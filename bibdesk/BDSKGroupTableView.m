@@ -45,7 +45,6 @@
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKTypeSelectHelper.h"
 #import "BDSKGroup.h"
-#import "BibAuthor.h"
 #import "BDSKGroupCell.h"
 
 @interface BDSKGroupCellFormatter : NSFormatter
@@ -361,18 +360,17 @@
 
 // this is actually never used, as BDSKGroupCell doesn't go through the formatter for display
 - (NSString *)stringForObjectValue:(id)obj{
-    BDSKASSERT([obj isKindOfClass:[BDSKGroup class]]);
-    return [obj respondsToSelector:@selector(name)] ? [[obj name] description] : [obj description];
+    BDSKASSERT([obj isKindOfClass:[NSDictionary class]]);
+    return [obj valueForKey:BDSKGroupCellStringKey];
 }
 
 - (NSString *)editingStringForObjectValue:(id)obj{
-    BDSKASSERT([obj isKindOfClass:[BDSKGroup class]]);
-    id name = [obj name];
-    return [name isKindOfClass:[BibAuthor class]] ? [name originalName] : [name description];
+    BDSKASSERT([obj isKindOfClass:[NSDictionary class]]);
+    return [obj valueForKey:BDSKGroupCellEditingStringKey] ?: [obj valueForKey:BDSKGroupCellStringKey];
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
-    *obj = [[[BDSKGroup alloc] initWithName:string count:0] autorelease];
+    *obj = [NSDictionary dictionaryWithObjectsAndKeys:string, BDSKGroupCellStringKey, string, BDSKGroupCellEditingStringKey, nil];
     return YES;
 }
 

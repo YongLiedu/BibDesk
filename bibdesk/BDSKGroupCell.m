@@ -42,14 +42,16 @@
 #import "NSImage_BDSKExtensions.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
-#import "BDSKCFCallBacks.h"
 
-static CFMutableDictionaryRef integerStringDictionary = NULL;
+static NSMutableDictionary *countStringDictionary = NULL;
 
 // names of these globals were changed to support key-value coding on BDSKGroup
 NSString *BDSKGroupCellStringKey = @"stringValue";
+NSString *BDSKGroupCellEditingStringKey = @"editingStringValue";
 NSString *BDSKGroupCellImageKey = @"icon";
 NSString *BDSKGroupCellCountKey = @"numberValue";
+NSString *BDSKGroupCellFailedDownloadKey = @"failedDownload";
+NSString *BDSKGroupCellIsRetrievingKey = @"isRetrieving";
 
 @interface BDSKGroupCell (Private)
 - (void)recacheCountAttributes;
@@ -61,11 +63,8 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 {
     BDSKINITIALIZE;
     
-    if (NULL == integerStringDictionary) {
-        integerStringDictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKIntegerDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-        int zero = 0;
-        CFDictionaryAddValue(integerStringDictionary,  (const void *)&zero, CFSTR(""));
-    }
+    if (NULL == countStringDictionary)
+        countStringDictionary = [[NSMutableDictionary alloc] initWithObjectsAndKeys:@"", [NSNumber numberWithInt:0], nil];
     
 }
 
@@ -144,27 +143,43 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
     [self recacheCountAttributes];
 }
 
-
 // all the -[NSNumber stringValue] does is create a string with a localized format description, so we'll cache more strings than Foundation does, since this shows up in Shark as a bottleneck
-static NSString *stringWithInteger(int count)
+static NSString *countStringWithNumber(NSNumber *number)
 {
-    CFStringRef string;
-    if (CFDictionaryGetValueIfPresent(integerStringDictionary, (const void *)&count, (const void **)&string) == FALSE) {
-        string = CFStringCreateWithFormat(CFAllocatorGetDefault(), NULL, CFSTR("%d"), count);
-        CFDictionaryAddValue(integerStringDictionary, (const void *)&count, (const void *)string);
-        CFRelease(string);
+    if (number == nil)
+        return @"";
+    NSString *string = [countStringDictionary objectForKey:number];
+    if (string == nil) {
+        string = [number stringValue];
+        [countStringDictionary setObject:string forKey:number];
     }
-    return (NSString *)string;
+    return string;
 }
 
-- (void)setObjectValue:(id <NSObject, NSCopying>)obj {
+- (void)setObjectValue:(id <NSCopying>)obj {
     // we should not set a derived value such as the group name here, otherwise NSTableView will call tableView:setObjectValue:forTableColumn:row: whenever a cell is selected
-    BDSKASSERT([obj isKindOfClass:[BDSKGroup class]]);
+    BDSKASSERT([(id)obj isKindOfClass:[NSDictionary class]]);
     
     [super setObjectValue:obj];
     
-    [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:obj == nil ? @"" : [(BDSKGroup *)obj stringValue]];
-    [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithInteger([(BDSKGroup *)obj count])];
+    [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:([(id)obj valueForKey:BDSKGroupCellStringKey] ?: @"")];
+    [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:countStringWithNumber([(id)obj valueForKey:BDSKGroupCellImageKey])];
+}
+
+- (NSImage *)icon {
+    return [[self objectValue] valueForKey:BDSKGroupCellImageKey];
+}
+
+- (int)count {
+    return [[[self objectValue] valueForKey:BDSKGroupCellCountKey] intValue];
+}
+
+- (BOOL)failedDownload {
+    return [[[self objectValue] valueForKey:BDSKGroupCellFailedDownloadKey] boolValue];
+}
+
+- (BOOL)isRetrieving {
+    return [[[self objectValue] valueForKey:BDSKGroupCellIsRetrievingKey] boolValue];
 }
 
 #pragma mark Drawing
@@ -192,7 +207,7 @@ static NSString *stringWithInteger(int count)
 // compute the oval padding based on the overall height of the cell
 - (float)countPaddingForCellSize:(NSSize)aSize;
 {
-    return ([[self objectValue] failedDownload] || [[self objectValue] isRetrieving]) ? 1.0 : 0.5 * aSize.height + 0.5;
+    return ([self failedDownload] || [self isRetrieving]) ? 1.0 : 0.5 * aSize.height + 0.5;
 }
 
 - (NSRect)countRectForBounds:(NSRect)aRect;
@@ -200,10 +215,10 @@ static NSString *stringWithInteger(int count)
     NSSize countSize = NSZeroSize;
     
     float countSep = [self countPaddingForCellSize:aRect.size];
-    if([[self objectValue] failedDownload] || [[self objectValue] isRetrieving]) {
+    if([self failedDownload] || [self isRetrieving]) {
         countSize = NSMakeSize(16, 16);
     }
-    else if([[self objectValue] count] > 0) {
+    else if([self count] > 0) {
         countSize = [countString boundingRectWithSize:aRect.size options:0].size;
     }
     NSRect countRect, ignored;
@@ -228,10 +243,10 @@ static NSString *stringWithInteger(int count)
     NSSize cellSize = [super cellSize];
     NSSize countSize = NSZeroSize;
     float countSep = [self countPaddingForCellSize:cellSize];
-    if ([[self objectValue] isRetrieving] || [[self objectValue] failedDownload]) {
+    if ([self isRetrieving] || [self failedDownload]) {
         countSize = NSMakeSize(16, 16);
     }
-    else if ([[self objectValue] count] > 0) {
+    else if ([self count] > 0) {
         countSize = [countString boundingRectWithSize:cellSize options:0].size;
     }
     float countWidth = countSize.width + 2 * countSep + BORDER_BETWEEN_EDGE_AND_COUNT;
@@ -274,13 +289,13 @@ static NSString *stringWithInteger(int count)
     BOOL controlViewIsFlipped = [controlView isFlipped];
     NSRect countRect = [self countRectForBounds:aRect];
     
-    if ([[self objectValue] isRetrieving] == NO) {
-        if ([[self objectValue] failedDownload]) {
+    if ([self isRetrieving] == NO) {
+        if ([self failedDownload]) {
             NSImage *cautionImage = [NSImage imageNamed:@"BDSKSmallCautionIcon"];
             NSSize cautionImageSize = [cautionImage size];
             NSRect cautionIconRect = NSMakeRect(0, 0, cautionImageSize.width, cautionImageSize.height);
             [cautionImage drawFlipped:controlViewIsFlipped inRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
-        } else if ([[self objectValue] count] > 0) {
+        } else if ([self count] > 0) {
             [NSGraphicsContext saveGraphicsState];
             [bgColor setFill];
             [NSBezierPath fillHorizontalOvalAroundRect:countRect];
@@ -294,7 +309,7 @@ static NSString *stringWithInteger(int count)
     NSRect imageRect = BDSKCenterRect([self iconRectForBounds:aRect], [self iconSizeForBounds:aRect], controlViewIsFlipped);
     [NSGraphicsContext saveGraphicsState];
     [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-    [[[self objectValue] icon] drawFlipped:controlViewIsFlipped inRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    [[self icon] drawFlipped:controlViewIsFlipped inRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     [NSGraphicsContext restoreGraphicsState];
 }
 

@@ -68,6 +68,8 @@
 - (id)initWithDictionary:(NSDictionary *)groupDict;
 - (NSDictionary *)dictionaryValue;
 
+- (NSDictionary *)cellValue;
+
 - (NSString *)uniqueID;
 - (void)setUniqueID:(NSString *)newID;
 
@@ -194,6 +196,13 @@
 	@discussion -
 */
 - (NSString *)stringValue;
+
+/*!
+	@method stringValue
+	@abstract Returns editing string value of the name.
+	@discussion -
+*/
+- (NSString *)editingStringValue;
 
 /*!
 	@method numberValue

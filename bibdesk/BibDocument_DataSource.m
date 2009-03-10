@@ -107,7 +107,7 @@
     if(tv == tableView){
         return [[shownPublications objectAtIndex:row] displayValueOfField:[tableColumn identifier]];
     }else if(tv == groupTableView){
-		return [groups objectAtIndex:row];
+		return [[groups objectAtIndex:row] cellValue];
     }else return nil;
 }
 
@@ -145,22 +145,30 @@
 		}
 	}else if(tv == groupTableView){
 		BDSKGroup *group = [groups objectAtIndex:row];
-        // object is always a group, see BDSKGroupCellFormatter
-        BDSKASSERT([object isKindOfClass:[BDSKGroup class]]);
-        id newName = [object name];
+        // object is always a dictionary, see BDSKGroupCellFormatter
+        BDSKASSERT([object isKindOfClass:[NSDictionary class]]);
+        id newName = [object valueForKey:BDSKGroupCellEditingStringKey];
 		if([[group name] isEqual:newName])
 			return;
 		if([group isCategory]){
-			NSArray *pubs = [groupedPublications copy];
-            // change the name of the group first, so we can preserve the selection; we need to old group info to move though
-            BDSKCategoryGroup *oldGroup = [[[BDSKCategoryGroup alloc] initWithName:[group name] key:[(BDSKCategoryGroup *)group key] count:[group count]] autorelease];
-            id name = [[self currentGroupField] isPersonField] ? [BibAuthor authorWithName:newName andPub:[[group name] publication]] : newName;
-            [(BDSKCategoryGroup *)group setName:name];
-			[self movePublications:pubs fromGroup:oldGroup toGroupNamed:newName];
-			[pubs release];
+            id name = newName;
+            if([[self currentGroupField] isPersonField]){
+                BDSKASSERT([[group name] isKindOfClass:[BibAuthor class]]);
+                name = [BibAuthor authorWithName:newName andPub:[[group name] publication]];
+            }
+            if([[group name] isEqual:name] == NO){
+                NSArray *pubs = [groupedPublications copy];
+                // change the name of the group first, so we can preserve the selection; we need to old group info to move though
+                BDSKCategoryGroup *oldGroup = [[[BDSKCategoryGroup alloc] initWithName:[group name] key:[(BDSKCategoryGroup *)group key] count:[group count]] autorelease];
+                [(BDSKCategoryGroup *)group setName:name];
+                [self movePublications:pubs fromGroup:oldGroup toGroupNamed:newName];
+                [pubs release];
+            }
 		}else if([group hasEditableName]){
-			[(BDSKMutableGroup *)group setName:newName];
-			[[self undoManager] setActionName:NSLocalizedString(@"Rename Group", @"Undo action name")];
+            if([[group name] isEqual:newName] == NO){
+                [(BDSKMutableGroup *)group setName:newName];
+                [[self undoManager] setActionName:NSLocalizedString(@"Rename Group", @"Undo action name")];
+            }
 		}
 	}
 }

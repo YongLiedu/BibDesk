@@ -100,6 +100,10 @@ static NSString *createUniqueID(void)
     return [NSDictionary dictionaryWithObjectsAndKeys:aName, @"group name", nil];
 }
 
+- (NSDictionary *)cellValue {
+    return [NSDictionary dictionaryWithValuesForKeys:[NSArray arrayWithObjects:@"stringValue", @"editingStringValue", @"icon", @"numberValue", @"failedDownload", @"isRetrieving", nil]];
+}
+
 // NSCoding protocol, should never be used
 
 - (id)initWithCoder:(NSCoder *)decoder {
@@ -206,6 +210,10 @@ static NSString *createUniqueID(void)
 // custom accessors
 
 - (NSString *)stringValue {
+    return [[self name] description];
+}
+
+- (NSString *)editingStringValue {
     return [[self name] description];
 }
 
