@@ -156,6 +156,10 @@ static BDSKMessageQueue *messageQueue = nil;
     [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
 }
 
+- (id)copyWithZone:(NSZone *)aZone {
+	return [[[self class] allocWithZone:aZone] initWithName:name scriptPath:scriptPath scriptArguments:scriptArguments scriptType:scriptType];
+}
+
 - (void)dealloc;
 {
     // don't release currentTask; it's managed in the thread
