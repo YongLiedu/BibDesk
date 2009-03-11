@@ -635,10 +635,13 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
             [proxyObject invalidate];
         }
         @catch (id exception) {
-            NSLog(@"%@: ignoring exception \"%@\" raised while invalidating client %@", [self class], exception, proxyObject);
+            NSLog(@"%@: ignoring exception \"%@\" raised while invalidating client %p", [self class], exception, proxyObject);
         }
-        @finally {
+        @try {
             [[proxyObject connectionForProxy] invalidate];
+        }
+        @catch (id exception) {
+            NSLog(@"%@: ignoring exception \"%@\" raised while invalidating connection to client %p", [self class], exception, proxyObject);
         }
     }
     [remoteClients removeAllObjects];
@@ -728,7 +731,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
             [proxyObject setNeedsUpdate:YES];
         }
         @catch (id exception) {
-            NSLog(@"server: \"%@\" trying to reach host %@", exception, proxyObject);
+            NSLog(@"server: \"%@\" trying to reach host %p", exception, proxyObject);
             // since it's not accessible, remove it from future notifications (we know it has this key)
             [self removeClientForIdentifier:key];
         }
