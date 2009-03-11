@@ -213,6 +213,14 @@ static NSString *createUniqueID(void)
 	return [NSNumber numberWithInt:count];
 }
 
+- (NSString *)editingStringValue {
+    return [[self name] description];
+}
+
+- (NSDictionary *)cellValue {
+    return [self dictionaryWithValuesForKeys:[NSArray arrayWithObjects:@"stringValue", @"editingStringValue", @"numberValue", @"icon", @"isRetrieving", @"failedDownload", nil]];
+}
+
 - (NSString *)toolTip {
     return [self stringValue];
 }

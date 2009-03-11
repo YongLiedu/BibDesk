@@ -48,11 +48,6 @@
 #import "BibAuthor.h"
 #import "BDSKGroupCell.h"
 
-@interface BDSKGroupCellFormatter : NSFormatter
-@end
-
-#pragma mark
-
 @implementation BDSKGroupTableView
 
 - (void)dealloc
@@ -76,14 +71,6 @@
 	
 	[self setHeaderView:customTableHeaderView];	
     [customTableHeaderView release];
-    
-    BDSKGroupCell *cell = [[BDSKGroupCell alloc] init];
-    [column setDataCell:cell];
-    [cell release];
-    
-    BDSKGroupCellFormatter *formatter = [[BDSKGroupCellFormatter alloc] init];
-    [[column dataCell] setFormatter:formatter];
-    [formatter release];
     
     BDSKPRECONDITION([[self enclosingScrollView] contentView]);
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -371,29 +358,6 @@
 	id headerCell = [[[[self tableView] tableColumns] objectAtIndex:0] headerCell];
 	BDSKASSERT([headerCell isKindOfClass:[NSPopUpButtonCell class]]);
 	return headerCell;
-}
-
-@end
-
-#pragma mark -
-
-@implementation BDSKGroupCellFormatter
-
-// this is actually never used, as BDSKGroupCell doesn't go through the formatter for display
-- (NSString *)stringForObjectValue:(id)obj{
-    BDSKASSERT([obj isKindOfClass:[BDSKGroup class]]);
-    return [obj respondsToSelector:@selector(name)] ? [[obj name] description] : [obj description];
-}
-
-- (NSString *)editingStringForObjectValue:(id)obj{
-    BDSKASSERT([obj isKindOfClass:[BDSKGroup class]]);
-    id name = [obj name];
-    return [name isKindOfClass:[BibAuthor class]] ? [name originalName] : [name description];
-}
-
-- (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
-    *obj = [[[BDSKGroup alloc] initWithName:string count:0] autorelease];
-    return YES;
 }
 
 @end

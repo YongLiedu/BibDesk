@@ -138,6 +138,10 @@
     }
 }
 
+- (NSString *)editingStringValue {
+    return [name isKindOfClass:[BibAuthor class]] ? [name originalName] : [super editingStringValue];
+}
+
 - (BOOL)isCategory { return YES; }
 
 - (BOOL)hasEditableName { return YES; }

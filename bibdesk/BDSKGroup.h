@@ -202,6 +202,10 @@
 */
 - (NSNumber *)numberValue;
 
+- (NSString *)editingStringValue;
+
+- (NSDictionary *)cellValue;
+
 - (NSString *)toolTip;
 
 - (BibDocument *)document;

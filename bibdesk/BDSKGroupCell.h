@@ -39,8 +39,11 @@
 #import <Cocoa/Cocoa.h>
 
 extern NSString *BDSKGroupCellStringKey;
+extern NSString *BDSKGroupCellEditingStringKey;
 extern NSString *BDSKGroupCellImageKey;
 extern NSString *BDSKGroupCellCountKey;
+extern NSString *BDSKGroupCellIsRetrievingKey;
+extern NSString *BDSKGroupCellFailedDownloadKey;
 
 @class BDSKGroup;
 
