@@ -455,7 +455,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 	return menu;
 }
 
-- (BOOL)tableViewShouldEditNextItemWhenEditingEnds:(NSTableView *)tv{
+- (BOOL)tableViewShouldEditNextItemWhenEditingEnds:(BDSKGroupTableView *)tv{
 	if (tv == groupTableView && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRenameGroupKey])
 		return NO;
 	return YES;

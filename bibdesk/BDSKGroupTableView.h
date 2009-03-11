@@ -61,4 +61,5 @@
 - (NSIndexSet *)tableViewSingleSelectionIndexes:(BDSKGroupTableView *)aTableView;
 - (void)tableView:(BDSKGroupTableView *)aTableView doubleClickedOnIconOfRow:(int)row;
 - (NSMenu *)tableView:(BDSKGroupTableView *)aTableView menuForTableHeaderColumn:(NSTableColumn *)aTableColumn onPopUp:(BOOL)flag;
+- (BOOL)tableViewShouldEditNextItemWhenEditingEnds:(BDSKGroupTableView *)aTableView;
 @end
