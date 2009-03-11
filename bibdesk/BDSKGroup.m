@@ -100,10 +100,6 @@ static NSString *createUniqueID(void)
     return [NSDictionary dictionaryWithObjectsAndKeys:aName, @"group name", nil];
 }
 
-- (NSDictionary *)cellValue {
-    return [self dictionaryWithValuesForKeys:[NSArray arrayWithObjects:@"stringValue", @"editingStringValue", @"icon", @"numberValue", @"failedDownload", @"isRetrieving", nil]];
-}
-
 // NSCoding protocol, should never be used
 
 - (id)initWithCoder:(NSCoder *)decoder {
@@ -120,10 +116,10 @@ static NSString *createUniqueID(void)
     [coder encodeInt:count forKey:@"count"];
 }
 
-// NSCopying protocol, may be used by the scripting duplicate command
+// NSCopying protocol, may be used in -[NSCell setObjectValue:] at some point
 
 - (id)copyWithZone:(NSZone *)aZone {
-    return [[[self class] allocWithZone:aZone] initWithName:name count:count];
+	return [self retain];
 }
 
 - (void)dealloc {
@@ -210,10 +206,6 @@ static NSString *createUniqueID(void)
 // custom accessors
 
 - (NSString *)stringValue {
-    return [[self name] description];
-}
-
-- (NSString *)editingStringValue {
     return [[self name] description];
 }
 

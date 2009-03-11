@@ -146,10 +146,6 @@ static NSImage *unlockedIcon = nil;
     [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
 }
 
-- (id)copyWithZone:(NSZone *)aZone {
-    return [[[self class] allocWithZone:aZone] initWithClient:client];
-}
-
 // Logging
 
 - (NSString *)description;

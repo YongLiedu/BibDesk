@@ -99,10 +99,6 @@
     [coder encodeObject:filter forKey:@"filter"];
 }
 
-- (id)copyWithZone:(NSZone *)aZone {
-    return [[[self class] allocWithZone:aZone] initWithName:name count:count filter:filter];
-}
-
 - (void)dealloc {
     [filter setGroup:nil];
     [filter release];

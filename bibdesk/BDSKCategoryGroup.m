@@ -95,10 +95,6 @@
     [coder encodeObject:key forKey:@"key"];
 }
 
-- (id)copyWithZone:(NSZone *)aZone {
-    return [[[self class] allocWithZone:aZone] initWithName:name key:key count:count];
-}
-
 - (void)dealloc {
     [key release];
     [super dealloc];
@@ -140,10 +136,6 @@
         [name release];
         name = [newName retain];
     }
-}
-
-- (NSString *)editingStringValue {
-    return [[self name] isKindOfClass:[BibAuthor class]] ? [[self name] originalName] : [super editingStringValue];
 }
 
 - (BOOL)isCategory { return YES; }

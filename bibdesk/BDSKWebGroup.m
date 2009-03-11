@@ -45,8 +45,6 @@
 #import "BibItem.h"
 
 @implementation BDSKWebGroup
-
-// designated initializer
 - (id)initWithName:(NSString *)aName{
     
     NSAssert(aName != nil, @"BDSKWebGroup requires a name");
@@ -60,11 +58,6 @@
     return self;
 }
 
-// old designated initializer
-- (id)initWithName:(id)aName count:(int)aCount {
-    return [self initWithName:aName];
-}
-
 - (id)initWithCoder:(NSCoder *)aCoder{
     [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
     return nil;
@@ -72,10 +65,6 @@
 
 - (void)encodeWithCoder:(NSCoder *)aCoder{
     [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
-}
-
-- (id)copyWithZone:(NSZone *)aZone {
-    return [[[self class] allocWithZone:aZone] initWithName:name];
 }
 
 - (void)dealloc{
