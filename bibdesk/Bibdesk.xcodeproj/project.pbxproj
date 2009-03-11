@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 44;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -3014,6 +3014,7 @@
 				F95CC0ED087F542F002C5694 /* Copy Files: Spotlight */,
 				CEEBA83C0D749C99000204B8 /* Copy Files: QuickLook */,
 				F9FF213B09E83BAB00BB1706 /* Run Script: Strip headers and .DS_Store */,
+				F95C5E850D10E52400C81970 /* Run Script: Codesign */,
 			);
 			buildRules = (
 			);
@@ -3060,7 +3061,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = F993F20208553A61007A7657 /* Build configuration list for PBXProject "Bibdesk" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 3.0";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* BibDesk */;
 			projectDirPath = "";
@@ -3557,6 +3558,20 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# Use a different bundle identifier, so we're independent of our preference settings\nBUNDLE_IDENTIFIER=edu.ucsd.cs.mmccrack.bibdesk.test\nBIBDESK_INFO=\"${BUILT_PRODUCTS_DIR}/BibDesk.app/Contents/Info\"\ndefaults write \"${BIBDESK_INFO}\" CFBundleIdentifier ${BUNDLE_IDENTIFIER}\nplutil -convert xml1 \"${BIBDESK_INFO}.plist\"\n\n# Start with a clean set of preferences, but prevent some initial windows\nrm -f ~/Library/Preferences/${BUNDLE_IDENTIFIER}.plist\ndefaults write ${BUNDLE_IDENTIFIER} \"Startup Behavior\" -integer 1\ndefaults write ${BUNDLE_IDENTIFIER} \"Last launched version number\" `defaults read \"${BIBDESK_INFO}\" CFBundleShortVersionString`\ndefaults write ${BUNDLE_IDENTIFIER} BDSKShowedLeopardInputManagerAlert -bool true\ndefaults write ${BUNDLE_IDENTIFIER} SUEnableAutomaticChecks -bool false\n\n# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n\n# Remeove the modified Info.plist, because Xcode doesn't replace it otherwise\nrm \"${BIBDESK_INFO}.plist\"\n";
+		};
+		F95C5E850D10E52400C81970 /* Run Script: Codesign */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script: Codesign";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ -f /usr/bin/codesign ]; then\n\tif ! /usr/bin/codesign -f -s \"BibDesk Signing Certificate\" -v ${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}\n\tthen\n         # lie about exit status so developers aren't forced to have a cert\n\t\techo \"warning: codesign failed\" >&2\n\t\techo \"warning: you need a certificate named \\\"BibDesk Signing Certificate\\\"\" >&2\n\t\texit 0\n\tfi\nfi";
 		};
 		F98870CD07580E5F001D4D49 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
