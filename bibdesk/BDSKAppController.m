@@ -284,6 +284,9 @@ static void fixLegacyTableColumnIdentifiers()
 - (void)applicationWillFinishLaunching:(NSNotification *)aNotification{
     NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
     
+    // this makes sure that the defaults are registered
+    [BDSKPreferenceController sharedPreferenceController];
+    
     if([sud boolForKey:BDSKShouldAutosaveDocumentKey])
         [[NSDocumentController sharedDocumentController] setAutosavingDelay:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKAutosaveTimeIntervalKey]];
     
