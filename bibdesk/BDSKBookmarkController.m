@@ -448,10 +448,10 @@ static id sharedBookmarkController = nil;
 - (void)outlineView:(NSOutlineView *)ov setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
     NSString *tcID = [tableColumn identifier];
     if ([tcID isEqualToString:@"name"]) {
-        if (object == nil)
-            object = @"";
-        if ([object isEqualToString:[item name]] == NO)
-            [(BDSKBookmark *)item setName:object];
+        // the editied object is always an NSDictionary, see BDSKTextWithIconFormatter
+        NSString *newName = [object valueForKey:BDSKTextWithIconCellStringKey] ?: @"";
+        if ([newName isEqualToString:[item name]] == NO)
+            [(BDSKBookmark *)item setName:newName];
     } else if ([tcID isEqualToString:@"url"]) {
         if ([object length] == 0 || [NSURL URLWithString:object] == nil) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid URL", @"Message in alert dialog when setting an invalid URL") 

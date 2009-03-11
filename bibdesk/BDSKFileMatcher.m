@@ -62,7 +62,7 @@ static float GROUP_ROW_HEIGHT = 24.0;
 
 @interface BDSKCountOvalCell : NSTextFieldCell
 @end
-@interface BDSKBoldShadowFormatter : NSFormatter
+@interface BDSKBoldShadowFormatter : BDSKTextWithIconFormatter
 @end
 
 @interface BDSKFileMatcher (Private)
@@ -325,15 +325,20 @@ static float GROUP_ROW_HEIGHT = 24.0;
 // change text appearance in top-level rows via a formatter, so we don't have to mess with custom text/icon cells
 - (void)outlineView:(NSOutlineView *)ov willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item;
 {
-    if (NO == [item isLeaf]) {
-        static BDSKBoldShadowFormatter *fm = nil;
-        if (nil == fm)
-            fm = [[BDSKBoldShadowFormatter alloc] init];
-        [cell setFormatter:fm];
-        [cell setTextColor:[NSColor whiteColor]];
-    } else if ([[tableColumn identifier] isEqualToString:@"title"]) {
-        [cell setFormatter:nil];
-        [cell setTextColor:[NSColor blackColor]];
+    if ([[tableColumn identifier] isEqualToString:@"title"]) {
+        if ([item isLeaf]) {
+            static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
+            if (nil == textWithIconFormatter)
+                textWithIconFormatter = [[BDSKTextWithIconFormatter alloc] init];
+            [cell setFormatter:textWithIconFormatter];
+            [cell setTextColor:[NSColor blackColor]];
+        } else {
+            static BDSKBoldShadowFormatter *boldShadowFormatter = nil;
+            if (nil == boldShadowFormatter)
+                boldShadowFormatter = [[BDSKBoldShadowFormatter alloc] init];
+            [cell setFormatter:boldShadowFormatter];
+            [cell setTextColor:[NSColor whiteColor]];
+        }
     }
 }
 
@@ -638,19 +643,12 @@ static NSDictionary *attributes = nil;
 
 - (NSAttributedString *)attributedStringForObjectValue:(id)obj withDefaultAttributes:(NSDictionary *)attrs;
 {
-    NSMutableAttributedString *attrString = [[[NSMutableAttributedString alloc] initWithString:obj] autorelease];
+    NSMutableAttributedString *attrString = [[[NSMutableAttributedString alloc] initWithString:[self stringForObjectValue:obj]] autorelease];
     NSMutableDictionary *newAttrs = [attrs mutableCopy];
     [newAttrs addEntriesFromDictionary:attributes];
     [attrString addAttributes:newAttrs range:NSMakeRange(0, [attrString length])];
     [newAttrs release];
     return attrString;
-}
-    
-- (NSString *)stringForObjectValue:(id)obj { return obj; }
-- (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error;
-{
-    *obj = string;
-    return YES;
 }
 
 @end

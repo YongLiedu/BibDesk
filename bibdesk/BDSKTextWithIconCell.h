@@ -44,14 +44,11 @@ extern NSString *BDSKTextWithIconCellImageKey;
 
 @interface BDSKTextWithIconCell : NSTextFieldCell
 {
-    NSImage *icon;
     BOOL hasDarkHighlight;
     BOOL settingUpFieldEditor;
 }
 
-// API
 - (NSImage *)icon;
-- (void)setIcon:(NSImage *)anIcon;
 
 - (BOOL)hasDarkHighlight;
 - (void)setHasDarkHighlight:(BOOL)flag;
@@ -59,4 +56,9 @@ extern NSString *BDSKTextWithIconCellImageKey;
 - (NSRect)textRectForBounds:(NSRect)aRect;
 - (NSRect)iconRectForBounds:(NSRect)aRect;
 
+@end
+
+#pragma mark -
+
+@interface BDSKTextWithIconFormatter : NSFormatter
 @end

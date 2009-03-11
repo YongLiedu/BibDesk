@@ -43,7 +43,22 @@
 NSString *BDSKTextWithIconCellStringKey = @"string";
 NSString *BDSKTextWithIconCellImageKey = @"image";
 
+static id nonNullObjectValueForKey(id object, NSString *key) {
+    id value = [object valueForKey:key];
+    return [value isEqual:[NSNull null]] ? nil : value;
+}
+
 @implementation BDSKTextWithIconCell
+
+static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
+
++ (void)initialize;
+{
+    BDSKINITIALIZE;
+    
+    textWithIconFormatter = [[BDSKTextWithIconFormatter alloc] init];
+    
+}
 
 // Init and dealloc
 
@@ -54,6 +69,7 @@ NSString *BDSKTextWithIconCellImageKey = @"image";
         [self setHasDarkHighlight:NO];
         [self setScrollable:YES];
         [self setLineBreakMode:NSLineBreakByTruncatingTail];
+        [self setFormatter:textWithIconFormatter];
     }
     return self;
 }
@@ -62,14 +78,10 @@ NSString *BDSKTextWithIconCellImageKey = @"image";
 {
     if (self = [super initWithCoder:coder]) {
         [self setHasDarkHighlight:NO];
+        if ([self formatter] == nil)
+            [self setFormatter:textWithIconFormatter];
     }
     return self;
-}
-
-- (void)dealloc;
-{
-    [icon release];
-    [super dealloc];
 }
 
 // NSCopying protocol
@@ -77,10 +89,7 @@ NSString *BDSKTextWithIconCellImageKey = @"image";
 - (id)copyWithZone:(NSZone *)zone;
 {
     BDSKTextWithIconCell *copy = [super copyWithZone:zone];
-    
-    copy->icon = [icon retain];
     copy->hasDarkHighlight = hasDarkHighlight;
-    
     return copy;
 }
 
@@ -210,23 +219,19 @@ NSString *BDSKTextWithIconCellImageKey = @"image";
 
 - (void)setObjectValue:(id <NSCopying>)obj;
 {
-    [self setIcon:[(NSObject *)obj valueForKey:BDSKTextWithIconCellImageKey]];
-    [super setObjectValue:[(NSObject *)obj valueForKey:BDSKTextWithIconCellStringKey]];
+    // the objectValue should be an object that's KVC compliant for the "string" and "image" keys
+    
+    // this can happen initially from the init, as there's no initializer passing an objectValue
+    if ([(id)obj isKindOfClass:[NSString class]])
+        obj = [NSDictionary dictionaryWithObjectsAndKeys:obj, BDSKTextWithIconCellStringKey, nil];
+    
+    // we should not set a derived value such as the string here, otherwise NSTableView will call tableView:setObjectValue:forTableColumn:row: whenever a cell is selected
+    [super setObjectValue:obj];
 }
-
-// API
 
 - (NSImage *)icon;
 {
-    return icon;
-}
-
-- (void)setIcon:(NSImage *)anIcon;
-{
-    if (anIcon == icon)
-        return;
-    [icon release];
-    icon = [anIcon retain];
+    return nonNullObjectValueForKey([self objectValue], BDSKTextWithIconCellImageKey);
 }
 
 - (BOOL)hasDarkHighlight;
@@ -241,10 +246,19 @@ NSString *BDSKTextWithIconCellImageKey = @"image";
 
 @end
 
+#pragma mark -
 
-// special cases for strings
-@interface NSString (BDSKTextWithIconCell) @end
-@implementation NSString (BDSKTextWithIconCell)
-- (NSString *)string { return self; }
-- (id)image { return nil; }
+@implementation BDSKTextWithIconFormatter
+
+- (NSString *)stringForObjectValue:(id)obj{
+    return [obj isKindOfClass:[NSString class]] ? obj : nonNullObjectValueForKey(obj, BDSKTextWithIconCellStringKey);
+}
+
+- (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
+    // even though 'string' is reported as immutable, it's actually changed after this method returns and before it's returned by the control!
+    string = [[string copy] autorelease];
+    *obj = [NSDictionary dictionaryWithObjectsAndKeys:string, BDSKTextWithIconCellStringKey, nil];
+    return YES;
+}
+
 @end

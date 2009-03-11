@@ -349,10 +349,10 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 - (void)outlineView:(NSOutlineView *)ov setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
     NSString *tcID = [tableColumn identifier];
     if ([tcID isEqualToString:@"label"]) {
-        if (object == nil)
-            object = @"";
-        if ([object isEqualToString:[item label]] == NO)
-            [item setLabel:object];
+        // the editied object is always an NSDictionary, see BDSKTextWithIconFormatter
+        NSString *newLabel = [object valueForKey:BDSKTextWithIconCellStringKey] ?: @"";
+        if ([newLabel isEqualToString:[item label]] == NO)
+            [item setLabel:newLabel];
     }
 }
 
