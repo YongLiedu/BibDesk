@@ -379,7 +379,7 @@ static NSString *stringWithNumber(NSNumber *number)
 // this is actually never used, as BDSKGroupCell doesn't go through the formatter for display
 - (NSString *)stringForObjectValue:(id)obj{
     BDSKASSERT([obj isKindOfClass:[NSDictionary class]]);
-    return nonNullObjectValueForKey(obj, BDSKGroupCellStringKey);
+    return [obj isKindOfClass:[NSString class]] ? obj : nonNullObjectValueForKey(obj, BDSKGroupCellStringKey);
 }
 
 - (NSString *)editingStringForObjectValue:(id)obj{
