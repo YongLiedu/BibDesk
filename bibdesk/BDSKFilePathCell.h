@@ -37,17 +37,15 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKIconTextFieldCell.h"
 
 
-@interface BDSKFilePathCell : NSTextFieldCell {
+@interface BDSKFilePathCell : BDSKIconTextFieldCell {
     NSImage *icon;
 }
 
 - (NSImage *)icon;
 - (void)setIcon:(NSImage *)newIcon;
-
-- (NSRect)textRectForBounds:(NSRect)aRect;
-- (NSRect)iconRectForBounds:(NSRect)aRect;
 
 @end
 

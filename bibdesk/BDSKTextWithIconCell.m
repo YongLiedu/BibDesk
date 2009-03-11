@@ -35,10 +35,8 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 #import "BDSKTextWithIconCell.h"
-#import "NSGeometry_BDSKExtensions.h"
-#import "NSImage_BDSKExtensions.h"
-#import "NSLayoutManager_BDSKExtensions.h"
 
 NSString *BDSKTextWithIconCellStringKey = @"string";
 NSString *BDSKTextWithIconCellImageKey = @"image";
@@ -52,18 +50,14 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
 
 static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
 
-+ (void)initialize;
-{
++ (void)initialize {
     BDSKINITIALIZE;
-    
     textWithIconFormatter = [[BDSKTextWithIconFormatter alloc] init];
-    
 }
 
 // Init and dealloc
 
-- (id)init;
-{
+- (id)init {
     if (self = [super initTextCell:@""]) {
         [self setEditable:YES];
         [self setHasDarkHighlight:NO];
@@ -74,8 +68,7 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
     return self;
 }
 
-- (id)initWithCoder:(NSCoder *)coder;
-{
+- (id)initWithCoder:(NSCoder *)coder {
     if (self = [super initWithCoder:coder]) {
         [self setHasDarkHighlight:NO];
         if ([self formatter] == nil)
@@ -86,20 +79,13 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
 
 // NSCopying protocol
 
-- (id)copyWithZone:(NSZone *)zone;
-{
+- (id)copyWithZone:(NSZone *)zone {
     BDSKTextWithIconCell *copy = [super copyWithZone:zone];
     copy->hasDarkHighlight = hasDarkHighlight;
     return copy;
 }
 
-- (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
-{
-    return nil;
-}
-
-- (NSColor *)textColor;
-{
+- (NSColor *)textColor {
     NSColor *color = nil;
     
     // this allows the expansion tooltips on 10.5 to draw with the correct color
@@ -122,103 +108,19 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
     return color;
 }
 
-#define BORDER_BETWEEN_EDGE_AND_IMAGE (1.0)
-#define BORDER_BETWEEN_IMAGE_AND_TEXT (0.0)
-#define IMAGE_OFFSET (1.0)
-
-- (NSSize)cellSize;
-{
-    NSSize cellSize = [super cellSize];
-    cellSize.width += cellSize.height + BORDER_BETWEEN_EDGE_AND_IMAGE + BORDER_BETWEEN_IMAGE_AND_TEXT;
-    return cellSize;
-}
-
-- (void)drawIconWithFrame:(NSRect)iconRect inView:(NSView *)controlView
-{
-    NSImage *img = [self icon];
-    
-    if (nil != img) {
-        
-        NSRect srcRect = NSZeroRect;
-        srcRect.size = [img size];
-        
-        NSRect drawFrame = iconRect;
-        float ratio = MIN(NSWidth(drawFrame) / srcRect.size.width, NSHeight(drawFrame) / srcRect.size.height);
-        drawFrame.size.width = ratio * srcRect.size.width;
-        drawFrame.size.height = ratio * srcRect.size.height;
-        
-        drawFrame = BDSKCenterRect(drawFrame, drawFrame.size, [controlView isFlipped]);
-        
-        NSGraphicsContext *ctxt = [NSGraphicsContext currentContext];
-        [ctxt saveGraphicsState];
-        
-        // this is the critical part that NSImageCell doesn't do
-        [ctxt setImageInterpolation:NSImageInterpolationHigh];
-        
-        [img drawFlipped:[controlView isFlipped] inRect:drawFrame fromRect:srcRect operation:NSCompositeSourceOver fraction:1.0];
-        
-        [ctxt restoreGraphicsState];
-    }
-}
-
-- (NSRect)textRectForBounds:(NSRect)aRect;
-{
-    float imageWidth = NSHeight(aRect) - 1;
-    NSRect ignored, textRect = aRect;
-    
-    NSDivideRect(aRect, &ignored, &textRect, BORDER_BETWEEN_EDGE_AND_IMAGE + imageWidth + BORDER_BETWEEN_IMAGE_AND_TEXT, NSMinXEdge);
-    
-    return textRect;
-}
-
-- (NSRect)iconRectForBounds:(NSRect)aRect;
-{
-    float imageWidth = NSHeight(aRect) - 1;
-    NSRect ignored, imageRect = aRect;
-    
-    NSDivideRect(aRect, &ignored, &imageRect, BORDER_BETWEEN_EDGE_AND_IMAGE, NSMinXEdge);
-    NSDivideRect(imageRect, &imageRect, &ignored, imageWidth, NSMinXEdge);
-    
-    return imageRect;
-}
-
-- (void)drawWithFrame:(NSRect)aRect inView:(NSView *)controlView;
-{
-    // let super draw the text, but vertically center the text for tall cells, because NSTextFieldCell aligns at the top
-    NSRect textRect = [self textRectForBounds:aRect];
-    if (NSHeight(textRect) > [self cellSize].height + 2.0)
-        textRect = BDSKCenterRectVertically(textRect, [self cellSize].height + 2.0, [controlView isFlipped]);
-    [super drawWithFrame:textRect inView:controlView];
-    
-    // Draw the image
-    NSRect imageRect = [self iconRectForBounds:aRect];
-    float imageHeight = NSHeight(aRect) - 1;
-    imageRect = BDSKCenterRectVertically(imageRect, imageHeight, [controlView isFlipped]);
-    imageRect.origin.y += [controlView isFlipped] ? -IMAGE_OFFSET : IMAGE_OFFSET;
-    [self drawIconWithFrame:imageRect inView:controlView];
-}
-
-- (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView untilMouseUp:(BOOL)flag;
-{
-    return [super trackMouse:theEvent inRect:cellFrame ofView:controlView untilMouseUp:flag];
-}
-
-- (void)editWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject event:(NSEvent *)theEvent;
-{
+- (void)editWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject event:(NSEvent *)theEvent {
     settingUpFieldEditor = YES;
     [super editWithFrame:aRect inView:controlView editor:textObj delegate:anObject event:theEvent];
     settingUpFieldEditor = NO;
 }
 
-- (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength;
-{
+- (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength {
     settingUpFieldEditor = YES;
     [super selectWithFrame:[self textRectForBounds:aRect] inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
     settingUpFieldEditor = NO;
 }
 
-- (void)setObjectValue:(id <NSCopying>)obj;
-{
+- (void)setObjectValue:(id <NSCopying>)obj {
     // the objectValue should be an object that's KVC compliant for the "string" and "image" keys
     
     // this can happen initially from the init, as there's no initializer passing an objectValue
@@ -229,18 +131,15 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
     [super setObjectValue:obj];
 }
 
-- (NSImage *)icon;
-{
+- (NSImage *)icon {
     return nonNullObjectValueForKey([self objectValue], BDSKTextWithIconCellImageKey);
 }
 
-- (BOOL)hasDarkHighlight;
-{
+- (BOOL)hasDarkHighlight {
     return hasDarkHighlight;
 }
 
-- (void)setHasDarkHighlight:(BOOL)flag;
-{
+- (void)setHasDarkHighlight:(BOOL)flag {
     hasDarkHighlight = flag;
 }
 
@@ -250,11 +149,11 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
 
 @implementation BDSKTextWithIconFormatter
 
-- (NSString *)stringForObjectValue:(id)obj{
+- (NSString *)stringForObjectValue:(id)obj {
     return [obj isKindOfClass:[NSString class]] ? obj : nonNullObjectValueForKey(obj, BDSKTextWithIconCellStringKey);
 }
 
-- (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
+- (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error {
     // even though 'string' is reported as immutable, it's actually changed after this method returns and before it's returned by the control!
     string = [[string copy] autorelease];
     *obj = [NSDictionary dictionaryWithObjectsAndKeys:string, BDSKTextWithIconCellStringKey, nil];
