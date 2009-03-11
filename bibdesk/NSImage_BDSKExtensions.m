@@ -226,7 +226,7 @@
     [tinySearchBookmarkImage setName:@"TinySearchBookmark"];
 }
     
-+ (void)makeFolderImages {
++ (void)makeGroupImages {
     static NSImage *genericGroupImage = nil;
     static NSImage *staticGroupImage = nil;
     static NSImage *smartGroupImage = nil;

@@ -70,7 +70,7 @@
 
 + (void)makePreviewDisplayImages;
 + (void)makeBookmarkImages;
-+ (void)makeFolderImages;
++ (void)makeGroupImages;
 
 + (NSImage *)systemIconWithCode:(OSType)code;
 + (NSImage *)httpInternetLocationImage;
