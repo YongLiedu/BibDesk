@@ -242,7 +242,7 @@
 - (void)textDidEndEditing:(NSNotification *)notification {
     int textMovement = [[[notification userInfo] objectForKey:@"NSTextMovement"] intValue];
     if ((textMovement == NSReturnTextMovement || textMovement == NSTabTextMovement) && 
-        [[self dataSource] respondsToSelector:@selector(tableViewShouldEditNextItemWhenEditingEnds:)] && [[self dataSource] tableViewShouldEditNextItemWhenEditingEnds:self] == NO) {
+        [[self delegate] respondsToSelector:@selector(tableViewShouldEditNextItemWhenEditingEnds:)] && [[self delegate] tableViewShouldEditNextItemWhenEditingEnds:self] == NO) {
         // This is ugly, but just about the only way to do it. NSTableView is determined to select and edit something else, even the text field that it just finished editing, unless we mislead it about what key was pressed to end editing.
         NSMutableDictionary *newUserInfo;
         NSNotification *newNotification;
