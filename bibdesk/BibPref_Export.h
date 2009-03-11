@@ -71,3 +71,12 @@ typedef enum {
 - (IBAction)dismissChooseMainPageSheet:(id)sender;
 
 @end
+
+
+@interface BDSKTemplateOutlineView : NSOutlineView
+@end
+
+
+@interface NSObject (BDSKTemplateOutlineViewDelegate)
+- (BOOL)outlineViewShouldEditNextItemWhenEditingEnds:(BDSKTemplateOutlineView *)anOutlineView;
+@end

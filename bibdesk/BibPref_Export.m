@@ -315,7 +315,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 }
 
 // return NO to avoid popping the NSOpenPanel unexpectedly
-- (BOOL)tableViewShouldEditNextItemWhenEditingEnds:(NSTableView *)tv { return NO; }
+- (BOOL)outlineViewShouldEditNextItemWhenEditingEnds:(BDSKTemplateOutlineView *)ov { return NO; }
 
 // this seems to be called when editing the NSComboBoxCell as well as the parent name
 - (void)outlineView:(NSOutlineView *)ov setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item{
@@ -626,3 +626,29 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 }
 
 @end
+
+
+@implementation BDSKTemplateOutlineView
+
+- (void)textDidEndEditing:(NSNotification *)notification {
+    int textMovement = [[[notification userInfo] objectForKey:@"NSTextMovement"] intValue];
+    if ((textMovement == NSReturnTextMovement || textMovement == NSTabTextMovement) && 
+        [[self delegate] respondsToSelector:@selector(outlineViewShouldEditNextItemWhenEditingEnds:)] && [[self delegate] outlineViewShouldEditNextItemWhenEditingEnds:self] == NO) {
+        // This is ugly, but just about the only way to do it. NSTableView is determined to select and edit something else, even the text field that it just finished editing, unless we mislead it about what key was pressed to end editing.
+        NSMutableDictionary *newUserInfo;
+        NSNotification *newNotification;
+
+        newUserInfo = [NSMutableDictionary dictionaryWithDictionary:[notification userInfo]];
+        [newUserInfo setObject:[NSNumber numberWithInt:NSIllegalTextMovement] forKey:@"NSTextMovement"];
+        newNotification = [NSNotification notificationWithName:[notification name] object:[notification object] userInfo:newUserInfo];
+        [super textDidEndEditing:notification];
+
+        // For some reason we lose firstResponder status when we do the above.
+        [[self window] makeFirstResponder:self];
+    } else {
+        [super textDidEndEditing:notification];
+    }
+}
+
+@end
+
