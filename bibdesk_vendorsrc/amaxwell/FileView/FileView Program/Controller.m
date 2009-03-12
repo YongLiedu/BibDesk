@@ -102,21 +102,21 @@
     [super dealloc];
 }
 
-- (NSUInteger)numberOfURLsInFileView:(FileView *)aFileView { return 0; }
+- (NSUInteger)numberOfURLsInFileView:(FVFileView *)aFileView { return 0; }
 
-- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx { return nil; }
+- (NSURL *)fileView:(FVFileView *)aFileView URLAtIndex:(NSUInteger)idx { return nil; }
 
-- (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
+- (NSString *)fileView:(FVFileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
 {
     return @"This is only a test.";
 }
 
-- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+- (void)fileView:(FVFileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     [arrayController insertObjects:absoluteURLs atArrangedObjectIndexes:aSet];
 }
 
-- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+- (BOOL)fileView:(FVFileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     if ([_filePaths count] > [aSet count]) {
         [arrayController removeObjectsAtArrangedObjectIndexes:aSet];
@@ -126,7 +126,7 @@
     return NO;
 }
 
-- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+- (BOOL)fileView:(FVFileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     NSArray *toMove = [[[arrayController arrangedObjects] objectsAtIndexes:aSet] copy];
     // reduce idx by the number of smaller indexes in aSet
@@ -142,7 +142,7 @@
     return YES;
 }    
 
-- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)fileView:(FVFileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexes;
 {
     if ([_filePaths count] >= [indexes count]) {
         [arrayController removeObjectsAtArrangedObjectIndexes:indexes];
@@ -151,7 +151,7 @@
     return NO;
 }
 
-- (NSDragOperation)fileView:(FileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation;
+- (NSDragOperation)fileView:(FVFileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation;
 {
     return dragOperation;
 }

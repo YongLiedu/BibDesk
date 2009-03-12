@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <FileView/FVPreviewer.h>
+#import "FVPreviewer.h"
 #import "FVScaledImageView.h"
 #import <Quartz/Quartz.h>
 #import <QTKit/QTKit.h>

@@ -39,17 +39,17 @@
 #import <Cocoa/Cocoa.h>
 #import "FVConcreteOperation.h"
 
-@class FVIcon, FileView;
+@class FVIcon, FVFileView;
 
 @interface FVIconOperation : FVConcreteOperation
 {
 @protected;
     FVIcon   *_icon;
-    FileView *_view;
+    FVFileView *_view;
 }
 
 // designated initializer; uses @selector(iconUpdated:) as callback (sent to view with icon as argument)
-- (id)initWithIcon:(FVIcon *)icon view:(FileView *)view;
+- (id)initWithIcon:(FVIcon *)icon view:(FVFileView *)view;
 
 @end
 

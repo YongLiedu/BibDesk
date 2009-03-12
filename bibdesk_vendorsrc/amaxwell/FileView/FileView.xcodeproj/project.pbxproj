@@ -63,14 +63,15 @@
 		CE89233F0D7CBB1A006D514C /* FVOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D5E90D7C22550034C2A8 /* FVOperation.m */; };
 		CEA831140DC1FAB500B551D1 /* FVAccessibilityIconElement.h in Headers */ = {isa = PBXBuildFile; fileRef = CEA831120DC1FAB500B551D1 /* FVAccessibilityIconElement.h */; };
 		CEA831150DC1FAB500B551D1 /* FVAccessibilityIconElement.m in Sources */ = {isa = PBXBuildFile; fileRef = CEA831130DC1FAB500B551D1 /* FVAccessibilityIconElement.m */; };
+		CEFC19B10F693E8B00B2AEE6 /* FileView.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC19B00F693E8B00B2AEE6 /* FileView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F92C7BC70D280D0E004409D8 /* FVWebViewIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */; };
 		F92C7BC80D280D0F004409D8 /* FVWebViewIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */; };
 		F92C7C4F0D282503004409D8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */; };
 		F92C7C500D28250F004409D8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */; };
 		F93C3AEB0D39473C006EB558 /* FVFinderLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = F93C3AE90D39473C006EB558 /* FVFinderLabel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F93C3AEC0D39473C006EB558 /* FVFinderLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = F93C3AEA0D39473C006EB558 /* FVFinderLabel.m */; };
-		F94692020CA56EC500AC2772 /* FileView.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691F70CA56EC500AC2772 /* FileView.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		F94692030CA56EC500AC2772 /* FileView.m in Sources */ = {isa = PBXBuildFile; fileRef = F94691F80CA56EC500AC2772 /* FileView.m */; };
+		F94692020CA56EC500AC2772 /* FVFileView.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691F70CA56EC500AC2772 /* FVFileView.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		F94692030CA56EC500AC2772 /* FVFileView.m in Sources */ = {isa = PBXBuildFile; fileRef = F94691F80CA56EC500AC2772 /* FVFileView.m */; };
 		F94692040CA56EC500AC2772 /* FVArrowButtonCell.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691F90CA56EC500AC2772 /* FVArrowButtonCell.h */; };
 		F94692050CA56EC500AC2772 /* FVArrowButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F94691FA0CA56EC500AC2772 /* FVArrowButtonCell.m */; };
 		F94692060CA56EC500AC2772 /* FVIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691FB0CA56EC500AC2772 /* FVIcon.h */; };
@@ -242,6 +243,7 @@
 		CE05D5E90D7C22550034C2A8 /* FVOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVOperation.m; sourceTree = "<group>"; };
 		CEA831120DC1FAB500B551D1 /* FVAccessibilityIconElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVAccessibilityIconElement.h; sourceTree = "<group>"; };
 		CEA831130DC1FAB500B551D1 /* FVAccessibilityIconElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVAccessibilityIconElement.m; sourceTree = "<group>"; };
+		CEFC19B00F693E8B00B2AEE6 /* FileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileView.h; sourceTree = "<group>"; };
 		F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVWebViewIcon.h; sourceTree = "<group>"; };
 		F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVWebViewIcon.m; sourceTree = "<group>"; };
 		F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
@@ -250,8 +252,8 @@
 		F93C35200D35D23E006EB558 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/FVPreviewer.nib; sourceTree = "<group>"; };
 		F93C3AE90D39473C006EB558 /* FVFinderLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVFinderLabel.h; sourceTree = "<group>"; };
 		F93C3AEA0D39473C006EB558 /* FVFinderLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVFinderLabel.m; sourceTree = "<group>"; };
-		F94691F70CA56EC500AC2772 /* FileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileView.h; sourceTree = "<group>"; };
-		F94691F80CA56EC500AC2772 /* FileView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileView.m; sourceTree = "<group>"; };
+		F94691F70CA56EC500AC2772 /* FVFileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVFileView.h; sourceTree = "<group>"; };
+		F94691F80CA56EC500AC2772 /* FVFileView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVFileView.m; sourceTree = "<group>"; };
 		F94691F90CA56EC500AC2772 /* FVArrowButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVArrowButtonCell.h; sourceTree = "<group>"; };
 		F94691FA0CA56EC500AC2772 /* FVArrowButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVArrowButtonCell.m; sourceTree = "<group>"; };
 		F94691FB0CA56EC500AC2772 /* FVIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVIcon.h; sourceTree = "<group>"; };
@@ -437,6 +439,7 @@
 				F93C3AEA0D39473C006EB558 /* FVFinderLabel.m */,
 				CE05D3240D7AFC830034C2A8 /* FVUtilities.h */,
 				CE05D3250D7AFC830034C2A8 /* FVUtilities.m */,
+				CEFC19B00F693E8B00B2AEE6 /* FileView.h */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -498,8 +501,8 @@
 		CE05D48A0D7B388C0034C2A8 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				F94691F70CA56EC500AC2772 /* FileView.h */,
-				F94691F80CA56EC500AC2772 /* FileView.m */,
+				F94691F70CA56EC500AC2772 /* FVFileView.h */,
+				F94691F80CA56EC500AC2772 /* FVFileView.m */,
 				F94691F90CA56EC500AC2772 /* FVArrowButtonCell.h */,
 				F94691FA0CA56EC500AC2772 /* FVArrowButtonCell.m */,
 				CE05D3AF0D7B22170034C2A8 /* FVColorMenuView.h */,
@@ -627,7 +630,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F94692020CA56EC500AC2772 /* FileView.h in Headers */,
+				F94692020CA56EC500AC2772 /* FVFileView.h in Headers */,
 				F94692040CA56EC500AC2772 /* FVArrowButtonCell.h in Headers */,
 				F94692060CA56EC500AC2772 /* FVIcon.h in Headers */,
 				F946920A0CA56EC500AC2772 /* FVPreviewer.h in Headers */,
@@ -679,6 +682,7 @@
 				CE89233C0D7CBB17006D514C /* FVInvocationOperation.h in Headers */,
 				CE89233E0D7CBB19006D514C /* FVOperation.h in Headers */,
 				CEA831140DC1FAB500B551D1 /* FVAccessibilityIconElement.h in Headers */,
+				CEFC19B10F693E8B00B2AEE6 /* FileView.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -816,7 +820,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F94692030CA56EC500AC2772 /* FileView.m in Sources */,
+				F94692030CA56EC500AC2772 /* FVFileView.m in Sources */,
 				F94692050CA56EC500AC2772 /* FVArrowButtonCell.m in Sources */,
 				F94692070CA56EC500AC2772 /* FVIcon.m in Sources */,
 				F946920B0CA56EC500AC2772 /* FVPreviewer.m in Sources */,

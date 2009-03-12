@@ -1,6 +1,6 @@
 //
-//  FileView.h
-//  FileViewTest
+//  FVFileView.h
+//  FileView
 //
 //  Created by Adam Maxwell on 06/23/07.
 /*
@@ -38,30 +38,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-// define here, since this is the only public header for the project
-// From NSObjCRuntime.h
-#ifndef NSINTEGER_DEFINED
-typedef int NSInteger;
-typedef unsigned int NSUInteger;
-#define NSIntegerMax    LONG_MAX
-#define NSIntegerMin    LONG_MIN
-#define NSUIntegerMax   ULONG_MAX
-#define NSINTEGER_DEFINED 1
-#endif /* NSINTEGER_DEFINED */
-
-// From CGBase.h
-#ifndef	CGFLOAT_DEFINED
-typedef float CGFloat;
-#define CGFLOAT_MIN FLT_MIN
-#define CGFLOAT_MAX FLT_MAX
-#define CGFLOAT_IS_DOUBLE 0
-#define CGFLOAT_DEFINED 1
-#endif /* CGFLOAT_DEFINED */
-
-#ifndef NSAppKitVersionNumber10_4
-#define NSAppKitVersionNumber10_4 824
-#endif
-
 enum {
     FVZoomInMenuItemTag = 1001,
     FVZoomOutMenuItemTag = 1002,
@@ -82,7 +58,7 @@ typedef enum _FVDropOperation {
 
 @class FVSliderWindow, FVOperationQueue;
 
-@interface FileView : NSView 
+@interface FVFileView : NSView 
 {
 @private
     id                      _delegate;
@@ -180,11 +156,11 @@ typedef enum _FVDropOperation {
 @interface NSObject (FileViewDataSource)
 
 // delegate must return an NSURL or nil (a missing value) for each index < numberOfFiles
-- (NSUInteger)numberOfURLsInFileView:(FileView *)aFileView;
-- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)anIndex;
+- (NSUInteger)numberOfURLsInFileView:(FVFileView *)aFileView;
+- (NSURL *)fileView:(FVFileView *)aFileView URLAtIndex:(NSUInteger)anIndex;
 
 // optional method for a subtitle
-- (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
+- (NSString *)fileView:(FVFileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
 
 @end
 
@@ -192,33 +168,33 @@ typedef enum _FVDropOperation {
 @interface NSObject (FileViewDragDataSource)
 
 // implement to do something (or nothing) with the dropped URLs
-- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+- (void)fileView:(FVFileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 
 // the datasource may replace the files at the given indexes
-- (BOOL)fileView:(FileView *)aFileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+- (BOOL)fileView:(FVFileView *)aFileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 
 // rearranging files in the view
-- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+- (BOOL)fileView:(FVFileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 
 // does not delete the file from disk; this is the datasource's responsibility
-- (BOOL)fileView:(FileView *)aFileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
+- (BOOL)fileView:(FVFileView *)aFileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
 
 @end
 
 @interface NSObject (FileViewDelegate)
 
 // Called immediately before display.   The anIndex parameter will be NSNotFound if there is not a URL at the mouse event location.  If you remove all items, the menu will not be shown.
-- (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)aMenu onIconAtIndex:(NSUInteger)anIndex;
+- (void)fileView:(FVFileView *)aFileView willPopUpMenu:(NSMenu *)aMenu onIconAtIndex:(NSUInteger)anIndex;
 
 // In addition, it can be sent the WebUIDelegate method webView:contextMenuItemsForElement:defaultMenuItems:
 
 // If unimplemented or returns YES, fileview will open the URL using NSWorkspace
-- (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL;
+- (BOOL)fileView:(FVFileView *)aFileView shouldOpenURL:(NSURL *)aURL;
 
 // If unimplemented, fileview will use a system temporary directory; if returns nil, cancels download.  Used with FVDownloadMenuItemTag menu item.
-- (NSURL *)fileView:(FileView *)aFileView downloadDestinationWithSuggestedFilename:(NSString *)filename;
+- (NSURL *)fileView:(FVFileView *)aFileView downloadDestinationWithSuggestedFilename:(NSString *)filename;
 
 // If unimplemented, uses the proposedDragOperation
-- (NSDragOperation)fileView:(FileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation;
+- (NSDragOperation)fileView:(FVFileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation;
 
 @end

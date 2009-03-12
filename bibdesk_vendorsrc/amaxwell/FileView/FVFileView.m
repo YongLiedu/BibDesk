@@ -1,6 +1,6 @@
 //
-//  FileView.m
-//  FileViewTest
+//  FVFileView.m
+//  FileView
 //
 //  Created by Adam Maxwell on 06/23/07.
 /*
@@ -36,9 +36,9 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <FileView/FileView.h>
-#import <FileView/FVFinderLabel.h>
-#import <FileView/FVPreviewer.h>
+#import "FVFileView.h"
+#import "FVFinderLabel.h"
+#import "FVPreviewer.h"
 
 #import <QTKit/QTKit.h>
 #import <WebKit/WebKit.h>
@@ -82,7 +82,7 @@ static CGColorRef _shadowColor = NULL;
 
 #pragma mark -
 
-@interface FileView (Private)
+@interface FVFileView (Private)
 // wrapper that calls bound array or datasource transparently; for internal use
 // clients should access the datasource or bound array directly
 - (NSURL *)iconURLAtIndex:(NSUInteger)anIndex;
@@ -104,11 +104,11 @@ static CGColorRef _shadowColor = NULL;
 
 #pragma mark -
 
-@implementation FileView
+@implementation FVFileView
 
 + (void)initialize 
 {
-    FVINITIALIZE(FileView);
+    FVINITIALIZE(FVFileView);
     
     NSMutableDictionary *ta = [NSMutableDictionary dictionary];
     [ta setObject:[NSFont systemFontOfSize:12.0] forKey:NSFontAttributeName];
@@ -365,7 +365,7 @@ static CGColorRef _shadowColor = NULL;
 
 - (void)awakeFromNib
 {
-    if ([[FileView superclass] instancesRespondToSelector:@selector(awakeFromNib)])
+    if ([[FVFileView superclass] instancesRespondToSelector:@selector(awakeFromNib)])
         [super awakeFromNib];
     // if the datasource connection is made in the nib, the drag type setup doesn't get done
     [self _registerForDraggedTypes];
@@ -625,11 +625,11 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     CFDictionaryRemoveAllValues(_iconIndexMap);
     CFDictionaryRemoveAllValues(_iconURLMap);
     
-    // -[FileView _cachedIconForURL:]
+    // -[FVFileView _cachedIconForURL:]
     id (*cachedIcon)(id, SEL, id);
     cachedIcon = (id (*)(id, SEL, id))[self methodForSelector:@selector(_cachedIconForURL:)];
     
-    // -[FileView iconURLAtIndex:]
+    // -[FVFileView iconURLAtIndex:]
     id (*iconURLAtIndex)(id, SEL, NSUInteger);
     iconURLAtIndex = (id (*)(id, SEL, NSUInteger))[self methodForSelector:@selector(iconURLAtIndex:)];
     
@@ -646,7 +646,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (void)reloadIcons;
 {
-    // Problem exposed in BibDesk: select all, scroll halfway down in file pane, then change selection to a single row.  FileView content didn't update correctly, even though reloadIcons was called.  Logging drawRect: indicated that the wrong region was being updated, but calling _recalculateGridSize here fixed it.
+    // Problem exposed in BibDesk: select all, scroll halfway down in file pane, then change selection to a single row.  FVFileView content didn't update correctly, even though reloadIcons was called.  Logging drawRect: indicated that the wrong region was being updated, but calling _recalculateGridSize here fixed it.
     [self _recalculateGridSize];
     [self _rebuildIconIndexMap];
     
@@ -1220,7 +1220,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     [path setLineWidth:previousLineWidth];
     [path setLineDash:NULL count:0 phase:0.0];
 
-    NSBundle *bundle = [NSBundle bundleForClass:[FileView class]];
+    NSBundle *bundle = [NSBundle bundleForClass:[FVFileView class]];
     NSString *message = NSLocalizedStringFromTableInBundle(@"Drop Files Here", @"FileView", bundle, @"placeholder message for empty file view");
     NSMutableAttributedString *attrString = [[[NSMutableAttributedString alloc] initWithString:message] autorelease];
     CGFloat fontSize = 24.0;
@@ -1544,7 +1544,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 static void _drawProgressIndicatorForDownload(const void *key, const void *value, void *view)
 {
-    FileView *self = view;
+    FVFileView *self = view;
     FVDownload *fvDownload = (id)value;
     
     NSUInteger anIndex = [fvDownload indexInView];
@@ -2855,7 +2855,7 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
         NSMenuItem *anItem;
         
         sharedMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@""];
-        NSBundle *bundle = [NSBundle bundleForClass:[FileView class]];
+        NSBundle *bundle = [NSBundle bundleForClass:[FVFileView class]];
         
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Quick Look", @"FileView", bundle, @"context menu title") action:@selector(previewAction:) keyEquivalent:@""];
         [anItem setTag:FVQuickLookMenuItemTag];

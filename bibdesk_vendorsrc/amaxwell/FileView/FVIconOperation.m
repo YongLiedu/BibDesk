@@ -40,12 +40,12 @@
 #import "FVOperationQueue.h"
 #import "FVInvocationOperation.h"
 #import "FVIcon.h"
-#import "FileView.h"
+#import "FVFileView.h"
 #import <pthread.h>
 
 @implementation FVIconOperation
 
-- (id)initWithIcon:(FVIcon *)icon view:(FileView *)view;
+- (id)initWithIcon:(FVIcon *)icon view:(FVFileView *)view;
 {
     NSParameterAssert(nil != icon);
     NSParameterAssert(nil == view || [view respondsToSelector:@selector(iconUpdated:)]);
@@ -96,7 +96,7 @@
 @interface FVIconUpdateOperation : FVIconOperation
 @end
 
-@interface FileView (Update)
+@interface FVFileView (Update)
 - (void)iconUpdated:(FVIcon *)anIcon;
 @end
 
