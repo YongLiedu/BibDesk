@@ -126,6 +126,7 @@ enum {
 
 - (NSProgressIndicator *)spinnerForGroup:(BDSKGroup *)group;
 - (void)removeSpinnerForGroup:(BDSKGroup *)group;
+- (void)removeSpinnersFromSuperview;
 
 - (BibDocument *)document;
 

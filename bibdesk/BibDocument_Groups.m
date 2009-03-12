@@ -403,6 +403,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [clientsToAdd release];
     [currentGroups release];
     
+    [groups removeSpinnersFromSuperview];
     [groupTableView reloadData];
     
 	// reset ourself as delegate
@@ -477,6 +478,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)handleDidAddRemoveGroupNotification:(NSNotification *)notification{
+    [groups removeSpinnersFromSuperview];
     [groupTableView reloadData];
     [self handleGroupTableSelectionChangedNotification:notification];
 }
@@ -573,6 +575,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     // update the count for the first item, not sure if it should be done here
     [[groups libraryGroup] setCount:[publications count]];
 	
+    [groups removeSpinnersFromSuperview];
     [groupTableView reloadData];
 	
 	// select the current groups, if still around. Otherwise select Library
@@ -1649,6 +1652,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	BDSKHeaderPopUpButtonCell *headerPopup = (BDSKHeaderPopUpButtonCell *)[groupTableView popUpHeaderCell];
 	[headerPopup setIndicatorImage:[NSImage imageNamed:docState.sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
 
+    [groups removeSpinnersFromSuperview];
     [groupTableView reloadData];
 	
 	// select the current groups. Otherwise select Library

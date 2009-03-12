@@ -558,6 +558,10 @@
     }
 }
 
+- (void)removeSpinnersFromSuperview{
+    [[(NSMutableDictionary *)spinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+}
+
 #pragma mark Sorting
 
 - (void)sortUsingDescriptors:(NSArray *)sortDescriptors{
