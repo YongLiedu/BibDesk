@@ -53,7 +53,7 @@
 @class BDSKAlert;
 @class BibAuthor;
 @class BDSKZoomablePDFView;
-@class FileView;
+@class FVFileView;
 @class BDSKGradientSplitView;
 @class BDSKEditorTableView;
 
@@ -129,7 +129,7 @@
 	
 	NSTextView *dragFieldEditor;
     
-    IBOutlet FileView *fileView;
+    IBOutlet FVFileView *fileView;
     
     NSButton *disableAutoFileButton;
 }

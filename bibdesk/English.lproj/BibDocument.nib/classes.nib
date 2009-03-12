@@ -195,7 +195,7 @@
 				<key>actionMenuButton</key>
 				<string>BDSKImagePopUpButton</string>
 				<key>bottomFileView</key>
-				<string>FileView</string>
+				<string>FVFileView</string>
 				<key>bottomPreviewButton</key>
 				<string>NSSegmentedControl</string>
 				<key>bottomPreviewTabView</key>
@@ -247,7 +247,7 @@
 				<key>searchField</key>
 				<string>NSSearchField</string>
 				<key>sideFileView</key>
-				<string>FileView</string>
+				<string>FVFileView</string>
 				<key>sidePreviewButton</key>
 				<string>NSSegmentedControl</string>
 				<key>sidePreviewTabView</key>
@@ -290,14 +290,6 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSMenu</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSObject</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
 			<string>NSControl</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -305,28 +297,12 @@
 			<string>NSView</string>
 		</dict>
 		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>delete</key>
-				<string>id</string>
-				<key>selectNextIcon</key>
-				<string>id</string>
-				<key>selectPreviousIcon</key>
-				<string>id</string>
-			</dict>
 			<key>CLASS</key>
-			<string>FileView</string>
+			<string>NSMenu</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>dataSource</key>
-				<string>id</string>
-				<key>delegate</key>
-				<string>id</string>
-			</dict>
 			<key>SUPERCLASS</key>
-			<string>NSView</string>
+			<string>NSObject</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -380,6 +356,36 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>changeFinderLabel</key>
+				<string>id</string>
+				<key>delete</key>
+				<string>id</string>
+				<key>openSelectedURLs</key>
+				<string>id</string>
+				<key>selectNextIcon</key>
+				<string>id</string>
+				<key>selectPreviousIcon</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>FVFileView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>dataSource</key>
+				<string>id</string>
+				<key>delegate</key>
+				<string>id</string>
+				<key>dragDataSource</key>
+				<string>id</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>

@@ -3227,7 +3227,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         [self displayTemplatedPreview:sidePreviewDisplayTemplate inTextView:sidePreviewTextView];
 }
 
-#pragma mark FileView
+#pragma mark FVFileView
 
 typedef struct _fileViewObjectContext {
     CFMutableArrayRef array;

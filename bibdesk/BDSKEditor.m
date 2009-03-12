@@ -81,7 +81,6 @@
 #import "BDSKEditorTableView.h"
 #import "BDSKEditorTextFieldCell.h"
 #import "BDSKCompletionManager.h"
-#import <FileView/FVPreviewer.h>
 #import "BDSKApplication.h"
 
 static NSString *BDSKEditorFrameAutosaveName = @"BDSKEditor window autosave name";
@@ -1067,7 +1066,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return NO;
 }
 
-- (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
+- (void)fileView:(FVFileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
     
     NSURL *theURL = anIndex == NSNotFound ? nil : [[publication objectInFilesAtIndex:anIndex] URL];
 	NSMenu *submenu;
@@ -1455,23 +1454,23 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	return YES;
 }
 
-#pragma mark FileView support
+#pragma mark FVFileView support
 
-- (NSUInteger)numberOfURLsInFileView:(FileView *)aFileView { return [publication countOfFiles]; }
+- (NSUInteger)numberOfURLsInFileView:(FVFileView *)aFileView { return [publication countOfFiles]; }
 
-- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
+- (NSURL *)fileView:(FVFileView *)aFileView URLAtIndex:(NSUInteger)idx;
 {
     return [[publication objectInFilesAtIndex:idx] displayURL];
 }
 
-- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+- (BOOL)fileView:(FVFileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     BDSKASSERT(anIndex != NSNotFound);
     [publication moveFilesAtIndexes:aSet toIndex:anIndex];
     return YES;
 }
 
-- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+- (BOOL)fileView:(FVFileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     BDSKLinkedFile *aFile = nil;
     NSEnumerator *enumerator = [newURLs objectEnumerator];
@@ -1496,7 +1495,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return YES;
 }
 
-- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+- (void)fileView:(FVFileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     BDSKLinkedFile *aFile;
     NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
@@ -1518,21 +1517,21 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     }
 }
 
-- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
+- (BOOL)fileView:(FVFileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
 {
     int moveToTrash = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKAskToTrashFilesKey] ? -1 : 0;
     [self deleteURLsAtIndexes:indexSet moveToTrash:moveToTrash];
     return YES;
 }
 
-- (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL {
+- (BOOL)fileView:(FVFileView *)aFileView shouldOpenURL:(NSURL *)aURL {
     if ([aURL isFileURL])
         return [[NSWorkspace sharedWorkspace] openLinkedFile:[aURL path]] == NO;
     else
         return [[NSWorkspace sharedWorkspace] openLinkedURL:aURL] == NO;
 }
 
-- (NSDragOperation)fileView:(FileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation {
+- (NSDragOperation)fileView:(FVFileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation {
     NSDragOperation dragOp = dragOperation;
     if ([[info draggingSource] isEqual:fileView] && dropOperation == FVDropOn && dragOperation != NSDragOperationCopy) {
         // redirect local drop on icon and drop on view
@@ -1554,7 +1553,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return dragOp;
 }
 
-- (NSURL *)fileView:(FileView *)aFileView downloadDestinationWithSuggestedFilename:(NSString *)filename {
+- (NSURL *)fileView:(FVFileView *)aFileView downloadDestinationWithSuggestedFilename:(NSString *)filename {
     NSURL *fileURL = nil;
     NSString *extension = [filename pathExtension];
     NSString *downloadsDirectory = [[[NSUserDefaults standardUserDefaults] stringForKey:@"BDSKDownloadsDirectory"] stringByExpandingTildeInPath];

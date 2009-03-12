@@ -85,7 +85,7 @@
 #import "BDSKPreviewer.h"
 #import "BDSKFileMigrationController.h"
 #import <sys/stat.h>
-#import <FileView/FVPreviewer.h>
+#import <FileView/FileView.h>
 #import "BDSKMacro.h"
 #import "BDSKAppController.h"
 #import "BDSKApplication.h"

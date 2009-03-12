@@ -1540,22 +1540,22 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     } else return [NSArray array];
 }
 
-#pragma mark FileView data source and delegate
+#pragma mark FVFileView data source and delegate
 
-- (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
+- (NSString *)fileView:(FVFileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
 {
     return [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"string"];
 }
 
-- (NSUInteger)numberOfURLsInFileView:(FileView *)aFileView {
+- (NSUInteger)numberOfURLsInFileView:(FVFileView *)aFileView {
     return [[self shownFiles] count];
 }
 
-- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)anIndex {
+- (NSURL *)fileView:(FVFileView *)aFileView URLAtIndex:(NSUInteger)anIndex {
     return [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"URL"];
 }
 
-- (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL {
+- (BOOL)fileView:(FVFileView *)aFileView shouldOpenURL:(NSURL *)aURL {
     if ([aURL isFileURL]) {
         NSString *searchString = @"";
         // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
@@ -1567,7 +1567,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     }
 }
 
-- (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
+- (void)fileView:(FVFileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
     NSURL *theURL = anIndex == NSNotFound ? nil : [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"URL"];
     int i;
     NSMenuItem *item;

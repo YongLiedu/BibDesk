@@ -44,7 +44,7 @@
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver, BDSKItemPasteboardHelper;
 @class BDSKEditor, BDSKMacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController, BDSKSearchGroupViewController;
-@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKGradientSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredBox, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FileView;
+@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKGradientSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredBox, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FVFileView;
 @class BDSKWebGroupViewController, BDSKSearchButtonController;
 @class BDSKItemSearchIndexes, BDSKFileMigrationController, BDSKDocumentSearch;
 
@@ -140,7 +140,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
     IBOutlet NSTabView *sidePreviewTabView;
     IBOutlet NSTextView *sidePreviewTextView;
-    IBOutlet FileView *sideFileView;
+    IBOutlet FVFileView *sideFileView;
     
     IBOutlet BDSKCollapsibleView *fileCollapsibleView;
     IBOutlet BDSKGradientView *fileGradientView;
@@ -155,7 +155,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
     IBOutlet NSTabView *bottomPreviewTabView;
     IBOutlet NSTextView *bottomPreviewTextView;
-    IBOutlet FileView *bottomFileView;
+    IBOutlet FVFileView *bottomFileView;
     BDSKPreviewer *previewer;
 	
     IBOutlet NSSegmentedControl *bottomPreviewButton;

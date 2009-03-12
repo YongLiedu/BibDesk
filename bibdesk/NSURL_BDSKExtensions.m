@@ -40,7 +40,7 @@
 #import "CFString_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSAppleEventDescriptor_BDSKExtensions.h"
-#import <FileView/FVFinderLabel.h>
+#import <FileView/FileView.h>
 #import "NSWorkspace_BDSKExtensions.h"
 #import <SkimNotes/SkimNotes.h>
 #import "NSFileManager_BDSKExtensions.h"
