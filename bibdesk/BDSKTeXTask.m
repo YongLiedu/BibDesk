@@ -562,24 +562,21 @@ static double runLoopTimeout = 30;
 - (void)removeFilesFromPreviousRun{
     // use FSDeleteObject for thread safety
     const FSRef fileRef;
-    static NSSet *filesToRemove = nil;
-    if (nil == filesToRemove)
-        filesToRemove = [[NSSet alloc] initWithObjects:[texPath blgFilePath], [texPath logFilePath], [texPath bblFilePath], [texPath auxFilePath], [texPath pdfFilePath], [texPath rtfFilePath], nil];
+    NSArray *filesToRemove = [[NSArray alloc] initWithObjects:[texPath blgFilePath], [texPath logFilePath], [texPath bblFilePath], [texPath auxFilePath], [texPath pdfFilePath], [texPath rtfFilePath], nil];
     
     NSEnumerator *e = [filesToRemove objectEnumerator];
     NSString *path;
-    CFAllocatorRef alloc = CFRetain(CFAllocatorGetDefault());
     CFURLRef fileURL;
     
     while(path = [e nextObject]){
-        fileURL = CFURLCreateWithFileSystemPath(alloc, (CFStringRef)path, kCFURLPOSIXPathStyle, FALSE);
+        fileURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, (CFStringRef)path, kCFURLPOSIXPathStyle, FALSE);
         if(fileURL){
             if(CFURLGetFSRef(fileURL, (struct FSRef *)&fileRef))
                 FSDeleteObject(&fileRef);
             CFRelease(fileURL);
         }
     }
-    CFRelease(alloc);
+    [filesToRemove release];
 }
 
 - (int)runTeXTasksForLaTeX{
