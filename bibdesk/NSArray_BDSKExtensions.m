@@ -360,7 +360,7 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
 }
 
 - (NSArray *)arrayByRemovingObject:(id)anObject {
-    if ([self containsObject:anObject])
+    if ([self containsObject:anObject] == NO)
         return self;
     NSMutableArray *tmpArray = [NSMutableArray arrayWithArray:self];
     [tmpArray removeObject:anObject];
