@@ -48,8 +48,8 @@
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error {
     NSArray *components = [string componentsSeparatedByString:@" "];
-    if ([components containsObject:@" "])
-        components = [components arrayByRemovingObject:@" "];
+    if ([components containsObject:@""])
+        components = [components arrayByRemovingObject:@""];
     *obj = components ?: [NSArray array];
     return YES;
 }
