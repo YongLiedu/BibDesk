@@ -83,7 +83,7 @@
         tmpStaticGroups = nil;
         categoryGroups = nil;
         document = aDocument;
-        spinners = nil;
+        spinners = NULL;
     }
     return self;
 }
@@ -100,7 +100,8 @@
     [staticGroups release];
     [tmpStaticGroups release];
     [categoryGroups release];
-    [spinners release];
+    if (spinners)
+        CFRelease(spinners);
     [super dealloc];
 }
 
@@ -523,18 +524,19 @@
 #pragma mark Spinners
 
 - (NSProgressIndicator *)spinnerForGroup:(BDSKGroup *)group{
-    NSProgressIndicator *spinner = [spinners objectForKey:group];
+    NSProgressIndicator *spinner = spinners == NULL ? nil : (id)CFDictionaryGetValue(spinners, group);
     
     if(spinner == nil && [group isRetrieving]){
-        if(spinners == nil)
-            spinners = [[NSMutableDictionary alloc] initWithCapacity:5];
+        // don't use NSMutableDictionary because that copies the groups
+        if(spinners == NULL)
+            spinners = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
         spinner = [[NSProgressIndicator alloc] init];
         [spinner setControlSize:NSSmallControlSize];
         [spinner setStyle:NSProgressIndicatorSpinningStyle];
         [spinner setDisplayedWhenStopped:NO];
         [spinner sizeToFit];
         [spinner setUsesThreadedAnimation:YES];
-        [spinners setObject:spinner forKey:group];
+        CFDictionarySetValue(spinners, group, spinner);
         [spinner release];
     }
     if(spinner){
@@ -548,11 +550,11 @@
 }
 
 - (void)removeSpinnerForGroup:(BDSKGroup *)group{
-    NSProgressIndicator *spinner = [spinners objectForKey:group];
+    NSProgressIndicator *spinner = spinners == NULL ? nil : (id)CFDictionaryGetValue(spinners, group);
     if(spinner){
         [spinner stopAnimation:nil];
         [spinner removeFromSuperview];
-        [spinners removeObjectForKey:group];
+        CFDictionaryRemoveValue(spinners, group);
     }
 }
 

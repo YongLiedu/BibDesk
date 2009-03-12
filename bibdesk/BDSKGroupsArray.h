@@ -62,7 +62,7 @@ enum {
     NSMutableArray *staticGroups;
     NSArray *tmpStaticGroups;
     NSMutableArray *categoryGroups;
-    NSMutableDictionary *spinners;
+    CFMutableDictionaryRef spinners;
     BibDocument *document;
 }
 
