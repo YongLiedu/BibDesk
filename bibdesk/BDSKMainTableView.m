@@ -50,8 +50,6 @@
 #import "NSBezierPath_CoreImageExtensions.h"
 #import "BDSKCenterScaledImageCell.h"
 #import "BDSKLevelIndicatorCell.h"
-#import "BDSKImageFadeAnimation.h"
-#import "NSViewAnimation_BDSKExtensions.h"
 #import <QuartzCore/QuartzCore.h>
 #import "BDSKTextWithIconCell.h"
 #import "NSImage_BDSKExtensions.h"
@@ -412,63 +410,6 @@ enum {
     [self updateColumnsMenu];
 }
 
-- (void)changeTableColumnsWithIdentifiers:(NSArray *)identifiers {
-    // Store the new column in the preferences
-    [[NSUserDefaults standardUserDefaults] setObject:[[identifiers arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
-                                                      forKey:BDSKShownColsNamesKey];
-    
-    if ([NSViewAnimation defaultAnimationTimeInterval] > 0.0) {
-        NSView *cacheView = [self enclosingScrollView];
-        NSImage *initialImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
-        NSBitmapImageRep *imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
-        [cacheView cacheDisplayInRect:[cacheView frame] toBitmapImageRep:imageRep];
-        [initialImage addRepresentation:imageRep];
-        
-        // set the view up with the new columns; don't force a redraw, though
-        [self setupTableColumnsWithIdentifiers:identifiers];
-        
-        // the added table column's content is not correct during the transition; -reloadData doesn't help
-        NSImage *finalImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
-        imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
-        [cacheView cacheDisplayInRect:[cacheView frame] toBitmapImageRep:imageRep];
-        [finalImage addRepresentation:imageRep];
-        
-        // block until this is done, so we can handle drawing manually
-        BDSKImageFadeAnimation *animation = [[BDSKImageFadeAnimation alloc] initWithDuration:[NSViewAnimation defaultAnimationTimeInterval] animationCurve:NSAnimationEaseInOut];
-        [animation setDelegate:self];
-        [animation setAnimationBlockingMode:NSAnimationBlocking];
-        
-        [animation setTargetImage:finalImage];
-        [animation setStartingImage:initialImage];
-        [animation startAnimation];
-        
-        [finalImage release];
-        [initialImage release];
-        
-        [animation autorelease];
-    } else {
-        // set the view up with the new columns
-        [self setupTableColumnsWithIdentifiers:identifiers];
-    }
-}
-
-- (void)imageAnimationDidUpdate:(BDSKImageFadeAnimation *)anAnimation {
-    NSView *scrollView = [self enclosingScrollView];
-    NSGraphicsContext *ctxt = [NSGraphicsContext graphicsContextWithWindow:[scrollView window]];
-    [NSGraphicsContext setCurrentContext:ctxt];
-    
-    [ctxt saveGraphicsState];
-    NSRectClip([scrollView convertRect:[scrollView visibleRect] toView:nil]);
-    
-    // we're drawing the scrollview as well as the tableview
-    NSRect frameRect = [scrollView convertRect:[scrollView frame] toView:nil];
-    CIImage *ciImage = [anAnimation currentCIImage];
-    CGRect rect = [ciImage extent];
-    [ciImage drawAtPoint:frameRect.origin fromRect:*(NSRect *)&rect operation:NSCompositeSourceOver fraction:1.0];
-    [ctxt flushGraphics];
-    [ctxt restoreGraphicsState];
-}
-
 - (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(unsigned)idx {
     NSMutableArray *shownColumns = [NSMutableArray arrayWithArray:[self tableColumnIdentifiers]];
     unsigned oldIndex = [shownColumns indexOfObject:identifier];
@@ -485,7 +426,7 @@ enum {
     
     [shownColumns insertObject:identifier atIndex:idx];
     
-    [self changeTableColumnsWithIdentifiers:shownColumns];
+    [self setupTableColumnsWithIdentifiers:shownColumns];
 }
 
 - (void)removeTableColumnWithIdentifier:(NSString *)identifier {
@@ -497,7 +438,7 @@ enum {
     
     [shownColumns removeObject:identifier];
     
-    [self changeTableColumnsWithIdentifiers:shownColumns];
+    [self setupTableColumnsWithIdentifiers:shownColumns];
 }
 
 - (NSMenu *)columnsMenu{
