@@ -526,24 +526,24 @@
 - (NSProgressIndicator *)spinnerForGroup:(BDSKGroup *)group{
     NSProgressIndicator *spinner = spinners == NULL ? nil : (id)CFDictionaryGetValue(spinners, group);
     
-    if(spinner == nil && [group isRetrieving]){
-        // don't use NSMutableDictionary because that copies the groups
-        if(spinners == NULL)
-            spinners = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-        spinner = [[NSProgressIndicator alloc] init];
-        [spinner setControlSize:NSSmallControlSize];
-        [spinner setStyle:NSProgressIndicatorSpinningStyle];
-        [spinner setDisplayedWhenStopped:NO];
-        [spinner sizeToFit];
-        [spinner setUsesThreadedAnimation:YES];
-        CFDictionarySetValue(spinners, group, spinner);
-        [spinner release];
-    }
-    if(spinner){
-        if ([group isRetrieving])
-            [spinner startAnimation:nil];
-        else
-            [spinner stopAnimation:nil];
+    if ([group isRetrieving]) {
+        if (spinner == nil) {
+            // don't use NSMutableDictionary because that copies the groups
+            if (spinners == NULL)
+                spinners = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+            spinner = [[NSProgressIndicator alloc] init];
+            [spinner setControlSize:NSSmallControlSize];
+            [spinner setStyle:NSProgressIndicatorSpinningStyle];
+            [spinner setDisplayedWhenStopped:NO];
+            [spinner sizeToFit];
+            [spinner setUsesThreadedAnimation:YES];
+            CFDictionarySetValue(spinners, group, spinner);
+            [spinner release];
+        }
+        [spinner startAnimation:nil];
+    } else if (spinner) {
+        [spinner stopAnimation:nil];
+        [spinner removeFromSuperview];
     }
     
     return spinner;
