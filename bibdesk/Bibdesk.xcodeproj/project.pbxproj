@@ -592,12 +592,12 @@
 			remoteGlobalIDString = 8D57630D048677EA00EA77CD;
 			remoteInfo = BibDesk;
 		};
-		CEEBA8490D749DB7000204B8 /* PBXContainerItemProxy */ = {
+		CEFC1F860F6AD7A800B2AEE6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F911D6A80CFE8E420009C77B /* FileView.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = F9F04CE10CE260EB00F28ED2;
-			remoteInfo = "Framework + Plugin";
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216 /* FileView */;
+			remoteInfo = FileView;
 		};
 		EF168E280F113753002F4D9F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -626,13 +626,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
 			remoteInfo = FileView;
-		};
-		F911D6B50CFE8E420009C77B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F911D6A80CFE8E420009C77B /* FileView.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = F94692130CA56F4300AC2772;
-			remoteInfo = "FileView-Leopard";
 		};
 		F911D6B70CFE8E420009C77B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -2546,7 +2539,6 @@
 			isa = PBXGroup;
 			children = (
 				F911D6B40CFE8E420009C77B /* FileView.framework */,
-				F911D6B60CFE8E420009C77B /* FileView-Leopard.bundle */,
 				F911D6B80CFE8E420009C77B /* FileView Program.app */,
 			);
 			name = Products;
@@ -3023,9 +3015,9 @@
 				F9AF56380BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */,
 				CEA4516A0E47C8C000D161AD /* PBXTargetDependency */,
+				CEFC1F870F6AD7A800B2AEE6 /* PBXTargetDependency */,
 				CEB34C4C0F5D49F80037E086 /* PBXTargetDependency */,
 				F90B13050C29900200144F1B /* PBXTargetDependency */,
-				CEEBA84A0D749DB7000204B8 /* PBXTargetDependency */,
 				F9AF56340BEA4160009B16D5 /* PBXTargetDependency */,
 				F9EF0CE20B4EFC8F00A1F282 /* PBXTargetDependency */,
 				CEEBA83F0D749CC9000204B8 /* PBXTargetDependency */,
@@ -3198,13 +3190,6 @@
 			fileType = wrapper.framework;
 			path = FileView.framework;
 			remoteRef = F911D6B30CFE8E420009C77B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F911D6B60CFE8E420009C77B /* FileView-Leopard.bundle */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = "FileView-Leopard.bundle";
-			remoteRef = F911D6B50CFE8E420009C77B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		F911D6B80CFE8E420009C77B /* FileView Program.app */ = {
@@ -3963,10 +3948,10 @@
 			name = BibDesk;
 			targetProxy = CEEBA83E0D749CC9000204B8 /* PBXContainerItemProxy */;
 		};
-		CEEBA84A0D749DB7000204B8 /* PBXTargetDependency */ = {
+		CEFC1F870F6AD7A800B2AEE6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = "Framework + Plugin";
-			targetProxy = CEEBA8490D749DB7000204B8 /* PBXContainerItemProxy */;
+			name = FileView;
+			targetProxy = CEFC1F860F6AD7A800B2AEE6 /* PBXContainerItemProxy */;
 		};
 		EF168E290F113753002F4D9F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
