@@ -105,7 +105,10 @@ static Boolean BDSKAliasHandleToFSRef(const AliasHandle inAlias, const FSRef *in
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
 #warning fixme: FSMatchAliasNoUI is deprecated, use FSMatchAliasBulk instead
 #endif
-    err = FSMatchAliasNoUI(inBaseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst | kARMTryFileIDFirst, inAlias, &aliasCount, outRef, shouldUpdate, NULL, NULL);
+    if (FSMatchAliasBulk != NULL)
+        err = FSMatchAliasBulk(inBaseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst | kARMTryFileIDFirst, inAlias, &aliasCount, outRef, shouldUpdate, NULL, NULL);
+    else
+        err = FSMatchAliasNoUI(inBaseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst | kARMTryFileIDFirst, inAlias, &aliasCount, outRef, shouldUpdate, NULL, NULL);
     
     return noErr == err;
 }
