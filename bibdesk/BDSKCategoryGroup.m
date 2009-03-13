@@ -132,7 +132,7 @@
 }
 
 - (NSImage *)icon {
-	return [NSImage imageNamed:@"genericGroup"];
+	return [NSImage imageNamed:@"categoryGroup"];
 }
 
 - (void)setName:(id)newName {

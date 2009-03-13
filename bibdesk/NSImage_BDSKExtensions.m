@@ -227,7 +227,7 @@
 }
     
 + (void)makeGroupImages {
-    static NSImage *genericGroupImage = nil;
+    static NSImage *categoryGroupImage = nil;
     static NSImage *staticGroupImage = nil;
     static NSImage *smartGroupImage = nil;
     static NSImage *importGroupImage = nil;
@@ -235,13 +235,13 @@
     if (genericGroupImage || floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
         return;
     
-    genericGroupImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
-    [genericGroupImage lockFocus];
+    categoryGroupImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
+    [categoryGroupImage lockFocus];
     CIImage *ciImage = [CIImage imageWithData:[[NSImage imageNamed:@"NSFolderSmart"] TIFFRepresentation]];
     ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.2 brightnessBias:0.3];
     [ciImage drawInRect:NSMakeRect(0, 0, 32.0, 32.0) fromRect:NSMakeRect(0, 0, 32.0, 32.0) operation:NSCompositeSourceOver fraction:1.0];
-    [genericGroupImage unlockFocus];
-    [genericGroupImage setName:@"genericGroup"];
+    [categoryGroupImage unlockFocus];
+    [categoryGroupImage setName:@"categoryGroup"];
     
     staticGroupImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] copy];
     [staticGroupImage setName:@"staticGroup"];
