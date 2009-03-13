@@ -58,6 +58,8 @@ enum {
     @result     (description)
 */
 - (id)initWithMonthDayYearString:(NSString *)dateString;
+// used for field values, tries to clean the month first and then uses initWithMonthDayYearString:
+- (id)initWithMonthString:(NSString *)monthString yearString:(NSString *)yearString;
 
 - (NSString *)dateDescription;
 - (NSString *)shortDateDescription;

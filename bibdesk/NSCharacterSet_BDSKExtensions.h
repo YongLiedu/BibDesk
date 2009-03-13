@@ -45,6 +45,7 @@
 + (id)searchStringSeparatorCharacterSet;
 + (id)upAndDownArrowCharacterSet;
 + (id)nonWhitespaceCharacterSet;
++ (id)nonLetterCharacterSet;
 + (id)nonDecimalDigitCharacterSet;
 
 @end

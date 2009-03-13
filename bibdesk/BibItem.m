@@ -3301,28 +3301,10 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     // pubDate is a derived field based on Month and Year fields; we take the 15th day of the month to avoid edge cases
     if (key == nil || allFieldsChanged || [BDSKYearString isEqualToString:key] || [BDSKMonthString isEqualToString:key]) {
-		NSString *yearValue = [pubFields objectForKey:BDSKYearString];
-        if([yearValue isComplex])
-            yearValue = [(BDSKStringNode *)[[yearValue nodes] objectAtIndex:0] value];
-		if (![NSString isEmptyString:yearValue]) {
-			NSString *monthValue = [pubFields objectForKey:BDSKMonthString];
-			if([monthValue isComplex]) {
-                NSArray *nodes = [monthValue nodes];
-                if ([nodes count] > 1 && [(BDSKStringNode *)[nodes objectAtIndex:1] type] == BSN_MACRODEF)
-                    monthValue = [(BDSKStringNode *)[nodes objectAtIndex:0] value];
-                else if ([nodes count] > 2 && [(BDSKStringNode *)[nodes objectAtIndex:2] type] == BSN_MACRODEF)
-                    monthValue = [(BDSKStringNode *)[nodes objectAtIndex:0] value];
-				else
-                    monthValue = [(BDSKStringNode *)[nodes objectAtIndex:0] value];
-			}
-            if (!monthValue) monthValue = @"";
-            // allows month as number, name or abbreviated name
-            theDate = [[NSCalendarDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"%@-15-%@", monthValue, yearValue]];
-			[self setDate:theDate];
-            [theDate release];
-		}else{
-			[self setDate:nil];    // nil means we don't have a good date.
-		}
+        // allows month as number, name or abbreviated name
+        theDate = [[NSCalendarDate alloc] initWithMonthString:[pubFields objectForKey:BDSKMonthString] yearString:[pubFields objectForKey:BDSKYearString]];
+        [self setDate:theDate];
+        [theDate release];
 	}
 	
     // setDateAdded: is only called here; it is derived based on pubFields value of BDSKDateAddedString

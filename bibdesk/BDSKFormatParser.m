@@ -325,7 +325,7 @@
                 	// year without century
                     NSString *yearString = [pub stringValueOfField:BDSKYearString];
                     if ([NSString isEmptyString:yearString] == NO) {
-                        NSDate *date = [[NSDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"6-15-%@", yearString]];
+                        NSDate *date = [[NSDate alloc] initWithMonthString:@"6" yearString:yearString];
 						yearString = [date descriptionWithCalendarFormat:@"%y" timeZone:nil locale:nil];
 						[parsedStr appendString:yearString];
                         [date release];
@@ -337,7 +337,7 @@
                 	// year with century
                     NSString *yearString = [pub stringValueOfField:BDSKYearString];
                     if ([NSString isEmptyString:yearString] == NO) {
-                        NSDate *date = [[NSDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"6-15-%@", yearString]];
+                        NSDate *date = [[NSDate alloc] initWithMonthString:@"6" yearString:yearString];
 						yearString = [date descriptionWithCalendarFormat:@"%Y" timeZone:nil locale:nil];
 						[parsedStr appendString:yearString];
                         [date release];
@@ -352,13 +352,13 @@
                         if([monthString isComplex]) {
                             NSArray *nodes = [monthString nodes];
                             if ([nodes count] > 1 && [(BDSKStringNode *)[nodes objectAtIndex:1] type] == BSN_MACRODEF)
-                                monthString = [(BDSKStringNode *)[nodes objectAtIndex:0] value];
+                                monthString = [(BDSKStringNode *)[nodes objectAtIndex:1] value];
                             else if ([nodes count] > 2 && [(BDSKStringNode *)[nodes objectAtIndex:2] type] == BSN_MACRODEF)
-                                monthString = [(BDSKStringNode *)[nodes objectAtIndex:0] value];
+                                monthString = [(BDSKStringNode *)[nodes objectAtIndex:2] value];
                             else
                                 monthString = [(BDSKStringNode *)[nodes objectAtIndex:0] value];
                         }
-                        NSDate *date = [[NSDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"%@-15-2000", monthString]];
+                        NSDate *date = [[NSDate alloc] initWithMonthString:monthString yearString:@"2000"];
 						monthString = [date descriptionWithCalendarFormat:@"%m" timeZone:nil locale:nil];
 						[parsedStr appendString:monthString];
                         [date release];
