@@ -41,6 +41,7 @@
 #import "FVInvocationOperation.h"
 #import "FVPriorityQueue.h"
 #import "FVMainThreadOperationQueue.h"
+#import "FVUtilities.h"
 
 // for sysctl stuff
 #import <sys/types.h>
@@ -49,19 +50,6 @@
 #import <pthread.h>
 #import <mach/mach.h>
 #import <mach/mach_port.h>
-
-// from CFInternal.h
-#if defined(__ppc__) || defined(__ppc64__)
-    #define HALT asm __volatile__("trap")
-#elif defined(__i386__) || defined(__x86_64__)
-    #if defined(__GNUC__)
-        #define HALT asm __volatile__("int3")
-    #elif defined(_MSC_VER)
-        #define HALT __asm int 3;
-    #else
-        #error Compiler not supported
-    #endif
-#endif
 
 @implementation FVConcreteOperationQueue
 
@@ -149,7 +137,6 @@ static volatile int32_t _activeCPUs = 0;
 
 - (void)dealloc
 {
-    OSMemoryBarrier();
     FVAPIAssert1(1 == _terminate, @"*** ERROR *** attempt to deallocate %@ without calling -terminate", self);
     [_threadLock release];
     [_pendingOperations release];
@@ -212,7 +199,6 @@ static uint32_t __FVSendTrivialMachMessage(mach_port_t port, uint32_t msg_id, CF
     ret = __FVSendTrivialMachMessage(_threadPort, 0, MACH_SEND_TIMEOUT, 0);
     if (ret != MACH_MSG_SUCCESS && ret != MACH_SEND_TIMED_OUT) {
         // we can ignore MACH_SEND_INVALID_DEST when terminating
-        OSMemoryBarrier();
         if (MACH_SEND_INVALID_DEST != ret || 1 != _terminate) HALT;
     }
 }
@@ -324,9 +310,17 @@ static void * __FVQueueMachPerform(void *msg, CFIndex size, CFAllocatorRef alloc
     if (MACH_PORT_NULL == _threadPort) HALT;
     
     CFRunLoopRef rl = CFRunLoopGetCurrent();
-    CFRunLoopSourceRef source = CFRunLoopSourceCreate(NULL, 0, (CFRunLoopSourceContext *)&context);
+    union { 
+        CFRunLoopSourceContext c; 
+        struct _v1 {
+            CFRunLoopSourceContext1 c1; 
+            unsigned long padding;
+        } v1;
+    } ctxt_u;
+    ctxt_u.v1.c1 = context;
+    CFRunLoopSourceRef source = CFRunLoopSourceCreate(NULL, 0, &ctxt_u.c);
+    // runloop retains the source, but keep a retain on it until we've called invalidate
     CFRunLoopAddSource(rl, source, kCFRunLoopDefaultMode);
-    CFRelease(source);
     
     [_threadLock unlockWithCondition:QUEUE_STARTUP_COMPLETE];
     [_threadLock lockWhenCondition:QUEUE_RUNNING];
@@ -336,21 +330,21 @@ static void * __FVQueueMachPerform(void *msg, CFIndex size, CFAllocatorRef alloc
         [pool release];
         pool = [NSAutoreleasePool new];
         
+        // timeout is only here in case the mach port dies
         SInt32 result = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 10, TRUE);
         if (kCFRunLoopRunFinished == result || kCFRunLoopRunStopped == result)
             OSAtomicCompareAndSwap32Barrier(0, 1, &_terminate);
-        else
-            OSMemoryBarrier();
         
     } while (0 == _terminate);
 
     CFRunLoopSourceInvalidate(source);
+    CFRelease(source);
+
     mach_port_t port = _threadPort;
     _threadPort = MACH_PORT_NULL;
     __FVPortFree(port);
 
     [_threadLock unlockWithCondition:QUEUE_TERMINATED];
-    
     [pool release];
 }
 

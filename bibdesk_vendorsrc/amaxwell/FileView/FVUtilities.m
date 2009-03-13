@@ -54,6 +54,16 @@ const CFDictionaryValueCallBacks FVIntegerValueDictionaryCallBacks = { 0, NULL, 
 const CFSetCallBacks FVNSObjectSetCallBacks = { 0, __FVObjectRetain, __FVObjectRelease, __FVObjectCopyDescription, __FVObjectEqual, __FVObjectHash };
 const CFSetCallBacks FVNSObjectPointerSetCallBacks = { 0, __FVObjectRetain, __FVObjectRelease, __FVObjectCopyDescription, NULL, NULL };
 
+Boolean FVCFDictionaryGetIntegerIfPresent(CFDictionaryRef dict, const void *key, NSInteger *value)
+{
+    union { const void *pv; const NSInteger iv; } u;
+    if (CFDictionaryGetValueIfPresent(dict, key, &u.pv)) {
+        *value = u.iv;
+        return TRUE;
+    }
+    return FALSE;
+}
+
 #pragma mark Timer
 
 // Object that can be retained and released by the timer, but does not retain its ivars
@@ -141,15 +151,14 @@ NSArray *FVURLsFromPasteboard(NSPasteboard *pboard)
     PasteboardRef carbonPboard;
     err = PasteboardCreate((CFStringRef)[pboard name], &carbonPboard);
     
-    PasteboardSyncFlags syncFlags;
-#pragma unused(syncFlags)
     if (noErr == err)
-        syncFlags = PasteboardSynchronize(carbonPboard);
+        (void)PasteboardSynchronize(carbonPboard);
     
     ItemCount itemCount, itemIndex;
     if (noErr == err)
         err = PasteboardGetItemCount(carbonPboard, &itemCount);
-    else
+    
+    if (noErr != err)
         itemCount = 0;
     
     NSMutableArray *toReturn = [NSMutableArray arrayWithCapacity:itemCount];
@@ -158,7 +167,7 @@ NSArray *FVURLsFromPasteboard(NSPasteboard *pboard)
     NSMutableSet *allURLsReadFromPasteboard = [NSMutableSet setWithCapacity:itemCount];
     
     // Pasteboard has 1-based indexing!
-            
+    
     for (itemIndex = 1; itemIndex <= itemCount; itemIndex++) {
         
         PasteboardItemID itemID;
@@ -171,7 +180,7 @@ NSArray *FVURLsFromPasteboard(NSPasteboard *pboard)
         
         if (noErr == err)
             flavorCount = CFArrayGetCount(flavors);
-                    
+        
         // webloc has file and non-file URL, and we may only have a string type
         CFURLRef destURL = NULL;
         CFURLRef fileURL = NULL;
@@ -248,13 +257,13 @@ NSArray *FVURLsFromPasteboard(NSPasteboard *pboard)
             [allURLsReadFromPasteboard addObject:(id)destURL];
             CFRelease(destURL);
         }
-    
+        
         if (NULL != flavors)
             CFRelease(flavors);
     }
-                                
+    
     if (carbonPboard) CFRelease(carbonPboard);
-
+    
     // NSPasteboard only allows a single NSURL for some idiotic reason, and NSURLPboardType isn't automagically coerced to a Carbon URL pboard type.  This step handles a program like BibDesk which presently adds a webloc promise + NSURLPboardType, where we want the NSURLPboardType data and ignore the HFS promise.  However, Finder puts all of these on the pboard, so don't add duplicate items to the array...since we may have already added the content (remote URL) if this is a webloc file.
     if ([[pboard types] containsObject:NSURLPboardType]) {
         NSURL *nsURL = [NSURL URLFromPasteboard:pboard];
@@ -270,7 +279,7 @@ NSArray *FVURLsFromPasteboard(NSPasteboard *pboard)
         if ([nsURL scheme] != nil && [allURLsReadFromPasteboard containsObject:nsURL] == NO)
             [toReturn addObject:nsURL];
     }
-
+    
     return toReturn;
 }
 
@@ -285,17 +294,16 @@ BOOL FVWriteURLsToPasteboard(NSArray *URLs, NSPasteboard *pboard)
     if (noErr == err)
         err = PasteboardClear(carbonPboard);
     
-    PasteboardSyncFlags syncFlags;
-#pragma unused(syncFlags)
     if (noErr == err)
-        syncFlags = PasteboardSynchronize(carbonPboard);
+        (void)PasteboardSynchronize(carbonPboard);
     
     NSUInteger i, iMax = [URLs count];
     
     for (i = 0; i < iMax && noErr == err; i++) {
         
         NSURL *theURL = [URLs objectAtIndex:i];
-        CFDataRef utf8Data = CFURLCreateData(nil, (CFURLRef)theURL, kCFStringEncodingUTF8, true);
+        NSString *string = [theURL absoluteString];
+        CFDataRef utf8Data = (CFDataRef)[string dataUsingEncoding:NSUTF8StringEncoding];
         
         // any pointer type; private to the creating application
         PasteboardItemID itemID = (void *)theURL;
@@ -303,13 +311,11 @@ BOOL FVWriteURLsToPasteboard(NSArray *URLs, NSPasteboard *pboard)
         // Finder adds a file URL and destination URL for weblocs, but only a file URL for regular files
         // could also put a string representation of the URL, but Finder doesn't do that
         
-        if (NULL != utf8Data) {
-            if ([theURL isFileURL]) {
-                err = PasteboardPutItemFlavor(carbonPboard, itemID, kUTTypeFileURL, utf8Data, kPasteboardFlavorNoFlags);
-            } else {
-                err = PasteboardPutItemFlavor(carbonPboard, itemID, kUTTypeURL, utf8Data, kPasteboardFlavorNoFlags);
-            }
-            CFRelease(utf8Data);
+        if ([theURL isFileURL]) {
+            err = PasteboardPutItemFlavor(carbonPboard, itemID, kUTTypeFileURL, utf8Data, kPasteboardFlavorNoFlags);
+        }
+        else {
+            err = PasteboardPutItemFlavor(carbonPboard, itemID, kUTTypeURL, utf8Data, kPasteboardFlavorNoFlags);
         }
     }
     
@@ -360,7 +366,7 @@ static bool __FVURLIsOnInternalVolume(NSURL *fileURL)
     GetVolParmsInfoBuffer infoBuffer;
     memset(&infoBuffer, 0, sizeof(GetVolParmsInfoBuffer));
     
-#if (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
+#if (__LP64__ || MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
     if (noErr == err)
         err = FSGetVolumeParms(volume, &infoBuffer, sizeof(GetVolParmsInfoBuffer));
 #else
@@ -448,97 +454,3 @@ bool FVCanMapFileAtURL(NSURL *fileURL)
 }
 
 @end
-
-@implementation NSData (FVZip)
-
-// 
-// implementation modified after http://www.cocoadev.com/index.pl?NSDataCategory
-//
-
-- (NSData *)_fv_zlibDecompress
-{
-	if ([self length] == 0) return [[self retain] autorelease];
-    
-	unsigned full_length = [self length];
-	unsigned half_length = [self length] / 2;
-    
-	NSMutableData *decompressed = [NSMutableData dataWithLength: full_length + half_length];
-	BOOL done = NO;
-	int status;
-    
-	z_stream strm;
-	strm.next_in = (Bytef *)[self bytes];
-	strm.avail_in = [self length];
-	strm.total_out = 0;
-	strm.zalloc = Z_NULL;
-	strm.zfree = Z_NULL;
-    
-	if (inflateInit (&strm) != Z_OK) return nil;
-    
-	while (!done)
-	{
-		// Make sure we have enough room and reset the lengths.
-		if (strm.total_out >= [decompressed length])
-			[decompressed increaseLengthBy: half_length];
-		strm.next_out = (Bytef *)[decompressed mutableBytes] + strm.total_out;
-		strm.avail_out = [decompressed length] - strm.total_out;
-        
-		// Inflate another chunk.
-		status = inflate (&strm, Z_SYNC_FLUSH);
-		if (status == Z_STREAM_END) done = YES;
-		else if (status != Z_OK) break;
-	}
-	if (inflateEnd (&strm) != Z_OK) return nil;
-    
-	// Set real length.
-	if (done)
-	{
-		[decompressed setLength: strm.total_out];
-		return decompressed;
-	}
-	else return nil;
-}
-
-- (NSData *)_fv_zlibCompress
-{
-	if ([self length] == 0) return [[self retain] autorelease];
-	
-	z_stream strm;
-    
-	strm.zalloc = Z_NULL;
-	strm.zfree = Z_NULL;
-	strm.opaque = Z_NULL;
-	strm.total_out = 0;
-	strm.next_in=(Bytef *)[self bytes];
-	strm.avail_in = [self length];
-    
-	// Compresssion Levels:
-	//   Z_NO_COMPRESSION
-	//   Z_BEST_SPEED
-	//   Z_BEST_COMPRESSION
-	//   Z_DEFAULT_COMPRESSION
-    
-	if (deflateInit(&strm, Z_BEST_SPEED) != Z_OK) return nil;
-    
-	NSMutableData *compressed = [NSMutableData dataWithLength:16384];  // 16K chunks for expansion
-    
-	do {
-        
-		if (strm.total_out >= [compressed length])
-			[compressed increaseLengthBy: 16384];
-		
-		strm.next_out = (Bytef *)[compressed mutableBytes] + strm.total_out;
-		strm.avail_out = [compressed length] - strm.total_out;
-		
-		deflate(&strm, Z_FINISH);  
-		
-	} while (strm.avail_out == 0);
-	
-	deflateEnd(&strm);
-	
-	[compressed setLength: strm.total_out];
-	return compressed;
-}
-
-@end
-

@@ -37,12 +37,14 @@
  */
 
 #import "FVMIMEIcon.h"
+#import "FVOperationQueue.h"
+#import "FVInvocationOperation.h"
 
 @implementation FVMIMEIcon
 
 static IconRef _networkIcon = NULL;
-static NSMutableDictionary *_fallbackTable = nil;
-static NSLock *_fallbackTableLock = nil;
+static NSMutableDictionary *_iconTable = nil;
+static NSLock *_iconTableLock = nil;
 static Class FVMIMEIconClass = Nil;
 static FVMIMEIcon *defaultPlaceholderIcon = nil;
 
@@ -53,8 +55,8 @@ static FVMIMEIcon *defaultPlaceholderIcon = nil;
     if ([FVMIMEIcon class] == self) {
         FVMIMEIconClass = self;
         GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericNetworkIcon, &_networkIcon);
-        _fallbackTable = [NSMutableDictionary new];
-        _fallbackTableLock = [[NSLock alloc] init];
+        _iconTable = [NSMutableDictionary new];
+        _iconTableLock = [[NSLock alloc] init];
         defaultPlaceholderIcon = (FVMIMEIcon *)NSAllocateObject(FVMIMEIconClass, 0, [self zone]);
     }
     
@@ -67,68 +69,62 @@ static FVMIMEIcon *defaultPlaceholderIcon = nil;
 
 - (id)_initWithMIMEType:(NSString *)type;
 {
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** +[%@ %@] requires main thread", self, NSStringFromSelector(_cmd));
     NSParameterAssert(defaultPlaceholderIcon != self);
     self = [super init];
     if (self) {
         OSStatus err;
         err = GetIconRefFromTypeInfo(0, 0, NULL, (CFStringRef)type, kIconServicesNormalUsageFlag, &_icon);
         if (err) _icon = NULL;
+        // don't return nil; we'll just draw the network icon
     }
     return self;
 }
 
-+ (void)_addNewItemInLockedTableWithMIMEType:(NSString *)type;
-{
-    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** +[%@ %@] requires main thread", self, NSStringFromSelector(_cmd));
-    NSAssert([_fallbackTableLock tryLock] == NO, @"caller failed to acquire lock first");
-    
-    id icon = (FVMIMEIcon *)NSAllocateObject(FVMIMEIconClass, 0, [self zone]);
-    icon = [icon _initWithMIMEType:type];
-    // should only return nil if NSAllocateObject fails
-    if (icon) {
-        [_fallbackTable setObject:icon forKey:type];
-        [icon release];
-    }
-}
-
 - (void)dealloc
 {
-#if DEBUG
-    NSLog(@"*** memory error *** dealloc of %@", [self class]);
-#endif
-    // stop compiler warning about missing [super dealloc]
-    if (0) [super dealloc];
+    FVAPIAssert1(0, @"attempt to deallocate %@", self);
+    [super dealloc];
 }
 
 - (BOOL)tryLock { return NO; }
 - (void)lock { /* do nothing */ }
 - (void)unlock { /* do nothing */ }
 
-// we always return a cached object owned solely by the _fallbackTable, which should never be deallocated
-- (id)retain { return self; }
-- (oneway void)release { }
-- (NSUInteger)retainCount { return NSUIntegerMax; }
-
 - (void)renderOffscreen
 {
     // no-op
 }
 
-- (NSSize)size { return (NSSize){ FVMaxThumbnailDimension, FVMaxThumbnailDimension }; }
+- (NSSize)size { return (NSSize){ FVMaxThumbnailDimension, FVMaxThumbnailDimension }; }   
 
-// self here is the placeholder; we always discard the result of +allocWithZone: here, since the actual +alloc has to occur on the main thread in _addNewItemInLockedTableWithMIMEType, or we're just returning a previously allocated instance.
+// We always ignore the result of +allocWithZone: since we may return a previously allocated instance.  No need to do [self release] on the placeholder.
 - (id)initWithMIMEType:(NSString *)type;
 {
     NSParameterAssert(nil != type);
     NSParameterAssert(defaultPlaceholderIcon == self);
-    [_fallbackTableLock lock];
-    self = [_fallbackTable objectForKey:type];
-    if (nil == self) {
-        [FVMIMEIconClass performSelectorOnMainThread:@selector(_addNewItemInLockedTableWithMIMEType:) withObject:type waitUntilDone:YES modes:[NSArray arrayWithObject:(id)kCFRunLoopCommonModes]];
-        self = [_fallbackTable objectForKey:type];
+    [_iconTableLock lock];
+    FVMIMEIcon *icon = [_iconTable objectForKey:type];
+    if (nil == icon) {
+        icon = (FVMIMEIcon *)NSAllocateObject(FVMIMEIconClass, 0, [self zone]);
+        FVInvocationOperation *operation = [[FVInvocationOperation alloc] initWithTarget:icon selector:@selector(_initWithMIMEType:) object:type];
+        [operation setConcurrent:NO];
+        // make sure this operation gets invoked first when we run the runloop
+        [operation setQueuePriority:FVOperationQueuePriorityVeryHigh];
+        [[FVOperationQueue mainQueue] addOperation:operation];
+        [operation autorelease];
+        // If this is already the main thread, running it in the default runloop mode should cause the operation to complete, but may lead to a deadlock since webview callouts can be sent multiple times due to server push or multiple views loading the same icon simultaneously (and this method is not reentrant).  The problem is that it can flush all pending operations.
+        while (NO == [operation isFinished])
+            CFRunLoopRunInMode((CFStringRef)FVMainQueueRunLoopMode, 0.1, YES);
+        
+        icon = [operation result];
+        if (icon) {
+            [_iconTable setObject:icon forKey:type];
+            [icon release];
+        }
     }
-    [_fallbackTableLock unlock];    
-    return self;
+    [_iconTableLock unlock];    
+    return [icon retain];
 }
 
 - (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;

@@ -43,22 +43,19 @@
 @class FVFinderIcon;
 @class WebView;
 
-@interface FVWebViewIcon : FVIcon
+@interface FVWebViewIcon : FVIcon <NSLocking>
 {
+    CGImageRef       _viewImage;
     CGImageRef       _fullImage;
     NSSize           _fullImageSize;
     CGImageRef       _thumbnail;
     NSSize           _thumbnailSize;
     FVIcon          *_fallbackIcon;
     NSURL           *_httpURL;
-    BOOL             _webviewFailed;
     NSSize           _desiredSize;
-    char            *_diskCacheName;
     WebView         *_webView;
-    BOOL             _isRendering;
-    pthread_mutex_t  _mutex;
+    id               _cacheKey;
+    NSConditionLock *_condLock;
 }
-
-- (id)initWithURL:(NSURL *)aURL;
 
 @end

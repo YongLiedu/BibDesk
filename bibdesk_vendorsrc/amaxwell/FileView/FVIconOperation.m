@@ -69,7 +69,8 @@
 - (void)dealloc
 {
     [_icon release];
-    [_view release];
+    // release is thread safe, but we don't want to trigger dealloc on this thread
+    [_view performSelectorOnMainThread:@selector(release) withObject:nil waitUntilDone:NO];
     [super dealloc];
 }
 
@@ -106,7 +107,7 @@
 
 - (void)main
 {
-    NSAssert(pthread_main_np() != 0, @"incorrect thread for FVIconUpdateOperation");
+    NSAssert(pthread_main_np() != 0, @"incorrect thread for FVIconUpdateOperation");        
     [_view iconUpdated:_icon];
     [self finished];
 }

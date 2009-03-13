@@ -154,14 +154,14 @@ static NSDictionary *__textAttributes = nil;
 - (void)displayIconForURL:(NSURL *)aURL
 {
     [self setFileURL:aURL];
-    [self setIcon:[FVIcon iconWithURL:aURL size:[self bounds].size]];
+    [self setIcon:[FVIcon iconWithURL:aURL]];
     [self makeText];
 }
 
 - (void)displayImageAtURL:(NSURL *)aURL;
 {
     [self setFileURL:aURL];
-    [self setIcon:[FVIcon iconWithURL:aURL size:[self bounds].size]];
+    [self setIcon:[FVIcon iconWithURL:aURL]];
     [_text autorelease];
     _text = nil;
 }

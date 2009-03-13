@@ -38,34 +38,28 @@
 
 #import <Cocoa/Cocoa.h>
 
-struct FVDataStorage;
+@class FVCacheFile;
 
 @interface FVIconCache : NSObject
 {
 @private;
-    struct FVDataStorage *_dataStorage;
-    NSLock               *_dataFileLock;
-    NSMutableDictionary  *_eventTable;
-    NSString             *_cacheName;
+    FVCacheFile *_cacheFile;
 }
 
-+ (CGImageRef)newThumbnailNamed:(const char *)name;
-+ (void)cacheThumbnail:(CGImageRef)image withName:(const char *)name;
+// use this to get a key for caching images to disk
++ (id)newKeyForURL:(NSURL *)aURL;
 
-+ (CGImageRef)newImageNamed:(const char *)name;
-+ (void)cacheImage:(CGImageRef)image withName:(const char *)name;
+// cache small images to disk
++ (CGImageRef)newThumbnailForKey:(id)aKey;
++ (void)cacheThumbnail:(CGImageRef)image forKey:(id)aKey;
 
+// cache large images to disk
++ (CGImageRef)newImageForKey:(id)aKey;
++ (void)cacheImage:(CGImageRef)image forKey:(id)aKey;
 
-// C-strings are used as names for compatibility with DTDataFile's use of std::string, and because it won't change.   Default is to use inode, and use the URL string as name for debug logging.  I was originally using -[[[NSURL path] lastPathComponent] fileSystemRepresentation] as the name when calling these methods, but it was creating a bunch of autoreleased objects and doing encoding conversions.
++ (void)invalidateCachesForKey:(id)aKey;
 
-+ (char *)createDiskCacheNameWithURL:(NSURL *)aURL;
-
-// This always returns a new instance with a retain count of one, based on the data stored on disk.  It will return NULL if an error occurred in deserializing the image data or if the image could not be found in the cache.
-- (CGImageRef)newImageNamed:(const char *)name decompress:(BOOL)decompress;
-
-// Note: it's likely best to use +cacheImage:withName: only with images created from our bitmap context factory, for colorspace compatibility.  I haven't tested that hypothesis.
-- (void)cacheImage:(CGImageRef)image withName:(const char *)name compress:(BOOL)compress;
-
+// sets name for recording/logging statistics
 - (void)setName:(NSString *)name;
 
 @end

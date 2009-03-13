@@ -38,19 +38,28 @@
 
 #import "FVFinderIcon.h"
 
+// Apple seems to use JPEG2000 storage for icons, and decompressing them is a serious performance hit on the main thread (when scrolling).  Hence, we'll create the images here and burn some memory to handle the common cases.  Custom icons still get their own instance and are drawn as needed with Icon Services.
 @interface FVSingletonFinderIcon : FVFinderIcon
+{
+@protected;
+    CGImageRef _thumbnail;
+    CGImageRef _fullImage;
+}
 + (id)sharedIcon;
 @end
 @interface FVMissingFinderIcon : FVSingletonFinderIcon
-{
-    IconRef _questionIcon;
-}
 @end
 @interface FVHTTPURLIcon : FVSingletonFinderIcon
 @end
 @interface FVGenericURLIcon : FVSingletonFinderIcon
 @end
 @interface FVFTPURLIcon : FVSingletonFinderIcon
+@end
+@interface FVMailURLIcon : FVSingletonFinderIcon
+@end
+@interface FVGenericFolderIcon : FVSingletonFinderIcon
+@end
+@interface FVSavedSearchIcon : FVSingletonFinderIcon
 @end
 
 @implementation FVFinderIcon
@@ -64,6 +73,30 @@
     [[FVHTTPURLIcon self] performSelectorOnMainThread:@selector(sharedIcon) withObject:nil waitUntilDone:NO];
     [[FVGenericURLIcon self] performSelectorOnMainThread:@selector(sharedIcon) withObject:nil waitUntilDone:NO];
     [[FVFTPURLIcon self] performSelectorOnMainThread:@selector(sharedIcon) withObject:nil waitUntilDone:NO];
+    [[FVMailURLIcon self] performSelectorOnMainThread:@selector(sharedIcon) withObject:nil waitUntilDone:NO];
+    [[FVGenericFolderIcon self] performSelectorOnMainThread:@selector(sharedIcon) withObject:nil waitUntilDone:NO];
+    [[FVSavedSearchIcon self] performSelectorOnMainThread:@selector(sharedIcon) withObject:nil waitUntilDone:NO];
+}
+
++ (BOOL)_isSavedSearchURL:(NSURL *)aURL
+{
+    if ([aURL isFileURL] == NO)
+        return NO;
+    
+    // rdar://problem/6028378 .savedSearch files have a dynamic UTI that does not conform to the UTI for a saved search
+    
+    CFStringRef extension = (CFStringRef)[[aURL path] pathExtension];
+    CFStringRef UTIFromExtension = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, extension, NULL);
+    BOOL isSavedSearch = NO;
+    if (NULL != UTIFromExtension) {
+        CFStringRef savedSearchUTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, FVSTR("savedSearch"), NULL);
+        if (savedSearchUTI) {
+            isSavedSearch = UTTypeEqual(UTIFromExtension, savedSearchUTI);
+            CFRelease(savedSearchUTI);
+        }
+        CFRelease(UTIFromExtension);
+    }
+    return isSavedSearch;
 }
 
 - (BOOL)needsRenderForSize:(NSSize)size
@@ -76,36 +109,34 @@
     // no-op
 }
 
-- (BOOL)tryLock { return NO; }
-- (void)lock { /* do nothing */ }
-- (void)unlock { /* do nothing */ }
-
 - (id)initWithURLScheme:(NSString *)scheme;
 {
     NSParameterAssert(nil != scheme);
-    [self release];
+    [super dealloc];
         
-    if ([scheme isEqualToString:@"http"])
-        self = [FVHTTPURLIcon sharedIcon];
+    if ([scheme hasPrefix:@"http"])
+        self = [[FVHTTPURLIcon sharedIcon] retain];
     else if ([scheme isEqualToString:@"ftp"])
-        self = [FVFTPURLIcon sharedIcon];
+        self = [[FVFTPURLIcon sharedIcon] retain];
+    else if ([scheme rangeOfString:@"mail"].length)
+        self = [[FVMailURLIcon sharedIcon] retain];
     else
-        self = [FVGenericURLIcon sharedIcon];
+        self = [[FVGenericURLIcon sharedIcon] retain];
     return self;
 }
 
-- (id)initWithFinderIconOfURL:(NSURL *)theURL;
+- (id)initWithURL:(NSURL *)theURL;
 {
     // missing file icon
     if (nil == theURL) {
-        [self release];
-        self = [FVMissingFinderIcon sharedIcon];
+        [super dealloc];
+        self = [[FVMissingFinderIcon sharedIcon] retain];
     }
     else if ([theURL isFileURL] == NO && [theURL scheme] != nil) {
         // non-file URLs
         self = [self initWithURLScheme:[theURL scheme]];
     }
-    else if ((self = [super init])) {
+    else if ((self = [self init])) {
         
         // this has to be a file icon, though the file itself may not exist
         _icon = NULL;
@@ -119,15 +150,40 @@
             err = fnfErr;
         else
             err = noErr;
-        
+
+        BOOL isSavedSearch = [FVFinderIcon _isSavedSearchURL:targetURL];
         [targetURL release];
+                
+        // see if this is a plain folder; we don't want to show FVGenericFolderIcon for a package/app/custom icon
+        CFTypeRef targetUTI = NULL;
+        if (noErr == err)
+            err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, &targetUTI);
+                
+        FSCatalogInfo catInfo;
+        HFSUniStr255 name;
+        if (noErr == err)
+            err = FSGetCatalogInfo(&fileRef, kIconServicesCatalogInfoMask, &catInfo, &name, NULL, NULL);
         
-        // header doesn't specify that this increments the refcount, but the doc page does
-        err = GetIconRefFromFileInfo(&fileRef, 0, NULL, kFSCatInfoNone, NULL, kIconServicesNoBadgeFlag, &_icon, NULL);
+        if (NO == _drawsLinkBadge && noErr == err && targetUTI && UTTypeEqual(targetUTI, kUTTypeFolder) && (((FolderInfo *)&catInfo.finderInfo)->finderFlags & kHasCustomIcon) == 0) {            
+            [super dealloc];
+            self = [[FVGenericFolderIcon sharedIcon] retain];
+        }
+        else if (NO == _drawsLinkBadge && isSavedSearch) {
+            [super dealloc];
+            self = [[FVSavedSearchIcon sharedIcon] retain];
+        }
+        else {
+            
+            // header doesn't specify that this increments the refcount, but the doc page does
+
+            err = GetIconRefFromFileInfo(&fileRef, name.length, name.unicode, kIconServicesCatalogInfoMask, &catInfo, kIconServicesNoBadgeFlag, &_icon, NULL);
+            
+            // file likely doesn't exist; can't just return FVMissingFinderIcon since we may need a link badge
+            if (noErr != err)
+                _icon = NULL;
+        }
         
-        // file likely doesn't exist; can't just return FVMissingFinderIcon since we may need a link badge
-        if (noErr != err)
-            _icon = NULL;
+        if (targetUTI) CFRelease(targetUTI);
     }
     return self;   
 }
@@ -168,22 +224,52 @@
 
 #pragma mark Base singleton
 
+static CGImageRef __FVCreateImageWithIcon(IconRef icon, size_t width, size_t height)
+{
+    FVBitmapContextRef ctxt = FVIconBitmapContextCreateWithSize(width, height);
+    CGRect rect = CGRectZero;
+    rect.size = CGSizeMake(width, height);
+    CGContextClearRect(ctxt, rect);
+    CGImageRef image = NULL;
+    if (noErr == PlotIconRefInContext(ctxt, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, icon))
+        image = CGBitmapContextCreateImage(ctxt);
+    FVIconBitmapContextRelease(ctxt);
+    return image;
+}
+
+static CGImageRef __FVCreateThumbnailWithIcon(IconRef icon)
+{
+    return __FVCreateImageWithIcon(icon, FVMaxThumbnailDimension, FVMaxThumbnailDimension);
+}
+
+static CGImageRef __FVCreateFullImageWithIcon(IconRef icon)
+{
+    return __FVCreateImageWithIcon(icon, FVMaxImageDimension, FVMaxImageDimension);
+}
+
 @implementation FVSingletonFinderIcon
 
-+ (id)sharedIcon {  NSAssert(0, @"subclasses must implement +sharedIcon and provide static storage"); return nil; }
++ (id)sharedIcon {  FVAPIAssert(0, @"subclasses must implement +sharedIcon and provide static storage"); return nil; }
 
 - (void)dealloc
 {
-#if DEBUG
-    NSLog(@"*** memory error *** dealloc of %@", [self class]);
-#endif
-    // stop compiler warning about missing [super dealloc]
-    if (0) [super dealloc];
+    FVAPIAssert1(0, @"attempt to deallocate %@", self);
+    [super dealloc];
 }
 
-- (id)retain { return self; }
-- (oneway void)release { }
-- (NSUInteger)retainCount { return NSUIntegerMax; }
+- (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
+{    
+    CGContextSaveGState(context);
+    // get rid of any shadow, as the image draws it
+    CGContextSetShadowWithColor(context, CGSizeZero, 0, NULL);
+    
+    if (FVShouldDrawFullImageWithThumbnailSize(dstRect.size, FVCGImageSize(_thumbnail)))
+        CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _fullImage);
+    else
+        CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _thumbnail);
+        
+    CGContextRestoreGState(context);
+}
 
 @end
 
@@ -205,28 +291,48 @@
     if (self) {
         _drawsLinkBadge = NO;
         OSStatus err;
-        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kQuestionMarkIcon, &_questionIcon);
-        if (err) _questionIcon = NULL;
-        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericDocumentIcon, &_icon);
-        if (err) _icon = NULL;
+        _icon = NULL;
+        
+        IconRef questionIcon;
+        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kQuestionMarkIcon, &questionIcon);
+        if (err) questionIcon = NULL;
+        
+        IconRef docIcon;
+        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericDocumentIcon, &docIcon);
+        if (err) docIcon = NULL;
+
+        FVBitmapContextRef context = FVIconBitmapContextCreateWithSize(FVMaxThumbnailDimension, FVMaxThumbnailDimension);
+        CGRect rect = CGRectZero;
+        
+        rect.size = CGSizeMake(FVMaxThumbnailDimension, FVMaxThumbnailDimension);
+        CGContextClearRect(context, rect);
+        if (docIcon) PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, docIcon);
+
+        rect = CGRectInset(rect, rect.size.width/4, rect.size.height/4);
+        if (questionIcon) PlotIconRefInContext(context, &rect, kAlignCenterBottom, kTransformNone, NULL, kIconServicesNoBadgeFlag, questionIcon);          
+        
+        _thumbnail = CGBitmapContextCreateImage(context);        
+        FVIconBitmapContextRelease(context);
+        
+        context = FVIconBitmapContextCreateWithSize(FVMaxImageDimension, FVMaxImageDimension);
+        rect = CGRectZero;
+        
+        rect.size = CGSizeMake(FVMaxImageDimension, FVMaxImageDimension);
+        CGContextClearRect(context, rect);
+        if (docIcon) PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, docIcon);
+        
+        rect = CGRectInset(rect, rect.size.width/4, rect.size.height/4);
+        if (questionIcon) PlotIconRefInContext(context, &rect, kAlignCenterBottom, kTransformNone, NULL, kIconServicesNoBadgeFlag, questionIcon);          
+        
+        _fullImage = CGBitmapContextCreateImage(context);        
+        FVIconBitmapContextRelease(context);
+        
+        if (questionIcon) ReleaseIconRef(questionIcon);
+        if (docIcon) ReleaseIconRef(docIcon);
+        
     }
     return self;
 }
-
-- (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
-{
-    CGRect rect = [self _drawingRectWithRect:dstRect];            
-    CGContextSaveGState(context);
-    // get rid of any shadow, as the image draws it
-    CGContextSetShadowWithColor(context, CGSizeZero, 0, NULL);
-    if (_icon)
-        PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, _icon);
-    rect = CGRectInset(rect, rect.size.width/4, rect.size.height/4);
-    if (_questionIcon)
-        PlotIconRefInContext(context, &rect, kAlignCenterBottom, kTransformNone, NULL, kIconServicesNoBadgeFlag, _questionIcon);          
-    CGContextRestoreGState(context);
-}
-
 
 @end
 
@@ -248,8 +354,15 @@
     if (self) {
         _drawsLinkBadge = NO;
         OSStatus err;
-        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kInternetLocationHTTPIcon, &_icon);
-        if (err) _icon = NULL;
+        _icon = NULL;
+        
+        IconRef icon;
+        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kInternetLocationHTTPIcon, &icon);
+        if (noErr == err) {
+            _thumbnail = __FVCreateThumbnailWithIcon(icon);
+            _fullImage = __FVCreateFullImageWithIcon(icon);
+            ReleaseIconRef(icon);
+        }
     }
     return self;
 }
@@ -274,8 +387,15 @@
     if (self) {
         _drawsLinkBadge = NO;
         OSStatus err;
-        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericURLIcon, &_icon);
-        if (err) _icon = NULL;
+        _icon = NULL;
+        
+        IconRef icon;
+        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericURLIcon, &icon);
+        if (noErr == err) {
+            _thumbnail = __FVCreateThumbnailWithIcon(icon);
+            _fullImage = __FVCreateFullImageWithIcon(icon);
+            ReleaseIconRef(icon);
+        }
     }
     return self;
 }
@@ -300,11 +420,116 @@
     if (self) {
         _drawsLinkBadge = NO;
         OSStatus err;
-        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kInternetLocationFTPIcon, &_icon);
-        if (err) _icon = NULL;
+        _icon = NULL;
+        
+        IconRef icon;
+        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kInternetLocationFTPIcon, &icon);
+        if (noErr == err) {
+            _thumbnail = __FVCreateThumbnailWithIcon(icon);
+            _fullImage = __FVCreateFullImageWithIcon(icon);
+            ReleaseIconRef(icon);
+        }
     }
     return self;
 }
 
 @end
 
+#pragma mark Mail URL icon
+
+@implementation FVMailURLIcon 
+
++ (id)sharedIcon
+{
+    static id sharedInstance = nil;
+    if (nil == sharedInstance)
+        sharedInstance = [[self allocWithZone:[self zone]] init];
+    return sharedInstance;
+}
+
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        _drawsLinkBadge = NO;
+        OSStatus err;
+        _icon = NULL;
+        
+        IconRef icon;
+        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kInternetLocationMailIcon, &icon);
+        if (noErr == err) {
+            _thumbnail = __FVCreateThumbnailWithIcon(icon);
+            _fullImage = __FVCreateFullImageWithIcon(icon);
+            ReleaseIconRef(icon);
+        }
+    }
+    return self;
+}
+
+@end
+
+#pragma mark Generic folder icon
+
+@implementation FVGenericFolderIcon 
+
++ (id)sharedIcon
+{
+    static id sharedInstance = nil;
+    if (nil == sharedInstance)
+        sharedInstance = [[self allocWithZone:[self zone]] init];
+    return sharedInstance;
+}
+
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        _drawsLinkBadge = NO;
+        OSStatus err;
+        _icon = NULL;
+        
+        IconRef icon;
+        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericFolderIcon, &icon);
+        if (noErr == err) {
+            _thumbnail = __FVCreateThumbnailWithIcon(icon);
+            _fullImage = __FVCreateFullImageWithIcon(icon);
+            ReleaseIconRef(icon);
+        }
+    }
+    return self;
+}
+
+@end
+
+#pragma mark Saved search icon
+
+@implementation FVSavedSearchIcon 
+
++ (id)sharedIcon
+{
+    static id sharedInstance = nil;
+    if (nil == sharedInstance)
+        sharedInstance = [[self allocWithZone:[self zone]] init];
+    return sharedInstance;
+}
+
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        _drawsLinkBadge = NO;
+        OSStatus err;
+        _icon = NULL;
+        
+        IconRef icon;
+        err = GetIconRefFromTypeInfo(0, 0, FVSTR("savedSearch"), NULL, kIconServicesNormalUsageFlag, &icon);
+        if (noErr == err) {
+            _thumbnail = __FVCreateThumbnailWithIcon(icon);
+            _fullImage = __FVCreateFullImageWithIcon(icon);
+            ReleaseIconRef(icon);
+        }
+    }
+    return self;
+}
+
+@end

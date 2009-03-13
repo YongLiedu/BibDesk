@@ -37,163 +37,146 @@
  */
 
 #import "FVPDFIcon.h"
+#import <libkern/OSAtomic.h>
 
-// cache these so we avoid hitting NSPrintInfo; we only care to have something that approximates a page size, anyway
-static NSSize _paperSize;
+#import "_FVMappedDataProvider.h"
+#import "_FVSplitSet.h"
+#import "_FVDocumentDescription.h"
+
+static OSSpinLock   _releaseLock = OS_SPINLOCK_INIT;
+static _FVSplitSet *_releaseableIcons = nil;
+static CGLayerRef   _pageLayer = NULL;
 
 @implementation FVPDFIcon
 
 + (void)initialize
 {
     FVINITIALIZE(FVPDFIcon);
-    _paperSize = [[NSPrintInfo sharedPrintInfo] paperSize];
-}
-
-static CGPDFDocumentRef createCGPDFDocumentWithPostScriptURL(NSURL *fileURL)
-{
-    CGPDFDocumentRef pdfDoc = NULL;
+    _releaseableIcons = [_FVSplitSet new];
     
-    NSData *psData = [[NSData alloc] initWithContentsOfURL:fileURL options:NSMappedRead error:NULL];
-    if (psData) {
-        CGPSConverterCallbacks converterCallbacks = { 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
-        CGPSConverterRef converter = CGPSConverterCreate(NULL, &converterCallbacks, NULL);    
-        CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)psData);
-        
-        CFMutableDataRef pdfData = CFDataCreateMutable(CFGetAllocator((CFDataRef)psData), 0);
-        [psData release];
-        
-        CGDataConsumerRef consumer = CGDataConsumerCreateWithCFData(pdfData);
-        Boolean success = CGPSConverterConvert(converter, provider, consumer, NULL);
-        
-        CGDataProviderRelease(provider);
-        CGDataConsumerRelease(consumer);
-        CFRelease(converter);
-        
-        if (success) {
-            provider = CGDataProviderCreateWithCFData(pdfData);
-            pdfDoc = CGPDFDocumentCreateWithProvider(provider);
-            CGDataProviderRelease(provider);
-        }
-        CFRelease(pdfData);
+    const CGSize layerSize = { 1, 1 };
+    CGContextRef context = [FVWindowGraphicsContextWithSize(NSSizeFromCGSize(layerSize)) graphicsPort];
+    _pageLayer = CGLayerCreateWithContext(context, layerSize, NULL);
+    context = CGLayerGetContext(_pageLayer);
+    CGFloat components[4] = { 1, 1 };
+    CGColorRef color = NULL;
+    if (NULL != &kCGColorWhite && NULL != CGColorGetConstantColor) {
+        color = CGColorRetain(CGColorGetConstantColor(kCGColorWhite));
     }
-    return pdfDoc;
+    else {
+        CGColorSpaceRef cspace = CGColorSpaceCreateWithName(kCGColorSpaceGenericGray);
+        color = CGColorCreate(cspace, components);
+        CGColorSpaceRelease(cspace);
+    }
+    CGContextSetFillColorWithColor(context, color);
+    CGColorRelease(color);
+    CGRect pageRect = CGRectZero;
+    pageRect.size = CGLayerGetSize(_pageLayer);
+    CGContextClipToRect(context, pageRect);
+    CGContextFillRect(context, pageRect);
 }
 
-static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
++ (void)_addIconForMappedRelease:(FVPDFIcon *)anIcon;
 {
-    NSString *filePath = [aURL path];
-    NSArray *files = [[NSFileManager defaultManager] subpathsAtPath:filePath];
-    NSString *fileName = [[[filePath lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"pdf"];
-    NSString *pdfFile = nil;
+    OSSpinLockLock(&_releaseLock);
+    [_releaseableIcons addObject:anIcon];
+    NSSet *oldObjects = nil;
+    if ([_FVMappedDataProvider maxSizeExceeded] || [_releaseableIcons count] >= [_releaseableIcons split] * 2) {
+        // copy inside the lock, then perform the slower makeObjectsPerformSelector: operation outside of it
+        oldObjects = [_releaseableIcons copyOldObjects];
+        // remove the first 100 objects, since the recently added ones are more likely to be needed again (scrolling up and down)
+        [_releaseableIcons removeOldObjects];
+    }
+    OSSpinLockUnlock(&_releaseLock);
     
-    if ([files containsObject:fileName]) {
-        pdfFile = fileName;
-    } else {
-        NSUInteger idx = [[files valueForKeyPath:@"pathExtension.lowercaseString"] indexOfObject:@"pdf"];
-        if (idx != NSNotFound)
-            pdfFile = [files objectAtIndex:idx];
+    if (oldObjects) {
+        [oldObjects makeObjectsPerformSelector:@selector(_releaseMappedResources)];
+        [oldObjects release];
     }
-    if (pdfFile)
-        pdfFile = [filePath stringByAppendingPathComponent:pdfFile];
-    return pdfFile ? [[NSURL alloc] initFileURLWithPath:pdfFile] : nil;
 }
 
-// return the same thing as PDF; just a container for the URL, until actually asked to render the PS file
-- (id)initWithPostscriptAtURL:(NSURL *)aURL;
++ (void)_removeIconForMappedRelease:(FVPDFIcon *)anIcon;
 {
-    NSParameterAssert([aURL isFileURL]);
-    self = [self initWithPDFAtURL:aURL];
-    if (self) {
-        _isPostscript = YES;
-    }
-    return self;
+    OSSpinLockLock(&_releaseLock);
+    [_releaseableIcons removeObject:anIcon];
+    OSSpinLockUnlock(&_releaseLock);    
 }
 
-// return the same thing as PDF; just a container for the URL, until actually asked to render the PDF file
-- (id)initWithPDFDAtURL:(NSURL *)aURL;
+- (id)initWithURL:(NSURL *)aURL;
 {
     NSParameterAssert([aURL isFileURL]);
-    self = [self initWithPDFAtURL:aURL];
-    if (self) {
-        NSURL *fileURL = createPDFURLForPDFBundleURL(_fileURL);
-        if (fileURL) {
-            [_fileURL release];
-            _fileURL = fileURL;
-        } else {
-            [self release];
-            self = nil;
-        }
-    }
-    return self;
-}
-
-- (id)initWithPDFAtURL:(NSURL *)aURL;
-{
-    NSParameterAssert([aURL isFileURL]);
-    self = [super init];
+    self = [super initWithURL:aURL];
     if (self) {
         
-        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:aURL copyTargetURL:&_fileURL];        
-
-        // PDF sucks because we have to read the file and parse it to find out the page size, even if we're not going to draw it.  Since that's not very efficient, don't even open the file until we have to draw it.
-        
-        // Set default sizes so we can draw a blank page on the first pass; this will use a common aspect ratio.
-        _fullSize = _paperSize;
+        // Set default sizes to a typical aspect ratio.
+        _fullSize = FVDefaultPaperSize;
         _thumbnailSize = _fullSize;
-        _diskCacheName = [FVIconCache createDiskCacheNameWithURL:aURL];
-        _isPostscript = NO;
+
         _pdfDoc = NULL;
+        _isMapped = NO;
         _pdfPage = NULL;
         _thumbnail = NULL;
         _desiredSize = NSZeroSize;
-        _inDiskCache = NO;
         
         // must be > 1 to be valid
         _currentPage = 1;
         
         // initialize to zero so we know whether to load the PDF document
-        _pageCount = 0;
-        
-        if (pthread_mutex_init(&_mutex, NULL))
-            perror("pthread_mutex_init");
+        _pageCount = 0;        
     }
     return self;
 }
 
 - (void)dealloc
 {
-    pthread_mutex_destroy(&_mutex);
-    [_fileURL release];
+    [[self class] _removeIconForMappedRelease:self];
+    if (_pdfDoc && _isMapped) [_FVMappedDataProvider releaseProviderForURL:_fileURL];
     CGImageRelease(_thumbnail);
     CGPDFDocumentRelease(_pdfDoc);
-    free(_diskCacheName);
     [super dealloc];
 }
-
-- (BOOL)tryLock { return pthread_mutex_trylock(&_mutex) == 0; }
-- (void)lock { pthread_mutex_lock(&_mutex); }
-- (void)unlock { pthread_mutex_unlock(&_mutex); }
 
 - (NSSize)size { return _fullSize; }
 
 - (BOOL)canReleaseResources;
 {
-    return _isPostscript ? (NULL != _thumbnail) : (NULL != _pdfDoc || NULL != _thumbnail);
+    return (NULL != _thumbnail || NULL != _pdfPage);
+}
+
+- (void)_releaseMappedResources
+{
+    if ([self tryLock]) {
+    
+        if (NULL != _pdfDoc) {
+            _pdfPage = NULL;
+            if (_isMapped) [_FVMappedDataProvider releaseProviderForURL:_fileURL];
+            CGPDFDocumentRelease(_pdfDoc);
+            _pdfDoc = NULL;
+        }
+        [self unlock];
+    }
 }
 
 - (void)releaseResources 
 {
+    // don't lock for this since it may call _releaseMappedResources immediately and deadlock (and the lock isn't needed anyway)
+    if (_pdfDoc) 
+        [[self class] _addIconForMappedRelease:self];
+    
     if ([self tryLock]) {
-        // Too expensive to create from PostScript on the fly, and PS is not that common; however, a CGPDFDocument data provider is the same size as the file on disk, so we want to get rid of them unless we're drawing full resolution.
-        if (_isPostscript != NO) {
-            CGPDFDocumentRelease(_pdfDoc);
-            _pdfDoc = NULL;
-            _pdfPage = NULL;
-        }
         CGImageRelease(_thumbnail);
         _thumbnail = NULL;
         [self unlock];
     }
+}
+
+- (void)recache;
+{
+    [FVIconCache invalidateCachesForKey:_cacheKey];
+    [self lock];
+    CGImageRelease(_thumbnail);
+    _thumbnail = NULL;
+    [self unlock];
 }
 
 - (NSUInteger)pageCount { return _pageCount; }
@@ -220,8 +203,62 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
     [self unlock];
 }
 
+// roughly 50% of a typical page minimum dimension
+#define FVMaxPDFThumbnailDimension 310
+
+// used to constrain thumbnail size for huge pages
+static bool __FVPDFIconLimitThumbnailSize(NSSize *size)
+{
+    CGFloat dimension = MAX(size->width, size->height);
+    if (dimension <= FVMaxPDFThumbnailDimension)
+        return false;
+    
+    while (dimension > FVMaxPDFThumbnailDimension) {
+        size->width *= 0.9;
+        size->height *= 0.9;
+        dimension = MAX(size->width, size->height);
+    }
+    return true;
+}
+
+- (CGPDFDocumentRef)_newPDFDocument
+{
+    CGPDFDocumentRef document = NULL;
+    if (FVCanMapFileAtURL(_fileURL))
+        document = CGPDFDocumentCreateWithProvider([_FVMappedDataProvider newDataProviderForURL:_fileURL]);
+    
+    if (document) {
+        _isMapped = YES;
+    }
+    else {
+        _isMapped = NO;
+        document = CGPDFDocumentCreateWithURL((CFURLRef)_fileURL);
+    }
+    return document;
+}
+
+// Draw a lock badge for encrypted PDF documents.  If drawing the PDF page fails, pdf_error() logs "failed to create default crypt filter." to the console each time (and doesn't draw anything).  Documents that just have restricted copy/print permissions will draw just fine (so shouldn't have the badge).
+- (void)_drawLockBadgeInRect:(CGRect)pageRect ofContext:(CGContextRef)ctxt
+{
+    IconRef lockIcon;
+    OSStatus err;
+    // kLockedBadgeIcon looks much better than kLockedIcon, which gets jagged quickly
+    err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kLockedBadgeIcon, &lockIcon);
+    // square, unscaled rectangle since this is a badge icon
+    CGRect lockRect;
+    lockRect.size.width = MIN(pageRect.size.width, pageRect.size.height);
+    lockRect.size.height = lockRect.size.width;
+    lockRect.origin.x = CGRectGetMidX(pageRect) - 0.5 * lockRect.size.width;
+    lockRect.origin.y = CGRectGetMidY(pageRect) - 0.5 * lockRect.size.height;
+    if (noErr == err)
+        (void)PlotIconRefInContext(ctxt, &lockRect, kAlignAbsoluteCenter, kTransformNone, NULL, kPlotIconRefNormalFlags, lockIcon);
+    if (noErr == err)
+        (void)ReleaseIconRef(lockIcon);
+}
+
 - (void)renderOffscreen
 {  
+    [[self class] _startRenderingForKey:_cacheKey];
     // hold the lock while initializing these variables, so we don't waste time trying to render again, since we may be returning YES from needsRender
     [self lock];
     
@@ -236,32 +273,44 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
         BOOL exitEarly;
         // if _thumbnail is non-NULL, we're guaranteed that _thumbnailSize has been initialized correctly
         
+        // always want _thumbnail for the fast drawing path
         if (FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize))
-            exitEarly = (NULL != _pdfDoc && NULL != _pdfPage);
+            exitEarly = (NULL != _pdfDoc && NULL != _pdfPage && NULL != _thumbnail);
         else
             exitEarly = (NULL != _thumbnail);
 
+        // !!! early return
         if (exitEarly) {
             [self unlock];
+            [[self class] _stopRenderingForKey:_cacheKey];
             return;
         }
     }
     
     if (NULL == _thumbnail && 1 == _currentPage) {
         
-        _thumbnail = [FVIconCache newImageNamed:_diskCacheName];
+        _thumbnail = [FVIconCache newThumbnailForKey:_cacheKey];
         BOOL exitEarly = NO;
         
         // This is an optimization to avoid loading the PDF document unless absolutely necessary.  If the icon was cached by a different FVPDFIcon instance, _pageCount won't be correct and we have to continue on and load the PDF document.  In that case, our sizes will be overwritten, but the thumbnail won't be recreated.  If we need to render something that's larger than the thumbnail by 20%, we have to continue on and make sure the PDF doc is loaded as well.
         
         if (NULL != _thumbnail) {
             _thumbnailSize = FVCGImageSize(_thumbnail);
+            // retain since there's a possible race here if another thread inserts a description (although multiple instances shouldn't be rendering for the same cache key)
+            _FVDocumentDescription *desc = [[_FVDocumentDescription descriptionForKey:_cacheKey] retain];
+            if (desc) {
+                _pageCount = desc->_pageCount;
+                _fullSize = desc->_fullSize;
+            }
+            [desc release];
+            NSParameterAssert(_thumbnailSize.width > 0 && _thumbnailSize.height > 0);
             exitEarly = NO == FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize) && _pageCount > 0;
         }
                 
         // !!! early return
         if (exitEarly) {
-            [self unlock];    
+            [self unlock];
+            [[self class] _stopRenderingForKey:_cacheKey];
             return;
         }
     }    
@@ -269,8 +318,7 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
     if (NULL == _pdfPage) {
         
         if (NULL == _pdfDoc) {
-            _pdfDoc = _isPostscript ? createCGPDFDocumentWithPostScriptURL(_fileURL) : CGPDFDocumentCreateWithURL((CFURLRef)_fileURL);
-            
+            _pdfDoc = [self _newPDFDocument];
             _pageCount = CGPDFDocumentGetNumberOfPages(_pdfDoc);
         }
         
@@ -278,64 +326,90 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
         if (_pdfDoc)
             _pdfPage = _pageCount ? CGPDFDocumentGetPage(_pdfDoc, _currentPage) : NULL;
         
+        // won't be able to display this document if it can't be unlocked with the empty string
+        if (_pdfDoc && CGPDFDocumentIsEncrypted(_pdfDoc) && CGPDFDocumentUnlockWithPassword(_pdfDoc, "") == false)
+            _pageCount = 1;
+        
         if (_pdfPage) {
             CGRect pageRect = CGPDFPageGetBoxRect(_pdfPage, kCGPDFCropBox);
             
             // these may have been bogus before
             int rotation = CGPDFPageGetRotationAngle(_pdfPage);
             if (0 == rotation || 180 == rotation)
-                _fullSize = ((NSRect *)&pageRect)->size;
+                _fullSize = NSRectFromCGRect(pageRect).size;
             else
                 _fullSize = NSMakeSize(pageRect.size.height, pageRect.size.width);
             
+            _FVDocumentDescription *desc = [_FVDocumentDescription new];
+            desc->_pageCount = _pageCount;
+            desc->_fullSize = _fullSize;
+            [_FVDocumentDescription setDescription:desc forKey:_cacheKey];
+            [desc release];
+            
             // scale appropriately; small PDF images, for instance, don't need scaling
             _thumbnailSize = _fullSize;   
-        
-            // really huge PDFs (e.g. maps) will create really huge bitmaps and run us out of memory
-            FVIconLimitThumbnailSize(&_thumbnailSize);
+            
+            // !!! should probably keep multiple rasters instead of this hack, just as for other icons; drawing medium-sized PDF thumbnails gives lousy scrolling performance
+           __FVPDFIconLimitThumbnailSize(&_thumbnailSize);
         }
     }
-                
-    // Bitmap contexts for PDF files tend to be in the 2-5 MB range, and even a one point size difference in height or width (typical, even for the same page size) results in us creating a new context for each one if we use the context cache.  That sucks, so we'll just create and destroy them as needed, since drawing into a large cached context and then cropping doesn't work.
-    
-    // don't bother redrawing this if it already exists, since that's a big waste of time, and our thumbnail size is a fixed percentage of the document size so there's never a need to re-render it
 
+    // local ref for caching to disk
+    CGImageRef thumbnail = NULL;
+
+    // don't bother redrawing this if it already exists, since that's a big waste of time
+    
     if (NULL == _thumbnail) {
         
-        CGContextRef ctxt = FVIconBitmapContextCreateWithSize(_thumbnailSize.width, _thumbnailSize.height);
+        FVBitmapContextRef ctxt = FVIconBitmapContextCreateWithSize(_thumbnailSize.width, _thumbnailSize.height);
         
         // set a white page background
-        CGContextSetRGBFillColor(ctxt, 1.0, 1.0, 1.0, 1.0);
         CGRect pageRect = CGRectMake(0, 0, _thumbnailSize.width, _thumbnailSize.height);
-        CGContextClipToRect(ctxt, pageRect);
-        CGContextFillRect(ctxt, pageRect);
+        CGContextDrawLayerInRect(ctxt, pageRect, _pageLayer);
         
         if (_pdfPage) {
-            // always downscaling, so CGPDFPageGetDrawingTransform is okay to use here
-            CGAffineTransform t = CGPDFPageGetDrawingTransform(_pdfPage, kCGPDFCropBox, pageRect, 0, true);
-            CGContextConcatCTM(ctxt, t);
-            CGContextClipToRect(ctxt, CGPDFPageGetBoxRect(_pdfPage, kCGPDFCropBox));
-            CGContextDrawPDFPage(ctxt, _pdfPage);
+            
+            if (CGPDFDocumentIsUnlocked(_pdfDoc)) {
+                // always downscaling, so CGPDFPageGetDrawingTransform is okay to use here
+                CGAffineTransform t = CGPDFPageGetDrawingTransform(_pdfPage, kCGPDFCropBox, pageRect, 0, true);
+                CGContextSaveGState(ctxt);
+                CGContextConcatCTM(ctxt, t);
+                CGContextClipToRect(ctxt, CGPDFPageGetBoxRect(_pdfPage, kCGPDFCropBox));
+                CGContextDrawPDFPage(ctxt, _pdfPage);
+                CGContextRestoreGState(ctxt);
+            }
+            else {
+                [self _drawLockBadgeInRect:pageRect ofContext:ctxt];
+            }
         }
         
         CGImageRelease(_thumbnail);
         _thumbnail = CGBitmapContextCreateImage(ctxt);
-        if (1 == _currentPage && NO == _inDiskCache && NULL != _thumbnail) {
-            [FVIconCache cacheImage:_thumbnail withName:_diskCacheName];
-            _inDiskCache = YES;
-        }
         
-        FVIconBitmapContextDispose(ctxt);
+        // okay to call cacheImage:forKey: even if the image is already cached
+        if (1 == _currentPage && NULL != _thumbnail)
+            thumbnail = CGImageRetain(_thumbnail);
+        
+        FVIconBitmapContextRelease(ctxt);
     }
     [self unlock];
+    
+    // okay to draw, but now cache to disk before allowing others to read from disk
+    if (thumbnail) [FVIconCache cacheThumbnail:thumbnail forKey:_cacheKey];
+    CGImageRelease(thumbnail);
+
+    [[self class] _stopRenderingForKey:_cacheKey];
 }
 
 - (BOOL)needsRenderForSize:(NSSize)size 
 {
+    [[self class] _removeIconForMappedRelease:self];
     BOOL needsRender = NO;
     if ([self tryLock]) {
         // tells the render method if work is needed
         _desiredSize = size;
+        
+        // If we're drawing full size, don't bother loading the thumbnail if we have a PDFPage.  It can be quicker just to draw the page if the document is already loaded, rather than loading the thumbnail from cache.
         if (FVShouldDrawFullImageWithThumbnailSize(size, _thumbnailSize))
             needsRender = (NULL == _pdfPage);
         else
@@ -351,25 +425,24 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
 
 - (void)fastDrawInRect:(NSRect)dstRect ofContext:(CGContextRef)context
 {    
-    // draw thumbnail if present, regardless of the size requested
+    // draw thumbnail if present, regardless of the size requested, then try the page
     if (NO == [self tryLock]) {
         // no lock, so just draw the blank page and bail out
         [self _drawPlaceholderInRect:dstRect ofContext:context];
     }
-    else if (NULL == _thumbnail) {
-        [self unlock];
-        [self _drawPlaceholderInRect:dstRect ofContext:context];
-    }
-    else if (_thumbnail) {
+    else if (NULL != _thumbnail) {
         CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _thumbnail);
         [self unlock];
         if (_drawsLinkBadge)
             [self _badgeIconInRect:dstRect ofContext:context];
     }
+    else if (NULL != _pdfPage) {
+        [self unlock];
+        [self drawInRect:dstRect ofContext:context];
+    }
     else {
         [self unlock];
-        // let drawInRect: handle the rect conversion
-        [self drawInRect:dstRect ofContext:context];
+        [self _drawPlaceholderInRect:dstRect ofContext:context];
     }
 }
 
@@ -383,28 +456,18 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
         CGRect drawRect = [self _drawingRectWithRect:dstRect];
         
         // draw the thumbnail if the rect is small or we have no PDF document (yet)...if we have neither, draw a blank page
-        if (false == FVShouldDrawFullImageWithThumbnailSize(dstRect.size, _thumbnailSize) || NULL == _pdfDoc) {
+        
+        if (FVShouldDrawFullImageWithThumbnailSize(dstRect.size, _thumbnailSize) && NULL != _pdfDoc) {
             
-            if (NULL != _thumbnail) {
-                CGContextDrawImage(context, drawRect, _thumbnail);
-                if (_drawsLinkBadge)
-                    [self _badgeIconInRect:dstRect ofContext:context];
-            }
-            else {
-                // draw a blank page as a placeholder, and the real icon will get picked up next time around
-                // this path is hit fairly often, but is seldom actually drawn because of the callback rate
-                [self _drawPlaceholderInRect:dstRect ofContext:context];
-            }
-            
-        }
-        else {
-            CGContextSaveGState(context);
-            CGContextSetRGBFillColor(context, 1.0, 1.0, 1.0, 1.0);
             // don't clip, because the caller has a shadow set
-            CGContextFillRect(context, drawRect);
+            CGContextDrawLayerInRect(context, drawRect, _pageLayer);
+
             // get rid of any shadow, or we may draw a text shadow if the page is transparent
+            CGContextSaveGState(context);
             CGContextSetShadowWithColor(context, CGSizeZero, 0, NULL);
-            if (_pdfDoc) {
+            
+            // unlocked with empty password at creation
+            if (CGPDFDocumentIsUnlocked(_pdfDoc)) {
                 // CGPDFPageGetDrawingTransform only downscales PDF, so we have to set up the CTM manually
                 // http://lists.apple.com/archives/Quartz-dev/2005/Mar/msg00118.html
                 CGRect cropBox = CGPDFPageGetBoxRect(_pdfPage, kCGPDFCropBox);
@@ -435,14 +498,178 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
                 CGContextClipToRect(context, cropBox);
                 CGContextDrawPDFPage(context, _pdfPage);
             }
-            CGContextRestoreGState(context);
-            
+            else {
+                [self _drawLockBadgeInRect:drawRect ofContext:context];
+            }
             if (_drawsLinkBadge)
                 [self _badgeIconInRect:dstRect ofContext:context];
-
+            
+            // restore shadow and possibly the CTM
+            CGContextRestoreGState(context);
+        }
+        else if (NULL != _thumbnail) {
+            CGContextDrawImage(context, drawRect, _thumbnail);
+            if (_drawsLinkBadge)
+                [self _badgeIconInRect:dstRect ofContext:context];
+        }
+        else {
+            // no doc and no thumbnail
+            [self _drawPlaceholderInRect:dstRect ofContext:context];
         }
         [self unlock];
     }
 }
 
+- (NSURL *)_fileURL { return _fileURL; }
+
+- (void)_setFileURL:(NSURL *)aURL
+{
+    [_fileURL autorelease];
+    _fileURL = [aURL copyWithZone:[self zone]];
+}
+
 @end
+
+@implementation FVPDFDIcon
+
+static NSURL * __FVCreatePDFURLForPDFBundleURL(NSURL *aURL)
+{
+    NSCParameterAssert(pthread_main_np() != 0);
+    NSString *filePath = [aURL path];
+    NSArray *files = [[NSFileManager defaultManager] subpathsAtPath:filePath];
+    NSString *fileName = [[[filePath lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"pdf"];
+    NSString *pdfFile = nil;
+    
+    if ([files containsObject:fileName]) {
+        pdfFile = fileName;
+    } else {
+        NSUInteger idx = [[files valueForKeyPath:@"pathExtension.lowercaseString"] indexOfObject:@"pdf"];
+        if (idx != NSNotFound)
+            pdfFile = [files objectAtIndex:idx];
+    }
+    if (pdfFile)
+        pdfFile = [filePath stringByAppendingPathComponent:pdfFile];
+    return pdfFile ? [[NSURL alloc] initFileURLWithPath:pdfFile] : nil;
+}
+
+// return the same thing as PDF; just a container for the URL, until actually asked to render the PDF file
+- (id)initWithURL:(NSURL *)aURL;
+{
+    NSParameterAssert([aURL isFileURL]);
+    self = [super initWithURL:aURL];
+    if (self) {
+        aURL = __FVCreatePDFURLForPDFBundleURL([self _fileURL]);
+        if (aURL) {
+            [self _setFileURL:aURL];
+        } else {
+            [super dealloc];
+            self = nil;
+        }
+    }
+    return self;
+}
+
+@end
+
+@implementation FVPostScriptIcon
+
+static NSMutableDictionary *_convertedKeys = nil;
+static NSLock              *_convertedKeysLock = nil;
+
++ (void)initialize
+{
+    FVINITIALIZE(FVPostScriptIcon);
+    _convertedKeys = [NSMutableDictionary new];
+    _convertedKeysLock = [NSLock new];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAppTerminate:) name:NSApplicationWillTerminateNotification object:nil];
+
+}
+
++ (void)handleAppTerminate:(NSNotification *)aNote
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [_convertedKeysLock lock];
+    
+    // keys are based on original file, and values are the temp PDF file(s) we created, so unlink all those files
+    NSEnumerator *tempURLEnum = [[_convertedKeys allValues] objectEnumerator];  
+    NSURL *aURL;
+    while ((aURL = [tempURLEnum nextObject]) != nil)
+        unlink([[aURL path] fileSystemRepresentation]);
+    
+    [_convertedKeys release];
+    _convertedKeys = nil;
+    [_convertedKeysLock unlock];
+}
+
+- (id)initWithURL:(NSURL *)aURL
+{
+    self = [super initWithURL:aURL];
+    if (self) {
+        _converted = NO;
+    }
+    return self;
+}
+
++ (NSURL *)_temporaryPDFURL
+{
+    CFUUIDRef uuid = CFUUIDCreate(CFAllocatorGetDefault());
+    NSString *uniqueString = (NSString *)CFUUIDCreateString(CFGetAllocator(uuid), uuid);
+    CFRelease(uuid);
+    NSString *newPath = [[NSTemporaryDirectory() stringByAppendingPathComponent:uniqueString] stringByAppendingPathExtension:@"pdf"];
+    NSURL *newURL = [NSURL fileURLWithPath:newPath];
+    [uniqueString release];
+    return newURL;
+}
+
+- (CGPDFDocumentRef)_newPDFDocument
+{   
+    if (NO == _converted) {
+        
+        [_convertedKeysLock lock];
+        
+        // key is based on /original/ file URL
+        id key = [[FVIconCache newKeyForURL:[self _fileURL]] autorelease];
+        NSURL *newURL = [_convertedKeys objectForKey:key];
+
+        if (nil != newURL) {
+            [self _setFileURL:newURL];
+        }
+        else {
+        
+            CGPSConverterCallbacks converterCallbacks = { 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+            CGPSConverterRef converter = CGPSConverterCreate(NULL, &converterCallbacks, NULL);    
+            CGDataProviderRef provider = CGDataProviderCreateWithURL((CFURLRef)[self _fileURL]);        
+            
+            newURL = [FVPostScriptIcon _temporaryPDFURL];
+            CGDataConsumerRef consumer = CGDataConsumerCreateWithURL((CFURLRef)newURL);
+            
+            // NB: the first call to CGPSConverterConvert() seems to cache ~16 MB of memory
+            _converted = (NULL != provider && NULL != consumer) ? CGPSConverterConvert(converter, provider, consumer, NULL) : NO;
+            CGDataProviderRelease(provider);
+            CGDataConsumerRelease(consumer);
+            CFRelease(converter);
+            
+            // Originally just kept the PDF data in-memory since conversion is so slow, but data can easily be a few MB in size for a single PS file.  Hence, we'll write the converted data to disk as a temporary PDF file, point the file URL to the temp file, and then use super's implementation.  This leaves us with a minor turd to clean up at exit or dealloc time, and duplicate PS URLs will be converted/saved each time.  A map of original->temp URL could be used if PS files are used heavily.
+            if (_converted) {
+                [_convertedKeys setObject:newURL forKey:key];
+                [self _setFileURL:newURL];
+            }
+            else {
+                NSLog(@"Failed to convert PostScript file %@", [[self _fileURL] path]);   
+            }
+        }
+        [_convertedKeysLock unlock];
+
+    }
+    
+    // lock in case the URL is blown away in app terminate before a mapped provider is opened
+    [_convertedKeysLock lock];
+    CGPDFDocumentRef pdfDoc = [super _newPDFDocument];
+    [_convertedKeysLock unlock];
+    
+    return pdfDoc;
+}
+
+
+@end
+

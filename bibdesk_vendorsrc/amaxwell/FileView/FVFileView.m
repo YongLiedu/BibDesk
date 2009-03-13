@@ -51,11 +51,12 @@
 #import "FVDownload.h"
 #import "FVSlider.h"
 #import "FVColorMenuView.h"
-#import "FVBitmapContextCache.h"
 #import "FVAccessibilityIconElement.h"
 
 
 static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
+
+static void *FVSelectionIndexesObserverContext = @"FVSelectionIndexesObserverContext";
 
 static const NSSize DEFAULT_ICON_SIZE = { 64.0, 64.0 };
 static const NSSize DEFAULT_PADDING = { 10.0, 4.0 };
@@ -218,16 +219,20 @@ static CGColorRef _shadowColor = NULL;
     _progressTimer = NULL;
     
     _operationQueue = [FVOperationQueue new];
+    
+    _isObservingSelectionIndexes = NO;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    if ([keyPath isEqualToString:@"selectionIndexes"]) {
+    if (context == FVSelectionIndexesObserverContext) {
         if ([FVPreviewer isPreviewing] && NSNotFound != [_selectedIndexes firstIndex]) {
             [FVPreviewer setWebViewContextMenuDelegate:[self delegate]];
             [FVPreviewer previewURL:[self iconURLAtIndex:[_selectedIndexes firstIndex]]];
         }
         [self setNeedsDisplay:YES];
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
 }
 
@@ -247,6 +252,8 @@ static CGColorRef _shadowColor = NULL;
 
 - (void)dealloc
 {
+    if (_isObservingSelectionIndexes)
+        [self removeObserver:self forKeyPath:@"selectionIndexes"];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_leftArrow release];
     [_rightArrow release];
@@ -685,22 +692,24 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     
     // mmalc's example unbinds here for a nil superview, but that causes problems if you remove the view and add it back in later (and also can cause crashes as a side effect, if we're not careful with the datasource)
     if (nil == newSuperview) {
-        [self removeObserver:self forKeyPath:@"selectionIndexes"];
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:FVWebIconUpdatedNotificationName object:nil];
+        if (_isObservingSelectionIndexes) {
+            [self removeObserver:self forKeyPath:@"selectionIndexes"];
+            _isObservingSelectionIndexes = NO;
+        }
+        
+        [_operationQueue cancel];
         
         // break a retain cycle; binding is retaining this view
         [[_sliderWindow slider] unbind:@"value"];
     }
     else {
-        [self addObserver:self forKeyPath:@"selectionIndexes" options:0 context:NULL];
+        if (_isObservingSelectionIndexes) {
+            [self addObserver:self forKeyPath:@"selectionIndexes" options:0 context:FVSelectionIndexesObserverContext];
+            _isObservingSelectionIndexes = YES;
+        }
         
         // bind here (noop if we don't have a slider)
         [[_sliderWindow slider] bind:@"value" toObject:self withKeyPath:@"iconScale" options:nil];
-        
-        // special case; see FVWebViewIcon for posting and comments
-        [[NSNotificationCenter defaultCenter] addObserver:self 
-                                                 selector:@selector(_handleWebIconNotification:) 
-                                                     name:FVWebIconUpdatedNotificationName object:nil];        
     }
     
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSViewFrameDidChangeNotification object:nil];
@@ -788,7 +797,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     // we don't cache paths, but we do cache icons
     FVIcon *icon = [_iconCache objectForKey:aURL];
     if (nil == icon) {
-        icon = [FVIcon iconWithURL:aURL size:_iconSize];
+        icon = [FVIcon iconWithURL:aURL];
         [_iconCache setObject:icon forKey:aURL];
     }
     return icon;
@@ -1082,11 +1091,6 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         while ((aURL = [keyEnum nextObject]))
             [_iconCache removeObjectForKey:aURL];
     }
-}
-
-- (void)_handleWebIconNotification:(NSNotification *)aNote
-{
-    [self iconUpdated:[aNote object]];
 }
 
 #pragma mark Drawing

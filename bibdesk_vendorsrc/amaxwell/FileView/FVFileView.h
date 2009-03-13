@@ -83,6 +83,7 @@ typedef enum _FVDropOperation {
     BOOL                    _isEditable;
     BOOL                    _isRescaling;
     BOOL                    _isDrawingDragImage;
+    BOOL                    _isObservingSelectionIndexes;
     CFAbsoluteTime          _timeOfLastOrigin;
     NSPoint                 _lastOrigin;
     CFMutableDictionaryRef  _trackingRectMap;

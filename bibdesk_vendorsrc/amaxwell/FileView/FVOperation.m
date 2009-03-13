@@ -38,6 +38,7 @@
 
 #import "FVOperation.h"
 #import "FVOperationQueue.h"
+#import "FVThread.h"
 
 @implementation FVOperation
 
@@ -109,7 +110,7 @@ static Class FVOperationClass = Nil;
         [NSException raise:NSInternalInconsistencyException format:@"attempt to start a previously executed operation"];
     
     if ([self isConcurrent])
-        [NSThread detachNewThreadSelector:@selector(main) toTarget:self withObject:nil];
+        [FVThread detachNewThreadSelector:@selector(main) toTarget:self withObject:nil];
     else
         [self main];
 }

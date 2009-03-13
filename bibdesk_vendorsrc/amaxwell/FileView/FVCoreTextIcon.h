@@ -1,8 +1,8 @@
 //
-//  FVBitmapContextCache.h
+//  FVCoreTextIcon.h
 //  FileView
 //
-//  Created by Adam Maxwell on 10/21/07.
+//  Created by Adam Maxwell on 6/14/08.
 /*
  This software is Copyright (c) 2007-2009
  Adam Maxwell. All rights reserved.
@@ -37,14 +37,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "FVTextIcon.h"
 
-FV_PRIVATE_EXTERN CGContextRef FVIconBitmapContextCreateWithSize(size_t width, size_t height);
-FV_PRIVATE_EXTERN void FVIconBitmapContextDispose(CGContextRef ctxt);
-
-@interface FVBitmapContextCache : NSObject
-
-// ARGB cache
-+ (CGContextRef)newBitmapContextOfWidth:(CGFloat)w height:(CGFloat)h;
-+ (void)disposeOfBitmapContext:(CGContextRef)ctxt;
+@interface FVCoreTextIcon : FVTextIcon
 
 @end
