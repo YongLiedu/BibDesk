@@ -84,6 +84,14 @@
     return nonWhitespaceCharacterSet;
 }
 
++ (id)nonLetterCharacterSet;
+{
+    static NSCharacterSet *nonLetterCharacterSet = nil;
+    if (nonLetterCharacterSet == nil)
+        nonLetterCharacterSet = [[[NSCharacterSet letterCharacterSet] invertedSet] copy];
+    return nonLetterCharacterSet;
+}
+
 + (id)nonDecimalDigitCharacterSet;
 {
     static NSCharacterSet *nonDecimalDigitCharacterSet = nil;

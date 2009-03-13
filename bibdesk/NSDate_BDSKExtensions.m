@@ -38,6 +38,9 @@
 
 #import "NSDate_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
+#import "NSCharacterSet_BDSKExtensions.h"
+#import "BDSKComplexString.h"
+#import "BDSKStringNode.h"
 
 
 @implementation NSDate (BDSKExtensions)
@@ -104,6 +107,52 @@
     // Now fall back to natural language parsing, which is fairly memory-intensive.
     // We should be able to use NSDateFormatter with the natural language option, but it doesn't seem to work as well as +dateWithNaturalLanguageString
     return [[NSDate dateWithNaturalLanguageString:dateString locale:locale] retain];
+}
+
+- (id)initWithMonthString:(NSString *)monthString yearString:(NSString *)yearString {
+    if([yearString isComplex])
+        yearString = [(BDSKStringNode *)[[yearString nodes] objectAtIndex:0] value];
+    if ([NSString isEmptyString:yearString]) {
+        [[super init] release];
+        return nil;
+    } else {
+        if([monthString isComplex]) {
+            NSArray *nodes = [monthString nodes];
+            NSEnumerator *nodeEnum = [nodes objectEnumerator];
+            BDSKStringNode *node = nil;
+            NSString *stringNode = nil;
+            while (node = [nodeEnum nextObject]) {
+                if ([node type] == BSN_MACRODEF) {
+                    monthString = [node value];
+                    break;
+                }
+            }
+            if (node == nil)
+                monthString = [(BDSKStringNode *)[nodes objectAtIndex:0] value];
+        } else if (monthString) {
+            NSRange r = [monthString rangeOfCharacterFromSet:[NSCharacterSet letterCharacterSet]];
+            unsigned int start = 0, end = [monthString length];
+            if (r.location != NSNotFound) {
+                start = r.location;
+                r = [monthString rangeOfCharacterFromSet:[NSCharacterSet nonLetterCharacterSet] options:0 range:NSMakeRange(start, end - start)];
+                if (r.location != NSNotFound)
+                    end = r.location;
+            } else {
+                r = [monthString rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet]];
+                if (r.location != NSNotFound) {
+                    start = r.location;
+                    r = [monthString rangeOfCharacterFromSet:[NSCharacterSet nonDecimalDigitCharacterSet] options:0 range:NSMakeRange(start, end - start)];
+                    if (r.location != NSNotFound)
+                        end = r.location;
+                }
+            }
+            if (start > 0 || end < [monthString length])
+                monthString = [monthString substringWithRange:NSMakeRange(start, end - start)];
+        } else {
+            monthString = @"";
+        }
+        return [self initWithMonthDayYearString:[NSString stringWithFormat:@"%@-15-%@", monthString, yearString]];
+    }
 }
 
 - (NSString *)dateDescription{
