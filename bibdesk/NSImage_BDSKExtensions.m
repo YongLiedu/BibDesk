@@ -232,7 +232,7 @@
     static NSImage *smartGroupImage = nil;
     static NSImage *importGroupImage = nil;
     
-    if (genericGroupImage || floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+    if (categoryGroupImage || floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
         return;
     
     categoryGroupImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
