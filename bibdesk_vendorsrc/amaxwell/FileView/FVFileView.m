@@ -151,9 +151,21 @@ static CGColorRef _shadowColor = NULL;
 
 + (NSColor *)defaultBackgroundColor
 {
-    // from Mail.app on 10.4
-    CGFloat red = (231.0f/255.0f), green = (237.0f/255.0f), blue = (246.0f/255.0f);
-    return [[NSColor colorWithCalibratedRed:red green:green blue:blue alpha:1.0] colorUsingColorSpaceName:NSDeviceRGBColorSpace];
+    NSColor *color = nil;
+    
+    // Magic source list color: http://lists.apple.com/archives/cocoa-dev/2008/Jun/msg02138.html
+    if ([NSOutlineView instancesRespondToSelector:@selector(setSelectionHighlightStyle:)]) {
+        NSOutlineView *outlineView = [[NSOutlineView alloc] initWithFrame:NSMakeRect(0,0,1,1)];
+        [outlineView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
+        color = [[[outlineView backgroundColor] retain] autorelease];
+        [outlineView release];
+    }
+    else {
+        // from Mail.app on 10.4
+        CGFloat red = (231.0f/255.0f), green = (237.0f/255.0f), blue = (246.0f/255.0f);
+        color = [[NSColor colorWithCalibratedRed:red green:green blue:blue alpha:1.0] colorUsingColorSpaceName:NSDeviceRGBColorSpace];
+    }
+    return color;
 }
 
 + (BOOL)accessInstanceVariablesDirectly { return NO; }
