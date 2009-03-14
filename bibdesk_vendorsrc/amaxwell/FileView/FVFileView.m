@@ -171,19 +171,20 @@ static CGFloat _subtitleHeight = 0.0;
 - (void)_commonInit {
     _iconCache = [[NSMutableDictionary alloc] init];
     _iconSize = DEFAULT_ICON_SIZE;
-    _autoScales = NO;
+    _fvFlags.autoScales = NO;
     _padding = [self _paddingForScale:1.0];
     _lastMouseDownLocInView = NSZeroPoint;
     // the next two are set to an illegal combination to indicate that no drop is in progress
     _dropIndex = NSNotFound;
     _dropOperation = FVDropBefore;
-    _isRescaling = NO;
+    _fvFlags.isRescaling = NO;
+    _fvFlags.scheduledLiveResize = NO;
     _selectedIndexes = [[NSMutableIndexSet alloc] init];
     _lastClickedIndex = NSNotFound;
     _rubberBandRect = NSZeroRect;
-    _isMouseDown = NO;
+    _fvFlags.isMouseDown = NO;
     _iconURLs = nil;
-    _isEditable = NO;
+    _fvFlags.isEditable = NO;
     [self setBackgroundColor:[[self class] defaultBackgroundColor]];
     _selectionOverlay = NULL;
     _numberOfColumns = 1;
@@ -228,7 +229,7 @@ static CGFloat _subtitleHeight = 0.0;
     
     _operationQueue = [FVOperationQueue new];
     
-    _isObservingSelectionIndexes = NO;
+    _fvFlags.isObservingSelectionIndexes = NO;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -260,7 +261,7 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (void)dealloc
 {
-    if (_isObservingSelectionIndexes)
+    if (_fvFlags.isObservingSelectionIndexes)
         [self removeObserver:self forKeyPath:@"selectionIndexes"];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_leftArrow release];
@@ -299,7 +300,7 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (NSColor *)backgroundColor
 { 
-    return _isDrawingDragImage ? [NSColor clearColor] : _backgroundColor;
+    return _fvFlags.isDrawingDragImage ? [NSColor clearColor] : _backgroundColor;
 }
 
 // scrollPositionAsPercentage borrowed and modified from the Omni frameworks
@@ -377,7 +378,7 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (void)setIconScale:(CGFloat)scale;
 {
-    if (_autoScales == NO) {
+    if (_fvFlags.autoScales == NO) {
         FVAPIAssert(scale > 0, @"scale must be greater than zero");
         _iconSize.width = DEFAULT_ICON_SIZE.width * scale;
         _iconSize.height = DEFAULT_ICON_SIZE.height * scale;
@@ -397,8 +398,8 @@ static CGFloat _subtitleHeight = 0.0;
         
         // Schedule a reload so we always have the correct quality icons, but don't do it while scaling in response to a slider.
         // This will also scroll to the first selected icon; maintaining scroll position while scaling is too jerky.
-        if (NO == _isRescaling) {
-            _isRescaling = YES;
+        if (NO == _fvFlags.isRescaling) {
+            _fvFlags.isRescaling = YES;
             // this is only sent in the default runloop mode, so it's not sent during event tracking
             [self performSelector:@selector(_rescaleComplete) withObject:nil afterDelay:0.0];
         }
@@ -417,7 +418,7 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (void)_registerForDraggedTypes
 {
-    if (_isEditable && _dataSource) {
+    if (_fvFlags.isEditable && _dataSource) {
         const SEL selectors[] = 
         { 
             @selector(fileView:insertURLs:atIndexes:forDrop:dropOperation:), 
@@ -436,12 +437,12 @@ static CGFloat _subtitleHeight = 0.0;
 }
 
 - (BOOL)autoScales {
-    return _autoScales;
+    return _fvFlags.autoScales;
 }
 
 - (void)setAutoScales:(BOOL)flag {
-    if (_autoScales != flag) {
-        _autoScales = flag;
+    if (_fvFlags.autoScales != flag) {
+        _fvFlags.autoScales = flag;
         
         // arrows out of place now, they will be added again when required when resetting the tracking rects
         [self _hideArrows];
@@ -499,13 +500,13 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (BOOL)isEditable 
 { 
-    return _isEditable;
+    return _fvFlags.isEditable;
 }
 
 - (void)setEditable:(BOOL)flag 
 {
-    if (_isEditable != flag) {
-        _isEditable = flag;
+    if (_fvFlags.isEditable != flag) {
+        _fvFlags.isEditable = flag;
         
         [self _registerForDraggedTypes];
     }
@@ -685,7 +686,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         else
             [self _hideArrows];
         
-        if (_autoScales == NO) {
+        if (_fvFlags.autoScales == NO) {
             NSRect sliderRect = NSIntersectionRect([self _topSliderRect], visibleRect);
             _topSliderTag = [self addTrackingRect:sliderRect owner:self userData:[self _sliderWindow] assumeInside:NSPointInRect(mouseLoc, sliderRect)];  
             sliderRect = NSIntersectionRect([self _bottomSliderRect], visibleRect);
@@ -797,9 +798,9 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     
     // mmalc's example unbinds here for a nil superview, but that causes problems if you remove the view and add it back in later (and also can cause crashes as a side effect, if we're not careful with the datasource)
     if (nil == newSuperview) {
-        if (_isObservingSelectionIndexes) {
+        if (_fvFlags.isObservingSelectionIndexes) {
             [self removeObserver:self forKeyPath:@"selectionIndexes"];
-            _isObservingSelectionIndexes = NO;
+            _fvFlags.isObservingSelectionIndexes = NO;
         }
         
         [_operationQueue cancel];
@@ -808,9 +809,9 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         [[_sliderWindow slider] unbind:@"value"];
     }
     else {
-        if (_isObservingSelectionIndexes) {
+        if (_fvFlags.isObservingSelectionIndexes) {
             [self addObserver:self forKeyPath:@"selectionIndexes" options:0 context:FVSelectionIndexesObserverContext];
-            _isObservingSelectionIndexes = YES;
+            _fvFlags.isObservingSelectionIndexes = YES;
         }
         
         // bind here (noop if we don't have a slider)
@@ -965,7 +966,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     NSSize contentSize = scrollView ? [scrollView contentSize] : [self bounds].size;
     NSUInteger numIcons = [self numberOfIcons];
     
-    if (_autoScales) {
+    if (_fvFlags.autoScales) {
         
         CGFloat iconScale = FVMax( 0.1, ( contentSize.width - DEFAULT_PADDING.width - 2 * DEFAULT_MARGIN ) / DEFAULT_ICON_SIZE.width );
         _padding = [self _paddingForScale:iconScale];
@@ -993,7 +994,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         frame.size.height = FVMax( FVCeil( [self _rowHeight] * _numberOfRows + [self _topMargin] + [self _bottomMargin] ), contentSize.height );
         if (NSEqualRects([self frame], frame) == NO) {
             [super setFrame:frame];
-            if (_autoScales && [scrollView autohidesScrollers] && FVAbs(NSHeight(frame) - contentSize.height) <= [NSScroller scrollerWidth])
+            if (_fvFlags.autoScales && [scrollView autohidesScrollers] && FVAbs(NSHeight(frame) - contentSize.height) <= [NSScroller scrollerWidth])
                 [scrollView tile];
         }
     }
@@ -1108,7 +1109,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         [self scrollRectToVisible:[self _rectOfIconInRow:r column:c]];
     }
     [self setNeedsDisplay:YES];
-    _isRescaling = NO;
+    _fvFlags.isRescaling = NO;
 }
 
 - (void)_enqueueReleaseOperationForIcons:(NSArray *)icons;
@@ -1434,6 +1435,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
 - (void)viewDidEndLiveResize
 {
     [self reloadIcons];
+    _fvFlags.scheduledLiveResize = NO;
 }
 
 // only invoked when autoscrolling or in response to user action
@@ -1509,7 +1511,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     
     // Call this only for icons that we're not going to display "soon."  The problem with this approach is that if you only have a single icon displayed at a time (say in a master-detail view), FVIcon cache resources will continue to be used up since each one is cached and then never touched again (if it doesn't show up in this loop, that is).  We handle this by using a timer that culls icons which are no longer present in the datasource.  I suppose this is only a symptom of the larger problem of a view maintaining a cache of model objects...but expecting a client to be aware of our caching strategy and icon management is a bit much.  
     
-    // Don't release resources while scrolling; caller has already checked -inLiveResize and _isRescaling for us
+    // Don't release resources while scrolling; caller has already checked -inLiveResize and _fvFlags.isRescaling for us
 
     if ([_iconCache count] > RELEASE_CACHE_THRESHOLD && NO == [self _isFastScrolling]) {
         
@@ -1562,7 +1564,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     CGContextSetBlendMode(cgContext, kCGBlendModeNormal);
     
     // don't limit quality based on scrolling unless we really need to
-    if (isResizing || _isRescaling) {
+    if (isResizing || _fvFlags.isRescaling) {
         CGContextSetInterpolationQuality(cgContext, kCGInterpolationNone);
         CGContextSetShouldAntialias(cgContext, false);
     }
@@ -1577,8 +1579,14 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
             
     // we should use the fast path when scrolling at small sizes; PDF sucks in that case...
     
-    BOOL useFastDrawingPath = (isResizing || _isRescaling || ([self _isFastScrolling] && _iconSize.height <= 256));
+    BOOL useFastDrawingPath = (isResizing || _fvFlags.isRescaling || ([self _isFastScrolling] && _iconSize.height <= 256));
     BOOL useSubtitle = [_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)];
+    
+    // redraw at high quality after scrolling
+    if (useFastDrawingPath && NO == _fvFlags.scheduledLiveResize && [self _isFastScrolling]) {
+        _fvFlags.scheduledLiveResize = YES;
+        [self performSelector:@selector(viewDidEndLiveResize) withObject:nil afterDelay:0 inModes:[NSArray arrayWithObject:NSDefaultRunLoopMode]];
+    }
     
     // shadow needs to be scaled as the icon scale changes to approximate the IconServices shadow
     CGFloat shadowBlur = 2.0 * [self iconScale];
@@ -1598,7 +1606,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
             i = [self _indexForGridRow:r column:c];
 
             // if we're creating a drag image, only draw selected icons
-            if (NSNotFound != i && (NO == _isDrawingDragImage || [_selectedIndexes containsIndex:i])) {
+            if (NSNotFound != i && (NO == _fvFlags.isDrawingDragImage || [_selectedIndexes containsIndex:i])) {
             
                 NSRect fileRect = [self _rectOfIconInRow:r column:c];
                 
@@ -1609,7 +1617,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                 // allow some extra for the shadow (-5)
                 NSRect textRect = [self _rectOfTextForIconRect:fileRect];
                 // always draw icon and text together, as they may overlap due to shadow and finder label, and redrawing a part may look odd
-                BOOL willDrawIcon = _isDrawingDragImage || [self needsToDrawRect:NSUnionRect(NSInsetRect(fileRect, -2.0 * [self iconScale], -[self iconScale]), textRect)];
+                BOOL willDrawIcon = _fvFlags.isDrawingDragImage || [self needsToDrawRect:NSUnionRect(NSInsetRect(fileRect, -2.0 * [self iconScale], -[self iconScale]), textRect)];
                                 
                 if (willDrawIcon) {
 
@@ -1702,7 +1710,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     // avoid hitting the cache thread while a live resize is in progress, but allow cache updates while scrolling
     // use the same range criteria that we used in iterating icons
     NSUInteger iMin = indexRange.location, iMax = NSMaxRange(indexRange);
-    if (NO == isResizing && NO == _isRescaling)
+    if (NO == isResizing && NO == _fvFlags.isRescaling)
         [self _scheduleIconsInRange:NSMakeRange(iMin, iMax - iMin)];
 }
 
@@ -1728,7 +1736,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     NSRect visRect = [self visibleRect];
     
     // downscaling changes the view origin, so enlarge the rect if needed after _recalculateGridSize
-    if (_isRescaling) {
+    if (_fvFlags.isRescaling) {
         CGFloat dy = visRect.origin.y - [self visibleRect].origin.y;
         CGFloat dx = visRect.origin.x - [self visibleRect].origin.x;
         if (dy > 0 || dx > 0)
@@ -1768,7 +1776,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     
     if (isDrawingToScreen) {
         
-        if ([self _hasArrows] && _isDrawingDragImage == NO) {
+        if ([self _hasArrows] && _fvFlags.isDrawingDragImage == NO) {
             if (NSIntersectsRect(rect, _leftArrowFrame))
                 [_leftArrow drawWithFrame:_leftArrowFrame inView:self];
             if (NSIntersectsRect(rect, _rightArrowFrame))
@@ -1834,7 +1842,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
 
     NSBitmapImageRep *imageRep = [self bitmapImageRepForCachingDisplayInRect:bounds];
     
-    _isDrawingDragImage = YES;
+    _fvFlags.isDrawingDragImage = YES;
     
     // this is not the recommended way to draw into a bitmap context, but the CTM isn't set up properly using the AppKit's mechanism as far as I can tell, so I can't make use of the higher-level drawing routines
     NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithBitmapImageRep:imageRep];
@@ -1846,7 +1854,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     [self drawRect:bounds];
     
     // reset flag
-    _isDrawingDragImage = NO;
+    _fvFlags.isDrawingDragImage = NO;
     [NSGraphicsContext restoreGraphicsState];
 
     NSImage *newImage = [[[NSImage alloc] initWithSize:bounds.size] autorelease];
@@ -1970,7 +1978,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     if ([NSApp isActive]) {
         if (CFDictionaryGetValueIfPresent(_trackingRectMap, (const void *)tag, (const void **)&anIndex)) {
             [self _showArrowsForIconAtIndex:anIndex];
-        } else if (_autoScales == NO && _sliderWindow && [event userData] == _sliderWindow) {
+        } else if (_fvFlags.autoScales == NO && _sliderWindow && [event userData] == _sliderWindow) {
             
             if ([_sliderWindow parentWindow] == nil) {
                 NSRect sliderRect = tag == _bottomSliderTag ? [self _bottomSliderRect] : [self _topSliderRect];
@@ -2078,7 +2086,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
 
 - (void)mouseDown:(NSEvent *)event
 {
-    _isMouseDown = YES;
+    _fvFlags.isMouseDown = YES;
     
     NSPoint p = [event locationInWindow];
     p = [self convertPoint:p fromView:nil];
@@ -2233,7 +2241,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (void)mouseUp:(NSEvent *)event
 {
-    _isMouseDown = NO;
+    _fvFlags.isMouseDown = NO;
     if (NO == NSIsEmptyRect(_rubberBandRect)) {
         [self setNeedsDisplayInRect:_rubberBandRect];
         _rubberBandRect = NSZeroRect;
@@ -2247,9 +2255,9 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
     NSURL *pointURL = [self _URLAtPoint:p];
     
-    // _isMouseDown tells us if the mouseDown: event originated in this view; if not, just ignore it
+    // _fvFlags.isMouseDown tells us if the mouseDown: event originated in this view; if not, just ignore it
     
-    if (NSEqualRects(_rubberBandRect, NSZeroRect) && nil != pointURL && _isMouseDown) {
+    if (NSEqualRects(_rubberBandRect, NSZeroRect) && nil != pointURL && _fvFlags.isMouseDown) {
         // No previous rubber band selection, so check to see if we're dragging an icon at this point.
         // The condition is also false when we're getting a repeated call to mouseDragged: for rubber band drawing.
         
@@ -2289,7 +2297,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         }
         
     }
-    else if (_isMouseDown) {   
+    else if (_fvFlags.isMouseDown) {   
         
         // no icons to drag, so we must draw the rubber band rectangle
         _rubberBandRect = NSIntersectionRect(_rectWithCorners(_lastMouseDownLocInView, p), [self bounds]);
@@ -2859,9 +2867,9 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     BOOL selectionCount = [_selectedIndexes count];
     
     if (action == @selector(zoomOut:) || action == @selector(zoomIn:))
-        return _autoScales == NO;
+        return _fvFlags.autoScales == NO;
     else if (action == @selector(toggleAutoScales:)) {
-        [anItem setState:_autoScales ? NSOnState : NSOffState];
+        [anItem setState:_fvFlags.autoScales ? NSOnState : NSOffState];
         return YES;
     } else if (action == @selector(revealInFinder:))
         return [aURL isFileURL] && [_selectedIndexes count] == 1 && NO == isMissing;

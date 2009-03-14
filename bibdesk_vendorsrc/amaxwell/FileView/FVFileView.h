@@ -84,14 +84,18 @@ typedef enum _FVDropOperation {
     NSUInteger              _dropOperation;
     NSUInteger              _dropIndex;
     NSRect                  _rubberBandRect;
-    BOOL                    _isMouseDown;
+    struct __fvFlags {
+        unsigned int isMouseDown : 1;
+        unsigned int isEditable : 1;
+        unsigned int autoScales : 1;
+        unsigned int isRescaling: 1;
+        unsigned int scheduledLiveResize : 1;
+        unsigned int isDrawingDragImage : 1;
+        unsigned int isObservingSelectionIndexes : 1;
+    } _fvFlags;
     NSSize                  _padding;
     NSSize                  _iconSize;
     NSPoint                 _lastMouseDownLocInView;
-    BOOL                    _isEditable;
-    BOOL                    _isRescaling;
-    BOOL                    _isDrawingDragImage;
-    BOOL                    _isObservingSelectionIndexes;
     CFAbsoluteTime          _timeOfLastOrigin;
     NSPoint                 _lastOrigin;
     CFMutableDictionaryRef  _trackingRectMap;
@@ -107,8 +111,6 @@ typedef enum _FVDropOperation {
     NSMutableArray         *_downloads;
     CFRunLoopTimerRef       _progressTimer;
     NSArray                *_iconURLs;
-    
-    BOOL                    _autoScales;
 }
 
 /** The icon URLs.
