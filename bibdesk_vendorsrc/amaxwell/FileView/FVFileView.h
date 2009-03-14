@@ -96,7 +96,7 @@ typedef enum _FVDropOperation {
     NSTrackingRectTag       _bottomSliderTag;
     FVOperationQueue       *_operationQueue;
     
-    CFMutableDictionaryRef  _activeDownloads;
+    NSMutableArray         *_downloads;
     CFRunLoopTimerRef       _progressTimer;
     NSArray                *_iconURLs;
     
