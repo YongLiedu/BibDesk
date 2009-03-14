@@ -58,6 +58,14 @@ typedef enum _FVDropOperation {
 
 @class FVSliderWindow, FVOperationQueue;
 
+/**
+ FVFileView is the primary class in the framework.  
+ 
+ FVFileView is an NSView subclass that provides automatic layout of icons, and handles update queueing transparently.  The data source may be an NSArrayController (via the view's Content binding), or an object that implements the @link NSObject(FVFileViewDataSource) @endlink informal protocol.  If the view is to be a drag-and-drop destination, the datasource must implement the @link NSObject(FVFileViewDragDataSource) @endlink informal protocol.
+ 
+ @see @link NSObject(FVFileViewDataSource) @endlink
+ @see @link NSObject(FVFileViewDataSource) @endlink
+ */
 @interface FVFileView : NSView 
 {
 @private
@@ -103,99 +111,291 @@ typedef enum _FVDropOperation {
     BOOL                    _autoScales;
 }
 
-// bindings compatibility, although this can be set directly
-- (void)setIconURLs:(NSArray *)anArray;
+/** The icon URLs.
+ 
+ This property is KVO-compliant and supports Cocoa bindings.*/
 - (NSArray *)iconURLs;
 
-// this is the only way to get selection information at present
+/** Set the icon URLs.
+ 
+  This property is KVO-compliant and supports Cocoa bindings.
+ 
+ @param anArray Must not be nil.  Pass an empty NSArray to clear selection.*/
+- (void)setIconURLs:(NSArray *)anArray;
+
+/** Currently selected indexes.
+ 
+ This property is KVO-compliant and supports Cocoa bindings.  Indexes are numbered in ascending order order from left to right, top to bottom (row-major order).*/
 - (NSIndexSet *)selectionIndexes;
+
+/** Set current selection indexes.
+ 
+  This property is KVO-compliant and supports Cocoa bindings.  Indexes are numbered in ascending order order from left to right, top to bottom (row-major order).
+ 
+ @param indexSet Must not be nil.  Pass an empty NSIndexSet to clear selection.*/
 - (void)setSelectionIndexes:(NSIndexSet *)indexSet;
 
-// bind a slider or other control to this
+/** The current icon scale of the view.
+ 
+ This property has no physical meaning; it's proportional to internal constants which determine the cached sizes of icons.  Can be bound.*/
 - (CGFloat)iconScale;
+
+/** Set the current icon scale.
+ @param scale The new value of FVFileView::iconScale. */
 - (void)setIconScale:(CGFloat)scale;
 
+/** Whether the icons scale automatically.
+ 
+ When this is set to YES, setIconScale: will be ignored, and the views shows the icons in a single column with a scale determined by the current width of the view.  Can be bound.*/
 - (BOOL)autoScales;
+
+/** Set whether the icons scale automatically.
+ @param flag The new value of FVFileView::autoScales. */
 - (void)setAutoScales:(BOOL)flag;
 
+/** Current number of rows displayed.*/
 - (NSUInteger)numberOfRows;
+
+/** Current number of columns displayed.*/
 - (NSUInteger)numberOfColumns;
+
+/** Invalidates all content and marks view for redisplay.
+ 
+ This must be called if the URLs provided by a datasource change, either in number or content, unless the Content binding is used.  May be fairly expensive if your datasource is slow, since it requests all values (unlike NSTableView).  Icon data such as bitmaps will be generated lazily as needed, however, and is also persistent for the life of the application.*/
 - (void)reloadIcons;
 
-// default is Mail's source list color
+/** The current background color.
+ 
+ The default is NSOutlineView's source list color, or an approximation thereof on 10.4.  Can be bound. */
 - (NSColor *)backgroundColor;
+
+/** Change the background color.
+ 
+ The default is NSOutlineView's source list color, or an approximation thereof on 10.4.  Can be bound.
+ @param aColor The new background color. */
 - (void)setBackgroundColor:(NSColor *)aColor;
 
-// actions that NSResponder doesn't declare
+/** Selects the previous icon in row-major order.*/
 - (IBAction)selectPreviousIcon:(id)sender;
+
+/** Selects the previous icon in row-major order.*/
 - (IBAction)selectNextIcon:(id)sender;
+
+/** Deletes the selected icon(s).
+ 
+ Requires implementation of the @link NSObject(FVFileViewDragDataSource) @endlink informal protocol.  If the view is editable, it sends  NSObject(FVFileViewDragDataSource)::fileView:deleteURLsAtIndexes: to the datasource object, which can then handle the action as needed.
+ 
+ @see @link NSObject(FVFileViewDragDataSource) @endlink
+ @see setEditable: */
 - (IBAction)delete:(id)sender;
 
-// sender must implement -tag to return a valid Finder label integer (0-7); non-file URLs are ignored
+/** Change Finder label color for selected icons.
+ 
+ Changes the Finder label color for the current selection.  Non-file: URLs and nonexistent files are ignored.
+ 
+ @param sender Must implement -tag to return a valid Finder label integer (0--7).  Typically an NSMenuItem.
+ */
 - (IBAction)changeFinderLabel:(id)sender;
+
+/** Opens the selected items using the default application.
+ 
+ Wraps -[NSWorkspace openURL:].*/
 - (IBAction)openSelectedURLs:(id)sender;
 
+/** Whether the view can be edited.
+ 
+ Can be bound.*/
 - (BOOL)isEditable;
+
+/** Change the view's editable property.
+ 
+ Default is NO for views created in code.  Can be bound.
+ 
+ @param flag If set to YES, requires the datasource to implement the @link NSObject(FVFileViewDragDataSource) @endlink informal protocol.  If set to NO, drop/paste/delete actions will be ignored, even if the protocol is implemented.  */
 - (void)setEditable:(BOOL)flag;
 
-- (void)setDropIndex:(NSUInteger)anIndex dropOperation:(FVDropOperation)anOperation;
-
-// required for drag-and-drop support
+/** Receiver forFileViewDataSource and @link NSObject(FVFileViewDragDataSource) @endlink messages.
+ 
+ A non-nil datasource is required for drag-and-drop support.
+ 
+ @param obj Nonretained, and may be set to nil.
+ @see @link NSObject(FVFileViewDataSource) @endlink
+ @see @link NSObject(FVFileViewDragDataSource) @endlink */
 - (void)setDataSource:(id)obj;
+
+/** Current datasource or nil.*/
 - (id)dataSource;
 
+/** Set a delegate for the view.
+ 
+ The delegate may implement any or all of the methods in the @link NSObject(FileViewDelegate) @endlink informal protocol.
+ 
+ @param obj The object to set as delegate.  Not retained.*/
 - (void)setDelegate:(id)obj;
+
+/** Returns the current delegate or nil.*/
 - (id)delegate;
 
+/** Whether the view allows downloading URLs. */
 - (BOOL)allowsDownloading;
+
+/** Change the view's allowsDownloading property.
+ 
+ Default is NO for views created in code.
+ 
+ @param flag If set to YES, a contextual download menu item is added for external URLs, and external URLs dropped while holding the Option key will be automatically downloaded.  */
 - (void)setAllowsDownloading:(BOOL)flag;
+
+/** Change drop index and drop operation for a drop on the view.
+ 
+ This can be used in the @link NSObject(FVFileViewDelegate) @endlink drop validation method to change the drop index or drop operation.
+ 
+ @param anIndex The new drop index.
+ @param anOperation The new drop operation.  */
+- (void)setDropIndex:(NSUInteger)anIndex dropOperation:(FVDropOperation)anOperation;
 
 @end
 
 
-// dataSource must conform to this
-@interface NSObject (FileViewDataSource)
+/** Informal protocol for datasources.
+ 
+ An object passed to FVFileView::setDataSource: must implement all required methods.  Results are cached internally on each call to FVFileView::reloadIcons, so datasource methods don't need to be incredibly efficient (so long as you avoid gratuitous calls to FVFileView::reloadIcons).  However, the view's internal cache requests all values when FVFileView::reloadIcons is called, not just visible rows/columns.  
+ */
+@interface NSObject (FVFileViewDataSource)
 
-// delegate must return an NSURL or nil (a missing value) for each index < numberOfFiles
+/** Required.
+ 
+ Return the current number of icons provided by your datasource.
+ 
+ @param aFileView The view requesting information
+ */
 - (NSUInteger)numberOfURLsInFileView:(FVFileView *)aFileView;
+
+/** Required.
+ 
+ The datasource must return an NSURL for each index < numberOfFiles.
+ 
+ @param aFileView The view requesting information
+ @param anIndex The requested index (row-major ordered)
+ @return An NSURL instance or nil/NSNull for a missing file.
+ */
 - (NSURL *)fileView:(FVFileView *)aFileView URLAtIndex:(NSUInteger)anIndex;
 
-// optional method for a subtitle
+/** Optional.  
+ 
+ String displayed below the URL name.  If you're using bindings and need a subtitle, you need to implement this method (and add dummy implementations of the required methods).  Either way, values are cached.
+ 
+ @param aFileView The view requesting information
+ @param anIndex The requested index (row-major ordered)
+ @return NSString instance
+ */
 - (NSString *)fileView:(FVFileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
 
 @end
 
-// datasource must implement all of these methods or dropping/rearranging will be disabled
-@interface NSObject (FileViewDragDataSource)
+/** Informal protocol for datasources.
+ 
+ Datasource must implement all of these methods or dropping/rearranging will be disabled.  
+ */
+@interface NSObject (FVFileViewDragDataSource)
 
-// implement to do something (or nothing) with the dropped URLs
+/** Implement to do something (or nothing) with the dropped URLs
+ */
 - (void)fileView:(FVFileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 
-// the datasource may replace the files at the given indexes
+/** The datasource may replace the files at the given indexes
+ @return YES if the replacement occurred.
+ */
 - (BOOL)fileView:(FVFileView *)aFileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 
-// rearranging files in the view
+/** Rearranging files in the view
+ @return YES if the rearrangement occurred.
+ */
 - (BOOL)fileView:(FVFileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 
-// does not delete the file from disk; this is the datasource's responsibility
+/** Does not delete the file from disk; this is the datasource's responsibility
+ @return YES if the deletion occurred.
+ */
 - (BOOL)fileView:(FVFileView *)aFileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
 
 @end
 
-@interface NSObject (FileViewDelegate)
+/** Informal protocol for delegates.
+ 
+ The delegate object may implement any or all of these methods to modify the the view's default behavior.  In addition, the delegate can be sent the WebUIDelegate method webView:contextMenuItemsForElement:defaultMenuItems: if implemented.
+ */
+@interface NSObject (FVFileViewDelegate)
 
-// Called immediately before display.   The anIndex parameter will be NSNotFound if there is not a URL at the mouse event location.  If you remove all items, the menu will not be shown.
+/** Allows modification of the contextual menu.
+ 
+ Called immediately before display; the delegate can safely modify the menu, as a new copy is presented each time.   The anIndex parameter will be NSNotFound if there is not a URL at the mouse event location.  If you remove all items, the menu will not be shown.
+ 
+ @param aFileView The requesting view
+ @param aMenu The menu that will be displayed
+ @param anIndex The index of the selected item
+ */
 - (void)fileView:(FVFileView *)aFileView willPopUpMenu:(NSMenu *)aMenu onIconAtIndex:(NSUInteger)anIndex;
 
-// In addition, it can be sent the WebUIDelegate method webView:contextMenuItemsForElement:defaultMenuItems:
-
-// If unimplemented or returns YES, fileview will open the URL using NSWorkspace
+/** Allows ignoring the default open handler.
+ 
+ If unimplemented or returns YES, fileview will open the URL using NSWorkspace.  You can return NO to open the URL yourself, for instance if you override the user's default application for a file type.
+ 
+ @param aFileView The requesting view
+ @param aURL The URL to open
+ @return YES to allow FileView to open the URL
+ */
 - (BOOL)fileView:(FVFileView *)aFileView shouldOpenURL:(NSURL *)aURL;
 
-// If unimplemented, fileview will use a system temporary directory; if returns nil, cancels download.  Used with FVDownloadMenuItemTag menu item.
+/** For download and replace of selection.
+ 
+ If unimplemented or returns nil, FileView will use a system temporary directory.  If a file currently exists at the returned URL, it may be overwritten.  Used with FileView::FVDownloadMenuItemTag context menu item.
+ 
+ @param aFileView The requesting view
+ @param filename The suggested filename, which may be incorporated into the returned URL
+ @return The URL to write the download data to, or nil to use a temporary file.
+ */
 - (NSURL *)fileView:(FVFileView *)aFileView downloadDestinationWithSuggestedFilename:(NSString *)filename;
 
-// If unimplemented, uses the proposedDragOperation
+/** Allows modification of the current drag operation.
+ 
+ Called during a drop operation to validate the drop.   You can call FVFileView::setDropIndex:dropOperation: to change the index and/or operation for the drop.
+ 
+ @param aFileView The requesting view
+ @param info The dragging info for the drop
+ @param draggedURLs The URLs on the pasteboard for the drop
+ @param proposedIndex The proposedindex for the drop
+ @param proposedDropOperation The proposed drop operation for the drop
+ @param proposedDragOperation The propsed drag operation for the drop; this will be returned when this method is not implemented.
+ */
 - (NSDragOperation)fileView:(FVFileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation;
 
 @end
+
+/** @var FVZoomInMenuItemTag 
+ Zoom in by @f$\sqrt 2@f$
+ */
+/** @var FVZoomOutMenuItemTag 
+ Zoom out by @f$\sqrt 2@f$
+ */
+/** @var FVQuickLookMenuItemTag 
+ Quick Look 
+ */
+/** @var FVOpenMenuItemTag 
+ Open in Finder 
+ */
+/** @var FVRevealMenuItemTag 
+ Reveal in Finder 
+ */
+/** @var FVChangeLabelMenuItemTag 
+ Change Finder label (color) 
+ */
+/** @var FVDownloadMenuItemTag 
+ Download and replace 
+ */
+/** @var FVRemoveMenuItemTag 
+ Delete from view 
+ */
+/** @var FVReloadMenuItemTag 
+ Recache the selected icon(s) 
+ */
+

@@ -79,7 +79,6 @@ static NSDictionary *_labeledAttributes = nil;
 static NSDictionary *_subtitleAttributes = nil;
 static CGFloat _titleHeight = 0.0;
 static CGFloat _subtitleHeight = 0.0;
-static CGColorRef _shadowColor = NULL;
 
 #pragma mark -
 
@@ -133,11 +132,6 @@ static CGColorRef _shadowColor = NULL;
     _titleHeight = [lm defaultLineHeightForFont:[_titleAttributes objectForKey:NSFontAttributeName]];
     _subtitleHeight = [lm defaultLineHeightForFont:[_subtitleAttributes objectForKey:NSFontAttributeName]];
     [lm release];
-    
-    CGColorSpaceRef cspace = CGColorSpaceCreateDeviceRGB();
-    CGFloat shadowComponents[] = { 0, 0, 0, 0.4 };
-    _shadowColor = CGColorCreate(cspace, shadowComponents);
-    CGColorSpaceRelease(cspace);
     
     // QTMovie raises if +initialize isn't sent on the AppKit thread
     [QTMovie class];
@@ -305,7 +299,78 @@ static CGColorRef _shadowColor = NULL;
 
 - (NSColor *)backgroundColor
 { 
-    return _backgroundColor;
+    return _isDrawingDragImage ? [NSColor clearColor] : _backgroundColor;
+}
+
+// scrollPositionAsPercentage borrowed and modified from the Omni frameworks
+- (NSPoint)scrollPercentage;
+{
+    NSRect bounds = [self bounds];
+    NSScrollView *enclosingScrollView = [self enclosingScrollView];
+    
+    // avoid returning a struct from a nil message
+    if (nil == enclosingScrollView)
+        return NSZeroPoint;
+    
+    NSRect documentVisibleRect = [enclosingScrollView documentVisibleRect];
+    
+    NSPoint scrollPosition;
+    
+    // Vertical position
+    if (NSHeight(documentVisibleRect) >= NSHeight(bounds)) {
+        scrollPosition.y = 0.0; // We're completely visible
+    } else {
+        scrollPosition.y = (NSMinY(documentVisibleRect) - NSMinY(bounds)) / (NSHeight(bounds) - NSHeight(documentVisibleRect));
+        scrollPosition.y = MAX(scrollPosition.y, 0.0);
+        scrollPosition.y = MIN(scrollPosition.y, 1.0);
+    }
+    
+    // Horizontal position
+    if (NSWidth(documentVisibleRect) >= NSWidth(bounds)) {
+        scrollPosition.x = 0.0; // We're completely visible
+    } else {
+        scrollPosition.x = (NSMinX(documentVisibleRect) - NSMinX(bounds)) / (NSWidth(bounds) - NSWidth(documentVisibleRect));
+        scrollPosition.x = MAX(scrollPosition.x, 0.0);
+        scrollPosition.x = MIN(scrollPosition.x, 1.0);
+    }
+    
+    return scrollPosition;
+}
+
+- (void)setScrollPercentage:(NSPoint)scrollPosition;
+{
+    NSRect bounds = [self bounds];
+    NSScrollView *enclosingScrollView = [self enclosingScrollView];
+    
+    // do nothing if we don't have a scrollview
+    if (nil == enclosingScrollView)
+        return;
+    
+    NSRect desiredRect = [enclosingScrollView documentVisibleRect];
+    
+    // Vertical position
+    if (NSHeight(desiredRect) < NSHeight(bounds)) {
+        scrollPosition.y = MAX(scrollPosition.y, 0.0);
+        scrollPosition.y = MIN(scrollPosition.y, 1.0);
+        desiredRect.origin.y = FVRound(NSMinY(bounds) + scrollPosition.y * (NSHeight(bounds) - NSHeight(desiredRect)));
+        if (NSMinY(desiredRect) < NSMinY(bounds))
+            desiredRect.origin.y = NSMinY(bounds);
+        else if (NSMaxY(desiredRect) > NSMaxY(bounds))
+            desiredRect.origin.y = NSMaxY(bounds) - NSHeight(desiredRect);
+    }
+    
+    // Horizontal position
+    if (NSWidth(desiredRect) < NSWidth(bounds)) {
+        scrollPosition.x = MAX(scrollPosition.x, 0.0);
+        scrollPosition.x = MIN(scrollPosition.x, 1.0);
+        desiredRect.origin.x = FVRound(NSMinX(bounds) + scrollPosition.x * (NSWidth(bounds) - NSWidth(desiredRect)));
+        if (NSMinX(desiredRect) < NSMinX(bounds))
+            desiredRect.origin.x = NSMinX(bounds);
+        else if (NSMaxX(desiredRect) > NSMaxX(bounds))
+            desiredRect.origin.x = NSMaxX(bounds) - NSHeight(desiredRect);
+    }
+    
+    [self scrollPoint:desiredRect.origin];
 }
 
 #pragma mark API
@@ -323,8 +388,12 @@ static CGColorRef _shadowColor = NULL;
         CGLayerRelease(_selectionOverlay);
         _selectionOverlay = NULL;
         
+        NSPoint scrollPoint = [self scrollPercentage];
+        
         // the full view will likely need repainting, this also recalculates the grid
         [self reloadIcons];
+        
+        [self setScrollPercentage:scrollPoint];
         
         // Schedule a reload so we always have the correct quality icons, but don't do it while scaling in response to a slider.
         // This will also scroll to the first selected icon; maintaining scroll position while scaling is too jerky.
@@ -377,8 +446,12 @@ static CGColorRef _shadowColor = NULL;
         // arrows out of place now, they will be added again when required when resetting the tracking rects
         [self _hideArrows];
         
+        NSPoint scrollPoint = [self scrollPercentage];
+        
         // the full view will likely need repainting, this also recalculates the grid
         [self reloadIcons];
+        
+        [self setScrollPercentage:scrollPoint];
     }
 }
 
@@ -392,11 +465,20 @@ static CGColorRef _shadowColor = NULL;
 
 - (void)setDataSource:(id)obj;
 {
-    if (obj) {
-        FVAPIAssert1([obj respondsToSelector:@selector(numberOfURLsInFileView:)], @"datasource must implement %@", NSStringFromSelector(@selector(numberOfURLsInFileView:)));
-        FVAPIAssert1([obj respondsToSelector:@selector(fileView:URLAtIndex:)], @"datasource must implement %@", NSStringFromSelector(@selector(fileView:URLAtIndex:)));
+    // I was asserting these conditions, but that crashes the IB simulator if you set a datasource in IB.  Setting datasource to nil in case of failure avoids other exceptions later (notably in FVViewController).
+    BOOL failed = NO;
+    if (obj && [obj respondsToSelector:@selector(numberOfIconsInFileView:)] == NO) {
+        FVLog(@"*** ERROR *** datasource %@ must implement %@", obj, NSStringFromSelector(@selector(numberOfIconsInFileView:)));
+        failed = YES;
     }
+    if (obj && [obj respondsToSelector:@selector(fileView:URLAtIndex:)] == NO) {
+        FVLog(@"*** ERROR *** datasource %@ must implement %@", obj, NSStringFromSelector(@selector(fileView:URLAtIndex:)));
+        failed = YES;
+    }
+    if (failed) obj = nil;
+    
     _dataSource = obj;
+    
     // convenient time to do this, although the timer would also handle it
     [_iconCache removeAllObjects];
     CFDictionaryRemoveAllValues(_iconIndexMap);
@@ -408,6 +490,9 @@ static CGColorRef _shadowColor = NULL;
     _padding = [self _paddingForScale:[self iconScale]];
     
     [self _registerForDraggedTypes];
+    
+    // datasource may implement subtitles, which affects our drawing layout (padding height)
+    [self reloadIcons];
 }
 
 - (id)dataSource { return _dataSource; }
@@ -652,15 +737,23 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     id (*iconURLAtIndex)(id, SEL, NSUInteger);
     iconURLAtIndex = (id (*)(id, SEL, NSUInteger))[self methodForSelector:@selector(iconURLAtIndex:)];
     
-    NSUInteger i, iMax = [self numberOfIcons];
+    NSUInteger i, numIcons = [self numberOfIcons];
     
-    for (i = 0; i < iMax; i++) {
+    for (i = 0; i < numIcons; i++) {
         NSURL *aURL = iconURLAtIndex(self, @selector(iconURLAtIndex:), i);
         FVIcon *icon = cachedIcon(self, @selector(_cachedIconForURL:), aURL);
         NSParameterAssert(nil != icon);
         CFDictionarySetValue(_iconIndexMap, (const void *)i, (const void *)icon);
         CFDictionarySetValue(_iconURLMap, (const void *)i, (const void *)aURL ?: (const void *)[NSNull null]);
     }    
+    
+    // Follow NSTableView's example and clear selection outside the current range of indexes
+    NSUInteger lastSelIndex = [_selectedIndexes lastIndex];
+    if (NSNotFound != lastSelIndex && lastSelIndex >= numIcons) {
+        [self willChangeValueForKey:@"selectionIndexes"];
+        [_selectedIndexes removeIndexesInRange:NSMakeRange(numIcons, lastSelIndex + 1 - numIcons)];
+        [self didChangeValueForKey:@"selectionIndexes"];
+    }
 }
 
 - (void)reloadIcons;
@@ -750,6 +843,11 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     if ([binding isEqualToString:@"iconScale"] || [binding isEqualToString:@"autoScales"] || [binding isEqualToString:@"iconURLs"]) {
         [self reloadIcons];
     }
+}
+
+- (Class)valueClassForBinding:(NSString *)binding
+{
+    return [binding isEqualToString:@"selectionIndexes"] ? [NSIndexSet class] : [super valueClassForBinding:binding];
 }
 
 - (void)setIconURLs:(NSArray *)anArray;
@@ -1220,26 +1318,14 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     NSFrameRectWithWidth(r, 1.0);
 }
 
-- (void)_drawDropMessage;
-{
-    NSRect aRect = [self centerScanRect:NSInsetRect([self visibleRect], 20, 20)];
-    NSBezierPath *path = [NSBezierPath fv_bezierPathWithRoundRect:aRect xRadius:10 yRadius:10];
-    CGFloat pattern[2] = { 12.0, 6.0 };
-    
-    // This sets all future paths to have a dash pattern, and it's not affected by save/restore gstate on Tiger.  Lame.
-    CGFloat previousLineWidth = [path lineWidth];
-    // ??? make this a continuous function of width <= 3
-    [path setLineWidth:(NSWidth(aRect) > 100 ? 3.0 : 2.0)];
-    [path setLineDash:pattern count:2 phase:0.0];
-    [[NSColor lightGrayColor] setStroke];
-    [path stroke];
-    [path setLineWidth:previousLineWidth];
-    [path setLineDash:NULL count:0 phase:0.0];
+#define DROP_MESSAGE_MIN_FONTSIZE ((CGFloat) 8.0)
+#define DROP_MESSAGE_MAX_INSET    ((CGFloat) 20.0)
 
+- (NSMutableAttributedString *)_dropMessageWithFontSize:(CGFloat)fontSize
+{
     NSBundle *bundle = [NSBundle bundleForClass:[FVFileView class]];
     NSString *message = NSLocalizedStringFromTableInBundle(@"Drop Files Here", @"FileView", bundle, @"placeholder message for empty file view");
     NSMutableAttributedString *attrString = [[[NSMutableAttributedString alloc] initWithString:message] autorelease];
-    CGFloat fontSize = 24.0;
     [attrString addAttribute:NSFontAttributeName value:[NSFont boldSystemFontOfSize:fontSize] range:NSMakeRange(0, [attrString length])];
     [attrString addAttribute:NSForegroundColorAttributeName value:[NSColor lightGrayColor] range:NSMakeRange(0, [attrString length])];
     
@@ -1248,27 +1334,100 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     [attrString addAttribute:NSParagraphStyleAttributeName value:ps range:NSMakeRange(0, [attrString length])];
     [ps release];
     
-    // avoid drawing text right up to the path at really small widths
-    aRect = NSInsetRect(aRect, NSWidth(aRect) / 10, 0);
+    return attrString;
+}
+
+static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString)
+{
+    NSString *string = [attributedString string];
     
-    CGFloat singleLineHeight = NSHeight([attrString boundingRectWithSize:aRect.size options:0]);
+    // !!! early return on 10.4
+    if (NULL == CFStringTokenizerCreate)
+        return [string componentsSeparatedByString:@" "];
+    
+    CFStringTokenizerRef tokenizer = CFStringTokenizerCreate(NULL, (CFStringRef)string, CFRangeMake(0, [string length]), kCFStringTokenizerUnitWord, NULL);
+    NSMutableArray *words = [NSMutableArray array];
+    while (kCFStringTokenizerTokenNone != CFStringTokenizerAdvanceToNextToken(tokenizer)) {
+        CFStringRef word = CFStringTokenizerCopyCurrentTokenAttribute(tokenizer, kCFStringTokenizerAttributeLatinTranscription);
+        if (word) {
+            [words addObject:(id)word];
+            CFRelease(word);
+        }
+    }
+    CFRelease(tokenizer);
+    return words;
+}
+
+- (CGFloat)_widthOfLongestWordInDropMessage
+{
+    NSMutableAttributedString *message = [self _dropMessageWithFontSize:DROP_MESSAGE_MIN_FONTSIZE];
+    NSString *word;
+    NSArray *words = _wordsFromAttributedString(message);
+    NSUInteger i, wordCount = [words count];
+    CGFloat width = 0;
+    for (i = 0; i < wordCount; i++) {
+        word = [words objectAtIndex:i];
+        [[message mutableString] setString:word];
+        width = MAX(width, NSWidth([message boundingRectWithSize:NSMakeSize(CGFLOAT_MAX, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin]));
+    }
+#if __LP64__
+    return ceil(width);
+#else
+    return ceilf(width);
+#endif
+}
+
+- (void)_drawDropMessage;
+{
+    CGFloat minWidth = [self _widthOfLongestWordInDropMessage];    
+    NSRect visibleRect = [self visibleRect];
+    CGFloat containerInset = (NSWidth(visibleRect) - minWidth) / 2.0;
+    containerInset = MIN(containerInset, DROP_MESSAGE_MAX_INSET);
+    NSRect containerRect = containerInset > 0 ? [self centerScanRect:NSInsetRect(visibleRect, containerInset, containerInset)] : visibleRect;
+    
+    // avoid drawing text right up to the path at small widths (inset < 20)
+    NSRect pathRect;
+    if (containerInset < DROP_MESSAGE_MAX_INSET)
+        pathRect = NSInsetRect(containerRect, -2, -2);
+    else
+        pathRect = NSInsetRect(visibleRect, DROP_MESSAGE_MAX_INSET, DROP_MESSAGE_MAX_INSET);
+    
+    // negative inset at small view widths may extend outside the view; in that case, don't draw the path
+    if (NSContainsRect(visibleRect, pathRect)) {
+        NSBezierPath *path = [NSBezierPath fv_bezierPathWithRoundRect:[self centerScanRect:pathRect] xRadius:10 yRadius:10];
+        CGFloat pattern[2] = { 12.0, 6.0 };
+        
+        // This sets all future paths to have a dash pattern, and it's not affected by save/restore gstate on Tiger.  Lame.
+        CGFloat previousLineWidth = [path lineWidth];
+        // ??? make this a continuous function of width <= 3
+        [path setLineWidth:(NSWidth(containerRect) > 100 ? 3.0 : 2.0)];
+        [path setLineDash:pattern count:2 phase:0.0];
+        [[NSColor lightGrayColor] setStroke];
+        [path stroke];
+        [path setLineWidth:previousLineWidth];
+        [path setLineDash:NULL count:0 phase:0.0];
+    }
+    
+    CGFloat fontSize = 24.0;
+    NSMutableAttributedString *message = [self _dropMessageWithFontSize:fontSize];
+    CGFloat singleLineHeight = NSHeight([message boundingRectWithSize:containerRect.size options:0]);
     
     // NSLayoutManager's defaultLineHeightForFont doesn't include padding that NSStringDrawing uses
-    NSRect r = [attrString boundingRectWithSize:aRect.size options:NSStringDrawingUsesLineFragmentOrigin];
+    NSRect r = [message boundingRectWithSize:containerRect.size options:NSStringDrawingUsesLineFragmentOrigin];
+    NSUInteger wordCount = [_wordsFromAttributedString(message) count];
     
-    /*  Assumes that localizations also use space to separate words; on 10.5 could use componentsSeparatedByCharactersInSet:.  Another route would be to use NSSpellChecker, but it's not clear what language to pass, and is buggy in some versions (only works if you're checking spelling).  Hence we'll just avoid overengineering here...
-     */
-    NSUInteger wordCount = [[message componentsSeparatedByString:@" "] count];
-    
-    // reduce font size until we have no more than wordCount lines, but don't reduce the font size too much, as that can lead to a hang
-    while (NSHeight(r) > wordCount * singleLineHeight && fontSize > 8.0) {
+    // reduce font size until we have no more than wordCount lines
+    while (fontSize > DROP_MESSAGE_MIN_FONTSIZE && NSHeight(r) > wordCount * singleLineHeight) {
         fontSize -= 1.0;
-        [attrString addAttribute:NSFontAttributeName value:[NSFont boldSystemFontOfSize:fontSize] range:NSMakeRange(0, [attrString length])];
-        singleLineHeight = NSHeight([attrString boundingRectWithSize:aRect.size options:0]);
-        r = [attrString boundingRectWithSize:aRect.size options:NSStringDrawingUsesLineFragmentOrigin];
+        [message addAttribute:NSFontAttributeName value:[NSFont boldSystemFontOfSize:fontSize] range:NSMakeRange(0, [message length])];
+        singleLineHeight = NSHeight([message boundingRectWithSize:containerRect.size options:0]);
+        r = [message boundingRectWithSize:containerRect.size options:NSStringDrawingUsesLineFragmentOrigin];
     }
-    aRect.origin.y = (NSHeight(aRect) - NSHeight(r)) * 1 / 2;
-    [attrString drawWithRect:aRect options:NSStringDrawingUsesLineFragmentOrigin];
+    containerRect.origin.y = (NSHeight(containerRect) - NSHeight(r)) / 2;
+    
+    // draw nothing if words are broken across lines, or the font size is too small
+    if (fontSize >= DROP_MESSAGE_MIN_FONTSIZE && NSHeight(r) <= wordCount * singleLineHeight)
+        [message drawWithRect:containerRect options:NSStringDrawingUsesLineFragmentOrigin];
 }
 
 // redraw at full quality after a resize
@@ -1424,6 +1583,10 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     // shadow needs to be scaled as the icon scale changes to approximate the IconServices shadow
     CGFloat shadowBlur = 2.0 * [self iconScale];
     CGSize shadowOffset = CGSizeMake(0.0, -[self iconScale]);
+    CGColorSpaceRef cspace = CGColorSpaceCreateDeviceRGB();
+    CGFloat shadowComponents[] = { 0, 0, 0, 0.4 };
+    CGColorRef shadowColor = CGColorCreate(cspace, shadowComponents);
+    CGColorSpaceRelease(cspace);
     
     BOOL iconIndexMapNeedsRebuild = NO;
     
@@ -1462,7 +1625,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
                     CGContextSaveGState(cgContext);
                     
                     // draw a shadow behind the image/page
-                    CGContextSetShadowWithColor(cgContext, shadowOffset, shadowBlur, _shadowColor);
+                    CGContextSetShadowWithColor(cgContext, shadowOffset, shadowBlur, shadowColor);
                     
                     // possibly better performance by caching all bitmaps in a flipped state, but bookkeeping is a pain
                     CGContextTranslateCTM(cgContext, 0, NSMaxY(iconRect));
@@ -1531,6 +1694,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         }
     }
     
+    CGColorRelease(shadowColor);
+    
     if (iconIndexMapNeedsRebuild)
         [self _rebuildIconIndexMap];
     
@@ -1558,21 +1723,6 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     return frame;
 }
 
-static void _drawProgressIndicatorForDownload(const void *value, void *view)
-{
-    FVFileView *self = view;
-    FVDownload *fvDownload = (id)value;
-    
-    NSUInteger anIndex = [fvDownload indexInView];
-    
-    // we only draw a if there's an active download for this URL/index pair
-    if (anIndex < [self numberOfIcons] && [[self iconURLAtIndex:anIndex] isEqual:[fvDownload downloadURL]]) {
-        
-        NSRect frame = [self _rectOfProgressIndicatorForIconAtIndex:anIndex];
-        [[fvDownload progressIndicator] drawWithFrame:frame inView:self];
-    }
-}
-
 - (void)drawRect:(NSRect)rect;
 {
     NSRect visRect = [self visibleRect];
@@ -1584,12 +1734,16 @@ static void _drawProgressIndicatorForDownload(const void *value, void *view)
         if (dy > 0 || dx > 0)
             rect = NSInsetRect(rect, -dx, -dy);
     }
-
+    
     [super drawRect:rect];
-
-    [[self backgroundColor] setFill];
-    NSRectFillUsingOperation(rect, NSCompositeCopy);
-        
+    
+    BOOL isDrawingToScreen = [[NSGraphicsContext currentContext] isDrawingToScreen];
+    
+    if (isDrawingToScreen) {
+        [[self backgroundColor] setFill];
+        NSRectFillUsingOperation(rect, NSCompositeCopy);
+    }
+    
     // Only iterate icons in the visible range, since we know the overall geometry
     NSRange rowRange, columnRange;
     [self _getRangeOfRows:&rowRange columns:&columnRange inRect:rect];
@@ -1602,7 +1756,7 @@ static void _drawProgressIndicatorForDownload(const void *value, void *view)
         iMin = [self numberOfIcons];
     else
         iMax = MIN([self numberOfIcons], iMin + rowRange.length * [self numberOfColumns]);
-
+    
     // only draw icons if we actually have some in this rect
     if (iMax > iMin) {
         [self _drawIconsInRange:NSMakeRange(iMin, iMax - iMin) rows:rowRange columns:columnRange];
@@ -1612,23 +1766,34 @@ static void _drawProgressIndicatorForDownload(const void *value, void *view)
         [self _drawDropMessage];
     }
     
-    if ([self _hasArrows] && _isDrawingDragImage == NO) {
-        if (NSIntersectsRect(rect, _leftArrowFrame))
-            [_leftArrow drawWithFrame:_leftArrowFrame inView:self];
-        if (NSIntersectsRect(rect, _rightArrowFrame))
-            [_rightArrow drawWithFrame:_rightArrowFrame inView:self];
+    if (isDrawingToScreen) {
+        
+        if ([self _hasArrows] && _isDrawingDragImage == NO) {
+            if (NSIntersectsRect(rect, _leftArrowFrame))
+                [_leftArrow drawWithFrame:_leftArrowFrame inView:self];
+            if (NSIntersectsRect(rect, _rightArrowFrame))
+                [_rightArrow drawWithFrame:_rightArrowFrame inView:self];
+        }
+        
+        // drop highlight and rubber band are mutually exclusive
+        if (_dropIndex != NSNotFound || _dropOperation == FVDropOn) {
+            [self _drawDropHighlight];
+        }
+        else if (NSIsEmptyRect(_rubberBandRect) == NO) {
+            [self _drawRubberbandRect];
+        }
+        
+        if ([self allowsDownloading] && [_downloads count]) {
+            NSEnumerator *dlEnum = [_downloads objectEnumerator];
+            FVDownload *download;
+            while (download = [dlEnum nextObject]) {
+                NSUInteger anIndex = [download indexInView];
+                // we only draw a if there's an active download for this URL/index pair
+                if (anIndex < [self numberOfIcons] && [[self iconURLAtIndex:anIndex] isEqual:[download downloadURL]])
+                    [[download progressIndicator] drawWithFrame:[self _rectOfProgressIndicatorForIconAtIndex:anIndex] inView:self];
+            }
+        }
     }
-    
-    // drop highlight and rubber band are mutually exclusive
-    if (_dropIndex != NSNotFound || _dropOperation == FVDropOn) {
-        [self _drawDropHighlight];
-    }
-    else if (NSIsEmptyRect(_rubberBandRect) == NO) {
-        [self _drawRubberbandRect];
-    }
-    
-    if ([self allowsDownloading])
-        CFArrayApplyFunction((CFArrayRef)_downloads, CFRangeMake(0, [_downloads count]), _drawProgressIndicatorForDownload, self);
 }
 
 #pragma mark Drag source
@@ -1669,9 +1834,6 @@ static void _drawProgressIndicatorForDownload(const void *value, void *view)
 
     NSBitmapImageRep *imageRep = [self bitmapImageRepForCachingDisplayInRect:bounds];
     
-    // temporarily set the background color to clear, and set a flag so only the selected icons are drawn
-    NSColor *c = [[self backgroundColor] retain];
-    [self setBackgroundColor:[NSColor clearColor]];
     _isDrawingDragImage = YES;
     
     // this is not the recommended way to draw into a bitmap context, but the CTM isn't set up properly using the AppKit's mechanism as far as I can tell, so I can't make use of the higher-level drawing routines
@@ -1683,10 +1845,8 @@ static void _drawProgressIndicatorForDownload(const void *value, void *view)
     CGContextScaleCTM(cgContext, 1, -1);
     [self drawRect:bounds];
     
-    // reset flag and restore background color
+    // reset flag
     _isDrawingDragImage = NO;
-    [self setBackgroundColor:c];
-    [c release];
     [NSGraphicsContext restoreGraphicsState];
 
     NSImage *newImage = [[[NSImage alloc] initWithSize:bounds.size] autorelease];
@@ -1707,6 +1867,13 @@ static void _drawProgressIndicatorForDownload(const void *value, void *view)
 - (BOOL)acceptsFirstResponder { return YES; }
 
 - (BOOL)canBecomeKeyView { return YES; }
+
+- (void)scrollWheel:(NSEvent *)event
+{
+    // Run in NSEventTrackingRunLoopMode for scroll wheel events, in order to avoid continuous tracking/tooltip rect resets while scrolling.
+    while ((event = [NSApp nextEventMatchingMask:NSScrollWheelMask untilDate:[NSDate dateWithTimeIntervalSinceNow:0.5] inMode:NSEventTrackingRunLoopMode dequeue:YES]))
+        [super scrollWheel:event];
+}
 
 - (void)_updateButtonsForIcon:(FVIcon *)anIcon;
 {
