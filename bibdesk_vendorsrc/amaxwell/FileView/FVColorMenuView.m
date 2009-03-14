@@ -148,7 +148,7 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 {
     FVColorMenuView *menuView = nil;
     
-    NSNib *nib = [[NSNib alloc] initWithNibNamed:@"FVColorMenuView" bundle:[NSBundle bundleForClass:[FVColorMenuView class]]];
+    NSNib *nib = [[NSNib alloc] initWithNibNamed:@"FVColorMenuView" bundle:[NSBundle bundleForClass:[FVColorMenuView self]]];
     NSArray *objects;
     
     if ([nib instantiateNibWithOwner:nil topLevelObjects:&objects]) {
@@ -170,21 +170,12 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 
 @implementation FVColorMenuCell
 
-static NSShadow *_shadow = nil;
-
 #define NO_BOX -1
-
-+ (void)initialize
-{
-    _shadow = [[NSShadow alloc] init];
-    [_shadow setShadowOffset:NSMakeSize(0, -1)];
-    [_shadow setShadowBlurRadius:2.0];
-}
 
 static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
 {
     // determine aspect ratio (copy paste from FVIcon)
-    NSSize s = (NSSize){ 128, 128 };
+    const NSSize s = (NSSize){ 128, 128 };
     
     CGFloat ratio = MIN(NSWidth(iconRect) / s.width, NSHeight(iconRect) / s.height);
     NSRect dstRect = iconRect;
@@ -221,8 +212,12 @@ static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
         [p stroke];
     }
     else {
-        [_shadow set];
+        NSShadow *labelShadow = [NSShadow new];
+        [labelShadow setShadowOffset:NSMakeSize(0, -1)];
+        [labelShadow setShadowBlurRadius:2.0];
+        [labelShadow set];
         [FVFinderLabel drawFinderLabel:tag inRect:interiorFrame roundEnds:NO];
+        [labelShadow release];
     }
     
     [NSGraphicsContext restoreGraphicsState];
@@ -274,29 +269,38 @@ static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
 {
     NSRect boxRect = [self cellFrameAtRow:r column:c];
     boxRect = __FVSquareRectCenteredInRect(boxRect);
-    return NSInsetRect([self centerScanRect:boxRect], 1.0, 1.0);
+    return [self centerScanRect:NSInsetRect(boxRect, 1.0, 1.0)];
 }
+
+#define BOX_WIDTH 1.5
+#define BOX_RADIUS 2
+
+- (BOOL)_isBoxedCellSelected { return ([self selectedRow] == _boxedRow && [self selectedColumn] == _boxedColumn); }
+
+- (BOOL)_isFirstCellSelected { return ([self selectedRow] == 0 && [self selectedColumn] == 0); }
 
 - (void)drawRect:(NSRect)aRect
 {
     [super drawRect:aRect];
         
-    // draw a box around the moused-over cell (unless it's selected)
-    if (NO_BOX != _boxedRow && NO_BOX != _boxedColumn && ([self selectedRow] != _boxedRow || [self selectedColumn] != _boxedColumn || ([self selectedRow] == 0 && [self selectedColumn] == 0))) {
-        [[NSColor colorWithCalibratedWhite:0.5 alpha:0.6] setStroke];
-        NSBezierPath *path = [NSBezierPath fv_bezierPathWithRoundRect:[self boxRectForCellAtRow:_boxedRow column:_boxedColumn] xRadius:1.5 yRadius:1.5];
-        [path setLineWidth:1.0];
-        [[NSColor colorWithCalibratedWhite:0.5 alpha:0.2] setFill];
-        [path fill];
-        [path stroke];
+    // draw a box around the moused-over cell (unless it's selected); the X cell always gets highlighted, since it's never drawn as selected
+    if (NO_BOX != _boxedRow && NO_BOX != _boxedColumn && (NO == [self _isBoxedCellSelected] || [self _isFirstCellSelected])) {
+        [[NSColor lightGrayColor] setStroke];
+        NSRect boxRect = [self boxRectForCellAtRow:_boxedRow column:_boxedColumn];
+        NSBezierPath *boxPath = [NSBezierPath fv_bezierPathWithRoundRect:boxRect xRadius:BOX_RADIUS yRadius:BOX_RADIUS];
+        [[NSColor colorWithCalibratedWhite:0.5 alpha:0.3] setFill];
+        [boxPath fill];
+        [boxPath setLineWidth:BOX_WIDTH];
+        [boxPath stroke];
     }
     
     // the X doesn't show as selected
     if ([self selectedRow] != 0 || [self selectedColumn] != 0) {
-        [[NSColor colorWithCalibratedWhite:0.5 alpha:0.6] setStroke];
-        NSBezierPath *path = [NSBezierPath fv_bezierPathWithRoundRect:[self boxRectForCellAtRow:[self selectedRow] column:[self selectedColumn]] xRadius:1.5 yRadius:1.5];
-        [path setLineWidth:1.0];
-        [path stroke];
+        [[NSColor lightGrayColor] setStroke];
+        NSRect boxRect = [self boxRectForCellAtRow:[self selectedRow] column:[self selectedColumn]];
+        NSBezierPath *boxPath = [NSBezierPath fv_bezierPathWithRoundRect:boxRect xRadius:BOX_RADIUS yRadius:BOX_RADIUS];
+        [boxPath setLineWidth:BOX_WIDTH];
+        [boxPath stroke];
     }
 }
 
