@@ -36,49 +36,40 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "FVPreviewer.h"
+#import <FileView/FVPreviewer.h>
 #import "FVScaledImageView.h"
 #import <Quartz/Quartz.h>
 #import <QTKit/QTKit.h>
 #import <WebKit/WebKit.h>
+#import <pthread.h>
 
-@interface PDFDocument (FVSkimNotesExtensions)
-- (id)initWithURL:(NSURL *)url readSkimNotes:(NSArray **)notes;
-@end
+#define USE_LAYER_BACKING 0
 
 @implementation FVPreviewer
 
-+ (id)sharedInstance;
++ (id)sharedPreviewer;
 {
+    FVAPIAssert(pthread_main_np() != 0, @"FVPreviewer must only be used on the main thread");
     static id sharedInstance = nil;
     if (nil == sharedInstance)
         sharedInstance = [[self alloc] init];
     return sharedInstance;
 }
 
-+ (void)previewURL:(NSURL *)absoluteURL;
+- (id)init
 {
-    [[self sharedInstance] previewURL:absoluteURL];
-}
-
-+ (void)previewFileURLs:(NSArray *)absoluteURLs;
-{
-    [[self sharedInstance] previewFileURLs:absoluteURLs];
-}
-
-+ (BOOL)isPreviewing;
-{
-    return [[self sharedInstance] isPreviewing];
+    // initWithWindowNibName searches the class' bundle automatically
+    self = [super initWithWindowNibName:[self windowNibName]];
+    if (self) {
+        // window is now loaded lazily, but we have to use a flag to avoid a hit when calling isPreviewing
+        windowLoaded = NO;
+    }
+    return self;
 }
 
 - (BOOL)isPreviewing;
 {
-    return ([[self window] isVisible] || [qlTask isRunning]);
-}
-
-+ (void)setWebViewContextMenuDelegate:(id)anObject;
-{
-    [[self sharedInstance] setWebViewContextMenuDelegate:anObject];
+    return (windowLoaded && ([[self window] isVisible] || [qlTask isRunning]));
 }
 
 - (void)setWebViewContextMenuDelegate:(id)anObject;
@@ -86,42 +77,57 @@
     webviewContextMenuDelegate = anObject;
 }
 
-- (id)init
+- (NSString *)windowFrameAutosaveName;
 {
-    // initWithWindowNibName searches the class' bundle automatically
-    self = [super initWithWindowNibName:[self windowNibName]];
-    // force the window to load, so we get -awakeFromNib
-    [self window];
+    return @"FileView preview window frame";
+}
+
+- (NSRect)savedFrame
+{
+    NSString *savedFrame = [[NSUserDefaults standardUserDefaults] objectForKey:[self windowFrameAutosaveName]];
+    return (nil == savedFrame) ? NSZeroRect : NSRectFromString(savedFrame);
+}
+
+- (void)windowDidLoad
+{
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-    if (self) {
-        // Finder hides QL when it loses focus, then restores when it regains it; we can't do that easily, so just get rid of it
-        [nc addObserver:self selector:@selector(stopPreview:) name:NSApplicationWillHideNotification object:nil];
-        [nc addObserver:self selector:@selector(stopPreview:) name:NSApplicationWillResignActiveNotification object:nil];
-        [nc addObserver:self selector:@selector(appTerminate:) name:NSApplicationWillTerminateNotification object:nil];
-    }
-    return self;
+    // Finder hides QL when it loses focus, then restores when it regains it; we can't do that easily, so just get rid of it
+    [nc addObserver:self selector:@selector(stopPreview:) name:NSApplicationWillHideNotification object:nil];
+    [nc addObserver:self selector:@selector(stopPreview:) name:NSApplicationWillResignActiveNotification object:nil];
+    [nc addObserver:self selector:@selector(stopPreview:) name:NSApplicationWillTerminateNotification object:nil];
+    
+    windowLoaded = YES;
 }
 
 - (void)awakeFromNib
 {
-    fvImageView = [[FVScaledImageView alloc] initWithFrame:[[[self window] contentView] frame]];
-    [fvImageView setAutoresizingMask:(NSViewWidthSizable|NSViewHeightSizable)];
-    // forgot to set this in the nib; needed for viewing icons
-    [[self window] setMinSize:[[self window] frame].size];
-    [[self window] setDelegate:self];
+    // revert to the previously saved size, or whatever was set in the nib
+    [self setWindowFrameAutosaveName:@""];
+    [[self window] setFrameAutosaveName:@""];
+
+    NSRect savedFrame = [self savedFrame];
+    if (NSEqualRects(savedFrame, NSZeroRect))
+        [[NSUserDefaults standardUserDefaults] setObject:NSStringFromRect([[self window] frame]) forKey:[self windowFrameAutosaveName]];
     
-    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"FVPreviewerPDFScaleFactor"]) {
-        float pdfScaleFactor = [[NSUserDefaults standardUserDefaults] floatForKey:@"FVPreviewerPDFScaleFactor"];
-        if (pdfScaleFactor > 0.0)
-            [pdfView setScaleFactor:pdfScaleFactor];
-        else
-            [pdfView setAutoScales:YES];
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+        [[fullScreenButton cell] setBackgroundStyle:NSBackgroundStyleDark];
+        [fullScreenButton setImage:[NSImage imageNamed:NSImageNameEnterFullScreenTemplate]];
+        [fullScreenButton setAlternateImage:[NSImage imageNamed:NSImageNameExitFullScreenTemplate]];
+        
+        // only set delegate on alpha animation, since we only need the delegate callback once
+        CABasicAnimation *fadeAnimation = [CABasicAnimation animationWithKeyPath:@"alphaValue"];
+        [fadeAnimation setDelegate:self];
+        
+        NSMutableDictionary *animations = [NSMutableDictionary dictionary];
+        [animations addEntriesFromDictionary:[[self window] animations]];
+        [animations setObject:fadeAnimation forKey:@"alphaValue"];
+        
+        [[self window] setAnimations:animations];
     }
-    
-    id animation = [NSClassFromString(@"CABasicAnimation") animation];
-    if (animation && [[self window] respondsToSelector:@selector(setAnimations:)]) {
-        [animation setDelegate:self];
-        [[self window] setAnimations:[NSDictionary dictionaryWithObject:animation forKey:@"alphaValue"]];
+    else {
+        [fullScreenButton removeFromSuperview];
+        fullScreenButton = nil;
+        [contentView setFrame:[[[self window] contentView] frame]];
     }
 }
 
@@ -130,41 +136,87 @@
     [self setWebViewContextMenuDelegate:nil];
 }
 
-- (NSWindow *)animator
+- (NSWindow *)windowAnimator
 {
     NSWindow *theWindow = [self window];
     return [theWindow respondsToSelector:@selector(animator)] ? [theWindow animator] : theWindow;
 }
 
+- (void)animationDidStop:(CAPropertyAnimation *)anim finished:(BOOL)flag;
+{
+    if (flag && [[self window] alphaValue] < 0.01) {
+        [[self window] close];
+    }
+    else {
+        [contentView selectFirstTabViewItem:nil];
+        // highlight around button isn't drawn unless the window is key, which happens randomly unless we force it here
+        [[self window] makeKeyAndOrderFront:nil];
+        [[self window] makeFirstResponder:fullScreenButton];
+    }
+#if USE_LAYER_BACKING
+    [[[self window] contentView] setWantsLayer:NO];
+#endif
+}
+
 - (BOOL)windowShouldClose:(id)sender
 {
+    [[NSUserDefaults standardUserDefaults] setObject:NSStringFromRect([[self window] frame]) forKey:[self windowFrameAutosaveName]];
     if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
         // make sure it doesn't respond to keystrokes while fading out
         [[self window] makeFirstResponder:nil];
-        [[self animator] setAlphaValue:0.0];
+        // image is now possibly out of sync due to scrolling/resizing
+        NSView *currentView = [[contentView tabViewItemAtIndex:0] view];
+        NSBitmapImageRep *imageRep = [currentView bitmapImageRepForCachingDisplayInRect:[currentView bounds]];
+        [currentView cacheDisplayInRect:[currentView bounds] toBitmapImageRep:imageRep];
+        NSImage *image = [[NSImage alloc] initWithSize:[imageRep size]];
+        [image addRepresentation:imageRep];
+        [animationView setImage:image];
+        [image release];
+        [contentView selectLastTabViewItem:nil];
+#if USE_LAYER_BACKING
+        [[[self window] contentView] setWantsLayer:YES];
+        [[self window] display];
+#endif
+        [NSAnimationContext beginGrouping];
+        [[self windowAnimator] setAlphaValue:0.0];
+        // shrink back to the icon frame
+        if (NSIsEmptyRect(previousIconFrame) == NO)
+            [[self windowAnimator] setFrame:previousIconFrame display:YES];
+        [NSAnimationContext endGrouping];
         return NO;
     }
     return YES;
 }
 
-- (void)animationDidStop:(id)animation finished:(BOOL)flag  {
-    if ([[self window] alphaValue] < 0.0001 && [[self window] isVisible])
-        [self close];
+- (void)_killTask
+{
+    [qlTask terminate];
+    // wait until the task actually exits, or we can end up launching a new task before this one quits (happened when duplicate KVO notifications were sent)
+    [qlTask waitUntilExit];
+    [qlTask release];
+    qlTask = nil;    
+}
+
+- (void)stopPreviewing;
+{
+    [self _killTask];
+
+    if (windowLoaded && [[self window] isVisible]) {
+        
+        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 && [[[self window] contentView] isInFullScreenMode]) {
+            [[[self window] contentView] exitFullScreenModeWithOptions:nil];
+            [[fullScreenButton cell] setBackgroundStyle:NSBackgroundStyleDark];
+        }
+        
+        // performClose: invokes windowShouldClose: and then closes the window, so state gets saved
+        [[self window] performClose:nil];
+        [self setWebViewContextMenuDelegate:nil];
+    }    
 }
 
 - (void)stopPreview:(NSNotification *)note
 {
-    if ([qlTask isRunning])
-        [qlTask terminate];
-    [[self window] orderOut:self];
-    [self setWebViewContextMenuDelegate:nil];
-}
-
-- (void)appTerminate:(NSNotification *)note
-{
-    if (pdfView)
-        [[NSUserDefaults standardUserDefaults] setFloat:([pdfView autoScales] ? 0.0 : [pdfView scaleFactor]) forKey:@"FVPreviewerPDFScaleFactor"];
-    [self stopPreview:note];
+    [self stopPreviewing];
 }
 
 - (NSString *)windowNibName { return @"FVPreviewer"; }
@@ -194,10 +246,14 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
     return [(id)pdfData autorelease];
 }
 
-- (NSView *)contentViewForURL:(NSURL *)representedURL;
+- (NSView *)contentViewForURL:(NSURL *)representedURL shouldUseQuickLook:(BOOL *)shouldUseQuickLook;
 {
+    // general case
+    *shouldUseQuickLook = NO;
+    
     // early return
-    if ([representedURL isFileURL] == NO) {
+    NSSet *webviewSchemes = [NSSet setWithObjects:@"http", @"https", @"ftp", nil];
+    if ([representedURL scheme] && [webviewSchemes containsObject:[representedURL scheme]]) {
         [webView setFrameLoadDelegate:self];
         
         // wth? why doesn't WebView accept an NSURL?
@@ -219,7 +275,7 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
     
     // return nil if we can't resolve the path
     if (FALSE == CFURLGetFSRef((CFURLRef)representedURL, &fileRef))
-        return nil;
+        err = fnfErr;
     
     // kLSItemContentType returns a CFStringRef, according to the header
     CFTypeRef theUTI = NULL;
@@ -229,7 +285,12 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
     
     NSView *theView = nil;
     
-    if (nil == theUTI) {
+    // we get this for e.g. doi or unrecognized schemes; let FVIcon handle those
+    if (fnfErr == err) {
+        theView = imageView;
+        [(FVScaledImageView *)theView displayImageAtURL:representedURL];
+    }
+    else if (nil == theUTI) {
         theView = textView;
         NSDictionary *attrs;
         NSAttributedString *string = [[NSAttributedString alloc] initWithURL:representedURL documentAttributes:&attrs];
@@ -245,20 +306,20 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
             theView = nil;
         [string release]; 
     }
-    else if (UTTypeConformsTo(theUTI, kUTTypePDF) || UTTypeConformsTo(theUTI, CFSTR("net.sourceforge.skim-app.pdfd"))) {
+    else if (UTTypeConformsTo(theUTI, kUTTypePDF)) {
         theView = pdfView;
-        PDFDocument *pdfDoc = [PDFDocument instancesRespondToSelector:@selector(initWithURL:readSkimNotes:)] ? [[PDFDocument alloc] initWithURL:representedURL readSkimNotes:NULL] : [[PDFDocument alloc] initWithURL:representedURL];
+        PDFDocument *pdfDoc = [[PDFDocument alloc] initWithURL:representedURL];
         [pdfView setDocument:pdfDoc];
         [pdfDoc release];
     }
-    else if (UTTypeConformsTo(theUTI, CFSTR("com.adobe.postscript"))) {
+    else if (UTTypeConformsTo(theUTI, FVSTR("com.adobe.postscript"))) {
         theView = pdfView;
         PDFDocument *pdfDoc = [[PDFDocument alloc] initWithData:PDFDataWithPostScriptDataAtURL(representedURL)];
         [pdfView setDocument:pdfDoc];
         [pdfDoc release];         
     }
     else if (UTTypeConformsTo(theUTI, kUTTypeImage)) {
-        theView = fvImageView;
+        theView = imageView;
         [(FVScaledImageView *)theView displayImageAtURL:representedURL];
     }
     else if (UTTypeConformsTo(theUTI, kUTTypeAudiovisualContent)) {
@@ -270,7 +331,7 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
             [movie release];
         }
     }
-    else if (UTTypeConformsTo(theUTI, CFSTR("public.composite-content")) || UTTypeConformsTo(theUTI, kUTTypeText)) {
+    else if (UTTypeConformsTo(theUTI, FVSTR("public.composite-content")) || UTTypeConformsTo(theUTI, kUTTypeText)) {
         theView = textView;
         NSDictionary *attrs;
         NSAttributedString *string = [[NSAttributedString alloc] initWithURL:representedURL documentAttributes:&attrs];
@@ -287,10 +348,11 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
         [string release]; 
     }
     
-    // probably just a Finder icon, but NSWorkspace returns a crappy little icon
+    // probably just a Finder icon, but NSWorkspace returns a crappy little icon (so use Quick Look if possible)
     if (nil == theView) {
-        theView = fvImageView;
+        theView = imageView;
         [(FVScaledImageView *)theView displayIconForURL:representedURL];
+        *shouldUseQuickLook = YES;
     }
 
     return theView;
@@ -347,63 +409,58 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
 
 - (void)previewFileURLs:(NSArray *)absoluteURLs;
 {
-    if ([qlTask isRunning]) {
-        [qlTask terminate];
-        [qlTask release];
-        
-        // set to nil, since we may alternate between QL and our own previewing
-        qlTask = nil;
-    }
+    previousIconFrame = NSZeroRect;
+    
+    [self _killTask];
     
     NSMutableArray *paths = [NSMutableArray array];
     NSUInteger cnt = [absoluteURLs count];
     
     // ignore non-file URLs; this isn't technically necessary for our pseudo-Quick Look, but it's consistent
-    while (cnt--)
+    while (cnt--) {
         if ([[absoluteURLs objectAtIndex:cnt] isFileURL])
             [paths insertObject:[[absoluteURLs objectAtIndex:cnt] path] atIndex:0];
+    }
     
     if ([paths count] && [[NSFileManager defaultManager] isExecutableFileAtPath:@"/usr/bin/qlmanage"]) {
         
         NSMutableArray *args = paths;
         [args insertObject:@"-p" atIndex:0];
-        
+        NSParameterAssert(nil == qlTask);
         qlTask = [[NSTask alloc] init];
-        [qlTask setLaunchPath:@"/usr/bin/qlmanage"];
-        [qlTask setArguments:args];
-        // qlmanage is really verbose, so don't fill the log with its spew
-        [qlTask setStandardError:[NSFileHandle fileHandleWithNullDevice]];
-        [qlTask setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
-        [qlTask launch];
+        @try {
+            [qlTask setLaunchPath:@"/usr/bin/qlmanage"];
+            [qlTask setArguments:args];
+            // qlmanage is really verbose, so don't fill the log with its spew
+            [qlTask setStandardError:[NSFileHandle fileHandleWithNullDevice]];
+            [qlTask setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
+            [qlTask launch];
+        }
+        @catch(id exception) {
+            NSLog(@"Unable to run qlmanage: %@", exception);
+        }
     }
     else if([paths count]) {
-        [[self class] previewURL:[NSURL fileURLWithPath:[paths objectAtIndex:0]]];
+        [self previewURL:[NSURL fileURLWithPath:[paths objectAtIndex:0]] forIconInRect:[[self window] frame]];
     }
 }
 
-- (void)previewURL:(NSURL *)absoluteURL;
+- (void)_previewURL:(NSURL *)absoluteURL animateFrame:(BOOL)shouldAnimate
 {
+    [self _killTask];
+        
+    BOOL shouldUseQuickLook;
+    NSView *newView = [self contentViewForURL:absoluteURL shouldUseQuickLook:&shouldUseQuickLook];
     
-    if ([qlTask isRunning]) {
-        [qlTask terminate];
-        [qlTask release];
+    // Quick Look (qlmanage) handles more types than our setup, but you can't copy any content from PDF/text sources, which sucks; hence, we only use it as a fallback (basically a replacement for FVScaledImageView).  There are some slight behavior mismatches, and we lose fullscreen (I think), but that's minor in comparison.
+    if (shouldUseQuickLook && [absoluteURL isFileURL] && [[NSFileManager defaultManager] isExecutableFileAtPath:@"/usr/bin/qlmanage"]) {
         
-        // set to nil, since we may alternate between QL and our own previewing
-        qlTask = nil;
-    }
-    
-    if (absoluteURL) {
+        if ([[self window] isVisible])
+            [[self window] performClose:self];
         
-        NSView *newView = [self contentViewForURL:absoluteURL];
-        
-        // Quick Look (qlmanage) handles more types than our setup, but you can't copy any content from PDF/text sources, which sucks; hence, we only use it as a fallback (basically a replacement for fvImageView).  There are some slight behavior mismatches, and we lose fullscreen (I think), but that's minor in comparison.
-        if ([fvImageView isEqual:newView] && [absoluteURL isFileURL] && [[NSFileManager defaultManager] isExecutableFileAtPath:@"/usr/bin/qlmanage"]) {
-            
-            // !!! Should animate the window fade as Quick Look does, but -animator doesn't help with that AFAICT.  Using an NSAnimation isn't quite smooth enough.  I tried using layer-backed view, but display craps out when loading a PDF because it apparently doesn't tile correctly (the entire image won't fit on the GPU).
-            if ([[self window] isVisible])
-                [[self window] close];
-
-            qlTask = [[NSTask alloc] init];
+        NSParameterAssert(nil == qlTask);
+        qlTask = [[NSTask alloc] init];
+        @try {
             [qlTask setLaunchPath:@"/usr/bin/qlmanage"];
             [qlTask setArguments:[NSArray arrayWithObjects:@"-p", [absoluteURL path], nil]];
             // qlmanage is really verbose, so don't fill the log with its spew
@@ -411,61 +468,135 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
             [qlTask setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
             [qlTask launch];
         }
-        else {
-            NSWindow *theWindow = [self window];
-            NSArray *subviews = [[theWindow contentView] subviews];
-            NSView *oldView = [subviews count] ? [subviews objectAtIndex:0] : nil;
-            
-            if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4)
-                [theWindow setAlphaValue:0.0];
-            
-            NSView *contentView = [theWindow contentView];
-            if (oldView)
-                [contentView replaceSubview:oldView with:newView];
-            else
-                [contentView addSubview:newView];
-            
-            // Inset margins for the HUD window on Leopard; Tiger uses NSPanel
-            NSRect frame = NSInsetRect([[theWindow contentView] frame], 1.0, 1.0);
-            if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-                frame.size.height -= 20;
-                frame.origin.y += 20;
-            }
-            [newView setFrame:frame];
-
-            // it's annoying to recenter if this is just in response to a selection change or something
-            if (NO == [theWindow isVisible])
-                [theWindow center];
-
-            if ([absoluteURL isFileURL]) {
-                [theWindow setTitleWithRepresentedFilename:[absoluteURL path]];
-            }
-            else {
-                // raises on nil
-                [theWindow setTitleWithRepresentedFilename:@""];
-            }
-
-            if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-                [[self window] setAlphaValue:0.0];
-                [[self window] makeKeyAndOrderFront:nil];
-                [[self animator] setAlphaValue:1.0];
-            }
-            else {
-                [self showWindow:self];
-            }
-            
-            // make sure the view updates properly, in case it was previously on screen
-            [[[self window] contentView] setNeedsDisplay:YES];
+        @catch(id exception) {
+            NSLog(@"Unable to run qlmanage: %@", exception);
         }
     }
     else {
-        NSBeep();
+        NSWindow *theWindow = [self window];
+        
+        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4)
+            [theWindow setAlphaValue:0.0];
+        [[contentView tabViewItemAtIndex:0] setView:newView];
+
+        // it's annoying to recenter if this is just in response to a selection change or something
+        if (NO == [theWindow isVisible] && NO == shouldAnimate)
+            [theWindow center];
+        
+        if ([absoluteURL isFileURL]) {
+            [theWindow setTitleWithRepresentedFilename:[absoluteURL path]];
+        }
+        else {
+            // raises on nil
+            [theWindow setTitleWithRepresentedFilename:@""];
+        }
+
+        // don't reset the window frame if it's already on-screen
+        NSRect newWindowFrame = [theWindow isVisible] ? [theWindow frame] : [self savedFrame];
+        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+            
+            [[self window] makeKeyAndOrderFront:nil];
+
+            if (shouldAnimate && NO == NSEqualRects(newWindowFrame, NSZeroRect)) {
+                // select the new view and set the window's frame in order to get the view's new frame
+                [contentView selectFirstTabViewItem:nil];
+                NSRect oldWindowFrame = [[self window] frame];
+                [[self window] setFrame:newWindowFrame display:YES];
+                
+                // cache the new view to an image
+                NSBitmapImageRep *imageRep = [newView bitmapImageRepForCachingDisplayInRect:[newView bounds]];
+                [newView cacheDisplayInRect:[newView bounds] toBitmapImageRep:imageRep];
+                [[self window] setFrame:oldWindowFrame display:NO];
+                NSImage *image = [[NSImage alloc] initWithSize:[imageRep size]];
+                [image addRepresentation:imageRep];
+                [animationView setImage:image];
+                [image release];
+
+#if USE_LAYER_BACKING
+                // now select the animation view and start animating
+                [[[self window] contentView] setWantsLayer:YES];
+                [(NSView *)[[self window] contentView] display];
+#endif
+                [contentView selectLastTabViewItem:nil];
+
+                [NSAnimationContext beginGrouping];
+                [[self windowAnimator] setFrame:newWindowFrame display:YES];
+                [[self windowAnimator] setAlphaValue:1.0];
+                [NSAnimationContext endGrouping];
+            }
+            else {
+                // no animation or frame was set to zero rect (if not previously in defaults database)
+                [[self windowAnimator] setAlphaValue:1.0];
+            }
+        }
+        else {
+            [[self window] setFrame:newWindowFrame display:YES animate:shouldAnimate];
+            [self showWindow:self];
+        }
     }
 }
 
-- (IBAction)previewAction:(id)sender {
-    // make this action toggle the previewer
-    [[self window] performClose:self];
+- (void)previewURL:(NSURL *)absoluteURL forIconInRect:(NSRect)screenRect
+{
+    FVAPIParameterAssert(nil != absoluteURL);
+    BOOL animate = YES;
+    
+    if (NSEqualRects(screenRect, NSZeroRect)) {
+        // set up a rect in the middle of the main screen for a default value
+        previousIconFrame = NSZeroRect;
+        screenRect.size = NSMakeSize(128, 128);
+        NSRect visibleFrame = [[NSScreen mainScreen] visibleFrame];
+        screenRect.origin = NSMakePoint(NSMidX(visibleFrame) - NSWidth(screenRect) / 2, NSMidY(visibleFrame) - NSHeight(screenRect) / 2);
+        animate = NO;
+    }
+    else if (NSHeight(screenRect) < 128 || NSWidth(screenRect) < 128) {
+        screenRect.size.height = 128;
+        screenRect.size.width = 128;
+    }
+    previousIconFrame = screenRect;
+    [[self window] setFrame:screenRect display:NO];
+    [self _previewURL:absoluteURL animateFrame:animate];
 }
+
+- (void)previewURL:(NSURL *)absoluteURL;
+{
+    FVAPIParameterAssert(nil != absoluteURL);
+    [self previewURL:absoluteURL forIconInRect:NSZeroRect];
+}
+
+- (void)previewAction:(id)sender 
+{
+    [self stopPreview:nil];
+}
+
+- (void)toggleFullscreen:(id)sender
+{
+    FVAPIAssert(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4, @"Full screen is only available on 10.5 and later");
+    if ([[[self window] contentView] isInFullScreenMode]) {
+        [[[self window] contentView] exitFullScreenModeWithOptions:nil];
+        [[fullScreenButton cell] setBackgroundStyle:NSBackgroundStyleDark];
+    }
+    else {
+        [[[self window] contentView] enterFullScreenMode:[[self window] screen] withOptions:nil];
+        [[fullScreenButton cell] setBackgroundStyle:NSBackgroundStyleLight];
+    }
+}
+
+// esc is typically bound to complete: instead of cancel: in a textview
+- (BOOL)textView:(NSTextView *)aTextView doCommandBySelector:(SEL)aSelector
+{
+    if (@selector(cancel:) == aSelector || @selector(complete:) == aSelector) {
+        [self stopPreviewing];
+        return YES;
+    }
+    return NO;
+}
+
+// end up getting this via the responder chain for most views
+- (void)cancel:(id)sender
+{
+    [self stopPreviewing];
+}    
+
 
 @end
