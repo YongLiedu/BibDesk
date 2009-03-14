@@ -231,9 +231,7 @@
 		CEBC676F0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */; };
 		CEC1CEA80F51D2CE00D18921 /* BDSKReadWriteLock.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC1CEA60F51D2CE00D18921 /* BDSKReadWriteLock.m */; };
 		CEC3158D0F24D0B9008D2C75 /* BDSKRichTextFormat.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC3158B0F24D0B9008D2C75 /* BDSKRichTextFormat.m */; };
-		CEC7CDE00F6725890051794E /* BDSKFilePathCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CEC7CDDE0F6725890051794E /* BDSKFilePathCell.h */; };
 		CEC7CDE10F6725890051794E /* BDSKFilePathCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC7CDDF0F6725890051794E /* BDSKFilePathCell.m */; };
-		CEC7D0250F680C970051794E /* BDSKIconTextFieldCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CEC7D0230F680C970051794E /* BDSKIconTextFieldCell.h */; };
 		CEC7D0260F680C970051794E /* BDSKIconTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC7D0240F680C970051794E /* BDSKIconTextFieldCell.m */; };
 		CED65AB70906BCC6003EED90 /* BDSKScriptHook.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */; };
 		CED65AB90906BCC6003EED90 /* BDSKScriptHookManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65AB50906BCC6003EED90 /* BDSKScriptHookManager.m */; };
@@ -290,7 +288,6 @@
 		CEF1817F0CEB702000716E85 /* Bookmarks.plist in Resources */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
 		CEF181BD0CEB711700716E85 /* Bookmarks.plist in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
 		CEF2EEE70F3462A900A7989E /* NSColor_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */; };
-		CEF5460F0F56BDDB008A630F /* BDSKStringArrayFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = CEF5460D0F56BDDB008A630F /* BDSKStringArrayFormatter.h */; };
 		CEF546100F56BDDB008A630F /* BDSKStringArrayFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5460E0F56BDDB008A630F /* BDSKStringArrayFormatter.m */; };
 		CEF5C0420F546ADB00DBC864 /* TestBDSKRISParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0270F5469E300DBC864 /* TestBDSKRISParser.m */; };
 		CEF5C0430F546ADC00DBC864 /* TestBDSKTypeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0290F5469E300DBC864 /* TestBDSKTypeManager.m */; };
@@ -2980,9 +2977,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CEF5460F0F56BDDB008A630F /* BDSKStringArrayFormatter.h in Headers */,
-				CEC7CDE00F6725890051794E /* BDSKFilePathCell.h in Headers */,
-				CEC7D0250F680C970051794E /* BDSKIconTextFieldCell.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
