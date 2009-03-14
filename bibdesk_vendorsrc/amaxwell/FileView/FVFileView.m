@@ -56,7 +56,7 @@
 
 static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
-static void *FVSelectionIndexesObserverContext = @"FVSelectionIndexesObserverContext";
+static char FVSelectionIndexesObserverContext;
 
 static const NSSize DEFAULT_ICON_SIZE = { 64.0, 64.0 };
 static const NSSize DEFAULT_PADDING = { 10.0, 4.0 };
@@ -234,7 +234,7 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    if (context == FVSelectionIndexesObserverContext) {
+    if (context == &FVSelectionIndexesObserverContext) {
         if ([[FVPreviewer sharedPreviewer] isPreviewing] && NSNotFound != [_selectedIndexes firstIndex]) {
             [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:[self delegate]];
             [[FVPreviewer sharedPreviewer] previewURL:[self iconURLAtIndex:[_selectedIndexes firstIndex]] forIconInRect:NSZeroRect];
@@ -810,7 +810,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     }
     else {
         if (_fvFlags.isObservingSelectionIndexes) {
-            [self addObserver:self forKeyPath:@"selectionIndexes" options:0 context:FVSelectionIndexesObserverContext];
+            [self addObserver:self forKeyPath:@"selectionIndexes" options:0 context:&FVSelectionIndexesObserverContext];
             _fvFlags.isObservingSelectionIndexes = YES;
         }
         
