@@ -71,9 +71,11 @@ typedef enum _FVDropOperation {
 @private
     id                      _delegate;
     id                      _dataSource;
+    NSMutableArray         *_orderedIcons;
+    NSMutableArray         *_orderedURLs;
+    NSMutableArray         *_orderedSubtitles;
     NSMutableDictionary    *_iconCache;
-    CFMutableDictionaryRef  _iconIndexMap;
-    CFMutableDictionaryRef  _iconURLMap;
+    CFMutableDictionaryRef  _infoTable;
     NSUInteger              _numberOfColumns;
     NSUInteger              _numberOfRows;
     NSColor                *_backgroundColor;
@@ -91,6 +93,7 @@ typedef enum _FVDropOperation {
         unsigned int isRescaling: 1;
         unsigned int scheduledLiveResize : 1;
         unsigned int isDrawingDragImage : 1;
+        unsigned int isBound : 1;
         unsigned int isObservingSelectionIndexes : 1;
     } _fvFlags;
     NSSize                  _padding;
@@ -107,7 +110,7 @@ typedef enum _FVDropOperation {
     NSTrackingRectTag       _topSliderTag;
     NSTrackingRectTag       _bottomSliderTag;
     FVOperationQueue       *_operationQueue;
-    
+    NSMutableDictionary    *_bindingInfo;
     NSMutableArray         *_downloads;
     CFRunLoopTimerRef       _progressTimer;
     NSArray                *_iconURLs;

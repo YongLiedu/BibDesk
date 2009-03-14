@@ -56,7 +56,9 @@
 
 static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
-static char FVSelectionIndexesObserverContext;
+static char _FVFileViewInternalSelectionIndexesObservationContext;
+static char _FVFileViewSelectionIndexesObservationContext;
+static char _FVFileViewContentObservationContext;
 
 static const NSSize DEFAULT_ICON_SIZE = { 64.0, 64.0 };
 static const NSSize DEFAULT_PADDING = { 10.0, 4.0 };
@@ -80,18 +82,34 @@ static NSDictionary *_subtitleAttributes = nil;
 static CGFloat _titleHeight = 0.0;
 static CGFloat _subtitleHeight = 0.0;
 
+@interface _FVURLInfo : NSObject
+{
+@public;
+    NSString   *_name;
+    NSUInteger  _label;
+}
+- (id)initWithURL:(NSURL *)aURL;
+- (NSString *)name;
+- (NSUInteger)label;
+@end
+
 #pragma mark -
 
 @interface FVFileView (Private)
 // wrapper that calls bound array or datasource transparently; for internal use
 // clients should access the datasource or bound array directly
-- (NSURL *)iconURLAtIndex:(NSUInteger)anIndex;
+- (NSURL *)URLAtIndex:(NSUInteger)anIndex;
 - (NSUInteger)numberOfIcons;
 
 // only declare methods here to shut the compiler up if we can't rearrange
+- (FVIcon *)iconAtIndex:(NSUInteger)anIndex;
+- (NSUInteger)_numberOfIcons;
 - (FVIcon *)_cachedIconForURL:(NSURL *)aURL;
+- (void)_getDisplayName:(NSString **)name andLabel:(NSUInteger *)label forURL:(NSURL *)aURL;
 - (NSSize)_paddingForScale:(CGFloat)scale;
 - (void)_recalculateGridSize;
+- (void)_reloadIcons;
+- (void)_resetViewLayout;
 - (void)_getRangeOfRows:(NSRange *)rowRange columns:(NSRange *)columnRange inRect:(NSRect)aRect;
 - (void)_showArrowsForIconAtIndex:(NSUInteger)anIndex;
 - (void)_hideArrows;
@@ -138,9 +156,9 @@ static CGFloat _subtitleHeight = 0.0;
     
     // binding an NSSlider in IB 3 results in a crash on 10.4
     [self exposeBinding:@"iconScale"];
-    [self exposeBinding:@"autoScales"];
-    [self exposeBinding:@"iconURLs"];
+    [self exposeBinding:@"content"];
     [self exposeBinding:@"selectionIndexes"];
+    [self exposeBinding:@"backgroundColor"];
 }
 
 + (NSColor *)defaultBackgroundColor
@@ -190,7 +208,21 @@ static CGFloat _subtitleHeight = 0.0;
     _numberOfColumns = 1;
     _numberOfRows = 1;
     
+    // Arrays associate FVIcon <--> NSURL in view order.  This is primarily because NSURL is a slow and expensive key for NSDictionary since it copies strings to compute -hash instead of storing it inline; as a consequence, calling [_iconCache objectForKey:[_datasource URLAtIndex:]] is a memory and CPU hog.  We use parallel arrays instead of one array filled with NSDictionaries because there will only be two, and this is less memory and fewer calls.
+    _orderedIcons = [[NSMutableArray alloc] init];
+   
+    // created lazily in case it's needed (only if using a datasource)
+    _orderedURLs = nil;
+    
+    // only created when datasource is set
+    _orderedSubtitles = nil;
+    
     CFAllocatorRef alloc = CFAllocatorGetDefault();
+    
+    // This avoids doing file operations on every URL while drawing, just to get the name and label.  This table is purged by -reload, so we can use pointer keys and avoid hashing CFURL instances (and avoid copying keys...be sure to use CF to add values!).
+    const CFDictionaryKeyCallBacks pointerKeyCallBacks = { 0, kCFTypeDictionaryKeyCallBacks.retain, kCFTypeDictionaryKeyCallBacks.release,
+                                                            kCFTypeDictionaryKeyCallBacks.copyDescription, NULL, NULL };
+    _infoTable = CFDictionaryCreateMutable(alloc, 0, &pointerKeyCallBacks, &kCFTypeDictionaryValueCallBacks);        
     
     // I'm not removing the timer in viewWillMoveToSuperview:nil because we may need to free up that memory, and the frequency is so low that it's insignificant overhead
     CFAbsoluteTime fireTime = CFAbsoluteTimeGetCurrent() + ZOMBIE_TIMER_INTERVAL;
@@ -201,9 +233,6 @@ static CGFloat _subtitleHeight = 0.0;
     _lastOrigin = NSZeroPoint;
     _timeOfLastOrigin = CFAbsoluteTimeGetCurrent();
     _trackingRectMap = CFDictionaryCreateMutable(alloc, 0, &FVIntegerKeyDictionaryCallBacks, &FVIntegerValueDictionaryCallBacks);
-    
-    _iconIndexMap = CFDictionaryCreateMutable(alloc, 0, &FVIntegerKeyDictionaryCallBacks, &kCFTypeDictionaryValueCallBacks);
-    _iconURLMap = CFDictionaryCreateMutable(alloc, 0, &FVIntegerKeyDictionaryCallBacks, &kCFTypeDictionaryValueCallBacks);
     
     _leftArrow = [[FVArrowButtonCell alloc] initWithArrowDirection:FVArrowLeft];
     [_leftArrow setTarget:self];
@@ -229,20 +258,8 @@ static CGFloat _subtitleHeight = 0.0;
     
     _operationQueue = [FVOperationQueue new];
     
+    _fvFlags.isBound = NO;
     _fvFlags.isObservingSelectionIndexes = NO;
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
-    if (context == &FVSelectionIndexesObserverContext) {
-        if ([[FVPreviewer sharedPreviewer] isPreviewing] && NSNotFound != [_selectedIndexes firstIndex]) {
-            [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:[self delegate]];
-            [[FVPreviewer sharedPreviewer] previewURL:[self iconURLAtIndex:[_selectedIndexes firstIndex]] forIconInRect:NSZeroRect];
-        }
-        [self setNeedsDisplay:YES];
-    } else {
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-    }
 }
 
 #pragma mark NSView overrides
@@ -267,11 +284,13 @@ static CGFloat _subtitleHeight = 0.0;
     [_leftArrow release];
     [_rightArrow release];
     [_iconURLs release];
-    CFRelease(_iconIndexMap);
-    CFRelease(_iconURLMap);
     CFRunLoopTimerInvalidate(_zombieTimer);
     CFRelease(_zombieTimer);
     [_iconCache release];
+    [_orderedIcons release];
+    [_orderedURLs release];
+    [_orderedSubtitles release];
+    CFRelease(_infoTable);
     [_selectedIndexes release];
     [_backgroundColor release];
     [_sliderWindow release];
@@ -392,7 +411,7 @@ static CGFloat _subtitleHeight = 0.0;
         NSPoint scrollPoint = [self scrollPercentage];
         
         // the full view will likely need repainting, this also recalculates the grid
-        [self reloadIcons];
+        [self _resetViewLayout];
         
         [self setScrollPercentage:scrollPoint];
         
@@ -468,8 +487,8 @@ static CGFloat _subtitleHeight = 0.0;
 {
     // I was asserting these conditions, but that crashes the IB simulator if you set a datasource in IB.  Setting datasource to nil in case of failure avoids other exceptions later (notably in FVViewController).
     BOOL failed = NO;
-    if (obj && [obj respondsToSelector:@selector(numberOfIconsInFileView:)] == NO) {
-        FVLog(@"*** ERROR *** datasource %@ must implement %@", obj, NSStringFromSelector(@selector(numberOfIconsInFileView:)));
+    if (obj && [obj respondsToSelector:@selector(numberOfURLsInFileView:)] == NO) {
+        FVLog(@"*** ERROR *** datasource %@ must implement %@", obj, NSStringFromSelector(@selector(numberOfURLsInFileView:)));
         failed = YES;
     }
     if (obj && [obj respondsToSelector:@selector(fileView:URLAtIndex:)] == NO) {
@@ -480,17 +499,15 @@ static CGFloat _subtitleHeight = 0.0;
     
     _dataSource = obj;
     
+    [_operationQueue cancel];
+    
+    [self _cancelDownloads];
+
+    [_orderedSubtitles release];
+    _orderedSubtitles = [obj respondsToSelector:@selector(fileView:subtitleAtIndex:)] ? [[NSMutableArray alloc] init] : nil;
+    
     // convenient time to do this, although the timer would also handle it
     [_iconCache removeAllObjects];
-    CFDictionaryRemoveAllValues(_iconIndexMap);
-    CFDictionaryRemoveAllValues(_iconURLMap);
-    
-    // make sure these get cleaned up; if the datasource is now nil, we're probably going to deallocate soon
-    [self _cancelDownloads];
-    [_operationQueue cancel];
-    _padding = [self _paddingForScale:[self iconScale]];
-    
-    [self _registerForDraggedTypes];
     
     // datasource may implement subtitles, which affects our drawing layout (padding height)
     [self reloadIcons];
@@ -680,7 +697,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
             }
         }    
         
-        FVIcon *anIcon = mouseIndex == NSNotFound ? nil : [self _cachedIconForURL:[self iconURLAtIndex:mouseIndex]];
+        FVIcon *anIcon = mouseIndex == NSNotFound ? nil : [self iconAtIndex:mouseIndex];
         if ([anIcon pageCount] > 1)
             [self _showArrowsForIconAtIndex:mouseIndex];
         else
@@ -725,43 +742,59 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     [self _resetTrackingRectsAndToolTips];
 }
 
-- (void)_rebuildIconIndexMap
+- (void)_reloadIcons;
 {
-    CFDictionaryRemoveAllValues(_iconIndexMap);
-    CFDictionaryRemoveAllValues(_iconURLMap);
+    // if we're using bindings, there's no need to cache all the URLs
+    if (NO == _fvFlags.isBound) {
+        
+        if (nil == _orderedURLs)
+            _orderedURLs = [NSMutableArray new];
+        else
+            [_orderedURLs removeAllObjects];
+    }
     
-    // -[FVFileView _cachedIconForURL:]
+    [_orderedIcons removeAllObjects];
+    [_orderedSubtitles removeAllObjects];
+    
+    CFDictionaryRemoveAllValues(_infoTable);
+    
+    // -[FVViewController _cachedIconForURL:]
     id (*cachedIcon)(id, SEL, id);
     cachedIcon = (id (*)(id, SEL, id))[self methodForSelector:@selector(_cachedIconForURL:)];
     
-    // -[FVFileView iconURLAtIndex:]
-    id (*iconURLAtIndex)(id, SEL, NSUInteger);
-    iconURLAtIndex = (id (*)(id, SEL, NSUInteger))[self methodForSelector:@selector(iconURLAtIndex:)];
+    // -[FVViewController URLAtIndex:] guaranteed non-nil/non-NSNULL
+    id (*_URLAtIndex)(id, SEL, NSUInteger);
+    _URLAtIndex = (id (*)(id, SEL, NSUInteger))[self methodForSelector:@selector(_URLAtIndex:)];
     
-    NSUInteger i, numIcons = [self numberOfIcons];
+    // -[NSCFArray insertObject:atIndex:] (do /not/ use +[NSMutableArray instanceMethodForSelector:]!)
+    SEL insertSel = @selector(insertObject:atIndex:);
+    void (*insertObjectAtIndex)(id, SEL, id, NSUInteger);
+    insertObjectAtIndex = (void (*)(id, SEL, id, NSUInteger))[_orderedIcons methodForSelector:insertSel];
     
-    for (i = 0; i < numIcons; i++) {
-        NSURL *aURL = iconURLAtIndex(self, @selector(iconURLAtIndex:), i);
+    // datasource subtitle method; may result in a NULL IMP (in which case _orderedSubtitles is nil)
+    SEL subtitleSel = @selector(fileView:subtitleAtIndex:);
+    id (*subtitleAtIndex)(id, SEL, id, NSUInteger);
+    subtitleAtIndex = (id (*)(id, SEL, id, NSUInteger))[_dataSource methodForSelector:subtitleSel];
+    
+    NSUInteger i, iMax = [self _numberOfIcons];
+    
+    for (i = 0; i < iMax; i++) {
+        NSURL *aURL = _URLAtIndex(self, @selector(_URLAtIndex:), i);
+        NSParameterAssert(nil != aURL && [NSNull null] != (id)aURL);
         FVIcon *icon = cachedIcon(self, @selector(_cachedIconForURL:), aURL);
         NSParameterAssert(nil != icon);
-        CFDictionarySetValue(_iconIndexMap, (const void *)i, (const void *)icon);
-        CFDictionarySetValue(_iconURLMap, (const void *)i, (const void *)aURL ?: (const void *)[NSNull null]);
-    }    
-    
-    // Follow NSTableView's example and clear selection outside the current range of indexes
-    NSUInteger lastSelIndex = [_selectedIndexes lastIndex];
-    if (NSNotFound != lastSelIndex && lastSelIndex >= numIcons) {
-        [self willChangeValueForKey:@"selectionIndexes"];
-        [_selectedIndexes removeIndexesInRange:NSMakeRange(numIcons, lastSelIndex + 1 - numIcons)];
-        [self didChangeValueForKey:@"selectionIndexes"];
-    }
+        if (NO == _fvFlags.isBound)
+            insertObjectAtIndex(_orderedURLs, insertSel, aURL, i);
+        insertObjectAtIndex(_orderedIcons, insertSel, icon, i);
+        if (_orderedSubtitles)
+            insertObjectAtIndex(_orderedSubtitles, insertSel, subtitleAtIndex(_dataSource, subtitleSel, self, i), i);
+    }  
 }
 
-- (void)reloadIcons;
+- (void)_resetViewLayout;
 {
     // Problem exposed in BibDesk: select all, scroll halfway down in file pane, then change selection to a single row.  FVFileView content didn't update correctly, even though reloadIcons was called.  Logging drawRect: indicated that the wrong region was being updated, but calling _recalculateGridSize here fixed it.
     [self _recalculateGridSize];
-    [self _rebuildIconIndexMap];
     
     // grid may have changed, so do a full redisplay
     [self setNeedsDisplay:YES];
@@ -775,16 +808,139 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         [self resetCursorRects];
 }
 
+- (void)reloadIcons;
+{
+    [self _reloadIcons];
+    
+    // Follow NSTableView's example and clear selection outside the current range of indexes
+    NSUInteger lastSelIndex = [_selectedIndexes lastIndex], numIcons = [self numberOfIcons];
+    if (NSNotFound != lastSelIndex && lastSelIndex >= numIcons) {
+        [self willChangeValueForKey:@"selectionIndexes"];
+        [_selectedIndexes removeIndexesInRange:NSMakeRange(numIcons, lastSelIndex + 1 - numIcons)];
+        [self didChangeValueForKey:@"selectionIndexes"];
+    }
+    
+    [self _resetViewLayout];
+}
+
 #pragma mark Binding support
 
 - (void)bind:(NSString *)binding toObject:(id)observable withKeyPath:(NSString *)keyPath options:(NSDictionary *)options;
 {
-    [super bind:binding toObject:observable withKeyPath:keyPath options:options];
-    if ([binding isEqualToString:@"iconScale"] || [binding isEqualToString:@"autoScales"] || [binding isEqualToString:@"iconURLs"]) {
-        [self reloadIcons];
+    if ([options count])
+        FVLog(@"*** warning *** binding options are unsupported in -[%@ %@] (requested %@)", [self class], NSStringFromSelector(_cmd), options);
+    
+    // Note: we don't bind to this, some client does.  We do register as an observer, but that's a different code path.
+    if ([binding isEqualToString:@"selectionIndexes"]) {
+        
+        FVAPIAssert3(nil == [_bindingInfo objectForKey:binding], @"attempt to bind %@ to %@ when bound to %@", keyPath, observable, [[_bindingInfo objectForKey:binding] objectForKey:NSObservedObjectKey]);
+        
+        // Create an object to handle the binding mechanics manually; it's deallocated when the client unbinds.
+        NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:observable, NSObservedObjectKey, [[keyPath copy] autorelease], NSObservedKeyPathKey, [[options copy] autorelease], NSOptionsKey, nil];
+        [_bindingInfo setObject:info forKey:binding];
+        [observable addObserver:self forKeyPath:keyPath options:0 context:&_FVFileViewSelectionIndexesObservationContext];
     }
+    else if ([binding isEqualToString:@"content"]) {
+     
+        FVAPIAssert3(nil == [_bindingInfo objectForKey:binding], @"attempt to bind %@ to %@ when bound to %@", keyPath, observable, [[_bindingInfo objectForKey:binding] objectForKey:NSObservedObjectKey]);
+        
+        // keep a record of the observervable object for unbinding; this is strictly for observation, not a manual binding
+        NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:observable, NSObservedObjectKey, [[keyPath copy] autorelease], NSObservedKeyPathKey, [[options copy] autorelease], NSOptionsKey, nil];
+        [_bindingInfo setObject:info forKey:binding];
+        [observable addObserver:self forKeyPath:keyPath options:0 context:&_FVFileViewContentObservationContext];
+        _fvFlags.isBound = YES;
+    }
+    
+    // ??? the IB inspector doesn't show values properly unless I call super for that case as well
+    [super bind:binding toObject:observable withKeyPath:keyPath options:options];
 }
 
+- (void)unbind:(NSString *)binding
+{
+    [super unbind:binding];
+
+    if ([binding isEqualToString:@"selectionIndexes"]) {
+        FVAPIAssert2(nil != [_bindingInfo objectForKey:binding], @"%@: attempt to unbind %@ when unbound", self, binding);
+        
+        [[_bindingInfo objectForKey:NSObservedObjectKey] removeObserver:self forKeyPath:[_bindingInfo objectForKey:NSObservedKeyPathKey]];
+        [_bindingInfo removeObjectForKey:binding];
+    }
+    else if ([binding isEqualToString:@"content"]) {
+        FVAPIAssert2(nil != [_bindingInfo objectForKey:binding], @"%@: attempt to unbind %@ when unbound", self, binding);
+        
+        [[_bindingInfo objectForKey:NSObservedObjectKey] removeObserver:self forKeyPath:[_bindingInfo objectForKey:NSObservedKeyPathKey]];
+        _fvFlags.isBound = NO;
+        
+        [self setIconURLs:nil];
+        // Calling -[super unbind:binding] after this may cause selection to be reset; this happens with the controller in the demo project, since it unbinds in the wrong order.  We should be resilient against that, so we unbind first.
+        [self setSelectionIndexes:[NSIndexSet indexSet]];
+    }
+    [self reloadIcons];
+}
+
+- (NSDictionary *)infoForBinding:(NSString *)binding;
+{
+    NSDictionary *info = nil;
+    if ([binding isEqualToString:@"selectionIndexes"] || [binding isEqualToString:@"content"])
+        info = [_bindingInfo objectForKey:binding];
+    else
+        info = [super infoForBinding:binding];
+    return info;
+}
+
+- (Class)valueClassForBinding:(NSString *)binding
+{
+    return [binding isEqualToString:@"selectionIndexes"] ? [NSIndexSet class] : [super valueClassForBinding:binding];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{    
+    if (context == &_FVFileViewInternalSelectionIndexesObservationContext || context == &_FVFileViewSelectionIndexesObservationContext) {
+
+        NSParameterAssert([keyPath isEqualToString:@"selectionIndexes"]);
+        
+        NSDictionary *info = [_bindingInfo objectForKey:@"selectionIndexes"];
+        BOOL updatePreviewer = NO;
+        
+        if (info && context == &_FVFileViewInternalSelectionIndexesObservationContext) {
+            // update the controller's selection; this call will cause a KVO notification that we'll also observe
+            [[info objectForKey:NSObservedObjectKey] setValue:_selectedIndexes forKeyPath:[info objectForKey:NSObservedKeyPathKey]];
+            
+            // since this will be called multiple times for a single event, we should only run the preview if self == context
+            updatePreviewer = YES;
+        }
+        else if (info && context == &_FVFileViewSelectionIndexesObservationContext) {
+            NSIndexSet *controllerSet = [[info objectForKey:NSObservedObjectKey] valueForKeyPath:[info objectForKey:NSObservedKeyPathKey]];
+            // since we manipulate _selectedIndexes directly, this won't cause a looping notification
+            if ([controllerSet isEqualToIndexSet:_selectedIndexes] == NO) {
+                [_selectedIndexes removeAllIndexes];
+                [_selectedIndexes addIndexes:controllerSet];
+            }
+        }
+        else if (nil == info) {
+            // no binding, so this should be a view-initiated change
+            NSParameterAssert(context == &_FVFileViewInternalSelectionIndexesObservationContext);
+            updatePreviewer = YES;
+        }
+        [self setNeedsDisplay:YES];
+        
+        FVPreviewer *previewer = [FVPreviewer sharedPreviewer];
+        if (updatePreviewer && [previewer isPreviewing] && NSNotFound != [_selectedIndexes firstIndex]) {
+            [previewer setWebViewContextMenuDelegate:[self delegate]];
+            [previewer previewURL:[self URLAtIndex:[_selectedIndexes firstIndex]] forIconInRect:[[previewer window] frame]];
+        }
+    }
+    else if (context == &_FVFileViewContentObservationContext) {
+        NSParameterAssert([keyPath isEqualToString:@"content"]);
+        // change to the number of icons or some rearrangement
+        [self reloadIcons];
+    }
+    else {
+        // not our context, so use super's implementation; documentation is totally wrong on this
+        // http://lists.apple.com/archives/cocoa-dev/2008/Oct/msg01096.html
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
 
 - (void)_handleSuperviewDidResize:(NSNotification *)notification {
     NSScrollView *scrollView = [self enclosingScrollView];
@@ -810,7 +966,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     }
     else {
         if (_fvFlags.isObservingSelectionIndexes) {
-            [self addObserver:self forKeyPath:@"selectionIndexes" options:0 context:&FVSelectionIndexesObserverContext];
+            [self addObserver:self forKeyPath:@"selectionIndexes" options:0 context:&_FVFileViewInternalSelectionIndexesObservationContext];
             _fvFlags.isObservingSelectionIndexes = YES;
         }
         
@@ -838,31 +994,20 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     }
 }
 
-- (void)unbind:(NSString *)binding
-{
-    [super unbind:binding];
-    if ([binding isEqualToString:@"iconScale"] || [binding isEqualToString:@"autoScales"] || [binding isEqualToString:@"iconURLs"]) {
-        [self reloadIcons];
-    }
-}
+#pragma mark Binding/datasource wrappers
 
-- (Class)valueClassForBinding:(NSString *)binding
+// should only be called when establishing a new binding
+- (void)setContent:(NSArray *)anArray;
 {
-    return [binding isEqualToString:@"selectionIndexes"] ? [NSIndexSet class] : [super valueClassForBinding:binding];
-}
-
-- (void)setIconURLs:(NSArray *)anArray;
-{
-    [_iconURLs autorelease];
-    _iconURLs = [anArray copy];
-    [self _cancelDownloads];
+    [self setIconURLs:anArray];
+    [self setSelectionIndexes:[NSIndexSet indexSet]];
     // datasource methods all trigger a redisplay, so we have to do the same here
     [self reloadIcons];
 }
 
-- (NSArray *)iconURLs;
+- (NSArray *)content;
 {
-    return _iconURLs;
+    return [self iconURLs];
 }
 
 - (void)setSelectionIndexes:(NSIndexSet *)indexSet;
@@ -878,73 +1023,86 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     return [[_selectedIndexes copy] autorelease];
 }
 
-#pragma mark Binding/datasource wrappers
-
-// following two methods are for binding compatibility with the datasource methods
-
-// this returns nil when the datasource or bound array returns NSNull, or else we end up with exceptions everywhere
-- (NSURL *)iconURLAtIndex:(NSUInteger)anIndex
+- (void)setIconURLs:(NSArray *)array
 {
+    if (_orderedURLs != array) {
+        [_orderedURLs release];
+        
+        // The array parameter will typically be an NSArrayController proxy object.  The view observes mutations to the collection and calls -reload, so we can retain instead of copying (which creates an NSCFArray).
+        _orderedURLs = [array retain];
+    }    
+}
+
+- (NSArray *)iconURLs
+{
+    return _orderedURLs;
+}
+
+- (FVIcon *)iconAtIndex:(NSUInteger)anIndex { 
+    FVAPIAssert(anIndex < [_orderedIcons count], @"invalid icon index requested; likely missing a call to -reloadIcons");
+    return [_orderedIcons objectAtIndex:anIndex]; 
+}
+
+- (NSString *)subtitleAtIndex:(NSUInteger)anIndex { 
+    // _orderedSubtitles is nil if the datasource doesn't implement the optional method
+    if (_orderedSubtitles) FVAPIAssert(anIndex < [_orderedSubtitles count], @"invalid subtitle index requested; likely missing a call to -reloadIcons");
+    return [_orderedSubtitles objectAtIndex:anIndex]; 
+}
+
+- (NSArray *)iconsAtIndexes:(NSIndexSet *)indexes { 
+    FVAPIAssert([indexes lastIndex] < [self numberOfIcons], @"invalid number of icons requested; likely missing a call to -reloadIcons");
+    return [_orderedIcons objectsAtIndexes:indexes]; 
+}
+
+/*
+ Wrap datasource/bindings and return [FVIcon missingFileURL] when the datasource or bound array 
+ returns nil or NSNull, or else we end up with exceptions everywhere.
+ */
+
+// public methods must be consistent at all times
+- (NSURL *)URLAtIndex:(NSUInteger)anIndex {
     NSParameterAssert(anIndex < [self numberOfIcons]);
-    NSURL *aURL = [[self iconURLs] objectAtIndex:anIndex];
-    if (nil == aURL)
-        aURL = [_dataSource fileView:self URLAtIndex:anIndex];
-    if (nil == aURL || [NSNull null] == (id)aURL)
+    NSURL *aURL = [_orderedURLs objectAtIndex:anIndex];
+    if (__builtin_expect(nil == aURL || [NSNull null] == (id)aURL, 0))
         aURL = [FVIcon missingFileURL];
     return aURL;
 }
 
-- (NSUInteger)numberOfIcons
+- (NSUInteger)numberOfIcons { return [_orderedURLs count]; }
+
+// only used by -_reloadIcons; always returns a value independent of cached state
+- (NSURL *)_URLAtIndex:(NSUInteger)anIndex { 
+    NSURL *aURL = _fvFlags.isBound ? [_orderedURLs objectAtIndex:anIndex] : [_dataSource fileView:self URLAtIndex:anIndex];
+    if (__builtin_expect(nil == aURL || [NSNull null] == (id)aURL, 0))
+        aURL = [FVIcon missingFileURL];
+    return aURL;
+}
+
+// only used by -_reloadIcons; always returns a value independent of cached state
+- (NSUInteger)_numberOfIcons { return _fvFlags.isBound ? [_orderedURLs count] : [_dataSource numberOfURLsInFileView:self]; }
+
+- (void)_getDisplayName:(NSString **)name andLabel:(NSUInteger *)label forURL:(NSURL *)aURL;
 {
-    return nil == _iconURLs ? [_dataSource numberOfURLsInFileView:self] : [_iconURLs count];
+    _FVURLInfo *info = [(id)_infoTable objectForKey:aURL];
+    if (nil == info) {
+        info = [[_FVURLInfo allocWithZone:[self zone]] initWithURL:aURL];
+        CFDictionarySetValue(_infoTable, (CFURLRef)aURL, info);
+        [info release];
+    }
+    if (name) *name = [info name];
+    if (label) *label = [info label];
 }
 
 - (FVIcon *)_cachedIconForURL:(NSURL *)aURL;
 {
-    // datasource returns nil for nonexistent paths, so cache that in the dictionary as a normal key
-    if (nil == aURL)
-        aURL = (id)[NSNull null];
-    
-    // we don't cache paths, but we do cache icons
+    NSParameterAssert([aURL isKindOfClass:[NSURL class]]);
     FVIcon *icon = [_iconCache objectForKey:aURL];
     if (nil == icon) {
-        icon = [FVIcon iconWithURL:aURL];
+        icon = [[FVIcon allocWithZone:NULL] initWithURL:aURL];
         [_iconCache setObject:icon forKey:aURL];
+        [icon release];
     }
     return icon;
-}
-
-// use this instead of iterating _cachedIconForURL: when you want more than a few icons, since it may fetch in bulk
-- (NSArray *)iconsAtIndexes:(NSIndexSet *)indexes
-{
-    // I was using [_iconCache objectsForKeys:notFoundMarker], but that assumed that _iconCache was fully populated (and it's filled lazily).  Likewise, using -iconURLs directly causes problems since it may contain NSNull, so there's really no way to get icons in bulk here.
-    NSMutableArray *icons = [NSMutableArray arrayWithCapacity:[indexes count]];
-        
-    // -[NSMutableArray addObject:]
-    void (*addObject)(id, SEL, id);
-    addObject = (void (*)(id, SEL, id))[icons methodForSelector:@selector(addObject:)];
-    
-    NSUInteger buffer[512];
-    NSRange range = NSMakeRange([indexes firstIndex], [indexes lastIndex] - [indexes firstIndex] + 1);
-    NSUInteger i, iMax;
-    
-    // ??? why isn't this created initially when bindings are used?
-    if (0 == CFDictionaryGetCount(_iconIndexMap))
-        [self _rebuildIconIndexMap];
-    
-    NSParameterAssert(CFDictionaryGetCount(_iconIndexMap) == (CFIndex)[self numberOfIcons]);
-    
-    while ((iMax = [indexes getIndexes:buffer maxCount:sizeof(buffer)/sizeof(NSUInteger) inIndexRange:&range]) > 0) {
-
-        for (i = 0; i < iMax; i++) {
-            NSUInteger indexInView = buffer[i];
-            FVIcon *icon = (id)CFDictionaryGetValue(_iconIndexMap, (const void *)indexInView);
-            NSParameterAssert(nil != icon);
-            addObject(icons, @selector(addObject:), icon);
-        }
-    }
-    
-    return icons;
 }
 
 - (NSArray *)_selectedURLs
@@ -952,7 +1110,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     NSMutableArray *array = [NSMutableArray array];
     NSUInteger idx = [_selectedIndexes firstIndex];
     while (NSNotFound != idx) {
-        [array addObject:[self iconURLAtIndex:idx]];
+        [array addObject:[self URLAtIndex:idx]];
         idx = [_selectedIndexes indexGreaterThanIndex:idx];
     }
     return array;
@@ -1170,7 +1328,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     // If an icon isn't visible, there's no need to redisplay anything.  Similarly, if 20 icons are displayed and only 5 updated, there's no need to redraw all 20.  Geometry calculations are much faster than redrawing, in general.
     for (i = iMin; i < iMax; i++) {
         
-        FVIcon *anIcon = (id)CFDictionaryGetValue(_iconIndexMap, (const void *)i);
+        FVIcon *anIcon = [self iconAtIndex:i];
         if (anIcon == updatedIcon) {
             NSUInteger r, c;
             if ([self _getGridRow:&r column:&c ofIndex:i])
@@ -1182,17 +1340,10 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 // drawRect: uses -releaseResources on icons that aren't visible but present in the datasource, so we just need a way to cull icons that are cached but not currently in the datasource
 - (void)_zombieTimerFired:(CFRunLoopTimerRef)timer
 {
-    NSUInteger i, iMax = [self numberOfIcons];
-    
     // don't do anything unless there's a meaningful discrepancy between the number of items reported by the datasource and our cache
-    if ((iMax + ZOMBIE_CACHE_THRESHOLD) < [_iconCache count]) {
+    if (([self numberOfIcons] + ZOMBIE_CACHE_THRESHOLD) < [_iconCache count]) {
         
-        NSMutableSet *iconURLsToKeep = [NSMutableSet set];        
-        for (i = 0; i < iMax; i++) {
-            NSURL *aURL = [self iconURLAtIndex:i];
-            if (aURL) [iconURLsToKeep addObject:aURL];
-        }
-        
+        NSMutableSet *iconURLsToKeep = [NSMutableSet setWithArray:_orderedURLs];        
         NSMutableSet *toRemove = [NSMutableSet setWithArray:[_iconCache allKeys]];
         [toRemove minusSet:iconURLsToKeep];
         
@@ -1513,7 +1664,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     
     // Don't release resources while scrolling; caller has already checked -inLiveResize and _fvFlags.isRescaling for us
 
-    if ([_iconCache count] > RELEASE_CACHE_THRESHOLD && NO == [self _isFastScrolling]) {
+    if (NO == [self _isFastScrolling]) {
         
         // make sure we don't call this on any icons that we just added to the render queue
         NSMutableIndexSet *unusedIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfIcons])];
@@ -1580,7 +1731,6 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     // we should use the fast path when scrolling at small sizes; PDF sucks in that case...
     
     BOOL useFastDrawingPath = (isResizing || _fvFlags.isRescaling || ([self _isFastScrolling] && _iconSize.height <= 256));
-    BOOL useSubtitle = [_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)];
     
     // redraw at high quality after scrolling
     if (useFastDrawingPath && NO == _fvFlags.scheduledLiveResize && [self _isFastScrolling]) {
@@ -1596,7 +1746,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     CGColorRef shadowColor = CGColorCreate(cspace, shadowComponents);
     CGColorSpaceRelease(cspace);
     
-    BOOL iconIndexMapNeedsRebuild = NO;
+    BOOL iconsNeedsRebuild = NO;
     
     // iterate each row/column to see if it's in the dirty rect, and evaluate the current cache state
     for (r = rMin; r < rMax; r++) 
@@ -1610,9 +1760,9 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
             
                 NSRect fileRect = [self _rectOfIconInRow:r column:c];
                 
-                NSURL *aURL = [self iconURLAtIndex:i];
+                NSURL *aURL = [self URLAtIndex:i];
                 // sanity check, see if the cached icons are not stale
-                iconIndexMapNeedsRebuild = iconIndexMapNeedsRebuild || [(id)CFDictionaryGetValue(_iconURLMap, (const void *)i) isEqual:(id)aURL ?: (id)[NSNull null]] == NO;
+                iconsNeedsRebuild = iconsNeedsRebuild || [[self _URLAtIndex:i] isEqual:aURL] == NO;
                 
                 // allow some extra for the shadow (-5)
                 NSRect textRect = [self _rectOfTextForIconRect:fileRect];
@@ -1621,7 +1771,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                                 
                 if (willDrawIcon) {
 
-                    FVIcon *image = [self _cachedIconForURL:aURL];
+                    FVIcon *image = [self iconAtIndex:i];
                     
                     // note that iconRect will be transformed for a flipped context
                     NSRect iconRect = fileRect;
@@ -1651,50 +1801,32 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                     CGContextRestoreGState(cgContext);
                     CGContextSaveGState(cgContext);
                     
-                    BOOL isFlippedContext = [ctxt isFlipped];
-                    
-                    // @@ this is a hack for drawing into the drag image context
-                    if (NO == isFlippedContext) {
-                        CGContextTranslateCTM(cgContext, 0, NSMaxY(textRect));
-                        CGContextScaleCTM(cgContext, 1, -1);
-                        textRect.origin.y = 0;
-                    }
                     textRect = [self centerScanRect:textRect];
                     
-                    // draw text over the icon/shadow
-                    NSString *name;
-                    if ([aURL isFileURL]) {
-                        if (noErr == LSCopyDisplayNameForURL((CFURLRef)aURL, (CFStringRef *)&name))
-                            name = [name autorelease];
-                        else
-                            name = [[aURL path] lastPathComponent];
-                    } else {
-                        name = [[aURL absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-                    }
+                    NSString *name, *subtitle = [self subtitleAtIndex:i];
+                    NSUInteger label;
+                    [self _getDisplayName:&name andLabel:&label forURL:aURL];
+                    NSStringDrawingOptions stringOptions = NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingOneShot;
                     
-                    NSUInteger label = [FVFinderLabel finderLabelForURL:aURL];
                     if (label > 0) {
                         CGRect labelRect = *(CGRect *)&textRect;
                         
                         // for drag image context
-                        if (NO == isFlippedContext)
-                            labelRect.origin.y += _titleHeight;
                         labelRect.size.height = _titleHeight;                        
-                        [FVFinderLabel drawFinderLabel:label inRect:labelRect ofContext:cgContext flipped:isFlippedContext roundEnds:YES];
+                        [FVFinderLabel drawFinderLabel:label inRect:labelRect ofContext:cgContext flipped:NO roundEnds:YES];
                         
                         // labeled title uses black text for greater contrast; inset horizontally because of the rounded end caps
                         NSRect titleRect = NSInsetRect(textRect, _titleHeight / 2.0, 0);
-                        [name drawWithRect:titleRect options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingOneShot attributes:_labeledAttributes];
+                        [name drawWithRect:titleRect options:stringOptions attributes:_labeledAttributes];
                     }
                     else {
-                        [name drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingOneShot attributes:_titleAttributes];
+                        [name drawWithRect:textRect options:stringOptions attributes:_titleAttributes];
                     }
                     
-                    if (useSubtitle) {
-                        if (isFlippedContext)
-                            textRect.origin.y += _titleHeight;
+                    if (subtitle) {
+                        textRect.origin.y += _titleHeight;
                         textRect.size.height -= _titleHeight;
-                        [[_dataSource fileView:self subtitleAtIndex:i] drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingOneShot attributes:_subtitleAttributes];
+                        [subtitle drawWithRect:textRect options:stringOptions attributes:_subtitleAttributes];
                     }
                     CGContextRestoreGState(cgContext);
                 } 
@@ -1704,8 +1836,8 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     
     CGColorRelease(shadowColor);
     
-    if (iconIndexMapNeedsRebuild)
-        [self _rebuildIconIndexMap];
+    if (iconsNeedsRebuild)
+        [self _reloadIcons];
     
     // avoid hitting the cache thread while a live resize is in progress, but allow cache updates while scrolling
     // use the same range criteria that we used in iterating icons
@@ -1797,7 +1929,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
             while (download = [dlEnum nextObject]) {
                 NSUInteger anIndex = [download indexInView];
                 // we only draw a if there's an active download for this URL/index pair
-                if (anIndex < [self numberOfIcons] && [[self iconURLAtIndex:anIndex] isEqual:[download downloadURL]])
+                if (anIndex < [self numberOfIcons] && [[self URLAtIndex:anIndex] isEqual:[download downloadURL]])
                     [[download progressIndicator] drawWithFrame:[self _rectOfProgressIndicatorForIconAtIndex:anIndex] inView:self];
             }
         }
@@ -1934,7 +2066,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     
     if ([self _getGridRow:&r column:&c ofIndex:anIndex]) {
     
-        FVIcon *anIcon = [self _cachedIconForURL:[self iconURLAtIndex:anIndex]];
+        FVIcon *anIcon = [self iconAtIndex:anIndex];
         
         if ([anIcon pageCount] > 1) {
         
@@ -2019,7 +2151,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     NSUInteger anIndex = NSNotFound, r, c;
     if ([self _getGridRow:&r column:&c atPoint:point])
         anIndex = [self _indexForGridRow:r column:c];
-    return NSNotFound == anIndex ? nil : [self iconURLAtIndex:anIndex];
+    return NSNotFound == anIndex ? nil : [self URLAtIndex:anIndex];
 }
 
 - (void)_openURLs:(NSArray *)URLs
@@ -2523,7 +2655,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
         while (dl = [dlEnum nextObject]) {
             NSUInteger anIndex = [[dl objectForKey:@"index"] unsignedIntValue];
             NSURL *aURL = [dl objectForKey:@"URL"];
-            if (anIndex < [self numberOfIcons] && [aURL isEqual:[self iconURLAtIndex:anIndex]])
+            if (anIndex < [self numberOfIcons] && [aURL isEqual:[self URLAtIndex:anIndex]])
                 [self _downloadURLAtIndex:anIndex];
         }
     }
@@ -2636,7 +2768,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 - (void)moveToBeginningOfLine:(id)sender;
 {
     if ([_selectedIndexes count] == 1) {
-        FVIcon *anIcon = [self _cachedIconForURL:[self iconURLAtIndex:[_selectedIndexes firstIndex]]];
+        FVIcon *anIcon = [self iconAtIndex:[_selectedIndexes firstIndex]];
         if ([anIcon currentPageIndex] > 1) {
             [anIcon showPreviousPage];
             [self _redisplayIconAfterPageChanged:anIcon];
@@ -2647,7 +2779,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 - (void)moveToEndOfLine:(id)sender;
 {
     if ([_selectedIndexes count] == 1) {
-        FVIcon *anIcon = [self _cachedIconForURL:[self iconURLAtIndex:[_selectedIndexes firstIndex]]];
+        FVIcon *anIcon = [self iconAtIndex:[_selectedIndexes firstIndex]];
         if ([anIcon currentPageIndex] < [anIcon pageCount]) {
             [anIcon showNextPage];
             [self _redisplayIconAfterPageChanged:anIcon];
@@ -3136,7 +3268,7 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 - (void)downloadFinished:(FVDownload *)download
 {
     NSUInteger idx = [download indexInView];
-    NSURL *currentURL = [self iconURLAtIndex:idx];
+    NSURL *currentURL = [self URLAtIndex:idx];
     NSURL *downloadURL = [download downloadURL];
     NSURL *dest = [download fileURL];
     // things could have been rearranged since the download was started, so don't replace the wrong one
@@ -3144,7 +3276,7 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
         if (NO == [currentURL isEqual:downloadURL]) {
             idx = [self numberOfIcons];
             while (idx-- > 0) {
-                currentURL = [self iconURLAtIndex:idx];
+                currentURL = [self URLAtIndex:idx];
                 if ([currentURL isEqual:downloadURL])
                     break;
             }
@@ -3184,7 +3316,7 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 - (void)_downloadURLAtIndex:(NSUInteger)anIndex;
 {
     if ([self allowsDownloading]) {
-        NSURL *theURL = [self iconURLAtIndex:anIndex];
+        NSURL *theURL = [self URLAtIndex:anIndex];
         FVDownload *download = [[FVDownload alloc] initWithDownloadURL:theURL indexInView:anIndex];       
         [_downloads addObject:download];
         [download release];
@@ -3260,7 +3392,7 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 }
 
 - (NSURL *)URLForIconElement:(id)element {
-    return [self iconURLAtIndex:[element index]];
+    return [self URLAtIndex:[element index]];
 }
 
 - (NSRect)screenRectForIconElement:(id)element {
@@ -3291,7 +3423,39 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 }
 
 - (void)openIconElement:(id)element {
-    [self _openURLs:[NSArray arrayWithObjects:[self iconURLAtIndex:[element index]], nil]];
+    [self _openURLs:[NSArray arrayWithObjects:[self URLAtIndex:[element index]], nil]];
 }
+
+@end
+
+
+@implementation _FVURLInfo
+
+- (id)initWithURL:(NSURL *)aURL;
+{
+    if (self = [super init]) {
+        if ([aURL isFileURL]) {
+            CFStringRef name;
+            if (noErr != LSCopyDisplayNameForURL((CFURLRef)aURL, &name))
+                _name = [[[aURL path] lastPathComponent] copyWithZone:[self zone]];
+            else
+                _name = (NSString *)name;
+        } else {
+            _name = [[[aURL absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] copyWithZone:[self zone]];
+        }
+        _label = [FVFinderLabel finderLabelForURL:aURL];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    [_name release];
+    [super dealloc];
+}
+
+- (NSString *)name { return _name; }
+
+- (NSUInteger)label { return _label; }
 
 @end
