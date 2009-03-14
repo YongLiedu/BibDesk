@@ -125,6 +125,7 @@
 #import <SkimNotes/SkimNotes.h>
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSView_BDSKExtensions.h"
+#import "NSColor_BDSKExtensions.h"
 #import "BDSKMessageQueue.h"
 
 // these are the same as in Info.plist
@@ -541,8 +542,10 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [tableView registerForDraggedTypes:dragTypes];
     [groupTableView registerForDraggedTypes:dragTypes];
     
-    [sideFileView setBackgroundColor:[[sideFileView enclosingScrollView] backgroundColor]];
-    [bottomFileView setBackgroundColor:[[bottomFileView enclosingScrollView] backgroundColor]];
+    [[sideFileView enclosingScrollView] setBackgroundColor:[NSColor sourceListBackgroundColor]];
+    [sideFileView setBackgroundColor:[NSColor sourceListBackgroundColor]];
+    [[bottomFileView enclosingScrollView] setBackgroundColor:[NSColor controlBackgroundColor]];
+    [bottomFileView setBackgroundColor:[NSColor controlBackgroundColor]];
     
     [fileCollapsibleView setCollapseEdges:BDSKMaxXEdgeMask];
     [fileCollapsibleView setMinSize:NSMakeSize(65.0, 22.0)];

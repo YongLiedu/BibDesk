@@ -47,6 +47,7 @@
 #import "BDSKGroup.h"
 #import "BibAuthor.h"
 #import "BDSKGroupCell.h"
+#import "NSColor_BDSKExtensions.h"
 
 @implementation BDSKGroupTableView
 
@@ -271,17 +272,10 @@
 }
 
 - (NSColor *)backgroundColor {
-    
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableBackgroundColorForGroupTable"] || [self respondsToSelector:@selector(setSelectionHighlightStyle:)])
         return [super backgroundColor];
-    
-    static NSColor *backgroundColor = nil;
-    if (nil == backgroundColor) {
-        // from Mail.app on 10.4; should be based on control tint?
-        float red = (231.0f/255.0f), green = (237.0f/255.0f), blue = (246.0f/255.0f);
-        backgroundColor = [[NSColor colorWithCalibratedRed:red green:green blue:blue alpha:1.0] retain];
-    }
-    return backgroundColor;
+    else
+        return [NSColor sourceListBackgroundColor];
 }
 
 @end

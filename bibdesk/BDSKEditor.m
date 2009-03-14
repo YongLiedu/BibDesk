@@ -82,6 +82,7 @@
 #import "BDSKEditorTextFieldCell.h"
 #import "BDSKCompletionManager.h"
 #import "BDSKApplication.h"
+#import "NSColor_BDSKExtensions.h"
 
 static NSString *BDSKEditorFrameAutosaveName = @"BDSKEditor window autosave name";
 static NSString *BDSKEditorObservationContext = @"BDSKEditorObservationContext";
@@ -263,6 +264,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	
     [self updateCiteKeyDuplicateWarning];
     
+    [[fileView enclosingScrollView] setBackgroundColor:[NSColor sourceListBackgroundColor]];
+    [fileView setBackgroundColor:[NSColor sourceListBackgroundColor]];
     [fileView setIconScale:[[NSUserDefaults standardUserDefaults] floatForKey:BDSKEditorFileViewIconScaleKey]];
     [fileView setAutoScales:YES];
     [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:BDSKEditorObservationContext];
