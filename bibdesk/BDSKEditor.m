@@ -474,8 +474,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             theURL = [[publication valueForKeyPath:@"remoteURLs.URL"] firstObject];
     }
     if (theURL && [theURL isEqual:[NSNull null]] == NO) {
-        [FVPreviewer setWebViewContextMenuDelegate:self];
-        [FVPreviewer previewURL:theURL];
+        [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:self];
+        [[FVPreviewer sharedPreviewer] previewURL:theURL forIconInRect:NSZeroRect];
     }
 }
 

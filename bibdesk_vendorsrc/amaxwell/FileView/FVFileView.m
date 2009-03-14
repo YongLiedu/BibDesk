@@ -226,9 +226,9 @@ static CGColorRef _shadowColor = NULL;
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if (context == FVSelectionIndexesObserverContext) {
-        if ([FVPreviewer isPreviewing] && NSNotFound != [_selectedIndexes firstIndex]) {
-            [FVPreviewer setWebViewContextMenuDelegate:[self delegate]];
-            [FVPreviewer previewURL:[self iconURLAtIndex:[_selectedIndexes firstIndex]]];
+        if ([[FVPreviewer sharedPreviewer] isPreviewing] && NSNotFound != [_selectedIndexes firstIndex]) {
+            [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:[self delegate]];
+            [[FVPreviewer sharedPreviewer] previewURL:[self iconURLAtIndex:[_selectedIndexes firstIndex]] forIconInRect:NSZeroRect];
         }
         [self setNeedsDisplay:YES];
     } else {
@@ -1982,8 +1982,8 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
         // change selection first, as Finder does
         if ([event clickCount] > 1 && [self _URLAtPoint:p] != nil) {
             if (flags & NSAlternateKeyMask) {
-                [FVPreviewer setWebViewContextMenuDelegate:[self delegate]];
-                [FVPreviewer previewURL:[self _URLAtPoint:p]];
+                [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:[self delegate]];
+                [[FVPreviewer sharedPreviewer] previewURL:[self _URLAtPoint:p] forIconInRect:NSZeroRect];
             } else {
                 [self openSelectedURLs:self];
             }
@@ -2615,12 +2615,12 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 - (IBAction)previewAction:(id)sender;
 {
     if ([_selectedIndexes count] == 1) {
-        [FVPreviewer setWebViewContextMenuDelegate:[self delegate]];
-        [FVPreviewer previewURL:[[self _selectedURLs] lastObject]];
+        [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:[self delegate]];
+        [[FVPreviewer sharedPreviewer] previewURL:[[self _selectedURLs] lastObject] forIconInRect:NSZeroRect];
     }
     else {
-        [FVPreviewer setWebViewContextMenuDelegate:nil];
-        [FVPreviewer previewFileURLs:[self _selectedURLs]];
+        [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:nil];
+        [[FVPreviewer sharedPreviewer] previewFileURLs:[self _selectedURLs]];
     }
 }
 

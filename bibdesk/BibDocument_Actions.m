@@ -1098,8 +1098,8 @@ static BOOL changingColors = NO;
             theURL = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"] firstObject];
     }
     if (theURL && [theURL isEqual:[NSNull null]] == NO) {
-        [FVPreviewer setWebViewContextMenuDelegate:self];
-        [FVPreviewer previewURL:theURL];
+        [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:self];
+        [[FVPreviewer sharedPreviewer] previewURL:theURL forIconInRect:NSZeroRect];
     }
 }
 
