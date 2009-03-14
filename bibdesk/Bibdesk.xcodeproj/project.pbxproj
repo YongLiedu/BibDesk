@@ -596,7 +596,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = F911D6A80CFE8E420009C77B /* FileView.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 8DC2EF4F0486A6940098B216 /* FileView */;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = FileView;
 		};
 		EF168E280F113753002F4D9F /* PBXContainerItemProxy */ = {
