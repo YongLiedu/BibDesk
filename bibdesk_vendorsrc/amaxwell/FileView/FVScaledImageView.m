@@ -41,7 +41,7 @@
 
 @implementation FVScaledImageView
 
-static NSDictionary *__textAttributes = nil;
+static NSDictionary *_textAttributes = nil;
 
 + (void)initialize {
     FVINITIALIZE(FVScaledImageView);
@@ -53,24 +53,13 @@ static NSDictionary *__textAttributes = nil;
     [ps setAlignment:NSCenterTextAlignment];
     [ta setObject:ps forKey:NSParagraphStyleAttributeName];
     [ps release];
-    __textAttributes = [ta copy];
-}
-
-- (void)addBox
-{
-    if (nil == _box) {
-        _box = [[NSBox alloc] initWithFrame:NSInsetRect([self frame], 17.0f, 17.0f)];
-        [_box setTitlePosition:NSNoTitle];
-        [_box setBoxType:NSBoxPrimary];
-        [self addSubview:_box];
-        [_box setAutoresizingMask:(NSViewWidthSizable|NSViewHeightSizable)];
-    }
+    _textAttributes = [ta copy];
 }
 
 - (void)makeText
 {
     NSMutableAttributedString *fileDescription = [[NSMutableAttributedString alloc] initWithString:[[NSFileManager defaultManager] displayNameAtPath:[_fileURL path]]];
-    [fileDescription addAttributes:__textAttributes range:NSMakeRange(0, [fileDescription length])];
+    [fileDescription addAttributes:_textAttributes range:NSMakeRange(0, [fileDescription length])];
     [fileDescription addAttribute:NSFontAttributeName value:[NSFont boldSystemFontOfSize:[NSFont systemFontSize]] range:NSMakeRange(0, [fileDescription length])];
     
     MDItemRef mdItem = MDItemCreate(NULL, (CFStringRef)[_fileURL path]);
@@ -83,7 +72,7 @@ static NSDictionary *__textAttributes = nil;
     NSBundle *bundle = [NSBundle bundleForClass:[FVScaledImageView class]];
     
     if (nil != mdAttributes) {
-        NSMutableAttributedString *kindString = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"\n\n%@", [mdAttributes objectForKey:(id)kMDItemKind]] attributes:__textAttributes];
+        NSMutableAttributedString *kindString = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"\n\n%@", [mdAttributes objectForKey:(id)kMDItemKind]] attributes:_textAttributes];
         if ([mdAttributes objectForKey:(id)kMDItemPixelHeight] && [mdAttributes objectForKey:(id)kMDItemPixelWidth])
             [[kindString mutableString] appendFormat:NSLocalizedStringFromTableInBundle(@"\n%@ by %@ pixels", @"FileView", bundle, @"two string format specifiers"), [mdAttributes objectForKey:(id)kMDItemPixelWidth], [mdAttributes objectForKey:(id)kMDItemPixelHeight]];
         [fileDescription appendAttributedString:kindString];
@@ -108,7 +97,7 @@ static NSDictionary *__textAttributes = nil;
             mbsize /= 1024.0f;
             label = @"GB";
         }
-        NSMutableAttributedString *details = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"\n\nSize: %.1f %@\nCreated: %@\nModified: %@", @"FileView", bundle, @"message displayed in preview"), mbsize, label, [formatter stringFromDate:[fattrs objectForKey:NSFileCreationDate]], [formatter stringFromDate:[fattrs objectForKey:NSFileModificationDate]]] attributes:__textAttributes];
+        NSMutableAttributedString *details = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"\n\nSize: %.1f %@\nCreated: %@\nModified: %@", @"FileView", bundle, @"message displayed in preview"), mbsize, label, [formatter stringFromDate:[fattrs objectForKey:NSFileCreationDate]], [formatter stringFromDate:[fattrs objectForKey:NSFileModificationDate]]] attributes:_textAttributes];
         [details addAttribute:NSFontAttributeName value:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]] range:NSMakeRange(0, [details length])];
         [fileDescription appendAttributedString:details];
         [details release];
@@ -120,23 +109,8 @@ static NSDictionary *__textAttributes = nil;
 - (void)dealloc
 {
     [_icon release];
-    [_box release];
     [_text release];
     [super dealloc];
-}
-
-- (id)initWithFrame:(NSRect)frame
-{
-    self = [super initWithFrame:frame];
-    [self addBox];
-    return self;
-}
-
-- (id)initWithCoder:(NSCoder *)coder
-{
-    self = [super initWithCoder:coder];
-    [self addBox];
-    return self;
 }
 
 - (void)setIcon:(FVIcon *)anIcon
