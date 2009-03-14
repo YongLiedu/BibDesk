@@ -85,7 +85,7 @@
 #import "NSColor_BDSKExtensions.h"
 
 static NSString *BDSKEditorFrameAutosaveName = @"BDSKEditor window autosave name";
-static NSString *BDSKEditorObservationContext = @"BDSKEditorObservationContext";
+static char BDSKEditorObservationContext;
 
 // offset of the table from the left window edge
 #define TABLE_OFFSET 13.0
@@ -268,7 +268,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [fileView setBackgroundColor:[NSColor sourceListBackgroundColor]];
     [fileView setIconScale:[[NSUserDefaults standardUserDefaults] floatForKey:BDSKEditorFileViewIconScaleKey]];
     [fileView setAutoScales:YES];
-    [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:BDSKEditorObservationContext];
+    [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:&BDSKEditorObservationContext];
     [fileView setEditable:isEditable];
     [fileView setAllowsDownloading:isEditable];
 }
@@ -1634,7 +1634,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == BDSKEditorObservationContext) {
+    if (context == &BDSKEditorObservationContext) {
         [[NSUserDefaults standardUserDefaults] setFloat:[fileView iconScale] forKey:BDSKEditorFileViewIconScaleKey];
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];

@@ -44,7 +44,7 @@
 #import "NSWindowController_BDSKExtensions.h"
 
 
-static NSString *BDSKErrorManagerObservationContext = @"BDSKErrorManagerObservationContext";
+static char BDSKErrorManagerObservationContext;
 
 @interface BDSKAllItemsErrorManager : BDSKErrorManager @end
 
@@ -112,8 +112,8 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
         document = [newDocument retain];
         [self updateDisplayName];
         if(document){
-            [document addObserver:self forKeyPath:@"displayName" options:0 context:BDSKErrorManagerObservationContext];
-            [document addObserver:self forKeyPath:@"documentStringEncoding" options:0 context:BDSKErrorManagerObservationContext];
+            [document addObserver:self forKeyPath:@"displayName" options:0 context:&BDSKErrorManagerObservationContext];
+            [document addObserver:self forKeyPath:@"documentStringEncoding" options:0 context:&BDSKErrorManagerObservationContext];
         }
     }
 }
@@ -172,7 +172,7 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
-    if (context == BDSKErrorManagerObservationContext) {
+    if (context == &BDSKErrorManagerObservationContext) {
         if(object == document && [keyPath isEqualToString:@"displayName"])
             [self updateDisplayName];
         else if(object == document && document && [keyPath isEqualToString:@"documentStringEncoding"])

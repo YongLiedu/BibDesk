@@ -152,8 +152,8 @@ static NSString *BDSKDocumentStringEncodingKey = @"BDSKDocumentStringEncodingKey
 static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentageKey";
 static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 
-static NSString *BDSKDocumentFileViewObservationContext = @"BDSKDocumentFileViewObservationContext";
-static NSString *BDSKDocumentDefaultsObservationContext = @"BDSKDocumentDefaultsObservationContext";
+static char BDSKDocumentFileViewObservationContext;
+static char BDSKDocumentDefaultsObservationContext;
 
 enum {
     BDSKItemChangedGroupFieldMask = 1,
@@ -560,7 +560,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         [sideFileView setIconScale:iconScale];
     }
     [sideFileView setAutoScales:YES];
-    [sideFileView addObserver:self forKeyPath:@"iconScale" options:0 context:BDSKDocumentFileViewObservationContext];
+    [sideFileView addObserver:self forKeyPath:@"iconScale" options:0 context:&BDSKDocumentFileViewObservationContext];
 
     iconScale = [xattrDefaults floatForKey:BDSKBottomFileViewIconScaleKey defaultValue:[sud floatForKey:BDSKBottomFileViewIconScaleKey]];
     if (iconScale < 0.00001) {
@@ -569,7 +569,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         [bottomFileView setAutoScales:NO];
         [bottomFileView setIconScale:iconScale];
     }
-    [bottomFileView addObserver:self forKeyPath:@"iconScale" options:0 context:BDSKDocumentFileViewObservationContext];
+    [bottomFileView addObserver:self forKeyPath:@"iconScale" options:0 context:&BDSKDocumentFileViewObservationContext];
     
     [(BDSKZoomableTextView *)sidePreviewTextView setScaleFactor:[xattrDefaults floatForKey:BDSKSidePreviewScaleFactorKey defaultValue:1.0]];
     [(BDSKZoomableTextView *)bottomPreviewTextView setScaleFactor:[xattrDefaults floatForKey:BDSKBottomPreviewScaleFactorKey defaultValue:1.0]];
@@ -2790,19 +2790,19 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [sud addObserver:self
               forKeyPath:[@"values." stringByAppendingString:BDSKIgnoredSortTermsKey]
                  options:0
-                 context:BDSKDocumentDefaultsObservationContext];
+                 context:&BDSKDocumentDefaultsObservationContext];
         [sud addObserver:self
               forKeyPath:[@"values." stringByAppendingString:BDSKAuthorNameDisplayKey]
                  options:0
-                 context:BDSKDocumentDefaultsObservationContext];
+                 context:&BDSKDocumentDefaultsObservationContext];
         [sud addObserver:self
               forKeyPath:[@"values." stringByAppendingString:BDSKBTStyleKey]
                  options:0
-                 context:BDSKDocumentDefaultsObservationContext];
+                 context:&BDSKDocumentDefaultsObservationContext];
         [sud addObserver:self
               forKeyPath:[@"values." stringByAppendingString:BDSKUsesTeXKey]
                  options:0
-                 context:BDSKDocumentDefaultsObservationContext];
+                 context:&BDSKDocumentDefaultsObservationContext];
 }           
 
 - (void)handleBibItemAddDelNotification:(NSNotification *)notification{
@@ -3069,7 +3069,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == BDSKDocumentFileViewObservationContext) {
+    if (context == &BDSKDocumentFileViewObservationContext) {
         if (object == sideFileView) {
             float iconScale = [sideFileView autoScales] ? 0.0 : [sideFileView iconScale];
             [[NSUserDefaults standardUserDefaults] setFloat:iconScale forKey:BDSKSideFileViewIconScaleKey];
@@ -3077,7 +3077,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
             float iconScale = [bottomFileView autoScales] ? 0.0 : [bottomFileView iconScale];
             [[NSUserDefaults standardUserDefaults] setFloat:iconScale forKey:BDSKBottomFileViewIconScaleKey];
         }
-    } else if (context == BDSKDocumentDefaultsObservationContext) {
+    } else if (context == &BDSKDocumentDefaultsObservationContext) {
         NSString *key = [keyPath substringFromIndex:7];
         if ([key isEqualToString:BDSKIgnoredSortTermsKey]) {
             [self sortPubsByKey:nil];

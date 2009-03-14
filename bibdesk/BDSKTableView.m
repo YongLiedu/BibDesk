@@ -42,7 +42,7 @@
 #import "BDSKMessageQueue.h"
 
 
-static void *BDSKTableViewFontDefaultsObservationContext = (void *)@"BDSKTableViewFontDefaultsObservationContext";
+static char BDSKTableViewFontDefaultsObservationContext;
 
 @implementation BDSKTableView
 
@@ -89,8 +89,8 @@ static void *BDSKTableViewFontDefaultsObservationContext = (void *)@"BDSKTableVi
 
 - (void)addObserverForFontPreferences {
     if (fontNamePreferenceKey && fontSizePreferenceKey) {
-        [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self forKeyPath:[@"values." stringByAppendingString:fontNamePreferenceKey] options:0 context:BDSKTableViewFontDefaultsObservationContext];
-        [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self forKeyPath:[@"values." stringByAppendingString:fontSizePreferenceKey] options:0 context:BDSKTableViewFontDefaultsObservationContext];
+        [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self forKeyPath:[@"values." stringByAppendingString:fontNamePreferenceKey] options:0 context:&BDSKTableViewFontDefaultsObservationContext];
+        [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self forKeyPath:[@"values." stringByAppendingString:fontSizePreferenceKey] options:0 context:&BDSKTableViewFontDefaultsObservationContext];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateFontPanel:) name:NSWindowDidBecomeKeyNotification object:[self window]];
     }
 }
@@ -179,7 +179,7 @@ static void *BDSKTableViewFontDefaultsObservationContext = (void *)@"BDSKTableVi
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == BDSKTableViewFontDefaultsObservationContext)
+    if (context == &BDSKTableViewFontDefaultsObservationContext)
         [self tableViewFontChanged];
     else
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];

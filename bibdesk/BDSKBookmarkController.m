@@ -56,7 +56,7 @@ static NSString *BDSKBookmarkChildrenKey = @"children";
 static NSString *BDSKBookmarkNameKey = @"name";
 static NSString *BDSKBookmarkUrlStringKey = @"urlString";
 
-static NSString *BDSKBookmarkPropertiesObservationContext = @"BDSKBookmarkPropertiesObservationContext";
+static char BDSKBookmarkPropertiesObservationContext;
 
 
 @interface BDSKBookmarkController (BDSKPrivate)
@@ -323,10 +323,10 @@ static id sharedBookmarkController = nil;
     BDSKBookmark *bm;
     while (bm = [bmEnum nextObject]) {
         if ([bm bookmarkType] != BDSKBookmarkTypeSeparator) {
-            [bm addObserver:self forKeyPath:BDSKBookmarkNameKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:BDSKBookmarkPropertiesObservationContext];
-            [bm addObserver:self forKeyPath:BDSKBookmarkUrlStringKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:BDSKBookmarkPropertiesObservationContext];
+            [bm addObserver:self forKeyPath:BDSKBookmarkNameKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKBookmarkPropertiesObservationContext];
+            [bm addObserver:self forKeyPath:BDSKBookmarkUrlStringKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKBookmarkPropertiesObservationContext];
             if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
-                [bm addObserver:self forKeyPath:BDSKBookmarkChildrenKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:BDSKBookmarkPropertiesObservationContext];
+                [bm addObserver:self forKeyPath:BDSKBookmarkChildrenKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKBookmarkPropertiesObservationContext];
                 [self startObservingBookmarks:[bm children]];
             }
         }
@@ -363,7 +363,7 @@ static id sharedBookmarkController = nil;
 #pragma mark KVO
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == BDSKBookmarkPropertiesObservationContext) {
+    if (context == &BDSKBookmarkPropertiesObservationContext) {
         BDSKBookmark *bookmark = (BDSKBookmark *)object;
         id newValue = [change objectForKey:NSKeyValueChangeNewKey];
         id oldValue = [change objectForKey:NSKeyValueChangeOldKey];

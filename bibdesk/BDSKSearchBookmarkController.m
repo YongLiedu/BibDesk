@@ -53,7 +53,7 @@ static NSString *BDSKSearchBookmarksDeleteToolbarItemIdentifier = @"BDSKSearchBo
 static NSString *BDSKSearchBookmarkChildrenKey = @"children";
 static NSString *BDSKSearchBookmarkLabelKey = @"label";
 
-static NSString *BDSKSearchBookmarkPropertiesObservationContext = @"BDSKSearchBookmarkPropertiesObservationContext";
+static char BDSKSearchBookmarkPropertiesObservationContext;
 
 
 @interface BDSKSearchBookmarkController (BDSKPrivate)
@@ -225,9 +225,9 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     BDSKSearchBookmark *bm;
     while (bm = [bmEnum nextObject]) {
         if ([bm bookmarkType] != BDSKSearchBookmarkTypeSeparator) {
-            [bm addObserver:self forKeyPath:BDSKSearchBookmarkLabelKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:BDSKSearchBookmarkPropertiesObservationContext];
+            [bm addObserver:self forKeyPath:BDSKSearchBookmarkLabelKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKSearchBookmarkPropertiesObservationContext];
             if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
-                [bm addObserver:self forKeyPath:BDSKSearchBookmarkChildrenKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:BDSKSearchBookmarkPropertiesObservationContext];
+                [bm addObserver:self forKeyPath:BDSKSearchBookmarkChildrenKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKSearchBookmarkPropertiesObservationContext];
                 [self startObservingBookmarks:[bm children]];
             }
         }
@@ -263,7 +263,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 #pragma mark KVO
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == BDSKSearchBookmarkPropertiesObservationContext) {
+    if (context == &BDSKSearchBookmarkPropertiesObservationContext) {
         BDSKSearchBookmark *bookmark = (BDSKSearchBookmark *)object;
         id newValue = [change objectForKey:NSKeyValueChangeNewKey];
         id oldValue = [change objectForKey:NSKeyValueChangeOldKey];

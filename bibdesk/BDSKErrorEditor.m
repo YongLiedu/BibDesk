@@ -46,7 +46,7 @@
 #import "BDSKStringEncodingManager.h"
 #import "NSWindowController_BDSKExtensions.h"
 
-static NSString *BDSKErrorEditorObservationContext = @"BDSKErrorEditorObservationContext";
+static char BDSKErrorEditorObservationContext;
 
 @implementation BDSKErrorEditor
 
@@ -158,7 +158,7 @@ static NSString *BDSKErrorEditorObservationContext = @"BDSKErrorEditorObservatio
         manager = newManager;
         [self updateDisplayName];
         if(manager)
-            [manager addObserver:self forKeyPath:@"displayName" options:0 context:BDSKErrorEditorObservationContext];
+            [manager addObserver:self forKeyPath:@"displayName" options:0 context:&BDSKErrorEditorObservationContext];
     }
 }
 
@@ -193,7 +193,7 @@ static NSString *BDSKErrorEditorObservationContext = @"BDSKErrorEditorObservatio
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
-    if (context == BDSKErrorEditorObservationContext) {
+    if (context == &BDSKErrorEditorObservationContext) {
         if(object == manager && [keyPath isEqualToString:@"displayName"]){
             [self updateDisplayName];
             

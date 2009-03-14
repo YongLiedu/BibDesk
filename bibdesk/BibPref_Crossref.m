@@ -40,7 +40,7 @@
 #import "BDSKTypeNameFormatter.h"
 #import "BDSKStringConstants.h"
 
-static void *BDSKBibPrefCrossrefDefaultsObservationContext = @"BDSKBibPrefCrossrefDefaultsObservationContext";
+static char BDSKBibPrefCrossrefDefaultsObservationContext;
 
 
 @interface BibPref_Crossref (Private)
@@ -67,7 +67,7 @@ static void *BDSKBibPrefCrossrefDefaultsObservationContext = @"BDSKBibPrefCrossr
     [self updateDuplicateBooktitleUI];
     [self updateDuplicateTypes];
     
-    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnEditInheritedKey] options:0 context:BDSKBibPrefCrossrefDefaultsObservationContext];
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnEditInheritedKey] options:0 context:&BDSKBibPrefCrossrefDefaultsObservationContext];
 }
 
 - (void)dealloc{
@@ -160,7 +160,7 @@ static void *BDSKBibPrefCrossrefDefaultsObservationContext = @"BDSKBibPrefCrossr
 #pragma mark KVO
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == BDSKBibPrefCrossrefDefaultsObservationContext) {
+    if (context == &BDSKBibPrefCrossrefDefaultsObservationContext) {
         NSString *key = [keyPath substringFromIndex:7];
         if ([key isEqualToString:BDSKWarnOnEditInheritedKey]) {
             [warnOnEditInheritedCheckButton setState:[sud boolForKey:BDSKWarnOnEditInheritedKey] ? NSOnState : NSOffState];

@@ -41,7 +41,7 @@
 
 #define MAX_PREVIEW_WIDTH	465.0
 
-static void *BDSKBibPrefCiteDefaultsObservationContext = @"BDSKBibPrefCiteDefaultsObservationContext";
+static char BDSKBibPrefCiteDefaultsObservationContext;
 
 
 @interface BibPref_Cite (Private)
@@ -62,7 +62,7 @@ static void *BDSKBibPrefCiteDefaultsObservationContext = @"BDSKBibPrefCiteDefaul
     [self updateTemplates];
     [self updateDragCopyUI];
     [self updateCiteCommandUI];
-    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree] options:0 context:BDSKBibPrefCiteDefaultsObservationContext];
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree] options:0 context:&BDSKBibPrefCiteDefaultsObservationContext];
 }
 
 - (void)dealloc{
@@ -202,7 +202,7 @@ static void *BDSKBibPrefCiteDefaultsObservationContext = @"BDSKBibPrefCiteDefaul
 #pragma mark KVO
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == BDSKBibPrefCiteDefaultsObservationContext) {
+    if (context == &BDSKBibPrefCiteDefaultsObservationContext) {
         NSString *key = [keyPath substringFromIndex:7];
         if ([key isEqualToString:BDSKExportTemplateTree]) {
             [self updateTemplates];

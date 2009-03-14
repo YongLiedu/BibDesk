@@ -41,8 +41,8 @@
 #import "BDAlias.h"
 #import <Sparkle/Sparkle.h>
 
-static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneralDefaultsObservationContext";
-static void *BDSKBibPrefGeneralUpdaterObservationContext = @"BDSKBibPrefGeneralUpdaterObservationContext";
+static char BDSKBibPrefGeneralDefaultsObservationContext;
+static char BDSKBibPrefGeneralUpdaterObservationContext;
 
 
 @interface BibPref_General (Private)
@@ -58,14 +58,14 @@ static void *BDSKBibPrefGeneralUpdaterObservationContext = @"BDSKBibPrefGeneralU
 @implementation BibPref_General
 
 - (void)awakeFromNib{
-    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnDeleteKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
-    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRemovalFromGroupKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
-    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRenameGroupKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
-    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnCiteKeyChangeKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
-    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKAskToTrashFilesKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
-    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
-    [[SUUpdater sharedUpdater] addObserver:self forKeyPath:@"automaticallyChecksForUpdates" options:0 context:BDSKBibPrefGeneralUpdaterObservationContext];
-    [[SUUpdater sharedUpdater] addObserver:self forKeyPath:@"updateCheckInterval" options:0 context:BDSKBibPrefGeneralUpdaterObservationContext];
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnDeleteKey] options:0 context:&BDSKBibPrefGeneralDefaultsObservationContext];
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRemovalFromGroupKey] options:0 context:&BDSKBibPrefGeneralDefaultsObservationContext];
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRenameGroupKey] options:0 context:&BDSKBibPrefGeneralDefaultsObservationContext];
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnCiteKeyChangeKey] options:0 context:&BDSKBibPrefGeneralDefaultsObservationContext];
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKAskToTrashFilesKey] options:0 context:&BDSKBibPrefGeneralDefaultsObservationContext];
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree] options:0 context:&BDSKBibPrefGeneralDefaultsObservationContext];
+    [[SUUpdater sharedUpdater] addObserver:self forKeyPath:@"automaticallyChecksForUpdates" options:0 context:&BDSKBibPrefGeneralUpdaterObservationContext];
+    [[SUUpdater sharedUpdater] addObserver:self forKeyPath:@"updateCheckInterval" options:0 context:&BDSKBibPrefGeneralUpdaterObservationContext];
     [self updateEmailTemplateUI];
     [self updateStartupBehaviorUI];
     [self updateDefaultBibFileUI];
@@ -240,7 +240,7 @@ static void *BDSKBibPrefGeneralUpdaterObservationContext = @"BDSKBibPrefGeneralU
 #pragma mark KVO
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == BDSKBibPrefGeneralDefaultsObservationContext) {
+    if (context == &BDSKBibPrefGeneralDefaultsObservationContext) {
         NSString *key = [keyPath substringFromIndex:7];
         if ([key isEqualToString:BDSKWarnOnDeleteKey] || [key isEqualToString:BDSKWarnOnRemovalFromGroupKey] || 
             [key isEqualToString:BDSKWarnOnRenameGroupKey] || [key isEqualToString:BDSKWarnOnCiteKeyChangeKey] || 
@@ -249,7 +249,7 @@ static void *BDSKBibPrefGeneralUpdaterObservationContext = @"BDSKBibPrefGeneralU
         } else if ([key isEqualToString:BDSKExportTemplateTree]) {
             [self updateEmailTemplateUI];
         }
-    } else if (context == BDSKBibPrefGeneralUpdaterObservationContext) {
+    } else if (context == &BDSKBibPrefGeneralUpdaterObservationContext) {
         [self updateUpdaterUI];
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];

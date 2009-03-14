@@ -41,7 +41,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSCharacterSet_BDSKExtensions.h"
 
-static void *BDSKTypeManagerDefaultsObservationContext = @"BDSKTypeManagerDefaultsObservationContext";
+static char BDSKTypeManagerDefaultsObservationContext;
 
 static BDSKTypeManager *sharedInstance = nil;
 
@@ -142,7 +142,7 @@ static BDSKTypeManager *sharedInstance = nil;
             [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self
                 forKeyPath:[@"values." stringByAppendingString:prefKey]
                    options:0
-                   context:BDSKTypeManagerDefaultsObservationContext];
+                   context:&BDSKTypeManagerDefaultsObservationContext];
     }
 	return sharedInstance;
 }
@@ -274,7 +274,7 @@ static BDSKTypeManager *sharedInstance = nil;
 #pragma mark KVO
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == BDSKTypeManagerDefaultsObservationContext) {
+    if (context == &BDSKTypeManagerDefaultsObservationContext) {
         [self reloadAllFieldNames];
         [self reloadURLFields];
         [self reloadSpecialFields];

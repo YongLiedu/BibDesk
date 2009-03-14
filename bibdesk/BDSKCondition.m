@@ -44,7 +44,7 @@
 #import "BDSKSmartGroup.h"
 #import "BDSKCondition+Scripting.h"
 
-static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationContext";
+static char BDSKConditionObservationContext;
 
 @interface BDSKCondition (Private)
 - (NSDate *)cachedEndDate;
@@ -766,9 +766,9 @@ static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationCon
 #pragma mark KVO
 
 - (void)startObserving {
-    [self addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:BDSKConditionObservationContext];
-    [self addObserver:self forKeyPath:@"comparison" options:0  context:BDSKConditionObservationContext];
-    [self addObserver:self forKeyPath:@"value" options:0  context:BDSKConditionObservationContext];
+    [self addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:&BDSKConditionObservationContext];
+    [self addObserver:self forKeyPath:@"comparison" options:0  context:&BDSKConditionObservationContext];
+    [self addObserver:self forKeyPath:@"value" options:0  context:&BDSKConditionObservationContext];
 }
 
 - (void)endObserving {
@@ -778,7 +778,7 @@ static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationCon
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == BDSKConditionObservationContext) {
+    if (context == &BDSKConditionObservationContext) {
         if ([keyPath isEqualToString:@"key"]) {
             NSString *oldKey = [change objectForKey:NSKeyValueChangeOldKey];
             NSString *newKey = [change objectForKey:NSKeyValueChangeNewKey];

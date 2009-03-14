@@ -40,7 +40,7 @@
 #import "NSURL_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
 
-static void *BDSKEditorTextViewDefaultsObservationContext = @"BDSKEditorTextViewDefaultsObservationContext";
+static char BDSKEditorTextViewDefaultsObservationContext;
 
 @interface BDSKEditorTextView (Private)
 
@@ -118,7 +118,7 @@ static void *BDSKEditorTextViewDefaultsObservationContext = @"BDSKEditorTextView
 #pragma mark KVO
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == BDSKEditorTextViewDefaultsObservationContext) {
+    if (context == &BDSKEditorTextViewDefaultsObservationContext) {
         NSString *key = [keyPath substringFromIndex:7];
         if ([key isEqualToString:BDSKEditorFontNameKey]) {
             [self updateFontFromPreferences];
@@ -267,7 +267,7 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned sta
     [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self
         forKeyPath:[@"values." stringByAppendingString:BDSKEditorFontNameKey]
            options:0
-           context:BDSKEditorTextViewDefaultsObservationContext];
+           context:&BDSKEditorTextViewDefaultsObservationContext];
 }    
 
 @end

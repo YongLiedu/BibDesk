@@ -48,7 +48,7 @@
 #import "NSObject_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 
-static void *BDSKMacroResolverDefaultsObservationContext = @"BDSKMacroResolverDefaultsObservationContext";
+static char BDSKMacroResolverDefaultsObservationContext;
 
 @interface BDSKGlobalMacroResolver : BDSKMacroResolver {
     NSMutableDictionary *standardMacroDefinitions;
@@ -342,7 +342,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self
             forKeyPath:[@"values." stringByAppendingString:BDSKGlobalMacroFilesKey]
                options:0
-               context:BDSKMacroResolverDefaultsObservationContext];
+               context:&BDSKMacroResolverDefaultsObservationContext];
     }
     return self;
 }
@@ -450,7 +450,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 #pragma mark KVO
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == BDSKMacroResolverDefaultsObservationContext) {
+    if (context == &BDSKMacroResolverDefaultsObservationContext) {
         [fileMacroDefinitions release];
         fileMacroDefinitions = nil;
         modification++;
