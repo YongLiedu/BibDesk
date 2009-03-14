@@ -59,12 +59,12 @@ static const NSUInteger _sizes[] = { 32, 64, 128, 256, 512 };
         NSGraphicsContext *windowContext = FVWindowGraphicsContextWithSize(dstRect.size);
         NSParameterAssert(nil != windowContext);
 
-        CGLayerRef layer = CGLayerCreateWithContext([windowContext graphicsPort], NSRectToCGRect(dstRect).size, NULL);
+        CGLayerRef layer = CGLayerCreateWithContext([windowContext graphicsPort], *(CGSize*)&dstRect.size, NULL);
         CGContextRef context = CGLayerGetContext(layer);
         
         // don't use CGContextClearRect with non-window/bitmap contexts
         CGContextSetRGBFillColor(context, 0, 0, 0, 0);
-        CGContextFillRect(context, NSRectToCGRect(dstRect));
+        CGContextFillRect(context, *(CGRect*)&dstRect);
         
         NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:context flipped:YES];
         [NSGraphicsContext saveGraphicsState];

@@ -92,7 +92,7 @@
 - (void)drawWithFrame:(NSRect)aRect inView:(NSView *)aView
 {
     CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
-    CGRect progressRect = NSRectToCGRect(aRect);    
+    CGRect progressRect = *(CGRect*)&aRect;    
     CGPoint ctr = CGPointMake(CGRectGetMidX(progressRect), CGRectGetMidY(progressRect));
     
     // indeterminate download length
