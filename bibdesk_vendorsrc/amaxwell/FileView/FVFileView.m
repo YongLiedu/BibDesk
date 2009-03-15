@@ -60,6 +60,16 @@ static char _FVFileViewInternalSelectionIndexesObservationContext;
 static char _FVFileViewSelectionIndexesObservationContext;
 static char _FVFileViewContentObservationContext;
 
+#define SELECTIONINDEXES_BINDING_NAME @"selectionIndexes"
+#define CONTENT_BINDING_NAME @"content"
+#define ICONSCALE_BINDING_NAME @"iconScale"
+#define AUTOSCALES_BINDING_NAME @"autoScales"
+#define EDITABLE_BINDING_NAME @"editable"
+#define BACKGROUNDCOLOR_BINDING_NAME @"backgroundColor"
+
+#define SELECTIONINDEXES_KEY @"selectionIndexes"
+#define ICONSCALE_KEY @"iconScale"
+
 static const NSSize DEFAULT_ICON_SIZE = { 64.0, 64.0 };
 static const NSSize DEFAULT_PADDING = { 10.0, 4.0 };
 static const CGFloat DEFAULT_MARGIN = 4.0;
@@ -110,6 +120,7 @@ static CGFloat _subtitleHeight = 0.0;
 - (void)_recalculateGridSize;
 - (void)_reloadIcons;
 - (void)_resetViewLayout;
+- (void)_resetTrackingRectsAndToolTips;
 - (void)_getRangeOfRows:(NSRange *)rowRange columns:(NSRange *)columnRange inRect:(NSRect)aRect;
 - (void)_showArrowsForIconAtIndex:(NSUInteger)anIndex;
 - (void)_hideArrows;
@@ -156,10 +167,12 @@ static CGFloat _subtitleHeight = 0.0;
     [QTMovie class];
     
     // binding an NSSlider in IB 3 results in a crash on 10.4
-    [self exposeBinding:@"iconScale"];
-    [self exposeBinding:@"content"];
-    [self exposeBinding:@"selectionIndexes"];
-    [self exposeBinding:@"backgroundColor"];
+    [self exposeBinding:ICONSCALE_BINDING_NAME];
+    [self exposeBinding:AUTOSCALES_BINDING_NAME];
+    [self exposeBinding:EDITABLE_BINDING_NAME];
+    [self exposeBinding:CONTENT_BINDING_NAME];
+    [self exposeBinding:SELECTIONINDEXES_BINDING_NAME];
+    [self exposeBinding:BACKGROUNDCOLOR_BINDING_NAME];
 }
 
 + (NSColor *)defaultBackgroundColor
@@ -262,6 +275,8 @@ static CGFloat _subtitleHeight = 0.0;
     _fvFlags.isBound = NO;
     _fvFlags.isObservingSelectionIndexes = NO;
     
+    _fvFlags.updatingFromSlider = NO;
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleFinderLabelChanged:) name:FVFinderLabelDidChangeNotification object:nil];
 }
 
@@ -282,7 +297,7 @@ static CGFloat _subtitleHeight = 0.0;
 - (void)dealloc
 {
     if (_fvFlags.isObservingSelectionIndexes)
-        [self removeObserver:self forKeyPath:@"selectionIndexes"];
+        [self removeObserver:self forKeyPath:SELECTIONINDEXES_BINDING_NAME];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_leftArrow release];
     [_rightArrow release];
@@ -398,6 +413,16 @@ static CGFloat _subtitleHeight = 0.0;
 
 #pragma mark API
 
+- (void)_setIconScale:(CGFloat)scale;
+{
+    if (_fvFlags.autoScales == NO) {
+        [self setIconScale:scale];
+        
+        NSDictionary *info = [self infoForBinding:ICONSCALE_BINDING_NAME];
+        [[info objectForKey:NSObservedObjectKey] setValue:[NSNumber numberWithFloat:[self iconScale]] forKeyPath:[info objectForKey:NSObservedKeyPathKey]];
+    }
+}
+
 - (void)setIconScale:(CGFloat)scale;
 {
     if (_fvFlags.autoScales == NO) {
@@ -425,6 +450,9 @@ static CGFloat _subtitleHeight = 0.0;
             // this is only sent in the default runloop mode, so it's not sent during event tracking
             [self performSelector:@selector(_rescaleComplete) withObject:nil afterDelay:0.0];
         }
+        
+        if (_fvFlags.updatingFromSlider == NO)
+            [[_sliderWindow slider] setFloatValue:[self iconScale]];
     }
 }
 
@@ -458,8 +486,13 @@ static CGFloat _subtitleHeight = 0.0;
     }
 }
 
-- (BOOL)autoScales {
-    return _fvFlags.autoScales;
+- (void)_setAutoScales:(BOOL)flag {
+    if (_fvFlags.autoScales != flag) {
+        [self setAutoScales:flag];
+        
+        NSDictionary *info = [self infoForBinding:AUTOSCALES_BINDING_NAME];
+        [[info objectForKey:NSObservedObjectKey] setValue:[NSNumber numberWithBool:[self autoScales]] forKey:[info objectForKey:NSObservedKeyPathKey]];
+    }
 }
 
 - (void)setAutoScales:(BOOL)flag {
@@ -469,13 +502,26 @@ static CGFloat _subtitleHeight = 0.0;
         // arrows out of place now, they will be added again when required when resetting the tracking rects
         [self _hideArrows];
         
+        if (_fvFlags.autoScales == NO && _sliderWindow) {
+            [[NSNotificationCenter defaultCenter] removeObserver:self name:FVSliderMouseExitedNotificationName object:nil];
+            [_sliderWindow orderOut:nil];
+            [_sliderWindow release];
+            _sliderWindow = nil;
+        }
+        
         NSPoint scrollPoint = [self scrollPercentage];
         
         // the full view will likely need repainting, this also recalculates the grid
         [self reloadIcons];
         
         [self setScrollPercentage:scrollPoint];
+        
+        [self _resetTrackingRectsAndToolTips];
     }
+}
+
+- (BOOL)autoScales {
+    return _fvFlags.autoScales;
 }
 
 - (void)awakeFromNib
@@ -584,15 +630,23 @@ static CGFloat _subtitleHeight = 0.0;
     return size;
 }
 
+- (void)_sliderAction:(id)sender {
+    if (_fvFlags.autoScales == NO) {
+        _fvFlags.updatingFromSlider = YES;
+        [self _setIconScale:[sender floatValue]];
+        _fvFlags.updatingFromSlider = NO;
+    }
+}
+
 - (FVSliderWindow *)_sliderWindow {
-    if (_sliderWindow == nil) {
+    if (_sliderWindow == nil && _fvFlags.autoScales == NO) {
         _sliderWindow = [[FVSliderWindow alloc] init];
         FVSlider *slider = [_sliderWindow slider];
         // binding & unbinding is handled in viewWillMoveToSuperview:
         [slider setMaxValue:16.0];
         [slider setMinValue:0.5];
-        if ([self superview])
-            [[_sliderWindow slider] bind:@"value" toObject:self withKeyPath:@"iconScale" options:nil];
+        [slider setAction:@selector(_sliderAction:)];
+        [slider setTarget:self];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSliderMouseExited:) name:FVSliderMouseExitedNotificationName object:slider];
     }
     return _sliderWindow;
@@ -818,9 +872,9 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     // Follow NSTableView's example and clear selection outside the current range of indexes
     NSUInteger lastSelIndex = [_selectedIndexes lastIndex], numIcons = [self numberOfIcons];
     if (NSNotFound != lastSelIndex && lastSelIndex >= numIcons) {
-        [self willChangeValueForKey:@"selectionIndexes"];
+        [self willChangeValueForKey:SELECTIONINDEXES_KEY];
         [_selectedIndexes removeIndexesInRange:NSMakeRange(numIcons, lastSelIndex + 1 - numIcons)];
-        [self didChangeValueForKey:@"selectionIndexes"];
+        [self didChangeValueForKey:SELECTIONINDEXES_KEY];
     }
     
     [self _resetViewLayout];
@@ -839,7 +893,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         FVLog(@"*** warning *** binding options are unsupported in -[%@ %@] (requested %@)", [self class], NSStringFromSelector(_cmd), options);
     
     // Note: we don't bind to this, some client does.  We do register as an observer, but that's a different code path.
-    if ([binding isEqualToString:@"selectionIndexes"]) {
+    if ([binding isEqualToString:SELECTIONINDEXES_BINDING_NAME]) {
         
         FVAPIAssert3(nil == [_bindingInfo objectForKey:binding], @"attempt to bind %@ to %@ when bound to %@", keyPath, observable, [[_bindingInfo objectForKey:binding] objectForKey:NSObservedObjectKey]);
         
@@ -847,41 +901,46 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:observable, NSObservedObjectKey, [[keyPath copy] autorelease], NSObservedKeyPathKey, [[options copy] autorelease], NSOptionsKey, nil];
         [_bindingInfo setObject:info forKey:binding];
         [observable addObserver:self forKeyPath:keyPath options:0 context:&_FVFileViewSelectionIndexesObservationContext];
+        [self observeValueForKeyPath:keyPath ofObject:observable change:nil context:&_FVFileViewSelectionIndexesObservationContext];
     }
-    else if ([binding isEqualToString:@"content"]) {
+    else if ([binding isEqualToString:CONTENT_BINDING_NAME]) {
      
         FVAPIAssert3(nil == [_bindingInfo objectForKey:binding], @"attempt to bind %@ to %@ when bound to %@", keyPath, observable, [[_bindingInfo objectForKey:binding] objectForKey:NSObservedObjectKey]);
         
         // keep a record of the observervable object for unbinding; this is strictly for observation, not a manual binding
         NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:observable, NSObservedObjectKey, [[keyPath copy] autorelease], NSObservedKeyPathKey, [[options copy] autorelease], NSOptionsKey, nil];
         [_bindingInfo setObject:info forKey:binding];
-        [observable addObserver:self forKeyPath:keyPath options:0 context:&_FVFileViewContentObservationContext];
         _fvFlags.isBound = YES;
+        [observable addObserver:self forKeyPath:keyPath options:0 context:&_FVFileViewContentObservationContext];
+        [self observeValueForKeyPath:keyPath ofObject:observable change:nil context:&_FVFileViewContentObservationContext];
     }
-    
-    // ??? the IB inspector doesn't show values properly unless I call super for that case as well
-    [super bind:binding toObject:observable withKeyPath:keyPath options:options];
+    else {
+        // ??? the IB inspector doesn't show values properly unless I call super for that case as well
+        [super bind:binding toObject:observable withKeyPath:keyPath options:options];
+    }
 }
 
 - (void)unbind:(NSString *)binding
 {
-    [super unbind:binding];
-
-    if ([binding isEqualToString:@"selectionIndexes"]) {
+    if ([binding isEqualToString:SELECTIONINDEXES_BINDING_NAME]) {
         FVAPIAssert2(nil != [_bindingInfo objectForKey:binding], @"%@: attempt to unbind %@ when unbound", self, binding);
         
         [[_bindingInfo objectForKey:NSObservedObjectKey] removeObserver:self forKeyPath:[_bindingInfo objectForKey:NSObservedKeyPathKey]];
         [_bindingInfo removeObjectForKey:binding];
     }
-    else if ([binding isEqualToString:@"content"]) {
+    else if ([binding isEqualToString:CONTENT_BINDING_NAME]) {
         FVAPIAssert2(nil != [_bindingInfo objectForKey:binding], @"%@: attempt to unbind %@ when unbound", self, binding);
         
         [[_bindingInfo objectForKey:NSObservedObjectKey] removeObserver:self forKeyPath:[_bindingInfo objectForKey:NSObservedKeyPathKey]];
+        [_bindingInfo removeObjectForKey:binding];
         _fvFlags.isBound = NO;
         
         [self setIconURLs:nil];
         // Calling -[super unbind:binding] after this may cause selection to be reset; this happens with the controller in the demo project, since it unbinds in the wrong order.  We should be resilient against that, so we unbind first.
         [self setSelectionIndexes:[NSIndexSet indexSet]];
+    }
+    else {
+        [super unbind:binding];
     }
     [self reloadIcons];
 }
@@ -889,7 +948,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 - (NSDictionary *)infoForBinding:(NSString *)binding;
 {
     NSDictionary *info = nil;
-    if ([binding isEqualToString:@"selectionIndexes"] || [binding isEqualToString:@"content"])
+    if ([binding isEqualToString:SELECTIONINDEXES_BINDING_NAME] || [binding isEqualToString:CONTENT_BINDING_NAME])
         info = [_bindingInfo objectForKey:binding];
     else
         info = [super infoForBinding:binding];
@@ -898,16 +957,23 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (Class)valueClassForBinding:(NSString *)binding
 {
-    return [binding isEqualToString:@"selectionIndexes"] ? [NSIndexSet class] : [super valueClassForBinding:binding];
+    if ([binding isEqualToString:SELECTIONINDEXES_BINDING_NAME])
+        return [NSIndexSet class];
+    else if ([binding isEqualToString:ICONSCALE_BINDING_NAME] || [binding isEqualToString:AUTOSCALES_BINDING_NAME] || [binding isEqualToString:EDITABLE_BINDING_NAME])
+        return [NSNumber class];
+    else if ([binding isEqualToString:BACKGROUNDCOLOR_BINDING_NAME])
+        return [NSColor class];
+    else
+        return [super valueClassForBinding:binding];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {    
     if (context == &_FVFileViewInternalSelectionIndexesObservationContext || context == &_FVFileViewSelectionIndexesObservationContext) {
 
-        NSParameterAssert([keyPath isEqualToString:@"selectionIndexes"]);
+        NSParameterAssert([keyPath isEqualToString:SELECTIONINDEXES_BINDING_NAME]);
         
-        NSDictionary *info = [_bindingInfo objectForKey:@"selectionIndexes"];
+        NSDictionary *info = [_bindingInfo objectForKey:SELECTIONINDEXES_BINDING_NAME];
         BOOL updatePreviewer = NO;
         
         if (info && context == &_FVFileViewInternalSelectionIndexesObservationContext) {
@@ -939,7 +1005,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         }
     }
     else if (context == &_FVFileViewContentObservationContext) {
-        NSParameterAssert([keyPath isEqualToString:@"content"]);
+        NSParameterAssert([keyPath isEqualToString:CONTENT_BINDING_NAME]);
         // change to the number of icons or some rearrangement
         [self reloadIcons];
     }
@@ -963,23 +1029,22 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     // mmalc's example unbinds here for a nil superview, but that causes problems if you remove the view and add it back in later (and also can cause crashes as a side effect, if we're not careful with the datasource)
     if (nil == newSuperview) {
         if (_fvFlags.isObservingSelectionIndexes) {
-            [self removeObserver:self forKeyPath:@"selectionIndexes"];
+            [self removeObserver:self forKeyPath:SELECTIONINDEXES_BINDING_NAME];
             _fvFlags.isObservingSelectionIndexes = NO;
         }
         
-        [_operationQueue cancel];
-        
-        // break a retain cycle; binding is retaining this view
-        [[_sliderWindow slider] unbind:@"value"];
-    }
-    else {
-        if (_fvFlags.isObservingSelectionIndexes) {
-            [self addObserver:self forKeyPath:@"selectionIndexes" options:0 context:&_FVFileViewInternalSelectionIndexesObservationContext];
-            _fvFlags.isObservingSelectionIndexes = YES;
+        NSEnumerator *bindingEnum = [[self exposedBindings] objectEnumerator];
+        NSString *binding;
+        while (binding = [bindingEnum nextObject]) {
+            if (nil != [self infoForBinding:binding])
+                [self unbind:binding];
         }
         
-        // bind here (noop if we don't have a slider)
-        [[_sliderWindow slider] bind:@"value" toObject:self withKeyPath:@"iconScale" options:nil];
+        if ([[_sliderWindow parentWindow] isEqual:[self window]]) {
+            [_sliderWindow orderOut:nil];
+        }
+        
+        [_operationQueue cancel];
     }
     
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSViewFrameDidChangeNotification object:nil];
@@ -992,6 +1057,11 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     
     // this can be send in a dealloc when the view hierarchy is decomposed
     if (superview) {
+        if (_fvFlags.isObservingSelectionIndexes) {
+            [self addObserver:self forKeyPath:SELECTIONINDEXES_BINDING_NAME options:0 context:&_FVFileViewInternalSelectionIndexesObservationContext];
+            _fvFlags.isObservingSelectionIndexes = YES;
+        }
+        
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleSuperviewDidResize:) name:NSViewFrameDidChangeNotification object:observedView];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleSuperviewDidResize:) name:NSViewBoundsDidChangeNotification object:observedView];
         
@@ -999,6 +1069,12 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         [[self window] invalidateCursorRectsForView:self];
         if ([self window] && [[self window] isKeyWindow] == NO)
             [self resetCursorRects];
+    }
+}
+
+- (void)viewWillMoveToWindow:(NSWindow *)newWindow {
+    if (newWindow == nil && [[_sliderWindow parentWindow] isEqual:[self window]]) {
+        [_sliderWindow orderOut:nil];
     }
 }
 
@@ -2128,7 +2204,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                 if (NSEqualRects([_sliderWindow frame], sliderRect) == NO)
                     [_sliderWindow setFrame:sliderRect display:NO];
                 
-                [_sliderWindow orderFront:self];
+                [_sliderWindow fadeIn:self];
                 [[self window] addChildWindow:_sliderWindow ordered:NSWindowAbove];
             }
         }
@@ -2144,7 +2220,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
 {
     if ([[_sliderWindow parentWindow] isEqual:[self window]]) {
         [[self window] removeChildWindow:_sliderWindow];
-        [_sliderWindow orderOut:self];
+        [_sliderWindow fadeOut:self];
     }
 }
 
@@ -2259,9 +2335,9 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                 // add a single index for an unmodified or cmd-click
                 // add a single index for shift click only if there is no current selection
                 if ((flags & NSShiftKeyMask) == 0 || [_selectedIndexes count] == 0) {
-                    [self willChangeValueForKey:@"selectionIndexes"];
+                    [self willChangeValueForKey:SELECTIONINDEXES_KEY];
                     [_selectedIndexes addIndex:i];
-                    [self didChangeValueForKey:@"selectionIndexes"];
+                    [self didChangeValueForKey:SELECTIONINDEXES_KEY];
                 }
                 else if ((flags & NSShiftKeyMask) != 0) {
                     // Shift-click extends by a region; this is equivalent to iPhoto's grid view.  Finder treats shift-click like cmd-click in icon view, but we have a fixed layout, so this behavior is convenient and will be predictable.
@@ -2273,23 +2349,23 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                     NSUInteger end = [_selectedIndexes lastIndex];
 
                     if (i < start) {
-                        [self willChangeValueForKey:@"selectionIndexes"];
+                        [self willChangeValueForKey:SELECTIONINDEXES_KEY];
                         [_selectedIndexes addIndexesInRange:NSMakeRange(i, start - i)];
-                        [self didChangeValueForKey:@"selectionIndexes"];
+                        [self didChangeValueForKey:SELECTIONINDEXES_KEY];
                     }
                     else if (i > end) {
-                        [self willChangeValueForKey:@"selectionIndexes"];
+                        [self willChangeValueForKey:SELECTIONINDEXES_KEY];
                         [_selectedIndexes addIndexesInRange:NSMakeRange(end + 1, i - end)];
-                        [self didChangeValueForKey:@"selectionIndexes"];
+                        [self didChangeValueForKey:SELECTIONINDEXES_KEY];
                     }
                     else if (NSNotFound != _lastClickedIndex) {
                         // This handles the case of clicking in a deselected region between two selected regions.  We want to extend from the last click to the current one, instead of randomly picking an end to start from.
-                        [self willChangeValueForKey:@"selectionIndexes"];
+                        [self willChangeValueForKey:SELECTIONINDEXES_KEY];
                         if (_lastClickedIndex > i)
                             [_selectedIndexes addIndexesInRange:NSMakeRange(i, _lastClickedIndex - i)];
                         else
                             [_selectedIndexes addIndexesInRange:NSMakeRange(_lastClickedIndex + 1, i - _lastClickedIndex)];
-                        [self didChangeValueForKey:@"selectionIndexes"];
+                        [self didChangeValueForKey:SELECTIONINDEXES_KEY];
                     }
                 }
                 [self setNeedsDisplay:YES];     
@@ -2297,9 +2373,9 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
         }
         else if ((flags & NSCommandKeyMask) != 0) {
             // cmd-clicked a previously selected index, so remove it from the selection
-            [self willChangeValueForKey:@"selectionIndexes"];
+            [self willChangeValueForKey:SELECTIONINDEXES_KEY];
             [_selectedIndexes removeIndex:i];
-            [self didChangeValueForKey:@"selectionIndexes"];
+            [self didChangeValueForKey:SELECTIONINDEXES_KEY];
             [self setNeedsDisplay:YES];
         }
         
@@ -2452,7 +2528,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 {
     float dz = [theEvent deltaZ];
     dz = dz > 0 ? FVMin(0.2, dz) : FVMax(-0.2, dz);
-    [self setIconScale:FVMax(0.1, [self iconScale] + 0.5 * dz)];
+    [self _setIconScale:FVMax(0.1, [self iconScale] + 0.5 * dz)];
 }
 
 #pragma mark Drop target
@@ -2927,17 +3003,17 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (IBAction)zoomIn:(id)sender;
 {
-    [self setIconScale:([self iconScale] * 2)];
+    [self _setIconScale:([self iconScale] * 2)];
 }
 
 - (IBAction)zoomOut:(id)sender;
 {
-    [self setIconScale:([self iconScale] / 2)];
+    [self _setIconScale:([self iconScale] / 2)];
 }
 
 - (IBAction)toggleAutoScales:(id)sender;
 {
-    [self setAutoScales:[self autoScales] == NO];
+    [self _setAutoScales:[self autoScales] == NO];
 }
 
 - (IBAction)previewAction:(id)sender;

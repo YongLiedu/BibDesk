@@ -162,28 +162,32 @@ NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNoti
 
 - (FVSlider *)slider { return _slider; }
 
-- (void)orderFront:(id)sender {
+- (void)fadeIn:(id)sender {
     if ([self isVisible] == NO && [self respondsToSelector:@selector(animator)]) {
         [self setAlphaValue:0.0];
-        [super orderFront:sender];
+        [self orderFront:sender];
         [[self animator] setAlphaValue:1.0];
     } else {
-        [super orderFront:sender];
+        [self orderFront:sender];
+    }
+}
+
+- (void)fadeOut:(id)sender {
+    if ([self isVisible] && [self respondsToSelector:@selector(animator)]) {
+        [[self animator] setAlphaValue:0.0];
+    } else {
+        [self orderOut:sender];
     }
 }
 
 - (void)orderOut:(id)sender {
-    if ([self isVisible] && [self respondsToSelector:@selector(animator)]) {
-        [[self animator] setAlphaValue:0.0];
-    } else {
-        [super orderOut:sender];
-    }
+    [[self parentWindow] removeChildWindow:self];
+    [super orderOut:self];
 }
 
 - (void)animationDidStop:(id)animation finished:(BOOL)flag  {
     if ([self alphaValue] < 0.0001 && [self isVisible]) {
-        [[self parentWindow] removeChildWindow:self];
-        [super orderOut:self];
+        [self orderOut:self];
     }
 }
 

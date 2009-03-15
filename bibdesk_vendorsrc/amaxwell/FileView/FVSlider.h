@@ -54,6 +54,10 @@ NSString * const FVSliderMouseExitedNotificationName;
 }
 
 - (id)init;
+
 - (FVSlider *)slider;
+
+- (void)fadeIn:(id)sender;
+- (void)fadeOut:(id)sender;
 
 @end
