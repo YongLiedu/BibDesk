@@ -903,8 +903,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 }
 
 - (void)handleFinderLabelChanged:(NSNotification *)note {
-    if ([_orderedURLs containsObject:[note object]])
-        CFDictionaryRemoveValue(_infoTable, [note object]);
+    CFDictionaryRemoveValue(_infoTable, [note object]);
 }
 
 #pragma mark Binding support
