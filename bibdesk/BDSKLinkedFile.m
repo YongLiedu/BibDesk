@@ -169,6 +169,8 @@ static AliasHandle BDSKPathToAliasHandle(CFStringRef inPath, CFStringRef inBaseP
     AliasHandle alias;
     const FSRef *fileRef;
     NSString *relativePath;
+    NSURL *lastURL;
+    BOOL isInitial;
     id delegate;
 }
 
@@ -362,6 +364,8 @@ static Class BDSKLinkedFileClass = Nil;
         alias = anAlias;
         relativePath = [relPath copy];
         delegate = aDelegate;
+        lastURL = nil;
+        isInitial = YES;
     }
     return self;    
 }
@@ -467,6 +471,7 @@ static Class BDSKLinkedFileClass = Nil;
     NSZoneFree([self zone], (void *)fileRef);
     BDSKDisposeAliasHandle(alias);
     [relativePath release];
+    [lastURL release];
     [super dealloc];
 }
 
@@ -571,6 +576,14 @@ static Class BDSKLinkedFileClass = Nil;
         if ([self fileRef] != NULL)
             aURL = CFURLCreateFromFSRef(NULL, fileRef);
     }
+    BOOL changed = [(NSURL *)aURL isEqual:lastURL] == NO && (aURL != NULL || lastURL != nil);
+    if (changed) {
+        [lastURL release];
+        lastURL = [(NSURL *)aURL retain];
+        if (isInitial == NO)
+            [delegate performSelector:@selector(linkedFileURLChanged:) withObject:self afterDelay:0.0];
+    }
+    isInitial = NO;
     return [(NSURL *)aURL autorelease];
 }
 

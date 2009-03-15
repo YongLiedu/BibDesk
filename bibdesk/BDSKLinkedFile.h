@@ -76,4 +76,5 @@
 
 @interface NSObject (BDSKLinkedFileDelegate)
 - (NSString *)basePathForLinkedFile:(BDSKLinkedFile *)file;
+- (void)linkedFileURLChanged:(BDSKLinkedFile *)file;
 @end
