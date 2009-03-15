@@ -1840,8 +1840,6 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     CGColorRef shadowColor = CGColorCreate(cspace, shadowComponents);
     CGColorSpaceRelease(cspace);
     
-    BOOL iconsNeedsRebuild = NO;
-    
     // iterate each row/column to see if it's in the dirty rect, and evaluate the current cache state
     for (r = rMin; r < rMax; r++) 
     {
@@ -1853,10 +1851,6 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
             if (NSNotFound != i && (NO == _fvFlags.isDrawingDragImage || [_selectedIndexes containsIndex:i])) {
             
                 NSRect fileRect = [self _rectOfIconInRow:r column:c];
-                
-                NSURL *aURL = [self URLAtIndex:i];
-                // sanity check, see if the cached icons are not stale
-                iconsNeedsRebuild = iconsNeedsRebuild || [[self _URLAtIndex:i] isEqual:aURL] == NO;
                 
                 // allow some extra for the shadow (-5)
                 NSRect textRect = [self _rectOfTextForIconRect:fileRect];
@@ -1899,7 +1893,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                     
                     NSString *name, *subtitle = [self subtitleAtIndex:i];
                     NSUInteger label;
-                    [self _getDisplayName:&name andLabel:&label forURL:aURL];
+                    [self _getDisplayName:&name andLabel:&label forURL:[self URLAtIndex:i]];
                     NSStringDrawingOptions stringOptions = NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingOneShot;
                     
                     if (label > 0) {
@@ -1929,9 +1923,6 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     }
     
     CGColorRelease(shadowColor);
-    
-    if (iconsNeedsRebuild)
-        [self _reloadIcons];
     
     // avoid hitting the cache thread while a live resize is in progress, but allow cache updates while scrolling
     // use the same range criteria that we used in iterating icons
