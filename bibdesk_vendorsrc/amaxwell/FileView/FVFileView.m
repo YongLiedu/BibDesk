@@ -3126,7 +3126,9 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     for (i = 0; i < iMax; i++) {
         [FVFinderLabel setFinderLabel:label forURL:[selectedURLs objectAtIndex:i]];
     }
-    [self setNeedsDisplay:YES];
+    
+    // FVViewController label cache needs to be rebuilt
+    [self reloadIcons];
 }
 
 static void addFinderLabelsToSubmenu(NSMenu *submenu)
