@@ -38,6 +38,8 @@
 
 #import <Cocoa/Cocoa.h>
 
+extern NSString *FVFinderLabelDidChangeNotification;
+
 /** Finder icon label interface.
  
  Finder labels are stored as integers in the filesystem, and are restricted to values 0--7.  Each integer corresponds to a color and name, which can be set in Finder's preferences.  Pass a value of 0 to clear the label.

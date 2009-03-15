@@ -40,6 +40,8 @@
 #import "FVUtilities.h"
 #import "FVIcon.h"
 
+NSString *FVFinderLabelDidChangeNotification = @"FVFinderLabelDidChangeNotification";
+
 @implementation FVFinderLabel
 
 static CFMutableDictionaryRef _layers = NULL;
@@ -458,6 +460,8 @@ static void ClipContextToCircleCappedPathInRect(CGContextRef context, CGRect rec
                 fInfo->finderFlags |= (label & kColor);
             }
             FSSetCatalogInfo(&fileRef, kFSCatInfoFinderInfo, &catalogInfo);
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:FVFinderLabelDidChangeNotification object:aURL];
         }
     }
 }

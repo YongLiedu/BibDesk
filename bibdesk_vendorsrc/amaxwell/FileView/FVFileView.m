@@ -117,6 +117,7 @@ static CGFloat _subtitleHeight = 0.0;
 - (void)_cancelDownloads;
 - (void)_downloadURLAtIndex:(NSUInteger)anIndex;
 - (void)_invalidateProgressTimer;
+- (void)handleFinderLabelChanged:(NSNotification *)note;
 
 @end
 
@@ -260,6 +261,8 @@ static CGFloat _subtitleHeight = 0.0;
     
     _fvFlags.isBound = NO;
     _fvFlags.isObservingSelectionIndexes = NO;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleFinderLabelChanged:) name:FVFinderLabelDidChangeNotification object:nil];
 }
 
 #pragma mark NSView overrides
@@ -821,6 +824,11 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     }
     
     [self _resetViewLayout];
+}
+
+- (void)handleFinderLabelChanged:(NSNotification *)note {
+    if ([_orderedURLs containsObject:[note object]])
+        [self _reloadIcons];
 }
 
 #pragma mark Binding support
@@ -3123,12 +3131,8 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     
     NSArray *selectedURLs = [self _selectedURLs];
     NSUInteger i, iMax = [selectedURLs count];
-    for (i = 0; i < iMax; i++) {
+    for (i = 0; i < iMax; i++)
         [FVFinderLabel setFinderLabel:label forURL:[selectedURLs objectAtIndex:i]];
-    }
-    
-    // FVViewController label cache needs to be rebuilt
-    [self reloadIcons];
 }
 
 static void addFinderLabelsToSubmenu(NSMenu *submenu)
