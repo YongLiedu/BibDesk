@@ -56,7 +56,6 @@
 
 static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
-static char _FVFileViewInternalSelectionIndexesObservationContext;
 static char _FVFileViewSelectionIndexesObservationContext;
 static char _FVFileViewContentObservationContext;
 
@@ -131,6 +130,9 @@ static CGFloat _subtitleHeight = 0.0;
 - (void)_downloadURLAtIndex:(NSUInteger)anIndex;
 - (void)_invalidateProgressTimer;
 - (void)handleFinderLabelChanged:(NSNotification *)note;
+- (void)_addSelectionIndexesInRange:(NSRange)range;
+- (void)_removeSelectionIndexesInRange:(NSRange)range;
+- (void)_selectionIndexesChanged:(BOOL)updateBinding;
 
 @end
 
@@ -277,7 +279,6 @@ static CGFloat _subtitleHeight = 0.0;
     _operationQueue = [FVOperationQueue new];
     
     _fvFlags.isBound = NO;
-    _fvFlags.isObservingSelectionIndexes = NO;
     
     _fvFlags.updatingFromSlider = NO;
     
@@ -300,8 +301,6 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (void)dealloc
 {
-    if (_fvFlags.isObservingSelectionIndexes)
-        [self removeObserver:self forKeyPath:SELECTIONINDEXES_BINDING_NAME];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_leftArrow release];
     [_rightArrow release];
@@ -894,9 +893,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     // Follow NSTableView's example and clear selection outside the current range of indexes
     NSUInteger lastSelIndex = [_selectedIndexes lastIndex], numIcons = [self numberOfIcons];
     if (NSNotFound != lastSelIndex && lastSelIndex >= numIcons) {
-        [self willChangeValueForKey:SELECTIONINDEXES_KEY];
-        [_selectedIndexes removeIndexesInRange:NSMakeRange(numIcons, lastSelIndex + 1 - numIcons)];
-        [self didChangeValueForKey:SELECTIONINDEXES_KEY];
+        [self _removeSelectionIndexesInRange:NSMakeRange(numIcons, lastSelIndex + 1 - numIcons)];
     }
     
     [self _resetViewLayout];
@@ -990,40 +987,20 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {    
-    if (context == &_FVFileViewInternalSelectionIndexesObservationContext || context == &_FVFileViewSelectionIndexesObservationContext) {
-
+    if (context == &_FVFileViewSelectionIndexesObservationContext) {
         NSParameterAssert([keyPath isEqualToString:SELECTIONINDEXES_BINDING_NAME]);
         
         NSDictionary *info = [_bindingInfo objectForKey:SELECTIONINDEXES_BINDING_NAME];
-        BOOL updatePreviewer = NO;
+        NSIndexSet *controllerSet = [[info objectForKey:NSObservedObjectKey] valueForKeyPath:[info objectForKey:NSObservedKeyPathKey]];
         
-        if (nil == info) {
-            // no binding, so this should be a view-initiated change
-            NSParameterAssert(context == &_FVFileViewInternalSelectionIndexesObservationContext);
-            updatePreviewer = YES;
+        // since we manipulate _selectedIndexes directly, this won't cause a looping notification
+        if ([controllerSet isEqualToIndexSet:_selectedIndexes] == NO) {
+            [_selectedIndexes removeAllIndexes];
+            [_selectedIndexes addIndexes:controllerSet];
+            [self _selectionIndexesChanged:NO];
         }
-        else if (context == &_FVFileViewInternalSelectionIndexesObservationContext) {
-            // update the controller's selection; this call will cause a KVO notification that we'll also observe
-            [[info objectForKey:NSObservedObjectKey] setValue:_selectedIndexes forKeyPath:[info objectForKey:NSObservedKeyPathKey]];
-            
-            // since this will be called multiple times for a single event, we should only run the preview if self == context
-            updatePreviewer = YES;
-        }
-        else if (context == &_FVFileViewSelectionIndexesObservationContext) {
-            NSIndexSet *controllerSet = [[info objectForKey:NSObservedObjectKey] valueForKeyPath:[info objectForKey:NSObservedKeyPathKey]];
-            // since we manipulate _selectedIndexes directly, this won't cause a looping notification
-            if ([controllerSet isEqualToIndexSet:_selectedIndexes] == NO) {
-                [_selectedIndexes removeAllIndexes];
-                [_selectedIndexes addIndexes:controllerSet];
-            }
-        }
+        
         [self setNeedsDisplay:YES];
-        
-        FVPreviewer *previewer = [FVPreviewer sharedPreviewer];
-        if (updatePreviewer && [previewer isPreviewing] && NSNotFound != [_selectedIndexes firstIndex]) {
-            [previewer setWebViewContextMenuDelegate:[self delegate]];
-            [previewer previewURL:[self URLAtIndex:[_selectedIndexes firstIndex]] forIconInRect:[[previewer window] frame]];
-        }
     }
     else if (context == &_FVFileViewContentObservationContext) {
         NSParameterAssert([keyPath isEqualToString:CONTENT_BINDING_NAME]);
@@ -1053,11 +1030,6 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     
     // mmalc's example unbinds here for a nil superview, but that causes problems if you remove the view and add it back in later (and also can cause crashes as a side effect, if we're not careful with the datasource)
     if (nil == newSuperview) {
-        if (_fvFlags.isObservingSelectionIndexes) {
-            [self removeObserver:self forKeyPath:SELECTIONINDEXES_BINDING_NAME];
-            _fvFlags.isObservingSelectionIndexes = NO;
-        }
-        
         NSEnumerator *bindingEnum = [[self exposedBindings] objectEnumerator];
         NSString *binding;
         while (binding = [bindingEnum nextObject]) {
@@ -1082,11 +1054,6 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     
     // this can be send in a dealloc when the view hierarchy is decomposed
     if (superview) {
-        if (_fvFlags.isObservingSelectionIndexes) {
-            [self addObserver:self forKeyPath:SELECTIONINDEXES_BINDING_NAME options:0 context:&_FVFileViewInternalSelectionIndexesObservationContext];
-            _fvFlags.isObservingSelectionIndexes = YES;
-        }
-        
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleSuperviewDidResize:) name:NSViewFrameDidChangeNotification object:observedView];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleSuperviewDidResize:) name:NSViewBoundsDidChangeNotification object:observedView];
         
@@ -1105,12 +1072,47 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 #pragma mark Binding/datasource wrappers
 
+- (void)_selectionIndexesChanged:(BOOL)updateBinding {
+    if (updateBinding) {
+        NSDictionary *info = [_bindingInfo objectForKey:SELECTIONINDEXES_BINDING_NAME];
+        if (info)
+            [[info objectForKey:NSObservedObjectKey] setValue:_selectedIndexes forKeyPath:[info objectForKey:NSObservedKeyPathKey]];
+    }
+    
+    FVPreviewer *previewer = [FVPreviewer sharedPreviewer];
+    NSUInteger firstIndex = [_selectedIndexes firstIndex];
+    if ([previewer isPreviewing] && NSNotFound != firstIndex) {
+        [previewer setWebViewContextMenuDelegate:[self delegate]];
+        [previewer previewURL:[self URLAtIndex:firstIndex] forIconInRect:[[previewer window] frame]];
+    }
+    
+    [self setNeedsDisplay:YES];
+    
+    NSAccessibilityPostNotification(NSAccessibilityUnignoredAncestor(self), NSAccessibilityFocusedUIElementChangedNotification);
+}
+
+- (void)_addSelectionIndexesInRange:(NSRange)range {
+    [self willChangeValueForKey:SELECTIONINDEXES_KEY];
+    [_selectedIndexes removeIndexesInRange:range];
+    [self didChangeValueForKey:SELECTIONINDEXES_KEY];
+    [self _selectionIndexesChanged:YES];
+}
+
+- (void)_removeSelectionIndexesInRange:(NSRange)range {
+    [self willChangeValueForKey:SELECTIONINDEXES_KEY];
+    [_selectedIndexes removeIndexesInRange:range];
+    [self didChangeValueForKey:SELECTIONINDEXES_KEY];
+    [self _selectionIndexesChanged:YES];
+}
+
 - (void)setSelectionIndexes:(NSIndexSet *)indexSet;
 {
     FVAPIAssert(nil != indexSet, @"index set must not be nil");
-    [_selectedIndexes autorelease];
-    _selectedIndexes = [indexSet mutableCopy];
-    NSAccessibilityPostNotification(NSAccessibilityUnignoredAncestor(self), NSAccessibilityFocusedUIElementChangedNotification);
+    if (indexSet != _selectedIndexes) {
+        [_selectedIndexes release];
+        _selectedIndexes = [indexSet mutableCopy];
+        [self _selectionIndexesChanged:YES];
+    }
 }
 
 - (NSIndexSet *)selectionIndexes;
@@ -2335,9 +2337,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                 // add a single index for an unmodified or cmd-click
                 // add a single index for shift click only if there is no current selection
                 if ((flags & NSShiftKeyMask) == 0 || [_selectedIndexes count] == 0) {
-                    [self willChangeValueForKey:SELECTIONINDEXES_KEY];
-                    [_selectedIndexes addIndex:i];
-                    [self didChangeValueForKey:SELECTIONINDEXES_KEY];
+                    [self _addSelectionIndexesInRange:NSMakeRange(i, 1)];
                 }
                 else if ((flags & NSShiftKeyMask) != 0) {
                     // Shift-click extends by a region; this is equivalent to iPhoto's grid view.  Finder treats shift-click like cmd-click in icon view, but we have a fixed layout, so this behavior is convenient and will be predictable.
@@ -2349,23 +2349,17 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                     NSUInteger end = [_selectedIndexes lastIndex];
 
                     if (i < start) {
-                        [self willChangeValueForKey:SELECTIONINDEXES_KEY];
-                        [_selectedIndexes addIndexesInRange:NSMakeRange(i, start - i)];
-                        [self didChangeValueForKey:SELECTIONINDEXES_KEY];
+                        [self _addSelectionIndexesInRange:NSMakeRange(i, start - i)];
                     }
                     else if (i > end) {
-                        [self willChangeValueForKey:SELECTIONINDEXES_KEY];
-                        [_selectedIndexes addIndexesInRange:NSMakeRange(end + 1, i - end)];
-                        [self didChangeValueForKey:SELECTIONINDEXES_KEY];
+                        [self _addSelectionIndexesInRange:NSMakeRange(end + 1, i - end)];
                     }
                     else if (NSNotFound != _lastClickedIndex) {
                         // This handles the case of clicking in a deselected region between two selected regions.  We want to extend from the last click to the current one, instead of randomly picking an end to start from.
-                        [self willChangeValueForKey:SELECTIONINDEXES_KEY];
                         if (_lastClickedIndex > i)
-                            [_selectedIndexes addIndexesInRange:NSMakeRange(i, _lastClickedIndex - i)];
+                            [self _addSelectionIndexesInRange:NSMakeRange(i, _lastClickedIndex - i)];
                         else
-                            [_selectedIndexes addIndexesInRange:NSMakeRange(_lastClickedIndex + 1, i - _lastClickedIndex)];
-                        [self didChangeValueForKey:SELECTIONINDEXES_KEY];
+                            [self _addSelectionIndexesInRange:NSMakeRange(_lastClickedIndex + 1, i - _lastClickedIndex)];
                     }
                 }
                 [self setNeedsDisplay:YES];     
@@ -2373,9 +2367,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
         }
         else if ((flags & NSCommandKeyMask) != 0) {
             // cmd-clicked a previously selected index, so remove it from the selection
-            [self willChangeValueForKey:SELECTIONINDEXES_KEY];
-            [_selectedIndexes removeIndex:i];
-            [self didChangeValueForKey:SELECTIONINDEXES_KEY];
+            [self _removeSelectionIndexesInRange:NSMakeRange(i, 1)];
             [self setNeedsDisplay:YES];
         }
         
