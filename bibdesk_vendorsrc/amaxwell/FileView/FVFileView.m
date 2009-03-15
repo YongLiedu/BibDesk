@@ -1526,7 +1526,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         CGSize layerSize = CGLayerGetSize(_selectionOverlay);
         imageRect.size.height = layerSize.height;
         imageRect.size.width = layerSize.width;
-        CGContextClearRect(layerContext, *(CGRect *)&imageRect);
+        CGContextClearRect(layerContext, NSRectToCGRect(imageRect));
         
         [NSGraphicsContext saveGraphicsState];
         NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:layerContext flipped:YES];
@@ -1550,7 +1550,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     // make sure we use source over for drawing the image
     CGContextSaveGState(drawingContext);
     CGContextSetBlendMode(drawingContext, kCGBlendModeNormal);
-    CGContextDrawLayerInRect(drawingContext, *(CGRect *)&aRect, _selectionOverlay);
+    CGContextDrawLayerInRect(drawingContext, NSRectToCGRect(aRect), _selectionOverlay);
     CGContextRestoreGState(drawingContext);
 }
 
@@ -1897,7 +1897,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                     NSStringDrawingOptions stringOptions = NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingOneShot;
                     
                     if (label > 0) {
-                        CGRect labelRect = *(CGRect *)&textRect;
+                        CGRect labelRect = NSRectToCGRect(textRect);
                         
                         // for drag image context
                         labelRect.size.height = _titleHeight;                        
