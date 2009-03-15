@@ -998,25 +998,25 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         NSDictionary *info = [_bindingInfo objectForKey:SELECTIONINDEXES_BINDING_NAME];
         BOOL updatePreviewer = NO;
         
-        if (info && context == &_FVFileViewInternalSelectionIndexesObservationContext) {
+        if (nil == info) {
+            // no binding, so this should be a view-initiated change
+            NSParameterAssert(context == &_FVFileViewInternalSelectionIndexesObservationContext);
+            updatePreviewer = YES;
+        }
+        else if (context == &_FVFileViewInternalSelectionIndexesObservationContext) {
             // update the controller's selection; this call will cause a KVO notification that we'll also observe
             [[info objectForKey:NSObservedObjectKey] setValue:_selectedIndexes forKeyPath:[info objectForKey:NSObservedKeyPathKey]];
             
             // since this will be called multiple times for a single event, we should only run the preview if self == context
             updatePreviewer = YES;
         }
-        else if (info && context == &_FVFileViewSelectionIndexesObservationContext) {
+        else if (context == &_FVFileViewSelectionIndexesObservationContext) {
             NSIndexSet *controllerSet = [[info objectForKey:NSObservedObjectKey] valueForKeyPath:[info objectForKey:NSObservedKeyPathKey]];
             // since we manipulate _selectedIndexes directly, this won't cause a looping notification
             if ([controllerSet isEqualToIndexSet:_selectedIndexes] == NO) {
                 [_selectedIndexes removeAllIndexes];
                 [_selectedIndexes addIndexes:controllerSet];
             }
-        }
-        else if (nil == info) {
-            // no binding, so this should be a view-initiated change
-            NSParameterAssert(context == &_FVFileViewInternalSelectionIndexesObservationContext);
-            updatePreviewer = YES;
         }
         [self setNeedsDisplay:YES];
         
@@ -1028,7 +1028,11 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     }
     else if (context == &_FVFileViewContentObservationContext) {
         NSParameterAssert([keyPath isEqualToString:CONTENT_BINDING_NAME]);
-        // change to the number of icons or some rearrangement
+        
+        NSDictionary *info = [_bindingInfo objectForKey:SELECTIONINDEXES_BINDING_NAME];
+        NSArray *controllerArray = [[info objectForKey:NSObservedObjectKey] valueForKeyPath:[info objectForKey:NSObservedKeyPathKey]];
+        
+        [self setIconURLs:controllerArray];
         [self reloadIcons];
     }
     else {
@@ -1102,20 +1106,6 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 #pragma mark Binding/datasource wrappers
 
-// should only be called when establishing a new binding
-- (void)setContent:(NSArray *)anArray;
-{
-    [self setIconURLs:anArray];
-    [self setSelectionIndexes:[NSIndexSet indexSet]];
-    // datasource methods all trigger a redisplay, so we have to do the same here
-    [self reloadIcons];
-}
-
-- (NSArray *)content;
-{
-    return [self iconURLs];
-}
-
 - (void)setSelectionIndexes:(NSIndexSet *)indexSet;
 {
     FVAPIAssert(nil != indexSet, @"index set must not be nil");
@@ -1133,9 +1123,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 {
     if (_orderedURLs != array) {
         [_orderedURLs release];
-        
-        // The array parameter will typically be an NSArrayController proxy object.  The view observes mutations to the collection and calls -reload, so we can retain instead of copying (which creates an NSCFArray).
-        _orderedURLs = [array retain];
+        _orderedURLs = [[NSMutableArray alloc] initWithArray:array];
     }    
 }
 
