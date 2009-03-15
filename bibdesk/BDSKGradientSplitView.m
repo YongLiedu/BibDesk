@@ -99,7 +99,7 @@
         [[NSBezierPath bezierPathWithRect:rectToFill] fillPathVertically:NO == [self isVertical] withStartColor:[[self class] startColor] endColor:[[self class] endColor]];
         [NSGraphicsContext restoreGraphicsState];
     }
-    CGContextDrawLayerInRect(currentContext, NSRectToCGRect(aRec)t, dividerLayer);
+    CGContextDrawLayerInRect(currentContext, NSRectToCGRect(aRect), dividerLayer);
     
     if (blendStyle) {
         NSRect endRect, ignored;
