@@ -99,7 +99,7 @@
         [[NSBezierPath bezierPathWithRect:rectToFill] fillPathVertically:NO == [self isVertical] withStartColor:[[self class] startColor] endColor:[[self class] endColor]];
         [NSGraphicsContext restoreGraphicsState];
     }
-    CGContextDrawLayerInRect(currentContext, *(CGRect *)&aRect, dividerLayer);
+    CGContextDrawLayerInRect(currentContext, NSRectToCGRect(aRec)t, dividerLayer);
     
     if (blendStyle) {
         NSRect endRect, ignored;
@@ -117,7 +117,7 @@
                 [[NSBezierPath bezierPathWithRect:rectToFill] fillPathVertically:[self isVertical] withStartColor:[[self class] endColor] endColor:[CIColor clearColor]];
                 [NSGraphicsContext restoreGraphicsState];
             }
-            CGContextDrawLayerInRect(currentContext, *(CGRect *)&endRect, minBlendLayer);
+            CGContextDrawLayerInRect(currentContext, NSRectToCGRect(endRect), minBlendLayer);
         }
         
         if (blendStyle & BDSKMaxBlendStyleMask) {
@@ -133,7 +133,7 @@
                 [[NSBezierPath bezierPathWithRect:rectToFill] fillPathVertically:[self isVertical] withStartColor:[CIColor clearColor] endColor:[[self class] startColor]];
                 [NSGraphicsContext restoreGraphicsState];
             }
-            CGContextDrawLayerInRect(currentContext, *(CGRect *)&endRect, maxBlendLayer);
+            CGContextDrawLayerInRect(currentContext, NSRectToCGRect(endRect), maxBlendLayer);
         } else if ([self isVertical] && (blendStyle & BDSKStatusBarBlendStyleMask)) {
             NSDivideRect(aRect, &endRect, &ignored, END_JOIN_HEIGHT, NSMaxYEdge);
             if (NULL == maxBlendLayer) {
@@ -151,7 +151,7 @@
                                                                                               toColor:[BDSKStatusBar lowerColor]];
                 [NSGraphicsContext restoreGraphicsState];
             }
-            CGContextDrawLayerInRect(currentContext, *(CGRect *)&endRect, maxBlendLayer);
+            CGContextDrawLayerInRect(currentContext, NSRectToCGRect(endRect), maxBlendLayer);
         }
     }
     // Draw dimple

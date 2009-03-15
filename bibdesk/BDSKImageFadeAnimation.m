@@ -106,7 +106,7 @@
     CIImage *ciImage = [filter valueForKey:@"outputImage"];
     if (nil != ciImage) {
         CGRect extent = [ciImage extent];
-        NSRect sourceRect = *(NSRect *)&extent;
+        NSRect sourceRect = NSRectFromCGRect(extent);
         NSRect targetRect = sourceRect;
         targetRect.origin = NSZeroPoint;
         

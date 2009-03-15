@@ -162,9 +162,9 @@
         CIColor *startColor;
         CIColor *endColor;
         
-        layer = CGLayerCreateWithContext(viewContext, *(CGSize *)&layerSize, NULL);
-        selectedLayer = CGLayerCreateWithContext(viewContext, *(CGSize *)&layerSize, NULL);
-        highlightedLayer = CGLayerCreateWithContext(viewContext, *(CGSize *)&layerSize, NULL);
+        layer = CGLayerCreateWithContext(viewContext, NSSizeToCGSize(layerSize), NULL);
+        selectedLayer = CGLayerCreateWithContext(viewContext, NSSizeToCGSize(layerSize), NULL);
+        highlightedLayer = CGLayerCreateWithContext(viewContext, NSSizeToCGSize(layerSize), NULL);
         
         if ([controlView isFlipped]) {
             startColor = [CIColor colorWithWhite:0.9];
@@ -211,7 +211,7 @@
     
     [NSGraphicsContext saveGraphicsState];
     CGContextSetBlendMode(viewContext, kCGBlendModeNormal);
-    CGContextDrawLayerInRect(viewContext, *(CGRect *)&frame, [self _trackingSegment] == segment ? highlightedLayer : [self isSelectedForSegment:segment] ? selectedLayer : layer);
+    CGContextDrawLayerInRect(viewContext, NSRectToCGRect(frame), [self _trackingSegment] == segment ? highlightedLayer : [self isSelectedForSegment:segment] ? selectedLayer : layer);
     [NSGraphicsContext restoreGraphicsState];
     
     NSImage *image = [self imageForSegment:segment];

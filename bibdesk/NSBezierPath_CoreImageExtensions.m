@@ -51,7 +51,7 @@
 - (void)fillPathVertically:(BOOL)isVertical withStartColor:(CIColor *)startColor endColor:(CIColor *)endColor;
 {
     NSRect rect = [self bounds];
-    CGRect ciRect = *(CGRect*)&rect;
+    CGRect ciRect = NSRectToCGRect(rect);
     CGPoint startPoint = ciRect.origin;
     CGPoint endPoint = startPoint;
     
@@ -81,7 +81,7 @@
 {
     NSRect rect = [self bounds];
     
-    CIImage *image = [CIImage imageInRect:*(CGRect*)&rect withHorizontalGradientFromColor:fgStartColor toColor:fgEndColor blendedAtTop:top ofVerticalGradientFromColor:bgStartColor toColor:bgEndColor];
+    CIImage *image = [CIImage imageInRect:NSRectToCGRect(rect) withHorizontalGradientFromColor:fgStartColor toColor:fgEndColor blendedAtTop:top ofVerticalGradientFromColor:bgStartColor toColor:bgEndColor];
     
     NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
     [nsContext saveGraphicsState];
@@ -97,7 +97,7 @@
 {
     NSRect rect = [self bounds];
     
-    CIImage *image = [CIImage imageInRect:*(CGRect*)&rect withVerticalGradientFromColor:fgStartColor toColor:fgEndColor blendedAtRight:right ofHorizontalGradientFromColor:bgStartColor toColor:bgEndColor];
+    CIImage *image = [CIImage imageInRect:NSRectToCGRect(rect) withVerticalGradientFromColor:fgStartColor toColor:fgEndColor blendedAtRight:right ofHorizontalGradientFromColor:bgStartColor toColor:bgEndColor];
     
     NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
     [nsContext saveGraphicsState];
@@ -113,7 +113,7 @@
 {
     NSRect rect = [self bounds];
     
-    CIImage *image = [CIImage imageInRect:*(CGRect*)&rect withColor:fgColor blendedAtRight:right ofVerticalGradientFromColor:bgStartColor toColor:bgEndColor];
+    CIImage *image = [CIImage imageInRect:NSRectToCGRect(rect) withColor:fgColor blendedAtRight:right ofVerticalGradientFromColor:bgStartColor toColor:bgEndColor];
     
     NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
     [nsContext saveGraphicsState];

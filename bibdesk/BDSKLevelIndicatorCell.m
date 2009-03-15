@@ -181,14 +181,14 @@
     CGContextSaveGState(ctxt);
     
     // clip since doubleValue may exceed maxValue
-    CGContextClipToRect(ctxt, *(CGRect *)&cellFrame);
+    CGContextClipToRect(ctxt, NSRectToCGRect(cellFrame));
     
     NSRect drawRect = r;
     drawRect.size.width = 2;
     CGContextSetBlendMode(ctxt, kCGBlendModeNormal);
     for (i = 0; i < iMax; i++) {
         drawRect.origin.x += 2;
-        CGContextDrawLayerInRect(ctxt, *(CGRect *)&drawRect, toDraw);
+        CGContextDrawLayerInRect(ctxt, NSRectToCGRect(drawRect), toDraw);
     }
     CGContextRestoreGState(ctxt);
 }
