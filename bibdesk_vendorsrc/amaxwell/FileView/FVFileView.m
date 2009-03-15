@@ -63,6 +63,8 @@ static char _FVFileViewContentObservationContext;
 #define SELECTIONINDEXES_BINDING_NAME @"selectionIndexes"
 #define CONTENT_BINDING_NAME @"content"
 #define ICONSCALE_BINDING_NAME @"iconScale"
+#define MINICONSCALE_BINDING_NAME @"minIconScale"
+#define MAXICONSCALE_BINDING_NAME @"maxIconScale"
 #define AUTOSCALES_BINDING_NAME @"autoScales"
 #define EDITABLE_BINDING_NAME @"editable"
 #define BACKGROUNDCOLOR_BINDING_NAME @"backgroundColor"
@@ -168,6 +170,8 @@ static CGFloat _subtitleHeight = 0.0;
     
     // binding an NSSlider in IB 3 results in a crash on 10.4
     [self exposeBinding:ICONSCALE_BINDING_NAME];
+    [self exposeBinding:MINICONSCALE_BINDING_NAME];
+    [self exposeBinding:MAXICONSCALE_BINDING_NAME];
     [self exposeBinding:AUTOSCALES_BINDING_NAME];
     [self exposeBinding:EDITABLE_BINDING_NAME];
     [self exposeBinding:CONTENT_BINDING_NAME];
@@ -413,17 +417,17 @@ static CGFloat _subtitleHeight = 0.0;
 
 #pragma mark API
 
-- (void)_setIconScale:(CGFloat)scale;
+- (void)_setIconScale:(double)scale;
 {
     if (_fvFlags.autoScales == NO) {
         [self setIconScale:scale];
         
         NSDictionary *info = [self infoForBinding:ICONSCALE_BINDING_NAME];
-        [[info objectForKey:NSObservedObjectKey] setValue:[NSNumber numberWithFloat:[self iconScale]] forKeyPath:[info objectForKey:NSObservedKeyPathKey]];
+        [[info objectForKey:NSObservedObjectKey] setValue:[NSNumber numberWithDouble:[self iconScale]] forKeyPath:[info objectForKey:NSObservedKeyPathKey]];
     }
 }
 
-- (void)setIconScale:(CGFloat)scale;
+- (void)setIconScale:(double)scale;
 {
     if (_fvFlags.autoScales == NO) {
         FVAPIAssert(scale > 0, @"scale must be greater than zero");
@@ -456,9 +460,27 @@ static CGFloat _subtitleHeight = 0.0;
     }
 }
 
-- (CGFloat)iconScale;
+- (double)iconScale;
 {
     return _iconSize.width / DEFAULT_ICON_SIZE.width;
+}
+
+- (double)maxIconScale { return _maxScale; }
+
+- (void)setMaxIconScale:(double)scale { 
+    _maxScale = scale; 
+    [[_sliderWindow slider] setMaxValue:scale];
+    if ([self iconScale] > scale && scale > 0)
+        [self setIconScale:scale];
+}
+
+- (double)minIconScale { return _minScale; }
+
+- (void)setMinIconScale:(double)scale { 
+    _minScale = scale; 
+    [[_sliderWindow slider] setMinValue:scale];
+    if ([self iconScale] < scale && scale > 0)
+        [self setIconScale:scale];
 }
 
 - (CGFloat)_autoScaleIconScale;
@@ -643,8 +665,8 @@ static CGFloat _subtitleHeight = 0.0;
         _sliderWindow = [[FVSliderWindow alloc] init];
         FVSlider *slider = [_sliderWindow slider];
         // binding & unbinding is handled in viewWillMoveToSuperview:
-        [slider setMaxValue:16.0];
-        [slider setMinValue:0.5];
+        [slider setMaxValue:_maxScale];
+        [slider setMinValue:_minScale];
         [slider setAction:@selector(_sliderAction:)];
         [slider setTarget:self];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSliderMouseExited:) name:FVSliderMouseExitedNotificationName object:slider];
@@ -959,7 +981,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 {
     if ([binding isEqualToString:SELECTIONINDEXES_BINDING_NAME])
         return [NSIndexSet class];
-    else if ([binding isEqualToString:ICONSCALE_BINDING_NAME] || [binding isEqualToString:AUTOSCALES_BINDING_NAME] || [binding isEqualToString:EDITABLE_BINDING_NAME])
+    else if ([binding isEqualToString:ICONSCALE_BINDING_NAME] || [binding isEqualToString:MINICONSCALE_BINDING_NAME] || [binding isEqualToString:MAXICONSCALE_BINDING_NAME] || [binding isEqualToString:AUTOSCALES_BINDING_NAME] || [binding isEqualToString:EDITABLE_BINDING_NAME])
         return [NSNumber class];
     else if ([binding isEqualToString:BACKGROUNDCOLOR_BINDING_NAME])
         return [NSColor class];

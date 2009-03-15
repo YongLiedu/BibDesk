@@ -99,6 +99,8 @@ typedef enum _FVDropOperation {
     } _fvFlags;
     NSSize                  _padding;
     NSSize                  _iconSize;
+    double                  _minScale;
+    double                  _maxScale;
     NSPoint                 _lastMouseDownLocInView;
     CFAbsoluteTime          _timeOfLastOrigin;
     NSPoint                 _lastOrigin;
@@ -144,11 +146,33 @@ typedef enum _FVDropOperation {
 /** The current icon scale of the view.
  
  This property has no physical meaning; it's proportional to internal constants which determine the cached sizes of icons.  Can be bound.*/
-- (CGFloat)iconScale;
+- (double)iconScale;
 
 /** Set the current icon scale.
  @param scale The new value of FVFileView::iconScale. */
-- (void)setIconScale:(CGFloat)scale;
+- (void)setIconScale:(double)scale;
+
+/** Maximum value of iconScale
+ 
+ Default value is 16.  Legitimate values are from 0.01 -- 100 in IB, but this is not enforced in the view (i.e. you can set anything programmatically).  Can be bound.*/
+- (double)maxIconScale;
+
+/** Set maximum value of iconScale
+ 
+ Legitmate values are from 0.01 -- 100 in IB, but this is not enforced in the view (i.e. you can set anything programmatically).  Can be bound.
+ @param scale The new value of FileView::maxIconScale. */
+- (void)setMaxIconScale:(double)scale;
+
+/** Minimum value of iconScale
+ 
+ Default value is 0.5.  Legitmate values are from 0.01 -- 100 in IB, but this is not enforced in the view (i.e. you can set anything programmatically).  Can be bound. */
+- (double)minIconScale;
+
+/** Set minimum value of iconScale
+
+ Legitmate values are from 0.01 -- 100 in IB, but this is not enforced in the view (i.e. you can set anything programmatically).  Can be bound.
+ @param scale The new value of FileView::minIconScale. */
+- (void)setMinIconScale:(double)scale;
 
 /** Whether the icons scale automatically.
  
