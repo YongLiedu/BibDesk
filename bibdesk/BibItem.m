@@ -2415,6 +2415,10 @@ static void addFilesToArray(const void *value, void *context)
     return [self basePath];
 }
 
+- (void)linkedFileURLChanged:(BDSKLinkedFile *)file {
+    [self noteFilesChanged:YES];
+}
+
 // for main tableview sort descriptor
 - (NSNumber *)countOfLocalFilesAsNumber { return [NSNumber numberWithInt:[[self localFiles] count]]; }
 - (NSNumber *)countOfRemoteURLsAsNumber { return [NSNumber numberWithInt:[[self remoteURLs] count]]; }
