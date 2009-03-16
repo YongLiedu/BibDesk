@@ -48,7 +48,9 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BibDocument.h"
 #import "BDSKBookmarkController.h"
+#import "NSMenu_BDSKExtensions.h"
 
+#define MAX_HISTORY 50
 
 @implementation BDSKWebGroupViewController
 
@@ -163,6 +165,14 @@
     [backForwardButton setFrame:frame];
     if ([backForwardButton respondsToSelector:@selector(setSegmentStyle:)])
         [backForwardButton setSegmentStyle:NSSegmentStyleTexturedRounded];
+    backMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+    [backMenu addItemWithTitle:@"back" action:NULL keyEquivalent:@""];
+    [backMenu setDelegate:self];
+    [backForwardButton setMenu:backMenu forSegment:0];
+    forwardMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+    [forwardMenu addItemWithTitle:@"forward" action:NULL keyEquivalent:@""];
+    [forwardMenu setDelegate:self];
+    [backForwardButton setMenu:forwardMenu forSegment:1];
     [stopOrReloadButton setImagePosition:NSImageOnly];
     [stopOrReloadButton setImage:[NSImage imageNamed:@"ReloadAdorn"]];
     [webView setEditingDelegate:self];
@@ -271,6 +281,12 @@
         [[NSWorkspace sharedWorkspace] openLinkedURL:theURL];
 }
 
+- (void)goBackForwardInHistory:(id)sender {
+    WebHistoryItem *item = [sender representedObject];
+    if (item)
+        [webView goToBackForwardItem:item];
+}
+
 - (void)setRetrieving:(BOOL)retrieving {
     [group setRetrieving:retrieving];
     [backForwardButton setEnabled:[webView canGoBack] forSegment:0];
@@ -284,6 +300,27 @@
         [stopOrReloadButton setImage:[NSImage imageNamed:@"ReloadAdorn"]];
         [stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page", @"Tool tip message")];
         [stopOrReloadButton setKeyEquivalent:@"r"];
+    }
+}
+
+#pragma mark NSMenu delegate protocol
+
+- (void)menuNeedsUpdate:(NSMenu *)menu {
+    WebBackForwardList *backForwardList = [webView backForwardList];
+    NSArray *list = nil;
+    if (menu == backMenu)
+        list = [backForwardList backListWithLimit:MAX_HISTORY];
+    else if (menu == forwardMenu)
+        list = [backForwardList forwardListWithLimit:MAX_HISTORY];
+    else
+        return;
+    [menu removeAllItems];
+    NSEnumerator *itemEnum = [list objectEnumerator];
+    WebHistoryItem *item;
+    while (item = [itemEnum nextObject]) {
+        NSMenuItem *menuItem = [menu addItemWithTitle:[item title] action:@selector(goBackForwardInHistory:) keyEquivalent:@""];
+        [menuItem setTarget:self];
+        [menuItem setRepresentedObject:item];
     }
 }
 

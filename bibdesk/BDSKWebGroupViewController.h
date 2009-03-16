@@ -55,6 +55,8 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
     WebFrame *loadingWebFrame;
     NSUndoManager *undoManager;
     NSMutableArray *downloads;
+    NSMenu *backMenu;
+    NSMenu *forwardMenu;
 }
 
 - (id)initWithGroup:(BDSKWebGroup *)aGroup document:(BibDocument *)aDocument;
