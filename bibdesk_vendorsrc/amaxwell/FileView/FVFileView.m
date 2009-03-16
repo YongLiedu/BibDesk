@@ -1554,8 +1554,8 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
 {
     NSString *string = [attributedString string];
     
-    // !!! early return on 10.4
-    if (NULL == CFStringTokenizerCreate)
+    // !!! early return on 10.4, CFStringTokenizerCreate is not weakly linked, so we can't just check for NULL
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
         return [string componentsSeparatedByString:@" "];
     
     CFStringTokenizerRef tokenizer = CFStringTokenizerCreate(NULL, (CFStringRef)string, CFRangeMake(0, [string length]), kCFStringTokenizerUnitWord, NULL);

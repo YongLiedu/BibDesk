@@ -119,7 +119,8 @@ const uint8_t * __FVCGImageGetBytePtr(CGImageRef image, size_t *len)
 {
     CGDataProviderRef provider = CGImageGetDataProvider(image);
     uint8_t *bytePtr = NULL;
-    if (NULL != CGDataProviderGetBytePtr && NULL != CGDataProviderGetSize) {
+    // CGDataProviderGetBytePtr and CGDataProviderGetSize are not weakly bound, so we can't check for those
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
         bytePtr = (uint8_t *)CGDataProviderGetBytePtr(provider);
         if (len) *len = CGDataProviderGetSize(provider);
     }
