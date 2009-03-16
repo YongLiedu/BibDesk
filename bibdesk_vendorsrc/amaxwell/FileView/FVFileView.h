@@ -80,7 +80,7 @@ typedef enum _FVDropOperation {
     NSUInteger              _numberOfRows;
     NSColor                *_backgroundColor;
     CFRunLoopTimerRef       _zombieTimer;
-    NSMutableIndexSet      *_selectedIndexes;
+    NSMutableIndexSet      *_selectionIndexes;
     CGLayerRef              _selectionOverlay;
     NSUInteger              _lastClickedIndex;
     NSUInteger              _dropOperation;

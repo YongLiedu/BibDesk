@@ -130,8 +130,7 @@ static CGFloat _subtitleHeight = 0.0;
 - (void)_downloadURLAtIndex:(NSUInteger)anIndex;
 - (void)_invalidateProgressTimer;
 - (void)handleFinderLabelChanged:(NSNotification *)note;
-- (void)_addSelectionIndexesInRange:(NSRange)range;
-- (void)_removeSelectionIndexesInRange:(NSRange)range;
+- (void)_setSelectionIndexes:(NSIndexSet *)indexSet;
 
 @end
 
@@ -216,7 +215,7 @@ static CGFloat _subtitleHeight = 0.0;
     _dropOperation = FVDropBefore;
     _fvFlags.isRescaling = NO;
     _fvFlags.scheduledLiveResize = NO;
-    _selectedIndexes = [[NSMutableIndexSet alloc] init];
+    _selectionIndexes = [[NSIndexSet alloc] init];
     _lastClickedIndex = NSNotFound;
     _rubberBandRect = NSZeroRect;
     _fvFlags.isMouseDown = NO;
@@ -311,7 +310,7 @@ static CGFloat _subtitleHeight = 0.0;
     [_orderedURLs release];
     [_orderedSubtitles release];
     CFRelease(_infoTable);
-    [_selectedIndexes release];
+    [_selectionIndexes release];
     [_backgroundColor release];
     [_sliderWindow release];
     // this variable is accessed in super's dealloc, so set it to NULL
@@ -890,9 +889,12 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     [self _reloadIcons];
     
     // Follow NSTableView's example and clear selection outside the current range of indexes
-    NSUInteger lastSelIndex = [_selectedIndexes lastIndex], numIcons = [self numberOfIcons];
+    NSUInteger lastSelIndex = [_selectionIndexes lastIndex], numIcons = [self numberOfIcons];
     if (NSNotFound != lastSelIndex && lastSelIndex >= numIcons) {
-        [self _removeSelectionIndexesInRange:NSMakeRange(numIcons, lastSelIndex + 1 - numIcons)];
+        NSMutableIndexSet *newSelIndexes = [_selectionIndexes mutableCopy];
+        [newSelIndexes removeIndexesInRange:NSMakeRange(numIcons, lastSelIndex + 1 - numIcons)];
+        [self _setSelectionIndexes:newSelIndexes];
+        [newSelIndexes release];
     }
     
     [self _resetViewLayout];
@@ -996,8 +998,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         NSDictionary *info = [_bindingInfo objectForKey:SELECTIONINDEXES_BINDING_NAME];
         NSIndexSet *controllerSet = [[info objectForKey:NSObservedObjectKey] valueForKeyPath:[info objectForKey:NSObservedKeyPathKey]];
         
-        // since we manipulate _selectedIndexes directly, this won't cause a looping notification
-        if ([controllerSet isEqualToIndexSet:_selectedIndexes] == NO)
+        // since we manipulate _selectionIndexes directly, this won't cause a looping notification
+        if ([controllerSet isEqualToIndexSet:_selectionIndexes] == NO)
             [self setSelectionIndexes:controllerSet];
     }
     else if (context == &_FVFileViewContentObservationContext) {
@@ -1070,59 +1072,37 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 #pragma mark Binding/datasource wrappers
 
-- (void)_updateSelectionIndexesBinding {
-    NSDictionary *info = [_bindingInfo objectForKey:SELECTIONINDEXES_BINDING_NAME];
-    if (info)
-        [[info objectForKey:NSObservedObjectKey] setValue:_selectedIndexes forKeyPath:[info objectForKey:NSObservedKeyPathKey]];
-}
-
-- (void)_selectionIndexesChanged {
-    FVPreviewer *previewer = [FVPreviewer sharedPreviewer];
-    NSUInteger firstIndex = [_selectedIndexes firstIndex];
-    if ([previewer isPreviewing] && NSNotFound != firstIndex) {
-        [previewer setWebViewContextMenuDelegate:[self delegate]];
-        [previewer previewURL:[self URLAtIndex:firstIndex] forIconInRect:[[previewer window] frame]];
-    }
-    
-    [self setNeedsDisplay:YES];
-    
-    NSAccessibilityPostNotification(NSAccessibilityUnignoredAncestor(self), NSAccessibilityFocusedUIElementChangedNotification);
-}
-
-- (void)_addSelectionIndexesInRange:(NSRange)range {
-    [self willChangeValueForKey:SELECTIONINDEXES_KEY];
-    [_selectedIndexes addIndexesInRange:range];
-    [self didChangeValueForKey:SELECTIONINDEXES_KEY];
-    [self _selectionIndexesChanged];
-    [self _updateSelectionIndexesBinding];
-}
-
-- (void)_removeSelectionIndexesInRange:(NSRange)range {
-    [self willChangeValueForKey:SELECTIONINDEXES_KEY];
-    [_selectedIndexes removeIndexesInRange:range];
-    [self didChangeValueForKey:SELECTIONINDEXES_KEY];
-    [self _selectionIndexesChanged];
-    [self _updateSelectionIndexesBinding];
-}
-
 - (void)_setSelectionIndexes:(NSIndexSet *)indexSet {
     [self setSelectionIndexes:indexSet];
-    [self _updateSelectionIndexesBinding];
+    
+    NSDictionary *info = [_bindingInfo objectForKey:SELECTIONINDEXES_BINDING_NAME];
+    if (info)
+        [[info objectForKey:NSObservedObjectKey] setValue:_selectionIndexes forKeyPath:[info objectForKey:NSObservedKeyPathKey]];
 }
 
 - (void)setSelectionIndexes:(NSIndexSet *)indexSet;
 {
     FVAPIAssert(nil != indexSet, @"index set must not be nil");
-    if (indexSet != _selectedIndexes) {
-        [_selectedIndexes release];
-        _selectedIndexes = [indexSet mutableCopy];
-        [self _selectionIndexesChanged];
+    if (indexSet != _selectionIndexes) {
+        [_selectionIndexes release];
+        _selectionIndexes = [indexSet copy];
+        
+        [self setNeedsDisplay:YES];
+        
+        NSAccessibilityPostNotification(NSAccessibilityUnignoredAncestor(self), NSAccessibilityFocusedUIElementChangedNotification);
+        
+        FVPreviewer *previewer = [FVPreviewer sharedPreviewer];
+        NSUInteger firstIndex = [_selectionIndexes firstIndex];
+        if ([previewer isPreviewing] && NSNotFound != firstIndex) {
+            [previewer setWebViewContextMenuDelegate:[self delegate]];
+            [previewer previewURL:[self URLAtIndex:firstIndex] forIconInRect:[[previewer window] frame]];
+        }
     }
 }
 
 - (NSIndexSet *)selectionIndexes;
 {
-    return [[_selectedIndexes copy] autorelease];
+    return _selectionIndexes;
 }
 
 - (void)setIconURLs:(NSArray *)array
@@ -1208,10 +1188,10 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 - (NSArray *)_selectedURLs
 {
     NSMutableArray *array = [NSMutableArray array];
-    NSUInteger idx = [_selectedIndexes firstIndex];
+    NSUInteger idx = [_selectionIndexes firstIndex];
     while (NSNotFound != idx) {
         [array addObject:[self URLAtIndex:idx]];
-        idx = [_selectedIndexes indexGreaterThanIndex:idx];
+        idx = [_selectionIndexes indexGreaterThanIndex:idx];
     }
     return array;
 }
@@ -1255,15 +1235,6 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
             if (_fvFlags.autoScales && [scrollView autohidesScrollers] && FVAbs(NSHeight(frame) - contentSize.height) <= [NSScroller scrollerWidth])
                 [scrollView tile];
         }
-    }
-    
-    // ??? move to -reloadIcons
-    NSUInteger lastSelIndex = [_selectedIndexes lastIndex];
-    if (lastSelIndex != NSNotFound && lastSelIndex >= numIcons) {
-        NSMutableIndexSet *tmpIndexes = [_selectedIndexes mutableCopy];
-        [tmpIndexes removeIndexesInRange:NSMakeRange(numIcons, lastSelIndex + 1 - numIcons)];
-        [self setSelectionIndexes:tmpIndexes];
-        [tmpIndexes release];
     }
 }    
 
@@ -1359,7 +1330,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (void)_rescaleComplete;
 {    
-    NSUInteger scrollIndex = [_selectedIndexes firstIndex];
+    NSUInteger scrollIndex = [_selectionIndexes firstIndex];
     if (NSNotFound != scrollIndex) {
         NSUInteger r, c;
         [self _getGridRow:&r column:&c ofIndex:scrollIndex];
@@ -1854,7 +1825,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
             i = [self _indexForGridRow:r column:c];
 
             // if we're creating a drag image, only draw selected icons
-            if (NSNotFound != i && (NO == _fvFlags.isDrawingDragImage || [_selectedIndexes containsIndex:i])) {
+            if (NSNotFound != i && (NO == _fvFlags.isDrawingDragImage || [_selectionIndexes containsIndex:i])) {
             
                 NSRect fileRect = [self _rectOfIconInRow:r column:c];
                 
@@ -1871,7 +1842,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                     NSRect iconRect = fileRect;
                     
                     // draw highlight, then draw icon over it, as Finder does
-                    if ([_selectedIndexes containsIndex:i])
+                    if ([_selectionIndexes containsIndex:i])
                         [self _drawHighlightInRect:NSInsetRect(fileRect, -4, -4)];
                     
                     CGContextSaveGState(cgContext);
@@ -2033,7 +2004,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
 {
     // only called if we originated the drag, so the row/column must be valid
     if ((operation & NSDragOperationDelete) != 0 && operation != NSDragOperationEvery && [self isEditable]) {
-        [[self dataSource] fileView:self deleteURLsAtIndexes:_selectedIndexes];
+        [[self dataSource] fileView:self deleteURLsAtIndexes:_selectionIndexes];
         [self _setSelectionIndexes:[NSIndexSet indexSet]];
         [self reloadIcons];
     }
@@ -2329,51 +2300,58 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
         
         // remember _indexForGridRow:column: returns NSNotFound if you're in an empty slot of an existing row/column, but that's a deselect event so we still need to remove all selection indexes and mark for redisplay
         i = [self _indexForGridRow:r column:c];
-
-        if ([_selectedIndexes containsIndex:i] == NO) {
+        
+        NSMutableIndexSet *newSelection = nil;
+        
+        if ([_selectionIndexes containsIndex:i] == NO) {
             
             // deselect all if modifier key was not pressed, or i == NSNotFound
-            if ((flags & (NSCommandKeyMask | NSShiftKeyMask)) == 0 || NSNotFound == i) {
-                [self _setSelectionIndexes:[NSIndexSet indexSet]];
-            }
+            if ((flags & (NSCommandKeyMask | NSShiftKeyMask)) == 0 || NSNotFound == i)
+                newSelection = [[NSMutableIndexSet alloc] init];
+            else
+                newSelection = [_selectionIndexes mutableCopy];
             
             // if there's an icon in this cell, add to the current selection (which we may have just reset)
             if (NSNotFound != i) {
                 // add a single index for an unmodified or cmd-click
                 // add a single index for shift click only if there is no current selection
-                if ((flags & NSShiftKeyMask) == 0 || [_selectedIndexes count] == 0) {
-                    [self _addSelectionIndexesInRange:NSMakeRange(i, 1)];
+                if ((flags & NSShiftKeyMask) == 0 || [newSelection count] == 0) {
+                    [newSelection addIndex:i];
                 }
                 else if ((flags & NSShiftKeyMask) != 0) {
                     // Shift-click extends by a region; this is equivalent to iPhoto's grid view.  Finder treats shift-click like cmd-click in icon view, but we have a fixed layout, so this behavior is convenient and will be predictable.
                     
-                    // at this point, we know that [_selectedIndexes count] > 0
-                    NSParameterAssert([_selectedIndexes count]);
+                    // at this point, we know that [_selectionIndexes count] > 0
+                    NSParameterAssert([newSelection count]);
                     
-                    NSUInteger start = [_selectedIndexes firstIndex];
-                    NSUInteger end = [_selectedIndexes lastIndex];
+                    NSUInteger start = [newSelection firstIndex];
+                    NSUInteger end = [newSelection lastIndex];
 
                     if (i < start) {
-                        [self _addSelectionIndexesInRange:NSMakeRange(i, start - i)];
+                        [newSelection addIndexesInRange:NSMakeRange(i, start - i)];
                     }
                     else if (i > end) {
-                        [self _addSelectionIndexesInRange:NSMakeRange(end + 1, i - end)];
+                        [newSelection addIndexesInRange:NSMakeRange(end + 1, i - end)];
                     }
                     else if (NSNotFound != _lastClickedIndex) {
                         // This handles the case of clicking in a deselected region between two selected regions.  We want to extend from the last click to the current one, instead of randomly picking an end to start from.
                         if (_lastClickedIndex > i)
-                            [self _addSelectionIndexesInRange:NSMakeRange(i, _lastClickedIndex - i)];
+                            [newSelection addIndexesInRange:NSMakeRange(i, _lastClickedIndex - i)];
                         else
-                            [self _addSelectionIndexesInRange:NSMakeRange(_lastClickedIndex + 1, i - _lastClickedIndex)];
+                            [newSelection addIndexesInRange:NSMakeRange(_lastClickedIndex + 1, i - _lastClickedIndex)];
                     }
                 }
-                [self setNeedsDisplay:YES];     
             }
         }
         else if ((flags & NSCommandKeyMask) != 0) {
             // cmd-clicked a previously selected index, so remove it from the selection
-            [self _removeSelectionIndexesInRange:NSMakeRange(i, 1)];
-            [self setNeedsDisplay:YES];
+            newSelection = [_selectionIndexes mutableCopy];
+            [newSelection removeIndex:i];
+        }
+        
+        if (newSelection) {
+            [self _setSelectionIndexes:newSelection];
+            [newSelection release];
         }
         
         // always reset this
@@ -2390,7 +2368,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
         }
         
     }
-    else if ([_selectedIndexes count]) {
+    else if ([_selectionIndexes count]) {
         // deselect all, since we had a previous selection and clicked on a non-icon area
         [self _setSelectionIndexes:[NSIndexSet indexSet]];
     }
@@ -2591,8 +2569,8 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         else if (FVDropBefore == _dropOperation || FVDropAfter == _dropOperation) {
             // inserting inside the block we're dragging doesn't make sense; this does allow dropping a disjoint selection at some locations within the selection; the delegate may override
             insertIndex = FVDropAfter == _dropOperation ? _dropIndex + 1 : _dropIndex;
-            firstIndex = [_selectedIndexes firstIndex], endIndex = [_selectedIndexes lastIndex] + 1;
-            if ([_selectedIndexes containsIndexesInRange:NSMakeRange(firstIndex, endIndex - firstIndex)] &&
+            firstIndex = [_selectionIndexes firstIndex], endIndex = [_selectionIndexes lastIndex] + 1;
+            if ([_selectionIndexes containsIndexesInRange:NSMakeRange(firstIndex, endIndex - firstIndex)] &&
                 insertIndex >= firstIndex && insertIndex <= endIndex) {
                 dragOp = NSDragOperationNone;
             } 
@@ -2789,7 +2767,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (void)moveUp:(id)sender;
 {
-    NSUInteger curIdx = [_selectedIndexes firstIndex];
+    NSUInteger curIdx = [_selectionIndexes firstIndex];
     NSUInteger next = (NSNotFound == curIdx || curIdx < [self numberOfColumns]) ? 0 : curIdx - [self numberOfColumns];
     if (next >= [self numberOfIcons]) {
         NSBeep();
@@ -2802,7 +2780,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (void)moveDown:(id)sender;
 {
-    NSUInteger curIdx = [_selectedIndexes firstIndex];
+    NSUInteger curIdx = [_selectionIndexes firstIndex];
     NSUInteger next = NSNotFound == curIdx ? 0 : curIdx + [self numberOfColumns];
     if ([self numberOfIcons] == 0) {
         NSBeep();
@@ -2828,7 +2806,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (void)insertTab:(id)sender;
 {
-    NSUInteger curIdx = [_selectedIndexes lastIndex], numIcons = [self numberOfIcons];
+    NSUInteger curIdx = [_selectionIndexes lastIndex], numIcons = [self numberOfIcons];
     
     if (numIcons > 0 && curIdx != numIcons - 1)
         [self selectNextIcon:self];
@@ -2838,7 +2816,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (void)insertBacktab:(id)sender;
 {
-    NSUInteger curIdx = [_selectedIndexes firstIndex];
+    NSUInteger curIdx = [_selectionIndexes firstIndex];
     
     if ([self numberOfIcons] > 0 && curIdx != 0)
         [self selectPreviousIcon:self];
@@ -2848,8 +2826,8 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (void)moveToBeginningOfLine:(id)sender;
 {
-    if ([_selectedIndexes count] == 1) {
-        FVIcon *anIcon = [self iconAtIndex:[_selectedIndexes firstIndex]];
+    if ([_selectionIndexes count] == 1) {
+        FVIcon *anIcon = [self iconAtIndex:[_selectionIndexes firstIndex]];
         if ([anIcon currentPageIndex] > 1) {
             [anIcon showPreviousPage];
             [self _redisplayIconAfterPageChanged:anIcon];
@@ -2859,8 +2837,8 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (void)moveToEndOfLine:(id)sender;
 {
-    if ([_selectedIndexes count] == 1) {
-        FVIcon *anIcon = [self iconAtIndex:[_selectedIndexes firstIndex]];
+    if ([_selectionIndexes count] == 1) {
+        FVIcon *anIcon = [self iconAtIndex:[_selectionIndexes firstIndex]];
         if ([anIcon currentPageIndex] < [anIcon pageCount]) {
             [anIcon showNextPage];
             [self _redisplayIconAfterPageChanged:anIcon];
@@ -2870,7 +2848,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (void)insertNewline:(id)sender;
 {
-    if ([_selectedIndexes count])
+    if ([_selectionIndexes count])
         [self openSelectedURLs:sender];
 }
 
@@ -2958,7 +2936,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (IBAction)selectPreviousIcon:(id)sender;
 {
-    NSUInteger curIdx = [_selectedIndexes firstIndex];
+    NSUInteger curIdx = [_selectionIndexes firstIndex];
     NSUInteger previous = NSNotFound, numIcons = [self numberOfIcons];
     
     if (numIcons > 0) {
@@ -2974,7 +2952,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (IBAction)selectNextIcon:(id)sender;
 {
-    NSUInteger curIdx = [_selectedIndexes lastIndex];
+    NSUInteger curIdx = [_selectionIndexes lastIndex];
     NSUInteger next = NSNotFound, numIcons = [self numberOfIcons];
     
     if (numIcons > 0) {
@@ -3015,7 +2993,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (IBAction)previewAction:(id)sender;
 {
-    if ([_selectedIndexes count] == 1) {
+    if ([_selectionIndexes count] == 1) {
         [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:[self delegate]];
         [[FVPreviewer sharedPreviewer] previewURL:[[self _selectedURLs] lastObject] forIconInRect:NSZeroRect];
     }
@@ -3027,7 +3005,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (IBAction)delete:(id)sender;
 {
-    if (NO == [self isEditable] || NO == [[self dataSource] fileView:self deleteURLsAtIndexes:_selectedIndexes])
+    if (NO == [self isEditable] || NO == [[self dataSource] fileView:self deleteURLsAtIndexes:_selectionIndexes])
         NSBeep();
     else
         [self reloadIcons];
@@ -3077,7 +3055,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     // generally only check this for actions that are dependent on single selection
     BOOL isMissing = [aURL isEqual:[FVIcon missingFileURL]];
     BOOL isEditable = [self isEditable];
-    BOOL selectionCount = [_selectedIndexes count];
+    BOOL selectionCount = [_selectionIndexes count];
     
     if (action == @selector(zoomOut:) || action == @selector(zoomIn:))
         return _fvFlags.autoScales == NO;
@@ -3085,7 +3063,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
         [anItem setState:_fvFlags.autoScales ? NSOnState : NSOffState];
         return YES;
     } else if (action == @selector(revealInFinder:))
-        return [aURL isFileURL] && [_selectedIndexes count] == 1 && NO == isMissing;
+        return [aURL isFileURL] && [_selectionIndexes count] == 1 && NO == isMissing;
     else if (action == @selector(openSelectedURLs:) || action == @selector(copy:))
         return selectionCount > 0;
     else if (action == @selector(delete:) || action == @selector(cut:))
@@ -3097,7 +3075,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     else if (action == @selector(paste:))
         return [self isEditable];
     else if (action == @selector(submenuAction:))
-        return selectionCount > 1 || ([_selectedIndexes count] == 1 && [aURL isFileURL]);
+        return selectionCount > 1 || ([_selectionIndexes count] == 1 && [aURL isFileURL]);
     else if (action == @selector(changeFinderLabel:) || [anItem tag] == FVChangeLabelMenuItemTag) {
 
         BOOL enabled = NO;
@@ -3156,7 +3134,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
         idx = [self _indexForGridRow:r column:c];
     
     // Finder changes selection only if the clicked item isn't in the current selection
-    if (menu && NO == [_selectedIndexes containsIndex:idx])
+    if (menu && NO == [_selectionIndexes containsIndex:idx])
         [self _setSelectionIndexes:idx == NSNotFound ? [NSIndexSet indexSet] : [NSIndexSet indexSetWithIndex:idx]];
 
     // remove disabled items and double separators
@@ -3408,7 +3386,7 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 {
     if ([self allowsDownloading]) {
         // validation ensures that we have a single selection, and that there is no current download with this URL
-        NSUInteger selIndex = [_selectedIndexes firstIndex];
+        NSUInteger selIndex = [_selectionIndexes firstIndex];
         if (NSNotFound != selIndex)
             [self _downloadURLAtIndex:selIndex];
     }
@@ -3436,10 +3414,10 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
         return NSAccessibilityUnignoredChildren(children);
     } else if ([attribute isEqualToString:NSAccessibilitySelectedChildrenAttribute]) {
         NSMutableArray *children = [NSMutableArray array];
-        NSUInteger i = [_selectedIndexes firstIndex];
+        NSUInteger i = [_selectionIndexes firstIndex];
         while (i != NSNotFound) {
             [children addObject:[FVAccessibilityIconElement elementWithIndex:i parent:self]];
-            i = [_selectedIndexes indexGreaterThanIndex:i];
+            i = [_selectionIndexes indexGreaterThanIndex:i];
         }
         return NSAccessibilityUnignoredChildren(children);
     } else {
@@ -3463,7 +3441,7 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 }
 
 - (id)accessibilityFocusedUIElement {
-    NSUInteger i = [_selectedIndexes firstIndex];
+    NSUInteger i = [_selectionIndexes firstIndex];
     if (i != NSNotFound)
         return [[FVAccessibilityIconElement elementWithIndex:i parent:self] accessibilityFocusedUIElement];
     else
