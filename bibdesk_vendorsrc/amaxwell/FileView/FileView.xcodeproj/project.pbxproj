@@ -418,16 +418,16 @@
 		08FB77AEFE84172EC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				CE05D48A0D7B388C0034C2A8 /* FileView */,
+				CED643780F6F107B00283709 /* Previewer */,
 				CE05D4840D7B37A80034C2A8 /* Icons */,
-				CE05D48A0D7B388C0034C2A8 /* Views */,
 				CE05D5CC0D7C21E30034C2A8 /* Queueing */,
 				CE05D5CD0D7C22070034C2A8 /* Operations */,
 				CE05D48B0D7B38B20034C2A8 /* Caching */,
 				CEFC1CE30F6AB77D00B2AEE6 /* Scaling */,
 				CEFC1F760F6AD52A00B2AEE6 /* Download */,
 				CEFC1F750F6AD52000B2AEE6 /* FinderLabel */,
-				CEFC1F770F6AD54500B2AEE6 /* Object */,
-				CEFC1F780F6AD55B00B2AEE6 /* Miscellaneous */,
+				CEFC1F770F6AD54500B2AEE6 /* Utilities */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -453,6 +453,7 @@
 			isa = PBXGroup;
 			children = (
 				32DBCF5E0370ADEE00C91783 /* FileView_Prefix.pch */,
+				CEFC19B00F693E8B00B2AEE6 /* FileView.h */,
 			);
 			name = "Other Sources";
 			sourceTree = "<group>";
@@ -492,25 +493,19 @@
 			name = Icons;
 			sourceTree = "<group>";
 		};
-		CE05D48A0D7B388C0034C2A8 /* Views */ = {
+		CE05D48A0D7B388C0034C2A8 /* FileView */ = {
 			isa = PBXGroup;
 			children = (
 				F94691F70CA56EC500AC2772 /* FVFileView.h */,
 				F94691F80CA56EC500AC2772 /* FVFileView.m */,
 				F94691F90CA56EC500AC2772 /* FVArrowButtonCell.h */,
 				F94691FA0CA56EC500AC2772 /* FVArrowButtonCell.m */,
-				CE05D3AF0D7B22170034C2A8 /* FVColorMenuView.h */,
-				CE05D3B00D7B22170034C2A8 /* FVColorMenuView.m */,
-				F94691FF0CA56EC500AC2772 /* FVPreviewer.h */,
-				F94692000CA56EC500AC2772 /* FVPreviewer.m */,
-				CE05D3CE0D7B27FC0034C2A8 /* FVProgressIndicatorCell.h */,
-				CE05D3CF0D7B27FC0034C2A8 /* FVProgressIndicatorCell.m */,
-				F946944E0CA59AF100AC2772 /* FVScaledImageView.h */,
-				F946944F0CA59AF100AC2772 /* FVScaledImageView.m */,
 				CE05D5A00D7C10FD0034C2A8 /* FVSlider.h */,
 				CE05D5A10D7C10FD0034C2A8 /* FVSlider.m */,
+				CEA831120DC1FAB500B551D1 /* FVAccessibilityIconElement.h */,
+				CEA831130DC1FAB500B551D1 /* FVAccessibilityIconElement.m */,
 			);
-			name = Views;
+			name = FileView;
 			sourceTree = "<group>";
 		};
 		CE05D48B0D7B38B20034C2A8 /* Caching */ = {
@@ -566,6 +561,17 @@
 			name = Operations;
 			sourceTree = "<group>";
 		};
+		CED643780F6F107B00283709 /* Previewer */ = {
+			isa = PBXGroup;
+			children = (
+				F946944E0CA59AF100AC2772 /* FVScaledImageView.h */,
+				F946944F0CA59AF100AC2772 /* FVScaledImageView.m */,
+				F94691FF0CA56EC500AC2772 /* FVPreviewer.h */,
+				F94692000CA56EC500AC2772 /* FVPreviewer.m */,
+			);
+			name = Previewer;
+			sourceTree = "<group>";
+		};
 		CEFC1CE30F6AB77D00B2AEE6 /* Scaling */ = {
 			isa = PBXGroup;
 			children = (
@@ -584,6 +590,8 @@
 			children = (
 				F93C3AE90D39473C006EB558 /* FVFinderLabel.h */,
 				F93C3AEA0D39473C006EB558 /* FVFinderLabel.m */,
+				CE05D3AF0D7B22170034C2A8 /* FVColorMenuView.h */,
+				CE05D3B00D7B22170034C2A8 /* FVColorMenuView.m */,
 			);
 			name = FinderLabel;
 			sourceTree = "<group>";
@@ -593,13 +601,17 @@
 			children = (
 				CE05D3C40D7B272A0034C2A8 /* FVDownload.h */,
 				CE05D3C50D7B272A0034C2A8 /* FVDownload.m */,
+				CE05D3CE0D7B27FC0034C2A8 /* FVProgressIndicatorCell.h */,
+				CE05D3CF0D7B27FC0034C2A8 /* FVProgressIndicatorCell.m */,
 			);
 			name = Download;
 			sourceTree = "<group>";
 		};
-		CEFC1F770F6AD54500B2AEE6 /* Object */ = {
+		CEFC1F770F6AD54500B2AEE6 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				CE05D3240D7AFC830034C2A8 /* FVUtilities.h */,
+				CE05D3250D7AFC830034C2A8 /* FVUtilities.m */,
 				CEFC1D110F6AB94F00B2AEE6 /* FVObject.h */,
 				CEFC1D120F6AB94F00B2AEE6 /* FVObject.m */,
 				CEFC1D130F6AB94F00B2AEE6 /* FVAllocator.h */,
@@ -607,19 +619,7 @@
 				CEFC1D150F6AB94F00B2AEE6 /* fv_zone.h */,
 				CEFC1D160F6AB94F00B2AEE6 /* fv_zone.cpp */,
 			);
-			name = Object;
-			sourceTree = "<group>";
-		};
-		CEFC1F780F6AD55B00B2AEE6 /* Miscellaneous */ = {
-			isa = PBXGroup;
-			children = (
-				CEA831120DC1FAB500B551D1 /* FVAccessibilityIconElement.h */,
-				CEA831130DC1FAB500B551D1 /* FVAccessibilityIconElement.m */,
-				CE05D3240D7AFC830034C2A8 /* FVUtilities.h */,
-				CE05D3250D7AFC830034C2A8 /* FVUtilities.m */,
-				CEFC19B00F693E8B00B2AEE6 /* FileView.h */,
-			);
-			name = Miscellaneous;
+			name = Utilities;
 			sourceTree = "<group>";
 		};
 		F946927B0CA5777300AC2772 /* FileView Program */ = {
