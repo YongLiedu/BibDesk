@@ -56,7 +56,6 @@
 
 static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
-static char _FVFileViewSelectionIndexesObservationContext;
 static char _FVFileViewContentObservationContext;
 
 #define SELECTIONINDEXES_BINDING_NAME @"selectionIndexes"
@@ -276,7 +275,7 @@ static CGFloat _subtitleHeight = 0.0;
     
     _operationQueue = [FVOperationQueue new];
     
-    _fvFlags.isBound = NO;
+    _contentBinding = nil;
     
     _fvFlags.updatingFromSlider = NO;
     
@@ -821,7 +820,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 - (void)_reloadIcons;
 {
     // if we're using bindings, there's no need to cache all the URLs
-    if (NO == _fvFlags.isBound) {
+    if (nil == _contentBinding) {
         
         if (nil == _orderedURLs)
             _orderedURLs = [NSMutableArray new];
@@ -859,7 +858,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         NSParameterAssert(nil != aURL && [NSNull null] != (id)aURL);
         FVIcon *icon = cachedIcon(self, @selector(_cachedIconForURL:), aURL);
         NSParameterAssert(nil != icon);
-        if (NO == _fvFlags.isBound)
+        if (nil == _contentBinding)
             insertObjectAtIndex(_orderedURLs, insertSel, aURL, i);
         insertObjectAtIndex(_orderedIcons, insertSel, icon, i);
         if (_orderedSubtitles)
@@ -912,28 +911,12 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (void)bind:(NSString *)binding toObject:(id)observable withKeyPath:(NSString *)keyPath options:(NSDictionary *)options;
 {
-    if ([options count])
-        FVLog(@"*** warning *** binding options are unsupported in -[%@ %@] (requested %@)", [self class], NSStringFromSelector(_cmd), options);
-    
-    // Note: we don't bind to this, some client does.  We do register as an observer, but that's a different code path.
-    if ([binding isEqualToString:SELECTIONINDEXES_BINDING_NAME]) {
-        
-        FVAPIAssert3(nil == [_bindingInfo objectForKey:binding], @"attempt to bind %@ to %@ when bound to %@", keyPath, observable, [[_bindingInfo objectForKey:binding] objectForKey:NSObservedObjectKey]);
-        
-        // Create an object to handle the binding mechanics manually; it's deallocated when the client unbinds.
-        NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:observable, NSObservedObjectKey, [[keyPath copy] autorelease], NSObservedKeyPathKey, [[options copy] autorelease], NSOptionsKey, nil];
-        [_bindingInfo setObject:info forKey:binding];
-        [observable addObserver:self forKeyPath:keyPath options:0 context:&_FVFileViewSelectionIndexesObservationContext];
-        [self observeValueForKeyPath:keyPath ofObject:observable change:nil context:&_FVFileViewSelectionIndexesObservationContext];
-    }
-    else if ([binding isEqualToString:CONTENT_BINDING_NAME]) {
+    if ([binding isEqualToString:CONTENT_BINDING_NAME]) {
      
-        FVAPIAssert3(nil == [_bindingInfo objectForKey:binding], @"attempt to bind %@ to %@ when bound to %@", keyPath, observable, [[_bindingInfo objectForKey:binding] objectForKey:NSObservedObjectKey]);
+        FVAPIAssert3(nil == _contentBinding, @"attempt to bind %@ to %@ when bound to %@", keyPath, observable, [_contentBinding objectForKey:NSObservedObjectKey]);
         
         // keep a record of the observervable object for unbinding; this is strictly for observation, not a manual binding
-        NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:observable, NSObservedObjectKey, [[keyPath copy] autorelease], NSObservedKeyPathKey, [[options copy] autorelease], NSOptionsKey, nil];
-        [_bindingInfo setObject:info forKey:binding];
-        _fvFlags.isBound = YES;
+        _contentBinding = [[NSDictionary alloc] initWithObjectsAndKeys:observable, NSObservedObjectKey, [[keyPath copy] autorelease], NSObservedKeyPathKey, [[options copy] autorelease], NSOptionsKey, nil];
         [observable addObserver:self forKeyPath:keyPath options:0 context:&_FVFileViewContentObservationContext];
         [self observeValueForKeyPath:keyPath ofObject:observable change:nil context:&_FVFileViewContentObservationContext];
     }
@@ -945,18 +928,12 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (void)unbind:(NSString *)binding
 {
-    if ([binding isEqualToString:SELECTIONINDEXES_BINDING_NAME]) {
-        FVAPIAssert2(nil != [_bindingInfo objectForKey:binding], @"%@: attempt to unbind %@ when unbound", self, binding);
+    if ([binding isEqualToString:CONTENT_BINDING_NAME]) {
+        FVAPIAssert2(nil != _contentBinding, @"%@: attempt to unbind %@ when unbound", self, binding);
         
-        [[_bindingInfo objectForKey:NSObservedObjectKey] removeObserver:self forKeyPath:[_bindingInfo objectForKey:NSObservedKeyPathKey]];
-        [_bindingInfo removeObjectForKey:binding];
-    }
-    else if ([binding isEqualToString:CONTENT_BINDING_NAME]) {
-        FVAPIAssert2(nil != [_bindingInfo objectForKey:binding], @"%@: attempt to unbind %@ when unbound", self, binding);
-        
-        [[_bindingInfo objectForKey:NSObservedObjectKey] removeObserver:self forKeyPath:[_bindingInfo objectForKey:NSObservedKeyPathKey]];
-        [_bindingInfo removeObjectForKey:binding];
-        _fvFlags.isBound = NO;
+        [[_contentBinding objectForKey:NSObservedObjectKey] removeObserver:self forKeyPath:[_contentBinding objectForKey:NSObservedKeyPathKey]];
+        [_contentBinding release];
+        _contentBinding = nil;
         
         [self setIconURLs:nil];
         // Calling -[super unbind:binding] after this may cause selection to be reset; this happens with the controller in the demo project, since it unbinds in the wrong order.  We should be resilient against that, so we unbind first.
@@ -970,12 +947,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (NSDictionary *)infoForBinding:(NSString *)binding;
 {
-    NSDictionary *info = nil;
-    if ([binding isEqualToString:SELECTIONINDEXES_BINDING_NAME] || [binding isEqualToString:CONTENT_BINDING_NAME])
-        info = [_bindingInfo objectForKey:binding];
-    else
-        info = [super infoForBinding:binding];
-    return info;
+    return [binding isEqualToString:CONTENT_BINDING_NAME] ? _contentBinding : [super infoForBinding:binding];
 }
 
 - (Class)valueClassForBinding:(NSString *)binding
@@ -992,20 +964,10 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {    
-    if (context == &_FVFileViewSelectionIndexesObservationContext) {
-        NSParameterAssert([keyPath isEqualToString:SELECTIONINDEXES_BINDING_NAME]);
-        
-        NSDictionary *info = [_bindingInfo objectForKey:SELECTIONINDEXES_BINDING_NAME];
-        NSIndexSet *controllerSet = [[info objectForKey:NSObservedObjectKey] valueForKeyPath:[info objectForKey:NSObservedKeyPathKey]];
-        
-        // since we manipulate _selectionIndexes directly, this won't cause a looping notification
-        if ([controllerSet isEqualToIndexSet:_selectionIndexes] == NO)
-            [self setSelectionIndexes:controllerSet];
-    }
-    else if (context == &_FVFileViewContentObservationContext) {
+    if (context == &_FVFileViewContentObservationContext) {
         NSParameterAssert([keyPath isEqualToString:CONTENT_BINDING_NAME]);
         
-        NSDictionary *info = [_bindingInfo objectForKey:SELECTIONINDEXES_BINDING_NAME];
+        NSDictionary *info = [self infoForBinding:SELECTIONINDEXES_BINDING_NAME];
         NSArray *controllerArray = [[info objectForKey:NSObservedObjectKey] valueForKeyPath:[info objectForKey:NSObservedKeyPathKey]];
         
         [self setIconURLs:controllerArray];
@@ -1075,7 +1037,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 - (void)_setSelectionIndexes:(NSIndexSet *)indexSet {
     [self setSelectionIndexes:indexSet];
     
-    NSDictionary *info = [_bindingInfo objectForKey:SELECTIONINDEXES_BINDING_NAME];
+    NSDictionary *info = [self infoForBinding:SELECTIONINDEXES_BINDING_NAME];
     if (info)
         [[info objectForKey:NSObservedObjectKey] setValue:_selectionIndexes forKeyPath:[info objectForKey:NSObservedKeyPathKey]];
 }
@@ -1152,14 +1114,14 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 // only used by -_reloadIcons; always returns a value independent of cached state
 - (NSURL *)_URLAtIndex:(NSUInteger)anIndex { 
-    NSURL *aURL = _fvFlags.isBound ? [_orderedURLs objectAtIndex:anIndex] : [_dataSource fileView:self URLAtIndex:anIndex];
+    NSURL *aURL = _contentBinding != nil ? [_orderedURLs objectAtIndex:anIndex] : [_dataSource fileView:self URLAtIndex:anIndex];
     if (__builtin_expect(nil == aURL || [NSNull null] == (id)aURL, 0))
         aURL = [FVIcon missingFileURL];
     return aURL;
 }
 
 // only used by -_reloadIcons; always returns a value independent of cached state
-- (NSUInteger)_numberOfIcons { return _fvFlags.isBound ? [_orderedURLs count] : [_dataSource numberOfURLsInFileView:self]; }
+- (NSUInteger)_numberOfIcons { return _contentBinding != nil ? [_orderedURLs count] : [_dataSource numberOfURLsInFileView:self]; }
 
 - (void)_getDisplayName:(NSString **)name andLabel:(NSUInteger *)label forURL:(NSURL *)aURL;
 {

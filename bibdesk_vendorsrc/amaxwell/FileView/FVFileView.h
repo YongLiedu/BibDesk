@@ -93,7 +93,6 @@ typedef enum _FVDropOperation {
         unsigned int isRescaling: 1;
         unsigned int scheduledLiveResize : 1;
         unsigned int isDrawingDragImage : 1;
-        unsigned int isBound : 1;
         unsigned int updatingFromSlider : 1;
     } _fvFlags;
     NSSize                  _padding;
@@ -112,7 +111,7 @@ typedef enum _FVDropOperation {
     NSTrackingRectTag       _topSliderTag;
     NSTrackingRectTag       _bottomSliderTag;
     FVOperationQueue       *_operationQueue;
-    NSMutableDictionary    *_bindingInfo;
+    NSDictionary           *_contentBinding;
     NSMutableArray         *_downloads;
     CFRunLoopTimerRef       _progressTimer;
     NSArray                *_iconURLs;
