@@ -60,20 +60,25 @@
     return arrowImage;
 }
 
+- (void)makeButtonCell {
+    buttonCell = [[NSButtonCell alloc] initTextCell: @""];
+    [buttonCell setBordered: NO];
+    [buttonCell setHighlightsBy: NSContentsCellMask];
+    [buttonCell setImagePosition: NSImageLeft];
+    [buttonCell setEnabled:[self isEnabled]];
+    [buttonCell setShowsFirstResponder:[self showsFirstResponder]];
+}
+
 // this used to be the designated intializer
 - (id)initTextCell:(NSString *)stringValue pullsDown:(BOOL)pullsDown{
-    self = [self initImageCell:nil];
-    return self;
+    return [self initImageCell:nil];
 }
 
 // this is now the designated intializer
 - (id)initImageCell:(NSImage *)anImage{
     if (self = [super initTextCell:@"" pullsDown:YES]) {
-		buttonCell = [[NSButtonCell alloc] initTextCell: @""];
-		[buttonCell setBordered: NO];
-		[buttonCell setHighlightsBy: NSContentsCellMask];
-		[buttonCell setImagePosition: NSImageLeft];
-		image = [anImage retain];
+		[self makeButtonCell];
+        image = [anImage retain];
         iconSize = image ? [image size] : NSMakeSize(32.0, 32.0);
     }
     
@@ -82,7 +87,7 @@
 
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
-        buttonCell = [[coder decodeObjectForKey:@"buttonCell"] retain];
+		[self makeButtonCell];
 		image = [[coder decodeObjectForKey:@"image"] retain];
 		iconSize = [coder decodeSizeForKey:@"iconSize"];
 		// hack to always get regular controls in a toolbar customization palette, there should be a better way
@@ -93,7 +98,6 @@
 
 - (void)encodeWithCoder:(NSCoder *)encoder{
 	[super encodeWithCoder:encoder];
-	[encoder encodeObject:buttonCell forKey:@"buttonCell"];
 	[encoder encodeObject:image forKey:@"image"];
 	[encoder encodeSize:iconSize forKey:@"iconSize"];
 }

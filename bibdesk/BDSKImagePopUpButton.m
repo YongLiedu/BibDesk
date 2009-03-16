@@ -51,12 +51,12 @@
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
 		if ([[self cell] isKindOfClass:[[self class] cellClass]] == NO) {
-			id cell = [[[[[self class] cellClass] alloc] init] autorelease];
 			id oldCell = [self cell];
+			id cell = [[[[[self class] cellClass] alloc] initImageCell:[oldCell image]] autorelease];
             
-            [cell setImage:[oldCell image]];
-            if ([oldCell image])
-                [cell setIconSize:[[oldCell image] size]];
+			[cell setEnabled:[oldCell isEnabled]];
+			[cell setShowsFirstResponder:[oldCell showsFirstResponder]];
+			[cell setUsesItemFromMenu:[oldCell usesItemFromMenu]];
 			[cell setAlternateImage:[oldCell alternateImage]];
             [cell setArrowPosition:[oldCell arrowPosition]];
 			[cell setMenu:[oldCell menu]];
