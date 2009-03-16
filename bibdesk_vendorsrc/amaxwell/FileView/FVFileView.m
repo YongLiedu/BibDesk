@@ -903,7 +903,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     NSURL *url = [note object];
     if (CFDictionaryContainsKey(_infoTable, url)) {
         CFDictionaryRemoveValue(_infoTable, url);
-        [self needsDisplay:YES];
+        [self setNeedsDisplay:YES];
     }
 }
 
