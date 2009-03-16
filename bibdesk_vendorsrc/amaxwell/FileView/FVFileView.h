@@ -264,12 +264,14 @@ typedef enum _FVDropOperation {
 /** Returns the current delegate or nil.*/
 - (id)delegate;
 
-/** Whether the view allows downloading URLs. */
+/** Whether the view allows downloading URLs.
+ 
+ Can be bound.*/
 - (BOOL)allowsDownloading;
 
 /** Change the view's allowsDownloading property.
  
- Default is NO for views created in code.
+ Default is NO for views created in code.  Can be bound.
  
  @param flag If set to YES, a contextual download menu item is added for external URLs, and external URLs dropped while holding the Option key will be automatically downloaded.  */
 - (void)setAllowsDownloading:(BOOL)flag;

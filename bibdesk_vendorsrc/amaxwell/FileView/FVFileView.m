@@ -65,6 +65,7 @@ static char _FVFileViewContentObservationContext;
 #define MAXICONSCALE_BINDING_NAME @"maxIconScale"
 #define AUTOSCALES_BINDING_NAME @"autoScales"
 #define EDITABLE_BINDING_NAME @"editable"
+#define ALLOWSDOWNLOADING_BINDING_NAME @"allowsDownloading"
 #define BACKGROUNDCOLOR_BINDING_NAME @"backgroundColor"
 
 #define SELECTIONINDEXES_KEY @"selectionIndexes"
@@ -128,7 +129,8 @@ static CGFloat _subtitleHeight = 0.0;
 - (void)_cancelDownloads;
 - (void)_downloadURLAtIndex:(NSUInteger)anIndex;
 - (void)_invalidateProgressTimer;
-- (void)handleFinderLabelChanged:(NSNotification *)note;
+- (void)_handleFinderLabelChanged:(NSNotification *)note;
+- (void)_updateBinding:(NSString *)binding;
 - (void)_setSelectionIndexes:(NSIndexSet *)indexSet;
 
 @end
@@ -173,6 +175,7 @@ static CGFloat _subtitleHeight = 0.0;
     [self exposeBinding:MAXICONSCALE_BINDING_NAME];
     [self exposeBinding:AUTOSCALES_BINDING_NAME];
     [self exposeBinding:EDITABLE_BINDING_NAME];
+    [self exposeBinding:ALLOWSDOWNLOADING_BINDING_NAME];
     [self exposeBinding:CONTENT_BINDING_NAME];
     [self exposeBinding:SELECTIONINDEXES_BINDING_NAME];
     [self exposeBinding:BACKGROUNDCOLOR_BINDING_NAME];
@@ -279,7 +282,7 @@ static CGFloat _subtitleHeight = 0.0;
     
     _fvFlags.updatingFromSlider = NO;
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleFinderLabelChanged:) name:FVFinderLabelDidChangeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleFinderLabelChanged:) name:FVFinderLabelDidChangeNotification object:nil];
 }
 
 #pragma mark NSView overrides
@@ -417,9 +420,7 @@ static CGFloat _subtitleHeight = 0.0;
 {
     if (_fvFlags.autoScales == NO) {
         [self setIconScale:scale];
-        
-        NSDictionary *info = [self infoForBinding:ICONSCALE_BINDING_NAME];
-        [[info objectForKey:NSObservedObjectKey] setValue:[NSNumber numberWithDouble:[self iconScale]] forKeyPath:[info objectForKey:NSObservedKeyPathKey]];
+        [self _updateBinding:ICONSCALE_BINDING_NAME];
     }
 }
 
@@ -507,9 +508,7 @@ static CGFloat _subtitleHeight = 0.0;
 - (void)_setAutoScales:(BOOL)flag {
     if (_fvFlags.autoScales != flag) {
         [self setAutoScales:flag];
-        
-        NSDictionary *info = [self infoForBinding:AUTOSCALES_BINDING_NAME];
-        [[info objectForKey:NSObservedObjectKey] setValue:[NSNumber numberWithBool:[self autoScales]] forKey:[info objectForKey:NSObservedKeyPathKey]];
+        [self _updateBinding:AUTOSCALES_BINDING_NAME];
     }
 }
 
@@ -899,7 +898,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     [self _resetViewLayout];
 }
 
-- (void)handleFinderLabelChanged:(NSNotification *)note {
+- (void)_handleFinderLabelChanged:(NSNotification *)note {
     NSURL *url = [note object];
     if (CFDictionaryContainsKey(_infoTable, url)) {
         CFDictionaryRemoveValue(_infoTable, url);
@@ -936,7 +935,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         _contentBinding = nil;
         
         [self setIconURLs:nil];
-        // Calling -[super unbind:binding] after this may cause selection to be reset; this happens with the controller in the demo project, since it unbinds in the wrong order.  We should be resilient against that, so we unbind first.
+        [self reloadIcons];
         [self setSelectionIndexes:[NSIndexSet indexSet]];
     }
     else {
@@ -952,9 +951,11 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (Class)valueClassForBinding:(NSString *)binding
 {
-    if ([binding isEqualToString:SELECTIONINDEXES_BINDING_NAME])
+    if ([binding isEqualToString:CONTENT_BINDING_NAME])
+        return [NSArray class];
+    else if ([binding isEqualToString:SELECTIONINDEXES_BINDING_NAME])
         return [NSIndexSet class];
-    else if ([binding isEqualToString:ICONSCALE_BINDING_NAME] || [binding isEqualToString:MINICONSCALE_BINDING_NAME] || [binding isEqualToString:MAXICONSCALE_BINDING_NAME] || [binding isEqualToString:AUTOSCALES_BINDING_NAME] || [binding isEqualToString:EDITABLE_BINDING_NAME])
+    else if ([binding isEqualToString:ICONSCALE_BINDING_NAME] || [binding isEqualToString:MINICONSCALE_BINDING_NAME] || [binding isEqualToString:MAXICONSCALE_BINDING_NAME] || [binding isEqualToString:AUTOSCALES_BINDING_NAME] || [binding isEqualToString:EDITABLE_BINDING_NAME] || [binding isEqualToString:ALLOWSDOWNLOADING_BINDING_NAME])
         return [NSNumber class];
     else if ([binding isEqualToString:BACKGROUNDCOLOR_BINDING_NAME])
         return [NSColor class];
@@ -967,16 +968,46 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     if (context == &_FVFileViewContentObservationContext) {
         NSParameterAssert([keyPath isEqualToString:CONTENT_BINDING_NAME]);
         
-        NSDictionary *info = [self infoForBinding:SELECTIONINDEXES_BINDING_NAME];
-        NSArray *controllerArray = [[info objectForKey:NSObservedObjectKey] valueForKeyPath:[info objectForKey:NSObservedKeyPathKey]];
-        
-        [self setIconURLs:controllerArray];
-        [self reloadIcons];
+        id observedArray = [[_contentBinding objectForKey:NSObservedObjectKey] valueForKeyPath:[_contentBinding objectForKey:NSObservedKeyPathKey]];
+        if (NSIsControllerMarker(observedArray) == NO) {
+            NSDictionary *options = [_contentBinding objectForKey:NSOptionsKey];
+            NSValueTransformer *transformer = [options objectForKey:NSValueTransformerBindingOption];
+            if (transformer == nil) {
+                NSString *transformerName = [options objectForKey:NSValueTransformerNameBindingOption];
+                if (transformerName)
+                    transformer = [NSValueTransformer valueTransformerForName:transformerName];
+            }
+            if (transformer)
+                observedArray = [transformer transformedValue:observedArray];
+            
+            [self setIconURLs:observedArray];
+            [self reloadIcons];
+        }
     }
     else {
         // not our context, so use super's implementation; documentation is totally wrong on this
         // http://lists.apple.com/archives/cocoa-dev/2008/Oct/msg01096.html
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
+
+- (void)_updateBinding:(NSString *)binding {
+    NSDictionary *info = [self infoForBinding:binding];
+    if (info) {
+        id value = [self valueForKey:binding];
+        id observable = [info objectForKey:NSObservedObjectKey];
+        NSString *keyPath = [info objectForKey:NSObservedKeyPathKey];
+        NSDictionary *options = [info objectForKey:NSOptionsKey];
+        NSValueTransformer *transformer = [options objectForKey:NSValueTransformerBindingOption];
+        if (transformer == nil) {
+            NSString *transformerName = [options objectForKey:NSValueTransformerNameBindingOption];
+            if (transformerName)
+                transformer = [NSValueTransformer valueTransformerForName:transformerName];
+        }
+        if (transformer)
+            value = [transformer reverseTransformedValue:value];
+        
+        [observable setValue:value forKeyPath:keyPath];
     }
 }
 
@@ -1036,10 +1067,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (void)_setSelectionIndexes:(NSIndexSet *)indexSet {
     [self setSelectionIndexes:indexSet];
-    
-    NSDictionary *info = [self infoForBinding:SELECTIONINDEXES_BINDING_NAME];
-    if (info)
-        [[info objectForKey:NSObservedObjectKey] setValue:_selectionIndexes forKeyPath:[info objectForKey:NSObservedKeyPathKey]];
+    [self _updateBinding:SELECTIONINDEXES_BINDING_NAME];
 }
 
 - (void)setSelectionIndexes:(NSIndexSet *)indexSet;
@@ -1047,7 +1075,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     FVAPIAssert(nil != indexSet, @"index set must not be nil");
     if (indexSet != _selectionIndexes) {
         [_selectionIndexes release];
-        _selectionIndexes = [indexSet copy];
+        _selectionIndexes = [[NSIndexSet alloc] initWithIndexSet:indexSet];
         
         [self setNeedsDisplay:YES];
         
