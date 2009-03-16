@@ -894,7 +894,7 @@ static OSType finderSignatureBytes = 'MACS';
 
     if(NO == success && error != nil){
         NSString *errorMessage = nil;
-        if(GetMacOSStatusCommentString != NULL && noErr != err)
+        if(noErr != err)
             errorMessage = [NSString stringWithUTF8String:GetMacOSStatusCommentString(err)];
         if(nil == errorMessage)
             errorMessage = NSLocalizedString(@"Unable to copy file.", @"Error description");

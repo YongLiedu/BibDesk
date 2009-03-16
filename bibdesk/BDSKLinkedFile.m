@@ -105,7 +105,7 @@ static Boolean BDSKAliasHandleToFSRef(const AliasHandle inAlias, const FSRef *in
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
 #warning fixme: FSMatchAliasNoUI is deprecated, use FSMatchAliasBulk instead
 #endif
-    if (FSMatchAliasBulk != NULL)
+    if (FSMatchAliasBulk != kUnresolvedCFragSymbolAddress)
         err = FSMatchAliasBulk(inBaseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst | kARMTryFileIDFirst, inAlias, &aliasCount, outRef, shouldUpdate, NULL, NULL);
     else
         err = FSMatchAliasNoUI(inBaseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst | kARMTryFileIDFirst, inAlias, &aliasCount, outRef, shouldUpdate, NULL, NULL);
