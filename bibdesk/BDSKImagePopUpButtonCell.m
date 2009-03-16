@@ -102,6 +102,14 @@
 	[encoder encodeSize:iconSize forKey:@"iconSize"];
 }
 
+- (id)copyWithZone:(NSZone *)aZone {
+    BDSKImagePopUpButtonCell *copy = [super copyWithZone:aZone];
+    copy->buttonCell = [buttonCell copyWithZone:aZone];
+    copy->image = [image copyWithZone:aZone];
+    copy->iconSize = iconSize;
+    return copy;
+}
+
 - (void)dealloc{
     [buttonCell release];
     buttonCell = nil;
