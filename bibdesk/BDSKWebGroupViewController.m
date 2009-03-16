@@ -165,12 +165,10 @@
     [backForwardButton setFrame:frame];
     if ([backForwardButton respondsToSelector:@selector(setSegmentStyle:)])
         [backForwardButton setSegmentStyle:NSSegmentStyleTexturedRounded];
-    backMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
-    [backMenu addItemWithTitle:@"back" action:NULL keyEquivalent:@""];
+    backMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
     [backMenu setDelegate:self];
     [backForwardButton setMenu:backMenu forSegment:0];
-    forwardMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
-    [forwardMenu addItemWithTitle:@"forward" action:NULL keyEquivalent:@""];
+    forwardMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
     [forwardMenu setDelegate:self];
     [backForwardButton setMenu:forwardMenu forSegment:1];
     [stopOrReloadButton setImagePosition:NSImageOnly];
@@ -307,15 +305,14 @@
 
 - (void)menuNeedsUpdate:(NSMenu *)menu {
     WebBackForwardList *backForwardList = [webView backForwardList];
-    NSArray *list = nil;
+    NSEnumerator *itemEnum = nil;
     if (menu == backMenu)
-        list = [backForwardList backListWithLimit:MAX_HISTORY];
+        itemEnum = [[backForwardList backListWithLimit:MAX_HISTORY] reverseObjectEnumerator];
     else if (menu == forwardMenu)
-        list = [backForwardList forwardListWithLimit:MAX_HISTORY];
+        itemEnum = [[backForwardList forwardListWithLimit:MAX_HISTORY] objectEnumerator];
     else
         return;
     [menu removeAllItems];
-    NSEnumerator *itemEnum = [list objectEnumerator];
     WebHistoryItem *item;
     while (item = [itemEnum nextObject]) {
         NSMenuItem *menuItem = [menu addItemWithTitle:[item title] action:@selector(goBackForwardInHistory:) keyEquivalent:@""];
