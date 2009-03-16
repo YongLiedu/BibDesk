@@ -57,7 +57,6 @@
 			[cell setEnabled:[oldCell isEnabled]];
 			[cell setShowsFirstResponder:[oldCell showsFirstResponder]];
 			[cell setUsesItemFromMenu:[oldCell usesItemFromMenu]];
-			[cell setAlternateImage:[oldCell alternateImage]];
             [cell setArrowPosition:[oldCell arrowPosition]];
 			[cell setMenu:[oldCell menu]];
             
@@ -65,6 +64,14 @@
 		}
 	}
 	return self;
+}
+
+- (NSImage *)icon {
+    return [[self cell] icon];
+}
+
+- (void)setIcon:(NSImage *)anImage {
+    [[self cell] setIcon:anImage];
 }
 
 - (NSSize)iconSize {

@@ -61,7 +61,7 @@
 }
 
 - (void)makeButtonCell {
-    buttonCell = [[NSButtonCell alloc] initTextCell: @""];
+    buttonCell = [[NSButtonCell allocWithZone:[self zone]] initTextCell: @""];
     [buttonCell setBordered: NO];
     [buttonCell setHighlightsBy: NSContentsCellMask];
     [buttonCell setImagePosition: NSImageLeft];
@@ -78,8 +78,8 @@
 - (id)initImageCell:(NSImage *)anImage{
     if (self = [super initTextCell:@"" pullsDown:YES]) {
 		[self makeButtonCell];
-        image = [anImage retain];
-        iconSize = image ? [image size] : NSMakeSize(32.0, 32.0);
+        icon = [anImage retain];
+        iconSize = icon ? [icon size] : NSMakeSize(32.0, 32.0);
     }
     
     return self;
@@ -88,7 +88,7 @@
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
 		[self makeButtonCell];
-		image = [[coder decodeObjectForKey:@"image"] retain];
+		icon = [[coder decodeObjectForKey:@"icon"] retain];
 		iconSize = [coder decodeSizeForKey:@"iconSize"];
 		// hack to always get regular controls in a toolbar customization palette, there should be a better way
 		[self setControlSize:NSRegularControlSize];
@@ -98,14 +98,14 @@
 
 - (void)encodeWithCoder:(NSCoder *)encoder{
 	[super encodeWithCoder:encoder];
-	[encoder encodeObject:image forKey:@"image"];
+	[encoder encodeObject:icon forKey:@"icon"];
 	[encoder encodeSize:iconSize forKey:@"iconSize"];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
     BDSKImagePopUpButtonCell *copy = [super copyWithZone:aZone];
-    copy->buttonCell = [buttonCell copyWithZone:aZone];
-    copy->image = [image copyWithZone:aZone];
+    [copy makeButtonCell];
+    copy->icon = [icon copyWithZone:aZone];
     copy->iconSize = iconSize;
     return copy;
 }
@@ -113,8 +113,8 @@
 - (void)dealloc{
     [buttonCell release];
     buttonCell = nil;
-    [image release];
-    image = nil;
+    [icon release];
+    icon = nil;
     [super dealloc];
 }
 
@@ -131,14 +131,14 @@
     }
 }
 
-- (NSImage *)image {
-    return image;
+- (NSImage *)icon {
+    return icon;
 }
 
-- (void)setImage:(NSImage *)anImage{
-    if (image != anImage) {
-        [image release];
-        image = [anImage retain];
+- (void)setIcon:(NSImage *)anImage{
+    if (icon != anImage) {
+        [icon release];
+        icon = [anImage retain];
         [buttonCell setImage:nil]; // invalidate the image
     }
 }
@@ -146,12 +146,6 @@
 - (void)setArrowPosition:(NSPopUpArrowPosition)position {
     [super setArrowPosition:position];
     [buttonCell setImage:nil]; // invalidate the image
-}
-
-- (void)setAlternateImage:(NSImage *)anImage{
-	[super setAlternateImage:anImage];
-	[buttonCell setAlternateImage:nil]; // invalidate the image
-	[buttonCell setImage:nil]; // invalidate the image
 }
 
 - (void)setEnabled:(BOOL)flag {
@@ -192,7 +186,7 @@
 	if ([buttonCell image] == nil || [self usesItemFromMenu]) {
 		// we need to redraw the image
 
-		NSImage *img = [self usesItemFromMenu] ? [[self selectedItem] image] : [self image];
+		NSImage *img = [self usesItemFromMenu] ? [[self selectedItem] image] : [self icon];
 				
 		NSSize drawSize = [self iconDrawSize];
 		NSRect iconRect = NSZeroRect;
@@ -219,19 +213,6 @@
 
 		[buttonCell setImage: popUpImage];
 		[popUpImage release];
-		
-		if ([self alternateImage]) {
-			popUpImage = [[NSImage alloc] initWithSize: drawSize];
-			
-			[popUpImage lockFocus];
-			[[self alternateImage] drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
-            if ([self arrowPosition] != NSPopUpNoArrow)
-				[[[self class] arrowImage] drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
-			[popUpImage unlockFocus];
-		
-			[buttonCell setAlternateImage: popUpImage];
-			[popUpImage release];
-		}
     }
 	//   NSLog(@"cellFrame: %@  selectedItem: %@", NSStringFromRect(cellFrame), [[self selectedItem] title]);
 	

@@ -108,7 +108,7 @@ enum {
     BDSKImagePopUpButton *cornerViewButton = [[BDSKImagePopUpButton alloc] initWithFrame:cornerViewFrame];
     [cornerViewButton setPullsDown:YES];
     [cornerViewButton setIconSize:cornerViewFrame.size];
-    [cornerViewButton setImage:[NSImage imageNamed:@"cornerColumns"]];
+    [cornerViewButton setIcon:[NSImage imageNamed:@"cornerColumns"]];
     [[cornerViewButton cell] setArrowPosition:NSPopUpNoArrow];
     [[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
     [[cornerViewButton cell] setUsesItemFromMenu:NO];

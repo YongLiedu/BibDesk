@@ -41,6 +41,11 @@
 
 
 @interface BDSKImagePopUpButton : NSPopUpButton
+
+- (NSImage *)icon;
+- (void)setIcon:(NSImage *)anImage;
+
 - (NSSize)iconSize;
 - (void)setIconSize:(NSSize)newIconSize;
+
 @end
