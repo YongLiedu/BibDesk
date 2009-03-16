@@ -132,7 +132,6 @@ static CGFloat _subtitleHeight = 0.0;
 - (void)handleFinderLabelChanged:(NSNotification *)note;
 - (void)_addSelectionIndexesInRange:(NSRange)range;
 - (void)_removeSelectionIndexesInRange:(NSRange)range;
-- (void)_selectionIndexesChanged:(BOOL)updateBinding;
 
 @end
 
@@ -998,13 +997,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         NSIndexSet *controllerSet = [[info objectForKey:NSObservedObjectKey] valueForKeyPath:[info objectForKey:NSObservedKeyPathKey]];
         
         // since we manipulate _selectedIndexes directly, this won't cause a looping notification
-        if ([controllerSet isEqualToIndexSet:_selectedIndexes] == NO) {
-            [_selectedIndexes removeAllIndexes];
-            [_selectedIndexes addIndexes:controllerSet];
-            [self _selectionIndexesChanged:NO];
-        }
-        
-        [self setNeedsDisplay:YES];
+        if ([controllerSet isEqualToIndexSet:_selectedIndexes] == NO)
+            [self setSelectionIndexes:controllerSet];
     }
     else if (context == &_FVFileViewContentObservationContext) {
         NSParameterAssert([keyPath isEqualToString:CONTENT_BINDING_NAME]);
@@ -1076,13 +1070,13 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 #pragma mark Binding/datasource wrappers
 
-- (void)_selectionIndexesChanged:(BOOL)updateBinding {
-    if (updateBinding) {
-        NSDictionary *info = [_bindingInfo objectForKey:SELECTIONINDEXES_BINDING_NAME];
-        if (info)
-            [[info objectForKey:NSObservedObjectKey] setValue:_selectedIndexes forKeyPath:[info objectForKey:NSObservedKeyPathKey]];
-    }
-    
+- (void)_updateSelectionIndexesBinding {
+    NSDictionary *info = [_bindingInfo objectForKey:SELECTIONINDEXES_BINDING_NAME];
+    if (info)
+        [[info objectForKey:NSObservedObjectKey] setValue:_selectedIndexes forKeyPath:[info objectForKey:NSObservedKeyPathKey]];
+}
+
+- (void)_selectionIndexesChanged {
     FVPreviewer *previewer = [FVPreviewer sharedPreviewer];
     NSUInteger firstIndex = [_selectedIndexes firstIndex];
     if ([previewer isPreviewing] && NSNotFound != firstIndex) {
@@ -1097,16 +1091,23 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (void)_addSelectionIndexesInRange:(NSRange)range {
     [self willChangeValueForKey:SELECTIONINDEXES_KEY];
-    [_selectedIndexes removeIndexesInRange:range];
+    [_selectedIndexes addIndexesInRange:range];
     [self didChangeValueForKey:SELECTIONINDEXES_KEY];
-    [self _selectionIndexesChanged:YES];
+    [self _selectionIndexesChanged];
+    [self _updateSelectionIndexesBinding];
 }
 
 - (void)_removeSelectionIndexesInRange:(NSRange)range {
     [self willChangeValueForKey:SELECTIONINDEXES_KEY];
     [_selectedIndexes removeIndexesInRange:range];
     [self didChangeValueForKey:SELECTIONINDEXES_KEY];
-    [self _selectionIndexesChanged:YES];
+    [self _selectionIndexesChanged];
+    [self _updateSelectionIndexesBinding];
+}
+
+- (void)_setSelectionIndexes:(NSIndexSet *)indexSet {
+    [self setSelectionIndexes:indexSet];
+    [self _updateSelectionIndexesBinding];
 }
 
 - (void)setSelectionIndexes:(NSIndexSet *)indexSet;
@@ -1115,7 +1116,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     if (indexSet != _selectedIndexes) {
         [_selectedIndexes release];
         _selectedIndexes = [indexSet mutableCopy];
-        [self _selectionIndexesChanged:YES];
+        [self _selectionIndexesChanged];
     }
 }
 
@@ -2033,7 +2034,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     // only called if we originated the drag, so the row/column must be valid
     if ((operation & NSDragOperationDelete) != 0 && operation != NSDragOperationEvery && [self isEditable]) {
         [[self dataSource] fileView:self deleteURLsAtIndexes:_selectedIndexes];
-        [self setSelectionIndexes:[NSIndexSet indexSet]];
+        [self _setSelectionIndexes:[NSIndexSet indexSet]];
         [self reloadIcons];
     }
 }
@@ -2333,7 +2334,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
             
             // deselect all if modifier key was not pressed, or i == NSNotFound
             if ((flags & (NSCommandKeyMask | NSShiftKeyMask)) == 0 || NSNotFound == i) {
-                [self setSelectionIndexes:[NSIndexSet indexSet]];
+                [self _setSelectionIndexes:[NSIndexSet indexSet]];
             }
             
             // if there's an icon in this cell, add to the current selection (which we may have just reset)
@@ -2391,7 +2392,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     }
     else if ([_selectedIndexes count]) {
         // deselect all, since we had a previous selection and clicked on a non-icon area
-        [self setSelectionIndexes:[NSIndexSet indexSet]];
+        [self _setSelectionIndexes:[NSIndexSet indexSet]];
     }
     else {
         [super mouseDown:event];
@@ -2479,7 +2480,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         selectedURLs = [self _selectedURLs];
         if ([selectedURLs containsObject:pointURL] == NO) {
             selectedURLs = nil;
-            [self setSelectionIndexes:[NSIndexSet indexSet]];
+            [self _setSelectionIndexes:[NSIndexSet indexSet]];
         }
         
         NSUInteger i, r, c;
@@ -2488,7 +2489,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         if (0 == [selectedURLs count] && nil != pointURL && [self _getGridRow:&r column:&c atPoint:p]) {
             selectedURLs = [NSArray arrayWithObject:pointURL];
             i = [self _indexForGridRow:r column:c];
-            [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:i]];
+            [self _setSelectionIndexes:[NSIndexSet indexSetWithIndex:i]];
         }
         
         // if we have anything to drag, start a drag session
@@ -2513,7 +2514,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         
         // no icons to drag, so we must draw the rubber band rectangle
         _rubberBandRect = NSIntersectionRect(_rectWithCorners(_lastMouseDownLocInView, p), [self bounds]);
-        [self setSelectionIndexes:[self _allIndexesInRubberBandRect]];
+        [self _setSelectionIndexes:[self _allIndexesInRubberBandRect]];
         [self setNeedsDisplayInRect:_rubberBandRect];
         [self autoscroll:event];
         [super mouseDragged:event];
@@ -2776,7 +2777,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
                 }
                 if (idx != NSNotFound) {
                     [self scrollItemAtIndexToVisible:idx];
-                    [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:idx]];
+                    [self _setSelectionIndexes:[NSIndexSet indexSetWithIndex:idx]];
                 }
             }
         }
@@ -2795,7 +2796,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     }
     else {
         [self scrollItemAtIndexToVisible:next];
-        [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:next]];
+        [self _setSelectionIndexes:[NSIndexSet indexSetWithIndex:next]];
     }
 }
 
@@ -2811,7 +2812,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
             next = [self numberOfIcons] - 1;
 
         [self scrollItemAtIndexToVisible:next];
-        [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:next]];
+        [self _setSelectionIndexes:[NSIndexSet indexSetWithIndex:next]];
     }
 }
 
@@ -2917,7 +2918,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
             if (NSIntersectsRect([self _rectOfIconInRow:r column:c], rect)) {
                 idx = [self _indexForGridRow:r column:c];
                 if (NSNotFound != idx) {
-                    [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:idx]];
+                    [self _setSelectionIndexes:[NSIndexSet indexSetWithIndex:idx]];
                     return;
                 }
             }
@@ -2967,7 +2968,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
             previous = numIcons - 1;
         
         [self scrollItemAtIndexToVisible:previous];
-        [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:previous]];
+        [self _setSelectionIndexes:[NSIndexSet indexSetWithIndex:previous]];
     }
 }
 
@@ -2983,7 +2984,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
             next = 0;
         
         [self scrollItemAtIndexToVisible:next];
-        [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:next]];
+        [self _setSelectionIndexes:[NSIndexSet indexSetWithIndex:next]];
     }
 }
 
@@ -3034,12 +3035,12 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (IBAction)selectAll:(id)sender;
 {
-    [self setSelectionIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfIcons])]];
+    [self _setSelectionIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfIcons])]];
 }
 
 - (IBAction)deselectAll:(id)sender;
 {
-    [self setSelectionIndexes:[NSIndexSet indexSet]];
+    [self _setSelectionIndexes:[NSIndexSet indexSet]];
 }
 
 - (IBAction)copy:(id)sender;
@@ -3156,7 +3157,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     
     // Finder changes selection only if the clicked item isn't in the current selection
     if (menu && NO == [_selectedIndexes containsIndex:idx])
-        [self setSelectionIndexes:idx == NSNotFound ? [NSIndexSet indexSet] : [NSIndexSet indexSetWithIndex:idx]];
+        [self _setSelectionIndexes:idx == NSNotFound ? [NSIndexSet indexSet] : [NSIndexSet indexSetWithIndex:idx]];
 
     // remove disabled items and double separators
     i = [menu numberOfItems];
@@ -3491,11 +3492,11 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 - (void)setSelected:(BOOL)selected forIconElement:(id)element {
     NSUInteger i = [element index];
     if (selected) {
-        [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:i]];
+        [self _setSelectionIndexes:[NSIndexSet indexSetWithIndex:i]];
     } else if ([[self selectionIndexes] containsIndex:i]) {
         NSMutableIndexSet *indexes = [[self selectionIndexes] mutableCopy];
         [indexes removeIndex:i];
-        [self setSelectionIndexes:indexes];
+        [self _setSelectionIndexes:indexes];
         [indexes release];
     }
 }
