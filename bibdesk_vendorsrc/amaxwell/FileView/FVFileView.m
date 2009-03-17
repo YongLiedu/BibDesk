@@ -1769,7 +1769,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     }
 }
 
-- (void)_drawIconsInRange:(NSRange)indexRange rows:(NSRange)rows columns:(NSRange)columns forDragImage:(BOOL)isDrawingDragImage
+- (void)_drawIconsInRows:(NSRange)rows columns:(NSRange)columns forDragImage:(BOOL)isDrawingDragImage
 {
     BOOL isResizing = [self inLiveResize];
 
@@ -1895,12 +1895,6 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     }
     
     CGColorRelease(shadowColor);
-    
-    // avoid hitting the cache thread while a live resize is in progress, but allow cache updates while scrolling
-    // use the same range criteria that we used in iterating icons
-    NSUInteger iMin = indexRange.location, iMax = NSMaxRange(indexRange);
-    if (NO == isResizing && NO == _fvFlags.isRescaling)
-        [self _scheduleIconsInRange:NSMakeRange(iMin, iMax - iMin)];
 }
 
 - (NSRect)_rectOfProgressIndicatorForIconAtIndex:(NSUInteger)anIndex;
@@ -1922,18 +1916,6 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
 
 - (void)drawRect:(NSRect)rect;
 {
-    NSRect visRect = [self visibleRect];
-    
-    // downscaling changes the view origin, so enlarge the rect if needed after _recalculateGridSize
-    if (_fvFlags.isRescaling) {
-        CGFloat dy = visRect.origin.y - [self visibleRect].origin.y;
-        CGFloat dx = visRect.origin.x - [self visibleRect].origin.x;
-        if (dy > 0 || dx > 0)
-            rect = NSInsetRect(rect, -dx, -dy);
-    }
-    
-    [super drawRect:rect];
-    
     BOOL isDrawingToScreen = [[NSGraphicsContext currentContext] isDrawingToScreen];
     
     if (isDrawingToScreen) {
@@ -1956,7 +1938,12 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     
     // only draw icons if we actually have some in this rect
     if (iMax > iMin) {
-        [self _drawIconsInRange:NSMakeRange(iMin, iMax - iMin) rows:rowRange columns:columnRange forDragImage:NO];
+        [self _drawIconsInRows:rowRange columns:columnRange forDragImage:NO];
+        
+        // avoid hitting the cache thread while a live resize is in progress, but allow cache updates while scrolling
+        // use the same range criteria that we used in iterating icons
+        if (NO == [self inLiveResize] && NO == _fvFlags.isRescaling)
+            [self _scheduleIconsInRange:NSMakeRange(iMin, iMax - iMin)];
     }
     else if (0 == iMax && [self isEditable]) {
         [[NSGraphicsContext currentContext] setShouldAntialias:YES];
@@ -2018,22 +2005,27 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
 
 - (void)dragImage:(NSImage *)anImage at:(NSPoint)viewLocation offset:(NSSize)unused event:(NSEvent *)event pasteboard:(NSPasteboard *)pboard source:(id)sourceObj slideBack:(BOOL)slideFlag;
 {
+    NSUInteger r, c, cMin = NSUIntegerMax, cMax = 0, rMin = NSUIntegerMax, rMax = 0;
     NSUInteger i = [_selectionIndexes firstIndex];
-    NSUInteger iMin = i, iMax = i, cMin = NSUIntegerMax, cMax = 0, rMin = NSUIntegerMax, rMax = 0;
-    NSRect rect = NSZeroRect;
     while (i != NSNotFound) {
-        NSUInteger r, c;
         [self _getGridRow:&r column:&c ofIndex:i];
         cMin = MIN(cMin, c);
         cMax = MAX(cMax, c);
         rMin = MIN(rMin, r);
         rMax = MAX(rMax, r);
-        iMax = i;
+        i = [_selectionIndexes indexGreaterThanIndex:i];
+    }
+    
+    NSRect rect = NSZeroRect;
+    for (r = rMin, c = cMin; r <= rMax && c <= cMax;) {
         NSRect iconRect = [self _rectOfIconInRow:r column:c];
         NSRect textRect = [self _rectOfTextForIconRect:iconRect];
-        iconRect = NSUnionRect(NSInsetRect([self centerScanRect:iconRect], -4, -4), [self centerScanRect:textRect]);
+        iconRect = NSUnionRect(NSInsetRect([self centerScanRect:iconRect], -4.0, -4.0), [self centerScanRect:textRect]);
         rect = NSUnionRect(rect, iconRect);
-        i = [_selectionIndexes indexGreaterThanIndex:i];
+        if (r >= rMax && c >= cMax)
+            break;
+        r = rMax;
+        c = cMax;
     }
     
     NSRect bounds = [self bounds];
@@ -2041,7 +2033,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     NSImage *newImage = [[[NSImage alloc] initWithSize:bounds.size] autorelease];
     [newImage setFlipped:YES];
     [newImage lockFocus];
-    [self _drawIconsInRange:NSMakeRange(iMin, iMax + 1 - iMin) rows:NSMakeRange(rMin, rMax + 1 - rMin) columns:NSMakeRange(cMin, cMax + 1 - cMax) forDragImage:YES];
+    [self _drawIconsInRows:NSMakeRange(rMin, rMax + 1 - rMin) columns:NSMakeRange(cMin, cMax + 1 - cMax) forDragImage:YES];
     [newImage unlockFocus];
     
     // redraw with transparency, so it's easier to see a target
