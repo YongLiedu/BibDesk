@@ -166,7 +166,7 @@
     static NSImage *image = nil;
     if(image == nil){
         image = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
-        NSImage *genericImage = [NSImage imageNamed:@"genericGroup"];
+        NSImage *genericImage = [NSImage imageNamed:@"categoryGroup"];
         NSImage *questionMark = [NSImage iconWithSize:NSMakeSize(20.0, 20.0) forToolboxCode:kQuestionMarkIcon];
         unsigned i;
         [image lockFocus];
