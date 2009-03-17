@@ -74,10 +74,10 @@
             webGroup = nil;
         }
         lastImportGroup = nil;
+        searchGroups = [[NSMutableArray alloc] init];
         sharedGroups = [[NSMutableArray alloc] init];
         urlGroups = [[NSMutableArray alloc] init];
         scriptGroups = [[NSMutableArray alloc] init];
-        searchGroups = [[NSMutableArray alloc] init];
         smartGroups = [[NSMutableArray alloc] init];
         staticGroups = [[NSMutableArray alloc] init];
         tmpStaticGroups = nil;
@@ -129,6 +129,11 @@
             return webGroup;
         idx -= 1;
     }
+    
+    count = [searchGroups count];
+    if (idx < count)
+        return [searchGroups objectAtIndex:idx];
+    idx -= count;
         
     count = [sharedGroups count];
     if (idx < count)
@@ -143,11 +148,6 @@
     count = [scriptGroups count];
     if (idx < count)
         return [scriptGroups objectAtIndex:idx];
-    idx -= count;
-    
-    count = [searchGroups count];
-    if (idx < count)
-        return [searchGroups objectAtIndex:idx];
     idx -= count;
     
     if ([lastImportGroup count] != 0) {
@@ -183,6 +183,10 @@
     return lastImportGroup;
 }
 
+- (NSArray *)searchGroups{
+    return searchGroups;
+}
+
 - (NSArray *)sharedGroups{
     return sharedGroups;
 }
@@ -193,10 +197,6 @@
 
 - (NSArray *)scriptGroups{
     return scriptGroups;
-}
-
-- (NSArray *)searchGroups{
-    return searchGroups;
 }
 
 - (NSArray *)smartGroups{
@@ -214,11 +214,12 @@
 
 #pragma mark Index ranges of groups
 
+- (NSRange)rangeOfSearchGroups{
+    return NSMakeRange(webGroup != nil ? 2 : 1, [searchGroups count]);
+}
+
 - (NSRange)rangeOfSharedGroups{
-    if(webGroup != nil)
-        return NSMakeRange(2, [sharedGroups count]); // library and web
-    else
-        return NSMakeRange(1, [sharedGroups count]); // library only
+    return NSMakeRange(NSMaxRange([self rangeOfSearchGroups]), [sharedGroups count]);
 }
 
 - (NSRange)rangeOfURLGroups{
@@ -229,12 +230,8 @@
     return NSMakeRange(NSMaxRange([self rangeOfURLGroups]), [scriptGroups count]);
 }
 
-- (NSRange)rangeOfSearchGroups{
-    return NSMakeRange(NSMaxRange([self rangeOfScriptGroups]), [searchGroups count]);
-}
-
 - (NSRange)rangeOfSmartGroups{
-    unsigned startIndex = NSMaxRange([self rangeOfSearchGroups]);
+    unsigned startIndex = NSMaxRange([self rangeOfScriptGroups]);
     if([lastImportGroup count] > 0) startIndex++;
     return NSMakeRange(startIndex, [smartGroups count]);
 }
@@ -249,7 +246,11 @@
 }
 
 - (NSRange)rangeOfExternalGroups{
-    return NSMakeRange(1, NSMaxRange([self rangeOfSearchGroups]) - 1);
+    return NSMakeRange(1, NSMaxRange([self rangeOfScriptGroups]) - 1);
+}
+
+- (unsigned int)numberOfSearchGroupsAtIndexes:(NSIndexSet *)indexes{
+    return [indexes numberOfIndexesInRange:[self rangeOfSearchGroups]];
 }
 
 - (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes{
@@ -262,10 +263,6 @@
 
 - (unsigned int)numberOfScriptGroupsAtIndexes:(NSIndexSet *)indexes{
     return [indexes numberOfIndexesInRange:[self rangeOfScriptGroups]];
-}
-
-- (unsigned int)numberOfSearchGroupsAtIndexes:(NSIndexSet *)indexes{
-    return [indexes numberOfIndexesInRange:[self rangeOfSearchGroups]];
 }
 
 - (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes{
@@ -290,6 +287,11 @@
     return [indexes intersectsIndexesInRange:webRange];
 }
 
+- (BOOL)hasSearchGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange searchRange = [self rangeOfSearchGroups];
+    return [indexes intersectsIndexesInRange:searchRange];
+}
+
 - (BOOL)hasSharedGroupsAtIndexes:(NSIndexSet *)indexes{
     NSRange sharedRange = [self rangeOfSharedGroups];
     return [indexes intersectsIndexesInRange:sharedRange];
@@ -303,11 +305,6 @@
 - (BOOL)hasScriptGroupsAtIndexes:(NSIndexSet *)indexes{
     NSRange scriptRange = [self rangeOfScriptGroups];
     return [indexes intersectsIndexesInRange:scriptRange];
-}
-
-- (BOOL)hasSearchGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange searchRange = [self rangeOfSearchGroups];
-    return [indexes intersectsIndexesInRange:searchRange];
 }
 
 - (BOOL)hasSmartGroupsAtIndexes:(NSIndexSet *)indexes{
