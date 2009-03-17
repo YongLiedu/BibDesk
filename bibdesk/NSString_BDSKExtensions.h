@@ -468,6 +468,7 @@ An inline buffer is used for speed in accessing each character.
 
 - (NSString *)stringByRemovingSurroundingWhitespace;
 - (NSString *)stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
+- (NSString *)stringByRemovingSurroundingWhitespaceAndNewlines;
 
 - (NSString *)fullyEncodeAsIURI;
 

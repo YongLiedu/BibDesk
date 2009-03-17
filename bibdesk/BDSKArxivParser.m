@@ -81,6 +81,11 @@
     NSString *journalNodePath = @".//div[@class='list-journal-ref']";
     NSString *abstractNodePath = @".//p";
     
+    AGRegex *eprintRegex1 = [AGRegex regexWithPattern:@"([0-9]{2})([0-9]{2})\\.([0-9]{4})"
+                                              options:AGRegexMultiline];
+    AGRegex *eprintRegex2 = [AGRegex regexWithPattern:@"([0-9]{2})([0-9]{2})([0-9]{3})"
+                                              options:AGRegexMultiline];
+    
     AGRegex *journalRegex1 = [AGRegex regexWithPattern:@"(.+) +([^ ]+) +\\(([0-9]{4})\\) +([^ ]+)"
                                                options:AGRegexMultiline];
     AGRegex *journalRegex2 = [AGRegex regexWithPattern:@"(.+[^0-9]) +([^ ]+), +([^ ]+) +\\(([0-9]{4})\\)"
@@ -157,6 +162,7 @@
         nodes = [arxivLinkNode nodesForXPath:arxivIDNodePath error:&error];
         if (nil != nodes && 1 == [nodes count]) {
             if (string = [[nodes objectAtIndex:0] stringValue]) {
+                string = [string stringByRemovingSurroundingWhitespaceAndNewlines];
                 if ([string hasCaseInsensitivePrefix:@"arXiv:"])
                     string = [string substringFromIndex:6];
                 [pubFields setValue:string forKey:@"Eprint"];
@@ -166,15 +172,18 @@
         // search for title
         nodes = [arxivMetaNode nodesForXPath:titleNodePath error:&error];
         if (nil != nodes && 1 == [nodes count]) {
-            if (string = [[[nodes objectAtIndex:0] childAtIndex:1] stringValue])
+            if (string = [[[nodes objectAtIndex:0] childAtIndex:1] stringValue]) {
+                string = [string stringByRemovingSurroundingWhitespaceAndNewlines];
                 [pubFields setValue:string forKey:BDSKTitleString];
+            }
         }
         
         // search for authors
         nodes = [arxivMetaNode nodesForXPath:authorsNodePath error:&error];
         if (nil != nodes && 0 < [nodes count]) {
-            if (string = [[nodes valueForKey:@"stringValue"] componentsJoinedByString:@" and "])
+            if (string = [[nodes valueForKeyPath:@"stringValue.stringByRemovingSurroundingWhitespaceAndNewlines"] componentsJoinedByString:@" and "]) {
                 [pubFields setValue:string forKey:BDSKAuthorString];
+            }
         }
         
         // search for journal ref
@@ -184,6 +193,7 @@
             // actual journal ref comes after a span containing a label
             if ([journalRefNode childCount] > 1) {
                 if (string = [[journalRefNode childAtIndex:1] stringValue]) {
+                    string = [string stringByRemovingSurroundingWhitespaceAndNewlines];
                     // try to get full journal ref components, as "Journal Volume (Year) Pages"
                     AGRegexMatch *match = [journalRegex1 findInString:string];
                     if ([match groupAtIndex:0]) {
@@ -214,8 +224,32 @@
         // search for abstract
         nodes = [arxivMetaNode nodesForXPath:abstractNodePath error:&error];
         if (nil != nodes && 1 == [nodes count]) {
-            if (string = [[nodes objectAtIndex:0] stringValue])
+            if (string = [[nodes objectAtIndex:0] stringValue]) {
+                string = [string stringByRemovingSurroundingWhitespaceAndNewlines];
                 [pubFields setValue:string forKey:BDSKAbstractString];
+            }
+        }
+        
+        // fill year+month from the arxiv ID if we did not get it from a journal
+        if ([pubFields valueForKey:BDSKYearString] == nil && (string = [pubFields valueForKey:@"Eprint"])) {
+            // try new format, yymm.nnnn
+            AGRegexMatch *match = [eprintRegex1 findInString:string];
+            if (string = [match groupAtIndex:1]) {
+                [pubFields setValue:[@"20" stringByAppendingString:string] forKey:BDSKYearString];
+                [pubFields setValue:[match groupAtIndex:2] forKey:BDSKMonthString];
+            } else {
+                // try old format, yymmnnn
+                match = [eprintRegex2 findInString:string];
+                if (string = [match groupAtIndex:1]) {
+                    [pubFields setValue:[([string intValue] < 90 ? @"20" : @"19") stringByAppendingString:string] forKey:BDSKYearString];
+                    [pubFields setValue:[match groupAtIndex:2] forKey:BDSKMonthString];
+                }
+            }
+        }
+        
+        // fill URL from arxiv ID if we did not find a link
+        if ([pubFields valueForKey:BDSKUrlString] == nil && (string = [pubFields valueForKey:@"Eprint"])) {
+            [pubFields setValue:[NSString stringWithFormat:@"http://%@/pdf/%@", [url host], string] forKey:BDSKUrlString];
         }
         
         BibItem *item = [[BibItem alloc] initWithType:BDSKArticleString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];

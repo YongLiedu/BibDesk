@@ -1383,6 +1383,10 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return self;
 }
 
+- (NSString *)stringByRemovingSurroundingWhitespaceAndNewlines {
+    return [self stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+}
+
 - (NSString *)stringByRemovingSurroundingWhitespace {
     return [self stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 }
