@@ -45,10 +45,7 @@
 
 + (id)defaultServerInfoWithType:(NSString *)aType;
 {
-    BOOL isEntrez = [aType isEqualToString:BDSKSearchGroupEntrez];
     BOOL isZoom = [aType isEqualToString:BDSKSearchGroupZoom];
-    BOOL isISI = [aType isEqualToString:BDSKSearchGroupISI];
-    BOOL isDBLP = [aType isEqualToString:BDSKSearchGroupDBLP];
     
     return [[[[self class] alloc] initWithType:aType 
                                           name:NSLocalizedString(@"New Server", @"")
@@ -181,6 +178,31 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 
 
 @implementation BDSKMutableServerInfo
+
++ (void)initialize{
+    [self setKeys:[NSArray arrayWithObject:@"type"] triggerChangeNotificationsForDependentKey:@"host"];
+    [self setKeys:[NSArray arrayWithObject:@"type"] triggerChangeNotificationsForDependentKey:@"port"];
+    [self setKeys:[NSArray arrayWithObject:@"type"] triggerChangeNotificationsForDependentKey:@"options"];
+    [self setKeys:[NSArray arrayWithObject:@"options"] triggerChangeNotificationsForDependentKey:@"password"];
+    [self setKeys:[NSArray arrayWithObject:@"options"] triggerChangeNotificationsForDependentKey:@"username"];
+    [self setKeys:[NSArray arrayWithObject:@"options"] triggerChangeNotificationsForDependentKey:@"recordSyntax"];
+    [self setKeys:[NSArray arrayWithObject:@"options"] triggerChangeNotificationsForDependentKey:@"resultEncoding"];
+    [self setKeys:[NSArray arrayWithObject:@"options"] triggerChangeNotificationsForDependentKey:@"removeDiacritics"];
+    BDSKINITIALIZE;
+}
+
+- (void)setType:(NSString *)newType {
+    if ([type isEqualToString:newType] == NO) {
+        [type release];
+        type = [newType retain];
+        if ([self isZoom]) {
+            if (host == nil)
+                [self setHost:@"host.domain.com"];
+            if (port == nil)
+                [self setPort:@"0"];
+        }
+    }
+}
 
 - (void)setName:(NSString *)newName;
 {

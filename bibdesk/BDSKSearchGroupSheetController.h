@@ -45,7 +45,6 @@
     BDSKSearchGroup *group;
     NSUndoManager *undoManager;
     BDSKMutableServerInfo *serverInfo;
-    NSString *type;
     
     BOOL isCustom;
     BOOL isEditable;
@@ -73,16 +72,16 @@
 }
 
 + (void)resetServers;
-+ (void)saveServer:(BDSKServerInfo *)serverInfo;
-+ (void)deleteServer:(BDSKServerInfo *)serverInfo;
-+ (NSArray *)serversForType:(NSString *)type;
-+ (void)addServer:(BDSKServerInfo *)info forType:(NSString *)type;
-+ (void)setServer:(BDSKServerInfo *)info atIndex:(unsigned)index forType:(NSString *)type;
-+ (void)removeServerAtIndex:(unsigned)index forType:(NSString *)type;
++ (void)loadCustomServers;
++ (void)saveServerFile:(BDSKServerInfo *)serverInfo;
++ (void)deleteServerFile:(BDSKServerInfo *)serverInfo;
++ (NSArray *)servers;
++ (void)addServer:(BDSKServerInfo *)info;
++ (void)setServer:(BDSKServerInfo *)info atIndex:(unsigned)index;
++ (void)removeServerAtIndex:(unsigned)index;
 
 - (id)initWithGroup:(BDSKSearchGroup *)aGroup;
 
-- (IBAction)selectServerType:(id)sender;
 - (IBAction)selectPredefinedServer:(id)sender;
 - (IBAction)selectSyntax:(id)sender;
 
@@ -98,9 +97,15 @@
 - (BOOL)isEditable;
 - (BOOL)isEntrez;
 - (BOOL)isZoom;
+- (BOOL)isISI;
+- (BOOL)isDBLP;
 
-- (void)setType:(NSString *)t;
+- (void)setType:(NSString *)newType;
 - (NSString *)type;
+
+- (void)setTypeTag:(int)tag;
+- (int)typeTag;
+
 - (void)setServerInfo:(BDSKServerInfo *)info;
 - (BDSKServerInfo *)serverInfo;
 

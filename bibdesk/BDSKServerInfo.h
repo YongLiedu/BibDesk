@@ -78,6 +78,7 @@
 
 @interface BDSKMutableServerInfo : BDSKServerInfo
 
+- (void)setType:(NSString *)newType;
 - (void)setName:(NSString *)newName;
 - (void)setPort:(NSString *)newPort;
 - (void)setHost:(NSString *)newHost;

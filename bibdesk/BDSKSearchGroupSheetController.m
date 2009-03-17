@@ -47,32 +47,26 @@
 #define SERVERS_FILENAME @"SearchGroupServers"
 #define SERVERS_DIRNAME @"SearchGroupServers"
 
-static NSDictionary *searchGroupServers = nil;
-static NSDictionary *searchGroupServerFiles = nil;
+static NSMutableArray *searchGroupServers = nil;
+static NSMutableDictionary *searchGroupServerFiles = nil;
 
 @implementation BDSKSearchGroupSheetController
 
-#pragma mark Server info
+#pragma mark Search group servers
 
 static BOOL isSearchFileAtPath(NSString *path)
 {
     return [[[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]] isEqualToUTI:@"net.sourceforge.bibdesk.bdsksearch"];
 }
     
-+ (void)initialize {
-    NSArray *typeKeys = [NSArray arrayWithObjects:@"type", nil];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"entrez"];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"zoom"];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"isi"];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"dblp"];
++ (void)resetServers;
+{
+    [searchGroupServers removeAllObjects];
+    [searchGroupServerFiles removeAllObjects];
     
-    BDSKINITIALIZE;
-    
-    NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
     NSString *path = [[NSBundle mainBundle] pathForResource:SERVERS_FILENAME ofType:@"plist"];
     
     NSDictionary *serverDicts = [NSDictionary dictionaryWithContentsOfFile:path];
-    NSMutableDictionary *newServerDicts = [NSMutableDictionary dictionaryWithCapacity:3];
     NSEnumerator *typeEnum = [[NSArray arrayWithObjects:BDSKSearchGroupEntrez, BDSKSearchGroupZoom, BDSKSearchGroupISI, BDSKSearchGroupDBLP, nil] objectEnumerator];
     NSString *type;
     
@@ -80,21 +74,19 @@ static BOOL isSearchFileAtPath(NSString *path)
         NSArray *dicts = [serverDicts objectForKey:type];
         NSEnumerator *dictEnum = [dicts objectEnumerator];
         NSDictionary *dict;
-        NSMutableArray *infos = [NSMutableArray arrayWithCapacity:[dicts count]];
         while (dict = [dictEnum nextObject]) {
             BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithType:type dictionary:dict];
             if (info) {
-                [infos addObject:info];
+                [searchGroupServers addObject:info];
                 [info release];
             }
         }
-        [newServerDicts setObject:infos forKey:type];
     }
-    
-    [searchGroupServerFiles release];
-    searchGroupServerFiles = [[NSDictionary alloc] initWithObjectsAndKeys:
-        [NSMutableDictionary dictionary], BDSKSearchGroupEntrez, [NSMutableDictionary dictionary], BDSKSearchGroupZoom, [NSMutableDictionary dictionary], BDSKSearchGroupISI, [NSMutableDictionary dictionary], BDSKSearchGroupDBLP, nil];
-    
+}
+
++ (void)loadCustomServers;
+{
+    NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
     NSString *serversPath = [applicationSupportPath stringByAppendingPathComponent:SERVERS_DIRNAME];
     BOOL isDir = NO;
     if ([[NSFileManager defaultManager] fileExistsAtPath:serversPath isDirectory:&isDir] && isDir) {
@@ -104,73 +96,24 @@ static BOOL isSearchFileAtPath(NSString *path)
             if ([[[dirEnum fileAttributes] valueForKey:NSFileType] isEqualToString:NSFileTypeDirectory]) {
                 [dirEnum skipDescendents];
             } else if (isSearchFileAtPath([serversPath stringByAppendingPathComponent:file])) {
-                path = [serversPath stringByAppendingPathComponent:file];
+                NSString *path = [serversPath stringByAppendingPathComponent:file];
                 NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:path];
                 BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithType:nil dictionary:dict];
                 if (info) {
-                    NSMutableArray *servers = [newServerDicts objectForKey:[info type]];
-                    unsigned idx = [[servers valueForKey:@"name"] indexOfObject:[info name]];
+                    unsigned idx = [[searchGroupServers valueForKey:@"name"] indexOfObject:[info name]];
                     if (idx != NSNotFound)
-                        [servers replaceObjectAtIndex:idx withObject:info];
+                        [searchGroupServers replaceObjectAtIndex:idx withObject:info];
                     else
-                        [servers addObject:info];
-                    [[searchGroupServerFiles objectForKey:[info type]] setObject:path forKey:[info name]];
+                        [searchGroupServers addObject:info];
+                    [searchGroupServerFiles setObject:path forKey:[info name]];
                     [info release];
                 }
             }
         }
     }
-    
-    [searchGroupServers release];
-    searchGroupServers = [newServerDicts copy];
 }
 
-+ (void)resetServers;
-{
-    NSDictionary *serverDicts = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:SERVERS_FILENAME ofType:@"plist"]];
-    NSMutableDictionary *newServerDicts = [NSMutableDictionary dictionaryWithCapacity:[serverDicts count]];
-    NSEnumerator *typeEnum = [[NSArray arrayWithObjects:BDSKSearchGroupEntrez, BDSKSearchGroupZoom, BDSKSearchGroupISI, BDSKSearchGroupDBLP, nil] objectEnumerator];
-    NSString *type;
-    
-    while (type = [typeEnum nextObject]) {
-        NSArray *dicts = [serverDicts objectForKey:type];
-        NSEnumerator *dictEnum = [dicts objectEnumerator];
-        NSDictionary *dict;
-        NSMutableArray *infos = [NSMutableArray arrayWithCapacity:[dicts count]];
-        while (dict = [dictEnum nextObject]) {
-            BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithType:type dictionary:dict];
-            if (info) {
-                [infos addObject:info];
-                [info release];
-            }
-        }
-        [newServerDicts setObject:infos forKey:type];
-    }
-    
-    NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
-    NSString *serversPath = [applicationSupportPath stringByAppendingPathComponent:SERVERS_DIRNAME];
-    BOOL isDir = NO;
-    if ([[NSFileManager defaultManager] fileExistsAtPath:serversPath isDirectory:&isDir] && isDir) {
-        NSDirectoryEnumerator *dirEnum = [[NSFileManager defaultManager] enumeratorAtPath:serversPath];
-        NSString *file;
-        while (file = [dirEnum nextObject]) {
-            if ([[[dirEnum fileAttributes] valueForKey:NSFileType] isEqualToString:NSFileTypeDirectory]) {
-                [dirEnum skipDescendents];
-            } else if (isSearchFileAtPath([serversPath stringByAppendingPathComponent:file])) {
-                [[NSFileManager defaultManager] removeFileAtPath:[serversPath stringByAppendingPathComponent:file] handler:nil];
-            }
-        }
-    }
-    
-    [searchGroupServers release];
-    searchGroupServers = [newServerDicts copy];
-    
-    [searchGroupServerFiles release];
-    searchGroupServerFiles = [[NSDictionary alloc] initWithObjectsAndKeys:
-        [NSMutableDictionary dictionary], BDSKSearchGroupEntrez, [NSMutableDictionary dictionary], BDSKSearchGroupZoom, [NSMutableDictionary dictionary], BDSKSearchGroupISI, [NSMutableDictionary dictionary], BDSKSearchGroupDBLP, nil];
-}
-
-+ (void)saveServer:(BDSKServerInfo *)serverInfo;
++ (void)saveServerFile:(BDSKServerInfo *)serverInfo;
 {
     NSString *error = nil;
     NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
@@ -192,51 +135,66 @@ static BOOL isSearchFileAtPath(NSString *path)
             return;
         }
         
-        NSString *path = [[searchGroupServerFiles objectForKey:[serverInfo type]] objectForKey:[serverInfo name]];
+        NSString *path = [searchGroupServerFiles objectForKey:[serverInfo name]];
         if (path)
             [[NSFileManager defaultManager] removeFileAtPath:path handler:nil];
         path = [serversPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%@.bdsksearch", [serverInfo name], [serverInfo type]]];
         [data writeToFile:path atomically:YES];
-        [[searchGroupServerFiles objectForKey:[serverInfo type]] setObject:path forKey:[serverInfo name]];
+        [searchGroupServerFiles setObject:path forKey:[serverInfo name]];
     }
 }
 
-+ (void)deleteServer:(BDSKServerInfo *)serverInfo;
++ (void)deleteServerFile:(BDSKServerInfo *)serverInfo;
 {
-    NSString *path = [[searchGroupServerFiles objectForKey:[serverInfo type]] objectForKey:[serverInfo name]];
+    NSString *path = [searchGroupServerFiles objectForKey:[serverInfo name]];
     if (path) {
         [[NSFileManager defaultManager] removeFileAtPath:path handler:nil];
-        [[searchGroupServerFiles objectForKey:[serverInfo type]] removeObjectForKey:[serverInfo name]];
+        [searchGroupServerFiles removeObjectForKey:[serverInfo name]];
     }
 }
 
-+ (NSArray *)serversForType:(NSString *)type;
-{
-    return [searchGroupServers objectForKey:type];
++ (NSArray *)servers
+{ 
+    return searchGroupServers;
 }
 
-+ (void)addServer:(BDSKServerInfo *)serverInfo forType:(NSString *)type;
++ (void)addServer:(BDSKServerInfo *)serverInfo
 {
-    [[searchGroupServers objectForKey:type] addObject:serverInfo];
-    [self saveServer:serverInfo];
+    [searchGroupServers addObject:serverInfo];
+    [self saveServerFile:serverInfo];
 }
 
-+ (void)setServer:(BDSKServerInfo *)serverInfo atIndex:(unsigned)idx forType:(NSString *)type;
++ (void)setServer:(BDSKServerInfo *)serverInfo atIndex:(unsigned)idx
 {
-    NSMutableArray *servers = [searchGroupServers objectForKey:type];
-    [self deleteServer:[servers objectAtIndex:idx]];
-    [servers replaceObjectAtIndex:idx withObject:serverInfo];
-    [self saveServer:serverInfo];
+    [self deleteServerFile:[searchGroupServers objectAtIndex:idx]];
+    [searchGroupServers replaceObjectAtIndex:idx withObject:serverInfo];
+    [self saveServerFile:serverInfo];
 }
 
-+ (void)removeServerAtIndex:(unsigned)idx forType:(NSString *)type;
++ (void)removeServerAtIndex:(unsigned)idx
 {
-    NSMutableArray *servers = [searchGroupServers objectForKey:type];
-    [self deleteServer:[servers objectAtIndex:idx]];
-    [servers removeObjectAtIndex:idx];
+    [self deleteServerFile:[searchGroupServers objectAtIndex:idx]];
+    [searchGroupServers removeObjectAtIndex:idx];
 }
 
 #pragma mark Initialization
+
++ (void)initialize {
+    NSArray *typeKeys = [NSArray arrayWithObjects:@"type", nil];
+    [self setKeys:[NSArray arrayWithObjects:@"serverInfo", nil] triggerChangeNotificationsForDependentKey:@"type"];
+    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"typeTag"];
+    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"entrez"];
+    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"zoom"];
+    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"isi"];
+    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"dblp"];
+    
+    BDSKINITIALIZE;
+    
+    searchGroupServers = [[NSMutableArray alloc] init];
+    searchGroupServerFiles = [[NSMutableDictionary alloc] init];
+    [self resetServers];
+    [self loadCustomServers];
+}
 
 - (id)init {
     return [self initWithGroup:nil];
@@ -248,8 +206,7 @@ static BOOL isSearchFileAtPath(NSString *path)
         group = [aGroup retain];
         undoManager = nil;
         
-        type = group ? [[group type] copy] : [BDSKSearchGroupEntrez copy];
-        serverInfo = nil; // this will be set indirectly in awakeFromNib
+        serverInfo = group ? [[group serverInfo] mutableCopy] : [[BDSKServerInfo defaultServerInfoWithType:BDSKSearchGroupEntrez] mutableCopy];
         
         isCustom = NO;
         isEditable = NO;
@@ -260,7 +217,6 @@ static BOOL isSearchFileAtPath(NSString *path)
 - (void)dealloc
 {
     [group release];
-    [type release];
     [undoManager release];
     [serverInfo release];
     [serverView release];
@@ -270,7 +226,7 @@ static BOOL isSearchFileAtPath(NSString *path)
 - (NSString *)windowNibName { return @"BDSKSearchGroupSheet"; }
 
 - (void)reloadServersSelectingIndex:(unsigned)idx{
-    NSArray *servers = [[self class] serversForType:type];
+    NSArray *servers = [[self class] servers];
     [serverPopup removeAllItems];
     [serverPopup addItemsWithTitles:[servers valueForKey:@"name"]];
     [[serverPopup menu] addItem:[NSMenuItem separatorItem]];
@@ -299,9 +255,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     [revealButton setBezelStyle:NSRoundedDisclosureBezelStyle];
     [revealButton performClick:self];
     
-    [typeMatrix selectCellWithTag:[self isEntrez] ? 0 : [self isZoom] ? 1 : 2];
-    
-    NSArray *servers = [[self class] serversForType:type];
+    NSArray *servers = [[self class] servers];
     unsigned idx = 0;
     
     if ([servers count] == 0) {
@@ -330,7 +284,7 @@ static BOOL isSearchFileAtPath(NSString *path)
                 
         // we don't have a group, so create  a new one
         if(group == nil){
-            group = [[BDSKSearchGroup alloc] initWithType:type serverInfo:serverInfo searchTerm:nil];
+            group = [[BDSKSearchGroup alloc] initWithType:[self type] serverInfo:serverInfo searchTerm:nil];
         }else{
             [group setServerInfo:serverInfo];
             [[group undoManager] setActionName:NSLocalizedString(@"Edit Search Group", @"Undo action name")];
@@ -338,27 +292,6 @@ static BOOL isSearchFileAtPath(NSString *path)
     }
     
     [super dismiss:sender];
-}
-
-- (IBAction)selectServerType:(id)sender;
-{
-    int t = [[sender selectedCell] tag];
-    switch (t) {
-        case 0:
-            [self setType:BDSKSearchGroupEntrez];
-            break;
-        case 1:
-            [self setType:BDSKSearchGroupZoom];
-            break;
-        case 2:
-            [self setType:BDSKSearchGroupISI];
-            break;
-        case 3:
-            [self setType:BDSKSearchGroupDBLP];
-            break;
-        default:
-            NSAssert1(0, @"Unknown tag %d", t);
-    }
 }
 
 - (IBAction)selectPredefinedServer:(id)sender;
@@ -377,7 +310,7 @@ static BOOL isSearchFileAtPath(NSString *path)
         [addRemoveButton setTitle:NSLocalizedString(@"Add", @"Button title")];
         [addRemoveButton setToolTip:NSLocalizedString(@"Add a new default server with the current settings", @"Tool tip message")];
     } else {
-        NSArray *servers = [[self class] serversForType:type];
+        NSArray *servers = [[self class] servers];
         [self setServerInfo:[servers objectAtIndex:i]];
         [self setCustom:NO];
         [self setEditable:NO];
@@ -402,7 +335,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     if ([self isCustom]) {
         // add the custom server as a default server
         
-        NSArray *servers = [[self class] serversForType:[self type]];
+        NSArray *servers = [[self class] servers];
         if ([[servers valueForKey:@"name"] containsObject:[[self serverInfo] name]]) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Server Name", @"Message in alert dialog when adding a search group server with a duplicate name")
                                              defaultButton:nil
@@ -414,13 +347,13 @@ static BOOL isSearchFileAtPath(NSString *path)
         }
         
         unsigned idx = [servers count];
-        [[self class] addServer:[self serverInfo] forType:[self type]];
+        [[self class] addServer:[self serverInfo]];
         [self reloadServersSelectingIndex:idx];
         
     } else {
         // remove the selected default server
         
-        [[self class] removeServerAtIndex:[serverPopup indexOfSelectedItem] forType:[self type]];
+        [[self class] removeServerAtIndex:[serverPopup indexOfSelectedItem]];
         [self reloadServersSelectingIndex:0];
         
     }
@@ -441,7 +374,7 @@ static BOOL isSearchFileAtPath(NSString *path)
             return;
         
         unsigned idx = [serverPopup indexOfSelectedItem];
-        unsigned existingIndex = [[[[self class] serversForType:[self type]] valueForKey:@"name"] indexOfObject:[serverPopup titleOfSelectedItem]];
+        unsigned existingIndex = [[[[self class] servers] valueForKey:@"name"] indexOfObject:[serverPopup titleOfSelectedItem]];
         if (existingIndex != NSNotFound && existingIndex != idx) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Server Name", @"Message in alert dialog when setting a search group server with a duplicate name")
                                              defaultButton:nil
@@ -453,7 +386,7 @@ static BOOL isSearchFileAtPath(NSString *path)
         }
         
         BDSKServerInfo *info = [[serverInfo copy] autorelease];
-        [[self class] setServer:info atIndex:idx forType:[self type]];
+        [[self class] setServer:info atIndex:idx];
         [self reloadServersSelectingIndex:idx];
     } else {
         [editButton setTitle:NSLocalizedString(@"Set", @"Button title")];
@@ -545,14 +478,45 @@ static BOOL isSearchFileAtPath(NSString *path)
     [self changeOptions];
 }
 
-- (void)setType:(NSString *)t {
-    [type autorelease];
-    type = [t copy];
-    [self reloadServersSelectingIndex:0];
+- (NSString *)type { return [serverInfo type] ?: BDSKSearchGroupEntrez; }
+
+- (void)setType:(NSString *)newType {
+    if ([newType isEqualToString:[serverInfo type]] == NO)
+        [serverInfo setType:newType];
+}
+ 
+- (int)typeTag {
+    if ([self isEntrez])
+        return 0;
+    else if ([self isZoom])
+        return 1;
+    else if ([self isISI])
+        return 2;
+    else if ([self isDBLP])
+        return 3;
+    BDSKASSERT_NOT_REACHED("Unknown search type");
+    return 0;
 }
 
-- (NSString *)type { return type; }
-  
+- (void)setTypeTag:(int)tag {
+    switch (tag) {
+        case 0:
+            [self setType:BDSKSearchGroupEntrez];
+            break;
+        case 1:
+            [self setType:BDSKSearchGroupZoom];
+            break;
+        case 2:
+            [self setType:BDSKSearchGroupISI];
+            break;
+        case 3:
+            [self setType:BDSKSearchGroupDBLP];
+            break;
+        default:
+            BDSKASSERT_NOT_REACHED("Unknown search type tag");
+    }
+}
+ 
 #pragma mark NSEditor
 
 - (BOOL)commitEditing {
