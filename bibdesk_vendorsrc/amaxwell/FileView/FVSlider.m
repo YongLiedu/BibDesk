@@ -40,8 +40,6 @@
 #import "FVUtilities.h"
 #import <QuartzCore/QuartzCore.h>
 
-NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNotificationName";
-
 @interface FVSliderCell : NSSliderCell
 @end
 
@@ -130,7 +128,8 @@ NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNoti
 - (void)mouseExited:(NSEvent *)event
 {
     [super mouseExited:event];
-    [[NSNotificationCenter defaultCenter] postNotificationName:FVSliderMouseExitedNotificationName object:self];
+    [[[self window] parentWindow] removeChildWindow:[self window]];
+    [(FVSliderWindow *)[self window] fadeOut:self];
 }
 
 @end

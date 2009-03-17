@@ -520,7 +520,6 @@ static CGFloat _subtitleHeight = 0.0;
         [self _hideArrows];
         
         if (_fvFlags.autoScales == NO && _sliderWindow) {
-            [[NSNotificationCenter defaultCenter] removeObserver:self name:FVSliderMouseExitedNotificationName object:nil];
             [_sliderWindow orderOut:nil];
             [_sliderWindow release];
             _sliderWindow = nil;
@@ -659,12 +658,10 @@ static CGFloat _subtitleHeight = 0.0;
     if (_sliderWindow == nil && _fvFlags.autoScales == NO) {
         _sliderWindow = [[FVSliderWindow alloc] init];
         FVSlider *slider = [_sliderWindow slider];
-        // binding & unbinding is handled in viewWillMoveToSuperview:
         [slider setMaxValue:_maxScale];
         [slider setMinValue:_minScale];
         [slider setAction:@selector(_sliderAction:)];
         [slider setTarget:self];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSliderMouseExited:) name:FVSliderMouseExitedNotificationName object:slider];
     }
     return _sliderWindow;
 }
@@ -2181,15 +2178,6 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     
     // !!! calling this before adding buttons seems to disable the tooltip on 10.4; what does it do on 10.5?
     [super mouseEntered:event];
-}
-
-// we can't do this in mouseExited: since it's received as soon as the mouse enters the slider's window (and checking the mouse location just postpones the problems)
-- (void)handleSliderMouseExited:(NSNotification *)aNote
-{
-    if ([[_sliderWindow parentWindow] isEqual:[self window]]) {
-        [[self window] removeChildWindow:_sliderWindow];
-        [_sliderWindow fadeOut:self];
-    }
 }
 
 - (void)mouseExited:(NSEvent *)event;
