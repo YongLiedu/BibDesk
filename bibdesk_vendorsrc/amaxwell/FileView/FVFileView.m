@@ -343,7 +343,7 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (NSColor *)backgroundColor
 { 
-    return _fvFlags.isDrawingDragImage ? [NSColor clearColor] : _backgroundColor;
+    return _backgroundColor;
 }
 
 // scrollPositionAsPercentage borrowed and modified from the Omni frameworks
@@ -1769,7 +1769,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     }
 }
 
-- (void)_drawIconsInRange:(NSRange)indexRange rows:(NSRange)rows columns:(NSRange)columns
+- (void)_drawIconsInRange:(NSRange)indexRange rows:(NSRange)rows columns:(NSRange)columns forDragImage:(BOOL)isDrawingDragImage
 {
     BOOL isResizing = [self inLiveResize];
 
@@ -1821,14 +1821,14 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
             i = [self _indexForGridRow:r column:c];
 
             // if we're creating a drag image, only draw selected icons
-            if (NSNotFound != i && (NO == _fvFlags.isDrawingDragImage || [_selectionIndexes containsIndex:i])) {
+            if (NSNotFound != i && (NO == isDrawingDragImage || [_selectionIndexes containsIndex:i])) {
             
                 NSRect fileRect = [self _rectOfIconInRow:r column:c];
                 
                 // allow some extra for the shadow (-5)
                 NSRect textRect = [self _rectOfTextForIconRect:fileRect];
                 // always draw icon and text together, as they may overlap due to shadow and finder label, and redrawing a part may look odd
-                BOOL willDrawIcon = _fvFlags.isDrawingDragImage || [self needsToDrawRect:NSUnionRect(NSInsetRect(fileRect, -2.0 * [self iconScale], -[self iconScale]), textRect)];
+                BOOL willDrawIcon = isDrawingDragImage || [self needsToDrawRect:NSUnionRect(NSInsetRect(fileRect, -2.0 * [self iconScale], -[self iconScale]), textRect)];
                                 
                 if (willDrawIcon) {
 
@@ -1872,7 +1872,6 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                     if (label > 0) {
                         CGRect labelRect = NSRectToCGRect(textRect);
                         
-                        // for drag image context
                         labelRect.size.height = _titleHeight;                        
                         [FVFinderLabel drawFinderLabel:label inRect:labelRect ofContext:cgContext flipped:NO roundEnds:YES];
                         
@@ -1957,7 +1956,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     
     // only draw icons if we actually have some in this rect
     if (iMax > iMin) {
-        [self _drawIconsInRange:NSMakeRange(iMin, iMax - iMin) rows:rowRange columns:columnRange];
+        [self _drawIconsInRange:NSMakeRange(iMin, iMax - iMin) rows:rowRange columns:columnRange forDragImage:NO];
     }
     else if (0 == iMax && [self isEditable]) {
         [[NSGraphicsContext currentContext] setShouldAntialias:YES];
@@ -1966,7 +1965,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     
     if (isDrawingToScreen) {
         
-        if ([self _hasArrows] && _fvFlags.isDrawingDragImage == NO) {
+        if ([self _hasArrows]) {
             if (NSIntersectsRect(rect, _leftArrowFrame))
                 [_leftArrow drawWithFrame:_leftArrowFrame inView:self];
             if (NSIntersectsRect(rect, _rightArrowFrame))
@@ -2018,46 +2017,43 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
 }
 
 - (void)dragImage:(NSImage *)anImage at:(NSPoint)viewLocation offset:(NSSize)unused event:(NSEvent *)event pasteboard:(NSPasteboard *)pboard source:(id)sourceObj slideBack:(BOOL)slideFlag;
-{        
-    // we want the lower left corner of the scrollview, converted to this view's coordinates
+{
+    NSUInteger i = [_selectionIndexes firstIndex];
+    NSUInteger iMin = i, iMax = i, cMin = NSUIntegerMax, cMax = 0, rMin = NSUIntegerMax, rMax = 0;
+    NSRect rect = NSZeroRect;
+    while (i != NSNotFound) {
+        NSUInteger r, c;
+        [self _getGridRow:&r column:&c ofIndex:i];
+        cMin = MIN(cMin, c);
+        cMax = MAX(cMax, c);
+        rMin = MIN(rMin, r);
+        rMax = MAX(rMax, r);
+        iMax = i;
+        NSRect iconRect = [self _rectOfIconInRow:r column:c];
+        NSRect textRect = [self _rectOfTextForIconRect:iconRect];
+        iconRect = NSUnionRect(NSInsetRect([self centerScanRect:iconRect], -4, -4), [self centerScanRect:textRect]);
+        rect = NSUnionRect(rect, iconRect);
+        i = [_selectionIndexes indexGreaterThanIndex:i];
+    }
     
-    // upper left
-    NSPoint p = [[self enclosingScrollView] bounds].origin;
-    // lower left
-    p.y += NSHeight([[self enclosingScrollView] bounds]);
-    p = [[self enclosingScrollView] convertPoint:p toView:self];
+    NSRect bounds = [self bounds];
     
-    // this will force a redraw of the entire area into the cached image
-    NSRect bounds = [[self enclosingScrollView] documentVisibleRect];
-
-    NSBitmapImageRep *imageRep = [self bitmapImageRepForCachingDisplayInRect:bounds];
-    
-    _fvFlags.isDrawingDragImage = YES;
-    
-    // this is not the recommended way to draw into a bitmap context, but the CTM isn't set up properly using the AppKit's mechanism as far as I can tell, so I can't make use of the higher-level drawing routines
-    NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithBitmapImageRep:imageRep];
-    [NSGraphicsContext saveGraphicsState];
-    [NSGraphicsContext setCurrentContext:nsContext];
-    CGContextRef cgContext = [nsContext graphicsPort];
-    CGContextTranslateCTM(cgContext, 0, NSMaxY(bounds));
-    CGContextScaleCTM(cgContext, 1, -1);
-    [self drawRect:bounds];
-    
-    // reset flag
-    _fvFlags.isDrawingDragImage = NO;
-    [NSGraphicsContext restoreGraphicsState];
-
     NSImage *newImage = [[[NSImage alloc] initWithSize:bounds.size] autorelease];
-    [newImage addRepresentation:imageRep];
+    [newImage setFlipped:YES];
+    [newImage lockFocus];
+    [self _drawIconsInRange:NSMakeRange(iMin, iMax + 1 - iMin) rows:NSMakeRange(rMin, rMax + 1 - rMin) columns:NSMakeRange(cMin, cMax + 1 - cMax) forDragImage:YES];
+    [newImage unlockFocus];
     
     // redraw with transparency, so it's easier to see a target
-    anImage = [[[NSImage alloc] initWithSize:bounds.size] autorelease];
-    [anImage lockFocus];
-    [newImage drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:0.7];
-    [anImage unlockFocus];
-    newImage = anImage;
+    NSPoint drawPoint = NSMakePoint(NSMinX(bounds) - NSMinX(rect), NSMaxY(rect) - NSMaxY(bounds));
+    NSImage *dragImage = [[[NSImage alloc] initWithSize:rect.size] autorelease];
+    [dragImage lockFocus];
+    [newImage drawAtPoint:drawPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:0.7];
+    [dragImage unlockFocus];
     
-    [super dragImage:newImage at:p offset:unused event:event pasteboard:pboard source:sourceObj slideBack:slideFlag];
+    NSPoint dragPoint = NSMakePoint(NSMinX(rect), NSMaxY(rect));
+    
+    [super dragImage:dragImage at:dragPoint offset:unused event:event pasteboard:pboard source:sourceObj slideBack:slideFlag];
 }
 
 #pragma mark Event handling

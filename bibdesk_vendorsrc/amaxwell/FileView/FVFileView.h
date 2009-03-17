@@ -93,7 +93,6 @@ typedef enum _FVDropOperation {
         unsigned int autoScales : 1;
         unsigned int isRescaling: 1;
         unsigned int scheduledLiveResize : 1;
-        unsigned int isDrawingDragImage : 1;
         unsigned int updatingFromSlider : 1;
     } _fvFlags;
     NSSize                  _padding;
