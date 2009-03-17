@@ -1385,8 +1385,10 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 }
 
 - (BOOL)tableView:(NSTableView *)tv canDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
-	if (tv == tableView || tv == [fileSearchController tableView] || tv == groupTableView) {
+	if (tv == tableView || tv == [fileSearchController tableView]) {
 		return [self hasExternalGroupsSelected] == NO && [rowIndexes count] > 0;
+	} else if (tv == groupTableView) {
+		return [self hasStaticGroupsSelected] || [self hasSmartGroupsSelected] || [self hasSearchGroupsSelected] || [self hasURLGroupsSelected] || [self hasScriptGroupsSelected];
 	}
     return NO;
 }
