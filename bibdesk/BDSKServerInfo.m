@@ -52,7 +52,7 @@
     
     return [[[[self class] alloc] initWithType:aType 
                                           name:NSLocalizedString(@"New Server", @"")
-                                          host:(isEntrez || isISI || isDBLP) ? nil : @"host.domain.com"
+                                          host:isZoom ? @"host.domain.com" : nil
                                           port:isZoom ? @"0" : nil 
                                       database:@"database" 
                                        options:isZoom ? [NSDictionary dictionary] : nil] autorelease];
@@ -125,8 +125,6 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
     // we don't compare the name, as that is just a label
     if ([self isMemberOfClass:[other class]] == NO || [[self type] isEqualToString:[(BDSKServerInfo *)other type]] == NO)
         isEqual = NO;
-    else if ([self isEntrez] || [self isISI] || [self isDBLP])
-        isEqual = isEqualOrBothNil([self database], [other database]);
     else if ([self isZoom])
         isEqual = isEqualOrBothNil([self host], [other host]) && 
                   isEqualOrBothNil([self port], [(BDSKServerInfo *)other port]) && 
@@ -135,7 +133,7 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
                   isEqualOrBothNil([self username], [other username]) && 
                   (isEqualOrBothNil([self options], [(BDSKServerInfo *)other options]) || ([[self options] count] == 0 && [[(BDSKServerInfo *)other options] count] == 0));
     else
-        isEqual = isEqualOrBothNil([self host], [other host]);
+        isEqual = isEqualOrBothNil([self database], [other database]);
     return isEqual;
 }
 
@@ -156,23 +154,23 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 
 - (NSString *)name { return name; }
 
-- (NSString *)host { return host; }
+- (NSString *)host { return [self isZoom] ? host : nil; }
 
-- (NSString *)port { return port; }
+- (NSString *)port { return [self isZoom] ? port : nil; }
 
 - (NSString *)database { return database; }
 
-- (NSString *)password { return [options objectForKey:@"password"]; }
+- (NSString *)password { return [[self options] objectForKey:@"password"]; }
 
-- (NSString *)username { return [options objectForKey:@"username"]; }
+- (NSString *)username { return [[self options] objectForKey:@"username"]; }
 
-- (NSString *)recordSyntax { return [options objectForKey:@"recordSyntax"]; }
+- (NSString *)recordSyntax { return [[self options] objectForKey:@"recordSyntax"]; }
 
-- (NSString *)resultEncoding { return [options objectForKey:@"resultEncoding"]; }
+- (NSString *)resultEncoding { return [[self options] objectForKey:@"resultEncoding"]; }
 
-- (BOOL)removeDiacritics { return [[options objectForKey:@"removeDiacritics"] boolValue]; }
+- (BOOL)removeDiacritics { return [[[self options] objectForKey:@"removeDiacritics"] boolValue]; }
 
-- (NSDictionary *)options { return options; }
+- (NSDictionary *)options { return [self isZoom] ? options : nil; }
 
 - (BOOL)isEntrez { return [[self type] isEqualToString:BDSKSearchGroupEntrez]; }
 - (BOOL)isZoom { return [[self type] isEqualToString:BDSKSearchGroupZoom]; }
@@ -208,48 +206,36 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
     database = [newDbase copy];
 }
 
+- (void)setOptionValue:(id)value forKey:(NSString *)key {
+    if (options)
+        [options setValue:value forKey:key];
+    else if (value)
+        [self setOptions:[NSDictionary dictionaryWithObjectsAndKeys:value, key, nil]];
+}
+
 - (void)setPassword:(NSString *)newPassword;
 {
-    if (options)
-        [options setValue:newPassword forKey:@"password"];
-    else if (newPassword)
-        [self setOptions:[NSDictionary dictionaryWithObjectsAndKeys:newPassword, @"password", nil]];
+    [self setOptionValue:newPassword forKey:@"password"];
 }
 
 - (void)setUsername:(NSString *)newUser;
 {
-    if (options)
-        [options setValue:newUser forKey:@"username"];
-    else if (newUser)
-        [self setOptions:[NSDictionary dictionaryWithObjectsAndKeys:newUser, @"username", nil]];
+    [self setOptionValue:newUser forKey:@"username"];
 }
 
 - (void)setRecordSyntax:(NSString *)newSyntax;
 {
-    if (options)
-        [options setValue:newSyntax forKey:@"recordSyntax"];
-    else if (newSyntax)
-        [self setOptions:[NSDictionary dictionaryWithObjectsAndKeys:newSyntax, @"recordSyntax", nil]];
+    [self setOptionValue:newSyntax forKey:@"recordSyntax"];
 }
 
 - (void)setResultEncoding:(NSString *)newEncoding;
 {
-    if (options)
-        [options setValue:newEncoding forKey:@"resultEncoding"];
-    else if (newEncoding)
-        [self setOptions:[NSDictionary dictionaryWithObjectsAndKeys:newEncoding, @"resultEncoding", nil]];
+    [self setOptionValue:newEncoding forKey:@"resultEncoding"];
 }
 
 - (void)setRemoveDiacritics:(BOOL)flag;
 {
-    if (flag) {
-        if (options)
-            [options setValue:@"YES" forKey:@"removeDiacritics"];
-        else
-            [self setOptions:[NSDictionary dictionaryWithObjectsAndKeys:@"YES", @"removeDiacritics", nil]];
-    } else if (options) {
-        [options setValue:nil forKey:@"removeDiacritics"];
-    }
+    [self setOptionValue:(flag ? @"YES" : nil) forKey:@"removeDiacritics"];
 }
 
 - (void)setOptions:(NSDictionary *)newOptions;
@@ -260,8 +246,8 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 
 - (BOOL)validateHost:(id *)value error:(NSError **)error {
     NSString *string = *value;
-    NSRange range = [string rangeOfString:@"://"];
     if ([self isZoom]) {
+        NSRange range = [string rangeOfString:@"://"];
         if(range.location != NSNotFound){
             // ZOOM gets confused when the host has a protocol
             string = [string substringFromIndex:NSMaxRange(range)];
