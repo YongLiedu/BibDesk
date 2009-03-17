@@ -191,10 +191,6 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 
 @implementation BDSKMutableServerInfo
 
-- (void)setDelegate:(id)newDelegate { delegate = newDelegate; }
-
-- (id)delegate { return delegate; }
-
 - (void)setName:(NSString *)newName;
 {
     [name autorelease];
@@ -319,16 +315,6 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
         [*error setValue:NSLocalizedString(@"See http://www.iana.org/assignments/character-sets for recognized values.", @"error suggestion for setting zoom result encoding") forKey:NSLocalizedRecoverySuggestionErrorKey];
     }
     return isValid;
-}
-
-- (void)objectDidBeginEditing:(id)editor {
-    if ([delegate respondsToSelector:@selector(objectDidBeginEditing:)])
-        [delegate objectDidBeginEditing:editor];
-}
-
-- (void)objectDidEndEditing:(id)editor {
-    if ([delegate respondsToSelector:@selector(objectDidEndEditing:)])
-        [delegate objectDidEndEditing:editor];
 }
 
 @end

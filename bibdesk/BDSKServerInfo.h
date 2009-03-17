@@ -76,12 +76,7 @@
 
 @end
 
-@interface BDSKMutableServerInfo : BDSKServerInfo {
-    id delegate;
-}
-
-- (void)setDelegate:(id)newDelegate;
-- (id)delegate;
+@interface BDSKMutableServerInfo : BDSKServerInfo
 
 - (void)setName:(NSString *)newName;
 - (void)setPort:(NSString *)newPort;

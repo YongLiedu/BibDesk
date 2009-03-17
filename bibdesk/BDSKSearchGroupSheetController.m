@@ -536,10 +536,8 @@ static BOOL isSearchFileAtPath(NSString *path)
 - (void)setServerInfo:(BDSKServerInfo *)info;
 {
     [objectController discardEditing];
-    [serverInfo setDelegate:nil];
     [serverInfo autorelease];
     serverInfo = [info mutableCopy];
-    [serverInfo setDelegate:self];
     [self changeOptions];
 }
 
