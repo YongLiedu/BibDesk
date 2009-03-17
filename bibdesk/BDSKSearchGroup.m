@@ -82,14 +82,19 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 {
     NSString *aName = (([info name] ?: [info database]) ?: string) ?: NSLocalizedString(@"Empty", @"Name for empty search group");
     if (self = [super initWithName:aName count:0]) {
-        type = [aType copy];
-        searchTerm = [string copy];
-        history = nil;
-        publications = nil;
-        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
-        searchIndexes = [[BDSKItemSearchIndexes alloc] init];
-        [self resetServerWithInfo:info];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
+        if (aType == nil || info == nil) {
+            [self release];
+            self = nil;
+        } else {
+            type = [aType copy];
+            searchTerm = [string copy];
+            history = nil;
+            publications = nil;
+            macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
+            searchIndexes = [[BDSKItemSearchIndexes alloc] init];
+            [self resetServerWithInfo:info];
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
+        }
     }
     return self;
 }

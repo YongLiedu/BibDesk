@@ -956,9 +956,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 - (IBAction)newSearchGroupFromBookmark:(id)sender {
     NSDictionary *dict = [sender representedObject];
     BDSKSearchGroup *group = [[[BDSKSearchGroup alloc] initWithDictionary:dict] autorelease];
-    unsigned int insertIndex = NSMaxRange([groups rangeOfSearchGroups]);
-    [groups addSearchGroup:(id)group];        
-    [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
+    if (group) {
+        unsigned int insertIndex = NSMaxRange([groups rangeOfSearchGroups]);
+        [groups addSearchGroup:(id)group];        
+        [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
+    } else
+        NSBeep();
 }
 
 - (void)searchBookmarkSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
