@@ -83,8 +83,10 @@ static BOOL isSearchFileAtPath(NSString *path)
         NSMutableArray *infos = [NSMutableArray arrayWithCapacity:[dicts count]];
         while (dict = [dictEnum nextObject]) {
             BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithType:type dictionary:dict];
-            [infos addObject:info];
-            [info release];
+            if (info) {
+                [infos addObject:info];
+                [info release];
+            }
         }
         [newServerDicts setObject:infos forKey:type];
     }
@@ -137,8 +139,10 @@ static BOOL isSearchFileAtPath(NSString *path)
         NSMutableArray *infos = [NSMutableArray arrayWithCapacity:[dicts count]];
         while (dict = [dictEnum nextObject]) {
             BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithType:type dictionary:dict];
-            [infos addObject:info];
-            [info release];
+            if (info) {
+                [infos addObject:info];
+                [info release];
+            }
         }
         [newServerDicts setObject:infos forKey:type];
     }

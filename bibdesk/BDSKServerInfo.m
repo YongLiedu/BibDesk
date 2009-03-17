@@ -63,25 +63,18 @@
     if (self = [super init]) {
         type = [aType copy];
         name = [aName copy];
+        database = [aDbase copy];
         if ([self isEntrez] || [self isISI] || [self isDBLP]) {
             host = nil;
             port = nil;
-            database = [aDbase copy];
             options = nil;
         } else if ([self isZoom]) {
             host = [aHost copy];
             port = [aPort copy];
-            database = [aDbase copy];
             options = [opts mutableCopy];
         } else {
-            host = [aHost copy];
-            // unknown type; you'll get a surprise if these are set to nil, so maybe we should just raise here...
-            BDSKPRECONDITION(nil == aDbase);
-            BDSKPRECONDITION(nil == opts);
-            BDSKPRECONDITION(nil == aPort);
-            port = nil;
-            database = nil;
-            options = nil;
+            [self release];
+            self = nil;
         }
     }
     return self;
