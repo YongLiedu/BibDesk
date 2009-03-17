@@ -39,15 +39,16 @@
 #import <Cocoa/Cocoa.h>
 
 enum {
-    FVZoomInMenuItemTag = 1001,
-    FVZoomOutMenuItemTag = 1002,
-    FVAutoScalesMenuItemTag = 1003,
-    FVQuickLookMenuItemTag = 1004,
-    FVOpenMenuItemTag = 1005,
-    FVRevealMenuItemTag = 1006,
+    FVZoomInMenuItemTag      = 1001,
+    FVZoomOutMenuItemTag     = 1002,
+    FVAutoScalesMenuItemTag  = 1003,
+    FVQuickLookMenuItemTag   = 1004,
+    FVOpenMenuItemTag        = 1005,
+    FVRevealMenuItemTag      = 1006,
     FVChangeLabelMenuItemTag = 1007,
     FVDownloadMenuItemTag    = 1008,
-    FVRemoveMenuItemTag = 1009
+    FVRemoveMenuItemTag      = 1009,
+    FVReloadMenuItemTag      = 1010 
 };
 
 typedef enum _FVDropOperation {
@@ -187,10 +188,32 @@ typedef enum _FVDropOperation {
 /** Current number of columns displayed.*/
 - (NSUInteger)numberOfColumns;
 
-/** Invalidates all content and marks view for redisplay.
+/** Returns the current delegate or nil.*/
+- (id)delegate;
+
+/** Whether the view can be edited.
  
- This must be called if the URLs provided by a datasource change, either in number or content, unless the Content binding is used.  May be fairly expensive if your datasource is slow, since it requests all values (unlike NSTableView).  Icon data such as bitmaps will be generated lazily as needed, however, and is also persistent for the life of the application.*/
-- (void)reloadIcons;
+ Can be bound.*/
+- (BOOL)isEditable;
+
+/** Change the view's editable property.
+ 
+ Default is NO for views created in code.  Can be bound.
+ 
+ @param flag If set to YES, requires the datasource to implement the @link NSObject(FVFileViewDragDataSource) @endlink informal protocol.  If set to NO, drop/paste/delete actions will be ignored, even if the protocol is implemented.  */
+- (void)setEditable:(BOOL)flag;
+
+/** Whether the view allows downloading URLs.
+ 
+ Can be bound.*/
+- (BOOL)allowsDownloading;
+
+/** Change the view's allowsDownloading property.
+ 
+ Default is NO for views created in code.  Can be bound.
+ 
+ @param flag If set to YES, a contextual download menu item is added for external URLs, and external URLs dropped while holding the Option key will be automatically downloaded.  */
+- (void)setAllowsDownloading:(BOOL)flag;
 
 /** The current background color.
  
@@ -202,6 +225,11 @@ typedef enum _FVDropOperation {
  The default is NSOutlineView's source list color, or an approximation thereof on 10.4.  Can be bound.
  @param aColor The new background color. */
 - (void)setBackgroundColor:(NSColor *)aColor;
+
+/** Invalidates all content and marks view for redisplay.
+ 
+ This must be called if the URLs provided by a datasource change, either in number or content, unless the Content binding is used.  May be fairly expensive if your datasource is slow, since it requests all values (unlike NSTableView).  Icon data such as bitmaps will be generated lazily as needed, however, and is also persistent for the life of the application.*/
+- (void)reloadIcons;
 
 /** Selects the previous icon in row-major order.*/
 - (IBAction)selectPreviousIcon:(id)sender;
@@ -217,6 +245,11 @@ typedef enum _FVDropOperation {
  @see setEditable: */
 - (IBAction)delete:(id)sender;
 
+/** Invalidates existing cached data.
+ 
+ Invalidates any cached bitmaps for the selected icons and marks the view for redisplay.*/
+- (IBAction)reloadSelectedIcons:(id)sender;
+
 /** Change Finder label color for selected icons.
  
  Changes the Finder label color for the current selection.  Non-file: URLs and nonexistent files are ignored.
@@ -229,18 +262,6 @@ typedef enum _FVDropOperation {
  
  Wraps -[NSWorkspace openURL:].*/
 - (IBAction)openSelectedURLs:(id)sender;
-
-/** Whether the view can be edited.
- 
- Can be bound.*/
-- (BOOL)isEditable;
-
-/** Change the view's editable property.
- 
- Default is NO for views created in code.  Can be bound.
- 
- @param flag If set to YES, requires the datasource to implement the @link NSObject(FVFileViewDragDataSource) @endlink informal protocol.  If set to NO, drop/paste/delete actions will be ignored, even if the protocol is implemented.  */
-- (void)setEditable:(BOOL)flag;
 
 /** Receiver forFileViewDataSource and @link NSObject(FVFileViewDragDataSource) @endlink messages.
  
@@ -260,21 +281,6 @@ typedef enum _FVDropOperation {
  
  @param obj The object to set as delegate.  Not retained.*/
 - (void)setDelegate:(id)obj;
-
-/** Returns the current delegate or nil.*/
-- (id)delegate;
-
-/** Whether the view allows downloading URLs.
- 
- Can be bound.*/
-- (BOOL)allowsDownloading;
-
-/** Change the view's allowsDownloading property.
- 
- Default is NO for views created in code.  Can be bound.
- 
- @param flag If set to YES, a contextual download menu item is added for external URLs, and external URLs dropped while holding the Option key will be automatically downloaded.  */
-- (void)setAllowsDownloading:(BOOL)flag;
 
 /** Change drop index and drop operation for a drop on the view.
  

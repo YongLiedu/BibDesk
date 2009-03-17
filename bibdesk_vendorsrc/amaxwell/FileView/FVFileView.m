@@ -3035,6 +3035,17 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     else NSBeep();
 }
 
+- (IBAction)reloadSelectedIcons:(id)sender;
+{
+    NSEnumerator *iconEnum = [[self iconsAtIndexes:[self selectionIndexes]] objectEnumerator];
+    FVIcon *anIcon;
+    while ((anIcon = [iconEnum nextObject]) != nil)
+        [anIcon recache];
+
+    // ensure consistency between URL and icon, since this will require re-reading the URL from disk/net
+    [self reloadIcons];
+}
+
 #pragma mark Context menu
 
 - (BOOL)validateMenuItem:(NSMenuItem *)anItem
@@ -3108,6 +3119,9 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
             // don't check reachability; just handle the error if it fails
             return isMissing == NO && isEditable && selectionCount == 1 && [aURL isFileURL] == NO && FALSE == alreadyDownloading;
         } else return NO;
+    }
+    else if (action == @selector(reloadSelectedIcons:)) {
+        return selectionCount > 0;
     }
     
     // need to handle print: and other actions
@@ -3233,6 +3247,8 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
         [anItem setTag:FVOpenMenuItemTag];
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Reveal in Finder", @"FileView", bundle, @"context menu title") action:@selector(revealInFinder:) keyEquivalent:@""];
         [anItem setTag:FVRevealMenuItemTag];
+        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Reload", @"FileView", bundle, @"context menu title") action:@selector(reloadSelectedIcons:) keyEquivalent:@""];
+        [anItem setTag:FVReloadMenuItemTag];        
         
         [sharedMenu addItem:[NSMenuItem separatorItem]];
         
