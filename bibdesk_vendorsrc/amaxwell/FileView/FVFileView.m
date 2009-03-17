@@ -265,6 +265,9 @@ static CGFloat _subtitleHeight = 0.0;
     _leftArrowFrame = NSZeroRect;
     _rightArrowFrame = NSZeroRect;
     
+    _minScale = 0.5;
+    _maxScale = 16.0;
+    
     // this is created lazily when needed
     _sliderWindow = nil;
     // always initialize this to -1
@@ -453,7 +456,7 @@ static CGFloat _subtitleHeight = 0.0;
         }
         
         if (_fvFlags.updatingFromSlider == NO)
-            [[_sliderWindow slider] setFloatValue:[self iconScale]];
+            [[_sliderWindow slider] setDoubleValue:[self iconScale]];
     }
 }
 
@@ -519,10 +522,15 @@ static CGFloat _subtitleHeight = 0.0;
         // arrows out of place now, they will be added again when required when resetting the tracking rects
         [self _hideArrows];
         
-        if (_fvFlags.autoScales == NO && _sliderWindow) {
-            [_sliderWindow orderOut:nil];
-            [_sliderWindow release];
-            _sliderWindow = nil;
+        if (_sliderWindow) {
+            if (_fvFlags.autoScales) {
+                [_sliderWindow orderOut:nil];
+                [_sliderWindow release];
+                _sliderWindow = nil;
+            }
+            else {
+                [[_sliderWindow slider] setDoubleValue:[self iconScale]];
+            }
         }
         
         NSPoint scrollPoint = [self scrollPercentage];
@@ -649,7 +657,7 @@ static CGFloat _subtitleHeight = 0.0;
 - (void)_sliderAction:(id)sender {
     if (_fvFlags.autoScales == NO) {
         _fvFlags.updatingFromSlider = YES;
-        [self _setIconScale:[sender floatValue]];
+        [self _setIconScale:[sender doubleValue]];
         _fvFlags.updatingFromSlider = NO;
     }
 }
@@ -660,6 +668,7 @@ static CGFloat _subtitleHeight = 0.0;
         FVSlider *slider = [_sliderWindow slider];
         [slider setMaxValue:_maxScale];
         [slider setMinValue:_minScale];
+        [slider setDoubleValue:[self iconScale]];
         [slider setAction:@selector(_sliderAction:)];
         [slider setTarget:self];
     }
