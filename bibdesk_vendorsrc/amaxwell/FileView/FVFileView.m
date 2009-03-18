@@ -191,7 +191,7 @@ static CGFloat _subtitleHeight = 0.0;
     if ([NSOutlineView instancesRespondToSelector:@selector(setSelectionHighlightStyle:)]) {
         NSOutlineView *outlineView = [[NSOutlineView alloc] initWithFrame:NSMakeRect(0,0,1,1)];
         [outlineView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
-        color = [[[[outlineView backgroundColor] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain] autorelease];
+        color = [[[outlineView backgroundColor] retain] autorelease];
         [outlineView release];
     }
     else {
@@ -1076,9 +1076,30 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     }
 }
 
+- (void)_handleKeyStateNotification:(NSNotification *)note {
+    NSView *view = (id)[self enclosingScollView] ?: (id)self;
+    [view setNeedsDisplay:YES];
+}
+
 - (void)viewWillMoveToWindow:(NSWindow *)newWindow {
-    if (newWindow == nil && [[_sliderWindow parentWindow] isEqual:[self window]]) {
+    NSWindow *window = [self window];
+    if (newWindow == nil && [[_sliderWindow parentWindow] isEqual:window]) {
         [_sliderWindow orderOut:nil];
+    }
+    if (window) {
+        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+        [nc removeObserver:self name:NSWindowDidBecomeKeyNotification object:window];
+        [nc removeObserver:self name:NSWindowDidResignKeyNotification object:window];
+    }
+}
+
+- (void)viewDidMoveToWindow {
+    // for redrawing background color
+    NSWindow *window = [self window];
+    if (window) {
+        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+        [nc addObserver:self selector:@selector(_handleKeyStateNotification:) name:NSWindowDidBecomeKeyNotification object:window];
+        [nc addObserver:self selector:@selector(_handleKeyStateNotification:) name:NSWindowDidResignKeyNotification object:window];
     }
 }
 
