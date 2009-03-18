@@ -191,7 +191,7 @@ static CGFloat _subtitleHeight = 0.0;
     if ([NSOutlineView instancesRespondToSelector:@selector(setSelectionHighlightStyle:)]) {
         NSOutlineView *outlineView = [[NSOutlineView alloc] initWithFrame:NSMakeRect(0,0,1,1)];
         [outlineView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
-        color = [[[outlineView backgroundColor] retain] autorelease];
+        color = [[[[outlineView backgroundColor] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain] autorelease];
         [outlineView release];
     }
     else {
