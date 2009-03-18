@@ -91,6 +91,8 @@ static NSColor *secondaryHighlightDarkColor = nil;
     if (self = [super initWithFrame:frameRect]) {
         if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)])
             [self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
+        else // from Mail.app on 10.4
+            [self setBackgroundColor:[NSColor colorWithCalibratedRed:231.0f/255.0f green:237.0f/255.0f blue:246.0f/255.0f alpha:1.0] colorUsingColorSpaceName:NSDeviceRGBColorSpace]];
     }
     return self;
 }
@@ -99,6 +101,8 @@ static NSColor *secondaryHighlightDarkColor = nil;
     if (self = [super initWithCoder:coder]) {
         if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)])
             [self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
+        else // from Mail.app on 10.4
+            [self setBackgroundColor:[NSColor colorWithCalibratedRed:231.0f/255.0f green:237.0f/255.0f blue:246.0f/255.0f alpha:1.0] colorUsingColorSpaceName:NSDeviceRGBColorSpace]];
     }
     return self;
 }

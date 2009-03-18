@@ -47,7 +47,6 @@
 #import "BDSKGroup.h"
 #import "BibAuthor.h"
 #import "BDSKGroupCell.h"
-#import "NSColor_BDSKExtensions.h"
 
 @implementation BDSKGroupTableView
 
@@ -269,13 +268,6 @@
 - (IBAction)deselectAll:(id)sender {
 	[self selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
 	[self scrollRowToVisible:0];
-}
-
-- (NSColor *)backgroundColor {
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableBackgroundColorForGroupTable"] || [self respondsToSelector:@selector(setSelectionHighlightStyle:)])
-        return [super backgroundColor];
-    else
-        return [NSColor sourceListBackgroundColor];
 }
 
 @end

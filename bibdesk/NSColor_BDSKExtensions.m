@@ -48,23 +48,6 @@
     return altColors;
 }
 
-+ (NSColor *)sourceListBackgroundColor {
-    static NSColor *sourceListBackgroundColor = nil;
-    if (sourceListBackgroundColor == nil) {
-        if ([NSOutlineView instancesRespondToSelector:@selector(setSelectionHighlightStyle:)]) {
-            NSOutlineView *outlineView = [[NSOutlineView alloc] initWithFrame:NSMakeRect(0,0,1,1)];
-            [outlineView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
-            sourceListBackgroundColor = [[[outlineView backgroundColor] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
-            [outlineView release];
-        } else {
-            // from Mail.app on 10.4
-            CGFloat red = (231.0f/255.0f), green = (237.0f/255.0f), blue = (246.0f/255.0f);
-            sourceListBackgroundColor = [[[NSColor colorWithCalibratedRed:red green:green blue:blue alpha:1.0] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
-        }
-    }
-    return sourceListBackgroundColor;
-}
-
 typedef union _BDSKRGBAInt {
     struct {
         uint8_t r;

@@ -542,10 +542,10 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [tableView registerForDraggedTypes:dragTypes];
     [groupTableView registerForDraggedTypes:dragTypes];
     
-    [[sideFileView enclosingScrollView] setBackgroundColor:[NSColor sourceListBackgroundColor]];
-    [sideFileView setBackgroundColor:[NSColor sourceListBackgroundColor]];
-    [[bottomFileView enclosingScrollView] setBackgroundColor:[NSColor controlBackgroundColor]];
+    [sideFileView setBackgroundColor:[FVFileView defaultBackgroundColor]];
+    [[sideFileView enclosingScrollView] setBackgroundColor:[sideFileView backgroundColor]];
     [bottomFileView setBackgroundColor:[NSColor controlBackgroundColor]];
+    [[bottomFileView enclosingScrollView] setBackgroundColor:[bottomFileView backgroundColor]];
     
     [fileCollapsibleView setCollapseEdges:BDSKMaxXEdgeMask];
     [fileCollapsibleView setMinSize:NSMakeSize(65.0, 22.0)];

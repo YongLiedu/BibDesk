@@ -43,8 +43,6 @@
 
 + (NSArray *)alternateControlAlternatingRowBackgroundColors;
 
-+ (NSColor *)sourceListBackgroundColor;
-
 + (NSColor *)colorWithFourByteString:(NSString *)string;
 - (id)fourByteStringValue;
 
