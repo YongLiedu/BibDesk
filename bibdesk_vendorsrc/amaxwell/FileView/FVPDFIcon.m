@@ -173,8 +173,7 @@ static bool __FVPDFIconLimitThumbnailSize(NSSize *size)
 
 - (CGPDFDocumentRef)_newPDFDocument
 {
-    int options = FVCanMapFileAtURL(_fileURL) ? NSMappedRead : 0;
-    NSData *data = [[NSData alloc] initWithContentsOfURL:_fileURL options:options error:NULL];
+    NSData *data = [[NSData alloc] initWithContentsOfURL:_fileURL];
     CGDataProviderRef provider = data ?  CGDataProviderCreateWithCFData((CFDataRef)data) : NULL;
     CGPDFDocumentRef document = provider ? CGPDFDocumentCreateWithProvider(provider) : NULL;
     CGDataProviderRelease(provider);
