@@ -41,6 +41,12 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 
+// IMPORTANT WARNING:
+// When anything changes about server infos, e.g. a new type is added, this should be carefully considered, as it has many consequences for data integrity and and the editing sheet.
+// Assumptions are made in BDSKSearchGroup and BDSKSearchGroupSheetController.
+// Currently, anything other than zoom is expected to have just a type, name, and database.
+// Also when other validations are necessary, changing the type must make sure that the data validates properly for the new type, if necessary adding missing values.
+
 @implementation BDSKServerInfo
 
 + (id)defaultServerInfoWithType:(NSString *)aType;
@@ -180,17 +186,20 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 @implementation BDSKMutableServerInfo
 
 + (void)initialize{
-    [self setKeys:[NSArray arrayWithObject:@"type"] triggerChangeNotificationsForDependentKey:@"host"];
-    [self setKeys:[NSArray arrayWithObject:@"type"] triggerChangeNotificationsForDependentKey:@"port"];
-    [self setKeys:[NSArray arrayWithObject:@"type"] triggerChangeNotificationsForDependentKey:@"options"];
-    [self setKeys:[NSArray arrayWithObject:@"options"] triggerChangeNotificationsForDependentKey:@"password"];
-    [self setKeys:[NSArray arrayWithObject:@"options"] triggerChangeNotificationsForDependentKey:@"username"];
-    [self setKeys:[NSArray arrayWithObject:@"options"] triggerChangeNotificationsForDependentKey:@"recordSyntax"];
-    [self setKeys:[NSArray arrayWithObject:@"options"] triggerChangeNotificationsForDependentKey:@"resultEncoding"];
-    [self setKeys:[NSArray arrayWithObject:@"options"] triggerChangeNotificationsForDependentKey:@"removeDiacritics"];
+    NSArray *typeKeys = [NSArray arrayWithObject:@"type"];
+    NSArray *optionsKeys = [NSArray arrayWithObject:@"options"];
+    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"host"];
+    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"port"];
+    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"options"];
+    [self setKeys:optionsKeys triggerChangeNotificationsForDependentKey:@"password"];
+    [self setKeys:optionsKeys triggerChangeNotificationsForDependentKey:@"username"];
+    [self setKeys:optionsKeys triggerChangeNotificationsForDependentKey:@"recordSyntax"];
+    [self setKeys:optionsKeys triggerChangeNotificationsForDependentKey:@"resultEncoding"];
+    [self setKeys:optionsKeys triggerChangeNotificationsForDependentKey:@"removeDiacritics"];
     BDSKINITIALIZE;
 }
 
+// When changing the type, all data must be properly updated to be valid, taking into account the condition implict in the validation methods
 - (void)setType:(NSString *)newType {
     if ([type isEqualToString:newType] == NO) {
         [type release];
