@@ -264,7 +264,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	
     [self updateCiteKeyDuplicateWarning];
     
-    [fileView setBackgroundColor:[FVFileView defaultBackgroundColor]];
     [[fileView enclosingScrollView] setBackgroundColor:[fileView backgroundColor]];
     [fileView setIconScale:[[NSUserDefaults standardUserDefaults] floatForKey:BDSKEditorFileViewIconScaleKey]];
     [fileView setAutoScales:YES];
