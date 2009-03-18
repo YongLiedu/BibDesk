@@ -2350,8 +2350,14 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
         // change selection first, as Finder does
         if ([event clickCount] > 1 && [self _URLAtPoint:p] != nil) {
             if (flags & NSAlternateKeyMask) {
-                [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:[self delegate]];
-                [[FVPreviewer sharedPreviewer] previewURL:[self _URLAtPoint:p] forIconInRect:NSZeroRect];
+                FVPreviewer *previewer = [FVPreviewer sharedPreviewer];
+                [previewer setWebViewContextMenuDelegate:[self delegate]];
+                [self _getGridRow:&r column:&c atPoint:p];
+                NSRect iconRect = [self _rectOfIconInRow:r column:c];
+                iconRect = [self convertRect:iconRect toView:nil];
+                NSPoint origin = [[self window] convertBaseToScreen:iconRect.origin];
+                iconRect.origin = origin;
+                [previewer previewURL:[self _URLAtPoint:p] forIconInRect:iconRect];
             } else {
                 [self openSelectedURLs:self];
             }
@@ -2983,13 +2989,23 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (IBAction)previewAction:(id)sender;
 {
-    if ([_selectionIndexes count] == 1) {
+    FVPreviewer *previewer = [FVPreviewer sharedPreviewer];
+    if ([previewer isPreviewing]) {
+        [previewer stopPreviewing];
+    }
+    else if ([_selectionIndexes count] == 1) {
         [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:[self delegate]];
-        [[FVPreviewer sharedPreviewer] previewURL:[[self _selectedURLs] lastObject] forIconInRect:NSZeroRect];
+        NSUInteger r, c;
+        [self _getGridRow:&r column:&c ofIndex:[_selectionIndexes lastIndex]];
+        NSRect iconRect = [self _rectOfIconInRow:r column:c];
+        iconRect = [self convertRect:iconRect toView:nil];
+        NSPoint origin = [[self window] convertBaseToScreen:iconRect.origin];
+        iconRect.origin = origin;
+        [previewer previewURL:[[self _selectedURLs] lastObject] forIconInRect:iconRect];
     }
     else {
-        [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:nil];
-        [[FVPreviewer sharedPreviewer] previewFileURLs:[self _selectedURLs]];
+        [previewer setWebViewContextMenuDelegate:nil];
+        [previewer previewFileURLs:[self _selectedURLs]];
     }
 }
 
