@@ -225,7 +225,7 @@ static bool __FVPDFIconLimitThumbnailSize(NSSize *size)
 {
     CGPDFDocumentRef document = NULL;
     if (FVCanMapFileAtURL(_fileURL))
-        document = CGPDFDocumentCreateWithProvider([_FVMappedDataProvider newDataProviderForURL:_fileURL]);
+        document = CGPDFDocumentCreateWithProvider([_FVMappedDataProvider dataProviderForURL:_fileURL]);
     
     if (document) {
         _isMapped = YES;
