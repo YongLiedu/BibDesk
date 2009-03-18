@@ -53,6 +53,8 @@
 #import "FVColorMenuView.h"
 #import "FVAccessibilityIconElement.h"
 
+// draws grid and margin frames
+#define DEBUG_GRID 0
 
 static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
@@ -74,6 +76,7 @@ static char _FVFileViewContentObservationContext;
 static const NSSize DEFAULT_ICON_SIZE = { 64.0, 64.0 };
 static const NSSize DEFAULT_PADDING = { 10.0, 4.0 };
 static const CGFloat DEFAULT_MARGIN = 4.0;
+static const CGFloat TEXT_OFFSET = 2.0;
 
 // don't bother removing icons from the cache if there are fewer than this value
 static const NSUInteger ZOMBIE_CACHE_THRESHOLD = 100;
@@ -648,7 +651,7 @@ static CGFloat _subtitleHeight = 0.0;
     
     // if we autoscale, we should always derive the scale from the current bounds,  but rather the current bounds. This calculation basically inverts the calculation in _recalculateGridSize
     size.width = DEFAULT_PADDING.width + FVRound(4.0 * scale);
-    size.height = size.width + DEFAULT_PADDING.height - DEFAULT_PADDING.width + _titleHeight;
+    size.height = DEFAULT_PADDING.height + FVRound(4.0 * scale) + _titleHeight;
     if ([_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)])
         size.height += _subtitleHeight;
     return size;
@@ -715,9 +718,11 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (NSRect)_rectOfTextForIconRect:(NSRect)iconRect;
 {
-    NSRect textRect = NSMakeRect(NSMinX(iconRect), NSMaxY(iconRect), NSWidth(iconRect), _padding.height);
+    // add a couple of points between the icon and text, which is useful if we're drawing a Finder label
+    // don't draw all the way into the padding vertically, so we don't draw over the selection highlight of the next icon
+    NSRect textRect = NSMakeRect(NSMinX(iconRect), NSMaxY(iconRect), NSWidth(iconRect) + TEXT_OFFSET, _padding.height - 2.0 * TEXT_OFFSET);
     // allow the text rect to extend outside the grid cell
-    return NSInsetRect(textRect, -_padding.width / 3.0, 2.0);
+    return NSInsetRect(textRect, -_padding.width / 3.0, 0.0);
 }
 
 - (void)_setNeedsDisplayForIconInRow:(NSUInteger)row column:(NSUInteger)column {
@@ -1839,7 +1844,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                     
                     // draw highlight, then draw icon over it, as Finder does
                     if ([_selectionIndexes containsIndex:i])
-                        [self _drawHighlightInRect:NSInsetRect(fileRect, -4, -4)];
+                        [self _drawHighlightInRect:NSInsetRect(fileRect, -2.0 * TEXT_OFFSET, -2.0 * TEXT_OFFSET)];
                     
                     CGContextSaveGState(cgContext);
                     
@@ -1890,6 +1895,15 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                     }
                     CGContextRestoreGState(cgContext);
                 } 
+#if DEBUG_GRID
+                [NSGraphicsContext saveGraphicsState];
+                if ((c + r) % 2)
+                    [[NSColor redColor] setFill];
+                else
+                    [[NSColor greenColor] setFill];
+                NSFrameRect(NSUnionRect(NSInsetRect(fileRect, -2.0 * [self iconScale], 0), textRect));                
+                [NSGraphicsContext restoreGraphicsState];
+#endif
             }
         }
     }
@@ -1978,6 +1992,10 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
             }
         }
     }
+#if DEBUG_GRID 
+    [[NSColor grayColor] set];
+    NSFrameRect(NSInsetRect([self bounds], [self _leftMargin], [self _topMargin]));
+#endif
 }
 
 #pragma mark Drag source
@@ -2020,7 +2038,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     for (r = rMin, c = cMin; r <= rMax && c <= cMax;) {
         NSRect iconRect = [self _rectOfIconInRow:r column:c];
         NSRect textRect = [self _rectOfTextForIconRect:iconRect];
-        iconRect = NSUnionRect(NSInsetRect([self centerScanRect:iconRect], -4.0, -4.0), [self centerScanRect:textRect]);
+        iconRect = NSUnionRect(NSInsetRect([self centerScanRect:iconRect], -2.0 * TEXT_OFFSET, -2.0 * TEXT_OFFSET), [self centerScanRect:textRect]);
         rect = NSUnionRect(rect, iconRect);
         if (r >= rMax && c >= cMax)
             break;
