@@ -1089,17 +1089,20 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)previewAction:(id)sender {
-    NSURL *theURL = [sender representedObject];
-    if (theURL == nil) {
-        NSArray *selectedURLs = [self selectedFileURLs];
-        if ([selectedURLs count])
-            theURL = [selectedURLs firstObject];
-        else
-            theURL = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"] firstObject];
+    NSArray *theURLs = [sender representedObject];
+    if (theURLs == nil) {
+        theURLs = [self selectedFileURLs];
+        if ([theURLs count] == 0)
+            theURLs = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
     }
-    if (theURL && [theURL isEqual:[NSNull null]] == NO) {
-        [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:self];
-        [[FVPreviewer sharedPreviewer] previewURL:theURL forIconInRect:NSZeroRect];
+    FVPreviewer *qlPreviewer = [FVPreviewer sharedPreviewer];
+    if ([theURLs count] == 1) {
+        [qlPreviewer setWebViewContextMenuDelegate:self];
+        [qlPreviewer previewURL:[theURLs lastObject] forIconInRect:NSZeroRect];
+    }
+    else if ([theURLs count] > 0) {
+        [qlPreviewer setWebViewContextMenuDelegate:nil];
+        [qlPreviewer previewFileURLs:theURLs];
     }
 }
 

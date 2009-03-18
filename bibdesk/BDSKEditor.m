@@ -468,17 +468,15 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (IBAction)previewAction:(id)sender {
-    NSURL *theURL = [sender representedObject];
-    if (theURL == nil) {
-        NSArray *theURLs = [publication valueForKeyPath:@"localFiles.URL"];
-        if ([theURLs count])
-            theURL = [theURLs firstObject];
-        else
-            theURL = [[publication valueForKeyPath:@"remoteURLs.URL"] firstObject];
+    NSArray *theURLs = [publication valueForKeyPath:@"files.URL"];
+    FVPreviewer *previewer = [FVPreviewer sharedPreviewer];
+    if ([theURLs count] == 1) {
+        [previewer setWebViewContextMenuDelegate:self];
+        [previewer previewURL:[theURLs lastObject] forIconInRect:NSZeroRect];
     }
-    if (theURL && [theURL isEqual:[NSNull null]] == NO) {
-        [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:self];
-        [[FVPreviewer sharedPreviewer] previewURL:theURL forIconInRect:NSZeroRect];
+    else if ([theURLs count] > 0) {
+        [previewer setWebViewContextMenuDelegate:nil];
+        [previewer previewFileURLs:theURLs];
     }
 }
 
@@ -1427,7 +1425,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
 	}
 	else if (theAction == @selector(previewAction:)) {
-		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] || [[publication valueForKey:@"linkedURLs"] count];
+		return [[publication files] count];
 	}
     else if (theAction == @selector(editSelectedFieldAsRawBibTeX:)) {
         if (isEditable == NO)

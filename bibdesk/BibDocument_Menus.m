@@ -232,7 +232,7 @@
 }	
 
 - (BOOL) validatePreviewMenuItem:(NSMenuItem*) menuItem {
-    return ([menuItem representedObject] != nil || 
+    return ([[menuItem representedObject] count] ||
             [[self selectedFileURLs] count] ||
             [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count]);
 }	

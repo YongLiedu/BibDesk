@@ -380,7 +380,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
                     if([linkedURLs count] == 1){
                         item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
                         [item setTarget:self];
-                        [item setRepresentedObject:[linkedURLs lastObject]];
+                        [item setRepresentedObject:linkedURLs];
                     }
                     item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked Files", @"Menu item title") action:@selector(openLinkedFile:) keyEquivalent:@""];
                     [item setTarget:self];
@@ -403,7 +403,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
                     if([linkedURLs count] == 1){
                         item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
                         [item setTarget:self];
-                        [item setRepresentedObject:[linkedURLs lastObject]];
+                        [item setRepresentedObject:linkedURLs];
                     }
                     item = [menu addItemWithTitle:NSLocalizedString(@"Open URLs in Browser", @"Menu item title") action:@selector(openLinkedURL:) keyEquivalent:@""];
                     [item setTarget:self];
