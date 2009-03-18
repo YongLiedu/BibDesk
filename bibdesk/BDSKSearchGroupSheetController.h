@@ -95,10 +95,7 @@
 - (BOOL)isCustom;
 - (void)setEditable:(BOOL)flag;
 - (BOOL)isEditable;
-- (BOOL)isEntrez;
 - (BOOL)isZoom;
-- (BOOL)isISI;
-- (BOOL)isDBLP;
 
 - (void)setType:(NSString *)newType;
 - (NSString *)type;

@@ -38,6 +38,12 @@
 
 #import <Cocoa/Cocoa.h>
 
+enum {
+    BDSKServerTypeEntrez,
+    BDSKServerTypeZoom,
+    BDSKServerTypeISI,
+    BDSKServerTypeDBLP
+};
 
 @interface BDSKServerInfo : NSObject <NSCopying, NSMutableCopying> {
     NSString *type;
@@ -73,6 +79,8 @@
 - (BOOL)isZoom;
 - (BOOL)isISI;
 - (BOOL)isDBLP;
+
+- (int)serverType;
 
 @end
 

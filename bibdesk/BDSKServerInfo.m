@@ -180,6 +180,19 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 - (BOOL)isISI { return [[self type] isEqualToString:BDSKSearchGroupISI]; }
 - (BOOL)isDBLP { return [[self type] isEqualToString:BDSKSearchGroupDBLP]; }
 
+- (int)serverType {
+    if ([self isEntrez])
+        return BDSKServerTypeEntrez;
+    if ([self isZoom])
+        return BDSKServerTypeZoom;
+    if ([self isISI])
+        return BDSKServerTypeISI;
+    if ([self isDBLP])
+        return BDSKServerTypeDBLP;
+    BDSKASSERT_NOT_REACHED("Unknown search type");
+    return BDSKServerTypeEntrez;
+}
+
 @end
 
 
@@ -188,6 +201,7 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 + (void)initialize{
     NSArray *typeKeys = [NSArray arrayWithObject:@"type"];
     NSArray *optionsKeys = [NSArray arrayWithObject:@"options"];
+    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"serverType"];
     [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"host"];
     [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"port"];
     [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"options"];

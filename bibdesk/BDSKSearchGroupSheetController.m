@@ -47,8 +47,11 @@
 #define SERVERS_FILENAME @"SearchGroupServers"
 #define SERVERS_DIRNAME @"SearchGroupServers"
 
+#define DEFAULT_SERVER_NAME @"PubMed"
+
 static NSMutableArray *searchGroupServers = nil;
 static NSMutableDictionary *searchGroupServerFiles = nil;
+static NSArray *sortDescriptors = nil;
 
 @implementation BDSKSearchGroupSheetController
 
@@ -82,6 +85,8 @@ static BOOL isSearchFileAtPath(NSString *path)
             }
         }
     }
+    
+    [searchGroupServers sortUsingDescriptors:sortDescriptors];
 }
 
 + (void)loadCustomServers;
@@ -111,6 +116,7 @@ static BOOL isSearchFileAtPath(NSString *path)
             }
         }
     }
+    [searchGroupServers sortUsingDescriptors:sortDescriptors];
 }
 
 + (void)saveServerFile:(BDSKServerInfo *)serverInfo;
@@ -160,14 +166,16 @@ static BOOL isSearchFileAtPath(NSString *path)
 
 + (void)addServer:(BDSKServerInfo *)serverInfo
 {
-    [searchGroupServers addObject:serverInfo];
+    [searchGroupServers addObject:[[serverInfo copy] autorelease]];
+    [searchGroupServers sortUsingDescriptors:sortDescriptors];
     [self saveServerFile:serverInfo];
 }
 
 + (void)setServer:(BDSKServerInfo *)serverInfo atIndex:(unsigned)idx
 {
     [self deleteServerFile:[searchGroupServers objectAtIndex:idx]];
-    [searchGroupServers replaceObjectAtIndex:idx withObject:serverInfo];
+    [searchGroupServers replaceObjectAtIndex:idx withObject:[[serverInfo copy] autorelease]];
+    [searchGroupServers sortUsingDescriptors:sortDescriptors];
     [self saveServerFile:serverInfo];
 }
 
@@ -183,15 +191,16 @@ static BOOL isSearchFileAtPath(NSString *path)
     NSArray *typeKeys = [NSArray arrayWithObjects:@"type", nil];
     [self setKeys:[NSArray arrayWithObjects:@"serverInfo", nil] triggerChangeNotificationsForDependentKey:@"type"];
     [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"typeTag"];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"entrez"];
     [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"zoom"];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"isi"];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"dblp"];
     
     BDSKINITIALIZE;
     
+    NSSortDescriptor *typeSort = [[[NSSortDescriptor alloc] initWithKey:@"serverType" ascending:YES selector:@selector(compare:)] autorelease];
+    NSSortDescriptor *nameSort = [[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
+    
     searchGroupServers = [[NSMutableArray alloc] init];
     searchGroupServerFiles = [[NSMutableDictionary alloc] init];
+    sortDescriptors = [[NSArray alloc] initWithObjects:typeSort, nameSort, nil];
     [self resetServers];
     [self loadCustomServers];
 }
@@ -225,10 +234,14 @@ static BOOL isSearchFileAtPath(NSString *path)
 
 - (NSString *)windowNibName { return @"BDSKSearchGroupSheet"; }
 
-- (void)reloadServersSelectingIndex:(unsigned)idx{
+- (void)reloadServersSelectingServerNamed:(NSString *)name{
     NSArray *servers = [[self class] servers];
+    NSArray *names = [servers valueForKey:@"name"];
+    unsigned int idx = (name == nil || [names count] == 0) ? [names count] + 1 : [names indexOfObject:name];
+    if (idx == NSNotFound)
+        idx = 0;
     [serverPopup removeAllItems];
-    [serverPopup addItemsWithTitles:[servers valueForKey:@"name"]];
+    [serverPopup addItemsWithTitles:names];
     [[serverPopup menu] addItem:[NSMenuItem separatorItem]];
     [serverPopup addItemWithTitle:NSLocalizedString(@"Other", @"Popup menu item name for other search group server")];
     [serverPopup selectItemAtIndex:idx];
@@ -255,20 +268,20 @@ static BOOL isSearchFileAtPath(NSString *path)
     [revealButton setBezelStyle:NSRoundedDisclosureBezelStyle];
     [revealButton performClick:self];
     
+    NSString *name = nil;
     NSArray *servers = [[self class] servers];
-    unsigned idx = 0;
     
-    if ([servers count] == 0) {
-        idx = 1;
-    } else if (group) {
-        idx = [servers indexOfObject:[group serverInfo]];
-        if (idx == NSNotFound)
-            idx = [servers count] + 1;
+    if (group) {
+        unsigned int idx = [servers indexOfObject:[group serverInfo]];
+        if (idx != NSNotFound)
+            name = [[servers objectAtIndex:idx] name];
+    } else if ([servers count]) {
+        name = DEFAULT_SERVER_NAME;
     }
     
     [syntaxPopup addItemsWithTitles:[BDSKZoomGroupServer supportedRecordSyntaxes]];
     
-    [self reloadServersSelectingIndex:idx];
+    [self reloadServersSelectingServerNamed:name];
     [self changeOptions];
 }
 
@@ -302,7 +315,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     [editButton setToolTip:NSLocalizedString(@"Edit the selected default server settings", @"Tool tip message")];
     
     if (i == [sender numberOfItems] - 1) {
-        [self setServerInfo:(serverInfo == nil && group) ? [group serverInfo] : [BDSKServerInfo defaultServerInfoWithType:[self type]]];
+        [self setServerInfo:[group serverInfo] ?: [BDSKServerInfo defaultServerInfoWithType:[self type]]];
         if ([revealButton state] == NSOffState)
             [revealButton performClick:self];
         [self setCustom:YES];
@@ -348,13 +361,13 @@ static BOOL isSearchFileAtPath(NSString *path)
         
         unsigned idx = [servers count];
         [[self class] addServer:[self serverInfo]];
-        [self reloadServersSelectingIndex:idx];
+        [self reloadServersSelectingServerNamed:[[self serverInfo] name]];
         
     } else {
         // remove the selected default server
         
         [[self class] removeServerAtIndex:[serverPopup indexOfSelectedItem]];
-        [self reloadServersSelectingIndex:0];
+        [self reloadServersSelectingServerNamed:DEFAULT_SERVER_NAME];
         
     }
 }
@@ -385,9 +398,8 @@ static BOOL isSearchFileAtPath(NSString *path)
             return;
         }
         
-        BDSKServerInfo *info = [[serverInfo copy] autorelease];
-        [[self class] setServer:info atIndex:idx];
-        [self reloadServersSelectingIndex:idx];
+        [[self class] setServer:[self serverInfo] atIndex:idx];
+        [self reloadServersSelectingServerNamed:[[self serverInfo] name]];
     } else {
         [editButton setTitle:NSLocalizedString(@"Set", @"Button title")];
         [editButton setToolTip:NSLocalizedString(@"Set the selected default server settings", @"Tool tip message")];
@@ -406,7 +418,7 @@ static BOOL isSearchFileAtPath(NSString *path)
 {
     if (returnCode == NSOKButton) {
         [[self class] resetServers];
-        [self reloadServersSelectingIndex:0];
+        [self reloadServersSelectingServerNamed:DEFAULT_SERVER_NAME];
     }
 }
 
@@ -458,13 +470,7 @@ static BOOL isSearchFileAtPath(NSString *path)
 
 - (BOOL)isEditable { return isEditable; }
 
-- (BOOL)isEntrez { return [[self type] isEqualToString:BDSKSearchGroupEntrez]; }
-
-- (BOOL)isZoom { return [[self type] isEqualToString:BDSKSearchGroupZoom]; }
-
-- (BOOL)isISI { return [[self type] isEqualToString:BDSKSearchGroupISI]; }
-
-- (BOOL)isDBLP { return [[self type] isEqualToString:BDSKSearchGroupDBLP]; }
+- (BOOL)isZoom { return [serverInfo isZoom]; }
 
 - (BDSKSearchGroup *)group { return group; }
 
@@ -486,34 +492,17 @@ static BOOL isSearchFileAtPath(NSString *path)
 }
  
 - (int)typeTag {
-    if ([self isEntrez])
-        return 0;
-    else if ([self isZoom])
-        return 1;
-    else if ([self isISI])
-        return 2;
-    else if ([self isDBLP])
-        return 3;
-    BDSKASSERT_NOT_REACHED("Unknown search type");
-    return 0;
+    return [serverInfo serverType];
 }
 
 - (void)setTypeTag:(int)tag {
+    // use [self setType:] to trigger KVO
     switch (tag) {
-        case 0:
-            [self setType:BDSKSearchGroupEntrez];
-            break;
-        case 1:
-            [self setType:BDSKSearchGroupZoom];
-            break;
-        case 2:
-            [self setType:BDSKSearchGroupISI];
-            break;
-        case 3:
-            [self setType:BDSKSearchGroupDBLP];
-            break;
-        default:
-            BDSKASSERT_NOT_REACHED("Unknown search type tag");
+        case BDSKServerTypeEntrez: [self setType:BDSKSearchGroupEntrez]; break;
+        case BDSKServerTypeZoom:   [self setType:BDSKSearchGroupZoom];   break;
+        case BDSKServerTypeISI:    [self setType:BDSKSearchGroupISI];    break;
+        case BDSKServerTypeDBLP:   [self setType:BDSKSearchGroupDBLP];   break;
+        default: BDSKASSERT_NOT_REACHED("Unknown search type tag");
     }
 }
  
@@ -525,7 +514,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     
     NSString *message = nil;
     
-    if (([self isEntrez] || [self isISI] || [self isDBLP]) && ([NSString isEmptyString:[serverInfo name]] || [NSString isEmptyString:[serverInfo database]])) {
+    if ([self isZoom] == NO && ([NSString isEmptyString:[serverInfo name]] || [NSString isEmptyString:[serverInfo database]])) {
         message = NSLocalizedString(@"Unable to create a search group with an empty server name or database", @"Informative text in alert dialog when search group is invalid");
     } else if ([self isZoom] && ([NSString isEmptyString:[serverInfo name]] || [NSString isEmptyString:[serverInfo host]] || [NSString isEmptyString:[serverInfo database]] || [[serverInfo port] intValue] == 0)) {
         message = NSLocalizedString(@"Unable to create a search group with an empty server name, address, database or port", @"Informative text in alert dialog when search group is invalid");
