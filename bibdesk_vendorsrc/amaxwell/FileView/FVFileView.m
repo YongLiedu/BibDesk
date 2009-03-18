@@ -117,7 +117,6 @@ static CGFloat _subtitleHeight = 0.0;
 
 // only declare methods here to shut the compiler up if we can't rearrange
 - (FVIcon *)iconAtIndex:(NSUInteger)anIndex;
-- (NSUInteger)_numberOfIcons;
 - (FVIcon *)_cachedIconForURL:(NSURL *)aURL;
 - (void)_getDisplayName:(NSString **)name andLabel:(NSUInteger *)label forURL:(NSURL *)aURL;
 - (NSSize)_paddingForScale:(CGFloat)scale;
@@ -829,11 +828,11 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (void)_reloadIcons;
 {
-    // if we're using bindings, there's no need to cache all the URLs
-    if (nil == _contentBinding) {
-        
+    BOOL isBound = nil != _contentBinding;
+    
+    if (NO == isBound) {
         if (nil == _orderedURLs)
-            _orderedURLs = [NSMutableArray new];
+            _orderedURLs = [[NSMutableArray alloc] init];
         else
             [_orderedURLs removeAllObjects];
     }
@@ -843,13 +842,20 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     
     CFDictionaryRemoveAllValues(_infoTable);
     
-    // -[FVViewController _cachedIconForURL:]
-    id (*cachedIcon)(id, SEL, id);
-    cachedIcon = (id (*)(id, SEL, id))[self methodForSelector:@selector(_cachedIconForURL:)];
+    // datasource URL method
+    SEL URLSel = @selector(fileView:URLAtIndex:);
+    id (*URLAtIndex)(id, SEL, id, NSUInteger);
+    URLAtIndex = (id (*)(id, SEL, id, NSUInteger))[_dataSource methodForSelector:URLSel];
     
-    // -[FVViewController URLAtIndex:] guaranteed non-nil/non-NSNULL
-    id (*_URLAtIndex)(id, SEL, NSUInteger);
-    _URLAtIndex = (id (*)(id, SEL, NSUInteger))[self methodForSelector:@selector(_URLAtIndex:)];
+    // -[NSCFArray objectAtIndex:] (do /not/ use +[NSMutableArray instanceMethodForSelector:]!)
+    SEL objectSel = @selector(objectAtIndex:);
+    id (*objectAtIndex)(id, SEL, NSUInteger);
+    objectAtIndex = (id (*)(id, SEL, NSUInteger))[_orderedIcons methodForSelector:objectSel];
+    
+    // -[FVViewController _cachedIconForURL:]
+    SEL cachedIconSel = @selector(_cachedIconForURL:);
+    id (*cachedIcon)(id, SEL, id);
+    cachedIcon = (id (*)(id, SEL, id))[self methodForSelector:cachedIconSel];
     
     // -[NSCFArray insertObject:atIndex:] (do /not/ use +[NSMutableArray instanceMethodForSelector:]!)
     SEL insertSel = @selector(insertObject:atIndex:);
@@ -861,14 +867,16 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     id (*subtitleAtIndex)(id, SEL, id, NSUInteger);
     subtitleAtIndex = (id (*)(id, SEL, id, NSUInteger))[_dataSource methodForSelector:subtitleSel];
     
-    NSUInteger i, iMax = [self _numberOfIcons];
+    NSUInteger i, iMax = isBound ? [_orderedURLs count] : [_dataSource numberOfURLsInFileView:self];
     
     for (i = 0; i < iMax; i++) {
-        NSURL *aURL = _URLAtIndex(self, @selector(_URLAtIndex:), i);
+        NSURL *aURL = isBound ? objectAtIndex(_orderedURLs, objectSel, i) : URLAtIndex(_dataSource, URLSel, self, i);
+        if (__builtin_expect(nil == aURL || [NSNull null] == (id)aURL, 0))
+            aURL = [FVIcon missingFileURL];
         NSParameterAssert(nil != aURL && [NSNull null] != (id)aURL);
-        FVIcon *icon = cachedIcon(self, @selector(_cachedIconForURL:), aURL);
+        FVIcon *icon = cachedIcon(self, cachedIconSel, aURL);
         NSParameterAssert(nil != icon);
-        if (nil == _contentBinding)
+        if (NO == isBound)
             insertObjectAtIndex(_orderedURLs, insertSel, aURL, i);
         insertObjectAtIndex(_orderedIcons, insertSel, icon, i);
         if (_orderedSubtitles)
@@ -1150,17 +1158,6 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 }
 
 - (NSUInteger)numberOfIcons { return [_orderedURLs count]; }
-
-// only used by -_reloadIcons; always returns a value independent of cached state
-- (NSURL *)_URLAtIndex:(NSUInteger)anIndex { 
-    NSURL *aURL = _contentBinding != nil ? [_orderedURLs objectAtIndex:anIndex] : [_dataSource fileView:self URLAtIndex:anIndex];
-    if (__builtin_expect(nil == aURL || [NSNull null] == (id)aURL, 0))
-        aURL = [FVIcon missingFileURL];
-    return aURL;
-}
-
-// only used by -_reloadIcons; always returns a value independent of cached state
-- (NSUInteger)_numberOfIcons { return _contentBinding != nil ? [_orderedURLs count] : [_dataSource numberOfURLsInFileView:self]; }
 
 - (void)_getDisplayName:(NSString **)name andLabel:(NSUInteger *)label forURL:(NSURL *)aURL;
 {
