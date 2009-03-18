@@ -54,7 +54,7 @@
         if ([NSOutlineView instancesRespondToSelector:@selector(setSelectionHighlightStyle:)]) {
             NSOutlineView *outlineView = [[NSOutlineView alloc] initWithFrame:NSMakeRect(0,0,1,1)];
             [outlineView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
-            sourceListBackgroundColor = [[outlineView backgroundColor] retain];
+            sourceListBackgroundColor = [[[outlineView backgroundColor] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
             [outlineView release];
         } else {
             // from Mail.app on 10.4
