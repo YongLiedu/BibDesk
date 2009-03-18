@@ -1077,7 +1077,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 }
 
 - (void)_handleKeyStateNotification:(NSNotification *)note {
-    NSView *view = (id)[self enclosingScollView] ?: (id)self;
+    NSView *view = (id)[self enclosingScrollView] ?: (id)self;
     [view setNeedsDisplay:YES];
 }
 
