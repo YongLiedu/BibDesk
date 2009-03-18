@@ -48,8 +48,6 @@
 		CEFC19B10F693E8B00B2AEE6 /* FileView.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC19B00F693E8B00B2AEE6 /* FileView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CEFC1CF60F6AB84000B2AEE6 /* _FVDocumentDescription.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1CE90F6AB84000B2AEE6 /* _FVDocumentDescription.h */; };
 		CEFC1CF70F6AB84000B2AEE6 /* _FVDocumentDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1CEA0F6AB84000B2AEE6 /* _FVDocumentDescription.m */; };
-		CEFC1CF80F6AB84000B2AEE6 /* _FVMappedDataProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1CEB0F6AB84000B2AEE6 /* _FVMappedDataProvider.h */; };
-		CEFC1CF90F6AB84000B2AEE6 /* _FVMappedDataProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1CEC0F6AB84000B2AEE6 /* _FVMappedDataProvider.m */; };
 		CEFC1CFA0F6AB84000B2AEE6 /* _FVSplitSet.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1CED0F6AB84000B2AEE6 /* _FVSplitSet.h */; };
 		CEFC1CFB0F6AB84000B2AEE6 /* _FVSplitSet.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1CEE0F6AB84000B2AEE6 /* _FVSplitSet.m */; };
 		CEFC1CFC0F6AB84000B2AEE6 /* FVCacheFile.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1CEF0F6AB84000B2AEE6 /* FVCacheFile.h */; };
@@ -220,8 +218,6 @@
 		CEFC19B00F693E8B00B2AEE6 /* FileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileView.h; sourceTree = "<group>"; };
 		CEFC1CE90F6AB84000B2AEE6 /* _FVDocumentDescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _FVDocumentDescription.h; sourceTree = "<group>"; };
 		CEFC1CEA0F6AB84000B2AEE6 /* _FVDocumentDescription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _FVDocumentDescription.m; sourceTree = "<group>"; };
-		CEFC1CEB0F6AB84000B2AEE6 /* _FVMappedDataProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _FVMappedDataProvider.h; sourceTree = "<group>"; };
-		CEFC1CEC0F6AB84000B2AEE6 /* _FVMappedDataProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _FVMappedDataProvider.m; sourceTree = "<group>"; };
 		CEFC1CED0F6AB84000B2AEE6 /* _FVSplitSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _FVSplitSet.h; sourceTree = "<group>"; };
 		CEFC1CEE0F6AB84000B2AEE6 /* _FVSplitSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _FVSplitSet.m; sourceTree = "<group>"; };
 		CEFC1CEF0F6AB84000B2AEE6 /* FVCacheFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVCacheFile.h; sourceTree = "<group>"; };
@@ -513,8 +509,6 @@
 			children = (
 				CEFC1CE90F6AB84000B2AEE6 /* _FVDocumentDescription.h */,
 				CEFC1CEA0F6AB84000B2AEE6 /* _FVDocumentDescription.m */,
-				CEFC1CEB0F6AB84000B2AEE6 /* _FVMappedDataProvider.h */,
-				CEFC1CEC0F6AB84000B2AEE6 /* _FVMappedDataProvider.m */,
 				CEFC1CED0F6AB84000B2AEE6 /* _FVSplitSet.h */,
 				CEFC1CEE0F6AB84000B2AEE6 /* _FVSplitSet.m */,
 				CEFC1CEF0F6AB84000B2AEE6 /* FVCacheFile.h */,
@@ -742,7 +736,6 @@
 				CEA831140DC1FAB500B551D1 /* FVAccessibilityIconElement.h in Headers */,
 				CEFC19B10F693E8B00B2AEE6 /* FileView.h in Headers */,
 				CEFC1CF60F6AB84000B2AEE6 /* _FVDocumentDescription.h in Headers */,
-				CEFC1CF80F6AB84000B2AEE6 /* _FVMappedDataProvider.h in Headers */,
 				CEFC1CFA0F6AB84000B2AEE6 /* _FVSplitSet.h in Headers */,
 				CEFC1CFC0F6AB84000B2AEE6 /* FVCacheFile.h in Headers */,
 				CEFC1CFE0F6AB84000B2AEE6 /* FVCGColorSpaceDescription.h in Headers */,
@@ -910,7 +903,6 @@
 				CE89233F0D7CBB1A006D514C /* FVOperation.m in Sources */,
 				CEA831150DC1FAB500B551D1 /* FVAccessibilityIconElement.m in Sources */,
 				CEFC1CF70F6AB84000B2AEE6 /* _FVDocumentDescription.m in Sources */,
-				CEFC1CF90F6AB84000B2AEE6 /* _FVMappedDataProvider.m in Sources */,
 				CEFC1CFB0F6AB84000B2AEE6 /* _FVSplitSet.m in Sources */,
 				CEFC1CFD0F6AB84000B2AEE6 /* FVCacheFile.mm in Sources */,
 				CEFC1CFF0F6AB84000B2AEE6 /* FVCGColorSpaceDescription.m in Sources */,

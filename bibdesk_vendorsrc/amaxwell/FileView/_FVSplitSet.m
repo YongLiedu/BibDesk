@@ -65,13 +65,11 @@
 
 - (void)addObject:(id)obj
 {
-    if ((NSUInteger)CFSetGetCount(_new) < _split) {
-        CFSetAddValue(_new, obj);
-    }
-    else {
+    if ((NSUInteger)CFSetGetCount(_new) >= _split) {
         [(NSMutableSet *)_old unionSet:(NSSet *)_new];
         CFSetRemoveAllValues(_new);
     }
+    CFSetAddValue(_new, obj);
 }
 
 - (void)removeObject:(id)obj

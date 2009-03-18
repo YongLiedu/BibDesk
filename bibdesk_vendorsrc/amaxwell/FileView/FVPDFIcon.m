@@ -39,7 +39,6 @@
 #import "FVPDFIcon.h"
 #import <libkern/OSAtomic.h>
 
-#import "_FVMappedDataProvider.h"
 #import "_FVSplitSet.h"
 #import "_FVDocumentDescription.h"
 
@@ -81,7 +80,7 @@ static CGLayerRef   _pageLayer = NULL;
     OSSpinLockLock(&_releaseLock);
     [_releaseableIcons addObject:anIcon];
     NSSet *oldObjects = nil;
-    if ([_FVMappedDataProvider maxSizeExceeded] || [_releaseableIcons count] >= [_releaseableIcons split] * 2) {
+    if ([_releaseableIcons count] >= [_releaseableIcons split] * 2) {
         // copy inside the lock, then perform the slower makeObjectsPerformSelector: operation outside of it
         oldObjects = [_releaseableIcons copyOldObjects];
         // remove the first 100 objects, since the recently added ones are more likely to be needed again (scrolling up and down)
@@ -113,7 +112,6 @@ static CGLayerRef   _pageLayer = NULL;
         _thumbnailSize = _fullSize;
 
         _pdfDoc = NULL;
-        _isMapped = NO;
         _pdfPage = NULL;
         _thumbnail = NULL;
         _desiredSize = NSZeroSize;
@@ -130,7 +128,6 @@ static CGLayerRef   _pageLayer = NULL;
 - (void)dealloc
 {
     [[self class] _removeIconForMappedRelease:self];
-    if (_pdfDoc && _isMapped) [_FVMappedDataProvider releaseProviderForURL:_fileURL];
     CGImageRelease(_thumbnail);
     CGPDFDocumentRelease(_pdfDoc);
     [super dealloc];
@@ -149,7 +146,6 @@ static CGLayerRef   _pageLayer = NULL;
     
         if (NULL != _pdfDoc) {
             _pdfPage = NULL;
-            if (_isMapped) [_FVMappedDataProvider releaseProviderForURL:_fileURL];
             CGPDFDocumentRelease(_pdfDoc);
             _pdfDoc = NULL;
         }
@@ -223,17 +219,11 @@ static bool __FVPDFIconLimitThumbnailSize(NSSize *size)
 
 - (CGPDFDocumentRef)_newPDFDocument
 {
-    CGPDFDocumentRef document = NULL;
-    if (FVCanMapFileAtURL(_fileURL))
-        document = CGPDFDocumentCreateWithProvider([_FVMappedDataProvider dataProviderForURL:_fileURL]);
-    
-    if (document) {
-        _isMapped = YES;
-    }
-    else {
-        _isMapped = NO;
-        document = CGPDFDocumentCreateWithURL((CFURLRef)_fileURL);
-    }
+    NSData *data = [[NSData alloc] initWithContentsOfURL:_fileURL];
+    CGDataProviderRef provider = data ?  CGDataProviderCreateWithCFData((CFDataRef)data) : NULL;
+    CGPDFDocumentRef document = provider ? CGPDFDocumentCreateWithProvider(provider) : NULL;
+    CGDataProviderRelease(provider);
+    [data release];
     return document;
 }
 

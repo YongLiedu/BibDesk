@@ -43,7 +43,6 @@
 {
 @private
     CGPDFDocumentRef  _pdfDoc;
-    BOOL              _isMapped;
     CGPDFPageRef      _pdfPage;
     NSSize            _fullSize;
     CGImageRef        _thumbnail;
