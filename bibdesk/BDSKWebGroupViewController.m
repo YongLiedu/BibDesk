@@ -44,6 +44,7 @@
 #import "BDSKWebGroup.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKEdgeView.h"
+#import "BDSKDragTextField.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BibDocument.h"
@@ -155,11 +156,13 @@
 }
 
 - (void)windowDidLoad {
+    // navigation views
     [collapsibleView setMinSize:[collapsibleView frame].size];
     [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
+    
     [view setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     [view setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
-    [webEdgeView setEdges:BDSKEveryEdgeMask];
+    
     NSRect frame = [backForwardButton frame];
     frame.size.height = 25.0;
     [backForwardButton setFrame:frame];
@@ -171,9 +174,16 @@
     forwardMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
     [forwardMenu setDelegate:self];
     [backForwardButton setMenu:forwardMenu forSegment:1];
+    
     [stopOrReloadButton setImagePosition:NSImageOnly];
     [stopOrReloadButton setImage:[NSImage imageNamed:@"ReloadAdorn"]];
+    
+    [urlField registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil]];
+    
+    // webview
+    [webEdgeView setEdges:BDSKEveryEdgeMask];
     [webView setEditingDelegate:self];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleApplicationWillTerminateNotification:)
                                                  name:NSApplicationWillTerminateNotification
@@ -319,6 +329,31 @@
         [menuItem setTarget:self];
         [menuItem setRepresentedObject:item];
     }
+}
+
+#pragma mark Dragging support
+
+- (NSDragOperation)dragTextField:(BDSKDragTextField *)textField validateDrop:(id <NSDraggingInfo>)sender {
+    NSPasteboard *pboard = [sender draggingPasteboard];
+	NSString *dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]];
+    
+    return dragType ? NSDragOperationEvery : NSDragOperationNone;
+}
+
+- (BOOL)dragTextField:(BDSKDragTextField *)textField acceptDrop:(id <NSDraggingInfo>)sender {
+    NSPasteboard *pboard = [sender draggingPasteboard];
+	NSString *dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]];
+    NSURL *url = nil;
+    
+    if ([dragType isEqualToString:NSURLPboardType])
+        url = [NSURL URLFromPasteboard:pboard];
+    else if ([dragType isEqualToString:BDSKWeblocFilePboardType])
+        url = [NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]];
+    if (url) {
+        [self setURLString:[url absoluteString]];
+        return YES;
+    }
+    return NO;
 }
 
 #pragma mark WebFrameLoadDelegate protocol

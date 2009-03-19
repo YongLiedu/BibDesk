@@ -176,6 +176,14 @@
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
 		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKDragTextField</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTextField</string>
+		</dict>
 	</array>
 	<key>IBVersion</key>
 	<string>1</string>

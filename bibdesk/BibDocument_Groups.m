@@ -1343,7 +1343,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             return;
         }
     }
-    [[self webGroupViewController] loadURL:[sender representedObject]];
+    [[self webGroupViewController] setURLString:[[sender representedObject] absoluteString]];
 }
 
 - (IBAction)addBookmark:(id)sender {
