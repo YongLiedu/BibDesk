@@ -44,6 +44,8 @@
 #import "BDSKGroupCell.h"
 #import "BDSKGroup.h"
 #import "BDSKStaticGroup.h"
+#import "BDSKWebGroup.h"
+#import "BDSKWebGroupViewController.h"
 #import "BDSKScriptHookManager.h"
 #import "BibDocument_Groups.h"
 #import "BibDocument_Search.h"
@@ -1019,7 +1021,9 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
             return NSDragOperationNone;
         }
         
-        if (op == NSTableViewDropAbove || (row >= 0 && [[groups objectAtIndex:row] isValidDropTarget] == NO)) {
+        if (op == NSTableViewDropOn && row >= 0 && [[groups objectAtIndex:row] isEqual:[groups webGroup]] && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil] containsObject:type]) {
+            // drop a URL on the web group
+        } else if (op == NSTableViewDropAbove || (row >= 0 && [[groups objectAtIndex:row] isValidDropTarget] == NO)) {
             // here we actually target the whole table, as we don't insert in a specific location
             row = -1;
             [tv setDropRow:row dropOperation:NSTableViewDropOn];
@@ -1150,6 +1154,24 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
         
 		if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromExternalGroups && row == 0) {
             return [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
+        } else if (row >= 0 && [[groups objectAtIndex:row] isEqual:[groups webGroup]] && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil] containsObject:type]){
+            NSURL *url = nil;
+            if ([type isEqualToString:BDSKWeblocFilePboardType])
+                url = [NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]]; 	
+            else if ([type isEqualToString:NSURLPboardType])
+                url = [NSURL URLFromPasteboard:pboard];
+            if (url) {
+                // switch to the web group
+                if ([self hasWebGroupSelected] == NO) {
+                    // make sure the controller and its nib are loaded
+                    [[self webGroupViewController] window];
+                    [self selectGroup:[groups webGroup]];
+                }
+                [[self webGroupViewController] setURLString:[url absoluteString]];
+                return YES;
+            } else {
+                return NO;
+            }
         } else if(isDragFromGroupTable || isDragFromDrawer || (row >= 0 && [group isValidDropTarget] == NO)) {
             return NO;
         } else if(isDragFromMainTable){
