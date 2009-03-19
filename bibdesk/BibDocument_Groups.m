@@ -87,6 +87,8 @@
 #import "BDSKCFCallBacks.h"
 #import "BDSKMessageQueue.h"
 #import "BDSKFileContentSearchController.h"
+#import "BDSKSplitView.h"
+#import "BDSKGradientSplitView.h"
 
 
 @implementation BibDocument (Groups)
@@ -191,6 +193,7 @@ The groupedPublications array is a subset of the publications array, developed b
     NSView *webView = [[self webGroupViewController] webView];
     
     if ([self isDisplayingWebGroupView] == NO) {
+        
         [self insertControlView:webGroupView atTop:NO];
         
         NSView *view1 = [[splitView subviews] objectAtIndex:0];
@@ -200,10 +203,13 @@ The groupedPublications array is a subset of the publications array, developed b
         NSRect tableFrame = svFrame;
         NSRect previewFrame = svFrame;
         float height = NSHeight(svFrame) - 2 * [splitView dividerThickness];
-        float factor = NSHeight([view2 frame]) / (NSHeight([view1 frame]) + NSHeight([view2 frame]));
+        float oldFraction = [splitView fraction];
         
-        webFrame.size.height = roundf(0.4 * height);
-        previewFrame.size.height = roundf(0.6 * height * factor);
+        if (docState.lastWebViewFraction <= 0.0)
+            docState.lastWebViewFraction = 0.4;
+        
+        webFrame.size.height = roundf(height * docState.lastWebViewFraction);
+        previewFrame.size.height = roundf((height - NSHeight(webFrame)) * oldFraction);
         tableFrame.size.height = height - NSHeight(webFrame) - NSHeight(previewFrame);
         tableFrame.origin.y = NSMaxY(previewFrame) + [splitView dividerThickness];
         webFrame.origin.y = NSMaxY(tableFrame) + [splitView dividerThickness];
@@ -225,6 +231,7 @@ The groupedPublications array is a subset of the publications array, developed b
         id firstResponder = [documentWindow firstResponder];
         if ([firstResponder respondsToSelector:@selector(isDescendantOf:)] && [firstResponder isDescendantOf:webGroupView])
             [documentWindow makeFirstResponder:tableView];
+        docState.lastWebViewFraction = NSHeight([webView frame]) / fmaxf(1.0, NSHeight([splitView frame]) - 2 * [splitView dividerThickness]);
         [self removeControlView:webGroupView];
         [webView removeFromSuperview];
         [splitView adjustSubviews];

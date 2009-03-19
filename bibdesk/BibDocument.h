@@ -234,6 +234,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
         float               lastPreviewHeight;  // for the splitview double-click handling
         float               lastGroupViewWidth;
         float               lastFileViewWidth;
+        float               lastWebViewFraction;
         NSStringEncoding    documentStringEncoding;
         NSSaveOperationType currentSaveOperationType; // used to check for autosave during writeToFile:ofType:
         BOOL                sortDescending;

@@ -265,6 +265,7 @@ enum {
         docState.lastPreviewHeight = 0.0;
         docState.lastGroupViewWidth = 0.0;
         docState.lastFileViewWidth = 0.0;
+        docState.lastWebViewFraction = 0.0;
         
         // these are temporary state variables
         promiseDragColumnIdentifier = nil;
