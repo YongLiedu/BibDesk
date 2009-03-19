@@ -55,7 +55,7 @@
 @end
 
 // the above delegate methods could be implemented by calling these delegate methods for NSControl subclasses that actually have a delegate
-// currently implemented for NSTableView
+// currently implemented for NSTextField and NSTableView
 @interface NSControl (NSControlBDSKFieldEditorDelegate)
 - (NSRange)control:(NSControl *)control textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange;
 - (BOOL)control:(NSControl *)control textViewShouldAutoComplete:(NSTextView *)textView;

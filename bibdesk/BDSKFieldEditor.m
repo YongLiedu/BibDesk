@@ -335,6 +335,7 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
 
 @end
 
+#pragma mark -
 
 @implementation BDSKFieldEditor (Private)
 
@@ -355,5 +356,77 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
 - (void)handleTextDidBeginEditingNotification:(NSNotification *)note { isEditing = YES; }
 
 - (void)handleTextDidEndEditingNotification:(NSNotification *)note { isEditing = NO; }
+
+@end
+
+#pragma mark -
+
+@implementation NSTextField (BDSKFieldEditorDelegate)
+
+- (NSRange)textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
+	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textView:rangeForUserCompletion:)]) 
+		return [[self delegate] control:self textView:textView rangeForUserCompletion:charRange];
+	return charRange;
+}
+
+- (BOOL)textViewShouldAutoComplete:(NSTextView *)textView {
+	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textViewShouldAutoComplete:)]) 
+		return [(id)[self delegate] control:self textViewShouldAutoComplete:textView];
+	return NO;
+}
+
+- (BOOL)textViewShouldLinkKeys:(NSTextView *)textView {
+    return textView == [self currentEditor] && 
+           [[self delegate] respondsToSelector:@selector(control:textViewShouldLinkKeys:)] &&
+           [[self delegate] control:self textViewShouldLinkKeys:textView];
+}
+
+- (BOOL)textView:(NSTextView *)textView isValidKey:(NSString *)key{
+    return textView == [self currentEditor] && 
+           [[self delegate] respondsToSelector:@selector(control:textView:isValidKey:)] &&
+           [[self delegate] control:self textView:textView isValidKey:key];
+}
+
+- (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex{
+    return textView == [self currentEditor] && 
+           [[self delegate] respondsToSelector:@selector(control:textView:clickedOnLink:atIndex:)] &&
+           [[self delegate] control:self textView:textView clickedOnLink:aLink atIndex:charIndex];
+}
+
+@end
+
+#pragma mark -
+
+@implementation NSTableView (BDSKFieldEditorDelegate)
+
+- (NSRange)textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
+	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textView:rangeForUserCompletion:)]) 
+		return [[self delegate] control:self textView:textView rangeForUserCompletion:charRange];
+	return charRange;
+}
+
+- (BOOL)textViewShouldAutoComplete:(NSTextView *)textView {
+	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textViewShouldAutoComplete:)]) 
+		return [(id)[self delegate] control:self textViewShouldAutoComplete:textView];
+	return NO;
+}
+
+- (BOOL)textViewShouldLinkKeys:(NSTextView *)textView {
+    return textView == [self currentEditor] && 
+           [[self delegate] respondsToSelector:@selector(control:textViewShouldLinkKeys:)] &&
+           [[self delegate] control:self textViewShouldLinkKeys:textView];
+}
+
+- (BOOL)textView:(NSTextView *)textView isValidKey:(NSString *)key{
+    return textView == [self currentEditor] && 
+           [[self delegate] respondsToSelector:@selector(control:textView:isValidKey:)] &&
+           [[self delegate] control:self textView:textView isValidKey:key];
+}
+
+- (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex{
+    return textView == [self currentEditor] && 
+           [[self delegate] respondsToSelector:@selector(control:textView:clickedOnLink:atIndex:)] &&
+           [[self delegate] control:self textView:textView clickedOnLink:aLink atIndex:charIndex];
+}
 
 @end

@@ -38,7 +38,6 @@
 
 #import "NSTableView_BDSKExtensions.h"
 #import "NSBezierPath_BDSKExtensions.h"
-#import "BDSKFieldEditor.h"
 
 
 @implementation NSTableView (BDSKExtensions)
@@ -75,38 +74,6 @@
     [self lockFocus];
     [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:2.0 color:[NSColor alternateSelectedControlColor]];
     [self unlockFocus];
-}
-
-#pragma mark BDSKFieldEditor delegate methods for NSControl
-
-- (NSRange)textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
-	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textView:rangeForUserCompletion:)]) 
-		return [[self delegate] control:self textView:textView rangeForUserCompletion:charRange];
-	return charRange;
-}
-
-- (BOOL)textViewShouldAutoComplete:(NSTextView *)textView {
-	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textViewShouldAutoComplete:)]) 
-		return [(id)[self delegate] control:self textViewShouldAutoComplete:textView];
-	return NO;
-}
-
-- (BOOL)textViewShouldLinkKeys:(NSTextView *)textView {
-    return textView == [self currentEditor] && 
-           [[self delegate] respondsToSelector:@selector(control:textViewShouldLinkKeys:)] &&
-           [[self delegate] control:self textViewShouldLinkKeys:textView];
-}
-
-- (BOOL)textView:(NSTextView *)textView isValidKey:(NSString *)key{
-    return textView == [self currentEditor] && 
-           [[self delegate] respondsToSelector:@selector(control:textView:isValidKey:)] &&
-           [[self delegate] control:self textView:textView isValidKey:key];
-}
-
-- (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex{
-    return textView == [self currentEditor] && 
-           [[self delegate] respondsToSelector:@selector(control:textView:clickedOnLink:atIndex:)] &&
-           [[self delegate] control:self textView:textView clickedOnLink:aLink atIndex:charIndex];
 }
 
 @end

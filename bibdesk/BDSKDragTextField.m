@@ -38,7 +38,6 @@
 
 #import "BDSKDragTextField.h"
 #import "NSBezierPath_BDSKExtensions.h"
-#import "BDSKFieldEditor.h"
 
 
 @implementation BDSKDragTextField
@@ -75,20 +74,6 @@
         [NSBezierPath drawHighlightInRect:[self bounds] radius:4.0 lineWidth:2.0 color:[NSColor alternateSelectedControlColor]];
         [NSGraphicsContext restoreGraphicsState];
 	}
-}
-
-#pragma mark BDSKFieldEditor delegate methods for NSControl
-
-- (NSRange)textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
-	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textView:rangeForUserCompletion:)]) 
-		return [[self delegate] control:self textView:textView rangeForUserCompletion:charRange];
-	return charRange;
-}
-
-- (BOOL)textViewShouldAutoComplete:(NSTextView *)textView {
-	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textViewShouldAutoComplete:)]) 
-		return [(id)[self delegate] control:self textViewShouldAutoComplete:textView];
-	return NO;
 }
 
 @end
