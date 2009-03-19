@@ -78,9 +78,6 @@ static char _FVFileViewContentObservationContext;
 #define DEFAULT_MARGIN ((CGFloat) 4.0)
 #define TEXT_OFFSET ((CGFloat) 2.0)
 
-// don't bother removing icons from the cache if there are fewer than this value
-#define ZOMBIE_CACHE_THRESHOLD 100L
-
 // check the icon cache every five minutes and get rid of stale icons
 #define ZOMBIE_TIMER_INTERVAL 60.0
 
@@ -206,7 +203,11 @@ static CGFloat _subtitleHeight = 0.0;
 - (CGFloat)_rowHeight { return _iconSize.height + _padding.height; }
 
 - (void)_commonInit {
+     // Icons keyed by URL; may contain icons that are no longer displayed.  Keeping this as primary storage means that
+     // rearranging/reloading is relatively cheap, since we don't recreate all FVIcon instances every time -reload is called.
     _iconCache = [[NSMutableDictionary alloc] init];
+    // Icons keyed by URL that aren't in the current datasource; this is purged and repopulated every ZOMBIE_TIMER_INTERVAL
+    _zombieIconCache = [[NSMutableDictionary alloc] init];
     _iconSize = DEFAULT_ICON_SIZE;
     _fvFlags.autoScales = NO;
     _padding = [self _paddingForScale:1.0];
@@ -227,7 +228,12 @@ static CGFloat _subtitleHeight = 0.0;
     _numberOfColumns = 1;
     _numberOfRows = 1;
     
-    // Arrays associate FVIcon <--> NSURL in view order.  This is primarily because NSURL is a slow and expensive key for NSDictionary since it copies strings to compute -hash instead of storing it inline; as a consequence, calling [_iconCache objectForKey:[_datasource URLAtIndex:]] is a memory and CPU hog.  We use parallel arrays instead of one array filled with NSDictionaries because there will only be two, and this is less memory and fewer calls.
+    /*
+     Arrays associate FVIcon <--> NSURL in view order.  This is primarily because NSURL is a slow and expensive key 
+     for NSDictionary since it copies strings to compute -hash instead of storing it inline; as a consequence, 
+     calling [_iconCache objectForKey:[_datasource URLAtIndex:]] is a memory and CPU hog.  We use parallel arrays 
+     instead of one array filled with NSDictionaries because there will only be two, and this is less memory and fewer calls.
+     */
     _orderedIcons = [[NSMutableArray alloc] init];
    
     // created lazily in case it's needed (only if using a datasource)
@@ -238,7 +244,11 @@ static CGFloat _subtitleHeight = 0.0;
     
     CFAllocatorRef alloc = CFAllocatorGetDefault();
     
-    // This avoids doing file operations on every URL while drawing, just to get the name and label.  This table is purged by -reload, so we can use pointer keys and avoid hashing CFURL instances (and avoid copying keys...be sure to use CF to add values!).
+    /*
+     This avoids doing file operations on every URL while drawing, just to get the name and label.  
+     This table is purged by -reload, so we can use pointer keys and avoid hashing CFURL instances 
+     (and avoid copying keys...be sure to use CF to add values!).
+     */
     const CFDictionaryKeyCallBacks pointerKeyCallBacks = { 0, kCFTypeDictionaryKeyCallBacks.retain, kCFTypeDictionaryKeyCallBacks.release,
                                                             kCFTypeDictionaryKeyCallBacks.copyDescription, NULL, NULL };
     _infoTable = CFDictionaryCreateMutable(alloc, 0, &pointerKeyCallBacks, &kCFTypeDictionaryValueCallBacks);        
@@ -310,6 +320,7 @@ static CGFloat _subtitleHeight = 0.0;
     CFRunLoopTimerInvalidate(_zombieTimer);
     CFRelease(_zombieTimer);
     [_iconCache release];
+    [_zombieIconCache release];
     [_orderedIcons release];
     [_orderedURLs release];
     [_orderedSubtitles release];
@@ -580,6 +591,7 @@ static CGFloat _subtitleHeight = 0.0;
     
     // convenient time to do this, although the timer would also handle it
     [_iconCache removeAllObjects];
+    [_zombieIconCache removeAllObjects];
     
     // datasource may implement subtitles, which affects our drawing layout (padding height)
     [self reloadIcons];
@@ -1193,6 +1205,17 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 {
     NSParameterAssert([aURL isKindOfClass:[NSURL class]]);
     FVIcon *icon = [_iconCache objectForKey:aURL];
+    
+    // try zombie cache first
+    if (nil == icon) {
+        icon = [_zombieIconCache objectForKey:aURL];
+        if (icon) {
+            [_iconCache setObject:icon forKey:aURL];
+            [_zombieIconCache removeObjectForKey:aURL];
+        }
+    }
+    
+    // still no icon, so make a new one and cache it
     if (nil == icon) {
         icon = [[FVIcon allocWithZone:NULL] initWithURL:aURL];
         [_iconCache setObject:icon forKey:aURL];
@@ -1424,21 +1447,35 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     }
 }
 
-// drawRect: uses -releaseResources on icons that aren't visible but present in the datasource, so we just need a way to cull icons that are cached but not currently in the datasource
+// -drawRect: uses -releaseResources on icons that aren't visible but present in the datasource, so we just need a way to cull icons that are cached but not currently in the datasource.
 - (void)_zombieTimerFired:(CFRunLoopTimerRef)timer
 {
-    // don't do anything unless there's a meaningful discrepancy between the number of items reported by the datasource and our cache
-    if (([self numberOfIcons] + ZOMBIE_CACHE_THRESHOLD) < [_iconCache count]) {
-        
-        NSMutableSet *iconURLsToKeep = [NSMutableSet setWithArray:_orderedURLs];        
-        NSMutableSet *toRemove = [NSMutableSet setWithArray:[_iconCache allKeys]];
-        [toRemove minusSet:iconURLsToKeep];
-        
-        // anything remaining in toRemove is not present in the dataSource, so remove it from the cache
-        NSEnumerator *keyEnum = [toRemove objectEnumerator];
-        NSURL *aURL;
-        while ((aURL = [keyEnum nextObject]))
-            [_iconCache removeObjectForKey:aURL];
+    NSMutableSet *iconURLsToKeep = [NSMutableSet setWithArray:_orderedURLs];        
+
+    // find any icons in _zombieIconCache that we want to move back to _iconCache (may never be hit...)
+    NSMutableSet *toRemove = [NSMutableSet setWithArray:[_zombieIconCache allKeys]];
+    [toRemove intersectSet:iconURLsToKeep];
+    
+    NSEnumerator *keyEnum = [toRemove objectEnumerator];
+    NSURL *aURL;
+    while ((aURL = [keyEnum nextObject])) {
+        NSParameterAssert([_iconCache objectForKey:aURL] == nil);
+        [_iconCache setObject:[_zombieIconCache objectForKey:aURL] forKey:aURL];
+        [_zombieIconCache removeObjectForKey:aURL];
+    }
+
+    // now remove the remaining undead...
+    [_zombieIconCache removeAllObjects];
+
+    // now find stale keys in _iconCache
+    toRemove = [NSMutableSet setWithArray:[_iconCache allKeys]];
+    [toRemove minusSet:iconURLsToKeep];
+    
+    // anything remaining in toRemove is not present in the dataSource, so transfer from _iconCache to _zombieIconCache
+    keyEnum = [toRemove objectEnumerator];
+    while ((aURL = [keyEnum nextObject])) {
+        [_zombieIconCache setObject:[_iconCache objectForKey:aURL] forKey:aURL];
+        [_iconCache removeObjectForKey:aURL];
     }
 }
 

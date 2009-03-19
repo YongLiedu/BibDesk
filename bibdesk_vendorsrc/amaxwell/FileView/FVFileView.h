@@ -76,6 +76,7 @@ typedef enum _FVDropOperation {
     NSMutableArray         *_orderedURLs;
     NSMutableArray         *_orderedSubtitles;
     NSMutableDictionary    *_iconCache;
+    NSMutableDictionary    *_zombieIconCache;
     CFMutableDictionaryRef  _infoTable;
     NSUInteger              _numberOfColumns;
     NSUInteger              _numberOfRows;
