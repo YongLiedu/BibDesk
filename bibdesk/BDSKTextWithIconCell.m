@@ -116,7 +116,7 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
 
 - (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength {
     settingUpFieldEditor = YES;
-    [super selectWithFrame:[self textRectForBounds:aRect] inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
+    [super selectWithFrame:aRect inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
     settingUpFieldEditor = NO;
 }
 

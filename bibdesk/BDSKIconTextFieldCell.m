@@ -47,13 +47,18 @@
     return nil;
 }
 
-#define BORDER_BETWEEN_EDGE_AND_IMAGE (1.0)
-#define BORDER_BETWEEN_IMAGE_AND_TEXT (0.0)
+#define BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERLESS (1.0)
+#define BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERLESS (0.0)
+#define BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERED (2.0)
+#define BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERED (-2.0)
 #define IMAGE_OFFSET (1.0)
 
 - (NSSize)cellSize {
     NSSize cellSize = [super cellSize];
-    cellSize.width += cellSize.height + BORDER_BETWEEN_EDGE_AND_IMAGE + BORDER_BETWEEN_IMAGE_AND_TEXT;
+    if ([self isBordered] || [self isBezeled])
+        cellSize.width += cellSize.height - BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERED + BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERED;
+    else
+        cellSize.width += cellSize.height - 1 + BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERLESS + BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERLESS;
     return cellSize;
 }
 
@@ -85,19 +90,32 @@
 }
 
 - (NSRect)textRectForBounds:(NSRect)aRect {
-    float imageWidth = NSHeight(aRect) - 1;
     NSRect ignored, textRect = aRect;
+    float border;
     
-    NSDivideRect(aRect, &ignored, &textRect, BORDER_BETWEEN_EDGE_AND_IMAGE + imageWidth + BORDER_BETWEEN_IMAGE_AND_TEXT, NSMinXEdge);
+    if ([self isBordered] || [self isBezeled])
+        border = NSHeight(aRect) - BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERED + BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERED;
+    else
+        border = NSHeight(aRect) - 1 + BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERLESS + BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERLESS;
+    
+    NSDivideRect(aRect, &ignored, &textRect, border, NSMinXEdge);
     
     return textRect;
 }
 
 - (NSRect)iconRectForBounds:(NSRect)aRect {
-    float imageWidth = NSHeight(aRect) - 1;
+    float border, imageWidth;
     NSRect ignored, imageRect = aRect;
     
-    NSDivideRect(aRect, &ignored, &imageRect, BORDER_BETWEEN_EDGE_AND_IMAGE, NSMinXEdge);
+    if ([self isBordered] || [self isBezeled]) {
+        border = BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERED;
+        imageWidth = NSHeight(aRect) - 2.0 * border;
+    } else {
+        border = BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERLESS;
+        imageWidth = NSHeight(aRect) - 1;
+    }
+    
+    NSDivideRect(aRect, &ignored, &imageRect, border, NSMinXEdge);
     NSDivideRect(imageRect, &imageRect, &ignored, imageWidth, NSMinXEdge);
     
     return imageRect;
@@ -112,15 +130,53 @@
     
     // Draw the image
     NSRect imageRect = [self iconRectForBounds:aRect];
-    float imageHeight = NSHeight(aRect) - 1;
+    float imageHeight;
+    if ([self isBordered] || [self isBezeled])
+        imageHeight = NSHeight(aRect) - 2.0 * BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERED;
+    else
+        imageHeight =  NSHeight(aRect) - 1;
     imageRect = BDSKCenterRectVertically(imageRect, imageHeight, [controlView isFlipped]);
-    imageRect.origin.y += [controlView isFlipped] ? -IMAGE_OFFSET : IMAGE_OFFSET;
+    if ([self isBordered] == NO && [self isBezeled] == NO)
+        imageRect.origin.y += [controlView isFlipped] ? -IMAGE_OFFSET : IMAGE_OFFSET;
     [self drawIconWithFrame:imageRect inView:controlView];
 }
 
 // this is supposed to be implemented by subclasses
 - (NSImage *)icon {
     return nil;
+}
+
+- (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength {
+    [super selectWithFrame:[self textRectForBounds:aRect] inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKConcreteIconTextFieldCell
+
+- (id)copyWithZone:(NSZone *)zone {
+    BDSKConcreteIconTextFieldCell *copy = [super copyWithZone:zone];
+    copy->icon = [icon retain];
+    return copy;
+}
+
+- (void)dealloc {
+    [icon release];
+    [super dealloc];
+}
+
+- (NSImage *)icon {
+    return icon;
+}
+
+- (void)setIcon:(NSImage *)newIcon {
+    if (icon != newIcon) {
+        [icon release];
+        icon = [newIcon retain];
+        [(NSControl *)[self controlView] updateCellInside:self];
+    }
 }
 
 @end

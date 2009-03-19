@@ -45,6 +45,7 @@
 #import "BDSKCollapsibleView.h"
 #import "BDSKEdgeView.h"
 #import "BDSKDragTextField.h"
+#import "BDSKIconTextFieldCell.h"
 #import "BDSKFieldEditor.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
@@ -52,6 +53,7 @@
 #import "BDSKBookmarkController.h"
 #import "BDSKBookmark.h"
 #import "NSMenu_BDSKExtensions.h"
+#import "NSImage_BDSKExtensions.h"
 
 #define MAX_HISTORY 50
 
@@ -200,6 +202,24 @@
     // update the buttons, we should not be retrieving at this point
     [self setRetrieving:NO];
     
+    id oldCell = [urlField cell];
+    BDSKConcreteIconTextFieldCell *cell = [[BDSKConcreteIconTextFieldCell alloc] initTextCell:[oldCell stringValue]];
+    [cell setEditable:[oldCell isEditable]];
+    [cell setSelectable:[oldCell isSelectable]];
+    [cell setEnabled:[oldCell isEnabled]];
+    [cell setScrollable:[oldCell isScrollable]];
+    [cell setWraps:[oldCell wraps]];
+    [cell setAlignment:[oldCell alignment]];
+    [cell setLineBreakMode:[oldCell lineBreakMode]];
+    [cell setBezeled:[oldCell isBezeled]];
+    [cell setBezelStyle:[oldCell bezelStyle]];
+    [cell setTarget:[oldCell target]];
+    [cell setAction:[oldCell action]];
+    [cell setSendsActionOnEndEditing:[oldCell sendsActionOnEndEditing]];
+    [cell setPlaceholderString:[oldCell placeholderString]];
+    [cell setIcon:[NSImage smallMissingFileImage]];
+    [urlField setCell:cell];
+    
     [urlField registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil]];
     
     // webview
@@ -241,6 +261,7 @@
 - (void)setURLString:(NSString *)newURLString {
     [self window];
     [urlField setStringValue:newURLString];
+    [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:[NSImage smallMissingFileImage]];
     [self changeURL:urlField];
 }
 
@@ -414,6 +435,12 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     }
 }
 
+- (void)controlTextDidBeginEditing:(NSNotification *)aNotification {
+    if ([aNotification object] == urlField) {
+        [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:[NSImage smallMissingFileImage]];
+    }
+}
+
 #pragma mark WebFrameLoadDelegate protocol
 
 - (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame{
@@ -514,6 +541,9 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     }
 }
 
+- (void)webView:(WebView *)sender didReceiveIcon:(NSImage *)image forFrame:(WebFrame *)frame{
+    [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:image];
+}
 
 #pragma mark WebUIDelegate protocol
 

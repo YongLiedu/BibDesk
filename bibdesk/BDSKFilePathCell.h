@@ -40,13 +40,7 @@
 #import "BDSKIconTextFieldCell.h"
 
 
-@interface BDSKFilePathCell : BDSKIconTextFieldCell {
-    NSImage *icon;
-}
-
-- (NSImage *)icon;
-- (void)setIcon:(NSImage *)newIcon;
-
+@interface BDSKFilePathCell : BDSKConcreteIconTextFieldCell
 @end
 
 

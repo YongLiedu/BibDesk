@@ -69,28 +69,6 @@ static BDSKFilePathFormatter *filePathFormatter = nil;
     return self;
 }
 
-- (void)dealloc {
-    [icon release];
-    [super dealloc];
-}
-
-- (id)copyWithZone:(NSZone *)zone {
-    BDSKFilePathCell *copy = [super copyWithZone:zone];
-    copy->icon = [icon retain];
-    return copy;
-}
-
-- (NSImage *)icon {
-    return icon;
-}
-
-- (void)setIcon:(NSImage *)newIcon {
-    if (newIcon != icon) {
-        [icon release];
-        icon = [newIcon retain];
-    }
-}
-
 - (void)setObjectValue:(id <NSCopying>)obj {
     [super setObjectValue:obj];
     

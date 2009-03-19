@@ -47,3 +47,11 @@
 - (NSRect)iconRectForBounds:(NSRect)aRect;
 
 @end
+
+#pragma mrk -
+
+@interface BDSKConcreteIconTextFieldCell : BDSKIconTextFieldCell {
+    NSImage *icon;
+}
+- (void)setIcon:(NSImage *)newIcon;
+@end

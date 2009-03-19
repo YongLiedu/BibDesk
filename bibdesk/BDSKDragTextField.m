@@ -76,4 +76,8 @@
 	}
 }
 
+- (void)setKeyboardFocusRingNeedsDisplayInRect:(NSRect)rect {
+    return [super setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
+}
+
 @end
