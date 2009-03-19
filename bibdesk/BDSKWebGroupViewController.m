@@ -158,6 +158,22 @@
     [downloads removeAllObjects];
 }
 
+- (void)setRetrieving:(BOOL)retrieving {
+    [group setRetrieving:retrieving];
+    [backForwardButton setEnabled:[webView canGoBack] forSegment:0];
+    [backForwardButton setEnabled:[webView canGoForward] forSegment:1];
+    [stopOrReloadButton setEnabled:YES];
+    if (retrieving) {
+        [stopOrReloadButton setImage:[NSImage imageNamed:@"StopAdorn"]];
+        [stopOrReloadButton setToolTip:NSLocalizedString(@"Cancel download", @"Tool tip message")];
+        [stopOrReloadButton setKeyEquivalent:@"."];
+    } else {
+        [stopOrReloadButton setImage:[NSImage imageNamed:@"ReloadAdorn"]];
+        [stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page", @"Tool tip message")];
+        [stopOrReloadButton setKeyEquivalent:@"r"];
+    }
+}
+
 - (void)windowDidLoad {
     // navigation views
     [collapsibleView setMinSize:[collapsibleView frame].size];
@@ -180,6 +196,9 @@
     
     [stopOrReloadButton setImagePosition:NSImageOnly];
     [stopOrReloadButton setImage:[NSImage imageNamed:@"ReloadAdorn"]];
+    
+    // update the buttons, we should not be retrieving at this point
+    [self setRetrieving:NO];
     
     [urlField registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil]];
     
@@ -296,22 +315,6 @@
     WebHistoryItem *item = [sender representedObject];
     if (item)
         [webView goToBackForwardItem:item];
-}
-
-- (void)setRetrieving:(BOOL)retrieving {
-    [group setRetrieving:retrieving];
-    [backForwardButton setEnabled:[webView canGoBack] forSegment:0];
-    [backForwardButton setEnabled:[webView canGoForward] forSegment:1];
-    [stopOrReloadButton setEnabled:YES];
-    if (retrieving) {
-        [stopOrReloadButton setImage:[NSImage imageNamed:@"StopAdorn"]];
-        [stopOrReloadButton setToolTip:NSLocalizedString(@"Cancel download", @"Tool tip message")];
-        [stopOrReloadButton setKeyEquivalent:@"."];
-    } else {
-        [stopOrReloadButton setImage:[NSImage imageNamed:@"ReloadAdorn"]];
-        [stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page", @"Tool tip message")];
-        [stopOrReloadButton setKeyEquivalent:@"r"];
-    }
 }
 
 #pragma mark NSMenu delegate protocol
