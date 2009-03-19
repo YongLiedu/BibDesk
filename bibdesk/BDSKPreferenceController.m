@@ -168,6 +168,14 @@ static id sharedController = nil;
     return [NSString stringWithFormat:NSLocalizedString(@"%@ Preferences", @""), [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"]];
 }
 
+// allow the pane to change the field editor
+- (id)windowWillReturnFieldEditor:(NSWindow *)sender toObject:(id)anObject {
+    id pane = [self selectedPane];
+    if ([pane respondsToSelector:_cmd])
+        return [pane windowWillReturnFieldEditor:sender toObject:anObject];
+    return nil;
+}
+
 #pragma mark Actions
 
 - (void)revertPaneSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
