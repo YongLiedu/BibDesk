@@ -690,6 +690,12 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+- (id)windowWillReturnFieldEditor:(NSWindow *)sender toObject:(id)anObject {
+    if ([self isDisplayingWebGroupView] && [[self webGroupViewController] respondsToSelector:_cmd])
+        return [[self webGroupViewController] windowWillReturnFieldEditor:sender toObject:anObject];
+    return nil;
+}
+
 // returns empty dictionary if no attributes set
 - (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes {
     if (mainWindowSetupDictionary == nil) {

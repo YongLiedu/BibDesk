@@ -149,6 +149,7 @@
     [group release];
     [undoManager release];
     [downloads release];
+    [fieldEditor release];
     [super dealloc];
 }
 
@@ -336,11 +337,14 @@
 #pragma mark TextField delegates
 
 - (id)windowWillReturnFieldEditor:(NSWindow *)sender toObject:(id)anObject {
-	if (fieldEditor == nil) {
-		fieldEditor = [[BDSKFieldEditor alloc] init];
-        // we could support dragging here as well, but NSTextView already handles URLs, and it's probably better not to commit when we're editing
+    if (anObject == urlField) {
+        if (fieldEditor == nil) {
+            fieldEditor = [[BDSKFieldEditor alloc] init];
+            // we could support dragging here as well, but NSTextView already handles URLs, and it's probably better not to commit when we're editing
+        }
+        return fieldEditor;
 	}
-	return fieldEditor;
+    return nil;
 }
 
 - (NSDragOperation)dragTextField:(BDSKDragTextField *)textField validateDrop:(id <NSDraggingInfo>)sender {
@@ -367,7 +371,7 @@
 }
 
 - (BOOL)control:(NSControl *)control textViewShouldAutoComplete:(NSTextView *)textView {
-    return YES;
+    return control == urlField;
 }
 
 - (NSRange)control:(NSControl *)control textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
