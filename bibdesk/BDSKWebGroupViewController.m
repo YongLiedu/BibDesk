@@ -422,8 +422,11 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
         [group setPublications:nil];
         loadingWebFrame = frame;
         
-        NSString *url = [[[[frame provisionalDataSource] request] URL] absoluteString];
-        [urlField setStringValue:url];
+        WebDataSource *dataSource = [frame provisionalDataSource];
+        if ([dataSource unreachableURL] == nil) {
+            NSString *url = [[[dataSource request] URL] absoluteString];
+            [urlField setStringValue:url];
+        }
         
     } else if (loadingWebFrame == nil) {
         
@@ -482,6 +485,10 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
         [self setRetrieving:NO];
         [group addPublications:nil];
         loadingWebFrame = nil;
+        
+        NSURL *url = [[[frame provisionalDataSource] request] URL];
+        NSString *errorHTML = [NSString stringWithFormat:@"<html><body><h1>%@</h1></body></html>", [error localizedDescription]];
+        [frame loadAlternateHTMLString:errorHTML baseURL:nil forUnreachableURL:url];
     }
 }
 
