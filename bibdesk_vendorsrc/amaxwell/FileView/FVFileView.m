@@ -73,22 +73,19 @@ static char _FVFileViewContentObservationContext;
 #define SELECTIONINDEXES_KEY @"selectionIndexes"
 #define ICONSCALE_KEY @"iconScale"
 
-static const NSSize DEFAULT_ICON_SIZE = { 64.0, 64.0 };
-static const NSSize DEFAULT_PADDING = { 10.0, 4.0 };
-static const CGFloat DEFAULT_MARGIN = 4.0;
-static const CGFloat TEXT_OFFSET = 2.0;
+#define DEFAULT_ICON_SIZE ((NSSize) { 64.0, 64.0 })
+#define DEFAULT_PADDING ((NSSize) { 10.0, 4.0 })
+#define DEFAULT_MARGIN ((CGFloat) 4.0)
+#define TEXT_OFFSET ((CGFloat) 2.0)
 
 // don't bother removing icons from the cache if there are fewer than this value
-static const NSUInteger ZOMBIE_CACHE_THRESHOLD = 100;
-
-// thin the icons if we have more than this value; 25 is a good value, but 5 is good for cache testing
-static const NSUInteger RELEASE_CACHE_THRESHOLD = 25;
+#define ZOMBIE_CACHE_THRESHOLD 100L
 
 // check the icon cache every five minutes and get rid of stale icons
-static const CFTimeInterval ZOMBIE_TIMER_INTERVAL = 300.0;
+#define ZOMBIE_TIMER_INTERVAL 60.0
 
 // time interval for indeterminate download progress indicator updates
-static const CFTimeInterval PROGRESS_TIMER_INTERVAL = 0.1;
+#define PROGRESS_TIMER_INTERVAL 0.1
 
 static NSDictionary *_titleAttributes = nil;
 static NSDictionary *_labeledAttributes = nil;
