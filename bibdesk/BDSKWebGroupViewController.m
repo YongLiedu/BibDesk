@@ -401,9 +401,10 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 
 - (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(NSInteger *)anIndex {
     if (control == urlField) {
-        BDSKBookmark *bookmark = [[BDSKBookmarkController sharedBookmarkController] bookmarkRoot];
         NSMutableArray *matches = [NSMutableArray array];
-        addMatchesFromBookmarks(matches, bookmark, [textView string]);
+        NSString *string = [textView string];
+        if ([@"http://" hasPrefix:string] || [@"https://" hasPrefix:string])
+            addMatchesFromBookmarks(matches, [[BDSKBookmarkController sharedBookmarkController] bookmarkRoot], string);
         return matches;
     } else {
         return words;
