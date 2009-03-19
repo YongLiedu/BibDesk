@@ -45,10 +45,12 @@
 #import "BDSKCollapsibleView.h"
 #import "BDSKEdgeView.h"
 #import "BDSKDragTextField.h"
+#import "BDSKFieldEditor.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BibDocument.h"
 #import "BDSKBookmarkController.h"
+#import "BDSKBookmark.h"
 #import "NSMenu_BDSKExtensions.h"
 
 #define MAX_HISTORY 50
@@ -331,7 +333,15 @@
     }
 }
 
-#pragma mark Dragging support
+#pragma mark TextField delegates
+
+- (id)windowWillReturnFieldEditor:(NSWindow *)sender toObject:(id)anObject {
+	if (fieldEditor == nil) {
+		fieldEditor = [[BDSKFieldEditor alloc] init];
+        // we could support dragging here as well, but NSTextView already handles URLs, and it's probably better not to commit when we're editing
+	}
+	return fieldEditor;
+}
 
 - (NSDragOperation)dragTextField:(BDSKDragTextField *)textField validateDrop:(id <NSDraggingInfo>)sender {
     NSPasteboard *pboard = [sender draggingPasteboard];
@@ -354,6 +364,46 @@
         return YES;
     }
     return NO;
+}
+
+- (BOOL)control:(NSControl *)control textViewShouldAutoComplete:(NSTextView *)textView {
+    return YES;
+}
+
+- (NSRange)control:(NSControl *)control textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
+    if (control == urlField) {
+        // always complete the whole string
+        return NSMakeRange(0, [[textView string] length]);
+    } else {
+        return charRange;
+    }
+}
+
+static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookmark *bookmark, NSString *string) {
+    if ([bookmark bookmarkType] == BDSKBookmarkTypeBookmark) {
+        NSURL *url = [bookmark URL];
+        NSString *urlString = [url absoluteString];
+        unsigned int loc = [urlString rangeOfString:string options:NSCaseInsensitiveSearch].location;
+        if (loc == NSNotFound && [string rangeOfString:@"//:"].length == 0)
+            loc = [urlString rangeOfString:[@"www." stringByAppendingString:string] options:NSCaseInsensitiveSearch].location;
+        if (loc <= [[url scheme] length] + 3)
+            [bookmarks addObject:urlString];
+    } else if ([bookmark bookmarkType] == BDSKBookmarkTypeFolder) {
+        unsigned int i, iMax = [bookmark countOfChildren];
+        for (i = 0; i < iMax; i++)
+            addMatchesFromBookmarks(bookmarks, [bookmark objectInChildrenAtIndex:i], string);
+    }
+}
+
+- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(NSInteger *)anIndex {
+    if (control == urlField) {
+        BDSKBookmark *bookmark = [[BDSKBookmarkController sharedBookmarkController] bookmarkRoot];
+        NSMutableArray *matches = [NSMutableArray array];
+        addMatchesFromBookmarks(matches, bookmark, [textView string]);
+        return matches;
+    } else {
+        return words;
+    }
 }
 
 #pragma mark WebFrameLoadDelegate protocol
