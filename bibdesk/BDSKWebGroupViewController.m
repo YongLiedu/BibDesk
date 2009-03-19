@@ -372,10 +372,10 @@
 }
 
 - (NSDragOperation)dragTextField:(BDSKDragTextField *)textField validateDrop:(id <NSDraggingInfo>)sender {
-    NSPasteboard *pboard = [sender draggingPasteboard];
-	NSString *dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]];
-    
-    return dragType ? NSDragOperationEvery : NSDragOperationNone;
+    if ([sender draggingSource] != textField && 
+        [[sender draggingPasteboard] availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]])
+        return NSDragOperationEvery;
+    return NSDragOperationNone;
 }
 
 - (BOOL)dragTextField:(BDSKDragTextField *)textField acceptDrop:(id <NSDraggingInfo>)sender {
@@ -389,6 +389,16 @@
         url = [NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]];
     if (url) {
         [self setURLString:[url absoluteString]];
+        return YES;
+    }
+    return NO;
+}
+
+- (BOOL)dragTextField:(BDSKDragTextField *)textField writeDataToPasteboard:(NSPasteboard *)pboard {
+    NSURL *url = [NSURL URLWithString:[textField stringValue]];
+    if (url) {
+        [pboard declareTypes:[NSArray arrayWithObjects:NSURLPboardType, nil] owner:nil];
+        [url writeToPasteboard:pboard];
         return YES;
     }
     return NO;

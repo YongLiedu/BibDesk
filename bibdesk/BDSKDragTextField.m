@@ -37,6 +37,7 @@
  */
 
 #import "BDSKDragTextField.h"
+#import "BDSKIconTextFieldCell.h"
 #import "NSBezierPath_BDSKExtensions.h"
 
 
@@ -78,6 +79,74 @@
 
 - (void)setKeyboardFocusRingNeedsDisplayInRect:(NSRect)rect {
     return [super setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
+}
+
+- (void)mouseDown:(NSEvent *)theEvent {
+    if ([[self cell] respondsToSelector:@selector(iconRectForBounds:)] && [[self delegate] respondsToSelector:@selector(dragTextField:writeDataToPasteboard:)]) {
+        NSRect iconRect = [[self cell] iconRectForBounds:[self bounds]];
+        NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+        if (NSMouseInRect(mouseLoc, iconRect, [self isFlipped])) {
+            [[self cell] highlight:YES withFrame:iconRect inView:self];
+            NSEvent *nextEvent = [[self window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
+            [[self cell] highlight:NO withFrame:iconRect inView:self];
+            
+            if (NSLeftMouseDragged == [nextEvent type]) {
+                NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
+                
+                if ([[self delegate] dragTextField:self writeDataToPasteboard:pboard]) {
+               
+                    NSImage *dragImage = nil;
+                    NSSize imageSize = NSZeroSize;
+                    NSPoint dragPoint = NSZeroPoint;
+                    if ([[self delegate] respondsToSelector:@selector(dragImageForDragTextField:)]) {
+                        dragImage = [[self delegate] dragImageForDragTextField:self];
+                        imageSize = [dragImage size];
+                    }
+                    if (dragImage == nil) {
+                        NSImage *image = nil;
+                        if ([[self cell] respondsToSelector:@selector(drawIconWithFrame:inView:)]) {
+                            NSRect rect = [[self cell] iconRectForBounds:[self bounds]];
+                            dragPoint = rect.origin;
+                            if ([self isFlipped])
+                                dragPoint.y += NSHeight(rect);
+                            rect.origin = NSZeroPoint;
+                            image = [[[NSImage alloc] initWithSize:rect.size] autorelease];
+                            [image lockFocus];
+                            [[self cell] drawIconWithFrame:rect inView:nil];
+                            [image unlockFocus];
+                        } else if ([[self cell] respondsToSelector:@selector(icon)]) {
+                            image = [[self cell] icon];
+                            imageSize = [image size];
+                            dragPoint = NSMakePoint(mouseLoc.x - 0.5 * imageSize.width, mouseLoc.y - 0.5 * imageSize.height);
+                            if ([self isFlipped])
+                                dragPoint.y += imageSize.height;
+                        }
+                        if (image == nil) {
+                            NSRect rect = [self bounds];
+                            dragPoint = rect.origin;
+                            if ([self isFlipped])
+                                dragPoint.y += NSHeight(rect);
+                            rect.origin = NSZeroPoint;
+                            image = [[[NSImage alloc] initWithSize:rect.size] autorelease];
+                            [image lockFocus];
+                            [[[self cell] backgroundColor] setFill];
+                            NSRectFill(rect);
+                            [[self cell] drawInteriorWithFrame:rect inView:nil];
+                            [image unlockFocus];
+                        }
+                        imageSize = [image size];
+                        dragImage = [[[NSImage alloc] initWithSize:imageSize] autorelease];
+                        [dragImage lockFocus];
+                        [image compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:0.7];
+                        [dragImage unlockFocus];
+                    }
+                    [self dragImage:dragImage at:dragPoint offset:NSZeroSize event:theEvent pasteboard:pboard source:self slideBack:YES]; 
+                }
+            }
+            return;
+        }
+    }
+    [super mouseDown:theEvent];
 }
 
 @end
