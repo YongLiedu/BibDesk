@@ -27,6 +27,10 @@
 		CE05D4760D7B36DD0034C2A8 /* FVPlaceholderImage.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D46F0D7B36DD0034C2A8 /* FVPlaceholderImage.m */; };
 		CE05D5A20D7C10FD0034C2A8 /* FVSlider.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D5A00D7C10FD0034C2A8 /* FVSlider.h */; };
 		CE05D5A30D7C10FD0034C2A8 /* FVSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D5A10D7C10FD0034C2A8 /* FVSlider.m */; };
+		CE65FC5C0F72578D0089F9DC /* _FVMappedDataProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = CE65FC580F72578D0089F9DC /* _FVMappedDataProvider.h */; };
+		CE65FC5D0F72578D0089F9DC /* _FVMappedDataProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = CE65FC590F72578D0089F9DC /* _FVMappedDataProvider.m */; };
+		CE65FC5E0F72578D0089F9DC /* _FVSplitSet.h in Headers */ = {isa = PBXBuildFile; fileRef = CE65FC5A0F72578D0089F9DC /* _FVSplitSet.h */; };
+		CE65FC5F0F72578D0089F9DC /* _FVSplitSet.m in Sources */ = {isa = PBXBuildFile; fileRef = CE65FC5B0F72578D0089F9DC /* _FVSplitSet.m */; };
 		CE8923300D7CBB0C006D514C /* FVConcreteOperationQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D5D40D7C223E0034C2A8 /* FVConcreteOperationQueue.h */; };
 		CE8923310D7CBB0D006D514C /* FVConcreteOperationQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D5D50D7C223E0034C2A8 /* FVConcreteOperationQueue.m */; };
 		CE8923320D7CBB0E006D514C /* FVMainThreadOperationQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D5CE0D7C223E0034C2A8 /* FVMainThreadOperationQueue.h */; };
@@ -211,6 +215,10 @@
 		CE05D5E70D7C22550034C2A8 /* FVInvocationOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVInvocationOperation.m; sourceTree = "<group>"; };
 		CE05D5E80D7C22550034C2A8 /* FVOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVOperation.h; sourceTree = "<group>"; };
 		CE05D5E90D7C22550034C2A8 /* FVOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVOperation.m; sourceTree = "<group>"; };
+		CE65FC580F72578D0089F9DC /* _FVMappedDataProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _FVMappedDataProvider.h; sourceTree = "<group>"; };
+		CE65FC590F72578D0089F9DC /* _FVMappedDataProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _FVMappedDataProvider.m; sourceTree = "<group>"; };
+		CE65FC5A0F72578D0089F9DC /* _FVSplitSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _FVSplitSet.h; sourceTree = "<group>"; };
+		CE65FC5B0F72578D0089F9DC /* _FVSplitSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _FVSplitSet.m; sourceTree = "<group>"; };
 		CEA831120DC1FAB500B551D1 /* FVAccessibilityIconElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVAccessibilityIconElement.h; sourceTree = "<group>"; };
 		CEA831130DC1FAB500B551D1 /* FVAccessibilityIconElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVAccessibilityIconElement.m; sourceTree = "<group>"; };
 		CEFC19B00F693E8B00B2AEE6 /* FileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileView.h; sourceTree = "<group>"; };
@@ -505,6 +513,10 @@
 			children = (
 				CEFC1CE90F6AB84000B2AEE6 /* _FVDocumentDescription.h */,
 				CEFC1CEA0F6AB84000B2AEE6 /* _FVDocumentDescription.m */,
+				CE65FC580F72578D0089F9DC /* _FVMappedDataProvider.h */,
+				CE65FC590F72578D0089F9DC /* _FVMappedDataProvider.m */,
+				CE65FC5A0F72578D0089F9DC /* _FVSplitSet.h */,
+				CE65FC5B0F72578D0089F9DC /* _FVSplitSet.m */,
 				CEFC1CEF0F6AB84000B2AEE6 /* FVCacheFile.h */,
 				CEFC1CF00F6AB84000B2AEE6 /* FVCacheFile.mm */,
 				CEFC1CF10F6AB84000B2AEE6 /* FVCGColorSpaceDescription.h */,
@@ -743,6 +755,8 @@
 				CEFC1D2A0F6ABA2300B2AEE6 /* FVAliasBadge.h in Headers */,
 				CEFC1D2B0F6ABA2300B2AEE6 /* FVBaseIcon.h in Headers */,
 				CEFC1D2F0F6ABA3C00B2AEE6 /* FVCoreTextIcon.h in Headers */,
+				CE65FC5C0F72578D0089F9DC /* _FVMappedDataProvider.h in Headers */,
+				CE65FC5E0F72578D0089F9DC /* _FVSplitSet.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -911,6 +925,8 @@
 				CEFC1D2C0F6ABA2300B2AEE6 /* FVBaseIcon.m in Sources */,
 				CEFC1D300F6ABA3C00B2AEE6 /* FVCoreTextIcon.m in Sources */,
 				CEFC1F6E0F6AD4B300B2AEE6 /* FVQuickLookIcon.m in Sources */,
+				CE65FC5D0F72578D0089F9DC /* _FVMappedDataProvider.m in Sources */,
+				CE65FC5F0F72578D0089F9DC /* _FVSplitSet.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

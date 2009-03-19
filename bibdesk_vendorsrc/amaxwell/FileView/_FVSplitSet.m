@@ -1,10 +1,10 @@
 //
-//  FVPDFIcon.h
+//  _FVSplitSet.m
 //  FileView
 //
-//  Created by Adam Maxwell on 10/21/07.
+//  Created by Adam Maxwell on 7/14/08.
 /*
- This software is Copyright (c) 2007-2009
+ This software is Copyright (c) 2008-2009
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -36,29 +36,54 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
-#import "FVBaseIcon.h"
+#import "_FVSplitSet.h"
 
-@interface FVPDFIcon : FVBaseIcon
+
+@implementation _FVSplitSet
+
+- (id)initWithSplit:(NSUInteger)split
 {
-@private
-    CGPDFDocumentRef  _pdfDoc;
-    BOOL              _isMapped;
-    CGPDFPageRef      _pdfPage;
-    NSSize            _fullSize;
-    CGImageRef        _thumbnail;
-    NSSize            _thumbnailSize;
-    NSSize            _desiredSize;
-    NSUInteger        _currentPage;
-    NSUInteger        _pageCount;
+    NSParameterAssert(split > 0);
+    self = [super init];
+    if (self) {
+        _old = CFSetCreateMutable(CFAllocatorGetDefault(), 0, NULL);
+        _new = CFSetCreateMutable(CFAllocatorGetDefault(), split, NULL);
+        _split = split;
+    }
+    return self;
 }
-@end
 
-@interface FVPDFDIcon : FVPDFIcon
-@end
+- (id)init { return [self initWithSplit:100]; }
 
-@interface FVPostScriptIcon : FVPDFIcon
+- (void)dealloc
 {
-    BOOL _converted;
+    CFRelease(_old);
+    CFRelease(_new);
+    [super dealloc];
 }
+
+- (NSUInteger)split { return _split; }
+
+- (void)addObject:(id)obj
+{
+    if (_split == (NSUInteger)CFSetGetCount(_new)) {
+        [(NSMutableSet *)_old unionSet:(NSSet *)_new];
+        CFSetRemoveAllValues(_new);
+    }
+    CFSetAddValue(_new, obj);
+    CFSetRemoveValue(_old, obj);
+}
+
+- (void)removeObject:(id)obj
+{
+    CFSetRemoveValue(_new, obj);
+    CFSetRemoveValue(_old, obj);
+}
+
+- (void)removeOldObjects { CFSetRemoveAllValues(_old); }
+
+- (NSSet *)copyOldObjects { return (NSSet *)CFSetCreateCopy(CFGetAllocator(_old), _old); }
+
+- (NSUInteger)count { return CFSetGetCount(_old) + CFSetGetCount(_new); }
+
 @end

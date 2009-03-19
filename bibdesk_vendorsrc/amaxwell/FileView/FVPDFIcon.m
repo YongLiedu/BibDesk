@@ -38,15 +38,21 @@
 
 #import "FVPDFIcon.h"
 #import <libkern/OSAtomic.h>
+
+#import "_FVMappedDataProvider.h"
+#import "_FVSplitSet.h"
 #import "_FVDocumentDescription.h"
 
-static CGLayerRef _pageLayer = NULL;
+static OSSpinLock   _releaseLock = OS_SPINLOCK_INIT;
+static _FVSplitSet *_releaseableIcons = nil;
+static CGLayerRef   _pageLayer = NULL;
 
 @implementation FVPDFIcon
 
 + (void)initialize
 {
     FVINITIALIZE(FVPDFIcon);
+    _releaseableIcons = [_FVSplitSet new];
     
     const CGSize layerSize = { 1, 1 };
     CGContextRef context = [FVWindowGraphicsContextWithSize(NSSizeFromCGSize(layerSize)) graphicsPort];
@@ -70,6 +76,32 @@ static CGLayerRef _pageLayer = NULL;
     CGContextFillRect(context, pageRect);
 }
 
++ (void)_addIconForMappedRelease:(FVPDFIcon *)anIcon;
+{
+    OSSpinLockLock(&_releaseLock);
+    [_releaseableIcons addObject:anIcon];
+    NSSet *oldObjects = nil;
+    if ([_FVMappedDataProvider maxSizeExceeded] || [_releaseableIcons count] >= [_releaseableIcons split] * 2) {
+        // copy inside the lock, then perform the slower makeObjectsPerformSelector: operation outside of it
+        oldObjects = [_releaseableIcons copyOldObjects];
+        // remove the first 100 objects, since the recently added ones are more likely to be needed again (scrolling up and down)
+        [_releaseableIcons removeOldObjects];
+    }
+    OSSpinLockUnlock(&_releaseLock);
+    
+    if (oldObjects) {
+        [oldObjects makeObjectsPerformSelector:@selector(_releaseMappedResources)];
+        [oldObjects release];
+    }
+}
+
++ (void)_removeIconForMappedRelease:(FVPDFIcon *)anIcon;
+{
+    OSSpinLockLock(&_releaseLock);
+    [_releaseableIcons removeObject:anIcon];
+    OSSpinLockUnlock(&_releaseLock);    
+}
+
 - (id)initWithURL:(NSURL *)aURL;
 {
     NSParameterAssert([aURL isFileURL]);
@@ -81,6 +113,7 @@ static CGLayerRef _pageLayer = NULL;
         _thumbnailSize = _fullSize;
 
         _pdfDoc = NULL;
+        _isMapped = NO;
         _pdfPage = NULL;
         _thumbnail = NULL;
         _desiredSize = NSZeroSize;
@@ -96,6 +129,8 @@ static CGLayerRef _pageLayer = NULL;
 
 - (void)dealloc
 {
+    [[self class] _removeIconForMappedRelease:self];
+    if (_pdfDoc && _isMapped) [_FVMappedDataProvider releaseProviderForURL:_fileURL];
     CGImageRelease(_thumbnail);
     CGPDFDocumentRelease(_pdfDoc);
     [super dealloc];
@@ -108,14 +143,29 @@ static CGLayerRef _pageLayer = NULL;
     return (NULL != _thumbnail || NULL != _pdfPage);
 }
 
+- (void)_releaseMappedResources
+{
+    if ([self tryLock]) {
+    
+        if (NULL != _pdfDoc) {
+            _pdfPage = NULL;
+            if (_isMapped) [_FVMappedDataProvider releaseProviderForURL:_fileURL];
+            CGPDFDocumentRelease(_pdfDoc);
+            _pdfDoc = NULL;
+        }
+        [self unlock];
+    }
+}
+
 - (void)releaseResources 
 {
+    // don't lock for this since it may call _releaseMappedResources immediately and deadlock (and the lock isn't needed anyway)
+    if (_pdfDoc) 
+        [[self class] _addIconForMappedRelease:self];
+    
     if ([self tryLock]) {
         CGImageRelease(_thumbnail);
         _thumbnail = NULL;
-        _pdfPage = NULL;
-        CGPDFDocumentRelease(_pdfDoc);
-        _pdfDoc = NULL;
         [self unlock];
     }
 }
@@ -173,11 +223,17 @@ static bool __FVPDFIconLimitThumbnailSize(NSSize *size)
 
 - (CGPDFDocumentRef)_newPDFDocument
 {
-    NSData *data = [[NSData alloc] initWithContentsOfURL:_fileURL];
-    CGDataProviderRef provider = data ?  CGDataProviderCreateWithCFData((CFDataRef)data) : NULL;
-    CGPDFDocumentRef document = provider ? CGPDFDocumentCreateWithProvider(provider) : NULL;
-    CGDataProviderRelease(provider);
-    [data release];
+    CGPDFDocumentRef document = NULL;
+    if (FVCanMapFileAtURL(_fileURL))
+        document = CGPDFDocumentCreateWithProvider([_FVMappedDataProvider newDataProviderForURL:_fileURL]);
+    
+    if (document) {
+        _isMapped = YES;
+    }
+    else {
+        _isMapped = NO;
+        document = CGPDFDocumentCreateWithURL((CFURLRef)_fileURL);
+    }
     return document;
 }
 
@@ -347,6 +403,7 @@ static bool __FVPDFIconLimitThumbnailSize(NSSize *size)
 
 - (BOOL)needsRenderForSize:(NSSize)size 
 {
+    [[self class] _removeIconForMappedRelease:self];
     BOOL needsRender = NO;
     if ([self tryLock]) {
         // tells the render method if work is needed

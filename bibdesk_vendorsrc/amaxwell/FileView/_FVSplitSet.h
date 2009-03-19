@@ -1,8 +1,8 @@
 //
-//  FVPDFIcon.h
+//  _FVSplitSet.h
 //  FileView
 //
-//  Created by Adam Maxwell on 10/21/07.
+//  Created by Adam Maxwell on 7/14/08.
 /*
  This software is Copyright (c) 2007-2009
  Adam Maxwell. All rights reserved.
@@ -37,28 +37,21 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "FVBaseIcon.h"
 
-@interface FVPDFIcon : FVBaseIcon
+
+@interface _FVSplitSet : NSObject
 {
-@private
-    CGPDFDocumentRef  _pdfDoc;
-    BOOL              _isMapped;
-    CGPDFPageRef      _pdfPage;
-    NSSize            _fullSize;
-    CGImageRef        _thumbnail;
-    NSSize            _thumbnailSize;
-    NSSize            _desiredSize;
-    NSUInteger        _currentPage;
-    NSUInteger        _pageCount;
+    CFMutableSetRef _old;
+    CFMutableSetRef _new;
+    NSUInteger      _split;
 }
-@end
 
-@interface FVPDFDIcon : FVPDFIcon
-@end
+- (id)initWithSplit:(NSUInteger)split;
+- (NSUInteger)split;
+- (void)addObject:(id)obj;
+- (void)removeObject:(id)obj;
+- (void)removeOldObjects;
+- (NSSet *)copyOldObjects;
+- (NSUInteger)count;
 
-@interface FVPostScriptIcon : FVPDFIcon
-{
-    BOOL _converted;
-}
 @end
