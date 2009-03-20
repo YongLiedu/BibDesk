@@ -86,9 +86,7 @@
         NSRect iconRect = [[self cell] iconRectForBounds:[self bounds]];
         NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
         if (NSMouseInRect(mouseLoc, iconRect, [self isFlipped])) {
-            [[self cell] highlight:YES withFrame:iconRect inView:self];
             NSEvent *nextEvent = [[self window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
-            [[self cell] highlight:NO withFrame:iconRect inView:self];
             
             if (NSLeftMouseDragged == [nextEvent type]) {
                 NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
@@ -129,8 +127,6 @@
                             rect.origin = NSZeroPoint;
                             image = [[[NSImage alloc] initWithSize:rect.size] autorelease];
                             [image lockFocus];
-                            [[[self cell] backgroundColor] setFill];
-                            NSRectFill(rect);
                             [[self cell] drawInteriorWithFrame:rect inView:nil];
                             [image unlockFocus];
                         }
