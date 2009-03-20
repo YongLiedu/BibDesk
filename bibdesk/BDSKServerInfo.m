@@ -88,11 +88,6 @@
     return self;
 }
 
-- (id)initWithType:(NSString *)aType name:(NSString *)aName database:(NSString *)aDbase host:(NSString *)aHost port:(NSString *)aPort;
-{
-    return [self initWithType:aType name:aName database:aDbase host:aHost port:aPort options:[NSDictionary dictionary]];
-}
-
 - (id)initWithType:(NSString *)aType dictionary:(NSDictionary *)info;
 {    
     self = [self initWithType:aType ?: [info objectForKey:@"type"]

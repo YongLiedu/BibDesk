@@ -57,7 +57,6 @@ enum {
 + (id)defaultServerInfoWithType:(NSString *)aType;
 
 - (id)initWithType:(NSString *)aType name:(NSString *)aName database:(NSString *)aDbase host:(NSString *)aHost port:(NSString *)aPort options:(NSDictionary *)options;
-- (id)initWithType:(NSString *)aType name:(NSString *)aName database:(NSString *)aDbase host:(NSString *)aHost port:(NSString *)aPort;
 
 - (id)initWithType:(NSString *)aType dictionary:(NSDictionary *)info;
 
