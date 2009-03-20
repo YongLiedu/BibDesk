@@ -129,19 +129,27 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 }
 
 - (BOOL)isEqual:(id)other {
-    BOOL isEqual = NO;
+    BOOL isEqual = YES;
     // we don't compare the name, as that is just a label
-    if ([self isMemberOfClass:[other class]] == NO || [[self type] isEqualToString:[(BDSKServerInfo *)other type]] == NO)
-        isEqual = NO;
-    else if (isEqualOrBothNil([self database], [other database]))
+    if ([self isKindOfClass:[BDSKServerInfo self]] == NO ||
+        [[self type] isEqualToString:[(BDSKServerInfo *)other type]] == NO ||
+        isEqualOrBothNil([self database], [other database]) == NO)
         isEqual = NO;
     else if ([self isZoom])
         isEqual = isEqualOrBothNil([self host], [other host]) && 
                   isEqualOrBothNil([self port], [(BDSKServerInfo *)other port]) && 
-                  isEqualOrBothNil([self password], [other password]) && 
-                  isEqualOrBothNil([self username], [other username]) && 
                   (isEqualOrBothNil([self options], [(BDSKServerInfo *)other options]) || ([[self options] count] == 0 && [[(BDSKServerInfo *)other options] count] == 0));
     return isEqual;
+}
+
+- (unsigned int)hash {
+    unsigned int hash = [[self type] hash] + [[self database] hash];
+    if ([self isZoom]) {
+        hash += [[self host] hash] + [[self port] hash] + [[self password] hash];
+        if ([options count])
+            hash += [[self options] hash];
+    }
+    return hash;
 }
 
 - (NSDictionary *)dictionaryValue {
