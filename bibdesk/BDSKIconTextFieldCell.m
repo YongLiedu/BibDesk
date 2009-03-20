@@ -70,8 +70,6 @@
     NSImage *img = [self icon];
     
     if (nil != img) {
-        img = [img highlightedImage];
-        
         NSRect srcRect = NSZeroRect;
         srcRect.size = [img size];
         
