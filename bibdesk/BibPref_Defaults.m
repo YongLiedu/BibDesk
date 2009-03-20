@@ -193,7 +193,9 @@ static NSSet *alwaysDisabledFields = nil;
     int i, iMax = [pdfViewers count];
     int idx = 0;
     
-    [pdfViewerPopup removeAllItems];
+    while ([pdfViewerPopup numberOfItems] > 4)
+        [pdfViewerPopup removeItemAtIndex:2];
+    
     for(i = 0; i < iMax; i++){
         NSDictionary *dict = [pdfViewers objectAtIndex:i];
         NSString *bundleID = [dict objectForKey:@"bundleID"];
