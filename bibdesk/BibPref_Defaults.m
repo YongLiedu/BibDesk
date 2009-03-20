@@ -187,6 +187,21 @@ static NSSet *alwaysDisabledFields = nil;
 }
 
 - (void)updateUI {
+    [convertURLFieldsButton setState:[sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey] ? NSOnState : NSOffState];
+    [removeLocalFileFieldsButton setState:[sud boolForKey:BDSKRemoveConvertedLocalFileFieldsKey] ? NSOnState : NSOffState];
+    [removeRemoteURLFieldsButton setState:[sud boolForKey:BDSKRemoveConvertedRemoteURLFieldsKey] ? NSOnState : NSOffState];
+	[removeLocalFileFieldsButton setEnabled:[sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey]];
+	[removeRemoteURLFieldsButton setEnabled:[sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey]];
+    
+    [self updateDeleteButton];
+}
+
+- (void)awakeFromNib{
+    BDSKFieldNameFormatter *fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
+    [[[[defaultFieldsTableView tableColumns] objectAtIndex:0] dataCell] setFormatter:fieldNameFormatter];
+    [fieldNameFormatter release];
+    [globalMacroFilesTableView registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
+    
     NSWorkspace *sws = [NSWorkspace sharedWorkspace];
     NSArray *pdfViewers = [[NSWorkspace sharedWorkspace] editorAndViewerNamesAndBundleIDsForPathExtension:@"pdf"];
     NSString *pdfViewerID = [[sud dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
@@ -215,21 +230,6 @@ static NSSet *alwaysDisabledFields = nil;
     
     [pdfViewerPopup selectItemAtIndex:idx];
     
-    [convertURLFieldsButton setState:[sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey] ? NSOnState : NSOffState];
-    [removeLocalFileFieldsButton setState:[sud boolForKey:BDSKRemoveConvertedLocalFileFieldsKey] ? NSOnState : NSOffState];
-    [removeRemoteURLFieldsButton setState:[sud boolForKey:BDSKRemoveConvertedRemoteURLFieldsKey] ? NSOnState : NSOffState];
-	[removeLocalFileFieldsButton setEnabled:[sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey]];
-	[removeRemoteURLFieldsButton setEnabled:[sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey]];
-    
-    [self updateDeleteButton];
-}
-
-- (void)awakeFromNib{
-    BDSKFieldNameFormatter *fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
-    [[[[defaultFieldsTableView tableColumns] objectAtIndex:0] dataCell] setFormatter:fieldNameFormatter];
-    [fieldNameFormatter release];
-    [globalMacroFilesTableView registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
-    
     [self updateUI];
 }
 
@@ -240,6 +240,8 @@ static NSSet *alwaysDisabledFields = nil;
     // reset UI, but only if we loaded the nib
     if ([self isWindowLoaded]) {
         [self updateUI];
+        // we should use the default viewer by default
+        [pdfViewerPopup selectItemAtIndex:0];
         [globalMacroFilesTableView reloadData];
         [defaultFieldsTableView reloadData];
     }
