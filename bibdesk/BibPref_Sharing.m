@@ -92,6 +92,14 @@
 - (void)defaultsDidRevert {
     // always clear the password, as that's not set in our prefs, and always send the notifications
     [BDSKPasswordController addOrModifyPassword:@"" name:BDSKServiceNameForKeychain userName:nil];
+    if ([sud boolForKey:BDSKShouldLookForSharedFilesKey])
+        [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
+    else
+        [[BDSKSharingBrowser sharedBrowser] disableSharedBrowsing];
+    if ([sud boolForKey:BDSKShouldShareFilesKey])
+        [[BDSKSharingServer defaultServer] enableSharing];
+    else
+        [[BDSKSharingServer defaultServer] disableSharing];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingPasswordChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingNameChangedNotification object:self];
     // reset UI, but only if we loaded the nib
