@@ -180,7 +180,10 @@ static id sharedController = nil;
 
 - (void)revertPaneSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertDefaultReturn) {
-        [[self selectedPane] revertDefaults];
+        NSDictionary *initialValues = [[self selectedPane] initialValues];
+        if ([initialValues count])
+            [[[NSUserDefaultsController sharedUserDefaultsController] values] setValuesForKeysWithDictionary:initialValues];
+        [[self selectedPane] defaultsDidRevert];
     }
 }
 
@@ -205,6 +208,7 @@ static id sharedController = nil;
         NSTimeInterval interval = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"SUScheduledCheckInterval"] doubleValue];
         [[SUUpdater sharedUpdater] setUpdateCheckInterval:interval];
         [[SUUpdater sharedUpdater] setAutomaticallyChecksForUpdates:interval > 0.0];
+        [[panes allValues] makeObjectsPerformSelector:@selector(defaultsDidRevert)];
     }
 }
 

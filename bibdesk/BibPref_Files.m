@@ -64,6 +64,19 @@
     [useTemplateFileButton setState:[sud boolForKey:BDSKShouldUseTemplateFileKey] ? NSOnState : NSOffState];
 }
 
+- (void)defaultsDidRevert {
+    // reset UI, but only if we loaded the nib
+    if ([self isWindowLoaded]) {
+        [self updateAutoSaveUI];
+        [encodingPopUp setEncoding:[sud integerForKey:BDSKDefaultStringEncodingKey]];
+        [showErrorsCheckButton setState:[sud boolForKey:BDSKShowWarningsKey] ? NSOnState : NSOffState  ];	
+        [shouldTeXifyCheckButton setState:[sud boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] ? NSOnState : NSOffState];
+        [saveAnnoteAndAbstractAtEndButton setState:[sud boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey] ? NSOnState : NSOffState];
+        [useNormalizedNamesButton setState:[sud boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] ? NSOnState : NSOffState];
+        [useTemplateFileButton setState:[sud boolForKey:BDSKShouldUseTemplateFileKey] ? NSOnState : NSOffState];
+    }
+}
+
 - (void)updateAutoSaveUI{
     // prefs time is in seconds, but we display in minutes
     NSTimeInterval saveDelay = [sud integerForKey:BDSKAutosaveTimeIntervalKey] / 60;

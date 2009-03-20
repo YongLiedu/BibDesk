@@ -72,9 +72,9 @@ typedef int BDSKPreferencePaneUnselectReply;
 - (NSURL *)helpURL;
 - (NSDictionary *)initialValues;
 
-- (void)revertDefaults;
-
 // these are sent to the selected pane and by default do nothing
+
+- (void)defaultsDidRevert;
 
 - (void)willSelect;
 - (void)didSelect;

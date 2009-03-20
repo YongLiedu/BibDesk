@@ -117,8 +117,7 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
     }
 }
 
-- (void)revertDefaults {
-    [super revertDefaults];
+- (void)defaultsDidRevert {
     NSTimeInterval interval = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"SUScheduledCheckInterval"] doubleValue];
     [[SUUpdater sharedUpdater] setUpdateCheckInterval:interval];
     [[SUUpdater sharedUpdater] setAutomaticallyChecksForUpdates:interval > 0.0];

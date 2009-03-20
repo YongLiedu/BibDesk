@@ -62,12 +62,6 @@ enum {
 static NSSet *alwaysDisabledFields = nil;
 
 
-@interface BibPref_Defaults (Private)
-- (void)addGlobalMacroFilePanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)updateDeleteButton;
-@end
-
-
 @implementation BibPref_Defaults
 
 + (void)initialize {
@@ -75,13 +69,7 @@ static NSSet *alwaysDisabledFields = nil;
     alwaysDisabledFields = [[NSSet alloc] initWithObjects:BDSKAuthorString, BDSKEditorString, nil];
 }
 
-- (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController {
-	if(self = [super initWithRecord:aRecord forPreferenceController:aController]){
-        globalMacroFiles = [[NSMutableArray alloc] initWithArray:[sud stringArrayForKey:BDSKGlobalMacroFilesKey]];
-       
-        customFieldsArray = [[NSMutableArray alloc] initWithCapacity:6];
-		customFieldsSet = [[NSMutableSet alloc] initWithCapacity:6];
-		
+- (void)resetDefaultFields {
 		// initialize the default fields from the prefs
 		NSArray *defaultFields = [sud arrayForKey:BDSKDefaultFieldsKey];
 		NSEnumerator *e;
@@ -90,6 +78,9 @@ static NSSet *alwaysDisabledFields = nil;
 		NSNumber *type;
 		NSNumber *isDefault;
 		
+        [customFieldsArray removeAllObjects];
+        [customFieldsSet removeAllObjects];
+        
 		// Add Local File fields
 		e = [[sud arrayForKey:BDSKLocalFileFieldsKey] objectEnumerator];
 		type = [NSNumber numberWithInt:BDSKLocalFileType];
@@ -171,22 +162,38 @@ static NSSet *alwaysDisabledFields = nil;
 			[customFieldsArray insertObject:dict atIndex:0];
 			[customFieldsSet addObject:field];
 		}
+}
+
+- (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController {
+	if(self = [super initWithRecord:aRecord forPreferenceController:aController]){
+        globalMacroFiles = [[NSMutableArray alloc] initWithArray:[sud stringArrayForKey:BDSKGlobalMacroFilesKey]];
+       
+        customFieldsArray = [[NSMutableArray alloc] initWithCapacity:6];
+        customFieldsArray = [[NSMutableArray alloc] initWithCapacity:6];
+		customFieldsSet = [[NSMutableSet alloc] initWithCapacity:6];
+		
+		// initialize the default fields from the prefs
+        [self resetDefaultFields];
 	}
 	return self;
 }
 
-- (void)awakeFromNib{
-    BDSKFieldNameFormatter *fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
-    [[[[defaultFieldsTableView tableColumns] objectAtIndex:0] dataCell] setFormatter:fieldNameFormatter];
-    [fieldNameFormatter release];
-    [globalMacroFilesTableView registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
-    
+- (void)updateDeleteButton{	
+	BOOL shouldEnable = NO;
+    int row = [defaultFieldsTableView selectedRow];
+    if(row >= 0)
+        shouldEnable = NO == [alwaysDisabledFields containsObject:[[customFieldsArray objectAtIndex:row] objectForKey:@"field"]];
+    [delSelectedDefaultFieldButton setEnabled:shouldEnable];
+}
+
+- (void)updateUI {
     NSWorkspace *sws = [NSWorkspace sharedWorkspace];
     NSArray *pdfViewers = [[NSWorkspace sharedWorkspace] editorAndViewerNamesAndBundleIDsForPathExtension:@"pdf"];
     NSString *pdfViewerID = [[sud dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
     int i, iMax = [pdfViewers count];
     int idx = 0;
     
+    [pdfViewerPopup removeAllItems];
     for(i = 0; i < iMax; i++){
         NSDictionary *dict = [pdfViewers objectAtIndex:i];
         NSString *bundleID = [dict objectForKey:@"bundleID"];
@@ -213,6 +220,27 @@ static NSSet *alwaysDisabledFields = nil;
 	[removeRemoteURLFieldsButton setEnabled:[sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey]];
     
     [self updateDeleteButton];
+}
+
+- (void)awakeFromNib{
+    BDSKFieldNameFormatter *fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
+    [[[[defaultFieldsTableView tableColumns] objectAtIndex:0] dataCell] setFormatter:fieldNameFormatter];
+    [fieldNameFormatter release];
+    [globalMacroFilesTableView registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
+    
+    [self updateUI];
+}
+
+- (void)defaultsDidRevert {
+    // these should always be reset, becaus eth prefs may have changed
+    [globalMacroFiles setArray:[sud stringArrayForKey:BDSKGlobalMacroFilesKey]];
+    [self resetDefaultFields];
+    // reset UI, but only if we loaded the nib
+    if ([self isWindowLoaded]) {
+        [self updateUI];
+        [globalMacroFilesTableView reloadData];
+        [defaultFieldsTableView reloadData];
+    }
 }
 
 - (void)updatePrefs{
@@ -285,14 +313,6 @@ static NSSet *alwaysDisabledFields = nil;
 	[self updateDeleteButton];
 	
     // !!! notification of these changes is posted by the type manager, which observes the pref keys; this ensures that the type manager gets notified first, so notification observers don't get stale data; as a consequence, if you add another custom field type, the type manager needs to observe it in -init
-}
-    
-- (void)updateDeleteButton{	
-	BOOL shouldEnable = NO;
-    int row = [defaultFieldsTableView selectedRow];
-    if(row >= 0)
-        shouldEnable = NO == [alwaysDisabledFields containsObject:[[customFieldsArray objectAtIndex:row] objectForKey:@"field"]];
-    [delSelectedDefaultFieldButton setEnabled:shouldEnable];
 }
 
 - (void)dealloc{
@@ -595,6 +615,15 @@ static NSSet *alwaysDisabledFields = nil;
     [NSApp endSheet:globalMacroFileSheet];
 }
 
+- (void)addGlobalMacroFilePanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    if(returnCode == NSCancelButton)
+        return;
+    
+    [globalMacroFiles addNonDuplicateObjectsFromArray:[openPanel filenames]];
+    [globalMacroFilesTableView reloadData];
+    [sud setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+}
+
 - (IBAction)addGlobalMacroFile:(id)sender{
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
     [openPanel setAllowsMultipleSelection:YES];
@@ -609,15 +638,6 @@ static NSSet *alwaysDisabledFields = nil;
                         modalDelegate:self 
                        didEndSelector:@selector(addGlobalMacroFilePanelDidEnd:returnCode:contextInfo:) 
                           contextInfo:nil];
-}
-
-- (void)addGlobalMacroFilePanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSCancelButton)
-        return;
-    
-    [globalMacroFiles addNonDuplicateObjectsFromArray:[openPanel filenames]];
-    [globalMacroFilesTableView reloadData];
-    [sud setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
 }
 
 - (IBAction)delGlobalMacroFiles:(id)sender {

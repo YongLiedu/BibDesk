@@ -60,10 +60,21 @@
 - (void)awakeFromNib{
     [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"Display all items in preview"), @"1", @"5", @"10", @"20", nil]];
     [ignoredSortTermsField setFormatter:[[[BDSKStringArrayFormatter alloc] init] autorelease]];
+    
     [displayGroupCountButton setState:[sud boolForKey:BDSKHideGroupCountKey] ? NSOffState : NSOnState];
     [self updatePreviewDisplayUI];
     [self updateAuthorNameDisplayUI];
     [self updateSortWordsDisplayUI];
+}
+
+- (void)defaultsDidRevert {
+    // reset UI, but only if we loaded the nib
+    if ([self isWindowLoaded]) {
+        [displayGroupCountButton setState:[sud boolForKey:BDSKHideGroupCountKey] ? NSOffState : NSOnState];
+        [self updatePreviewDisplayUI];
+        [self updateAuthorNameDisplayUI];
+        [self updateSortWordsDisplayUI];
+    }
 }
 
 - (void)updatePreviewDisplayUI{

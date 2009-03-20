@@ -110,10 +110,7 @@
     return [record initialValues];
 }
 
-- (void)revertDefaults {
-    if ([[self initialValues] count])
-        [[[NSUserDefaultsController sharedUserDefaultsController] values] setValuesForKeysWithDictionary:[self initialValues]];
-}
+- (void)defaultsDidRevert {}
 
 - (void)willSelect {}
 - (void)didSelect {}

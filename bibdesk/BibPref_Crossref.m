@@ -70,6 +70,22 @@ static char BDSKBibPrefCrossrefDefaultsObservationContext;
     [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnEditInheritedKey] options:0 context:&BDSKBibPrefCrossrefDefaultsObservationContext];
 }
 
+- (void)defaultsDidRevert {
+    // reset UI, but only if we loaded the nib
+    if ([self isWindowLoaded]) {
+        [typesArray setArray:[sud arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
+        
+        //[warnOnEditInheritedCheckButton setState:[sud boolForKey:BDSKWarnOnEditInheritedKey] ? NSOnState : NSOffState]; this should be done by KVO
+        [autoSortCheckButton setState:[sud boolForKey:BDSKAutoSortForCrossrefsKey] ? NSOnState : NSOffState];
+        
+        [duplicateBooktitleCheckButton setState:[sud boolForKey:BDSKDuplicateBooktitleKey] ? NSOnState : NSOffState];
+        [forceDuplicateBooktitleCheckButton setState:[sud boolForKey:BDSKForceDuplicateBooktitleKey] ? NSOnState : NSOffState];
+        
+        [self updateDuplicateBooktitleUI];
+        [self updateDuplicateTypes];
+    }
+}
+
 - (void)dealloc{
     @try { [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnEditInheritedKey]]; }
     @catch (id e) {}

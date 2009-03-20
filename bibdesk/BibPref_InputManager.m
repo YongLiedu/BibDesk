@@ -92,6 +92,20 @@ static int tableIconSize = 24;
     [self updateUI];
 }
 
+- (void)defaultsDidRevert {
+    // reset UI and prefs on disk, because the pref controller won't do this as these are not our prefs
+    if ([self isWindowLoaded]) {
+        [arrayController setContent:[NSArray array]];
+        [self synchronizePreferences];
+        [self updateUI];
+    } else {
+        CFPreferencesSetAppValue(BDSKInputManagerLoadableApplications, (CFArrayRef)[NSArray array], BDSKInputManagerID);
+        BOOL success = CFPreferencesAppSynchronize( (CFStringRef)BDSKInputManagerID );
+        if(success == NO)
+            NSLog(@"Failed to synchronize preferences for %@", BDSKInputManagerID);
+    }
+}
+
 - (void)addApplicationsWithIdentifiers:(NSArray *)identifiers{
     NSParameterAssert(identifiers);
         

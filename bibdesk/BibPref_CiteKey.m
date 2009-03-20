@@ -68,6 +68,15 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	[super dealloc];
 }
 
+- (void)updateUI {
+    [citeKeyAutogenerateCheckButton setState:[sud boolForKey:BDSKCiteKeyAutogenerateKey] ? NSOnState : NSOffState];
+    
+    [citeKeyLowercaseCheckButton setState:[sud boolForKey:BDSKCiteKeyLowercaseKey] ? NSOnState : NSOffState];
+    [formatCleanRadio selectCellWithTag:[sud integerForKey:BDSKCiteKeyCleanOptionKey]];
+    
+    [self updateFormatPresetUI];
+}
+
 - (void)awakeFromNib{
 	BDSKFormatStringFormatter *formatter = [[BDSKFormatStringFormatter alloc] initWithField:BDSKCiteKeyString fileType:BDSKBibtexString];
     [formatSheetField setFormatter:formatter];
@@ -76,13 +85,16 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	coloringEditor = [[BDSKFormatStringFieldEditor alloc] initWithFrame:[formatSheetField frame] parseField:BDSKCiteKeyString fileType:BDSKBibtexString];
     
     [previewDisplay setStringValue:[[BDSKPreviewItem sharedItem] displayText]];
+    [previewDisplay sizeToFit];
     
-    [citeKeyAutogenerateCheckButton setState:[sud boolForKey:BDSKCiteKeyAutogenerateKey] ? NSOnState : NSOffState];
-    
-    [citeKeyLowercaseCheckButton setState:[sud boolForKey:BDSKCiteKeyLowercaseKey] ? NSOnState : NSOffState];
-    [formatCleanRadio selectCellWithTag:[sud integerForKey:BDSKCiteKeyCleanOptionKey]];
-    
-    [self updateFormatPresetUI];
+    [self updateUI];
+}
+
+- (void)defaultsDidRevert {
+    // reset UI, but only if we loaded the nib
+    if ([self isWindowLoaded]) {
+        [self updateUI];
+    }
 }
 
 // sheet's delegate must be connected to file's owner in IB

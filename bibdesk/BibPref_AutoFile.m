@@ -73,6 +73,17 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	[super dealloc];
 }
 
+- (void)updateUI {
+    [filePapersAutomaticallyCheckButton setState:[sud boolForKey:BDSKFilePapersAutomaticallyKey] ? NSOnState : NSOffState];
+    [warnOnMoveFolderCheckButton setState:[sud boolForKey:BDSKWarnOnMoveFolderKey] ? NSOnState : NSOffState];
+    
+    [formatLowercaseCheckButton setState:[sud boolForKey:BDSKLocalFileLowercaseKey] ? NSOnState : NSOffState];
+    [formatCleanRadio selectCellWithTag:[sud integerForKey:BDSKLocalFileCleanOptionKey]];
+    
+    [self updatePapersFolderUI];
+    [self updateFormatPresetUI];
+}
+
 - (void)awakeFromNib{
 	BDSKFormatStringFormatter *formatter = [[BDSKFormatStringFormatter alloc] initWithField:BDSKLocalFileString fileType:BDSKBibtexString];
     [formatSheetField setFormatter:formatter];
@@ -85,14 +96,14 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
     [previewDisplay setStringValue:[[BDSKPreviewItem sharedItem] displayText]];
     [previewDisplay sizeToFit];
     
-    [filePapersAutomaticallyCheckButton setState:[sud boolForKey:BDSKFilePapersAutomaticallyKey] ? NSOnState : NSOffState];
-    [warnOnMoveFolderCheckButton setState:[sud boolForKey:BDSKWarnOnMoveFolderKey] ? NSOnState : NSOffState];
-    
-    [formatLowercaseCheckButton setState:[sud boolForKey:BDSKLocalFileLowercaseKey] ? NSOnState : NSOffState];
-    [formatCleanRadio selectCellWithTag:[sud integerForKey:BDSKLocalFileCleanOptionKey]];
-    
-    [self updatePapersFolderUI];
-    [self updateFormatPresetUI];
+    [self updateUI];
+}
+
+- (void)defaultsDidRevert {
+    // reset UI, but only if we loaded the nib
+    if ([self isWindowLoaded]) {
+        [self updateUI];
+    }
 }
 
 // sheet's delegate must be connected to file's owner in IB

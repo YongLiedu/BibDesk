@@ -81,8 +81,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 	return self;
 }
 
-- (void)revertDefaults {
-    [super revertDefaults];
+- (void)defaultsDidRevert {
     if (templatePrefList == BDSKExportTemplateList) {
         [self setItemNodes:[BDSKTemplate defaultExportTemplates]];
     } else {

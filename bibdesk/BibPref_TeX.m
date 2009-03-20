@@ -64,14 +64,7 @@ static NSSet *standardStyles = nil;
     standardStyles = [[NSSet alloc] initWithObjects:@"abbrv", @"acm", @"alpha", @"apalike", @"ieeetr", @"plain", @"siam", @"unsrt", nil];
 }
 
-- (void)awakeFromNib{
-    BDSKShellCommandFormatter *formatter = [[BDSKShellCommandFormatter alloc] init];
-    [texBinaryPathField setFormatter:formatter];
-    [texBinaryPathField setDelegate:self];
-    [bibtexBinaryPathField setFormatter:formatter];
-    [bibtexBinaryPathField setDelegate:self];
-    [formatter release];
-    
+- (void)updateUI {
     [self updateTeXPathUI];
     [self updateBibTeXPathUI];
     
@@ -82,6 +75,17 @@ static NSSet *standardStyles = nil;
     [encodingPopUpButton setEncoding:[sud integerForKey:BDSKTeXPreviewFileEncodingKey]];
 }
 
+- (void)awakeFromNib{
+    BDSKShellCommandFormatter *formatter = [[BDSKShellCommandFormatter alloc] init];
+    [texBinaryPathField setFormatter:formatter];
+    [texBinaryPathField setDelegate:self];
+    [bibtexBinaryPathField setFormatter:formatter];
+    [bibtexBinaryPathField setDelegate:self];
+    [formatter release];
+    
+    [self updateUI];
+}
+
 - (void)updateTeXPathUI{
     NSString *teXPath = [sud objectForKey:BDSKTeXBinPathKey];
     [texBinaryPathField setStringValue:teXPath];
@@ -89,6 +93,13 @@ static NSSet *standardStyles = nil;
         [texBinaryPathField setTextColor:[NSColor blackColor]];
     else
         [texBinaryPathField setTextColor:[NSColor redColor]];
+}
+
+- (void)defaultsDidRevert {
+    // reset UI, but only if we loaded the nib
+    if ([self isWindowLoaded]) {
+         [self updateUI];
+    }
 }
 
 - (void)updateBibTeXPathUI{

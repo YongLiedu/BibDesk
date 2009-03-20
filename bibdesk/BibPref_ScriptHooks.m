@@ -53,6 +53,14 @@
 	[tableView reloadData];
 }
 
+- (void)defaultsDidRevert {
+    // reset UI, but only if we loaded the nib
+    if ([self isWindowLoaded]) {
+        [self tableViewSelectionDidChange:nil];
+        [tableView reloadData];
+    }
+}
+
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSCancelButton)
         return;

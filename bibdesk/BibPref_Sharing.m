@@ -57,6 +57,16 @@
 
 @implementation BibPref_Sharing
 
+- (void)updateUI {
+    [enableSharingButton setState:[sud boolForKey:BDSKShouldShareFilesKey] ? NSOnState : NSOffState];
+    [enableBrowsingButton setState:[sud boolForKey:BDSKShouldLookForSharedFilesKey] ? NSOnState : NSOffState];
+    [usePasswordButton setState:[sud boolForKey:BDSKSharingRequiresPasswordKey] ? NSOnState : NSOffState];
+    
+    [self updateSettingsUI];
+    [self updateNameUI];
+    [self updateStatusUI];
+}
+
 - (void)awakeFromNib
 {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSharingNameChanged:) name:BDSKSharingNameChangedNotification object:nil];
@@ -68,7 +78,7 @@
         NSString *pwString = [[NSString alloc] initWithData:pwData encoding:NSUTF8StringEncoding];
         [passwordField setStringValue:pwString];
         [pwString release];
-    }    
+    }
     
     [enableSharingButton setState:[sud boolForKey:BDSKShouldShareFilesKey] ? NSOnState : NSOffState];
     [enableBrowsingButton setState:[sud boolForKey:BDSKShouldLookForSharedFilesKey] ? NSOnState : NSOffState];
@@ -76,7 +86,19 @@
     
     [self updateSettingsUI];
     [self updateNameUI];
-    [self updateStatusUI];
+    [self updateUI];
+}
+
+- (void)defaultsDidRevert {
+    // always clear the password, as that's not set in our prefs, and always send the notifications
+    [BDSKPasswordController addOrModifyPassword:@"" name:BDSKServiceNameForKeychain userName:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingPasswordChangedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingNameChangedNotification object:self];
+    // reset UI, but only if we loaded the nib
+    if ([self isWindowLoaded]) {
+        [passwordField setStringValue:@""];
+        [self updateUI];
+    }
 }
 
 - (void)dealloc

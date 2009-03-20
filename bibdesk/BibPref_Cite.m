@@ -65,6 +65,15 @@ static char BDSKBibPrefCiteDefaultsObservationContext;
     [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree] options:0 context:&BDSKBibPrefCiteDefaultsObservationContext];
 }
 
+- (void)defaultsDidRevert {
+    // reset UI, but only if we loaded the nib
+    if ([self isWindowLoaded]) {
+        //[self updateTemplates]; this should be done by KVO
+        [self updateDragCopyUI];
+        [self updateCiteCommandUI];
+    }
+}
+
 - (void)dealloc{
     @try { [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree]]; }
     @catch (id e) {}
