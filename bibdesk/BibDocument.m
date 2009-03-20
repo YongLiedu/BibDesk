@@ -302,6 +302,7 @@ enum {
         [sud removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKAuthorNameDisplayKey]];
         [sud removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKBTStyleKey]];
         [sud removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKUsesTeXKey]];
+        [sud removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKHideGroupCountKey]];
     }
     @catch (id e) {}
     // workaround for crash: to reproduce, create empty doc, hit cmd-n for new editor window, then cmd-q to quit, choose "don't save"; this results in an -undoManager message to the dealloced document
@@ -2809,6 +2810,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
               forKeyPath:[@"values." stringByAppendingString:BDSKUsesTeXKey]
                  options:0
                  context:&BDSKDocumentDefaultsObservationContext];
+        [sud addObserver:self
+              forKeyPath:[@"values." stringByAppendingString:BDSKHideGroupCountKey]
+                 options:0
+                 context:&BDSKDocumentDefaultsObservationContext];
 }           
 
 - (void)handleBibItemAddDelNotification:(NSNotification *)notification{
@@ -3100,6 +3105,12 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
                 [self updatePreviewer:[BDSKPreviewer sharedPreviewer]];
         } else if ([key isEqualToString:BDSKUsesTeXKey]) {
             [bottomPreviewButton setEnabled:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey] forSegment:BDSKPreviewDisplayTeX];
+        } else if ([key isEqualToString:BDSKHideGroupCountKey]) {
+            // if we were hiding the count, the smart group counts weren't updated, so we need to update them now when we're showing the count, otherwise just reload
+            if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKHideGroupCountKey])
+                [groupTableView reloadData];
+            else
+                [self updateSmartGroupsCountAndContent:NO];
         }
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];

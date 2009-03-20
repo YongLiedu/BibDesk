@@ -47,6 +47,8 @@
     IBOutlet NSButton *fontButton;
     
     IBOutlet NSTextField *ignoredSortTermsField;
+
+    IBOutlet NSButton *displayGroupCountButton;
     
     IBOutlet NSButton *authorFirstNameButton;
     IBOutlet NSButton *authorAbbreviateButton;
@@ -56,6 +58,8 @@
 - (IBAction)changePreviewMaxNumber:(id)sender;
 
 - (IBAction)changeAuthorDisplay:(id)sender;
+
+- (IBAction)changeDisplayGroupCount:(id)sender;
 
 - (IBAction)changeIgnoredSortTerms:(id)sender;
 

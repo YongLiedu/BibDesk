@@ -45,6 +45,17 @@
 #import "BDSKRuntime.h"
 
 
+@implementation BDSKGroup
+
+static NSArray *cellValueKeys = nil;
+static NSArray *noCountCellValueKeys = nil;
+
++ (void)initialize {
+    BDSKINITIALIZE;
+    cellValueKeys = [[NSArray alloc] initWithObjects:@"stringValue", @"editingStringValue", @"numberValue", @"icon", @"isRetrieving", @"failedDownload", nil];
+    noCountCellValueKeys = [[NSArray alloc] initWithObjects:@"stringValue", @"editingStringValue", @"icon", @"isRetrieving", @"failedDownload", nil];
+}
+ 
 static NSString *createUniqueID(void)
 {
     CFUUIDRef uuid = CFUUIDCreate(NULL);
@@ -52,8 +63,6 @@ static NSString *createUniqueID(void)
     CFRelease(uuid);
     return uuidStr;
 }    
-
-@implementation BDSKGroup
 
 // super's designated initializer
 - (id)init {
@@ -218,7 +227,10 @@ static NSString *createUniqueID(void)
 }
 
 - (NSDictionary *)cellValue {
-    return [self dictionaryWithValuesForKeys:[NSArray arrayWithObjects:@"stringValue", @"editingStringValue", @"numberValue", @"icon", @"isRetrieving", @"failedDownload", nil]];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKHideGroupCountKey])
+        return [self dictionaryWithValuesForKeys:noCountCellValueKeys];
+    else
+        return [self dictionaryWithValuesForKeys:cellValueKeys];
 }
 
 - (NSString *)toolTip {

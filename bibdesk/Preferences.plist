@@ -276,6 +276,8 @@
 					<string>LucidaGrande</string>
 					<key>BDSKGroupTableViewFontSizeKey</key>
 					<real>0</real>
+					<key>BDSKHideGroupCount</key>
+					<false/>
 					<key>BDSKMainTableViewFontNameKey</key>
 					<string>LucidaGrande</string>
 					<key>BDSKMainTableViewFontSizeKey</key>

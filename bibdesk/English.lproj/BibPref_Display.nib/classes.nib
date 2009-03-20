@@ -11,6 +11,8 @@
 				<string>id</string>
 				<key>changeAuthorDisplay</key>
 				<string>id</string>
+				<key>changeDisplayGroupCount</key>
+				<string>id</string>
 				<key>changeFont</key>
 				<string>id</string>
 				<key>changeFontElement</key>
@@ -33,6 +35,8 @@
 				<key>authorFirstNameButton</key>
 				<string>NSButton</string>
 				<key>authorLastNameFirstButton</key>
+				<string>NSButton</string>
+				<key>displayGroupCountButton</key>
 				<string>NSButton</string>
 				<key>fontButton</key>
 				<string>NSButton</string>

@@ -620,21 +620,25 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     unsigned int row = NSMaxRange(smartRange);
 	BOOL needsUpdate = NO;
     BOOL hasManyGroups = smartRange.length > 10;
+    BOOL hideCount = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKHideGroupCountKey];
+    BOOL sortByCount = [sortGroupsKey isEqualToString:BDSKGroupCellCountKey];
     
     while(NSLocationInRange(--row, smartRange)){
-		if (hasManyGroups == NO)
+		if([groupTableView isRowSelected:row])
+			needsUpdate = shouldUpdate;
+		else if (hideCount == YES && sortByCount == NO)
+            continue;
+        if (hasManyGroups == NO)
             [(BDSKSmartGroup *)[groups objectAtIndex:row] filterItems:publications];
         else if (docState.isDocumentClosed == NO)
             [self queueSelectorOnce:@selector(updateCountForSmartGroup:) withObject:(BDSKSmartGroup *)[groups objectAtIndex:row]];
-		if([groupTableView isRowSelected:row])
-			needsUpdate = shouldUpdate;
     }
     
-    if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
+    if(sortByCount){
         NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];
         [self sortGroupsByKey:sortGroupsKey];
         [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
-    }else{
+    }else if (needsUpdate == YES || hideCount == NO){
         [groupTableView reloadData];
         if(needsUpdate == YES){
             // fix for bug #1362191: after changing a checkbox that removed an item from a smart group, the table scrolled to the top
@@ -751,7 +755,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (IBAction)sortGroupsByCount:(id)sender{
 	if ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) return;
-	[self sortGroupsByKey:BDSKGroupCellCountKey];
+    [self sortGroupsByKey:BDSKGroupCellCountKey];
 }
 
 - (IBAction)changeGroupFieldAction:(id)sender{
@@ -1628,6 +1632,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 			docState.sortGroupsDescending = YES; // more appropriate for default count sort
 		[sortGroupsKey release];
         sortGroupsKey = [key retain];
+        if ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKHideGroupCountKey]) {
+            // the smart group counts were not updated, so we need to do that now; this will get back to us, so just return here.
+            [self updateSmartGroupsCountAndContent:NO];
+            return;
+        }
 	}
     
     // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)

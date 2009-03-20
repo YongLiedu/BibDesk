@@ -194,6 +194,8 @@ extern NSString *BDSKRemoveConvertedRemoteURLFieldsKey;
 
 extern NSString *BDSKAuthorNameDisplayKey;
 
+extern NSString *BDSKHideGroupCountKey;
+
 extern NSString *BDSKSpotlightVersionInfoKey;
 
 extern NSString *BDSKShouldShowWebGroupPrefKey;

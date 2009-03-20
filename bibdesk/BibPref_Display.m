@@ -60,6 +60,7 @@
 - (void)awakeFromNib{
     [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"Display all items in preview"), @"1", @"5", @"10", @"20", nil]];
     [ignoredSortTermsField setFormatter:[[[BDSKStringArrayFormatter alloc] init] autorelease]];
+    [displayGroupCountButton setState:[sud boolForKey:BDSKHideGroupCountKey] ? NSOffState : NSOnState];
     [self updatePreviewDisplayUI];
     [self updateAuthorNameDisplayUI];
     [self updateSortWordsDisplayUI];
@@ -97,6 +98,10 @@
 - (IBAction)changeIgnoredSortTerms:(id)sender{
     [sud setObject:[sender objectValue] forKey:BDSKIgnoredSortTermsKey];
     CFNotificationCenterPostNotification(CFNotificationCenterGetLocalCenter(), CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, NULL, FALSE);
+}
+
+- (IBAction)changeDisplayGroupCount:(id)sender{
+    [sud setBool:[sender state] == NSOffState forKey:BDSKHideGroupCountKey];
 }
 
 - (IBAction)changeAuthorDisplay:(id)sender;
