@@ -53,6 +53,8 @@ static NSMutableArray *searchGroupServers = nil;
 static NSMutableDictionary *searchGroupServerFiles = nil;
 static NSArray *sortDescriptors = nil;
 
+static NSString *BDSKSearchGroupServersDidChangeNotification = @"BDSKSearchGroupServersDidChangeNotification";
+
 @implementation BDSKSearchGroupSheetController
 
 #pragma mark Search group servers
@@ -225,6 +227,7 @@ static BOOL isSearchFileAtPath(NSString *path)
 
 - (void)dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [group release];
     [undoManager release];
     [serverInfo release];
@@ -259,6 +262,28 @@ static BOOL isSearchFileAtPath(NSString *path)
     }
 }
 
+- (void)handleServersChanged:(NSNotification *)note {
+    if ([note object] != self) {
+        NSString *name = nil;
+        NSArray *servers = [[self class] servers];
+        BDSKServerInfo *info = [[self serverInfo] copy];
+        
+        if ([self isCustom] == NO) {
+            unsigned int idx = [servers indexOfObject:info];
+            if (idx == NSNotFound)
+                idx = [[servers valueForKey:@"name"] indexOfObject:[serverPopup titleOfSelectedItem]];
+            if (idx != NSNotFound)
+                name = [[servers objectAtIndex:idx] name];
+        }
+        
+        [self reloadServersSelectingServerNamed:name];
+        
+        if (name == nil)
+            [self setServerInfo:info];
+        [info release];
+    }
+}
+
 - (void)awakeFromNib
 {
     [serverView retain];
@@ -283,6 +308,8 @@ static BOOL isSearchFileAtPath(NSString *path)
     
     [self reloadServersSelectingServerNamed:name];
     [self changeOptions];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleServersChanged:) name:BDSKSearchGroupServersDidChangeNotification object:nil];
 }
 
 #pragma mark Actions
@@ -362,12 +389,14 @@ static BOOL isSearchFileAtPath(NSString *path)
         unsigned idx = [servers count];
         [[self class] addServer:[self serverInfo]];
         [self reloadServersSelectingServerNamed:[[self serverInfo] name]];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupServersDidChangeNotification object:self];
         
     } else {
         // remove the selected default server
         
         [[self class] removeServerAtIndex:[serverPopup indexOfSelectedItem]];
         [self reloadServersSelectingServerNamed:DEFAULT_SERVER_NAME];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupServersDidChangeNotification object:self];
         
     }
 }
@@ -400,6 +429,7 @@ static BOOL isSearchFileAtPath(NSString *path)
         
         [[self class] setServer:[self serverInfo] atIndex:idx];
         [self reloadServersSelectingServerNamed:[[self serverInfo] name]];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupServersDidChangeNotification object:self];
     } else {
         [editButton setTitle:NSLocalizedString(@"Set", @"Button title")];
         [editButton setToolTip:NSLocalizedString(@"Set the selected default server settings", @"Tool tip message")];
@@ -419,6 +449,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     if (returnCode == NSOKButton) {
         [[self class] resetServers];
         [self reloadServersSelectingServerNamed:DEFAULT_SERVER_NAME];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupServersDidChangeNotification object:self];
     }
 }
 
