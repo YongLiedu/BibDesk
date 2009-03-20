@@ -510,7 +510,7 @@
             [options setValue:[info valueForKey:@"removeDiacritics"] forKey:@"removeDiacritics"];
         }
         
-        serverInfo = [[BDSKMutableServerInfo alloc] initWithType:serverType name:serverName host:host port:port database:database options:options];
+        serverInfo = [[BDSKMutableServerInfo alloc] initWithType:serverType name:serverName database:database host:host port:port options:options];
     }
     
     BOOL isValid = YES;

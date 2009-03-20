@@ -41,6 +41,11 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 
+#define DEFAULT_NAME     NSLocalizedString(@"New Server", @"")
+#define DEFAULT_DATABASE @"database" 
+#define DEFAULT_HOST     @"host.domain.com"
+#define DEFAULT_PORT     @"0"
+
 // IMPORTANT WARNING:
 // When anything changes about server infos, e.g. a new type is added, this should be carefully considered, as it has many consequences for data integrity and and the editing sheet.
 // Assumptions are made in BDSKSearchGroup and BDSKSearchGroupSheetController.
@@ -53,15 +58,15 @@
 {
     BOOL isZoom = [aType isEqualToString:BDSKSearchGroupZoom];
     
-    return [[[[self class] alloc] initWithType:aType 
-                                          name:NSLocalizedString(@"New Server", @"")
-                                          host:isZoom ? @"host.domain.com" : nil
-                                          port:isZoom ? @"0" : nil 
-                                      database:@"database" 
+    return [[[[self class] alloc] initWithType:aType
+                                          name:DEFAULT_NAME
+                                      database:DEFAULT_DATABASE
+                                          host:isZoom ? DEFAULT_HOST : nil
+                                          port:isZoom ? DEFAULT_PORT : nil
                                        options:isZoom ? [NSDictionary dictionary] : nil] autorelease];
 }
 
-- (id)initWithType:(NSString *)aType name:(NSString *)aName host:(NSString *)aHost port:(NSString *)aPort database:(NSString *)aDbase options:(NSDictionary *)opts;
+- (id)initWithType:(NSString *)aType name:(NSString *)aName database:(NSString *)aDbase host:(NSString *)aHost port:(NSString *)aPort options:(NSDictionary *)opts;
 {
     if (self = [super init]) {
         type = [aType copy];
@@ -83,38 +88,38 @@
     return self;
 }
 
-- (id)initWithType:(NSString *)aType name:(NSString *)aName host:(NSString *)aHost port:(NSString *)aPort database:(NSString *)aDbase;
+- (id)initWithType:(NSString *)aType name:(NSString *)aName database:(NSString *)aDbase host:(NSString *)aHost port:(NSString *)aPort;
 {
-    return [self initWithType:aType name:aName host:aHost port:aPort database:aDbase options:[NSDictionary dictionary]];
+    return [self initWithType:aType name:aName database:aDbase host:aHost port:aPort options:[NSDictionary dictionary]];
 }
 
 - (id)initWithType:(NSString *)aType dictionary:(NSDictionary *)info;
 {    
     self = [self initWithType:aType ?: [info objectForKey:@"type"]
                          name:[info objectForKey:@"name"]
+                     database:[info objectForKey:@"database"]
                          host:[info objectForKey:@"host"]
                          port:[info objectForKey:@"port"]
-                     database:[info objectForKey:@"database"]
                       options:[info objectForKey:@"options"]];
     return self;
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
-    id copy = [[BDSKServerInfo allocWithZone:aZone] initWithType:[self type] name:[self name] host:[self host] port:[self port] database:[self database] options:[self options]];
+    id copy = [[BDSKServerInfo allocWithZone:aZone] initWithType:[self type] name:[self name] database:[self database] host:[self host] port:[self port] options:[self options]];
     return copy;
 }
 
 - (id)mutableCopyWithZone:(NSZone *)aZone {
-    id copy = [[BDSKMutableServerInfo allocWithZone:aZone] initWithType:[self type] name:[self name] host:[self host] port:[self port] database:[self database] options:[self options]];
+    id copy = [[BDSKMutableServerInfo allocWithZone:aZone] initWithType:[self type] name:[self name] database:[self database] host:[self host] port:[self port] options:[self options]];
     return copy;
 }
 
 - (void)dealloc {
     [type release];
     [name release];
+    [database release];
     [host release];
     [port release];
-    [database release];
     [options release];
     [super dealloc];
 }
@@ -128,15 +133,14 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
     // we don't compare the name, as that is just a label
     if ([self isMemberOfClass:[other class]] == NO || [[self type] isEqualToString:[(BDSKServerInfo *)other type]] == NO)
         isEqual = NO;
+    else if (isEqualOrBothNil([self database], [other database]))
+        isEqual = NO;
     else if ([self isZoom])
         isEqual = isEqualOrBothNil([self host], [other host]) && 
                   isEqualOrBothNil([self port], [(BDSKServerInfo *)other port]) && 
-                  isEqualOrBothNil([self database], [other database]) && 
                   isEqualOrBothNil([self password], [other password]) && 
                   isEqualOrBothNil([self username], [other username]) && 
                   (isEqualOrBothNil([self options], [(BDSKServerInfo *)other options]) || ([[self options] count] == 0 && [[(BDSKServerInfo *)other options] count] == 0));
-    else
-        isEqual = isEqualOrBothNil([self database], [other database]);
     return isEqual;
 }
 
@@ -157,11 +161,11 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 
 - (NSString *)name { return name; }
 
+- (NSString *)database { return database; }
+
 - (NSString *)host { return [self isZoom] ? host : nil; }
 
 - (NSString *)port { return [self isZoom] ? port : nil; }
-
-- (NSString *)database { return database; }
 
 - (NSString *)password { return [[self options] objectForKey:@"password"]; }
 
@@ -220,9 +224,9 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
         type = [newType retain];
         if ([self isZoom]) {
             if (host == nil)
-                [self setHost:@"host.domain.com"];
+                [self setHost:DEFAULT_HOST];
             if (port == nil)
-                [self setPort:@"0"];
+                [self setPort:DEFAULT_PORT];
         }
     }
 }
@@ -233,10 +237,10 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
     name = [newName copy];
 }
 
-- (void)setPort:(NSString *)newPort;
+- (void)setDatabase:(NSString *)newDbase;
 {
-    [port autorelease];
-    port = [newPort copy];
+    [database autorelease];
+    database = [newDbase copy];
 }
 
 - (void)setHost:(NSString *)newHost;
@@ -245,10 +249,10 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
     host = [newHost copy];
 }
 
-- (void)setDatabase:(NSString *)newDbase;
+- (void)setPort:(NSString *)newPort;
 {
-    [database autorelease];
-    database = [newDbase copy];
+    [port autorelease];
+    port = [newPort copy];
 }
 
 - (void)setOptionValue:(id)value forKey:(NSString *)key {
