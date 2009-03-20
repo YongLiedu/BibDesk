@@ -261,13 +261,14 @@
 - (void)setURLString:(NSString *)newURLString {
     [self window];
     [urlField setStringValue:newURLString];
-    [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:[NSImage smallMissingFileImage]];
     [self changeURL:urlField];
 }
 
 - (void)loadURL:(NSURL *)theURL {
-    if (theURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:theURL] == NO)
+    if (theURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:theURL] == NO) {
+        [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:[NSImage smallMissingFileImage]];
         [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:theURL]];
+    }
 }
 
 - (IBAction)changeURL:(id)sender {
@@ -445,12 +446,6 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     }
 }
 
-- (void)controlTextDidBeginEditing:(NSNotification *)aNotification {
-    if ([aNotification object] == urlField) {
-        [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:[NSImage smallMissingFileImage]];
-    }
-}
-
 #pragma mark WebFrameLoadDelegate protocol
 
 - (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame{
@@ -516,6 +511,8 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
         [self setRetrieving:NO];
         [group addPublications:newPubs ?: [NSArray array]];
         loadingWebFrame = nil;
+        if ([[(BDSKConcreteIconTextFieldCell *)[urlField cell] icon] isEqual:[NSImage smallMissingFileImage]])
+            [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:[NSImage imageNamed:@"Bookmark"]];
     } else {
         [group addPublications:newPubs ?: [NSArray array]];
     }
@@ -552,7 +549,9 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 }
 
 - (void)webView:(WebView *)sender didReceiveIcon:(NSImage *)image forFrame:(WebFrame *)frame{
-    [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:image];
+    if (frame == loadingWebFrame) {
+        [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:image];
+    }
 }
 
 #pragma mark WebUIDelegate protocol
