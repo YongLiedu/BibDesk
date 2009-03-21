@@ -182,7 +182,7 @@ static inline id _placeholderForZone(NSZone *aZone)
 
 - (void)release {}
 
-- (unsigned)retainCount { return UINT_MAX; }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (NSString *)description { return [NSString stringWithFormat:@"%@: placeholder for zone %@", [super description], NSZoneName([self zone])]; }
 

@@ -42,6 +42,10 @@
 
 NSString * const FVMainQueueRunLoopMode = @"FVMainQueueRunLoopMode";
 
+
+@interface FVPlaceholderOperationQueue : FVOperationQueue
+@end
+
 @implementation FVOperationQueue
 
 static id _mainThreadQueue = nil;
@@ -57,13 +61,13 @@ static Class FVOperationQueueClass = Nil;
 {
     FVINITIALIZE(FVOperationQueue);  
     FVOperationQueueClass = self;
-    defaultPlaceholderQueue = (FVOperationQueue *)NSAllocateObject(FVOperationQueueClass, 0, [self zone]);
+    defaultPlaceholderQueue = (FVOperationQueue *)NSAllocateObject([FVPlaceholderOperationQueue self], 0, [self zone]);
     _mainThreadQueue = [FVMainThreadOperationQueue new];
 }
 
 + (id)allocWithZone:(NSZone *)aZone
 {
-    return FVOperationQueueClass == self ? defaultPlaceholderQueue : NSAllocateObject(self, 0, aZone);
+    return FVOperationQueueClass == self ? defaultPlaceholderQueue : [super allocWithZone:aZone];
 }
 
 // ensure that alloc always calls through to allocWithZone:
@@ -74,13 +78,8 @@ static Class FVOperationQueueClass = Nil;
 
 - (id)init
 {
-    return ([self class] == FVOperationQueueClass) ? [[FVConcreteOperationQueue allocWithZone:[self zone]] init] : [super init];
-}
-
-- (void)dealloc
-{
-    if ([self class] != FVOperationQueueClass)
-        [super dealloc];
+    self = [super init];
+    return self;
 }
 
 - (void)subclassResponsibility:(SEL)selector
@@ -117,5 +116,22 @@ static Class FVOperationQueueClass = Nil;
 {
     [self subclassResponsibility:_cmd];
 }
+
+@end
+
+
+@implementation FVPlaceholderOperationQueue
+
+- (id)init {
+    return [[FVConcreteOperationQueue allocWithZone:[self zone]] init];
+}
+
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 @end

@@ -37,8 +37,13 @@
  */
 
 #import "FVOperation.h"
+#import "FVConcreteOperation.h"
 #import "FVOperationQueue.h"
 #import "FVThread.h"
+
+
+@interface FVPlaceholderOperation : FVOperation
+@end
 
 @implementation FVOperation
 
@@ -51,12 +56,12 @@ static Class FVOperationClass = Nil;
     FVINITIALIZE(FVOperation);
     
     FVOperationClass = self;
-    defaultPlaceholderOperation = (FVOperation *)NSAllocateObject(FVOperationClass, 0, [self zone]);
+    defaultPlaceholderOperation = (FVOperation *)NSAllocateObject([FVPlaceholderOperation self], 0, [self zone]);
 }
 
 + (id)allocWithZone:(NSZone *)aZone
 {
-    return FVOperationClass == self ? defaultPlaceholderOperation : NSAllocateObject(self, 0, aZone);
+    return FVOperationClass == self ? defaultPlaceholderOperation : [super allocWithZone:aZone];
 }
 
 // ensure that alloc always calls through to allocWithZone:
@@ -67,24 +72,19 @@ static Class FVOperationClass = Nil;
 
 - (id)init
 {
+    self = [super init];
     return self;
-}
-
-- (void)dealloc
-{
-    if ([self class] != FVOperationClass)
-        [super dealloc];
 }
 
 - (NSUInteger)hash 
 {
-    return (NSUInteger)self;
+    return [super hash];
 }
 
 - (BOOL)isEqual:(id)object
 {
     // ??? ignores priority for now
-    return object == self;
+    return [super isEqual:object];
 }
 
 - (NSString *)description
@@ -135,5 +135,22 @@ static Class FVOperationClass = Nil;
 - (void)setQueue:(id)queue { [self doesNotRecognizeSelector:_cmd]; }
 - (id)queue { [self doesNotRecognizeSelector:_cmd]; return nil; };
 - (void)setConcurrent:(BOOL)flag { [self doesNotRecognizeSelector:_cmd]; }
+
+@end
+
+
+@implementation FVPlaceholderOperation
+
+- (id)init {
+    return [[FVConcreteOperation allocWithZone:[self zone]] init];
+}
+
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 @end
