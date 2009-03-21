@@ -58,6 +58,7 @@
 
 @implementation FVTextIcon
 
+static Class FVTextIconClass = Nil;
 static NSMutableSet *_cachedTextSystems = nil;
 static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
 
@@ -67,11 +68,24 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
 + (void)initialize
 {
     FVINITIALIZE(FVTextIcon);
+    
     FVAPIParameterAssert(pthread_main_np() != 0);
+    
+    FVTextIconClass = self;
     
     // make sure we compare with pointer equality; all I really want is a bag
     _cachedTextSystems = (NSMutableSet *)CFSetCreateMutable(NULL, MAX_CACHED_TEXT_SYSTEMS, &FVNSObjectPointerSetCallBacks);
 }
+
+#if USE_CORE_TEXT && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
++ (id)allocWithZone:(NSZone *)aZone
+{
+    if (floor(NSAppKitVersionNumber > NSAppKitVersionNumber10_4) && self == FVTextIconClass)
+        return [FVCoreTextIcon allocWithZone:aZone];
+    else
+        return [super allocWithZone:aZone];
+}
+#endif
 
 + (NSSize)_containerSize
 {
@@ -188,7 +202,7 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
     return canInit;
 }
 
-- (id)_initWithURL:(NSURL *)aURL isPlainText:(BOOL)isPlainText
+- (id)initWithURL:(NSURL *)aURL isPlainText:(BOOL)isPlainText
 {
     self = [super initWithURL:aURL];
     if (self) {
@@ -201,22 +215,6 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
         _thumbnail = NULL;
         _isPlainText = isPlainText;
     }
-    return self;
-}
-
-- (id)initWithURL:(NSURL *)aURL isPlainText:(BOOL)isPlainText;
-{
-#if USE_CORE_TEXT && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
-    if (floor(NSAppKitVersionNumber > NSAppKitVersionNumber10_4)) {
-        [super dealloc];
-        self = [[FVCoreTextIcon alloc] _initWithURL:aURL isPlainText:isPlainText];
-    }
-    else {
-        self = [self _initWithURL:aURL isPlainText:isPlainText];
-    }
-#else
-    self = [self _initWithURL:aURL isPlainText:isPlainText];
-#endif
     return self;
 }
 
