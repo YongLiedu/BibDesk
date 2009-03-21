@@ -42,6 +42,17 @@
 
 #import <objc/runtime.h>
 
+static inline Class fv_class_getSuperclass(Class aClass)
+{
+#if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
+    return aClass->super_class;
+#elif MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+    return class_getSuperclass != NULL ? class_getSuperclass(aClass) : aClass->super_class;
+#else
+    return class_getSuperclass(aClass);
+#endif
+}
+
 @interface _FVQueuedKeys : NSObject
 {
     NSCountedSet   *_keys;
@@ -75,11 +86,7 @@ static CFDictionaryRef _queuedKeysByClass = NULL;
         
         for (classIndex = 0; classIndex < numClasses; classIndex++) {
             Class aClass = classes[classIndex];
-#if (__LP64__ || MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
-            Class superClass = class_getSuperclass(aClass);
-#else
-            Class superClass = aClass->super_class;
-#endif
+            Class superClass = fv_class_getSuperclass(aClass);
             
             while (Nil != superClass) {
 
@@ -89,11 +96,7 @@ static CFDictionaryRef _queuedKeysByClass = NULL;
                     [qkeys release];
                     break;
                 }
-#if (__LP64__ || MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
-                superClass = class_getSuperclass(superClass);
-#else
-                superClass = superClass->super_class;
-#endif
+                superClass = fv_class_getSuperclass(superClass);
             }
         }
         NSZoneFree([self zone], classes);
