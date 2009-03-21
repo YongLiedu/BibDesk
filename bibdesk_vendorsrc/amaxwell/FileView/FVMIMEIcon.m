@@ -37,14 +37,11 @@
  */
 
 #import "FVMIMEIcon.h"
-#import "FVOperationQueue.h"
-#import "FVInvocationOperation.h"
 
 @implementation FVMIMEIcon
 
 static IconRef _networkIcon = NULL;
 static NSMutableDictionary *_iconTable = nil;
-static NSLock *_iconTableLock = nil;
 
 + (void)initialize
 {
@@ -52,32 +49,18 @@ static NSLock *_iconTableLock = nil;
     
     GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericNetworkIcon, &_networkIcon);
     _iconTable = [NSMutableDictionary new];
-    _iconTableLock = [[NSLock alloc] init];
-    
 }
 
 + (id)newIconWithMIMEType:(NSString *)type;
 {
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** +[%@ %@] requires main thread", self, NSStringFromSelector(_cmd));
     NSParameterAssert(nil != type);
-    [_iconTableLock lock];
     FVMIMEIcon *icon = [[_iconTable objectForKey:type] retain];
     if (nil == icon) {
-        icon = [[self class] allocWithZone:[self zone]];
-        FVInvocationOperation *operation = [[FVInvocationOperation alloc] initWithTarget:icon selector:@selector(initWithMIMEType:) object:type];
-        [operation setConcurrent:NO];
-        // make sure this operation gets invoked first when we run the runloop
-        [operation setQueuePriority:FVOperationQueuePriorityVeryHigh];
-        [[FVOperationQueue mainQueue] addOperation:operation];
-        [operation autorelease];
-        // If this is already the main thread, running it in the default runloop mode should cause the operation to complete, but may lead to a deadlock since webview callouts can be sent multiple times due to server push or multiple views loading the same icon simultaneously (and this method is not reentrant).  The problem is that it can flush all pending operations.
-        while (NO == [operation isFinished])
-            CFRunLoopRunInMode((CFStringRef)FVMainQueueRunLoopMode, 0.1, YES);
-        
-        icon = [[operation result] retain];
+        icon = [[[self class] allocWithZone:[self zone]] initWithMIMEType:type];
         if (icon)
             [_iconTable setObject:icon forKey:type];
     }
-    [_iconTableLock unlock];    
     return icon;
 }
 
