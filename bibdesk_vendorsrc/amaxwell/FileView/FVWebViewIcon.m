@@ -371,7 +371,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
         [self lock];
         NSParameterAssert([_condLock condition] == LOADING);
         [_fallbackIcon release];
-        _fallbackIcon = [[FVMIMEIcon allocWithZone:[self zone]] initWithMIMEType:type];
+        _fallbackIcon = [FVMIMEIcon newIconWithMIMEType:type];
         [self unlock];
         // this triggers webView:didFailProvisionalLoadWithError:forFrame:
         [listener ignore];        

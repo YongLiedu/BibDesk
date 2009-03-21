@@ -47,6 +47,11 @@
 }
 
 // this class is used as a fallback icon for FVWebViewIcon when it detects a non-text MIME type
+
+// this class factory method initializes the icon on the main queue if itn hasn't already been created
++ (id)newIconWithMIMEType:(NSString *)type;
+
+// you probably want to use +newWithMIMEType:
 - (id)initWithMIMEType:(NSString *)type;
 
 @end

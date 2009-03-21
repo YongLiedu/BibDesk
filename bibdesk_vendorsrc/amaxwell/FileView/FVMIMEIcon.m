@@ -45,34 +45,46 @@
 static IconRef _networkIcon = NULL;
 static NSMutableDictionary *_iconTable = nil;
 static NSLock *_iconTableLock = nil;
-static Class FVMIMEIconClass = Nil;
-static FVMIMEIcon *defaultPlaceholderIcon = nil;
 
 + (void)initialize
 {
     FVINITIALIZE(FVMIMEIcon);
     
-    if ([FVMIMEIcon class] == self) {
-        FVMIMEIconClass = self;
-        GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericNetworkIcon, &_networkIcon);
-        _iconTable = [NSMutableDictionary new];
-        _iconTableLock = [[NSLock alloc] init];
-        defaultPlaceholderIcon = (FVMIMEIcon *)NSAllocateObject(FVMIMEIconClass, 0, [self zone]);
-    }
+    GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericNetworkIcon, &_networkIcon);
+    _iconTable = [NSMutableDictionary new];
+    _iconTableLock = [[NSLock alloc] init];
     
 }
 
-+ (id)allocWithZone:(NSZone *)aZone
++ (id)newIconWithMIMEType:(NSString *)type;
 {
-    return defaultPlaceholderIcon;
+    NSParameterAssert(nil != type);
+    [_iconTableLock lock];
+    FVMIMEIcon *icon = [[_iconTable objectForKey:type] retain];
+    if (nil == icon) {
+        icon = [[self class] allocWithZone:[self zone]];
+        FVInvocationOperation *operation = [[FVInvocationOperation alloc] initWithTarget:icon selector:@selector(initWithMIMEType:) object:type];
+        [operation setConcurrent:NO];
+        // make sure this operation gets invoked first when we run the runloop
+        [operation setQueuePriority:FVOperationQueuePriorityVeryHigh];
+        [[FVOperationQueue mainQueue] addOperation:operation];
+        [operation autorelease];
+        // If this is already the main thread, running it in the default runloop mode should cause the operation to complete, but may lead to a deadlock since webview callouts can be sent multiple times due to server push or multiple views loading the same icon simultaneously (and this method is not reentrant).  The problem is that it can flush all pending operations.
+        while (NO == [operation isFinished])
+            CFRunLoopRunInMode((CFStringRef)FVMainQueueRunLoopMode, 0.1, YES);
+        
+        icon = [[operation result] retain];
+        if (icon)
+            [_iconTable setObject:icon forKey:type];
+    }
+    [_iconTableLock unlock];    
+    return icon;
 }
 
-- (id)_initWithMIMEType:(NSString *)type;
+- (id)initWithMIMEType:(NSString *)type;
 {
     NSAssert2(pthread_main_np() != 0, @"*** threading violation *** +[%@ %@] requires main thread", self, NSStringFromSelector(_cmd));
-    NSParameterAssert(defaultPlaceholderIcon != self);
-    self = [super init];
-    if (self) {
+    if (self = [super init]) {
         OSStatus err;
         err = GetIconRefFromTypeInfo(0, 0, NULL, (CFStringRef)type, kIconServicesNormalUsageFlag, &_icon);
         if (err) _icon = NULL;
@@ -91,41 +103,9 @@ static FVMIMEIcon *defaultPlaceholderIcon = nil;
 - (void)lock { /* do nothing */ }
 - (void)unlock { /* do nothing */ }
 
-- (void)renderOffscreen
-{
-    // no-op
-}
+- (void)renderOffscreen { /* no-op */ }
 
 - (NSSize)size { return (NSSize){ FVMaxThumbnailDimension, FVMaxThumbnailDimension }; }   
-
-// We always ignore the result of +allocWithZone: since we may return a previously allocated instance.  No need to do [self release] on the placeholder.
-- (id)initWithMIMEType:(NSString *)type;
-{
-    NSParameterAssert(nil != type);
-    NSParameterAssert(defaultPlaceholderIcon == self);
-    [_iconTableLock lock];
-    FVMIMEIcon *icon = [_iconTable objectForKey:type];
-    if (nil == icon) {
-        icon = (FVMIMEIcon *)NSAllocateObject(FVMIMEIconClass, 0, [self zone]);
-        FVInvocationOperation *operation = [[FVInvocationOperation alloc] initWithTarget:icon selector:@selector(_initWithMIMEType:) object:type];
-        [operation setConcurrent:NO];
-        // make sure this operation gets invoked first when we run the runloop
-        [operation setQueuePriority:FVOperationQueuePriorityVeryHigh];
-        [[FVOperationQueue mainQueue] addOperation:operation];
-        [operation autorelease];
-        // If this is already the main thread, running it in the default runloop mode should cause the operation to complete, but may lead to a deadlock since webview callouts can be sent multiple times due to server push or multiple views loading the same icon simultaneously (and this method is not reentrant).  The problem is that it can flush all pending operations.
-        while (NO == [operation isFinished])
-            CFRunLoopRunInMode((CFStringRef)FVMainQueueRunLoopMode, 0.1, YES);
-        
-        icon = [operation result];
-        if (icon) {
-            [_iconTable setObject:icon forKey:type];
-            [icon release];
-        }
-    }
-    [_iconTableLock unlock];    
-    return [icon retain];
-}
 
 - (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
 {
