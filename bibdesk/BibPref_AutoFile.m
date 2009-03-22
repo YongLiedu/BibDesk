@@ -69,7 +69,6 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 - (void)dealloc{
     [lastPapersFolderPath release];
     [coloringEditor release];
-	[formatSheet release];
 	[super dealloc];
 }
 

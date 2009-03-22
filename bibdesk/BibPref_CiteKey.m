@@ -64,7 +64,6 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 
 - (void)dealloc{
     [coloringEditor release];
-	[formatSheet release];
 	[super dealloc];
 }
 
