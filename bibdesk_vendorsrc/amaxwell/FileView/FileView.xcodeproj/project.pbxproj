@@ -11,7 +11,6 @@
 		8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
 		CE05D35B0D7B0D4A0034C2A8 /* FVUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D3250D7AFC830034C2A8 /* FVUtilities.m */; };
 		CE05D35E0D7B0D750034C2A8 /* FVUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D3240D7AFC830034C2A8 /* FVUtilities.h */; };
-		CE05D3AD0D7B21DC0034C2A8 /* FVColorMenuView.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE05D3AC0D7B21DC0034C2A8 /* FVColorMenuView.nib */; };
 		CE05D3B10D7B22170034C2A8 /* FVColorMenuView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D3AF0D7B22170034C2A8 /* FVColorMenuView.h */; };
 		CE05D3B20D7B22170034C2A8 /* FVColorMenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D3B00D7B22170034C2A8 /* FVColorMenuView.m */; };
 		CE05D3C60D7B272A0034C2A8 /* FVDownload.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D3C40D7B272A0034C2A8 /* FVDownload.h */; };
@@ -49,6 +48,8 @@
 		CE89233F0D7CBB1A006D514C /* FVOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D5E90D7C22550034C2A8 /* FVOperation.m */; };
 		CEA831140DC1FAB500B551D1 /* FVAccessibilityIconElement.h in Headers */ = {isa = PBXBuildFile; fileRef = CEA831120DC1FAB500B551D1 /* FVAccessibilityIconElement.h */; };
 		CEA831150DC1FAB500B551D1 /* FVAccessibilityIconElement.m in Sources */ = {isa = PBXBuildFile; fileRef = CEA831130DC1FAB500B551D1 /* FVAccessibilityIconElement.m */; };
+		CEF33C200F76F15F0026452B /* FVColorMenuView.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEF33C1E0F76F15E0026452B /* FVColorMenuView.nib */; };
+		CEF33C210F76F15F0026452B /* FVPreviewer.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEF33C1F0F76F15F0026452B /* FVPreviewer.nib */; };
 		CEFC19B10F693E8B00B2AEE6 /* FileView.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC19B00F693E8B00B2AEE6 /* FileView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CEFC1CF60F6AB84000B2AEE6 /* _FVDocumentDescription.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1CE90F6AB84000B2AEE6 /* _FVDocumentDescription.h */; };
 		CEFC1CF70F6AB84000B2AEE6 /* _FVDocumentDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1CEA0F6AB84000B2AEE6 /* _FVDocumentDescription.m */; };
@@ -106,7 +107,6 @@
 		F94692850CA5777300AC2772 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = F94692800CA5777300AC2772 /* MainMenu.nib */; };
 		F94692860CA5777300AC2772 /* FileView Program-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F94692820CA5777300AC2772 /* FileView Program-Info.plist */; };
 		F946928F0CA5784700AC2772 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F946928E0CA5784700AC2772 /* main.m */; };
-		F94692A60CA5793B00AC2772 /* FVPreviewer.nib in Resources */ = {isa = PBXBuildFile; fileRef = F94692A50CA5793B00AC2772 /* FVPreviewer.nib */; };
 		F94693FF0CA583A300AC2772 /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8DC2EF5B0486A6940098B216 /* FileView.framework */; };
 		F94694500CA59AF100AC2772 /* FVScaledImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = F946944E0CA59AF100AC2772 /* FVScaledImageView.h */; };
 		F94694510CA59AF100AC2772 /* FVScaledImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = F946944F0CA59AF100AC2772 /* FVScaledImageView.m */; };
@@ -149,8 +149,6 @@
 		8DC2EF5B0486A6940098B216 /* FileView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FileView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE05D3240D7AFC830034C2A8 /* FVUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVUtilities.h; sourceTree = "<group>"; };
 		CE05D3250D7AFC830034C2A8 /* FVUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVUtilities.m; sourceTree = "<group>"; };
-		CE05D3A70D7B21A70034C2A8 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/FVColorMenuView.nib; sourceTree = "<group>"; };
-		CE05D3AE0D7B21EF0034C2A8 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/FVColorMenuView.nib; sourceTree = "<group>"; };
 		CE05D3AF0D7B22170034C2A8 /* FVColorMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVColorMenuView.h; sourceTree = "<group>"; };
 		CE05D3B00D7B22170034C2A8 /* FVColorMenuView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVColorMenuView.m; sourceTree = "<group>"; };
 		CE05D3C40D7B272A0034C2A8 /* FVDownload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVDownload.h; sourceTree = "<group>"; };
@@ -188,6 +186,8 @@
 		CE65FC5B0F72578D0089F9DC /* _FVSplitSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _FVSplitSet.m; sourceTree = "<group>"; };
 		CEA831120DC1FAB500B551D1 /* FVAccessibilityIconElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVAccessibilityIconElement.h; sourceTree = "<group>"; };
 		CEA831130DC1FAB500B551D1 /* FVAccessibilityIconElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVAccessibilityIconElement.m; sourceTree = "<group>"; };
+		CEF33C1E0F76F15E0026452B /* FVColorMenuView.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; path = FVColorMenuView.nib; sourceTree = "<group>"; };
+		CEF33C1F0F76F15F0026452B /* FVPreviewer.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; path = FVPreviewer.nib; sourceTree = "<group>"; };
 		CEFC19B00F693E8B00B2AEE6 /* FileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileView.h; sourceTree = "<group>"; };
 		CEFC1CE90F6AB84000B2AEE6 /* _FVDocumentDescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _FVDocumentDescription.h; sourceTree = "<group>"; };
 		CEFC1CEA0F6AB84000B2AEE6 /* _FVDocumentDescription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _FVDocumentDescription.m; sourceTree = "<group>"; };
@@ -224,7 +224,6 @@
 		F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
 		F93C351E0D35D214006EB558 /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/FileView.strings; sourceTree = "<group>"; };
 		F93C351F0D35D221006EB558 /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F93C35200D35D23E006EB558 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/FVPreviewer.nib; sourceTree = "<group>"; };
 		F93C3AE90D39473C006EB558 /* FVFinderLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVFinderLabel.h; sourceTree = "<group>"; };
 		F93C3AEA0D39473C006EB558 /* FVFinderLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVFinderLabel.m; sourceTree = "<group>"; };
 		F94691F70CA56EC500AC2772 /* FVFileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVFileView.h; sourceTree = "<group>"; };
@@ -235,7 +234,6 @@
 		F94691FC0CA56EC500AC2772 /* FVIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVIcon.m; sourceTree = "<group>"; };
 		F94691FF0CA56EC500AC2772 /* FVPreviewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVPreviewer.h; sourceTree = "<group>"; };
 		F94692000CA56EC500AC2772 /* FVPreviewer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVPreviewer.m; sourceTree = "<group>"; };
-		F94692010CA56EC500AC2772 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/FVPreviewer.nib; sourceTree = "<group>"; };
 		F946921C0CA5700800AC2772 /* FVQuickLookIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVQuickLookIcon.m; sourceTree = "<group>"; };
 		F946922D0CA5710500AC2772 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = /System/Library/Frameworks/QTKit.framework; sourceTree = "<absolute>"; };
 		F946922E0CA5710500AC2772 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = /System/Library/Frameworks/Quartz.framework; sourceTree = "<absolute>"; };
@@ -339,11 +337,11 @@
 		089C1665FE841158C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				F9E469350CFF6D12003E6C0A /* FileView.strings */,
-				CE05D3AC0D7B21DC0034C2A8 /* FVColorMenuView.nib */,
-				F94692A50CA5793B00AC2772 /* FVPreviewer.nib */,
 				8DC2EF5A0486A6940098B216 /* Info.plist */,
 				089C1666FE841158C02AAC07 /* InfoPlist.strings */,
+				F9E469350CFF6D12003E6C0A /* FileView.strings */,
+				CEF33C1E0F76F15E0026452B /* FVColorMenuView.nib */,
+				CEF33C1F0F76F15F0026452B /* FVPreviewer.nib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -692,10 +690,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */,
-				F94692A60CA5793B00AC2772 /* FVPreviewer.nib in Resources */,
 				F9F22DE90CDAD53300A9D449 /* License in Resources */,
 				F9E469370CFF6D12003E6C0A /* FileView.strings in Resources */,
-				CE05D3AD0D7B21DC0034C2A8 /* FVColorMenuView.nib in Resources */,
+				CEF33C200F76F15F0026452B /* FVColorMenuView.nib in Resources */,
+				CEF33C210F76F15F0026452B /* FVPreviewer.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -803,15 +801,6 @@
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
-		CE05D3AC0D7B21DC0034C2A8 /* FVColorMenuView.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				CE05D3A70D7B21A70034C2A8 /* English */,
-				CE05D3AE0D7B21EF0034C2A8 /* French */,
-			);
-			name = FVColorMenuView.nib;
-			sourceTree = "<group>";
-		};
 		F946927E0CA5777300AC2772 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -826,15 +815,6 @@
 				F94692810CA5777300AC2772 /* English */,
 			);
 			name = MainMenu.nib;
-			sourceTree = "<group>";
-		};
-		F94692A50CA5793B00AC2772 /* FVPreviewer.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F94692010CA56EC500AC2772 /* English */,
-				F93C35200D35D23E006EB558 /* French */,
-			);
-			name = FVPreviewer.nib;
 			sourceTree = "<group>";
 		};
 		F9E469350CFF6D12003E6C0A /* FileView.strings */ = {
