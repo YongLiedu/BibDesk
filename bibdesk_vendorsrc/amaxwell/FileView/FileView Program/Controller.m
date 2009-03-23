@@ -52,7 +52,7 @@
 - (void)windowWillClose:(NSNotification *)aNotification
 {
     [_slider unbind:@"value"];
-    [_fileView unbind:@"iconURLs"];
+    [_fileView unbind:@"content"];
     [_fileView unbind:@"selectionIndexes"];
     [_fileView setDataSource:nil];
     [_fileView setDelegate:nil];
@@ -87,7 +87,7 @@
     // nonexistent domain
     [arrayController insertObject:[NSURL URLWithString:@"http://bibdesk.sourceforge.tld/"] atArrangedObjectIndex:insertIndex++];
     
-    [_fileView bind:@"iconURLs" toObject:arrayController withKeyPath:@"arrangedObjects" options:nil];
+    [_fileView bind:@"content" toObject:arrayController withKeyPath:@"arrangedObjects" options:nil];
     [_fileView bind:@"selectionIndexes" toObject:arrayController withKeyPath:@"selectionIndexes" options:nil];
     
     // for optional datasource method
