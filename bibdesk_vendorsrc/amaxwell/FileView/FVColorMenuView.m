@@ -67,18 +67,18 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 
 - (id)initWithFrame:(NSRect)aRect
 {
-    self = [super initWithFrame:NSMakeRect(0.0, 0.0, 188.0, 68.0)];
+    self = [super initWithFrame:aRect];
     if (self) {
         NSBundle *bundle = [NSBundle bundleForClass:[FVColorMenuView self]];
-        _labelCell = [[NSCell alloc] initTextCell:NSLocalizedStringFromTableInBundle(@"Label:", @"FileView", bundle, @"Finder label menu item title")];
+        _labelCell = [[NSTextFieldCell alloc] initTextCell:NSLocalizedStringFromTableInBundle(@"Label:", @"FileView", bundle, @"Finder label menu item title")];
         [_labelCell setFont:[NSFont menuBarFontOfSize:0.0]];
         
-        _labelNameCell = [[NSCell alloc] initTextCell:@""];
+        _labelNameCell = [[NSTextFieldCell alloc] initTextCell:@""];
         [_labelNameCell setAlignment:NSCenterTextAlignment];
         [_labelNameCell setFont:[NSFont boldSystemFontOfSize:[NSFont smallSystemFontSize]]];
+        [_labelNameCell setTextColor:[NSColor disabledControlTextColor]];
         
-        _matrix = [[FVColorMenuMatrix alloc] initWithFrame:NSMakeRect(20.0, 22.0, 158.0, 18.0)];
-        [_matrix setAutoresizingMask:NSViewMaxXMargin|NSViewMinYMargin];
+        _matrix = [[FVColorMenuMatrix alloc] initWithFrame:NSMakeRect(20.0, 28.0, 158.0, 18.0)];
         [_matrix setTarget:self];
         [_matrix setAction:@selector(fvLabelColorAction:)];
         [self addSubview:_matrix];
@@ -87,7 +87,6 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
         _target = nil;
         _action = nil;
         
-        [self setAutoresizingMask:NSViewMaxXMargin|NSViewMinYMargin];
         if (_matrix)
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleColorNameUpdate:) name:FVColorNameUpdateNotification object:_matrix];
     }
@@ -107,13 +106,22 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 - (id)initWithCoder:(NSCoder *)coder
 {
     if (self = [super initWithCoder:coder]) {
-        // the following should be unarchived as subviews, so no need to retain them
+        // the following should be unarchived as a subview, so no need to retain them
         _matrix = [coder decodeObjectForKey:@"_matrix"];
         _labelCell = [[coder decodeObjectForKey:@"_labelCell"] retain];
         _labelNameCell = [[coder decodeObjectForKey:@"_labelNameCell"] retain];
         _target = [coder decodeObjectForKey:@"_target"];
         _action = NSSelectorFromString([coder decodeObjectForKey:@"_action"]);
+        
         [_labelNameCell setStringValue:@""];
+        
+        if (_matrix == nil) {
+            _matrix = [[FVColorMenuMatrix alloc] initWithFrame:NSMakeRect(20.0, 28.0, 158.0, 18.0)];
+            [_matrix setTarget:self];
+            [_matrix setAction:@selector(fvLabelColorAction:)];
+            [self addSubview:_matrix];
+            [_matrix release];
+        }
         if (_matrix)
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleColorNameUpdate:) name:FVColorNameUpdateNotification object:_matrix];
     }
@@ -126,6 +134,13 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
     [_labelCell release];
     [_labelNameCell release];
     [super dealloc];
+}
+
+- (BOOL)isFlipped { return YES; }
+
+- (void)sizeToFit
+{
+    [self setFrameSize:NSMakeSize(188.0, 68.0)];
 }
 
 - (void)setTarget:(id)target { _target = target; }
@@ -159,15 +174,15 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
     NSRect labelRect;
     
     // draw the label
-    labelRect.origin.x = 20.0;
-    labelRect.origin.y = NSMaxY(bounds) - 20.0;
     labelRect.size = [_labelCell cellSize];
+    labelRect.origin.x = 20.0;
+    labelRect.origin.y = 20.0 - NSHeight(labelRect);
     [_labelCell drawWithFrame:labelRect inView:self];
     
     // draw the label name
-    labelRect.origin.y -= 48.0;
     labelRect.size.width = NSWidth(bounds) - 40.0;
     labelRect.size.height = [_labelNameCell cellSize].height;
+    labelRect.origin.y = 68.0 - NSHeight(labelRect);
     [_labelNameCell drawWithFrame:labelRect inView:self];
 }
 

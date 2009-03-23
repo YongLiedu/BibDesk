@@ -61,8 +61,8 @@
 @interface FVColorMenuView : NSControl
 {
     FVColorMenuMatrix *_matrix;
-    NSCell            *_labelCell;
-    NSCell            *_labelNameCell;
+    NSTextFieldCell   *_labelCell;
+    NSTextFieldCell   *_labelNameCell;
     SEL                _action;
     id                 _target;
 }
