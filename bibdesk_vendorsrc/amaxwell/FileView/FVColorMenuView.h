@@ -69,8 +69,7 @@
 
 /** @brief Returns a new, autoreleased instance.
  
- This is the primary interface for returning a new menu view.  It handles loading UI elements from the nib and setting up connections.
- @warning Do not use initWithFrame: to create a new instance. */
+ This is the primary interface for returning a new menu view.  It handles loading UI elements from the nib and setting up connections. */
 + (FVColorMenuView *)menuView;
 
 /** @brief Select a given Finder label.
