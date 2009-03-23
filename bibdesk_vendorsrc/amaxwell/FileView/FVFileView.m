@@ -3149,7 +3149,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     else if (action == @selector(submenuAction:))
         return selectionCount > 1 || ([_selectionIndexes count] == 1 && [aURL isFileURL]);
     else if (action == @selector(changeFinderLabel:) || [anItem tag] == FVChangeLabelMenuItemTag) {
-
+        
         BOOL enabled = NO;
         NSInteger state = NSOffState;
 
@@ -3176,9 +3176,6 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
             
             enabled = YES;
         }
-        
-        if ([anItem respondsToSelector:@selector(setView:)])
-            [(FVColorMenuView *)[anItem view] setTarget:self];
         
         // no effect on menu items with a custom view
         [anItem setState:state];
@@ -3217,6 +3214,8 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     BOOL wasSeparator = YES;
     while (i--) {
         NSMenuItem *menuItem = [menu itemAtIndex:i];
+        if ([menuItem tag] == FVChangeLabelMenuItemTag && [menuItem respondsToSelector:@selector(setView:)])
+            [(FVColorMenuView *)[menuItem view] setTarget:self];
         if ([menuItem isSeparatorItem]) {
             // see if this is a double separator, if so remove it
             if (wasSeparator)
