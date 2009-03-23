@@ -54,7 +54,6 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 @end
 
 @interface FVColorMenuView (FVPrivate)
-- (void)setupSubviews;
 - (void)_handleColorNameUpdate:(NSNotification *)note;
 - (void)fvLabelColorAction:(id)sender;
 @end
@@ -70,10 +69,25 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 {
     self = [super initWithFrame:NSMakeRect(0.0, 0.0, 188.0, 68.0)];
     if (self) {
+        NSBundle *bundle = [NSBundle bundleForClass:[FVColorMenuView self]];
+        _labelCell = [[NSCell alloc] initTextCell:NSLocalizedStringFromTableInBundle(@"Label:", @"FileView", bundle, @"Finder label menu item title")];
+        [_labelCell setFont:[NSFont menuBarFontOfSize:0.0]];
+        
+        _labelNameCell = [[NSCell alloc] initTextCell:@""];
+        [_labelNameCell setAlignment:NSCenterTextAlignment];
+        [_labelNameCell setFont:[NSFont boldSystemFontOfSize:[NSFont smallSystemFontSize]]];
+        
+        _matrix = [[FVColorMenuMatrix alloc] initWithFrame:NSMakeRect(20.0, 22.0, 158.0, 18.0)];
+        [_matrix setAutoresizingMask:NSViewMaxXMargin|NSViewMinYMargin];
+        [_matrix setTarget:self];
+        [_matrix setAction:@selector(fvLabelColorAction:)];
+        [self addSubview:_matrix];
+        [_matrix release];
+        
         _target = nil;
         _action = nil;
+        
         [self setAutoresizingMask:NSViewMaxXMargin|NSViewMinYMargin];
-        [self setupSubviews];
         if (_matrix)
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleColorNameUpdate:) name:FVColorNameUpdateNotification object:_matrix];
     }
@@ -84,8 +98,8 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 {
     [super encodeWithCoder:coder];
     [coder encodeConditionalObject:_matrix forKey:@"_matrix"];
-    [coder encodeConditionalObject:_labelField forKey:@"_labelField"];
-    [coder encodeConditionalObject:_labelNameField forKey:@"_labelNameField"];
+    [coder encodeObject:_labelCell forKey:@"_labelCell"];
+    [coder encodeObject:_labelNameCell forKey:@"_labelNameCell"];
     [coder encodeConditionalObject:_target forKey:@"_target"];
     [coder encodeObject:NSStringFromSelector(_action) forKey:@"_action"];
 }
@@ -95,11 +109,11 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
     if (self = [super initWithCoder:coder]) {
         // the following should be unarchived as subviews, so no need to retain them
         _matrix = [coder decodeObjectForKey:@"_matrix"];
-        _labelField = [coder decodeObjectForKey:@"_labelField"];
-        _labelNameField = [coder decodeObjectForKey:@"_labelNameField"];
+        _labelCell = [[coder decodeObjectForKey:@"_labelCell"] retain];
+        _labelNameCell = [[coder decodeObjectForKey:@"_labelNameCell"] retain];
         _target = [coder decodeObjectForKey:@"_target"];
         _action = NSSelectorFromString([coder decodeObjectForKey:@"_action"]);
-        [_labelNameField setStringValue:@""];
+        [_labelNameCell setStringValue:@""];
         if (_matrix)
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleColorNameUpdate:) name:FVColorNameUpdateNotification object:_matrix];
     }
@@ -109,6 +123,8 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [_labelCell release];
+    [_labelNameCell release];
     [super dealloc];
 }
 
@@ -138,47 +154,29 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
     return [self selectedTag];
 }
 
-- (void)setupSubviews
-{
-    // these are all added as subviews, so no need to retain them
+- (void)drawRect:(NSRect)aRect {
+    NSRect bounds = [self bounds];
+    NSRect labelRect;
     
-    _labelField = [[[NSTextField alloc] initWithFrame:NSMakeRect(19.0, 48.0, 121.0, 17.0)] autorelease];
-    [_labelField setEditable:NO];
-    [_labelField setSelectable:NO];
-    [_labelField setBordered:NO];
-    [_labelNameField setAlignment:NSLeftTextAlignment];
-    [[_labelField cell] setLineBreakMode:NSLineBreakByClipping];
-    [[_labelField cell] setScrollable:NO];
-    [_labelField setFont:[NSFont menuBarFontOfSize:0.0]];
-    [_labelField setAutoresizingMask:NSViewMaxXMargin|NSViewMinYMargin];
-    [_labelField setStringValue:NSLocalizedStringFromTableInBundle(@"Label:", @"FileView", [NSBundle bundleForClass:[FVColorMenuView self]], @"Finder label menu item title")];
-    [_labelField sizeToFit];
-    [self addSubview:_labelField];
+    // draw the label
+    labelRect.origin.x = 20.0;
+    labelRect.origin.y = NSMaxY(bounds) - 20.0;
+    labelRect.size = [_labelCell cellSize];
+    [_labelCell drawWithFrame:labelRect inView:self];
     
-    _labelNameField = [[[NSTextField alloc] initWithFrame:NSMakeRect(20.0, 0.0, 148.0, 14.0)] autorelease];
-    [_labelNameField setEditable:NO];
-    [_labelNameField setSelectable:NO];
-    [_labelNameField setBordered:NO];
-    [_labelNameField setAlignment:NSCenterTextAlignment];
-    [[_labelNameField cell] setLineBreakMode:NSLineBreakByClipping];
-    [[_labelNameField cell] setScrollable:NO];
-    [[_labelNameField cell] setControlSize:NSSmallControlSize];
-    [_labelNameField setFont:[NSFont boldSystemFontOfSize:[NSFont smallSystemFontSize]]];
-    [_labelNameField setAutoresizingMask:NSViewWidthSizable|NSViewMinYMargin];
-    [_labelNameField setStringValue:@""];
-    [self addSubview:_labelNameField];
-    
-    _matrix = [[[FVColorMenuMatrix alloc] initWithFrame:NSMakeRect(20.0, 22.0, 158.0, 18.0)] autorelease];
-    [_matrix setAutoresizingMask:NSViewMaxXMargin|NSViewMinYMargin];
-    [_matrix setTarget:self];
-    [_matrix setAction:@selector(fvLabelColorAction:)];
-    [self addSubview:_matrix];
+    // draw the label name
+    labelRect.origin.y -= 48.0;
+    labelRect.size.width = NSWidth(bounds) - 40.0;
+    labelRect.size.height = [_labelNameCell cellSize].height;
+    [_labelNameCell drawWithFrame:labelRect inView:self];
 }
+
 
 // notification posted in response to a mouseover so we can update the label name
 - (void)_handleColorNameUpdate:(NSNotification *)note
 {
-    [_labelNameField setStringValue:[_matrix boxedLabelName]];
+    [_labelNameCell setStringValue:[_matrix boxedLabelName]];
+    [self setNeedsDisplay:YES];
 }
 
 - (void)fvLabelColorAction:(id)sender
