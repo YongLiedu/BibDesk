@@ -178,8 +178,7 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 // notification posted in response to a mouseover so we can update the label name
 - (void)_handleColorNameUpdate:(NSNotification *)note
 {
-    if ([note object] == _matrix)
-        [_labelNameField setStringValue:[_matrix boxedLabelName]];
+    [_labelNameField setStringValue:[_matrix boxedLabelName]];
 }
 
 - (void)fvLabelColorAction:(id)sender
