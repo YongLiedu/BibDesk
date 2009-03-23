@@ -42,7 +42,43 @@
 
 static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotification";
 
+@interface FVColorMenuCell : NSButtonCell
+@end
+
+@interface FVColorMenuMatrix : NSMatrix
+{
+    NSInteger _boxedRow;
+    NSInteger _boxedColumn;
+}
+- (NSString *)boxedLabelName;
+@end
+
+@interface FVColorMenuView (FVPrivate)
+- (void)setupSubviews;
+- (void)_handleColorNameUpdate:(NSNotification *)note;
+- (void)fvLabelColorAction:(id)sender;
+@end
+
 @implementation FVColorMenuView
+
++ (FVColorMenuView *)menuView;
+{
+    return [[[self alloc] initWithFrame:NSMakeRect(0.0, 0.0, 188.0, 68.0)] autorelease];
+}
+
+- (id)initWithFrame:(NSRect)aRect
+{
+    self = [super initWithFrame:NSMakeRect(0.0, 0.0, 188.0, 68.0)];
+    if (self) {
+        _target = nil;
+        _action = nil;
+        [self setAutoresizingMask:NSViewMaxXMargin|NSViewMinYMargin];
+        [self setupSubviews];
+        if (_matrix)
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleColorNameUpdate:) name:FVColorNameUpdateNotification object:_matrix];
+    }
+    return self;
+}
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
@@ -51,62 +87,29 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
     [coder encodeConditionalObject:_labelField forKey:@"_labelField"];
     [coder encodeConditionalObject:_labelNameField forKey:@"_labelNameField"];
     [coder encodeConditionalObject:_target forKey:@"_target"];
-    if (_action)
-        [coder encodeObject:NSStringFromSelector(_action) forKey:@"_action"];
-}
-
-- (void)setupSubviews
-{
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleColorNameUpdate:) name:FVColorNameUpdateNotification object:nil];
-    [_labelNameField setStringValue:@""];
-    [[_labelField cell] setFont:[NSFont menuBarFontOfSize:0]];
-    NSBundle *bundle = [NSBundle bundleForClass:[FVColorMenuView self]];
-    [_labelField setStringValue:NSLocalizedStringFromTableInBundle(@"Label:", @"FileView", bundle, @"Finder label menu item title")];
-    [_labelField sizeToFit];
-    
-    [_matrix setTarget:self];
-    [_matrix setAction:@selector(fvLabelColorAction:)];
-}
-
-- (id)initWithFrame:(NSRect)aRect
-{
-    self = [super initWithFrame:aRect];
-    if (self) {
-        _target = nil;
-        _action = nil;
-    }
-    return self;
+    [coder encodeObject:NSStringFromSelector(_action) forKey:@"_action"];
 }
 
 - (id)initWithCoder:(NSCoder *)coder
 {
     if (self = [super initWithCoder:coder]) {
+        // the following should be unarchived as subviews, so no need to retain them
         _matrix = [coder decodeObjectForKey:@"_matrix"];
         _labelField = [coder decodeObjectForKey:@"_labelField"];
         _labelNameField = [coder decodeObjectForKey:@"_labelNameField"];
         _target = [coder decodeObjectForKey:@"_target"];
         _action = NSSelectorFromString([coder decodeObjectForKey:@"_action"]);
-        [self setupSubviews];
+        [_labelNameField setStringValue:@""];
+        if (_matrix)
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleColorNameUpdate:) name:FVColorNameUpdateNotification object:_matrix];
     }
     return self;
-}
-
-- (void)awakeFromNib
-{
-    [self setupSubviews];
 }
 
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
-}
-
-// notification posted in response to a mouseover so we can update the label name
-- (void)_handleColorNameUpdate:(NSNotification *)note
-{
-    if ([note object] == _matrix)
-        [_labelNameField setStringValue:[_matrix boxedLabelName]];
 }
 
 - (void)setTarget:(id)target { _target = target; }
@@ -116,15 +119,6 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 - (SEL)action { return _action; }
 
 - (void)setAction:(SEL)action { _action = action; }
-
-- (void)fvLabelColorAction:(id)sender
-{
-    [NSApp sendAction:[self action] to:[self target] from:self];
-    
-    // we have to close the menu manually
-    if ([self respondsToSelector:@selector(enclosingMenuItem)] && [[[self enclosingMenuItem] menu] respondsToSelector:@selector(cancelTracking)])
-        [[[self enclosingMenuItem] menu] cancelTracking];
-}
 
 - (void)selectLabel:(NSUInteger)label;
 {
@@ -144,33 +138,76 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
     return [self selectedTag];
 }
 
-+ (FVColorMenuView *)menuView;
+- (void)setupSubviews
 {
-    FVColorMenuView *menuView = nil;
+    // these are all added as subviews, so no need to retain them
     
-    NSNib *nib = [[NSNib alloc] initWithNibNamed:@"FVColorMenuView" bundle:[NSBundle bundleForClass:[FVColorMenuView self]]];
-    NSArray *objects;
+    _labelField = [[[NSTextField alloc] initWithFrame:NSMakeRect(19.0, 48.0, 121.0, 17.0)] autorelease];
+    [_labelField setEditable:NO];
+    [_labelField setSelectable:NO];
+    [_labelField setBordered:NO];
+    [_labelNameField setAlignment:NSLeftTextAlignment];
+    [[_labelField cell] setLineBreakMode:NSLineBreakByClipping];
+    [[_labelField cell] setScrollable:NO];
+    [_labelField setFont:[NSFont menuBarFontOfSize:0.0]];
+    [_labelField setAutoresizingMask:NSViewMaxXMargin|NSViewMinYMargin];
+    [_labelField setStringValue:NSLocalizedStringFromTableInBundle(@"Label:", @"FileView", [NSBundle bundleForClass:[FVColorMenuView self]], @"Finder label menu item title")];
+    [_labelField sizeToFit];
+    [self addSubview:_labelField];
     
-    if ([nib instantiateNibWithOwner:nil topLevelObjects:&objects]) {
-        NSParameterAssert([objects count] > 0);
-        NSUInteger i = [objects count];
-        while (i--) {
-            if ([[objects objectAtIndex:i] isKindOfClass:[FVColorMenuView class]]) {
-                menuView = [objects objectAtIndex:i];
-                break;
-            }
-        }
-    }
-    [nib release];
-    // top level objects in a nib are implicitly retained, but we should return an autoreleased object
-    return [menuView autorelease];
+    _labelNameField = [[[NSTextField alloc] initWithFrame:NSMakeRect(20.0, 0.0, 148.0, 14.0)] autorelease];
+    [_labelNameField setEditable:NO];
+    [_labelNameField setSelectable:NO];
+    [_labelNameField setBordered:NO];
+    [_labelNameField setAlignment:NSCenterTextAlignment];
+    [[_labelNameField cell] setLineBreakMode:NSLineBreakByClipping];
+    [[_labelNameField cell] setScrollable:NO];
+    [[_labelNameField cell] setControlSize:NSSmallControlSize];
+    [_labelNameField setFont:[NSFont boldSystemFontOfSize:[NSFont smallSystemFontSize]]];
+    [_labelNameField setAutoresizingMask:NSViewWidthSizable|NSViewMinYMargin];
+    [_labelNameField setStringValue:@""];
+    [self addSubview:_labelNameField];
+    
+    _matrix = [[[FVColorMenuMatrix alloc] initWithFrame:NSMakeRect(20.0, 22.0, 158.0, 18.0)] autorelease];
+    [_matrix setAutoresizingMask:NSViewMaxXMargin|NSViewMinYMargin];
+    [_matrix setTarget:self];
+    [_matrix setAction:@selector(fvLabelColorAction:)];
+    [self addSubview:_matrix];
+}
+
+// notification posted in response to a mouseover so we can update the label name
+- (void)_handleColorNameUpdate:(NSNotification *)note
+{
+    if ([note object] == _matrix)
+        [_labelNameField setStringValue:[_matrix boxedLabelName]];
+}
+
+- (void)fvLabelColorAction:(id)sender
+{
+    [NSApp sendAction:[self action] to:[self target] from:self];
+    
+    // we have to close the menu manually
+    if ([self respondsToSelector:@selector(enclosingMenuItem)] && [[[self enclosingMenuItem] menu] respondsToSelector:@selector(cancelTracking)])
+        [[[self enclosingMenuItem] menu] cancelTracking];
 }
 
 @end
 
 @implementation FVColorMenuCell
 
-#define NO_BOX -1
+- (id)initTextCell:(NSString *)aString
+{
+    if (self = [super initTextCell:aString]) {
+        [self setButtonType:NSRadioButton];
+        [self setBordered:NO];
+    }
+    return self;
+}
+
+- (NSSize)cellSize
+{
+    return NSMakeSize(18.0, 18.0);
+}
 
 static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
 {
@@ -226,6 +263,26 @@ static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
 @end
 
 @implementation FVColorMenuMatrix
+
+#define NO_BOX -1
+
+- (id)initWithFrame:(NSRect)frameRect
+{
+    if (self = [super initWithFrame:frameRect]) {
+        [self setPrototype:[[[FVColorMenuCell alloc] initTextCell:@""] autorelease]];
+        [self setCellSize:NSMakeSize(18.0, 18.0)];
+        [self setIntercellSpacing:NSMakeSize(2.0, 4.0)];
+        [self setMode:NSRadioModeMatrix];
+        [self renewRows:1 columns:8];
+        [self sizeToCells];
+        int column, tags[8] = {0, 6, 7, 5, 2, 4, 3, 1};
+        for (column = 0; column < 8; column++)
+            [[self cellAtRow:0 column:column] setTag:tags[column]];
+        _boxedRow = NO_BOX;
+        _boxedColumn = NO_BOX;
+    }
+    return self;
+}
 
 - (void)removeTrackingAreas
 {

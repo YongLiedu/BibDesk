@@ -55,16 +55,16 @@
  // add anItem to a menu
  @endcode
  
- Although this class is marked for internal use only, it should be useful elsewhere.  It's dependent on the FVColorMenuView.nib, so make sure to copy that if you use this class.
+ Although this class is marked for internal use only, it should be useful elsewhere.
  
  */
 @interface FVColorMenuView : NSControl
 {
-    IBOutlet FVColorMenuMatrix *_matrix;
-    IBOutlet NSTextField       *_labelField;
-    IBOutlet NSTextField       *_labelNameField;
-    SEL                         _action;
-    id                          _target;
+    FVColorMenuMatrix *_matrix;
+    NSTextField       *_labelField;
+    NSTextField       *_labelNameField;
+    SEL                _action;
+    id                 _target;
 }
 
 /** @brief Returns a new, autoreleased instance.
@@ -93,22 +93,5 @@
  
  @param action Action will be sent to the control's target. */
 - (void)setAction:(SEL)action;
-
-@end
-
-/*
- 
- The following undocumented classes are only declared for IB.  Do not rely on them or use them outside the FVColorMenuView implementation.
-
- */
-@interface FVColorMenuCell : NSButtonCell
-@end
-
-@interface FVColorMenuMatrix : NSMatrix
-{
-    NSInteger _boxedRow;
-    NSInteger _boxedColumn;
-}
-- (NSString *)boxedLabelName;
 
 @end
