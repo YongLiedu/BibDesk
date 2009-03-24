@@ -506,13 +506,16 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
             //[NSApp presentError:error];
         }
     }
-        
+    
+    if (frame == [sender mainFrame]) {
+        if ([[(BDSKConcreteIconTextFieldCell *)[urlField cell] icon] isEqual:[NSImage smallMissingFileImage]])
+            [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:[NSImage imageNamed:@"Bookmark"]];
+    }
+    
     if (frame == loadingWebFrame) {
         [self setRetrieving:NO];
         [group addPublications:newPubs ?: [NSArray array]];
         loadingWebFrame = nil;
-        if ([[(BDSKConcreteIconTextFieldCell *)[urlField cell] icon] isEqual:[NSImage smallMissingFileImage]])
-            [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:[NSImage imageNamed:@"Bookmark"]];
     } else {
         [group addPublications:newPubs ?: [NSArray array]];
     }
@@ -523,11 +526,11 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
         [self setRetrieving:NO];
         [group addPublications:nil];
         loadingWebFrame = nil;
-        
-        NSURL *url = [[[frame provisionalDataSource] request] URL];
-        NSString *errorHTML = [NSString stringWithFormat:@"<html><body><h1>%@</h1></body></html>", [error localizedDescription]];
-        [frame loadAlternateHTMLString:errorHTML baseURL:nil forUnreachableURL:url];
     }
+    
+    NSURL *url = [[[frame provisionalDataSource] request] URL];
+    NSString *errorHTML = [NSString stringWithFormat:@"<html><body><h1>%@</h1></body></html>", [error localizedDescription]];
+    [frame loadAlternateHTMLString:errorHTML baseURL:nil forUnreachableURL:url];
 }
 
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
@@ -542,14 +545,14 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 }
 
 - (void)webView:(WebView *)sender didReceiveServerRedirectForProvisionalLoadForFrame:(WebFrame *)frame{
-    if (frame == loadingWebFrame){ 
+    if (frame == [sender mainFrame]) { 
         NSString *url = [[[[frame provisionalDataSource] request] URL] absoluteString];
         [urlField setStringValue:url];
     }
 }
 
 - (void)webView:(WebView *)sender didReceiveIcon:(NSImage *)image forFrame:(WebFrame *)frame{
-    if (frame == loadingWebFrame) {
+    if (frame == [sender mainFrame]) { 
         [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:image];
     }
 }
