@@ -52,7 +52,8 @@
         return NO;
     }
     
-    NSString *containsArxivLinkNode = @"//span[@class='list-identifier']"; 
+    BOOL isAbstract = [[[url path] lowercaseString] hasPrefix:@"/abs/"];
+    NSString *containsArxivLinkNode = isAbstract ? @"//td[@class='tablecell arxivid']" : @"//span[@class='list-identifier']"; 
     
     NSError *error = nil;    
 
@@ -70,16 +71,29 @@
 
     NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
     
+    BOOL isAbstract = [[[url path] lowercaseString] hasPrefix:@"/abs/"];
+    
     NSString *arxivSearchResultNodePath = @"//dl/dt";
     
     NSString *arxivLinkNodePath = @".//span[@class='list-identifier']";
     NSString *arxivIDNodePath = @"./a[contains(text(),'arXiv:')]";
     NSString *pdfURLNodePath = @"./a[contains(text(),'pdf')]";
-
+    
     NSString *titleNodePath = @".//div[@class='list-title']";
     NSString *authorsNodePath = @".//div[@class='list-authors']/a";
     NSString *journalNodePath = @".//div[@class='list-journal-ref']";
     NSString *abstractNodePath = @".//p";
+    
+    if (isAbstract) {
+        arxivLinkNodePath = @".//td[@class='tablecell arxivid']";
+        arxivIDNodePath = @"./a[contains(text(),'arXiv:')]";
+        
+        pdfURLNodePath = @".//div[@class='full-text']//a[contains(text(),'PDF')]";
+        titleNodePath = @".//h1[@class='title']";
+        authorsNodePath = @".//div[@class='authors']/a";
+        journalNodePath = @".//td[@class='tablecell jref']";
+        abstractNodePath = @".//blockquote[@class='abstract']";
+    }
     
     AGRegex *eprintRegex1 = [AGRegex regexWithPattern:@"([0-9]{2})([0-9]{2})\\.([0-9]{4})"
                                               options:AGRegexMultiline];
@@ -96,8 +110,11 @@
     NSError *error = nil;
             
     // fetch the arxiv search results
-    NSArray *arxivSearchResults = [[xmlDocument rootElement] nodesForXPath:arxivSearchResultNodePath
-                                                                     error:&error];
+    NSArray *arxivSearchResults = nil;
+    if (isAbstract)
+        arxivSearchResults = [NSArray arrayWithObjects:[xmlDocument rootElement], nil];
+    else
+        arxivSearchResults = [[xmlDocument rootElement] nodesForXPath:arxivSearchResultNodePath error:&error];
     
     // bail out with an XML error if the Xpath query fails
     if (nil == arxivSearchResults) {
@@ -141,22 +158,11 @@
         }
         
         NSXMLNode *arxivLinkNode = [arxivLinkNodes objectAtIndex:0];
-        NSXMLNode *arxivMetaNode = [arxivSearchResult nextSibling];
+        NSXMLNode *arxivMetaNode = isAbstract ? arxivSearchResult : [arxivSearchResult nextSibling];
         NSArray *nodes;
         
         NSMutableDictionary *pubFields = [NSMutableDictionary dictionary];
         NSString *string = nil;
-        
-        nodes = [arxivLinkNode nodesForXPath:pdfURLNodePath error:&error];
-        if (nil != nodes && 1 == [nodes count]) {
-            // successfully found the result PDF url
-            if (string = [[nodes objectAtIndex:0] stringValueOfAttribute:@"href"]) {
-                // fix relative urls
-                if (NO == [string hasPrefix:@"http"])
-                    string = [[NSURL URLWithString:string relativeToURL:url] absoluteString];
-                [pubFields setValue:string forKey:BDSKUrlString];
-            }
-        }
         
         // search for arXiv ID
         nodes = [arxivLinkNode nodesForXPath:arxivIDNodePath error:&error];
@@ -166,6 +172,19 @@
                 if ([string hasCaseInsensitivePrefix:@"arXiv:"])
                     string = [string substringFromIndex:6];
                 [pubFields setValue:string forKey:@"Eprint"];
+            }
+        }
+        
+        if (isAbstract)
+            arxivLinkNode = arxivSearchResult;
+        
+        if (nil != nodes && 1 == [nodes count]) {
+            // successfully found the result PDF url
+            if (string = [[nodes objectAtIndex:0] stringValueOfAttribute:@"href"]) {
+                // fix relative urls
+                if (NO == [string hasPrefix:@"http"])
+                    string = [[NSURL URLWithString:string relativeToURL:url] absoluteString];
+                [pubFields setValue:string forKey:BDSKUrlString];
             }
         }
         
@@ -224,7 +243,10 @@
         // search for abstract
         nodes = [arxivMetaNode nodesForXPath:abstractNodePath error:&error];
         if (nil != nodes && 1 == [nodes count]) {
-            if (string = [[nodes objectAtIndex:0] stringValue]) {
+            NSXMLNode *abstractNode = [nodes objectAtIndex:0];
+            if (isAbstract && [abstractNode childCount] > 1)
+                abstractNode = [abstractNode childAtIndex:1];
+            if (string = [abstractNode stringValue]) {
                 string = [string stringByRemovingSurroundingWhitespaceAndNewlines];
                 [pubFields setValue:string forKey:BDSKAbstractString];
             }
