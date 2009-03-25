@@ -229,19 +229,26 @@ static NSString *stringWithNumber(NSNumber *number)
         countSize = [countString boundingRectWithSize:aRect.size options:0].size;
     }
     NSRect countRect, ignored;
-    // set countRect origin to the string drawing origin (number has countSep on either side for oval padding)
-    NSDivideRect(aRect, &ignored, &countRect, countSep + BORDER_BETWEEN_EDGE_AND_COUNT, NSMaxXEdge);
-    NSDivideRect(countRect, &countRect, &ignored, countSize.width, NSMaxXEdge);
-    // now set the size of it to the string size
-    countRect = BDSKCenterRect(countRect, countSize, YES);
+    if (countSize.width > 0.0) {
+        // set countRect origin to the string drawing origin (number has countSep on either side for oval padding)
+        NSDivideRect(aRect, &ignored, &countRect, countSep + BORDER_BETWEEN_EDGE_AND_COUNT, NSMaxXEdge);
+        NSDivideRect(countRect, &countRect, &ignored, countSize.width, NSMaxXEdge);
+        // now set the size of it to the string size
+        countRect = BDSKCenterRect(countRect, countSize, YES);
+    } else {
+        NSDivideRect(aRect, &countRect, &ignored, 0.0, NSMaxXEdge);
+    }
     return countRect;
 }    
 
 - (NSRect)textRectForBounds:(NSRect)aRect;
 {
-    NSRect textRect = aRect;
+    NSRect textRect = aRect, countRect = [self countRectForBounds:aRect];
     textRect.origin.x = NSMaxX([self iconRectForBounds:aRect]) + BORDER_BETWEEN_IMAGE_AND_TEXT;
-    textRect.size.width = NSMinX([self countRectForBounds:aRect]) - BORDER_BETWEEN_COUNT_AND_TEXT - [self countPaddingForCellSize:aRect.size] - NSMinX(textRect);
+    if (NSWidth(countRect) > 0.0)
+        textRect.size.width = NSMinX(countRect) - BORDER_BETWEEN_COUNT_AND_TEXT - [self countPaddingForCellSize:aRect.size] - NSMinX(textRect);
+    else
+        textRect.size.width = NSMaxX(aRect) - NSMinX(textRect);
     return textRect;
 }
 
@@ -250,16 +257,14 @@ static NSString *stringWithNumber(NSNumber *number)
     NSSize cellSize = [super cellSize];
     NSSize countSize = NSZeroSize;
     float countSep = [self countPaddingForCellSize:cellSize];
-    if ([self isRetrieving] || [self failedDownload]) {
+    if ([self isRetrieving] || [self failedDownload])
         countSize = NSMakeSize(16, 16);
-    }
-    else if ([self count] > 0) {
+    else if ([self count] > 0)
         countSize = [countString boundingRectWithSize:cellSize options:0].size;
-    }
-    float countWidth = countSize.width + 2 * countSep + BORDER_BETWEEN_EDGE_AND_COUNT;
     // cellSize.height approximates the icon size
-    cellSize.width += cellSize.height + countWidth;
-    cellSize.width += BORDER_BETWEEN_EDGE_AND_IMAGE + BORDER_BETWEEN_IMAGE_AND_TEXT + BORDER_BETWEEN_COUNT_AND_TEXT;
+    cellSize.width += BORDER_BETWEEN_EDGE_AND_IMAGE + cellSize.height + BORDER_BETWEEN_IMAGE_AND_TEXT;
+    if (countSize.width > 0.0)
+        cellSize.width += BORDER_BETWEEN_COUNT_AND_TEXT + countSize.width + 2 * countSep + BORDER_BETWEEN_EDGE_AND_COUNT;
     return cellSize;
 }
 
