@@ -900,9 +900,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 // this is used for the lower pane
 - (NSString *)title{
-    NSString *title = [self valueOfField:BDSKTitleString] ?: @"";
+    NSString *title = [[self valueOfField:BDSKTitleString] expandedString] ?: @"";
 	if ([[self pubType] isEqualToString:BDSKInbookString]) {
-		NSString *chapter = [self valueOfField:BDSKChapterString];
+		NSString *chapter = [[self valueOfField:BDSKChapterString] expandedString];
 		if (![NSString isEmptyString:chapter]) {
 			title = [NSString stringWithFormat:NSLocalizedString(@"%@ (chapter %@)", @"Inbook item title format: [Title of inbook] (chapter [Chapter])"), title, chapter];
 		} else {
@@ -912,8 +912,6 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
             }
         }
 	}
-    if ([title isComplex] || [title isInherited])
-        title = [NSString stringWithFormat:@"%@", title];
     BDSKPOSTCONDITION(title != nil);
 	return title;
 }
@@ -1547,7 +1545,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [info setObject:@"BibDesk" forKey:(NSString *)kMDItemCreator];
 
     // A given item is not guaranteed to have all of these, so make sure they are non-nil
-    if(value = [self displayTitle])
+    if(value = [[self displayTitle] expandedString])
         [info setObject:value forKey:(NSString *)kMDItemTitle];
     
     // this is what shows up in search results
@@ -1558,7 +1556,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     if(value = [[self valueOfField:BDSKAbstractString] stringByRemovingTeX])
         [info setObject:value forKey:(NSString *)kMDItemDescription];
     
-    if(value = [[self container] stringByRemovingTeX])
+    if(value = [[[self container] expandedString] stringByRemovingTeX])
         [info setObject:value forKey:@"net_sourceforge_bibdesk_container"];
     
     if(value = [self pubType])
@@ -2801,9 +2799,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 		return groupSet;
 
 	// otherwise build it if we have a value
-    NSString *value = [self stringValueOfField:field];
-	if([value isComplex] || [value isInherited])
-		value = [NSString stringWithString:value];
+    NSString *value = [[self stringValueOfField:field] expandedString];
     if([NSString isEmptyString:value])
         return [NSSet set];
 	
@@ -2855,7 +2851,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     NSString *oldString = [self stringValueOfField:field];
 	if([oldString isComplex] || [oldString isInherited]){
 		isInherited = [oldString isInherited];
-		oldString = [NSString stringWithString:oldString];
+		oldString = [oldString expandedString];
 	}
 	
 	if(isInherited){
@@ -2912,7 +2908,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     NSString *oldString = [self stringValueOfField:field];
 	if([oldString isComplex] || [oldString isInherited]){
 		isInherited = [oldString isInherited];
-		oldString = [NSString stringWithString:oldString];
+		oldString = [oldString expandedString];
 	}
 	
 	if(isInherited){
@@ -3050,7 +3046,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     NSString *oldString = [self stringValueOfField:field];
 	if([oldString isComplex] || [oldString isInherited]){
 		isInherited = [oldString isInherited];
-		oldString = [NSString stringWithString:oldString];
+		oldString = [oldString expandedString];
 	}
 	
 	if(isInherited){
