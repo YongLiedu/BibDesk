@@ -528,6 +528,9 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
         loadingWebFrame = nil;
     }
     
+    // !!! logs are here to help diagnose problems that users are reporting
+    NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
+    
     NSURL *url = [[[frame provisionalDataSource] request] URL];
     NSString *errorHTML = [NSString stringWithFormat:@"<html><body><h1>%@</h1></body></html>", [error localizedDescription]];
     [frame loadAlternateHTMLString:errorHTML baseURL:nil forUnreachableURL:url];
@@ -539,9 +542,13 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
         [group addPublications:nil];
         loadingWebFrame = nil;
     }
+    
     // !!! logs are here to help diagnose problems that users are reporting
     NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
-    [NSApp presentError:error];
+    
+    NSURL *url = [[[frame provisionalDataSource] request] URL];
+    NSString *errorHTML = [NSString stringWithFormat:@"<html><body><h1>%@</h1></body></html>", [error localizedDescription]];
+    [frame loadAlternateHTMLString:errorHTML baseURL:nil forUnreachableURL:url];
 }
 
 - (void)webView:(WebView *)sender didReceiveServerRedirectForProvisionalLoadForFrame:(WebFrame *)frame{
