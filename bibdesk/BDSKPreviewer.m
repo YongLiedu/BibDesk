@@ -52,7 +52,7 @@
 #import "BDSKPrintableView.h"
 #import "BDSKPreferenceController.h"
 
-static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
+#define BDSKPreviewPanelFrameAutosaveName @"BDSKPreviewPanel"
 
 @protocol BDSKPreviewerServerThread <BDSKAsyncDOServerThread>
 - (oneway void)processQueueUntilEmpty;

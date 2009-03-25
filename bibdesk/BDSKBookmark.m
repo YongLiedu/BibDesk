@@ -43,9 +43,9 @@
 #define URL_KEY         @"URLString"
 #define TYPE_KEY        @"Type"
 
-static NSString *BDSKBookmarkTypeBookmarkString = @"bookmark";
-static NSString *BDSKBookmarkTypeFolderString = @"folder";
-static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
+#define BDSKBookmarkTypeBookmarkString @"bookmark"
+#define BDSKBookmarkTypeFolderString @"folder"
+#define BDSKBookmarkTypeSeparatorString @"separator"
 
 
 @interface BDSKPlaceholderBookmark : BDSKBookmark

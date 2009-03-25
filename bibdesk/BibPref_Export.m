@@ -46,7 +46,7 @@
 #import "NSMenu_BDSKExtensions.h"
 #import "BDSKPreferenceRecord.h"
 
-static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
+#define BDSKTemplateRowsPboardType @"BDSKTemplateRowsPboardType"
 
 
 @interface BibPref_Export (Private)

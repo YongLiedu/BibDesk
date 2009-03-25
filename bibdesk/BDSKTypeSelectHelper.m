@@ -42,7 +42,7 @@
 #define REPEAT_CHARACTER 0x2F
 #define CANCEL_CHARACTER 0x1B
 
-static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDidChangeFirstResponderNotification";
+#define BDSKWindowDidChangeFirstResponderNotification @"BDSKWindowDidChangeFirstResponderNotification"
 
 @interface NSString (BDSKTypeAheadHelperExtensions)
 - (BOOL)containsStringStartingAtWord:(NSString *)string options:(int)mask range:(NSRange)range;

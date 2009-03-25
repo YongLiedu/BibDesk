@@ -47,11 +47,11 @@
 
 #define MAX_RESULTS 100
 
-static NSString *BDSKUSMARCString = @"US MARC";
-static NSString *BDSKUNIMARCString = @"UNIMARC";
-static NSString *BDSKMARCXMLString = @"MARC XML";
-static NSString *BDSKDCXMLString = @"DC XML";
-static NSString *BDSKMODSString = @"MODS";
+#define BDSKUSMARCString @"US MARC"
+#define BDSKUNIMARCString @"UNIMARC"
+#define BDSKMARCXMLString @"MARC XML"
+#define BDSKDCXMLString @"DC XML"
+#define BDSKMODSString @"MODS"
 
 @implementation BDSKZoomGroupServer
 

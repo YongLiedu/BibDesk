@@ -84,7 +84,7 @@
 #import "BDSKApplication.h"
 #import "NSColor_BDSKExtensions.h"
 
-static NSString *BDSKEditorFrameAutosaveName = @"BDSKEditor window autosave name";
+#define BDSKEditorFrameAutosaveName @"BDSKEditor window autosave name"
 static char BDSKEditorObservationContext;
 
 // offset of the table from the left window edge

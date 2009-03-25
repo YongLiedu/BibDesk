@@ -326,11 +326,11 @@ static void addStringToDictionary(NSString *value, NSMutableDictionary *pubDict,
     [scanner release];
 }
 
-static NSString *MARCTitleTag = @"245";
-static NSString *MARCSubtitleSubTag = @"b";
-static NSString *MARCPersonTag = @"700";
-static NSString *MARCNameSubTag = @"a";
-static NSString *MARCRelatorSubTag = @"e";
+#define MARCTitleTag @"245"
+#define MARCSubtitleSubTag @"b"
+#define MARCPersonTag @"700"
+#define MARCNameSubTag @"a"
+#define MARCRelatorSubTag @"e"
 
 static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pubDict, NSString *tag, NSString *subTag, BOOL isUNIMARC){
     NSString *key = [[[BDSKTypeManager sharedManager] fieldNamesForMARCTag:tag] objectForKey:subTag];

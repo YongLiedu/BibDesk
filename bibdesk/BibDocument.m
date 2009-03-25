@@ -143,14 +143,14 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 // private keys used for storing window information in xattrs
-static NSString *BDSKMainWindowExtendedAttributeKey = @"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes";
-static NSString *BDSKGroupSplitViewFractionKey = @"BDSKGroupSplitViewFractionKey";
-static NSString *BDSKMainTableSplitViewFractionKey = @"BDSKMainTableSplitViewFractionKey";
-static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
-static NSString *BDSKSelectedPublicationsKey = @"BDSKSelectedPublicationsKey";
-static NSString *BDSKDocumentStringEncodingKey = @"BDSKDocumentStringEncodingKey";
-static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentageKey";
-static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
+#define BDSKMainWindowExtendedAttributeKey @"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes"
+#define BDSKGroupSplitViewFractionKey @"BDSKGroupSplitViewFractionKey"
+#define BDSKMainTableSplitViewFractionKey @"BDSKMainTableSplitViewFractionKey"
+#define BDSKDocumentWindowFrameKey @"BDSKDocumentWindowFrameKey"
+#define BDSKSelectedPublicationsKey @"BDSKSelectedPublicationsKey"
+#define BDSKDocumentStringEncodingKey @"BDSKDocumentStringEncodingKey"
+#define BDSKDocumentScrollPercentageKey @"BDSKDocumentScrollPercentageKey"
+#define BDSKSelectedGroupsKey @"BDSKSelectedGroupsKey"
 
 static char BDSKDocumentFileViewObservationContext;
 static char BDSKDocumentDefaultsObservationContext;

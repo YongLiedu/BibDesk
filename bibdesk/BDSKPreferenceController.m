@@ -54,11 +54,11 @@
 #define MINIMUM_SYSTEM_VERSION_KEY @"minimumSystemVersion"
 #define MAXIMUM_SYSTEM_VERSION_KEY @"maximumSystemVersion"
 
-static NSString *BDSKPreferencesToolbarIdentifier = @"BDSKPreferencesToolbarIdentifier";
-static NSString *BDSKPreferencesToolbarShowAllItemIdentifier = @"BDSKPreferencesToolbarShowAllItemIdentifier";
-static NSString *BDSKPreferencesToolbarPreviousItemIdentifier = @"BDSKPreferencesToolbarPreviousItemIdentifier";
-static NSString *BDSKPreferencesToolbarNextItemIdentifier = @"BDSKPreferencesToolbarNextItemIdentifier";
-static NSString *BDSKPreferencesToolbarSearchItemIdentifier = @"BDSKPreferencesToolbarSearchItemIdentifier";
+#define BDSKPreferencesToolbarIdentifier @"BDSKPreferencesToolbarIdentifier"
+#define BDSKPreferencesToolbarShowAllItemIdentifier @"BDSKPreferencesToolbarShowAllItemIdentifier"
+#define BDSKPreferencesToolbarPreviousItemIdentifier @"BDSKPreferencesToolbarPreviousItemIdentifier"
+#define BDSKPreferencesToolbarNextItemIdentifier @"BDSKPreferencesToolbarNextItemIdentifier"
+#define BDSKPreferencesToolbarSearchItemIdentifier @"BDSKPreferencesToolbarSearchItemIdentifier"
 
 
 @interface BDSKPreferenceController (BDSKPrivate)

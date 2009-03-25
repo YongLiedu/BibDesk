@@ -40,7 +40,7 @@
 #import <Carbon/Carbon.h>
 #import "NSURL_BDSKExtensions.h"
 
-static NSString *BDSKDefaultBrowserKey = @"BDSKDefaultBrowserKey";
+#define BDSKDefaultBrowserKey @"BDSKDefaultBrowserKey"
 
 @implementation NSWorkspace (BDSKExtensions)
 

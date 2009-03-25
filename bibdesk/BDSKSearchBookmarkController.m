@@ -43,15 +43,15 @@
 #import "BDSKBookmarkOutlineView.h"
 #import "BDSKTextWithIconCell.h"
 
-static NSString *BDSKSearchBookmarkRowsPboardType = @"BDSKSearchBookmarkRowsPboardType";
+#define BDSKSearchBookmarkRowsPboardType @"BDSKSearchBookmarkRowsPboardType"
 
-static NSString *BDSKSearchBookmarksToolbarIdentifier = @"BDSKSearchBookmarksToolbarIdentifier";
-static NSString *BDSKSearchBookmarksNewFolderToolbarItemIdentifier = @"BDSKSearchBookmarksNewFolderToolbarItemIdentifier";
-static NSString *BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier = @"BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier";
-static NSString *BDSKSearchBookmarksDeleteToolbarItemIdentifier = @"BDSKSearchBookmarksDeleteToolbarItemIdentifier";
+#define BDSKSearchBookmarksToolbarIdentifier @"BDSKSearchBookmarksToolbarIdentifier"
+#define BDSKSearchBookmarksNewFolderToolbarItemIdentifier @"BDSKSearchBookmarksNewFolderToolbarItemIdentifier"
+#define BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier @"BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier"
+#define BDSKSearchBookmarksDeleteToolbarItemIdentifier @"BDSKSearchBookmarksDeleteToolbarItemIdentifier"
 
-static NSString *BDSKSearchBookmarkChildrenKey = @"children";
-static NSString *BDSKSearchBookmarkLabelKey = @"label";
+#define BDSKSearchBookmarkChildrenKey @"children"
+#define BDSKSearchBookmarkLabelKey @"label"
 
 static char BDSKSearchBookmarkPropertiesObservationContext;
 

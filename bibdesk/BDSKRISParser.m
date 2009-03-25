@@ -223,8 +223,8 @@
     return type;
 }
 
-static NSString *RISStartPageString = @"Sp";
-static NSString *RISEndPageString = @"Ep";
+#define RISStartPageString @"Sp"
+#define RISEndPageString @"Ep"
 
 + (void)fixPublicationDictionary:(NSMutableDictionary *)pubDict;
 {

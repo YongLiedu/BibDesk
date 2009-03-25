@@ -46,7 +46,7 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKTextWithIconCell.h"
 
-static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow";
+#define BDSKFileMigrationFrameAutosaveName @"BDSKFileMigrationWindow"
 
 @interface BDSKURLTransformer : NSValueTransformer
 @end

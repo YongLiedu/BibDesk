@@ -80,7 +80,7 @@
 #import "BDSKCFCallBacks.h"
 #import "NSCharacterSet_BDSKExtensions.h"
 
-static NSString *BDSKDefaultCiteKey = @"cite-key";
+#define BDSKDefaultCiteKey @"cite-key"
 static NSSet *fieldsToWriteIfEmpty = nil;
 
 

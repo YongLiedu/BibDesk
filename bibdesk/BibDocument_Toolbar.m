@@ -48,15 +48,15 @@
 #define TOOLBAR_SEARCHFIELD_MIN_SIZE NSMakeSize(110.0, 22.0)
 #define TOOLBAR_SEARCHFIELD_MAX_SIZE NSMakeSize(1000.0, 22.0)
 
-static NSString *BibDocumentToolbarIdentifier = @"BibDocumentToolbarIdentifier";
-static NSString *BibDocumentToolbarNewItemIdentifier = @"BibDocumentToolbarNewItemIdentifier";
-static NSString *BibDocumentToolbarSearchItemIdentifier = @"BibDocumentToolbarSearchItemIdentifier";
-static NSString *BibDocumentToolbarActionItemIdentifier = @"BibDocumentToolbarActionItemIdentifier";
-static NSString *BibDocumentToolbarGroupActionItemIdentifier = @"BibDocumentToolbarGroupActionItemIdentifier";
-static NSString *BibDocumentToolbarEditItemIdentifier = @"BibDocumentToolbarEditItemIdentifier";
-static NSString *BibDocumentToolbarDeleteItemIdentifier = @"BibDocumentToolbarDeleteItemIdentifier";
-static NSString *BibDocumentToolbarPreviewItemIdentifier = @"BibDocumentToolbarPreviewItemIdentifier";
-static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolbarCiteDrawerItemIdentifier";
+#define BibDocumentToolbarIdentifier @"BibDocumentToolbarIdentifier"
+#define BibDocumentToolbarNewItemIdentifier @"BibDocumentToolbarNewItemIdentifier"
+#define BibDocumentToolbarSearchItemIdentifier @"BibDocumentToolbarSearchItemIdentifier"
+#define BibDocumentToolbarActionItemIdentifier @"BibDocumentToolbarActionItemIdentifier"
+#define BibDocumentToolbarGroupActionItemIdentifier @"BibDocumentToolbarGroupActionItemIdentifier"
+#define BibDocumentToolbarEditItemIdentifier @"BibDocumentToolbarEditItemIdentifier"
+#define BibDocumentToolbarDeleteItemIdentifier @"BibDocumentToolbarDeleteItemIdentifier"
+#define BibDocumentToolbarPreviewItemIdentifier @"BibDocumentToolbarPreviewItemIdentifier"
+#define BibDocumentToolbarCiteDrawerItemIdentifier @"BibDocumentToolbarCiteDrawerItemIdentifier"
 
 @implementation BibDocument (Toolbar)
 

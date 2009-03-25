@@ -38,9 +38,9 @@
 
 #import "BDSKSearchBookmark.h"
 
-static NSString *BDSKSearchBookmarkTypeBookmarkString = @"bookmark";
-static NSString *BDSKSearchBookmarkTypeFolderString = @"folder";
-static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
+#define BDSKSearchBookmarkTypeBookmarkString @"bookmark"
+#define BDSKSearchBookmarkTypeFolderString @"folder"
+#define BDSKSearchBookmarkTypeSeparatorString @"separator"
 
 #define CHILDREN_KEY        @"children"
 #define LABEL_KEY           @"label"

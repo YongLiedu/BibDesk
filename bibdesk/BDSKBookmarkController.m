@@ -44,17 +44,17 @@
 #import "BDSKBookmarkOutlineView.h"
 #import "BDSKTextWithIconCell.h"
 
-static NSString *BDSKBookmarkRowsPboardType = @"BDSKBookmarkRowsPboardType";
+#define BDSKBookmarkRowsPboardType @"BDSKBookmarkRowsPboardType"
 
-static NSString *BDSKBookmarksToolbarIdentifier = @"BDSKBookmarksToolbarIdentifier";
-static NSString *BDSKBookmarksNewBookmarkToolbarItemIdentifier = @"BDSKBookmarksNewBookmarkToolbarItemIdentifier";
-static NSString *BDSKBookmarksNewFolderToolbarItemIdentifier = @"BDSKBookmarksNewFolderToolbarItemIdentifier";
-static NSString *BDSKBookmarksNewSeparatorToolbarItemIdentifier = @"BDSKBookmarksNewSeparatorToolbarItemIdentifier";
-static NSString *BDSKBookmarksDeleteToolbarItemIdentifier = @"BDSKBookmarksDeleteToolbarItemIdentifier";
+#define BDSKBookmarksToolbarIdentifier @"BDSKBookmarksToolbarIdentifier"
+#define BDSKBookmarksNewBookmarkToolbarItemIdentifier @"BDSKBookmarksNewBookmarkToolbarItemIdentifier"
+#define BDSKBookmarksNewFolderToolbarItemIdentifier @"BDSKBookmarksNewFolderToolbarItemIdentifier"
+#define BDSKBookmarksNewSeparatorToolbarItemIdentifier @"BDSKBookmarksNewSeparatorToolbarItemIdentifier"
+#define BDSKBookmarksDeleteToolbarItemIdentifier @"BDSKBookmarksDeleteToolbarItemIdentifier"
 
-static NSString *BDSKBookmarkChildrenKey = @"children";
-static NSString *BDSKBookmarkNameKey = @"name";
-static NSString *BDSKBookmarkUrlStringKey = @"urlString";
+#define BDSKBookmarkChildrenKey @"children"
+#define BDSKBookmarkNameKey @"name"
+#define BDSKBookmarkUrlStringKey @"urlString"
 
 static char BDSKBookmarkPropertiesObservationContext;
 

@@ -53,8 +53,8 @@
 CFStringRef BDSKInputManagerID = CFSTR("net.sourceforge.bibdesk.inputmanager");
 CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles that we recognize");
 
-static NSString *BDSKBundleIdentifierKey = @"bundleIdentifierKey";
-static int tableIconSize = 24;
+#define BDSKBundleIdentifierKey @"bundleIdentifierKey"
+#define tableIconSize 24
 
 
 @interface BibPref_InputManager (Private)

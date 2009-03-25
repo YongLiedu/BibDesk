@@ -41,7 +41,7 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSCharacterSet_BDSKExtensions.h"
 
-static NSString *BDSKRangeKey = @"__BDSKRange";
+#define BDSKRangeKey @"__BDSKRange"
 
 static void BDSKGetAttributeDictionariesAndFixString(NSMutableArray *attributeDictionaries, NSMutableString *mutableString, NSDictionary *attributes, NSRange *rangePtr)
 {

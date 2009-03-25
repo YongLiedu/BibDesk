@@ -43,8 +43,8 @@
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKVersionNumber.h"
 
-static NSString *BDSKMenuTargetURL = @"BDSKMenuTargetURL";
-static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
+#define BDSKMenuTargetURL @"BDSKMenuTargetURL"
+#define BDSKMenuApplicationURL @"BDSKMenuApplicationURL"
 
 @interface BDSKOpenWithMenuController : NSObject 
 + (id)sharedInstance;

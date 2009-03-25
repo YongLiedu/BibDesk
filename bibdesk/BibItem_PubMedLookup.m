@@ -52,7 +52,7 @@
 
 // here is another exampled of a doi regex = /(10\.[0-9]+\/[a-z0-9\.\-\+\/\(\)]+)/i;
 // from http://userscripts.org/scripts/review/8939
-static NSString *doiRegexString = @"doi[:\\s/]{1,2}(10\\.[0-9]{3,4})[\\s/0]{1,3}(\\S+)";
+#define doiRegexString @"doi[:\\s/]{1,2}(10\\.[0-9]{3,4})[\\s/0]{1,3}(\\S+)"
 
 - (NSString *) stringByExtractingDOIFromString;
 {

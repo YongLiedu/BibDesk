@@ -53,7 +53,7 @@ static NSMutableArray *searchGroupServers = nil;
 static NSMutableDictionary *searchGroupServerFiles = nil;
 static NSArray *sortDescriptors = nil;
 
-static NSString *BDSKSearchGroupServersDidChangeNotification = @"BDSKSearchGroupServersDidChangeNotification";
+#define BDSKSearchGroupServersDidChangeNotification @"BDSKSearchGroupServersDidChangeNotification"
 
 @implementation BDSKSearchGroupSheetController
 

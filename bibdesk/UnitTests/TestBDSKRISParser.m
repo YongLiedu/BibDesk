@@ -41,9 +41,9 @@
 #import "BDSKRISParser.h"
 
 
-static NSString *goodRIS = @"TY  - JOUR\nT1  - Julian Steward, American Anthropology, and Colonialism\nA1  - Marc Pinkoski\nJF  - Histories of Anthropology Annual\nVL  - 4\nSP  - 172\nEP  - 204\nY1  - 2008\nPB  - University of Nebraska Press\nSN  - 1940-5138\nUR  - http://muse.jhu.edu/journals/histories_of_anthropology_annual/v004/4.pinkoski.html\nN1  - Volume 4, 2008\nER  - \n";
-static NSString *goodRISNoFinalReturnOrSpace = @"TY  - JOUR\nT1  - Julian Steward, American Anthropology, and Colonialism\nA1  - Marc Pinkoski\nJF  - Histories of Anthropology Annual\nVL  - 4\nSP  - 172\nEP  - 204\nY1  - 2008\nPB  - University of Nebraska Press\nSN  - 1940-5138\nUR  - http://muse.jhu.edu/journals/histories_of_anthropology_annual/v004/4.pinkoski.html\nN1  - Volume 4, 2008\nER  -";
-static NSString *badRISSingleSpace = @"TY - JOUR\nT1 - Julian Steward, American Anthropology, and Colonialism\nA1 - Marc Pinkoski\nJF - Histories of Anthropology Annual\nVL - 4\nSP - 172\nEP - 204\nY1 - 2008\nPB - University of Nebraska Press\nSN - 1940-5138\nUR - http://muse.jhu.edu/journals/histories_of_anthropology_annual/v004/4.pinkoski.html\nN1 - Volume 4, 2008\nER -\n";
+#define goodRIS @"TY  - JOUR\nT1  - Julian Steward, American Anthropology, and Colonialism\nA1  - Marc Pinkoski\nJF  - Histories of Anthropology Annual\nVL  - 4\nSP  - 172\nEP  - 204\nY1  - 2008\nPB  - University of Nebraska Press\nSN  - 1940-5138\nUR  - http://muse.jhu.edu/journals/histories_of_anthropology_annual/v004/4.pinkoski.html\nN1  - Volume 4, 2008\nER  - \n"
+#define goodRISNoFinalReturnOrSpace @"TY  - JOUR\nT1  - Julian Steward, American Anthropology, and Colonialism\nA1  - Marc Pinkoski\nJF  - Histories of Anthropology Annual\nVL  - 4\nSP  - 172\nEP  - 204\nY1  - 2008\nPB  - University of Nebraska Press\nSN  - 1940-5138\nUR  - http://muse.jhu.edu/journals/histories_of_anthropology_annual/v004/4.pinkoski.html\nN1  - Volume 4, 2008\nER  -"
+#define badRISSingleSpace @"TY - JOUR\nT1 - Julian Steward, American Anthropology, and Colonialism\nA1 - Marc Pinkoski\nJF - Histories of Anthropology Annual\nVL - 4\nSP - 172\nEP - 204\nY1 - 2008\nPB - University of Nebraska Press\nSN - 1940-5138\nUR - http://muse.jhu.edu/journals/histories_of_anthropology_annual/v004/4.pinkoski.html\nN1 - Volume 4, 2008\nER -\n"
 
 
 @implementation TestBDSKRISParser
