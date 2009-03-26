@@ -71,7 +71,7 @@
     
     if (nil != img) {
         if ([img respondsToSelector:@selector(isTemplate)] && [img isTemplate] && 
-            [self respondsToSelector:@selector(backgroundStyle)] && [self backgroundStyle] == NSBackgroundStyleDark) {
+            [self respondsToSelector:@selector(interiorBackgroundStyle)] && [self interiorBackgroundStyle] == NSBackgroundStyleDark) {
             img = [img invertedImage];
         }
         
