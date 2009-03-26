@@ -54,9 +54,7 @@ static NSString *endColorKey = @"inputColor1";
 
 + (CIImage *)imageWithConstantColor:(CIColor *)color;
 {
-    static CIFilter *colorFilter = nil;
-    if (colorFilter == nil)
-        colorFilter = [[CIFilter filterWithName:@"CIConstantColorGenerator"] retain];    
+    CIFilter *colorFilter = [CIFilter filterWithName:@"CIConstantColorGenerator"];    
     
     [colorFilter setValue:color forKey:@"inputColor"];
     
@@ -65,9 +63,7 @@ static NSString *endColorKey = @"inputColor1";
 
 + (CIImage *)imageInRect:(CGRect)aRect withLinearGradientFromPoint:(CGPoint)startPoint toPoint:(CGPoint)endPoint fromColor:(CIColor *)startColor toColor:(CIColor *)endColor;
 {
-    static CIFilter *linearFilter = nil;
-    if (linearFilter == nil)
-        linearFilter = [[CIFilter filterWithName:@"CILinearGradient"] retain];    
+    CIFilter *linearFilter = [CIFilter filterWithName:@"CILinearGradient"];    
     
     [linearFilter setValue:startColor forKey:startColorKey];
     [linearFilter setValue:endColor forKey:endColorKey];
@@ -96,9 +92,7 @@ static NSString *endColorKey = @"inputColor1";
 
 + (CIImage *)imageWithGaussianGradientWithCenter:(CGPoint)center radius:(float)radius fromColor:(CIColor *)startColor toColor:(CIColor *)endColor;
 {
-    static CIFilter *gaussianFilter = nil;
-    if (gaussianFilter == nil)
-        gaussianFilter = [[CIFilter filterWithName:@"CIGaussianGradient"] retain];    
+    CIFilter *gaussianFilter = [CIFilter filterWithName:@"CIGaussianGradient"];    
     
     [gaussianFilter setValue:startColor forKey:@"inputColor0"];
     [gaussianFilter setValue:endColor forKey:@"inputColor1"];
@@ -111,7 +105,7 @@ static NSString *endColorKey = @"inputColor1";
 
 + (CIColor *)colorWithWhiteOne;
 {
-    static CIColor *color = nil;
+    CIColor *color = nil;
     if (nil == color)
         color = [[CIColor colorWithWhite:1.0] retain];
     return color;
@@ -187,9 +181,7 @@ static NSString *endColorKey = @"inputColor1";
 
 - (CIImage *)blendedImageWithBackground:(CIImage *)background usingMask:(CIImage *)mask;
 {
-    static CIFilter *blendFilter = nil;
-    if (blendFilter == nil)
-        blendFilter = [[CIFilter filterWithName:@"CIBlendWithMask"] retain];    
+    CIFilter *blendFilter = [CIFilter filterWithName:@"CIBlendWithMask"];    
     
     [blendFilter setValue:self forKey:@"inputImage"];
     [blendFilter setValue:background forKey:@"inputBackgroundImage"];
@@ -200,9 +192,7 @@ static NSString *endColorKey = @"inputColor1";
 
 - (CIImage *)blurredImageWithBlurRadius:(float)radius;
 {
-    static CIFilter *gaussianBlurFilter = nil;
-    if (gaussianBlurFilter == nil)
-        gaussianBlurFilter = [[CIFilter filterWithName:@"CIGaussianBlur"] retain];    
+    CIFilter *gaussianBlurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];    
     
     [gaussianBlurFilter setValue:[NSNumber numberWithFloat:radius] forKey:@"inputRadius"];
     [gaussianBlurFilter setValue:self forKey:@"inputImage"];
@@ -212,13 +202,8 @@ static NSString *endColorKey = @"inputColor1";
 
 - (CIImage *)croppedImageWithRect:(CGRect)aRect;
 {
-    static CIFilter *transformFilter = nil;
-    static CIFilter *cropFilter = nil;
-    if (transformFilter == nil)
-        transformFilter = [[CIFilter filterWithName:@"CIAffineTransform"] retain];    
-    if (cropFilter == nil)
-        cropFilter = [[CIFilter filterWithName:@"CICrop"] retain];    
-    
+    CIFilter *transformFilter = [CIFilter filterWithName:@"CIAffineTransform"];
+    CIFilter *cropFilter = [CIFilter filterWithName:@"CICrop"];
     CIImage *image = self;
     
     if (CGPointEqualToPoint(aRect.origin, CGPointZero) == NO) {
@@ -241,12 +226,8 @@ static NSString *endColorKey = @"inputColor1";
 
 - (CIImage *)imageWithAdjustedHueAngle:(float)hue saturationFactor:(float)saturation brightnessBias:(float)brightness;
 {
-    static CIFilter *hueAdjustFilter = nil;
-    static CIFilter *colorControlsFilter = nil;
-    if (hueAdjustFilter == nil)
-        hueAdjustFilter = [[CIFilter filterWithName:@"CIHueAdjust"] retain];    
-    if (colorControlsFilter == nil)
-        colorControlsFilter = [[CIFilter filterWithName:@"CIColorControls"] retain];    
+    CIFilter *hueAdjustFilter = [CIFilter filterWithName:@"CIHueAdjust"];
+    CIFilter *colorControlsFilter = [CIFilter filterWithName:@"CIColorControls"];
     
     [hueAdjustFilter setValue:[NSNumber numberWithFloat:hue * M_PI] forKey:@"inputAngle"];
     [hueAdjustFilter setValue:self forKey:@"inputImage"];
@@ -257,6 +238,14 @@ static NSString *endColorKey = @"inputColor1";
     [colorControlsFilter setValue:[hueAdjustFilter valueForKey:@"outputImage"] forKey:@"inputImage"];
     
     return [colorControlsFilter valueForKey:@"outputImage"];
+}
+
+- (CIImage *)invertedImage {
+    CIFilter *invertFilter = [CIFilter filterWithName:@"CIColorInvert"];
+    
+    [invertFilter setValue:self forKey:@"inputImage"];
+    
+    return [invertFilter valueForKey:@"outputImage"];
 }
 
 @end 

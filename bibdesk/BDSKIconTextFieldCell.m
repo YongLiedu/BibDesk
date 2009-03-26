@@ -70,6 +70,11 @@
     NSImage *img = [self icon];
     
     if (nil != img) {
+        if ([img respondsToSelector:@selector(isTemplate)] && [img isTemplate] && 
+            [self respondsToSelector:@selector(backgroundStyle)] && [self backgroundStyle] == NSBackgroundStyleDark) {
+            img = [img invertedImage];
+        }
+        
         NSRect srcRect = NSZeroRect;
         srcRect.size = [img size];
         

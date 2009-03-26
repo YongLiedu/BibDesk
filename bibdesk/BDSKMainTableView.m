@@ -501,6 +501,8 @@ enum {
         NSImage *paperclip = [[[NSImage paperclipImage] copy] autorelease];
         [paperclip setScalesWhenResized:YES];
         [paperclip setSize:NSMakeSize(16, 16)];
+        if ([paperclip respondsToSelector:@selector(setTemplate:)])
+            [paperclip setTemplate:NO];
         NSImage *color = [[[NSImage imageNamed:@"colors"] copy] autorelease];
         [color setScalesWhenResized:YES];
         [color setSize:NSMakeSize(16, 16)];

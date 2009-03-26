@@ -473,8 +473,11 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
 + (NSImage *)paperclipImage;
 {
     static NSImage *image = nil;
-    if(image == nil)
+    if(image == nil) {
         image = createPaperclipImageWithColor([NSColor blackColor]);
+        if ([image respondsToSelector:@selector(setTemplate:)])
+            [image setTemplate:YES];
+    }
     return image;
 }
 
@@ -532,6 +535,16 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
     [newImage unlockFocus];
     
     return [newImage autorelease];
+}
+
+- (NSImage *)invertedImage {
+    CIImage *ciImage = [CIImage imageWithData:[self TIFFRepresentation]];
+    NSRect rect = {NSZeroPoint, [self size]};
+    NSImage *image = [[[NSImage alloc] initWithSize:rect.size] autorelease];
+    [image lockFocus];
+    [[ciImage invertedImage] drawInRect:rect fromRect:rect operation:NSCompositeCopy fraction:1.0];
+    [image unlockFocus];
+    return image;
 }
 
 - (NSImage *)dragImageWithCount:(int)count;

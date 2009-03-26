@@ -68,6 +68,8 @@
 
 - (CIImage *)imageWithAdjustedHueAngle:(float)hue saturationFactor:(float)saturation brightnessBias:(float)brightness;
 
+- (CIImage *)invertedImage;
+
 @end
 
 
