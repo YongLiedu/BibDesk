@@ -38,9 +38,9 @@
 
 #import "BDSKSearchBookmark.h"
 
-#define BDSKSearchBookmarkTypeBookmarkString @"bookmark"
-#define BDSKSearchBookmarkTypeFolderString @"folder"
-#define BDSKSearchBookmarkTypeSeparatorString @"separator"
+#define BOOKMARK_STRING     @"bookmark"
+#define FOLDER_STRING       @"folder"
+#define SEPARATOR_STRING    @"separator"
 
 #define CHILDREN_KEY        @"children"
 #define LABEL_KEY           @"label"
@@ -205,14 +205,14 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
-    if ([[dictionary objectForKey:BOOKMARK_TYPE_KEY] isEqualToString:BDSKSearchBookmarkTypeFolderString]) {
+    if ([[dictionary objectForKey:BOOKMARK_TYPE_KEY] isEqualToString:FOLDER_STRING]) {
         NSEnumerator *dictEnum = [[dictionary objectForKey:CHILDREN_KEY] objectEnumerator];
         NSDictionary *dict;
         NSMutableArray *newChildren = [NSMutableArray array];
         while (dict = [dictEnum nextObject])
             [newChildren addObject:[[[[self class] alloc] initWithDictionary:dict] autorelease]];
         return [self initFolderWithChildren:newChildren label:[dictionary objectForKey:LABEL_KEY]];
-    } else if ([[dictionary objectForKey:BOOKMARK_TYPE_KEY] isEqualToString:BDSKSearchBookmarkTypeSeparatorString]) {
+    } else if ([[dictionary objectForKey:BOOKMARK_TYPE_KEY] isEqualToString:SEPARATOR_STRING]) {
         return [self initSeparator];
     } else {
         NSMutableDictionary *dict = [[dictionary mutableCopy] autorelease];
@@ -259,7 +259,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (NSDictionary *)dictionaryValue {
-    NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithObjectsAndKeys:BDSKSearchBookmarkTypeBookmarkString, BOOKMARK_TYPE_KEY, label, LABEL_KEY, nil];
+    NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithObjectsAndKeys:BOOKMARK_STRING, BOOKMARK_TYPE_KEY, label, LABEL_KEY, nil];
     [(NSMutableDictionary *)dictionary addEntriesFromDictionary:info];
     return dictionary;
 }
@@ -317,7 +317,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (NSDictionary *)dictionaryValue {
-    return [NSDictionary dictionaryWithObjectsAndKeys:BDSKSearchBookmarkTypeFolderString, BOOKMARK_TYPE_KEY, [children valueForKey:@"dictionaryValue"], CHILDREN_KEY, label, LABEL_KEY, nil];
+    return [NSDictionary dictionaryWithObjectsAndKeys:FOLDER_STRING, BOOKMARK_TYPE_KEY, [children valueForKey:@"dictionaryValue"], CHILDREN_KEY, label, LABEL_KEY, nil];
 }
 
 - (int)bookmarkType {
@@ -376,7 +376,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (NSDictionary *)dictionaryValue {
-    return [NSDictionary dictionaryWithObjectsAndKeys:BDSKSearchBookmarkTypeSeparatorString, BOOKMARK_TYPE_KEY, nil];
+    return [NSDictionary dictionaryWithObjectsAndKeys:SEPARATOR_STRING, BOOKMARK_TYPE_KEY, nil];
 }
 
 - (int)bookmarkType {

@@ -80,7 +80,7 @@
 #import "BDSKCFCallBacks.h"
 #import "NSCharacterSet_BDSKExtensions.h"
 
-#define BDSKDefaultCiteKey @"cite-key"
+#define DEFAULT_CITEKEY @"cite-key"
 static NSSet *fieldsToWriteIfEmpty = nil;
 
 
@@ -255,7 +255,7 @@ static CFDictionaryRef selectorTable = NULL;
 {
 	self = [self initWithType:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKPubTypeStringKey] 
                      fileType:BDSKBibtexString 
-                      citeKey:BDSKDefaultCiteKey 
+                      citeKey:DEFAULT_CITEKEY 
                     pubFields:nil 
                         files:nil 
                         isNew:YES];
@@ -310,7 +310,7 @@ static CFDictionaryRef selectorTable = NULL;
         [self updateMetadataForKey:nil];
         
         if (key == nil) {
-            [self setCiteKeyString: BDSKDefaultCiteKey];
+            [self setCiteKeyString: DEFAULT_CITEKEY];
         } else {
             [self setCiteKeyString: key];
         }
@@ -1094,7 +1094,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (BOOL)hasEmptyOrDefaultCiteKey{
     NSString *key = [self citeKey];
-    return [NSString isEmptyString:key] || [key isEqualToString:BDSKDefaultCiteKey];
+    return [NSString isEmptyString:key] || [key isEqualToString:DEFAULT_CITEKEY];
 }
 
 - (BOOL)canGenerateAndSetCiteKey

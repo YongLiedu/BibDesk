@@ -47,11 +47,11 @@
 
 #define MAX_RESULTS 100
 
-#define BDSKUSMARCString @"US MARC"
-#define BDSKUNIMARCString @"UNIMARC"
-#define BDSKMARCXMLString @"MARC XML"
-#define BDSKDCXMLString @"DC XML"
-#define BDSKMODSString @"MODS"
+#define USMARC_STRING   @"US MARC"
+#define UNIMARC_STRING  @"UNIMARC"
+#define MARCXML_STRING  @"MARC XML"
+#define DCXML_STRING    @"DC XML"
+#define MODS_STRING     @"MODS"
 
 @implementation BDSKZoomGroupServer
 
@@ -62,15 +62,15 @@
 }
 
 + (NSArray *)supportedRecordSyntaxes {
-    return [NSArray arrayWithObjects:BDSKUSMARCString, BDSKUNIMARCString, BDSKMARCXMLString, BDSKDCXMLString, BDSKMODSString, nil];
+    return [NSArray arrayWithObjects:USMARC_STRING, UNIMARC_STRING, MARCXML_STRING, DCXML_STRING, MODS_STRING, nil];
 }
 
 + (ZOOMSyntaxType)zoomRecordSyntaxForRecordSyntaxString:(NSString *)syntax{
-    if ([syntax isEqualToString:BDSKUSMARCString]) 
+    if ([syntax isEqualToString:USMARC_STRING]) 
         return USMARC;
-    else if ([syntax isEqualToString:BDSKUNIMARCString]) 
+    else if ([syntax isEqualToString:UNIMARC_STRING]) 
         return UNIMARC;
-    else if ([syntax isEqualToString:BDSKMARCXMLString] || [syntax isEqualToString:BDSKDCXMLString] || [syntax isEqualToString:BDSKMODSString]) 
+    else if ([syntax isEqualToString:MARCXML_STRING] || [syntax isEqualToString:DCXML_STRING] || [syntax isEqualToString:MODS_STRING]) 
         return XML;
     else
         return UNKNOWN;
@@ -231,17 +231,17 @@
 {
     NSString *recordSyntax = [serverInfo recordSyntax];
     int stringType = BDSKUnknownStringType;
-    if([recordSyntax isEqualToString:BDSKUSMARCString] || [recordSyntax isEqualToString:BDSKUNIMARCString]) {
+    if([recordSyntax isEqualToString:USMARC_STRING] || [recordSyntax isEqualToString:UNIMARC_STRING]) {
         stringType = BDSKMARCStringType;
-    } else if([recordSyntax isEqualToString:BDSKMARCXMLString]) {
+    } else if([recordSyntax isEqualToString:MARCXML_STRING]) {
         stringType = BDSKMARCStringType;
         if ([BDSKStringParser canParseString:string ofType:stringType] == NO)
             stringType = BDSKDublinCoreStringType;
-    } else if([recordSyntax isEqualToString:BDSKDCXMLString]) {
+    } else if([recordSyntax isEqualToString:DCXML_STRING]) {
         stringType = BDSKDublinCoreStringType;
         if ([BDSKStringParser canParseString:string ofType:stringType] == NO)
             stringType = BDSKMARCStringType;
-    } else if([recordSyntax isEqualToString:BDSKMODSString]) {
+    } else if([recordSyntax isEqualToString:MODS_STRING]) {
         stringType = BDSKMODSStringType;
     }
     if (NO == [BDSKStringParser canParseString:string ofType:stringType])

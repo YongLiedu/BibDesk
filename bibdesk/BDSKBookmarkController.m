@@ -46,15 +46,15 @@
 
 #define BDSKBookmarkRowsPboardType @"BDSKBookmarkRowsPboardType"
 
-#define BDSKBookmarksToolbarIdentifier @"BDSKBookmarksToolbarIdentifier"
-#define BDSKBookmarksNewBookmarkToolbarItemIdentifier @"BDSKBookmarksNewBookmarkToolbarItemIdentifier"
-#define BDSKBookmarksNewFolderToolbarItemIdentifier @"BDSKBookmarksNewFolderToolbarItemIdentifier"
-#define BDSKBookmarksNewSeparatorToolbarItemIdentifier @"BDSKBookmarksNewSeparatorToolbarItemIdentifier"
-#define BDSKBookmarksDeleteToolbarItemIdentifier @"BDSKBookmarksDeleteToolbarItemIdentifier"
+#define BDSKBookmarksToolbarIdentifier                  @"BDSKBookmarksToolbarIdentifier"
+#define BDSKBookmarksNewBookmarkToolbarItemIdentifier   @"BDSKBookmarksNewBookmarkToolbarItemIdentifier"
+#define BDSKBookmarksNewFolderToolbarItemIdentifier     @"BDSKBookmarksNewFolderToolbarItemIdentifier"
+#define BDSKBookmarksNewSeparatorToolbarItemIdentifier  @"BDSKBookmarksNewSeparatorToolbarItemIdentifier"
+#define BDSKBookmarksDeleteToolbarItemIdentifier        @"BDSKBookmarksDeleteToolbarItemIdentifier"
 
-#define BDSKBookmarkChildrenKey @"children"
-#define BDSKBookmarkNameKey @"name"
-#define BDSKBookmarkUrlStringKey @"urlString"
+#define CHILDREN_KEY    @"children"
+#define NAME_KEY        @"name"
+#define URLSTRING_KEY   @"urlString"
 
 static char BDSKBookmarkPropertiesObservationContext;
 
@@ -323,10 +323,10 @@ static id sharedBookmarkController = nil;
     BDSKBookmark *bm;
     while (bm = [bmEnum nextObject]) {
         if ([bm bookmarkType] != BDSKBookmarkTypeSeparator) {
-            [bm addObserver:self forKeyPath:BDSKBookmarkNameKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKBookmarkPropertiesObservationContext];
-            [bm addObserver:self forKeyPath:BDSKBookmarkUrlStringKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKBookmarkPropertiesObservationContext];
+            [bm addObserver:self forKeyPath:NAME_KEY options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKBookmarkPropertiesObservationContext];
+            [bm addObserver:self forKeyPath:URLSTRING_KEY options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKBookmarkPropertiesObservationContext];
             if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
-                [bm addObserver:self forKeyPath:BDSKBookmarkChildrenKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKBookmarkPropertiesObservationContext];
+                [bm addObserver:self forKeyPath:CHILDREN_KEY options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKBookmarkPropertiesObservationContext];
                 [self startObservingBookmarks:[bm children]];
             }
         }
@@ -338,10 +338,10 @@ static id sharedBookmarkController = nil;
     BDSKBookmark *bm;
     while (bm = [bmEnum nextObject]) {
         if ([bm bookmarkType] != BDSKBookmarkTypeSeparator) {
-            [bm removeObserver:self forKeyPath:BDSKBookmarkNameKey];
-            [bm removeObserver:self forKeyPath:BDSKBookmarkUrlStringKey];
+            [bm removeObserver:self forKeyPath:NAME_KEY];
+            [bm removeObserver:self forKeyPath:URLSTRING_KEY];
             if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
-                [bm removeObserver:self forKeyPath:BDSKBookmarkChildrenKey];
+                [bm removeObserver:self forKeyPath:CHILDREN_KEY];
                 [self stopObservingBookmarks:[bm children]];
             }
         }
@@ -349,15 +349,15 @@ static id sharedBookmarkController = nil;
 }
 
 - (void)setChildren:(NSArray *)newChildren ofBookmark:(BDSKBookmark *)bookmark {
-    [[bookmark mutableArrayValueForKey:BDSKBookmarkChildrenKey] setArray:newChildren];
+    [[bookmark mutableArrayValueForKey:CHILDREN_KEY] setArray:newChildren];
 }
 
 - (void)insertObjects:(NSArray *)newChildren inChildrenOfBookmark:(BDSKBookmark *)bookmark atIndexes:(NSIndexSet *)indexes {
-    [[bookmark mutableArrayValueForKey:BDSKBookmarkChildrenKey] insertObjects:newChildren atIndexes:indexes];
+    [[bookmark mutableArrayValueForKey:CHILDREN_KEY] insertObjects:newChildren atIndexes:indexes];
 }
 
 - (void)removeObjectsFromChildrenOfBookmark:(BDSKBookmark *)bookmark atIndexes:(NSIndexSet *)indexes {
-    [[bookmark mutableArrayValueForKey:BDSKBookmarkChildrenKey] removeObjectsAtIndexes:indexes];
+    [[bookmark mutableArrayValueForKey:CHILDREN_KEY] removeObjectsAtIndexes:indexes];
 }
 
 #pragma mark KVO
@@ -374,7 +374,7 @@ static id sharedBookmarkController = nil;
         
         switch ([[change objectForKey:NSKeyValueChangeKindKey] unsignedIntValue]) {
             case NSKeyValueChangeSetting:
-                if ([keyPath isEqualToString:BDSKBookmarkChildrenKey]) {
+                if ([keyPath isEqualToString:CHILDREN_KEY]) {
                     NSMutableArray *old = [NSMutableArray arrayWithArray:oldValue];
                     NSMutableArray *new = [NSMutableArray arrayWithArray:newValue];
                     [old removeObjectsInArray:newValue];
@@ -382,26 +382,26 @@ static id sharedBookmarkController = nil;
                     [self stopObservingBookmarks:old];
                     [self startObservingBookmarks:new];
                     [[[self undoManager] prepareWithInvocationTarget:self] setChildren:oldValue ofBookmark:bookmark];
-                } else if ([keyPath isEqualToString:BDSKBookmarkNameKey]) {
+                } else if ([keyPath isEqualToString:NAME_KEY]) {
                     [(BDSKBookmark *)[[self undoManager] prepareWithInvocationTarget:bookmark] setName:oldValue];
-                } else if ([keyPath isEqualToString:BDSKBookmarkUrlStringKey]) {
+                } else if ([keyPath isEqualToString:URLSTRING_KEY]) {
                     [[[self undoManager] prepareWithInvocationTarget:bookmark] setUrlString:oldValue];
                 }
                 break;
             case NSKeyValueChangeInsertion:
-                if ([keyPath isEqualToString:BDSKBookmarkChildrenKey]) {
+                if ([keyPath isEqualToString:CHILDREN_KEY]) {
                     [self startObservingBookmarks:newValue];
                     [[[self undoManager] prepareWithInvocationTarget:self] removeObjectsFromChildrenOfBookmark:bookmark atIndexes:indexes];
                 }
                 break;
             case NSKeyValueChangeRemoval:
-                if ([keyPath isEqualToString:BDSKBookmarkChildrenKey]) {
+                if ([keyPath isEqualToString:CHILDREN_KEY]) {
                     [self stopObservingBookmarks:oldValue];
                     [[[self undoManager] prepareWithInvocationTarget:self] insertObjects:oldValue inChildrenOfBookmark:bookmark atIndexes:indexes];
                 }
                 break;
             case NSKeyValueChangeReplacement:
-                if ([keyPath isEqualToString:BDSKBookmarkChildrenKey]) {
+                if ([keyPath isEqualToString:CHILDREN_KEY]) {
                     [self stopObservingBookmarks:oldValue];
                     [self startObservingBookmarks:newValue];
                     [[[self undoManager] prepareWithInvocationTarget:self] removeObjectsFromChildrenOfBookmark:bookmark atIndexes:indexes];

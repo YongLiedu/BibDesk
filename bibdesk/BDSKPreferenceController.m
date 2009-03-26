@@ -45,20 +45,20 @@
 #import "BDSKVersionNumber.h"
 #import <Sparkle/Sparkle.h>
 
-#define LOCALIZATION_TABLE @"Preferences"
-#define DEFAULTS_TABLE @"Preferences"
-#define IDENTIFIER_KEY @"identifier"
-#define TITLE_KEY @"title"
-#define INITIAL_VALUES_KEY @"initialValues"
-#define PANES_KEY @"panes"
-#define MINIMUM_SYSTEM_VERSION_KEY @"minimumSystemVersion"
-#define MAXIMUM_SYSTEM_VERSION_KEY @"maximumSystemVersion"
+#define LOCALIZATION_TABLE          @"Preferences"
+#define DEFAULTS_TABLE              @"Preferences"
+#define IDENTIFIER_KEY              @"identifier"
+#define TITLE_KEY                   @"title"
+#define INITIAL_VALUES_KEY          @"initialValues"
+#define PANES_KEY                   @"panes"
+#define MINIMUM_SYSTEM_VERSION_KEY  @"minimumSystemVersion"
+#define MAXIMUM_SYSTEM_VERSION_KEY  @"maximumSystemVersion"
 
-#define BDSKPreferencesToolbarIdentifier @"BDSKPreferencesToolbarIdentifier"
-#define BDSKPreferencesToolbarShowAllItemIdentifier @"BDSKPreferencesToolbarShowAllItemIdentifier"
-#define BDSKPreferencesToolbarPreviousItemIdentifier @"BDSKPreferencesToolbarPreviousItemIdentifier"
-#define BDSKPreferencesToolbarNextItemIdentifier @"BDSKPreferencesToolbarNextItemIdentifier"
-#define BDSKPreferencesToolbarSearchItemIdentifier @"BDSKPreferencesToolbarSearchItemIdentifier"
+#define BDSKPreferencesToolbarIdentifier                @"BDSKPreferencesToolbarIdentifier"
+#define BDSKPreferencesToolbarShowAllItemIdentifier     @"BDSKPreferencesToolbarShowAllItemIdentifier"
+#define BDSKPreferencesToolbarPreviousItemIdentifier    @"BDSKPreferencesToolbarPreviousItemIdentifier"
+#define BDSKPreferencesToolbarNextItemIdentifier        @"BDSKPreferencesToolbarNextItemIdentifier"
+#define BDSKPreferencesToolbarSearchItemIdentifier      @"BDSKPreferencesToolbarSearchItemIdentifier"
 
 
 @interface BDSKPreferenceController (BDSKPrivate)

@@ -43,9 +43,9 @@
 #define URL_KEY         @"URLString"
 #define TYPE_KEY        @"Type"
 
-#define BDSKBookmarkTypeBookmarkString @"bookmark"
-#define BDSKBookmarkTypeFolderString @"folder"
-#define BDSKBookmarkTypeSeparatorString @"separator"
+#define BOOKMARK_STRING  @"bookmark"
+#define FOLDER_STRING    @"folder"
+#define SEPARATOR_STRING @"separator"
 
 
 @interface BDSKPlaceholderBookmark : BDSKBookmark
@@ -208,14 +208,14 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
-    if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:BDSKBookmarkTypeFolderString]) {
+    if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:FOLDER_STRING]) {
         NSEnumerator *dictEnum = [[dictionary objectForKey:CHILDREN_KEY] objectEnumerator];
         NSDictionary *dict;
         NSMutableArray *newChildren = [NSMutableArray array];
         while (dict = [dictEnum nextObject])
             [newChildren addObject:[[[[self class] alloc] initWithDictionary:dict] autorelease]];
         return [self initFolderWithChildren:newChildren name:[dictionary objectForKey:TITLE_KEY]];
-    } else if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:BDSKBookmarkTypeSeparatorString]) {
+    } else if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:SEPARATOR_STRING]) {
         return [self initSeparator];
     } else {
         return [self initWithUrlString:[dictionary objectForKey:URL_KEY] name:[dictionary objectForKey:TITLE_KEY]];
@@ -259,7 +259,7 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (NSDictionary *)dictionaryValue {
-    return [NSDictionary dictionaryWithObjectsAndKeys:BDSKBookmarkTypeBookmarkString, TYPE_KEY, urlString, URL_KEY, name, TITLE_KEY, nil];
+    return [NSDictionary dictionaryWithObjectsAndKeys:BOOKMARK_STRING, TYPE_KEY, urlString, URL_KEY, name, TITLE_KEY, nil];
 }
 
 - (int)bookmarkType {
@@ -354,7 +354,7 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (NSDictionary *)dictionaryValue {
-    return [NSDictionary dictionaryWithObjectsAndKeys:BDSKBookmarkTypeFolderString, TYPE_KEY, [children valueForKey:@"dictionaryValue"], CHILDREN_KEY, name, TITLE_KEY, nil];
+    return [NSDictionary dictionaryWithObjectsAndKeys:FOLDER_STRING, TYPE_KEY, [children valueForKey:@"dictionaryValue"], CHILDREN_KEY, name, TITLE_KEY, nil];
 }
 
 - (int)bookmarkType {
@@ -427,7 +427,7 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (NSDictionary *)dictionaryValue {
-    return [NSDictionary dictionaryWithObjectsAndKeys:BDSKBookmarkTypeSeparatorString, TYPE_KEY, nil];
+    return [NSDictionary dictionaryWithObjectsAndKeys:SEPARATOR_STRING, TYPE_KEY, nil];
 }
 
 - (int)bookmarkType {
