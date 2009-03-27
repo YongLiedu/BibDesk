@@ -285,10 +285,19 @@ static NSString *stringWithNumber(NSNumber *number)
     [countString addAttributes:countAttributes range:countRange];
     
     // Draw the text
-    // @@ Mail.app uses NSLineBreakByTruncatingTail for this
     NSRect textRect = NSInsetRect([self textRectForBounds:aRect], SIZE_OF_TEXT_FIELD_BORDER, 0.0); 
     NSRange labelRange = NSMakeRange(0, [label length]);
-    [label addAttribute:NSFontAttributeName value:[self font] range:labelRange];
+    NSFont *font = [self font];
+    if ([self isHighlighted]) {
+        font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSBoldFontMask];
+        NSShadow *shade = [[NSShadow alloc] init];
+        [shade setShadowOffset:NSMakeSize(0.0, -1.0)];
+        [label addAttribute:NSShadowAttributeName value:shade range:labelRange];
+        [shade release];
+    } else {
+        [label removeAttribute:NSShadowAttributeName range:labelRange];
+    }
+    [label addAttribute:NSFontAttributeName value:font range:labelRange];
     [label addAttribute:NSForegroundColorAttributeName value:[self textColor] range:labelRange];
     [label addAttribute:NSParagraphStyleAttributeName value:[NSParagraphStyle defaultTruncatingTailParagraphStyle] range:labelRange];
     
