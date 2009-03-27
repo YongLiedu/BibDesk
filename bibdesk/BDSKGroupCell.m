@@ -42,10 +42,6 @@
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
 
-#define BORDER_BETWEEN_EDGE_AND_IMAGE (2.0)
-#define BORDER_BETWEEN_IMAGE_AND_TEXT (3.0)
-#define BORDER_BETWEEN_EDGE_AND_COUNT (2.0)
-#define BORDER_BETWEEN_COUNT_AND_TEXT (1.0)
 
 // names of these globals were changed to support key-value coding on BDSKGroup
 NSString *BDSKGroupCellStringKey = @"stringValue";
@@ -93,6 +89,7 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
         [self setEditable:YES];
         [self setScrollable:YES];
         
+        label = [[NSMutableAttributedString alloc] initWithString:@""];
         countString = [[NSMutableAttributedString alloc] initWithString:@""];
         
         countAttributes = [[NSMutableDictionary alloc] initWithCapacity:5];
@@ -111,6 +108,8 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
         countAttributes = [[NSMutableDictionary alloc] initWithCapacity:5];
         [self recacheCountAttributes];
         
+        // could encode these, but presumably we want a fresh string
+        label = [[NSMutableAttributedString alloc] initWithString:@""];
         countString = [[NSMutableAttributedString alloc] initWithString:@""];
         
         if ([self formatter] == nil)
@@ -130,12 +129,14 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 
     // count attributes are shared between this cell and all copies, but not with new instances
     copy->countAttributes = [countAttributes retain];
+    copy->label = [label mutableCopy];
     copy->countString = [countString mutableCopy];
 
     return copy;
 }
 
 - (void)dealloc {
+    [label release];
     [countString release];
     [countAttributes release];
 	[super dealloc];
@@ -195,10 +196,17 @@ static NSString *stringWithNumber(NSNumber *number)
     
     [super setObjectValue:obj];
     
+    [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:nonNullObjectValueForKey(obj, BDSKGroupCellStringKey) ?: @""];
     [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithNumber(nonNullObjectValueForKey(obj, BDSKGroupCellCountKey))];
 }
 
 #pragma mark Drawing
+
+#define BORDER_BETWEEN_EDGE_AND_IMAGE (2.0)
+#define BORDER_BETWEEN_IMAGE_AND_TEXT (3.0)
+#define SIZE_OF_TEXT_FIELD_BORDER (1.0)
+#define BORDER_BETWEEN_EDGE_AND_COUNT (2.0)
+#define BORDER_BETWEEN_COUNT_AND_TEXT (1.0)
 
 - (NSSize)iconSizeForBounds:(NSRect)aRect;
 {
@@ -272,32 +280,41 @@ static NSString *stringWithNumber(NSNumber *number)
 }
 
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView {
+
+    NSRange labelRange = NSMakeRange(0, [label length]);
+    [label addAttribute:NSFontAttributeName value:[self font] range:labelRange];
+    [label addAttribute:NSForegroundColorAttributeName value:[self textColor] range:labelRange];
+        	
+	BOOL highlighted = [self isHighlighted];
+	NSColor *bgColor = [NSColor disabledControlTextColor];
+    NSRange countRange = NSMakeRange(0, [countString length]);
+    [countString addAttributes:countAttributes range:countRange];
+
+	if (highlighted) {
+		[countString addAttribute:NSForegroundColorAttributeName value:[NSColor disabledControlTextColor] range:countRange];
+		bgColor = [[NSColor alternateSelectedControlTextColor] colorWithAlphaComponent:0.8];
+	} else {
+		[countString addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:countRange];
+		bgColor = [bgColor colorWithAlphaComponent:0.7];
+	}
+
     // Draw the text
-    [super drawInteriorWithFrame:[self textRectForBounds:aRect] inView:controlView];
+    // @@ Mail.app uses NSLineBreakByTruncatingTail for this
+    [label addAttribute:NSParagraphStyleAttributeName value:[NSParagraphStyle defaultTruncatingTailParagraphStyle] range:labelRange];
+    NSRect textRect = NSInsetRect([self textRectForBounds:aRect], SIZE_OF_TEXT_FIELD_BORDER, 0.0); 
+    
+    [label drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin];
     
     BOOL controlViewIsFlipped = [controlView isFlipped];
+    NSRect countRect = [self countRectForBounds:aRect];
     
-    // Draw the count or caution icon
     if ([self isRetrieving] == NO) {
-        NSRect countRect = [self countRectForBounds:aRect];
         if ([self failedDownload]) {
             NSImage *cautionImage = [NSImage imageNamed:@"BDSKSmallCautionIcon"];
             NSSize cautionImageSize = [cautionImage size];
             NSRect cautionIconRect = NSMakeRect(0, 0, cautionImageSize.width, cautionImageSize.height);
             [cautionImage drawFlipped:controlViewIsFlipped inRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
         } else if ([self count] > 0) {
-            NSColor *bgColor = nil;
-            NSRange countRange = NSMakeRange(0, [countString length]);
-            
-            [countString addAttributes:countAttributes range:countRange];
-            if ([self isHighlighted]) {
-                [countString addAttribute:NSForegroundColorAttributeName value:[NSColor disabledControlTextColor] range:countRange];
-                bgColor = [[NSColor alternateSelectedControlTextColor] colorWithAlphaComponent:0.8];
-            } else {
-                [countString addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:countRange];
-                bgColor = [[NSColor disabledControlTextColor] colorWithAlphaComponent:0.7];
-            }
-            
             [NSGraphicsContext saveGraphicsState];
             [bgColor setFill];
             [NSBezierPath fillHorizontalOvalAroundRect:countRect];
