@@ -149,12 +149,23 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 
 - (NSColor *)textColor;
 {
+    NSColor *color = nil;
+    
+    // this allows the expansion tooltips on 10.5 to draw with the correct color
+#if defined(MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
+    // on 10.5, we can just check background style instead of messing around with flags and checking the highlight color, which accounts for much of the code in this class
+#warning 10.5 fixme
+#endif
+    if ([self respondsToSelector:@selector(backgroundStyle)] && NSBackgroundStyleLight == [self backgroundStyle])
+        return [self isHighlighted] ? [NSColor textBackgroundColor] : [NSColor blackColor];
+        
     if (settingUpFieldEditor)
-        return [NSColor textColor];
-    else if (_cFlags.highlighted)
-        return [NSColor textBackgroundColor];
+        color = [NSColor blackColor];
+    else if ([self isHighlighted])
+        color = [NSColor textBackgroundColor];
     else
-        return [super textColor];
+        color = [super textColor];
+    return color;
 }
 
 - (void)setFont:(NSFont *)font {
@@ -274,16 +285,12 @@ static NSString *stringWithNumber(NSNumber *number)
     [label addAttribute:NSFontAttributeName value:[self font] range:labelRange];
     [label addAttribute:NSForegroundColorAttributeName value:[self textColor] range:labelRange];
         	
-	NSColor *highlightColor = [self highlightColorWithFrame:aRect inView:controlView];
 	BOOL highlighted = [self isHighlighted];
 	NSColor *bgColor = [NSColor disabledControlTextColor];
     NSRange countRange = NSMakeRange(0, [countString length]);
     [countString addAttributes:countAttributes range:countRange];
 
 	if (highlighted) {
-		// add the alternate text color attribute.
-		if ([highlightColor isEqual:[NSColor alternateSelectedControlColor]])
-			[label addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:labelRange];
 		[countString addAttribute:NSForegroundColorAttributeName value:[NSColor disabledControlTextColor] range:countRange];
 		bgColor = [[NSColor alternateSelectedControlTextColor] colorWithAlphaComponent:0.8];
 	} else {

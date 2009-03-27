@@ -96,12 +96,12 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
     if ([self respondsToSelector:@selector(backgroundStyle)]) {
         NSBackgroundStyle style = [self backgroundStyle];
         if (NSBackgroundStyleLight == style)
-            return (hasDarkHighlight && _cFlags.highlighted) ? [NSColor textBackgroundColor] : [NSColor blackColor];
+            return (hasDarkHighlight && [self isHighlighted]) ? [NSColor textBackgroundColor] : [NSColor blackColor];
     }
         
     if (settingUpFieldEditor)
         color = [NSColor blackColor];
-    else if (hasDarkHighlight && _cFlags.highlighted)
+    else if (hasDarkHighlight && [self isHighlighted])
         color = [NSColor textBackgroundColor];
     else
         color = [super textColor];
