@@ -246,7 +246,10 @@
     staticGroupImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] copy];
     [staticGroupImage setName:@"staticGroup"];
     
-    smartGroupImage = [[NSImage imageNamed:@"NSFolderSmart"] copy];
+    smartGroupImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
+    [smartGroupImage lockFocus];
+    [[NSImage imageNamed:@"NSFolderSmart"] drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+    [smartGroupImage unlockFocus];
     [smartGroupImage setName:@"smartGroup"];
     
     importGroupImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] copy];
