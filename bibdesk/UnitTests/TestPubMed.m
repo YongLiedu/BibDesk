@@ -124,8 +124,8 @@
 	// GJ TODO - wouldn't it be nice to have the date parse the full date info 
 	// if available in the Month field.  Right now everything is converted to the
 	// 15th of the month even if more info is available	
-	STAssertEqualObjects([b displayValueOfField:BDSKPubDateString],
-						 @"Mar 2007", @"for BibItem pubDate Publication Date");
+	//STAssertEqualObjects([b displayValueOfField:BDSKPubDateString],
+	//					 @"Mar 2007", @"for BibItem pubDate Publication Date");
 
 	// Test pubFields ie direct results of BDSKPubMedParser
 	// ==============
