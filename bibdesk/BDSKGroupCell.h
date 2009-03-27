@@ -51,7 +51,6 @@ extern NSString *BDSKGroupCellFailedDownloadKey;
 {
     BOOL settingUpFieldEditor;
     NSMutableDictionary *countAttributes;
-    NSMutableAttributedString *label;
     NSMutableAttributedString *countString;
 }
 
