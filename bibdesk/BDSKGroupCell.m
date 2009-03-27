@@ -171,6 +171,7 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 - (void)setFont:(NSFont *)font {
     [super setFont:font];
     [self recacheCountAttributes];
+    [countString addAttributes:countAttributes range:NSMakeRange(0, [countString length])];
 }
 
 
@@ -198,6 +199,7 @@ static NSString *stringWithNumber(NSNumber *number)
     
     [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:nonNullObjectValueForKey(obj, BDSKGroupCellStringKey) ?: @""];
     [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithNumber(nonNullObjectValueForKey(obj, BDSKGroupCellCountKey))];
+    [countString addAttributes:countAttributes range:NSMakeRange(0, [countString length])];
 }
 
 #pragma mark Drawing
@@ -280,10 +282,6 @@ static NSString *stringWithNumber(NSNumber *number)
 }
 
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView {
-    // we have to do this first, otherwise the size calculation may be wrong
-    NSRange countRange = NSMakeRange(0, [countString length]);
-    [countString addAttributes:countAttributes range:countRange];
-    
     // Draw the text
     NSRect textRect = NSInsetRect([self textRectForBounds:aRect], SIZE_OF_TEXT_FIELD_BORDER, 0.0); 
     NSRange labelRange = NSMakeRange(0, [label length]);
@@ -292,6 +290,7 @@ static NSString *stringWithNumber(NSNumber *number)
         font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSBoldFontMask];
         NSShadow *shade = [[NSShadow alloc] init];
         [shade setShadowOffset:NSMakeSize(0.0, -1.0)];
+        [shade setShadowColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.5]];
         [label addAttribute:NSShadowAttributeName value:shade range:labelRange];
         [shade release];
     } else {
@@ -313,13 +312,14 @@ static NSString *stringWithNumber(NSNumber *number)
             NSRect cautionIconRect = NSMakeRect(0, 0, cautionImageSize.width, cautionImageSize.height);
             [cautionImage drawFlipped:controlViewIsFlipped inRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
         } else if ([self count] > 0) {
-            NSColor *bgColor = [NSColor disabledControlTextColor];
+            NSColor *fgColor;
+            NSColor *bgColor;
             if ([self isHighlighted]) {
-                [countString addAttribute:NSForegroundColorAttributeName value:[NSColor disabledControlTextColor] range:countRange];
+                fgColor = [NSColor disabledControlTextColor];
                 bgColor = [[NSColor alternateSelectedControlTextColor] colorWithAlphaComponent:0.8];
             } else {
-                [countString addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:countRange];
-                bgColor = [bgColor colorWithAlphaComponent:0.7];
+                fgColor = [NSColor alternateSelectedControlTextColor];
+                bgColor = [[NSColor disabledControlTextColor] colorWithAlphaComponent:0.7];
             }
 
             [NSGraphicsContext saveGraphicsState];
@@ -327,6 +327,7 @@ static NSString *stringWithNumber(NSNumber *number)
             [NSBezierPath fillHorizontalOvalAroundRect:countRect];
             [NSGraphicsContext restoreGraphicsState];
 
+            [countString addAttribute:NSForegroundColorAttributeName value:fgColor range:NSMakeRange(0, [countString length])];
             [countString drawWithRect:countRect options:NSStringDrawingUsesLineFragmentOrigin];
         }
     }
