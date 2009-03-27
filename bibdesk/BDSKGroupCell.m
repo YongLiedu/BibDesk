@@ -280,41 +280,39 @@ static NSString *stringWithNumber(NSNumber *number)
 }
 
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView {
-
+    // we have to do this first, otherwise the size calculation may be wrong
+    NSRange countRange = NSMakeRange(0, [countString length]);
+    [countString addAttributes:countAttributes range:countRange];
+    
+    // Draw the text
+    // @@ Mail.app uses NSLineBreakByTruncatingTail for this
+    NSRect textRect = NSInsetRect([self textRectForBounds:aRect], SIZE_OF_TEXT_FIELD_BORDER, 0.0); 
     NSRange labelRange = NSMakeRange(0, [label length]);
     [label addAttribute:NSFontAttributeName value:[self font] range:labelRange];
     [label addAttribute:NSForegroundColorAttributeName value:[self textColor] range:labelRange];
-        	
-	BOOL highlighted = [self isHighlighted];
-	NSColor *bgColor = [NSColor disabledControlTextColor];
-    NSRange countRange = NSMakeRange(0, [countString length]);
-    [countString addAttributes:countAttributes range:countRange];
-
-	if (highlighted) {
-		[countString addAttribute:NSForegroundColorAttributeName value:[NSColor disabledControlTextColor] range:countRange];
-		bgColor = [[NSColor alternateSelectedControlTextColor] colorWithAlphaComponent:0.8];
-	} else {
-		[countString addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:countRange];
-		bgColor = [bgColor colorWithAlphaComponent:0.7];
-	}
-
-    // Draw the text
-    // @@ Mail.app uses NSLineBreakByTruncatingTail for this
     [label addAttribute:NSParagraphStyleAttributeName value:[NSParagraphStyle defaultTruncatingTailParagraphStyle] range:labelRange];
-    NSRect textRect = NSInsetRect([self textRectForBounds:aRect], SIZE_OF_TEXT_FIELD_BORDER, 0.0); 
     
     [label drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin];
     
     BOOL controlViewIsFlipped = [controlView isFlipped];
-    NSRect countRect = [self countRectForBounds:aRect];
     
     if ([self isRetrieving] == NO) {
+        NSRect countRect = [self countRectForBounds:aRect];
         if ([self failedDownload]) {
             NSImage *cautionImage = [NSImage imageNamed:@"BDSKSmallCautionIcon"];
             NSSize cautionImageSize = [cautionImage size];
             NSRect cautionIconRect = NSMakeRect(0, 0, cautionImageSize.width, cautionImageSize.height);
             [cautionImage drawFlipped:controlViewIsFlipped inRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
         } else if ([self count] > 0) {
+            NSColor *bgColor = [NSColor disabledControlTextColor];
+            if ([self isHighlighted]) {
+                [countString addAttribute:NSForegroundColorAttributeName value:[NSColor disabledControlTextColor] range:countRange];
+                bgColor = [[NSColor alternateSelectedControlTextColor] colorWithAlphaComponent:0.8];
+            } else {
+                [countString addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:countRange];
+                bgColor = [bgColor colorWithAlphaComponent:0.7];
+            }
+
             [NSGraphicsContext saveGraphicsState];
             [bgColor setFill];
             [NSBezierPath fillHorizontalOvalAroundRect:countRect];
