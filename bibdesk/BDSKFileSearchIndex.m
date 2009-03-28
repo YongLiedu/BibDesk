@@ -191,14 +191,6 @@
     delegate = anObject;
 }
 
-- (NSURL *)identifierURLForURL:(NSURL *)theURL
-{
-    [rwLock lockForReading];
-    NSURL *identifierURL = [[[identifierURLs anyObjectForKey:theURL] retain] autorelease];
-    [rwLock unlock];
-    return identifierURL;
-}
-
 - (NSSet *)allIdentifierURLsForURL:(NSURL *)theURL
 {
     [rwLock lockForReading];
@@ -496,19 +488,18 @@ static void addItemFunction(const void *value, void *context) {
     
     BDSKASSERT(identifierURL);
     
-    NSEnumerator *urlEnumerator = [urlsToAdd objectEnumerator];
+    // SKIndexSetProperties is more generally useful, but is really slow when creating the index
+    // SKIndexRenameDocument changes the URL, so it's not useful
+    
+    [rwLock lockForWriting];
+    [identifierURLs addObject:identifierURL forKeys:urlsToAdd];
+    [rwLock unlock];
+    
+    NSEnumerator *urlEnum = [urlsToAdd objectEnumerator];
     NSURL *url = nil;
     
-    while(url = [urlEnumerator nextObject]){
-        // SKIndexSetProperties is more generally useful, but is really slow when creating the index
-        // SKIndexRenameDocument changes the URL, so it's not useful
-        
-        [rwLock lockForWriting];
-        [identifierURLs addObject:identifierURL forKey:url];
-        [rwLock unlock];
-        
+    while(url = [urlEnum nextObject])
         [self indexFileURL:url];
-    }
     
     // the caller is responsible for updating the delegate, so we can throttle initial indexing
 }
