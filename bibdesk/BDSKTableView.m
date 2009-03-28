@@ -154,7 +154,6 @@ static char BDSKTableViewFontDefaultsObservationContext;
         font = [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:[self cellControlSize]]];
     font = [fontManager convertFont:font];
     
-    // set the name last, as that's what we observe
     [sud setFloat:[font pointSize] forKey:fontSizePrefKey];
     [sud setObject:[font fontName] forKey:fontNamePrefKey];
 }
@@ -172,9 +171,11 @@ static char BDSKTableViewFontDefaultsObservationContext;
         
         [self setFont:font];
         [self setRowHeight:[NSLayoutManager defaultViewLineHeightForFont:font] + 2.0f];
-            
+        
         [self tile];
         [self reloadData]; // othewise the change isn't immediately visible
+        
+        [self updateFontPanel:nil];
     }
 }
 
@@ -191,6 +192,13 @@ static char BDSKTableViewFontDefaultsObservationContext;
         float fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:fontSizePreferenceKey];
         [[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
     }
+}
+
+- (BOOL)becomeFirstResponder {
+    BOOL success = [super becomeFirstResponder];
+    if (success)
+        [self updateFontPanel:nil];
+    return success;
 }
 
 #pragma mark Keyboard shortcuts and actions
