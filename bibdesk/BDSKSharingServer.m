@@ -48,6 +48,8 @@
 #import <libkern/OSAtomic.h>
 #import "BDSKAsynchronousDOServer.h"
 #import "BDSKReadWriteLock.h"
+#import "BDSKPublicationsArray.h"
+#import "BDSKMacroResolver.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -119,9 +121,6 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 - (void)setNumberOfConnections:(unsigned int)count;
 
 - (void)notifyClientConnectionsChanged;
-
-- (NSArray *)copyPublicationsFromOpenDocuments;
-- (NSDictionary *)copyMacrosFromOpenDocuments;
 
 @end
 
@@ -738,49 +737,32 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     }
 }
 
-- (NSArray *)copyPublicationsFromOpenDocuments
-{
-    NSMutableSet *set = nil;
-    NSMutableArray *pubs = [[NSMutableArray alloc] initWithCapacity:100];
-
-    // this is only useful if everyone else uses the mutex, though...
-    @synchronized([NSDocumentController sharedDocumentController]){
-        NSEnumerator *docE = [[[[[NSDocumentController sharedDocumentController] documents] copy] autorelease] objectEnumerator];
-        set = (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKBibItemEqualitySetCallBacks);
-        id document = nil;
-        while(document = [docE nextObject]){
-            [document getCopyOfPublicationsOnMainThread:pubs];
-            [set addObjectsFromArray:pubs];
-            [pubs removeAllObjects];
-        }
-        [pubs removeAllObjects];
+- (void)getPublicationsAndMacros:(NSMutableDictionary *)pubsAndMacros {
+    NSMutableSet *allPubs = (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKBibItemEqualitySetCallBacks);
+    NSMutableDictionary *allMacros = [[NSMutableDictionary alloc] init];
+    NSEnumerator *docEnum = [[NSApp orderedDocuments] objectEnumerator];
+    BibDocument *doc = nil;
+    while (doc = [docEnum nextObject]) {
+        NSArray *items = [[NSArray alloc] initWithArray:[doc publications] copyItems:YES];
+        [allPubs addObjectsFromArray:items];
+        [items release];
+        NSDictionary *dict = [[NSDictionary alloc] initWithDictionary:[[doc macroResolver] macroDefinitions] copyItems:YES];
+        [allMacros addEntriesFromDictionary:dict];
+        [dict release];
     }
-    [pubs addObjectsFromArray:[set allObjects]];
-    [set release];
-    return pubs;
-}
-
-- (NSDictionary *)copyMacrosFromOpenDocuments
-{
-    NSMutableDictionary *macros = [[NSMutableDictionary alloc] initWithCapacity:10];
-
-    // this is only useful if everyone else uses the mutex, though...
-    @synchronized([NSDocumentController sharedDocumentController]){
-        NSArray *docs = [[[NSDocumentController sharedDocumentController] documents] copy];
-        [docs makeObjectsPerformSelector:@selector(getCopyOfMacrosOnMainThread:) withObject:macros];
-        [docs release];
-    }
-    return macros;
+    [pubsAndMacros setObject:[allPubs allObjects] forKey:@"publications"];
+    [pubsAndMacros setObject:allMacros forKey:@"macros"];
+    [allPubs release];
+    [allMacros release];
 }
 
 - (bycopy NSData *)archivedSnapshotOfPublications
 {
-    NSArray *pubs = [self copyPublicationsFromOpenDocuments];
-    NSDictionary *macros = [self copyMacrosFromOpenDocuments];
-    NSData *dataToSend = [NSKeyedArchiver archivedDataWithRootObject:pubs];
-    NSData *macroDataToSend = [NSKeyedArchiver archivedDataWithRootObject:macros];
-    [pubs release];
-    [macros release];
+    NSMutableDictionary *pubsAndMacros = [[NSMutableDictionary alloc] init];
+    [self performSelectorOnMainThread:@selector(getPublicationsAndMacros:) withObject:pubsAndMacros waitUntilDone:YES];
+    NSData *dataToSend = [NSKeyedArchiver archivedDataWithRootObject:[pubsAndMacros objectForKey:@"publications"]];
+    NSData *macroDataToSend = [NSKeyedArchiver archivedDataWithRootObject:[pubsAndMacros objectForKey:@"macros"]];
+    [pubsAndMacros release];
     
     if(dataToSend != nil && macroDataToSend != nil){
         NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:dataToSend, BDSKSharedArchivedDataKey, macroDataToSend, BDSKSharedArchivedMacroDataKey, nil];

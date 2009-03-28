@@ -891,28 +891,6 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     return searchIndexes;
 }
 
-#pragma mark -
-
-- (void)getCopyOfPublicationsOnMainThread:(NSMutableArray *)dstArray{
-    if([NSThread isMainThread] == NO){
-        [self performSelectorOnMainThread:_cmd withObject:dstArray waitUntilDone:YES];
-    } else {
-        NSArray *array = [[NSArray alloc] initWithArray:[self publications] copyItems:YES];
-        [dstArray addObjectsFromArray:array];
-        [array release];
-    }
-}
-
-- (void)getCopyOfMacrosOnMainThread:(NSMutableDictionary *)dstDict{
-    if([NSThread isMainThread] == NO){
-        [self performSelectorOnMainThread:_cmd withObject:dstDict waitUntilDone:YES];
-    } else {
-        NSDictionary *dict = [[NSDictionary alloc] initWithDictionary:[macroResolver macroDefinitions] copyItems:YES];
-        [dstDict addEntriesFromDictionary:dict];
-        [dict release];
-    }
-}
-
 #pragma mark Document Info
 
 - (NSDictionary *)documentInfo{
