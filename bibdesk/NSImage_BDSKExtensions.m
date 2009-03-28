@@ -235,26 +235,39 @@
     if (categoryGroupImage || floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
         return;
     
+    smartGroupImage = [[NSImage imageNamed:@"NSFolderSmart"] copy];
+    [smartGroupImage setName:@"smartGroup"];
+    
+    staticGroupImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] copy];
+    [staticGroupImage addRepresentation:[[[self iconWithSize:NSMakeSize(16.0, 16.0) forToolboxCode:kGenericFolderIcon] representations] objectAtIndex:0]];
+    [staticGroupImage setName:@"staticGroup"];
+    
     categoryGroupImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
     [categoryGroupImage lockFocus];
-    CIImage *ciImage = [CIImage imageWithData:[[NSImage imageNamed:@"NSFolderSmart"] TIFFRepresentation]];
+    CIImage *ciImage = [CIImage imageWithData:[smartGroupImage TIFFRepresentation]];
     ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.2 brightnessBias:0.3];
     [ciImage drawInRect:NSMakeRect(0, 0, 32.0, 32.0) fromRect:NSMakeRect(0, 0, 32.0, 32.0) operation:NSCompositeSourceOver fraction:1.0];
     [categoryGroupImage unlockFocus];
+    NSImage *tinyImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
+    NSImage *tinySmartFolder = [[NSImage imageNamed:@"NSFolderSmart"] copy];
+    [tinySmartFolder setScalesWhenResized:YES];
+    [tinySmartFolder setSize:NSMakeSize(16.0, 16.0)];
+    [tinyImage lockFocus];
+    ciImage = [CIImage imageWithData:[tinySmartFolder TIFFRepresentation]];
+    ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.2 brightnessBias:0.3];
+    [ciImage drawInRect:NSMakeRect(0, 0, 16.0, 16.0) fromRect:NSMakeRect(0, 0, 16.0, 16.0) operation:NSCompositeSourceOver fraction:1.0];
+    [tinyImage unlockFocus];
+    [categoryGroupImage addRepresentation:[[tinyImage representations] lastObject]];
+    [tinyImage release];
+    [tinySmartFolder release];
     [categoryGroupImage setName:@"categoryGroup"];
     
-    staticGroupImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] copy];
-    [staticGroupImage setName:@"staticGroup"];
-    
-    smartGroupImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
-    [smartGroupImage lockFocus];
-    [[NSImage imageNamed:@"NSFolderSmart"] drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-    [smartGroupImage unlockFocus];
-    [smartGroupImage setName:@"smartGroup"];
-    
-    importGroupImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] copy];
-    [importGroupImage lockFocus];
+    importGroupImage = [staticGroupImage copy];
+    [importGroupImage lockFocusOnRepresentation:[[importGroupImage representations] objectAtIndex:0]];
     [[NSImage imageNamed:@"importBadge"] drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    [importGroupImage unlockFocus];
+    [importGroupImage lockFocusOnRepresentation:[[importGroupImage representations] objectAtIndex:1]];
+    [[NSImage imageNamed:@"importBadge"] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     [importGroupImage unlockFocus];
     [importGroupImage setName:@"importGroup"];
 }
