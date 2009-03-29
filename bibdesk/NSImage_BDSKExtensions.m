@@ -231,6 +231,7 @@
     static NSImage *staticGroupImage = nil;
     static NSImage *smartGroupImage = nil;
     static NSImage *importGroupImage = nil;
+    static NSImage *sharedGroupImage = nil;
     
     if (categoryGroupImage || floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
         return;
@@ -270,6 +271,9 @@
     [[NSImage imageNamed:@"importBadge"] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     [importGroupImage unlockFocus];
     [importGroupImage setName:@"importGroup"];
+    
+    sharedGroupImage = [[NSImage imageNamed:@"NSBonjour"] copy];
+    [sharedGroupImage setName:@"sharedGroup"];
 }
 
 + (NSImage *)systemIconWithCode:(OSType)code {
