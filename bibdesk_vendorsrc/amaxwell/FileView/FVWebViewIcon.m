@@ -100,7 +100,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
 // return nil if _maxWebViews is exceeded
 + (WebView *)_newWebView
 {
-    FVAPIAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
     FVAPIParameterAssert(_maxWebViews > 0);
     WebView *view = nil;
     if (_numberOfWebViews < _maxWebViews) {
@@ -166,7 +166,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
 
 - (void)_releaseWebView
 {
-    FVAPIAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
     // in case we get -releaseResources or -dealloc while waiting for another webview
     [[NSNotificationCenter defaultCenter] removeObserver:self name:FVWebIconWebViewAvailableNotificationName object:[self class]];
     if (nil != _webView) {
@@ -289,7 +289,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
 
 - (void)_handleWebView:(WebView *)sender loadError:(NSError *)error forFrame:(WebFrame *)frame;
 {
-    FVAPIAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
     FVAPIParameterAssert([sender isEqual:_webView]);
     
     // if a frame fails to load and the webview isn't loading anything else, bail out
@@ -313,7 +313,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
 
 - (void)_pageDidFinishLoading
 {
-    FVAPIAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
     FVAPIParameterAssert(NO == [_webView fv_isLoading]);
 
     [self lock];
@@ -361,7 +361,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
 
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame
 {
-    FVAPIAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
     FVAPIParameterAssert([sender isEqual:_webView]);
     
     // wait until all frames are loaded
@@ -371,7 +371,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
 
 - (void)webView:(WebView *)sender decidePolicyForMIMEType:(NSString *)type request:(NSURLRequest *)request frame:(WebFrame *)frame decisionListener:(id < WebPolicyDecisionListener >)listener
 {
-    FVAPIAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
     FVAPIParameterAssert([sender isEqual:_webView]);
     
     // !!! Better to just load text/html and ignore everything else?  The point of implementing this method is to ignore PDF.  It doesn't show up in the thumbnail and it's slow to load, so there's no point in loading it.  Plugins are disabled, so stuff like Flash should be ignored anyway, and WebKit doesn't try to display PostScript AFAIK.
@@ -412,14 +412,28 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
     if (theUTI) CFRelease(theUTI);
 }
 
+// should only be relevant for clicking links, but implement it anyway
+- (void)webView:(WebView *)sender decidePolicyForNewWindowAction:(NSDictionary *)actionInformation request:(NSURLRequest *)request newFrameName:(NSString *)frameName decisionListener:(id < WebPolicyDecisionListener >)listener
+{
+    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);        
+    FVAPIParameterAssert([sender isEqual:_webView]);
+    [listener ignore];
+}
+
 - (void)webView:(WebView *)sender resource:(id)identifier didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge fromDataSource:(WebDataSource *)dataSource
 {
-    [[challenge sender] cancelAuthenticationChallenge:challenge];
+    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);        
+    FVAPIParameterAssert([sender isEqual:_webView]);
+    /*
+     Causes rendering of a 401 (unauthorized) page here.  Callout to stopLoading: 
+     or _handleWebView:loadError:forFrame: will cause a crash in the URL loader.
+     */
+    [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
 }
 
 - (void)renderOffscreenOnMainThread 
 { 
-    FVAPIAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));   
+    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);   
     // !!! Was seeing occasional assertion failures here with the new operation queue setup; it's likely to be a race with releaseResources:.  Should be eliminated with the new condition lock scheme.
     NSAssert(nil == _webView, @"*** Render error *** renderOffscreenOnMainThread called when _webView already exists");
     
@@ -445,7 +459,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
 
 - (void)_handleWebViewAvailableNotification:(NSNotification *)aNotification
 {
-    FVAPIAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
     [[NSNotificationCenter defaultCenter] removeObserver:self name:FVWebIconWebViewAvailableNotificationName object:[self class]];
     [self renderOffscreenOnMainThread];
 }
