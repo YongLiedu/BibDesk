@@ -172,6 +172,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
     if (nil != _webView) {
         [_webView setPolicyDelegate:nil];
         [_webView setFrameLoadDelegate:nil];
+        [_webView setResourceLoadDelegate:nil];
         [_webView stopLoading:nil];
         FVAPIAssert([_webView downloadDelegate] == nil, @"downloadDelegate non-nil");
         FVAPIAssert([_webView UIDelegate] == nil, @"UIDelegate non-nil");
@@ -411,6 +412,11 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
     if (theUTI) CFRelease(theUTI);
 }
 
+- (void)webView:(WebView *)sender resource:(id)identifier didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge fromDataSource:(WebDataSource *)dataSource
+{
+    [[challenge sender] cancelAuthenticationChallenge:challenge];
+}
+
 - (void)renderOffscreenOnMainThread 
 { 
     FVAPIAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));   
@@ -430,6 +436,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
         
         [_webView setFrameLoadDelegate:self];
         [_webView setPolicyDelegate:self];
+        [_webView setResourceLoadDelegate:self];
         
         NSURLRequest *request = [NSURLRequest requestWithURL:_httpURL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:60.0];
         [[_webView mainFrame] loadRequest:request];        
