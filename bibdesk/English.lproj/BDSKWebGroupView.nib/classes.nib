@@ -139,7 +139,7 @@
 				<key>stopOrReloadButton</key>
 				<string>NSButton</string>
 				<key>urlField</key>
-				<string>NSTextField</string>
+				<string>BDSKDragTextField</string>
 				<key>view</key>
 				<string>BDSKEdgeView</string>
 				<key>webEdgeView</key>
