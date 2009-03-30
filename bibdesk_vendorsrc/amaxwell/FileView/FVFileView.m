@@ -994,7 +994,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {    
     if (context == &_FVFileViewContentObservationContext) {
-        NSParameterAssert([keyPath isEqualToString:CONTENT_BINDING_NAME]);
+        NSParameterAssert([keyPath isEqualToString:[_contentBinding objectForKey:NSObservedKeyPathKey]]);
+        NSParameterAssert(object == [_contentBinding objectForKey:NSObservedObjectKey]);
         
         id observedArray = [[_contentBinding objectForKey:NSObservedObjectKey] valueForKeyPath:[_contentBinding objectForKey:NSObservedKeyPathKey]];
         if (NSIsControllerMarker(observedArray) == NO) {
@@ -1027,12 +1028,12 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         NSString *keyPath = [info objectForKey:NSObservedKeyPathKey];
         NSDictionary *options = [info objectForKey:NSOptionsKey];
         NSValueTransformer *transformer = [options objectForKey:NSValueTransformerBindingOption];
-        if (transformer == nil) {
+        if (transformer == nil || [transformer isEqual:[NSNull null]]) {
             NSString *transformerName = [options objectForKey:NSValueTransformerNameBindingOption];
-            if (transformerName)
+            if (transformerName && [transformer isEqual:[NSNull null]] == NO)
                 transformer = [NSValueTransformer valueTransformerForName:transformerName];
         }
-        if (transformer)
+        if (transformer && [transformer isEqual:[NSNull null]] == NO)
             value = [transformer reverseTransformedValue:value];
         
         [observable setValue:value forKeyPath:keyPath];
