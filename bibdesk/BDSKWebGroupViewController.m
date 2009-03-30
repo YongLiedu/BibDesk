@@ -564,6 +564,13 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     }
 }
 
+#pragma mark WebPolicyDelegate protocol
+
+- (void)webView:(WebView *)sender decidePolicyForNewWindowAction:(NSDictionary *)actionInformation request:(NSURLRequest *)request newFrameName:(NSString *)frameName decisionListener:(id < WebPolicyDecisionListener >)listener {
+    [listener ignore];
+    [[NSWorkspace sharedWorkspace] openURL:[request URL]];
+}
+
 #pragma mark WebUIDelegate protocol
 
 - (void)setStatus:(NSString *)text {
