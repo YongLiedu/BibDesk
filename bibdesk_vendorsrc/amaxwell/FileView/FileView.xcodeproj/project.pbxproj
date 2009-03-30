@@ -104,7 +104,6 @@
 		F94692830CA5777300AC2772 /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = F946927D0CA5777300AC2772 /* Controller.m */; };
 		F94692840CA5777300AC2772 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F946927E0CA5777300AC2772 /* InfoPlist.strings */; };
 		F94692850CA5777300AC2772 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = F94692800CA5777300AC2772 /* MainMenu.nib */; };
-		F94692860CA5777300AC2772 /* FileView Program-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F94692820CA5777300AC2772 /* FileView Program-Info.plist */; };
 		F946928F0CA5784700AC2772 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F946928E0CA5784700AC2772 /* main.m */; };
 		F94693FF0CA583A300AC2772 /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8DC2EF5B0486A6940098B216 /* FileView.framework */; };
 		F94694500CA59AF100AC2772 /* FVScaledImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = F946944E0CA59AF100AC2772 /* FVScaledImageView.h */; };
@@ -124,6 +123,16 @@
 		F9E469370CFF6D12003E6C0A /* FileView.strings in Resources */ = {isa = PBXBuildFile; fileRef = F9E469350CFF6D12003E6C0A /* FileView.strings */; };
 		F9F22DE90CDAD53300A9D449 /* License in Resources */ = {isa = PBXBuildFile; fileRef = F9F22DE80CDAD53300A9D449 /* License */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		CE2A3CAC0F8129BB005BD1CD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216 /* FileView */;
+			remoteInfo = FileView;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		F94693FE0CA583A000AC2772 /* CopyFiles */ = {
@@ -656,6 +665,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				CE2A3CAD0F8129BB005BD1CD /* PBXTargetDependency */,
 			);
 			name = "FileView Program";
 			productName = "FileView Program";
@@ -699,7 +709,6 @@
 			files = (
 				F94692840CA5777300AC2772 /* InfoPlist.strings in Resources */,
 				F94692850CA5777300AC2772 /* MainMenu.nib in Resources */,
-				F94692860CA5777300AC2772 /* FileView Program-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -786,6 +795,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		CE2A3CAD0F8129BB005BD1CD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8DC2EF4F0486A6940098B216 /* FileView */;
+			targetProxy = CE2A3CAC0F8129BB005BD1CD /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		089C1666FE841158C02AAC07 /* InfoPlist.strings */ = {
