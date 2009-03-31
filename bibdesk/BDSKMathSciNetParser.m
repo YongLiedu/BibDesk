@@ -40,6 +40,7 @@
 #import "BDSKBibTeXParser.h"
 #import "BibItem.h"
 #import "NSError_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 #import <AGRegEx/AGRegEx.h>
 
 
@@ -81,8 +82,6 @@
 	
 	
 	NSMutableArray * results = [NSMutableArray arrayWithCapacity:[IDArray count]];
-	AGRegex * whitespaceKiller = [AGRegex regexWithPattern:@"\\s+" options:AGRegexMultiline];
-	AGRegex * ampersandFixer = [AGRegex regexWithPattern:@"\\\\&" options:AGRegexMultiline];
 
 	/* MSN will return 50 results in one go, so loop in batches of 50 */
 	while ([IDArray count] > 0) {
@@ -123,8 +122,8 @@
 		
 		while (node = [nodeEnumerator nextObject]) {
 			NSString * preContent = [node stringValue];		
-			NSString * cleanedRecord = 	[whitespaceKiller replaceWithString:@" " inString:preContent];
-			cleanedRecord = [ampersandFixer replaceWithString:@"\\&amp;" inString:cleanedRecord];
+			NSString * cleanedRecord = 	[preContent stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
+			cleanedRecord = [cleanedRecord stringByReplacingOccurrencesOfString:@"\\&" withString:@"\\&amp;"];
 			
 			BOOL isPartialData;
 			NSError * parseError;

@@ -40,6 +40,7 @@
 #import "BDSKBibTeXParser.h"
 #import "BibItem.h"
 #import "NSError_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 #import <AGRegEx/AGRegEx.h>
 
 
@@ -79,7 +80,6 @@
 		}
 	}
 
-	AGRegex * whitespaceKiller = [AGRegex regexWithPattern:@"\\s+" options:AGRegexMultiline];
 	/* ZMath sometimes uses \"o for umlauts which isn't parsed */
 	AGRegex * umlautFixer = [AGRegex regexWithPattern:@"\\\\\"([a-zA-Z])" options:AGRegexMultiline];
 	NSMutableArray * results = [NSMutableArray arrayWithCapacity:[IDArray count]];
@@ -107,8 +107,9 @@
 		}
 		
 		NSString * bibTeXString = [[[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding] autorelease];
-		bibTeXString = [whitespaceKiller replaceWithString:@" " inString:bibTeXString];
-		bibTeXString = [umlautFixer replaceWithString:@"{\\\\\"$1}" inString:bibTeXString];
+		bibTeXString = [bibTeXString stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
+        if ([bibTeXString rangeOfString:@"\\\""].length)
+            bibTeXString = [umlautFixer replaceWithString:@"{\\\\\"$1}" inString:bibTeXString];
 		BOOL isPartialData;
 		NSError * ignoreError;
 		NSArray * newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString document:nil isPartialData:&isPartialData error: &ignoreError];
