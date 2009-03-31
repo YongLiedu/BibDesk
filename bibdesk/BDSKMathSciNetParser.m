@@ -122,7 +122,7 @@
 		
 		while (node = [nodeEnumerator nextObject]) {
 			NSString * preContent = [node stringValue];		
-			NSString * cleanedRecord = 	[preContent stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
+			NSString * cleanedRecord = 	[preContent stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 			cleanedRecord = [cleanedRecord stringByReplacingOccurrencesOfString:@"\\&" withString:@"\\&amp;"];
 			
 			BOOL isPartialData;

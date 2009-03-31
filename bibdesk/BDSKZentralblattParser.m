@@ -57,17 +57,17 @@
 	NSError * error;
 	
 	/* 
-		Find occurrences of strings Zbl [pre]1234.56789 or JFM 12.3456.78 on the page and remove leading zeroes.
-		These are the IDs of the related records.
+		Find occurrences of strings Zbl [pre]1234.56789 or JFM 12.3456.78 on the page.
+		The numbers in them are the records'  IDs.
 	*/
-	AGRegex *MRRegexp = [AGRegex regexWithPattern:@"(Zbl|JFM) (pre)?([0-9.]*)" options:AGRegexMultiline];
-	NSArray * regexpResults = [MRRegexp findAllInString:[xmlDocument XMLString]];
+	AGRegex *ZblRegexp = [AGRegex regexWithPattern:@"(Zbl|JFM) (pre)?([0-9.]*)" options:AGRegexMultiline];
+	NSArray * regexpResults = [ZblRegexp findAllInString:[xmlDocument XMLString]];
 	
 	if (0 == [regexpResults count]) { return nil; }
 
 	
 	/*  
-		Ask server for BibTeX records for all related records found on the page
+		Ask server for BibTeX records for all related records found on the page.
 	*/
 	NSEnumerator * matchEnumerator = [regexpResults objectEnumerator];
 	AGRegexMatch * match;
@@ -80,7 +80,7 @@
 		}
 	}
 
-	/* ZMath sometimes uses \"o for umlauts which isn't parsed */
+	/* ZMath sometimes uses \"o for umlauts which is incorrect, fix that for the parser to work. */
 	AGRegex * umlautFixer = [AGRegex regexWithPattern:@"\\\\\"([a-zA-Z])" options:AGRegexMultiline];
 	NSMutableArray * results = [NSMutableArray arrayWithCapacity:[IDArray count]];
 
@@ -90,6 +90,7 @@
 		NSArray * processArray = [IDArray subarrayWithRange:elementRange];
 		[IDArray removeObjectsInRange:elementRange];
 		
+		/* ZMath need to be queried with a POST request */
 		NSString * URLString = @"http://www.zentralblatt-math.org/zmath/en/command/";
 		NSMutableURLRequest * request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:URLString]];
 		[request setHTTPMethod:@"post"];
@@ -107,7 +108,7 @@
 		}
 		
 		NSString * bibTeXString = [[[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding] autorelease];
-		bibTeXString = [bibTeXString stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
+		bibTeXString = [bibTeXString stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         if ([bibTeXString rangeOfString:@"\\\""].length)
             bibTeXString = [umlautFixer replaceWithString:@"{\\\\\"$1}" inString:bibTeXString];
 		BOOL isPartialData;
@@ -127,9 +128,9 @@
 	BibItem * item;
 	
 	while (item = [itemEnumerator nextObject]) {
-		NSString * MRNumber = [item citeKey];
-		NSString * MRItemURLString = [NSString stringWithFormat:@"http://www.zentralblatt-math.org/zmath/en/search/?format=complete&q=an:%@", MRNumber];
-		[item setField:BDSKUrlString toValue:MRItemURLString];
+		NSString * ZMathNumber = [item citeKey];
+		NSString * ZMathItemURLString = [NSString stringWithFormat:@"http://www.zentralblatt-math.org/zmath/en/search/?format=complete&q=an:%@", ZMathNumber];
+		[item setField:BDSKUrlString toValue:ZMathItemURLString];
 	}
 	
 	return results;  
