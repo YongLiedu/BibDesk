@@ -277,7 +277,6 @@ The groupedPublications array is a subset of the publications array, developed b
         }else{
             if ([sortKey isEqualToString:BDSKImportOrderString] == NO) {
                 newSortKey = BDSKImportOrderString;
-                docState.sortDescending = NO;
             }  
             [self showWebGroupView];
         }
@@ -285,7 +284,6 @@ The groupedPublications array is a subset of the publications array, developed b
         if ([self hasSearchGroupsSelected]) {
             if ([sortKey isEqualToString:BDSKImportOrderString] == NO) {
                 newSortKey = BDSKImportOrderString;
-                docState.sortDescending = NO;
             }
             [self showSearchGroupView];
         } 
@@ -304,10 +302,10 @@ The groupedPublications array is a subset of the publications array, developed b
         if ([previousSortKey isEqualToString:BDSKImportOrderString]) {
             [previousSortKey release];
             previousSortKey = [BDSKTitleString retain];
+            docState.previousSortDescending = NO;
         }
         if ([sortKey isEqualToString:BDSKImportOrderString]) {
             newSortKey = [[previousSortKey retain] autorelease];
-            docState.sortDescending = NO;
         }
         [self hideSearchGroupView];
         [self hideWebGroupView];

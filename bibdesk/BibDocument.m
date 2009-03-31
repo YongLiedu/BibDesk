@@ -249,6 +249,7 @@ enum {
         sortGroupsKey = nil;
         currentGroupField = nil;
         docState.sortDescending = NO;
+        docState.previousSortDescending = NO;
         docState.sortGroupsDescending = NO;
         docState.didImport = NO;
         docState.itemChangeMask = 0;
@@ -532,6 +533,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     sortKey = [[xattrDefaults objectForKey:BDSKDefaultSortedTableColumnKey defaultObject:[sud objectForKey:BDSKDefaultSortedTableColumnKey]] retain];
     previousSortKey = [sortKey retain];
     docState.sortDescending = [xattrDefaults  boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey defaultValue:[sud boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey]];
+    docState.previousSortDescending = docState.sortDescending;
     [tableView setHighlightedTableColumn:[tableView tableColumnWithIdentifier:sortKey]];
     
     [sortGroupsKey autorelease];
@@ -2490,62 +2492,63 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark Sorting
 
 - (void)sortPubsByKey:(NSString *)key{
+    if (key == nil && sortKey == nil)
+        return;
     
-    NSTableColumn *tableColumn = nil;
+    NSTableColumn *tableColumn = [tableView tableColumnWithIdentifier:key ?: sortKey];
     
-    // cache the selection; this works for multiple publications
-    NSArray *pubsToSelect = nil;
-    if([tableView numberOfSelectedRows])
-        pubsToSelect = [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
-    
-    // a nil argument means resort the current column in the same order
-    if(key == nil){
-        if(sortKey == nil)
-            return;
-        key = sortKey;
-        docState.sortDescending = !docState.sortDescending; // we'll reverse this again in the next step
-    }
-    
-    tableColumn = [tableView tableColumnWithIdentifier:key];
-    
-    if ([sortKey isEqualToString:key]) {
+    if (key == nil) {
+        // a nil argument means resort the current column in the same order
+    } else if ([sortKey isEqualToString:key]) {
         // User clicked same column, change sort order
         docState.sortDescending = !docState.sortDescending;
     } else {
         // User clicked new column, change old/new column headers,
         // save new sorting selector, and re-sort the array.
-        docState.sortDescending = [key isEqualToString:BDSKRelevanceString];
         if (sortKey)
             [tableView setIndicatorImage:nil inTableColumn:[tableView tableColumnWithIdentifier:sortKey]];
-        if([previousSortKey isEqualToString:sortKey] == NO){
-            [previousSortKey release];
-            previousSortKey = sortKey; // this is retained
-        }else{
-            [sortKey release];
+        if ([sortKey isEqualToString:BDSKImportOrderString] || [sortKey isEqualToString:BDSKRelevanceString]) {
+            // this is probably after removing an ImportOrder or Relevance column, try to reinstate the previous sort order
+            if ([key isEqualToString:previousSortKey])
+                docState.sortDescending = docState.previousSortDescending;
+            else
+                docState.sortDescending = [key isEqualToString:BDSKRelevanceString];
+        } else {
+            if ([previousSortKey isEqualToString:sortKey] == NO) {
+                [previousSortKey release];
+                previousSortKey = [sortKey retain];
+            }
+            docState.previousSortDescending = docState.sortDescending;
+            docState.sortDescending = [key isEqualToString:BDSKRelevanceString];
         }
+        [sortKey release];
         sortKey = [key retain];
         [tableView setHighlightedTableColumn:tableColumn]; 
 	}
     
-    if(previousSortKey == nil)
+    if (previousSortKey == nil) {
         previousSortKey = [sortKey retain];
+        docState.previousSortDescending = docState.sortDescending;
+    }
     
     NSString *userInfo = [self fileName];
-    NSArray *sortDescriptors = [NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:sortKey ascending:!docState.sortDescending userInfo:userInfo], [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:previousSortKey ascending:!docState.sortDescending userInfo:userInfo], nil];
+    NSArray *sortDescriptors = [NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:sortKey ascending:!docState.sortDescending userInfo:userInfo], [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:previousSortKey ascending:!docState.previousSortDescending userInfo:userInfo], nil];
     [tableView setSortDescriptors:sortDescriptors]; // just using this to store them; it's really a no-op
     
-
     // @@ DON'T RETURN WITHOUT RESETTING THIS!
     // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
     [tableView setDelegate:nil];
+    
+    // cache the selection; this works for multiple publications
+    NSArray *pubsToSelect = nil;
+    if ([tableView numberOfSelectedRows])
+        pubsToSelect = [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
     
     // sort by new primary column, subsort with previous primary column
     [shownPublications mergeSortUsingDescriptors:sortDescriptors];
 
     // Set the graphic for the new column header
-    [tableView setIndicatorImage: (docState.sortDescending ?
-                                   [NSImage imageNamed:@"NSDescendingSortIndicator"] :
-                                   [NSImage imageNamed:@"NSAscendingSortIndicator"])
+    [tableView setIndicatorImage: [NSImage imageNamed:(docState.sortDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator")]
                    inTableColumn: tableColumn];
 
     // have to reload so the rows get set up right, but a full updateStatus flashes the preview, which is annoying (and the preview won't change if we're maintaining the selection)
