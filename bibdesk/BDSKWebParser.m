@@ -44,6 +44,8 @@
 #import "BDSKGoogleScholarParser.h"
 #import "BDSKSpiresParser.h"
 #import "BDSKArxivParser.h"
+#import "BDSKMathSciNetParser.h"
+#import "BDSKZentralblattParser.h"
 #import "NSError_BDSKExtensions.h"
 #import "BDSKRuntime.h"
 
@@ -66,6 +68,10 @@ static Class webParserClassForType(int stringType)
             return [BDSKSpiresParser class];
 		case BDSKArxivWebType: 
             return [BDSKArxivParser class];
+		case BDSKMathSciNetWebType: 
+            return [BDSKMathSciNetParser class];
+		case BDSKZentralblattWebType: 
+            return [BDSKZentralblattParser class];
         default:
             return Nil;
     }    
@@ -86,6 +92,10 @@ static Class webParserClassForType(int stringType)
 		return BDSKSpiresWebType;
     if([BDSKArxivParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
 		return BDSKArxivWebType;
+    if([BDSKMathSciNetParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
+		return BDSKMathSciNetWebType;
+    if([BDSKZentralblattParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
+		return BDSKZentralblattWebType;
     return BDSKUnknownWebType;
 }
 

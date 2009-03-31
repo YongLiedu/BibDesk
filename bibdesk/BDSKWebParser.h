@@ -47,7 +47,9 @@ enum {
     BDSKHubmedWebType,
     BDSKGoogleScholarWebType,
     BDSKSpiresWebType,
-    BDSKArxivWebType
+    BDSKArxivWebType,
+	BDSKMathSciNetWebType,
+	BDSKZentralblattWebType
 };
 
 // this method is the main entry point for the BDSKWebParser class
