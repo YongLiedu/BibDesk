@@ -322,7 +322,7 @@ The groupedPublications array is a subset of the publications array, developed b
     if([groups indexOfObjectIdenticalTo:[notification object]] == NSNotFound)
         return;
     if([sortGroupsKey isEqualToString:BDSKGroupCellStringKey])
-        [self sortGroupsByKey:sortGroupsKey];
+        [self sortGroupsByKey:nil];
     else
         [groupTableView setNeedsDisplay:YES];
 }
@@ -364,7 +364,7 @@ The groupedPublications array is a subset of the publications array, developed b
     BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
     
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
-        [self sortGroupsByKey:sortGroupsKey];
+        [self sortGroupsByKey:nil];
     }else{
         [groupTableView reloadData];
         if ([[self selectedGroups] containsObject:group] && succeeded == YES)
@@ -431,7 +431,7 @@ The groupedPublications array is a subset of the publications array, developed b
         return; /// must be from another document
     
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
-        [self sortGroupsByKey:sortGroupsKey];
+        [self sortGroupsByKey:nil];
     }else{
         [groupTableView reloadData];
         if ([[self selectedGroups] containsObject:group] && succeeded == YES)
@@ -450,7 +450,7 @@ The groupedPublications array is a subset of the publications array, developed b
         return; /// must be from another document
     
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
-        [self sortGroupsByKey:sortGroupsKey];
+        [self sortGroupsByKey:nil];
     }else{
         [groupTableView reloadData];
         if ([[self selectedGroups] containsObject:group] && succeeded == YES)
@@ -602,7 +602,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     if (oldCount != [group count]) {
         if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
             NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];
-            [self sortGroupsByKey:sortGroupsKey];
+            [self sortGroupsByKey:nil];
             [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
         } else {
             [groupTableView reloadData];
@@ -634,7 +634,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     
     if(sortByCount){
         NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];
-        [self sortGroupsByKey:sortGroupsKey];
+        [self sortGroupsByKey:nil];
         [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
     }else if (needsUpdate == YES || hideCount == NO){
         [groupTableView reloadData];
@@ -747,13 +747,13 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 #pragma mark Actions
 
 - (IBAction)sortGroupsByGroup:(id)sender{
-	if ([sortGroupsKey isEqualToString:BDSKGroupCellStringKey]) return;
-	[self sortGroupsByKey:BDSKGroupCellStringKey];
+	if ([sortGroupsKey isEqualToString:BDSKGroupCellStringKey] == NO)
+        [self sortGroupsByKey:BDSKGroupCellStringKey];
 }
 
 - (IBAction)sortGroupsByCount:(id)sender{
-	if ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) return;
-    [self sortGroupsByKey:BDSKGroupCellCountKey];
+	if ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey] == NO)
+        [self sortGroupsByKey:BDSKGroupCellCountKey];
 }
 
 - (IBAction)changeGroupFieldAction:(id)sender{
@@ -1617,10 +1617,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (void)sortGroupsByKey:(NSString *)key{
     if (key == nil) {
+		// nil key indicates resort
+    } else if ([key isEqualToString:sortGroupsKey]) {
         // clicked the sort arrow in the table header, change sort order
         docState.sortGroupsDescending = !docState.sortGroupsDescending;
-    } else if ([key isEqualToString:sortGroupsKey]) {
-		// same key, resort
     } else {
         // change key
         // save new sorting selector, and re-sort the array.

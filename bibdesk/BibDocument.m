@@ -1776,7 +1776,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [self setSearchString:@""];
         [self updateSmartGroupsCountAndContent:NO];
         [self updateCategoryGroupsPreservingSelection:YES];
-        [self sortGroupsByKey:sortGroupsKey]; // resort
+        [self sortGroupsByKey:nil]; // resort
 		[tableView deselectAll:self]; // clear before resorting
 		[self search:searchField]; // redo the search
         [self sortPubsByKey:nil]; // resort

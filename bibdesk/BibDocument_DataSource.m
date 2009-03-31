@@ -319,7 +319,7 @@
     if (tableView == tv){
         [self sortPubsByKey:[tableColumn identifier]];
 	}else if (groupTableView == tv){
-        [self sortGroupsByKey:nil];
+        [self sortGroupsByKey:sortGroupsKey];
 	}
 
 }
