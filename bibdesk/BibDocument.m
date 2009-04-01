@@ -146,6 +146,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 #define BDSKMainWindowExtendedAttributeKey @"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes"
 #define BDSKGroupSplitViewFractionKey @"BDSKGroupSplitViewFractionKey"
 #define BDSKMainTableSplitViewFractionKey @"BDSKMainTableSplitViewFractionKey"
+#define BDSKWebViewFractionKey @"BDSKWebViewFractionKey"
 #define BDSKDocumentWindowFrameKey @"BDSKDocumentWindowFrameKey"
 #define BDSKSelectedPublicationsKey @"BDSKSelectedPublicationsKey"
 #define BDSKDocumentStringEncodingKey @"BDSKDocumentStringEncodingKey"
@@ -514,6 +515,8 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     if (fract >= 0)
         [splitView setFraction:fract];
     
+    docState.lastWebViewFraction = [xattrDefaults floatForKey:BDSKWebViewFractionKey defaultValue:0.0];
+    
     [mainBox setBackgroundColor:[NSColor controlBackgroundColor]];
     
     // this might be replaced by the file content tableView
@@ -737,6 +740,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         // of the 3 splitviews, the fraction of the first divider would be considered, so fallback to the fraction from the nib
         if (NO == [self hasWebGroupSelected])
             [dictionary setFloatValue:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
+        [dictionary setFloatValue:docState.lastWebViewFraction forKey:BDSKWebViewFractionKey];
         [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
         
         // if this isn't a save operation, the encoding in xattr is already correct, while our encoding might be different from the actual file encoding, if the user might ignored an encoding warning without saving
