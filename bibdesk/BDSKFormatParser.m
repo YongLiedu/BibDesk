@@ -1087,15 +1087,16 @@
 		// check optional arguments
 		if ([validOptArgSpecifierChars characterIsMember:specifier]) {
 			if (NO == [scanner isAtEnd]) {
-				int numOpts = ((specifier == 'A' || specifier == 'P' || specifier == 's')? 3 : ((specifier == 'a' || specifier == 'p' || specifier == 'w')? 2 : 1));
-				while (numOpts-- && [scanner scanString:@"[" intoString: NULL]) {
+				int i, numOpts = ((specifier == 'A' || specifier == 'P' || specifier == 's')? 3 : ((specifier == 'a' || specifier == 'p' || specifier == 'w')? 2 : 1));
+				for (i = 0; i < numOpts && [scanner scanString:@"[" intoString: NULL]; i++) {
 					if (NO == [scanner scanUpToString:@"]" intoString:&string]) 
 						string = @"";
 					if (NO == [scanner scanString:@"]" intoString:NULL]) {
 						errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Missing \"]\" after specifier %%%C.", @"Error description"), specifier];
 						break;
 					}
-					string = [self stringBySanitizingString:string forField:fieldName inFileType:type];
+                    if (specifier != 'w' || i > 0)
+                        string = [self stringBySanitizingString:string forField:fieldName inFileType:type];
 					AppendStringToFormatStrings(@"[", paramAttr);
 					AppendStringToFormatStrings(string, paramAttr);
 					AppendStringToFormatStrings(@"]", paramAttr);
