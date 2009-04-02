@@ -3719,6 +3719,9 @@ The specifiers are displayed in blue, the optional parameters in green.
 @item @specargparam{%f, Field, [/]0 }
 @tab Arbitrary field, also @samp{Cite Key} or @samp{BibTeX Type}
 @tab slash replacement, max length
+@item @specargparam{%w, Field, [ ][/]0 }
+@tab Words of arbitrary field
+@tab separator characters, slash replacement, max number of words
 @item @specargparam{%c, Field, 3}
 @tab Arbitrary field as initials (acronym)
 @tab max length of words to ignore
@@ -3777,7 +3780,7 @@ In the local file format the slash-character (/) has a special meaning, as it is
 to build the (UNIX style) folder hierarchy. This is usually not what you want generated 
 parts of the format to do. Therefore in the @samp{author} and @samp{title} slashes 
 are always replaced by dashes (-) for the local file format. The same replacement is also 
-performed by default for the @samp{keyword} or @samp{field} specifiers. 
+performed by default for the @samp{keyword}, @samp{field} or @samp{words} specifiers. 
 These latter two however can have an optional parameters delimited by square brackets, 
 which can be used to set the replacement string to another value. In particular, setting 
 the argument between brackets to slash (/), no replacement will be made. This is also 

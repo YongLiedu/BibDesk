@@ -509,6 +509,60 @@
 					}
 					break;
 				}
+                case 'w':
+				{
+                	// words
+                    NSString *key = nil;
+                    NSString *sepChars = nil;
+                    NSString *slash = (isLocalFile) ? @"-" : @"/";
+                    if ([scanner scanString:@"{" intoString:NULL] &&
+						[scanner scanUpToString:@"}" intoString:&key] &&
+						[scanner scanString:@"}" intoString:NULL]) {
+                        // look for [sep]
+                        if ([scanner scanString:@"[" intoString:NULL]) {
+                            if (NO == [scanner scanUpToString:@"]" intoString:&sepChars]) sepChars = @" ";
+                            [scanner scanString:@"]" intoString:NULL];
+                        }
+                        // look for [slash]
+                        if ([scanner scanString:@"[" intoString:NULL]) {
+                            if (NO == [scanner scanUpToString:@"]" intoString:&slash]) slash = @"";
+                            [scanner scanString:@"]" intoString:NULL];
+                        }
+                        NSString *wordsString = [pub stringValueOfField:key];
+                        unsigned int i, numWords = 0;
+                        if (NO == [scanner scanUnsignedInt:&numWords]) numWords = 0;
+                        if ([NSString isEmptyString:wordsString] == NO) {
+                            NSMutableArray *words = [NSMutableArray array];
+                            NSString *word;
+                            // split the word string using the same methodology as addString:forCompletionEntry:, treating sepChars as possible dividers
+                            NSCharacterSet *sepCharSet = [NSCharacterSet characterSetWithCharactersInString:sepChars];
+                            NSRange wordPunctuationRange = [wordsString rangeOfCharacterFromSet:sepCharSet];
+                            if (wordPunctuationRange.location != NSNotFound) {
+                                NSScanner *wordScanner = [NSScanner scannerWithString:wordsString];
+                                [wordScanner setCharactersToBeSkipped:nil];
+                                
+                                while (NO == [wordScanner isAtEnd]) {
+                                    if ([wordScanner scanUpToCharactersFromSet:sepCharSet intoString:&word])
+                                        [words addObject:word];
+                                    [wordScanner scanCharactersFromSet:sepCharSet intoString:nil];
+                                }
+                            } else {
+                                [words addObject:wordsString];
+                            }
+                            for (i = 0; i < [words count] && (numWords == 0 || i < numWords); i++) { 
+                                word = [[words objectAtIndex:i] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]; 
+                                word = [self stringByStrictlySanitizingString:word forField:fieldName inFileType:[pub fileType]]; 
+                                if (NO == [slash isEqualToString:@"/"])
+                                    word = [word stringByReplacingCharactersInSet:slashCharSet withString:slash];
+                                [parsedStr appendString:word]; 
+                            }
+                        }
+					}
+					else {
+						NSLog(@"Missing {'field'} after format specifier %%w in format.");
+					}
+					break;
+				}
                 case 'c':
 				{
                 	// This handles acronym specifiers of the form %c{FieldName}
@@ -936,13 +990,13 @@
 	static NSDictionary *errorAttr = nil;
 	
 	if (validSpecifierChars == nil) {
-		validSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTmyYlLebkfcsirRduUn0123456789%[]"] retain];
-		validParamSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTkfciuUn"] retain];
+		validSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTmyYlLebkfwcsirRduUn0123456789%[]"] retain];
+		validParamSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTkfwciuUn"] retain];
 		validUniqueSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"uUn"] retain];
 		validLocalFileSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"lLe"] retain];
 		validEscapeSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"0123456789%[]"] retain];
-		validArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"fcsi"] retain];
-		validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPTkfsuUn"] retain];
+		validArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"fwcsi"] retain];
+		validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPTkfwsuUn"] retain];
 		validAuthorSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApP"] retain];
         
 		NSFont *font = [NSFont systemFontOfSize:0];
@@ -1033,7 +1087,7 @@
 		// check optional arguments
 		if ([validOptArgSpecifierChars characterIsMember:specifier]) {
 			if (NO == [scanner isAtEnd]) {
-				int numOpts = ((specifier == 'A' || specifier == 'P' || specifier == 's')? 3 : ((specifier == 'a' || specifier == 'p')? 2 : 1));
+				int numOpts = ((specifier == 'A' || specifier == 'P' || specifier == 's')? 3 : ((specifier == 'a' || specifier == 'p' || specifier == 'w')? 2 : 1));
 				while (numOpts-- && [scanner scanString:@"[" intoString: NULL]) {
 					if (NO == [scanner scanUpToString:@"]" intoString:&string]) 
 						string = @"";
