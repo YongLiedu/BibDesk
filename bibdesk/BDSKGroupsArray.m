@@ -541,6 +541,8 @@
     } else if (spinner) {
         [spinner stopAnimation:nil];
         [spinner removeFromSuperview];
+        CFDictionaryRemoveValue(spinners, group);
+        spinner = nil;
     }
     
     return spinner;
