@@ -169,7 +169,7 @@
     } else {
         NSRect textRect = [self textRectForBounds:cellFrame];
         float textWidth = [super cellSize].width;
-        if (textWidth < NSWidth(textRect))
+        if (textWidth < NSWidth(textRect) && [NSString isEmptyString:[self stringValue]] == NO)
             textRect.size.width = textWidth;
         if (NSMouseInRect(mouseLoc, textRect, [controlView isFlipped]))
             hit = NSCellHitContentArea | NSCellHitEditableTextArea;

@@ -40,6 +40,7 @@
 #import "NSBezierPath_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSGeometry_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
 
 
@@ -359,7 +360,7 @@ static NSString *stringWithNumber(NSNumber *number)
     } else {
         NSRect textRect = [self textRectForBounds:cellFrame];
         float textWidth = [super cellSize].width;
-        if (textWidth < NSWidth(textRect))
+        if (textWidth < NSWidth(textRect) && [NSString isEmptyString:[self stringValue]] == NO)
             textRect.size.width = textWidth;
         if (NSMouseInRect(mouseLoc, textRect, [controlView isFlipped]))
             hit = NSCellHitContentArea | NSCellHitEditableTextArea;
