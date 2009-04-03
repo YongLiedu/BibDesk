@@ -354,8 +354,16 @@ static NSString *stringWithNumber(NSNumber *number)
     // super returns 0 for button clicks, so -[NSTableView mouseDown:] doesn't track the cell
     NSRect iconRect = [self iconRectForBounds:cellFrame];
     NSPoint mouseLoc = [controlView convertPoint:[event locationInWindow] fromView:nil];
-    if (NSMouseInRect(mouseLoc, iconRect, [controlView isFlipped]))
+    if (NSMouseInRect(mouseLoc, iconRect, [controlView isFlipped])) {
         hit = NSCellHitContentArea;
+    } else {
+        NSRect textRect = [self textRectForBounds:cellFrame];
+        float textWidth = [super cellSize].width;
+        if (textWidth < NSWidth(textRect))
+            textRect.size.width = textWidth;
+        if (NSMouseInRect(mouseLoc, textRect, [controlView isFlipped]))
+            hit = NSCellHitContentArea | NSCellHitEditableTextArea;
+    }
     return hit;
 }
 
