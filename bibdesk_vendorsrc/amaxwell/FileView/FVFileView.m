@@ -1099,7 +1099,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     if (window) {
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
         [nc removeObserver:self name:NSWindowDidBecomeMainNotification object:window];
-        [nc removeObserver:self name:NSWindowDidBecomeMainNotification object:window];
+        [nc removeObserver:self name:NSWindowDidResignMainNotification object:window];
     }
 }
 
