@@ -675,6 +675,11 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 	return menuItems;
 }
 
+- (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request {
+    [[NSWorkspace sharedWorkspace] openURL:[request URL]];
+    return nil;
+}
+
 #pragma mark WebEditingDelegate protocol
 
 // this is needed because WebView uses the document's undo manager by default, rather than the one from the window.
