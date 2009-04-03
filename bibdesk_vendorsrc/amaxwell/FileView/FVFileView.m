@@ -1086,7 +1086,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     }
 }
 
-- (void)_handleKeyStateNotification:(NSNotification *)note {
+- (void)_handleMainStateNotification:(NSNotification *)note {
     NSView *view = (id)[self enclosingScrollView] ?: (id)self;
     [view setNeedsDisplay:YES];
 }
@@ -1098,8 +1098,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     }
     if (window) {
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-        [nc removeObserver:self name:NSWindowDidBecomeKeyNotification object:window];
-        [nc removeObserver:self name:NSWindowDidResignKeyNotification object:window];
+        [nc removeObserver:self name:NSWindowDidBecomeMainNotification object:window];
+        [nc removeObserver:self name:NSWindowDidBecomeMainNotification object:window];
     }
 }
 
@@ -1108,8 +1108,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     NSWindow *window = [self window];
     if (window) {
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-        [nc addObserver:self selector:@selector(_handleKeyStateNotification:) name:NSWindowDidBecomeKeyNotification object:window];
-        [nc addObserver:self selector:@selector(_handleKeyStateNotification:) name:NSWindowDidResignKeyNotification object:window];
+        [nc addObserver:self selector:@selector(_handleMainStateNotification:) name:NSWindowDidBecomeMainNotification object:window];
+        [nc addObserver:self selector:@selector(_handleMainStateNotification:) name:NSWindowDidResignMainNotification object:window];
     }
 }
 
