@@ -48,7 +48,8 @@
 @implementation BDSKMathSciNetParser
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
-	BOOL result = (0 == [[[[url path] pathComponents] objectAtIndex:1] rangeOfString:@"mathscinet"].location);	
+    NSString *pathComponents = [[url path] pathComponents];
+	BOOL result = [pathComponents count] > 1 && [[pathComponents objectAtIndex:1] caseInsensitiveCompare:@"mathscinet"] == NSOrderedSame;	
 	return result;
 }
 

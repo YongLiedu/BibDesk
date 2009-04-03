@@ -48,7 +48,7 @@
 @implementation BDSKZentralblattParser
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
-	BOOL result = ([[url host] rangeOfString:@"zentralblatt-math.org"].location != NSNotFound);
+	BOOL result = [[[url host] lowercaseString] hasSuffix:@"zentralblatt-math.org"];
 	return result;
 }
 
