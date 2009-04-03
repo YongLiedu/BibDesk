@@ -48,7 +48,7 @@
 @implementation BDSKMathSciNetParser
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
-    NSString *pathComponents = [[url path] pathComponents];
+    NSArray *pathComponents = [[url path] pathComponents];
 	BOOL result = [pathComponents count] > 1 && [[pathComponents objectAtIndex:1] caseInsensitiveCompare:@"mathscinet"] == NSOrderedSame;	
 	return result;
 }
