@@ -235,17 +235,15 @@ static NSString *stringWithNumber(NSNumber *number)
 {
     NSSize countSize = NSZeroSize;
     
-    float countSep = [self countPaddingForCellSize:aRect.size];
     if([self failedDownload] || [self isRetrieving]) {
-        countSize = NSMakeSize(16, 16);
-    }
-    else if([self count] > 0) {
+        countSize = NSMakeSize(16.0, 16.0);
+    } else if ([self count] > 0) {
         countSize = [countString boundingRectWithSize:aRect.size options:0].size;
+        countSize.width += [self count] < 100 ? countSize.height : 0.5 * countSize.height; // add oval pading around count
     }
     NSRect countRect, ignored;
     if (countSize.width > 0.0) {
-        // set countRect origin to the string drawing origin (number has countSep on either side for oval padding)
-        NSDivideRect(aRect, &ignored, &countRect, countSep + BORDER_BETWEEN_EDGE_AND_COUNT, NSMaxXEdge);
+        NSDivideRect(aRect, &ignored, &countRect, BORDER_BETWEEN_EDGE_AND_COUNT, NSMaxXEdge);
         NSDivideRect(countRect, &countRect, &ignored, countSize.width, NSMaxXEdge);
         // now set the size of it to the string size
         countRect = BDSKCenterRect(countRect, countSize, YES);
@@ -260,7 +258,7 @@ static NSString *stringWithNumber(NSNumber *number)
     NSRect textRect = aRect, countRect = [self countRectForBounds:aRect];
     textRect.origin.x = NSMaxX([self iconRectForBounds:aRect]) + BORDER_BETWEEN_IMAGE_AND_TEXT;
     if (NSWidth(countRect) > 0.0)
-        textRect.size.width = NSMinX(countRect) - BORDER_BETWEEN_COUNT_AND_TEXT - [self countPaddingForCellSize:aRect.size] - NSMinX(textRect);
+        textRect.size.width = NSMinX(countRect) - BORDER_BETWEEN_COUNT_AND_TEXT - NSMinX(textRect);
     else
         textRect.size.width = NSMaxX(aRect) - NSMinX(textRect);
     return textRect;
@@ -270,15 +268,16 @@ static NSString *stringWithNumber(NSNumber *number)
 {
     NSSize cellSize = [super cellSize];
     NSSize countSize = NSZeroSize;
-    float countSep = [self countPaddingForCellSize:cellSize];
-    if ([self isRetrieving] || [self failedDownload])
+    if ([self isRetrieving] || [self failedDownload]) {
         countSize = NSMakeSize(16, 16);
-    else if ([self count] > 0)
+    } else if ([self count] > 0) {
         countSize = [countString boundingRectWithSize:cellSize options:0].size;
+        countSize.width += countSize.height;
+    }
     // cellSize.height approximates the icon size
     cellSize.width += BORDER_BETWEEN_EDGE_AND_IMAGE + cellSize.height + BORDER_BETWEEN_IMAGE_AND_TEXT;
     if (countSize.width > 0.0)
-        cellSize.width += BORDER_BETWEEN_COUNT_AND_TEXT + countSize.width + 2 * countSep + BORDER_BETWEEN_EDGE_AND_COUNT;
+        cellSize.width += BORDER_BETWEEN_COUNT_AND_TEXT + countSize.width + BORDER_BETWEEN_EDGE_AND_COUNT;
     return cellSize;
 }
 
@@ -307,12 +306,14 @@ static NSString *stringWithNumber(NSNumber *number)
     
     if ([self isRetrieving] == NO) {
         NSRect countRect = [self countRectForBounds:aRect];
+        int count = [self count];
         if ([self failedDownload]) {
             NSImage *cautionImage = [NSImage imageNamed:@"BDSKSmallCautionIcon"];
             NSSize cautionImageSize = [cautionImage size];
             NSRect cautionIconRect = NSMakeRect(0, 0, cautionImageSize.width, cautionImageSize.height);
             [cautionImage drawFlipped:controlViewIsFlipped inRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
-        } else if ([self count] > 0) {
+        } else if (count > 0) {
+            float countInset = count < 100 ? 0.5 * NSHeight(countRect) : 0.25 * NSHeight(countRect);
             NSColor *fgColor;
             NSColor *bgColor;
             if ([controlView respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
@@ -345,11 +346,11 @@ static NSString *stringWithNumber(NSNumber *number)
             
             [NSGraphicsContext saveGraphicsState];
             [bgColor setFill];
-            [NSBezierPath fillHorizontalOvalAroundRect:countRect];
+            [NSBezierPath fillHorizontalOvalInRect:countRect];
             [NSGraphicsContext restoreGraphicsState];
             
             [countString addAttribute:NSForegroundColorAttributeName value:fgColor range:NSMakeRange(0, [countString length])];
-            [countString drawWithRect:countRect options:NSStringDrawingUsesLineFragmentOrigin];
+            [countString drawWithRect:NSInsetRect(countRect, countInset, 0.0) options:NSStringDrawingUsesLineFragmentOrigin];
         }
     }
     

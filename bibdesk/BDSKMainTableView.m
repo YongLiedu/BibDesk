@@ -203,10 +203,10 @@ enum {
                 NSDivideRect([self rectOfRow:row], &ignored, &rect, 1.0, NSMaxYEdge);
                 if ([self isRowSelected:row]) {
                     [NSBezierPath setDefaultLineWidth:2.0];
-                    [NSBezierPath strokeHorizontalOvalAroundRect:NSInsetRect(rect, 2.0 + 0.5 * NSHeight(rect), 1.0)];
+                    [NSBezierPath strokeHorizontalOvalInRect:NSInsetRect(rect, 2.0, 1.0)];
                     [NSBezierPath setDefaultLineWidth:1.0];
                 } else {
-                    [NSBezierPath fillHorizontalOvalAroundRect:NSInsetRect(rect, 1.0 + 0.5 * NSHeight(rect), 0.0)];
+                    [NSBezierPath fillHorizontalOvalInRect:NSInsetRect(rect, 1.0, 0.0)];
                 }
                 [NSGraphicsContext restoreGraphicsState];
             }
@@ -713,8 +713,8 @@ enum {
     float alpha = [self isEnabled] ? 1.0 : 0.6;
     NSRect rect = cellFrame;
     rect.size.height -= 1.0;
-    rect = NSInsetRect(rect, 0.5 * NSHeight(rect), 0.5);
-    NSBezierPath *path = [NSBezierPath bezierPathWithHorizontalOvalAroundRect:rect];
+    rect = NSInsetRect(rect, 0.0, 0.5);
+    NSBezierPath *path = [NSBezierPath bezierPathWithHorizontalOvalInRect:rect];
 
     [path fillPathVerticallyWithStartColor:[CIColor colorWithRed:startWhite green:startWhite blue:startWhite alpha:alpha] endColor:[CIColor colorWithRed:endWhite green:endWhite blue:endWhite alpha:alpha]];
     [[NSColor colorWithCalibratedWhite:0.8 alpha:alpha] set];

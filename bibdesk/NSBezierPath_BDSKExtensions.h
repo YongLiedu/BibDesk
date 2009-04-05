@@ -46,9 +46,9 @@
 
 + (void)drawHighlightInRect:(NSRect)rect radius:(float)radius lineWidth:(float)lineWidth color:(NSColor *)color;
 
-+ (void)fillHorizontalOvalAroundRect:(NSRect)rect;
-+ (void)strokeHorizontalOvalAroundRect:(NSRect)rect;
-+ (NSBezierPath*)bezierPathWithHorizontalOvalAroundRect:(NSRect)rect;
++ (void)fillHorizontalOvalInRect:(NSRect)rect;
++ (void)strokeHorizontalOvalInRect:(NSRect)rect;
++ (NSBezierPath*)bezierPathWithHorizontalOvalInRect:(NSRect)rect;
 
 + (void)fillStarInRect:(NSRect)rect;
 + (void)fillInvertedStarInRect:(NSRect)rect;

@@ -608,7 +608,7 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
         
         // draw a count of the rows being dragged, similar to Mail.app
         [[NSColor redColor] setFill];
-        [NSBezierPath fillHorizontalOvalAroundRect:countRect];
+        [NSBezierPath fillHorizontalOvalInRect:NSInsetRect(countRect, -0.5 * NSHeight(countRect), 0.0)];
         [countString drawInRect:countRect];
         
         [labeledImage unlockFocus];

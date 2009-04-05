@@ -101,35 +101,36 @@
     [path stroke];
 }
 
-+ (void)fillHorizontalOvalAroundRect:(NSRect)rect
++ (void)fillHorizontalOvalInRect:(NSRect)rect
 {
-    NSBezierPath *p = [self bezierPathWithHorizontalOvalAroundRect:rect];
+    NSBezierPath *p = [self bezierPathWithHorizontalOvalInRect:rect];
     [p fill];
 }
 
 
-+ (void)strokeHorizontalOvalAroundRect:(NSRect)rect
++ (void)strokeHorizontalOvalInRect:(NSRect)rect
 {
-    NSBezierPath *p = [self bezierPathWithHorizontalOvalAroundRect:rect];
+    NSBezierPath *p = [self bezierPathWithHorizontalOvalInRect:rect];
     [p stroke];
 }
 
-+ (NSBezierPath*)bezierPathWithHorizontalOvalAroundRect:(NSRect)rect
++ (NSBezierPath*)bezierPathWithHorizontalOvalInRect:(NSRect)rect
 {
     BDSKASSERT([NSThread isMainThread]);
-
-    float radius = 0.5f * rect.size.height;
+    BDSKPRECONDITION(NSWidth(rect) >= NSHeight(rect));
+    
+    float radius = 0.5f * NSHeight(rect);
     NSBezierPath *path = [self bezierPath];
     
     [path removeAllPoints];
     
     // Now draw our rectangle:
-    [path moveToPoint: NSMakePoint(NSMinX(rect), NSMaxY(rect))];
+    [path moveToPoint: NSMakePoint(NSMinX(rect) + radius, NSMaxY(rect))];
     
     // Left half circle:
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rect), NSMidY(rect)) radius:radius startAngle:90.0 endAngle:270.0];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rect) + radius, NSMidY(rect)) radius:radius startAngle:90.0 endAngle:270.0];
     // Bottom edge and right half circle:
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rect), NSMidY(rect)) radius:radius startAngle:-90.0 endAngle:90.0];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rect) - radius, NSMidY(rect)) radius:radius startAngle:-90.0 endAngle:90.0];
     // Top edge:
     [path closePath];
     
