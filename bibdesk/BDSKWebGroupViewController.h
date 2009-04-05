@@ -39,7 +39,7 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKCollapsibleView, BDSKEdgeView, BDSKWebGroup, WebView, WebFrame, BibDocument, BDSKDragTextField, BDSKFieldEditor;
+@class BDSKCollapsibleView, BDSKEdgeView, BDSKWebGroup, WebView, WebFrame, BibDocument, BDSKDragTextField, BDSKFieldEditor, BDSKNewWebWindowHandler;
 
 @interface BDSKWebGroupViewController : NSWindowController {
     IBOutlet BDSKEdgeView *view;
@@ -58,6 +58,7 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
     NSMenu *backMenu;
     NSMenu *forwardMenu;
     BDSKFieldEditor *fieldEditor;
+    BDSKNewWebWindowHandler *newWindowHandler;
 }
 
 - (id)initWithGroup:(BDSKWebGroup *)aGroup document:(BibDocument *)aDocument;

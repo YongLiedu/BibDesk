@@ -57,6 +57,15 @@
 
 #define MAX_HISTORY 50
 
+// workaround for loading a URL from a javasecript window.open event http://stackoverflow.com/questions/270458/cocoa-webkit-having-window-open-javascipt-links-opening-in-an-instance-of-safa
+@interface BDSKNewWebWindowHandler : NSObject {
+    WebView *webView;
+}
+- (WebView *)webView;
+@end
+
+#pragma mark -
+
 @implementation BDSKWebGroupViewController
 
 + (void)initialize {
@@ -152,6 +161,7 @@
     [undoManager release];
     [downloads release];
     [fieldEditor release];
+    [newWindowHandler release];
     [super dealloc];
 }
 
@@ -676,8 +686,10 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 }
 
 - (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request {
-    [[NSWorkspace sharedWorkspace] openURL:[request URL]];
-    return nil;
+    // due to a known WebKit bug the request is always nil https://bugs.webkit.org/show_bug.cgi?id=23432
+    if (newWindowHandler == nil)
+        newWindowHandler = [[BDSKNewWebWindowHandler alloc] init];
+    return [newWindowHandler webView];
 }
 
 #pragma mark WebEditingDelegate protocol
@@ -738,3 +750,32 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 }
 
 @end
+
+#pragma mark -
+
+@implementation BDSKNewWebWindowHandler
+
+- (id)init {
+    if (self = [super init]) {
+        webView = [[WebView alloc] init];
+        [webView setPolicyDelegate:self];  
+    }
+    return self;
+}
+
+- (void)webView:(WebView *)sender decidePolicyForNavigationAction:(NSDictionary *)actionInformation request:(NSURLRequest *)request frame:(WebFrame *)frame decisionListener:(id<WebPolicyDecisionListener>)listener {
+    [[NSWorkspace sharedWorkspace] openURL:[actionInformation objectForKey:WebActionOriginalURLKey]];
+    [listener ignore];
+}
+
+-(WebView *)webView {
+    return webView;
+}
+
+- (void)dealloc {
+    [webView release];
+    [super dealloc];
+}
+
+@end
+
