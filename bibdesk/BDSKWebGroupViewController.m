@@ -54,6 +54,7 @@
 #import "BDSKBookmark.h"
 #import "NSMenu_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 
 #define MAX_HISTORY 50
 
@@ -406,11 +407,14 @@
 }
 
 - (BOOL)dragTextField:(BDSKDragTextField *)textField writeDataToPasteboard:(NSPasteboard *)pboard {
-    NSURL *url = [NSURL URLWithString:[textField stringValue]];
-    if (url) {
-        [pboard declareTypes:[NSArray arrayWithObjects:NSURLPboardType, nil] owner:nil];
-        [url writeToPasteboard:pboard];
-        return YES;
+    NSString *urlString = [self URLString];
+    if ([NSString isEmptyString:urlString] == NO) {
+        NSURL *url = [NSURL URLWithString:urlString];
+        if (url) {
+            [pboard declareTypes:[NSArray arrayWithObjects:NSURLPboardType, nil] owner:nil];
+            [url writeToPasteboard:pboard];
+            return YES;
+        }
     }
     return NO;
 }
