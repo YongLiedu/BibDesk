@@ -315,19 +315,39 @@ static NSString *stringWithNumber(NSNumber *number)
         } else if ([self count] > 0) {
             NSColor *fgColor;
             NSColor *bgColor;
-            if ([self isHighlighted]) {
-                fgColor = [NSColor disabledControlTextColor];
-                bgColor = [[NSColor alternateSelectedControlTextColor] colorWithAlphaComponent:0.8];
+            if ([controlView respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
+                if ([[controlView window] isMainWindow]) {
+                    if ([self isHighlighted]) {
+                        fgColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:1.0];
+                        bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.9];
+                    } else {
+                        fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
+                        bgColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:0.9];
+                    }
+                } else {
+                    if ([self isHighlighted]) {
+                        fgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:1.0];
+                        bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.9];
+                    } else {
+                        fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
+                        bgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:0.9];
+                    }
+                }
             } else {
-                fgColor = [NSColor alternateSelectedControlTextColor];
-                bgColor = [[NSColor disabledControlTextColor] colorWithAlphaComponent:0.7];
+                if ([self isHighlighted]) {
+                    fgColor = [NSColor disabledControlTextColor];
+                    bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.8];
+                } else {
+                    fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
+                    bgColor = [[NSColor disabledControlTextColor] colorWithAlphaComponent:0.7];
+                }
             }
-
+            
             [NSGraphicsContext saveGraphicsState];
             [bgColor setFill];
             [NSBezierPath fillHorizontalOvalAroundRect:countRect];
             [NSGraphicsContext restoreGraphicsState];
-
+            
             [countString addAttribute:NSForegroundColorAttributeName value:fgColor range:NSMakeRange(0, [countString length])];
             [countString drawWithRect:countRect options:NSStringDrawingUsesLineFragmentOrigin];
         }
