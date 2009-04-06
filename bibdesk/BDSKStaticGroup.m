@@ -63,7 +63,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
 // designated initializer
 - (id)initWithName:(id)aName publications:(NSArray *)array {
     if (self = [super initWithName:aName count:[array count]]) {
-        publications = [[NSArray alloc] initWithArray:array];
+        publications = [[NSMutableArray alloc] initWithArray:array];
     }
     return self;
 }
