@@ -37,6 +37,7 @@
  */
 
 #import "BDSKGradientTableView.h"
+#import "NSLayoutManager_BDSKExtensions.h"
 
 // This class is basically a copy of OAGradientTableView
 
@@ -179,6 +180,10 @@ static NSColor *secondaryHighlightDarkColor = nil;
     }
     CGFunctionRelease(linearBlendFunctionRef);
     CGColorSpaceRelease(colorSpace);
+}
+
+- (float)rowHeightForFont:(NSFont *)font {
+    return [NSLayoutManager defaultViewLineHeightForFont:font] + 2.0;
 }
 
 @end

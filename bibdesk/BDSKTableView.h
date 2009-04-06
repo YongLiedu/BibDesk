@@ -54,6 +54,7 @@
 
 - (void)changeFont:(id)sender;
 - (void)tableViewFontChanged;
+- (float)rowHeightForFont:(NSFont *)font;
 - (void)updateFontPanel:(NSNotification *)notification;
 - (NSString *)fontNamePreferenceKey;
 - (void)setFontNamePreferenceKey:(NSString *)newFontNamePreferenceKey;

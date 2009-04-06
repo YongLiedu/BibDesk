@@ -170,7 +170,6 @@ static char BDSKTableViewFontDefaultsObservationContext;
             font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
         
         [self setFont:font];
-        [self setRowHeight:[NSLayoutManager defaultViewLineHeightForFont:font] + 2.0f];
         
         [self tile];
         [self reloadData]; // othewise the change isn't immediately visible
@@ -536,8 +535,12 @@ static char BDSKTableViewFontDefaultsObservationContext;
             [cell setFont:font];
     }
     
-    [self setRowHeight:[NSLayoutManager defaultViewLineHeightForFont:font]];
+    [self setRowHeight:[self rowHeightForFont:font]];
     [self noteHeightOfRowsWithIndexesChanged:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfRows])]];
+}
+
+- (float)rowHeightForFont:(NSFont *)font {
+    return [NSLayoutManager defaultViewLineHeightForFont:font];
 }
 
 #pragma mark SKTypeSelectHelper datasource protocol
