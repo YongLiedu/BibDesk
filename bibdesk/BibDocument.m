@@ -2996,6 +2996,9 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [self updateFileViews];
     [self updatePreviews];
     [groupTableView updateHighlights];
+    BOOL fileViewEditable = [self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO && [[self selectedPublications] count] == 1;
+    [sideFileView setEditable:fileViewEditable];
+    [bottomFileView setEditable:fileViewEditable]; 
 }
 
 - (void)handleFlagsChangedNotification:(NSNotification *)notification{

@@ -1618,6 +1618,183 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     }
 }
 
+- (BOOL)fileView:(FVFileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+{
+    BDSKASSERT(anIndex != NSNotFound);
+    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+        NSArray *selPubs = [self selectedPublications];
+        if ([selPubs count] == 1) {
+            [[selPubs lastObject] moveFilesAtIndexes:aSet toIndex:anIndex];
+            return YES;
+        }
+    }
+    return NO;
+}
+
+- (BOOL)fileView:(FVFileView *)aFileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+{
+    BibItem *publication = nil;
+    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+        NSArray *selPubs = [self selectedPublications];
+        if ([selPubs count] == 1)
+            publication = [selPubs lastObject];
+    }
+    if (publication == nil)
+        return NO;
+    
+    BDSKLinkedFile *aFile = nil;
+    NSEnumerator *enumerator = [newURLs objectEnumerator];
+    NSURL *aURL;
+    NSUInteger idx = [aSet firstIndex];
+    
+    while (NSNotFound != idx) {
+        if ((aURL = [enumerator nextObject]) && 
+            (aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication])) {
+            NSURL *oldURL = [[[publication objectInFilesAtIndex:idx] URL] retain];
+            [publication removeObjectFromFilesAtIndex:idx];
+            if (oldURL)
+                [self userRemovedURL:oldURL forPublication:publication];
+            [oldURL release];
+            [publication insertObject:aFile inFilesAtIndex:idx];
+            [self userAddedURL:aURL forPublication:publication];
+            if (([NSApp currentModifierFlags] & NSCommandKeyMask) == 0)
+                [publication autoFileLinkedFile:aFile];
+        }
+        idx = [aSet indexGreaterThanIndex:idx];
+    }
+    return YES;
+}
+
+- (void)fileView:(FVFileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+{
+    BibItem *publication = nil;
+    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+        NSArray *selPubs = [self selectedPublications];
+        if ([selPubs count] == 1)
+            publication = [selPubs lastObject];
+    }
+    if (publication == nil)
+        return;
+    
+    BDSKLinkedFile *aFile;
+    NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
+    NSURL *aURL;
+    NSUInteger idx = [aSet firstIndex], offset = 0;
+    
+    while (NSNotFound != idx) {
+        if ((aURL = [enumerator nextObject]) && 
+            (aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication])) {
+            [publication insertObject:aFile inFilesAtIndex:idx - offset];
+            [self userAddedURL:aURL forPublication:publication];
+            if (([NSApp currentModifierFlags] & NSCommandKeyMask) == 0)
+                [publication autoFileLinkedFile:aFile];
+        } else {
+            // the indexes in aSet assume that we inserted the file
+            offset++;
+        }
+        idx = [aSet indexGreaterThanIndex:idx];
+    }
+}
+
+- (void)trashAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo
+{
+    if (alert && [alert checkValue])
+        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKAskToTrashFilesKey];
+    NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
+    if (returnCode == NSAlertAlternateReturn) {
+        NSEnumerator *urlEnum = [fileURLs objectEnumerator];
+        NSURL *url;
+        while (url = [urlEnum nextObject]) {
+            NSString *path = [url path];
+            NSString *folderPath = [path stringByDeletingLastPathComponent];
+            NSString *fileName = [path lastPathComponent];
+            int tag = 0;
+            [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
+        }
+    }
+}
+
+// moveToTrash: 0 = no, 1 = yes, -1 = ask
+- (void)publication:(BibItem *)publication deleteURLsAtIndexes:(NSIndexSet *)indexSet moveToTrash:(int)moveToTrash{
+    NSUInteger idx = [indexSet lastIndex];
+    NSMutableArray *fileURLs = [NSMutableArray array];
+    while (NSNotFound != idx) {
+        NSURL *aURL = [[[publication objectInFilesAtIndex:idx] URL] retain];
+        if ([aURL isFileURL])
+            [fileURLs addObject:aURL];
+        [publication removeObjectFromFilesAtIndex:idx];
+        if (aURL)
+            [self userRemovedURL:aURL forPublication:publication];
+        [aURL release];
+        idx = [indexSet indexLessThanIndex:idx];
+    }
+    if ([fileURLs count]) {
+        if (moveToTrash == 1) {
+            [self trashAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[fileURLs retain]];
+        } else if (moveToTrash == -1) {
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
+                                                 defaultButton:NSLocalizedString(@"No", @"Button title")
+                                               alternateButton:NSLocalizedString(@"Yes", @"Button title")
+                                                   otherButton:nil
+                                     informativeTextWithFormat:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
+            [alert setHasCheckButton:YES];
+            [alert setCheckValue:NO];
+            [alert beginSheetModalForWindow:documentWindow
+                              modalDelegate:self 
+                             didEndSelector:@selector(trashAlertDidEnd:returnCode:contextInfo:)  
+                         didDismissSelector:NULL 
+                                contextInfo:[fileURLs retain]];
+        }
+    }
+}
+
+- (BOOL)fileView:(FVFileView *)aFileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
+{
+    BibItem *publication = nil;
+    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+        NSArray *selPubs = [self selectedPublications];
+        if ([selPubs count] == 1)
+            publication = [selPubs lastObject];
+    }
+    if (publication == nil)
+        return NO;
+    
+    int moveToTrash = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKAskToTrashFilesKey] ? -1 : 0;
+    [self publication:publication deleteURLsAtIndexes:indexSet moveToTrash:moveToTrash];
+    return YES;
+}
+
+- (NSDragOperation)fileView:(FVFileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation {
+    BibItem *publication = nil;
+    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+        NSArray *selPubs = [self selectedPublications];
+        if ([selPubs count] == 1)
+            publication = [selPubs lastObject];
+    }
+    if (publication == nil)
+        return NSDragOperationNone;
+    
+    NSDragOperation dragOp = dragOperation;
+    if ([[info draggingSource] isEqual:aFileView] && dropOperation == FVDropOn && dragOperation != NSDragOperationCopy) {
+        // redirect local drop on icon and drop on view
+        NSIndexSet *dragIndexes = [aFileView selectionIndexes];
+        NSUInteger firstIndex = [dragIndexes firstIndex], endIndex = [dragIndexes lastIndex] + 1, count = [publication countOfFiles];
+        if (anIndex == NSNotFound)
+            anIndex = count;
+        // if we're dragging a continuous range, don't move when we drop on that range
+        if ([dragIndexes count] != endIndex - firstIndex || anIndex < firstIndex || anIndex > endIndex) {
+            dragOp = NSDragOperationMove;
+            if (anIndex == count) // note that the count must be > 0, or we wouldn't have a local drag
+                [aFileView setDropIndex:count - 1 dropOperation:FVDropAfter];
+            else
+                [aFileView setDropIndex:anIndex dropOperation:FVDropBefore];
+        }
+    } else if (dragOperation == NSDragOperationLink && ([NSApp currentModifierFlags] & NSCommandKeyMask) == 0) {
+        dragOp = NSDragOperationGeneric;
+    }
+    return dragOp;
+}
+
 @end
 
 #pragma mark -
