@@ -1929,6 +1929,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	if(isPartialData && outError) *outError = error;	
     [self setPublicationsWithoutUndo:newPubs];
     
+    // update the publications of all static groups from the archived keys
+    [[groups staticGroups] makeObjectsPerformSelector:@selector(update)];
+    
     return isPartialData == NO;
 }
 

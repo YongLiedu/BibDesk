@@ -55,7 +55,6 @@
 
 @interface BDSKGroupsArray (Private)
 
-- (void)updateStaticGroupsIfNeeded;
 - (NSUndoManager *)undoManager;
 
 @end
@@ -80,7 +79,6 @@
         scriptGroups = [[NSMutableArray alloc] init];
         smartGroups = [[NSMutableArray alloc] init];
         staticGroups = [[NSMutableArray alloc] init];
-        tmpStaticGroups = nil;
         categoryGroups = nil;
         document = aDocument;
         spinners = NULL;
@@ -98,7 +96,6 @@
     [searchGroups release];
     [smartGroups release];
     [staticGroups release];
-    [tmpStaticGroups release];
     [categoryGroups release];
     if (spinners)
         CFRelease(spinners);
@@ -108,7 +105,6 @@
 #pragma mark NSArray primitive methods
 
 - (unsigned int)count {
-    [self updateStaticGroupsIfNeeded];
     return [sharedGroups count] + [urlGroups count] + [scriptGroups count] + [searchGroups count]
         + [smartGroups count] + [staticGroups count] + [categoryGroups count] + 
         ([lastImportGroup count] ? 1 : 0) + (webGroup == nil ? 0 : 1) + 1 /* add 1 for all publications group */ ;
@@ -116,8 +112,6 @@
 
 - (id)objectAtIndex:(unsigned int)idx {
     unsigned int count;
-    
-    [self updateStaticGroupsIfNeeded];
     
     if (idx == 0)
 		return libraryGroup;
@@ -204,7 +198,6 @@
 }
 
 - (NSArray *)staticGroups{
-    [self updateStaticGroupsIfNeeded];
     return staticGroups;
 }
 
@@ -237,7 +230,6 @@
 }
 
 - (NSRange)rangeOfStaticGroups{
-    [self updateStaticGroupsIfNeeded];
     return NSMakeRange(NSMaxRange([self rangeOfSmartGroups]), [staticGroups count]);
 }
 
@@ -457,7 +449,6 @@
 	[[[self undoManager] prepareWithInvocationTarget:self] removeStaticGroup:group];
 	
     [group setDocument:[self document]];
-    [self updateStaticGroupsIfNeeded];
     [staticGroups addObject:group];
     
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
@@ -469,7 +460,6 @@
 	[[[self undoManager] prepareWithInvocationTarget:self] addStaticGroup:group];
 	
     [group setDocument:nil];
-    [self updateStaticGroupsIfNeeded];
     [staticGroups removeObjectIdenticalTo:group];
     
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
@@ -574,8 +564,6 @@
         }
     }
     
-    [self updateStaticGroupsIfNeeded];
-    
     // we don't sort serachGroups, as their names change and the order-as-added can be useful to track them
     
     [sharedGroups sortUsingDescriptors:sortDescriptors];
@@ -618,8 +606,8 @@
         groupClass = [BDSKSmartGroup class];
         groupArray = smartGroups;
 	} else if (groupType == BDSKStaticGroupType) {
-        [tmpStaticGroups release]; // just to be sure, for revert
-        tmpStaticGroups = [plist retain];
+        groupClass = [BDSKStaticGroup class];
+        groupArray = staticGroups;
 	} else if (groupType == BDSKURLGroupType) {
         groupClass = [BDSKURLGroup class];
         groupArray = urlGroups;
@@ -690,57 +678,6 @@
         }
 	}
     return data;
-}
-
-@end
-
-
-@implementation BDSKGroupsArray (Private)
-
-- (void)updateStaticGroupsIfNeeded{
-    if (tmpStaticGroups == nil) 
-        return;
-    
-    NSEnumerator *groupEnum = [tmpStaticGroups objectEnumerator];
-    NSDictionary *groupDict;
-    BDSKStaticGroup *group = nil;
-    NSMutableArray *pubArray = nil;
-    NSString *name;
-    NSArray *keys;
-    NSEnumerator *keyEnum;
-    NSString *key;
-    
-    [staticGroups removeAllObjects];
-    
-    while (groupDict = [groupEnum nextObject]) {
-        @try {
-            name = [[groupDict objectForKey:@"group name"] stringByUnescapingGroupPlistEntities];
-            keys = [[groupDict objectForKey:@"keys"] componentsSeparatedByString:@","];
-            keyEnum = [keys objectEnumerator];
-            pubArray = [[NSMutableArray alloc] initWithCapacity:[keys count]];
-            while (key = [keyEnum nextObject]) 
-                [pubArray addObjectsFromArray:[[document publications] allItemsForCiteKey:key]];
-            group = [[BDSKStaticGroup alloc] initWithName:name publications:pubArray];
-            [group setDocument:[self document]];
-            [staticGroups addObject:group];
-        }
-        @catch(id exception) {
-            NSLog(@"Ignoring exception \"%@\" while parsing static groups data.", exception);
-        }
-        @finally {
-            [group release];
-            group = nil;
-            [pubArray release];
-            pubArray = nil;
-        }
-    }
-    
-    [tmpStaticGroups release];
-    tmpStaticGroups = nil;
-}
-
-- (NSUndoManager *)undoManager {
-    return [document undoManager];
 }
 
 @end
