@@ -124,9 +124,14 @@
     
     float lineWidth = 1.0;
     float heightOffset = fmaxf(1.0f, roundf(0.25 * [self intercellSpacing].height) - lineWidth);
-    NSColor *highlightColor = [NSColor disabledControlTextColor];
+    NSColor *highlightColor;
     
-    [self lockFocus];
+    if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)] == NO)
+        highlightColor = [NSColor disabledControlTextColor];
+    else if ([[self window] isMainWindow])
+        highlightColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:1.0];
+    else
+        highlightColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:1.0];
     
     unsigned rowIndex = [rows firstIndex];
     NSRect drawRect;
@@ -138,8 +143,6 @@
         
         rowIndex = [rows indexGreaterThanIndex:rowIndex];
     }
-    
-    [self unlockFocus];    
 }
 
 // public method for updating the highlights (as when another table's selection changes)
