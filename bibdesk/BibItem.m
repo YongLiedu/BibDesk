@@ -3332,9 +3332,10 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     // Updates the document's file content search index
     if([owner isDocument] && [key isEqualToString:BDSKLocalFileString]){
+        NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObject:self], @"pubs", nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFileSearchIndexInfoChangedNotification
                                                             object:(BibDocument *)owner
-                                                          userInfo:[self searchIndexInfo]];
+                                                          userInfo:notifInfo];
     }
 }
 

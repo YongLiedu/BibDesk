@@ -673,19 +673,11 @@ static void addItemFunction(const void *value, void *context) {
 - (void)processNotification:(NSNotification *)note
 {    
     BDSKASSERT([NSThread isMainThread]);
-    // get the search index info, dopn't use the note because we don't want to retain the pubs
-    NSArray *searchIndexInfo = nil;
-    NSString *name = [note name];
-    // this is a background thread that can handle these notifications
-    if([name isEqualToString:BDSKFileSearchIndexInfoChangedNotification])
-        searchIndexInfo = [NSArray arrayWithObjects:[note userInfo], nil];
-    else if([name isEqualToString:BDSKDocAddItemNotification] || [name isEqualToString:BDSKDocDelItemNotification])
-        searchIndexInfo = [[note userInfo] valueForKey:@"searchIndexInfo"];
-    else
-        [NSException raise:NSInvalidArgumentException format:@"notification %@ is not handled by %@", note, self];
-    // Forward the notification to the correct thread
+    // get the search index info, don't use the note because we don't want to retain the pubs
+    NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[note name], @"name", 
+                                [[note userInfo] valueForKeyPath:@"pubs.searchIndexInfo"], @"searchIndexInfo", nil];
     [noteLock lock];
-    [notificationQueue addObject:[NSDictionary dictionaryWithObjectsAndKeys:name, @"name", searchIndexInfo, @"searchIndexInfo", nil]];
+    [notificationQueue addObject:info]; // Forward the notification to the correct thread
     [noteLock unlock];
     [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
 }

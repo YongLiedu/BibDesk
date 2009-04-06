@@ -834,7 +834,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 	
     [searchIndexes addPublications:pubs];
 
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", [pubs arrayByPerformingSelector:@selector(searchIndexInfo)], @"searchIndexInfo", nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocAddItemNotification
 														object:self
 													  userInfo:notifInfo];
@@ -856,7 +856,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     NSArray *pubs = [publications objectsAtIndexes:indexes];
 	[[[self undoManager] prepareWithInvocationTarget:self] insertPublications:pubs atIndexes:indexes];
 	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", [pubs arrayByPerformingSelector:@selector(searchIndexInfo)], @"searchIndexInfo", nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocWillRemoveItemNotification
 														object:self
 													  userInfo:notifInfo];	
@@ -870,7 +870,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 	[pubs makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [[NSFileManager defaultManager] removeSpotlightCacheFilesForCiteKeys:[pubs arrayByPerformingSelector:@selector(citeKey)]];
 	
-	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", [pubs arrayByPerformingSelector:@selector(searchIndexInfo)], @"searchIndexInfo", nil];
+	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocDelItemNotification
 														object:self
 													  userInfo:notifInfo];
