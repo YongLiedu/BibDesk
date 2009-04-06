@@ -83,6 +83,9 @@
     [aTypeSelectHelper setMatchesPrefix:NO];
     [self setTypeSelectHelper:aTypeSelectHelper];
     [aTypeSelectHelper release];
+    
+    // default is (3.0, 2.0); use a larger spacing for the highlights
+    [self setIntercellSpacing:NSMakeSize(3.0, 4.0)];
 }
 
 - (NSPopUpButtonCell *)popUpHeaderCell{
@@ -93,38 +96,6 @@
 {
     // work around for bug where corner view doesn't get redrawn after scrollers hide
     [[self cornerView] setNeedsDisplay:YES];
-}
-
-- (void)tableViewFontChanged
-{
-    // overwrite this as we want to change the intercellspacing
-    NSString *fontNamePrefKey = [self fontNamePreferenceKey];
-    NSString *fontSizePrefKey = [self fontSizePreferenceKey];
-    if (fontNamePrefKey == nil || fontSizePrefKey == nil) 
-        return;
-    NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:fontNamePrefKey];
-    float fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:fontSizePrefKey];
-    NSFont *font = nil;
-
-    if(nil != fontName)
-        font = [NSFont fontWithName:fontName size:fontSize];
-    if(nil == font)
-        font = [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:[self cellControlSize]]];
-	NSParameterAssert(nil != font);
-	[self setFont:font];
-    
-    // This is how IB calculates row height based on font http://lists.apple.com/archives/cocoa-dev/2006/Mar/msg01591.html
-    NSSize textSize = [@"" sizeWithAttributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]];
-    float rowHeight = textSize.height;
-    [self setRowHeight:rowHeight];
-    
-    // default is (3.0, 2.0); use a larger spacing for the gradient and drop highlights
-    NSSize intercellSize = [self intercellSpacing];
-    intercellSize.height = fmaxf(2.0f, roundf(0.5f * rowHeight));
-    [self setIntercellSpacing:intercellSize];
-
-	[self tile];
-    [self reloadData]; // otherwise the change isn't immediately visible
 }
 
 - (void)mouseDown:(NSEvent *)theEvent{
@@ -147,13 +118,13 @@
     [super mouseDown:theEvent];
 }
 
-- (void)drawHighlightOnRows:(NSIndexSet *)rows usingColor:(NSColor *)highlightColor
+- (void)drawHighlightOnRows:(NSIndexSet *)rows
 {
     NSParameterAssert(rows != nil);
-    NSParameterAssert(highlightColor != nil);
     
     float lineWidth = 1.0;
-    float heightOffset = fmaxf(0.0f, roundf(0.25 * [self intercellSpacing].height) - lineWidth);
+    float heightOffset = fmaxf(1.0f, roundf(0.25 * [self intercellSpacing].height) - lineWidth);
+    NSColor *highlightColor = [NSColor disabledControlTextColor];
     
     [self lockFocus];
     
@@ -162,31 +133,13 @@
     
     while(rowIndex != NSNotFound){
         
-        drawRect = NSInsetRect([self rectOfRow:rowIndex], 0.0, heightOffset);
+        drawRect = NSInsetRect([self rectOfRow:rowIndex], 1.0, heightOffset);
         [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:lineWidth color:highlightColor];
         
         rowIndex = [rows indexGreaterThanIndex:rowIndex];
     }
     
     [self unlockFocus];    
-}
-
-// we override this private method to draw something nicer than the default ugly black square
-// from http://www.cocoadev.com/index.pl?UglyBlackHighlightRectWhenDraggingToNSTableView
-// modified to use -intercellSpacing and save/restore graphics state
-
--(void)_drawDropHighlightOnRow:(int)rowIndex
-{
-    float lineWidth = 2.0;
-    float heightOffset = rowIndex == -1 ? 0.0f : fmaxf(0.0f, roundf(0.25 * [self intercellSpacing].height) - lineWidth);
-    
-    [self lockFocus];
-    
-    NSRect drawRect = (rowIndex == -1) ? [self visibleRect] : [self rectOfRow:rowIndex];
-    drawRect = NSInsetRect(drawRect, 0.0, heightOffset);
-    [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:lineWidth color:[NSColor alternateSelectedControlColor]];
-    
-    [self unlockFocus];
 }
 
 // public method for updating the highlights (as when another table's selection changes)
@@ -200,7 +153,7 @@
     [super highlightSelectionInClipRect:clipRect];
     // check this in case it's been disconnected in one of our reloading optimizations
     if([[self delegate] respondsToSelector:@selector(tableView:indexesOfRowsToHighlightInRange:)])
-        [self drawHighlightOnRows:[[self delegate] tableView:self indexesOfRowsToHighlightInRange:[self rowsInRect:clipRect]] usingColor:[NSColor disabledControlTextColor]];
+        [self drawHighlightOnRows:[[self delegate] tableView:self indexesOfRowsToHighlightInRange:[self rowsInRect:clipRect]]];
 }
 
 // make sure that certain rows are only selected as a single selection

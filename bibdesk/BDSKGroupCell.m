@@ -205,7 +205,7 @@ static NSString *stringWithNumber(NSNumber *number)
 
 #pragma mark Drawing
 
-#define BORDER_BETWEEN_EDGE_AND_IMAGE (2.0)
+#define BORDER_BETWEEN_EDGE_AND_IMAGE (3.0)
 #define BORDER_BETWEEN_IMAGE_AND_TEXT (3.0)
 #define SIZE_OF_TEXT_FIELD_BORDER (1.0)
 #define BORDER_BETWEEN_EDGE_AND_COUNT (2.0)
