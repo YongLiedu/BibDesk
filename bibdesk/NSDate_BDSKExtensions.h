@@ -66,18 +66,10 @@ enum {
 - (NSString *)rssDescription;
 - (NSString *)standardDescription;
 
-- (NSDate *)startOfHour;
-- (NSDate *)endOfHour;
 - (NSDate *)startOfDay;
 - (NSDate *)endOfDay;
 - (NSDate *)startOfWeek;
 - (NSDate *)endOfWeek;
-- (NSDate *)startOfMonth;
-- (NSDate *)endOfMonth;
-- (NSDate *)startOfYear;
-- (NSDate *)endOfYear;
-- (NSDate *)startOfPeriod:(int)period;
-- (NSDate *)endOfPeriod:(int)period;
 - (NSDate *)dateByAddingNumber:(int)number ofPeriod:(int)period;
 
 @end

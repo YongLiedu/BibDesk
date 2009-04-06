@@ -45,9 +45,6 @@
 
 @implementation NSDate (BDSKExtensions)
     
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
-#warning fixme: uses deprecated API, use NSDateFormatter instead
-#endif
 - (id)initWithMonthDayYearString:(NSString *)dateString;
 {    
     [[self init] release];
@@ -55,15 +52,22 @@
     
     CFAllocatorRef alloc = CFAllocatorGetDefault();
     
-    static NSDictionary *locale = nil;
-    if(nil == locale){
-        NSArray *monthNames = [NSArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December", nil];
-        NSArray *shortMonthNames = [NSArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec", nil];
+    static id locale = nil;
+    if (nil == locale) {
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
+#warning remove this
+#endif
+        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+            locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en"];
+        } else {
+            NSArray *monthNames = [NSArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December", nil];
+            NSArray *shortMonthNames = [NSArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec", nil];
         
-        locale = [[NSDictionary alloc] initWithObjectsAndKeys:@"MDYH", NSDateTimeOrdering, monthNames, NSMonthNameArray, shortMonthNames, NSShortMonthNameArray, nil];
+            locale = [[NSDictionary alloc] initWithObjectsAndKeys:@"MDYH", NSDateTimeOrdering, monthNames, NSMonthNameArray, shortMonthNames, NSShortMonthNameArray, nil];
+        }
     }
     static CFDateFormatterRef dateFormatter = nil;
-    if(NULL == dateFormatter){
+    if (NULL == dateFormatter) {
         // use the en locale, since dates use en short names as keys in BibTeX
         CFLocaleRef enLocale = CFLocaleCreate(alloc, CFSTR("en"));
     
@@ -79,7 +83,7 @@
         if(enLocale) CFRelease(enLocale);
     }
     static CFDateFormatterRef numericDateFormatter = nil;
-    if(NULL == numericDateFormatter){
+    if (NULL == numericDateFormatter) {
         // use the en locale, since dates use en short names as keys in BibTeX
         CFLocaleRef enLocale = CFLocaleCreate(alloc, CFSTR("en"));
         
@@ -189,30 +193,6 @@
     return [formatter stringFromDate:self];
 }
 
-- (NSDate *)startOfHour;
-{
-    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
-    unsigned unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit | NSWeekdayOrdinalCalendarUnit | NSWeekdayCalendarUnit | NSDayCalendarUnit | NSHourCalendarUnit;
-    NSDateComponents *components = [calendar components:unitFlags fromDate:self];
-    [components setMinute:0];
-    [components setSecond:0];
-    NSDate *date = [calendar dateFromComponents:components];
-    [calendar release];
-    return date;
-}
-
-- (NSDate *)endOfHour;
-{
-    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
-    unsigned unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit | NSWeekdayOrdinalCalendarUnit | NSWeekdayCalendarUnit | NSDayCalendarUnit | NSHourCalendarUnit;
-    NSDateComponents *components = [calendar components:unitFlags fromDate:self];
-    [components setMinute:59];
-    [components setSecond:59];
-    NSDate *date = [calendar dateFromComponents:components];
-    [calendar release];
-    return date;
-}
-
 - (NSDate *)startOfDay;
 {
     NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
@@ -265,92 +245,6 @@
     return date;
 }
 
-- (NSDate *)startOfMonth;
-{
-    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
-    unsigned unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit;
-    NSDateComponents *components = [calendar components:unitFlags fromDate:self];
-    [components setDay:1];
-    [components setHour:0];
-    [components setMinute:0];
-    [components setSecond:0];
-    NSDate *date = [calendar dateFromComponents:components];
-    [calendar release];
-    return date;
-}
-
-- (NSDate *)endOfMonth;
-{
-    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
-    NSDateComponents *components = [NSDateComponents dateComponentsWithYear:0 month:1 day:0 hour:0 minute:0 second:-1];
-    NSDate *date = [calendar dateByAddingComponents:components toDate:[self startOfMonth] options:0];
-    [calendar release];
-    [components release];
-    return date;
-}
-
-- (NSDate *)startOfYear;
-{
-    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
-    unsigned unitFlags = NSYearCalendarUnit;
-    NSDateComponents *components = [calendar components:unitFlags fromDate:self];
-    [components setMonth:1];
-    [components setDay:1];
-    [components setHour:0];
-    [components setMinute:0];
-    [components setSecond:0];
-    NSDate *date = [calendar dateFromComponents:components];
-    [calendar release];
-    return date;
-}
-
-- (NSDate *)endOfYear;
-{
-    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
-    NSDateComponents *components = [NSDateComponents dateComponentsWithYear:1 month:0 day:0 hour:0 minute:0 second:-1];
-    NSDate *date = [calendar dateByAddingComponents:components toDate:[self startOfYear] options:0];
-    [calendar release];
-    return date;
-}
-
-- (NSDate *)startOfPeriod:(int)period;
-{
-    switch (period) {
-        case BDSKPeriodHour:
-            return [self startOfHour];
-        case BDSKPeriodDay:
-            return [self startOfDay];
-        case BDSKPeriodWeek:
-            return [self startOfWeek];
-        case BDSKPeriodMonth:
-            return [self startOfMonth];
-        case BDSKPeriodYear:
-            return [self startOfYear];
-        default:
-            NSLog(@"Unknown period %d",period);
-            return self;
-    }
-}
-
-- (NSDate *)endOfPeriod:(int)period;
-{
-    switch (period) {
-        case BDSKPeriodHour:
-            return [self endOfHour];
-        case BDSKPeriodDay:
-            return [self endOfDay];
-        case BDSKPeriodWeek:
-            return [self endOfWeek];
-        case BDSKPeriodMonth:
-            return [self endOfMonth];
-        case BDSKPeriodYear:
-            return [self endOfYear];
-        default:
-            NSLog(@"Unknown period %d",period);
-            return self;
-    }
-}
-
 - (NSDate *)dateByAddingNumber:(int)number ofPeriod:(int)period {
     NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
     NSDateComponents *components = [[NSDateComponents alloc] init];
@@ -396,9 +290,10 @@
 - (NSCalendarDate *)initWithNaturalLanguageString:(NSString *)dateString;
 {
     // initWithString should release self when it returns nil
-    NSCalendarDate *date = [self initWithString:dateString];
-
-    return (date != nil ? date : [[NSCalendarDate dateWithNaturalLanguageString:dateString] retain]);
+    self = [self initWithString:dateString];
+    if (self == nil)
+        self = [[NSCalendarDate dateWithNaturalLanguageString:dateString] retain];
+    return self;
 }
 
 // override this NSDate method so we can return an NSCalendarDate efficiently
