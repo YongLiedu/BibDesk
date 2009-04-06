@@ -210,10 +210,11 @@ static NSString *stringWithNumber(NSNumber *number)
 #define SIZE_OF_TEXT_FIELD_BORDER (1.0)
 #define BORDER_BETWEEN_EDGE_AND_COUNT (2.0)
 #define BORDER_BETWEEN_COUNT_AND_TEXT (1.0)
+#define IMAGE_OFFSET (1.0)
 
 - (NSSize)iconSizeForBounds:(NSRect)aRect;
 {
-    return NSMakeSize(NSHeight(aRect) + 1, NSHeight(aRect) + 1);
+    return NSMakeSize(NSHeight(aRect) - 1.0, NSHeight(aRect) - 1.0);
 }
 
 - (NSRect)iconRectForBounds:(NSRect)aRect;
@@ -223,12 +224,6 @@ static NSString *stringWithNumber(NSNumber *number)
     NSDivideRect(aRect, &ignored, &imageRect, BORDER_BETWEEN_EDGE_AND_IMAGE, NSMinXEdge);
     NSDivideRect(imageRect, &imageRect, &ignored, imageSize.width, NSMinXEdge);
     return imageRect;
-}
-
-// compute the oval padding based on the overall height of the cell
-- (float)countPaddingForCellSize:(NSSize)aSize;
-{
-    return ([self failedDownload] || [self isRetrieving]) ? 1.0 : 0.5 * aSize.height + 0.5;
 }
 
 - (NSRect)countRectForBounds:(NSRect)aRect;
@@ -356,6 +351,7 @@ static NSString *stringWithNumber(NSNumber *number)
     
     // Draw the image
     NSRect imageRect = BDSKCenterRect([self iconRectForBounds:aRect], [self iconSizeForBounds:aRect], controlViewIsFlipped);
+    imageRect.origin.y += [controlView isFlipped] ? -IMAGE_OFFSET : IMAGE_OFFSET;
     [NSGraphicsContext saveGraphicsState];
     [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
     [[self icon] drawFlipped:controlViewIsFlipped inRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
