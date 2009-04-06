@@ -52,23 +52,13 @@
 @interface BDSKFileSearchIndex (Private)
 
 + (NSString *)indexCacheFolder;
-+ (NSString *)indexCachePathForDocumentURL:(NSURL *)documentURL;
-- (void)buildIndexWithInfo:(NSDictionary *)info;
-- (void)indexFileURL:(NSURL *)aURL;
-- (void)removeFileURL:(NSURL *)aURL;
-- (void)indexFilesForItems:(NSArray *)items numberPreviouslyIndexed:(double)numberIndexed totalCount:(double)totalObjectCount;
-- (void)indexFileURLs:(NSSet *)urlstoBeAdded forIdentifierURL:(NSURL *)identifierURL;
-- (void)removeFileURLs:(NSSet *)urlstoBeAdded forIdentifierURL:(NSURL *)identifierURL;
-- (void)reindexFileURLsIfNeeded:(NSSet *)urlsToReindex forIdentifierURL:(NSURL *)identifierURL;
 - (void)runIndexThreadWithInfo:(NSDictionary *)info;
-- (void)searchIndexDidUpdateOnMainThread;
-- (void)searchIndexDidUpdate;
-- (void)searchIndexDidFinish;
 - (void)processNotification:(NSNotification *)note;
-- (void)handleMachMessage:(void *)msg;
 - (void)writeIndexToDiskForDocumentURL:(NSURL *)documentURL;
 
 @end
+
+#pragma mark -
 
 @implementation BDSKFileSearchIndex
 
@@ -79,6 +69,8 @@
 
 // increment if incompatible changes are introduced
 #define CACHE_VERSION @"1"
+
+#pragma mark API
 
 - (id)initForDocument:(BibDocument *)aDocument
 {
@@ -205,10 +197,9 @@
     return theValue;
 }
 
-@end
+#pragma mark Private methods
 
-
-@implementation BDSKFileSearchIndex (Private)
+#pragma mark Caching
 
 // this can return any object conforming to NSCoding
 static inline id signatureForURL(NSURL *aURL) {
@@ -281,6 +272,189 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     }
     return indexCachePath;
 }
+
+- (void)writeIndexToDiskForDocumentURL:(NSURL *)documentURL
+{
+    NSParameterAssert([NSThread isMainThread]);
+    NSParameterAssert([setupLock condition] == INDEX_THREAD_DONE);
+    
+    // @@ temporary for testing
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableFileSearchIndexCacheKey"])
+        return;
+    
+    if (index && documentURL) {
+        // flush all pending updates and compact the index as needed before writing
+        SKIndexCompact(index);
+        CFRelease(index);
+        index = NULL;
+        
+        NSString *indexCachePath = [[self class] indexCachePathForDocumentURL:documentURL];
+        if (nil == indexCachePath) {
+            indexCachePath = [[[[documentURL path] lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bdskindex"];
+            indexCachePath = [[NSFileManager defaultManager] uniqueFilePathWithName:indexCachePath atPath:[[self class] indexCacheFolder]];
+        }
+        
+        NSMutableData *data = [NSMutableData data];
+        NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
+        [archiver encodeObject:documentURL forKey:@"documentURL"];
+        [archiver encodeObject:(NSMutableData *)indexData forKey:@"indexData"];
+        [archiver encodeObject:signatures forKey:@"signatures"];
+        [archiver finishEncoding];
+        [archiver release];
+        [data writeToFile:indexCachePath atomically:YES];
+    }
+}
+
+#pragma mark Update callbacks
+
+- (void)searchIndexDidUpdate
+{
+    BDSKASSERT([NSThread isMainThread]);
+    OSMemoryBarrier();
+    if (flags.shouldKeepRunning == 1) {
+        // Make sure we send frequently enough to update a progress bar, but not too frequently to avoid beachball on single-core systems; too many search updates slow down indexing due to repeated flushes.  Even though this is always queued and supposed to be sent once, it can still be sent too often.
+        if (CFAbsoluteTimeGetCurrent() - lastUpdateTime >= 0.5) {
+            [delegate searchIndexDidUpdate:self];
+            lastUpdateTime = CFAbsoluteTimeGetCurrent();
+        } else {
+            // Guarantees that the delegate message will always be sent eventually, so the delegate can never miss an update.
+            [[self class] cancelPreviousPerformRequestsWithTarget:self selector:_cmd object:nil];
+            [self performSelector:_cmd withObject:nil afterDelay:0.5];
+        }
+    }
+}
+
+- (void)searchIndexDidUpdateOnMainThread {
+    OSMemoryBarrier();
+    if (flags.shouldKeepRunning == 1)
+        [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
+}
+
+// @@ only sent after the initial indexing so the controller knows to remove the progress bar; can possibly be removed entirely and delegate can check finishedInitialIndexing when it gets searchIndexDidUpdate:
+- (void)searchIndexDidFinish
+{
+    BDSKASSERT([NSThread isMainThread]);
+    OSMemoryBarrier();
+    if (flags.shouldKeepRunning == 1)
+        [delegate searchIndexDidFinish:self];
+}
+
+#pragma mark Indexing
+
+- (void)indexFileURL:(NSURL *)aURL{
+    id signature = signatureForURL(aURL);
+    
+    if ([[signatures objectForKey:aURL] isEqual:signature] == NO) {
+        // either the file was not indexed, or it has changed
+        
+        SKDocumentRef skDocument = SKDocumentCreateWithURL((CFURLRef)aURL);
+        
+        BDSKPOSTCONDITION(skDocument);
+        
+        if (skDocument != NULL) {
+            
+            BDSKASSERT(signature);
+            [signatures setObject:signature forKey:aURL];
+            
+            SKIndexAddDocument(index, skDocument, NULL, TRUE);
+            CFRelease(skDocument);
+        }
+    }
+}
+
+- (void)removeFileURL:(NSURL *)aURL{
+    SKDocumentRef skDocument = SKDocumentCreateWithURL((CFURLRef)aURL);
+    
+    BDSKPOSTCONDITION(skDocument);
+    
+    if (skDocument != NULL) {
+        [signatures removeObjectForKey:aURL];
+        
+        SKIndexRemoveDocument(index, skDocument);
+        CFRelease(skDocument);
+    }
+}
+
+- (void)indexFileURLs:(NSSet *)urlsToAdd forIdentifierURL:(NSURL *)identifierURL
+{
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    
+    BDSKASSERT(identifierURL);
+    
+    // SKIndexSetProperties is more generally useful, but is really slow when creating the index
+    // SKIndexRenameDocument changes the URL, so it's not useful
+    
+    [rwLock lockForWriting];
+    [identifierURLs addObject:identifierURL forKeys:urlsToAdd];
+    [rwLock unlock];
+    
+    NSEnumerator *urlEnum = [urlsToAdd objectEnumerator];
+    NSURL *url = nil;
+    
+    while(url = [urlEnum nextObject])
+        [self indexFileURL:url];
+    
+    // the caller is responsible for updating the delegate, so we can throttle initial indexing
+}
+
+- (void)removeFileURLs:(NSSet *)urlsToRemove forIdentifierURL:(NSURL *)identifierURL
+{
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
+
+    BDSKASSERT(identifierURL);
+        
+    NSEnumerator *urlEnum = nil;
+    NSURL *url = nil;
+    BOOL shouldBeRemoved;
+    
+    urlEnum = [urlsToRemove objectEnumerator];
+    
+    // loop through the array of URLs, create a new SKDocumentRef, and try to remove it
+    while (url = [urlEnum nextObject]) {
+        
+        [rwLock lockForWriting];
+        [identifierURLs removeObject:identifierURL forKey:url];
+        shouldBeRemoved = (0 == [identifierURLs countForKey:url]);
+        [rwLock unlock];
+        
+        if (shouldBeRemoved)
+            [self removeFileURL:url];
+	}
+    
+    // the caller is responsible for updating the delegate, so we can throttle initial indexing
+}
+
+- (void)indexFilesForItems:(NSArray *)items numberPreviouslyIndexed:(double)numberIndexed totalCount:(double)totalObjectCount
+{
+    NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
+    
+    NSEnumerator *enumerator = [items objectEnumerator];
+    id anObject = nil;
+        
+    // Use a local pool since initial indexing can use a fair amount of memory, and it's not released until the thread's run loop starts
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+        
+    OSMemoryBarrier();
+    while(flags.shouldKeepRunning == 1 && (anObject = [enumerator nextObject])) {
+        [self indexFileURLs:[NSSet setWithArray:[anObject objectForKey:@"urls"]] forIdentifierURL:[anObject objectForKey:@"identifierURL"]];
+        numberIndexed++;
+        @synchronized(self) {
+            progressValue = (numberIndexed / totalObjectCount) * 100;
+        }
+        
+        [pool release];
+        pool = [NSAutoreleasePool new];
+        
+        [self searchIndexDidUpdateOnMainThread];
+        OSMemoryBarrier();
+    }
+        
+    // caller queues a final update
+    
+    [pool release];
+}
+
+#pragma mark Thread initialization
 
 static void addItemFunction(const void *value, void *context) {
     BDSKManyToManyDictionary *dict = (BDSKManyToManyDictionary *)context;
@@ -415,166 +589,6 @@ static void addItemFunction(const void *value, void *context) {
     [self performSelectorOnMainThread:@selector(searchIndexDidFinish) withObject:nil waitUntilDone:NO];
 }
 
-- (void)indexFileURL:(NSURL *)aURL{
-    id signature = signatureForURL(aURL);
-    
-    if ([[signatures objectForKey:aURL] isEqual:signature] == NO) {
-        // either the file was not indexed, or it has changed
-        
-        SKDocumentRef skDocument = SKDocumentCreateWithURL((CFURLRef)aURL);
-        
-        BDSKPOSTCONDITION(skDocument);
-        
-        if (skDocument != NULL) {
-            
-            BDSKASSERT(signature);
-            [signatures setObject:signature forKey:aURL];
-            
-            SKIndexAddDocument(index, skDocument, NULL, TRUE);
-            CFRelease(skDocument);
-        }
-    }
-}
-
-- (void)removeFileURL:(NSURL *)aURL{
-    SKDocumentRef skDocument = SKDocumentCreateWithURL((CFURLRef)aURL);
-    
-    BDSKPOSTCONDITION(skDocument);
-    
-    if (skDocument != NULL) {
-        [signatures removeObjectForKey:aURL];
-        
-        SKIndexRemoveDocument(index, skDocument);
-        CFRelease(skDocument);
-    }
-}
-
-- (void)indexFilesForItems:(NSArray *)items numberPreviouslyIndexed:(double)numberIndexed totalCount:(double)totalObjectCount
-{
-    NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
-    
-    NSEnumerator *enumerator = [items objectEnumerator];
-    id anObject = nil;
-        
-    // Use a local pool since initial indexing can use a fair amount of memory, and it's not released until the thread's run loop starts
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-        
-    OSMemoryBarrier();
-    while(flags.shouldKeepRunning == 1 && (anObject = [enumerator nextObject])) {
-        [self indexFileURLs:[NSSet setWithArray:[anObject objectForKey:@"urls"]] forIdentifierURL:[anObject objectForKey:@"identifierURL"]];
-        numberIndexed++;
-        @synchronized(self) {
-            progressValue = (numberIndexed / totalObjectCount) * 100;
-        }
-        
-        [pool release];
-        pool = [NSAutoreleasePool new];
-        
-        [self searchIndexDidUpdateOnMainThread];
-        OSMemoryBarrier();
-    }
-        
-    // caller queues a final update
-    
-    [pool release];
-}
-
-- (void)indexFileURLs:(NSSet *)urlsToAdd forIdentifierURL:(NSURL *)identifierURL
-{
-    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
-    
-    BDSKASSERT(identifierURL);
-    
-    // SKIndexSetProperties is more generally useful, but is really slow when creating the index
-    // SKIndexRenameDocument changes the URL, so it's not useful
-    
-    [rwLock lockForWriting];
-    [identifierURLs addObject:identifierURL forKeys:urlsToAdd];
-    [rwLock unlock];
-    
-    NSEnumerator *urlEnum = [urlsToAdd objectEnumerator];
-    NSURL *url = nil;
-    
-    while(url = [urlEnum nextObject])
-        [self indexFileURL:url];
-    
-    // the caller is responsible for updating the delegate, so we can throttle initial indexing
-}
-
-- (void)removeFileURLs:(NSSet *)urlsToRemove forIdentifierURL:(NSURL *)identifierURL
-{
-    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
-
-    BDSKASSERT(identifierURL);
-        
-    NSEnumerator *urlEnum = nil;
-    NSURL *url = nil;
-    BOOL shouldBeRemoved;
-    
-    urlEnum = [urlsToRemove objectEnumerator];
-    
-    // loop through the array of URLs, create a new SKDocumentRef, and try to remove it
-    while (url = [urlEnum nextObject]) {
-        
-        [rwLock lockForWriting];
-        [identifierURLs removeObject:identifierURL forKey:url];
-        shouldBeRemoved = (0 == [identifierURLs countForKey:url]);
-        [rwLock unlock];
-        
-        if (shouldBeRemoved)
-            [self removeFileURL:url];
-	}
-    
-    // the caller is responsible for updating the delegate, so we can throttle initial indexing
-}
-
-- (void)reindexFileURLsIfNeeded:(NSSet *)urlsToReindex forIdentifierURL:(NSURL *)identifierURL
-{
-    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
-    
-    BDSKASSERT(identifierURL);
-    
-    NSEnumerator *urlEnumerator = [urlsToReindex objectEnumerator];
-    NSURL *url = nil;
-        
-    while(url = [urlEnumerator nextObject])
-        [self indexFileURL:url];
-    
-    // the caller is responsible for updating the delegate, so we can throttle initial indexing
-}
-
-- (void)writeIndexToDiskForDocumentURL:(NSURL *)documentURL
-{
-    NSParameterAssert([NSThread isMainThread]);
-    NSParameterAssert([setupLock condition] == INDEX_THREAD_DONE);
-    
-    // @@ temporary for testing
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableFileSearchIndexCacheKey"])
-        return;
-    
-    if (index && documentURL) {
-        // flush all pending updates and compact the index as needed before writing
-        SKIndexCompact(index);
-        CFRelease(index);
-        index = NULL;
-        
-        NSString *indexCachePath = [[self class] indexCachePathForDocumentURL:documentURL];
-        if (nil == indexCachePath) {
-            indexCachePath = [[[[documentURL path] lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bdskindex"];
-            indexCachePath = [[NSFileManager defaultManager] uniqueFilePathWithName:indexCachePath atPath:[[self class] indexCacheFolder]];
-        }
-        
-        NSMutableData *data = [NSMutableData data];
-        NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
-        [archiver encodeObject:documentURL forKey:@"documentURL"];
-        [archiver encodeObject:(NSMutableData *)indexData forKey:@"indexData"];
-        [archiver encodeObject:signatures forKey:@"signatures"];
-        [archiver finishEncoding];
-        [archiver release];
-        [data writeToFile:indexCachePath atomically:YES];
-    }
-}
-
 - (void)runIndexThreadWithInfo:(NSDictionary *)info
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -638,37 +652,7 @@ static void addItemFunction(const void *value, void *context) {
     }
 }
 
-- (void)searchIndexDidUpdateOnMainThread {
-    OSMemoryBarrier();
-    if (flags.shouldKeepRunning == 1)
-        [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
-}
-
-- (void)searchIndexDidUpdate
-{
-    BDSKASSERT([NSThread isMainThread]);
-    OSMemoryBarrier();
-    if (flags.shouldKeepRunning == 1) {
-        // Make sure we send frequently enough to update a progress bar, but not too frequently to avoid beachball on single-core systems; too many search updates slow down indexing due to repeated flushes.  Even though this is always queued and supposed to be sent once, it can still be sent too often.
-        if (CFAbsoluteTimeGetCurrent() - lastUpdateTime >= 0.5) {
-            [delegate searchIndexDidUpdate:self];
-            lastUpdateTime = CFAbsoluteTimeGetCurrent();
-        } else {
-            // Guarantees that the delegate message will always be sent eventually, so the delegate can never miss an update.
-            [[self class] cancelPreviousPerformRequestsWithTarget:self selector:_cmd object:nil];
-            [self performSelector:_cmd withObject:nil afterDelay:0.5];
-        }
-    }
-}
-
-// @@ only sent after the initial indexing so the controller knows to remove the progress bar; can possibly be removed entirely and delegate can check finishedInitialIndexing when it gets searchIndexDidUpdate:
-- (void)searchIndexDidFinish
-{
-    BDSKASSERT([NSThread isMainThread]);
-    OSMemoryBarrier();
-    if (flags.shouldKeepRunning == 1)
-        [delegate searchIndexDidFinish:self];
-}
+#pragma mark Change notification handling
 
 - (void)processNotification:(NSNotification *)note
 {    
@@ -689,8 +673,7 @@ static void addItemFunction(const void *value, void *context) {
     BDSKPRECONDITION(searchIndexInfo);
             
     // this will update the delegate when all is complete
-    [self indexFilesForItems:searchIndexInfo numberPreviouslyIndexed:0 totalCount:1];        
-    [self searchIndexDidUpdateOnMainThread];
+    [self indexFilesForItems:searchIndexInfo numberPreviouslyIndexed:0 totalCount:[searchIndexInfo count]];        
 }
 
 - (void)handleDocDelItem:(NSArray *)searchIndexInfo
@@ -723,41 +706,22 @@ static void addItemFunction(const void *value, void *context) {
     NSDictionary *item = [searchIndexInfo lastObject];
     NSURL *identifierURL = [item objectForKey:@"identifierURL"];
     
-    NSSet *oldURLs;
-    NSSet *newURLs;
+    NSSet *newURLs = [[NSSet alloc] initWithArray:[item valueForKey:@"urls"]];
     NSMutableSet *removedURLs;
-    NSMutableSet *addedURLs;
-    NSMutableSet *sameURLs;
     
     [rwLock lockForReading];
-    oldURLs = [[identifierURLs allKeysForObject:identifierURL] copy];
+    removedURLs = [[identifierURLs allKeysForObject:identifierURL] mutableCopy];
     [rwLock unlock];
-    newURLs = [[NSSet alloc] initWithArray:[item valueForKey:@"urls"]];
-    
-    removedURLs = [oldURLs mutableCopy];
     [removedURLs minusSet:newURLs];
     
-    addedURLs = [newURLs mutableCopy];
-    [addedURLs minusSet:oldURLs];
-    
-    sameURLs = [newURLs mutableCopy];
-    [sameURLs intersectSet:oldURLs];
-    
-    [oldURLs release];
-    [newURLs release];
-        
     if ([removedURLs count])
         [self removeFileURLs:removedURLs forIdentifierURL:identifierURL];
     
-    if ([addedURLs count])
-        [self indexFileURLs:addedURLs forIdentifierURL:identifierURL];
-    
-    if ([sameURLs count])
-        [self reindexFileURLsIfNeeded:sameURLs forIdentifierURL:identifierURL];
+    if ([newURLs count])
+        [self indexFileURLs:newURLs forIdentifierURL:identifierURL];
         
     [removedURLs release];
-    [addedURLs release];
-    [sameURLs release];
+    [newURLs release];
     
     [self searchIndexDidUpdateOnMainThread];
 }    
