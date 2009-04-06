@@ -856,7 +856,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     NSArray *pubs = [publications objectsAtIndexes:indexes];
 	[[[self undoManager] prepareWithInvocationTarget:self] insertPublications:pubs atIndexes:indexes];
 	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", [pubs arrayByPerformingSelector:@selector(searchIndexInfo)], @"searchIndexInfo", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocWillRemoveItemNotification
 														object:self
 													  userInfo:notifInfo];	

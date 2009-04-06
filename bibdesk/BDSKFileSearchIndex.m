@@ -65,9 +65,6 @@
 - (void)searchIndexDidUpdate;
 - (void)searchIndexDidFinish;
 - (void)processNotification:(NSNotification *)note;
-- (void)handleDocAddItemNotification:(NSNotification *)note;
-- (void)handleDocDelItemNotification:(NSNotification *)note;
-- (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note;
 - (void)handleMachMessage:(void *)msg;
 - (void)writeIndexToDiskForDocumentURL:(NSURL *)documentURL;
 
@@ -676,18 +673,27 @@ static void addItemFunction(const void *value, void *context) {
 - (void)processNotification:(NSNotification *)note
 {    
     BDSKASSERT([NSThread isMainThread]);
+    // get the search index info, dopn't use the note because we don't want to retain the pubs
+    NSArray *searchIndexInfo = nil;
+    NSString *name = [note name];
+    // this is a background thread that can handle these notifications
+    if([name isEqualToString:BDSKFileSearchIndexInfoChangedNotification])
+        searchIndexInfo = [NSArray arrayWithObjects:[note userInfo], nil];
+    else if([name isEqualToString:BDSKDocAddItemNotification] || [name isEqualToString:BDSKDocDelItemNotification])
+        searchIndexInfo = [[note userInfo] valueForKey:@"searchIndexInfo"];
+    else
+        [NSException raise:NSInvalidArgumentException format:@"notification %@ is not handled by %@", note, self];
     // Forward the notification to the correct thread
     [noteLock lock];
-    [notificationQueue addObject:note];
+    [notificationQueue addObject:[NSDictionary dictionaryWithObjectsAndKeys:name, @"name", searchIndexInfo, @"searchIndexInfo", nil]];
     [noteLock unlock];
     [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
 }
 
-- (void)handleDocAddItemNotification:(NSNotification *)note
+- (void)handleDocAddItem:(NSArray *)searchIndexInfo
 {
     BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
-	NSArray *searchIndexInfo = [[note userInfo] valueForKey:@"searchIndexInfo"];
     BDSKPRECONDITION(searchIndexInfo);
             
     // this will update the delegate when all is complete
@@ -695,11 +701,11 @@ static void addItemFunction(const void *value, void *context) {
     [self searchIndexDidUpdateOnMainThread];
 }
 
-- (void)handleDocDelItemNotification:(NSNotification *)note
+- (void)handleDocDelItem:(NSArray *)searchIndexInfo
 {
     BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
-	NSEnumerator *itemEnumerator = [[[note userInfo] valueForKey:@"searchIndexInfo"] objectEnumerator];
+	NSEnumerator *itemEnumerator = [searchIndexInfo objectEnumerator];
     id anItem;
         
     NSURL *identifierURL = nil;
@@ -718,11 +724,11 @@ static void addItemFunction(const void *value, void *context) {
     [self searchIndexDidUpdateOnMainThread];
 }
 
-- (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note
+- (void)handleSearchIndexInfoChanged:(NSArray *)searchIndexInfo
 {
     BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
     
-    NSDictionary *item = [note userInfo];
+    NSDictionary *item = [searchIndexInfo lastObject];
     NSURL *identifierURL = [item objectForKey:@"identifierURL"];
     
     NSSet *oldURLs;
@@ -764,8 +770,8 @@ static void addItemFunction(const void *value, void *context) {
     [self searchIndexDidUpdateOnMainThread];
 }    
 
-- (NSNotification *)newNotification {
-    NSNotification *note = nil;
+- (NSDictionary *)newNotification {
+    NSDictionary *note = nil;
     [noteLock lock];
     if ([notificationQueue count]) {
         note = [[notificationQueue objectAtIndex:0] retain];
@@ -778,17 +784,18 @@ static void addItemFunction(const void *value, void *context) {
 - (void)handleMachMessage:(void *)msg
 {
     BDSKASSERT([NSThread isMainThread] == NO);
-    NSNotification *note;
+    NSDictionary *note;
     
     while (note = [self newNotification]) {
-        NSString *name = [note name];
+        NSString *name = [note valueForKey:@"name"];
+        NSArray *searchIndexInfo = [note valueForKey:@"searchIndexInfo"];
         // this is a background thread that can handle these notifications
         if([name isEqualToString:BDSKFileSearchIndexInfoChangedNotification])
-            [self handleSearchIndexInfoChangedNotification:note];
+            [self handleSearchIndexInfoChanged:searchIndexInfo];
         else if([name isEqualToString:BDSKDocAddItemNotification])
-            [self handleDocAddItemNotification:note];
+            [self handleDocAddItem:searchIndexInfo];
         else if([name isEqualToString:BDSKDocDelItemNotification])
-            [self handleDocDelItemNotification:note];
+            [self handleDocDelItem:searchIndexInfo];
         else
             [NSException raise:NSInvalidArgumentException format:@"notification %@ is not handled by %@", note, self];
         [note release];
