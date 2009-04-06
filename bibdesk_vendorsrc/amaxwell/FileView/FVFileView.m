@@ -514,7 +514,7 @@ static CGFloat _subtitleHeight = 0.0;
 
         [self registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, FVWeblocFilePboardType, (NSString *)kUTTypeURL, (NSString *)kUTTypeUTF8PlainText, NSStringPboardType, nil]];
     } else {
-        [self registerForDraggedTypes:nil];
+        [self unregisterDraggedTypes];
     }
 }
 
