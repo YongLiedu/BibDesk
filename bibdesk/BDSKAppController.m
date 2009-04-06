@@ -125,8 +125,6 @@ static void fixLegacyTableColumnIdentifiers()
         requiredFieldsForLocalFile = nil;
         
         metadataCacheLock = [[NSLock alloc] init];
-        metadataMessageQueue = [[BDSKMessageQueue alloc] init];
-        [metadataMessageQueue startBackgroundProcessors:1];
         canWriteMetadata = 1;
     }
     return self;
@@ -137,7 +135,6 @@ static void fixLegacyTableColumnIdentifiers()
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 	[requiredFieldsForCiteKey release];
     [metadataCacheLock release];
-    [metadataMessageQueue release];
     [super dealloc];
 }
 
@@ -1240,10 +1237,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 #pragma mark Spotlight support
 
-- (void)rebuildMetadataCache:(id)userInfo{        
-    [metadataMessageQueue queueSelector:@selector(privateRebuildMetadataCache:) forTarget:self withObject:userInfo];
-}
-
 - (void)privateRebuildMetadataCache:(id)userInfo{
     
     BDSKPRECONDITION([NSThread isMainThread] == NO);
@@ -1351,6 +1344,10 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         [metadataCacheLock unlock];
         [pool release];
     }
+}
+
+- (void)rebuildMetadataCache:(id)userInfo{  
+    [NSThread detachNewThreadSelector:@selector(privateRebuildMetadataCache:) toTarget:self withObject:userInfo];
 }
 
 - (void)doSpotlightImportIfNeeded {

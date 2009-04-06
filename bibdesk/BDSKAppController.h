@@ -64,7 +64,6 @@
 
     NSLock *metadataCacheLock;
     int32_t canWriteMetadata;
-    BDSKMessageQueue *metadataMessageQueue;
     NSConnection *completionConnection;
 }
 
@@ -155,13 +154,6 @@
     @param      document (description)
 */
 - (void)rebuildMetadataCache:(id)userInfo;
-/*!
-    @method     privateRebuildMetadataCache:
-    @abstract   Private method; do not use this, but use the public rebuildMetadataCache which queues this method properly.
-    @discussion (comprehensive description)
-    @param      userInfo (description)
-*/
-- (void)privateRebuildMetadataCache:(id)userInfo;
 
 /*!
     @method     doSpotlightImportIfNeeded
