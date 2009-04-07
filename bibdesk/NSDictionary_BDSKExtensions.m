@@ -35,7 +35,11 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+ 
 /*
+ Some methods in this category are copied from OmniFoundation 
+ and are subject to the following licence:
+ 
  Omni Source License 2007
 
  OPEN PERMISSION TO USE AND REPRODUCE OMNI SOURCE CODE SOFTWARE
@@ -79,6 +83,8 @@
     return ([key length] && [key characterAtIndex:0] == '@') ? [super valueForKey:[key substringFromIndex:1]] : [self objectForKey:key];
 }
 #endif
+
+// The rest of these methods are copied from NSData-OFExtensions.m
 
 // This seems more convenient than having to write your own if statement a zillion times
 - (id)objectForKey:(NSString *)key defaultObject:(id)defaultObject {
@@ -184,6 +190,8 @@
 	[[self init] release];
     return (NSMutableDictionary *)CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 }
+
+// The rest of these methods are copied from NSMutableData-OFExtensions.m
 
 - (void)setFloatValue:(float)value forKey:(NSString *)key {
     NSNumber *number = [[NSNumber alloc] initWithFloat:value];

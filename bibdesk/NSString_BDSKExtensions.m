@@ -33,7 +33,11 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+ 
 /*
+ Some methods in this category are copied from OmniFoundation 
+ and are subject to the following licence:
+ 
  Omni Source License 2007
 
  OPEN PERMISSION TO USE AND REPRODUCE OMNI SOURCE CODE SOFTWARE
@@ -103,10 +107,12 @@
     return mixedString;
 }
 
+// This method is copied from NSString-OFStringExtensions.m
 + (BOOL)isEmptyString:(NSString *)string {
     return string == nil || [string isEqualToString:@""];
 }
 
+// This method is copied from NSString-OFStringExtensions.m
 + (NSString *)horizontalEllipsisString; // '...'
 {
     static NSString *string = nil;
@@ -115,6 +121,7 @@
     return string;
 }
 
+// This method is copied from NSString-OFStringExtensions.m
 + (NSString *)emdashString; // '---'
 {
     static NSString *string = nil;
@@ -123,6 +130,7 @@
     return string;
 }
 
+// This method is copied from NSString-OFStringExtensions.m
 + (NSString *)endashString; // '--'
 {
     static NSString *string = nil;
@@ -131,6 +139,7 @@
     return string;
 }
 
+// This method is copied from NSString-OFStringExtensions.m
 + (NSString *)commandKeyIndicatorString;
 {
     static NSString *string = nil;
@@ -139,6 +148,7 @@
     return string;
 }
 
+// This method is copied from NSString-OFStringExtensions.m
 + (NSString *)controlKeyIndicatorString;
 {
     static NSString *string = nil;
@@ -147,6 +157,7 @@
     return string;
 }
 
+// This method is copied from NSString-OFStringExtensions.m
 + (NSString *)alternateKeyIndicatorString;
 {
     static NSString *string = nil;
@@ -155,6 +166,7 @@
     return string;
 }
 
+// This method is copied from NSString-OFStringExtensions.m
 + (NSString *)shiftKeyIndicatorString;
 {
     static NSString *string = nil;
@@ -163,6 +175,7 @@
     return string;
 }
 
+// This method is copied from NSString-OFStringExtensions.m
 + (NSString *)hexStringForCharacter:(unichar)ch{
     NSMutableString *string = [NSMutableString stringWithCapacity:4];
     [string appendFormat:@"%X", ch];
@@ -1369,6 +1382,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return [[self componentsSeparatedByString:removeString] componentsJoinedByString:@""];
 }
 
+// This method is copied from NSString-OFStringExtensions.m
 - (NSString *)stringByRemovingPrefix:(NSString *)prefix {
     unsigned int length = [prefix length];
     if (length && [self hasPrefix:prefix])
@@ -1376,6 +1390,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return self;
 }
 
+// This method is copied from NSString-OFStringExtensions.m
 - (NSString *)stringByRemovingSuffix:(NSString *)suffix {
     unsigned int length = [suffix length];
     if (length && [self hasSuffix:suffix])
@@ -1395,6 +1410,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return [self stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 }
 
+// This method is copied and modified from NSString-OFStringExtensions.m
 - (NSString *)fullyEncodeAsIURI {
     static const char hexDigits[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
     static NSCharacterSet *unsafeCharacterSet = nil;
@@ -1451,6 +1467,8 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 }
 
 #pragma mark Paths
+
+// These methods are copied and modified from NSString-OFStringExtensions.m
 
 + (NSString *)pathSeparator {
     return [NSOpenStepRootDirectory() substringToIndex:1];
@@ -1952,6 +1970,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     BDReplaceCharactersInCharacterSet((CFMutableStringRef)self, (CFCharacterSetRef)set, (CFStringRef)replaceString);
 }
 
+// This method is copied from NSMutableString-OFStringExtensions.m
 - (void)appendStrings:(NSString *)first, ... {
     va_list argList;
     NSString *next;

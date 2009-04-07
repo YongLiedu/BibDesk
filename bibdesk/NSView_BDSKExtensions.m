@@ -35,7 +35,11 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+ 
 /*
+ Some methods in this category are copied from OmniAppKit 
+ and are subject to the following licence:
+ 
  Omni Source License 2007
 
  OPEN PERMISSION TO USE AND REPRODUCE OMNI SOURCE CODE SOFTWARE
@@ -68,6 +72,7 @@
 
 @implementation NSView (BDSKExtensions)
 
+// Copied from OmniAppKit/NSView-OAExtensions.m
 - (NSPoint)scrollPositionAsPercentage {
     NSRect bounds = [self bounds];
     NSScrollView *enclosingScrollView = [self enclosingScrollView];
@@ -96,6 +101,7 @@
     return scrollPosition;
 }
 
+// Copied from OmniAppKit/NSView-OAExtensions.m
 - (void)setScrollPositionAsPercentage:(NSPoint)scrollPosition {
     NSRect bounds = [self bounds];
     NSScrollView *enclosingScrollView = [self enclosingScrollView];

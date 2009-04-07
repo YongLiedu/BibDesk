@@ -35,7 +35,11 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+ 
 /*
+ Some methods in this category are copied from OmniFoundation 
+ and are subject to the following licence:
+ 
  Omni Source License 2007
 
  OPEN PERMISSION TO USE AND REPRODUCE OMNI SOURCE CODE SOFTWARE
@@ -335,8 +339,8 @@ static NSData *sha1Signature(void *cookie, int (*readfn)(void *, char *, int), i
 	return [NSData dataWithData:compressed];
 }
 
+// This method is copied and slightly modified from NSData-OFExtensions.m
 /*" Creates a stdio FILE pointer for reading from the receiver via the funopen() BSD facility.  The receiver is automatically retained until the returned FILE is closed. "*/
-
 - (FILE *)openReadOnlyStandardIOFile {
     BDSKDataFileContext *ctx = calloc(1, sizeof(BDSKDataFileContext));
     ctx->data = [self retain];

@@ -36,7 +36,11 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+ 
 /*
+ Some methods in this category are copied from OmniFoundation 
+ and are subject to the following licence:
+ 
  Omni Source License 2007
 
  OPEN PERMISSION TO USE AND REPRODUCE OMNI SOURCE CODE SOFTWARE
@@ -290,6 +294,7 @@ static void destroyTemporaryDirectory()
 
 #pragma mark Temporary files and directories
 
+// This method is copied and modified from NSFileManager-OFExtensions.m
 - (NSString *)uniqueFilenameFromName:(NSString *)filename error:(NSError **)outError;
 {
     // We either aren't allowing the original, or it exists.
@@ -339,6 +344,7 @@ static void destroyTemporaryDirectory()
     return nil;
 }
 
+// This method is copied and modified from NSFileManager-OFExtensions.m
 // Note that if this returns an error, a common course of action would be to put the temporary file in the same folder as the original file.  This has the same security problems as -uniqueFilenameFromName:, of course, so we don't want to do that by default.  The calling code should make this decision.
 - (NSString *)temporaryDirectoryForFileSystemContainingPath:(NSString *)path error:(NSError **)outError;
 /*" Returns the path to the 'Temporary Items' folder on the same filesystem as the given path.  Returns an error if there is a problem (for example, iDisk doesn't have temporary folders).  The returned directory should be only readable by the calling user, so files written into this directory can be written with the desired final permissions without worrying about security (the expectation being that you'll soon call -exchangeFileAtPath:withFileAtPath:). "*/
@@ -388,6 +394,7 @@ static void destroyTemporaryDirectory()
     return temporaryItemsPath;
 }
 
+// This method is copied and modified from NSFileManager-OFExtensions.m
 // Note that due to the permissions behavior of FSFindFolder, this shouldn't have the security problems that raw calls to -uniqueFilenameFromName: may have.
 - (NSString *)temporaryPathForWritingToPath:(NSString *)path error:(NSError **)outError
 /*" Returns a unique filename in the -temporaryDirectoryForFileSystemContainingPath: for the filesystem containing the given path.  The returned path is suitable for writing to and then replacing the input path using -replaceFileAtPath:withFileAtPath:handler:.  This means that the result should never be equal to the input path.  If no suitable temporary items folder is found and allowOriginalDirectory is NO, this will raise.  If allowOriginalDirectory is YES, on the other hand, this will return a file name in the same folder.  Note that passing YES for allowOriginalDirectory could potentially result in security implications of the form noted with -uniqueFilenameFromName:. "*/
@@ -416,6 +423,7 @@ static void destroyTemporaryDirectory()
     return temporaryFilePath;
 }
 
+// This method is copied and modified from NSFileManager-OFExtensions.m
 - (NSString *)temporaryFileWithBasename:(NSString *)fileName;
 {
 	if(nil == fileName)
@@ -448,6 +456,7 @@ static void destroyTemporaryDirectory()
     return finalPath;
 }
 
+// This method is copied and modified from NSFileManager-OFExtensions.m
 - (NSString *)uniqueFilePathWithName:(NSString *)fileName atPath:(NSString *)directory {
     // could expand this path?
     NSParameterAssert([directory isAbsolutePath]);
@@ -576,6 +585,7 @@ static void destroyTemporaryDirectory()
 
 #pragma mark Resoving aliases
 
+// This method is copied and modified from NSFileManager-OFExtensions.m
 - (NSString *)resolveAliasesInPath:(NSString *)originalPath
 {
     FSRef ref, originalRefOfPath;

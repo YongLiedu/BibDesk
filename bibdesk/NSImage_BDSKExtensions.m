@@ -35,7 +35,11 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+ 
 /*
+ Some methods in this category are copied from OmniAppKit 
+ and are subject to the following licence:
+ 
  Omni Source License 2007
 
  OPEN PERMISSION TO USE AND REPRODUCE OMNI SOURCE CODE SOFTWARE
@@ -276,6 +280,7 @@
     [sharedGroupImage setName:@"sharedGroup"];
 }
 
+// This methods and the following dependent methods are copied from OmniAppKit/NSImage-OAExtensions.m
 + (NSImage *)systemIconWithCode:(OSType)code {
     IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:code];
     NSImage *image = [iconFamily imageWithAllReps];
@@ -668,6 +673,7 @@ static NSComparisonResult compareImageRepWidths(NSBitmapImageRep *r1, NSBitmapIm
     return toReturn;    
 }
 
+// Modified and generalized from OmniAppKit/NSImage-OAExtensions
 - (void)drawFlippedInRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(float)delta {
     [NSGraphicsContext saveGraphicsState];
     NSAffineTransform *transform = [NSAffineTransform transform];
