@@ -281,8 +281,7 @@ static char BDSKConditionObservationContext;
         // unset values are considered empty strings
         NSString *itemValue = [item stringValueOfField:key] ?: @"";
         // to speed up comparisons
-        if ([itemValue isComplex] || [itemValue isInherited])
-            itemValue = [NSString stringWithString:itemValue];
+        itemValue = [itemValue expandedString];
         
         if (comparison == BDSKEqual || comparison == BDSKNotEqual) {
             if ([key isEqualToString:BDSKAllFieldsString]) {
