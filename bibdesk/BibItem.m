@@ -895,7 +895,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 		c = @"";
 	}
     BDSKPOSTCONDITION(c != nil);
-	return c;
+	return [c expandedString];
 }
 
 // this is used for the lower pane
