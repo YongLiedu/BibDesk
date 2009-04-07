@@ -652,6 +652,17 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     return [[[NSDocumentController sharedDocumentController] mainDocument] isEqual:self];
 }
 
+- (BOOL)commitPendingEdits {
+    NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
+    id editor;
+    while (editor = [wcEnum nextObject]) {
+        // not all window controllers are editors...
+        if ([editor respondsToSelector:@selector(commitEditing)] && [editor commitEditing] == NO)
+            return NO;
+    }
+    return YES;
+}
+
 - (void)windowWillClose:(NSNotification *)notification{
         
     // see comment in invalidateSearchFieldCellTimer
@@ -1121,10 +1132,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSError *nsError = nil;
     NSArray *items = publications;
     
-    // first we make sure all edits are committed
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionary]];
+    // callers are responsible for making sure all edits are committed
+    NSParameterAssert([self commitPendingEdits]);
     
     if(docState.currentSaveOperationType == NSSaveToOperation && [exportSelectionCheckButton state] == NSOnState)
         items = [self numberOfSelectedPubs] > 0 ? [self selectedPublications] : groupedPublications;
@@ -1152,9 +1161,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         nsError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:errTitle underlyingError:nsError];
         [nsError setValue:errMsg forKey:NSLocalizedRecoverySuggestionErrorKey];        
     }
-    // needed because of finalize changes; don't send -clearChangeCount if the save failed for any reason, or if we're autosaving!
-    else if (docState.currentSaveOperationType != NSAutosaveOperation && docState.currentSaveOperationType != NSSaveToOperation)
-        [self performSelector:@selector(clearChangeCount) withObject:nil afterDelay:0.01];
     
     // setting to nil is okay
     if (outError) *outError = nsError;
@@ -3710,7 +3716,10 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     NSMutableArray *autofileFiles = [NSMutableArray arrayWithCapacity:[pubs count]];
     
     while(pub = [pubEnum nextObject]){
-        [[self editorForPublication:pub create:NO] finalizeChanges:nil];
+        
+        // ??? will this ever happen?
+        if ([[self editorForPublication:pub create:NO] commitEditing] == NO)
+            continue;
         
         // generate cite key if we have enough information
         if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyAutogenerateKey] && [pub canGenerateAndSetCiteKey])

@@ -72,10 +72,16 @@
     IBOutlet NSTextView *notesView;
     IBOutlet NSTextView *abstractView;
     IBOutlet NSTextView *rssDescriptionView;
-	NSTextView *currentEditedView;
+	
+    // one of the three previous textviews:
+    NSTextView *currentEditedView;
+    NSString *previousValueForCurrentEditedView;
+    
+    // each textview gets its own undo manager
     NSUndoManager *notesViewUndoManager;
     NSUndoManager *abstractViewUndoManager;
     NSUndoManager *rssDescriptionViewUndoManager;
+    
     BOOL ignoreFieldChange;
     // for the splitview double-click handling
 	float lastFileViewWidth;
@@ -122,9 +128,6 @@
     BDSKComplexStringEditor *complexStringEditor;
 
 	// edit field stuff
-	BOOL forceEndEditing;
-	BOOL ignoreEdit;
-
     BOOL didSetupFields;
 	
 	NSTextView *dragFieldEditor;
@@ -191,14 +194,6 @@
 
 - (NSString *)status;
 - (void)setStatus:(NSString *)status;
-
-/*!
-    @method     finalizeChanges:
-    @abstract   Makes sure that edits of fields are submitted.
-    @discussion (comprehensive description)
-    @param      aNotification Unused
-*/
-- (void)finalizeChanges:(NSNotification *)aNotification;
 
 - (IBAction)openLinkedFile:(id)sender;
 

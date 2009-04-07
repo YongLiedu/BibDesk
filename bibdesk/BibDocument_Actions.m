@@ -1355,13 +1355,13 @@ static BOOL changingColors = NO;
         return;
 
     // first we make sure all edits are committed
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionary]];
-    NSArray *selectedFiles = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"];
-    [[BDSKFiler sharedFiler] filePapers:selectedFiles fromDocument:self check:check];
-	
-	[[self undoManager] setActionName:NSLocalizedString(@"AutoFile Files", @"Undo action name")];
+    if ([self commitPendingEdits]) {
+        NSArray *selectedFiles = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"];
+        [[BDSKFiler sharedFiler] filePapers:selectedFiles fromDocument:self check:check];
+        [[self undoManager] setActionName:NSLocalizedString(@"AutoFile Files", @"Undo action name")];
+    } else {
+        NSBeep();
+    }
 }
 
 - (IBAction)consolidateLinkedFiles:(id)sender{
@@ -1387,6 +1387,12 @@ static BOOL changingColors = NO;
 #pragma mark Cite Keys and Crossref support
 
 - (void)generateCiteKeysForPublications:(NSArray *)pubs{
+        
+    // !!! early return
+    if ([self commitPendingEdits] == NO) {
+        NSBeep();
+        return;
+    }
     
     unsigned int numberOfPubs = [pubs count];
     NSEnumerator *selEnum = [pubs objectEnumerator];
@@ -1395,11 +1401,6 @@ static BOOL changingColors = NO;
     NSMutableArray *arrayOfOldValues = [NSMutableArray arrayWithCapacity:numberOfPubs];
     NSMutableArray *arrayOfNewValues = [NSMutableArray arrayWithCapacity:numberOfPubs];
     BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKWillGenerateCiteKeyScriptHookName];
-    
-    // first we make sure all edits are committed
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionary]];
     
     // put these pubs into an array, since the indices can change after we set the cite key, due to sorting or searching
     while (aPub = [selEnum nextObject]) {
@@ -1553,16 +1554,18 @@ static BOOL changingColors = NO;
 }
 
 - (void)dublicateTitleToBooktitleAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    
+    // !!! early return
+    if ([self commitPendingEdits] == NO) {
+        NSBeep();
+        return;
+    }
+    
 	BOOL overwrite = (returnCode == NSAlertAlternateReturn);
 	
 	NSSet *parentTypes = [NSSet setWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
 	NSEnumerator *selEnum = [[self selectedPublications] objectEnumerator];
 	BibItem *aPub;
-	
-    // first we make sure all edits are committed
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionary]];
 	
 	while (aPub = [selEnum nextObject]) {
 		if([parentTypes containsObject:[aPub pubType]])

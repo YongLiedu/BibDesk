@@ -135,7 +135,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         fields = [[NSMutableArray alloc] init];
         isEditable = [[publication owner] isDocument];
                 
-        forceEndEditing = NO;
         didSetupFields = NO;
     }
     return self;
@@ -292,6 +291,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [addedFields release];
 	[authorTableView setDelegate:nil];
     [authorTableView setDataSource:nil];
+    [previousValueForCurrentEditedView release];
     [notesViewUndoManager release];
     [abstractViewUndoManager release];
     [rssDescriptionViewUndoManager release];   
@@ -313,54 +313,112 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [self showWindow:self];
 }
 
-// note that we don't want the - document accessor! It messes us up by getting called for other stuff.
+- (BOOL)validateCurrentEditedView
+{
+    BOOL rv = [[currentEditedView string] isStringTeXQuotingBalancedWithBraces:YES connected:NO];
+    if (NO == rv) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
+                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"Informative text in alert dialog")];
+        
+        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];   
+    }
+    return rv;
+}
 
-- (void)finalizeChangesPreservingSelection:(BOOL)shouldPreserveSelection{
+- (void)discardEditing
+{
+    // check textviews first
+    if (currentEditedView == [[self window] firstResponder]) {
+        // need some reasonable state for annote et al. textviews
+        NSParameterAssert(nil != previousValueForCurrentEditedView);
+        [currentEditedView setString:previousValueForCurrentEditedView];
+    }
+    // now handle any field editor(s)
+    else if ([[[self window] firstResponder] isKindOfClass:[NSText class]]) {
+     
+        /*
+         Omit the standard check for [[self window] fieldEditor:NO forObject:nil],
+         since that returns nil for the tableview's field editor.
+         */
+        
+        NSControl *control = [(NSText *)[[self window] firstResponder] delegate];
+        
+        // may be self, if a textview was being edited (but we should have taken the first branch in that case)
+        if ([control respondsToSelector:@selector(abortEditing)]) {
+            [control abortEditing];
+        }
+        else {
+            fprintf(stderr, "%s, control does not respond to abortEditing\n", __func__);
+        }
+    }
+    else {
+        // should never happen
+        fprintf(stderr, "%s, unhandled firstResponder = %s\n", __func__, [[[[[self window] firstResponder] class] description] UTF8String]);
+    }
+    [[self document] objectDidEndEditing:self];
+}
 
+- (void)commitEditingWithDelegate:(id)delegate didCommitSelector:(SEL)didCommitSelector contextInfo:(void *)contextInfo
+{
+    BOOL didCommit = [self commitEditing];
+    if (delegate && didCommitSelector) {
+        // - (void)editor:(id)editor didCommit:(BOOL)didCommit contextInfo:(void *)contextInfo
+        NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:didCommitSelector]];
+        [invocation setTarget:delegate];
+        [invocation setSelector:didCommitSelector];
+        [invocation setArgument:&self atIndex:2];
+        [invocation setArgument:&didCommit atIndex:3];
+        [invocation setArgument:&contextInfo atIndex:4];
+        [invocation invoke];
+    }
+}
+
+- (BOOL)commitEditing
+{
     NSResponder *firstResponder = [[self window] firstResponder];
     
-	// need to finalize text field cells being edited or the abstract/annote text views, since the text views bypass the normal undo mechanism for speed, and won't cause the doc to be marked dirty on subsequent edits
+	/*
+     Need to finalize text field cells being edited or the abstract/annote text views, since the 
+     text views bypass the normal undo mechanism for speed, and won't cause the doc to be marked 
+     dirty on subsequent edits.
+     */
 	if([firstResponder isKindOfClass:[NSText class]]){
         
         NSTextView *textView = (NSTextView *)firstResponder;
 		int editedRow = -1;
 		NSRange selection = [textView selectedRange];
-        if (shouldPreserveSelection && [textView isFieldEditor]) {
+        if ([textView isFieldEditor]) {
             firstResponder = [textView delegate];
             if (firstResponder == tableView)
                 editedRow = [tableView editedRow];
         }
         
-		forceEndEditing = YES; // make sure the validation will always allow the end of the edit
 		didSetupFields = NO; // if we we rebuild the fields, the selection will become meaningless
         
-		// now make sure we submit the edit
-		if ([[self window] makeFirstResponder:[self window]] == NO) {
-            // this will remove the field editor from the view, set its delegate to nil, and empty it of text
-			[[self window] endEditingFor:nil];
-            forceEndEditing = NO;
-            return;
-        }
+        // check textviews for balanced braces as needed
+        if (currentEditedView && [self validateCurrentEditedView] == NO)
+            return NO;
         
-		forceEndEditing = NO;
-        
-        if(shouldPreserveSelection == NO)
-            return;
+        // commit edits (formatters may refuse to allow this)
+        if ([[self window] makeFirstResponder:[self window]] == NO)
+            return NO;
         
         // for inherited fields, we should do something here to make sure the user doesn't have to go through the warning sheet
 		
-		if (shouldPreserveSelection && [[self window] makeFirstResponder:firstResponder] && didSetupFields == NO) {
+		if ([[self window] makeFirstResponder:firstResponder] && didSetupFields == NO) {
             if (firstResponder == tableView && editedRow != -1)
                 [tableView editColumn:1 row:editedRow withEvent:nil select:NO];
             if ([[textView string] length] >= NSMaxRange(selection)) // check range for safety
                 [textView setSelectedRange:selection];
         }
-            
-	}
-}
-
-- (void)finalizeChanges:(NSNotification *)aNotification{
-    [self finalizeChangesPreservingSelection:YES];
+        return YES;
+        
+	} else {
+        return [[self window] makeFirstResponder:nil];
+    }
 }
 
 #pragma mark Actions
@@ -665,10 +723,12 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:", @"Label for adding field")
                                                                                               fieldsArray:fieldNames];
-	[addFieldController beginSheetModalForWindow:[self window]
-                                   modalDelegate:self
-                                  didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
-                                     contextInfo:currentFields];
+    if ([self commitEditing]) {
+        [addFieldController beginSheetModalForWindow:[self window]
+                                       modalDelegate:self
+                                      didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
+                                         contextInfo:currentFields];
+    }
     [addFieldController release];
 }
 
@@ -706,18 +766,21 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                                                                                                        fieldsArray:removableFields];
     int selectedRow = [tableView selectedRow];
     NSString *selectedField = selectedRow == -1 ? nil : [fields objectAtIndex:selectedRow];
+    BOOL didValidate = YES;
     if([removableFields containsObject:selectedField]){
         [removeFieldController setField:selectedField];
         // if we don't deselect this cell, we can't remove it from the form
-        [self finalizeChangesPreservingSelection:NO];
+        didValidate = [self commitEditing];
     }
     
 	[removableFields release];
 	
-	[removeFieldController beginSheetModalForWindow:[self window]
-                                      modalDelegate:self
-                                     didEndSelector:@selector(removeFieldSheetDidEnd:returnCode:contextInfo:)
-                                        contextInfo:NULL];
+    if (didValidate) {
+        [removeFieldController beginSheetModalForWindow:[self window]
+                                          modalDelegate:self
+                                         didEndSelector:@selector(removeFieldSheetDidEnd:returnCode:contextInfo:)
+                                            contextInfo:NULL];
+    }
     [removeFieldController release];
 }
 
@@ -743,6 +806,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (void)raiseChangeFieldSheetForField:(NSString *)field{
+    
+    if ([self commitEditing] == NO)
+        return;
+    
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     NSArray *fieldNames;
     NSMutableArray *currentFields = [fields mutableCopy];
@@ -768,10 +835,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         field = [tableView selectedRow] == -1 ? nil : [fields objectAtIndex:[tableView selectedRow]];
     
     BDSKASSERT(field == nil || [fields containsObject:field]);
-    
-    // if we don't deselect this cell, we can't remove it from the form
-    [self finalizeChangesPreservingSelection:NO];
-    
     [changeFieldController setField:field];
     
 	[changeFieldController beginSheetModalForWindow:[self window]
@@ -793,7 +856,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [self raiseChangeFieldSheetForField:field];
 }
 
-- (void)generateCiteKeyAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)generateCiteKeyAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	if([alert checkValue] == YES)
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
     
@@ -801,10 +864,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         return;
     
     // could use [[alert window] orderOut:nil] here, but we're using the didDismissSelector instead
-    // This is problematic, since finalizeChangesPreservingSelection: ends up triggering a format failure sheet if the user deleted the citekey and then chose to generate (this might be common in case of duplicating an item, for instance).  Therefore, we'll catch that case here and reset the control to the publication's current value, since we're going to generate a new one anyway.
-    if ([NSString isEmptyString:[citeKeyField stringValue]])
-        [citeKeyField setStringValue:[publication citeKey]];
-	[self finalizeChangesPreservingSelection:YES];
+    BDSKPRECONDITION([self commitEditing]);
 	
 	BDSKScriptHook *scriptHook = nil;
 	NSString *oldKey = [publication citeKey];
@@ -850,6 +910,15 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (IBAction)generateCiteKey:(id)sender{
+    
+    /*
+     If citekey is being edited, abort that edit, which avoids any validation for whatever is
+     currently in the field.  If any other field is being edited, validate pending changes to 
+     other controls before trying to generate a key.
+     */
+    if ([citeKeyField abortEditing] == NO && [self commitEditing] == NO)
+        return;
+    
     if([publication hasEmptyOrDefaultCiteKey] == NO && 
        [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
         BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Really Generate Cite Key?", @"Message in alert dialog when generating cite keys")
@@ -907,7 +976,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (IBAction)consolidateLinkedFiles:(id)sender{
-	[self finalizeChangesPreservingSelection:YES];
+    
+    if ([self commitEditing] == NO)
+        return;
 	
     // context menu sets item index as represented object; otherwise we try to autofile everything
     NSNumber *indexNumber = [sender representedObject];
@@ -951,22 +1022,25 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (IBAction)duplicateTitleToBooktitle:(id)sender{
-	[self finalizeChangesPreservingSelection:YES];
-	
-	[publication duplicateTitleToBooktitleOverwriting:YES];
-	
-	[[self undoManager] setActionName:NSLocalizedString(@"Duplicate Title", @"Undo action name")];
+	if ([self commitEditing]) {
+        [publication duplicateTitleToBooktitleOverwriting:YES];
+        [[self undoManager] setActionName:NSLocalizedString(@"Duplicate Title", @"Undo action name")];
+    }
 }
 
 - (IBAction)bibTypeDidChange:(id)sender{
-    [self finalizeChangesPreservingSelection:YES];
-    NSString *newType = [bibTypeButton titleOfSelectedItem];
-    if(![[publication pubType] isEqualToString:newType]){
-        [publication setPubType:newType];
-        [[NSUserDefaults standardUserDefaults] setObject:newType
-                                                          forKey:BDSKPubTypeStringKey];
-		
-		[[self undoManager] setActionName:NSLocalizedString(@"Change Type", @"Undo action name")];
+	if ([self commitEditing]) {
+        NSString *newType = [bibTypeButton titleOfSelectedItem];
+        if(![[publication pubType] isEqualToString:newType]){
+            [publication setPubType:newType];
+            [[NSUserDefaults standardUserDefaults] setObject:newType
+                                                              forKey:BDSKPubTypeStringKey];
+            
+            [[self undoManager] setActionName:NSLocalizedString(@"Change Type", @"Undo action name")];
+        }
+    } else {
+        // revert to previous
+        [bibTypeButton selectItemWithTitle:[publication pubType]];
     }
 }
 
@@ -1784,6 +1858,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             }
         }
 	}
+    if (canEdit) [[self document] objectDidBeginEditing:self];
     return canEdit;
 }
 
@@ -1799,78 +1874,51 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 // send by the formatter when formatting in getObjectValue... failed
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)aString errorDescription:(NSString *)error{
-	BOOL accept = forceEndEditing;
+	BOOL accept = NO;
     
-    if (control == tableView) {
+    if (nil == error) {
+        // shouldn't get here
+        NSLog(@"%@:%d formatter failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__);
+    } else if (control == tableView) {
+        
         NSString *fieldName = [fields objectAtIndex:[tableView editedRow]];
 		if ([fieldName isEqualToString:BDSKCrossrefString]) {
             // this may occur if the cite key formatter fails to format
-            if(error != nil){
-                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Key", @"Message in alert dialog when entering invalid Crossref key") 
-                                                     defaultButton:nil
-                                                   alternateButton:nil
-                                                       otherButton:nil
-                                         informativeTextWithFormat:@"%@", error];
-                
-                [alert runSheetModalForWindow:[self window]];
-            }else{
-                NSLog(@"%@:%d formatter for control %@ failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__, control);
-            }
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Key", @"Message in alert dialog when entering invalid Crossref key") 
+                                             defaultButton:nil
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:@"%@", error];
+            
+            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 		} else if ([fieldName isCitationField]) {
             // this may occur if the citation formatter fails to format
-            if(error != nil){
-                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Citation Key", @"Message in alert dialog when entering invalid Crossref key") 
-                                                     defaultButton:nil
-                                                   alternateButton:nil
-                                                       otherButton:nil
-                                         informativeTextWithFormat:@"%@", error];
-                
-                [alert runSheetModalForWindow:[self window]];
-            }else{
-                NSLog(@"%@:%d formatter for control %@ failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__, control);
-            }
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Citation Key", @"Message in alert dialog when entering invalid Crossref key") 
+                                             defaultButton:nil
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:@"%@", error];
+            
+            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         } else if (NO == [tableCellFormatter editAsComplexString]) {
 			// this is a simple string, an error means that there are unbalanced braces
-			NSString *message = nil;
-			NSString *cancelButton = nil;
-			
-			if (forceEndEditing) {
-				message = NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"Informative text in alert dialog");
-			} else {
-				message = NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved. Do you want to keep editing?", @"Informative text in alert dialog");
-				cancelButton = NSLocalizedString(@"Cancel", @"Button title");
-			}
-			
             BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
-                                                 defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                               alternateButton:cancelButton
-                                                   otherButton:nil
-                                     informativeTextWithFormat:message];
-            
-            int rv = [alert runSheetModalForWindow:[self window]];
-			
-			accept = (forceEndEditing || rv == NSAlertAlternateReturn);
-		}
-        if(accept)
-            ignoreEdit = YES;
-	} else if (control == citeKeyField) {
-        // this may occur if the cite key formatter fails to format
-        if(error != nil){
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key", @"Message in alert dialog when enetring invalid cite key") 
                                                  defaultButton:nil
                                                alternateButton:nil
                                                    otherButton:nil
-                                     informativeTextWithFormat:@"%@", error];
-            
-            [alert runSheetModalForWindow:[self window]];
-		}else{
-            NSLog(@"%@:%d formatter for control %@ failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__, control);
-		}
-        if (accept)
-            [citeKeyField setStringValue:[publication citeKey]];
-    } else {
-        // shouldn't get here
-        NSLog(@"%@:%d formatter failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__);
+                                 informativeTextWithFormat:NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"Informative text in alert dialog")];
+            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+        }
+        
+	} else if (control == citeKeyField) {
+        // !!! may have to revisit this with strict invalid keys?
+        // this may occur if the cite key formatter fails to format
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key", @"Message in alert dialog when enetring invalid cite key") 
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:@"%@", error];        
+        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
     return accept;
 }
@@ -1898,14 +1946,14 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                 message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"Informative text in alert dialog");
             
             if (message) {
-                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key") 
-                                                     defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                                   alternateButton:nil
-                                                       otherButton:nil
-                                         informativeTextWithFormat:message];
+                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key") 
+                                                 defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                               alternateButton:nil
+                                                   otherButton:nil
+                                     informativeTextWithFormat:message];
                 
-                [alert runSheetModalForWindow:[self window]];
-                ignoreEdit = YES;
+                [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+                endEdit = NO;
             }
         }
         
@@ -1913,17 +1961,16 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		
         NSString *message = nil;
         NSString *cancelButton = nil;
+        NSString *defaultButton = nil;
         NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] fragileCiteKeyCharacterSet];
         NSRange r = [[control stringValue] rangeOfCharacterFromSet:invalidSet];
         
+        // check for fragile invalid characters, as the formatter doesn't do this
         if (r.location != NSNotFound) {
             
-            if (forceEndEditing) {
-                message = NSLocalizedString(@"The cite key you entered contains characters that could be invalid in TeX.", @"Informative text in alert dialog");
-            } else {
-                message = NSLocalizedString(@"The cite key you entered contains characters that could be invalid in TeX. Do you want to continue editing with the invalid characters removed?", @"Informative text in alert dialog");
-                cancelButton = NSLocalizedString(@"Cancel", @"Button title");
-            }
+            message = NSLocalizedString(@"The cite key you entered contains characters that could be invalid in TeX. Do you want to keep them or remove them?", @"Informative text in alert dialog");
+            defaultButton = NSLocalizedString(@"Remove", @"Button title");
+            cancelButton = NSLocalizedString(@"Keep", @"Button title");
             
         } else {
             // check whether we won't crossref to the new citekey
@@ -1934,21 +1981,20 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                 message = NSLocalizedString(@"Cannot set this cite key as this would lead to a crossreff chain.", @"Informative text in alert dialog");
         }
         
-        // @@ fixme: button titles don't correspond to message options
         if (message) {
             BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
-                                                 defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                                 defaultButton:defaultButton
                                                alternateButton:cancelButton
                                                    otherButton:nil
                                      informativeTextWithFormat:message];
             
             int rv = [alert runSheetModalForWindow:[self window]];
             
-            if (forceEndEditing || rv == NSAlertAlternateReturn) {
-                [citeKeyField setStringValue:[publication citeKey]];
-             } else {
+            if (rv == NSAlertDefaultReturn) {
                 [control setStringValue:[[control stringValue] stringByReplacingCharactersInSet:invalidSet withString:@""]];
                 endEdit = NO;
+            } else {
+                 [citeKeyField setStringValue:[control stringValue]];
             }
 		}
 	}
@@ -1979,6 +2025,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             
         }
     }
+    [[self document] objectDidEndEditing:self];
 }
 
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
@@ -2015,6 +2062,13 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 #pragma mark annote/abstract/rss
+ 
+- (void)setPreviousValueForCurrentEditedNotesView:(NSString *)aString {
+    if (aString != previousValueForCurrentEditedView) {
+        [previousValueForCurrentEditedView release];
+        previousValueForCurrentEditedView = [aString copy];
+    }
+}
 
 - (void)textDidBeginEditing:(NSNotification *)aNotification{
     // Add the mutableString of the text storage to the item's pubFields, so changes
@@ -2037,6 +2091,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     if(selRange.location != NSNotFound && selRange.location < [[currentEditedView string] length])
         [currentEditedView setSelectedRange:selRange];
     ignoreFieldChange = NO;
+    
+    // save off the old value in case abortEditing gets called
+    [self setPreviousValueForCurrentEditedNotesView:[currentEditedView string]];
+    [[self document] objectDidBeginEditing:self];
 }
 
 // Clear all the undo actions when changing tab items, just in case; otherwise we
@@ -2049,21 +2107,19 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (BOOL)tabView:(NSTabView *)tabView shouldSelectTabViewItem:(NSTabViewItem *)tabViewItem{
-    if (currentEditedView && [[currentEditedView string] isStringTeXQuotingBalancedWithBraces:YES connected:NO] == NO) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"Informative text in alert dialog")];
-    
-        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-        return NO;
-    }
+    return [self commitEditing];
+}
+
+- (BOOL)textShouldEndEditing:(NSText *)aTextObject {
+    BDSKASSERT(aTextObject == currentEditedView);
+    if (aTextObject == currentEditedView)
+        return [self validateCurrentEditedView];
     return YES;
 }
 
 // sent by the textViews
 - (void)textDidEndEditing:(NSNotification *)aNotification{
+    
     NSString *field = nil;
     if(currentEditedView == notesView)
         field = BDSKAnnoteString;
@@ -2080,17 +2136,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                                                           userInfo:notifInfo];
     }
     
-	currentEditedView = nil;
-    
-    if ([[[aNotification object] string] isStringTeXQuotingBalancedWithBraces:YES connected:NO] == NO) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The value you entered contains unbalanced braces. If you save you might not be able to reopen the file.", @"Informative text in alert dialog")];
-    
-        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-    }
+    NSParameterAssert([self validateCurrentEditedView]);
+    currentEditedView = nil;
+    [self setPreviousValueForCurrentEditedNotesView:nil];
+    [[self document] objectDidEndEditing:self];
 }
 
 // sent by the textviews; this ensures that the document's annote/abstract preview gets updated
@@ -2264,16 +2313,20 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
  
 - (void)typeInfoDidChange:(NSNotification *)aNotification{
-	[self setupTypePopUp];
-	[self resetFieldsIfNeeded];
+    if ([self commitEditing]) {
+        [self setupTypePopUp];
+        [self resetFieldsIfNeeded];
+    }
 }
  
 - (void)customFieldsDidChange:(NSNotification *)aNotification{
     // ensure that the pub updates first, since it observes this notification also
     [publication customFieldsDidChange:aNotification];
-	[self resetFieldsIfNeeded];
-    [self setupMatrix];
-    [authorTableView reloadData];
+    if ([self commitEditing]) {
+        [self resetFieldsIfNeeded];
+        [self setupMatrix];
+        [authorTableView reloadData];
+    }
 }
 
 - (void)macrosDidChange:(NSNotification *)notification{
@@ -2282,7 +2335,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         NSEnumerator *fieldEnum = [fields objectEnumerator];
         NSString *field;
         while (field = [fieldEnum nextObject]) {
-            if ([[publication valueOfField:field] isComplex]) {
+            if ([[publication valueOfField:field] isComplex] && [self commitEditing]) {
                 [self reloadTable];
                 break;
             }
@@ -2641,13 +2694,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (BOOL)windowShouldClose:(id)sender{
-    // User may have started editing some field, e.g. deleted the citekey and not tabbed out; if the user then chooses to discard, the finalizeChangesPreservingSelection: in windowWillClose: ultimately results in a crash due to OAApplication's sheet queue interaction with modal BDSKAlerts.  Hence, we need to call it earlier.  
-    [self finalizeChangesPreservingSelection:NO];
     
-    // @@ Some of this might be handled automatically for us if we didn't use endEditingFor: to basically override formatter return values.  Forcing the field editor to end editing has always been problematic (see the comments in some of the sheet callbacks).  Perhaps we should just return NO here if [[self window] makeFirstResponder:[self window]] fails, rather than using finalizeChangesPreservingSelection:'s brute force behavior.
-
-    // finalizeChangesPreservingSelection: may end up triggering other sheets, as well (move file, for example; bug #1565645), and we don't want to close the window when it has a sheet attached, since it's waiting for user input at that point.  This is sort of a hack, but there's too much state for us to keep track of and decide if the window should really close.
-    if ([[self window] attachedSheet] != nil)
+    // this may trigger warning sheets, so we can't close the window
+    if ([self commitEditing] == NO)
         return NO;
     
 	// we shouldn't further check external items, though they could have had a macro editor
@@ -2766,17 +2815,13 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
     if ([tv isEqual:tableView] && [[tableColumn identifier] isEqualToString:@"value"]) {
-        if (ignoreEdit == NO) {
-            NSString *field = [fields objectAtIndex:row];
-            NSString *oldValue = [publication valueOfField:field] ?: @"";
-            if (object == nil)
-                object = @"";
-            
-            if (NO == [object isEqualAsComplexString:oldValue])
-                [self recordChangingField:field toValue:object];
-        }
-        // tableView:shouldEditTableColumn:row: may not be called when the user continues editing
-        ignoreEdit = NO;
+        NSString *field = [fields objectAtIndex:row];
+        NSString *oldValue = [publication valueOfField:field] ?: @"";
+        if (object == nil)
+            object = @"";
+        
+        if (NO == [object isEqualAsComplexString:oldValue])
+            [self recordChangingField:field toValue:object];
     }
 }
 
@@ -2925,7 +2970,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
 	if ([tv isEqual:tableView] && [[tableColumn identifier] isEqualToString:@"value"]) {
-        ignoreEdit = NO;
         // we always want to "edit" even when we are not editable, so we can always select, and the cell will prevent editing when isEditable == NO
         return YES;
     }
@@ -3127,10 +3171,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	if(fieldEditor){
 		selection = [fieldEditor selectedRange];
 		editedTitle = [fields objectAtIndex:[tableView editedRow]];
-		forceEndEditing = YES;
 		if ([[self window] makeFirstResponder:[self window]] == NO)
-			[[self window] endEditingFor:nil];
-		forceEndEditing = NO;
+            [NSException raise:NSInternalInconsistencyException format:@"Failed to commit edits in %s, trouble ahead", __func__];
 	}
 	
     if (newFields && [fields isEqualToArray:newFields] == NO) {
@@ -3377,10 +3419,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                    selector:@selector(groupWillBeRemoved:)
                        name:BDSKDidAddRemoveGroupNotification
                      object:nil];
-    [nc addObserver:self
-           selector:@selector(finalizeChanges:)
-               name:BDSKFinalizeChangesNotification
-             object:[self document]];
     [nc addObserver:self
            selector:@selector(fileURLDidChange:)
                name:BDSKDocumentFileURLDidChangeNotification
