@@ -2294,6 +2294,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [fileView reloadIcons];
 }
 
+- (void)appDidBecomeActive:(NSNotification *)notification{
+    // resolve all the URLs, when a file was renamed on disk this will trigger an update notification
+    [[publication files] valueForKey:@"URL"];
+}
+
 #pragma mark document interaction
 	
 - (void)bibWillBeRemoved:(NSNotification *)notification{
@@ -3343,6 +3348,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)registerForNotifications {
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc addObserver:self
+           selector:@selector(appDidBecomeActive:)
+               name:NSApplicationDidBecomeActiveNotification
+             object:NSApp];
     [nc addObserver:self
            selector:@selector(bibDidChange:)
                name:BDSKBibItemChangedNotification

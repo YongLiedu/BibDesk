@@ -2760,6 +2760,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                    name:BDSKFlagsChangedNotification
                  object:nil];
         [nc addObserver:self
+               selector:@selector(handleApplicationDidBecomeActiveNotification:)
+                   name:NSApplicationDidBecomeActiveNotification
+                 object:nil];
+        [nc addObserver:self
                selector:@selector(handleApplicationWillTerminateNotification:)
                    name:NSApplicationWillTerminateNotification
                  object:nil];
@@ -3041,6 +3045,11 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification{
     [self saveSortOrder];
+}
+
+- (void)handleApplicationDidBecomeActiveNotification:(NSNotification *)notification{
+    // resolve all the shown URLs, when a file was renamed on disk this will trigger an update notification
+    [self selectedFileURLs];
 }
 
 - (void)handleCustomFieldsDidChangeNotification:(NSNotification *)notification{
