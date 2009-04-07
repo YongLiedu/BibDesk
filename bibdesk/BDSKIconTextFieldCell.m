@@ -39,6 +39,7 @@
 #import "BDSKIconTextFieldCell.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
+#import "BDSKCenterScaledImageCell.h"
 
 
 @implementation BDSKIconTextFieldCell
@@ -68,33 +69,8 @@
 
 - (void)drawIconWithFrame:(NSRect)iconRect inView:(NSView *)controlView {
     NSImage *img = [self icon];
-    
-    if (nil != img) {
-        if ([img respondsToSelector:@selector(isTemplate)] && [img isTemplate] && 
-            [self respondsToSelector:@selector(interiorBackgroundStyle)] && [self interiorBackgroundStyle] == NSBackgroundStyleDark) {
-            img = [img invertedImage];
-        }
-        
-        NSRect srcRect = NSZeroRect;
-        srcRect.size = [img size];
-        
-        NSRect drawFrame = iconRect;
-        float ratio = MIN(NSWidth(drawFrame) / srcRect.size.width, NSHeight(drawFrame) / srcRect.size.height);
-        drawFrame.size.width = ratio * srcRect.size.width;
-        drawFrame.size.height = ratio * srcRect.size.height;
-        
-        drawFrame = BDSKCenterRect(drawFrame, drawFrame.size, [controlView isFlipped]);
-        
-        NSGraphicsContext *ctxt = [NSGraphicsContext currentContext];
-        [ctxt saveGraphicsState];
-        
-        // this is the critical part that NSImageCell doesn't do
-        [ctxt setImageInterpolation:NSImageInterpolationHigh];
-        
-        [img drawFlipped:[controlView isFlipped] inRect:drawFrame fromRect:srcRect operation:NSCompositeSourceOver fraction:1.0];
-        
-        [ctxt restoreGraphicsState];
-    }
+    if (nil != img)
+        [self drawIcon:img withFrame:iconRect inView:controlView];
 }
 
 - (NSRect)textRectForBounds:(NSRect)aRect {

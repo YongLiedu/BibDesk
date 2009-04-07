@@ -39,8 +39,11 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKCenterScaledImageCell : NSImageCell {
+@interface BDSKCenterScaledImageCell : NSImageCell
+@end
 
-}
+#pragma mark -
 
+@interface NSCell (BDSKCenterScaling)
+- (void)drawIcon:(NSImage *)img withFrame:(NSRect)iconRect inView:(NSView *)controlView;
 @end

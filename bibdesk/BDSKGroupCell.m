@@ -42,6 +42,7 @@
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
+#import "BDSKCenterScaledImageCell.h"
 
 
 // names of these globals were changed to support key-value coding on BDSKGroup
@@ -297,16 +298,11 @@ static NSString *stringWithNumber(NSNumber *number)
     
     [label drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin];
     
-    BOOL controlViewIsFlipped = [controlView isFlipped];
-    
     if ([self isRetrieving] == NO) {
         NSRect countRect = [self countRectForBounds:aRect];
         int count = [self count];
         if ([self failedDownload]) {
-            NSImage *cautionImage = [NSImage imageNamed:@"BDSKSmallCautionIcon"];
-            NSSize cautionImageSize = [cautionImage size];
-            NSRect cautionIconRect = NSMakeRect(0, 0, cautionImageSize.width, cautionImageSize.height);
-            [cautionImage drawFlipped:controlViewIsFlipped inRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
+            [self drawIcon:[NSImage imageNamed:@"BDSKSmallCautionIcon"] withFrame:countRect inView:controlView];
         } else if (count > 0) {
             float countInset = count < 100 ? 0.5 * NSHeight(countRect) : 0.25 * NSHeight(countRect);
             NSColor *fgColor;
@@ -350,12 +346,10 @@ static NSString *stringWithNumber(NSNumber *number)
     }
     
     // Draw the image
-    NSRect imageRect = BDSKCenterRect([self iconRectForBounds:aRect], [self iconSizeForBounds:aRect], controlViewIsFlipped);
+    NSRect imageRect = BDSKCenterRect([self iconRectForBounds:aRect], [self iconSizeForBounds:aRect], [controlView isFlipped]);
     imageRect.origin.y += [controlView isFlipped] ? -IMAGE_OFFSET : IMAGE_OFFSET;
-    [NSGraphicsContext saveGraphicsState];
-    [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-    [[self icon] drawFlipped:controlViewIsFlipped inRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [NSGraphicsContext restoreGraphicsState];
+    if ([self icon])
+        [self drawIcon:[self icon] withFrame:imageRect inView:controlView];
 }
 
 - (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength;
