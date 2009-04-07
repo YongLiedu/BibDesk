@@ -60,9 +60,24 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 
 @implementation FVColorMenuView
 
+#define DEFAULT_FRAME        ((NSRect) { 0.0, 0.0, 188.0, 68.0 })
+#define DEFAULT_SIZE         ((NSSize) { 188.0, 68.0 })
+#define DEFAULT_HEIGHT       ((CGFloat) 68.0)
+#define DEFAULT_MATRIX_FRAME ((NSRect) { 20.0, 28.0, 158.0, 18.0 })
+#define LABEL_MARGIN         ((CGFloat) 20.0)
+
 + (FVColorMenuView *)menuView;
 {
-    return [[[self alloc] initWithFrame:NSMakeRect(0.0, 0.0, 188.0, 68.0)] autorelease];
+    return [[[self alloc] initWithFrame:DEFAULT_FRAME] autorelease];
+}
+
+- (void)_createMatrix
+{
+    _matrix = [[FVColorMenuMatrix alloc] initWithFrame:DEFAULT_MATRIX_FRAME];
+    [_matrix setTarget:self];
+    [_matrix setAction:@selector(fvLabelColorAction:)];
+    [self addSubview:_matrix];
+    [_matrix release];
 }
 
 - (id)initWithFrame:(NSRect)aRect
@@ -78,11 +93,7 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
         [_labelNameCell setFont:[NSFont boldSystemFontOfSize:[NSFont smallSystemFontSize]]];
         [_labelNameCell setTextColor:[NSColor disabledControlTextColor]];
         
-        _matrix = [[FVColorMenuMatrix alloc] initWithFrame:NSMakeRect(20.0, 28.0, 158.0, 18.0)];
-        [_matrix setTarget:self];
-        [_matrix setAction:@selector(fvLabelColorAction:)];
-        [self addSubview:_matrix];
-        [_matrix release];
+        [self _createMatrix];
         
         _target = nil;
         _action = nil;
@@ -115,13 +126,8 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
         
         [_labelNameCell setStringValue:@""];
         
-        if (_matrix == nil) {
-            _matrix = [[FVColorMenuMatrix alloc] initWithFrame:NSMakeRect(20.0, 28.0, 158.0, 18.0)];
-            [_matrix setTarget:self];
-            [_matrix setAction:@selector(fvLabelColorAction:)];
-            [self addSubview:_matrix];
-            [_matrix release];
-        }
+        if (_matrix == nil)
+            [self _createMatrix];
         if (_matrix)
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleColorNameUpdate:) name:FVColorNameUpdateNotification object:_matrix];
     }
@@ -140,7 +146,7 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 
 - (void)sizeToFit
 {
-    [self setFrameSize:NSMakeSize(188.0, 68.0)];
+    [self setFrameSize:DEFAULT_SIZE];
 }
 
 - (void)setTarget:(id)target { _target = target; }
@@ -175,14 +181,14 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
     
     // draw the label
     labelRect.size = [_labelCell cellSize];
-    labelRect.origin.x = 20.0;
-    labelRect.origin.y = 20.0 - NSHeight(labelRect);
+    labelRect.origin.x = LABEL_MARGIN;
+    labelRect.origin.y = LABEL_MARGIN - NSHeight(labelRect);
     [_labelCell drawWithFrame:labelRect inView:self];
     
     // draw the label name
-    labelRect.size.width = NSWidth(bounds) - 40.0;
+    labelRect.size.width = NSWidth(bounds) - 2 * LABEL_MARGIN;
     labelRect.size.height = [_labelNameCell cellSize].height;
-    labelRect.origin.y = 68.0 - NSHeight(labelRect);
+    labelRect.origin.y = DEFAULT_HEIGHT - NSHeight(labelRect);
     [_labelNameCell drawWithFrame:labelRect inView:self];
 }
 
@@ -207,6 +213,8 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 
 @implementation FVColorMenuCell
 
+#define CELL_SIZE ((NSSize) { 18.0, 18.0 })
+
 - (id)initTextCell:(NSString *)aString
 {
     if (self = [super initTextCell:aString]) {
@@ -218,21 +226,21 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 
 - (NSSize)cellSize
 {
-    return NSMakeSize(18.0, 18.0);
+    return CELL_SIZE;
 }
 
 static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
 {
     // determine aspect ratio (copy paste from FVIcon)
-    const NSSize s = (NSSize){ 128, 128 };
+    const NSSize s = (NSSize){ 128.0, 128.0 };
     
     CGFloat ratio = MIN(NSWidth(iconRect) / s.width, NSHeight(iconRect) / s.height);
     NSRect dstRect = iconRect;
     dstRect.size.width = ratio * s.width;
     dstRect.size.height = ratio * s.height;
     
-    CGFloat dx = (iconRect.size.width - dstRect.size.width) / 2;
-    CGFloat dy = (iconRect.size.height - dstRect.size.height) / 2;
+    CGFloat dx = (NSHeight(iconRect) - NSHeight(dstRect)) / 2.0;
+    CGFloat dy = (NSHeight(iconRect) - NSHeight(dstRect)) / 2.0;
     dstRect.origin.x += dx;
     dstRect.origin.y += dy;
     
@@ -249,7 +257,7 @@ static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
     [NSGraphicsContext saveGraphicsState];
 
     if (0 == tag) {
-        interiorFrame = NSInsetRect(interiorFrame, 2, 2);
+        interiorFrame = NSInsetRect(interiorFrame, 2.0, 2.0);
         NSBezierPath *p = [NSBezierPath bezierPath];
         [p moveToPoint:interiorFrame.origin];
         [p lineToPoint:NSMakePoint(NSMaxX(interiorFrame), NSMaxY(interiorFrame))];
@@ -262,7 +270,7 @@ static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
     }
     else {
         NSShadow *labelShadow = [NSShadow new];
-        [labelShadow setShadowOffset:NSMakeSize(0, -1)];
+        [labelShadow setShadowOffset:NSMakeSize(0.0, -1.0)];
         [labelShadow setShadowBlurRadius:2.0];
         [labelShadow set];
         [FVFinderLabel drawFinderLabel:tag inRect:interiorFrame roundEnds:NO];
@@ -278,16 +286,21 @@ static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
 
 #define NO_BOX -1
 
+#define FINDER_LABELS { 0, 6, 7, 5, 2, 4, 3, 1 }
+
+#define BOX_WIDTH 1.5
+#define BOX_RADIUS 2
+
 - (id)initWithFrame:(NSRect)frameRect
 {
     if (self = [super initWithFrame:frameRect]) {
         [self setPrototype:[[[FVColorMenuCell alloc] initTextCell:@""] autorelease]];
-        [self setCellSize:NSMakeSize(18.0, 18.0)];
+        [self setCellSize:CELL_SIZE];
         [self setIntercellSpacing:NSMakeSize(2.0, 4.0)];
         [self setMode:NSRadioModeMatrix];
         [self renewRows:1 columns:8];
         [self sizeToCells];
-        int column, tags[8] = {0, 6, 7, 5, 2, 4, 3, 1};
+        int column, tags[8] = FINDER_LABELS;
         for (column = 0; column < 8; column++)
             [[self cellAtRow:0 column:column] setTag:tags[column]];
         _boxedRow = NO_BOX;
@@ -341,8 +354,6 @@ static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
     return [self centerScanRect:NSInsetRect(boxRect, 1.0, 1.0)];
 }
 
-#define BOX_WIDTH 1.5
-#define BOX_RADIUS 2
 
 - (BOOL)_isBoxedCellSelected { return ([self selectedRow] == _boxedRow && [self selectedColumn] == _boxedColumn); }
 
