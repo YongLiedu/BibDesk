@@ -198,10 +198,6 @@ static CGFloat _subtitleHeight = 0.0;
 
 + (BOOL)accessInstanceVariablesDirectly { return NO; }
 
-// not part of the API because padding is private, and that's a can of worms
-- (CGFloat)_columnWidth { return _iconSize.width + _padding.width; }
-- (CGFloat)_rowHeight { return _iconSize.height + _padding.height; }
-
 - (void)_commonInit {
      // Icons keyed by URL; may contain icons that are no longer displayed.  Keeping this as primary storage means that
      // rearranging/reloading is relatively cheap, since we don't recreate all FVIcon instances every time -reload is called.
@@ -343,6 +339,8 @@ static CGFloat _subtitleHeight = 0.0;
 - (BOOL)isOpaque { return YES; }
 - (BOOL)isFlipped { return YES; }
 
+#pragma mark API
+
 - (void)setBackgroundColor:(NSColor *)aColor;
 {
     if (_backgroundColor != aColor) {
@@ -426,8 +424,6 @@ static CGFloat _subtitleHeight = 0.0;
     
     [self scrollPoint:desiredRect.origin];
 }
-
-#pragma mark API
 
 - (void)_setIconScale:(double)scale;
 {
@@ -558,14 +554,6 @@ static CGFloat _subtitleHeight = 0.0;
     return _fvFlags.autoScales;
 }
 
-- (void)awakeFromNib
-{
-    if ([[FVFileView superclass] instancesRespondToSelector:@selector(awakeFromNib)])
-        [super awakeFromNib];
-    // if the datasource connection is made in the nib, the drag type setup doesn't get done
-    [self _registerForDraggedTypes];
-}
-
 - (void)setDataSource:(id)obj;
 {
     // I was asserting these conditions, but that crashes the IB simulator if you set a datasource in IB.  Setting datasource to nil in case of failure avoids other exceptions later (notably in FVViewController).
@@ -636,302 +624,126 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (id)delegate { return _delegate; }
 
-// overall borders around the view
-- (CGFloat)_leftMargin { return _padding.width / 2 + DEFAULT_MARGIN; }
-- (CGFloat)_rightMargin { return _padding.width / 2 + DEFAULT_MARGIN; }
-- (CGFloat)_topMargin { return _titleHeight; }
-- (CGFloat)_bottomMargin { return 0.0; }
+- (void)_setSelectionIndexes:(NSIndexSet *)indexSet {
+    [self setSelectionIndexes:indexSet];
+    [self _updateBinding:SELECTIONINDEXES_BINDING_NAME];
+}
 
-- (NSUInteger)numberOfRows;
+- (void)setSelectionIndexes:(NSIndexSet *)indexSet;
 {
-    return _numberOfRows;
-}
-
-- (NSUInteger)numberOfColumns;
-{
-    return _numberOfColumns;
-}
-
-- (NSSize)_paddingForScale:(CGFloat)scale;
-{
-    // ??? magic number here... using a fixed padding looked funny at some sizes, so this is now adjustable
-    NSSize size = NSZeroSize;
-    
-    // if we autoscale, we should always derive the scale from the current bounds,  but rather the current bounds. This calculation basically inverts the calculation in _recalculateGridSize
-    size.width = DEFAULT_PADDING.width + FVRound(4.0 * scale);
-    size.height = DEFAULT_PADDING.height + FVRound(4.0 * scale) + _titleHeight;
-    if ([_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)])
-        size.height += _subtitleHeight;
-    return size;
-}
-
-- (void)_sliderAction:(id)sender {
-    if (_fvFlags.autoScales == NO) {
-        _fvFlags.updatingFromSlider = YES;
-        [self _setIconScale:[sender doubleValue]];
-        _fvFlags.updatingFromSlider = NO;
-    }
-}
-
-- (FVSliderWindow *)_sliderWindow {
-    if (_sliderWindow == nil && _fvFlags.autoScales == NO) {
-        _sliderWindow = [[FVSliderWindow alloc] init];
-        FVSlider *slider = [_sliderWindow slider];
-        [slider setMaxValue:_maxScale];
-        [slider setMinValue:_minScale];
-        [slider setDoubleValue:[self iconScale]];
-        [slider setAction:@selector(_sliderAction:)];
-        [slider setTarget:self];
-    }
-    return _sliderWindow;
-}
-
-#define MIN_SLIDER_WIDTH 50.0
-#define MAX_SLIDER_WIDTH 200.0
-#define SLIDER_HEIGHT 15.0
-#define TOP_SLIDER_OFFSET 1.0
-#define BOTTOM_SLIDER_OFFSET 19.0
-
-- (NSRect)_topSliderRect
-{
-    NSRect r = [self visibleRect];
-    CGFloat l = FVFloor( NSMidX(r) - FVMax( MIN_SLIDER_WIDTH / 2, FVMin( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
-    r.origin.x += l;
-    r.origin.y += TOP_SLIDER_OFFSET;
-    r.size.width -= 2 * l;
-    r.size.height = SLIDER_HEIGHT;
-    return r;
-}
-
-- (NSRect)_bottomSliderRect
-{
-    NSRect r = [self visibleRect];
-    CGFloat l = FVFloor( NSMidX(r) - FVMax( MIN_SLIDER_WIDTH / 2, FVMin( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
-    r.origin.x += l;
-    r.origin.y += NSHeight(r) - BOTTOM_SLIDER_OFFSET;
-    r.size.width -= 2 * l;
-    r.size.height = SLIDER_HEIGHT;
-    return r;
-}
-
-// This is the square rect the icon is drawn in.  It doesn't include padding, so rects aren't contiguous.
-// Caller is responsible for any centering before drawing.
-- (NSRect)_rectOfIconInRow:(NSUInteger)row column:(NSUInteger)column;
-{
-    NSPoint origin = [self bounds].origin;
-    CGFloat leftEdge = origin.x + [self _leftMargin] + [self _columnWidth] * column;
-    CGFloat topEdge = origin.y + [self _topMargin] + [self _rowHeight] * row;
-    return NSMakeRect(leftEdge, topEdge, _iconSize.width, _iconSize.height);
-}
-
-- (NSRect)_rectOfTextForIconRect:(NSRect)iconRect;
-{
-    // add a couple of points between the icon and text, which is useful if we're drawing a Finder label
-    // don't draw all the way into the padding vertically, so we don't draw over the selection highlight of the next icon
-    NSRect textRect = NSMakeRect(NSMinX(iconRect), NSMaxY(iconRect), NSWidth(iconRect) + TEXT_OFFSET, _padding.height - 2.0 * TEXT_OFFSET);
-    // allow the text rect to extend outside the grid cell
-    return NSInsetRect(textRect, -_padding.width / 3.0, 0.0);
-}
-
-- (void)_setNeedsDisplayForIconInRow:(NSUInteger)row column:(NSUInteger)column {
-    NSRect dirtyRect = [self _rectOfIconInRow:row column:column];
-    dirtyRect = NSUnionRect(NSInsetRect(dirtyRect, -2.0 * [self iconScale], -[self iconScale]), [self _rectOfTextForIconRect:dirtyRect]);
-    [self setNeedsDisplayInRect:dirtyRect];
-}
-
-static void _removeTrackingRectTagFromView(const void *key, const void *value, void *context)
-{
-    [(NSView *)context removeTrackingRect:(NSTrackingRectTag)key];
-}
-
-- (void)_removeAllTrackingRects
-{
-    if (_trackingRectMap) {
-        CFDictionaryApplyFunction(_trackingRectMap, _removeTrackingRectTagFromView, self);
-        CFDictionaryRemoveAllValues(_trackingRectMap);
-    }
-    if (-1 != _topSliderTag)
-        [self removeTrackingRect:_topSliderTag];
-    if (-1 != _bottomSliderTag)
-        [self removeTrackingRect:_bottomSliderTag];
-}
-
-// We assume that all existing tracking rects and tooltips have been removed prior to invoking this method, so don't call it directly.  Use -[NSWindow invalidateCursorRectsForView:] instead.
-- (void)_resetTrackingRectsAndToolTips
-{    
-    // no guarantee that we have a window, in which case these will all be wrong
-    if (nil != [self window]) {
-        NSRect visibleRect = [self visibleRect];
-        NSUInteger r, rMin = 0, rMax = [self numberOfRows];
-        NSUInteger c, cMin = 0, cMax = [self numberOfColumns];
-        NSUInteger i, iMin = 0, iMax = [self numberOfIcons];
-        NSPoint mouseLoc = [self convertPoint:[[self window] mouseLocationOutsideOfEventStream] fromView:nil];
-        NSUInteger mouseIndex = NSNotFound;
+    FVAPIAssert(nil != indexSet, @"index set must not be nil");
+    if (indexSet != _selectionIndexes) {
+        [_selectionIndexes release];
+        _selectionIndexes = [[NSIndexSet alloc] initWithIndexSet:indexSet];
         
-        for (r = rMin, i = iMin; r < rMax; r++) 
-        {
-            for (c = cMin; c < cMax && i < iMax; c++, i++) 
-            {
-                NSRect iconRect = NSIntersectionRect(visibleRect, [self _rectOfIconInRow:r column:c]);
-                
-                if (NSIsEmptyRect(iconRect) == NO) {
-                    BOOL mouseInside = NSPointInRect(mouseLoc, iconRect);
-                    
-                    if (mouseInside)
-                        mouseIndex = i;
-                    
-                    // Getting the location from the mouseEntered: event isn't reliable if you move the mouse slowly, so we either need to enlarge this tracking rect, or keep a map table of tag->index.  Since we have to keep a set of tags anyway, we'll use the latter method.
-                    NSTrackingRectTag tag = [self addTrackingRect:iconRect owner:self userData:NULL assumeInside:mouseInside];
-                    CFDictionarySetValue(_trackingRectMap, (const void *)tag, (const void *)i);
-                    
-                    // don't pass the URL as owner, as it's not retained; use the delegate method instead
-                    [self addToolTipRect:iconRect owner:self userData:NULL];
-                }
-            }
-        }    
+        [self setNeedsDisplay:YES];
         
-        FVIcon *anIcon = mouseIndex == NSNotFound ? nil : [self iconAtIndex:mouseIndex];
-        if ([anIcon pageCount] > 1)
-            [self _showArrowsForIconAtIndex:mouseIndex];
-        else
-            [self _hideArrows];
+        NSAccessibilityPostNotification(NSAccessibilityUnignoredAncestor(self), NSAccessibilityFocusedUIElementChangedNotification);
         
-        if (_fvFlags.autoScales == NO) {
-            NSRect sliderRect = NSIntersectionRect([self _topSliderRect], visibleRect);
-            _topSliderTag = [self addTrackingRect:sliderRect owner:self userData:[self _sliderWindow] assumeInside:NSPointInRect(mouseLoc, sliderRect)];  
-            sliderRect = NSIntersectionRect([self _bottomSliderRect], visibleRect);
-            _bottomSliderTag = [self addTrackingRect:sliderRect owner:self userData:[self _sliderWindow] assumeInside:NSPointInRect(mouseLoc, sliderRect)];  
+        FVPreviewer *previewer = [FVPreviewer sharedPreviewer];
+        NSUInteger firstIndex = [_selectionIndexes firstIndex];
+        if ([previewer isPreviewing] && NSNotFound != firstIndex) {
+            [previewer setWebViewContextMenuDelegate:[self delegate]];
+            [previewer previewURL:[self URLAtIndex:firstIndex] forIconInRect:[[previewer window] frame]];
         }
     }
 }
 
-// Here again, use -[NSWindow invalidateCursorRectsForView:] instead of calling this directly.
-- (void)_discardTrackingRectsAndToolTips
+- (NSIndexSet *)selectionIndexes;
 {
-    [self _removeAllTrackingRects];
-    [self removeAllToolTips];   
+    return _selectionIndexes;
 }
 
-/*  
-   10.4 docs say "You need never invoke this method directly; it's invoked automatically before the receiver's cursor rectangles are reestablished using resetCursorRects."
-   10.5 docs say "You need never invoke this method directly; neither is it typically invoked during the invalidation of cursor rectangles. [...] This method is invoked just before the receiver is removed from a window and when the receiver is deallocated."
- 
-   This is a pretty radical change that makes -discardCursorRects sound pretty useless.  Maybe that explains why cursor rects have always sucked in Apple's apps and views?  Anyway, I'm explicitly discarding before resetting, just to be safe.  I'm also telling the window to invalidate cursor rects for this view explicitly whenever the grid changes due to number of icons or resize.  Even though I don't use cursor rects right now, this is a convenient funnel point for tracking rect handling.
- 
-   It is important to note that discardCursorRects /has/ to be safe during dealloc (hence the _trackingRectMap is explicitly set to NULL).
- 
+- (void)setIconURLs:(NSArray *)array
+{
+    if (_orderedURLs != array) {
+        [_orderedURLs release];
+        _orderedURLs = [[NSMutableArray alloc] initWithArray:array];
+    }    
+}
+
+- (NSArray *)iconURLs
+{
+    return _orderedURLs;
+}
+
+#pragma mark Binding/datasource wrappers
+
+- (FVIcon *)iconAtIndex:(NSUInteger)anIndex { 
+    FVAPIAssert(anIndex < [_orderedIcons count], @"invalid icon index requested; likely missing a call to -reloadIcons");
+    return [_orderedIcons objectAtIndex:anIndex]; 
+}
+
+- (NSString *)subtitleAtIndex:(NSUInteger)anIndex { 
+    // _orderedSubtitles is nil if the datasource doesn't implement the optional method
+    if (_orderedSubtitles) FVAPIAssert(anIndex < [_orderedSubtitles count], @"invalid subtitle index requested; likely missing a call to -reloadIcons");
+    return [_orderedSubtitles objectAtIndex:anIndex]; 
+}
+
+- (NSArray *)iconsAtIndexes:(NSIndexSet *)indexes { 
+    FVAPIAssert([indexes lastIndex] < [self numberOfIcons], @"invalid number of icons requested; likely missing a call to -reloadIcons");
+    return [_orderedIcons objectsAtIndexes:indexes]; 
+}
+
+/*
+ Wrap datasource/bindings and return [FVIcon missingFileURL] when the datasource or bound array 
+ returns nil or NSNull, or else we end up with exceptions everywhere.
  */
-- (void)discardCursorRects
-{
-    [super discardCursorRects];
-    [self _discardTrackingRectsAndToolTips];
+
+- (NSURL *)URLAtIndex:(NSUInteger)anIndex {
+    NSParameterAssert(anIndex < [self numberOfIcons]);
+    NSURL *aURL = [_orderedURLs objectAtIndex:anIndex];
+    if (__builtin_expect(nil == aURL || [NSNull null] == (id)aURL, 0))
+        aURL = [FVIcon missingFileURL];
+    return aURL;
 }
 
-// automatically invoked as needed after -[NSWindow invalidateCursorRectsForView:]
-- (void)resetCursorRects
+- (NSUInteger)numberOfIcons { return [_orderedURLs count]; }
+
+- (void)_getDisplayName:(NSString **)name andLabel:(NSUInteger *)label forURL:(NSURL *)aURL;
 {
-    [super resetCursorRects];
-    [self _discardTrackingRectsAndToolTips];
-    [self _resetTrackingRectsAndToolTips];
+    _FVURLInfo *info = [(id)_infoTable objectForKey:aURL];
+    if (nil == info) {
+        info = [[_FVURLInfo allocWithZone:[self zone]] initWithURL:aURL];
+        CFDictionarySetValue(_infoTable, (CFURLRef)aURL, info);
+        [info release];
+    }
+    if (name) *name = [info name];
+    if (label) *label = [info label];
 }
 
-- (void)_reloadIcons;
+- (FVIcon *)_cachedIconForURL:(NSURL *)aURL;
 {
-    BOOL isBound = nil != _contentBinding;
+    NSParameterAssert([aURL isKindOfClass:[NSURL class]]);
+    FVIcon *icon = [_iconCache objectForKey:aURL];
     
-    if (NO == isBound) {
-        if (nil == _orderedURLs)
-            _orderedURLs = [[NSMutableArray alloc] init];
-        else
-            [_orderedURLs removeAllObjects];
+    // try zombie cache first
+    if (nil == icon) {
+        icon = [_zombieIconCache objectForKey:aURL];
+        if (icon) {
+            [_iconCache setObject:icon forKey:aURL];
+            [_zombieIconCache removeObjectForKey:aURL];
+        }
     }
     
-    [_orderedIcons removeAllObjects];
-    [_orderedSubtitles removeAllObjects];
-    
-    CFDictionaryRemoveAllValues(_infoTable);
-    
-    // datasource URL method
-    SEL URLSel = @selector(fileView:URLAtIndex:);
-    id (*URLAtIndex)(id, SEL, id, NSUInteger);
-    URLAtIndex = (id (*)(id, SEL, id, NSUInteger))[_dataSource methodForSelector:URLSel];
-    
-    // -[NSCFArray objectAtIndex:] (do /not/ use +[NSMutableArray instanceMethodForSelector:]!)
-    SEL objectSel = @selector(objectAtIndex:);
-    id (*objectAtIndex)(id, SEL, NSUInteger);
-    objectAtIndex = (id (*)(id, SEL, NSUInteger))[_orderedIcons methodForSelector:objectSel];
-    
-    // -[FVViewController _cachedIconForURL:]
-    SEL cachedIconSel = @selector(_cachedIconForURL:);
-    id (*cachedIcon)(id, SEL, id);
-    cachedIcon = (id (*)(id, SEL, id))[self methodForSelector:cachedIconSel];
-    
-    // -[NSCFArray insertObject:atIndex:] (do /not/ use +[NSMutableArray instanceMethodForSelector:]!)
-    SEL insertSel = @selector(insertObject:atIndex:);
-    void (*insertObjectAtIndex)(id, SEL, id, NSUInteger);
-    insertObjectAtIndex = (void (*)(id, SEL, id, NSUInteger))[_orderedIcons methodForSelector:insertSel];
-    
-    // datasource subtitle method; may result in a NULL IMP (in which case _orderedSubtitles is nil)
-    SEL subtitleSel = @selector(fileView:subtitleAtIndex:);
-    id (*subtitleAtIndex)(id, SEL, id, NSUInteger);
-    subtitleAtIndex = (id (*)(id, SEL, id, NSUInteger))[_dataSource methodForSelector:subtitleSel];
-    
-    NSUInteger i, iMax = isBound ? [_orderedURLs count] : [_dataSource numberOfURLsInFileView:self];
-    
-    for (i = 0; i < iMax; i++) {
-        NSURL *aURL = isBound ? objectAtIndex(_orderedURLs, objectSel, i) : URLAtIndex(_dataSource, URLSel, self, i);
-        if (__builtin_expect(nil == aURL || [NSNull null] == (id)aURL, 0))
-            aURL = [FVIcon missingFileURL];
-        NSParameterAssert(nil != aURL && [NSNull null] != (id)aURL);
-        FVIcon *icon = cachedIcon(self, cachedIconSel, aURL);
-        NSParameterAssert(nil != icon);
-        if (NO == isBound)
-            insertObjectAtIndex(_orderedURLs, insertSel, aURL, i);
-        insertObjectAtIndex(_orderedIcons, insertSel, icon, i);
-        if (_orderedSubtitles)
-            insertObjectAtIndex(_orderedSubtitles, insertSel, subtitleAtIndex(_dataSource, subtitleSel, self, i), i);
-    }  
-}
-
-- (void)_resetViewLayout;
-{
-    // Problem exposed in BibDesk: select all, scroll halfway down in file pane, then change selection to a single row.  FVFileView content didn't update correctly, even though reloadIcons was called.  Logging drawRect: indicated that the wrong region was being updated, but calling _recalculateGridSize here fixed it.
-    [self _recalculateGridSize];
-    
-    // grid may have changed, so do a full redisplay
-    [self setNeedsDisplay:YES];
-    
-    /* 
-     Any time the number of icons or scale changes, cursor rects are garbage and need to be reset.  The approved way to do this is by calling invalidateCursorRectsForView:, and the docs say to never invoke -[NSView resetCursorRects] manually.  Unfortunately, tracking rects are still active even though the window isn't key, and we show buttons for non-key windows.  As a consequence, if the number of icons just changed from (say) 3 to 1 in a non-key view, it can receive mouseEntered: events for the now-missing icons.  Possibly we don't need to reset cursor rects since they only change for the key window, but we'll reset everything manually just in case.  Allow NSWindow to handle it if the window is key.
-     */
-    NSWindow *window = [self window];
-    [window invalidateCursorRectsForView:self];
-    if ([window isKeyWindow] == NO)
-        [self resetCursorRects];
-}
-
-- (void)reloadIcons;
-{
-    [self _reloadIcons];
-    
-    // Follow NSTableView's example and clear selection outside the current range of indexes
-    NSUInteger lastSelIndex = [_selectionIndexes lastIndex], numIcons = [self numberOfIcons];
-    if (NSNotFound != lastSelIndex && lastSelIndex >= numIcons) {
-        NSMutableIndexSet *newSelIndexes = [_selectionIndexes mutableCopy];
-        [newSelIndexes removeIndexesInRange:NSMakeRange(numIcons, lastSelIndex + 1 - numIcons)];
-        [self _setSelectionIndexes:newSelIndexes];
-        [newSelIndexes release];
+    // still no icon, so make a new one and cache it
+    if (nil == icon) {
+        icon = [[FVIcon allocWithZone:NULL] initWithURL:aURL];
+        [_iconCache setObject:icon forKey:aURL];
+        [icon release];
     }
-    
-    [self _resetViewLayout];
+    return icon;
 }
 
-- (void)_handleFinderLabelChanged:(NSNotification *)note {
-    NSURL *url = [note object];
-    if (CFDictionaryContainsKey(_infoTable, url)) {
-        CFDictionaryRemoveValue(_infoTable, url);
-        [self setNeedsDisplay:YES];
+- (NSArray *)_selectedURLs
+{
+    NSMutableArray *array = [NSMutableArray array];
+    NSUInteger idx = [_selectionIndexes firstIndex];
+    while (NSNotFound != idx) {
+        [array addObject:[self URLAtIndex:idx]];
+        idx = [_selectionIndexes indexGreaterThanIndex:idx];
     }
+    return array;
 }
 
 #pragma mark Binding support
@@ -1040,6 +852,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     }
 }
 
+#pragma mark View and Window notifications
+
 - (void)_handleSuperviewDidResize:(NSNotification *)notification {
     NSScrollView *scrollView = [self enclosingScrollView];
     if ((scrollView && [[notification object] isEqual:[self superview]]) || (scrollView == nil && [[notification object] isEqual:self]))
@@ -1113,127 +927,61 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     }
 }
 
-#pragma mark Binding/datasource wrappers
+#pragma mark Layout
 
-- (void)_setSelectionIndexes:(NSIndexSet *)indexSet {
-    [self setSelectionIndexes:indexSet];
-    [self _updateBinding:SELECTIONINDEXES_BINDING_NAME];
-}
+- (CGFloat)_columnWidth { return _iconSize.width + _padding.width; }
 
-- (void)setSelectionIndexes:(NSIndexSet *)indexSet;
+- (CGFloat)_rowHeight { return _iconSize.height + _padding.height; }
+
+// overall borders around the view
+- (CGFloat)_leftMargin { return _padding.width / 2 + DEFAULT_MARGIN; }
+
+- (CGFloat)_rightMargin { return _padding.width / 2 + DEFAULT_MARGIN; }
+
+- (CGFloat)_topMargin { return _titleHeight; }
+
+- (CGFloat)_bottomMargin { return 0.0; }
+
+- (NSUInteger)numberOfRows { return _numberOfRows; }
+
+- (NSUInteger)numberOfColumns { return _numberOfColumns; }
+
+- (NSSize)_paddingForScale:(CGFloat)scale;
 {
-    FVAPIAssert(nil != indexSet, @"index set must not be nil");
-    if (indexSet != _selectionIndexes) {
-        [_selectionIndexes release];
-        _selectionIndexes = [[NSIndexSet alloc] initWithIndexSet:indexSet];
-        
-        [self setNeedsDisplay:YES];
-        
-        NSAccessibilityPostNotification(NSAccessibilityUnignoredAncestor(self), NSAccessibilityFocusedUIElementChangedNotification);
-        
-        FVPreviewer *previewer = [FVPreviewer sharedPreviewer];
-        NSUInteger firstIndex = [_selectionIndexes firstIndex];
-        if ([previewer isPreviewing] && NSNotFound != firstIndex) {
-            [previewer setWebViewContextMenuDelegate:[self delegate]];
-            [previewer previewURL:[self URLAtIndex:firstIndex] forIconInRect:[[previewer window] frame]];
-        }
-    }
-}
-
-- (NSIndexSet *)selectionIndexes;
-{
-    return _selectionIndexes;
-}
-
-- (void)setIconURLs:(NSArray *)array
-{
-    if (_orderedURLs != array) {
-        [_orderedURLs release];
-        _orderedURLs = [[NSMutableArray alloc] initWithArray:array];
-    }    
-}
-
-- (NSArray *)iconURLs
-{
-    return _orderedURLs;
-}
-
-- (FVIcon *)iconAtIndex:(NSUInteger)anIndex { 
-    FVAPIAssert(anIndex < [_orderedIcons count], @"invalid icon index requested; likely missing a call to -reloadIcons");
-    return [_orderedIcons objectAtIndex:anIndex]; 
-}
-
-- (NSString *)subtitleAtIndex:(NSUInteger)anIndex { 
-    // _orderedSubtitles is nil if the datasource doesn't implement the optional method
-    if (_orderedSubtitles) FVAPIAssert(anIndex < [_orderedSubtitles count], @"invalid subtitle index requested; likely missing a call to -reloadIcons");
-    return [_orderedSubtitles objectAtIndex:anIndex]; 
-}
-
-- (NSArray *)iconsAtIndexes:(NSIndexSet *)indexes { 
-    FVAPIAssert([indexes lastIndex] < [self numberOfIcons], @"invalid number of icons requested; likely missing a call to -reloadIcons");
-    return [_orderedIcons objectsAtIndexes:indexes]; 
-}
-
-/*
- Wrap datasource/bindings and return [FVIcon missingFileURL] when the datasource or bound array 
- returns nil or NSNull, or else we end up with exceptions everywhere.
- */
-
-// public methods must be consistent at all times
-- (NSURL *)URLAtIndex:(NSUInteger)anIndex {
-    NSParameterAssert(anIndex < [self numberOfIcons]);
-    NSURL *aURL = [_orderedURLs objectAtIndex:anIndex];
-    if (__builtin_expect(nil == aURL || [NSNull null] == (id)aURL, 0))
-        aURL = [FVIcon missingFileURL];
-    return aURL;
-}
-
-- (NSUInteger)numberOfIcons { return [_orderedURLs count]; }
-
-- (void)_getDisplayName:(NSString **)name andLabel:(NSUInteger *)label forURL:(NSURL *)aURL;
-{
-    _FVURLInfo *info = [(id)_infoTable objectForKey:aURL];
-    if (nil == info) {
-        info = [[_FVURLInfo allocWithZone:[self zone]] initWithURL:aURL];
-        CFDictionarySetValue(_infoTable, (CFURLRef)aURL, info);
-        [info release];
-    }
-    if (name) *name = [info name];
-    if (label) *label = [info label];
-}
-
-- (FVIcon *)_cachedIconForURL:(NSURL *)aURL;
-{
-    NSParameterAssert([aURL isKindOfClass:[NSURL class]]);
-    FVIcon *icon = [_iconCache objectForKey:aURL];
+    // ??? magic number here... using a fixed padding looked funny at some sizes, so this is now adjustable
+    NSSize size = NSZeroSize;
     
-    // try zombie cache first
-    if (nil == icon) {
-        icon = [_zombieIconCache objectForKey:aURL];
-        if (icon) {
-            [_iconCache setObject:icon forKey:aURL];
-            [_zombieIconCache removeObjectForKey:aURL];
-        }
-    }
-    
-    // still no icon, so make a new one and cache it
-    if (nil == icon) {
-        icon = [[FVIcon allocWithZone:NULL] initWithURL:aURL];
-        [_iconCache setObject:icon forKey:aURL];
-        [icon release];
-    }
-    return icon;
+    // if we autoscale, we should always derive the scale from the current bounds,  but rather the current bounds. This calculation basically inverts the calculation in _recalculateGridSize
+    size.width = DEFAULT_PADDING.width + FVRound(4.0 * scale);
+    size.height = DEFAULT_PADDING.height + FVRound(4.0 * scale) + _titleHeight;
+    if ([_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)])
+        size.height += _subtitleHeight;
+    return size;
 }
 
-- (NSArray *)_selectedURLs
+// This is the square rect the icon is drawn in.  It doesn't include padding, so rects aren't contiguous.
+// Caller is responsible for any centering before drawing.
+- (NSRect)_rectOfIconInRow:(NSUInteger)row column:(NSUInteger)column;
 {
-    NSMutableArray *array = [NSMutableArray array];
-    NSUInteger idx = [_selectionIndexes firstIndex];
-    while (NSNotFound != idx) {
-        [array addObject:[self URLAtIndex:idx]];
-        idx = [_selectionIndexes indexGreaterThanIndex:idx];
-    }
-    return array;
+    NSPoint origin = [self bounds].origin;
+    CGFloat leftEdge = origin.x + [self _leftMargin] + [self _columnWidth] * column;
+    CGFloat topEdge = origin.y + [self _topMargin] + [self _rowHeight] * row;
+    return NSMakeRect(leftEdge, topEdge, _iconSize.width, _iconSize.height);
+}
+
+- (NSRect)_rectOfTextForIconRect:(NSRect)iconRect;
+{
+    // add a couple of points between the icon and text, which is useful if we're drawing a Finder label
+    // don't draw all the way into the padding vertically, so we don't draw over the selection highlight of the next icon
+    NSRect textRect = NSMakeRect(NSMinX(iconRect), NSMaxY(iconRect), NSWidth(iconRect) + TEXT_OFFSET, _padding.height - 2.0 * TEXT_OFFSET);
+    // allow the text rect to extend outside the grid cell
+    return NSInsetRect(textRect, -_padding.width / 3.0, 0.0);
+}
+
+- (void)_setNeedsDisplayForIconInRow:(NSUInteger)row column:(NSUInteger)column {
+    NSRect dirtyRect = [self _rectOfIconInRow:row column:column];
+    dirtyRect = NSUnionRect(NSInsetRect(dirtyRect, -2.0 * [self iconScale], -[self iconScale]), [self _rectOfTextForIconRect:dirtyRect]);
+    [self setNeedsDisplayInRect:dirtyRect];
 }
 
 #pragma mark Drawing layout
@@ -1364,6 +1112,254 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         *rowIndex = idx;
     
     return YES;
+}
+
+#pragma mark Slider
+
+- (void)_sliderAction:(id)sender {
+    if (_fvFlags.autoScales == NO) {
+        _fvFlags.updatingFromSlider = YES;
+        [self _setIconScale:[sender doubleValue]];
+        _fvFlags.updatingFromSlider = NO;
+    }
+}
+
+- (FVSliderWindow *)_sliderWindow {
+    if (_sliderWindow == nil && _fvFlags.autoScales == NO) {
+        _sliderWindow = [[FVSliderWindow alloc] init];
+        FVSlider *slider = [_sliderWindow slider];
+        [slider setMaxValue:_maxScale];
+        [slider setMinValue:_minScale];
+        [slider setDoubleValue:[self iconScale]];
+        [slider setAction:@selector(_sliderAction:)];
+        [slider setTarget:self];
+    }
+    return _sliderWindow;
+}
+
+#define MIN_SLIDER_WIDTH     ((CGFloat) 50.0)
+#define MAX_SLIDER_WIDTH     ((CGFloat) 200.0)
+#define SLIDER_HEIGHT        ((CGFloat) 15.0)
+#define TOP_SLIDER_OFFSET    ((CGFloat) 1.0)
+#define BOTTOM_SLIDER_OFFSET ((CGFloat) 19.0)
+
+- (NSRect)_topSliderRect
+{
+    NSRect r = [self visibleRect];
+    CGFloat l = FVFloor( NSMidX(r) - FVMax( MIN_SLIDER_WIDTH / 2, FVMin( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
+    r.origin.x += l;
+    r.origin.y += TOP_SLIDER_OFFSET;
+    r.size.width -= 2 * l;
+    r.size.height = SLIDER_HEIGHT;
+    return r;
+}
+
+- (NSRect)_bottomSliderRect
+{
+    NSRect r = [self visibleRect];
+    CGFloat l = FVFloor( NSMidX(r) - FVMax( MIN_SLIDER_WIDTH / 2, FVMin( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
+    r.origin.x += l;
+    r.origin.y += NSHeight(r) - BOTTOM_SLIDER_OFFSET;
+    r.size.width -= 2 * l;
+    r.size.height = SLIDER_HEIGHT;
+    return r;
+}
+
+#pragma mark Layout and content updating
+
+static void _removeTrackingRectTagFromView(const void *key, const void *value, void *context)
+{
+    [(NSView *)context removeTrackingRect:(NSTrackingRectTag)key];
+}
+
+- (void)_removeAllTrackingRects
+{
+    if (_trackingRectMap) {
+        CFDictionaryApplyFunction(_trackingRectMap, _removeTrackingRectTagFromView, self);
+        CFDictionaryRemoveAllValues(_trackingRectMap);
+    }
+    if (-1 != _topSliderTag)
+        [self removeTrackingRect:_topSliderTag];
+    if (-1 != _bottomSliderTag)
+        [self removeTrackingRect:_bottomSliderTag];
+}
+
+// We assume that all existing tracking rects and tooltips have been removed prior to invoking this method, so don't call it directly.  Use -[NSWindow invalidateCursorRectsForView:] instead.
+- (void)_resetTrackingRectsAndToolTips
+{    
+    // no guarantee that we have a window, in which case these will all be wrong
+    if (nil != [self window]) {
+        NSRect visibleRect = [self visibleRect];
+        NSUInteger r, rMin = 0, rMax = [self numberOfRows];
+        NSUInteger c, cMin = 0, cMax = [self numberOfColumns];
+        NSUInteger i, iMin = 0, iMax = [self numberOfIcons];
+        NSPoint mouseLoc = [self convertPoint:[[self window] mouseLocationOutsideOfEventStream] fromView:nil];
+        NSUInteger mouseIndex = NSNotFound;
+        
+        for (r = rMin, i = iMin; r < rMax; r++) 
+        {
+            for (c = cMin; c < cMax && i < iMax; c++, i++) 
+            {
+                NSRect iconRect = NSIntersectionRect(visibleRect, [self _rectOfIconInRow:r column:c]);
+                
+                if (NSIsEmptyRect(iconRect) == NO) {
+                    BOOL mouseInside = NSPointInRect(mouseLoc, iconRect);
+                    
+                    if (mouseInside)
+                        mouseIndex = i;
+                    
+                    // Getting the location from the mouseEntered: event isn't reliable if you move the mouse slowly, so we either need to enlarge this tracking rect, or keep a map table of tag->index.  Since we have to keep a set of tags anyway, we'll use the latter method.
+                    NSTrackingRectTag tag = [self addTrackingRect:iconRect owner:self userData:NULL assumeInside:mouseInside];
+                    CFDictionarySetValue(_trackingRectMap, (const void *)tag, (const void *)i);
+                    
+                    // don't pass the URL as owner, as it's not retained; use the delegate method instead
+                    [self addToolTipRect:iconRect owner:self userData:NULL];
+                }
+            }
+        }    
+        
+        FVIcon *anIcon = mouseIndex == NSNotFound ? nil : [self iconAtIndex:mouseIndex];
+        if ([anIcon pageCount] > 1)
+            [self _showArrowsForIconAtIndex:mouseIndex];
+        else
+            [self _hideArrows];
+        
+        if (_fvFlags.autoScales == NO) {
+            NSRect sliderRect = NSIntersectionRect([self _topSliderRect], visibleRect);
+            _topSliderTag = [self addTrackingRect:sliderRect owner:self userData:[self _sliderWindow] assumeInside:NSPointInRect(mouseLoc, sliderRect)];  
+            sliderRect = NSIntersectionRect([self _bottomSliderRect], visibleRect);
+            _bottomSliderTag = [self addTrackingRect:sliderRect owner:self userData:[self _sliderWindow] assumeInside:NSPointInRect(mouseLoc, sliderRect)];  
+        }
+    }
+}
+
+// Here again, use -[NSWindow invalidateCursorRectsForView:] instead of calling this directly.
+- (void)_discardTrackingRectsAndToolTips
+{
+    [self _removeAllTrackingRects];
+    [self removeAllToolTips];   
+}
+
+/*  
+   10.4 docs say "You need never invoke this method directly; it's invoked automatically before the receiver's cursor rectangles are reestablished using resetCursorRects."
+   10.5 docs say "You need never invoke this method directly; neither is it typically invoked during the invalidation of cursor rectangles. [...] This method is invoked just before the receiver is removed from a window and when the receiver is deallocated."
+ 
+   This is a pretty radical change that makes -discardCursorRects sound pretty useless.  Maybe that explains why cursor rects have always sucked in Apple's apps and views?  Anyway, I'm explicitly discarding before resetting, just to be safe.  I'm also telling the window to invalidate cursor rects for this view explicitly whenever the grid changes due to number of icons or resize.  Even though I don't use cursor rects right now, this is a convenient funnel point for tracking rect handling.
+ 
+   It is important to note that discardCursorRects /has/ to be safe during dealloc (hence the _trackingRectMap is explicitly set to NULL).
+ 
+ */
+- (void)discardCursorRects
+{
+    [super discardCursorRects];
+    [self _discardTrackingRectsAndToolTips];
+}
+
+// automatically invoked as needed after -[NSWindow invalidateCursorRectsForView:]
+- (void)resetCursorRects
+{
+    [super resetCursorRects];
+    [self _discardTrackingRectsAndToolTips];
+    [self _resetTrackingRectsAndToolTips];
+}
+
+- (void)_resetViewLayout;
+{
+    // Problem exposed in BibDesk: select all, scroll halfway down in file pane, then change selection to a single row.  FVFileView content didn't update correctly, even though reloadIcons was called.  Logging drawRect: indicated that the wrong region was being updated, but calling _recalculateGridSize here fixed it.
+    [self _recalculateGridSize];
+    
+    // grid may have changed, so do a full redisplay
+    [self setNeedsDisplay:YES];
+    
+    /* 
+     Any time the number of icons or scale changes, cursor rects are garbage and need to be reset.  The approved way to do this is by calling invalidateCursorRectsForView:, and the docs say to never invoke -[NSView resetCursorRects] manually.  Unfortunately, tracking rects are still active even though the window isn't key, and we show buttons for non-key windows.  As a consequence, if the number of icons just changed from (say) 3 to 1 in a non-key view, it can receive mouseEntered: events for the now-missing icons.  Possibly we don't need to reset cursor rects since they only change for the key window, but we'll reset everything manually just in case.  Allow NSWindow to handle it if the window is key.
+     */
+    NSWindow *window = [self window];
+    [window invalidateCursorRectsForView:self];
+    if ([window isKeyWindow] == NO)
+        [self resetCursorRects];
+}
+
+- (void)_reloadIcons;
+{
+    BOOL isBound = nil != _contentBinding;
+    
+    if (NO == isBound) {
+        if (nil == _orderedURLs)
+            _orderedURLs = [[NSMutableArray alloc] init];
+        else
+            [_orderedURLs removeAllObjects];
+    }
+    
+    [_orderedIcons removeAllObjects];
+    [_orderedSubtitles removeAllObjects];
+    
+    CFDictionaryRemoveAllValues(_infoTable);
+    
+    // datasource URL method
+    SEL URLSel = @selector(fileView:URLAtIndex:);
+    id (*URLAtIndex)(id, SEL, id, NSUInteger);
+    URLAtIndex = (id (*)(id, SEL, id, NSUInteger))[_dataSource methodForSelector:URLSel];
+    
+    // -[NSCFArray objectAtIndex:] (do /not/ use +[NSMutableArray instanceMethodForSelector:]!)
+    SEL objectSel = @selector(objectAtIndex:);
+    id (*objectAtIndex)(id, SEL, NSUInteger);
+    objectAtIndex = (id (*)(id, SEL, NSUInteger))[_orderedIcons methodForSelector:objectSel];
+    
+    // -[FVViewController _cachedIconForURL:]
+    SEL cachedIconSel = @selector(_cachedIconForURL:);
+    id (*cachedIcon)(id, SEL, id);
+    cachedIcon = (id (*)(id, SEL, id))[self methodForSelector:cachedIconSel];
+    
+    // -[NSCFArray insertObject:atIndex:] (do /not/ use +[NSMutableArray instanceMethodForSelector:]!)
+    SEL insertSel = @selector(insertObject:atIndex:);
+    void (*insertObjectAtIndex)(id, SEL, id, NSUInteger);
+    insertObjectAtIndex = (void (*)(id, SEL, id, NSUInteger))[_orderedIcons methodForSelector:insertSel];
+    
+    // datasource subtitle method; may result in a NULL IMP (in which case _orderedSubtitles is nil)
+    SEL subtitleSel = @selector(fileView:subtitleAtIndex:);
+    id (*subtitleAtIndex)(id, SEL, id, NSUInteger);
+    subtitleAtIndex = (id (*)(id, SEL, id, NSUInteger))[_dataSource methodForSelector:subtitleSel];
+    
+    NSUInteger i, iMax = isBound ? [_orderedURLs count] : [_dataSource numberOfURLsInFileView:self];
+    
+    for (i = 0; i < iMax; i++) {
+        NSURL *aURL = isBound ? objectAtIndex(_orderedURLs, objectSel, i) : URLAtIndex(_dataSource, URLSel, self, i);
+        if (__builtin_expect(nil == aURL || [NSNull null] == (id)aURL, 0))
+            aURL = [FVIcon missingFileURL];
+        NSParameterAssert(nil != aURL && [NSNull null] != (id)aURL);
+        FVIcon *icon = cachedIcon(self, cachedIconSel, aURL);
+        NSParameterAssert(nil != icon);
+        if (NO == isBound)
+            insertObjectAtIndex(_orderedURLs, insertSel, aURL, i);
+        insertObjectAtIndex(_orderedIcons, insertSel, icon, i);
+        if (_orderedSubtitles)
+            insertObjectAtIndex(_orderedSubtitles, insertSel, subtitleAtIndex(_dataSource, subtitleSel, self, i), i);
+    }  
+}
+
+- (void)reloadIcons;
+{
+    [self _reloadIcons];
+    
+    // Follow NSTableView's example and clear selection outside the current range of indexes
+    NSUInteger lastSelIndex = [_selectionIndexes lastIndex], numIcons = [self numberOfIcons];
+    if (NSNotFound != lastSelIndex && lastSelIndex >= numIcons) {
+        NSMutableIndexSet *newSelIndexes = [_selectionIndexes mutableCopy];
+        [newSelIndexes removeIndexesInRange:NSMakeRange(numIcons, lastSelIndex + 1 - numIcons)];
+        [self _setSelectionIndexes:newSelIndexes];
+        [newSelIndexes release];
+    }
+    
+    [self _resetViewLayout];
+}
+
+- (void)_handleFinderLabelChanged:(NSNotification *)note {
+    NSURL *url = [note object];
+    if (CFDictionaryContainsKey(_infoTable, url)) {
+        CFDictionaryRemoveValue(_infoTable, url);
+        [self setNeedsDisplay:YES];
+    }
 }
 
 #pragma mark Cache thread
@@ -2119,6 +2115,228 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     [super dragImage:dragImage at:dragPoint offset:unused event:event pasteboard:pboard source:sourceObj slideBack:slideFlag];
 }
 
+#pragma mark Drop target
+
+- (void)setDropIndex:(NSUInteger)anIndex dropOperation:(FVDropOperation)anOperation
+{
+    _dropIndex = anIndex;
+    _dropOperation = anOperation;
+}
+
+- (BOOL)_isLocalDraggingInfo:(id <NSDraggingInfo>)sender
+{
+    return [[sender draggingSource] isEqual:self];
+}
+
+- (BOOL)wantsPeriodicDraggingUpdates { return NO; }
+
+- (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender
+{
+    NSPoint dragLoc = [self convertPoint:[sender draggingLocation] fromView:nil];
+    NSPoint p = dragLoc;
+    NSUInteger r, c;
+    NSDragOperation dragOp = [sender draggingSourceOperationMask] & ~NSDragOperationMove;
+    BOOL isCopy = [self allowsDownloading] && dragOp == NSDragOperationCopy;
+    NSUInteger insertIndex, firstIndex, endIndex;
+    
+    // !!! this is quite expensive to call repeatedly in -draggingUpdated
+    NSArray *draggedURLs = FVURLsFromPasteboard([sender draggingPasteboard]);
+    
+    // First determine the drop location, check whether the index is not NSNotFound, because the grid cell can be empty
+    if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
+        _dropOperation = FVDropOn;
+    } else {
+        p = NSMakePoint(dragLoc.x + _iconSize.width - 0.5, dragLoc.y);
+
+        if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
+            _dropOperation = FVDropBefore;
+        } else {
+            p = NSMakePoint(dragLoc.x - _iconSize.width + 0.5, dragLoc.y);
+            
+            if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
+                _dropOperation = FVDropAfter;
+            } else {
+                // drop on the whole view
+                _dropOperation = FVDropOn;
+                _dropIndex = NSNotFound;
+            }
+        }
+    }
+    
+    // We won't reset the drop location info when we propose NSDragOperationNone, because the delegate may want to override our decision, we will reset it at the end
+    
+    if ([draggedURLs count] == 0) {
+        // We have to make sure the pasteboard really has a URL here, since most NSStrings aren't valid URLs, but the delegate may accept other types
+        dragOp = NSDragOperationNone;
+    }
+    else if ([self _isLocalDraggingInfo:sender] && isCopy == NO) {
+        // invalidate some local drags, otherwise make sure we use a Move operation
+        if (FVDropOn == _dropOperation) {
+            // drop on the whole view (add operation) or an icon (replace operation) makes no sense for a local drag, but the delegate may override
+            dragOp = NSDragOperationNone;
+        } 
+        else if (FVDropBefore == _dropOperation || FVDropAfter == _dropOperation) {
+            // inserting inside the block we're dragging doesn't make sense; this does allow dropping a disjoint selection at some locations within the selection; the delegate may override
+            insertIndex = FVDropAfter == _dropOperation ? _dropIndex + 1 : _dropIndex;
+            firstIndex = [_selectionIndexes firstIndex], endIndex = [_selectionIndexes lastIndex] + 1;
+            if ([_selectionIndexes containsIndexesInRange:NSMakeRange(firstIndex, endIndex - firstIndex)] &&
+                insertIndex >= firstIndex && insertIndex <= endIndex) {
+                dragOp = NSDragOperationNone;
+            } 
+            else {
+                dragOp = NSDragOperationMove;
+            }
+        }
+    }
+    else if (isCopy == NO) {
+        dragOp = NSDragOperationLink;
+    }
+    
+    // we could allow the delegate to change the _dropIndex and _dropOperation as NSTableView does, but we don't use that at present
+    if ([[self delegate] respondsToSelector:@selector(fileView:validateDrop:draggedURLs:proposedIndex:proposedDropOperation:proposedDragOperation:)])
+        dragOp = [[self delegate] fileView:self validateDrop:sender draggedURLs:draggedURLs proposedIndex:_dropIndex proposedDropOperation:_dropOperation proposedDragOperation:dragOp];
+    
+    // make sure we're consistent, also see comment above
+    if (dragOp == NSDragOperationNone) {
+        _dropIndex = NSNotFound;
+        _dropOperation = FVDropBefore;
+    }
+    
+    [self setNeedsDisplay:YES];
+    return dragOp;
+}
+
+// this is called as soon as the mouse is moved to start a drag, or enters the window from outside
+- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
+{
+    return [self draggingUpdated:sender];
+}
+
+- (void)draggingExited:(id <NSDraggingInfo>)sender
+{
+    _dropIndex = NSNotFound;
+    _dropOperation = FVDropBefore;
+    [self setNeedsDisplay:YES];
+}
+
+// only invoked if performDragOperation returned YES
+- (void)concludeDragOperation:(id <NSDraggingInfo>)sender;
+{
+    _dropIndex = NSNotFound;
+    _dropOperation = FVDropBefore;
+    [self reloadIcons];
+}
+
+static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSString *path = [fileURL path];
+    NSString *basePath = [path stringByDeletingPathExtension];
+    NSString *ext = [path pathExtension];
+    NSUInteger i = 0;
+    NSString *newPath = nil;
+    
+    do {
+        newPath = [[NSString stringWithFormat:@"%@-%i", basePath, ++i] stringByAppendingPathExtension:ext];
+    } while ([fm fileExistsAtPath:newPath]);
+    
+    if ([fm copyPath:path toPath:newPath handler:nil]) {
+        return [NSURL fileURLWithPath:newPath];
+    } else {
+        return nil;
+    }
+}
+
+- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
+{
+    NSPasteboard *pboard = [sender draggingPasteboard];
+    NSDragOperation dragOp = [sender draggingSourceOperationMask] & ~NSDragOperationMove;
+    BOOL isCopy = [self allowsDownloading] && dragOp == NSDragOperationCopy;
+    BOOL isMove = [self _isLocalDraggingInfo:sender] && isCopy == NO;
+    BOOL didPerform = NO;
+    NSArray *draggedURLs = isMove ? nil : FVURLsFromPasteboard(pboard);
+    NSArray *allURLs = draggedURLs;
+    NSMutableArray *downloads = nil;
+    NSUInteger insertIndex = 0;
+    
+    if (FVDropBefore == _dropOperation) {
+        insertIndex = _dropIndex;
+    } else if (FVDropAfter == _dropOperation) {
+        insertIndex = _dropIndex + 1;
+    } else if (_dropIndex == NSNotFound) {
+        insertIndex = [self numberOfIcons];
+    } else {
+        insertIndex = _dropIndex;
+        if ([allURLs count] > 1)
+            allURLs = [NSArray arrayWithObject:[allURLs objectAtIndex:0]];
+    }
+    
+    if (isCopy) {
+        NSMutableArray *copiedURLs = [NSMutableArray array];
+        NSEnumerator *urlEnum = [allURLs objectEnumerator];
+        NSURL *aURL;
+        NSUInteger i = insertIndex;
+        
+        downloads = [NSMutableArray array];
+        
+        while (aURL = [urlEnum nextObject]) {
+            if ([aURL isFileURL])
+                aURL = makeCopyOfFileAtURL(aURL);
+            else if ([self allowsDownloading])
+                [downloads addObject:[NSDictionary dictionaryWithObjectsAndKeys:aURL, @"URL", [NSNumber numberWithUnsignedInt:i], @"index", nil]];
+            if (aURL) {
+                [copiedURLs addObject:aURL];
+                i++;
+            }
+        }
+        allURLs = copiedURLs;
+    }
+    
+    if (isMove) {
+        
+        didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:_dropIndex forDrop:sender dropOperation:_dropOperation];
+        
+    } else if (FVDropBefore == _dropOperation || FVDropAfter == _dropOperation || NSNotFound == _dropIndex) {
+           
+        // drop on the whole view
+        NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(insertIndex, [allURLs count])];
+        [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet forDrop:sender dropOperation:_dropOperation];
+        didPerform = YES;
+
+    }
+    else {
+        // we're targeting a particular cell, make sure that cell is a legal replace operation
+        
+        NSURL *aURL = [allURLs lastObject];
+        
+        // only drop a single file on a given cell!
+        
+        if (nil == aURL && [[pboard types] containsObject:NSFilenamesPboardType]) {
+            aURL = [NSURL fileURLWithPath:[[pboard propertyListForType:NSFilenamesPboardType] lastObject]];
+        }
+        if (aURL)
+            didPerform = [[self dataSource] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:_dropIndex] withURLs:[NSArray arrayWithObject:aURL] forDrop:sender dropOperation:_dropOperation];
+    }
+    
+    if ([downloads count]) {
+        NSEnumerator *dlEnum = [downloads objectEnumerator];
+        NSDictionary *dl;
+        while (dl = [dlEnum nextObject]) {
+            NSUInteger anIndex = [[dl objectForKey:@"index"] unsignedIntValue];
+            NSURL *aURL = [dl objectForKey:@"URL"];
+            if (anIndex < [self numberOfIcons] && [aURL isEqual:[self URLAtIndex:anIndex]])
+                [self _downloadURLAtIndex:anIndex];
+        }
+    }
+    
+    // if we return NO, concludeDragOperation doesn't get called
+    _dropIndex = NSNotFound;
+    _dropOperation = FVDropBefore;
+    [self setNeedsDisplay:YES];
+    
+    // reload is handled in concludeDragOperation:
+    return didPerform;
+}
+
 #pragma mark Event handling
 
 - (BOOL)acceptsFirstResponder { return YES; }
@@ -2556,228 +2774,6 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     float dz = [theEvent deltaZ];
     dz = dz > 0 ? FVMin(0.2, dz) : FVMax(-0.2, dz);
     [self _setIconScale:FVMax(0.1, [self iconScale] + 0.5 * dz)];
-}
-
-#pragma mark Drop target
-
-- (void)setDropIndex:(NSUInteger)anIndex dropOperation:(FVDropOperation)anOperation
-{
-    _dropIndex = anIndex;
-    _dropOperation = anOperation;
-}
-
-- (BOOL)_isLocalDraggingInfo:(id <NSDraggingInfo>)sender
-{
-    return [[sender draggingSource] isEqual:self];
-}
-
-- (BOOL)wantsPeriodicDraggingUpdates { return NO; }
-
-- (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender
-{
-    NSPoint dragLoc = [self convertPoint:[sender draggingLocation] fromView:nil];
-    NSPoint p = dragLoc;
-    NSUInteger r, c;
-    NSDragOperation dragOp = [sender draggingSourceOperationMask] & ~NSDragOperationMove;
-    BOOL isCopy = [self allowsDownloading] && dragOp == NSDragOperationCopy;
-    NSUInteger insertIndex, firstIndex, endIndex;
-    
-    // !!! this is quite expensive to call repeatedly in -draggingUpdated
-    NSArray *draggedURLs = FVURLsFromPasteboard([sender draggingPasteboard]);
-    
-    // First determine the drop location, check whether the index is not NSNotFound, because the grid cell can be empty
-    if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
-        _dropOperation = FVDropOn;
-    } else {
-        p = NSMakePoint(dragLoc.x + _iconSize.width - 0.5, dragLoc.y);
-
-        if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
-            _dropOperation = FVDropBefore;
-        } else {
-            p = NSMakePoint(dragLoc.x - _iconSize.width + 0.5, dragLoc.y);
-            
-            if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
-                _dropOperation = FVDropAfter;
-            } else {
-                // drop on the whole view
-                _dropOperation = FVDropOn;
-                _dropIndex = NSNotFound;
-            }
-        }
-    }
-    
-    // We won't reset the drop location info when we propose NSDragOperationNone, because the delegate may want to override our decision, we will reset it at the end
-    
-    if ([draggedURLs count] == 0) {
-        // We have to make sure the pasteboard really has a URL here, since most NSStrings aren't valid URLs, but the delegate may accept other types
-        dragOp = NSDragOperationNone;
-    }
-    else if ([self _isLocalDraggingInfo:sender] && isCopy == NO) {
-        // invalidate some local drags, otherwise make sure we use a Move operation
-        if (FVDropOn == _dropOperation) {
-            // drop on the whole view (add operation) or an icon (replace operation) makes no sense for a local drag, but the delegate may override
-            dragOp = NSDragOperationNone;
-        } 
-        else if (FVDropBefore == _dropOperation || FVDropAfter == _dropOperation) {
-            // inserting inside the block we're dragging doesn't make sense; this does allow dropping a disjoint selection at some locations within the selection; the delegate may override
-            insertIndex = FVDropAfter == _dropOperation ? _dropIndex + 1 : _dropIndex;
-            firstIndex = [_selectionIndexes firstIndex], endIndex = [_selectionIndexes lastIndex] + 1;
-            if ([_selectionIndexes containsIndexesInRange:NSMakeRange(firstIndex, endIndex - firstIndex)] &&
-                insertIndex >= firstIndex && insertIndex <= endIndex) {
-                dragOp = NSDragOperationNone;
-            } 
-            else {
-                dragOp = NSDragOperationMove;
-            }
-        }
-    }
-    else if (isCopy == NO) {
-        dragOp = NSDragOperationLink;
-    }
-    
-    // we could allow the delegate to change the _dropIndex and _dropOperation as NSTableView does, but we don't use that at present
-    if ([[self delegate] respondsToSelector:@selector(fileView:validateDrop:draggedURLs:proposedIndex:proposedDropOperation:proposedDragOperation:)])
-        dragOp = [[self delegate] fileView:self validateDrop:sender draggedURLs:draggedURLs proposedIndex:_dropIndex proposedDropOperation:_dropOperation proposedDragOperation:dragOp];
-    
-    // make sure we're consistent, also see comment above
-    if (dragOp == NSDragOperationNone) {
-        _dropIndex = NSNotFound;
-        _dropOperation = FVDropBefore;
-    }
-    
-    [self setNeedsDisplay:YES];
-    return dragOp;
-}
-
-// this is called as soon as the mouse is moved to start a drag, or enters the window from outside
-- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
-{
-    return [self draggingUpdated:sender];
-}
-
-- (void)draggingExited:(id <NSDraggingInfo>)sender
-{
-    _dropIndex = NSNotFound;
-    _dropOperation = FVDropBefore;
-    [self setNeedsDisplay:YES];
-}
-
-// only invoked if performDragOperation returned YES
-- (void)concludeDragOperation:(id <NSDraggingInfo>)sender;
-{
-    _dropIndex = NSNotFound;
-    _dropOperation = FVDropBefore;
-    [self reloadIcons];
-}
-
-static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
-    NSFileManager *fm = [NSFileManager defaultManager];
-    NSString *path = [fileURL path];
-    NSString *basePath = [path stringByDeletingPathExtension];
-    NSString *ext = [path pathExtension];
-    NSUInteger i = 0;
-    NSString *newPath = nil;
-    
-    do {
-        newPath = [[NSString stringWithFormat:@"%@-%i", basePath, ++i] stringByAppendingPathExtension:ext];
-    } while ([fm fileExistsAtPath:newPath]);
-    
-    if ([fm copyPath:path toPath:newPath handler:nil]) {
-        return [NSURL fileURLWithPath:newPath];
-    } else {
-        return nil;
-    }
-}
-
-- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
-{
-    NSPasteboard *pboard = [sender draggingPasteboard];
-    NSDragOperation dragOp = [sender draggingSourceOperationMask] & ~NSDragOperationMove;
-    BOOL isCopy = [self allowsDownloading] && dragOp == NSDragOperationCopy;
-    BOOL isMove = [self _isLocalDraggingInfo:sender] && isCopy == NO;
-    BOOL didPerform = NO;
-    NSArray *draggedURLs = isMove ? nil : FVURLsFromPasteboard(pboard);
-    NSArray *allURLs = draggedURLs;
-    NSMutableArray *downloads = nil;
-    NSUInteger insertIndex = 0;
-    
-    if (FVDropBefore == _dropOperation) {
-        insertIndex = _dropIndex;
-    } else if (FVDropAfter == _dropOperation) {
-        insertIndex = _dropIndex + 1;
-    } else if (_dropIndex == NSNotFound) {
-        insertIndex = [self numberOfIcons];
-    } else {
-        insertIndex = _dropIndex;
-        if ([allURLs count] > 1)
-            allURLs = [NSArray arrayWithObject:[allURLs objectAtIndex:0]];
-    }
-    
-    if (isCopy) {
-        NSMutableArray *copiedURLs = [NSMutableArray array];
-        NSEnumerator *urlEnum = [allURLs objectEnumerator];
-        NSURL *aURL;
-        NSUInteger i = insertIndex;
-        
-        downloads = [NSMutableArray array];
-        
-        while (aURL = [urlEnum nextObject]) {
-            if ([aURL isFileURL])
-                aURL = makeCopyOfFileAtURL(aURL);
-            else if ([self allowsDownloading])
-                [downloads addObject:[NSDictionary dictionaryWithObjectsAndKeys:aURL, @"URL", [NSNumber numberWithUnsignedInt:i], @"index", nil]];
-            if (aURL) {
-                [copiedURLs addObject:aURL];
-                i++;
-            }
-        }
-        allURLs = copiedURLs;
-    }
-    
-    if (isMove) {
-        
-        didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:_dropIndex forDrop:sender dropOperation:_dropOperation];
-        
-    } else if (FVDropBefore == _dropOperation || FVDropAfter == _dropOperation || NSNotFound == _dropIndex) {
-           
-        // drop on the whole view
-        NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(insertIndex, [allURLs count])];
-        [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet forDrop:sender dropOperation:_dropOperation];
-        didPerform = YES;
-
-    }
-    else {
-        // we're targeting a particular cell, make sure that cell is a legal replace operation
-        
-        NSURL *aURL = [allURLs lastObject];
-        
-        // only drop a single file on a given cell!
-        
-        if (nil == aURL && [[pboard types] containsObject:NSFilenamesPboardType]) {
-            aURL = [NSURL fileURLWithPath:[[pboard propertyListForType:NSFilenamesPboardType] lastObject]];
-        }
-        if (aURL)
-            didPerform = [[self dataSource] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:_dropIndex] withURLs:[NSArray arrayWithObject:aURL] forDrop:sender dropOperation:_dropOperation];
-    }
-    
-    if ([downloads count]) {
-        NSEnumerator *dlEnum = [downloads objectEnumerator];
-        NSDictionary *dl;
-        while (dl = [dlEnum nextObject]) {
-            NSUInteger anIndex = [[dl objectForKey:@"index"] unsignedIntValue];
-            NSURL *aURL = [dl objectForKey:@"URL"];
-            if (anIndex < [self numberOfIcons] && [aURL isEqual:[self URLAtIndex:anIndex]])
-                [self _downloadURLAtIndex:anIndex];
-        }
-    }
-    
-    // if we return NO, concludeDragOperation doesn't get called
-    _dropIndex = NSNotFound;
-    _dropOperation = FVDropBefore;
-    [self setNeedsDisplay:YES];
-    
-    // reload is handled in concludeDragOperation:
-    return didPerform;
 }
 
 #pragma mark User interaction
