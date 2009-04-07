@@ -156,11 +156,8 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
     NSMutableAttributedString *mas;
     
     // get rid of whitespace if we have to; we can't use this on the attributed string's content store, though
-    if(collapse){
-        if([string isComplex])
-            string = [NSString stringWithString:string];
-        string = [string stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    }
+    if (collapse)
+        string = [[string expandedString] stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     
     NSMutableString *mutableString = [string mutableCopy];
     
