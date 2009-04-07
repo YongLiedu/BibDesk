@@ -68,10 +68,6 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 @end
 
 @protocol BDSKISIGroupServerLocalThread <BDSKAsyncDOServerThread>
-- (int)availableResults;
-- (void)setAvailableResults:(int)value;
-- (int)fetchedResults;
-- (void)setFetchedResults:(int)value;
 - (oneway void)downloadWithSearchTerm:(NSString *)searchTerm;
 @end
 
@@ -124,7 +120,6 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
         availableResults = 0;
         fetchedResults = 0;
         infoLock = [[BDSKReadWriteLock alloc] init];
-        resultCounterLock = [[NSLock alloc] init];
     
         [self startDOServerSync];
     }
@@ -135,7 +130,6 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
     [infoLock release];
     [serverInfo release];
     serverInfo = nil;
-    [resultCounterLock release];
     [super dealloc];
 }
 
@@ -189,32 +183,22 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 
 - (void)setNumberOfAvailableResults:(int)value;
 {
-    [resultCounterLock lock];
-    availableResults = value;
-    [resultCounterLock unlock];
+    OSAtomicCompareAndSwap32Barrier(availableResults, value, &availableResults);
 }
 
 - (int)numberOfAvailableResults;
 {
-    [resultCounterLock lock];
-    int value = availableResults;
-    [resultCounterLock unlock];
-    return value;
+    return availableResults;
 }
 
 - (void)setNumberOfFetchedResults:(int)value;
 {
-    [resultCounterLock lock];
-    fetchedResults = value;
-    [resultCounterLock unlock];
+    OSAtomicCompareAndSwap32Barrier(fetchedResults, value, &fetchedResults);
 }
 
 - (int)numberOfFetchedResults;
 {
-    [resultCounterLock lock];
-    int value = fetchedResults;
-    [resultCounterLock unlock];
-    return value;
+    return fetchedResults;
 }
 
 - (BOOL)failedDownload { OSMemoryBarrier(); return 1 == flags.failedDownload; }

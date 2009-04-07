@@ -47,10 +47,6 @@
 @end
 
 @protocol BDSKZoomGroupServerLocalThread <BDSKAsyncDOServerThread>
-- (int)availableResults;
-- (void)setAvailableResults:(int)value;
-- (int)fetchedResults;
-- (void)setFetchedResults:(int)value;
 - (oneway void)downloadWithSearchTerm:(NSString *)searchTerm;
 - (oneway void)terminateConnection;
 @end
@@ -69,8 +65,8 @@ typedef struct _BDSKZoomGroupFlags {
     BDSKSearchGroup *group;
     ZOOMConnection *connection;
     BDSKServerInfo *serverInfo;
-    int availableResults;
-    int fetchedResults;
+    volatile int32_t availableResults;
+    volatile int32_t fetchedResults;
     BDSKZoomGroupFlags flags;
     BDSKReadWriteLock *infoLock;
 }

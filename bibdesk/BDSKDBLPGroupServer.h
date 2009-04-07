@@ -51,8 +51,8 @@ typedef struct _BDSKDBLPGroupFlags {
 {
     BDSKSearchGroup *group;
     BDSKServerInfo *serverInfo;
-    int availableResults;
-    int fetchedResults;
+    volatile int32_t availableResults;
+    volatile int32_t fetchedResults;
     BDSKDBLPGroupFlags flags;
     BDSKReadWriteLock *infoLock;
     

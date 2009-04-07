@@ -43,7 +43,7 @@
 #import "BDSKBibTeXParser.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
-#import "BDSKReadWriteLock.h""
+#import "BDSKReadWriteLock.h"
 
 // private protocols for inter-thread messaging
 @protocol BDSKDBLPGroupServerMainThread <BDSKAsyncDOServerMainThread>
@@ -51,10 +51,6 @@
 @end
 
 @protocol BDSKDBLPGroupServerLocalThread <BDSKAsyncDOServerThread>
-- (int)availableResults;
-- (void)setAvailableResults:(int)value;
-- (int)fetchedResults;
-- (void)setFetchedResults:(int)value;
 - (oneway void)downloadWithSearchTerm:(NSString *)searchTerm;
 @end
 
@@ -159,22 +155,22 @@
 
 - (void)setNumberOfAvailableResults:(int)value;
 {
-    [[self serverOnServerThread] setAvailableResults:value];
+    OSAtomicCompareAndSwap32Barrier(availableResults, value, &availableResults);
 }
 
 - (int)numberOfAvailableResults;
 {
-    return [[self serverOnServerThread] availableResults];
+    return availableResults;
 }
 
 - (void)setNumberOfFetchedResults:(int)value;
 {
-    [[self serverOnServerThread] setFetchedResults:value];
+    OSAtomicCompareAndSwap32Barrier(fetchedResults, value, &fetchedResults);
 }
 
 - (int)numberOfFetchedResults;
 {
-    return [[self serverOnServerThread] fetchedResults];
+    return fetchedResults;
 }
 
 - (BOOL)failedDownload { OSMemoryBarrier(); return 1 == flags.failedDownload; }
@@ -191,26 +187,6 @@
 }
 
 #pragma mark Server thread
-
-- (void)setAvailableResults:(int)value;
-{
-    availableResults = value;
-}
-
-- (int)availableResults;
-{
-    return availableResults;
-}
-
-- (void)setFetchedResults:(int)value;
-{
-    fetchedResults = value;
-}
-
-- (int)fetchedResults;
-{
-    return fetchedResults;
-}
 
 - (NSArray *)resultsWithSearchTerm:(NSString *)searchTerm
 {
@@ -269,7 +245,7 @@ static void fixEEURL(BibItem *pub)
     if (NO == [NSString isEmptyString:searchTerm]){
         
         NSArray *dblpKeys = [[self resultsWithSearchTerm:searchTerm] valueForKeyPath:@"dblp_key"];
-        [self setAvailableResults:[dblpKeys count]];
+        [self setNumberOfAvailableResults:[dblpKeys count]];
 
         NSMutableSet *btEntries = [NSMutableSet set];
         NSMutableDictionary *abstracts = [NSMutableDictionary dictionary];
@@ -313,8 +289,8 @@ static void fixEEURL(BibItem *pub)
         if (flags.isRetrieving == 0)
             pubs = [NSArray array];
         
-        [self setAvailableResults:[pubs count]];
-        [self setFetchedResults:[pubs count]];
+        [self setNumberOfAvailableResults:[pubs count]];
+        [self setNumberOfFetchedResults:[pubs count]];
         
     }
     

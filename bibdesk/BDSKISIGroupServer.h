@@ -51,11 +51,10 @@ typedef struct _BDSKISIGroupFlags {
 {
     BDSKSearchGroup *group;
     BDSKServerInfo *serverInfo;
-    int availableResults;
-    int fetchedResults;
+    volatile int32_t availableResults;
+    volatile int32_t fetchedResults;
     BDSKISIGroupFlags flags;
     BDSKReadWriteLock *infoLock;
-    NSLock *resultCounterLock;
 }
 
 @end

@@ -150,22 +150,22 @@
 
 - (void)setNumberOfAvailableResults:(int)value;
 {
-    [[self serverOnServerThread] setAvailableResults:value];
+    OSAtomicCompareAndSwap32Barrier(availableResults, value, &availableResults);
 }
 
 - (int)numberOfAvailableResults;
 {
-    return [[self serverOnServerThread] availableResults];
+    return availableResults;
 }
 
 - (void)setNumberOfFetchedResults:(int)value;
 {
-    [[self serverOnServerThread] setFetchedResults:value];
+    OSAtomicCompareAndSwap32Barrier(fetchedResults, value, &fetchedResults);
 }
 
 - (int)numberOfFetchedResults;
 {
-    return [[self serverOnServerThread] fetchedResults];
+    return fetchedResults;
 }
 
 - (BOOL)failedDownload { OSMemoryBarrier(); return 1 == flags.failedDownload; }
@@ -214,9 +214,9 @@
     }else {
         connection = nil;
     }
-    // we're on the server thread, so call the server thread setters
-    [self setAvailableResults:0];
-    [self setFetchedResults:0];
+    
+    [self setNumberOfAvailableResults:0];
+    [self setNumberOfFetchedResults:0];
 } 
 
 - (oneway void)terminateConnection;
@@ -277,15 +277,15 @@
         if (nil == resultSet)
             OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedDownload);
         
-        [self setAvailableResults:[resultSet countOfRecords]];
+        [self setNumberOfAvailableResults:[resultSet countOfRecords]];
         
-        int numResults = MIN([self availableResults] - [self fetchedResults], MAX_RESULTS);
+        int numResults = MIN([self numberOfAvailableResults] - [self numberOfFetchedResults], MAX_RESULTS);
         //NSAssert(numResults >= 0, @"number of results to get must be non-negative");
         
         if(numResults > 0){
-            NSArray *records = [resultSet recordsInRange:NSMakeRange([self fetchedResults], numResults)];
+            NSArray *records = [resultSet recordsInRange:NSMakeRange([self numberOfFetchedResults], numResults)];
             
-            [self setFetchedResults:[self fetchedResults] + numResults];
+            [self setNumberOfFetchedResults:[self numberOfFetchedResults] + numResults];
             
             pubs = [NSMutableArray array];
             int i, iMax = [records count];
@@ -319,26 +319,6 @@
 
 - (void)serverDidFinish{
     [self terminateConnection];
-}
-
-- (void)setAvailableResults:(int)value;
-{
-    availableResults = value;
-}
-
-- (int)availableResults;
-{
-    return availableResults;
-}
-
-- (void)setFetchedResults:(int)value;
-{
-    fetchedResults = value;
-}
-
-- (int)fetchedResults;
-{
-    return fetchedResults;
 }
 
 @end
