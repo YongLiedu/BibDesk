@@ -227,7 +227,7 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
         countSize = NSMakeSize(16, 16);
     } else if ([self count] > 0) {
         countSize = [countString boundingRectWithSize:cellSize options:0].size;
-        countSize.width += countSize.height;
+        countSize.width += [self count] < 100 ? countSize.height : 0.5 * countSize.height; // add oval pading around count
     }
     // cellSize.height approximates the icon size
     cellSize.width += BORDER_BETWEEN_EDGE_AND_IMAGE + cellSize.height + BORDER_BETWEEN_IMAGE_AND_TEXT;
