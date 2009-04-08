@@ -334,8 +334,10 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
 }
 
 - (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength {
+    NSRect editRect = [self textRectForBounds:aRect];
+    editRect.size.width = NSMaxX(aRect) - NSMinX(editRect);
     settingUpFieldEditor = YES;
-    [super selectWithFrame:[self textRectForBounds:aRect] inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
+    [super selectWithFrame:editRect inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
     settingUpFieldEditor = NO;
 }
 
