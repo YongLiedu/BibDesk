@@ -47,9 +47,7 @@ extern NSString *BDSKGroupCellFailedDownloadKey;
 
 @class BDSKGroup;
 
-@interface BDSKGroupCell : NSTextFieldCell
-{
-    NSMutableDictionary *countAttributes;
+@interface BDSKGroupCell : NSTextFieldCell {
     NSMutableAttributedString *countString;
 }
 
