@@ -316,21 +316,29 @@ static NSString *stringWithNumber(NSNumber *number)
             NSColor *fgColor;
             NSColor *bgColor;
             if ([controlView respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
-                if ([[controlView window] isMainWindow]) {
+                if ([[controlView window] isMainWindow] == NO) {
                     if (isHighlighted) {
-                        fgColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:1.0];
-                        bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.9];
+                        fgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:1.0];
+                        bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
                     } else {
                         fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
-                        bgColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:0.9];
+                        bgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:0.95];
+                    }
+                } else if ([[controlView window] isKeyWindow] && [[controlView window] firstResponder] == controlView) {
+                    if (isHighlighted) {
+                        fgColor = [NSColor colorWithDeviceRed:14135.0/65535.0 green:29298.0/65535.0 blue:48830.0/65535.0 alpha:1.0];
+                        bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
+                    } else {
+                        fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
+                        bgColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:0.95];
                     }
                 } else {
                     if (isHighlighted) {
-                        fgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:1.0];
-                        bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.9];
+                        fgColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:1.0];
+                        bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
                     } else {
                         fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
-                        bgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:0.9];
+                        bgColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:0.95];
                     }
                 }
             } else {
