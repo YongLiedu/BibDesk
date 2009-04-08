@@ -68,6 +68,8 @@
     if (self) {
         textCell = [[NSTextFieldCell alloc] initTextCell:@""];
 		[textCell setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
+        if ([textCell respondsToSelector:@selector(setBackgroundStyle:)])
+            [textCell setBackgroundStyle:NSBackgroundStyleRaised];
 		
         iconCell = [[BDSKCenterScaledImageCell alloc] init];
 		
