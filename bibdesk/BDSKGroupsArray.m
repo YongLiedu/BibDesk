@@ -81,7 +81,6 @@
         staticGroups = [[NSMutableArray alloc] init];
         categoryGroups = nil;
         document = aDocument;
-        spinners = NULL;
     }
     return self;
 }
@@ -97,8 +96,6 @@
     [smartGroups release];
     [staticGroups release];
     [categoryGroups release];
-    if (spinners)
-        CFRelease(spinners);
     [super dealloc];
 }
 
@@ -346,14 +343,18 @@
 
 - (void)setSharedGroups:(NSArray *)array{
     if(sharedGroups != array){
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillAddRemoveGroupNotification object:self];
+        NSMutableArray *removedGroups = [sharedGroups mutableCopy];
+        [removedGroups removeObjectsInArray:array];
+        if ([removedGroups count])
+            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
+                object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:removedGroups, @"groups", nil]];
+        [removedGroups release];
         
         // try to preserve the unique ID when we regenerate the groups
         if ([array count] && [sharedGroups count])
             [self duplicateUniqueIDsFromGroups:sharedGroups toGroups:array];
         
         [sharedGroups removeObjectsInArray:array];
-        [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:sharedGroups];
         [sharedGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
         [sharedGroups setArray:array]; 
         [sharedGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:[self document]];
@@ -370,11 +371,10 @@
 }
 
 - (void)removeURLGroup:(BDSKURLGroup *)group {
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillAddRemoveGroupNotification object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
+        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], @"groups", nil]];
     
 	[[[self undoManager] prepareWithInvocationTarget:self] addURLGroup:group];
-    
-    [self removeSpinnerForGroup:group];
     
     [group setDocument:nil];
 	[urlGroups removeObjectIdenticalTo:group];
@@ -392,11 +392,10 @@
 }
 
 - (void)removeScriptGroup:(BDSKScriptGroup *)group {
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillAddRemoveGroupNotification object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
+        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], @"groups", nil]];
     
 	[[[self undoManager] prepareWithInvocationTarget:self] addScriptGroup:group];
-    
-    [self removeSpinnerForGroup:group];
     
     [group setDocument:nil];
 	[scriptGroups removeObjectIdenticalTo:group];
@@ -412,9 +411,8 @@
 }
 
 - (void)removeSearchGroup:(BDSKSearchGroup *)group {
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillAddRemoveGroupNotification object:self];
-    
-    [self removeSpinnerForGroup:group];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
+        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], @"groups", nil]];
     
     [group setDocument:nil];
 	[searchGroups removeObjectIdenticalTo:group];
@@ -435,7 +433,8 @@
 }
 
 - (void)removeSmartGroup:(BDSKSmartGroup *)group {
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillAddRemoveGroupNotification object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
+        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], @"groups", nil]];
     
 	[[[self undoManager] prepareWithInvocationTarget:self] addSmartGroup:group];
 	
@@ -455,7 +454,8 @@
 }
 
 - (void)removeStaticGroup:(BDSKStaticGroup *)group {
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillAddRemoveGroupNotification object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
+        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], @"groups", nil]];
     
 	[[[self undoManager] prepareWithInvocationTarget:self] addStaticGroup:group];
 	
@@ -467,7 +467,8 @@
  
 - (void)setCategoryGroups:(NSArray *)array{
     if(categoryGroups != array){
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillAddRemoveGroupNotification object:self];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
+            object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:categoryGroups, @"groups", nil]];
         
         // try to preserve the unique ID when we regenerate the groups
         if ([[[array lastObject] key] isEqualToString:[[categoryGroups lastObject] key]])
@@ -482,9 +483,6 @@
 
 // this should only be used just before reading from file, in particular revert, so we shouldn't make this undoable
 - (void)removeAllNonSharedGroups {
-    [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:urlGroups];
-    [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:scriptGroups];
-    
     [lastImportGroup setPublications:[NSArray array]];
     [urlGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
     [urlGroups removeAllObjects];
@@ -506,49 +504,6 @@
 
 - (BibDocument *)document{
     return document;
-}
-
-#pragma mark Spinners
-
-- (NSProgressIndicator *)spinnerForGroup:(BDSKGroup *)group{
-    NSProgressIndicator *spinner = spinners == NULL ? nil : (id)CFDictionaryGetValue(spinners, group);
-    
-    if ([group isRetrieving]) {
-        if (spinner == nil) {
-            // don't use NSMutableDictionary because that copies the groups
-            if (spinners == NULL)
-                spinners = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-            spinner = [[NSProgressIndicator alloc] init];
-            [spinner setControlSize:NSSmallControlSize];
-            [spinner setStyle:NSProgressIndicatorSpinningStyle];
-            [spinner setDisplayedWhenStopped:NO];
-            [spinner sizeToFit];
-            [spinner setUsesThreadedAnimation:YES];
-            CFDictionarySetValue(spinners, group, spinner);
-            [spinner release];
-        }
-        [spinner startAnimation:nil];
-    } else if (spinner) {
-        [spinner stopAnimation:nil];
-        [spinner removeFromSuperview];
-        CFDictionaryRemoveValue(spinners, group);
-        spinner = nil;
-    }
-    
-    return spinner;
-}
-
-- (void)removeSpinnerForGroup:(BDSKGroup *)group{
-    NSProgressIndicator *spinner = spinners == NULL ? nil : (id)CFDictionaryGetValue(spinners, group);
-    if(spinner){
-        [spinner stopAnimation:nil];
-        [spinner removeFromSuperview];
-        CFDictionaryRemoveValue(spinners, group);
-    }
-}
-
-- (void)removeSpinnersFromSuperview{
-    [[(NSMutableDictionary *)spinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
 }
 
 #pragma mark Sorting

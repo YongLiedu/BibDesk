@@ -245,7 +245,7 @@
         }
     } else if (tv == groupTableView) {
         BDSKGroup *group = [groups objectAtIndex:row];
-        NSProgressIndicator *spinner = [groups spinnerForGroup:group];
+        NSProgressIndicator *spinner = [self spinnerForGroup:group];
         
         if (spinner) {
             int column = [[tv tableColumns] indexOfObject:aTableColumn];

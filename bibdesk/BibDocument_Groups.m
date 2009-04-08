@@ -408,7 +408,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [clientsToAdd release];
     [currentGroups release];
     
-    [groups removeSpinnersFromSuperview];
+    [[(NSMutableDictionary *)groupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [groupTableView reloadData];
     
 	// reset ourself as delegate
@@ -477,13 +477,14 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 
-- (void)handleWillAddRemoveGroupNotification:(NSNotification *)notification{
+- (void)handleWillRemoveGroupsNotification:(NSNotification *)notification{
     if([groupTableView editedRow] != -1 && [documentWindow makeFirstResponder:nil] == NO)
         [documentWindow endEditingFor:groupTableView];
+    [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:[[notification userInfo] valueForKey:@"groups"]];
 }
 
 - (void)handleDidAddRemoveGroupNotification:(NSNotification *)notification{
-    [groups removeSpinnersFromSuperview];
+    [[(NSMutableDictionary *)groupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [groupTableView reloadData];
     [self handleGroupTableSelectionChangedNotification:notification];
 }
@@ -580,7 +581,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     // update the count for the first item, not sure if it should be done here
     [[groups libraryGroup] setCount:[publications count]];
 	
-    [groups removeSpinnersFromSuperview];
+    [[(NSMutableDictionary *)groupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [groupTableView reloadData];
 	
 	// select the current groups, if still around. Otherwise select Library
@@ -742,6 +743,45 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [menuItem release];
 	
 	return [menu autorelease];
+}
+
+#pragma mark Spinners
+
+- (NSProgressIndicator *)spinnerForGroup:(BDSKGroup *)group{
+    NSProgressIndicator *spinner = groupSpinners == NULL ? nil : (id)CFDictionaryGetValue(groupSpinners, group);
+    
+    if ([group isRetrieving]) {
+        if (spinner == nil) {
+            // don't use NSMutableDictionary because that copies the groups
+            if (groupSpinners == NULL)
+                groupSpinners = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+            spinner = [[NSProgressIndicator alloc] init];
+            [spinner setControlSize:NSSmallControlSize];
+            [spinner setStyle:NSProgressIndicatorSpinningStyle];
+            [spinner setDisplayedWhenStopped:NO];
+            [spinner sizeToFit];
+            [spinner setUsesThreadedAnimation:YES];
+            CFDictionarySetValue(groupSpinners, group, spinner);
+            [spinner release];
+        }
+        [spinner startAnimation:nil];
+    } else if (spinner) {
+        [spinner stopAnimation:nil];
+        [spinner removeFromSuperview];
+        CFDictionaryRemoveValue(groupSpinners, group);
+        spinner = nil;
+    }
+    
+    return spinner;
+}
+
+- (void)removeSpinnerForGroup:(BDSKGroup *)group{
+    NSProgressIndicator *spinner = groupSpinners == NULL ? nil : (id)CFDictionaryGetValue(groupSpinners, group);
+    if (spinner) {
+        [spinner stopAnimation:nil];
+        [spinner removeFromSuperview];
+        CFDictionaryRemoveValue(groupSpinners, group);
+    }
 }
 
 #pragma mark Actions
@@ -1669,7 +1709,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	BDSKHeaderPopUpButtonCell *headerPopup = (BDSKHeaderPopUpButtonCell *)[groupTableView popUpHeaderCell];
 	[headerPopup setIndicatorImage:[NSImage imageNamed:docState.sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
 
-    [groups removeSpinnersFromSuperview];
+    [[(NSMutableDictionary *)groupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [groupTableView reloadData];
 	
 	// select the current groups. Otherwise select Library

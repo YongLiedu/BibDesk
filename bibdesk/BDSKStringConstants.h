@@ -304,7 +304,7 @@ extern NSString *BDSKScriptGroupUpdatedNotification;
 extern NSString *BDSKSearchGroupUpdatedNotification;
 extern NSString *BDSKWebGroupUpdatedNotification;
 extern NSString *BDSKDidAddRemoveGroupNotification;
-extern NSString *BDSKWillAddRemoveGroupNotification;
+extern NSString *BDSKWillRemoveGroupsNotification;
 extern NSString *BDSKClientConnectionsChangedNotification;
 extern NSString *BDSKSharingStatusChangedNotification;
 extern NSString *BDSKSharingNameChangedNotification;

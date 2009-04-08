@@ -38,7 +38,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
 
-@class BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BDSKWebGroup, BDSKFilterController, BDSKURLGroupSheetController, BDSKScriptGroupSheetController, BDSKWebGroupViewController;
+@class BDSKGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BDSKWebGroup, BDSKFilterController, BDSKURLGroupSheetController, BDSKScriptGroupSheetController, BDSKWebGroupViewController;
 
 @interface BibDocument (Groups)
 
@@ -91,8 +91,11 @@
 - (void)handleURLGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleScriptGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleSearchGroupUpdatedNotification:(NSNotification *)notification;
-- (void)handleWillAddRemoveGroupNotification:(NSNotification *)notification;
+- (void)handleWillRemoveGroupsNotification:(NSNotification *)notification;
 - (void)handleDidAddRemoveGroupNotification:(NSNotification *)notification;
+
+- (NSProgressIndicator *)spinnerForGroup:(BDSKGroup *)group;
+- (void)removeSpinnerForGroup:(BDSKGroup *)group;
 
 - (IBAction)sortGroupsByGroup:(id)sender;
 - (IBAction)sortGroupsByCount:(id)sender;

@@ -61,7 +61,6 @@ enum {
     NSMutableArray *smartGroups;
     NSMutableArray *staticGroups;
     NSMutableArray *categoryGroups;
-    CFMutableDictionaryRef spinners;
     BibDocument *document;
 }
 
@@ -122,10 +121,6 @@ enum {
 - (void)removeAllNonSharedGroups;
 
 - (void)sortUsingDescriptors:(NSArray *)sortDescriptors;
-
-- (NSProgressIndicator *)spinnerForGroup:(BDSKGroup *)group;
-- (void)removeSpinnerForGroup:(BDSKGroup *)group;
-- (void)removeSpinnersFromSuperview;
 
 - (BibDocument *)document;
 

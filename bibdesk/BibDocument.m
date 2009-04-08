@@ -341,6 +341,8 @@ enum {
     [migrationController release];
     [documentSearch release];
     [mainWindowSetupDictionary release];
+    if (groupSpinners)
+        CFRelease(groupSpinners);
     [super dealloc];
 }
 
@@ -1814,7 +1816,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     // make sure we clear all macros and groups that are saved in the file, should only have those for revert
     // better do this here, so we don't remove them when reading the data fails
     [macroResolver removeAllMacros];
-    [groups removeAllNonSharedGroups]; // this also removes spinners and editor windows for external groups
+    [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:[groups URLGroups]];
+    [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:[groups scriptGroups]];
+    [groups removeAllNonSharedGroups]; // this also removes editor windows for external groups
     [frontMatter setString:@""];
     
     // This is only a sanity check; an encoding of 0 is not valid, so is a signal we should ignore xattrs; could only check for public.text UTIs, but it will be zero if it was never written (and we don't warn in that case).  The user can do many things to make the attribute incorrect, so this isn't very robust.
@@ -2754,8 +2758,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                    name:BDSKWebGroupUpdatedNotification
                  object:nil];
         [nc addObserver:self
-               selector:@selector(handleWillAddRemoveGroupNotification:)
-                   name:BDSKWillAddRemoveGroupNotification
+               selector:@selector(handleWillRemoveGroupsNotification:)
+                   name:BDSKWillRemoveGroupsNotification
                  object:nil];
         [nc addObserver:self
                selector:@selector(handleDidAddRemoveGroupNotification:)
