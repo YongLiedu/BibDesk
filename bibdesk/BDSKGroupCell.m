@@ -91,7 +91,6 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
         [self setEditable:YES];
         [self setScrollable:YES];
         
-        label = [[NSMutableAttributedString alloc] initWithString:@""];
         countString = [[NSMutableAttributedString alloc] initWithString:@""];
         
         countAttributes = [[NSMutableDictionary alloc] initWithCapacity:5];
@@ -110,8 +109,6 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
         countAttributes = [[NSMutableDictionary alloc] initWithCapacity:5];
         [self recacheCountAttributes];
         
-        // could encode these, but presumably we want a fresh string
-        label = [[NSMutableAttributedString alloc] initWithString:@""];
         countString = [[NSMutableAttributedString alloc] initWithString:@""];
         
         if ([self formatter] == nil)
@@ -131,43 +128,19 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 
     // count attributes are shared between this cell and all copies, but not with new instances
     copy->countAttributes = [countAttributes retain];
-    copy->label = [label mutableCopy];
-    copy->countString = [countString mutableCopy];
+    copy->countString = [countString mutableCopyWithZone:zone];
 
     return copy;
 }
 
 - (void)dealloc {
-    [label release];
     [countString release];
     [countAttributes release];
 	[super dealloc];
 }
 
-- (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
-{
+- (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     return nil;
-}
-
-- (NSColor *)textColor;
-{
-    NSColor *color = nil;
-    
-    // this allows the expansion tooltips on 10.5 to draw with the correct color
-#if defined(MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
-    // on 10.5, we can just check background style instead of messing around with flags and checking the highlight color, which accounts for much of the code in this class
-#warning 10.5 fixme
-#endif
-    if ([self respondsToSelector:@selector(backgroundStyle)] && NSBackgroundStyleLight == [self backgroundStyle])
-        return [self isHighlighted] ? [NSColor textBackgroundColor] : [NSColor blackColor];
-        
-    if (settingUpFieldEditor)
-        color = [NSColor blackColor];
-    else if ([self isHighlighted])
-        color = [NSColor textBackgroundColor];
-    else
-        color = [super textColor];
-    return color;
 }
 
 - (void)setFont:(NSFont *)font {
@@ -199,7 +172,6 @@ static NSString *stringWithNumber(NSNumber *number)
     
     [super setObjectValue:obj];
     
-    [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:nonNullObjectValueForKey(obj, BDSKGroupCellStringKey) ?: @""];
     [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithNumber(nonNullObjectValueForKey(obj, BDSKGroupCellCountKey))];
     [countString addAttributes:countAttributes range:NSMakeRange(0, [countString length])];
 }
@@ -278,30 +250,32 @@ static NSString *stringWithNumber(NSNumber *number)
 }
 
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView {
-    // Draw the text
-    NSRect textRect = NSInsetRect([self textRectForBounds:aRect], SIZE_OF_TEXT_FIELD_BORDER, 0.0); 
-    NSRange labelRange = NSMakeRange(0, [label length]);
-    NSFont *font = [self font];
-    BOOL isHighlighted = [self isHighlighted];
+    BOOL isHighlighted;
     if ([self respondsToSelector:@selector(backgroundStyle)])
         isHighlighted = ([self backgroundStyle] == NSBackgroundStyleDark || [self backgroundStyle] == NSBackgroundStyleLowered);
+    else
+        isHighlighted = [self isHighlighted];
     
+    // Draw the text
+    NSRect textRect = NSInsetRect([self textRectForBounds:aRect], SIZE_OF_TEXT_FIELD_BORDER, 0.0); 
+    NSAttributedString *label = [self attributedStringValue];
     if (isHighlighted) {
-        font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSBoldFontMask];
+        // reproduce the bold shadowed color normally used by the source list highlight style
+        NSMutableAttributedString *mutableLabel = [label mutableCopy];
+        NSRange labelRange = NSMakeRange(0, [label length]);
+        NSFont *font = [[NSFontManager sharedFontManager] convertFont:[self font] toHaveTrait:NSBoldFontMask];
         NSShadow *shade = [[NSShadow alloc] init];
         [shade setShadowOffset:NSMakeSize(0.0, -1.0)];
         [shade setShadowColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.5]];
-        [label addAttribute:NSShadowAttributeName value:shade range:labelRange];
+        [mutableLabel addAttribute:NSFontAttributeName value:font range:labelRange];
+        [mutableLabel addAttribute:NSForegroundColorAttributeName value:[NSColor whiteColor] range:labelRange];
+        [mutableLabel addAttribute:NSShadowAttributeName value:shade range:labelRange];
         [shade release];
-    } else {
-        [label removeAttribute:NSShadowAttributeName range:labelRange];
+        label = [mutableLabel autorelease];
     }
-    [label addAttribute:NSFontAttributeName value:font range:labelRange];
-    [label addAttribute:NSForegroundColorAttributeName value:[self textColor] range:labelRange];
-    [label addAttribute:NSParagraphStyleAttributeName value:[NSParagraphStyle defaultTruncatingTailParagraphStyle] range:labelRange];
-    
     [label drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin];
     
+    // Draw the count bubble or caution icon, when we're retrieving we don't draw to leave space for the spinner
     if ([self isRetrieving] == NO) {
         NSRect countRect = [self countRectForBounds:aRect];
         int count = [self count];
@@ -312,6 +286,7 @@ static NSString *stringWithNumber(NSNumber *number)
             NSColor *fgColor;
             NSColor *bgColor;
             if ([controlView respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
+                // On Leopard, use the blue or gray color taken from the center of the gradient highlight
                 if ([[controlView window] isMainWindow] == NO) {
                     if (isHighlighted) {
                         fgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:1.0];
@@ -338,6 +313,7 @@ static NSString *stringWithNumber(NSNumber *number)
                     }
                 }
             } else {
+                // On Tiger use gray
                 if (isHighlighted) {
                     fgColor = [NSColor disabledControlTextColor];
                     bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.8];
@@ -366,10 +342,7 @@ static NSString *stringWithNumber(NSNumber *number)
 
 - (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength;
 {
-    
-    settingUpFieldEditor = YES;
     [super selectWithFrame:[self textRectForBounds:aRect] inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
-    settingUpFieldEditor = NO;
 }
 
 - (NSUInteger)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView
