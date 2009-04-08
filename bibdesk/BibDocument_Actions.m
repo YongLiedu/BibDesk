@@ -89,6 +89,7 @@
 #import "BDSKMacro.h"
 #import "BDSKAppController.h"
 #import "BDSKApplication.h"
+#import "NSIndexSet_BDSKExtensions.h"
 
 @implementation BibDocument (Actions)
 
@@ -134,7 +135,7 @@ static BOOL changingColors = NO;
         }
     }
 	
-	if (isSingleValued && [groups numberOfCategoryGroupsAtIndexes:[groupTableView selectedRowIndexes]] > 1) {
+	if (isSingleValued && [[groupTableView selectedRowIndexes] numberOfIndexesInRange:[groups rangeOfCategoryGroups]] > 1) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Cannot Add to All Groups", @"Message in alert dialog when trying to add to multiple single-valued field groups")
                                          defaultButton:nil
                                        alternateButton:nil

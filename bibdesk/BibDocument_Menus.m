@@ -122,13 +122,12 @@
         return NO;
     if([self hasLibraryGroupSelected])
         return [self validateDeleteSelectionMenuItem:menuItem];
-    
-    NSIndexSet *selIndexes = [groupTableView selectedRowIndexes];
-    int n = [groups numberOfStaticGroupsAtIndexes:selIndexes];
+    if ([self hasStaticGroupsSelected])
+        return YES;
     // don't remove from single valued group field, as that will clear the field, which is most probably a mistake. See bug # 1435344
-    if ([[self currentGroupField] isSingleValuedGroupField] == NO)
-        n += [groups numberOfCategoryGroupsAtIndexes:selIndexes];
-    return n > 0;
+    if ([[self currentGroupField] isSingleValuedGroupField] == NO && [self hasCategoryGroupsSelected])
+        return YES;
+    return NO
 }	
 
 - (BOOL)validateSendToLyXMenuItem:(NSMenuItem*) menuItem {
@@ -358,11 +357,11 @@
 } 
 
 - (BOOL) validateRemoveSelectedGroupsMenuItem:(NSMenuItem *)menuItem{
-    return [groups numberOfSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]] > 0 ||
-           [groups numberOfStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]] > 0 ||
-           [groups numberOfURLGroupsAtIndexes:[groupTableView selectedRowIndexes]] > 0 ||
-           [groups numberOfScriptGroupsAtIndexes:[groupTableView selectedRowIndexes]] > 0 ||
-           [groups numberOfSearchGroupsAtIndexes:[groupTableView selectedRowIndexes]] > 0;
+    return [self hasSmartGroupsSelected] ||
+           [self hasStaticGroupsSelected] ||
+           [self hasURLGroupsSelected] ||
+           [self hasScriptGroupsSelected] ||
+           [self hasSearchGroupsSelected];
 } 
 
 - (BOOL) validateRenameGroupMenuItem:(NSMenuItem *)menuItem{
