@@ -236,6 +236,16 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     return cellSize;
 }
 
+- (NSColor *)textColor {
+    if ([self respondsToSelector:@selector(backgroundStyle)] == NO) {
+        if (settingUpFieldEditor)
+            return [NSColor blackColor];
+        else if ([self isHighlighted])
+            return [NSColor textBackgroundColor];
+    }
+    return [super textColor];
+}
+
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView {
     BOOL isHighlighted;
     if ([self respondsToSelector:@selector(backgroundStyle)])
@@ -245,22 +255,18 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     
     // Draw the text
     NSRect textRect = NSInsetRect([self textRectForBounds:aRect], SIZE_OF_TEXT_FIELD_BORDER, 0.0); 
+    NSFont *font = nil;
     NSAttributedString *label = [self attributedStringValue];
     if (isHighlighted) {
-        // reproduce the bold shadowed color normally used by the source list highlight style
-        NSMutableAttributedString *mutableLabel = [label mutableCopy];
-        NSRange labelRange = NSMakeRange(0, [label length]);
-        NSFont *font = [[NSFontManager sharedFontManager] convertFont:[self font] toHaveTrait:NSBoldFontMask];
-        NSShadow *shade = [[NSShadow alloc] init];
-        [shade setShadowOffset:NSMakeSize(0.0, -1.0)];
-        [shade setShadowColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.5]];
-        [mutableLabel addAttribute:NSFontAttributeName value:font range:labelRange];
-        [mutableLabel addAttribute:NSForegroundColorAttributeName value:[NSColor whiteColor] range:labelRange];
-        [mutableLabel addAttribute:NSShadowAttributeName value:shade range:labelRange];
-        [shade release];
-        label = [mutableLabel autorelease];
+        // source list draws selected text bold, but only when the passing an NSString to setObjectValue:
+        font = [[self font] retain];
+        [super setFont:[[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSBoldFontMask]];
     }
-    [label drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin];
+    [super drawInteriorWithFrame:textRect inView:controlView];
+    if (font) {
+        [super setFont:font];
+        [font release];
+    }
     
     // Draw the count bubble or caution icon, when we're retrieving we don't draw to leave space for the spinner
     if ([self isRetrieving] == NO) {
@@ -328,7 +334,9 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
 }
 
 - (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength {
+    settingUpFieldEditor = YES;
     [super selectWithFrame:[self textRectForBounds:aRect] inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
+    settingUpFieldEditor = NO;
 }
 
 - (NSUInteger)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView {
