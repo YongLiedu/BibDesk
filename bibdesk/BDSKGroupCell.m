@@ -277,12 +277,20 @@ static NSString *stringWithNumber(NSNumber *number)
     return cellSize;
 }
 
+- (NSRect)drawingRectForBounds:(NSRect)theRect {
+    return [self textRectForBounds:theRect];
+}
+
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView {
     // Draw the text
     NSRect textRect = NSInsetRect([self textRectForBounds:aRect], SIZE_OF_TEXT_FIELD_BORDER, 0.0); 
     NSRange labelRange = NSMakeRange(0, [label length]);
     NSFont *font = [self font];
-    if ([self isHighlighted]) {
+    BOOL isHighlighted = [self isHighlighted];
+    if ([self respondsToSelector:@selector(backgroundStyle)])
+        isHighlighted = ([self backgroundStyle] == NSBackgroundStyleDark || [self backgroundStyle] == NSBackgroundStyleLowered);
+    
+    if (isHighlighted) {
         font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSBoldFontMask];
         NSShadow *shade = [[NSShadow alloc] init];
         [shade setShadowOffset:NSMakeSize(0.0, -1.0)];
@@ -309,7 +317,7 @@ static NSString *stringWithNumber(NSNumber *number)
             NSColor *bgColor;
             if ([controlView respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
                 if ([[controlView window] isMainWindow]) {
-                    if ([self isHighlighted]) {
+                    if (isHighlighted) {
                         fgColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:1.0];
                         bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.9];
                     } else {
@@ -317,7 +325,7 @@ static NSString *stringWithNumber(NSNumber *number)
                         bgColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:0.9];
                     }
                 } else {
-                    if ([self isHighlighted]) {
+                    if (isHighlighted) {
                         fgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:1.0];
                         bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.9];
                     } else {
@@ -326,7 +334,7 @@ static NSString *stringWithNumber(NSNumber *number)
                     }
                 }
             } else {
-                if ([self isHighlighted]) {
+                if (isHighlighted) {
                     fgColor = [NSColor disabledControlTextColor];
                     bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.8];
                 } else {
@@ -362,20 +370,13 @@ static NSString *stringWithNumber(NSNumber *number)
 
 - (NSUInteger)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView
 {
-    NSUInteger hit = [super hitTestForEvent:event inRect:cellFrame ofView:controlView];
-    // super returns 0 for button clicks, so -[NSTableView mouseDown:] doesn't track the cell
-    NSRect iconRect = [self iconRectForBounds:cellFrame];
+    NSRect textRect = [self textRectForBounds:cellFrame];
     NSPoint mouseLoc = [controlView convertPoint:[event locationInWindow] fromView:nil];
-    if (NSMouseInRect(mouseLoc, iconRect, [controlView isFlipped])) {
+    NSUInteger hit = NSCellHitNone;
+    if (NSMouseInRect(mouseLoc, textRect, [controlView isFlipped]))
+        hit = [super hitTestForEvent:event inRect:textRect ofView:controlView];
+    else if (NSMouseInRect(mouseLoc, [self iconRectForBounds:cellFrame], [controlView isFlipped]))
         hit = NSCellHitContentArea;
-    } else {
-        NSRect textRect = [self textRectForBounds:cellFrame];
-        float textWidth = [super cellSize].width;
-        if (textWidth < NSWidth(textRect) && [NSString isEmptyString:[self stringValue]] == NO)
-            textRect.size.width = textWidth;
-        if (NSMouseInRect(mouseLoc, textRect, [controlView isFlipped]))
-            hit = NSCellHitContentArea | NSCellHitEditableTextArea;
-    }
     return hit;
 }
 
