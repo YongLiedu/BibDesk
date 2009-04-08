@@ -277,10 +277,6 @@ static NSString *stringWithNumber(NSNumber *number)
     return cellSize;
 }
 
-- (NSRect)drawingRectForBounds:(NSRect)theRect {
-    return [self textRectForBounds:theRect];
-}
-
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView {
     // Draw the text
     NSRect textRect = NSInsetRect([self textRectForBounds:aRect], SIZE_OF_TEXT_FIELD_BORDER, 0.0); 
