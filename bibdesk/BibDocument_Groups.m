@@ -633,9 +633,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     if ([selectedGroups count] == 1 && [self hasLibraryGroupSelected]) {
         array = publications;
     } else if ([selectedGroups count] == 1 && ([self hasExternalGroupsSelected] || [self hasStaticGroupsSelected])) {
-        unsigned int rowIndex = [[groupTableView selectedRowIndexes] firstIndex];
-        BDSKGroup *group = [groups objectAtIndex:rowIndex];
-        array = [(id)group publications];
+        array = [(id)[selectedGroups lastObject] publications];
     } else {
         // multiple selections are never shared groups, so they are contained in the publications
         NSEnumerator *pubEnum = [publications objectEnumerator];
@@ -937,13 +935,14 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 - (void)smartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
 		BDSKSmartGroup *group = [[BDSKSmartGroup alloc] initWithFilter:[filterController filter]];
-        unsigned int insertIndex = NSMaxRange([groups rangeOfSmartGroups]);
 		[groups addSmartGroup:group];
 		[group release];
-		
-		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
-		[groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
-		[[self undoManager] setActionName:NSLocalizedString(@"Add Smart Group", @"Undo action name")];
+        unsigned int row = [groups indexOfObjectIdenticalTo:group];
+        if (row != NSNotFound) {
+            [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+            [groupTableView editColumn:0 row:row withEvent:nil select:YES];
+		}
+        [[self undoManager] setActionName:NSLocalizedString(@"Add Smart Group", @"Undo action name")];
 		// updating of the tables is done when finishing the edit of the name
 	}
 	
@@ -951,22 +950,24 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (IBAction)addStaticGroupAction:(id)sender {
     BDSKStaticGroup *group = [[BDSKStaticGroup alloc] init];
-    unsigned int insertIndex = NSMaxRange([groups rangeOfStaticGroups]);
     [groups addStaticGroup:group];
     [group release];
-    
-    [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
-    [groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
+    unsigned int row = [groups indexOfObjectIdenticalTo:group];
+    if (row != NSNotFound) {
+        [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        [groupTableView editColumn:0 row:row withEvent:nil select:YES];
+    }
     [[self undoManager] setActionName:NSLocalizedString(@"Add Static Group", @"Undo action name")];
     // updating of the tables is done when finishing the edit of the name
 }
 
 - (void)searchGroupSheetDidEnd:(BDSKSearchGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
-        unsigned int insertIndex = NSMaxRange([groups rangeOfSearchGroups]);
         BDSKGroup *group = [sheetController group];
-		[groups addSearchGroup:(id)group];        
-		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
+		[groups addSearchGroup:(id)group];
+        unsigned int row = [groups indexOfObjectIdenticalTo:group];
+        if (row != NSNotFound)
+            [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 	}
 }
 
@@ -983,9 +984,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSDictionary *dict = [sender representedObject];
     BDSKSearchGroup *group = [[[BDSKSearchGroup alloc] initWithDictionary:dict] autorelease];
     if (group) {
-        unsigned int insertIndex = NSMaxRange([groups rangeOfSearchGroups]);
         [groups addSearchGroup:(id)group];        
-        [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
+        unsigned int row = [groups indexOfObjectIdenticalTo:group];
+        if (row != NSNotFound)
+            [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     } else
         NSBeep();
 }
@@ -1053,14 +1055,15 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (void)URLGroupSheetDidEnd:(BDSKURLGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
-        unsigned int insertIndex = NSMaxRange([groups rangeOfURLGroups]);
         BDSKURLGroup *group = [sheetController group];
 		[groups addURLGroup:group];
         [group publications];
-        
-		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
-		[groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
-		[[self undoManager] setActionName:NSLocalizedString(@"Add External File Group", @"Undo action name")];
+        unsigned int row = [groups indexOfObjectIdenticalTo:group];
+        if (row != NSNotFound) {
+            [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+            [groupTableView editColumn:0 row:row withEvent:nil select:YES];
+		}
+        [[self undoManager] setActionName:NSLocalizedString(@"Add External File Group", @"Undo action name")];
 		// updating of the tables is done when finishing the edit of the name
 	}
 }
@@ -1076,14 +1079,15 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (void)scriptGroupSheetDidEnd:(BDSKScriptGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
-        unsigned int insertIndex = NSMaxRange([groups rangeOfScriptGroups]);
         BDSKScriptGroup *group = [sheetController group];
 		[groups addScriptGroup:group];
         [group publications];
-        
-		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
-		[groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
-		[[self undoManager] setActionName:NSLocalizedString(@"Add Script Group", @"Undo action name")];
+        unsigned int row = [groups indexOfObjectIdenticalTo:group];
+        if (row != NSNotFound) {
+            [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+            [groupTableView editColumn:0 row:row withEvent:nil select:YES];
+		}
+        [[self undoManager] setActionName:NSLocalizedString(@"Add Script Group", @"Undo action name")];
 		// updating of the tables is done when finishing the edit of the name
 	}
 	
@@ -1706,24 +1710,23 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSSet *pubSet = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)items, countOfItems, &kBDSKBibItemEquivalenceSetCallBacks);
     NSZoneFree([self zone], items);
     
-    NSIndexSet *indexes;
-    unsigned int idx;
-    
+    NSMutableArray *groupsToTest = [NSMutableArray array];
+        
     if (aGroup) {
-        idx = [groups indexOfObjectIdenticalTo:aGroup];
-        if (idx != NSNotFound)
-            indexes = [NSIndexSet indexSetWithIndex:idx]; 
-        else
-            indexes = [NSIndexSet indexSet];
+        [groupsToTest addObject:aGroup];
     } else {
-        indexes = [NSIndexSet indexSetWithIndexesInRange:[groups rangeOfExternalGroups]]; 
+        if ([groups webGroup])
+            [groupsToTest addObject:[groups webGroup]];
+        [groupsToTest addObjectsFromArray:[groups sharedGroups]];
+        [groupsToTest addObjectsFromArray:[groups URLGroups]];
+        [groupsToTest addObjectsFromArray:[groups scriptGroups]];
+        [groupsToTest addObjectsFromArray:[groups searchGroups]];
     }
     
-    idx = [indexes firstIndex];
+    NSEnumerator *groupEnum = [groupsToTest objectEnumerator];
+    id group;
     
-    while (idx != NSNotFound) {
-        id group = [groups objectAtIndex:idx];
-        idx = [indexes indexGreaterThanIndex:idx];
+    while (group = [groupEnum nextObject]) {
         if ([group count] == 0) continue; // otherwise the group will load
         NSEnumerator *pubEnum = [[group publications] objectEnumerator];
         BibItem *pub;
