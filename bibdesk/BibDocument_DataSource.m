@@ -560,7 +560,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
                 }
                 pubs = pubsInGroup;
             }
-            docState.dragFromExternalGroups = [groups hasExternalGroupsAtIndexes:rowIndexes];
+            docState.dragFromExternalGroups = [rowIndexes intersectsIndexesInRange:[groups rangeOfExternalGroups]];
 		}
 		if([pubs count] == 0 && [self hasSearchGroupsSelected] == NO){
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty Groups", @"Message in alert dialog when dragging from empty groups")

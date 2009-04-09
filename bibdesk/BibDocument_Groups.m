@@ -90,7 +90,6 @@
 #import "BDSKSplitView.h"
 #import "BDSKGradientSplitView.h"
 
-
 @implementation BibDocument (Groups)
 
 #pragma mark Selected group types
@@ -104,35 +103,35 @@
 }
 
 - (BOOL)hasSharedGroupsSelected{
-    return [groups hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+    return [[groupTableView selectedRowIndexes] intersectsIndexesInRange:[groups rangeOfSharedGroups]];
 }
 
 - (BOOL)hasURLGroupsSelected{
-    return [groups hasURLGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+    return [[groupTableView selectedRowIndexes] intersectsIndexesInRange:[groups rangeOfURLGroups]];
 }
 
 - (BOOL)hasScriptGroupsSelected{
-    return [groups hasScriptGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+    return [[groupTableView selectedRowIndexes] intersectsIndexesInRange:[groups rangeOfScriptGroups]];
 }
 
 - (BOOL)hasSearchGroupsSelected{
-    return [groups hasSearchGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+    return [[groupTableView selectedRowIndexes] intersectsIndexesInRange:[groups rangeOfSearchGroups]];
 }
 
 - (BOOL)hasSmartGroupsSelected{
-    return [groups hasSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+    return [[groupTableView selectedRowIndexes] intersectsIndexesInRange:[groups rangeOfSmartGroups]];
 }
 
 - (BOOL)hasStaticGroupsSelected{
-    return [groups hasStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+    return [[groupTableView selectedRowIndexes] intersectsIndexesInRange:[groups rangeOfStaticGroups]];
 }
 
 - (BOOL)hasCategoryGroupsSelected{
-    return [groups hasCategoryGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+    return [[groupTableView selectedRowIndexes] intersectsIndexesInRange:[groups rangeOfCategoryGroups]];
 }
 
 - (BOOL)hasExternalGroupsSelected{
-    return [groups hasExternalGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+    return [[groupTableView selectedRowIndexes] intersectsIndexesInRange:[groups rangeOfExternalGroups]];
 }
 
 /* 
