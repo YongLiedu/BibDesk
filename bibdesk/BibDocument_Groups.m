@@ -596,54 +596,32 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [groupTableView setDelegate:self];
 }
 
-- (void)updateCountForSmartGroup:(BDSKSmartGroup *)group {
-    int oldCount = [group count];
-    [group filterItems:publications];
-    if (oldCount != [group count]) {
-        if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
-            NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];
-            [self sortGroupsByKey:nil];
-            [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
-        } else {
-            [groupTableView reloadData];
-        }
-    }
-}
-
 // force the smart groups to refilter their items, so the group content and count get redisplayed
 // if this becomes slow, we could make filters thread safe and update them in the background
 - (void)updateSmartGroupsCountAndContent:(BOOL)shouldUpdate{
 
 	NSRange smartRange = [groups rangeOfSmartGroups];
     unsigned int row = NSMaxRange(smartRange);
-	BOOL needsUpdate = NO;
-    BOOL hasManyGroups = smartRange.length > 10;
+	BOOL needsUpdate = shouldUpdate && [self hasSmartGroupsSelected];
     BOOL hideCount = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKHideGroupCountKey];
     BOOL sortByCount = [sortGroupsKey isEqualToString:BDSKGroupCellCountKey];
+    NSArray *smartGroups = [groups smartGroups];
     
-    while(NSLocationInRange(--row, smartRange)){
-		if([groupTableView isRowSelected:row])
-			needsUpdate = shouldUpdate;
-		else if (hideCount == YES && sortByCount == NO)
-            continue;
-        if (hasManyGroups == NO)
-            [(BDSKSmartGroup *)[groups objectAtIndex:row] filterItems:publications];
-        else if (docState.isDocumentClosed == NO)
-            [self queueSelectorOnce:@selector(updateCountForSmartGroup:) withObject:(BDSKSmartGroup *)[groups objectAtIndex:row]];
-    }
+    if (hideCount == NO || sortByCount == YES)
+        [smartGroups makeObjectsPerformSelector:@selector(filterItems:) withObject:publications];
     
-    if(sortByCount){
-        NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];
+    if (sortByCount) {
+        NSPoint scrollPoint = [[groupTableView enclosingScrollView] scrollPositionAsPercentage];
         [self sortGroupsByKey:nil];
-        [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
-    }else if (needsUpdate == YES || hideCount == NO){
+        [[groupTableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
+    } else if (needsUpdate) {
         [groupTableView reloadData];
-        if(needsUpdate == YES){
-            // fix for bug #1362191: after changing a checkbox that removed an item from a smart group, the table scrolled to the top
-            NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];
-            [self displaySelectedGroups];
-            [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
-        }
+        // fix for bug #1362191: after changing a checkbox that removed an item from a smart group, the table scrolled to the top
+        NSPoint scrollPoint = [[groupTableView enclosingScrollView] scrollPositionAsPercentage];
+        [self displaySelectedGroups];
+        [[groupTableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
+    } else if (hideCount == NO) {
+        [groupTableView reloadData];
     }
 }
 
