@@ -127,7 +127,7 @@
     // don't remove from single valued group field, as that will clear the field, which is most probably a mistake. See bug # 1435344
     if ([[self currentGroupField] isSingleValuedGroupField] == NO && [self hasCategoryGroupsSelected])
         return YES;
-    return NO
+    return NO;
 }	
 
 - (BOOL)validateSendToLyXMenuItem:(NSMenuItem*) menuItem {
