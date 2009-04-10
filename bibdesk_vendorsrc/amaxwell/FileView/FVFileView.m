@@ -1020,8 +1020,8 @@ static CGFloat _subtitleHeight = 0.0;
         frame.size.height = FVMax( FVCeil( [self _rowHeight] * _numberOfRows + [self _topMargin] + [self _bottomMargin] ), contentSize.height );
         if (NSEqualRects([self frame], frame) == NO) {
             [super setFrame:frame];
-            if (_fvFlags.autoScales && [scrollView autohidesScrollers] && FVAbs(NSHeight(frame) - contentSize.height) <= [NSScroller scrollerWidth])
-                [scrollView tile];
+            if (_fvFlags.autoScales)
+                [scrollView reflectScrolledClipView:cv];
         }
     }
 }    
