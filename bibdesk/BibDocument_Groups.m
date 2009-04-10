@@ -95,7 +95,7 @@
 #pragma mark Selected group types
 
 - (BOOL)hasLibraryGroupSelected{
-    return [groupOutlineView selectedRow] == 0;
+    return [[self selectedGroups] containsObject:[groups libraryGroup]];
 }
 
 - (BOOL)hasWebGroupSelected{
