@@ -1021,7 +1021,7 @@ static CGFloat _subtitleHeight = 0.0;
         if (NSEqualRects([self frame], frame) == NO) {
             [super setFrame:frame];
             if (_fvFlags.autoScales)
-                [scrollView reflectScrolledClipView:cv];
+                [scrollView reflectScrolledClipView:[scrollView contentView]];
         }
     }
 }    
