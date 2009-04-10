@@ -44,6 +44,7 @@
 #import "BDSKAppController.h"
 #import "BDSKStringConstants.h"
 #import "BDSKGroup.h"
+#import "BDSKParentGroup.h"
 #import "BDSKStaticGroup.h"
 #import "BDSKSearchGroup.h"
 #import "BDSKPublicationsArray.h"
@@ -85,7 +86,7 @@
 
 #import "BDSKMacroResolver.h"
 #import "BDSKErrorObjectController.h"
-#import "BDSKGroupTableView.h"
+#import "BDSKGroupOutlineView.h"
 #import "BDSKFileContentSearchController.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKStatusBar.h"
@@ -98,7 +99,7 @@
 #import "BDSKSharingServer.h"
 #import "BDSKSharingBrowser.h"
 #import "BDSKTemplate.h"
-#import "BDSKGroupTableView.h"
+#import "BDSKGroupOutlineView.h"
 #import "BDSKFileContentSearchController.h"
 #import "BDSKTemplateParser.h"
 #import "BDSKTemplateObjectProxy.h"
@@ -152,6 +153,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 #define BDSKDocumentStringEncodingKey @"BDSKDocumentStringEncodingKey"
 #define BDSKDocumentScrollPercentageKey @"BDSKDocumentScrollPercentageKey"
 #define BDSKSelectedGroupsKey @"BDSKSelectedGroupsKey"
+#define BDSKDocumentGroupsToExpandKey @"BDSKDocumentGroupsToExpandKey"
 
 static char BDSKDocumentFileViewObservationContext;
 static char BDSKDocumentDefaultsObservationContext;
@@ -365,6 +367,18 @@ enum {
     // some xattr setup has to be done after the window is on-screen
     NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
     
+    NSArray *groupsToExpand = [xattrDefaults objectForKey:BDSKDocumentGroupsToExpandKey defaultObject:[groups valueForKey:@"name"]];
+    NSEnumerator *groupEnum = [groupsToExpand objectEnumerator];
+    NSString *groupName;
+    while (groupName = [groupEnum nextObject]) {
+        NSEnumerator *parentEnum = [groups objectEnumerator];
+        BDSKParentGroup *parent;
+        while (parent = [parentEnum nextObject]) {
+            if ([[parent name] isEqual:groupName])
+                [groupOutlineView expandItem:parent];
+        }
+    }
+    
     NSData *groupData = [xattrDefaults objectForKey:BDSKSelectedGroupsKey];
     if ([groupData length])
         [self selectGroups:[NSKeyedUnarchiver unarchiveObjectWithData:groupData]];
@@ -428,6 +442,9 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
 {
+    [groupOutlineView expandItem:[groupOutlineView itemAtRow:0]];
+    [self selectLibraryGroup:nil];
+    
     [super windowControllerDidLoadNib:aController];
     
     // this is the controller for the main window
@@ -445,7 +462,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [self setupToolbar];
     
     replaceSplitViewSubview(bottomPreviewTabView, splitView, 1);
-    replaceSplitViewSubview([[groupTableView enclosingScrollView] superview], groupSplitView, 0);
+    replaceSplitViewSubview([[groupOutlineView enclosingScrollView] superview], groupSplitView, 0);
     replaceSplitViewSubview([mainBox superview], groupSplitView, 1);
     replaceSplitViewSubview([sidePreviewTabView superview], groupSplitView, 2);
     
@@ -486,7 +503,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     // make sure they are ordered correctly, mainly for the focus ring
 	[groupCollapsibleView retain];
     [groupCollapsibleView removeFromSuperview];
-    [[[groupTableView enclosingScrollView] superview] addSubview:groupCollapsibleView positioned:NSWindowBelow relativeTo:nil];
+    [[[groupOutlineView enclosingScrollView] superview] addSubview:groupCollapsibleView positioned:NSWindowBelow relativeTo:nil];
 	[groupCollapsibleView release];
 
     NSRect frameRect = [xattrDefaults rectForKey:BDSKDocumentWindowFrameKey defaultValue:NSZeroRect];
@@ -530,8 +547,8 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     
     [tableView setFontNamePreferenceKey:BDSKMainTableViewFontNameKey];
     [tableView setFontSizePreferenceKey:BDSKMainTableViewFontSizeKey];
-    [groupTableView setFontNamePreferenceKey:BDSKGroupTableViewFontNameKey];
-    [groupTableView setFontSizePreferenceKey:BDSKGroupTableViewFontSizeKey];
+    [groupOutlineView setFontNamePreferenceKey:BDSKGroupTableViewFontNameKey];
+    [groupOutlineView setFontSizePreferenceKey:BDSKGroupTableViewFontSizeKey];
     
     tableColumnWidths = [[xattrDefaults objectForKey:BDSKColumnWidthsKey] retain];
     [tableView setupTableColumnsWithIdentifiers:[xattrDefaults objectForKey:BDSKShownColsNamesKey defaultObject:[sud objectForKey:BDSKShownColsNamesKey]]];
@@ -549,7 +566,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [tableView setDoubleAction:@selector(editPubOrOpenURLAction:)];
     NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil];
     [tableView registerForDraggedTypes:dragTypes];
-    [groupTableView registerForDraggedTypes:dragTypes];
+    [groupOutlineView registerForDraggedTypes:dragTypes];
     
     [[sideFileView enclosingScrollView] setBackgroundColor:[sideFileView backgroundColor]];
     [bottomFileView setBackgroundColor:[NSColor controlBackgroundColor]];
@@ -595,7 +612,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 	[[groupActionButton cell] setUsesItemFromMenu:NO];
 	[groupActionButton setMenu:groupMenu];
     
-	BDSKHeaderPopUpButtonCell *headerCell = (BDSKHeaderPopUpButtonCell *)[groupTableView popUpHeaderCell];
+	BDSKHeaderPopUpButtonCell *headerCell = (BDSKHeaderPopUpButtonCell *)[groupOutlineView popUpHeaderCell];
 	[headerCell setAction:@selector(changeGroupFieldAction:)];
 	[headerCell setTarget:self];
 	[headerCell setMenu:[self groupFieldsMenu]];
@@ -788,6 +805,18 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         if(fileSearchController){
             [dictionary setObject:[fileSearchController sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
         }
+        
+        int row, numRows = [groupOutlineView numberOfRows];
+        NSMutableArray *groupsToExpand = [NSMutableArray array];
+        NSEnumerator *groupEnum = [groups objectEnumerator];
+        BDSKParentGroup *parent;
+        while (parent = [groupEnum nextObject]) {
+            // name is localized, but that's not worth worrying about
+            if ([groupOutlineView isItemExpanded:parent])
+                [groupsToExpand addObject:[parent name]];
+            
+        }
+        [dictionary setObject:groupsToExpand forKey:BDSKDocumentGroupsToExpandKey];
         
         NSError *error;
         
@@ -1818,7 +1847,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [macroResolver removeAllMacros];
     [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:[groups URLGroups]];
     [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:[groups scriptGroups]];
-    [groups removeAllNonSharedGroups]; // this also removes editor windows for external groups
+    [groups removeAllSavedGroups]; // this also removes editor windows for external groups
     [frontMatter setString:@""];
     
     // This is only a sanity check; an encoding of 0 is not valid, so is a signal we should ignore xattrs; could only check for public.text UTIs, but it will be zero if it was never written (and we don't warn in that case).  The user can do many things to make the attribute incorrect, so this isn't very robust.
@@ -3009,7 +3038,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 - (void)handleTableSelectionChangedNotification:(NSNotification *)notification{
     [self updateFileViews];
     [self updatePreviews];
-    [groupTableView updateHighlights];
+    [groupOutlineView updateHighlights];
     BOOL fileViewEditable = [self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO && [[self selectedPublications] count] == 1;
     [sideFileView setEditable:fileViewEditable];
     [bottomFileView setEditable:fileViewEditable]; 
@@ -3105,7 +3134,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         } else if ([key isEqualToString:BDSKAuthorNameDisplayKey]) {
             [tableView reloadData];
             if ([currentGroupField isPersonField])
-                [groupTableView reloadData];
+                [groupOutlineView reloadData];
         } else if ([key isEqualToString:BDSKBTStyleKey]) {
             if ([previewer isVisible])
                 [self updatePreviews];
@@ -3118,7 +3147,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         } else if ([key isEqualToString:BDSKHideGroupCountKey]) {
             // if we were hiding the count, the smart group counts weren't updated, so we need to update them now when we're showing the count, otherwise just reload
             if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKHideGroupCountKey])
-                [groupTableView reloadData];
+                [groupOutlineView reloadData];
             else
                 [self updateSmartGroupsCountAndContent:NO];
         }
@@ -3333,7 +3362,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         [statusStr appendFormat:@"%i %@", shownItemsCount, (shownItemsCount == 1) ? NSLocalizedString(@"item", @"item, in status message") : NSLocalizedString(@"items", @"items, in status message")];
         
         if (shownItemsCount != totalItemsCount) {
-            NSString *groupStr = ([groupTableView numberOfSelectedRows] == 1) ?
+            NSString *groupStr = ([groupOutlineView numberOfSelectedRows] == 1) ?
                 [NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"in group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]] :
                 NSLocalizedString(@"in multiple groups", @"Partial status message");
             [statusStr appendFormat:@" %@ (%@ %i)", groupStr, ofStr, totalItemsCount];
@@ -3371,7 +3400,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
             else if (groupPubsCount < matchCount)
                 [statusStr appendString:NSLocalizedString(@" Some results could not be parsed.", @"Partial status message")];
         } else if (groupPubsCount != totalPubsCount) {
-            NSString *groupStr = ([groupTableView numberOfSelectedRows] == 1) ?
+            NSString *groupStr = ([groupOutlineView numberOfSelectedRows] == 1) ?
                 [NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"in group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]] :
                 NSLocalizedString(@"in multiple groups", @"Partial status message");
             [statusStr appendFormat:@" %@ (%@ %i)", groupStr, ofStr, totalPubsCount];

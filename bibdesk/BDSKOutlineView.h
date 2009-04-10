@@ -42,6 +42,8 @@
 
 @interface BDSKOutlineView : NSOutlineView {
     BDSKTypeSelectHelper *typeSelectHelper;
+    NSString *fontNamePreferenceKey;
+    NSString *fontSizePreferenceKey;
     NSArray *draggedItems;
 }
 
@@ -50,6 +52,17 @@
 
 - (BDSKTypeSelectHelper *)typeSelectHelper;
 - (void)setTypeSelectHelper:(BDSKTypeSelectHelper *)newTypeSelectHelper;
+
+- (void)changeFont:(id)sender;
+- (void)outlineViewFontChanged;
+- (float)rowHeightForFont:(NSFont *)font;
+- (void)updateFontPanel:(NSNotification *)notification;
+- (NSString *)fontNamePreferenceKey;
+- (void)setFontNamePreferenceKey:(NSString *)newFontNamePreferenceKey;
+- (NSString *)fontSizePreferenceKey;
+- (void)setFontSizePreferenceKey:(NSString *)newFontSizePreferenceKey;
+
+- (NSControlSize)cellControlSize;
 
 - (void)moveUp:(id)sender;
 - (void)moveDown:(id)sender;

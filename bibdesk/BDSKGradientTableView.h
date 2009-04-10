@@ -38,8 +38,12 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKTableView.h"
+#import "BDSKOutlineView.h"
 
 
 @interface BDSKGradientTableView : BDSKTableView
+@end
 
+
+@interface BDSKGradientOutlineView : BDSKOutlineView
 @end

@@ -44,7 +44,7 @@
 #import "BDSKFieldSheetController.h"
 #import "BDSKGradientSplitView.h"
 #import "BDSKFileContentSearchController.h"
-#import "BDSKGroupTableView.h"
+#import "BDSKGroupOutlineView.h"
 #import "NSTableView_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKZoomablePDFView.h"

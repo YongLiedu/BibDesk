@@ -41,7 +41,17 @@
 #import "NSLayoutManager_BDSKExtensions.h"
 
 
+static char BDSKOutlineViewFontDefaultsObservationContext;
+
 @implementation BDSKOutlineView
+
+- (void)dealloc {
+    [self setFontNamePreferenceKey:nil]; // this will also stop observing
+    [self setFontSizePreferenceKey:nil];
+    [typeSelectHelper setDataSource:nil];
+    [typeSelectHelper release];
+    [super dealloc];
+}
 
 - (NSArray *)itemsAtRowIndexes:(NSIndexSet *)indexes {
     NSMutableArray *items = [NSMutableArray array];
@@ -57,6 +67,8 @@
 - (NSArray *)selectedItems {
     return [self itemsAtRowIndexes:[self selectedRowIndexes]];
 }
+
+#pragma mark TypeSelectHelper methods
 
 - (BDSKTypeSelectHelper *)typeSelectHelper {
     return typeSelectHelper;
@@ -86,6 +98,123 @@
     [super reloadData];
     [typeSelectHelper rebuildTypeSelectSearchCache];
 }
+
+#pragma mark Font preferences methods
+
+- (void)addObserverForFontPreferences {
+    if (fontNamePreferenceKey && fontSizePreferenceKey) {
+        [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self forKeyPath:[@"values." stringByAppendingString:fontNamePreferenceKey] options:0 context:&BDSKOutlineViewFontDefaultsObservationContext];
+        [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self forKeyPath:[@"values." stringByAppendingString:fontSizePreferenceKey] options:0 context:&BDSKOutlineViewFontDefaultsObservationContext];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateFontPanel:) name:NSWindowDidBecomeKeyNotification object:[self window]];
+    }
+}
+
+- (void)removeObserverForFontPreferences {
+    if (fontNamePreferenceKey && fontSizePreferenceKey) {
+        [[NSUserDefaultsController sharedUserDefaultsController] removeObserver:self forKeyPath:[@"values." stringByAppendingString:fontNamePreferenceKey]];
+        [[NSUserDefaultsController sharedUserDefaultsController] removeObserver:self forKeyPath:[@"values." stringByAppendingString:fontSizePreferenceKey]];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeKeyNotification object:[self window]];
+    }
+}
+
+- (NSString *)fontNamePreferenceKey{
+    return fontNamePreferenceKey;
+}
+
+- (void)setFontNamePreferenceKey:(NSString *)newFontNamePreferenceKey{
+    if (fontNamePreferenceKey != newFontNamePreferenceKey) {
+        [self removeObserverForFontPreferences];
+        [fontNamePreferenceKey release];
+        fontNamePreferenceKey = [newFontNamePreferenceKey retain];
+        [self addObserverForFontPreferences];
+        [self outlineViewFontChanged];
+    }
+}
+
+- (NSString *)fontSizePreferenceKey{
+    return fontSizePreferenceKey;
+}
+
+- (void)setFontSizePreferenceKey:(NSString *)newFontSizePreferenceKey{
+    if (fontSizePreferenceKey != newFontSizePreferenceKey) {
+        [self removeObserverForFontPreferences];
+        [fontSizePreferenceKey release];
+        fontSizePreferenceKey = [newFontSizePreferenceKey retain];
+        [self addObserverForFontPreferences];
+        [self outlineViewFontChanged];
+    }
+}
+
+- (NSControlSize)cellControlSize {
+    NSCell *dataCell = [[[self tableColumns] lastObject] dataCell];
+    return nil == dataCell ? NSRegularControlSize : [dataCell controlSize];
+}
+
+- (void)changeFont:(id)sender {
+    NSString *fontNamePrefKey = [self fontNamePreferenceKey];
+    NSString *fontSizePrefKey = [self fontSizePreferenceKey];
+    if (fontNamePrefKey == nil || fontSizePrefKey == nil) 
+        return;
+    NSFontManager *fontManager = [NSFontManager sharedFontManager];
+    NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
+    
+    NSString *fontName = [sud objectForKey:fontNamePrefKey];
+    float fontSize = [sud floatForKey:fontSizePrefKey];
+	NSFont *font = nil;
+        
+    if(fontName != nil)
+        font = [NSFont fontWithName:fontName size:fontSize];
+    if(font == nil)
+        font = [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:[self cellControlSize]]];
+    font = [fontManager convertFont:font];
+    
+    [sud setFloat:[font pointSize] forKey:fontSizePrefKey];
+    [sud setObject:[font fontName] forKey:fontNamePrefKey];
+}
+
+- (void)outlineViewFontChanged {
+    if (fontNamePreferenceKey && fontSizePreferenceKey) {
+        NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:fontNamePreferenceKey];
+        float fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:fontSizePreferenceKey];
+        NSFont *font = nil;
+        
+        if(fontName != nil)
+            font = [NSFont fontWithName:fontName size:fontSize];
+        if(font == nil)
+            font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+        
+        [self setFont:font];
+        
+        [self tile];
+        [self reloadData]; // othewise the change isn't immediately visible
+        
+        [self updateFontPanel:nil];
+    }
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (context == &BDSKOutlineViewFontDefaultsObservationContext)
+        [self outlineViewFontChanged];
+    else
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+}
+
+- (void)updateFontPanel:(NSNotification *)notification {
+    if ([[[self window] firstResponder] isEqual:self] && fontNamePreferenceKey && fontSizePreferenceKey) {
+        NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:fontNamePreferenceKey];
+        float fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:fontSizePreferenceKey];
+        [[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
+    }
+}
+
+- (BOOL)becomeFirstResponder {
+    BOOL success = [super becomeFirstResponder];
+    if (success)
+        [self updateFontPanel:nil];
+    return success;
+}
+
+#pragma mark Keyboard shortcuts and actions
 
 - (void)keyDown:(NSEvent *)theEvent {
     NSString *characters = [theEvent charactersIgnoringModifiers];
@@ -396,8 +525,12 @@
             [cell setFont:font];
     }
     
-    [self setRowHeight:[NSLayoutManager defaultViewLineHeightForFont:font]];
+    [self setRowHeight:[self rowHeightForFont:font]];
     [self noteHeightOfRowsWithIndexesChanged:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfRows])]];
+}
+
+- (float)rowHeightForFont:(NSFont *)font {
+    return [NSLayoutManager defaultViewLineHeightForFont:font];
 }
 
 #pragma mark SKTypeSelectHelper datasource protocol

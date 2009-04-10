@@ -38,13 +38,14 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BibItem, BibDocument, BDSKMacroResolver;
+@class BibItem, BibDocument, BDSKMacroResolver, BDSKParentGroup;
 
 /* note that NSCoding support is presently limited in some cases */
 
 @interface BDSKGroup : NSObject <NSCopying, NSCoding> {
 	id name;
 	int count;
+    BDSKParentGroup *parent;
     BibDocument *document;
     NSString *uniqueID;
 }
@@ -99,6 +100,20 @@
 	@discussion -
 */
 - (NSImage *)icon;
+
+/*!
+	@method isParent
+	@abstract Boolean, returns whether the receiver is a parent group. 
+	@discussion -
+*/
+- (BOOL)isParent;
+
+/*!
+	@method isLibraryParent
+	@abstract Boolean, returns whether the receiver is the library parent group. 
+	@discussion -
+*/
+- (BOOL)isLibraryParent;
 
 /*!
 	@method isStatic
@@ -207,6 +222,9 @@
 - (NSDictionary *)cellValue;
 
 - (NSString *)toolTip;
+
+- (BDSKParentGroup *)parent;
+- (void)setParent:(BDSKParentGroup *)newParent;
 
 - (BibDocument *)document;
 - (void)setDocument:(BibDocument *)newDocument;

@@ -41,7 +41,7 @@
 #import "BDSKGroup.h"
 #import "BibDocument_Groups.h"
 #import "BDSKMainTableView.h"
-#import "BDSKGroupTableView.h"
+#import "BDSKGroupOutlineView.h"
 #import "BibItem.h"
 #import "BDSKTypeManager.h"
 #import "BDSKTemplate.h"
@@ -365,10 +365,10 @@
 } 
 
 - (BOOL) validateRenameGroupMenuItem:(NSMenuItem *)menuItem{
-	int row = [groupTableView selectedRow];
-	if ([groupTableView numberOfSelectedRows] == 1 &&
+	int row = [groupOutlineView selectedRow];
+	if ([groupOutlineView numberOfSelectedRows] == 1 &&
 		row > 0 &&
-        [[groups objectAtIndex:row] hasEditableName]) {
+        [[groupOutlineView itemAtRow:row] hasEditableName]) {
 		// single group selection
 		return YES;
 	} else {
@@ -388,10 +388,10 @@
 - (BOOL) validateEditGroupMenuItem:(NSMenuItem *)menuItem{
     if ([documentWindow isKeyWindow] == NO)
         return NO;
-	int row = [groupTableView selectedRow];
-	if ([groupTableView numberOfSelectedRows] == 1 && row > 0) {
+	int row = [groupOutlineView selectedRow];
+	if ([groupOutlineView numberOfSelectedRows] == 1 && row > 0) {
 		// single group selection
-        return [[groups objectAtIndex:row] isEditable];
+        return [[groupOutlineView itemAtRow:row] isEditable];
 	} else {
 		// multiple selection or no smart group selected
 		return NO;
@@ -406,7 +406,7 @@
     id firstResponder = [documentWindow firstResponder];
 	if (firstResponder == tableView || firstResponder == [fileSearchController tableView]) {
 		return [self validateEditSelectionMenuItem:menuItem];
-	} else if (firstResponder == groupTableView) {
+	} else if (firstResponder == groupOutlineView) {
 		return [self validateEditGroupMenuItem:menuItem];
 	} else {
 		return NO;
@@ -419,7 +419,7 @@
     id firstResponder = [documentWindow firstResponder];
 	if (firstResponder == tableView || tableView == [fileSearchController tableView]) {
 		return [self validateRemoveSelectionMenuItem:menuItem];
-	} else if (firstResponder == groupTableView) {
+	} else if (firstResponder == groupOutlineView) {
 		return [self validateRemoveSelectedGroupsMenuItem:menuItem];
 	} else {
 		return NO;

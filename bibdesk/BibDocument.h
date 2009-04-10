@@ -44,7 +44,7 @@
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver, BDSKItemPasteboardHelper;
 @class BDSKEditor, BDSKMacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController, BDSKSearchGroupViewController;
-@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKGradientSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredBox, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FVFileView;
+@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupOutlineView, BDSKGradientView, BDSKGradientSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredBox, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FVFileView;
 @class BDSKWebGroupViewController, BDSKSearchButtonController;
 @class BDSKItemSearchIndexes, BDSKFileMigrationController, BDSKDocumentSearch;
 
@@ -128,7 +128,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     
 #pragma mark Group pane variables
 
-    IBOutlet BDSKGroupTableView *groupTableView;
+    IBOutlet BDSKGroupOutlineView *groupOutlineView;
     IBOutlet BDSKGradientSplitView *groupSplitView;
     IBOutlet BDSKImagePopUpButton *groupActionButton;
     IBOutlet NSButton *groupAddButton;

@@ -73,7 +73,7 @@
 #import "BDSKTemplate.h"
 #import "BDSKTemplateObjectProxy.h"
 #import "BDSKMainTableView.h"
-#import "BDSKGroupTableView.h"
+#import "BDSKGroupOutlineView.h"
 #import "BDSKGradientSplitView.h"
 #import "NSTask_BDSKExtensions.h"
 #import "BDSKColoredBox.h"
@@ -135,7 +135,7 @@ static BOOL changingColors = NO;
         }
     }
 	
-	if (isSingleValued && [[groupTableView selectedRowIndexes] numberOfIndexesInRange:[groups rangeOfCategoryGroups]] > 1) {
+	if (isSingleValued && [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isCategory == YES"]] count] > 1) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Cannot Add to All Groups", @"Message in alert dialog when trying to add to multiple single-valued field groups")
                                          defaultButton:nil
                                        alternateButton:nil
@@ -387,7 +387,7 @@ static BOOL changingColors = NO;
 	id firstResponder = [documentWindow firstResponder];
     if (firstResponder == tableView || firstResponder == [fileSearchController tableView])
 		[self editPubCmd:sender];
-	else if (firstResponder == groupTableView)
+	else if (firstResponder == groupOutlineView)
 		[self editGroupAction:sender];
 }
 
@@ -1153,8 +1153,8 @@ static BOOL changingColors = NO;
     [[NSFontManager sharedFontManager] orderFrontFontPanel:sender];
     
     id firstResponder = [documentWindow firstResponder];
-    if (firstResponder != groupTableView)
-        [documentWindow makeFirstResponder:groupTableView];
+    if (firstResponder != groupOutlineView)
+        [documentWindow makeFirstResponder:groupOutlineView];
 }
 
 - (IBAction)changePreviewDisplay:(id)sender{
@@ -1271,7 +1271,7 @@ static BOOL changingColors = NO;
 
 - (IBAction)showMacrosWindow:(id)sender{
     if ([self hasExternalGroupsSelected]) {
-        BDSKMacroResolver *resolver = [(id<BDSKOwner>)[groups objectAtIndex:[groupTableView selectedRow]] macroResolver];
+        BDSKMacroResolver *resolver = [[[self selectedGroups] lastObject] macroResolver];
         BDSKMacroWindowController *controller = nil;
         NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
         NSWindowController *wc;

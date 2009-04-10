@@ -267,13 +267,16 @@
     [tinySmartFolder release];
     [categoryGroupImage setName:@"categoryGroup"];
     
-    importGroupImage = [staticGroupImage copy];
-    [importGroupImage lockFocusOnRepresentation:[[importGroupImage representations] objectAtIndex:0]];
+    importGroupImage = [[NSImage imageNamed:@"NSFolderSmart"] copy];
+    [importGroupImage lockFocus];
     [[NSImage imageNamed:@"importBadge"] drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     [importGroupImage unlockFocus];
-    [importGroupImage lockFocusOnRepresentation:[[importGroupImage representations] objectAtIndex:1]];
+    tinyImage = [[NSImage imageNamed:@"NSFolderSmart"] copy];
+    [tinyImage lockFocus];
     [[NSImage imageNamed:@"importBadge"] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [importGroupImage unlockFocus];
+    [tinyImage unlockFocus];
+    [importGroupImage addRepresentation:[[tinyImage representations] lastObject]];
+    [tinyImage release];
     [importGroupImage setName:@"importGroup"];
     
     sharedGroupImage = [[NSImage imageNamed:@"NSBonjour"] copy];

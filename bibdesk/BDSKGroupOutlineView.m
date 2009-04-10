@@ -1,5 +1,5 @@
 //
-//  BDSKGroupTableView.m
+//  BDSKGroupOutlineView.m
 //  Bibdesk
 //
 //  Created by Adam Maxwell on 10/19/05.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKGroupTableView.h"
+#import "BDSKGroupOutlineView.h"
 #import "BDSKStringConstants.h"
 #import "BDSKHeaderPopUpButtonCell.h"
 #import "NSBezierPath_BDSKExtensions.h"
@@ -47,12 +47,14 @@
 #import "BDSKGroup.h"
 #import "BibAuthor.h"
 #import "BDSKGroupCell.h"
+#import "NSLayoutManager_BDSKExtensions.h"
 
-@implementation BDSKGroupTableView
+@implementation BDSKGroupOutlineView
 
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [parentCell release];
     [super dealloc];
 }
 
@@ -84,12 +86,36 @@
     [self setTypeSelectHelper:aTypeSelectHelper];
     [aTypeSelectHelper release];
     
-    // default is (3.0, 2.0); use a larger spacing for the highlights
-    [self setIntercellSpacing:NSMakeSize(3.0, 4.0)];
+    // the source list style sets the vertical spacing to 0, but using the default spacing gives the same result as Mail
+    [self setIntercellSpacing:NSMakeSize(3.0, 2.0)];
+}
+
+- (NSRect)frameOfOutlineCellAtRow:(NSInteger)row
+{
+    return row > 0 ? [super frameOfOutlineCellAtRow:row] : NSZeroRect;
 }
 
 - (NSPopUpButtonCell *)popUpHeaderCell{
 	return [(BDSKGroupTableHeaderView *)[self headerView] popUpHeaderCell];
+}
+
+- (NSTextFieldCell *)parentCell {
+    if (parentCell == nil) {
+        parentCell = [[NSTextFieldCell alloc] init];
+        [parentCell setTextColor:[NSColor disabledControlTextColor]];
+        [parentCell setFont:[[NSFontManager sharedFontManager] convertFont:[self font] toHaveTrait:NSBoldFontMask]];
+    }
+    return parentCell;
+}
+
+- (void)setFont:(NSFont *)newFont {
+    [super setFont:newFont];
+    [parentCell setFont:[[NSFontManager sharedFontManager] convertFont:newFont toHaveTrait:NSBoldFontMask]];
+}
+
+- (float)rowHeightForFont:(NSFont *)font {
+    // use a larger row height to give space for the highlights, also reproduces the row height in Mail
+    return [NSLayoutManager defaultViewLineHeightForFont:font] + 4.0;
 }
 
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note
@@ -99,19 +125,19 @@
 }
 
 - (void)mouseDown:(NSEvent *)theEvent{
-    NSPoint point = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-    int row = [self rowAtPoint:point];
-    int column = [self columnAtPoint:point];
-    if (row != -1 && column == 0) {
-        BDSKGroupCell *cell = [[[self tableColumns] objectAtIndex:0] dataCellForRow:row];
-        NSRect iconRect = [cell iconRectForBounds:[self frameOfCellAtColumn:column row:row]];
-        if (NSPointInRect(point, iconRect)) {
-            if ([theEvent clickCount] == 2) {
-                if ([[self delegate] respondsToSelector:@selector(tableView:doubleClickedOnIconOfRow:)])
-                    [[self delegate] tableView:self doubleClickedOnIconOfRow:row];
-                return;
-            } else if ([self isRowSelected:row]) {
-                return;
+    if ([theEvent clickCount] == 2) {
+        NSPoint point = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+        int row = [self rowAtPoint:point];
+        int column = [self columnAtPoint:point];
+        if (row != -1 && column == 0) {
+            BDSKGroupCell *cell = [[[self tableColumns] objectAtIndex:0] dataCellForRow:row];
+            if ([cell respondsToSelector:@selector(iconRectForBounds:)]) {
+                NSRect iconRect = [cell iconRectForBounds:[self frameOfCellAtColumn:column row:row]];
+                if (NSPointInRect(point, iconRect)) {
+                    if ([[self delegate] respondsToSelector:@selector(outlineView:doubleClickedOnIconOfRow:)])
+                        [[self delegate] outlineView:self doubleClickedOnIconOfRow:row];
+                    return;
+                }
             }
         }
     }
@@ -150,20 +176,50 @@
 {
     [self setNeedsDisplay:YES];
 }
+- (void)reloadData
+{
+    const NSInteger nrows = [self numberOfRows];
+    [super reloadData];
+    
+    /*
+     Reloading can cause a selection change as side effect, but doesn't ask the delegate if it should select the row.
+     This ends up selecting group rows, which is pretty undesirable, and can happen as a result of undo (via a
+     notification handler), so isn't straightforward to work around in the controller.
+     */
+    if (nrows != [self numberOfRows] && [[self delegate] respondsToSelector:@selector(outlineView:shouldSelectItem:)]) {
+        
+        NSIndexSet *selectedIndexes = [self selectedRowIndexes];
+        NSMutableIndexSet *indexesToSelect = [NSMutableIndexSet indexSet];
+        NSUInteger row = [selectedIndexes firstIndex];
+        while (NSNotFound != row) {
+            if ([[self delegate] outlineView:self shouldSelectItem:[self itemAtRow:row]]) {
+                [indexesToSelect addIndex:row];
+            }
+            row = [selectedIndexes indexGreaterThanIndex:row];
+        }
+        
+        if ([indexesToSelect count]) {
+            [self selectRowIndexes:indexesToSelect byExtendingSelection:NO];
+        }
+        else {
+            [self deselectAll:nil];
+        }
+    }
+}
 
 - (void)highlightSelectionInClipRect:(NSRect)clipRect
 {
     [super highlightSelectionInClipRect:clipRect];
     // check this in case it's been disconnected in one of our reloading optimizations
-    if([[self delegate] respondsToSelector:@selector(tableView:indexesOfRowsToHighlightInRange:)])
-        [self drawHighlightOnRows:[[self delegate] tableView:self indexesOfRowsToHighlightInRange:[self rowsInRect:clipRect]]];
+    if([[self delegate] respondsToSelector:@selector(outlineView:indexesOfRowsToHighlightInRange:)])
+        [self drawHighlightOnRows:[[self delegate] outlineView:self indexesOfRowsToHighlightInRange:[self rowsInRect:clipRect]]];
 }
 
 // make sure that certain rows are only selected as a single selection
 - (void)selectRowIndexes:(NSIndexSet *)indexes byExtendingSelection:(BOOL)shouldExtend{
     NSIndexSet *singleIndexes = nil;
-    if ([[self delegate] respondsToSelector:@selector(tableViewSingleSelectionIndexes:)])
-        singleIndexes = [[self delegate] tableViewSingleSelectionIndexes:self];
+    if ([[self delegate] respondsToSelector:@selector(outlineViewSingleSelectionIndexes:)])
+        singleIndexes = [[self delegate] outlineViewSingleSelectionIndexes:self];
     
     // don't extend rows that should be in single selection
     if (shouldExtend == YES && singleIndexes && [[self selectedRowIndexes] intersectsIndexSet:singleIndexes])
@@ -185,7 +241,7 @@
 - (void)textDidEndEditing:(NSNotification *)notification {
     int textMovement = [[[notification userInfo] objectForKey:@"NSTextMovement"] intValue];
     if ((textMovement == NSReturnTextMovement || textMovement == NSTabTextMovement) && 
-        [[self delegate] respondsToSelector:@selector(tableViewShouldEditNextItemWhenEditingEnds:)] && [[self delegate] tableViewShouldEditNextItemWhenEditingEnds:self] == NO) {
+        [[self delegate] respondsToSelector:@selector(outlineViewShouldEditNextItemWhenEditingEnds:)] && [[self delegate] outlineViewShouldEditNextItemWhenEditingEnds:self] == NO) {
         // This is ugly, but just about the only way to do it. NSTableView is determined to select and edit something else, even the text field that it just finished editing, unless we mislead it about what key was pressed to end editing.
         NSMutableDictionary *newUserInfo;
         NSNotification *newNotification;
@@ -204,9 +260,23 @@
 
 // the default implementation is broken with the above modifications, and would be invalid anyway
 - (IBAction)selectAll:(id)sender {
-    NSIndexSet *singleIndexes = [[self delegate] tableViewSingleSelectionIndexes:self];
+    NSIndexSet *singleIndexes = nil;
+    if ([[self delegate] respondsToSelector:@selector(outlineViewSingleSelectionIndexes:)])
+        singleIndexes = [[self delegate] outlineViewSingleSelectionIndexes:self];
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfRows])];
     [indexes removeIndexes:singleIndexes];
+    
+    if ([[self delegate] respondsToSelector:@selector(outlineView:shouldSelectItem:)]) {
+        NSMutableIndexSet *selectableIndexes = [NSMutableIndexSet indexSet];
+        NSUInteger row = [indexes firstIndex];
+        while (NSNotFound != row) {
+            if ([[self delegate] outlineView:self shouldSelectItem:[self itemAtRow:row]]) {
+                [selectableIndexes addIndex:row];
+            }
+        }
+        indexes = selectableIndexes;
+    }
+    
     if ([indexes count] == 0) {
         return;
     } else if ([indexes count] == 1) {
@@ -222,7 +292,7 @@
 
 // the default implementation would be meaningless anyway as we don't allow empty selection
 - (IBAction)deselectAll:(id)sender {
-	[self selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+	[self selectRowIndexes:[NSIndexSet indexSetWithIndex:1] byExtendingSelection:NO];
 	[self scrollRowToVisible:0];
 }
 
@@ -274,15 +344,15 @@
 }
 
 - (NSMenu *)menuForEvent:(NSEvent *)theEvent {
-	BDSKGroupTableView *tableView = (BDSKGroupTableView *)[self tableView];
-	id delegate = [tableView delegate];
+	BDSKGroupOutlineView *outlineView = (BDSKGroupOutlineView *)[self tableView];
+	id delegate = [outlineView delegate];
 	NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
 	int column = [self columnAtPoint:location];
 	
 	if (column == -1)
 		return nil;
 	
-	NSTableColumn *tableColumn = [[tableView tableColumns] objectAtIndex:column];
+	NSTableColumn *tableColumn = [[outlineView tableColumns] objectAtIndex:column];
     id cell = [tableColumn headerCell];
     BOOL onPopUp = NO;
 		
@@ -290,8 +360,8 @@
 		NSPointInRect(location, [cell popUpRectForBounds:[self headerRectOfColumn:column]])) 
 		onPopUp = YES;
 		
-	if ([delegate respondsToSelector:@selector(tableView:menuForTableHeaderColumn:onPopUp:)]) {
-		return [delegate tableView:tableView menuForTableHeaderColumn:tableColumn onPopUp:onPopUp];
+	if ([delegate respondsToSelector:@selector(outlineView:menuForTableHeaderColumn:onPopUp:)]) {
+		return [delegate outlineView:outlineView menuForTableHeaderColumn:tableColumn onPopUp:onPopUp];
 	}
 	return nil;
 }

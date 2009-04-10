@@ -38,6 +38,7 @@
 
 #import "BDSKGroupsArray.h"
 #import "BDSKGroup.h"
+#import "BDSKParentGroup.h"
 #import "BDSKSharedGroup.h"
 #import "BDSKURLGroup.h"
 #import "BDSKScriptGroup.h"
@@ -53,189 +54,148 @@
 #import "BDSKFilter.h"
 #import "NSArray_BDSKExtensions.h"
 
-@interface BDSKGroupsArray (Private)
-
-- (NSUndoManager *)undoManager;
-
-@end
+#define LIBRARY_PARENT_INDEX  0
+#define EXTERNAL_PARENT_INDEX 1 /* webGroup, searchGroups, sharedGroups, URLGroups, scriptGroups */
+#define SMART_PARENT_INDEX    2 /* lastImportGroup, smartGroups */
+#define STATIC_PARENT_INDEX   3 /* staticGroups */
+#define CATEGORY_PARENT_INDEX 4 /* categoryGroups */
 
 
 @implementation BDSKGroupsArray 
 
 - (id)initWithDocument:(BibDocument *)aDocument {
     if(self = [super init]) {
-        libraryGroup = [[BDSKGroup alloc] initLibraryGroup];
-        [libraryGroup setDocument:aDocument];
-        if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldShowWebGroupPrefKey]){
-            webGroup = [[BDSKWebGroup alloc] initWithName:NSLocalizedString(@"Web", @"Web")];
-            [webGroup setDocument:aDocument];
-        }else{
-            webGroup = nil;
-        }
-        lastImportGroup = nil;
-        searchGroups = [[NSMutableArray alloc] init];
-        sharedGroups = [[NSMutableArray alloc] init];
-        urlGroups = [[NSMutableArray alloc] init];
-        scriptGroups = [[NSMutableArray alloc] init];
-        smartGroups = [[NSMutableArray alloc] init];
-        staticGroups = [[NSMutableArray alloc] init];
-        categoryGroups = nil;
+        NSMutableArray *parents = [[NSMutableArray alloc] init];
+        BDSKParentGroup *parent;
+        
+        parent = [[BDSKLibraryParentGroup alloc] init];
+        [parent setDocument:aDocument];
+        [parents addObject:parent];
+        
+        parent = [[BDSKExternalParentGroup alloc] init];
+        [parent setDocument:aDocument];
+        [parents addObject:parent];
+        
+        parent = [[BDSKSmartParentGroup alloc] init];
+        [parent setDocument:aDocument];
+        [parents addObject:parent];
+        
+        parent = [[BDSKStaticParentGroup alloc] init];
+        [parent setDocument:aDocument];
+        [parents addObject:parent];
+        
+        parent = [[BDSKCategoryParentGroup alloc] init];
+        [parent setDocument:aDocument];
+        [parents addObject:parent];
+        
+        groups = [parents copy];
+        [parents release];
+        
         document = aDocument;
     }
     return self;
 }
 
 - (void)dealloc {
-    [libraryGroup release];
-    [webGroup release];
-    [lastImportGroup release];
-    [sharedGroups release];
-    [urlGroups release];
-    [scriptGroups release];
-    [searchGroups release];
-    [smartGroups release];
-    [staticGroups release];
-    [categoryGroups release];
+    [groups release];
     [super dealloc];
+}
+
+- (NSUndoManager *)undoManager {
+    return [[self document] undoManager];
 }
 
 #pragma mark NSArray primitive methods
 
 - (unsigned int)count {
-    return [sharedGroups count] + [urlGroups count] + [scriptGroups count] + [searchGroups count]
-        + [smartGroups count] + [staticGroups count] + [categoryGroups count] + 
-        ([lastImportGroup count] ? 1 : 0) + (webGroup == nil ? 0 : 1) + 1 /* add 1 for all publications group */ ;
+    return [groups count];
 }
 
 - (id)objectAtIndex:(unsigned int)idx {
-    unsigned int count;
-    
-    if (idx == 0)
-		return libraryGroup;
-    idx -= 1;
-    
-    if (webGroup != nil){
-        // if we are showing the web group, insert it after the library:
-        if(idx == 0)
-            return webGroup;
-        idx -= 1;
-    }
-    
-    count = [searchGroups count];
-    if (idx < count)
-        return [searchGroups objectAtIndex:idx];
-    idx -= count;
-        
-    count = [sharedGroups count];
-    if (idx < count)
-        return [sharedGroups objectAtIndex:idx];
-    idx -= count;
-    
-    count = [urlGroups count];
-    if (idx < count)
-        return [urlGroups objectAtIndex:idx];
-    idx -= count;
-    
-    count = [scriptGroups count];
-    if (idx < count)
-        return [scriptGroups objectAtIndex:idx];
-    idx -= count;
-    
-    if ([lastImportGroup count] != 0) {
-        if (idx == 0)
-            return lastImportGroup;
-        idx -= 1;
-    }
-    
-	count = [smartGroups count];
-    if (idx < count)
-		return [smartGroups objectAtIndex:idx];
-    idx -= count;
-    
-    count = [staticGroups count];
-    if (idx < count)
-        return [staticGroups objectAtIndex:idx];
-    idx -= count;
-    
-    return [categoryGroups objectAtIndex:idx];
+    return [groups objectAtIndex:idx];
 }
 
 #pragma mark Subarray Accessors
 
+- (NSArray *)allGroups {
+    NSMutableArray *allGroups = [NSMutableArray array];
+    NSEnumerator *parentEnum = [groups objectEnumerator];
+    BDSKParentGroup *parent;
+    while (parent = [parentEnum nextObject])
+        [allGroups addObjectsFromArray:[parent childrenInRange:NSMakeRange(0, [parent numberOfChildren])]];
+    return allGroups;
+}
+
+- (BDSKLibraryParentGroup *)libraryParent { return [groups objectAtIndex:LIBRARY_PARENT_INDEX]; }
+
+- (BDSKExternalParentGroup *)externalParent { return [groups objectAtIndex:EXTERNAL_PARENT_INDEX]; }
+
+- (BDSKSmartParentGroup *)smartParent { return [groups objectAtIndex:SMART_PARENT_INDEX]; }
+
+- (BDSKStaticParentGroup *)staticParent { return [groups objectAtIndex:STATIC_PARENT_INDEX]; }
+
+- (BDSKCategoryParentGroup *)categoryParent { return [groups objectAtIndex:CATEGORY_PARENT_INDEX]; }
+
 - (BDSKGroup *)libraryGroup{
-    return libraryGroup;
+    return (BDSKGroup *)[[self libraryParent] childAtIndex:0];
 }
 
 - (BDSKWebGroup *)webGroup{
-    return webGroup;
-}
-
-- (BDSKStaticGroup *)lastImportGroup{
-    return lastImportGroup;
+    return [[self externalParent] webGroup];
 }
 
 - (NSArray *)searchGroups{
-    return searchGroups;
+    return [[self externalParent] searchGroups];
 }
 
 - (NSArray *)sharedGroups{
-    return sharedGroups;
+    return [[self externalParent] sharedGroups];
 }
 
 - (NSArray *)URLGroups{
-    return urlGroups;
+    return [[self externalParent] URLGroups];
 }
 
 - (NSArray *)scriptGroups{
-    return scriptGroups;
+    return [[self externalParent] scriptGroups];
+}
+
+- (BDSKStaticGroup *)lastImportGroup{
+    return [[self smartParent] lastImportGroup];
 }
 
 - (NSArray *)smartGroups{
-    return smartGroups;
+    return [[self smartParent] smartGroups];
 }
 
 - (NSArray *)staticGroups{
-    return staticGroups;
+    return [[self staticParent] staticGroups];
 }
 
 - (NSArray *)categoryGroups{
-    return categoryGroups;
+    return [[self categoryParent] categoryGroups];
 }
 
-#pragma mark Index ranges of groups
+#pragma mark Containment
 
-- (NSRange)rangeOfSearchGroups{
-    return NSMakeRange(webGroup != nil ? 2 : 1, [searchGroups count]);
+- (BOOL)containsGroupIdenticalTo:(id)group {
+    NSEnumerator *parentEnum = [groups objectEnumerator];
+    BDSKParentGroup *parent;
+    while (parent = [parentEnum nextObject]) {
+        if ([parent containsChildIdenticalTo:group])
+            return YES;
+    }
+    return NO;
 }
 
-- (NSRange)rangeOfSharedGroups{
-    return NSMakeRange(NSMaxRange([self rangeOfSearchGroups]), [sharedGroups count]);
-}
-
-- (NSRange)rangeOfURLGroups{
-    return NSMakeRange(NSMaxRange([self rangeOfSharedGroups]), [urlGroups count]);
-}
-
-- (NSRange)rangeOfScriptGroups{
-    return NSMakeRange(NSMaxRange([self rangeOfURLGroups]), [scriptGroups count]);
-}
-
-- (NSRange)rangeOfSmartGroups{
-    unsigned startIndex = NSMaxRange([self rangeOfScriptGroups]);
-    if([lastImportGroup count] > 0) startIndex++;
-    return NSMakeRange(startIndex, [smartGroups count]);
-}
-
-- (NSRange)rangeOfStaticGroups{
-    return NSMakeRange(NSMaxRange([self rangeOfSmartGroups]), [staticGroups count]);
-}
-
-- (NSRange)rangeOfCategoryGroups{
-    return NSMakeRange(NSMaxRange([self rangeOfStaticGroups]), [categoryGroups count]);
-}
-
-- (NSRange)rangeOfExternalGroups{
-    return NSMakeRange(1, NSMaxRange([self rangeOfScriptGroups]) - 1);
+- (BOOL)containsGroup:(id)group {
+    NSEnumerator *parentEnum = [groups objectEnumerator];
+    BDSKParentGroup *parent;
+    while (parent = [parentEnum nextObject]) {
+        if ([parent containsChild:group])
+            return YES;
+    }
+    return NO;
 }
 
 #pragma mark Mutable accessors
@@ -255,171 +215,107 @@
 }
 
 - (void)setLastImportedPublications:(NSArray *)pubs{
-    if(lastImportGroup == nil) {
-        lastImportGroup = [[BDSKStaticGroup alloc] initWithLastImport:pubs];
-        [lastImportGroup setDocument:[self document]];
-    } else {
-        [lastImportGroup setPublications:pubs];
-    }
+    [[self smartParent] setLastImportedPublications:pubs];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)setSharedGroups:(NSArray *)array{
-    if(sharedGroups != array){
-        NSMutableArray *removedGroups = [sharedGroups mutableCopy];
-        [removedGroups removeObjectsInArray:array];
-        if ([removedGroups count])
-            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
-                object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:removedGroups, @"groups", nil]];
-        [removedGroups release];
-        
-        // try to preserve the unique ID when we regenerate the groups
-        if ([array count] && [sharedGroups count])
-            [self duplicateUniqueIDsFromGroups:sharedGroups toGroups:array];
-        
-        [sharedGroups removeObjectsInArray:array];
-        [sharedGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
-        [sharedGroups setArray:array]; 
-        [sharedGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:[self document]];
-    }
+    NSMutableArray *removedGroups = [[self sharedGroups] mutableCopy];
+    [removedGroups removeObjectsInArray:array];
+    if ([removedGroups count])
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
+            object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:removedGroups, @"groups", nil]];
+    [removedGroups release];
+    
+    // try to preserve the unique ID when we regenerate the groups
+    if ([array count] && [[self sharedGroups] count])
+        [self duplicateUniqueIDsFromGroups:[self sharedGroups] toGroups:array];
+    
+    [[self externalParent] setSharedGroups:array];
 }
 
 - (void)addURLGroup:(BDSKURLGroup *)group {
 	[[[self undoManager] prepareWithInvocationTarget:self] removeURLGroup:group];
-    
-	[urlGroups addObject:group];
-    [group setDocument:[self document]];
-    
+	[[self externalParent] addURLGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)removeURLGroup:(BDSKURLGroup *)group {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
         object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], @"groups", nil]];
-    
 	[[[self undoManager] prepareWithInvocationTarget:self] addURLGroup:group];
-    
-    [group setDocument:nil];
-	[urlGroups removeObjectIdenticalTo:group];
-    
+	[[self externalParent] removeURLGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)addScriptGroup:(BDSKScriptGroup *)group {
 	[[[self undoManager] prepareWithInvocationTarget:self] removeScriptGroup:group];
-    
-	[scriptGroups addObject:group];
-    [group setDocument:[self document]];
-    
+	[[self externalParent] addScriptGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)removeScriptGroup:(BDSKScriptGroup *)group {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
         object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], @"groups", nil]];
-    
 	[[[self undoManager] prepareWithInvocationTarget:self] addScriptGroup:group];
-    
-    [group setDocument:nil];
-	[scriptGroups removeObjectIdenticalTo:group];
-    
+	[[self externalParent] removeScriptGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)addSearchGroup:(BDSKSearchGroup *)group {
-	[searchGroups addObject:group];
-    [group setDocument:[self document]];
-    
+	[[self externalParent] addSearchGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)removeSearchGroup:(BDSKSearchGroup *)group {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
         object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], @"groups", nil]];
-    
-    [group setDocument:nil];
-	[searchGroups removeObjectIdenticalTo:group];
-    
+	[[self externalParent] removeSearchGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)addSmartGroup:(BDSKSmartGroup *)group {
 	[[[self undoManager] prepareWithInvocationTarget:self] removeSmartGroup:group];
-    
     // update the count
 	[group filterItems:[document publications]];
-	
-	[smartGroups addObject:group];
-    [group setDocument:[self document]];
-    
+	[[self smartParent] addSmartGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)removeSmartGroup:(BDSKSmartGroup *)group {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
         object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], @"groups", nil]];
-    
 	[[[self undoManager] prepareWithInvocationTarget:self] addSmartGroup:group];
-	
-    [group setDocument:nil];
-	[smartGroups removeObjectIdenticalTo:group];
-    
+	[[self smartParent] removeSmartGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)addStaticGroup:(BDSKStaticGroup *)group {
 	[[[self undoManager] prepareWithInvocationTarget:self] removeStaticGroup:group];
-	
-    [group setDocument:[self document]];
-    [staticGroups addObject:group];
-    
+	[[self staticParent] addStaticGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)removeStaticGroup:(BDSKStaticGroup *)group {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
         object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], @"groups", nil]];
-    
 	[[[self undoManager] prepareWithInvocationTarget:self] addStaticGroup:group];
-	
-    [group setDocument:nil];
-    [staticGroups removeObjectIdenticalTo:group];
-    
+	[[self staticParent] removeStaticGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
  
 - (void)setCategoryGroups:(NSArray *)array{
-    if(categoryGroups != array){
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
-            object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:categoryGroups, @"groups", nil]];
-        
-        // try to preserve the unique ID when we regenerate the groups
-        if ([[[array lastObject] key] isEqualToString:[[categoryGroups lastObject] key]])
-            [self duplicateUniqueIDsFromGroups:categoryGroups toGroups:array];
-        
-        [categoryGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
-        [categoryGroups release];
-        categoryGroups = [array mutableCopy]; 
-        [categoryGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:[self document]];
-    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
+        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[self categoryGroups], @"groups", nil]];
+    // try to preserve the unique ID when we regenerate the groups
+    if ([[[array lastObject] key] isEqualToString:[[[self categoryGroups] lastObject] key]])
+        [self duplicateUniqueIDsFromGroups:[self categoryGroups] toGroups:array];
+    [[self categoryParent] setCategoryGroups:array];
 }
 
 // this should only be used just before reading from file, in particular revert, so we shouldn't make this undoable
-- (void)removeAllNonSharedGroups {
-    [lastImportGroup setPublications:[NSArray array]];
-    [urlGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
-    [urlGroups removeAllObjects];
-    [scriptGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
-    [scriptGroups removeAllObjects];
-    [searchGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
-    [searchGroups removeAllObjects];
-    [staticGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
-    [staticGroups removeAllObjects];
-    [smartGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
-    [smartGroups removeAllObjects];
-    [staticGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
-    [staticGroups removeAllObjects];
-    [categoryGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
-    [categoryGroups removeAllObjects];
+- (void)removeAllSavedGroups {
+    [groups makeObjectsPerformSelector:_cmd];
 }
 
 #pragma mark Document
@@ -431,29 +327,7 @@
 #pragma mark Sorting
 
 - (void)sortUsingDescriptors:(NSArray *)sortDescriptors{
-    BDSKGroup *emptyGroup = nil;
-    
-    if ([categoryGroups count] > 0) {
-        id firstName = [[categoryGroups objectAtIndex:0] name];
-        if ([firstName isEqual:@""] || [firstName isEqual:[BibAuthor emptyAuthor]]) {
-            emptyGroup = [[categoryGroups objectAtIndex:0] retain];
-            [categoryGroups removeObjectAtIndex:0];
-        }
-    }
-    
-    // we don't sort serachGroups, as their names change and the order-as-added can be useful to track them
-    
-    [sharedGroups sortUsingDescriptors:sortDescriptors];
-    [urlGroups sortUsingDescriptors:sortDescriptors];
-    [scriptGroups sortUsingDescriptors:sortDescriptors];
-    [smartGroups sortUsingDescriptors:sortDescriptors];
-    [staticGroups sortUsingDescriptors:sortDescriptors];
-    [categoryGroups sortUsingDescriptors:sortDescriptors];
-	
-    if (emptyGroup != nil) {
-        [categoryGroups insertObject:emptyGroup atIndex:0];
-        [emptyGroup release];
-    }
+    [groups makeObjectsPerformSelector:_cmd withObject:sortDescriptors];
 }
 
 #pragma mark Serializing
@@ -477,33 +351,33 @@
 	}
 	
     Class groupClass = Nil;
-    NSMutableArray *groupArray = nil;
     
-    if (groupType == BDSKSmartGroupType) {
+    if (groupType == BDSKSmartGroupType)
         groupClass = [BDSKSmartGroup class];
-        groupArray = smartGroups;
-	} else if (groupType == BDSKStaticGroupType) {
+    else if (groupType == BDSKStaticGroupType)
         groupClass = [BDSKStaticGroup class];
-        groupArray = staticGroups;
-	} else if (groupType == BDSKURLGroupType) {
+	else if (groupType == BDSKURLGroupType)
         groupClass = [BDSKURLGroup class];
-        groupArray = urlGroups;
-	} else if (groupType == BDSKScriptGroupType) {
+	else if (groupType == BDSKScriptGroupType)
         groupClass = [BDSKScriptGroup class];
-        groupArray = scriptGroups;
-    }
     
-    if (groupClass && groupArray) {
+    if (groupClass) {
         NSEnumerator *groupEnum = [plist objectEnumerator];
         NSDictionary *groupDict;
-        NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:[(NSArray *)plist count]];
-        BDSKGroup *group = nil;
+        id group = nil;
         
         while (groupDict = [groupEnum nextObject]) {
             @try {
                 group = [[groupClass alloc] initWithDictionary:groupDict];
-                [group setDocument:[self document]];
-                [array addObject:group];
+                [(BDSKGroup *)group setDocument:[self document]];
+                if (groupType == BDSKSmartGroupType)
+                    [[self smartParent] addSmartGroup:group];
+                else if (groupType == BDSKURLGroupType)
+                    [[self externalParent] addURLGroup:group];
+                else if (groupType == BDSKScriptGroupType)
+                    [[self externalParent] addScriptGroup:group];
+                else if (groupType == BDSKStaticGroupType)
+                    [[self staticParent] addStaticGroup:group];
             }
             @catch(id exception) {
                 NSLog(@"Ignoring exception \"%@\" while parsing group data.", exception);
@@ -513,28 +387,25 @@
                 group = nil;
             }
         }
-        
-        [groupArray setArray:array];
-        [array release];
     }
 }
 
 - (NSData *)serializedGroupsDataOfType:(int)groupType {
     Class groupClass = Nil;
-    NSMutableArray *groupArray = nil;
+    NSArray *groupArray = nil;
     
     if (groupType == BDSKSmartGroupType) {
         groupClass = [BDSKSmartGroup class];
-        groupArray = smartGroups;
+        groupArray = [self smartGroups];
 	} else if (groupType == BDSKStaticGroupType) {
         groupClass = [BDSKStaticGroup class];
-        groupArray = staticGroups;
+        groupArray = [self staticGroups];
 	} else if (groupType == BDSKURLGroupType) {
         groupClass = [BDSKURLGroup class];
-        groupArray = urlGroups;
+        groupArray = [self URLGroups];
 	} else if (groupType == BDSKScriptGroupType) {
         groupClass = [BDSKScriptGroup class];
-        groupArray = scriptGroups;
+        groupArray = [self scriptGroups];
     }
     
     NSData *data = nil;

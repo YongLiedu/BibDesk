@@ -172,13 +172,13 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
 
 #define BORDER_BETWEEN_EDGE_AND_IMAGE (3.0)
 #define BORDER_BETWEEN_IMAGE_AND_TEXT (3.0)
-#define SIZE_OF_TEXT_FIELD_BORDER (1.0)
 #define BORDER_BETWEEN_EDGE_AND_COUNT (2.0)
 #define BORDER_BETWEEN_COUNT_AND_TEXT (1.0)
-#define IMAGE_OFFSET (1.0)
+#define TEXT_INSET                    (2.0)
+#define IMAGE_SIZE_OFFSET             (2.0)
 
 - (NSSize)iconSizeForBounds:(NSRect)aRect {
-    return NSMakeSize(NSHeight(aRect) - 1.0, NSHeight(aRect) - 1.0);
+    return NSMakeSize(NSHeight(aRect) - IMAGE_SIZE_OFFSET, NSHeight(aRect) - IMAGE_SIZE_OFFSET);
 }
 
 - (NSRect)iconRectForBounds:(NSRect)aRect {
@@ -217,7 +217,7 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
         textRect.size.width = NSMinX(countRect) - BORDER_BETWEEN_COUNT_AND_TEXT - NSMinX(textRect);
     else
         textRect.size.width = NSMaxX(aRect) - NSMinX(textRect);
-    return textRect;
+    return NSInsetRect(textRect, 0.0, TEXT_INSET);
 }
 
 - (NSSize)cellSize {
@@ -254,7 +254,7 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
         isHighlighted = [self isHighlighted];
     
     // Draw the text
-    NSRect textRect = NSInsetRect([self textRectForBounds:aRect], SIZE_OF_TEXT_FIELD_BORDER, 0.0); 
+    NSRect textRect = [self textRectForBounds:aRect]; 
     NSFont *font = nil;
     NSAttributedString *label = [self attributedStringValue];
     if (isHighlighted) {
@@ -328,14 +328,13 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     
     // Draw the image
     NSRect imageRect = BDSKCenterRect([self iconRectForBounds:aRect], [self iconSizeForBounds:aRect], [controlView isFlipped]);
-    imageRect.origin.y += [controlView isFlipped] ? -IMAGE_OFFSET : IMAGE_OFFSET;
     if ([self icon])
         [self drawIcon:[self icon] withFrame:imageRect inView:controlView];
 }
 
 - (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength {
     NSRect editRect = [self textRectForBounds:aRect];
-    editRect.size.width = NSMaxX(aRect) - NSMinX(editRect);
+    editRect.size.width = NSMaxX(aRect) - NSMinX(editRect) - 1.0;
     settingUpFieldEditor = YES;
     [super selectWithFrame:editRect inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
     settingUpFieldEditor = NO;
@@ -360,7 +359,7 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
 
 // this is actually never used, as BDSKGroupCell doesn't go through the formatter for display
 - (NSString *)stringForObjectValue:(id)obj {
-    BDSKASSERT([obj isKindOfClass:[NSDictionary class]]);
+    //BDSKASSERT([obj isKindOfClass:[NSDictionary class]]);
     return [obj isKindOfClass:[NSString class]] ? obj : nonNullObjectValueForKey(obj, BDSKGroupCellStringKey);
 }
 

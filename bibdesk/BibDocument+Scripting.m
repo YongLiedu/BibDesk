@@ -236,12 +236,14 @@
 #pragma mark Groups
 
 - (BDSKGroup *)valueInGroupsWithUniqueID:(NSString *)aUniqueID {
-    unsigned int idx = [[groups valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
-    return idx == NSNotFound ? nil : [groups objectAtIndex:idx];
+    NSArray *allGroups = [groups allGroups];
+    unsigned int idx = [[allGroups valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    return idx == NSNotFound ? nil : [allGroups objectAtIndex:idx];
 }
 
 - (BDSKGroup *)valueInGroupsWithName:(NSString *)name {
-    NSArray *names = [groups valueForKey:@"stringValue"];
+    NSArray *allGroups = [groups allGroups];
+    NSArray *names = [allGroups valueForKey:@"stringValue"];
     unsigned int idx = [names indexOfObject:name];
     if (idx == NSNotFound) {
         NSMutableArray *fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &kBDSKCaseInsensitiveStringArrayCallBacks);
@@ -249,7 +251,7 @@
         idx = [fuzzyNames indexOfObject:name];
         [fuzzyNames release];
     }
-    return idx == NSNotFound ? nil : [groups objectAtIndex:idx];
+    return idx == NSNotFound ? nil : [allGroups objectAtIndex:idx];
 }
 
 - (void)insertInGroups:(BDSKGroup *)group {
@@ -633,12 +635,13 @@
         NSScriptObjectSpecifier *endSpec = [rangeSpec endSpecifier];
         NSString *startKey = [startSpec key];
         NSString *endKey = [endSpec key];
-
+        NSArray *allGroups = [groups allGroups];
+        
         if ((startSpec == nil) && (endSpec == nil))
             // We need to have at least one of these...
             return nil;
         
-        if ([groups count] == 0)
+        if ([allGroups count] == 0)
             // If there are no groups, there can be no match.  Just return now.
             return [NSArray array];
 
@@ -660,7 +663,7 @@
                     // Oops.  We could not find the start object.
                     return nil;
                 
-                startIndex = [groups indexOfObjectIdenticalTo:startObject];
+                startIndex = [allGroups indexOfObjectIdenticalTo:startObject];
                 if (startIndex == NSNotFound)
                     // Oops.  We couldn't find the start object in the groups array.  This should not happen.
                     return nil;
@@ -679,13 +682,13 @@
                     // Oops.  We could not find the end object.
                     return nil;
                 
-                endIndex = [groups indexOfObjectIdenticalTo:endObject];
+                endIndex = [allGroups indexOfObjectIdenticalTo:endObject];
                 if (endIndex == NSNotFound)
                     // Oops.  We couldn't find the end object in the groups array.  This should not happen.
                     return nil;
                 
             } else {
-                endIndex = [groups count] - 1;
+                endIndex = [allGroups count] - 1;
             }
 
             if (endIndex < startIndex) {
@@ -709,7 +712,7 @@
                 if (keyIsGroups) {
                     [result addObject:[NSNumber numberWithInt:i]];
                 } else {
-                    curObj = [groups objectAtIndex:i];
+                    curObj = [allGroups objectAtIndex:i];
                     curKeyIndex = [rangeKeyObjects indexOfObjectIdenticalTo:curObj];
                     if (curKeyIndex != NSNotFound)
                         [result addObject:[NSNumber numberWithInt:curKeyIndex]];
@@ -730,12 +733,13 @@
         NSScriptObjectSpecifier *baseSpec = [relSpec baseSpecifier];
         NSString *baseKey = [baseSpec key];
         NSRelativePosition relPos = [relSpec relativePosition];
-
+        NSArray *allGroups = [groups allGroups];
+        
         if (baseSpec == nil)
             // We need to have one of these...
             return nil;
         
-        if ([groups count] == 0)
+        if ([allGroups count] == 0)
             // If there are no groups, there can be no match.  Just return now.
             return [NSArray array];
 
@@ -757,7 +761,7 @@
                 baseObject = (relPos == NSRelativeBefore ? [baseObject objectAtIndex:0] : [baseObject lastObject]);
             }
 
-            baseIndex = [groups indexOfObjectIdenticalTo:baseObject];
+            baseIndex = [allGroups indexOfObjectIdenticalTo:baseObject];
             if (baseIndex == NSNotFound)
                 // Oops.  We couldn't find the base object in the groups array.  This should not happen.
                 return nil;
@@ -770,7 +774,7 @@
             NSArray *relKeyObjects = (keyIsGroups ? nil : [self valueForKey:key]);
             id curObj;
             unsigned curKeyIndex;
-            int groupCount = [groups count];
+            int groupCount = [allGroups count];
 
             if (relPos == NSRelativeBefore)
                 baseIndex--;
@@ -782,7 +786,7 @@
                     [result addObject:[NSNumber numberWithInt:baseIndex]];
                     break;
                 } else {
-                    curObj = [groups objectAtIndex:baseIndex];
+                    curObj = [allGroups objectAtIndex:baseIndex];
                     curKeyIndex = [relKeyObjects indexOfObjectIdenticalTo:curObj];
                     if (curKeyIndex != NSNotFound) {
                         [result addObject:[NSNumber numberWithInt:curKeyIndex]];

@@ -48,32 +48,22 @@ enum {
 	BDSKCategoryGroupType
 };
 
-@class BDSKGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BDSKSearchGroup, BDSKWebGroup, BibDocument;
+@class BDSKGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BDSKSearchGroup, BDSKWebGroup, BDSKLibraryParentGroup, BDSKExternalParentGroup, BDSKSmartParentGroup, BDSKStaticParentGroup, BDSKCategoryParentGroup, BibDocument;
 
 @interface BDSKGroupsArray : NSArray {
-    BDSKGroup *libraryGroup;
-    BDSKWebGroup *webGroup;
-    BDSKStaticGroup *lastImportGroup;
-    NSMutableArray *sharedGroups;
-    NSMutableArray *urlGroups;
-    NSMutableArray *scriptGroups;
-    NSMutableArray *searchGroups;
-    NSMutableArray *smartGroups;
-    NSMutableArray *staticGroups;
-    NSMutableArray *categoryGroups;
+    NSArray *groups;
     BibDocument *document;
 }
 
 - (id)initWithDocument:(BibDocument *)aDocument;
 
-- (NSRange)rangeOfSharedGroups;
-- (NSRange)rangeOfURLGroups;
-- (NSRange)rangeOfScriptGroups;
-- (NSRange)rangeOfSearchGroups;
-- (NSRange)rangeOfSmartGroups;
-- (NSRange)rangeOfStaticGroups;
-- (NSRange)rangeOfCategoryGroups;
-- (NSRange)rangeOfExternalGroups;
+- (NSArray *)allGroups;
+
+- (BDSKLibraryParentGroup *)libraryParent;
+- (BDSKExternalParentGroup *)externalParent;
+- (BDSKSmartParentGroup *)smartParent;
+- (BDSKStaticParentGroup *)staticParent;
+- (BDSKCategoryParentGroup *)categoryParent;
 
 - (BDSKGroup *)libraryGroup;
 - (BDSKWebGroup *)webGroup;
@@ -85,6 +75,9 @@ enum {
 - (NSArray *)smartGroups;
 - (NSArray *)staticGroups;
 - (NSArray *)categoryGroups;
+
+- (BOOL)containsGroupIdenticalTo:(id)group;
+- (BOOL)containsGroup:(id)group;
 
 - (void)setLastImportedPublications:(NSArray *)pubs;
 - (void)setSharedGroups:(NSArray *)array;
@@ -99,7 +92,7 @@ enum {
 - (void)addStaticGroup:(BDSKStaticGroup *)group;
 - (void)removeStaticGroup:(BDSKStaticGroup *)group;
 - (void)setCategoryGroups:(NSArray *)array;
-- (void)removeAllNonSharedGroups;
+- (void)removeAllSavedGroups;
 
 - (void)sortUsingDescriptors:(NSArray *)sortDescriptors;
 

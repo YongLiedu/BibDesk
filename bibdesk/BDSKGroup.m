@@ -37,6 +37,7 @@
  */
 
 #import "BDSKGroup.h"
+#import "BDSKParentGroup.h"
 #import "BibItem.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKOwnerProtocol.h"
@@ -186,6 +187,10 @@ static NSString *createUniqueID(void)
 	return nil;
 }
 
+- (BOOL)isParent { return NO; }
+
+- (BOOL)isLibraryParent { return NO; }
+
 - (BOOL)isStatic { return NO; }
 
 - (BOOL)isSmart { return NO; }
@@ -237,6 +242,14 @@ static NSString *createUniqueID(void)
     return [self stringValue];
 }
 
+- (BDSKParentGroup *)parent {
+    return parent;
+}
+
+- (void)setParent:(BDSKParentGroup *)newParent {
+    parent = newParent;
+}
+
 - (BibDocument *)document{
     return document;
 }
@@ -280,12 +293,7 @@ static NSString *BDSKLibraryLocalizedString = nil;
 }
 
 - (NSImage *)icon {
-    // this icon looks better than the one we get from +[NSImage imageNamed:@"FolderPenIcon"] or imageNamed:
-    static NSImage *image = nil;
-    if(nil == image)
-        image = [[[NSWorkspace sharedWorkspace] iconForFile:[[NSBundle mainBundle] bundlePath]] copy];
-    
-	return image;
+	return [NSImage imageNamed:@"NSApplicationIcon"];
 }
 
 - (BOOL)containsItem:(BibItem *)item {

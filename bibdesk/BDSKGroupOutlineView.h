@@ -1,5 +1,5 @@
 //
-//  BDSKGroupTableView.h
+//  BDSKGroupOutlineView.h
 //  Bibdesk
 //
 //  Created by Adam Maxwell on 10/19/05.
@@ -39,10 +39,13 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKGradientTableView.h"
 
-@class BDSKGroupTableView;
+@class BDSKGroupOutlineView;
 
-@interface BDSKGroupTableView : BDSKGradientTableView
+@interface BDSKGroupOutlineView : BDSKGradientOutlineView {
+    NSTextFieldCell *parentCell;
+}
 - (NSPopUpButtonCell *)popUpHeaderCell;
+- (NSTextFieldCell *)parentCell;
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note;
 - (void)updateHighlights;
 @end
@@ -57,9 +60,9 @@
 #pragma mark -
 
 @interface NSObject (BDSKGroupTableViewDelegate)
-- (NSIndexSet *)tableView:(BDSKGroupTableView *)aTableView indexesOfRowsToHighlightInRange:(NSRange)indexRange;
-- (NSIndexSet *)tableViewSingleSelectionIndexes:(BDSKGroupTableView *)aTableView;
-- (void)tableView:(BDSKGroupTableView *)aTableView doubleClickedOnIconOfRow:(int)row;
-- (NSMenu *)tableView:(BDSKGroupTableView *)aTableView menuForTableHeaderColumn:(NSTableColumn *)aTableColumn onPopUp:(BOOL)flag;
-- (BOOL)tableViewShouldEditNextItemWhenEditingEnds:(BDSKGroupTableView *)aTableView;
+- (NSIndexSet *)outlineView:(BDSKGroupOutlineView *)anOutlineView indexesOfRowsToHighlightInRange:(NSRange)indexRange;
+- (NSIndexSet *)outlineViewSingleSelectionIndexes:(BDSKGroupOutlineView *)anOutlineView;
+- (void)outlineView:(BDSKGroupOutlineView *)aTableView doubleClickedOnIconOfRow:(int)row;
+- (NSMenu *)outlineView:(BDSKGroupOutlineView *)anOutlineView menuForTableHeaderColumn:(NSTableColumn *)aTableColumn onPopUp:(BOOL)flag;
+- (BOOL)outlineViewShouldEditNextItemWhenEditingEnds:(BDSKGroupOutlineView *)aTableView;
 @end
