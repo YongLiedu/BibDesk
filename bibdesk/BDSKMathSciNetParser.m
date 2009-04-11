@@ -39,37 +39,36 @@
 #import "BDSKMathSciNetParser.h"
 #import "BDSKBibTeXParser.h"
 #import "BibItem.h"
-#import "NSError_BDSKExtensions.h"
-#import "NSString_BDSKExtensions.h"
 #import <AGRegEx/AGRegEx.h>
 
+#define MSNBATCHSIZE 50u
 
 
 @implementation BDSKMathSciNetParser
 
+
+/*
+ MathSciNet is mirrored across different servers, don't use the server name to recognise the URL.
+ Instead recognise all URLs beginning with 'mathscinet', to match both general MatSciNet URLs like <http://www.ams.org/mathscinet/...>  and MathSciNet reference URLS <http://www.ams.org/mathscinet-getitem?...>.
+*/
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
-    NSArray *pathComponents = [[url path] pathComponents];
-	BOOL result = [pathComponents count] > 1 && [[pathComponents objectAtIndex:1] caseInsensitiveCompare:@"mathscinet"] == NSOrderedSame;	
+	BOOL result = [[url path] rangeOfString:@"/mathscinet" options: (NSAnchoredSearch)].location != NSNotFound;
 	return result;
 }
 
-	
+
+
+/*
+ Finds strings of type MR1234567 in the current page. 
+ Creates a list of their IDs (without leading zeroes), and retrieves the BibItems for them.
+ Returns an array wit those BibItems.
+*/
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
-	NSError * error;
-	
-	/* 
-		Find occurrences of strings MR1234567 on the page and remove leading zeroes.
-		These are the IDs of the related records.
-	*/
-	AGRegex *MRRegexp = [AGRegex regexWithPattern:@"MR0*([1-9][0-9]*)" options:AGRegexMultiline];
+	AGRegex * MRRegexp = [AGRegex regexWithPattern:@"MR0*([0-9]+)" options:AGRegexMultiline];
 	NSArray * regexpResults = [MRRegexp findAllInString:[xmlDocument XMLString]];
 	
 	if (0 == [regexpResults count]) { return nil; }
 
-	
-	/*  
-		Ask server for BibTeX records for all related records found on the page
-	*/
 	NSEnumerator * matchEnumerator = [regexpResults objectEnumerator];
 	AGRegexMatch * match;
 	NSMutableArray * IDArray = [NSMutableArray arrayWithCapacity:[regexpResults count]];
@@ -81,33 +80,72 @@
 		}
 	}
 	
-	
-	NSMutableArray * results = [NSMutableArray arrayWithCapacity:[IDArray count]];
+	NSArray * results = [BDSKMathSciNetParser bibItemsForMRIDs:IDArray referrer:url error:outError];
+	return results;  
+}
 
-	/* MSN will return 50 results in one go, so loop in batches of 50 */
-	while ([IDArray count] > 0) {
-		NSRange elementRange = NSMakeRange(0, MIN(50u, [IDArray count]));
-		NSArray * processArray = [IDArray subarrayWithRange:elementRange];
-		[IDArray removeObjectsInRange:elementRange];
+
+
+/*
+ Helper method that turns an array of MR ID numbers into an array of BibItems using the default server.
+*/
++ (NSArray *) bibItemsForMRIDs:(NSArray *) IDs {
+	return [BDSKMathSciNetParser bibItemsForMRIDs:IDs referrer:nil error:NULL];
+}
+
+
+
+/*
+ Turns an array of MR ID numbers into an array of BibItems.
+ The referrer: URL argument is used to send requests to the same mirror that was used originally. 
+*/
++ (NSArray *) bibItemsForMRIDs:(NSArray *) IDs referrer:(NSURL *) URL error:(NSError **) outError {
+	NSError * error;
+	
+	/*  
+	 Determine the server name to use.
+	 If the referring URL's server name contains 'ams', assume we were using a mirror server before and continue using that.
+	 If the referring URL's server name doesn't contain 'ams' we're processing MR IDs not coming from a MathSciNet page and use the 'ams.org' server.
+	*/
+	NSString * serverName = [[URL host] lowercaseString];
+	
+	if (!serverName || [serverName rangeOfString:@"ams"].location == NSNotFound) {
+		// it's not an ams server => use ams.org instead
+		serverName = @"ams.org";
+	}
+	
+	
+	/* Downloaded BibTeX records sometimes use \"o for umlauts which is incorrect and rejected by the parser. Use a regular expression to find and replace them. Also add brackets to acute and grave accents, so BibDesk translates them to Unicode properly for display. 
+	*/
+	AGRegex * umlautFixer = [AGRegex regexWithPattern:@"(\\\\[\"'`][a-zA-Z])" options:AGRegexMultiline];
+	
+
+	/* Loop through IDs in batches of MSNBATCHSIZE. */
+	NSUInteger count = [IDs count];
+	NSMutableArray * results = [NSMutableArray arrayWithCapacity:count];
+	NSUInteger firstElement = 0;
+	while (firstElement < count) {
+		NSRange elementRange = NSMakeRange(firstElement, MIN(MSNBATCHSIZE, count - firstElement));
+		NSArray * processArray = [IDs subarrayWithRange:elementRange];
+		firstElement += MSNBATCHSIZE;
 		
 		NSString * queryString = [processArray componentsJoinedByString:@"&b="];
-		NSString * URLString = [NSString stringWithFormat:@"http://%@/mathscinet/search/publications.html?&fmt=bibtex&extend=1&b=%@", [url host], queryString];
-		NSURL * URL = [NSURL URLWithString:URLString];
-	
-		NSXMLDocument * resultsPage = [[[NSXMLDocument alloc] initWithContentsOfURL:URL options: NSXMLDocumentTidyHTML error:&error] autorelease];
-	
+		NSString * URLString = [NSString stringWithFormat:@"http://%@/mathscinet/search/publications.html?&fmt=bibtex&extend=1&b=%@", serverName, queryString];
+		NSURL * bibTeXBatchDownloadURL = [NSURL URLWithString:URLString];
+		
+		NSXMLDocument * resultsPage = [[[NSXMLDocument alloc] initWithContentsOfURL:bibTeXBatchDownloadURL options: NSXMLDocumentTidyHTML error:&error] autorelease];
+		
 		if ((error != nil)  && (resultsPage == nil)) {
-			/* only return with an error if we don't receive an XML object back.
+			/*  Only return with an error if we don't receive an XML object back.
 				NSXMLDocument returns an  NSXMLParserInternalError NSError if markup was slightly invalid.
-				MSN sends such markup by including unescaped ampersands in their XHTML, but the NSXMLDocumentTidyHTML fixes that problem despite the NSError
+				MSN sends such markup by including unescaped ampersands in their XHTML, but the NSXMLDocumentTidyHTML fixes that problem despite the NSError.
 			*/
 			if (outError != NULL) { *outError = error; }
 			return nil; 
 		}
-
 		
-		/* 
-			In the returned web page results live inside a <div class="doc"> tag.
+		
+		/*	In the returned web page results live inside a <div class="doc"> tag.
 			Each of them is wrapped in a <pre> tag. 
 			Find these, kill the potentially superfluous whitespace in there and create BibItems for each of them.
 		*/
@@ -124,7 +162,7 @@
 		while (node = [nodeEnumerator nextObject]) {
 			NSString * preContent = [node stringValue];		
 			NSString * cleanedRecord = 	[preContent stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-			cleanedRecord = [cleanedRecord stringByReplacingOccurrencesOfString:@"\\&" withString:@"\\&amp;"];
+			cleanedRecord = [umlautFixer replaceWithString:@"{$1}" inString:cleanedRecord];
 			
 			BOOL isPartialData;
 			NSError * parseError;
@@ -134,24 +172,35 @@
 				[results addObjectsFromArray:newPubs];
 			}
 		}
-	}  // end of while loop over 50 element subarrays
-
+	}  // end of while loop over MSNBATCHSIZE element subarrays
+	
 	
 
-	
-	/* STEP 4
-		Add a URL reference to the review's web page to each record.
-	*/
+	//	Add a URL reference pointing to the review's web page to each record.
 	NSEnumerator * itemEnumerator = [results objectEnumerator];	
 	BibItem * item;
 	
 	while (item = [itemEnumerator nextObject]) {
 		NSString * MRNumber = [[item citeKey] stringByRemovingPrefix:@"MR"];
-		NSString * MRItemURLString = [NSString stringWithFormat:@"http://%@/mathscinet-getitem?mr=%@", [url host], MRNumber];
-		[item setField:BDSKUrlString toValue:MRItemURLString];
+		NSString * MRItemURLString = [NSString stringWithFormat:@"http://%@/mathscinet-getitem?mr=%@", serverName, MRNumber];
+		NSURL * MRItemURL = [NSURL URLWithString:MRItemURLString];
+		[item addFileForURL:MRItemURL autoFile:NO runScriptHook:NO];
 	}
 	
-	return results;  
+	return results;
+}
+
+
+
+
+/*
+ Returns URL to the review for a given ID.
+ It always points to the default server.
+*/
++ (NSURL *) reviewLinkForID: (NSString *) MRID {
+	NSString * MRItemURLString = [NSString stringWithFormat:@"http://ams.org/mathscinet-getitem?mr=%@", MRID];
+	NSURL * MRItemURL = [NSURL URLWithString:MRItemURLString];
+	return MRItemURL;
 }
 
 @end

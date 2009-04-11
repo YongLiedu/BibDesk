@@ -39,36 +39,34 @@
 #import "BDSKZentralblattParser.h"
 #import "BDSKBibTeXParser.h"
 #import "BibItem.h"
-#import "NSError_BDSKExtensions.h"
-#import "NSString_BDSKExtensions.h"
 #import <AGRegEx/AGRegEx.h>
+
+#define ZMATHBATCHSIZE 100u
 
 
 
 @implementation BDSKZentralblattParser
-
+/*
+ Zentralblatt Math is recognised by the domain name of its server: zentralblatt-math.org
+*/
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
 	BOOL result = [[[url host] lowercaseString] hasSuffix:@"zentralblatt-math.org"];
 	return result;
 }
 
-	
+
+
+/*
+ Find occurrences of strings Zbl [pre]1234.56789 or JFM 12.3456.78 on the page.
+ Extract their IDs and look them up.
+ Return the resulting BibItems.
+*/	
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
-	NSError * error;
-	
-	/* 
-		Find occurrences of strings Zbl [pre]1234.56789 or JFM 12.3456.78 on the page.
-		The numbers in them are the records'  IDs.
-	*/
-	AGRegex *ZblRegexp = [AGRegex regexWithPattern:@"(Zbl|JFM) (pre)?([0-9.]*)" options:AGRegexMultiline];
-	NSArray * regexpResults = [ZblRegexp findAllInString:[xmlDocument XMLString]];
+	AGRegex *ZMathRegexp = [AGRegex regexWithPattern:@"(Zbl|JFM) (pre)?([0-9.]*)" options:AGRegexMultiline];
+	NSArray * regexpResults = [ZMathRegexp findAllInString:[xmlDocument XMLString]];
 	
 	if (0 == [regexpResults count]) { return nil; }
 
-	
-	/*  
-		Ask server for BibTeX records for all related records found on the page.
-	*/
 	NSEnumerator * matchEnumerator = [regexpResults objectEnumerator];
 	AGRegexMatch * match;
 	NSMutableArray * IDArray = [NSMutableArray arrayWithCapacity:[regexpResults count]];
@@ -80,17 +78,32 @@
 		}
 	}
 
-	/* ZMath sometimes uses \"o for umlauts which is incorrect, fix that for the parser to work. */
-	AGRegex * umlautFixer = [AGRegex regexWithPattern:@"\\\\\"([a-zA-Z])" options:AGRegexMultiline];
-	NSMutableArray * results = [NSMutableArray arrayWithCapacity:[IDArray count]];
+	NSArray * results = [BDSKZentralblattParser bibItemsForZMathIDs:IDArray error:outError];	
+	return results;  
+}
 
-	/* ZMath will return 100 results in one go, so loop in batches of 100 */
-	while ([IDArray count] > 0) {
-		NSRange elementRange = NSMakeRange(0, MIN(100u, [IDArray count]));
-		NSArray * processArray = [IDArray subarrayWithRange:elementRange];
-		[IDArray removeObjectsInRange:elementRange];
+
+
+
+/*
+ Turns an array of Zentralblatt Math IDs into an array of BibItems.
+*/
++ (NSArray *) bibItemsForZMathIDs:(NSArray *) IDs error:(NSError **) outError {
+	NSError * error;
+	
+	/* ZMath sometimes uses \"o for umlauts which is incorrect, fix that by adding brackets around it for the parser to work. Also add brackets to acute and grave accents, so BibDesk translates them to Unicode properly for display */
+	AGRegex * umlautFixer = [AGRegex regexWithPattern:@"(\\\\[\"'`][a-zA-Z])" options:AGRegexMultiline];
+
+	// Loop through IDs in batches of ZMATHBATCHSIZE.
+	NSUInteger count = [IDs count];
+	NSMutableArray * results = [NSMutableArray arrayWithCapacity:count];
+	NSUInteger firstElement = 0;
+	while (firstElement < count) {
+		NSRange elementRange = NSMakeRange(firstElement, MIN(ZMATHBATCHSIZE, count - firstElement));
+		NSArray * processArray = [IDs subarrayWithRange:elementRange];
+		firstElement += ZMATHBATCHSIZE;
 		
-		/* ZMath need to be queried with a POST request */
+		// Query ZMath with a POST request
 		NSString * URLString = @"http://www.zentralblatt-math.org/zmath/en/command/";
 		NSMutableURLRequest * request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:URLString]];
 		[request setHTTPMethod:@"post"];
@@ -98,7 +111,7 @@
 		NSString * queryString = [NSString stringWithFormat:@"type=bibtex&count=100&q=an:%@", [processArray componentsJoinedByString:@"|an:"]];
 		queryString = [queryString stringByAddingPercentEscapes];
 		[request setHTTPBody:[queryString dataUsingEncoding:NSUTF8StringEncoding]];
-
+		
 		NSURLResponse * response;
 		NSData * result = [NSURLConnection sendSynchronousRequest:request returningResponse: &response error: &error];
 		
@@ -109,31 +122,41 @@
 		
 		NSString * bibTeXString = [[[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding] autorelease];
 		bibTeXString = [bibTeXString stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        if ([bibTeXString rangeOfString:@"\\\""].length)
-            bibTeXString = [umlautFixer replaceWithString:@"{\\\\\"$1}" inString:bibTeXString];
+		bibTeXString = [umlautFixer replaceWithString:@"{$1}" inString:bibTeXString];
 		BOOL isPartialData;
 		NSError * ignoreError;
 		NSArray * newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString document:nil isPartialData:&isPartialData error: &ignoreError];
-			
+		
 		if (newPubs != nil) {
 			[results addObjectsFromArray:newPubs];
 		}
-	}  // end of while loop over 100 element subarrays
-		
-		
-	/*
-		Add a URL reference to the review's web page to each record.
-	*/
+	}  // end of while loop over ZMATHBATCHSIZE element subarrays
+	
+	
+	// Add a URL reference to the review's web page to each record.
 	NSEnumerator * itemEnumerator = [results objectEnumerator];	
 	BibItem * item;
 	
 	while (item = [itemEnumerator nextObject]) {
 		NSString * ZMathNumber = [item citeKey];
-		NSString * ZMathItemURLString = [NSString stringWithFormat:@"http://www.zentralblatt-math.org/zmath/en/search/?format=complete&q=an:%@", ZMathNumber];
-		[item setField:BDSKUrlString toValue:ZMathItemURLString];
+		NSURL * reviewURL = [BDSKZentralblattParser reviewLinkForID:ZMathNumber];
+		[item addFileForURL:reviewURL autoFile:NO runScriptHook:NO];
 	}
 	
-	return results;  
+	return results;
 }
+
+
+
+/*
+ Returns URL to the review for a given ID.
+*/
++ (NSURL *) reviewLinkForID: (NSString *) ZMathID {
+	NSString * ZMathItemURLString = [NSString stringWithFormat:@"http://www.zentralblatt-math.org/zmath/en/search/?format=complete&q=an:%@", ZMathID];
+	NSURL * ZMathItemURL = [NSURL URLWithString:ZMathItemURLString];
+	return ZMathItemURL;
+}
+
+
 
 @end
