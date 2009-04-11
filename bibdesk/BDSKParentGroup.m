@@ -198,14 +198,14 @@
 - (id)init {
     self = [self initWithName:NSLocalizedString(@"EXTERNAL", @"source list group row title")];
     if (self) {
-        BDSKWebGroup *webGroup = [[BDSKWebGroup alloc] initWithName:NSLocalizedString(@"Web", @"")];
-        [self insertChild:webGroup atIndex:0];
-        [webGroup release];
         webGroupCount = 1;
         sharedGroupCount = 0;
         URLGroupCount = 0;
         scriptGroupCount = 0;
         searchGroupCount = 0;
+        BDSKWebGroup *webGroup = [[BDSKWebGroup alloc] initWithName:NSLocalizedString(@"Web", @"")];
+        [self insertChild:webGroup atIndex:0];
+        [webGroup release];
     }
     return self;
 }
@@ -236,14 +236,14 @@
 
 - (void)addSearchGroup:(BDSKSearchGroup *)group {
     NSUInteger idx = webGroupCount;
-    [self insertChild:group atIndex:idx];
     searchGroupCount += 1;    
+    [self insertChild:group atIndex:idx];
 }
 
 - (void)removeSearchGroup:(BDSKSearchGroup *)group {
     NSParameterAssert(searchGroupCount);
-    [self removeChild:group];
     searchGroupCount -= 1;    
+    [self removeChild:group];
 }
 
 - (void)setSharedGroups:(NSArray *)array {
@@ -253,26 +253,26 @@
 
 - (void)addURLGroup:(BDSKURLGroup *)group {
     NSUInteger idx = webGroupCount + searchGroupCount + sharedGroupCount;
-    [self insertChild:group atIndex:idx];
     URLGroupCount += 1;
+    [self insertChild:group atIndex:idx];
 }
 
 - (void)removeURLGroup:(BDSKURLGroup *)group {
     NSParameterAssert(URLGroupCount);
-    [self removeChild:group];
     URLGroupCount -= 1;
+    [self removeChild:group];
 }
 
 - (void)addScriptGroup:(BDSKScriptGroup *)group {
     NSUInteger idx = webGroupCount + searchGroupCount + sharedGroupCount + URLGroupCount;
-    [self insertChild:group atIndex:idx];
     scriptGroupCount += 1;
+    [self insertChild:group atIndex:idx];
 }
 
 - (void)removeScriptGroup:(BDSKScriptGroup *)group {
     NSParameterAssert(scriptGroupCount);
-    [self removeChild:group];
     scriptGroupCount -= 1;
+    [self removeChild:group];
 }
 
 - (void)resort {
@@ -295,9 +295,9 @@
 
 - (void)removeAllSavedGroups {
     NSRange range = NSMakeRange((webGroupCount + searchGroupCount + sharedGroupCount), (URLGroupCount + scriptGroupCount));
-    [self replaceChildrenInRange:range withChildren:[NSArray array]];
     URLGroupCount = 0;
     scriptGroupCount = 0;
+    [self replaceChildrenInRange:range withChildren:[NSArray array]];
 }
 
 @end
@@ -382,27 +382,27 @@
 
 - (void)setLastImportedPublications:(NSArray *)pubs {
     if (lastImportGroupCount == 0) {
+        lastImportGroupCount += 1;
         BDSKStaticGroup *group = [[BDSKStaticGroup alloc] initWithLastImport:pubs];
         [self insertChild:group atIndex:0];
         [group release];
-        lastImportGroupCount += 1;
     } else if ([pubs count]) {
         [[self childAtIndex:0] setPublications:pubs];
     } else {
-        [self removeChild:[self childAtIndex:0]];
         lastImportGroupCount = 0;
+        [self removeChild:[self childAtIndex:0]];
     }
 }
 
 - (void)addSmartGroup:(BDSKSmartGroup *)group {
     NSUInteger idx = lastImportGroupCount + smartGroupCount;
-    [self insertChild:group atIndex:idx];
     smartGroupCount += 1;
+    [self insertChild:group atIndex:idx];
 }
 
 - (void)removeSmartGroup:(BDSKSmartGroup *)group {
-    [self removeChild:group];
     smartGroupCount -= 1;
+    [self removeChild:group];
 }
 
 - (void)resort {
@@ -418,9 +418,9 @@
 }
 
 - (void)removeAllSavedGroups {
-    [super removeAllSavedGroups];
     lastImportGroupCount = 0;
     smartGroupCount = 0;
+    [super removeAllSavedGroups];
 }
 
 @end
