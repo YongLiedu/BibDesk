@@ -1,5 +1,5 @@
 //
-//  BDSKColoredBox.h
+//  BDSKColoredView.h
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 10/28/06.
@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKColoredBox : NSBox {
+@interface BDSKColoredView : NSView {
     NSColor *backgroundColor;
 }
 

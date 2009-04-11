@@ -76,7 +76,7 @@
 #import "BDSKGroupOutlineView.h"
 #import "BDSKGradientSplitView.h"
 #import "NSTask_BDSKExtensions.h"
-#import "BDSKColoredBox.h"
+#import "BDSKColoredView.h"
 #import "BDSKStringParser.h"
 #import "BDSKZoomablePDFView.h"
 #import "BDSKCustomCiteDrawerController.h"

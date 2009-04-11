@@ -1,5 +1,5 @@
 //
-//  BDSKColoredBox.m
+//  BDSKColoredView.m
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 10/28/06.
@@ -36,10 +36,10 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKColoredBox.h"
+#import "BDSKColoredView.h"
 
 
-@implementation BDSKColoredBox
+@implementation BDSKColoredView
 
 - (id)initWithFrame:(NSRect)frame {
     if (self = [super initWithFrame:frame]) {

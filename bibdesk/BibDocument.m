@@ -108,7 +108,7 @@
 #import "NSData_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
-#import "BDSKColoredBox.h"
+#import "BDSKColoredView.h"
 #import "BDSKCustomCiteDrawerController.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKDocumentController.h"
@@ -3424,7 +3424,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     if ([documentWindow isEqual:[controlView window]])
         return;
     
-    NSArray *views = [[[mainBox contentView] subviews] copy];
+    NSArray *views = [[mainBox subviews] copy];
     NSEnumerator *viewEnum;
     NSView *view;
     NSRect controlFrame = [controlView frame];
@@ -3475,7 +3475,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     if ([documentWindow isEqual:[controlView window]] == NO)
         return;
     
-    NSArray *views = [[NSArray alloc] initWithArray:[[mainBox contentView] subviews] copyItems:NO];
+    NSArray *views = [[NSArray alloc] initWithArray:[mainBox subviews] copyItems:NO];
     NSRect controlFrame = [controlView frame];
     NSRect endRect, startRect = NSUnionRect([splitView frame], controlFrame);
     

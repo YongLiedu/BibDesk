@@ -67,7 +67,6 @@
 #import "BDSKScriptGroupSheetController.h"
 #import "BDSKEditor.h"
 #import "BDSKPersonController.h"
-#import "BDSKColoredBox.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKSearchGroup.h"
 #import "BDSKMainTableView.h"

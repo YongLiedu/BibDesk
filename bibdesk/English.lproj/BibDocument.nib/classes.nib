@@ -233,7 +233,7 @@
 				<key>groupTableView</key>
 				<string>BDSKGroupTableView</string>
 				<key>mainBox</key>
-				<string>BDSKColoredBox</string>
+				<string>BDSKColoredView</string>
 				<key>mainView</key>
 				<string>NSView</string>
 				<key>saveAccessoryView</key>
@@ -565,6 +565,14 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>BDSKColoredView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>NSTableHeaderView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -607,14 +615,6 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>BDSKGradientOutlineView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKColoredBox</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSBox</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>

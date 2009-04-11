@@ -44,7 +44,7 @@
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver, BDSKItemPasteboardHelper;
 @class BDSKEditor, BDSKMacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController, BDSKSearchGroupViewController;
-@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupOutlineView, BDSKGradientView, BDSKGradientSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredBox, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FVFileView;
+@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupOutlineView, BDSKGradientView, BDSKGradientSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredView, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FVFileView;
 @class BDSKWebGroupViewController, BDSKSearchButtonController;
 @class BDSKItemSearchIndexes, BDSKFileMigrationController, BDSKDocumentSearch;
 
@@ -113,7 +113,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSWindow *documentWindow;
     IBOutlet BDSKMainTableView *tableView;
     IBOutlet BDSKGradientSplitView *splitView;
-    IBOutlet BDSKColoredBox *mainBox;
+    IBOutlet BDSKColoredView *mainBox;
     IBOutlet NSView *mainView;
     
     IBOutlet BDSKStatusBar *statusBar;

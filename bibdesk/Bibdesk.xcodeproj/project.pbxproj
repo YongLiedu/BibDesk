@@ -163,7 +163,7 @@
 		CE56D6510A2DAB55003CE000 /* BDSKDocumentController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE56D6500A2DAB55003CE000 /* BDSKDocumentController.m */; };
 		CE573D2709F6A0300020EC16 /* NSIndexSet_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE573D2509F6A0300020EC16 /* NSIndexSet_BDSKExtensions.m */; };
 		CE5C29CE0AE14FEC00C3E6B5 /* BibDocument_Actions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE5C29CC0AE14FEC00C3E6B5 /* BibDocument_Actions.m */; };
-		CE6003290AF3E465000B5680 /* BDSKColoredBox.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6003270AF3E465000B5680 /* BDSKColoredBox.m */; };
+		CE6003290AF3E465000B5680 /* BDSKColoredView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6003270AF3E465000B5680 /* BDSKColoredView.m */; };
 		CE600E300AF405D6000B5680 /* BDSKRISParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE600E2E0AF405D6000B5680 /* BDSKRISParser.m */; };
 		CE601A4F0AF4C488000B5680 /* BDSKReferenceMinerParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE601A4D0AF4C488000B5680 /* BDSKReferenceMinerParser.m */; };
 		CE602A600AF65A9C000B5680 /* BDSKStringParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE602A5F0AF65A9C000B5680 /* BDSKStringParser.m */; };
@@ -1091,8 +1091,8 @@
 		CE573D2509F6A0300020EC16 /* NSIndexSet_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSIndexSet_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE5C29CB0AE14FEC00C3E6B5 /* BibDocument_Actions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibDocument_Actions.h; sourceTree = "<group>"; };
 		CE5C29CC0AE14FEC00C3E6B5 /* BibDocument_Actions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibDocument_Actions.m; sourceTree = "<group>"; };
-		CE6003260AF3E465000B5680 /* BDSKColoredBox.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKColoredBox.h; sourceTree = "<group>"; };
-		CE6003270AF3E465000B5680 /* BDSKColoredBox.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKColoredBox.m; sourceTree = "<group>"; };
+		CE6003260AF3E465000B5680 /* BDSKColoredView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKColoredView.h; sourceTree = "<group>"; };
+		CE6003270AF3E465000B5680 /* BDSKColoredView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKColoredView.m; sourceTree = "<group>"; };
 		CE600E2D0AF405D6000B5680 /* BDSKRISParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKRISParser.h; sourceTree = "<group>"; };
 		CE600E2E0AF405D6000B5680 /* BDSKRISParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKRISParser.m; sourceTree = "<group>"; };
 		CE601A4C0AF4C488000B5680 /* BDSKReferenceMinerParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKReferenceMinerParser.h; sourceTree = "<group>"; };
@@ -2047,7 +2047,7 @@
 				2730077707CF20B500F2E485 /* BDSKBorderlessKeyWindow.m */,
 				F9A5B10A0B8CEA9600C52257 /* BDSKCenterScaledImageCell.m */,
 				CEEC6C53093A411E00A64F54 /* BDSKCollapsibleView.m */,
-				CE6003270AF3E465000B5680 /* BDSKColoredBox.m */,
+				CE6003270AF3E465000B5680 /* BDSKColoredView.m */,
 				CE34E9780A03C16B00222942 /* BDSKConditionsView.m */,
 				CE7595FE0ADDB0E0009C1329 /* BDSKContainerView.m */,
 				CEEC70E0093B6EC200A64F54 /* BDSKDragImageView.m */,
@@ -2580,7 +2580,7 @@
 				F9022C380758027800C3F701 /* BDSKCiteKeyFormatter.h */,
 				45DB3E490CAADFC3001EACDA /* BDSKCiteULikeParser.h */,
 				CEEC6C52093A411D00A64F54 /* BDSKCollapsibleView.h */,
-				CE6003260AF3E465000B5680 /* BDSKColoredBox.h */,
+				CE6003260AF3E465000B5680 /* BDSKColoredView.h */,
 				CE09CEA40DDEF65E00F3F2FE /* BDSKCompletionManager.h */,
 				CE3A0BD50B1634D500233208 /* BDSKCompletionServerProtocol.h */,
 				273007A407CF216700F2E485 /* BDSKComplexString.h */,
@@ -3801,7 +3801,7 @@
 				CE564D260AECBA5B002F0A24 /* NSScanner_BDSKExtensions.m in Sources */,
 				CE565BC00AEF848B002F0A24 /* BDSKPublicationsArray.m in Sources */,
 				CEFA07F50AF0E52100A3B4B1 /* BDSKApplication.m in Sources */,
-				CE6003290AF3E465000B5680 /* BDSKColoredBox.m in Sources */,
+				CE6003290AF3E465000B5680 /* BDSKColoredView.m in Sources */,
 				CE600E300AF405D6000B5680 /* BDSKRISParser.m in Sources */,
 				CE601A4F0AF4C488000B5680 /* BDSKReferenceMinerParser.m in Sources */,
 				F97FA7930AF56FA100C32BBA /* BDSKImageFadeAnimation.m in Sources */,
