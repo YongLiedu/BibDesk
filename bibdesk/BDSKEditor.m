@@ -315,7 +315,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (BOOL)validateCurrentEditedView
 {
-    BOOL rv = [[currentEditedView string] isStringTeXQuotingBalancedWithBraces:YES connected:NO];
+    NSString *currentString = [currentEditedView string];
+    BOOL rv = ([NSString isEmptyString:currentString] || [currentString isStringTeXQuotingBalancedWithBraces:YES connected:NO]);
     if (NO == rv) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
                                          defaultButton:NSLocalizedString(@"OK", @"Button title")
