@@ -594,7 +594,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			</element>
 			<element type="group"
 				description="Groups in the document">
-				<cocoa key="groups"/>
+				<cocoa key="scriptingGroups"/>
 			</element>
 			<element type="library group"
 				description="The library group in the document">

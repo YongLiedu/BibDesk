@@ -1259,9 +1259,8 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 }
 
 - (void)outlineViewItemDidExpand:(NSNotification *)notification {
-    // could make this conditional on the item that expanded
-    [self updateCategoryGroupsPreservingSelection:YES];
-    [self updateSmartGroupsCountAndContent:YES];
+    if ([[[notification userInfo] objectForKey:@"NSObject"] isEqual:[groups smartParent]])   
+        [self updateSmartGroupsCountAndContent:YES];
 }
 
 - (void)outlineView:(NSOutlineView *)outlineView didClickTableColumn:(NSTableColumn *)tableColumn {

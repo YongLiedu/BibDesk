@@ -597,8 +597,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 // force the smart groups to refilter their items, so the group content and count get redisplayed
 // if this becomes slow, we could make filters thread safe and update them in the background
 - (void)updateSmartGroupsCountAndContent:(BOOL)shouldUpdate{
-
-	BOOL needsUpdate = shouldUpdate && [self hasSmartGroupsSelected];
+    
+	// !!! early return if not expanded in outline view
+    if ([groupOutlineView isItemExpanded:[groups smartParent]] == NO)
+        return;
+    
+    BOOL needsUpdate = shouldUpdate && [self hasSmartGroupsSelected];
     BOOL hideCount = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKHideGroupCountKey];
     BOOL sortByCount = [sortGroupsKey isEqualToString:BDSKGroupCellCountKey];
     NSArray *smartGroups = [groups smartGroups];

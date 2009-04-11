@@ -57,11 +57,12 @@
 - (NSArray *)editors;
 - (BibAuthor *)valueInEditorsWithName:(NSString *)name;
 
-- (BDSKGroup *)valueInGroupsWithUniqueID:(NSString *)aUniqueID;
-- (BDSKGroup *)valueInGroupsWithName:(NSString *)name;
-- (void)insertInGroups:(BDSKGroup *)group;
-- (void)insertObject:(BDSKGroup *)group inGroupsAtIndex:(unsigned int)idx;
-- (void)removeObjectFromGroupsAtIndex:(unsigned int)idx;
+- (NSArray *)scriptingGroups;
+- (BDSKGroup *)valueInScriptingGroupsWithUniqueID:(NSString *)aUniqueID;
+- (BDSKGroup *)valueInScriptingGroupsWithName:(NSString *)name;
+- (void)insertInScriptingGroups:(BDSKGroup *)group;
+- (void)insertObject:(BDSKGroup *)group inScriptingGroupsAtIndex:(unsigned int)idx;
+- (void)removeObjectFromScriptingGroupsAtIndex:(unsigned int)idx;
 
 - (NSArray *)staticGroups;
 - (BDSKStaticGroup *)valueInStaticGroupsWithUniqueID:(NSString *)aUniqueID;

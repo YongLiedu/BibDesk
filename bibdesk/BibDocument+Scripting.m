@@ -235,13 +235,17 @@
 
 #pragma mark Groups
 
-- (BDSKGroup *)valueInGroupsWithUniqueID:(NSString *)aUniqueID {
+- (NSArray *)scriptingGroups {
+    return [groups allGroups];
+}
+
+- (BDSKGroup *)valueInScriptingGroupsWithUniqueID:(NSString *)aUniqueID {
     NSArray *allGroups = [groups allGroups];
     unsigned int idx = [[allGroups valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [allGroups objectAtIndex:idx];
 }
 
-- (BDSKGroup *)valueInGroupsWithName:(NSString *)name {
+- (BDSKGroup *)valueInScriptingGroupsWithName:(NSString *)name {
     NSArray *allGroups = [groups allGroups];
     NSArray *names = [allGroups valueForKey:@"stringValue"];
     unsigned int idx = [names indexOfObject:name];
@@ -254,7 +258,7 @@
     return idx == NSNotFound ? nil : [allGroups objectAtIndex:idx];
 }
 
-- (void)insertInGroups:(BDSKGroup *)group {
+- (void)insertInScriptingGroups:(BDSKGroup *)group {
     if ([group document]) {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
@@ -282,11 +286,11 @@
     }
 }
 
-- (void)insertObject:(BDSKGroup *)group inGroupsAtIndex:(unsigned int)idx {
-    [self insertInGroups:group];
+- (void)insertObject:(BDSKGroup *)group inScriptingGroupsAtIndex:(unsigned int)idx {
+    [self insertInScriptingGroups:group];
 }
 
-- (void)removeObjectFromGroupsAtIndex:(unsigned int)idx {
+- (void)removeObjectFromScriptingGroupsAtIndex:(unsigned int)idx {
     BDSKGroup *group = [[groups staticGroups] objectAtIndex:idx];
     if ([group isSmart] == YES) {
         [groups removeSmartGroup:(BDSKSmartGroup *)group];
