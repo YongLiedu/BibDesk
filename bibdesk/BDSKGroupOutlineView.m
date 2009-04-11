@@ -134,8 +134,8 @@
             if ([cell respondsToSelector:@selector(iconRectForBounds:)]) {
                 NSRect iconRect = [cell iconRectForBounds:[self frameOfCellAtColumn:column row:row]];
                 if (NSPointInRect(point, iconRect)) {
-                    if ([[self delegate] respondsToSelector:@selector(outlineView:doubleClickedOnIconOfRow:)])
-                        [[self delegate] outlineView:self doubleClickedOnIconOfRow:row];
+                    if ([[self delegate] respondsToSelector:@selector(outlineView:doubleClickedOnIconOfItem:)])
+                        [[self delegate] outlineView:self doubleClickedOnIconOfItem:[self itemAtRow:row]];
                     return;
                 }
             }

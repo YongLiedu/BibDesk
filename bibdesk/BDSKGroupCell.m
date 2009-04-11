@@ -192,8 +192,10 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
 - (NSRect)countRectForBounds:(NSRect)aRect {
     NSSize countSize = NSZeroSize;
     
-    if([self failedDownload] || [self isRetrieving]) {
+    if ([self isRetrieving]) {
         countSize = NSMakeSize(16.0, 16.0);
+    } else if ([self failedDownload]) {
+        countSize = [self iconSizeForBounds:aRect];
     } else if ([self count] > 0) {
         countSize = [countString boundingRectWithSize:aRect.size options:0].size;
         countSize.width += [self count] < 100 ? countSize.height : 0.5 * countSize.height; // add oval pading around count
@@ -333,10 +335,8 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
 }
 
 - (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength {
-    NSRect editRect = [self textRectForBounds:aRect];
-    editRect.size.width = NSMaxX(aRect) - NSMinX(editRect) - 1.0;
     settingUpFieldEditor = YES;
-    [super selectWithFrame:editRect inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
+    [super selectWithFrame:[self textRectForBounds:aRect] inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
     settingUpFieldEditor = NO;
 }
 

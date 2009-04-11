@@ -1280,7 +1280,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
         int column = [[outlineView tableColumns] indexOfObject:tableColumn];
         NSRect ignored, rect = [outlineView frameOfCellAtColumn:column row:[outlineView rowForItem:item]];
         NSSize size = [spinner frame].size;
-        NSDivideRect(rect, &ignored, &rect, 3.0f, NSMaxXEdge);
+        NSDivideRect(rect, &ignored, &rect, 2.0f, NSMaxXEdge);
         NSDivideRect(rect, &rect, &ignored, size.width, NSMaxXEdge);
         rect = BDSKCenterRectVertically(rect, size.height, [outlineView isFlipped]);
         
@@ -1339,8 +1339,8 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     return indexes;
 }
 
-- (void)outlineView:(BDSKGroupOutlineView *)aTableView doubleClickedOnIconOfRow:(int)row {
-    [self editGroupAtRow:row];
+- (void)outlineView:(BDSKGroupOutlineView *)aTableView doubleClickedOnIconOfItem:(id)item {
+    [self editGroup:item];
 }
 
 - (NSMenu *)outlineView:(BDSKGroupOutlineView *)anOutlineView menuForTableHeaderColumn:(NSTableColumn *)tableColumn onPopUp:(BOOL)flag {

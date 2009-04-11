@@ -1141,9 +1141,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	}
 }
 
-- (void)editGroupAtRow:(int)row {
-	BDSKASSERT(row != -1);
-	BDSKGroup *group = [groupOutlineView itemAtRow:row];
+- (void)editGroup:(BDSKGroup *)group {
     
     if ([group isEditable] == NO) {
 		NSBeep();
@@ -1201,14 +1199,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)editGroupAction:(id)sender {
-	if ([groupOutlineView numberOfSelectedRows] != 1) {
+    NSArray *selectedGroups = [self selectedGroups];
+	if ([selectedGroups count] != 1) {
 		NSBeep();
 		return;
 	} 
-	
-	int row = [groupOutlineView selectedRow];
-	BDSKASSERT(row != -1);
-	if(row > 0) [self editGroupAtRow:row];
+	[self editGroup:[selectedGroups lastObject]];
 }
 
 - (IBAction)renameGroupAction:(id)sender {

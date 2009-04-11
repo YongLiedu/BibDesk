@@ -62,7 +62,7 @@
 @interface NSObject (BDSKGroupTableViewDelegate)
 - (NSIndexSet *)outlineView:(BDSKGroupOutlineView *)anOutlineView indexesOfRowsToHighlightInRange:(NSRange)indexRange;
 - (NSIndexSet *)outlineViewSingleSelectionIndexes:(BDSKGroupOutlineView *)anOutlineView;
-- (void)outlineView:(BDSKGroupOutlineView *)aTableView doubleClickedOnIconOfRow:(int)row;
+- (void)outlineView:(BDSKGroupOutlineView *)aTableView doubleClickedOnIconOfItem:(id)item;
 - (NSMenu *)outlineView:(BDSKGroupOutlineView *)anOutlineView menuForTableHeaderColumn:(NSTableColumn *)aTableColumn onPopUp:(BOOL)flag;
 - (BOOL)outlineViewShouldEditNextItemWhenEditingEnds:(BDSKGroupOutlineView *)aTableView;
 @end

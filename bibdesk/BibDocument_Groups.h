@@ -110,7 +110,7 @@
 - (IBAction)dismissSearchBookmarkSheet:(id)sender;
 - (IBAction)addGroupButtonAction:(id)sender;
 - (IBAction)removeSelectedGroups:(id)sender;
-- (void)editGroupAtRow:(int)row;
+- (void)editGroup:(BDSKGroup *)group;
 - (IBAction)editGroupAction:(id)sender;
 - (IBAction)renameGroupAction:(id)sender;
 - (IBAction)copyGroupURLAction:(id)sender;
