@@ -217,6 +217,8 @@ static NSString *createUniqueID(void)
 
 - (BOOL)isRetrieving { return NO; }
 
+- (int)sortOrder { return 0; }
+
 // custom accessors
 
 - (NSString *)stringValue {

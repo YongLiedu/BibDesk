@@ -156,6 +156,8 @@
 
 - (BOOL)isValidDropTarget { return YES; }
 
+- (int)sortOrder { return 1; }
+
 @end
 
 #pragma mark -
@@ -204,6 +206,8 @@
 - (BOOL)hasEditableName { return NO; }
 
 - (BOOL)isEditable { return NO; }
+
+- (int)sortOrder { return 0; }
 
 - (BOOL)isEqual:(id)other { return self == other; }
 

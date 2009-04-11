@@ -328,6 +328,8 @@
 
 - (BOOL)failedDownload { return failedDownload; }
 
+- (int)sortOrder { return 3; }
+
 // BDSKGroup overrides
 
 - (NSImage *)icon {

@@ -203,6 +203,8 @@
 */
 - (BOOL)isValidDropTarget;
 
+- (int)sortOrder;
+
 /*!
 	@method stringValue
 	@abstract Returns string value of the name.

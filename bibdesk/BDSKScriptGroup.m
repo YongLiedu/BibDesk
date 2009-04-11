@@ -436,6 +436,8 @@ static BDSKMessageQueue *messageQueue = nil;
 
 - (BOOL)isEditable { return YES; }
 
+- (int)sortOrder { return 4; }
+
 - (void)applicationWillTerminate:(NSNotification *)aNotification{
     [self terminate];
     [[NSFileManager defaultManager] deleteObjectAtFileURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
