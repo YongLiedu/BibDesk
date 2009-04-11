@@ -125,8 +125,6 @@
 
 - (BOOL)isEditable { return YES; }
 
-- (int)sortOrder { return 1; }
-
 - (NSImage *)icon {
 	return [NSImage imageNamed:@"smartGroup"];
 }

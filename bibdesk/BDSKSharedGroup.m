@@ -258,8 +258,6 @@ static NSImage *unlockedIcon = nil;
 
 - (BOOL)isExternal { return YES; }
 
-- (int)sortOrder { return 2; }
-
 - (BOOL)containsItem:(BibItem *)item {
     // calling [self publications] will repeatedly reschedule a retrieval, which is undesirable if the user canceled a password; containsItem is called very frequently
     NSArray *pubs = [publications retain];

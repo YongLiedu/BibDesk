@@ -48,14 +48,7 @@
 #import "BibDocument.h"
 
 
-static NSSortDescriptor *sortOrderDescriptor = nil;
-
 @implementation BDSKParentGroup
-
-+ (void)initialize {
-    BDSKINITIALIZE;
-    sortOrderDescriptor = [[NSSortDescriptor alloc] initWithKey:@"sortOrder" ascending:YES];
-}
 
 - (id)initWithName:(NSString *)aName {
     if (self = [super initWithName:aName count:0]) {
@@ -281,11 +274,23 @@ static NSSortDescriptor *sortOrderDescriptor = nil;
     scriptGroupCount -= 1;
 }
 
-- (void)sortUsingDescriptors:(NSArray *)newSortDescriptors {
-    NSMutableArray *tmpSort = [newSortDescriptors mutableCopy];
-    [tmpSort insertObject:sortOrderDescriptor atIndex:0];
-    [super sortUsingDescriptors:newSortDescriptors];
-    [tmpSort release];
+
+- (void)resort {
+    if (sortDescriptors) {
+        NSRange range;
+        if (sharedGroupCount > 1) {
+            range = NSMakeRange(webGroupCount + searchGroupCount, sharedGroupCount);
+            [children replaceObjectsInRange:range withObjectsFromArray:[[children subarrayWithRange:range] sortedArrayUsingDescriptors:sortDescriptors]];
+        }
+        if (URLGroupCount > 1) {
+            range = NSMakeRange((webGroupCount + searchGroupCount + sharedGroupCount), URLGroupCount);
+            [children replaceObjectsInRange:range withObjectsFromArray:[[children subarrayWithRange:range] sortedArrayUsingDescriptors:sortDescriptors]];
+        }
+        if (scriptGroupCount > 1) {
+            range = NSMakeRange((webGroupCount + searchGroupCount + sharedGroupCount + URLGroupCount), scriptGroupCount);
+            [children replaceObjectsInRange:range withObjectsFromArray:[[children subarrayWithRange:range] sortedArrayUsingDescriptors:sortDescriptors]];
+        }
+    }
 }
 
 - (void)removeAllSavedGroups {
@@ -315,13 +320,6 @@ static NSSortDescriptor *sortOrderDescriptor = nil;
 
 - (id)objectAtIndex:(unsigned)idx {
     return nil;
-}
-
-- (void)sortUsingDescriptors:(NSArray *)newSortDescriptors {
-    NSMutableArray *tmpSort = [newSortDescriptors mutableCopy];
-    [tmpSort insertObject:sortOrderDescriptor atIndex:0];
-    [super sortUsingDescriptors:newSortDescriptors];
-    [tmpSort release];
 }
 
 @end
@@ -396,11 +394,13 @@ static NSSortDescriptor *sortOrderDescriptor = nil;
     smartGroupCount -= 1;
 }
 
-- (void)sortUsingDescriptors:(NSArray *)newSortDescriptors {
-    NSMutableArray *tmpSort = [newSortDescriptors mutableCopy];
-    [tmpSort insertObject:sortOrderDescriptor atIndex:0];
-    [super sortUsingDescriptors:newSortDescriptors];
-    [tmpSort release];
+- (void)resort {
+    if (lastImportGroupCount == 0) {
+        [super resort];
+    } else if (sortDescriptors && smartGroupCount) {
+        NSRange range = NSMakeRange(lastImportGroupCount, smartGroupCount);
+        [children replaceObjectsInRange:range withObjectsFromArray:[[children subarrayWithRange:range] sortedArrayUsingDescriptors:sortDescriptors]];
+    }
 }
 
 - (void)removeAllSavedGroups {
