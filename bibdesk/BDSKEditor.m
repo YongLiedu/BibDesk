@@ -2757,6 +2757,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     
     // @@ problem here:  BDSKEditor is the delegate for a lot of things, and if they get messaged before the window goes away, but after the editor goes away, we have crashes.  In particular, the finalizeChanges (or something?) ends up causing the window and form to be redisplayed if a form cell is selected when you close the window, and the form sends formCellHasArrowButton to a garbage editor.  Rather than set the delegate of all objects to nil here, we'll just hang around a bit longer.
     [[self retain] autorelease];
+    
+    // document still has a retain up to this point
+    [[self document] removeWindowController:self];
 }
 
 #pragma mark undo manager
