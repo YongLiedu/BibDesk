@@ -46,6 +46,7 @@
 #import "BDSKCategoryGroup.h"
 #import "BDSKWebGroup.h"
 #import "BibDocument.h"
+#import "BibAuthor.h"
 
 
 @implementation BDSKParentGroup
@@ -274,7 +275,6 @@
     scriptGroupCount -= 1;
 }
 
-
 - (void)resort {
     if (sortDescriptors) {
         NSRange range;
@@ -318,8 +318,19 @@
     [self replaceChildrenInRange:NSMakeRange(0, [self numberOfChildren]) withChildren:array];
 }
 
-- (id)objectAtIndex:(unsigned)idx {
-    return nil;
+- (void)resort {
+    if (sortDescriptors && [self numberOfChildren]) {
+        BDSKCategoryGroup *first = [self childAtIndex:0];
+        if ([[first name] isEqual:@""] || [[first name] isEqual:[BibAuthor emptyAuthor]]) {
+            [first retain];
+            [children removeObjectAtIndex:0];
+            [super resort];
+            [children insertObject:first atIndex:0];
+            [first release];
+        } else {
+            [super resort];
+        }
+    }
 }
 
 @end
@@ -397,9 +408,12 @@
 - (void)resort {
     if (lastImportGroupCount == 0) {
         [super resort];
-    } else if (sortDescriptors && smartGroupCount) {
-        NSRange range = NSMakeRange(lastImportGroupCount, smartGroupCount);
-        [children replaceObjectsInRange:range withObjectsFromArray:[[children subarrayWithRange:range] sortedArrayUsingDescriptors:sortDescriptors]];
+    } else if (sortDescriptors && smartGroupCount > 1) {
+        BDSKGroup *lastImport = [[self childAtIndex:0] retain];
+        [children removeObjectAtIndex:0];
+        [super resort];
+        [children insertObject:lastImport atIndex:0];
+        [lastImport release];
     }
 }
 
