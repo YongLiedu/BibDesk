@@ -315,8 +315,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (BOOL)validateCurrentEditedView
 {
-    NSString *currentString = [currentEditedView string];
-    BOOL rv = ([NSString isEmptyString:currentString] || [currentString isStringTeXQuotingBalancedWithBraces:YES connected:NO]);
+    NSParameterAssert(currentEditedView);
+    BOOL rv = ([[currentEditedView string] isStringTeXQuotingBalancedWithBraces:YES connected:NO]);
     if (NO == rv) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
                                          defaultButton:NSLocalizedString(@"OK", @"Button title")
@@ -2137,10 +2137,13 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                                                           userInfo:notifInfo];
     }
     
-    NSParameterAssert([self validateCurrentEditedView]);
-    currentEditedView = nil;
-    [self setPreviousValueForCurrentEditedNotesView:nil];
-    [[self document] objectDidEndEditing:self];
+    // this is called multiple times when switching tabs
+    if (currentEditedView) {
+        NSParameterAssert([self validateCurrentEditedView]);
+        currentEditedView = nil;
+        [self setPreviousValueForCurrentEditedNotesView:nil];
+        [[self document] objectDidEndEditing:self];
+    }
 }
 
 // sent by the textviews; this ensures that the document's annote/abstract preview gets updated
