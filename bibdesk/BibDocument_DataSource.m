@@ -787,10 +787,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 
 #pragma mark TableView dragging destination
 
-- (NSDragOperation)tableView:(NSTableView*)tv
-                validateDrop:(id <NSDraggingInfo>)info
-                 proposedRow:(int)row
-       proposedDropOperation:(NSTableViewDropOperation)op{
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
     
     NSPasteboard *pboard = [info draggingPasteboard];
     BOOL isDragFromMainTable = [[info draggingSource] isEqual:tableView];
@@ -834,26 +831,57 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     return NSDragOperationNone;
 }
 
-// This method is called when the mouse is released over a table view that previously decided to allow a drop via the validateDrop method.  The data source should incorporate the data from the dragging pasteboard at this time.
+- (BOOL)selectItemsInAuxFileAtPath:(NSString *)auxPath {
+    NSString *auxString = [NSString stringWithContentsOfFile:auxPath encoding:[self documentStringEncoding] guessEncoding:YES];
+    NSString *command = @"\\bibcite{"; // we used to get the command by looking at the line after \bibdata, but that's unreliable as there can be other stuff in between the \bibcite commands
 
-- (BOOL)tableView:(NSTableView*)tv
-       acceptDrop:(id <NSDraggingInfo>)info
-              row:(int)row
-    dropOperation:(NSTableViewDropOperation)op{
+    if (auxString == nil)
+        return NO;
+    
+    if ([auxString rangeOfString:command].length == 0) {
+        // if there are no \bibcite commands we'll use the cite's, which are usualy added as \citation commands to the .aux file
+        command = @"\\citation{";
+        if ([auxString rangeOfString:command].length == 0)
+            return NO;
+    }
+    
+    NSScanner *scanner = [NSScanner scannerWithString:auxString];
+    NSString *key = nil;
+    NSArray *items = nil;
+    NSMutableArray *selItems = [NSMutableArray array];
+    
+    [scanner setCharactersToBeSkipped:nil];
+    
+    do {
+        if ([scanner scanString:command intoString:NULL] &&
+            [scanner scanUpToString:@"}" intoString:&key] &&
+            (items = [publications allItemsForCiteKey:key]))
+            [selItems addObjectsFromArray:items];
+        [scanner scanUpToCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
+        [scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
+    } while ([scanner isAtEnd] == NO);
+    
+    if ([selItems count])
+        [self selectPublications:selItems];
+    
+    return YES;
+}
+
+- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op{
 	
     NSPasteboard *pboard = [info draggingPasteboard];
     
-    if(tv == tableView){
+    if (tv == tableView) {
         NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil]];
         
-        if([self hasExternalGroupsSelected])
+        if ([self hasExternalGroupsSelected])
             return NO;
-		if(row != -1){
+		if (row != -1) {
             BibItem *pub = [shownPublications objectAtIndex:row];
             NSMutableArray *urlsToAdd = [NSMutableArray array];
             NSURL *theURL = nil;
             
-            if([type isEqualToString:NSFilenamesPboardType]){
+            if ([type isEqualToString:NSFilenamesPboardType]) {
                 NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
                 if ([fileNames count] == 0)
                     return NO;
@@ -861,14 +889,14 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
                 NSString *aPath;
                 while (aPath = [fileEnum nextObject])
                     [urlsToAdd addObject:[NSURL fileURLWithPath:[aPath stringByExpandingTildeInPath]]];
-            }else if([type isEqualToString:BDSKWeblocFilePboardType]){
+            } else if([type isEqualToString:BDSKWeblocFilePboardType]) {
                 [urlsToAdd addObject:[NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]]];
-            }else if([type isEqualToString:NSURLPboardType]){
+            } else if([type isEqualToString:NSURLPboardType]) {
                 [urlsToAdd addObject:[NSURL URLFromPasteboard:pboard]];
-            }else if([type isEqualToString:NSColorPboardType]){
+            } else if([type isEqualToString:NSColorPboardType]) {
                 [[[self shownPublications] objectAtIndex:row] setColor:[NSColor colorFromPasteboard:pboard]];
                 return YES;
-            }else
+            } else
                 return NO;
             
             if([urlsToAdd count] == 0)
@@ -882,48 +910,16 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
             [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
             return YES;
             
-        }else{
+        } else {
             
             [self selectLibraryGroup:nil];
             
-            if([type isEqualToString:NSFilenamesPboardType]){
+            if ([type isEqualToString:NSFilenamesPboardType]) {
                 NSArray *filenames = [pboard propertyListForType:NSFilenamesPboardType];
-                if([filenames count] == 1){
+                if ([filenames count] == 1) {
                     NSString *file = [filenames lastObject];
-                    if([[file pathExtension] caseInsensitiveCompare:@"aux"] == NSOrderedSame){
-                        NSString *auxString = [NSString stringWithContentsOfFile:file encoding:[self documentStringEncoding] guessEncoding:YES];
-                        NSString *command = @"\\bibcite{"; // we used to get the command by looking at the line after \bibdata, but that's unreliable as there can be other stuff in between the \bibcite commands
-                        
-                        if (auxString == nil)
-                            return NO;
-                        if ([auxString rangeOfString:command].length == 0) {
-                            // if there are no \bibcite commands we'll use the cite's, which are usualy added as \citation commands to the .aux file
-                            command = @"\\citation{";
-                            if ([auxString rangeOfString:command].length == 0)
-                                return NO;
-                        }
-                        
-                        NSScanner *scanner = [NSScanner scannerWithString:auxString];
-                        NSString *key = nil;
-                        NSArray *items = nil;
-                        NSMutableArray *selItems = [NSMutableArray array];
-                        
-                        [scanner setCharactersToBeSkipped:nil];
-                        
-                        do {
-                            if ([scanner scanString:command intoString:NULL] &&
-                                [scanner scanUpToString:@"}" intoString:&key] &&
-                                (items = [publications allItemsForCiteKey:key]))
-                                [selItems addObjectsFromArray:items];
-                            [scanner scanUpToCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
-                            [scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
-                        } while ([scanner isAtEnd] == NO);
-                        
-                        if ([selItems count])
-                            [self selectPublications:selItems];
-                        
-                        return YES;
-                    }
+                    if([[file pathExtension] caseInsensitiveCompare:@"aux"] == NSOrderedSame)
+                        return [self selectItemsInAuxFileAtPath:file];
                 }
             }
             
