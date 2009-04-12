@@ -78,6 +78,8 @@ static char _FVFileViewContentObservationContext;
 #define DEFAULT_MARGIN ((CGFloat) 4.0)
 #define TEXT_OFFSET ((CGFloat) 2.0)
 
+#define MIN_AUTO_ICON_SCALE ((CGFloat) 0.1)
+
 // check the icon cache every five minutes and get rid of stale icons
 #define ZOMBIE_TIMER_INTERVAL 60.0
 
@@ -993,6 +995,25 @@ static CGFloat _subtitleHeight = 0.0;
     return size;
 }
 
+- (void)_setPaddingAndIconSizeFromContentWidth:(CGFloat)width {
+    // guess the iconScale, ignoring the variable padding because that depends on the iconScale
+    CGFloat iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( width - DEFAULT_PADDING.width - 2 * DEFAULT_MARGIN ) / DEFAULT_ICON_SIZE.width );
+    _padding = [self _paddingForScale:iconScale];
+    // recalculate exactly based on this padding, inverting the calculation in _frameSizeForContentSize
+    iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( width - [self _leftMargin] - [self _rightMargin] ) / DEFAULT_ICON_SIZE.width );
+    _iconSize = NSMakeSize(iconScale * DEFAULT_ICON_SIZE.width, iconScale * DEFAULT_ICON_SIZE.height);
+}
+
+- (void)_setPaddingAndIconSizeFromContentHeight:(CGFloat)height {
+    // guess the iconScale, ignoring the variable padding because that depends on the iconScale
+    CGFloat subtitleHeight = [[self dataSource] respondsToSelector:@selector(fileView:subtitleAtIndex:)] ? _subtitleHeight : 0.0;
+    CGFloat iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( height - _titleHeight ) / _numberOfRows - DEFAULT_PADDING.height - _titleHeight - subtitleHeight ) / DEFAULT_ICON_SIZE.height );
+    _padding = [self _paddingForScale:iconScale];
+    // recalculate exactly based on this padding, inverting the calculation in _frameSizeForContentSize
+    iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( height - [self _topMargin] - [self _bottomMargin] ) / _numberOfRows - _padding.height ) / DEFAULT_ICON_SIZE.height );
+    _iconSize = NSMakeSize(iconScale * DEFAULT_ICON_SIZE.width, iconScale * DEFAULT_ICON_SIZE.height);
+}
+
 - (void)_recalculateGridSize
 {
     NSScrollView *scrollView = [self enclosingScrollView];
@@ -1004,33 +1025,41 @@ static CGFloat _subtitleHeight = 0.0;
         _numberOfColumns = 1;
         _numberOfRows = numIcons;
         
+        // if we have an auto-hiding vertical scroller, we may or may not have scroll bars, which affects the effective width
         if ([scrollView autohidesScrollers] && [scrollView hasVerticalScroller]) {
+            // fist assume we need a vertical scroller...
             
-            NSRect scrollFrame = [scrollView frame];
-            contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrame.size hasHorizontalScroller:NO hasVerticalScroller:NO borderType:[scrollView borderType]];
-            if ([scrollView hasHorizontalScroller] && (contentSize.width < FVCeil( DEFAULT_PADDING.width + 0.1 * DEFAULT_ICON_SIZE.width + 2.0 * DEFAULT_MARGIN )))
-                contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrame.size hasHorizontalScroller:YES hasVerticalScroller:NO borderType:[scrollView borderType]];
+            NSSize scrollFrameSize = [scrollView frame].size;
+            CGFloat minContentWidth = FVCeil( DEFAULT_PADDING.width + MIN_AUTO_ICON_SCALE * DEFAULT_ICON_SIZE.width + 2 * DEFAULT_MARGIN );
             
-            CGFloat iconScale = FVMax( 0.1, ( contentSize.width - DEFAULT_PADDING.width - 2 * DEFAULT_MARGIN ) / DEFAULT_ICON_SIZE.width );
-            _padding = [self _paddingForScale:iconScale];
-            iconScale = FVMax( 0.1, ( contentSize.width - [self _leftMargin] - [self _rightMargin] ) / DEFAULT_ICON_SIZE.width );
-            _iconSize = NSMakeSize(iconScale * DEFAULT_ICON_SIZE.width, iconScale * DEFAULT_ICON_SIZE.height);
+            contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrameSize hasHorizontalScroller:NO hasVerticalScroller:YES borderType:[scrollView borderType]];
+            // if the icons reach the minimum size, we should have a horizontal scroller if it's available
+            if ([scrollView hasHorizontalScroller] && contentSize.width < minContentWidth)
+                contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrameSize hasHorizontalScroller:YES hasVerticalScroller:YES borderType:[scrollView borderType]];
             
-            if (contentSize.height < [self _frameSizeForContentSize:contentSize].height) {
-                contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrame.size hasHorizontalScroller:NO hasVerticalScroller:YES borderType:[scrollView borderType]];
+            [self _setPaddingAndIconSizeFromContentWidth:contentSize.width];
+            
+            if (contentSize.height > [self _frameSizeForContentSize:NSZeroSize].height) {
+                // we have sufficient height to fit all icons, so recalculate without vertical scroller
                 
-                iconScale = FVMax( 0.1, ( contentSize.width - DEFAULT_PADDING.width - 2 * DEFAULT_MARGIN ) / DEFAULT_ICON_SIZE.width );
-                _padding = [self _paddingForScale:iconScale];
-                iconScale = FVMax( 0.1, ( contentSize.width - [self _leftMargin] - [self _rightMargin] ) / DEFAULT_ICON_SIZE.width );
-                _iconSize = NSMakeSize(iconScale * DEFAULT_ICON_SIZE.width, iconScale * DEFAULT_ICON_SIZE.height);
+                contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrameSize hasHorizontalScroller:NO hasVerticalScroller:NO borderType:[scrollView borderType]];
+                if ([scrollView hasHorizontalScroller] && contentSize.width < minContentWidth)
+                    contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrameSize hasHorizontalScroller:YES hasVerticalScroller:NO borderType:[scrollView borderType]];
+                
+                [self _setPaddingAndIconSizeFromContentWidth:contentSize.width];
+                
+                if (_numberOfRows > 0 && contentSize.height < [self _frameSizeForContentSize:NSZeroSize].height) {
+                    // the height with this wider icons becomes too much, so we now recalculate by fitting the height, still without vertical scroller
+                    // this should come out in between the previous two calculations
+                    
+                    [self _setPaddingAndIconSizeFromContentHeight:contentSize.height];
+                }
             }
+            
             
         } else {
         
-            CGFloat iconScale = FVMax( 0.1, ( contentSize.width - DEFAULT_PADDING.width - 2 * DEFAULT_MARGIN ) / DEFAULT_ICON_SIZE.width );
-            _padding = [self _paddingForScale:iconScale];
-            iconScale = FVMax( 0.1, ( contentSize.width - [self _leftMargin] - [self _rightMargin] ) / DEFAULT_ICON_SIZE.width );
-            _iconSize = NSMakeSize(iconScale * DEFAULT_ICON_SIZE.width, iconScale * DEFAULT_ICON_SIZE.height);
+            [self _setPaddingAndIconSizeFromContentWidth:contentSize.width];
             
         }
         
@@ -1051,6 +1080,7 @@ static CGFloat _subtitleHeight = 0.0;
             [super setFrame:frame];
             [scrollView reflectScrolledClipView:[scrollView contentView]];
             contentSize = [scrollView contentSize];
+            // make sure the scrollView did not hide a scroller unexpectedly and we get too small
             if (contentSize.width > NSWidth(frame) || contentSize.height > NSHeight(frame)) {
                 frame.size = [self _frameSizeForContentSize:contentSize];
                 [super setFrame:frame];
