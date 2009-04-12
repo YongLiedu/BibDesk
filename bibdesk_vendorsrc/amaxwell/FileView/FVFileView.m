@@ -986,6 +986,13 @@ static CGFloat _subtitleHeight = 0.0;
 
 #pragma mark Drawing layout
 
+- (NSSize)_frameSizeForContentSize:(NSSize)contentSize {
+    NSSize size = contentSize;
+    size.width = FVMax( FVCeil( [self _columnWidth] * _numberOfColumns - _padding.width + [self _leftMargin] + [self _rightMargin] ), contentSize.width );
+    size.height = FVMax( FVCeil( [self _rowHeight] * _numberOfRows + [self _topMargin] + [self _bottomMargin] ), contentSize.height );
+    return size;
+}
+
 - (void)_recalculateGridSize
 {
     NSScrollView *scrollView = [self enclosingScrollView];
@@ -994,14 +1001,38 @@ static CGFloat _subtitleHeight = 0.0;
     
     if (_fvFlags.autoScales) {
         
-        CGFloat iconScale = FVMax( 0.1, ( contentSize.width - DEFAULT_PADDING.width - 2 * DEFAULT_MARGIN ) / DEFAULT_ICON_SIZE.width );
-        _padding = [self _paddingForScale:iconScale];
-        
         _numberOfColumns = 1;
         _numberOfRows = numIcons;
         
-        iconScale = FVMax( 0.1, ( contentSize.width - [self _leftMargin] - [self _rightMargin] ) / DEFAULT_ICON_SIZE.width );
-        _iconSize = NSMakeSize(iconScale * DEFAULT_ICON_SIZE.width, iconScale * DEFAULT_ICON_SIZE.height);
+        if ([scrollView autohidesScrollers] && [scrollView hasVerticalScroller]) {
+            
+            NSRect scrollFrame = [scrollView frame];
+            contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrame.size hasHorizontalScroller:NO hasVerticalScroller:NO borderType:[scrollView borderType]];
+            if ([scrollView hasHorizontalScroller] && (contentSize.width < FVCeil( DEFAULT_PADDING.width + 0.1 * DEFAULT_ICON_SIZE.width + 2.0 * DEFAULT_MARGIN )))
+                contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrame.size hasHorizontalScroller:YES hasVerticalScroller:NO borderType:[scrollView borderType]];
+            
+            CGFloat iconScale = FVMax( 0.1, ( contentSize.width - DEFAULT_PADDING.width - 2 * DEFAULT_MARGIN ) / DEFAULT_ICON_SIZE.width );
+            _padding = [self _paddingForScale:iconScale];
+            iconScale = FVMax( 0.1, ( contentSize.width - [self _leftMargin] - [self _rightMargin] ) / DEFAULT_ICON_SIZE.width );
+            _iconSize = NSMakeSize(iconScale * DEFAULT_ICON_SIZE.width, iconScale * DEFAULT_ICON_SIZE.height);
+            
+            if (contentSize.height < [self _frameSizeForContentSize:contentSize].height) {
+                contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrame.size hasHorizontalScroller:NO hasVerticalScroller:YES borderType:[scrollView borderType]];
+                
+                iconScale = FVMax( 0.1, ( contentSize.width - DEFAULT_PADDING.width - 2 * DEFAULT_MARGIN ) / DEFAULT_ICON_SIZE.width );
+                _padding = [self _paddingForScale:iconScale];
+                iconScale = FVMax( 0.1, ( contentSize.width - [self _leftMargin] - [self _rightMargin] ) / DEFAULT_ICON_SIZE.width );
+                _iconSize = NSMakeSize(iconScale * DEFAULT_ICON_SIZE.width, iconScale * DEFAULT_ICON_SIZE.height);
+            }
+            
+        } else {
+        
+            CGFloat iconScale = FVMax( 0.1, ( contentSize.width - DEFAULT_PADDING.width - 2 * DEFAULT_MARGIN ) / DEFAULT_ICON_SIZE.width );
+            _padding = [self _paddingForScale:iconScale];
+            iconScale = FVMax( 0.1, ( contentSize.width - [self _leftMargin] - [self _rightMargin] ) / DEFAULT_ICON_SIZE.width );
+            _iconSize = NSMakeSize(iconScale * DEFAULT_ICON_SIZE.width, iconScale * DEFAULT_ICON_SIZE.height);
+            
+        }
         
         CGLayerRelease(_selectionOverlay);
         _selectionOverlay = NULL;
@@ -1015,13 +1046,15 @@ static CGFloat _subtitleHeight = 0.0;
     }
     
     if (scrollView) {
-        NSRect frame = { NSZeroPoint, contentSize };
-        frame.size.width = FVMax( FVCeil( [self _columnWidth] * _numberOfColumns - _padding.width + [self _leftMargin] + [self _rightMargin] ), contentSize.width );
-        frame.size.height = FVMax( FVCeil( [self _rowHeight] * _numberOfRows + [self _topMargin] + [self _bottomMargin] ), contentSize.height );
+        NSRect frame = { NSZeroPoint, [self _frameSizeForContentSize:contentSize] };
         if (NSEqualRects([self frame], frame) == NO) {
             [super setFrame:frame];
-            if (_fvFlags.autoScales)
-                [scrollView reflectScrolledClipView:[scrollView contentView]];
+            [scrollView reflectScrolledClipView:[scrollView contentView]];
+            contentSize = [scrollView contentSize];
+            if (contentSize.width > NSWidth(frame) || contentSize.height > NSHeight(frame)) {
+                frame.size = [self _frameSizeForContentSize:contentSize];
+                [super setFrame:frame];
+            }
         }
     }
 }    
