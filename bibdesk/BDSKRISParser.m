@@ -244,7 +244,7 @@
 	}
     
     // the PY field should have the format YYYY/MM/DD/part, but may only contain the year
-    NSString *date = [pubDict objectForKey:BDSKDateString];
+    NSString *date = [[[pubDict objectForKey:BDSKYearString] retain] autorelease];
     
     if (date) {
         unsigned first = NSNotFound, second = NSNotFound, third = NSNotFound, length = [date length];
@@ -255,8 +255,9 @@
                 third = [date rangeOfString:@"/" options:0 range:NSMakeRange(second + 1, length - second - 1)].location;
         }
         if (first != NSNotFound) {
-            if ([pubDict objectForKey:BDSKYearString] == nil)
-                [pubDict setObject:[date substringToIndex:first] forKey:BDSKYearString];
+            if ([pubDict objectForKey:BDSKDateString] == nil)
+                [pubDict setObject:date forKey:BDSKDateString];
+            [pubDict setObject:[date substringToIndex:first] forKey:BDSKYearString];
             if (second != NSNotFound) {
                 if ([pubDict objectForKey:BDSKMonthString] == nil) {
                     if (second > first + 1)
@@ -267,8 +268,6 @@
                 if (third != NSNotFound && third > second + 1 && [pubDict objectForKey:@"Day"] == nil)
                     [pubDict setObject:[date substringWithRange:NSMakeRange(second + 1, third - second - 1)] forKey:@"Day"];
             }
-        } else if ([pubDict objectForKey:BDSKYearString] == nil) {
-            [pubDict setObject:date forKey:BDSKYearString];
         }
     }
 }

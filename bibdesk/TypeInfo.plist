@@ -99,7 +99,7 @@
         N1 = Annote; 
         N2 = Abstract; 
         PB = Publisher; 
-        PY = Date; 
+        PY = Year; 
         RP = Status; 
         SN = Isbn; 
         T1 = Title; 
