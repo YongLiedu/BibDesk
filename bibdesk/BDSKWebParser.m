@@ -164,12 +164,7 @@ static Class webParserClassForType(int stringType)
 + (NSDictionary *) siteInfoWithName: (NSString *) name address: (NSString *) address andTitle: (NSString *) title {
 	NSDictionary * result = nil;
 	if (name && address) {
-		if (title) {
-			result = [NSDictionary dictionaryWithObjectsAndKeys:name, BDSKSITENAME, address, BDSKSITEADDRESS, title, BDSKSITEINFORMATION, nil];
-			}
-			else {
-				result = [NSDictionary dictionaryWithObjectsAndKeys:name, BDSKSITENAME, address, BDSKSITEADDRESS,  nil];	
-		}
+        result = [NSDictionary dictionaryWithObjectsAndKeys:name, BDSKSITENAME, address, BDSKSITEADDRESS, title, BDSKSITEINFORMATION, nil];
 	}
 	return result;
 }
