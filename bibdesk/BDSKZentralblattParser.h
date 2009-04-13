@@ -41,6 +41,7 @@
 
 
 @interface BDSKZentralblattParser : BDSKWebParser
-+ (NSArray *) bibItemsForZMathIDs:(NSArray *) IDs error:(NSError **) outError;
++ (NSArray *) bibItemsForZMathIDs:(NSArray *) IDs;
++ (NSArray *) bibItemsForZMathIDs:(NSArray *) IDs referrer:(NSURL *) referrer error:(NSError **) outError;
 + (NSURL *) reviewLinkForID: (NSString *) ZblID;
 @end

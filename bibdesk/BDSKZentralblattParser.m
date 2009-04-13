@@ -47,10 +47,11 @@
 
 @implementation BDSKZentralblattParser
 /*
- Zentralblatt Math is recognised by the domain name of its server: zentralblatt-math.org
+ Zentralblatt Math is mirrored across several servers. (http://www.zentralblatt-math.org/zmath/en/mirrors/)
+ Accept URLs whose path begins with zmath. As sometimes paths begin with multiple slashes, trim those first.
 */
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
-	BOOL result = [[[url host] lowercaseString] hasSuffix:@"zentralblatt-math.org"];
+	BOOL result = ([[[url path] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"/"]] rangeOfString:@"zmath" options: NSCaseInsensitiveSearch | NSAnchoredSearch].location != NSNotFound);
 	return result;
 }
 
@@ -78,20 +79,43 @@
 		}
 	}
 
-	NSArray * results = [BDSKZentralblattParser bibItemsForZMathIDs:IDArray error:outError];	
+	NSArray * results = [BDSKZentralblattParser bibItemsForZMathIDs:IDArray referrer:url error:outError];	
 	return results;  
 }
 
+
+
+/*
+ Turns an array of Zentralblatt Math IDs into an array of BibItems using the default server.
+*/
++ (NSArray *) bibItemsForZMathIDs:(NSArray *) IDs {
+	return [BDSKZentralblattParser bibItemsForZMathIDs:IDs referrer:nil error:NULL];
+}
 
 
 
 /*
  Turns an array of Zentralblatt Math IDs into an array of BibItems.
 */
-+ (NSArray *) bibItemsForZMathIDs:(NSArray *) IDs error:(NSError **) outError {
++ (NSArray *) bibItemsForZMathIDs:(NSArray *) IDs referrer:(NSURL *) referrer error:(NSError **) outError {
 	NSError * error;
 	
-	/* ZMath sometimes uses \"o for umlauts which is incorrect, fix that by adding brackets around it for the parser to work. Also add brackets to acute and grave accents, so BibDesk translates them to Unicode properly for display */
+	/*	Determine the server name to use.
+		If the referring URL's path begins with '/zmath', assume we are using a Zentralblatt mirror server before and continue using that.
+		If not, use the default server instead.
+	*/
+	NSString * serverName = [[referrer host] lowercaseString];
+	if ( [BDSKZentralblattParser canParseDocument:nil xmlDocument:nil fromURL:referrer] ) {
+		if ( [[referrer path] rangeOfString:@"/ZMATH/zmath"].location != NSNotFound ) {
+			// some mirrors' paths begin with /ZMATH, add that
+			serverName = [serverName stringByAppendingString:@"/ZMATH"];
+		}
+	}
+	else {
+		serverName = @"www.zentralblatt-math.org";
+	}
+	
+	/*	ZMath sometimes uses \"o for umlauts which is incorrect, fix that by adding brackets around it for the parser to work. Also add brackets to acute and grave accents, so BibDesk translates them to Unicode properly for display */
 	AGRegex * umlautFixer = [AGRegex regexWithPattern:@"(\\\\[\"'`][a-zA-Z])" options:AGRegexMultiline];
 
 	// Loop through IDs in batches of ZMATHBATCHSIZE.
@@ -104,7 +128,7 @@
 		firstElement += ZMATHBATCHSIZE;
 		
 		// Query ZMath with a POST request
-		NSString * URLString = @"http://www.zentralblatt-math.org/zmath/en/command/";
+		NSString * URLString = [NSString stringWithFormat:@"http://%@/zmath/en/command/", serverName];
 		NSMutableURLRequest * request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:URLString]];
 		[request setHTTPMethod:@"post"];
 		[request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-type"];
@@ -150,6 +174,7 @@
 
 /*
  Returns URL to the review for a given ID.
+ Always uses the default server.
 */
 + (NSURL *) reviewLinkForID: (NSString *) ZMathID {
 	NSString * ZMathItemURLString = [NSString stringWithFormat:@"http://www.zentralblatt-math.org/zmath/en/search/?format=complete&q=an:%@", ZMathID];
@@ -157,6 +182,14 @@
 	return ZMathItemURL;
 }
 
+
+
+/*
+ Array with site description dictionary for main www.zentralblatt-math.org.
+*/
++ (NSArray *) subscriptionSites {
+	return [NSArray arrayWithObject:[self siteInfoWithName:@"Zentralblatt Math" address:@"http://www.zentralblatt-math.org/zmath/en/" andTitle:NSLocalizedString(@"Database of Zentralblatt Mathematik with reviews of mathematical papers. Only the first three search results are displayed without a subscription.", @"Description for Zentralblatt Math site.")]];
+}
 
 
 @end
