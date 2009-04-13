@@ -913,9 +913,7 @@ http://home.planet.nl/~faase009/GNU.txt
 }
 
 - (NSString *)lossyASCIIString{
-    return [[[NSString alloc] initWithData:[self dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] encoding:NSASCIIStringEncoding] autorelease];
-- (NSString *)lossyASCIIString{
-    NSData *asciiData = [ms dataUsingEncoding:NSASCIIStringEncoding];
+    NSData *asciiData = [self dataUsingEncoding:NSASCIIStringEncoding];
     if (asciiData == nil) {
         NSMutableString *ms = [self mutableCopyWithZone:[self zone]];
         // do as much transliteration as possible, then strip all combining marks; works with ideographs as well
