@@ -914,6 +914,18 @@ http://home.planet.nl/~faase009/GNU.txt
 
 - (NSString *)lossyASCIIString{
     return [[[NSString alloc] initWithData:[self dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] encoding:NSASCIIStringEncoding] autorelease];
+- (NSString *)lossyASCIIString{
+    NSData *asciiData = [ms dataUsingEncoding:NSASCIIStringEncoding];
+    if (asciiData == nil) {
+        NSMutableString *ms = [self mutableCopyWithZone:[self zone]];
+        // do as much transliteration as possible, then strip all combining marks; works with ideographs as well
+        CFStringTransform((CFMutableStringRef)ms, NULL, kCFStringTransformToLatin, FALSE);
+        CFStringTransform((CFMutableStringRef)ms, NULL, kCFStringTransformStripCombiningMarks, FALSE);
+        // final step to guarantee ASCII
+        asciiData = [ms dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+        [ms release];
+    }
+    return asciiData ? [[[NSString alloc] initWithData:asciiData encoding:NSASCIIStringEncoding] autorelease] : nil;
 }
 
 #pragma mark Comparisons
