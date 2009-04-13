@@ -43,6 +43,7 @@
 #import "BDSKCFCallBacks.h"
 #import "NSCharacterSet_BDSKExtensions.h"
 #import "CFString_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 
 @interface BibAuthor (Private)
 
@@ -293,7 +294,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
         theName = mask & BDSKAuthorAbbreviateFirstNameMask ? [self abbreviatedNormalizedName] : normalizedName;
     else
         theName = mask & BDSKAuthorAbbreviateFirstNameMask ? [self abbreviatedName] : name;
-    return theName;
+    return [theName stringByRemovingTeX];
 }
 
 
