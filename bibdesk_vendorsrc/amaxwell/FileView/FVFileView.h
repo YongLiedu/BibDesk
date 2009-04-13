@@ -183,13 +183,13 @@ typedef NSInteger FVDisplayMode;
  @param scale The new value of FileView::minIconScale. */
 - (void)setMinIconScale:(double)scale;
 
-/** Whether the icons scale automatically.
+/** Whether the icons scale are ordered in a grid or a single auto-scaled column or row.
  
- When this is not set to FVDisplayModeGrid, setIconScale: will be ignored, and the views shows the icons in a single column or row with a scale determined by the current width or height of the view.  Can be bound.*/
+ When this is not set to FVDisplayModeGrid, setIconScale: will be ignored, and the view shows the icons in a single column or row with a scale determined by the current width or height of the view.  Can be bound.*/
 - (FVDisplayMode)displayMode;
 
-/** Set whether the icons scale automatically.
- @param flag The new value of FVFileView::displayMode. */
+/** Set whether the icons are ordered in a grid or a single auto-scaled column or row.
+ @param mode The new value of FVFileView::displayMode. */
 - (void)setDisplayMode:(FVDisplayMode)mode;
 
 /** Current number of rows displayed.*/
