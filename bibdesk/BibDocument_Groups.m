@@ -94,27 +94,27 @@
 #pragma mark Selected group types
 
 - (BOOL)hasLibraryGroupSelected{
-    return [[self selectedGroups] containsObject:[groups libraryGroup]];
+    return [[self selectedGroups] lastObject] == [groups libraryGroup];
 }
 
 - (BOOL)hasWebGroupSelected{
-    return [[self selectedGroups] containsObject:[groups webGroup]];
+    return [[self selectedGroups] lastObject] == [groups webGroup];
 }
 
 - (BOOL)hasSharedGroupsSelected{
-    return [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isShared == YES"]] count] > 0;
+    return [[[self selectedGroups] lastObject] isShared];
 }
 
 - (BOOL)hasURLGroupsSelected{
-    return [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isURL == YES"]] count] > 0;
+    return [[[self selectedGroups] lastObject] isURL];
 }
 
 - (BOOL)hasScriptGroupsSelected{
-    return [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isScript == YES"]] count] > 0;
+    return [[[self selectedGroups] lastObject] isScript];
 }
 
 - (BOOL)hasSearchGroupsSelected{
-    return [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isSearch == YES"]] count] > 0;
+    return [[[self selectedGroups] lastObject] isSearch];
 }
 
 - (BOOL)hasSmartGroupsSelected{
@@ -130,7 +130,7 @@
 }
 
 - (BOOL)hasExternalGroupsSelected{
-    return [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isExternal == YES"]] count] > 0;
+    return [[[self selectedGroups] lastObject] isExternal];
 }
 
 /* 
