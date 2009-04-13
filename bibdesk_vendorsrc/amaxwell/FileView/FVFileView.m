@@ -949,10 +949,9 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (NSSize)_paddingForScale:(CGFloat)scale;
 {
-    // ??? magic number here... using a fixed padding looked funny at some sizes, so this is now adjustable
     NSSize size = NSZeroSize;
     
-    // if we autoscale, we should always derive the scale from the current bounds,  but rather the current bounds. This calculation basically inverts the calculation in _recalculateGridSize
+    // ??? magic number here... using a fixed padding looked funny at some sizes, so this is now adjustable
     size.width = DEFAULT_PADDING.width + FVRound(4.0 * scale);
     size.height = DEFAULT_PADDING.height + FVRound(4.0 * scale) + _titleHeight;
     if ([_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)])
@@ -997,7 +996,7 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (void)_setPaddingAndIconSizeFromContentWidth:(CGFloat)width {
     // guess the iconScale, ignoring the variable padding because that depends on the iconScale
-    CGFloat iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( width - 2 * DEFAULT_MARGIN ) / _numberOfColumns - DEFAULT_PADDING.width ) / DEFAULT_ICON_SIZE.width );
+    CGFloat iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( width - 2 * DEFAULT_MARGIN ) / _numberOfColumns - [self _paddingForScale:0.0].width ) / ( DEFAULT_ICON_SIZE.width + 4.0 ));
     _padding = [self _paddingForScale:iconScale];
     // recalculate exactly based on this padding, inverting the calculation in _frameWidth
     iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( width - [self _leftMargin] - [self _rightMargin] + _padding.width ) / _numberOfColumns - _padding.width ) / DEFAULT_ICON_SIZE.width );
@@ -1006,8 +1005,7 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (void)_setPaddingAndIconSizeFromContentHeight:(CGFloat)height {
     // guess the iconScale, ignoring the variable padding because that depends on the iconScale
-    CGFloat subtitleHeight = [[self dataSource] respondsToSelector:@selector(fileView:subtitleAtIndex:)] ? _subtitleHeight : 0.0;
-    CGFloat iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( height - _titleHeight ) / _numberOfRows - DEFAULT_PADDING.height - _titleHeight - subtitleHeight ) / DEFAULT_ICON_SIZE.height );
+    CGFloat iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( height - _titleHeight ) / _numberOfRows - [self _paddingForScale:0.0].height ) / ( DEFAULT_ICON_SIZE.height + 4.0 ) );
     _padding = [self _paddingForScale:iconScale];
     // recalculate exactly based on this padding, inverting the calculation in _frameHeight
     iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( height - [self _topMargin] - [self _bottomMargin] ) / _numberOfRows - _padding.height ) / DEFAULT_ICON_SIZE.height );
