@@ -111,5 +111,12 @@
     
 }
 
+
+
+
++ (NSArray *) publicSites {
+	return [NSArray arrayWithObject:[self siteInfoWithName:@"HubMed" address:@"http://www.hubmed.org/" andTitle:NSLocalizedString(@"Alternative interface for queries to the PubMed database of medical literature.", @"Description for HubMed site")]];
+}
+
 @end 
 

@@ -253,4 +253,10 @@ static void splitDateString(NSMutableDictionary *pubDict)
     return returnArray;
 }
 
+
+
++ (NSArray *) publicSites {
+	return [NSArray arrayWithObject:[self siteInfoWithName:@"JSTOR" address:@"http://www.jstor.org/" andTitle:NSLocalizedString(@"Archive site for scholarly works.", @"Description for JSTOR site")]];
+}
+
 @end

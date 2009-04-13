@@ -42,6 +42,7 @@
 #import "BDSKWebParser.h"
 #import "BDSKStringParser.h"
 #import "BDSKWebGroup.h"
+#import "BDSKBibDeskProtocol.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKEdgeView.h"
 #import "BDSKDragTextField.h"
@@ -143,6 +144,10 @@
         [stopAdornImage unlockFocus];
         [stopAdornImage setName:@"StopAdorn"];
     }
+	
+	// register for bibdesk: protocol, so we can display a help page on start
+	[NSURLProtocol registerClass:[BDSKBibDeskProtocol class]];
+	[WebView registerURLSchemeAsLocal:BDSKBibDeskProtocolName];	
 }
 
 - (id)initWithGroup:(BDSKWebGroup *)aGroup document:(BibDocument *)aDocument {
@@ -236,7 +241,8 @@
     // webview
     [webEdgeView setEdges:BDSKEveryEdgeMask];
     [webView setEditingDelegate:self];
-    
+    [self loadURL: BDSKBibDeskWebGroupURL];
+	
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleApplicationWillTerminateNotification:)
                                                  name:NSApplicationWillTerminateNotification

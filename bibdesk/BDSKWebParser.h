@@ -39,6 +39,11 @@
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
 
+// keys for site dictionaries
+#define BDSKSITENAME @"name"
+#define BDSKSITEADDRESS @"address"
+#define BDSKSITEINFORMATION @"information"
+
 enum {
 	BDSKUnknownWebType = -1, 
     BDSKHCiteWebType,
@@ -49,17 +54,24 @@ enum {
     BDSKSpiresWebType,
     BDSKArxivWebType,
 	BDSKMathSciNetWebType,
-	BDSKZentralblattWebType
+	BDSKZentralblattWebType,
+	BDSKProjectEuclidWebType,
+	BDSKNumdamWebType
 };
 
-// this method is the main entry point for the BDSKWebParser class
-// it should not be overridden by the concrete subclasses
 @interface BDSKWebParser : NSObject
++ (Class) webParserClassForType: (int) stringType;
+// this method is the main entry point for the BDSKWebParser class it should not be overridden by the concrete subclasses
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument fromURL:(NSURL *)url error:(NSError **)outError;
+// helper method for creating correctly formatted site dictionaries 
++ (NSDictionary *) siteInfoWithName: (NSString *) name address: (NSString *) address andTitle: (NSString *) title;
 @end
 
-// these methods must be implemented by the concrete subclasses, and are invalid for the BDSKWebParser class
 @interface BDSKWebParser (SubclassResponsibility)
+// these methods must be implemented by the concrete subclasses, and are invalid for the BDSKWebParser class
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url;
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError;
+// Subclasses return site info dictionaries here to be listed on the web group start page.
++ (NSArray *) publicSites;
++ (NSArray *) subscriptionSites;
 @end

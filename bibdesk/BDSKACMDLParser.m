@@ -156,5 +156,9 @@
     
 }
 
-@end 
 
++ (NSArray *) publicSites {
+	return [NSArray arrayWithObject:[self siteInfoWithName:@"ACM" address:@"http://portal.acm.org/" andTitle:nil]];
+}
+
+@end 

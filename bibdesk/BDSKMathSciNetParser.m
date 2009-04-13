@@ -102,20 +102,17 @@
 + (NSArray *) bibItemsForMRIDs:(NSArray *) IDs referrer:(NSURL *) URL error:(NSError **) outError {
 	NSError * error;
 	
-	/*  
-	 Determine the server name to use.
-	 If the referring URL's server name contains 'ams', assume we were using a mirror server before and continue using that.
-	 If the referring URL's server name doesn't contain 'ams' we're processing MR IDs not coming from a MathSciNet page and use the 'ams.org' server.
+	/*	Determine the server name to use.
+		If the referring URL's server name contains 'ams', assume we were using a mirror server before and continue using that.
+		If not, we're processing MR IDs not coming from a MathSciNet page and use the default 'ams.org' server.
 	*/
 	NSString * serverName = [[URL host] lowercaseString];
-	
 	if (!serverName || [serverName rangeOfString:@"ams"].location == NSNotFound) {
-		// it's not an ams server => use ams.org instead
 		serverName = @"ams.org";
 	}
 	
 	
-	/* Downloaded BibTeX records sometimes use \"o for umlauts which is incorrect and rejected by the parser. Use a regular expression to find and replace them. Also add brackets to acute and grave accents, so BibDesk translates them to Unicode properly for display. 
+	/*	Downloaded BibTeX records sometimes use \"o for umlauts which is incorrect and rejected by the parser. Use a regular expression to find and replace them. Also add brackets to acute and grave accents, so BibDesk translates them to Unicode properly for display. 
 	*/
 	AGRegex * umlautFixer = [AGRegex regexWithPattern:@"(\\\\[\"'`][a-zA-Z])" options:AGRegexMultiline];
 	
@@ -192,7 +189,6 @@
 
 
 
-
 /*
  Returns URL to the review for a given ID.
  It always points to the default server.
@@ -202,5 +198,15 @@
 	NSURL * MRItemURL = [NSURL URLWithString:MRItemURLString];
 	return MRItemURL;
 }
+
+
+
+/*
+ Array with site description dictionary for ams.org/mathscinet.
+*/
++ (NSArray *) subscriptionSites {
+	return [NSArray arrayWithObject:[self siteInfoWithName:@"MathSciNet" address:@"http://ams.org/mathscinet/" andTitle:NSLocalizedString(@"Database of Mathematical Reviews by the American Mathematical Society.", @"Description for MathSciNet site")]];
+}
+
 
 @end

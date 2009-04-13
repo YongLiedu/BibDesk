@@ -96,5 +96,12 @@
     
 }
 
+
+
++ (NSArray *) publicSites {
+	return [NSArray arrayWithObject:[self siteInfoWithName:@"CiteULike" address:@"http://www.citeulike.org/" andTitle:nil]];
+}
+
+
 @end 
 

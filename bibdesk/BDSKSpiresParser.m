@@ -145,4 +145,11 @@
     
 }
 
+
+
++ (NSArray *) publicSites {
+	return [NSArray arrayWithObject:[self siteInfoWithName:@"SPIRES" address:@"http://www.slac.stanford.edu/spires/"  andTitle:NSLocalizedString(@"SPIRES database of literature on particle physics.", @"Description for SPIRES site")]];
+}
+
+
 @end 

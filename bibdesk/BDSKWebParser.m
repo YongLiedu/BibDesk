@@ -46,6 +46,7 @@
 #import "BDSKArxivParser.h"
 #import "BDSKMathSciNetParser.h"
 #import "BDSKZentralblattParser.h"
+#import "BDSKMathSiteParser.h"
 #import "NSError_BDSKExtensions.h"
 #import "BDSKRuntime.h"
 
@@ -72,9 +73,17 @@ static Class webParserClassForType(int stringType)
             return [BDSKMathSciNetParser class];
 		case BDSKZentralblattWebType: 
             return [BDSKZentralblattParser class];
+		case BDSKProjectEuclidWebType:
+			return [BDSKProjectEuclidParser class];
+		case BDSKNumdamWebType:
+			return [BDSKNumdamParser class];
         default:
             return Nil;
     }    
+}
+
++ (Class) webParserClassForType: (int) stringType {
+	return webParserClassForType(stringType);
 }
 
 + (int)webTypeOfDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
@@ -96,6 +105,10 @@ static Class webParserClassForType(int stringType)
 		return BDSKMathSciNetWebType;
     if([BDSKZentralblattParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
 		return BDSKZentralblattWebType;
+    if([BDSKProjectEuclidParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
+		return BDSKProjectEuclidWebType;
+    if([BDSKNumdamParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
+		return BDSKNumdamWebType;
     return BDSKUnknownWebType;
 }
 
@@ -145,6 +158,29 @@ static Class webParserClassForType(int stringType)
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
     BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
+}
+
+
++ (NSDictionary *) siteInfoWithName: (NSString *) name address: (NSString *) address andTitle: (NSString *) title {
+	NSDictionary * result = nil;
+	if (name && address) {
+		if (title) {
+			result = [NSDictionary dictionaryWithObjectsAndKeys:name, BDSKSITENAME, address, BDSKSITEADDRESS, title, BDSKSITEINFORMATION, nil];
+			}
+			else {
+				result = [NSDictionary dictionaryWithObjectsAndKeys:name, BDSKSITENAME, address, BDSKSITEADDRESS,  nil];	
+		}
+	}
+	return result;
+}
+
+
++ (NSArray *) publicSites {
+	return nil;
+}
+
++ (NSArray *) subscriptionSites {
+	return nil;
 }
 
 @end

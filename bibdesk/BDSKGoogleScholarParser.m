@@ -236,5 +236,11 @@
     
 }
 
+
++ (NSArray *) publicSites {
+	return [NSArray arrayWithObject:[self siteInfoWithName:@"Google Scholar" address:@"http://scholar.google.com/" andTitle:NSLocalizedString(@"Google\342\200\231s attempt to provide a universal search for and in research related literature. Please go to \342\200\230Scholar Preferences\342\200\231 and set the \342\200\230Bibliography Manager\342\200\231 option to \342\200\230Show links to import citations to BibTeX\342\200\231 for it to work.", @"Description for Google Scholar site")]];
+}
+
+
 @end 
 
