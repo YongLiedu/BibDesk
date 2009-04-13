@@ -4642,7 +4642,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 1462;
+				CURRENT_PROJECT_VERSION = 1463;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -4651,7 +4651,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 1462;
+				CURRENT_PROJECT_VERSION = 1463;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../BuildProducts/Debug\"",
