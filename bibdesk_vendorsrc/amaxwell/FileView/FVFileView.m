@@ -464,7 +464,7 @@ static CGFloat _subtitleHeight = 0.0;
         }
         
         if (_fvFlags.updatingFromSlider == NO)
-            [[_sliderWindow slider] setDoubleValue:[self iconScale]];
+            [[_sliderWindow slider] setDoubleValue:log([self iconScale])];
     }
 }
 
@@ -477,7 +477,7 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (void)setMaxIconScale:(double)scale { 
     _maxScale = scale; 
-    [[_sliderWindow slider] setMaxValue:scale];
+    [[_sliderWindow slider] setMaxValue:log(scale)];
     if ([self iconScale] > scale && scale > 0)
         [self setIconScale:scale];
 }
@@ -486,7 +486,7 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (void)setMinIconScale:(double)scale { 
     _minScale = scale; 
-    [[_sliderWindow slider] setMinValue:scale];
+    [[_sliderWindow slider] setMinValue:log(scale)];
     if ([self iconScale] < scale && scale > 0)
         [self setIconScale:scale];
 }
@@ -532,7 +532,7 @@ static CGFloat _subtitleHeight = 0.0;
         
         if (_sliderWindow) {
             if (_fvFlags.displayMode == FVDisplayModeGrid) {
-                [[_sliderWindow slider] setDoubleValue:[self iconScale]];
+                [[_sliderWindow slider] setDoubleValue:log([self iconScale])];
             } else {
                 [_sliderWindow orderOut:nil];
                 [_sliderWindow release];
@@ -1265,7 +1265,7 @@ static CGFloat _subtitleHeight = 0.0;
 - (void)_sliderAction:(id)sender {
     if (_fvFlags.displayMode == FVDisplayModeGrid) {
         _fvFlags.updatingFromSlider = YES;
-        [self _setIconScale:[sender doubleValue]];
+        [self _setIconScale:exp([sender doubleValue])];
         _fvFlags.updatingFromSlider = NO;
     }
 }
@@ -1274,9 +1274,9 @@ static CGFloat _subtitleHeight = 0.0;
     if (_sliderWindow == nil && _fvFlags.displayMode == FVDisplayModeGrid) {
         _sliderWindow = [[FVSliderWindow alloc] init];
         FVSlider *slider = [_sliderWindow slider];
-        [slider setMaxValue:_maxScale];
-        [slider setMinValue:_minScale];
-        [slider setDoubleValue:[self iconScale]];
+        [slider setMaxValue:log(_maxScale)];
+        [slider setMinValue:log(_minScale)];
+        [slider setDoubleValue:log([self iconScale])];
         [slider setAction:@selector(_sliderAction:)];
         [slider setTarget:self];
     }
