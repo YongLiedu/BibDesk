@@ -65,7 +65,7 @@ static char _FVFileViewContentObservationContext;
 #define ICONSCALE_BINDING_NAME @"iconScale"
 #define MINICONSCALE_BINDING_NAME @"minIconScale"
 #define MAXICONSCALE_BINDING_NAME @"maxIconScale"
-#define AUTOSCALES_BINDING_NAME @"autoScales"
+#define DISPLAYMODE_BINDING_NAME @"displayMode"
 #define EDITABLE_BINDING_NAME @"editable"
 #define ALLOWSDOWNLOADING_BINDING_NAME @"allowsDownloading"
 #define BACKGROUNDCOLOR_BINDING_NAME @"backgroundColor"
@@ -171,7 +171,7 @@ static CGFloat _subtitleHeight = 0.0;
     [self exposeBinding:ICONSCALE_BINDING_NAME];
     [self exposeBinding:MINICONSCALE_BINDING_NAME];
     [self exposeBinding:MAXICONSCALE_BINDING_NAME];
-    [self exposeBinding:AUTOSCALES_BINDING_NAME];
+    [self exposeBinding:DISPLAYMODE_BINDING_NAME];
     [self exposeBinding:EDITABLE_BINDING_NAME];
     [self exposeBinding:ALLOWSDOWNLOADING_BINDING_NAME];
     [self exposeBinding:CONTENT_BINDING_NAME];
@@ -207,7 +207,7 @@ static CGFloat _subtitleHeight = 0.0;
     // Icons keyed by URL that aren't in the current datasource; this is purged and repopulated every ZOMBIE_TIMER_INTERVAL
     _zombieIconCache = [[NSMutableDictionary alloc] init];
     _iconSize = DEFAULT_ICON_SIZE;
-    _fvFlags.autoScales = NO;
+    _fvFlags.displayMode = FVDisplayModeGrid;
     _padding = [self _paddingForScale:1.0];
     _lastMouseDownLocInView = NSZeroPoint;
     // the next two are set to an illegal combination to indicate that no drop is in progress
@@ -429,7 +429,7 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (void)_setIconScale:(double)scale;
 {
-    if (_fvFlags.autoScales == NO) {
+    if (_fvFlags.displayMode == FVDisplayModeGrid) {
         [self setIconScale:scale];
         [self _updateBinding:ICONSCALE_BINDING_NAME];
     }
@@ -437,7 +437,7 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (void)setIconScale:(double)scale;
 {
-    if (_fvFlags.autoScales == NO) {
+    if (_fvFlags.displayMode == FVDisplayModeGrid) {
         FVAPIAssert(scale > 0, @"scale must be greater than zero");
         _iconSize.width = DEFAULT_ICON_SIZE.width * scale;
         _iconSize.height = DEFAULT_ICON_SIZE.height * scale;
@@ -516,28 +516,27 @@ static CGFloat _subtitleHeight = 0.0;
     }
 }
 
-- (void)_setAutoScales:(BOOL)flag {
-    if (_fvFlags.autoScales != flag) {
-        [self setAutoScales:flag];
-        [self _updateBinding:AUTOSCALES_BINDING_NAME];
+- (void)_setDisplayMode:(FVDisplayMode)mode {
+    if (_fvFlags.displayMode != mode) {
+        [self setDisplayMode:mode];
+        [self _updateBinding:DISPLAYMODE_BINDING_NAME];
     }
 }
 
-- (void)setAutoScales:(BOOL)flag {
-    if (_fvFlags.autoScales != flag) {
-        _fvFlags.autoScales = flag;
+- (void)setDisplayMode:(FVDisplayMode)mode {
+    if (_fvFlags.displayMode != mode) {
+        _fvFlags.displayMode = mode;
         
         // arrows out of place now, they will be added again when required when resetting the tracking rects
         [self _hideArrows];
         
         if (_sliderWindow) {
-            if (_fvFlags.autoScales) {
+            if (_fvFlags.displayMode == FVDisplayModeGrid) {
+                [[_sliderWindow slider] setDoubleValue:[self iconScale]];
+            } else {
                 [_sliderWindow orderOut:nil];
                 [_sliderWindow release];
                 _sliderWindow = nil;
-            }
-            else {
-                [[_sliderWindow slider] setDoubleValue:[self iconScale]];
             }
         }
         
@@ -552,8 +551,8 @@ static CGFloat _subtitleHeight = 0.0;
     }
 }
 
-- (BOOL)autoScales {
-    return _fvFlags.autoScales;
+- (FVDisplayMode)displayMode {
+    return _fvFlags.displayMode;
 }
 
 - (void)setDataSource:(id)obj;
@@ -797,7 +796,7 @@ static CGFloat _subtitleHeight = 0.0;
         return [NSArray class];
     else if ([binding isEqualToString:SELECTIONINDEXES_BINDING_NAME])
         return [NSIndexSet class];
-    else if ([binding isEqualToString:ICONSCALE_BINDING_NAME] || [binding isEqualToString:MINICONSCALE_BINDING_NAME] || [binding isEqualToString:MAXICONSCALE_BINDING_NAME] || [binding isEqualToString:AUTOSCALES_BINDING_NAME] || [binding isEqualToString:EDITABLE_BINDING_NAME] || [binding isEqualToString:ALLOWSDOWNLOADING_BINDING_NAME])
+    else if ([binding isEqualToString:ICONSCALE_BINDING_NAME] || [binding isEqualToString:MINICONSCALE_BINDING_NAME] || [binding isEqualToString:MAXICONSCALE_BINDING_NAME] || [binding isEqualToString:DISPLAYMODE_BINDING_NAME] || [binding isEqualToString:EDITABLE_BINDING_NAME] || [binding isEqualToString:ALLOWSDOWNLOADING_BINDING_NAME])
         return [NSNumber class];
     else if ([binding isEqualToString:BACKGROUNDCOLOR_BINDING_NAME])
         return [NSColor class];
@@ -1015,13 +1014,19 @@ static CGFloat _subtitleHeight = 0.0;
     _iconSize = NSMakeSize(iconScale * DEFAULT_ICON_SIZE.width, iconScale * DEFAULT_ICON_SIZE.height);
 }
 
-- (NSSize)_contentSizeForScrollView:(NSScrollView *)scrollView hasVerticalScroller:(BOOL)hasVerticalScroller {
+
+- (void)_setColumnsAndRowsFromContentWidth:(CGFloat)width {
+    _numberOfColumns = MAX( 1,  (NSInteger)FVFloor( ( width - [self _leftMargin] - [self _rightMargin] + _padding.width ) / [self _columnWidth] ) );
+    _numberOfRows = ( [self numberOfIcons]  + _numberOfColumns - 1 ) / _numberOfColumns;
+}
+
+- (NSSize)_contentSizeForScrollView:(NSScrollView *)scrollView minWidth:(CGFloat)minWidth hasVerticalScroller:(BOOL)hasVerticalScroller {
     NSSize scrollFrameSize = [scrollView frame].size;
     NSSize contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrameSize hasHorizontalScroller:NO hasVerticalScroller:hasVerticalScroller borderType:[scrollView borderType]];
     if (hasVerticalScroller && [[scrollView verticalScroller] controlSize] != NSRegularControlSize)
         contentSize.width += [NSScroller scrollerWidth] - [NSScroller scrollerWidthForControlSize:[[scrollView verticalScroller] controlSize]];
     // if the icons reach the minimum size, we should have a horizontal scroller if it's available
-    if ([scrollView hasHorizontalScroller] && contentSize.width < FVCeil( DEFAULT_PADDING.width + MIN_AUTO_ICON_SCALE * DEFAULT_ICON_SIZE.width + 2 * DEFAULT_MARGIN )) {
+    if ([scrollView hasHorizontalScroller] && contentSize.width < minWidth) {
         contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrameSize hasHorizontalScroller:YES hasVerticalScroller:hasVerticalScroller borderType:[scrollView borderType]];
         if ([[scrollView horizontalScroller] controlSize] != NSRegularControlSize)
             contentSize.height += [NSScroller scrollerWidth] - [NSScroller scrollerWidthForControlSize:[[scrollView horizontalScroller] controlSize]];
@@ -1032,26 +1037,44 @@ static CGFloat _subtitleHeight = 0.0;
     return contentSize;
 }
 
+- (NSSize)_contentSizeForScrollView:(NSScrollView *)scrollView minHeight:(CGFloat)minHeight hasHorizontalScroller:(BOOL)hasHorizontalScroller {
+    NSSize scrollFrameSize = [scrollView frame].size;
+    NSSize contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrameSize hasHorizontalScroller:hasHorizontalScroller hasVerticalScroller:NO borderType:[scrollView borderType]];
+    if (hasHorizontalScroller && [[scrollView horizontalScroller] controlSize] != NSRegularControlSize)
+        contentSize.height += [NSScroller scrollerWidth] - [NSScroller scrollerWidthForControlSize:[[scrollView horizontalScroller] controlSize]];
+    // if the icons reach the minimum size, we should have a vertical scroller if it's available
+    if ([scrollView hasVerticalScroller] && contentSize.height < minHeight) {
+        contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrameSize hasHorizontalScroller:hasHorizontalScroller hasVerticalScroller:YES borderType:[scrollView borderType]];
+        if ([[scrollView verticalScroller] controlSize] != NSRegularControlSize)
+            contentSize.width += [NSScroller scrollerWidth] - [NSScroller scrollerWidthForControlSize:[[scrollView verticalScroller] controlSize]];
+        if (hasHorizontalScroller && [[scrollView horizontalScroller] controlSize] != NSRegularControlSize)
+            contentSize.height += [NSScroller scrollerWidth] - [NSScroller scrollerWidthForControlSize:[[scrollView horizontalScroller] controlSize]];
+    }
+    
+    return contentSize;
+}
+
 - (void)_recalculateGridSize
 {
     NSScrollView *scrollView = [self enclosingScrollView];
     NSSize contentSize = scrollView ? [scrollView contentSize] : [self bounds].size;
-    NSUInteger numIcons = [self numberOfIcons];
     
-    if (_fvFlags.autoScales) {
+    if (_fvFlags.displayMode == FVDisplayModeColumn) {
         
         _numberOfColumns = 1;
-        _numberOfRows = numIcons;
+        _numberOfRows = [self numberOfIcons];
         
         // if we have an auto-hiding vertical scroller, we may or may not have scroll bars, which affects the effective width
         if ([scrollView autohidesScrollers] && [scrollView hasVerticalScroller]) {
+            CGFloat minWidth = FVCeil( DEFAULT_PADDING.width + MIN_AUTO_ICON_SCALE * DEFAULT_ICON_SIZE.width + 2 * DEFAULT_MARGIN );
+            
             // fist assume we need a vertical scroller...
-            contentSize = [self _contentSizeForScrollView:scrollView hasVerticalScroller:YES];
+            contentSize = [self _contentSizeForScrollView:scrollView minWidth:minWidth hasVerticalScroller:YES];
             [self _setPaddingAndIconSizeFromContentWidth:contentSize.width];
             
             if (contentSize.height > [self _frameHeight]) {
                 // we have sufficient height to fit all icons, so recalculate without vertical scroller
-                contentSize = [self _contentSizeForScrollView:scrollView hasVerticalScroller:NO];
+                contentSize = [self _contentSizeForScrollView:scrollView minWidth:minWidth hasVerticalScroller:NO];
                 [self _setPaddingAndIconSizeFromContentWidth:contentSize.width];
                 
                 if (_numberOfRows > 0 && contentSize.height < [self _frameHeight]) {
@@ -1061,10 +1084,43 @@ static CGFloat _subtitleHeight = 0.0;
                 }
             }
             
-            
         } else {
         
             [self _setPaddingAndIconSizeFromContentWidth:contentSize.width];
+            
+        }
+        
+        CGLayerRelease(_selectionOverlay);
+        _selectionOverlay = NULL;
+            
+    } else if (_fvFlags.displayMode == FVDisplayModeRow) {
+        
+        _numberOfColumns = [self numberOfIcons];
+        _numberOfRows = 1;
+        
+        // if we have an auto-hiding horizontal scroller, we may or may not have scroll bars, which affects the effective height
+        if ([scrollView autohidesScrollers] && [scrollView hasHorizontalScroller]) {
+            CGFloat minHeight = FVCeil( DEFAULT_PADDING.height + MIN_AUTO_ICON_SCALE * DEFAULT_ICON_SIZE.height + _titleHeight );
+            
+            // fist assume we need a horizontal scroller...
+            contentSize = [self _contentSizeForScrollView:scrollView minHeight:minHeight hasHorizontalScroller:YES];
+            [self _setPaddingAndIconSizeFromContentHeight:contentSize.height];
+            
+            if (contentSize.width > [self _frameWidth]) {
+                // we have sufficient width to fit all icons, so recalculate without horizontal scroller
+                contentSize = [self _contentSizeForScrollView:scrollView minHeight:minHeight hasHorizontalScroller:NO];
+                [self _setPaddingAndIconSizeFromContentHeight:contentSize.height];
+                
+                if (_numberOfColumns > 0 && contentSize.width < [self _frameWidth]) {
+                    // the width with this wider icons becomes too much, so we now recalculate by fitting the width, still without horizontal scroller
+                    // this should come out in between the previous two calculations
+                    [self _setPaddingAndIconSizeFromContentWidth:contentSize.width];
+                }
+            }
+            
+        } else {
+        
+            [self _setPaddingAndIconSizeFromContentHeight:contentSize.height];
             
         }
         
@@ -1075,8 +1131,27 @@ static CGFloat _subtitleHeight = 0.0;
         
         _padding = [self _paddingForScale:[self iconScale]];
         
-        _numberOfColumns = MAX( 1,  (NSInteger)FVFloor( ( contentSize.width - [self _leftMargin] - [self _rightMargin] + _padding.width ) / [self _columnWidth] ) );
-        _numberOfRows = ( [self numberOfIcons]  + _numberOfColumns - 1 ) / _numberOfColumns;
+        // if we have an auto-hiding horizontal scroller, we may or may not have scroll bars, which affects the effective height
+        if ([scrollView autohidesScrollers] && [scrollView hasHorizontalScroller]) {
+            // set the number of colunns to 1 to calculate the minimal required width
+            _numberOfColumns = 1;
+            CGFloat minWidth = [self _frameWidth];
+            
+            // fist assume we don't need a vertical scroller...
+            contentSize = [self _contentSizeForScrollView:scrollView minWidth:minWidth hasVerticalScroller:NO];
+            [self _setColumnsAndRowsFromContentWidth:contentSize.width];
+            
+            if (contentSize.height < [self _frameHeight]) {
+                // we have insufficient height to fit all icons, so recalculate with vertical scroller
+                contentSize = [self _contentSizeForScrollView:scrollView minWidth:minWidth hasVerticalScroller:YES];
+                [self _setColumnsAndRowsFromContentWidth:contentSize.width];
+            }
+            
+        } else {
+            
+            [self _setColumnsAndRowsFromContentWidth:contentSize.width];
+            
+        }
     }
     
     if (scrollView) {
@@ -1188,7 +1263,7 @@ static CGFloat _subtitleHeight = 0.0;
 #pragma mark Slider
 
 - (void)_sliderAction:(id)sender {
-    if (_fvFlags.autoScales == NO) {
+    if (_fvFlags.displayMode == FVDisplayModeGrid) {
         _fvFlags.updatingFromSlider = YES;
         [self _setIconScale:[sender doubleValue]];
         _fvFlags.updatingFromSlider = NO;
@@ -1196,7 +1271,7 @@ static CGFloat _subtitleHeight = 0.0;
 }
 
 - (FVSliderWindow *)_sliderWindow {
-    if (_sliderWindow == nil && _fvFlags.autoScales == NO) {
+    if (_sliderWindow == nil && _fvFlags.displayMode == FVDisplayModeGrid) {
         _sliderWindow = [[FVSliderWindow alloc] init];
         FVSlider *slider = [_sliderWindow slider];
         [slider setMaxValue:_maxScale];
@@ -1295,7 +1370,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         else
             [self _hideArrows];
         
-        if (_fvFlags.autoScales == NO) {
+        if (_fvFlags.displayMode == FVDisplayModeGrid) {
             NSRect sliderRect = NSIntersectionRect([self _topSliderRect], visibleRect);
             _topSliderTag = [self addTrackingRect:sliderRect owner:self userData:[self _sliderWindow] assumeInside:NSPointInRect(mouseLoc, sliderRect)];  
             sliderRect = NSIntersectionRect([self _bottomSliderRect], visibleRect);
@@ -2516,7 +2591,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     if ([NSApp isActive]) {
         if (CFDictionaryGetValueIfPresent(_trackingRectMap, (const void *)tag, (const void **)&anIndex)) {
             [self _showArrowsForIconAtIndex:anIndex];
-        } else if (_fvFlags.autoScales == NO && _sliderWindow && [event userData] == _sliderWindow) {
+        } else if (_fvFlags.displayMode == FVDisplayModeGrid && _sliderWindow && [event userData] == _sliderWindow) {
             
             if ([_sliderWindow parentWindow] == nil) {
                 NSRect sliderRect = tag == _bottomSliderTag ? [self _bottomSliderRect] : [self _topSliderRect];
@@ -3105,9 +3180,19 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     [self _setIconScale:([self iconScale] / 2)];
 }
 
-- (IBAction)toggleAutoScales:(id)sender;
+- (IBAction)displayGrid:(id)sender;
 {
-    [self _setAutoScales:[self autoScales] == NO];
+    [self _setDisplayMode:FVDisplayModeGrid];
+}
+
+- (IBAction)displayColumn:(id)sender;
+{
+    [self _setDisplayMode:FVDisplayModeColumn];
+}
+
+- (IBAction)displayRow:(id)sender;
+{
+    [self _setDisplayMode:FVDisplayModeRow];
 }
 
 - (IBAction)previewAction:(id)sender;
@@ -3198,9 +3283,15 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     BOOL selectionCount = [_selectionIndexes count];
     
     if (action == @selector(zoomOut:) || action == @selector(zoomIn:))
-        return _fvFlags.autoScales == NO;
-    else if (action == @selector(toggleAutoScales:)) {
-        [anItem setState:_fvFlags.autoScales ? NSOnState : NSOffState];
+        return _fvFlags.displayMode == FVDisplayModeGrid;
+    else if (action == @selector(displayGrid:)) {
+        [anItem setState:_fvFlags.displayMode == FVDisplayModeGrid ? NSOnState : NSOffState];
+        return YES;
+    } else if (action == @selector(displayColumn:)) {
+        [anItem setState:_fvFlags.displayMode == FVDisplayModeColumn ? NSOnState : NSOffState];
+        return YES;
+    } else if (action == @selector(displayRow:)) {
+        [anItem setState:_fvFlags.displayMode == FVDisplayModeRow ? NSOnState : NSOffState];
         return YES;
     } else if (action == @selector(revealInFinder:))
         return [aURL isFileURL] && [_selectionIndexes count] == 1 && NO == isMissing;
@@ -3421,8 +3512,15 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
         [anItem setTag:FVZoomInMenuItemTag];
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Zoom Out", @"FileView", bundle, @"context menu title") action:@selector(zoomOut:) keyEquivalent:@""];
         [anItem setTag:FVZoomOutMenuItemTag];
-        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Single Column", @"FileView", bundle, @"context menu title") action:@selector(toggleAutoScales:) keyEquivalent:@""];
-        [anItem setTag:FVAutoScalesMenuItemTag];
+        
+        [sharedMenu addItem:[NSMenuItem separatorItem]];
+        
+        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Grid", @"FileView", bundle, @"context menu title") action:@selector(displayGrid:) keyEquivalent:@""];
+        [anItem setTag:FVGridMenuItemTag];
+        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Column", @"FileView", bundle, @"context menu title") action:@selector(displayColumn:) keyEquivalent:@""];
+        [anItem setTag:FVColumnMenuItemTag];
+        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Row", @"FileView", bundle, @"context menu title") action:@selector(displayRow:) keyEquivalent:@""];
+        [anItem setTag:FVRowMenuItemTag];
 
     }
     return sharedMenu;

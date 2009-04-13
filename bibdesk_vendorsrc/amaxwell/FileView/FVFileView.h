@@ -41,21 +41,31 @@
 enum {
     FVZoomInMenuItemTag      = 1001,
     FVZoomOutMenuItemTag     = 1002,
-    FVAutoScalesMenuItemTag  = 1003,
-    FVQuickLookMenuItemTag   = 1004,
-    FVOpenMenuItemTag        = 1005,
-    FVRevealMenuItemTag      = 1006,
-    FVChangeLabelMenuItemTag = 1007,
-    FVDownloadMenuItemTag    = 1008,
-    FVRemoveMenuItemTag      = 1009,
-    FVReloadMenuItemTag      = 1010 
+    FVGridMenuItemTag        = 1003,
+    FVColumnMenuItemTag      = 1004,
+    FVRowMenuItemTag         = 1005,
+    FVQuickLookMenuItemTag   = 1006,
+    FVOpenMenuItemTag        = 1007,
+    FVRevealMenuItemTag      = 1008,
+    FVChangeLabelMenuItemTag = 1009,
+    FVDownloadMenuItemTag    = 1010,
+    FVRemoveMenuItemTag      = 1011,
+    FVReloadMenuItemTag      = 1012 
 };
 
-typedef enum _FVDropOperation {
+enum {
     FVDropOn,
     FVDropBefore,
     FVDropAfter
-} FVDropOperation;
+};
+typedef NSUInteger FVDropOperation;
+
+enum {
+    FVDisplayModeGrid,
+    FVDisplayModeColumn,
+    FVDisplayModeRow
+};
+typedef NSInteger FVDisplayMode;
 
 @class FVSliderWindow, FVOperationQueue;
 
@@ -89,9 +99,9 @@ typedef enum _FVDropOperation {
     NSUInteger              _dropIndex;
     NSRect                  _rubberBandRect;
     struct __fvFlags {
-        unsigned int isMouseDown : 1;
+        unsigned int displayMode : 2;
         unsigned int isEditable : 1;
-        unsigned int autoScales : 1;
+        unsigned int isMouseDown : 1;
         unsigned int isRescaling: 1;
         unsigned int scheduledLiveResize : 1;
         unsigned int updatingFromSlider : 1;
@@ -175,12 +185,12 @@ typedef enum _FVDropOperation {
 
 /** Whether the icons scale automatically.
  
- When this is set to YES, setIconScale: will be ignored, and the views shows the icons in a single column with a scale determined by the current width of the view.  Can be bound.*/
-- (BOOL)autoScales;
+ When this is not set to FVDisplayModeGrid, setIconScale: will be ignored, and the views shows the icons in a single column or row with a scale determined by the current width or height of the view.  Can be bound.*/
+- (FVDisplayMode)displayMode;
 
 /** Set whether the icons scale automatically.
- @param flag The new value of FVFileView::autoScales. */
-- (void)setAutoScales:(BOOL)flag;
+ @param flag The new value of FVFileView::displayMode. */
+- (void)setDisplayMode:(FVDisplayMode)mode;
 
 /** Current number of rows displayed.*/
 - (NSUInteger)numberOfRows;
