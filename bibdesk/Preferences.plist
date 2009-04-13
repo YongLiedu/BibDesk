@@ -256,12 +256,16 @@
 				<dict>
 					<key>BDSKAuthorNameDisplayKey</key>
 					<integer>3</integer>
+					<key>BDSKBottomFileViewDisplayModeKey</key>
+					<integer>0</integer>
 					<key>BDSKBottomFileViewIconScaleKey</key>
 					<real>1</real>
 					<key>BDSKBottomPreviewDisplayKey</key>
 					<integer>0</integer>
 					<key>BDSKBottomPreviewDisplayTemplateKey</key>
 					<string>Default RTF template</string>
+					<key>BDSKEditorFileViewDisplayModeKey</key>
+					<integer>1</integer>
 					<key>BDSKEditorFileViewIconScaleKey</key>
 					<real>1</real>
 					<key>BDSKEditorFontNameKey</key>
@@ -290,6 +294,8 @@
 					<string>LucidaGrande</string>
 					<key>BDSKPersonTableViewFontSizeKey</key>
 					<real>0</real>
+					<key>BDSKSideFileViewDisplayModeKey</key>
+					<integer>1</integer>
 					<key>BDSKSideFileViewIconScaleKey</key>
 					<real>0</real>
 					<key>BDSKSidePreviewDisplayKey</key>
