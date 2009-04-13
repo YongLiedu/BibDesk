@@ -1324,7 +1324,7 @@
 		CEF83F4D0C7792D300A3AD51 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BookmarksWindow.nib; sourceTree = "<group>"; };
 		CEF83F5F0C77948F00A3AD51 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BookmarksWindow.nib; sourceTree = "<group>"; };
 		CEF8F8DE0F93519700948A88 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = English; path = English.lproj/WebGroupStartPage.html; sourceTree = "<group>"; };
-		CEF8F8E00F9351A600948A88 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = French; path = French.lproj/WebGroupStartPage.html; sourceTree = "<group>"; };
+		CEF8F8E00F9351A600948A88 /* French */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = French; path = French.lproj/WebGroupStartPage.html; sourceTree = "<group>"; };
 		CEF9420F0926458C00750FFA /* BDSKPathColorTransformer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPathColorTransformer.h; sourceTree = "<group>"; };
 		CEF942100926458C00750FFA /* BDSKPathColorTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPathColorTransformer.m; sourceTree = "<group>"; };
 		CEF94412092668EA00750FFA /* BDSKTableSortDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTableSortDescriptor.h; sourceTree = "<group>"; };
