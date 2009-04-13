@@ -423,6 +423,15 @@ typedef NSInteger FVDisplayMode;
 /** @var FVZoomOutMenuItemTag 
  Zoom out by @f$\sqrt 2@f$
  */
+/** @var FVZoomGridMenuItemTag 
+ Display icons in a grid
+ */
+/** @var FVZoomColumnMenuItemTag 
+ Display icons in a single column
+ */
+/** @var FVZoomRowMenuItemTag 
+ Display icons in a single row
+ */
 /** @var FVQuickLookMenuItemTag 
  Quick Look 
  */
@@ -445,3 +454,22 @@ typedef NSInteger FVDisplayMode;
  Recache the selected icon(s) 
  */
 
+/** @var FVDropOn 
+ Drop on an icon 
+ */
+/** @var FVDropBefore 
+ Drop before an icon
+ */
+/** @var FVDropAfter 
+ Drop after an icon
+ */
+
+/** @var FVDisplayModeGrid 
+ Display icons in a grid with the specified scale
+ */
+/** @var FVDisplayModeColumn 
+ Display icons in a single column fit to the width
+ */
+/** @var FVDisplayModeRow 
+ Display icons in a single row fit to the height
+ */
