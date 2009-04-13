@@ -133,8 +133,11 @@ NSString *BDSKPreviewLinkedFileScaleFactorKey = @"Preview Linked File Scale Fact
 NSString *BDSKBottomPreviewScaleFactorKey = @"BDSKBottomPreviewScaleFactorKey";
 NSString *BDSKSidePreviewScaleFactorKey = @"BDSKSidePreviewScaleFactorKey";
 NSString *BDSKBottomFileViewIconScaleKey = @"BDSKBottomFileViewIconScaleKey";
+NSString *BDSKBottomFileViewDisplayModeKey = @"BDSKBottomFileViewDisplayModeKey";
 NSString *BDSKSideFileViewIconScaleKey = @"BDSKSideFileViewIconScaleKey";
+NSString *BDSKSideFileViewDisplayModeKey = @"BDSKSideFileViewDisplayModeKey";
 NSString *BDSKEditorFileViewIconScaleKey = @"BDSKEditorFileViewIconScaleKey";
+NSString *BDSKEditorFileViewDisplayModeKey = @"BDSKEditorFileViewDisplayModeKey";
 
 NSString *BDSKDefaultFieldsKey = @"Default Fields";
 NSString *BDSKLocalFileFieldsKey = @"Local File Fields";

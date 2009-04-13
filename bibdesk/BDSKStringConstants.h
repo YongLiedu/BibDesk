@@ -202,8 +202,11 @@ extern NSString *BDSKShouldShowWebGroupPrefKey;
 extern NSString *BDSKDefaultArrayJoinStringKey;
 
 extern NSString *BDSKBottomFileViewIconScaleKey;
+extern NSString *BDSKBottomFileViewDisplayModeKey;
 extern NSString *BDSKSideFileViewIconScaleKey;
+extern NSString *BDSKSideFileViewDisplayModeKey;
 extern NSString *BDSKEditorFileViewIconScaleKey;
+extern NSString *BDSKEditorFileViewDisplayModeKey;
 
 #pragma mark Field name strings
 

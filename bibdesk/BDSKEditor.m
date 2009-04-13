@@ -264,9 +264,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [self updateCiteKeyDuplicateWarning];
     
     [[fileView enclosingScrollView] setBackgroundColor:[fileView backgroundColor]];
+    [fileView setDisplayMode:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKEditorFileViewDisplayModeKey]];
     [fileView setIconScale:[[NSUserDefaults standardUserDefaults] floatForKey:BDSKEditorFileViewIconScaleKey]];
-    [fileView setAutoScales:YES];
     [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:&BDSKEditorObservationContext];
+    [fileView addObserver:self forKeyPath:@"displayMode" options:0 context:&BDSKEditorObservationContext];
     [fileView setEditable:isEditable];
     [fileView setAllowsDownloading:isEditable];
 }
@@ -1707,6 +1708,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if (context == &BDSKEditorObservationContext) {
+        [[NSUserDefaults standardUserDefaults] setInteger:[fileView displayMode] forKey:BDSKEditorFileViewDisplayModeKey];
         [[NSUserDefaults standardUserDefaults] setFloat:[fileView iconScale] forKey:BDSKEditorFileViewIconScaleKey];
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
@@ -2755,6 +2757,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     [self breakTextStorageConnections];
     
     [fileView removeObserver:self forKeyPath:@"iconScale"];
+    [fileView removeObserver:self forKeyPath:@"displayMode"];
     [fileView setDataSource:nil];
     [fileView setDelegate:nil];
     

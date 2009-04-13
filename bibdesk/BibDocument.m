@@ -578,23 +578,28 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [fileGradientView setLowerColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
     
     float iconScale = [xattrDefaults floatForKey:BDSKSideFileViewIconScaleKey defaultValue:[sud floatForKey:BDSKSideFileViewIconScaleKey]];
-    if (iconScale < 0.00001) {
-        [sideFileView setAutoScales:YES];
-    } else {
-        [sideFileView setAutoScales:NO];
-        [sideFileView setIconScale:iconScale];
+    FVDisplayMode displayMode = [xattrDefaults floatForKey:BDSKSideFileViewDisplayModeKey defaultValue:[sud floatForKey:BDSKSideFileViewDisplayModeKey]];
+    [sideFileView setDisplayMode:displayMode];
+    if (displayMode == FVDisplayModeGrid) {
+        if (iconScale < 0.00001)
+            [sideFileView setDisplayMode:FVDisplayModeColumn];
+        else
+            [sideFileView setIconScale:iconScale];
     }
-    [sideFileView setAutoScales:YES];
     [sideFileView addObserver:self forKeyPath:@"iconScale" options:0 context:&BDSKDocumentFileViewObservationContext];
+    [sideFileView addObserver:self forKeyPath:@"displayMode" options:0 context:&BDSKDocumentFileViewObservationContext];
 
     iconScale = [xattrDefaults floatForKey:BDSKBottomFileViewIconScaleKey defaultValue:[sud floatForKey:BDSKBottomFileViewIconScaleKey]];
-    if (iconScale < 0.00001) {
-        [bottomFileView setAutoScales:YES];
-    } else {
-        [bottomFileView setAutoScales:NO];
-        [bottomFileView setIconScale:iconScale];
+    displayMode = [xattrDefaults floatForKey:BDSKBottomFileViewDisplayModeKey defaultValue:[sud floatForKey:BDSKBottomFileViewDisplayModeKey]];
+    [bottomFileView setDisplayMode:displayMode];
+    if (displayMode == FVDisplayModeGrid) {
+        if (iconScale < 0.00001)
+            [bottomFileView setDisplayMode:FVDisplayModeRow];
+        else
+            [bottomFileView setIconScale:iconScale];
     }
     [bottomFileView addObserver:self forKeyPath:@"iconScale" options:0 context:&BDSKDocumentFileViewObservationContext];
+    [bottomFileView addObserver:self forKeyPath:@"displayMode" options:0 context:&BDSKDocumentFileViewObservationContext];
     
     [(BDSKZoomableTextView *)sidePreviewTextView setScaleFactor:[xattrDefaults floatForKey:BDSKSidePreviewScaleFactorKey defaultValue:1.0]];
     [(BDSKZoomableTextView *)bottomPreviewTextView setScaleFactor:[xattrDefaults floatForKey:BDSKBottomPreviewScaleFactorKey defaultValue:1.0]];
@@ -715,10 +720,12 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     pboardHelper = nil;
     
     [sideFileView removeObserver:self forKeyPath:@"iconScale"];
+    [sideFileView removeObserver:self forKeyPath:@"displayMode"];
     [sideFileView setDataSource:nil];
     [sideFileView setDelegate:nil];
     
     [bottomFileView removeObserver:self forKeyPath:@"iconScale"];
+    [bottomFileView removeObserver:self forKeyPath:@"displayMode"];
     [bottomFileView setDataSource:nil];
     [bottomFileView setDelegate:nil];
     
@@ -791,8 +798,10 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         [dictionary setIntValue:sidePreviewDisplay forKey:BDSKSidePreviewDisplayKey];
         [dictionary setObject:sidePreviewDisplayTemplate forKey:BDSKSidePreviewDisplayTemplateKey];
         
-        [dictionary setFloatValue:[bottomFileView autoScales] ? 0.0 : [bottomFileView iconScale] forKey:BDSKBottomFileViewIconScaleKey];
-        [dictionary setFloatValue:[sideFileView autoScales] ? 0.0 : [sideFileView iconScale] forKey:BDSKSideFileViewIconScaleKey];
+        [dictionary setIntValue:[bottomFileView displayMode] forKey:BDSKBottomFileViewDisplayModeKey];
+        [dictionary setFloatValue:([bottomFileView displayMode] == FVDisplayModeGrid ? [bottomFileView iconScale] : 0.0) forKey:BDSKBottomFileViewIconScaleKey];
+        [dictionary setIntValue:[sideFileView displayMode] forKey:BDSKSideFileViewDisplayModeKey];
+        [dictionary setFloatValue:([sideFileView displayMode] == FVDisplayModeGrid ? [sideFileView iconScale] : 0.0) forKey:BDSKSideFileViewIconScaleKey];
         
         [dictionary setFloatValue:[(BDSKZoomableTextView *)bottomPreviewTextView scaleFactor] forKey:BDSKBottomPreviewScaleFactorKey];
         [dictionary setFloatValue:[(BDSKZoomableTextView *)sidePreviewTextView scaleFactor] forKey:BDSKSidePreviewScaleFactorKey];
@@ -3121,11 +3130,15 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if (context == &BDSKDocumentFileViewObservationContext) {
         if (object == sideFileView) {
-            float iconScale = [sideFileView autoScales] ? 0.0 : [sideFileView iconScale];
+            FVDisplayMode displayMode = [sideFileView displayMode];
+            float iconScale = displayMode == FVDisplayModeGrid ? [sideFileView iconScale] : 0.0;
             [[NSUserDefaults standardUserDefaults] setFloat:iconScale forKey:BDSKSideFileViewIconScaleKey];
+            [[NSUserDefaults standardUserDefaults] setInteger:displayMode forKey:BDSKSideFileViewDisplayModeKey];
         } else if (object == bottomFileView) {
-            float iconScale = [bottomFileView autoScales] ? 0.0 : [bottomFileView iconScale];
+            FVDisplayMode displayMode = [bottomFileView displayMode];
+            float iconScale = displayMode == FVDisplayModeGrid ? [bottomFileView iconScale] : 0.0;
             [[NSUserDefaults standardUserDefaults] setFloat:iconScale forKey:BDSKBottomFileViewIconScaleKey];
+            [[NSUserDefaults standardUserDefaults] setInteger:displayMode forKey:BDSKBottomFileViewDisplayModeKey];
         }
     } else if (context == &BDSKDocumentDefaultsObservationContext) {
         NSString *key = [keyPath substringFromIndex:7];
