@@ -134,9 +134,7 @@
 */
 - (NSString *) markupForSiteArray: (NSArray *) siteArray {
 	NSEnumerator * myEnum = [siteArray objectEnumerator];
-	NSUInteger siteCount = [siteArray count];
-	NSMutableArray * linkStrings = [NSMutableArray arrayWithCapacity:siteCount * 2];
-	NSUInteger currentPosition = 0;
+	NSMutableArray * linkStrings = [NSMutableArray arrayWithCapacity:[siteArray count] * 2];
 	NSDictionary * siteInfo;
 	NSString * s;
 	
@@ -151,17 +149,9 @@
 		}
 		
 		[linkStrings addObject:[aElement XMLString]];
-		
-		if (currentPosition + 1 < siteCount) {
-			[linkStrings addObject:@", "];
-		}
-		else {
-			[linkStrings addObject:@"."];
-		}
-		currentPosition++;
 	}
 	
-	NSString * result = [linkStrings componentsJoinedByString:@""];
+	NSString * result = [[linkStrings componentsJoinedByString:@", "] stringByAppendingString:@"."];
 	return result;
 }
 
