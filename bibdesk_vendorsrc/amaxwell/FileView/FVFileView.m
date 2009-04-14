@@ -1029,36 +1029,24 @@ static CGFloat _subtitleHeight = 0.0;
 }
 
 - (NSSize)_contentSizeForScrollView:(NSScrollView *)scrollView minWidth:(CGFloat)minWidth hasVerticalScroller:(BOOL)hasVerticalScroller {
-    NSSize scrollFrameSize = [scrollView frame].size;
-    NSSize contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrameSize hasHorizontalScroller:NO hasVerticalScroller:hasVerticalScroller borderType:[scrollView borderType]];
-    if (hasVerticalScroller && [[scrollView verticalScroller] controlSize] != NSRegularControlSize)
-        contentSize.width += [NSScroller scrollerWidth] - [NSScroller scrollerWidthForControlSize:[[scrollView verticalScroller] controlSize]];
+    // NSScrollView does not have a method to get the content size for arbitrary controlSize, so we substract the scroller widths ourselves
+    NSSize contentSize = [[scrollView class] contentSizeForFrameSize:[scrollView frame].size hasHorizontalScroller:NO hasVerticalScroller:NO borderType:[scrollView borderType]];
+    if (hasVerticalScroller)
+        contentSize.width -= [NSScroller scrollerWidthForControlSize:[[scrollView verticalScroller] controlSize]];
     // if the icons reach the minimum size, we should have a horizontal scroller if it's available
-    if ([scrollView hasHorizontalScroller] && contentSize.width < minWidth) {
-        contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrameSize hasHorizontalScroller:YES hasVerticalScroller:hasVerticalScroller borderType:[scrollView borderType]];
-        if ([[scrollView horizontalScroller] controlSize] != NSRegularControlSize)
-            contentSize.height += [NSScroller scrollerWidth] - [NSScroller scrollerWidthForControlSize:[[scrollView horizontalScroller] controlSize]];
-        if (hasVerticalScroller && [[scrollView verticalScroller] controlSize] != NSRegularControlSize)
-            contentSize.width += [NSScroller scrollerWidth] - [NSScroller scrollerWidthForControlSize:[[scrollView verticalScroller] controlSize]];
-    }
-    
+    if ([scrollView hasHorizontalScroller] && contentSize.width < minWidth)
+        contentSize.height -= [NSScroller scrollerWidthForControlSize:[[scrollView horizontalScroller] controlSize]];
     return contentSize;
 }
 
 - (NSSize)_contentSizeForScrollView:(NSScrollView *)scrollView minHeight:(CGFloat)minHeight hasHorizontalScroller:(BOOL)hasHorizontalScroller {
-    NSSize scrollFrameSize = [scrollView frame].size;
-    NSSize contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrameSize hasHorizontalScroller:hasHorizontalScroller hasVerticalScroller:NO borderType:[scrollView borderType]];
-    if (hasHorizontalScroller && [[scrollView horizontalScroller] controlSize] != NSRegularControlSize)
-        contentSize.height += [NSScroller scrollerWidth] - [NSScroller scrollerWidthForControlSize:[[scrollView horizontalScroller] controlSize]];
+    // NSScrollView does not have a method to get the content size for arbitrary controlSize, so we substract the scroller widths ourselves
+    NSSize contentSize = [[scrollView class] contentSizeForFrameSize:[scrollView frame].size hasHorizontalScroller:NO hasVerticalScroller:NO borderType:[scrollView borderType]];
+    if (hasHorizontalScroller)
+        contentSize.height -= [NSScroller scrollerWidthForControlSize:[[scrollView horizontalScroller] controlSize]];
     // if the icons reach the minimum size, we should have a vertical scroller if it's available
-    if ([scrollView hasVerticalScroller] && contentSize.height < minHeight) {
-        contentSize = [[scrollView class] contentSizeForFrameSize:scrollFrameSize hasHorizontalScroller:hasHorizontalScroller hasVerticalScroller:YES borderType:[scrollView borderType]];
-        if ([[scrollView verticalScroller] controlSize] != NSRegularControlSize)
-            contentSize.width += [NSScroller scrollerWidth] - [NSScroller scrollerWidthForControlSize:[[scrollView verticalScroller] controlSize]];
-        if (hasHorizontalScroller && [[scrollView horizontalScroller] controlSize] != NSRegularControlSize)
-            contentSize.height += [NSScroller scrollerWidth] - [NSScroller scrollerWidthForControlSize:[[scrollView horizontalScroller] controlSize]];
-    }
-    
+    if ([scrollView hasVerticalScroller] && contentSize.height < minHeight)
+        contentSize.width -= [NSScroller scrollerWidthForControlSize:[[scrollView verticalScroller] controlSize]];
     return contentSize;
 }
 
