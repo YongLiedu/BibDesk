@@ -528,7 +528,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         }
         
         NSArray *oldGroups = [groups categoryGroups];
-        NSArray *oldGroupNames = nil;
+        NSArray *oldGroupNames = [NSArray array];
         
         if ([groupField isEqualToString:[[oldGroups lastObject] key]] && [groupField isPersonField] == [[oldGroups lastObject] isKindOfClass:[BibAuthor class]])
             oldGroupNames = [oldGroups valueForKey:@"name"];
