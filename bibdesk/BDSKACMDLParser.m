@@ -157,8 +157,9 @@
 }
 
 
-+ (NSArray *) publicSites {
-	return [NSArray arrayWithObject:[self siteInfoWithName:@"ACM" address:@"http://portal.acm.org/" andTitle:nil]];
++ (NSArray *) parserInfos {
+	NSDictionary * parserInfos = [BDSKWebParser parserInfoWithName:@"ACM" address:@"http://portal.acm.org/" description:nil flags:BDSKPARSERFEATUREFLAGNONE];
+	return [NSArray arrayWithObject:parserInfos];
 }
 
 @end 

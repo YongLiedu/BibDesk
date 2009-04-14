@@ -147,8 +147,11 @@
 
 
 
-+ (NSArray *) publicSites {
-	return [NSArray arrayWithObject:[self siteInfoWithName:@"SPIRES" address:@"http://www.slac.stanford.edu/spires/"  andTitle:NSLocalizedString(@"SPIRES database of literature on particle physics.", @"Description for SPIRES site")]];
++ (NSArray *) parserInfos {
+	NSString * parserDescription = NSLocalizedString(@"SPIRES database of literature on particle physics.", @"Description for SPIRES site");
+	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"SPIRES" address:@"http://www.slac.stanford.edu/spires/"  description:parserDescription flags:BDSKPARSERFEATUREFLAGNONE];
+	
+	return [NSArray arrayWithObject:parserInfo];
 }
 
 

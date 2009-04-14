@@ -161,21 +161,27 @@ static Class webParserClassForType(int stringType)
 }
 
 
-+ (NSDictionary *) siteInfoWithName: (NSString *) name address: (NSString *) address andTitle: (NSString *) title {
+
++ (NSDictionary *) parserInfoWithName: (NSString *) name address: (NSString *) address description: (NSString *) description flags: (NSUInteger) flags {
 	NSDictionary * result = nil;
-	if (name && address) {
-        result = [NSDictionary dictionaryWithObjectsAndKeys:name, BDSKSITENAME, address, BDSKSITEADDRESS, title, BDSKSITEINFORMATION, nil];
+	NSMutableDictionary * dict = [NSMutableDictionary dictionaryWithCapacity:4];
+
+	if (name) { // name of the site or format is required for a parser dictionary. 
+		[dict setObject:name forKey:BDSKPARSERFEATURENAME];
+		if (address) { [dict setObject:address forKey:BDSKPARSERFEATUREADDRESS]; }
+		if (description) { [dict setObject:description forKey:BDSKPARSERFEATUREDESCRIPTION]; }
+		NSNumber * flagsNumber = [NSNumber numberWithInt:flags];
+		[dict setObject:flagsNumber forKey:BDSKPARSERFEATUREFLAGS];
+		result = dict;
 	}
+
 	return result;
 }
 
 
-+ (NSArray *) publicSites {
++ (NSArray *) parserInfos {
 	return nil;
 }
 
-+ (NSArray *) subscriptionSites {
-	return nil;
-}
 
 @end

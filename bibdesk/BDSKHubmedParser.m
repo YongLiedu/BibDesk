@@ -114,8 +114,11 @@
 
 
 
-+ (NSArray *) publicSites {
-	return [NSArray arrayWithObject:[self siteInfoWithName:@"HubMed" address:@"http://www.hubmed.org/" andTitle:NSLocalizedString(@"Alternative interface for queries to the PubMed database of medical literature.", @"Description for HubMed site")]];
++ (NSArray *) parserInfos {
+	NSString * parserDescription = NSLocalizedString(@"Alternative interface for queries to the PubMed database of medical literature.", @"Description for HubMed site");
+	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"HubMed" address:@"http://www.hubmed.org/" description:parserDescription flags: BDSKPARSERFEATUREFLAGNONE];
+	
+	return [NSArray arrayWithObject: parserInfo];
 }
 
 @end 

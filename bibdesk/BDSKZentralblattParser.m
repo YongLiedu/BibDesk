@@ -187,8 +187,11 @@
 /*
  Array with site description dictionary for main www.zentralblatt-math.org.
 */
-+ (NSArray *) subscriptionSites {
-	return [NSArray arrayWithObject:[self siteInfoWithName:@"Zentralblatt Math" address:@"http://www.zentralblatt-math.org/zmath/en/" andTitle:NSLocalizedString(@"Database of Zentralblatt Mathematik with reviews of mathematical papers. Only the first three search results are displayed without a subscription.", @"Description for Zentralblatt Math site.")]];
++ (NSArray *) parserInfos {
+	NSString * parserDescription = NSLocalizedString(@"Database of Zentralblatt Mathematik with reviews of mathematical papers. Only the first three search results are displayed without a subscription.", @"Description for Zentralblatt Math site.");
+	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"Zentralblatt Math" address:@"http://www.zentralblatt-math.org/zmath/en/" description: parserDescription flags: BDSKPARSERFEATUREFLAGSUBSCRIPTION];
+	
+	return [NSArray arrayWithObject:parserInfo];
 }
 
 

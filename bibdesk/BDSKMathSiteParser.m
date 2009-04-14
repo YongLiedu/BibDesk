@@ -117,8 +117,11 @@
 
 
 
-+ (NSArray *) subscriptionSites {
-	return [NSArray arrayWithObject:[self siteInfoWithName:@"Project Euclid" address:@"http://projecteuclid.org/"  andTitle:NSLocalizedString(@"Project Euclid provides a publishing platform for \342\200\230independent and society journals\342\200\231 in mathematics and statistics. BibDesk can provide bibliographic information for its articles if you have access to MathSciNet or Zentralblatt Math.", @"Description for Project Euclid site")]];
++ (NSArray *) parserInfos {
+	NSString * parserDescription = NSLocalizedString(@"Project Euclid provides a publishing platform for \342\200\230independent and society journals\342\200\231 in mathematics and statistics. BibDesk can provide bibliographic information for its articles if you have access to MathSciNet or Zentralblatt Math.", @"Description for Project Euclid site");
+	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"Project Euclid" address:@"http://projecteuclid.org/"  description: parserDescription flags: BDSKPARSERFEATUREFLAGSUBSCRIPTION];
+	
+	return [NSArray arrayWithObject:parserInfo];
 }
 
 
@@ -319,8 +322,11 @@
 
 
 
-+ (NSArray *) subscriptionSites {
-	return [NSArray arrayWithObject:[self siteInfoWithName:@"NUMDAM" address:NSLocalizedString(@"http://www.numdam.org/?lang=en", @"URL for NUMDAM")  andTitle:NSLocalizedString(@"NUMDAM (Num\303\251risation de documents anciens math\303\251matiques) provides digital versions of old mathematical papers. The site itself is public but BibDesk\342\200\231s support for it requires access to the Zentralblatt Math service.", @"Description for NUMDAM site")]];
++ (NSArray *) parserInfos {
+	NSString * parserDescription = NSLocalizedString(@"NUMDAM (Num\303\251risation de documents anciens math\303\251matiques) provides digital versions of old mathematical papers. The site itself is public but BibDesk\342\200\231s support for it requires access to the Zentralblatt Math service.", @"Description for NUMDAM site");
+	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"NUMDAM" address:NSLocalizedString(@"http://www.numdam.org/?lang=en", @"URL for NUMDAM")  description:parserDescription flags: BDSKPARSERFEATUREFLAGSUBSCRIPTION];
+	
+	return [NSArray arrayWithObject: parserInfo];
 }
 
 

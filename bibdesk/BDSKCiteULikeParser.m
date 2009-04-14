@@ -98,8 +98,9 @@
 
 
 
-+ (NSArray *) publicSites {
-	return [NSArray arrayWithObject:[self siteInfoWithName:@"CiteULike" address:@"http://www.citeulike.org/" andTitle:nil]];
++ (NSArray *) parserInfos {
+	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"CiteULike" address:@"http://www.citeulike.org/" description:nil flags: BDSKPARSERFEATUREFLAGNONE];
+	return [NSArray arrayWithObject:parserInfo];
 }
 
 

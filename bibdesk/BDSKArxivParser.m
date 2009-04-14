@@ -291,8 +291,11 @@
 }
 
 
-+ (NSArray *) publicSites {
-	return [NSArray arrayWithObject:[self siteInfoWithName:@"arXiv" address:@"http://arxiv.org/" andTitle:NSLocalizedString(@"E-Print archive used frequently in mathematics and physics but also containing sections for non-linear science, computer science, quantitative biology and statistics.", @"Description for arXiv site")]];
++ (NSArray *) parserInfos {
+	NSString * parserDescription = NSLocalizedString(@"E-Print archive used frequently in mathematics and physics but also containing sections for non-linear science, computer science, quantitative biology and statistics.", @"Description for arXiv site");
+	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"arXiv" address:@"http://arxiv.org/" description:parserDescription flags:BDSKPARSERFEATUREFLAGNONE];
+	
+	return [NSArray arrayWithObject: parserInfo];
 }
 
 @end
