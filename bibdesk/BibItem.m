@@ -2858,7 +2858,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 		if(operation ==  BDSKOperationAsk || operation == BDSKOperationIgnore)
 			return operation;
 	}else{
-		if([field isSingleValuedGroupField] || [NSString isEmptyString:oldString] || ([@"" isEqual:groupName] || [[BibAuthor emptyAuthor] isEqual:groupName] || [field isEqualToString:BDSKPubTypeString]))
+		if([field isSingleValuedGroupField] || [field isEqualToString:BDSKPubTypeString] || [NSString isEmptyString:oldString] || [group isEmpty])
 			operation = BDSKOperationSet;
 		else
 			operation = BDSKOperationAppend;
@@ -2867,7 +2867,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	
     // groupName may be an author object, so convert it to a string
     // if the groupName is an empty object (author or string), use the empty string as description since stringValue would be "Empty field"
-    NSString *groupDescription = ([@"" isEqual:groupName] || [[BibAuthor emptyAuthor] isEqual:groupName]) ? @"" : [group stringValue];
+    NSString *groupDescription = [group isEmpty] ? @"" : [group stringValue];
 	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[groupDescription length] + [oldString length] + 1];
 
     // we set the type and journal field, add to other fields if needed

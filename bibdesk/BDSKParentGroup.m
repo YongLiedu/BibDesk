@@ -321,7 +321,7 @@
 - (void)resort {
     if (sortDescriptors && [self numberOfChildren]) {
         BDSKCategoryGroup *first = [self childAtIndex:0];
-        if ([[first name] isEqual:@""] || [[first name] isEqual:[BibAuthor emptyAuthor]]) {
+        if ([first isEmpty]) {
             [first retain];
             [children removeObjectAtIndex:0];
             [super resort];

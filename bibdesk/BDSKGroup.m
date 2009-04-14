@@ -161,13 +161,6 @@ static NSString *createUniqueID(void)
     return uniqueID;
 }
 
-- (void)setUniqueID:(NSString *)newID {
-    if (uniqueID != newID) {
-        [uniqueID release];
-        uniqueID = [newID retain];
-    }
-}
-
 - (id)name {
     return [[name retain] autorelease];
 }

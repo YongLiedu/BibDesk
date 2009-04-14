@@ -70,7 +70,6 @@
 - (NSDictionary *)dictionaryValue;
 
 - (NSString *)uniqueID;
-- (void)setUniqueID:(NSString *)newID;
 
 /*!
 	@method name

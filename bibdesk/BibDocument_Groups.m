@@ -527,13 +527,21 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             setAndBag.bag = CFBagCreateMutable(kCFAllocatorDefault, 0, &kBDSKCaseInsensitiveStringBagCallBacks);
         }
         
+        NSArray *oldGroups = [groups categoryGroups];
+        NSArray *oldGroupNames = nil;
+        
+        if ([groupField isEqualToString:[[oldGroups lastObject] key]] && [groupField isPersonField] == [[oldGroups lastObject] isKindOfClass:[BibAuthor class]])
+            oldGroupNames = [oldGroups valueForKey:@"name"];
+        else
+            oldGroups = nil;
+        
         int emptyCount = 0;
         
         NSEnumerator *pubEnum = [publications objectEnumerator];
         BibItem *pub;
         
         NSSet *tmpSet = nil;
-        while(pub = [pubEnum nextObject]){
+        while (pub = [pubEnum nextObject]) {
             tmpSet = [pub groupsForField:groupField];
             if([tmpSet count])
                 CFSetApplyFunction((CFSetRef)tmpSet, addObjectToSetAndBag, &setAndBag);
@@ -548,8 +556,14 @@ static void addObjectToSetAndBag(const void *value, void *context) {
                 
         // now add the group names that we found from our BibItems, using a generic folder icon
         // use BDSKTextWithIconCell keys
-        while(groupName = [groupEnum nextObject]){
-            group = [[BDSKCategoryGroup alloc] initWithName:groupName key:groupField count:CFBagGetCountOfValue(setAndBag.bag, groupName)];
+        while (groupName = [groupEnum nextObject]) {
+            unsigned int idx = [oldGroupNames indexOfObject:groupName];
+            if (idx == NSNotFound) {
+                group = [[BDSKCategoryGroup alloc] initWithName:groupName key:groupField count:CFBagGetCountOfValue(setAndBag.bag, groupName)];
+            } else {
+                group = [[oldGroups objectAtIndex:idx] retain];
+                [group setCount:CFBagGetCountOfValue(setAndBag.bag, groupName)];
+            }
             [mutableGroups addObject:group];
             [group release];
         }
@@ -561,8 +575,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         
         // add the "empty" group at index 0; this is a group of pubs whose value is empty for this field, so they
         // will not be contained in any of the other groups for the currently selected group field (hence multiple selection is desirable)
-        if(emptyCount > 0){
-            group = [[BDSKCategoryGroup alloc] initEmptyGroupWithKey:groupField count:emptyCount];
+        if (emptyCount > 0) {
+            if ([oldGroups count] && [[oldGroups objectAtIndex:0] isEmpty])
+                group = [[oldGroups objectAtIndex:0] retain];
+            else
+                group = [[BDSKCategoryGroup alloc] initEmptyGroupWithKey:groupField count:emptyCount];
             [mutableGroups insertObject:group atIndex:0];
             [group release];
         }

@@ -77,4 +77,6 @@
 */
 - (void)setName:(id)newName;
 
+- (BOOL)isEmpty;
+
 @end
