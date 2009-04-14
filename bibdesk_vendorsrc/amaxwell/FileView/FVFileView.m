@@ -60,25 +60,25 @@ static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20"
 
 static char _FVFileViewContentObservationContext;
 
-#define SELECTIONINDEXES_BINDING_NAME @"selectionIndexes"
-#define CONTENT_BINDING_NAME @"content"
-#define ICONSCALE_BINDING_NAME @"iconScale"
-#define MINICONSCALE_BINDING_NAME @"minIconScale"
-#define MAXICONSCALE_BINDING_NAME @"maxIconScale"
-#define DISPLAYMODE_BINDING_NAME @"displayMode"
-#define EDITABLE_BINDING_NAME @"editable"
+#define SELECTIONINDEXES_BINDING_NAME  @"selectionIndexes"
+#define CONTENT_BINDING_NAME           @"content"
+#define ICONSCALE_BINDING_NAME         @"iconScale"
+#define MINICONSCALE_BINDING_NAME      @"minIconScale"
+#define MAXICONSCALE_BINDING_NAME      @"maxIconScale"
+#define DISPLAYMODE_BINDING_NAME       @"displayMode"
+#define EDITABLE_BINDING_NAME          @"editable"
 #define ALLOWSDOWNLOADING_BINDING_NAME @"allowsDownloading"
-#define BACKGROUNDCOLOR_BINDING_NAME @"backgroundColor"
+#define BACKGROUNDCOLOR_BINDING_NAME   @"backgroundColor"
 
-#define SELECTIONINDEXES_KEY @"selectionIndexes"
-#define ICONSCALE_KEY @"iconScale"
-
+// it's important that DEFAULT_PADDING.height >= TEXT_OFFSET - HIGHLIGHT_INSET
 #define DEFAULT_ICON_SIZE ((NSSize) { 64.0, 64.0 })
-#define DEFAULT_PADDING ((NSSize) { 10.0, 4.0 })
-#define DEFAULT_MARGIN ((NSSize) { 4.0, 0.0 })
-#define PADDING_STRETCH ((CGFloat) 4.0)
-#define TEXT_OFFSET ((CGFloat) 2.0)
+#define DEFAULT_PADDING   ((NSSize) { 10.0, 8.0 })
+#define DEFAULT_MARGIN    ((NSSize) { 4.0, 8.0 })
+#define PADDING_STRETCH   ((CGFloat) 4.0)
+#define TEXT_OFFSET       ((CGFloat) 2.0)
+#define HIGHLIGHT_INSET   ((CGFloat) -4.0)
 
+// the minimum scale used when auto-scaling in column or row mode
 #define MIN_AUTO_ICON_SCALE ((CGFloat) 0.125)
 
 // check the icon cache every five minutes and get rid of stale icons
@@ -940,13 +940,21 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (CGFloat)_rightMargin { return _padding.width / 2 + DEFAULT_MARGIN.width; }
 
-- (CGFloat)_topMargin { return _titleHeight; }
+- (CGFloat)_topMargin { return DEFAULT_MARGIN.height; }
 
-- (CGFloat)_bottomMargin { return DEFAULT_MARGIN.height; }
+- (CGFloat)_bottomMargin { return 0.0; }
 
 - (NSUInteger)numberOfRows { return _numberOfRows; }
 
 - (NSUInteger)numberOfColumns { return _numberOfColumns; }
+
+- (CGFloat)_textHeight;
+{
+    CGFloat textHeight = _titleHeight;
+    if ([_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)])
+        textHeight += _subtitleHeight;
+    return textHeight;
+}
 
 - (NSSize)_paddingForScale:(CGFloat)scale;
 {
@@ -954,9 +962,7 @@ static CGFloat _subtitleHeight = 0.0;
     // ??? magic number here... using a fixed padding looked funny at some sizes, so this is now adjustable
     CGFloat extraPadding = FVRound(PADDING_STRETCH * scale);
     size.width += extraPadding;
-    size.height += extraPadding + _titleHeight;
-    if ([_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)])
-        size.height += _subtitleHeight;
+    size.height += extraPadding + [self _textHeight];
     return size;
 }
 
@@ -975,14 +981,16 @@ static CGFloat _subtitleHeight = 0.0;
 {
     // add a couple of points between the icon and text, which is useful if we're drawing a Finder label
     // don't draw all the way into the padding vertically, so we don't draw over the selection highlight of the next icon
-    NSRect textRect = NSMakeRect(NSMinX(iconRect), NSMaxY(iconRect), NSWidth(iconRect) + TEXT_OFFSET, _padding.height - 2.0 * TEXT_OFFSET);
+    NSRect textRect = NSMakeRect(NSMinX(iconRect), NSMaxY(iconRect) + TEXT_OFFSET, NSWidth(iconRect), [self _textHeight]);
     // allow the text rect to extend outside the grid cell
     return NSInsetRect(textRect, -_padding.width / 3.0, 0.0);
 }
 
 - (void)_setNeedsDisplayForIconInRow:(NSUInteger)row column:(NSUInteger)column {
     NSRect dirtyRect = [self _rectOfIconInRow:row column:column];
-    dirtyRect = NSUnionRect(NSInsetRect(dirtyRect, -2.0 * [self iconScale], -[self iconScale]), [self _rectOfTextForIconRect:dirtyRect]);
+    // extend the icon rect to account for shadow in case text is narrower than the icon
+    // extend downward to account for the text area
+    dirtyRect = NSUnionRect(NSInsetRect(dirtyRect, -FVCeil(2.0 * [self iconScale]), -FVCeil([self iconScale])), [self _rectOfTextForIconRect:dirtyRect]);
     [self setNeedsDisplayInRect:dirtyRect];
 }
 
@@ -1007,7 +1015,7 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (void)_setPaddingAndIconSizeFromContentHeight:(CGFloat)height {
     // guess the iconScale, ignoring the variable padding because that depends on the iconScale
-    CGFloat iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( height - _titleHeight - DEFAULT_MARGIN.height ) / _numberOfRows - [self _paddingForScale:0.0].height ) / ( DEFAULT_ICON_SIZE.height + PADDING_STRETCH ) );
+    CGFloat iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( height - DEFAULT_MARGIN.height ) / _numberOfRows - [self _paddingForScale:0.0].height ) / ( DEFAULT_ICON_SIZE.height + PADDING_STRETCH ) );
     _padding = [self _paddingForScale:iconScale];
     // recalculate exactly based on this padding, inverting the calculation in _frameHeight
     iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( height - [self _topMargin] - [self _bottomMargin] ) / _numberOfRows - _padding.height ) / DEFAULT_ICON_SIZE.height );
@@ -1100,7 +1108,7 @@ static CGFloat _subtitleHeight = 0.0;
         
         // if we have an auto-hiding horizontal scroller, we may or may not have scroll bars, which affects the effective height
         if ([scrollView autohidesScrollers] && [scrollView hasHorizontalScroller]) {
-            CGFloat minHeight = FVCeil( DEFAULT_PADDING.height + MIN_AUTO_ICON_SCALE * DEFAULT_ICON_SIZE.height + _titleHeight );
+            CGFloat minHeight = FVCeil( DEFAULT_PADDING.height + MIN_AUTO_ICON_SCALE * DEFAULT_ICON_SIZE.height + DEFAULT_MARGIN.height );
             
             // fist assume we need a horizontal scroller...
             contentSize = [self _contentSizeForScrollView:scrollView minHeight:minHeight hasHorizontalScroller:YES];
@@ -2039,7 +2047,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                     
                     // draw highlight, then draw icon over it, as Finder does
                     if ([_selectionIndexes containsIndex:i])
-                        [self _drawHighlightInRect:NSInsetRect(fileRect, -2.0 * TEXT_OFFSET, -2.0 * TEXT_OFFSET)];
+                        [self _drawHighlightInRect:NSInsetRect(fileRect, HIGHLIGHT_INSET, HIGHLIGHT_INSET)];
                     
                     CGContextSaveGState(cgContext);
                     
@@ -2076,8 +2084,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                         [FVFinderLabel drawFinderLabel:label inRect:labelRect ofContext:cgContext flipped:NO roundEnds:YES];
                         
                         // labeled title uses black text for greater contrast; inset horizontally because of the rounded end caps
-                        NSRect titleRect = NSInsetRect(textRect, _titleHeight / 2.0, 0);
-                        [name drawWithRect:titleRect options:stringOptions attributes:_labeledAttributes];
+                        [name drawWithRect:NSInsetRect(textRect, _titleHeight / 2.0, 0) options:stringOptions attributes:_labeledAttributes];
                     }
                     else {
                         [name drawWithRect:textRect options:stringOptions attributes:_titleAttributes];
@@ -2235,7 +2242,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     for (r = rMin, c = cMin; r <= rMax && c <= cMax;) {
         NSRect iconRect = [self _rectOfIconInRow:r column:c];
         NSRect textRect = [self _rectOfTextForIconRect:iconRect];
-        iconRect = NSUnionRect(NSInsetRect([self centerScanRect:iconRect], -2.0 * TEXT_OFFSET, -2.0 * TEXT_OFFSET), [self centerScanRect:textRect]);
+        iconRect = NSUnionRect(NSInsetRect([self centerScanRect:iconRect], HIGHLIGHT_INSET, HIGHLIGHT_INSET), [self centerScanRect:textRect]);
         rect = NSUnionRect(rect, iconRect);
         if (r >= rMax && c >= cMax)
             break;
