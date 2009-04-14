@@ -75,7 +75,8 @@ static char _FVFileViewContentObservationContext;
 
 #define DEFAULT_ICON_SIZE ((NSSize) { 64.0, 64.0 })
 #define DEFAULT_PADDING ((NSSize) { 10.0, 4.0 })
-#define DEFAULT_MARGIN ((CGFloat) 4.0)
+#define DEFAULT_MARGIN ((NSSize) { 4.0, 0.0 })
+#define PADDING_STRETCH ((CGFloat) 4.0)
 #define TEXT_OFFSET ((CGFloat) 2.0)
 
 #define MIN_AUTO_ICON_SCALE ((CGFloat) 0.125)
@@ -935,13 +936,13 @@ static CGFloat _subtitleHeight = 0.0;
 - (CGFloat)_rowHeight { return _iconSize.height + _padding.height; }
 
 // overall borders around the view
-- (CGFloat)_leftMargin { return _padding.width / 2 + DEFAULT_MARGIN; }
+- (CGFloat)_leftMargin { return _padding.width / 2 + DEFAULT_MARGIN.width; }
 
-- (CGFloat)_rightMargin { return _padding.width / 2 + DEFAULT_MARGIN; }
+- (CGFloat)_rightMargin { return _padding.width / 2 + DEFAULT_MARGIN.width; }
 
 - (CGFloat)_topMargin { return _titleHeight; }
 
-- (CGFloat)_bottomMargin { return 0.0; }
+- (CGFloat)_bottomMargin { return DEFAULT_MARGIN.height; }
 
 - (NSUInteger)numberOfRows { return _numberOfRows; }
 
@@ -949,11 +950,11 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (NSSize)_paddingForScale:(CGFloat)scale;
 {
-    NSSize size = NSZeroSize;
-    
+    NSSize size = DEFAULT_PADDING;
     // ??? magic number here... using a fixed padding looked funny at some sizes, so this is now adjustable
-    size.width = DEFAULT_PADDING.width + FVRound(4.0 * scale);
-    size.height = DEFAULT_PADDING.height + FVRound(4.0 * scale) + _titleHeight;
+    CGFloat extraPadding = FVRound(PADDING_STRETCH * scale);
+    size.width += extraPadding;
+    size.height += extraPadding + _titleHeight;
     if ([_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)])
         size.height += _subtitleHeight;
     return size;
@@ -963,10 +964,11 @@ static CGFloat _subtitleHeight = 0.0;
 // Caller is responsible for any centering before drawing.
 - (NSRect)_rectOfIconInRow:(NSUInteger)row column:(NSUInteger)column;
 {
-    NSPoint origin = [self bounds].origin;
-    CGFloat leftEdge = origin.x + [self _leftMargin] + [self _columnWidth] * column;
-    CGFloat topEdge = origin.y + [self _topMargin] + [self _rowHeight] * row;
-    return NSMakeRect(leftEdge, topEdge, _iconSize.width, _iconSize.height);
+    NSRect rect = [self bounds];
+    rect.origin.x += [self _leftMargin] + [self _columnWidth] * column;
+    rect.origin.y += [self _topMargin] + [self _rowHeight] * row;
+    rect.size = _iconSize;
+    return rect;
 }
 
 - (NSRect)_rectOfTextForIconRect:(NSRect)iconRect;
@@ -996,7 +998,7 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (void)_setPaddingAndIconSizeFromContentWidth:(CGFloat)width {
     // guess the iconScale, ignoring the variable padding because that depends on the iconScale
-    CGFloat iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( width - 2 * DEFAULT_MARGIN ) / _numberOfColumns - [self _paddingForScale:0.0].width ) / ( DEFAULT_ICON_SIZE.width + 4.0 ));
+    CGFloat iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( width - 2 * DEFAULT_MARGIN.width ) / _numberOfColumns - [self _paddingForScale:0.0].width ) / ( DEFAULT_ICON_SIZE.width + PADDING_STRETCH ));
     _padding = [self _paddingForScale:iconScale];
     // recalculate exactly based on this padding, inverting the calculation in _frameWidth
     iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( width - [self _leftMargin] - [self _rightMargin] + _padding.width ) / _numberOfColumns - _padding.width ) / DEFAULT_ICON_SIZE.width );
@@ -1005,7 +1007,7 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (void)_setPaddingAndIconSizeFromContentHeight:(CGFloat)height {
     // guess the iconScale, ignoring the variable padding because that depends on the iconScale
-    CGFloat iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( height - _titleHeight ) / _numberOfRows - [self _paddingForScale:0.0].height ) / ( DEFAULT_ICON_SIZE.height + 4.0 ) );
+    CGFloat iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( height - _titleHeight - DEFAULT_MARGIN.height ) / _numberOfRows - [self _paddingForScale:0.0].height ) / ( DEFAULT_ICON_SIZE.height + PADDING_STRETCH ) );
     _padding = [self _paddingForScale:iconScale];
     // recalculate exactly based on this padding, inverting the calculation in _frameHeight
     iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( height - [self _topMargin] - [self _bottomMargin] ) / _numberOfRows - _padding.height ) / DEFAULT_ICON_SIZE.height );
@@ -1064,7 +1066,7 @@ static CGFloat _subtitleHeight = 0.0;
         
         // if we have an auto-hiding vertical scroller, we may or may not have scroll bars, which affects the effective width
         if ([scrollView autohidesScrollers] && [scrollView hasVerticalScroller]) {
-            CGFloat minWidth = FVCeil( DEFAULT_PADDING.width + MIN_AUTO_ICON_SCALE * DEFAULT_ICON_SIZE.width + 2 * DEFAULT_MARGIN );
+            CGFloat minWidth = FVCeil( DEFAULT_PADDING.width + MIN_AUTO_ICON_SCALE * DEFAULT_ICON_SIZE.width + 2 * DEFAULT_MARGIN.width );
             
             // fist assume we need a vertical scroller...
             contentSize = [self _contentSizeForScrollView:scrollView minWidth:minWidth hasVerticalScroller:YES];
@@ -2187,7 +2189,9 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     }
 #if DEBUG_GRID 
     [[NSColor grayColor] set];
-    NSFrameRect(NSInsetRect([self bounds], [self _leftMargin], [self _topMargin]));
+    NSRect r = NSInsetRect([self bounds], [self _leftMargin], [self _topMargin]);
+    r.size.height += [self _topMargin] - [self _bottomMargin];
+    NSFrameRect(r);
 #endif
 }
 
