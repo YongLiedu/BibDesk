@@ -1563,21 +1563,19 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             [[self undoManager] setActionName:NSLocalizedString(@"Remove From Group", @"Undo action name")];
             count = [pubs count];
             continue;
-        } else if ([[(BDSKCategoryGroup *)group key] isSingleValuedGroupField]) {
-            continue;
         }
-		
+        
 		NSEnumerator *pubEnum = [pubs objectEnumerator];
 		BibItem *pub;
         NSMutableArray *changedPubs = [NSMutableArray arrayWithCapacity:[pubs count]];
         NSMutableArray *oldValues = [NSMutableArray arrayWithCapacity:[pubs count]];
         NSMutableArray *newValues = [NSMutableArray arrayWithCapacity:[pubs count]];
         NSString *oldValue = nil;
-        NSString *field = [group isCategory] ? [(BDSKCategoryGroup *)group key] : nil;
+        NSString *field = [(BDSKCategoryGroup *)group key];
 		int rv;
         int tmpCount = 0;
 		
-        if([field isEqualToString:BDSKPubTypeString])
+        if([field isSingleValuedGroupField] || [field isEqualToString:BDSKPubTypeString])
             continue;
         
 		while(pub = [pubEnum nextObject]){
