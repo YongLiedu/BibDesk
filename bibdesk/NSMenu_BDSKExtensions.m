@@ -377,16 +377,19 @@ static id sharedOpenWithController = nil;
 
 - (void)setImageAndSize:(NSImage *)image;
 {
-    const NSSize dstSize = { 16.0, 16.0 };
+    NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
+    [layoutManager setTypesetterBehavior:NSTypesetterBehavior_10_4];
+    float lineHeight = [layoutManager defaultLineHeightForFont:[NSFont menuFontOfSize:0]];
+    [layoutManager release];
+    NSSize dstSize = { lineHeight, lineHeight };
     NSSize srcSize = [image size];
     if (NSEqualSizes(srcSize, dstSize)) {
         [self setImage:image];
     } else {
         NSImage *newImage = [[NSImage alloc] initWithSize:dstSize];
-        NSGraphicsContext *ctxt = [NSGraphicsContext currentContext];
         [newImage lockFocus];
-        [ctxt setImageInterpolation:NSImageInterpolationHigh];
-        [image drawInRect:NSMakeRect(0, 0, 16.0, 16.0) fromRect:NSMakeRect(0, 0, srcSize.width, srcSize.height) operation:NSCompositeCopy fraction:1.0];
+        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
+        [image drawInRect:NSMakeRect(0, 0, dstSize.width, dstSize.height) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
         [newImage unlockFocus];
         [self setImage:newImage];
         [newImage release];
