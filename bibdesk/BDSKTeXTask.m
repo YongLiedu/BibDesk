@@ -463,10 +463,10 @@ static double runLoopTimeout = 30;
     [enumerator setDesiredInfo:kFSCatInfoNodeFlags];
     
 	NSString *path = nil;
-    NSSet *helperTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"cfg", @"sty", nil];
+    NSSet *helperTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"cfg", @"sty", @"bst", nil];
     NSMutableArray *helperFiles = [NSMutableArray array];
     
-	// copy all user .cfg and .sty files from application support
+	// copy all user helper files from application support
 	while(path = [enumerator nextObjectFullPath]){
 		if([enumerator isDirectory] == NO && [helperTypes containsObject:[path pathExtension]]){
             [helperFiles addObject:path];
