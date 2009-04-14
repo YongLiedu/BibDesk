@@ -44,6 +44,10 @@
 #import "BDSKWebParser.h"
 #import <WebKit/WebView.h>
 
+#define NAME_KEY        @"name"
+#define ADDRESS_KEY     @"address"
+#define DESCRIPTION_KEY @"description"
+#define FLAGS_KEY       @"flags"
 
 @implementation BDSKBibDeskProtocol
 
@@ -111,7 +115,7 @@
 		webParserID++;
 	}
 	
-	NSSortDescriptor * sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:BDSKPARSERFEATURENAME ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
+	NSSortDescriptor * sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:NAME_KEY ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
 	[parserFeatures sortUsingDescriptors:[NSArray arrayWithObject: sortDescriptor]];
 
 	NSMutableArray * publicFeatures = [NSMutableArray array];
@@ -121,13 +125,13 @@
 	NSEnumerator * myEnum = [parserFeatures objectEnumerator];
 	NSDictionary * parserInfo; 
 	while ( parserInfo = [myEnum nextObject] ) {
-		NSUInteger parserFlags = [[parserInfo objectForKey:BDSKPARSERFEATUREFLAGS] unsignedIntValue];
-		if ( parserFlags & BDSKPARSERFEATUREFLAGALLPAGES ) {
+		NSUInteger parserFlags = [[parserInfo objectForKey:FLAGS_KEY] unsignedIntValue];
+		if ( parserFlags & BDSKParserFeatureAllPagesMask ) {
 			// it's a 'general' parser that's not limited to particular sites
 			[generalFeatures addObject: parserInfo];
 		}
 		else {
-			if ( parserFlags & BDSKPARSERFEATUREFLAGSUBSCRIPTION ) {
+			if ( parserFlags & BDSKParserFeatureSubscriptionMask ) {
 				[subscriptionFeatures addObject: parserInfo];
 			}
 			else {
@@ -159,13 +163,13 @@
 	NSString * s;
 	
 	while (siteInfo = [myEnum nextObject]) {
-		NSXMLElement * aElement = [NSXMLElement elementWithName:@"a" stringValue:[siteInfo objectForKey:BDSKPARSERFEATURENAME]];
-		NSString * addressString = [siteInfo objectForKey:BDSKPARSERFEATUREADDRESS];
+		NSXMLElement * aElement = [NSXMLElement elementWithName:@"a" stringValue:[siteInfo objectForKey:NAME_KEY]];
+		NSString * addressString = [siteInfo objectForKey:ADDRESS_KEY];
 		if (addressString) {
 			NSXMLNode * hrefNode = [NSXMLNode attributeWithName:@"href" stringValue: addressString];
 			[aElement addAttribute:hrefNode];
 		}
-		NSString * titleString = [siteInfo objectForKey:BDSKPARSERFEATUREDESCRIPTION];
+		NSString * titleString = [siteInfo objectForKey:DESCRIPTION_KEY];
 		if (titleString) {
 			NSXMLNode * titleNode = [NSXMLNode attributeWithName:@"title" stringValue:titleString];
 			[aElement addAttribute:titleNode];

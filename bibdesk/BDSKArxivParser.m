@@ -293,7 +293,7 @@
 
 + (NSArray *) parserInfos {
 	NSString * parserDescription = NSLocalizedString(@"E-Print archive used frequently in mathematics and physics but also containing sections for non-linear science, computer science, quantitative biology and statistics.", @"Description for arXiv site");
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"arXiv" address:@"http://arxiv.org/" description:parserDescription flags:BDSKPARSERFEATUREFLAGNONE];
+	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"arXiv" address:@"http://arxiv.org/" description:parserDescription flags:BDSKParserFeatureNone];
 	
 	return [NSArray arrayWithObject: parserInfo];
 }

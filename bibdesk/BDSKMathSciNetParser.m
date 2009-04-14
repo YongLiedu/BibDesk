@@ -206,7 +206,7 @@
 */
 + (NSArray *) parserInfos {
 	NSString * parserDescription = NSLocalizedString(@"Database of Mathematical Reviews by the American Mathematical Society.", @"Description for MathSciNet site");
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"MathSciNet" address:@"http://ams.org/mathscinet/" description: parserDescription flags: BDSKPARSERFEATUREFLAGSUBSCRIPTION];
+	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"MathSciNet" address:@"http://ams.org/mathscinet/" description: parserDescription flags: BDSKParserFeatureSubscriptionMask];
 	
 	return [NSArray arrayWithObject:parserInfo];
 }

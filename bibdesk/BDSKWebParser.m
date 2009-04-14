@@ -50,6 +50,11 @@
 #import "NSError_BDSKExtensions.h"
 #import "BDSKRuntime.h"
 
+#define NAME_KEY        @"name"
+#define ADDRESS_KEY     @"address"
+#define DESCRIPTION_KEY @"description"
+#define FLAGS_KEY       @"flags"
+
 @implementation BDSKWebParser
 
 static Class webParserClassForType(int stringType)
@@ -167,11 +172,11 @@ static Class webParserClassForType(int stringType)
 	NSMutableDictionary * dict = [NSMutableDictionary dictionaryWithCapacity:4];
 
 	if (name) { // name of the site or format is required for a parser dictionary. 
-		[dict setObject:name forKey:BDSKPARSERFEATURENAME];
-		if (address) { [dict setObject:address forKey:BDSKPARSERFEATUREADDRESS]; }
-		if (description) { [dict setObject:description forKey:BDSKPARSERFEATUREDESCRIPTION]; }
+		[dict setObject:name forKey:NAME_KEY];
+		if (address) { [dict setObject:address forKey:ADDRESS_KEY]; }
+		if (description) { [dict setObject:description forKey:DESCRIPTION_KEY]; }
 		NSNumber * flagsNumber = [NSNumber numberWithInt:flags];
-		[dict setObject:flagsNumber forKey:BDSKPARSERFEATUREFLAGS];
+		[dict setObject:flagsNumber forKey:FLAGS_KEY];
 		result = dict;
 	}
 

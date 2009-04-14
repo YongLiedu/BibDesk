@@ -363,7 +363,7 @@
 
 + (NSArray *) parserInfos {
 	NSString * parserDescription = NSLocalizedString(@"HCite is meant to become a microformat for adding bibliographic information to web pages. It is unlikely to be relevant or useful at the moment.", @"Description for the HCite microformat");
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"HCite" address:@"http://microformats.org/wiki/citation" description:parserDescription flags: BDSKPARSERFEATUREFLAGALLPAGES];
+	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"HCite" address:@"http://microformats.org/wiki/citation" description:parserDescription flags: BDSKParserFeatureAllPagesMask];
 	return [NSArray arrayWithObject:parserInfo];
 }
 

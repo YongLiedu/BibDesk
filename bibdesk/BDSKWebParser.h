@@ -39,16 +39,14 @@
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
 
-// keys for site dictionaries
-#define BDSKPARSERFEATURENAME @"name"
-#define BDSKPARSERFEATUREADDRESS @"address"
-#define BDSKPARSERFEATUREDESCRIPTION @"description"
-#define BDSKPARSERFEATUREFLAGS @"flags"
-#define BDSKPARSERFEATUREFLAGNONE 0
+
+enum {
+    BDSKParserFeatureNone = 0,
 // flag indicating that full usage of the parser's feature requires some sort of subscription
-#define BDSKPARSERFEATUREFLAGSUBSCRIPTION 1
+    BDSKParserFeatureSubscriptionMask = 1 << 0,
 // flag indicating that the parser's feature looks for specific data on all pages:
-#define BDSKPARSERFEATUREFLAGALLPAGES 2
+    BDSKParserFeatureAllPagesMask
+};
 
 enum {
 	BDSKUnknownWebType = -1, 
