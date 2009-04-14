@@ -1476,7 +1476,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group{
-	BDSKASSERT([group isSmart] == NO && [group isExternal] == NO && [group isEqual:[groups libraryGroup]] == NO && [group isEqual:[groups lastImportGroup]] == NO);
+    BDSKPRECONDITION(([group isStatic] && [group isEqual:[groups lastImportGroup]] == NO) || [group isCategory]);
     
     if ([group isStatic]) {
         [(BDSKStaticGroup *)group addPublicationsFromArray:pubs];
@@ -1550,7 +1550,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	NSString *groupName = nil;
     
     while(group = [groupEnum nextObject]){
-		if([group isSmart] == YES || [group isExternal] == YES || group == [groups libraryGroup] || group == [groups lastImportGroup])
+		if([group isCategory] == NO && ([group isStatic] == NO || group == [groups lastImportGroup]))
 			continue;
 		
 		if (groupName == nil)
@@ -1563,7 +1563,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             [[self undoManager] setActionName:NSLocalizedString(@"Remove From Group", @"Undo action name")];
             count = [pubs count];
             continue;
-        } else if ([group isCategory] && [[(BDSKCategoryGroup *)group key] isSingleValuedGroupField]) {
+        } else if ([[(BDSKCategoryGroup *)group key] isSingleValuedGroupField]) {
             continue;
         }
 		
