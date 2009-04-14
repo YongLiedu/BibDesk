@@ -45,7 +45,7 @@ enum {
 // flag indicating that full usage of the parser's feature requires some sort of subscription
     BDSKParserFeatureSubscriptionMask = 1 << 0,
 // flag indicating that the parser's feature looks for specific data on all pages:
-    BDSKParserFeatureAllPagesMask
+    BDSKParserFeatureAllPagesMask = 1 << 1
 };
 
 enum {
