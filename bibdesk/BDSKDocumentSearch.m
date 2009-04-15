@@ -117,7 +117,6 @@
 {
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&shouldKeepRunning);
     [trigger signal];
-    [self cancelSearch];
     [searchLock lock];
     NSInvocation *cb = callback;
     callback = nil;
@@ -157,7 +156,7 @@
 
 #define SEARCH_BUFFER_MAX 1024
 
-- (void)_searchForString:(NSString *)searchString index:(SKIndexRef )skIndex
+- (void)_searchForString:(NSString *)searchString index:(SKIndexRef)skIndex
 {
     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&isSearching);
     [self performSelectorOnMainThread:@selector(invokeStartedCallback) withObject:nil waitUntilDone:YES];
@@ -259,34 +258,40 @@
     [self queueInvocation:invocation];
 }
 
+- (BOOL)shouldKeepRunning {
+    OSMemoryBarrier();
+    return shouldKeepRunning;
+}
+
 - (void)runSearchThread
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
-	BOOL didRun = NO;
-    OSMemoryBarrier();
-	while (shouldKeepRunning) {
-		if (didRun == NO)
-			[trigger wait];
-		
+	while ([self shouldKeepRunning]) {
+        // get the next invocation from the queue
         NSInvocation *invocation = nil;
         [queueLock lock];
         if ([queue count]) {
             invocation = [[queue objectAtIndex:0] retain];
             [queue removeObjectAtIndex:0];
-            didRun = YES;
         }
         [queueLock unlock];
         
-        [invocation invoke];
-        [invocation release];
-		
+        if (invocation) {
+            [invocation invoke];
+            [invocation release];
+		} else if ([self shouldKeepRunning]) {
+            // if there's no more invocation wait until we're woken up again, either for a new invocation or to stop
+            [trigger wait];
+        }
+        
 		[pool release];
 		pool = [[NSAutoreleasePool alloc] init];
 		
-        OSMemoryBarrier();
-	}
 	
+    // make sure the last search was canceled
+    [self _cancelSearch];
+    
     [queueLock lock];
     [queue removeAllObjects];
     [queueLock unlock];
