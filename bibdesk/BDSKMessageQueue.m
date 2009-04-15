@@ -80,9 +80,8 @@
         queueLock = [[NSConditionLock alloc] initWithCondition:QUEUE_HAS_NO_SCHEDULABLE_INVOCATIONS];
         
         idleProcessors = 0;
-        queueProcessorsLock = [[NSLock alloc] init];
-        uncreatedProcessors = 0;
-        queueProcessors = [[NSMutableArray alloc] init];
+        queueProcessorLock = [[NSLock alloc] init];
+        queueProcessor = nil;
         
         isMain = NO;
     }
@@ -93,12 +92,10 @@
     if (self = [self init]) {
         isMain = YES;
         
-        [queueProcessorsLock release];
-        queueProcessorsLock = nil;
+        [queueProcessorLock release];
+        queueProcessorLock = nil;
         
-        BDSKMainQueueProcessor *queueProcessor = [[BDSKMainQueueProcessor alloc] initForQueue:self];
-        [queueProcessors addObject:queueProcessor];
-        [queueProcessor release];
+        queueProcessor = [[BDSKMainQueueProcessor alloc] initForQueue:self];
         [queueProcessor startProcessingQueue];
     }
     return self;
@@ -112,11 +109,11 @@
 }
 
 - (void)dealloc {
-    [queueProcessors release];
+    [queueProcessor release];
     [queue release];
     [queueSet release];
     [queueLock release];
-    [queueProcessorsLock release];
+    [queueProcessorLock release];
     [super dealloc];
 }
 
@@ -129,34 +126,12 @@
 }
 
 - (void)createProcessorsForQueueSize:(unsigned int)queueCount {
-    unsigned int projectedIdleProcessors;
-    
-    [queueProcessorsLock lock];
-    projectedIdleProcessors = idleProcessors;
-    while (projectedIdleProcessors < queueCount && uncreatedProcessors > 0) {
-        BDSKQueueProcessor *newProcessor;
-        
-        newProcessor = [[BDSKQueueProcessor alloc] initForQueue:self];
-        [newProcessor startProcessingQueue];
-        [queueProcessors addObject:newProcessor];
-        [newProcessor release];
-        uncreatedProcessors--;
-        projectedIdleProcessors++;
+    [queueProcessorLock lock];
+    if (idleProcessors < queueCount && queueProcessor == nil) {
+        queueProcessor = [[BDSKQueueProcessor alloc] initForQueue:self];
+        [queueProcessor startProcessingQueue];
     }
-    [queueProcessorsLock unlock];
-}
-
-- (void)startBackgroundProcessors:(unsigned int)processorCount {
-    if (isMain == NO) {
-        [queueProcessorsLock lock];
-        uncreatedProcessors += processorCount;
-        [queueProcessorsLock unlock];
-
-        // Now, go ahead and start some (or all) of those processors to handle messages already queued
-        [queueLock lock];
-        [self createProcessorsForQueueSize:[queue count]];
-        [queueLock unlock];
-    }
+    [queueProcessorLock unlock];
 }
 
 - (BDSKInvocation *)newInvocation {
@@ -172,13 +147,13 @@
     if (isMain) {
         [queueLock lock];
     } else {
-        [queueProcessorsLock lock];
+        [queueProcessorLock lock];
         idleProcessors++;
-        [queueProcessorsLock unlock];
+        [queueProcessorLock unlock];
         [queueLock lockWhenCondition:QUEUE_HAS_INVOCATIONS];
-        [queueProcessorsLock lock];
+        [queueProcessorLock lock];
         idleProcessors--;
-        [queueProcessorsLock unlock];
+        [queueProcessorLock unlock];
     }
     
     invocationCount = [queue count];
@@ -218,7 +193,7 @@
     
     // Tickle main thread processor if needed
     if (isMain && queueCount == 1)
-        [[queueProcessors lastObject] continueProcessingQueue];
+        [queueProcessor continueProcessingQueue];
 }
 
 - (void)queueInvocationOnce:(BDSKInvocation *)anInvocation {
@@ -248,7 +223,7 @@
         
         // Tickle main thread processor if needed
         if (isMain && queueCount == 1)
-            [[queueProcessors lastObject] continueProcessingQueue];
+            [queueProcessor continueProcessingQueue];
     }
 }
 
