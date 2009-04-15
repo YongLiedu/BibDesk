@@ -104,7 +104,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 #pragma mark -
 
-@interface BDSKSharingDOServer : BDSKAsynchronousDOServer <BDSKSharingServerLocalThread, BDSKSharingServer> {
+@interface BDSKSharingDOServer : BDSKAsynchronousDOServer {
     BDSKSharingServer *sharingServer;
     NSString *sharingName;
     NSConnection *connection;
