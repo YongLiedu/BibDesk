@@ -47,7 +47,6 @@
 #import "NSArray_BDSKExtensions.h"
 #import "BDAlias.h"
 #import "NSWorkspace_BDSKExtensions.h"
-#import "BDSKAlert.h"
 #import "BibItem.h"
 #import "BDSKTemplate.h"
 #import "NSString_BDSKExtensions.h"

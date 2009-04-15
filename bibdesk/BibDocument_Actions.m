@@ -64,7 +64,7 @@
 
 #import "BDSKTypeManager.h"
 #import "BDSKScriptHookManager.h"
-#import "BDSKAlert.h"
+#import "NSAlert_BDSKExtensions.h"
 #import "BDSKFiler.h"
 #import "BDSKTextImportController.h"
 #import "BDSKStatusBar.h"
@@ -119,12 +119,12 @@ static BOOL changingColors = NO;
             if(op == BDSKOperationSet || op == BDSKOperationAppend){
                 count++;
             }else if(op == BDSKOperationAsk){
-                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
-                                                     defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
-                                                   alternateButton:nil // "Set" would end up choosing an arbitrary one
-                                                       otherButton:NSLocalizedString(@"Append", @"Button title")
-                                         informativeTextWithFormat:NSLocalizedString(@"The new item has a group value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
-                handleInherited = [alert runSheetModalForWindow:documentWindow];
+                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
+                                                 defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
+                                               alternateButton:nil // "Set" would end up choosing an arbitrary one
+                                                   otherButton:NSLocalizedString(@"Append", @"Button title")
+                                     informativeTextWithFormat:NSLocalizedString(@"The new item has a group value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
+                handleInherited = [alert runModal];
                 if(handleInherited != BDSKOperationIgnore){
                     [newBI addToGroup:group handleInherited:handleInherited];
                     count++;
@@ -184,8 +184,8 @@ static BOOL changingColors = NO;
     }
 }
 
-- (void)removePubsAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if ([alert checkValue] == YES)
+- (void)removePubsAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if ([alert suppressionButtonState] == NSOnState)
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnRemovalFromGroupKey];
     if (returnCode == NSAlertDefaultReturn)
         [self removePublications:[self selectedPublications] fromGroups:[self selectedGroups]];
@@ -210,18 +210,16 @@ static BOOL changingColors = NO;
         // the items may not belong to the groups that you're trying to remove them from, but we'll warn as if they were
         if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRemovalFromGroupKey]) {
             NSString *groupName = ([selectedGroups count] > 1 ? NSLocalizedString(@"multiple groups", @"multiple groups") : [NSString stringWithFormat:NSLocalizedString(@"group \"%@\"", @"group \"Name\""), [[selectedGroups firstObject] stringValue]]);
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
-                                                 defaultButton:NSLocalizedString(@"Yes", @"Button title")
-                                               alternateButton:nil
-                                                   otherButton:NSLocalizedString(@"No", @"Button title")
-                                     informativeTextWithFormat:NSLocalizedString(@"You are about to remove %i %@ from %@.  Do you want to proceed?", @"Informative text in alert dialog: You are about to remove [number] item(s) from [group \"Name\"]."), [self numberOfSelectedPubs], ([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"items", @"") : NSLocalizedString(@"item", @"")), groupName];
-            [alert setHasCheckButton:YES];
-            [alert setCheckValue:NO];
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
+                                             defaultButton:NSLocalizedString(@"Yes", @"Button title")
+                                           alternateButton:nil
+                                               otherButton:NSLocalizedString(@"No", @"Button title")
+                                 informativeTextWithFormat:NSLocalizedString(@"You are about to remove %i %@ from %@.  Do you want to proceed?", @"Informative text in alert dialog: You are about to remove [number] item(s) from [group \"Name\"]."), [self numberOfSelectedPubs], ([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"items", @"") : NSLocalizedString(@"item", @"")), groupName];
+            [alert setShowsSuppressionButton:YES];
             // use didDismissSelector because the action may pop up its own sheet
             [alert beginSheetModalForWindow:documentWindow
                               modalDelegate:self 
-                             didEndSelector:NULL 
-                         didDismissSelector:@selector(removePubsAlertDidEnd:returnCode:contextInfo:) 
+                             didEndSelector:@selector(removePubsAlertDidEnd:returnCode:contextInfo:) 
                                 contextInfo:NULL];
             return;
         } else {
@@ -230,8 +228,8 @@ static BOOL changingColors = NO;
 	}
 }
 
-- (void)deletePubsAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if (alert != nil && [alert checkValue] == YES)
+- (void)deletePubsAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if (alert != nil && [alert suppressionButtonState] == NSOnState)
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnDeleteKey];
     if (returnCode == NSAlertOtherReturn)
         return;
@@ -278,18 +276,16 @@ static BOOL changingColors = NO;
             info = [NSString stringWithFormat:NSLocalizedString(@"You are about to delete %i publications. Do you want to proceed?", @"Informative text in alert dialog"), numSelectedPubs];
         else
             info = NSLocalizedString(@"You are about to delete a publication. Do you want to proceed?", @"Informative text in alert dialog");
-		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
-											 defaultButton:NSLocalizedString(@"OK", @"Button title")
-										   alternateButton:nil
-											   otherButton:NSLocalizedString(@"Cancel", @"Button title")
-								 informativeTextWithFormat:info];
-		[alert setHasCheckButton:YES];
-		[alert setCheckValue:NO];
+		NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
+                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                       alternateButton:nil
+                                           otherButton:NSLocalizedString(@"Cancel", @"Button title")
+                             informativeTextWithFormat:info];
+		[alert setShowsSuppressionButton:YES];
         // use didDismissSelector because the action may pop up its own sheet
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self 
-                         didEndSelector:NULL 
-                     didDismissSelector:@selector(deletePubsAlertDidEnd:returnCode:contextInfo:) 
+                         didEndSelector:@selector(deletePubsAlertDidEnd:returnCode:contextInfo:) 
                             contextInfo:NULL];
 	} else {
         [self deletePubsAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
@@ -1350,39 +1346,30 @@ static BOOL changingColors = NO;
 
 #pragma mark AutoFile stuff
 
-- (void)consolidateAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    BOOL check = (returnCode == NSAlertDefaultReturn);
-    if (returnCode == NSAlertAlternateReturn)
-        return;
-
-    // first we make sure all edits are committed
-    if ([self commitPendingEdits]) {
-        NSArray *selectedFiles = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"];
-        [[BDSKFiler sharedFiler] filePapers:selectedFiles fromDocument:self check:check];
-        [[self undoManager] setActionName:NSLocalizedString(@"AutoFile Files", @"Undo action name")];
-    } else {
-        NSBeep();
-    }
-}
-
 - (IBAction)consolidateLinkedFiles:(id)sender{
     if ([self hasExternalGroupsSelected] == YES) {
         NSBeep();
         return;
     }
-    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"AutoFile Linked Files", @"Message in alert dialog when consolidating files")
-                                         defaultButton:NSLocalizedString(@"Move Complete Only", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                           otherButton:NSLocalizedString(@"Move All", @"Button title")
-                             informativeTextWithFormat:NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?", @"Informative text in alert dialog")];
-    // we need the callback in the didDismissSelector, because the sheet must be removed from the document before we call BDSKFiler 
-    // as that will use a sheet as well, see bug # 1526145
-	[alert beginSheetModalForWindow:documentWindow
-                      modalDelegate:self
-                     didEndSelector:NULL
-                 didDismissSelector:@selector(consolidateAlertDidEnd:returnCode:contextInfo:)
-                        contextInfo:NULL];
+    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"AutoFile Linked Files", @"Message in alert dialog when consolidating files")
+                                     defaultButton:NSLocalizedString(@"Move Complete Only", @"Button title")
+                                   alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+                                       otherButton:NSLocalizedString(@"Move All", @"Button title")
+                         informativeTextWithFormat:NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?", @"Informative text in alert dialog")];
     
+	int rv = [alert runModal];
+    
+    if (rv != NSAlertSecondButtonReturn) {
+        // first we make sure all edits are committed
+        if ([self commitPendingEdits]) {
+            NSArray *selectedFiles = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"];
+            [[BDSKFiler sharedFiler] filePapers:selectedFiles fromDocument:self check:(rv == NSAlertDefaultReturn)];
+            
+            [[self undoManager] setActionName:NSLocalizedString(@"AutoFile Files", @"Undo action name")];
+        } else {
+            NSBeep();
+        }
+    }
 }
 
 #pragma mark Cite Keys and Crossref support
@@ -1465,8 +1452,8 @@ static BOOL changingColors = NO;
     [[self undoManager] setActionName:(numberOfPubs > 1 ? NSLocalizedString(@"Generate Cite Keys", @"Undo action name") : NSLocalizedString(@"Generate Cite Key", @"Undo action name"))];
 }    
 
-- (void)generateCiteKeyAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if([alert checkValue] == YES)
+- (void)generateCiteKeyAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if([alert suppressionButtonState] == NSOnState)
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
     
     if(returnCode == NSAlertDefaultReturn)
@@ -1482,13 +1469,12 @@ static BOOL changingColors = NO;
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
         NSString *alertTitle = numberOfSelectedPubs > 1 ? NSLocalizedString(@"Really Generate Cite Keys?", @"Message in alert dialog when generating cite keys") : NSLocalizedString(@"Really Generate Cite Key?", @"Message in alert dialog when generating cite keys");
         NSString *message = numberOfSelectedPubs > 1 ? [NSString stringWithFormat:NSLocalizedString(@"This action will generate cite keys for %d publications.  This action is undoable.", @"Informative text in alert dialog"), numberOfSelectedPubs] : NSLocalizedString(@"This action will generate a cite key for the selected publication.  This action is undoable.", @"Informative text in alert dialog");
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:alertTitle
-                                             defaultButton:NSLocalizedString(@"Generate", @"Button title")
-                                           alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
-                                               otherButton:nil
-                                 informativeTextWithFormat:message];
-        [alert setHasCheckButton:YES];
-        [alert setCheckValue:NO];
+        NSAlert *alert = [NSAlert alertWithMessageText:alertTitle
+                                         defaultButton:NSLocalizedString(@"Generate", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
+                                           otherButton:nil
+                             informativeTextWithFormat:message];
+        [alert setShowsSuppressionButton:YES];
         [alert beginSheetModalForWindow:documentWindow 
                           modalDelegate:self 
                          didEndSelector:@selector(generateCiteKeyAlertDidEnd:returnCode:contextInfo:) 

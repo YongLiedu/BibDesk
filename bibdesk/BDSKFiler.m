@@ -46,7 +46,7 @@
 #import "BibDocument_Actions.h"
 #import "BDSKAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "BDSKAlert.h"
+#import "NSAlert_BDSKExtensions.h"
 #import "BDSKLinkedFile.h"
 #import "BDSKPreferenceController.h"
 
@@ -562,15 +562,14 @@ static BDSKFiler *sharedFiler = nil;
             if(statusFlag == BDSKNoError){
                 if([fileType isEqualToString:NSFileTypeDirectory] && [[NSWorkspace sharedWorkspace] isFilePackageAtPath:resolvedPath] == NO && force == NO && 
                    [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnMoveFolderKey]){
-                    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Really Move Folder?", @"Message in alert dialog when trying to auto file a folder")
-                                                         defaultButton:NSLocalizedString(@"Move", @"Button title")
-                                                       alternateButton:NSLocalizedString(@"Don't Move", @"Button title") 
-                                                           otherButton:nil
-                                             informativeTextWithFormat:NSLocalizedString(@"AutoFile is about to move the folder \"%@\" to \"%@\". Do you want to move the folder?", @"Informative text in alert dialog"), path, newPath];
-                    [alert setHasCheckButton:YES];
-                    [alert setCheckValue:NO];
+                    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Really Move Folder?", @"Message in alert dialog when trying to auto file a folder")
+                                                     defaultButton:NSLocalizedString(@"Move", @"Button title")
+                                                   alternateButton:NSLocalizedString(@"Don't Move", @"Button title") 
+                                                       otherButton:nil
+                                         informativeTextWithFormat:NSLocalizedString(@"AutoFile is about to move the folder \"%@\" to \"%@\". Do you want to move the folder?", @"Informative text in alert dialog"), path, newPath];
+                    [alert setShowsSuppressionButton:YES];
                     ignoreMove = (NSAlertAlternateReturn == [alert runModal]);
-                    if([alert checkValue] == YES)
+                    if([alert suppressionButtonState] == NSOnState)
                         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnMoveFolderKey];
                 }
                 if(ignoreMove){

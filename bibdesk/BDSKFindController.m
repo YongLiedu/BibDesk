@@ -48,7 +48,6 @@
 #import <AGRegex/AGRegex.h>
 #import "BibItem.h"
 #import "BDSKFiler.h"
-#import "BDSKAlert.h"
 #import "BDSKFindFieldEditor.h"
 #import "BDSKLinkedFile.h"
 

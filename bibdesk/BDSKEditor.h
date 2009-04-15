@@ -41,21 +41,9 @@
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
 
-@class BDSKRatingButton;
-@class BDSKRatingButtonCell;
-@class BDSKComplexStringFormatter;
-@class BDSKCrossrefFormatter;
-@class BDSKCitationFormatter;
-@class BDSKComplexStringEditor;
-@class BDSKImagePopUpButton;
-@class BibItem;
-@class BDSKStatusBar;
-@class BDSKAlert;
-@class BibAuthor;
-@class BDSKZoomablePDFView;
-@class FVFileView;
-@class BDSKGradientSplitView;
-@class BDSKEditorTableView;
+@class BDSKRatingButton, BDSKRatingButtonCell, BDSKImagePopUpButton, BDSKStatusBar, BDSKZoomablePDFView, FVFileView, BDSKGradientSplitView, BDSKEditorTableView;
+@class BDSKComplexStringFormatter, BDSKCrossrefFormatter, BDSKCitationFormatter, BDSKComplexStringEditor;
+@class BibItem, BibAuthor;
 
 /*!
     @class BDSKEditor
@@ -314,8 +302,6 @@
 - (IBAction)createNewPubUsingCrossrefAction:(id)sender;
 
 - (IBAction)tableButtonAction:(id)sender;
-
-- (void)editInheritedAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (NSUndoManager *)undoManager;
 

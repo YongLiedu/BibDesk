@@ -45,7 +45,7 @@
 #import "BDSKScriptHookManager.h"
 #import "BDSKEdgeView.h"
 #import "NSString_BDSKExtensions.h"
-#import "BDSKAlert.h"
+#import "NSAlert_BDSKExtensions.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKFiler.h"
 #import "BDSKDragWindow.h"
@@ -858,8 +858,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [self raiseChangeFieldSheetForField:field];
 }
 
-- (void)generateCiteKeyAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if([alert checkValue] == YES)
+- (void)generateCiteKeyAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if([alert suppressionButtonState] == NSOnState)
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
     
     if(returnCode == NSAlertAlternateReturn)
@@ -923,19 +923,17 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     if([publication hasEmptyOrDefaultCiteKey] == NO && 
        [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Really Generate Cite Key?", @"Message in alert dialog when generating cite keys")
-                                             defaultButton:NSLocalizedString(@"Generate", @"Button title")
-                                           alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"This action will generate a new cite key for the publication.  This action is undoable.", @"Informative text in alert dialog")];
-        [alert setHasCheckButton:YES];
-        [alert setCheckValue:NO];
-           
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Really Generate Cite Key?", @"Message in alert dialog when generating cite keys")
+                                         defaultButton:NSLocalizedString(@"Generate", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"This action will generate a new cite key for the publication.  This action is undoable.", @"Informative text in alert dialog")];
+        [alert setShowsSuppressionButton:YES];
+        
         // use didDismissSelector or else we can have sheets competing for the window
         [alert beginSheetModalForWindow:[self window] 
                           modalDelegate:self 
-                         didEndSelector:NULL
-                     didDismissSelector:@selector(generateCiteKeyAlertDidEnd:returnCode:contextInfo:) 
+                         didEndSelector:@selector(generateCiteKeyAlertDidEnd:returnCode:contextInfo:) 
                             contextInfo:NULL];
     } else {
         [self generateCiteKeyAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
@@ -1654,9 +1652,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return fileURL;
 }
 
-- (void)trashAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo
+- (void)trashAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo
 {
-    if (alert && [alert checkValue])
+    if (alert && [alert suppressionButtonState] == NSOnState)
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKAskToTrashFilesKey];
     NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
     if (returnCode == NSAlertAlternateReturn) {
@@ -1690,17 +1688,15 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         if (moveToTrash == 1) {
             [self trashAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[fileURLs retain]];
         } else if (moveToTrash == -1) {
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
-                                                 defaultButton:NSLocalizedString(@"No", @"Button title")
-                                               alternateButton:NSLocalizedString(@"Yes", @"Button title")
-                                                   otherButton:nil
-                                     informativeTextWithFormat:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
-            [alert setHasCheckButton:YES];
-            [alert setCheckValue:NO];
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
+                                             defaultButton:NSLocalizedString(@"No", @"Button title")
+                                           alternateButton:NSLocalizedString(@"Yes", @"Button title")
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
+            [alert setShowsSuppressionButton:YES];
             [alert beginSheetModalForWindow:[self window]
                               modalDelegate:self 
                              didEndSelector:@selector(trashAlertDidEnd:returnCode:contextInfo:)  
-                         didDismissSelector:NULL 
                                 contextInfo:[fileURLs retain]];
         }
     }
@@ -1841,18 +1837,18 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         
         if([value isInherited] &&
            [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnEditInheritedKey]){
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
                                                  defaultButton:NSLocalizedString(@"OK", @"Button title")
                                                alternateButton:NSLocalizedString(@"Cancel", @"Button title")
                                                    otherButton:NSLocalizedString(@"Edit Parent", @"Button title")
                                      informativeTextWithFormat:NSLocalizedString(@"The value was inherited from the item linked to by the Crossref field. Do you want to overwrite the inherited value?", @"Informative text in alert dialog")];
-            [alert setHasCheckButton:YES];
-            [alert setCheckValue:NO];
-            int rv = [alert runSheetModalForWindow:[self window]
-                                     modalDelegate:self 
-                                    didEndSelector:@selector(editInheritedAlertDidEnd:returnCode:contextInfo:)  
-                                didDismissSelector:NULL 
-                                       contextInfo:NULL];
+            [alert setShowsSuppressionButton:YES];
+            
+            if ([alert suppressionButtonState] == NSOnState)
+                [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnEditInheritedKey];
+            
+            int rv = [alert runModal];
+            
             if (rv == NSAlertAlternateReturn) {
                 canEdit = NO;
             } else if (rv == NSAlertOtherReturn) {
@@ -1863,11 +1859,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	}
     if (canEdit) [[self document] objectDidBeginEditing:self];
     return canEdit;
-}
-
-- (void)editInheritedAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if ([alert checkValue] == YES)
-		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnEditInheritedKey];
 }
 
 // send by the formatter when validation failed
@@ -1905,11 +1896,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         } else if (NO == [tableCellFormatter editAsComplexString]) {
 			// this is a simple string, an error means that there are unbalanced braces
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
-                                                 defaultButton:nil
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"Informative text in alert dialog")];
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
+                                             defaultButton:nil
+                                           alternateButton:nil
+                                               otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"Informative text in alert dialog")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         }
         
@@ -1985,13 +1976,13 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         }
         
         if (message) {
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
-                                                 defaultButton:defaultButton
-                                               alternateButton:cancelButton
-                                                   otherButton:nil
-                                     informativeTextWithFormat:message];
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
+                                             defaultButton:defaultButton
+                                           alternateButton:cancelButton
+                                               otherButton:nil
+                                 informativeTextWithFormat:message];
             
-            int rv = [alert runSheetModalForWindow:[self window]];
+            int rv = [alert runModal];
             
             if (rv == NSAlertDefaultReturn) {
                 [control setStringValue:[[control stringValue] stringByReplacingCharactersInSet:invalidSet withString:@""]];

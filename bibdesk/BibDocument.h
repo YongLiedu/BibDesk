@@ -44,7 +44,7 @@
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver, BDSKItemPasteboardHelper;
 @class BDSKEditor, BDSKMacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController, BDSKSearchGroupViewController;
-@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupOutlineView, BDSKGradientView, BDSKGradientSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredView, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FVFileView;
+@class BDSKStatusBar, BDSKMainTableView, BDSKGroupOutlineView, BDSKGradientView, BDSKGradientSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredView, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FVFileView;
 @class BDSKWebGroupViewController, BDSKSearchButtonController;
 @class BDSKItemSearchIndexes, BDSKFileMigrationController, BDSKDocumentSearch;
 

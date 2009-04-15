@@ -54,12 +54,11 @@
 #import "BDSKFileMatcher.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKLinkedFile.h"
-#import "BDSKAlert.h"
 #import "BDSKTableView.h"
 
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)refreshOrphanedFiles;
-- (void)findAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)findAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)restartServer;
 - (void)startAnimationWithStatusMessage:(NSString *)message;
 - (void)stopAnimationWithStatusMessage:(NSString *)message;
@@ -271,7 +270,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     }
 }   
 
-- (void)trashAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)trashAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSArray *files = [(NSArray *)contextInfo autorelease];
     if (returnCode == NSAlertDefaultReturn) {
         [[self mutableArrayValueForKey:@"orphanedFiles"] removeObjectsInArray:files];
@@ -288,15 +287,14 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (IBAction)moveToTrash:(id)sender{
     NSArray *files = [arrayController selectedObjects];
-    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
-                                         defaultButton:NSLocalizedString(@"Yes", @"Button title")
-                                       alternateButton:NSLocalizedString(@"No", @"Button title")
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
+    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
+                                     defaultButton:NSLocalizedString(@"Yes", @"Button title")
+                                   alternateButton:NSLocalizedString(@"No", @"Button title")
+                                       otherButton:nil
+                         informativeTextWithFormat:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
     [alert beginSheetModalForWindow:[self window]
                       modalDelegate:self 
                      didEndSelector:@selector(trashAlertDidEnd:returnCode:contextInfo:)  
-                 didDismissSelector:NULL 
                         contextInfo:[files retain]];
 }
 
@@ -315,15 +313,14 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (void)tableView:(NSTableView *)tv concludeDragOperation:(NSDragOperation)operation{
     if (operation == NSDragOperationDelete && [draggedFiles count]) {
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
-                                             defaultButton:NSLocalizedString(@"Yes", @"Button title")
-                                           alternateButton:NSLocalizedString(@"No", @"Button title")
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
+                                         defaultButton:NSLocalizedString(@"Yes", @"Button title")
+                                       alternateButton:NSLocalizedString(@"No", @"Button title")
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self 
                          didEndSelector:@selector(trashAlertDidEnd:returnCode:contextInfo:)  
-                     didDismissSelector:NULL 
                             contextInfo:[draggedFiles retain]];
     }
     [draggedFiles release];
@@ -351,7 +348,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 @implementation BDSKOrphanedFilesFinder (Private)
 
-- (void)findAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)findAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     if (returnCode == NSAlertDefaultReturn)
         [self refreshOrphanedFiles];
 }

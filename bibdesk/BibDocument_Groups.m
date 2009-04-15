@@ -53,7 +53,6 @@
 #import "BDSKStaticGroup.h"
 #import "BDSKCategoryGroup.h"
 #import "BDSKWebGroup.h"
-#import "BDSKAlert.h"
 #import "BDSKFieldSheetController.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
@@ -1513,12 +1512,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 			if([[self currentGroupField] isSingleValuedGroupField] == NO)
 				otherButton = NSLocalizedString(@"Append", @"Button title");
 			
-			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
-												 defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
-											   alternateButton:NSLocalizedString(@"Set", @"Button title")
-												   otherButton:otherButton
-									 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
-			rv = [alert runSheetModalForWindow:documentWindow];
+			NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
+                                             defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
+                                           alternateButton:NSLocalizedString(@"Set", @"Button title")
+                                               otherButton:otherButton
+                                 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
+			rv = [alert runModal];
 			handleInherited = rv;
 			if(handleInherited != BDSKOperationIgnore){
                 [pub addToGroup:group handleInherited:handleInherited];
@@ -1592,12 +1591,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
                     [newValues addObject:[pub valueOfField:field]];
                 }
 			}else if(rv == BDSKOperationAsk){
-				BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
-													 defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
-												   alternateButton:nil
-													   otherButton:NSLocalizedString(@"Remove", @"Button title")
-										 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
-				rv = [alert runSheetModalForWindow:documentWindow];
+				NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
+                                                 defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
+                                               alternateButton:nil
+                                                   otherButton:NSLocalizedString(@"Remove", @"Button title")
+                                     informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
+				rv = [alert runModal];
 				handleInherited = rv;
 				if(handleInherited != BDSKOperationIgnore){
 					[pub removeFromGroup:group handleInherited:handleInherited];
@@ -1657,12 +1656,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             [oldValues addObject:oldValue ?: @""];
             [newValues addObject:[pub valueOfField:field]];
         }else if(rv == BDSKOperationAsk){
-			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
-												 defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
-											   alternateButton:nil
-												   otherButton:NSLocalizedString(@"Remove", @"Button title")
-									 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
-			rv = [alert runSheetModalForWindow:documentWindow];
+			NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
+                                             defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
+                                           alternateButton:nil
+                                               otherButton:NSLocalizedString(@"Remove", @"Button title")
+                                 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
+			rv = [alert runModal];
 			handleInherited = rv;
 			if(handleInherited != BDSKOperationIgnore){
 				[pub replaceGroup:group withGroupNamed:newGroupName handleInherited:handleInherited];

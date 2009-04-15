@@ -63,7 +63,8 @@
 #import "BibDocument_Groups.h"
 #import "BibDocument_Search.h"
 #import "BDSKTableSortDescriptor.h"
-#import "BDSKAlert.h"
+#import "BDSKTableSortDescriptor.h"
+#import "NSAlert_BDSKExtensions.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKPreviewer.h"
 #import "BDSKTeXTask.h"
@@ -348,9 +349,9 @@ enum {
         return @"BibDocument";
 }
 
-- (void)migrationAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)unused {
+- (void)migrationAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)unused {
     
-    if ([alert checkValue] == YES)
+    if ([alert suppressionButtonState] == NSOnState)
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"BDSKDisableMigrationWarning"];
     
     if (NSAlertDefaultReturn == returnCode)
@@ -415,15 +416,14 @@ enum {
         docState.displayMigrationAlert = NO;
         // If a single file was migrated, this alert will be shown even if all other BibItems already use BDSKLinkedFile.  However, I think that's an edge case, since the user had to manually add that pub in a text editor or by setting the local-url field.  Items imported or added in BD will already use BDSKLinkedFile, so this notification won't be posted.
         NSString *verify = NSLocalizedString(@"Verify", @"button title for migration alert");
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Local File and URL fields have been automatically converted", @"warning in document")
-                                             defaultButton:verify 
-                                           alternateButton:NSLocalizedString(@"Later", @"") 
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"These fields are being deprecated.  BibDesk now uses a more flexible storage format in place of these fields.  Choose \"%@\" to manually verify the conversion and optionally remove the old fields.  Conversion can be done at any time from the \"%@\" menu.  See the Defaults preferences for more options.", @"alert text"), verify, NSLocalizedString(@"Database", @"Database main menu title")];
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Local File and URL fields have been automatically converted", @"warning in document")
+                                          defaultButton:verify 
+                                        alternateButton:NSLocalizedString(@"Later", @"") 
+                                            otherButton:nil
+                              informativeTextWithFormat:NSLocalizedString(@"These fields are being deprecated.  BibDesk now uses a more flexible storage format in place of these fields.  Choose \"%@\" to manually verify the conversion and optionally remove the old fields.  Conversion can be done at any time from the \"%@\" menu.  See the Defaults preferences for more options.", @"alert text"), verify, NSLocalizedString(@"Database", @"Database main menu title")];
         
         // @@ Should we show a check button? If the user saves the doc as-is, it'll have local-url and bdsk-file fields in it, and there will be no warning the next time it's opened.  Someone who uses a script hook to convert bdsk-file back to local-url won't want to see it, though.
-        [alert setHasCheckButton:YES];
-        [alert setCheckValue:NO];
+        [alert setShowsSuppressionButton:YES];
         [alert setShowsHelp:YES];
         [alert setHelpAnchor:@"FileMigration"];
         [alert beginSheetModalForWindow:[self windowForSheet] modalDelegate:self didEndSelector:@selector(migrationAlertDidEnd:returnCode:contextInfo:) contextInfo:NULL];
@@ -650,13 +650,13 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 
 - (BOOL)undoManagerShouldUndoChange:(id)sender{
 	if (![self isDocumentEdited]) {
-		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog") 
-											 defaultButton:NSLocalizedString(@"Yes", @"Button title") 
-										   alternateButton:NSLocalizedString(@"No", @"Button title") 
-											   otherButton:nil
-								 informativeTextWithFormat:NSLocalizedString(@"You are about to undo past the last point this file was saved. Do you want to do this?", @"Informative text in alert dialog") ];
+		NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog") 
+                                         defaultButton:NSLocalizedString(@"Yes", @"Button title") 
+                                       alternateButton:NSLocalizedString(@"No", @"Button title") 
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"You are about to undo past the last point this file was saved. Do you want to do this?", @"Informative text in alert dialog") ];
 
-		int rv = [alert runSheetModalForWindow:documentWindow];
+		int rv = [alert runModal];
 		if (rv == NSAlertAlternateReturn)
 			return NO;
 	}

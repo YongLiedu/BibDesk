@@ -101,7 +101,6 @@
 		CE1EF2940F8E0D54004E7AE8 /* BDSKParentGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE1EF2920F8E0D54004E7AE8 /* BDSKParentGroup.m */; };
 		CE1EF3890F8E6190004E7AE8 /* BDSKGradientTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE1EF3880F8E6190004E7AE8 /* BDSKGradientTableView.m */; };
 		CE21D10B09208B9D0075E607 /* BDSKGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE21D10909208B9D0075E607 /* BDSKGroup.m */; };
-		CE2209A8093639B0004D7D92 /* BDSKAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2209A6093639B0004D7D92 /* BDSKAlert.m */; };
 		CE2209AB09363A05004D7D92 /* BDSKAlert.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE2209A909363A05004D7D92 /* BDSKAlert.nib */; };
 		CE22E1CE0A8CCF9D002CEFB8 /* BDSKOrphanedFilesFinder.m in Sources */ = {isa = PBXBuildFile; fileRef = CE22E1CC0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.m */; };
 		CE22E1D50A8CCFBD002CEFB8 /* BDSKOrphanedFilesFinder.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE22E1CF0A8CCFBD002CEFB8 /* BDSKOrphanedFilesFinder.nib */; };
@@ -247,6 +246,7 @@
 		CED65DC90907A2FD003EED90 /* BDSKParseFormatCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65DC70907A2FD003EED90 /* BDSKParseFormatCommand.m */; };
 		CED65DCD0907A338003EED90 /* BDSKScriptHook+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */; };
 		CEDA7D410F9609D600F72C0A /* RALatchTrigger.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDA7D3F0F9609D600F72C0A /* RALatchTrigger.m */; };
+		CEDA7E0D0F96497B00F72C0A /* NSAlert_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDA7E0B0F96497B00F72C0A /* NSAlert_BDSKExtensions.m */; };
 		CEDB58F40D3692A400E40354 /* ComplexStringEditor.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEDB58F20D3692A400E40354 /* ComplexStringEditor.nib */; };
 		CEDBDE4C0F4C863500190AF5 /* BDSKPreferenceRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDBDE4A0F4C863500190AF5 /* BDSKPreferenceRecord.m */; };
 		CEDBE05A0F4CDAD900190AF5 /* NSView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDBE0580F4CDAD900190AF5 /* NSView_BDSKExtensions.m */; };
@@ -986,8 +986,6 @@
 		CE1EF3880F8E6190004E7AE8 /* BDSKGradientTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGradientTableView.m; sourceTree = "<group>"; };
 		CE21D10809208B9D0075E607 /* BDSKGroup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKGroup.h; sourceTree = "<group>"; };
 		CE21D10909208B9D0075E607 /* BDSKGroup.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKGroup.m; sourceTree = "<group>"; };
-		CE2209A5093639B0004D7D92 /* BDSKAlert.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKAlert.h; sourceTree = "<group>"; };
-		CE2209A6093639B0004D7D92 /* BDSKAlert.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKAlert.m; sourceTree = "<group>"; };
 		CE2209AA09363A05004D7D92 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKAlert.nib; sourceTree = "<group>"; };
 		CE22E1CB0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKOrphanedFilesFinder.h; sourceTree = "<group>"; };
 		CE22E1CC0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKOrphanedFilesFinder.m; sourceTree = "<group>"; };
@@ -1247,6 +1245,8 @@
 		CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BDSKScriptHook+Scripting.m"; sourceTree = "<group>"; };
 		CEDA7D3E0F9609D600F72C0A /* RALatchTrigger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RALatchTrigger.h; sourceTree = "<group>"; };
 		CEDA7D3F0F9609D600F72C0A /* RALatchTrigger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RALatchTrigger.m; sourceTree = "<group>"; };
+		CEDA7E0A0F96497B00F72C0A /* NSAlert_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSAlert_BDSKExtensions.h; sourceTree = "<group>"; };
+		CEDA7E0B0F96497B00F72C0A /* NSAlert_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSAlert_BDSKExtensions.m; sourceTree = "<group>"; };
 		CEDB58F30D3692A400E40354 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/ComplexStringEditor.nib; sourceTree = "<group>"; };
 		CEDB58F50D3692B700E40354 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/ComplexStringEditor.nib; sourceTree = "<group>"; };
 		CEDBDE490F4C863500190AF5 /* BDSKPreferenceRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPreferenceRecord.h; sourceTree = "<group>"; };
@@ -2105,6 +2105,7 @@
 			isa = PBXGroup;
 			children = (
 				CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */,
+				CEDA7E0B0F96497B00F72C0A /* NSAlert_BDSKExtensions.m */,
 				F97BF0B8090AE7520063504B /* NSBezierPath_BDSKExtensions.m */,
 				CE28346209176C88006B4C63 /* NSBezierPath_CoreImageExtensions.m */,
 				CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */,
@@ -2158,7 +2159,6 @@
 		CE38FA80091D241600BCB69D /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				CE2209A6093639B0004D7D92 /* BDSKAlert.m */,
 				F9022C5E075802E300C3F701 /* BDSKAppController.m */,
 				CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */,
 				CEF83F360C77911F00A3AD51 /* BDSKBookmarkController.m */,
@@ -2570,7 +2570,6 @@
 			children = (
 				CE3011A00D5CC41C00C0B7FA /* BDSKAddCommand.h */,
 				45DB3E470CAADFC3001EACDA /* BDSKACMDLParser.h */,
-				CE2209A5093639B0004D7D92 /* BDSKAlert.h */,
 				F920DAFA075C2B69000C5FCA /* BDSKAppController+Scripting.h */,
 				F9022C5D075802E300C3F701 /* BDSKAppController.h */,
 				CEFA07F20AF0E52100A3B4B1 /* BDSKApplication.h */,
@@ -2813,6 +2812,7 @@
 				F9025F2E0969D66F008A551C /* CFString_BDSKExtensions.h */,
 				CE7E29D60A0E84AA009D04C3 /* CIImage_BDSKExtensions.h */,
 				F9022C9B0758038000C3F701 /* html2tex.h */,
+				CEDA7E0A0F96497B00F72C0A /* NSAlert_BDSKExtensions.h */,
 				CE3011B70D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.h */,
 				F99BC25C095A5C7000E018C3 /* NSArray_BDSKExtensions.h */,
 				CEB772E80A34529D00B8A299 /* NSAttributedString_BDSKExtensions.h */,
@@ -3739,7 +3739,6 @@
 				CEF942120926458C00750FFA /* BDSKPathColorTransformer.m in Sources */,
 				CEF94415092668EA00750FFA /* BDSKTableSortDescriptor.m in Sources */,
 				CE969E340931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.m in Sources */,
-				CE2209A8093639B0004D7D92 /* BDSKAlert.m in Sources */,
 				CEEC6C55093A411E00A64F54 /* BDSKCollapsibleView.m in Sources */,
 				CEEC70E2093B6EC200A64F54 /* BDSKDragImageView.m in Sources */,
 				F9463F4609436F7500CC4549 /* NSSet_BDSKExtensions.m in Sources */,
@@ -3933,6 +3932,7 @@
 				6C5DE3E80F8FC33B00E02D5F /* BDSKMathSiteParser.m in Sources */,
 				6CD26A240F928EEE0089FDFD /* BDSKBibDeskProtocol.m in Sources */,
 				CEDA7D410F9609D600F72C0A /* RALatchTrigger.m in Sources */,
+				CEDA7E0D0F96497B00F72C0A /* NSAlert_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

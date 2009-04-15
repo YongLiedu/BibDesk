@@ -39,7 +39,6 @@
 #import "BDSKAppController.h"
 #import "BDSKConverter.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "BDSKAlert.h"
 
 
 @implementation BDSKCharacterConversion
@@ -141,12 +140,12 @@ static BDSKCharacterConversion *sharedConversionEditor;
 		return;
 	if (!validRoman || !validTex) {
         // NSAlert does not work here for some reason
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Conversion", @"Message in alert dialog when entering invalid TeX conversion")
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The last item you entered is invalid or a duplicate. Please first edit it.", @"Informative text in alert dialog")];
-        [alert beginSheetModalForWindow:[self window]];
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Conversion", @"Message in alert dialog when entering invalid TeX conversion")
+                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The last item you entered is invalid or a duplicate. Please first edit it.", @"Informative text in alert dialog")];
+        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 		[listButton selectItemAtIndex:[listButton indexOfItemWithTag:[self listType]]];
 		return;
 	}
@@ -196,12 +195,12 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	
     if ([sender tag] == NSOKButton) {
         if (!validRoman || !validTex) {
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Conversion", @"Message in alert dialog when entering invalid TeX conversion")
-                                                 defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                     informativeTextWithFormat:NSLocalizedString(@"The last item you entered is invalid or a duplicate. Please first edit it.", @"Informative text in alert dialog")];
-            [alert beginSheetModalForWindow:[self window]];
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Conversion", @"Message in alert dialog when entering invalid TeX conversion")
+                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"The last item you entered is invalid or a duplicate. Please first edit it.", @"Informative text in alert dialog")];
+            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
             return;
         }
         
@@ -343,12 +342,12 @@ static BDSKCharacterConversion *sharedConversionEditor;
 			} else {
                 int rv = NSAlertDefaultReturn;
                 if ([defaultOneWayRomanSet containsObject:object]) {
-                    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Duplicate Unicode Character", @"Message in alert dialog when trying to add duplicate character for TeX conversion")
-                                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                                           otherButton:nil
-                                             informativeTextWithFormat:NSLocalizedString(@"The character %@ you entered already has a one-way TeX equivalent defined internally by BibDesk. Do you want to overwrite this?", @"Informative text in alert dialog"), object];
-                    rv = [alert runSheetModalForWindow:[self window]];
+                    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Unicode Character", @"Message in alert dialog when trying to add duplicate character for TeX conversion")
+                                                     defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                                   alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+                                                       otherButton:nil
+                                         informativeTextWithFormat:NSLocalizedString(@"The character %@ you entered already has a one-way TeX equivalent defined internally by BibDesk. Do you want to overwrite this?", @"Informative text in alert dialog"), object];
+                    rv = [alert runModal];
                 }
                 if (rv == NSAlertDefaultReturn) {
                     [currentArray replaceObjectAtIndex:row withObject:object];

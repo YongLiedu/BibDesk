@@ -1,10 +1,10 @@
 //
-//  BDSKAlert.h
-//  BibDesk
+//  NSAlert_BDSKExtensions.h
+//  Bibdesk
 //
-//  Created by Christiaan Hofman on 24/11/05.
+//  Created by Christiaan Hofman on 4/15/09.
 /*
- This software is Copyright (c) 2005-2009
+ This software is Copyright (c) 2009
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,51 +37,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKSheetController.h"
 
 
-@interface BDSKAlert : BDSKSheetController {
-	IBOutlet NSTextField *informationField;
-	IBOutlet NSTextField *messageField;
-	IBOutlet NSButton *checkButton;
-	IBOutlet NSImageView *imageView;
-    IBOutlet NSButton *helpButton;
-    NSString *helpAnchor;
-    NSMutableArray *buttons;
-    NSImage *unbadgedImage;
-    int alertStyle;
-	BOOL hasCheckButton;
-	NSSize minButtonSize;
-}
-
-+ (BDSKAlert *)alertWithMessageText:(NSString *)messageTitle defaultButton:(NSString *)defaultButtonTitle alternateButton:(NSString *)alternateButtonTitle otherButton:(NSString *)otherButtonTitle informativeTextWithFormat:(NSString *)format, ...;
-
-- (void)setMessageText:(NSString *)messageText;
-- (NSString *)messageText;
-- (void)setInformativeText:(NSString *)informativeText;
-- (NSString *)informativeText;
-
-- (void)setIcon:(NSImage *)icon;
-- (NSImage *)icon;
-
-- (void)setHasCheckButton:(BOOL)flag;
-- (BOOL)hasCheckButton;
-- (void)setCheckText:(NSString *)checkText;
-- (NSString *)checkText;
-- (void)setCheckValue:(BOOL)flag;
-- (BOOL)checkValue;
-
-- (NSButton *)addButtonWithTitle:(NSString *)aTitle;
-- (NSArray *)buttons;
-- (NSButton *)checkButton;
-
-- (IBAction)helpAction:(id)sender;
-- (void)setHelpAnchor:(NSString *)anchor;
-- (NSString *)helpAnchor;
-- (void)setShowsHelp:(BOOL)flag;
-- (BOOL)showsHelp;
-
-- (void)setAlertStyle:(NSAlertStyle)style;
-- (NSAlertStyle)alertStyle;
-
+@interface NSAlert (BDSKExtensions)
+- (int)suppressionButtonState;
 @end

@@ -40,7 +40,6 @@
 #import "BDSKStringConstants.h"
 #import "BibItem.h"
 #import "NSImage_BDSKExtensions.h"
-#import "BDSKAlert.h"
 #import "BDSKFormatParser.h"
 #import "BDSKAppController.h"
 #import "BDSKPreviewItem.h"
@@ -286,12 +285,12 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		otherButton = NSLocalizedString(@"Revert to Last", @"Button title");
 	}
 	
-	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key Format", @"Message in alert dialog when entering invalid cite key format") 
-										 defaultButton:NSLocalizedString(@"Keep Editing", @"Button title") 
-									   alternateButton:NSLocalizedString(@"Revert to Default", @"Button title") 
-										   otherButton:otherButton
-							 informativeTextWithFormat:@"%@", error];
-	int rv = [alert runSheetModalForWindow:formatSheet];
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key Format", @"Message in alert dialog when entering invalid cite key format") 
+                                     defaultButton:NSLocalizedString(@"Keep Editing", @"Button title") 
+                                   alternateButton:NSLocalizedString(@"Revert to Default", @"Button title") 
+                                       otherButton:otherButton
+                         informativeTextWithFormat:@"%@", error];
+	int rv = [alert runModal];
 	
 	if (rv == NSAlertDefaultReturn){
 		[formatSheetField selectText:self];
