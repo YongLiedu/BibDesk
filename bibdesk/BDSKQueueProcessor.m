@@ -65,7 +65,6 @@
 
 #import "BDSKQueueProcessor.h"
 #import "BDSKMessageQueue.h"
-#import "BDSKInvocation.h"
 
 
 @implementation BDSKQueueProcessor
@@ -98,7 +97,7 @@ static BDSKQueueProcessor *detachingQueueProcessor;
 - (BOOL)shouldProcessQueueEnd { return NO; }
 
 - (void)processQueue {
-    BDSKInvocation *invocation;
+    NSInvocation *invocation;
     NSAutoreleasePool *pool;
     NSTimeInterval startingInterval, endTime;
     NSTimeInterval maximumTime = 0.25; // TJW -- Bug #332 about why this time check is here by default

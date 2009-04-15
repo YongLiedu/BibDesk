@@ -127,7 +127,6 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSView_BDSKExtensions.h"
 #import "NSColor_BDSKExtensions.h"
-#import "BDSKMessageQueue.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -234,9 +233,6 @@ enum {
         [pboardHelper setDelegate:self];
         
         docState.isDocumentClosed = NO;
-        
-        // remove all invocations from the main message queue
-        [self dequeueAllInvocations];
         
         // need to set this for new documents
         [self setDocumentStringEncoding:[BDSKStringEncodingManager defaultEncoding]]; 
@@ -697,8 +693,8 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     
     docState.isDocumentClosed = YES;
     
-    // remove all queued invocations to us from the main message queue
-    [self dequeueAllInvocations];
+    // remove all queued invocations
+    [[self class] cancelPreviousPerformRequestsWithTarget:self];
     
     [documentSearch terminate];
     [fileSearchController terminate];
@@ -3031,8 +3027,10 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     
     
     // queue for UI updating, in case the item is changed as part of a batch process such as Find & Replace or AutoFile
-    if (docState.isDocumentClosed == NO)
-        [self queueSelectorOnce:@selector(handlePrivateBibItemChanged)];
+    if (docState.isDocumentClosed == NO) {
+        [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(handlePrivateBibItemChanged) object:nil];
+        [self performSelector:@selector(handlePrivateBibItemChanged) withObject:nil afterDelay:0.0];
+    }
 }
 
 - (void)handleMacroChangedNotification:(NSNotification *)aNotification{
@@ -3193,8 +3191,10 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     // Coalesce these messages here, since something like select all -> generate cite keys will force a preview update for every
     // changed key, so we have to update all the previews each time.  This should be safer than using cancelPrevious... since those
     // don't get performed on the main thread (apparently), and can lead to problems.
-    if (docState.isDocumentClosed == NO && [documentWindow isVisible])
-        [self queueSelectorOnce:@selector(doUpdatePreviews)];
+    if (docState.isDocumentClosed == NO && [documentWindow isVisible]) {
+        [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(doUpdatePreviews) object:nil];
+        [self performSelector:@selector(doUpdatePreviews) withObject:nil afterDelay:0.0];
+    }
 }
 
 - (void)updatePreviewer:(BDSKPreviewer *)aPreviewer{

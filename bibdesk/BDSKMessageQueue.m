@@ -65,8 +65,7 @@
 
 #import "BDSKMessageQueue.h"
 #import "BDSKQueueProcessor.h"
-#import "BDSKMainQueueProcessor.h"
-#import "BDSKInvocation.h"
+#import "NSInvocation_BDSKExtensions.h"
 
 #define QUEUE_HAS_NO_SCHEDULABLE_INVOCATIONS 0
 #define QUEUE_HAS_INVOCATIONS 1
@@ -82,36 +81,13 @@
         idleProcessors = 0;
         queueProcessorLock = [[NSLock alloc] init];
         queueProcessor = nil;
-        
-        isMain = NO;
     }
     return self;
-}
-
-- (id)initMainQueue {
-    if (self = [self init]) {
-        isMain = YES;
-        
-        [queueProcessorLock release];
-        queueProcessorLock = nil;
-        
-        queueProcessor = [[BDSKMainQueueProcessor alloc] initForQueue:self];
-        [queueProcessor startProcessingQueue];
-    }
-    return self;
-}
-
-+ (id)mainQueue {
-    static BDSKMessageQueue *mainQueue = nil;
-    if (mainQueue == nil)
-        mainQueue = [[self alloc] initMainQueue];
-    return mainQueue;
 }
 
 - (void)dealloc {
     [queueProcessor release];
     [queue release];
-    [queueSet release];
     [queueLock release];
     [queueProcessorLock release];
     [super dealloc];
@@ -134,9 +110,9 @@
     [queueProcessorLock unlock];
 }
 
-- (BDSKInvocation *)newInvocation {
+- (NSInvocation *)newInvocation {
     unsigned int invocationCount;
-    BDSKInvocation *nextInvocation = nil;
+    NSInvocation *nextInvocation = nil;
     
     [queueLock lock];
     if ([queue count])
@@ -144,17 +120,13 @@
     else
         [queueLock unlockWithCondition:QUEUE_HAS_NO_SCHEDULABLE_INVOCATIONS];
     
-    if (isMain) {
-        [queueLock lock];
-    } else {
-        [queueProcessorLock lock];
-        idleProcessors++;
-        [queueProcessorLock unlock];
-        [queueLock lockWhenCondition:QUEUE_HAS_INVOCATIONS];
-        [queueProcessorLock lock];
-        idleProcessors--;
-        [queueProcessorLock unlock];
-    }
+    [queueProcessorLock lock];
+    idleProcessors++;
+    [queueProcessorLock unlock];
+    [queueLock lockWhenCondition:QUEUE_HAS_INVOCATIONS];
+    [queueProcessorLock lock];
+    idleProcessors--;
+    [queueProcessorLock unlock];
     
     invocationCount = [queue count];
     if (invocationCount == 0) {
@@ -162,8 +134,6 @@
     } else {
         nextInvocation = [[queue objectAtIndex:0] retain];
         [queue removeObjectAtIndex:0];
-        if (queueSet)
-            [queueSet removeObject:nextInvocation];
         
         if (invocationCount == 1)
             [queueLock unlockWithCondition:QUEUE_HAS_NO_SCHEDULABLE_INVOCATIONS];
@@ -174,7 +144,7 @@
     return nextInvocation;
 }
 
-- (void)queueInvocation:(BDSKInvocation *)anInvocation {
+- (void)queueInvocation:(NSInvocation *)anInvocation {
     unsigned int queueCount;
     
     [queueLock lock];
@@ -182,189 +152,35 @@
     queueCount = [queue count];
     [queue insertObject:anInvocation atIndex:queueCount];
     queueCount++;
-    if (queueSet)
-        [queueSet addObject:anInvocation];
     
-    if (isMain == NO)
-        // Create new processor if needed and we can
-        [self createProcessorsForQueueSize:queueCount];
+    // Create new processor if needed and we can
+    [self createProcessorsForQueueSize:queueCount];
     
     [queueLock unlockWithCondition:QUEUE_HAS_INVOCATIONS];
-    
-    // Tickle main thread processor if needed
-    if (isMain && queueCount == 1)
-        [queueProcessor continueProcessingQueue];
-}
-
-- (void)queueInvocationOnce:(BDSKInvocation *)anInvocation {
-    unsigned int queueCount;
-    BOOL alreadyContainsObject;
-    
-    [queueLock lock];
-    
-    if (queueSet == nil)
-        queueSet = [[NSMutableSet alloc] initWithArray:queue];
-    alreadyContainsObject = [queueSet member:anInvocation] != nil;
-    
-    if (alreadyContainsObject) {
-        [queueLock unlock];
-    } else {
-        queueCount = [queue count];
-        [queue insertObject:anInvocation atIndex:queueCount];
-        queueCount++;
-        if (queueSet)
-            [queueSet addObject:anInvocation];
-        
-        if (isMain == NO)
-            // Create new processor if needed and we can
-            [self createProcessorsForQueueSize:queueCount];
-        
-        [queueLock unlockWithCondition:QUEUE_HAS_INVOCATIONS];
-        
-        // Tickle main thread processor if needed
-        if (isMain && queueCount == 1)
-            [queueProcessor continueProcessingQueue];
-    }
-}
-
-- (void)dequeueInvocation:(BDSKInvocation *)anInvocation {
-    [queueLock lock];
-    [queue removeObject:anInvocation];
-    if (queueSet)
-        [queueSet removeObject:anInvocation];
-    [queueLock unlock];
-}
-
-- (void)dequeueAllInvocationsForTarget:(id)aTarget {
-    [queueLock lock];
-    int i = [queue count];
-    while (i--) {
-        if ([[queue objectAtIndex:i] target] == aTarget)
-            [queue removeObjectAtIndex:i];
-    }
-    if (queueSet) {
-        [queueSet release];
-        queueSet = nil;
-    }
-    [queueLock unlock];
 }
 
 - (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget {
     if (aTarget) {
-        BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector];
+        NSInvocation *invocation = [NSInvocation invocationWithTarget:aTarget selector:aSelector];
         [self queueInvocation:invocation];
-        [invocation release];
-    }
-}
-
-- (void)queueSelectorOnce:(SEL)aSelector forTarget:(id)aTarget {
-    if (aTarget) {
-        BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector];
-        [self queueInvocationOnce:invocation];
-        [invocation release];
-    }
-}
-
-- (void)dequeueSelector:(SEL)aSelector forTarget:(id)aTarget {
-    if (aTarget) {
-        BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector];
-        [self dequeueInvocation:invocation];
-        [invocation release];
     }
 }
 
 - (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject {
     if (aTarget) {
-        BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector withObject:anObject];
+        NSInvocation *invocation = [NSInvocation invocationWithTarget:aTarget selector:aSelector];
+        [invocation setArgument:&anObject atIndex:2];
         [self queueInvocation:invocation];
-        [invocation release];
-    }
-}
-
-- (void)queueSelectorOnce:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject {
-    if (aTarget) {
-        BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector withObject:anObject];
-        [self queueInvocationOnce:invocation];
-        [invocation release];
-    }
-}
-
-- (void)dequeueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject {
-    if (aTarget) {
-        BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector withObject:anObject];
-        [self dequeueInvocation:invocation];
-        [invocation release];
     }
 }
 
 - (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject1 withObject:(id)anObject2 {
     if (aTarget) {
-        BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector withObject:anObject1 withObject:anObject2];
+        NSInvocation *invocation = [NSInvocation invocationWithTarget:aTarget selector:aSelector];
+        [invocation setArgument:&anObject1 atIndex:2];
+        [invocation setArgument:&anObject2 atIndex:3];
         [self queueInvocation:invocation];
-        [invocation release];
     }
-}
-
-- (void)queueSelectorOnce:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject1 withObject:(id)anObject2 {
-    if (aTarget) {
-        BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector withObject:anObject1 withObject:anObject2];
-        [self queueInvocationOnce:invocation];
-        [invocation release];
-    }
-}
-
-- (void)dequeueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject1 withObject:(id)anObject2 {
-    if (aTarget) {
-        BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector withObject:anObject1 withObject:anObject2];
-        [self dequeueInvocation:invocation];
-        [invocation release];
-    }
-}
-
-@end
-
-#pragma mark -
-
-@implementation NSObject (BDSKMessageQueue)
-
-- (void)queueSelector:(SEL)aSelector {
-    [[BDSKMessageQueue mainQueue] queueSelector:aSelector forTarget:self];
-}
-
-- (void)queueSelectorOnce:(SEL)aSelector {
-    [[BDSKMessageQueue mainQueue] queueSelectorOnce:aSelector forTarget:self];
-}
-
-- (void)dequeueSelector:(SEL)aSelector {
-    [[BDSKMessageQueue mainQueue] dequeueSelector:aSelector forTarget:self];
-}
-
-- (void)queueSelector:(SEL)aSelector withObject:(id)anObject {
-    [[BDSKMessageQueue mainQueue] queueSelector:aSelector forTarget:self withObject:anObject];
-}
-
-- (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject {
-    [[BDSKMessageQueue mainQueue] queueSelectorOnce:aSelector forTarget:self withObject:anObject];
-}
-
-- (void)dequeueSelector:(SEL)aSelector withObject:(id)anObject {
-    [[BDSKMessageQueue mainQueue] dequeueSelector:aSelector forTarget:self withObject:anObject];
-}
-
-- (void)queueSelector:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2 {
-    [[BDSKMessageQueue mainQueue] queueSelector:aSelector forTarget:self withObject:anObject1 withObject:anObject2];
-}
-
-- (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2 {
-    [[BDSKMessageQueue mainQueue] queueSelectorOnce:aSelector forTarget:self withObject:anObject1 withObject:anObject2];
-}
-
-- (void)dequeueSelector:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2 {
-    [[BDSKMessageQueue mainQueue] dequeueSelector:aSelector forTarget:self withObject:anObject1 withObject:anObject2];
-}
-
-- (void)dequeueAllInvocations {
-    [[BDSKMessageQueue mainQueue] dequeueAllInvocationsForTarget:self];
 }
 
 @end

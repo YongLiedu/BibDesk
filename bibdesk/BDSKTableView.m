@@ -39,7 +39,6 @@
 #import "BDSKTableView.h"
 #import "BDSKTypeSelectHelper.h"
 #import "NSLayoutManager_BDSKExtensions.h"
-#import "BDSKMessageQueue.h"
 
 
 static char BDSKTableViewFontDefaultsObservationContext;
@@ -66,7 +65,7 @@ static char BDSKTableViewFontDefaultsObservationContext;
     if (typeSelectHelper != newTypeSelectHelper) {
         if ([typeSelectHelper dataSource] == self) {
             if ([[self class] shouldQueueTypeSelectHelper])
-                [typeSelectHelper dequeueSelector:@selector(rebuildTypeSelectSearchCache)];
+                [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(rebuildTypeSelectSearchCache) object:nil];
             [typeSelectHelper setDataSource:nil];
         }
         [typeSelectHelper release];
@@ -78,10 +77,12 @@ static char BDSKTableViewFontDefaultsObservationContext;
 - (void)reloadData {
     [super reloadData];
     if (typeSelectHelper) {
-        if ([[self class] shouldQueueTypeSelectHelper])
-            [typeSelectHelper queueSelectorOnce:@selector(rebuildTypeSelectSearchCache)];
-        else
+        if ([[self class] shouldQueueTypeSelectHelper]) {
+            [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(rebuildTypeSelectSearchCache) object:nil];
+            [self performSelector:@selector(rebuildTypeSelectSearchCache) withObject:nil afterDelay:0.0];
+        } else {
             [typeSelectHelper rebuildTypeSelectSearchCache];
+        }
     }
 }
 

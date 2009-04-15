@@ -51,7 +51,6 @@
 #import "BDSKSplitView.h"
 #import "BDSKTableView.h"
 #import <AddressBook/AddressBook.h>
-#import "BDSKMessageQueue.h"
 
 @implementation BDSKPersonController
 
@@ -165,7 +164,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     // make sure we won't try to access this, e.g. in a delayed setPublicationItems:
     owner = nil;
-    [self dequeueAllInvocations];
+    [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(setPublicationItems:) object:nil];
 }
 
 - (void)updateFilter {
@@ -341,14 +340,18 @@
 
 - (void)handleBibItemChanged:(NSNotification *)note{
     NSString *key = [[note userInfo] valueForKey:@"key"];
-    if (([key isPersonField] || key == nil) && owner)
-        [self queueSelectorOnce:@selector(setPublicationItems:) withObject:nil];
+    if (([key isPersonField] || key == nil) && owner) {
+        [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(setPublicationItems:) object:nil];
+        [self performSelector:@selector(setPublicationItems:) withObject:nil afterDelay:0.0];
+    }
 }
 
 - (void)handleBibItemAddDel:(NSNotification *)note{
     // we may be adding or removing items, so we can't check publications for containment
-    if (owner)
-        [self queueSelectorOnce:@selector(setPublicationItems:) withObject:nil];
+    if (owner) {
+        [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(setPublicationItems:) object:nil];
+        [self performSelector:@selector(setPublicationItems:) withObject:nil afterDelay:0.0];
+    }
 }
 
 - (void)handleGroupWillBeRemoved:(NSNotification *)note{

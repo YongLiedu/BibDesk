@@ -67,53 +67,23 @@
 
 // This class should only be used as global object, as there are retain cycles between the queue and the processors, and moreover it cannot safely be stopped
 
-@class BDSKInvocation, BDSKQueueProcessor;
+@class BDSKQueueProcessor;
 
 @interface BDSKMessageQueue : NSObject {
     NSMutableArray *queue;
-    NSMutableSet *queueSet;
     NSConditionLock *queueLock;
     NSLock *queueProcessorLock;
     unsigned int idleProcessors;
     BDSKQueueProcessor *queueProcessor;
-    BOOL isMain;
 }
 
-+ (id)mainQueue;
-
 - (BOOL)hasInvocations;
-- (BDSKInvocation *)newInvocation;
+- (NSInvocation *)newInvocation;
 
-- (void)queueInvocation:(BDSKInvocation *)anInvocation;
-- (void)queueInvocationOnce:(BDSKInvocation *)anInvocation;
-- (void)dequeueInvocation:(BDSKInvocation *)anInvocation;
-- (void)dequeueAllInvocationsForTarget:(id)aTarget;
+- (void)queueInvocation:(NSInvocation *)anInvocation;
 
 - (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget;
-- (void)queueSelectorOnce:(SEL)aSelector forTarget:(id)aTarget;
-- (void)dequeueSelector:(SEL)aSelector forTarget:(id)aTarget;
 - (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject;
-- (void)queueSelectorOnce:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject;
-- (void)dequeueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject;
 - (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject1 withObject:(id)anObject2;
-- (void)queueSelectorOnce:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject1 withObject:(id)anObject2;
-- (void)dequeueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject1 withObject:(id)anObject2;
-
-@end
-
-#pragma mark -
-
-@interface NSObject (BDSKMessageQueue)
-
-- (void)queueSelector:(SEL)aSelector;
-- (void)queueSelectorOnce:(SEL)aSelector;
-- (void)dequeueSelector:(SEL)aSelector;
-- (void)queueSelector:(SEL)aSelector withObject:(id)anObject;
-- (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject;
-- (void)dequeueSelector:(SEL)aSelector withObject:(id)anObject;
-- (void)queueSelector:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2;
-- (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2;
-- (void)dequeueSelector:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2;
-- (void)dequeueAllInvocations;
 
 @end

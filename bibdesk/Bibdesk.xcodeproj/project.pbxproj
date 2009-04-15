@@ -283,8 +283,6 @@
 		CEED2CBE0F4DAD2C0078E87A /* BDSKCFCallBacks.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2CBC0F4DAD2C0078E87A /* BDSKCFCallBacks.m */; };
 		CEED2E030F4DEB550078E87A /* BDSKMessageQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2E010F4DEB550078E87A /* BDSKMessageQueue.m */; };
 		CEED2E070F4DEB6A0078E87A /* BDSKQueueProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2E050F4DEB6A0078E87A /* BDSKQueueProcessor.m */; };
-		CEED2E0B0F4DEB9E0078E87A /* BDSKMainQueueProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2E090F4DEB9E0078E87A /* BDSKMainQueueProcessor.m */; };
-		CEED2E150F4DED830078E87A /* BDSKInvocation.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2E130F4DED830078E87A /* BDSKInvocation.m */; };
 		CEED2F350F4E0C860078E87A /* BDSKRuntime.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2F330F4E0C860078E87A /* BDSKRuntime.m */; };
 		CEED306C0F4ED3410078E87A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CEED306B0F4ED3410078E87A /* libz.dylib */; };
 		CEEFDE010B03ED0200668BB0 /* BDSKScriptGroupSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFDDFD0B03ED0200668BB0 /* BDSKScriptGroupSheetController.m */; };
@@ -1276,10 +1274,6 @@
 		CEED2E010F4DEB550078E87A /* BDSKMessageQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKMessageQueue.m; sourceTree = "<group>"; };
 		CEED2E040F4DEB6A0078E87A /* BDSKQueueProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKQueueProcessor.h; sourceTree = "<group>"; };
 		CEED2E050F4DEB6A0078E87A /* BDSKQueueProcessor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKQueueProcessor.m; sourceTree = "<group>"; };
-		CEED2E080F4DEB9E0078E87A /* BDSKMainQueueProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKMainQueueProcessor.h; sourceTree = "<group>"; };
-		CEED2E090F4DEB9E0078E87A /* BDSKMainQueueProcessor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKMainQueueProcessor.m; sourceTree = "<group>"; };
-		CEED2E120F4DED830078E87A /* BDSKInvocation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKInvocation.h; sourceTree = "<group>"; };
-		CEED2E130F4DED830078E87A /* BDSKInvocation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKInvocation.m; sourceTree = "<group>"; };
 		CEED2F320F4E0C860078E87A /* BDSKRuntime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKRuntime.h; sourceTree = "<group>"; };
 		CEED2F330F4E0C860078E87A /* BDSKRuntime.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKRuntime.m; sourceTree = "<group>"; };
 		CEED306B0F4ED3410078E87A /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
@@ -2229,7 +2223,6 @@
 				CE38FB8B091D94A100BCB69D /* BDSKFilter.m */,
 				CE21D10909208B9D0075E607 /* BDSKGroup.m */,
 				CEEFE6C00B0403E700668BB0 /* BDSKGroupsArray.m */,
-				CEED2E130F4DED830078E87A /* BDSKInvocation.m */,
 				F97C9DB10C4481670002EE01 /* BDSKISIGroupServer.m */,
 				F97C9DBD0C44866F0002EE01 /* BDSKISIWebServices.m */,
 				F9936CC40BC746C300A32DC4 /* BDSKItemSearchIndexes.m */,
@@ -2298,7 +2291,6 @@
 				F925332208FC9FB80045D563 /* BDSKFileSearchIndex.m */,
 				CE7A313E0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m */,
 				CE3B5E7B09CEDE470017D339 /* BDSKMacroResolver.m */,
-				CEED2E090F4DEB9E0078E87A /* BDSKMainQueueProcessor.m */,
 				CEED2E010F4DEB550078E87A /* BDSKMessageQueue.m */,
 				F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */,
 				CEED2E050F4DEB6A0078E87A /* BDSKQueueProcessor.m */,
@@ -2667,7 +2659,6 @@
 				CE3B682609D1B0190017D339 /* BDSKImagePopUpButton.h */,
 				CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */,
 				CE40EC520EE9AAEF00BCF379 /* BDSKImportCommand.h */,
-				CEED2E120F4DED830078E87A /* BDSKInvocation.h */,
 				F97C9DB00C4481670002EE01 /* BDSKISIGroupServer.h */,
 				F97C9DBC0C44866F0002EE01 /* BDSKISIWebServices.h */,
 				CE7A313F0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.h */,
@@ -2679,7 +2670,6 @@
 				CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */,
 				CE82BE8A0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.h */,
 				2730077B07CF20B500F2E485 /* BDSKMacroWindowController.h */,
-				CEED2E080F4DEB9E0078E87A /* BDSKMainQueueProcessor.h */,
 				CE2E78CA0D40F6BB00340B39 /* BDSKManyToManyDictionary.h */,
 				CE34A5710B249E0B00755730 /* BDSKMARCParser.h */,
 				6C567DBE0F818A1600DE285D /* BDSKMathSciNetParser.h */,
@@ -3929,8 +3919,6 @@
 				CEED2CBE0F4DAD2C0078E87A /* BDSKCFCallBacks.m in Sources */,
 				CEED2E030F4DEB550078E87A /* BDSKMessageQueue.m in Sources */,
 				CEED2E070F4DEB6A0078E87A /* BDSKQueueProcessor.m in Sources */,
-				CEED2E0B0F4DEB9E0078E87A /* BDSKMainQueueProcessor.m in Sources */,
-				CEED2E150F4DED830078E87A /* BDSKInvocation.m in Sources */,
 				CEED2F350F4E0C860078E87A /* BDSKRuntime.m in Sources */,
 				CEC1CEA80F51D2CE00D18921 /* BDSKReadWriteLock.m in Sources */,
 				CEF546100F56BDDB008A630F /* BDSKStringArrayFormatter.m in Sources */,
