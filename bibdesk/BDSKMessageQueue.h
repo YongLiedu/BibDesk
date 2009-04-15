@@ -67,22 +67,19 @@
 
 // This class should only be used as global object, as there are retain cycles between the queue and the processors, and moreover it cannot safely be stopped
 
-@class BDSKInvocation;
+@class BDSKInvocation, BDSKQueueProcessor;
 
 @interface BDSKMessageQueue : NSObject {
     NSMutableArray *queue;
     NSMutableSet *queueSet;
     NSConditionLock *queueLock;
-    NSLock *queueProcessorsLock;
+    NSLock *queueProcessorLock;
     unsigned int idleProcessors;
-    unsigned int uncreatedProcessors;
-    NSMutableArray *queueProcessors;
+    BDSKQueueProcessor *queueProcessor;
     BOOL isMain;
 }
 
 + (id)mainQueue;
-
-- (void)startBackgroundProcessors:(unsigned int)processorCount;
 
 - (BOOL)hasInvocations;
 - (BDSKInvocation *)newInvocation;
