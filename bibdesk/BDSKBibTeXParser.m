@@ -202,16 +202,13 @@ error:(NSError **)outError{
     
     NSError *error = nil;
     
-    if(isPasteOrDrag || [[NSFileManager defaultManager] fileExistsAtPath:filePath] == NO){
+    if (isPasteOrDrag || [[NSFileManager defaultManager] fileExistsAtPath:filePath] == NO) {
         fs_path = NULL; // used for error context in libbtparse
-        infile = [inData openReadOnlyStandardIOFile];
-    }else if(didReplaceNewlines){
+        infile = [inData openReadStream];
+    } else {
         fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
-        infile = [inData openReadOnlyStandardIOFile];
-    }else{
-        fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
-        infile = fopen(fs_path, "r");
-    }    
+        infile = didReplaceNewlines ? [inData openReadStream] : fopen(fs_path, "r");
+    }
 
     buf = (const char *) [inData bytes];
 

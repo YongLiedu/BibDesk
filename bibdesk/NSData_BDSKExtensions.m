@@ -339,19 +339,28 @@ static NSData *sha1Signature(void *cookie, int (*readfn)(void *, char *, int), i
 	return [NSData dataWithData:compressed];
 }
 
-// This method is copied and slightly modified from NSData-OFExtensions.m
-/*" Creates a stdio FILE pointer for reading from the receiver via the funopen() BSD facility.  The receiver is automatically retained until the returned FILE is closed. "*/
-- (FILE *)openReadOnlyStandardIOFile {
-    BDSKDataFileContext *ctx = calloc(1, sizeof(BDSKDataFileContext));
-    ctx->data = [self retain];
-    ctx->bytes = (void *)[self bytes];
-    ctx->length = [self length];
-    //fprintf(stderr, "open read -> ctx:%p\n", ctx);
+- (void)_writeToPipeInBackground:(NSPipe *)aPipe
+{
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+    @try {
+        [[aPipe fileHandleForWriting] writeData:self];
+    }
+    @catch (id exception) {
+        NSLog(@"caught exception writing %d bytes to pipe (%@)", [self length], exception);
+    }
+    [[aPipe fileHandleForWriting] closeFile];
+    [pool release];
+}
 
-    FILE *f = funopen(ctx, _data_readfn, NULL/*writefn*/, _data_seekfn, _data_closefn);
-    if (f == NULL)
-        [self release]; // Don't leak ourselves if funopen fails
-    return f;
+- (FILE *)openReadStream
+{    
+    (void) signal(SIGPIPE, SIG_IGN);
+    NSPipe *aPipe = [NSPipe pipe];
+    [NSThread detachNewThreadSelector:@selector(_writeToPipeInBackground:) toTarget:self withObject:aPipe];
+    int fd = [[aPipe fileHandleForReading] fileDescriptor];
+    NSParameterAssert(-1 != fd);
+    // caller will block on this until we write to it
+    return (-1 == fd) ? NULL : fdopen(fd, "r");
 }
 
 @end

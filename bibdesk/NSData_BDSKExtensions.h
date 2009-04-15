@@ -82,7 +82,7 @@ extern NSString *BDSKEncodingConversionException;
 - (NSData *)compressedData;
 - (NSData *)decompressedData;
 
-- (FILE *)openReadOnlyStandardIOFile;
+- (FILE *)openReadStream;
 
 @end
 
