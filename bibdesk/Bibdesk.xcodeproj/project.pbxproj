@@ -246,6 +246,7 @@
 		CED65AC30906BE65003EED90 /* BibPref_ScriptHooks.nib in Resources */ = {isa = PBXBuildFile; fileRef = CED65AC10906BE65003EED90 /* BibPref_ScriptHooks.nib */; };
 		CED65DC90907A2FD003EED90 /* BDSKParseFormatCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65DC70907A2FD003EED90 /* BDSKParseFormatCommand.m */; };
 		CED65DCD0907A338003EED90 /* BDSKScriptHook+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */; };
+		CEDA7D410F9609D600F72C0A /* RALatchTrigger.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDA7D3F0F9609D600F72C0A /* RALatchTrigger.m */; };
 		CEDB58F40D3692A400E40354 /* ComplexStringEditor.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEDB58F20D3692A400E40354 /* ComplexStringEditor.nib */; };
 		CEDBDE4C0F4C863500190AF5 /* BDSKPreferenceRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDBDE4A0F4C863500190AF5 /* BDSKPreferenceRecord.m */; };
 		CEDBE05A0F4CDAD900190AF5 /* NSView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDBE0580F4CDAD900190AF5 /* NSView_BDSKExtensions.m */; };
@@ -281,7 +282,6 @@
 		CEED2AB40F4D89BC0078E87A /* IconFamily.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2A840F4D856E0078E87A /* IconFamily.m */; };
 		CEED2C150F4DA0E00078E87A /* BDSKMultiValueDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2C130F4DA0E00078E87A /* BDSKMultiValueDictionary.m */; };
 		CEED2CBE0F4DAD2C0078E87A /* BDSKCFCallBacks.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2CBC0F4DAD2C0078E87A /* BDSKCFCallBacks.m */; };
-		CEED2E030F4DEB550078E87A /* BDSKMessageQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2E010F4DEB550078E87A /* BDSKMessageQueue.m */; };
 		CEED2F350F4E0C860078E87A /* BDSKRuntime.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2F330F4E0C860078E87A /* BDSKRuntime.m */; };
 		CEED306C0F4ED3410078E87A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CEED306B0F4ED3410078E87A /* libz.dylib */; };
 		CEEFDE010B03ED0200668BB0 /* BDSKScriptGroupSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFDDFD0B03ED0200668BB0 /* BDSKScriptGroupSheetController.m */; };
@@ -1245,6 +1245,8 @@
 		CED65DC70907A2FD003EED90 /* BDSKParseFormatCommand.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKParseFormatCommand.m; sourceTree = "<group>"; };
 		CED65DCA0907A338003EED90 /* BDSKScriptHook+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = "BDSKScriptHook+Scripting.h"; sourceTree = "<group>"; };
 		CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BDSKScriptHook+Scripting.m"; sourceTree = "<group>"; };
+		CEDA7D3E0F9609D600F72C0A /* RALatchTrigger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RALatchTrigger.h; sourceTree = "<group>"; };
+		CEDA7D3F0F9609D600F72C0A /* RALatchTrigger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RALatchTrigger.m; sourceTree = "<group>"; };
 		CEDB58F30D3692A400E40354 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/ComplexStringEditor.nib; sourceTree = "<group>"; };
 		CEDB58F50D3692B700E40354 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/ComplexStringEditor.nib; sourceTree = "<group>"; };
 		CEDBDE490F4C863500190AF5 /* BDSKPreferenceRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPreferenceRecord.h; sourceTree = "<group>"; };
@@ -1269,8 +1271,6 @@
 		CEED2C130F4DA0E00078E87A /* BDSKMultiValueDictionary.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKMultiValueDictionary.m; sourceTree = "<group>"; };
 		CEED2CBB0F4DAD2C0078E87A /* BDSKCFCallBacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCFCallBacks.h; sourceTree = "<group>"; };
 		CEED2CBC0F4DAD2C0078E87A /* BDSKCFCallBacks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCFCallBacks.m; sourceTree = "<group>"; };
-		CEED2E000F4DEB550078E87A /* BDSKMessageQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKMessageQueue.h; sourceTree = "<group>"; };
-		CEED2E010F4DEB550078E87A /* BDSKMessageQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKMessageQueue.m; sourceTree = "<group>"; };
 		CEED2F320F4E0C860078E87A /* BDSKRuntime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKRuntime.h; sourceTree = "<group>"; };
 		CEED2F330F4E0C860078E87A /* BDSKRuntime.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKRuntime.m; sourceTree = "<group>"; };
 		CEED306B0F4ED3410078E87A /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
@@ -2014,6 +2014,7 @@
 				CE3E4A080E75B9F20014C328 /* Ken Ferry */,
 				F924FC140BC4000B00672839 /* harmless */,
 				CEED2A820F4D85220078E87A /* IconFamily */,
+				CEDA7D3A0F96098100F72C0A /* RAOperationQueue */,
 			);
 			name = "Third Party Sources";
 			path = vendorsrc;
@@ -2288,7 +2289,6 @@
 				F925332208FC9FB80045D563 /* BDSKFileSearchIndex.m */,
 				CE7A313E0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m */,
 				CE3B5E7B09CEDE470017D339 /* BDSKMacroResolver.m */,
-				CEED2E010F4DEB550078E87A /* BDSKMessageQueue.m */,
 				F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */,
 				CEC1CEA60F51D2CE00D18921 /* BDSKReadWriteLock.m */,
 				CED65AB50906BCC6003EED90 /* BDSKScriptHookManager.m */,
@@ -2403,6 +2403,16 @@
 				CEB34BA80F5CB2CC0037E086 /* Sparkle Unit Tests.octest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		CEDA7D3A0F96098100F72C0A /* RAOperationQueue */ = {
+			isa = PBXGroup;
+			children = (
+				CEDA7D3E0F9609D600F72C0A /* RALatchTrigger.h */,
+				CEDA7D3F0F9609D600F72C0A /* RALatchTrigger.m */,
+			);
+			name = RAOperationQueue;
+			path = RoqueAmoeba/RAOperationQueue;
 			sourceTree = "<group>";
 		};
 		CEE23BAE0BFBA5FE002B746B /* Shared Support */ = {
@@ -2670,7 +2680,6 @@
 				CE34A5710B249E0B00755730 /* BDSKMARCParser.h */,
 				6C567DBE0F818A1600DE285D /* BDSKMathSciNetParser.h */,
 				6C5DE3E50F8FC33B00E02D5F /* BDSKMathSiteParser.h */,
-				CEED2E000F4DEB550078E87A /* BDSKMessageQueue.h */,
 				F9D0E5340BF92768001C6C22 /* BDSKMODSParser.h */,
 				CEED2C120F4DA0E00078E87A /* BDSKMultiValueDictionary.h */,
 				CEF71AD80B91BBCB003A2771 /* BDSKNotesWindowController.h */,
@@ -3912,7 +3921,6 @@
 				CEED2AB40F4D89BC0078E87A /* IconFamily.m in Sources */,
 				CEED2C150F4DA0E00078E87A /* BDSKMultiValueDictionary.m in Sources */,
 				CEED2CBE0F4DAD2C0078E87A /* BDSKCFCallBacks.m in Sources */,
-				CEED2E030F4DEB550078E87A /* BDSKMessageQueue.m in Sources */,
 				CEED2F350F4E0C860078E87A /* BDSKRuntime.m in Sources */,
 				CEC1CEA80F51D2CE00D18921 /* BDSKReadWriteLock.m in Sources */,
 				CEF546100F56BDDB008A630F /* BDSKStringArrayFormatter.m in Sources */,
@@ -3924,6 +3932,7 @@
 				CE1EF3890F8E6190004E7AE8 /* BDSKGradientTableView.m in Sources */,
 				6C5DE3E80F8FC33B00E02D5F /* BDSKMathSiteParser.m in Sources */,
 				6CD26A240F928EEE0089FDFD /* BDSKBibDeskProtocol.m in Sources */,
+				CEDA7D410F9609D600F72C0A /* RALatchTrigger.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -40,18 +40,16 @@
 #import "BibDocument.h"
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
-#import "BDSKMessageQueue.h"
 #import "NSInvocation_BDSKExtensions.h"
+#import "RALatchTrigger.h"
 
-static BDSKMessageQueue *searchQueue = nil;
+
+@interface BDSKDocumentSearch (BDSKPrivate)
+- (void)runSearchThread;
+
+@end
 
 @implementation BDSKDocumentSearch
-
-+ (void)initialize
-{
-    BDSKINITIALIZE;
-    searchQueue = [[BDSKMessageQueue alloc] init];
-}
 
 - (id)initWithDocument:(id)doc;
 {
@@ -63,11 +61,17 @@ static BDSKMessageQueue *searchQueue = nil;
         NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
         [invocation setTarget:doc];
         [invocation setSelector:cb];
-        searchLock = [NSLock new];
+        searchLock = [[NSLock alloc] init];
+        queueLock = [[NSLock alloc] init];
+		trigger = [[RALatchTrigger alloc] init];
+        queue = [[NSMutableArray alloc] init];
         
         callback = [invocation retain];
         originalScores = [NSMutableDictionary new];
         isSearching = 0;
+        shouldKeepRunning = 1;
+        
+        [NSThread detachNewThreadSelector:@selector(runSearchThread) toTarget:self withObject:nil];
     }
     return self;
 }
@@ -75,12 +79,21 @@ static BDSKMessageQueue *searchQueue = nil;
 // owner should have already sent -terminate; sending it from -dealloc causes resurrection
 - (void)dealloc
 {
+	[trigger release];
+	[queue release];
     [currentSearchString release];
     [originalScores release];
     [callback release];
     [previouslySelectedPublications release];
     [searchLock release];
     [super dealloc];
+}
+
+- (void)queueInvocation:(NSInvocation *)invocation {
+    [queueLock lock];
+    [queue addObject:invocation];
+    [queueLock unlock];
+    [trigger signal];
 }
 
 - (void)_cancelSearch;
@@ -97,11 +110,13 @@ static BDSKMessageQueue *searchQueue = nil;
 - (void)cancelSearch;
 {
     NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(_cancelSearch)];
-    [searchQueue queueInvocation:invocation];
+    [self queueInvocation:invocation];
 }
 
 - (void)terminate;
 {
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&shouldKeepRunning);
+    [trigger signal];
     [self cancelSearch];
     [searchLock lock];
     NSInvocation *cb = callback;
@@ -241,7 +256,42 @@ static BDSKMessageQueue *searchQueue = nil;
     NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(_searchForString:index:)];
     [invocation setArgument:&searchString atIndex:2];
     [invocation setArgument:&skIndex atIndex:3];
-    [searchQueue queueInvocation:invocation];
+    [self queueInvocation:invocation];
+}
+
+- (void)runSearchThread
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
+	BOOL didRun = NO;
+    OSMemoryBarrier();
+	while (shouldKeepRunning) {
+		if (didRun == NO)
+			[trigger wait];
+		
+        NSInvocation *invocation = nil;
+        [queueLock lock];
+        if ([queue count]) {
+            invocation = [[queue objectAtIndex:0] retain];
+            [queue removeObjectAtIndex:0];
+            didRun = YES;
+        }
+        [queueLock unlock];
+        
+        [invocation invoke];
+        [invocation release];
+		
+		[pool release];
+		pool = [[NSAutoreleasePool alloc] init];
+		
+        OSMemoryBarrier();
+	}
+	
+    [queueLock lock];
+    [queue removeAllObjects];
+    [queueLock unlock];
+	
+	[pool release];
 }
 
 @end

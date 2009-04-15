@@ -38,6 +38,8 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class RALatchTrigger;
+
 @interface BDSKDocumentSearch : NSObject {
     @private;
     SKSearchRef search;                       // active search
@@ -45,9 +47,13 @@
     float maxScore;                           // maximum score encountered
     NSMutableDictionary *originalScores;      // non-normalized scores, identifier URLs as keys
     volatile int32_t isSearching;
+    volatile int32_t shouldKeepRunning;
     NSString *currentSearchString;            // avoids duplicate searches
     NSLock *searchLock;                       // for currentSearchString and invocation
-
+    NSLock *queueLock;                        // for queued invocations
+    NSMutableArray *queue;
+    RALatchTrigger *trigger;
+    
     // main thread access only
     NSArray *previouslySelectedPublications;  // convenience for the document
     NSPoint previousScrollPositionAsPercentage;
