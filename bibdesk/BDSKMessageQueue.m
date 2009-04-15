@@ -64,7 +64,6 @@
  */
 
 #import "BDSKMessageQueue.h"
-#import "NSInvocation_BDSKExtensions.h"
 
 #define QUEUE_HAS_NO_SCHEDULABLE_INVOCATIONS 0
 #define QUEUE_HAS_INVOCATIONS 1
@@ -212,30 +211,6 @@ static BDSKMessageQueue *detachingQueue;
         [self startProcessingQueue];
     [queueProcessorLock unlock];
     [queueLock unlockWithCondition:QUEUE_HAS_INVOCATIONS];
-}
-
-- (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget {
-    if (aTarget) {
-        NSInvocation *invocation = [NSInvocation invocationWithTarget:aTarget selector:aSelector];
-        [self queueInvocation:invocation];
-    }
-}
-
-- (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject {
-    if (aTarget) {
-        NSInvocation *invocation = [NSInvocation invocationWithTarget:aTarget selector:aSelector];
-        [invocation setArgument:&anObject atIndex:2];
-        [self queueInvocation:invocation];
-    }
-}
-
-- (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject1 withObject:(id)anObject2 {
-    if (aTarget) {
-        NSInvocation *invocation = [NSInvocation invocationWithTarget:aTarget selector:aSelector];
-        [invocation setArgument:&anObject1 atIndex:2];
-        [invocation setArgument:&anObject2 atIndex:3];
-        [self queueInvocation:invocation];
-    }
 }
 
 @end

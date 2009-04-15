@@ -41,6 +41,7 @@
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
 #import "BDSKMessageQueue.h"
+#import "NSInvocation_BDSKExtensions.h"
 
 static BDSKMessageQueue *searchQueue = nil;
 
@@ -95,7 +96,8 @@ static BDSKMessageQueue *searchQueue = nil;
 
 - (void)cancelSearch;
 {
-    [searchQueue queueSelector:@selector(_cancelSearch) forTarget:self];
+    NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(_cancelSearch)];
+    [searchQueue queueInvocation:invocation];
 }
 
 - (void)terminate;
@@ -140,14 +142,12 @@ static BDSKMessageQueue *searchQueue = nil;
 
 #define SEARCH_BUFFER_MAX 1024
 
-// array argument is so OFInvocation doesn't barf when it tries to retain the SKIndexRef
-- (void)backgroundSearchForString:(NSString *)searchString indexArray:(NSArray *)skIndexArray
+- (void)_searchForString:(NSString *)searchString index:(SKIndexRef )skIndex
 {
     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&isSearching);
     [self performSelectorOnMainThread:@selector(invokeStartedCallback) withObject:nil waitUntilDone:YES];
 
     // note that the add/remove methods flush the index, so we don't have to do it again
-    SKIndexRef skIndex = (void *)[skIndexArray objectAtIndex:0];
     NSParameterAssert(NULL == search);
     search = SKSearchCreate(skIndex, (CFStringRef)searchString, kSKSearchOptionDefault);
     
@@ -238,7 +238,10 @@ static BDSKMessageQueue *searchQueue = nil;
         [self cancelSearch];
     
     // always queue a search, since the index content may be changing (in case of a search group)
-    [searchQueue queueSelector:@selector(backgroundSearchForString:indexArray:) forTarget:self withObject:searchString withObject:[NSArray arrayWithObject:(id)skIndex]];
+    NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(_searchForString:index:)];
+    [invocation setArgument:&searchString atIndex:2];
+    [invocation setArgument:&skIndex atIndex:3];
+    [searchQueue queueInvocation:invocation];
 }
 
 @end

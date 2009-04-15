@@ -80,8 +80,4 @@
 
 - (void)queueInvocation:(NSInvocation *)anInvocation;
 
-- (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget;
-- (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject;
-- (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject1 withObject:(id)anObject2;
-
 @end
