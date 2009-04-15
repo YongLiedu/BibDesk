@@ -229,16 +229,16 @@ static BDSKMessageQueue *searchQueue = nil;
     [self setPreviouslySelectedPublications:selPubs];
     [self setPreviousScrollPositionAsPercentage:scrollPoint];
     
-        [searchLock lock];
-        [currentSearchString autorelease];
-        currentSearchString = [searchString copy];
-        [searchLock unlock];
+    [searchLock lock];
+    [currentSearchString autorelease];
+    currentSearchString = [searchString copy];
+    [searchLock unlock];
 
-        if ([self isSearching])
-            [self cancelSearch];
-        
+    if ([self isSearching])
+        [self cancelSearch];
+    
     // always queue a search, since the index content may be changing (in case of a search group)
-        [searchQueue queueSelector:@selector(backgroundSearchForString:indexArray:) forTarget:self withObject:searchString withObject:[NSArray arrayWithObject:(id)skIndex]];
-    }
+    [searchQueue queueSelector:@selector(backgroundSearchForString:indexArray:) forTarget:self withObject:searchString withObject:[NSArray arrayWithObject:(id)skIndex]];
+}
 
 @end
