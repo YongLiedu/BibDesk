@@ -35,156 +35,96 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
-/*
- Some methods in this category are copied from OmniFoundation 
- and are subject to the following licence:
- 
- Omni Source License 2007
-
- OPEN PERMISSION TO USE AND REPRODUCE OMNI SOURCE CODE SOFTWARE
-
- Omni Source Code software is available from The Omni Group on their 
- web site at http://www.omnigroup.com/www.omnigroup.com. 
-
- Permission is hereby granted, free of charge, to any person obtaining 
- a copy of this software and associated documentation files (the 
- "Software"), to deal in the Software without restriction, including 
- without limitation the rights to use, copy, modify, merge, publish, 
- distribute, sublicense, and/or sell copies of the Software, and to 
- permit persons to whom the Software is furnished to do so, subject to 
- the following conditions:
-
- Any original copyright notices and this permission notice shall be 
- included in all copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, 
- EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
- MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
- IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
- CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
- TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
- SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 
 #import "NSData_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import <openssl/bio.h>
 #import <openssl/evp.h>
 #import <unistd.h>
+#import <sys/mman.h>
+#import <sys/stat.h>
 #import <zlib.h>
 
 NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
 
 @implementation NSData (BDSKExtensions)
 
-// context and read, seek, close functions for file reading
-typedef struct _BDSKFileContext {
-    int fd;
-} BDSKFileContext;
-
-static int _file_readfn(void *_ctx, char *buf, int nbytes) {
-    BDSKFileContext *ctx = (BDSKFileContext *)_ctx;
-    return read(ctx->fd, buf, nbytes);
-}
-
-static int _file_closefn(void *_ctx) {
-    BDSKFileContext *ctx = (BDSKFileContext *)_ctx;
-    close(ctx->fd);
-    free(ctx);
-    return 0;
-}
-
-// context and read, seek, close functions for data as file reading
-typedef struct _BDSKDataFileContext {
-    NSData *data;
-    void   *bytes;
-    size_t  length;
-    size_t  position;
-} BDSKDataFileContext;
-
-static int _data_readfn(void *_ctx, char *buf, int nbytes) {
-    //fprintf(stderr, " read(ctx:%p buf:%p nbytes:%d)\n", _ctx, buf, nbytes);
-    BDSKDataFileContext *ctx = (BDSKDataFileContext *)_ctx;
-    nbytes = MIN((unsigned)nbytes, ctx->length - ctx->position);
-    memcpy(buf, ctx->bytes + ctx->position, nbytes);
-    ctx->position += nbytes;
-    return nbytes;
-}
-
-static fpos_t _data_seekfn(void *_ctx, off_t offset, int whence) {
-    //fprintf(stderr, " seek(ctx:%p off:%qd whence:%d)\n", _ctx, offset, whence);
-    BDSKDataFileContext *ctx = (BDSKDataFileContext *)_ctx;
-    size_t reference;
-    if (whence == SEEK_SET)
-        reference = 0;
-    else if (whence == SEEK_CUR)
-        reference = ctx->position;
-    else if (whence == SEEK_END)
-        reference = ctx->length;
-    else
-        return -1;
-    if (reference + offset >= 0 && reference + offset <= ctx->length) {
-        // position is a size_t (i.e., memory/vm sized) while the reference and offset are off_t (file system positioned).
-        // since we are refering to an NSData, this must be OK (and we checked 'reference + offset' vs. our length above).
-        ctx->position = (size_t)(reference + offset);
-        return ctx->position;
-    }
-    return -1;
-}
-
-static int _data_closefn(void *_ctx) {
-    //fprintf(stderr, "close(ctx:%p)\n", _ctx);
-    BDSKDataFileContext *ctx = (BDSKDataFileContext *)_ctx;
-    [ctx->data release];
-    free(ctx);
-    return 0;
-}
-
-static NSData *sha1Signature(void *cookie, int (*readfn)(void *, char *, int), int (*closefn)(void *))
-{
+- (NSData *)sha1Signature {
     EVP_MD_CTX mdctx;
     const EVP_MD *md = EVP_sha1();
-    int status;
     EVP_MD_CTX_init(&mdctx);
     
     // NB: status == 1 for success
-    status = EVP_DigestInit_ex(&mdctx, md, NULL);
+    int status = EVP_DigestInit_ex(&mdctx, md, NULL);
     
     // page size
-    char buffer[4096];
-
-    ssize_t bytesRead;
-    while ((bytesRead = readfn(cookie, buffer, sizeof(buffer))) > 0)
-        status = EVP_DigestUpdate(&mdctx, buffer, bytesRead);
+    unsigned int blockSize = 4096;
+    char buffer[blockSize];
     
-    closefn(cookie);    
+    unsigned int length = [self length];
+    NSRange range = NSMakeRange(0, MIN(blockSize, length));
+    while (range.length > 0) {
+        [self getBytes:buffer range:range];
+        status = EVP_DigestUpdate(&mdctx, buffer, range.length);
+        range.location = NSMaxRange(range);
+        range.length = MIN(blockSize, length - range.location);
+    }
     
     unsigned char md_value[EVP_MAX_MD_SIZE];
     unsigned int md_len;
     status = EVP_DigestFinal_ex(&mdctx, md_value, &md_len);
     status = EVP_MD_CTX_cleanup(&mdctx);
 
-    // return nil instead of a random hash if read() fails (it returns -1 for a directory) 
-    return -1 == bytesRead ? nil : [NSData dataWithBytes:md_value length:md_len];
+    return [NSData dataWithBytes:md_value length:md_len];
 }
 
 + (NSData *)sha1SignatureForFile:(NSString *)absolutePath {
-    int fd = open([absolutePath fileSystemRepresentation], O_RDONLY);
+    const char *path = [absolutePath fileSystemRepresentation];
+    
     // early out in case we can't open the file
+    int fd = open(path, O_RDONLY);
     if (fd == -1)
         return nil;
-    BDSKFileContext *ctx = calloc(1, sizeof(BDSKFileContext));
-    ctx->fd = fd;
-    return sha1Signature(ctx, _file_readfn, _file_closefn);
-}
+    
+    int status;
+    struct stat sb;
+    status = fstat(fd, &sb);
+    if (status) {
+        perror(path);
+        close(fd);
+        return nil;
+    }
+    
+    (void) fcntl(fd, F_NOCACHE, 1);
+    
+    EVP_MD_CTX mdctx;
+    const EVP_MD *md = EVP_sha1();
+    EVP_MD_CTX_init(&mdctx);
+    
+    // NB: status == 1 for success
+    status = EVP_DigestInit_ex(&mdctx, md, NULL);
+    
+    // I originally used read() with 4K blocks, but that actually made the system sluggish during intensive hashing.
+    // Using 1 MB blocks gives reasonable performance, and avoids problems with really large files.
+    const vm_size_t blockSize = vm_page_size * 1024;
+    
+    off_t offset = 0;
+    size_t len = MIN(blockSize, sb.st_size - offset);
+    char *buffer;
+    while (len > 0 && (buffer = mmap(0, len, PROT_READ, MAP_SHARED | MAP_NOCACHE, fd, offset)) != (void *)-1) {
+        status = EVP_DigestUpdate(&mdctx, buffer, len);
+        munmap(buffer, len);
+        offset += len;
+        len = MIN(blockSize, sb.st_size - offset);
+    }
+    close(fd);    
+    
+    unsigned char md_value[EVP_MAX_MD_SIZE];
+    unsigned int md_len;
+    status = EVP_DigestFinal_ex(&mdctx, md_value, &md_len);
+    status = EVP_MD_CTX_cleanup(&mdctx);
 
-- (NSData *)sha1Signature {
-    BDSKDataFileContext *ctx = calloc(1, sizeof(BDSKDataFileContext));
-    ctx->data = [self retain];
-    ctx->bytes = (void *)[self bytes];
-    ctx->length = [self length];
-    return sha1Signature(ctx, _data_readfn, _data_closefn);
+    return [NSData dataWithBytes:md_value length:md_len];
 }
 
 // base 64 encoding/decoding methods modified from sample code on CocoaDev http://www.cocoadev.com/index.pl?BaseSixtyFour
