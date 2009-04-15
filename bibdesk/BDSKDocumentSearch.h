@@ -74,5 +74,5 @@
 @interface NSObject (BDSKDocumentSearchCallback)
 - (void)searchDidStart:(BDSKDocumentSearch *)aSearch;
 - (void)searchDidStop:(BDSKDocumentSearch *)aSearch;
-- (void)handleSearchCallbackWithIdentifiers:(NSSet *)identifierURLs normalizedScores:(NSDictionary *)scores;
+- (void)search:(BDSKDocumentSearch *)aSearch foundIdentifiers:(NSSet *)identifierURLs normalizedScores:(NSDictionary *)scores;
 @end

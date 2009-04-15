@@ -263,7 +263,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [self updateStatus];
 }
 
-- (void)handleSearchCallbackWithIdentifiers:(NSSet *)identifierURLs normalizedScores:(NSDictionary *)scores;
+- (void)search:(BDSKDocumentSearch *)aSearch foundIdentifiers:(NSSet *)identifierURLs normalizedScores:(NSDictionary *)scores;
 {
     id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;    
     BDSKPublicationsArray *pubArray = [owner publications];    

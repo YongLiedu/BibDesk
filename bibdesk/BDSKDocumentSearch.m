@@ -55,12 +55,13 @@
 {
     self = [super init];
     if (self) {
-        SEL cb = @selector(handleSearchCallbackWithIdentifiers:normalizedScores:);
+        SEL cb = @selector(search:foundIdentifiers:normalizedScores:);
         NSMethodSignature *sig = [doc methodSignatureForSelector:cb];
         NSParameterAssert(nil != sig);
         NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
         [invocation setTarget:doc];
         [invocation setSelector:cb];
+        [invocation setArgument:&self atIndex:2];
         searchLock = [[NSLock alloc] init];
         queueLock = [[NSLock alloc] init];
 		trigger = [[RALatchTrigger alloc] init];
@@ -208,8 +209,8 @@
 
         if (keepGoing) {
             NSDictionary *normalizedScores = [self normalizedScores];
-            [callback setArgument:&foundURLSet atIndex:2];
-            [callback setArgument:&normalizedScores atIndex:3];
+            [callback setArgument:&foundURLSet atIndex:3];
+            [callback setArgument:&normalizedScores atIndex:4];
             [callback performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
         }
                 
