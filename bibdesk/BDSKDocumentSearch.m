@@ -287,7 +287,7 @@
         
 		[pool release];
 		pool = [[NSAutoreleasePool alloc] init];
-		
+    }
 	
     // make sure the last search was canceled
     [self _cancelSearch];
