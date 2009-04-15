@@ -64,7 +64,6 @@
  */
 
 #import "BDSKMessageQueue.h"
-#import "BDSKQueueProcessor.h"
 #import "NSInvocation_BDSKExtensions.h"
 
 #define QUEUE_HAS_NO_SCHEDULABLE_INVOCATIONS 0
@@ -73,6 +72,17 @@
 
 @implementation BDSKMessageQueue
 
+static NSConditionLock *detachThreadLock;
+static BDSKMessageQueue *detachingQueue;
+
++ (void)initialize {
+    BDSKINITIALIZE;
+    detachThreadLock = [[NSConditionLock alloc] init];
+    detachingQueue = nil;
+    // This will trigger +[NSPort initialize], which registers for the NSBecomingMultiThreaded notification and avoids a race condition between NSThread and NSPort.
+    [NSPort class];
+}
+
 - (id)init {
     if (self = [super init]) {
         queue = [[NSMutableArray alloc] init];
@@ -80,13 +90,13 @@
         
         idleProcessors = 0;
         queueProcessorLock = [[NSLock alloc] init];
-        queueProcessor = nil;
+        isProcessing = NO;
+        didDetach = NO;
     }
     return self;
 }
 
 - (void)dealloc {
-    [queueProcessor release];
     [queue release];
     [queueLock release];
     [queueProcessorLock release];
@@ -101,14 +111,7 @@
     return hasInvocations;
 }
 
-- (void)createProcessorsForQueueSize:(unsigned int)queueCount {
-    [queueProcessorLock lock];
-    if (idleProcessors < queueCount && queueProcessor == nil) {
-        queueProcessor = [[BDSKQueueProcessor alloc] initForQueue:self];
-        [queueProcessor startProcessingQueue];
-    }
-    [queueProcessorLock unlock];
-}
+#pragma mark Processing
 
 - (NSInvocation *)newInvocation {
     unsigned int invocationCount;
@@ -144,18 +147,70 @@
     return nextInvocation;
 }
 
+- (void)processQueue {
+    NSInvocation *invocation;
+    NSAutoreleasePool *pool;
+    NSTimeInterval startingInterval, endTime;
+    NSTimeInterval maximumTime = 0.25; // TJW -- Bug #332 about why this time check is here by default
+    
+    startingInterval = [NSDate timeIntervalSinceReferenceDate];
+    endTime = ( maximumTime >= 0 ) ? startingInterval + maximumTime : startingInterval;
+    pool = [[NSAutoreleasePool alloc] init];
+    
+    if (detachingQueue == self) {
+        detachingQueue = nil;
+        [detachThreadLock lock];
+        [detachThreadLock unlockWithCondition:0];
+    }
+
+    while (invocation = [self newInvocation]) {
+        @try { [invocation invoke]; }
+        @catch (NSException *e) { NSLog(@"%@: %@", invocation, [e reason]); }
+        @catch (id e) { NSLog(@"%@: %@", invocation, e); }
+
+        [invocation release];
+
+        if (maximumTime >= 0) {
+            // TJW -- Bug #332 about why this time check is here
+            if (endTime < [NSDate timeIntervalSinceReferenceDate])
+                break;
+        }
+        
+        [pool release];
+        pool = [[NSAutoreleasePool alloc] init];
+    }
+    
+    [pool release];
+}
+
+- (void)processQueueInThread {
+    detachingQueue = self;
+    while (YES) {
+        @try { [self processQueue]; }
+        @catch (NSException *e) { NSLog(@"%@", [e reason]); }
+        @catch (id e) { NSLog(@"%@", e); }
+    }
+}
+
+- (void)startProcessingQueue {
+    if (isProcessing)
+        return;
+    isProcessing = YES;
+    [detachThreadLock lockWhenCondition:0];
+    [detachThreadLock unlockWithCondition:1];
+    [NSThread detachNewThreadSelector:@selector(processQueueInThread) toTarget:self withObject:nil];
+}
+
+#pragma mark Queueing
+
 - (void)queueInvocation:(NSInvocation *)anInvocation {
-    unsigned int queueCount;
-    
     [queueLock lock];
-    
-    queueCount = [queue count];
-    [queue insertObject:anInvocation atIndex:queueCount];
-    queueCount++;
-    
+    [queue addObject:anInvocation];
     // Create new processor if needed and we can
-    [self createProcessorsForQueueSize:queueCount];
-    
+    [queueProcessorLock lock];
+    if (idleProcessors < [queue count])
+        [self startProcessingQueue];
+    [queueProcessorLock unlock];
     [queueLock unlockWithCondition:QUEUE_HAS_INVOCATIONS];
 }
 
