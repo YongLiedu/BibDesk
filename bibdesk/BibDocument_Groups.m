@@ -84,7 +84,6 @@
 #import "NSView_BDSKExtensions.h"
 #import "BDSKApplication.h"
 #import "BDSKCFCallBacks.h"
-#import "BDSKMessageQueue.h"
 #import "BDSKFileContentSearchController.h"
 #import "BDSKSplitView.h"
 #import "BDSKGradientSplitView.h"

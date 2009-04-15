@@ -54,21 +54,12 @@
 #import "BDSKItemSearchIndexes.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKTask.h"
-#import "BDSKMessageQueue.h"
 
 #define APPLESCRIPT_HANDLER_NAME @"main"
 
-static BDSKMessageQueue *messageQueue = nil;
+static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMode";
 
 @implementation BDSKScriptGroup
-
-+ (void)initialize
-{
-    BDSKINITIALIZE;
-    messageQueue = [[BDSKMessageQueue alloc] init];
-    // use a small pool of threads for running NSTasks
-    [messageQueue startBackgroundProcessors:2];
-}
 
 // old designated initializer
 - (id)initWithName:(NSString *)aName count:(int)aCount;
@@ -119,9 +110,6 @@ static BDSKMessageQueue *messageQueue = nil;
         failedDownload = NO;
         
         workingDirPath = [[[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:nil] retain];
-        
-        processingLock = [[NSLock alloc] init];
-        currentTaskLock = [[NSLock alloc] init];
         searchIndexes = [BDSKItemSearchIndexes new];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     }
@@ -166,8 +154,6 @@ static BDSKMessageQueue *messageQueue = nil;
     [[NSFileManager defaultManager] deleteObjectAtFileURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self terminate];
-    [processingLock release];
-    [currentTaskLock release];
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [scriptPath release];
     [scriptArguments release];
@@ -183,7 +169,7 @@ static BDSKMessageQueue *messageQueue = nil;
 - (BOOL)isEqual:(id)other { return self == other; }
 
 - (unsigned int)hash {
-    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
+    return (unsigned int)self;
 }
 
 - (NSString *)description;
@@ -202,6 +188,9 @@ static BDSKMessageQueue *messageQueue = nil;
     BOOL isDir = NO;
     NSString *standardizedPath = [scriptPath stringByStandardizingPath];
     
+    isRetrieving = NO;
+    failedDownload = NO;
+    
     if([[NSFileManager defaultManager] fileExistsAtPath:standardizedPath isDirectory:&isDir] == NO || isDir){
         NSError *error = [NSError mutableLocalErrorWithCode:kBDSKFileNotFound localizedDescription:nil];
         if (isDir)
@@ -211,69 +200,61 @@ static BDSKMessageQueue *messageQueue = nil;
         [error setValue:standardizedPath forKey:NSFilePathErrorKey];
         [self scriptDidFailWithError:error];
     } else if (scriptType == BDSKShellScriptType) {
-        NSError *error = nil;
-        @try{
-            if (argsArray == nil)
-                argsArray = [[scriptArguments shellScriptArgumentsArray] retain];
-        }
-        @catch (id exception) {
-            error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error Parsing Arguments", @"Error description")];
-            [error setValue:[exception reason] forKey:NSLocalizedRecoverySuggestionErrorKey];
-        }
-        if (error) {
-            [self scriptDidFailWithError:error];
-        } else {
-            [messageQueue queueSelector:@selector(runShellScriptAtPath:withArguments:) forTarget:self withObject:standardizedPath withObject:argsArray];
-            isRetrieving = YES;
-        }
+        [self runShellScript];
     } else if (scriptType == BDSKAppleScriptType) {
-        // NSAppleScript can only run on the main thread
-        NSString *outputString = nil;
-        NSError *error = nil;
-        NSDictionary *errorInfo = nil;
-        NSAppleScript *script = [[NSAppleScript alloc] initWithContentsOfURL:[NSURL fileURLWithPath:standardizedPath] error:&errorInfo];
-        if (errorInfo) {
-            error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Unable to Create AppleScript", @"Error description")];
-            [error setValue:[errorInfo objectForKey:NSAppleScriptErrorMessage] forKey:NSLocalizedRecoverySuggestionErrorKey];
-        } else {
-            @try{
-                if (argsArray == nil)
-                    argsArray = [[scriptArguments appleScriptArgumentsArray] retain];
-                if ([argsArray count])
-                    outputString = [script executeHandler:APPLESCRIPT_HANDLER_NAME withParametersFromArray:argsArray];
-                else 
-                    outputString = [script executeHandler:APPLESCRIPT_HANDLER_NAME];
-            }
-            @catch (id exception){
-                // if there are no arguments we try to run the whole script
-                if ([argsArray count] == 0) {
-                    errorInfo = nil;
-                    outputString = [[script executeAndReturnError:&errorInfo] objCObjectValue];
-                    if (errorInfo) {
-                        error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error Executing AppleScript", @"Error description")];
-                        [error setValue:[errorInfo objectForKey:NSAppleScriptErrorMessage] forKey:NSLocalizedRecoverySuggestionErrorKey];
-                    }
-                } else {
-                    error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error Executing AppleScript", @"Error description")];
-                    [error setValue:[exception reason] forKey:NSLocalizedRecoverySuggestionErrorKey];
-                }
-            }
-            [script release];
-        }
-        if (error || nil == outputString || NO == [outputString isKindOfClass:[NSString class]]) {
-            if (error == nil)
-                error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return Anything", @"Error description")];
-            [self scriptDidFailWithError:error];
-        } else {
-            [self scriptDidFinishWithResult:outputString];
-        }
+        [self runAppleScript];
     }
 }
 
+- (void)runAppleScript
+{
+    NSParameterAssert([NSThread isMainThread]);
+    NSString *outputString = nil;
+    NSError *error = nil;
+    NSDictionary *errorInfo = nil;
+    NSAppleScript *script = [[NSAppleScript alloc] initWithContentsOfURL:[NSURL fileURLWithPath:[scriptPath stringByStandardizingPath]] error:&errorInfo];
+    if (errorInfo) {
+        error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Unable to load AppleScript", @"Error description")];
+        [error setValue:[errorInfo objectForKey:NSAppleScriptErrorMessage] forKey:NSLocalizedRecoverySuggestionErrorKey];
+    } else {
+        @try{
+            if (argsArray == nil)
+                argsArray = [[scriptArguments appleScriptArgumentsArray] retain];
+            if ([argsArray count])
+                outputString = [script executeHandler:APPLESCRIPT_HANDLER_NAME withParametersFromArray:argsArray];
+            else 
+                outputString = [script executeHandler:APPLESCRIPT_HANDLER_NAME];
+        }
+        @catch (id exception){
+            // if there are no arguments we try to run the whole script
+            if ([argsArray count] == 0) {
+                errorInfo = nil;
+                outputString = [[script executeAndReturnError:&errorInfo] objCObjectValue];
+                if (errorInfo) {
+                    error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error executing AppleScript", @"Error description")];
+                    [error setValue:[errorInfo objectForKey:NSAppleScriptErrorMessage] forKey:NSLocalizedRecoverySuggestionErrorKey];
+                }
+            } else {
+                error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error executing AppleScript", @"Error description")];
+                [error setValue:[exception reason] forKey:NSLocalizedRecoverySuggestionErrorKey];
+            }
+        }
+        [script release];
+    }
+    if (error || nil == outputString || NO == [outputString isKindOfClass:[NSString class]]) {
+        if (error == nil)
+            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"The script did not return any output", @"Error description")];
+        [self scriptDidFailWithError:error];
+    } else {
+        [self scriptDidFinishWithResult:outputString];
+    }
+}    
+
 - (void)scriptDidFinishWithResult:(NSString *)outputString;
 {
+    NSParameterAssert([NSThread isMainThread]);
+    NSParameterAssert(NO == failedDownload);
     isRetrieving = NO;
-    failedDownload = NO;
     NSError *error = nil;
 
     NSArray *pubs = nil;
@@ -290,7 +271,7 @@ static BDSKMessageQueue *messageQueue = nil;
     } else if (type != BDSKUnknownStringType){
         pubs = [BDSKStringParser itemsFromString:outputString ofType:type error:&error];
     } else {
-        error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return BibTeX", @"Error description")];
+        error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script did not return BibTeX", @"Error description")];
     }
     if (pubs == nil || isPartialData) {
         failedDownload = YES;
@@ -301,6 +282,7 @@ static BDSKMessageQueue *messageQueue = nil;
 
 - (void)scriptDidFailWithError:(NSError *)error;
 {
+    NSParameterAssert([NSThread isMainThread]);
     isRetrieving = NO;
     failedDownload = YES;
     
@@ -441,150 +423,120 @@ static BDSKMessageQueue *messageQueue = nil;
     [[NSFileManager defaultManager] deleteObjectAtFileURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
 }
 
-#pragma mark Shell task thread
+#pragma mark Shell task
 
 // this method is called from the main thread
 - (void)terminate{
+    if([currentTask isRunning])
+        [currentTask terminate];
+    [currentTask release];
+    currentTask = nil;
+}
+
+- (void)taskFinished:(NSNotification *)aNote
+{
+    NSParameterAssert([aNote object] == currentTask);
     
-    NSDate *referenceDate = [NSDate date];
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc removeObserver:self name:NSTaskDidTerminateNotification object:[aNote object]];
+
+    // now that the task is finished, run the special runloop mode (only one source in this mode)
+    SInt32 ret;
     
-    while ([self isProcessing]){
-        // if the task is still running after 2 seconds, kill it; we can't sleep here, because the main thread (usually this one) may be updating the UI for a task
-        if([referenceDate timeIntervalSinceNow] > -2 && [currentTaskLock tryLock]){
-            if([currentTask isRunning])
-                [currentTask terminate];
-            [currentTask release];
-            currentTask = nil;
-            [currentTaskLock unlock];
-            break;
-        } else if([referenceDate timeIntervalSinceNow] > -2.1){ // just in case this ever happens
-            NSLog(@"%@ failed to lock for task %@", self, currentTask);
-            [currentTask terminate];
-            [currentTask release];
-            currentTask = nil;
+    do {
+        
+        // handle the source in this mode immediately
+        // any nonzero timeout should be sufficient, since the task has completed and flushed the pipe
+        ret = CFRunLoopRunInMode((CFStringRef)BDSKScriptGroupRunLoopMode, 0.1, FALSE);
+        
+        // should get this immediately
+        if (kCFRunLoopRunFinished == ret || kCFRunLoopRunStopped == ret) {
             break;
         }
-    }    
-}
+        
+        // hard timeout, since all I get when a task is terminated is kCFRunLoopRunTimedOut
+        if (kCFRunLoopRunTimedOut == ret) {
+            break;
+        }
+        
+    } while (kCFRunLoopRunHandledSource == ret);
 
-- (BOOL)isProcessing{
-	// just see if we can get the lock, otherwise we are processing
-    if([processingLock tryLock]){
-		[processingLock unlock];
-		return NO;
-	}
-	return YES;
-}
-
-// this runs in the background thread
-// we pass arguments because our ivars might change on the main thread
-// @@ is this safe now?
-- (void)runShellScriptAtPath:(NSString *)path withArguments:(NSArray *)args;
-{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-    [processingLock lock];
+    NSFileHandle *outputFileHandle = [[currentTask standardOutput] fileHandleForReading];
+    [nc removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
     
+    NSString *outputString = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:NSUTF8StringEncoding];
+    if(outputString == nil)
+        outputString = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:[NSString defaultCStringEncoding]];
+    [outputString autorelease];
+    
+    int terminationStatus = [currentTask terminationStatus];
+    
+    [currentTask release];
+    currentTask = nil;
+
+    if (terminationStatus != EXIT_SUCCESS || nil == outputString) {
+        NSError *error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"The script did not return any output", @"Error description")];
+        [self scriptDidFailWithError:error];
+    } else {
+        [self scriptDidFinishWithResult:outputString];
+    }
+}
+
+- (void)runShellScript;
+{    
     if (stdoutData) {
         [stdoutData autorelease];
         stdoutData = nil;
     }
     
-    NSString *outputString = nil;
-    NSError *error = nil;
+    @try{
+        if (argsArray == nil)
+            argsArray = [[scriptArguments shellScriptArgumentsArray] copy];
+    }
+    @catch (id exception) {
+        NSError *error = [NSError mutableLocalErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Error parsing script arguments", @"Error description")];
+        [error setValue:[exception reason] forKey:NSLocalizedRecoverySuggestionErrorKey];
+        [self scriptDidFailWithError:error];
+        
+        // !!! early return here
+        return;
+    }
+    
     NSPipe *outputPipe = [NSPipe pipe];
-    NSFileHandle *outputFileHandle = [outputPipe fileHandleForReading];
-    BOOL isRunning;
 
     // ignore SIGPIPE, as it causes a crash (seems to happen if the binaries don't exist and you try writing to the pipe)
-    sig_t previousSignalMask = signal(SIGPIPE, SIG_IGN);
+    (void) signal(SIGPIPE, SIG_IGN);
+        
+    currentTask = [[BDSKTask allocWithZone:[self zone]] init];    
+    [currentTask setStandardError:[NSFileHandle fileHandleWithStandardError]];
+    [currentTask setLaunchPath:[scriptPath stringByStandardizingPath]];
+    [currentTask setCurrentDirectoryPath:workingDirPath];
+    [currentTask setStandardOutput:outputPipe];
+    if ([argsArray count])
+        [currentTask setArguments:argsArray];
     
-    int terminationStatus = 1;
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     
-    @try {
-        
-        [currentTaskLock lock];
-        currentTask = [[BDSKTask allocWithZone:[self zone]] init];    
-        [currentTask setStandardError:[NSFileHandle fileHandleWithStandardError]];
-        [currentTask setLaunchPath:path];
-        [currentTask setCurrentDirectoryPath:workingDirPath];
-        [currentTask setStandardOutput:outputPipe];
-        if ([args count])
-            [currentTask setArguments:args];
-        [currentTaskLock unlock];
-    
-        [nc addObserver:self selector:@selector(stdoutNowAvailable:) name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
-        [outputFileHandle readToEndOfFileInBackgroundAndNotifyForModes:[NSArray arrayWithObject:@"BDSKSpecialPipeServiceRunLoopMode"]];
-    
-        [currentTaskLock lock];
-        [currentTask launch];
-        isRunning = [currentTask isRunning];
-        [currentTaskLock unlock];
-        
-        if (isRunning) {
-            
-            // run the runloop and pick up our notifications
-            while (nil == stdoutData)
-                [[NSRunLoop currentRunLoop] runMode:@"BDSKSpecialPipeServiceRunLoopMode" beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
-            [currentTask waitUntilExit];
-                        
-            [nc removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
-            
-            outputString = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:NSUTF8StringEncoding];
-            if(outputString == nil)
-                outputString = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:[NSString defaultCStringEncoding]];
-            
-            [currentTaskLock lock];
-            terminationStatus = [currentTask terminationStatus];
-            [currentTaskLock unlock];
+    NSFileHandle *outputFileHandle = [outputPipe fileHandleForReading];
+    [nc addObserver:self selector:@selector(stdoutNowAvailable:) name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
+    [outputFileHandle readToEndOfFileInBackgroundAndNotifyForModes:[NSArray arrayWithObject:BDSKScriptGroupRunLoopMode]];
 
-        } else {
-            terminationStatus = 1;
-            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Failed to Run Script", @"Error description")];
-            [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Failed to launch shell script %@", @"Error description"), path] forKey:NSLocalizedRecoverySuggestionErrorKey];
-        }
-    }
-    @catch(id exception){
-        terminationStatus = 1;
-        [currentTaskLock lock];
-        if([currentTask isRunning])
-            [currentTask terminate];
-        [currentTaskLock unlock];
-        
-        [nc removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
-
-        // if the pipe failed, we catch an exception here and ignore it
-        error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Failed to Run Script", @"Error description")];
-        [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Exception %@ encountered while trying to run shell script %@", @"Error description"), [exception name], path] forKey:NSLocalizedRecoverySuggestionErrorKey];
+    [nc addObserver:self selector:@selector(taskFinished:) name:NSTaskDidTerminateNotification object:currentTask];
+    
+    [currentTask launch];
+    isRetrieving = [currentTask isRunning];
+    
+    if (NO == isRetrieving) {
+        NSError *error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Failed to launch shell script", @"Error description")];
+        [self scriptDidFailWithError:error];
     }
     
-    // reset signal handling to default behavior
-    signal(SIGPIPE, previousSignalMask);
-    
-    [currentTaskLock lock];
-    [currentTask release];
-    currentTask = nil;
-    [currentTaskLock unlock];
-    
-    if (terminationStatus != EXIT_SUCCESS || nil == outputString) {
-        if(error == nil)
-            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return Anything", @"Error description")];
-        [self performSelectorOnMainThread:@selector(scriptDidFailWithError:) withObject:error waitUntilDone:NO];
-    } else {
-        [self performSelectorOnMainThread:@selector(scriptDidFinishWithResult:) withObject:outputString waitUntilDone:NO];
-    }
-    
-    [outputString release];
-    
-    [processingLock unlock];
-	[pool release];
 }
 
 - (void)stdoutNowAvailable:(NSNotification *)notification {
     NSData *outputData = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
     if ([outputData length])
-        stdoutData = [outputData retain];
-    }
+        stdoutData = [outputData copy];
+}
 
 @end

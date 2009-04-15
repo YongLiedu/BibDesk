@@ -36,7 +36,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BibDocument, BDSKMessageQueue;
+@class BibDocument;
 @protocol BDSKOwner;
 
 /*!

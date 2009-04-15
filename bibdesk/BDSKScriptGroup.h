@@ -59,8 +59,6 @@ enum {
     BDSKTask *currentTask;
     NSString *workingDirPath;
     NSData *stdoutData;
-    NSLock *processingLock;    
-    NSLock *currentTaskLock;
     BDSKItemSearchIndexes *searchIndexes;
 }
 
@@ -82,9 +80,9 @@ enum {
 - (void)startRunningScript;
 - (void)scriptDidFinishWithResult:(NSString *)outputString;
 - (void)scriptDidFailWithError:(NSError *)error;
-- (void)runShellScriptAtPath:(NSString *)path withArguments:(NSArray *)args;
+- (void)runShellScript;
+- (void)runAppleScript;
 - (void)terminate;
-- (BOOL)isProcessing;
 - (void)stdoutNowAvailable:(NSNotification *)notification;
 
 @end

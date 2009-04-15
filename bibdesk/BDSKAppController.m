@@ -88,7 +88,6 @@
 #import "BDSKWebGroup.h"
 #import "BDSKWebGroupViewController.h"
 #import "KFASHandlerAdditions-TypeTranslation.h"
-#import "BDSKMessageQueue.h"
 #import <Sparkle/Sparkle.h>
 
 #define WEB_URL @"http://bibdesk.sourceforge.net/"

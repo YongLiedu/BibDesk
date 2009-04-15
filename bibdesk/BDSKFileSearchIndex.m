@@ -46,7 +46,6 @@
 #import "NSData_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import "UKDirectoryEnumerator.h"
-#import "BDSKMessageQueue.h"
 #import "BDSKReadWriteLock.h"
 
 @interface BDSKFileSearchIndex (Private)
@@ -102,7 +101,7 @@
         [nc addObserver:self selector:handler name:BDSKDocDelItemNotification object:aDocument];
         
         flags.finishedInitialIndexing = 0;
-        flags.shouldKeepRunning = 1;
+        flags.updateScheduled = 1;
         
         // maintain dictionaries mapping URL -> identifierURL, since SKIndex properties are slow; this should be accessed with the rwlock
         identifierURLs = [[BDSKManyToManyDictionary alloc] init];
@@ -147,9 +146,6 @@
     NSParameterAssert([NSThread isMainThread]);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     OSAtomicCompareAndSwap32Barrier(flags.shouldKeepRunning, 0, (int32_t *)&flags.shouldKeepRunning);
-    
-    // remove all pending invocations from the main message queue
-    [self dequeueAllInvocations];
     
     // wake the thread up so the runloop will exit; shouldKeepRunning may have already done that, so don't send if the port is already dead
     if ([notificationPort isValid])
@@ -307,27 +303,20 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
 
 #pragma mark Update callbacks
 
+- (void)notifyDelegate
+{
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.updateScheduled);
+    [delegate searchIndexDidUpdate:self];
+}
+
 - (void)searchIndexDidUpdate
 {
     BDSKASSERT([NSThread isMainThread]);
-    OSMemoryBarrier();
-    if (flags.shouldKeepRunning == 1) {
-        // Make sure we send frequently enough to update a progress bar, but not too frequently to avoid beachball on single-core systems; too many search updates slow down indexing due to repeated flushes.  Even though this is always queued and supposed to be sent once, it can still be sent too often.
-        if (CFAbsoluteTimeGetCurrent() - lastUpdateTime >= 0.5) {
-            [delegate searchIndexDidUpdate:self];
-            lastUpdateTime = CFAbsoluteTimeGetCurrent();
-        } else {
-            // Guarantees that the delegate message will always be sent eventually, so the delegate can never miss an update.
-            [[self class] cancelPreviousPerformRequestsWithTarget:self selector:_cmd object:nil];
-            [self performSelector:_cmd withObject:nil afterDelay:0.5];
-        }
+    // Make sure we send frequently enough to update a progress bar, but not too frequently to avoid beachball on single-core systems; too many search updates slow down indexing due to repeated flushes. 
+    if (0 == flags.updateScheduled) {
+        [self performSelector:@selector(_notifyDelegate) withObject:nil afterDelay:0.5];
+        OSAtomicCompareAndSwap32Barrier(0, 1, &flags.updateScheduled);
     }
-}
-
-- (void)searchIndexDidUpdateOnMainThread {
-    OSMemoryBarrier();
-    if (flags.shouldKeepRunning == 1)
-        [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
 }
 
 // @@ only sent after the initial indexing so the controller knows to remove the progress bar; can possibly be removed entirely and delegate can check finishedInitialIndexing when it gets searchIndexDidUpdate:
@@ -445,7 +434,8 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
         [pool release];
         pool = [NSAutoreleasePool new];
         
-        [self searchIndexDidUpdateOnMainThread];
+        if (0 == flags.updateScheduled)
+            [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
         OSMemoryBarrier();
     }
         
@@ -515,7 +505,8 @@ static void addItemFunction(const void *value, void *context) {
             [rwLock unlock];
         }
         
-        [self searchIndexDidUpdateOnMainThread];
+        if (0 == flags.updateScheduled)
+            [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
         
         NSMutableSet *URLsToRemove = [[NSMutableSet alloc] initWithArray:[signatures allKeys]];
         NSMutableArray *itemsToAdd = [[NSMutableArray alloc] init];
@@ -553,7 +544,8 @@ static void addItemFunction(const void *value, void *context) {
                     progressValue = (numberIndexed / totalObjectCount) * 100;
                 }
                 
-                [self searchIndexDidUpdateOnMainThread];
+                if (0 == flags.updateScheduled)
+                    [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
             }
             
             [pool release];
@@ -570,7 +562,8 @@ static void addItemFunction(const void *value, void *context) {
         }
         [URLsToRemove release];
         
-        [self searchIndexDidUpdateOnMainThread];
+        if (0 == flags.updateScheduled)
+            [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
         
         [items release];
         items = itemsToAdd;
@@ -696,7 +689,8 @@ static void addItemFunction(const void *value, void *context) {
         [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
 	}
 	
-    [self searchIndexDidUpdateOnMainThread];
+    if (0 == flags.updateScheduled)
+        [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
 }
 
 - (void)handleSearchIndexInfoChanged:(NSArray *)searchIndexInfo
@@ -723,7 +717,8 @@ static void addItemFunction(const void *value, void *context) {
     [removedURLs release];
     [newURLs release];
     
-    [self searchIndexDidUpdateOnMainThread];
+    if (0 == flags.updateScheduled)
+        [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
 }    
 
 - (NSDictionary *)newNotification {
