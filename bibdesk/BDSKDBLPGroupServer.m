@@ -109,27 +109,27 @@
 - (void)terminate
 {
     [self stopDOServer];
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
 }
 
 - (void)stop
 {
     [scheduledService cancel];
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
 }
 
 - (void)retrievePublications
 {
     if ([[self class] canConnect]) {
-        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedDownload);
+        OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
         
         // stop the current service (if any); -cancel is thread safe, and so is calling it multiple times
         [scheduledService cancel];
-        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
+        OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
         [[self serverOnServerThread] downloadWithSearchTerm:[group searchTerm]];
         
     } else {
-        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedDownload);
+        OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
         NSError *presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to connect to server", @"")];
         [NSApp presentError:presentableError];
     }
@@ -295,7 +295,7 @@ static void fixEEURL(BibItem *pub)
     }
     
     // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
     
     // this will create the array if it doesn't exist
     [[self serverOnMainThread] addPublicationsToGroup:pubs];

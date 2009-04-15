@@ -101,7 +101,7 @@
 {
     if (NULL != search) {
         // set first in case this is called while we're working
-        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&isSearching);
+        OSAtomicCompareAndSwap32Barrier(1, 0, &isSearching);
         SKSearchCancel(search);
         CFRelease(search);
         search = NULL;
@@ -116,7 +116,7 @@
 
 - (void)terminate;
 {
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&shouldKeepRunning);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &shouldKeepRunning);
     [trigger signal];
     [searchLock lock];
     NSInvocation *cb = callback;
@@ -159,7 +159,7 @@
 
 - (void)_searchForString:(NSString *)searchString index:(SKIndexRef)skIndex
 {
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&isSearching);
+    OSAtomicCompareAndSwap32Barrier(0, 1, &isSearching);
     [self performSelectorOnMainThread:@selector(invokeStartedCallback) withObject:nil waitUntilDone:YES];
 
     // note that the add/remove methods flush the index, so we don't have to do it again

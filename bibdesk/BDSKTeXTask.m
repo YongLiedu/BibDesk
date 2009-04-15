@@ -269,10 +269,10 @@ static double runLoopTimeout = 30;
         }
 	}
 
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.hasLTB);
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.hasLaTeX);
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.hasPDFData);
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.hasRTFData);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.hasLTB);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.hasLaTeX);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.hasPDFData);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.hasRTFData);
     
     // make sure the PATH environment variable is set correctly
     NSString *pdfTeXBinPathDir = [[[NSUserDefaults standardUserDefaults] objectForKey:BDSKTeXBinPathKey] stringByDeletingLastPathComponent];
@@ -298,22 +298,22 @@ static double runLoopTimeout = 30;
     
     if((rv & 2) == 0){
         if (flag == BDSKGenerateLTB)
-            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.hasLTB);
+            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.hasLTB);
         else
-            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.hasLaTeX);
+            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.hasLaTeX);
         
         if(flag > BDSKGenerateLaTeX){
             rv |= [self runTeXTasksForPDF];
             
             if((rv & 2) == 0){
 
-                OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.hasPDFData);
+                OSAtomicCompareAndSwap32Barrier(0, 1, &flags.hasPDFData);
                 
                 if(flag > BDSKGeneratePDF){
                         rv |= [self runTeXTaskForRTF];
                     
                     if((rv & 2) == 0){
-                        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.hasRTFData);
+                        OSAtomicCompareAndSwap32Barrier(0, 1, &flags.hasRTFData);
                     }
                 }
             }

@@ -140,24 +140,24 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 - (void)terminate
 {
     [self stopDOServer];
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
 }
 
 - (void)stop
 {
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
 }
 
 - (void)retrievePublications
 {
     if ([[self class] canConnect]) {
-        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedDownload);
+        OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
     
-        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
+        OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
         [[self serverOnServerThread] downloadWithSearchTerm:[group searchTerm]];
 
     } else {
-        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedDownload);
+        OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
         NSError *presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to connect to server", @"")];
         [NSApp presentError:presentableError];
     }
@@ -354,7 +354,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
         }
         
         if (nil == resultString && nil == resultInfo && operation != retrieveRecid) {
-            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedDownload);
+            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
             // we already know that a connection can be made, so we likely don't have permission to read this edition or database
             NSError *presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database.", @"Error message when connection to Web of Science fails.")];
             [NSApp performSelectorOnMainThread:@selector(presentError:) withObject:presentableError waitUntilDone:NO];
@@ -428,7 +428,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
     [self setNumberOfFetchedResults:fetchedResultsLocal];
     
     // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
     
     // this will create the array if it doesn't exist
     if (availableResultsLocal == (int)[pubs count]) {

@@ -391,7 +391,7 @@ static void fixLegacyTableColumnIdentifiers()
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification{
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&canWriteMetadata);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &canWriteMetadata);
     
     [[BDSKSharingServer defaultServer] disableSharing];
     

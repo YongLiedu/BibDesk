@@ -296,7 +296,7 @@ typedef struct _BDSKSharingClientFlags {
             // if the user didn't cancel, set an auth failure flag and show an alert
             OSMemoryBarrier();
             if(flags.canceledAuthentication == 0){
-                OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.authenticationFailed);
+                OSAtomicCompareAndSwap32Barrier(0, 1, &flags.authenticationFailed);
                 // don't show the alert when we couldn't authenticate when cleaning up
                 if([self shouldKeepRunning]){
                     [[self serverOnMainThread] runAuthenticationFailedAlert];
@@ -360,7 +360,7 @@ typedef struct _BDSKSharingClientFlags {
         return [[NSData data] sha1Signature];
     
     NSData *password = nil;
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.canceledAuthentication);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.canceledAuthentication);
     
     int rv = 1;
     OSMemoryBarrier();
@@ -375,9 +375,9 @@ typedef struct _BDSKSharingClientFlags {
         // retry from the keychain
         if (password){
             // assume we succeeded; the exception handler for the connection will change it back if we fail again
-            OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.authenticationFailed);
+            OSAtomicCompareAndSwap32Barrier(1, 0, &flags.authenticationFailed);
         }else{
-            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.canceledAuthentication);
+            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.canceledAuthentication);
         }
     }
     
@@ -395,7 +395,7 @@ typedef struct _BDSKSharingClientFlags {
         int32_t val = [[[[NSString alloc] initWithData:[dict objectForKey:BDSKTXTAuthenticateKey] encoding:NSUTF8StringEncoding] autorelease] intValue];
         OSMemoryBarrier();
         int32_t oldVal = flags.needsAuthentication;
-        OSAtomicCompareAndSwap32Barrier(oldVal, val, (int32_t *)&flags.needsAuthentication);
+        OSAtomicCompareAndSwap32Barrier(oldVal, val, &flags.needsAuthentication);
     }
 }
 
@@ -416,8 +416,8 @@ typedef struct _BDSKSharingClientFlags {
 - (oneway void)retrievePublications;
 {
     // set so we don't try calling this multiple times
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedDownload);
+    OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
     
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
@@ -440,14 +440,14 @@ typedef struct _BDSKSharingClientFlags {
                 macroArchive = [dictionary objectForKey:BDSKSharedArchivedMacroDataKey];
             }
         }
-        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
+        OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
         // use the main thread; this avoids an extra (un)archiving between threads and it ends up posting notifications for UI updates
         [[self serverOnMainThread] setArchivedPublications:archive archivedMacros:macroArchive];
     }
     @catch(id exception){
         NSLog(@"%@: discarding exception \"%@\" while retrieving publications", [self class], exception);
-        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
-        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedDownload);
+        OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+        OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
         
         // this posts a notification that the publications of the client changed, forcing a redisplay of the table cell
         [client performSelectorOnMainThread:@selector(setArchivedPublications:) withObject:nil waitUntilDone:NO];

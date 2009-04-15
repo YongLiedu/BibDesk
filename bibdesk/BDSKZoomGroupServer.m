@@ -112,20 +112,20 @@
 - (void)terminate
 {
     [self stopDOServer];
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
 }
 
 - (void)stop
 {
     [[self serverOnServerThread] terminateConnection];
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
 }
 
 - (void)retrievePublications
 {
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedDownload);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
     
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
     [[self serverOnServerThread] downloadWithSearchTerm:[group searchTerm]];
 }
 
@@ -137,7 +137,7 @@
         serverInfo = [info copy];
     }
     [infoLock unlock];
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.needsReset);
+    OSAtomicCompareAndSwap32Barrier(0, 1, &flags.needsReset);
 }
 
 - (BDSKServerInfo *)serverInfo;
@@ -210,7 +210,7 @@
                 [connection setOption:[[info options] objectForKey:key] forKey:key];
         }
         
-        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.needsReset);
+        OSAtomicCompareAndSwap32Barrier(1, 0, &flags.needsReset);
     }else {
         connection = nil;
     }
@@ -223,8 +223,8 @@
 {
     [connection release];
     connection = nil;
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.needsReset);
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(0, 1, &flags.needsReset);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
 } 
 
 - (int)stringTypeForRecordString:(NSString *)string
@@ -275,7 +275,7 @@
         ZOOMResultSet *resultSet = query ? [connection resultsForQuery:query] : nil;
         
         if (nil == resultSet)
-            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedDownload);
+            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
         
         [self setNumberOfAvailableResults:[resultSet countOfRecords]];
         
@@ -311,7 +311,7 @@
         
     }
     // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
 
     // this will create the array if it doesn't exist
     [[self serverOnMainThread] addPublicationsToGroup:pubs];

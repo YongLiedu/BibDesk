@@ -606,17 +606,17 @@ static BDSKPreviewer *sharedPreviewer = nil;
         if(isProcessing == 0)
             [[self serverOnServerThread] processQueueUntilEmpty];
         // start sending task finished messages to the previewer
-        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&notifyWhenDone);
+        OSAtomicCompareAndSwap32Barrier(0, 1, &notifyWhenDone);
     }else{
         // don't notify the previewer of any pending task results; it might be better if the previewer learned to ignore the messages?
-        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&notifyWhenDone);
+        OSAtomicCompareAndSwap32Barrier(1, 0, &notifyWhenDone);
     }
 }
 
 // Server thread protocol
 
 - (oneway void)processQueueUntilEmpty{
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&isProcessing);
+    OSAtomicCompareAndSwap32Barrier(0, 1, &isProcessing);
     
     NSDictionary *dict = nil;
     [queueLock lock];
@@ -669,7 +669,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
     } while (1 == notifyWhenDone && [queue count]);
 
     // swap, then unlock, so if a potential caller is blocking on the lock, they know to call processQueueUntilEmpty
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&isProcessing);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &isProcessing);
     [queueLock unlock];
 }
 

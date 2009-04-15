@@ -145,7 +145,7 @@
 {
     NSParameterAssert([NSThread isMainThread]);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    OSAtomicCompareAndSwap32Barrier(flags.shouldKeepRunning, 0, (int32_t *)&flags.shouldKeepRunning);
+    OSAtomicCompareAndSwap32Barrier(flags.shouldKeepRunning, 0, &flags.shouldKeepRunning);
     
     // wake the thread up so the runloop will exit; shouldKeepRunning may have already done that, so don't send if the port is already dead
     if ([notificationPort isValid])
@@ -578,7 +578,7 @@ static void addItemFunction(const void *value, void *context) {
     
     [items release];
 
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.finishedInitialIndexing);
+    OSAtomicCompareAndSwap32Barrier(0, 1, &flags.finishedInitialIndexing);
     [self performSelectorOnMainThread:@selector(searchIndexDidFinish) withObject:nil waitUntilDone:NO];
 }
 

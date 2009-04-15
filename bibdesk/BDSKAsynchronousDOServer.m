@@ -202,7 +202,7 @@ struct BDSKDOServerFlags {
         
         // allow subclasses to do some custom setup
         [self serverDidSetup];
-        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&serverFlags->serverDidSetup);
+        OSAtomicCompareAndSwap32Barrier(0, 1, &serverFlags->serverDidSetup);
         
         NSRunLoop *rl = [NSRunLoop currentRunLoop];
         NSDate *distantFuture = [[NSDate distantFuture] retain];
@@ -220,7 +220,7 @@ struct BDSKDOServerFlags {
     @catch(id exception) {
         NSLog(@"Exception \"%@\" raised in object %@", exception, self);
         // allow the main thread to continue, anyway
-        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&serverFlags->serverDidSetup);
+        OSAtomicCompareAndSwap32Barrier(0, 1, &serverFlags->serverDidSetup);
     }
     
     @finally {
@@ -272,7 +272,7 @@ struct BDSKDOServerFlags {
 {
     BDSKASSERT([NSThread isMainThread]);
     // set the stop flag, so any long process (possibly with loops) knows it can return
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&serverFlags->shouldKeepRunning);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &serverFlags->shouldKeepRunning);
     // this is mainly to tickle the runloop on the server thread so it will finish
     [serverOnServerThread stopRunning];
     

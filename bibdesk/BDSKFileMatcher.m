@@ -208,7 +208,7 @@ static float GROUP_ROW_HEIGHT = 24.0;
     [[self window] makeKeyAndOrderFront:self];
     [abortButton setEnabled:YES];
 
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&_matchFlags.shouldAbortThread);
+    OSAtomicCompareAndSwap32Barrier(0, 1, &_matchFlags.shouldAbortThread);
     
     // block if necessary until the thread aborts
     [indexingLock lock];
@@ -218,7 +218,7 @@ static float GROUP_ROW_HEIGHT = 24.0;
 
     // okay to set pubs here, since we have the lock
     [self setCurrentPublications:pubs];
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&_matchFlags.shouldAbortThread);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &_matchFlags.shouldAbortThread);
     [NSThread detachNewThreadSelector:@selector(indexFiles:) toTarget:self withObject:absoluteURLs];
     
     // the first thing the thread will do is block until it acquires the lock, so let it go
@@ -238,7 +238,7 @@ static float GROUP_ROW_HEIGHT = 24.0;
 
 - (IBAction)abort:(id)sender;
 {
-    if (false == OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&_matchFlags.shouldAbortThread))
+    if (false == OSAtomicCompareAndSwap32Barrier(0, 1, &_matchFlags.shouldAbortThread))
         NSBeep();
     [abortButton setEnabled:NO];
 }
