@@ -292,6 +292,94 @@ static void destroyTemporaryDirectory()
     return path;
 }
 
+// note: IC is not thread safe
+- (NSURL *)downloadFolderURL;
+{
+    OSStatus err = fnfErr;
+    FSRef pathRef;
+    CFURLRef downloadsURL = NULL;
+    
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+#endif
+        err = FSFindFolder(kUserDomain, kDownloadsFolderType, TRUE, &pathRef);
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
+    } else {
+        ICInstance inst;
+        ICAttr junk = 0;
+        ICFileSpec spec;
+        long size = sizeof(ICFileSpec);
+        
+        err = ICStart(&inst, 'SKim');
+        if (noErr == err) {
+            err = ICBegin(inst, icReadOnlyPerm);
+            
+            if (err == noErr) {
+                err = ICGetPref(inst, kICDownloadFolder, &junk, &spec, &size);
+                ICEnd(inst);
+                if (err == noErr)
+                    err = FSpMakeFSRef(&(spec.fss), &pathRef);
+            }
+            
+            ICStop(inst);
+        }
+    }
+#endif
+    if(err == noErr)
+        downloadsURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &pathRef);
+    
+    return [(NSURL *)downloadsURL autorelease];
+}
+
+- (NSString *)newestLyXPipePath {
+    NSString *appSupportPath = [self applicationSupportDirectory:kUserDomain];
+    NSDirectoryEnumerator *dirEnum = [self enumeratorAtPath:appSupportPath];
+    NSString *file;
+    NSString *lyxPipePath = nil;
+    BDSKVersionNumber *version = nil;
+    
+    while (file = [dirEnum nextObject]) {
+        NSString *fullPath = [appSupportPath stringByAppendingPathComponent:file];
+        NSDictionary *fileAttributes = [self fileAttributesAtPath:fullPath traverseLink:YES];
+        if ([[fileAttributes fileType] isEqualToString:NSFileTypeDirectory]) {
+            [dirEnum skipDescendents];
+            NSString *pipePath = [fullPath stringByAppendingPathComponent:@".lyxpipe.in"];
+            if ([file hasPrefix:@"LyX"] && [self fileExistsAtPath:pipePath]) {
+                if (version == nil) {
+                    lyxPipePath = pipePath;
+                } else {
+                    BDSKVersionNumber *fileVersion = nil;
+                    if ([file hasPrefix:@"LyX-"])
+                        fileVersion = [[[BDSKVersionNumber alloc] initWithVersionString:[file substringFromIndex:4]] autorelease];
+                    else
+                        fileVersion = [[[BDSKVersionNumber alloc] initWithVersionString:@""] autorelease];
+                    if ([fileVersion compareToVersionNumber:version] == NSOrderedDescending) {
+                        lyxPipePath = pipePath;
+                        version = fileVersion;
+                    }
+                }
+            }
+        }
+    }
+    if (lyxPipePath == nil) {
+        NSString *pipePath = [[NSHomeDirectory() stringByAppendingPathComponent:@".lyx"] stringByAppendingPathComponent:@"lyxpipe.in"];
+        if ([self fileExistsAtPath:pipePath])
+            lyxPipePath = pipePath;
+    }
+    return lyxPipePath;
+}
+
+- (BOOL)copyFileFromSharedSupportToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite{
+    NSString *targetPath = [[self currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:fileName];
+    NSString *sourcePath = [[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:fileName];
+    if ([self fileExistsAtPath:targetPath]) {
+        if (overwrite == NO)
+            return NO;
+        [self removeFileAtPath:targetPath handler:nil];
+    }
+    return [self copyPath:sourcePath toPath:targetPath handler:nil];
+}
+
 #pragma mark Temporary files and directories
 
 // This method is copied and modified from NSFileManager-OFExtensions.m
@@ -476,94 +564,6 @@ static void destroyTemporaryDirectory()
     }
 
 	return fullPath;
-}
-
-// note: IC is not thread safe
-- (NSURL *)downloadFolderURL;
-{
-    OSStatus err = fnfErr;
-    FSRef pathRef;
-    CFURLRef downloadsURL = NULL;
-    
-#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-#endif
-        err = FSFindFolder(kUserDomain, kDownloadsFolderType, TRUE, &pathRef);
-#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
-    } else {
-        ICInstance inst;
-        ICAttr junk = 0;
-        ICFileSpec spec;
-        long size = sizeof(ICFileSpec);
-        
-        err = ICStart(&inst, 'SKim');
-        if (noErr == err) {
-            err = ICBegin(inst, icReadOnlyPerm);
-            
-            if (err == noErr) {
-                err = ICGetPref(inst, kICDownloadFolder, &junk, &spec, &size);
-                ICEnd(inst);
-                if (err == noErr)
-                    err = FSpMakeFSRef(&(spec.fss), &pathRef);
-            }
-            
-            ICStop(inst);
-        }
-    }
-#endif
-    if(err == noErr)
-        downloadsURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &pathRef);
-    
-    return [(NSURL *)downloadsURL autorelease];
-}
-
-- (NSString *)newestLyXPipePath {
-    NSString *appSupportPath = [self applicationSupportDirectory:kUserDomain];
-    NSDirectoryEnumerator *dirEnum = [self enumeratorAtPath:appSupportPath];
-    NSString *file;
-    NSString *lyxPipePath = nil;
-    BDSKVersionNumber *version = nil;
-    
-    while (file = [dirEnum nextObject]) {
-        NSString *fullPath = [appSupportPath stringByAppendingPathComponent:file];
-        NSDictionary *fileAttributes = [self fileAttributesAtPath:fullPath traverseLink:YES];
-        if ([[fileAttributes fileType] isEqualToString:NSFileTypeDirectory]) {
-            [dirEnum skipDescendents];
-            NSString *pipePath = [fullPath stringByAppendingPathComponent:@".lyxpipe.in"];
-            if ([file hasPrefix:@"LyX"] && [self fileExistsAtPath:pipePath]) {
-                if (version == nil) {
-                    lyxPipePath = pipePath;
-                } else {
-                    BDSKVersionNumber *fileVersion = nil;
-                    if ([file hasPrefix:@"LyX-"])
-                        fileVersion = [[[BDSKVersionNumber alloc] initWithVersionString:[file substringFromIndex:4]] autorelease];
-                    else
-                        fileVersion = [[[BDSKVersionNumber alloc] initWithVersionString:@""] autorelease];
-                    if ([fileVersion compareToVersionNumber:version] == NSOrderedDescending) {
-                        lyxPipePath = pipePath;
-                        version = fileVersion;
-                    }
-                }
-            }
-        }
-    }
-    if (lyxPipePath == nil) {
-        NSString *pipePath = [[NSHomeDirectory() stringByAppendingPathComponent:@".lyx"] stringByAppendingPathComponent:@"lyxpipe.in"];
-        if ([self fileExistsAtPath:pipePath])
-            lyxPipePath = pipePath;
-    }
-    return lyxPipePath;
-}
-
-- (BOOL)copyFileFromSharedSupportToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite{
-    NSString *targetPath = [[self currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:fileName];
-    NSString *sourcePath = [[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:fileName];
-    if ([self fileExistsAtPath:targetPath]) {
-        if (overwrite == NO)
-            return NO;
-        [self removeFileAtPath:targetPath handler:nil];
-    }
-    return [self copyPath:sourcePath toPath:targetPath handler:nil];
 }
 
 #pragma mark Creating paths
