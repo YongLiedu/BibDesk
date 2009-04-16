@@ -72,7 +72,7 @@ static char _FVFileViewContentObservationContext;
 
 // it's important that DEFAULT_PADDING.height >= TEXT_OFFSET - HIGHLIGHT_INSET
 #define DEFAULT_ICON_SIZE ((NSSize) { 64.0, 64.0 })
-#define DEFAULT_PADDING   ((NSSize) { 10.0, 8.0 })
+#define DEFAULT_PADDING   ((NSSize) { 10.0, 6.0 })
 #define DEFAULT_MARGIN    ((NSSize) { 4.0, 8.0 })
 #define PADDING_STRETCH   ((CGFloat) 4.0)
 #define TEXT_OFFSET       ((CGFloat) 2.0)
