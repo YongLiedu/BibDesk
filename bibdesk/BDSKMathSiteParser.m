@@ -115,16 +115,6 @@
 	return result;
 }
 
-
-
-+ (NSArray *) parserInfos {
-	NSString * parserDescription = NSLocalizedString(@"Project Euclid provides a publishing platform for \342\200\230independent and society journals\342\200\231 in mathematics and statistics. BibDesk can provide bibliographic information for its articles if you have access to MathSciNet or Zentralblatt Math.", @"Description for Project Euclid site");
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"Project Euclid" address:@"http://projecteuclid.org/"  description: parserDescription flags: BDSKParserFeatureSubscriptionMask];
-	
-	return [NSArray arrayWithObject:parserInfo];
-}
-
-
 @end
 
 
@@ -139,11 +129,16 @@
  Recognise Project Euclid pages by their server name ending in projecteuclid.org.
 */
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
-	BOOL result = [[url host] rangeOfString:@"projecteuclid.org" options: (NSAnchoredSearch | NSCaseInsensitiveSearch | NSBackwardsSearch)].location != NSNotFound;
+	BOOL result = NO;
+	NSString * hostName = [url host];
+	if (hostName) {
+		result = ([hostName rangeOfString:@"projecteuclid.org" options: (NSAnchoredSearch | NSCaseInsensitiveSearch | NSBackwardsSearch)].location != NSNotFound);
+	}
 	return result;
 }
 
 	
+
 /*
  Find references for Mathematical Reviews and Zentralblatt Math in the page. Then look them up, giving preference to MSN if both are available.
 */ 
@@ -151,7 +146,7 @@
 	NSError * error;
 
 	NSArray * identifiers = [xmlDocument nodesForXPath:@".//div[@id='identifier']/p" error:&error];
-	if ( [identifiers count] == 0 ) { return nil; } // no identifier on this page => probably a non-article page on the site => bail out
+	if ( [identifiers count] == 0 ) { return identifiers; } // no identifier on this page => probably a non-article page on the site => return empty array
 	
 	NSXMLElement * identifier = [identifiers objectAtIndex:0];
 	NSString * identifierString = [identifier stringValue];
@@ -219,6 +214,13 @@
 }
 
 
++ (NSArray *) parserInfos {
+	NSString * parserDescription = NSLocalizedString(@"Project Euclid provides a publishing platform for \342\200\230independent and society journals\342\200\231 in mathematics and statistics. BibDesk can provide bibliographic information for its articles if you have access to MathSciNet or Zentralblatt Math.", @"Description for Project Euclid site");
+	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"Project Euclid" address:@"http://projecteuclid.org/"  description: parserDescription flags: BDSKParserFeatureSubscriptionMask];
+	
+	return [NSArray arrayWithObject:parserInfo];
+}
+
 @end
 
 
@@ -231,7 +233,11 @@
  Recognise Numdam pages by their server name ending in numdam.org.
 */
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
-	BOOL result = [[url host] rangeOfString:@"numdam.org" options: (NSAnchoredSearch | NSCaseInsensitiveSearch | NSBackwardsSearch)].location != NSNotFound;
+	BOOL result =  NO;
+	NSString * hostName = [url host];
+	if (hostName) {
+		result = ([hostName rangeOfString:@"numdam.org" options: (NSAnchoredSearch | NSCaseInsensitiveSearch | NSBackwardsSearch)].location != NSNotFound) ;
+	}
 	return result;
 }
 

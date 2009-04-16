@@ -47,11 +47,15 @@
 
 @implementation BDSKZentralblattParser
 /*
- Zentralblatt Math is mirrored across several servers. (http://www.zentralblatt-math.org/zmath/en/mirrors/)
+ Zentralblatt Math is mirrored across several servers. See http://www.zentralblatt-math.org/zmath/en/mirrors/ .
  Accept URLs whose path begins with zmath. As sometimes paths begin with multiple slashes, trim those first.
 */
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
-	BOOL result = ([[[url path] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"/"]] rangeOfString:@"zmath" options: NSCaseInsensitiveSearch | NSAnchoredSearch].location != NSNotFound);
+	BOOL result = NO;
+	NSString * cleanedPath = [[url path] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"/"]];
+	if (cleanedPath) {
+		result = ([cleanedPath rangeOfString:@"zmath" options: (NSCaseInsensitiveSearch|NSAnchoredSearch)].location != NSNotFound );
+	}
 	return result;
 }
 
@@ -66,7 +70,7 @@
 	AGRegex *ZMathRegexp = [AGRegex regexWithPattern:@"(Zbl|JFM) (pre)?([0-9.]*)" options:AGRegexMultiline];
 	NSArray * regexpResults = [ZMathRegexp findAllInString:[xmlDocument XMLString]];
 	
-	if (0 == [regexpResults count]) { return nil; }
+	if (0 == [regexpResults count]) { return regexpResults; } // no matches but no error => return empty array
 
 	NSEnumerator * matchEnumerator = [regexpResults objectEnumerator];
 	AGRegexMatch * match;

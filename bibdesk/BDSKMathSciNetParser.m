@@ -52,7 +52,11 @@
  Instead recognise all URLs beginning with 'mathscinet', to match both general MatSciNet URLs like <http://www.ams.org/mathscinet/...>  and MathSciNet reference URLS <http://www.ams.org/mathscinet-getitem?...>.
 */
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
-	BOOL result = [[url path] rangeOfString:@"/mathscinet" options: (NSAnchoredSearch)].location != NSNotFound;
+	BOOL result = NO;
+	NSString * path = [url path];
+	if (path) {
+		result = [[url path] rangeOfString:@"/mathscinet" options: (NSAnchoredSearch)].location != NSNotFound;
+	}
 	return result;
 }
 
@@ -67,7 +71,7 @@
 	AGRegex * MRRegexp = [AGRegex regexWithPattern:@"MR0*([0-9]+)" options:AGRegexMultiline];
 	NSArray * regexpResults = [MRRegexp findAllInString:[xmlDocument XMLString]];
 	
-	if (0 == [regexpResults count]) { return nil; }
+	if (0 == [regexpResults count]) { return regexpResults; } // no matches but no error => return empty array
 
 	NSEnumerator * matchEnumerator = [regexpResults objectEnumerator];
 	AGRegexMatch * match;
