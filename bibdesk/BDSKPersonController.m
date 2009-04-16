@@ -190,8 +190,6 @@
         [publicationItems release];
     publicationItems = [[NSMutableArray alloc] init];
     
-    // @@ note that if a person is author and editor (in a collection, for instance), the same pub can appear twice in publicationItems
-    
     NSMutableSet *theNames = [[NSMutableSet alloc] init];
     NSMutableSet *peopleSet = [[NSMutableSet alloc] initForFuzzyAuthors];
     NSEnumerator *pubEnum = [[owner publications] objectEnumerator];
@@ -200,6 +198,9 @@
     while (pub = [pubEnum nextObject]) {
         NSEnumerator *fieldEnum = [fields objectEnumerator];
         NSString *field;
+        NSDictionary *info = nil;
+        NSMutableSet *fieldSet = nil;
+        NSMutableSet *nameSet = nil;
         
         while (field = [fieldEnum nextObject]) {
             NSArray *people = [pub peopleArrayForField:field];
@@ -207,14 +208,22 @@
             [peopleSet addObjectsFromArray:people];
             
             if ([peopleSet containsObject:person]) {
-                NSMutableSet *fieldSet = [[NSMutableSet alloc] init];
-                NSMutableSet *nameSet = [[NSMutableSet alloc] init];
                 NSEnumerator *personEnum = [people objectEnumerator];
                 BibAuthor *aPerson;
                 NSString *name;
                 
                 while (aPerson = [personEnum nextObject]) {
                     if ([aPerson fuzzyEqual:person]) {
+                        if (info == nil) {
+                            fieldSet = [[NSMutableSet alloc] init];
+                            nameSet = [[NSMutableSet alloc] init];
+                            info = [[NSDictionary alloc] initWithObjectsAndKeys:pub, @"publication", nameSet, @"names", fieldSet, @"fields", nil];
+                            [publicationItems addObject:info];
+                            [info release];
+                            [nameSet release];
+                            [fieldSet release];
+                        }
+                        
                         name = [aPerson originalName];
                         [nameSet addObject:name];
                         [fieldSet addObject:field];
@@ -222,12 +231,6 @@
                     }
                 }
                 
-                NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:
-                    pub, @"publication", nameSet, @"names", fieldSet, @"fields", nil];
-                [publicationItems addObject:info];
-                [info release];
-                [nameSet release];
-                [fieldSet release];
             }
             [peopleSet removeAllObjects];
         }
