@@ -65,7 +65,7 @@ static char BDSKTableViewFontDefaultsObservationContext;
     if (typeSelectHelper != newTypeSelectHelper) {
         if ([typeSelectHelper dataSource] == self) {
             if ([[self class] shouldQueueTypeSelectHelper])
-                [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(rebuildTypeSelectSearchCache) object:nil];
+                [[typeSelectHelper class] cancelPreviousPerformRequestsWithTarget:typeSelectHelper selector:@selector(rebuildTypeSelectSearchCache) object:nil];
             [typeSelectHelper setDataSource:nil];
         }
         [typeSelectHelper release];
@@ -78,8 +78,8 @@ static char BDSKTableViewFontDefaultsObservationContext;
     [super reloadData];
     if (typeSelectHelper) {
         if ([[self class] shouldQueueTypeSelectHelper]) {
-            [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(rebuildTypeSelectSearchCache) object:nil];
-            [self performSelector:@selector(rebuildTypeSelectSearchCache) withObject:nil afterDelay:0.0];
+            [[typeSelectHelper class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(rebuildTypeSelectSearchCache) object:nil];
+            [typeSelectHelper performSelector:@selector(rebuildTypeSelectSearchCache) withObject:nil afterDelay:0.0];
         } else {
             [typeSelectHelper rebuildTypeSelectSearchCache];
         }
