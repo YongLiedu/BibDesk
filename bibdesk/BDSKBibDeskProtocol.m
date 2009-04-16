@@ -160,7 +160,6 @@
 	NSEnumerator * myEnum = [siteArray objectEnumerator];
 	NSMutableArray * linkStrings = [NSMutableArray arrayWithCapacity:[siteArray count] * 2];
 	NSDictionary * siteInfo;
-	NSString * s;
 	
 	while (siteInfo = [myEnum nextObject]) {
 		NSXMLElement * aElement = [NSXMLElement elementWithName:@"a" stringValue:[siteInfo objectForKey:NAME_KEY]];
