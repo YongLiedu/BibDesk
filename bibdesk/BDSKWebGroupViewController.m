@@ -78,7 +78,22 @@
     static NSImage *reloadAdornImage = nil;
     static NSImage *stopAdornImage = nil;
     
-    if (backAdornImage == nil) {
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+        
+        backAdornImage = [[NSImage imageNamed:NSImageNameGoLeftTemplate] copy];
+        [backAdornImage setName:@"BackAdorn"];
+        
+        forwardAdornImage = [[NSImage imageNamed:NSImageNameGoRightTemplate] copy];
+        [forwardAdornImage setName:@"ForwardAdorn"];
+        
+        reloadAdornImage = [[NSImage imageNamed:NSImageNameRefreshTemplate] copy];
+        [reloadAdornImage setName:@"ReloadAdorn"];
+        
+        stopAdornImage = [[NSImage imageNamed:NSImageNameStopProgressTemplate] copy];
+        [stopAdornImage setName:@"StopAdorn"];
+        
+    } else {
+        
         NSSize size = NSMakeSize(25.0, 13.0);
         NSBezierPath *path;
         
