@@ -179,29 +179,33 @@ static void destroyTemporaryDirectory()
     [pool release];
 }
 
+static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boolean createFolder) {
+    FSRef foundRef;
+    OSStatus err = noErr;
+    
+    err = FSFindFolder(domain, folderType, createFolder, &foundRef);
+    if (err == noErr)
+        NSLog(@"Error %d:  the system was unable to find your folder of type %i in domain %i.", err, folderType, domain);
+    
+    CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
+    NSString *retStr = nil;
+    
+    if(url != nil){
+        retStr = [(NSURL *)url path];
+        CFRelease(url);
+    }
+    
+    return retStr;
+}
+
 - (NSString *)currentApplicationSupportPathForCurrentUser{
     
     static NSString *path = nil;
     
     if(path == nil){
-        FSRef foundRef;
-        OSStatus err = noErr;
-        
-        err = FSFindFolder(kUserDomain,  kApplicationSupportFolderType, kCreateFolder, &foundRef);
-        if(err != noErr){
-            NSLog(@"Error %d:  the system was unable to find your Application Support folder.", err);
-            return nil;
-        }
-        
-        CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
-        
-        if(url != nil){
-            path = [(NSURL *)url path];
-            CFRelease(url);
-        }
+        path = findSpecialFolder(kUserDomain, kApplicationSupportFolderType, kCreateFolder);
         
         NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleNameKey];
-        
         if(appName == nil)
             [NSException raise:NSObjectNotAvailableException format:NSLocalizedString(@"Unable to find CFBundleIdentifier for %@", @"Exception message"), [NSApp description]];
         
@@ -224,47 +228,15 @@ static void destroyTemporaryDirectory()
 }
 
 - (NSString *)applicationSupportDirectory:(SInt16)domain{
-    
-    FSRef foundRef;
-    OSStatus err = noErr;
-    
-    err = FSFindFolder(domain,
-                       kApplicationSupportFolderType,
-                       kCreateFolder,
-                       &foundRef);
-    NSAssert1( err == noErr, @"Error %d:  the system was unable to find your Application Support folder.", err);
-    
-    CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
-    NSString *retStr = nil;
-    
-    if(url != nil){
-        retStr = [(NSURL *)url path];
-        CFRelease(url);
-    }
-    
-    return retStr;
+    return findSpecialFolder(domain, kApplicationSupportFolderType, kCreateFolder);
 }
 
 - (NSString *)applicationsDirectory{
-    
-    NSString *path = nil;
-    FSRef foundRef;
-    OSStatus err = noErr;
-    CFURLRef url = NULL;
-    BOOL isDir = YES;
-    
-    err = FSFindFolder(kLocalDomain,  kApplicationsFolderType, kDontCreateFolder, &foundRef);
-    if(err == noErr){
-        url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
-    }
-    
-    if(url != NULL){
-        path = [(NSURL *)url path];
-        CFRelease(url);
-    }
+    NSString *path = findSpecialFolder(kLocalDomain, kApplicationSupportFolderType, kDontCreateFolder);
     
     if(path == nil){
         path = @"/Applications";
+        BOOL isDir;
         if([self fileExistsAtPath:path isDirectory:&isDir] == NO || isDir == NO){
             NSLog(@"The system was unable to find your Applications folder.", @"");
             return nil;
@@ -275,21 +247,7 @@ static void destroyTemporaryDirectory()
 }
 
 - (NSString *)desktopDirectory {
-    FSRef foundRef;
-    OSStatus err = FSFindFolder(kUserDomain, kDesktopFolderType, kCreateFolder, &foundRef);
-    NSString *path = nil;
-    
-    NSAssert1( err == noErr, @"Error %d:  the system was unable to find your Desktop folder.", err);
-    
-    if (err == noErr) {
-        CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
-        if(url != nil){
-            path = [(NSURL *)url path];
-            CFRelease(url);
-        }
-    }
-    
-    return path;
+    return findSpecialFolder(kUserDomain, kDesktopFolderType, kCreateFolder);
 }
 
 // note: IC is not thread safe
@@ -437,14 +395,12 @@ static void destroyTemporaryDirectory()
 - (NSString *)temporaryDirectoryForFileSystemContainingPath:(NSString *)path error:(NSError **)outError;
 /*" Returns the path to the 'Temporary Items' folder on the same filesystem as the given path.  Returns an error if there is a problem (for example, iDisk doesn't have temporary folders).  The returned directory should be only readable by the calling user, so files written into this directory can be written with the desired final permissions without worrying about security (the expectation being that you'll soon call -exchangeFileAtPath:withFileAtPath:). "*/
 {
+    // The file in question might not exist yet.  This loop assumes that it will terminate due to '/' always being valid.
     OSErr err;
     FSRef ref;
-    
-    
-    // The file in question might not exist yet.  This loop assumes that it will terminate due to '/' always being valid.
     NSString *attempt = path;
     while (YES) {
-        CFURLRef url = (CFURLRef)[[[NSURL alloc] initFileURLWithPath:attempt] autorelease];
+        CFURLRef url = (CFURLRef)[NSURL fileURLWithPath:attempt];
         if (CFURLGetFSRef((CFURLRef)url, &ref))
             break;
         attempt = [attempt stringByDeletingLastPathComponent];
@@ -459,25 +415,12 @@ static void destroyTemporaryDirectory()
         return nil;
     }
     
-    FSRef temporaryItemsRef;
-    err = FSFindFolder(catalogInfo.volume, kTemporaryFolderType, kCreateFolder, &temporaryItemsRef);
-    if (err != noErr) {
+    NSString *temporaryItemsPath = findSpecialFolder(catalogInfo.volume, kTemporaryFolderType, kCreateFolder);
+    if (temporaryItemsPath == nil) {
         NSError *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:nil]; // underlying error
         if (outError)
             *outError = [NSError localErrorWithCode:kBDSKCannotFindTemporaryDirectoryError localizedDescription:[NSString stringWithFormat:@"Unable to find temporary items directory for '%@'", path] underlyingError:error];
-        return nil;
     }
-    
-    CFURLRef temporaryItemsURL;
-    temporaryItemsURL = CFURLCreateFromFSRef(kCFAllocatorDefault, &temporaryItemsRef);
-    if (!temporaryItemsURL) {
-        if (outError)
-            *outError = [NSError localErrorWithCode:kBDSKCannotFindTemporaryDirectoryError localizedDescription:[NSString stringWithFormat:@"Unable to create URL to temporary items directory for '%@'", path]];
-        return nil;
-    }
-    
-    NSString *temporaryItemsPath = [[[(NSURL *)temporaryItemsURL path] copy] autorelease];
-    [(id)temporaryItemsURL release];
     
     return temporaryItemsPath;
 }
@@ -511,12 +454,8 @@ static void destroyTemporaryDirectory()
     return temporaryFilePath;
 }
 
-// This method is copied and modified from NSFileManager-OFExtensions.m
-- (NSString *)temporaryFileWithBasename:(NSString *)fileName;
-{
-	if(nil == fileName)
-        fileName = [[NSProcessInfo processInfo] globallyUniqueString];
-	return [self uniqueFilePathWithName:fileName atPath:temporaryBaseDirectory];
+- (NSString *)temporaryFileWithBasename:(NSString *)fileName {
+	return [self uniqueFilePathWithName:fileName atPath:temporaryBaseDirectory ?: [[NSProcessInfo processInfo] globallyUniqueString]];
 }
 
 // This method is subject to a race condition in our temporary directory if we pass the same baseName to this method and temporaryFileWithBasename: simultaneously; hence the lock in uniqueFilePathWithName:atPath:, even though it and temporaryFileWithBasename: are not thread safe or secure.
@@ -544,7 +483,6 @@ static void destroyTemporaryDirectory()
     return finalPath;
 }
 
-// This method is copied and modified from NSFileManager-OFExtensions.m
 - (NSString *)uniqueFilePathWithName:(NSString *)fileName atPath:(NSString *)directory {
     // could expand this path?
     NSParameterAssert([directory isAbsolutePath]);
