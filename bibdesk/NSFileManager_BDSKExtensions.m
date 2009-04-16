@@ -173,20 +173,21 @@ static void destroyTemporaryDirectory()
 static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boolean createFolder) {
     FSRef foundRef;
     OSStatus err = noErr;
+    CFURLRef url = NULL;
+    NSString *path = nil;
     
     err = FSFindFolder(domain, folderType, createFolder, &foundRef);
-    if (err == noErr)
+    if (err != noErr)
         NSLog(@"Error %d:  the system was unable to find your folder of type %i in domain %i.", err, folderType, domain);
+    else
+        url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
     
-    CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
-    NSString *retStr = nil;
-    
-    if(url != nil){
-        retStr = [(NSURL *)url path];
+    if(url != NULL){
+        path = [(NSURL *)url path];
         CFRelease(url);
     }
     
-    return retStr;
+    return path;
 }
 
 - (NSString *)currentApplicationSupportPathForCurrentUser{
