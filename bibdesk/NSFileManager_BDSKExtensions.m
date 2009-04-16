@@ -124,7 +124,6 @@ typedef struct WLDragMapEntryStruct
 
 @implementation NSFileManager (BDSKExtensions)
 
-static NSLock *tempFilenameLock;
 static NSString *temporaryBaseDirectory = nil;
 
 // we can't use +initialize in a category, and +load is too dangerous
@@ -156,14 +155,6 @@ static void createTemporaryDirectory()
     free(template);
         
     assert(NULL != temporaryBaseDirectory);
-    [pool release];
-}
-
-__attribute__((constructor))
-static void createTempFilenameLock()
-{    
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    tempFilenameLock = [[NSLock alloc] init];
     [pool release];
 }
 
@@ -341,60 +332,15 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
 #pragma mark Temporary files and directories
 
 // This method is copied and modified from NSFileManager-OFExtensions.m
-- (NSString *)uniqueFilenameFromName:(NSString *)filename error:(NSError **)outError;
+// Note that due to the permissions behavior of FSFindFolder, this shouldn't have the security problems that raw calls to -uniqueFilenameFromName: may have.
+- (NSString *)temporaryPathForWritingToPath:(NSString *)path error:(NSError **)outError
+/*" Returns a unique filename in the -temporaryDirectoryForFileSystemContainingPath: for the filesystem containing the given path.  The returned path is suitable for writing to and then replacing the input path using -replaceFileAtPath:withFileAtPath:handler:.  This means that the result should never be equal to the input path.  If no suitable temporary items folder is found and allowOriginalDirectory is NO, this will raise.  If allowOriginalDirectory is YES, on the other hand, this will return a file name in the same folder.  Note that passing YES for allowOriginalDirectory could potentially result in security implications of the form noted with -uniqueFilenameFromName:. "*/
 {
-    // We either aren't allowing the original, or it exists.
-    NSString *extension = [filename pathExtension];
-    NSString *baseFilename = [filename stringByDeletingPathExtension];
-    unsigned int triesLeft = 10;
-    NSMutableString *tempFilename = [NSMutableString string];
+    BDSKPRECONDITION(![NSString isEmptyString:path]);
     
-    while (triesLeft--) {
-        unsigned int tempFilenameNumber = 1;
-        
-        [tempFilenameLock lock];
-        @try {
-            do {
-                [tempFilename setString:baseFilename];
-                [tempFilename appendFormat:@"-%d", tempFilenameNumber++];
-                if ([extension length])
-                    [tempFilename appendFormat:@".%@", extension];
-            } while ([self fileExistsAtPath:tempFilename]);
-        }
-        @catch (id e) {
-            [tempFilenameLock unlock];
-            [tempFilename release];
-            tempFilename = nil;
-            [e raise];
-        }
-        [tempFilenameLock unlock];
-        
-        int fd = open((const char *)[self fileSystemRepresentationWithPath:tempFilename], O_EXCL | O_WRONLY | O_CREAT | O_TRUNC, 0666);
-        if (fd != -1) {
-            close(fd); // no unlink, were are on the 'create' branch
-            return tempFilename;
-        }
-        if (errno != EEXIST) {
-            // TODO: Not sure whether EACCES or EEXIST has precedence if both could be returned.
-            // TODO: EINTR?
-            // Probably EACCES, we aren't going to recover.
-            NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil]; // underlying error
-            if (outError)
-                *outError = [NSError localErrorWithCode:kBDSKCannotCreateTemporaryFileError localizedDescription:[NSString stringWithFormat:@"Unable to create unique file from %@.", filename] underlyingError:error];
-            return nil;
-        }
-    }
+    NSString *tempFileName = nil;
     
-    if (outError)
-        *outError = [NSError localErrorWithCode:kBDSKCannotCreateTemporaryFileError localizedDescription:[NSString stringWithFormat:@"Unable to find a variant of %@ that didn't already exist.", filename]];
-    return nil;
-}
-
-// This method is copied and modified from NSFileManager-OFExtensions.m
-// Note that if this returns an error, a common course of action would be to put the temporary file in the same folder as the original file.  This has the same security problems as -uniqueFilenameFromName:, of course, so we don't want to do that by default.  The calling code should make this decision.
-- (NSString *)temporaryDirectoryForFileSystemContainingPath:(NSString *)path error:(NSError **)outError;
-/*" Returns the path to the 'Temporary Items' folder on the same filesystem as the given path.  Returns an error if there is a problem (for example, iDisk doesn't have temporary folders).  The returned directory should be only readable by the calling user, so files written into this directory can be written with the desired final permissions without worrying about security (the expectation being that you'll soon call -exchangeFileAtPath:withFileAtPath:). "*/
-{
+    // first find the Temporary Items folder for the volume containing path
     // The file in question might not exist yet.  This loop assumes that it will terminate due to '/' always being valid.
     OSErr err;
     FSRef ref;
@@ -415,43 +361,43 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
         return nil;
     }
     
-    NSString *temporaryItemsPath = findSpecialFolder(catalogInfo.volume, kTemporaryFolderType, kCreateFolder);
-    if (temporaryItemsPath == nil) {
+    NSString *tempItemsPath = findSpecialFolder(catalogInfo.volume, kTemporaryFolderType, kCreateFolder);
+    if (tempItemsPath == nil) {
         NSError *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:nil]; // underlying error
         if (outError)
             *outError = [NSError localErrorWithCode:kBDSKCannotFindTemporaryDirectoryError localizedDescription:[NSString stringWithFormat:@"Unable to find temporary items directory for '%@'", path] underlyingError:error];
     }
     
-    return temporaryItemsPath;
-}
-
-// This method is copied and modified from NSFileManager-OFExtensions.m
-// Note that due to the permissions behavior of FSFindFolder, this shouldn't have the security problems that raw calls to -uniqueFilenameFromName: may have.
-- (NSString *)temporaryPathForWritingToPath:(NSString *)path error:(NSError **)outError
-/*" Returns a unique filename in the -temporaryDirectoryForFileSystemContainingPath: for the filesystem containing the given path.  The returned path is suitable for writing to and then replacing the input path using -replaceFileAtPath:withFileAtPath:handler:.  This means that the result should never be equal to the input path.  If no suitable temporary items folder is found and allowOriginalDirectory is NO, this will raise.  If allowOriginalDirectory is YES, on the other hand, this will return a file name in the same folder.  Note that passing YES for allowOriginalDirectory could potentially result in security implications of the form noted with -uniqueFilenameFromName:. "*/
-{
-    BDSKPRECONDITION(![NSString isEmptyString:path]);
-    
-    NSString *temporaryFilePath = nil;
-    NSString *dir = [self temporaryDirectoryForFileSystemContainingPath:path error:outError];
-    if (dir) {
-        temporaryFilePath = [dir stringByAppendingPathComponent:[path lastPathComponent]];
+    if (tempItemsPath) {
         // Don't pass in paths that are already inside Temporary Items or you might get back the same path you passed in.
-        BDSKASSERT(![temporaryFilePath isEqualToString:path]);
-        temporaryFilePath = [self uniqueFilenameFromName:temporaryFilePath error:outError];
+        if (tempFileName = [self uniqueFilePathWithName:[path lastPathComponent] atPath:tempItemsPath]) {
+            int fd = open((const char *)[self fileSystemRepresentationWithPath:tempFileName], O_EXCL | O_WRONLY | O_CREAT | O_TRUNC, 0666);
+            if (fd != -1)
+                close(fd); // no unlink, were are on the 'create' branch
+            else if (errno != EEXIST)
+                tempFileName = nil;
+        }
     }
     
-    if (!temporaryFilePath) {
+    if (tempFileName == nil) {
         if (outError)
             *outError = nil; // Ignore any previous error
         // Try to use the same directory.  Can't just call -uniqueFilenameFromName:path since we want a NEW file name (-uniqueFilenameFromName: would just return the input path and the caller expecting a path where it can put something temporarily, i.e., different from the input path).
-        temporaryFilePath = [self uniqueFilenameFromName:path error:outError];
+        if (tempFileName = [self uniqueFilePathWithName:[path lastPathComponent] atPath:[path stringByDeletingLastPathComponent]]) {
+            int fd = open((const char *)[self fileSystemRepresentationWithPath:tempFileName], O_EXCL | O_WRONLY | O_CREAT | O_TRUNC, 0666);
+            if (fd != -1)
+                close(fd); // no unlink, were are on the 'create' branch
+            else if (errno != EEXIST)
+                tempFileName = nil;
+        }
     }
     
-    BDSKPOSTCONDITION(!temporaryFilePath || [self fileExistsAtPath:temporaryFilePath]);
-    BDSKPOSTCONDITION(!temporaryFilePath || (![path isEqualToString:temporaryFilePath]));
+    if (tempFileName == nil && outError)
+        *outError = [NSError localErrorWithCode:kBDSKCannotCreateTemporaryFileError localizedDescription:[NSString stringWithFormat:@"Unable to create unique file for %@.", path]];
     
-    return temporaryFilePath;
+    BDSKPOSTCONDITION(!tempFileName || [self fileExistsAtPath:tempFileName] || ![path isEqualToString:tempFileName]);
+    
+    return tempFileName;
 }
 
 - (NSString *)temporaryFileWithBasename:(NSString *)fileName {
