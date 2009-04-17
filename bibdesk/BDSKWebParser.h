@@ -50,7 +50,6 @@ enum {
 
 enum {
 	BDSKUnknownWebType = -1, 
-    BDSKHCiteWebType,
     BDSKCiteULikeWebType,
     BDSKACMDLWebType,
     BDSKHubmedWebType,
@@ -60,7 +59,10 @@ enum {
 	BDSKMathSciNetWebType,
 	BDSKZentralblattWebType,
 	BDSKProjectEuclidWebType,
-	BDSKNumdamWebType
+	BDSKNumdamWebType,
+	// parsers for microformats which are not site-specific should better be at the end 
+	BDSKCOinSWebType,
+    BDSKHCiteWebType
 };
 
 @interface BDSKWebParser : NSObject
