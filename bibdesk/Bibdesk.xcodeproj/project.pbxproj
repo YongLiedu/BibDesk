@@ -73,9 +73,7 @@
 		45DB3E8F0CAAFED5001EACDA /* BDSKHubmedParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB3E8D0CAAFED5001EACDA /* BDSKHubmedParser.m */; };
 		6C567DBA0F8189F500DE285D /* BDSKZentralblattParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 6C567DB80F8189F500DE285D /* BDSKZentralblattParser.m */; };
 		6C567DBF0F818A1600DE285D /* BDSKMathSciNetParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 6C567DBD0F818A1600DE285D /* BDSKMathSciNetParser.m */; };
-		6C5DE3E70F8FC33B00E02D5F /* BDSKMathSiteParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 6C5DE3E50F8FC33B00E02D5F /* BDSKMathSiteParser.h */; };
 		6C5DE3E80F8FC33B00E02D5F /* BDSKMathSiteParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 6C5DE3E60F8FC33B00E02D5F /* BDSKMathSiteParser.m */; };
-		6CD26A230F928EEE0089FDFD /* BDSKBibDeskProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 6CD26A210F928EEE0089FDFD /* BDSKBibDeskProtocol.h */; };
 		6CD26A240F928EEE0089FDFD /* BDSKBibDeskProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 6CD26A220F928EEE0089FDFD /* BDSKBibDeskProtocol.m */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
@@ -3024,8 +3022,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				6C5DE3E70F8FC33B00E02D5F /* BDSKMathSiteParser.h in Headers */,
-				6CD26A230F928EEE0089FDFD /* BDSKBibDeskProtocol.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
