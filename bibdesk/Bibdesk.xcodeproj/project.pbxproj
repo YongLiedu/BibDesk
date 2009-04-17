@@ -1323,6 +1323,7 @@
 		CEFA07F20AF0E52100A3B4B1 /* BDSKApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKApplication.h; sourceTree = "<group>"; };
 		CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKApplication.m; sourceTree = "<group>"; };
 		CEFA0F4C0AF1400900A3B4B1 /* BDSKOwnerProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKOwnerProtocol.h; sourceTree = "<group>"; };
+		CEFA2C150F98D25500531EB6 /* HowtoRelease.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = HowtoRelease.txt; sourceTree = "<group>"; };
 		CEFA2F100CC0272C002A8262 /* BDSKTemplateTag.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTemplateTag.h; sourceTree = "<group>"; };
 		CEFA2F110CC0272C002A8262 /* BDSKTemplateTag.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTemplateTag.m; sourceTree = "<group>"; };
 		CEFD45860BFFC1F80027B933 /* NSWindow+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSWindow+Scripting.h"; sourceTree = "<group>"; };
@@ -1846,6 +1847,7 @@
 		27D4FB5607DE7A97001CAB00 /* DeveloperDocumentation */ = {
 			isa = PBXGroup;
 			children = (
+				CEFA2C150F98D25500531EB6 /* HowtoRelease.txt */,
 				27D4FB5707DE7A97001CAB00 /* build_instructions.tex */,
 				27D4FB5807DE7A97001CAB00 /* HackingBibDesk.rtf */,
 				27D4FB5407DE7A83001CAB00 /* HelpNotes.txt */,
