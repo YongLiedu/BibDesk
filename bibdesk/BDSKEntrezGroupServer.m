@@ -333,6 +333,10 @@
         [presentableError embedError:error];
     }
     
+    [[NSFileManager defaultManager] removeFileAtPath:filePath handler:nil];
+    [filePath release];
+    filePath = nil;
+    
     if (failedDownload)
         [NSApp presentError:presentableError];
 
@@ -347,6 +351,12 @@
     if (URLDownload) {
         [URLDownload release];
         URLDownload = nil;
+    }
+    
+    if (filePath) {
+        [[NSFileManager defaultManager] removeFileAtPath:filePath handler:nil];
+        [filePath release];
+        filePath = nil;
     }
     
     // redraw 
