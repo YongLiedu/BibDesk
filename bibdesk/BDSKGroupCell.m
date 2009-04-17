@@ -281,29 +281,57 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
             NSColor *bgColor;
             if ([controlView respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
                 // On Leopard, use the blue or gray color taken from the center of the gradient highlight
-                if ([[controlView window] isMainWindow] == NO) {
-                    if (isHighlighted) {
-                        fgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:1.0];
-                        bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
+                if ([NSColor currentControlTint] == NSGraphiteControlTint) {
+                    if ([[controlView window] isMainWindow] == NO) {
+                        if (isHighlighted) {
+                            fgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:1.0];
+                            bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
+                        } else {
+                            fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
+                            bgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:0.95];
+                        }
+                    } else if ([[controlView window] isKeyWindow] && [[controlView window] firstResponder] == controlView) {
+                        if (isHighlighted) {
+                            fgColor = [NSColor colorWithDeviceRed:24672.0/65535.0 green:29812.0/65535.0 blue:35466.0/65535.0 alpha:1.0];
+                            bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
+                        } else {
+                            fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
+                            bgColor = [NSColor colorWithDeviceRed:24672.0/65535.0 green:29812.0/65535.0 blue:35466.0/65535.0 alpha:0.95];
+                        }
                     } else {
-                        fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
-                        bgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:0.95];
-                    }
-                } else if ([[controlView window] isKeyWindow] && [[controlView window] firstResponder] == controlView) {
-                    if (isHighlighted) {
-                        fgColor = [NSColor colorWithDeviceRed:14135.0/65535.0 green:29298.0/65535.0 blue:48830.0/65535.0 alpha:1.0];
-                        bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
-                    } else {
-                        fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
-                        bgColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:0.95];
+                        if (isHighlighted) {
+                            fgColor = [NSColor colorWithDeviceRed:37779.0/65535.0 green:41634.0/65535.0 blue:45489.0/65535.0 alpha:1.0];
+                            bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
+                        } else {
+                            fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
+                            bgColor = [NSColor colorWithDeviceRed:37779.0/65535.0 green:41634.0/65535.0 blue:45489.0/65535.0 alpha:0.95];
+                        }
                     }
                 } else {
-                    if (isHighlighted) {
-                        fgColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:1.0];
-                        bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
+                    if ([[controlView window] isMainWindow] == NO) {
+                        if (isHighlighted) {
+                            fgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:1.0];
+                            bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
+                        } else {
+                            fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
+                            bgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:0.95];
+                        }
+                    } else if ([[controlView window] isKeyWindow] && [[controlView window] firstResponder] == controlView) {
+                        if (isHighlighted) {
+                            fgColor = [NSColor colorWithDeviceRed:14135.0/65535.0 green:29298.0/65535.0 blue:48830.0/65535.0 alpha:1.0];
+                            bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
+                        } else {
+                            fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
+                            bgColor = [NSColor colorWithDeviceRed:14135.0/65535.0 green:29298.0/65535.0 blue:48830.0/65535.0 alpha:0.95];
+                        }
                     } else {
-                        fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
-                        bgColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:0.95];
+                        if (isHighlighted) {
+                            fgColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:1.0];
+                            bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
+                        } else {
+                            fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
+                            bgColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:0.95];
+                        }
                     }
                 }
             } else {
