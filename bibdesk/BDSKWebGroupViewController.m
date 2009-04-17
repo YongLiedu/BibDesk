@@ -621,7 +621,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 
 - (void)webView:(WebView *)sender mouseDidMoveOverElement:(NSDictionary *)elementInformation modifierFlags:(unsigned int)modifierFlags {
     NSURL *aLink = [elementInformation objectForKey:WebElementLinkURLKey];
-    [self setStatus:[aLink absoluteString]];
+    [self setStatus:[[aLink absoluteString] stringByReplacingPercentEscapes]];
 }
 
 - (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems;
