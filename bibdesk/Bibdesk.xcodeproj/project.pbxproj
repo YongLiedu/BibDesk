@@ -252,7 +252,6 @@
 		CEDBE05A0F4CDAD900190AF5 /* NSView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDBE0580F4CDAD900190AF5 /* NSView_BDSKExtensions.m */; };
 		CEDBE0900F4CE06600190AF5 /* ScriptMenu.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEDBE08F0F4CE06600190AF5 /* ScriptMenu.tiff */; };
 		CEE22B210BFB7DA8002B746B /* RelNotes.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F994B8F607F5F65F00751DA1 /* RelNotes.rtf */; };
-		CEE23BDB0BFBA768002B746B /* BibDeskInputManager in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D2C0758069E00C3F701 /* BibDeskInputManager */; };
 		CEE23BDC0BFBA775002B746B /* Scripts in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = CEE23BD50BFBA6D6002B746B /* Scripts */; };
 		CEE23BDD0BFBA781002B746B /* Templates in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = CE97A3B90A28F19A00CF2DF3 /* Templates */; };
 		CEE23BE40BFBA78F002B746B /* previewtemplate.tex in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F91B5CC7076579830011ED22 /* previewtemplate.tex */; };
@@ -313,6 +312,8 @@
 		CEF942120926458C00750FFA /* BDSKPathColorTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF942100926458C00750FFA /* BDSKPathColorTransformer.m */; };
 		CEF94415092668EA00750FFA /* BDSKTableSortDescriptor.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF94413092668EA00750FFA /* BDSKTableSortDescriptor.m */; };
 		CEFA07F50AF0E52100A3B4B1 /* BDSKApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */; };
+		CEFA2CEB0F98E07000531EB6 /* BibDeskInputManager.bundle in Copy Files: InputManager */ = {isa = PBXBuildFile; fileRef = F9C7E5520BEA3C2700D65C7F /* BibDeskInputManager.bundle */; };
+		CEFA2CEF0F98E0E700531EB6 /* Info in Copy Files: InputManager */ = {isa = PBXBuildFile; fileRef = CEFA2CE80F98E04800531EB6 /* Info */; };
 		CEFA2F130CC0272C002A8262 /* BDSKTemplateTag.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFA2F110CC0272C002A8262 /* BDSKTemplateTag.m */; };
 		CEFD45890BFFC1F80027B933 /* NSWindow+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFD45870BFFC1F80027B933 /* NSWindow+Scripting.m */; };
 		CEFDBDBE0AEA86BA009EE99D /* BDSKSmartGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDBC0AEA86BA009EE99D /* BDSKSmartGroup.m */; };
@@ -818,6 +819,18 @@
 			name = "Copy Files: QuickLook";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CEFA2CE70F98E00F00531EB6 /* Copy Files: InputManager */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = BibDeskInputManager;
+			dstSubfolderSpec = 12;
+			files = (
+				CEFA2CEB0F98E07000531EB6 /* BibDeskInputManager.bundle in Copy Files: InputManager */,
+				CEFA2CEF0F98E0E700531EB6 /* Info in Copy Files: InputManager */,
+			);
+			name = "Copy Files: InputManager";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F9022E8B07580A7C00C3F701 /* Copy Files: Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -840,7 +853,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 12;
 			files = (
-				CEE23BDB0BFBA768002B746B /* BibDeskInputManager in Copy Files: Shared Support */,
 				CEE23BDC0BFBA775002B746B /* Scripts in Copy Files: Shared Support */,
 				CEE23BDD0BFBA781002B746B /* Templates in Copy Files: Shared Support */,
 				CEE23BE40BFBA78F002B746B /* previewtemplate.tex in Copy Files: Shared Support */,
@@ -1324,6 +1336,7 @@
 		CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKApplication.m; sourceTree = "<group>"; };
 		CEFA0F4C0AF1400900A3B4B1 /* BDSKOwnerProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKOwnerProtocol.h; sourceTree = "<group>"; };
 		CEFA2C150F98D25500531EB6 /* HowtoRelease.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = HowtoRelease.txt; sourceTree = "<group>"; };
+		CEFA2CE80F98E04800531EB6 /* Info */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Info; sourceTree = "<group>"; };
 		CEFA2F100CC0272C002A8262 /* BDSKTemplateTag.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTemplateTag.h; sourceTree = "<group>"; };
 		CEFA2F110CC0272C002A8262 /* BDSKTemplateTag.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTemplateTag.m; sourceTree = "<group>"; };
 		CEFD45860BFFC1F80027B933 /* NSWindow+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSWindow+Scripting.h"; sourceTree = "<group>"; };
@@ -1423,7 +1436,6 @@
 		F9022D150758066000C3F701 /* CharacterConversion.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = CharacterConversion.plist; sourceTree = "<group>"; };
 		F9022D180758066000C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = English; path = English.lproj/ReadMe.rtf; sourceTree = "<group>"; };
 		F9022D1B0758066000C3F701 /* TypeInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = TypeInfo.plist; sourceTree = "<group>"; };
-		F9022D2C0758069E00C3F701 /* BibDeskInputManager */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BibDeskInputManager; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9022D4B0758073E00C3F701 /* direct.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = direct.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/direct.cfg; sourceTree = SOURCE_ROOT; };
 		F9022D4D0758073E00C3F701 /* english.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = english.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/english.cfg; sourceTree = SOURCE_ROOT; };
 		F9022D510758073E00C3F701 /* fonts.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = fonts.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/fonts.cfg; sourceTree = SOURCE_ROOT; };
@@ -2420,7 +2432,7 @@
 		CEE23BAE0BFBA5FE002B746B /* Shared Support */ = {
 			isa = PBXGroup;
 			children = (
-				F9022D2C0758069E00C3F701 /* BibDeskInputManager */,
+				CEFA2CE60F98E00E00531EB6 /* inputmanager */,
 				CEE23BD50BFBA6D6002B746B /* Scripts */,
 				CE97A3B90A28F19A00CF2DF3 /* Templates */,
 				F91B5CC7076579830011ED22 /* previewtemplate.tex */,
@@ -2450,6 +2462,14 @@
 			);
 			name = IconFamily;
 			path = iconfamily;
+			sourceTree = "<group>";
+		};
+		CEFA2CE60F98E00E00531EB6 /* inputmanager */ = {
+			isa = PBXGroup;
+			children = (
+				CEFA2CE80F98E04800531EB6 /* Info */,
+			);
+			path = inputmanager;
 			sourceTree = "<group>";
 		};
 		EF168DE70F1132CC002F4D9F /* UnitTests */ = {
@@ -3026,6 +3046,7 @@
 				F920DB22075C2D40000C5FCA /* Rez */,
 				CE424A430D0F121400F824E7 /* Headers */,
 				F91B5C4E076412A10011ED22 /* Copy Files: Shared Support */,
+				CEFA2CE70F98E00F00531EB6 /* Copy Files: InputManager */,
 				F95CC0ED087F542F002C5694 /* Copy Files: Spotlight */,
 				CEEBA83C0D749C99000204B8 /* Copy Files: QuickLook */,
 				F9FF213B09E83BAB00BB1706 /* Run Script: Strip headers and .DS_Store */,
