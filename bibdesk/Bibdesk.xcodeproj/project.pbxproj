@@ -2432,13 +2432,13 @@
 		CEE23BAE0BFBA5FE002B746B /* Shared Support */ = {
 			isa = PBXGroup;
 			children = (
-				CEFA2CE60F98E00E00531EB6 /* inputmanager */,
 				CEE23BD50BFBA6D6002B746B /* Scripts */,
 				CE97A3B90A28F19A00CF2DF3 /* Templates */,
 				F91B5CC7076579830011ED22 /* previewtemplate.tex */,
 				F91B5CE407657A200011ED22 /* template.txt */,
 				CEF1817E0CEB701F00716E85 /* Bookmarks.plist */,
 				F9022D410758073E00C3F701 /* cfg */,
+				CEFA2CE60F98E00E00531EB6 /* inputmanager */,
 			);
 			name = "Shared Support";
 			sourceTree = "<group>";
@@ -2503,8 +2503,8 @@
 				F9022D690758073E00C3F701 /* style.cfg */,
 			);
 			name = cfg;
-			path = ../../build/bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg;
-			sourceTree = BUILT_PRODUCTS_DIR;
+			path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg;
+			sourceTree = "<group>";
 		};
 		F9022DDA0758089500C3F701 /* Images */ = {
 			isa = PBXGroup;
