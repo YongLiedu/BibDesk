@@ -811,7 +811,6 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
             [dictionary setObject:[fileSearchController sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
         }
         
-        int row, numRows = [groupOutlineView numberOfRows];
         NSMutableArray *groupsToExpand = [NSMutableArray array];
         NSEnumerator *groupEnum = [groups objectEnumerator];
         BDSKParentGroup *parent;

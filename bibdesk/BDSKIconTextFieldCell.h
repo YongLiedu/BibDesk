@@ -50,7 +50,7 @@
 
 @end
 
-#pragma mrk -
+#pragma mark -
 
 @interface BDSKConcreteIconTextFieldCell : BDSKIconTextFieldCell {
     NSImage *icon;

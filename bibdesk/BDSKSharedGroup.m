@@ -103,7 +103,6 @@ static NSImage *unlockedIcon = nil;
         NSRect badgeSrcRect = NSMakeRect(0.0, 0.0, 9.0, 12.0);
         NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
         NSImage *badge = [NSImage imageNamed:@"unlocked"];
-        NSSize srcSize = [[self icon] size];
         
         [image lockFocus];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];

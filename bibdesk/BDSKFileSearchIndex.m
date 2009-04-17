@@ -314,7 +314,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     BDSKASSERT([NSThread isMainThread]);
     // Make sure we send frequently enough to update a progress bar, but not too frequently to avoid beachball on single-core systems; too many search updates slow down indexing due to repeated flushes. 
     if (0 == flags.updateScheduled) {
-        [self performSelector:@selector(_notifyDelegate) withObject:nil afterDelay:0.5];
+        [self performSelector:@selector(notifyDelegate) withObject:nil afterDelay:0.5];
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.updateScheduled);
     }
 }

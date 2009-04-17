@@ -386,7 +386,6 @@ static BOOL isSearchFileAtPath(NSString *path)
             return;
         }
         
-        unsigned idx = [servers count];
         [[self class] addServer:[self serverInfo]];
         [self reloadServersSelectingServerNamed:[[self serverInfo] name]];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupServersDidChangeNotification object:self];

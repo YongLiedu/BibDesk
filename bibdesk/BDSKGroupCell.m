@@ -258,7 +258,6 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     // Draw the text
     NSRect textRect = [self textRectForBounds:aRect]; 
     NSFont *font = nil;
-    NSAttributedString *label = [self attributedStringValue];
     if (isHighlighted) {
         // source list draws selected text bold, but only when the passing an NSString to setObjectValue:
         font = [[self font] retain];

@@ -1346,7 +1346,6 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard {
     NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
-    unsigned int idx = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? 1 : 0;
     NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
 	int dragCopyType = [sud integerForKey:dragCopyTypeKey];
     BOOL success = NO;

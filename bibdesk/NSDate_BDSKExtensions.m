@@ -124,7 +124,6 @@
             NSArray *nodes = [monthString nodes];
             NSEnumerator *nodeEnum = [nodes objectEnumerator];
             BDSKStringNode *node = nil;
-            NSString *stringNode = nil;
             while (node = [nodeEnum nextObject]) {
                 if ([node type] == BSN_MACRODEF) {
                     monthString = [node value];
