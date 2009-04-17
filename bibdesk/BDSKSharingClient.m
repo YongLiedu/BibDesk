@@ -362,7 +362,6 @@ typedef struct _BDSKSharingClientFlags {
     NSData *password = nil;
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.canceledAuthentication);
     
-    int rv = 1;
     OSMemoryBarrier();
     if(flags.authenticationFailed == 0)
         password = [BDSKPasswordController passwordHashedForKeychainServiceName:[[self class] keychainServiceNameWithComputerName:[service name]]];
