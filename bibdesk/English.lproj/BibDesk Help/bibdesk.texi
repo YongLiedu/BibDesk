@@ -1446,6 +1446,7 @@ into distinct categories without managing many small files scattered around your
 * Smart Groups::     Grouping references based on specific criteria.
 * Static Groups::    Grouping arbitrary sets of references.
 * External Groups::  Importing groups of items from an external source.
+* Web Group::		 Detecting bibliographic information in web pages.
 @end menu
 
 @node Field Groups
@@ -1547,26 +1548,65 @@ To add publications to the group, just drag the items and drop them on the group
 @subsection External Groups
 
 @cindex external group
-
+@cindex shared group
+@cindex script group
 BibDesk can automatically fetch publications from external sources.  There are four types of external groups.  
 
-Shared Groups contain items that others share on your local network.  
-They are fetched using Bonjour.  This is similar to sharing of music files in iTunes.  
+The @ref{Web Group,@b{Web Group}} provides a web browser inside BibDesk which attempts to find bibliographic information in web pages. 
+
+@b{Shared Groups} contain items that others share on your local network.  
+They are discovered using Bonjour.  This is similar to sharing of music files in iTunes.  
 You can turn on sharing in the @ref{Sharing Preferences,Sharing Preferences}.  
 
-External File Groups get their items from a remote URL on the internet or from a local file on your computer. 
+@b{External File Groups} get their items from a remote URL on the internet or from a local file on your computer. 
 
-Script Groups generate their items using a script, either a shell script or an AppleScript.  
+@b{Script Groups} generate their items using a script, either a shell script or an AppleScript.  
 For example, the script can download content from a remote location and parse the content to get the items.  
 The script should return valid BibTeX. 
 
-@ref{Searching External Databases, Search Groups} contain items obtained from searching an external database, 
+@ref{Searching External Databases, @b{Search Groups}} contain items obtained from searching an external database, 
 such as PubMed or libraries allowing z39.50 searches. 
 
 Items in external groups are not included in the Library and can not be edited.  
 You can add external items to your Library by dragging them to the Library group.  
 You can also use the @menutitle{Merge In External Publications} menu item in the 
 @menutitle{File} menu. This wil only add items that are not yet in your Library. 
+
+@c
+
+@node Web Group
+@subsection Web Group
+
+@cindex web group
+BibDesk's Web Group attempts to detect bibliographic information in web pages. The detection will only work if BibDesk recognises the current web page or the formats therein. Once detected, the publications are displayed in the group for easy import into the Library.
+
+The Web Group supports a number of web sites as well as a few bibliographic formats which may be used on all web pages. Sometimes additional services which may require a subscription are used to provide a full bibliographic record.
+
+@subheading Supported Web Sites
+@uref{http://portal.acm.org/,ACM}
+
+@uref{http://arxiv.org/,arXiv}: E-Print archive used frequently in mathematics and physics but also containing sections for non-linear science, computer science, quantitative biology and statistics.
+
+@uref{http://www.citeulike.org/,CiteULike}
+
+@uref{http://scholar.google.com/,Google Scholar}: Google's attempt to provide a universal search for and in research related literature. Please go to 'Scholar Preferences' and set the 'Bibliography Manager' option to 'Show links to import citations to BibTeX' for it to work.
+
+@uref{http://www.hubmed.org/,HubMed}: Alternative interface for queries to the PubMed database of medical literature.
+
+@uref{http://ams.org/mathscinet/,MathSciNet}: Database of Mathematical Reviews by the American Mathematical Society. Requires a subscription to be accessed. 
+
+@uref{http://www.numdam.org/?lang=en,NUMDAM} (Num@'erisation de documents anciens math@'ematiques): Digital versions of old mathematical papers. The site itself is public but BibDesk's support for it requires access to the Zentralblatt Math service.
+
+@uref{http://projecteuclid.org/,Project Euclid}: A publishing platform for 'independent and society journals' in mathematics and statistics. BibDesk can provide bibliographic information for those articles and references mentioed on the site if MathSciNet or Zentralblatt Math IDs are listed for them and you   have access to those sites.
+
+@uref{http://www.slac.stanford.edu/spires/,SPIRES}: Database of literature on particle physics.
+
+@uref{http://www.zentralblatt-math.org/zmath/en/,Zentralblatt Math}: Database of Zentralblatt Mathematik with reviews of mathematical papers. Only the first three search results are displayed without a subscription.
+
+@subheading Supported General Formats
+@uref{http://ocoins.info/,COinS}: A microformat which adds bibliographic information to a web page by placing it into the title attribute of a span element with class 'Z3988'. A number of web sites ranging from blogs to library catalogues insert these elements into their web pages. Examples: @uref{http://citeseerx.ist.psu.edu/,CiteSeerX}, @uref{http://suche3.suub.uni-bremen.de/index.html,Uni Bremen Library}, @uref{https://kataloge.uni-hamburg.de/,Some OPACs}.
+
+@uref{http://microformats.org/wiki/citation,HCite}: Another microformat for adding bibliographic information to web pages. Hardly used.
 
 @c --------------------------------------------------------------------------------------
 
