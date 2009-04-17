@@ -93,26 +93,30 @@ static NSColor *secondaryHighlightColor = nil;
 static NSColor *secondaryHighlightLightColor = nil;
 static NSColor *secondaryHighlightDarkColor = nil;
 
+static void initializeHighlightColors() {
+    if (highlightColor == nil) {
+        highlightColor = [[NSColor alternateSelectedControlColor] retain];
+        // If this view isn't key, use the gray version of the dark color. Note that this varies from the standard gray version that NSCell returns as its highlightColorWithFrame: when the cell is not in a key view, in that this is a lot darker. Mike and I think this is justified for this kind of view -- if you're using the dark selection color to show the selected status, it makes sense to leave it dark.
+        secondaryHighlightColor = [[[highlightColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
+        
+        // Take the color apart
+        float hue, saturation, brightness, alpha;
+        [[highlightColor colorUsingColorSpaceName:NSDeviceRGBColorSpace] getHue:&hue saturation:&saturation brightness:&brightness alpha:&alpha];
+
+        // Create synthetic darker and lighter versions
+        // NSColor *highlightLightColor = [NSColor colorWithDeviceHue:hue - (1.0/120.0) saturation:MAX(0.0, saturation-0.12) brightness:MIN(1.0, brightness+0.045) alpha:alpha];
+        highlightLightColor = [[NSColor colorWithDeviceHue:hue saturation:MAX(0.0, saturation-.12) brightness:MIN(1.0, brightness+0.30) alpha:alpha] retain];
+        highlightDarkColor = [[NSColor colorWithDeviceHue:hue saturation:MIN(1.0, (saturation > .04) ? saturation+0.12 : 0.0) brightness:MAX(0.0, brightness-0.045) alpha:alpha] retain];
+        secondaryHighlightLightColor = [[[highlightLightColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
+        secondaryHighlightDarkColor = [[[highlightDarkColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
+    }
+}
+
 @implementation BDSKGradientTableView
 
 + (void)initialize {
-    
     BDSKINITIALIZE;
-    
-    highlightColor = [[NSColor alternateSelectedControlColor] retain];
-    // If this view isn't key, use the gray version of the dark color. Note that this varies from the standard gray version that NSCell returns as its highlightColorWithFrame: when the cell is not in a key view, in that this is a lot darker. Mike and I think this is justified for this kind of view -- if you're using the dark selection color to show the selected status, it makes sense to leave it dark.
-    secondaryHighlightColor = [[[highlightColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
-    
-    // Take the color apart
-    float hue, saturation, brightness, alpha;
-    [[highlightColor colorUsingColorSpaceName:NSDeviceRGBColorSpace] getHue:&hue saturation:&saturation brightness:&brightness alpha:&alpha];
-
-    // Create synthetic darker and lighter versions
-    // NSColor *highlightLightColor = [NSColor colorWithDeviceHue:hue - (1.0/120.0) saturation:MAX(0.0, saturation-0.12) brightness:MIN(1.0, brightness+0.045) alpha:alpha];
-    highlightLightColor = [[NSColor colorWithDeviceHue:hue saturation:MAX(0.0, saturation-.12) brightness:MIN(1.0, brightness+0.30) alpha:alpha] retain];
-    highlightDarkColor = [[NSColor colorWithDeviceHue:hue saturation:MIN(1.0, (saturation > .04) ? saturation+0.12 : 0.0) brightness:MAX(0.0, brightness-0.045) alpha:alpha] retain];
-    secondaryHighlightLightColor = [[[highlightLightColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
-    secondaryHighlightDarkColor = [[[highlightDarkColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
+    initializeHighlightColors();
 }
 
 - (id)initWithFrame:(NSRect)frameRect {
@@ -136,16 +140,6 @@ static NSColor *secondaryHighlightDarkColor = nil;
 }
 
 - (id)_highlightColorForCell:(NSCell *)cell { return nil; }
-
-- (void)selectRowIndexes:(NSIndexSet *)indexes byExtendingSelection:(BOOL)shouldExtend {
-    [super selectRowIndexes:indexes byExtendingSelection:shouldExtend];
-    [self setNeedsDisplay:YES]; // we display extra because we draw multiple contiguous selected rows differently, so changing one row's selection can change how others draw.
-}
-
-- (void)deselectRow:(int)row {
-    [super deselectRow:row];
-    [self setNeedsDisplay:YES]; // we display extra because we draw multiple contiguous selected rows differently, so changing one row's selection can change how others draw.
-}
 
 - (void)highlightSelectionInClipRect:(NSRect)rect {
     if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
@@ -176,24 +170,20 @@ static NSColor *secondaryHighlightDarkColor = nil;
     linearBlendFunctionRef = CGFunctionCreate(twoColors, 1, domainAndRange, 4, domainAndRange, &linearFunctionCallbacks);
     
     NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-    unsigned int rowIndex = [selectedRowIndexes firstIndex];
+    unsigned int rowIndex = [selectedRowIndexes firstIndex], prevRowIndex = NSNotFound;
     
     while (rowIndex != NSNotFound) {
-        unsigned int endOfCurrentRunRowIndex, newRowIndex = rowIndex;
-        do {
-            endOfCurrentRunRowIndex = newRowIndex;
-            newRowIndex = [selectedRowIndexes indexGreaterThanIndex:endOfCurrentRunRowIndex];
-        } while (newRowIndex == endOfCurrentRunRowIndex + 1);
-            
-        NSRect rowRect = NSUnionRect([self rectOfRow:rowIndex], [self rectOfRow:endOfCurrentRunRowIndex]);
+        NSRect rowRect = [self rectOfRow:rowIndex];
         
         NSRect topBar, washRect;
         NSDivideRect(rowRect, &topBar, &washRect, 1.0, NSMinYEdge);
         
         // Draw the top line of pixels of the selected row in the alternateSelectedControlColor
-        [color set];
-        NSRectFill(topBar);
-
+        if (rowIndex == 0 || rowIndex - 1 != prevRowIndex) {
+            [color setFill];
+            NSRectFill(topBar);
+        }
+        
         // Draw a soft wash underneath it
         CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
         CGContextSaveGState(context);
@@ -203,7 +193,8 @@ static NSColor *secondaryHighlightDarkColor = nil;
         CGShadingRelease(cgShading);
         CGContextRestoreGState(context);
 
-        rowIndex = newRowIndex;
+        prevRowIndex = rowIndex;
+        rowIndex = [selectedRowIndexes indexGreaterThanIndex:rowIndex];
     }
     CGFunctionRelease(linearBlendFunctionRef);
     CGColorSpaceRelease(colorSpace);
@@ -219,6 +210,11 @@ static NSColor *secondaryHighlightDarkColor = nil;
 
 @implementation BDSKGradientOutlineView
 
++ (void)initialize {
+    BDSKINITIALIZE;
+    initializeHighlightColors();
+}
+
 - (id)initWithFrame:(NSRect)frameRect {
     if (self = [super initWithFrame:frameRect]) {
         if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)])
@@ -240,16 +236,6 @@ static NSColor *secondaryHighlightDarkColor = nil;
 }
 
 - (id)_highlightColorForCell:(NSCell *)cell { return nil; }
-
-- (void)selectRowIndexes:(NSIndexSet *)indexes byExtendingSelection:(BOOL)shouldExtend {
-    [super selectRowIndexes:indexes byExtendingSelection:shouldExtend];
-    [self setNeedsDisplay:YES]; // we display extra because we draw multiple contiguous selected rows differently, so changing one row's selection can change how others draw.
-}
-
-- (void)deselectRow:(int)row {
-    [super deselectRow:row];
-    [self setNeedsDisplay:YES]; // we display extra because we draw multiple contiguous selected rows differently, so changing one row's selection can change how others draw.
-}
 
 - (void)highlightSelectionInClipRect:(NSRect)rect {
     if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
@@ -280,24 +266,20 @@ static NSColor *secondaryHighlightDarkColor = nil;
     linearBlendFunctionRef = CGFunctionCreate(twoColors, 1, domainAndRange, 4, domainAndRange, &linearFunctionCallbacks);
     
     NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-    unsigned int rowIndex = [selectedRowIndexes firstIndex];
+    unsigned int rowIndex = [selectedRowIndexes firstIndex], prevRowIndex = NSNotFound;
     
     while (rowIndex != NSNotFound) {
-        unsigned int endOfCurrentRunRowIndex, newRowIndex = rowIndex;
-        do {
-            endOfCurrentRunRowIndex = newRowIndex;
-            newRowIndex = [selectedRowIndexes indexGreaterThanIndex:endOfCurrentRunRowIndex];
-        } while (newRowIndex == endOfCurrentRunRowIndex + 1);
-            
-        NSRect rowRect = NSUnionRect([self rectOfRow:rowIndex], [self rectOfRow:endOfCurrentRunRowIndex]);
+        NSRect rowRect = [self rectOfRow:rowIndex];
         
         NSRect topBar, washRect;
         NSDivideRect(rowRect, &topBar, &washRect, 1.0, NSMinYEdge);
         
         // Draw the top line of pixels of the selected row in the alternateSelectedControlColor
-        [color set];
-        NSRectFill(topBar);
-
+        if (rowIndex == 0 || rowIndex - 1 != prevRowIndex) {
+            [color setFill];
+            NSRectFill(topBar);
+        }
+        
         // Draw a soft wash underneath it
         CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
         CGContextSaveGState(context);
@@ -307,7 +289,8 @@ static NSColor *secondaryHighlightDarkColor = nil;
         CGShadingRelease(cgShading);
         CGContextRestoreGState(context);
 
-        rowIndex = newRowIndex;
+        prevRowIndex = rowIndex;
+        rowIndex = [selectedRowIndexes indexGreaterThanIndex:rowIndex];
     }
     CGFunctionRelease(linearBlendFunctionRef);
     CGColorSpaceRelease(colorSpace);
