@@ -69,8 +69,6 @@ static Class webParserClassForType(int stringType)
             return [BDSKCiteULikeParser class];
         case BDSKHubmedWebType:
             return [BDSKHubmedParser class];
-		case BDSKHCiteWebType: 
-            return [BDSKHCiteParser class];
 		case BDSKSpiresWebType: 
             return [BDSKSpiresParser class];
 		case BDSKArxivWebType: 
@@ -85,6 +83,8 @@ static Class webParserClassForType(int stringType)
 			return [BDSKNumdamParser class];
 		case BDSKCOinSWebType:
 			return [BDSKCOinSParser class];
+		case BDSKHCiteWebType: 
+            return [BDSKHCiteParser class];
         default:
             return Nil;
     }    
@@ -103,8 +103,6 @@ static Class webParserClassForType(int stringType)
         return BDSKCiteULikeWebType;
     if([BDSKACMDLParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
         return BDSKACMDLWebType;
-    if([BDSKHCiteParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
-		return BDSKHCiteWebType;
     if([BDSKSpiresParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
 		return BDSKSpiresWebType;
     if([BDSKArxivParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
@@ -119,6 +117,8 @@ static Class webParserClassForType(int stringType)
 		return BDSKNumdamWebType;
     if([BDSKCOinSParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
 		return BDSKCOinSWebType;
+    if([BDSKHCiteParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
+		return BDSKHCiteWebType;
     return BDSKUnknownWebType;
 }
 
