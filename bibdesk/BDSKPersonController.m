@@ -366,8 +366,8 @@
 
 - (void)openSelectedPub:(id)sender{
     int row = [publicationTableView selectedRow];
-    NSAssert(row >= 0, @"Cannot perform double-click action when no row is selected");
-    [(BibDocument *)[self document] editPub:[[[publicationArrayController arrangedObjects] objectAtIndex:row] valueForKey:@"publication"]];
+    if (row != -1)
+        [(BibDocument *)[self document] editPub:[[[publicationArrayController arrangedObjects] objectAtIndex:row] valueForKey:@"publication"]];
 }
 
 - (void)changeNameToString:(NSString *)newNameString{
