@@ -136,20 +136,13 @@
 }
 
 - (NSUInteger)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView {
-    NSUInteger hit = [super hitTestForEvent:event inRect:cellFrame ofView:controlView];
-    // super returns 0 for button clicks, so -[NSTableView mouseDown:] doesn't track the cell
-    NSRect iconRect = [self iconRectForBounds:cellFrame];
+    NSRect textRect = [self textRectForBounds:cellFrame];
     NSPoint mouseLoc = [controlView convertPoint:[event locationInWindow] fromView:nil];
-    if (NSMouseInRect(mouseLoc, iconRect, [controlView isFlipped])) {
+    NSUInteger hit = NSCellHitNone;
+    if (NSMouseInRect(mouseLoc, textRect, [controlView isFlipped]))
+        hit = [super hitTestForEvent:event inRect:textRect ofView:controlView];
+    else if (NSMouseInRect(mouseLoc, [self iconRectForBounds:cellFrame], [controlView isFlipped]))
         hit = NSCellHitContentArea;
-    } else {
-        NSRect textRect = [self textRectForBounds:cellFrame];
-        float textWidth = [super cellSize].width;
-        if (textWidth < NSWidth(textRect) && [NSString isEmptyString:[self stringValue]] == NO)
-            textRect.size.width = textWidth;
-        if (NSMouseInRect(mouseLoc, textRect, [controlView isFlipped]))
-            hit = NSCellHitContentArea | NSCellHitEditableTextArea;
-    }
     return hit;
 }
 
