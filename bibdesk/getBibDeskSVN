@@ -15,12 +15,12 @@ Build Instructions
 -----------------
 (Also check http://bibdesk.sourceforge.net/wiki/index.php/BuildingFromSVN )
 
-1. You must have the Cross Compiling tools, which are a customize
+1. MacOSX 10.5 with at least the Xcode 3.1.1 developer tools installed
+   is required to build BibDesk
+
+2. You must have the Cross Compiling tools, which are a customize
    option during the Xcode install.  This avoids 
    "/Developer/SDKs/MacOSX10.4u.sdk does not exist" type errors
-    
-2. In Xcode, Set Build Preferences to "Separate Location for Build Products"
-   (This is required by the OmniFrameworks, but is good practice anyway)
     
 Do you want to open the project file (bibdesk/Bibdesk.xcodeproj) now? (y/n)
 ENDHERE
