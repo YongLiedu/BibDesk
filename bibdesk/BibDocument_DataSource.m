@@ -1740,23 +1740,6 @@ static BDSKGroup *targetGroupFromDropItem(id item, NSInteger idx)
 }
 
 #pragma mark -
-
-// as the window delegate, we receive these from NSInputManager and doCommandBySelector:
-- (void)moveLeft:(id)sender{
-    if([documentWindow firstResponder] != groupOutlineView && [documentWindow makeFirstResponder:groupOutlineView])
-        if([groupOutlineView numberOfSelectedRows] == 0)
-            [self selectLibraryGroup:nil];
-}
-
-- (void)moveRight:(id)sender{
-    if([documentWindow firstResponder] != tableView && [documentWindow makeFirstResponder:tableView]){
-        if([tableView numberOfSelectedRows] == 0)
-            [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
-    } else if([documentWindow firstResponder] == tableView)
-        [self editPubCmd:nil];
-}
-
-#pragma mark -
 #pragma mark FVFileView data source and delegate
 
 - (NSString *)fileView:(FVFileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex {
