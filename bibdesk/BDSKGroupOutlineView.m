@@ -144,7 +144,7 @@
     [super mouseDown:theEvent];
 }
 
-static CGFloat mainColorBlue[3]         = {37779.0/65535.0, 41634.0/65535.0, 45489.0/65535.0};
+static CGFloat mainColorBlue[3]         = {34695.0/65535.0, 39064.0/65535.0, 48316.0/65535.0};
 static CGFloat disabledColorBlue[3]     = {40606.0/65535.0, 40606.0/65535.0, 40606.0/65535.0};
 static CGFloat mainColorGraphite[3]     = {37779.0/65535.0, 41634.0/65535.0, 45489.0/65535.0};
 static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 40606.0/65535.0};
@@ -157,7 +157,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
     float heightOffset = fmaxf(1.0f, roundf(0.25 * [self intercellSpacing].height) - lineWidth);
     NSColor *highlightColor;
     
-    if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)] == NO) {
+    if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
         CGFloat *color;
         BOOL isGraphite = [NSColor currentControlTint] == NSGraphiteControlTint;
         if ([[self window] isMainWindow])
