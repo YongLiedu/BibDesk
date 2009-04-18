@@ -902,7 +902,7 @@ static CGFloat _subtitleHeight = 0.0;
     }
 }
 
-- (void)_handleMainStateNotification:(NSNotification *)note {
+- (void)_handleKeyOrMainStateNotification:(NSNotification *)note {
     NSView *view = (id)[self enclosingScrollView] ?: (id)self;
     [view setNeedsDisplay:YES];
 }
@@ -916,6 +916,8 @@ static CGFloat _subtitleHeight = 0.0;
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
         [nc removeObserver:self name:NSWindowDidBecomeMainNotification object:window];
         [nc removeObserver:self name:NSWindowDidResignMainNotification object:window];
+        [nc removeObserver:self name:NSWindowDidBecomeKeyNotification object:window];
+        [nc removeObserver:self name:NSWindowDidResignKeyNotification object:window];
     }
 }
 
@@ -924,8 +926,10 @@ static CGFloat _subtitleHeight = 0.0;
     NSWindow *window = [self window];
     if (window) {
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-        [nc addObserver:self selector:@selector(_handleMainStateNotification:) name:NSWindowDidBecomeMainNotification object:window];
-        [nc addObserver:self selector:@selector(_handleMainStateNotification:) name:NSWindowDidResignMainNotification object:window];
+        [nc addObserver:self selector:@selector(_handleKeyOrMainStateNotification:) name:NSWindowDidBecomeMainNotification object:window];
+        [nc addObserver:self selector:@selector(_handleKeyOrMainStateNotification:) name:NSWindowDidResignMainNotification object:window];
+        [nc addObserver:self selector:@selector(_handleKeyOrMainStateNotification:) name:NSWindowDidBecomeKeyNotification object:window];
+        [nc addObserver:self selector:@selector(_handleKeyOrMainStateNotification:) name:NSWindowDidResignKeyNotification object:window];
     }
 }
 
