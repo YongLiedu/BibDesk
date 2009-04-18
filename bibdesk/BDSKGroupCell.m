@@ -248,6 +248,13 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     return [super textColor];
 }
 
+static CGFloat keyColorBlue[3]          = {14135.0/65535.0, 29298.0/65535.0, 48830.0/65535.0};
+static CGFloat mainColorBlue[3]         = {37779.0/65535.0, 41634.0/65535.0, 45489.0/65535.0};
+static CGFloat disabledColorBlue[3]     = {40606.0/65535.0, 40606.0/65535.0, 40606.0/65535.0};
+static CGFloat keyColorGraphite[3]      = {24672.0/65535.0, 29812.0/65535.0, 35466.0/65535.0};
+static CGFloat mainColorGraphite[3]     = {37779.0/65535.0, 41634.0/65535.0, 45489.0/65535.0};
+static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 40606.0/65535.0};
+
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView {
     BOOL isHighlighted;
     if ([self respondsToSelector:@selector(backgroundStyle)])
@@ -281,58 +288,21 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
             NSColor *bgColor;
             if ([controlView respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
                 // On Leopard, use the blue or gray color taken from the center of the gradient highlight
-                if ([NSColor currentControlTint] == NSGraphiteControlTint) {
-                    if ([[controlView window] isMainWindow] == NO) {
-                        if (isHighlighted) {
-                            fgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:1.0];
-                            bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
-                        } else {
-                            fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
-                            bgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:0.95];
-                        }
-                    } else if ([[controlView window] isKeyWindow] && [[controlView window] firstResponder] == controlView) {
-                        if (isHighlighted) {
-                            fgColor = [NSColor colorWithDeviceRed:24672.0/65535.0 green:29812.0/65535.0 blue:35466.0/65535.0 alpha:1.0];
-                            bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
-                        } else {
-                            fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
-                            bgColor = [NSColor colorWithDeviceRed:24672.0/65535.0 green:29812.0/65535.0 blue:35466.0/65535.0 alpha:0.95];
-                        }
-                    } else {
-                        if (isHighlighted) {
-                            fgColor = [NSColor colorWithDeviceRed:37779.0/65535.0 green:41634.0/65535.0 blue:45489.0/65535.0 alpha:1.0];
-                            bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
-                        } else {
-                            fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
-                            bgColor = [NSColor colorWithDeviceRed:37779.0/65535.0 green:41634.0/65535.0 blue:45489.0/65535.0 alpha:0.95];
-                        }
-                    }
+                CGFloat *color;
+                BOOL isGraphite = [NSColor currentControlTint] == NSGraphiteControlTint;
+                if ([[controlView window] isMainWindow] == NO)
+                    color = isGraphite ? disabledColorGraphite : disabledColorBlue;
+                else if ([[controlView window] isKeyWindow] && [[controlView window] firstResponder] == controlView)
+                    // the key state color does not look nice for the count bubble background
+                    color = isHighlighted ? (isGraphite ? keyColorGraphite : keyColorBlue) : (isGraphite ? mainColorGraphite : mainColorBlue);
+                else
+                    color = isGraphite ? mainColorGraphite : mainColorBlue;
+                if (isHighlighted) {
+                    fgColor = [NSColor colorWithDeviceRed:color[0] green:color[1] blue:color[2] alpha:1.0];
+                    bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
                 } else {
-                    if ([[controlView window] isMainWindow] == NO) {
-                        if (isHighlighted) {
-                            fgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:1.0];
-                            bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
-                        } else {
-                            fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
-                            bgColor = [NSColor colorWithDeviceRed:40606.0/65535.0 green:40606.0/65535.0 blue:40606.0/65535.0 alpha:0.95];
-                        }
-                    } else if ([[controlView window] isKeyWindow] && [[controlView window] firstResponder] == controlView) {
-                        if (isHighlighted) {
-                            fgColor = [NSColor colorWithDeviceRed:14135.0/65535.0 green:29298.0/65535.0 blue:48830.0/65535.0 alpha:1.0];
-                            bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
-                        } else {
-                            fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
-                            bgColor = [NSColor colorWithDeviceRed:14135.0/65535.0 green:29298.0/65535.0 blue:48830.0/65535.0 alpha:0.95];
-                        }
-                    } else {
-                        if (isHighlighted) {
-                            fgColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:1.0];
-                            bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
-                        } else {
-                            fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
-                            bgColor = [NSColor colorWithDeviceRed:34695.0/65535.0 green:39064.0/65535.0 blue:48316.0/65535.0 alpha:0.95];
-                        }
-                    }
+                    fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
+                    bgColor = [NSColor colorWithDeviceRed:color[0] green:color[1] blue:color[2] alpha:0.95];
                 }
             } else {
                 // On Tiger use gray
