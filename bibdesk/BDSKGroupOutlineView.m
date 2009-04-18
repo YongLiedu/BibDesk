@@ -160,7 +160,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
     if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
         CGFloat *color;
         BOOL isGraphite = [NSColor currentControlTint] == NSGraphiteControlTint;
-        if ([[self window] isMainWindow])
+        if ([[self window] isMainWindow] || [[self window] isKeyWindow])
             color = isGraphite ? mainColorGraphite : mainColorBlue;
         else
             color = isGraphite ? disabledColorGraphite : disabledColorBlue;

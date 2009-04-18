@@ -290,13 +290,13 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
                 // On Leopard, use the blue or gray color taken from the center of the gradient highlight
                 CGFloat *color;
                 BOOL isGraphite = [NSColor currentControlTint] == NSGraphiteControlTint;
-                if ([[controlView window] isMainWindow] == NO)
-                    color = isGraphite ? disabledColorGraphite : disabledColorBlue;
-                else if ([[controlView window] isKeyWindow] && [[controlView window] firstResponder] == controlView)
+                if ([[controlView window] isKeyWindow] && [[controlView window] firstResponder] == controlView)
                     // the key state color does not look nice for the count bubble background
                     color = isHighlighted ? (isGraphite ? keyColorGraphite : keyColorBlue) : (isGraphite ? mainColorGraphite : mainColorBlue);
-                else
+                else if ([[controlView window] isMainWindow] || [[controlView window] isKeyWindow])
                     color = isGraphite ? mainColorGraphite : mainColorBlue;
+                else
+                    color = isGraphite ? disabledColorGraphite : disabledColorBlue;
                 if (isHighlighted) {
                     fgColor = [NSColor colorWithDeviceRed:color[0] green:color[1] blue:color[2] alpha:1.0];
                     bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
