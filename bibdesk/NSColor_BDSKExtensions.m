@@ -62,7 +62,7 @@ typedef union _BDSKRGBAInt {
     NSColor *color = nil;
     if ([NSString isEmptyString:string] == NO) {
         BDSKRGBAInt u;
-        u.uintValue = CFSwapInt32BigToHost([string unsignedIntValue]);
+        u.uintValue = CFSwapInt32BigToHost(strtoul([string UTF8String], NULL, 10));
         color = [NSColor colorWithCalibratedRed:u.rgba.r / 255.0 green:u.rgba.g / 255.0 blue:u.rgba.b / 255.0 alpha:u.rgba.a / 255.0];
     }
     return color;

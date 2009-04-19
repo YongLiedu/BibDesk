@@ -1093,10 +1093,6 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     }
 }
 
-- (unsigned int)unsignedIntValue {
-    return strtoul([self UTF8String], NULL, 10);
-}
-
 - (NSString *)acronymValueIgnoringWordLength:(unsigned int)ignoreLength{
     NSMutableString *result = [NSMutableString string];
     NSArray *allComponents = [self componentsSeparatedByString:@" "]; // single whitespace

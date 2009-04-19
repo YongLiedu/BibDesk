@@ -377,8 +377,6 @@ An inline buffer is used for speed in accessing each character.
  */
 - (NSCellStateValue)triStateValue;
 
-- (unsigned int)unsignedIntValue;
-
 - (NSString *)acronymValueIgnoringWordLength:(unsigned int)ignoreLength;
 
 #pragma mark -
