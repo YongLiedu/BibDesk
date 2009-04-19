@@ -140,6 +140,17 @@ static CGFloat _subtitleHeight = 0.0;
 
 + (void)initialize 
 {
+    // binding an NSSlider in IB 3 results in a crash on 10.4
+    [self exposeBinding:ICONSCALE_BINDING_NAME];
+    [self exposeBinding:MINICONSCALE_BINDING_NAME];
+    [self exposeBinding:MAXICONSCALE_BINDING_NAME];
+    [self exposeBinding:DISPLAYMODE_BINDING_NAME];
+    [self exposeBinding:EDITABLE_BINDING_NAME];
+    [self exposeBinding:ALLOWSDOWNLOADING_BINDING_NAME];
+    [self exposeBinding:CONTENT_BINDING_NAME];
+    [self exposeBinding:SELECTIONINDEXES_BINDING_NAME];
+    [self exposeBinding:BACKGROUNDCOLOR_BINDING_NAME];
+    
     FVINITIALIZE(FVFileView);
     
     NSMutableDictionary *ta = [NSMutableDictionary dictionary];
@@ -167,17 +178,6 @@ static CGFloat _subtitleHeight = 0.0;
     
     // QTMovie raises if +initialize isn't sent on the AppKit thread
     [QTMovie class];
-    
-    // binding an NSSlider in IB 3 results in a crash on 10.4
-    [self exposeBinding:ICONSCALE_BINDING_NAME];
-    [self exposeBinding:MINICONSCALE_BINDING_NAME];
-    [self exposeBinding:MAXICONSCALE_BINDING_NAME];
-    [self exposeBinding:DISPLAYMODE_BINDING_NAME];
-    [self exposeBinding:EDITABLE_BINDING_NAME];
-    [self exposeBinding:ALLOWSDOWNLOADING_BINDING_NAME];
-    [self exposeBinding:CONTENT_BINDING_NAME];
-    [self exposeBinding:SELECTIONINDEXES_BINDING_NAME];
-    [self exposeBinding:BACKGROUNDCOLOR_BINDING_NAME];
 }
 
 + (NSColor *)defaultBackgroundColor
