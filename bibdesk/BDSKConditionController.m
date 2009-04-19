@@ -133,7 +133,7 @@ static char BDSKConditionControllerObservationContext;
     [[triStateButton superview] retain];
     [[ratingButton superview] retain];
     
-    [ratingButton setRating:[[condition stringValue] unsignedIntValue]];
+    [ratingButton setRating:[[condition stringValue] intValue]];
     
     NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
     [formatter setDateStyle:NSDateFormatterShortStyle];
@@ -329,7 +329,7 @@ static char BDSKConditionControllerObservationContext;
                 [[undoManager prepareWithInvocationTarget:condition] setStringComparison:[oldValue intValue]];
             } else if ([keyPath isEqualToString:@"stringValue"]) {
                 [[undoManager prepareWithInvocationTarget:condition] setStringValue:oldValue];
-                [ratingButton setRating:[[condition stringValue] unsignedIntValue]];
+                [ratingButton setRating:[[condition stringValue] intValue]];
             } else if ([keyPath isEqualToString:@"countValue"]) {
                 [[undoManager prepareWithInvocationTarget:condition] setCountValue:[oldValue intValue]];
             } else if ([keyPath isEqualToString:@"numberValue"]) {
