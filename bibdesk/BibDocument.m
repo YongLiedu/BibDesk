@@ -2173,24 +2173,27 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     }
     
     BOOL autoGenerate = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyAutogenerateKey];
-    NSMutableArray *pubs = [NSMutableArray arrayWithCapacity:[newPubs count]];
+    NSMutableArray *autogeneratePubs = [NSMutableArray arrayWithCapacity:[newPubs count]];
+    BOOL hasDuplicateCiteKey = NO;
     
     pubEnum = [newPubs objectEnumerator];
     
     while (pub = [pubEnum nextObject]) {
         if ((autoGenerate == NO && [pub hasEmptyOrDefaultCiteKey]) ||
-            (autoGenerate && [pub canGenerateAndSetCiteKey])) // @@ or should we check for hasEmptyOrDefaultCiteKey ?
-            [pubs addObject:pub];
+            (autoGenerate && [pub canGenerateAndSetCiteKey])) { // @@ or should we check for hasEmptyOrDefaultCiteKey ?
+            [autogeneratePubs addObject:pub];
+        } else if ([pub isValidCiteKey:[pub citeKey]] == NO) {
+            hasDuplicateCiteKey = YES;
+        }
     }
-    [self generateCiteKeysForPublications:pubs];
+    [self generateCiteKeysForPublications:autogeneratePubs];
     
     // set Date-Added to the current date, since unarchived items will have their own (incorrect) date
     NSCalendarDate *importDate = [NSCalendarDate date];
     [newPubs makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
 	
-	if(shouldEdit) {
+	if(shouldEdit)
 		[self editPublications:newPubs]; // this will ask the user when there are many pubs
-	}
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication", @"Undo action name")];
     
@@ -2206,8 +2209,17 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKImportPublicationsScriptHookName forPublications:newPubs document:self];
     
-    if(tmpCiteKey != nil)
+    if (tmpCiteKey != nil) {
         [self reportTemporaryCiteKeys:tmpCiteKey forNewDocument:NO];
+    } else if (hasDuplicateCiteKey) { // should we do this when we don't edit?
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Cite Key", @"Message in alert dialog when duplicate citye key was found") 
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"One or more items you added have a cite key which is either already used in this document. You should provide a unique one.", @"Informative text in alert dialog")];
+        // don't begin a sheet, because the edit command may have one put up already
+        [alert runModal];
+    }
 }
 
 - (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)shouldSelect verbose:(BOOL)verbose error:(NSError **)outError{
