@@ -50,7 +50,7 @@
 
 - (void)setupTableColumnsWithIdentifiers:(NSArray *)identifiers;
 - (NSMenu *)columnsMenu;
-- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(unsigned)index;
+- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(unsigned int)index;
 - (void)removeTableColumnWithIdentifier:(NSString *)identifier;
 
 - (void)removeAllTableColumns;

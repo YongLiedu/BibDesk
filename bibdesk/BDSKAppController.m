@@ -101,7 +101,7 @@ static void fixLegacyTableColumnIdentifiers()
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     NSMutableArray *fixedTableColumnIdentifiers = [[[sud arrayForKey:BDSKShownColsNamesKey] mutableCopy] autorelease];
 
-    unsigned idx;
+    unsigned int idx;
     BOOL didFixIdentifier = NO;
     NSDictionary *legacyKeys = [NSDictionary dictionaryWithObjectsAndKeys:BDSKDateAddedString, @"Added", BDSKDateAddedString, @"Created", BDSKDateModifiedString, @"Modified", BDSKAuthorEditorString, @"Authors Or Editors", BDSKAuthorString, @"Authors", nil];
     NSEnumerator *keyEnum = [legacyKeys keyEnumerator];
@@ -240,10 +240,10 @@ static void fixLegacyTableColumnIdentifiers()
         NSString *fixedFormatString = nil;
         NSString *otherButton = nil;
         if ([formatString hasSuffix:@"%e"]) {
-            unsigned i = [formatString length] - 2;
+            unsigned int i = [formatString length] - 2;
             fixedFormatString = [[formatString substringToIndex:i] stringByAppendingString:@"%n0%e"];
         } else if ([formatString hasSuffix:@"%L"]) {
-            unsigned i = [formatString length] - 2;
+            unsigned int i = [formatString length] - 2;
             fixedFormatString = [[formatString substringToIndex:i] stringByAppendingString:@"%l%n0%e"];
         } else if ([formatString rangeOfString:@"."].length) {
             fixedFormatString = [[[formatString stringByDeletingPathExtension] stringByAppendingString:@"%n0"] stringByAppendingPathExtension:[formatString pathExtension]];

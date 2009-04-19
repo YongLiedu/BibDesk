@@ -247,7 +247,7 @@
     NSString *date = [[[pubDict objectForKey:BDSKYearString] retain] autorelease];
     
     if (date) {
-        unsigned first = NSNotFound, second = NSNotFound, third = NSNotFound, length = [date length];
+        unsigned int first = NSNotFound, second = NSNotFound, third = NSNotFound, length = [date length];
         first = [date rangeOfString:@"/"].location;
         if (first != NSNotFound && first + 1 < length) {
             second = [date rangeOfString:@"/" options:0 range:NSMakeRange(first + 1, length - first - 1)].location;

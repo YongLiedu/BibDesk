@@ -373,7 +373,7 @@ static int BDSKCompletionMinHeight = 20;
 - (NSSize)windowContentSize
 {
 	float hSize = 0.0f;
-    unsigned count = [tableView numberOfRows];
+    unsigned int count = [tableView numberOfRows];
 	NSCell *cell = [[[tableView tableColumns] objectAtIndex:0] dataCell];
 	while(count--){
 		[cell setStringValue:[completions objectAtIndex:count]];

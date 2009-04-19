@@ -236,7 +236,7 @@ static Class BDSKFileClass = Nil;
 
 - (void)release {}
 
-- (unsigned)retainCount { return UINT_MAX; }
+- (unsigned int)retainCount { return UINT_MAX; }
 
 @end
 

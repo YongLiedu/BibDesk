@@ -309,7 +309,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
                 pubs = publicationsWithISIRefXMLString(resultString, hotRecids);
                 NSRange retrieveRange = {0, 0};
                 while ([hotRecids count] > retrieveRange.location) {
-                    retrieveRange.length = MIN((unsigned)MAX_RESULTS, [hotRecids count] - retrieveRange.location);
+                    retrieveRange.length = MIN((unsigned int)MAX_RESULTS, [hotRecids count] - retrieveRange.location);
                     NSArray *subHotRecids = [hotRecids subarrayWithRange:retrieveRange];
                     NSString *fullString;
                     fullString = [BDSKISISearchRetrieveService retrieveRecid:@"WOS"

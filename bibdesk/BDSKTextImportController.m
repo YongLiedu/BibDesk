@@ -1222,7 +1222,7 @@
     }
 }
 
-- (void)download:(NSURLDownload *)theDownload didReceiveDataOfLength:(unsigned)length{
+- (void)download:(NSURLDownload *)theDownload didReceiveDataOfLength:(unsigned int)length{
     if (expectedContentLength > 0) {
         receivedContentLength += length;
         int percent = round(100.0 * (double)receivedContentLength / (double)expectedContentLength);
@@ -1399,7 +1399,7 @@
     return [[self publications] itemForCiteKey:key] != nil;
 }
 
-- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex {
+- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned int)charIndex {
     // we don't open the linked item from the text import sheet
     return NO;
 }
@@ -1684,8 +1684,8 @@
         if([headList length] != 1) return;
         DOMNode *headNode = [headList item:0];
         DOMNodeList *headChildren = [headNode childNodes];
-        unsigned i = 0;
-        unsigned length = [headChildren length];
+        unsigned int i = 0;
+        unsigned int length = [headChildren length];
         NSMutableDictionary *metaTagDict = [[NSMutableDictionary alloc] initWithCapacity:length];    
         
         
@@ -1867,7 +1867,7 @@
         
         if (c >= '0' && c <= '9') {
         
-            unsigned idx = c == '0' ? 10 : (unsigned)(c - '1');
+            unsigned int idx = c == '0' ? 10 : (unsigned int)(c - '1');
             BOOL rv = YES;
             if (flags & NSAlternateKeyMask)
                 idx += 10;
@@ -1948,7 +1948,7 @@
     return [[self delegate] tableView:self textView:textView isValidKey:key];
 }
 
-- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex{
+- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned int)charIndex{
     return [[self delegate] tableView:self textView:aTextView clickedOnLink:aLink atIndex:charIndex];
 }
 

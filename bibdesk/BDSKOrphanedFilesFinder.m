@@ -92,7 +92,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (void)release {}
 
-- (unsigned)retainCount { return UINT_MAX; }
+- (unsigned int)retainCount { return UINT_MAX; }
 
 - (void)awakeFromNib{
     [tableView setDoubleAction:@selector(showFile:)];
@@ -214,19 +214,19 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return [[orphanedFiles copy] autorelease];
 }
 
-- (unsigned)countOfOrphanedFiles {
+- (unsigned int)countOfOrphanedFiles {
     return [orphanedFiles count];
 }
 
-- (id)objectInOrphanedFilesAtIndex:(unsigned)theIndex {
+- (id)objectInOrphanedFilesAtIndex:(unsigned int)theIndex {
     return [orphanedFiles objectAtIndex:theIndex];
 }
 
-- (void)insertObject:(id)obj inOrphanedFilesAtIndex:(unsigned)theIndex {
+- (void)insertObject:(id)obj inOrphanedFilesAtIndex:(unsigned int)theIndex {
     [orphanedFiles insertObject:obj atIndex:theIndex];
 }
 
-- (void)removeObjectFromOrphanedFilesAtIndex:(unsigned)theIndex {
+- (void)removeObjectFromOrphanedFilesAtIndex:(unsigned int)theIndex {
     [orphanedFiles removeObjectAtIndex:theIndex];
 }
 
@@ -488,7 +488,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
         return [super arrangeObjects:objects];
     
     NSMutableArray *array = [[objects mutableCopy] autorelease];
-    unsigned i = [array count];
+    unsigned int i = [array count];
     BOOL itemMatches;
     while(i--){
         itemMatches = [[array objectAtIndex:i] pathContainsSubstring:searchString];

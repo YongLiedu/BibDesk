@@ -388,15 +388,15 @@ enum {
     return [[findHistory retain] autorelease];
 }
 
-- (unsigned)countOfFindHistory {
+- (unsigned int)countOfFindHistory {
     return [findHistory count];
 }
 
-- (id)objectInFindHistoryAtIndex:(unsigned)idx {
+- (id)objectInFindHistoryAtIndex:(unsigned int)idx {
     return [findHistory objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inFindHistoryAtIndex:(unsigned)idx {
+- (void)insertObject:(id)obj inFindHistoryAtIndex:(unsigned int)idx {
     if ([NSString isEmptyString:obj] || [findHistory containsObject:obj])
 		return;
 	[findHistory insertObject:obj atIndex:idx];
@@ -405,7 +405,7 @@ enum {
 		[findHistory removeObjectAtIndex:count - 1];
 }
 
-- (void)removeObjectFromFindHistoryAtIndex:(unsigned)idx {
+- (void)removeObjectFromFindHistoryAtIndex:(unsigned int)idx {
     [findHistory removeObjectAtIndex:idx];
 }
 
@@ -413,15 +413,15 @@ enum {
     return [[replaceHistory retain] autorelease];
 }
 
-- (unsigned)countOfReplaceHistory {
+- (unsigned int)countOfReplaceHistory {
     return [replaceHistory count];
 }
 
-- (id)objectInReplaceHistoryAtIndex:(unsigned)idx {
+- (id)objectInReplaceHistoryAtIndex:(unsigned int)idx {
     return [replaceHistory objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inReplaceHistoryAtIndex:(unsigned)idx {
+- (void)insertObject:(id)obj inReplaceHistoryAtIndex:(unsigned int)idx {
     if ([NSString isEmptyString:obj] || [replaceHistory containsObject:obj])
 		return;
 	[replaceHistory insertObject:obj atIndex:idx];
@@ -430,7 +430,7 @@ enum {
 		[replaceHistory removeObjectAtIndex:count - 1];
 }
 
-- (void)removeObjectFromReplaceHistoryAtIndex:(unsigned)idx {
+- (void)removeObjectFromReplaceHistoryAtIndex:(unsigned int)idx {
     [replaceHistory removeObjectAtIndex:idx];
 }
 
@@ -711,7 +711,7 @@ enum {
 
     NSEnumerator *selPubE = [[theDocument selectedPublications] objectEnumerator];
     BibItem *selItem = [selPubE nextObject];
-    unsigned indexOfSelectedItem;
+    unsigned int indexOfSelectedItem;
     if(selItem == nil){ // no selection, so select the first one
         indexOfSelectedItem = 0;
     } else {        
@@ -818,7 +818,7 @@ enum {
     NSString *findStr = [self findString];
 	// get the current search option settings
     NSString *field = [self field];
-    unsigned searchOpts = (ignoreCase ? NSCaseInsensitiveSearch : 0);
+    unsigned int searchOpts = (ignoreCase ? NSCaseInsensitiveSearch : 0);
 	
 	switch(searchScope){
 		case FCEndsWithSearch:
@@ -946,7 +946,7 @@ enum {
     NSString *replStr = [self replaceString];
 	// get the current search option settings
     NSString *field = [self field];
-    unsigned searchOpts = (ignoreCase ? NSCaseInsensitiveSearch : 0);
+    unsigned int searchOpts = (ignoreCase ? NSCaseInsensitiveSearch : 0);
 	
 	if(!findAsMacro && replaceAsMacro)
 		searchScope = FCWholeFieldSearch; // we can only reliably replace a complete string by a macro
@@ -969,7 +969,7 @@ enum {
     NSString *origStr;
     NSString *newStr;
 	unsigned int numRepl = 0;
-	unsigned number = 0;
+	unsigned int number = 0;
 	
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -1045,7 +1045,7 @@ enum {
     BibItem *bibItem;
     NSString *origStr;
 	NSString *complexStr;
-	unsigned number = 0;
+	unsigned int number = 0;
 	
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -1115,7 +1115,7 @@ enum {
     NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
     BibItem *bibItem;
     NSString *origStr;
-	unsigned number = 0;
+	unsigned int number = 0;
 
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -1178,7 +1178,7 @@ enum {
     NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
     BibItem *bibItem;
     NSString *origStr;
-	unsigned number = 0;
+	unsigned int number = 0;
 
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -1237,7 +1237,7 @@ enum {
     NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
     BibItem *bibItem;
     NSString *origStr;
-	unsigned number = 0;
+	unsigned int number = 0;
 
     while(bibItem = [pubE nextObject]){
         // don't touch external items

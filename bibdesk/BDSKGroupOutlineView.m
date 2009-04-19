@@ -169,7 +169,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
         highlightColor = [NSColor disabledControlTextColor];
     }
     
-    unsigned rowIndex = [rows firstIndex];
+    unsigned int rowIndex = [rows firstIndex];
     NSRect drawRect;
     
     while (rowIndex != NSNotFound) {

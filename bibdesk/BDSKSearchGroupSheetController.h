@@ -77,8 +77,8 @@
 + (void)deleteServerFile:(BDSKServerInfo *)serverInfo;
 + (NSArray *)servers;
 + (void)addServer:(BDSKServerInfo *)info;
-+ (void)setServer:(BDSKServerInfo *)info atIndex:(unsigned)index;
-+ (void)removeServerAtIndex:(unsigned)index;
++ (void)setServer:(BDSKServerInfo *)info atIndex:(unsigned int)index;
++ (void)removeServerAtIndex:(unsigned int)index;
 
 - (id)initWithGroup:(BDSKSearchGroup *)aGroup;
 

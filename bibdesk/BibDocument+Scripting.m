@@ -777,7 +777,7 @@
             BOOL keyIsGroups = [key isEqual:@"groups"];
             NSArray *relKeyObjects = (keyIsGroups ? nil : [self valueForKey:key]);
             id curObj;
-            unsigned curKeyIndex;
+            unsigned int curKeyIndex;
             int groupCount = [allGroups count];
 
             if (relPos == NSRelativeBefore)

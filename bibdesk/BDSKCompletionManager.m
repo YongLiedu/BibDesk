@@ -70,7 +70,7 @@ static id sharedManager = nil;
 
 - (void)release {}
 
-- (unsigned)retainCount { return UINT_MAX; }
+- (unsigned int)retainCount { return UINT_MAX; }
 
 - (void)addNamesForCompletion:(NSArray *)names {
     NSMutableSet *nameSet = [autoCompletionDict objectForKey:BDSKAuthorString];
@@ -79,7 +79,7 @@ static id sharedManager = nil;
         [autoCompletionDict setObject:nameSet forKey:BDSKAuthorString];
         [nameSet release];
     }
-    unsigned i, iMax = [names count];
+    unsigned int i, iMax = [names count];
     NSString *name;
     for (i = 0; i < iMax; i++) {
         name = [names objectAtIndex:i];
@@ -149,7 +149,7 @@ static id sharedManager = nil;
     NSRange andRange = [fullString rangeOfString:@" and "
 										 options:NSBackwardsSearch | NSLiteralSearch
 										   range:searchRange];
-	unsigned matchStart = 0;
+	unsigned int matchStart = 0;
 	// now find the beginning of the match, reflecting addString:forCompletionEntry:. We might be more sophisticated, like in groups
     if ([entry isPersonField]) {
 		// these are delimited by "and"

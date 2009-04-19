@@ -128,7 +128,7 @@
 	return [self compareNode:aNode options:0];
 }
 
-- (NSComparisonResult)compareNode:(BDSKStringNode *)aNode options:(unsigned)mask{
+- (NSComparisonResult)compareNode:(BDSKStringNode *)aNode options:(unsigned int)mask{
 	if (type < [aNode type])
 		return NSOrderedAscending;
 	if (type > [aNode type])

@@ -302,7 +302,7 @@
 }
 
 - (void)removeIconWithIdentifier:(NSString *)identifier {
-	unsigned i = [icons count];
+	unsigned int i = [icons count];
 	while (i--) {
 		if ([[[icons objectAtIndex:i] objectForKey:@"identifier"] isEqualToString:identifier]) {
 			[icons removeObjectAtIndex:i];

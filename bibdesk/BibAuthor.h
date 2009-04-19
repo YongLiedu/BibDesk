@@ -77,7 +77,7 @@ enum {
     NSString *unpunctuatedAbbreviatedNormalizedName;
     BibItem *publication;
     NSString *field;
-    unsigned hash;
+    unsigned int hash;
    
 @private
     NSArray *firstNames;  // always non-nil

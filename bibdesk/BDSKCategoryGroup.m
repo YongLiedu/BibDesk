@@ -170,7 +170,7 @@
         image = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
         NSImage *genericImage = [NSImage imageNamed:@"categoryGroup"];
         NSImage *questionMark = [NSImage iconWithSize:NSMakeSize(20.0, 20.0) forToolboxCode:kQuestionMarkIcon];
-        unsigned i;
+        unsigned int i;
         [image lockFocus];
         [genericImage drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
         // hack to make the question mark dark enough to be visible

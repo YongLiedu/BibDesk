@@ -114,7 +114,7 @@ static id sharedController = nil;
 
 - (void)release {}
 
-- (unsigned)retainCount { return UINT_MAX; }
+- (unsigned int)retainCount { return UINT_MAX; }
 
 // windiwDidLoad comes after the window is already moved onscreen, I think that's wrong
 - (void)windowDidLoad {

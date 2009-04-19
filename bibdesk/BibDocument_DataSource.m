@@ -418,7 +418,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 				if([dragColumnId isLocalFileField]){
 
                     // if we have more than one row, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
-                    unsigned row = [rowIndexes firstIndex];
+                    unsigned int row = [rowIndexes firstIndex];
                     BibItem *pub = nil;
                     NSString *path;
                     NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
@@ -446,7 +446,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 					[self setPromiseDragColumnIdentifier:dragColumnId];
 
                     // if we have more than one row, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
-                    unsigned row = [rowIndexes firstIndex];
+                    unsigned int row = [rowIndexes firstIndex];
                     BibItem *pub = nil;
                     NSURL *url, *theURL = nil;
                     NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
@@ -472,7 +472,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
                 }else if([dragColumnId isEqualToString:BDSKLocalFileString]){
 
                     // if we have more than one files, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
-                    unsigned row = [rowIndexes firstIndex];
+                    unsigned int row = [rowIndexes firstIndex];
                     BibItem *pub = nil;
                     NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
                     NSEnumerator *fileEnum;
@@ -504,7 +504,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 					// cache this so we know which column (field) was dragged
 					[self setPromiseDragColumnIdentifier:dragColumnId];
                     
-                    unsigned row = [rowIndexes firstIndex];
+                    unsigned int row = [rowIndexes firstIndex];
                     BibItem *pub = nil;
                     NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
                     NSString *fileName;
@@ -543,7 +543,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     if (dragCopyType == BDSKTemplateDragCopyType) {
         NSString *dragCopyTemplateKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
         NSString *template = [sud stringForKey:dragCopyTemplateKey];
-        unsigned templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
+        unsigned int templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
         if (templateIdx != NSNotFound)
             dragCopyType += templateIdx;
     }
@@ -936,7 +936,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 - (NSArray *)tableView:(NSTableView *)tv namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forDraggedRowsWithIndexes:(NSIndexSet *)indexSet {
 
     if ([tv isEqual:tableView]) {
-        unsigned rowIdx = [indexSet firstIndex];
+        unsigned int rowIdx = [indexSet firstIndex];
         NSMutableDictionary *fullPathDict = [NSMutableDictionary dictionaryWithCapacity:[indexSet count]];
         
         // We're supposed to return this to our caller (usually the Finder); just an array of file names, not full paths
@@ -1395,7 +1395,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     if (dragCopyType == BDSKTemplateDragCopyType) {
         NSString *dragCopyTemplateKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
         NSString *template = [sud stringForKey:dragCopyTemplateKey];
-        unsigned templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
+        unsigned int templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
         if (templateIdx != NSNotFound)
             dragCopyType += templateIdx;
     }

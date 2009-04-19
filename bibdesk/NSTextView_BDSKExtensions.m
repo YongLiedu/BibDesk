@@ -51,8 +51,8 @@
 {
     int i;
     NSString *string;
-    unsigned start;
-    unsigned end;
+    unsigned int start;
+    unsigned int end;
     NSRange myRange;
 
     string = [self string];
@@ -161,7 +161,7 @@
     // Note the guarantees in the header for -selectedRanges and requirements for setSelectedRanges:
     NSArray *ranges = [self selectedRanges];
     NSMutableArray *newRanges = [NSMutableArray array];
-    unsigned i, iMax = [ranges count];
+    unsigned int i, iMax = [ranges count];
     
     // this represents the entire string
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [[self string] length])];
@@ -177,7 +177,7 @@
         [newRanges addObject:[NSValue valueWithRange:NSMakeRange(0, 0)]];
     } else {
         
-        unsigned start, next;
+        unsigned int start, next;
         start = i;
         
         while (NSNotFound != i) {

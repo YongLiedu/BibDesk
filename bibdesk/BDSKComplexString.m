@@ -247,7 +247,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
     return [[self expandedString] length];
 }
 
-- (unichar)characterAtIndex:(unsigned)idx{
+- (unichar)characterAtIndex:(unsigned int)idx{
     return [[self expandedString] characterAtIndex:idx];
 }
 
@@ -297,7 +297,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 	}
 }
 
-- (NSComparisonResult)compareAsComplexString:(NSString *)other options:(unsigned)mask{
+- (NSComparisonResult)compareAsComplexString:(NSString *)other options:(unsigned int)mask{
 	if ([self isComplex]) {
 		if (![other isComplex])
 			return NSOrderedDescending;
@@ -355,7 +355,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
     return retStr; 
 }
 
-- (BOOL)hasSubstring:(NSString *)target options:(unsigned)opts{
+- (BOOL)hasSubstring:(NSString *)target options:(unsigned int)opts{
 	if ([self isInherited] && ![self isComplex])
 		return [[[nodes objectAtIndex:0] value] hasSubstring:target options:opts];
 	
@@ -380,7 +380,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 	return NO;
 }
 
-- (NSString *)stringByReplacingOccurrencesOfString:(NSString *)target withString:(NSString *)replacement options:(unsigned)opts replacements:(unsigned int *)number{
+- (NSString *)stringByReplacingOccurrencesOfString:(NSString *)target withString:(NSString *)replacement options:(unsigned int)opts replacements:(unsigned int *)number{
 	NSArray *targetNodes = [target nodes];
 	NSArray *replNodes = [replacement nodes];
 	NSMutableArray *newNodes;
@@ -690,7 +690,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 	return [self compareAsComplexString:other options:0];
 }
 
-- (NSComparisonResult)compareAsComplexString:(NSString *)other options:(unsigned)mask{
+- (NSComparisonResult)compareAsComplexString:(NSString *)other options:(unsigned int)mask{
 	if ([other isComplex])
 		return NSOrderedAscending;
 	return [self compare:other options:mask];
@@ -708,7 +708,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
     return self;
 }
         
-- (BOOL)hasSubstring:(NSString *)target options:(unsigned)opts{
+- (BOOL)hasSubstring:(NSString *)target options:(unsigned int)opts{
 	if ([target isComplex])
 		return NO;
 	
@@ -717,7 +717,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 	return (range.location != NSNotFound);
 }
 
-- (NSString *)stringByReplacingOccurrencesOfString:(NSString *)target withString:(NSString *)replacement options:(unsigned)opts replacements:(unsigned int *)number{
+- (NSString *)stringByReplacingOccurrencesOfString:(NSString *)target withString:(NSString *)replacement options:(unsigned int)opts replacements:(unsigned int *)number{
 	if ([target isComplex] || [self length] < [target length]) {// we need this last check for anchored search
 		*number = 0;
 		return self;

@@ -153,7 +153,7 @@ static BDSKTypeManager *sharedInstance = nil;
 
 - (void)release {}
 
-- (unsigned)retainCount { return UINT_MAX; }
+- (unsigned int)retainCount { return UINT_MAX; }
 
 - (void)reloadTypeInfo{
     // Load the TypeInfo plists

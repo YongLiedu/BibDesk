@@ -96,13 +96,13 @@ static float BDSKScaleMenuFontSize = 11.0;
         // set a suitable font, the control size is 0, 1 or 2
         [scalePopUpButton setFont:[NSFont toolTipsFontOfSize: BDSKScaleMenuFontSize - [[scalePopUpButton cell] controlSize]]];
 		
-        unsigned cnt, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuLabels) / sizeof(NSString *));
+        unsigned int cnt, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuLabels) / sizeof(NSString *));
         id curItem;
         NSString *label;
         float width, maxWidth = 0.0;
         NSSize size = NSMakeSize(1000.0, 1000.0);
         NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:[scalePopUpButton font], NSFontAttributeName, nil];
-        unsigned maxIndex = 0;
+        unsigned int maxIndex = 0;
 
         // fill it
         for (cnt = 0; cnt < numberOfDefaultItems; cnt++) {

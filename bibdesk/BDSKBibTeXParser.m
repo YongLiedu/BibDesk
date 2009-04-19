@@ -80,10 +80,10 @@ static BOOL addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
 static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, NSString *filePath, BibDocument *document, NSStringEncoding encoding);
 
 // private function for preserving newlines in annote/abstract fields; does not lock the parser
-static NSString *copyStringFromNoteField(AST *field, const char *data, unsigned inputDataLength, NSString *filePath, NSStringEncoding encoding, NSString **error);
+static NSString *copyStringFromNoteField(AST *field, const char *data, unsigned int inputDataLength, NSString *filePath, NSStringEncoding encoding, NSString **error);
 
 // parses an individual entry and adds it's field/value pairs to the dictionary
-static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, unsigned inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding);
+static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, unsigned int inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding);
 
 @end
 
@@ -138,7 +138,7 @@ error:(NSError **)outError{
 
 + (NSArray *)itemsFromData:(NSData *)inData frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(id<BDSKOwner>)anOwner encoding:(NSStringEncoding)parserEncoding isPartialData:(BOOL *)isPartialData error:(NSError **)outError{
     
-    unsigned inputDataLength = [inData length];
+    unsigned int inputDataLength = [inData length];
     
     // btparse will crash if we pass it a zero-length data, so we'll return here for empty files
     if (isPartialData)
@@ -151,7 +151,7 @@ error:(NSError **)outError{
     
     // btparse chokes on classic Macintosh line endings, so we'll replace all returns with a newline; this takes < 0.01 seconds on a 1000+ item file with Unix line endings, so performance is not affected.  Windows line endings will be replaced by a single newline.
     NSMutableData *fixedData = [[inData mutableCopy] autorelease];
-    unsigned currIndex, nextIndex;
+    unsigned int currIndex, nextIndex;
     NSRange replaceRange;
     const char lf[1] = {'\n'};
     unsigned char *bytePtr = [fixedData mutableBytes];
@@ -876,7 +876,7 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     return success;
 }
 
-static NSString *copyStringFromNoteField(AST *field, const char *data, unsigned inputDataLength, NSString *filePath, NSStringEncoding encoding, NSString **errorString)
+static NSString *copyStringFromNoteField(AST *field, const char *data, unsigned int inputDataLength, NSString *filePath, NSStringEncoding encoding, NSString **errorString)
 {
     NSString *returnString = nil;
     unsigned long cidx = 0; // used to scan through buf for annotes.
@@ -930,7 +930,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, unsigned 
     return returnString;
 }
 
-static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, unsigned inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding)
+static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, unsigned int inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding)
 {
     AST *field = NULL;
     NSString *fieldName, *fieldValue, *tmpStr;

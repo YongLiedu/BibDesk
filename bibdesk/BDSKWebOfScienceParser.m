@@ -87,7 +87,7 @@ static NSString *fixedAuthorName(NSString *name)
     
     NSMutableString *newName = [[lastName mutableCopy] autorelease];    
     
-    unsigned idx, maxIdx = [firstNames length];
+    unsigned int idx, maxIdx = [firstNames length];
     for(idx = 0; idx < maxIdx; idx++){
         [newName appendString:[firstNames substringWithRange:NSMakeRange(idx, 1)]];
         [newName appendString:(idx == maxIdx - 1 ? @"." : @". ")];

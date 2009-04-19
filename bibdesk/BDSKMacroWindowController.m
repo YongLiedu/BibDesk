@@ -187,23 +187,23 @@
     [macros setArray:newMacros];
 }
 
-- (unsigned)countOfMacros {
+- (unsigned int)countOfMacros {
     return [macros count];
 }
 
-- (id)objectInMacrosAtIndex:(unsigned)idx {
+- (id)objectInMacrosAtIndex:(unsigned int)idx {
     return [macros objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inMacrosAtIndex:(unsigned)idx {
+- (void)insertObject:(id)obj inMacrosAtIndex:(unsigned int)idx {
     [macros insertObject:obj atIndex:idx];
 }
 
-- (void)removeObjectFromMacrosAtIndex:(unsigned)idx {
+- (void)removeObjectFromMacrosAtIndex:(unsigned int)idx {
     [macros removeObjectAtIndex:idx];
 }
 
-- (void)replaceObjectInMacrosAtIndex:(unsigned)idx withObject:(id)obj {
+- (void)replaceObjectInMacrosAtIndex:(unsigned int)idx withObject:(id)obj {
     [macros replaceObjectAtIndex:idx withObject:obj];
 }
 
@@ -233,7 +233,7 @@
         } else if ([type isEqualToString:@"Remove macro"]) {
             NSString *key = [info objectForKey:@"macroKey"];
             if (key) {
-                unsigned idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[key lowercaseString]];
+                unsigned int idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[key lowercaseString]];
                 BDSKASSERT(idx != NSNotFound);
                 [self removeObjectFromMacrosAtIndex:idx];
             } else {
@@ -243,7 +243,7 @@
         } else if ([type isEqualToString:@"Change key"]) {
             NSString *newKey = [info objectForKey:@"newKey"];
             NSString *oldKey = [info objectForKey:@"oldKey"];
-            unsigned idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[oldKey lowercaseString]];
+            unsigned int idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[oldKey lowercaseString]];
             BDSKMacro *macro = [[BDSKMacro alloc] initWithName:newKey macroResolver:macroResolver];
             BDSKASSERT(idx != NSNotFound);
             [self replaceObjectInMacrosAtIndex:idx withObject:macro];
@@ -451,7 +451,7 @@
         [macroResolver changeMacroKey:key to:object];
 
         // Rearranging objects will likely move the row we just edited (bug #1859542), so find this macro and edit its value instead of some random macro's value.  Using [[arrayController arrangedObjects] indexOfObject:macro] won't work because the notification handler just replaced it with another object (so that's probably a garbage pointer now, as well).
-        unsigned newRow = [[[arrayController arrangedObjects] valueForKeyPath:@"name.lowercaseString"] indexOfObject:[object lowercaseString]];
+        unsigned int newRow = [[[arrayController arrangedObjects] valueForKeyPath:@"name.lowercaseString"] indexOfObject:[object lowercaseString]];
         if (NSNotFound != newRow) {
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:newRow] byExtendingSelection:YES];
             [tableView editColumn:1 row:newRow withEvent:nil select:YES];
@@ -671,7 +671,7 @@
     BibItem *pub;
     NSEnumerator *fieldEnum;
     NSString *field;
-    unsigned numRepl;
+    unsigned int numRepl;
     NSString *oldValue;
     NSString *newValue;
     

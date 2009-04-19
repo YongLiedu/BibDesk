@@ -410,9 +410,9 @@ enum {
     [self updateColumnsMenu];
 }
 
-- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(unsigned)idx {
+- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(unsigned int)idx {
     NSMutableArray *shownColumns = [NSMutableArray arrayWithArray:[self tableColumnIdentifiers]];
-    unsigned oldIndex = [shownColumns indexOfObject:identifier];
+    unsigned int oldIndex = [shownColumns indexOfObject:identifier];
     
     // Check if an object already exists in the tableview, remove the old one if it does
     // This means we can't have a column more than once.

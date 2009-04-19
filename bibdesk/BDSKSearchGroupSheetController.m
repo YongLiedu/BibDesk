@@ -107,7 +107,7 @@ static BOOL isSearchFileAtPath(NSString *path)
                 NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:path];
                 BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithType:nil dictionary:dict];
                 if (info) {
-                    unsigned idx = [[searchGroupServers valueForKey:@"name"] indexOfObject:[info name]];
+                    unsigned int idx = [[searchGroupServers valueForKey:@"name"] indexOfObject:[info name]];
                     if (idx != NSNotFound)
                         [searchGroupServers replaceObjectAtIndex:idx withObject:info];
                     else
@@ -173,7 +173,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     [self saveServerFile:serverInfo];
 }
 
-+ (void)setServer:(BDSKServerInfo *)serverInfo atIndex:(unsigned)idx
++ (void)setServer:(BDSKServerInfo *)serverInfo atIndex:(unsigned int)idx
 {
     [self deleteServerFile:[searchGroupServers objectAtIndex:idx]];
     [searchGroupServers replaceObjectAtIndex:idx withObject:[[serverInfo copy] autorelease]];
@@ -181,7 +181,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     [self saveServerFile:serverInfo];
 }
 
-+ (void)removeServerAtIndex:(unsigned)idx
++ (void)removeServerAtIndex:(unsigned int)idx
 {
     [self deleteServerFile:[searchGroupServers objectAtIndex:idx]];
     [searchGroupServers removeObjectAtIndex:idx];
@@ -414,8 +414,8 @@ static BOOL isSearchFileAtPath(NSString *path)
         if ([self commitEditing] == NO)
             return;
         
-        unsigned idx = [serverPopup indexOfSelectedItem];
-        unsigned existingIndex = [[[[self class] servers] valueForKey:@"name"] indexOfObject:[serverPopup titleOfSelectedItem]];
+        unsigned int idx = [serverPopup indexOfSelectedItem];
+        unsigned int existingIndex = [[[[self class] servers] valueForKey:@"name"] indexOfObject:[serverPopup titleOfSelectedItem]];
         if (existingIndex != NSNotFound && existingIndex != idx) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Server Name", @"Message in alert dialog when setting a search group server with a duplicate name")
                                              defaultButton:nil

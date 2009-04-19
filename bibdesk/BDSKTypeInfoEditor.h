@@ -70,7 +70,7 @@
 - (void)revertTypes;
 
 - (void)addType:(NSString *)newType withFields:(NSDictionary *)fieldsDict;
-- (void)insertType:(NSString *)newType withFields:(NSDictionary *)fieldsDict atIndex:(unsigned)index;
+- (void)insertType:(NSString *)newType withFields:(NSDictionary *)fieldsDict atIndex:(unsigned int)index;
 - (void)setCurrentType:(NSString *)newCurrentType;
 
 - (IBAction)addType:(id)sender;

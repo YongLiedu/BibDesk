@@ -416,7 +416,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
             CFRelease(uuid);
         }
         
-        unsigned i = 0;
+        unsigned int i = 0;
         NSURL *fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:baseName]];
         while ([self objectExistsAtFileURL:fileURL]) {
             fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%i", baseName, ++i]]];
@@ -588,7 +588,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     
     NSURL *parent = [NSURL fileURLWithPath:[path stringByDeletingLastPathComponent]];
     NSString *fileName = [path lastPathComponent];
-    unsigned length = [fileName length];
+    unsigned int length = [fileName length];
     UniChar *name = (UniChar *)NSZoneMalloc(NULL, length * sizeof(UniChar));
     [fileName getCharacters:name];
     
@@ -885,7 +885,7 @@ static OSType finderSignatureBytes = 'MACS';
     // create an empty file, since weblocs are just a resource
     NSURL *parent = [NSURL fileURLWithPath:[fullPath stringByDeletingLastPathComponent]];
     NSString *fileName = [fullPath lastPathComponent];
-    unsigned length = [fileName length];
+    unsigned int length = [fileName length];
     UniChar *name = (UniChar *)NSZoneMalloc(NULL, length * sizeof(UniChar));
     [fileName getCharacters:name];
     

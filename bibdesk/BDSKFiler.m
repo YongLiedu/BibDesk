@@ -96,7 +96,7 @@ static BDSKFiler *sharedFiler = nil;
 
 - (void)release {}
 
-- (unsigned)retainCount { return UINT_MAX; }
+- (unsigned int)retainCount { return UINT_MAX; }
 
 #pragma mark Auto file methods
 
@@ -391,19 +391,19 @@ static BDSKFiler *sharedFiler = nil;
     return errorInfoDicts;
 }
 
-- (unsigned)countOfErrorInfoDicts {
+- (unsigned int)countOfErrorInfoDicts {
     return [errorInfoDicts count];
 }
 
-- (id)objectInErrorInfoDictsAtIndex:(unsigned)idx {
+- (id)objectInErrorInfoDictsAtIndex:(unsigned int)idx {
     return [errorInfoDicts objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inErrorInfoDictsAtIndex:(unsigned)idx {
+- (void)insertObject:(id)obj inErrorInfoDictsAtIndex:(unsigned int)idx {
     [errorInfoDicts insertObject:obj atIndex:idx];
 }
 
-- (void)removeObjectFromErrorInfoDictsAtIndex:(unsigned)idx {
+- (void)removeObjectFromErrorInfoDictsAtIndex:(unsigned int)idx {
     [errorInfoDicts removeObjectAtIndex:idx];
 }
 

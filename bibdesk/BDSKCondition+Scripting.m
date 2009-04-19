@@ -91,7 +91,7 @@ enum {
 
 - (NSScriptObjectSpecifier *)objectSpecifier {
 	NSArray *conditions = [[[self group] filter] conditions];
-	unsigned idx = [conditions indexOfObjectIdenticalTo:self];
+	unsigned int idx = [conditions indexOfObjectIdenticalTo:self];
     if ([self group] && idx != NSNotFound) {
         NSScriptObjectSpecifier *containerRef = [(id)[self group] objectSpecifier];
         return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"conditions" index:idx] autorelease];

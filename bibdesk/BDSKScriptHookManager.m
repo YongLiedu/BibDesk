@@ -97,7 +97,7 @@ static NSArray *scriptHookNames = nil;
 
 - (void)release {}
 
-- (unsigned)retainCount { return UINT_MAX; }
+- (unsigned int)retainCount { return UINT_MAX; }
 
 - (BDSKScriptHook *)scriptHookWithUniqueID:(NSNumber *)uniqueID {
 	return [scriptHooks objectForKey:uniqueID];

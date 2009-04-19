@@ -80,7 +80,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 
 - (void)release {}
 
-- (unsigned)retainCount { return UINT_MAX; }
+- (unsigned int)retainCount { return UINT_MAX; }
 
 - (void)awakeFromNib {
 	texFormatter = [[BDSKTeXFormatter alloc] init];

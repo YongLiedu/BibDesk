@@ -143,7 +143,7 @@
                             }
                             if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 								[scanner setScanLocation:[scanner scanLocation]+1];
-								numAuth = (unsigned)(nextChar - '0');
+								numAuth = (unsigned int)(nextChar - '0');
 								// scan for #chars per name
 								if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 0;
 							}
@@ -215,7 +215,7 @@
                             }
 							if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 								[scanner setScanLocation:[scanner scanLocation]+1];
-								numAuth = (unsigned)(nextChar - '0');
+								numAuth = (unsigned int)(nextChar - '0');
 							}
 						}
 					}
@@ -280,7 +280,7 @@
                     NSString *title = [pub title];
                     if ([scanner scanString:@"[" intoString:NULL]) {
                         if ([scanner scanUpToString:@"]" intoString:&numString])
-                            smallWordLength = (unsigned)[numString intValue];
+                            smallWordLength = (unsigned int)[numString intValue];
                         else
                             smallWordLength = 0;
                         [scanner scanString:@"]" intoString:NULL];
@@ -728,9 +728,9 @@
 	
 	if (uniqueSpecifier != 0) {
         NSString *suggestedUnique = nil;
-        unsigned prefixLength = [prefixStr length];
-        unsigned suffixLength = [parsedStr length];
-        unsigned suggestionLength = [suggestion length] - prefixLength - suffixLength;
+        unsigned int prefixLength = [prefixStr length];
+        unsigned int suffixLength = [parsedStr length];
+        unsigned int suggestionLength = [suggestion length] - prefixLength - suffixLength;
         if (suggestion && ((uniqueNumber == 0 && suggestionLength >= 0) || suggestionLength == uniqueNumber) &&
             (prefixLength == 0 || [suggestion hasPrefix:prefixStr]) && (suffixLength == 0 || [suggestion hasSuffix:parsedStr])) {
             suggestedUnique = [suggestion substringWithRange:NSMakeRange(prefixLength, suggestionLength)];
@@ -1233,7 +1233,7 @@
 - (void)recolorText
 {
     NSTextStorage *textStorage = [self textStorage];
-    unsigned length = [textStorage length];
+    unsigned int length = [textStorage length];
     
     NSRange range;
     NSDictionary *attributes;
@@ -1250,7 +1250,7 @@
 		return;
     
     // get the attributes of the parsed string and apply them to our NSTextStorage; it may not be safe to set it directly at this point
-    unsigned start = 0;
+    unsigned int start = 0;
     while(start < length){
         
         attributes = [attrString attributesAtIndex:start effectiveRange:&range];        
@@ -1322,7 +1322,7 @@
     format = [attrString string];
 	
 	if (NO == [format isEqualToString:*partialStringPtr]) {
-		unsigned length = [format length];
+		unsigned int length = [format length];
 		*partialStringPtr = format;
 		if ([format isEqualToString:origString]) 
 			*proposedSelRangePtr = origSelRange;

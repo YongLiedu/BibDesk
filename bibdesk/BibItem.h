@@ -690,7 +690,7 @@ enum {
     @param      flag Whether a lossy search is to be performed (by removing diacritic marks)
     @result     (description)
 */
-- (BOOL)matchesSubstring:(NSString *)substring withOptions:(unsigned)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
+- (BOOL)matchesSubstring:(NSString *)substring withOptions:(unsigned int)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
 
 - (NSDictionary *)searchIndexInfo;
 - (NSDictionary *)metadataCacheInfoForUpdate:(BOOL)update;

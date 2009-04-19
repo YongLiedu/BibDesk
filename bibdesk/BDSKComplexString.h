@@ -186,7 +186,7 @@
     @param      mask The search options to use in the comparison. These are the same as for normal string compare methods. 
     @result     -
 */
-- (NSComparisonResult)compareAsComplexString:(NSString *)other options:(unsigned)mask;
+- (NSComparisonResult)compareAsComplexString:(NSString *)other options:(unsigned int)mask;
 
 /*!
     @method     stringAsBibTeXString
@@ -210,7 +210,7 @@
     @discussion When the receiver is not complex and target is complex always returns NO. 
     @result     (description)
 */
-- (BOOL)hasSubstring:(NSString *)target options:(unsigned)opts;
+- (BOOL)hasSubstring:(NSString *)target options:(unsigned int)opts;
 
 /*!
     @method     stringByReplacingOccurrencesOfString:withString:options:replacements:
@@ -219,7 +219,7 @@
                 When the receiver is complex, only whole node matches are replaced. 
     @result     (description)
 */
-- (NSString *)stringByReplacingOccurrencesOfString:(NSString *)target withString:(NSString *)replacement options:(unsigned)opts replacements:(unsigned int *)number;
+- (NSString *)stringByReplacingOccurrencesOfString:(NSString *)target withString:(NSString *)replacement options:(unsigned int)opts replacements:(unsigned int *)number;
 
 - (NSString *)complexStringByAppendingString:(NSString *)string;
 

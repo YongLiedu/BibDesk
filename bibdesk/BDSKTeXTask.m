@@ -363,7 +363,7 @@ static double runLoopTimeout = 30;
     if([self hasLTB] && [dataFileLock tryLockForReading]) {
         string = [NSString stringWithContentsOfFile:[texPath bblFilePath] encoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey] error:NULL];
         [dataFileLock unlock];
-        unsigned start, end;
+        unsigned int start, end;
         start = [string rangeOfString:@"\\bib{"].location;
         end = [string rangeOfString:@"\\end{biblist}" options:NSBackwardsSearch].location;
         if (start != NSNotFound && end != NSNotFound)
@@ -377,7 +377,7 @@ static double runLoopTimeout = 30;
     if([self hasLaTeX] && [dataFileLock tryLockForReading]) {
         string = [NSString stringWithContentsOfFile:[texPath bblFilePath] encoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey] error:NULL];
         [dataFileLock unlock];
-        unsigned start, end;
+        unsigned int start, end;
         start = [string rangeOfString:@"\\bibitem"].location;
         end = [string rangeOfString:@"\\end{thebibliography}" options:NSBackwardsSearch].location;
         if (start != NSNotFound && end != NSNotFound)

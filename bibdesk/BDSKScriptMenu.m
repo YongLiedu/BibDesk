@@ -93,7 +93,7 @@ static int recursionDepth = 0;
 
 static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
 {
-    unsigned i, count = [folders count];
+    unsigned int i, count = [folders count];
     NSDate *date = [NSDate distantPast];
     for(i = 0; i < count; i++){
         NSDate *modDate = [[[NSFileManager defaultManager] fileAttributesAtPath:[folders objectAtIndex:i] traverseLink:YES] objectForKey:NSFileModificationDate];

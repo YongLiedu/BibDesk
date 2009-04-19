@@ -335,7 +335,7 @@
     [self window];
     NSMutableArray *sortDescriptors = [NSMutableArray array];
     [sortDescriptors addObjectsFromArray:[NSUnarchiver unarchiveObjectWithData:data]];
-    unsigned i = [sortDescriptors count];
+    unsigned int i = [sortDescriptors count];
     // see https://sourceforge.net/tracker/index.php?func=detail&aid=1837498&group_id=61487&atid=497423
     // We changed BDSKFileSearchResult and started saving sort descriptors in EA at about the same time, so apparently a user ended up with a sort key of @"dictionary.string" in EA; this caused a bunch of ignored exceptions, and content search failed.  Another possibility (remote) is that the EA were corrupted somehow.  Anyway, check for the correct keys to avoid this in future.
     NSSet *keys = [NSSet setWithObjects:@"string", @"score", nil];
@@ -477,12 +477,12 @@
     NSArray *previouslySelectedObjects = [[NSArray alloc] initWithArray:[self selectedObjects] copyItems:NO];
     [super setContent:object];
     
-    unsigned cnt = [previouslySelectedObjects count];
+    unsigned int cnt = [previouslySelectedObjects count];
     NSArray *arrangedObjects = [self arrangedObjects];
     NSMutableIndexSet *indexesToSelect = [NSMutableIndexSet indexSet];
     while (cnt--) {
         id oldObject = [previouslySelectedObjects objectAtIndex:cnt];
-        unsigned i = [arrangedObjects indexOfObject:oldObject];
+        unsigned int i = [arrangedObjects indexOfObject:oldObject];
         if (NSNotFound != i)
             [indexesToSelect addIndex:i];
     }

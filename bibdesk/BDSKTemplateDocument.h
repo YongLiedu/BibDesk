@@ -137,10 +137,10 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 
 - (NSArray *)typeTemplates;
 - (void)setTypeTemplates:(NSArray *)newTypeTemplates;
-- (unsigned)countOfTypeTemplates;
-- (id)objectInTypeTemplatesAtIndex:(unsigned)index;
-- (void)insertObject:(id)obj inTypeTemplatesAtIndex:(unsigned)index;
-- (void)removeObjectFromTypeTemplatesAtIndex:(unsigned)index;
+- (unsigned int)countOfTypeTemplates;
+- (id)objectInTypeTemplatesAtIndex:(unsigned int)index;
+- (void)insertObject:(id)obj inTypeTemplatesAtIndex:(unsigned int)index;
+- (void)removeObjectFromTypeTemplatesAtIndex:(unsigned int)index;
 
 - (NSArray *)specialTokens;
 - (void)setSpecialTokens:(NSArray *)newSpecialTokens;

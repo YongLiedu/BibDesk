@@ -270,7 +270,7 @@ static int MAX_RATING = 5;
 
 static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 {
-    unsigned len = [data length];
+    unsigned int len = [data length];
     size_t size = sizeof(UniChar);
     BOOL rv = NO;
     if(len >= size){
@@ -399,12 +399,12 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     return self;
 }
 
-- (unsigned)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned int)startLoc
+- (unsigned int)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned int)startLoc
 {
     return [self indexOfRightBraceMatchingLeftBraceInRange:NSMakeRange(startLoc, [self length] - startLoc)];
 }
 
-- (unsigned)indexOfRightBraceMatchingLeftBraceInRange:(NSRange)range
+- (unsigned int)indexOfRightBraceMatchingLeftBraceInRange:(NSRange)range
 {
     
     CFStringInlineBuffer inlineBuffer;
@@ -574,7 +574,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     
     NSMutableString *toReturn = [self mutableCopy];
     while (r.length) {
-        unsigned start;
+        unsigned int start;
         if (r.location == 0 || [toReturn characterAtIndex:(r.location - 1)] != '\\') {
             // insert the backslash, then advance the search range by two characters
             [toReturn replaceCharactersInRange:NSMakeRange(r.location, 0) withString:@"\\"];
@@ -865,10 +865,10 @@ http://home.planet.nl/~faase009/GNU.txt
     // ARM:  This code came from Art Isbell to cocoa-dev on Tue Jul 10 22:13:11 2001.  Comments are his.
     //       We were using componentsSeparatedByString:@"\r", but this is not robust.  Files from ScienceDirect
     //       have \n as newlines, so this code handles those cases as well as PubMed.
-    unsigned stringLength = [self length];
-    unsigned startIndex;
-    unsigned lineEndIndex = 0;
-    unsigned contentsEndIndex;
+    unsigned int stringLength = [self length];
+    unsigned int startIndex;
+    unsigned int lineEndIndex = 0;
+    unsigned int contentsEndIndex;
     NSRange range;
     NSMutableArray *sourceLines = [NSMutableArray array];
     
@@ -1310,7 +1310,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
         @"and",
     };
     
-    unsigned i, j, iMax = sizeof(uppercaseWords) / sizeof(NSString *);
+    unsigned int i, j, iMax = sizeof(uppercaseWords) / sizeof(NSString *);
     
     for (i = 0; i < iMax; i++) {
         
@@ -1862,7 +1862,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     NSMutableString *returnString = [NSMutableString stringWithCapacity:[self length]];
     int nesting = 0;
     unichar ch;
-    unsigned location;
+    unsigned int location;
     NSRange range;
     BOOL foundFirstLetter = NO;
     

@@ -2081,7 +2081,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
-	unsigned numberOfPubs = [items count];
+	unsigned int numberOfPubs = [items count];
 	NSMutableString *bibString = [[NSMutableString alloc] initWithCapacity:(numberOfPubs * 100)];
     
     int options = BDSKBibTeXOptionDropLinkedURLsMask;

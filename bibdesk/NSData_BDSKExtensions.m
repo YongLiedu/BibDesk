@@ -199,8 +199,8 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
 {
 	if ([self length] == 0) return self;
 	
-	unsigned full_length = [self length];
-	unsigned half_length = [self length] / 2;
+	unsigned int full_length = [self length];
+	unsigned int half_length = [self length] / 2;
 	
 	NSMutableData *decompressed = [NSMutableData dataWithLength: full_length + half_length];
 	BOOL done = NO;

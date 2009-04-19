@@ -278,7 +278,7 @@ void __BDDeleteTeXCommandsForSorting(CFMutableStringRef mutableString)
     
     NSRange searchRange = NSMakeRange(0, CFStringGetLength(mutableString));
     NSRange cmdRange;
-    unsigned startLoc;
+    unsigned int startLoc;
         
     // This will find and remove the commands such as \textit{some word} that can confuse the sort order;
     // unfortunately, we can't remove things like {\textit some word}, since it could also be something
@@ -298,14 +298,14 @@ uint32_t __BDFastHash(CFStringRef aString)
     
     // Golden ratio - arbitrary start value to avoid mapping all 0's to all 0's
     // or anything like that.
-    unsigned PHI = 0x9e3779b9U;
+    unsigned int PHI = 0x9e3779b9U;
     
     // Paul Hsieh's SuperFastHash
     // http://www.azillionmonkeys.com/qed/hash.html
     // Implementation from Apple's WebCore/khtml/xml/dom_stringimpl.cpp, designed
     // to hash UTF-16 characters.
     
-    unsigned l = CFStringGetLength(aString);
+    unsigned int l = CFStringGetLength(aString);
     uint32_t fastHash = PHI;
     uint32_t tmp;
     

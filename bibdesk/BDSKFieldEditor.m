@@ -92,7 +92,7 @@
     NSTextStorage *textStorage = [self textStorage];
     NSString *string = [textStorage string];
     
-    unsigned start, length = [string length];
+    unsigned int start, length = [string length];
     NSRange range = NSMakeRange(0, 0);
     NSString *keyString;
     
@@ -387,7 +387,7 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
            [[self delegate] control:self textView:textView isValidKey:key];
 }
 
-- (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex{
+- (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned int)charIndex{
     return textView == [self currentEditor] && 
            [[self delegate] respondsToSelector:@selector(control:textView:clickedOnLink:atIndex:)] &&
            [[self delegate] control:self textView:textView clickedOnLink:aLink atIndex:charIndex];
@@ -423,7 +423,7 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
            [[self delegate] control:self textView:textView isValidKey:key];
 }
 
-- (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex{
+- (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned int)charIndex{
     return textView == [self currentEditor] && 
            [[self delegate] respondsToSelector:@selector(control:textView:clickedOnLink:atIndex:)] &&
            [[self delegate] control:self textView:textView clickedOnLink:aLink atIndex:charIndex];

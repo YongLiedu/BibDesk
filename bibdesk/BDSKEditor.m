@@ -1279,7 +1279,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	NSArray *historyArray = [self safariDownloadHistory];
 		
 	unsigned int i = 0;
-	unsigned numberOfItems = [historyArray count];
+	unsigned int numberOfItems = [historyArray count];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     
     [menu removeAllItems];
@@ -1309,7 +1309,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (void)updateSafariRecentURLsMenu:(NSMenu *)menu{
 	NSArray *historyArray = [self safariDownloadHistory];
-	unsigned numberOfItems = [historyArray count];
+	unsigned int numberOfItems = [historyArray count];
 	unsigned int i = 0;
     
     [menu removeAllItems];
@@ -1380,7 +1380,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     }
     
 	unsigned int i = 0;
-	unsigned numberOfItems = [(NSArray *)historyArray count];
+	unsigned int numberOfItems = [(NSArray *)historyArray count];
 	for (i = 0; i < numberOfItems; i ++){
 		itemDict = [(NSArray *)historyArray objectAtIndex:i];
 		aliasData = [[itemDict objectForKey:@"_NSLocator"] objectForKey:@"_NSAlias"];
@@ -1715,7 +1715,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (int)numberOfPersons {
     NSArray *allArrays = [[publication people] allValues];
-    unsigned count = 0, i = [allArrays count];
+    unsigned int count = 0, i = [allArrays count];
     
     while(i--)
         count += [[allArrays objectAtIndex:i] count];
@@ -2435,7 +2435,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return NO;
 }
 
-- (BOOL)control:(NSControl *)control textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex {
+- (BOOL)control:(NSControl *)control textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned int)charIndex {
     if ([control isEqual:tableView]) {
         BibItem *pub = [[[publication owner] publications] itemForCiteKey:aLink];
         if (nil == pub) {
@@ -2587,7 +2587,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	// create a crossref (cmd-option), or fill empty fields (no modifiers)
     
     // uses the Carbon function since [NSApp modifierFlags] won't work if we're not the front app
-	unsigned modifierFlags = [NSApp currentModifierFlags];
+	unsigned int modifierFlags = [NSApp currentModifierFlags];
 	
 	// we always have sourceDragMask & NSDragOperationLink here for some reason, so test the mask manually
 	if((modifierFlags & (NSAlternateKeyMask | NSCommandKeyMask)) == (NSAlternateKeyMask | NSCommandKeyMask)){

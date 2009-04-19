@@ -474,35 +474,35 @@ static inline unsigned int endOfLeadingEmptyLine(NSString *string, NSRange range
     }
 }
 
-- (unsigned)countOfTypeTemplates {
+- (unsigned int)countOfTypeTemplates {
     return [typeTemplates count];
 }
 
-- (id)objectInTypeTemplatesAtIndex:(unsigned)idx {
+- (id)objectInTypeTemplatesAtIndex:(unsigned int)idx {
     return [typeTemplates objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inTypeTemplatesAtIndex:(unsigned)idx {
+- (void)insertObject:(id)obj inTypeTemplatesAtIndex:(unsigned int)idx {
     [typeTemplates insertObject:obj atIndex:idx];
 }
 
-- (void)removeObjectFromTypeTemplatesAtIndex:(unsigned)idx {
+- (void)removeObjectFromTypeTemplatesAtIndex:(unsigned int)idx {
     [typeTemplates removeObjectAtIndex:idx];
 }
 
-- (unsigned)countOfSizes {
+- (unsigned int)countOfSizes {
     return sizeof(BDSKDefaultFontSizes) / sizeof(float);
 }
 
-- (id)objectInSizesAtIndex:(unsigned)idx {
+- (id)objectInSizesAtIndex:(unsigned int)idx {
     return [NSNumber numberWithFloat:BDSKDefaultFontSizes[idx]];
 }
 
-- (unsigned)countOfTokenSizes {
+- (unsigned int)countOfTokenSizes {
     return 1 + sizeof(BDSKDefaultFontSizes) / sizeof(float);
 }
 
-- (id)objectInTokenSizesAtIndex:(unsigned)idx {
+- (id)objectInTokenSizesAtIndex:(unsigned int)idx {
     return [NSNumber numberWithFloat:idx == 0 ? 0.0 : BDSKDefaultFontSizes[idx - 1]];
 }
 
@@ -1079,7 +1079,7 @@ static inline unsigned int endOfLeadingEmptyLine(NSString *string, NSRange range
     return menu;
 }
 
-- (NSArray *)tokenField:(NSTokenField *)tokenField shouldAddObjects:(NSArray *)tokens atIndex:(unsigned)idx {
+- (NSArray *)tokenField:(NSTokenField *)tokenField shouldAddObjects:(NSArray *)tokens atIndex:(unsigned int)idx {
     if (tokenField == itemTemplateTokenField) {
         NSEnumerator *tokenEnum = [tokens objectEnumerator];
         id token;

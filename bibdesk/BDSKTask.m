@@ -238,7 +238,7 @@ static void __BDSKTaskNotify(void *info)
         env = NSZoneCalloc([self zone], [environment count] + 1, sizeof(char *));
         NSEnumerator *keyEnum = [environment keyEnumerator];
         NSString *key;
-        unsigned envIndex = 0;
+        unsigned int envIndex = 0;
         while (key = [keyEnum nextObject]) {
             env[envIndex++] = (char *)[[NSString stringWithFormat:@"%@=%@", key, [environment objectForKey:key]] UTF8String];        
         }

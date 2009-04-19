@@ -289,9 +289,9 @@ static char BDSKErrorEditorObservationContext;
 - (void)gotoLine:(int)lineNumber{
     int i = 0;
     NSString *string = [textView string];
-    unsigned start = 0;
-    unsigned end = 0;
-    unsigned length = [string length];
+    unsigned int start = 0;
+    unsigned int end = 0;
+    unsigned int length = [string length];
     NSRange range;
     
     while (i++ < lineNumber && end < length) {
@@ -309,10 +309,10 @@ static char BDSKErrorEditorObservationContext;
     
     int lineNumber = 0;
     NSString *string = [textView string];
-    unsigned length = [string length];
-    unsigned location = selectedRange.location;
-    unsigned end = 0;
-    unsigned contentsEnd = 0;
+    unsigned int length = [string length];
+    unsigned int location = selectedRange.location;
+    unsigned int end = 0;
+    unsigned int contentsEnd = 0;
     
     while (end <= location) {
         ++lineNumber;
@@ -372,9 +372,9 @@ static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isE
     
     NSCharacterSet *newlineSet = [NSCharacterSet newlineCharacterSet];
     
-    unsigned start = MIN(proposedRange.location, invalidSyntaxHighlightMark);
-    unsigned end = NSMaxRange(proposedRange);
-    unsigned length = [string length];
+    unsigned int start = MIN(proposedRange.location, invalidSyntaxHighlightMark);
+    unsigned int end = NSMaxRange(proposedRange);
+    unsigned int length = [string length];
     
     // quoted or commented text can have multiple lines
     do {

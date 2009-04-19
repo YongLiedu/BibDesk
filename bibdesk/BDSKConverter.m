@@ -81,7 +81,7 @@ static BDSKConverter *sharedConverter = nil;
 
 - (void)release {}
 
-- (unsigned)retainCount { return UINT_MAX; }
+- (unsigned int)retainCount { return UINT_MAX; }
 
 - (void)loadDict{
     
@@ -229,7 +229,7 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 {        
     // decompose to canonical form
     CFStringNormalize((CFMutableStringRef)charString, kCFStringNormalizationFormD);
-    unsigned decomposedLength = [charString length];
+    unsigned int decomposedLength = [charString length];
     
     // first check if we can convert this, we should have a base character + an accent we know
     if (decomposedLength == 0 || [baseCharacterSetForTeX characterIsMember:[charString characterAtIndex:0]] == NO)
@@ -369,7 +369,7 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
     else if (ch == ' ')
         idx++;      // TeX accepts {\' i} or {\'i}, but space shouldn't be included in the letter token
     
-    unsigned letterStart = idx;
+    unsigned int letterStart = idx;
     NSString *character = nil;
     
     for (idx = letterStart; idx < length; idx++) {

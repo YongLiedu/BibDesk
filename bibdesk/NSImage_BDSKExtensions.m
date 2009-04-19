@@ -657,7 +657,7 @@ static NSComparisonResult compareImageRepWidths(NSBitmapImageRep *r1, NSBitmapIm
     // sort the image reps by increasing width, so we can easily pick the next largest one
     NSMutableArray *reps = [[self representations] mutableCopy];
     [reps sortUsingFunction:compareImageRepWidths context:NULL];
-    unsigned i, iMax = [reps count];
+    unsigned int i, iMax = [reps count];
     NSBitmapImageRep *toReturn = nil;
     
     for (i = 0; i < iMax && nil == toReturn; i++) {

@@ -192,7 +192,7 @@
 
 #pragma mark Comparison
 
-- (unsigned)hash;
+- (unsigned int)hash;
 {
     return [cleanVersionString hash];
 }

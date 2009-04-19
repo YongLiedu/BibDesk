@@ -244,7 +244,7 @@
     
     NSString *characters = [keyEvent charactersIgnoringModifiers];
     unichar character = [characters length] > 0 ? [characters characterAtIndex:0] : 0;
-	unsigned modifierFlags = [keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+	unsigned int modifierFlags = [keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
     
     return modifierFlags == 0 && character == REPEAT_CHARACTER;
 }
@@ -258,7 +258,7 @@
     
     NSString *characters = [keyEvent charactersIgnoringModifiers];
     unichar character = [characters length] > 0 ? [characters characterAtIndex:0] : 0;
-	unsigned modifierFlags = [keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+	unsigned int modifierFlags = [keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
     
     return modifierFlags == 0 && character == CANCEL_CHARACTER;
 }

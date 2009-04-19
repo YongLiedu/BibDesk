@@ -205,7 +205,7 @@
         commandHistory = [NSMutableArray arrayWithArray:[uniqueCommandHistory allObjects]];
     
     // this is also a workaround for older versions
-    unsigned MAX_HISTORY = 7;
+    unsigned int MAX_HISTORY = 7;
     if([commandHistory count] > MAX_HISTORY)
         [commandHistory removeObjectsInRange:NSMakeRange(MAX_HISTORY, [commandHistory count] - MAX_HISTORY)];
     [openUsingFilterComboBox addItemsWithObjectValues:commandHistory];
@@ -226,7 +226,7 @@
             [self openDocumentWithContentsOfURL:aURL usingFilter:shellCommand encoding:encoding];
         }
         
-        unsigned commandIndex = [commandHistory indexOfObject:shellCommand];
+        unsigned int commandIndex = [commandHistory indexOfObject:shellCommand];
         // already in the array, so move it to the head of the list
         if(commandIndex != NSNotFound && commandIndex != 0) {
             [[shellCommand retain] autorelease];

@@ -694,7 +694,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	if([peopleArray count] == 0)
         return @"";
     
-    unsigned idx, count = [peopleArray count];
+    unsigned int idx, count = [peopleArray count];
     BibAuthor *person;
     NSMutableString *names = [NSMutableString stringWithCapacity:10 * count];
 	
@@ -783,7 +783,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	if([peopleArray count] == 0)
         return @"";
     
-    unsigned idx, count = [peopleArray count];
+    unsigned int idx, count = [peopleArray count];
     BibAuthor *person;
     NSMutableString *names = [NSMutableString stringWithCapacity:10 * count];
 	
@@ -1419,7 +1419,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         return [NSNumber numberWithFloat:[self searchScore]];
     }else if([field isEqualToString:BDSKLocalFileString]){
         NSArray *localFiles = [self localFiles];
-        unsigned count = [localFiles count];
+        unsigned int count = [localFiles count];
         BOOL hasMissingFile = count && [[localFiles valueForKey:@"URL"] containsObject:[NSNull null]];
         NSDictionary *cellDictionary = nil;
         if (count > 0) {
@@ -1429,7 +1429,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         }
         return cellDictionary;
     }else if([field isEqualToString:BDSKRemoteURLString]){
-        unsigned count = [[self remoteURLs] count];
+        unsigned int count = [[self remoteURLs] count];
         NSDictionary *cellDictionary = nil;
         if (count > 0) {
             NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%d items", @""), count];
@@ -1469,7 +1469,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 static inline 
-Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind, unsigned options, Boolean lossy)
+Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind, unsigned int options, Boolean lossy)
 {    
     if(BDIsEmptyString((CFStringRef)theString))
         return FALSE;
@@ -1488,7 +1488,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return found;
 }
 
-- (BOOL)matchesSubstring:(NSString *)substring withOptions:(unsigned)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
+- (BOOL)matchesSubstring:(NSString *)substring withOptions:(unsigned int)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
 {
     SEL selector = (void *)CFDictionaryGetValue(selectorTable, (CFStringRef)field);
     if(NULL == selector){
@@ -1889,7 +1889,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (NSString *)MODSString{
     NSDictionary *genreForTypeDict = [[BDSKTypeManager sharedManager] MODSGenresForBibTeXType:[self pubType]];
     NSMutableString *s = [NSMutableString stringWithString:@"<mods>\n"];
-    unsigned i = 0;
+    unsigned int i = 0;
     NSString *value;
     
     [s appendString:@"<titleInfo>\n"];
@@ -2468,7 +2468,7 @@ static void addFilesToArray(const void *value, void *context)
     BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:self];
     if (aFile == nil)
         return NO;
-    unsigned idx = [files count];
+    unsigned int idx = [files count];
     if ([aFile isFile]) {
         NSArray *localFiles = [self localFiles];
         if ([localFiles count])
@@ -2538,7 +2538,7 @@ static void addFilesToArray(const void *value, void *context)
         value = [value substringWithRange:NSMakeRange(5, [value length] - 6)];
     } else if([value hasPrefix:@"\\href{"]){
         // may also take the form \href{http://arXiv.org/abs/hep-th/0304033}{arXiv:hep-th/0304033}
-        unsigned loc = [value indexOfRightBraceMatchingLeftBraceAtIndex:5];
+        unsigned int loc = [value indexOfRightBraceMatchingLeftBraceAtIndex:5];
         if (NSNotFound != loc)
             value = [value substringWithRange:NSMakeRange(6, loc - 6)];
     }
@@ -2667,7 +2667,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     fieldsArray = (CFArrayRef)[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRemoteURLFieldsKey];
     CFArrayApplyFunction(fieldsArray, CFRangeMake(0, CFArrayGetCount(fieldsArray)), addURLForFieldToArrayIfNotNil, &context);
     
-    unsigned failureCount = [messages count];
+    unsigned int failureCount = [messages count];
 
     if (failureCount > 0 && outError) {
         *outError = [NSError mutableLocalErrorWithCode:kBDSKFileNotFound localizedDescription:NSLocalizedString(@"Unable to migrate files completely", @"")];
@@ -3387,7 +3387,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     if ([owner fileURL])
         [files makeObjectsPerformSelector:@selector(update)];
     
-    unsigned unresolvedFileCount = [unresolvedFiles count], unresolvedURLCount = [unresolvedURLs count];
+    unsigned int unresolvedFileCount = [unresolvedFiles count], unresolvedURLCount = [unresolvedURLs count];
     
     // remove from pubFields to avoid duplication when saving
     [pubFields removeObjectsForKeys:keysToRemove];

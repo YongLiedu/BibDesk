@@ -815,7 +815,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
 
 - (NSAttributedString *)templateAttributedStringValueWithAttributes:(NSDictionary *)attributes {
     NSMutableAttributedString *attributedString = [self mutableCopy];
-    unsigned idx = 0, length = [self length];
+    unsigned int idx = 0, length = [self length];
     NSRange range = NSMakeRange(0, length);
     NSDictionary *attrs;
     [attributedString addAttributes:attributes range:range];

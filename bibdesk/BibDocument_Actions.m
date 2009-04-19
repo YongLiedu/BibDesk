@@ -652,7 +652,7 @@ static BOOL changingColors = NO;
 
 #pragma mark URL actions
 
-- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex
+- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned int)charIndex
 {
     if ([aLink respondsToSelector:@selector(isFileURL)] && [aLink isFileURL]) {
         NSString *searchString;

@@ -154,7 +154,7 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
 
 - (void)release {}
 
-- (unsigned)retainCount { return UINT_MAX; }
+- (unsigned int)retainCount { return UINT_MAX; }
 
 #pragma mark -
 
@@ -243,9 +243,9 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
 
 
 // This method initializes the provided popup with list of encodings; it also sets up the selected encoding as indicated and if includeDefaultItem is YES, includes an initial item for selecting "Automatic" choice.  These non-encoding items all have 0 as their tags. Otherwise the tags are set to the NSStringEncoding value for the encoding.
-- (void)setupPopUp:(BDSKEncodingPopUpButton *)popup selectedEncoding:(unsigned)selectedEncoding {
+- (void)setupPopUp:(BDSKEncodingPopUpButton *)popup selectedEncoding:(unsigned int)selectedEncoding {
     NSArray *encs = [self enabledEncodings];
-    unsigned cnt, numEncodings, itemToSelect = 0;
+    unsigned int cnt, numEncodings, itemToSelect = 0;
         
     // Put the encodings in the popup
     [popup removeAllItems];
@@ -349,7 +349,7 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
 
     for (cnt = 0; cnt < numRows; cnt++) {
         NSCell *cell = [encodingMatrix cellAtRow:cnt column:0];
-        if (((unsigned)[cell tag] != 0) && ([cell state] == NSOnState)) [encs addObject:[NSNumber numberWithUnsignedInt:[cell tag]]];
+        if (((unsigned int)[cell tag] != 0) && ([cell state] == NSOnState)) [encs addObject:[NSNumber numberWithUnsignedInt:[cell tag]]];
     }
 
     [encodings autorelease];

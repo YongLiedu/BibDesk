@@ -407,7 +407,7 @@
         return [NSNumber numberWithUnsignedInt:maxRating];
     } else if ([attribute isEqualToString:NSAccessibilityAllowedValuesAttribute]) {
         NSMutableArray *values = [NSMutableArray array];
-        unsigned i;
+        unsigned int i;
         for (i = 0; i <= maxRating; i++)
             [values addObject:[NSNumber numberWithUnsignedInt:i]];
         return values;

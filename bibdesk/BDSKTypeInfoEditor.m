@@ -85,7 +85,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 - (void)release {}
 
-- (unsigned)retainCount { return UINT_MAX; }
+- (unsigned int)retainCount { return UINT_MAX; }
 
 - (void)awakeFromNib
 {
@@ -135,7 +135,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 # pragma mark Accessors
 
-- (void)insertType:(NSString *)newType withFields:(NSDictionary *)fieldsDict atIndex:(unsigned)idx {
+- (void)insertType:(NSString *)newType withFields:(NSDictionary *)fieldsDict atIndex:(unsigned int)idx {
 	[types insertObject:newType atIndex:idx];
 	
 	// create mutable containers for the fields

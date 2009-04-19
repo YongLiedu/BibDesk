@@ -279,7 +279,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 }
 
 // Automatically called by collection classes; override OBObject's implementation for templating, although the output still won't generally be appropriate for users.
-- (NSString *)descriptionWithLocale:(NSDictionary *)locale indent:(unsigned)level{
+- (NSString *)descriptionWithLocale:(NSDictionary *)locale indent:(unsigned int)level{
     return [self description];
 }
 

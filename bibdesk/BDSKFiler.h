@@ -149,10 +149,10 @@ BDSKForceAutoFileOptionMask forces AutoFiling, even if there may be problems mov
 - (IBAction)showFile:(id)sender;
 
 - (NSArray *)errorInfoDicts;
-- (unsigned)countOfErrorInfoDicts;
-- (id)objectInErrorInfoDictsAtIndex:(unsigned)index;
-- (void)insertObject:(id)obj inErrorInfoDictsAtIndex:(unsigned)index;
-- (void)removeObjectFromErrorInfoDictsAtIndex:(unsigned)index;
+- (unsigned int)countOfErrorInfoDicts;
+- (id)objectInErrorInfoDictsAtIndex:(unsigned int)index;
+- (void)insertObject:(id)obj inErrorInfoDictsAtIndex:(unsigned int)index;
+- (void)removeObjectFromErrorInfoDictsAtIndex:(unsigned int)index;
 
 @end
 

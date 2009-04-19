@@ -101,7 +101,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 
 - (void)release {}
 
-- (unsigned)retainCount { return UINT_MAX; }
+- (unsigned int)retainCount { return UINT_MAX; }
 
 - (void)windowDidLoad {
     [self setupToolbar];

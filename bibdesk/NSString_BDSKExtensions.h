@@ -229,9 +229,9 @@ An inline buffer is used for speed in accessing each character.
 @param      range The range to search for matching braces, the first character should be the left brace.
 @result     The index of the matching brace character.
 */
-- (unsigned)indexOfRightBraceMatchingLeftBraceInRange:(NSRange)range;
+- (unsigned int)indexOfRightBraceMatchingLeftBraceInRange:(NSRange)range;
 
-- (unsigned)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned int)startLoc;
+- (unsigned int)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned int)startLoc;
     
     /*!
     @method     isStringTeXQuotingBalancedWithBraces:connected:

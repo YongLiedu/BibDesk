@@ -56,16 +56,16 @@
 + (BDSKErrorObjectController *)sharedErrorObjectController;
 
 - (NSArray *)errors;
-- (unsigned)countOfErrors;
-- (id)objectInErrorsAtIndex:(unsigned)index;
-- (void)insertObject:(id)obj inErrorsAtIndex:(unsigned)index;
-- (void)removeObjectFromErrorsAtIndex:(unsigned)index;
+- (unsigned int)countOfErrors;
+- (id)objectInErrorsAtIndex:(unsigned int)index;
+- (void)insertObject:(id)obj inErrorsAtIndex:(unsigned int)index;
+- (void)removeObjectFromErrorsAtIndex:(unsigned int)index;
 
 - (NSArray *)managers;
-- (unsigned)countOfManagers;
-- (id)objectInManagersAtIndex:(unsigned)theIndex;
-- (void)insertObject:(id)obj inManagersAtIndex:(unsigned)theIndex;
-- (void)removeObjectFromManagersAtIndex:(unsigned)theIndex;
+- (unsigned int)countOfManagers;
+- (id)objectInManagersAtIndex:(unsigned int)theIndex;
+- (void)insertObject:(id)obj inManagersAtIndex:(unsigned int)theIndex;
+- (void)removeObjectFromManagersAtIndex:(unsigned int)theIndex;
 - (void)addManager:(BDSKErrorManager *)manager;
 - (void)removeManager:(BDSKErrorManager *)manager;
 

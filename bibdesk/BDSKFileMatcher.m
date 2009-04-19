@@ -434,7 +434,7 @@ static NSString *titleStringWithPub(BibItem *pub)
 static void normalizeScoresForItem(BDSKTreeNode *parent, float maxScore)
 {
     // nodes are shallow, so we only traverse 1 deep
-    unsigned i, iMax = [parent numberOfChildren];
+    unsigned int i, iMax = [parent numberOfChildren];
     for (i = 0; i < iMax; i++) {
         BDSKTreeNode *child = [parent childAtIndex:i];
         NSNumber *score = [child valueForKey:@"score"];

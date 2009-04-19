@@ -75,7 +75,7 @@
 
 - (void)addItemsFromMenu:(NSMenu *)other;
 {
-    unsigned i, count = [other numberOfItems];
+    unsigned int i, count = [other numberOfItems];
     NSMenuItem *anItem;
     NSZone *zone = [self zone];
     for(i = 0; i < count; i++){
@@ -319,7 +319,7 @@ static id sharedOpenWithController = nil;
 
 - (void)release {}
 
-- (unsigned)retainCount { return UINT_MAX; }
+- (unsigned int)retainCount { return UINT_MAX; }
 
 - (void)chooseApplicationToOpenURL:(NSURL *)aURL;
 {

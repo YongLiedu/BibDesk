@@ -172,16 +172,16 @@
 - (BOOL)validateOperation:(id *)value error:(NSError **)error;
 
 - (NSArray *)findHistory;
-- (unsigned)countOfFindHistory;
-- (id)objectInFindHistoryAtIndex:(unsigned)index;
-- (void)insertObject:(id)obj inFindHistoryAtIndex:(unsigned)index;
-- (void)removeObjectFromFindHistoryAtIndex:(unsigned)index;
+- (unsigned int)countOfFindHistory;
+- (id)objectInFindHistoryAtIndex:(unsigned int)index;
+- (void)insertObject:(id)obj inFindHistoryAtIndex:(unsigned int)index;
+- (void)removeObjectFromFindHistoryAtIndex:(unsigned int)index;
 
 - (NSArray *)replaceHistory;
-- (unsigned)countOfReplaceHistory;
-- (id)objectInReplaceHistoryAtIndex:(unsigned)index;
-- (void)insertObject:(id)obj inReplaceHistoryAtIndex:(unsigned)index;
-- (void)removeObjectFromReplaceHistoryAtIndex:(unsigned)index;
+- (unsigned int)countOfReplaceHistory;
+- (id)objectInReplaceHistoryAtIndex:(unsigned int)index;
+- (void)insertObject:(id)obj inReplaceHistoryAtIndex:(unsigned int)index;
+- (void)removeObjectFromReplaceHistoryAtIndex:(unsigned int)index;
 
 - (IBAction)toggleStatusBar:(id)sender;
 

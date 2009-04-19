@@ -111,7 +111,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 - (void)release {}
 
-- (unsigned)retainCount { return UINT_MAX; }
+- (unsigned int)retainCount { return UINT_MAX; }
 
 - (void)awakeFromNib;
 {
@@ -129,19 +129,19 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     return errors;
 }
 
-- (unsigned)countOfErrors {
+- (unsigned int)countOfErrors {
     return [errors count];
 }
 
-- (id)objectInErrorsAtIndex:(unsigned)idx {
+- (id)objectInErrorsAtIndex:(unsigned int)idx {
     return [errors objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inErrorsAtIndex:(unsigned)idx {
+- (void)insertObject:(id)obj inErrorsAtIndex:(unsigned int)idx {
     [errors insertObject:obj atIndex:idx];
 }
 
-- (void)removeObjectFromErrorsAtIndex:(unsigned)idx {
+- (void)removeObjectFromErrorsAtIndex:(unsigned int)idx {
     [errors removeObjectAtIndex:idx];
 }
 
@@ -151,19 +151,19 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     return managers;
 }
 
-- (unsigned)countOfManagers {
+- (unsigned int)countOfManagers {
     return [managers count];
 }
 
-- (id)objectInManagersAtIndex:(unsigned)theIndex {
+- (id)objectInManagersAtIndex:(unsigned int)theIndex {
     return [managers objectAtIndex:theIndex];
 }
 
-- (void)insertObject:(id)obj inManagersAtIndex:(unsigned)theIndex {
+- (void)insertObject:(id)obj inManagersAtIndex:(unsigned int)theIndex {
     [managers insertObject:obj atIndex:theIndex];
 }
 
-- (void)removeObjectFromManagersAtIndex:(unsigned)theIndex {
+- (void)removeObjectFromManagersAtIndex:(unsigned int)theIndex {
     [managers removeObjectAtIndex:theIndex];
 }
 
@@ -261,7 +261,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
         [self showWindow:self];
 	
     // remove any earlier failed load editors unless we're editing them
-    unsigned idx = [managers count];
+    unsigned int idx = [managers count];
     BDSKErrorManager *manager;
     
     while (idx--) {
@@ -283,7 +283,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (void)handleRemoveDocumentNotification:(NSNotification *)notification{
     BibDocument *document = [notification object];
     // clear reference to document in its editors and close it when it is not editing
-    unsigned idx = [managers count];
+    unsigned int idx = [managers count];
     BDSKErrorManager *manager;
     
     while (idx--) {
@@ -305,7 +305,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (void)removeErrorsForPublications:(NSArray *)pubs{
-	unsigned idx = [self countOfErrors];
+	unsigned int idx = [self countOfErrors];
     BibItem *pub;
     
     NSMutableIndexSet *indexesToRemove = [NSMutableIndexSet indexSet];
@@ -323,7 +323,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (void)removeErrorsForEditor:(BDSKErrorEditor *)editor{
-	unsigned idx = [self countOfErrors];
+	unsigned int idx = [self countOfErrors];
     BDSKErrorObject *errObj;
     
     NSMutableIndexSet *indexesToRemove = [NSMutableIndexSet indexSet];
