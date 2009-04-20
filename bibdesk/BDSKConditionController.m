@@ -381,12 +381,16 @@ static char BDSKConditionControllerObservationContext;
     }
 }
 
+- (void)discardEditing {
+    [objectController discardEditing];
+}
+
 - (BOOL)commitEditing {
     return [objectController commitEditing];
 }
 
-- (void)discardEditing {
-    [objectController discardEditing];
+- (void)commitEditingWithDelegate:(id)delegate didCommitSelector:(SEL)didCommitSelector contextInfo:(void *)contextInfo {
+    return [objectController commitEditingWithDelegate:delegate didCommitSelector:didCommitSelector contextInfo:contextInfo];
 }
 
 @end

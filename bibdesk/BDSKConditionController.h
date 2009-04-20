@@ -89,7 +89,8 @@
 - (NSArray *)keys;
 - (void)setKeys:(NSArray *)newKeys;
 
-- (BOOL)commitEditing;
 - (void)discardEditing;
+- (BOOL)commitEditing;
+- (void)commitEditingWithDelegate:(id)delegate didCommitSelector:(SEL)didCommitSelector contextInfo:(void *)contextInfo;
 
 @end
