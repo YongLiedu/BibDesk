@@ -86,20 +86,6 @@
     return [children subarrayWithRange:range];
 }
 
-- (void)replaceChildrenInRange:(NSRange)range withChildren:(NSArray *)newChildren {
-    if (NSEqualRanges(range, NSMakeRange(0, [self numberOfChildren]))) {
-        [children makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
-        [children makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
-        [children setArray:newChildren];
-    } else {
-        [[children subarrayWithRange:range] makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
-        [[children subarrayWithRange:range] makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
-        [children replaceObjectsInRange:range withObjectsFromArray:newChildren];
-    }
-    [children makeObjectsPerformSelector:@selector(setParent:) withObject:self];
-    [children makeObjectsPerformSelector:@selector(setDocument:) withObject:[self document]];
-}
-
 - (NSUInteger)numberOfChildren { return [children count]; }
 
 - (void)resort {
@@ -127,6 +113,21 @@
         [child setDocument:nil];
         [children removeObjectAtIndex:idx];
     }
+}
+
+- (void)replaceChildrenInRange:(NSRange)range withChildren:(NSArray *)newChildren {
+    if (NSEqualRanges(range, NSMakeRange(0, [self numberOfChildren]))) {
+        [children makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
+        [children makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+        [children setArray:newChildren];
+    } else {
+        [[children subarrayWithRange:range] makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
+        [[children subarrayWithRange:range] makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+        [children replaceObjectsInRange:range withObjectsFromArray:newChildren];
+    }
+    [children makeObjectsPerformSelector:@selector(setParent:) withObject:self];
+    [children makeObjectsPerformSelector:@selector(setDocument:) withObject:[self document]];
+    [self resort];
 }
 
 - (void)removeAllChildren {
@@ -207,23 +208,19 @@
 }
 
 - (NSArray *)searchGroups {
-    NSRange range = NSMakeRange(webGroupCount, searchGroupCount);
-    return [self childrenInRange:range];
+    return [self childrenInRange:NSMakeRange(webGroupCount, searchGroupCount)];
 }
 
 - (NSArray *)sharedGroups {
-    NSRange range = NSMakeRange(webGroupCount + searchGroupCount, sharedGroupCount);
-    return [self childrenInRange:range];
+    return [self childrenInRange:NSMakeRange(webGroupCount + searchGroupCount, sharedGroupCount)];
 }
 
 - (NSArray *)URLGroups {
-    NSRange range = NSMakeRange((webGroupCount + searchGroupCount + sharedGroupCount), URLGroupCount);
-    return [self childrenInRange:range];
+    return [self childrenInRange:NSMakeRange((webGroupCount + searchGroupCount + sharedGroupCount), URLGroupCount)];
 }
 
 - (NSArray *)scriptGroups {
-    NSRange range = NSMakeRange((webGroupCount + searchGroupCount + sharedGroupCount + URLGroupCount), scriptGroupCount);
-    return [self childrenInRange:range];
+    return [self childrenInRange:NSMakeRange((webGroupCount + searchGroupCount + sharedGroupCount + URLGroupCount), scriptGroupCount)];
 }
 
 - (void)addSearchGroup:(BDSKSearchGroup *)group {
@@ -239,8 +236,9 @@
 }
 
 - (void)setSharedGroups:(NSArray *)array {
-    [self replaceChildrenInRange:NSMakeRange(webGroupCount + searchGroupCount, sharedGroupCount) withChildren:array];
+    NSRange range = NSMakeRange(webGroupCount + searchGroupCount, sharedGroupCount);
     sharedGroupCount = [array count];
+    [self replaceChildrenInRange:range withChildren:array];
 }
 
 - (void)addURLGroup:(BDSKURLGroup *)group {
@@ -356,55 +354,51 @@
 
 - (id)init {
    if (self = [self initWithName:NSLocalizedString(@"SMART", @"source list group row title")]) {
-        lastImportGroupCount = 0;
-        smartGroupCount = 0;
+        hasLastImportGroup = NO;
     }
     return self;
 }
 
 // return nil if non-existent
 - (BDSKStaticGroup *)lastImportGroup {
-    return lastImportGroupCount ? [self childAtIndex:0] : nil;
+    return hasLastImportGroup ? [self childAtIndex:0] : nil;
 }
 
 - (NSArray *)smartGroups {
-    if (lastImportGroupCount == 0)
+    if (hasLastImportGroup == 0)
         return [self children];
-    NSRange range = NSMakeRange(lastImportGroupCount, smartGroupCount);
+    NSRange range = NSMakeRange(1, [self numberOfChildren] - 1);
     return [self childrenInRange:range];
 }
 
 - (void)setLastImportedPublications:(NSArray *)pubs {
     if ([pubs count]) {
-        if (lastImportGroupCount == 0) {
-            lastImportGroupCount += 1;
+        if (hasLastImportGroup == NO) {
+            hasLastImportGroup = YES;
             BDSKStaticGroup *group = [[BDSKStaticGroup alloc] initWithLastImport:pubs];
             [self insertChild:group atIndex:0];
             [group release];
         } else {
             [[self childAtIndex:0] setPublications:pubs];
         }
-    } else if (lastImportGroupCount) {
-        lastImportGroupCount = 0;
+    } else if (hasLastImportGroup) {
+        hasLastImportGroup = NO;
         [self removeChild:[self childAtIndex:0]];
     }
 }
 
 - (void)addSmartGroup:(BDSKSmartGroup *)group {
-    NSUInteger idx = lastImportGroupCount + smartGroupCount;
-    smartGroupCount += 1;
-    [self insertChild:group atIndex:idx];
+    [self insertChild:group atIndex:[self numberOfChildren]];
 }
 
 - (void)removeSmartGroup:(BDSKSmartGroup *)group {
-    smartGroupCount -= 1;
     [self removeChild:group];
 }
 
 - (void)resort {
-    if (lastImportGroupCount == 0) {
+    if (hasLastImportGroup == NO) {
         [super resort];
-    } else if (sortDescriptors && smartGroupCount > 1) {
+    } else if (sortDescriptors && [self numberOfChildren] > 2) {
         BDSKGroup *lastImport = [[self childAtIndex:0] retain];
         [children removeObjectAtIndex:0];
         [super resort];
@@ -414,8 +408,7 @@
 }
 
 - (void)removeAllUndoableChildren {
-    lastImportGroupCount = 0;
-    smartGroupCount = 0;
+    hasLastImportGroup = NO;
     [super removeAllUndoableChildren];
 }
 
