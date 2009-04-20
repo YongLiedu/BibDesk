@@ -389,11 +389,12 @@ The groupedPublications array is a subset of the publications array, developed b
     NSEnumerator *clientEnum = [clientsToAdd objectEnumerator];
     BDSKSharingClient *client;
     
-    while (client = [clientEnum nextObject])
-        [currentGroups addObject:[[[BDSKSharedGroup alloc] initWithClient:client] autorelease]];
+    while (client = [clientEnum nextObject]) {
+        BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithClient:client];
+        [currentGroups addObject:group];
+        [group release];
+    }
     
-    SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ? @selector(countCompare:) : @selector(nameCompare:);
-    [currentGroups sortUsingSelector:sortSelector ascending:!docState.sortGroupsDescending];
     [groups setSharedGroups:currentGroups];
     
     [clients release];
@@ -564,11 +565,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             [mutableGroups addObject:group];
             [group release];
         }
-        
-        // now sort using the current column and order
-        SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ?
-                            @selector(countCompare:) : @selector(nameCompare:);
-        [mutableGroups sortUsingSelector:sortSelector ascending:!docState.sortGroupsDescending];
         
         // add the "empty" group at index 0; this is a group of pubs whose value is empty for this field, so they
         // will not be contained in any of the other groups for the currently selected group field (hence multiple selection is desirable)
