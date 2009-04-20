@@ -381,14 +381,16 @@
 }
 
 - (void)setLastImportedPublications:(NSArray *)pubs {
-    if (lastImportGroupCount == 0) {
-        lastImportGroupCount += 1;
-        BDSKStaticGroup *group = [[BDSKStaticGroup alloc] initWithLastImport:pubs];
-        [self insertChild:group atIndex:0];
-        [group release];
-    } else if ([pubs count]) {
-        [[self childAtIndex:0] setPublications:pubs];
-    } else {
+    if ([pubs count]) {
+        if (lastImportGroupCount == 0) {
+            lastImportGroupCount += 1;
+            BDSKStaticGroup *group = [[BDSKStaticGroup alloc] initWithLastImport:pubs];
+            [self insertChild:group atIndex:0];
+            [group release];
+        } else {
+            [[self childAtIndex:0] setPublications:pubs];
+        }
+    } else if (lastImportGroupCount) {
         lastImportGroupCount = 0;
         [self removeChild:[self childAtIndex:0]];
     }
