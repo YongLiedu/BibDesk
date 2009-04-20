@@ -117,15 +117,6 @@
 
 #pragma mark Subarray Accessors
 
-- (NSArray *)allGroups {
-    NSMutableArray *allGroups = [NSMutableArray array];
-    NSEnumerator *parentEnum = [groups objectEnumerator];
-    BDSKParentGroup *parent;
-    while (parent = [parentEnum nextObject])
-        [allGroups addObjectsFromArray:[parent childrenInRange:NSMakeRange(0, [parent numberOfChildren])]];
-    return allGroups;
-}
-
 - (BDSKLibraryParentGroup *)libraryParent { return [groups objectAtIndex:LIBRARY_PARENT_INDEX]; }
 
 - (BDSKExternalParentGroup *)externalParent { return [groups objectAtIndex:EXTERNAL_PARENT_INDEX]; }
