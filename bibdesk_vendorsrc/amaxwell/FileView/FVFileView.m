@@ -3173,12 +3173,12 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (IBAction)zoomIn:(id)sender;
 {
-    [self _setIconScale:([self iconScale] * 2)];
+    [self _setIconScale:FVMin([self maxIconScale], [self iconScale] * sqrt(2.0))];
 }
 
 - (IBAction)zoomOut:(id)sender;
 {
-    [self _setIconScale:([self iconScale] / 2)];
+    [self _setIconScale:FVMax([self minIconScale], [self iconScale] * sqrt(0.5))];
 }
 
 - (IBAction)displayGrid:(id)sender;
@@ -3283,8 +3283,10 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     BOOL isEditable = [self isEditable];
     BOOL selectionCount = [_selectionIndexes count];
     
-    if (action == @selector(zoomOut:) || action == @selector(zoomIn:))
-        return _fvFlags.displayMode == FVDisplayModeGrid;
+    if (action == @selector(zoomIn:))
+        return _fvFlags.displayMode == FVDisplayModeGrid && [self iconScale] < [self maxIconScale];
+    else if (action == @selector(zoomOut:))
+        return _fvFlags.displayMode == FVDisplayModeGrid && [self iconScale] > [self minIconScale];
     else if (action == @selector(displayGrid:)) {
         [anItem setState:_fvFlags.displayMode == FVDisplayModeGrid ? NSOnState : NSOffState];
         return YES;
