@@ -84,6 +84,8 @@
 #import "BDSKApplication.h"
 #import "NSColor_BDSKExtensions.h"
 
+#define WEAK_NULL NULL
+
 #define BDSKEditorFrameAutosaveName @"BDSKEditor window autosave name"
 static char BDSKEditorObservationContext;
 
@@ -1333,75 +1335,91 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (void)updatePreviewRecentDocumentsMenu:(NSMenu *)menu{
     // get all of the items from the Apple menu (works on 10.4, anyway), and build a set of the file paths for easy comparison as strings
-    NSMutableSet *globalRecentPaths = [[NSMutableSet alloc] initWithCapacity:10];
-    CFDictionaryRef globalRecentDictionary = CFPreferencesCopyAppValue(CFSTR("Documents"), CFSTR("com.apple.recentitems"));
-    NSArray *globalItems = [(NSDictionary *)globalRecentDictionary objectForKey:@"CustomListItems"];
-    [(id)globalRecentDictionary autorelease];
+    NSMutableArray *globalRecentPaths = [[NSMutableArray alloc] initWithCapacity:10];
+    NSDictionary *itemDict;
+    NSData *aliasData;
+    NSString *filePath;
+    BDAlias *alias;
+    NSEnumerator *e;
     
-    NSEnumerator *e = [globalItems objectEnumerator];
-    NSDictionary *itemDict = nil;
-    NSData *aliasData = nil;
-    NSString *filePath = nil;
-    BDAlias *alias = nil;
-    
-    while(itemDict = [e nextObject]){
-        aliasData = [itemDict objectForKey:@"Alias"];
-        alias = [[BDAlias alloc] initWithData:aliasData];
-        filePath = [alias fullPathNoUI];
-        if(filePath)
-            [globalRecentPaths addObject:filePath];
-        [alias release];
+    if (LSSharedFileListCreate != WEAK_NULL) {
+        
+        LSSharedFileListRef fileList = LSSharedFileListCreate(kCFAllocatorDefault, kLSSharedFileListRecentDocumentItems, NULL);
+        if (NULL == fileList) return;
+        UInt32 seed;
+        CFArrayRef fileListItems = LSSharedFileListCopySnapshot(fileList, &seed);
+        CFRelease(fileList);
+        
+        if (fileListItems) {
+            
+            CFIndex idx;
+            for (idx = 0; idx < CFArrayGetCount(fileListItems); idx++) {
+                
+                LSSharedFileListItemRef item = (void *)CFArrayGetValueAtIndex(fileListItems, idx);
+                CFURLRef itemURL;
+                if (noErr != LSSharedFileListItemResolve(item, 0, &itemURL, NULL))
+                    [globalRecentPaths addObject:[(NSURL *)itemURL path]];
+            }
+            CFRelease(fileListItems);
+        }
+        
+    } else {
+        
+        CFDictionaryRef globalRecentDictionary = CFPreferencesCopyAppValue(CFSTR("Documents"), CFSTR("com.apple.recentitems"));
+        NSArray *globalItems = [(NSDictionary *)globalRecentDictionary objectForKey:@"CustomListItems"];
+        [(id)globalRecentDictionary autorelease];
+        
+        e = [globalItems objectEnumerator];
+        
+        while (itemDict = [e nextObject]) {
+            aliasData = [itemDict objectForKey:@"Alias"];
+            alias = [[BDAlias alloc] initWithData:aliasData];
+            filePath = [alias fullPathNoUI];
+            if(filePath)
+                [globalRecentPaths addObject:filePath];
+            [alias release];
+        }
+        
     }
     
-    // now get all of the recent items from the default PDF viewer, Preview.app and Skim.app; this does not include items opened since Preview's last launch, unfortunately, regardless of the call to CFPreferencesSynchronize
-    NSMutableArray *historyArray = [[NSMutableArray alloc] initWithCapacity:10];
-    NSMutableSet *previewRecentPaths = [[NSMutableSet alloc] initWithCapacity:10];
-	CFArrayRef tmpArray;
+    // now get all of the recent items from the default PDF viewer; this does not include items opened since the viewer's last launch, unfortunately, regardless of the call to CFPreferencesSynchronize
+    NSMutableArray *previewRecentPaths = [[NSMutableArray alloc] initWithCapacity:10];
     
     CFURLRef appURL;
     NSString *appIdentifier = nil;
+    
     if (noErr == LSGetApplicationForInfo('PDF ', kLSUnknownCreator, CFSTR("pdf"), kLSRolesEditor | kLSRolesViewer, NULL, &appURL)) {
-        if (appIdentifier = [[NSBundle bundleWithPath:[(NSURL *)appURL path]] bundleIdentifier]) {
-            tmpArray = CFPreferencesCopyAppValue(CFSTR("NSRecentDocumentRecords"), CFSTR("com.apple.Preview"));
-            [historyArray addObjectsFromArray:(NSArray *)tmpArray];
-            if(tmpArray) CFRelease(tmpArray);
+        appIdentifier = [[NSBundle bundleWithPath:[(NSURL *)appURL path]] bundleIdentifier];
+        CFRelease(appURL);
+    }
+    if (appIdentifier == nil)
+        appIdentifier = @"com.apple.Preview";
+    
+    CFArrayRef tmpArray = CFPreferencesCopyAppValue(CFSTR("NSRecentDocumentRecords"), (CFStringRef)appIdentifier);
+    
+    if (tmpArray) {
+        e = [(NSArray *)tmpArray objectEnumerator];
+        
+        while (itemDict = [e nextObject]) {
+            aliasData = [[itemDict objectForKey:@"_NSLocator"] objectForKey:@"_NSAlias"];
+            alias = [[BDAlias alloc] initWithData:aliasData];
+            filePath = [alias fullPathNoUI];
+            if(filePath)
+                [previewRecentPaths addObject:filePath];
+            [alias release];
         }
-        if (appURL) CFRelease(appURL);
+        
+        CFRelease(tmpArray);
     }
-    if (appIdentifier && [appIdentifier caseInsensitiveCompare:@"com.apple.Preview"] != NSOrderedSame) {
-        tmpArray = CFPreferencesCopyAppValue(CFSTR("NSRecentDocumentRecords"), CFSTR("com.apple.Preview"));
-        [historyArray addObjectsFromArray:(NSArray *)tmpArray];
-        if(tmpArray) CFRelease(tmpArray);
-	}
-    if (appIdentifier && [appIdentifier caseInsensitiveCompare:@"net.sourceforge.skim-app.Skim"] != NSOrderedSame) {
-        tmpArray = CFPreferencesCopyAppValue(CFSTR("NSRecentDocumentRecords"), CFSTR("net.sourceforge.skim-app.Skim"));
-        [historyArray addObjectsFromArray:(NSArray *)tmpArray];
-        if(tmpArray) CFRelease(tmpArray);
-    }
-    
-	unsigned int i = 0;
-	unsigned int numberOfItems = [(NSArray *)historyArray count];
-	for (i = 0; i < numberOfItems; i ++){
-		itemDict = [(NSArray *)historyArray objectAtIndex:i];
-		aliasData = [[itemDict objectForKey:@"_NSLocator"] objectForKey:@"_NSAlias"];
-		
-        alias = [[BDAlias alloc] initWithData:aliasData];
-        filePath = [alias fullPathNoUI];
-        if(filePath)
-            [previewRecentPaths addObject:filePath];
-        [alias release];
-	}
-    
-    [historyArray release];
     
     NSString *fileName;
     NSMenuItem *item;
     
     [menu removeAllItems];
-
+    
     // now add all of the items from Preview, which are most likely what we want
     e = [previewRecentPaths objectEnumerator];
-    while(filePath = [e nextObject]){
+    while (filePath = [e nextObject]) {
         if([[NSFileManager defaultManager] fileExistsAtPath:filePath]){
             fileName = [filePath lastPathComponent];            
             item = [menu addItemWithTitle:fileName
@@ -1413,7 +1431,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     }
     
     // add a separator between Preview and global recent items, unless Preview has never been used
-    if([previewRecentPaths count])
+    if ([previewRecentPaths count])
         [menu addItem:[NSMenuItem separatorItem]];
 
     // now add all of the items that /were not/ in Preview's recent items path; this works for files opened from Preview's open panel, as well as from the Finder
@@ -1430,10 +1448,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         }
     }  
     
-    if ([globalRecentPaths count] == 0) {
+    if ([globalRecentPaths count] == 0)
         [menu addItemWithTitle:NSLocalizedString(@"No Recent Documents", @"Menu item title") action:NULL keyEquivalent:@""];
-    }
-        
+    
     [globalRecentPaths release];
     [previewRecentPaths release];
 }
