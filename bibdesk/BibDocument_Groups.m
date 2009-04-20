@@ -176,13 +176,12 @@ The groupedPublications array is a subset of the publications array, developed b
 #pragma mark Web Group 
 
 - (BDSKWebGroupViewController *)webGroupViewController {
-    if (webGroupViewController == nil && [groups webGroup])
+    if (webGroupViewController == nil)
         webGroupViewController = [[BDSKWebGroupViewController alloc] initWithGroup:[groups webGroup] document:self];
     return webGroupViewController;
 }
 
 - (void)showWebGroupView {
-    NSAssert([groups webGroup], @"tried to show WebGroupView when web group pref was false");
     NSView *webGroupView = [[self webGroupViewController] view];
     NSView *webView = [[self webGroupViewController] webView];
     
@@ -1763,8 +1762,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     if (aGroup) {
         [groupsToTest addObject:aGroup];
     } else {
-        if ([groups webGroup])
-            [groupsToTest addObject:[groups webGroup]];
+        [groupsToTest addObject:[groups webGroup]];
         [groupsToTest addObjectsFromArray:[groups sharedGroups]];
         [groupsToTest addObjectsFromArray:[groups URLGroups]];
         [groupsToTest addObjectsFromArray:[groups scriptGroups]];
