@@ -62,7 +62,6 @@
     if (sharedApplication == nil) {
         sharedApplication = [super sharedApplication];
         [NSThread assignMainThread];
-        //[OBObject self]; // Trigger +[OBPostLoader processClasses]
     }
     return sharedApplication;
 }
@@ -74,10 +73,7 @@
     NSString *fileName;
     while(fileName = [fEnum nextObject]){
         NSData *data = [[BDAlias aliasWithPath:fileName] aliasData];
-        if(data)
-            [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:fileName, @"fileName", data, @"_BDAlias", nil]];
-        else
-            [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:fileName, @"fileName", nil]];
+        [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:fileName, @"fileName", data, @"_BDAlias", nil]];
     }
     [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKLastOpenFileNamesKey];
     
@@ -86,9 +82,8 @@
 
 - (void)sendEvent:(NSEvent *)event {
     [super sendEvent:event];
-    if ([event type] == NSFlagsChanged) {
+    if ([event type] == NSFlagsChanged)
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:self];
-    }
 }
 
 - (unsigned int)currentModifierFlags {
