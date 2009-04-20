@@ -312,7 +312,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)handleGroupNameChangedNotification:(NSNotification *)notification{
-    if([groups containsGrou:[notification object]] == NO)
+    if([groups containsGroup:[notification object]] == NO)
         return;
     if([sortGroupsKey isEqualToString:BDSKGroupCellStringKey])
         [self sortGroupsByKey:nil];
