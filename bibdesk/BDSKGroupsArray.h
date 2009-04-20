@@ -89,7 +89,7 @@ enum {
 - (void)addStaticGroup:(BDSKStaticGroup *)group;
 - (void)removeStaticGroup:(BDSKStaticGroup *)group;
 - (void)setCategoryGroups:(NSArray *)array;
-- (void)removeAllSavedGroups;
+- (void)removeAllUndoableGroups;
 
 - (void)sortUsingDescriptors:(NSArray *)sortDescriptors;
 

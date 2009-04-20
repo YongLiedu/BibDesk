@@ -1851,7 +1851,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [macroResolver removeAllMacros];
     [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:[groups URLGroups]];
     [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:[groups scriptGroups]];
-    [groups removeAllSavedGroups]; // this also removes editor windows for external groups
+    [groups removeAllUndoableGroups]; // this also removes editor windows for external groups
     [frontMatter setString:@""];
     
     // This is only a sanity check; an encoding of 0 is not valid, so is a signal we should ignore xattrs; could only check for public.text UTIs, but it will be zero if it was never written (and we don't warn in that case).  The user can do many things to make the attribute incorrect, so this isn't very robust.

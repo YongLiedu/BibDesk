@@ -152,7 +152,7 @@
     [children makeObjectsPerformSelector:@selector(setDocument:) withObject:newDocument];
 }
 
-- (void)removeAllSavedGroups {
+- (void)removeAllUndoableChildren {
     [self removeAllChildren];
 }
 
@@ -179,7 +179,7 @@
 - (void)sortUsingDescriptors:(NSArray *)descriptors {}
 
 // do nothing
-- (void)removeAllSavedGroups {}
+- (void)removeAllUndoableChildren {}
 
 @end
 
@@ -285,7 +285,7 @@
     }
 }
 
-- (void)removeAllSavedGroups {
+- (void)removeAllUndoableChildren {
     NSRange range = NSMakeRange((webGroupCount + searchGroupCount + sharedGroupCount), (URLGroupCount + scriptGroupCount));
     URLGroupCount = 0;
     scriptGroupCount = 0;
@@ -413,10 +413,10 @@
     }
 }
 
-- (void)removeAllSavedGroups {
+- (void)removeAllUndoableChildren {
     lastImportGroupCount = 0;
     smartGroupCount = 0;
-    [super removeAllSavedGroups];
+    [super removeAllUndoableChildren];
 }
 
 @end

@@ -273,8 +273,8 @@
 }
 
 // this should only be used just before reading from file, in particular revert, so we shouldn't make this undoable
-- (void)removeAllSavedGroups {
-    [groups makeObjectsPerformSelector:_cmd];
+- (void)removeAllUndoableGroups {
+    [groups makeObjectsPerformSelector:@selector(removeAllUndoableChildren)];
 }
 
 #pragma mark Document
