@@ -1032,14 +1032,18 @@ static CGFloat _subtitleHeight = 0.0;
     _numberOfRows = ( [self numberOfIcons]  + _numberOfColumns - 1 ) / _numberOfColumns;
 }
 
+static CGFloat _scrollerWidthForScroller(NSScroller *scroller) {
+    return [[scroller class] scrollerWidthForControlSize:[scroller controlSize]];
+}
+
 - (NSSize)_contentSizeForScrollView:(NSScrollView *)scrollView minWidth:(CGFloat)minWidth hasVerticalScroller:(BOOL)hasVerticalScroller {
     // NSScrollView does not have a method to get the content size for arbitrary controlSize, so we substract the scroller widths ourselves
     NSSize contentSize = [[scrollView class] contentSizeForFrameSize:[scrollView frame].size hasHorizontalScroller:NO hasVerticalScroller:NO borderType:[scrollView borderType]];
     if (hasVerticalScroller)
-        contentSize.width -= [NSScroller scrollerWidthForControlSize:[[scrollView verticalScroller] controlSize]];
+        contentSize.width -= _scrollerWidthForScroller([scrollView verticalScroller]);
     // if the icons reach the minimum size, we should have a horizontal scroller if it's available
     if ([scrollView hasHorizontalScroller] && contentSize.width < minWidth)
-        contentSize.height -= [NSScroller scrollerWidthForControlSize:[[scrollView horizontalScroller] controlSize]];
+        contentSize.height -= _scrollerWidthForScroller([scrollView horizontalScroller]);
     return contentSize;
 }
 
@@ -1047,10 +1051,10 @@ static CGFloat _subtitleHeight = 0.0;
     // NSScrollView does not have a method to get the content size for arbitrary controlSize, so we substract the scroller widths ourselves
     NSSize contentSize = [[scrollView class] contentSizeForFrameSize:[scrollView frame].size hasHorizontalScroller:NO hasVerticalScroller:NO borderType:[scrollView borderType]];
     if (hasHorizontalScroller)
-        contentSize.height -= [NSScroller scrollerWidthForControlSize:[[scrollView horizontalScroller] controlSize]];
+        contentSize.height -= _scrollerWidthForScroller([scrollView horizontalScroller]);
     // if the icons reach the minimum size, we should have a vertical scroller if it's available
     if ([scrollView hasVerticalScroller] && contentSize.height < minHeight)
-        contentSize.width -= [NSScroller scrollerWidthForControlSize:[[scrollView verticalScroller] controlSize]];
+        contentSize.width -= _scrollerWidthForScroller([scrollView verticalScroller]);
     return contentSize;
 }
 
@@ -1068,7 +1072,7 @@ static CGFloat _subtitleHeight = 0.0;
         if ([scrollView autohidesScrollers] && [scrollView hasVerticalScroller]) {
             CGFloat minWidth = FVCeil( DEFAULT_PADDING.width + MIN_AUTO_ICON_SCALE * DEFAULT_ICON_SIZE.width + 2 * DEFAULT_MARGIN.width );
             
-            // fist assume we need a vertical scroller...
+            // first assume we need a vertical scroller...
             contentSize = [self _contentSizeForScrollView:scrollView minWidth:minWidth hasVerticalScroller:YES];
             [self _setPaddingAndIconSizeFromContentWidth:contentSize.width];
             
@@ -1102,7 +1106,7 @@ static CGFloat _subtitleHeight = 0.0;
         if ([scrollView autohidesScrollers] && [scrollView hasHorizontalScroller]) {
             CGFloat minHeight = FVCeil( DEFAULT_PADDING.height + MIN_AUTO_ICON_SCALE * DEFAULT_ICON_SIZE.height + DEFAULT_MARGIN.height );
             
-            // fist assume we need a horizontal scroller...
+            // first assume we need a horizontal scroller...
             contentSize = [self _contentSizeForScrollView:scrollView minHeight:minHeight hasHorizontalScroller:YES];
             [self _setPaddingAndIconSizeFromContentHeight:contentSize.height];
             
@@ -1131,13 +1135,13 @@ static CGFloat _subtitleHeight = 0.0;
         
         _padding = [self _paddingForScale:[self iconScale]];
         
-        // if we have an auto-hiding horizontal scroller, we may or may not have scroll bars, which affects the effective height
-        if ([scrollView autohidesScrollers] && [scrollView hasHorizontalScroller]) {
-            // set the number of colunns to 1 to calculate the minimal required width
+        // if we have an auto-hiding vertical scroller, we may or may not have scroll bars, which affects the effective width
+        if ([scrollView autohidesScrollers] && [scrollView hasVerticalScroller]) {
+            // set the number of columns to 1 to calculate the minimal required width
             _numberOfColumns = 1;
             CGFloat minWidth = [self _frameWidth];
             
-            // fist assume we don't need a vertical scroller...
+            // first assume we don't need a vertical scroller...
             contentSize = [self _contentSizeForScrollView:scrollView minWidth:minWidth hasVerticalScroller:NO];
             [self _setColumnsAndRowsFromContentWidth:contentSize.width];
             
