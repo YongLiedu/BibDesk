@@ -40,6 +40,10 @@
 #import "NSBezierPath_BDSKExtensions.h"
 
 
+@interface NSTableView (BDSApplePrivate)
+-(void)_drawDropHighlightOnRow:(int)rowIndex;
+@end
+
 @implementation NSTableView (BDSKExtensions)
 
 // this is necessary as the NSTableView-OAExtensions defines these actions accordingly
@@ -64,23 +68,30 @@
 
 #pragma mark Drop highlight
 
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
 // we override this private method to draw something nicer than the default ugly black square
 // from http://www.cocoadev.com/index.pl?UglyBlackHighlightRectWhenDraggingToNSTableView
 // modified to use -intercellSpacing and save/restore graphics state
-
--(void)_drawDropHighlightOnRow:(int)rowIndex{
+-(void)replacement_drawDropHighlightOnRow:(int)rowIndex{
     NSRect drawRect = (rowIndex == -1) ? [self visibleRect] : [self rectOfRow:rowIndex];
-    
     [self lockFocus];
     [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:2.0 color:[NSColor alternateSelectedControlColor]];
     [self unlockFocus];
 }
 
+- (void)load {
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+        BDSKReplaceInstanceMethodImplementation(self, @selector(_drawDropHighlightOnRow:), @selector(replacement_drawDropHighlightOnRow:));
+}
+
+#else
+#warning fixme: remove NSTableView highlights
+#endif
 @end
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
 @implementation NSTableColumn (BDSKExtensions)
-- (id)dataCellForRow:(NSInteger)row {
+- (id)replacement_dataCellForRow:(NSInteger)row {
     id cell = [self dataCell];
     id tableView = [self tableView];
     if ([tableView isKindOfClass:[NSOutlineView class]] && [[tableView delegate] respondsToSelector:@selector(outlineView:dataCellForTableColumn:item:)])
@@ -89,6 +100,12 @@
         cell = [[tableView delegate] tableView:tableView dataCellForTableColumn:self row:row];
     return cell;
 }
+
+- (void)load {
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+        BDSKReplaceInstanceMethodImplementation(self, @selector(dataCellForRow:), @selector(replacement_dataCellForRow:));
+}
+
 @end
 #else
 #warning fixme: remove NSTableColumn category
