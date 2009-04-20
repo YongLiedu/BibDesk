@@ -1131,28 +1131,28 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	NSIndexSet *rowIndexes = [groupOutlineView selectedRowIndexes];
     unsigned int rowIndex = [rowIndexes lastIndex];
 	BDSKGroup *group;
-	unsigned int count = 0;
+    BOOL didRemove = NO;
 	
 	while (rowIndexes != nil && rowIndex != NSNotFound) {
 		group = [groups objectAtIndex:rowIndex];
-		if ([group isSmart] == YES) {
+		if ([group isSmart]) {
 			[groups removeSmartGroup:(BDSKSmartGroup *)group];
-			count++;
-		} else if ([group isStatic] == YES && [group isEqual:[groups lastImportGroup]] == NO) {
+			didRemove = YES;
+		} else if ([group isStatic] && [group isEqual:[groups lastImportGroup]] == NO) {
 			[groups removeStaticGroup:(BDSKStaticGroup *)group];
-			count++;
-		} else if ([group isURL] == YES) {
+			didRemove = YES;
+		} else if ([group isURL]) {
 			[groups removeURLGroup:(BDSKURLGroup *)group];
-			count++;
-		} else if ([group isScript] == YES) {
+			didRemove = YES;
+		} else if ([group isScript]) {
 			[groups removeScriptGroup:(BDSKScriptGroup *)group];
-			count++;
-		} else if ([group isSearch] == YES) {
+			didRemove = YES;
+		} else if ([group isSearch]) {
 			[groups removeSearchGroup:(BDSKSearchGroup *)group];
         }
 		rowIndex = [rowIndexes indexLessThanIndex:rowIndex];
 	}
-	if (count > 0) {
+	if (didRemove) {
 		[[self undoManager] setActionName:NSLocalizedString(@"Remove Groups", @"Undo action name")];
         [self displaySelectedGroups];
 	}
@@ -1186,32 +1186,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         BDSKSearchGroupSheetController *sheetController = [(BDSKSearchGroupSheetController *)[BDSKSearchGroupSheetController alloc] initWithGroup:(BDSKSearchGroup *)group];
         [sheetController beginSheetModalForWindow:documentWindow];
         [sheetController release];
-	}
-    
-    NSEnumerator *groupEnum = [[[[self selectedGroups] copy] autorelease] objectEnumerator];
-    BOOL shouldDisplay = NO;
-   
-    while (group = [groupEnum nextObject]) {
-		if ([group isSmart]) {
-			[groups removeSmartGroup:(BDSKSmartGroup *)group];
-			shouldDisplay = YES;
-		} else if ([group isStatic] && [group isEqual:[groups lastImportGroup]] == NO) {
-			[groups removeStaticGroup:(BDSKStaticGroup *)group];
-			shouldDisplay = YES;
-		} else if ([group isURL]) {
-			[groups removeURLGroup:(BDSKURLGroup *)group];
-			shouldDisplay = YES;
-		} else if ([group isScript]) {
-			[groups removeScriptGroup:(BDSKScriptGroup *)group];
-			shouldDisplay = YES;
-		} else if ([group isSearch]) {
-			[groups removeSearchGroup:(BDSKSearchGroup *)group];
-        }        
-    }
-    
-	if (shouldDisplay) {
-		[[self undoManager] setActionName:NSLocalizedString(@"Remove Groups", @"Undo action name")];
-        [self displaySelectedGroups];
 	}
 }
 
