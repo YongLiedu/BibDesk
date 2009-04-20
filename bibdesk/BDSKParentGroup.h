@@ -95,8 +95,7 @@
 #pragma mark -
 
 @interface BDSKSmartParentGroup : BDSKParentGroup {
-    NSUInteger lastImportGroupCount;
-    NSUInteger smartGroupCount;
+    BOOL hasLastImportGroup;
 }
 
 - (BDSKStaticGroup *)lastImportGroup;
