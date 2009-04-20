@@ -127,7 +127,8 @@
     }
     [children makeObjectsPerformSelector:@selector(setParent:) withObject:self];
     [children makeObjectsPerformSelector:@selector(setDocument:) withObject:[self document]];
-    [self resort];
+    if ([newChildren count])
+        [self resort];
 }
 
 - (void)removeAllChildren {
