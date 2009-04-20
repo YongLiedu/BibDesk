@@ -108,13 +108,6 @@
 - (BOOL)isParent;
 
 /*!
-	@method isLibraryParent
-	@abstract Boolean, returns whether the receiver is the library parent group. 
-	@discussion -
-*/
-- (BOOL)isLibraryParent;
-
-/*!
 	@method isStatic
 	@abstract Boolean, returns whether the receiver is a static group. 
 	@discussion -

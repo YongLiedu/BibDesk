@@ -76,13 +76,14 @@
 
 - (BOOL)isParent { return YES; }
 
-- (BOOL)isLibraryParent { return NO; }
-
 - (NSString *)cellValue { return [self name]; }
 
+- (NSArray *)children {
+    return children;
+}
+
 - (NSArray *)childrenInRange:(NSRange)range {
-    // avoid copying if possible
-    return NSEqualRanges(range, NSMakeRange(0, [self numberOfChildren])) ? children : [children subarrayWithRange:range];
+    return [children subarrayWithRange:range];
 }
 
 - (void)replaceChildrenInRange:(NSRange)range withChildren:(NSArray *)newChildren {
@@ -311,7 +312,7 @@
 }
 
 - (NSArray *)categoryGroups {
-    return [self childrenInRange:NSMakeRange(0, [self numberOfChildren])];
+    return [self children];
 }
 
 - (void)setCategoryGroups:(NSArray *)array {
@@ -344,7 +345,7 @@
 }
 
 - (NSArray *)staticGroups {
-    return [self childrenInRange:NSMakeRange(0, [self numberOfChildren])];
+    return [self children];
 }
 
 - (void)addStaticGroup:(BDSKStaticGroup *)group {
@@ -376,6 +377,8 @@
 }
 
 - (NSArray *)smartGroups {
+    if (lastImportGroupCount == 0)
+        return [self children];
     NSRange range = NSMakeRange(lastImportGroupCount, smartGroupCount);
     return [self childrenInRange:range];
 }

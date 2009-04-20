@@ -182,8 +182,6 @@ static NSString *createUniqueID(void)
 
 - (BOOL)isParent { return NO; }
 
-- (BOOL)isLibraryParent { return NO; }
-
 - (BOOL)isStatic { return NO; }
 
 - (BOOL)isSmart { return NO; }

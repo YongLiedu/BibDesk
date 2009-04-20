@@ -56,6 +56,7 @@
 - (void)removeChild:(id)child;
 - (void)removeAllChildren;
 - (void)sortUsingDescriptors:(NSArray *)sortDescriptors;
+- (NSArray *)children;
 - (NSArray *)childrenInRange:(NSRange)range;
 - (void)replaceChildrenInRange:(NSRange)range withChildren:(NSArray *)children;
 - (BOOL)containsChild:(id)group;

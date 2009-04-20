@@ -57,8 +57,6 @@ enum {
 
 - (id)initWithDocument:(BibDocument *)aDocument;
 
-- (NSArray *)allGroups;
-
 - (BDSKLibraryParentGroup *)libraryParent;
 - (BDSKExternalParentGroup *)externalParent;
 - (BDSKSmartParentGroup *)smartParent;

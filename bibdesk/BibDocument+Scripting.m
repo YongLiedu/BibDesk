@@ -236,17 +236,17 @@
 #pragma mark Groups
 
 - (NSArray *)scriptingGroups {
-    return [groups allGroups];
+    return [groups valueForKeyPath:@"@unionOfArrays.children"];
 }
 
 - (BDSKGroup *)valueInScriptingGroupsWithUniqueID:(NSString *)aUniqueID {
-    NSArray *allGroups = [groups allGroups];
+    NSArray *allGroups = [self scriptingGroups];
     unsigned int idx = [[allGroups valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [allGroups objectAtIndex:idx];
 }
 
 - (BDSKGroup *)valueInScriptingGroupsWithName:(NSString *)name {
-    NSArray *allGroups = [groups allGroups];
+    NSArray *allGroups = [self scriptingGroups];
     NSArray *names = [allGroups valueForKey:@"stringValue"];
     unsigned int idx = [names indexOfObject:name];
     if (idx == NSNotFound) {
@@ -639,7 +639,7 @@
         NSScriptObjectSpecifier *endSpec = [rangeSpec endSpecifier];
         NSString *startKey = [startSpec key];
         NSString *endKey = [endSpec key];
-        NSArray *allGroups = [groups allGroups];
+        NSArray *allGroups = [self scriptingGroups];
         
         if ((startSpec == nil) && (endSpec == nil))
             // We need to have at least one of these...
@@ -737,7 +737,7 @@
         NSScriptObjectSpecifier *baseSpec = [relSpec baseSpecifier];
         NSString *baseKey = [baseSpec key];
         NSRelativePosition relPos = [relSpec relativePosition];
-        NSArray *allGroups = [groups allGroups];
+        NSArray *allGroups = [self scriptingGroups];
         
         if (baseSpec == nil)
             // We need to have one of these...

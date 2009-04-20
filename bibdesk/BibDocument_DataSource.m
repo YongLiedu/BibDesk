@@ -1177,7 +1177,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 #pragma mark OutlineView delegate
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldCollapseItem:(id)item {
-    return [item isLibraryParent] == NO;
+    return [item isEqual:[groups libraryParent]] == NO;
 }
 
 - (NSCell *)outlineView:(NSOutlineView *)outlineView dataCellForTableColumn:(NSTableColumn *)tableColumn item:(id)item {
