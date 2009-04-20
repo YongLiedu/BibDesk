@@ -74,7 +74,6 @@ enum {
 - (NSArray *)staticGroups;
 - (NSArray *)categoryGroups;
 
-- (BOOL)containsGroupIdenticalTo:(id)group;
 - (BOOL)containsGroup:(id)group;
 
 - (void)setLastImportedPublications:(NSArray *)pubs;

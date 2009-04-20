@@ -119,14 +119,9 @@
     [self resort];
 }
 
-- (NSUInteger)indexOfChild:(id)child {
-    NSParameterAssert(nil != children);
-    return [children indexOfObject:child];
-}
-
 - (void)removeChild:(id)child {
     // -[NSMutableArray removeObject:] removes all occurrences, which is not what we want here
-    NSUInteger idx = [self indexOfChild:child];
+    NSUInteger idx = [children indexOfObjectIdenticalTo:child];
     if (NSNotFound != idx) {
         [child setParent:nil];
         [child setDocument:nil];
@@ -141,10 +136,6 @@
 }
 
 - (BOOL)containsChild:(id)group {
-    return NSNotFound != [children indexOfObject:group];
-}
-
-- (BOOL)containsChildIdenticalTo:(id)group {
     return NSNotFound != [children indexOfObjectIdenticalTo:group];
 }
 

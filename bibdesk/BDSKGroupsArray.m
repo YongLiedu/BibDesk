@@ -169,16 +169,6 @@
 
 #pragma mark Containment
 
-- (BOOL)containsGroupIdenticalTo:(id)group {
-    NSEnumerator *parentEnum = [groups objectEnumerator];
-    BDSKParentGroup *parent;
-    while (parent = [parentEnum nextObject]) {
-        if ([parent containsChildIdenticalTo:group])
-            return YES;
-    }
-    return NO;
-}
-
 - (BOOL)containsGroup:(id)group {
     NSEnumerator *parentEnum = [groups objectEnumerator];
     BDSKParentGroup *parent;

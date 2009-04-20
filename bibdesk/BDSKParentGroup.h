@@ -52,7 +52,6 @@
 - (NSUInteger)numberOfChildren;
 - (id)childAtIndex:(NSUInteger)anIndex;
 - (void)insertChild:(id)child atIndex:(NSUInteger)anIndex;
-- (NSUInteger)indexOfChild:(id)child;
 - (void)removeChild:(id)child;
 - (void)removeAllChildren;
 - (void)sortUsingDescriptors:(NSArray *)sortDescriptors;
@@ -60,7 +59,6 @@
 - (NSArray *)childrenInRange:(NSRange)range;
 - (void)replaceChildrenInRange:(NSRange)range withChildren:(NSArray *)children;
 - (BOOL)containsChild:(id)group;
-- (BOOL)containsChildIdenticalTo:(id)group;
 
 - (void)removeAllSavedGroups;
 
