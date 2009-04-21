@@ -36,7 +36,6 @@
 
 #import "NSTextView_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
-//#import "BDSKTextViewFindController.h"
 #import "NSObject_BDSKExtensions.h"
 
 @implementation NSTextView (BDSKExtensions)
