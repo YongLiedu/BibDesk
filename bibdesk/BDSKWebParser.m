@@ -58,7 +58,7 @@
 
 @implementation BDSKWebParser
 
-static Class webParserClassForType(int stringType)
+static Class webParserClassForType(NSInteger stringType)
 {
     switch(stringType){
         case BDSKGoogleScholarWebType:
@@ -90,11 +90,11 @@ static Class webParserClassForType(int stringType)
     }    
 }
 
-+ (Class) webParserClassForType: (int) stringType {
++ (Class) webParserClassForType: (NSInteger) stringType {
 	return webParserClassForType(stringType);
 }
 
-+ (int)webTypeOfDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
++ (NSInteger)webTypeOfDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     if([BDSKGoogleScholarParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
         return BDSKGoogleScholarWebType;
     if([BDSKHubmedParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
@@ -146,7 +146,7 @@ static Class webParserClassForType(int stringType)
         return nil;
     }
     
-    int webType = [self webTypeOfDocument:domDocument xmlDocument:xmlDoc fromURL:url];
+    NSInteger webType = [self webTypeOfDocument:domDocument xmlDocument:xmlDoc fromURL:url];
     
     Class parserClass = webParserClassForType(webType);
     

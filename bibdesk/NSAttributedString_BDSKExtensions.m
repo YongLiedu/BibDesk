@@ -60,8 +60,8 @@ static void BDSKGetAttributeDictionariesAndFixString(NSMutableArray *attributeDi
     NSRange searchRange = range;
     NSRange cmdRange;
     NSRange styleRange;
-    unsigned int startLoc; // starting character index to apply tex attributes
-    unsigned int endLoc;   // ending index to apply tex attributes
+    NSUInteger startLoc; // starting character index to apply tex attributes
+    NSUInteger endLoc;   // ending index to apply tex attributes
     
     CFAllocatorRef alloc = CFGetAllocator(mutableString);
     
@@ -166,7 +166,7 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
     NSRange range = NSMakeRange(0, [mutableString length]);
     BDSKGetAttributeDictionariesAndFixString(attributeDictionaries, mutableString, attributes, &range);
     
-    unsigned int numberOfDictionaries = [attributeDictionaries count];
+    NSUInteger numberOfDictionaries = [attributeDictionaries count];
     if (numberOfDictionaries > 0) {
 
         // discard the result of +alloc, since we're going to create a new object

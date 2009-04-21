@@ -93,7 +93,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
 		return returnArray;
     }
 	
-	int startLoc = NSMaxRange(startRange);
+	NSInteger startLoc = NSMaxRange(startRange);
 	NSRange endRange = [itemString rangeOfString:@"--------------------------------------------------------------------------------\n" options:NSLiteralSearch range:NSMakeRange(startLoc, [itemString length] - startLoc)];
 	if (endRange.location == NSNotFound)
 		endRange = NSMakeRange([itemString length], 0);
@@ -145,8 +145,8 @@ static void splitDateString(NSMutableDictionary *pubDict)
 			
 			BDSKPRECONDITION([valueArray count] == [keyArray count]);
 			
-			int count = [keyArray count];
-			int i;
+			NSInteger count = [keyArray count];
+			NSInteger i;
 			
 			if(count == 0)
 				continue;

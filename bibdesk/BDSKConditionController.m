@@ -312,8 +312,8 @@ static char BDSKConditionControllerObservationContext;
                 oldValue = nil;
             if ([keyPath isEqualToString:@"key"]){
                 NSString *newValue = [change objectForKey:NSKeyValueChangeNewKey];
-                int oldFieldType = [oldValue fieldType];
-                int newFieldType = [newValue fieldType];
+                NSInteger oldFieldType = [oldValue fieldType];
+                NSInteger newFieldType = [newValue fieldType];
                 if(MIN(oldFieldType, BDSKStringField) != MIN(newFieldType, BDSKStringField))
                     [self layoutComparisonControls];
                 if(oldFieldType != newFieldType)

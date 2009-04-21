@@ -76,19 +76,19 @@
 
 - (BOOL)writeBibTeXFile:(NSString *)bibStr;
 
-- (int)runTeXTasksForLaTeX;
+- (NSInteger)runTeXTasksForLaTeX;
 
-- (int)runTeXTasksForPDF;
+- (NSInteger)runTeXTasksForPDF;
 
-- (int)runTeXTaskForRTF;
+- (NSInteger)runTeXTaskForRTF;
 
-- (int)runPDFTeXTask;
+- (NSInteger)runPDFTeXTask;
 
-- (int)runBibTeXTask;
+- (NSInteger)runBibTeXTask;
 
-- (int)runLaTeX2RTFTask;
+- (NSInteger)runLaTeX2RTFTask;
 
-- (int)runTask:(NSString *)binPath withArguments:(NSArray *)arguments;
+- (NSInteger)runTask:(NSString *)binPath withArguments:(NSArray *)arguments;
 
 @end
 
@@ -243,13 +243,13 @@ static double runLoopTimeout = 30;
 	return [self runWithBibTeXString:bibStr citeKeys:citeKeys generatedTypes:BDSKGenerateRTF];
 }
 
-- (BOOL)runWithBibTeXString:(NSString *)bibStr generatedTypes:(int)flag{
+- (BOOL)runWithBibTeXString:(NSString *)bibStr generatedTypes:(NSInteger)flag{
 	return [self runWithBibTeXString:bibStr citeKeys:nil generatedTypes:flag];
 }
 
-- (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys generatedTypes:(int)flag{
+- (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys generatedTypes:(NSInteger)flag{
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    int rv = 0;
+    NSInteger rv = 0;
 
     if([processingLock tryLock] == NO){
         NSLog(@"%@ couldn't get processing lock", self);
@@ -363,7 +363,7 @@ static double runLoopTimeout = 30;
     if([self hasLTB] && [dataFileLock tryLockForReading]) {
         string = [NSString stringWithContentsOfFile:[texPath bblFilePath] encoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey] error:NULL];
         [dataFileLock unlock];
-        unsigned int start, end;
+        NSUInteger start, end;
         start = [string rangeOfString:@"\\bib{"].location;
         end = [string rangeOfString:@"\\end{biblist}" options:NSBackwardsSearch].location;
         if (start != NSNotFound && end != NSNotFound)
@@ -377,7 +377,7 @@ static double runLoopTimeout = 30;
     if([self hasLaTeX] && [dataFileLock tryLockForReading]) {
         string = [NSString stringWithContentsOfFile:[texPath bblFilePath] encoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey] error:NULL];
         [dataFileLock unlock];
-        unsigned int start, end;
+        NSUInteger start, end;
         start = [string rangeOfString:@"\\bibitem"].location;
         end = [string rangeOfString:@"\\end{thebibliography}" options:NSBackwardsSearch].location;
         if (start != NSNotFound && end != NSNotFound)
@@ -579,8 +579,8 @@ static double runLoopTimeout = 30;
     [filesToRemove release];
 }
 
-- (int)runTeXTasksForLaTeX{
-    volatile int rv;
+- (NSInteger)runTeXTasksForLaTeX{
+    volatile NSInteger rv;
     rv = 0;
     
     [dataFileLock lockForWriting];
@@ -598,8 +598,8 @@ static double runLoopTimeout = 30;
 	return rv;
 }
 
-- (int)runTeXTasksForPDF{
-    volatile int rv;
+- (NSInteger)runTeXTasksForPDF{
+    volatile NSInteger rv;
     rv = 0;
     
     [dataFileLock lockForWriting];
@@ -614,8 +614,8 @@ static double runLoopTimeout = 30;
 	return rv;
 }
 
-- (int)runTeXTaskForRTF{
-    volatile int rv;
+- (NSInteger)runTeXTaskForRTF{
+    volatile NSInteger rv;
     rv = 0;
     
     [dataFileLock lockForWriting];
@@ -627,7 +627,7 @@ static double runLoopTimeout = 30;
 	return rv;
 }
 
-- (int)runPDFTeXTask{
+- (NSInteger)runPDFTeXTask{
     NSString *command = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKTeXBinPathKey];
 
     NSArray *argArray = [BDSKShellCommandFormatter argumentsFromCommand:command];
@@ -640,7 +640,7 @@ static double runLoopTimeout = 30;
     return [self runTask:pdftexbinpath withArguments:args];
 }
 
-- (int)runBibTeXTask{
+- (NSInteger)runBibTeXTask{
     NSString *command = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBibTeXBinPathKey];
 	
     NSArray *argArray = [BDSKShellCommandFormatter argumentsFromCommand:command];
@@ -653,7 +653,7 @@ static double runLoopTimeout = 30;
     return [self runTask:bibtexbinpath withArguments:args];
 }
 
-- (int)runLaTeX2RTFTask{
+- (NSInteger)runLaTeX2RTFTask{
     NSString *latex2rtfpath = [[NSBundle mainBundle] pathForResource:@"latex2rtf" ofType:nil];
     
     // This task runs latex2rtf on our tex file to generate tmpbib.rtf
@@ -661,7 +661,7 @@ static double runLoopTimeout = 30;
     return [self runTask:latex2rtfpath withArguments:[NSArray arrayWithObjects:@"-P", [[NSBundle mainBundle] sharedSupportPath], [texPath baseNameWithoutExtension], nil]];
 }
 
-- (int)runTask:(NSString *)binPath withArguments:(NSArray *)arguments{
+- (NSInteger)runTask:(NSString *)binPath withArguments:(NSArray *)arguments{
     currentTask = [[BDSKTask alloc] init];
         [currentTask setCurrentDirectoryPath:[texPath workingDirectory]];
         [currentTask setLaunchPath:binPath];
@@ -669,7 +669,7 @@ static double runLoopTimeout = 30;
         [currentTask setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
         [currentTask setStandardError:[NSFileHandle fileHandleWithNullDevice]];
         
-    int rv = 0;
+    NSInteger rv = 0;
             
     [currentTask launch];
     [currentTask waitUntilExit];

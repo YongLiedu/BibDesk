@@ -66,7 +66,7 @@
 }
 
 // this is called from initWithArray:
-- (id)initWithObjects:(id *)objects count:(unsigned int)count;
+- (id)initWithObjects:(id *)objects count:(NSUInteger)count;
 {
     if (self = [super init]) {
         NSZone *zone = [self zone];
@@ -79,7 +79,7 @@
     return self;
 }
 
-- (id)initWithCapacity:(unsigned int)numItems;
+- (id)initWithCapacity:(NSUInteger)numItems;
 {
     if (self = [super init]) {
         NSZone *zone = [self zone];
@@ -107,12 +107,12 @@
 
 #pragma mark NSMutableArray primitive methods
 
-- (unsigned int)count;
+- (NSUInteger)count;
 {
     return [publications count];
 }
 
-- (id)objectAtIndex:(unsigned int)idx;
+- (id)objectAtIndex:(NSUInteger)idx;
 {
     return [publications objectAtIndex:idx];
 }
@@ -124,7 +124,7 @@
     [anObject setFileOrder:[NSNumber numberWithInt:[publications count]]];
 }
 
-- (void)insertObject:(id)anObject atIndex:(unsigned int)idx;
+- (void)insertObject:(id)anObject atIndex:(NSUInteger)idx;
 {
     [publications insertObject:anObject atIndex:idx];
     [self addToItemsForCiteKeys:anObject];
@@ -140,14 +140,14 @@
     }
 }
 
-- (void)removeObjectAtIndex:(unsigned int)idx;
+- (void)removeObjectAtIndex:(NSUInteger)idx;
 {
     [self removeFromItemsForCiteKeys:[publications objectAtIndex:idx]];
     [publications removeObjectAtIndex:idx];
     [self updateFileOrder];
 }
 
-- (void)replaceObjectAtIndex:(unsigned int)idx withObject:(id)anObject;
+- (void)replaceObjectAtIndex:(NSUInteger)idx withObject:(id)anObject;
 {
     BibItem *oldObject = [publications objectAtIndex:idx];
     [anObject setFileOrder:[oldObject fileOrder]];
@@ -307,8 +307,8 @@
 }
 
 - (void)updateFileOrder{
-    unsigned int i, count = [publications count];
-    int fileOrder = 1;
+    NSUInteger i, count = [publications count];
+    NSInteger fileOrder = 1;
     CFAllocatorRef alloc = CFAllocatorGetDefault();
     for(i = 0; i < count; i++, fileOrder++) {
         CFNumberRef n = CFNumberCreate(alloc, kCFNumberIntType, &fileOrder);

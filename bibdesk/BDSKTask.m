@@ -219,10 +219,10 @@ static void __BDSKTaskNotify(void *info)
         [path release];
     }
 
-    int argCount = [_arguments count];
+    NSInteger argCount = [_arguments count];
     const char *workingDir = [_currentDirectoryPath fileSystemRepresentation];
     char **args = NSZoneCalloc([self zone], (argCount + 2), sizeof(char *));
-    int i, iMax = argCount;
+    NSInteger i, iMax = argCount;
     args[0] = (char *)[_launchPath fileSystemRepresentation];
     for (i = 0; i < iMax; i++) {
         args[i + 1] = (char *)[[_arguments objectAtIndex:i] fileSystemRepresentation];
@@ -238,7 +238,7 @@ static void __BDSKTaskNotify(void *info)
         env = NSZoneCalloc([self zone], [environment count] + 1, sizeof(char *));
         NSEnumerator *keyEnum = [environment keyEnumerator];
         NSString *key;
-        unsigned int envIndex = 0;
+        NSUInteger envIndex = 0;
         while (key = [keyEnum nextObject]) {
             env[envIndex++] = (char *)[[NSString stringWithFormat:@"%@=%@", key, [environment objectForKey:key]] UTF8String];        
         }

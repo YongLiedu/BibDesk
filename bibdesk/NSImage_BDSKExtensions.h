@@ -94,8 +94,8 @@
 - (NSImage *)imageFlippedHorizontally;
 - (NSImage *)highlightedImage;
 - (NSImage *)invertedImage;
-- (NSImage *)dragImageWithCount:(int)count;
-- (NSImage *)dragImageWithCount:(int)count inside:(BOOL)inside isIcon:(BOOL)isIcon;
+- (NSImage *)dragImageWithCount:(NSInteger)count;
+- (NSImage *)dragImageWithCount:(NSInteger)count inside:(BOOL)inside isIcon:(BOOL)isIcon;
 - (NSBitmapImageRep *)bestImageRepForSize:(NSSize)preferredSize device:(NSDictionary *)deviceDescription;
 
 - (void)drawFlippedInRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(float)delta;

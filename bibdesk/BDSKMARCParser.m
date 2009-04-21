@@ -91,8 +91,8 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
         return [NSArray array];
     }
     
-    unsigned int tagStartIndex = [match rangeAtIndex:1].length;
-    unsigned int fieldStartIndex = [match range].length - 2;
+    NSUInteger tagStartIndex = [match rangeAtIndex:1].length;
+    NSUInteger fieldStartIndex = [match range].length - 2;
     NSString *subFieldIndicator = [[match group] substringWithRange:NSMakeRange(fieldStartIndex, 1)];
     
     BibItem *newBI = nil;
@@ -210,7 +210,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     
     NSArray *fields;
     NSString *tag = nil, *field = nil, *value = nil, *dir = nil;
-    unsigned int base, fieldsStart, i, dirLength;
+    NSUInteger base, fieldsStart, i, dirLength;
     BOOL isControlField;
     
     while(record = [recordEnum nextObject]){
@@ -408,7 +408,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 // Formatted MARC: @"^[ \t]*LDR[ \t]+[ \\-0-9]{5}[a-z]{3}[ \\-a][ a\\-0-9]22[ \\-0-9]{5}[ \\-1-8uz][ \\-a-z][ \\-r]45[ 0A-Z]0\n{1,2}[ \t]*[0-9]{3}[ \t]+"
 
 - (BOOL)isMARCString{
-    unsigned int fieldTerminator = 0x1E;
+    NSUInteger fieldTerminator = 0x1E;
     NSString *pattern = [NSString stringWithFormat:@"^[0-9]{5}[0-9a-zA-Z \\-\\.]{19}([0-9]{12})+%C", fieldTerminator];
     AGRegex *MARCRegex = [AGRegex regexWithPattern:pattern];
     
@@ -417,19 +417,19 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 
 - (BOOL)isFormattedMARCString{
     AGRegex *regex = [AGRegex regexWithPattern:@"^[ \t]*LDR[ \t]+[ \\-0-9]{5}[a-z]{3}[ \\-a][ a\\-0-9]22[ \\-0-9]{5}[ \\-1-8uz][ \\-a-z][ \\-r]45[ 0A-Z]0\n{1,2}[ \t]*[0-9]{3}[ \t]+" options:AGRegexMultiline];
-    unsigned int maxLen = MIN([self length], (unsigned int)100);
+    NSUInteger maxLen = MIN([self length], (NSUInteger)100);
     return nil != [regex findInString:[[self substringToIndex:maxLen] stringByNormalizingSpacesAndLineBreaks]];
 }
 
 - (BOOL)isMARCXMLString{
     AGRegex *regex = [AGRegex regexWithPattern:@"<record( xmlns=\"[^<>\"]*\")?>\n *<leader>[ 0-9]{5}[a-z]{3}[ a]{2}22[ 0-9]{5}[ 1-8uz][ a-z][ r]45[ 0A-Z]0</leader>\n *<controlfield tag=\"00[0-9]\">"];
-    unsigned int maxLen = MIN([self length], (unsigned int)100);
+    NSUInteger maxLen = MIN([self length], (NSUInteger)100);
     return nil != [regex findInString:[[self substringToIndex:maxLen] stringByNormalizingSpacesAndLineBreaks]];
 }
 
 - (NSString *)stringByFixingFormattedMARCStart{
     AGRegex *regex = [AGRegex regexWithPattern:@"^[ \t]*LDR[ \t]+[ \\-0-9]{5}[a-z]{3}[ \\-a][ a\\-0-9]22[ \\-0-9]{5}[ \\-1-8uz][ \\-a-z][ \\-r]45[ 0A-Z]0\n{1,2}[ \t]*[0-9]{3}[ \t]+" options:AGRegexMultiline];
-    unsigned int start = [[regex findInString:self] range].location;
+    NSUInteger start = [[regex findInString:self] range].location;
     return start == 0 || start == NSNotFound ? self : [self substringFromIndex:start];
 }
 
@@ -442,9 +442,9 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
         bracketCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"[]"] retain];
     
     NSString *string = self;
-    unsigned int length = [string length];
+    NSUInteger length = [string length];
     NSRange range = [self rangeOfString:@"["];
-    unsigned int start = range.location;
+    NSUInteger start = range.location;
     if(start != NSNotFound){
         range = [self rangeOfString:@"]" options:0 range:NSMakeRange(start, length - start)];
         if(range.location != NSNotFound){

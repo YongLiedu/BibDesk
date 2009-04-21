@@ -76,7 +76,7 @@
     NSArray *mainNodes = [[xmlDocument rootElement] nodesForXPath:containsCitationPath
                                                     error:&error];
     
-    unsigned int i, count = [mainNodes count];
+    NSUInteger i, count = [mainNodes count];
     
     if(mainNodes == nil){
         if(outError) *outError = error;
@@ -116,7 +116,7 @@
     NSMutableDictionary *rd = [NSMutableDictionary dictionaryWithCapacity:0];
     
     NSError *err = nil;
-    unsigned int i = 0;
+    NSUInteger i = 0;
     
     // find type but not type that's a descendant of 'container'.
     NSArray *typeNodes = [citationNode descendantOrSelfNodesWithClassName:@"type" error:&err];

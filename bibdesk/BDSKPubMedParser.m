@@ -181,7 +181,7 @@
 			options:NSLiteralSearch range:NSMakeRange(0, [value length])];
         // see bug #1584054, PubMed now doesn't use a comma between the lastName and the firstName
         // this should be OK for valid RIS, as that should be in the format "last, first"
-        int lastSpace = [value rangeOfString:@" " options:NSBackwardsSearch].location;
+        NSInteger lastSpace = [value rangeOfString:@" " options:NSBackwardsSearch].location;
         if([value rangeOfString:@","].location == NSNotFound && lastSpace != NSNotFound)
             [value insertString:@"," atIndex:lastSpace];
     }
@@ -208,7 +208,7 @@
             newString = collapsedWhitespaceString;
         } else if([key isSingleValuedField] || [key isURLField]) {
             // for single valued and URL fields, create a new field name
-            int i = 1;
+            NSInteger i = 1;
             NSString *newKey = [key stringByAppendingFormat:@"%d", i];
             while ([pubDict objectForKey:newKey] != nil) {
                 i++;

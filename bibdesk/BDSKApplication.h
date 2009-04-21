@@ -40,5 +40,5 @@
 
 
 @interface BDSKApplication : NSApplication 
-- (unsigned int)currentModifierFlags;
+- (NSUInteger)currentModifierFlags;
 @end

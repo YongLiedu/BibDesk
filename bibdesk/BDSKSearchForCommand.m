@@ -122,8 +122,8 @@ The command should have the form
 	if (forCompletion) {
 		/* we're doing this for completion, so return a different array. Instead of an array of publications (BibItems) this will simply be an array of strings containing the cite key, the authors' surnames and the title for the publication. This could be sufficient for completion and allows the application possibly integrating with BibDesk to remain ignorant of the inner workings of BibItems.
 		*/
-		int i = 0;
-		int n = [results count];
+		NSInteger i = 0;
+		NSInteger n = [results count];
 		BibItem * result;
 		id  resultObject;
 		while (i < n) {

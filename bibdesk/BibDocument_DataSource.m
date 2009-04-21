@@ -94,7 +94,7 @@
 
 #pragma mark TableView data source
 
-- (int)numberOfRowsInTableView:(NSTableView *)tv{
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tv{
     if(tv == (NSTableView *)tableView) {
         return [shownPublications count];
     }
@@ -102,21 +102,21 @@
     return 0;
 }
 
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     if(tv == tableView){
         return [[shownPublications objectAtIndex:row] displayValueOfField:[tableColumn identifier]];
     }
     return nil;
 }
 
-- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     if(tv == tableView){
 
 		NSString *tcID = [tableColumn identifier];
 		if([tcID isRatingField]){
 			BibItem *pub = [shownPublications objectAtIndex:row];
-			int oldRating = [pub ratingValueOfField:tcID];
-			int newRating = [object intValue];
+			NSInteger oldRating = [pub ratingValueOfField:tcID];
+			NSInteger newRating = [object intValue];
 			if(newRating != oldRating) {
 				[pub setField:tcID toRatingValue:newRating];
                 [self userChangedField:tcID ofPublications:[NSArray arrayWithObject:pub] from:[NSArray arrayWithObject:[NSString stringWithFormat:@"%i", oldRating]] to:[NSArray arrayWithObject:[NSString stringWithFormat:@"%i", newRating]]];
@@ -144,7 +144,7 @@
 	}
 }
 
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
+- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation{
     if (tv == tableView) {
         NSString *tcID = [tableColumn identifier];
         if ([tcID isEqualToString:BDSKImportOrderString]) {
@@ -166,7 +166,7 @@
 
 #pragma mark TableView delegate
 
-- (void)tableView:(NSTableView *)tv willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)row{
+- (void)tableView:(NSTableView *)tv willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row{
     if (row == -1) return;
     if (tv == tableView) {
         if([aCell isKindOfClass:[NSButtonCell class]]){
@@ -243,7 +243,7 @@
 }
 
 static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
-    int i = [menu numberOfItems];
+    NSInteger i = [menu numberOfItems];
 	while (--i >= 0) {
         NSMenuItem *item = [menu itemAtIndex:i];
         if ([item isSeparatorItem] == NO && [validator validateMenuItem:item])
@@ -252,7 +252,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     return YES;
 }
 
-- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(int)row {
+- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
     
     // autorelease when creating an instance, since there are multiple exit points from this method
 	NSMenu *menu = nil;
@@ -353,7 +353,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 	}
 	
 	// kick out every item we won't need:
-	int i = [menu numberOfItems];
+	NSInteger i = [menu numberOfItems];
     BOOL wasSeparator = YES;
 	
 	while (--i >= 0) {
@@ -372,7 +372,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 	return menu;
 }
 
-- (NSColor *)tableView:(NSTableView *)tv highlightColorForRow:(int)row {
+- (NSColor *)tableView:(NSTableView *)tv highlightColorForRow:(NSInteger)row {
     return [[[self shownPublications] objectAtIndex:row] color];
 }
 
@@ -381,7 +381,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
-	int dragCopyType = [sud integerForKey:dragCopyTypeKey];
+	NSInteger dragCopyType = [sud integerForKey:dragCopyTypeKey];
     BOOL success = NO;
 	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
     NSArray *pubs = nil;
@@ -407,7 +407,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 			if([rowIndexes count]){
 				NSPoint eventPt = [[tv window] mouseLocationOutsideOfEventStream];
 				NSPoint dragPosition = [tv convertPoint:eventPt fromView:nil];
-				int dragColumn = [tv columnAtPoint:dragPosition];
+				NSInteger dragColumn = [tv columnAtPoint:dragPosition];
 				NSString *dragColumnId = nil;
 						
 				if(dragColumn == -1)
@@ -418,7 +418,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 				if([dragColumnId isLocalFileField]){
 
                     // if we have more than one row, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
-                    unsigned int row = [rowIndexes firstIndex];
+                    NSUInteger row = [rowIndexes firstIndex];
                     BibItem *pub = nil;
                     NSString *path;
                     NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
@@ -446,7 +446,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 					[self setPromiseDragColumnIdentifier:dragColumnId];
 
                     // if we have more than one row, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
-                    unsigned int row = [rowIndexes firstIndex];
+                    NSUInteger row = [rowIndexes firstIndex];
                     BibItem *pub = nil;
                     NSURL *url, *theURL = nil;
                     NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
@@ -472,7 +472,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
                 }else if([dragColumnId isEqualToString:BDSKLocalFileString]){
 
                     // if we have more than one files, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
-                    unsigned int row = [rowIndexes firstIndex];
+                    NSUInteger row = [rowIndexes firstIndex];
                     BibItem *pub = nil;
                     NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
                     NSEnumerator *fileEnum;
@@ -504,7 +504,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 					// cache this so we know which column (field) was dragged
 					[self setPromiseDragColumnIdentifier:dragColumnId];
                     
-                    unsigned int row = [rowIndexes firstIndex];
+                    NSUInteger row = [rowIndexes firstIndex];
                     BibItem *pub = nil;
                     NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
                     NSString *fileName;
@@ -543,7 +543,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     if (dragCopyType == BDSKTemplateDragCopyType) {
         NSString *dragCopyTemplateKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
         NSString *template = [sud stringForKey:dragCopyTemplateKey];
-        unsigned int templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
+        NSUInteger templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
         if (templateIdx != NSNotFound)
             dragCopyType += templateIdx;
     }
@@ -558,7 +558,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     return success;
 }
 	
-- (BOOL)writePublications:(NSArray *)pubs forDragCopyType:(int)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard{
+- (BOOL)writePublications:(NSArray *)pubs forDragCopyType:(NSInteger)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard{
 	NSString *mainType = nil;
 	NSString *string = nil;
 	NSData *data = nil;
@@ -656,8 +656,8 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     NSPasteboard *pb = [NSPasteboard pasteboardWithName:NSDragPboard];
     NSString *dragType = [pb availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, NSFilesPromisePboardType, NSPDFPboardType, NSRTFPboardType, NSStringPboardType, nil]];
 	NSArray *promisedDraggedItems = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
-	int dragCopyType = -1;
-	int count = 0;
+	NSInteger dragCopyType = -1;
+	NSInteger count = 0;
     BOOL inside = NO;
     BOOL isIcon = NO;
 	
@@ -672,9 +672,9 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
         image = [NSImage imageForURL:[NSURL URLFromPasteboard:pb]];
         isIcon = YES;
         if ([pb availableTypeFromArray:[NSArray arrayWithObject:NSFilesPromisePboardType]])
-            count = MAX(1, (int)[[pb propertyListForType:NSFilesPromisePboardType] count]);
+            count = MAX(1, (NSInteger)[[pb propertyListForType:NSFilesPromisePboardType] count]);
         else if ([pb availableTypeFromArray:[NSArray arrayWithObject:@"WebURLsWithTitlesPboardType"]])
-            count = MAX(1, (int)[[pboardHelper promisedItemsForPasteboard:pb] count]);
+            count = MAX(1, (NSInteger)[[pboardHelper promisedItemsForPasteboard:pb] count]);
     
 	} else if ([dragType isEqualToString:NSFilesPromisePboardType]) {
 		NSArray *fileNames = [pb propertyListForType:NSFilesPromisePboardType];
@@ -742,7 +742,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
                     image = [NSImage imageForURL:[NSURL URLFromPasteboard:pb]];
                     isIcon = YES;
                     if ([pb availableTypeFromArray:[NSArray arrayWithObject:@"WebURLsWithTitlesPboardType"]])
-                        count = MAX(1, (int)[[pboardHelper promisedItemsForPasteboard:pb] count]);
+                        count = MAX(1, (NSInteger)[[pboardHelper promisedItemsForPasteboard:pb] count]);
                     break;
                 default:
                     [s appendString:@"["];
@@ -787,7 +787,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 
 #pragma mark TableView dragging destination
 
-- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op{
     
     NSPasteboard *pboard = [info draggingPasteboard];
     BOOL isDragFromMainTable = [[info draggingSource] isEqual:tableView];
@@ -867,7 +867,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     return YES;
 }
 
-- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op{
+- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
 	
     NSPasteboard *pboard = [info draggingPasteboard];
     
@@ -936,7 +936,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 - (NSArray *)tableView:(NSTableView *)tv namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forDraggedRowsWithIndexes:(NSIndexSet *)indexSet {
 
     if ([tv isEqual:tableView]) {
-        unsigned int rowIdx = [indexSet firstIndex];
+        NSUInteger rowIdx = [indexSet firstIndex];
         NSMutableDictionary *fullPathDict = [NSMutableDictionary dictionaryWithCapacity:[indexSet count]];
         
         // We're supposed to return this to our caller (usually the Finder); just an array of file names, not full paths
@@ -953,7 +953,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
         BDSKLinkedFile *file;
         NSString *fileName;
         NSString *basePath = [dropDestination path];
-        int i = 0;
+        NSInteger i = 0;
         
         BDSKASSERT(isRemoteURLField || [fieldName isEqualToString:BDSKRemoteURLString]);
         
@@ -1030,7 +1030,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
         // to avoid calling it twice on -reloadData, but that will only work if -reloadData reloads
         // all rows instead of just visible rows.
         
-        unsigned int i, count = [shownPublications count];
+        NSUInteger i, count = [shownPublications count];
         NSMutableArray *a = [NSMutableArray arrayWithCapacity:count];
 
         // table datasource returns an NSImage for URL fields, so we'll ignore those columns
@@ -1149,7 +1149,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     return NO;
 }
 
-- (void)tableView:(NSTableView *)tv openParentForItemAtRow:(int)row{
+- (void)tableView:(NSTableView *)tv openParentForItemAtRow:(NSInteger)row{
     BibItem *parent = [[shownPublications objectAtIndex:row] crossrefParent];
     if (parent)
         [self editPub:parent];
@@ -1236,7 +1236,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
                                            otherButton:nil
                              informativeTextWithFormat:NSLocalizedString(@"This action will change the %@ field in %i items. Do you want to proceed?", @"Informative text in alert dialog"), [currentGroupField localizedFieldName], [groupedPublications count]];
         [alert setShowsSuppressionButton:YES];
-        int rv = [alert runModal];
+        NSInteger rv = [alert runModal];
         if ([alert suppressionButtonState] == NSOnState)
             [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnRenameGroupKey];
         if (rv == NSAlertAlternateReturn)
@@ -1263,7 +1263,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
         spinner = [self spinnerForGroup:group];
     
     if (spinner) {
-        int column = [[outlineView tableColumns] indexOfObject:tableColumn];
+        NSInteger column = [[outlineView tableColumns] indexOfObject:tableColumn];
         NSRect ignored, rect = [outlineView frameOfCellAtColumn:column row:[outlineView rowForItem:item]];
         NSSize size = [spinner frame].size;
         NSDivideRect(rect, &ignored, &rect, 2.0f, NSMaxXEdge);
@@ -1294,7 +1294,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     [visibleIndexes removeIndexes:[groupOutlineView selectedRowIndexes]];
     
     NSArray *selectedPubs = [self selectedPublications];
-    unsigned int groupIndex = [visibleIndexes firstIndex];
+    NSUInteger groupIndex = [visibleIndexes firstIndex];
     
     while (groupIndex != NSNotFound) {
         BDSKGroup *group = [groupOutlineView itemAtRow:groupIndex];
@@ -1347,7 +1347,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 - (BOOL)outlineView:(NSOutlineView *)outlineView writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard {
     NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
     NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
-	int dragCopyType = [sud integerForKey:dragCopyTypeKey];
+	NSInteger dragCopyType = [sud integerForKey:dragCopyTypeKey];
     BOOL success = NO;
 	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
     NSArray *pubs = nil;
@@ -1395,7 +1395,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     if (dragCopyType == BDSKTemplateDragCopyType) {
         NSString *dragCopyTemplateKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
         NSString *template = [sud stringForKey:dragCopyTemplateKey];
-        unsigned int templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
+        NSUInteger templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
         if (templateIdx != NSNotFound)
             dragCopyType += templateIdx;
     }
@@ -1673,8 +1673,8 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 - (NSArray *)outlineView:(NSOutlineView *)ov typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
     if ([ov isEqual:groupOutlineView]) {
         
-        int i;
-		int groupCount = [ov numberOfRows];
+        NSInteger i;
+		NSInteger groupCount = [ov numberOfRows];
         NSMutableArray *array = [NSMutableArray arrayWithCapacity:groupCount];
         BDSKGroup *group;
         
@@ -1751,7 +1751,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 
 - (void)fileView:(FVFileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
     NSURL *theURL = anIndex == NSNotFound ? nil : [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"URL"];
-    int i;
+    NSInteger i;
     NSMenuItem *item;
     
     if (theURL && [[aFileView selectionIndexes] count] <= 1) {
@@ -1851,7 +1851,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     }
 }
 
-- (void)trashAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo
+- (void)trashAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
     if (alert && [alert suppressionButtonState] == NSOnState)
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKAskToTrashFilesKey];
@@ -1863,14 +1863,14 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
             NSString *path = [url path];
             NSString *folderPath = [path stringByDeletingLastPathComponent];
             NSString *fileName = [path lastPathComponent];
-            int tag = 0;
+            NSInteger tag = 0;
             [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
         }
     }
 }
 
 // moveToTrash: 0 = no, 1 = yes, -1 = ask
-- (void)publication:(BibItem *)publication deleteURLsAtIndexes:(NSIndexSet *)indexSet moveToTrash:(int)moveToTrash{
+- (void)publication:(BibItem *)publication deleteURLsAtIndexes:(NSIndexSet *)indexSet moveToTrash:(NSInteger)moveToTrash{
     NSUInteger idx = [indexSet lastIndex];
     NSMutableArray *fileURLs = [NSMutableArray array];
     while (NSNotFound != idx) {
@@ -1911,7 +1911,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     if (publication == nil)
         return NO;
     
-    int moveToTrash = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKAskToTrashFilesKey] ? -1 : 0;
+    NSInteger moveToTrash = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKAskToTrashFilesKey] ? -1 : 0;
     [self publication:publication deleteURLsAtIndexes:indexSet moveToTrash:moveToTrash];
     return YES;
 }

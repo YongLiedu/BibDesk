@@ -93,11 +93,11 @@ enum {
 @interface BDSKFieldCollection : NSObject {
     BibItem *item;
     NSMutableSet *usedFields;
-    int type;
+    NSInteger type;
 }
 
 - (id)initWithItem:(BibItem *)anItem;
-- (void)setType:(int)type;
+- (void)setType:(NSInteger)type;
 - (id)fieldForName:(NSString *)name;
 - (BOOL)isUsedField:(NSString *)name;
 - (BOOL)isEmptyField:(NSString *)name;
@@ -112,8 +112,8 @@ enum {
 
 - (id)initWithFieldCollection:(BDSKFieldCollection *)collection fieldNames:(NSArray *)array;
 - (id)nonEmpty;
-- (unsigned int)count;
-- (id)objectAtIndex:(unsigned int)index;
+- (NSUInteger)count;
+- (id)objectAtIndex:(NSUInteger)index;
 
 @end
 
@@ -551,12 +551,12 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 #ifdef __ppc__
-- (unsigned int)hash{
+- (NSUInteger)hash{
     // Optimized hash from http://www.mulle-kybernetik.com/artikel/Optimization/opti-7.html (for ppc).  Use super's hash implementation on other architectures.
 
     // note that BibItems are used in hashing collections and so -hash must not depend on mutable state
-    return( ((unsigned int) self >> 4) | 
-            (unsigned int) self << (32 - 4));
+    return( ((NSUInteger) self >> 4) | 
+            (NSUInteger) self << (32 - 4));
 }
 #endif
 
@@ -694,7 +694,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	if([peopleArray count] == 0)
         return @"";
     
-    unsigned int idx, count = [peopleArray count];
+    NSUInteger idx, count = [peopleArray count];
     BibAuthor *person;
     NSMutableString *names = [NSMutableString stringWithCapacity:10 * count];
 	
@@ -710,11 +710,11 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 #pragma mark Author Handling code
 
-- (int)numberOfAuthors{
+- (NSInteger)numberOfAuthors{
 	return [self numberOfAuthorsInheriting:YES];
 }
 
-- (int)numberOfAuthorsInheriting:(BOOL)inherit{
+- (NSInteger)numberOfAuthorsInheriting:(BOOL)inherit{
     return [[self pubAuthorsInheriting:inherit] count];
 }
 
@@ -751,11 +751,11 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     return [self peopleStringForDisplayFromField:BDSKAuthorString];
 }
 
-- (BibAuthor *)authorAtIndex:(unsigned int)idx{ 
+- (BibAuthor *)authorAtIndex:(NSUInteger)idx{ 
     return [self authorAtIndex:idx inherit:YES];
 }
 
-- (BibAuthor *)authorAtIndex:(unsigned int)idx inherit:(BOOL)inherit{ 
+- (BibAuthor *)authorAtIndex:(NSUInteger)idx inherit:(BOOL)inherit{ 
 	NSArray *auths = [self pubAuthorsInheriting:inherit];
 	if ([auths count] > idx)
         return [auths objectAtIndex:idx];
@@ -783,7 +783,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	if([peopleArray count] == 0)
         return @"";
     
-    unsigned int idx, count = [peopleArray count];
+    NSUInteger idx, count = [peopleArray count];
     BibAuthor *person;
     NSMutableString *names = [NSMutableString stringWithCapacity:10 * count];
 	
@@ -803,11 +803,11 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 #pragma mark Author or Editor Handling code
 
-- (int)numberOfAuthorsOrEditors{
+- (NSInteger)numberOfAuthorsOrEditors{
 	return [self numberOfAuthorsOrEditorsInheriting:YES];
 }
 
-- (int)numberOfAuthorsOrEditorsInheriting:(BOOL)inherit{
+- (NSInteger)numberOfAuthorsOrEditorsInheriting:(BOOL)inherit{
     return [[self pubAuthorsInheriting:inherit] count];
 }
 
@@ -844,11 +844,11 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     return [self peopleStringForDisplayFromField:([[self peopleArrayForField:BDSKAuthorString] count] ? BDSKAuthorString : BDSKEditorString)];
 }
 
-- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)idx{ 
+- (BibAuthor *)authorOrEditorAtIndex:(NSUInteger)idx{ 
     return [self authorOrEditorAtIndex:idx inherit:YES];
 }
 
-- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)idx inherit:(BOOL)inherit{ 
+- (BibAuthor *)authorOrEditorAtIndex:(NSUInteger)idx inherit:(BOOL)inherit{ 
 	NSArray *auths = [self pubAuthorsOrEditorsInheriting:inherit];
 	if ([auths count] > idx)
         return [auths objectAtIndex:idx];
@@ -1002,13 +1002,13 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     return pubType;
 }
 
-- (unsigned int)rating{
+- (NSUInteger)rating{
     NSArray *ratingFields = [[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRatingFieldsKey];
     NSString *field = [ratingFields containsObject:BDSKRatingString] ? BDSKRatingString : [ratingFields firstObject];
-	return field ? (unsigned int)[self ratingValueOfField:field] : 0U;
+	return field ? (NSUInteger)[self ratingValueOfField:field] : 0U;
 }
 
-- (void)setRating:(unsigned int)rating{
+- (void)setRating:(NSUInteger)rating{
     NSArray *ratingFields = [[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRatingFieldsKey];
     NSString *field = [ratingFields containsObject:BDSKRatingString] ? BDSKRatingString : [ratingFields firstObject];
     if (field)
@@ -1132,8 +1132,8 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     return ([[owner publications] citeKeyIsUsed:proposedCiteKey byItemOtherThan:self] == NO);
 }
 
-- (int)canSetCrossref:(NSString *)aCrossref andCiteKey:(NSString *)aCiteKey{
-    int errorCode = BDSKNoCrossrefError;
+- (NSInteger)canSetCrossref:(NSString *)aCrossref andCiteKey:(NSString *)aCiteKey{
+    NSInteger errorCode = BDSKNoCrossrefError;
     if ([NSString isEmptyString:aCrossref] == NO) {
         if ([aCiteKey caseInsensitiveCompare:aCrossref] == NSOrderedSame)
             errorCode = BDSKSelfCrossrefError;
@@ -1311,24 +1311,24 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	}
 }
 
-- (int)intValueOfField:(NSString *)field {
+- (NSInteger)intValueOfField:(NSString *)field {
 		
 	if([field isRatingField]){
 		return [self ratingValueOfField:field];
 	}else if([field isBooleanField]){
-		return (int)[self boolValueOfField:field];
+		return (NSInteger)[self boolValueOfField:field];
     }else if([field isTriStateField]){
-		return (int)[self triStateValueOfField:field];
+		return (NSInteger)[self triStateValueOfField:field];
 	}else{
 		return [NSString isEmptyString:[self valueOfField:field]] ? 0 : 1;
     }
 }
 
-- (int)ratingValueOfField:(NSString *)field{
+- (NSInteger)ratingValueOfField:(NSString *)field{
     return [[self valueOfField:field inherit:NO] intValue];
 }
 
-- (void)setField:(NSString *)field toRatingValue:(unsigned int)rating{
+- (void)setField:(NSString *)field toRatingValue:(NSUInteger)rating{
 	if (rating > 5)
 		rating = 5;
 	[self setField:field toValue:[NSString stringWithFormat:@"%u", rating]];
@@ -1419,7 +1419,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         return [NSNumber numberWithFloat:[self searchScore]];
     }else if([field isEqualToString:BDSKLocalFileString]){
         NSArray *localFiles = [self localFiles];
-        unsigned int count = [localFiles count];
+        NSUInteger count = [localFiles count];
         BOOL hasMissingFile = count && [[localFiles valueForKey:@"URL"] containsObject:[NSNull null]];
         NSDictionary *cellDictionary = nil;
         if (count > 0) {
@@ -1429,7 +1429,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         }
         return cellDictionary;
     }else if([field isEqualToString:BDSKRemoteURLString]){
-        unsigned int count = [[self remoteURLs] count];
+        NSUInteger count = [[self remoteURLs] count];
         NSDictionary *cellDictionary = nil;
         if (count > 0) {
             NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%d items", @""), count];
@@ -1469,7 +1469,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 static inline 
-Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind, unsigned int options, Boolean lossy)
+Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind, NSUInteger options, Boolean lossy)
 {    
     if(BDIsEmptyString((CFStringRef)theString))
         return FALSE;
@@ -1488,7 +1488,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return found;
 }
 
-- (BOOL)matchesSubstring:(NSString *)substring withOptions:(unsigned int)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
+- (BOOL)matchesSubstring:(NSString *)substring withOptions:(NSUInteger)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
 {
     SEL selector = (void *)CFDictionaryGetValue(selectorTable, (CFStringRef)field);
     if(NULL == selector){
@@ -1537,7 +1537,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSString *value;
     NSArray *array;
     NSDate *date;
-    unsigned int rating;
+    NSUInteger rating;
     
     if(value = [self citeKey])
         [info setObject:value forKey:@"net_sourceforge_bibdesk_citekey"];
@@ -1673,7 +1673,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return string;
 }
 
-- (NSData *)bibTeXDataWithOptions:(int)options relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError{
+- (NSData *)bibTeXDataWithOptions:(NSInteger)options relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError{
 	NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     BOOL shouldNormalizeAuthors = [sud boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey];
     
@@ -1797,7 +1797,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return isOK ? data : nil;
 }
 
-- (NSString *)bibTeXStringWithOptions:(int)options{
+- (NSString *)bibTeXStringWithOptions:(NSInteger)options{
     NSData *data = [self bibTeXDataWithOptions:options relativeToPath:[self basePath] encoding:NSUTF8StringEncoding error:NULL];
     NSString *btString = nil;
     if (nil != data)
@@ -1806,7 +1806,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSString *)bibTeXString{
-    int options = 0;
+    NSInteger options = 0;
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey])
         options |= BDSKBibTeXOptionTeXifyMask;
 	return [self bibTeXStringWithOptions:options];
@@ -1889,7 +1889,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (NSString *)MODSString{
     NSDictionary *genreForTypeDict = [[BDSKTypeManager sharedManager] MODSGenresForBibTeXType:[self pubType]];
     NSMutableString *s = [NSMutableString stringWithString:@"<mods>\n"];
-    unsigned int i = 0;
+    NSUInteger i = 0;
     NSString *value;
     
     [s appendString:@"<titleInfo>\n"];
@@ -1948,7 +1948,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     NSString *fileName = [[[self owner] fileURL] path];
     
-    int refTypeID;
+    NSInteger refTypeID;
     NSString *entryType = [self pubType];
     NSString *publisherField = BDSKPublisherString;
     NSString *organizationField = @"Organization";
@@ -2300,9 +2300,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return [[self persons] valueForKey:[self numberOfAuthors] ? BDSKAuthorString : BDSKEditorString];
 }
 
-- (void)setItemIndex:(int)idx{ currentIndex = idx; }
+- (void)setItemIndex:(NSInteger)idx{ currentIndex = idx; }
 
-- (int)itemIndex{ return currentIndex; }
+- (NSInteger)itemIndex{ return currentIndex; }
 
 - (NSCalendarDate *)currentDate{ return [NSCalendarDate date]; }
 
@@ -2468,7 +2468,7 @@ static void addFilesToArray(const void *value, void *context)
     BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:self];
     if (aFile == nil)
         return NO;
-    unsigned int idx = [files count];
+    NSUInteger idx = [files count];
     if ([aFile isFile]) {
         NSArray *localFiles = [self localFiles];
         if ([localFiles count])
@@ -2538,7 +2538,7 @@ static void addFilesToArray(const void *value, void *context)
         value = [value substringWithRange:NSMakeRange(5, [value length] - 6)];
     } else if([value hasPrefix:@"\\href{"]){
         // may also take the form \href{http://arXiv.org/abs/hep-th/0304033}{arXiv:hep-th/0304033}
-        unsigned int loc = [value indexOfRightBraceMatchingLeftBraceAtIndex:5];
+        NSUInteger loc = [value indexOfRightBraceMatchingLeftBraceAtIndex:5];
         if (NSNotFound != loc)
             value = [value substringWithRange:NSMakeRange(6, loc - 6)];
     }
@@ -2601,8 +2601,8 @@ typedef struct _conversionContext {
     BibItem *publication;
     BOOL removeField;
     NSMutableArray *messages;
-    int numberOfAddedFiles;
-    int numberOfRemovedFields;
+    NSInteger numberOfAddedFiles;
+    NSInteger numberOfRemovedFields;
 } conversionContext;
 
 static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
@@ -2648,9 +2648,9 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     }
 }
 
-- (BOOL)migrateFilesWithRemoveOptions:(int)removeMask numberOfAddedFiles:(int *)numberOfAddedFiles numberOfRemovedFields:(int *)numberOfRemovedFields error:(NSError **)outError
+- (BOOL)migrateFilesWithRemoveOptions:(NSInteger)removeMask numberOfAddedFiles:(NSInteger *)numberOfAddedFiles numberOfRemovedFields:(NSInteger *)numberOfRemovedFields error:(NSError **)outError
 {
-    int addedLocalFiles = 0;
+    NSInteger addedLocalFiles = 0;
     NSMutableArray *messages = [NSMutableArray new];
     conversionContext context;
     context.publication = self;
@@ -2667,7 +2667,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     fieldsArray = (CFArrayRef)[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRemoteURLFieldsKey];
     CFArrayApplyFunction(fieldsArray, CFRangeMake(0, CFArrayGetCount(fieldsArray)), addURLForFieldToArrayIfNotNil, &context);
     
-    unsigned int failureCount = [messages count];
+    NSUInteger failureCount = [messages count];
 
     if (failureCount > 0 && outError) {
         *outError = [NSError mutableLocalErrorWithCode:kBDSKFileNotFound localizedDescription:NSLocalizedString(@"Unable to migrate files completely", @"")];
@@ -2835,7 +2835,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	return [[self groupsForField:field] containsObject:name];
 }
 
-- (int)addToGroup:(BDSKGroup *)aGroup handleInherited:(int)operation{
+- (NSInteger)addToGroup:(BDSKGroup *)aGroup handleInherited:(NSInteger)operation{
 	BDSKASSERT([aGroup isCategory] == YES && [owner isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
     
@@ -2893,7 +2893,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	return operation;
 }
 
-- (int)removeFromGroup:(BDSKGroup *)aGroup handleInherited:(int)operation{
+- (NSInteger)removeFromGroup:(BDSKGroup *)aGroup handleInherited:(NSInteger)operation{
 	BDSKASSERT([aGroup isCategory] == YES && [owner isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
@@ -2990,7 +2990,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[oldString length] - [groupName length] - 1];
 	BOOL addedToken = NO;
 	NSString *lastDelimiter = @"";
-	int startLocation, endLocation;
+	NSInteger startLocation, endLocation;
     BOOL foundToken;
 	
     [scanner setCharactersToBeSkipped:nil];
@@ -3031,7 +3031,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	return operation;
 }
 
-- (int)replaceGroup:(BDSKGroup *)aGroup withGroupNamed:(NSString *)newGroupName handleInherited:(int)operation{
+- (NSInteger)replaceGroup:(BDSKGroup *)aGroup withGroupNamed:(NSString *)newGroupName handleInherited:(NSInteger)operation{
 	BDSKASSERT([aGroup isCategory] == YES && [owner isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
@@ -3116,7 +3116,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[oldString length] - [groupName length] - 1];
 	BOOL addedToken = NO;
 	NSString *lastDelimiter = @"";
-	int startLocation, endLocation;
+	NSInteger startLocation, endLocation;
     BOOL foundToken;
 	
     [scanner setCharactersToBeSkipped:nil];
@@ -3387,7 +3387,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     if ([owner fileURL])
         [files makeObjectsPerformSelector:@selector(update)];
     
-    unsigned int unresolvedFileCount = [unresolvedFiles count], unresolvedURLCount = [unresolvedURLs count];
+    NSUInteger unresolvedFileCount = [unresolvedFiles count], unresolvedURLCount = [unresolvedURLs count];
     
     // remove from pubFields to avoid duplication when saving
     [pubFields removeObjectsForKeys:keysToRemove];
@@ -3405,8 +3405,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     
     if (0 == [files count] && [sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey]) {
-        int added;
-        int removeMask = BDSKRemoveNoFields;
+        NSInteger added;
+        NSInteger removeMask = BDSKRemoveNoFields;
         if ([sud boolForKey:BDSKRemoveConvertedLocalFileFieldsKey])
             removeMask |= BDSKRemoveLocalFileFieldsMask;
         if ([sud boolForKey:BDSKRemoveConvertedRemoteURLFieldsKey])
@@ -3465,7 +3465,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     return value;
 }
 
-- (void)setType:(int)aType{
+- (void)setType:(NSInteger)aType{
     type = aType;
 }
 
@@ -3510,16 +3510,16 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     [super dealloc];
 }
 
-- (unsigned int)count{
+- (NSUInteger)count{
     return [fieldNames count];
 }
 
-- (id)objectAtIndex:(unsigned int)idx{
+- (id)objectAtIndex:(NSUInteger)idx{
     return [fieldCollection fieldForName:[fieldNames objectAtIndex:idx]];
 }
 
 - (id)nonEmpty{
-    unsigned int i = [fieldNames count];
+    NSUInteger i = [fieldNames count];
     while (i--) 
         if ([fieldCollection isEmptyField:[fieldNames objectAtIndex:i]])
             [fieldNames removeObjectAtIndex:i];

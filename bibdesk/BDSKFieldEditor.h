@@ -61,5 +61,5 @@
 - (BOOL)control:(NSControl *)control textViewShouldAutoComplete:(NSTextView *)textView;
 - (BOOL)control:(NSControl *)control textViewShouldLinkKeys:(NSTextView *)textView;
 - (BOOL)control:(NSControl *)control textView:(NSTextView *)textView isValidKey:(NSString *)key;
-- (BOOL)control:(NSControl *)control textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned int)charIndex;
+- (BOOL)control:(NSControl *)control textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex;
 @end

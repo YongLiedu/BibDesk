@@ -326,7 +326,7 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
         // Omni uses strlen, but it returns incorrect length for some strings with strange Unicode characters (bug #1558548)
         CFIndex length = CFStringGetLength((CFStringRef)string);
         CFIndex bufLen;
-        CFIndex convertedLength = CFStringGetBytes((CFStringRef)string, CFRangeMake(0, length), cfEncoding, 0, FALSE, NULL, UINT_MAX, &bufLen);
+        CFIndex convertedLength = CFStringGetBytes((CFStringRef)string, CFRangeMake(0, length), cfEncoding, 0, FALSE, NULL, INT_MAX, &bufLen);
         if (convertedLength != length){
             if(error != NULL){
                 *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert string to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]]];

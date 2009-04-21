@@ -46,7 +46,7 @@
 - (NSString *)title;
 - (NSString *)container;
 - (NSString *)stringValueOfField:(NSString *)field;
-- (int)intValueOfField:(NSString *)field;
+- (NSInteger)intValueOfField:(NSString *)field;
 - (NSArray *)peopleArrayForField:(NSString *)field;
 - (NSURL *)localFileURLForField:(NSString *)field;
 - (BOOL)isValidCiteKey:(NSString *)key;
@@ -95,7 +95,7 @@
                  separator:(NSString *)separator
 				  forField:(NSString *)fieldName 
 					ofItem:(id <BDSKParseableItem>)pub
-			 numberOfChars:(unsigned int)number 
+			 numberOfChars:(NSUInteger)number 
 					  from:(unichar)fromChar 
 						to:(unichar)toChar 
 					 force:(BOOL)force;

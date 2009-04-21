@@ -53,7 +53,7 @@ enum {
     NSString *scriptPath;
     NSString *scriptArguments;
     NSArray *argsArray;
-    int scriptType;
+    NSInteger scriptType;
     BOOL isRetrieving;
     BOOL failedDownload;
     BDSKTask *currentTask;
@@ -62,8 +62,8 @@ enum {
     BDSKItemSearchIndexes *searchIndexes;
 }
 
-- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(int)type;
-- (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(int)type;
+- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
+- (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
 
 - (BDSKPublicationsArray *)publications;
 - (void)setPublications:(NSArray *)newPubs;
@@ -74,8 +74,8 @@ enum {
 - (NSString *)scriptArguments;
 - (void)setScriptArguments:(NSString *)newArguments;
 
-- (int)scriptType;
-- (void)setScriptType:(int)newType;
+- (NSInteger)scriptType;
+- (void)setScriptType:(NSInteger)newType;
 
 - (void)startRunningScript;
 - (void)scriptDidFinishWithResult:(NSString *)outputString;

@@ -533,7 +533,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         else
             oldGroups = nil;
         
-        int emptyCount = 0;
+        NSInteger emptyCount = 0;
         
         NSEnumerator *pubEnum = [publications objectEnumerator];
         BibItem *pub;
@@ -555,7 +555,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         // now add the group names that we found from our BibItems, using a generic folder icon
         // use BDSKTextWithIconCell keys
         while (groupName = [groupEnum nextObject]) {
-            unsigned int idx = [oldGroupNames indexOfObject:groupName];
+            NSUInteger idx = [oldGroupNames indexOfObject:groupName];
             if (idx == NSNotFound) {
                 group = [[BDSKCategoryGroup alloc] initWithName:groupName key:groupField count:CFBagGetCountOfValue(setAndBag.bag, groupName)];
             } else {
@@ -810,7 +810,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 // for adding/removing groups, we use the searchfield sheets
     
-- (void)addGroupFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)addGroupFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
 	NSString *newGroupField = [addFieldController field];
     if(returnCode == NSCancelButton || newGroupField == nil)
         return; // the user canceled
@@ -873,7 +873,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [addFieldController release];
 }
 
-- (void)removeGroupFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)removeGroupFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
 	NSString *oldGroupField = [removeFieldController field];
     if(returnCode == NSCancelButton || [NSString isEmptyString:oldGroupField])
         return;
@@ -934,7 +934,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         
         // Ignore this change if we already have that field (shouldn't happen), or are removing the current group field; in the latter case, it's already removed in prefs, so it'll be gone next time the document is opened.  Removing all fields means we have to deal with the add/remove menu items and separator, so avoid that.
         if([[[headerCell selectedItem] representedObject] isEqualToString:field] == NO){
-            int changeType = [[userInfo valueForKey:NSKeyValueChangeKindKey] intValue];
+            NSInteger changeType = [[userInfo valueForKey:NSKeyValueChangeKindKey] intValue];
             
             if(changeType == NSKeyValueChangeInsertion) {
                 [headerCell insertItemWithTitle:field atIndex:0];
@@ -955,12 +955,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	[filterController release];
 }
 
-- (void)smartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
+- (void)smartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
 		BDSKSmartGroup *group = [[BDSKSmartGroup alloc] initWithFilter:[filterController filter]];
 		[groups addSmartGroup:group];
 		[group release];
-        int row = [groupOutlineView rowForItem:group];
+        NSInteger row = [groupOutlineView rowForItem:group];
         if (row != -1) {
             [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [groupOutlineView editColumn:0 row:row withEvent:nil select:YES];
@@ -975,7 +975,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     BDSKStaticGroup *group = [[BDSKStaticGroup alloc] init];
     [groups addStaticGroup:group];
     [group release];
-    int row = [groupOutlineView rowForItem:group];
+    NSInteger row = [groupOutlineView rowForItem:group];
     if (row != -1) {
         [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
         [groupOutlineView editColumn:0 row:row withEvent:nil select:YES];
@@ -984,11 +984,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     // updating of the tables is done when finishing the edit of the name
 }
 
-- (void)searchGroupSheetDidEnd:(BDSKSearchGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
+- (void)searchGroupSheetDidEnd:(BDSKSearchGroupSheetController *)sheetController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
         BDSKGroup *group = [sheetController group];
 		[groups addSearchGroup:(id)group];
-        int row = [groupOutlineView rowForItem:group];
+        NSInteger row = [groupOutlineView rowForItem:group];
         if (row != -1)
             [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 	}
@@ -1008,14 +1008,14 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     BDSKSearchGroup *group = [[[BDSKSearchGroup alloc] initWithDictionary:dict] autorelease];
     if (group) {
         [groups addSearchGroup:(id)group];        
-        int row = [groupOutlineView rowForItem:group];
+        NSInteger row = [groupOutlineView rowForItem:group];
         if (row != -1)
             [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     } else
         NSBeep();
 }
 
-- (void)searchBookmarkSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)searchBookmarkSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSOKButton) {
         BDSKGroup *group = [[self selectedGroups] lastObject];
         BDSKSearchBookmark *folder = [[searchBookmarkPopUp selectedItem] representedObject];
@@ -1023,8 +1023,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     }
 }
 
-- (void)addMenuItemsForBookmarks:(NSArray *)bookmarksArray level:(int)level toMenu:(NSMenu *)menu {
-    int i, iMax = [bookmarksArray count];
+- (void)addMenuItemsForBookmarks:(NSArray *)bookmarksArray level:(NSInteger)level toMenu:(NSMenu *)menu {
+    NSInteger i, iMax = [bookmarksArray count];
     for (i = 0; i < iMax; i++) {
         BDSKSearchBookmark *bm = [bookmarksArray objectAtIndex:i];
         if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
@@ -1076,12 +1076,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [sheetController release];
 }
 
-- (void)URLGroupSheetDidEnd:(BDSKURLGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
+- (void)URLGroupSheetDidEnd:(BDSKURLGroupSheetController *)sheetController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
         BDSKURLGroup *group = [sheetController group];
 		[groups addURLGroup:group];
         [group publications];
-        int row = [groupOutlineView rowForItem:group];
+        NSInteger row = [groupOutlineView rowForItem:group];
         if (row != -1) {
             [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [groupOutlineView editColumn:0 row:row withEvent:nil select:YES];
@@ -1100,12 +1100,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [sheetController release];
 }
 
-- (void)scriptGroupSheetDidEnd:(BDSKScriptGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
+- (void)scriptGroupSheetDidEnd:(BDSKScriptGroupSheetController *)sheetController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
         BDSKScriptGroup *group = [sheetController group];
 		[groups addScriptGroup:group];
         [group publications];
-        int row = [groupOutlineView rowForItem:group];
+        NSInteger row = [groupOutlineView rowForItem:group];
         if (row != -1) {
             [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [groupOutlineView editColumn:0 row:row withEvent:nil select:YES];
@@ -1125,7 +1125,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (IBAction)removeSelectedGroups:(id)sender {
 	NSIndexSet *rowIndexes = [groupOutlineView selectedRowIndexes];
-    unsigned int rowIndex = [rowIndexes lastIndex];
+    NSUInteger rowIndex = [rowIndexes lastIndex];
 	BDSKGroup *group;
     BOOL didRemove = NO;
 	
@@ -1200,7 +1200,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 		return;
 	} 
 	
-	int row = [groupOutlineView selectedRow];
+	NSInteger row = [groupOutlineView selectedRow];
 	BDSKASSERT(row != -1);
 	if (row <= 0) return;
     
@@ -1273,7 +1273,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (void)editGroupWithoutWarning:(BDSKGroup *)group {
-    int i = [groupOutlineView rowForItem:group];
+    NSInteger i = [groupOutlineView rowForItem:group];
     BDSKASSERT(i != -1);
     
     if(i != -1){
@@ -1291,7 +1291,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSString *baseName = NSLocalizedString(@"Untitled", @"");
     NSString *name = baseName;
     BDSKStaticGroup *group;
-    unsigned int i = 1;
+    NSUInteger i = 1;
     while([names containsObject:name]){
         name = [NSString stringWithFormat:@"%@%d", baseName, i++];
     }
@@ -1320,7 +1320,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSString *baseName = NSLocalizedString(@"Untitled", @"");
     id name = baseName;
     BDSKCategoryGroup *group;
-    unsigned int i = 1;
+    NSUInteger i = 1;
     
     while ([names containsObject:name])
         name = [NSString stringWithFormat:@"%@%d", baseName, i++];
@@ -1458,9 +1458,9 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSMutableArray *newValues = [NSMutableArray arrayWithCapacity:[pubs count]];
     NSString *oldValue = nil;
     NSString *field = [group isCategory] ? [(BDSKCategoryGroup *)group key] : nil;
-    int count = 0;
-    int handleInherited = BDSKOperationAsk;
-	int rv;
+    NSInteger count = 0;
+    NSInteger handleInherited = BDSKOperationAsk;
+	NSInteger rv;
     
     while(pub = [pubEnum nextObject]){
         BDSKASSERT([pub isKindOfClass:[BibItem class]]);        
@@ -1512,8 +1512,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 - (BOOL)removePublications:(NSArray *)pubs fromGroups:(NSArray *)groupArray{
     NSEnumerator *groupEnum = [groupArray objectEnumerator];
 	BDSKGroup *group;
-	int count = 0;
-	int handleInherited = BDSKOperationAsk;
+	NSInteger count = 0;
+	NSInteger handleInherited = BDSKOperationAsk;
 	NSString *groupName = nil;
     
     while(group = [groupEnum nextObject]){
@@ -1539,8 +1539,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         NSMutableArray *newValues = [NSMutableArray arrayWithCapacity:[pubs count]];
         NSString *oldValue = nil;
         NSString *field = [(BDSKCategoryGroup *)group key];
-		int rv;
-        int tmpCount = 0;
+		NSInteger rv;
+        NSInteger tmpCount = 0;
 		
         if([field isSingleValuedGroupField] || [field isEqualToString:BDSKPubTypeString])
             continue;
@@ -1598,11 +1598,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (BOOL)movePublications:(NSArray *)pubs fromGroup:(BDSKGroup *)group toGroupNamed:(NSString *)newGroupName{
-	int count = 0;
-	int handleInherited = BDSKOperationAsk;
+	NSInteger count = 0;
+	NSInteger handleInherited = BDSKOperationAsk;
 	NSEnumerator *pubEnum = [pubs objectEnumerator];
 	BibItem *pub;
-	int rv;
+	NSInteger rv;
 	
 	if([group isCategory] == NO)
 		return NO;
@@ -1758,7 +1758,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         [tableView setNeedsDisplayInRect:[tableView rectOfColumn:[[tableView tableColumns] indexOfObject:tc]]];
 }
 
-- (void)tableView:(NSTableView *)aTableView importItemAtRow:(int)rowIndex{
+- (void)tableView:(NSTableView *)aTableView importItemAtRow:(NSInteger)rowIndex{
     BibItem *pub = [shownPublications objectAtIndex:rowIndex];
     // also import a possible crossref parent if that wasn't already present
     BibItem *parent = [pub crossrefParent];

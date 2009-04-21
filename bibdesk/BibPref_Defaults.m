@@ -180,7 +180,7 @@ static NSSet *alwaysDisabledFields = nil;
 
 - (void)updateDeleteButton{	
 	BOOL shouldEnable = NO;
-    int row = [defaultFieldsTableView selectedRow];
+    NSInteger row = [defaultFieldsTableView selectedRow];
     if(row >= 0)
         shouldEnable = NO == [alwaysDisabledFields containsObject:[[customFieldsArray objectAtIndex:row] objectForKey:@"field"]];
     [delSelectedDefaultFieldButton setEnabled:shouldEnable];
@@ -205,8 +205,8 @@ static NSSet *alwaysDisabledFields = nil;
     NSWorkspace *sws = [NSWorkspace sharedWorkspace];
     NSArray *pdfViewers = [[NSWorkspace sharedWorkspace] editorAndViewerNamesAndBundleIDsForPathExtension:@"pdf"];
     NSString *pdfViewerID = [[sud dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
-    int i, iMax = [pdfViewers count];
-    int idx = 0;
+    NSInteger i, iMax = [pdfViewers count];
+    NSInteger idx = 0;
     
     while ([pdfViewerPopup numberOfItems] > 4)
         [pdfViewerPopup removeItemAtIndex:2];
@@ -263,7 +263,7 @@ static NSSet *alwaysDisabledFields = nil;
 	NSEnumerator *e = [customFieldsArray objectEnumerator];
 	NSDictionary *dict = nil;
 	NSString *field;
-	int type;
+	NSInteger type;
 	
 	while(dict = [e nextObject]){
 		field = [dict objectForKey:@"field"]; 
@@ -349,7 +349,7 @@ static NSSet *alwaysDisabledFields = nil;
 
 #pragma mark TableView DataSource methods
 
-- (int)numberOfRowsInTableView:(NSTableView *)tableView{
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView{
     if (tableView == defaultFieldsTableView)
         return [customFieldsArray count];
     else if (tableView == globalMacroFilesTableView)
@@ -357,7 +357,7 @@ static NSSet *alwaysDisabledFields = nil;
     return 0;
 }
 
-- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     if (tableView == defaultFieldsTableView) {
         return [[customFieldsArray objectAtIndex:row] objectForKey:[tableColumn identifier]];
     } else if (tableView == globalMacroFilesTableView) {
@@ -366,7 +366,7 @@ static NSSet *alwaysDisabledFields = nil;
     return nil;
 }
 
-- (void)tableView:(NSTableView *)tableView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (void)tableView:(NSTableView *)tableView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     if (tableView == defaultFieldsTableView) {
         NSString *colID = [tableColumn identifier];
         NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
@@ -415,13 +415,13 @@ static NSSet *alwaysDisabledFields = nil;
 
 #pragma mark | TableView Dragging
 
-- (NSDragOperation)tableView:(NSTableView*)tableView validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
+- (NSDragOperation)tableView:(NSTableView*)tableView validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op{
     if (tableView != globalMacroFilesTableView) 
         return NSDragOperationNone;
     return NSDragOperationEvery;
 }
 
-- (BOOL)tableView:(NSTableView *)tableView acceptDrop:(id <NSDraggingInfo> )info row:(int)row dropOperation:(NSTableViewDropOperation)op{
+- (BOOL)tableView:(NSTableView *)tableView acceptDrop:(id <NSDraggingInfo> )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
     if (tableView != globalMacroFilesTableView) 
         return NO;
     NSPasteboard *pboard = [info draggingPasteboard];
@@ -448,7 +448,7 @@ static NSSet *alwaysDisabledFields = nil;
 
 #pragma mark TableView Delegate methods
 
-- (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     if (tableView == defaultFieldsTableView) {
         
         return YES;
@@ -458,7 +458,7 @@ static NSSet *alwaysDisabledFields = nil;
     return NO;
 }
 
-- (void)tableView:(NSTableView *)tableView willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (void)tableView:(NSTableView *)tableView willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     if (tableView == defaultFieldsTableView) {
         NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
         
@@ -471,7 +471,7 @@ static NSSet *alwaysDisabledFields = nil;
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
     if ([[aNotification object] isEqual:defaultFieldsTableView]) {
-        int row = [defaultFieldsTableView selectedRow];
+        NSInteger row = [defaultFieldsTableView selectedRow];
         if(row == -1){
             [delSelectedDefaultFieldButton setEnabled:NO];
             return;
@@ -509,7 +509,7 @@ static NSSet *alwaysDisabledFields = nil;
 #pragma mark Add and Del fields buttons
 
 - (IBAction)delSelectedDefaultField:(id)sender{
-	int row = [defaultFieldsTableView selectedRow];
+	NSInteger row = [defaultFieldsTableView selectedRow];
     if(row != -1){
 		if([defaultFieldsTableView editedRow] != -1)
 			[[defaultFieldsTableView window] makeFirstResponder:nil];
@@ -520,7 +520,7 @@ static NSSet *alwaysDisabledFields = nil;
 }
 
 - (IBAction)addDefaultField:(id)sender{
-    int row = [customFieldsArray count];
+    NSInteger row = [customFieldsArray count];
 	NSMutableDictionary *newDict = [NSMutableDictionary dictionaryWithObjectsAndKeys: @"Field", @"field", [NSNumber numberWithInt:BDSKStringType], @"type", [NSNumber numberWithBool:NO], @"default", nil]; // do not localize
 	[customFieldsArray addObject:newDict];
     [defaultFieldsTableView reloadData];
@@ -537,7 +537,7 @@ static NSSet *alwaysDisabledFields = nil;
 
 #pragma mark default viewer
 
-- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(int)returnCode contextInfo:(void  *)contextInfo{
+- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(NSInteger)returnCode contextInfo:(void  *)contextInfo{
     NSString *bundleID;
     if (returnCode == NSOKButton)
         bundleID = [[NSBundle bundleWithPath:[panel filename]] bundleIdentifier];
@@ -545,7 +545,7 @@ static NSSet *alwaysDisabledFields = nil;
         bundleID = [[sud dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
     
     if([bundleID length]){
-        int i, iMax = [pdfViewerPopup numberOfItems] - 2;
+        NSInteger i, iMax = [pdfViewerPopup numberOfItems] - 2;
         
         for(i = 2; i < iMax; i++){
             if([[[pdfViewerPopup itemAtIndex:i] representedObject] isEqualToString:bundleID]){
@@ -621,7 +621,7 @@ static NSSet *alwaysDisabledFields = nil;
     [NSApp endSheet:globalMacroFileSheet];
 }
 
-- (void)addGlobalMacroFilePanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)addGlobalMacroFilePanelDidEnd:(NSOpenPanel *)openPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     if(returnCode == NSCancelButton)
         return;
     

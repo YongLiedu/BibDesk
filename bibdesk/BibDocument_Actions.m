@@ -107,9 +107,9 @@ static BOOL changingColors = NO;
     NSEnumerator *groupEnum = [[self selectedGroups] objectEnumerator];
 	BDSKGroup *group;
 	BOOL isSingleValued = [[self currentGroupField] isSingleValuedGroupField];
-    int count = 0;
+    NSInteger count = 0;
     // we don't overwrite inherited single valued fields, they already have the field set through inheritance
-    int op, handleInherited = isSingleValued ? BDSKOperationIgnore : BDSKOperationAsk;
+    NSInteger op, handleInherited = isSingleValued ? BDSKOperationIgnore : BDSKOperationAsk;
     
     while (group = [groupEnum nextObject]) {
 		if ([group isCategory]){
@@ -184,7 +184,7 @@ static BOOL changingColors = NO;
     }
 }
 
-- (void)removePubsAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)removePubsAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
 	if ([alert suppressionButtonState] == NSOnState)
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnRemovalFromGroupKey];
     if (returnCode == NSAlertDefaultReturn)
@@ -228,7 +228,7 @@ static BOOL changingColors = NO;
 	}
 }
 
-- (void)deletePubsAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)deletePubsAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
 	if (alert != nil && [alert suppressionButtonState] == NSOnState)
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnDeleteKey];
     if (returnCode == NSAlertOtherReturn)
@@ -236,7 +236,7 @@ static BOOL changingColors = NO;
     
     // deletion changes the scroll position
     NSTableView *tv = [self isDisplayingFileContentSearch] ? [fileSearchController tableView] : tableView;
-	int numSelectedPubs = [self numberOfSelectedPubs];
+	NSInteger numSelectedPubs = [self numberOfSelectedPubs];
     
     // This is preserved as an ivar; since removePublications: triggers an async search as a UI update, restoring the selection/scroll position here will no longer work if a search is active.  Storing a row is safe since sort order should be stable.
     rowToSelectAfterDelete = [[tv selectedRowIndexes] lastIndex];
@@ -264,7 +264,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)deleteSelectedPubs:(id)sender{
-	int numSelectedPubs = [self numberOfSelectedPubs];
+	NSInteger numSelectedPubs = [self numberOfSelectedPubs];
     if (numSelectedPubs == 0 ||
         [self hasExternalGroupsSelected] == YES) {
         return;
@@ -295,7 +295,7 @@ static BOOL changingColors = NO;
 // -delete:,  -alternateDelete:, -copy:, -cut:, -alternateCut:, -paste:, and -duplicate are defined in BDSKTableView and BDSKMainTableView using dataSource methods
 
 - (IBAction)copyAsAction:(id)sender{
-	int copyType = [sender tag];
+	NSInteger copyType = [sender tag];
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
 	NSString *citeString = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey];
 	[self writePublications:[self selectedPublications] forDragCopyType:copyType citeString:citeString toPasteboard:pboard];
@@ -327,7 +327,7 @@ static BOOL changingColors = NO;
 }
 
 - (BDSKEditor *)editPubBeforePub:(BibItem *)pub{
-    unsigned int idx = [shownPublications indexOfObject:pub];
+    NSUInteger idx = [shownPublications indexOfObject:pub];
     if(idx == NSNotFound){
         NSBeep();
         return nil;
@@ -338,7 +338,7 @@ static BOOL changingColors = NO;
 }
 
 - (BDSKEditor *)editPubAfterPub:(BibItem *)pub{
-    unsigned int idx = [shownPublications indexOfObject:pub];
+    NSUInteger idx = [shownPublications indexOfObject:pub];
     if(idx == NSNotFound){
         NSBeep();
         return nil;
@@ -348,7 +348,7 @@ static BOOL changingColors = NO;
     return [self editPub:[shownPublications objectAtIndex:idx]];
 }
 
-- (void)editPubAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)editPubAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     NSArray *pubs = (NSArray *)contextInfo;
     if (returnCode == NSAlertAlternateReturn) {
         [self performSelector:@selector(editPub:) withObjectsFromArray:pubs];
@@ -357,7 +357,7 @@ static BOOL changingColors = NO;
 }
 
 - (void)editPublications:(NSArray *)pubs{
-    int n = [pubs count];
+    NSInteger n = [pubs count];
     if (n > 6) {
         // Do we really want a gazillion of editor windows?
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Edit publications", @"Message in alert dialog when trying to open a lot of publication editors")
@@ -388,7 +388,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)editPubOrOpenURLAction:(id)sender{
-    int column = [tableView clickedColumn];
+    NSInteger column = [tableView clickedColumn];
     NSString *colID = column != -1 ? [[[tableView tableColumns] objectAtIndex:column] identifier] : nil;
     
     if([colID isLocalFileField]) {
@@ -406,7 +406,7 @@ static BOOL changingColors = NO;
         if ([theURLs count])
             [self openLinkedURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[theURLs retain]];
     } else if([colID isEqualToString:BDSKColorString] || [colID isEqualToString:BDSKColorLabelString]) {
-        int row = [tableView clickedRow];
+        NSInteger row = [tableView clickedRow];
         NSColor *color = row != -1 ? [[[self shownPublications] objectAtIndex:row] color] : nil;
         if (color) {
             changingColors = YES;
@@ -504,7 +504,7 @@ static BOOL changingColors = NO;
     
     NSString *lyxPipePath = [[NSUserDefaults standardUserDefaults] stringForKey:@"BDSKLyXPipePath"];
     NSFileManager *fm = [NSFileManager defaultManager];
-    int fd = 0;
+    NSInteger fd = 0;
     
     if (lyxPipePath && [[lyxPipePath pathExtension] length] == 0)
         lyxPipePath = [lyxPipePath stringByAppendingPathExtension:@"in"];
@@ -551,7 +551,7 @@ static BOOL changingColors = NO;
             
             // Now read the reply message from the server's output pipe; no stat() check on this, since it's not critical.
             lyxPipePath = [[lyxPipePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"out"];
-            int reader = open([lyxPipePath fileSystemRepresentation], O_RDONLY | O_NONBLOCK);
+            NSInteger reader = open([lyxPipePath fileSystemRepresentation], O_RDONLY | O_NONBLOCK);
             
             if (-1 != reader) {
                 
@@ -599,7 +599,7 @@ static BOOL changingColors = NO;
         
     } else if (-1 == fd) {
         // local copy of errno since Foundation calls can overwrite it...
-        int err = errno;
+        NSInteger err = errno;
         // not clear why this happens, but a user reported it and the fix was removing the fifo manually in Terminal
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid LyX Pipe", @"Alert dialog title") 
                                          defaultButton:nil 
@@ -652,7 +652,7 @@ static BOOL changingColors = NO;
 
 #pragma mark URL actions
 
-- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned int)charIndex
+- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex
 {
     if ([aLink respondsToSelector:@selector(isFileURL)] && [aLink isFileURL]) {
         NSString *searchString;
@@ -677,7 +677,7 @@ static BOOL changingColors = NO;
     [self openLocalURLForField:field];
 }
 
-- (void)openLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)openLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     NSString *field = (NSString *)contextInfo;
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *e = [[self selectedPublications] objectEnumerator];
@@ -701,7 +701,7 @@ static BOOL changingColors = NO;
 }
 
 - (void)openLocalURLForField:(NSString *)field{
-	int n = [self numberOfSelectedPubs];
+	NSInteger n = [self numberOfSelectedPubs];
     
     if (n > 6) {
 		// Do we really want a gazillion of files open?
@@ -724,7 +724,7 @@ static BOOL changingColors = NO;
     [self revealLocalURLForField:field];
 }
 
-- (void)revealLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)revealLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     NSString *field = (NSString *)contextInfo;
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *e = [[self selectedPublications] objectEnumerator];
@@ -740,7 +740,7 @@ static BOOL changingColors = NO;
 }
 
 - (void)revealLocalURLForField:(NSString *)field{
-	int n = [self numberOfSelectedPubs];
+	NSInteger n = [self numberOfSelectedPubs];
     
     if (n > 6) {
 		// Do we really want a gazillion of Finder windows?
@@ -763,7 +763,7 @@ static BOOL changingColors = NO;
     [self openRemoteURLForField:field];
 }
 
-- (void)openRemoteURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)openRemoteURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
 	NSString *field = (NSString *)contextInfo;
     if(returnCode == NSAlertAlternateReturn){
         NSEnumerator *e = [[self selectedPublications] objectEnumerator];
@@ -777,7 +777,7 @@ static BOOL changingColors = NO;
 }
 
 - (void)openRemoteURLForField:(NSString *)field{
-	int n = [self numberOfSelectedPubs];
+	NSInteger n = [self numberOfSelectedPubs];
     
     if (n > 6) {
 		// Do we really want a gazillion of browser windows?
@@ -800,7 +800,7 @@ static BOOL changingColors = NO;
     [self showNotesForLocalURLForField:field];
 }
 
-- (void)showNotesForLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)showNotesForLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     NSString *field = (NSString *)contextInfo;
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *e = [[self selectedPublications] objectEnumerator];
@@ -821,7 +821,7 @@ static BOOL changingColors = NO;
 }
 
 - (void)showNotesForLocalURLForField:(NSString *)field{
-	int n = [self numberOfSelectedPubs];
+	NSInteger n = [self numberOfSelectedPubs];
     
     if (n > 6) {
 		// Do we really want a gazillion of files open?
@@ -872,7 +872,7 @@ static BOOL changingColors = NO;
 
 #pragma mark | Linked File actions
 
-- (void)openLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)openLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *urlEnum;
         NSURL *fileURL;
@@ -903,7 +903,7 @@ static BOOL changingColors = NO;
     if (fileURL) {
         [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[[NSArray alloc] initWithObjects:fileURL, nil]];
     } else {
-        int n = [[self selectedFileURLs] count];
+        NSInteger n = [[self selectedFileURLs] count];
         
         if (n > 6) {
             // Do we really want a gazillion of files open?
@@ -922,7 +922,7 @@ static BOOL changingColors = NO;
     }
 }
 
-- (void)revealLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)revealLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *urlEnum;
         NSURL *fileURL;
@@ -946,7 +946,7 @@ static BOOL changingColors = NO;
     if (fileURL) {
         [self revealLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[[NSArray alloc] initWithObjects:fileURL, nil]];
     } else {
-        int n = [[self selectedFileURLs] count];
+        NSInteger n = [[self selectedFileURLs] count];
         
         if (n > 6) {
             // Do we really want a gazillion of Finder windows?
@@ -965,7 +965,7 @@ static BOOL changingColors = NO;
     }
 }
 
-- (void)openLinkedURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)openLinkedURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if(returnCode == NSAlertAlternateReturn){
         NSEnumerator *urlEnum;
         NSURL *remoteURL;
@@ -989,7 +989,7 @@ static BOOL changingColors = NO;
     if (remoteURL) {
         [self openLinkedURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[[NSArray alloc] initWithObjects:remoteURL, nil]];
     } else {
-        int n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count];
+        NSInteger n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count];
         
         if (n > 6) {
             // Do we really want a gazillion of browser windows?
@@ -1008,7 +1008,7 @@ static BOOL changingColors = NO;
     }
 }
 
-- (void)showNotesForLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)showNotesForLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *urlEnum;
         NSURL *fileURL;
@@ -1035,7 +1035,7 @@ static BOOL changingColors = NO;
     if (fileURL) {
         [self showNotesForLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[[NSArray alloc] initWithObjects:fileURL, nil]];
     } else {
-        int n = [[self selectedFileURLs] count];
+        NSInteger n = [[self selectedFileURLs] count];
         
         if (n > 6) {
             // Do we really want a gazillion of files open?
@@ -1154,7 +1154,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)changePreviewDisplay:(id)sender{
-    int tag = [sender respondsToSelector:@selector(selectedSegment)] ? [[sender cell] tagForSegment:[sender selectedSegment]] : [sender tag];
+    NSInteger tag = [sender respondsToSelector:@selector(selectedSegment)] ? [[sender cell] tagForSegment:[sender selectedSegment]] : [sender tag];
     NSString *style = [sender respondsToSelector:@selector(representedObject)] ? [sender representedObject] : nil;
     BOOL changed = NO;
     
@@ -1177,7 +1177,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)changeSidePreviewDisplay:(id)sender{
-    int tag = [sender respondsToSelector:@selector(selectedSegment)] ? [[sender cell] tagForSegment:[sender selectedSegment]] : [sender tag];
+    NSInteger tag = [sender respondsToSelector:@selector(selectedSegment)] ? [[sender cell] tagForSegment:[sender selectedSegment]] : [sender tag];
     NSString *style = [sender respondsToSelector:@selector(representedObject)] ? [sender representedObject] : nil;
     BOOL changed = NO;
     
@@ -1212,7 +1212,7 @@ static BOOL changingColors = NO;
     NSPoint p = [[scrollView documentView] scrollPositionAsPercentage];
     
     if(p.y > 0.99 || NSHeight([scrollView documentVisibleRect]) >= NSHeight([[scrollView documentView] bounds])){ // select next row if the last scroll put us at the end
-        int i = [[tableView selectedRowIndexes] lastIndex];
+        NSInteger i = [[tableView selectedRowIndexes] lastIndex];
         if (i == NSNotFound)
             i = 0;
         else if (i < [tableView numberOfRows])
@@ -1237,7 +1237,7 @@ static BOOL changingColors = NO;
     NSPoint p = [[scrollView documentView] scrollPositionAsPercentage];
     
     if(p.y < 0.01){ // select previous row if we're already at the top
-        int i = [[tableView selectedRowIndexes] firstIndex];
+        NSInteger i = [[tableView selectedRowIndexes] firstIndex];
 		if (i == NSNotFound)
 			i = 0;
 		else if (i > 0)
@@ -1357,7 +1357,7 @@ static BOOL changingColors = NO;
                                        otherButton:NSLocalizedString(@"Move All", @"Button title")
                          informativeTextWithFormat:NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?", @"Informative text in alert dialog")];
     
-	int rv = [alert runModal];
+	NSInteger rv = [alert runModal];
     
     if (rv != NSAlertSecondButtonReturn) {
         // first we make sure all edits are committed
@@ -1382,7 +1382,7 @@ static BOOL changingColors = NO;
         return;
     }
     
-    unsigned int numberOfPubs = [pubs count];
+    NSUInteger numberOfPubs = [pubs count];
     NSEnumerator *selEnum = [pubs objectEnumerator];
     BibItem *aPub;
     NSMutableArray *arrayOfPubs = [NSMutableArray arrayWithCapacity:numberOfPubs];
@@ -1452,7 +1452,7 @@ static BOOL changingColors = NO;
     [[self undoManager] setActionName:(numberOfPubs > 1 ? NSLocalizedString(@"Generate Cite Keys", @"Undo action name") : NSLocalizedString(@"Generate Cite Key", @"Undo action name"))];
 }    
 
-- (void)generateCiteKeyAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)generateCiteKeyAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
 	if([alert suppressionButtonState] == NSOnState)
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
     
@@ -1462,7 +1462,7 @@ static BOOL changingColors = NO;
 
 - (IBAction)generateCiteKey:(id)sender
 {
-    unsigned int numberOfSelectedPubs = [self numberOfSelectedPubs];
+    NSUInteger numberOfSelectedPubs = [self numberOfSelectedPubs];
 	if (numberOfSelectedPubs == 0 ||
         [self hasExternalGroupsSelected] == YES) return;
     
@@ -1540,7 +1540,7 @@ static BOOL changingColors = NO;
     [self selectCrossrefParentForItem:selectedBI];
 }
 
-- (void)dublicateTitleToBooktitleAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)dublicateTitleToBooktitleAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     
     // !!! early return
     if ([self commitPendingEdits] == NO) {
@@ -1615,7 +1615,7 @@ static BOOL changingColors = NO;
     [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"Status message: [number] duplicate publication(s) found"), countOfItems, pubSingularPlural]];
 }
 
-- (void)selectDuplicatesAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)selectDuplicatesAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn)
         return;
     

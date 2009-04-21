@@ -57,7 +57,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 @implementation BDSKSearchGroup
 
 // old designated initializer
-- (id)initWithName:(NSString *)aName count:(int)aCount;
+- (id)initWithName:(NSString *)aName count:(NSInteger)aCount;
 {
     // ignore the name, because if this is called it's a dummy name anyway
     NSScriptCommand *cmd = [NSScriptCommand currentCommand];
@@ -141,7 +141,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     }
     
     while (query = [queryEnum nextObject]) {
-        unsigned int idx = [query rangeOfString:@"="].location;
+        NSUInteger idx = [query rangeOfString:@"="].location;
         if (idx != NSNotFound && idx > 0) {
             NSString *key = [query substringToIndex:idx];
             NSString *value = [[query substringFromIndex:idx + 1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -231,8 +231,8 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 - (BOOL)isEqual:(id)other { return self == other; }
 
-- (unsigned int)hash {
-    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
+- (NSUInteger)hash {
+    return( ((NSUInteger) self >> 4) | (NSUInteger) self << (32 - 4));
 }
 
 // Logging
@@ -434,12 +434,12 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 - (NSArray *)history {return history; }
 
-- (void)setNumberOfAvailableResults:(int)value;
+- (void)setNumberOfAvailableResults:(NSInteger)value;
 {
     [server setNumberOfAvailableResults:value];
 }
 
-- (int)numberOfAvailableResults { return [server numberOfAvailableResults]; }
+- (NSInteger)numberOfAvailableResults { return [server numberOfAvailableResults]; }
 
 - (BOOL)hasMoreResults;
 {

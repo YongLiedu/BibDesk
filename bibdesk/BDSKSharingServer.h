@@ -73,14 +73,14 @@ enum {
     BDSKSharingStatusPublishing,
     BDSKSharingStatusSharing
 };
-typedef int BDSKSharingStatus;
+typedef NSInteger BDSKSharingStatus;
 
 @interface BDSKSharingServer : NSObject {    
     NSNetService *netService;
     id server;
     NSString *sharingName;
     BDSKSharingStatus status;
-    int tryCount;
+    NSInteger tryCount;
 }
 
 + (id)defaultServer;
@@ -90,7 +90,7 @@ typedef int BDSKSharingStatus;
 - (NSString *)sharingName;
 - (BDSKSharingStatus)status;
 
-- (unsigned int)numberOfConnections;
+- (NSUInteger)numberOfConnections;
 
 - (void)queueDataChangedNotification:(NSNotification *)note;
 - (void)handleComputerNameChangedNotification:(NSNotification *)note;

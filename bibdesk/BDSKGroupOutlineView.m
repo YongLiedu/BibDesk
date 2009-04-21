@@ -127,8 +127,8 @@
 - (void)mouseDown:(NSEvent *)theEvent{
     if ([theEvent clickCount] == 2) {
         NSPoint point = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-        int row = [self rowAtPoint:point];
-        int column = [self columnAtPoint:point];
+        NSInteger row = [self rowAtPoint:point];
+        NSInteger column = [self columnAtPoint:point];
         if (row != -1 && column == 0) {
             BDSKGroupCell *cell = [[[self tableColumns] objectAtIndex:0] dataCellForRow:row];
             if ([cell respondsToSelector:@selector(iconRectForBounds:)]) {
@@ -169,7 +169,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
         highlightColor = [NSColor disabledControlTextColor];
     }
     
-    unsigned int rowIndex = [rows firstIndex];
+    NSUInteger rowIndex = [rows firstIndex];
     NSRect drawRect;
     
     while (rowIndex != NSNotFound) {
@@ -247,7 +247,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
 }
 
 - (void)textDidEndEditing:(NSNotification *)notification {
-    int textMovement = [[[notification userInfo] objectForKey:@"NSTextMovement"] intValue];
+    NSInteger textMovement = [[[notification userInfo] objectForKey:@"NSTextMovement"] intValue];
     if ((textMovement == NSReturnTextMovement || textMovement == NSTabTextMovement) && 
         [[self delegate] respondsToSelector:@selector(outlineViewShouldEditNextItemWhenEditingEnds:)] && [[self delegate] outlineViewShouldEditNextItemWhenEditingEnds:self] == NO) {
         // This is ugly, but just about the only way to do it. NSTableView is determined to select and edit something else, even the text field that it just finished editing, unless we mislead it about what key was pressed to end editing.
@@ -328,7 +328,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
 {
     NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     
-    int colIndex = [self columnAtPoint:location];
+    NSInteger colIndex = [self columnAtPoint:location];
     BDSKASSERT(colIndex != -1);
     if(colIndex == -1)
         return;
@@ -355,7 +355,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
 	BDSKGroupOutlineView *outlineView = (BDSKGroupOutlineView *)[self tableView];
 	id delegate = [outlineView delegate];
 	NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-	int column = [self columnAtPoint:location];
+	NSInteger column = [self columnAtPoint:location];
 	
 	if (column == -1)
 		return nil;

@@ -312,11 +312,11 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
 
 #pragma mark Metadata
 
-- (int)finderLabel{
+- (NSInteger)finderLabel{
     return [FVFinderLabel finderLabelForURL:self];
 }
 
-- (void)setFinderLabel:(int)label{
+- (void)setFinderLabel:(NSInteger)label{
     if (label < 0 || label > 7) label = 0;
     [FVFinderLabel setFinderLabel:label forURL:self];
 }

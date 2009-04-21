@@ -56,8 +56,8 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 NSString *BDSKTemplateScriptString = @"Postprocess Script";
 
 static inline NSString *itemTemplateSubstring(NSString *templateString){
-    int start, end, length = [templateString length];
-    unsigned int nonwsLoc;
+    NSInteger start, end, length = [templateString length];
+    NSUInteger nonwsLoc;
     NSRange range = [templateString rangeOfString:@"<$publications>"];
     start = NSMaxRange(range);
     if (start != NSNotFound) {
@@ -65,7 +65,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
         if (nonwsLoc != NSNotFound) {
             unichar firstChar = [templateString characterAtIndex:nonwsLoc];
             if ([[NSCharacterSet newlineCharacterSet] characterIsMember:firstChar]) {
-                if (firstChar == NSCarriageReturnCharacter && (int)nonwsLoc + 1 < length && [templateString characterAtIndex:nonwsLoc + 1] == NSNewlineCharacter)
+                if (firstChar == NSCarriageReturnCharacter && (NSInteger)nonwsLoc + 1 < length && [templateString characterAtIndex:nonwsLoc + 1] == NSNewlineCharacter)
                     start = nonwsLoc + 2;
                 else 
                     start = nonwsLoc + 1;

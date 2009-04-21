@@ -44,7 +44,7 @@
 #define SEPARATOR_LEFT_INDENT 20.0
 #define SEPARATOR_RIGHT_INDENT 2.0
 
-- (void)drawRow:(int)rowIndex clipRect:(NSRect)clipRect {
+- (void)drawRow:(NSInteger)rowIndex clipRect:(NSRect)clipRect {
     if ([[self delegate] respondsToSelector:@selector(outlineView:drawSeparatorRowForItem:)] &&
         [[self delegate] outlineView:self drawSeparatorRowForItem:[self itemAtRow:rowIndex]]) {
         float indent = [self levelForItem:[self itemAtRow:rowIndex]] * [self indentationPerLevel];

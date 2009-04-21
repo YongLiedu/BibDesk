@@ -41,7 +41,7 @@
 
 
 @interface NSTableView (BDSApplePrivate)
--(void)_drawDropHighlightOnRow:(int)rowIndex;
+-(void)_drawDropHighlightOnRow:(NSInteger)rowIndex;
 @end
 
 @implementation NSTableView (BDSKExtensions)
@@ -72,7 +72,7 @@
 // we override this private method to draw something nicer than the default ugly black square
 // from http://www.cocoadev.com/index.pl?UglyBlackHighlightRectWhenDraggingToNSTableView
 // modified to use -intercellSpacing and save/restore graphics state
--(void)replacement_drawDropHighlightOnRow:(int)rowIndex{
+-(void)replacement_drawDropHighlightOnRow:(NSInteger)rowIndex{
     NSRect drawRect = (rowIndex == -1) ? [self visibleRect] : [self rectOfRow:rowIndex];
     [self lockFocus];
     [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:2.0 color:[NSColor alternateSelectedControlColor]];

@@ -40,16 +40,16 @@
 
 
 @interface BDSKRatingButtonCell : NSButtonCell {
-	unsigned int rating;
-	unsigned int maxRating;
+	NSUInteger rating;
+	NSUInteger maxRating;
 }
 
-- (id)initWithMaxRating:(unsigned int)aRating;
+- (id)initWithMaxRating:(NSUInteger)aRating;
 
-- (unsigned int)rating;
-- (void)setRating:(unsigned int)newRating;
+- (NSUInteger)rating;
+- (void)setRating:(NSUInteger)newRating;
 
-- (unsigned int)maxRating;
-- (void)setMaxRating:(unsigned int)newRating;
+- (NSUInteger)maxRating;
+- (void)setMaxRating:(NSUInteger)newRating;
 
 @end

@@ -44,13 +44,13 @@
 
 #pragma mark Run modal dialog
 
-- (int)runModal {
+- (NSInteger)runModal {
 	[self prepare];
 	
 	runAppModal = YES;
 	
 	[[self window] makeKeyAndOrderFront:self];
-	int returnCode = [NSApp runModalForWindow:[self window]];
+	NSInteger returnCode = [NSApp runModalForWindow:[self window]];
 	[[self window] orderOut:self];
 	
 	return returnCode;
@@ -84,15 +84,15 @@
 		  contextInfo:NULL];
 }
 
-- (int)runSheetModalForWindow:(NSWindow *)window {
+- (NSInteger)runSheetModalForWindow:(NSWindow *)window {
 	return [self runSheetModalForWindow:window modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
 }
 
-- (int)runSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
+- (NSInteger)runSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
 	return [self runSheetModalForWindow:window modalDelegate:delegate didEndSelector:didEndSelector didDismissSelector:NULL contextInfo:contextInfo];
 }
 
-- (int)runSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector didDismissSelector:(SEL)didDismissSelector contextInfo:(void *)contextInfo {
+- (NSInteger)runSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector didDismissSelector:(SEL)didDismissSelector contextInfo:(void *)contextInfo {
 	[self prepare];
 	
 	runAppModal = YES;
@@ -106,7 +106,7 @@
 		modalDelegate:self
 	   didEndSelector:@selector(didEndSheet:returnCode:contextInfo:)
 		  contextInfo:NULL];
-	int returnCode = [NSApp runModalForWindow:[self window]];
+	NSInteger returnCode = [NSApp runModalForWindow:[self window]];
     [self endSheetWithReturnCode:returnCode];
 	return returnCode;
 }
@@ -116,7 +116,7 @@
 - (void)prepare {}
 
 - (IBAction)dismiss:(id)sender {
-	int returnCode = [sender tag];
+	NSInteger returnCode = [sender tag];
 	if (runAppModal) {
 		[NSApp stopModalWithCode:returnCode];
 	} else {
@@ -125,7 +125,7 @@
 	}
 }
 
-- (void)didEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)didEndSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
 	if(theModalDelegate != nil && theDidEndSelector != NULL){
 		NSInvocation *invocation = [NSInvocation invocationWithTarget:theModalDelegate selector:theDidEndSelector];
 		[invocation setArgument:&self atIndex:2];
@@ -135,7 +135,7 @@
 	}
 }
 
-- (void)endSheetWithReturnCode:(int)returnCode {
+- (void)endSheetWithReturnCode:(NSInteger)returnCode {
     [NSApp endSheet:[self window] returnCode:returnCode];
     [[self window] orderOut:self];
     

@@ -82,7 +82,7 @@
         [client URLProtocolDidFinishLoading:self];
         [response release];
     } else {
-        int resultCode = NSURLErrorResourceUnavailable;		
+        NSInteger resultCode = NSURLErrorResourceUnavailable;		
         [client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain code:resultCode userInfo:nil]];
     }
 }
@@ -108,7 +108,7 @@
 	
 	NSMutableArray * parserFeatures = [NSMutableArray array];
 		
-	int webParserID = 0;
+	NSInteger webParserID = 0;
 	Class webParserClass;
 	while ( webParserClass = [BDSKWebParser webParserClassForType:webParserID] ) {
 		[parserFeatures addObjectsFromArray: [webParserClass parserInfos]];

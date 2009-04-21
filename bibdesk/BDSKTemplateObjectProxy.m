@@ -128,7 +128,7 @@
 - (NSArray *)publications {
     NSEnumerator *e = [publications objectEnumerator];
     BibItem *pub;
-    unsigned int idx = 0;
+    NSUInteger idx = 0;
     
     while (pub = [e nextObject]) {
         if (publicationsContext) {
@@ -153,7 +153,7 @@
     NSAutoreleasePool *pool = nil;
     NSMutableDictionary *parsedTemplates = [NSMutableDictionary dictionary];
     NSArray *parsedTemplate;
-    int currentIndex = 0;
+    NSInteger currentIndex = 0;
     
     if (format & BDSKPlainTextTemplateFormat) {
         

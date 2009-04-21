@@ -58,7 +58,7 @@
 
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)refreshOrphanedFiles;
-- (void)findAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)findAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)restartServer;
 - (void)startAnimationWithStatusMessage:(NSString *)message;
 - (void)stopAnimationWithStatusMessage:(NSString *)message;
@@ -92,7 +92,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (void)release {}
 
-- (unsigned int)retainCount { return UINT_MAX; }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)awakeFromNib{
     [tableView setDoubleAction:@selector(showFile:)];
@@ -203,7 +203,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 - (IBAction)search:(id)sender{
     [arrayController setSearchString:[sender stringValue]];
     [arrayController rearrangeObjects];
-    unsigned int count = [[arrayController arrangedObjects] count];
+    NSUInteger count = [[arrayController arrangedObjects] count];
     NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found", @"Status message"), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found", @"Status message"), count];
     [statusField setStringValue:message];
 }    
@@ -214,33 +214,33 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return [[orphanedFiles copy] autorelease];
 }
 
-- (unsigned int)countOfOrphanedFiles {
+- (NSUInteger)countOfOrphanedFiles {
     return [orphanedFiles count];
 }
 
-- (id)objectInOrphanedFilesAtIndex:(unsigned int)theIndex {
+- (id)objectInOrphanedFilesAtIndex:(NSUInteger)theIndex {
     return [orphanedFiles objectAtIndex:theIndex];
 }
 
-- (void)insertObject:(id)obj inOrphanedFilesAtIndex:(unsigned int)theIndex {
+- (void)insertObject:(id)obj inOrphanedFilesAtIndex:(NSUInteger)theIndex {
     [orphanedFiles insertObject:obj atIndex:theIndex];
 }
 
-- (void)removeObjectFromOrphanedFilesAtIndex:(unsigned int)theIndex {
+- (void)removeObjectFromOrphanedFilesAtIndex:(NSUInteger)theIndex {
     [orphanedFiles removeObjectAtIndex:theIndex];
 }
 
 #pragma mark TableView stuff
 
 // dummy dataSource implementation
-- (int)numberOfRowsInTableView:(NSTableView *)tView{ return 0; }
-- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{ return nil; }
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tView{ return 0; }
+- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{ return nil; }
 
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)aTableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
+- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation{
     return [[[arrayController arrangedObjects] objectAtIndex:row] path];
 }
 
-- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(int)rowIndex {
+- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex {
     return [[arrayController selectedObjects] count] ? contextMenu : nil;
 }
 
@@ -249,7 +249,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     if ([paths count] == 0)
         return;
     
-    int type = -1;
+    NSInteger type = -1;
     
     if(sender == tableView){
         if([tableView clickedColumn] == -1)
@@ -270,7 +270,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     }
 }   
 
-- (void)trashAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)trashAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     NSArray *files = [(NSArray *)contextInfo autorelease];
     if (returnCode == NSAlertDefaultReturn) {
         [[self mutableArrayValueForKey:@"orphanedFiles"] removeObjectsInArray:files];
@@ -279,7 +279,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
         while (path = [pathEnum nextObject]) {
             NSString *folderPath = [path stringByDeletingLastPathComponent];
             NSString *fileName = [path lastPathComponent];
-            int tag = 0;
+            NSInteger tag = 0;
             [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
         }
     }
@@ -331,7 +331,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
     NSString *dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
     NSImage *image = nil;
-    int count = 0;
+    NSInteger count = 0;
     
     if ([dragType isEqualToString:NSFilenamesPboardType]) {
 		NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
@@ -348,7 +348,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 @implementation BDSKOrphanedFilesFinder (Private)
 
-- (void)findAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)findAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     if (returnCode == NSAlertDefaultReturn)
         [self refreshOrphanedFiles];
 }
@@ -398,13 +398,13 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 - (void)orphanedFileServer:(BDSKOrphanedFileServer *)aServer foundFiles:(NSArray *)newFiles{
     NSMutableArray *mutableArray = [self mutableArrayValueForKey:@"orphanedFiles"];
     [mutableArray addObjectsFromArray:newFiles];
-    unsigned int count = [[arrayController arrangedObjects] count];
+    NSUInteger count = [[arrayController arrangedObjects] count];
     NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found", @"Status message"), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found", @"Status message"), count];
     [statusField setStringValue:[message stringByAppendingEllipsis]];
 }
 
 - (void)orphanedFileServerDidFinish:(BDSKOrphanedFileServer *)aServer{
-    unsigned int count = [[arrayController arrangedObjects] count];
+    NSUInteger count = [[arrayController arrangedObjects] count];
     NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found", @"Status message"), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found", @"Status message"), count];
     if ([server allFilesEnumerated] == NO)
         message = [NSString stringWithFormat:@"%@. %@", NSLocalizedString(@"Stopped", @"Partial status message"), message];
@@ -488,7 +488,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
         return [super arrangeObjects:objects];
     
     NSMutableArray *array = [[objects mutableCopy] autorelease];
-    unsigned int i = [array count];
+    NSUInteger i = [array count];
     BOOL itemMatches;
     while(i--){
         itemMatches = [[array objectAtIndex:i] pathContainsSubstring:searchString];

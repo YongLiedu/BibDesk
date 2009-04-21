@@ -70,7 +70,7 @@ static id sharedManager = nil;
 
 - (void)release {}
 
-- (unsigned int)retainCount { return UINT_MAX; }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)addNamesForCompletion:(NSArray *)names {
     NSMutableSet *nameSet = [autoCompletionDict objectForKey:BDSKAuthorString];
@@ -79,7 +79,7 @@ static id sharedManager = nil;
         [autoCompletionDict setObject:nameSet forKey:BDSKAuthorString];
         [nameSet release];
     }
-    unsigned int i, iMax = [names count];
+    NSUInteger i, iMax = [names count];
     NSString *name;
     for (i = 0; i < iMax; i++) {
         name = [names objectAtIndex:i];
@@ -149,7 +149,7 @@ static id sharedManager = nil;
     NSRange andRange = [fullString rangeOfString:@" and "
 										 options:NSBackwardsSearch | NSLiteralSearch
 										   range:searchRange];
-	unsigned int matchStart = 0;
+	NSUInteger matchStart = 0;
 	// now find the beginning of the match, reflecting addString:forCompletionEntry:. We might be more sophisticated, like in groups
     if ([entry isPersonField]) {
 		// these are delimited by "and"
@@ -170,7 +170,7 @@ static id sharedManager = nil;
 	return NSMakeRange(matchStart, NSMaxRange(charRange) - matchStart);
 }
 
-- (NSArray *)entry:(NSString *)entry completions:(NSArray *)words forPartialWordRange:(NSRange)charRange ofString:(NSString *)fullString indexOfSelectedItem:(int *)idx {
+- (NSArray *)entry:(NSString *)entry completions:(NSArray *)words forPartialWordRange:(NSRange)charRange ofString:(NSString *)fullString indexOfSelectedItem:(NSInteger *)idx {
     // all persons are keyed to author
 	if ([entry isPersonField])	
 		entry = BDSKAuthorString;
@@ -197,7 +197,7 @@ static id sharedManager = nil;
     
     [completions sortUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     
-	int i, count = [completions count];
+	NSInteger i, count = [completions count];
 	for (i = 0; i < count; i++) {
         string = [completions objectAtIndex:i];
 		if ([[string stringByRemovingCurlyBraces] caseInsensitiveCompare:matchString]) {
@@ -218,7 +218,7 @@ static id sharedManager = nil;
 		[tmpSet release];
 	}
 	// we extend, as we use a different set of punctuation characters as Apple does
-	unsigned int prefixLength = 0;
+	NSUInteger prefixLength = 0;
 	while (charRange.location > prefixLength && ![punctuationCharSet characterIsMember:[fullString characterAtIndex:charRange.location - prefixLength - 1]]) 
 		prefixLength++;
 	if (prefixLength > 0) {
@@ -228,7 +228,7 @@ static id sharedManager = nil;
 	return charRange;
 }
 
-- (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(int *)idx{
+- (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(NSInteger *)idx{
     NSString *partialString = [fullString substringWithRange:charRange];
     NSMutableArray *matches = [NSMutableArray arrayWithCapacity:[definitions count]];
     NSEnumerator *keyE = [definitions keyEnumerator];
@@ -242,7 +242,7 @@ static id sharedManager = nil;
     }
     [matches sortUsingSelector:@selector(caseInsensitiveCompare:)];
 
-    int i, count = [matches count];
+    NSInteger i, count = [matches count];
     for (i = 0; i < count; i++) {
         key = [matches objectAtIndex:i];
         if ([key hasPrefix:partialString]) {

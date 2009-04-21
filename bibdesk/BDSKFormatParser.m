@@ -90,7 +90,7 @@
     NSMutableString *parsedStr = [NSMutableString string];
 	NSString *prefixStr = nil;
 	NSScanner *scanner = [NSScanner scannerWithString:format];
-    unsigned int uniqueNumber;
+    NSUInteger uniqueNumber;
 	unichar specifier, nextChar, uniqueSpecifier = 0;
     NSString *uniqueSeparator = nil;
 	NSCharacterSet *slashCharSet = [NSCharacterSet characterSetWithCharactersInString:@"/"];
@@ -114,8 +114,8 @@
 				case 'p':
                 {
 					// author names, optional [separator], [etal], #names and #chars
-					unsigned int numChars = 0;
-					unsigned int i, numAuth = 0;
+					NSUInteger numChars = 0;
+					NSUInteger i, numAuth = 0;
 					NSString *authSep = @"";
 					NSString *etal = @"";
                     BOOL isLast = NO;
@@ -143,7 +143,7 @@
                             }
                             if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 								[scanner setScanLocation:[scanner scanLocation]+1];
-								numAuth = (unsigned int)(nextChar - '0');
+								numAuth = (NSUInteger)(nextChar - '0');
 								// scan for #chars per name
 								if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 0;
 							}
@@ -181,7 +181,7 @@
 				case 'P':
 				{
                 	// author names with initials, optional [author separator], [name separator], [etal], #names
-					unsigned int i, numAuth = 0;
+					NSUInteger i, numAuth = 0;
 					NSString *authSep = @";";
 					NSString *nameSep = @".";
 					NSString *etal = @"";
@@ -215,7 +215,7 @@
                             }
 							if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 								[scanner setScanLocation:[scanner scanLocation]+1];
-								numAuth = (unsigned int)(nextChar - '0');
+								numAuth = (NSUInteger)(nextChar - '0');
 							}
 						}
 					}
@@ -255,7 +255,7 @@
                 case 't':
 				{
                 	// title, optional #chars
-                    unsigned int numChars = 0;
+                    NSUInteger numChars = 0;
                     NSString *title = [pub title];
 					title = [self stringByStrictlySanitizingString:title forField:fieldName inFileType:[pub fileType]];
 					if ([NSString isEmptyString:title] == NO) {
@@ -274,13 +274,13 @@
                 case 'T':
 				{
                 	// title, optional #words
-                    unsigned int i, numWords = 0;
-                    unsigned int smallWordLength = 3;
+                    NSUInteger i, numWords = 0;
+                    NSUInteger smallWordLength = 3;
                     NSString *numString = nil;
                     NSString *title = [pub title];
                     if ([scanner scanString:@"[" intoString:NULL]) {
                         if ([scanner scanUpToString:@"]" intoString:&numString])
-                            smallWordLength = (unsigned int)[numString intValue];
+                            smallWordLength = (NSUInteger)[numString intValue];
                         else
                             smallWordLength = 0;
                         [scanner scanString:@"]" intoString:NULL];
@@ -375,7 +375,7 @@
 						[scanner scanString:@"]" intoString:NULL];
 					}
 					NSString *keywordsString = [pub stringValueOfField:BDSKKeywordsString];
-					unsigned int i, numWords = 0;
+					NSUInteger i, numWords = 0;
                     if (NO == [scanner scanUnsignedInt:&numWords]) numWords = 0;
 					if ([NSString isEmptyString:keywordsString] == NO) {
 						NSMutableArray *keywords = [NSMutableArray array];
@@ -474,7 +474,7 @@
                     NSString *key = nil;
                     NSString *value = nil;
                     NSString *slash = (isLocalFile) ? @"-" : @"/";
-                    unsigned int numChars = 0;
+                    NSUInteger numChars = 0;
 					if ([scanner scanString:@"{" intoString:NULL] &&
 						[scanner scanUpToString:@"}" intoString:&key] &&
 						[scanner scanString:@"}" intoString:NULL]) {
@@ -529,7 +529,7 @@
                             [scanner scanString:@"]" intoString:NULL];
                         }
                         NSString *wordsString = [pub stringValueOfField:key];
-                        unsigned int i, numWords = 0;
+                        NSUInteger i, numWords = 0;
                         if (NO == [scanner scanUnsignedInt:&numWords]) numWords = 0;
                         if ([NSString isEmptyString:wordsString] == NO) {
                             NSMutableArray *words = [NSMutableArray array];
@@ -568,7 +568,7 @@
                 	// This handles acronym specifiers of the form %c{FieldName}
 					NSString *key = nil;
                     NSString *value = nil;
-                    unsigned int smallWordLength = 3;
+                    NSUInteger smallWordLength = 3;
                     if ([scanner scanString:@"{" intoString:NULL] &&
 						[scanner scanUpToString:@"}" intoString:&key] &&
 						[scanner scanString:@"}" intoString:NULL]) {
@@ -590,8 +590,8 @@
                     NSString *yesValue = @"";
                     NSString *noValue = @"";
                     NSString *mixedValue = @"";
-                    unsigned int numChars = 0;
-                    int intValue = 0;
+                    NSUInteger numChars = 0;
+                    NSInteger intValue = 0;
                     NSString *value = nil;
 					if ([scanner scanString:@"{" intoString:NULL] &&
 						[scanner scanUpToString:@"}" intoString:&key] &&
@@ -630,7 +630,7 @@
                 	// arbitrary document info
                     NSString *key = nil;
                     NSString *value = nil;
-                    unsigned int numChars = 0;
+                    NSUInteger numChars = 0;
 					if ([scanner scanString:@"{" intoString:NULL] &&
 						[scanner scanUpToString:@"}" intoString:&key] &&
 						[scanner scanString:@"}" intoString:NULL]) {
@@ -654,7 +654,7 @@
                 case 'r':
 				{
                 	// random lowercase letters
-					unsigned int numChars = 1;
+					NSUInteger numChars = 1;
                     if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 1;
 					while (numChars-- > 0) {
 						[parsedStr appendFormat:@"%c",'a' + (char)(rand() % 26)];
@@ -664,7 +664,7 @@
                 case 'R':
 				{
                 	// random uppercase letters
-					unsigned int numChars = 1;
+					NSUInteger numChars = 1;
 					if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 1;
 					while (numChars-- > 0) {
 						[parsedStr appendFormat:@"%c",'A' + (char)(rand() % 26)];
@@ -674,10 +674,10 @@
                 case 'd':
 				{
                 	// random digits
-					unsigned int numChars = 1;
+					NSUInteger numChars = 1;
 					if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 1;
 					while (numChars-- > 0) {
-						[parsedStr appendFormat:@"%i",(int)(rand() % 10)];
+						[parsedStr appendFormat:@"%i",(NSInteger)(rand() % 10)];
 					}
 					break;
 				}
@@ -728,9 +728,9 @@
 	
 	if (uniqueSpecifier != 0) {
         NSString *suggestedUnique = nil;
-        unsigned int prefixLength = [prefixStr length];
-        unsigned int suffixLength = [parsedStr length];
-        unsigned int suggestionLength = [suggestion length] - prefixLength - suffixLength;
+        NSUInteger prefixLength = [prefixStr length];
+        NSUInteger suffixLength = [parsedStr length];
+        NSUInteger suggestionLength = [suggestion length] - prefixLength - suffixLength;
         if (suggestion && ((uniqueNumber == 0 && suggestionLength >= 0) || suggestionLength == uniqueNumber) &&
             (prefixLength == 0 || [suggestion hasPrefix:prefixStr]) && (suffixLength == 0 || [suggestion hasSuffix:parsedStr])) {
             suggestedUnique = [suggestion substringWithRange:NSMakeRange(prefixLength, suggestionLength)];
@@ -791,7 +791,7 @@
 	}
 	
 	if([NSString isEmptyString:parsedStr]) {
-		int i = 0;
+		NSInteger i = 0;
         NSString *string = nil;
 		do {
 			string = [@"empty" stringByAppendingFormat:@"%i", i++];
@@ -808,7 +808,7 @@
                  separator:(NSString *)separator
 				  forField:(NSString *)fieldName 
 					ofItem:(id <BDSKParseableItem>)pub
-			 numberOfChars:(unsigned int)number 
+			 numberOfChars:(NSUInteger)number 
 					  from:(unichar)fromChar 
 						to:(unichar)toChar 
 					 force:(BOOL)force {
@@ -904,7 +904,7 @@
 {
 	NSCharacterSet *invalidCharSet = [[BDSKTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
     NSString *newString = nil;
-	int cleanOption = 0;
+	NSInteger cleanOption = 0;
 
 	if ([fieldName isEqualToString:BDSKCiteKeyString]) {
 		cleanOption = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKCiteKeyCleanOptionKey];
@@ -1017,7 +1017,7 @@
 	BOOL foundUnique = NO;
 	NSMutableAttributedString *attrString = nil;
 	NSString *errorMsg = nil;
-	unsigned int location = 0;
+	NSUInteger location = 0;
 	
 	if (attrFormatString != NULL)
 		attrString = [[NSMutableAttributedString alloc] init];
@@ -1087,7 +1087,7 @@
 		// check optional arguments
 		if ([validOptArgSpecifierChars characterIsMember:specifier]) {
 			if (NO == [scanner isAtEnd]) {
-				int i, numOpts = ((specifier == 'A' || specifier == 'P' || specifier == 's')? 3 : ((specifier == 'a' || specifier == 'p' || specifier == 'w')? 2 : 1));
+				NSInteger i, numOpts = ((specifier == 'A' || specifier == 'P' || specifier == 's')? 3 : ((specifier == 'a' || specifier == 'p' || specifier == 'w')? 2 : 1));
 				for (i = 0; i < numOpts && [scanner scanString:@"[" intoString: NULL]; i++) {
 					if (NO == [scanner scanUpToString:@"]" intoString:&string]) 
 						string = @"";
@@ -1147,7 +1147,7 @@
 + (NSArray *)requiredFieldsForFormat:(NSString *)formatString
 {
 	NSMutableArray *arr = [NSMutableArray arrayWithCapacity:3];
-    unsigned int i = 0, j, l = [formatString length];
+    NSUInteger i = 0, j, l = [formatString length];
     
 	while (i != NSNotFound && i < l) {
 		i = NSMaxRange([formatString rangeOfString:@"%" options:0 range:NSMakeRange(i, l - i)]);
@@ -1233,7 +1233,7 @@
 - (void)recolorText
 {
     NSTextStorage *textStorage = [self textStorage];
-    unsigned int length = [textStorage length];
+    NSUInteger length = [textStorage length];
     
     NSRange range;
     NSDictionary *attributes;
@@ -1250,7 +1250,7 @@
 		return;
     
     // get the attributes of the parsed string and apply them to our NSTextStorage; it may not be safe to set it directly at this point
-    unsigned int start = 0;
+    NSUInteger start = 0;
     while(start < length){
         
         attributes = [attrString attributesAtIndex:start effectiveRange:&range];        
@@ -1322,7 +1322,7 @@
     format = [attrString string];
 	
 	if (NO == [format isEqualToString:*partialStringPtr]) {
-		unsigned int length = [format length];
+		NSUInteger length = [format length];
 		*partialStringPtr = format;
 		if ([format isEqualToString:origString]) 
 			*proposedSelRangePtr = origSelRange;

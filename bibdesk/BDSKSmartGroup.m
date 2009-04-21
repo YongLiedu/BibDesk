@@ -45,7 +45,7 @@
 @implementation BDSKSmartGroup
 
 // super's designated initializer
-- (id)initWithName:(id)aName count:(int)aCount {
+- (id)initWithName:(id)aName count:(NSInteger)aCount {
     BDSKFilter *aFilter = [[BDSKFilter alloc] init];
 	self = [self initWithName:aName count:aCount filter:aFilter];
 	[aFilter release];
@@ -53,7 +53,7 @@
 }
 
 // designated initializer
-- (id)initWithName:(id)aName count:(int)aCount filter:(BDSKFilter *)aFilter {
+- (id)initWithName:(id)aName count:(NSInteger)aCount filter:(BDSKFilter *)aFilter {
     if (self = [super initWithName:aName count:aCount]) {
         filter = [aFilter copy];
         [filter setGroup:self];

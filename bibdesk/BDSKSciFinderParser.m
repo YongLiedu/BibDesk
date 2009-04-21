@@ -51,7 +51,7 @@
 + (BOOL)copyKey:(NSString **)key value:(NSString **)value fromLine:(NSString *)line;
 {
     NSRange r = [line rangeOfString:@":"];
-    unsigned int len = [line length];
+    NSUInteger len = [line length];
     if (r.location != NSNotFound && (r.location + 1) < len) {
         CFAllocatorRef alloc = CFGetAllocator((CFStringRef)line);
         *key = (id)CFStringCreateWithSubstring(alloc, (CFStringRef)line, CFRangeMake(0, r.location));
@@ -180,7 +180,7 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
 {        
     // initial sanity check to make sure we have start/end tags
     NSRange r = [itemString rangeOfString:@"START_RECORD"];
-    unsigned int nStart = 0, nStop = 0;
+    NSUInteger nStart = 0, nStop = 0;
     while (r.length) {
         nStart++;
         r = [itemString rangeOfString:@"START_RECORD" options:0 range:NSMakeRange(NSMaxRange(r), [itemString length] - NSMaxRange(r))];
@@ -215,7 +215,7 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
         // split each record up into field/value lines
         NSArray *lines = [str componentsSeparatedByString:@"\nFIELD "];
         
-        unsigned int i, iMax = [lines count];
+        NSUInteger i, iMax = [lines count];
         for (i = 0; i < iMax; i++) {
             
             NSString *line = [lines objectAtIndex:i];

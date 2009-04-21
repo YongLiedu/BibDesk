@@ -133,7 +133,7 @@ static char BDSKEditorTextViewDefaultsObservationContext;
 @implementation BDSKEditorTextView (Private)
 
 // Determine if a % character is followed by two digits (valid in a URL)
-static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned int startIndex)
+static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, NSUInteger startIndex)
 {
     static NSCharacterSet *hexadecimalCharacterSet = nil;
     if (hexadecimalCharacterSet == nil) {
@@ -159,7 +159,7 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned int
 */
 - (NSString *)URLStringFromRange:(NSRange *)startRange inString:(NSString *)string
 {
-    unsigned int startIdx = NSNotFound, endIdx = NSNotFound;
+    NSUInteger startIdx = NSNotFound, endIdx = NSNotFound;
     NSRange range = NSMakeRange(0, startRange->location);
     
     do {
@@ -215,7 +215,7 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned int
     NSTextStorage *textStorage = [self textStorage];
     NSString *string = [textStorage string];
     
-    int start, length = [string length];
+    NSInteger start, length = [string length];
     NSRange range = NSMakeRange(0, 0);
     NSString *urlString;
     NSURL *url;

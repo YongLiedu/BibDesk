@@ -101,7 +101,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 
 - (void)release {}
 
-- (unsigned int)retainCount { return UINT_MAX; }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)windowDidLoad {
     [self setupToolbar];
@@ -156,9 +156,9 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 
 - (IBAction)insertBookmarkFolder:(id)sender {
     BDSKSearchBookmark *folder = [BDSKSearchBookmark searchBookmarkFolderWithLabel:NSLocalizedString(@"Folder", @"default folder name")];
-    int rowIndex = [[outlineView selectedRowIndexes] lastIndex];
+    NSInteger rowIndex = [[outlineView selectedRowIndexes] lastIndex];
     BDSKSearchBookmark *item = bookmarkRoot;
-    unsigned int idx = [[bookmarkRoot children] count];
+    NSUInteger idx = [[bookmarkRoot children] count];
     
     if (rowIndex != NSNotFound) {
         BDSKSearchBookmark *selectedItem = [outlineView itemAtRow:rowIndex];
@@ -172,16 +172,16 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     }
     [item insertObject:folder inChildrenAtIndex:idx];
     
-    int row = [outlineView rowForItem:folder];
+    NSInteger row = [outlineView rowForItem:folder];
     [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     [outlineView editColumn:0 row:row withEvent:nil select:YES];
 }
 
 - (IBAction)insertBookmarkSeparator:(id)sender {
     BDSKSearchBookmark *separator = [BDSKSearchBookmark searchBookmarkSeparator];
-    int rowIndex = [[outlineView selectedRowIndexes] lastIndex];
+    NSInteger rowIndex = [[outlineView selectedRowIndexes] lastIndex];
     BDSKSearchBookmark *item = bookmarkRoot;
-    unsigned int idx = [[bookmarkRoot children] count];
+    NSUInteger idx = [[bookmarkRoot children] count];
     
     if (rowIndex != NSNotFound) {
         BDSKSearchBookmark *selectedItem = [outlineView itemAtRow:rowIndex];
@@ -195,7 +195,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     }
     [item insertObject:separator inChildrenAtIndex:idx];
     
-    int row = [outlineView rowForItem:separator];
+    NSInteger row = [outlineView rowForItem:separator];
     [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 }
 
@@ -317,7 +317,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 
 #pragma mark NSOutlineView datasource methods
 
-- (int)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item {
+- (NSInteger)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item {
     return [[(item ?: bookmarkRoot) children] count];
 }
 
@@ -325,7 +325,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     return [item bookmarkType] == BDSKSearchBookmarkTypeFolder;
 }
 
-- (id)outlineView:(NSOutlineView *)ov child:(int)idx ofItem:(id)item {
+- (id)outlineView:(NSOutlineView *)ov child:(NSInteger)idx ofItem:(id)item {
     return [[(item ?: bookmarkRoot) children] objectAtIndex:idx];
 }
 
@@ -335,7 +335,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
         return [NSDictionary dictionaryWithObjectsAndKeys:[item label], BDSKTextWithIconCellStringKey, [item icon], BDSKTextWithIconCellImageKey, nil];
     } else if ([tcID isEqualToString:@"server"]) {
         if ([item bookmarkType] == BDSKSearchBookmarkTypeFolder) {
-            int count = [[item children] count];
+            NSInteger count = [[item children] count];
             return count == 1 ? NSLocalizedString(@"1 item", @"Bookmark folder description") : [NSString stringWithFormat:NSLocalizedString(@"%i items", @"Bookmark folder description"), count];
         } else {
             return [[item info] valueForKey:@"name"];
@@ -366,7 +366,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     return NO;
 }
 
-- (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)idx {
+- (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKSearchBookmarkRowsPboardType, nil]];
     
@@ -385,7 +385,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     return NSDragOperationNone;
 }
 
-- (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(int)idx {
+- (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(NSInteger)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKSearchBookmarkRowsPboardType, nil]];
     
@@ -399,7 +399,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
         
 		while (bookmark = [bmEnum nextObject]) {
             BDSKSearchBookmark *parent = [bookmark parent];
-            int bookmarkIndex = [[parent children] indexOfObject:bookmark];
+            NSInteger bookmarkIndex = [[parent children] indexOfObject:bookmark];
             if (item == parent) {
                 if (idx > bookmarkIndex)
                     idx--;
@@ -445,7 +445,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     
     while (item = [itemEnum  nextObject]) {
         BDSKSearchBookmark *parent = [item parent];
-        unsigned int itemIndex = [[parent children] indexOfObject:item];
+        NSUInteger itemIndex = [[parent children] indexOfObject:item];
         if (itemIndex != NSNotFound)
             [parent removeObjectFromChildrenAtIndex:itemIndex];
     }

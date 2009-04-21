@@ -156,7 +156,7 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     return nonNullObjectValueForKey([self objectValue], BDSKGroupCellImageKey);
 }
 
-- (int)count {
+- (NSInteger)count {
     return [nonNullObjectValueForKey([self objectValue], BDSKGroupCellCountKey) intValue];
 }
 
@@ -279,7 +279,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
     // Draw the count bubble or caution icon, when we're retrieving we don't draw to leave space for the spinner
     if ([self isRetrieving] == NO) {
         NSRect countRect = [self countRectForBounds:aRect];
-        int count = [self count];
+        NSInteger count = [self count];
         if ([self failedDownload]) {
             [self drawIcon:[NSImage imageNamed:@"BDSKSmallCautionIcon"] withFrame:countRect inView:controlView];
         } else if (count > 0) {
@@ -331,7 +331,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
         [self drawIcon:[self icon] withFrame:imageRect inView:controlView];
 }
 
-- (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength {
+- (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(NSInteger)selStart length:(NSInteger)selLength {
     settingUpFieldEditor = YES;
     [super selectWithFrame:[self textRectForBounds:aRect] inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
     settingUpFieldEditor = NO;

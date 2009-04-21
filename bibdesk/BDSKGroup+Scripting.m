@@ -152,11 +152,11 @@
     [[self document] insertInScriptingPublications:pub];
 }
 
-- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx {
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
     [[self document] insertObject:pub inScriptingPublicationsAtIndex:idx];
 }
 
-- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx {
+- (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx {
     [[self document] removeObjectFromScriptingPublicationsAtIndex:idx];
 }
 
@@ -202,11 +202,11 @@
     }
 }
 
-- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx {
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
     [self insertInScriptingPublications:pub];
 }
 
-- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx {
+- (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx {
     [self removePublication:[publications objectAtIndex:idx]];
     [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
@@ -235,13 +235,13 @@
     [cmd setScriptErrorString:NSLocalizedString(@"Cannot modify publications of last import group.",@"Error description")];
 }
 
-- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx {
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
     NSScriptCommand *cmd = [NSScriptCommand currentCommand];
     [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
     [cmd setScriptErrorString:NSLocalizedString(@"Cannot modify publications of last import group.",@"Error description")];
 }
 
-- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx {
+- (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx {
     NSScriptCommand *cmd = [NSScriptCommand currentCommand];
     [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
     [cmd setScriptErrorString:NSLocalizedString(@"Cannot modify publications of last import group.",@"Error description")];
@@ -267,7 +267,7 @@
     [self insertObject:condition inConditionsAtIndex:[[[self filter] conditions] count]];
 }
 
-- (void)insertObject:(BDSKCondition *)condition inConditionsAtIndex:(unsigned int)idx {
+- (void)insertObject:(BDSKCondition *)condition inConditionsAtIndex:(NSUInteger)idx {
 	if ([condition group]) {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
@@ -281,7 +281,7 @@
     }
 }
 
-- (void)removeObjectFromConditionsAtIndex:(unsigned int)idx {
+- (void)removeObjectFromConditionsAtIndex:(NSUInteger)idx {
 	NSMutableArray *conditions = [[[self filter] conditions] mutableCopy];
     [conditions removeObjectAtIndex:idx];
     [[self filter] setConditions:conditions];
@@ -322,11 +322,11 @@
     }
 }
 
-- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx {
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
     [self insertInScriptingPublications:pub];
 }
 
-- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx {
+- (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx {
     [[self document] removePublications:[[self scriptingPublications] subarrayWithRange:NSMakeRange(idx, 1)] fromGroups:[NSArray arrayWithObject:self]];
     [[[self document] undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
@@ -418,7 +418,7 @@
 - (NSDictionary *)scriptingServerInfo {
     BDSKServerInfo *serverInfo = [self serverInfo];
     NSMutableDictionary *info = [NSMutableDictionary dictionary];
-    int serverType = 0;
+    NSInteger serverType = 0;
     
     if ([serverInfo isEntrez])
         serverType = BDSKScriptingSearchGroupEntrez;
@@ -540,7 +540,7 @@
     [serverInfo release];
 }
 
-- (int)scriptingServerType {
+- (NSInteger)scriptingServerType {
     if ([type isEqualToString:BDSKSearchGroupEntrez])
         return BDSKScriptingSearchGroupEntrez;
     else if ([type isEqualToString:BDSKSearchGroupZoom])

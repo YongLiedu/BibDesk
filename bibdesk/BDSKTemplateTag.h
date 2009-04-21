@@ -130,7 +130,7 @@ typedef NSInteger BDSKTemplateTagMatchType;
 - (BDSKTemplateTagMatchType)matchType;
 - (NSArray *)matchStrings;
 - (NSArray *)subtemplates;
-- (NSArray *)subtemplateAtIndex:(unsigned int)anIndex;
+- (NSArray *)subtemplateAtIndex:(NSUInteger)anIndex;
 
 @end
 

@@ -128,7 +128,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (void)updateFormatPresetUI{
-    int formatPresetChoice = [sud integerForKey:BDSKLocalFileFormatPresetKey];
+    NSInteger formatPresetChoice = [sud integerForKey:BDSKLocalFileFormatPresetKey];
 	BOOL custom = (formatPresetChoice == 0);
 	
     [formatPresetPopUp selectItemAtIndex:[formatPresetPopUp indexOfItemWithTag:formatPresetChoice]];
@@ -178,7 +178,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
     [self updatePapersFolderUI];
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
 	if (returnCode == NSOKButton) {
 		NSString *path = [[sheet filenames] objectAtIndex: 0];
 		[sud setObject:path forKey:BDSKPapersFolderPathKey];
@@ -264,7 +264,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (IBAction)localUrlFormatAdd:(id)sender{
-	int idx = [formatRepositoryPopUp indexOfSelectedItem];
+	NSInteger idx = [formatRepositoryPopUp indexOfSelectedItem];
 	NSString *newSpecifier = repositorySpecifierStrings[idx];
     NSText *fieldEditor = [formatSheetField currentEditor];
 	NSRange selRange;
@@ -302,7 +302,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (IBAction)localUrlFormatChanged:(id)sender{
-	int presetChoice = 0;
+	NSInteger presetChoice = 0;
 	NSString *formatString;
 	
 	if (sender == formatPresetPopUp || sender == formatPresetSheetPopUp) {
@@ -385,7 +385,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
                                    alternateButton:NSLocalizedString(@"Revert to Default", @"Button title") 
                                        otherButton:otherButton
                          informativeTextWithFormat:@"%@", error];
-	int rv = [alert runModal];
+	NSInteger rv = [alert runModal];
 	
 	if (rv == NSAlertDefaultReturn){
 		[formatSheetField selectText:self];

@@ -87,7 +87,7 @@ static NSString *fixedAuthorName(NSString *name)
     
     NSMutableString *newName = [[lastName mutableCopy] autorelease];    
     
-    unsigned int idx, maxIdx = [firstNames length];
+    NSUInteger idx, maxIdx = [firstNames length];
     for(idx = 0; idx < maxIdx; idx++){
         [newName appendString:[firstNames substringWithRange:NSMakeRange(idx, 1)]];
         [newName appendString:(idx == maxIdx - 1 ? @"." : @". ")];
@@ -161,7 +161,7 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
 		return returnArray;
     }
 	
-	int startLoc = NSMaxRange(startRange);
+	NSInteger startLoc = NSMaxRange(startRange);
 	NSRange endRange = [itemString rangeOfString:@"\nEF" options:NSLiteralSearch|NSBackwardsSearch range:NSMakeRange(startLoc, [itemString length] - startLoc)];
 	if (endRange.location == NSNotFound)
 		endRange = NSMakeRange([itemString length], 0);

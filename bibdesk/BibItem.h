@@ -85,13 +85,13 @@ enum {
     NSMutableSet *filesToBeFiled;
 	id<BDSKOwner> owner;
     BDSKFieldCollection *templateFields;
-    int currentIndex;
+    NSInteger currentIndex;
     BOOL spotlightMetadataChanged;
     BOOL isImported;
     float searchScore;
     NSURL *identifierURL;
     NSMutableArray *files;
-    unsigned int colorLabel;
+    NSUInteger colorLabel;
 }
 
 - (NSArray *)files;
@@ -105,7 +105,7 @@ enum {
 
 - (void)noteFilesChanged:(BOOL)isFile;
 
-- (BOOL)migrateFilesWithRemoveOptions:(int)removeMask numberOfAddedFiles:(int *)numberOfAddedFiles numberOfRemovedFields:(int *)numberOfRemovedFields error:(NSError **)outError;
+- (BOOL)migrateFilesWithRemoveOptions:(NSInteger)removeMask numberOfAddedFiles:(NSInteger *)numberOfAddedFiles numberOfRemovedFields:(NSInteger *)numberOfRemovedFields error:(NSError **)outError;
 
 - (NSString *)basePath;
 
@@ -202,7 +202,7 @@ enum {
     @discussion (discussion)
     
 */
-- (int)numberOfAuthors;
+- (NSInteger)numberOfAuthors;
 
 /*!
     @method numberOfAuthorsInheriting:
@@ -211,7 +211,7 @@ enum {
     @discussion (discussion)
     
 */
-- (int)numberOfAuthorsInheriting:(BOOL)inherit;
+- (NSInteger)numberOfAuthorsInheriting:(BOOL)inherit;
 
 /*!
     @method pubAuthors
@@ -253,7 +253,7 @@ enum {
     @discussion zero-based indexing
     
 */
-- (BibAuthor *)authorAtIndex:(unsigned int)index;
+- (BibAuthor *)authorAtIndex:(NSUInteger)index;
 
 /*!
     @method authorAtIndex:inherit:
@@ -263,7 +263,7 @@ enum {
     @discussion zero-based indexing
     
 */
-- (BibAuthor *)authorAtIndex:(unsigned int)index inherit:(BOOL)inherit;
+- (BibAuthor *)authorAtIndex:(NSUInteger)index inherit:(BOOL)inherit;
 
 - (BibAuthor *)firstAuthor;
 - (BibAuthor *)secondAuthor;
@@ -316,7 +316,7 @@ enum {
     @discussion (discussion)
     
 */
-- (int)numberOfAuthorsOrEditors;
+- (NSInteger)numberOfAuthorsOrEditors;
 
 /*!
     @method numberOfAuthorsOrEditorsInheriting:
@@ -325,7 +325,7 @@ enum {
     @discussion (discussion)
     
 */
-- (int)numberOfAuthorsOrEditorsInheriting:(BOOL)inherit;
+- (NSInteger)numberOfAuthorsOrEditorsInheriting:(BOOL)inherit;
 
 /*!
     @method pubAuthorsOrEditors
@@ -367,7 +367,7 @@ enum {
     @discussion zero-based indexing
     
 */
-- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)index;
+- (BibAuthor *)authorOrEditorAtIndex:(NSUInteger)index;
 
 /*!
     @method authorOrEditorAtIndex:inherit:
@@ -377,7 +377,7 @@ enum {
     @discussion zero-based indexing
     
 */
-- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)index inherit:(BOOL)inherit;
+- (BibAuthor *)authorOrEditorAtIndex:(NSUInteger)index inherit:(BOOL)inherit;
 
 - (BibAuthor *)firstAuthorOrEditor;
 - (BibAuthor *)secondAuthorOrEditor;
@@ -460,7 +460,7 @@ enum {
     @abstract   The value of the rating field as an integer.
     @discussion (comprehensive description)
 */
-- (unsigned int)rating;
+- (NSUInteger)rating;
 
 /*!
     @method     setRating:
@@ -468,7 +468,7 @@ enum {
     @discussion (comprehensive description)
     @param      rating The new value for the rating.
 */
-- (void)setRating:(unsigned int)rating;
+- (void)setRating:(NSUInteger)rating;
 
 - (NSColor *)color;
 - (void)setColor:(NSColor *)label;
@@ -482,7 +482,7 @@ enum {
     @param      field (description)
     @param      rating (description)
 */
-- (void)setField:(NSString *)field toRatingValue:(unsigned int)rating;
+- (void)setField:(NSString *)field toRatingValue:(NSUInteger)rating;
 
 /*!
     @method     ratingValueOfField:
@@ -491,7 +491,7 @@ enum {
     @param      field (description)
     @result     (description)
 */
-- (int)ratingValueOfField:(NSString *)field;
+- (NSInteger)ratingValueOfField:(NSString *)field;
 
 /*!
     @method     boolValueOfField:
@@ -533,12 +533,12 @@ enum {
     
 /*!
     @method     intValueOfField:
-    @abstract   Returns the value of a string stored in the item's pubFields dictionary as an int. Only for boolean, rating or tri-state fields.
+    @abstract   Returns the value of a string stored in the item's pubFields dictionary as an NSInteger. Only for boolean, rating or tri-state fields.
     @discussion (comprehensive description)
     @param      field (description)
     @result     (description)
 */
-- (int)intValueOfField:(NSString *)field;
+- (NSInteger)intValueOfField:(NSString *)field;
 
 /*!
     @method     stringValueOfField:
@@ -609,7 +609,7 @@ enum {
     @discussion -
     @result 0: no problem, 1: crossref to self, 2: crossref to item with crossref, 3: self is crossreffed
 */
-- (int)canSetCrossref:(NSString *)aCrossref andCiteKey:(NSString *)aCiteKey;
+- (NSInteger)canSetCrossref:(NSString *)aCrossref andCiteKey:(NSString *)aCiteKey;
 
 /*!
 	@method     setCiteKeyString
@@ -690,7 +690,7 @@ enum {
     @param      flag Whether a lossy search is to be performed (by removing diacritic marks)
     @result     (description)
 */
-- (BOOL)matchesSubstring:(NSString *)substring withOptions:(unsigned int)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
+- (BOOL)matchesSubstring:(NSString *)substring withOptions:(NSUInteger)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
 
 - (NSDictionary *)searchIndexInfo;
 - (NSDictionary *)metadataCacheInfoForUpdate:(BOOL)update;
@@ -702,9 +702,9 @@ enum {
 */
 - (NSString *)bibTeXString;
 
-- (NSString *)bibTeXStringWithOptions:(int)options;
+- (NSString *)bibTeXStringWithOptions:(NSInteger)options;
 
-- (NSData *)bibTeXDataWithOptions:(int)options relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError;
+- (NSData *)bibTeXDataWithOptions:(NSInteger)options relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 
 - (NSString *)RISStringValue;
 - (NSString *)MODSString;
@@ -738,8 +738,8 @@ enum {
 - (id)authors;
 - (id)editors;
 - (id)authorsOrEditors;
-- (int)itemIndex;
-- (void)setItemIndex:(int)index;
+- (NSInteger)itemIndex;
+- (void)setItemIndex:(NSInteger)index;
 - (NSCalendarDate *)currentDate;
 - (NSString *)textSkimNotes;
 - (NSAttributedString *)richTextSkimNotes;
@@ -807,9 +807,9 @@ enum {
 
 - (NSSet *)groupsForField:(NSString *)field;
 - (BOOL)isContainedInGroupNamed:(id)group forField:(NSString *)field;
-- (int)addToGroup:(BDSKGroup *)group handleInherited:(int)operation;
-- (int)removeFromGroup:(BDSKGroup *)group handleInherited:(int)operation;
-- (int)replaceGroup:(BDSKGroup *)group withGroupNamed:(NSString *)newGroupName handleInherited:(int)operation;
+- (NSInteger)addToGroup:(BDSKGroup *)group handleInherited:(NSInteger)operation;
+- (NSInteger)removeFromGroup:(BDSKGroup *)group handleInherited:(NSInteger)operation;
+- (NSInteger)replaceGroup:(BDSKGroup *)group withGroupNamed:(NSString *)newGroupName handleInherited:(NSInteger)operation;
 - (void)invalidateGroupNames;
 
 - (BOOL)isImported;

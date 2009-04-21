@@ -66,7 +66,7 @@ typedef enum {
     
     BDSKPreviewerServer *server;
     BDSKPreviewState previewState;
-    int generatedTypes;
+    NSInteger generatedTypes;
 }
 
 /*!
@@ -85,12 +85,12 @@ typedef enum {
 - (float)RTFScaleFactor;
 - (void)setRTFScaleFactor:(float)scaleFactor;
 
-- (int)generatedTypes;
-- (void)setGeneratedTypes:(int)newGeneratedTypes;
+- (NSInteger)generatedTypes;
+- (void)setGeneratedTypes:(NSInteger)newGeneratedTypes;
 
 - (BOOL)isVisible;
 - (void)handleMainDocumentDidChangeNotification:(NSNotification *)notification;
-- (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 
 /*!
     @method updateWithBibTeXString:

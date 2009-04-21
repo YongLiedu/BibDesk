@@ -79,9 +79,9 @@ static BDSKTypeManager *sharedInstance = nil;
         
         fragileCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@"&$^"] copy];
         
-        tmpSet = [[NSCharacterSet characterSetWithRange:NSMakeRange( (unsigned int)'a', 26)] mutableCopy];
-        [tmpSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
-        [tmpSet addCharactersInRange:NSMakeRange( (unsigned int)'-', 15)];  //  -./0123456789:;
+        tmpSet = [[NSCharacterSet characterSetWithRange:NSMakeRange( (NSUInteger)'a', 26)] mutableCopy];
+        [tmpSet addCharactersInRange:NSMakeRange( (NSUInteger)'A', 26)];
+        [tmpSet addCharactersInRange:NSMakeRange( (NSUInteger)'-', 15)];  //  -./0123456789:;
         
         // this is used for generated cite keys, very strict!
         strictInvalidCiteKeyCharSet = [[tmpSet invertedSet] copy];  // don't release this
@@ -102,8 +102,8 @@ static BDSKTypeManager *sharedInstance = nil;
         [tmpSet release];
         
         // see the URI specifications for the valid characters
-        NSMutableCharacterSet *validSet = [[NSCharacterSet characterSetWithRange:NSMakeRange( (unsigned int)'a', 26)] mutableCopy];
-        [validSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
+        NSMutableCharacterSet *validSet = [[NSCharacterSet characterSetWithRange:NSMakeRange( (NSUInteger)'a', 26)] mutableCopy];
+        [validSet addCharactersInRange:NSMakeRange( (NSUInteger)'A', 26)];
         [validSet addCharactersInString:@"-._~:/?#[]@!$&'()*+,;="];
         
         // this set is used for warning the user on manual entry of a remote url
@@ -153,7 +153,7 @@ static BDSKTypeManager *sharedInstance = nil;
 
 - (void)release {}
 
-- (unsigned int)retainCount { return UINT_MAX; }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)reloadTypeInfo{
     // Load the TypeInfo plists

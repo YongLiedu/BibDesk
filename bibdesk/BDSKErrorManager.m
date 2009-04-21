@@ -118,7 +118,7 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
     }
 }
 
-- (int)uniqueNumber;
+- (NSInteger)uniqueNumber;
 {
     return uniqueNumber;
 }
@@ -213,7 +213,7 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 
 - (void)removeClosedEditors;
 {
-    unsigned int idx = [editors count];
+    NSUInteger idx = [editors count];
     BDSKErrorEditor *editor;
     
     while(idx--){

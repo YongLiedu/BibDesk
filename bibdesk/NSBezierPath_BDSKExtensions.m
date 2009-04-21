@@ -150,7 +150,7 @@
     float centerY = NSMidY(rect);
     float radiusX = 0.5 * NSWidth(rect);
     float radiusY = 0.5 * NSHeight(rect);
-    int i = 0;
+    NSInteger i = 0;
     NSBezierPath *path = [self bezierPath];
     
     [path removeAllPoints];
@@ -168,7 +168,7 @@
     float centerY = NSMidY(rect);
     float radiusX = 0.5 * NSWidth(rect);
     float radiusY = 0.5 * NSHeight(rect);
-    int i;
+    NSInteger i;
     NSBezierPath *path = [self bezierPath];
     
     [path removeAllPoints];

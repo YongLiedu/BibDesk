@@ -58,7 +58,7 @@
         if ([[self cell] isKindOfClass:[[self class] cellClass]] == NO) {
             id cell = [[[[[self class] cellClass] alloc] init] autorelease];
             id oldCell = [self cell];
-            unsigned int i, count = [self segmentCount];
+            NSUInteger i, count = [self segmentCount];
             
             [cell setSegmentCount:count];
             [cell setTrackingMode:[oldCell trackingMode]];

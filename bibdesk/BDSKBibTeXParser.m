@@ -66,9 +66,9 @@ static NSLock *parserLock = nil;
 @interface BDSKBibTeXParser (Private)
 
 // private function to check the string for encoding.
-static inline BOOL checkStringForEncoding(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding);
+static inline BOOL checkStringForEncoding(NSString *s, NSInteger line, NSString *filePath, NSStringEncoding parserEncoding);
 // private function to do create a string from a c-string with encoding checking.
-static inline NSString *copyCheckedString(const char *cstring, int line, NSString *filePath, NSStringEncoding parserEncoding);
+static inline NSString *copyCheckedString(const char *cstring, NSInteger line, NSString *filePath, NSStringEncoding parserEncoding);
 
 // private function to get array value from field:
 // "foo" # macro # {string} # 19
@@ -80,10 +80,10 @@ static BOOL addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
 static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, NSString *filePath, BibDocument *document, NSStringEncoding encoding);
 
 // private function for preserving newlines in annote/abstract fields; does not lock the parser
-static NSString *copyStringFromNoteField(AST *field, const char *data, unsigned int inputDataLength, NSString *filePath, NSStringEncoding encoding, NSString **error);
+static NSString *copyStringFromNoteField(AST *field, const char *data, NSUInteger inputDataLength, NSString *filePath, NSStringEncoding encoding, NSString **error);
 
 // parses an individual entry and adds it's field/value pairs to the dictionary
-static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, unsigned int inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding);
+static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, NSUInteger inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding);
 
 @end
 
@@ -138,7 +138,7 @@ error:(NSError **)outError{
 
 + (NSArray *)itemsFromData:(NSData *)inData frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(id<BDSKOwner>)anOwner encoding:(NSStringEncoding)parserEncoding isPartialData:(BOOL *)isPartialData error:(NSError **)outError{
     
-    unsigned int inputDataLength = [inData length];
+    NSUInteger inputDataLength = [inData length];
     
     // btparse will crash if we pass it a zero-length data, so we'll return here for empty files
     if (isPartialData)
@@ -151,7 +151,7 @@ error:(NSError **)outError{
     
     // btparse chokes on classic Macintosh line endings, so we'll replace all returns with a newline; this takes < 0.01 seconds on a 1000+ item file with Unix line endings, so performance is not affected.  Windows line endings will be replaced by a single newline.
     NSMutableData *fixedData = [[inData mutableCopy] autorelease];
-    unsigned int currIndex, nextIndex;
+    NSUInteger currIndex, nextIndex;
     NSRange replaceRange;
     const char lf[1] = {'\n'};
     unsigned char *bytePtr = [fixedData mutableBytes];
@@ -354,7 +354,7 @@ error:(NSError **)outError{
     BOOL quoted = NO;
 
 	NSString *s;
-	int nesting;
+	NSInteger nesting;
 	unichar ch;
     
     NSError *error= nil;
@@ -446,7 +446,7 @@ error:(NSError **)outError{
     BOOL quoted = NO;
 
 	NSString *s;
-	int nesting;
+	NSInteger nesting;
 	unichar ch;
     
     NSError *error = nil;
@@ -622,10 +622,10 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
 
 /// private functions used with libbtparse code
 
-static inline int numberOfValuesInField(AST *field)
+static inline NSInteger numberOfValuesInField(AST *field)
 {
     AST *simple_value = field->down;
-    int cnt = 0;
+    NSInteger cnt = 0;
     while (simple_value && simple_value->text) {
         simple_value = simple_value->right;
         cnt++;
@@ -633,7 +633,7 @@ static inline int numberOfValuesInField(AST *field)
     return cnt;
 }
 
-static inline BOOL checkStringForEncoding(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding){
+static inline BOOL checkStringForEncoding(NSString *s, NSInteger line, NSString *filePath, NSStringEncoding parserEncoding){
     if(![s canBeConvertedToEncoding:parserEncoding]){
         NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Unable to convert characters to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:parserEncoding]];
         [BDSKErrorObject reportError:message forFile:filePath line:line];      
@@ -643,7 +643,7 @@ static inline BOOL checkStringForEncoding(NSString *s, int line, NSString *fileP
     return YES;
 }
 
-static inline NSString *copyCheckedString(const char *cstring, int line, NSString *filePath, NSStringEncoding parserEncoding){
+static inline NSString *copyCheckedString(const char *cstring, NSInteger line, NSString *filePath, NSStringEncoding parserEncoding){
     NSString *nsString = cstring ? [[NSString alloc] initWithCString:cstring encoding:parserEncoding] : nil;
     if (nsString && checkStringForEncoding(nsString, line, filePath, parserEncoding) == NO) {
         [nsString release];
@@ -665,7 +665,7 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
 	simple_value = field->down;
     
     // traverse the AST and find out how many fields we have
-    int nodeCount = numberOfValuesInField(field);
+    NSInteger nodeCount = numberOfValuesInField(field);
     
     // from profiling: optimize for the single quoted string node case; avoids the array, node, and complex string overhead
     if (1 == nodeCount && simple_value->nodetype == BTAST_STRING) {
@@ -876,11 +876,11 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     return success;
 }
 
-static NSString *copyStringFromNoteField(AST *field, const char *data, unsigned int inputDataLength, NSString *filePath, NSStringEncoding encoding, NSString **errorString)
+static NSString *copyStringFromNoteField(AST *field, const char *data, NSUInteger inputDataLength, NSString *filePath, NSStringEncoding encoding, NSString **errorString)
 {
     NSString *returnString = nil;
     unsigned long cidx = 0; // used to scan through buf for annotes.
-    int braceDepth = 0;
+    NSInteger braceDepth = 0;
     BOOL lengthOverrun = NO;
     if(field->down){
         cidx = field->down->offset;
@@ -930,7 +930,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, unsigned 
     return returnString;
 }
 
-static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, unsigned int inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding)
+static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, NSUInteger inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding)
 {
     AST *field = NULL;
     NSString *fieldName, *fieldValue, *tmpStr;

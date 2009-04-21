@@ -69,7 +69,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
 }
 
 // super's designated initializer
-- (id)initWithName:(id)aName count:(int)aCount {
+- (id)initWithName:(id)aName count:(NSInteger)aCount {
     self = [self initWithName:aName publications:nil];
     return self;
 }
@@ -194,8 +194,8 @@ static NSString *BDSKLastImportLocalizedString = nil;
 
 - (BOOL)isEqual:(id)other { return other == self; }
 
-- (unsigned int)hash {
-    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
+- (NSUInteger)hash {
+    return( ((NSUInteger) self >> 4) | (NSUInteger) self << (32 - 4));
 }
 
 @end

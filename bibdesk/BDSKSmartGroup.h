@@ -61,7 +61,7 @@
 	@param count The count for the smart group.
 	@param aFilter The filter for the smart group with. 
 */
-- (id)initWithName:(id)aName count:(int)aCount filter:(BDSKFilter *)aFilter;
+- (id)initWithName:(id)aName count:(NSInteger)aCount filter:(BDSKFilter *)aFilter;
 
 /*!
 	@method filter

@@ -58,13 +58,13 @@
 @implementation NSMenu (BDSKExtensions)
 
 - (void)removeAllItems {
-    unsigned int numItems = 0;
+    NSUInteger numItems = 0;
     while (numItems = [self numberOfItems])
         [self removeItemAtIndex:numItems - 1];
 }
 
 - (NSMenuItem *)itemWithAction:(SEL)action {
-    unsigned int i = [self numberOfItems];
+    NSUInteger i = [self numberOfItems];
     while (i--) {
         NSMenuItem *item = [self itemAtIndex:i];
         if ([item action] == action)
@@ -75,7 +75,7 @@
 
 - (void)addItemsFromMenu:(NSMenu *)other;
 {
-    unsigned int i, count = [other numberOfItems];
+    NSUInteger i, count = [other numberOfItems];
     NSMenuItem *anItem;
     NSZone *zone = [self zone];
     for(i = 0; i < count; i++){
@@ -85,7 +85,7 @@
     }
 }
 
-- (NSMenuItem *)insertItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu atIndex:(unsigned int)idx;
+- (NSMenuItem *)insertItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu atIndex:(NSUInteger)idx;
 {
     NSMenuItem *item = [[NSMenuItem allocWithZone:[self zone]] initWithTitle:itemTitle action:NULL keyEquivalent:@""];
     [item setSubmenu:submenu];
@@ -99,7 +99,7 @@
     return [self insertItemWithTitle:itemTitle submenu:submenu atIndex:[self numberOfItems]];
 }
 
-- (NSMenuItem *)insertItemWithTitle:(NSString *)itemTitle submenuTitle:(NSString *)submenuTitle submenuDelegate:(id)delegate atIndex:(unsigned int)idx;
+- (NSMenuItem *)insertItemWithTitle:(NSString *)itemTitle submenuTitle:(NSString *)submenuTitle submenuDelegate:(id)delegate atIndex:(NSUInteger)idx;
 {
     NSMenuItem *item = [[NSMenuItem allocWithZone:[self zone]] initWithTitle:itemTitle action:NULL keyEquivalent:@""];
     NSMenu *submenu = [[NSMenu allocWithZone:[self zone]] initWithTitle:submenuTitle];
@@ -116,7 +116,7 @@
     return [self insertItemWithTitle:itemTitle submenuTitle:submenuTitle submenuDelegate:delegate atIndex:[self numberOfItems]];
 }
 
-- (NSMenuItem *)insertItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL atIndex:(unsigned int)idx;
+- (NSMenuItem *)insertItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL atIndex:(NSUInteger)idx;
 {
     if (theURL == nil) {
         // just return an empty item
@@ -170,7 +170,7 @@ static inline NSString *displayNameForURL(NSURL *appURL) {
 
 static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, NSURL *defaultAppURL) {
     NSMutableArray *uniqueNamesAndURLs = [[NSMutableArray alloc] init];
-    int i, count = [appURLs count];
+    NSInteger i, count = [appURLs count];
     
     if (count > 1) {
         NSMutableSet *versionStrings = [[NSMutableSet alloc] init];
@@ -188,7 +188,7 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
             BOOL isPreferred = [defaultAppURL isEqual:appURL] || fileIsInApplicationsOrSystem(appURL);
             if (isPreferred) {
                 // if it's preferred, remove any alternative
-                unsigned int idx = [[uniqueNamesAndURLs valueForKey:@"versionString"] indexOfObject:versionString];
+                NSUInteger idx = [[uniqueNamesAndURLs valueForKey:@"versionString"] indexOfObject:versionString];
                 if (idx != NSNotFound) {
                     NSURL *altURL = [[uniqueNamesAndURLs objectAtIndex:idx] objectForKey:@"appURL"];
                     if ([defaultAppURL isEqual:altURL] == NO && fileIsInApplicationsOrSystem(altURL) == NO)
@@ -238,7 +238,7 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
     NSString *menuTitle;
     NSString *version;
     NSDictionary *dict;
-    unsigned int i, j, subCount, count = [appURLs count];
+    NSUInteger i, j, subCount, count = [appURLs count];
     
     for (i = 0; i < count; i++) {
         appURL = [appURLs objectAtIndex:i];
@@ -319,7 +319,7 @@ static id sharedOpenWithController = nil;
 
 - (void)release {}
 
-- (unsigned int)retainCount { return UINT_MAX; }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)chooseApplicationToOpenURL:(NSURL *)aURL;
 {
@@ -328,7 +328,7 @@ static id sharedOpenWithController = nil;
     [openPanel setAllowsMultipleSelection:NO];
     [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"Prompt for Choose panel")];
     
-    int rv = [openPanel runModalForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
+    NSInteger rv = [openPanel runModalForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
                                         file:nil 
                                        types:[NSArray arrayWithObjects:@"app", nil]];
     if(NSFileHandlingPanelOKButton == rv)

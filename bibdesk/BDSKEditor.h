@@ -143,11 +143,11 @@
 - (void)show;
 
 - (IBAction)chooseLocalFile:(id)sender;
-- (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)chooseRemoteURL:(id)sender;
 - (IBAction)dismissChooseURLSheet:(id)sender;
-- (void)chooseRemoteURLSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)chooseRemoteURLSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)toggleStatusBar:(id)sender;
 
@@ -177,8 +177,8 @@
 
 - (void)updateCiteKeyAutoGenerateStatus;
 
-- (int)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue;
-- (int)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue didAutoGenerate:(int)mask;
+- (NSInteger)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue;
+- (NSInteger)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue didAutoGenerate:(NSInteger)mask;
 
 - (NSString *)status;
 - (void)setStatus:(NSString *)status;
@@ -305,14 +305,14 @@
 
 - (NSUndoManager *)undoManager;
 
-- (void)deleteURLsAtIndexes:(NSIndexSet *)indexSet moveToTrash:(int)moveToTrash;
+- (void)deleteURLsAtIndexes:(NSIndexSet *)indexSet moveToTrash:(NSInteger)moveToTrash;
 
 #pragma mark Person controller
 
 - (IBAction)showPersonDetail:(id)sender;
 
-- (int)numberOfPersons;
-- (BibAuthor *)personAtIndex:(unsigned int)anIndex;
+- (NSInteger)numberOfPersons;
+- (BibAuthor *)personAtIndex:(NSUInteger)anIndex;
 - (NSArray *)persons;
 
 #pragma mark Macro support

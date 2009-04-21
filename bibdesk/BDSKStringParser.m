@@ -53,7 +53,7 @@
 
 @implementation BDSKStringParser
 
-static Class classForType(int stringType)
+static Class classForType(NSInteger stringType)
 {
     Class parserClass = Nil;
     switch(stringType){
@@ -93,7 +93,7 @@ static Class classForType(int stringType)
     return parserClass;
 }
 
-+ (BOOL)canParseString:(NSString *)string ofType:(int)stringType{
++ (BOOL)canParseString:(NSString *)string ofType:(NSInteger)stringType{
     BDSKASSERT(self == [BDSKStringParser class]);
     if (stringType == BDSKUnknownStringType)
         stringType = [string contentStringType];
@@ -102,7 +102,7 @@ static Class classForType(int stringType)
     return [parserClass canParseString:string];
 }
 
-+ (NSArray *)itemsFromString:(NSString *)string ofType:(int)stringType error:(NSError **)outError{
++ (NSArray *)itemsFromString:(NSString *)string ofType:(NSInteger)stringType error:(NSError **)outError{
     BDSKASSERT(self == [BDSKStringParser class]);
     if (stringType == BDSKUnknownStringType)
         stringType = [string contentStringType];
@@ -140,7 +140,7 @@ static Class classForType(int stringType)
 
 @implementation NSString (BDSKStringParserExtensions)
 
-- (int)contentStringType{
+- (NSInteger)contentStringType{
 	if([BDSKBibTeXParser canParseString:self])
 		return BDSKBibTeXStringType;
 	if([BDSKReferenceMinerParser canParseString:self])

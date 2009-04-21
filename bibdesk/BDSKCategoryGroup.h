@@ -52,7 +52,7 @@
 	@param aKey The key for the group.
 	@param count The count for the group.
 */
-- (id)initWithName:(id)aName key:(NSString *)aKey count:(int)aCount;
+- (id)initWithName:(id)aName key:(NSString *)aKey count:(NSInteger)aCount;
 
 /*!
     @method     initEmptyGroupWithKey:count:
@@ -60,7 +60,7 @@
 	@param      aKey The key for the group.
 	@param      count The count for the group.
 */
-- (id)initEmptyGroupWithKey:(NSString *)aKey count:(int)aCount;
+- (id)initEmptyGroupWithKey:(NSString *)aKey count:(NSInteger)aCount;
 
 /*!
 	@method key

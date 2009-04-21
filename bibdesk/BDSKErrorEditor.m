@@ -279,19 +279,19 @@ static char BDSKErrorEditorObservationContext;
 }
 
 - (IBAction)changeLineNumber:(id)sender{
-    int lineNumber = [sender intValue];
+    NSInteger lineNumber = [sender intValue];
     if (lineNumber > 0)
         [self gotoLine:lineNumber];
     else
         NSBeep();
 }
 
-- (void)gotoLine:(int)lineNumber{
-    int i = 0;
+- (void)gotoLine:(NSInteger)lineNumber{
+    NSInteger i = 0;
     NSString *string = [textView string];
-    unsigned int start = 0;
-    unsigned int end = 0;
-    unsigned int length = [string length];
+    NSUInteger start = 0;
+    NSUInteger end = 0;
+    NSUInteger length = [string length];
     NSRange range;
     
     while (i++ < lineNumber && end < length) {
@@ -307,12 +307,12 @@ static char BDSKErrorEditorObservationContext;
 - (void)handleSelectionDidChangeNotification:(NSNotification *)notification{
     NSRange selectedRange = [textView selectedRange];
     
-    int lineNumber = 0;
+    NSInteger lineNumber = 0;
     NSString *string = [textView string];
-    unsigned int length = [string length];
-    unsigned int location = selectedRange.location;
-    unsigned int end = 0;
-    unsigned int contentsEnd = 0;
+    NSUInteger length = [string length];
+    NSUInteger location = selectedRange.location;
+    NSUInteger end = 0;
+    NSUInteger contentsEnd = 0;
     
     while (end <= location) {
         ++lineNumber;
@@ -372,9 +372,9 @@ static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isE
     
     NSCharacterSet *newlineSet = [NSCharacterSet newlineCharacterSet];
     
-    unsigned int start = MIN(proposedRange.location, invalidSyntaxHighlightMark);
-    unsigned int end = NSMaxRange(proposedRange);
-    unsigned int length = [string length];
+    NSUInteger start = MIN(proposedRange.location, invalidSyntaxHighlightMark);
+    NSUInteger end = NSMaxRange(proposedRange);
+    NSUInteger length = [string length];
     
     // quoted or commented text can have multiple lines
     do {

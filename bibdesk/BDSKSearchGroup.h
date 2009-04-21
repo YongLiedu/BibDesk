@@ -51,10 +51,10 @@ extern NSString *BDSKSearchGroupDBLP;
 - (id)initWithGroup:(BDSKSearchGroup *)aGroup serverInfo:(BDSKServerInfo *)info;
 - (BDSKServerInfo *)serverInfo;
 - (void)setServerInfo:(BDSKServerInfo *)info;
-- (void)setNumberOfAvailableResults:(int)value;
-- (int)numberOfAvailableResults;
-- (void)setNumberOfFetchedResults:(int)value;
-- (int)numberOfFetchedResults;
+- (void)setNumberOfAvailableResults:(NSInteger)value;
+- (NSInteger)numberOfAvailableResults;
+- (void)setNumberOfFetchedResults:(NSInteger)value;
+- (NSInteger)numberOfFetchedResults;
 - (BOOL)failedDownload;
 - (BOOL)isRetrieving;
 - (void)retrievePublications;
@@ -91,8 +91,8 @@ extern NSString *BDSKSearchGroupDBLP;
 - (void)setHistory:(NSArray *)newHistory;
 - (NSArray *)history;
 
-- (void)setNumberOfAvailableResults:(int)value;
-- (int)numberOfAvailableResults;
+- (void)setNumberOfAvailableResults:(NSInteger)value;
+- (NSInteger)numberOfAvailableResults;
 
 - (BOOL)hasMoreResults;
 

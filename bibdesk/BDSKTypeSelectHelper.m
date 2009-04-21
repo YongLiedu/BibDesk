@@ -45,7 +45,7 @@
 #define BDSKWindowDidChangeFirstResponderNotification @"BDSKWindowDidChangeFirstResponderNotification"
 
 @interface NSString (BDSKTypeAheadHelperExtensions)
-- (BOOL)containsStringStartingAtWord:(NSString *)string options:(int)mask range:(NSRange)range;
+- (BOOL)containsStringStartingAtWord:(NSString *)string options:(NSInteger)mask range:(NSRange)range;
 @end
 
 @interface NSWindow (BDSKTypeAheadHelperExtensions)
@@ -59,7 +59,7 @@
 - (void)startTimer;
 - (void)typeSelectSearchTimeout:(id)sender;
 - (NSTimeInterval)timeoutInterval;
-- (unsigned int)indexOfMatchedItemAfterIndex:(unsigned int)selectedIndex;
+- (NSUInteger)indexOfMatchedItemAfterIndex:(NSUInteger)selectedIndex;
 
 @end
 
@@ -244,7 +244,7 @@
     
     NSString *characters = [keyEvent charactersIgnoringModifiers];
     unichar character = [characters length] > 0 ? [characters characterAtIndex:0] : 0;
-	unsigned int modifierFlags = [keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+	NSUInteger modifierFlags = [keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
     
     return modifierFlags == 0 && character == REPEAT_CHARACTER;
 }
@@ -258,7 +258,7 @@
     
     NSString *characters = [keyEvent charactersIgnoringModifiers];
     unichar character = [characters length] > 0 ? [characters characterAtIndex:0] : 0;
-	unsigned int modifierFlags = [keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+	NSUInteger modifierFlags = [keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
     
     return modifierFlags == 0 && character == CANCEL_CHARACTER;
 }
@@ -319,7 +319,7 @@
 
 // See http://www.mactech.com/articles/mactech/Vol.18/18.10/1810TableTechniques/index.html
 - (NSTimeInterval)timeoutInterval {
-    int keyThreshTicks = [[NSUserDefaults standardUserDefaults] integerForKey:@"InitialKeyRepeat"];
+    NSInteger keyThreshTicks = [[NSUserDefaults standardUserDefaults] integerForKey:@"InitialKeyRepeat"];
     if (0 == keyThreshTicks)
         keyThreshTicks = 35;	// apparent default value, translates to 1.17 sec timeout.
     
@@ -331,7 +331,7 @@
     BDSKPRECONDITION(dataSource != nil);
     
     if ([searchString length]) {
-        unsigned int selectedIndex, startIndex, foundIndex;
+        NSUInteger selectedIndex, startIndex, foundIndex;
         
         if (cycleResults) {
             selectedIndex = [dataSource typeSelectHelperCurrentlySelectedIndex:self];
@@ -357,9 +357,9 @@
     }
 }
 
-- (unsigned int)indexOfMatchedItemAfterIndex:(unsigned int)selectedIndex;
+- (NSUInteger)indexOfMatchedItemAfterIndex:(NSUInteger)selectedIndex;
 {
-    unsigned int labelCount = [[self searchCache] count];
+    NSUInteger labelCount = [[self searchCache] count];
     
     if (labelCount == NO)
         return NSNotFound;
@@ -367,9 +367,9 @@
     if (selectedIndex == NSNotFound)
         selectedIndex = labelCount - 1;
 
-    unsigned int labelIndex = selectedIndex;
+    NSUInteger labelIndex = selectedIndex;
     BOOL looped = NO;
-    int options = NSCaseInsensitiveSearch;
+    NSInteger options = NSCaseInsensitiveSearch;
     
     if (matchPrefix)
         options |= NSAnchoredSearch;
@@ -396,8 +396,8 @@
 
 @implementation NSString (BDSKTypeAheadHelperExtensions)
 
-- (BOOL)containsStringStartingAtWord:(NSString *)string options:(int)mask range:(NSRange)range {
-    unsigned int stringLength = [string length];
+- (BOOL)containsStringStartingAtWord:(NSString *)string options:(NSInteger)mask range:(NSRange)range {
+    NSUInteger stringLength = [string length];
     if (stringLength == 0 || stringLength > range.length)
         return NO;
     while (range.length >= stringLength) {

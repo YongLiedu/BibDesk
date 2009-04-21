@@ -82,8 +82,8 @@ typedef struct _BDSKTeXTaskFlags {
 
 - (BOOL)runWithBibTeXString:(NSString *)bibStr;
 - (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys;
-- (BOOL)runWithBibTeXString:(NSString *)bibStr generatedTypes:(int)flag;
-- (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys generatedTypes:(int)flag;
+- (BOOL)runWithBibTeXString:(NSString *)bibStr generatedTypes:(NSInteger)flag;
+- (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys generatedTypes:(NSInteger)flag;
 
 - (void)terminate;
 

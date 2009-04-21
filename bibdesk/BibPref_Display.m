@@ -78,7 +78,7 @@
 }
 
 - (void)updatePreviewDisplayUI{
-    int maxNumber = [sud integerForKey:BDSKPreviewMaxNumberKey];
+    NSInteger maxNumber = [sud integerForKey:BDSKPreviewMaxNumberKey];
 	if (maxNumber == 0)
 		[previewMaxNumberComboBox setStringValue:NSLocalizedString(@"All",@"Display all items in preview")];
 	else 
@@ -86,7 +86,7 @@
 }
 
 - (void)updateAuthorNameDisplayUI{
-    int mask = [sud integerForKey:BDSKAuthorNameDisplayKey];
+    NSInteger mask = [sud integerForKey:BDSKAuthorNameDisplayKey];
     [authorFirstNameButton setState:(mask & BDSKAuthorDisplayFirstNameMask) ? NSOnState : NSOffState];
     [authorAbbreviateButton setState:(mask & BDSKAuthorAbbreviateFirstNameMask) ? NSOnState : NSOffState];
     [authorLastNameFirstButton setState:(mask & BDSKAuthorLastNameFirstMask) ? NSOnState : NSOffState];
@@ -99,7 +99,7 @@
 }
 
 - (IBAction)changePreviewMaxNumber:(id)sender{
-    int maxNumber = [[[sender cell] objectValueOfSelectedItem] intValue]; // returns 0 if not a number (as in @"All")
+    NSInteger maxNumber = [[[sender cell] objectValueOfSelectedItem] intValue]; // returns 0 if not a number (as in @"All")
     if(maxNumber != [sud integerForKey:BDSKPreviewMaxNumberKey]){
 		[sud setInteger:maxNumber forKey:BDSKPreviewMaxNumberKey];
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
@@ -117,8 +117,8 @@
 
 - (IBAction)changeAuthorDisplay:(id)sender;
 {
-    int itemMask = 1 << [sender tag];
-    int prefMask = [sud integerForKey:BDSKAuthorNameDisplayKey];
+    NSInteger itemMask = 1 << [sender tag];
+    NSInteger prefMask = [sud integerForKey:BDSKAuthorNameDisplayKey];
     if([sender state] == NSOnState)
         prefMask |= itemMask;
     else

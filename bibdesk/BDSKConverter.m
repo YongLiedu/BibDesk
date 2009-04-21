@@ -81,7 +81,7 @@ static BDSKConverter *sharedConverter = nil;
 
 - (void)release {}
 
-- (unsigned int)retainCount { return UINT_MAX; }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)loadDict{
     
@@ -177,11 +177,11 @@ static BDSKConverter *sharedConverter = nil;
     NSMutableString *tmpConv = nil;
     NSMutableString *convertedSoFar = [precomposedString mutableCopy];
 
-    int offset = 0;
+    CFIndex offset = 0;
     NSString *TEXString = nil;
     
     UniChar ch;
-    unsigned int idx, numberOfCharacters = CFStringGetLength((CFStringRef)precomposedString);
+    CFIndex idx, numberOfCharacters = CFStringGetLength((CFStringRef)precomposedString);
     NSRange r;
     CFStringInlineBuffer inlineBuffer;
     CFStringInitInlineBuffer((CFStringRef)precomposedString, &inlineBuffer, CFRangeMake(0, numberOfCharacters));
@@ -229,7 +229,7 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 {        
     // decompose to canonical form
     CFStringNormalize((CFMutableStringRef)charString, kCFStringNormalizationFormD);
-    unsigned int decomposedLength = [charString length];
+    NSUInteger decomposedLength = [charString length];
     
     // first check if we can convert this, we should have a base character + an accent we know
     if (decomposedLength == 0 || [baseCharacterSetForTeX characterIsMember:[charString characterAtIndex:0]] == NO)
@@ -284,7 +284,7 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
     NSString *TEXString = nil;
 
     NSMutableString *convertedSoFar = nil;
-    unsigned int start, length = [s length];
+    NSUInteger start, length = [s length];
     NSRange range = [s rangeOfString:@"{\\" options:0 range:NSMakeRange(0, length)];
     
     if (range.length){
@@ -341,7 +341,7 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
     
 	NSString *texAccent = nil;
 	NSString *accent = nil;
-    unsigned int idx = 0, length = [texString length];
+    CFIndex idx = 0, length = [texString length];
     
     CFStringInlineBuffer inlineBuffer;
     CFStringInitInlineBuffer((CFStringRef)texString, &inlineBuffer, CFRangeMake(0, length));
@@ -369,7 +369,7 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
     else if (ch == ' ')
         idx++;      // TeX accepts {\' i} or {\'i}, but space shouldn't be included in the letter token
     
-    unsigned int letterStart = idx;
+    CFIndex letterStart = idx;
     NSString *character = nil;
     
     for (idx = letterStart; idx < length; idx++) {

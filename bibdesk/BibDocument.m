@@ -349,7 +349,7 @@ enum {
         return @"BibDocument";
 }
 
-- (void)migrationAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)unused {
+- (void)migrationAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)unused {
     
     if ([alert suppressionButtonState] == NSOnState)
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"BDSKDisableMigrationWarning"];
@@ -656,7 +656,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
                                            otherButton:nil
                              informativeTextWithFormat:NSLocalizedString(@"You are about to undo past the last point this file was saved. Do you want to do this?", @"Informative text in alert dialog") ];
 
-		int rv = [alert runModal];
+		NSInteger rv = [alert runModal];
 		if (rv == NSAlertAlternateReturn)
 			return NO;
 	}
@@ -886,7 +886,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 													  userInfo:notifInfo];
 }
 
-- (void)insertPublication:(BibItem *)pub atIndex:(unsigned int)idx {
+- (void)insertPublication:(BibItem *)pub atIndex:(NSUInteger)idx {
     [self insertPublications:[NSArray arrayWithObject:pub] atIndexes:[NSIndexSet indexSetWithIndex:idx]];
 }
 
@@ -1579,7 +1579,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSString *encodingName = [NSString localizedNameOfStringEncoding:encoding];
     NSStringEncoding groupsEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
     
-    int options = 0;
+    NSInteger options = 0;
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey])
         options |= BDSKBibTeXOptionTeXifyMask;
     if (drop)
@@ -1813,7 +1813,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (BOOL)revertToContentsOfURL:(NSURL *)absoluteURL ofType:(NSString *)aType error:(NSError **)outError
 {
 	// first remove all editor windows, as they will be invalid afterwards
-    unsigned int idx = [[self windowControllers] count];
+    NSUInteger idx = [[self windowControllers] count];
     while(--idx)
         [[[self windowControllers] objectAtIndex:idx] close];
     
@@ -1858,7 +1858,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSStringEncoding encodingFromFile = [[self mainWindowSetupDictionaryFromExtendedAttributes] unsignedIntForKey:BDSKDocumentStringEncodingKey defaultValue:0];
     if (encodingFromFile != 0 && encodingFromFile != encoding) {
         
-        int rv;
+        NSInteger rv;
         
         error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:NSLocalizedString(@"Incorrect encoding", @"Message in alert dialog when opening a document with different encoding")];
         [error setValue:[NSString stringWithFormat:NSLocalizedString(@"BibDesk tried to open the document using encoding %@, but it should have been opened with encoding %@.", @"Informative text in alert dialog when opening a document with different encoding"), [NSString localizedNameOfStringEncoding:encoding], [NSString localizedNameOfStringEncoding:encodingFromFile]] forKey:NSLocalizedRecoverySuggestionErrorKey];
@@ -1898,7 +1898,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             // bypass the partial data warning, since we have no data
 			return NO;
         }
-        int type = [string contentStringType];
+        NSInteger type = [string contentStringType];
         if(type == BDSKBibTeXStringType){
             success = [self readFromBibTeXData:data fromURL:absoluteURL encoding:encoding error:&error];
 		}else if (type == BDSKNoKeyBibTeXStringType){
@@ -1923,7 +1923,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     // @@ move this to NSDocumentController; need to figure out where to add it, though
     if(success == NO){
-        int rv;
+        NSInteger rv;
         // run a modal dialog asking if we want to use partial data or give up
         NSAlert *alert = [NSAlert alertWithMessageText:[error localizedDescription] ?: NSLocalizedString(@"Error reading file!", @"Message in alert dialog when unable to read file")
                                          defaultButton:NSLocalizedString(@"Give Up", @"Button title")
@@ -1978,7 +1978,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return isPartialData == NO;
 }
 
-- (BOOL)readFromData:(NSData *)data ofStringType:(int)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
+- (BOOL)readFromData:(NSData *)data ofStringType:(NSInteger)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
     
     NSError *error = nil;    
     NSString *dataString = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
@@ -2016,7 +2016,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 #pragma mark -
 
-- (void)temporaryCiteKeysAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)temporaryCiteKeysAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     NSString *tmpKey = [(NSString *)contextInfo autorelease];
     if(returnCode == NSAlertDefaultReturn){
         NSArray *selItems = [self selectedPublications];
@@ -2064,7 +2064,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSMutableString *s = [NSMutableString string];
 	NSEnumerator *e = [items objectEnumerator];
 	BibItem *pub;
-	int options = 0;
+	NSInteger options = 0;
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey])
         options |= BDSKBibTeXOptionTeXifyMask;
@@ -2081,10 +2081,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
-	unsigned int numberOfPubs = [items count];
+	NSUInteger numberOfPubs = [items count];
 	NSMutableString *bibString = [[NSMutableString alloc] initWithCapacity:(numberOfPubs * 100)];
     
-    int options = BDSKBibTeXOptionDropLinkedURLsMask;
+    NSInteger options = BDSKBibTeXOptionDropLinkedURLsMask;
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey])
         options |= BDSKBibTeXOptionTeXifyMask;
     
@@ -2145,7 +2145,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSString *startBracket = [sud stringForKey:BDSKCiteStartBracketKey];
 	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", ([sud boolForKey:BDSKCitePrependTildeKey] ? @"~" : @""), citeString, startBracket]; 
 	NSString *endCite = [sud stringForKey:BDSKCiteEndBracketKey]; 
-	int separateCite = [sud integerForKey:BDSKSeparateCiteKey];
+	NSInteger separateCite = [sud integerForKey:BDSKSeparateCiteKey];
     NSString *separator = separateCite == 1 ? [endCite stringByAppendingString:startCite] : separateCite == 2 ? [endCite stringByAppendingString:startBracket] : @",";
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
@@ -2318,7 +2318,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 // pass BDSKUnkownStringType to allow BDSKStringParser to sniff the text and determine the format
-- (NSArray *)publicationsForString:(NSString *)string type:(int)type verbose:(BOOL)verbose error:(NSError **)outError {
+- (NSArray *)publicationsForString:(NSString *)string type:(NSInteger)type verbose:(BOOL)verbose error:(NSError **)outError {
     NSArray *newPubs = nil;
     NSError *parseError = nil;
     BOOL isPartialData = NO;
@@ -2345,7 +2345,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         NSString *alternateButton = nil;
         NSString *otherButton = nil;
         NSString *alertTitle = NSLocalizedString(@"Error Reading String", @"Message in alert dialog when failing to parse dropped or copied string");
-        int errorCode = [parseError code];
+        NSInteger errorCode = [parseError code];
         
         // the partial data alert only applies to BibTeX; we could show the editor window for non-BibTeX data (I think...), but we also have to deal with alerts being shown twice if NSError is involved
         if(type == BDSKBibTeXStringType || type == BDSKNoKeyBibTeXStringType){
@@ -2369,7 +2369,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                                            alternateButton:alternateButton
                                                otherButton:otherButton
                                  informativeTextWithFormat:message];
-            int rv = [alert runModal];
+            NSInteger rv = [alert runModal];
             
             if(rv == NSAlertDefaultReturn && errorCode != kBDSKParserIgnoredFrontMatter){
                 // the user said to give up
@@ -2411,7 +2411,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSString *fileName;
     NSString *contentString;
     NSMutableArray *array = [NSMutableArray array];
-    int type = BDSKUnknownStringType;
+    NSInteger type = BDSKUnknownStringType;
     
     // some common types that people might use as attachments; we don't need to sniff these
     NSSet *unreadableTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
@@ -2644,7 +2644,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark -
 #pragma mark Selection
 
-- (int)numberOfSelectedPubs{
+- (NSInteger)numberOfSelectedPubs{
     if ([self isDisplayingFileContentSearch])
         return [[fileSearchController selectedIdentifierURLs] count];
     else
@@ -3220,7 +3220,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         return;
     
     NSArray *items = [self selectedPublications];
-    unsigned int maxItems = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKPreviewMaxNumberKey];
+    NSUInteger maxItems = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKPreviewMaxNumberKey];
     
     if (maxItems > 0 && [items count] > maxItems)
         items = [items subarrayWithRange:NSMakeRange(0, maxItems)];
@@ -3281,7 +3281,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 }
 
 - (void)updateBottomPreviewPane{
-    int tabIndex = [bottomPreviewTabView indexOfTabViewItem:[bottomPreviewTabView selectedTabViewItem]];
+    NSInteger tabIndex = [bottomPreviewTabView indexOfTabViewItem:[bottomPreviewTabView selectedTabViewItem]];
     if (bottomPreviewDisplay != tabIndex) {
         if (bottomPreviewDisplay == BDSKPreviewDisplayTeX)
             [self prepareForTeXPreview];
@@ -3299,7 +3299,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 }
 
 - (void)updateSidePreviewPane{
-    int tabIndex = [sidePreviewTabView indexOfTabViewItem:[sidePreviewTabView selectedTabViewItem]];
+    NSInteger tabIndex = [sidePreviewTabView indexOfTabViewItem:[sidePreviewTabView selectedTabViewItem]];
     if (sidePreviewDisplay != tabIndex) {
         [sidePreviewTabView selectTabViewItemAtIndex:sidePreviewDisplay];
     }
@@ -3380,8 +3380,8 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     
     if ([self isDisplayingFileContentSearch]) {
         
-        int shownItemsCount = [[fileSearchController filteredResults] count];
-        int totalItemsCount = [[fileSearchController results] count];
+        NSInteger shownItemsCount = [[fileSearchController filteredResults] count];
+        NSInteger totalItemsCount = [[fileSearchController results] count];
         
         [statusStr appendFormat:@"%i %@", shownItemsCount, (shownItemsCount == 1) ? NSLocalizedString(@"item", @"item, in status message") : NSLocalizedString(@"items", @"items, in status message")];
         
@@ -3394,9 +3394,9 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         
     } else {
 
-        int shownPubsCount = [shownPublications count];
-        int groupPubsCount = [groupedPublications count];
-        int totalPubsCount = [publications count];
+        NSInteger shownPubsCount = [shownPublications count];
+        NSInteger groupPubsCount = [groupedPublications count];
+        NSInteger totalPubsCount = [publications count];
         
         if (shownPubsCount != groupPubsCount) { 
             [statusStr appendFormat:@"%i %@ ", shownPubsCount, ofStr];
@@ -3414,7 +3414,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         } else if ([self hasSearchGroupsSelected] == YES) {
             BDSKSearchGroup *group = [[self selectedGroups] firstObject];
             [statusStr appendFormat:NSLocalizedString(@" in \"%@\" search group", @"Partial status message"), [[group serverInfo] name]];
-            int matchCount = [group numberOfAvailableResults];
+            NSInteger matchCount = [group numberOfAvailableResults];
             if (matchCount == 1)
                 [statusStr appendFormat:NSLocalizedString(@". There was 1 match.", @"Partial status message")];
             else if (matchCount > 1)
@@ -3582,7 +3582,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         while ([menu numberOfItems])
             [menu removeItemAtIndex:0];
         NSArray *styles = [BDSKTemplate allStyleNames];
-        unsigned int i, count = [styles count];
+        NSUInteger i, count = [styles count];
         for (i = 0; i < count; i++) {
             NSMenuItem *item = [menu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
             [item setTarget:self];
@@ -3640,7 +3640,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 #pragma mark SplitView delegate
 
 - (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize {
-    int i = [[sender subviews] count] - 2;
+    NSInteger i = [[sender subviews] count] - 2;
     BDSKASSERT(i >= 0);
 	NSView *zerothView = i == 0 ? nil : [[sender subviews] objectAtIndex:0];
 	NSView *firstView = [[sender subviews] objectAtIndex:i];
@@ -3664,7 +3664,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         if (NSHeight(secondFrame) < 1.0)
             secondFrame.size.height = 0.0;
         // randomly divide the remaining gap over the two views; NSSplitView dumps it all over the last view, which grows that one more than the others
-        int gap = (int)(contentHeight - NSHeight(zerothFrame) - NSHeight(firstFrame) - NSHeight(secondFrame));
+        NSInteger gap = (NSInteger)(contentHeight - NSHeight(zerothFrame) - NSHeight(firstFrame) - NSHeight(secondFrame));
         while (gap > 0) {
             i = floorf((3.0f * rand()) / RAND_MAX);
             if (i == 0 && NSHeight(zerothFrame) > 0.0) {
@@ -3706,8 +3706,8 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     [sender adjustSubviews];
 }
 
-- (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(int)offset {
-    int i = [[sender subviews] count] - 2;
+- (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(NSInteger)offset {
+    NSInteger i = [[sender subviews] count] - 2;
     BDSKASSERT(i >= 0);
 	NSView *zerothView = i == 0 ? nil : [[sender subviews] objectAtIndex:0];
 	NSView *firstView = [[sender subviews] objectAtIndex:i];
@@ -3764,8 +3764,8 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 
 #pragma mark -
 
-- (int)userChangedField:(NSString *)fieldName ofPublications:(NSArray *)pubs from:(NSArray *)oldValues to:(NSArray *)newValues{
-    int rv = 0;
+- (NSInteger)userChangedField:(NSString *)fieldName ofPublications:(NSArray *)pubs from:(NSArray *)oldValues to:(NSArray *)newValues{
+    NSInteger rv = 0;
     
     NSEnumerator *pubEnum = [pubs objectEnumerator];
     BibItem *pub;

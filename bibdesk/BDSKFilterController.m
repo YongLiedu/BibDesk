@@ -145,7 +145,7 @@
     if ([aConditionController condition] == nil)
         [self removeConditionController:[[aConditionController retain] autorelease]];
 	
-    unsigned int idx = [conditionControllers indexOfObject:aConditionController];
+    NSUInteger idx = [conditionControllers indexOfObject:aConditionController];
 	if (idx == NSNotFound) 
 		idx = [conditionControllers count];
     else
@@ -154,10 +154,10 @@
     [self insertConditionController:newController atIndex:idx];
 }
 
-- (void)insertConditionController:(BDSKConditionController *)newController atIndex:(unsigned int)idx {
+- (void)insertConditionController:(BDSKConditionController *)newController atIndex:(NSUInteger)idx {
     [[[self undoManager] prepareWithInvocationTarget:self] removeConditionControllerAtIndex:idx];
 	
-    unsigned int count = [conditionControllers count];
+    NSUInteger count = [conditionControllers count];
     [conditionControllers insertObject:newController atIndex:idx];
     [conditionsView insertView:[newController view] atIndex:idx];
     [newController setCanRemove:(count > 0)];
@@ -170,11 +170,11 @@
 }
 
 - (void)removeConditionController:(BDSKConditionController *)aConditionController {
-	unsigned int idx = [conditionControllers indexOfObject:aConditionController];
+	NSUInteger idx = [conditionControllers indexOfObject:aConditionController];
     [self removeConditionControllerAtIndex:idx];
 }
 
-- (void)removeConditionControllerAtIndex:(unsigned int)idx {
+- (void)removeConditionControllerAtIndex:(NSUInteger)idx {
     BDSKConditionController *aConditionController = [conditionControllers objectAtIndex:idx];
     
     [[[self undoManager] prepareWithInvocationTarget:self] insertConditionController:aConditionController atIndex:idx];

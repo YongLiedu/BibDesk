@@ -187,23 +187,23 @@
     [macros setArray:newMacros];
 }
 
-- (unsigned int)countOfMacros {
+- (NSUInteger)countOfMacros {
     return [macros count];
 }
 
-- (id)objectInMacrosAtIndex:(unsigned int)idx {
+- (id)objectInMacrosAtIndex:(NSUInteger)idx {
     return [macros objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inMacrosAtIndex:(unsigned int)idx {
+- (void)insertObject:(id)obj inMacrosAtIndex:(NSUInteger)idx {
     [macros insertObject:obj atIndex:idx];
 }
 
-- (void)removeObjectFromMacrosAtIndex:(unsigned int)idx {
+- (void)removeObjectFromMacrosAtIndex:(NSUInteger)idx {
     [macros removeObjectAtIndex:idx];
 }
 
-- (void)replaceObjectInMacrosAtIndex:(unsigned int)idx withObject:(id)obj {
+- (void)replaceObjectInMacrosAtIndex:(NSUInteger)idx withObject:(id)obj {
     [macros replaceObjectAtIndex:idx withObject:obj];
 }
 
@@ -233,7 +233,7 @@
         } else if ([type isEqualToString:@"Remove macro"]) {
             NSString *key = [info objectForKey:@"macroKey"];
             if (key) {
-                unsigned int idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[key lowercaseString]];
+                NSUInteger idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[key lowercaseString]];
                 BDSKASSERT(idx != NSNotFound);
                 [self removeObjectFromMacrosAtIndex:idx];
             } else {
@@ -243,7 +243,7 @@
         } else if ([type isEqualToString:@"Change key"]) {
             NSString *newKey = [info objectForKey:@"newKey"];
             NSString *oldKey = [info objectForKey:@"oldKey"];
-            unsigned int idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[oldKey lowercaseString]];
+            NSUInteger idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[oldKey lowercaseString]];
             BDSKMacro *macro = [[BDSKMacro alloc] initWithName:newKey macroResolver:macroResolver];
             BDSKASSERT(idx != NSNotFound);
             [self replaceObjectInMacrosAtIndex:idx withObject:macro];
@@ -260,7 +260,7 @@
     BDSKASSERT(isEditable);
     NSDictionary *macroDefinitions = [macroResolver macroDefinitions];
     // find a unique new macro key
-    int i = 0;
+    NSInteger i = 0;
     NSString *newKey = [NSString stringWithString:@"macro"];
     while([macroDefinitions objectForKey:newKey] != nil)
         newKey = [NSString stringWithFormat:@"macro%d", ++i];
@@ -268,7 +268,7 @@
     [macroResolver addMacroDefinition:@"definition" forMacro:newKey];
     [[[self window] undoManager] setActionName:NSLocalizedString(@"Add Macro", @"Undo action name")];
     
-    unsigned int row = [[[arrayController arrangedObjects] valueForKey:@"name"] indexOfObject:newKey];
+    NSUInteger row = [[[arrayController arrangedObjects] valueForKey:@"name"] indexOfObject:newKey];
     [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     [tableView editColumn:0 row:row withEvent:nil select:YES];
 }
@@ -335,7 +335,7 @@
 #pragma mark Macro editing
 
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender{
-	int row = [tableView selectedRow];
+	NSInteger row = [tableView selectedRow];
 	if (row == -1 || isEditable == NO) 
 		return;
     [self editSelectedCellAsMacro];
@@ -344,7 +344,7 @@
 }
 
 - (BOOL)editSelectedCellAsMacro{
-    int row = [tableView selectedRow];
+    NSInteger row = [tableView selectedRow];
 	if ([complexStringEditor isEditing] || row == -1) 
 		return NO;
 	if(complexStringEditor == nil) {
@@ -378,11 +378,11 @@
 
 #pragma mark NSTableView datasource methods
 
-- (int)numberOfRowsInTableView:(NSTableView *)tv{
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tv{
     return [[arrayController arrangedObjects] count];
 }
 
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     BDSKMacro *macro = [[arrayController arrangedObjects] objectAtIndex:row];
     
     if([[tableColumn identifier] isEqualToString:@"macro"]){
@@ -393,11 +393,11 @@
     
 }
 
-- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     NSUndoManager *undoMan = [[self window] undoManager];
 	if([undoMan isUndoing] || [undoMan isRedoing]) return;
     NSArray *arrangedMacros = [arrayController arrangedObjects];
-    NSParameterAssert(row >= 0 && row < (int)[arrangedMacros count]);    
+    NSParameterAssert(row >= 0 && row < (NSInteger)[arrangedMacros count]);    
     NSDictionary *macroDefinitions = [macroResolver macroDefinitions];
     BDSKMacro *macro = [arrangedMacros objectAtIndex:row];
     NSString *key = [macro name];
@@ -451,7 +451,7 @@
         [macroResolver changeMacroKey:key to:object];
 
         // Rearranging objects will likely move the row we just edited (bug #1859542), so find this macro and edit its value instead of some random macro's value.  Using [[arrayController arrangedObjects] indexOfObject:macro] won't work because the notification handler just replaced it with another object (so that's probably a garbage pointer now, as well).
-        unsigned int newRow = [[[arrayController arrangedObjects] valueForKeyPath:@"name.lowercaseString"] indexOfObject:[object lowercaseString]];
+        NSUInteger newRow = [[[arrayController arrangedObjects] valueForKeyPath:@"name.lowercaseString"] indexOfObject:[object lowercaseString]];
         if (NSNotFound != newRow) {
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:newRow] byExtendingSelection:YES];
             [tableView editColumn:1 row:newRow withEvent:nil select:YES];
@@ -501,7 +501,7 @@
     
 }
 
-- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op{
     if (isEditable == NO) {
         return NSDragOperationNone;    
     } else if ([info draggingSource]) {
@@ -519,7 +519,7 @@
     }
 }
 
-- (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo> )info row:(int)row dropOperation:(NSTableViewDropOperation)op{
+- (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo> )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, nil]];
     
@@ -579,7 +579,7 @@
 
 #pragma mark NSTableView delegate methods
 
-- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
 	if([[tableColumn identifier] isEqualToString:@"definition"]){
         [tableCellFormatter setHighlighted:[tv isRowSelected:row]];
 	}
@@ -589,7 +589,7 @@
     [self updateButtons];
 }
 
-- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     return isEditable;
 }
 
@@ -671,7 +671,7 @@
     BibItem *pub;
     NSEnumerator *fieldEnum;
     NSString *field;
-    unsigned int numRepl;
+    NSUInteger numRepl;
     NSString *oldValue;
     NSString *newValue;
     

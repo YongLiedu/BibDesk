@@ -80,13 +80,13 @@
 - (void)setupTypeUI;
 - (void)setType:(NSString *)type;
 
-- (void)initialOpenPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)initialUrlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)autoDiscoverFromFrameAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)autoDiscoverFromStringAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)initialOpenPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+- (void)initialUrlSheetDidEnd:(NSPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+- (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+- (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+- (void)autoDiscoverFromFrameAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+- (void)autoDiscoverFromStringAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 
 - (void)setLoading:(BOOL)loading;
 
@@ -94,7 +94,7 @@
 - (void)setLocalUrlFromDownload;
 - (void)setDownloading:(BOOL)downloading;
 
-- (BOOL)addCurrentSelectionToFieldAtIndex:(unsigned int)index;
+- (BOOL)addCurrentSelectionToFieldAtIndex:(NSUInteger)index;
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value;
 - (BOOL)autoFileLinkedFile:(BDSKLinkedFile *)file;
 
@@ -250,7 +250,7 @@
 #pragma mark Actions
 
 - (IBAction)addItemAction:(id)sender{
-    int optKey = [NSApp currentModifierFlags] & NSAlternateKeyMask;
+    NSInteger optKey = [NSApp currentModifierFlags] & NSAlternateKeyMask;
     BibItem *newItem = (optKey) ? [item copy] : [[BibItem alloc] init];
     
     // make the tableview stop editing:
@@ -282,9 +282,9 @@
     item = newItem;
     [item setOwner:self];
 	
-	int numItems = [itemsAdded count];
+	NSInteger numItems = [itemsAdded count];
 	NSString *pubSingularPlural = (numItems == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message");
-    [statusLine setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%d %@ added.", @"format string for pubs added. args: one int for number added, then one string for singular or plural of publication(s)."), numItems, pubSingularPlural]];
+    [statusLine setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%d %@ added.", @"format string for pubs added. args: one NSInteger for number added, then one string for singular or plural of publication(s)."), numItems, pubSingularPlural]];
     
     [itemTypeButton selectItemWithTitle:[item pubType]];
     [citeKeyField setStringValue:[item citeKey]];
@@ -388,14 +388,14 @@
 	}
 }
 
-- (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
 	NSString *newField = [addFieldController field];
     newField = [newField fieldName];
     
     if(newField == nil || [fields containsObject:newField])
         return;
     
-    int row = [fields count];
+    NSInteger row = [fields count];
     
     [fields addObject:newField];
     [item setField:newField toValue:[NSString stringWithFormat:@"%@ %@",NSLocalizedString(@"Add data for field:", @"Default value for new field"), newField]];
@@ -420,7 +420,7 @@
 }
 
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender{
-	int row = [itemTableView selectedRow];
+	NSInteger row = [itemTableView selectedRow];
 	if (row == -1) 
 		return;
     [self editSelectedCellAsMacro];
@@ -445,7 +445,7 @@
     [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 }
 
-- (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     NSArray *files = nil;
     
     if (returnCode == NSAlertAlternateReturn){
@@ -615,7 +615,7 @@
 @implementation BDSKTextImportController (Private)
 
 - (void)handleFlagsChangedNotification:(NSNotification *)notification{
-    unsigned int modifierFlags = [NSApp currentModifierFlags];
+    NSUInteger modifierFlags = [NSApp currentModifierFlags];
     
     if (modifierFlags & NSAlternateKeyMask) {
         [addButton setTitle:NSLocalizedString(@"Add & Copy", @"Button title")];
@@ -644,7 +644,7 @@
 	if([firstResponder isKindOfClass:[NSText class]]){
 		NSText *textView = (NSText *)firstResponder;
 		NSRange selection = [textView selectedRange];
-        int editedRow = -1;
+        NSInteger editedRow = -1;
 		id textDelegate = [textView delegate];
         if(textDelegate == itemTableView || textDelegate == citeKeyField){
             firstResponder = textDelegate;
@@ -790,7 +790,7 @@
 
 #pragma mark Sheet callbacks
 
-- (void)didEndSheet:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)didEndSheet:(NSPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     // cleanup
     [self cancelDownload];
 	[webView stopLoading:nil];
@@ -803,7 +803,7 @@
     [super didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
 }
 
-- (void)initialOpenPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)initialOpenPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     // this is the initial file load, the main window is not yet there
     NSWindow *docWindow = [(NSWindow *)contextInfo autorelease];
     
@@ -827,7 +827,7 @@
     }
 }
 	
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     if(returnCode == NSOKButton){
         NSURL *url = [[sheet URLs] lastObject];
 		NSTextStorage *text = [sourceTextView textStorage];
@@ -850,7 +850,7 @@
     }        
 }
 
-- (void)initialUrlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)initialUrlSheetDidEnd:(NSPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     // this is the initial web load, the main window is not yet there
     NSWindow *docWindow = [(NSWindow *)contextInfo autorelease];
     
@@ -868,7 +868,7 @@
     }
 }
 
-- (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     if(returnCode == NSOKButton){
 		// setup webview and load page
         
@@ -893,7 +893,7 @@
     }        
 }
 
-- (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     
 	if (returnCode == NSOKButton) {
 		if ([[[[webView mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
@@ -993,7 +993,7 @@
 		[menuItem setTitle:[NSLocalizedString(@"Load Website", @"Menu item title") stringByAppendingEllipsis]];
 		return YES;
 	} else if ([menuItem action] == @selector(editSelectedFieldAsRawBibTeX:)) {
-		int row = [itemTableView selectedRow];
+		NSInteger row = [itemTableView selectedRow];
 		return (row != -1 && [complexStringEditor isEditing] == NO && [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] == NO && [[fields objectAtIndex:row] isCitationField] == NO);
 	} else if ([menuItem action] == @selector(generateCiteKey:)) {
 		// need to set the title, as the document can change it in the main menu
@@ -1117,7 +1117,7 @@
     [statusLine setStringValue:text];
 }
 
-- (void)webView:(WebView *)sender mouseDidMoveOverElement:(NSDictionary *)elementInformation modifierFlags:(unsigned int)modifierFlags {
+- (void)webView:(WebView *)sender mouseDidMoveOverElement:(NSDictionary *)elementInformation modifierFlags:(NSUInteger)modifierFlags {
     NSURL *aLink = [elementInformation objectForKey:WebElementLinkURLKey];
     [statusLine setStringValue:aLink ? [aLink absoluteString] : @""];
 }
@@ -1214,7 +1214,7 @@
     [sPanel setCanSelectHiddenExtension:YES];
 	
     // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
-    int returnCode = [sPanel runModalForDirectory:nil file:filename];
+    NSInteger returnCode = [sPanel runModalForDirectory:nil file:filename];
     if (returnCode == NSOKButton) {
         [download setDestination:[sPanel filename] allowOverwrite:YES];
     } else {
@@ -1222,10 +1222,10 @@
     }
 }
 
-- (void)download:(NSURLDownload *)theDownload didReceiveDataOfLength:(unsigned int)length{
+- (void)download:(NSURLDownload *)theDownload didReceiveDataOfLength:(NSUInteger)length{
     if (expectedContentLength > 0) {
         receivedContentLength += length;
-        int percent = round(100.0 * (double)receivedContentLength / (double)expectedContentLength);
+        NSInteger percent = round(100.0 * (double)receivedContentLength / (double)expectedContentLength);
 		NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Tool tip message"), percent] stringByAppendingEllipsis];
 		[progressIndicator setToolTip:message];
 		[statusLine setStringValue:message];
@@ -1266,7 +1266,7 @@
 
 #pragma mark Editing
 
-- (BOOL)addCurrentSelectionToFieldAtIndex:(unsigned int)idx{
+- (BOOL)addCurrentSelectionToFieldAtIndex:(NSUInteger)idx{
     if ([fields count] <= idx)
         return NO;
     
@@ -1327,7 +1327,7 @@
 	}
 }
 
-- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)idx{
+- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(NSInteger *)idx{
     if (control != itemTableView) {
 		return words;
 	} else if ([complexStringEditor isEditing]) {
@@ -1362,7 +1362,7 @@
 #pragma mark Macro editing
 
 - (BOOL)editSelectedCellAsMacro{
-	int row = [itemTableView selectedRow];
+	NSInteger row = [itemTableView selectedRow];
 	if ([complexStringEditor isEditing] || row == -1 || [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] || [[fields objectAtIndex:row] isCitationField]) 
 		return NO;
 	if (complexStringEditor == nil)
@@ -1391,7 +1391,7 @@
 }
 
 - (BOOL)tableView:(NSTableView *)tView textViewShouldLinkKeys:(NSTextView *)textView {
-    int row = [tView editedRow];
+    NSInteger row = [tView editedRow];
     return row != -1 && [[fields objectAtIndex:row] isCitationField];
 }
 
@@ -1399,7 +1399,7 @@
     return [[self publications] itemForCiteKey:key] != nil;
 }
 
-- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned int)charIndex {
+- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex {
     // we don't open the linked item from the text import sheet
     return NO;
 }
@@ -1458,11 +1458,11 @@
 
 #pragma mark TableView Data source
 
-- (int)numberOfRowsInTableView:(NSTableView *)tableView{
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView{
     return [fields count]; 
 }
 
-- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     NSString *key = [fields objectAtIndex:row];
     NSString *tcID = [tableColumn identifier];
     
@@ -1479,7 +1479,7 @@
     }
 }
 
-- (void)tableView:(NSTableView *)tableView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (void)tableView:(NSTableView *)tableView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
 	NSString *tcID = [tableColumn identifier];
     if([tcID isEqualToString:@"FieldName"] ||
        [tcID isEqualToString:@"Num"] ){
@@ -1494,14 +1494,14 @@
 }
 
 // This method is used by NSTableView to determine a valid drop target.  Based on the mouse position, the table view will suggest a proposed drop location.  This method must return a value that indicates which dragging operation the data source will perform.  The data source may "re-target" a drop if desired by calling setDropRow:dropOperation: and returning something other than NSDragOperationNone.  One may choose to re-target for various reasons (eg. for better visual feedback when inserting into a sorted position).
-- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op{
     if(op ==  NSTableViewDropOn)
         return NSDragOperationCopy;
     else return NSDragOperationNone;
 }
 
 // This method is called when the mouse is released over a table view that previously decided to allow a drop via the validateDrop method.  The data source should incorporate the data from the dragging pasteboard at this time.
-- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op{
+- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
     NSPasteboard *pb = [info draggingPasteboard];
     NSString *pbType = [pb availableTypeFromArray:[NSArray arrayWithObjects:NSStringPboardType, nil]];
     if ([NSStringPboardType isEqualToString:pbType]){
@@ -1528,7 +1528,7 @@
 }
 
 - (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
-	int idx = [tv selectedRow];
+	NSInteger idx = [tv selectedRow];
 	NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
 	
 	if (type && idx != -1) {
@@ -1561,13 +1561,13 @@
 
 #pragma mark TableView delegate methods
 
-- (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     if([[tableColumn identifier] isEqualToString:@"FieldValue"])
         return YES;
 	return NO;
 }
 
-- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
 	if([[tableColumn identifier] isEqualToString:@"FieldValue"]){
 		NSString *field = [fields objectAtIndex:row];
 		NSFormatter *formatter;
@@ -1624,7 +1624,7 @@
     if (set)
         [self addTextToCurrentFieldAction:itemTableView];
     if (edit) {
-        int row = [itemTableView selectedRow];
+        NSInteger row = [itemTableView selectedRow];
         if (row != -1)
             [itemTableView editColumn:2 row:row withEvent:nil select:YES];
     }
@@ -1637,11 +1637,11 @@
 
 #pragma mark Splitview delegate methods
 
-- (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)offset{
+- (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(NSInteger)offset{
 	return proposedMin + 126; // from IB
 }
 
-- (float)splitView:(NSSplitView *)sender constrainMaxCoordinate:(float)proposedMax ofSubviewAt:(int)offset{
+- (float)splitView:(NSSplitView *)sender constrainMaxCoordinate:(float)proposedMax ofSubviewAt:(NSInteger)offset{
 	return proposedMax - 200.0;
 }
 
@@ -1684,15 +1684,15 @@
         if([headList length] != 1) return;
         DOMNode *headNode = [headList item:0];
         DOMNodeList *headChildren = [headNode childNodes];
-        unsigned int i = 0;
-        unsigned int length = [headChildren length];
+        NSUInteger i = 0;
+        NSUInteger length = [headChildren length];
         NSMutableDictionary *metaTagDict = [[NSMutableDictionary alloc] initWithCapacity:length];    
         
         
         for (i = 0; i < length; i++) {
             DOMNode *node = [headChildren item:i];
             DOMNamedNodeMap *attributes = [node attributes];
-            int typeIndex = 0;
+            NSInteger typeIndex = 0;
             
             NSString *nodeName = [node nodeName];
             if([nodeName isEqualToString:@"META"]){
@@ -1759,7 +1759,7 @@
     }
 }
 
-- (void)autoDiscoverFromFrameAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)autoDiscoverFromFrameAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     NSDictionary *metaTagDict = [(NSDictionary *)contextInfo autorelease];
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     NSEnumerator *metaTagKeyE = [metaTagDict keyEnumerator];
@@ -1811,7 +1811,7 @@
 }
 
 - (void)autoDiscoverDataFromString:(NSString *)string{
-    int type = [string contentStringType];
+    NSInteger type = [string contentStringType];
     
     if(type == BDSKUnknownStringType)
         return;
@@ -1841,7 +1841,7 @@
     }
 }
 
-- (void)autoDiscoverFromStringAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)autoDiscoverFromStringAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     BibItem *pub = [(BibItem *)contextInfo autorelease];
     
     if(returnCode == NSAlertDefaultReturn){
@@ -1861,13 +1861,13 @@
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent{
     
     unichar c = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
-    unsigned int flags = [theEvent modifierFlags];
+    NSUInteger flags = [theEvent modifierFlags];
     
     if (flags & NSCommandKeyMask) {
         
         if (c >= '0' && c <= '9') {
         
-            unsigned int idx = c == '0' ? 10 : (unsigned int)(c - '1');
+            NSUInteger idx = c == '0' ? 10 : (NSUInteger)(c - '1');
             BOOL rv = YES;
             if (flags & NSAlternateKeyMask)
                 idx += 10;
@@ -1904,7 +1904,7 @@
     if ([chars length] == 0)
         return;
     unichar c = [chars characterAtIndex:0];
-    unsigned int flags = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask & ~NSAlphaShiftKeyMask);
+    NSUInteger flags = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask & ~NSAlphaShiftKeyMask);
     
     static NSCharacterSet *fieldNameCharSet = nil;
     if (fieldNameCharSet == nil) 
@@ -1948,7 +1948,7 @@
     return [[self delegate] tableView:self textView:textView isValidKey:key];
 }
 
-- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned int)charIndex{
+- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex{
     return [[self delegate] tableView:self textView:aTextView clickedOnLink:aLink atIndex:charIndex];
 }
 
@@ -1965,7 +1965,7 @@
 
 - (NSMenu *)menuForEvent:(NSEvent *)event{
     NSMenu *menu = [super menuForEvent:event];
-    int i, count = [menu numberOfItems];
+    NSInteger i, count = [menu numberOfItems];
     
     for (i = 0; i < count; i++) {
         if ([[menu itemAtIndex:i] action] == @selector(paste:)) {

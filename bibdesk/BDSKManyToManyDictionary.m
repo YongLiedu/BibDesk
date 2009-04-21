@@ -75,19 +75,19 @@
     return value;
 }
 
-- (unsigned int)keyCount {
+- (NSUInteger)keyCount {
     return CFDictionaryGetCount(dictionary);
 }
 
-- (unsigned int)objectCount {
+- (NSUInteger)objectCount {
     return CFDictionaryGetCount(inverseDictionary);
 }
 
-- (unsigned int)countForKey:(id)aKey {
+- (NSUInteger)countForKey:(id)aKey {
     return [[self _setForValue:aKey inverse:NO create:NO] count];
 }
 
-- (unsigned int)countForObject:(id)anObject {
+- (NSUInteger)countForObject:(id)anObject {
     return [[self _setForValue:anObject inverse:YES create:NO] count];
 }
 

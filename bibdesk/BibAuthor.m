@@ -174,7 +174,7 @@ static BibAuthor *emptyAuthorInstance = nil;
     return obj == self ? YES : [normalizedName isEqualToString:[obj normalizedName]];
 }
 
-- (unsigned int)hash{
+- (NSUInteger)hash{
     // @@ assumes that these objects will not be modified while contained in a hashing collection
     return hash;
 }
@@ -279,12 +279,12 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 }
 
 // Automatically called by collection classes; override OBObject's implementation for templating, although the output still won't generally be appropriate for users.
-- (NSString *)descriptionWithLocale:(NSDictionary *)locale indent:(unsigned int)level{
+- (NSString *)descriptionWithLocale:(NSDictionary *)locale indent:(NSUInteger)level{
     return [self description];
 }
 
 - (NSString *)displayName{
-    int mask = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKAuthorNameDisplayKey];
+    NSInteger mask = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKAuthorNameDisplayKey];
 
     NSString *theName = nil;
 
@@ -411,7 +411,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 // creates an NSString from the given bt_name and bt_namepart, which were parsed with the given encoding; returns nil if no such name component exists
 static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *theName, bt_namepart thePart, CFStringEncoding encoding)
 {
-    int i, numberOfTokens = theName->part_len[thePart];
+    NSInteger i, numberOfTokens = theName->part_len[thePart];
     CFStringRef theString = NULL;
  
     // typical for some parts; let's not bother with a mutable string in this case
@@ -419,7 +419,7 @@ static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *the
         theString = CFStringCreateWithCString(alloc, theName->parts[thePart][0], encoding);
     } else if (numberOfTokens > 1){
         CFMutableStringRef mutableString = CFStringCreateMutable(alloc, 0);
-        int stopTokenIndex = numberOfTokens - 1;
+        NSInteger stopTokenIndex = numberOfTokens - 1;
         
         for (i = 0; i < numberOfTokens; i++){
             theString = CFStringCreateWithCString(alloc, theName->parts[thePart][i], encoding);

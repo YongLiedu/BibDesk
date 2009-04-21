@@ -278,7 +278,7 @@ void __BDDeleteTeXCommandsForSorting(CFMutableStringRef mutableString)
     
     NSRange searchRange = NSMakeRange(0, CFStringGetLength(mutableString));
     NSRange cmdRange;
-    unsigned int startLoc;
+    NSUInteger startLoc;
         
     // This will find and remove the commands such as \textit{some word} that can confuse the sort order;
     // unfortunately, we can't remove things like {\textit some word}, since it could also be something
@@ -298,7 +298,7 @@ uint32_t __BDFastHash(CFStringRef aString)
     
     // Golden ratio - arbitrary start value to avoid mapping all 0's to all 0's
     // or anything like that.
-    unsigned int PHI = 0x9e3779b9U;
+    uint32_t PHI = 0x9e3779b9U;
     
     // Paul Hsieh's SuperFastHash
     // http://www.azillionmonkeys.com/qed/hash.html
@@ -317,7 +317,7 @@ uint32_t __BDFastHash(CFStringRef aString)
         
         if(l > STACK_BUFFER_SIZE){
             allocator = CFGetAllocator(aString);
-            buf = (UniChar *)CFAllocatorAllocate(allocator, l * sizeof(UniChar), 0);;
+            buf = (UniChar *)CFAllocatorAllocate(allocator, l * sizeof(UniChar), 0);
             NSCAssert(buf != NULL, @"unable to allocate memory");
         } else {
             buf = stackBuffer;

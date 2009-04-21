@@ -101,7 +101,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (void)updateFormatPresetUI{
-    int citeKeyPresetChoice = [sud integerForKey:BDSKCiteKeyFormatPresetKey];
+    NSInteger citeKeyPresetChoice = [sud integerForKey:BDSKCiteKeyFormatPresetKey];
 	BOOL custom = (citeKeyPresetChoice == 0);
     
 	[formatPresetPopUp selectItemAtIndex:[formatPresetPopUp indexOfItemWithTag:citeKeyPresetChoice]];
@@ -173,7 +173,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (IBAction)citeKeyFormatAdd:(id)sender{
-	int idx = [formatRepositoryPopUp indexOfSelectedItem];
+	NSInteger idx = [formatRepositoryPopUp indexOfSelectedItem];
 	NSString *newSpecifier = repositorySpecifierStrings[idx];
     NSText *fieldEditor = [formatSheetField currentEditor];
 	NSRange selRange;
@@ -207,7 +207,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (IBAction)citeKeyFormatChanged:(id)sender{
-	int presetChoice = 0;
+	NSInteger presetChoice = 0;
 	NSString *formatString;
 	
 	if (sender == formatPresetPopUp || sender == formatPresetSheetPopUp) {
@@ -290,7 +290,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
                                    alternateButton:NSLocalizedString(@"Revert to Default", @"Button title") 
                                        otherButton:otherButton
                          informativeTextWithFormat:@"%@", error];
-	int rv = [alert runModal];
+	NSInteger rv = [alert runModal];
 	
 	if (rv == NSAlertDefaultReturn){
 		[formatSheetField selectText:self];

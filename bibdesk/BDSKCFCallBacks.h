@@ -38,12 +38,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-extern const void *BDSKIntegerRetain(CFAllocatorRef allocator, const void *value);
-extern void BDSKIntegerRelease(CFAllocatorRef allocator, const void *value);
-extern CFStringRef BDSKIntegerCopyDescription(const void *value);
-extern Boolean BDSKIntegerEqual(const void *value1, const void *value2);
-extern CFHashCode BDSKIntegerHash(const void *value);
-
 extern CFStringRef BDSKSELCopyDescription(const void *value);
 
 extern const void *BDSKNSObjectRetain(CFAllocatorRef allocator, const void *value);
@@ -54,8 +48,6 @@ extern Boolean BDSKCaseInsensitiveStringEqual(const void *value1, const void *va
 extern CFHashCode BDSKCaseInsensitiveStringHash(const void *value);
 
 #pragma mark CallBacks
-
-extern const CFDictionaryKeyCallBacks kBDSKIntegerDictionaryKeyCallBacks;
 
 extern const CFDictionaryKeyCallBacks kBDSKNonOwnedObjectDictionaryKeyCallBacks;
 

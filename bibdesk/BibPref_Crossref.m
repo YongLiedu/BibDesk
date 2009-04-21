@@ -125,7 +125,7 @@ static char BDSKBibPrefCrossrefDefaultsObservationContext;
 }
 
 - (IBAction)deleteType:(id)sender{
-    int row = [tableView selectedRow];
+    NSInteger row = [tableView selectedRow];
     if(row != -1){
         if ([tableView editedRow] != -1)
             [[[self view] window] makeFirstResponder:tableView];
@@ -137,7 +137,7 @@ static char BDSKBibPrefCrossrefDefaultsObservationContext;
 - (IBAction)addType:(id)sender{
     NSString *newType = @"type"; // do not localize
     [typesArray addObject:newType];
-    int row = [typesArray count] - 1;
+    NSInteger row = [typesArray count] - 1;
     [tableView reloadData];
     [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     [tableView editColumn:0 row:row withEvent:nil select:YES];
@@ -145,15 +145,15 @@ static char BDSKBibPrefCrossrefDefaultsObservationContext;
 
 #pragma mark TableView datasource methods
 
-- (int)numberOfRowsInTableView:(NSTableView *)tv{
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tv{
     return [typesArray count];
 }
 
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     return [typesArray objectAtIndex:row];
 }
 
-- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     if([object isEqualToString:@""])
         [typesArray removeObjectAtIndex:row];
     else
@@ -161,11 +161,11 @@ static char BDSKBibPrefCrossrefDefaultsObservationContext;
     [self updateDuplicateTypes];
 }
 
-- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
 	return [tv isEnabled];
 }
 
-- (BOOL)tableView:(NSTableView *)tv shouldSelectRow:(int)row{
+- (BOOL)tableView:(NSTableView *)tv shouldSelectRow:(NSInteger)row{
 	return [tv isEnabled];
 }
 

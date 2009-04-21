@@ -89,8 +89,8 @@
 	
 	WebDownload *download;
 	NSString *downloadFileName;
-    int receivedContentLength;
-    int expectedContentLength;
+    NSInteger receivedContentLength;
+    NSInteger expectedContentLength;
 	
 	BDSKComplexStringEditor *complexStringEditor;
     
@@ -141,7 +141,7 @@
 @interface NSObject (TextImportItemTableViewDelegate)
 - (BOOL)tableView:(NSTableView *)tView textViewShouldLinkKeys:(NSTextView *)textView;
 - (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)textView isValidKey:(NSString *)key;
-- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(unsigned int)charIndex;
+- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(NSUInteger)charIndex;
 @end
 
 #pragma mark -

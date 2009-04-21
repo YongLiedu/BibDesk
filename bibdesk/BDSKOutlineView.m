@@ -55,7 +55,7 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
 
 - (NSArray *)itemsAtRowIndexes:(NSIndexSet *)indexes {
     NSMutableArray *items = [NSMutableArray array];
-    unsigned int idx = [indexes firstIndex];
+    NSUInteger idx = [indexes firstIndex];
     
     while (idx != NSNotFound) {
         [items addObject:[self itemAtRow:idx]];
@@ -219,7 +219,7 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
 - (void)keyDown:(NSEvent *)theEvent {
     NSString *characters = [theEvent charactersIgnoringModifiers];
     unichar eventChar = [characters length] > 0 ? [characters characterAtIndex:0] : 0;
-    unsigned int modifierFlags = [theEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+    NSUInteger modifierFlags = [theEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
     
 	if ((eventChar == NSEnterCharacter || eventChar == NSFormFeedCharacter || eventChar == NSNewlineCharacter || eventChar == NSCarriageReturnCharacter) && modifierFlags == 0) {
         [self insertNewline:self];
@@ -245,9 +245,9 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
 
 - (void)moveUp:(id)sender {
     NSIndexSet *rowIndexes = [self selectedRowIndexes];
-    unsigned int row = [rowIndexes firstIndex];
+    NSUInteger row = [rowIndexes firstIndex];
     if (row == NSNotFound) { // If nothing was selected
-        unsigned int numberOfRows = [self numberOfRows];
+        NSUInteger numberOfRows = [self numberOfRows];
         if (numberOfRows > 0) // If there are rows in the table
             row = numberOfRows - 1; // Select the last row
         else
@@ -268,7 +268,7 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
 
 - (void)moveDown:(id)sender {
     NSIndexSet *rowIndexes = [self selectedRowIndexes];
-    unsigned int row = [rowIndexes lastIndex], numberOfRows = [self numberOfRows];
+    NSUInteger row = [rowIndexes lastIndex], numberOfRows = [self numberOfRows];
     if (row == NSNotFound) { // If nothing was selected
         if (numberOfRows > 0) // If there are rows in the table
             row = 0; // Select the first row
@@ -314,12 +314,12 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
 
 - (void)delete:(id)sender {
     if ([self canDelete]) {
-        unsigned int originalNumberOfRows = [self numberOfRows];
+        NSUInteger originalNumberOfRows = [self numberOfRows];
         // -selectedRow is last row of multiple selection, no good for trying to select the row before the selection.
-        unsigned int selectedRow = [[self selectedRowIndexes] firstIndex];
+        NSUInteger selectedRow = [[self selectedRowIndexes] firstIndex];
         [[self dataSource] outlineView:self deleteItems:[self selectedItems]];
         [self reloadData];
-        unsigned int newNumberOfRows = [self numberOfRows];
+        NSUInteger newNumberOfRows = [self numberOfRows];
         
         // Maintain an appropriate selection after deletions
         if (originalNumberOfRows != newNumberOfRows) {
@@ -490,8 +490,8 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
     
     if ([[self delegate] respondsToSelector:@selector(outlineView:menuForTableColumn:item:)]) {
         NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-        int row = [self rowAtPoint:mouseLoc];
-        int column = [self columnAtPoint:mouseLoc];
+        NSInteger row = [self rowAtPoint:mouseLoc];
+        NSInteger column = [self columnAtPoint:mouseLoc];
         if (row != -1 && column != -1) {
             if ([self isRowSelected:row] == NO && ([[self delegate] respondsToSelector:@selector(outlineView:shouldSelectItem:)] == NO || [[self delegate] outlineView:self shouldSelectItem:[self itemAtRow:row]]))
                 [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
@@ -541,11 +541,11 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
     return nil;
 }
 
-- (unsigned int)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)aTypeSelectHelper {
+- (NSUInteger)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)aTypeSelectHelper {
     return [[self selectedRowIndexes] lastIndex];
 }
 
-- (void)typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper selectItemAtIndex:(unsigned int)itemIndex {
+- (void)typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper selectItemAtIndex:(NSUInteger)itemIndex {
     [self selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
     [self scrollRowToVisible:itemIndex];
 }

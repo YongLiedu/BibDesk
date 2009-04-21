@@ -62,7 +62,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
 @implementation BDSKScriptGroup
 
 // old designated initializer
-- (id)initWithName:(NSString *)aName count:(int)aCount;
+- (id)initWithName:(NSString *)aName count:(NSInteger)aCount;
 {
     // ignore the name, because if this is called it's a dummy name anyway
     NSString *path = nil;
@@ -88,14 +88,14 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     return self;
 }
 
-- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(int)type;
+- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
 {
     self = [self initWithName:nil scriptPath:path scriptArguments:arguments scriptType:type];
     return self;
 }
 
 // designated initialzer
-- (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(int)type;
+- (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
 {
     NSParameterAssert(path != nil);
     if (aName == nil)
@@ -120,7 +120,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     NSString *aName = [[groupDict objectForKey:@"group name"] stringByUnescapingGroupPlistEntities];
     NSString *aPath = [[groupDict objectForKey:@"script path"] stringByUnescapingGroupPlistEntities];
     NSString *anArguments = [[groupDict objectForKey:@"script arguments"] stringByUnescapingGroupPlistEntities];
-    int aType = [[groupDict objectForKey:@"script type"] intValue];
+    NSInteger aType = [[groupDict objectForKey:@"script type"] intValue];
     self = [self initWithName:aName scriptPath:aPath scriptArguments:anArguments scriptType:aType];
     return self;
 }
@@ -168,8 +168,8 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
 
 - (BOOL)isEqual:(id)other { return self == other; }
 
-- (unsigned int)hash {
-    return (unsigned int)self;
+- (NSUInteger)hash {
+    return (NSUInteger)self;
 }
 
 - (NSString *)description;
@@ -258,7 +258,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     NSError *error = nil;
 
     NSArray *pubs = nil;
-    int type = [outputString contentStringType];
+    NSInteger type = [outputString contentStringType];
     if (type == BDSKNoKeyBibTeXStringType) {
         outputString = [outputString stringWithPhoneyCiteKeys:@"FixMe"];
         type = BDSKBibTeXStringType;
@@ -376,12 +376,12 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     }
 }
 
-- (int)scriptType;
+- (NSInteger)scriptType;
 {
     return scriptType;
 }
 
-- (void)setScriptType:(int)newType;
+- (void)setScriptType:(NSInteger)newType;
 {
     if (newType != scriptType) {
 		[(BDSKScriptGroup *)[[self undoManager] prepareWithInvocationTarget:self] setScriptType:scriptType];
@@ -469,7 +469,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
         outputString = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:[NSString defaultCStringEncoding]];
     [outputString autorelease];
     
-    int terminationStatus = [currentTask terminationStatus];
+    NSInteger terminationStatus = [currentTask terminationStatus];
     
     [currentTask release];
     currentTask = nil;

@@ -38,28 +38,6 @@
 
 #import "BDSKCFCallBacks.h"
 #import "CFString_BDSKExtensions.h"
-    
-const void *BDSKIntegerRetain(CFAllocatorRef allocator, const void *value) {
-    int *intPtr = (int *)CFAllocatorAllocate(allocator, sizeof(int), 0);
-    *intPtr = *(int *)value;
-    return intPtr;
-}
-
-void BDSKIntegerRelease(CFAllocatorRef allocator, const void *value) {
-    CFAllocatorDeallocate(allocator, (int *)value);
-}
-
-CFStringRef BDSKIntegerCopyDescription(const void *value) {
-    return CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), *(int *)value);
-}
-
-Boolean	BDSKIntegerEqual(const void *value1, const void *value2) {
-    return *(int *)value1 == *(int *)value2;
-}
-
-CFHashCode BDSKIntegerHash(const void *value) {
-    return (CFHashCode)*(int *)value;
-}
 
 CFStringRef BDSKSELCopyDescription(const void *value) {
     return (CFStringRef)[NSStringFromSelector((SEL)value) retain];
@@ -84,15 +62,6 @@ Boolean BDSKCaseInsensitiveStringEqual(const void *value1, const void *value2) {
 CFHashCode BDSKCaseInsensitiveStringHash(const void *value) {
     return BDCaseInsensitiveStringHash(value);
 }
-
-const CFDictionaryKeyCallBacks kBDSKIntegerDictionaryKeyCallBacks = {
-    0,   // version
-    BDSKIntegerRetain,
-    BDSKIntegerRelease,
-    BDSKIntegerCopyDescription,
-    BDSKIntegerEqual,
-    BDSKIntegerHash
-};
 
 const CFDictionaryKeyCallBacks kBDSKNonOwnedObjectDictionaryKeyCallBacks = {
     0,    // version

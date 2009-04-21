@@ -113,7 +113,7 @@ static id sharedBookmarkController = nil;
 
 - (void)release {}
 
-- (unsigned int)retainCount { return UINT_MAX; }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)windowDidLoad {
     [self setupToolbar];
@@ -164,7 +164,7 @@ static id sharedBookmarkController = nil;
     }
 }
 
-- (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     NSString *urlString = (NSString *)contextInfo;
 	if (returnCode == NSOKButton) {
         [self addBookmarkWithUrlString:urlString name:[bookmarkField stringValue] toFolder:[[folderPopUp selectedItem] representedObject]];
@@ -172,8 +172,8 @@ static id sharedBookmarkController = nil;
     [urlString release]; //the contextInfo was retained
 }
 
-- (void)addMenuItemsForBookmarks:(NSArray *)bookmarksArray level:(int)level toMenu:(NSMenu *)menu {
-    int i, iMax = [bookmarksArray count];
+- (void)addMenuItemsForBookmarks:(NSArray *)bookmarksArray level:(NSInteger)level toMenu:(NSMenu *)menu {
+    NSInteger i, iMax = [bookmarksArray count];
     for (i = 0; i < iMax; i++) {
         BDSKBookmark *bm = [bookmarksArray objectAtIndex:i];
         if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
@@ -213,9 +213,9 @@ static id sharedBookmarkController = nil;
 
 - (IBAction)insertBookmark:(id)sender {
     BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithUrlString:@"http://" name:nil];
-    int rowIndex = [[outlineView selectedRowIndexes] lastIndex];
+    NSInteger rowIndex = [[outlineView selectedRowIndexes] lastIndex];
     BDSKBookmark *item = bookmarkRoot;
-    unsigned int idx = [[bookmarkRoot children] count];
+    NSUInteger idx = [[bookmarkRoot children] count];
     
     if (rowIndex != NSNotFound) {
         BDSKBookmark *selectedItem = [outlineView itemAtRow:rowIndex];
@@ -229,16 +229,16 @@ static id sharedBookmarkController = nil;
     }
     [item insertObject:bookmark inChildrenAtIndex:idx];
     
-    int row = [outlineView rowForItem:bookmark];
+    NSInteger row = [outlineView rowForItem:bookmark];
     [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     [outlineView editColumn:0 row:row withEvent:nil select:YES];
 }
 
 - (IBAction)insertBookmarkFolder:(id)sender {
     BDSKBookmark *folder = [BDSKBookmark bookmarkFolderWithName:NSLocalizedString(@"Folder", @"default folder name")];
-    int rowIndex = [[outlineView selectedRowIndexes] lastIndex];
+    NSInteger rowIndex = [[outlineView selectedRowIndexes] lastIndex];
     BDSKBookmark *item = bookmarkRoot;
-    unsigned int idx = [[bookmarkRoot children] count];
+    NSUInteger idx = [[bookmarkRoot children] count];
     
     if (rowIndex != NSNotFound) {
         BDSKBookmark *selectedItem = [outlineView itemAtRow:rowIndex];
@@ -252,16 +252,16 @@ static id sharedBookmarkController = nil;
     }
     [item insertObject:folder inChildrenAtIndex:idx];
     
-    int row = [outlineView rowForItem:folder];
+    NSInteger row = [outlineView rowForItem:folder];
     [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     [outlineView editColumn:0 row:row withEvent:nil select:YES];
 }
 
 - (IBAction)insertBookmarkSeparator:(id)sender {
     BDSKBookmark *separator = [BDSKBookmark bookmarkSeparator];
-    int rowIndex = [[outlineView selectedRowIndexes] lastIndex];
+    NSInteger rowIndex = [[outlineView selectedRowIndexes] lastIndex];
     BDSKBookmark *item = bookmarkRoot;
-    unsigned int idx = [[bookmarkRoot children] count];
+    NSUInteger idx = [[bookmarkRoot children] count];
     
     if (rowIndex != NSNotFound) {
         BDSKBookmark *selectedItem = [outlineView itemAtRow:rowIndex];
@@ -275,7 +275,7 @@ static id sharedBookmarkController = nil;
     }
     [item insertObject:separator inChildrenAtIndex:idx];
     
-    int row = [outlineView rowForItem:separator];
+    NSInteger row = [outlineView rowForItem:separator];
     [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 }
 
@@ -418,7 +418,7 @@ static id sharedBookmarkController = nil;
 
 #pragma mark NSOutlineView datasource methods
 
-- (int)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item {
+- (NSInteger)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item {
     return [[(item ?: bookmarkRoot) children] count];
 }
 
@@ -426,7 +426,7 @@ static id sharedBookmarkController = nil;
     return [item bookmarkType] == BDSKBookmarkTypeFolder;
 }
 
-- (id)outlineView:(NSOutlineView *)ov child:(int)idx ofItem:(id)item {
+- (id)outlineView:(NSOutlineView *)ov child:(NSInteger)idx ofItem:(id)item {
     return [[(item ?: bookmarkRoot) children]  objectAtIndex:idx];
 }
 
@@ -436,7 +436,7 @@ static id sharedBookmarkController = nil;
         return [NSDictionary dictionaryWithObjectsAndKeys:[item name], BDSKTextWithIconCellStringKey, [item icon], BDSKTextWithIconCellImageKey, nil];
     } else if ([tcID isEqualToString:@"url"]) {
         if ([item bookmarkType] == BDSKBookmarkTypeFolder) {
-            int count = [[item children] count];
+            NSInteger count = [[item children] count];
             return count == 1 ? NSLocalizedString(@"1 item", @"Bookmark folder description") : [NSString stringWithFormat:NSLocalizedString(@"%i items", @"Bookmark folder description"), count];
         } else {
             return [item urlString];
@@ -480,7 +480,7 @@ static id sharedBookmarkController = nil;
     return NO;
 }
 
-- (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)idx {
+- (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, BDSKWeblocFilePboardType, NSURLPboardType, nil]];
     
@@ -510,7 +510,7 @@ static id sharedBookmarkController = nil;
     return NSDragOperationNone;
 }
 
-- (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(int)idx {
+- (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(NSInteger)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, BDSKWeblocFilePboardType, NSURLPboardType, nil]];
     
@@ -524,7 +524,7 @@ static id sharedBookmarkController = nil;
         
 		while (bookmark = [bmEnum nextObject]) {
             BDSKBookmark *parent = [bookmark parent];
-            int bookmarkIndex = [[parent children] indexOfObject:bookmark];
+            NSInteger bookmarkIndex = [[parent children] indexOfObject:bookmark];
             if (item == parent) {
                 if (idx > bookmarkIndex)
                     idx--;
@@ -603,7 +603,7 @@ static id sharedBookmarkController = nil;
     
     while (item = [itemEnum  nextObject]) {
         BDSKBookmark *parent = [item parent];
-        unsigned int itemIndex = [[parent children] indexOfObject:item];
+        NSUInteger itemIndex = [[parent children] indexOfObject:item];
         if (itemIndex != NSNotFound)
             [parent removeObjectFromChildrenAtIndex:itemIndex];
     }

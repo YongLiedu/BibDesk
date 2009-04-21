@@ -66,8 +66,8 @@
 - (IBAction)add:(id)sender;
 - (IBAction)remove:(id)sender;
 
-- (int)listType;
-- (void)setListType:(int)newListType;
+- (NSInteger)listType;
+- (void)setListType:(NSInteger)newListType;
 - (NSDictionary *)oneWayDict;
 - (void)setOneWayDict:(NSDictionary *)newOneWayDict;
 - (NSDictionary *)twoWayDict;

@@ -64,7 +64,7 @@
     return [self _showsDontWarnAgain];
 }
 
-- (int)suppressionButtonState {
+- (NSInteger)suppressionButtonState {
     if ([self respondsToSelector:@selector(suppressionButton)])
         return [[self suppressionButton] state];
     if ([self respondsToSelector:@selector(_dontWarnAgain)])

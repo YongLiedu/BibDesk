@@ -80,7 +80,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 
 - (void)release {}
 
-- (unsigned int)retainCount { return UINT_MAX; }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)awakeFromNib {
 	texFormatter = [[BDSKTeXFormatter alloc] init];
@@ -131,11 +131,11 @@ static BDSKCharacterConversion *sharedConversionEditor;
 
 #pragma mark Acessors
 
-- (int)listType {
+- (NSInteger)listType {
     return (currentDict == oneWayDict)? 1 : 2;
 }
 
-- (void)setListType:(int)listType {
+- (void)setListType:(NSInteger)listType {
 	if ([self listType] == listType)
 		return;
 	if (!validRoman || !validTex) {
@@ -263,7 +263,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	
     [tableView reloadData];
 	
-    int row = [currentArray indexOfObject:newRoman];
+    NSInteger row = [currentArray indexOfObject:newRoman];
     [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     [tableView editColumn:0 row:row withEvent:nil select:YES];
 	
@@ -273,7 +273,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 - (IBAction)remove:(id)sender {
     [self finalizeChangesIgnoringEdit:YES]; // make sure we are not editing
 	
-	int row = [tableView selectedRow];
+	NSInteger row = [tableView selectedRow];
 	if (row == -1) return;
 	NSString *oldRoman = [currentArray objectAtIndex:row];
 	NSString *oldTex = [currentDict objectForKey:oldRoman];
@@ -308,11 +308,11 @@ static BDSKCharacterConversion *sharedConversionEditor;
 
 #pragma mark NSTableview Datasource
 
-- (int)numberOfRowsInTableView:(NSTableView *)tv {
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tv {
 	return [currentArray count];
 }
 
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
 	NSString *roman = [currentArray objectAtIndex:row];
 	if ([[tableColumn identifier] isEqualToString:@"roman"]) {
 		return roman;
@@ -322,7 +322,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	}
 }
 
-- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
 	if (ignoreEdit) return;
 	
 	NSString *roman = [currentArray objectAtIndex:row];
@@ -340,7 +340,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 				
 				[tableView reloadData];
 			} else {
-                int rv = NSAlertDefaultReturn;
+                NSInteger rv = NSAlertDefaultReturn;
                 if ([defaultOneWayRomanSet containsObject:object]) {
                     NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Unicode Character", @"Message in alert dialog when trying to add duplicate character for TeX conversion")
                                                      defaultButton:NSLocalizedString(@"OK", @"Button title")

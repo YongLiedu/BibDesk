@@ -43,7 +43,7 @@ enum {
     BDSKPreferencePaneUnselectNow,
     BDSKPreferencePaneUnselectLater
 };
-typedef int BDSKPreferencePaneUnselectReply;
+typedef NSInteger BDSKPreferencePaneUnselectReply;
 
 @class BDSKPreferenceController, BDSKPreferenceRecord;
 

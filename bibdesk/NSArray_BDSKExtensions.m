@@ -242,11 +242,11 @@
     NSEnumerator *itemEnum = [[self sortedArrayUsingSelector:@selector(compare:)] objectEnumerator];
     id item;
     NSMutableArray *array = [NSMutableArray array];
-    int start = INT_MIN, end = INT_MIN;
+    NSInteger start = INT_MIN, end = INT_MIN;
     
     while (item = [itemEnum nextObject]) {
         if ([item respondsToSelector:@selector(intValue)] == NO) continue;
-        int value = [item intValue];
+        NSInteger value = [item intValue];
         if (value != end + 1) {
             if (start != INT_MIN) {
                 NSArray *range = [[NSArray alloc] initWithObjects:[NSNumber numberWithInt:start], start == end ? nil : [NSNumber numberWithInt:end], nil];
@@ -270,11 +270,11 @@
     NSEnumerator *itemEnum = [[self sortedArrayUsingSelector:@selector(compare:)] objectEnumerator];
     id item;
     NSMutableArray *array = [NSMutableArray array];
-    int start = INT_MIN, end = INT_MIN;
+    NSInteger start = INT_MIN, end = INT_MIN;
     
     while (item = [itemEnum nextObject]) {
         if ([item respondsToSelector:@selector(intValue)] == NO) continue;
-        int value = [item intValue];
+        NSInteger value = [item intValue];
         if (value != end + 1) {
             if (start != INT_MIN) {
                 NSString *string = [[NSString alloc] initWithFormat:(start == end ? @"%i" : @"%i-%i"), start, end];
@@ -309,14 +309,14 @@ static inline
 NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *objectsToFind, SEL theSelector)
 {
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
-    unsigned int idx;
+    NSUInteger idx;
     NSEnumerator *objEnum = [objectsToFind objectEnumerator];
 	id obj;
-    unsigned int count = [arrayToSearch count];
+    NSUInteger count = [arrayToSearch count];
     
     NSRange range = NSMakeRange(0, count);
     
-    typedef unsigned int (*indexIMP)(id, SEL, id, NSRange);
+    typedef NSUInteger (*indexIMP)(id, SEL, id, NSRange);
     indexIMP indexOfObjectInRange = (indexIMP)[arrayToSearch methodForSelector:theSelector];
     
     while(obj = [objEnum nextObject]){
@@ -450,8 +450,8 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
     if(ascend)
         return;
     
-    int rhIndex = ([self count] - 1);
-    int lhIndex = 0;
+    NSInteger rhIndex = ([self count] - 1);
+    NSInteger lhIndex = 0;
     
     while( (rhIndex - lhIndex) > 0)
         [self exchangeObjectAtIndex:rhIndex-- withObjectAtIndex:lhIndex++];
@@ -465,10 +465,10 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
     NSParameterAssert([sortDescriptors count]);
     if([sortDescriptors count] > 1)
         NSLog(@"*** WARNING: Multiple sort descriptors are not supported by method %@.", NSStringFromSelector(_cmd));
-    unsigned int low = 0;
-    unsigned int range = 1;
-    unsigned int test = 0;
-    unsigned int count = [self count];
+    NSUInteger low = 0;
+    NSUInteger range = 1;
+    NSUInteger test = 0;
+    NSUInteger count = [self count];
     NSComparisonResult result;
     IMP objectAtIndexImp = [self methodForSelector:@selector(objectAtIndex:)];
     NSSortDescriptor *sort = [sortDescriptors objectAtIndex:0];
@@ -522,16 +522,16 @@ typedef struct _BDSortCacheValue {
 } BDSortCacheValue;
 
 // this function may be passed to a stdlib mergesort/qsort function
-static inline int __BDCompareSortCacheValues(const void *a, const void *b)
+static inline NSInteger __BDCompareSortCacheValues(const void *a, const void *b)
 {
     return __comparator(__sort, __selector, ((BDSortCacheValue *)a)->sortValue, ((BDSortCacheValue *)b)->sortValue);
 }
 
 // for multiple sort descriptors; finds ranges of objects compare NSOrderedSame (concept from GNUStep's NSSortDescriptor)
-static inline NSRange * __BDFindEqualRanges(BDSortCacheValue *buf, NSRange searchRange, NSRange *equalRanges, unsigned int *numRanges, NSZone *zone)
+static inline NSRange * __BDFindEqualRanges(BDSortCacheValue *buf, NSRange searchRange, NSRange *equalRanges, NSUInteger *numRanges, NSZone *zone)
 {
-    unsigned int i = searchRange.location, j;
-    unsigned int bufLen = NSMaxRange(searchRange);
+    NSUInteger i = searchRange.location, j;
+    NSUInteger bufLen = NSMaxRange(searchRange);
     *numRanges = 0;
     if(bufLen > 1){
         while(i < bufLen - 1){
@@ -555,11 +555,11 @@ static inline NSRange * __BDFindEqualRanges(BDSortCacheValue *buf, NSRange searc
 #ifdef DEBUG
 
 // for debugging only; prints a sort cache buffer (#ifdefed to avoid compiler warning)
-static void print_buffer(BDSortCacheValue *buf, unsigned int count, NSString *msg){
+static void print_buffer(BDSortCacheValue *buf, NSUInteger count, NSString *msg){
     // print the array before using the second sort descriptor...
     NSMutableArray *new = [[NSMutableArray alloc] initWithCapacity:count];
     BDSortCacheValue value;
-    unsigned int i;
+    NSUInteger i;
     for(i = 0; i < count; i++){
         value = buf[i];
         [new addObject:value.object];
@@ -596,13 +596,13 @@ static inline void __BDClearStatics()
     BDSortCacheValue *cache = (BDSortCacheValue *)NSZoneMalloc(zone, count * size);
     BDSortCacheValue aValue;
     
-    unsigned int i, sortIdx = 0, numberOfDescriptors = [sortDescriptors count];
+    NSUInteger i, sortIdx = 0, numberOfDescriptors = [sortDescriptors count];
     
     // first "equal range" is considered to be the entire array
     NSRange *equalRanges = (NSRange *)NSZoneMalloc(zone, 1 * sizeof(NSRange));
     equalRanges[0].location = 0;
     equalRanges[0].length = count;
-    unsigned int numberOfEqualRanges = 1;
+    NSUInteger numberOfEqualRanges = 1;
     
     for(i = 0; i < count; i++){
         
@@ -621,7 +621,7 @@ static inline void __BDClearStatics()
     for(sortIdx = 0; sortIdx < numberOfDescriptors && NULL != equalRanges; sortIdx++){
         
         // temporary (local to this loop)
-        unsigned int rangeIdx;
+        NSUInteger rangeIdx;
         
         // setup the statics for this descriptor, so we can use the sort functions
         __BDSetupStaticsForDescriptor([sortDescriptors objectAtIndex:sortIdx]);
@@ -635,7 +635,7 @@ static inline void __BDClearStatics()
             
             // update cache for objects in equality range(s)
             // only the sortValue needs to change, as it's dependent on the key path
-            unsigned int maxRange = NSMaxRange(sortRange);
+            NSUInteger maxRange = NSMaxRange(sortRange);
             for(i = sortRange.location; i < maxRange; i++)
                 ((BDSortCacheValue *)&cache[i])->sortValue = [cache[i].object valueForKeyPath:keyPath];
             
@@ -646,7 +646,7 @@ static inline void __BDClearStatics()
         // find equal ranges based on the current descriptor, if we have another sort descriptor to process
         if(sortIdx + 1 < numberOfDescriptors){            
             NSRange *newEqualRanges = NULL;
-            unsigned int newNumberOfRanges = 0;
+            NSUInteger newNumberOfRanges = 0;
             
             // don't check the entire array; only previously equal ranges (of course, for the second sort descriptor, this will still cover the entire array)
             for(rangeIdx = 0; rangeIdx < numberOfEqualRanges; rangeIdx++)

@@ -72,25 +72,25 @@
 	return self;
 }
 
-- (unsigned int)rating {
+- (NSUInteger)rating {
 	id cell = [self cell];
     BDSKPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
     return [cell rating];
 }
 
-- (void)setRating:(unsigned int)newRating {
+- (void)setRating:(NSUInteger)newRating {
 	id cell = [self cell];
     BDSKPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
 	[cell setRating:newRating];
 }
 
-- (unsigned int)maxRating {
+- (NSUInteger)maxRating {
 	id cell = [self cell];
     BDSKPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
     return [cell maxRating];
 }
 
-- (void)setMaxRating:(unsigned int)newRating {
+- (void)setMaxRating:(NSUInteger)newRating {
 	id cell = [self cell];
     BDSKPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
     [cell setMaxRating:newRating];
@@ -107,7 +107,7 @@
 		
 		// Handle number keys to set the rating
 		if (character >= '0' && character <= '9' && character <= '0' + [self maxRating]) {
-			[self setRating:(int)(character - '0')];
+			[self setRating:(NSInteger)(character - '0')];
             [self sendAction:[self action] to:[self target]];
 			return;
 		}   

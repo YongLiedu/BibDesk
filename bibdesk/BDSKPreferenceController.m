@@ -76,7 +76,7 @@
 @interface NSToolbar (BDSKPrivateDeclarations)
 - (void)_setCustomizesAlwaysOnClickAndDrag:(BOOL)flag;
 - (void)_setWantsToolbarContextMenu:(BOOL)flag;
-- (void)_setFirstMoveableItemIndex:(int)index;
+- (void)_setFirstMoveableItemIndex:(NSInteger)index;
 @end
 
 
@@ -114,7 +114,7 @@ static id sharedController = nil;
 
 - (void)release {}
 
-- (unsigned int)retainCount { return UINT_MAX; }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 // windiwDidLoad comes after the window is already moved onscreen, I think that's wrong
 - (void)windowDidLoad {
@@ -170,7 +170,7 @@ static id sharedController = nil;
 
 #pragma mark Actions
 
-- (void)revertPaneSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)revertPaneSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertDefaultReturn) {
         NSDictionary *initialValues = [[self selectedPane] initialValues];
         if ([initialValues count])
@@ -194,7 +194,7 @@ static id sharedController = nil;
 
 }
 
-- (void)revertAllSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)revertAllSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertDefaultReturn) {
         [[NSUserDefaultsController sharedUserDefaultsController] revertToInitialValues:nil];
         NSTimeInterval interval = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"SUScheduledCheckInterval"] doubleValue];
@@ -234,7 +234,7 @@ static id sharedController = nil;
         [self selectPaneWithIdentifier:[sender itemIdentifier]];
     else if ([sender respondsToSelector:@selector(representedObject)] && [sender representedObject])
         [self selectPaneWithIdentifier:[sender representedObject]];
-    else if ([sender respondsToSelector:@selector(tag)] && (unsigned int)[sender tag] < [[self allPaneIdentifiers] count])
+    else if ([sender respondsToSelector:@selector(tag)] && (NSUInteger)[sender tag] < [[self allPaneIdentifiers] count])
         [self selectPaneWithIdentifier:[[self allPaneIdentifiers] objectAtIndex:[sender tag]]];
 }
 
@@ -246,7 +246,7 @@ static id sharedController = nil;
     BDSKPreferencePane *pane = [self selectedPane];
     NSString *identifier = [pane identifier];
     NSArray *allPanes = [self allPaneIdentifiers];
-    unsigned int idx = identifier ? [allPanes indexOfObject:identifier] : NSNotFound;
+    NSUInteger idx = identifier ? [allPanes indexOfObject:identifier] : NSNotFound;
     if (idx == NSNotFound || idx + 1 >= [allPanes count])
         idx = 0;
     else
@@ -258,7 +258,7 @@ static id sharedController = nil;
     BDSKPreferencePane *pane = [self selectedPane];
     NSString *identifier = [pane identifier];
     NSArray *allPanes = [self allPaneIdentifiers];
-    unsigned int idx = identifier ? [allPanes indexOfObject:identifier] : NSNotFound;
+    NSUInteger idx = identifier ? [allPanes indexOfObject:identifier] : NSNotFound;
     if (idx == NSNotFound || idx == 0)
         idx = [allPanes count] - 1;
     else
@@ -488,12 +488,12 @@ static id sharedController = nil;
         return nil;
     
     NSString *searchTerm = [searchField stringValue];
-    unsigned int i, iMax = [categories count];
+    NSUInteger i, iMax = [categories count];
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:iMax];
     
     for (i = 0; i < iMax; i++) {
         NSArray *paneIDs = [self panesForCategory:[categories objectAtIndex:i]];
-        unsigned int j, jMax = [paneIDs count];
+        NSUInteger j, jMax = [paneIDs count];
         
         for (j = 0; j < jMax; j++) {
             NSString *string = [identifierSearchTerms objectForKey:[paneIDs objectAtIndex:j]];

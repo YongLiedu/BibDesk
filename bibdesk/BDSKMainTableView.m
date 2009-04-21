@@ -71,16 +71,16 @@ enum {
 };
 
 @interface BDSKTableColumn : NSTableColumn {
-    int columnType;
+    NSInteger columnType;
 }
-- (int)columnType;
-- (void)setColumnType:(int)type;
+- (NSInteger)columnType;
+- (void)setColumnType:(NSInteger)type;
 @end
 
 @interface BDSKMainTableHeaderView : NSTableHeaderView {
-    int columnForMenu;
+    NSInteger columnForMenu;
 }
-- (int)columnForMenu;
+- (NSInteger)columnForMenu;
 @end
 
 @interface BDSKMainTableView (Private)
@@ -89,7 +89,7 @@ enum {
 - (NSString *)headerTitleForField:(NSString *)field;
 - (void)columnsMenuSelectTableColumn:(id)sender;
 - (void)columnsMenuAddTableColumn:(id)sender;
-- (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)updateColumnsMenu;
 - (IBAction)importItem:(id)sender;
 - (IBAction)openParentItem:(id)sender;
@@ -138,12 +138,12 @@ enum {
 
 - (void)alternateDelete:(id)sender {
     if ([self canDelete]) {
-        unsigned int originalNumberOfRows = [self numberOfRows];
+        NSUInteger originalNumberOfRows = [self numberOfRows];
         // -selectedRow is last row of multiple selection, no good for trying to select the row before the selection.
-        unsigned int selectedRow = [[self selectedRowIndexes] firstIndex];
+        NSUInteger selectedRow = [[self selectedRowIndexes] firstIndex];
         [[self dataSource] tableView:self alternateDeleteRowsWithIndexes:[self selectedRowIndexes]];
         [self reloadData];
-        unsigned int newNumberOfRows = [self numberOfRows];
+        NSUInteger newNumberOfRows = [self numberOfRows];
         
         // Maintain an appropriate selection after deletions
         if (originalNumberOfRows != newNumberOfRows) {
@@ -193,7 +193,7 @@ enum {
     
     if ([[self delegate] respondsToSelector:@selector(tableView:highlightColorForRow:)]) {
         NSRange visibleRows = [self rowsInRect:clipRect];
-        unsigned int row;
+        NSUInteger row;
         NSColor *color;
         NSRect ignored, rect;
         for (row = visibleRows.location; row < NSMaxRange(visibleRows); row++) {
@@ -246,8 +246,8 @@ enum {
 
 #pragma mark TableColumn setup
 
-- (int)columnTypeForField:(NSString *)colName {
-    int type = 0;
+- (NSInteger)columnTypeForField:(NSString *)colName {
+    NSInteger type = 0;
     if([colName isURLField])
         type = BDSKColumnTypeURL;
     else if([colName isEqualToString:BDSKLocalFileString] || [colName isEqualToString:BDSKRemoteURLString])
@@ -271,7 +271,7 @@ enum {
     return type;
 }
 
-- (id)dataCellForColumnType:(int)columnType {
+- (id)dataCellForColumnType:(NSInteger)columnType {
     id cell = nil;
     
     switch(columnType) {
@@ -341,7 +341,7 @@ enum {
 - (NSTableColumn *)configuredTableColumnForField:(NSString *)colName {
     BDSKTableColumn *tc = (BDSKTableColumn *)[self tableColumnWithIdentifier:colName];
     id dataCell = [tc dataCell];
-    int columnType = [self columnTypeForField:colName];
+    NSInteger columnType = [self columnTypeForField:colName];
     
     if(tc == nil){
         // it is a new column, so create it
@@ -410,9 +410,9 @@ enum {
     [self updateColumnsMenu];
 }
 
-- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(unsigned int)idx {
+- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(NSUInteger)idx {
     NSMutableArray *shownColumns = [NSMutableArray arrayWithArray:[self tableColumnIdentifiers]];
-    unsigned int oldIndex = [shownColumns indexOfObject:identifier];
+    NSUInteger oldIndex = [shownColumns indexOfObject:identifier];
     
     // Check if an object already exists in the tableview, remove the old one if it does
     // This means we can't have a column more than once.
@@ -461,7 +461,7 @@ enum {
 - (NSArray *)tableColumnIdentifiers { return [[self tableColumns] valueForKey:@"identifier"]; }
 
 // copied from -[NSTableView (OAExtensions) scrollSelectedRowsToVisibility:]
-- (void)scrollRowToCenter:(unsigned int)row;
+- (void)scrollRowToCenter:(NSUInteger)row;
 {
     NSRect rowRect = [self rectOfRow:row];
     
@@ -548,7 +548,7 @@ enum {
         [self insertTableColumnWithIdentifier:[sender representedObject] atIndex:[self numberOfColumns]];
 }
 
-- (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     NSString *newColumnName = [addFieldController field];
     
     if(newColumnName && returnCode == NSOKButton)
@@ -634,7 +634,7 @@ enum {
 }
 
 - (void)importItem:(id)sender {
-    int row = [self clickedRow];
+    NSInteger row = [self clickedRow];
     BDSKASSERT(row != -1);
     if (row == -1)
         return;
@@ -643,7 +643,7 @@ enum {
 }
 
 - (void)openParentItem:(id)sender {
-    int row = [self clickedRow];
+    NSInteger row = [self clickedRow];
     BDSKASSERT(row != -1);
     if (row == -1)
         return;
@@ -651,8 +651,8 @@ enum {
         [[self delegate] tableView:self openParentForItemAtRow:row];
 }
 
-- (void)doAutosizeColumn:(unsigned int)column {
-    int row, numRows = [self numberOfRows];
+- (void)doAutosizeColumn:(NSUInteger)column {
+    NSInteger row, numRows = [self numberOfRows];
     NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
     id cell;
     float width = 0.0;
@@ -673,13 +673,13 @@ enum {
 }
 
 - (void)autosizeColumn:(id)sender {
-    int clickedColumn = [(BDSKMainTableHeaderView *)[self headerView] columnForMenu];
+    NSInteger clickedColumn = [(BDSKMainTableHeaderView *)[self headerView] columnForMenu];
     if (clickedColumn >= 0)
         [self doAutosizeColumn:clickedColumn];
 }
 
 - (void)autosizeAllColumns:(id)sender {
-    unsigned int column, numColumns = [self numberOfColumns];
+    NSUInteger column, numColumns = [self numberOfColumns];
     for (column = 0; column < numColumns; column++)
         [self doAutosizeColumn:column];
 }
@@ -689,9 +689,9 @@ enum {
 
 @implementation BDSKTableColumn
 
-- (int)columnType { return columnType; }
+- (NSInteger)columnType { return columnType; }
 
-- (void)setColumnType:(int)type { columnType = type; }
+- (void)setColumnType:(NSInteger)type { columnType = type; }
 
 @end
 
@@ -775,7 +775,7 @@ enum {
     return menu;
 }
 
-- (int)columnForMenu {
+- (NSInteger)columnForMenu {
     return columnForMenu;
 }
 

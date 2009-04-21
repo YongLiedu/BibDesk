@@ -92,7 +92,7 @@
     @param      rating (description)
     @result     (description)
 */
-+ (NSString *)ratingStringWithInteger:(int)rating;
++ (NSString *)ratingStringWithInteger:(NSInteger)rating;
 
 /*!
  @method     stringWithBool:
@@ -229,9 +229,9 @@ An inline buffer is used for speed in accessing each character.
 @param      range The range to search for matching braces, the first character should be the left brace.
 @result     The index of the matching brace character.
 */
-- (unsigned int)indexOfRightBraceMatchingLeftBraceInRange:(NSRange)range;
+- (NSUInteger)indexOfRightBraceMatchingLeftBraceInRange:(NSRange)range;
 
-- (unsigned int)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned int)startLoc;
+- (NSUInteger)indexOfRightBraceMatchingLeftBraceAtIndex:(NSUInteger)startLoc;
     
     /*!
     @method     isStringTeXQuotingBalancedWithBraces:connected:
@@ -377,7 +377,7 @@ An inline buffer is used for speed in accessing each character.
  */
 - (NSCellStateValue)triStateValue;
 
-- (NSString *)acronymValueIgnoringWordLength:(unsigned int)ignoreLength;
+- (NSString *)acronymValueIgnoringWordLength:(NSUInteger)ignoreLength;
 
 #pragma mark -
 

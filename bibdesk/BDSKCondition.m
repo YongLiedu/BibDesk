@@ -212,7 +212,7 @@ static char BDSKConditionObservationContext;
         
     } else if ([self isAttachmentCondition]) {
         
-        int count = 0;
+        NSInteger count = 0;
         if ([key isEqualToString:BDSKLocalFileString])
             count = [[item localFiles] count];
         else if ([key isEqualToString:BDSKRemoteURLString])
@@ -276,7 +276,7 @@ static char BDSKConditionObservationContext;
         }
         
         // use local values, as we may change them to support "Any Field"
-        int comparison = stringComparison;
+        NSInteger comparison = stringComparison;
         NSString *value = stringValue;
         // unset values are considered empty strings
         NSString *itemValue = [item stringValueOfField:key] ?: @"";
@@ -358,11 +358,11 @@ static char BDSKConditionObservationContext;
     }
 }
 
-- (int)comparison {
+- (NSInteger)comparison {
     return [self isDateCondition] ? dateComparison : [self isAttachmentCondition] ? attachmentComparison : stringComparison;
 }
 
-- (void)setComparison:(int)newComparison {
+- (void)setComparison:(NSInteger)newComparison {
     if ([self isDateCondition])
         [self setDateComparison:(BDSKDateComparison)newComparison];
     if ([self isAttachmentCondition])
@@ -497,11 +497,11 @@ static char BDSKConditionObservationContext;
     attachmentComparison = newComparison;
 }
 
-- (int)countValue {
+- (NSInteger)countValue {
     return countValue;
 }
 
-- (void)setCountValue:(int)newValue {
+- (void)setCountValue:(NSInteger)newValue {
     countValue = newValue;
 }
 
@@ -515,27 +515,27 @@ static char BDSKConditionObservationContext;
     dateComparison = newComparison;
 }
 
-- (int)numberValue {
+- (NSInteger)numberValue {
     return numberValue;
 }
 
-- (void)setNumberValue:(int)newNumber {
+- (void)setNumberValue:(NSInteger)newNumber {
     numberValue = newNumber;
 }
 
-- (int)andNumberValue {
+- (NSInteger)andNumberValue {
     return andNumberValue;
 }
 
-- (void)setAndNumberValue:(int)newNumber {
+- (void)setAndNumberValue:(NSInteger)newNumber {
     andNumberValue = newNumber;
 }
 
-- (int)periodValue {
+- (NSInteger)periodValue {
     return periodValue;
 }
 
-- (void)setPeriodValue:(int)newPeriod {
+- (void)setPeriodValue:(NSInteger)newPeriod {
     periodValue = newPeriod;
 }
 
@@ -781,8 +781,8 @@ static char BDSKConditionObservationContext;
         if ([keyPath isEqualToString:@"key"]) {
             NSString *oldKey = [change objectForKey:NSKeyValueChangeOldKey];
             NSString *newKey = [change objectForKey:NSKeyValueChangeNewKey];
-            int oldFieldType = [oldKey fieldType];
-            int newFieldType = [newKey fieldType];
+            NSInteger oldFieldType = [oldKey fieldType];
+            NSInteger newFieldType = [newKey fieldType];
             if(oldFieldType != newFieldType){
                 if (oldFieldType == BDSKDateField)
                     [self updateCachedDates]; // remove the cached date and stop the timer
@@ -802,7 +802,7 @@ static char BDSKConditionObservationContext;
 
 @implementation NSString (BDSKConditionExtensions)
 
-- (int)fieldType {
+- (NSInteger)fieldType {
     if ([self isEqualToString:BDSKDateAddedString] || [self isEqualToString:BDSKDateModifiedString])
         return BDSKDateField;
     else if ([self isEqualToString:BDSKLocalFileString] || [self isEqualToString:BDSKRemoteURLString])

@@ -107,7 +107,7 @@ static BOOL isSearchFileAtPath(NSString *path)
                 NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:path];
                 BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithType:nil dictionary:dict];
                 if (info) {
-                    unsigned int idx = [[searchGroupServers valueForKey:@"name"] indexOfObject:[info name]];
+                    NSUInteger idx = [[searchGroupServers valueForKey:@"name"] indexOfObject:[info name]];
                     if (idx != NSNotFound)
                         [searchGroupServers replaceObjectAtIndex:idx withObject:info];
                     else
@@ -173,7 +173,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     [self saveServerFile:serverInfo];
 }
 
-+ (void)setServer:(BDSKServerInfo *)serverInfo atIndex:(unsigned int)idx
++ (void)setServer:(BDSKServerInfo *)serverInfo atIndex:(NSUInteger)idx
 {
     [self deleteServerFile:[searchGroupServers objectAtIndex:idx]];
     [searchGroupServers replaceObjectAtIndex:idx withObject:[[serverInfo copy] autorelease]];
@@ -181,7 +181,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     [self saveServerFile:serverInfo];
 }
 
-+ (void)removeServerAtIndex:(unsigned int)idx
++ (void)removeServerAtIndex:(NSUInteger)idx
 {
     [self deleteServerFile:[searchGroupServers objectAtIndex:idx]];
     [searchGroupServers removeObjectAtIndex:idx];
@@ -240,7 +240,7 @@ static BOOL isSearchFileAtPath(NSString *path)
 - (void)reloadServersSelectingServerNamed:(NSString *)name{
     NSArray *servers = [[self class] servers];
     NSArray *names = [servers valueForKey:@"name"];
-    unsigned int idx = (name == nil || [names count] == 0) ? [names count] + 1 : [names indexOfObject:name];
+    NSUInteger idx = (name == nil || [names count] == 0) ? [names count] + 1 : [names indexOfObject:name];
     if (idx == NSNotFound)
         idx = 0;
     [serverPopup removeAllItems];
@@ -269,7 +269,7 @@ static BOOL isSearchFileAtPath(NSString *path)
         BDSKServerInfo *info = [[self serverInfo] copy];
         
         if ([self isCustom] == NO) {
-            unsigned int idx = [servers indexOfObject:info];
+            NSUInteger idx = [servers indexOfObject:info];
             if (idx == NSNotFound)
                 idx = [[servers valueForKey:@"name"] indexOfObject:[serverPopup titleOfSelectedItem]];
             if (idx != NSNotFound)
@@ -297,7 +297,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     NSArray *servers = [[self class] servers];
     
     if (group) {
-        unsigned int idx = [servers indexOfObject:[group serverInfo]];
+        NSUInteger idx = [servers indexOfObject:[group serverInfo]];
         if (idx != NSNotFound)
             name = [[servers objectAtIndex:idx] name];
     } else if ([servers count]) {
@@ -336,7 +336,7 @@ static BOOL isSearchFileAtPath(NSString *path)
 
 - (IBAction)selectPredefinedServer:(id)sender;
 {
-    int i = [sender indexOfSelectedItem];
+    NSInteger i = [sender indexOfSelectedItem];
     
     [editButton setTitle:NSLocalizedString(@"Edit", @"Button title")];
     [editButton setToolTip:NSLocalizedString(@"Edit the selected default server settings", @"Tool tip message")];
@@ -414,8 +414,8 @@ static BOOL isSearchFileAtPath(NSString *path)
         if ([self commitEditing] == NO)
             return;
         
-        unsigned int idx = [serverPopup indexOfSelectedItem];
-        unsigned int existingIndex = [[[[self class] servers] valueForKey:@"name"] indexOfObject:[serverPopup titleOfSelectedItem]];
+        NSUInteger idx = [serverPopup indexOfSelectedItem];
+        NSUInteger existingIndex = [[[[self class] servers] valueForKey:@"name"] indexOfObject:[serverPopup titleOfSelectedItem]];
         if (existingIndex != NSNotFound && existingIndex != idx) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Server Name", @"Message in alert dialog when setting a search group server with a duplicate name")
                                              defaultButton:nil
@@ -443,7 +443,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     }
 }
 
-- (void)resetAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)resetAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 {
     if (returnCode == NSOKButton) {
         [[self class] resetServers];
@@ -521,11 +521,11 @@ static BOOL isSearchFileAtPath(NSString *path)
         [serverInfo setType:newType];
 }
  
-- (int)typeTag {
+- (NSInteger)typeTag {
     return [serverInfo serverType];
 }
 
-- (void)setTypeTag:(int)tag {
+- (void)setTypeTag:(NSInteger)tag {
     // use [self setType:] to trigger KVO
     switch (tag) {
         case BDSKServerTypeEntrez: [self setType:BDSKSearchGroupEntrez]; break;

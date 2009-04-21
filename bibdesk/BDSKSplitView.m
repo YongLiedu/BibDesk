@@ -115,9 +115,9 @@
             NSArray *frameStrings = [[NSUserDefaults standardUserDefaults] arrayForKey:[self positionAutosaveKey]];
             if (frameStrings) {
                 NSArray *subviews = [self subviews];
-                unsigned int subviewCount = [subviews count];
-                unsigned int frameCount = [frameStrings count];
-                unsigned int i;
+                NSUInteger subviewCount = [subviews count];
+                NSUInteger frameCount = [frameStrings count];
+                NSUInteger i;
 
                 // Walk through our subviews re-applying frames so we don't explode in the event that the archived frame strings become out of sync with our subview count
                 for (i = 0; i < subviewCount && i < frameCount; i++)
@@ -131,7 +131,7 @@
     if ([NSString isEmptyString:positionAutosaveName] == NO) {
         NSMutableArray *frameStrings = [NSMutableArray array];
         NSArray *subviews = [self subviews];
-        unsigned int i, iMax = [subviews count];
+        NSUInteger i, iMax = [subviews count];
         for (i = 0; i < iMax; i++)
             [frameStrings addObject:NSStringFromRect([[subviews objectAtIndex:i] frame])];
         [[NSUserDefaults standardUserDefaults] setObject:frameStrings forKey:[self positionAutosaveKey]];
@@ -145,7 +145,7 @@
     BOOL inDivider = NO;
     NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     NSArray *subviews = [self subviews];
-    int i, count = [subviews count];
+    NSInteger i, count = [subviews count];
     id view;
     NSRect divRect;
     

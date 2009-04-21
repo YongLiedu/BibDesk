@@ -134,7 +134,7 @@
                 monthString = [(BDSKStringNode *)[nodes objectAtIndex:0] value];
         } else if (monthString) {
             NSRange r = [monthString rangeOfCharacterFromSet:[NSCharacterSet letterCharacterSet]];
-            unsigned int start = 0, end = [monthString length];
+            NSUInteger start = 0, end = [monthString length];
             if (r.location != NSNotFound) {
                 start = r.location;
                 r = [monthString rangeOfCharacterFromSet:[NSCharacterSet nonLetterCharacterSet] options:0 range:NSMakeRange(start, end - start)];
@@ -195,7 +195,7 @@
 - (NSDate *)startOfDay;
 {
     NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
-    unsigned int unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit | NSWeekdayOrdinalCalendarUnit | NSWeekdayCalendarUnit | NSDayCalendarUnit;
+    NSUInteger unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit | NSWeekdayOrdinalCalendarUnit | NSWeekdayCalendarUnit | NSDayCalendarUnit;
     NSDateComponents *components = [calendar components:unitFlags fromDate:self];
     [components setHour:0];
     [components setMinute:0];
@@ -208,7 +208,7 @@
 - (NSDate *)endOfDay;
 {
     NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
-    unsigned int unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit | NSWeekdayOrdinalCalendarUnit | NSWeekdayCalendarUnit | NSDayCalendarUnit;
+    NSUInteger unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit | NSWeekdayOrdinalCalendarUnit | NSWeekdayCalendarUnit | NSDayCalendarUnit;
     NSDateComponents *components = [calendar components:unitFlags fromDate:self];
     [components setHour:23];
     [components setMinute:59];
@@ -221,7 +221,7 @@
 - (NSDate *)startOfWeek;
 {
     NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
-    unsigned int unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit;
+    NSUInteger unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit;
     NSDateComponents *components = [calendar components:unitFlags fromDate:self];
     // the week jumps at firstWeekday, not at weekday=1
     [components setWeekday:[calendar firstWeekday]];
@@ -244,7 +244,7 @@
     return date;
 }
 
-- (NSDate *)dateByAddingNumber:(int)number ofPeriod:(int)period {
+- (NSDate *)dateByAddingNumber:(NSInteger)number ofPeriod:(NSInteger)period {
     NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
     NSDateComponents *components = [[NSDateComponents alloc] init];
     [components setYear:0];
@@ -310,7 +310,7 @@
 
 @implementation NSDateComponents (BDSKExtensions)
 
-+ (NSDateComponents *)dateComponentsWithYear:(int)year month:(int)month day:(int)day hour:(int)hour minute:(int)minute second:(int)second
++ (NSDateComponents *)dateComponentsWithYear:(NSInteger)year month:(NSInteger)month day:(NSInteger)day hour:(NSInteger)hour minute:(NSInteger)minute second:(NSInteger)second
 {
     NSDateComponents *components = [[[NSDateComponents alloc] init] autorelease];
     [components setYear:year];

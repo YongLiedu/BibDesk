@@ -80,5 +80,5 @@
 
 
 @interface NSObject (BDSKSplitViewExtendedDelegate)
-- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset;
+- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(NSInteger)offset;
 @end

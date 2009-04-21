@@ -147,19 +147,19 @@
     }
 }
 
-- (void)setNumberOfAvailableResults:(int)value;
+- (void)setNumberOfAvailableResults:(NSInteger)value;
 {
     availableResults = value;
 }
 
-- (int)numberOfFetchedResults { return fetchedResults; }
+- (NSInteger)numberOfFetchedResults { return fetchedResults; }
 
-- (void)setNumberOfFetchedResults:(int)value;
+- (void)setNumberOfFetchedResults:(NSInteger)value;
 {
     fetchedResults = value;
 }
 
-- (int)numberOfAvailableResults { return availableResults; }
+- (NSInteger)numberOfAvailableResults { return availableResults; }
 
 - (BOOL)failedDownload { return failedDownload; }
 
@@ -263,7 +263,7 @@
         return;
     }
     
-    int numResults = MIN([self numberOfAvailableResults] - [self numberOfFetchedResults], MAX_RESULTS);
+    NSInteger numResults = MIN([self numberOfAvailableResults] - [self numberOfFetchedResults], MAX_RESULTS);
     
     // need to escape queryKey, but the rest should be valid for a URL
     NSString *efetch = [[[self class] baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=medline&retmode=text&retstart=%d&retmax=%d&db=%@&query_key=%@&WebEnv=%@&tool=bibdesk", [self numberOfFetchedResults], numResults, [[self serverInfo] database], [[self queryKey] stringByAddingPercentEscapesIncludingReserved], [self webEnv]];
@@ -313,7 +313,7 @@
         presentableError = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:NSLocalizedString(@"Empty search result", @"error when pubmed search fails")];
         [presentableError setValue:NSLocalizedString(@"Either the server didn't return any data, or BibDesk was unable to read it as text.", @"Error informative text") forKey:NSLocalizedRecoverySuggestionErrorKey];
     } else {
-        int type = [contentString contentStringType];
+        NSInteger type = [contentString contentStringType];
         BOOL isPartialData = NO;
         NSError *error;
         if (type == BDSKBibTeXStringType) {

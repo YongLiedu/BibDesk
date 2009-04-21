@@ -185,14 +185,14 @@
     return string;
 }
 
-static int MAX_RATING = 5;
-+ (NSString *)ratingStringWithInteger:(int)rating;
+static NSInteger MAX_RATING = 5;
++ (NSString *)ratingStringWithInteger:(NSInteger)rating;
 {
     NSParameterAssert(rating >= 0 && rating <= MAX_RATING);
     static NSString **ratingStrings = NULL;
     if(ratingStrings == NULL){
         ratingStrings = NSZoneMalloc(NULL, (MAX_RATING + 1) * sizeof(NSString *));
-        int i = 0;
+        NSInteger i = 0;
         NSMutableString *ratingString = [NSMutableString string];
         do {
             ratingStrings[rating] = [ratingString copy];
@@ -270,7 +270,7 @@ static int MAX_RATING = 5;
 
 static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 {
-    unsigned int len = [data length];
+    NSUInteger len = [data length];
     size_t size = sizeof(UniChar);
     BOOL rv = NO;
     if(len >= size){
@@ -399,12 +399,12 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     return self;
 }
 
-- (unsigned int)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned int)startLoc
+- (NSUInteger)indexOfRightBraceMatchingLeftBraceAtIndex:(NSUInteger)startLoc
 {
     return [self indexOfRightBraceMatchingLeftBraceInRange:NSMakeRange(startLoc, [self length] - startLoc)];
 }
 
-- (unsigned int)indexOfRightBraceMatchingLeftBraceInRange:(NSRange)range
+- (NSUInteger)indexOfRightBraceMatchingLeftBraceInRange:(NSRange)range
 {
     
     CFStringInlineBuffer inlineBuffer;
@@ -416,7 +416,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     
     CFStringInitInlineBuffer((CFStringRef)self, &inlineBuffer, CFRangeMake(0, length));
     UniChar ch;
-    int nesting = 0;
+    NSInteger nesting = 0;
     
     if(CFStringGetCharacterFromInlineBuffer(&inlineBuffer, startLoc) != '{')
         [NSException raise:NSInternalInconsistencyException format:@"character at index %i is not a brace", startLoc];
@@ -445,7 +445,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 }
 
 - (BOOL)isStringTeXQuotingBalancedWithBraces:(BOOL)braces connected:(BOOL)connected range:(NSRange)range{
-	int nesting = 0;
+	NSInteger nesting = 0;
 	NSCharacterSet *delimCharSet;
 	unichar rightDelim;
 	
@@ -458,7 +458,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 	}
 	
 	NSRange delimRange = [self rangeOfCharacterFromSet:delimCharSet options:NSLiteralSearch range:range];
-	int delimLoc = delimRange.location;
+	NSInteger delimLoc = delimRange.location;
 	
 	while (delimLoc != NSNotFound) {
 		if (delimLoc == 0 || braces || [self characterAtIndex:delimLoc - 1] != '\\') {
@@ -498,7 +498,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 		NSScanner *scanner = [NSScanner scannerWithString:self];
 		NSMutableString *mutableFileString = [NSMutableString stringWithCapacity:[self length]];
 		NSString *tmp = nil;
-		int scanLocation = 0;
+		NSInteger scanLocation = 0;
         NSString *replaceRegex = [NSString stringWithFormat:@"$1%@,", tmpKey];
         
         [scanner setCharactersToBeSkipped:nil];
@@ -574,7 +574,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     
     NSMutableString *toReturn = [self mutableCopy];
     while (r.length) {
-        unsigned int start;
+        NSUInteger start;
         if (r.location == 0 || [toReturn characterAtIndex:(r.location - 1)] != '\\') {
             // insert the backslash, then advance the search range by two characters
             [toReturn replaceCharactersInRange:NSMakeRange(r.location, 0) withString:@"\\"];
@@ -660,7 +660,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 + (NSString *)TeXStringWithHTMLString:(NSString *)htmlString;
 {
     const char *str = [htmlString UTF8String];
-    int ln = strlen(str);
+    NSInteger ln = strlen(str);
     FILE *freport = stdout;
     char *html_fn = NULL;
     BOOL in_math = NO;
@@ -704,13 +704,13 @@ http://home.planet.nl/~faase009/GNU.txt
     
 	for(; *str; str++)
 	{   BOOL special = NO;
-		int v = 0;
+		NSInteger v = 0;
 		char ch = '\0';
 		char html_ch[10];
 		html_ch[0] = '\0';
 
             if (*str == '&')
-            {   int i = 0;
+            {   NSInteger i = 0;
                 BOOL correct = NO;
                 
                 if (isalpha(str[1]))
@@ -730,7 +730,7 @@ http://home.planet.nl/~faase009/GNU.txt
                         }
                 }
                     else if (str[1] == '#')
-                    {   int code = 0;
+                    {   NSInteger code = 0;
                         html_ch[0] = '#';
                         for (i = 1; i < 9; i++)
                             if (isdigit(str[i+1]))
@@ -865,10 +865,10 @@ http://home.planet.nl/~faase009/GNU.txt
     // ARM:  This code came from Art Isbell to cocoa-dev on Tue Jul 10 22:13:11 2001.  Comments are his.
     //       We were using componentsSeparatedByString:@"\r", but this is not robust.  Files from ScienceDirect
     //       have \n as newlines, so this code handles those cases as well as PubMed.
-    unsigned int stringLength = [self length];
-    unsigned int startIndex;
-    unsigned int lineEndIndex = 0;
-    unsigned int contentsEndIndex;
+    NSUInteger stringLength = [self length];
+    NSUInteger startIndex;
+    NSUInteger lineEndIndex = 0;
+    NSUInteger contentsEndIndex;
     NSRange range;
     NSMutableArray *sourceLines = [NSMutableArray array];
     
@@ -1003,8 +1003,8 @@ http://home.planet.nl/~faase009/GNU.txt
 
 - (NSComparisonResult)triStateCompare:(NSString *)other{
     // we order increasingly as 0, -1, 1
-    int myValue = [self triStateValue];
-    int otherValue = [other triStateValue];
+    NSInteger myValue = [self triStateValue];
+    NSInteger otherValue = [other triStateValue];
     if (myValue == otherValue)
         return NSOrderedSame;
     else if (myValue == 0 || otherValue == 1)
@@ -1093,12 +1093,12 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     }
 }
 
-- (NSString *)acronymValueIgnoringWordLength:(unsigned int)ignoreLength{
+- (NSString *)acronymValueIgnoringWordLength:(NSUInteger)ignoreLength{
     NSMutableString *result = [NSMutableString string];
     NSArray *allComponents = [self componentsSeparatedByString:@" "]; // single whitespace
     NSEnumerator *e = [allComponents objectEnumerator];
     NSString *component = nil;
-	unsigned int currentIgnoreLength;
+	NSUInteger currentIgnoreLength;
     
     while(component = [e nextObject]){
 		currentIgnoreLength = ignoreLength;
@@ -1165,7 +1165,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 - (BOOL)hasCaseInsensitivePrefix:(NSString *)prefix;
 {
-    unsigned int length = [prefix length];
+    NSUInteger length = [prefix length];
     if(prefix == nil || length > [self length])
         return NO;
     
@@ -1310,7 +1310,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
         @"and",
     };
     
-    unsigned int i, j, iMax = sizeof(uppercaseWords) / sizeof(NSString *);
+    NSUInteger i, j, iMax = sizeof(uppercaseWords) / sizeof(NSString *);
     
     for (i = 0; i < iMax; i++) {
         
@@ -1390,7 +1390,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 // This method is copied from NSString-OFStringExtensions.m
 - (NSString *)stringByRemovingPrefix:(NSString *)prefix {
-    unsigned int length = [prefix length];
+    NSUInteger length = [prefix length];
     if (length && [self hasPrefix:prefix])
         return [self substringFromIndex:length];
     return self;
@@ -1398,7 +1398,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 // This method is copied from NSString-OFStringExtensions.m
 - (NSString *)stringByRemovingSuffix:(NSString *)suffix {
-    unsigned int length = [suffix length];
+    NSUInteger length = [suffix length];
     if (length && [self hasSuffix:suffix])
         return [self substringToIndex:[self length] - length];
     return self;
@@ -1436,8 +1436,8 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     
     NSData *utf8Data = [self dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
     const unsigned char *source = [utf8Data bytes];
-    unsigned int sourceSize = [utf8Data length];
-    unsigned int destSize = sourceSize;
+    NSUInteger sourceSize = [utf8Data length];
+    NSUInteger destSize = sourceSize;
     
     if (destSize < 20)
         destSize *= 3;
@@ -1445,14 +1445,14 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
         destSize += ( destSize >> 1 );
     
     unsigned char *dest = NSZoneMalloc(NULL, destSize);
-    unsigned int i, j = 0;
+    NSUInteger i, j = 0;
     
     for (i = 0; i < sourceSize; i++) {
         unsigned char ch = source[i];
         
         // Headroom: we may insert up to three bytes into destination.
         if (j + 3 >= destSize) {
-            int newSize = destSize + ( destSize >> 1 );
+            NSInteger newSize = destSize + ( destSize >> 1 );
             dest = NSZoneRealloc(NULL, dest, newSize);
             destSize = newSize;
         }
@@ -1483,7 +1483,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 - (NSArray *)commonRootPathComponentsOfFilename:(NSString *)filename components:(NSArray **)components otherComponents:(NSArray **)otherComponents {
     NSArray *array = [self pathComponents];
     NSArray *otherArray = [[filename stringByStandardizingPath] pathComponents];
-    unsigned int i, minLength = MIN([array count], [otherArray count]);
+    NSUInteger i, minLength = MIN([array count], [otherArray count]);
     NSMutableArray *resultArray = [NSMutableArray arrayWithCapacity:minLength];
 
     for (i = 0; i < minLength; i++) {
@@ -1511,7 +1511,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 - (NSString *)relativePathFromPath:(NSString *)basePath {
     NSArray *commonRoot, *myUniquePart, *baseUniquePart;
-    int numberOfStepsUp, i;
+    NSInteger numberOfStepsUp, i;
 
     basePath = [basePath stringByStandardizingPath];
     commonRoot = [[self stringByStandardizingPath] commonRootPathComponentsOfFilename:basePath components:&myUniquePart otherComponents:&baseUniquePart];
@@ -1546,7 +1546,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 - (NSString *)stringByNormalizingPath {
     // Split on slashes and chop out '.' and '..' correctly.
     NSArray *pathElements = [self pathComponents];
-    unsigned int i, count = [pathElements count], preserveCount;
+    NSUInteger i, count = [pathElements count], preserveCount;
     NSMutableArray *newPathElements = [NSMutableArray arrayWithCapacity:count];
     if (count > 0 && [[pathElements objectAtIndex:0] isEqualToString:@"/"])
         preserveCount = 1;
@@ -1591,7 +1591,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     unichar *ptr, *begin, *end;
     NSMutableString *result;
     NSString *string;
-    int length;
+    NSInteger length;
     
     length = [self length];
     ptr = NSZoneMalloc([self zone], length * sizeof(unichar));
@@ -1604,7 +1604,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     while (ptr < end) {
         if (*ptr > 127) {
             APPEND_PREVIOUS();
-            [result appendFormat:@"&#%d;", (int)*ptr];
+            [result appendFormat:@"&#%d;", (NSInteger)*ptr];
         } else if (*ptr == '&') {
             APPEND_PREVIOUS();
             [result appendString:@"&amp;"];
@@ -1647,7 +1647,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     unichar *ptr, *begin, *end;
     NSMutableString *result;
     NSString *string;
-    int length;
+    NSInteger length;
     BOOL isQuoted, needsSpace;
     
     length = [self length];
@@ -1704,7 +1704,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     unichar *ptr, *begin, *end;
     NSMutableString *result;
     NSString *string;
-    int length;
+    NSInteger length;
     BOOL needsSpace;
     
     length = [self length];
@@ -1860,9 +1860,9 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     NSScanner *scanner = [[NSScanner alloc] initWithString:self];
     NSString *s = nil;
     NSMutableString *returnString = [NSMutableString stringWithCapacity:[self length]];
-    int nesting = 0;
+    NSInteger nesting = 0;
     unichar ch;
-    unsigned int location;
+    NSUInteger location;
     NSRange range;
     BOOL foundFirstLetter = NO;
     

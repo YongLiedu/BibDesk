@@ -58,7 +58,7 @@
 @interface BDSKURLFile : BDSKFile
 {
     NSURL *fileURL;
-    unsigned int hash;
+    NSUInteger hash;
 }
 @end
 
@@ -236,7 +236,7 @@ static Class BDSKFileClass = Nil;
 
 - (void)release {}
 
-- (unsigned int)retainCount { return UINT_MAX; }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 @end
 
@@ -268,7 +268,7 @@ static Class BDSKFileClass = Nil;
     return [self retain];
 }
 
-- (unsigned int)hash
+- (NSUInteger)hash
 { 
     return hash; 
 }
@@ -352,7 +352,7 @@ static Class BDSKFileClass = Nil;
     return isEqual;
 }
 
-- (unsigned int)hash
+- (NSUInteger)hash
 {
     return hash;
 }

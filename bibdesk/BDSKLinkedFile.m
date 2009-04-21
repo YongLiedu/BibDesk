@@ -341,7 +341,7 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (void)release {}
 
-- (unsigned int)retainCount { return UINT_MAX; }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 @end
 

@@ -41,8 +41,8 @@
 
 
 @interface BDSKScrollableTextFieldCell : NSTextFieldCell {
-	int scrollStep;
-	int maxScrollStep;
+	NSInteger scrollStep;
+	NSInteger maxScrollStep;
 	BOOL isLeftButtonHighlighted;
 	BOOL isRightButtonHighlighted;
 	BOOL isClipped;

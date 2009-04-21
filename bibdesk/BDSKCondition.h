@@ -97,10 +97,10 @@ enum {
 	BDSKAttachmentComparison attachmentComparison;
 	BDSKDateComparison dateComparison;
 	NSString *stringValue;
-    int countValue;
-    int numberValue;
-    int andNumberValue;
-    int periodValue;
+    NSInteger countValue;
+    NSInteger numberValue;
+    NSInteger andNumberValue;
+    NSInteger periodValue;
     NSDate *dateValue;
     NSDate *toDateValue;
     BDSKSmartGroup *group;
@@ -122,8 +122,8 @@ enum {
 - (void)setKey:(NSString *)newKey;
 - (NSString *)value;
 - (void)setValue:(NSString *)newValue;
-- (int)comparison;
-- (void)setComparison:(int)newComparison;
+- (NSInteger)comparison;
+- (void)setComparison:(NSInteger)newComparison;
 
 // String accessors
 - (BDSKStringComparison)stringComparison;
@@ -134,18 +134,18 @@ enum {
 // Count accessors
 - (BDSKAttachmentComparison)attachmentComparison;
 - (void)setAttachmentComparison:(BDSKAttachmentComparison)newComparison;
-- (int)countValue;
-- (void)setCountValue:(int)newValue;
+- (NSInteger)countValue;
+- (void)setCountValue:(NSInteger)newValue;
 
 // Date accessors
 - (BDSKDateComparison)dateComparison;
 - (void)setDateComparison:(BDSKDateComparison)newComparison;
-- (int)numberValue;
-- (void)setNumberValue:(int)value;
-- (int)andNumberValue;
-- (void)setAndNumberValue:(int)value;
-- (int)periodValue;
-- (void)setPeriodValue:(int)value;
+- (NSInteger)numberValue;
+- (void)setNumberValue:(NSInteger)value;
+- (NSInteger)andNumberValue;
+- (void)setAndNumberValue:(NSInteger)value;
+- (NSInteger)periodValue;
+- (void)setPeriodValue:(NSInteger)value;
 - (NSDate *)dateValue;
 - (void)setDateValue:(NSDate *)value;
 - (NSDate *)toDateValue;
@@ -164,5 +164,5 @@ enum {
 
 
 @interface NSString (BDSKConditionExtensions)
-- (int)fieldType;
+- (NSInteger)fieldType;
 @end

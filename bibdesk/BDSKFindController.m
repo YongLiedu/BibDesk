@@ -146,8 +146,8 @@ enum {
 	[[self window] setMaxSize:maxWindowSize];
 	
 	// this fixes a bug with initialization of the menuItem states when using bindings
-	int numItems = [searchTypePopUpButton numberOfItems];
-	int i;
+	NSInteger numItems = [searchTypePopUpButton numberOfItems];
+	NSInteger i;
 	for (i = 0; i < numItems; i++) 
 		if ([searchTypePopUpButton indexOfSelectedItem] != i)
 			[[searchTypePopUpButton itemAtIndex:i] setState:NSOffState];
@@ -216,11 +216,11 @@ enum {
 
 #pragma mark Accessors
 
-- (int)operation {
+- (NSInteger)operation {
     return operation;
 }
 
-- (void)setOperation:(int)newOperation {
+- (void)setOperation:(NSInteger)newOperation {
     if (operation != newOperation) {
         operation = newOperation;
 		if (FCOperationFindAndReplace != operation) {
@@ -277,21 +277,21 @@ enum {
     }
 }
 
-- (int)searchType {
+- (NSInteger)searchType {
     return searchType;
 }
 
-- (void)setSearchType:(int)newSearchType {
+- (void)setSearchType:(NSInteger)newSearchType {
     if (searchType != newSearchType) {
         searchType = newSearchType;
     }
 }
 
-- (int)searchScope {
+- (NSInteger)searchScope {
     return searchScope;
 }
 
-- (void)setSearchScope:(int)newSearchScope {
+- (void)setSearchScope:(NSInteger)newSearchScope {
     if (searchScope != newSearchScope) {
         searchScope = newSearchScope;
     }
@@ -388,24 +388,24 @@ enum {
     return [[findHistory retain] autorelease];
 }
 
-- (unsigned int)countOfFindHistory {
+- (NSUInteger)countOfFindHistory {
     return [findHistory count];
 }
 
-- (id)objectInFindHistoryAtIndex:(unsigned int)idx {
+- (id)objectInFindHistoryAtIndex:(NSUInteger)idx {
     return [findHistory objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inFindHistoryAtIndex:(unsigned int)idx {
+- (void)insertObject:(id)obj inFindHistoryAtIndex:(NSUInteger)idx {
     if ([NSString isEmptyString:obj] || [findHistory containsObject:obj])
 		return;
 	[findHistory insertObject:obj atIndex:idx];
-	int count = [findHistory count];
+	NSInteger count = [findHistory count];
 	if (count > MAX_HISTORY_COUNT)
 		[findHistory removeObjectAtIndex:count - 1];
 }
 
-- (void)removeObjectFromFindHistoryAtIndex:(unsigned int)idx {
+- (void)removeObjectFromFindHistoryAtIndex:(NSUInteger)idx {
     [findHistory removeObjectAtIndex:idx];
 }
 
@@ -413,24 +413,24 @@ enum {
     return [[replaceHistory retain] autorelease];
 }
 
-- (unsigned int)countOfReplaceHistory {
+- (NSUInteger)countOfReplaceHistory {
     return [replaceHistory count];
 }
 
-- (id)objectInReplaceHistoryAtIndex:(unsigned int)idx {
+- (id)objectInReplaceHistoryAtIndex:(NSUInteger)idx {
     return [replaceHistory objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inReplaceHistoryAtIndex:(unsigned int)idx {
+- (void)insertObject:(id)obj inReplaceHistoryAtIndex:(NSUInteger)idx {
     if ([NSString isEmptyString:obj] || [replaceHistory containsObject:obj])
 		return;
 	[replaceHistory insertObject:obj atIndex:idx];
-	int count = [findHistory count];
+	NSInteger count = [findHistory count];
 	if (count > MAX_HISTORY_COUNT)
 		[replaceHistory removeObjectAtIndex:count - 1];
 }
 
-- (void)removeObjectFromReplaceHistoryAtIndex:(unsigned int)idx {
+- (void)removeObjectFromReplaceHistoryAtIndex:(NSUInteger)idx {
     [replaceHistory removeObjectAtIndex:idx];
 }
 
@@ -711,7 +711,7 @@ enum {
 
     NSEnumerator *selPubE = [[theDocument selectedPublications] objectEnumerator];
     BibItem *selItem = [selPubE nextObject];
-    unsigned int indexOfSelectedItem;
+    NSUInteger indexOfSelectedItem;
     if(selItem == nil){ // no selection, so select the first one
         indexOfSelectedItem = 0;
     } else {        
@@ -818,7 +818,7 @@ enum {
     NSString *findStr = [self findString];
 	// get the current search option settings
     NSString *field = [self field];
-    unsigned int searchOpts = (ignoreCase ? NSCaseInsensitiveSearch : 0);
+    NSUInteger searchOpts = (ignoreCase ? NSCaseInsensitiveSearch : 0);
 	
 	switch(searchScope){
 		case FCEndsWithSearch:
@@ -939,14 +939,14 @@ enum {
 	return nil;
 }
 
-- (unsigned int)stringFindAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
+- (NSUInteger)stringFindAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
 	// find and replace using BDSKComplexString methods
     // first we setup all the search settings
     NSString *findStr = [self findString];
     NSString *replStr = [self replaceString];
 	// get the current search option settings
     NSString *field = [self field];
-    unsigned int searchOpts = (ignoreCase ? NSCaseInsensitiveSearch : 0);
+    NSUInteger searchOpts = (ignoreCase ? NSCaseInsensitiveSearch : 0);
 	
 	if(!findAsMacro && replaceAsMacro)
 		searchScope = FCWholeFieldSearch; // we can only reliably replace a complete string by a macro
@@ -968,8 +968,8 @@ enum {
     BibItem *bibItem;
     NSString *origStr;
     NSString *newStr;
-	unsigned int numRepl = 0;
-	unsigned int number = 0;
+	NSUInteger numRepl = 0;
+	NSUInteger number = 0;
 	
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -981,7 +981,7 @@ enum {
             NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
             BDSKLinkedFile *file;
             BDSKLinkedFile *replFile;
-            unsigned int idx;
+            NSUInteger idx;
             
             while (file = [fileEnum nextObject]) {
                 idx = [[bibItem files] indexOfObjectIdenticalTo:file];
@@ -1029,7 +1029,7 @@ enum {
 	return number;
 }
 
-- (unsigned int)regexFindAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
+- (NSUInteger)regexFindAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
 	// find and replace using AGRegex
     // first we setup all the search settings
     NSString *replStr = [self replaceString];
@@ -1045,7 +1045,7 @@ enum {
     BibItem *bibItem;
     NSString *origStr;
 	NSString *complexStr;
-	unsigned int number = 0;
+	NSUInteger number = 0;
 	
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -1057,7 +1057,7 @@ enum {
             NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
             BDSKLinkedFile *file;
             BDSKLinkedFile *replFile;
-            unsigned int idx;
+            NSUInteger idx;
             
             while (file = [fileEnum nextObject]) {
                 idx = [[bibItem files] indexOfObjectIdenticalTo:file];
@@ -1101,7 +1101,7 @@ enum {
 	return number;
 }
 
-- (unsigned int)overwriteInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
+- (NSUInteger)overwriteInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
 	// overwrite using BDSKComplexString methods
     // first we setup all the search settings
     NSString *replStr = [self replaceString];
@@ -1115,7 +1115,7 @@ enum {
     NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
     BibItem *bibItem;
     NSString *origStr;
-	unsigned int number = 0;
+	NSUInteger number = 0;
 
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -1161,7 +1161,7 @@ enum {
 	return number;
 }
 
-- (unsigned int)prependInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
+- (NSUInteger)prependInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
 	// prepend using BDSKComplexString methods
     // first we setup all the search settings
     NSString *replStr = [self replaceString];
@@ -1178,7 +1178,7 @@ enum {
     NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
     BibItem *bibItem;
     NSString *origStr;
-	unsigned int number = 0;
+	NSUInteger number = 0;
 
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -1190,7 +1190,7 @@ enum {
             NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
             BDSKLinkedFile *file;
             BDSKLinkedFile *replFile;
-            unsigned int idx;
+            NSUInteger idx;
             
             while (file = [fileEnum nextObject]) {
                 idx = [[bibItem files] indexOfObjectIdenticalTo:file];
@@ -1220,7 +1220,7 @@ enum {
 	return number;
 }
 
-- (unsigned int)appendInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
+- (NSUInteger)appendInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
 	// prepend using BDSKComplexString methods
     // first we setup all the search settings
     NSString *replStr = [self replaceString];
@@ -1237,7 +1237,7 @@ enum {
     NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
     BibItem *bibItem;
     NSString *origStr;
-	unsigned int number = 0;
+	NSUInteger number = 0;
 
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -1249,7 +1249,7 @@ enum {
             NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
             BDSKLinkedFile *file;
             BDSKLinkedFile *replFile;
-            unsigned int idx;
+            NSUInteger idx;
             
             while (file = [fileEnum nextObject]) {
                 idx = [[bibItem files] indexOfObjectIdenticalTo:file];
@@ -1279,8 +1279,8 @@ enum {
 	return number;
 }
 
-- (unsigned int)findAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
-	unsigned int number;
+- (NSUInteger)findAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
+	NSUInteger number;
     
 	if(FCOperationOverwrite == [self operation])
 		number = [self overwriteInItems:arrayOfPubs ofDocument:theDocument];

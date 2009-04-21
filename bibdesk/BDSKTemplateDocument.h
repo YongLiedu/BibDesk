@@ -127,7 +127,7 @@ extern NSString *BDSKRichTextTemplateDocumentType;
     BOOL italic;
     BDSKToken *selectedToken;
     BDSKToken *menuToken;
-    unsigned int defaultTypeIndex;
+    NSUInteger defaultTypeIndex;
     
     NSString *string;
     NSAttributedString *attributedString;
@@ -137,10 +137,10 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 
 - (NSArray *)typeTemplates;
 - (void)setTypeTemplates:(NSArray *)newTypeTemplates;
-- (unsigned int)countOfTypeTemplates;
-- (id)objectInTypeTemplatesAtIndex:(unsigned int)index;
-- (void)insertObject:(id)obj inTypeTemplatesAtIndex:(unsigned int)index;
-- (void)removeObjectFromTypeTemplatesAtIndex:(unsigned int)index;
+- (NSUInteger)countOfTypeTemplates;
+- (id)objectInTypeTemplatesAtIndex:(NSUInteger)index;
+- (void)insertObject:(id)obj inTypeTemplatesAtIndex:(NSUInteger)index;
+- (void)removeObjectFromTypeTemplatesAtIndex:(NSUInteger)index;
 
 - (NSArray *)specialTokens;
 - (void)setSpecialTokens:(NSArray *)newSpecialTokens;
@@ -175,8 +175,8 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 - (BDSKToken *)selectedToken;
 - (void)setSelectedToken:(BDSKToken *)newSelectedToken;
 
-- (unsigned int)defaultTypeIndex;
-- (void)setDefaultTypeIndex:(unsigned int)newDefaultTypeIndex;
+- (NSUInteger)defaultTypeIndex;
+- (void)setDefaultTypeIndex:(NSUInteger)newDefaultTypeIndex;
 
 - (NSAttributedString *)attributedString;
 - (NSString *)string;

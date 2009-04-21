@@ -46,7 +46,7 @@
 @interface BDSKItemPasteboardHelper (Private)
 
 - (NSMutableArray *)promisedTypesForPasteboard:(NSPasteboard *)pboard;
-- (int)promisedDragCopyTypeForPasteboard:(NSPasteboard *)pboard;
+- (NSInteger)promisedDragCopyTypeForPasteboard:(NSPasteboard *)pboard;
 - (NSString *)promisedBibTeXStringForPasteboard:(NSPasteboard *)pboard;
 - (NSArray *)promisedCiteKeysForPasteboard:(NSPasteboard *)pboard;
 - (void)removePromisedType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;
@@ -99,7 +99,7 @@
 
 #pragma mark Promising and adding data
 
-- (void)declareType:(NSString *)type dragCopyType:(int)dragCopyType forItems:(NSArray *)items forPasteboard:(NSPasteboard *)pboard{
+- (void)declareType:(NSString *)type dragCopyType:(NSInteger)dragCopyType forItems:(NSArray *)items forPasteboard:(NSPasteboard *)pboard{
 	NSMutableArray *types = [NSMutableArray arrayWithObjects:type, BDSKBibItemPboardType, nil];
     
     if ([type isEqualToString:NSURLPboardType]) {
@@ -199,7 +199,7 @@
             citeKeys = [self promisedCiteKeysForPasteboard:pboard];
         }
         if(bibString != nil){
-            int dragCopyType = [self promisedDragCopyTypeForPasteboard:pboard];
+            NSInteger dragCopyType = [self promisedDragCopyTypeForPasteboard:pboard];
             if([type isEqualToString:NSPDFPboardType]){
                 BDSKASSERT(dragCopyType == BDSKPDFDragCopyType);
                 NSData *data = nil;
@@ -308,7 +308,7 @@
 	return [self pasteboardIsValid:pboard] ? [[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"types"] : nil;
 }
 
-- (int)promisedDragCopyTypeForPasteboard:(NSPasteboard *)pboard {
+- (NSInteger)promisedDragCopyTypeForPasteboard:(NSPasteboard *)pboard {
 	return [self pasteboardIsValid:pboard] ? [[[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"dragCopyType"] intValue] : -1;
 }
 

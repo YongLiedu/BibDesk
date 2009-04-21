@@ -109,7 +109,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     NSString *sharingName;
     NSConnection *connection;
     NSMutableDictionary *remoteClients;
-    unsigned int numberOfConnections;
+    NSUInteger numberOfConnections;
     BDSKReadWriteLock *rwLock;
 }
 
@@ -117,8 +117,8 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (id)initForSharingServer:(BDSKSharingServer *)aSharingServer;
 
-- (unsigned int)numberOfConnections;
-- (void)setNumberOfConnections:(unsigned int)count;
+- (NSUInteger)numberOfConnections;
+- (void)setNumberOfConnections:(NSUInteger)count;
 
 - (void)notifyClientConnectionsChanged;
 
@@ -211,7 +211,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     return status;
 }
 
-- (unsigned int)numberOfConnections { 
+- (NSUInteger)numberOfConnections { 
     // minor thread-safety issue here; this may be off by one
     return [server numberOfConnections]; 
 }
@@ -256,7 +256,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     uint16_t chosenPort = 0;
     
     // Here, create the socket from traditional BSD socket calls
-    int fdForListening;
+    NSInteger fdForListening;
     struct sockaddr_in serverAddress;
     socklen_t namelen = sizeof(serverAddress);
     
@@ -452,7 +452,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void)netService:(NSNetService *)sender didNotPublish:(NSDictionary *)errorDict
 {
-    int err = [[errorDict objectForKey:NSNetServicesErrorCode] intValue];
+    NSInteger err = [[errorDict objectForKey:NSNetServicesErrorCode] intValue];
     
     [self disableSharing];
     
@@ -555,14 +555,14 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 #pragma mark Thread Safe
 
-- (unsigned int)numberOfConnections {
+- (NSUInteger)numberOfConnections {
     [rwLock lockForReading];
-    unsigned int count = numberOfConnections; 
+    NSUInteger count = numberOfConnections; 
     [rwLock unlock];
     return count;
 }
 
-- (void)setNumberOfConnections:(unsigned int)count {
+- (void)setNumberOfConnections:(NSUInteger)count {
     [rwLock lockForWriting];
     numberOfConnections = count;
     [rwLock unlock];
@@ -663,7 +663,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 {
     // set the child connection's delegate so we get authentication messages
     // this hidden pref will be zero by default, but we'll add a limit here just in case it's needed
-    static unsigned int maxConnections = 0;
+    static NSUInteger maxConnections = 0;
     if(maxConnections == 0)
         maxConnections = MAX(20, [[NSUserDefaults standardUserDefaults] integerForKey:@"BDSKSharingServerMaxConnections"]);
     

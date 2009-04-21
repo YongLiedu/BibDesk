@@ -50,12 +50,12 @@
 
 - (void)setupTableColumnsWithIdentifiers:(NSArray *)identifiers;
 - (NSMenu *)columnsMenu;
-- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(unsigned int)index;
+- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(NSUInteger)index;
 - (void)removeTableColumnWithIdentifier:(NSString *)identifier;
 
 - (void)removeAllTableColumns;
 - (NSArray *)tableColumnIdentifiers;
-- (void)scrollRowToCenter:(unsigned int)row;
+- (void)scrollRowToCenter:(NSUInteger)row;
 
 - (void)alternateDelete:(id)sender;
 - (void)alternateCut:(id)sender;
@@ -68,9 +68,9 @@
 
 @interface NSObject (BDSKMainTableViewDelegate)
 - (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView;
-- (void)tableView:(NSTableView *)aTableView importItemAtRow:(int)rowIndex;
-- (void)tableView:(NSTableView *)aTableView openParentForItemAtRow:(int)rowIndex;
-- (NSColor *)tableView:(NSTableView *)aTableView highlightColorForRow:(int)rowIndex;
+- (void)tableView:(NSTableView *)aTableView importItemAtRow:(NSInteger)rowIndex;
+- (void)tableView:(NSTableView *)aTableView openParentForItemAtRow:(NSInteger)rowIndex;
+- (NSColor *)tableView:(NSTableView *)aTableView highlightColorForRow:(NSInteger)rowIndex;
 @end
 
 

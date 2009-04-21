@@ -46,12 +46,12 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:NSApp];
 }
 
-- (void)selectLineNumber:(int) line;
+- (void)selectLineNumber:(NSInteger) line;
 {
-    int i;
+    NSInteger i;
     NSString *string;
-    unsigned int start;
-    unsigned int end;
+    NSUInteger start;
+    NSUInteger end;
     NSRange myRange;
 
     string = [self string];
@@ -130,8 +130,8 @@
     NSString *string = [self string];
     NSTextStorage *textStorage = [self textStorage];
     NSRange range = [string rangeOfString:substring options:NSCaseInsensitiveSearch];
-    unsigned int maxRangeLoc;
-    unsigned int length = [string length];
+    NSUInteger maxRangeLoc;
+    NSUInteger length = [string length];
     
     // Mail.app appears to use a light gray highlight, which is rather ugly, but we don't want to use the selected text highlight
     static NSDictionary *highlightAttributes = nil;
@@ -160,7 +160,7 @@
     // Note the guarantees in the header for -selectedRanges and requirements for setSelectedRanges:
     NSArray *ranges = [self selectedRanges];
     NSMutableArray *newRanges = [NSMutableArray array];
-    unsigned int i, iMax = [ranges count];
+    NSUInteger i, iMax = [ranges count];
     
     // this represents the entire string
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [[self string] length])];
@@ -176,7 +176,7 @@
         [newRanges addObject:[NSValue valueWithRange:NSMakeRange(0, 0)]];
     } else {
         
-        unsigned int start, next;
+        NSUInteger start, next;
         start = i;
         
         while (NSNotFound != i) {

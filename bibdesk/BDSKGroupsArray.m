@@ -107,11 +107,11 @@
 
 #pragma mark NSArray primitive methods
 
-- (unsigned int)count {
+- (NSUInteger)count {
     return [groups count];
 }
 
-- (id)objectAtIndex:(unsigned int)idx {
+- (id)objectAtIndex:(NSUInteger)idx {
     return [groups objectAtIndex:idx];
 }
 
@@ -291,7 +291,7 @@
 
 #pragma mark Serializing
 
-- (void)setGroupsOfType:(int)groupType fromSerializedData:(NSData *)data {
+- (void)setGroupsOfType:(NSInteger)groupType fromSerializedData:(NSData *)data {
 	NSString *error = nil;
 	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
 	id plist = [NSPropertyListSerialization propertyListFromData:data
@@ -349,7 +349,7 @@
     }
 }
 
-- (NSData *)serializedGroupsDataOfType:(int)groupType {
+- (NSData *)serializedGroupsDataOfType:(NSInteger)groupType {
     Class groupClass = Nil;
     NSArray *groupArray = nil;
     

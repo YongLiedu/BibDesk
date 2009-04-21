@@ -87,7 +87,7 @@
 
 - (BOOL) validateCopyAsMenuItem:(NSMenuItem*) menuItem {
     BOOL usesTeX = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey];
-	int copyType = [menuItem tag];
+	NSInteger copyType = [menuItem tag];
     
     if (usesTeX == NO && (copyType == BDSKPDFDragCopyType || copyType == BDSKRTFDragCopyType || copyType == BDSKLaTeXDragCopyType || copyType == BDSKLTBDragCopyType))
         return NO;
@@ -365,7 +365,7 @@
 } 
 
 - (BOOL) validateRenameGroupMenuItem:(NSMenuItem *)menuItem{
-	int row = [groupOutlineView selectedRow];
+	NSInteger row = [groupOutlineView selectedRow];
 	if ([groupOutlineView numberOfSelectedRows] == 1 &&
 		row > 0 &&
         [[groupOutlineView itemAtRow:row] hasEditableName]) {
@@ -388,7 +388,7 @@
 - (BOOL) validateEditGroupMenuItem:(NSMenuItem *)menuItem{
     if ([documentWindow isKeyWindow] == NO)
         return NO;
-	int row = [groupOutlineView selectedRow];
+	NSInteger row = [groupOutlineView selectedRow];
 	if ([groupOutlineView numberOfSelectedRows] == 1 && row > 0) {
 		// single group selection
         return [[groupOutlineView itemAtRow:row] isEditable];
@@ -480,7 +480,7 @@
 }
 
 - (BOOL)validateChangePreviewDisplayMenuItem:(NSMenuItem *)menuItem {
-    int tag = [menuItem tag], state = NSOffState;
+    NSInteger tag = [menuItem tag], state = NSOffState;
     NSString *style = [menuItem representedObject];
     if (tag == bottomPreviewDisplay && tag != BDSKPreviewDisplayText) {
         state = NSOnState;
@@ -493,7 +493,7 @@
 }
 
 - (BOOL)validateChangeSidePreviewDisplayMenuItem:(NSMenuItem *)menuItem {
-    int tag = [menuItem tag], state = NSOffState;
+    NSInteger tag = [menuItem tag], state = NSOffState;
     NSString *style = [menuItem representedObject];
     if (tag == sidePreviewDisplay && tag != BDSKPreviewDisplayText) {
         state = NSOnState;

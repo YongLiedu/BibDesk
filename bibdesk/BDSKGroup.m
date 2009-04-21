@@ -89,7 +89,7 @@ static NSString *createUniqueID(void)
 }
 
 // designated initializer
-- (id)initWithName:(id)aName count:(int)aCount {
+- (id)initWithName:(id)aName count:(NSInteger)aCount {
     if (self = [super init]) {
         name = [aName copy];
         count = aCount;
@@ -138,7 +138,7 @@ static NSString *createUniqueID(void)
     [super dealloc];
 }
 
-- (unsigned int)hash {
+- (NSUInteger)hash {
     return [name hash];
 }
 
@@ -165,11 +165,11 @@ static NSString *createUniqueID(void)
     return [[name retain] autorelease];
 }
 
-- (int)count {
+- (NSInteger)count {
     return count;
 }
 
-- (void)setCount:(int)newCount {
+- (void)setCount:(NSInteger)newCount {
 	count = newCount;
 }
 
@@ -293,8 +293,8 @@ static NSString *BDSKLibraryLocalizedString = nil;
 
 - (BOOL)isEqual:(id)other { return self == other; }
 
-- (unsigned int)hash {
-    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
+- (NSUInteger)hash {
+    return( ((NSUInteger) self >> 4) | (NSUInteger) self << (32 - 4));
 }
 
 - (BOOL)isValidDropTarget { return YES; }

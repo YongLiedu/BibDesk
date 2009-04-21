@@ -32,9 +32,9 @@ enum {
     NSString *originalVersionString;
     NSString *cleanVersionString;
     
-    unsigned int componentCount;
-    int *components;
-    int releaseType;
+    NSUInteger componentCount;
+    NSInteger *components;
+    NSInteger releaseType;
 }
 
 + (id)versionNumberWithVersionString:(NSString *)versionString;
@@ -44,10 +44,10 @@ enum {
 - (NSString *)originalVersionString;
 - (NSString *)cleanVersionString;
 
-- (unsigned int)componentCount;
-- (int)componentAtIndex:(unsigned int)componentIndex;
+- (NSUInteger)componentCount;
+- (NSInteger)componentAtIndex:(NSUInteger)componentIndex;
 
-- (int)releaseType;
+- (NSInteger)releaseType;
 - (BOOL)isRelease;
 - (BOOL)isReleaseCandidate;
 - (BOOL)isDevelopment;

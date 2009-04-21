@@ -213,7 +213,7 @@ Ensure that views are always ordered vertically from top to bottom as
 
 // simplified search used by BDSKAppController's Service for legacy compatibility
 - (NSArray *)publicationsMatchingSubstring:(NSString *)searchString inField:(NSString *)field{
-    unsigned int i, iMax = [publications count];
+    NSUInteger i, iMax = [publications count];
     NSMutableArray *results = [NSMutableArray arrayWithCapacity:100];
     for (i = 0; i < iMax; i++) {
         BibItem *pub = [publications objectAtIndex:i];

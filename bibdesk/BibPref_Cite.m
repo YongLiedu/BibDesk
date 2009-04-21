@@ -185,7 +185,7 @@ static char BDSKBibPrefCiteDefaultsObservationContext;
 
 - (IBAction)setCitationBracketStyle:(id)sender{
 	// 1 - tex 2 - context
-	int tag = [[sender selectedCell] tag];
+	NSInteger tag = [[sender selectedCell] tag];
 	if(tag == 1){
 		[sud setObject:@"{" forKey:BDSKCiteStartBracketKey];
 		[sud setObject:@"}" forKey:BDSKCiteEndBracketKey];

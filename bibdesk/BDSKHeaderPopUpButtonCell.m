@@ -149,7 +149,7 @@
 	}
 	
 	// Two little arrows. We could also use some image here
-	int controlSize = [self controlSize];
+	NSInteger controlSize = [self controlSize];
 	float width = 5.0 - controlSize;
 	float height = 4.0 - controlSize;
 	float totalHeight = 3.0 + 2 * height;

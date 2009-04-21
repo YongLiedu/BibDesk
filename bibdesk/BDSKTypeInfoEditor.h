@@ -70,7 +70,7 @@
 - (void)revertTypes;
 
 - (void)addType:(NSString *)newType withFields:(NSDictionary *)fieldsDict;
-- (void)insertType:(NSString *)newType withFields:(NSDictionary *)fieldsDict atIndex:(unsigned int)index;
+- (void)insertType:(NSString *)newType withFields:(NSDictionary *)fieldsDict atIndex:(NSUInteger)index;
 - (void)setCurrentType:(NSString *)newCurrentType;
 
 - (IBAction)addType:(id)sender;
@@ -85,7 +85,7 @@
 
 - (BOOL)canEditType:(NSString *)type;
 - (BOOL)canEditField:(NSString *)field;
-- (BOOL)canEditTableView:(NSTableView *)tv row:(int)row;
+- (BOOL)canEditTableView:(NSTableView *)tv row:(NSInteger)row;
 - (void)updateButtons;
 
 @end

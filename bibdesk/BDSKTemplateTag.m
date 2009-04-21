@@ -198,7 +198,7 @@
     return matchStrings;
 }
 
-- (NSArray *)subtemplateAtIndex:(unsigned int)anIndex {
+- (NSArray *)subtemplateAtIndex:(NSUInteger)anIndex {
     id subtemplate = [subtemplates objectAtIndex:anIndex];
     if ([subtemplate isKindOfClass:[NSArray class]] == NO) {
         subtemplate = [BDSKTemplateParser arrayByParsingTemplateString:subtemplate isSubtemplate:YES];
@@ -213,7 +213,7 @@
 
 @implementation BDSKRichConditionTemplateTag
 
-- (NSArray *)subtemplateAtIndex:(unsigned int)anIndex {
+- (NSArray *)subtemplateAtIndex:(NSUInteger)anIndex {
     id subtemplate = [subtemplates objectAtIndex:anIndex];
     if ([subtemplate isKindOfClass:[NSArray class]] == NO) {
         subtemplate = [BDSKTemplateParser arrayByParsingTemplateAttributedString:subtemplate isSubtemplate:YES];

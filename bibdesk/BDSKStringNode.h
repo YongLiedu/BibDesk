@@ -141,7 +141,7 @@ typedef enum{
      @param		mask The search options used in the comparison. These are the same as for string compare methods. 
      @result     -
      */
-- (NSComparisonResult)compareNode:(BDSKStringNode *)aNode options:(unsigned int)mask;
+- (NSComparisonResult)compareNode:(BDSKStringNode *)aNode options:(NSUInteger)mask;
 
     /*!
     @method     type

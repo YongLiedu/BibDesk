@@ -58,9 +58,9 @@
 - (void)updateUI;
 - (BDSKFilter *)filter;
 - (void)insertNewConditionAfter:(BDSKConditionController *)aConditionController;
-- (void)insertConditionController:(BDSKConditionController *)newController atIndex:(unsigned int)index;
+- (void)insertConditionController:(BDSKConditionController *)newController atIndex:(NSUInteger)index;
 - (void)removeConditionController:(BDSKConditionController *)aConditionController;
-- (void)removeConditionControllerAtIndex:(unsigned int)index;
+- (void)removeConditionControllerAtIndex:(NSUInteger)index;
 - (BOOL)canRemoveCondition;
 - (NSArray *)conditionControllers;
 - (BDSKConjunction)conjunction;

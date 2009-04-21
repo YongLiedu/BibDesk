@@ -79,7 +79,7 @@ enum {
 - (BOOL)isISI;
 - (BOOL)isDBLP;
 
-- (int)serverType;
+- (NSInteger)serverType;
 
 @end
 

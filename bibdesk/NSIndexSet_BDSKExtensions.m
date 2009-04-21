@@ -56,7 +56,7 @@
 - (BOOL)intersectsIndexSet:(NSIndexSet *)indexSet{
     if ([indexSet count] == 0)
         return NO;
-    unsigned int idx = [indexSet firstIndex];
+    NSUInteger idx = [indexSet firstIndex];
     while (idx != NSNotFound) {
         if ([self containsIndex:idx])
             return YES;
@@ -67,15 +67,15 @@
 
 #define STACK_BUFFER_SIZE 256
 
-- (unsigned int)numberOfIndexesInRange:(NSRange)range {
-    unsigned int maxCount = MIN([self count], range.length);
-    unsigned int stackBuffer[STACK_BUFFER_SIZE];
+- (NSUInteger)numberOfIndexesInRange:(NSRange)range {
+    NSUInteger maxCount = MIN([self count], range.length);
+    NSUInteger stackBuffer[STACK_BUFFER_SIZE];
 
-    unsigned int *buffer = stackBuffer;
+    NSUInteger *buffer = stackBuffer;
     if (maxCount > STACK_BUFFER_SIZE)
-        buffer = NSZoneMalloc([self zone], maxCount * sizeof(unsigned int));
+        buffer = NSZoneMalloc([self zone], maxCount * sizeof(NSUInteger));
 
-    unsigned int numberOfIndexes = [self getIndexes:buffer maxCount:maxCount inIndexRange:&range];
+    NSUInteger numberOfIndexes = [self getIndexes:buffer maxCount:maxCount inIndexRange:&range];
     if (buffer != stackBuffer)
         NSZoneFree([self zone], buffer);
     

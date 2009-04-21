@@ -53,13 +53,13 @@
 
 - (NSArray *)linkedFiles;
 - (void)insertInLinkedFiles:(NSURL *)newURL;
-- (void)insertObject:(NSURL *)newURL inLinkedFilesAtIndex:(unsigned int)idx;
-- (void)removeObjectFromLinkedFilesAtIndex:(unsigned int)idx;
+- (void)insertObject:(NSURL *)newURL inLinkedFilesAtIndex:(NSUInteger)idx;
+- (void)removeObjectFromLinkedFilesAtIndex:(NSUInteger)idx;
 
 - (NSArray *)linkedURLs;
 - (void)insertInLinkedURLs:(NSString *)newURLString;
-- (void)insertObject:(NSString *)newURLString inLinkedURLsAtIndex:(unsigned int)idx;
-- (void)removeObjectFromLinkedURLsAtIndex:(unsigned int)idx;
+- (void)insertObject:(NSString *)newURLString inLinkedURLsAtIndex:(NSUInteger)idx;
+- (void)removeObjectFromLinkedURLsAtIndex:(NSUInteger)idx;
 
 - (id)uniqueID;
 
@@ -108,8 +108,8 @@
 - (NSString *)keywords;
 - (void)setKeywords:(NSString *)keywords;
 
-- (int)scriptingRating;
-- (void)setScriptingRating:(int)rating;
+- (NSInteger)scriptingRating;
+- (void)setScriptingRating:(NSInteger)rating;
 
 - (NSScriptObjectSpecifier *) objectSpecifier;
 

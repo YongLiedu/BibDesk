@@ -113,7 +113,7 @@
     return (value != nil) ? value : field;
 }
 
-- (int)intValueOfField:(NSString *)field { 
+- (NSInteger)intValueOfField:(NSString *)field { 
     if ([field isBooleanField] || [field isRatingField])
         return 0;
     else if ([field isTriStateField])

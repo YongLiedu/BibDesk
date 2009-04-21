@@ -154,7 +154,7 @@
     [openTextEncodingPopupButton setEncoding:[BDSKStringEncodingManager defaultEncoding]];
     [oPanel setDirectory:[self currentDirectory]];
 		
-    int result = [self runModalOpenPanel:oPanel forTypes:types];
+    NSInteger result = [self runModalOpenPanel:oPanel forTypes:types];
     if(result == NSOKButton){
         *encoding = [openTextEncodingPopupButton encoding];
         return [oPanel URLs];
@@ -186,7 +186,7 @@
 
 - (IBAction)openDocumentUsingFilter:(id)sender
 {
-    int result;
+    NSInteger result;
     
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:YES];
@@ -205,7 +205,7 @@
         commandHistory = [NSMutableArray arrayWithArray:[uniqueCommandHistory allObjects]];
     
     // this is also a workaround for older versions
-    unsigned int MAX_HISTORY = 7;
+    NSUInteger MAX_HISTORY = 7;
     if([commandHistory count] > MAX_HISTORY)
         [commandHistory removeObjectsInRange:NSMakeRange(MAX_HISTORY, [commandHistory count] - MAX_HISTORY)];
     [openUsingFilterComboBox addItemsWithObjectValues:commandHistory];
@@ -226,7 +226,7 @@
             [self openDocumentWithContentsOfURL:aURL usingFilter:shellCommand encoding:encoding];
         }
         
-        unsigned int commandIndex = [commandHistory indexOfObject:shellCommand];
+        NSUInteger commandIndex = [commandHistory indexOfObject:shellCommand];
         // already in the array, so move it to the head of the list
         if(commandIndex != NSNotFound && commandIndex != 0) {
             [[shellCommand retain] autorelease];
@@ -455,7 +455,7 @@
     [oPanel setAllowsMultipleSelection:YES];
     [oPanel setDirectory:[self currentDirectory]];
 		
-    int result = [self runModalOpenPanel:oPanel forTypes:[NSArray arrayWithObjects:@"txt", @"rtf", nil]];
+    NSInteger result = [self runModalOpenPanel:oPanel forTypes:[NSArray arrayWithObjects:@"txt", @"rtf", nil]];
     if(result == NSOKButton){
         NSEnumerator *urlEnum = [[oPanel URLs] objectEnumerator];
         NSURL *aURL;

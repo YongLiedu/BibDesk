@@ -267,8 +267,8 @@ static NSImage *unlockedIcon = nil;
 
 - (BOOL)isEqual:(id)other { return self == other; }
 
-- (unsigned int)hash {
-    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
+- (NSUInteger)hash {
+    return( ((NSUInteger) self >> 4) | (NSUInteger) self << (32 - 4));
 }
 
 - (BDSKItemSearchIndexes *)searchIndexes {

@@ -48,7 +48,7 @@
     BDSKScriptGroup *group;
     NSString *path;
     NSString *arguments;
-    int type;
+    NSInteger type;
     NSUndoManager *undoManager;
     BDSKFieldEditor *dragFieldEditor;
 }

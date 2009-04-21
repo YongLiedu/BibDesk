@@ -85,7 +85,7 @@ static NSCharacterSet *keyCharSet = nil;
     
     NSString *string = [attrString string];
     
-    unsigned int start, length = [string length];
+    NSUInteger start, length = [string length];
     NSRange range = NSMakeRange(0, 0);
     NSString *keyString;
     

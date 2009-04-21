@@ -51,7 +51,7 @@ There are some issues with BibAuthor's sortCompare:, though, which we may revisi
 */
 - (NSComparisonResult)sortCompareToAuthorArray:(NSArray *)other;
 {
-    unsigned int myCount = [self count], otherCount = [other count];
+    NSUInteger myCount = [self count], otherCount = [other count];
     
     // hack for our non-standard sort order, which looks weirder than usual in this case...
     if (myCount == 0)
@@ -59,7 +59,7 @@ There are some issues with BibAuthor's sortCompare:, though, which we may revisi
     else if (otherCount == 0)
         return NSOrderedAscending;
 
-    unsigned int i, iMax = MIN(myCount, otherCount);    
+    NSUInteger i, iMax = MIN(myCount, otherCount);    
     NSComparisonResult order = NSOrderedSame;
     
     // compare up to the maximum number of elements, but break early if not ordered same

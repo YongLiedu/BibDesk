@@ -45,8 +45,8 @@
 - (id)valueInScriptingPublicationsWithUniqueID:(NSString *)uniqueID;
 - (NSArray *)scriptingPublications;
 - (void)insertInScriptingPublications:(BibItem *)pub;
-- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx;
-- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx;
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx;
+- (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx;
 
 - (BDSKMacro *)valueInMacrosWithName:(NSString *)name;
 - (NSArray *)macros;
@@ -61,22 +61,22 @@
 - (BDSKGroup *)valueInScriptingGroupsWithUniqueID:(NSString *)aUniqueID;
 - (BDSKGroup *)valueInScriptingGroupsWithName:(NSString *)name;
 - (void)insertInScriptingGroups:(BDSKGroup *)group;
-- (void)insertObject:(BDSKGroup *)group inScriptingGroupsAtIndex:(unsigned int)idx;
-- (void)removeObjectFromScriptingGroupsAtIndex:(unsigned int)idx;
+- (void)insertObject:(BDSKGroup *)group inScriptingGroupsAtIndex:(NSUInteger)idx;
+- (void)removeObjectFromScriptingGroupsAtIndex:(NSUInteger)idx;
 
 - (NSArray *)staticGroups;
 - (BDSKStaticGroup *)valueInStaticGroupsWithUniqueID:(NSString *)aUniqueID;
 - (BDSKStaticGroup *)valueInStaticGroupsWithName:(NSString *)name;
 - (void)insertInStaticGroups:(BDSKStaticGroup *)group;
-- (void)insertObject:(BDSKStaticGroup *)group inStaticGroupsAtIndex:(unsigned int)idx;
-- (void)removeObjectFromStaticGroupsAtIndex:(unsigned int)idx;
+- (void)insertObject:(BDSKStaticGroup *)group inStaticGroupsAtIndex:(NSUInteger)idx;
+- (void)removeObjectFromStaticGroupsAtIndex:(NSUInteger)idx;
 
 - (NSArray *)smartGroups;
 - (BDSKSmartGroup *)valueInSmartGroupsWithUniqueID:(NSString *)aUniqueID;
 - (BDSKSmartGroup *)valueInSmartGroupsWithName:(NSString *)name;
 - (void)insertInSmartGroups:(BDSKSmartGroup *)group;
-- (void)insertObject:(BDSKSmartGroup *)group inSmartGroupsAtIndex:(unsigned int)idx;
-- (void)removeObjectFromSmartGroupsAtIndex:(unsigned int)idx;
+- (void)insertObject:(BDSKSmartGroup *)group inSmartGroupsAtIndex:(NSUInteger)idx;
+- (void)removeObjectFromSmartGroupsAtIndex:(NSUInteger)idx;
 
 - (NSArray *)fieldGroups;
 - (BDSKCategoryGroup *)valueInFieldGroupsWithUniqueID:(NSString *)aUniqueID;
@@ -86,21 +86,21 @@
 - (BDSKURLGroup *)valueInExternalFileGroupsWithUniqueID:(NSString *)aUniqueID;
 - (BDSKURLGroup *)valueInExternalFileGroupsWithName:(NSString *)name;
 - (void)insertInExternalFileGroups:(BDSKURLGroup *)group;
-- (void)insertObject:(BDSKURLGroup *)group inExternalFileGroupsAtIndex:(unsigned int)idx;
-- (void)removeObjectFromExternalFileGroupsAtIndex:(unsigned int)idx;
+- (void)insertObject:(BDSKURLGroup *)group inExternalFileGroupsAtIndex:(NSUInteger)idx;
+- (void)removeObjectFromExternalFileGroupsAtIndex:(NSUInteger)idx;
 
 - (NSArray *)scriptGroups;
 - (BDSKScriptGroup *)valueInScriptGroupsWithUniqueID:(NSString *)aUniqueID;
 - (BDSKScriptGroup *)valueInScriptGroupsWithName:(NSString *)name;
 - (void)insertInScriptGroups:(BDSKScriptGroup *)group;
-- (void)removeObjectFromScriptGroupsAtIndex:(unsigned int)idx;
+- (void)removeObjectFromScriptGroupsAtIndex:(NSUInteger)idx;
 
 - (NSArray *)searchGroups;
 - (BDSKSearchGroup *)valueInSearchGroupsWithUniqueID:(NSString *)aUniqueID;
 - (BDSKSearchGroup *)valueInSearchGroupsWithName:(NSString *)name;
 - (void)insertInSearchGroups:(BDSKSearchGroup *)group;
-- (void)insertObject:(BDSKSearchGroup *)group inSearchGroupsAtIndex:(unsigned int)idx;
-- (void)removeObjectFromSearchGroupsAtIndex:(unsigned int)idx;
+- (void)insertObject:(BDSKSearchGroup *)group inSearchGroupsAtIndex:(NSUInteger)idx;
+- (void)removeObjectFromSearchGroupsAtIndex:(NSUInteger)idx;
 
 - (NSArray *)sharedGroups;
 - (BDSKSharedGroup *)valueInSharedGroupsWithUniqueID:(NSString *)aUniqueID;

@@ -106,7 +106,7 @@
             newString = collapsedWhitespaceString;
         } else if([key isSingleValuedField] || [key isURLField]) {
             // for single valued and URL fields, create a new field name
-            int i = 1;
+            NSInteger i = 1;
             NSString *newKey = [key stringByAppendingFormat:@"%d", i];
             while ([pubDict objectForKey:newKey] != nil) {
                 i++;
@@ -134,7 +134,7 @@ static void fixDateInDictionary(NSMutableDictionary *pubDict)
     if (dateString) {
         NSScanner *scanner = [[NSScanner alloc] initWithString:dateString];
         [scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL];
-        int year;
+        NSInteger year;
         if ([scanner scanInt:&year])
             [pubDict setObject:[NSString stringWithFormat:@"%d", year] forKey:BDSKYearString];
         [scanner release];
@@ -176,7 +176,7 @@ static inline BOOL isTagLine(NSString *sourceLine)
     }
 	
     // this basically trims whitespace and newlines
-	int startLoc = startRange.location;
+	NSInteger startLoc = startRange.location;
 	NSRange endRange = NSMakeRange([itemString length], 0);
 	itemString = [itemString substringWithRange:NSMakeRange(startLoc, endRange.location - startLoc)];
     

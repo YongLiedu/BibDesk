@@ -61,7 +61,7 @@ CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles th
 - (void)updateUI;
 - (void)addApplicationsWithIdentifiers:(NSArray *)identifiers;
 - (void)synchronizePreferences;
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 @end
 
 
@@ -179,7 +179,7 @@ CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles th
 
 #pragma mark Citekey autocompletion
 
-- (void)enableCompletionSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)enableCompletionSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     
     if(returnCode == NSAlertAlternateReturn){
         // set tableview as first responder
@@ -247,7 +247,7 @@ CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles th
 		   contextInfo:nil];
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     if(returnCode == NSOKButton){
 	
         // check to see if it's a Cocoa application (returns no for BBEdit Lite and MS Word, but yes for Carbon Emacs and Aqua LyX, so it's not foolproof)
@@ -293,7 +293,7 @@ CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles th
 }
 
 - (IBAction)removeApplication:(id)sender{
-    unsigned int selIndex = [arrayController selectionIndex];
+    NSUInteger selIndex = [arrayController selectionIndex];
     if (NSNotFound != selIndex)
         [arrayController removeObjectAtArrangedObjectIndex:selIndex];
     [self synchronizePreferences];

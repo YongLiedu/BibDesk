@@ -61,7 +61,7 @@
     }
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSCancelButton)
         return;
     
@@ -69,7 +69,7 @@
 	if (path == nil)
 		return;
 
-	int row = [tableView selectedRow]; // cannot be -1
+	NSInteger row = [tableView selectedRow]; // cannot be -1
 	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[sud dictionaryForKey:BDSKScriptHooksKey]];
 	[dict setObject:path forKey:name];
@@ -95,7 +95,7 @@
 }
 
 - (IBAction)removeScriptHook:(id)sender{
-	int row = [tableView selectedRow];
+	NSInteger row = [tableView selectedRow];
 	if (row == -1) return;
 	
 	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
@@ -106,7 +106,7 @@
 }
 
 - (void)showOrChooseScriptFile:(id)sender {
-	int row = [tableView clickedRow];
+	NSInteger row = [tableView clickedRow];
 	
 	if (row == -1)
 		return;
@@ -128,11 +128,11 @@
 
 #pragma mark TableView DataSource methods
 
-- (int)numberOfRowsInTableView:(NSTableView *)tv{
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tv{
 	return [[BDSKScriptHookManager scriptHookNames] count];
 }
 
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
 	NSString *colID = [tableColumn identifier];
 	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
 	
@@ -143,7 +143,7 @@
 	}
 }
 
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
+- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation{
 	NSString *colID = [tableColumn identifier];
 	
 	if([colID isEqualToString:@"name"])
@@ -158,7 +158,7 @@
 		return [[sud dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 }
 
-- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op{
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
     if (type && row >= 0 && row < [tableView numberOfRows]) {
@@ -171,7 +171,7 @@
     return NSDragOperationNone;
 }
 
-- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op{
+- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
     if (type) {
@@ -189,12 +189,12 @@
 #pragma mark TableView Delegate methods
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
-	int row = [tableView selectedRow];
+	NSInteger row = [tableView selectedRow];
 	[addButton setEnabled:(row != -1)];
 	[removeButton setEnabled:(row != -1)];
 }
 
-- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
 	return NO;
 }
 
@@ -202,7 +202,7 @@
     if ([rowIndexes count]) {
         NSArray *names = [BDSKScriptHookManager scriptHookNames];
         NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[sud dictionaryForKey:BDSKScriptHooksKey]];
-        unsigned int row = [rowIndexes firstIndex];
+        NSUInteger row = [rowIndexes firstIndex];
         while (row != NSNotFound) {
             [dict removeObjectForKey:[names objectAtIndex:row]];
             row = [rowIndexes indexGreaterThanIndex:row];

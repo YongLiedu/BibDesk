@@ -44,7 +44,7 @@
 
 @interface BDSKGroup : NSObject <NSCopying, NSCoding> {
 	id name;
-	int count;
+	NSInteger count;
     BDSKParentGroup *parent;
     BibDocument *document;
     NSString *uniqueID;
@@ -57,7 +57,7 @@
 	@param aName The name for the group.
 	@param count The count for the group.
 */
-- (id)initWithName:(id)aName count:(int)aCount;
+- (id)initWithName:(id)aName count:(NSInteger)aCount;
 
 /*!
 	@method initLibraryGroup
@@ -83,7 +83,7 @@
 	@abstract Returns the count of the group.
 	@discussion -
 */
-- (int)count;
+- (NSInteger)count;
 
 /*!
 	@method setCount:
@@ -91,7 +91,7 @@
 	@discussion -
 	@param newCount The new count to set.
 */
-- (void)setCount:(int)newCount;
+- (void)setCount:(NSInteger)newCount;
 
 /*!
 	@method count

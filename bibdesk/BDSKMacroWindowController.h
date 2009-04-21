@@ -60,11 +60,11 @@
 
 - (NSArray *)macros;
 - (void)setMacros:(NSArray *)newMacros;
-- (unsigned int)countOfMacros;
-- (id)objectInMacrosAtIndex:(unsigned int)idx;
-- (void)insertObject:(id)obj inMacrosAtIndex:(unsigned int)idx;
-- (void)removeObjectFromMacrosAtIndex:(unsigned int)idx;
-- (void)replaceObjectInMacrosAtIndex:(unsigned int)idx withObject:(id)obj;
+- (NSUInteger)countOfMacros;
+- (id)objectInMacrosAtIndex:(NSUInteger)idx;
+- (void)insertObject:(id)obj inMacrosAtIndex:(NSUInteger)idx;
+- (void)removeObjectFromMacrosAtIndex:(NSUInteger)idx;
+- (void)replaceObjectInMacrosAtIndex:(NSUInteger)idx withObject:(id)obj;
 
 - (IBAction)addMacro:(id)sender;
 - (IBAction)removeSelectedMacros:(id)sender;

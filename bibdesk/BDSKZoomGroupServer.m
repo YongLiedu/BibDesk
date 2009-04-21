@@ -148,22 +148,22 @@
     return info;
 }
 
-- (void)setNumberOfAvailableResults:(int)value;
+- (void)setNumberOfAvailableResults:(NSInteger)value;
 {
     OSAtomicCompareAndSwap32Barrier(availableResults, value, &availableResults);
 }
 
-- (int)numberOfAvailableResults;
+- (NSInteger)numberOfAvailableResults;
 {
     return availableResults;
 }
 
-- (void)setNumberOfFetchedResults:(int)value;
+- (void)setNumberOfFetchedResults:(NSInteger)value;
 {
     OSAtomicCompareAndSwap32Barrier(fetchedResults, value, &fetchedResults);
 }
 
-- (int)numberOfFetchedResults;
+- (NSInteger)numberOfFetchedResults;
 {
     return fetchedResults;
 }
@@ -227,10 +227,10 @@
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
 } 
 
-- (int)stringTypeForRecordString:(NSString *)string
+- (NSInteger)stringTypeForRecordString:(NSString *)string
 {
     NSString *recordSyntax = [serverInfo recordSyntax];
-    int stringType = BDSKUnknownStringType;
+    NSInteger stringType = BDSKUnknownStringType;
     if([recordSyntax isEqualToString:USMARC_STRING] || [recordSyntax isEqualToString:UNIMARC_STRING]) {
         stringType = BDSKMARCStringType;
     } else if([recordSyntax isEqualToString:MARCXML_STRING]) {
@@ -279,7 +279,7 @@
         
         [self setNumberOfAvailableResults:[resultSet countOfRecords]];
         
-        int numResults = MIN([self numberOfAvailableResults] - [self numberOfFetchedResults], MAX_RESULTS);
+        NSInteger numResults = MIN([self numberOfAvailableResults] - [self numberOfFetchedResults], MAX_RESULTS);
         //NSAssert(numResults >= 0, @"number of results to get must be non-negative");
         
         if(numResults > 0){
@@ -288,9 +288,9 @@
             [self setNumberOfFetchedResults:[self numberOfFetchedResults] + numResults];
             
             pubs = [NSMutableArray array];
-            int i, iMax = [records count];
+            NSInteger i, iMax = [records count];
             NSString *record;
-            int stringType;
+            NSInteger stringType;
             BibItem *anItem;
             for (i = 0; i < iMax; i++) {
                 record = [[records objectAtIndex:i] rawString];

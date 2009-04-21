@@ -38,7 +38,7 @@
 
 
 @interface NSTextView (BDSKExtensions)
-- (void)selectLineNumber:(int)line;
+- (void)selectLineNumber:(NSInteger)line;
 - (void)highlightComponentsOfSearchString:(NSString *)searchString;
 - (void)highlightOccurrencesOfString:(NSString *)substring;
 - (NSPoint)locationForCompletionWindow;

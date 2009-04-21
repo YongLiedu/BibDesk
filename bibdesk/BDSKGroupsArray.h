@@ -95,7 +95,7 @@ enum {
 
 - (BibDocument *)document;
 
-- (void)setGroupsOfType:(int)groupType fromSerializedData:(NSData *)data;
-- (NSData *)serializedGroupsDataOfType:(int)groupType;
+- (void)setGroupsOfType:(NSInteger)groupType fromSerializedData:(NSData *)data;
+- (NSData *)serializedGroupsDataOfType:(NSInteger)groupType;
 
 @end

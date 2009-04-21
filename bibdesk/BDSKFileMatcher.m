@@ -243,7 +243,7 @@ static float GROUP_ROW_HEIGHT = 24.0;
     [abortButton setEnabled:NO];
 }
 
-- (void)configSheetDidEnd:(NSWindow *)sheet returnCode:(int)code contextInfo:(void *)context;
+- (void)configSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)code contextInfo:(void *)context;
 {
     BDSKFileMatchConfigController *config = (id)context;
     [config autorelease];
@@ -269,7 +269,7 @@ static float GROUP_ROW_HEIGHT = 24.0;
     return NO;
 }
 
-- (NSDragOperation)outlineView:(NSOutlineView*)olv validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)idx;
+- (NSDragOperation)outlineView:(NSOutlineView*)olv validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx;
 {
     if ([[info draggingSource] isEqual:outlineView] && [item isLeaf] == NO) {
         [olv setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
@@ -278,7 +278,7 @@ static float GROUP_ROW_HEIGHT = 24.0;
     return NSDragOperationNone;
 }
 
-- (BOOL)outlineView:(NSOutlineView*)olv acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(int)idx;
+- (BOOL)outlineView:(NSOutlineView*)olv acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(NSInteger)idx;
 {
     NSArray *types = [[info draggingPasteboard] types];
     NSURL *fileURL = ([types containsObject:NSURLPboardType] ? [NSURL URLFromPasteboard:[info draggingPasteboard]] : nil);
@@ -344,7 +344,7 @@ static float GROUP_ROW_HEIGHT = 24.0;
 
 #pragma mark Outline view datasource
 
-- (id)outlineView:(NSOutlineView *)ov child:(int)idx ofItem:(id)item;
+- (id)outlineView:(NSOutlineView *)ov child:(NSInteger)idx ofItem:(id)item;
 {
     return nil == item ? [matches objectAtIndex:idx] : [item childAtIndex:idx];
 }
@@ -354,7 +354,7 @@ static float GROUP_ROW_HEIGHT = 24.0;
     return item ? (NO == [item isLeaf]) : YES;
 }
 
-- (int)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item;
+- (NSInteger)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item;
 {
     return item ? [item numberOfChildren] : [matches count];
 }
@@ -434,7 +434,7 @@ static NSString *titleStringWithPub(BibItem *pub)
 static void normalizeScoresForItem(BDSKTreeNode *parent, float maxScore)
 {
     // nodes are shallow, so we only traverse 1 deep
-    unsigned int i, iMax = [parent numberOfChildren];
+    NSUInteger i, iMax = [parent numberOfChildren];
     for (i = 0; i < iMax; i++) {
         BDSKTreeNode *child = [parent childAtIndex:i];
         NSNumber *score = [child valueForKey:@"score"];
@@ -501,7 +501,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
                 CFURLRef urls[MAX_SEARCHKIT_RESULTS];
                 SKIndexCopyDocumentURLsForDocumentIDs(searchIndex, numFound, docID, urls);
                 
-                int i, iMax = numFound;
+                NSInteger i, iMax = numFound;
                 
                 // now we have a matching file; we could remove it from the index, but multiple matches are reasonable
                 for (i =  0; i < iMax; i++) {
@@ -763,7 +763,7 @@ static NSColor *fillColor = nil;
         [super drawGridInClipRect:rect];
 }
 
-- (void)drawRow:(int)rowIndex clipRect:(NSRect)clipRect
+- (void)drawRow:(NSInteger)rowIndex clipRect:(NSRect)clipRect
 {
     if ([self isExpandable:[self itemAtRow:rowIndex]]) {
 
@@ -776,7 +776,7 @@ static NSColor *fillColor = nil;
     [super drawRow:rowIndex clipRect:clipRect];
 }
 
--(void)_drawDropHighlightOnRow:(int)rowIndex{
+-(void)_drawDropHighlightOnRow:(NSInteger)rowIndex{
     NSRect drawRect = (rowIndex == -1) ? [self visibleRect] : [self rectOfRow:rowIndex];
     
     [self lockFocus];

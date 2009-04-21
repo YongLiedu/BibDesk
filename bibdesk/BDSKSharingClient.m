@@ -60,7 +60,7 @@ typedef struct _BDSKSharingClientFlags {
 @protocol BDSKSharingClientServerMainThread <BDSKAsyncDOServerMainThread>
 
 - (oneway void)setArchivedPublications:(bycopy NSData *)publicationsArchive archivedMacros:(bycopy NSData *)macrosArchive;
-- (int)runAuthenticationFailedAlert;
+- (NSInteger)runAuthenticationFailedAlert;
 
 @end
 
@@ -341,7 +341,7 @@ typedef struct _BDSKSharingClientFlags {
     return [BDSKPasswordController runModalPanelForKeychainServiceName:[[self class] keychainServiceNameWithComputerName:[service name]] message:[NSString stringWithFormat:NSLocalizedString(@"Enter password for %@", @"Prompt for Password dialog"), [service name]]];
 }
 
-- (int)runAuthenticationFailedAlert;
+- (NSInteger)runAuthenticationFailedAlert;
 {
     NSAssert([NSThread isMainThread] == 1, @"runAuthenticationFailedAlert must be run from the main thread");
     NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Authentication Failed", @"Message in alert dialog when authentication failed")

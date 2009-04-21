@@ -58,8 +58,8 @@ extern NSString *BDSKRichTextString;
     NSString *title;
     NSString *fontName;
     float fontSize;
-    int bold;
-    int italic;
+    NSInteger bold;
+    NSInteger italic;
     BDSKTemplateDocument *document;
 }
 
@@ -67,7 +67,7 @@ extern NSString *BDSKRichTextString;
 
 - (id)initWithTitle:(NSString *)aTitle;
 
-- (int)type;
+- (NSInteger)type;
 
 - (NSString *)title;
 
@@ -77,11 +77,11 @@ extern NSString *BDSKRichTextString;
 - (float)fontSize;
 - (void)setFontSize:(float)newFontSize;
 
-- (int)bold;
-- (void)setBold:(int)newBold;
+- (NSInteger)bold;
+- (void)setBold:(NSInteger)newBold;
 
-- (int)italic;
-- (void)setItalic:(int)newItalic;
+- (NSInteger)italic;
+- (void)setItalic:(NSInteger)newItalic;
 
 - (BDSKTemplateDocument *)document;
 - (void)setDocument:(BDSKTemplateDocument *)newDocument;

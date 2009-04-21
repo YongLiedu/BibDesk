@@ -50,7 +50,7 @@
 @implementation BDSKCategoryGroup
 
 // designated initializer
-- (id)initWithName:(id)aName key:(NSString *)aKey count:(int)aCount {
+- (id)initWithName:(id)aName key:(NSString *)aKey count:(NSInteger)aCount {
     if (self = [super initWithName:aName count:aCount]) {
         key = [aKey copy];
     }
@@ -58,12 +58,12 @@
 }
 
 // super's designated initializer
-- (id)initWithName:(id)aName count:(int)aCount {
+- (id)initWithName:(id)aName count:(NSInteger)aCount {
     self = [self initWithName:aName key:nil count:aCount];
     return self;
 }
 
-- (id)initEmptyGroupWithKey:(NSString *)aKey count:(int)aCount {
+- (id)initEmptyGroupWithKey:(NSString *)aKey count:(NSInteger)aCount {
     NSZone *zone = [self zone];
 	[[super init] release];
     id aName = ([aKey isPersonField]) ? [BibAuthor emptyAuthor] : @"";
@@ -105,7 +105,7 @@
 }
 
 // name can change, but key doesn't change, and it's also required for equality
-- (unsigned int)hash {
+- (NSUInteger)hash {
     return [key hash];
 }
 
@@ -170,7 +170,7 @@
         image = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
         NSImage *genericImage = [NSImage imageNamed:@"categoryGroup"];
         NSImage *questionMark = [NSImage iconWithSize:NSMakeSize(20.0, 20.0) forToolboxCode:kQuestionMarkIcon];
-        unsigned int i;
+        NSUInteger i;
         [image lockFocus];
         [genericImage drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
         // hack to make the question mark dark enough to be visible

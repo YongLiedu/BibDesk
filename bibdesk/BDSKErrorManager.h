@@ -47,7 +47,7 @@
     BDSKErrorEditor *mainEditor;
     NSString *documentDisplayName;
     NSStringEncoding documentStringEncoding;
-    int uniqueNumber;
+    NSInteger uniqueNumber;
 }
 
 + (id)allItemsErrorManager;
@@ -62,7 +62,7 @@
 - (BibDocument *)sourceDocument;
 - (void)setSourceDocument:(BibDocument *)newDocument;
 
-- (int)uniqueNumber;
+- (NSInteger)uniqueNumber;
 - (NSString *)documentDisplayName;
 - (void)setDocumentDisplayName:(NSString *)newName;
 - (NSString *)displayName;

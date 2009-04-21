@@ -45,7 +45,7 @@
     NSMutableArray *managers;
     NSMutableArray *currentErrors;
     
-    unsigned int lastIndex;
+    NSUInteger lastIndex;
     
     // error-handling stuff:
     IBOutlet BDSKTableView *errorTableView;
@@ -56,16 +56,16 @@
 + (BDSKErrorObjectController *)sharedErrorObjectController;
 
 - (NSArray *)errors;
-- (unsigned int)countOfErrors;
-- (id)objectInErrorsAtIndex:(unsigned int)index;
-- (void)insertObject:(id)obj inErrorsAtIndex:(unsigned int)index;
-- (void)removeObjectFromErrorsAtIndex:(unsigned int)index;
+- (NSUInteger)countOfErrors;
+- (id)objectInErrorsAtIndex:(NSUInteger)index;
+- (void)insertObject:(id)obj inErrorsAtIndex:(NSUInteger)index;
+- (void)removeObjectFromErrorsAtIndex:(NSUInteger)index;
 
 - (NSArray *)managers;
-- (unsigned int)countOfManagers;
-- (id)objectInManagersAtIndex:(unsigned int)theIndex;
-- (void)insertObject:(id)obj inManagersAtIndex:(unsigned int)theIndex;
-- (void)removeObjectFromManagersAtIndex:(unsigned int)theIndex;
+- (NSUInteger)countOfManagers;
+- (id)objectInManagersAtIndex:(NSUInteger)theIndex;
+- (void)insertObject:(id)obj inManagersAtIndex:(NSUInteger)theIndex;
+- (void)removeObjectFromManagersAtIndex:(NSUInteger)theIndex;
 - (void)addManager:(BDSKErrorManager *)manager;
 - (void)removeManager:(BDSKErrorManager *)manager;
 

@@ -146,7 +146,7 @@
     NSString *statusMessage = nil;
     NSString *sharingName = nil;
     if([sud boolForKey:BDSKShouldShareFilesKey]){
-        unsigned int number = [server numberOfConnections];
+        NSUInteger number = [server numberOfConnections];
         if(number == 1)
             statusMessage = NSLocalizedString(@"On, 1 user connected", @"Bonjour sharing is on status message, single connection");
         else if([server status] >= BDSKSharingStatusPublishing)

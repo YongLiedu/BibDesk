@@ -85,7 +85,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 - (void)release {}
 
-- (unsigned int)retainCount { return UINT_MAX; }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)awakeFromNib
 {
@@ -135,7 +135,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 # pragma mark Accessors
 
-- (void)insertType:(NSString *)newType withFields:(NSDictionary *)fieldsDict atIndex:(unsigned int)idx {
+- (void)insertType:(NSString *)newType withFields:(NSDictionary *)fieldsDict atIndex:(NSUInteger)idx {
 	[types insertObject:newType atIndex:idx];
 	
 	// create mutable containers for the fields
@@ -217,7 +217,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 - (IBAction)addType:(id)sender {
 	NSString *newType = [NSString stringWithString:@"new-type"];
-	int i = 0;
+	NSInteger i = 0;
 	while ([types containsObject:newType]) {
 		newType = [NSString stringWithFormat:@"new-type-%i",++i];
 	}
@@ -225,7 +225,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	
     [typeTableView reloadData];
 	
-    int row = [types indexOfObject:newType];
+    NSInteger row = [types indexOfObject:newType];
     [typeTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 	[[[typeTableView tableColumnWithIdentifier:@"type"] dataCell] setEnabled:YES];
     [typeTableView editColumn:0 row:row withEvent:nil select:YES];
@@ -251,7 +251,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 - (IBAction)addRequired:(id)sender {
 	NSString *newField = [NSString stringWithString:@"New-Field"];
-	int i = 0;
+	NSInteger i = 0;
 	while ([currentRequiredFields containsObject:newField]) {
 		newField = [NSString stringWithFormat:@"New-Field-%i",++i];
 	}
@@ -259,7 +259,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	
     [requiredTableView reloadData];
 	
-    int row = [currentRequiredFields indexOfObject:newField];
+    NSInteger row = [currentRequiredFields indexOfObject:newField];
     [requiredTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 	[[[requiredTableView tableColumnWithIdentifier:@"required"] dataCell] setEnabled:YES];
     [requiredTableView editColumn:0 row:row withEvent:nil select:YES];
@@ -283,7 +283,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 - (IBAction)addOptional:(id)sender {
 	NSString *newField = [NSString stringWithString:@"New-Field"];
-	int i = 0;
+	NSInteger i = 0;
 	while ([currentOptionalFields containsObject:newField]) {
 		newField = [NSString stringWithFormat:@"New-Field-%i",++i];
 	}
@@ -291,7 +291,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	
     [optionalTableView reloadData];
 	
-    int row = [currentOptionalFields indexOfObject:newField];
+    NSInteger row = [currentOptionalFields indexOfObject:newField];
     [optionalTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 	[[[optionalTableView tableColumnWithIdentifier:@"optional"] dataCell] setEnabled:YES];
     [optionalTableView editColumn:0 row:row withEvent:nil select:YES];
@@ -350,7 +350,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	[self setDocumentEdited:YES];
 }
 
-- (void)warningSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)warningSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     canEditDefaultTypes = returnCode == NSOKButton;
     [canEditDefaultTypesButton setState:canEditDefaultTypes ? NSOnState : NSOffState];
     
@@ -395,7 +395,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	return YES; // any other fields of default types can be removed
 }
 
-- (BOOL)canEditTableView:(NSTableView *)tv row:(int)row{
+- (BOOL)canEditTableView:(NSTableView *)tv row:(NSInteger)row{
 	if (tv == typeTableView)
 		return [self canEditType:[types objectAtIndex:row]];
 	if ([self canEditType:currentType])
@@ -409,7 +409,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 - (void)updateButtons {
 	NSIndexSet *rowIndexes;
-	int row;
+	NSInteger row;
 	BOOL canRemove;
 	NSString *value;
 	
@@ -475,7 +475,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 #pragma mark NSTableview datasource
 
-- (int)numberOfRowsInTableView:(NSTableView *)tv {
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tv {
 	if (tv == typeTableView) {
 		return [types count];
 	}
@@ -492,7 +492,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
     return 0;
 }
 
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
 	if (tv == typeTableView) {
 		return [types objectAtIndex:row];
 	}
@@ -506,7 +506,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
     return nil;
 }
 
-- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
 	NSString *oldValue;
 	NSString *newValue;
 	
@@ -553,11 +553,11 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 #pragma mark NSTableview delegate
 
-- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
 	return [self canEditTableView:tv row:row];
 }
 
-- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
+- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
 	if ([self canEditTableView:tv row:row]) {
 		[cell setTextColor:[NSColor controlTextColor]]; // when selected, this is automatically changed to white
 	} else if ([[self window] isKeyWindow] && [[[self window] firstResponder] isEqual:tv] && [tv isRowSelected:row]) {
@@ -582,7 +582,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
             // append "copy" here instead of in the loop
             NSString *name = [[aType objectForKey:@"name"] stringByAppendingString:@"-copy"];
             newType = name;
-            int i = 0;
+            NSInteger i = 0;
             while ([types containsObject:newType]) {
                 newType = [NSString stringWithFormat:@"%@-%i",name, ++i];
             }
@@ -592,7 +592,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
         [typeTableView reloadData];
         
         // select and edit the first item we added
-        int row = [types count] - [newTypes count];
+        NSInteger row = [types count] - [newTypes count];
 
         [typeTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
         [[[typeTableView tableColumnWithIdentifier:@"type"] dataCell] setEnabled:YES];
@@ -629,7 +629,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	return YES;
 }
 
-- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op {
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op {
 	if ([info draggingSource] != tv) {// we don't allow dragging between tables, as we want to keep default types in the same place
 		if ([info draggingSource] == typeTableView || tv == typeTableView || [self canEditType:currentType] == NO)
             return NSDragOperationNone;
@@ -646,7 +646,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
         return NSDragOperationMove;
 }
 
-- (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo> )info row:(int)row dropOperation:(NSTableViewDropOperation)op {
+- (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo> )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op {
 	NSPasteboard *pboard = [info draggingPasteboard];
 	NSArray *rows = [pboard propertyListForType:BDSKTypeInfoRowsPboardType];
     NSIndexSet *insertIndexes;
@@ -657,7 +657,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
         NSEnumerator *typeEnum = [[types objectsAtIndexes:[NSIndexSet indexSetWithIndexesInArray:rows]] objectEnumerator];
         NSString *type;
         NSString *newType;
-        int i;
+        NSInteger i;
         
         insertIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(row, [rows count])];
         
@@ -674,8 +674,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
         
         NSEnumerator *rowEnum = [rows objectEnumerator];
         NSNumber *rowNum;
-        int i;
-        int insertRow = row;
+        NSInteger i;
+        NSInteger insertRow = row;
         NSMutableArray *sourceFields = nil;
         NSMutableArray *targetFields = nil;
         NSArray *draggedFields;
@@ -745,11 +745,11 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 #pragma mark Splitview delegate methods
 
-- (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)offset{
+- (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(NSInteger)offset{
 	return proposedMin + 50.0;
 }
 
-- (float)splitView:(NSSplitView *)sender constrainMaxCoordinate:(float)proposedMax ofSubviewAt:(int)offset{
+- (float)splitView:(NSSplitView *)sender constrainMaxCoordinate:(float)proposedMax ofSubviewAt:(NSInteger)offset{
 	return proposedMax - 50.0;
 }
 

@@ -170,7 +170,7 @@ static void initializeHighlightColors() {
     linearBlendFunctionRef = CGFunctionCreate(twoColors, 1, domainAndRange, 4, domainAndRange, &linearFunctionCallbacks);
     
     NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-    unsigned int rowIndex = [selectedRowIndexes firstIndex], prevRowIndex = NSNotFound;
+    NSUInteger rowIndex = [selectedRowIndexes firstIndex], prevRowIndex = NSNotFound;
     
     while (rowIndex != NSNotFound) {
         NSRect rowRect = [self rectOfRow:rowIndex];
@@ -266,7 +266,7 @@ static void initializeHighlightColors() {
     linearBlendFunctionRef = CGFunctionCreate(twoColors, 1, domainAndRange, 4, domainAndRange, &linearFunctionCallbacks);
     
     NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-    unsigned int rowIndex = [selectedRowIndexes firstIndex], prevRowIndex = NSNotFound;
+    NSUInteger rowIndex = [selectedRowIndexes firstIndex], prevRowIndex = NSNotFound;
     
     while (rowIndex != NSNotFound) {
         NSRect rowRect = [self rectOfRow:rowIndex];

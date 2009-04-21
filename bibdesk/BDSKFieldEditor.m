@@ -92,7 +92,7 @@
     NSTextStorage *textStorage = [self textStorage];
     NSString *string = [textStorage string];
     
-    unsigned int start, length = [string length];
+    NSUInteger start, length = [string length];
     NSRange range = NSMakeRange(0, 0);
     NSString *keyString;
     
@@ -283,7 +283,7 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
 
 #pragma mark Auto-completion methods
 
-- (NSArray *)completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)idx;
+- (NSArray *)completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(NSInteger *)idx;
 {
     NSArray *completions = nil;
     
@@ -306,7 +306,7 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
         return;
 
     // make sure to initialize this
-    int idx = 0;
+    NSInteger idx = 0;
     NSArray *completions = [self completionsForPartialWordRange:selRange indexOfSelectedItem:&idx];
     
     if(sender == self) // auto-complete, don't select an item
@@ -387,7 +387,7 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
            [[self delegate] control:self textView:textView isValidKey:key];
 }
 
-- (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned int)charIndex{
+- (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex{
     return textView == [self currentEditor] && 
            [[self delegate] respondsToSelector:@selector(control:textView:clickedOnLink:atIndex:)] &&
            [[self delegate] control:self textView:textView clickedOnLink:aLink atIndex:charIndex];
@@ -423,7 +423,7 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
            [[self delegate] control:self textView:textView isValidKey:key];
 }
 
-- (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned int)charIndex{
+- (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex{
     return textView == [self currentEditor] && 
            [[self delegate] respondsToSelector:@selector(control:textView:clickedOnLink:atIndex:)] &&
            [[self delegate] control:self textView:textView clickedOnLink:aLink atIndex:charIndex];

@@ -154,7 +154,7 @@
 
 #pragma mark NSOutlineView datasource and delegate methods
 
-- (int)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item {
+- (NSInteger)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item {
     if (item == nil)
         return [notes count];
     else if ([[item valueForKey:@"type"] isEqualToString:@"Note"])
@@ -166,7 +166,7 @@
     return [[item valueForKey:@"type"] isEqualToString:@"Note"];
 }
 
-- (id)outlineView:(NSOutlineView *)ov child:(int)idx ofItem:(id)item {
+- (id)outlineView:(NSOutlineView *)ov child:(NSInteger)idx ofItem:(id)item {
     if (item == nil) {
         return [notes objectAtIndex:idx];
     } else {
@@ -190,7 +190,7 @@
     return heightNumber ? [heightNumber floatValue] : 17.0;
 }
 
-- (void)outlineView:(NSOutlineView *)ov setHeightOfRow:(int)newHeight byItem:(id)item {
+- (void)outlineView:(NSOutlineView *)ov setHeightOfRow:(NSInteger)newHeight byItem:(id)item {
     [item setObject:[NSNumber numberWithFloat:newHeight] forKey:@"rowHeight"];
 }
 
@@ -244,7 +244,7 @@
 
 #pragma mark NSSplitView deldegate methods
 
-- (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(int)offset {
+- (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(NSInteger)offset {
     NSView *notesView = [[sender subviews] objectAtIndex:0]; // outlineView
     NSView *tagsView = [[sender subviews] objectAtIndex:1]; // tokenField
     NSRect notesFrame = [notesView frame];
@@ -298,7 +298,7 @@
 
 @implementation BDSKNotesOutlineView
 
-- (void)resizeRow:(int)row withEvent:(NSEvent *)theEvent {
+- (void)resizeRow:(NSInteger)row withEvent:(NSEvent *)theEvent {
     id item = [self itemAtRow:row];
     NSPoint startPoint = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     float startHeight = [[self delegate] outlineView:self heightOfRowByItem:item];
@@ -334,7 +334,7 @@
 - (void)mouseDown:(NSEvent *)theEvent {
     if ([theEvent clickCount] == 1 && [[self delegate] respondsToSelector:@selector(outlineView:canResizeRowByItem:)] && [[self delegate] respondsToSelector:@selector(outlineView:setHeightOfRow:byItem:)]) {
         NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-        int row = [self rowAtPoint:mouseLoc];
+        NSInteger row = [self rowAtPoint:mouseLoc];
         
         if (row != -1 && [[self delegate] outlineView:self canResizeRowByItem:[self itemAtRow:row]]) {
             NSRect ignored, rect;
@@ -356,7 +356,7 @@
         if (visibleRows.length == 0)
             return;
         
-        unsigned int row;
+        NSUInteger row;
         BOOL isFirstResponder = [[self window] isKeyWindow] && [[self window] firstResponder] == self;
         
         [NSGraphicsContext saveGraphicsState];
@@ -401,7 +401,7 @@
         [super resetCursorRects];
 
         NSRange visibleRows = [self rowsInRect:[self visibleRect]];
-        unsigned int row;
+        NSUInteger row;
         
         if (visibleRows.length == 0)
             return;

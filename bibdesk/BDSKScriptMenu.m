@@ -51,7 +51,7 @@
 @implementation BDSKScriptMenu
 
 static NSArray *sortDescriptors = nil;
-static int recursionDepth = 0;
+static NSInteger recursionDepth = 0;
 
 + (void)initialize
 {
@@ -69,7 +69,7 @@ static int recursionDepth = 0;
     [scriptItem setSubmenu:newMenu];
     [newMenu setDelegate:newMenu];
     [newMenu release];
-    int itemIndex = [[NSApp mainMenu] numberOfItems] - 1;
+    NSInteger itemIndex = [[NSApp mainMenu] numberOfItems] - 1;
     if (itemIndex > 0)
         [[NSApp mainMenu] insertItem:scriptItem atIndex:itemIndex];
     [scriptItem release];
@@ -93,7 +93,7 @@ static int recursionDepth = 0;
 
 static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
 {
-    unsigned int i, count = [folders count];
+    NSUInteger i, count = [folders count];
     NSDate *date = [NSDate distantPast];
     for(i = 0; i < count; i++){
         NSDate *modDate = [[[NSFileManager defaultManager] fileAttributesAtPath:[folders objectAtIndex:i] traverseLink:YES] objectForKey:NSFileModificationDate];
@@ -111,7 +111,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
     NSMutableArray *scripts;
     NSMutableArray *defaultScripts;
     NSArray *scriptFolders;
-    unsigned int i, count;
+    NSUInteger i, count;
     
     scripts = [[NSMutableArray alloc] init];
     scriptFolders = [self scriptPaths];
@@ -267,7 +267,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
         NSString *appSupportDirectory = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleNameKey];
         
         NSArray *libraries = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSAllDomainsMask, YES);
-        unsigned int libraryIndex, libraryCount;
+        NSUInteger libraryIndex, libraryCount;
         libraryCount = [libraries count];
         NSMutableArray *result = [[NSMutableArray alloc] initWithCapacity:libraryCount + 1];
         for (libraryIndex = 0; libraryIndex < libraryCount; libraryIndex++) {

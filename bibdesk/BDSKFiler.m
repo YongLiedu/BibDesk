@@ -96,7 +96,7 @@ static BDSKFiler *sharedFiler = nil;
 
 - (void)release {}
 
-- (unsigned int)retainCount { return UINT_MAX; }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 #pragma mark Auto file methods
 
@@ -119,14 +119,14 @@ static BDSKFiler *sharedFiler = nil;
 		return;
 	}
 	
-    int mask = BDSKInitialAutoFileOptionMask;
+    NSInteger mask = BDSKInitialAutoFileOptionMask;
     if (check == YES) mask |= BDSKCheckCompleteAutoFileOptionMask;
 	[self movePapers:papers forField:BDSKLocalFileString fromDocument:doc options:mask];
 }
 
-- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(int)mask{
+- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(NSInteger)mask{
 	NSFileManager *fm = [NSFileManager defaultManager];
-    int numberOfPapers = [paperInfos count];
+    NSInteger numberOfPapers = [paperInfos count];
 	NSEnumerator *paperEnum = [paperInfos objectEnumerator];
 	id paperInfo = nil;
 	BibItem *pub = nil;
@@ -307,7 +307,7 @@ static BDSKFiler *sharedFiler = nil;
 
 - (IBAction)tryAgain:(id)sender{
 	NSDictionary *info = nil;
-    int i, count = [self countOfErrorInfoDicts];
+    NSInteger i, count = [self countOfErrorInfoDicts];
 	NSMutableArray *fileInfoDicts = [NSMutableArray arrayWithCapacity:count];
     
     for (i = 0; i < count; i++) {
@@ -336,7 +336,7 @@ static BDSKFiler *sharedFiler = nil;
     
     BibDocument *doc = [[document retain] autorelease];
     NSString *field = [[fieldName retain] autorelease];
-    int mask = (options & BDSKInitialAutoFileOptionMask);
+    NSInteger mask = (options & BDSKInitialAutoFileOptionMask);
     mask |= ([forceCheckButton state]) ? BDSKForceAutoFileOptionMask : (options & BDSKCheckCompleteAutoFileOptionMask);
     
     [window close];
@@ -347,7 +347,7 @@ static BDSKFiler *sharedFiler = nil;
 - (IBAction)dump:(id)sender{
     NSMutableString *string = [NSMutableString string];
 	NSDictionary *info = nil;
-    int i, count = [self countOfErrorInfoDicts];
+    NSInteger i, count = [self countOfErrorInfoDicts];
     
     for (i = 0; i < count; i++) {
         info = [self objectInErrorInfoDictsAtIndex:i];
@@ -391,29 +391,29 @@ static BDSKFiler *sharedFiler = nil;
     return errorInfoDicts;
 }
 
-- (unsigned int)countOfErrorInfoDicts {
+- (NSUInteger)countOfErrorInfoDicts {
     return [errorInfoDicts count];
 }
 
-- (id)objectInErrorInfoDictsAtIndex:(unsigned int)idx {
+- (id)objectInErrorInfoDictsAtIndex:(NSUInteger)idx {
     return [errorInfoDicts objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inErrorInfoDictsAtIndex:(unsigned int)idx {
+- (void)insertObject:(id)obj inErrorInfoDictsAtIndex:(NSUInteger)idx {
     [errorInfoDicts insertObject:obj atIndex:idx];
 }
 
-- (void)removeObjectFromErrorInfoDictsAtIndex:(unsigned int)idx {
+- (void)removeObjectFromErrorInfoDictsAtIndex:(NSUInteger)idx {
     [errorInfoDicts removeObjectAtIndex:idx];
 }
 
 #pragma mark table view stuff
 
 // dummy dataSource implementation
-- (int)numberOfRowsInTableView:(NSTableView *)tView{ return 0; }
-- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{ return nil; }
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tView{ return 0; }
+- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{ return nil; }
 
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
+- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation{
 	NSString *tcid = [tableColumn identifier];
     if ([tcid isEqualToString:SELECT_KEY]) {
         return NSLocalizedString(@"Select items to Try Again or to Force.", @"Tool tip message");
@@ -422,18 +422,18 @@ static BDSKFiler *sharedFiler = nil;
 }
 
 - (IBAction)showFile:(id)sender{
-    int row = [tv selectedRow];
+    NSInteger row = [tv selectedRow];
     if (row == -1)
         return;
     NSDictionary *dict = [self objectInErrorInfoDictsAtIndex:row];
-    int statusFlag = [[dict objectForKey:FLAG_KEY] intValue];
+    NSInteger statusFlag = [[dict objectForKey:FLAG_KEY] intValue];
     NSString *tcid = nil;
     NSString *path = nil;
     BibItem *pub = nil;
-    int type = -1;
+    NSInteger type = -1;
 
     if(sender == tv){
-        int column = [tv clickedColumn];
+        NSInteger column = [tv clickedColumn];
         if(column == -1)
             return;
         tcid = [[[tv tableColumns] objectAtIndex:column] identifier];
@@ -469,7 +469,7 @@ static BDSKFiler *sharedFiler = nil;
 	}
 }
 
-- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(int)rowIndex {
+- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex {
     return contextMenu;
 }
 
@@ -484,7 +484,7 @@ static BDSKFiler *sharedFiler = nil;
     NSString *comment = nil;
     NSString *status = nil;
     NSString *fix = nil;
-    int statusFlag = BDSKNoError;
+    NSInteger statusFlag = BDSKNoError;
     BOOL ignoreMove = NO;
     BOOL isDir;
     

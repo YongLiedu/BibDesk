@@ -78,7 +78,7 @@
         id locationSpecifier = [[self arguments] objectForKey:@"ToLocation"];
         id insertionContainer = nil;
         NSString *insertionKey = nil;
-        int insertionIndex = -1;
+        NSInteger insertionIndex = -1;
         NSScriptClassDescription *containerClassDescription = nil;
         NSArray *classDescriptions = [insertionObjects valueForKey:@"scriptClassDescription"];
         NSScriptClassDescription *insertionClassDescription = [classDescriptions containsObject:[NSNull null]] ? nil : [NSScriptClassDescription commonAncestorForClassDescriptions:classDescriptions];

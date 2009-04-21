@@ -112,7 +112,7 @@ typedef struct WLDragMapEntryStruct
     ResID _resID;
 }
 
-+ (id)entryWithType:(OSType)type resID:(int)resID;
++ (id)entryWithType:(OSType)type resID:(NSInteger)resID;
 + (NSData*)dragDataWithEntries:(NSArray*)entries;
 
 - (OSType)type;
@@ -372,7 +372,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     if (tempItemsPath) {
         // Don't pass in paths that are already inside Temporary Items or you might get back the same path you passed in.
         if (tempFileName = [self uniqueFilePathWithName:[path lastPathComponent] atPath:tempItemsPath]) {
-            int fd = open((const char *)[self fileSystemRepresentationWithPath:tempFileName], O_EXCL | O_WRONLY | O_CREAT | O_TRUNC, 0666);
+            NSInteger fd = open((const char *)[self fileSystemRepresentationWithPath:tempFileName], O_EXCL | O_WRONLY | O_CREAT | O_TRUNC, 0666);
             if (fd != -1)
                 close(fd); // no unlink, were are on the 'create' branch
             else if (errno != EEXIST)
@@ -385,7 +385,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
             *outError = nil; // Ignore any previous error
         // Try to use the same directory.  Can't just call -uniqueFilenameFromName:path since we want a NEW file name (-uniqueFilenameFromName: would just return the input path and the caller expecting a path where it can put something temporarily, i.e., different from the input path).
         if (tempFileName = [self uniqueFilePathWithName:[path lastPathComponent] atPath:[path stringByDeletingLastPathComponent]]) {
-            int fd = open((const char *)[self fileSystemRepresentationWithPath:tempFileName], O_EXCL | O_WRONLY | O_CREAT | O_TRUNC, 0666);
+            NSInteger fd = open((const char *)[self fileSystemRepresentationWithPath:tempFileName], O_EXCL | O_WRONLY | O_CREAT | O_TRUNC, 0666);
             if (fd != -1)
                 close(fd); // no unlink, were are on the 'create' branch
             else if (errno != EEXIST)
@@ -416,7 +416,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
             CFRelease(uuid);
         }
         
-        unsigned int i = 0;
+        NSUInteger i = 0;
         NSURL *fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:baseName]];
         while ([self objectExistsAtFileURL:fileURL]) {
             fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%i", baseName, ++i]]];
@@ -439,7 +439,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     
     // optimistically assume we can just return the sender's guess of /directory/filename
     NSString *fullPath = [directory stringByAppendingPathComponent:fileName];
-    int i = 0;
+    NSInteger i = 0;
     
     // this method is always invoked from the main thread, but we don't want multiple threads in temporaryBaseDirectory (which may be passed as directory here); could make the lock conditional, but performance isn't a concern here
     @synchronized(self) {
@@ -588,7 +588,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     
     NSURL *parent = [NSURL fileURLWithPath:[path stringByDeletingLastPathComponent]];
     NSString *fileName = [path lastPathComponent];
-    unsigned int length = [fileName length];
+    NSUInteger length = [fileName length];
     UniChar *name = (UniChar *)NSZoneMalloc(NULL, length * sizeof(UniChar));
     [fileName getCharacters:name];
     
@@ -885,7 +885,7 @@ static OSType finderSignatureBytes = 'MACS';
     // create an empty file, since weblocs are just a resource
     NSURL *parent = [NSURL fileURLWithPath:[fullPath stringByDeletingLastPathComponent]];
     NSString *fileName = [fullPath lastPathComponent];
-    unsigned int length = [fileName length];
+    NSUInteger length = [fileName length];
     UniChar *name = (UniChar *)NSZoneMalloc(NULL, length * sizeof(UniChar));
     [fileName getCharacters:name];
     
@@ -1085,7 +1085,7 @@ static OSType finderSignatureBytes = 'MACS';
 
 @implementation WLDragMapEntry
 
-- (id)initWithType:(OSType)type resID:(int)resID;
+- (id)initWithType:(OSType)type resID:(NSInteger)resID;
 {
     self = [super init];
     
@@ -1095,7 +1095,7 @@ static OSType finderSignatureBytes = 'MACS';
     return self;
 }
 
-+ (id)entryWithType:(OSType)type resID:(int)resID;
++ (id)entryWithType:(OSType)type resID:(NSInteger)resID;
 {
     WLDragMapEntry* result = [[WLDragMapEntry alloc] initWithType:type resID:resID];
     

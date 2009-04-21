@@ -96,13 +96,13 @@ static float BDSKScaleMenuFontSize = 11.0;
         // set a suitable font, the control size is 0, 1 or 2
         [scalePopUpButton setFont:[NSFont toolTipsFontOfSize: BDSKScaleMenuFontSize - [[scalePopUpButton cell] controlSize]]];
 		
-        unsigned int cnt, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuLabels) / sizeof(NSString *));
+        NSUInteger cnt, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuLabels) / sizeof(NSString *));
         id curItem;
         NSString *label;
         float width, maxWidth = 0.0;
         NSSize size = NSMakeSize(1000.0, 1000.0);
         NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:[scalePopUpButton font], NSFontAttributeName, nil];
-        unsigned int maxIndex = 0;
+        NSUInteger maxIndex = 0;
 
         // fill it
         for (cnt = 0; cnt < numberOfDefaultItems; cnt++) {
@@ -148,8 +148,8 @@ static float BDSKScaleMenuFontSize = 11.0;
     }
 }
 
-- (unsigned int)lowerIndexForScaleFactor:(float)scale {
-    unsigned int i, count = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+- (NSUInteger)lowerIndexForScaleFactor:(float)scale {
+    NSUInteger i, count = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
     for (i = count - 1; i > 0; i--) {
         if (scale * 1.01 > BDSKDefaultScaleMenuFactors[i])
             return i;
@@ -157,8 +157,8 @@ static float BDSKScaleMenuFontSize = 11.0;
     return 1;
 }
 
-- (unsigned int)upperIndexForScaleFactor:(float)scale {
-    unsigned int i, count = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+- (NSUInteger)upperIndexForScaleFactor:(float)scale {
+    NSUInteger i, count = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
     for (i = 1; i < count; i++) {
         if (scale * 0.99 < BDSKDefaultScaleMenuFactors[i])
             return i;
@@ -166,8 +166,8 @@ static float BDSKScaleMenuFontSize = 11.0;
     return count - 1;
 }
 
-- (unsigned int)indexForScaleFactor:(float)scale {
-    unsigned int lower = [self lowerIndexForScaleFactor:scaleFactor], upper = [self upperIndexForScaleFactor:scale];
+- (NSUInteger)indexForScaleFactor:(float)scale {
+    NSUInteger lower = [self lowerIndexForScaleFactor:scaleFactor], upper = [self upperIndexForScaleFactor:scale];
     if (upper > lower && scale < 0.5 * (BDSKDefaultScaleMenuFactors[lower] + BDSKDefaultScaleMenuFactors[upper]))
         return lower;
     return upper;
@@ -183,7 +183,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 
 - (void)setScaleFactor:(float)newScaleFactor adjustPopup:(BOOL)flag {
 	if (flag) {
-            unsigned int i = [self indexForScaleFactor:newScaleFactor];
+            NSUInteger i = [self indexForScaleFactor:newScaleFactor];
             [scalePopUpButton selectItemAtIndex:i];
             newScaleFactor = BDSKDefaultScaleMenuFactors[i];
     }
@@ -206,14 +206,14 @@ static float BDSKScaleMenuFontSize = 11.0;
 }
 
 - (IBAction)zoomIn:(id)sender{
-    unsigned int numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
-    unsigned int i = [self lowerIndexForScaleFactor:[self scaleFactor]];
+    NSUInteger numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    NSUInteger i = [self lowerIndexForScaleFactor:[self scaleFactor]];
     if (i < numberOfDefaultItems - 1) i++;
     [self setScaleFactor:BDSKDefaultScaleMenuFactors[i]];
 }
 
 - (IBAction)zoomOut:(id)sender{
-    unsigned int i = [self upperIndexForScaleFactor:[self scaleFactor]];
+    NSUInteger i = [self upperIndexForScaleFactor:[self scaleFactor]];
     if (i > 1) i--;
     [self setScaleFactor:BDSKDefaultScaleMenuFactors[i]];
 }
@@ -223,13 +223,13 @@ static float BDSKScaleMenuFontSize = 11.0;
 }
 
 - (BOOL)canZoomIn{
-    unsigned int numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
-    unsigned int i = [self lowerIndexForScaleFactor:[self scaleFactor]];
+    NSUInteger numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    NSUInteger i = [self lowerIndexForScaleFactor:[self scaleFactor]];
     return i < numberOfDefaultItems - 1;
 }
 
 - (BOOL)canZoomOut{
-    unsigned int i = [self upperIndexForScaleFactor:[self scaleFactor]];
+    NSUInteger i = [self upperIndexForScaleFactor:[self scaleFactor]];
     return i > 1;
 }
 
@@ -274,7 +274,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     if ([theEvent respondsToSelector:@selector(magnification)]) {
         pinchZoomFactor *= 1.0 + fmaxf(-0.5, fminf(1.0 , [theEvent magnification]));
         float scale = pinchZoomFactor * [self scaleFactor];
-        unsigned int i = [self indexForScaleFactor:fmaxf(scale, BDSKDefaultScaleMenuFactors[1])];
+        NSUInteger i = [self indexForScaleFactor:fmaxf(scale, BDSKDefaultScaleMenuFactors[1])];
         if (i != [self indexForScaleFactor:[self scaleFactor]]) {
             [self setScaleFactor:BDSKDefaultScaleMenuFactors[i]];
             pinchZoomFactor = scale / [self scaleFactor];

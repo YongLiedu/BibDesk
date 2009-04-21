@@ -88,7 +88,7 @@
     return [NSString stringWithFormat:@"File: %@ \n\t string = \"%@\"", file, string];
 }
 
-- (unsigned int)hash
+- (NSUInteger)hash
 {
     return [file hash];
 }

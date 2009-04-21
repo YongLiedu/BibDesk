@@ -112,10 +112,13 @@ NSString *BDSKRichTextString = @"Rich Text";
         }
     } else {
         if (self = [self initWithTitle:[decoder decodeObject]]) {
+            int tmp;
             fontName = [[decoder decodeObject] retain];
             [decoder decodeValueOfObjCType:@encode(float) at:&fontSize];
-            [decoder decodeValueOfObjCType:@encode(int) at:&bold];
-            [decoder decodeValueOfObjCType:@encode(int) at:&italic];
+            [decoder decodeValueOfObjCType:"i" at:&tmp];
+            bold = tmp;
+            [decoder decodeValueOfObjCType:"i" at:&tmp];
+            italic = tmp;
         }
     }
     return self;
@@ -129,11 +132,14 @@ NSString *BDSKRichTextString = @"Rich Text";
         [encoder encodeInt:bold forKey:@"bold"];
         [encoder encodeInt:italic forKey:@"italic"];
     } else {
+        int tmp;
         [encoder encodeObject:title];
         [encoder encodeObject:fontName];
         [encoder encodeValueOfObjCType:@encode(float) at:&fontSize];
-        [encoder encodeValueOfObjCType:@encode(int) at:&bold];
-        [encoder encodeValueOfObjCType:@encode(int) at:&italic];
+        tmp = bold;
+        [encoder encodeValueOfObjCType:"i" at:&tmp];
+        tmp = italic;
+        [encoder encodeValueOfObjCType:"i" at:&tmp];
     }
 }
 
@@ -161,7 +167,7 @@ NSString *BDSKRichTextString = @"Rich Text";
            italic == [other italic];
 }
 */
-- (int)type {
+- (NSInteger)type {
     return -1;
 }
 
@@ -194,11 +200,11 @@ NSString *BDSKRichTextString = @"Rich Text";
     }
 }
 
-- (int)bold {
+- (NSInteger)bold {
     return bold;
 }
 
-- (void)setBold:(int)newBold {
+- (void)setBold:(NSInteger)newBold {
     if (bold != newBold) {
         [(BDSKToken *)[[self undoManager] prepareWithInvocationTarget:self] setBold:bold];
         bold = newBold;
@@ -206,11 +212,11 @@ NSString *BDSKRichTextString = @"Rich Text";
     }
 }
 
-- (int)italic {
+- (NSInteger)italic {
     return italic;
 }
 
-- (void)setItalic:(int)newItalic {
+- (void)setItalic:(NSInteger)newItalic {
     if (italic != newItalic) {
         [(BDSKToken *)[[self undoManager] prepareWithInvocationTarget:self] setItalic:italic];
         italic = newItalic;
@@ -239,7 +245,7 @@ NSString *BDSKRichTextString = @"Rich Text";
     NSAttributedString *attrString = nil;
     NSMutableDictionary *attrs = [attributes mutableCopy];
     NSFont *font = [attrs objectForKey:NSFontAttributeName];
-    int traits = [fm traitsOfFont:font];
+    NSInteger traits = [fm traitsOfFont:font];
     BOOL wasBold = (traits & NSBoldFontMask) != 0;
     BOOL wasItalic = (traits & NSItalicFontMask) != 0;
     BOOL useBold = bold == NSMixedState ? wasBold : bold;
@@ -551,7 +557,7 @@ NSString *BDSKRichTextString = @"Rich Text";
            EQUAL_OR_NIL_STRINGS(cleaningKey, [other cleaningKey]);
 }
 */
-- (int)type {
+- (NSInteger)type {
     return BDSKFieldTokenType;
 }
 
@@ -670,7 +676,7 @@ NSString *BDSKRichTextString = @"Rich Text";
            EQUAL_OR_NIL_STRINGS(urlFormatKey, [other urlFormatKey]);
 }
 */
-- (int)type {
+- (NSInteger)type {
     return BDSKURLTokenType;
 }
 
@@ -764,7 +770,7 @@ NSString *BDSKRichTextString = @"Rich Text";
            EQUAL_OR_NIL_STRINGS(joinStyleKey, [other joinStyleKey]);
 }
 */
-- (int)type {
+- (NSInteger)type {
     return BDSKPersonTokenType;
 }
 
@@ -872,7 +878,7 @@ NSString *BDSKRichTextString = @"Rich Text";
            EQUAL_OR_NIL_STRINGS(linkedFileJoinStyleKey, [other linkedFileJoinStyleKey]);
 }
 */
-- (int)type {
+- (NSInteger)type {
     return BDSKLinkedFileTokenType;
 }
 
@@ -970,7 +976,7 @@ NSString *BDSKRichTextString = @"Rich Text";
            EQUAL_OR_NIL_STRINGS(dateFormatKey, [other dateFormatKey]);
 }
 */
-- (int)type {
+- (NSInteger)type {
     return BDSKDateTokenType;
 }
 
@@ -1064,7 +1070,7 @@ NSString *BDSKRichTextString = @"Rich Text";
            EQUAL_OR_NIL_STRINGS(counterCasingKey, [other counterCasingKey]);
 }
 */
-- (int)type {
+- (NSInteger)type {
     return BDSKNumberTokenType;
 }
 
@@ -1171,7 +1177,7 @@ NSString *BDSKRichTextString = @"Rich Text";
            EQUAL_OR_NIL_STRINGS(altText, [other altText]);
 }
 */
-- (int)type {
+- (NSInteger)type {
     return BDSKTextTokenType;
 }
 

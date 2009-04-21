@@ -141,7 +141,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     [self insertObject:newURL inLinkedFilesAtIndex:[[self localFiles] count]];
 }
 
-- (void)insertObject:(NSURL *)newURL inLinkedFilesAtIndex:(unsigned int)idx {
+- (void)insertObject:(NSURL *)newURL inLinkedFilesAtIndex:(NSUInteger)idx {
     if ([[self owner] isDocument]) {
         BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURL:newURL delegate:self];
         if (file) {
@@ -162,7 +162,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     }
 }
 
-- (void)removeObjectFromLinkedFilesAtIndex:(unsigned int)idx {
+- (void)removeObjectFromLinkedFilesAtIndex:(NSUInteger)idx {
     [[self mutableArrayValueForKey:@"files"] removeObject:[[self localFiles] objectAtIndex:idx]];
 }
 
@@ -174,7 +174,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     [self insertObject:newURLString inLinkedURLsAtIndex:[[self remoteURLs] count]];
 }
 
-- (void)insertObject:(NSString *)newURLString inLinkedURLsAtIndex:(unsigned int)idx {
+- (void)insertObject:(NSString *)newURLString inLinkedURLsAtIndex:(NSUInteger)idx {
     if ([[self owner] isDocument]) {
         NSURL *newURL = [NSURL URLWithStringByNormalizingPercentEscapes:newURLString];
         BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURL:newURL delegate:self];
@@ -196,7 +196,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     }
 }
 
-- (void)removeObjectFromLinkedURLsAtIndex:(unsigned int)idx {
+- (void)removeObjectFromLinkedURLsAtIndex:(NSUInteger)idx {
     [[self mutableArrayValueForKey:@"files"] removeObject:[[self remoteURLs] objectAtIndex:idx]];
 }
 
@@ -345,7 +345,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
         if (file == nil)
             return;
         NSArray *remoteURLs = [self remoteURLs];
-        unsigned int idx = [self countOfFiles];
+        NSUInteger idx = [self countOfFiles];
         if ([remoteURLs count]) {
             idx = [files indexOfObject:[remoteURLs objectAtIndex:0]];
             if (idx == NSNotFound)
@@ -376,7 +376,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
         if (file == nil)
             return;
         NSArray *localFiles = [self localFiles];
-        unsigned int idx = 0;
+        NSUInteger idx = 0;
         if ([localFiles count]) {
             idx = [files indexOfObject:[localFiles objectAtIndex:0]];
             if (idx == NSNotFound)
@@ -484,11 +484,11 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     }
 }
 
-- (int)scriptingRating{
+- (NSInteger)scriptingRating{
     return [self rating];
 }
 
-- (void)setScriptingRating:(int)rating{
+- (void)setScriptingRating:(NSInteger)rating{
     if ([[self owner] isDocument]) {
         [self setRating:rating];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];

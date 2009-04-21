@@ -327,8 +327,8 @@
 }
 
 + (NSImage *)iconWithSize:(NSSize)iconSize forToolboxCode:(OSType) code {
-	int width = iconSize.width;
-	int height = iconSize.height;
+	NSInteger width = iconSize.width;
+	NSInteger height = iconSize.height;
 	IconRef iconref;
 	OSErr myErr = GetIconRef (kOnSystemDisk, kSystemIconsCreator, code, &iconref);
 	
@@ -575,12 +575,12 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
     return image;
 }
 
-- (NSImage *)dragImageWithCount:(int)count;
+- (NSImage *)dragImageWithCount:(NSInteger)count;
 {
     return [self dragImageWithCount:count inside:NO isIcon:YES];
 }
 
-- (NSImage *)dragImageWithCount:(int)count inside:(BOOL)inside isIcon:(BOOL)isIcon;
+- (NSImage *)dragImageWithCount:(NSInteger)count inside:(BOOL)inside isIcon:(BOOL)isIcon;
 {
     NSImage *labeledImage;
     NSRect sourceRect = {NSZeroPoint, [self size]};
@@ -657,7 +657,7 @@ static NSComparisonResult compareImageRepWidths(NSBitmapImageRep *r1, NSBitmapIm
     // sort the image reps by increasing width, so we can easily pick the next largest one
     NSMutableArray *reps = [[self representations] mutableCopy];
     [reps sortUsingFunction:compareImageRepWidths context:NULL];
-    unsigned int i, iMax = [reps count];
+    NSUInteger i, iMax = [reps count];
     NSBitmapImageRep *toReturn = nil;
     
     for (i = 0; i < iMax && nil == toReturn; i++) {

@@ -169,11 +169,11 @@
 	[[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:self];
 }
 
-- (int)blendStyle {
+- (NSInteger)blendStyle {
     return blendStyle;
 }
 
-- (void)setBlendStyle:(int)mask {
+- (void)setBlendStyle:(NSInteger)mask {
     if (blendStyle != mask) {
         blendStyle = mask;
         CGLayerRelease(minBlendLayer);

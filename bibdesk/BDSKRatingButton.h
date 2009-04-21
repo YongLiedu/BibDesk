@@ -43,10 +43,10 @@
 @interface BDSKRatingButton : NSButton {
 }
 
-- (unsigned int)rating;
-- (void)setRating:(unsigned int)newRating;
+- (NSUInteger)rating;
+- (void)setRating:(NSUInteger)newRating;
 
-- (unsigned int)maxRating;
-- (void)setMaxRating:(unsigned int)newRating;
+- (NSUInteger)maxRating;
+- (void)setMaxRating:(NSUInteger)newRating;
 
 @end

@@ -81,7 +81,7 @@ NSString *__BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolv
 	BDSKStringNode *node = nil;
     BDSKStringNode **stringNodes, *stackBuffer[STACK_BUFFER_SIZE];
     
-    int iMax = nil == nodes ? 0 : CFArrayGetCount((CFArrayRef)nodes);
+    NSInteger iMax = nil == nodes ? 0 : CFArrayGetCount((CFArrayRef)nodes);
     
     if(0 == iMax) return nil;
         
@@ -243,11 +243,11 @@ Rather than relying on the same call sequence to be used, I think we should igno
 
 /* A bunch of methods that have to be overridden in a concrete subclass of NSString */
 
-- (unsigned int)length{
+- (NSUInteger)length{
     return [[self expandedString] length];
 }
 
-- (unichar)characterAtIndex:(unsigned int)idx{
+- (unichar)characterAtIndex:(NSUInteger)idx{
     return [[self expandedString] characterAtIndex:idx];
 }
 
@@ -297,7 +297,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 	}
 }
 
-- (NSComparisonResult)compareAsComplexString:(NSString *)other options:(unsigned int)mask{
+- (NSComparisonResult)compareAsComplexString:(NSString *)other options:(NSUInteger)mask{
 	if ([self isComplex]) {
 		if (![other isComplex])
 			return NSOrderedDescending;
@@ -337,7 +337,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 
 // Returns the bibtex value of the string.
 - (NSString *)stringAsBibTeXString{
-    unsigned int i = 0;
+    NSUInteger i = 0;
     NSMutableString *retStr = [NSMutableString string];
         
     for( i = 0; i < [nodes count]; i++){
@@ -355,20 +355,20 @@ Rather than relying on the same call sequence to be used, I think we should igno
     return retStr; 
 }
 
-- (BOOL)hasSubstring:(NSString *)target options:(unsigned int)opts{
+- (BOOL)hasSubstring:(NSString *)target options:(NSUInteger)opts{
 	if ([self isInherited] && ![self isComplex])
 		return [[[nodes objectAtIndex:0] value] hasSubstring:target options:opts];
 	
 	NSArray *targetNodes = [target nodes];
 	
-	int tNum = [targetNodes count];
-	int max = [nodes count] - tNum;
+	NSInteger tNum = [targetNodes count];
+	NSInteger max = [nodes count] - tNum;
 	BOOL back = (BOOL)(opts & NSBackwardsSearch);
-	int i = (back ? max : 0);
+	NSInteger i = (back ? max : 0);
 	
 	while (i <= max && i >= 0) {
 		if ([(BDSKStringNode *)[nodes objectAtIndex:i] compareNode:[targetNodes objectAtIndex:0] options:opts] == NSOrderedSame) {
-			int j = 1;
+			NSInteger j = 1;
 			while (j < tNum && [(BDSKStringNode *)[nodes objectAtIndex:i + j] compareNode:[targetNodes objectAtIndex:j] options:opts] == NSOrderedSame) 
 				j++;
 			if (j == tNum)
@@ -380,19 +380,19 @@ Rather than relying on the same call sequence to be used, I think we should igno
 	return NO;
 }
 
-- (NSString *)stringByReplacingOccurrencesOfString:(NSString *)target withString:(NSString *)replacement options:(unsigned int)opts replacements:(unsigned int *)number{
+- (NSString *)stringByReplacingOccurrencesOfString:(NSString *)target withString:(NSString *)replacement options:(NSUInteger)opts replacements:(NSUInteger *)number{
 	NSArray *targetNodes = [target nodes];
 	NSArray *replNodes = [replacement nodes];
 	NSMutableArray *newNodes;
 	NSString *newString;
 	
-	unsigned int num = 0;
-	int tNum = [targetNodes count];
-	int rNum = [replNodes count];
-	int min = 0;
-	int max = [nodes count] - tNum;
+	NSUInteger num = 0;
+	NSInteger tNum = [targetNodes count];
+	NSInteger rNum = [replNodes count];
+	NSInteger min = 0;
+	NSInteger max = [nodes count] - tNum;
 	BOOL back = (BOOL)(opts & NSBackwardsSearch);
-	int i;
+	NSInteger i;
 	
 	if ([self isInherited] || max < min) {
 		*number = 0;
@@ -411,7 +411,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 	i = (back ? max : min);
 	while (i <= max && i >= min) {
 		if ([(BDSKStringNode *)[newNodes objectAtIndex:i] compareNode:[targetNodes objectAtIndex:0] options:opts] == NSOrderedSame) {
-			int j = 1;
+			NSInteger j = 1;
 			while (j < tNum && [(BDSKStringNode *)[newNodes objectAtIndex:i + j] compareNode:[targetNodes objectAtIndex:j] options:opts] == NSOrderedSame) 
 				j++;
 			if (j == tNum) {
@@ -517,7 +517,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
     NSScanner *sc = [[NSScanner alloc] initWithString:btstring];
     [sc setCharactersToBeSkipped:nil];
     NSString *s = nil;
-    int nesting;
+    NSInteger nesting;
     unichar ch;
     NSError *error = nil;
     
@@ -690,7 +690,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 	return [self compareAsComplexString:other options:0];
 }
 
-- (NSComparisonResult)compareAsComplexString:(NSString *)other options:(unsigned int)mask{
+- (NSComparisonResult)compareAsComplexString:(NSString *)other options:(NSUInteger)mask{
 	if ([other isComplex])
 		return NSOrderedAscending;
 	return [self compare:other options:mask];
@@ -708,7 +708,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
     return self;
 }
         
-- (BOOL)hasSubstring:(NSString *)target options:(unsigned int)opts{
+- (BOOL)hasSubstring:(NSString *)target options:(NSUInteger)opts{
 	if ([target isComplex])
 		return NO;
 	
@@ -717,7 +717,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 	return (range.location != NSNotFound);
 }
 
-- (NSString *)stringByReplacingOccurrencesOfString:(NSString *)target withString:(NSString *)replacement options:(unsigned int)opts replacements:(unsigned int *)number{
+- (NSString *)stringByReplacingOccurrencesOfString:(NSString *)target withString:(NSString *)replacement options:(NSUInteger)opts replacements:(NSUInteger *)number{
 	if ([target isComplex] || [self length] < [target length]) {// we need this last check for anchored search
 		*number = 0;
 		return self;

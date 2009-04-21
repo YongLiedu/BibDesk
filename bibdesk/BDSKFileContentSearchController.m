@@ -174,7 +174,7 @@
 
 - (IBAction)tableAction:(id)sender
 {
-    int row = [tableView clickedRow];
+    NSInteger row = [tableView clickedRow];
     if(row == -1)
         return;
     
@@ -335,7 +335,7 @@
     [self window];
     NSMutableArray *sortDescriptors = [NSMutableArray array];
     [sortDescriptors addObjectsFromArray:[NSUnarchiver unarchiveObjectWithData:data]];
-    unsigned int i = [sortDescriptors count];
+    NSUInteger i = [sortDescriptors count];
     // see https://sourceforge.net/tracker/index.php?func=detail&aid=1837498&group_id=61487&atid=497423
     // We changed BDSKFileSearchResult and started saving sort descriptors in EA at about the same time, so apparently a user ended up with a sort key of @"dictionary.string" in EA; this caused a bunch of ignored exceptions, and content search failed.  Another possibility (remote) is that the EA were corrupted somehow.  Anyway, check for the correct keys to avoid this in future.
     NSSet *keys = [NSSet setWithObjects:@"string", @"score", nil];
@@ -444,7 +444,7 @@
         [[self document] tableViewSelectionDidChange:notification];
 }
 
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation {
+- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation {
     CFStringRef displayName = NULL;
     LSCopyDisplayNameForURL((CFURLRef)[[[resultsArrayController arrangedObjects] objectAtIndex:row] URL], &displayName);
     return [(id)displayName autorelease];
@@ -477,12 +477,12 @@
     NSArray *previouslySelectedObjects = [[NSArray alloc] initWithArray:[self selectedObjects] copyItems:NO];
     [super setContent:object];
     
-    unsigned int cnt = [previouslySelectedObjects count];
+    NSUInteger cnt = [previouslySelectedObjects count];
     NSArray *arrangedObjects = [self arrangedObjects];
     NSMutableIndexSet *indexesToSelect = [NSMutableIndexSet indexSet];
     while (cnt--) {
         id oldObject = [previouslySelectedObjects objectAtIndex:cnt];
-        unsigned int i = [arrangedObjects indexOfObject:oldObject];
+        NSUInteger i = [arrangedObjects indexOfObject:oldObject];
         if (NSNotFound != i)
             [indexesToSelect addIndex:i];
     }

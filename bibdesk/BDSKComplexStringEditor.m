@@ -77,7 +77,7 @@
     editable = flag;
 }
 
-- (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString formatter:(BDSKComplexStringFormatter *)aFormatter {
+- (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(NSInteger)aRow column:(NSInteger)aColumn withValue:(NSString *)aString formatter:(BDSKComplexStringFormatter *)aFormatter {
 	if ([self isEditing]) 
 		return NO; // we are already busy editing
     
@@ -267,8 +267,8 @@
 
 - (void)tableViewColumnDidMove:(NSNotification *)notification {
 	NSDictionary *userInfo = [notification userInfo];
-	int oldColumn = [[userInfo objectForKey:@"oldColumn"] intValue];
-	int newColumn = [[userInfo objectForKey:@"newColumn"] intValue];
+	NSInteger oldColumn = [[userInfo objectForKey:@"oldColumn"] intValue];
+	NSInteger newColumn = [[userInfo objectForKey:@"newColumn"] intValue];
 	if (oldColumn == column) {
 		column = newColumn;
 	} else if (oldColumn < column) {

@@ -67,7 +67,7 @@
 - (BOOL)isUnparseableEncoding:(NSStringEncoding)encoding;
 
 - (NSArray *)enabledEncodings;
-- (void)setupPopUp:(BDSKEncodingPopUpButton *)button selectedEncoding:(unsigned int)selectedEncoding;
+- (void)setupPopUp:(BDSKEncodingPopUpButton *)button selectedEncoding:(NSUInteger)selectedEncoding;
 
 - (IBAction)showPanel:(id)sender;
 - (IBAction)encodingListChanged:(id)sender;

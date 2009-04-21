@@ -124,7 +124,7 @@
             NSBeep();
 }
 
-- (void)templateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)templateAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     if (returnCode == NSAlertAlternateReturn)
         return;
     NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -152,7 +152,7 @@
 	[[BDSKCharacterConversion sharedConversionEditor] beginSheetModalForWindow:[[self view] window]];
 }
 
-- (void)conversionsAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)conversionsAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     if (returnCode == NSAlertAlternateReturn)
         return;
     NSFileManager *fileManager = [NSFileManager defaultManager];

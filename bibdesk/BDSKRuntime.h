@@ -44,8 +44,8 @@ enum {
     BDSKAddOnly
 };
 
-extern IMP BDSKSetMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types, BOOL isInstance, int options);
-extern IMP BDSKSetMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector, BOOL isInstance, int options);
+extern IMP BDSKSetMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types, BOOL isInstance, NSInteger options);
+extern IMP BDSKSetMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector, BOOL isInstance, NSInteger options);
 
 extern IMP BDSKReplaceInstanceMethodImplementation(Class aClass, SEL aSelector, IMP anImp);
 extern IMP BDSKReplaceClassMethodImplementation(Class aClass, SEL aSelector, IMP anImp);

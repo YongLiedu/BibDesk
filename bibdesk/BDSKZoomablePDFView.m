@@ -126,7 +126,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     [pboard setData:[[self currentPage] dataRepresentation] forType:NSPDFPboardType];
 }
 
-- (void)saveDocumentSheetDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode  contextInfo:(void  *)contextInfo;
+- (void)saveDocumentSheetDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode  contextInfo:(void  *)contextInfo;
 {
     NSError *error = nil;
     if(returnCode == NSOKButton){
@@ -195,13 +195,13 @@ static float BDSKScaleMenuFontSize = 11.0;
         // set a suitable font, the control size is 0, 1 or 2
         [scalePopUpButton setFont:[NSFont toolTipsFontOfSize: BDSKScaleMenuFontSize - controlSize]];
 
-        unsigned int cnt, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuLabels) / sizeof(NSString *));
+        NSUInteger cnt, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuLabels) / sizeof(NSString *));
         id curItem;
         NSString *label;
         float width, maxWidth = 0.0;
         NSSize size = NSMakeSize(1000.0, 1000.0);
         NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:[scalePopUpButton font], NSFontAttributeName, nil];
-        unsigned int maxIndex = 0;
+        NSUInteger maxIndex = 0;
         
         // fill it
         for (cnt = 0; cnt < numberOfDefaultItems; cnt++) {
@@ -248,8 +248,8 @@ static float BDSKScaleMenuFontSize = 11.0;
         [self setScaleFactor:[selectedFactorObject floatValue] adjustPopup:NO];
 }
 
-- (unsigned int)lowerIndexForScaleFactor:(float)scaleFactor {
-    unsigned int i, count = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+- (NSUInteger)lowerIndexForScaleFactor:(float)scaleFactor {
+    NSUInteger i, count = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
     for (i = count - 1; i > 0; i--) {
         if (scaleFactor * 1.01 > BDSKDefaultScaleMenuFactors[i])
             return i;
@@ -257,8 +257,8 @@ static float BDSKScaleMenuFontSize = 11.0;
     return 1;
 }
 
-- (unsigned int)upperIndexForScaleFactor:(float)scaleFactor {
-    unsigned int i, count = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+- (NSUInteger)upperIndexForScaleFactor:(float)scaleFactor {
+    NSUInteger i, count = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
     for (i = 1; i < count; i++) {
         if (scaleFactor * 0.99 < BDSKDefaultScaleMenuFactors[i])
             return i;
@@ -266,8 +266,8 @@ static float BDSKScaleMenuFontSize = 11.0;
     return count - 1;
 }
 
-- (unsigned int)indexForScaleFactor:(float)scaleFactor {
-    unsigned int lower = [self lowerIndexForScaleFactor:scaleFactor], upper = [self upperIndexForScaleFactor:scaleFactor];
+- (NSUInteger)indexForScaleFactor:(float)scaleFactor {
+    NSUInteger lower = [self lowerIndexForScaleFactor:scaleFactor], upper = [self upperIndexForScaleFactor:scaleFactor];
     if (upper > lower && scaleFactor < 0.5 * (BDSKDefaultScaleMenuFactors[lower] + BDSKDefaultScaleMenuFactors[upper]))
         return lower;
     return upper;
@@ -285,7 +285,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 		if (newScaleFactor < 0.01) {
             newScaleFactor = 0.0;
         } else {
-            unsigned int i = [self indexForScaleFactor:newScaleFactor];
+            NSUInteger i = [self indexForScaleFactor:newScaleFactor];
             [scalePopUpButton selectItemAtIndex:i];
             newScaleFactor = BDSKDefaultScaleMenuFactors[i];
         }
@@ -308,8 +308,8 @@ static float BDSKScaleMenuFontSize = 11.0;
     if([self autoScales]){
         [super zoomIn:sender];
     }else{
-        unsigned int numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
-        unsigned int i = [self lowerIndexForScaleFactor:[self scaleFactor]];
+        NSUInteger numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+        NSUInteger i = [self lowerIndexForScaleFactor:[self scaleFactor]];
         if (i < numberOfDefaultItems - 1) i++;
         [self setScaleFactor:BDSKDefaultScaleMenuFactors[i]];
     }
@@ -319,7 +319,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     if([self autoScales]){
         [super zoomOut:sender];
     }else{
-        unsigned int i = [self upperIndexForScaleFactor:[self scaleFactor]];
+        NSUInteger i = [self upperIndexForScaleFactor:[self scaleFactor]];
         if (i > 1) i--;
         [self setScaleFactor:BDSKDefaultScaleMenuFactors[i]];
     }
@@ -330,8 +330,8 @@ static float BDSKScaleMenuFontSize = 11.0;
         return NO;
     if([self autoScales])   
         return YES;
-    unsigned int numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
-    unsigned int i = [self lowerIndexForScaleFactor:[self scaleFactor]];
+    NSUInteger numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    NSUInteger i = [self lowerIndexForScaleFactor:[self scaleFactor]];
     return i < numberOfDefaultItems - 1;
 }
 
@@ -340,7 +340,7 @@ static float BDSKScaleMenuFontSize = 11.0;
         return NO;
     if([self autoScales])   
         return YES;
-    unsigned int i = [self upperIndexForScaleFactor:[self scaleFactor]];
+    NSUInteger i = [self upperIndexForScaleFactor:[self scaleFactor]];
     return i > 1;
 }
 
@@ -384,7 +384,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     if ([theEvent respondsToSelector:@selector(magnification)]) {
         pinchZoomFactor *= 1.0 + fmaxf(-0.5, fminf(1.0 , [theEvent magnification]));
         float scaleFactor = pinchZoomFactor * [self scaleFactor];
-        unsigned int i = [self indexForScaleFactor:fmaxf(scaleFactor, BDSKDefaultScaleMenuFactors[1])];
+        NSUInteger i = [self indexForScaleFactor:fmaxf(scaleFactor, BDSKDefaultScaleMenuFactors[1])];
         if (i != [self indexForScaleFactor:[self scaleFactor]]) {
             [self setScaleFactor:BDSKDefaultScaleMenuFactors[i]];
             pinchZoomFactor = scaleFactor / [self scaleFactor];

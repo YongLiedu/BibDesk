@@ -181,22 +181,22 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
     return info;
 }
 
-- (void)setNumberOfAvailableResults:(int)value;
+- (void)setNumberOfAvailableResults:(NSInteger)value;
 {
     OSAtomicCompareAndSwap32Barrier(availableResults, value, &availableResults);
 }
 
-- (int)numberOfAvailableResults;
+- (NSInteger)numberOfAvailableResults;
 {
     return availableResults;
 }
 
-- (void)setNumberOfFetchedResults:(int)value;
+- (void)setNumberOfFetchedResults:(NSInteger)value;
 {
     OSAtomicCompareAndSwap32Barrier(fetchedResults, value, &fetchedResults);
 }
 
-- (int)numberOfFetchedResults;
+- (NSInteger)numberOfFetchedResults;
 {
     return fetchedResults;
 }
@@ -227,8 +227,8 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
     NSArray *pubs = nil;
     NSMutableArray *identifiers = nil;
     enum operationTypes { search, retrieve, retrieveRecid, citedReferences, citingArticles, citingArticlesByRecids } operation = search;
-    int availableResultsLocal = [self numberOfAvailableResults];
-    int fetchedResultsLocal = [self numberOfFetchedResults];
+    NSInteger availableResultsLocal = [self numberOfAvailableResults];
+    NSInteger fetchedResultsLocal = [self numberOfFetchedResults];
     
     if (NO == [NSString isEmptyString:searchTerm]){
         
@@ -309,7 +309,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
                 pubs = publicationsWithISIRefXMLString(resultString, hotRecids);
                 NSRange retrieveRange = {0, 0};
                 while ([hotRecids count] > retrieveRange.location) {
-                    retrieveRange.length = MIN((unsigned int)MAX_RESULTS, [hotRecids count] - retrieveRange.location);
+                    retrieveRange.length = MIN((NSUInteger)MAX_RESULTS, [hotRecids count] - retrieveRange.location);
                     NSArray *subHotRecids = [hotRecids subarrayWithRange:retrieveRange];
                     NSString *fullString;
                     fullString = [BDSKISISearchRetrieveService retrieveRecid:@"WOS"
@@ -360,7 +360,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
             [NSApp performSelectorOnMainThread:@selector(presentError:) withObject:presentableError waitUntilDone:NO];
         }
         
-        int numResults = MIN(availableResultsLocal - fetchedResultsLocal, MAX_RESULTS);
+        NSInteger numResults = MIN(availableResultsLocal - fetchedResultsLocal, MAX_RESULTS);
         //NSAssert(numResults >= 0, @"number of results to get must be non-negative");
         
         if(numResults > 0) {
@@ -431,7 +431,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
     
     // this will create the array if it doesn't exist
-    if (availableResultsLocal == (int)[pubs count]) {
+    if (availableResultsLocal == (NSInteger)[pubs count]) {
         [[self serverOnMainThread] setPublicationsOfGroup:pubs];
     } else {
     [[self serverOnMainThread] addPublicationsToGroup:pubs];

@@ -80,7 +80,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 
 - (void)release {}
 
-- (unsigned int)retainCount { return UINT_MAX; }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (NSSet *)sharingClients{
     return sharingClients;

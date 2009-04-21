@@ -300,7 +300,7 @@
 
 #pragma mark actions
 
-- (void)editSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)editSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSOKButton) {
         NSString *newName = [editField stringValue];
         if ([NSString isEmptyString:newName] == NO)
@@ -365,7 +365,7 @@
 }
 
 - (void)openSelectedPub:(id)sender{
-    int row = [publicationTableView selectedRow];
+    NSInteger row = [publicationTableView selectedRow];
     if (row != -1)
         [(BibDocument *)[self document] editPub:[[[publicationArrayController arrangedObjects] objectAtIndex:row] valueForKey:@"publication"]];
 }
@@ -521,7 +521,7 @@
         NSRect frames[2];
         float contentHeight = NSHeight([sender frame]) - [sender dividerThickness];
         float factor = contentHeight / (oldSize.height - [sender dividerThickness]);
-        int i, gap;
+        NSInteger i, gap;
         
         [[sender subviews] getObjects:views];
         for (i = 0; i < 2; i++) {
@@ -568,7 +568,7 @@
     [sender adjustSubviews];
 }
 
-- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset {
+- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(NSInteger)offset {
     if ([sender isEqual:splitView]) {
         
         NSView *pickerView = [[sender subviews] objectAtIndex:0];

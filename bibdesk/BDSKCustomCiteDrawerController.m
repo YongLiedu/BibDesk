@@ -76,7 +76,7 @@
 - (BOOL)isDrawerOpen{
     if(drawer == nil)
         return NO;
-    int state = [drawer state];
+    NSInteger state = [drawer state];
     return state == NSDrawerOpenState || state == NSDrawerOpeningState;
 }
 
@@ -88,7 +88,7 @@
 }
 
 - (IBAction)addCustomCiteString:(id)sender{
-    int row = [customStringArray count];
+    NSInteger row = [customStringArray count];
 	[customStringArray addObject:@"citeCommand"];
     [tableView reloadData];
 	[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
@@ -110,15 +110,15 @@
 #pragma mark -
 #pragma mark TableView data source
 
-- (int)numberOfRowsInTableView:(NSTableView *)tView{
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tView{
     return [customStringArray count];
 }
 
-- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     return [customStringArray objectAtIndex:row];
 }
 
-- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     [customStringArray replaceObjectAtIndex:row withObject:object];
     [[NSUserDefaults standardUserDefaults] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
 }

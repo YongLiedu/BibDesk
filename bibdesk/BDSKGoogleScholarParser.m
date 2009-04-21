@@ -55,7 +55,7 @@
     
     NSError *error = nil;    
 
-    int nodecount = [[[xmlDocument rootElement] nodesForXPath:containsBibTexLinkNode error:&error] count];
+    NSUInteger nodecount = [[[xmlDocument rootElement] nodesForXPath:containsBibTexLinkNode error:&error] count];
 
     return nodecount > 0;
 }
@@ -89,7 +89,7 @@
         return nil;
     }    
     
-    unsigned int i, iMax = [googSearchResults count];
+    NSUInteger i, iMax = [googSearchResults count];
     
     // check the number of nodes first
     if (0 == iMax) {

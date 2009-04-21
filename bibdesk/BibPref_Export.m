@@ -151,7 +151,7 @@
     [self updateUI];
 }
 
-- (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     if (NSAlertDefaultReturn == returnCode)
         [[NSApp delegate] copyAllExportTemplatesToApplicationSupportAndOverwrite:YES];
 }
@@ -172,7 +172,7 @@
 - (IBAction)addNode:(id)sender;
 {
     // may be nil
-    int row = [outlineView selectedRow];
+    NSInteger row = [outlineView selectedRow];
     BDSKTreeNode *selectedNode = row == -1 ? nil : [outlineView itemAtRow:row];
     BDSKTemplate *newNode = [[BDSKTemplate alloc] init];
 
@@ -206,7 +206,7 @@
 - (IBAction)removeNode:(id)sender;
 {
     
-    int row = [outlineView selectedRow];
+    NSInteger row = [outlineView selectedRow];
     BDSKTreeNode *selectedNode = row == -1 ? nil : [outlineView itemAtRow:row];
     if(nil != selectedNode){
         if([selectedNode isLeaf])
@@ -226,7 +226,7 @@
     return item ? (NO == [item isLeaf]) : YES;
 }
 
-- (int)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item
+- (NSInteger)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item
 { 
     return item ? [item numberOfChildren] : [itemNodes count];
 }
@@ -253,7 +253,7 @@
     return value;
 }
 
-- (id)outlineView:(NSOutlineView *)ov child:(int)idx ofItem:(id)item
+- (id)outlineView:(NSOutlineView *)ov child:(NSInteger)idx ofItem:(id)item
 {
     return nil == item ? [itemNodes objectAtIndex:idx] : [[item children] objectAtIndex:idx];
 }
@@ -269,7 +269,7 @@
     return [NSKeyedArchiver archivedDataWithRootObject:item];
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(int)returnCode contextInfo:(BDSKTemplate *)aNode
+- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(NSInteger)returnCode contextInfo:(BDSKTemplate *)aNode
 {
     NSURL *fileURL = [[panel URLs] lastObject];
     if(NSOKButton == returnCode && nil != fileURL){
@@ -284,8 +284,8 @@
 // Formerly implemented in outlineView:shouldEditTableColumn:item:, but on Leopard a second click on the selected row (outside the double click interval) would cause the open panel to run.  This was highly annoying.
 - (IBAction)chooseFileDoubleAction:(id)sender
 {
-    int row = [outlineView clickedRow];
-    int column = [outlineView clickedColumn];
+    NSInteger row = [outlineView clickedRow];
+    NSInteger column = [outlineView clickedColumn];
     if (row >= 0 && column >= 0) {
         
         NSString *columnID = [[[outlineView tableColumns] objectAtIndex:column] identifier];
@@ -346,7 +346,7 @@
 
 - (BOOL)canDeleteSelectedItem
 {
-    int row = [outlineView selectedRow];
+    NSInteger row = [outlineView selectedRow];
     BDSKTreeNode *selItem = row == -1 ? nil : [outlineView itemAtRow:row];
     if (selItem == nil)
         return NO;
@@ -400,7 +400,7 @@
     return NO;
 }
 
-- (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)idx{
+- (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx{
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
     
@@ -434,16 +434,16 @@
     [NSApp endSheet:chooseMainPageSheet returnCode:[sender tag]];
 }
 
-- (void)chooseMainPageSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)chooseMainPageSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     if (returnCode == NSCancelButton)
         return;
     
     NSDictionary *info = [(NSDictionary *)contextInfo autorelease];
     NSArray *fileNames = [info objectForKey:@"fileNames"];
-    int idx = [[info objectForKey:@"index"] intValue];
+    NSInteger idx = [[info objectForKey:@"index"] intValue];
     
-    int mainIndex = [chooseMainPagePopup indexOfSelectedItem] - 1;
-    int i, count = [fileNames count];
+    NSInteger mainIndex = [chooseMainPagePopup indexOfSelectedItem] - 1;
+    NSInteger i, count = [fileNames count];
     id newNode = nil;
     id childNode = nil;
     NSMutableArray *addedItems = [NSMutableArray array];
@@ -474,7 +474,7 @@
 }
 
 
-- (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(int)idx{
+- (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(NSInteger)idx{
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
     
@@ -527,7 +527,7 @@
     } else if ([type isEqualToString:BDSKTemplateRowsPboardType]) {
         id dropItem = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKTemplateRowsPboardType]];
         if ([dropItem isLeaf]) {
-            int sourceIndex = [[item children] indexOfObject:dropItem];
+            NSInteger sourceIndex = [[item children] indexOfObject:dropItem];
             if (sourceIndex == NSNotFound)
                 return NO;
             if (sourceIndex < idx)
@@ -535,7 +535,7 @@
             [(BDSKTreeNode *)item removeChild:dropItem];
             [item insertChild:dropItem atIndex:idx];
         } else {
-            int sourceIndex = [itemNodes indexOfObject:dropItem];
+            NSInteger sourceIndex = [itemNodes indexOfObject:dropItem];
             if (sourceIndex == NSNotFound)
                 return NO;
             if (sourceIndex < idx)
@@ -590,7 +590,7 @@
     SEL action = [menuItem action];
     BOOL validate = NO;
     if (@selector(revealInFinder:) == action || @selector(chooseFile:) == action) {
-        int row = [outlineView selectedRow];
+        NSInteger row = [outlineView selectedRow];
         if(row >= 0)
             validate = [[outlineView itemAtRow:row] isLeaf];
     }
@@ -599,14 +599,14 @@
 
 - (IBAction)revealInFinder:(id)sender;
 {
-    int row = [outlineView selectedRow];
+    NSInteger row = [outlineView selectedRow];
     if(row >= 0)
         [[NSWorkspace sharedWorkspace] selectFile:[[[outlineView itemAtRow:row] representedFileURL] path] inFileViewerRootedAtPath:@""];
 }
 
 - (IBAction)chooseFile:(id)sender;
 {
-    int row = [outlineView selectedRow];
+    NSInteger row = [outlineView selectedRow];
     id item = [outlineView itemAtRow:row];
     
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
@@ -630,7 +630,7 @@
 @implementation BDSKTemplateOutlineView
 
 - (void)textDidEndEditing:(NSNotification *)notification {
-    int textMovement = [[[notification userInfo] objectForKey:@"NSTextMovement"] intValue];
+    NSInteger textMovement = [[[notification userInfo] objectForKey:@"NSTextMovement"] intValue];
     if ((textMovement == NSReturnTextMovement || textMovement == NSTabTextMovement) && 
         [[self delegate] respondsToSelector:@selector(outlineViewShouldEditNextItemWhenEditingEnds:)] && [[self delegate] outlineViewShouldEditNextItemWhenEditingEnds:self] == NO) {
         // This is ugly, but just about the only way to do it. NSTableView is determined to select and edit something else, even the text field that it just finished editing, unless we mislead it about what key was pressed to end editing.

@@ -81,8 +81,8 @@ enum {
 @interface BDSKLibraryGroup (Scripting)
 
 - (void)insertInScriptingPublications:(BibItem *)pub;
-- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx;
-- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx;
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx;
+- (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx;
 
 @end
 
@@ -99,8 +99,8 @@ enum {
 @interface BDSKStaticGroup (Scripting)
 
 - (void)insertInScriptingPublications:(BibItem *)pub;
-- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx;
-- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx;
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx;
+- (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx;
 
 @end
 
@@ -115,8 +115,8 @@ enum {
 
 - (NSArray *)conditions;
 - (void)insertInConditions:(BDSKCondition *)condition;
-- (void)insertObject:(BDSKCondition *)condition inConditionsAtIndex:(unsigned int)idx;
-- (void)removeObjectFromConditionsAtIndex:(unsigned int)idx;
+- (void)insertObject:(BDSKCondition *)condition inConditionsAtIndex:(NSUInteger)idx;
+- (void)removeObjectFromConditionsAtIndex:(NSUInteger)idx;
 
 - (BOOL)satisfyAll;
 - (void)setSatisfyAll:(BOOL)flag;
@@ -128,8 +128,8 @@ enum {
 @interface BDSKCategoryGroup (Scripting)
 
 - (void)insertInScriptingPublications:(BibItem *)pub;
-- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx;
-- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx;
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx;
+- (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx;
 
 @end
 
@@ -167,7 +167,7 @@ enum {
 - (NSDictionary *)scriptingServerInfo;
 - (void)setScriptingServerInfo:(NSDictionary *)info;
 
-- (int)scriptingServerType;
+- (NSInteger)scriptingServerType;
 
 - (NSString *)scriptingServerName;
 

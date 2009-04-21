@@ -193,7 +193,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 {
     NSString *path = nil;
 	if(previewState == BDSKShowingPreviewState){
-        int tabIndex = [tabView indexOfTabViewItem:[tabView selectedTabViewItem]];
+        NSInteger tabIndex = [tabView indexOfTabViewItem:[tabView selectedTabViewItem]];
         if(tabIndex == 0)
             path = [[server texTask] PDFFilePath];
         else if(tabIndex == 1)
@@ -252,12 +252,12 @@ static BDSKPreviewer *sharedPreviewer = nil;
 }
 
 
-- (int)generatedTypes;
+- (NSInteger)generatedTypes;
 {
     return generatedTypes;
 }
 
-- (void)setGeneratedTypes:(int)newGeneratedTypes;
+- (void)setGeneratedTypes:(NSInteger)newGeneratedTypes;
 {
     generatedTypes = newGeneratedTypes;
 }
@@ -287,7 +287,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
     }
 }
 
-- (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     if(returnCode == NSAlertDefaultReturn){
         [[BDSKPreferenceController sharedPreferenceController] showWindow:nil];
         [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.TeX"];
@@ -648,7 +648,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
                 }
                 [queueLock unlock];
             }
-            int generatedTypes = [dict objectForKey:@"generatedTypes"] ? [[dict objectForKey:@"generatedTypes"] intValue] : BDSKGenerateRTF;
+            NSInteger generatedTypes = [dict objectForKey:@"generatedTypes"] ? [[dict objectForKey:@"generatedTypes"] intValue] : BDSKGenerateRTF;
             // previous task is done, so we can start a new one
             success = [texTask runWithBibTeXString:[dict objectForKey:@"bibTeXString"]  citeKeys:[dict objectForKey:@"citeKeys"] generatedTypes:generatedTypes];
             [dict release];

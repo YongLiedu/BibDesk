@@ -302,7 +302,7 @@
 }
 
 - (void)removeIconWithIdentifier:(NSString *)identifier {
-	unsigned int i = [icons count];
+	NSUInteger i = [icons count];
 	while (i--) {
 		if ([[[icons objectAtIndex:i] objectForKey:@"identifier"] isEqualToString:identifier]) {
 			[icons removeObjectAtIndex:i];
@@ -387,7 +387,7 @@
 		[progressIndicator removeFromSuperview];
 		progressIndicator = nil;
 	} else {
-		if ((int)[progressIndicator style] == style)
+		if ((NSInteger)[progressIndicator style] == style)
 			return;
 		if(progressIndicator == nil) {
             progressIndicator = [[NSProgressIndicator alloc] init];

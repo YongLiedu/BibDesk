@@ -56,7 +56,7 @@
 @implementation BDSKURLGroup
 
 // old designated initializer
-- (id)initWithName:(NSString *)aName count:(int)aCount;
+- (id)initWithName:(NSString *)aName count:(NSInteger)aCount;
 {
     // ignore the name, because if this is called it's a dummy name anyway
     NSURL *theURL = [NSURL URLWithString:@"http://"];
@@ -151,8 +151,8 @@
 
 - (BOOL)isEqual:(id)other { return self == other; }
 
-- (unsigned int)hash {
-    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
+- (NSUInteger)hash {
+    return( ((NSUInteger) self >> 4) | (NSUInteger) self << (32 - 4));
 }
 
 // Logging
@@ -221,7 +221,7 @@
     if (nil == contentString) {
         failedDownload = YES;
     } else {
-        int type = [contentString contentStringType];
+        NSInteger type = [contentString contentStringType];
         BOOL isPartialData = NO;
         if (type == BDSKBibTeXStringType) {
             NSMutableString *frontMatter = [NSMutableString string];

@@ -457,13 +457,13 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     if ([bookmark bookmarkType] == BDSKBookmarkTypeBookmark) {
         NSURL *url = [bookmark URL];
         NSString *urlString = [url absoluteString];
-        unsigned int loc = [urlString rangeOfString:string options:NSCaseInsensitiveSearch].location;
+        NSUInteger loc = [urlString rangeOfString:string options:NSCaseInsensitiveSearch].location;
         if (loc == NSNotFound && [string rangeOfString:@"//:"].length == 0)
             loc = [urlString rangeOfString:[@"www." stringByAppendingString:string] options:NSCaseInsensitiveSearch].location;
         if (loc <= [[url scheme] length] + 3)
             [bookmarks addObject:urlString];
     } else if ([bookmark bookmarkType] == BDSKBookmarkTypeFolder) {
-        unsigned int i, iMax = [bookmark countOfChildren];
+        NSUInteger i, iMax = [bookmark countOfChildren];
         for (i = 0; i < iMax; i++)
             addMatchesFromBookmarks(bookmarks, [bookmark objectInChildrenAtIndex:i], string);
     }
@@ -529,7 +529,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
                     nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
                 string = [[[NSString alloc] initWithData:[dataSource data] encoding:nsEncoding] autorelease];
             }
-            int type = [string contentStringType];
+            NSInteger type = [string contentStringType];
             if(type != BDSKUnknownStringType)
                 newPubs = [document publicationsForString:string type:type verbose:NO error:&error];
         }
@@ -619,7 +619,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     [self setStatus:text];
 }
 
-- (void)webView:(WebView *)sender mouseDidMoveOverElement:(NSDictionary *)elementInformation modifierFlags:(unsigned int)modifierFlags {
+- (void)webView:(WebView *)sender mouseDidMoveOverElement:(NSDictionary *)elementInformation modifierFlags:(NSUInteger)modifierFlags {
     NSURL *aLink = [elementInformation objectForKey:WebElementLinkURLKey];
     [self setStatus:[[aLink absoluteString] stringByReplacingPercentEscapes]];
 }
@@ -634,12 +634,12 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     NSNumber *n;
     NSEnumerator *removeEnum = [itemsToRemove objectEnumerator];
     while (n = [removeEnum nextObject]) {
-        unsigned int toRemove = [[menuItems valueForKey:@"tag"] indexOfObject:n];
+        NSUInteger toRemove = [[menuItems valueForKey:@"tag"] indexOfObject:n];
         if (toRemove != NSNotFound)
             [menuItems removeObjectAtIndex:toRemove];
     }
 	
-    unsigned int i = [[menuItems valueForKey:@"tag"] indexOfObject:[NSNumber numberWithInt:WebMenuItemTagCopyLinkToClipboard]];
+    NSUInteger i = [[menuItems valueForKey:@"tag"] indexOfObject:[NSNumber numberWithInt:WebMenuItemTagCopyLinkToClipboard]];
     
     if (i != NSNotFound) {
         
@@ -743,7 +743,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     [sPanel setCanSelectHiddenExtension:YES];
 	
     // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
-    int returnCode = [sPanel runModalForDirectory:nil file:filename];
+    NSInteger returnCode = [sPanel runModalForDirectory:nil file:filename];
     if (returnCode == NSOKButton) {
         [download setDestination:[sPanel filename] allowOverwrite:YES];
     } else {

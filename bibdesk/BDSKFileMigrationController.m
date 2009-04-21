@@ -128,11 +128,11 @@
     [progressBar setHidden:NO];
     [migrateButton setEnabled:NO];
     
-    int current = 0, final = [pubs count];
-    int numberOfAddedFiles = 0, numberOfRemovedFields = 0, addedFiles, removedFields;
+    NSInteger current = 0, final = [pubs count];
+    NSInteger numberOfAddedFiles = 0, numberOfRemovedFields = 0, addedFiles, removedFields;
     NSEnumerator *pubEnum = [pubs objectEnumerator];
     BibItem *aPub;
-    int mask = BDSKRemoveNoFields;
+    NSInteger mask = BDSKRemoveNoFields;
     if (keepLocalFileFields == NO)
         mask |= BDSKRemoveLocalFileFieldsMask;
     if (keepRemoteURLFields == NO)
@@ -179,7 +179,7 @@
 
 - (IBAction)editPublication:(id)sender;
 {
-    int row = [tableView clickedRow];
+    NSInteger row = [tableView clickedRow];
     BibItem *pub = nil;
     if ([sender respondsToSelector:@selector(representedObject)])
         pub = [[sender representedObject] valueForKey:@"publication"];
@@ -207,7 +207,7 @@
 
 - (IBAction)openParentDirectory:(id)sender;
 {
-    int row = [tableView clickedRow];
+    NSInteger row = [tableView clickedRow];
     NSURL *theURL = nil;
     NSString *path = nil;
     if ([sender respondsToSelector:@selector(representedObject)])
@@ -239,7 +239,7 @@
     return tooltip;
 }
 
-- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(int)row;
+- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row;
 {
     NSZone *zone = [NSMenu menuZone];
     NSMenu *menu = [[[NSMenu allocWithZone:zone] initWithTitle:@""] autorelease];

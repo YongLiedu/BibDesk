@@ -71,7 +71,7 @@ enum {
 	
     BibDocument *document;
     NSString *fieldName;
-    int options;
+    NSInteger options;
     
 	NSMutableArray *errorInfoDicts;
 }
@@ -104,7 +104,7 @@ BDSKInitialAutoFileOptionMask should be used for initial autofile moves, the new
 BDSKCheckCompleteAutoFileOptionMask indicates that for initial moves a check will be done whether all required fields are set. 
 BDSKForceAutoFileOptionMask forces AutoFiling, even if there may be problems moving the file. 
 */
-- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(int)masks;
+- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(NSInteger)masks;
 
 /*!
 	@method		closeProgress:
@@ -149,10 +149,10 @@ BDSKForceAutoFileOptionMask forces AutoFiling, even if there may be problems mov
 - (IBAction)showFile:(id)sender;
 
 - (NSArray *)errorInfoDicts;
-- (unsigned int)countOfErrorInfoDicts;
-- (id)objectInErrorInfoDictsAtIndex:(unsigned int)index;
-- (void)insertObject:(id)obj inErrorInfoDictsAtIndex:(unsigned int)index;
-- (void)removeObjectFromErrorInfoDictsAtIndex:(unsigned int)index;
+- (NSUInteger)countOfErrorInfoDicts;
+- (id)objectInErrorInfoDictsAtIndex:(NSUInteger)index;
+- (void)insertObject:(id)obj inErrorInfoDictsAtIndex:(NSUInteger)index;
+- (void)removeObjectFromErrorInfoDictsAtIndex:(NSUInteger)index;
 
 @end
 

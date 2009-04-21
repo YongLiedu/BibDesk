@@ -134,7 +134,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 
 - (NSDictionary *)dictionaryValue { return nil; }
 
-- (int)bookmarkType { return 0; }
+- (NSInteger)bookmarkType { return 0; }
 
 - (NSString *)label { return nil; }
 - (void)setLabel:(NSString *)newLabel {}
@@ -144,10 +144,10 @@ static Class BDSKSearchBookmarkClass = Nil;
 - (NSDictionary *)info { return nil; }
 
 - (NSArray *)children { return nil; }
-- (unsigned int)countOfChildren { return 0; }
-- (BDSKSearchBookmark *)objectInChildrenAtIndex:(unsigned int)idx { return nil; }
-- (void)insertObject:(BDSKSearchBookmark *)child inChildrenAtIndex:(unsigned int)idx {}
-- (void)removeObjectFromChildrenAtIndex:(unsigned int)idx {}
+- (NSUInteger)countOfChildren { return 0; }
+- (BDSKSearchBookmark *)objectInChildrenAtIndex:(NSUInteger)idx { return nil; }
+- (void)insertObject:(BDSKSearchBookmark *)child inChildrenAtIndex:(NSUInteger)idx {}
+- (void)removeObjectFromChildrenAtIndex:(NSUInteger)idx {}
 
 - (BDSKSearchBookmark *)parent {
     return parent;
@@ -228,7 +228,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 
 - (void)release {}
 
-- (unsigned int)retainCount { return UINT_MAX; }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 @end
 
@@ -264,7 +264,7 @@ static Class BDSKSearchBookmarkClass = Nil;
     return dictionary;
 }
 
-- (int)bookmarkType {
+- (NSInteger)bookmarkType {
     return BDSKSearchBookmarkTypeBookmark;
 }
 
@@ -320,7 +320,7 @@ static Class BDSKSearchBookmarkClass = Nil;
     return [NSDictionary dictionaryWithObjectsAndKeys:FOLDER_STRING, BOOKMARK_TYPE_KEY, [children valueForKey:@"dictionaryValue"], CHILDREN_KEY, label, LABEL_KEY, nil];
 }
 
-- (int)bookmarkType {
+- (NSInteger)bookmarkType {
     return BDSKSearchBookmarkTypeFolder;
 }
 
@@ -343,20 +343,20 @@ static Class BDSKSearchBookmarkClass = Nil;
     return [[children copy] autorelease];
 }
 
-- (unsigned int)countOfChildren {
+- (NSUInteger)countOfChildren {
     return [children count];
 }
 
-- (BDSKSearchBookmark *)objectInChildrenAtIndex:(unsigned int)idx {
+- (BDSKSearchBookmark *)objectInChildrenAtIndex:(NSUInteger)idx {
     return [children objectAtIndex:idx];
 }
 
-- (void)insertObject:(BDSKSearchBookmark *)child inChildrenAtIndex:(unsigned int)idx {
+- (void)insertObject:(BDSKSearchBookmark *)child inChildrenAtIndex:(NSUInteger)idx {
     [children insertObject:child atIndex:idx];
     [child setParent:self];
 }
 
-- (void)removeObjectFromChildrenAtIndex:(unsigned int)idx {
+- (void)removeObjectFromChildrenAtIndex:(NSUInteger)idx {
     [[children objectAtIndex:idx] setParent:nil];
     [children removeObjectAtIndex:idx];
 }
@@ -379,7 +379,7 @@ static Class BDSKSearchBookmarkClass = Nil;
     return [NSDictionary dictionaryWithObjectsAndKeys:SEPARATOR_STRING, BOOKMARK_TYPE_KEY, nil];
 }
 
-- (int)bookmarkType {
+- (NSInteger)bookmarkType {
     return BDSKSearchBookmarkTypeSeparator;
 }
 

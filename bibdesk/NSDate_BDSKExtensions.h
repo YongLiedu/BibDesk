@@ -70,7 +70,7 @@ enum {
 - (NSDate *)endOfDay;
 - (NSDate *)startOfWeek;
 - (NSDate *)endOfWeek;
-- (NSDate *)dateByAddingNumber:(int)number ofPeriod:(int)period;
+- (NSDate *)dateByAddingNumber:(NSInteger)number ofPeriod:(NSInteger)period;
 
 @end
 
@@ -81,5 +81,5 @@ enum {
 @end
 
 @interface NSDateComponents (BDSKExtensions)
-+ (NSDateComponents *)dateComponentsWithYear:(int)year month:(int)month day:(int)day hour:(int)hour minute:(int)minute second:(int)second;
++ (NSDateComponents *)dateComponentsWithYear:(NSInteger)year month:(NSInteger)month day:(NSInteger)day hour:(NSInteger)hour minute:(NSInteger)minute second:(NSInteger)second;
 @end

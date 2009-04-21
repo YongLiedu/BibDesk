@@ -77,8 +77,8 @@
 + (void)deleteServerFile:(BDSKServerInfo *)serverInfo;
 + (NSArray *)servers;
 + (void)addServer:(BDSKServerInfo *)info;
-+ (void)setServer:(BDSKServerInfo *)info atIndex:(unsigned int)index;
-+ (void)removeServerAtIndex:(unsigned int)index;
++ (void)setServer:(BDSKServerInfo *)info atIndex:(NSUInteger)index;
++ (void)removeServerAtIndex:(NSUInteger)index;
 
 - (id)initWithGroup:(BDSKSearchGroup *)aGroup;
 
@@ -100,8 +100,8 @@
 - (void)setType:(NSString *)newType;
 - (NSString *)type;
 
-- (void)setTypeTag:(int)tag;
-- (int)typeTag;
+- (void)setTypeTag:(NSInteger)tag;
+- (NSInteger)typeTag;
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
 - (BDSKServerInfo *)serverInfo;

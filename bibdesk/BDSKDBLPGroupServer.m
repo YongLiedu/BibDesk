@@ -153,22 +153,22 @@
     return info;
 }
 
-- (void)setNumberOfAvailableResults:(int)value;
+- (void)setNumberOfAvailableResults:(NSInteger)value;
 {
     OSAtomicCompareAndSwap32Barrier(availableResults, value, &availableResults);
 }
 
-- (int)numberOfAvailableResults;
+- (NSInteger)numberOfAvailableResults;
 {
     return availableResults;
 }
 
-- (void)setNumberOfFetchedResults:(int)value;
+- (void)setNumberOfFetchedResults:(NSInteger)value;
 {
     OSAtomicCompareAndSwap32Barrier(fetchedResults, value, &fetchedResults);
 }
 
-- (int)numberOfFetchedResults;
+- (NSInteger)numberOfFetchedResults;
 {
     return fetchedResults;
 }

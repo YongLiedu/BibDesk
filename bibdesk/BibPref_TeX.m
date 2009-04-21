@@ -145,7 +145,7 @@ static NSSet *standardStyles = nil;
     return YES;
 }
 
-- (void)styleAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)styleAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     NSString *newStyle = [(id)contextInfo autorelease];
     if (NSAlertDefaultReturn == returnCode) {
         [sud setObject:newStyle forKey:BDSKBTStyleKey];
@@ -185,7 +185,7 @@ static NSSet *standardStyles = nil;
     }
 }
 
-- (void)openTemplateFailureSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode path:(void *)path{
+- (void)openTemplateFailureSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode path:(void *)path{
     [(id)path autorelease];
     if(returnCode == NSAlertDefaultReturn)
         [[NSWorkspace sharedWorkspace] selectFile:path inFileViewerRootedAtPath:@""];
@@ -217,7 +217,7 @@ static NSSet *standardStyles = nil;
     }
 }
 
-- (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     if (returnCode == NSAlertAlternateReturn)
         return;
     NSFileManager *fileManager = [NSFileManager defaultManager];

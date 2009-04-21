@@ -57,7 +57,7 @@
     
     NSError *error = nil;    
 
-    int nodecount = [[[xmlDocument rootElement] nodesForXPath:containsArxivLinkNode error:&error] count];
+    NSInteger nodecount = [[[xmlDocument rootElement] nodesForXPath:containsArxivLinkNode error:&error] count];
 
     return nodecount > 0;
 }
@@ -122,7 +122,7 @@
         return nil;
     }    
     
-    unsigned int i, iMax = [arxivSearchResults count];
+    NSUInteger i, iMax = [arxivSearchResults count];
     
     // check the number of nodes first
     if (0 == iMax) {

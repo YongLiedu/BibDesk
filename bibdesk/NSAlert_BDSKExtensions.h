@@ -40,5 +40,5 @@
 
 
 @interface NSAlert (BDSKExtensions)
-- (int)suppressionButtonState;
+- (NSInteger)suppressionButtonState;
 @end

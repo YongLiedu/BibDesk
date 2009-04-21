@@ -68,10 +68,10 @@
 - (IBAction)search:(id)sender;
 
 - (NSArray *)orphanedFiles;
-- (unsigned int)countOfOrphanedFiles;
-- (id)objectInOrphanedFilesAtIndex:(unsigned int)theIndex;
-- (void)insertObject:(id)obj inOrphanedFilesAtIndex:(unsigned int)theIndex;
-- (void)removeObjectFromOrphanedFilesAtIndex:(unsigned int)theIndex;
+- (NSUInteger)countOfOrphanedFiles;
+- (id)objectInOrphanedFilesAtIndex:(NSUInteger)theIndex;
+- (void)insertObject:(id)obj inOrphanedFilesAtIndex:(NSUInteger)theIndex;
+- (void)removeObjectFromOrphanedFilesAtIndex:(NSUInteger)theIndex;
 
 @end
 

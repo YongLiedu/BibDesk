@@ -392,7 +392,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	if([firstResponder isKindOfClass:[NSText class]]){
         
         NSTextView *textView = (NSTextView *)firstResponder;
-		int editedRow = -1;
+		NSInteger editedRow = -1;
 		NSRange selection = [textView selectedRange];
         if ([textView isFieldEditor]) {
             firstResponder = [textView delegate];
@@ -566,7 +566,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (IBAction)chooseLocalFile:(id)sender{
-    unsigned int anIndex = NSNotFound;
+    NSUInteger anIndex = NSNotFound;
     NSNumber *indexNumber = [sender representedObject];
     NSString *path = nil;
     if (indexNumber) {
@@ -600,10 +600,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
   
 }
 
-- (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
 
     if(returnCode == NSOKButton){
-        unsigned int anIndex = (unsigned int)contextInfo;
+        NSUInteger anIndex = (NSUInteger)contextInfo;
         NSURL *aURL = [[sheet URLs] objectAtIndex:0];
         BOOL shouldAutoFile = [disableAutoFileButton state] == NSOffState && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey];
         if (anIndex != NSNotFound) {
@@ -634,7 +634,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (IBAction)chooseRemoteURL:(id)sender{
-    unsigned int anIndex = NSNotFound;
+    NSUInteger anIndex = NSNotFound;
     NSNumber *indexNumber = [sender representedObject];
     NSString *urlString = @"http://";
     if (indexNumber) {
@@ -650,7 +650,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
           contextInfo:(void *)anIndex];
 }
 
-- (void)chooseRemoteURLSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)chooseRemoteURLSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
 
     if (returnCode == NSOKButton) {
         NSString *aURLString = [chooseURLField stringValue];
@@ -659,7 +659,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         NSURL *aURL = [NSURL URLWithStringByNormalizingPercentEscapes:aURLString];
         if (aURL == nil)
             return;
-        unsigned int anIndex = (unsigned int)contextInfo;
+        NSUInteger anIndex = (NSUInteger)contextInfo;
         if (anIndex != NSNotFound) {
             BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
             if (aFile == nil)
@@ -694,7 +694,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [self deleteURLsAtIndexes:[sender representedObject] moveToTrash:1];
 }
 
-- (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     NSArray *currentFields = [(NSArray *)contextInfo autorelease];
 	NSString *newField = [addFieldController field];
     if(returnCode == NSCancelButton || newField == nil)
@@ -736,7 +736,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [addFieldController release];
 }
 
-- (void)removeFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)removeFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
 	NSString *oldField = [removeFieldController field];
     NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
     NSArray *removableFields = [removeFieldController fieldsArray];
@@ -768,7 +768,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt
                                                                                                        fieldsArray:removableFields];
-    int selectedRow = [tableView selectedRow];
+    NSInteger selectedRow = [tableView selectedRow];
     NSString *selectedField = selectedRow == -1 ? nil : [fields objectAtIndex:selectedRow];
     BOOL didValidate = YES;
     if([removableFields containsObject:selectedField]){
@@ -788,11 +788,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [removeFieldController release];
 }
 
-- (void)changeFieldSheetDidEnd:(BDSKChangeFieldSheetController *)changeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)changeFieldSheetDidEnd:(BDSKChangeFieldSheetController *)changeFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
 	NSString *oldField = [changeFieldController field];
     NSString *newField = [changeFieldController replaceField];
     NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
-    int autoGenerateStatus = 0;
+    NSInteger autoGenerateStatus = 0;
     
     if (returnCode == NSOKButton && [NSString isEmptyString:newField] == NO  && 
         [newField isEqualToString:oldField] == NO && [fields containsObject:newField] == NO) {
@@ -852,7 +852,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (IBAction)raiseChangeFieldName:(id)sender{
     NSString *field = nil;
     if (sender == tableView) {
-        int clickedRow = [tableView clickedRow];
+        NSInteger clickedRow = [tableView clickedRow];
         if (clickedRow == -1)
             return;
         field = [fields objectAtIndex:clickedRow];
@@ -860,7 +860,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [self raiseChangeFieldSheetForField:field];
 }
 
-- (void)generateCiteKeyAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)generateCiteKeyAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
 	if([alert suppressionButtonState] == NSOnState)
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
     
@@ -942,9 +942,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     }
 }
 
-- (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     NSArray *files = nil;
-    unsigned int anIndex = (unsigned int)contextInfo;
+    NSUInteger anIndex = (NSUInteger)contextInfo;
     
     if (anIndex == NSNotFound)
         files = [publication localFiles];
@@ -984,7 +984,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	
     // context menu sets item index as represented object; otherwise we try to autofile everything
     NSNumber *indexNumber = [sender representedObject];
-    unsigned int anIndex = NSNotFound;
+    NSUInteger anIndex = NSNotFound;
 	BOOL canSet = YES;
     
     if (indexNumber) {
@@ -1053,8 +1053,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (IBAction)changeRating:(id)sender{
 	BDSKRatingButtonCell *cell = [sender selectedCell];
 	NSString *field = [cell representedObject];
-	int oldRating = [publication ratingValueOfField:field];
-	int newRating = [cell rating];
+	NSInteger oldRating = [publication ratingValueOfField:field];
+	NSInteger newRating = [cell rating];
 		
 	if(newRating != oldRating) {
 		[publication setField:field toRatingValue:newRating];
@@ -1116,7 +1116,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (IBAction)showPersonDetail:(id)sender{
-    int i = [authorTableView clickedRow];
+    NSInteger i = [authorTableView clickedRow];
     
     if(i == -1)
         NSBeep();
@@ -1147,7 +1147,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     NSURL *theURL = anIndex == NSNotFound ? nil : [[publication objectInFilesAtIndex:anIndex] URL];
 	NSMenu *submenu;
 	NSMenuItem *item;
-    int i = 0;
+    NSInteger i = 0;
     
     if (theURL && [[aFileView selectionIndexes] count] <= 1) {
         i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
@@ -1280,8 +1280,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (void)updateSafariRecentDownloadsMenu:(NSMenu *)menu{
 	NSArray *historyArray = [self safariDownloadHistory];
 		
-	unsigned int i = 0;
-	unsigned int numberOfItems = [historyArray count];
+	NSUInteger i = 0;
+	NSUInteger numberOfItems = [historyArray count];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     
     [menu removeAllItems];
@@ -1311,8 +1311,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (void)updateSafariRecentURLsMenu:(NSMenu *)menu{
 	NSArray *historyArray = [self safariDownloadHistory];
-	unsigned int numberOfItems = [historyArray count];
-	unsigned int i = 0;
+	NSUInteger numberOfItems = [historyArray count];
+	NSUInteger i = 0;
     
     [menu removeAllItems];
 	
@@ -1520,7 +1520,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     else if (theAction == @selector(editSelectedFieldAsRawBibTeX:)) {
         if (isEditable == NO)
             return NO;
-        int row = [tableView editedRow];
+        NSInteger row = [tableView editedRow];
 		return (row != -1 && [complexStringEditor isEditing] == NO && 
                 [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] == NO && [[fields objectAtIndex:row] isCitationField] == NO);
     }
@@ -1610,7 +1610,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (BOOL)fileView:(FVFileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
 {
-    int moveToTrash = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKAskToTrashFilesKey] ? -1 : 0;
+    NSInteger moveToTrash = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKAskToTrashFilesKey] ? -1 : 0;
     [self deleteURLsAtIndexes:indexSet moveToTrash:moveToTrash];
     return YES;
 }
@@ -1669,7 +1669,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return fileURL;
 }
 
-- (void)trashAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo
+- (void)trashAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
     if (alert && [alert suppressionButtonState] == NSOnState)
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKAskToTrashFilesKey];
@@ -1681,14 +1681,14 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             NSString *path = [url path];
             NSString *folderPath = [path stringByDeletingLastPathComponent];
             NSString *fileName = [path lastPathComponent];
-            int tag = 0;
+            NSInteger tag = 0;
             [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
         }
     }
 }
 
 // moveToTrash: 0 = no, 1 = yes, -1 = ask
-- (void)deleteURLsAtIndexes:(NSIndexSet *)indexSet moveToTrash:(int)moveToTrash{
+- (void)deleteURLsAtIndexes:(NSIndexSet *)indexSet moveToTrash:(NSInteger)moveToTrash{
     NSUInteger idx = [indexSet lastIndex];
     NSMutableArray *fileURLs = [NSMutableArray array];
     while (NSNotFound != idx) {
@@ -1730,9 +1730,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 #pragma mark People
 
-- (int)numberOfPersons {
+- (NSInteger)numberOfPersons {
     NSArray *allArrays = [[publication people] allValues];
-    unsigned int count = 0, i = [allArrays count];
+    NSUInteger count = 0, i = [allArrays count];
     
     while(i--)
         count += [[allArrays objectAtIndex:i] count];
@@ -1740,7 +1740,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return count;
 }
 
-- (BibAuthor *)personAtIndex:(unsigned int)anIndex {
+- (BibAuthor *)personAtIndex:(NSUInteger)anIndex {
     return [[self persons] objectAtIndex:anIndex];
 }
 
@@ -1787,7 +1787,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     }else if([fieldName isEqualToString:BDSKCiteKeyString]){
         [citeKeyField selectText:nil];
     }else if([fieldName isIntegerField]){
-        int i, j, numRows = [matrix numberOfRows], numCols = [matrix numberOfColumns];
+        NSInteger i, j, numRows = [matrix numberOfRows], numCols = [matrix numberOfColumns];
         id cell;
         
         for (i = 0; i < numRows; i++) {
@@ -1801,7 +1801,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             }
         }
     }else{
-        unsigned int row = [fields indexOfObject:fieldName];
+        NSUInteger row = [fields indexOfObject:fieldName];
         if (row != NSNotFound) {
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:1 row:row withEvent:nil select:YES];
@@ -1812,7 +1812,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 #pragma mark Text Change handling
 
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender{
-	int row = [tableView selectedRow];
+	NSInteger row = [tableView selectedRow];
 	if (row == -1) 
 		return;
     [self editSelectedCellAsMacro];
@@ -1821,7 +1821,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (BOOL)editSelectedCellAsMacro{
-	int row = [tableView selectedRow];
+	NSInteger row = [tableView selectedRow];
 	if ([complexStringEditor isEditing] || row == -1) 
 		return NO;
 	if (complexStringEditor == nil) {
@@ -1864,7 +1864,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             if ([alert suppressionButtonState] == NSOnState)
                 [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnEditInheritedKey];
             
-            int rv = [alert runModal];
+            NSInteger rv = [alert runModal];
             
             if (rv == NSAlertAlternateReturn) {
                 canEdit = NO;
@@ -1948,7 +1948,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             NSString *message = nil;
             
             // check whether we won't get a crossref chain
-            int errorCode = [publication canSetCrossref:value andCiteKey:[publication citeKey]];
+            NSInteger errorCode = [publication canSetCrossref:value andCiteKey:[publication citeKey]];
             if (errorCode == BDSKSelfCrossrefError)
                 message = NSLocalizedString(@"An item cannot cross reference to itself.", @"Informative text in alert dialog");
             else if (errorCode == BDSKChainCrossrefError)
@@ -1985,7 +1985,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             
         } else {
             // check whether we won't crossref to the new citekey
-            int errorCode = [publication canSetCrossref:[publication valueOfField:BDSKCrossrefString inherit:NO] andCiteKey:[control stringValue]];
+            NSInteger errorCode = [publication canSetCrossref:[publication valueOfField:BDSKCrossrefString inherit:NO] andCiteKey:[control stringValue]];
             if (errorCode == BDSKSelfCrossrefError)
                 message = NSLocalizedString(@"An item cannot cross reference to itself.", @"Informative text in alert dialog");
             else if (errorCode != BDSKNoCrossrefError) // shouldn't happen
@@ -1999,7 +1999,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                                                otherButton:nil
                                  informativeTextWithFormat:message];
             
-            int rv = [alert runModal];
+            NSInteger rv = [alert runModal];
             
             if (rv == NSAlertDefaultReturn) {
                 [control setStringValue:[[control stringValue] stringByReplacingCharactersInSet:invalidSet withString:@""]];
@@ -2051,7 +2051,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
-- (int)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue didAutoGenerate:(int)mask{
+- (NSInteger)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue didAutoGenerate:(NSInteger)mask{
     mask |= [[self document] userChangedField:fieldName ofPublications:[NSArray arrayWithObject:publication] from:[NSArray arrayWithObject:oldValue ?: @""] to:[NSArray arrayWithObject:newValue]];
     
     if (mask != 0) {
@@ -2068,7 +2068,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return mask;
 }
 
-- (int)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue{
+- (NSInteger)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue{
     return [self userChangedField:fieldName from:oldValue to:newValue didAutoGenerate:0];
 }
 
@@ -2202,7 +2202,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	   (parentDidChange && [changeKey isEqualToString:BDSKCiteKeyString])){
         // Reset if the crossref changed, or our parent's cite key changed.
         // If we are editing a crossref field, we should first set the new value, because resetFields will set the edited value. This happens when it is set through drag/drop
-		int editedRow = [tableView editedRow];
+		NSInteger editedRow = [tableView editedRow];
         if (editedRow != -1 && [[fields objectAtIndex:editedRow] isEqualToString:changeKey])
             [[tableView currentEditor] setString:newValue ?: @""];
         if ([changeKey isEqualToString:BDSKCrossrefString] && [NSString isEmptyString:newValue] == [fields containsObject:changeKey]) {
@@ -2404,7 +2404,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	return NO;
 }
 
-- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)idx{
+- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(NSInteger *)idx{
     if (control != tableView) {
 		return words;
 	} else if ([complexStringEditor isEditing]) {
@@ -2452,7 +2452,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return NO;
 }
 
-- (BOOL)control:(NSControl *)control textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned int)charIndex {
+- (BOOL)control:(NSControl *)control textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex {
     if ([control isEqual:tableView]) {
         BibItem *pub = [[[publication owner] publications] itemForCiteKey:aLink];
         if (nil == pub) {
@@ -2604,7 +2604,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	// create a crossref (cmd-option), or fill empty fields (no modifiers)
     
     // uses the Carbon function since [NSApp modifierFlags] won't work if we're not the front app
-	unsigned int modifierFlags = [NSApp currentModifierFlags];
+	NSUInteger modifierFlags = [NSApp currentModifierFlags];
 	
 	// we always have sourceDragMask & NSDragOperationLink here for some reason, so test the mask manually
 	if((modifierFlags & (NSAlternateKeyMask | NSCommandKeyMask)) == (NSAlternateKeyMask | NSCommandKeyMask)){
@@ -2614,7 +2614,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 		NSString *message = nil;
 		
 		// first check if we don't create a Crossref chain
-        int errorCode = [publication canSetCrossref:crossref andCiteKey:[publication citeKey]];
+        NSInteger errorCode = [publication canSetCrossref:crossref andCiteKey:[publication citeKey]];
 		if (errorCode == BDSKSelfCrossrefError)
 			message = NSLocalizedString(@"An item cannot cross reference to itself.", @"Informative text in alert dialog");
 		else if (errorCode == BDSKChainCrossrefError)
@@ -2645,7 +2645,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         NSString *oldValue = nil;
         NSString *newValue = nil;
         BOOL shouldOverwrite = (modifierFlags & NSAlternateKeyMask) != 0;
-        int autoGenerateStatus = 0;
+        NSInteger autoGenerateStatus = 0;
         
         [publication setPubType:[tempBI pubType]]; // do we want this always?
         
@@ -2694,7 +2694,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	return dragFieldEditor;
 }
 
-- (void)shouldCloseAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)shouldCloseAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     switch (returnCode){
         case NSAlertOtherReturn:
             break; // do nothing
@@ -2807,7 +2807,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 #pragma mark TableView datasource methods
 
-- (int)numberOfRowsInTableView:(NSTableView *)tv{
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tv{
 	if ([tv isEqual:tableView]) {
         return [fields count];
 	} else if ([tv isEqual:authorTableView]) {
@@ -2816,7 +2816,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return 0;
 }
 
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
 	if ([tv isEqual:tableView]) {
         NSString *tcID = [tableColumn identifier];
         NSString *field = [fields objectAtIndex:row];
@@ -2831,7 +2831,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return nil;
 }
 
-- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
     if ([tv isEqual:tableView] && [[tableColumn identifier] isEqualToString:@"value"]) {
         NSString *field = [fields objectAtIndex:row];
         NSString *oldValue = [publication valueOfField:field] ?: @"";
@@ -2843,7 +2843,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     }
 }
 
-- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op{
     if ([tv isEqual:tableView]) {
         if (row == -1)
             row = [tableView numberOfRows] - 1;
@@ -2874,7 +2874,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return NSDragOperationNone;
 }
 
-- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op{
+- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
     if ([tv isEqual:tableView]) {
         NSPasteboard *pboard = [info draggingPasteboard];
         NSString *field = [fields objectAtIndex:row];
@@ -2891,7 +2891,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                     return NO;
                 
                 // first check if we don't create a Crossref chain
-                int errorCode = [publication canSetCrossref:crossref andCiteKey:[publication citeKey]];
+                NSInteger errorCode = [publication canSetCrossref:crossref andCiteKey:[publication citeKey]];
                 NSString *message = nil;
                 if (errorCode == BDSKSelfCrossrefError)
                     message = NSLocalizedString(@"An item cannot cross reference to itself.", @"Informative text in alert dialog");
@@ -2986,7 +2986,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 #pragma mark TableView delegate methods
 
-- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
 	if ([tv isEqual:tableView] && [[tableColumn identifier] isEqualToString:@"value"]) {
         // we always want to "edit" even when we are not editable, so we can always select, and the cell will prevent editing when isEditable == NO
         return YES;
@@ -2994,7 +2994,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return NO;
 }
 
-- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
 	if ([tv isEqual:tableView]) {
         NSString *field = [fields objectAtIndex:row];
         if([[tableColumn identifier] isEqualToString:@"field"]){
@@ -3013,7 +3013,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     }
 }
 
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
+- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation{
 	if ([tv isEqual:authorTableView]) {
         BibAuthor *person = [self personAtIndex:row];
         return [NSString stringWithFormat:@"%@ (%@)", [person displayName], [[person field] localizedFieldName]];
@@ -3023,7 +3023,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 #pragma mark Splitview delegate methods
 
-- (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(int)offset {
+- (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(NSInteger)offset {
     if ([sender isEqual:mainSplitView]) {
         NSView *tabs = [[mainSplitView subviews] objectAtIndex:0]; // tabs
         NSView *files = [[mainSplitView subviews] objectAtIndex:1]; // files+authors
@@ -3081,7 +3081,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     }
 }
 
-- (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)offset{
+- (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(NSInteger)offset{
     if ([sender isEqual:mainSplitView]) {
         return fmaxf(proposedMin, 390.0);
     }
@@ -3201,8 +3201,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         if([fields count] > 0){
             NSTableColumn *tableColumn = [tableView tableColumnWithIdentifier:@"field"];
             id cell;
-            int numberOfRows = [fields count];
-            int row;
+            NSInteger numberOfRows = [fields count];
+            NSInteger row;
             float maxWidth = NSWidth([citeKeyTitle frame]) + 4.0;
             
             for (row = 0; row < numberOfRows; row++) {
@@ -3229,7 +3229,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     
 	// restore the edited cell and its selection
 	if(editedTitle){
-        unsigned int editedRow = [fields indexOfObject:editedTitle];
+        NSUInteger editedRow = [fields indexOfObject:editedTitle];
         if (editedRow != NSNotFound) {
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:editedRow] byExtendingSelection:NO];
             [tableView editColumn:1 row:editedRow withEvent:nil select:NO];
@@ -3259,12 +3259,12 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	didSetupFields = YES;
 }
 
-- (void)getNumberOfRows:(int *)rows columns:(int *)columns forMatrixCellSize:(NSSize)cellSize {
+- (void)getNumberOfRows:(NSInteger *)rows columns:(NSInteger *)columns forMatrixCellSize:(NSSize)cellSize {
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-    int numEntries = [[typeMan booleanFieldsSet] count] + [[typeMan triStateFieldsSet] count] + [[typeMan ratingFieldsSet] count];
+    NSInteger numEntries = [[typeMan booleanFieldsSet] count] + [[typeMan triStateFieldsSet] count] + [[typeMan ratingFieldsSet] count];
     NSSize size = [[matrix enclosingScrollView] frame].size;
     NSSize spacing = [matrix intercellSpacing];
-    int numRows, numCols = MIN(floor((size.width + spacing.width) / (cellSize.width + spacing.width)), numEntries);
+    NSInteger numRows, numCols = MIN(floor((size.width + spacing.width) / (cellSize.width + spacing.width)), numEntries);
     numCols = MAX(numCols, 1);
     numRows = ceil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
     if (numRows * (cellSize.height + spacing.height) > 190.0 + spacing.height) {
@@ -3294,7 +3294,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSArray *ratingFields = [sud stringArrayForKey:BDSKRatingFieldsKey];
     NSArray *booleanFields = [sud stringArrayForKey:BDSKBooleanFieldsKey];
     NSArray *triStateFields = [sud stringArrayForKey:BDSKTriStateFieldsKey];
-    int numRows, numCols, numEntries = [ratingFields count] + [booleanFields count] + [triStateFields count], i;
+    NSInteger numRows, numCols, numEntries = [ratingFields count] + [booleanFields count] + [triStateFields count], i;
     NSPoint origin = [matrix frame].origin;
 	NSEnumerator *e;
     NSString *field;
@@ -3355,7 +3355,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     
 	// restore the edited cell
     if (editedTitle) {
-        unsigned int editedIndex = [[cells valueForKey:@"representedObject"] indexOfObject:editedTitle];
+        NSUInteger editedIndex = [[cells valueForKey:@"representedObject"] indexOfObject:editedTitle];
         if (editedIndex != NSNotFound) {
             [[self window] makeFirstResponder:matrix];
             [matrix selectCellAtRow:editedIndex / numCols column:editedIndex % numCols];
@@ -3387,7 +3387,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)matrixFrameDidChange:(NSNotification *)notification {
-    int numberOfColumns;
+    NSInteger numberOfColumns;
     [self getNumberOfRows:NULL columns:&numberOfColumns forMatrixCellSize:[matrix cellSize]];
     if (numberOfColumns != [matrix numberOfColumns])
         [self setupMatrix];
@@ -3498,7 +3498,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if (type != NSKeyDown && type != NSKeyUp)
         return NO;
     unichar c = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
-    unsigned int flags = [theEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+    NSUInteger flags = [theEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
     
     if((c == NSRightArrowFunctionKey || c == NSDownArrowFunctionKey) && (flags & NSCommandKeyMask) && (flags & NSAlternateKeyMask)){
         if([self indexOfTabViewItem:[self selectedTabViewItem]] == [self numberOfTabViewItems] - 1)

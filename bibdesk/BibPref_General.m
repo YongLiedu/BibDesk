@@ -46,7 +46,7 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
 
 
 @interface BibPref_General (Private)
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)updateUpdaterUI;
 - (void)updateEmailTemplateUI;
 - (void)updateStartupBehaviorUI;
@@ -76,7 +76,7 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
 }
 
 - (void)updateStartupBehaviorUI {
-    int startupBehavior = [[sud objectForKey:BDSKStartupBehaviorKey] intValue];
+    NSInteger startupBehavior = [[sud objectForKey:BDSKStartupBehaviorKey] intValue];
     [startupBehaviorRadio selectCellWithTag:startupBehavior];
     [defaultBibFileTextField setEnabled:startupBehavior == 3];
     [defaultBibFileButton setEnabled:startupBehavior == 3];
@@ -100,11 +100,11 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
 }
 
 - (void)updateUpdaterUI {
-    int interval = 0;
+    NSInteger interval = 0;
     if ([[SUUpdater sharedUpdater] automaticallyChecksForUpdates])
         interval = [[SUUpdater sharedUpdater] updateCheckInterval];
     if (NO == [checkForUpdatesButton selectItemWithTag:interval]) {
-        int i, iMax = [checkForUpdatesButton numberOfItems];
+        NSInteger i, iMax = [checkForUpdatesButton numberOfItems];
         for (i = 1; i < iMax; i++) {
             if (interval > [[checkForUpdatesButton itemAtIndex:i] tag] / 2) {
                 [checkForUpdatesButton selectItemAtIndex:i];
@@ -125,7 +125,7 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
 
 
 - (IBAction)changeUpdateInterval:(id)sender{
-    int interval = [[sender selectedItem] tag];
+    NSInteger interval = [[sender selectedItem] tag];
     if (interval > 0)
         [[SUUpdater sharedUpdater] setUpdateCheckInterval:interval];
     [[SUUpdater sharedUpdater] setAutomaticallyChecksForUpdates:interval > 0];
@@ -139,7 +139,7 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
 }
 
 - (IBAction)changeStartupBehavior:(id)sender{
-    int n = [[sender selectedCell] tag];
+    NSInteger n = [[sender selectedCell] tag];
     [sud setObject:[NSNumber numberWithInt:n] forKey:BDSKStartupBehaviorKey];
     [self updateStartupBehaviorUI];
     if(n == 3 && [[defaultBibFileTextField stringValue] isEqualToString:@""])
@@ -160,7 +160,7 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
 						  contextInfo:NULL];
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSCancelButton)
         return;
     
@@ -173,7 +173,7 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
 }
 
 - (IBAction)changeEmailTemplate:(id)sender{
-    int idx = [sender indexOfSelectedItem];
+    NSInteger idx = [sender indexOfSelectedItem];
     NSString *style = idx == 0 ? @"" : [sender titleOfSelectedItem];
     if ([style isEqualToString:[sud stringForKey:BDSKEmailTemplateKey]] == NO) {
         [sud setObject:style forKey:BDSKEmailTemplateKey];
