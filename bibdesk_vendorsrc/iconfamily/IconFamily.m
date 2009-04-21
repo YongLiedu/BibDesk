@@ -1091,10 +1091,10 @@ static BOOL IconFamilyGetFSRefCreatingFile(NSString *path, FSRef *fsRef, BOOL cr
     }
     if (size.width >= size.height) {
         newSize.width  = iconWidth;
-        newSize.height = floor( (float) iconWidth * size.height / size.width + 0.5 );
+        newSize.height = floor( (CGFloat) iconWidth * size.height / size.width + 0.5 );
     } else {
         newSize.height = iconWidth;
-        newSize.width  = floor( (float) iconWidth * size.width / size.height + 0.5 );
+        newSize.width  = floor( (CGFloat) iconWidth * size.width / size.height + 0.5 );
     }
     [workingImage setSize:newSize];
 
@@ -1115,8 +1115,8 @@ static BOOL IconFamilyGetFSRefCreatingFile(NSString *path, FSRef *fsRef, BOOL cr
     [graphicsContext setImageInterpolation:imageInterpolation];
     
     // Composite the working image into the icon bitmap, centered.
-    targetRect.origin.x = ((float)iconWidth - newSize.width ) / 2.0;
-    targetRect.origin.y = ((float)iconWidth - newSize.height) / 2.0;
+    targetRect.origin.x = ((CGFloat)iconWidth - newSize.width ) / 2.0;
+    targetRect.origin.y = ((CGFloat)iconWidth - newSize.height) / 2.0;
     targetRect.size.width = newSize.width;
     targetRect.size.height = newSize.height;
     [workingImageRep drawInRect:targetRect];
@@ -1142,7 +1142,7 @@ static BOOL IconFamilyGetFSRefCreatingFile(NSString *path, FSRef *fsRef, BOOL cr
     unsigned char* pDest;
     NSInteger x, y;
     unsigned char alphaByte;
-    float oneOverAlpha;
+    CGFloat oneOverAlpha;
     
     // Get information about the bitmapImageRep.
     NSInteger pixelsWide      = [bitmapImageRep pixelsWide];
@@ -1194,7 +1194,7 @@ static BOOL IconFamilyGetFSRefCreatingFile(NSString *path, FSRef *fsRef, BOOL cr
 						// lossiness unfortunately) when retrieving the bitmap data.
 						*pDest++ = alphaByte = *(pSrc+3);
 						if (alphaByte) {
-							oneOverAlpha = 255.0f / (float)alphaByte;
+							oneOverAlpha = 255.0f / (CGFloat)alphaByte;
 							*pDest++ = *(pSrc+0) * oneOverAlpha;
 							*pDest++ = *(pSrc+1) * oneOverAlpha;
 							*pDest++ = *(pSrc+2) * oneOverAlpha;
@@ -1282,9 +1282,9 @@ static BOOL IconFamilyGetFSRefCreatingFile(NSString *path, FSRef *fsRef, BOOL cr
 			for (y = 0; y < pixelsHigh; y++) {
 				pSrc = bitmapData + y * bytesPerRow;
 				for (x = 0; x < pixelsWide; x++) {
-					cgCol.red = ((float)*(pSrc)) / 255;
-					cgCol.green = ((float)*(pSrc+1)) / 255;
-					cgCol.blue = ((float)*(pSrc+2)) / 255;
+					cgCol.red = ((CGFloat)*(pSrc)) / 255;
+					cgCol.green = ((CGFloat)*(pSrc+1)) / 255;
+					cgCol.blue = ((CGFloat)*(pSrc+2)) / 255;
 	
 					*pDest++ = CGPaletteGetIndexForColor(cgPal, cgCol);
 	
@@ -1295,9 +1295,9 @@ static BOOL IconFamilyGetFSRefCreatingFile(NSString *path, FSRef *fsRef, BOOL cr
 			for (y = 0; y < pixelsHigh; y++) {
 				pSrc = bitmapData + y * bytesPerRow;
 				for (x = 0; x < pixelsWide; x++) {
-					cgCol.red = ((float)*(pSrc)) / 255;
-					cgCol.green = ((float)*(pSrc+1)) / 255;
-					cgCol.blue = ((float)*(pSrc+2)) / 255;
+					cgCol.red = ((CGFloat)*(pSrc)) / 255;
+					cgCol.green = ((CGFloat)*(pSrc+1)) / 255;
+					cgCol.blue = ((CGFloat)*(pSrc+2)) / 255;
 	
 					*pDest++ = CGPaletteGetIndexForColor(cgPal, cgCol);
 	

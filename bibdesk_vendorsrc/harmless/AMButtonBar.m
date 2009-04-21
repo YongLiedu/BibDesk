@@ -10,9 +10,9 @@
 #import "AMButtonBarItem.h"
 #import "AMButtonBarCell.h"
 
-static float const AM_START_GAP_WIDTH = 8.0;
-static float const AM_BUTTON_GAP_WIDTH = 2.0;
-static float const AM_BUTTON_HEIGHT = 17.0;
+static CGFloat const AM_START_GAP_WIDTH = 8.0;
+static CGFloat const AM_BUTTON_GAP_WIDTH = 2.0;
+static CGFloat const AM_BUTTON_HEIGHT = 17.0;
 
 NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelectionDidChangeNotification";
 
