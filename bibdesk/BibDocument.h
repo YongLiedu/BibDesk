@@ -232,10 +232,10 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 #pragma mark Scalar state variables
 
     struct _docState {
-        float               lastPreviewHeight;  // for the splitview double-click handling
-        float               lastGroupViewWidth;
-        float               lastFileViewWidth;
-        float               lastWebViewFraction;
+        CGFloat               lastPreviewHeight;  // for the splitview double-click handling
+        CGFloat               lastGroupViewWidth;
+        CGFloat               lastFileViewWidth;
+        CGFloat               lastWebViewFraction;
         NSStringEncoding    documentStringEncoding;
         NSSaveOperationType currentSaveOperationType; // used to check for autosave during writeToFile:ofType:
         BOOL                sortDescending;

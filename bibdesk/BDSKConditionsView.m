@@ -50,7 +50,7 @@
 
 - (NSSize)minimumSize { 
     NSArray *subviews = [self subviews];
-    float height = ([subviews count] > 0) ? NSMaxY([[subviews lastObject] frame]) : 10.0f;
+    CGFloat height = ([subviews count] > 0) ? NSMaxY([[subviews lastObject] frame]) : 10.0f;
     return NSMakeSize(NSWidth([self frame]), height);
 }
 
@@ -62,9 +62,9 @@
 
 - (void)updateSize {
     NSSize newSize = [self minimumSize];
-    float oldHeight = NSHeight([self frame]);
-    float newHeight = newSize.height;
-    float dh = fminf(newHeight, MAX_HEIGHT) - fminf(oldHeight, MAX_HEIGHT);
+    CGFloat oldHeight = NSHeight([self frame]);
+    CGFloat newHeight = newSize.height;
+    CGFloat dh = BDSKMin(newHeight, MAX_HEIGHT) - BDSKMin(oldHeight, MAX_HEIGHT);
     
     if (newHeight < oldHeight)
         [self setFrameSize:newSize];
@@ -82,7 +82,7 @@
 - (void)insertView:(NSView *)view atIndex:(NSUInteger)idx{
     NSArray *subviews = [[self subviews] copy];
     
-    float yPosition = (idx > 0) ? NSMaxY([[subviews objectAtIndex:idx - 1] frame]) + SEPARATION : 0.0f;
+    CGFloat yPosition = (idx > 0) ? NSMaxY([[subviews objectAtIndex:idx - 1] frame]) + SEPARATION : 0.0f;
     NSSize size = [view frame].size;
     NSInteger i, count = [subviews count];
     
@@ -117,7 +117,7 @@
     if (idx != NSNotFound) {
 
         NSPoint newPoint = [view frame].origin;
-        float dy = NSHeight([view frame]) + SEPARATION;
+        CGFloat dy = NSHeight([view frame]) + SEPARATION;
         
         [view removeFromSuperview];
         

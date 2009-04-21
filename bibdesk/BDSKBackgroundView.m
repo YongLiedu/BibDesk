@@ -62,8 +62,8 @@
 }
 
 - (void)drawRect:(NSRect)rect{
-	float blur = 4.0;
-	float offset = 2.0;
+	CGFloat blur = 4.0;
+	CGFloat offset = 2.0;
 	NSSize size = [self bounds].size;
 	NSRect viewRect = NSMakeRect(blur, blur + offset, size.width - 2 * blur, size.height - blur - offset);
 	NSShadow *aShadow = [[[NSShadow alloc] init] autorelease];

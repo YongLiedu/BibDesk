@@ -103,44 +103,21 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if ([decoder allowsKeyedCoding]) {
-        if (self = [self initWithTitle:[decoder decodeObjectForKey:@"title"]]) {
-            fontName = [[decoder decodeObjectForKey:@"fontName"] retain];
-            fontSize = [decoder decodeFloatForKey:@"fontSize"];
-            bold = [decoder decodeIntForKey:@"bold"];
-            italic = [decoder decodeIntForKey:@"italic"];
-        }
-    } else {
-        if (self = [self initWithTitle:[decoder decodeObject]]) {
-            int tmp;
-            fontName = [[decoder decodeObject] retain];
-            [decoder decodeValueOfObjCType:@encode(float) at:&fontSize];
-            [decoder decodeValueOfObjCType:"i" at:&tmp];
-            bold = tmp;
-            [decoder decodeValueOfObjCType:"i" at:&tmp];
-            italic = tmp;
-        }
+    if (self = [super init]) {
+        fontName = [[decoder decodeObjectForKey:@"fontName"] retain];
+        fontSize = [decoder decodeFloatForKey:@"fontSize"];
+        bold = [decoder decodeIntForKey:@"bold"];
+        italic = [decoder decodeIntForKey:@"italic"];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
-    if ([encoder allowsKeyedCoding]) {
-        [encoder encodeObject:title forKey:@"title"];
-        [encoder encodeObject:fontName forKey:@"fontName"];
-        [encoder encodeFloat:fontSize forKey:@"fontSize"];
-        [encoder encodeInt:bold forKey:@"bold"];
-        [encoder encodeInt:italic forKey:@"italic"];
-    } else {
-        int tmp;
-        [encoder encodeObject:title];
-        [encoder encodeObject:fontName];
-        [encoder encodeValueOfObjCType:@encode(float) at:&fontSize];
-        tmp = bold;
-        [encoder encodeValueOfObjCType:"i" at:&tmp];
-        tmp = italic;
-        [encoder encodeValueOfObjCType:"i" at:&tmp];
-    }
+    [encoder encodeObject:title forKey:@"title"];
+    [encoder encodeObject:fontName forKey:@"fontName"];
+    [encoder encodeFloat:fontSize forKey:@"fontSize"];
+    [encoder encodeInt:bold forKey:@"bold"];
+    [encoder encodeInt:italic forKey:@"italic"];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -188,12 +165,12 @@ NSString *BDSKRichTextString = @"Rich Text";
     }
 }
 
-- (float)fontSize {
+- (CGFloat)fontSize {
     return fontSize;
 }
 
-- (void)setFontSize:(float)newFontSize {
-    if (fabs(fontSize - newFontSize) > 0.0) {
+- (void)setFontSize:(CGFloat)newFontSize {
+    if (BDSKAbs(fontSize - newFontSize) > 0.0) {
         [[[self undoManager] prepareWithInvocationTarget:self] setFontSize:fontSize];
         fontSize = newFontSize;
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];

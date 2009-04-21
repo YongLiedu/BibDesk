@@ -379,7 +379,7 @@ static id sharedOpenWithController = nil;
 {
     NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
     [layoutManager setTypesetterBehavior:NSTypesetterBehavior_10_4];
-    float lineHeight = [layoutManager defaultLineHeightForFont:[NSFont menuFontOfSize:0]];
+    CGFloat lineHeight = [layoutManager defaultLineHeightForFont:[NSFont menuFontOfSize:0]];
     [layoutManager release];
     NSSize dstSize = { lineHeight, lineHeight };
     NSSize srcSize = [image size];

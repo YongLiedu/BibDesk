@@ -370,7 +370,7 @@ enum {
         [headerCell setStringValue:[[NSBundle mainBundle] localizedStringForKey:colName value:@"" table:@"BibTeXKeys"]];
     
     if (columnType != BDSKColumnTypeText && columnType != BDSKColumnTypeLocalFile && columnType != BDSKColumnTypeRelevance)
-        [tc setWidth:fmaxf([dataCell cellSize].width, [headerCell cellSize].width)];
+        [tc setWidth:BDSKMax([dataCell cellSize].width, [headerCell cellSize].width)];
     
     return tc;
 }
@@ -469,7 +469,7 @@ enum {
         return;
     
     NSRect visibleRect;
-    float heightDifference;
+    CGFloat heightDifference;
     
     visibleRect = [self visibleRect];
     
@@ -655,7 +655,7 @@ enum {
     NSInteger row, numRows = [self numberOfRows];
     NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
     id cell;
-    float width = 0.0;
+    CGFloat width = 0.0;
     
     for (row = 0; row < numRows; row++) {
         if ([self respondsToSelector:@selector(preparedCellAtColumn:row:)]) {
@@ -666,9 +666,9 @@ enum {
                 [[self delegate] tableView:self willDisplayCell:cell forTableColumn:tableColumn row:row];
             [cell setObjectValue:[[self dataSource] tableView:self objectValueForTableColumn:tableColumn row:row]];
         }
-        width = fmaxf(width, [cell cellSize].width);
+        width = BDSKMax(width, [cell cellSize].width);
     }
-    width = fminf([tableColumn maxWidth], fmaxf([tableColumn minWidth], width));
+    width = BDSKMin([tableColumn maxWidth], BDSKMax([tableColumn minWidth], width));
     [tableColumn setWidth:width];
 }
 
@@ -708,9 +708,9 @@ enum {
 }
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView{
-    float startWhite = [self isHighlighted] ? 0.9 : 1.0;
-    float endWhite = [self isHighlighted] ? 0.95 : 0.9;
-    float alpha = [self isEnabled] ? 1.0 : 0.6;
+    CGFloat startWhite = [self isHighlighted] ? 0.9 : 1.0;
+    CGFloat endWhite = [self isHighlighted] ? 0.95 : 0.9;
+    CGFloat alpha = [self isEnabled] ? 1.0 : 0.6;
     NSRect rect = cellFrame;
     rect.size.height -= 1.0;
     rect = NSInsetRect(rect, 0.0, 0.5);

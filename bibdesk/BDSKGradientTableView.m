@@ -69,11 +69,11 @@
 // This class is basically a copy of OAGradientTableView
 
 typedef struct {
-    float red1, green1, blue1, alpha1;
-    float red2, green2, blue2, alpha2;
+    CGFloat red1, green1, blue1, alpha1;
+    CGFloat red2, green2, blue2, alpha2;
 } _twoColorsType;
 
-static void _linearColorBlendFunction(void *info, const float *in, float *out) {
+static void _linearColorBlendFunction(void *info, const CGFloat *in, CGFloat *out) {
     _twoColorsType *twoColors = info;
     
     out[0] = (1.0 - *in) * twoColors->red1 + *in * twoColors->red2;
@@ -100,7 +100,7 @@ static void initializeHighlightColors() {
         secondaryHighlightColor = [[[highlightColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
         
         // Take the color apart
-        float hue, saturation, brightness, alpha;
+        CGFloat hue, saturation, brightness, alpha;
         [[highlightColor colorUsingColorSpaceName:NSDeviceRGBColorSpace] getHue:&hue saturation:&saturation brightness:&brightness alpha:&alpha];
 
         // Create synthetic darker and lighter versions
@@ -162,7 +162,7 @@ static void initializeHighlightColors() {
         darkColor = secondaryHighlightDarkColor;
     }
     
-    static const float domainAndRange[8] = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
+    static const CGFloat domainAndRange[8] = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
     
     _twoColorsType *twoColors = malloc(sizeof(_twoColorsType)); // We malloc() the helper data because we may draw this wash during printing, in which case it won't necessarily be evaluated immediately. We need for all the data the shading function needs to draw to potentially outlive us.
     [lightColor getRed:&twoColors->red1 green:&twoColors->green1 blue:&twoColors->blue1 alpha:&twoColors->alpha1];
@@ -200,7 +200,7 @@ static void initializeHighlightColors() {
     CGColorSpaceRelease(colorSpace);
 }
 
-- (float)rowHeightForFont:(NSFont *)font {
+- (CGFloat)rowHeightForFont:(NSFont *)font {
     return [NSLayoutManager defaultViewLineHeightForFont:font] + 2.0;
 }
 
@@ -258,7 +258,7 @@ static void initializeHighlightColors() {
         darkColor = secondaryHighlightDarkColor;
     }
     
-    static const float domainAndRange[8] = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
+    static const CGFloat domainAndRange[8] = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
     
     _twoColorsType *twoColors = malloc(sizeof(_twoColorsType)); // We malloc() the helper data because we may draw this wash during printing, in which case it won't necessarily be evaluated immediately. We need for all the data the shading function needs to draw to potentially outlive us.
     [lightColor getRed:&twoColors->red1 green:&twoColors->green1 blue:&twoColors->blue1 alpha:&twoColors->alpha1];
@@ -296,7 +296,7 @@ static void initializeHighlightColors() {
     CGColorSpaceRelease(colorSpace);
 }
 
-- (float)rowHeightForFont:(NSFont *)font {
+- (CGFloat)rowHeightForFont:(NSFont *)font {
     return [NSLayoutManager defaultViewLineHeightForFont:font] + 2.0;
 }
 

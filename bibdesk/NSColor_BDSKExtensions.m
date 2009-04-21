@@ -72,7 +72,7 @@ typedef union _BDSKRGBAInt {
     NSString *string = nil;
     NSColor *rgbColor = [self colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
     if (rgbColor) {
-        float r = 0.0, g = 0.0, b = 0.0, a = 0.0;
+        CGFloat r = 0.0, g = 0.0, b = 0.0, a = 0.0;
         [rgbColor getRed:&r green:&g blue:&b alpha:&a];
         // store a 32 bit color instead of the floating point values
         BDSKRGBAInt u;
@@ -85,8 +85,8 @@ typedef union _BDSKRGBAInt {
     return string;
 }
 
-- (BOOL)isBlackOrWhiteOrTransparentForMargin:(float)margin {
-    float r = 0.0, g = 0.0, b = 0.0, a = 0.0;
+- (BOOL)isBlackOrWhiteOrTransparentForMargin:(CGFloat)margin {
+    CGFloat r = 0.0, g = 0.0, b = 0.0, a = 0.0;
     [[self colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getRed:&r green:&g blue:&b alpha:&a];
     return ((r > 1.0-margin && g > 1.0-margin && b > 1.0-margin) || (r < margin && g < margin && b < margin) || a < margin);
 }
@@ -94,7 +94,7 @@ typedef union _BDSKRGBAInt {
 - (NSComparisonResult)colorCompare:(id)other {
     if (NO == [other isKindOfClass:[NSColor class]])
         return NSOrderedAscending;
-    float hue1 = 0.0, saturation1 = 0.0, brightness1 = 0.0, alpha1 = 0.0, hue2 = 0.0, saturation2 = 0.0, brightness2 = 0.0, alpha2 = 0.0;
+    CGFloat hue1 = 0.0, saturation1 = 0.0, brightness1 = 0.0, alpha1 = 0.0, hue2 = 0.0, saturation2 = 0.0, brightness2 = 0.0, alpha2 = 0.0;
     [[self colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getHue:&hue1 saturation:&saturation1 brightness:&brightness1 alpha:&alpha1];
     [[other colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getHue:&hue2 saturation:&saturation2 brightness:&brightness2 alpha:&alpha2];
     uint32_t h1 = (uint32_t)(hue1 * 255);
@@ -142,16 +142,16 @@ typedef union _BDSKRGBAInt {
 
 + (id)scriptingRgbaColorWithDescriptor:(NSAppleEventDescriptor *)descriptor {
     if ([descriptor numberOfItems] > 0) {
-        float red, green, blue, alpha;
-        red = green = blue = (float)[[descriptor descriptorAtIndex:1] int32Value] / 65535.0f;
+        CGFloat red, green, blue, alpha;
+        red = green = blue = (CGFloat)[[descriptor descriptorAtIndex:1] int32Value] / 65535.0f;
         if ([descriptor numberOfItems] > 2) {
-            green = (float)[[descriptor descriptorAtIndex:2] int32Value] / 65535.0f;
-            blue = (float)[[descriptor descriptorAtIndex:3] int32Value] / 65535.0f;
+            green = (CGFloat)[[descriptor descriptorAtIndex:2] int32Value] / 65535.0f;
+            blue = (CGFloat)[[descriptor descriptorAtIndex:3] int32Value] / 65535.0f;
         }
         if ([descriptor numberOfItems] == 2)
-            alpha = (float)[[descriptor descriptorAtIndex:2] int32Value] / 65535.0f;
+            alpha = (CGFloat)[[descriptor descriptorAtIndex:2] int32Value] / 65535.0f;
         else if ([descriptor numberOfItems] > 3)
-            alpha = (float)[[descriptor descriptorAtIndex:4] int32Value] / 65535.0f;
+            alpha = (CGFloat)[[descriptor descriptorAtIndex:4] int32Value] / 65535.0f;
         else
             alpha= 1.0;
         return [NSColor colorWithCalibratedRed:red green:green blue:blue alpha:alpha];
@@ -165,14 +165,14 @@ typedef union _BDSKRGBAInt {
 }
 
 - (id)scriptingRgbaColorDescriptor {
-    float red, green, blue, alpha;
+    CGFloat red, green, blue, alpha;
     [[self colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getRed:&red green:&green blue:&blue alpha:&alpha];
     
     NSAppleEventDescriptor *descriptor = [NSAppleEventDescriptor listDescriptor];
-    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:round(65535 * red)] atIndex:1];
-    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:round(65535 * green)] atIndex:2];
-    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:round(65535 * blue)] atIndex:3];
-    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:round(65535 * alpha)] atIndex:4];
+    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:BDSKRound(65535 * red)] atIndex:1];
+    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:BDSKRound(65535 * green)] atIndex:2];
+    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:BDSKRound(65535 * blue)] atIndex:3];
+    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:BDSKRound(65535 * alpha)] atIndex:4];
     
     return descriptor;
 }

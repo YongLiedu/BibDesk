@@ -61,16 +61,16 @@
 - (NSSize)cellSize {
     // this is used for column auto-resizing, and NSLevelIndicatorCell seems to return an insanely large size
     NSSize cellSize = [super cellSize];
-    cellSize.width = fminf(100.0, cellSize.width);
+    cellSize.width = BDSKMin(100.0, cellSize.width);
     return cellSize;
 }
 
-- (void)setMaxHeight:(float)h;
+- (void)setMaxHeight:(CGFloat)h;
 {
     maxHeight = h;
 }
 
-- (float)indicatorHeight { return maxHeight; }
+- (CGFloat)indicatorHeight { return maxHeight; }
 
 // DigitalColor Meter indicates 0.7 and 0.5 are the approximate values for a deselected level indicator cell (relevancy mode).  This looks really bad when selected in a gradient tableview, though, particularly when the table doesn't have focus.
 #define WIDTH 2

@@ -422,10 +422,10 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
         if (value = [note objectForKey:SKNPDFAnnotationBoundsKey]) {
             NSRect nsBounds = NSRectFromString(value);
             Rect qdBounds;
-            qdBounds.left = round(NSMinX(nsBounds));
-            qdBounds.bottom = round(NSMinY(nsBounds));
-            qdBounds.right = round(NSMaxX(nsBounds));
-            qdBounds.top = round(NSMaxY(nsBounds));
+            qdBounds.left = BDSKRound(NSMinX(nsBounds));
+            qdBounds.bottom = BDSKRound(NSMinY(nsBounds));
+            qdBounds.right = BDSKRound(NSMaxX(nsBounds));
+            qdBounds.top = BDSKRound(NSMaxY(nsBounds));
             [note setValue:[NSData dataWithBytes:&qdBounds length:sizeof(Rect)] forKey:SKNPDFAnnotationBoundsKey];
         }
         if (value = [note objectForKey:SKNPDFAnnotationPageIndexKey]) {
@@ -445,15 +445,15 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
         if (value = [note objectForKey:SKNPDFAnnotationStartPointKey]) {
             NSPoint nsPoint = NSPointFromString(value);
             Point qdPoint;
-            qdPoint.h = round(nsPoint.x);
-            qdPoint.v = round(nsPoint.y);
+            qdPoint.h = BDSKRound(nsPoint.x);
+            qdPoint.v = BDSKRound(nsPoint.y);
             [note setValue:[NSData dataWithBytes:&qdPoint length:sizeof(Point)] forKey:SKNPDFAnnotationStartPointKey];
         }
         if (value = [note objectForKey:SKNPDFAnnotationEndPointKey]) {
             NSPoint nsPoint = NSPointFromString(value);
             Point qdPoint;
-            qdPoint.h = round(nsPoint.x);
-            qdPoint.v = round(nsPoint.y);
+            qdPoint.h = BDSKRound(nsPoint.x);
+            qdPoint.v = BDSKRound(nsPoint.y);
             [note setValue:[NSData dataWithBytes:&qdPoint length:sizeof(Point)] forKey:SKNPDFAnnotationEndPointKey];
         }
         if (value = [note objectForKey:SKNPDFAnnotationStartLineStyleKey]) {
@@ -507,8 +507,8 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
             while (pointString = [pointEnum nextObject]) {
                 NSPoint nsPoint = NSPointFromString(pointString);
                 Point qdPoint;
-                qdPoint.h = round(nsPoint.x);
-                qdPoint.v = round(nsPoint.y);
+                qdPoint.h = BDSKRound(nsPoint.x);
+                qdPoint.v = BDSKRound(nsPoint.y);
                 [points addObject:[NSData dataWithBytes:&qdPoint length:sizeof(Point)]];
                 if ([points count] == 4) {
                     [pathList addObject:points];
@@ -529,8 +529,8 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
                 while (pointString = [pointEnum nextObject]) {
                     NSPoint nsPoint = NSPointFromString(pointString);
                     Point qdPoint;
-                    qdPoint.h = round(nsPoint.x);
-                    qdPoint.v = round(nsPoint.y);
+                    qdPoint.h = BDSKRound(nsPoint.x);
+                    qdPoint.v = BDSKRound(nsPoint.y);
                     [points addObject:[NSData dataWithBytes:&qdPoint length:sizeof(Point)]];
                 }
                 [pathList addObject:points];

@@ -55,7 +55,7 @@
 
 - (void)changeFont:(id)sender;
 - (void)outlineViewFontChanged;
-- (float)rowHeightForFont:(NSFont *)font;
+- (CGFloat)rowHeightForFont:(NSFont *)font;
 - (void)updateFontPanel:(NSNotification *)notification;
 - (NSString *)fontNamePreferenceKey;
 - (void)setFontNamePreferenceKey:(NSString *)newFontNamePreferenceKey;

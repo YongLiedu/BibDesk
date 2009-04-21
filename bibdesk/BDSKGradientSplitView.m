@@ -46,11 +46,11 @@
 
 @interface BDSKGradientSplitView (Private)
 
-- (float)horizontalFraction;
-- (void)setHorizontalFraction:(float)newFract;
+- (CGFloat)horizontalFraction;
+- (void)setHorizontalFraction:(CGFloat)newFract;
 
-- (float)verticalFraction;
-- (void)setVerticalFraction:(float)newFract;
+- (CGFloat)verticalFraction;
+- (void)setVerticalFraction:(CGFloat)newFract;
 
 @end
 
@@ -158,7 +158,7 @@
     [super drawDividerInRect:aRect];
 }
 
-- (float)dividerThickness {
+- (CGFloat)dividerThickness {
 	return 6.0;
 }
 

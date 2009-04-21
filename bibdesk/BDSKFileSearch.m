@@ -50,7 +50,7 @@
 {
  @private
     SKDocumentID *ids;
-    float *scores;
+    CGFloat *scores;
     size_t indexSize;
     
     SKDocumentRef *docs;
@@ -58,7 +58,7 @@
 }
 
 - (SKDocumentID *)documentIDBuffer;
-- (float *)scoreBuffer;
+- (CGFloat *)scoreBuffer;
 - (SKDocumentRef *)documentRefBuffer;
 - (BOOL)changeIndexSize:(size_t)size;
 - (BOOL)changeResultSize:(size_t)size;
@@ -192,7 +192,7 @@
 
     CFIndex actualCount;
     
-    float *scores = [data scoreBuffer];
+    CGFloat *scores = [data scoreBuffer];
     SKDocumentID *documentIDs = [data documentIDBuffer];
     
     SKSearchFindMatches(search, maxCount, documentIDs, scores, 10, &actualCount);
@@ -218,7 +218,7 @@
                 
         while (actualCount--) {
             
-            float score = *scores++;
+            CGFloat score = *scores++;
             skDocument = *skDocuments++;
             
             // these scores are arbitrarily scaled, so we'll keep track of the search kit's max/min values
@@ -302,7 +302,7 @@
 {
     if ((!ids && !scores) || indexSize < size) {
         ids = (SKDocumentID *)NSZoneRealloc([self zone], ids, size * sizeof(SKDocumentID));
-        scores = (float *)NSZoneRealloc([self zone], scores, size * sizeof(float));
+        scores = (CGFloat *)NSZoneRealloc([self zone], scores, size * sizeof(CGFloat));
         indexSize = size;
     } 
     return NULL != scores && NULL != ids;
@@ -318,7 +318,7 @@
 }
 
 - (SKDocumentID *)documentIDBuffer { return ids; }
-- (float *)scoreBuffer { return scores; }
+- (CGFloat *)scoreBuffer { return scores; }
 - (SKDocumentRef *)documentRefBuffer { return docs; }
 
 @end

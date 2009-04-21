@@ -59,7 +59,7 @@
 - (NSRect)buttonRect:(BDSKScrollButton)button forBounds:(NSRect)theRect;
 - (NSRect)textRectForBounds:(NSRect)theRect;
 
-- (float)stringWidth;
+- (CGFloat)stringWidth;
 - (void)stringHasChanged;
 
 @end

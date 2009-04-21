@@ -68,8 +68,8 @@
 
 @interface NSDictionary (BDSKExtensions)
 - (id)objectForKey:(NSString *)key defaultObject:(id)defaultObject;
-- (float)floatForKey:(NSString *)key defaultValue:(float)defaultValue;
-- (float)floatForKey:(NSString *)key;
+- (CGFloat)floatForKey:(NSString *)key defaultValue:(CGFloat)defaultValue;
+- (CGFloat)floatForKey:(NSString *)key;
 - (double)doubleForKey:(NSString *)key defaultValue:(double)defaultValue;
 - (double)doubleForKey:(NSString *)key;
 - (NSPoint)pointForKey:(NSString *)key defaultValue:(NSPoint)defaultValue;
@@ -90,7 +90,7 @@
 
 @interface NSMutableDictionary (BDSKExtensions)
 - (id)initForCaseInsensitiveKeys;
-- (void)setFloatValue:(float)value forKey:(NSString *)key;
+- (void)setFloatValue:(CGFloat)value forKey:(NSString *)key;
 - (void)setDoubleValue:(double)value forKey:(NSString *)key;
 - (void)setIntValue:(int)value forKey:(NSString *)key;
 - (void)setUnsignedIntValue:(unsigned int)value forKey:(NSString *)key;

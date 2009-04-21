@@ -226,10 +226,10 @@
         CGFloat z = -3.0, y = NSMidY(frame);
         
         if ([controlView isFlipped]) {
-            y = ceil(y) + 1.0;
+            y = BDSKCeil(y) + 1.0;
             z = 3.0;
         } else {
-            y = floor(y) - 1.0;
+            y = BDSKFloor(y) - 1.0;
         }
         
         NSBezierPath *arrowPath = [NSBezierPath bezierPath];

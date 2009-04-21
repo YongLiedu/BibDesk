@@ -592,9 +592,9 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
         NSAttributedString *countString = [[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%ld", (long)count]
                                             attributeName:NSForegroundColorAttributeName attributeValue:[NSColor whiteColor]] autorelease];
         NSRect countRect = {NSZeroPoint, [countString size]};
-        float countOffset;
+        CGFloat countOffset;
         
-        countOffset = floorf(0.5f * NSHeight(countRect)); // make sure the cap radius is integral
+        countOffset = BDSKFloor(0.5f * NSHeight(countRect)); // make sure the cap radius is integral
         countRect.size.height = 2.0 * countOffset;
         
         if (inside) {
@@ -677,7 +677,7 @@ static NSComparisonResult compareImageRepWidths(NSBitmapImageRep *r1, NSBitmapIm
 }
 
 // Modified and generalized from OmniAppKit/NSImage-OAExtensions
-- (void)drawFlippedInRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(float)delta {
+- (void)drawFlippedInRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(CGFloat)delta {
     [NSGraphicsContext saveGraphicsState];
     NSAffineTransform *transform = [NSAffineTransform transform];
     [transform translateXBy:0.0 yBy:NSMaxY(dstRect)];
@@ -688,7 +688,7 @@ static NSComparisonResult compareImageRepWidths(NSBitmapImageRep *r1, NSBitmapIm
     [NSGraphicsContext restoreGraphicsState];
 }
 
-- (void)drawFlipped:(BOOL)isFlipped inRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(float)delta {
+- (void)drawFlipped:(BOOL)isFlipped inRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(CGFloat)delta {
     if (isFlipped) {
         [self drawFlippedInRect:dstRect fromRect:srcRect operation:op fraction:delta];
     } else {

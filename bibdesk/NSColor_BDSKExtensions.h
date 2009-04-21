@@ -46,7 +46,7 @@
 + (NSColor *)colorWithFourByteString:(NSString *)string;
 - (id)fourByteStringValue;
 
-- (BOOL)isBlackOrWhiteOrTransparentForMargin:(float)margin;
+- (BOOL)isBlackOrWhiteOrTransparentForMargin:(CGFloat)margin;
 
 - (NSComparisonResult)colorCompare:(id)other;
 

@@ -519,14 +519,14 @@
         
         NSView *views[2];
         NSRect frames[2];
-        float contentHeight = NSHeight([sender frame]) - [sender dividerThickness];
-        float factor = contentHeight / (oldSize.height - [sender dividerThickness]);
+        CGFloat contentHeight = NSHeight([sender frame]) - [sender dividerThickness];
+        CGFloat factor = contentHeight / (oldSize.height - [sender dividerThickness]);
         NSInteger i, gap;
         
         [[sender subviews] getObjects:views];
         for (i = 0; i < 2; i++) {
             frames[i] = [views[i] frame];
-            frames[i].size.height = floorf(factor * NSHeight(frames[i]));
+            frames[i].size.height = BDSKFloor(factor * NSHeight(frames[i]));
         }
         
         // randomly divide the remaining gap over the two views; NSSplitView dumps it all over the last view, which grows that one more than the others
@@ -549,14 +549,14 @@
         NSView *rightView = [[sender subviews] objectAtIndex:1];
         NSRect leftFrame = [leftView frame];
         NSRect rightFrame = [rightView frame];
-        float contentWidth = NSWidth([sender frame]) - [sender dividerThickness];
+        CGFloat contentWidth = NSWidth([sender frame]) - [sender dividerThickness];
         
         if (NSWidth(rightFrame) <= 1.0)
             rightFrame.size.width = 0.0;
         else if (NSWidth(leftFrame) <= 1.0)
             rightFrame.size.width = contentWidth;
         else if (contentWidth < NSWidth(rightFrame))
-            rightFrame.size.width = floorf(NSWidth(rightFrame) * contentWidth / (oldSize.width - [sender dividerThickness]));
+            rightFrame.size.width = BDSKFloor(NSWidth(rightFrame) * contentWidth / (oldSize.width - [sender dividerThickness]));
         
         leftFrame.size.width = contentWidth - NSWidth(rightFrame);
         rightFrame.origin.x = NSMaxX(leftFrame) + [sender dividerThickness];

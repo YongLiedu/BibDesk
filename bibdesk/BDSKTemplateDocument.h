@@ -122,7 +122,7 @@ extern NSString *BDSKRichTextTemplateDocumentType;
     NSMutableAttributedString *separatorTemplate;
     BOOL richText;
     NSString *fontName;
-    float fontSize;
+    CGFloat fontSize;
     BOOL bold;
     BOOL italic;
     BDSKToken *selectedToken;
@@ -163,8 +163,8 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 - (NSString *)fontName;
 - (void)setFontName:(NSString *)newFontName;
 
-- (float)fontSize;
-- (void)setFontSize:(float)newFontSize;
+- (CGFloat)fontSize;
+- (void)setFontSize:(CGFloat)newFontSize;
 
 - (BOOL)isBold;
 - (void)setBold:(BOOL)newBold;

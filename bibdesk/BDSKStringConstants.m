@@ -362,7 +362,7 @@ NSString *BDSKUnimplementedException = @"BDSKUnimplementedException";
  BDSKDisableBackgroundColorForGroupTable         bool    false
  BDSKScriptMenuDisabled                          bool    false
  BDSKAnnoteFieldName                             string  nil
- BDSKDefaultAnimationTimeInterval                float   0.15    // set to zero to disable
+ BDSKDefaultAnimationTimeInterval                CGFloat   0.15    // set to zero to disable
  BDSKTableHeaderImages                           dict    nil
  BDSKTableHeaderTitles                           dict    nil
  BDSKGroupFieldSeparatorCharactersKey            string  ";:,"

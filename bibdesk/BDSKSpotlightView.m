@@ -84,7 +84,7 @@
     
     NSEnumerator *rectEnum = [highlightCircleRects objectEnumerator];
     
-    float blurPadding = MAXIMUM_BLUR * 2.0;
+    CGFloat blurPadding = MAXIMUM_BLUR * 2.0;
     NSRect bounds = [self bounds];
 
     // we make the bounds larger so the blurred edges will fall outside the view
@@ -98,7 +98,7 @@
     
     while (rectValue = [rectEnum nextObject]) {
         NSRect rect = [rectValue rectValue];
-        float diameter = CIRCLE_FACTOR * fmaxf(NSHeight(rect), NSWidth(rect));
+        CGFloat diameter = CIRCLE_FACTOR * BDSKMax(NSHeight(rect), NSWidth(rect));
         [path appendBezierPathWithOvalInRect:NSInsetRect(rect, (NSWidth(rect) - diameter) / 2.0, (NSHeight(rect) - diameter) / 2.0)];
     }
     

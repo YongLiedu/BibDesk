@@ -72,8 +72,8 @@
     
     BOOL ignoreFieldChange;
     // for the splitview double-click handling
-	float lastFileViewWidth;
-    float lastAuthorsHeight;
+	CGFloat lastFileViewWidth;
+    CGFloat lastAuthorsHeight;
     
 	NSButtonCell *booleanButtonCell;
 	NSButtonCell *triStateButtonCell;

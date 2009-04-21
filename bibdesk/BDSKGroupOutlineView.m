@@ -113,7 +113,7 @@
     [parentCell setFont:[[NSFontManager sharedFontManager] convertFont:newFont toHaveTrait:NSBoldFontMask]];
 }
 
-- (float)rowHeightForFont:(NSFont *)font {
+- (CGFloat)rowHeightForFont:(NSFont *)font {
     // use a larger row height to give space for the highlights, also reproduces the row height in Mail
     return [NSLayoutManager defaultViewLineHeightForFont:font] + 4.0;
 }
@@ -153,8 +153,8 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
 {
     NSParameterAssert(rows != nil);
     
-    float lineWidth = 1.0;
-    float heightOffset = fmaxf(1.0f, roundf(0.25 * [self intercellSpacing].height) - lineWidth);
+    CGFloat lineWidth = 1.0;
+    CGFloat heightOffset = BDSKMax(1.0f, BDSKRound(0.25 * [self intercellSpacing].height) - lineWidth);
     NSColor *highlightColor;
     
     if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {

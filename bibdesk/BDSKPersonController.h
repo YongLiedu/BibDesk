@@ -47,7 +47,7 @@
     NSMutableArray *publicationItems;
     NSSet *names;
     NSSet *fields;
-	float lastPickerHeight;
+	CGFloat lastPickerHeight;
     IBOutlet NSTextField *nameTextField;
     IBOutlet BDSKDragImageView *imageView;
     IBOutlet BDSKTableView *publicationTableView;

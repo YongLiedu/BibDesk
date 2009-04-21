@@ -52,7 +52,7 @@ typedef enum {
 	NSProgressIndicator *progressIndicator;
 	NSMutableArray *icons;
 	id delegate;
-    float textOffset;
+    CGFloat textOffset;
 }
 
 + (CIColor *)lowerColor;
@@ -66,7 +66,7 @@ typedef enum {
 	@param view The view that should be resized.
 	@param offset The extra amount by which the view should resize over the receivers height.
 */
-- (void)toggleBelowView:(NSView *)view offset:(float)offset;
+- (void)toggleBelowView:(NSView *)view offset:(CGFloat)offset;
 
 /*!
 	@method toggleInWindow:offset:
@@ -75,7 +75,7 @@ typedef enum {
 	@param window The window that should be resized.
 	@param offset The extra amount by which the window should resize over the receivers height.
 */
-- (void)toggleInWindow:(NSWindow *)window offset:(float)offset;
+- (void)toggleInWindow:(NSWindow *)window offset:(CGFloat)offset;
 
 /*!
 	@method isVisible
@@ -96,8 +96,8 @@ typedef enum {
 - (id)textCell;
 - (void)setTextCell:(NSCell *)aCell;
 
-- (float)textOffset;
-- (void)setTextOffset:(float)offset;
+- (CGFloat)textOffset;
+- (void)setTextOffset:(CGFloat)offset;
 
 - (NSProgressIndicator *)progressIndicator;
 

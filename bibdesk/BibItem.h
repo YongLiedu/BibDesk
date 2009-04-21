@@ -88,7 +88,7 @@ enum {
     NSInteger currentIndex;
     BOOL spotlightMetadataChanged;
     BOOL isImported;
-    float searchScore;
+    CGFloat searchScore;
     NSURL *identifierURL;
     NSMutableArray *files;
     NSUInteger colorLabel;
@@ -816,8 +816,8 @@ enum {
 - (void)setImported:(BOOL)flag;
 
 - (NSURL *)identifierURL;
-- (void)setSearchScore:(float)val;
-- (float)searchScore;
+- (void)setSearchScore:(CGFloat)val;
+- (CGFloat)searchScore;
 - (NSString *)skimNotesForLocalURL;
 
 - (NSURL *)bdskURL;

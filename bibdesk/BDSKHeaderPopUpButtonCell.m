@@ -150,11 +150,11 @@
 	
 	// Two little arrows. We could also use some image here
 	NSInteger controlSize = [self controlSize];
-	float width = 5.0 - controlSize;
-	float height = 4.0 - controlSize;
-	float totalHeight = 3.0 + 2 * height;
+	CGFloat width = 5.0 - controlSize;
+	CGFloat height = 4.0 - controlSize;
+	CGFloat totalHeight = 3.0 + 2 * height;
 	NSBezierPath *path = [NSBezierPath bezierPath];
-	[path moveToPoint:NSMakePoint(NSMaxX(cellFrame) - 7.5 + controlSize, floorf(NSMidY(cellFrame) - 0.5f * totalHeight))];
+	[path moveToPoint:NSMakePoint(NSMaxX(cellFrame) - 7.5 + controlSize, BDSKFloor(NSMidY(cellFrame) - 0.5f * totalHeight))];
 	[path relativeLineToPoint:NSMakePoint(-0.5f * width, height)];
 	[path relativeLineToPoint:NSMakePoint(width, 0.0)];
 	[path closePath];

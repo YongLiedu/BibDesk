@@ -73,8 +73,8 @@
 - (NSString *)positionAutosaveName;
 - (void)setPositionAutosaveName:(NSString *)name;
 
-- (float)fraction;
-- (void)setFraction:(float)newFraction;
+- (CGFloat)fraction;
+- (void)setFraction:(CGFloat)newFraction;
 
 @end
 

@@ -40,5 +40,5 @@
 
 
 @interface NSLayoutManager (BDSKExtensions)
-+ (float)defaultViewLineHeightForFont:(NSFont *)theFont;
++ (CGFloat)defaultViewLineHeightForFont:(NSFont *)theFont;
 @end

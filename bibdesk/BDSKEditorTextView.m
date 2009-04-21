@@ -238,7 +238,7 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, NSUInteger s
 - (void)updateFontFromPreferences;
 {
     NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKEditorFontNameKey];
-    float fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:BDSKEditorFontSizeKey];
+    CGFloat fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:BDSKEditorFontSizeKey];
     NSFont *font = nil;
     
     if(fontName != nil)

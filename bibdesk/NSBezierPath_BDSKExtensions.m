@@ -44,26 +44,26 @@
 // code from http://www.cocoadev.com/index.pl?NSBezierPathCategory
 // removed UK rect function calls, changed spacing/alignment
 
-+ (void)fillRoundRectInRect:(NSRect)rect radius:(float)radius
++ (void)fillRoundRectInRect:(NSRect)rect radius:(CGFloat)radius
 {
     NSBezierPath *p = [self bezierPathWithRoundRectInRect:rect radius:radius];
     [p fill];
 }
 
 
-+ (void)strokeRoundRectInRect:(NSRect)rect radius:(float)radius
++ (void)strokeRoundRectInRect:(NSRect)rect radius:(CGFloat)radius
 {
     NSBezierPath *p = [self bezierPathWithRoundRectInRect:rect radius:radius];
     [p stroke];
 }
 
-+ (NSBezierPath*)bezierPathWithRoundRectInRect:(NSRect)rect radius:(float)radius
++ (NSBezierPath*)bezierPathWithRoundRectInRect:(NSRect)rect radius:(CGFloat)radius
 {
     BDSKASSERT([NSThread isMainThread]);
     
     // Make sure radius doesn't exceed a maximum size to avoid artifacts:
-    float rectLimit = fminf(NSHeight(rect), NSWidth(rect));
-    radius = fminf(radius, 0.5f * rectLimit);
+    CGFloat rectLimit = BDSKMin(NSHeight(rect), NSWidth(rect));
+    radius = BDSKMin(radius, 0.5f * rectLimit);
     
     // Make sure silly values simply lead to un-rounded corners:
     if( radius <= 0 )
@@ -91,7 +91,7 @@
     return path;
 }
 
-+ (void)drawHighlightInRect:(NSRect)rect radius:(float)radius lineWidth:(float)lineWidth color:(NSColor *)color
++ (void)drawHighlightInRect:(NSRect)rect radius:(CGFloat)radius lineWidth:(CGFloat)lineWidth color:(NSColor *)color
 {
     NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:NSInsetRect(rect, 0.5 * lineWidth, 0.5 * lineWidth) radius:radius];
     [path setLineWidth:lineWidth];
@@ -119,7 +119,7 @@
     BDSKASSERT([NSThread isMainThread]);
     BDSKPRECONDITION(NSWidth(rect) >= NSHeight(rect));
     
-    float radius = 0.5f * NSHeight(rect);
+    CGFloat radius = 0.5f * NSHeight(rect);
     NSBezierPath *path = [self bezierPath];
     
     [path removeAllPoints];
@@ -146,10 +146,10 @@
 }
 
 + (NSBezierPath *)bezierPathWithStarInRect:(NSRect)rect{
-    float centerX = NSMidX(rect);
-    float centerY = NSMidY(rect);
-    float radiusX = 0.5 * NSWidth(rect);
-    float radiusY = 0.5 * NSHeight(rect);
+    CGFloat centerX = NSMidX(rect);
+    CGFloat centerY = NSMidY(rect);
+    CGFloat radiusX = 0.5 * NSWidth(rect);
+    CGFloat radiusY = 0.5 * NSHeight(rect);
     NSInteger i = 0;
     NSBezierPath *path = [self bezierPath];
     
@@ -164,10 +164,10 @@
 }
 
 + (NSBezierPath *)bezierPathWithInvertedStarInRect:(NSRect)rect{
-    float centerX = NSMidX(rect);
-    float centerY = NSMidY(rect);
-    float radiusX = 0.5 * NSWidth(rect);
-    float radiusY = 0.5 * NSHeight(rect);
+    CGFloat centerX = NSMidX(rect);
+    CGFloat centerY = NSMidY(rect);
+    CGFloat radiusX = 0.5 * NSWidth(rect);
+    CGFloat radiusY = 0.5 * NSHeight(rect);
     NSInteger i;
     NSBezierPath *path = [self bezierPath];
     

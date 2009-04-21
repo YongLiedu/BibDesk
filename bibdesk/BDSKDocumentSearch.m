@@ -139,7 +139,7 @@
     while (aKey = [keyEnum nextObject]) {
         NSNumber *nsScore = [originalScores objectForKey:aKey];
         NSParameterAssert(nil != nsScore);
-        float score = [nsScore floatValue];
+        CGFloat score = [nsScore floatValue];
         [scores setObject:[NSNumber numberWithFloat:(score/maxScore)] forKey:aKey];
     }
     return scores;
@@ -167,7 +167,7 @@
     search = SKSearchCreate(skIndex, (CFStringRef)searchString, kSKSearchOptionDefault);
     
     SKDocumentID documents[SEARCH_BUFFER_MAX] = { 0 };
-    float scores[SEARCH_BUFFER_MAX] = { 0.0 };
+    CGFloat scores[SEARCH_BUFFER_MAX] = { 0.0 };
     CFIndex i, foundCount;
     
     Boolean more, keepGoing;

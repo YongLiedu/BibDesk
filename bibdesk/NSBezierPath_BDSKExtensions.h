@@ -40,11 +40,11 @@
 
 @interface NSBezierPath (BDSKExtensions)
 
-+ (void)fillRoundRectInRect:(NSRect)rect radius:(float)radius;
-+ (void)strokeRoundRectInRect:(NSRect)rect radius:(float)radius;
-+ (NSBezierPath*)bezierPathWithRoundRectInRect:(NSRect)rect radius:(float)radius;
++ (void)fillRoundRectInRect:(NSRect)rect radius:(CGFloat)radius;
++ (void)strokeRoundRectInRect:(NSRect)rect radius:(CGFloat)radius;
++ (NSBezierPath*)bezierPathWithRoundRectInRect:(NSRect)rect radius:(CGFloat)radius;
 
-+ (void)drawHighlightInRect:(NSRect)rect radius:(float)radius lineWidth:(float)lineWidth color:(NSColor *)color;
++ (void)drawHighlightInRect:(NSRect)rect radius:(CGFloat)radius lineWidth:(CGFloat)lineWidth color:(NSColor *)color;
 
 + (void)fillHorizontalOvalInRect:(NSRect)rect;
 + (void)strokeHorizontalOvalInRect:(NSRect)rect;

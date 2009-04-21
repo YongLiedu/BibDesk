@@ -75,7 +75,7 @@
 
 - (NSRect)textRectForBounds:(NSRect)aRect {
     NSRect ignored, textRect = aRect;
-    float border;
+    CGFloat border;
     
     if ([self isBordered])
         border = NSHeight(aRect) - BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERED + BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERED;
@@ -90,7 +90,7 @@
 }
 
 - (NSRect)iconRectForBounds:(NSRect)aRect {
-    float border, imageWidth;
+    CGFloat border, imageWidth;
     NSRect ignored, imageRect = aRect;
     
     if ([self isBordered]) {

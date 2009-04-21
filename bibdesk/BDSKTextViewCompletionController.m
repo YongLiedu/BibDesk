@@ -353,13 +353,13 @@ static NSInteger BDSKCompletionMinHeight = 20;
     NSRect screenFrame = [[NSScreen mainScreen] visibleFrame];
     
     // get the remaining space on the screen
-    float hSize = NSMaxX(screenFrame) - BDSKCompletionMaxWidth - topLeftPoint.x;
+    CGFloat hSize = NSMaxX(screenFrame) - BDSKCompletionMaxWidth - topLeftPoint.x;
     hSize = hSize <= 0.0f ? BDSKCompletionMaxWidth + hSize : BDSKCompletionMaxWidth;
-    hSize = floorf(fmaxf(hSize, BDSKCompletionMinWidth));
+    hSize = BDSKFloor(BDSKMax(hSize, BDSKCompletionMinWidth));
     
-    float vSize = topLeftPoint.y - BDSKCompletionMaxHeight;
+    CGFloat vSize = topLeftPoint.y - BDSKCompletionMaxHeight;
     vSize = vSize <= 0.0f ? BDSKCompletionMaxHeight + vSize : BDSKCompletionMaxHeight;
-    vSize = floorf(fmaxf(vSize, BDSKCompletionMinHeight));
+    vSize = BDSKFloor(BDSKMax(vSize, BDSKCompletionMinHeight));
     
     NSSize adjustedSize = [self windowContentSize];
     if(adjustedSize.width > hSize)
@@ -372,18 +372,18 @@ static NSInteger BDSKCompletionMinHeight = 20;
 
 - (NSSize)windowContentSize
 {
-	float hSize = 0.0f;
+	CGFloat hSize = 0.0f;
     NSUInteger count = [tableView numberOfRows];
 	NSCell *cell = [[[tableView tableColumns] objectAtIndex:0] dataCell];
 	while(count--){
 		[cell setStringValue:[completions objectAtIndex:count]];
-		hSize = fmaxf(hSize, [cell cellSize].width);
+		hSize = BDSKMax(hSize, [cell cellSize].width);
 	}
 	hSize += [NSScroller scrollerWidth] + [tableView intercellSpacing].width;
     
-	float vSize = NSHeight(NSUnionRect([tableView rectOfRow:0], [tableView rectOfRow:[tableView numberOfRows] - 1]));
+	CGFloat vSize = NSHeight(NSUnionRect([tableView rectOfRow:0], [tableView rectOfRow:[tableView numberOfRows] - 1]));
 	
-	return NSMakeSize(ceilf(hSize), ceilf(vSize));
+	return NSMakeSize(BDSKCeil(hSize), BDSKCeil(vSize));
 }
 
 
@@ -452,7 +452,7 @@ static NSInteger BDSKCompletionMinHeight = 20;
 
 - (BOOL)hasShadow { return YES; }
 
-- (float)alphaValue { return 0.9; }
+- (CGFloat)alphaValue { return 0.9; }
 
 // explicitly note that we want these to return NO, even though that's the default for windows created in code
 - (BOOL)canBecomeKeyWindow { return NO; }

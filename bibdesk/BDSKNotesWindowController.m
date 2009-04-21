@@ -185,7 +185,7 @@
     return nil;
 }
 
-- (float)outlineView:(NSOutlineView *)ov heightOfRowByItem:(id)item {
+- (CGFloat)outlineView:(NSOutlineView *)ov heightOfRowByItem:(id)item {
     NSNumber *heightNumber = [item valueForKey:@"rowHeight"];
     return heightNumber ? [heightNumber floatValue] : 17.0;
 }
@@ -301,7 +301,7 @@
 - (void)resizeRow:(NSInteger)row withEvent:(NSEvent *)theEvent {
     id item = [self itemAtRow:row];
     NSPoint startPoint = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-    float startHeight = [[self delegate] outlineView:self heightOfRowByItem:item];
+    CGFloat startHeight = [[self delegate] outlineView:self heightOfRowByItem:item];
 	BOOL keepGoing = YES;
 	
     [[NSCursor resizeUpDownCursor] push];
@@ -312,7 +312,7 @@
 			case NSLeftMouseDragged:
             {
                 NSPoint currentPoint = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-                float currentHeight = fmaxf([self rowHeight], startHeight + currentPoint.y - startPoint.y);
+                CGFloat currentHeight = BDSKMax([self rowHeight], startHeight + currentPoint.y - startPoint.y);
                 
                 [[self delegate] outlineView:self setHeightOfRow:currentHeight byItem:item];
                 [self noteHeightOfRowsWithIndexesChanged:[NSIndexSet indexSetWithIndex:row]];
@@ -370,8 +370,8 @@
             BOOL isHighlighted = isFirstResponder && [self isRowSelected:row];
             NSColor *color = [NSColor colorWithCalibratedWhite:isHighlighted ? 1.0 : 0.5 alpha:0.7];
             NSRect rect = [self rectOfRow:row];
-            float x = ceilf(NSMidX(rect));
-            float y = NSMaxY(rect) - 1.5;
+            CGFloat x = BDSKCeil(NSMidX(rect));
+            CGFloat y = NSMaxY(rect) - 1.5;
             
             [color set];
             [NSBezierPath strokeLineFromPoint:NSMakePoint(x - 1.0, y) toPoint:NSMakePoint(x + 1.0, y)];

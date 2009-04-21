@@ -80,10 +80,10 @@ typedef enum {
 - (NSTextView *)textView;
 - (BDSKOverlay *)progressOverlay;
 
-- (float)PDFScaleFactor;
-- (void)setPDFScaleFactor:(float)scaleFactor;
-- (float)RTFScaleFactor;
-- (void)setRTFScaleFactor:(float)scaleFactor;
+- (CGFloat)PDFScaleFactor;
+- (void)setPDFScaleFactor:(CGFloat)scaleFactor;
+- (CGFloat)RTFScaleFactor;
+- (void)setRTFScaleFactor:(CGFloat)scaleFactor;
 
 - (NSInteger)generatedTypes;
 - (void)setGeneratedTypes:(NSInteger)newGeneratedTypes;

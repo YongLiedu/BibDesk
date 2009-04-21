@@ -178,7 +178,7 @@
 
 #pragma mark Fraction
 
-- (float)fraction {
+- (CGFloat)fraction {
     if ([[self subviews] count] < 2)
         return 0.0;
     
@@ -191,7 +191,7 @@
         return NSHeight(secondFrame) / (NSHeight(secondFrame) + NSHeight(firstFrame));
 }
 
-- (void)setFraction:(float)newFraction {
+- (void)setFraction:(CGFloat)newFraction {
     NSRect firstFrame, secondFrame;
     NSView *firstView;
     NSView *secondView;
@@ -204,11 +204,11 @@
     firstFrame = [firstView frame];
     secondFrame = [secondView frame];
     if ([self isVertical]) {
-        float totalWidth = NSWidth(secondFrame) + NSWidth(firstFrame);
+        CGFloat totalWidth = NSWidth(secondFrame) + NSWidth(firstFrame);
         secondFrame.size.width = newFraction * totalWidth;
         firstFrame.size.width = totalWidth - NSWidth(secondFrame);
     } else {
-        float totalHeight = NSHeight(secondFrame) + NSHeight(firstFrame);
+        CGFloat totalHeight = NSHeight(secondFrame) + NSHeight(firstFrame);
         secondFrame.size.height = newFraction * totalHeight;
         firstFrame.size.height = totalHeight - NSHeight(secondFrame);
     }

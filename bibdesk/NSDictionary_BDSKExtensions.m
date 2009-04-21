@@ -91,12 +91,12 @@
     return [self objectForKey:key] ?: defaultObject;
 }
 
-- (float)floatForKey:(NSString *)key defaultValue:(float)defaultValue {
+- (CGFloat)floatForKey:(NSString *)key defaultValue:(CGFloat)defaultValue {
     id value = [self objectForKey:key];
     return value ? [value floatValue] : defaultValue;
 }
 
-- (float)floatForKey:(NSString *)key {
+- (CGFloat)floatForKey:(NSString *)key {
     return [self floatForKey:key defaultValue:0.0f];
 }
 
@@ -193,7 +193,7 @@
 
 // The rest of these methods are copied from NSMutableData-OFExtensions.m
 
-- (void)setFloatValue:(float)value forKey:(NSString *)key {
+- (void)setFloatValue:(CGFloat)value forKey:(NSString *)key {
     NSNumber *number = [[NSNumber alloc] initWithFloat:value];
     [self setObject:number forKey:key];
     [number release];

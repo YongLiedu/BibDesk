@@ -1446,8 +1446,8 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 #pragma mark Search support
 
-- (void)setSearchScore:(float)val { searchScore = val; }
-- (float)searchScore { return searchScore; }
+- (void)setSearchScore:(CGFloat)val { searchScore = val; }
+- (CGFloat)searchScore { return searchScore; }
 
 - (NSString *)skimNotesForLocalURL{
     NSMutableString *string = [NSMutableString string];

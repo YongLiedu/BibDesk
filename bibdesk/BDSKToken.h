@@ -57,7 +57,7 @@ extern NSString *BDSKRichTextString;
 @interface BDSKToken : NSObject <NSCopying, NSCoding> {
     NSString *title;
     NSString *fontName;
-    float fontSize;
+    CGFloat fontSize;
     NSInteger bold;
     NSInteger italic;
     BDSKTemplateDocument *document;
@@ -74,8 +74,8 @@ extern NSString *BDSKRichTextString;
 - (NSString *)fontName;
 - (void)setFontName:(NSString *)newFontName;
 
-- (float)fontSize;
-- (void)setFontSize:(float)newFontSize;
+- (CGFloat)fontSize;
+- (void)setFontSize:(CGFloat)newFontSize;
 
 - (NSInteger)bold;
 - (void)setBold:(NSInteger)newBold;

@@ -199,8 +199,8 @@
 	NSRectEdge lowerEdge = [tableView isFlipped] ? NSMaxYEdge : NSMinYEdge;
 	NSRect lowerEdgeRect, ignored;
 	NSRect winFrame = [[self window] frame];
-	float margin = 4.0; // for the shadow and focus ring
-	float minWidth = 16.0; // minimal width of the window without margins, so subviews won't get shifted
+	CGFloat margin = 4.0; // for the shadow and focus ring
+	CGFloat minWidth = 16.0; // minimal width of the window without margins, so subviews won't get shifted
 	NSView *contentView = (NSView *)[[tableView enclosingScrollView] contentView] ?: (NSView *)tableView;
 	
 	NSDivideRect([tableView frameOfCellAtColumn:column row:row], &lowerEdgeRect, &ignored, 1.0, lowerEdge);
@@ -217,7 +217,7 @@
 	lowerEdgeRect = [tableView convertRect:lowerEdgeRect toView:nil]; // takes into account isFlipped
     winFrame.origin = [[tableView window] convertBaseToScreen:lowerEdgeRect.origin];
 	winFrame.origin.y -= NSHeight(winFrame);
-	winFrame.size.width = fmaxf(NSWidth(lowerEdgeRect), minWidth);
+	winFrame.size.width = BDSKMax(NSWidth(lowerEdgeRect), minWidth);
 	winFrame = NSInsetRect(winFrame, -margin, 0.0);
 	[[self window] setFrame:winFrame display:YES];
 	

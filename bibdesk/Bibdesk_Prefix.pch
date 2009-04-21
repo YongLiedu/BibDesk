@@ -69,3 +69,21 @@
 
 #endif
 
+#if __LP64__
+#define BDSKRound(f)    round(f)
+#define BDSKFloor(f)    floor(f)
+#define BDSKCeil(f)     ceil(f)
+#define BDSKTrunc(f)    trunc(f)
+#define BDSKAbs(f)      fabs(f)
+#define BDSKMin(f1, f2) fmin(f1, f2)
+#define BDSKMax(f1, f2) fmax(f1, f2)
+#else
+#define BDSKRound(f)    roundf(f)
+#define BDSKFloor(f)    floorf(f)
+#define BDSKCeil(f)     ceilf(f)
+#define BDSKTrunc(f)    truncf(f)
+#define BDSKAbs(f)      fabsf(f)
+#define BDSKMin(f1, f2) fminf(f1, f2)
+#define BDSKMax(f1, f2) fmaxf(f1, f2)
+#endif
+

@@ -87,7 +87,7 @@
         scrollPosition.y = (NSMinY(documentVisibleRect) - NSMinY(bounds)) / (NSHeight(bounds) - NSHeight(documentVisibleRect));
         if (![self isFlipped])
             scrollPosition.y = 1.0f - scrollPosition.y;
-        scrollPosition.y = fminf(fmaxf(scrollPosition.y, 0.0f), 1.0f);
+        scrollPosition.y = BDSKMin(BDSKMax(scrollPosition.y, 0.0f), 1.0f);
     }
 
     // Horizontal position
@@ -95,7 +95,7 @@
         scrollPosition.x = 0.0f; // We're completely visible
     } else {
         scrollPosition.x = (NSMinX(documentVisibleRect) - NSMinX(bounds)) / (NSWidth(bounds) - NSWidth(documentVisibleRect));
-        scrollPosition.x = fminf(fmaxf(scrollPosition.x, 0.0f), 1.0f);
+        scrollPosition.x = BDSKMin(BDSKMax(scrollPosition.x, 0.0f), 1.0f);
     }
 
     return scrollPosition;
@@ -109,7 +109,7 @@
 
     // Vertical position
     if (NSHeight(desiredRect) < NSHeight(bounds)) {
-        scrollPosition.y = fminf(fmaxf(scrollPosition.y, 0.0f), 1.0f);
+        scrollPosition.y = BDSKMin(BDSKMax(scrollPosition.y, 0.0f), 1.0f);
         if (![self isFlipped])
             scrollPosition.y = 1.0f - scrollPosition.y;
         desiredRect.origin.y = rintf(NSMinY(bounds) + scrollPosition.y * (NSHeight(bounds) - NSHeight(desiredRect)));
@@ -121,7 +121,7 @@
 
     // Horizontal position
     if (NSWidth(desiredRect) < NSWidth(bounds)) {
-        scrollPosition.x = fminf(fmaxf(scrollPosition.x, 0.0f), 1.0f);
+        scrollPosition.x = BDSKMin(BDSKMax(scrollPosition.x, 0.0f), 1.0f);
         desiredRect.origin.x = rintf(NSMinX(bounds) + scrollPosition.x * (NSWidth(bounds) - NSWidth(desiredRect)));
         if (NSMinX(desiredRect) < NSMinX(bounds))
             desiredRect.origin.x = NSMinX(bounds);

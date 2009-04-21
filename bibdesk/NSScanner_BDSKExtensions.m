@@ -125,7 +125,7 @@
         }
     } else if ([numberChars characterIsMember:ch]) {
         // explicit number, should we check for integers?
-        float tmpFloat = 0;
+        CGFloat tmpFloat = 0;
         if ([self scanFloat:&tmpFloat])
             tmpObject = [NSNumber numberWithFloat:tmpFloat];
     } else if (ch == '{') {

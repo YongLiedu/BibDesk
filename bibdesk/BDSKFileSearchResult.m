@@ -42,7 +42,7 @@
 
 @implementation BDSKFileSearchResult
 
-- (id)initWithURL:(NSURL *)aURL identifierURL:(NSURL *)anIdentifierURL title:(NSString *)aTitle score:(float)aScore;
+- (id)initWithURL:(NSURL *)aURL identifierURL:(NSURL *)anIdentifierURL title:(NSString *)aTitle score:(CGFloat)aScore;
 {
     
     NSParameterAssert(nil != aURL);

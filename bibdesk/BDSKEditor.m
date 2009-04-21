@@ -2848,7 +2848,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         if (row == -1)
             row = [tableView numberOfRows] - 1;
         else if (op ==  NSTableViewDropAbove)
-            row = fminf(row, [tableView numberOfRows] - 1);
+            row = BDSKMin(row, [tableView numberOfRows] - 1);
         [tableView setDropRow:row dropOperation:NSTableViewDropOn];
         
         NSPasteboard *pboard = [info draggingPasteboard];
@@ -3081,9 +3081,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     }
 }
 
-- (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(NSInteger)offset{
+- (CGFloat)splitView:(NSSplitView *)sender constrainMinCoordinate:(CGFloat)proposedMin ofSubviewAt:(NSInteger)offset{
     if ([sender isEqual:mainSplitView]) {
-        return fmaxf(proposedMin, 390.0);
+        return BDSKMax(proposedMin, 390.0);
     }
     return proposedMin;
 }
@@ -3203,21 +3203,21 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             id cell;
             NSInteger numberOfRows = [fields count];
             NSInteger row;
-            float maxWidth = NSWidth([citeKeyTitle frame]) + 4.0;
+            CGFloat maxWidth = NSWidth([citeKeyTitle frame]) + 4.0;
             
             for (row = 0; row < numberOfRows; row++) {
                 cell = [tableColumn dataCellForRow:row];
                 [self tableView:tableView willDisplayCell:cell forTableColumn:tableColumn row:row];
                 [cell setObjectValue:[fields objectAtIndex:row]];
-                maxWidth = fmaxf(maxWidth, [cell cellSize].width);
+                maxWidth = BDSKMax(maxWidth, [cell cellSize].width);
             }
-            maxWidth = ceilf(maxWidth);
+            maxWidth = BDSKCeil(maxWidth);
             [tableColumn setMinWidth:maxWidth];
             [tableColumn setMaxWidth:maxWidth];
             [tableView sizeToFit];
             NSRect frame = [citeKeyField frame];
             NSRect oldFrame = frame;
-            float offset = fminf(NSMaxX(frame) - 20.0, maxWidth + NSMinX([citeKeyTitle frame]) + 4.0);
+            CGFloat offset = BDSKMin(NSMaxX(frame) - 20.0, maxWidth + NSMinX([citeKeyTitle frame]) + 4.0);
             frame.size.width = NSMaxX(frame) - offset;
             frame.origin.x = offset;
             [citeKeyField setFrame:frame];
@@ -3264,12 +3264,12 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSInteger numEntries = [[typeMan booleanFieldsSet] count] + [[typeMan triStateFieldsSet] count] + [[typeMan ratingFieldsSet] count];
     NSSize size = [[matrix enclosingScrollView] frame].size;
     NSSize spacing = [matrix intercellSpacing];
-    NSInteger numRows, numCols = MIN(floor((size.width + spacing.width) / (cellSize.width + spacing.width)), numEntries);
+    NSInteger numRows, numCols = MIN(BDSKFloor((size.width + spacing.width) / (cellSize.width + spacing.width)), numEntries);
     numCols = MAX(numCols, 1);
-    numRows = ceil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
+    numRows = BDSKCeil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
     if (numRows * (cellSize.height + spacing.height) > 190.0 + spacing.height) {
-        numCols = MIN(floor((size.width - [NSScroller scrollerWidth] + spacing.width) / (cellSize.width + spacing.width)), numEntries);
-        numRows = ceil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
+        numCols = MIN(BDSKFloor((size.width - [NSScroller scrollerWidth] + spacing.width) / (cellSize.width + spacing.width)), numEntries);
+        numRows = BDSKCeil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
     }
     if (columns)
         *columns = numCols;
@@ -3305,19 +3305,19 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     e = [ratingFields objectEnumerator];
     while (field = [e nextObject]) {
 		size = [self addMatrixButtonCell:ratingButtonCell toArray:cells forField:field];
-        cellSize = NSMakeSize(fmaxf(size.width, cellSize.width), fmaxf(size.height, cellSize.height));
+        cellSize = NSMakeSize(BDSKMax(size.width, cellSize.width), BDSKMax(size.height, cellSize.height));
     }
 	
     e = [booleanFields objectEnumerator];
     while (field = [e nextObject]) {
 		size = [self addMatrixButtonCell:booleanButtonCell toArray:cells forField:field];
-        cellSize = NSMakeSize(fmaxf(size.width, cellSize.width), fmaxf(size.height, cellSize.height));
+        cellSize = NSMakeSize(BDSKMax(size.width, cellSize.width), BDSKMax(size.height, cellSize.height));
     }
 	
     e = [triStateFields objectEnumerator];
     while (field = [e nextObject]) {
 		size = [self addMatrixButtonCell:triStateButtonCell toArray:cells forField:field];
-        cellSize = NSMakeSize(fmaxf(size.width, cellSize.width), fmaxf(size.height, cellSize.height));
+        cellSize = NSMakeSize(BDSKMax(size.width, cellSize.width), BDSKMax(size.height, cellSize.height));
     }
     
     if ([[self window] firstResponder] == matrix)
@@ -3339,10 +3339,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSView *tableScrollView = [tableView enclosingScrollView];
     NSRect tableFrame = [tableScrollView frame];
     NSRect matrixFrame = [matrixEdgeView frame];
-    float dh = fminf(NSHeight([matrix frame]), 190.0) + 1.0 - NSHeight(matrixFrame);
+    CGFloat dh = BDSKMin(NSHeight([matrix frame]), 190.0) + 1.0 - NSHeight(matrixFrame);
     if ([cells count] == 0)
         dh -= 1.0;
-    if (fabsf(dh) > 0.1) {
+    if (BDSKAbs(dh) > 0.1) {
         tableFrame.size.height -= dh;
         tableFrame.origin.y += dh;
         matrixFrame.size.height += dh;

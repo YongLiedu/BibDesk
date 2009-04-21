@@ -44,7 +44,7 @@
     @private;
     SKSearchRef search;                       // active search
     NSInvocation *callback;                   // encapsulates document target for callback messages
-    float maxScore;                           // maximum score encountered
+    CGFloat maxScore;                           // maximum score encountered
     NSMutableDictionary *originalScores;      // non-normalized scores, identifier URLs as keys
     volatile int32_t isSearching;
     volatile int32_t shouldKeepRunning;

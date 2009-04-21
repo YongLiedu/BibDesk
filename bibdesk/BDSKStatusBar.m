@@ -104,14 +104,14 @@
 
 - (NSSize)cellSizeForIcon:(NSImage *)icon {
     NSSize iconSize = [icon size];
-    float cellHeight = NSHeight([self bounds]) - 2.0;
-    float cellWidth = iconSize.width * cellHeight / iconSize.height;
+    CGFloat cellHeight = NSHeight([self bounds]) - 2.0;
+    CGFloat cellWidth = iconSize.width * cellHeight / iconSize.height;
 	return NSMakeSize(cellWidth, cellHeight);
 }
 
 - (void)drawRect:(NSRect)rect {
 	NSRect textRect, ignored;
-    float rightMargin = RIGHT_MARGIN;
+    CGFloat rightMargin = RIGHT_MARGIN;
 	
 	[super drawRect:rect];
     
@@ -149,11 +149,11 @@
 	return [self superview]  && [self isHidden] == NO;
 }
 
-- (void)toggleBelowView:(NSView *)view offset:(float)offset {
+- (void)toggleBelowView:(NSView *)view offset:(CGFloat)offset {
 	NSRect viewFrame = [view frame];
 	NSView *contentView = [view superview];
 	NSRect statusRect = [contentView bounds];
-	float shiftHeight = NSHeight([self frame]) + offset;
+	CGFloat shiftHeight = NSHeight([self frame]) + offset;
 	statusRect.size.height = NSHeight([self frame]);
 	
 	BDSKASSERT(contentView != nil);
@@ -177,12 +177,12 @@
 	[contentView setNeedsDisplay:YES];
 }
 
-- (void)toggleInWindow:(NSWindow *)window offset:(float)offset {
+- (void)toggleInWindow:(NSWindow *)window offset:(CGFloat)offset {
 	NSRect winFrame = [window frame];
 	NSSize minSize = [window minSize];
 	NSSize maximumSize = [window maxSize];
 	NSView *contentView = [window contentView];
-	float shiftHeight = NSHeight([self frame]) + offset;
+	CGFloat shiftHeight = NSHeight([self frame]) + offset;
 	BOOL autoresizes = [contentView autoresizesSubviews];
 	NSEnumerator *viewEnum = [[contentView subviews] objectEnumerator];
 	NSView *view;
@@ -266,11 +266,11 @@
 	}
 }
 
-- (float)textOffset {
+- (CGFloat)textOffset {
     return textOffset;
 }
 
-- (void)setTextOffset:(float)offset {
+- (void)setTextOffset:(CGFloat)offset {
     textOffset = offset;
     [self setNeedsDisplay:YES];
 }
@@ -330,7 +330,7 @@
 
 - (void)rebuildToolTips {
 	NSRect ignored, rect;
-    float rightMargin = RIGHT_MARGIN;
+    CGFloat rightMargin = RIGHT_MARGIN;
 	
 	if (progressIndicator != nil) 
 		rightMargin += NSMinX([progressIndicator frame]) + MARGIN_BETWEEN_ITEMS;

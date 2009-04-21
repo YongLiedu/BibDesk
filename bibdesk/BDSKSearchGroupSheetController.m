@@ -468,7 +468,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     NSRect winRect = [[self window] frame];
     NSSize minSize = [[self window] minSize];
     NSSize maximumSize = [[self window] maxSize];
-    float dh = [serverView minSize].height;
+    CGFloat dh = [serverView minSize].height;
     if (collapse)
         dh *= -1;
     winRect.size.height += dh;

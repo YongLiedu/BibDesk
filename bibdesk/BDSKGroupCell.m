@@ -283,7 +283,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
         if ([self failedDownload]) {
             [self drawIcon:[NSImage imageNamed:@"BDSKSmallCautionIcon"] withFrame:countRect inView:controlView];
         } else if (count > 0) {
-            float countInset = count < 100 ? 0.5 * NSHeight(countRect) : 0.25 * NSHeight(countRect);
+            CGFloat countInset = count < 100 ? 0.5 * NSHeight(countRect) : 0.25 * NSHeight(countRect);
             NSColor *fgColor;
             NSColor *bgColor;
             if ([controlView respondsToSelector:@selector(setSelectionHighlightStyle:)]) {

@@ -57,8 +57,8 @@
 #import "NSInvocation_BDSKExtensions.h"
 
 #define MAX_SEARCHKIT_RESULTS 10
-static float LEAF_ROW_HEIGHT = 20.0;
-static float GROUP_ROW_HEIGHT = 24.0;
+static CGFloat LEAF_ROW_HEIGHT = 20.0;
+static CGFloat GROUP_ROW_HEIGHT = 24.0;
 
 @interface BDSKCountOvalCell : NSTextFieldCell
 @end
@@ -294,7 +294,7 @@ static float GROUP_ROW_HEIGHT = 24.0;
 #pragma mark Delegate display methods
 
 // return a larger row height for the items; tried using a spotlight controller image, but row size is too large to be practical
-- (float)outlineView:(NSOutlineView *)ov heightOfRowByItem:(id)item
+- (CGFloat)outlineView:(NSOutlineView *)ov heightOfRowByItem:(id)item
 {
     return [item isLeaf] ? LEAF_ROW_HEIGHT : GROUP_ROW_HEIGHT;
 }
@@ -431,7 +431,7 @@ static NSString *titleStringWithPub(BibItem *pub)
 }
 
 // normalize scores on a per-parent basis
-static void normalizeScoresForItem(BDSKTreeNode *parent, float maxScore)
+static void normalizeScoresForItem(BDSKTreeNode *parent, CGFloat maxScore)
 {
     // nodes are shallow, so we only traverse 1 deep
     NSUInteger i, iMax = [parent numberOfChildren];
@@ -439,7 +439,7 @@ static void normalizeScoresForItem(BDSKTreeNode *parent, float maxScore)
         BDSKTreeNode *child = [parent childAtIndex:i];
         NSNumber *score = [child valueForKey:@"score"];
         if (score) {
-            float oldValue = [score floatValue];
+            CGFloat oldValue = [score floatValue];
             double newValue = oldValue/maxScore;
             [child setValue:[NSNumber numberWithDouble:newValue] forKey:@"score"];
         }
@@ -485,12 +485,12 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
         
         // if we get more than 10 matches back per pub, the results will be pretty useless anyway
         SKDocumentID docID[MAX_SEARCHKIT_RESULTS];
-        float scores[MAX_SEARCHKIT_RESULTS];
+        CGFloat scores[MAX_SEARCHKIT_RESULTS];
         
         CFIndex numFound;
         
         Boolean moreToFind;
-        float thisScore, maxScore = 0.0f;
+        CGFloat thisScore, maxScore = 0.0f;
         
         do {
             
@@ -688,7 +688,7 @@ static NSColor *fillColor = nil;
     NSSize textSize = [self cellSizeForBounds:theRect];
     
     // Center that in the proposed rect
-    float heightDelta = newRect.size.height - textSize.height;	
+    CGFloat heightDelta = newRect.size.height - textSize.height;	
     if (heightDelta > 0) {
         newRect.size.height -= heightDelta;
         newRect.origin.y += (heightDelta / 2);
@@ -717,8 +717,8 @@ static NSColor *fillColor = nil;
     
     // colors similar to Spotlight's window: darker blue at bottom, lighter at top
     CGColorSpaceRef cspace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
-    const float upper[4] = { 106.0/255.0, 158.0/255.0, 238.0/255.0, 1.0 };
-    const float lower[4] = {  72.0/255.0, 139.0/255.0, 244.0/255.0, 1.0 };
+    const CGFloat upper[4] = { 106.0/255.0, 158.0/255.0, 238.0/255.0, 1.0 };
+    const CGFloat lower[4] = {  72.0/255.0, 139.0/255.0, 244.0/255.0, 1.0 };
     
     CGColorRef cgColor;
     

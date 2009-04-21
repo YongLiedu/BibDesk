@@ -46,7 +46,7 @@
     NSMutableArray *notes;
     NSArray *tags;
     double rating;
-    float lastTagsHeight;
+    CGFloat lastTagsHeight;
     IBOutlet NSOutlineView *outlineView;
     IBOutlet NSTokenField *tokenField;
     IBOutlet BDSKGradientSplitView *splitView;

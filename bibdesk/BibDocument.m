@@ -522,7 +522,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     }
     
     // set previous splitview frames
-    float fract;
+    CGFloat fract;
     fract = [xattrDefaults floatForKey:BDSKGroupSplitViewFractionKey defaultValue:-1.0];
     if (fract >= 0)
         [groupSplitView setFraction:fract];
@@ -573,7 +573,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [fileGradientView setUpperColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
     [fileGradientView setLowerColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
     
-    float iconScale = [xattrDefaults floatForKey:BDSKSideFileViewIconScaleKey defaultValue:[sud floatForKey:BDSKSideFileViewIconScaleKey]];
+    CGFloat iconScale = [xattrDefaults floatForKey:BDSKSideFileViewIconScaleKey defaultValue:[sud floatForKey:BDSKSideFileViewIconScaleKey]];
     FVDisplayMode displayMode = [xattrDefaults floatForKey:BDSKSideFileViewDisplayModeKey defaultValue:[sud floatForKey:BDSKSideFileViewDisplayModeKey]];
     [sideFileView setDisplayMode:displayMode];
     if (displayMode == FVDisplayModeGrid) {
@@ -3140,12 +3140,12 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     if (context == &BDSKDocumentFileViewObservationContext) {
         if (object == sideFileView) {
             FVDisplayMode displayMode = [sideFileView displayMode];
-            float iconScale = displayMode == FVDisplayModeGrid ? [sideFileView iconScale] : 0.0;
+            CGFloat iconScale = displayMode == FVDisplayModeGrid ? [sideFileView iconScale] : 0.0;
             [[NSUserDefaults standardUserDefaults] setFloat:iconScale forKey:BDSKSideFileViewIconScaleKey];
             [[NSUserDefaults standardUserDefaults] setInteger:displayMode forKey:BDSKSideFileViewDisplayModeKey];
         } else if (object == bottomFileView) {
             FVDisplayMode displayMode = [bottomFileView displayMode];
-            float iconScale = displayMode == FVDisplayModeGrid ? [bottomFileView iconScale] : 0.0;
+            CGFloat iconScale = displayMode == FVDisplayModeGrid ? [bottomFileView iconScale] : 0.0;
             [[NSUserDefaults standardUserDefaults] setFloat:iconScale forKey:BDSKBottomFileViewIconScaleKey];
             [[NSUserDefaults standardUserDefaults] setInteger:displayMode forKey:BDSKBottomFileViewDisplayModeKey];
         }
@@ -3651,12 +3651,12 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 	
 	if (sender == splitView) {
 		// first = table, second = preview, zeroth = web
-        float contentHeight = NSHeight([sender frame]) - i * [sender dividerThickness];
-        float factor = contentHeight / (oldSize.height - i * [sender dividerThickness]);
+        CGFloat contentHeight = NSHeight([sender frame]) - i * [sender dividerThickness];
+        CGFloat factor = contentHeight / (oldSize.height - i * [sender dividerThickness]);
         secondFrame = NSIntegralRect(secondFrame);
-        zerothFrame.size.height = floorf(factor * NSHeight(zerothFrame));
-        firstFrame.size.height = floorf(factor * NSHeight(firstFrame));
-        secondFrame.size.height = floorf(factor * NSHeight(secondFrame));
+        zerothFrame.size.height = BDSKFloor(factor * NSHeight(zerothFrame));
+        firstFrame.size.height = BDSKFloor(factor * NSHeight(firstFrame));
+        secondFrame.size.height = BDSKFloor(factor * NSHeight(secondFrame));
         if (NSHeight(zerothFrame) < 1.0)
             zerothFrame.size.height = 0.0;
         if (NSHeight(firstFrame) < 1.0)
@@ -3666,7 +3666,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         // randomly divide the remaining gap over the two views; NSSplitView dumps it all over the last view, which grows that one more than the others
         NSInteger gap = (NSInteger)(contentHeight - NSHeight(zerothFrame) - NSHeight(firstFrame) - NSHeight(secondFrame));
         while (gap > 0) {
-            i = floorf((3.0f * rand()) / RAND_MAX);
+            i = BDSKFloor((3.0f * rand()) / RAND_MAX);
             if (i == 0 && NSHeight(zerothFrame) > 0.0) {
                 zerothFrame.size.height += 1.0;
                 gap--;
@@ -3684,15 +3684,15 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         secondFrame.origin.y = NSMaxY(firstFrame) + [sender dividerThickness];
 	} else {
 		// zeroth = group, first = table+preview, second = fileview
-        float contentWidth = NSWidth([sender frame]) - 2 * [sender dividerThickness];
+        CGFloat contentWidth = NSWidth([sender frame]) - 2 * [sender dividerThickness];
         if (NSWidth(zerothFrame) < 1.0)
             zerothFrame.size.width = 0.0;
         if (NSWidth(secondFrame) < 1.0)
             secondFrame.size.width = 0.0;
         if (contentWidth < NSWidth(zerothFrame) + NSWidth(secondFrame)) {
-            float factor = contentWidth / (oldSize.width - [sender dividerThickness]);
-            zerothFrame.size.width = floorf(factor * NSWidth(zerothFrame));
-            secondFrame.size.width = floorf(factor * NSWidth(secondFrame));
+            CGFloat factor = contentWidth / (oldSize.width - [sender dividerThickness]);
+            zerothFrame.size.width = BDSKFloor(factor * NSWidth(zerothFrame));
+            secondFrame.size.width = BDSKFloor(factor * NSWidth(secondFrame));
         }
         firstFrame.size.width = contentWidth - NSWidth(zerothFrame) - NSWidth(secondFrame);
         firstFrame.origin.x = NSMaxX(zerothFrame) + [sender dividerThickness];
@@ -3724,7 +3724,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 			secondFrame.size.height = 0;
 		} else {
 			if(docState.lastPreviewHeight <= 0)
-				docState.lastPreviewHeight = floorf(NSHeight([sender frame]) / 3); // a reasonable value for uncollapsing the first time
+				docState.lastPreviewHeight = BDSKFloor(NSHeight([sender frame]) / 3); // a reasonable value for uncollapsing the first time
 			firstFrame.size.height = NSHeight(firstFrame) + NSHeight(secondFrame) - docState.lastPreviewHeight;
 			secondFrame.size.height = docState.lastPreviewHeight;
 		}
@@ -3737,7 +3737,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
                 zerothFrame.size.width = 0;
             } else {
                 if(docState.lastGroupViewWidth <= 0)
-                    docState.lastGroupViewWidth = fminf(120, NSWidth(firstFrame)); // a reasonable value for uncollapsing the first time
+                    docState.lastGroupViewWidth = BDSKMin(120, NSWidth(firstFrame)); // a reasonable value for uncollapsing the first time
                 firstFrame.size.width -= docState.lastGroupViewWidth;
                 zerothFrame.size.width = docState.lastGroupViewWidth;
             }
@@ -3748,7 +3748,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
                 secondFrame.size.width = 0;
             } else {
                 if(docState.lastFileViewWidth <= 0)
-                    docState.lastFileViewWidth = fminf(120, NSWidth(firstFrame)); // a reasonable value for uncollapsing the first time
+                    docState.lastFileViewWidth = BDSKMin(120, NSWidth(firstFrame)); // a reasonable value for uncollapsing the first time
                 firstFrame.size.width -= docState.lastFileViewWidth;
                 secondFrame.size.width = docState.lastFileViewWidth;
             }

@@ -97,7 +97,7 @@
     [promptField setStringValue:(prompt)? prompt : @""];
     [promptField sizeToFit];
     NSRect newPromptFrame = [promptField frame];
-    float dw = NSWidth(newPromptFrame) - NSWidth(oldPromptFrame);
+    CGFloat dw = NSWidth(newPromptFrame) - NSWidth(oldPromptFrame);
     fieldsFrame.size.width -= dw;
     fieldsFrame.origin.x += dw;
     [fieldsControl setFrame:fieldsFrame];
@@ -227,7 +227,7 @@
     [replacePromptField sizeToFit];
     NSRect newPromptFrame = [promptField frame];
     NSRect newReplacePromptFrame = [replacePromptField frame];
-    float dw;
+    CGFloat dw;
     if (NSWidth(newPromptFrame) > NSWidth(newReplacePromptFrame)) {
         dw = NSWidth(newPromptFrame) - NSWidth(oldPromptFrame);
         newReplacePromptFrame.size.width = NSWidth(newPromptFrame);

@@ -50,7 +50,7 @@
 #import "NSCharacterSet_BDSKExtensions.h"
 #import "BDSKRuntime.h"
 
-static float BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
+static CGFloat BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
 
 NSString *BDSKTextTemplateDocumentType = @"Text Template";
 NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
@@ -491,7 +491,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 }
 
 - (NSUInteger)countOfSizes {
-    return sizeof(BDSKDefaultFontSizes) / sizeof(float);
+    return sizeof(BDSKDefaultFontSizes) / sizeof(CGFloat);
 }
 
 - (id)objectInSizesAtIndex:(NSUInteger)idx {
@@ -499,7 +499,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 }
 
 - (NSUInteger)countOfTokenSizes {
-    return 1 + sizeof(BDSKDefaultFontSizes) / sizeof(float);
+    return 1 + sizeof(BDSKDefaultFontSizes) / sizeof(CGFloat);
 }
 
 - (id)objectInTokenSizesAtIndex:(NSUInteger)idx {
@@ -580,12 +580,12 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     }
 }
 
-- (float)fontSize {
+- (CGFloat)fontSize {
     return fontSize;
 }
 
-- (void)setFontSize:(float)newFontSize {
-    if (fabsf(fontSize - newFontSize) > 0.0) {
+- (void)setFontSize:(CGFloat)newFontSize {
+    if (BDSKAbs(fontSize - newFontSize) > 0.0) {
         [[[self undoManager] prepareWithInvocationTarget:self] setFontSize:fontSize];
         fontSize = newFontSize;
         [self updateStrings];
@@ -855,14 +855,14 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 - (void)updateTokenFields {
     NSRect frame;
-    float width = 0.0;
+    CGFloat width = 0.0;
     NSEnumerator *tfEnum = [[NSArray arrayWithObjects:specialTokenField, requiredTokenField, optionalTokenField, defaultTokenField, nil] objectEnumerator];
     NSTokenField *tokenField;
     
     while (tokenField = [tfEnum nextObject]) {
         [tokenField sizeToFit];
         frame = [tokenField frame];
-        width = fmaxf(width, NSWidth(frame));
+        width = BDSKMax(width, NSWidth(frame));
         // NSTokenField bug: add 10px to the width, because otherwise the tracking rect for the last token is broken
         frame.size.width += 10.0;
         [tokenField setFrame:frame];
@@ -1157,12 +1157,12 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         NSRect frame1 = [view1 frame];
         NSRect frame2 = [view2 frame];
         
-        float contentWidth = NSWidth([sender frame]) - [sender dividerThickness];
+        CGFloat contentWidth = NSWidth([sender frame]) - [sender dividerThickness];
         
         if (NSWidth(frame1) <= 1.0)
             frame1.size.width = 0.0;
         if (contentWidth < NSWidth(frame1))
-            frame1.size.width = floorf(NSWidth(frame1) * contentWidth / (oldSize.width - [sender dividerThickness]));
+            frame1.size.width = BDSKFloor(NSWidth(frame1) * contentWidth / (oldSize.width - [sender dividerThickness]));
         
         frame2.size.width = contentWidth - NSWidth(frame1);
         frame2.origin.x = NSMaxX(frame1) + [sender dividerThickness];
@@ -1173,13 +1173,13 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     } else {
         NSView *views[3];
         NSRect frames[3];
-        float factor = (NSWidth([sender frame]) - 2 * [sender dividerThickness]) / (oldSize.width - 2 * [sender dividerThickness]);
+        CGFloat factor = (NSWidth([sender frame]) - 2 * [sender dividerThickness]) / (oldSize.width - 2 * [sender dividerThickness]);
         NSInteger i, gap;
         
         [[sender subviews] getObjects:views];
         for (i = 0; i < 3; i++) {
             frames[i] = [views[i] frame];
-            frames[i].size.width = floorf(factor * NSWidth(frames[i]));
+            frames[i].size.width = BDSKFloor(factor * NSWidth(frames[i]));
         }
         
         // randomly divide the remaining gap over the three views; NSSplitView dumps it all over the last view, which grows that one more than the others
@@ -1201,7 +1201,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     }
 }
 
-- (float)splitView:(NSSplitView *)sender constrainMaxCoordinate:(float)proposedMax ofSubviewAt:(NSInteger)offset {
+- (CGFloat)splitView:(NSSplitView *)sender constrainMaxCoordinate:(CGFloat)proposedMax ofSubviewAt:(NSInteger)offset {
     if (sender == tableViewSplitView) {
         return proposedMax - 600.0;
     } else {
@@ -1458,7 +1458,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         
         if ([[font familyName] isEqualToString:[defaultFont familyName]] == NO)
             [token setFontName:[font familyName]];
-        if (fabsf([font pointSize] - [defaultFont pointSize]) > 0.0)
+        if (BDSKAbs([font pointSize] - [defaultFont pointSize]) > 0.0)
             [token setFontSize:[font pointSize]];
         if (isBold != defaultBold)
             [token setBold:isBold];

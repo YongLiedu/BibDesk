@@ -143,12 +143,12 @@
 	BOOL keepOn = YES;
     BOOL mouseWentUp = NO;
     NSPoint lastLoc = mouseLoc;
-	float border = ([self isBordered] ? 1 : 0);
-	float margin = 0;
-	float offset;
+	CGFloat border = ([self isBordered] ? 1 : 0);
+	CGFloat margin = 0;
+	CGFloat offset;
 	NSUInteger newRating;
 
-	float innerWidth = OUTER_SIZE * maxRating;
+	CGFloat innerWidth = OUTER_SIZE * maxRating;
 	NSSize buttonSize = NSMakeSize(innerWidth, OUTER_SIZE);
 	NSRect buttonRect = cellFrame;
 	
@@ -177,7 +177,7 @@
 		return NO;
 	
 	offset = mouseLoc.x - buttonRect.origin.x - margin;
-	newRating = (offset < 2) ? 0 : ceil(offset / OUTER_SIZE);
+	newRating = (offset < 2) ? 0 : BDSKCeil(offset / OUTER_SIZE);
 	if (newRating > maxRating)
 		newRating = maxRating;
 	if (rating != newRating) {
@@ -197,7 +197,7 @@
                 keepOn = NO;
                 mouseWentUp = YES;
             case NSLeftMouseDragged:
-                newRating = (offset < 2) ? 0 : ceil(offset / OUTER_SIZE);
+                newRating = (offset < 2) ? 0 : BDSKCeil(offset / OUTER_SIZE);
                 if (newRating > maxRating)
                     newRating = maxRating;
                 if (rating != newRating) {
@@ -232,7 +232,7 @@
 		case NSImageLeft:
 		case NSImageRight:
 			size.width = buttonSize.width + titleSize.width + BUTTON_TEXT_X_SEP;
-			size.height = fmaxf(buttonSize.height, titleSize.height);
+			size.height = BDSKMax(buttonSize.height, titleSize.height);
 			if ([self isBordered])
 				size.width -= EXTRA_BORDER_MARGIN;
 			break;
@@ -275,9 +275,9 @@
 }
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-	float margin = 0;
-	float border = ([self isBordered] ? 1 : 0);
-	float innerWidth = OUTER_SIZE * maxRating;
+	CGFloat margin = 0;
+	CGFloat border = ([self isBordered] ? 1 : 0);
+	CGFloat innerWidth = OUTER_SIZE * maxRating;
 
 	NSAttributedString *titleToDisplay = [self attributedTitle];
 	NSSize titleSize = [titleToDisplay size];

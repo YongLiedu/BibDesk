@@ -120,8 +120,8 @@ static BDSKPreviewer *sharedPreviewer = nil;
 #pragma mark UI setup and display
 
 - (void)windowDidLoad{
-    float pdfScaleFactor = 0.0;
-    float rtfScaleFactor = 1.0;
+    CGFloat pdfScaleFactor = 0.0;
+    CGFloat rtfScaleFactor = 1.0;
     BDSKCollapsibleView *collapsibleView = (BDSKCollapsibleView *)[[[progressOverlay contentView] subviews] firstObject];
     NSSize minSize = [progressIndicator frame].size;
     NSRect rect = [warningImageView bounds];
@@ -227,25 +227,25 @@ static BDSKPreviewer *sharedPreviewer = nil;
     return progressOverlay;
 }
 
-- (float)PDFScaleFactor;
+- (CGFloat)PDFScaleFactor;
 {
     [self window];
     return [pdfView autoScales] ? 0.0 : [pdfView scaleFactor];
 }
 
-- (void)setPDFScaleFactor:(float)scaleFactor;
+- (void)setPDFScaleFactor:(CGFloat)scaleFactor;
 {
     [self window];
     [pdfView setScaleFactor:scaleFactor];
 }
 
-- (float)RTFScaleFactor;
+- (CGFloat)RTFScaleFactor;
 {
     [self window];
     return [(BDSKZoomableTextView *)rtfPreviewView scaleFactor];
 }
 
-- (void)setRTFScaleFactor:(float)scaleFactor;
+- (void)setRTFScaleFactor:(CGFloat)scaleFactor;
 {
     [self window];
     [(BDSKZoomableTextView *)rtfPreviewView setScaleFactor:scaleFactor];
@@ -517,12 +517,12 @@ static BDSKPreviewer *sharedPreviewer = nil;
 	// save the visibility of the previewer
 	[[NSUserDefaults standardUserDefaults] setBool:[self isWindowVisible] forKey:BDSKShowingPreviewKey];
     // save the scalefactors of the views
-    float scaleFactor = ([pdfView autoScales] ? 0.0 : [pdfView scaleFactor]);
+    CGFloat scaleFactor = ([pdfView autoScales] ? 0.0 : [pdfView scaleFactor]);
 
-	if (fabsf(scaleFactor - [[NSUserDefaults standardUserDefaults] floatForKey:BDSKPreviewPDFScaleFactorKey]) > 0.01)
+	if (BDSKAbs(scaleFactor - [[NSUserDefaults standardUserDefaults] floatForKey:BDSKPreviewPDFScaleFactorKey]) > 0.01)
 		[[NSUserDefaults standardUserDefaults] setFloat:scaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
 	scaleFactor = [(BDSKZoomableTextView *)rtfPreviewView scaleFactor];
-	if (fabsf(scaleFactor - [[NSUserDefaults standardUserDefaults] floatForKey:BDSKPreviewRTFScaleFactorKey]) > 0.01)
+	if (BDSKAbs(scaleFactor - [[NSUserDefaults standardUserDefaults] floatForKey:BDSKPreviewRTFScaleFactorKey]) > 0.01)
 		[[NSUserDefaults standardUserDefaults] setFloat:scaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
     
     // make sure we don't process anything else; the TeX task will take care of its own cleanup

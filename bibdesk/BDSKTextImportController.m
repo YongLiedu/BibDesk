@@ -1637,11 +1637,11 @@
 
 #pragma mark Splitview delegate methods
 
-- (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(NSInteger)offset{
+- (CGFloat)splitView:(NSSplitView *)sender constrainMinCoordinate:(CGFloat)proposedMin ofSubviewAt:(NSInteger)offset{
 	return proposedMin + 126; // from IB
 }
 
-- (float)splitView:(NSSplitView *)sender constrainMaxCoordinate:(float)proposedMax ofSubviewAt:(NSInteger)offset{
+- (CGFloat)splitView:(NSSplitView *)sender constrainMaxCoordinate:(CGFloat)proposedMax ofSubviewAt:(NSInteger)offset{
 	return proposedMax - 200.0;
 }
 

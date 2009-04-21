@@ -146,7 +146,7 @@ static char BDSKTableViewFontDefaultsObservationContext;
     NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
     
     NSString *fontName = [sud objectForKey:fontNamePrefKey];
-    float fontSize = [sud floatForKey:fontSizePrefKey];
+    CGFloat fontSize = [sud floatForKey:fontSizePrefKey];
 	NSFont *font = nil;
         
     if(fontName != nil)
@@ -162,7 +162,7 @@ static char BDSKTableViewFontDefaultsObservationContext;
 - (void)tableViewFontChanged {
     if (fontNamePreferenceKey && fontSizePreferenceKey) {
         NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:fontNamePreferenceKey];
-        float fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:fontSizePreferenceKey];
+        CGFloat fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:fontSizePreferenceKey];
         NSFont *font = nil;
         
         if(fontName != nil)
@@ -189,7 +189,7 @@ static char BDSKTableViewFontDefaultsObservationContext;
 - (void)updateFontPanel:(NSNotification *)notification {
     if ([[[self window] firstResponder] isEqual:self] && fontNamePreferenceKey && fontSizePreferenceKey) {
         NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:fontNamePreferenceKey];
-        float fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:fontSizePreferenceKey];
+        CGFloat fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:fontSizePreferenceKey];
         [[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
     }
 }
@@ -540,7 +540,7 @@ static char BDSKTableViewFontDefaultsObservationContext;
     [self noteHeightOfRowsWithIndexesChanged:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfRows])]];
 }
 
-- (float)rowHeightForFont:(NSFont *)font {
+- (CGFloat)rowHeightForFont:(NSFont *)font {
     return [NSLayoutManager defaultViewLineHeightForFont:font];
 }
 
