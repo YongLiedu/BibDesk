@@ -219,7 +219,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	NSString *newType = [NSString stringWithString:@"new-type"];
 	NSInteger i = 0;
 	while ([types containsObject:newType]) {
-		newType = [NSString stringWithFormat:@"new-type-%i",++i];
+		newType = [NSString stringWithFormat:@"new-type-%ld", (long)++i];
 	}
 	[self addType:newType withFields:nil];
 	
@@ -253,7 +253,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	NSString *newField = [NSString stringWithString:@"New-Field"];
 	NSInteger i = 0;
 	while ([currentRequiredFields containsObject:newField]) {
-		newField = [NSString stringWithFormat:@"New-Field-%i",++i];
+		newField = [NSString stringWithFormat:@"New-Field-%ld", (long)++i];
 	}
 	[currentRequiredFields addObject:newField];
 	
@@ -285,7 +285,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	NSString *newField = [NSString stringWithString:@"New-Field"];
 	NSInteger i = 0;
 	while ([currentOptionalFields containsObject:newField]) {
-		newField = [NSString stringWithFormat:@"New-Field-%i",++i];
+		newField = [NSString stringWithFormat:@"New-Field-%ld", (long)++i];
 	}
 	[currentOptionalFields addObject:newField];
 	
@@ -584,7 +584,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
             newType = name;
             NSInteger i = 0;
             while ([types containsObject:newType]) {
-                newType = [NSString stringWithFormat:@"%@-%i",name, ++i];
+                newType = [NSString stringWithFormat:@"%@-%ld", name, (long)++i];
             }
             [self addType:newType withFields:[aType objectForKey:@"fields"]];
             
@@ -665,7 +665,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
             newType = [NSString stringWithFormat:@"%@-copy", type];
             i = 0;
             while ([types containsObject:newType]) {
-                newType = [NSString stringWithFormat:@"%@-copy-%i", type, ++i];
+                newType = [NSString stringWithFormat:@"%@-copy-%ld", type, (long)++i];
             }
             [self insertType:newType withFields:[fieldsForTypesDict objectForKey:type] atIndex:row];
         }

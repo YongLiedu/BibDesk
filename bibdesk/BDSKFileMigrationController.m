@@ -159,7 +159,7 @@
         numberOfAddedFiles += addedFiles;
         numberOfRemovedFields += removedFields;
         [progressBar incrementBy:1.0];
-        [statusField setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%i of %i", @"Status message"), current, final]];
+        [statusField setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%ld of %ld", @"Status message"), (long)current, (long)final]];
     }
     
     [progressBar setHidden:YES];
@@ -167,10 +167,10 @@
     
     NSString *messageFormat = nil;
     if (mask == BDSKRemoveNoFields)
-        messageFormat = NSLocalizedString(@"Converted %i files or URLs.", @"Status message");
+        messageFormat = NSLocalizedString(@"Converted %ld files or URLs.", @"Status message");
     else
-        messageFormat = NSLocalizedString(@"Converted %i files or URLs, removed %i fields.", @"Status message");
-    [statusField setStringValue:[NSString stringWithFormat:messageFormat, numberOfAddedFiles, numberOfRemovedFields]];
+        messageFormat = NSLocalizedString(@"Converted %ld files or URLs, removed %ld fields.", @"Status message");
+    [statusField setStringValue:[NSString stringWithFormat:messageFormat, (long)numberOfAddedFiles, (long)numberOfRemovedFields]];
     
     // BibItem change notifications are only posted if the old fields are removed, so this ensures that the file view is updated
     if (numberOfAddedFiles > 0)

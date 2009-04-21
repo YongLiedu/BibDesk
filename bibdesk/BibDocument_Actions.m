@@ -214,7 +214,7 @@ static BOOL changingColors = NO;
                                              defaultButton:NSLocalizedString(@"Yes", @"Button title")
                                            alternateButton:nil
                                                otherButton:NSLocalizedString(@"No", @"Button title")
-                                 informativeTextWithFormat:NSLocalizedString(@"You are about to remove %i %@ from %@.  Do you want to proceed?", @"Informative text in alert dialog: You are about to remove [number] item(s) from [group \"Name\"]."), [self numberOfSelectedPubs], ([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"items", @"") : NSLocalizedString(@"item", @"")), groupName];
+                                 informativeTextWithFormat:NSLocalizedString(@"You are about to remove %ld %@ from %@.  Do you want to proceed?", @"Informative text in alert dialog: You are about to remove [number] item(s) from [group \"Name\"]."), (long)[self numberOfSelectedPubs], ([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"items", @"") : NSLocalizedString(@"item", @"")), groupName];
             [alert setShowsSuppressionButton:YES];
             // use didDismissSelector because the action may pop up its own sheet
             [alert beginSheetModalForWindow:documentWindow
@@ -273,7 +273,7 @@ static BOOL changingColors = NO;
 	if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnDeleteKey]) {
         NSString *info;
         if (numSelectedPubs > 1)
-            info = [NSString stringWithFormat:NSLocalizedString(@"You are about to delete %i publications. Do you want to proceed?", @"Informative text in alert dialog"), numSelectedPubs];
+            info = [NSString stringWithFormat:NSLocalizedString(@"You are about to delete %ld publications. Do you want to proceed?", @"Informative text in alert dialog"), (long)numSelectedPubs];
         else
             info = NSLocalizedString(@"You are about to delete a publication. Do you want to proceed?", @"Informative text in alert dialog");
 		NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
@@ -364,7 +364,7 @@ static BOOL changingColors = NO;
                                          defaultButton:NSLocalizedString(@"No", @"Button title")
                                       alternateButton:NSLocalizedString(@"Yes", @"Button title")
                                           otherButton:nil
-                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i editor windows.  Is this really what you want?" , @"Informative text in alert dialog"), n]];
+                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %ld editor windows.  Is this really what you want?" , @"Informative text in alert dialog"), (long)n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
                          didEndSelector:@selector(editPubAlertDidEnd:returnCode:contextInfo:) 
@@ -544,9 +544,9 @@ static BOOL changingColors = NO;
             NSData *data = [cites dataUsingEncoding:[self documentStringEncoding]];
             
             sig_t sig = signal(SIGPIPE, SIG_IGN);
-            ssize_t len = write(fd, [data bytes], [data length]);
+            ssize_t len = write(fd, [data bytes], (ssize_t)[data length]);
             if (len != (ssize_t)[data length])
-                NSLog(@"Failed to write all data to LyX pipe \"%@\" (%d of %d bytes written)", lyxPipePath, len, [data length]);
+                NSLog(@"Failed to write all data to LyX pipe \"%@\" (%d of %d bytes written)", lyxPipePath, len, (ssize_t)[data length]);
             signal(SIGPIPE, sig);
             
             // Now read the reply message from the server's output pipe; no stat() check on this, since it's not critical.
@@ -709,7 +709,7 @@ static BOOL changingColors = NO;
                                          defaultButton:NSLocalizedString(@"No", @"Button title")
                                        alternateButton:NSLocalizedString(@"Open", @"Button title")
                                            otherButton:nil
-                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
+                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %ld linked files. Do you want to proceed?" , @"Informative text in alert dialog"), (long)n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
                          didEndSelector:@selector(openLocalURLAlertDidEnd:returnCode:contextInfo:) 
@@ -748,7 +748,7 @@ static BOOL changingColors = NO;
                                          defaultButton:NSLocalizedString(@"No", @"Button title")
                                        alternateButton:NSLocalizedString(@"Reveal", @"Button title")
                                            otherButton:nil
-                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to reveal %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
+                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to reveal %ld linked files. Do you want to proceed?" , @"Informative text in alert dialog"), (long)n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
                          didEndSelector:@selector(revealLocalURLAlertDidEnd:returnCode:contextInfo:) 
@@ -785,7 +785,7 @@ static BOOL changingColors = NO;
                                          defaultButton:NSLocalizedString(@"No", @"Button title")
                                       alternateButton:NSLocalizedString(@"Open", @"Button title")
                                           otherButton:nil
-                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i URLs. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
+                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %ld URLs. Do you want to proceed?" , @"Informative text in alert dialog"), (long)n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
                          didEndSelector:@selector(openRemoteURLAlertDidEnd:returnCode:contextInfo:) 
@@ -829,7 +829,7 @@ static BOOL changingColors = NO;
                                          defaultButton:NSLocalizedString(@"No", @"Button title")
                                        alternateButton:NSLocalizedString(@"Open", @"Button title")
                                            otherButton:nil
-                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open windows for notes for %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
+                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open windows for notes for %ld linked files. Do you want to proceed?" , @"Informative text in alert dialog"), (long)n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
                          didEndSelector:@selector(showNotesForLocalURLAlertDidEnd:returnCode:contextInfo:) 
@@ -911,7 +911,7 @@ static BOOL changingColors = NO;
                                              defaultButton:NSLocalizedString(@"No", @"Button title")
                                            alternateButton:NSLocalizedString(@"Open", @"Button title")
                                                otherButton:nil
-                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
+                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %ld linked files. Do you want to proceed?" , @"Informative text in alert dialog"), (long)n]];
             [alert beginSheetModalForWindow:documentWindow
                               modalDelegate:self
                              didEndSelector:@selector(openLinkedFileAlertDidEnd:returnCode:contextInfo:) 
@@ -954,7 +954,7 @@ static BOOL changingColors = NO;
                                              defaultButton:NSLocalizedString(@"No", @"Button title")
                                            alternateButton:NSLocalizedString(@"Reveal", @"Button title")
                                                otherButton:nil
-                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to reveal %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
+                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to reveal %ld linked files. Do you want to proceed?" , @"Informative text in alert dialog"), (long)n]];
             [alert beginSheetModalForWindow:documentWindow
                               modalDelegate:self
                              didEndSelector:@selector(revealLinkedFileAlertDidEnd:returnCode:contextInfo:) 
@@ -997,7 +997,7 @@ static BOOL changingColors = NO;
                                              defaultButton:NSLocalizedString(@"No", @"Button title")
                                           alternateButton:NSLocalizedString(@"Open", @"Button title")
                                               otherButton:nil
-                                informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i URLs. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
+                                informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %ld URLs. Do you want to proceed?" , @"Informative text in alert dialog"), (long)n]];
             [alert beginSheetModalForWindow:documentWindow
                               modalDelegate:self
                              didEndSelector:@selector(openLinkedURLAlertDidEnd:returnCode:contextInfo:) 
@@ -1043,7 +1043,7 @@ static BOOL changingColors = NO;
                                              defaultButton:NSLocalizedString(@"No", @"Button title")
                                            alternateButton:NSLocalizedString(@"Open", @"Button title")
                                                otherButton:nil
-                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open windows for notes for %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
+                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open windows for notes for %ld linked files. Do you want to proceed?" , @"Informative text in alert dialog"), (long)n]];
             [alert beginSheetModalForWindow:documentWindow
                               modalDelegate:self
                              didEndSelector:@selector(showNotesForLinkedFileAlertDidEnd:returnCode:contextInfo:) 
@@ -1468,7 +1468,7 @@ static BOOL changingColors = NO;
     
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
         NSString *alertTitle = numberOfSelectedPubs > 1 ? NSLocalizedString(@"Really Generate Cite Keys?", @"Message in alert dialog when generating cite keys") : NSLocalizedString(@"Really Generate Cite Key?", @"Message in alert dialog when generating cite keys");
-        NSString *message = numberOfSelectedPubs > 1 ? [NSString stringWithFormat:NSLocalizedString(@"This action will generate cite keys for %d publications.  This action is undoable.", @"Informative text in alert dialog"), numberOfSelectedPubs] : NSLocalizedString(@"This action will generate a cite key for the selected publication.  This action is undoable.", @"Informative text in alert dialog");
+        NSString *message = numberOfSelectedPubs > 1 ? [NSString stringWithFormat:NSLocalizedString(@"This action will generate cite keys for %lu publications.  This action is undoable.", @"Informative text in alert dialog"), (unsigned long)numberOfSelectedPubs] : NSLocalizedString(@"This action will generate a cite key for the selected publication.  This action is undoable.", @"Informative text in alert dialog");
         NSAlert *alert = [NSAlert alertWithMessageText:alertTitle
                                          defaultButton:NSLocalizedString(@"Generate", @"Button title")
                                        alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
@@ -1612,7 +1612,7 @@ static BOOL changingColors = NO;
     
 	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message");
     // update status line after the updateStatus notification, or else it gets overwritten
-    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"Status message: [number] duplicate publication(s) found"), countOfItems, pubSingularPlural]];
+    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%ld duplicate %@ found.", @"Status message: [number] duplicate publication(s) found"), (long)countOfItems, pubSingularPlural]];
 }
 
 - (void)selectDuplicatesAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
@@ -1683,7 +1683,7 @@ static BOOL changingColors = NO;
         NSBeep();
     
 	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message");
-    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"Status message: [number] duplicate publication(s) found"), countOfItems, pubSingularPlural]];
+    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%ld duplicate %@ found.", @"Status message: [number] duplicate publication(s) found"), (long)countOfItems, pubSingularPlural]];
 }
 
 // select duplicates, then allow user to delete/copy/whatever
@@ -1736,7 +1736,7 @@ static BOOL changingColors = NO;
         NSBeep();
     
 	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message");
-    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i incomplete %@ found.", @"Status message: [number] incomplete publication(s) found"), countOfItems, pubSingularPlural]];
+    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%ld incomplete %@ found.", @"Status message: [number] incomplete publication(s) found"), (long)countOfItems, pubSingularPlural]];
 }
 
 @end

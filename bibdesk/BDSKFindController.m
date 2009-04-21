@@ -1296,7 +1296,7 @@ enum {
 		number = 0;
 	
 	NSString *fieldString = (number == 1)? NSLocalizedString(@"field",@"field") : NSLocalizedString(@"fields",@"fields");
-	[statusBar setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Replaced in %i %@",@"Status message: Replaced in [number] field(s)"), number, fieldString]];
+	[statusBar setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Replaced in %lu %@",@"Status message: Replaced in [number] field(s)"), (unsigned long)number, fieldString]];
 	
 	return number;
 }

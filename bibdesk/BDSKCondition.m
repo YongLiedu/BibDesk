@@ -377,9 +377,9 @@ static char BDSKConditionObservationContext;
             case BDSKExactly: 
             case BDSKInLast: 
             case BDSKNotInLast: 
-                return [NSString stringWithFormat:@"%i %i", numberValue, periodValue];
+                return [NSString stringWithFormat:@"%ld %ld", (long)numberValue, (long)periodValue];
             case BDSKBetween: 
-                return [NSString stringWithFormat:@"%i %i %i", numberValue, andNumberValue, periodValue];
+                return [NSString stringWithFormat:@"%ld %ld %ld", (long)numberValue, (long)andNumberValue, (long)periodValue];
             case BDSKDate: 
             case BDSKAfterDate: 
             case BDSKBeforeDate: 
@@ -395,7 +395,7 @@ static char BDSKConditionObservationContext;
             case BDSKCountNotEqual: 
             case BDSKCountLarger: 
             case BDSKCountSmaller: 
-                return [NSString stringWithFormat:@"%i", countValue];
+                return [NSString stringWithFormat:@"%ld", (long)countValue];
             case BDSKAttachmentContain: 
             case BDSKAttachmentNotContain: 
             case BDSKAttachmentStartWith: 

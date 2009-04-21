@@ -419,7 +419,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
         NSUInteger i = 0;
         NSURL *fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:baseName]];
         while ([self objectExistsAtFileURL:fileURL]) {
-            fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%i", baseName, ++i]]];
+            fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%lu", baseName, (unsigned long)++i]]];
         }
         finalPath = [fileURL path];
         
@@ -445,7 +445,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     @synchronized(self) {
     // if the file exists, try /directory/filename-i.extension
     while([self fileExistsAtPath:fullPath])
-        fullPath = [directory stringByAppendingPathComponent:[[NSString stringWithFormat:@"%@-%i", baseName, ++i] stringByAppendingPathExtension:extension]];
+        fullPath = [directory stringByAppendingPathComponent:[[NSString stringWithFormat:@"%@-%lu", baseName, (unsigned long)++i] stringByAppendingPathExtension:extension]];
     }
 
 	return fullPath;
@@ -1008,7 +1008,7 @@ static OSType finderSignatureBytes = 'MACS';
     NSParameterAssert(0 != nsEncoding);
     CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(nsEncoding);
     CFStringRef name = CFStringConvertEncodingToIANACharSetName(cfEncoding);
-    NSString *encodingString = [NSString stringWithFormat:@"%@;%d", name, cfEncoding];
+    NSString *encodingString = [NSString stringWithFormat:@"%@;%ld", name, (long)cfEncoding];
     return [[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:@"com.apple.TextEncoding" toValue:[encodingString dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:error];
 }
 

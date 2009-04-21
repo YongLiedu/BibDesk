@@ -286,7 +286,7 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
         [[aPipe fileHandleForWriting] writeData:self];
     }
     @catch (id exception) {
-        NSLog(@"caught exception writing %d bytes to pipe (%@)", [self length], exception);
+        NSLog(@"caught exception writing %ld bytes to pipe (%@)", (long)[self length], exception);
     }
     [[aPipe fileHandleForWriting] closeFile];
     [pool release];

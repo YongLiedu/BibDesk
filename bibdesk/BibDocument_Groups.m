@@ -941,7 +941,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
                 [[headerCell itemAtIndex:0] setRepresentedObject:field];
             } else if(changeType == NSKeyValueChangeRemoval) {
                 [headerCell removeItemAtIndex:[headerCell indexOfItemWithRepresentedObject:field]];
-            } else [NSException raise:NSInvalidArgumentException format:@"Unrecognized change type %d", changeType];
+            } else [NSException raise:NSInvalidArgumentException format:@"Unrecognized change type %ld", (long)changeType];
         }
     }
 }
@@ -1293,7 +1293,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     BDSKStaticGroup *group;
     NSUInteger i = 1;
     while([names containsObject:name]){
-        name = [NSString stringWithFormat:@"%@%d", baseName, i++];
+        name = [NSString stringWithFormat:@"%@%lu", baseName, (unsigned long)i++];
     }
     
     // first merge in shared groups
@@ -1323,7 +1323,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSUInteger i = 1;
     
     while ([names containsObject:name])
-        name = [NSString stringWithFormat:@"%@%d", baseName, i++];
+        name = [NSString stringWithFormat:@"%@%lu", baseName, (unsigned long)i++];
     if (isAuthor)
         name = [BibAuthor authorWithName:name andPub:nil];
     group = [[[BDSKCategoryGroup alloc] initWithName:name key:currentGroupField count:[pubs count]] autorelease];
@@ -1591,7 +1591,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 			pubSingularPlural = NSLocalizedString(@"publication", @"publication, in status message");
 		else
 			pubSingularPlural = NSLocalizedString(@"publications", @"publications, in status message");
-		[self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Removed %i %@ from %@", @"Status message: Removed [number] publications(s) from selected group(s)"), count, pubSingularPlural, groupName] immediate:NO];
+		[self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Removed %ld %@ from %@", @"Status message: Removed [number] publications(s) from selected group(s)"), (long)count, pubSingularPlural, groupName] immediate:NO];
 	}
     
     return YES;

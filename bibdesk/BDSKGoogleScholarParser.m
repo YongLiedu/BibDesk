@@ -116,14 +116,14 @@
 
             // This is an error since this method isn't supposed to be called if the bibtex
             // links don't appear on the page
-            NSLog(@"Google Scholar Error: unable to parse bibtex url from search result %u due to xpath error", i);
+            NSLog(@"Google Scholar Error: unable to parse bibtex url from search result %lu due to xpath error", (unsigned long)i);
             continue;
 
         } else if (1 != [BibTeXLinkNodes count]) {
 
             // If Google ever start providing multiple alternative bibtex links for a
             // single item we will need to deal with that
-            NSLog(@"Google Scholar Error: unable to parse bibtex url from search result %u, found %u bibtex urls (expected 1)", i, [BibTeXLinkNodes count]);
+            NSLog(@"Google Scholar Error: unable to parse bibtex url from search result %lu, found %lu bibtex urls (expected 1)", (unsigned long)i, (unsigned long)[BibTeXLinkNodes count]);
             continue;
 
         }

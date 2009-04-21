@@ -188,7 +188,7 @@ static char BDSKConditionControllerObservationContext;
 
 // we could implement binding in BDSKRatingButton, but that's a lot of hassle and exposes us to the binding-to-owner bug
 - (IBAction)changeRating:(id)sender {
-    [condition setStringValue:[NSString stringWithFormat:@"%i", [sender rating]]];
+    [condition setStringValue:[NSString stringWithFormat:@"%ld", (long)[sender rating]]];
 }
 
 - (BDSKCondition *)condition {

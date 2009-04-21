@@ -526,7 +526,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
         CFRelease(search);
         
         normalizeScoresForItem(node, maxScore);
-        [node setValue:[NSString stringWithFormat:@"%d", [node numberOfChildren]] forKey:@"score"];
+        [node setValue:[NSString stringWithFormat:@"%ld", (long)[node numberOfChildren]] forKey:@"score"];
         [node sortChildrenUsingFunction:scoreComparator context:NULL];
         
         val++;

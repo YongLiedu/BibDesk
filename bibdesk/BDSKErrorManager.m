@@ -138,7 +138,7 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 
 - (NSString *)displayName;
 {
-    return (uniqueNumber == 0) ? documentDisplayName : [NSString stringWithFormat:@"%@ (%d)", documentDisplayName, uniqueNumber];
+    return (uniqueNumber == 0) ? documentDisplayName : [NSString stringWithFormat:@"%@ (%ld)", documentDisplayName, (long)uniqueNumber];
 }
 
 

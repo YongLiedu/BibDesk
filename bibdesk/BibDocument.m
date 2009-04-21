@@ -3383,13 +3383,13 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         NSInteger shownItemsCount = [[fileSearchController filteredResults] count];
         NSInteger totalItemsCount = [[fileSearchController results] count];
         
-        [statusStr appendFormat:@"%i %@", shownItemsCount, (shownItemsCount == 1) ? NSLocalizedString(@"item", @"item, in status message") : NSLocalizedString(@"items", @"items, in status message")];
+        [statusStr appendFormat:@"%ld %@", (long)shownItemsCount, (shownItemsCount == 1) ? NSLocalizedString(@"item", @"item, in status message") : NSLocalizedString(@"items", @"items, in status message")];
         
         if (shownItemsCount != totalItemsCount) {
             NSString *groupStr = ([groupOutlineView numberOfSelectedRows] == 1) ?
                 [NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"in group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]] :
                 NSLocalizedString(@"in multiple groups", @"Partial status message");
-            [statusStr appendFormat:@" %@ (%@ %i)", groupStr, ofStr, totalItemsCount];
+            [statusStr appendFormat:@" %@ (%@ %ld)", groupStr, ofStr, (long)totalItemsCount];
         }
         
     } else {
@@ -3399,9 +3399,9 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         NSInteger totalPubsCount = [publications count];
         
         if (shownPubsCount != groupPubsCount) { 
-            [statusStr appendFormat:@"%i %@ ", shownPubsCount, ofStr];
+            [statusStr appendFormat:@"%ld %@ ", (long)shownPubsCount, ofStr];
         }
-        [statusStr appendFormat:@"%i %@", groupPubsCount, (groupPubsCount == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message")];
+        [statusStr appendFormat:@"%ld %@", (long)groupPubsCount, (groupPubsCount == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message")];
         // we can have only a single external group selected at a time
         if ([self hasWebGroupSelected] == YES) {
             [statusStr appendFormat:@" %@", NSLocalizedString(@"in web group", @"Partial status message")];
@@ -3418,7 +3418,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
             if (matchCount == 1)
                 [statusStr appendFormat:NSLocalizedString(@". There was 1 match.", @"Partial status message")];
             else if (matchCount > 1)
-                [statusStr appendFormat:NSLocalizedString(@". There were %i matches.", @"Partial status message"), matchCount];
+                [statusStr appendFormat:NSLocalizedString(@". There were %ld matches.", @"Partial status message"), (long)matchCount];
             if ([group hasMoreResults])
                 [statusStr appendString:NSLocalizedString(@" Hit \"Search\" to load more.", @"Partial status message")];
             else if (groupPubsCount < matchCount)
@@ -3427,7 +3427,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
             NSString *groupStr = ([groupOutlineView numberOfSelectedRows] == 1) ?
                 [NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"in group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]] :
                 NSLocalizedString(@"in multiple groups", @"Partial status message");
-            [statusStr appendFormat:@" %@ (%@ %i)", groupStr, ofStr, totalPubsCount];
+            [statusStr appendFormat:@" %@ (%@ %ld)", groupStr, ofStr, (long)totalPubsCount];
         }
         
     }

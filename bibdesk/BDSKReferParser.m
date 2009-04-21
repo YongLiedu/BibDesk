@@ -107,10 +107,10 @@
         } else if([key isSingleValuedField] || [key isURLField]) {
             // for single valued and URL fields, create a new field name
             NSInteger i = 1;
-            NSString *newKey = [key stringByAppendingFormat:@"%d", i];
+            NSString *newKey = [key stringByAppendingFormat:@"%ld", (long)i];
             while ([pubDict objectForKey:newKey] != nil) {
                 i++;
-                newKey = [key stringByAppendingFormat:@"%d", i];
+                newKey = [key stringByAppendingFormat:@"%ld", (long)i];
             }
             key = newKey;
             newString = [value copy];
@@ -136,7 +136,7 @@ static void fixDateInDictionary(NSMutableDictionary *pubDict)
         [scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL];
         NSInteger year;
         if ([scanner scanInt:&year])
-            [pubDict setObject:[NSString stringWithFormat:@"%d", year] forKey:BDSKYearString];
+            [pubDict setObject:[NSString stringWithFormat:@"%ld", (long)year] forKey:BDSKYearString];
         [scanner release];
     }
 }

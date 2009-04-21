@@ -184,9 +184,9 @@
     CFIndex maxCount = SKIndexGetDocumentCount(skIndex);
     
     BOOL changeSize = [data changeIndexSize:maxCount];
-    NSAssert1(changeSize, @"Unable to allocate memory for index of size %d", maxCount);
+    NSAssert1(changeSize, @"Unable to allocate memory for index of size %ld", (long)maxCount);
     if (NO == changeSize) {
-        NSLog(@"*** ERROR: unable to allocate memory for index of size %d", maxCount);
+        NSLog(@"*** ERROR: unable to allocate memory for index of size %ld", (long)maxCount);
         return;
     }
 
@@ -202,9 +202,9 @@
     if (actualCount > 0) {
         
         changeSize = [data changeResultSize:actualCount];
-        NSAssert1(changeSize, @"Unable to allocate memory for results of size %d", actualCount);
+        NSAssert1(changeSize, @"Unable to allocate memory for results of size %ld", (long)actualCount);
         if (NO == changeSize) {
-            NSLog(@"*** ERROR: unable to allocate memory for results of size %d", actualCount);
+            NSLog(@"*** ERROR: unable to allocate memory for results of size %ld", (long)actualCount);
             return;
         }
         

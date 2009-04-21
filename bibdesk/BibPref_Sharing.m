@@ -150,7 +150,7 @@
         if(number == 1)
             statusMessage = NSLocalizedString(@"On, 1 user connected", @"Bonjour sharing is on status message, single connection");
         else if([server status] >= BDSKSharingStatusPublishing)
-            statusMessage = [NSString stringWithFormat:NSLocalizedString(@"On, %i users connected", @"Bonjour sharing is on status message, zero or multiple connections"), number];
+            statusMessage = [NSString stringWithFormat:NSLocalizedString(@"On, %lu users connected", @"Bonjour sharing is on status message, zero or multiple connections"), (unsigned long)number];
         else
             statusMessage = [NSString stringWithFormat:NSLocalizedString(@"Standby", @"Bonjour sharing is standby status message"), number];
         if ([server status] >= BDSKSharingStatusPublishing)

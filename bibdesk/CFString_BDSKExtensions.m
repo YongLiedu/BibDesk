@@ -162,7 +162,7 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingCharactersInSet(CFAllocatorRe
         buffer = stackBuffer;
     }
     
-    NSCAssert1(buffer != NULL, @"failed to allocate memory for string of length %d", length);
+    NSCAssert1(buffer != NULL, @"failed to allocate memory for string of length %ld", (long)length);
     
     BOOL isFirst = NO;
     int bufCnt = 0;
@@ -386,7 +386,7 @@ CFStringRef __BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef al
         buffer = stackBuffer;
     }
     
-    NSCAssert1(buffer != NULL, @"failed to allocate memory for string of length %d", length);
+    NSCAssert1(buffer != NULL, @"failed to allocate memory for string of length %ld", (long)length);
     
     int bufCnt = 0;
     BOOL ignoreNextNewline = NO;

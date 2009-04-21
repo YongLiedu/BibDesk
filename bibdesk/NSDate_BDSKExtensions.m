@@ -273,7 +273,7 @@
             [components setYear:number];
             break;
         default:
-            NSLog(@"Unknown period %d",period);
+            NSLog(@"Unknown period %ld", (long)period);
             break;
     }
     NSDate *date = [calendar dateByAddingComponents:components toDate:self options:0];

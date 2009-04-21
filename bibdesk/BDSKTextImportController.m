@@ -284,7 +284,7 @@
 	
 	NSInteger numItems = [itemsAdded count];
 	NSString *pubSingularPlural = (numItems == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message");
-    [statusLine setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%d %@ added.", @"format string for pubs added. args: one NSInteger for number added, then one string for singular or plural of publication(s)."), numItems, pubSingularPlural]];
+    [statusLine setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%ld %@ added.", @"format string for pubs added. args: one NSInteger for number added, then one string for singular or plural of publication(s)."), (long)numItems, pubSingularPlural]];
     
     [itemTypeButton selectItemWithTitle:[item pubType]];
     [citeKeyField setStringValue:[item citeKey]];
@@ -953,7 +953,7 @@
     if (isDownloading != downloading) {
         isDownloading = downloading;
         if (isDownloading) {
-			NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Tool tip message"), 0] stringByAppendingEllipsis];
+			NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %ld%%", @"Tool tip message"), (long)0] stringByAppendingEllipsis];
 			[progressIndicator setToolTip:message];
 			[statusLine setStringValue:@""];
 			[stopOrReloadButton setImage:[NSImage imageNamed:@"stop_small"]];
@@ -1226,7 +1226,7 @@
     if (expectedContentLength > 0) {
         receivedContentLength += length;
         NSInteger percent = round(100.0 * (double)receivedContentLength / (double)expectedContentLength);
-		NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Tool tip message"), percent] stringByAppendingEllipsis];
+		NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %ld%%", @"Tool tip message"), (long)percent] stringByAppendingEllipsis];
 		[progressIndicator setToolTip:message];
 		[statusLine setStringValue:message];
     }
@@ -1470,9 +1470,9 @@
         return [key localizedFieldName];
     }else if([tcID isEqualToString:@"Num"]){
         if(row < 10)
-            return [NSString stringWithFormat:@"%@%d", [NSString commandKeyIndicatorString], (row + 1) % 10];
+            return [NSString stringWithFormat:@"%@%ld", [NSString commandKeyIndicatorString], (long)((row + 1) % 10)];
         else if(row < 20)
-            return [NSString stringWithFormat:@"%@%@%d", [NSString alternateKeyIndicatorString], [NSString commandKeyIndicatorString], (row + 1) % 10];
+            return [NSString stringWithFormat:@"%@%@%ld", [NSString alternateKeyIndicatorString], [NSString commandKeyIndicatorString], (long)((row + 1) % 10)];
         else return @"";
     }else{
         return [item valueOfField:key];
@@ -1715,7 +1715,7 @@
                 if([metaName isEqualToString:@"DC.type"]){
                     NSString *currentVal = [metaTagDict objectForKey:metaName];
                     if(currentVal != nil){
-                        metaName = [NSString stringWithFormat:@"DC.type.%d", ++typeIndex];
+                        metaName = [NSString stringWithFormat:@"DC.type.%ld", (long)++typeIndex];
                     }
                 }
                 

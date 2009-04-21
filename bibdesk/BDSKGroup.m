@@ -152,7 +152,7 @@ static NSString *createUniqueID(void)
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"%@<%p>: name=\"%@\",count=%d", [self class], self, name, count];
+    return [NSString stringWithFormat:@"%@<%p>: name=\"%@\",count=%ld", [self class], self, name, (long)count];
 }
 
 // accessors

@@ -482,7 +482,7 @@ enum {
     @param      field (description)
     @param      rating (description)
 */
-- (void)setField:(NSString *)field toRatingValue:(NSUInteger)rating;
+- (void)setField:(NSString *)field toRatingValue:(NSInteger)rating;
 
 /*!
     @method     ratingValueOfField:

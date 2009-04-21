@@ -145,7 +145,7 @@
 }
 
 - (NSString *)description{
-    return [NSString stringWithFormat:@"type: %d, %@", type, value];
+    return [NSString stringWithFormat:@"type: %ld, %@", (long)type, value];
 }
 
 @end

@@ -589,7 +589,7 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
     
     if (count > 1) {
         
-        NSAttributedString *countString = [[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%i", count]
+        NSAttributedString *countString = [[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%ld", (long)count]
                                             attributeName:NSForegroundColorAttributeName attributeValue:[NSColor whiteColor]] autorelease];
         NSRect countRect = {NSZeroPoint, [countString size]};
         float countOffset;

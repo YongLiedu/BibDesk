@@ -430,7 +430,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         
         // try again with a different name
         if (tryCount < MAX_TRY_COUNT) {
-            [self setSharingName:[NSString stringWithFormat:@"%@-%i", [BDSKSharingServer defaultSharingName], ++tryCount]];
+            [self setSharingName:[NSString stringWithFormat:@"%@-%ld", [BDSKSharingServer defaultSharingName], (long)++tryCount]];
             [self _enableSharing];
         } else {
             [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingStatusChangedNotification object:nil];
@@ -458,7 +458,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     
     if (err == NSNetServicesCollisionError && tryCount < MAX_TRY_COUNT) {
         
-        [self setSharingName:[NSString stringWithFormat:@"%@-%i", [BDSKSharingServer defaultSharingName], ++tryCount]];
+        [self setSharingName:[NSString stringWithFormat:@"%@-%ld", [BDSKSharingServer defaultSharingName], (long)++tryCount]];
         [self _enableSharing];
         
     } else {
@@ -671,7 +671,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     if(allowConnection){
         [newConnection setDelegate:self];
     } else {
-        NSLog(@"*** WARNING *** Maximum number of sharing clients (%d) exceeded.", maxConnections);
+        NSLog(@"*** WARNING *** Maximum number of sharing clients (%ld) exceeded.", (long)maxConnections);
         NSLog(@"Use `defaults write %@ BDSKSharingServerMaxConnections N` to change the limit to N.", [[NSBundle mainBundle] bundleIdentifier]);
     }
     return allowConnection;

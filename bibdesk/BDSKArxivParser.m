@@ -145,14 +145,14 @@
 
             // This is an error since this method isn't supposed to be called if the bibtex
             // links don't appear on the page
-            NSLog(@"ArXiv Error: unable to parse bibtex url from search result %u due to xpath error", i);
+            NSLog(@"ArXiv Error: unable to parse bibtex url from search result %lu due to xpath error", (unsigned long)i);
             continue;
 
         } else if (1 != [arxivLinkNodes count]) {
 
             // If Google ever start providing multiple alternative bibtex links for a
             // single item we will need to deal with that
-            NSLog(@"ArXiv Error: unable to parse bibtex url from search result %u, found %u bibtex urls (expected 1)", i, [arxivLinkNodes count]);
+            NSLog(@"ArXiv Error: unable to parse bibtex url from search result %lu, found %lu bibtex urls (expected 1)", (unsigned long)i, (unsigned long)[arxivLinkNodes count]);
             continue;
 
         }

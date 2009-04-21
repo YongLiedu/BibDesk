@@ -263,7 +263,7 @@
     NSInteger i = 0;
     NSString *newKey = [NSString stringWithString:@"macro"];
     while([macroDefinitions objectForKey:newKey] != nil)
-        newKey = [NSString stringWithFormat:@"macro%d", ++i];
+        newKey = [NSString stringWithFormat:@"macro%ld", (long)++i];
     
     [macroResolver addMacroDefinition:@"definition" forMacro:newKey];
     [[[self window] undoManager] setActionName:NSLocalizedString(@"Add Macro", @"Undo action name")];

@@ -277,7 +277,7 @@
         NSInteger value = [item intValue];
         if (value != end + 1) {
             if (start != INT_MIN) {
-                NSString *string = [[NSString alloc] initWithFormat:(start == end ? @"%i" : @"%i-%i"), start, end];
+                NSString *string = [[NSString alloc] initWithFormat:(start == end ? @"%ld" : @"%ld-%ld"), (long)start, (long)end];
                 [array addObject:string];
                 [string release];
             }
@@ -286,7 +286,7 @@
         end = value;
     }
     if (start != INT_MIN) {
-        NSString *string = [[NSString alloc] initWithFormat:(start == end ? @"%i" : @"%i-%i"), start, end];
+        NSString *string = [[NSString alloc] initWithFormat:(start == end ? @"%ld" : @"%ld-%ld"), (long)start, (long)end];
         [array addObject:string];
         [string release];
     }

@@ -677,7 +677,7 @@
 					NSUInteger numChars = 1;
 					if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 1;
 					while (numChars-- > 0) {
-						[parsedStr appendFormat:@"%i",(NSInteger)(rand() % 10)];
+						[parsedStr appendFormat:@"%ld",(long)(rand() % 10)];
 					}
 					break;
 				}
@@ -794,7 +794,7 @@
 		NSInteger i = 0;
         NSString *string = nil;
 		do {
-			string = [@"empty" stringByAppendingFormat:@"%i", i++];
+			string = [@"empty" stringByAppendingFormat:@"%ld", (long)i++];
 		} while (NO == [self stringIsValid:string forField:fieldName ofItem:pub]);
 		return string;
 	} else {

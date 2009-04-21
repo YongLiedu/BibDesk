@@ -132,7 +132,7 @@
     NSInteger i = 0;
     NSString *newKey = @"key";
     while([info objectForKey:newKey] != nil)
-        newKey = [NSString stringWithFormat:@"key%i", ++i];
+        newKey = [NSString stringWithFormat:@"key%ld", (long)++i];
     
     [info setObject:@"" forKey:newKey];
     [self refreshKeys];

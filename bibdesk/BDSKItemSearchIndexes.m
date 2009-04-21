@@ -43,7 +43,7 @@
 static CFStringRef searchIndexCopyDescription(const void *value)
 {
     CFStringRef cfDesc = CFCopyDescription(value);
-    CFStringRef desc = (CFStringRef)[[NSString alloc] initWithFormat:@"%@: type %d, %d documents", cfDesc, SKIndexGetIndexType((SKIndexRef)value), SKIndexGetDocumentCount((SKIndexRef)value)];
+    CFStringRef desc = (CFStringRef)[[NSString alloc] initWithFormat:@"%@: type %ld, %ld documents", cfDesc, (long)SKIndexGetIndexType((SKIndexRef)value), (long)SKIndexGetDocumentCount((SKIndexRef)value)];
     CFRelease(cfDesc);
     return desc;
 }

@@ -1273,7 +1273,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 - (NSString *)stringValueOfField:(NSString *)field inherit:(BOOL)inherit {
 		
 	if([field isRatingField]){
-		return [NSString stringWithFormat:@"%i", [self ratingValueOfField:field]];
+		return [NSString stringWithFormat:@"%ld", (long)[self ratingValueOfField:field]];
 	}else if([field isBooleanField]){
 		return [NSString stringWithBool:[self boolValueOfField:field]];
     }else if([field isTriStateField]){
@@ -1328,10 +1328,10 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     return [[self valueOfField:field inherit:NO] intValue];
 }
 
-- (void)setField:(NSString *)field toRatingValue:(NSUInteger)rating{
+- (void)setField:(NSString *)field toRatingValue:(NSInteger)rating{
 	if (rating > 5)
 		rating = 5;
-	[self setField:field toValue:[NSString stringWithFormat:@"%u", rating]];
+	[self setField:field toValue:[NSString stringWithFormat:@"%ld", (long)rating]];
 }
 
 - (BOOL)boolValueOfField:(NSString *)field{
@@ -1423,7 +1423,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         BOOL hasMissingFile = count && [[localFiles valueForKey:@"URL"] containsObject:[NSNull null]];
         NSDictionary *cellDictionary = nil;
         if (count > 0) {
-            NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%d items", @""), count];
+            NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%ld items", @""), (long)count];
             NSImage *image = hasMissingFile ? [NSImage redPaperclipImage] : [NSImage paperclipImage];
             cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:image, BDSKTextWithIconCellImageKey, label, BDSKTextWithIconCellStringKey, nil];
         }
@@ -1432,7 +1432,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         NSUInteger count = [[self remoteURLs] count];
         NSDictionary *cellDictionary = nil;
         if (count > 0) {
-            NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%d items", @""), count];
+            NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%ld items", @""), (long)count];
             cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:[NSImage genericInternetLocationImage], BDSKTextWithIconCellImageKey, label, BDSKTextWithIconCellStringKey, nil];
         }
         return cellDictionary;
@@ -1647,12 +1647,12 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSString *key = @"Bdsk-File-1";
     
     while ([pubFields objectForKey:key])
-        key = [NSString stringWithFormat:@"Bdsk-File-%u", ++fileIndex];
+        key = [NSString stringWithFormat:@"Bdsk-File-%lu", (unsigned long)++fileIndex];
     
     key = @"Bdsk-Url-1";
     
     while ([pubFields objectForKey:key])
-        key = [NSString stringWithFormat:@"Bdsk-Url-%u", ++urlIndex];
+        key = [NSString stringWithFormat:@"Bdsk-Url-%lu", (unsigned long)++urlIndex];
     
     NSMutableString *string = nil;
     NSString *value;
@@ -1662,9 +1662,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         for (i = 0; i < iMax; i++) {
             file = [files objectAtIndex:i];
             if ([file isFile])
-                key = [NSString stringWithFormat:@"Bdsk-File-%u", fileIndex++];
+                key = [NSString stringWithFormat:@"Bdsk-File-%lu", (unsigned long)fileIndex++];
             else
-                key = [NSString stringWithFormat:@"Bdsk-Url-%u", urlIndex++];
+                key = [NSString stringWithFormat:@"Bdsk-Url-%lu", (unsigned long)urlIndex++];
             value = [file stringRelativeToPath:basePath];
             BDSKPRECONDITION([value rangeOfCharacterFromSet:[NSCharacterSet curlyBraceCharacterSet]].length == 0);
             [string appendFormat:@",\n\t%@ = {%@}", key, value];
@@ -2016,7 +2016,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [s appendFormat:@"<rec-number>%@</rec-number>", [self fileOrder]];
     
     // ref-type
-    [s appendFormat:@"<ref-type>%i</ref-type>", refTypeID];
+    [s appendFormat:@"<ref-type>%ld</ref-type>", (long)refTypeID];
     
     // contributors
     
@@ -3361,7 +3361,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         [keysToRemove addObject:key];
         
         // next key in the sequence; increment i first, so it's guaranteed correct
-        key = [NSString stringWithFormat:@"Bdsk-File-%u", ++i];
+        key = [NSString stringWithFormat:@"Bdsk-File-%lu", (unsigned long)++i];
     }
     
     // reset i so we can get all of the remote URL types
@@ -3381,7 +3381,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         [keysToRemove addObject:key];
         
         // next key in the sequence; increment i first, so it's guaranteed correct
-        key = [NSString stringWithFormat:@"Bdsk-Url-%u", ++i];
+        key = [NSString stringWithFormat:@"Bdsk-Url-%lu", (unsigned long)++i];
     }
     
     if ([owner fileURL])
@@ -3395,11 +3395,11 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     // add unresolved URLs back in, and make sure the remaining keys are contiguous
     if (unresolvedFileCount) {
         for (i = 0; i < unresolvedFileCount; i++)
-            [pubFields setObject:[unresolvedFiles objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-File-%u", i + 1]];
+            [pubFields setObject:[unresolvedFiles objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-File-%lu", (unsigned long)(i + 1)]];
     }
     if (unresolvedURLCount) {
         for (i = 0; i < unresolvedURLCount; i++)
-            [pubFields setObject:[unresolvedURLs objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-Url-%u", i + 1]];
+            [pubFields setObject:[unresolvedURLs objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-Url-%lu", (unsigned long)(i + 1)]];
     }
     
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];

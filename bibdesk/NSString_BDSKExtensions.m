@@ -419,7 +419,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     NSInteger nesting = 0;
     
     if(CFStringGetCharacterFromInlineBuffer(&inlineBuffer, startLoc) != '{')
-        [NSException raise:NSInternalInconsistencyException format:@"character at index %i is not a brace", startLoc];
+        [NSException raise:NSInternalInconsistencyException format:@"character at index %ld is not a brace", (long)startLoc];
     
     // we don't consider escaped braces yet
     for(cnt = startLoc; cnt < endLoc; cnt++){
@@ -431,7 +431,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         else if(ch == '}')
             nesting--;
         if(nesting == 0){
-            //NSLog(@"match found at index %i", cnt);
+            //NSLog(@"match found at index %ld", (long)cnt);
             matchFound = YES;
             break;
         }
@@ -660,7 +660,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 + (NSString *)TeXStringWithHTMLString:(NSString *)htmlString;
 {
     const char *str = [htmlString UTF8String];
-    NSInteger ln = strlen(str);
+    int ln = strlen(str);
     FILE *freport = stdout;
     char *html_fn = NULL;
     BOOL in_math = NO;
@@ -1604,7 +1604,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     while (ptr < end) {
         if (*ptr > 127) {
             APPEND_PREVIOUS();
-            [result appendFormat:@"&#%d;", (NSInteger)*ptr];
+            [result appendFormat:@"&#%d;", (int)*ptr];
         } else if (*ptr == '&') {
             APPEND_PREVIOUS();
             [result appendString:@"&amp;"];

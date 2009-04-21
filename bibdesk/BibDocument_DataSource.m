@@ -119,7 +119,7 @@
 			NSInteger newRating = [object intValue];
 			if(newRating != oldRating) {
 				[pub setField:tcID toRatingValue:newRating];
-                [self userChangedField:tcID ofPublications:[NSArray arrayWithObject:pub] from:[NSArray arrayWithObject:[NSString stringWithFormat:@"%i", oldRating]] to:[NSArray arrayWithObject:[NSString stringWithFormat:@"%i", newRating]]];
+                [self userChangedField:tcID ofPublications:[NSArray arrayWithObject:pub] from:[NSArray arrayWithObject:[NSString stringWithFormat:@"%ld", (long)oldRating]] to:[NSArray arrayWithObject:[NSString stringWithFormat:@"%ld", (long)newRating]]];
 				[[pub undoManager] setActionName:NSLocalizedString(@"Change Rating", @"Undo action name")];
 			}
 		}else if([tcID isBooleanField]){
@@ -972,7 +972,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
                     if (url = [file URL]) {
                         fileName = [theBib displayTitle];
                         if (i > 0)
-                            fileName = [fileName stringByAppendingFormat:@"-%i", i];
+                            fileName = [fileName stringByAppendingFormat:@"-%ld", (long)i];
                         i++;
                         fullPath = [[basePath stringByAppendingPathComponent:fileName] stringByAppendingPathExtension:@"webloc"];
                         [fullPathDict setValue:url forKey:fullPath];
@@ -1234,7 +1234,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
                                          defaultButton:NSLocalizedString(@"OK", @"Button title")
                                        alternateButton:NSLocalizedString(@"Cancel", @"Button title")
                                            otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"This action will change the %@ field in %i items. Do you want to proceed?", @"Informative text in alert dialog"), [currentGroupField localizedFieldName], [groupedPublications count]];
+                             informativeTextWithFormat:NSLocalizedString(@"This action will change the %@ field in %ld items. Do you want to proceed?", @"Informative text in alert dialog"), [currentGroupField localizedFieldName], (long)[groupedPublications count]];
         [alert setShowsSuppressionButton:YES];
         NSInteger rv = [alert runModal];
         if ([alert suppressionButtonState] == NSOnState)
