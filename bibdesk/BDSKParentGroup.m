@@ -346,6 +346,8 @@
     [self removeChild:group];
 }
 
+- (BOOL)isValidDropTarget { return YES; }
+
 @end
 
 

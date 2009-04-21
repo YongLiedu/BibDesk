@@ -1424,25 +1424,14 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 
 #pragma mark OutlineView dragging destination
 
-static BDSKGroup *targetGroupFromDropItem(id item, NSInteger idx)
-{
-    BDSKParentGroup *parent = [item isParent] ? item : nil;
-    BDSKGroup *targetGroup = nil;
-    if (parent == nil)
-        targetGroup = item;
-    else if (idx != NSOutlineViewDropOnItemIndex && [parent numberOfChildren])
-        targetGroup = (BDSKGroup *)[parent childAtIndex:MIN((NSInteger)[parent numberOfChildren] - 1, idx)];
-
-    return [[targetGroup retain] autorelease];
-}
-
 - (NSDragOperation)outlineView:(NSOutlineView *)outlineView validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
     
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
     
     // bail out if no recognizable types
-    if (nil == type) return NSDragOperationNone;
+    if (nil == type)
+        return NSDragOperationNone;
     
     BOOL isDragFromMainTable = [[info draggingSource] isEqual:tableView];
     BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupOutlineView];
@@ -1456,6 +1445,10 @@ static BDSKGroup *targetGroupFromDropItem(id item, NSInteger idx)
         return NSDragOperationCopy;
     }
     
+    // we don't allow local drags unless they're targeted on a specific group
+    if (isDragFromDrawer || isDragFromGroupTable)
+        return NSDragOperationNone;
+    
     // drop a file or URL on external groups
     if ([item isEqual:[groups webGroup]] && idx == NSOutlineViewDropOnItemIndex && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil] containsObject:type]) {
         return NSDragOperationEvery;
@@ -1464,37 +1457,27 @@ static BDSKGroup *targetGroupFromDropItem(id item, NSInteger idx)
         return NSDragOperationLink;
     }
     
-    BDSKGroup *targetGroup = targetGroupFromDropItem(item, idx);
-    
-    if (nil == item && nil == targetGroup) {
-        // here we actually target the whole table, as we don't insert in a specific location
+    // we don't insert in a particular location
+    if (idx != NSOutlineViewDropOnItemIndex) {
+        if (nil == item || [(BDSKParentGroup *)item numberOfChildren] == 0) {
+            // here we actually target the whole table or the parent
+            [outlineView setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
+        } else {
+            // redirect to a drop on the closest child
+            item = [(BDSKParentGroup *)item childAtIndex:MIN((NSInteger)[(BDSKParentGroup *)item numberOfChildren] - 1, idx)];
+            [outlineView setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
+        }
         idx = NSOutlineViewDropOnItemIndex;
-        [outlineView setDropItem:nil dropChildIndex:NSOutlineViewDropOnItemIndex];    
-    } else if (targetGroup && idx != NSOutlineViewDropOnItemIndex) {
-        // redirect to a drop on the closest group
-        item = targetGroup;
-        idx = NSOutlineViewDropOnItemIndex;
-        [outlineView setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
     }
     
-    // no dropping on shared groups...
-    if (targetGroup && [targetGroup isValidDropTarget] == NO) {
+    // no dropping on shared groups or parents other than the static parent
+    if (item && [item isValidDropTarget] == NO)
         return NSDragOperationNone;
-    }
-    // we don't allow local drags unless they're target on a specific group
-    if (isDragFromDrawer || isDragFromGroupTable || type == nil || ([targetGroup isEqual:[groups libraryGroup]] && isDragFromMainTable))
-        return NSDragOperationNone;
-    
-    // disallow drops on parent groups, except for the static group
-    if (nil == targetGroup && item && item != [groups staticParent]) {
-        return NSDragOperationNone;
-    }
     
     if (isDragFromMainTable) {
-        if ([type isEqualToString:BDSKBibItemPboardType] && (targetGroup || item == [groups staticParent]))
-            return NSDragOperationLink;
-        else
+        if ([type isEqualToString:BDSKBibItemPboardType] == NO || item == nil || [item isEqual:[groups libraryGroup]])
             return NSDragOperationNone;
+        return NSDragOperationLink;
     } else if ([type isEqualToString:BDSKBibItemPboardType]) {
         return NSDragOperationCopy;
     } else {
@@ -1511,10 +1494,6 @@ static BDSKGroup *targetGroupFromDropItem(id item, NSInteger idx)
     BOOL isDragFromMainTable = [[info draggingSource] isEqual:tableView];
     BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupOutlineView];
     BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
-    
-    BDSKGroup *group = targetGroupFromDropItem(item, idx);
-    
-    BOOL shouldSelect = (nil == group || [[self selectedGroups] containsObject:group]);
     
     if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromExternalGroups && nil == item) {
         
@@ -1559,7 +1538,7 @@ static BDSKGroup *targetGroupFromDropItem(id item, NSInteger idx)
         
         NSEnumerator *urlEnum = [urls objectEnumerator];
         NSURL *url;
-        group = nil;
+        BDSKGroup *group = nil;
         
         while (url = [urlEnum nextObject]) {
             if ([url isFileURL] && [[[url path] pathExtension] isEqualToString:@"bdsksearch"]) {
@@ -1587,57 +1566,61 @@ static BDSKGroup *targetGroupFromDropItem(id item, NSInteger idx)
             return NO;
         }
         
-    } else if (isDragFromGroupTable || isDragFromDrawer || (nil != group && [group isValidDropTarget] == NO)) {
-        
-        // shouldn't get here at this point
-        return NO;
-        
-    } else if (isDragFromMainTable) {
-        
-        // we already have these publications, so we just want to add them to the group, not the document
-        pubs = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];\
-        
-    } else {
-        
-        if ([self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL] == NO)
-            return NO;
-        pubs = [self selectedPublications];     
-        
     }
     
+    if (idx != NSOutlineViewDropOnItemIndex) {
+        // we shouldn't get here at this point
+        if (item && [(BDSKParentGroup *)item numberOfChildren])
+            item = [(BDSKParentGroup *)item childAtIndex:MIN((NSInteger)[(BDSKParentGroup *)item numberOfChildren] - 1, idx)];
+        idx = NSOutlineViewDropOnItemIndex;
+    }
+    
+    if (isDragFromGroupTable || isDragFromDrawer || (item && [item isValidDropTarget] == NO)) {
+        // shouldn't get here at this point
+        return NO;
+    } else if (isDragFromMainTable) {
+        // we already have these publications, so we just want to add them to the group, not the document
+        pubs = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
+    } else {
+        if ([self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL])
+            pubs = [self selectedPublications];     
+    }
+    
+    if ([pubs count] == 0)
+        return NO;
+    
+    BOOL shouldSelect = (item == nil || [item isParent] || [[self selectedGroups] containsObject:item]);
+    
     // if dropping on the static group parent, create a new static groups using a common author name or keyword if available
-    if (nil == group && item == [groups staticParent] && [pubs count]) {
+    if ([item isEqual:[groups staticParent]]) {
         NSEnumerator *pubEnum = [pubs objectEnumerator];
         BibItem *pub = [pubEnum nextObject];
         NSMutableSet *auths = [[NSMutableSet alloc] initForFuzzyAuthors];
         NSMutableSet *keywords = [[NSMutableSet alloc] initWithSet:[pub groupsForField:BDSKKeywordsString]];
+        
         [auths setSet:[pub allPeople]];
-        while(pub = [pubEnum nextObject]){
+        while (pub = [pubEnum nextObject]) {
             [auths intersectSet:[pub allPeople]];
             [keywords intersectSet:[pub groupsForField:BDSKKeywordsString]];
         }
-        group = [[BDSKStaticGroup alloc] init];
-        if([auths count])
-            [(BDSKStaticGroup *)group setName:[[auths anyObject] displayName]];
-        else if([keywords count])
-            [(BDSKStaticGroup *)group setName:[keywords anyObject]];
+        
+        item = [[[BDSKStaticGroup alloc] init] autorelease];
+        if ([auths count])
+            [(BDSKStaticGroup *)item setName:[[auths anyObject] displayName]];
+        else if ([keywords count])
+            [(BDSKStaticGroup *)item setName:[keywords anyObject]];
         [auths release];
         [keywords release];
-        [groups addStaticGroup:(BDSKStaticGroup *)group];
-        [group release];
+        [groups addStaticGroup:(BDSKStaticGroup *)item];
     }
     
     // add to the group we're dropping on, /not/ the currently selected group; no need to add to all pubs group, though
-    if (group && [group isEqual:[groups libraryGroup]] == NO && item && [pubs count]) {
+    if (item && [item isParent] == NO && [item isEqual:[groups libraryGroup]] == NO) {
         
-        [self addPublications:pubs toGroup:group];
-        
-        /*
-         Reselect if necessary, or we default to selecting the all publications group 
-         (which is really annoying when creating a new pub by dropping a PDF on a group).
-         */
-        if(shouldSelect)
-            [self selectGroup:group];
+        [self addPublications:pubs toGroup:item];
+        // Reselect if necessary, or we default to selecting the all publications group (which is really annoying when creating a new pub by dropping a PDF on a group).
+        if (shouldSelect)
+            [self selectGroup:item];
     }
     
     return YES;
