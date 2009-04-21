@@ -45,18 +45,18 @@ extern NSString *BDSKParserErrorNotification;
 	id editor;
 	id publication;
     
-    int lineNumber;
+    NSInteger lineNumber;
     
     NSString *itemDescription;
-    int itemNumber;
+    NSInteger itemNumber;
     
     NSString *errorClassName;
     NSString *errorMessage;
     BOOL isIgnorableWarning;
 }
 
-+ (void)reportError:(NSString *)msg forFile:(NSString *)filePath line:(int)line;
-+ (void)reportWarning:(NSString *)msg forFile:(NSString *)filePath line:(int)line;
++ (void)reportError:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line;
++ (void)reportWarning:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line;
 
 - (NSString *)fileName;
 - (void)setFileName:(NSString *)newFileName;
@@ -67,14 +67,14 @@ extern NSString *BDSKParserErrorNotification;
 - (id)publication;
 - (void)setPublication:(id)newPublication;
 
-- (int)lineNumber;
-- (void)setLineNumber:(int)newLineNumber;
+- (NSInteger)lineNumber;
+- (void)setLineNumber:(NSInteger)newLineNumber;
 
 - (NSString *)itemDescription;
 - (void)setItemDescription:(NSString *)newItemDescription;
 
-- (int)itemNumber;
-- (void)setItemNumber:(int)newItemNumber;
+- (NSInteger)itemNumber;
+- (void)setItemNumber:(NSInteger)newItemNumber;
 
 - (NSString *)errorClassName;
 - (void)setErrorClassName:(NSString *)newErrorClassName;

@@ -64,7 +64,7 @@ NSString *BDSKParserErrorNotification = @"BDSKParserErrorNotification";
     [super dealloc];
 }
 
-+ (void)reportError:(NSString *)msg forFile:(NSString *)filePath line:(int)line;
++ (void)reportError:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line;
 {
     id error = [[self alloc] init];
     // @@ localizing this is probably dangerous
@@ -76,7 +76,7 @@ NSString *BDSKParserErrorNotification = @"BDSKParserErrorNotification";
     [error release];
 }
 
-+ (void)reportWarning:(NSString *)msg forFile:(NSString *)filePath line:(int)line;
++ (void)reportWarning:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line;
 {
     id error = [[self alloc] init];
     // @@ localizing this is probably dangerous
@@ -125,11 +125,11 @@ NSString *BDSKParserErrorNotification = @"BDSKParserErrorNotification";
     }
 }
 
-- (int)lineNumber {
+- (NSInteger)lineNumber {
     return lineNumber;
 }
 
-- (void)setLineNumber:(int)newLineNumber {
+- (void)setLineNumber:(NSInteger)newLineNumber {
     lineNumber = newLineNumber;
 }
 
@@ -144,11 +144,11 @@ NSString *BDSKParserErrorNotification = @"BDSKParserErrorNotification";
     }
 }
 
-- (int)itemNumber {
+- (NSInteger)itemNumber {
     return itemNumber;
 }
 
-- (void)setItemNumber:(int)newItemNumber {
+- (void)setItemNumber:(NSInteger)newItemNumber {
     itemNumber = newItemNumber;
 }
 
