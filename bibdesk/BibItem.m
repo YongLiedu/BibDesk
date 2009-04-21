@@ -1468,43 +1468,32 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     return [string length] ? string : nil;
 }
 
-static inline 
-Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind, NSUInteger options, Boolean lossy)
-{    
-    if(BDIsEmptyString((CFStringRef)theString))
-        return FALSE;
-    
-    CFMutableStringRef mutableCopy = CFStringCreateMutableCopy(CFAllocatorGetDefault(), 0, (CFStringRef)theString);
-    BDDeleteCharactersInCharacterSet(mutableCopy, (CFCharacterSetRef)[NSCharacterSet curlyBraceCharacterSet]);
-    
-    if(lossy){
-        CFStringNormalize(mutableCopy, kCFStringNormalizationFormD);
-        BDDeleteCharactersInCharacterSet(mutableCopy, CFCharacterSetGetPredefined(kCFCharacterSetNonBase));
-    }
-    
-    Boolean found = CFStringFindWithOptions(mutableCopy, (CFStringRef)stringToFind, CFRangeMake(0, CFStringGetLength(mutableCopy)), options, NULL);
-    
-    CFRelease(mutableCopy);
-    return found;
-}
-
-- (BOOL)matchesSubstring:(NSString *)substring withOptions:(NSUInteger)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
+- (BOOL)matchesSubstring:(NSString *)substring inField:(NSString *)field;
 {
     SEL selector = (void *)CFDictionaryGetValue(selectorTable, (CFStringRef)field);
-    if(NULL == selector){
-        
-        if([field isBooleanField]){
+    if (NULL == selector) {
+        if ([field isBooleanField])
             return [self boolValueOfField:field] == [substring booleanValue];
-        } else if([field isTriStateField]){
+        else if([field isTriStateField])
             return [self triStateValueOfField:field] == [substring triStateValue];
-        } else if([field isRatingField]){
+        else if([field isRatingField])
             return [self ratingValueOfField:field] == [substring intValue];
-        }
     }
 
     // must be a string of some kind...
     NSString *value = NULL == selector ? [self stringValueOfField:field] : [self performSelector:selector];
-    return stringContainsLossySubstring(value, substring, searchOptions, flag);
+    if ([NSString isEmptyString:value])
+        return NO;
+    
+    CFMutableStringRef mutableCopy = CFStringCreateMutableCopy(CFAllocatorGetDefault(), 0, (CFStringRef)value);
+    BDDeleteCharactersInCharacterSet(mutableCopy, (CFCharacterSetRef)[NSCharacterSet curlyBraceCharacterSet]);
+    CFStringNormalize(mutableCopy, kCFStringNormalizationFormD);
+    BDDeleteCharactersInCharacterSet(mutableCopy, CFCharacterSetGetPredefined(kCFCharacterSetNonBase));
+    
+    Boolean found = CFStringFindWithOptions(mutableCopy, (CFStringRef)substring, CFRangeMake(0, CFStringGetLength(mutableCopy)), kCFCompareCaseInsensitive, NULL);
+    CFRelease(mutableCopy);
+    
+    return found;
 }
 
 - (NSDictionary *)searchIndexInfo{

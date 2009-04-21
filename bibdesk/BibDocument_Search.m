@@ -217,7 +217,7 @@ Ensure that views are always ordered vertically from top to bottom as
     NSMutableArray *results = [NSMutableArray arrayWithCapacity:100];
     for (i = 0; i < iMax; i++) {
         BibItem *pub = [publications objectAtIndex:i];
-        if ([pub matchesSubstring:searchString withOptions:NSCaseInsensitiveSearch inField:field removeDiacritics:YES])
+        if ([pub matchesSubstring:searchString inField:field])
             [results addObject:pub];
     }
     return results;

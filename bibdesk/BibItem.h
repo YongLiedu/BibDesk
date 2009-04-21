@@ -681,16 +681,13 @@ enum {
 - (NSArray *)allFieldNames;
 
 /*!
-    @method     matchesSubstring:withOptions:inField:removeDiacritics:
+    @method     matchesSubstring:inField:
     @abstract   Used for searching methods; handles various field types.
     @discussion (comprehensive description)
-    @param      substring The string to search for, which may be a string representation of a boolean or date
-    @param      searchOptions NSString search option (e.g. NSCaseInsensitiveSearch)
-    @param      field The BibItem field
-    @param      flag Whether a lossy search is to be performed (by removing diacritic marks)
+    @param      substring The string to search for, which may be a string representation of a boolean or date    @param      field The BibItem field
     @result     (description)
 */
-- (BOOL)matchesSubstring:(NSString *)substring withOptions:(NSUInteger)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
+- (BOOL)matchesSubstring:(NSString *)substring inField:(NSString *)field;
 
 - (NSDictionary *)searchIndexInfo;
 - (NSDictionary *)metadataCacheInfoForUpdate:(BOOL)update;

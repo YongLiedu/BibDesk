@@ -111,7 +111,7 @@ static CFMutableDictionaryRef scrollViewPlacards = NULL;
     original_tile = (void (*)(id, SEL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(tile), @selector(replacement_tile));
     
     // dictionary doesn't retain keys, so no retain cycles; pointer equality used to compare views
-    scrollViewPlacards = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKNonOwnedObjectDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    scrollViewPlacards = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, NULL, &kCFTypeDictionaryValueCallBacks);
 }
 
 - (NSArray *)placards {
