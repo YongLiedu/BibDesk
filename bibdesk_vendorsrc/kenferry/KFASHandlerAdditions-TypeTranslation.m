@@ -280,7 +280,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     else
     {
         [NSException raise:NSInvalidArgumentException 
-                    format:@"Cannot create an NSAppleEventDescriptor for float with %d bytes of data.",  bytes];
+                    format:@"Cannot create an NSAppleEventDescriptor for float with %lu bytes of data.", (unsigned long)bytes];
     }
     
     return resultDesc;
@@ -477,7 +477,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     return resultNumber;
 }
 
-+ (id) kfNumberWithSignedIntP:(void *)int_p byteCount:(unsigned int)bytes
++ (id) kfNumberWithSignedIntP:(void *)int_p byteCount:(NSUInteger)bytes
 {
     NSNumber *resultNumber = nil;
     
@@ -504,7 +504,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     else 
     {
         [NSException raise:NSInvalidArgumentException 
-                    format:@"NSNumber kfNumberWithSignedIntP:byteCount: number with %i bytes not supported.", bytes];
+                    format:@"NSNumber kfNumberWithSignedIntP:byteCount: number with %lu bytes not supported.", (unsigned long)bytes];
     }    
     
     return resultNumber;
@@ -537,7 +537,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     else 
     {
         [NSException raise:NSInvalidArgumentException 
-                    format:@"NSNumber numberWithUnsignedInt:byteCount: number with %i bytes not supported.", bytes];
+                    format:@"NSNumber numberWithUnsignedInt:byteCount: number with %lu bytes not supported.", (unsigned long)bytes];
     }
     
     return resultNumber;
@@ -558,7 +558,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     else 
     {
         [NSException raise:NSInvalidArgumentException 
-                    format:@"NSNumber numberWithFloat:byteCount: floating point number with %i bytes not supported.", bytes];
+                    format:@"NSNumber numberWithFloat:byteCount: floating point number with %lu bytes not supported.", (unsigned long)bytes];
     }
     
     return resultNumber;
