@@ -63,15 +63,6 @@ CFHashCode BDSKCaseInsensitiveStringHash(const void *value) {
     return BDCaseInsensitiveStringHash(value);
 }
 
-const CFDictionaryKeyCallBacks kBDSKNonOwnedObjectDictionaryKeyCallBacks = {
-    0,    // version
-    NULL, // retain
-    NULL, // release
-    BDSKNSObjectCopyDescription,
-    NULL, // equal
-    NULL  // hash
-};
-
 const CFDictionaryValueCallBacks kBDSKSELDictionaryValueCallBacks = {
     0,    // version
     NULL, // retain
