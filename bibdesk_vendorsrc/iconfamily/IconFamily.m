@@ -1056,7 +1056,7 @@ static BOOL IconFamilyGetFSRefCreatingFile(NSString *path, FSRef *fsRef, BOOL cr
 
 @implementation IconFamily (Internals)
 
-+ (NSImage*) resampleImage:(NSImage*)image toIconWidth:(NSinteger)iconWidth usingImageInterpolation:(NSImageInterpolation)imageInterpolation
++ (NSImage*) resampleImage:(NSImage*)image toIconWidth:(NSInteger)iconWidth usingImageInterpolation:(NSImageInterpolation)imageInterpolation
 {
     NSGraphicsContext* graphicsContext;
     BOOL wasAntialiasing;
