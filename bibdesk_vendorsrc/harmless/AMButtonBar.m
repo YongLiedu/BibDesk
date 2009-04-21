@@ -131,12 +131,12 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 #pragma mark 		public methods
 //====================================================================
 
-- (AMButtonBarItem *)itemAtIndex:(int)idx
+- (AMButtonBarItem *)itemAtIndex:(NSInteger)idx
 {
 	return [items objectAtIndex:idx];
 }
 
-- (void)insertItem:(AMButtonBarItem *)item atIndex:(int)idx
+- (void)insertItem:(AMButtonBarItem *)item atIndex:(NSInteger)idx
 {
 	[items insertObject:item atIndex:idx];
     [item setTarget:self];
@@ -153,7 +153,7 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 	[self setNeedsDisplay:YES];
 }
 
-- (void)removeItemAtIndex:(int)idx
+- (void)removeItemAtIndex:(NSInteger)idx
 {
 	[self removeItem:[items objectAtIndex:idx]];
 }

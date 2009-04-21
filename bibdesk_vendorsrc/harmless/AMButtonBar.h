@@ -36,13 +36,13 @@ extern NSString *const AMButtonBarSelectionDidChangeNotification;
 - (NSString *)selectedItemIdentifier;
 - (NSArray *)selectedItemIdentifiers;
 
-- (AMButtonBarItem *)itemAtIndex:(int)index;
+- (AMButtonBarItem *)itemAtIndex:(NSInteger)index;
 - (void)didClickItem:(AMButtonBarItem *)item;
 
-- (void)insertItem:(AMButtonBarItem *)item atIndex:(int)index;
+- (void)insertItem:(AMButtonBarItem *)item atIndex:(NSInteger)index;
 
 - (void)removeItem:(AMButtonBarItem *)item;
-- (void)removeItemAtIndex:(int)index;
+- (void)removeItemAtIndex:(NSInteger)index;
 - (void)removeAllItems;
 
 - (void)selectItemWithIdentifier:(NSString *)identifier;
