@@ -43,15 +43,15 @@ static BOOL IconFamilyGetFSRefCreatingFile(NSString *path, FSRef *fsRef, BOOL cr
 
 @interface IconFamily (Internals)
 
-+ (NSImage*) resampleImage:(NSImage*)image toIconWidth:(int)width usingImageInterpolation:(NSImageInterpolation)imageInterpolation;
++ (NSImage*) resampleImage:(NSImage*)image toIconWidth:(NSInteger)width usingImageInterpolation:(NSImageInterpolation)imageInterpolation;
 
-+ (Handle) get32BitDataFromBitmapImageRep:(NSBitmapImageRep*)bitmapImageRep requiredPixelSize:(int)requiredPixelSize;
++ (Handle) get32BitDataFromBitmapImageRep:(NSBitmapImageRep*)bitmapImageRep requiredPixelSize:(NSInteger)requiredPixelSize;
 
-+ (Handle) get8BitDataFromBitmapImageRep:(NSBitmapImageRep*)bitmapImageRep requiredPixelSize:(int)requiredPixelSize;
++ (Handle) get8BitDataFromBitmapImageRep:(NSBitmapImageRep*)bitmapImageRep requiredPixelSize:(NSInteger)requiredPixelSize;
 
-+ (Handle) get8BitMaskFromBitmapImageRep:(NSBitmapImageRep*)bitmapImageRep requiredPixelSize:(int)requiredPixelSize;
++ (Handle) get8BitMaskFromBitmapImageRep:(NSBitmapImageRep*)bitmapImageRep requiredPixelSize:(NSInteger)requiredPixelSize;
 
-+ (Handle) get1BitMaskFromBitmapImageRep:(NSBitmapImageRep*)bitmapImageRep requiredPixelSize:(int)requiredPixelSize;
++ (Handle) get1BitMaskFromBitmapImageRep:(NSBitmapImageRep*)bitmapImageRep requiredPixelSize:(NSInteger)requiredPixelSize;
 
 - (BOOL) addResourceType:(OSType)type asResID:(int)resID;
 
@@ -384,7 +384,7 @@ static BOOL IconFamilyGetFSRefCreatingFile(NSString *path, FSRef *fsRef, BOOL cr
 - (NSBitmapImageRep*) bitmapImageRepWithAlphaForIconFamilyElement:(OSType)elementType;
 {
     NSBitmapImageRep* bitmapImageRep;
-    int pixelsWide;
+    NSInteger pixelsWide;
     Handle hRawBitmapData;
     Handle hRawMaskData = NULL;
     OSType maskElementType;
@@ -1056,7 +1056,7 @@ static BOOL IconFamilyGetFSRefCreatingFile(NSString *path, FSRef *fsRef, BOOL cr
 
 @implementation IconFamily (Internals)
 
-+ (NSImage*) resampleImage:(NSImage*)image toIconWidth:(int)iconWidth usingImageInterpolation:(NSImageInterpolation)imageInterpolation
++ (NSImage*) resampleImage:(NSImage*)image toIconWidth:(NSinteger)iconWidth usingImageInterpolation:(NSImageInterpolation)imageInterpolation
 {
     NSGraphicsContext* graphicsContext;
     BOOL wasAntialiasing;
@@ -1133,25 +1133,25 @@ static BOOL IconFamilyGetFSRefCreatingFile(NSString *path, FSRef *fsRef, BOOL cr
     return [newImage autorelease];
 }
 
-+ (Handle) get32BitDataFromBitmapImageRep:(NSBitmapImageRep*)bitmapImageRep requiredPixelSize:(int)requiredPixelSize
++ (Handle) get32BitDataFromBitmapImageRep:(NSBitmapImageRep*)bitmapImageRep requiredPixelSize:(NSInteger)requiredPixelSize
 {
     Handle hRawData;
     unsigned char* pRawData;
     Size rawDataSize;
     unsigned char* pSrc;
     unsigned char* pDest;
-    int x, y;
+    NSInteger x, y;
     unsigned char alphaByte;
     float oneOverAlpha;
     
     // Get information about the bitmapImageRep.
-    int pixelsWide      = [bitmapImageRep pixelsWide];
-    int pixelsHigh      = [bitmapImageRep pixelsHigh];
-    int bitsPerSample   = [bitmapImageRep bitsPerSample];
-    int samplesPerPixel = [bitmapImageRep samplesPerPixel];
-    int bitsPerPixel    = [bitmapImageRep bitsPerPixel];
+    NSInteger pixelsWide      = [bitmapImageRep pixelsWide];
+    NSInteger pixelsHigh      = [bitmapImageRep pixelsHigh];
+    NSInteger bitsPerSample   = [bitmapImageRep bitsPerSample];
+    NSInteger samplesPerPixel = [bitmapImageRep samplesPerPixel];
+    NSInteger bitsPerPixel    = [bitmapImageRep bitsPerPixel];
     BOOL isPlanar       = [bitmapImageRep isPlanar];
-    int bytesPerRow     = [bitmapImageRep bytesPerRow];
+    NSInteger bytesPerRow     = [bitmapImageRep bytesPerRow];
     unsigned char* bitmapData = [bitmapImageRep bitmapData];
 
     // Make sure bitmap has the required dimensions.
@@ -1227,23 +1227,23 @@ static BOOL IconFamilyGetFSRefCreatingFile(NSString *path, FSRef *fsRef, BOOL cr
     return hRawData;
 }
 
-+ (Handle) get8BitDataFromBitmapImageRep:(NSBitmapImageRep*)bitmapImageRep requiredPixelSize:(int)requiredPixelSize
++ (Handle) get8BitDataFromBitmapImageRep:(NSBitmapImageRep*)bitmapImageRep requiredPixelSize:(NSInteger)requiredPixelSize
 {
     Handle hRawData;
     unsigned char* pRawData;
     Size rawDataSize;
     unsigned char* pSrc;
     unsigned char* pDest;
-    int x, y;
+    NSInteger x, y;
 	
     // Get information about the bitmapImageRep.
-    int pixelsWide      = [bitmapImageRep pixelsWide];
-    int pixelsHigh      = [bitmapImageRep pixelsHigh];
-    int bitsPerSample   = [bitmapImageRep bitsPerSample];
-    int samplesPerPixel = [bitmapImageRep samplesPerPixel];
-    int bitsPerPixel    = [bitmapImageRep bitsPerPixel];
+    NSInteger pixelsWide      = [bitmapImageRep pixelsWide];
+    NSInteger pixelsHigh      = [bitmapImageRep pixelsHigh];
+    NSInteger bitsPerSample   = [bitmapImageRep bitsPerSample];
+    NSInteger samplesPerPixel = [bitmapImageRep samplesPerPixel];
+    NSInteger bitsPerPixel    = [bitmapImageRep bitsPerPixel];
     BOOL isPlanar       = [bitmapImageRep isPlanar];
-    int bytesPerRow     = [bitmapImageRep bytesPerRow];
+    NSInteger bytesPerRow     = [bitmapImageRep bytesPerRow];
     unsigned char* bitmapData = [bitmapImageRep bitmapData];
     
     // Make sure bitmap has the required dimensions.
@@ -1317,23 +1317,23 @@ static BOOL IconFamilyGetFSRefCreatingFile(NSString *path, FSRef *fsRef, BOOL cr
     return hRawData;
 }
 
-+ (Handle) get8BitMaskFromBitmapImageRep:(NSBitmapImageRep*)bitmapImageRep requiredPixelSize:(int)requiredPixelSize
++ (Handle) get8BitMaskFromBitmapImageRep:(NSBitmapImageRep*)bitmapImageRep requiredPixelSize:(NSInteger)requiredPixelSize
 {
     Handle hRawData;
     unsigned char* pRawData;
     Size rawDataSize;
     unsigned char* pSrc;
     unsigned char* pDest;
-    int x, y;
+    NSInteger x, y;
     
     // Get information about the bitmapImageRep.
-    int pixelsWide      = [bitmapImageRep pixelsWide];
-    int pixelsHigh      = [bitmapImageRep pixelsHigh];
-    int bitsPerSample   = [bitmapImageRep bitsPerSample];
-    int samplesPerPixel = [bitmapImageRep samplesPerPixel];
-    int bitsPerPixel    = [bitmapImageRep bitsPerPixel];
+    NSInteger pixelsWide      = [bitmapImageRep pixelsWide];
+    NSInteger pixelsHigh      = [bitmapImageRep pixelsHigh];
+    NSInteger bitsPerSample   = [bitmapImageRep bitsPerSample];
+    NSInteger samplesPerPixel = [bitmapImageRep samplesPerPixel];
+    NSInteger bitsPerPixel    = [bitmapImageRep bitsPerPixel];
     BOOL isPlanar       = [bitmapImageRep isPlanar];
-    int bytesPerRow     = [bitmapImageRep bytesPerRow];
+    NSInteger bytesPerRow     = [bitmapImageRep bytesPerRow];
     unsigned char* bitmapData = [bitmapImageRep bitmapData];
 
     // Make sure bitmap has the required dimensions.
@@ -1394,24 +1394,24 @@ static BOOL IconFamilyGetFSRefCreatingFile(NSString *path, FSRef *fsRef, BOOL cr
 }
 
 // NOTE: This method hasn't been fully tested yet.
-+ (Handle) get1BitMaskFromBitmapImageRep:(NSBitmapImageRep*)bitmapImageRep requiredPixelSize:(int)requiredPixelSize
++ (Handle) get1BitMaskFromBitmapImageRep:(NSBitmapImageRep*)bitmapImageRep requiredPixelSize:(NSInteger)requiredPixelSize
 {
     Handle hRawData;
     unsigned char* pRawData;
     Size rawDataSize;
     unsigned char* pSrc;
     unsigned char* pDest;
-    int x, y;
+    NSInteger x, y;
     unsigned char maskByte;
     
     // Get information about the bitmapImageRep.
-    int pixelsWide      = [bitmapImageRep pixelsWide];
-    int pixelsHigh      = [bitmapImageRep pixelsHigh];
-    int bitsPerSample   = [bitmapImageRep bitsPerSample];
-    int samplesPerPixel = [bitmapImageRep samplesPerPixel];
-    int bitsPerPixel    = [bitmapImageRep bitsPerPixel];
+    NSInteger pixelsWide      = [bitmapImageRep pixelsWide];
+    NSInteger pixelsHigh      = [bitmapImageRep pixelsHigh];
+    NSInteger bitsPerSample   = [bitmapImageRep bitsPerSample];
+    NSInteger samplesPerPixel = [bitmapImageRep samplesPerPixel];
+    NSInteger bitsPerPixel    = [bitmapImageRep bitsPerPixel];
     BOOL isPlanar       = [bitmapImageRep isPlanar];
-    int bytesPerRow     = [bitmapImageRep bytesPerRow];
+    NSInteger bytesPerRow     = [bitmapImageRep bytesPerRow];
     unsigned char* bitmapData = [bitmapImageRep bitmapData];
 	
     // Make sure bitmap has the required dimensions.
