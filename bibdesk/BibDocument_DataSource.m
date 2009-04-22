@@ -1283,11 +1283,11 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     BOOL wasSeparator = YES;
 	
 	while (--i >= 0) {
-		NSMenuItem *menuItem = (NSMenuItem*)[menu itemAtIndex:i];
-		if ([self validateMenuItem:item] == NO || ((wasSeparator || i == 0) && [item isSeparatorItem]) || ([item submenu] && menuHasNoValidItems(self, [item submenu])))
-			[menu removeItem:item];
+		NSMenuItem *menuItem = [menu itemAtIndex:i];
+		if ([self validateMenuItem:menuItem] == NO || ((wasSeparator || i == 0) && [menuItem isSeparatorItem]))
+			[menu removeItem:menuItem];
         else
-            wasSeparator = [item isSeparatorItem];
+            wasSeparator = [menuItem isSeparatorItem];
 	}
 	while ([menu numberOfItems] > 0 && [(NSMenuItem*)[menu itemAtIndex:0] isSeparatorItem])	
 		[menu removeItemAtIndex:0];
