@@ -41,13 +41,13 @@ enum {
 	AGRegex *regex;
 	NSString *string;
 	int *matchv;
-	int count;
+	NSInteger count;
 }
 
 /*!
 @method count
 The number of capturing subpatterns, including the pattern itself. */
-- (int)count;
+- (NSInteger)count;
 
 /*!
 @method group
@@ -57,7 +57,7 @@ Returns the part of the target string that matched the pattern. */
 /*!
 @method groupAtIndex:
 Returns the part of the target string that matched the subpattern at the given index or nil if it wasn't matched. The subpatterns are indexed in order of their opening parentheses, 0 is the entire pattern, 1 is the first capturing subpattern, and so on. */
-- (NSString *)groupAtIndex:(int)idx;
+- (NSString *)groupAtIndex:(NSInteger)idx;
 
 /*!
 @method groupNamed:
@@ -72,7 +72,7 @@ Returns the range of the target string that matched the pattern. */
 /*!
 @method rangeAtIndex:
 Returns the range of the target string that matched the subpattern at the given index or {NSNotFound, 0} if it wasn't matched. The subpatterns are indexed in order of their opening parentheses, 0 is the entire pattern, 1 is the first capturing subpattern, and so on. */
-- (NSRange)rangeAtIndex:(int)idx;
+- (NSRange)rangeAtIndex:(NSInteger)idx;
 
 /*!
 @method rangeNamed:
@@ -149,7 +149,7 @@ In Perl, this would return "R", undef, "p", "a", "t", undef, "r". Unfortunately,
 @interface AGRegex : NSObject {
 	void *regex;
 	void *extra;
-	int groupCount;
+	NSInteger groupCount;
 }
 
 /*!
@@ -160,7 +160,7 @@ Creates a new regex using the given pattern string. Returns nil if the pattern s
 /*!
 @method regexWithPattern:options:
 Creates a new regex using the given pattern string and option flags. Returns nil if the pattern string is invalid. */
-+ (id)regexWithPattern:(NSString *)pat options:(int)opts;
++ (id)regexWithPattern:(NSString *)pat options:(NSInteger)opts;
 
 
 /*!
@@ -171,7 +171,7 @@ Initializes the regex using the given pattern string. Returns nil if the pattern
 /*!
 @method initWithPattern:options:
 Initializes the regex using the given pattern string and option flags. Returns nil if the pattern string is invalid. */
-- (id)initWithPattern:(NSString *)pat options:(int)opts;
+- (id)initWithPattern:(NSString *)pat options:(NSInteger)opts;
 
 /*!
 @method findInString:
@@ -213,7 +213,7 @@ Calls replaceWithString:inString:limit: with no limit. */
 Returns the string created by replacing occurrences of the regex in the target string with the replacement string. If the limit is positive, no more than that many replacements will be made.
 
 Captured subpatterns can be interpolated into the replacement string using the syntax $x or ${x} where x is the index or name of the subpattern. $0 and $&amp; both refer to the entire pattern. Additionally, the case modifier sequences \U...\E, \L...\E, \u, and \l are allowed in the replacement string. All other escape sequences are handled literally. */
-- (NSString *)replaceWithString:(NSString *)rep inString:(NSString *)str limit:(int)limit;
+- (NSString *)replaceWithString:(NSString *)rep inString:(NSString *)str limit:(NSInteger)limit;
 
 /*!
 @method splitString:
@@ -223,6 +223,6 @@ Call splitString:limit: with no limit. */
 /*!
 @method splitString:limit:
 Returns an array of strings created by splitting the target string at each occurrence of the pattern. If the limit is positive, no more than that many splits will be made. If there are captured subpatterns, they are returned in the array.  */
-- (NSArray *)splitString:(NSString *)str limit:(int)lim;
+- (NSArray *)splitString:(NSString *)str limit:(NSInteger)lim;
 
 @end
