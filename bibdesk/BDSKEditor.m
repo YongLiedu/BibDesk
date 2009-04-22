@@ -2181,8 +2181,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     // If it is not our item or his crossref parent, we don't care, but our parent may have changed his cite key
 	if (sender != publication && NO == parentDidChange) {
         // though a change of the cite key of another item may change the duplicate status
-        if ([changeKey isEqualToString:BDSKCiteKeyString] &&
-            [[publication citeKey] caseInsensitiveCompare:[userInfo objectForKey:@"oldValue"]] == NSOrderedSame)
+        if ([changeKey isEqualToString:BDSKCiteKeyString])
             [self updateCiteKeyDuplicateWarning];
 		return;
 	}
