@@ -39,10 +39,11 @@
 #import <Cocoa/Cocoa.h>
 
 
-typedef enum {
+enum {
 	BDSKScrollLeftButton = 0,
 	BDSKScrollRightButton = 1
-} BDSKScrollButton;
+};
+typedef NSUInteger BDSKScrollButton;
 
 
 @interface BDSKScrollableTextField : NSTextField {

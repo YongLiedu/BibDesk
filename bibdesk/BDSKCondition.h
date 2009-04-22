@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 
 // this should correspond to the tags of the items in the popup
-typedef enum {
+enum {
 	BDSKGroupContain = 0,
 	BDSKGroupNotContain,
 	BDSKContain,
@@ -50,10 +50,11 @@ typedef enum {
 	BDSKEndWith,
 	BDSKSmaller,
 	BDSKLarger
-} BDSKStringComparison;
+};
+typedef NSUInteger BDSKStringComparison;
 
 // this should correspond to the tags of the items in the popup
-typedef enum {
+enum {
 	BDSKCountEqual = 0,
 	BDSKCountNotEqual,
 	BDSKCountLarger,
@@ -62,10 +63,11 @@ typedef enum {
 	BDSKAttachmentNotContain,
 	BDSKAttachmentStartWith,
 	BDSKAttachmentEndWith
-} BDSKAttachmentComparison;
+};
+typedef NSUInteger BDSKAttachmentComparison;
 
 // this should correspond to the tags of the items in the popup
-typedef enum {
+enum {
     BDSKToday = 0, 
     BDSKYesterday, 
     BDSKThisWeek, 
@@ -78,7 +80,8 @@ typedef enum {
     BDSKAfterDate, 
     BDSKBeforeDate, 
     BDSKInDateRange
-} BDSKDateComparison;
+};
+typedef NSUInteger BDSKDateComparison;
 
 enum {
     BDSKDateField,

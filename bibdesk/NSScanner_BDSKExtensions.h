@@ -41,7 +41,7 @@
 
 @interface NSScanner (BDSKExtensions)
 
-- (BOOL)scanUnsignedInt:(NSUInteger *)unsignedValue;
+- (BOOL)scanUnsignedInteger:(NSUInteger *)unsignedValue;
 
 - (BOOL)scanCharacter:(unichar *)ch;
 - (BOOL)peekCharacter:(unichar *)ch;

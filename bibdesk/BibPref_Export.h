@@ -39,10 +39,11 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKPreferencePane.h"
 
-typedef enum {
+enum {
     BDSKExportTemplateList = 0,
     BDSKServiceTemplateList = 1
-} BDSKTemplateListType;
+};
+typedef NSUInteger BDSKTemplateListType;
 
 @interface BibPref_Export : BDSKPreferencePane {
     IBOutlet NSOutlineView *outlineView;

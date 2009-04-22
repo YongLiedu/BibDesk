@@ -39,11 +39,12 @@
 #import <Cocoa/Cocoa.h>
 
 
-typedef enum{
+enum {
     BSN_STRING = 0,
     BSN_NUMBER = 1,
     BSN_MACRODEF = 2
-} BDSKStringNodeType;
+};
+typedef NSUInteger BDSKStringNodeType;
 
 @interface BDSKStringNode : NSObject <NSCopying, NSCoding>{
     @public

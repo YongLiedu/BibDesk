@@ -145,7 +145,7 @@
 								[scanner setScanLocation:[scanner scanLocation]+1];
 								numAuth = (NSUInteger)(nextChar - '0');
 								// scan for #chars per name
-								if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 0;
+								if (NO == [scanner scanUnsignedInteger:&numChars]) numChars = 0;
 							}
 						}
 					}
@@ -262,7 +262,7 @@
                         if (isLocalFile) {
                             title = [title stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
                         }
-                        if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 0;
+                        if (NO == [scanner scanUnsignedInteger:&numChars]) numChars = 0;
                         if (numChars > 0 && [title length] > numChars) {
                             [parsedStr appendString:[title substringToIndex:numChars]];
                         } else {
@@ -285,7 +285,7 @@
                             smallWordLength = 0;
                         [scanner scanString:@"]" intoString:NULL];
                     }
-					if (NO == [scanner scanUnsignedInt:&numWords]) numWords = 0;
+					if (NO == [scanner scanUnsignedInteger:&numWords]) numWords = 0;
 					if ([NSString isEmptyString:title] == NO) {
 						NSMutableArray *words = [NSMutableArray array];
                         NSString *word;
@@ -376,7 +376,7 @@
 					}
 					NSString *keywordsString = [pub stringValueOfField:BDSKKeywordsString];
 					NSUInteger i, numWords = 0;
-                    if (NO == [scanner scanUnsignedInt:&numWords]) numWords = 0;
+                    if (NO == [scanner scanUnsignedInteger:&numWords]) numWords = 0;
 					if ([NSString isEmptyString:keywordsString] == NO) {
 						NSMutableArray *keywords = [NSMutableArray array];
                         NSString *keyword;
@@ -484,7 +484,7 @@
 							[scanner scanString:@"]" intoString:NULL];
 						}
                         
-						if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 0;
+						if (NO == [scanner scanUnsignedInteger:&numChars]) numChars = 0;
 						if (NO == [fieldName isEqualToString:BDSKCiteKeyString] &&
 							[key isEqualToString:BDSKCiteKeyString]) {
 							value = [pub citeKey];
@@ -530,7 +530,7 @@
                         }
                         NSString *wordsString = [pub stringValueOfField:key];
                         NSUInteger i, numWords = 0;
-                        if (NO == [scanner scanUnsignedInt:&numWords]) numWords = 0;
+                        if (NO == [scanner scanUnsignedInteger:&numWords]) numWords = 0;
                         if ([NSString isEmptyString:wordsString] == NO) {
                             NSMutableArray *words = [NSMutableArray array];
                             NSString *word;
@@ -572,7 +572,7 @@
                     if ([scanner scanString:@"{" intoString:NULL] &&
 						[scanner scanUpToString:@"}" intoString:&key] &&
 						[scanner scanString:@"}" intoString:NULL]) {
-						if (NO == [scanner scanUnsignedInt:&smallWordLength]) smallWordLength = 3;
+						if (NO == [scanner scanUnsignedInteger:&smallWordLength]) smallWordLength = 3;
 				
 						value = [[pub stringValueOfField:key] acronymValueIgnoringWordLength:smallWordLength];
 						value = [self stringByStrictlySanitizingString:value forField:fieldName inFileType:[pub fileType]];
@@ -611,7 +611,7 @@
                                 }
                             }
                         }
-						if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 0;
+						if (NO == [scanner scanUnsignedInteger:&numChars]) numChars = 0;
                         intValue = [pub intValueOfField:key];
                         value = (intValue == 0 ? noValue : (intValue == 1 ? yesValue : mixedValue));
                         if (numChars > 0 && [value length] > numChars) {
@@ -635,7 +635,7 @@
 						[scanner scanUpToString:@"}" intoString:&key] &&
 						[scanner scanString:@"}" intoString:NULL]) {
 					
-						if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 0;
+						if (NO == [scanner scanUnsignedInteger:&numChars]) numChars = 0;
                         value = [[pub owner] documentInfoForKey:key];
 						if ([NSString isEmptyString:value] == NO) {
 							value = [self stringByStrictlySanitizingString:value forField:fieldName inFileType:[pub fileType]];
@@ -655,7 +655,7 @@
 				{
                 	// random lowercase letters
 					NSUInteger numChars = 1;
-                    if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 1;
+                    if (NO == [scanner scanUnsignedInteger:&numChars]) numChars = 1;
 					while (numChars-- > 0) {
 						[parsedStr appendFormat:@"%c",'a' + (char)(rand() % 26)];
 					}
@@ -665,7 +665,7 @@
 				{
                 	// random uppercase letters
 					NSUInteger numChars = 1;
-					if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 1;
+					if (NO == [scanner scanUnsignedInteger:&numChars]) numChars = 1;
 					while (numChars-- > 0) {
 						[parsedStr appendFormat:@"%c",'A' + (char)(rand() % 26)];
 					}
@@ -675,7 +675,7 @@
 				{
                 	// random digits
 					NSUInteger numChars = 1;
-					if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 1;
+					if (NO == [scanner scanUnsignedInteger:&numChars]) numChars = 1;
 					while (numChars-- > 0) {
 						[parsedStr appendFormat:@"%ld",(long)(rand() % 10)];
 					}
@@ -713,7 +713,7 @@
                             [scanner scanUpToString:@"]" intoString:&uniqueSeparator];
                             [scanner scanString:@"]" intoString:NULL];
                         }
-						if (NO == [scanner scanUnsignedInt:&uniqueNumber]) uniqueNumber = 1;
+						if (NO == [scanner scanUnsignedInteger:&uniqueNumber]) uniqueNumber = 1;
 					}
 					else {
 						NSLog(@"Specifier %%%C can only be used once in the format.", specifier);

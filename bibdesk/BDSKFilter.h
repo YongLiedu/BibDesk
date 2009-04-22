@@ -38,10 +38,11 @@
 
 #import <Cocoa/Cocoa.h>
 
-typedef enum {
+enum {
 	BDSKAnd = 0,
 	BDSKOr = 1
-} BDSKConjunction;
+};
+typedef NSUInteger BDSKConjunction;
 
 @class BDSKCondition, BibItem, BDSKSmartGroup;
 

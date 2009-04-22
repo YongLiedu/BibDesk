@@ -42,12 +42,13 @@
 
 @class PDFView, BDSKZoomablePDFView, BDSKTeXTask, BDSKOverlay, BDSKPreviewerServer;
 
-typedef enum {
+enum {
 	BDSKUnknownPreviewState = -1,
 	BDSKEmptyPreviewState   =  0,
 	BDSKWaitingPreviewState =  1,
 	BDSKShowingPreviewState =  2
-} BDSKPreviewState;
+};
+typedef NSInteger BDSKPreviewState;
 
 /*!
     @class BDSKPreviewer

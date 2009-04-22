@@ -39,11 +39,12 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKGradientView.h"
 
-typedef enum {
+enum {
    BDSKProgressIndicatorNone = -1,
    BDSKProgressIndicatorBarStyle = NSProgressIndicatorBarStyle,
    BDSKProgressIndicatorSpinningStyle = NSProgressIndicatorSpinningStyle
-} BDSKProgressIndicatorStyle;
+};
+typedef NSInteger BDSKProgressIndicatorStyle;
 
 
 @interface BDSKStatusBar : BDSKGradientView {

@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKTreeNode.h"
 
-typedef enum _BDSKTemplateFormat {
+enum {
     BDSKUnknownTemplateFormat = 0,
     BDSKTextTemplateFormat = 1, // generic plain text template
     BDSKPlainHTMLTemplateFormat = 2, // HTML template edited as plain text
@@ -51,7 +51,8 @@ typedef enum _BDSKTemplateFormat {
     BDSKDocxTemplateFormat = 64,
     BDSKOdtTemplateFormat = 128,
     BDSKRichTextTemplateFormat = 188 // Rich HTML, RTF, RTFD, Doc, Docx, or ODT
-} BDSKTemplateFormat;
+};
+typedef NSUInteger BDSKTemplateFormat;
 
 extern NSString *BDSKTemplateRoleString;
 extern NSString *BDSKTemplateNameString;

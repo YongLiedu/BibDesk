@@ -41,7 +41,7 @@
 
 @implementation NSScanner (BDSKExtensions)
 
-- (BOOL)scanUnsignedInt:(NSUInteger *)unsignedValue{
+- (BOOL)scanUnsignedInteger:(NSUInteger *)unsignedValue{
     NSUInteger rewindLocation = [self scanLocation];
     NSInteger intValue = 0;
     BOOL returnValue = [self scanInt:&intValue];
