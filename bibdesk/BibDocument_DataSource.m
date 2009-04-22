@@ -1929,7 +1929,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     return YES;
 }
 
-- (NSDragOperation)fileView:(FVFileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation {
+- (NSDragOperation)fileView:(FVFileView *)aFileView validateDrop:(id <NSDraggingInfo>)info proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation {
     BibItem *publication = nil;
     if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
         NSArray *selPubs = [self selectedPublications];
