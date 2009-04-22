@@ -408,12 +408,11 @@ typedef NSInteger FVDisplayMode;
  
  @param aFileView The requesting view
  @param info The dragging info for the drop
- @param draggedURLs The URLs on the pasteboard for the drop
  @param proposedIndex The proposedindex for the drop
  @param proposedDropOperation The proposed drop operation for the drop
  @param proposedDragOperation The propsed drag operation for the drop; this will be returned when this method is not implemented.
  */
-- (NSDragOperation)fileView:(FVFileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation;
+- (NSDragOperation)fileView:(FVFileView *)aFileView validateDrop:(id <NSDraggingInfo>)info proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation;
 
 @end
 

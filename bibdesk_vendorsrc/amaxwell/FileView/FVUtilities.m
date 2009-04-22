@@ -143,6 +143,18 @@ void FVLog(NSString *format, ...)
 
 #pragma mark Pasteboard URL functions
 
+BOOL FVPasteboardHasURL(NSPasteboard *pboard)
+{ 	 
+    NSArray *types = [pboard types];
+    
+    // quicker test than URLsFromPasteboard(); at least on 10.5, NSPasteboard has the UTI types
+    if ([types containsObject:(id)kUTTypeURL] || [types containsObject:(id)kUTTypeFileURL] || [types containsObject:NSURLPboardType])
+        return YES;
+    
+    // also catches case of file URL, which conforms to kUTTypeURL, and strings that might be URLs
+    return [FVURLsFromPasteboard(pboard) count] > 0;
+}
+
 // NSPasteboard only lets us read a single webloc or NSURL instance from the pasteboard, which isn't very considerate of it.  Fortunately, we can create a Carbon pasteboard that isn't as fundamentally crippled (except in its moderately annoying API).  
 NSArray *FVURLsFromPasteboard(NSPasteboard *pboard)
 {

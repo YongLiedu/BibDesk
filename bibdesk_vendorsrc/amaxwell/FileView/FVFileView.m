@@ -2291,7 +2291,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     NSUInteger insertIndex, firstIndex, endIndex;
     
     // !!! this is quite expensive to call repeatedly in -draggingUpdated
-    NSArray *draggedURLs = FVURLsFromPasteboard([sender draggingPasteboard]);
+    BOOL hasURLs = FVPasteboardHasURL([sender draggingPasteboard]);
     
     // First determine the drop location, check whether the index is not NSNotFound, because the grid cell can be empty
     if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
@@ -2316,7 +2316,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     
     // We won't reset the drop location info when we propose NSDragOperationNone, because the delegate may want to override our decision, we will reset it at the end
     
-    if ([draggedURLs count] == 0) {
+    if (hasURLs == NO) {
         // We have to make sure the pasteboard really has a URL here, since most NSStrings aren't valid URLs, but the delegate may accept other types
         dragOp = NSDragOperationNone;
     }
@@ -2344,8 +2344,8 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     }
     
     // we could allow the delegate to change the _dropIndex and _dropOperation as NSTableView does, but we don't use that at present
-    if ([[self delegate] respondsToSelector:@selector(fileView:validateDrop:draggedURLs:proposedIndex:proposedDropOperation:proposedDragOperation:)])
-        dragOp = [[self delegate] fileView:self validateDrop:sender draggedURLs:draggedURLs proposedIndex:_dropIndex proposedDropOperation:_dropOperation proposedDragOperation:dragOp];
+    if ([[self delegate] respondsToSelector:@selector(fileView:validateDrop:proposedIndex:proposedDropOperation:proposedDragOperation:)])
+        dragOp = [[self delegate] fileView:self validateDrop:sender proposedIndex:_dropIndex proposedDropOperation:_dropOperation proposedDragOperation:dragOp];
     
     // make sure we're consistent, also see comment above
     if (dragOp == NSDragOperationNone) {

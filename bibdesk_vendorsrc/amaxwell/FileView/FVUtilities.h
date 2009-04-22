@@ -87,6 +87,12 @@ FV_PRIVATE_EXTERN void FVLogv(NSString *format, va_list argList);
 FV_PRIVATE_EXTERN void FVLog(NSString *format, ...);
 
 /** @internal
+ Checks the pasteboard for any URL data.  Converts an NSPasteboard to a Carbon PasteboardRef. 
+ @param pboard Any NSPasteboard instance.
+ @return YES if pboard has a URL type or a string that can be converted to a URL. */
+FV_PRIVATE_EXTERN BOOL FVPasteboardHasURL(NSPasteboard *pboard);
+
+/** @internal
  Reads URLs from the pasteboard, whether file: or other scheme.  Finder puts multiple URLs on the pasteboard, and also webloc files.  Converts an NSPasteboard to a Carbon PasteboardRef in order to work around NSPasteboard's terrible URL support.
  @param pboard Any NSPasteboard instance.
  @return An array of URLs from the pasteboard. */
