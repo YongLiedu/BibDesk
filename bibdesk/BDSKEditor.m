@@ -2179,9 +2179,14 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 							 [crossref caseInsensitiveCompare:[userInfo objectForKey:@"oldValue"]] == NSOrderedSame));
 	
     // If it is not our item or his crossref parent, we don't care, but our parent may have changed his cite key
-	if (sender != publication && NO == parentDidChange)
+	if (sender != publication && NO == parentDidChange) {
+        // though a change of the cite key of another item may change the duplicate status
+        if ([changeKey isEqualToString:BDSKCiteKeyString] &&
+            [[publication citeKey] caseInsensitiveCompare:[userInfo objectForKey:@"oldValue"]] == NSOrderedSame)
+            [self updateCiteKeyDuplicateWarning];
 		return;
-	
+	}
+    
 	if([changeKey isEqualToString:BDSKLocalFileString]){
         [fileView reloadIcons];
         [self synchronizeWindowTitleWithDocumentName];
@@ -2194,7 +2199,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		[self updateTypePopup];
 	}
 	else if([changeKey isEqualToString:BDSKCiteKeyString]){
-		[citeKeyField setStringValue:newValue];
+		[citeKeyField setStringValue:[publication citeKey]];
 		[self updateCiteKeyAutoGenerateStatus];
         [self updateCiteKeyDuplicateWarning];
 	}
@@ -2263,7 +2268,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             [authorTableView reloadData];
         
         if ([tableView editedRow] != -1 && [[fields objectAtIndex:[tableView editedRow]] isEqualToString:changeKey]) {
-            NSString *tmpValue = newValue ?: @"";
+            NSString *tmpValue = [publication valueOfField:changeKey] ?: @"";
             if ([changeKey isCitationField] == NO && [tableCellFormatter editAsComplexString])
                 tmpValue = [tmpValue stringAsBibTeXString];
             [[tableView currentEditor] setString:tmpValue];
