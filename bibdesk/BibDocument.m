@@ -1032,7 +1032,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         NSPopUpButton *saveFormatPopupButton = popUpButtonSubview(accessoryView);
         BDSKASSERT(saveFormatPopupButton != nil);
         NSRect savFrame = [saveAccessoryView frame];
-        savFrame.size.width = NSWidth([accessoryView frame]);
         NSRect exportFrame = [exportAccessoryView frame];
         savFrame.origin = NSMakePoint(0.0, SAVE_ENCODING_VIEW_OFFSET);
         [saveAccessoryView setFrame:savFrame];
