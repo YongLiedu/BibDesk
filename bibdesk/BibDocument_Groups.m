@@ -569,10 +569,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         // add the "empty" group at index 0; this is a group of pubs whose value is empty for this field, so they
         // will not be contained in any of the other groups for the currently selected group field (hence multiple selection is desirable)
         if (emptyCount > 0) {
-            if ([oldGroups count] && [[oldGroups objectAtIndex:0] isEmpty])
+            if ([oldGroups count] && [[oldGroups objectAtIndex:0] isEmpty]) {
                 group = [[oldGroups objectAtIndex:0] retain];
-            else
+                [group setCount:emptyCount];
+            } else {
                 group = [[BDSKCategoryGroup alloc] initEmptyGroupWithKey:groupField count:emptyCount];
+            }
             [mutableGroups insertObject:group atIndex:0];
             [group release];
         }
