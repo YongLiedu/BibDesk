@@ -106,7 +106,7 @@ NSString *__BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolv
     while(iMax--){
         node = *stringNodeIdx++;
         nodeVal = (CFStringRef)(node->value);
-        if(node->type == BSN_MACRODEF){
+        if(node->type == BDSKStringNodeMacro){
             expandedValue = (CFStringRef)[macroResolver valueOfMacro:(NSString *)nodeVal];
             if(expandedValue == nil && macroResolver != [BDSKMacroResolver defaultMacroResolver])
                 expandedValue = (CFStringRef)[[BDSKMacroResolver defaultMacroResolver] valueOfMacro:(NSString *)nodeVal];
@@ -345,7 +345,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
         if (i != 0){
             [retStr appendString:@" # "];
         }
-        if([valNode type] == BSN_STRING){
+        if([valNode type] == BDSKStringNodeString){
             [retStr appendString:[[valNode value] stringAsBibTeXString]];
         }else{
             [retStr appendString:[valNode value]];
@@ -483,7 +483,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 }
 
 - (id)initWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)aMacroResolver{
-    if ([nodesArray count] == 1 && [(BDSKStringNode *)[nodesArray objectAtIndex:0] type] == BSN_STRING) {
+    if ([nodesArray count] == 1 && [(BDSKStringNode *)[nodesArray objectAtIndex:0] type] == BDSKStringNodeString) {
         self = [self initWithString:[(BDSKStringNode *)[nodesArray objectAtIndex:0] value]];
     } else { 
         [[self init] release];

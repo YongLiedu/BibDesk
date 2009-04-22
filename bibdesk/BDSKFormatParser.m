@@ -351,9 +351,9 @@
                     if ([NSString isEmptyString:monthString] == NO) {
                         if([monthString isComplex]) {
                             NSArray *nodes = [monthString nodes];
-                            if ([nodes count] > 1 && [(BDSKStringNode *)[nodes objectAtIndex:1] type] == BSN_MACRODEF)
+                            if ([nodes count] > 1 && [(BDSKStringNode *)[nodes objectAtIndex:1] type] == BDSKStringNodeMacro)
                                 monthString = [(BDSKStringNode *)[nodes objectAtIndex:1] value];
-                            else if ([nodes count] > 2 && [(BDSKStringNode *)[nodes objectAtIndex:2] type] == BSN_MACRODEF)
+                            else if ([nodes count] > 2 && [(BDSKStringNode *)[nodes objectAtIndex:2] type] == BDSKStringNodeMacro)
                                 monthString = [(BDSKStringNode *)[nodes objectAtIndex:2] value];
                             else
                                 monthString = [(BDSKStringNode *)[nodes objectAtIndex:0] value];

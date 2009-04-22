@@ -40,9 +40,9 @@
 
 
 enum {
-    BSN_STRING = 0,
-    BSN_NUMBER = 1,
-    BSN_MACRODEF = 2
+    BDSKStringNodeString = 0,
+    BDSKStringNodeNumber = 1,
+    BDSKStringNodeMacro = 2
 };
 typedef NSUInteger BDSKStringNodeType;
 
@@ -146,7 +146,7 @@ typedef NSUInteger BDSKStringNodeType;
 
     /*!
     @method     type
-     @abstract   The type of the string node. This can be BSN_STRING, BSN_NUMBER, or BSN_MACRODEF. 
+     @abstract   The type of the string node. This can be BDSKStringNodeString, BDSKStringNodeNumber, or BDSKStringNodeMacro. 
      @discussion (description)
      @result     -
      */

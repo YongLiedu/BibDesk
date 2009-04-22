@@ -125,7 +125,7 @@
             NSEnumerator *nodeEnum = [nodes objectEnumerator];
             BDSKStringNode *node = nil;
             while (node = [nodeEnum nextObject]) {
-                if ([node type] == BSN_MACRODEF) {
+                if ([node type] == BDSKStringNodeMacro) {
                     monthString = [node value];
                     break;
                 }

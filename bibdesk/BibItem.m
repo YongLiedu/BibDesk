@@ -2381,7 +2381,7 @@ static void addFilesToArray(const void *value, void *context)
         NSEnumerator *nodeEnum = [[value nodes] objectEnumerator];
         BDSKStringNode *node;
         while (node = [nodeEnum nextObject]) {
-            if ([node type] != BSN_MACRODEF) continue;
+            if ([node type] != BDSKStringNodeMacro) continue;
             BDSKMacroResolver *resolver = [[value macroResolver] valueOfMacro:[node value]] ? [value macroResolver] : [BDSKMacroResolver defaultMacroResolver];
             BDSKMacro *macro = [[BDSKMacro alloc] initWithName:[node value] macroResolver:resolver];
             [macros addObject:macro];

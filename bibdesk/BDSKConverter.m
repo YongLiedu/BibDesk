@@ -143,7 +143,7 @@ static BDSKConverter *sharedConverter = nil;
     NSString *string;
     
     while(node = [nodeEnum nextObject]){
-        if([node type] == BSN_STRING){
+        if([node type] == BDSKStringNodeString){
             string = [self performSelector:copySelector withObject:[node value]];
             newNode = [[BDSKStringNode alloc] initWithQuotedString:string];
             [string release];

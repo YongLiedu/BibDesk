@@ -42,34 +42,34 @@
 @implementation BDSKStringNode
 
 + (BDSKStringNode *)nodeWithQuotedString:(NSString *)s{
-    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BSN_STRING value:s];
+    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BDSKStringNodeString value:s];
 	return [node autorelease];
 }
 
 + (BDSKStringNode *)nodeWithNumberString:(NSString *)s{
-    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BSN_NUMBER value:s];
+    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BDSKStringNodeNumber value:s];
 	return [node autorelease];
 }
 
 + (BDSKStringNode *)nodeWithMacroString:(NSString *)s{
-    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BSN_MACRODEF value:s];
+    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BDSKStringNodeMacro value:s];
 	return [node autorelease];
 }
 
 - (BDSKStringNode *)initWithQuotedString:(NSString *)s{
-    return [self initWithType:BSN_STRING value:s];
+    return [self initWithType:BDSKStringNodeString value:s];
 }
 
 - (BDSKStringNode *)initWithNumberString:(NSString *)s{
-    return [self initWithType:BSN_NUMBER value:s];
+    return [self initWithType:BDSKStringNodeNumber value:s];
 }
 
 - (BDSKStringNode *)initWithMacroString:(NSString *)s{
-    return [self initWithType:BSN_MACRODEF value:s];
+    return [self initWithType:BDSKStringNodeMacro value:s];
 }
 
 - (id)init{
-	self = [self initWithType:BSN_STRING value:@""];
+	self = [self initWithType:BDSKStringNodeString value:@""];
 	return self;
 }
 
