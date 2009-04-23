@@ -254,6 +254,7 @@
     
     // always queue a search, since the index content may be changing (in case of a search group)
     NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(_searchForString:index:)];
+    [invocation retainArguments];
     [invocation setArgument:&searchString atIndex:2];
     [invocation setArgument:&skIndex atIndex:3];
     [self queueInvocation:invocation];
