@@ -1636,6 +1636,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     NSBezierPath *p;
     NSUInteger r, c;
     NSRect aRect = NSZeroRect;
+    BOOL isColumn = (_fvFlags.displayMode == FVDisplayModeColumn);
     
     switch (_dropOperation) {
         case FVDropOn:
@@ -1649,16 +1650,26 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         case FVDropBefore:
             [self _getGridRow:&r column:&c ofIndex:_dropIndex];
             aRect = [self _rectOfIconInRow:r column:c];
-            // aRect size is 6, and should be centered between icons horizontally
-            aRect.origin.x -= _padding.width / 2 + 3.0;
-            aRect.size.width = 6.0;    
+            // aRect size is 6, and should be centered between icons
+            if (isColumn) {
+                aRect.origin.y -= 6.0;
+                aRect.size.height = 6.0;
+            } else {
+                aRect.origin.x -= _padding.width / 2 + 3.0;
+                aRect.size.width = 6.0;    
+            }
             break;
         case FVDropAfter:
             [self _getGridRow:&r column:&c ofIndex:_dropIndex];
             aRect = [self _rectOfIconInRow:r column:c];
-            // aRect size is 6, and should be centered between icons horizontally
-            aRect.origin.x += _iconSize.width + _padding.width / 2 - 3.0;
-            aRect.size.width = 6.0;
+            // aRect size is 6, and should be centered between icons
+            if (isColumn) {
+                aRect.origin.y += _iconSize.height + _padding.height - 6.0;
+                aRect.size.height = 6.0;
+            } else {
+                aRect.origin.x += _iconSize.width + _padding.width / 2 - 3.0;
+                aRect.size.width = 6.0;
+            }
             break;
         default:
             break;
@@ -1674,6 +1685,15 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
             // it's either a drop on the whole table or on top of a cell
             p = [NSBezierPath fv_bezierPathWithRoundRect:NSInsetRect(aRect, 0.5 * lineWidth, 0.5 * lineWidth) xRadius:7 yRadius:7];
             [p fill];
+        }
+        else if (isColumn) {
+            // similar to NSTableView's between-row drop indicator
+            CGFloat radius = NSHeight(aRect) / 2;
+            NSPoint point = NSMakePoint(NSMaxX(aRect), NSMidY(aRect));
+            p = [NSBezierPath bezierPath];
+            [p appendBezierPathWithArcWithCenter:point radius:radius startAngle:-180 endAngle:180];
+            point.x = NSMinX(aRect);
+            [p appendBezierPathWithArcWithCenter:point radius:radius startAngle:0 endAngle:360];
         }
         else {
             // similar to NSTableView's between-row drop indicator
@@ -2296,6 +2316,22 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     // First determine the drop location, check whether the index is not NSNotFound, because the grid cell can be empty
     if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
         _dropOperation = FVDropOn;
+    } else if (_fvFlags.displayMode == FVDisplayModeColumn) {
+        p = NSMakePoint(dragLoc.x, dragLoc.y + _iconSize.height - 0.5);
+
+        if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
+            _dropOperation = FVDropBefore;
+        } else {
+            p = NSMakePoint(dragLoc.x, dragLoc.y - _iconSize.height + 0.5);
+            
+            if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
+                _dropOperation = FVDropAfter;
+            } else {
+                // drop on the whole view
+                _dropOperation = FVDropOn;
+                _dropIndex = NSNotFound;
+            }
+        }
     } else {
         p = NSMakePoint(dragLoc.x + _iconSize.width - 0.5, dragLoc.y);
 
