@@ -1264,6 +1264,89 @@ static CGFloat _scrollerWidthForScroller(NSScroller *scroller) {
     return YES;
 }
 
+- (BOOL)_getGridRow:(NSUInteger *)rowIndex column:(NSUInteger *)colIndex dropOperation:(FVDropOperation *)operation atPoint:(NSPoint)point;
+{
+    // column width is padding + icon width
+    // row height is padding + icon width
+    NSInteger r, c, nc = [self numberOfColumns], nr = [self numberOfRows];
+    FVDropOperation op;
+    BOOL isColumn = (_fvFlags.displayMode == FVDisplayModeColumn);
+    CGFloat columnWidth = [self _columnWidth];
+    CGFloat rowHeight = [self _rowHeight];
+    CGFloat start;
+    
+    if (nc == 0 || nr == 0)
+        return NO;
+    
+    start = [self _leftMargin];
+    
+    if (point.x <= start) {
+        if (isColumn) {
+            return NO;
+        } else {
+            c = 0;
+            op = FVDropBefore;
+        }
+    } else {
+        
+        for (c = 0; c < nc; c++, start += columnWidth) {
+            if (point.x < (start + _iconSize.width)) {
+                op = FVDropOn;
+                break;
+            } else if (point.x <= (start + columnWidth)) {
+                if (isColumn) {
+                    return NO;
+                } else {
+                    op = FVDropAfter;
+                    break;
+                }
+            }
+        }
+        
+        if (c == nc)
+            return NO;
+    }
+    
+    start = [self _topMargin];
+    
+    if (point.y <= start) {
+        if (isColumn == NO) {
+            return NO;
+        } else {
+            r = 0;
+            op = FVDropBefore;
+        }
+    } else {
+        
+        for (r = 0; r < nr; r++, start += rowHeight) {
+            
+            if (point.y < (start + _iconSize.height)) {
+                op = FVDropOn;
+                break;
+            } else if (point.y <= (start + rowHeight)) {
+                if (isColumn == NO) {
+                    return NO;
+                } else {
+                    op = FVDropAfter;
+                    break;
+                }
+            }
+        }
+        
+        if (r == nr)
+            return NO;
+    }
+    
+    if (colIndex)
+        *colIndex = c;
+    if (rowIndex)
+        *rowIndex = r;
+    if (operation)
+        *operation = op;
+    
+    return YES;
+}
+
 #pragma mark Slider
 
 - (void)_sliderAction:(id)sender {
@@ -2314,40 +2397,10 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     BOOL hasURLs = FVPasteboardHasURL([sender draggingPasteboard]);
     
     // First determine the drop location, check whether the index is not NSNotFound, because the grid cell can be empty
-    if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
+    if ([self _getGridRow:&r column:&c dropOperation:&_dropOperation atPoint:p] == NO ||
+        NSNotFound == (_dropIndex = [self _indexForGridRow:r column:c])) {
         _dropOperation = FVDropOn;
-    } else if (_fvFlags.displayMode == FVDisplayModeColumn) {
-        p = NSMakePoint(dragLoc.x, dragLoc.y + _iconSize.height - 0.5);
-
-        if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
-            _dropOperation = FVDropBefore;
-        } else {
-            p = NSMakePoint(dragLoc.x, dragLoc.y - _iconSize.height + 0.5);
-            
-            if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
-                _dropOperation = FVDropAfter;
-            } else {
-                // drop on the whole view
-                _dropOperation = FVDropOn;
-                _dropIndex = NSNotFound;
-            }
-        }
-    } else {
-        p = NSMakePoint(dragLoc.x + _iconSize.width - 0.5, dragLoc.y);
-
-        if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
-            _dropOperation = FVDropBefore;
-        } else {
-            p = NSMakePoint(dragLoc.x - _iconSize.width + 0.5, dragLoc.y);
-            
-            if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
-                _dropOperation = FVDropAfter;
-            } else {
-                // drop on the whole view
-                _dropOperation = FVDropOn;
-                _dropIndex = NSNotFound;
-            }
-        }
+        _dropIndex = NSNotFound;
     }
     
     // We won't reset the drop location info when we propose NSDragOperationNone, because the delegate may want to override our decision, we will reset it at the end
