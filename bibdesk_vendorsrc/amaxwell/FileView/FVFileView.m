@@ -1321,7 +1321,7 @@ static CGFloat _scrollerWidthForScroller(NSScroller *scroller) {
         for (r = 0; r < nr; r++, start += rowHeight) {
             
             if (point.y < (start + _iconSize.height)) {
-                op = FVDropOn;
+                // this is a drop on the row, don't change op from what it was set previously
                 break;
             } else if (point.y <= (start + rowHeight)) {
                 if (isColumn == NO) {
