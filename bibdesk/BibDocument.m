@@ -364,16 +364,13 @@ enum {
     // some xattr setup has to be done after the window is on-screen
     NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
     
-    NSArray *groupsToExpand = [xattrDefaults objectForKey:BDSKDocumentGroupsToExpandKey defaultObject:[groups valueForKey:@"name"]];
-    NSEnumerator *groupEnum = [groupsToExpand objectEnumerator];
-    NSString *groupName;
-    while (groupName = [groupEnum nextObject]) {
-        NSEnumerator *parentEnum = [groups objectEnumerator];
-        BDSKParentGroup *parent;
-        while (parent = [parentEnum nextObject]) {
-            if ([[parent name] isEqual:groupName])
-                [groupOutlineView expandItem:parent];
-        }
+    NSArray *groupsToExpand = [xattrDefaults objectForKey:BDSKDocumentGroupsToExpandKey];
+    NSEnumerator *parentEnum = [groups objectEnumerator];
+    BDSKParentGroup *parent;
+    [parentEnum nextObject];
+    while (parent = [parentEnum nextObject]) {
+        if (groupsToExpand == nil || [groupsToExpand containsObject:NSStringFromClass([parent class])])
+            [groupOutlineView expandItem:parent];
     }
     // make sure the groups are sorted and have their sort descriptors set
     [self sortGroupsByKey:nil];
@@ -804,10 +801,10 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         NSMutableArray *groupsToExpand = [NSMutableArray array];
         NSEnumerator *groupEnum = [groups objectEnumerator];
         BDSKParentGroup *parent;
+        [groupEnum nextObject];
         while (parent = [groupEnum nextObject]) {
-            // name is localized, but that's not worth worrying about
             if ([groupOutlineView isItemExpanded:parent])
-                [groupsToExpand addObject:[parent name]];
+                [groupsToExpand addObject:NSStringFromClass([parent class])];
             
         }
         [dictionary setObject:groupsToExpand forKey:BDSKDocumentGroupsToExpandKey];
