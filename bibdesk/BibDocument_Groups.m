@@ -1130,7 +1130,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	BDSKGroup *group;
     BOOL didRemove = NO;
 	
-	while (group == [groupEnum nextObject]) {
+	while (group = [groupEnum nextObject]) {
 		if ([group isSmart]) {
 			[groups removeSmartGroup:(BDSKSmartGroup *)group];
 			didRemove = YES;
