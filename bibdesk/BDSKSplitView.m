@@ -160,7 +160,7 @@
             divRect.size.height = [self dividerThickness];
         }
         
-        if (NSPointInRect(mouseLoc, divRect)) {
+        if (NSMouseInRect(mouseLoc, divRect, [self isFlipped])) {
             inDivider = YES;
             break;
         }

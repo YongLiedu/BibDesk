@@ -449,7 +449,7 @@
     NSDivideRect(rect, &ignored, &rect, RIGHT_MARGIN, NSMaxXEdge);
     if (progressIndicator) {
         NSDivideRect(rect, &childRect, &rect, NSWidth([progressIndicator frame]), NSMaxXEdge);
-        if (NSPointInRect(localPoint, childRect))
+        if (NSMouseInRect(localPoint, childRect, [self isFlipped]))
             return NSAccessibilityUnignoredAncestor(progressIndicator);
         NSDivideRect(rect, &ignored, &rect, MARGIN_BETWEEN_ITEMS, NSMaxXEdge);
 	}

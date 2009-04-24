@@ -173,7 +173,7 @@
 	if (margin < border)
 		margin = border;
 	
-	if (!NSPointInRect(mouseLoc, buttonRect))
+	if (!NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped]))
 		return NO;
 	
 	offset = mouseLoc.x - buttonRect.origin.x - margin;

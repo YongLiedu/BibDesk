@@ -133,7 +133,7 @@
             BDSKGroupCell *cell = [[[self tableColumns] objectAtIndex:0] dataCellForRow:row];
             if ([cell respondsToSelector:@selector(iconRectForBounds:)]) {
                 NSRect iconRect = [cell iconRectForBounds:[self frameOfCellAtColumn:column row:row]];
-                if (NSPointInRect(point, iconRect)) {
+                if (NSMouseInRect(point, iconRect, [self isFlipped])) {
                     if ([[self delegate] respondsToSelector:@selector(outlineView:doubleClickedOnIconOfItem:)])
                         [[self delegate] outlineView:self doubleClickedOnIconOfItem:[self itemAtRow:row]];
                     return;
@@ -338,7 +338,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
 	NSRect headerRect = [self headerRectOfColumn:colIndex];
     
 	if ([cell isKindOfClass:[BDSKHeaderPopUpButtonCell class]]) {
-		if (NSPointInRect(location, [cell popUpRectForBounds:headerRect])) {
+		if (NSMouseInRect(location, [cell popUpRectForBounds:headerRect], [self isFlipped])) {
 			[cell trackMouse:theEvent 
 					  inRect:headerRect 
 					  ofView:self 
@@ -365,7 +365,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
     BOOL onPopUp = NO;
 		
 	if ([cell isKindOfClass:[BDSKHeaderPopUpButtonCell class]] &&
-		NSPointInRect(location, [cell popUpRectForBounds:[self headerRectOfColumn:column]])) 
+		NSMouseInRect(location, [cell popUpRectForBounds:[self headerRectOfColumn:column]], [self isFlipped])) 
 		onPopUp = YES;
 		
 	if ([delegate respondsToSelector:@selector(outlineView:menuForTableHeaderColumn:onPopUp:)]) {
