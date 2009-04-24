@@ -60,8 +60,6 @@
 
 - (void)awakeFromNib
 {
-	[self setHeaderView:nil];	
-    
     BDSKPRECONDITION([[self enclosingScrollView] contentView]);
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleClipViewFrameChangedNotification:)
