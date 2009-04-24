@@ -1456,14 +1456,15 @@ into distinct categories without managing many small files scattered around your
 
 @subheading Features
 
-Field Groups groups organize entries based on the contents of a certain field, 
-the @samp{group field,} such as the @samp{Group} or @samp{Keywords} field.
+Field Groups organize entries based on the contents of a certain field, 
+the @samp{group field,} such as e.g. the @samp{Keywords}, @samp{Author}, or @samp{Journal} field.
 
-In order to select a field to use as a group field, use the popup menu at the top of the list
-on the left-hand side of BibDesk's window.  Add a BibTeX field name to this menu, or use one
-of the existing options.  When you choose a group field from the popup menu, a list of all
-possible groups is constructed, using the contents of the selected field for all entries in
-your file.  
+In order to select a field to use as a group field, use the @menutitle{Group Field} menu 
+from the @menutitle{View} menu, or the contextual menu of the field group header item.
+Add a new BibTeX field name to this menu, or use one of the existing options.
+When you choose a group field from the @menutitle{Group Field} menu, a list of all
+possible groups is automatically constructed and updated, using the contents of the selected 
+field for all entries in your file.  
 
 @subheading Example
 
