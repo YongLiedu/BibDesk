@@ -375,6 +375,8 @@ enum {
                 [groupOutlineView expandItem:parent];
         }
     }
+    // make sure the groups are sorted and have their sort descriptors set
+    [self sortGroupsByKey:nil];
     
     NSData *groupData = [xattrDefaults objectForKey:BDSKSelectedGroupsKey];
     if ([groupData length])
