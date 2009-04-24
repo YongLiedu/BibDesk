@@ -45,7 +45,8 @@
 					<key>BDSKGroupFieldsKey</key>
 					<array>
 						<string>Keywords</string>
-						<string>Group</string>
+						<string>Author</string>
+						<string>Journal</string>
 					</array>
 					<key>BDSKIntersectGroupsKey</key>
 					<false/>
