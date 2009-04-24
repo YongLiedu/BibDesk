@@ -1126,13 +1126,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)removeSelectedGroups:(id)sender {
-	NSIndexSet *rowIndexes = [groupOutlineView selectedRowIndexes];
-    NSUInteger rowIndex = [rowIndexes lastIndex];
+    NSEnumerator *groupEnum = [[self selectedGroups] objectEnumerator];
 	BDSKGroup *group;
     BOOL didRemove = NO;
 	
-	while (rowIndexes != nil && rowIndex != NSNotFound) {
-		group = [groups objectAtIndex:rowIndex];
+	while (group == [groupEnum nextObject]) {
 		if ([group isSmart]) {
 			[groups removeSmartGroup:(BDSKSmartGroup *)group];
 			didRemove = YES;
@@ -1148,7 +1146,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 		} else if ([group isSearch]) {
 			[groups removeSearchGroup:(BDSKSearchGroup *)group];
         }
-		rowIndex = [rowIndexes indexLessThanIndex:rowIndex];
 	}
 	if (didRemove) {
 		[[self undoManager] setActionName:NSLocalizedString(@"Remove Groups", @"Undo action name")];
