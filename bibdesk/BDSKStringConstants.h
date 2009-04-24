@@ -285,7 +285,6 @@ extern NSString *BDSKPreviewDisplayChangedNotification;
 extern NSString *BDSKTableSelectionChangedNotification;
 extern NSString *BDSKGroupTableSelectionChangedNotification;
 extern NSString *BDSKGroupFieldChangedNotification;
-extern NSString *BDSKGroupFieldAddRemoveNotification;
 extern NSString *BDSKBibItemChangedNotification;
 extern NSString *BDSKNeedsToBeFiledChangedNotification;
 extern NSString *BDSKDocSetPublicationsNotification;
