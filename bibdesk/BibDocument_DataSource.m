@@ -1343,7 +1343,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 }
 
 - (NSMenu *)outlineView:(BDSKGroupOutlineView *)anOutlineView menuForTableHeaderColumn:(NSTableColumn *)tableColumn onPopUp:(BOOL)flag {
-	if ([[tableColumn identifier] isEqualToString:@"group"] && flag == NO) {
+	if (flag == NO) {
 		return [[NSApp delegate] groupSortMenu];
 	}
 	return nil;
