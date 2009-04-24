@@ -615,18 +615,6 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 	[[groupActionButton cell] setUsesItemFromMenu:NO];
 	[groupActionButton setMenu:groupMenu];
     
-	BDSKHeaderPopUpButtonCell *headerCell = (BDSKHeaderPopUpButtonCell *)[groupOutlineView popUpHeaderCell];
-	[headerCell setAction:@selector(changeGroupFieldAction:)];
-	[headerCell setTarget:self];
-	[headerCell setMenu:[self groupFieldsMenu]];
-	[headerCell setIndicatorImage:[NSImage imageNamed:docState.sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
-    [headerCell setUsesItemFromMenu:NO];
-	[headerCell setTitle:[currentGroupField localizedFieldName]];
-    if([headerCell indexOfItemWithRepresentedObject:currentGroupField] != -1)
-        [headerCell selectItemAtIndex:[headerCell indexOfItemWithRepresentedObject:currentGroupField]];
-    else
-        [headerCell selectItemAtIndex:0];
-    
     // array of BDSKSharedGroup objects and zeroconf support, doesn't do anything when already enabled
     // we don't do this in appcontroller as we want our data to be loaded
     if([sud boolForKey:BDSKShouldLookForSharedFilesKey]){
@@ -2735,10 +2723,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                selector:@selector(handleGroupFieldChangedNotification:)
 	               name:BDSKGroupFieldChangedNotification
                  object:self];
-		[nc addObserver:self
-               selector:@selector(handleGroupFieldAddRemoveNotification:)
-	               name:BDSKGroupFieldAddRemoveNotification
-                 object:nil];
 		[nc addObserver:self
                selector:@selector(handleTableSelectionChangedNotification:)
 	               name:BDSKTableSelectionChangedNotification

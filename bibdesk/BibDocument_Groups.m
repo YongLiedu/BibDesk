@@ -53,6 +53,7 @@
 #import "BDSKStaticGroup.h"
 #import "BDSKCategoryGroup.h"
 #import "BDSKWebGroup.h"
+#import "BDSKParentGroup.h"
 #import "BDSKFieldSheetController.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
@@ -139,6 +140,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	if (field != currentGroupField) {
 		[currentGroupField release];
 		currentGroupField = [field copy];
+		[[groups categoryParent] setName:[NSString isEmptyString:field] ? NSLocalizedString(@"FIELD", @"source list group row title") : [field uppercaseString]];
 	}
 }	
 
@@ -713,38 +715,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     return [self selectGroups:[NSArray arrayWithObject:aGroup]];
 }
 
-- (NSMenu *)groupFieldsMenu {
-	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
-	NSMenuItem *menuItem;
-	NSEnumerator *fieldEnum = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] objectEnumerator];
-	NSString *field;
-	
-    [menu addItemWithTitle:NSLocalizedString(@"No Field", @"Menu item title") action:NULL keyEquivalent:@""];
-	
-	while (field = [fieldEnum nextObject]) {
-		menuItem = [menu addItemWithTitle:field action:NULL keyEquivalent:@""];
-        [menuItem setRepresentedObject:field];
-	}
-    
-    [menu addItem:[NSMenuItem separatorItem]];
-	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Add Field", @"Menu item title") stringByAppendingEllipsis]
-										  action:@selector(addGroupFieldAction:)
-								   keyEquivalent:@""];
-	[menuItem setTarget:self];
-	[menu addItem:menuItem];
-    [menuItem release];
-	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Remove Field", @"Menu item title") stringByAppendingEllipsis]
-										  action:@selector(removeGroupFieldAction:)
-								   keyEquivalent:@""];
-	[menuItem setTarget:self];
-	[menu addItem:menuItem];
-    [menuItem release];
-	
-	return [menu autorelease];
-}
-
 #pragma mark Spinners
 
 - (NSProgressIndicator *)spinnerForGroup:(BDSKGroup *)group{
@@ -787,26 +757,20 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 #pragma mark Actions
 
 - (IBAction)sortGroupsByGroup:(id)sender{
-	if ([sortGroupsKey isEqualToString:BDSKGroupCellStringKey] == NO)
-        [self sortGroupsByKey:BDSKGroupCellStringKey];
+	[self sortGroupsByKey:BDSKGroupCellStringKey];
 }
 
 - (IBAction)sortGroupsByCount:(id)sender{
-	if ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey] == NO)
-        [self sortGroupsByKey:BDSKGroupCellCountKey];
+	[self sortGroupsByKey:BDSKGroupCellCountKey];
 }
 
 - (IBAction)changeGroupFieldAction:(id)sender{
-	NSPopUpButtonCell *headerCell = [groupOutlineView popUpHeaderCell];
-	NSString *field = ([headerCell indexOfSelectedItem] == 0) ? @"" : [[headerCell selectedItem] representedObject];
+    NSString *field = [sender representedObject] ?: @"";
     
 	if(![field isEqualToString:currentGroupField]){
 		[self setCurrentGroupField:field];
-        [headerCell setTitle:[headerCell indexOfSelectedItem] == 0 ? @"" : [headerCell titleOfSelectedItem]];
-		
-		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
-															object:self
-														  userInfo:[NSDictionary dictionary]];
+        
+		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification object:self];
 	}
 }
 
@@ -831,17 +795,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	[array addObject:newGroupField];
 	[[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];	
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldAddRemoveNotification
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionaryWithObjectsAndKeys:newGroupField, NSKeyValueChangeNewKey, [NSNumber numberWithInt:NSKeyValueChangeInsertion], NSKeyValueChangeKindKey, nil]];        
-    
-	NSPopUpButtonCell *headerCell = [groupOutlineView popUpHeaderCell];
-	
-	[headerCell insertItemWithTitle:newGroupField atIndex:[array count]];
-	[[headerCell itemAtIndex:[array count]] setRepresentedObject:newGroupField];
-	[self setCurrentGroupField:newGroupField];
-	[headerCell selectItemAtIndex:[headerCell indexOfItemWithRepresentedObject:currentGroupField]];
-    [headerCell setTitle:[headerCell indexOfSelectedItem] == 0 ? @"" : [headerCell titleOfSelectedItem]];
+    [self setCurrentGroupField:newGroupField];
 	
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
 														object:self
@@ -850,16 +804,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }    
 
 - (IBAction)addGroupFieldAction:(id)sender{
-	NSPopUpButtonCell *headerCell = [groupOutlineView popUpHeaderCell];
-	
-    if ([currentGroupField isEqualToString:@""]) {
-        [headerCell selectItemAtIndex:0];
-        [headerCell setTitle:@""];
-    } else  {
-        [headerCell selectItemAtIndex:[headerCell indexOfItemWithRepresentedObject:currentGroupField]];
-        [headerCell setTitle:[headerCell titleOfSelectedItem]];
-    }
-    
 	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
 	NSArray *groupFields = [[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey];
     NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCrossrefString, nil]
@@ -885,35 +829,17 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];
     [array release];
     
-	NSPopUpButtonCell *headerCell = [groupOutlineView popUpHeaderCell];
-	
-    [headerCell removeItemWithTitle:oldGroupField];
     if([oldGroupField isEqualToString:currentGroupField]){
         [self setCurrentGroupField:@""];
-        [headerCell selectItemAtIndex:0];
-        [headerCell setTitle:@""];
+		[[groups categoryParent] setName:NSLocalizedString(@"FIELD", @"")];
         
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
                                                             object:self
                                                           userInfo:[NSDictionary dictionary]];
     }
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldAddRemoveNotification
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionaryWithObjectsAndKeys:oldGroupField, NSKeyValueChangeNewKey, [NSNumber numberWithInt:NSKeyValueChangeRemoval], NSKeyValueChangeKindKey, nil]];        
 }
 
 - (IBAction)removeGroupFieldAction:(id)sender{
-	NSPopUpButtonCell *headerCell = [groupOutlineView popUpHeaderCell];
-	
-    if ([currentGroupField isEqualToString:@""]) {
-        [headerCell selectItemAtIndex:0];
-        [headerCell setTitle:@""];
-    } else  {
-        [headerCell selectItemAtIndex:[headerCell indexOfItemWithRepresentedObject:currentGroupField]];
-        [headerCell setTitle:[headerCell titleOfSelectedItem]];
-    }
-    
     BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field to remove:", @"Label for removing group field")
                                                                                                        fieldsArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey]];
 	[removeFieldController beginSheetModalForWindow:documentWindow
@@ -922,31 +848,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
                                         contextInfo:NULL];
     [removeFieldController release];
 }    
-
-- (void)handleGroupFieldAddRemoveNotification:(NSNotification *)notification{
-    // Handle changes to the popup from other documents.  The userInfo for this notification uses key-value observing keys: NSKeyValueChangeNewKey is the affected field (whether add/remove), and NSKeyValueChangeKindKey will be either insert/remove
-    if([notification object] != self){
-        NSPopUpButtonCell *headerCell = [groupOutlineView popUpHeaderCell];
-        
-        id userInfo = [notification userInfo];
-        NSParameterAssert(userInfo && [userInfo valueForKey:NSKeyValueChangeKindKey]);
-
-        NSString *field = [userInfo valueForKey:NSKeyValueChangeNewKey];
-        NSParameterAssert(field);
-        
-        // Ignore this change if we already have that field (shouldn't happen), or are removing the current group field; in the latter case, it's already removed in prefs, so it'll be gone next time the document is opened.  Removing all fields means we have to deal with the add/remove menu items and separator, so avoid that.
-        if([[[headerCell selectedItem] representedObject] isEqualToString:field] == NO){
-            NSInteger changeType = [[userInfo valueForKey:NSKeyValueChangeKindKey] intValue];
-            
-            if(changeType == NSKeyValueChangeInsertion) {
-                [headerCell insertItemWithTitle:field atIndex:0];
-                [[headerCell itemAtIndex:0] setRepresentedObject:field];
-            } else if(changeType == NSKeyValueChangeRemoval) {
-                [headerCell removeItemAtIndex:[headerCell indexOfItemWithRepresentedObject:field]];
-            } else [NSException raise:NSInvalidArgumentException format:@"Unrecognized change type %ld", (long)changeType];
-        }
-    }
-}
 
 - (IBAction)addSmartGroupAction:(id)sender {
 	BDSKFilterController *filterController = [[BDSKFilterController alloc] init];
@@ -1702,10 +1603,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     
     [groups sortUsingDescriptors:sortDescriptors];
     
-    // Set the graphic for the new column header
-	BDSKHeaderPopUpButtonCell *headerPopup = (BDSKHeaderPopUpButtonCell *)[groupOutlineView popUpHeaderCell];
-	[headerPopup setIndicatorImage:[NSImage imageNamed:docState.sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
-
     [[(NSMutableDictionary *)groupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [groupOutlineView reloadData];
 	

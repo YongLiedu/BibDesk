@@ -193,7 +193,7 @@
 				<key>actionMenuButton</key>
 				<string>BDSKImagePopUpButton</string>
 				<key>bottomFileView</key>
-				<string>FileView</string>
+				<string>FVFileView</string>
 				<key>bottomPreviewButton</key>
 				<string>NSSegmentedControl</string>
 				<key>bottomPreviewTabView</key>
@@ -224,12 +224,14 @@
 				<string>BDSKGradientView</string>
 				<key>groupMenu</key>
 				<string>NSMenu</string>
+				<key>groupOutlineView</key>
+				<string>BDSKGroupOutlineView</string>
 				<key>groupSplitView</key>
 				<string>BDSKGradientSplitView</string>
 				<key>groupTableView</key>
 				<string>BDSKGroupTableView</string>
 				<key>mainBox</key>
-				<string>BDSKColoredBox</string>
+				<string>BDSKColoredView</string>
 				<key>mainView</key>
 				<string>NSView</string>
 				<key>saveAccessoryView</key>
@@ -245,7 +247,7 @@
 				<key>searchField</key>
 				<string>NSSearchField</string>
 				<key>sideFileView</key>
-				<string>FileView</string>
+				<string>FVFileView</string>
 				<key>sidePreviewButton</key>
 				<string>NSSegmentedControl</string>
 				<key>sidePreviewTabView</key>
@@ -351,14 +353,6 @@
 			<string>NSView</string>
 		</dict>
 		<dict>
-			<key>CLASS</key>
-			<string>BDSKEncodingPopUpButton</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSPopUpButton</string>
-		</dict>
-		<dict>
 			<key>ACTIONS</key>
 			<dict>
 				<key>hideWindow</key>
@@ -372,6 +366,14 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKEncodingPopUpButton</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSPopUpButton</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -450,24 +452,6 @@
 		<dict>
 			<key>ACTIONS</key>
 			<dict>
-				<key>checkForUpdates</key>
-				<string>id</string>
-			</dict>
-			<key>CLASS</key>
-			<string>SUUpdater</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>delegate</key>
-				<string>id</string>
-			</dict>
-			<key>SUPERCLASS</key>
-			<string>NSObject</string>
-		</dict>
-		<dict>
-			<key>ACTIONS</key>
-			<dict>
 				<key>changeFont</key>
 				<string>id</string>
 				<key>copy</key>
@@ -503,6 +487,24 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSTableView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>checkForUpdates</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>SUUpdater</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>delegate</key>
+				<string>id</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -605,7 +607,7 @@
 				<key>fileSplitView</key>
 				<string>BDSKGradientSplitView</string>
 				<key>fileView</key>
-				<string>FileView</string>
+				<string>FVFileView</string>
 				<key>mainSplitView</key>
 				<string>BDSKGradientSplitView</string>
 				<key>matrix</key>
@@ -643,6 +645,8 @@
 		<dict>
 			<key>ACTIONS</key>
 			<dict>
+				<key>changeFont</key>
+				<string>id</string>
 				<key>copy</key>
 				<string>id</string>
 				<key>cut</key>
@@ -720,14 +724,6 @@
 			<string>NSDocumentController</string>
 		</dict>
 		<dict>
-			<key>CLASS</key>
-			<string>BDSKEditorTableView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSTableView</string>
-		</dict>
-		<dict>
 			<key>ACTIONS</key>
 			<dict>
 				<key>alternateCut</key>
@@ -741,6 +737,14 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>BDSKTableView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKEditorTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTableView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -985,6 +989,8 @@
 				<string>NSMenu</string>
 				<key>copyAsTemplateMenu</key>
 				<string>NSMenu</string>
+				<key>groupFieldMenu</key>
+				<string>NSMenu</string>
 				<key>groupSortMenu</key>
 				<string>NSMenu</string>
 				<key>previewDisplayMenu</key>
@@ -1053,6 +1059,8 @@
 			<string>ObjC</string>
 			<key>OUTLETS</key>
 			<dict>
+				<key>actionMenu</key>
+				<string>NSMenu</string>
 				<key>actionMenuButton</key>
 				<string>BDSKImagePopUpButton</string>
 				<key>addAndCloseButton</key>
@@ -1100,6 +1108,14 @@
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>BDSKSheetController</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSCell</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -1164,7 +1180,7 @@
 				<key>stopOrReloadButton</key>
 				<string>NSButton</string>
 				<key>urlField</key>
-				<string>NSTextField</string>
+				<string>BDSKDragTextField</string>
 				<key>view</key>
 				<string>BDSKEdgeView</string>
 				<key>webEdgeView</key>
@@ -1174,6 +1190,14 @@
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSWindowController</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKColoredView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -1315,6 +1339,14 @@
 			<string>NSWindowController</string>
 		</dict>
 		<dict>
+			<key>CLASS</key>
+			<string>BDSKGradientOutlineView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>BDSKOutlineView</string>
+		</dict>
+		<dict>
 			<key>ACTIONS</key>
 			<dict>
 				<key>addBookmark</key>
@@ -1365,6 +1397,14 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>BDSKGroupOutlineView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>BDSKGradientOutlineView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>BDSKPreferencePane</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -1375,14 +1415,6 @@
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSWindowController</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKColoredBox</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSBox</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -1434,6 +1466,14 @@
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>BDSKGradientView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKDragTextField</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTextField</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>

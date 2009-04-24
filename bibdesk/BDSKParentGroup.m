@@ -324,6 +324,13 @@
     }
 }
 
+- (void)setName:(id)newName {
+    if (name != newName) {
+        [name release];
+        name = [newName retain];
+    }
+}
+
 @end
 
 #pragma mark -

@@ -44,17 +44,9 @@
 @interface BDSKGroupOutlineView : BDSKGradientOutlineView {
     NSTextFieldCell *parentCell;
 }
-- (NSPopUpButtonCell *)popUpHeaderCell;
 - (NSTextFieldCell *)parentCell;
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note;
 - (void)updateHighlights;
-@end
-
-#pragma mark -
-
-@interface BDSKGroupTableHeaderView : NSTableHeaderView
-- (id)initWithTableColumn:(NSTableColumn *)tableColumn;
-- (NSPopUpButtonCell *)popUpHeaderCell;
 @end
 
 #pragma mark -
@@ -63,6 +55,5 @@
 - (NSIndexSet *)outlineView:(BDSKGroupOutlineView *)anOutlineView indexesOfRowsToHighlightInRange:(NSRange)indexRange;
 - (NSIndexSet *)outlineViewSingleSelectionIndexes:(BDSKGroupOutlineView *)anOutlineView;
 - (void)outlineView:(BDSKGroupOutlineView *)aTableView doubleClickedOnIconOfItem:(id)item;
-- (NSMenu *)outlineView:(BDSKGroupOutlineView *)anOutlineView menuForTableHeaderColumn:(NSTableColumn *)aTableColumn onPopUp:(BOOL)flag;
 - (BOOL)outlineViewShouldEditNextItemWhenEditingEnds:(BDSKGroupOutlineView *)aTableView;
 @end

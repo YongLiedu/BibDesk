@@ -1274,7 +1274,10 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 - (NSMenu *)outlineView:(NSOutlineView *)ov menuForTableColumn:(NSTableColumn *)tableColumn item:(id)item {
 	if (ov != groupOutlineView || tableColumn == nil || item == nil) 
 		return nil;
-		
+    
+    if (item == [groups categoryParent])
+        return [[NSApp delegate] groupFieldMenu];
+    
     NSMenu *menu = [[groupMenu copyWithZone:[NSMenu menuZone]] autorelease];
     [menu removeItemAtIndex:0];
     

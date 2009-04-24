@@ -349,7 +349,7 @@
 } 
 
 - (BOOL) validateChangeGroupFieldMenuItem:(NSMenuItem *)menuItem{
-	if([[menuItem title] isEqualToString:[self currentGroupField]])
+	if([([menuItem representedObject] ?: @"") isEqualToString:[self currentGroupField]])
 		[menuItem setState:NSOnState];
 	else
 		[menuItem setState:NSOffState];

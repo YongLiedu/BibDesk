@@ -113,6 +113,8 @@
 - (NSArray *)categoryGroups;
 - (void)setCategoryGroups:(NSArray *)array;
 
+- (void)setName:(id)newName;
+
 @end
 
 #pragma mark -

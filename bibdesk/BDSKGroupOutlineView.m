@@ -60,19 +60,7 @@
 
 - (void)awakeFromNib
 {
-    if([self numberOfColumns] == 0) 
-		[NSException raise:BDSKUnimplementedException format:@"%@ needs at least one column.", [self class]];
-    NSTableColumn *column = [[self tableColumns] objectAtIndex:0];
-    BDSKPRECONDITION(column);
- 	
-	NSTableHeaderView *currentTableHeaderView = [self headerView];
-	BDSKGroupTableHeaderView *customTableHeaderView = [[BDSKGroupTableHeaderView alloc] initWithTableColumn:column];
-	
-	[customTableHeaderView setFrame:[currentTableHeaderView frame]];
-	[customTableHeaderView setBounds:[currentTableHeaderView bounds]];
-	
-	[self setHeaderView:customTableHeaderView];	
-    [customTableHeaderView release];
+	[self setHeaderView:nil];	
     
     BDSKPRECONDITION([[self enclosingScrollView] contentView]);
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -93,10 +81,6 @@
 - (NSRect)frameOfOutlineCellAtRow:(NSInteger)row
 {
     return row > 0 ? [super frameOfOutlineCellAtRow:row] : NSZeroRect;
-}
-
-- (NSPopUpButtonCell *)popUpHeaderCell{
-	return [(BDSKGroupTableHeaderView *)[self headerView] popUpHeaderCell];
 }
 
 - (NSTextFieldCell *)parentCell {
@@ -302,82 +286,6 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
 - (IBAction)deselectAll:(id)sender {
 	[self selectRowIndexes:[NSIndexSet indexSetWithIndex:1] byExtendingSelection:NO];
 	[self scrollRowToVisible:0];
-}
-
-@end
-
-#pragma mark -
-
-@implementation BDSKGroupTableHeaderView 
-
-- (id)initWithTableColumn:(NSTableColumn *)tableColumn
-{
-    if(![super init])
-        return nil;
-    
-    BDSKHeaderPopUpButtonCell *cell;
-    cell = [[BDSKHeaderPopUpButtonCell alloc] initWithHeaderCell:[tableColumn headerCell]];
-        
-    [tableColumn setHeaderCell:cell];
-    [cell release];
-    
-    return self;
-}
-
-- (void)mouseDown:(NSEvent *)theEvent
-{
-    NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-    
-    NSInteger colIndex = [self columnAtPoint:location];
-    BDSKASSERT(colIndex != -1);
-    if(colIndex == -1)
-        return;
-    
-    NSTableColumn *column = [[[self tableView] tableColumns] objectAtIndex:colIndex];
-    id cell = [column headerCell];
-	NSRect headerRect = [self headerRectOfColumn:colIndex];
-    
-	if ([cell isKindOfClass:[BDSKHeaderPopUpButtonCell class]]) {
-		if (NSMouseInRect(location, [cell popUpRectForBounds:headerRect], [self isFlipped])) {
-			[cell trackMouse:theEvent 
-					  inRect:headerRect 
-					  ofView:self 
-				untilMouseUp:YES];
-		} else {
-			[super mouseDown:theEvent];
-		}
-	} else {
-		[super mouseDown:theEvent];
-	}
-}
-
-- (NSMenu *)menuForEvent:(NSEvent *)theEvent {
-	BDSKGroupOutlineView *outlineView = (BDSKGroupOutlineView *)[self tableView];
-	id delegate = [outlineView delegate];
-	NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-	NSInteger column = [self columnAtPoint:location];
-	
-	if (column == -1)
-		return nil;
-	
-	NSTableColumn *tableColumn = [[outlineView tableColumns] objectAtIndex:column];
-    id cell = [tableColumn headerCell];
-    BOOL onPopUp = NO;
-		
-	if ([cell isKindOfClass:[BDSKHeaderPopUpButtonCell class]] &&
-		NSMouseInRect(location, [cell popUpRectForBounds:[self headerRectOfColumn:column]], [self isFlipped])) 
-		onPopUp = YES;
-		
-	if ([delegate respondsToSelector:@selector(outlineView:menuForTableHeaderColumn:onPopUp:)]) {
-		return [delegate outlineView:outlineView menuForTableHeaderColumn:tableColumn onPopUp:onPopUp];
-	}
-	return nil;
-}
-
-- (NSPopUpButtonCell *)popUpHeaderCell{
-	id headerCell = [[[[self tableView] tableColumns] objectAtIndex:0] headerCell];
-	BDSKASSERT([headerCell isKindOfClass:[NSPopUpButtonCell class]]);
-	return headerCell;
 }
 
 @end

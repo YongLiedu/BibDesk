@@ -66,7 +66,6 @@
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group;
 - (BOOL)removePublications:(NSArray *)pubs fromGroups:(NSArray *)groupArray;
 - (BOOL)movePublications:(NSArray *)pubs fromGroup:(BDSKGroup *)group toGroupNamed:(NSString *)newGroupName;
-- (NSMenu *)groupFieldsMenu;
 
 - (IBAction)changeGroupFieldAction:(id)sender;
 - (IBAction)addGroupFieldAction:(id)sender;
@@ -81,7 +80,6 @@
 - (void)hideSearchGroupView;
 
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification;
-- (void)handleGroupFieldAddRemoveNotification:(NSNotification *)notification;
 - (void)handleGroupNameChangedNotification:(NSNotification *)notification;
 - (void)handleWebGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleStaticGroupChangedNotification:(NSNotification *)notification;

@@ -56,6 +56,7 @@
     
 	IBOutlet NSMenu *columnsMenu;
 	IBOutlet NSMenu *groupSortMenu;
+	IBOutlet NSMenu *groupFieldMenu;
 	IBOutlet NSMenu *copyAsTemplateMenu;
 	IBOutlet NSMenu *previewDisplayMenu;
 	IBOutlet NSMenu *sidePreviewDisplayMenu;
@@ -70,6 +71,7 @@
 - (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite;
 
 - (NSMenu *)groupSortMenu;
+- (NSMenu *)groupFieldMenu;
 	
 - (NSArray *)requiredFieldsForCiteKey;
 - (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;

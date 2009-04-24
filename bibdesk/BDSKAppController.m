@@ -537,6 +537,11 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 	return groupSortMenu;
 }
 
+- (NSMenu *)groupFieldMenu {
+    [self menuNeedsUpdate:groupFieldMenu];
+	return groupFieldMenu;
+}
+
 - (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
 	SEL act = [menuItem action];
 
@@ -640,6 +645,19 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         
         BibDocument *document = (BibDocument *)[[NSDocumentController sharedDocumentController] currentDocument];
         [menu addItemsFromMenu:[document columnsMenu]];
+        
+    } else if ([menu isEqual:groupFieldMenu]) {
+        
+        NSEnumerator *fieldEnum = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] reverseObjectEnumerator];
+        NSString *field;
+        
+        while ([[menu itemAtIndex:1] isSeparatorItem] == NO)
+            [menu removeItemAtIndex:1];
+        
+        while (field = [fieldEnum nextObject]) {
+            NSMenuItem *menuItem = [menu insertItemWithTitle:field action:@selector(changeGroupFieldAction:) keyEquivalent:@"" atIndex:1];
+            [menuItem setRepresentedObject:field];
+        }
         
     } else if ([menu isEqual:copyAsTemplateMenu]) {
     
