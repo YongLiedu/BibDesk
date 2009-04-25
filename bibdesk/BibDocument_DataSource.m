@@ -1070,8 +1070,6 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 	// the rows are always the selected rows
 	if (tv == tableView || tv == [fileSearchController tableView]) {
 		[self removeSelectedPubs:nil];
-	} else if (tv == groupOutlineView) {
-		[self removeSelectedGroups:nil];
 	}
 }
 
@@ -1090,7 +1088,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 }
 
 - (BOOL)tableView:(NSTableView *)tv canAlternateDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
-	if (tv == tableView || tv == [fileSearchController tableView] || tv == groupOutlineView) {
+	if (tv == tableView || tv == [fileSearchController tableView]) {
 		return [self hasExternalGroupsSelected] == NO && [rowIndexes count] > 0;
 	}
     return NO;
