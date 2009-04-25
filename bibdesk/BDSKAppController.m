@@ -644,7 +644,8 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             [menu removeItemAtIndex:0];
         
         BibDocument *document = (BibDocument *)[[NSDocumentController sharedDocumentController] currentDocument];
-        [menu addItemsFromMenu:[document columnsMenu]];
+        if ([document respondsToSelector:@selector(columnsMenu)])
+            [menu addItemsFromMenu:[document columnsMenu]];
         
     } else if ([menu isEqual:groupFieldMenu]) {
         
