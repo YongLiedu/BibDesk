@@ -77,6 +77,10 @@
 - (NSArray *)selectedURLs;
 - (NSArray *)selectedResults;
 
+- (NSArray *)identifierURLsAtIndexes:(NSIndexSet *)indexes;
+- (NSArray *)URLsAtIndexes:(NSIndexSet *)indexes;
+- (NSArray *)resultsAtIndexes:(NSIndexSet *)indexes;
+
 - (NSArray *)results;
 - (void)setResults:(NSArray *)newResults;
 - (NSArray *)filteredResults;

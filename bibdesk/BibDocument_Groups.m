@@ -1026,8 +1026,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         [self addStaticGroupAction:sender];
 }
 
-- (IBAction)removeSelectedGroups:(id)sender {
-    NSEnumerator *groupEnum = [[self selectedGroups] objectEnumerator];
+- (void)removeGroups:(NSArray *)theGroups {
+    NSEnumerator *groupEnum = [theGroups objectEnumerator];
 	BDSKGroup *group;
     BOOL didRemove = NO;
 	
@@ -1052,6 +1052,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 		[[self undoManager] setActionName:NSLocalizedString(@"Remove Groups", @"Undo action name")];
         [self displaySelectedGroups];
 	}
+}
+
+- (IBAction)removeSelectedGroups:(id)sender {
+    [self removeGroups:[self selectedGroups]];
 }
 
 - (void)editGroup:(BDSKGroup *)group {

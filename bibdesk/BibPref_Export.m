@@ -344,14 +344,18 @@
     }
 }
 
+- (BOOL)canDeleteItem:(BDSKTreeNode *)item
+{
+    return ((templatePrefList == BDSKExportTemplateList && [item isLeaf] == NO) || 
+            ([item isLeaf]  && [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO));
+}
+
 - (BOOL)canDeleteSelectedItem
 {
     NSInteger row = [outlineView selectedRow];
-    BDSKTreeNode *selItem = row == -1 ? nil : [outlineView itemAtRow:row];
-    if (selItem == nil)
+    if (row == -1)
         return NO;
-    return ((templatePrefList == BDSKExportTemplateList && [selItem isLeaf] == NO) || 
-            ([selItem isLeaf]  && [[selItem valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO));
+    return [self canDeleteItem:[outlineView itemAtRow:row]];
 }
 
 // we can't add items to the services outline view
@@ -368,16 +372,22 @@
 
 - (void)outlineView:(NSOutlineView *)ov deleteItems:(NSArray *)items;
 {
-    // currently we don't allow multiple selection, so we'll ignore the rows argument
-    if([self canDeleteSelectedItem])
+    // currently we don't allow multiple selection
+    BDSKTreeNode *item = [items lastObject];
+    if(item && [self canDeleteItem:item]) {
         [self removeNode:nil];
-    else
+        if ([item isLeaf])
+            [[item parent] removeChild:item];
+        else
+            [itemNodes removeObjectIdenticalTo:item];
+        [self updateUI];
+    } else
         NSBeep();
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov canDeleteItems:(NSArray *)items {
-    // currently we don't allow multiple selection, so we'll ignore the rows argument
-    return [self canDeleteSelectedItem];
+    // currently we don't allow multiple selection
+    return [self canDeleteItem:[items lastObject]];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov isGroupItem:(id)item {

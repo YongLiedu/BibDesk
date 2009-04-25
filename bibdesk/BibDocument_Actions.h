@@ -57,21 +57,12 @@
 */
 - (IBAction)newPub:(id)sender; // new pub button pressed.
 
-/*!
-    @method deleteSelectedPubs:
-    @abstract Deletes the selected publications from the document
-    @discussion Action of the Delete button. It removes the selected items of the tableview from the publications array. It assumes that there is at least one selected item -- the worst that could happen should be that the change count is wrong if it's called otherwise.
- @param sender The sending object - not used.
-    
-*/
+- (void)deletePubs:(NSArray *)pubs;
+
 - (IBAction)deleteSelectedPubs:(id)sender;
-/*!
-    @method removeSelectedPubs:
-    @abstract Removes the selected publications from the selected groups
-    @discussion It removes the selected items of the tableview from the groups selected in the group tableview, or deletes them if the first group is selected. It assumes that there is at least one selected item -- the worst that could happen should be that the change count is wrong if it's called otherwise.
- @param sender The sending object - not used.
-    
-*/
+
+- (void)removePubs:(NSArray *)pubs;
+
 - (IBAction)removeSelectedPubs:(id)sender;
 
 /*!

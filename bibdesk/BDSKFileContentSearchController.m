@@ -360,6 +360,19 @@
     return [resultsArrayController selectedObjects];
 }
 
+- (NSArray *)identifierURLsAtIndexes:(NSIndexSet *)indexes
+{
+    return [[[resultsArrayController arrangedObjects] objectsAtIndexes:indexes] valueForKeyPath:@"@distinctUnionOfObjects.identifierURL"];
+}
+
+- (NSArray *)URLsAtIndexes:(NSIndexSet *)indexes {
+    return [[[resultsArrayController arrangedObjects] objectsAtIndexes:indexes] valueForKeyPath:@"@distinctUnionOfObjects.URL"];
+}
+
+- (NSArray *)resultsAtIndexes:(NSIndexSet *)indexes {
+    return [[resultsArrayController arrangedObjects] objectsAtIndexes:indexes];
+}
+
 #pragma mark -
 #pragma mark SearchKit methods
 

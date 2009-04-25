@@ -185,30 +185,30 @@ static BOOL changingColors = NO;
 }
 
 - (void)removePubsAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-	if ([alert suppressionButtonState] == NSOnState)
+	NSArray *pubs = [(NSArray *)contextInfo autorelease];
+    if ([alert suppressionButtonState] == NSOnState)
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnRemovalFromGroupKey];
     if (returnCode == NSAlertDefaultReturn)
-        [self removePublications:[self selectedPublications] fromGroups:[self selectedGroups]];
+        [self removePublications:pubs fromGroups:[self selectedGroups]];
 }
 
 // this method is called for the main table; it's a wrapper for delete or remove from group
-- (IBAction)removeSelectedPubs:(id)sender{
+- (void)removePubs:(NSArray *)pubs{
 	NSArray *selectedGroups = [self selectedGroups];
 	
-	if([self hasLibraryGroupSelected]){
-		[self deleteSelectedPubs:sender];
-	}else{
+	if ([self hasLibraryGroupSelected]) {
+		[self deletePubs:pubs];
+	} else {
 		BOOL canRemove = NO;
         if ([self hasStaticGroupsSelected])
             canRemove = YES;
         else if ([[self currentGroupField] isSingleValuedGroupField] == NO)
             canRemove = [self hasCategoryGroupsSelected];
-		if(canRemove == NO){
+		if (canRemove == NO) {
 			NSBeep();
-			return;
 		}
         // the items may not belong to the groups that you're trying to remove them from, but we'll warn as if they were
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRemovalFromGroupKey]) {
+        else if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRemovalFromGroupKey]) {
             NSString *groupName = ([selectedGroups count] > 1 ? NSLocalizedString(@"multiple groups", @"multiple groups") : [NSString stringWithFormat:NSLocalizedString(@"group \"%@\"", @"group \"Name\""), [[selectedGroups firstObject] stringValue]]);
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
                                              defaultButton:NSLocalizedString(@"Yes", @"Button title")
@@ -220,15 +220,19 @@ static BOOL changingColors = NO;
             [alert beginSheetModalForWindow:documentWindow
                               modalDelegate:self 
                              didEndSelector:@selector(removePubsAlertDidEnd:returnCode:contextInfo:) 
-                                contextInfo:NULL];
-            return;
+                                contextInfo:[pubs retain]];
         } else {
-            [self removePublications:[self selectedPublications] fromGroups:selectedGroups];
+            [self removePublications:pubs fromGroups:selectedGroups];
         }
 	}
 }
 
+- (IBAction)removeSelectedPubs:(id)sender{
+	[self removePubs:[self selectedGroups]];
+}
+
 - (void)deletePubsAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+	NSArray *pubs = [(NSArray *)contextInfo autorelease];
 	if (alert != nil && [alert suppressionButtonState] == NSOnState)
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnDeleteKey];
     if (returnCode == NSAlertOtherReturn)
@@ -236,12 +240,12 @@ static BOOL changingColors = NO;
     
     // deletion changes the scroll position
     NSTableView *tv = [self isDisplayingFileContentSearch] ? [fileSearchController tableView] : tableView;
-	NSInteger numSelectedPubs = [self numberOfSelectedPubs];
+	NSInteger numPubs = [pubs count];
     
     // This is preserved as an ivar; since removePublications: triggers an async search as a UI update, restoring the selection/scroll position here will no longer work if a search is active.  Storing a row is safe since sort order should be stable.
     rowToSelectAfterDelete = [[tv selectedRowIndexes] lastIndex];
     scrollLocationAfterDelete = [[tv enclosingScrollView] scrollPositionAsPercentage];
-	[self removePublications:[self selectedPublications]];
+	[self removePublications:pubs];
     
     if([NSString isEmptyString:[self searchString]]) {
         if(rowToSelectAfterDelete >= [tv numberOfRows])
@@ -254,7 +258,7 @@ static BOOL changingColors = NO;
     }
     
 	NSString * pubSingularPlural;
-	if (numSelectedPubs == 1) {
+	if (numPubs == 1) {
 		pubSingularPlural = NSLocalizedString(@"publication", @"publication, in status message");
 	} else {
 		pubSingularPlural = NSLocalizedString(@"publications", @"publications, in status message");
@@ -263,17 +267,16 @@ static BOOL changingColors = NO;
 	[[self undoManager] setActionName:[NSString stringWithFormat:NSLocalizedString(@"Delete %@", @"Undo action name: Delete Publication(s)"),pubSingularPlural]];
 }
 
-- (IBAction)deleteSelectedPubs:(id)sender{
-	NSInteger numSelectedPubs = [self numberOfSelectedPubs];
-    if (numSelectedPubs == 0 ||
-        [self hasExternalGroupsSelected] == YES) {
+- (void)deletePubs:(NSArray *)pubs {
+	NSInteger numPubs = [pubs count];
+    if (numPubs == 0 || [self hasExternalGroupsSelected] == YES) {
         return;
     }
 	
 	if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnDeleteKey]) {
         NSString *info;
-        if (numSelectedPubs > 1)
-            info = [NSString stringWithFormat:NSLocalizedString(@"You are about to delete %ld publications. Do you want to proceed?", @"Informative text in alert dialog"), (long)numSelectedPubs];
+        if (numPubs > 1)
+            info = [NSString stringWithFormat:NSLocalizedString(@"You are about to delete %ld publications. Do you want to proceed?", @"Informative text in alert dialog"), (long)numPubs];
         else
             info = NSLocalizedString(@"You are about to delete a publication. Do you want to proceed?", @"Informative text in alert dialog");
 		NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
@@ -286,10 +289,14 @@ static BOOL changingColors = NO;
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self 
                          didEndSelector:@selector(deletePubsAlertDidEnd:returnCode:contextInfo:) 
-                            contextInfo:NULL];
+                            contextInfo:[pubs retain]];
 	} else {
-        [self deletePubsAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
+        [self deletePubsAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:[pubs retain]];
     }
+}
+
+- (IBAction)deleteSelectedPubs:(id)sender{
+    [self deletePubs:[self selectedPublications]];
 }
 
 // -delete:,  -alternateDelete:, -copy:, -cut:, -alternateCut:, -paste:, and -duplicate are defined in BDSKTableView and BDSKMainTableView using dataSource methods

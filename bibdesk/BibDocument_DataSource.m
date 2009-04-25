@@ -81,6 +81,7 @@
 #import <FileView/FileView.h>
 #import "BDSKApplication.h"
 #import "BDSKAppController.h"
+#import "BDSKFileContentSearchController.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
@@ -1067,9 +1068,18 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 }
 
 - (void)tableView:(NSTableView *)tv deleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
-	// the rows are always the selected rows
-	if (tv == tableView || tv == [fileSearchController tableView]) {
-		[self removeSelectedPubs:nil];
+	if (tv == tableView) {
+		[self removePubs:[shownPublications objectsAtIndexes:rowIndexes]];
+	} else if (tv == [fileSearchController tableView]) {
+        NSMutableArray *pubs = [NSMutableArray array];
+        NSEnumerator *itemEnum = [[fileSearchController identifierURLsAtIndexes:rowIndexes] objectEnumerator];
+        NSURL *idURL;
+        BibItem *pub;
+        while (idURL = [itemEnum nextObject]) {
+            if (pub = [publications itemForIdentifierURL:idURL])
+                [pubs addObject:pub];
+        }
+        [self removePubs:pubs];
 	}
 }
 
@@ -1081,9 +1091,18 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 }
 
 - (void)tableView:(NSTableView *)tv alternateDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
-	// the rows are always the selected rows
-	if (tv == tableView || tv == [fileSearchController tableView]) {
-		[self deleteSelectedPubs:nil];
+	if (tv == tableView) {
+		[self deletePubs:[shownPublications objectsAtIndexes:rowIndexes]];
+	} else if (tv == [fileSearchController tableView]) {
+        NSMutableArray *pubs = [NSMutableArray array];
+        NSEnumerator *itemEnum = [[fileSearchController identifierURLsAtIndexes:rowIndexes] objectEnumerator];
+        NSURL *idURL;
+        BibItem *pub;
+        while (idURL = [itemEnum nextObject]) {
+            if (pub = [publications itemForIdentifierURL:idURL])
+                [pubs addObject:pub];
+        }
+        [self deletePubs:pubs];
 	}
 }
 
@@ -1704,8 +1723,6 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 
 #pragma mark OutlineView actions
 
-// the next 3 are called from tableview actions defined in NSTableView_OAExtensions
-
 - (void)outlineViewInsertNewline:(NSOutlineView *)ov {
 	if (ov == groupOutlineView) {
 		[self renameGroupAction:nil];
@@ -1713,15 +1730,14 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 }
 
 - (void)outlineView:(NSOutlineView *)ov deleteItems:(NSArray *)items {
-	// the rows are always the selected rows
 	if (ov == groupOutlineView) {
-		[self removeSelectedGroups:nil];
+		[self removeGroups:items];
 	}
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov canDeleteItems:(NSArray *)items {
 	if (ov == groupOutlineView) {
-		return [self hasStaticGroupsSelected] || [self hasSmartGroupsSelected] || [self hasSearchGroupsSelected] || [self hasURLGroupsSelected] || [self hasScriptGroupsSelected];
+		return [[items filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isStatic == YES OR isSmart == YES OR isSearch == YES OR isURL == YES OR isScript == YES"]] count] > 0;
 	}
     return NO;
 }
