@@ -66,8 +66,7 @@ typedef struct _BDSKSearchIndexFlags
     BDSKReadWriteLock *rwLock;
     
     NSMutableArray *notificationQueue;
-    NSLock *noteLock;
-    NSMachPort *notificationPort;
+    NSConditionLock *noteLock;
     NSThread *notificationThread;
     NSConditionLock *setupLock;
     BDSKSearchIndexFlags flags;

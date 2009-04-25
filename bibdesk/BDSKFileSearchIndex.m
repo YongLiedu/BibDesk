@@ -66,6 +66,9 @@
 #define INDEX_THREAD_WORKING 3
 #define INDEX_THREAD_DONE 4
 
+#define QUEUE_EMPTY 0
+#define QUEUE_HAS_NOTIFICATIONS 1
+
 // increment if incompatible changes are introduced
 #define CACHE_VERSION @"1"
 
@@ -93,6 +96,9 @@
         
         delegate = nil;
         lastUpdateTime = CFAbsoluteTimeGetCurrent();
+        
+        notificationQueue = [[NSMutableArray alloc] init];
+        noteLock = [[NSConditionLock alloc] initWithCondition:QUEUE_EMPTY];
         
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
         SEL handler = @selector(processNotification:);
@@ -130,7 +136,6 @@
     identifierURLs = nil;
     [rwLock unlock];
     [rwLock release];
-    [notificationPort release];
     [notificationQueue release];
     [noteLock release];
     [signatures release];
@@ -140,16 +145,23 @@
     [super dealloc];
 }
 
+- (BOOL)shouldKeepRunning {
+    OSMemoryBarrier();
+    return flags.shouldKeepRunning == 1;
+}
+
 // cancel is always sent from the main thread
 - (void)cancelForDocumentURL:(NSURL *)documentURL
 {
     NSParameterAssert([NSThread isMainThread]);
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    OSAtomicCompareAndSwap32Barrier(flags.shouldKeepRunning, 0, &flags.shouldKeepRunning);
     
-    // wake the thread up so the runloop will exit; shouldKeepRunning may have already done that, so don't send if the port is already dead
-    if ([notificationPort isValid])
-        [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.shouldKeepRunning);
+    
+    [noteLock lock];
+    [notificationQueue removeAllObjects];
+    // wake the thread if necessary
+    [noteLock unlockWithCondition:QUEUE_HAS_NOTIFICATIONS];
     
     // wait until the thread exits, so we have exclusive access to the ivars
     [setupLock lockWhenCondition:INDEX_THREAD_DONE];
@@ -324,7 +336,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
 {
     BDSKASSERT([NSThread isMainThread]);
     OSMemoryBarrier();
-    if (flags.shouldKeepRunning == 1)
+    if ([self shouldKeepRunning])
         [delegate searchIndexDidFinish:self];
 }
 
@@ -423,8 +435,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     // Use a local pool since initial indexing can use a fair amount of memory, and it's not released until the thread's run loop starts
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
         
-    OSMemoryBarrier();
-    while(flags.shouldKeepRunning == 1 && (anObject = [enumerator nextObject])) {
+    while([self shouldKeepRunning] && (anObject = [enumerator nextObject])) {
         [self indexFileURLs:[NSSet setWithArray:[anObject objectForKey:@"urls"]] forIdentifierURL:[anObject objectForKey:@"identifierURL"]];
         numberIndexed++;
         @synchronized(self) {
@@ -436,13 +447,101 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
         
         if (0 == flags.updateScheduled)
             [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
-        OSMemoryBarrier();
     }
         
     // caller queues a final update
     
     [pool release];
 }
+
+#pragma mark Change notification handling
+
+- (void)processNotification:(NSNotification *)note
+{    
+    BDSKASSERT([NSThread isMainThread]);
+    // get the search index info, don't use the note because we don't want to retain the pubs
+    NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[note name], @"name", 
+                                [[note userInfo] valueForKeyPath:@"pubs.searchIndexInfo"], @"searchIndexInfo", nil];
+    [noteLock lock];
+    [notificationQueue addObject:info];
+    [noteLock unlockWithCondition:QUEUE_HAS_NOTIFICATIONS];
+}
+
+- (NSDictionary *)newNotification
+{
+    NSDictionary *note = nil;
+    [noteLock lockWhenCondition:QUEUE_HAS_NOTIFICATIONS];
+    NSUInteger count = [notificationQueue count];
+    if (count > 0) {
+        note = [[notificationQueue objectAtIndex:0] retain];
+        [notificationQueue removeObjectAtIndex:0];
+        count--;
+    }
+    [noteLock unlockWithCondition:(count > 0 ? QUEUE_HAS_NOTIFICATIONS : QUEUE_EMPTY)];
+    return note;
+}
+
+- (void)processDocAddItem:(NSArray *)searchIndexInfo
+{
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
+
+    BDSKPRECONDITION(searchIndexInfo);
+            
+    // this will update the delegate when all is complete
+    [self indexFilesForItems:searchIndexInfo numberPreviouslyIndexed:0 totalCount:[searchIndexInfo count]];        
+}
+
+- (void)processDocDelItem:(NSArray *)searchIndexInfo
+{
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
+
+	NSEnumerator *itemEnumerator = [searchIndexInfo objectEnumerator];
+    id anItem;
+        
+    NSURL *identifierURL = nil;
+    NSSet *urlsToRemove;
+    	
+    while (anItem = [itemEnumerator nextObject]) {
+        identifierURL = [anItem valueForKey:@"identifierURL"];
+        
+        [rwLock lockForReading];
+        urlsToRemove = [[[identifierURLs allKeysForObject:identifierURL] copy] autorelease];
+        [rwLock unlock];
+       
+        [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
+	}
+	
+    if (0 == flags.updateScheduled)
+        [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
+}
+
+- (void)processSearchIndexInfoChanged:(NSArray *)searchIndexInfo
+{
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    
+    NSDictionary *item = [searchIndexInfo lastObject];
+    NSURL *identifierURL = [item objectForKey:@"identifierURL"];
+    
+    NSSet *newURLs = [[NSSet alloc] initWithArray:[item valueForKey:@"urls"]];
+    NSMutableSet *removedURLs;
+    
+    [rwLock lockForReading];
+    removedURLs = [[identifierURLs allKeysForObject:identifierURL] mutableCopy];
+    [rwLock unlock];
+    [removedURLs minusSet:newURLs];
+    
+    if ([removedURLs count])
+        [self removeFileURLs:removedURLs forIdentifierURL:identifierURL];
+    
+    if ([newURLs count])
+        [self indexFileURLs:newURLs forIdentifierURL:identifierURL];
+        
+    [removedURLs release];
+    [newURLs release];
+    
+    if (0 == flags.updateScheduled)
+        [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
+}    
 
 #pragma mark Thread initialization
 
@@ -498,8 +597,7 @@ static void addItemFunction(const void *value, void *context) {
         // cached index, update identifierURLs and remove unlinked or invalid indexed URLs
         
         // set the identifierURLs map, so we can build search results immediately; no problem if it contains URLs that were not indexed or are replaced, we know these URLs should be added eventually
-        OSMemoryBarrier();
-        if (flags.shouldKeepRunning == 1) {
+        if ([self shouldKeepRunning]) {
             [rwLock lockForWriting];
             CFArrayApplyFunction((CFArrayRef)items, CFRangeMake(0, totalObjectCount), addItemFunction, (void *)identifierURLs);
             [rwLock unlock];
@@ -514,8 +612,7 @@ static void addItemFunction(const void *value, void *context) {
         id anItem = nil;
         
         // find URLs in the database that needs to be indexed, and URLs that were indexeed but are not in the database anymore
-        OSMemoryBarrier();
-        while(flags.shouldKeepRunning == 1 && (anItem = [itemEnum nextObject])) {
+        while([self shouldKeepRunning] && (anItem = [itemEnum nextObject])) {
             
             NSAutoreleasePool *pool = [NSAutoreleasePool new];
             
@@ -549,12 +646,10 @@ static void addItemFunction(const void *value, void *context) {
             }
             
             [pool release];
-            OSMemoryBarrier();
         }
             
         // remove URLs we could not find in the database
-        OSMemoryBarrier();
-        if (flags.shouldKeepRunning == 1 && [URLsToRemove count]) {
+        if ([self shouldKeepRunning] && [URLsToRemove count]) {
             NSEnumerator *urlEnum = [URLsToRemove objectEnumerator];
             NSURL *url;
             while (url = [urlEnum nextObject])
@@ -571,8 +666,7 @@ static void addItemFunction(const void *value, void *context) {
     }
     
     // add items that were not yet indexed
-    OSMemoryBarrier();
-    if (flags.shouldKeepRunning == 1 && [items count]) {
+    if ([self shouldKeepRunning] && [items count]) {
         [self indexFilesForItems:items numberPreviouslyIndexed:numberIndexed totalCount:totalObjectCount];
     }
     
@@ -591,13 +685,6 @@ static void addItemFunction(const void *value, void *context) {
     // release at the end of this method, just before the thread exits
     notificationThread = [[NSThread currentThread] retain];
     
-    notificationPort = [[NSMachPort alloc] init];
-    [notificationPort setDelegate:self];
-    [[NSRunLoop currentRunLoop] addPort:notificationPort forMode:NSDefaultRunLoopMode];
-    
-    notificationQueue = [[NSMutableArray alloc] initWithCapacity:5];
-    noteLock = [[NSLock alloc] init];
-    
     [setupLock unlockWithCondition:INDEX_STARTUP_COMPLETE];
     
     [setupLock lockWhenCondition:INDEX_THREAD_WORKING];
@@ -613,17 +700,25 @@ static void addItemFunction(const void *value, void *context) {
     // run the current run loop until we get a cancel message, or else the current thread/run loop will just go away when this function returns    
     @try{
         
-        NSRunLoop *rl = [NSRunLoop currentRunLoop];
-        BOOL keepRunning;
-        NSDate *distantFuture = [NSDate distantFuture];
+        while ([self shouldKeepRunning]) {
+            // this blocks until a new note is available, or the index finishes
+            NSDictionary *note = [self newNotification];
+            if (note) {
+                NSString *name = [note valueForKey:@"name"];
+                NSArray *searchIndexInfo = [note valueForKey:@"searchIndexInfo"];
+                
+                // this is a background thread that can handle these notifications
+                if ([name isEqualToString:BDSKFileSearchIndexInfoChangedNotification])
+                    [self processSearchIndexInfoChanged:searchIndexInfo];
+                else if ([name isEqualToString:BDSKDocAddItemNotification])
+                    [self processDocAddItem:searchIndexInfo];
+                else if ([name isEqualToString:BDSKDocDelItemNotification])
+                    [self processDocDelItem:searchIndexInfo];
+                
+                [note release];
+            }
+        }
         
-        do {
-            [pool release];
-            pool = [[NSAutoreleasePool alloc] init];
-            // Running with beforeDate: distantFuture causes the runloop to block indefinitely if shouldKeepRunning was set to 0 during the initial indexing phase; invalidating and removing the port manually doesn't change this.  Hence, we need to check that flag before running the runloop, or use a short limit date.
-            OSMemoryBarrier();
-            keepRunning = (flags.shouldKeepRunning == 1) && [rl runMode:NSDefaultRunLoopMode beforeDate:distantFuture];
-        } while(keepRunning);
     }
     @catch(id localException){
         NSLog(@"Exception %@ raised in search index; exiting thread run loop.", localException);
@@ -640,116 +735,7 @@ static void addItemFunction(const void *value, void *context) {
         
         [notificationThread release];
         notificationThread = nil;
-        [notificationPort invalidate];
         [setupLock unlockWithCondition:INDEX_THREAD_DONE];
-    }
-}
-
-#pragma mark Change notification handling
-
-- (void)processNotification:(NSNotification *)note
-{    
-    BDSKASSERT([NSThread isMainThread]);
-    // get the search index info, don't use the note because we don't want to retain the pubs
-    NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[note name], @"name", 
-                                [[note userInfo] valueForKeyPath:@"pubs.searchIndexInfo"], @"searchIndexInfo", nil];
-    [noteLock lock];
-    [notificationQueue addObject:info]; // Forward the notification to the correct thread
-    [noteLock unlock];
-    [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
-}
-
-- (void)handleDocAddItem:(NSArray *)searchIndexInfo
-{
-    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
-
-    BDSKPRECONDITION(searchIndexInfo);
-            
-    // this will update the delegate when all is complete
-    [self indexFilesForItems:searchIndexInfo numberPreviouslyIndexed:0 totalCount:[searchIndexInfo count]];        
-}
-
-- (void)handleDocDelItem:(NSArray *)searchIndexInfo
-{
-    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
-
-	NSEnumerator *itemEnumerator = [searchIndexInfo objectEnumerator];
-    id anItem;
-        
-    NSURL *identifierURL = nil;
-    NSSet *urlsToRemove;
-    	
-    while (anItem = [itemEnumerator nextObject]) {
-        identifierURL = [anItem valueForKey:@"identifierURL"];
-        
-        [rwLock lockForReading];
-        urlsToRemove = [[[identifierURLs allKeysForObject:identifierURL] copy] autorelease];
-        [rwLock unlock];
-       
-        [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
-	}
-	
-    if (0 == flags.updateScheduled)
-        [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
-}
-
-- (void)handleSearchIndexInfoChanged:(NSArray *)searchIndexInfo
-{
-    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
-    
-    NSDictionary *item = [searchIndexInfo lastObject];
-    NSURL *identifierURL = [item objectForKey:@"identifierURL"];
-    
-    NSSet *newURLs = [[NSSet alloc] initWithArray:[item valueForKey:@"urls"]];
-    NSMutableSet *removedURLs;
-    
-    [rwLock lockForReading];
-    removedURLs = [[identifierURLs allKeysForObject:identifierURL] mutableCopy];
-    [rwLock unlock];
-    [removedURLs minusSet:newURLs];
-    
-    if ([removedURLs count])
-        [self removeFileURLs:removedURLs forIdentifierURL:identifierURL];
-    
-    if ([newURLs count])
-        [self indexFileURLs:newURLs forIdentifierURL:identifierURL];
-        
-    [removedURLs release];
-    [newURLs release];
-    
-    if (0 == flags.updateScheduled)
-        [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
-}    
-
-- (NSDictionary *)newNotification {
-    NSDictionary *note = nil;
-    [noteLock lock];
-    if ([notificationQueue count]) {
-        note = [[notificationQueue objectAtIndex:0] retain];
-        [notificationQueue removeObjectAtIndex:0];
-    }
-    [noteLock unlock];
-    return note;
-}
-
-- (void)handleMachMessage:(void *)msg
-{
-    BDSKASSERT([NSThread isMainThread] == NO);
-    NSDictionary *note;
-    
-    while (note = [self newNotification]) {
-        NSString *name = [note valueForKey:@"name"];
-        NSArray *searchIndexInfo = [note valueForKey:@"searchIndexInfo"];
-        // this is a background thread that can handle these notifications
-        if([name isEqualToString:BDSKFileSearchIndexInfoChangedNotification])
-            [self handleSearchIndexInfoChanged:searchIndexInfo];
-        else if([name isEqualToString:BDSKDocAddItemNotification])
-            [self handleDocAddItem:searchIndexInfo];
-        else if([name isEqualToString:BDSKDocDelItemNotification])
-            [self handleDocDelItem:searchIndexInfo];
-        else
-            [NSException raise:NSInvalidArgumentException format:@"notification %@ is not handled by %@", note, self];
-        [note release];
     }
 }
 
