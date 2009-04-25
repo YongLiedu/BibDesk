@@ -467,20 +467,6 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     [noteLock unlockWithCondition:QUEUE_HAS_NOTIFICATIONS];
 }
 
-- (NSDictionary *)newNotification
-{
-    NSDictionary *note = nil;
-    [noteLock lockWhenCondition:QUEUE_HAS_NOTIFICATIONS];
-    NSUInteger count = [notificationQueue count];
-    if (count > 0) {
-        note = [[notificationQueue objectAtIndex:0] retain];
-        [notificationQueue removeObjectAtIndex:0];
-        count--;
-    }
-    [noteLock unlockWithCondition:(count > 0 ? QUEUE_HAS_NOTIFICATIONS : QUEUE_EMPTY)];
-    return note;
-}
-
 - (void)processDocAddItem:(NSArray *)searchIndexInfo
 {
     BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
@@ -542,6 +528,35 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     if (0 == flags.updateScheduled)
         [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
 }    
+
+- (void)processNextNotification
+{
+    NSDictionary *note = nil;
+    
+    [noteLock lockWhenCondition:QUEUE_HAS_NOTIFICATIONS];
+    NSUInteger count = [notificationQueue count];
+    if (count > 0) {
+        note = [[notificationQueue objectAtIndex:0] retain];
+        [notificationQueue removeObjectAtIndex:0];
+        count--;
+    }
+    [noteLock unlockWithCondition:(count > 0 ? QUEUE_HAS_NOTIFICATIONS : QUEUE_EMPTY)];
+    
+    if (note) {
+        NSString *name = [note valueForKey:@"name"];
+        NSArray *searchIndexInfo = [note valueForKey:@"searchIndexInfo"];
+        
+        // this is a background thread that can handle these notifications
+        if ([name isEqualToString:BDSKFileSearchIndexInfoChangedNotification])
+            [self processSearchIndexInfoChanged:searchIndexInfo];
+        else if ([name isEqualToString:BDSKDocAddItemNotification])
+            [self processDocAddItem:searchIndexInfo];
+        else if ([name isEqualToString:BDSKDocDelItemNotification])
+            [self processDocDelItem:searchIndexInfo];
+        
+        [note release];
+    }
+}
 
 #pragma mark Thread initialization
 
@@ -693,35 +708,19 @@ static void addItemFunction(const void *value, void *context) {
     @try{
         [self buildIndexWithInfo:info];
     }
-    @catch(id localException){
-        NSLog(@"Ignoring exception %@ raised while rebuilding index", localException);
+    @catch(id e){
+        NSLog(@"Ignoring exception %@ raised while rebuilding index", e);
     }
         
-    // run the current run loop until we get a cancel message, or else the current thread/run loop will just go away when this function returns    
+    // process notifications from the notificationQueue until we should stop
     @try{
-        
         while ([self shouldKeepRunning]) {
             // this blocks until a new note is available, or the index finishes
-            NSDictionary *note = [self newNotification];
-            if (note) {
-                NSString *name = [note valueForKey:@"name"];
-                NSArray *searchIndexInfo = [note valueForKey:@"searchIndexInfo"];
-                
-                // this is a background thread that can handle these notifications
-                if ([name isEqualToString:BDSKFileSearchIndexInfoChangedNotification])
-                    [self processSearchIndexInfoChanged:searchIndexInfo];
-                else if ([name isEqualToString:BDSKDocAddItemNotification])
-                    [self processDocAddItem:searchIndexInfo];
-                else if ([name isEqualToString:BDSKDocDelItemNotification])
-                    [self processDocDelItem:searchIndexInfo];
-                
-                [note release];
-            }
+            [self processNextNotification];
         }
-        
     }
-    @catch(id localException){
-        NSLog(@"Exception %@ raised in search index; exiting thread run loop.", localException);
+    @catch(id e){
+        NSLog(@"Exception %@ raised in search index; exiting thread run loop.", e);
         
         // clean these up to make sure we have no chance of saving it to disk
         if (index) CFRelease(index);
