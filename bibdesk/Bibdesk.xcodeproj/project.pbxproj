@@ -244,7 +244,6 @@
 		CED65AC30906BE65003EED90 /* BibPref_ScriptHooks.nib in Resources */ = {isa = PBXBuildFile; fileRef = CED65AC10906BE65003EED90 /* BibPref_ScriptHooks.nib */; };
 		CED65DC90907A2FD003EED90 /* BDSKParseFormatCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65DC70907A2FD003EED90 /* BDSKParseFormatCommand.m */; };
 		CED65DCD0907A338003EED90 /* BDSKScriptHook+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */; };
-		CEDA7D410F9609D600F72C0A /* RALatchTrigger.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDA7D3F0F9609D600F72C0A /* RALatchTrigger.m */; };
 		CEDA7E0D0F96497B00F72C0A /* NSAlert_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDA7E0B0F96497B00F72C0A /* NSAlert_BDSKExtensions.m */; };
 		CEDB58F40D3692A400E40354 /* ComplexStringEditor.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEDB58F20D3692A400E40354 /* ComplexStringEditor.nib */; };
 		CEDBDE4C0F4C863500190AF5 /* BDSKPreferenceRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDBDE4A0F4C863500190AF5 /* BDSKPreferenceRecord.m */; };
@@ -1256,8 +1255,6 @@
 		CED65DC70907A2FD003EED90 /* BDSKParseFormatCommand.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKParseFormatCommand.m; sourceTree = "<group>"; };
 		CED65DCA0907A338003EED90 /* BDSKScriptHook+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = "BDSKScriptHook+Scripting.h"; sourceTree = "<group>"; };
 		CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BDSKScriptHook+Scripting.m"; sourceTree = "<group>"; };
-		CEDA7D3E0F9609D600F72C0A /* RALatchTrigger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RALatchTrigger.h; sourceTree = "<group>"; };
-		CEDA7D3F0F9609D600F72C0A /* RALatchTrigger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RALatchTrigger.m; sourceTree = "<group>"; };
 		CEDA7E0A0F96497B00F72C0A /* NSAlert_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSAlert_BDSKExtensions.h; sourceTree = "<group>"; };
 		CEDA7E0B0F96497B00F72C0A /* NSAlert_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSAlert_BDSKExtensions.m; sourceTree = "<group>"; };
 		CEDB58F30D3692A400E40354 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/ComplexStringEditor.nib; sourceTree = "<group>"; };
@@ -2029,7 +2026,6 @@
 				CE3E4A080E75B9F20014C328 /* Ken Ferry */,
 				F924FC140BC4000B00672839 /* harmless */,
 				CEED2A820F4D85220078E87A /* IconFamily */,
-				CEDA7D3A0F96098100F72C0A /* RAOperationQueue */,
 			);
 			name = "Third Party Sources";
 			path = vendorsrc;
@@ -2419,16 +2415,6 @@
 				CEB34BA80F5CB2CC0037E086 /* Sparkle Unit Tests.octest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		CEDA7D3A0F96098100F72C0A /* RAOperationQueue */ = {
-			isa = PBXGroup;
-			children = (
-				CEDA7D3E0F9609D600F72C0A /* RALatchTrigger.h */,
-				CEDA7D3F0F9609D600F72C0A /* RALatchTrigger.m */,
-			);
-			name = RAOperationQueue;
-			path = RoqueAmoeba/RAOperationQueue;
 			sourceTree = "<group>";
 		};
 		CEE23BAE0BFBA5FE002B746B /* Shared Support */ = {
@@ -3955,7 +3941,6 @@
 				CE1EF3890F8E6190004E7AE8 /* BDSKGradientTableView.m in Sources */,
 				6C5DE3E80F8FC33B00E02D5F /* BDSKMathSiteParser.m in Sources */,
 				6CD26A240F928EEE0089FDFD /* BDSKBibDeskProtocol.m in Sources */,
-				CEDA7D410F9609D600F72C0A /* RALatchTrigger.m in Sources */,
 				CEDA7E0D0F96497B00F72C0A /* NSAlert_BDSKExtensions.m in Sources */,
 				6CAEE4CD0F98EC63009EA5FE /* BDSKCOinSParser.m in Sources */,
 			);
