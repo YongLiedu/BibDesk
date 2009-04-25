@@ -288,7 +288,8 @@ static NSImage *unlockedIcon = nil;
             [NSString setMacroResolverForUnarchiving:nil];
         }
         [self setPublications:pubs];
-    } else if ([key isEqualToString:@"archivedMacros"]) {
+    }
+    if ([key isEqualToString:@"archivedMacros"] || notification == nil) {
         NSData *archive = [client archivedMacros];
         NSDictionary *macros = nil;
         if (archive) {
