@@ -360,7 +360,6 @@ static NSData *copyMARC8BytesToUTF8(const char *buf, int length)
             {
                 int e = yaz_iconv_error(cd);
                 if (e != YAZ_ICONV_E2BIG) {
-                    [outputData release];
                     outputData = nil;
                     break;
                 }
