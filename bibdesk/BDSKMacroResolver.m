@@ -327,11 +327,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 - (id)initWithOwner:(id<BDSKOwner>)anOwner{
     if (self = [super initWithOwner:nil]) {
         // store system-defined macros for the months.
-        // we grab their localized versions for display.
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
-#warning fixme: NSMonthNameArray is deprecated, use NSLocale instead
-#endif
-        NSDictionary *standardDefs = [NSDictionary dictionaryWithObjects:[[NSUserDefaults standardUserDefaults] objectForKey:NSMonthNameArray]
+        NSDictionary *standardDefs = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December", nil]
                                                                  forKeys:[NSArray arrayWithObjects:@"jan", @"feb", @"mar", @"apr", @"may", @"jun", @"jul", @"aug", @"sep", @"oct", @"nov", @"dec", nil]];
         standardMacroDefinitions = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
         [standardMacroDefinitions addEntriesFromDictionary:standardDefs];
