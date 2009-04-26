@@ -210,7 +210,7 @@ static NSInteger MAX_RATING = 5;
 
 + (NSString *)stringWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
 {
-    return [[self alloc] initWithContentsOfFile:path encoding:encoding guessEncoding:try];
+    return [[[self alloc] initWithContentsOfFile:path encoding:encoding guessEncoding:try] autorelease];
 }
 
 + (NSString *)stringWithFileSystemRepresentation:(const char *)cstring;
