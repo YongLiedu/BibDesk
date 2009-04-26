@@ -348,7 +348,7 @@
 	if ([complexStringEditor isEditing] || row == -1) 
 		return NO;
 	if(complexStringEditor == nil) {
-        complexStringEditor = [[BDSKComplexStringEditor alloc] init];
+        complexStringEditor = [[BDSKComplexStringEditor alloc] initWithMacroResolver:macroResolver];
         [complexStringEditor setEditable:isEditable];
     }
     BDSKMacro *macro = [[arrayController arrangedObjects] objectAtIndex:row];
@@ -360,7 +360,7 @@
 		[[[tableView tableColumnWithIdentifier:@"value"] dataCellForRow:row] setObjectValue:value];
 		[fieldEditor selectAll:self];
 	}
-	return [complexStringEditor attachToTableView:tableView atRow:row column:1 withValue:value formatter:tableCellFormatter];
+	return [complexStringEditor attachToTableView:tableView atRow:row column:1 withValue:value];
 }
 
 #pragma mark BDSKMacroFormatter delegate

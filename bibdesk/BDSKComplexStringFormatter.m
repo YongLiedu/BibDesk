@@ -48,8 +48,6 @@
 
 - (id)initWithDelegate:(id)anObject macroResolver:(BDSKMacroResolver *)aMacroResolver {
     if (self = [super init]) {
-		parsedString = nil;
-		parseError = nil;
 		highlighted = NO;
 		editAsComplexString = NO;
 		[self setMacroResolver:aMacroResolver];
@@ -60,8 +58,6 @@
 
 - (void)dealloc {
     [macroResolver release];
-    [parsedString release];
-    [parseError release];
     [super dealloc];
 }
 
@@ -73,18 +69,11 @@
 
 - (NSString *)editingStringForObjectValue:(id)obj {
 	NSString *string = [self stringForObjectValue:obj];
-	[parsedString release];
-	parsedString = [obj retain];
-	[parseError release];
-	parseError = nil;
-	if ([obj isComplex] == YES && editAsComplexString == NO) {
+	if ([obj isComplex] && editAsComplexString == NO) {
 		if ([delegate respondsToSelector:@selector(formatter:shouldEditAsComplexString:)])
 			editAsComplexString = [delegate formatter:self shouldEditAsComplexString:obj];
 	}
-	if (editAsComplexString)
-		return [string stringAsBibTeXString];
-	else
-		return string;
+	return editAsComplexString ? [string stringAsBibTeXString] : string;
 }
 
 - (NSAttributedString *)attributedStringForObjectValue:(id)obj withDefaultAttributes:(NSDictionary *)defaultAttrs{
@@ -126,9 +115,6 @@
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
     
-    [self setParseError:nil];
-    [self setParsedString:nil];
-    
     // convert newlines to a single space, then collapse (mainly for paste/drag text, RFE #1457532)
     if([string rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet]].length){
         string = [string stringByReplacingCharactersInSet:[NSCharacterSet newlineCharacterSet] withString:@" "];
@@ -138,64 +124,25 @@
     string = [string stringByReplacingCharactersInSet:[NSCharacterSet controlCharacterSet] withString:@""];
     string = [string stringByReplacingCharactersInSet:[NSCharacterSet illegalCharacterSet] withString:@""];
     
-    NSError *complexError = nil;
-    
     if (editAsComplexString) {
-        NSString *complexString = [NSString stringWithBibTeXString:string macroResolver:macroResolver error:&complexError];
-        if (complexString)
-            [self setParsedString:complexString];
+        NSError *complexError = nil;
+        string = [NSString stringWithBibTeXString:string macroResolver:macroResolver error:&complexError];
+        if (string == nil && error)
+            *error = [complexError localizedDescription];
     } else if ([string isStringTeXQuotingBalancedWithBraces:YES connected:NO] == NO) {
-        // not really a complex string exception, but we'll handle it the same way
-        complexError = [NSError mutableLocalErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Unbalanced braces", @"error description")];
-    } else {
-        [self setParsedString:string];
+        string = nil;
+        if (error)
+            *error = NSLocalizedString(@"Unbalanced braces", @"error description");
     }
-
-    if (complexError)
-        [self setParseError:[complexError localizedDescription]];
     
-    if(error)
-        *error = [self parseError];
-    if(obj)
-        *obj = [self parsedString];
-
-    return (parseError ? NO : YES);
-}
-
-- (BOOL)isPartialStringValid:(NSString **)partialStringPtr     
-	   proposedSelectedRange:(NSRangePointer)proposedSelRangePtr  
-			  originalString:(NSString *)origString 
-	   originalSelectedRange:(NSRange)origSelRange
-            errorDescription:(NSString **)error{
-	// this sets the parsed string or the parse error
-	[self getObjectValue:NULL forString:*partialStringPtr errorDescription:NULL];
-    // return YES even if not valid or we won't be able to edit
-	return YES;
+    if (string == nil)
+        return NO;
+    else if (obj)
+        *obj = string;
+    return YES;
 }
 
 #pragma mark Accessors
-
-- (NSString *)parseError {
-    return [[parseError retain] autorelease];
-}
-
-- (void)setParseError:(NSString *)newError{
-    if(parseError != newError){
-        [parseError release];
-        parseError = [newError copy];
-    }
-}
-
-- (NSString *)parsedString {
-    return [[parsedString retain] autorelease];
-}
-
-- (void)setParsedString:(NSString *)newString{
-    if(parsedString != newString){
-        [parsedString release];
-        parsedString = [newString copy];
-    }
-}
 
 - (id)macroResolver {
     return macroResolver;

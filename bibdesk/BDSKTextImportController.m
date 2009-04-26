@@ -1366,8 +1366,8 @@
 	if ([complexStringEditor isEditing] || row == -1 || [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] || [[fields objectAtIndex:row] isCitationField]) 
 		return NO;
 	if (complexStringEditor == nil)
-    	complexStringEditor = [[BDSKComplexStringEditor alloc] init];
-	NSString *value = [item valueOfField:[fields objectAtIndex:row]];
+    	complexStringEditor = [[BDSKComplexStringEditor alloc] initWithMacroResolver:[self macroResolver]];
+    NSString *value = [item valueOfField:[fields objectAtIndex:row]];
 	NSText *fieldEditor = [itemTableView currentEditor];
 	[tableCellFormatter setEditAsComplexString:YES];
 	if (fieldEditor) {
@@ -1375,7 +1375,7 @@
 		[[[itemTableView tableColumnWithIdentifier:@"value"] dataCellForRow:row] setObjectValue:value];
 		[fieldEditor selectAll:self];
 	}
-	return [complexStringEditor attachToTableView:itemTableView atRow:row column:2 withValue:value formatter:tableCellFormatter];
+	return [complexStringEditor attachToTableView:itemTableView atRow:row column:2 withValue:value];
 }
 
 #pragma mark BDSKMacroFormatter delegate

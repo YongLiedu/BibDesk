@@ -1825,7 +1825,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	if ([complexStringEditor isEditing] || row == -1) 
 		return NO;
 	if (complexStringEditor == nil) {
-    	complexStringEditor = [[BDSKComplexStringEditor alloc] init];
+    	complexStringEditor = [[BDSKComplexStringEditor alloc] initWithMacroResolver:[[publication owner] macroResolver]];
         [complexStringEditor setEditable:isEditable];
 	}
     NSString *value = [publication valueOfField:[fields objectAtIndex:row]];
@@ -1836,7 +1836,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		[[[tableView tableColumnWithIdentifier:@"value"] dataCellForRow:row] setObjectValue:value];
 		[fieldEditor selectAll:self];
 	}
-	return [complexStringEditor attachToTableView:tableView atRow:row column:1 withValue:value formatter:tableCellFormatter];
+	return [complexStringEditor attachToTableView:tableView atRow:row column:1 withValue:value];
 }
 
 - (BOOL)formatter:(BDSKComplexStringFormatter *)formatter shouldEditAsComplexString:(NSString *)object {

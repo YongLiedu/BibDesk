@@ -39,21 +39,28 @@
 
 #import <AppKit/AppKit.h>
 
-@class BDSKBackgroundView, BDSKComplexStringFormatter;
+@class BDSKBackgroundView, BDSKMacroResolver;
 
 @interface BDSKComplexStringEditor : NSWindowController {
     IBOutlet NSTextField *expandedValueTextField;
     IBOutlet BDSKBackgroundView *backgroundView;
+    BDSKMacroResolver *macroResolver;
 	NSTableView *tableView;
-    BDSKComplexStringFormatter *formatter;
 	NSInteger row;
 	NSInteger column;
     BOOL editable;
 }
 
-- (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(NSInteger)aRow column:(NSInteger)aColumn withValue:(NSString *)aString formatter:(BDSKComplexStringFormatter *)aFormatter;
+- (id)initWithMacroResolver:(BDSKMacroResolver *)aMacroResolver;
+
+- (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(NSInteger)aRow column:(NSInteger)aColumn withValue:(NSString *)aString;
+
 - (BOOL)isEditing;
+
 - (BOOL)isEditable;
 - (void)setEditable:(BOOL)flag;
+
+- (BDSKMacroResolver *)macroResolver;
+- (void)setMacroResolver:(BDSKMacroResolver *)newMacroResolver;
 
 @end

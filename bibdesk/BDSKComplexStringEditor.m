@@ -36,7 +36,7 @@
 
 #import "BDSKComplexStringEditor.h"
 #import "BDSKComplexString.h"
-#import "BDSKComplexStringFormatter.h"
+#import "BDSKMacroResolver.h"
 #import "BDSKBackgroundView.h"
 #import "NSWindowController_BDSKExtensions.h"
 
@@ -45,7 +45,7 @@
 - (void)endEditingAndOrderOut;
 
 - (void)setExpandedValue:(NSString *)expandedValue;
-- (void)setErrorReason:(NSString *)reason errorMessage:(NSString *)message;
+- (void)setError:(NSError *)error;
 
 - (void)cellFrameDidChange:(NSNotification *)notification;
 - (void)cellWindowDidBecomeKey:(NSNotification *)notification;
@@ -58,15 +58,24 @@
 
 @implementation BDSKComplexStringEditor
 
-- (id)init {
+- (id)initWithMacroResolver:(BDSKMacroResolver *)aMacroResolver {
 	if (self = [super initWithWindowNibName:@"ComplexStringEditor"]) {
 		tableView = nil;
-        formatter = nil;
+        macroResolver = [aMacroResolver retain];
 		row = -1;
 		column = -1;
         editable = YES;
 	}
 	return self;
+}
+
+- (id)init {
+    return [self initWithMacroResolver:nil];
+}
+
+- (void)dealloc {
+    [macroResolver release];
+    [super dealloc];
 }
 
 - (BOOL)isEditable {
@@ -77,12 +86,22 @@
     editable = flag;
 }
 
-- (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(NSInteger)aRow column:(NSInteger)aColumn withValue:(NSString *)aString formatter:(BDSKComplexStringFormatter *)aFormatter {
+- (BDSKMacroResolver *)macroResolver {
+    return macroResolver;
+}
+
+- (void)setMacroResolver:(BDSKMacroResolver *)newMacroResolver {
+    if (macroResolver != newMacroResolver) {
+        [macroResolver release];
+        macroResolver = [newMacroResolver retain];
+    }
+}
+
+- (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(NSInteger)aRow column:(NSInteger)aColumn withValue:(NSString *)aString {
 	if ([self isEditing]) 
 		return NO; // we are already busy editing
     
 	tableView = [aTableView retain];
-	formatter = [aFormatter retain];
 	row = aRow;
 	column = aColumn;
 	
@@ -172,8 +191,6 @@
 	// release the temporary objects
 	[tableView release];
 	tableView = nil; // we should set this to nil, as we use this as a flag that we are editing
-	[formatter release];
-	formatter = nil;
 	row = -1;
 	column = -1;
 }
@@ -187,7 +204,9 @@
 	[expandedValueTextField setToolTip:NSLocalizedString(@"This field contains macros and is being edited as it would appear in a BibTeX file. This is the expanded value.", @"Tool tip message")];
 }
 
-- (void)setErrorReason:(NSString *)reason errorMessage:(NSString *)message {
+- (void)setError:(NSError *)error {
+    NSString *reason = [error localizedDescription];
+    NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Invalid BibTeX string: %@. This change will not be recorded.", @"Tool tip message"), reason];
 	[expandedValueTextField setTextColor:[NSColor redColor]];
 	[expandedValueTextField setStringValue:reason];
 	[expandedValueTextField setToolTip:message]; 
@@ -251,12 +270,14 @@
     [self endEditingAndOrderOut];
 }
 
-- (void)controlTextDidChange:(NSNotification*)notification { 
-	NSString *error = [formatter parseError];
-	if (error)
-		[self setErrorReason:error errorMessage:[NSString stringWithFormat:NSLocalizedString(@"Invalid BibTeX string: %@. This change will not be recorded.", @"Tool tip message"),error]];
+- (void)controlTextDidChange:(NSNotification *)notification {
+	NSString *string = [[[notification userInfo] objectForKey:@"NSFieldEditor"] string];
+    NSError *error = nil;
+    NSString *complexString = [NSString stringWithBibTeXString:string macroResolver:macroResolver error:&error];
+	if (complexString)
+		[self setExpandedValue:complexString];
 	else
-		[self setExpandedValue:[formatter parsedString]];
+		[self setError:error];
 }
 
 #pragma mark NSTableView notification handlers

@@ -39,8 +39,6 @@
 @class BDSKMacroResolver;
 
 @interface BDSKComplexStringFormatter : NSFormatter {
-	NSString *parsedString;
-	NSString *parseError;
 	id macroResolver;
 	BOOL editAsComplexString;
 	id delegate;
@@ -48,12 +46,6 @@
 }
 
 - (id)initWithDelegate:(id)anObject macroResolver:(BDSKMacroResolver *)aMacroResolver;
-
-- (NSString *)parsedString;
-- (void)setParsedString:(NSString *)newString;
-
-- (NSString *)parseError;
-- (void)setParseError:(NSString *)newError;
 
 - (id)macroResolver;
 - (void)setMacroResolver:(BDSKMacroResolver *)newMacroResolver;
