@@ -1874,8 +1874,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             }
         }
 	}
-    if (canEdit) [[self document] objectDidBeginEditing:self];
     return canEdit;
+}
+
+- (void)controlTextDidBeginEditing:(NSNotification *)note {
+    [[self document] objectDidBeginEditing:self];
 }
 
 // send by the formatter when validation failed
