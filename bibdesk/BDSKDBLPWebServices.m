@@ -78,7 +78,7 @@
                  methodName: @"all_publications_keywords_year"            
                  protocol: (NSString*) kWSSOAP2001Protocol            
                       style: (NSString*) kWSSOAPStyleRPC            
-                 soapAction: @"urn:soapservice#Service#all_publications_keywords_year"            
+                 soapAction: @"urn:soapservice#Service#all_publications_keywords_year"           
             methodNamespace: @"urn:soapservice"            
         ];        
 }
@@ -338,7 +338,7 @@
     [_invocation setParameters: in_year];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return result;    
+    return [result autorelease];    
 }
 
 
@@ -349,7 +349,7 @@
     [_invocation setParameters: in_searchTerm in_startYear:in_startYear in_endYear:in_endYear in_limit:in_limit];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return result;    
+    return [result autorelease];    
 }
 
 
@@ -360,7 +360,7 @@
     [_invocation setParameters: in_firstName in_familyName:in_familyName in_startYear:in_startYear in_endYear:in_endYear];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return result;    
+    return [result autorelease];    
 }
 
 
@@ -370,7 +370,7 @@
     BDSKDBLPAllJournalTitles* _invocation = [[BDSKDBLPAllJournalTitles alloc] init];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return result;    
+    return [result autorelease];    
 }
 
 
@@ -381,7 +381,7 @@
     [_invocation setParameters: in_dblp_key];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return result;    
+    return [result autorelease];    
 }
 
 
@@ -392,7 +392,7 @@
     [_invocation setParameters: in_dblp_key];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return result;    
+    return [result autorelease];    
 }
 
 
@@ -402,7 +402,7 @@
     BDSKDBLPAllProceedingTitles* _invocation = [[BDSKDBLPAllProceedingTitles alloc] init];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return result;    
+    return [result autorelease];    
 }
 
 
@@ -413,7 +413,7 @@
     [_invocation setParameters: in_dblp_key];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return result;    
+    return [result autorelease];    
 }
 
 
@@ -424,7 +424,7 @@
     [_invocation setParameters: in_dblp_key_frag in_startYear:in_startYear in_endYear:in_endYear];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return result;    
+    return [result autorelease];    
 }
 
 
