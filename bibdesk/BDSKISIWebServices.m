@@ -14,7 +14,7 @@ static NSString *BDSKISIEndpoint = nil;
 
 + (void)initialize
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     BDSKISIEndpoint = [[[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKISIEndpoint"] copy];
     if (nil == BDSKISIEndpoint)
         BDSKISIEndpoint = @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve";
