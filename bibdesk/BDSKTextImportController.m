@@ -1577,7 +1577,6 @@
 			formatter = citationFormatter;
 		} else {
 			formatter = tableCellFormatter;
-			[(BDSKComplexStringFormatter *)formatter setHighlighted:[tv isRowSelected:row]];
 		}
 		[cell setFormatter:formatter];
 	}

@@ -42,7 +42,6 @@
 	id macroResolver;
 	BOOL editAsComplexString;
 	id delegate;
-	BOOL highlighted;
 }
 
 - (id)initWithDelegate:(id)anObject macroResolver:(BDSKMacroResolver *)aMacroResolver;
@@ -55,9 +54,6 @@
 
 - (id)delegate;
 - (void)setDelegate:(id)newDelegate;
-
-- (BOOL)isHighlighted;
-- (void)setHighlighted:(BOOL)flag;
 
 @end
 

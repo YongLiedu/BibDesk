@@ -579,12 +579,6 @@
 
 #pragma mark NSTableView delegate methods
 
-- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
-	if([[tableColumn identifier] isEqualToString:@"definition"]){
-        [tableCellFormatter setHighlighted:[tv isRowSelected:row]];
-	}
-}
-
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
     [self updateButtons];
 }

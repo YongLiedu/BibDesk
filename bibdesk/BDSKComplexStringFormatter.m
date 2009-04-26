@@ -48,7 +48,6 @@
 
 - (id)initWithDelegate:(id)anObject macroResolver:(BDSKMacroResolver *)aMacroResolver {
     if (self = [super init]) {
-		highlighted = NO;
 		editAsComplexString = NO;
 		[self setMacroResolver:aMacroResolver];
 		[self setDelegate:anObject];
@@ -78,15 +77,15 @@
 
 - (NSAttributedString *)attributedStringForObjectValue:(id)obj withDefaultAttributes:(NSDictionary *)defaultAttrs{
 
-    if(![obj isComplex] && ![obj isInherited])
+    if ([obj isComplex] == NO && [obj isInherited] == NO)
         return nil;
     
     NSMutableDictionary *attrs = [[NSMutableDictionary alloc] initWithDictionary:defaultAttrs];
-	NSColor *color;
-	NSString *string = (NSString *)obj;
-	
-	if ([string isComplex]) {
-		if ([string isInherited]) {
+	NSColor *color = nil;
+	BOOL highlighted = [[[attrs objectForKey:NSForegroundColorAttributeName] colorUsingColorSpaceName:NSDeviceRGBColorSpace] isEqual:[NSColor colorWithDeviceRed:1 green:1 blue:1 alpha:1]];
+    
+	if ([obj isComplex]) {
+		if ([obj isInherited]) {
 			if (highlighted)
 				color = [[NSColor blueColor] blendedColorWithFraction:0.5 ofColor:[NSColor controlBackgroundColor]];
 			else
@@ -97,18 +96,15 @@
 			else
 				color = [NSColor blueColor];
 		}
-	} else {
-		if ([string isInherited]) {
-			if (highlighted)
-				color = [NSColor lightGrayColor];
-			else
-				color = [NSColor disabledControlTextColor];
-		} else {
-			color = [NSColor controlTextColor];
-		}
+	} else if ([obj isInherited]) {
+        if (highlighted)
+            color = [NSColor lightGrayColor];
+        else
+            color = [NSColor disabledControlTextColor];
 	}
-	[attrs setObject:color forKey:NSForegroundColorAttributeName];
-    NSAttributedString *attStr = [[[NSAttributedString alloc] initWithString:[self stringForObjectValue:obj] attributes:attrs] autorelease];
+	if (color)
+        [attrs setObject:color forKey:NSForegroundColorAttributeName];
+    NSAttributedString *attStr = [[[NSAttributedString alloc] initWithString:obj attributes:attrs] autorelease];
     [attrs release];
 	return attStr;
 }
@@ -172,14 +168,6 @@
 - (void)setDelegate:(id)newDelegate {
     BDSKPRECONDITION([newDelegate respondsToSelector:@selector(formatter:shouldEditAsComplexString:)]);
 	delegate = newDelegate;
-}
-
-- (BOOL)isHighlighted{
-	return highlighted;
-}
-
-- (void)setHighlighted:(BOOL)flag{
-	highlighted = flag;
 }
 
 @end
