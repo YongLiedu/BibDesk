@@ -73,7 +73,6 @@ typedef struct _BDSKTeXTaskFlags {
 
 - (id)init;
 - (id)initWithFileName:(NSString *)fileName;
-- (id)initWithWorkingDirPath:(NSString *)dirPath fileName:(NSString *)fileName;
 
 - (id)delegate;
 - (void)setDelegate:(id)newDelegate;

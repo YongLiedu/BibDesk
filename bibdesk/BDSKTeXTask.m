@@ -131,27 +131,17 @@ static double runLoopTimeout = 30;
 }
 
 - (id)init{
-    NSString *tmpDirPath = [[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:@"tmpbib"];
-	self = [self initWithWorkingDirPath:tmpDirPath fileName:@"tmpbib"];
-	return self;
+    return [self initWithFileName:@"tmpbib"];
 }
 
 - (id)initWithFileName:(NSString *)newFileName{
-    NSString *tmpDirPath = [[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:newFileName];
-	self = [self initWithWorkingDirPath:tmpDirPath fileName:newFileName];
-	return self;
-}
-
-- (id)initWithWorkingDirPath:(NSString *)dirPath fileName:(NSString *)newFileName{
 	if (self = [super init]) {
 		
 		NSFileManager *fm = [NSFileManager defaultManager];
-        
-		if (![fm objectExistsAtFileURL:[NSURL fileURLWithPath:dirPath]])
-			[fm createDirectoryAtPathWithNoAttributes:dirPath];
-		
+        NSString *dirPath = [fm makeTemporaryDirectoryWithBasename:newFileName];
+        NSParameterAssert([fm fileExistsAtPath:dirPath]);
 		texTemplatePath = [[[fm currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"previewtemplate.tex"] copy];
-        				
+        
 		NSString *filePath = [dirPath stringByAppendingPathComponent:newFileName];
         texPath = [[BDSKTeXPath alloc] initWithBasePath:filePath];
         
