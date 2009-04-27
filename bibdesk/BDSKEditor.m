@@ -1816,14 +1816,15 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	if (row == -1) 
 		return;
     [self editSelectedCellAsMacro];
-	if([tableView editedRow] != row)
+	if ([tableView editedRow] != row)
 		[tableView editColumn:1 row:row withEvent:nil select:YES];
 }
 
 - (BOOL)editSelectedCellAsMacro{
 	NSInteger row = [tableView selectedRow];
-	if ([complexStringEditor isEditing] || row == -1) 
-		return NO;
+    // this should never happen
+    if ([complexStringEditor isEditing] || row == -1) 
+        return NO;
 	if (complexStringEditor == nil) {
     	complexStringEditor = [[BDSKComplexStringEditor alloc] initWithMacroResolver:[[publication owner] macroResolver]];
         [complexStringEditor setEditable:isEditable];
@@ -1833,14 +1834,14 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	[tableCellFormatter setEditAsComplexString:YES];
 	if (fieldEditor) {
 		[fieldEditor setString:[tableCellFormatter editingStringForObjectValue:value]];
-		[[[tableView tableColumnWithIdentifier:@"value"] dataCellForRow:row] setObjectValue:value];
 		[fieldEditor selectAll:self];
 	}
-	return [complexStringEditor attachToTableView:tableView atRow:row column:1 withValue:value];
+	[complexStringEditor attachToTableView:tableView atRow:row column:1 withValue:value];
+    return YES;
 }
 
 - (BOOL)formatter:(BDSKComplexStringFormatter *)formatter shouldEditAsComplexString:(NSString *)object {
-	return [self editSelectedCellAsMacro];
+    return [self editSelectedCellAsMacro];
 }
 
 // this is called when the user actually starts editing

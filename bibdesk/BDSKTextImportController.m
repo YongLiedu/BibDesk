@@ -1363,6 +1363,7 @@
 
 - (BOOL)editSelectedCellAsMacro{
 	NSInteger row = [itemTableView selectedRow];
+    // this should never happen
 	if ([complexStringEditor isEditing] || row == -1 || [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] || [[fields objectAtIndex:row] isCitationField]) 
 		return NO;
 	if (complexStringEditor == nil)
@@ -1372,16 +1373,16 @@
 	[tableCellFormatter setEditAsComplexString:YES];
 	if (fieldEditor) {
 		[fieldEditor setString:[tableCellFormatter editingStringForObjectValue:value]];
-		[[[itemTableView tableColumnWithIdentifier:@"value"] dataCellForRow:row] setObjectValue:value];
 		[fieldEditor selectAll:self];
 	}
-	return [complexStringEditor attachToTableView:itemTableView atRow:row column:2 withValue:value];
+    [complexStringEditor attachToTableView:itemTableView atRow:row column:2 withValue:value];
+    return YES;
 }
 
 #pragma mark BDSKMacroFormatter delegate
 
 - (BOOL)formatter:(BDSKComplexStringFormatter *)formatter shouldEditAsComplexString:(NSString *)object {
-	return [self editSelectedCellAsMacro];
+    return [self editSelectedCellAsMacro];
 }
 
 #pragma mark BDSKCitationFormatter and TextImportItemTableView delegate
