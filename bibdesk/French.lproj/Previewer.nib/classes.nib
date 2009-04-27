@@ -6,40 +6,11 @@
 	<array>
 		<dict>
 			<key>CLASS</key>
-			<string>BDSKCollapsibleView</string>
+			<string>NSApplication</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>BDSKContainerView</string>
-		</dict>
-		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>scalePopUpAction</key>
-				<string>id</string>
-			</dict>
-			<key>CLASS</key>
-			<string>BDSKZoomablePDFView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>PDFView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSTextView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSText</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSMenu</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSObject</string>
+			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -65,6 +36,60 @@
 			<string>NSResponder</string>
 		</dict>
 		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSWindow</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSScrollView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKOverlayPanel</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSPanel</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKCollapsibleView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>BDSKContainerView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
 			<key>ACTIONS</key>
 			<dict>
 				<key></key>
@@ -79,57 +104,11 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>NSCell</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
 			<string>NSObject</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKContainerView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>contentView</key>
-				<string>id</string>
-			</dict>
-			<key>SUPERCLASS</key>
-			<string>NSView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKPreviewer</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>logView</key>
-				<string>NSTextView</string>
-				<key>pdfView</key>
-				<string>BDSKZoomablePDFView</string>
-				<key>progressIndicator</key>
-				<string>NSProgressIndicator</string>
-				<key>progressOverlay</key>
-				<string>BDSKOverlay</string>
-				<key>rtfPreviewView</key>
-				<string>NSTextView</string>
-				<key>tabView</key>
-				<string>NSTabView</string>
-				<key>warningImageView</key>
-				<string>NSImageView</string>
-				<key>warningView</key>
-				<string>NSView</string>
-			</dict>
-			<key>SUPERCLASS</key>
-			<string>NSWindowController</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKOverlay</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSPanel</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -151,18 +130,63 @@
 			<string>NSTextView</string>
 		</dict>
 		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>scalePopUpAction</key>
+				<string>id</string>
+			</dict>
 			<key>CLASS</key>
-			<string>NSWindow</string>
+			<string>BDSKZoomablePDFView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
+			<string>PDFView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSScrollView</string>
+			<string>BDSKPreviewer</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>logView</key>
+				<string>NSTextView</string>
+				<key>pdfView</key>
+				<string>BDSKZoomablePDFView</string>
+				<key>progressIndicator</key>
+				<string>NSProgressIndicator</string>
+				<key>progressOverlay</key>
+				<string>BDSKOverlayPanel</string>
+				<key>rtfPreviewView</key>
+				<string>NSTextView</string>
+				<key>tabView</key>
+				<string>NSTabView</string>
+				<key>warningImageView</key>
+				<string>NSImageView</string>
+				<key>warningView</key>
+				<string>NSView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSWindowController</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSTextView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSText</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKContainerView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>contentView</key>
+				<string>id</string>
+			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
 		</dict>

@@ -49,7 +49,7 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKZoomablePDFView.h"
 #import "BDSKPreviewer.h"
-#import "BDSKOverlay.h"
+#import "BDSKOverlayWindow.h"
 #import "BibDocument_Groups.h"
 #import "BDSKMainTableView.h"
 #import "BDSKFindController.h"

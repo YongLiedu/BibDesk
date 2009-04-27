@@ -1,5 +1,5 @@
 //
-//  BDSKOverlay.m
+//  BDSKOverlayWindow.m
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 9/8/05.
@@ -37,108 +37,8 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKOverlay.h"
+#import "BDSKOverlayWindow.h"
 
-@implementation BDSKOverlay
-
-// designated initializer of NSWindow
-- (id)initWithContentRect:(NSRect)contentRect 
-                styleMask:(NSUInteger)aStyle
-                  backing:(NSBackingStoreType)bufferingType 
-                    defer:(BOOL)flag {
-	
-	if (self = [super initWithContentRect:contentRect 
-								styleMask:NSBorderlessWindowMask
-								  backing:bufferingType
-									defer:flag]) {
-		parentView = nil;
-		// we are transparent and ignore mouse events
-		[self setBackgroundColor:[NSColor clearColor]];
-		[self setOpaque:NO];
-		[self setAlphaValue:.999];
-		[self setIgnoresMouseEvents:YES];
-	}
-	return self;
-}
-
-- (void)dealloc {
-	[self remove];
-	[super dealloc];
-}
-
-- (void)parentViewFrameChanged:(NSNotification *)notification {
-	NSRect viewRect = [parentView convertRect:[parentView bounds] toView:nil];
-	NSPoint windowOrigin = [[parentView window] frame].origin;
-	
-	viewRect.origin.x += windowOrigin.x;
-	viewRect.origin.y += windowOrigin.y;
-	
-	[self setFrame:viewRect display:YES];
-}
-
-- (void)parentWindowWillClose:(NSNotification *)notification {
-	[self orderOut:nil];
-}
-
-- (void)overlayView:(NSView *)aView {
-	if ([aView window] == nil)
-		return; // we don't support overlay if the view is not in a window
-	if (parentView)
-		[self remove]; // first remove from the old parentView
-	
-	parentView = [aView retain];
-    
-    NSWindow *parentWindow = [parentView window];
-	
-	// if the parent is a floating panel, we also should be. Otherwise we won't get on top.
-	[self setFloatingPanel:([parentWindow isKindOfClass:[NSPanel class]] && [(NSPanel *)parentWindow isFloatingPanel])];
-    [self setHidesOnDeactivate:[parentWindow hidesOnDeactivate]];
-    [self setLevel:[parentWindow level]];
-	[parentWindow addChildWindow:self ordered:NSWindowAbove];
-	
-	// resize ourselves to cover the view, and observe future frame changes
-	[self parentViewFrameChanged:nil];
-	[[NSNotificationCenter defaultCenter]
-		addObserver:self
-		   selector:@selector(parentViewFrameChanged:)
-			   name:NSViewFrameDidChangeNotification
-			 object:parentView];
-	[[NSNotificationCenter defaultCenter]
-		addObserver:self
-		   selector:@selector(parentWindowWillClose:)
-			   name:NSWindowWillCloseNotification
-			 object:parentWindow];
-	
-	if ([parentWindow isVisible])
-		[self orderFront:nil];
-}
-
-- (void)remove {
-	if (parentView == nil)
-		return;
-	
-	// stop observing our old parentView
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	
-	[[self parentWindow] removeChildWindow:self];
-	// we were on top, so it needs to redisplay
-	
-	[parentView setNeedsDisplay:YES];
-	[parentView release];
-	parentView = nil;
-	
-	[self orderOut:nil];
-}
-
-- (BOOL)accessiblityIsIgnored {
-    return YES;
-}
-
-@end
-
-//
-// This is identical to the NSPanel version, except that it accounts for a toolbar in the height calculation, and won't hide when the application is in the background.
-//
 
 @implementation BDSKOverlayWindow
 
@@ -233,9 +133,103 @@
 	[self orderOut:nil];
 }
 
-- (BOOL)accessiblityIsIgnored {
-    return YES;
-}
+- (BOOL)accessiblityIsIgnored { return YES; }
 
 @end
 
+#pragma mark -
+
+@implementation BDSKOverlayPanel
+
+// designated initializer of NSWindow
+- (id)initWithContentRect:(NSRect)contentRect 
+                styleMask:(NSUInteger)aStyle
+                  backing:(NSBackingStoreType)bufferingType 
+                    defer:(BOOL)flag {
+	
+	if (self = [super initWithContentRect:contentRect 
+								styleMask:NSBorderlessWindowMask
+								  backing:bufferingType
+									defer:flag]) {
+		parentView = nil;
+		// we are transparent and ignore mouse events
+		[self setBackgroundColor:[NSColor clearColor]];
+		[self setOpaque:NO];
+		[self setAlphaValue:.999];
+		[self setIgnoresMouseEvents:YES];
+	}
+	return self;
+}
+
+- (void)dealloc {
+	[self remove];
+	[super dealloc];
+}
+
+- (void)parentViewFrameChanged:(NSNotification *)notification {
+	NSRect viewRect = [parentView convertRect:[parentView bounds] toView:nil];
+	NSPoint windowOrigin = [[parentView window] frame].origin;
+	
+	viewRect.origin.x += windowOrigin.x;
+	viewRect.origin.y += windowOrigin.y;
+	
+	[self setFrame:viewRect display:YES];
+}
+
+- (void)parentWindowWillClose:(NSNotification *)notification {
+	[self orderOut:nil];
+}
+
+- (void)overlayView:(NSView *)aView {
+	if ([aView window] == nil)
+		return; // we don't support overlay if the view is not in a window
+	if (parentView)
+		[self remove]; // first remove from the old parentView
+	
+	parentView = [aView retain];
+    
+    NSWindow *parentWindow = [parentView window];
+	
+	// if the parent is a floating panel, we also should be. Otherwise we won't get on top.
+	[self setFloatingPanel:([parentWindow isKindOfClass:[NSPanel class]] && [(NSPanel *)parentWindow isFloatingPanel])];
+    [self setHidesOnDeactivate:[parentWindow hidesOnDeactivate]];
+    [self setLevel:[parentWindow level]];
+	[parentWindow addChildWindow:self ordered:NSWindowAbove];
+	
+	// resize ourselves to cover the view, and observe future frame changes
+	[self parentViewFrameChanged:nil];
+	[[NSNotificationCenter defaultCenter]
+		addObserver:self
+		   selector:@selector(parentViewFrameChanged:)
+			   name:NSViewFrameDidChangeNotification
+			 object:parentView];
+	[[NSNotificationCenter defaultCenter]
+		addObserver:self
+		   selector:@selector(parentWindowWillClose:)
+			   name:NSWindowWillCloseNotification
+			 object:parentWindow];
+	
+	if ([parentWindow isVisible])
+		[self orderFront:nil];
+}
+
+- (void)remove {
+	if (parentView == nil)
+		return;
+	
+	// stop observing our old parentView
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	
+	[[self parentWindow] removeChildWindow:self];
+	// we were on top, so it needs to redisplay
+	
+	[parentView setNeedsDisplay:YES];
+	[parentView release];
+	parentView = nil;
+	
+	[self orderOut:nil];
+}
+
+- (BOOL)accessiblityIsIgnored { return YES; }
+
+@end

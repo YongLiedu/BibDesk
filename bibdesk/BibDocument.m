@@ -68,7 +68,7 @@
 #import "BDSKFieldSheetController.h"
 #import "BDSKPreviewer.h"
 #import "BDSKTeXTask.h"
-#import "BDSKOverlay.h"
+#import "BDSKOverlayWindow.h"
 #import "BDSKEditor.h"
 
 #import "BDSKItemPasteboardHelper.h"

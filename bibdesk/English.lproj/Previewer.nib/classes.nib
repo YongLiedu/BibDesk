@@ -6,6 +6,14 @@
 	<array>
 		<dict>
 			<key>CLASS</key>
+			<string>NSApplication</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>NSMenu</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -43,14 +51,6 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>BDSKOverlay</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSPanel</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
 			<string>NSWindow</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -67,11 +67,27 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>BDSKOverlayPanel</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSPanel</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>BDSKCollapsibleView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>BDSKContainerView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -81,6 +97,14 @@
 			</dict>
 			<key>CLASS</key>
 			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSCell</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
@@ -132,7 +156,7 @@
 				<key>progressIndicator</key>
 				<string>NSProgressIndicator</string>
 				<key>progressOverlay</key>
-				<string>BDSKOverlay</string>
+				<string>BDSKOverlayPanel</string>
 				<key>rtfPreviewView</key>
 				<string>NSTextView</string>
 				<key>tabView</key>

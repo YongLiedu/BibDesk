@@ -37,7 +37,7 @@
 #import "BDSKPreviewer.h"
 #import "BDSKStringConstants.h"
 #import "BDSKTeXTask.h"
-#import "BDSKOverlay.h"
+#import "BDSKOverlayWindow.h"
 #import "BDSKAppController.h"
 #import "BDSKZoomableTextView.h"
 #import "BDSKZoomablePDFView.h"
@@ -221,7 +221,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
     return rtfPreviewView;
 }
 
-- (BDSKOverlay *)progressOverlay;
+- (BDSKOverlayPanel *)progressOverlay;
 {
     [self window];
     return progressOverlay;

@@ -1,5 +1,5 @@
 //
-//  BDSKOverlay.h
+//  BDSKOverlayWindow.h
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 9/8/05.
@@ -40,10 +40,9 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKOverlay : NSPanel {
+@interface BDSKOverlayWindow : NSWindow {
 	NSView *parentView;
 }
-
 /*!
 	@method overlayView:
 	@abstract Overlay aView with the receiver, automatically resizing itself to the frame of aView. 
@@ -57,14 +56,23 @@
 	@discussion (discussion)
 */
 - (void)remove;
-
 @end
 
-// this implementation is for use with NSWindows, since the NSPanel subclass has unwanted behavior when the parent window loses key status
 
-@interface BDSKOverlayWindow : NSWindow {
+@interface BDSKOverlayPanel : NSPanel {
 	NSView *parentView;
 }
+/*!
+	@method overlayView:
+	@abstract Overlay aView with the receiver, automatically resizing itself to the frame of aView. 
+	@discussion Removes itself from a previous parent view first. The parent view should be in a window and should not be removed from its window while the overlay is in place. 
+	@param aView The parent view to be overlayed.
+*/
 - (void)overlayView:(NSView *)aView;
+/*!
+	@method remove
+	@abstract Remove the receiver as an overlay from its parent view and release its parent view. 
+	@discussion (discussion)
+*/
 - (void)remove;
 @end

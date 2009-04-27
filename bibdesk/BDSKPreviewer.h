@@ -40,7 +40,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class PDFView, BDSKZoomablePDFView, BDSKTeXTask, BDSKOverlay, BDSKPreviewerServer;
+@class PDFView, BDSKZoomablePDFView, BDSKTeXTask, BDSKOverlayPanel, BDSKPreviewerServer;
 
 enum {
 	BDSKUnknownPreviewState = -1,
@@ -61,7 +61,7 @@ typedef NSInteger BDSKPreviewState;
     IBOutlet NSTextView *logView;
     IBOutlet NSTabView *tabView;
     IBOutlet NSProgressIndicator *progressIndicator;
-    IBOutlet BDSKOverlay *progressOverlay;
+    IBOutlet BDSKOverlayPanel *progressOverlay;
     IBOutlet NSImageView *warningImageView;
     IBOutlet NSView *warningView;
     
@@ -79,7 +79,7 @@ typedef NSInteger BDSKPreviewState;
 
 - (PDFView *)pdfView;
 - (NSTextView *)textView;
-- (BDSKOverlay *)progressOverlay;
+- (BDSKOverlayPanel *)progressOverlay;
 
 - (CGFloat)PDFScaleFactor;
 - (void)setPDFScaleFactor:(CGFloat)scaleFactor;
