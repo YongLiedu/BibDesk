@@ -76,11 +76,11 @@
 
 - (BOOL)writeBibTeXFile:(NSString *)bibStr;
 
-- (NSInteger)runTeXTasksForLaTeX;
+- (BOOL)runTeXTasksForLaTeX;
 
-- (NSInteger)runTeXTasksForPDF;
+- (BOOL)runTeXTasksForPDF;
 
-- (NSInteger)runTeXTaskForRTF;
+- (BOOL)runTeXTaskForRTF;
 
 - (NSInteger)runPDFTeXTask;
 
@@ -239,7 +239,6 @@ static double runLoopTimeout = 30;
 
 - (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys generatedTypes:(NSInteger)flag{
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSInteger rv = 0;
 
     if([processingLock tryLock] == NO){
         NSLog(@"%@ couldn't get processing lock", self);
@@ -276,49 +275,40 @@ static double runLoopTimeout = 30;
         setenv("PATH", [new_path fileSystemRepresentation], 1);
     }
     
-    if([self writeTeXFileForCiteKeys:citeKeys isLTB:(flag == BDSKGenerateLTB)]){
-        if([self writeBibTeXFile:bibStr]){
-            rv = [self runTeXTasksForLaTeX];
-        }else{
-            rv = 2;
-        }
-    }else{
-        rv = 2;
-    }
+    BOOL success = [self writeTeXFileForCiteKeys:citeKeys isLTB:(flag == BDSKGenerateLTB)] && [self writeBibTeXFile:bibStr];
     
-    if((rv & 2) == 0){
-        if (flag == BDSKGenerateLTB)
-            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.hasLTB);
-        else
-            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.hasLaTeX);
-        
-        if(flag > BDSKGenerateLaTeX){
-            rv |= [self runTeXTasksForPDF];
+    if (success) {
+        success = [self runTeXTasksForLaTeX];
+        if (success) {
+            if (flag == BDSKGenerateLTB)
+                OSAtomicCompareAndSwap32Barrier(0, 1, &flags.hasLTB);
+            else
+                OSAtomicCompareAndSwap32Barrier(0, 1, &flags.hasLaTeX);
             
-            if((rv & 2) == 0){
-
-                OSAtomicCompareAndSwap32Barrier(0, 1, &flags.hasPDFData);
-                
-                if(flag > BDSKGeneratePDF){
-                        rv |= [self runTeXTaskForRTF];
+            if (flag > BDSKGenerateLaTeX) {
+                success = [self runTeXTasksForPDF];
+                if (success) {
+                    OSAtomicCompareAndSwap32Barrier(0, 1, &flags.hasPDFData);
                     
-                    if((rv & 2) == 0){
-                        OSAtomicCompareAndSwap32Barrier(0, 1, &flags.hasRTFData);
+                    if(flag > BDSKGeneratePDF){
+                        success = [self runTeXTaskForRTF];
+                        if (success)
+                            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.hasRTFData);
                     }
                 }
             }
         }
-    }     
-	
+	}
+    
 	if (nil != taskFinishedInvocation) {
-        [taskFinishedInvocation setArgument:&rv atIndex:3];
+        [taskFinishedInvocation setArgument:&success atIndex:3];
         [taskFinishedInvocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:NO];
 	}
-
+    
 	[processingLock unlock];
     
 	[pool release];
-    return rv == 0;
+    return success;
 }
 
 #pragma mark Data accessors
@@ -569,7 +559,7 @@ static double runLoopTimeout = 30;
     [filesToRemove release];
 }
 
-- (NSInteger)runTeXTasksForLaTeX{
+- (BOOL)runTeXTasksForLaTeX{
     volatile NSInteger rv;
     rv = 0;
     
@@ -579,32 +569,28 @@ static double runLoopTimeout = 30;
     [self removeFilesFromPreviousRun];
         
     rv = [self runPDFTeXTask];
-    if((rv & 2) == 0){
-       rv |= [self runBibTeXTask];
-	}
+    rv |= [self runBibTeXTask];
     
     [dataFileLock unlock];
     
-	return rv;
+	return rv == 0;
 }
 
-- (NSInteger)runTeXTasksForPDF{
+- (BOOL)runTeXTasksForPDF{
     volatile NSInteger rv;
     rv = 0;
     
     [dataFileLock lockForWriting];
     
     rv = [self runPDFTeXTask];
-    if((rv & 2) == 0){
-        rv |= [self runPDFTeXTask];
-    }
+    rv |= [self runPDFTeXTask];
     
     [dataFileLock unlock];
     
-	return rv;
+	return rv == 0;
 }
 
-- (NSInteger)runTeXTaskForRTF{
+- (BOOL)runTeXTaskForRTF{
     volatile NSInteger rv;
     rv = 0;
     
@@ -614,7 +600,7 @@ static double runLoopTimeout = 30;
     
     [dataFileLock unlock];
     
-	return rv;
+	return rv == 0;
 }
 
 - (NSInteger)runPDFTeXTask{
@@ -653,20 +639,20 @@ static double runLoopTimeout = 30;
 
 - (NSInteger)runTask:(NSString *)binPath withArguments:(NSArray *)arguments{
     currentTask = [[BDSKTask alloc] init];
-        [currentTask setCurrentDirectoryPath:[texPath workingDirectory]];
-        [currentTask setLaunchPath:binPath];
-        [currentTask setArguments:arguments];
-        [currentTask setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
-        [currentTask setStandardError:[NSFileHandle fileHandleWithNullDevice]];
-        
+    [currentTask setCurrentDirectoryPath:[texPath workingDirectory]];
+    [currentTask setLaunchPath:binPath];
+    [currentTask setArguments:arguments];
+    [currentTask setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
+    [currentTask setStandardError:[NSFileHandle fileHandleWithNullDevice]];
+    
     NSInteger rv = 0;
-            
+    
     [currentTask launch];
     [currentTask waitUntilExit];
     rv = [currentTask terminationStatus];
-            
-        [currentTask release];
-        currentTask = nil;
+    
+    [currentTask release];
+    currentTask = nil;
     
     return rv;
 }
