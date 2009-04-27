@@ -110,7 +110,6 @@
 - (BOOL)tableView:(NSTableView *)aTableView canCopyRowsWithIndexes:(NSIndexSet *)rowIndexes;
 - (void)tableView:(NSTableView *)aTableView deleteRowsWithIndexes:(NSIndexSet *)rowIndexes;
 - (BOOL)tableView:(NSTableView *)aTableView canDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes;
-- (void)tableView:(NSTableView *)aTableView cutRowsWithIndexes:(NSIndexSet *)rowIndexes;
 - (void)tableView:(NSTableView *)aTableView pasteFromPasteboard:(NSPasteboard *)pboard;
 - (BOOL)tableViewCanPasteFromPasteboard:(NSTableView *)aTableView;
 - (void)tableView:(NSTableView *)aTableView duplicateRowsWithIndexes:(NSIndexSet *)rowIndexes; // defaults to copy+paste
