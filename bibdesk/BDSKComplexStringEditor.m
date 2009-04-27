@@ -296,7 +296,7 @@
 		if (newColumn >= column)
 			column--;
 	} else if (oldColumn > column) {
-		if (newColumn < column)
+		if (newColumn <= column)
 			column++;
 	}
 	[self cellFrameDidChange:nil];
