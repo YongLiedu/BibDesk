@@ -74,7 +74,7 @@
 }
 
 - (void)parentWindowWillClose:(NSNotification *)notification {
-	[self orderOut:nil];
+    [self remove];
 }
 
 - (void)orderFront:(id)sender{
@@ -169,7 +169,7 @@
 }
 
 - (void)parentWindowWillClose:(NSNotification *)notification {
-	[self orderOut:nil];
+    [self remove];
 }
 
 - (void)overlayView:(NSView *)aView {
