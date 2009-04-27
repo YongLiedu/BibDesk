@@ -69,12 +69,8 @@
 
 - (void)parentViewFrameChanged:(NSNotification *)notification {
 	NSRect viewRect = [parentView convertRect:[parentView bounds] toView:nil];
-	NSPoint windowOrigin = [[parentView window] frame].origin;
-	
-	viewRect.origin.x += windowOrigin.x;
-	viewRect.origin.y += windowOrigin.y;
-	
-	[self setFrame:viewRect display:YES];
+    viewRect.origin = [[parentView window] convertBaseToScreen:viewRect.origin];
+	[self setFrame:[self frameRectForContentRect:viewRect] display:YES];
 }
 
 - (void)parentWindowWillClose:(NSNotification *)notification {
@@ -168,12 +164,8 @@
 
 - (void)parentViewFrameChanged:(NSNotification *)notification {
 	NSRect viewRect = [parentView convertRect:[parentView bounds] toView:nil];
-	NSPoint windowOrigin = [[parentView window] frame].origin;
-	
-	viewRect.origin.x += windowOrigin.x;
-	viewRect.origin.y += windowOrigin.y;
-	
-	[self setFrame:viewRect display:YES];
+    viewRect.origin = [[parentView window] convertBaseToScreen:viewRect.origin];
+	[self setFrame:[self frameRectForContentRect:viewRect] display:YES];
 }
 
 - (void)parentWindowWillClose:(NSNotification *)notification {
@@ -191,7 +183,7 @@
     NSWindow *parentWindow = [parentView window];
 	
 	// if the parent is a floating panel, we also should be. Otherwise we won't get on top.
-	[self setFloatingPanel:([parentWindow isKindOfClass:[NSPanel class]] && [(NSPanel *)parentWindow isFloatingPanel])];
+	[self setFloatingPanel:([parentWindow respondsToSelector:@selector(isFloatingPanel)] && [(NSPanel *)parentWindow isFloatingPanel])];
     [self setHidesOnDeactivate:[parentWindow hidesOnDeactivate]];
     [self setLevel:[parentWindow level]];
 	[parentWindow addChildWindow:self ordered:NSWindowAbove];
