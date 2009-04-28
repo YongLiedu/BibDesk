@@ -85,27 +85,28 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
     return copy;
 }
 
+- (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+    return nil;
+}
+
 - (NSColor *)textColor {
-    NSColor *color = nil;
-    
     // this allows the expansion tooltips on 10.5 to draw with the correct color
 #if defined(MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
     // on 10.5, we can just check background style instead of messing around with flags and checking the highlight color, which accounts for much of the code in this class
 #warning 10.5 fixme
 #endif
-    if ([self respondsToSelector:@selector(backgroundStyle)]) {
-        NSBackgroundStyle style = [self backgroundStyle];
-        if (NSBackgroundStyleLight == style)
-            return (hasDarkHighlight && [self isHighlighted]) ? [NSColor textBackgroundColor] : [NSColor blackColor];
+    
+    if (settingUpFieldEditor == NO) {
+        if ([self respondsToSelector:@selector(backgroundStyle)]) {
+            if (hasDarkHighlight && [self isHighlighted])
+                return [NSColor textBackgroundColor];
+        } else {
+            if ((hasDarkHighlight && [self isHighlighted]) ||
+                ([[[self controlView] window] isKeyWindow] && [[[self controlView] window] firstResponder] == [self controlView]))
+                return [NSColor textBackgroundColor];
+        }
     }
-        
-    if (settingUpFieldEditor)
-        color = [NSColor blackColor];
-    else if (hasDarkHighlight && [self isHighlighted])
-        color = [NSColor textBackgroundColor];
-    else
-        color = [super textColor];
-    return color;
+    return [super textColor];
 }
 
 - (void)editWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject event:(NSEvent *)theEvent {
