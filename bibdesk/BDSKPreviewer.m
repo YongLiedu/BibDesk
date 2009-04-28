@@ -181,6 +181,9 @@ static BDSKPreviewer *sharedPreviewer = nil;
     PDFDocument *pdfDoc = [[[PDFDocument alloc] initWithData:[self PDFDataWithString:@"" color:nil]] autorelease];
     [pdfView setDocument:pdfDoc];
     
+    [pdfView setDisplaysPageBreaks:NO];
+    [pdfView setBackgroundColor:[NSColor controlBackgroundColor]];
+    
     // don't reset the scale factor until there's a document loaded, or else we get a huge gray border
     [pdfView setScaleFactor:pdfScaleFactor];
 	[(BDSKZoomableTextView *)rtfPreviewView setScaleFactor:rtfScaleFactor];
