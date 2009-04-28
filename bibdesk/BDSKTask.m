@@ -165,31 +165,6 @@ static int _kqueue = -1;
 - (id)standardOutput; { return _standardOutput; }
 - (id)standardError; { return _standardError; }
 
-// workaround for NSFileManager's asinine main thread requirement; unclear if using getcwd(3) would be equivalent
-+ (NSString *)newCurrentDirectoryPath
-{
-    NSString *path = nil;
-    if (pthread_main_np()) {
-        path = [[[NSFileManager defaultManager] currentDirectoryPath] copy];
-    }
-    else if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-        NSFileManager *fm = [NSFileManager new];
-        path = [[fm currentDirectoryPath] copy];
-        [fm release];
-    }    
-    else {
-        NSFileManager *fm = [NSFileManager defaultManager];
-        NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[fm methodSignatureForSelector:@selector(currentDirectoryPath)]];
-        [inv setTarget:fm];
-        [inv setSelector:@selector(currentDirectoryPath)];
-        NSArray *rlmodes = [NSArray arrayWithObject:(id)kCFRunLoopDefaultMode];
-        [inv performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES modes:rlmodes];
-        [inv getReturnValue:&path];
-        path = [path copy];
-    }
-    return path;
-}
-
 static void __BDSKTaskNotify(void *info)
 {
     BDSKTask *task = info;    
@@ -213,12 +188,6 @@ static void __BDSKTaskNotify(void *info)
 {
     ASSERT_NOTLAUNCHED;
     
-    if (nil == [self currentDirectoryPath]) {
-        NSString *path = [BDSKTask newCurrentDirectoryPath];
-        [self setCurrentDirectoryPath:path];
-        [path release];
-    }
-
     NSInteger argCount = [_arguments count];
     const char *workingDir = [_currentDirectoryPath fileSystemRepresentation];
     char **args = NSZoneCalloc([self zone], (argCount + 2), sizeof(char *));
@@ -293,7 +262,7 @@ static void __BDSKTaskNotify(void *info)
         if (-1 != fd_out) dup2(fd_out, STDOUT_FILENO);
         if (-1 != fd_err) dup2(fd_err, STDERR_FILENO);  
         
-        chdir(workingDir);
+        if (workingDir) chdir(workingDir);
         int ret = execve(args[0], args, env);
         _exit(ret);
     }
