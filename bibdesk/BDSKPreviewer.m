@@ -54,8 +54,22 @@
 
 #define BDSKPreviewPanelFrameAutosaveName @"BDSKPreviewPanel"
 
+@interface BDSKPreviewTask : NSObject {
+    NSString *bibTeXString;
+    NSArray *citeKeys;
+    NSInteger generatedTypes;
+}
++ (id)previewTaskWithBibTeXString:(NSString *)aString citeKeys:(NSArray *)aKeys generatedTypes:(NSInteger)aTypes;
+- (id)initWithBibTeXString:(NSString *)aString citeKeys:(NSArray *)aKeys generatedTypes:(NSInteger)aTypes;
+- (NSString *)bibTeXString;
+- (NSArray *)citeKeys;
+- (NSInteger)generatedTypes;
+@end
+
+#pragma mark -
+
 @protocol BDSKPreviewerServerThread <BDSKAsyncDOServerThread>
-- (oneway void)processQueueUntilEmpty;
+- (oneway void)processNextTask;
 @end
 
 @protocol BDSKPreviewerServerMainThread <BDSKAsyncDOServerMainThread>
@@ -66,8 +80,8 @@
     BDSKTeXTask *texTask;
     id delegate;
     NSString *bibString;
-    NSRecursiveLock *queueLock;
-    NSMutableArray *queue;
+    NSRecursiveLock *nextTaskLock;
+    BDSKPreviewTask *nextTask;
     volatile int32_t isProcessing;
     volatile int32_t notifyWhenDone;
 }
@@ -75,7 +89,7 @@
 - (id)delegate;
 - (void)setDelegate:(id)newDelegate;
 - (BDSKTeXTask *)texTask;
-- (void)runTeXTaskInBackgroundWithInfo:(NSDictionary *)info;
+- (void)runTeXTaskInBackgroundWithInfo:(BDSKPreviewTask *)previewTask;
 
 @end
 
@@ -465,7 +479,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 - (void)updateWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys{
     
 	if([NSString isEmptyString:bibStr]){
-		// reset, also removes any waiting tasks from the queue
+		// reset, also removes any waiting tasks from the nextTask
         [self displayPreviewsForState:BDSKEmptyPreviewState success:YES];
         // clean the server
         [server runTeXTaskInBackgroundWithInfo:nil];
@@ -473,7 +487,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 		// this will start the spinning wheel
         [self displayPreviewsForState:BDSKWaitingPreviewState success:YES];
         // run the tex task in the background
-        [server runTeXTaskInBackgroundWithInfo:[NSDictionary dictionaryWithObjectsAndKeys:bibStr, @"bibTeXString", citeKeys, @"citeKeys", [NSNumber numberWithInt:generatedTypes], @"generatedTypes", nil]];
+        [server runTeXTaskInBackgroundWithInfo:[BDSKPreviewTask previewTaskWithBibTeXString:bibStr citeKeys:citeKeys generatedTypes:generatedTypes]];
 	}	
 }
 
@@ -554,8 +568,8 @@ static BDSKPreviewer *sharedPreviewer = nil;
         texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview"];
         delegate = nil;
         bibString = nil;
-        queueLock = [NSRecursiveLock new];
-        queue = [NSMutableArray new];
+        nextTaskLock = [NSRecursiveLock new];
+        nextTask = nil;
         isProcessing = 0;
         notifyWhenDone = 0;
         [self startDOServerSync];
@@ -567,10 +581,10 @@ static BDSKPreviewer *sharedPreviewer = nil;
 {
     [texTask release];
     texTask = nil;
-    [queueLock release];
-    queueLock = nil;
-    [queue release];
-    queue = nil;
+    [nextTaskLock release];
+    nextTaskLock = nil;
+    [nextTask release];
+    nextTask = nil;
     [super dealloc];
 }
 
@@ -596,15 +610,16 @@ static BDSKPreviewer *sharedPreviewer = nil;
     return texTask;
 }
 
-- (void)runTeXTaskInBackgroundWithInfo:(NSDictionary *)info{
-    if(info){
-        [queueLock lock];
-        [queue addObject:info];
-        [queueLock unlock];
-        // If it's still working, we don't have to do anything; sending too many of these messages just piles them up in the DO queue until the port starts dropping them.
+- (void)runTeXTaskInBackgroundWithInfo:(BDSKPreviewTask *)previewTask{
+    [nextTaskLock lock];
+    [nextTask release];
+    nextTask = [previewTask retain];
+    [nextTaskLock unlock];
+    if(previewTask){
+        // If it's still working, we don't have to do anything; sending too many of these messages just replaces nextTask until the port starts dropping them.
         OSMemoryBarrier();
         if(isProcessing == 0)
-            [[self serverOnServerThread] processQueueUntilEmpty];
+            [[self serverOnServerThread] processNextTask];
         // start sending task finished messages to the previewer
         OSAtomicCompareAndSwap32Barrier(0, 1, &notifyWhenDone);
     }else{
@@ -615,24 +630,23 @@ static BDSKPreviewer *sharedPreviewer = nil;
 
 // Server thread protocol
 
-- (oneway void)processQueueUntilEmpty{
+- (oneway void)processNextTask{
     OSAtomicCompareAndSwap32Barrier(0, 1, &isProcessing);
     
-    NSDictionary *dict = nil;
-    [queueLock lock];
+    BDSKPreviewTask *previewTask = nil;
+    [nextTaskLock lock];
     NSDate *distantFuture = [NSDate distantFuture];
     NSRunLoop *rl = [NSRunLoop currentRunLoop];
     
     do { 
-        // we're only interested in the latest addition to the queue
-        dict = [[queue lastObject] retain];
-        
-        // get rid of everything in the queue, then allow the main thread to keep putting strings in it
-        [queue removeAllObjects];
-        [queueLock unlock];
+        // we're only interested in the latest addition to the nextTask
+        previewTask = nextTask;
+        // get rid of the nextTask, then allow the main thread to keep putting strings in it
+        nextTask = nil;
+        [nextTaskLock unlock];
         
         BOOL success = YES;
-        if (dict) {
+        if (previewTask) {
             BOOL didRun = YES;
             if ([texTask isProcessing]) {
                 // poll the runloop while the task is still running
@@ -640,37 +654,37 @@ static BDSKPreviewer *sharedPreviewer = nil;
                     didRun = [rl runMode:NSDefaultRunLoopMode beforeDate:distantFuture];
                 } while (didRun && [texTask isProcessing]);
                 
-                // get the latest string; the queue may have changed while we waited for this task to finish (doesn't seem to be the case in practice)
-                [queueLock lock];
-                if ([queue count]) {
-                    [dict release];
-                    dict = [[queue lastObject] retain];
+                // get the latest string; the nextTask may have changed while we waited for this task to finish (doesn't seem to be the case in practice)
+                [nextTaskLock lock];
+                if (nextTask) {
+                    [previewTask release];
+                    previewTask = nextTask;
+                    nextTask = nil;
                 }
-                [queueLock unlock];
+                [nextTaskLock unlock];
             }
-            NSInteger generatedTypes = [dict objectForKey:@"generatedTypes"] ? [[dict objectForKey:@"generatedTypes"] intValue] : BDSKGenerateRTF;
             // previous task is done, so we can start a new one
-            success = [texTask runWithBibTeXString:[dict objectForKey:@"bibTeXString"]  citeKeys:[dict objectForKey:@"citeKeys"] generatedTypes:generatedTypes];
-            [dict release];
+            success = [texTask runWithBibTeXString:[previewTask bibTeXString] citeKeys:[previewTask citeKeys] generatedTypes:[previewTask generatedTypes]];
+            [previewTask release];
         }
         
         // always lock going into the top of the loop for checking count
-        [queueLock lock];
+        [nextTaskLock lock];
         
-        // Don't notify the main thread until we've processed all of the entries in the queue
+        // Don't notify the main thread until we've processed all of the entries in the nextTask
         OSMemoryBarrier();
-        if (1 == notifyWhenDone && [queue count] == 0) {
-            // If the main thread is blocked on the queueLock, we're hosed because it can't service the DO port!
-            [queueLock unlock];
+        if (1 == notifyWhenDone && nextTask == nil) {
+            // If the main thread is blocked on the nextTaskLock, we're hosed because it can't service the DO port!
+            [nextTaskLock unlock];
             [[self serverOnMainThread] serverFinishedWithResult:success];
-            [queueLock lock];
+            [nextTaskLock lock];
         }
         OSMemoryBarrier();
-    } while (1 == notifyWhenDone && [queue count]);
+    } while (1 == notifyWhenDone && nextTask);
 
-    // swap, then unlock, so if a potential caller is blocking on the lock, they know to call processQueueUntilEmpty
+    // swap, then unlock, so if a potential caller is blocking on the lock, they know to call processNextTask
     OSAtomicCompareAndSwap32Barrier(1, 0, &isProcessing);
-    [queueLock unlock];
+    [nextTaskLock unlock];
 }
 
 // Main thread protocol
@@ -680,5 +694,34 @@ static BDSKPreviewer *sharedPreviewer = nil;
     if([delegate respondsToSelector:@selector(serverFinishedWithResult:)])
         [delegate serverFinishedWithResult:success];
 }
+
+@end
+
+#pragma mark -
+
+@implementation BDSKPreviewTask
+
++ (id)previewTaskWithBibTeXString:(NSString *)aString citeKeys:(NSArray *)aKeys generatedTypes:(NSInteger)aTypes {
+    return [[[self alloc] initWithBibTeXString:aString citeKeys:aKeys generatedTypes:aTypes] autorelease];
+}
+
+- (id)initWithBibTeXString:(NSString *)aString citeKeys:(NSArray *)aKeys generatedTypes:(NSInteger)aTypes {
+    if (self = [super init]) {
+        bibTeXString = [aString copy];
+        citeKeys = [aKeys copy];
+        generatedTypes = aTypes;
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [bibTeXString release];
+    [citeKeys release];
+    [super dealloc];
+}
+
+- (NSString *)bibTeXString { return bibTeXString; }
+- (NSArray *)citeKeys { return citeKeys; }
+- (NSInteger)generatedTypes { return generatedTypes; }
 
 @end
