@@ -42,7 +42,7 @@
 #import "BDSKOwnerProtocol.h"
 
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
-@class AGRegex, BDSKTeXTask, BDSKMacroResolver, BDSKItemPasteboardHelper;
+@class AGRegex, BDSKMacroResolver, BDSKItemPasteboardHelper;
 @class BDSKEditor, BDSKMacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController, BDSKSearchGroupViewController;
 @class BDSKStatusBar, BDSKMainTableView, BDSKGroupOutlineView, BDSKGradientView, BDSKGradientSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredView, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FVFileView;
 @class BDSKWebGroupViewController, BDSKSearchButtonController;

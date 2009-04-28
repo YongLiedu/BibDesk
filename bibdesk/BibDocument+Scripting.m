@@ -40,7 +40,6 @@
 #import "BibAuthor.h"
 #import "BibItem.h"
 #import "BDSKMacro.h"
-#import "BDSKTeXTask.h"
 #import "BDSKItemPasteboardHelper.h"
 #import "BDSKOwnerProtocol.h"
 #import "BDSKPublicationsArray.h"
