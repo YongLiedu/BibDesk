@@ -60,7 +60,7 @@
 enum {
     BDSKColumnTypeText,
     BDSKColumnTypeURL,
-    BDSKColumnTypeLocalFile,
+    BDSKColumnTypeLinkedFile,
     BDSKColumnTypeRating,
     BDSKColumnTypeBoolean,
     BDSKColumnTypeTriState,
@@ -251,7 +251,7 @@ enum {
     if([colName isURLField])
         type = BDSKColumnTypeURL;
     else if([colName isEqualToString:BDSKLocalFileString] || [colName isEqualToString:BDSKRemoteURLString])
-        type = BDSKColumnTypeLocalFile;
+        type = BDSKColumnTypeLinkedFile;
     else if([colName isRatingField])
         type = BDSKColumnTypeRating;
     else if([colName isBooleanField])
@@ -278,7 +278,7 @@ enum {
         case BDSKColumnTypeURL:
             cell = [[[BDSKCenterScaledImageCell alloc] init] autorelease];
             break;
-        case BDSKColumnTypeLocalFile:
+        case BDSKColumnTypeLinkedFile:
             cell = [[[BDSKTextWithIconCell alloc] init] autorelease];
             [cell setLineBreakMode:NSLineBreakByClipping];
             break;
@@ -369,7 +369,7 @@ enum {
     else
         [headerCell setStringValue:[[NSBundle mainBundle] localizedStringForKey:colName value:@"" table:@"BibTeXKeys"]];
     
-    if (columnType != BDSKColumnTypeText && columnType != BDSKColumnTypeLocalFile && columnType != BDSKColumnTypeRelevance)
+    if (columnType != BDSKColumnTypeText && columnType != BDSKColumnTypeLinkedFile && columnType != BDSKColumnTypeRelevance)
         [tc setWidth:BDSKMax([dataCell cellSize].width, [headerCell cellSize].width)];
     
     return tc;
