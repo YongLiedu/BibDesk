@@ -48,6 +48,14 @@
     return nil;
 }
 
+// Tiger inverts the text color based on the highlight color, which is lame
+- (NSColor *)textColor {
+    if ([self respondsToSelector:@selector(backgroundStyle)] == NO && 
+        [[[self controlView] window] isKeyWindow] && [[self controlView] firstResponder] == [self controlView])
+        return [NSColor textBackgroundColor];
+    return [super textColor];
+}
+
 #define BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERLESS (1.0)
 #define BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERLESS (0.0)
 #define BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERED (2.0)

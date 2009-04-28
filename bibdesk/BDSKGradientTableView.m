@@ -139,8 +139,6 @@ static void initializeHighlightColors() {
     return self;
 }
 
-- (id)_highlightColorForCell:(NSCell *)cell { return nil; }
-
 - (void)highlightSelectionInClipRect:(NSRect)rect {
     if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
         [super highlightSelectionInClipRect:rect];
@@ -234,8 +232,6 @@ static void initializeHighlightColors() {
     }
     return self;
 }
-
-- (id)_highlightColorForCell:(NSCell *)cell { return nil; }
 
 - (void)highlightSelectionInClipRect:(NSRect)rect {
     if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
