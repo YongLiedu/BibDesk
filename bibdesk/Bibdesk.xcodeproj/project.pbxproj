@@ -457,7 +457,6 @@
 		F97C9DB20C4481670002EE01 /* BDSKISIGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DB10C4481670002EE01 /* BDSKISIGroupServer.m */; };
 		F97C9DBE0C44866F0002EE01 /* WSGeneratedObj.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */; };
 		F97C9DBF0C4486700002EE01 /* BDSKISIWebServices.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DBD0C44866F0002EE01 /* BDSKISIWebServices.m */; };
-		F97FA7930AF56FA100C32BBA /* BDSKImageFadeAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = F97FA7910AF56FA100C32BBA /* BDSKImageFadeAnimation.m */; };
 		F98AACDE0D43DB5A00D3CD64 /* libssl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F98AACDD0D43DB5A00D3CD64 /* libssl.dylib */; };
 		F98AACF50D43E13C00D3CD64 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F98AACF40D43E13C00D3CD64 /* libcrypto.dylib */; };
 		F98DB3180A23C7730040D347 /* BDSKTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = F98DB3160A23C7730040D347 /* BDSKTemplate.m */; };
@@ -1594,8 +1593,6 @@
 		F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WSGeneratedObj.m; sourceTree = "<group>"; };
 		F97C9DBC0C44866F0002EE01 /* BDSKISIWebServices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKISIWebServices.h; sourceTree = "<group>"; };
 		F97C9DBD0C44866F0002EE01 /* BDSKISIWebServices.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKISIWebServices.m; sourceTree = "<group>"; };
-		F97FA7900AF56FA100C32BBA /* BDSKImageFadeAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKImageFadeAnimation.h; sourceTree = "<group>"; };
-		F97FA7910AF56FA100C32BBA /* BDSKImageFadeAnimation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKImageFadeAnimation.m; sourceTree = "<group>"; };
 		F98AA67F0971E3F400184BD8 /* BDSKTextViewCompletionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTextViewCompletionController.h; sourceTree = "<group>"; };
 		F98AA6800971E3F400184BD8 /* BDSKTextViewCompletionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTextViewCompletionController.m; sourceTree = "<group>"; };
 		F98AACDD0D43DB5A00D3CD64 /* libssl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.dylib; path = /usr/lib/libssl.dylib; sourceTree = "<absolute>"; };
@@ -2085,7 +2082,6 @@
 				CE1A7EDE090BDF1C00ACC864 /* BDSKHeaderPopUpButton.m */,
 				CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */,
 				CEC7D0240F680C970051794E /* BDSKIconTextFieldCell.m */,
-				F97FA7910AF56FA100C32BBA /* BDSKImageFadeAnimation.m */,
 				CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */,
 				CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */,
 				F92405010BC5856900672839 /* BDSKLevelIndicatorCell.m */,
@@ -2671,7 +2667,6 @@
 				CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */,
 				45DB3E8C0CAAFED5001EACDA /* BDSKHubmedParser.h */,
 				CEC7D0230F680C970051794E /* BDSKIconTextFieldCell.h */,
-				F97FA7900AF56FA100C32BBA /* BDSKImageFadeAnimation.h */,
 				CE3B682609D1B0190017D339 /* BDSKImagePopUpButton.h */,
 				CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */,
 				CE40EC520EE9AAEF00BCF379 /* BDSKImportCommand.h */,
@@ -3826,7 +3821,6 @@
 				CE6003290AF3E465000B5680 /* BDSKColoredView.m in Sources */,
 				CE600E300AF405D6000B5680 /* BDSKRISParser.m in Sources */,
 				CE601A4F0AF4C488000B5680 /* BDSKReferenceMinerParser.m in Sources */,
-				F97FA7930AF56FA100C32BBA /* BDSKImageFadeAnimation.m in Sources */,
 				CE602A600AF65A9C000B5680 /* BDSKStringParser.m in Sources */,
 				CE27D95C0AF92BFD00419879 /* BDSKZoomableTextView.m in Sources */,
 				CEEFDE010B03ED0200668BB0 /* BDSKScriptGroupSheetController.m in Sources */,
