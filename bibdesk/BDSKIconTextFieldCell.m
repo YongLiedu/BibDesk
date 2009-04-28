@@ -51,7 +51,7 @@
 // Tiger inverts the text color based on the highlight color, which is lame
 - (NSColor *)textColor {
     if ([self respondsToSelector:@selector(backgroundStyle)] == NO && 
-        [[[self controlView] window] isKeyWindow] && [[self controlView] firstResponder] == [self controlView])
+        [[[self controlView] window] isKeyWindow] && [[[self controlView] window] firstResponder] == [self controlView])
         return [NSColor textBackgroundColor];
     return [super textColor];
 }
