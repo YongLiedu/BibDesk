@@ -874,6 +874,7 @@
 				GCC_MODEL_TUNING = G4;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = FileView_Prefix.pch;
+				GCC_VERSION = 4.0;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@executable_path/../Frameworks";
