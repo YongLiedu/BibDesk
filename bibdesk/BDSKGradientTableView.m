@@ -215,20 +215,24 @@ static void initializeHighlightColors() {
 
 - (id)initWithFrame:(NSRect)frameRect {
     if (self = [super initWithFrame:frameRect]) {
-        if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)])
+        if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
             [self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
-        else // from Mail.app on 10.4
+        } else {// from Mail.app on 10.4
             [self setBackgroundColor:[[NSColor colorWithCalibratedRed:231.0f/255.0f green:237.0f/255.0f blue:246.0f/255.0f alpha:1.0] colorUsingColorSpaceName:NSDeviceRGBColorSpace]];
+            [self setIndentationPerLevel:14.0];
+        }
     }
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)coder {
     if (self = [super initWithCoder:coder]) {
-        if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)])
+        if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
             [self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
-        else // from Mail.app on 10.4
+        } else { // from Mail.app on 10.4
             [self setBackgroundColor:[[NSColor colorWithCalibratedRed:231.0f/255.0f green:237.0f/255.0f blue:246.0f/255.0f alpha:1.0] colorUsingColorSpaceName:NSDeviceRGBColorSpace]];
+            [self setIndentationPerLevel:14.0];
+        }
     }
     return self;
 }
