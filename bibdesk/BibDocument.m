@@ -159,10 +159,10 @@ static char BDSKDocumentFileViewObservationContext;
 static char BDSKDocumentDefaultsObservationContext;
 
 enum {
-    BDSKItemChangedGroupFieldMask = 1,
-    BDSKItemChangedSearchKeyMask = 2,
-    BDSKItemChangedSortKeyMask = 4,
-    BDSKItemChangedFilesMask = 8
+    BDSKItemChangedGroupFieldMask = 1 << 0,
+    BDSKItemChangedSearchKeyMask  = 1 << 1,
+    BDSKItemChangedSortKeyMask    = 1 << 2,
+    BDSKItemChangedFilesMask      = 1 << 3
 };
 
 @interface BDSKFileViewObject : NSObject {
@@ -174,32 +174,7 @@ enum {
 - (NSString *)string;
 @end
 
-@implementation BDSKFileViewObject
-
-- (id)initWithURL:(NSURL *)aURL string:(NSString *)aString {
-    if (self = [super init]) {
-        URL = [aURL copy];
-        string = [aString copy];
-    }
-    return self;
-}
-
-- (void)dealloc {
-    [URL release];
-    [string release];
-    [super dealloc];
-}
-
-- (NSURL *)URL { return URL; }
-
-- (NSString *)string { return string; }
-
-@end
-
-
-@interface NSFileWrapper (BDSKExtensions)
-- (NSFileWrapper *)addFileWrapperWithPath:(NSString *)path relativeTo:(NSString *)basePath recursive:(BOOL)recursive;
-@end
+#pragma mark -
 
 @interface NSDocument (BDSKPrivateExtensions)
 // declare a private NSDocument method so we can override it
@@ -3851,38 +3826,24 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 
 #pragma mark -
 
-@implementation NSFileWrapper (BDSKExtensions)
+@implementation BDSKFileViewObject
 
-- (NSFileWrapper *)addFileWrapperWithPath:(NSString *)path relativeTo:(NSString *)basePath recursive:(BOOL)recursive {
-    NSFileWrapper *fileWrapper = nil;
-    BOOL isDir;
-    if ([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir]) {
-        NSString *filename = [path lastPathComponent];
-        NSString *relativePath = basePath ? [path relativePathFromPath:basePath] : filename;
-        NSFileWrapper *container = self;
-        
-        if ([relativePath isEqualToString:filename] == NO)
-            container = [self addFileWrapperWithPath:[path stringByDeletingLastPathComponent] relativeTo:basePath recursive:NO];
-        
-        fileWrapper = [[container fileWrappers] objectForKey:filename];
-        if (fileWrapper == nil || [fileWrapper isDirectory] != isDir) {
-            if (isDir)
-                fileWrapper = [[NSFileWrapper alloc] initDirectoryWithFileWrappers:[NSDictionary dictionary]];
-            else
-                fileWrapper = [[NSFileWrapper alloc] initRegularFileWithContents:[NSData dataWithContentsOfFile:path]];
-            [fileWrapper setPreferredFilename:filename];
-            [container addFileWrapper:fileWrapper];
-            [fileWrapper release];
-        }
-        
-        if (isDir && recursive) {
-            NSEnumerator *fileEnum = [[[NSFileManager defaultManager] subpathsAtPath:path] objectEnumerator];
-            NSString *file;
-            while (file = [fileEnum nextObject])
-                [self addFileWrapperWithPath:[path stringByAppendingPathComponent:file] relativeTo:path recursive:YES];
-        }
+- (id)initWithURL:(NSURL *)aURL string:(NSString *)aString {
+    if (self = [super init]) {
+        URL = [aURL copy];
+        string = [aString copy];
     }
-    return fileWrapper;
+    return self;
 }
+
+- (void)dealloc {
+    [URL release];
+    [string release];
+    [super dealloc];
+}
+
+- (NSURL *)URL { return URL; }
+
+- (NSString *)string { return string; }
 
 @end
