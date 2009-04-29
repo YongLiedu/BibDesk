@@ -80,9 +80,9 @@
     [self unlockFocus];
 }
 
-- (void)load {
++ (void)load {
     if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
-        BDSKReplaceInstanceMethodImplementation(self, @selector(_drawDropHighlightOnRow:), @selector(replacement_drawDropHighlightOnRow:));
+        BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(_drawDropHighlightOnRow:), @selector(replacement_drawDropHighlightOnRow:));
 }
 
 #else
@@ -102,9 +102,9 @@
     return cell;
 }
 
-- (void)load {
++ (void)load {
     if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
-        BDSKReplaceInstanceMethodImplementation(self, @selector(dataCellForRow:), @selector(replacement_dataCellForRow:));
+        BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(dataCellForRow:), @selector(replacement_dataCellForRow:));
 }
 
 @end
