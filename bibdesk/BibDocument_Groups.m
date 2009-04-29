@@ -792,7 +792,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	}
 	
 	NSMutableArray *array = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
-	[array addObject:newGroupField];
+	if ([array indexOfObject:newGroupField] == NSNotFound)
+        [array addObject:newGroupField];
 	[[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];	
     
     [self setCurrentGroupField:newGroupField];
