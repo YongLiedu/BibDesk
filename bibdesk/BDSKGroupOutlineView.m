@@ -124,9 +124,9 @@
                     if ([[self delegate] respondsToSelector:@selector(outlineView:doubleClickedOnIconOfItem:)])
                         [[self delegate] outlineView:self doubleClickedOnIconOfItem:[self itemAtRow:row]];
                     return;
+                } else if ([self isRowSelected:row]) {
+                    return;
                 }
-            } else if ([self isRowSelected:row]) {
-                return;
             }
         }
     }
