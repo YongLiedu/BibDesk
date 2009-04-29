@@ -564,7 +564,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [groupOutlineView registerForDraggedTypes:dragTypes];
     
     [[sideFileView enclosingScrollView] setBackgroundColor:[sideFileView backgroundColor]];
-    [bottomFileView setBackgroundColor:[NSColor controlBackgroundColor]];
+    [bottomFileView setBackgroundColor:[[NSColor controlAlternatingRowBackgroundColors] lastObject]];
     [[bottomFileView enclosingScrollView] setBackgroundColor:[bottomFileView backgroundColor]];
     
     [fileCollapsibleView setCollapseEdges:BDSKMaxXEdgeMask];
