@@ -717,6 +717,9 @@ static void addItemFunction(const void *value, void *context) {
         while ([self shouldKeepRunning]) {
             // this blocks until a new note is available, or the index finishes
             [self processNextNotification];
+            
+            [pool release];
+            pool = [[NSAutoreleasePool alloc] init];
         }
     }
     @catch(id e){
@@ -735,6 +738,8 @@ static void addItemFunction(const void *value, void *context) {
         [notificationThread release];
         notificationThread = nil;
         [setupLock unlockWithCondition:INDEX_THREAD_DONE];
+        
+        [pool release];
     }
 }
 

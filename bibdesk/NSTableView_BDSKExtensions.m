@@ -38,6 +38,7 @@
 
 #import "NSTableView_BDSKExtensions.h"
 #import "NSBezierPath_BDSKExtensions.h"
+#import "BDSKRuntime.h"
 
 
 @interface NSTableView (BDSApplePrivate)
