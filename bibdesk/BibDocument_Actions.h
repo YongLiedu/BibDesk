@@ -57,11 +57,11 @@
 */
 - (IBAction)newPub:(id)sender; // new pub button pressed.
 
-- (void)deletePubs:(NSArray *)pubs;
+- (void)deletePublications:(NSArray *)pubs;
 
 - (IBAction)deleteSelectedPubs:(id)sender;
 
-- (void)removePubs:(NSArray *)pubs;
+- (void)removePublicationsFromSelectedGroups:(NSArray *)pubs;
 
 - (IBAction)removeSelectedPubs:(id)sender;
 

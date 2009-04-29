@@ -193,11 +193,11 @@ static BOOL changingColors = NO;
 }
 
 // this method is called for the main table; it's a wrapper for delete or remove from group
-- (void)removePubs:(NSArray *)pubs{
+- (void)removePublicationsFromSelectedGroups:(NSArray *)pubs{
 	NSArray *selectedGroups = [self selectedGroups];
 	
 	if ([self hasLibraryGroupSelected]) {
-		[self deletePubs:pubs];
+		[self deletePublications:pubs];
 	} else {
 		BOOL canRemove = NO;
         if ([self hasStaticGroupsSelected])
@@ -228,7 +228,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)removeSelectedPubs:(id)sender{
-	[self removePubs:[self selectedGroups]];
+	[self removePublicationsFromSelectedGroups:[self selectedGroups]];
 }
 
 - (void)deletePubsAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
@@ -267,7 +267,7 @@ static BOOL changingColors = NO;
 	[[self undoManager] setActionName:[NSString stringWithFormat:NSLocalizedString(@"Delete %@", @"Undo action name: Delete Publication(s)"),pubSingularPlural]];
 }
 
-- (void)deletePubs:(NSArray *)pubs {
+- (void)deletePublications:(NSArray *)pubs {
 	NSInteger numPubs = [pubs count];
     if (numPubs == 0 || [self hasExternalGroupsSelected] == YES) {
         return;
@@ -296,7 +296,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)deleteSelectedPubs:(id)sender{
-    [self deletePubs:[self selectedPublications]];
+    [self deletePublications:[self selectedPublications]];
 }
 
 // -delete:,  -alternateDelete:, -copy:, -cut:, -alternateCut:, -paste:, and -duplicate are defined in BDSKTableView and BDSKMainTableView using dataSource methods
