@@ -49,6 +49,11 @@
 #import "BDSKGroupCell.h"
 #import "NSLayoutManager_BDSKExtensions.h"
 
+
+@interface BDSKParentGroupCell : NSTextFieldCell
+@end
+
+
 @implementation BDSKGroupOutlineView
 
 - (void)dealloc
@@ -83,7 +88,7 @@
 
 - (NSTextFieldCell *)parentCell {
     if (parentCell == nil) {
-        parentCell = [[NSTextFieldCell alloc] init];
+        parentCell = [[BDSKParentGroupCell alloc] init];
         [parentCell setTextColor:[NSColor disabledControlTextColor]];
         [parentCell setFont:[[NSFontManager sharedFontManager] convertFont:[self font] toHaveTrait:NSBoldFontMask]];
     }
@@ -284,6 +289,19 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
 - (IBAction)deselectAll:(id)sender {
 	[self selectRowIndexes:[NSIndexSet indexSetWithIndex:1] byExtendingSelection:NO];
 	[self scrollRowToVisible:0];
+}
+
+@end
+
+
+@implementation BDSKParentGroupCell
+
+- (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
+        NSRect ignored;
+        NSDivideRect(cellFrame, &ignored, &cellFrame, 2.0, NSMinYEdge);
+    }
+    [super drawInteriorWithFrame:cellFrame inView:controlView];
 }
 
 @end
