@@ -115,18 +115,26 @@
     NSPoint point = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     NSInteger row = [self rowAtPoint:point];
     NSInteger column = [self columnAtPoint:point];
-    if (row != -1 && column == 0) {
-        BDSKGroupCell *cell = [[[self tableColumns] objectAtIndex:0] dataCellForRow:row];
-        if ([cell respondsToSelector:@selector(iconRectForBounds:)]) {
-            NSRect iconRect = [cell iconRectForBounds:[self frameOfCellAtColumn:column row:row]];
-            if (NSMouseInRect(point, iconRect, [self isFlipped])) {
-                if ([theEvent clickCount] == 2) {
-                    if ([[self delegate] respondsToSelector:@selector(outlineView:doubleClickedOnIconOfItem:)])
-                        [[self delegate] outlineView:self doubleClickedOnIconOfItem:[self itemAtRow:row]];
-                    return;
-                } else if ([self isRowSelected:row]) {
-                    return;
-                }
+    if (row != -1 && column == 0 && [self isRowSelected:row]) {
+        id cell = nil;
+        if ([self respondsToSelector:@selector(preparedCellAtColumn:row:)])
+            cell = [self preparedCellAtColumn:column row:row];
+        else
+            cell = [[[self tableColumns] objectAtIndex:0] dataCellForRow:row];
+        if ([cell isKindOfClass:[BDSKGroupCell class]]) {
+            NSRect cellFrame = [self frameOfCellAtColumn:column row:row];
+            NSUInteger hit = NSCellHitNone;
+            if ([NSCell instancesRespondToSelector:@selector(hitTestForEvent:inRect:ofView:)])
+                hit = [cell hitTestForEvent:theEvent inRect:cellFrame ofView:self];
+            else if (NSMouseInRect(point, [cell iconRectForBounds:cellFrame], [self isFlipped]))
+                hit = NSCellHitContentArea;
+            else if (NSMouseInRect(point, [cell textRectForBounds:cellFrame], [self isFlipped]))
+                hit = NSCellHitContentArea | NSCellHitEditableTextArea;
+            if ((hit & NSCellHitEditableTextArea) == 0) {
+                if ((hit & NSCellHitContentArea) != 0 && [theEvent clickCount] == 2 && 
+                    [[self delegate] respondsToSelector:@selector(outlineView:doubleClickedOnIconOfItem:)])
+                    [[self delegate] outlineView:self doubleClickedOnIconOfItem:[self itemAtRow:row]];
+                return;
             }
         }
     }
