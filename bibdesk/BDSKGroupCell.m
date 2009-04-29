@@ -198,7 +198,7 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
         countSize = [self iconSizeForBounds:aRect];
     } else if ([self count] > 0) {
         countSize = [countString boundingRectWithSize:aRect.size options:0].size;
-        countSize.width += [self count] < 100 ? countSize.height : 0.7 * countSize.height; // add oval pading around count
+        countSize.width += ([self count] < 100 ? 0.9 : 0.7) * countSize.height; // add oval pading around count
     }
     NSRect countRect, ignored;
     if (countSize.width > 0.0) {
@@ -229,7 +229,7 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
         countSize = NSMakeSize(16, 16);
     } else if ([self count] > 0) {
         countSize = [countString boundingRectWithSize:cellSize options:0].size;
-        countSize.width += [self count] < 100 ? countSize.height : 0.7 * countSize.height; // add oval pading around count
+        countSize.width += ([self count] < 100 ? 0.9 : 0.7) * countSize.height; // add oval pading around count
     }
     // cellSize.height approximates the icon size
     cellSize.width += BORDER_BETWEEN_EDGE_AND_IMAGE + cellSize.height + BORDER_BETWEEN_IMAGE_AND_TEXT;
@@ -283,7 +283,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
         if ([self failedDownload]) {
             [self drawIcon:[NSImage imageNamed:@"BDSKSmallCautionIcon"] withFrame:countRect inView:controlView];
         } else if (count > 0) {
-            CGFloat countInset = count < 100 ? 0.5 * NSHeight(countRect) : 0.35 * NSHeight(countRect);
+            CGFloat countInset = (count < 100 ? 0.45 : 0.35) * NSHeight(countRect);
             NSColor *fgColor;
             NSColor *bgColor;
             if ([controlView respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
