@@ -100,9 +100,8 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
         if ([self respondsToSelector:@selector(backgroundStyle)]) {
             if (hasDarkHighlight && [self isHighlighted])
                 return [NSColor textBackgroundColor];
-        } else {
-            if ((hasDarkHighlight && [self isHighlighted]) ||
-                ([[[self controlView] window] isKeyWindow] && [[[self controlView] window] firstResponder] == [self controlView]))
+        } else if ([self isHighlighted]) {
+            if (hasDarkHighlight || ([[[self controlView] window] isKeyWindow] && [[[[self controlView] window] firstResponder] isEqual:[self controlView]]))
                 return [NSColor textBackgroundColor];
         }
     }

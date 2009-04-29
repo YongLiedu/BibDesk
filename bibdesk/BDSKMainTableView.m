@@ -734,8 +734,8 @@ enum {
 
 // Tiger inverts the text color based on the highlight color, which is lame
 - (NSColor *)textColor {
-    if ([self respondsToSelector:@selector(backgroundStyle)] == NO && 
-        [[[self controlView] window] isKeyWindow] && [[[self controlView] window] firstResponder] == [self controlView])
+    if ([self respondsToSelector:@selector(backgroundStyle)] == NO && [self isHighlighted] && 
+        [[[self controlView] window] isKeyWindow] && [[[[self controlView] window] firstResponder] isEqual:[self controlView]])
         return [NSColor textBackgroundColor];
     return [super textColor];
 }
