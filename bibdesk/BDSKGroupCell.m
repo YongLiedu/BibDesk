@@ -110,7 +110,7 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 }
 
 - (void)updateCountAttributes {
-	NSFont *countFont = [NSFont fontWithName:@"Helvetica-Bold" size:([[self font] pointSize] - 1)] ?: [NSFont boldSystemFontOfSize:([[self font] pointSize] - 1)];
+	NSFont *countFont = [NSFont fontWithName:@"Helvetica-Bold" size:[[self font] pointSize]] ?: [NSFont boldSystemFontOfSize:[[self font] pointSize]];
 	BDSKPRECONDITION(countFont);     
     [countString addAttribute:NSFontAttributeName value:countFont range:NSMakeRange(0, [countString length])];
     [countString addAttribute:NSKernAttributeName value:[NSNumber numberWithFloat:-1.0] range:NSMakeRange(0, [countString length])];
