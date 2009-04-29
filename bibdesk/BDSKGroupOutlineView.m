@@ -112,19 +112,21 @@
 }
 
 - (void)mouseDown:(NSEvent *)theEvent{
-    if ([theEvent clickCount] == 2) {
-        NSPoint point = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-        NSInteger row = [self rowAtPoint:point];
-        NSInteger column = [self columnAtPoint:point];
-        if (row != -1 && column == 0) {
-            BDSKGroupCell *cell = [[[self tableColumns] objectAtIndex:0] dataCellForRow:row];
-            if ([cell respondsToSelector:@selector(iconRectForBounds:)]) {
-                NSRect iconRect = [cell iconRectForBounds:[self frameOfCellAtColumn:column row:row]];
-                if (NSMouseInRect(point, iconRect, [self isFlipped])) {
+    NSPoint point = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    NSInteger row = [self rowAtPoint:point];
+    NSInteger column = [self columnAtPoint:point];
+    if (row != -1 && column == 0) {
+        BDSKGroupCell *cell = [[[self tableColumns] objectAtIndex:0] dataCellForRow:row];
+        if ([cell respondsToSelector:@selector(iconRectForBounds:)]) {
+            NSRect iconRect = [cell iconRectForBounds:[self frameOfCellAtColumn:column row:row]];
+            if (NSMouseInRect(point, iconRect, [self isFlipped])) {
+                if ([theEvent clickCount] == 2) {
                     if ([[self delegate] respondsToSelector:@selector(outlineView:doubleClickedOnIconOfItem:)])
                         [[self delegate] outlineView:self doubleClickedOnIconOfItem:[self itemAtRow:row]];
                     return;
                 }
+            } else if ([self isRowSelected:row]) {
+                return;
             }
         }
     }
