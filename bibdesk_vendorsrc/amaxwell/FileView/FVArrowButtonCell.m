@@ -85,11 +85,20 @@
 
 - (void)drawWithFrame:(NSRect)frame inView:(NSView *)controlView;
 {
+    [self drawWithFrame:frame inView:controlView alpha:1.0];
+}
+
+- (void)drawWithFrame:(NSRect)frame inView:(NSView *)controlView alpha:(CGFloat)alpha;
+{
     // NSCell's highlight drawing does not look correct against a dark background, so override it completely
     NSColor *bgColor = nil;
     NSColor *arrowColor = nil;
     NSColor *strokeColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.9];
-    NSRect rect = NSInsetRect(frame, 1.0, 1.0);
+    NSRect diskFrame = NSInsetRect(frame, 2.5, 2.5);
+    NSRect circleFrame = NSInsetRect(frame, 2.0, 2.0);
+    NSShadow *buttonShadow = [[[NSShadow alloc] init] autorelease];
+    [buttonShadow setShadowBlurRadius:1.5];
+    [buttonShadow setShadowColor:[NSColor blackColor]];
     
     if ([self isEnabled] == NO) {
         bgColor = [NSColor colorWithCalibratedWhite:0.3 alpha:0.5];
@@ -102,20 +111,22 @@
         arrowColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.9];
     }
     
-    [NSGraphicsContext saveGraphicsState];
-    
+    CGContextRef ctxt = [[NSGraphicsContext currentContext] graphicsPort];
+    CGContextSaveGState(ctxt);
+
+    CGContextSetAlpha(ctxt, alpha);
+    NSRectClip(frame);
     [bgColor setFill];
     [strokeColor setStroke];
-    [[NSBezierPath bezierPathWithOvalInRect:rect] fill];
-    [[NSBezierPath bezierPathWithOvalInRect:NSInsetRect(frame, 0.5, 0.5)] stroke];
+    [[NSBezierPath bezierPathWithOvalInRect:diskFrame] fill];
+    [[NSBezierPath bezierPathWithOvalInRect:circleFrame] stroke];
     
-    CGContextRef ctxt = [[NSGraphicsContext currentContext] graphicsPort];
-    CGContextTranslateCTM(ctxt, NSMinX(rect), NSMinY(rect));
+    CGContextTranslateCTM(ctxt, NSMinX(diskFrame), NSMinY(diskFrame));
     
     [arrowColor setFill];
-    [[self arrowBezierPathWithSize:rect.size] fill];
+    [[self arrowBezierPathWithSize:diskFrame.size] fill];
     
-    [NSGraphicsContext restoreGraphicsState];
+    CGContextRestoreGState(ctxt);
 }
 
 - (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView untilMouseUp:(BOOL)untilMouseUp {
