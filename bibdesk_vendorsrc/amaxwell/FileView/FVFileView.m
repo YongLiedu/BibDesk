@@ -69,6 +69,10 @@ static char _FVFileViewContentObservationContext;
 #define EDITABLE_BINDING_NAME          @"editable"
 #define ALLOWSDOWNLOADING_BINDING_NAME @"allowsDownloading"
 #define BACKGROUNDCOLOR_BINDING_NAME   @"backgroundColor"
+#define TEXTCOLOR_BINDING_NAME         @"textColor"
+#define SUBTITLECOLOR_BINDING_NAME     @"subtitleColor"
+#define FONT_BINDING_NAME              @"font"
+#define SUBTITLEFONT_BINDING_NAME      @"subtitleFont"
 
 // it's important that DEFAULT_PADDING.height >= TEXT_OFFSET - HIGHLIGHT_INSET
 #define DEFAULT_ICON_SIZE ((NSSize) { 64.0, 64.0 })
@@ -86,12 +90,6 @@ static char _FVFileViewContentObservationContext;
 
 // time interval for indeterminate download progress indicator updates
 #define PROGRESS_TIMER_INTERVAL 0.1
-
-static NSDictionary *_titleAttributes = nil;
-static NSDictionary *_labeledAttributes = nil;
-static NSDictionary *_subtitleAttributes = nil;
-static CGFloat _titleHeight = 0.0;
-static CGFloat _subtitleHeight = 0.0;
 
 @interface _FVURLInfo : NSObject
 {
@@ -150,31 +148,12 @@ static CGFloat _subtitleHeight = 0.0;
     [self exposeBinding:CONTENT_BINDING_NAME];
     [self exposeBinding:SELECTIONINDEXES_BINDING_NAME];
     [self exposeBinding:BACKGROUNDCOLOR_BINDING_NAME];
+    [self exposeBinding:TEXTCOLOR_BINDING_NAME];
+    [self exposeBinding:SUBTITLECOLOR_BINDING_NAME];
+    [self exposeBinding:FONT_BINDING_NAME];
+    [self exposeBinding:SUBTITLEFONT_BINDING_NAME];
     
     FVINITIALIZE(FVFileView);
-    
-    NSMutableDictionary *ta = [NSMutableDictionary dictionary];
-    [ta setObject:[NSFont systemFontOfSize:12.0] forKey:NSFontAttributeName];
-    [ta setObject:[NSColor darkGrayColor] forKey:NSForegroundColorAttributeName];
-    NSMutableParagraphStyle *ps = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-    // Apple uses this in IKImageBrowserView
-    [ps setLineBreakMode:NSLineBreakByTruncatingTail];
-    [ps setAlignment:NSCenterTextAlignment];
-    [ta setObject:ps forKey:NSParagraphStyleAttributeName];
-    [ps release];
-    _titleAttributes = [ta copy];
-    
-    [ta setObject:[NSColor blackColor] forKey:NSForegroundColorAttributeName];
-    _labeledAttributes = [ta copy];
-    
-    [ta setObject:[NSFont systemFontOfSize:10.0] forKey:NSFontAttributeName];
-    [ta setObject:[NSColor grayColor] forKey:NSForegroundColorAttributeName];
-    _subtitleAttributes = [ta copy];
-    
-    NSLayoutManager *lm = [[NSLayoutManager alloc] init];
-    _titleHeight = [lm defaultLineHeightForFont:[_titleAttributes objectForKey:NSFontAttributeName]];
-    _subtitleHeight = [lm defaultLineHeightForFont:[_subtitleAttributes objectForKey:NSFontAttributeName]];
-    [lm release];
     
     // QTMovie raises if +initialize isn't sent on the AppKit thread
     [QTMovie class];
@@ -262,6 +241,18 @@ static CGFloat _subtitleHeight = 0.0;
     _timeOfLastOrigin = CFAbsoluteTimeGetCurrent();
     _trackingRectMap = CFDictionaryCreateMutable(alloc, 0, &FVIntegerKeyDictionaryCallBacks, &FVIntegerValueDictionaryCallBacks);
     
+    _titleCell = [[NSTextFieldCell alloc] initTextCell:@""];
+    [_titleCell setFont:[NSFont systemFontOfSize:12.0]];
+    [_titleCell setTextColor:[NSColor darkGrayColor]];
+    [_titleCell setLineBreakMode:NSLineBreakByTruncatingTail];
+    [_titleCell setAlignment:NSCenterTextAlignment];
+    
+    _subtitleCell = [[NSTextFieldCell alloc] initTextCell:@""];
+    [_subtitleCell setFont:[NSFont systemFontOfSize:10.0]];
+    [_subtitleCell setTextColor:[NSColor grayColor]];
+    [_subtitleCell setLineBreakMode:NSLineBreakByTruncatingTail];
+    [_subtitleCell setAlignment:NSCenterTextAlignment];
+    
     _leftArrow = [[FVArrowButtonCell alloc] initWithArrowDirection:FVArrowLeft];
     [_leftArrow setTarget:self];
     [_leftArrow setAction:@selector(leftArrowAction:)];
@@ -316,6 +307,8 @@ static CGFloat _subtitleHeight = 0.0;
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [_titleCell release];
+    [_subtitleCell release];
     [_leftArrow release];
     [_rightArrow release];
     [_iconURLs release];
@@ -358,6 +351,46 @@ static CGFloat _subtitleHeight = 0.0;
 - (NSColor *)backgroundColor
 { 
     return _backgroundColor;
+}
+
+- (void)setTextColor:(NSColor *)aColor;
+{
+    [_titleCell setTextColor:aColor];
+}
+
+- (NSColor *)textColor
+{
+    return [_titleCell textColor];
+}
+
+- (void)setSubtitleColor:(NSColor *)aColor;
+{
+    [_subtitleCell setTextColor:aColor];
+}
+
+- (NSColor *)subtitleColor
+{
+    return [_subtitleCell textColor];
+}
+
+- (void)setFont:(NSFont *)aFont
+{
+    [_titleCell setFont:aFont];
+}
+
+- (NSFont *)font
+{
+    return [_titleCell font];
+}
+
+- (void)setSubtitleFont:(NSFont *)aFont
+{
+    [_subtitleCell setFont:aFont];
+}
+
+- (NSFont *)subtitleFont
+{
+    return [_subtitleCell font];
 }
 
 // scrollPositionAsPercentage borrowed and modified from the Omni frameworks
@@ -802,8 +835,10 @@ static CGFloat _subtitleHeight = 0.0;
         return [NSIndexSet class];
     else if ([binding isEqualToString:ICONSCALE_BINDING_NAME] || [binding isEqualToString:MINICONSCALE_BINDING_NAME] || [binding isEqualToString:MAXICONSCALE_BINDING_NAME] || [binding isEqualToString:DISPLAYMODE_BINDING_NAME] || [binding isEqualToString:EDITABLE_BINDING_NAME] || [binding isEqualToString:ALLOWSDOWNLOADING_BINDING_NAME])
         return [NSNumber class];
-    else if ([binding isEqualToString:BACKGROUNDCOLOR_BINDING_NAME])
+    else if ([binding isEqualToString:BACKGROUNDCOLOR_BINDING_NAME] || [binding isEqualToString:TEXTCOLOR_BINDING_NAME] || [binding isEqualToString:SUBTITLECOLOR_BINDING_NAME])
         return [NSColor class];
+    else if ([binding isEqualToString:FONT_BINDING_NAME] || [binding isEqualToString:SUBTITLEFONT_BINDING_NAME])
+        return [NSFont class];
     else
         return [super valueClassForBinding:binding];
 }
@@ -957,9 +992,9 @@ static CGFloat _subtitleHeight = 0.0;
 
 - (CGFloat)_textHeight;
 {
-    CGFloat textHeight = _titleHeight;
+    CGFloat textHeight = [_titleCell cellSize].height;
     if ([_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)])
-        textHeight += _subtitleHeight;
+        textHeight += [_subtitleCell cellSize].height;
     return textHeight;
 }
 
@@ -2132,25 +2167,31 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                     NSString *name, *subtitle = [self subtitleAtIndex:i];
                     NSUInteger label;
                     [self _getDisplayName:&name andLabel:&label forURL:[self URLAtIndex:i]];
-                    NSStringDrawingOptions stringOptions = NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingOneShot;
+                    CGFloat titleHeight = [_titleCell cellSize].height;
                     
+                    [_titleCell setStringValue:name ?: @""];
                     if (label > 0) {
                         CGRect labelRect = NSRectToCGRect(textRect);
                         
-                        labelRect.size.height = _titleHeight;                        
+                        labelRect.size.height = titleHeight;                        
                         [FVFinderLabel drawFinderLabel:label inRect:labelRect ofContext:cgContext flipped:NO roundEnds:YES];
                         
                         // labeled title uses black text for greater contrast; inset horizontally because of the rounded end caps
-                        [name drawWithRect:NSInsetRect(textRect, _titleHeight / 2.0, 0) options:stringOptions attributes:_labeledAttributes];
+                        NSColor *titleColor = [[_titleCell textColor] retain];
+                        [_titleCell setTextColor:[NSColor controlTextColor]];
+                        [_titleCell drawWithFrame:NSInsetRect(textRect, titleHeight / 2.0, 0) inView:self];
+                        [_titleCell setTextColor:titleColor];
+                        [titleColor release];
                     }
                     else {
-                        [name drawWithRect:textRect options:stringOptions attributes:_titleAttributes];
+                        [_titleCell drawWithFrame:textRect inView:self];
                     }
                     
                     if (subtitle) {
-                        textRect.origin.y += _titleHeight;
-                        textRect.size.height -= _titleHeight;
-                        [subtitle drawWithRect:textRect options:stringOptions attributes:_subtitleAttributes];
+                        textRect.origin.y += titleHeight;
+                        textRect.size.height -= titleHeight;
+                        [_subtitleCell setStringValue:subtitle];
+                        [_subtitleCell drawWithFrame:textRect inView:self];
                     }
                     CGContextRestoreGState(cgContext);
                 } 

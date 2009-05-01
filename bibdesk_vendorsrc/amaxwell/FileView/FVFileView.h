@@ -115,6 +115,8 @@ typedef NSInteger FVDisplayMode;
     NSPoint                 _lastMouseDownLocInView;
     CFAbsoluteTime          _timeOfLastOrigin;
     NSPoint                 _lastOrigin;
+    NSTextFieldCell        *_titleCell;
+    NSTextFieldCell        *_subtitleCell;
     CFMutableDictionaryRef  _trackingRectMap;
     NSButtonCell           *_leftArrow;
     NSButtonCell           *_rightArrow;
@@ -238,6 +240,50 @@ typedef NSInteger FVDisplayMode;
  The default is NSOutlineView's source list color, or an approximation thereof on 10.4.  Can be bound.
  @param aColor The new background color. */
 - (void)setBackgroundColor:(NSColor *)aColor;
+
+/** The current text color.
+ 
+ The default is +[NSColor darkGrayColor].  Can be bound. */
+- (NSColor *)textColor;
+
+/** Change the text color.
+ 
+ The default is +[NSColor darkGrayColor].  Can be bound.
+ @param aColor The new text color. */
+- (void)setTextColor:(NSColor *)aColor;
+
+/** The current subtitle color.
+ 
+ The default is +[NSColor grayColor].  Can be bound. */
+- (NSColor *)subtitleColor;
+
+/** Change the subtitle color.
+ 
+ The default is +[NSColor grayColor].  Can be bound.
+ @param aColor The new subtitle color. */
+- (void)setSubtitleColor:(NSColor *)aColor;
+
+/** The current text font.
+ 
+ The default is the system font at 12pt.  Can be bound. */
+- (NSFont *)font;
+
+/** Change the text font.
+ 
+ The default is the system font at 12pt.  Can be bound.
+ @param aFont The new text font. */
+- (void)setFont:(NSFont *)aFont;
+
+/** The current subtitle font.
+ 
+ The default is the system font at 10pt.  Can be bound. */
+- (NSFont *)subtitleFont;
+
+/** Change the subtitle font.
+ 
+ The default is the system font at 10pt.  Can be bound.
+ @param aFont The new subtitle font. */
+- (void)setSubtitleFont:(NSFont *)aFont;
 
 /** Invalidates all content and marks view for redisplay.
  
