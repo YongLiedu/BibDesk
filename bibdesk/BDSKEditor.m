@@ -193,6 +193,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     edgeView = (BDSKEdgeView *)[[[matrix enclosingScrollView] superview] superview];
 	[edgeView setEdges:BDSKMaxYEdgeMask];
+	[edgeView setEdgeColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
     
     [fileSplitView setBlendStyle:BDSKMinBlendStyleMask];
     
