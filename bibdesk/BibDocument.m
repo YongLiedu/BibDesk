@@ -3224,7 +3224,6 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         [previewer setGeneratedTypes:BDSKGeneratePDF];
         BDSKEdgeView *previewerBox = [[[BDSKEdgeView alloc] init] autorelease];
         [previewerBox setEdges:BDSKEveryEdgeMask];
-        [previewerBox setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
         [previewerBox setContentView:[previewer pdfView]];
         [[bottomPreviewTabView tabViewItemAtIndex:BDSKPreviewDisplayTeX] setView:previewerBox];
     }

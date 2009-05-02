@@ -213,7 +213,6 @@
     [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     
     [view setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
-    [view setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
     
     NSRect frame = [backForwardButton frame];
     frame.size.height = 25.0;
@@ -255,7 +254,6 @@
     
     // webview
     [webEdgeView setEdges:BDSKEveryEdgeMask];
-    [webEdgeView setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
     [webView setEditingDelegate:self];
     [self loadURL: BDSKBibDeskWebGroupURL];
 	
