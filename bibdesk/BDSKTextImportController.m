@@ -159,7 +159,7 @@
     [statusLine setStringValue:@""];
 	
     [webViewBox setEdges:BDSKEveryEdgeMask];
-	[webViewBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
+	[webViewBox setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
 	[webViewBox setContentView:webView];
     
     [self setupTypeUI];

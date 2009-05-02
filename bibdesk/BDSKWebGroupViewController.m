@@ -255,6 +255,7 @@
     
     // webview
     [webEdgeView setEdges:BDSKEveryEdgeMask];
+    [webEdgeView setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
     [webView setEditingDelegate:self];
     [self loadURL: BDSKBibDeskWebGroupURL];
 	
