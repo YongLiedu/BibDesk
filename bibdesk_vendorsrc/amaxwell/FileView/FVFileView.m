@@ -2162,7 +2162,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                     CGContextRestoreGState(cgContext);
                     CGContextSaveGState(cgContext);
                     
-                    textRect = [self centerScanRect:textRect];
+                    textRect = [self centerScanRect:NSInsetRect(textRect, -4.0, 0.0)];
                     
                     NSString *name, *subtitle = [self subtitleAtIndex:i];
                     NSUInteger label;
@@ -2171,7 +2171,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                     
                     [_titleCell setStringValue:name ?: @""];
                     if (label > 0) {
-                        CGRect labelRect = NSRectToCGRect(textRect);
+                        CGRect labelRect = NSRectToCGRect([self centerScanRect:NSInsetRect(textRect, 4.0, 0.0)]);
                         
                         labelRect.size.height = titleHeight;                        
                         [FVFinderLabel drawFinderLabel:label inRect:labelRect ofContext:cgContext flipped:NO roundEnds:YES];
@@ -2179,7 +2179,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
                         // labeled title uses black text for greater contrast; inset horizontally because of the rounded end caps
                         NSColor *titleColor = [[_titleCell textColor] retain];
                         [_titleCell setTextColor:[NSColor controlTextColor]];
-                        [_titleCell drawWithFrame:NSInsetRect(textRect, titleHeight / 2.0, 0) inView:self];
+                        [_titleCell drawWithFrame:NSInsetRect(textRect, titleHeight / 2.0 , 0) inView:self];
                         [_titleCell setTextColor:titleColor];
                         [titleColor release];
                     }
