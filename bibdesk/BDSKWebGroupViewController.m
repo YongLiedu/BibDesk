@@ -213,6 +213,7 @@
     [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     
     [view setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
+    [view setEdgeColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
     
     NSRect frame = [backForwardButton frame];
     frame.size.height = 25.0;
