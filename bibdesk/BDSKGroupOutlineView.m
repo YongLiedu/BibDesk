@@ -309,7 +309,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
         NSRect ignored;
-        NSDivideRect(cellFrame, &ignored, &cellFrame, 4.0, NSMinYEdge);
+        NSDivideRect(cellFrame, &ignored, &cellFrame, 3.0, NSMinYEdge);
     }
     [super drawInteriorWithFrame:cellFrame inView:controlView];
 }
