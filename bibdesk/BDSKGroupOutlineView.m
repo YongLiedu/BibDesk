@@ -234,6 +234,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
             while (row != NSNotFound) {
                 if ([[self delegate] outlineView:self isSingleSelectionItem:[self itemAtRow:row]] == NO)
                     [mutableIndexes addIndex:row];
+                row = [indexes indexGreaterThanIndex:row];
             }
             indexes = mutableIndexes;
         }
