@@ -66,7 +66,8 @@
 #import "BDSKGradientTableView.h"
 #import "NSLayoutManager_BDSKExtensions.h"
 
-// This class is basically a copy of OAGradientTableView
+// The main gradient code for these classes is basically copied from OAGradientTableView
+// These classes are only effectively used on Tiger, on Leopard they simply use the built-in source list highlight style
 
 typedef struct {
     CGFloat red1, green1, blue1, alpha1;
@@ -104,13 +105,68 @@ static void initializeHighlightColors() {
         [[highlightColor colorUsingColorSpaceName:NSDeviceRGBColorSpace] getHue:&hue saturation:&saturation brightness:&brightness alpha:&alpha];
 
         // Create synthetic darker and lighter versions
-        // NSColor *highlightLightColor = [NSColor colorWithDeviceHue:hue - (1.0/120.0) saturation:MAX(0.0, saturation-0.12) brightness:MIN(1.0, brightness+0.045) alpha:alpha];
         highlightLightColor = [[NSColor colorWithDeviceHue:hue saturation:MAX(0.0, saturation-.12) brightness:MIN(1.0, brightness+0.30) alpha:alpha] retain];
         highlightDarkColor = [[NSColor colorWithDeviceHue:hue saturation:MIN(1.0, (saturation > .04) ? saturation+0.12 : 0.0) brightness:MAX(0.0, brightness-0.045) alpha:alpha] retain];
         secondaryHighlightLightColor = [[[highlightLightColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
         secondaryHighlightDarkColor = [[[highlightDarkColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
     }
 }
+
+static void highlightSelectionUsingGradient(NSTableView *tableView) {
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    
+    NSColor *color, *lightColor, *darkColor;
+    CGFunctionRef linearBlendFunctionRef;
+    
+    if ([[[tableView window] firstResponder] isEqual:tableView] && [[tableView window] isKeyWindow]) {
+        color = highlightColor;
+        lightColor = highlightLightColor;
+        darkColor = highlightDarkColor;
+    } else {
+        color = secondaryHighlightColor;
+        lightColor = secondaryHighlightLightColor;
+        darkColor = secondaryHighlightDarkColor;
+    }
+    
+    static const CGFloat domainAndRange[8] = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
+    
+    _twoColorsType *twoColors = malloc(sizeof(_twoColorsType)); // We malloc() the helper data because we may draw this wash during printing, in which case it won't necessarily be evaluated immediately. We need for all the data the shading function needs to draw to potentially outlive us.
+    [lightColor getRed:&twoColors->red1 green:&twoColors->green1 blue:&twoColors->blue1 alpha:&twoColors->alpha1];
+    [darkColor getRed:&twoColors->red2 green:&twoColors->green2 blue:&twoColors->blue2 alpha:&twoColors->alpha2];
+    linearBlendFunctionRef = CGFunctionCreate(twoColors, 1, domainAndRange, 4, domainAndRange, &linearFunctionCallbacks);
+    
+    NSIndexSet *selectedRowIndexes = [tableView selectedRowIndexes];
+    NSUInteger rowIndex = [selectedRowIndexes firstIndex], prevRowIndex = NSNotFound;
+    
+    while (rowIndex != NSNotFound) {
+        NSRect rowRect = [tableView rectOfRow:rowIndex];
+        
+        NSRect topBar, washRect;
+        NSDivideRect(rowRect, &topBar, &washRect, 1.0, NSMinYEdge);
+        
+        // Draw the top line of pixels of the selected row in the alternateSelectedControlColor
+        if (rowIndex == 0 || rowIndex - 1 != prevRowIndex) {
+            [color setFill];
+            NSRectFill(topBar);
+        }
+        
+        // Draw a soft wash underneath it
+        CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
+        CGContextSaveGState(context);
+        CGContextClipToRect(context, NSRectToCGRect(washRect));
+        CGShadingRef cgShading = CGShadingCreateAxial(colorSpace, CGPointMake(0, NSMinY(washRect)), CGPointMake(0, NSMaxY(washRect)), linearBlendFunctionRef, NO, NO);
+        CGContextDrawShading(context, cgShading);
+        CGShadingRelease(cgShading);
+        CGContextRestoreGState(context);
+
+        prevRowIndex = rowIndex;
+        rowIndex = [selectedRowIndexes indexGreaterThanIndex:rowIndex];
+    }
+    CGFunctionRelease(linearBlendFunctionRef);
+    CGColorSpaceRelease(colorSpace);
+}
+
+#pragma mark -
 
 @implementation BDSKGradientTableView
 
@@ -140,62 +196,10 @@ static void initializeHighlightColors() {
 }
 
 - (void)highlightSelectionInClipRect:(NSRect)rect {
-    if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
+    if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)])
         [super highlightSelectionInClipRect:rect];
-        return;
-    }
-    
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    
-    NSColor *color, *lightColor, *darkColor;
-    CGFunctionRef linearBlendFunctionRef;
-    
-    if ([[self window] firstResponder] == self && [[self window] isKeyWindow]) {
-        color = highlightColor;
-        lightColor = highlightLightColor;
-        darkColor = highlightDarkColor;
-    } else {
-        color = secondaryHighlightColor;
-        lightColor = secondaryHighlightLightColor;
-        darkColor = secondaryHighlightDarkColor;
-    }
-    
-    static const CGFloat domainAndRange[8] = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
-    
-    _twoColorsType *twoColors = malloc(sizeof(_twoColorsType)); // We malloc() the helper data because we may draw this wash during printing, in which case it won't necessarily be evaluated immediately. We need for all the data the shading function needs to draw to potentially outlive us.
-    [lightColor getRed:&twoColors->red1 green:&twoColors->green1 blue:&twoColors->blue1 alpha:&twoColors->alpha1];
-    [darkColor getRed:&twoColors->red2 green:&twoColors->green2 blue:&twoColors->blue2 alpha:&twoColors->alpha2];
-    linearBlendFunctionRef = CGFunctionCreate(twoColors, 1, domainAndRange, 4, domainAndRange, &linearFunctionCallbacks);
-    
-    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-    NSUInteger rowIndex = [selectedRowIndexes firstIndex], prevRowIndex = NSNotFound;
-    
-    while (rowIndex != NSNotFound) {
-        NSRect rowRect = [self rectOfRow:rowIndex];
-        
-        NSRect topBar, washRect;
-        NSDivideRect(rowRect, &topBar, &washRect, 1.0, NSMinYEdge);
-        
-        // Draw the top line of pixels of the selected row in the alternateSelectedControlColor
-        if (rowIndex == 0 || rowIndex - 1 != prevRowIndex) {
-            [color setFill];
-            NSRectFill(topBar);
-        }
-        
-        // Draw a soft wash underneath it
-        CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
-        CGContextSaveGState(context);
-        CGContextClipToRect(context, NSRectToCGRect(washRect));
-        CGShadingRef cgShading = CGShadingCreateAxial(colorSpace, CGPointMake(0, NSMinY(washRect)), CGPointMake(0, NSMaxY(washRect)), linearBlendFunctionRef, NO, NO);
-        CGContextDrawShading(context, cgShading);
-        CGShadingRelease(cgShading);
-        CGContextRestoreGState(context);
-
-        prevRowIndex = rowIndex;
-        rowIndex = [selectedRowIndexes indexGreaterThanIndex:rowIndex];
-    }
-    CGFunctionRelease(linearBlendFunctionRef);
-    CGColorSpaceRelease(colorSpace);
+    else
+        highlightSelectionUsingGradient(self);
 }
 
 - (CGFloat)rowHeightForFont:(NSFont *)font {
@@ -238,62 +242,10 @@ static void initializeHighlightColors() {
 }
 
 - (void)highlightSelectionInClipRect:(NSRect)rect {
-    if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
+    if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)])
         [super highlightSelectionInClipRect:rect];
-        return;
-    }
-    
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    
-    NSColor *color, *lightColor, *darkColor;
-    CGFunctionRef linearBlendFunctionRef;
-    
-    if ([[self window] firstResponder] == self && [[self window] isKeyWindow]) {
-        color = highlightColor;
-        lightColor = highlightLightColor;
-        darkColor = highlightDarkColor;
-    } else {
-        color = secondaryHighlightColor;
-        lightColor = secondaryHighlightLightColor;
-        darkColor = secondaryHighlightDarkColor;
-    }
-    
-    static const CGFloat domainAndRange[8] = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
-    
-    _twoColorsType *twoColors = malloc(sizeof(_twoColorsType)); // We malloc() the helper data because we may draw this wash during printing, in which case it won't necessarily be evaluated immediately. We need for all the data the shading function needs to draw to potentially outlive us.
-    [lightColor getRed:&twoColors->red1 green:&twoColors->green1 blue:&twoColors->blue1 alpha:&twoColors->alpha1];
-    [darkColor getRed:&twoColors->red2 green:&twoColors->green2 blue:&twoColors->blue2 alpha:&twoColors->alpha2];
-    linearBlendFunctionRef = CGFunctionCreate(twoColors, 1, domainAndRange, 4, domainAndRange, &linearFunctionCallbacks);
-    
-    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-    NSUInteger rowIndex = [selectedRowIndexes firstIndex], prevRowIndex = NSNotFound;
-    
-    while (rowIndex != NSNotFound) {
-        NSRect rowRect = [self rectOfRow:rowIndex];
-        
-        NSRect topBar, washRect;
-        NSDivideRect(rowRect, &topBar, &washRect, 1.0, NSMinYEdge);
-        
-        // Draw the top line of pixels of the selected row in the alternateSelectedControlColor
-        if (rowIndex == 0 || rowIndex - 1 != prevRowIndex) {
-            [color setFill];
-            NSRectFill(topBar);
-        }
-        
-        // Draw a soft wash underneath it
-        CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
-        CGContextSaveGState(context);
-        CGContextClipToRect(context, NSRectToCGRect(washRect));
-        CGShadingRef cgShading = CGShadingCreateAxial(colorSpace, CGPointMake(0, NSMinY(washRect)), CGPointMake(0, NSMaxY(washRect)), linearBlendFunctionRef, NO, NO);
-        CGContextDrawShading(context, cgShading);
-        CGShadingRelease(cgShading);
-        CGContextRestoreGState(context);
-
-        prevRowIndex = rowIndex;
-        rowIndex = [selectedRowIndexes indexGreaterThanIndex:rowIndex];
-    }
-    CGFunctionRelease(linearBlendFunctionRef);
-    CGColorSpaceRelease(colorSpace);
+    else
+        highlightSelectionUsingGradient(self);
 }
 
 - (CGFloat)rowHeightForFont:(NSFont *)font {
