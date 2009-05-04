@@ -1179,6 +1179,31 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     return [item cellValue];
 }
 
+- (void)outlineView:(NSOutlineView *)outlineView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
+    // should never receive this for parent groups
+    if ([item isParent])
+        return;
+    
+    BDSKGroup *group = item;
+    // object is always a group, see BDSKGroupCellFormatter
+    BDSKASSERT([object isKindOfClass:[NSDictionary class]]);
+    NSString *newName = [object valueForKey:BDSKGroupCellStringKey];
+    if([[group editingStringValue] isEqualToString:newName])  
+        return;
+    if ([group isCategory]) {
+        NSArray *pubs = [groupedPublications copy];
+        // change the name of the group first, so we can preserve the selection; we need to old group info to move though
+        id name = [[self currentGroupField] isPersonField] ? (id)[BibAuthor authorWithName:newName andPub:[[group name] publication]] : (id)newName;
+        BDSKCategoryGroup *oldGroup = [[[BDSKCategoryGroup alloc] initWithName:[group name] key:[(BDSKCategoryGroup *)group key] count:[group count]] autorelease];
+        [(BDSKCategoryGroup *)group setName:name];
+        [self movePublications:pubs fromGroup:oldGroup toGroupNamed:newName];
+        [pubs release];
+    } else if([group hasEditableName]) {
+        [(BDSKMutableGroup *)group setName:newName];
+        [[self undoManager] setActionName:NSLocalizedString(@"Rename Group", @"Undo action name")];
+    }
+}
+
 #pragma mark OutlineView delegate
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldCollapseItem:(id)item {
@@ -1205,31 +1230,6 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     return [item isParent];
 }
 
-- (void)outlineView:(NSOutlineView *)outlineView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
-    // should never receive this for parent groups
-    if ([item isParent])
-        return;
-    
-    BDSKGroup *group = item;
-    // object is always a group, see BDSKGroupCellFormatter
-    BDSKASSERT([object isKindOfClass:[NSDictionary class]]);
-    NSString *newName = [object valueForKey:BDSKGroupCellStringKey];
-    if([[group editingStringValue] isEqualToString:newName])  
-        return;
-    if ([group isCategory]) {
-        NSArray *pubs = [groupedPublications copy];
-        // change the name of the group first, so we can preserve the selection; we need to old group info to move though
-        id name = [[self currentGroupField] isPersonField] ? (id)[BibAuthor authorWithName:newName andPub:[[group name] publication]] : (id)newName;
-        BDSKCategoryGroup *oldGroup = [[[BDSKCategoryGroup alloc] initWithName:[group name] key:[(BDSKCategoryGroup *)group key] count:[group count]] autorelease];
-        [(BDSKCategoryGroup *)group setName:name];
-        [self movePublications:pubs fromGroup:oldGroup toGroupNamed:newName];
-        [pubs release];
-    } else if([group hasEditableName]) {
-        [(BDSKMutableGroup *)group setName:newName];
-        [[self undoManager] setActionName:NSLocalizedString(@"Rename Group", @"Undo action name")];
-    }
-}
-
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldEditTableColumn:(NSTableColumn *)tableColumn item:(id)item {
     if ([item isParent] || [item hasEditableName] == NO) {
         return NO;
@@ -1253,12 +1253,6 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 - (void)outlineViewItemDidExpand:(NSNotification *)notification {
     if ([[[notification userInfo] objectForKey:@"NSObject"] isEqual:[groups smartParent]])   
         [self updateSmartGroupsCountAndContent:YES];
-}
-
-- (void)outlineView:(NSOutlineView *)outlineView didClickTableColumn:(NSTableColumn *)tableColumn {
-	// check whether this is the right kind of table view and don't re-sort when we have a contextual menu click
-    if ([[NSApp currentEvent] type] != NSRightMouseDown) 
-        [self sortGroupsByKey:sortGroupsKey];
 }
 
 - (void)outlineView:(NSOutlineView *)outlineView willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item {
@@ -1346,26 +1340,12 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     return indexSet;
 }
 
-- (NSIndexSet *)outlineViewSingleSelectionIndexes:(BDSKGroupOutlineView *)ov {
-    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSetWithIndex:0];
-    NSInteger i;
-    for (i = 0; i < [ov numberOfRows]; i++) {
-        BDSKGroup *group = [ov itemAtRow:i];
-        if ([group isExternal])
-            [indexes addIndex:i];
-    }
-    return indexes;
+- (BOOL)outlineView:(BDSKGroupOutlineView *)ov isSingleSelectionItem:(id)item {
+    return [item isEqual:[groups libraryGroup]] || [item isExternal];
 }
 
 - (void)outlineView:(BDSKGroupOutlineView *)aTableView doubleClickedOnIconOfItem:(id)item {
     [self editGroup:item];
-}
-
-- (NSMenu *)outlineView:(BDSKGroupOutlineView *)anOutlineView menuForTableHeaderColumn:(NSTableColumn *)tableColumn onPopUp:(BOOL)flag {
-	if (flag == NO) {
-		return [[NSApp delegate] groupSortMenu];
-	}
-	return nil;
 }
 
 - (BOOL)outlineViewShouldEditNextItemWhenEditingEnds:(BDSKGroupOutlineView *)ov{

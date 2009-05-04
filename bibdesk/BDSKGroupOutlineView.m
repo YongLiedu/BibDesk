@@ -222,18 +222,21 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
 
 // make sure that certain rows are only selected as a single selection
 - (void)selectRowIndexes:(NSIndexSet *)indexes byExtendingSelection:(BOOL)shouldExtend{
-    NSIndexSet *singleIndexes = nil;
-    if ([[self delegate] respondsToSelector:@selector(outlineViewSingleSelectionIndexes:)])
-        singleIndexes = [[self delegate] outlineViewSingleSelectionIndexes:self];
-    
-    // don't extend rows that should be in single selection
-    if (shouldExtend == YES && singleIndexes && [[self selectedRowIndexes] intersectsIndexSet:singleIndexes])
-        return;
-    // remove single selection rows from multiple selections
-    if ((shouldExtend == YES || [indexes count] > 1) && singleIndexes && [indexes intersectsIndexSet:singleIndexes]) {
-        NSMutableIndexSet *mutableIndexes = [[indexes mutableCopy] autorelease];
-        [mutableIndexes removeIndexes:singleIndexes];
-        indexes = mutableIndexes;
+    if ([[self delegate] respondsToSelector:@selector(outlineView:isSingleSelectionItem:)]) {
+        // don't extend rows that should be in single selection
+        if (shouldExtend && [[self selectedRowIndexes] count] == 1 && 
+            [[self delegate] outlineView:self isSingleSelectionItem:[self itemAtRow:[[self selectedRowIndexes] firstIndex]]])
+            return;
+        // remove single selection rows from multiple selections
+        if (shouldExtend || [indexes count] > 1) { 
+            NSMutableIndexSet *mutableIndexes = [NSMutableIndexSet indexSet];
+            NSUInteger row = [indexes firstIndex];
+            while (row != NSNotFound) {
+                if ([[self delegate] outlineView:self isSingleSelectionItem:[self itemAtRow:row]] == NO)
+                    [mutableIndexes addIndex:row];
+            }
+            indexes = mutableIndexes;
+        }
     }
     if ([indexes count] == 0) 
         return;
@@ -265,21 +268,19 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
 
 // the default implementation is broken with the above modifications, and would be invalid anyway
 - (IBAction)selectAll:(id)sender {
-    NSIndexSet *singleIndexes = nil;
-    if ([[self delegate] respondsToSelector:@selector(outlineViewSingleSelectionIndexes:)])
-        singleIndexes = [[self delegate] outlineViewSingleSelectionIndexes:self];
+    BOOL hasSingle = [[self delegate] respondsToSelector:@selector(outlineView:isSingleSelectionItem:)];
+    BOOL hasUnselectable = [[self delegate] respondsToSelector:@selector(outlineView:shouldSelectItem:)];
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfRows])];
-    [indexes removeIndexes:singleIndexes];
     
-    if ([[self delegate] respondsToSelector:@selector(outlineView:shouldSelectItem:)]) {
-        NSMutableIndexSet *selectableIndexes = [NSMutableIndexSet indexSet];
+    if (hasSingle || hasUnselectable) {
         NSUInteger row = [indexes firstIndex];
         while (NSNotFound != row) {
-            if ([[self delegate] outlineView:self shouldSelectItem:[self itemAtRow:row]]) {
-                [selectableIndexes addIndex:row];
-            }
+            id item = [self itemAtRow:row];
+            if ((hasSingle && [[self delegate] outlineView:self isSingleSelectionItem:item]) ||
+                (hasUnselectable && [[self delegate] outlineView:self shouldSelectItem:item] == NO))
+                [indexes removeIndex:row];
+            row = [indexes indexGreaterThanIndex:row];
         }
-        indexes = selectableIndexes;
     }
     
     if ([indexes count] == 0) {
