@@ -181,6 +181,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
 {
     [self setNeedsDisplay:YES];
 }
+
 - (void)reloadData
 {
     const NSInteger nrows = [self numberOfRows];
@@ -243,8 +244,6 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
         return;
     
     [super selectRowIndexes:indexes byExtendingSelection:shouldExtend];
-    // this is needed because we draw multiple selections differently and BDSKGradientTableView calls this only for deprecated 10.3 methods
-    [self setNeedsDisplay:YES];
 }
 
 - (void)textDidEndEditing:(NSNotification *)notification {
