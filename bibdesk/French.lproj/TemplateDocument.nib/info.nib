@@ -9,18 +9,7 @@
 	<key>IBOldestOS</key>
 	<integer>5</integer>
 	<key>IBOpenObjects</key>
-	<array>
-		<integer>589</integer>
-		<integer>1759</integer>
-		<integer>358</integer>
-		<integer>88</integer>
-		<integer>1305</integer>
-		<integer>1425</integer>
-		<integer>804</integer>
-		<integer>144</integer>
-		<integer>1719</integer>
-		<integer>1814</integer>
-	</array>
+	<array/>
 	<key>IBSystem Version</key>
 	<string>9G55</string>
 	<key>targetFramework</key>

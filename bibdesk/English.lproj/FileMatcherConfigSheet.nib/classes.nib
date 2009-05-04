@@ -10,7 +10,7 @@
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSTextFieldCell</string>
+			<string>BDSKIconTextFieldCell</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -22,19 +22,19 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSControl</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
 			<string>NSMenu</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSControl</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -109,11 +109,19 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>NSCell</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>BDSKFilePathCell</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>BDSKTextWithIconCell</string>
+			<string>BDSKConcreteIconTextFieldCell</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -152,6 +160,22 @@
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>BDSKSheetController</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKIconTextFieldCell</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTextFieldCell</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKConcreteIconTextFieldCell</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>BDSKIconTextFieldCell</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>

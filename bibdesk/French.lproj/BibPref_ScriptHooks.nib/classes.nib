@@ -30,15 +30,7 @@
 				<string>NSTableView</string>
 			</dict>
 			<key>SUPERCLASS</key>
-			<string>OAPreferenceClient</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKTextWithIconCell</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSTextFieldCell</string>
+			<string>BDSKPreferencePane</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -50,14 +42,6 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSControl</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
 			<string>NSMenu</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -66,9 +50,79 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>NSControl</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>hideWindow</key>
+				<string>id</string>
+				<key>toggleShowingWindow</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>NSWindowController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>NSObject</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>changeFont</key>
+				<string>id</string>
+				<key>copy</key>
+				<string>id</string>
+				<key>cut</key>
+				<string>id</string>
+				<key>delete</key>
+				<string>id</string>
+				<key>duplicate</key>
+				<string>id</string>
+				<key>insertNewline</key>
+				<string>id</string>
+				<key>insertShiftSpace</key>
+				<string>id</string>
+				<key>insertSpace</key>
+				<string>id</string>
+				<key>invertSelection</key>
+				<string>id</string>
+				<key>moveDown</key>
+				<string>id</string>
+				<key>moveUp</key>
+				<string>id</string>
+				<key>paste</key>
+				<string>id</string>
+				<key>scrollToBeginningOfDocument</key>
+				<string>id</string>
+				<key>scrollToEndOfDocument</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BDSKTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTableView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSWindow</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -77,6 +131,14 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -93,35 +155,11 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>OFObject</string>
+			<string>NSCell</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>OBObject</string>
-		</dict>
-		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>restoreDefaults</key>
-				<string>id</string>
-				<key>setValueForSender</key>
-				<string>id</string>
-			</dict>
-			<key>CLASS</key>
-			<string>OAPreferenceClient</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>controlBox</key>
-				<string>NSView</string>
-				<key>initialFirstResponder</key>
-				<string>NSView</string>
-				<key>lastKeyView</key>
-				<string>NSView</string>
-			</dict>
-			<key>SUPERCLASS</key>
-			<string>OFObject</string>
+			<string>NSObject</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -129,7 +167,7 @@
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>BDSKTextWithIconCell</string>
+			<string>BDSKConcreteIconTextFieldCell</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -141,11 +179,32 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>OBObject</string>
+			<string>BDSKIconTextFieldCell</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSObject</string>
+			<string>NSTextFieldCell</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKConcreteIconTextFieldCell</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>BDSKIconTextFieldCell</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKPreferencePane</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>view</key>
+				<string>NSView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSWindowController</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>

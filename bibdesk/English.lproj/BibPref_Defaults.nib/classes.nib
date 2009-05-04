@@ -195,6 +195,14 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>NSCell</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>BDSKFilePathCell</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>

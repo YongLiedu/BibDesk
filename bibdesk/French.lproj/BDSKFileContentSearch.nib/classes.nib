@@ -18,15 +18,15 @@
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSTextFieldCell</string>
+			<string>BDSKIconTextFieldCell</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSMenu</string>
+			<string>NSApplication</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSObject</string>
+			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -35,6 +35,14 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -66,6 +74,45 @@
 			<string>BDSKContainerView</string>
 		</dict>
 		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>changeFont</key>
+				<string>id</string>
+				<key>copy</key>
+				<string>id</string>
+				<key>cut</key>
+				<string>id</string>
+				<key>delete</key>
+				<string>id</string>
+				<key>duplicate</key>
+				<string>id</string>
+				<key>insertNewline</key>
+				<string>id</string>
+				<key>insertShiftSpace</key>
+				<string>id</string>
+				<key>insertSpace</key>
+				<string>id</string>
+				<key>invertSelection</key>
+				<string>id</string>
+				<key>moveDown</key>
+				<string>id</string>
+				<key>moveUp</key>
+				<string>id</string>
+				<key>paste</key>
+				<string>id</string>
+				<key>scrollToBeginningOfDocument</key>
+				<string>id</string>
+				<key>scrollToEndOfDocument</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BDSKTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTableView</string>
+		</dict>
+		<dict>
 			<key>CLASS</key>
 			<string>NSWindow</string>
 			<key>LANGUAGE</key>
@@ -91,7 +138,23 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>NSView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSCell</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
@@ -130,6 +193,14 @@
 			<string>NSView</string>
 		</dict>
 		<dict>
+			<key>CLASS</key>
+			<string>BDSKGradientTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>BDSKTableView</string>
+		</dict>
+		<dict>
 			<key>ACTIONS</key>
 			<dict>
 				<key>cancelCurrentSearch</key>
@@ -154,18 +225,18 @@
 				<key>resultsArrayController</key>
 				<string>BDSKSelectionPreservingArrayController</string>
 				<key>tableView</key>
-				<string>NSTableView</string>
+				<string>BDSKTableView</string>
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSWindowController</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>OAGradientTableView</string>
+			<string>BDSKIconTextFieldCell</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSTableView</string>
+			<string>NSTextFieldCell</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
