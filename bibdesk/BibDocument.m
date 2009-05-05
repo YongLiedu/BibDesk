@@ -1553,7 +1553,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if ([userName canBeConvertedToEncoding:encoding] == NO)
             userName = [[[NSString alloc] initWithData:[userName dataUsingEncoding:encoding allowLossyConversion:YES] encoding:encoding] autorelease];
         
-        [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", userName, [NSCalendarDate calendarDate]];
+        [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", userName, [[NSDate date] standardDescription]];
 
         [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
         
