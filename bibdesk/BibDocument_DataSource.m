@@ -184,6 +184,9 @@
             } else {
                 [aCell setEnabled:[self hasExternalGroupsSelected] == NO];
             }
+        } else if ([[aTableColumn identifier] isEqualToString:BDSKCiteKeyString]) {
+            BibItem *pub = [[self shownPublications] objectAtIndex:row];
+            [aCell setTextColor:[pub isValidCiteKey:[pub citeKey]] ? [NSColor controlTextColor] : [NSColor redColor]];
         }
     }
 }
