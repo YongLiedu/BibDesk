@@ -150,7 +150,6 @@ CFHashCode BibItemEquivalenceHash(const void *item)
 	NSMutableSet *keys = [[NSMutableSet alloc] initWithCapacity:20];
 	[keys addObjectsFromArray:[btm requiredFieldsForType:type]];
 	[keys addObjectsFromArray:[btm optionalFieldsForType:type]];
-	[keys addObjectsFromArray:[btm userDefaultFieldsForType:type]];
     [keys removeObject:BDSKLocalUrlString];
 	NSEnumerator *keyEnum = [keys objectEnumerator];
     [keys release];
@@ -495,7 +494,6 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	NSMutableSet *keys = [[NSMutableSet alloc] initWithCapacity:20];
 	[keys addObjectsFromArray:[btm requiredFieldsForType:[self pubType]]];
 	[keys addObjectsFromArray:[btm optionalFieldsForType:[self pubType]]];
-	[keys addObjectsFromArray:[btm userDefaultFieldsForType:[self pubType]]];
     [keys removeObject:BDSKLocalUrlString];
 	NSEnumerator *keyEnum = [keys objectEnumerator];
     [keys release];
