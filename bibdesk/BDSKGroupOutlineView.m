@@ -264,11 +264,6 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
     }
 }
 
-// the default implementation is broken with the above modifications, and would be invalid anyway
-- (IBAction)selectAll:(id)sender {
-    [self selectRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfRows])] byExtendingSelection:NO];    
-}
-
 // the default implementation would be meaningless anyway as we don't allow empty selection
 - (IBAction)deselectAll:(id)sender {
 	[self selectRowIndexes:[NSIndexSet indexSetWithIndex:1] byExtendingSelection:NO];
