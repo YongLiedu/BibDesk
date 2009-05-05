@@ -263,19 +263,19 @@
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
         [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
         return;
-    } else if ([group isSmart] == YES) {
+    } else if ([group isSmart]) {
         [groups addSmartGroup:(BDSKSmartGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isStatic] == YES && [group isKindOfClass:[BDSKLastImportGroup class]] == NO) {
+    } else if ([group isStatic] && [group isKindOfClass:[BDSKLastImportGroup class]] == NO) {
         [groups addStaticGroup:(BDSKStaticGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isURL] == YES) {
+    } else if ([group isURL]) {
         [groups addURLGroup:(BDSKURLGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isScript] == YES) {
+    } else if ([group isScript]) {
         [groups addScriptGroup:(BDSKScriptGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isSearch] == YES) {
+    } else if ([group isSearch]) {
         [groups addSearchGroup:(BDSKSearchGroup *)group];
     } else {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
@@ -291,19 +291,19 @@
 
 - (void)removeObjectFromScriptingGroupsAtIndex:(NSUInteger)idx {
     BDSKGroup *group = [[groups staticGroups] objectAtIndex:idx];
-    if ([group isSmart] == YES) {
+    if ([group isSmart]) {
         [groups removeSmartGroup:(BDSKSmartGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isStatic] == YES && [group isEqual:[groups lastImportGroup]] == NO) {
+    } else if ([group isStatic] && [group isEqual:[groups lastImportGroup]] == NO) {
         [groups removeStaticGroup:(BDSKStaticGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isURL] == YES) {
+    } else if ([group isURL]) {
         [groups removeURLGroup:(BDSKURLGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isScript] == YES) {
+    } else if ([group isScript]) {
         [groups removeScriptGroup:(BDSKScriptGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isSearch] == YES) {
+    } else if ([group isSearch]) {
         [groups removeSearchGroup:(BDSKSearchGroup *)group];
     } else {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];

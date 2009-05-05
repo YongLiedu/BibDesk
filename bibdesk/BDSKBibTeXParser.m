@@ -825,7 +825,7 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     
     while(field = bt_next_value(entry, field, NULL, &text)){
         if(text){
-            if(firstValue == TRUE){
+            if(firstValue){
                 firstValue = FALSE;
                 if(strlen(text) >= smartGroupStrLength && strncmp(text, smartGroupStr, smartGroupStrLength) == 0)
                     isSmartGroup = TRUE;

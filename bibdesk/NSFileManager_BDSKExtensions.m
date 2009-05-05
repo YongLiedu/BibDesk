@@ -642,7 +642,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     if(NO == success && error != nil)
         *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"File does not exist.", @"Error description") forKey:NSLocalizedDescriptionKey]];
     
-    if(YES == success){
+    if(success){
         success = (noErr == FSDeleteObject(&fileRef));
         if(NO == success && error != nil)
             *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete file.", @"Error description") forKey:NSLocalizedDescriptionKey]];

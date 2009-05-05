@@ -437,7 +437,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         }
     }
     
-    return (matchFound == YES) ? cnt : NSNotFound;    
+    return (matchFound) ? cnt : NSNotFound;    
 }
 
 - (BOOL)isStringTeXQuotingBalancedWithBraces:(BOOL)braces connected:(BOOL)connected{
@@ -1080,7 +1080,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 }
 
 - (NSCellStateValue)triStateValue{
-    if([self booleanValue] == YES){
+    if([self booleanValue]){
         return NSOnState;
     }else if([self isEqualToString:@""] ||
              [self compare:[NSString stringWithBool:NO] options:NSCaseInsensitiveSearch] == NSOrderedSame ||

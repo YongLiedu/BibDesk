@@ -1312,7 +1312,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 }
 
 - (NSIndexSet *)outlineView:(BDSKGroupOutlineView *)outlineView indexesOfRowsToHighlightInRange:(NSRange)indexRange {
-    if([self numberOfSelectedPubs] == 0 || [self hasExternalGroupsSelected] == YES)
+    if([self numberOfSelectedPubs] == 0 || [self hasExternalGroupsSelected])
         return [NSIndexSet indexSet];
     
     // Use this for the indexes we're going to return

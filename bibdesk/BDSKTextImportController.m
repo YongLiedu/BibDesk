@@ -1285,7 +1285,7 @@
         [layoutManager addTemporaryAttributes:highlightAttrs
                             forCharacterRange:selRange];
     }
-	if ([NSString isEmptyString:selString] == YES)
+	if ([NSString isEmptyString:selString])
 		return NO;
 	
     NSString *oldValue = [item valueOfField:selKey];
@@ -1600,7 +1600,7 @@
 }
 
 - (void)startTemporaryTypeSelectMode{
-    if (temporaryTypeSelectMode == YES)
+    if (temporaryTypeSelectMode)
         return;
     temporaryTypeSelectMode = YES;
     savedFirstResponder = [[self window] firstResponder];

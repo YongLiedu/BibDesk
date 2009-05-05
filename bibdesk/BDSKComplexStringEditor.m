@@ -226,7 +226,7 @@
 	lowerEdgeRect = NSIntersectionRect(lowerEdgeRect, [contentView visibleRect]);
 	// see if the cell's lower edge is scrolled out of sight
 	if (NSIsEmptyRect(lowerEdgeRect)) {
-		if ([self isWindowVisible] == YES) {
+		if ([self isWindowVisible]) {
             [[tableView window] removeChildWindow:[self window]];
             [[self window] orderOut:self];
         }

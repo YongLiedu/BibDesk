@@ -186,7 +186,7 @@
 {
     BOOL flag = ([sender state] == NSOnState);
     [sud setBool:flag forKey:BDSKShouldLookForSharedFilesKey];
-    if(flag == YES)
+    if(flag)
         [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
     else
         [[BDSKSharingBrowser sharedBrowser] disableSharedBrowsing];
@@ -197,7 +197,7 @@
 {
     BOOL flag = ([sender state] == NSOnState);
     [sud setBool:flag forKey:BDSKShouldShareFilesKey];
-    if(flag == YES)
+    if(flag)
         [[BDSKSharingServer defaultServer] enableSharing];
     else
         [[BDSKSharingServer defaultServer] disableSharing];

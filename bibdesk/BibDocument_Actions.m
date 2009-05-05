@@ -269,7 +269,7 @@ static BOOL changingColors = NO;
 
 - (void)deletePublications:(NSArray *)pubs {
 	NSInteger numPubs = [pubs count];
-    if (numPubs == 0 || [self hasExternalGroupsSelected] == YES) {
+    if (numPubs == 0 || [self hasExternalGroupsSelected]) {
         return;
     }
 	
@@ -1354,7 +1354,7 @@ static BOOL changingColors = NO;
 #pragma mark AutoFile stuff
 
 - (IBAction)consolidateLinkedFiles:(id)sender{
-    if ([self hasExternalGroupsSelected] == YES) {
+    if ([self hasExternalGroupsSelected]) {
         NSBeep();
         return;
     }
@@ -1471,7 +1471,7 @@ static BOOL changingColors = NO;
 {
     NSUInteger numberOfSelectedPubs = [self numberOfSelectedPubs];
 	if (numberOfSelectedPubs == 0 ||
-        [self hasExternalGroupsSelected] == YES) return;
+        [self hasExternalGroupsSelected]) return;
     
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
         NSString *alertTitle = numberOfSelectedPubs > 1 ? NSLocalizedString(@"Really Generate Cite Keys?", @"Message in alert dialog when generating cite keys") : NSLocalizedString(@"Really Generate Cite Key?", @"Message in alert dialog when generating cite keys");
@@ -1570,7 +1570,7 @@ static BOOL changingColors = NO;
 
 - (IBAction)duplicateTitleToBooktitle:(id)sender{
 	if ([self numberOfSelectedPubs] == 0 ||
-        [self hasExternalGroupsSelected] == YES) return;
+        [self hasExternalGroupsSelected]) return;
 	
 	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Overwrite Booktitle?", @"Message in alert dialog when duplicating Title to Booktitle")
                                      defaultButton:NSLocalizedString(@"Don't Overwrite", @"Button title: overwrite Booktitle")

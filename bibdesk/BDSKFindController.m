@@ -452,7 +452,7 @@ enum {
             }
 			return NO;
 		}
-	} else if([self findAsMacro] == YES) { // check the "find" complex string
+	} else if([self findAsMacro]) { // check the "find" complex string
 		NSString *reason = nil;
 		if ([self stringIsValidAsComplexString:*value errorMessage:&reason] == NO) {
             if(error != nil){
@@ -468,7 +468,7 @@ enum {
 
 - (BOOL)validateReplaceString:(id *)value error:(NSError **)error {
 	NSString *reason = nil;
-	if ([self searchType] == FCTextualSearch && [self replaceAsMacro] == YES && 
+	if ([self searchType] == FCTextualSearch && [self replaceAsMacro] && 
 		[self stringIsValidAsComplexString:*value errorMessage:&reason] == NO) {
         if(error != nil){
             NSString *description = NSLocalizedString(@"Invalid BibTeX Macro.", @"Error description");
@@ -509,7 +509,7 @@ enum {
 
 - (BOOL)validateFindAsMacro:(id *)value error:(NSError **)error {
 	NSString *reason = nil;
-    if ([*value boolValue] == YES && [self searchType] == FCTextualSearch &&
+    if ([*value boolValue] && [self searchType] == FCTextualSearch &&
 	    [self stringIsValidAsComplexString:[self findString] errorMessage:&reason] == NO) {
         if(error != nil){
             NSString *description = NSLocalizedString(@"Invalid BibTeX Macro", @"Error description");
@@ -524,7 +524,7 @@ enum {
 
 - (BOOL)validateReplaceAsMacro:(id *)value error:(NSError **)error {
 	NSString *reason = nil;
-    if([*value boolValue] == YES && [self searchType] == FCTextualSearch &&
+    if([*value boolValue] && [self searchType] == FCTextualSearch &&
 	   [self stringIsValidAsComplexString:[self replaceString] errorMessage:&reason] == NO){
         if(error != nil){
             NSString *description = NSLocalizedString(@"Invalid BibTeX Macro", @"Error description");
@@ -748,7 +748,7 @@ enum {
 }
 
 - (void)replaceAllInSelection:(BOOL)selection{
-	if (selection == YES)
+	if (selection)
 		[self setSearchSelection:YES];
 	[statusBar setStringValue:@""];
 	

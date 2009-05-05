@@ -60,7 +60,7 @@
 	id firstResponder = [documentWindow firstResponder];
 	if (firstResponder != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
-        [self hasExternalGroupsSelected] == YES) {
+        [self hasExternalGroupsSelected]) {
 		// no selection or selection includes shared groups
 		return NO;
 	}
@@ -96,7 +96,7 @@
 }
 
 - (BOOL)validatePasteMenuItem:(NSMenuItem *)menuItem{
-	return ([documentWindow isKeyWindow] == YES && [[documentWindow firstResponder] isEqual:tableView]);
+	return ([documentWindow isKeyWindow] && [[documentWindow firstResponder] isEqual:tableView]);
 }
 
 - (BOOL)validateDuplicateMenuItem:(NSMenuItem *)menuItem{
@@ -104,7 +104,7 @@
         return NO;
 	if ([[documentWindow firstResponder] isEqual:tableView] == NO ||
 		[self numberOfSelectedPubs] == 0 ||
-        [self hasExternalGroupsSelected] == YES)
+        [self hasExternalGroupsSelected])
 		return NO;
 	return YES;
 }
@@ -427,15 +427,15 @@
 }
 
 - (BOOL)validateSelectAllPublicationsMenuItem:(NSMenuItem *)menuItem{
-    return ([documentWindow isKeyWindow] == YES);
+    return ([documentWindow isKeyWindow]);
 }
 
 - (BOOL)validateDeselectAllPublicationsMenuItem:(NSMenuItem *)menuItem{
-    return ([documentWindow isKeyWindow] == YES);
+    return ([documentWindow isKeyWindow]);
 }
 
 - (BOOL)validateSelectLibraryGroupMenuItem:(NSMenuItem *)menuItem{
-    return ([documentWindow isKeyWindow] == YES);
+    return ([documentWindow isKeyWindow]);
 }
 
 - (BOOL) validateSelectDuplicatesMenuItem:(NSMenuItem *)menuItem{

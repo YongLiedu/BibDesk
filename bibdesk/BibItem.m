@@ -474,9 +474,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	
 	NSString *crossref1 = [self valueOfField:BDSKCrossrefString inherit:NO];
 	NSString *crossref2 = [aBI valueOfField:BDSKCrossrefString inherit:NO];
-	if ([NSString isEmptyString:crossref1] == YES)
+	if ([NSString isEmptyString:crossref1])
 		return [NSString isEmptyString:crossref2];
-	else if ([NSString isEmptyString:crossref2] == YES)
+	else if ([NSString isEmptyString:crossref2])
 		return NO;
 	return ([crossref1 caseInsensitiveCompare:crossref2] == NSOrderedSame);
 }
@@ -508,9 +508,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	
 	NSString *crossref1 = [self valueOfField:BDSKCrossrefString inherit:NO];
 	NSString *crossref2 = [aBI valueOfField:BDSKCrossrefString inherit:NO];
-	if ([NSString isEmptyString:crossref1] == YES)
+	if ([NSString isEmptyString:crossref1])
 		return [NSString isEmptyString:crossref2];
-	else if ([NSString isEmptyString:crossref2] == YES)
+	else if ([NSString isEmptyString:crossref2])
 		return NO;
 	return ([crossref1 caseInsensitiveCompare:crossref2] == NSOrderedSame);
 }
@@ -534,12 +534,12 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	while (key = [keyEnum nextObject]) {
 		value1 = [self stringValueOfField:key inherit:NO];
 		value2 = [aBI stringValueOfField:key inherit:NO];
-		if ([NSString isEmptyString:value1] == YES) {
-			if ([NSString isEmptyString:value2] == YES)
+		if ([NSString isEmptyString:value1]) {
+			if ([NSString isEmptyString:value2])
 				continue;
 			else
 				return NO;
-		} else if ([NSString isEmptyString:value2] == YES) {
+		} else if ([NSString isEmptyString:value2]) {
 			return NO;
 		} else if ([value1 isEqualToString:value2] == NO) {
 			return NO;
@@ -1125,7 +1125,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 - (BOOL)isValidCiteKey:(NSString *)proposedCiteKey{
-	if ([NSString isEmptyString:proposedCiteKey] == YES)
+	if ([NSString isEmptyString:proposedCiteKey])
         return NO;
     return ([[owner publications] citeKeyIsUsed:proposedCiteKey byItemOtherThan:self] == NO);
 }
@@ -2823,7 +2823,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 - (NSInteger)addToGroup:(BDSKGroup *)aGroup handleInherited:(NSInteger)operation{
-	BDSKASSERT([aGroup isCategory] == YES && [owner isDocument]);
+	BDSKASSERT([aGroup isCategory] && [owner isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
     
     // don't add it twice; this is typed as id because it may be a BibAuthor or NSString, so be careful
@@ -2881,7 +2881,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 - (NSInteger)removeFromGroup:(BDSKGroup *)aGroup handleInherited:(NSInteger)operation{
-	BDSKASSERT([aGroup isCategory] == YES && [owner isDocument]);
+	BDSKASSERT([aGroup isCategory] && [owner isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
 	NSString *field = [group key];
@@ -2950,7 +2950,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 		BOOL first = YES;
 		while(auth = [authEnum nextObject]){
 			if([auth fuzzyEqual:groupName] == NO){
-				if(first == YES) 
+				if(first) 
                     first = NO;
 				else 
                     [string appendString:@" and "];
@@ -3006,7 +3006,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 			[scanner setScanLocation:[scanner scanLocation] + 5];
         [scanner scanUpToCharactersFromSet:nonWhitespaceCharSet intoString:NULL];
 		endLocation = [scanner scanLocation];
-		if(addedToken == YES)
+		if(addedToken)
 			lastDelimiter = [oldString substringWithRange:NSMakeRange(startLocation, endLocation - startLocation)];
 		
 	} while([scanner isAtEnd] == NO);
@@ -3019,7 +3019,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 - (NSInteger)replaceGroup:(BDSKGroup *)aGroup withGroupNamed:(NSString *)newGroupName handleInherited:(NSInteger)operation{
-	BDSKASSERT([aGroup isCategory] == YES && [owner isDocument]);
+	BDSKASSERT([aGroup isCategory] && [owner isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
 	NSString *field = [group key];
@@ -3075,7 +3075,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 		NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[oldString length] - [[groupName lastName] length] - 5];
 		BOOL first = YES;
 		while(auth = [authEnum nextObject]){
-			if(first == YES) first = NO;
+			if(first) first = NO;
 			else [string appendString:@" and "];
 			if([auth fuzzyEqual:groupName]){
 				[string appendString:newGroupName];
@@ -3135,7 +3135,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 			[scanner setScanLocation:[scanner scanLocation] + 5];
         [scanner scanUpToCharactersFromSet:nonWhitespaceCharSet intoString:NULL];
 		endLocation = [scanner scanLocation];
-		if(addedToken == YES)
+		if(addedToken)
 			lastDelimiter = [oldString substringWithRange:NSMakeRange(startLocation, endLocation - startLocation)];
 		
 	} while([scanner isAtEnd] == NO);

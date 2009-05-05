@@ -462,7 +462,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 }
 
 - (BDSKMacroResolver *)macroResolver{
-    return (macroResolver == nil && complex == YES) ? [BDSKMacroResolver defaultMacroResolver] : macroResolver;
+    return (macroResolver == nil && complex) ? [BDSKMacroResolver defaultMacroResolver] : macroResolver;
 }
 
 @end

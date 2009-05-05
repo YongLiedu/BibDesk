@@ -348,7 +348,7 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
 - (void)doAutoCompleteIfPossible {
 	if (completionWindowIsVisibleForTextView(self) == NO && isEditing) {
         if ([[self delegate] respondsToSelector:@selector(textViewShouldAutoComplete:)] &&
-            [[self delegate] textViewShouldAutoComplete:self] == YES)
+            [[self delegate] textViewShouldAutoComplete:self])
             [self complete:self]; // NB: the self argument is critical here (see comment in complete:)
     }
 } 

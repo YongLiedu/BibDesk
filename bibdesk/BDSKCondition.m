@@ -197,7 +197,7 @@ static char BDSKConditionObservationContext;
 }
 
 - (BOOL)isSatisfiedByItem:(BibItem *)item {
-	if ([NSString isEmptyString:key] == YES) 
+	if ([NSString isEmptyString:key]) 
 		return YES; // empty condition matches anything
 	
     if ([self isDateCondition]) {
@@ -269,7 +269,7 @@ static char BDSKConditionObservationContext;
                 return NO == isContain;
             } else {
                 if (stringComparison == BDSKGroupContain) 
-                    return ([item isContainedInGroupNamed:stringValue forField:key] == YES);
+                    return ([item isContainedInGroupNamed:stringValue forField:key]);
                 if (stringComparison == BDSKGroupNotContain) 
                     return ([item isContainedInGroupNamed:stringValue forField:key] == NO);
             }

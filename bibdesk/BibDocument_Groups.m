@@ -362,7 +362,7 @@ The groupedPublications array is a subset of the publications array, developed b
         [self sortGroupsByKey:nil];
     }else{
         [groupOutlineView reloadData];
-        if ([[self selectedGroups] containsObject:group] && succeeded == YES)
+        if ([[self selectedGroups] containsObject:group] && succeeded)
             [self displaySelectedGroups];
     }
     
@@ -430,7 +430,7 @@ The groupedPublications array is a subset of the publications array, developed b
         [self sortGroupsByKey:nil];
     }else{
         [groupOutlineView reloadData];
-        if ([[self selectedGroups] containsObject:group] && succeeded == YES)
+        if ([[self selectedGroups] containsObject:group] && succeeded)
             [self displaySelectedGroups];
     }
     
@@ -449,7 +449,7 @@ The groupedPublications array is a subset of the publications array, developed b
         [self sortGroupsByKey:nil];
     }else{
         [groupOutlineView reloadData];
-        if ([[self selectedGroups] containsObject:group] && succeeded == YES)
+        if ([[self selectedGroups] containsObject:group] && succeeded)
             [self displaySelectedGroups];
     }
     
@@ -465,7 +465,7 @@ The groupedPublications array is a subset of the publications array, developed b
         return; /// must be from another document
     
     [groupOutlineView reloadData];
-    if ([[self selectedGroups] containsObject:group] && succeeded == YES)
+    if ([[self selectedGroups] containsObject:group] && succeeded)
         [self displaySelectedGroups];
     
     if (succeeded)
@@ -620,7 +620,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     BOOL sortByCount = [sortGroupsKey isEqualToString:BDSKGroupCellCountKey];
     NSArray *smartGroups = [groups smartGroups];
     
-    if (hideCount == NO || sortByCount == YES)
+    if (hideCount == NO || sortByCount)
         [smartGroups makeObjectsPerformSelector:@selector(filterItems:) withObject:publications];
     
     if (sortByCount) {

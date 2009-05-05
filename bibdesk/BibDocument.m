@@ -3359,15 +3359,15 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         }
         [statusStr appendFormat:@"%ld %@", (long)groupPubsCount, (groupPubsCount == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message")];
         // we can have only a single external group selected at a time
-        if ([self hasWebGroupSelected] == YES) {
+        if ([self hasWebGroupSelected]) {
             [statusStr appendFormat:@" %@", NSLocalizedString(@"in web group", @"Partial status message")];
-        } else if ([self hasSharedGroupsSelected] == YES) {
+        } else if ([self hasSharedGroupsSelected]) {
             [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in shared group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
-        } else if ([self hasURLGroupsSelected] == YES) {
+        } else if ([self hasURLGroupsSelected]) {
             [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in external file group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
-        } else if ([self hasScriptGroupsSelected] == YES) {
+        } else if ([self hasScriptGroupsSelected]) {
             [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in script group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
-        } else if ([self hasSearchGroupsSelected] == YES) {
+        } else if ([self hasSearchGroupsSelected]) {
             BDSKSearchGroup *group = [[self selectedGroups] firstObject];
             [statusStr appendFormat:NSLocalizedString(@" in \"%@\" search group", @"Partial status message"), [[group serverInfo] name]];
             NSInteger matchCount = [group numberOfAvailableResults];

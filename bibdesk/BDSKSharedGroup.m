@@ -195,7 +195,7 @@ static NSImage *unlockedIcon = nil;
 
 - (BDSKPublicationsArray *)publications;
 {
-    if([self isRetrieving] == NO && ([self needsUpdate] == YES || publications == nil)){
+    if([self isRetrieving] == NO && ([self needsUpdate] || publications == nil)){
         // let the server get the publications asynchronously
         [client retrievePublications]; 
         

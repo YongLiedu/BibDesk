@@ -120,7 +120,7 @@ static BDSKFiler *sharedFiler = nil;
 	}
 	
     NSInteger mask = BDSKInitialAutoFileOptionMask;
-    if (check == YES) mask |= BDSKCheckCompleteAutoFileOptionMask;
+    if (check) mask |= BDSKCheckCompleteAutoFileOptionMask;
 	[self movePapers:papers forField:BDSKLocalFileString fromDocument:doc options:mask];
 }
 
@@ -139,7 +139,7 @@ static BDSKFiler *sharedFiler = nil;
     
     BOOL initial = (mask & BDSKInitialAutoFileOptionMask);
     BOOL force = (mask & BDSKForceAutoFileOptionMask);
-    BOOL check = (initial == YES) && (force == NO) && (mask & BDSKCheckCompleteAutoFileOptionMask);
+    BOOL check = (initial) && (force == NO) && (mask & BDSKCheckCompleteAutoFileOptionMask);
     
 	if (numberOfPapers == 0)
 		return;
@@ -312,7 +312,7 @@ static BDSKFiler *sharedFiler = nil;
     
     for (i = 0; i < count; i++) {
         info = [self objectInErrorInfoDictsAtIndex:i];
-        if ([[info objectForKey:SELECT_KEY] boolValue] == YES) {
+        if ([[info objectForKey:SELECT_KEY] boolValue]) {
             if (options & BDSKInitialAutoFileOptionMask) {
                 [fileInfoDicts addObject:[info objectForKey:PUBLICATION_KEY]];
             } else {

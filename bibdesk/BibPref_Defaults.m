@@ -393,7 +393,7 @@ static NSSet *alwaysDisabledFields = nil;
         
         if([[NSFileManager defaultManager] fileExistsAtPath:pathString isDirectory:&isDir] == NO){
             error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" does not exist.", @"Informative text in alert dialog"), object];
-        } else if (isDir == YES) {
+        } else if (isDir) {
             error = [NSString stringWithFormat:NSLocalizedString(@"\"%@\" is not a file.", @"Informative text in alert dialog"), object];
         } else if ([extension caseInsensitiveCompare:@"bib"] != NSOrderedSame && [extension caseInsensitiveCompare:@"bst"] != NSOrderedSame) {
             error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" is neither a BibTeX bibliography file nor a BibTeX style file.", @"Informative text in alert dialog"), object];

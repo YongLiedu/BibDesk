@@ -218,8 +218,8 @@ static id sharedController = nil;
 
 - (void)endDisplayAndComplete:(BOOL)complete;
 {
-	BOOL shouldComplete = (complete == YES && [tableView selectedRow] >= 0);
-    if(shouldComplete == YES || movement == NSCancelTextMovement){  
+	BOOL shouldComplete = (complete && [tableView selectedRow] >= 0);
+    if(shouldComplete || movement == NSCancelTextMovement){  
         // first revert to the original state, so undo will register the full change
         // if we do this when shouldComplete == NO, it restores the original string and effectively prevents modifying the text (i.e. all non-completable text is deleted when you tab out)
         [[textView undoManager] disableUndoRegistration];

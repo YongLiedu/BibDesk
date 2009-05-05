@@ -1498,7 +1498,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         return ([NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == NO);
 	}
 	else if (theAction == @selector(createNewPubUsingCrossrefAction:)) {
-        return (isEditable && [NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == YES);
+        return (isEditable && [NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]]);
 	}
 	else if (theAction == @selector(openLinkedFile:)) {
 		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
