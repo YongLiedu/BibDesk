@@ -229,10 +229,10 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
             [[self delegate] outlineView:self isSingleSelectionItem:[self itemAtRow:[[self selectedRowIndexes] firstIndex]]])
             return;
         // remove single selection rows from multiple selections
-        if (shouldExtend || [indexes count] > 1) { 
+        if (shouldExtend || [indexes count] > 1) {
             NSMutableIndexSet *mutableIndexes = [NSMutableIndexSet indexSet];
             NSUInteger row = [indexes firstIndex];
-            while (row != NSNotFound) {
+            while (NSNotFound != row) {
                 if ([[self delegate] outlineView:self isSingleSelectionItem:[self itemAtRow:row]] == NO)
                     [mutableIndexes addIndex:row];
                 row = [indexes indexGreaterThanIndex:row];
@@ -240,10 +240,8 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
             indexes = mutableIndexes;
         }
     }
-    if ([indexes count] == 0) 
-        return;
-    
-    [super selectRowIndexes:indexes byExtendingSelection:shouldExtend];
+    if ([indexes count]) 
+        [super selectRowIndexes:indexes byExtendingSelection:shouldExtend];
 }
 
 - (void)textDidEndEditing:(NSNotification *)notification {
@@ -268,32 +266,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
 
 // the default implementation is broken with the above modifications, and would be invalid anyway
 - (IBAction)selectAll:(id)sender {
-    BOOL hasSingle = [[self delegate] respondsToSelector:@selector(outlineView:isSingleSelectionItem:)];
-    BOOL hasUnselectable = [[self delegate] respondsToSelector:@selector(outlineView:shouldSelectItem:)];
-    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfRows])];
-    
-    if (hasSingle || hasUnselectable) {
-        NSUInteger row = [indexes firstIndex];
-        while (NSNotFound != row) {
-            id item = [self itemAtRow:row];
-            if ((hasSingle && [[self delegate] outlineView:self isSingleSelectionItem:item]) ||
-                (hasUnselectable && [[self delegate] outlineView:self shouldSelectItem:item] == NO))
-                [indexes removeIndex:row];
-            row = [indexes indexGreaterThanIndex:row];
-        }
-    }
-    
-    if ([indexes count] == 0) {
-        return;
-    } else if ([indexes count] == 1) {
-        [self selectRowIndexes:indexes byExtendingSelection:NO];
-    } else {
-        // this follows the default implementation: do it in 2 steps to make sure the selectedRow will be the last one
-        NSIndexSet *lastIndex = [NSIndexSet indexSetWithIndex:[indexes lastIndex]];
-        [indexes removeIndex:[indexes lastIndex]];
-        [self selectRowIndexes:indexes byExtendingSelection:NO];
-        [self selectRowIndexes:lastIndex byExtendingSelection:YES];
-    }
+    [self selectRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfRows])] byExtendingSelection:NO];    
 }
 
 // the default implementation would be meaningless anyway as we don't allow empty selection
