@@ -88,8 +88,12 @@
 
 - (NSTextFieldCell *)parentCell {
     if (parentCell == nil) {
-        parentCell = [[BDSKParentGroupCell alloc] init];
-        [parentCell setTextColor:[NSColor disabledControlTextColor]];
+        if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
+            parentCell = [[NSTextFieldCell alloc] init];
+        } else {
+            parentCell = [[BDSKParentGroupCell alloc] init];
+            [parentCell setTextColor:[NSColor disabledControlTextColor]];
+        }
         [parentCell setFont:[[NSFontManager sharedFontManager] convertFont:[self font] toHaveTrait:NSBoldFontMask]];
     }
     return parentCell;
@@ -276,10 +280,8 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
 @implementation BDSKParentGroupCell
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
-        NSRect ignored;
-        NSDivideRect(cellFrame, &ignored, &cellFrame, 3.0, NSMinYEdge);
-    }
+    NSRect ignored;
+    NSDivideRect(cellFrame, &ignored, &cellFrame, 3.0, NSMinYEdge);
     [super drawInteriorWithFrame:cellFrame inView:controlView];
 }
 
