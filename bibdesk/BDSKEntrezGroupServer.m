@@ -58,6 +58,7 @@
 #import "BDSKServerInfo.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "BDSKPubMedXMLParser.h"
 
 @implementation BDSKEntrezGroupServer
 
@@ -266,7 +267,7 @@
     NSInteger numResults = MIN([self numberOfAvailableResults] - [self numberOfFetchedResults], MAX_RESULTS);
     
     // need to escape queryKey, but the rest should be valid for a URL
-    NSString *efetch = [[[self class] baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=medline&retmode=text&retstart=%ld&retmax=%ld&db=%@&query_key=%@&WebEnv=%@&tool=bibdesk", (long)[self numberOfFetchedResults], (long)numResults, [[self serverInfo] database], [[self queryKey] stringByAddingPercentEscapesIncludingReserved], [self webEnv]];
+    NSString *efetch = [[[self class] baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=abstract&retmode=xml&retstart=%ld&retmax=%ld&db=%@&query_key=%@&WebEnv=%@&tool=bibdesk", (long)[self numberOfFetchedResults], (long)numResults, [[self serverInfo] database], [[self queryKey] stringByAddingPercentEscapesIncludingReserved], [self webEnv]];
     NSURL *theURL = [NSURL URLWithString:efetch];
     BDSKPOSTCONDITION(theURL);
     
@@ -304,43 +305,20 @@
         [URLDownload release];
         URLDownload = nil;
     }
-
-    // tried using -[NSString stringWithContentsOfFile:usedEncoding:error:] but it fails too often
-    NSString *contentString = [NSString stringWithContentsOfFile:filePath encoding:0 guessEncoding:YES];
-    NSArray *pubs = nil;
-    if (nil == contentString) {
+    
+    // specifically requested the XML type, so go straight to the correct parser
+    NSArray *pubs = [BDSKPubMedXMLParser itemsFromData:[NSData dataWithContentsOfMappedFile:filePath] error:&presentableError];
+    
+    if (nil == pubs) {
         failedDownload = YES;
-        presentableError = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:NSLocalizedString(@"Empty search result", @"error when pubmed search fails")];
-        [presentableError setValue:NSLocalizedString(@"Either the server didn't return any data, or BibDesk was unable to read it as text.", @"Error informative text") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        [NSApp presentError:presentableError];
     } else {
-        NSInteger type = [contentString contentStringType];
-        BOOL isPartialData = NO;
-        NSError *error;
-        if (type == BDSKBibTeXStringType) {
-            NSMutableString *frontMatter = [NSMutableString string];
-            pubs = [BDSKBibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:filePath document:group encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
-        } else if (type != BDSKUnknownStringType && type != BDSKNoKeyBibTeXStringType){
-            pubs = [BDSKStringParser itemsFromString:contentString ofType:type error:&error];
-        } else {
-            // this branch exists strictly to ensure that the error is initialized before being embedded
-            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Unknown data type", @"")];
-        }
-        if (pubs == nil || isPartialData) {
-            failedDownload = YES;
-        }
-        presentableError = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Incorrect result type", @"error when pubmed parse fails")];
-        [presentableError setValue:NSLocalizedString(@"The server did not return a recognized data format.  This is likely a server problem.", @"error when pubmed parse fails") forKey:NSLocalizedRecoverySuggestionErrorKey];
-        [presentableError embedError:error];
+        [group addPublications:pubs];
     }
     
     [[NSFileManager defaultManager] removeFileAtPath:filePath handler:nil];
     [filePath release];
     filePath = nil;
-    
-    if (failedDownload)
-        [NSApp presentError:presentableError];
-
-    [group addPublications:pubs];
 }
 
 - (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error

@@ -49,6 +49,7 @@
 #import "BDSKReferParser.h"
 #import "BDSKMODSParser.h"
 #import "BDSKSciFinderParser.h"
+#import "BDSKPubMedXMLParser.h"
 #import "BDSKRuntime.h"
 
 @implementation BDSKStringParser
@@ -86,6 +87,9 @@ static Class classForType(NSInteger stringType)
             break;
         case BDSKSciFinderStringType:
             parserClass = [BDSKSciFinderParser class];
+            break;
+        case BDSKPubMedXMLStringType:
+            parserClass = [BDSKPubMedXMLParser class];
             break;
         default:
             parserClass = Nil;
@@ -141,28 +145,30 @@ static Class classForType(NSInteger stringType)
 @implementation NSString (BDSKStringParserExtensions)
 
 - (NSInteger)contentStringType{
-	if([BDSKBibTeXParser canParseString:self])
-		return BDSKBibTeXStringType;
-	if([BDSKReferenceMinerParser canParseString:self])
-		return BDSKReferenceMinerStringType;
-	if([BDSKPubMedParser canParseString:self])
-		return BDSKPubMedStringType;
-	if([BDSKRISParser canParseString:self])
-		return BDSKRISStringType;
-	if([BDSKMARCParser canParseString:self])
-		return BDSKMARCStringType;
-	if([BDSKJSTORParser canParseString:self])
-		return BDSKJSTORStringType;
-	if([BDSKWebOfScienceParser canParseString:self])
-		return BDSKWOSStringType;
-	if([BDSKBibTeXParser canParseStringAfterFixingKeys:self])
-		return BDSKNoKeyBibTeXStringType;
+    if([BDSKBibTeXParser canParseString:self])
+        return BDSKBibTeXStringType;
+    if([BDSKReferenceMinerParser canParseString:self])
+        return BDSKReferenceMinerStringType;
+    if([BDSKPubMedParser canParseString:self])
+        return BDSKPubMedStringType;
+    if([BDSKRISParser canParseString:self])
+        return BDSKRISStringType;
+    if([BDSKMARCParser canParseString:self])
+        return BDSKMARCStringType;
+    if([BDSKJSTORParser canParseString:self])
+        return BDSKJSTORStringType;
+    if([BDSKWebOfScienceParser canParseString:self])
+        return BDSKWOSStringType;
+    if([BDSKBibTeXParser canParseStringAfterFixingKeys:self])
+        return BDSKNoKeyBibTeXStringType;
     if([BDSKReferParser canParseString:self])
         return BDSKReferStringType;
     if([BDSKMODSParser canParseString:self])
         return BDSKMODSStringType;
     if([BDSKSciFinderParser canParseString:self])
         return BDSKSciFinderStringType;
+    if([BDSKPubMedXMLParser canParseString:self])
+        return BDSKPubMedXMLStringType;
 	// don't check DC, as the check is too unreliable
     return BDSKUnknownStringType;
 }

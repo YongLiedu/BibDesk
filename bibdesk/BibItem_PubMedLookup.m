@@ -39,13 +39,14 @@
 #import "BibItem_PubMedLookup.h"
 #import <WebKit/WebKit.h>
 #import "BDSKStringParser.h"
+#import "BDSKPubMedXMLParser.h"
 #import <AGRegex/AGRegex.h>
 #import "NSURL_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
 #import "PDFMetadata.h"
 
 @interface BDSKPubMedLookupHelper : NSObject
-+ (NSString *)referenceForPubMedSearchTerm:(NSString *)searchTerm;
++ (NSData *)xmlReferenceDataForPMID:(NSString *)searchTerm;
 @end
 
 @implementation NSString (PubMedLookup)
@@ -345,8 +346,8 @@ static void removeAliens(NSMutableString *string)
 
 + (id)itemWithPubMedSearchTerm:(NSString *)searchTerm;
 {
-    NSString *string = [BDSKPubMedLookupHelper referenceForPubMedSearchTerm:searchTerm];
-    return string ? [[BDSKStringParser itemsFromString:string ofType:BDSKUnknownStringType error:NULL] lastObject] : nil;
+    NSData *data = [BDSKPubMedLookupHelper xmlReferenceDataForPMID:searchTerm];
+    return [data length] ? [[BDSKPubMedXMLParser itemsFromData:data error:NULL] lastObject] : nil;
 }
 
 @end
@@ -381,12 +382,12 @@ static void removeAliens(NSMutableString *string)
     return canConnect;
 }
 
-+ (NSString *)referenceForPubMedSearchTerm:(NSString *) searchTerm;
++ (NSData *)xmlReferenceDataForPMID:(NSString *)searchTerm;
 {
     NSParameterAssert(searchTerm != nil);
     
-    NSString *toReturn = nil;
-    
+    NSData *toReturn = nil;
+        
     if ([self canConnect] == NO)
         return toReturn;
         
@@ -419,29 +420,12 @@ static void removeAliens(NSMutableString *string)
         if ([count intValue] == 1) {  
             
             // get the first result (zero-based indexing)
-            NSString *efetch = [[[self class] baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=medline&retmode=text&retstart=0&retmax=1&db=pubmed&query_key=%@&WebEnv=%@&tool=bibdesk", queryKey, webEnv];
+            NSString *efetch = [[[self class] baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=abstract&retmode=xml&retstart=0&retmax=1&db=pubmed&query_key=%@&WebEnv=%@&tool=bibdesk", queryKey, webEnv];
             theURL = [NSURL URLWithString:efetch];
             BDSKPOSTCONDITION(theURL);
             
             request = [NSURLRequest requestWithURL:theURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
-            NSData *efetchResult = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-            
-            if (efetchResult) {
-                
-                // try to get encoding from the http headers; returned nil when I tried
-                NSString *encodingName = [response textEncodingName];
-                NSStringEncoding encoding = encodingName ? CFStringConvertEncodingToNSStringEncoding(CFStringConvertIANACharSetNameToEncoding((CFStringRef)encodingName)) : kCFStringEncodingInvalidId;
-                
-                if (encoding != kCFStringEncodingInvalidId)
-                    toReturn = [[NSString alloc] initWithData:efetchResult encoding:encoding];
-                else
-                    toReturn = [[NSString alloc] initWithData:efetchResult encoding:NSUTF8StringEncoding];
-                
-                if (nil == toReturn)
-                    toReturn = [[NSString alloc] initWithData:efetchResult encoding:NSISOLatin1StringEncoding];
-                
-                [toReturn autorelease];
-            }
+            toReturn = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
         }
         [document release];
     }

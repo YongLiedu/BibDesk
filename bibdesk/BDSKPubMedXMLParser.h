@@ -1,10 +1,10 @@
 //
-// BDSKStringParser.h
-// Bibdesk
+//  BDSKPubMedXMLParser.h
+//  Bibdesk
 //
-// Created by Adam Maxwell on 02/07/06.
+//  Created by Adam Maxwell on 5/2/09.
 /*
- This software is Copyright (c) 2006-2009
+ This software is Copyright (c) 2009
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -36,40 +36,15 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Foundation/Foundation.h>
+#import <Cocoa/Cocoa.h>
+#import "BDSKStringParser.h"
 
-enum {
-	BDSKUnknownStringType = -1, 
-	BDSKBibTeXStringType, 
-	BDSKNoKeyBibTeXStringType, 
-	BDSKPubMedStringType, 
-	BDSKRISStringType, 
-	BDSKMARCStringType, 
-	BDSKReferenceMinerStringType, 
-	BDSKJSTORStringType, 
-	BDSKWOSStringType, 
-	BDSKDublinCoreStringType,
-    BDSKReferStringType,
-    BDSKMODSStringType,
-    BDSKSciFinderStringType,
-    BDSKPubMedXMLStringType
-};
+@interface BDSKPubMedXMLParser : BDSKStringParser {
 
-// these methods are valid for the abstract class, and should not be used or defined for a concrete subclass
-// for BDSKUnknownStringType, type will be determined using [string contentStringType]
-@interface BDSKStringParser : NSObject
-+ (BOOL)canParseString:(NSString *)string ofType:(NSInteger)stringType;
-+ (NSArray *)itemsFromString:(NSString *)string ofType:(NSInteger)stringType error:(NSError **)outError;
-@end
+}
 
-// these methods must be implemented by the concrete subclasses
-// for the abstract class, these will call the corresponding method above using BDSKUnknownStringType
-@interface BDSKStringParser (SubclassResponsibility)
 + (BOOL)canParseString:(NSString *)string;
-+ (NSArray *)itemsFromString:(NSString *)string error:(NSError **)outError;
-@end
++ (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError;
++ (NSArray *)itemsFromData:(NSData *)itemData error:(NSError **)outError;
 
-
-@interface NSString (BDSKStringParserExtensions)
-- (NSInteger)contentStringType;
 @end
