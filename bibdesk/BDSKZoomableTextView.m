@@ -193,10 +193,10 @@ static CGFloat BDSKScaleMenuFontSize = 11.0;
 		
 		scaleFactor = newScaleFactor;
 		
-        [self scaleUnitSquareToSize:[self convertSize:NSMakeSize(1.0, 1.0) fromView:nil]];
-        [self scaleUnitSquareToSize:NSMakeSize(scaleFactor, scaleFactor)];
+        [self scaleUnitSquareToSize:[self convertSize:NSMakeSize(scaleFactor, scaleFactor) fromView:nil]];
         [self sizeToFit];
-		[self setScrollPositionAsPercentage:scrollPoint]; // maintain approximate scroll position
+		[[NSNotificationCenter defaultCenter] postNotificationName:NSViewFrameDidChangeNotification object:self];
+        [self setScrollPositionAsPercentage:scrollPoint]; // maintain approximate scroll position
         [[self superview] setNeedsDisplay:YES];
     }
 }
