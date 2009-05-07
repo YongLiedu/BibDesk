@@ -528,6 +528,35 @@
     return docClass;
 }
 
+- (NSString *)readableTypeFromFileExtension:(NSString *)extension {
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+        return nil;
+    NSEnumerator *classEnum = [[self documentClassNames] objectEnumerator];
+    NSString *className;
+    while (className = [classEnum nextObject]) {
+        NSEnumerator *typeEnum = [[NSClassFromString(className) readableTypes] objectEnumerator];
+        NSString *type;
+        while (type = [typeEnum nextObject]) {
+            if ([[NSWorkspace sharedWorkspace] filenameExtension:extension isValidForType:type]) {
+                return type;
+                break;
+            }
+        }
+    }
+    return nil;
+}
+
+- (NSString *)typeForContentsOfURL:(NSURL *)inAbsoluteURL error:(NSError **)outError {
+    NSString *type = [super typeForContentsOfURL:inAbsoluteURL error:outError];
+    if ([self documentClassForType:type] == Nil) {
+        // On 10.5 when another app declares a different UTI for one of our types, we may get their UTI, rdar://problem/6864895
+        NSString *extension = [[inAbsoluteURL path] pathExtension];
+        if ([extension length])
+            type = [self readableTypeFromFileExtension:extension] ?: type;
+    }
+    return type;
+}
+
 - (NSString *)displayNameForType:(NSString *)documentTypeName{
     NSString *displayName = nil;
     if([documentTypeName isEqualToString:BDSKMinimalBibTeXDocumentType])
