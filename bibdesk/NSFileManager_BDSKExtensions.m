@@ -1008,7 +1008,7 @@ static OSType finderSignatureBytes = 'MACS';
     NSParameterAssert(0 != nsEncoding);
     CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(nsEncoding);
     CFStringRef name = CFStringConvertEncodingToIANACharSetName(cfEncoding);
-    NSString *encodingString = [NSString stringWithFormat:@"%@;%ld", name, (long)cfEncoding];
+    NSString *encodingString = [NSString stringWithFormat:@"%@;%u", name, cfEncoding];
     return [[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:@"com.apple.TextEncoding" toValue:[encodingString dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:error];
 }
 
@@ -1036,7 +1036,7 @@ static OSType finderSignatureBytes = 'MACS';
     
     // currently only two elements, but may become arbitrarily long in future
     if ([array count] >= 2) {
-        CFStringEncoding cfEncoding = [[array objectAtIndex:1] unsignedIntValue];
+        CFStringEncoding cfEncoding = [[array objectAtIndex:1] intValue];
         nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
     }
     else if ([array count] > 0) {
