@@ -508,9 +508,14 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
     }
     
     CGImageRelease(_fullImage);
-    _fullImage = [self _newImageWithAttributedString:attrString documentAttributes:documentAttributes];
-    [attrString release];
-        
+    if (attrString) {
+        _fullImage = [self _newImageWithAttributedString:attrString documentAttributes:documentAttributes];
+        [attrString release];
+    }
+    else {
+        _fullImage = NULL;
+    }
+    
     if (NULL != _fullImage) {        
         // reset size while we have the lock, since it may be different now that we've read the string
         _fullSize = FVCGImageSize(_fullImage);
