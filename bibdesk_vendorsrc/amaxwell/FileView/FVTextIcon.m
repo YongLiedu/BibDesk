@@ -69,10 +69,7 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
 {
     FVINITIALIZE(FVTextIcon);
     
-    FVAPIParameterAssert(pthread_main_np() != 0);
-    
     FVTextIconClass = self;
-    
     // make sure we compare with pointer equality; all I really want is a bag
     _cachedTextSystems = (NSMutableSet *)CFSetCreateMutable(NULL, MAX_CACHED_TEXT_SYSTEMS, &FVNSObjectPointerSetCallBacks);
 }
@@ -320,8 +317,8 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
 
 - (CGImageRef)_newImageWithAttributedString:(NSMutableAttributedString *)attrString documentAttributes:(NSDictionary *)documentAttributes
 {
+    NSParameterAssert(attrString);
     FVBitmapContextRef ctxt = FVIconBitmapContextCreateWithSize(FVDefaultPaperSize.width, FVDefaultPaperSize.height);    
-    NSTextStorage *textStorage = [FVTextIcon popTextStorage];
 
     // set up default page layout parameters
     CGAffineTransform t1 = CGAffineTransformMakeTranslation(FVSideMargin, FVDefaultPaperSize.height - FVTopMargin);
@@ -334,48 +331,33 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
     CGFloat backgroundComps[4] = { 1.0, 1.0, 1.0, 1.0 };
 
     // use a monospaced font for plain text
-    if (nil != attrString) {
-        if (nil == documentAttributes || [[documentAttributes objectForKey:NSDocumentTypeDocumentAttribute] isEqualToString:NSPlainTextDocumentType]) {
-            NSFont *plainFont = [NSFont userFixedPitchFontOfSize:10.0f];
-            [attrString addAttribute:NSFontAttributeName value:plainFont range:NSMakeRange(0, [attrString length])];
-        }
-        else if (nil != documentAttributes) {
-            
-            CGFloat left, right, top, bottom;
-            
-            left = [[documentAttributes objectForKey:NSLeftMarginDocumentAttribute] floatValue];
-            right = [[documentAttributes objectForKey:NSRightMarginDocumentAttribute] floatValue];
-            top = [[documentAttributes objectForKey:NSTopMarginDocumentAttribute] floatValue];
-            bottom = [[documentAttributes objectForKey:NSBottomMarginDocumentAttribute] floatValue];
-            paperSize = [[documentAttributes objectForKey:NSPaperSizeDocumentAttribute] sizeValue];
-            
-            t1 = CGAffineTransformMakeTranslation(0, paperSize.height);
-            t2 = CGAffineTransformMakeScale(1, -1);
-            pageTransform = CGAffineTransformConcat(t2, t1);
-            t1 = CGAffineTransformMakeTranslation(left, -bottom);
-            pageTransform = CGAffineTransformConcat(pageTransform, t1);
-            containerSize.width = paperSize.width - left - right;
-            containerSize.height = paperSize.height - top - bottom;
-            
-            NSColor *nsColor = [documentAttributes objectForKey:NSBackgroundColorDocumentAttribute];
-            nsColor = [nsColor colorUsingColorSpaceName:NSDeviceRGBColorSpace];  
-            [nsColor getRed:&backgroundComps[0] green:&backgroundComps[1] blue:&backgroundComps[2] alpha:&backgroundComps[3]];
-        }
+    if (nil == documentAttributes || [[documentAttributes objectForKey:NSDocumentTypeDocumentAttribute] isEqualToString:NSPlainTextDocumentType]) {
+        NSFont *plainFont = [NSFont userFixedPitchFontOfSize:10.0f];
+        [attrString addAttribute:NSFontAttributeName value:plainFont range:NSMakeRange(0, [attrString length])];
     }
-    
-    [textStorage beginEditing];
-    if (attrString) {
-        [textStorage setAttributedString:attrString];
-    }
-    else {
-        // avoid setting the text storage to nil, and display a mildly unhelpful error message
-        NSBundle *bundle = [NSBundle bundleForClass:[FVTextIcon class]];
+    else if (nil != documentAttributes) {
         
-        NSString *err = [NSLocalizedStringFromTableInBundle(@"Unable to read text file ", @"FileView", bundle, @"error message with single trailing space") stringByAppendingString:[_fileURL path]];
-        [[textStorage mutableString] setString:err];
-    }  
-    [textStorage endEditing];
-    
+        CGFloat left, right, top, bottom;
+        
+        left = [[documentAttributes objectForKey:NSLeftMarginDocumentAttribute] floatValue];
+        right = [[documentAttributes objectForKey:NSRightMarginDocumentAttribute] floatValue];
+        top = [[documentAttributes objectForKey:NSTopMarginDocumentAttribute] floatValue];
+        bottom = [[documentAttributes objectForKey:NSBottomMarginDocumentAttribute] floatValue];
+        paperSize = [[documentAttributes objectForKey:NSPaperSizeDocumentAttribute] sizeValue];
+        
+        t1 = CGAffineTransformMakeTranslation(0, paperSize.height);
+        t2 = CGAffineTransformMakeScale(1, -1);
+        pageTransform = CGAffineTransformConcat(t2, t1);
+        t1 = CGAffineTransformMakeTranslation(left, -bottom);
+        pageTransform = CGAffineTransformConcat(pageTransform, t1);
+        containerSize.width = paperSize.width - left - right;
+        containerSize.height = paperSize.height - top - bottom;
+        
+        NSColor *nsColor = [documentAttributes objectForKey:NSBackgroundColorDocumentAttribute];
+        nsColor = [nsColor colorUsingColorSpaceName:NSDeviceRGBColorSpace];  
+        [nsColor getRed:&backgroundComps[0] green:&backgroundComps[1] blue:&backgroundComps[2] alpha:&backgroundComps[3]];
+    }
+        
     NSRect stringRect = NSZeroRect;
     stringRect.size = paperSize;
     
@@ -393,15 +375,16 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
     [NSGraphicsContext saveGraphicsState];
     [NSGraphicsContext setCurrentContext:nsCtxt];
     
+    NSTextStorage *textStorage = [FVTextIcon popTextStorage];
+    [textStorage setAttributedString:attrString];
+    
     // objectAtIndex:0 is safe, since we added these to the text storage (so there's at least one)
     NSLayoutManager *lm = [[textStorage layoutManagers] objectAtIndex:0];
     NSTextContainer *tc = [[lm textContainers] objectAtIndex:0];
     [tc setContainerSize:containerSize];
-    
-    NSRange glyphRange;
-    
+        
     // we now have a properly flipped graphics context, so force layout and then draw the text
-    glyphRange = [lm glyphRangeForBoundingRect:stringRect inTextContainer:tc];
+    NSRange glyphRange = [lm glyphRangeForBoundingRect:stringRect inTextContainer:tc];
     NSRect usedRect = [lm usedRectForTextContainer:tc];
     
     // NSRunStorage raises if we try drawing a zero length range (happens if you have an empty text file)
@@ -410,15 +393,15 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
         [lm drawGlyphsForGlyphRange:glyphRange atPoint:usedRect.origin];
     }
     
+    // text is drawn, so we're done with this
+    [FVTextIcon pushTextStorage:textStorage];
+    textStorage = nil;
     
     // restore the previous context
     [NSGraphicsContext restoreGraphicsState];
     
     // restore the bitmap context's state (although it's gone after this operation)
     CGContextRestoreGState(ctxt);
-    
-    [FVTextIcon pushTextStorage:textStorage];
-    textStorage = nil;
     
     CGImageRef image = CGBitmapContextCreateImage(ctxt);
     FVIconBitmapContextRelease(ctxt);
@@ -468,7 +451,11 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
         }
     }
 
-    // At this point, neither icon should be present, unless ImageIO failed previously or caching failed.  However, if multiple views are caching icons at the same time, we can end up here with a thumbnail but no full image.  Make sure we don't leak in that case.
+    /*
+     At this point, neither icon should be present, unless ImageIO failed previously or caching failed.  
+     However, if multiple views are caching icons at the same time, we can end up here with a thumbnail 
+     but no full image.
+     */
     NSParameterAssert(NULL == _fullImage);
         
     // originally kept the attributed string as an ivar, but it's not worth it in most cases
@@ -477,7 +464,12 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
     NSDictionary *documentAttributes = nil;
     NSMutableAttributedString *attrString = nil;
     
-        // This is a minor optimization: NSAttributedString creates a bunch of temporary objects for pasteboard translation when reading a file, but we avoid that by loading with NSString directly.  Interestingly, this also appears to be at least a partial workaround for rdar://problem/5775728 (CoreGraphics memory leaks), since Instruments shows I'm only leaking a single NSConcreteAttributedString here now.
+    /* 
+     This is a minor optimization: NSAttributedString creates a bunch of temporary objects for pasteboard 
+     translation when reading a file, but we avoid that by loading with NSString directly.  Interestingly, 
+     this also appears to be at least a partial workaround for rdar://problem/5775728 (CoreGraphics memory leaks), 
+     since Instruments shows I'm only leaking a single NSConcreteAttributedString here now.
+     */
     if (_isPlainText) {
         NSStringEncoding enc;
         NSString *text = [[NSString allocWithZone:[self zone]] initWithContentsOfURL:_fileURL usedEncoding:&enc error:NULL];
@@ -490,8 +482,12 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
         }
     }
 
+    // not plain text, so try to load with NSAttributedString
     if (nil == attrString) {
-        // Occasionally NSAttributedString might end up calling NSHTMLReader/WebKit to load a file, which raises an exception and crashes on 10.4.  The workaround is to always load on the main thread on 10.4.
+        /*
+         Occasionally NSAttributedString might end up calling NSHTMLReader/WebKit to load a file, which raises 
+         an exception and crashes on 10.4.  The workaround is to always load on the main thread on 10.4.
+         */
         if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
             [attrString release];
             _FVAttributedStringOperation *operation = [[_FVAttributedStringOperation allocWithZone:[self zone]] initWithURL:_fileURL];
@@ -507,15 +503,18 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
         }
     }
     
-    CGImageRelease(_fullImage);
-    if (attrString) {
-        _fullImage = [self _newImageWithAttributedString:attrString documentAttributes:documentAttributes];
-        [attrString release];
+    // plain text failed and so did NSAttributedString, so display a mildly unhelpful error message
+    if (nil == attrString) {
+        NSBundle *bundle = [NSBundle bundleForClass:[FVTextIcon class]];        
+        NSString *err = [NSLocalizedStringFromTableInBundle(@"Unable to read text file ", @"FileView", bundle, @"error message with single trailing space") stringByAppendingString:[_fileURL path]];
+        attrString = [[NSMutableAttributedString alloc] initWithString:err];
     }
-    else {
-        _fullImage = NULL;
-    }
+    FVAPIParameterAssert(nil != attrString);
     
+    CGImageRelease(_fullImage);
+    _fullImage = [self _newImageWithAttributedString:attrString documentAttributes:documentAttributes];
+    [attrString release];
+        
     if (NULL != _fullImage) {        
         // reset size while we have the lock, since it may be different now that we've read the string
         _fullSize = FVCGImageSize(_fullImage);

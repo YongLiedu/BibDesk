@@ -44,6 +44,7 @@
 
 - (CGImageRef)_newImageWithAttributedString:(NSMutableAttributedString *)attrString documentAttributes:(NSDictionary *)documentAttributes
 {
+    NSParameterAssert(attrString);
     CFMutableAttributedStringRef cfAttrString = (CFMutableAttributedStringRef)attrString;
     
     // set up page layout parameters
@@ -86,14 +87,6 @@
         [nsColor getRed:&backgroundComps[0] green:&backgroundComps[1] blue:&backgroundComps[2] alpha:&backgroundComps[3]];
     }
     
-    if (NULL == cfAttrString) {
-        // display a mildly unhelpful error message
-        NSBundle *bundle = [NSBundle bundleForClass:[FVCoreTextIcon class]];
-        
-        NSString *err = [NSLocalizedStringFromTableInBundle(@"Unable to read text file ", @"FileView", bundle, @"error message with single trailing space") stringByAppendingString:[_fileURL path]];
-        cfAttrString = (CFMutableAttributedStringRef)[[[NSMutableAttributedString alloc] initWithString:err] autorelease];
-    }  
-    
     CGContextSetTextMatrix(ctxt, CGAffineTransformIdentity);
     CGContextSetRGBFillColor(ctxt, backgroundComps[0], backgroundComps[1], backgroundComps[2], backgroundComps[3]);
     CGContextFillRect(ctxt, paperRect);
@@ -107,7 +100,9 @@
     CFRelease(framesetter);
     
     /*
-     NSGraphicsContext is required for NSColor attributes.  See http://lists.apple.com/archives/Quartz-dev/2008/Jun/msg00043.html  Unfortunately, colored underlines apparently aren't supported by CT; CTStringAttributes.h says that the color of those attributes is taken from the foreground text color, which is kind of lame.  Strikethrough apparently isn't supported at all.
+     NSGraphicsContext is required for NSColor attributes.  See http://lists.apple.com/archives/Quartz-dev/2008/Jun/msg00043.html  
+     Unfortunately, colored underlines apparently aren't supported by CT; CTStringAttributes.h says that the color of those 
+     attributes is taken from the foreground text color, which is kind of lame.  Strikethrough apparently isn't supported at all.
      */
     [NSGraphicsContext saveGraphicsState];
     [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithGraphicsPort:ctxt flipped:NO]];
