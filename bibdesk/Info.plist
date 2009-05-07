@@ -132,11 +132,6 @@
 				<string>BibTeX Database</string>
 				<string>RIS/Medline File</string>
 			</array>
-			<key>NSExportableTypes</key>
-			<array>
-				<string>org.tug.tex.bibtex</string>
-				<string>net.sourceforge.bibdesk.ris</string>
-			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeExtensions</key>
