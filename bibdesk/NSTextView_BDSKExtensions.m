@@ -86,8 +86,6 @@
 - (void)highlightComponentsOfSearchString:(NSString *)searchString;
 {
     NSParameterAssert(searchString != nil);
-    NSTextStorage *textStorage = [self textStorage];
-
     static NSCharacterSet *charactersToRemove = nil;
     if (nil == charactersToRemove) {
         // SearchKit ignores punctuation, so results can be surprising.  In bug #1779548 the user was trying to search for a literal "ic.8" with the default wildcard expansion.  This translated into a large number of matches, but nothing was highlighted in the textview because we only removed SearchKit special characters.
@@ -117,26 +115,20 @@
     NSArray *allComponents = [mutableString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet] trimWhitespace:YES];
     [mutableString release];
 
-    if ([allComponents count]) {
-        [textStorage beginEditing];
+    if ([allComponents count])
         [self performSelector:@selector(highlightOccurrencesOfString:) withObjectsFromArray:allComponents];
-        [textStorage endEditing];
-    }
 }
 
 - (void)highlightOccurrencesOfString:(NSString *)substring;
 {
     NSParameterAssert(substring != nil);
     NSString *string = [self string];
-    NSTextStorage *textStorage = [self textStorage];
     NSRange range = [string rangeOfString:substring options:NSCaseInsensitiveSearch];
     NSUInteger maxRangeLoc;
     NSUInteger length = [string length];
     
     // Mail.app appears to use a light gray highlight, which is rather ugly, but we don't want to use the selected text highlight
-    static NSDictionary *highlightAttributes = nil;
-    if(highlightAttributes == nil)
-        highlightAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSColor lightGrayColor], NSBackgroundColorAttributeName, nil];
+    NSDictionary *highlightAttributes = [NSDictionary dictionaryWithObjectsAndKeys:[NSColor lightGrayColor], NSBackgroundColorAttributeName, nil];
     
     // use the layout manager to add temporary attributes; the advantage for our purpose is that temporary attributes don't print
     NSLayoutManager *layoutManager = [self layoutManager];
@@ -144,15 +136,20 @@
     if(layoutManager == nil)
         return;
     
-    // docs say we can nest beginEditing/endEditing messages, so we'll make sure the changes are processed in a batch
-    [textStorage beginEditing];
+    /*
+     Using beginEditing/endEditing here can result in the following exception:
+     
+     -[NSLayoutManager _fillGlyphHoleForCharacterRange:startGlyphIndex:desiredNumberOfCharacters:] *** attempted glyph generation while textStorage is editing.  It is not valid to cause the layoutManager to do glyph generation while the textStorage is editing (ie the textStorage has been sent a beginEditing message without a matching endEditing.
+     
+     That's supposed to be a legitimate call before changes to attributes, and temporary attributes aren't supposed to affect layout...so it's odd that glyph generation is happening.  Maybe background layout is happening at the same time?
+     
+     */
     while(range.location != NSNotFound){
         
         [layoutManager addTemporaryAttributes:highlightAttributes forCharacterRange:range];        
         maxRangeLoc = NSMaxRange(range);
         range = [string rangeOfString:substring options:NSCaseInsensitiveSearch range:NSMakeRange(maxRangeLoc, length - maxRangeLoc)];
     }
-    [textStorage endEditing];
 }
 
 - (IBAction)invertSelection:(id)sender;
