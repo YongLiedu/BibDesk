@@ -864,6 +864,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 		BDSKSmartGroup *group = [[BDSKSmartGroup alloc] initWithFilter:[filterController filter]];
 		[groups addSmartGroup:group];
 		[group release];
+        [groupOutlineView expandItem:[group parent]];
         NSInteger row = [groupOutlineView rowForItem:group];
         if (row != -1) {
             [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
@@ -879,6 +880,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     BDSKStaticGroup *group = [[BDSKStaticGroup alloc] init];
     [groups addStaticGroup:group];
     [group release];
+    [groupOutlineView expandItem:[group parent]];
     NSInteger row = [groupOutlineView rowForItem:group];
     if (row != -1) {
         [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
@@ -892,6 +894,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	if(returnCode == NSOKButton){
         BDSKGroup *group = [sheetController group];
 		[groups addSearchGroup:(id)group];
+        [groupOutlineView expandItem:[group parent]];
         NSInteger row = [groupOutlineView rowForItem:group];
         if (row != -1)
             [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
@@ -912,6 +915,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     BDSKSearchGroup *group = [[[BDSKSearchGroup alloc] initWithDictionary:dict] autorelease];
     if (group) {
         [groups addSearchGroup:(id)group];        
+        [groupOutlineView expandItem:[group parent]];
         NSInteger row = [groupOutlineView rowForItem:group];
         if (row != -1)
             [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
@@ -985,6 +989,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         BDSKURLGroup *group = [sheetController group];
 		[groups addURLGroup:group];
         [group publications];
+        [groupOutlineView expandItem:[group parent]];
         NSInteger row = [groupOutlineView rowForItem:group];
         if (row != -1) {
             [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
@@ -1009,6 +1014,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         BDSKScriptGroup *group = [sheetController group];
 		[groups addScriptGroup:group];
         [group publications];
+        [groupOutlineView expandItem:[group parent]];
         NSInteger row = [groupOutlineView rowForItem:group];
         if (row != -1) {
             [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
@@ -1178,6 +1184,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (void)editGroupWithoutWarning:(BDSKGroup *)group {
+    [groupOutlineView expandItem:[group parent]];
     NSInteger i = [groupOutlineView rowForItem:group];
     BDSKASSERT(i != -1);
     
