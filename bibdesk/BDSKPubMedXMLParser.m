@@ -317,6 +317,11 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
         NSMutableDictionary *pubFields = [NSMutableDictionary new];
         
         [self _addJournalNode:[citation firstNodeForXPath:@"./Article/Journal"] toDictionary:pubFields];
+
+        // Replace Journal Title by MedlineTA if available
+        NSString* MedlineTA = [[citation firstNodeForXPath:@"./MedlineJournalInfo/MedlineTA"] stringValue];
+        addStringToDictionaryIfNotNil(_useTitlecase ? [MedlineTA titlecaseString] : MedlineTA, BDSKJournalString, pubFields);
+
         [self _addAuthorListNode:[citation firstNodeForXPath:@"./Article/AuthorList"] toDictionary:pubFields];
         
         // ex. PMID 16187791
