@@ -445,7 +445,10 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     @synchronized(self) {
     // if the file exists, try /directory/filename-i.extension
     while([self fileExistsAtPath:fullPath])
-        fullPath = [directory stringByAppendingPathComponent:[[NSString stringWithFormat:@"%@-%lu", baseName, (unsigned long)++i] stringByAppendingPathExtension:extension]];
+        fullPath = [directory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%lu", baseName, (unsigned long)++i]];
+        if (extension)
+            fullPath = [fullPath stringByAppendingPathExtension:extension];
+        
     }
 
 	return fullPath;
