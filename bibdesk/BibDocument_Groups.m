@@ -859,17 +859,26 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	[filterController release];
 }
 
+- (void)editGroupWithoutWarning:(BDSKGroup *)group {
+    [groupOutlineView expandItem:[group parent]];
+    NSInteger i = [groupOutlineView rowForItem:group];
+    BDSKASSERT(i != -1);
+    
+    if(i != -1){
+        [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
+        [groupOutlineView scrollRowToVisible:i];
+        
+        // don't show the warning sheet, since presumably the user wants to change the group name
+        [groupOutlineView editColumn:0 row:i withEvent:nil select:YES];
+    }
+}
+
 - (void)smartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
 		BDSKSmartGroup *group = [[BDSKSmartGroup alloc] initWithFilter:[filterController filter]];
 		[groups addSmartGroup:group];
+        [self editGroupWithoutWarning:group];
 		[group release];
-        [groupOutlineView expandItem:[group parent]];
-        NSInteger row = [groupOutlineView rowForItem:group];
-        if (row != -1) {
-            [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-            [groupOutlineView editColumn:0 row:row withEvent:nil select:YES];
-		}
         [[self undoManager] setActionName:NSLocalizedString(@"Add Smart Group", @"Undo action name")];
 		// updating of the tables is done when finishing the edit of the name
 	}
@@ -879,13 +888,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 - (IBAction)addStaticGroupAction:(id)sender {
     BDSKStaticGroup *group = [[BDSKStaticGroup alloc] init];
     [groups addStaticGroup:group];
+    [self editGroupWithoutWarning:group];
     [group release];
-    [groupOutlineView expandItem:[group parent]];
-    NSInteger row = [groupOutlineView rowForItem:group];
-    if (row != -1) {
-        [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-        [groupOutlineView editColumn:0 row:row withEvent:nil select:YES];
-    }
     [[self undoManager] setActionName:NSLocalizedString(@"Add Static Group", @"Undo action name")];
     // updating of the tables is done when finishing the edit of the name
 }
@@ -989,12 +993,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         BDSKURLGroup *group = [sheetController group];
 		[groups addURLGroup:group];
         [group publications];
-        [groupOutlineView expandItem:[group parent]];
-        NSInteger row = [groupOutlineView rowForItem:group];
-        if (row != -1) {
-            [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-            [groupOutlineView editColumn:0 row:row withEvent:nil select:YES];
-		}
+        [self editGroupWithoutWarning:group];
         [[self undoManager] setActionName:NSLocalizedString(@"Add External File Group", @"Undo action name")];
 		// updating of the tables is done when finishing the edit of the name
 	}
@@ -1014,12 +1013,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         BDSKScriptGroup *group = [sheetController group];
 		[groups addScriptGroup:group];
         [group publications];
-        [groupOutlineView expandItem:[group parent]];
-        NSInteger row = [groupOutlineView rowForItem:group];
-        if (row != -1) {
-            [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-            [groupOutlineView editColumn:0 row:row withEvent:nil select:YES];
-		}
+        [self editGroupWithoutWarning:group];
         [[self undoManager] setActionName:NSLocalizedString(@"Add Script Group", @"Undo action name")];
 		// updating of the tables is done when finishing the edit of the name
 	}
@@ -1180,20 +1174,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKIntersectGroupsKey] != flag) {
         [[NSUserDefaults standardUserDefaults] setBool:flag forKey:BDSKIntersectGroupsKey];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupTableSelectionChangedNotification object:self];
-    }
-}
-
-- (void)editGroupWithoutWarning:(BDSKGroup *)group {
-    [groupOutlineView expandItem:[group parent]];
-    NSInteger i = [groupOutlineView rowForItem:group];
-    BDSKASSERT(i != -1);
-    
-    if(i != -1){
-        [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
-        [groupOutlineView scrollRowToVisible:i];
-        
-        // don't show the warning sheet, since presumably the user wants to change the group name
-        [groupOutlineView editColumn:0 row:i withEvent:nil select:YES];
     }
 }
 
