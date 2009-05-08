@@ -1258,6 +1258,11 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
         [self updateSmartGroupsCountAndContent:YES];
 }
 
+- (void)outlineViewItemDidCollapse:(NSNotification *)notification {
+    if ([[groupOutlineView selectedRowIndexes] count] == 0)
+        [self selectLibraryGroup:nil];
+}
+
 - (void)outlineView:(NSOutlineView *)outlineView willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item {
     BDSKGroup *group = item;
     NSProgressIndicator *spinner = nil;
