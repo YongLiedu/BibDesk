@@ -56,9 +56,6 @@
 {
     NSError *error;
     NSArray *nodes = [self nodesForXPath:xpath error:&error];
-#ifdef OMNI_ASSERTIONS_ON
-    if (nil == nodes) NSLog(@"Error for XPath %@: %@", xpath, error);
-#endif
     return [nodes count] ? [nodes objectAtIndex:0] : nil;
 }
 
@@ -68,11 +65,7 @@
 @implementation BDSKPubMedXMLParser
 
 static bool _useTitlecase = false;
-#ifdef OMNI_ASSERTIONS_ON
-static bool _addXMLStringToAnnote = true;
-#else
 static bool _addXMLStringToAnnote = false;
-#endif
 
 + (void)initialize
 {
