@@ -67,7 +67,7 @@
 
 @implementation BDSKPubMedXMLParser
 
-static bool _useTitlecase = true;
+static bool _useTitlecase = false;
 #ifdef OMNI_ASSERTIONS_ON
 static bool _addXMLStringToAnnote = true;
 #else
@@ -79,9 +79,9 @@ static bool _addXMLStringToAnnote = false;
     // this is messy, but may be useful for debugging
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKAddPubMedXMLStringToAnnote"])
         _addXMLStringToAnnote = true;
-    // try to allow for common titlecasing in PubMed (which gives us sentence case journal titles)
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisablePubMedXMLTitleCasing"])
-        _useTitlecase = false;
+    // allow for common titlecasing in PubMed if needed, but it seems to capitalize places and proper names correctly
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnablePubMedXMLTitleCasing"])
+        _useTitlecase = true;
 }
 
 + (BOOL)canParseString:(NSString *)string;
@@ -317,11 +317,6 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
         NSMutableDictionary *pubFields = [NSMutableDictionary new];
         
         [self _addJournalNode:[citation firstNodeForXPath:@"./Article/Journal"] toDictionary:pubFields];
-
-        // Replace Journal Title by MedlineTA if available
-        NSString* MedlineTA = [[citation firstNodeForXPath:@"./MedlineJournalInfo/MedlineTA"] stringValue];
-        addStringToDictionaryIfNotNil(_useTitlecase ? [MedlineTA titlecaseString] : MedlineTA, BDSKJournalString, pubFields);
-
         [self _addAuthorListNode:[citation firstNodeForXPath:@"./Article/AuthorList"] toDictionary:pubFields];
         
         // ex. PMID 16187791
@@ -333,6 +328,17 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
         addStringValueOfNodeForField([citation firstNodeForXPath:@"./Article/Abstract/AbstractText"], BDSKAbstractString, pubFields);
         addStringValueOfNodeForField([citation firstNodeForXPath:@"./Article/Pagination/MedlinePgn"], BDSKPagesString, pubFields);
         addStringValueOfNodeForField([citation firstNodeForXPath:@"./PMID"], @"Pmid", pubFields);
+        
+        // use MedlineTA if available, since the full title evidently has too much information in some cases
+        NSString *ta = [[citation firstNodeForXPath:@"./MedlineJournalInfo/MedlineTA"] stringValue];        
+        if (ta) {
+            // save the full title in another field
+            if ([pubFields objectForKey:BDSKJournalString])
+                [pubFields setObject:[pubFields objectForKey:BDSKJournalString] forKey:@"Journal-Full"];
+            
+            // titlecasing this doesn't seem right, since it's already abbreviated
+            [pubFields setObject:ta forKey:BDSKJournalString];
+        }
         
         // grab the DOI if available
         NSArray *articleIDs = [article nodesForXPath:@"./PubmedData/ArticleIdList/ArticleId" error:NULL];
