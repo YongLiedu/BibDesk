@@ -55,6 +55,7 @@
     BOOL needsReset;
     NSInteger availableResults;
     NSInteger fetchedResults;
+    NSInteger downloadState;
 }
 + (NSString *)baseURLString;
 + (BOOL)canConnect;
