@@ -46,7 +46,7 @@
 #import "PDFMetadata.h"
 
 @interface BDSKPubMedLookupHelper : NSObject
-+ (NSData *)xmlReferenceDataForPMID:(NSString *)searchTerm;
++ (NSData *)xmlReferenceDataForSearchTerm:(NSString *)searchTerm;
 @end
 
 @implementation NSString (PubMedLookup)
@@ -346,7 +346,7 @@ static void removeAliens(NSMutableString *string)
 
 + (id)itemWithPubMedSearchTerm:(NSString *)searchTerm;
 {
-    NSData *data = [BDSKPubMedLookupHelper xmlReferenceDataForPMID:searchTerm];
+    NSData *data = [BDSKPubMedLookupHelper xmlReferenceDataForSearchTerm:searchTerm];
     return [data length] ? [[BDSKPubMedXMLParser itemsFromData:data error:NULL] lastObject] : nil;
 }
 
@@ -382,7 +382,7 @@ static void removeAliens(NSMutableString *string)
     return canConnect;
 }
 
-+ (NSData *)xmlReferenceDataForPMID:(NSString *)searchTerm;
++ (NSData *)xmlReferenceDataForSearchTerm:(NSString *)searchTerm;
 {
     NSParameterAssert(searchTerm != nil);
     
