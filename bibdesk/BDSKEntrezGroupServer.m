@@ -327,6 +327,9 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
             // specifically requested the XML type, so go straight to the correct parser
             NSArray *pubs = [BDSKPubMedXMLParser itemsFromData:[NSData dataWithContentsOfMappedFile:[downloadURL path]] error:&presentableError];
             
+            // set before addPublications:
+            downloadState = BDSKIdleState;
+            
             if (nil == pubs) {
                 failedDownload = YES;
                 [NSApp presentError:presentableError];
@@ -334,7 +337,6 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
             else {
                 [group addPublications:pubs];
             }
-            downloadState = BDSKIdleState;
             break;
         }
         case BDSKIdleState:
