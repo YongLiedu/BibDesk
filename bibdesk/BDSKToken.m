@@ -104,6 +104,7 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super init]) {
+        title = [[decoder decodeObjectForKey:@"title"] retain];
         fontName = [[decoder decodeObjectForKey:@"fontName"] retain];
         fontSize = [decoder decodeFloatForKey:@"fontSize"];
         bold = [decoder decodeIntForKey:@"bold"];
