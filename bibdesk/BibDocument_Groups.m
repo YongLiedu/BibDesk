@@ -43,7 +43,6 @@
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKFilterController.h"
 #import "BDSKGroupOutlineView.h"
-#import "BDSKHeaderPopUpButtonCell.h"
 #import "BibDocument_Search.h"
 #import "BDSKGroup.h"
 #import "BDSKSharedGroup.h"

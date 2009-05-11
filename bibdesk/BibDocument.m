@@ -56,7 +56,6 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringEncodingManager.h"
-#import "BDSKHeaderPopUpButtonCell.h"
 #import "BDSKGroupCell.h"
 #import "BDSKScriptHookManager.h"
 #import "BDSKFilterController.h"

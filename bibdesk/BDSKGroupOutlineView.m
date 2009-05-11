@@ -38,7 +38,6 @@
 
 #import "BDSKGroupOutlineView.h"
 #import "BDSKStringConstants.h"
-#import "BDSKHeaderPopUpButtonCell.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import "BibDocument_Groups.h"
 #import "NSTableView_BDSKExtensions.h"

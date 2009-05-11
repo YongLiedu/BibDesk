@@ -37,7 +37,6 @@
  */
 
 #import "BDSKZoomablePDFView.h"
-#import "BDSKHeaderPopUpButton.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSScrollView_BDSKExtensions.h"
@@ -179,22 +178,36 @@ static CGFloat BDSKScaleMenuFontSize = 11.0;
     
 #pragma mark Popup button
 
+static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anIndex) {
+    NSUInteger i = [popUpButton indexOfSelectedItem];
+    [popUpButton selectItemAtIndex:anIndex];
+    [popUpButton sizeToFit];
+    NSSize frameSize = [popUpButton frame].size;
+    frameSize.width -= 22.0 + 2 * [[popUpButton cell] controlSize];
+    [popUpButton setFrameSize:frameSize];
+    [popUpButton selectItemAtIndex:i];
+}
+
 - (void)makeScalePopUpButton {
     
     if (scalePopUpButton == nil) {
         
         NSScrollView *scrollView = [self scrollView];
         [scrollView setHasHorizontalScroller:YES];
-
+        
         // create it        
-        scalePopUpButton = [[BDSKHeaderPopUpButton allocWithZone:[self zone]] initWithFrame:NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown:NO];
+        scalePopUpButton = [[NSPopUpButton allocWithZone:[self zone]] initWithFrame:NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown:NO];
         
         NSControlSize controlSize = [[scrollView horizontalScroller] controlSize];
         [[scalePopUpButton cell] setControlSize:controlSize];
-
+		[scalePopUpButton setBordered:NO];
+		[scalePopUpButton setEnabled:YES];
+		[scalePopUpButton setRefusesFirstResponder:YES];
+		[[scalePopUpButton cell] setUsesItemFromMenu:YES];
+        
         // set a suitable font, the control size is 0, 1 or 2
         [scalePopUpButton setFont:[NSFont toolTipsFontOfSize: BDSKScaleMenuFontSize - controlSize]];
-
+        
         NSUInteger cnt, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuLabels) / sizeof(NSString *));
         id curItem;
         NSString *label;
@@ -220,20 +233,17 @@ static CGFloat BDSKScaleMenuFontSize = 11.0;
             [self setScaleFactor:0.0 adjustPopup:YES];
         else
             [self setScaleFactor:[self scaleFactor] adjustPopup:YES];
-
+        
         // Make sure the popup is big enough to fit the largest cell
-        cnt = [scalePopUpButton indexOfSelectedItem];
-        [scalePopUpButton selectItemAtIndex:maxIndex];
-        [scalePopUpButton sizeToFit];
-        [scalePopUpButton selectItemAtIndex:cnt];
-
+        sizePopUpToItemAtIndex(scalePopUpButton, maxIndex);
+        
 		// don't let it become first responder
 		[scalePopUpButton setRefusesFirstResponder:YES];
-
+        
         // hook it up
         [scalePopUpButton setTarget:self];
         [scalePopUpButton setAction:@selector(scalePopUpAction:)];
-
+        
         // put it in the scrollview
         [scrollView setPlacards:[NSArray arrayWithObject:scalePopUpButton]];
         [scalePopUpButton release];

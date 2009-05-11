@@ -97,8 +97,6 @@
 		CE129A180B44088900416D19 /* BDSKEntrezGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = CE129A160B44088900416D19 /* BDSKEntrezGroupServer.m */; };
 		CE12A1700B44AED200416D19 /* SearchGroupServers.plist in Resources */ = {isa = PBXBuildFile; fileRef = CE12A16F0B44AED100416D19 /* SearchGroupServers.plist */; };
 		CE15C0D80AA5B9A3002C555F /* BDSKErrorManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE15C0D60AA5B9A3002C555F /* BDSKErrorManager.m */; };
-		CE1A7F42090BEC3C00ACC864 /* BDSKHeaderPopUpButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */; };
-		CE1A7F4E090BED5600ACC864 /* BDSKHeaderPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE1A7EDE090BDF1C00ACC864 /* BDSKHeaderPopUpButton.m */; };
 		CE1EF2940F8E0D54004E7AE8 /* BDSKParentGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE1EF2920F8E0D54004E7AE8 /* BDSKParentGroup.m */; };
 		CE1EF3890F8E6190004E7AE8 /* BDSKGradientTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE1EF3880F8E6190004E7AE8 /* BDSKGradientTableView.m */; };
 		CE21D10B09208B9D0075E607 /* BDSKGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE21D10909208B9D0075E607 /* BDSKGroup.m */; };
@@ -993,10 +991,6 @@
 		CE15C0D50AA5B9A3002C555F /* BDSKErrorManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKErrorManager.h; sourceTree = "<group>"; };
 		CE15C0D60AA5B9A3002C555F /* BDSKErrorManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKErrorManager.m; sourceTree = "<group>"; };
 		CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-App.xcconfig"; sourceTree = "<group>"; };
-		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
-		CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKHeaderPopUpButtonCell.m; sourceTree = "<group>"; };
-		CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButton.h; sourceTree = "<group>"; };
-		CE1A7EDE090BDF1C00ACC864 /* BDSKHeaderPopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKHeaderPopUpButton.m; sourceTree = "<group>"; };
 		CE1EF2910F8E0D54004E7AE8 /* BDSKParentGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKParentGroup.h; sourceTree = "<group>"; };
 		CE1EF2920F8E0D54004E7AE8 /* BDSKParentGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKParentGroup.m; sourceTree = "<group>"; };
 		CE1EF3880F8E6190004E7AE8 /* BDSKGradientTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGradientTableView.m; sourceTree = "<group>"; };
@@ -2086,8 +2080,6 @@
 				CE1EF3880F8E6190004E7AE8 /* BDSKGradientTableView.m */,
 				CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */,
 				F97BE8F00907321F0063504B /* BDSKGroupOutlineView.m */,
-				CE1A7EDE090BDF1C00ACC864 /* BDSKHeaderPopUpButton.m */,
-				CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */,
 				CEC7D0240F680C970051794E /* BDSKIconTextFieldCell.m */,
 				CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */,
 				CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */,
@@ -2673,8 +2665,6 @@
 				CEEFE6C10B0403E700668BB0 /* BDSKGroupsArray.h */,
 				F97BE8EF0907321F0063504B /* BDSKGroupOutlineView.h */,
 				457538280B70170D00C0E49B /* BDSKHCiteParser.h */,
-				CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */,
-				CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */,
 				45DB3E8C0CAAFED5001EACDA /* BDSKHubmedParser.h */,
 				CEC7D0230F680C970051794E /* BDSKIconTextFieldCell.h */,
 				CE3B682609D1B0190017D339 /* BDSKImagePopUpButton.h */,
@@ -3737,8 +3727,6 @@
 				CED65DC90907A2FD003EED90 /* BDSKParseFormatCommand.m in Sources */,
 				CED65DCD0907A338003EED90 /* BDSKScriptHook+Scripting.m in Sources */,
 				F97BF0BA090AE7520063504B /* NSBezierPath_BDSKExtensions.m in Sources */,
-				CE1A7F42090BEC3C00ACC864 /* BDSKHeaderPopUpButtonCell.m in Sources */,
-				CE1A7F4E090BED5600ACC864 /* BDSKHeaderPopUpButton.m in Sources */,
 				CE2AFE5A0911425F00E65C87 /* BDSKGroupCell.m in Sources */,
 				F97073B00911592000526FC8 /* NSWorkspace_BDSKExtensions.m in Sources */,
 				CEF7A6690915115B00BE9E02 /* BDSKScriptMenu.m in Sources */,
