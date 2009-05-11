@@ -44,7 +44,6 @@
 
 - (id)initTextCell:(NSString *)stringValue pullsDown:(BOOL)pullDown {
 	if ([super initTextCell:@"" pullsDown:NO]) {
-		[self setArrowPosition:NSPopUpNoArrow];
 		[self setBordered:NO];
 		[self setEnabled:YES];
 		[self setUsesItemFromMenu:YES];
