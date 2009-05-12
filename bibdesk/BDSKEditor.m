@@ -95,6 +95,8 @@ static char BDSKEditorObservationContext;
 // this was copied verbatim from a Finder saved search for all items of kind document modified in the last week
 static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'public.content') && (kMDItemFSContentChangeDate >= $time.today(-7)) && (kMDItemContentType != com.apple.mail.emlx) && (kMDItemContentType != public.vcard)";
 
+enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
+
 @interface BDSKEditor (Private)
 
 - (void)setupActionButton;
@@ -692,7 +694,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (IBAction)trashLinkedFiles:(id)sender{
-    [self deleteURLsAtIndexes:[sender representedObject] moveToTrash:1];
+    [self deleteURLsAtIndexes:[sender representedObject] moveToTrash:BDSKMoveToTrashYes];
 }
 
 - (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
@@ -1611,7 +1613,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (BOOL)fileView:(FVFileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
 {
-    NSInteger moveToTrash = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKAskToTrashFilesKey] ? -1 : 0;
+    NSInteger moveToTrash = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKAskToTrashFilesKey] ? BDSKMoveToTrashAsk : BDSKMoveToTrashNo;
     [self deleteURLsAtIndexes:indexSet moveToTrash:moveToTrash];
     return YES;
 }
@@ -1688,7 +1690,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     }
 }
 
-// moveToTrash: 0 = no, 1 = yes, -1 = ask
 - (void)deleteURLsAtIndexes:(NSIndexSet *)indexSet moveToTrash:(NSInteger)moveToTrash{
     NSUInteger idx = [indexSet lastIndex];
     NSMutableArray *fileURLs = [NSMutableArray array];
@@ -1703,9 +1704,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         idx = [indexSet indexLessThanIndex:idx];
     }
     if ([fileURLs count]) {
-        if (moveToTrash == 1) {
+        if (moveToTrash == BDSKMoveToTrashYes) {
             [self trashAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[fileURLs retain]];
-        } else if (moveToTrash == -1) {
+        } else if (moveToTrash == BDSKMoveToTrashAsk) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
                                              defaultButton:NSLocalizedString(@"No", @"Button title")
                                            alternateButton:NSLocalizedString(@"Yes", @"Button title")
