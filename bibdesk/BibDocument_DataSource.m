@@ -1515,7 +1515,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupOutlineView];
     BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
     
-    if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromExternalGroups && nil == item) {
+    if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromExternalGroups) {
         
         return [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
         
