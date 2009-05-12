@@ -2773,8 +2773,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     // see method for notes
     [self breakTextStorageConnections];
     
-    [fileView removeObserver:self forKeyPath:@"iconScale"];
-    [fileView removeObserver:self forKeyPath:@"displayMode"];
+    @try {
+        [fileView removeObserver:self forKeyPath:@"iconScale"];
+        [fileView removeObserver:self forKeyPath:@"displayMode"];
+    }
+    @catch (id e) {}
     [fileView setDataSource:nil];
     [fileView setDelegate:nil];
     
