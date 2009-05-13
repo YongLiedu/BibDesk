@@ -116,7 +116,7 @@
 
 - (NSString *)fileView:(FVFileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
 {
-    return @"This is only a test.";
++    return [NSString stringWithFormat:@"Check pq for %d", anIndex];
 }
 
 - (void)fileView:(FVFileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
