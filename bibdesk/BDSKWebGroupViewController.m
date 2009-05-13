@@ -514,7 +514,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     
     NSError *error = nil;
     NSArray *newPubs = [BDSKWebParser itemsFromDocument:domDocument fromURL:url error:&error];
-    if (nil == newPubs) {
+    if ([newPubs count] == 0) {
         WebDataSource *dataSource = [frame dataSource];
         if ([[[dataSource mainResource] MIMEType] isEqualToString:@"text/plain"]) { 
             NSString *string = [[dataSource representation] documentSource];

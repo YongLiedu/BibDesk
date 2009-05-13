@@ -152,10 +152,14 @@ static Class webParserClassForType(NSInteger stringType)
     
     BDSKASSERT(parserClass != [BDSKWebParser class]);
     
-    // don't return nil here; this may be the Google Scholar homepage or something, and we don't want to display an error message for it
     // this may lead to some false negatives if the heuristics for canParseDocument::: change.
-    if (Nil == parserClass)
-        return [NSArray array];
+    if (Nil == parserClass) {
+        if (outError) {
+            *outError = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Unsupported URL", @"error when parsing text fails")];
+            [*outError setValue:NSLocalizedString(@"BibDesk was not able to find a parser for this web page.", @"error description") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        }
+        return nil;
+    }
     
     return [parserClass itemsFromDocument:domDocument xmlDocument:xmlDoc fromURL:url error:outError];
 }
