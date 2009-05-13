@@ -295,8 +295,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [publication release];
     [fields release];
     [addedFields release];
-	[authorTableView setDelegate:nil];
-    [authorTableView setDataSource:nil];
     [previousValueForCurrentEditedView release];
     [notesViewUndoManager release];
     [abstractViewUndoManager release];
@@ -2709,8 +2707,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         case NSAlertOtherReturn:
             break; // do nothing
         case NSAlertAlternateReturn:
-            [[publication retain] autorelease]; // make sure it stays around till we're closed
-            [[self document] removePublication:publication]; // now fall through to default
+            // we have a hard retain until -[BDSKEditor dealloc]
+            [[self document] removePublication:publication];
+            // now fall through to default
         default:
             [[alert window] orderOut:nil];
             [self close];
@@ -2728,19 +2727,18 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         return YES;
         
     NSString *errMsg = nil;
-    NSString *discardMsg = NSLocalizedString(@"Discard", @"Button title");
+    NSString *discardMsg = nil;
     
     // case 1: the item has not been edited
     if(![publication hasBeenEdited]){
         errMsg = NSLocalizedString(@"The item has not been edited.  Would you like to keep it?", @"Informative text in alert dialog");
+        discardMsg = NSLocalizedString(@"Discard", @"Button title");
     // case 2: cite key hasn't been set, and paper needs to be filed
     }else if([publication hasEmptyOrDefaultCiteKey] && [[publication filesToBeFiled] count] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set, and AutoFile did not have enough information to file the paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
-        discardMsg = nil; // this item has some fields filled out and has a paper associated with it; no discard option
     // case 3: only the paper needs to be filed
     }else if([[publication filesToBeFiled] count] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"AutoFile did not have enough information to file this paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
-        discardMsg = nil; // this item has some fields filled out and has a paper associated with it; no discard option
     // case 4: only the cite key needs to be set
     }else if([publication hasEmptyOrDefaultCiteKey]){
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set.  Would you like to cancel and edit the cite key, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
@@ -2781,9 +2779,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     @catch (id e) {}
     [fileView setDataSource:nil];
     [fileView setDelegate:nil];
-    
-    // @@ problem here:  BDSKEditor is the delegate for a lot of things, and if they get messaged before the window goes away, but after the editor goes away, we have crashes.  In particular, the finalizeChanges (or something?) ends up causing the window and form to be redisplayed if a form cell is selected when you close the window, and the form sends formCellHasArrowButton to a garbage editor.  Rather than set the delegate of all objects to nil here, we'll just hang around a bit longer.
-    [[self retain] autorelease];
+    [tableView setDataSource:nil];
+    [tableView setDelegate:nil];
+    [authorTableView setDataSource:nil];
+    [authorTableView setDelegate:nil];
     
     // document still has a retain up to this point
     [[self document] removeWindowController:self];
