@@ -2684,6 +2684,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     if ([NSString isEmptyString:proposedPath])
         return NO;
     NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
+    // NSFileManager need aliases resolved for existence checks
+    papersFolderPath = [[NSFileManager defaultManager] resolveAliasesInPath:papersFolderPath];
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKLocalFileLowercaseKey])
         proposedPath = [proposedPath lowercaseString];
     return ([[NSFileManager defaultManager] fileExistsAtPath:[papersFolderPath stringByAppendingPathComponent:proposedPath]] == NO);
