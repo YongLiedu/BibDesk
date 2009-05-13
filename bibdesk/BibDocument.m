@@ -350,9 +350,19 @@ enum {
     [self sortGroupsByKey:nil];
     
     NSData *groupData = [xattrDefaults objectForKey:BDSKSelectedGroupsKey];
-    if ([groupData length])
-        [self selectGroups:[NSKeyedUnarchiver unarchiveObjectWithData:groupData]];
-
+    if ([groupData length]) {
+        NSSet *allGroups = [NSSet setWithArray:[groups valueForKeyPath:@"@unionOfArrays.children"]];
+        NSMutableArray *groupsToSelect = [NSMutableArray array];
+        NSEnumerator *groupEnum = [[NSKeyedUnarchiver unarchiveObjectWithData:groupData] objectEnumerator];
+        BDSKGroup *group;
+        while (group = [groupEnum nextObject]) {
+            if (group = [allGroups member:group])
+                [groupsToSelect addObject:group];
+        }
+        if ([groupsToSelect count])
+            [self selectGroups:groupsToSelect];
+    }
+    
     [self selectItemsForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey defaultObject:[NSArray array]] selectLibrary:NO];
     NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
     [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
