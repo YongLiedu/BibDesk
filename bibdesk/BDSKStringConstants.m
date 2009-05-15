@@ -120,7 +120,6 @@ NSString *BDSKFileContentSearchTableViewFontSizeKey = @"BDSKFileContentSearchTab
 NSString *BDSKOrphanedFilesTableViewFontNameKey = @"BDSKOrphanedFilesTableViewFontNameKey";
 NSString *BDSKOrphanedFilesTableViewFontSizeKey = @"BDSKOrphanedFilesTableViewFontSizeKey";
 NSString *BDSKPreviewMaxNumberKey = @"Maximum Number of Items in Preview Pane";
-NSString *BDSKPreviewTemplateStyleKey = @"BDSKPreviewTemplateStyleKey";
 NSString *BDSKBottomPreviewDisplayKey = @"BDSKBottomPreviewDisplayKey";
 NSString *BDSKBottomPreviewDisplayTemplateKey = @"BDSKBottomPreviewDisplayTemplateKey";
 NSString *BDSKSidePreviewDisplayKey = @"BDSKSidePreviewDisplayKey";

@@ -97,7 +97,6 @@ extern NSString *BDSKFileContentSearchTableViewFontSizeKey;
 extern NSString *BDSKOrphanedFilesTableViewFontNameKey;
 extern NSString *BDSKOrphanedFilesTableViewFontSizeKey;
 extern NSString *BDSKPreviewMaxNumberKey;
-extern NSString *BDSKPreviewTemplateStyleKey;
 extern NSString *BDSKBottomPreviewDisplayKey;
 extern NSString *BDSKBottomPreviewDisplayTemplateKey;
 extern NSString *BDSKSidePreviewDisplayKey;
