@@ -40,9 +40,5 @@
 
 
 @interface NSTableView (BDSKExtensions)
-
-- (BOOL)validateMenuItem:(NSMenuItem *)menuItem;
-
 - (IBAction)invertSelection:(id)sender;
-
 @end

@@ -47,16 +47,16 @@
 
 @implementation NSTableView (BDSKExtensions)
 
-// this is necessary as the NSTableView-OAExtensions defines these actions accordingly
-- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
-	if ([menuItem action] == @selector(invertSelection:)) {
+static BOOL (*original_validateUserInterfaceItem)(id, SEL, id) = NULL;
+
+- (BOOL)replacement_validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem {
+	if ([anItem action] == @selector(invertSelection:))
 		return [self allowsMultipleSelection];
-	}
-    return YES; // we assume that any other implemented action is always valid
+    else
+        return original_validateUserInterfaceItem(self, _cmd, anItem);
 }
 
-- (IBAction)invertSelection:(id)sender;
-{
+- (IBAction)invertSelection:(id)sender {
     NSIndexSet *selRows = [self selectedRowIndexes];
     if ([self allowsMultipleSelection]) {
         NSMutableIndexSet *indexesToSelect = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfRows])];
@@ -79,15 +79,16 @@
     [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:2.0 color:[NSColor alternateSelectedControlColor]];
     [self unlockFocus];
 }
+#else
+#warning fixme: remove NSTableView highlights
+#endif
 
 + (void)load {
+    original_validateUserInterfaceItem = (BOOL (*)(id, SEL, id))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(validateUserInterfaceItem:), @selector(replacement_validateUserInterfaceItem:));
     if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
         BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(_drawDropHighlightOnRow:), @selector(replacement_drawDropHighlightOnRow:));
 }
 
-#else
-#warning fixme: remove NSTableView highlights
-#endif
 @end
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
