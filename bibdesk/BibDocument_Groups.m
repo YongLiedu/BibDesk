@@ -1108,7 +1108,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	BDSKASSERT(row != -1);
 	if (row <= 0) return;
     
-    if([self tableView:groupOutlineView shouldEditTableColumn:[[groupOutlineView tableColumns] objectAtIndex:0] row:row])
+    if([self outlineView:groupOutlineView shouldEditTableColumn:[[groupOutlineView tableColumns] objectAtIndex:0] item:[groupOutlineView itemAtRow:row]])
 		[groupOutlineView editColumn:0 row:row withEvent:nil select:YES];
 	
 }
