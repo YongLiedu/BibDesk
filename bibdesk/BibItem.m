@@ -2101,6 +2101,8 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     [s appendString:@"</related-urls>"];
     [s appendString:@"</urls>"];
     
+    AddXMLField(@"electronic-resource-num",BDSKDoiString);
+    
     AddXMLField(@"abstract",BDSKAbstractString);
     AddXMLField(@"research-notes",BDSKAnnoteString);
     AddXMLField(@"notes",@"Note");
