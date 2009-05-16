@@ -421,11 +421,4 @@ static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
     return 0 == [cell tag] ? @"" : [NSString stringWithFormat:@"%C%@%C", 0x201C, [FVFinderLabel localizedNameForLabel:[cell tag]], 0x201D];
 }
 
-- (NSString *)accessibilityAttributeValue:(NSString *)attribute {
-    if ([attribute isEqualToString:NSAccessibilityTitleAttribute])
-        return [self boxedLabelName];
-    else
-        return [super accessibilityAttributeValue:attribute];
-}
-
 @end
