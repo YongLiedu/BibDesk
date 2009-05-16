@@ -273,6 +273,11 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
 	[self scrollRowToVisible:0];
 }
 
+// very strange workaround for a very strange redrawing problem, when in live resize the table is only partially redrawn
+- (void)drawRect:(NSRect)aRect {
+    [super drawRect:aRect];
+}
+
 @end
 
 
