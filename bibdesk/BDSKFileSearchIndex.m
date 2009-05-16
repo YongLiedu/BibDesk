@@ -106,6 +106,7 @@
         [nc addObserver:self selector:handler name:BDSKDocAddItemNotification object:aDocument];
         [nc addObserver:self selector:handler name:BDSKDocDelItemNotification object:aDocument];
         
+        flags.shouldKeepRunning = 1;
         flags.finishedInitialIndexing = 0;
         flags.updateScheduled = 1;
         
