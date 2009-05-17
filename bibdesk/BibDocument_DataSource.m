@@ -1237,9 +1237,14 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     return YES;
 }
 
+- (void)updateSmartGroupsAfterExpand {
+    [self updateSmartGroupsCountAndContent:YES];
+}
+
 - (void)outlineViewItemDidExpand:(NSNotification *)notification {
+    // call this with a delay, otherwise we'll crash on Tiger, probbaly due to an AppKit bug
     if ([[[notification userInfo] objectForKey:@"NSObject"] isEqual:[groups smartParent]])   
-        [self updateSmartGroupsCountAndContent:YES];
+        [self performSelector:@selector(updateSmartGroupsAfterExpand) withObject:nil afterDelay:0.0];
 }
 
 - (void)outlineViewItemDidCollapse:(NSNotification *)notification {
