@@ -260,6 +260,19 @@
     return [itemsForIdentifierURLs objectForKey:aURL];   
 }
 
+- (NSArray *)itemsForIdentifierURLs:(NSArray *)anArray;
+{
+    NSMutableArray *array = [NSMutableArray array];
+    NSEnumerator *urlEnum = [anArray objectEnumerator];
+    NSURL *idURL;
+    BibItem *pub;
+    while (idURL = [urlEnum nextObject]) {
+        if (pub = [itemsForIdentifierURLs objectForKey:idURL])
+            [array addObject:pub];
+    }
+    return array;
+}
+
 #pragma mark Authors support
 
 - (NSArray *)itemsForAuthor:(BibAuthor *)anAuthor;

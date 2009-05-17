@@ -1073,15 +1073,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 	if (tv == tableView) {
 		[self removePublicationsFromSelectedGroups:[shownPublications objectsAtIndexes:rowIndexes]];
 	} else if (tv == [fileSearchController tableView]) {
-        NSMutableArray *pubs = [NSMutableArray array];
-        NSEnumerator *itemEnum = [[fileSearchController identifierURLsAtIndexes:rowIndexes] objectEnumerator];
-        NSURL *idURL;
-        BibItem *pub;
-        while (idURL = [itemEnum nextObject]) {
-            if (pub = [publications itemForIdentifierURL:idURL])
-                [pubs addObject:pub];
-        }
-        [self removePublicationsFromSelectedGroups:pubs];
+        [self removePublicationsFromSelectedGroups:[publications itemsForIdentifierURLs:[fileSearchController identifierURLsAtIndexes:rowIndexes]]];
 	}
 }
 
@@ -1096,15 +1088,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 	if (tv == tableView) {
 		[self deletePublications:[shownPublications objectsAtIndexes:rowIndexes]];
 	} else if (tv == [fileSearchController tableView]) {
-        NSMutableArray *pubs = [NSMutableArray array];
-        NSEnumerator *itemEnum = [[fileSearchController identifierURLsAtIndexes:rowIndexes] objectEnumerator];
-        NSURL *idURL;
-        BibItem *pub;
-        while (idURL = [itemEnum nextObject]) {
-            if (pub = [publications itemForIdentifierURL:idURL])
-                [pubs addObject:pub];
-        }
-        [self deletePublications:pubs];
+        [self deletePublications:[publications itemsForIdentifierURLs:[fileSearchController identifierURLsAtIndexes:rowIndexes]]];
 	}
 }
 

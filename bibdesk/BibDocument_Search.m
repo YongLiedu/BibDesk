@@ -273,22 +273,12 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     NSMutableSet *identifierURLsToKeep = [NSMutableSet setWithArray:[groupedPublications valueForKey:@"identifierURL"]];
     [foundURLSet intersectSet:identifierURLsToKeep];
     
-    NSEnumerator *keyEnum = [foundURLSet objectEnumerator];
-    NSURL *aURL;
-    BibItem *aPub;
-
-    // iterate and normalize search scores
-    while (aURL = [keyEnum nextObject]) {
-        aPub = [pubArray itemForIdentifierURL:aURL];
-        if (aPub) {
-            [shownPublications addObject:aPub];
-        }
-    }
-            
+    [shownPublications addObjectsFromArray:[pubArray itemsForIdentifierURLs:[foundURLSet allObjects]]];
+    
     NSEnumerator *pubEnum = [shownPublications objectEnumerator];
-    while (aPub = [pubEnum nextObject]) {
+    BibItem *aPub;
+    while (aPub = [pubEnum nextObject])
         [aPub setSearchScore:[[scores objectForKey:[aPub identifierURL]] floatValue]];
-    }
     
     [self sortPubsByKey:nil];
     [self selectPublications:[documentSearch previouslySelectedPublications]];    
@@ -366,14 +356,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
             [tableView deselectAll:nil];
             
             // we match based on title, since that's all the index knows about the BibItem at present
-            NSMutableArray *pubsToSelect = [NSMutableArray array];
-            NSEnumerator *itemEnum = [itemsToSelect objectEnumerator];
-            NSURL *aURL;
-            BibItem *pub;
-            while(aURL = [itemEnum nextObject])
-                if (pub = [publications itemForIdentifierURL:aURL])
-                    [pubsToSelect addObject:pub];
-            [self selectPublications:pubsToSelect];
+            [self selectPublications:[publications itemsForIdentifierURLs:itemsToSelect]];
             [tableView scrollRowToCenter:[tableView selectedRow]];
             
             // if searchfield doesn't have focus (user clicked cancel button), switch to the tableview

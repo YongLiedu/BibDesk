@@ -2633,17 +2633,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSArray *)selectedPublications{
     NSArray *selPubs = nil;
     if ([self isDisplayingFileContentSearch]) {
-        if ([[fileSearchController tableView] numberOfSelectedRows]) {
-            NSMutableArray *tmpArray = [NSMutableArray array];
-            NSEnumerator *itemEnum = [[fileSearchController selectedIdentifierURLs] objectEnumerator];
-            NSURL *idURL;
-            BibItem *pub;
-            while (idURL = [itemEnum nextObject]) {
-                if (pub = [publications itemForIdentifierURL:idURL])
-                    [tmpArray addObject:pub];
-            }
-            selPubs = tmpArray;
-        }
+        if ([[fileSearchController tableView] numberOfSelectedRows])
+            selPubs =  [publications itemsForIdentifierURLs:[fileSearchController selectedIdentifierURLs]];
     } else if ([tableView numberOfSelectedRows]) {
         selPubs = [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
     }
