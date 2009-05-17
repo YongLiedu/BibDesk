@@ -218,8 +218,6 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     [self setNumberOfAvailableResults:0];
     [self setNumberOfFetchedResults:0];
     
-    NSXMLDocument *document = nil;
-    
     if(NO == [NSString isEmptyString:[self searchTerm]]){
         // get the initial XML document with our search parameters in it
         NSString *esearch = [[[self class] baseURLString] stringByAppendingFormat:@"/esearch.fcgi?db=%@&retmax=1&usehistory=y&term=%@&tool=bibdesk", [[self serverInfo] database], [[self searchTerm] stringByAddingPercentEscapesIncludingReserved]];
