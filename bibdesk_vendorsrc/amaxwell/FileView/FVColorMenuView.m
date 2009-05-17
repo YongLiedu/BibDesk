@@ -177,7 +177,7 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 
 - (void)drawRect:(NSRect)aRect {
     NSRect bounds = [self bounds];
-    NSRect labelRect;
+    NSRect labelRect = NSZeroRect;
     
     // draw the label
     labelRect.size = [_labelCell cellSize];
