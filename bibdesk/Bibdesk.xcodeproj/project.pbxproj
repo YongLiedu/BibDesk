@@ -44,7 +44,6 @@
 		3D0D76B3084898C100A495A5 /* BibPref_Crossref.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D0D76B1084898C100A495A5 /* BibPref_Crossref.m */; };
 		3D4373AD07FB3E960007BA84 /* gear.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 3D4373AC07FB3E960007BA84 /* gear.tiff */; };
 		3D44F5630812A91D003C67F0 /* BDSKFormatParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D44F5610812A91D003C67F0 /* BDSKFormatParser.m */; };
-		3D5D34390770C8C3006AF48A /* cornerColumns.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 3D5D34380770C8C3006AF48A /* cornerColumns.tiff */; };
 		3D7406940849F5430081EC6F /* BDSKTypeNameFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D7406920849F5430081EC6F /* BDSKTypeNameFormatter.m */; };
 		3D7C78E2084F4A3A0026D861 /* crossref.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 3D7C78E1084F4A3A0026D861 /* crossref.tiff */; };
 		3D824AA907D099C300FB2F67 /* BDSKBackgroundView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D824AA707D099C300FB2F67 /* BDSKBackgroundView.m */; };
@@ -912,7 +911,6 @@
 		3D4373AC07FB3E960007BA84 /* gear.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = gear.tiff; sourceTree = "<group>"; };
 		3D44F5600812A91D003C67F0 /* BDSKFormatParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFormatParser.h; sourceTree = "<group>"; };
 		3D44F5610812A91D003C67F0 /* BDSKFormatParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFormatParser.m; sourceTree = "<group>"; };
-		3D5D34380770C8C3006AF48A /* cornerColumns.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = cornerColumns.tiff; sourceTree = "<group>"; };
 		3D7406910849F5430081EC6F /* BDSKTypeNameFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTypeNameFormatter.h; sourceTree = "<group>"; };
 		3D7406920849F5430081EC6F /* BDSKTypeNameFormatter.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTypeNameFormatter.m; sourceTree = "<group>"; };
 		3D7C78E1084F4A3A0026D861 /* crossref.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = crossref.tiff; sourceTree = "<group>"; };
@@ -2504,7 +2502,6 @@
 				F9DE8E55087F81A4006F0427 /* cacheDoc.icns */,
 				F9022DA90758088000C3F701 /* citation.tiff */,
 				CEF795E50F55728F003AD9A9 /* colors.tiff */,
-				3D5D34380770C8C3006AF48A /* cornerColumns.tiff */,
 				3D7C78E1084F4A3A0026D861 /* crossref.tiff */,
 				F9022DAA0758088000C3F701 /* defaults.tiff */,
 				F9022DAB0758088000C3F701 /* display.tiff */,
@@ -3446,7 +3443,6 @@
 				F9022DD30758088000C3F701 /* risDocIcon.icns in Resources */,
 				F9022DD50758088000C3F701 /* startup.tiff in Resources */,
 				F9022DD60758088000C3F701 /* TinyFile.tiff in Resources */,
-				3D5D34390770C8C3006AF48A /* cornerColumns.tiff in Resources */,
 				F92F4E470788DEDD001B8F82 /* genericBibDocIcon.tiff in Resources */,
 				CEE22B210BFB7DA8002B746B /* RelNotes.rtf in Resources */,
 				3D4373AD07FB3E960007BA84 /* gear.tiff in Resources */,
