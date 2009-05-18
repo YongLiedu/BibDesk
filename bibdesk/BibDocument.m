@@ -618,7 +618,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         [[BDSKSharingServer defaultServer] enableSharing];
     
     // The UI update from setPublications is too early when loading a new document
-    [self updateSmartGroupsCountAndContent:NO];
+    [self updateSmartGroupsCount];
     [self updateCategoryGroupsPreservingSelection:NO];
     
     [saveTextEncodingPopupButton setEncoding:0];
@@ -1798,7 +1798,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     if([super revertToContentsOfURL:absoluteURL ofType:aType error:outError]){
         [self setSearchString:@""];
-        [self updateSmartGroupsCountAndContent:NO];
+        [self updateSmartGroupsCount];
         [self updateCategoryGroupsPreservingSelection:YES];
         [self sortGroupsByKey:nil]; // resort
 		[tableView deselectAll:self]; // clear before resorting
@@ -2836,7 +2836,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		[self setSearchString:@""]; // clear the search when adding
 
     // update smart group counts
-    [self updateSmartGroupsCountAndContent:NO];
+    [self updateSmartGroupsCount];
     // this handles the remaining UI updates necessary (tableView and previews)
 	[self updateCategoryGroupsPreservingSelection:YES];
     
@@ -2888,7 +2888,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     BOOL shouldUpdateGroups = [NSString isEmptyString:[self currentGroupField]] == NO && (docState.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0;
     
     // allow updating a smart group if it's selected
-	[self updateSmartGroupsCountAndContent:YES];
+	[self updateSmartGroups];
     
     if(shouldUpdateGroups){
         // this handles all UI updates if we call it, so don't bother with any others
@@ -3079,7 +3079,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [publications makeObjectsPerformSelector:@selector(customFieldsDidChange:) withObject:notification];
     [tableView setupTableColumnsWithIdentifiers:[tableView tableColumnIdentifiers]];
     // current group field may have changed its type (string->person)
-    [self updateSmartGroupsCountAndContent:YES];
+    [self updateSmartGroups];
     [self updateCategoryGroupsPreservingSelection:YES];
     [self updatePreviews];
 }
@@ -3137,7 +3137,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
             if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKHideGroupCountKey])
                 [groupOutlineView reloadData];
             else
-                [self updateSmartGroupsCountAndContent:NO];
+                [self updateSmartGroupsCount];
         }
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];

@@ -244,7 +244,7 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification{
     if (NSNotFound != [[groups smartGroups] indexOfObjectIdenticalTo:[notification object]])
-        [self updateSmartGroupsCountAndContent:YES];
+        [self updateSmartGroups];
 }
 
 - (void)handleGroupTableSelectionChangedNotification:(NSNotification *)notification{
@@ -635,6 +635,14 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     } else if (hideCount == NO) {
         [groupOutlineView reloadData];
     }
+}
+
+- (void)updateSmartGroupsCount {
+    [self updateSmartGroupsCountAndContent:NO];
+}
+
+- (void)updateSmartGroups {
+    [self updateSmartGroupsCountAndContent:YES];
 }
 
 - (void)displaySelectedGroups{
@@ -1561,7 +1569,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         sortGroupsKey = [key retain];
         if ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKHideGroupCountKey]) {
             // the smart group counts were not updated, so we need to do that now; this will get back to us, so just return here.
-            [self updateSmartGroupsCountAndContent:NO];
+            [self updateSmartGroupsCount];
             return;
         }
 	}

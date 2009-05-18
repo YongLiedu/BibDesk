@@ -58,7 +58,8 @@
 
 - (NSArray *)selectedGroups;
 - (void)updateCategoryGroupsPreservingSelection:(BOOL)preserve;
-- (void)updateSmartGroupsCountAndContent:(BOOL)shouldUpdate;
+- (void)updateSmartGroupsCount;
+- (void)updateSmartGroups;
 - (void)displaySelectedGroups;
 - (BOOL)selectGroup:(BDSKGroup *)aGroup;
 - (BOOL)selectGroups:(NSArray *)theGroups;
