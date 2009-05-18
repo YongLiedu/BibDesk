@@ -1580,24 +1580,18 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     // cache the selection
 	NSArray *selectedGroups = [self selectedGroups];
     
-	NSSortDescriptor *countSort = [[NSSortDescriptor alloc] initWithKey:@"numberValue" ascending:!docState.sortGroupsDescending  selector:@selector(compare:)];
-    [countSort autorelease];
-
-    // could use "name" as key path, but then we'd still have to deal with names that are not NSStrings
-    NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"self" ascending:!docState.sortGroupsDescending  selector:@selector(nameCompare:)];
-    [nameSort autorelease];
-
     NSArray *sortDescriptors;
     
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
-        if(docState.sortGroupsDescending)
-            // doc bug: this is supposed to return a copy of the receiver, but sending -release results in a zombie error
-            nameSort = [nameSort reversedSortDescriptor];
+        NSSortDescriptor *countSort = [[NSSortDescriptor alloc] initWithKey:@"numberValue" ascending:!docState.sortGroupsDescending  selector:@selector(compare:)];
+        NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"self" ascending:docState.sortGroupsDescending  selector:@selector(nameCompare:)];
         sortDescriptors = [NSArray arrayWithObjects:countSort, nameSort, nil];
+        [countSort release];
+        [nameSort release];
     } else {
-        if(docState.sortGroupsDescending == NO)
-            countSort = [countSort reversedSortDescriptor];
-        sortDescriptors = [NSArray arrayWithObjects:nameSort, countSort, nil];
+        NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"self" ascending:!docState.sortGroupsDescending  selector:@selector(nameCompare:)];
+        sortDescriptors = [NSArray arrayWithObjects:nameSort, nil];
+        [nameSort release];
     }
     
     [groups sortUsingDescriptors:sortDescriptors];
