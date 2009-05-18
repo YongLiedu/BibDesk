@@ -39,7 +39,7 @@
 #import "BDSKMathSciNetParser.h"
 #import "BDSKBibTeXParser.h"
 #import "BibItem.h"
-#import <AGRegEx/AGRegEx.h>
+#import <AGRegex/AGRegex.h>
 
 #define MSNBATCHSIZE 50u
 

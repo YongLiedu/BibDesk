@@ -39,7 +39,7 @@
 #import "BDSKZentralblattParser.h"
 #import "BDSKBibTeXParser.h"
 #import "BibItem.h"
-#import <AGRegEx/AGRegEx.h>
+#import <AGRegex/AGRegex.h>
 
 #define ZMATHBATCHSIZE 100u
 

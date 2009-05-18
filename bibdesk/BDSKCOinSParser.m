@@ -38,7 +38,7 @@
 */
 
 #import "BDSKCOinSParser.h"
-#import <AGRegEx/AGRegEx.h>
+#import <AGRegex/AGRegex.h>
 
 /*
  The COinS or Z3988 format is a microformat which is embedded in web pages to include bibliographic information there.

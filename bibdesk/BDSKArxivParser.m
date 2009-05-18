@@ -40,7 +40,7 @@
 #import "BibItem.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSXMLNode_BDSKExtensions.h"
-#import <AGRegEx/AGRegEx.h>
+#import <AGRegex/AGRegex.h>
 
 
 @implementation BDSKArxivParser

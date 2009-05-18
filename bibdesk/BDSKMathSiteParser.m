@@ -42,7 +42,7 @@
 
 #import "BibItem.h"
 #import "BDSKComplexString.h"
-#import <AGRegEx/AGRegEx.h>
+#import <AGRegex/AGRegex.h>
 
 
 
