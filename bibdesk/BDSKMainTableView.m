@@ -101,14 +101,43 @@ enum {
 
 + (BOOL)shouldQueueTypeSelectHelper { return YES; }
 
++ (NSImage *)cornerColumnsImage {
+    static NSImage *cornerColumnsImage = nil;
+    if (cornerColumnsImage == nil) {
+        cornerColumnsImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 17.0)];
+        [cornerColumnsImage lockFocus];
+        NSCell *cell = [[[NSTableHeaderCell alloc] initTextCell:@""] autorelease];
+        [cell drawWithFrame:NSMakeRect(0.0, 0.0, 16.0, 17.0) inView:nil];
+        [cell drawWithFrame:NSMakeRect(0.0, 0.0, 1.0, 17.0) inView:nil];
+        NSBezierPath *path = [NSBezierPath bezierPath];
+        [path moveToPoint:NSMakePoint(7.0, 5.5)];
+        [path lineToPoint:NSMakePoint(3.5, 5.5)];
+        [path lineToPoint:NSMakePoint(3.5, 12.5)];
+        [path lineToPoint:NSMakePoint(11.5, 12.5)];
+        [path lineToPoint:NSMakePoint(11.5, 8.0)];
+        [path moveToPoint:NSMakePoint(3.0, 10.5)];
+        [path lineToPoint:NSMakePoint(12.0, 10.5)];
+        [path moveToPoint:NSMakePoint(7.5, 8.0)];
+        [path lineToPoint:NSMakePoint(7.5, 13.0)];
+        [[NSColor colorWithDeviceWhite:0.38 alpha:1.0] set];
+        [path stroke];
+        path = [NSBezierPath bezierPath];
+        [path moveToPoint:NSMakePoint(7.5, 7.0)];
+        [path lineToPoint:NSMakePoint(13.5, 7.0)];
+        [path lineToPoint:NSMakePoint(10.5, 3.5)];
+        [path fill];
+        [cornerColumnsImage unlockFocus];
+    }
+    return cornerColumnsImage;
+}
+
 - (void)awakeFromNib{
 	[self setHeaderView:[[[BDSKMainTableHeaderView alloc] initWithFrame:[[self headerView] frame]] autorelease]];	
-    
     NSRect cornerViewFrame = [[self cornerView] frame];
     BDSKImagePopUpButton *cornerViewButton = [[BDSKImagePopUpButton alloc] initWithFrame:cornerViewFrame];
     [cornerViewButton setPullsDown:YES];
     [cornerViewButton setIconSize:cornerViewFrame.size];
-    [cornerViewButton setIcon:[NSImage imageNamed:@"cornerColumns"]];
+    [cornerViewButton setIcon:[[self class] cornerColumnsImage]];
     [[cornerViewButton cell] setArrowPosition:NSPopUpNoArrow];
     [[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
     [[cornerViewButton cell] setUsesItemFromMenu:NO];
