@@ -743,15 +743,15 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     NSEnumerator *docEnum = [[NSApp orderedDocuments] objectEnumerator];
     BibDocument *doc = nil;
     while (doc = [docEnum nextObject]) {
-        NSArray *items = [[NSArray alloc] initWithArray:[doc publications] copyItems:YES];
-        [allPubs addObjectsFromArray:items];
-        [items release];
-        NSDictionary *dict = [[NSDictionary alloc] initWithDictionary:[[doc macroResolver] macroDefinitions] copyItems:YES];
-        [allMacros addEntriesFromDictionary:dict];
-        [dict release];
+        [allPubs addObjectsFromArray:[doc publications]];
+        [allMacros addEntriesFromDictionary:[[doc macroResolver] macroDefinitions]];
     }
-    [pubsAndMacros setObject:[allPubs allObjects] forKey:@"publications"];
-    [pubsAndMacros setObject:allMacros forKey:@"macros"];
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:[allPubs allObjects]];
+    if ([data length])
+        [pubsAndMacros setObject:data forKey:@"publications"];
+    data = [NSKeyedArchiver archivedDataWithRootObject:allMacros];
+    if ([data length])
+        [pubsAndMacros setValue:data forKey:@"macros"];
     [allPubs release];
     [allMacros release];
 }
@@ -760,11 +760,11 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 {
     NSMutableDictionary *pubsAndMacros = [[NSMutableDictionary alloc] init];
     [self performSelectorOnMainThread:@selector(getPublicationsAndMacros:) withObject:pubsAndMacros waitUntilDone:YES];
-    NSData *dataToSend = [NSKeyedArchiver archivedDataWithRootObject:[pubsAndMacros objectForKey:@"publications"]];
-    NSData *macroDataToSend = [NSKeyedArchiver archivedDataWithRootObject:[pubsAndMacros objectForKey:@"macros"]];
+    NSData *dataToSend = [pubsAndMacros objectForKey:@"publications"];
+    NSData *macroDataToSend = [pubsAndMacros objectForKey:@"macros"];
     [pubsAndMacros release];
     
-    if(dataToSend != nil && macroDataToSend != nil){
+    if(dataToSend != nil){
         NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:dataToSend, BDSKSharedArchivedDataKey, macroDataToSend, BDSKSharedArchivedMacroDataKey, nil];
         NSString *errorString = nil;
         dataToSend = [NSPropertyListSerialization dataFromPropertyList:dictionary format:NSPropertyListBinaryFormat_v1_0 errorDescription:&errorString];
