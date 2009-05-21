@@ -751,7 +751,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         [pubsAndMacros setObject:data forKey:@"publications"];
     data = [NSKeyedArchiver archivedDataWithRootObject:allMacros];
     if ([data length])
-        [pubsAndMacros setValue:data forKey:@"macros"];
+        [pubsAndMacros setObject:data forKey:@"macros"];
     [allPubs release];
     [allMacros release];
 }
