@@ -57,6 +57,7 @@
 
 - (id)initWithClient:(BDSKSharingClient *)aClient;
 - (BDSKSharingClient *)client;
+- (BDSKPublicationsArray *)publicationsWithoutUpdating; 
 - (BDSKPublicationsArray *)publications;
 - (void)setPublications:(NSArray *)newPublications;
 - (BOOL)isRetrieving;

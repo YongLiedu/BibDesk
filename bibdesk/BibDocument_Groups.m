@@ -1632,8 +1632,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     id group;
     
     while (group = [groupEnum nextObject]) {
-        if ([group count] == 0) continue; // otherwise the group will load
-        NSEnumerator *pubEnum = [[group publications] objectEnumerator];
+        // publicationsWithoutUpdating avoids triggering a load or update of external groups every time you add/remove a pub
+        NSEnumerator *pubEnum = [[group publicationsWithoutUpdating] objectEnumerator];
         BibItem *pub;
         while (pub = [pubEnum nextObject]) {
             if ([pubSet containsObject:pub])

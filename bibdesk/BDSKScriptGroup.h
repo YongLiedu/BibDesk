@@ -65,6 +65,7 @@ enum {
 - (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
 - (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
 
+- (BDSKPublicationsArray *)publicationsWithoutUpdating;
 - (BDSKPublicationsArray *)publications;
 - (void)setPublications:(NSArray *)newPubs;
 

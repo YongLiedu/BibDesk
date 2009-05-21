@@ -193,6 +193,8 @@ static NSImage *unlockedIcon = nil;
     return client;
 }
 
+- (BDSKPublicationsArray *)publicationsWithoutUpdating { return publications; }
+ 
 - (BDSKPublicationsArray *)publications;
 {
     if([self isRetrieving] == NO && ([self needsUpdate] || publications == nil)){

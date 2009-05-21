@@ -293,6 +293,8 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
 
 #pragma mark Accessors
 
+- (BDSKPublicationsArray *)publicationsWithoutUpdating { return publications; }
+ 
 - (BDSKPublicationsArray *)publications;
 {
     if([self isRetrieving] == NO && publications == nil){

@@ -76,6 +76,7 @@ extern NSString *BDSKSearchGroupDBLP;
 - (id)initWithType:(NSString *)aType serverInfo:(BDSKServerInfo *)info searchTerm:(NSString *)string;
 - (id)initWithURL:(NSURL *)bdsksearchURL;
 
+- (BDSKPublicationsArray *)publicationsWithoutUpdating; 
 - (BDSKPublicationsArray *)publications;
 - (void)setPublications:(NSArray *)newPublications;
 - (void)addPublications:(NSArray *)newPublications;

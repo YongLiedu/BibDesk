@@ -282,6 +282,8 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 #pragma mark BDSKOwner protocol
 
+- (BDSKPublicationsArray *)publicationsWithoutUpdating { return publications; }
+ 
 - (BDSKPublicationsArray *)publications;
 {
     if([self isRetrieving] == NO && publications == nil && [NSString isEmptyString:[self searchTerm]] == NO){
