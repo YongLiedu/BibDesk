@@ -762,7 +762,6 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [self performSelectorOnMainThread:@selector(getPublicationsAndMacros:) withObject:pubsAndMacros waitUntilDone:YES];
     NSData *dataToSend = [pubsAndMacros objectForKey:@"publications"];
     NSData *macroDataToSend = [pubsAndMacros objectForKey:@"macros"];
-    [pubsAndMacros release];
     
     if(dataToSend != nil){
         NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:dataToSend, BDSKSharedArchivedDataKey, macroDataToSend, BDSKSharedArchivedMacroDataKey, nil];
@@ -777,6 +776,8 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
             @catch(id exception){ NSLog(@"Ignoring exception %@ raised while compressing data to share.", exception); }
         }
     }
+    [pubsAndMacros release];
+    
     return dataToSend;
 }
 
