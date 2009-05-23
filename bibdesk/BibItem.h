@@ -473,8 +473,6 @@ enum {
 - (NSColor *)color;
 - (void)setColor:(NSColor *)label;
 
-- (void)setDateAddedField:(NSString *)value;
-
 /*!
     @method     setField:toRatingValue:
     @abstract   Sets an integer-type field value 0--5
