@@ -38,7 +38,6 @@
 
 #import "BibDocument_UI.h"
 #import "BibDocument_Groups.h"
-#import "BDSKOwnerProtocol.h"
 #import "BibItem.h"
 #import "BDSKGroup.h"
 #import "BDSKSearchGroup.h"
@@ -72,6 +71,7 @@
 - (NSString *)string;
 @end
 
+#pragma mark -
 
 @implementation BibDocument (UI)
 

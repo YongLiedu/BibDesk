@@ -67,8 +67,6 @@
 #import "NSAlert_BDSKExtensions.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKPreviewer.h"
-#import "BDSKTeXTask.h"
-#import "BDSKOverlayWindow.h"
 #import "BDSKEditor.h"
 
 #import "BDSKItemPasteboardHelper.h"
@@ -92,7 +90,6 @@
 #import "NSString_BDSKExtensions.h"
 #import "BDSKStatusBar.h"
 #import "NSArray_BDSKExtensions.h"
-#import "NSTextView_BDSKExtensions.h"
 #import "NSTableView_BDSKExtensions.h"
 #import "NSDictionary_BDSKExtensions.h"
 #import "NSSet_BDSKExtensions.h"
@@ -101,7 +98,6 @@
 #import "BDSKSharingBrowser.h"
 #import "BDSKTemplate.h"
 #import "BDSKGroupOutlineView.h"
-#import "BDSKFileContentSearchController.h"
 #import "BDSKTemplateParser.h"
 #import "BDSKTemplateObjectProxy.h"
 #import "NSMenu_BDSKExtensions.h"
@@ -121,7 +117,6 @@
 #import "BDSKLinkedFile.h"
 #import "NSDate_BDSKExtensions.h"
 #import "BDSKFileMigrationController.h"
-#import "NSViewAnimation_BDSKExtensions.h"
 #import "BDSKDocumentSearch.h"
 #import "NSImage_BDSKExtensions.h"
 #import <SkimNotes/SkimNotes.h>
