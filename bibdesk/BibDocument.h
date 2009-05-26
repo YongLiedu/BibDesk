@@ -388,8 +388,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 - (BDSKMacroResolver *)macroResolver;
 
-- (void)handleMacroChangedNotification:(NSNotification *)aNotification;
-
 /* Paste related methods */
 - (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect edit:(BOOL)shouldEdit;
 - (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)select verbose:(BOOL)verbose error:(NSError **)error;
@@ -409,36 +407,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @param      key (description)
 */
 - (void)sortPubsByKey:(NSString *)key;
-
-- (void)registerForNotifications;
-
-- (void)handleFlagsChangedNotification:(NSNotification *)notification;
-- (void)handleApplicationWillTerminateNotification:(NSNotification *)notification;
-- (void)handleApplicationDidBecomeActiveNotification:(NSNotification *)notification;
-- (void)handleTableSelectionChangedNotification:(NSNotification *)notification;
-
-// notifications observed on behalf of owned BibItems for efficiency
-- (void)handleCustomFieldsDidChangeNotification:(NSNotification *)notification;
-
-- (void)handleTemporaryFileMigrationNotification:(NSNotification *)notification;
-
-/*!
-    @method     handleBibItemAddDelNotification:
-    @abstract   this method gets called for setPublications: also
-    @discussion (comprehensive description)
-    @param      notification (description)
-*/
-- (void)handleBibItemAddDelNotification:(NSNotification *)notification;
-
-	
-/*!
-    @method handleBibItemChangedNotification
-	 @abstract responds to changing bib data
-	 @discussion 
-*/
-- (void)handleBibItemChangedNotification:(NSNotification *)notification;
-
-- (void)handleSkimFileDidSaveNotification:(NSNotification *)notification;
 
 /*!
     @method     numberOfSelectedPubs

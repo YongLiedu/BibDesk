@@ -150,16 +150,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 #define BDSKSelectedGroupsKey @"BDSKSelectedGroupsKey"
 #define BDSKDocumentGroupsToExpandKey @"BDSKDocumentGroupsToExpandKey"
 
-static char BDSKDocumentFileViewObservationContext;
-static char BDSKDocumentDefaultsObservationContext;
-
-enum {
-    BDSKItemChangedGroupFieldMask = 1 << 0,
-    BDSKItemChangedSearchKeyMask  = 1 << 1,
-    BDSKItemChangedSortKeyMask    = 1 << 2,
-    BDSKItemChangedFilesMask      = 1 << 3
-};
-
 #pragma mark -
 
 @interface NSDocument (BDSKPrivateExtensions)
@@ -267,15 +257,6 @@ enum {
         [[self undoManager] removeAllActions];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[NSDistributedNotificationCenter defaultCenter] removeObserver:self];
-    @try {
-        NSUserDefaultsController *sud = [NSUserDefaultsController sharedUserDefaultsController];
-        [sud removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKIgnoredSortTermsKey]];
-        [sud removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKAuthorNameDisplayKey]];
-        [sud removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKBTStyleKey]];
-        [sud removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKUsesTeXKey]];
-        [sud removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKHideGroupCountKey]];
-    }
-    @catch (id e) {}
     // workaround for crash: to reproduce, create empty doc, hit cmd-n for new editor window, then cmd-q to quit, choose "don't save"; this results in an -undoManager message to the dealloced document
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [groups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
@@ -561,8 +542,6 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         else
             [sideFileView setIconScale:iconScale];
     }
-    [sideFileView addObserver:self forKeyPath:@"iconScale" options:0 context:&BDSKDocumentFileViewObservationContext];
-    [sideFileView addObserver:self forKeyPath:@"displayMode" options:0 context:&BDSKDocumentFileViewObservationContext];
 
     iconScale = [xattrDefaults floatForKey:BDSKBottomFileViewIconScaleKey defaultValue:[sud floatForKey:BDSKBottomFileViewIconScaleKey]];
     displayMode = [xattrDefaults floatForKey:BDSKBottomFileViewDisplayModeKey defaultValue:[sud floatForKey:BDSKBottomFileViewDisplayModeKey]];
@@ -573,8 +552,6 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         else
             [bottomFileView setIconScale:iconScale];
     }
-    [bottomFileView addObserver:self forKeyPath:@"iconScale" options:0 context:&BDSKDocumentFileViewObservationContext];
-    [bottomFileView addObserver:self forKeyPath:@"displayMode" options:0 context:&BDSKDocumentFileViewObservationContext];
     
     [(BDSKZoomableTextView *)sidePreviewTextView setScaleFactor:[xattrDefaults floatForKey:BDSKSidePreviewScaleFactorKey defaultValue:1.0]];
     [(BDSKZoomableTextView *)bottomPreviewTextView setScaleFactor:[xattrDefaults floatForKey:BDSKBottomPreviewScaleFactorKey defaultValue:1.0]];
@@ -613,6 +590,8 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     // this shouldn't be necessary
     [documentWindow recalculateKeyViewLoop];
     [documentWindow makeFirstResponder:tableView];
+    
+    [self startObserving];
 }
 
 - (BOOL)undoManagerShouldUndoChange:(id)sender{
@@ -682,15 +661,13 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [pboardHelper release];
     pboardHelper = nil;
     
-    [sideFileView removeObserver:self forKeyPath:@"iconScale"];
-    [sideFileView removeObserver:self forKeyPath:@"displayMode"];
     [sideFileView setDataSource:nil];
     [sideFileView setDelegate:nil];
     
-    [bottomFileView removeObserver:self forKeyPath:@"iconScale"];
-    [bottomFileView removeObserver:self forKeyPath:@"displayMode"];
     [bottomFileView setDataSource:nil];
     [bottomFileView setDelegate:nil];
+    
+    [self endObserving];
     
     // safety call here, in case the pasteboard is retaining the document; we don't want notifications after the window closes, since all the pointers to UI elements will be garbage
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -2682,456 +2659,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 #pragma mark -
-#pragma mark Notification handlers
-
-- (void)registerForNotifications{
-        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-        
-		[nc addObserver:self
-               selector:@selector(handleGroupFieldChangedNotification:)
-	               name:BDSKGroupFieldChangedNotification
-                 object:self];
-		[nc addObserver:self
-               selector:@selector(handleTableSelectionChangedNotification:)
-	               name:BDSKTableSelectionChangedNotification
-                 object:self];
-		[nc addObserver:self
-               selector:@selector(handleGroupTableSelectionChangedNotification:)
-	               name:BDSKGroupTableSelectionChangedNotification
-                 object:self];
-		[nc addObserver:self
-               selector:@selector(handleBibItemChangedNotification:)
-	               name:BDSKBibItemChangedNotification
-                 object:nil];
-		[nc addObserver:self
-               selector:@selector(handleBibItemAddDelNotification:)
-	               name:BDSKDocSetPublicationsNotification
-                 object:self];
-		[nc addObserver:self
-               selector:@selector(handleBibItemAddDelNotification:)
-	               name:BDSKDocAddItemNotification
-                 object:self];
-		[nc addObserver:self
-               selector:@selector(handleBibItemAddDelNotification:)
-	               name:BDSKDocDelItemNotification
-                 object:self];
-        [nc addObserver:self
-               selector:@selector(handleMacroChangedNotification:)
-                   name:BDSKMacroDefinitionChangedNotification
-                 object:nil];
-        [nc addObserver:self
-               selector:@selector(handleFilterChangedNotification:)
-                   name:BDSKFilterChangedNotification
-                 object:nil];
-        [nc addObserver:self
-               selector:@selector(handleGroupNameChangedNotification:)
-                   name:BDSKGroupNameChangedNotification
-                 object:nil];
-        [nc addObserver:self
-               selector:@selector(handleStaticGroupChangedNotification:)
-                   name:BDSKStaticGroupChangedNotification
-                 object:nil];
-		[nc addObserver:self
-               selector:@selector(handleSharedGroupUpdatedNotification:)
-	               name:BDSKSharedGroupUpdatedNotification
-                 object:nil];
-        [nc addObserver:self
-               selector:@selector(handleSharedGroupsChangedNotification:)
-                   name:BDSKSharingClientsChangedNotification
-                 object:nil];
-        [nc addObserver:self
-               selector:@selector(handleURLGroupUpdatedNotification:)
-                   name:BDSKURLGroupUpdatedNotification
-                 object:nil];
-        [nc addObserver:self
-               selector:@selector(handleScriptGroupUpdatedNotification:)
-                   name:BDSKScriptGroupUpdatedNotification
-                 object:nil];
-        [nc addObserver:self
-               selector:@selector(handleSearchGroupUpdatedNotification:)
-                   name:BDSKSearchGroupUpdatedNotification
-                 object:nil];
-        [nc addObserver:self
-               selector:@selector(handleWebGroupUpdatedNotification:)
-                   name:BDSKWebGroupUpdatedNotification
-                 object:nil];
-        [nc addObserver:self
-               selector:@selector(handleWillRemoveGroupsNotification:)
-                   name:BDSKWillRemoveGroupsNotification
-                 object:nil];
-        [nc addObserver:self
-               selector:@selector(handleDidAddRemoveGroupNotification:)
-                   name:BDSKDidAddRemoveGroupNotification
-                 object:nil];
-        [nc addObserver:self
-               selector:@selector(handleFlagsChangedNotification:)
-                   name:BDSKFlagsChangedNotification
-                 object:nil];
-        [nc addObserver:self
-               selector:@selector(handleApplicationDidBecomeActiveNotification:)
-                   name:NSApplicationDidBecomeActiveNotification
-                 object:nil];
-        [nc addObserver:self
-               selector:@selector(handleApplicationWillTerminateNotification:)
-                   name:NSApplicationWillTerminateNotification
-                 object:nil];
-        [nc addObserver:self
-               selector:@selector(handleTemporaryFileMigrationNotification:)
-                   name:BDSKTemporaryFileMigrationNotification
-                 object:self];
-        // observe this on behalf of our BibItems, or else all BibItems register for these notifications and -[BibItem dealloc] gets expensive when unregistering; this means that (shared) items without a document won't get these notifications
-        [nc addObserver:self
-               selector:@selector(handleCustomFieldsDidChangeNotification:)
-                   name:BDSKCustomFieldsChangedNotification
-                 object:nil];
-        // Header says NSNotificationSuspensionBehaviorCoalesce is the default if suspensionBehavior isn't specified, but at least on 10.5 it appears to be NSNotificationSuspensionBehaviorDeliverImmediately.
-        [[NSDistributedNotificationCenter defaultCenter] 
-            addObserver:self
-               selector:@selector(handleSkimFileDidSaveNotification:)
-                   name:@"SKSkimFileDidSaveNotification"
-                 object:nil
-     suspensionBehavior:NSNotificationSuspensionBehaviorCoalesce];
-        
-        NSUserDefaultsController *sud = [NSUserDefaultsController sharedUserDefaultsController];
-        
-        [sud addObserver:self
-              forKeyPath:[@"values." stringByAppendingString:BDSKIgnoredSortTermsKey]
-                 options:0
-                 context:&BDSKDocumentDefaultsObservationContext];
-        [sud addObserver:self
-              forKeyPath:[@"values." stringByAppendingString:BDSKAuthorNameDisplayKey]
-                 options:0
-                 context:&BDSKDocumentDefaultsObservationContext];
-        [sud addObserver:self
-              forKeyPath:[@"values." stringByAppendingString:BDSKBTStyleKey]
-                 options:0
-                 context:&BDSKDocumentDefaultsObservationContext];
-        [sud addObserver:self
-              forKeyPath:[@"values." stringByAppendingString:BDSKUsesTeXKey]
-                 options:0
-                 context:&BDSKDocumentDefaultsObservationContext];
-        [sud addObserver:self
-              forKeyPath:[@"values." stringByAppendingString:BDSKHideGroupCountKey]
-                 options:0
-                 context:&BDSKDocumentDefaultsObservationContext];
-}           
-
-- (void)handleBibItemAddDelNotification:(NSNotification *)notification{
-    // NB: this method gets called for setPublications: also, so checking for AddItemNotification might not do what you expect
-	BOOL isDelete = [[notification name] isEqualToString:BDSKDocDelItemNotification];
-    if(isDelete == NO && [self hasLibraryGroupSelected])
-		[self setSearchString:@""]; // clear the search when adding
-
-    // update smart group counts
-    [self updateSmartGroupsCount];
-    // this handles the remaining UI updates necessary (tableView and previews)
-	[self updateCategoryGroupsPreservingSelection:YES];
-    
-    NSArray *pubs = [[notification userInfo] objectForKey:@"pubs"];
-    [self setImported:isDelete == NO forPublications:pubs inGroup:nil];
-}
-
-- (BOOL)sortKeyDependsOnKey:(NSString *)key{
-    if (key == nil)
-        return YES;
-    else if([sortKey isEqualToString:BDSKTitleString])
-        return [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKChapterString] || [key isEqualToString:BDSKPagesString] || [key isEqualToString:BDSKPubTypeString];
-    else if([sortKey isEqualToString:BDSKContainerString])
-        return [key isEqualToString:BDSKContainerString] || [key isEqualToString:BDSKJournalString] || [key isEqualToString:BDSKBooktitleString] || [key isEqualToString:BDSKVolumeString] || [key isEqualToString:BDSKSeriesString] || [key isEqualToString:BDSKPubTypeString];
-    else if([sortKey isEqualToString:BDSKPubDateString])
-        return [key isEqualToString:BDSKYearString] || [key isEqualToString:BDSKMonthString];
-    else if([sortKey isEqualToString:BDSKFirstAuthorString] || [sortKey isEqualToString:BDSKSecondAuthorString] || [sortKey isEqualToString:BDSKThirdAuthorString] || [sortKey isEqualToString:BDSKLastAuthorString])
-        return [key isEqualToString:BDSKAuthorString];
-    else if([sortKey isEqualToString:BDSKFirstAuthorEditorString] || [sortKey isEqualToString:BDSKSecondAuthorEditorString] || [sortKey isEqualToString:BDSKThirdAuthorEditorString] || [sortKey isEqualToString:BDSKLastAuthorEditorString])
-        return [key isEqualToString:BDSKAuthorString] || [key isEqualToString:BDSKEditorString];
-    else if([sortKey isEqualToString:BDSKColorString] || [sortKey isEqualToString:BDSKColorLabelString])
-        return [key isEqualToString:BDSKColorString] || [key isEqualToString:BDSKColorLabelString];
-    else
-        return [sortKey isEqualToString:key];
-}
-
-- (BOOL)searchKeyDependsOnKey:(NSString *)key{
-    NSString *searchKey = [[searchField stringValue] isEqualToString:@""] ? nil : [searchButtonController selectedItemIdentifier];
-    if ([searchKey isEqualToString:BDSKSkimNotesString] || [searchKey isEqualToString:BDSKFileContentSearchString])
-        return [key isEqualToString:BDSKLocalFileString];
-    else if (key == nil)
-        return YES;
-    else if ([searchKey isEqualToString:BDSKAllFieldsString])
-        return [key isEqualToString:BDSKLocalFileString] == NO && [key isEqualToString:BDSKRemoteURLString] == NO;
-    else if ([searchKey isEqualToString:BDSKPersonString])
-        return [key isPersonField];
-    else
-        return [key isEqualToString:searchKey];
-}
-
-- (void)handlePrivateBibItemChanged{
-    // we can be called from a queue after the document was closed
-    if (docState.isDocumentClosed)
-        return;
-    
-    if ((docState.itemChangeMask & BDSKItemChangedFilesMask) != 0)
-        [self updateFileViews];
-
-    BOOL shouldUpdateGroups = [NSString isEmptyString:[self currentGroupField]] == NO && (docState.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0;
-    
-    // allow updating a smart group if it's selected
-	[self updateSmartGroups];
-    
-    if(shouldUpdateGroups){
-        // this handles all UI updates if we call it, so don't bother with any others
-        [self updateCategoryGroupsPreservingSelection:YES];
-    } else if ((docState.itemChangeMask & BDSKItemChangedSearchKeyMask) != 0) {
-        // this handles all UI updates if we call it, so don't bother with any others
-        [searchField sendAction:[searchField action] to:[searchField target]];
-    } else {
-        // groups and quicksearch won't update for us
-        if ((docState.itemChangeMask & BDSKItemChangedSortKeyMask) != 0)
-            [self sortPubsByKey:nil];
-        else
-            [tableView reloadData];
-        [self updateStatus];
-        [self updatePreviews];
-    }
-    
-    docState.itemChangeMask = 0;
-}
-
-// this structure is only used in the following CFSetApplierFunction
-typedef struct __BibItemCiteKeyChangeInfo {
-    BibItem *pub;
-    NSCharacterSet *invalidSet;
-    NSString *key;
-    NSString *oldKey;
-} _BibItemCiteKeyChangeInfo;
-
-static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *context)
-{
-    NSString *field = (NSString *)citeField;
-    _BibItemCiteKeyChangeInfo *changeInfo = context;
-    NSString *value = [changeInfo->pub valueOfField:field inherit:NO];
-    // value may be nil, so check before calling rangeOfString:
-    if (nil != value) {
-        NSRange range = [value rangeOfString:changeInfo->oldKey];
-        if (range.location != NSNotFound &&
-            (range.location == 0 || [changeInfo->invalidSet characterIsMember:[value characterAtIndex:range.location]]) &&
-            (NSMaxRange(range) == [value length] || [changeInfo->invalidSet characterIsMember:[value characterAtIndex:NSMaxRange(range)]])) {
-            NSMutableString *tmpString = [value mutableCopy];
-            [tmpString replaceCharactersInRange:range withString:changeInfo->key];
-            [changeInfo->pub setField:field toValue:tmpString];
-            [tmpString release];
-        }
-    }
-}
-
-- (void)handleBibItemChangedNotification:(NSNotification *)notification{
-
-    // note: userInfo is nil if -[BibItem setFields:] is called
-	NSDictionary *userInfo = [notification userInfo];
-    BibItem *pub = [notification object];
-    
-    // see if it's ours
-	if([pub owner] != self)
-        return;
-
-	NSString *changedKey = [userInfo objectForKey:@"key"];
-    NSString *key = [pub citeKey];
-    NSString *oldKey = nil;
-    NSEnumerator *pubEnum = [publications objectEnumerator];
-    
-    // need to handle cite keys and crossrefs if a cite key changed
-    if([changedKey isEqualToString:BDSKCiteKeyString]){
-        oldKey = [userInfo objectForKey:@"oldValue"];
-        [publications changeCiteKey:oldKey toCiteKey:key forItem:pub];
-        if([NSString isEmptyString:oldKey])
-            oldKey = nil;
-    }
-    
-    // -[BDSKItemSearchIndexes addPublications:] will overwrite previous values for this pub
-    if ([changedKey isIntegerField] == NO && [changedKey isURLField] == NO)
-        [searchIndexes addPublications:[NSArray arrayWithObject:pub]];
-    
-    // access type manager outside the enumerator, since it's @synchronized...
-    BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
-    NSCharacterSet *invalidSet = [typeManager invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString];
-    NSSet *citeFields = [typeManager citationFieldsSet];
-    
-    _BibItemCiteKeyChangeInfo changeInfo;
-    changeInfo.invalidSet = invalidSet;
-    changeInfo.key = key;
-    changeInfo.oldKey = oldKey;
-    
-    while (pub = [pubEnum nextObject]) {
-        NSString *crossref = [pub valueOfField:BDSKCrossrefString inherit:NO];
-        if([NSString isEmptyString:crossref])
-            continue;
-        
-        // invalidate groups that depend on inherited values
-        if ([key caseInsensitiveCompare:crossref] == NSOrderedSame)
-            [pub invalidateGroupNames];
-        
-        // change the crossrefs if we change the parent cite key
-        if (oldKey) {
-            if ([oldKey caseInsensitiveCompare:crossref] == NSOrderedSame)
-                [pub setField:BDSKCrossrefString toValue:key];
-            changeInfo.pub = pub;
-            
-            // faster than creating an enumerator for what's typically a tiny set (helpful when generating keys for an entire file)
-            CFSetApplyFunction((CFSetRef)citeFields, applyChangesToCiteFieldsWithInfo, &changeInfo);
-        }
-    }
-    
-    if ([changedKey isEqualToString:[self currentGroupField]] || changedKey == nil)
-        docState.itemChangeMask |= BDSKItemChangedGroupFieldMask;
-    if ([self sortKeyDependsOnKey:changedKey])
-        docState.itemChangeMask |= BDSKItemChangedSortKeyMask;
-    if ([self searchKeyDependsOnKey:changedKey])
-        docState.itemChangeMask |= BDSKItemChangedSearchKeyMask;
-    if ([changedKey isEqualToString:BDSKLocalFileString] || [changedKey isEqualToString:BDSKRemoteURLString])
-        docState.itemChangeMask |= BDSKItemChangedFilesMask;
-    
-    
-    // queue for UI updating, in case the item is changed as part of a batch process such as Find & Replace or AutoFile
-    if (docState.isDocumentClosed == NO) {
-        [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(handlePrivateBibItemChanged) object:nil];
-        [self performSelector:@selector(handlePrivateBibItemChanged) withObject:nil afterDelay:0.0];
-    }
-}
-
-- (void)handleMacroChangedNotification:(NSNotification *)aNotification{
-	id changedOwner = [[aNotification object] owner];
-	if(changedOwner && changedOwner != self)
-		return; // only macro changes for ourselves or the global macros
-	
-    [tableView reloadData];
-    [self updatePreviews];
-}
-
-- (void)handleTableSelectionChangedNotification:(NSNotification *)notification{
-    [self updateFileViews];
-    [self updatePreviews];
-    [groupOutlineView updateHighlights];
-    BOOL fileViewEditable = [self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO && [[self selectedPublications] count] == 1;
-    [sideFileView setEditable:fileViewEditable];
-    [bottomFileView setEditable:fileViewEditable]; 
-}
-
-- (void)handleFlagsChangedNotification:(NSNotification *)notification{
-    BOOL isOptionKeyState = ([NSApp currentModifierFlags] & NSAlternateKeyMask) != 0;
-    
-    if (docState.inOptionKeyState != isOptionKeyState) {
-        docState.inOptionKeyState = isOptionKeyState;
-        
-        NSToolbarItem *toolbarItem = [toolbarItems objectForKey:@"BibDocumentToolbarNewItemIdentifier"];
-        
-        if (isOptionKeyState) {
-            [groupAddButton setImage:[NSImage imageNamed:@"GroupAddSmart"]];
-            [groupAddButton setToolTip:NSLocalizedString(@"Add new smart group.", @"Tool tip message")];
-            
-            static NSImage *alternateNewToolbarImage = nil;
-            if (alternateNewToolbarImage == nil) {
-                alternateNewToolbarImage = [[NSImage alloc] initWithSize:NSMakeSize(32, 32)];
-                [alternateNewToolbarImage lockFocus];
-                NSImage *srcImage = [NSImage imageNamed:@"newdoc"];
-                [srcImage drawInRect:NSMakeRect(0, 0, 32, 32) fromRect:NSMakeRect(0, 0, [srcImage size].width, [srcImage size].height) operation:NSCompositeSourceOver fraction:1.0]; 
-                [[NSImage imageWithSmallIconForToolboxCode:kAliasBadgeIcon] compositeToPoint:NSMakePoint(8,-10) operation:NSCompositeSourceOver];
-                [alternateNewToolbarImage unlockFocus];
-            }
-            
-            [toolbarItem setLabel:NSLocalizedString(@"New with Crossref", @"Toolbar item label")];
-            [toolbarItem setToolTip:NSLocalizedString(@"Create new publication with crossref", @"Tool tip message")];
-            [toolbarItem setImage:alternateNewToolbarImage];
-            [toolbarItem setAction:@selector(createNewPubUsingCrossrefAction:)];
-        } else {
-            [groupAddButton setImage:[NSImage imageNamed:@"GroupAdd"]];
-            [groupAddButton setToolTip:NSLocalizedString(@"Add new group.", @"Tool tip message")];
-            
-            [toolbarItem setLabel:NSLocalizedString(@"New", @"Toolbar item label")];
-            [toolbarItem setToolTip:NSLocalizedString(@"Create new publication", @"Tool tip message")];
-            [toolbarItem setImage:[NSImage imageNamed: @"newdoc"]];
-            [toolbarItem setAction:@selector(newPub:)];
-        }
-    }
-}
-
-- (void)handleApplicationWillTerminateNotification:(NSNotification *)notification{
-    [self saveSortOrder];
-}
-
-- (void)handleApplicationDidBecomeActiveNotification:(NSNotification *)notification{
-    // resolve all the shown URLs, when a file was renamed on disk this will trigger an update notification
-    [self selectedFileURLs];
-}
-
-- (void)handleCustomFieldsDidChangeNotification:(NSNotification *)notification{
-    [publications makeObjectsPerformSelector:@selector(customFieldsDidChange:) withObject:notification];
-    [tableView setupTableColumnsWithIdentifiers:[tableView tableColumnIdentifiers]];
-    // current group field may have changed its type (string->person)
-    [self updateSmartGroups];
-    [self updateCategoryGroupsPreservingSelection:YES];
-    [self updatePreviews];
-}
-
-- (void)handleTemporaryFileMigrationNotification:(NSNotification *)notification{
-    // display after the window loads so we can use a sheet, and the migration controller window is in front
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableMigrationWarning"] == NO)
-        docState.displayMigrationAlert = YES;
-}
-
-- (void)handleSkimFileDidSaveNotification:(NSNotification *)notification{
-    NSString *path = [notification object];
-    NSEnumerator *pubEnum = [publications objectEnumerator];
-    BibItem *pub;
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
-    
-    while (pub = [pubEnum nextObject]) {
-        if ([[[pub existingLocalFiles] valueForKey:@"path"] containsObject:path])
-            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification object:pub userInfo:notifInfo];
-    }
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == &BDSKDocumentFileViewObservationContext) {
-        if (object == sideFileView) {
-            FVDisplayMode displayMode = [sideFileView displayMode];
-            CGFloat iconScale = displayMode == FVDisplayModeGrid ? [sideFileView iconScale] : 0.0;
-            [[NSUserDefaults standardUserDefaults] setFloat:iconScale forKey:BDSKSideFileViewIconScaleKey];
-            [[NSUserDefaults standardUserDefaults] setInteger:displayMode forKey:BDSKSideFileViewDisplayModeKey];
-        } else if (object == bottomFileView) {
-            FVDisplayMode displayMode = [bottomFileView displayMode];
-            CGFloat iconScale = displayMode == FVDisplayModeGrid ? [bottomFileView iconScale] : 0.0;
-            [[NSUserDefaults standardUserDefaults] setFloat:iconScale forKey:BDSKBottomFileViewIconScaleKey];
-            [[NSUserDefaults standardUserDefaults] setInteger:displayMode forKey:BDSKBottomFileViewDisplayModeKey];
-        }
-    } else if (context == &BDSKDocumentDefaultsObservationContext) {
-        NSString *key = [keyPath substringFromIndex:7];
-        if ([key isEqualToString:BDSKIgnoredSortTermsKey]) {
-            [self sortPubsByKey:nil];
-        } else if ([key isEqualToString:BDSKAuthorNameDisplayKey]) {
-            [tableView reloadData];
-            if ([currentGroupField isPersonField])
-                [groupOutlineView reloadData];
-        } else if ([key isEqualToString:BDSKBTStyleKey]) {
-            if ([previewer isVisible])
-                [self updatePreviews];
-            else if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey] &&
-                    [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
-                    [self isMainDocument])
-                [self updatePreviewer:[BDSKPreviewer sharedPreviewer]];
-        } else if ([key isEqualToString:BDSKUsesTeXKey]) {
-            [bottomPreviewButton setEnabled:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey] forSegment:BDSKPreviewDisplayTeX];
-        } else if ([key isEqualToString:BDSKHideGroupCountKey]) {
-            // if we were hiding the count, the smart group counts weren't updated, so we need to update them now when we're showing the count, otherwise just reload
-            if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKHideGroupCountKey])
-                [groupOutlineView reloadData];
-            else
-                [self updateSmartGroupsCount];
-        }
-    } else {
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-    }
-}
-
-#pragma mark -
 #pragma mark Printing support
 
 - (IBAction)printDocument:(id)sender{
@@ -3178,6 +2705,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 }
 
 #pragma mark -
+#pragma mark Auto handling of changes
 
 - (NSInteger)userChangedField:(NSString *)fieldName ofPublications:(NSArray *)pubs from:(NSArray *)oldValues to:(NSArray *)newValues{
     NSInteger rv = 0;

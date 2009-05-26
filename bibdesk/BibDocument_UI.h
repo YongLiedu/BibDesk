@@ -65,5 +65,10 @@
 
 - (NSMenu *)columnsMenu;
 
+- (void)registerForNotifications;
+- (void)startObserving;
+- (void)endObserving;
+
+- (void)handleTableSelectionChangedNotification:(NSNotification *)notification;
 
 @end
