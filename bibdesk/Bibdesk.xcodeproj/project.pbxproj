@@ -96,7 +96,6 @@
 		CE129A180B44088900416D19 /* BDSKEntrezGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = CE129A160B44088900416D19 /* BDSKEntrezGroupServer.m */; };
 		CE12A1700B44AED200416D19 /* SearchGroupServers.plist in Resources */ = {isa = PBXBuildFile; fileRef = CE12A16F0B44AED100416D19 /* SearchGroupServers.plist */; };
 		CE15C0D80AA5B9A3002C555F /* BDSKErrorManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE15C0D60AA5B9A3002C555F /* BDSKErrorManager.m */; };
-		CE15E6220FCC28B1009FCBF1 /* BibDocument_UI.h in Headers */ = {isa = PBXBuildFile; fileRef = CE15E6200FCC28B1009FCBF1 /* BibDocument_UI.h */; };
 		CE15E6230FCC28B1009FCBF1 /* BibDocument_UI.m in Sources */ = {isa = PBXBuildFile; fileRef = CE15E6210FCC28B1009FCBF1 /* BibDocument_UI.m */; };
 		CE1EF2940F8E0D54004E7AE8 /* BDSKParentGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE1EF2920F8E0D54004E7AE8 /* BDSKParentGroup.m */; };
 		CE1EF3890F8E6190004E7AE8 /* BDSKGradientTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE1EF3880F8E6190004E7AE8 /* BDSKGradientTableView.m */; };
@@ -2889,7 +2888,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CE15E6220FCC28B1009FCBF1 /* BibDocument_UI.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
