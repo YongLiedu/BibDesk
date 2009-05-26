@@ -44,6 +44,7 @@
 #import "BDSKFilterController.h"
 #import "BDSKGroupOutlineView.h"
 #import "BibDocument_Search.h"
+#import "BibDocument_UI.h"
 #import "BDSKGroup.h"
 #import "BDSKSharedGroup.h"
 #import "BDSKURLGroup.h"

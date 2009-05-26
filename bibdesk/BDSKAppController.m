@@ -47,6 +47,7 @@
 #import "BDSKFindController.h"
 #import "BDSKScriptMenu.h"
 #import "BibDocument.h"
+#import "BibDocument_UI.h"
 #import "BibDocument_Search.h"
 #import "BibDocument_Actions.h"
 #import "BibDocument_Groups.h"

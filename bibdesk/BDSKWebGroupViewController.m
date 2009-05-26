@@ -51,6 +51,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BibDocument.h"
+#import "BibDocument_UI.h"
 #import "BDSKBookmarkController.h"
 #import "BDSKBookmark.h"
 #import "NSMenu_BDSKExtensions.h"

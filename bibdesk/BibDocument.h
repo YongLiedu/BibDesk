@@ -313,28 +313,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 - (void)reportTemporaryCiteKeys:(NSString *)tmpKey forNewDocument:(BOOL)isNewFile;
 
-// Responses to UI actions
-
-/*!
-    @method updatePreviews
-    @abstract Updates the document and/or shared previewer if needed. 
-    @discussion The actual messages are queued and coalesced, so bulk actions will only update the previews once.
-    
-*/
-- (void)updatePreviews;
-
-/*!
-    @method updatePreviewer:
-    @abstract Handles updating a previewer.
-    @discussion -
-    @param aPreviewer The previewer to update
-    
-*/
-- (void)updatePreviewer:(BDSKPreviewer *)aPreviewer;
-
-- (void)updateBottomPreviewPane;
-- (void)updateSidePreviewPane;
-
 /*!
 	@method bibTeXStringForPublications
 	@abstract auxiliary method for generating bibtex string for publication items
@@ -425,26 +403,12 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 // Private methods
 
 /*!
-    @method updateStatus
-    @abstract Updates the status message
-    @discussion -
-*/
-- (void)updateStatus;
-
-/*!
     @method     sortPubsByKey:
     @abstract   Sorts the publications table by the given key.  Pass nil for the table column to re-sort the previously sorted column with the same order.
     @discussion (comprehensive description)
     @param      key (description)
 */
 - (void)sortPubsByKey:(NSString *)key;
-
-/*!
-    @method     columnsMenu
-    @abstract   Returnes the columns menu
-    @discussion (comprehensive description)
-*/
-- (NSMenu *)columnsMenu;
 
 - (void)registerForNotifications;
 
@@ -500,20 +464,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)selectPublications:(NSArray *)bibArray;
 
 - (NSArray *)selectedFileURLs;
-
-- (NSArray *)shownFiles;
-- (void)updateFileViews;
-
-- (void)setStatus:(NSString *)status;
-- (void)setStatus:(NSString *)status immediate:(BOOL)now;
-
-- (BOOL)isDisplayingSearchButtons;
-- (BOOL)isDisplayingFileContentSearch;
-- (BOOL)isDisplayingSearchGroupView;
-- (BOOL)isDisplayingWebGroupView;
-
-- (void)insertControlView:(NSView *)controlView atTop:(BOOL)atTop;
-- (void)removeControlView:(NSView *)controlView;
 
 - (NSStringEncoding)documentStringEncoding;
 - (void)setDocumentStringEncoding:(NSStringEncoding)encoding;

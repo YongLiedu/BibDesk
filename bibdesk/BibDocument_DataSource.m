@@ -37,6 +37,7 @@
 #import "BibDocument_DataSource.h"
 #import <SkimNotes/SkimNotes.h>
 #import "BibDocument.h"
+#import "BibDocument_UI.h"
 #import "BibDocument_Actions.h"
 #import "BibItem.h"
 #import "BibAuthor.h"

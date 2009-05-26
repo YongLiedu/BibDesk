@@ -52,6 +52,7 @@
 #import "BDSKFileSearchResult.h"
 #import "BDSKLevelIndicatorCell.h"
 #import "BibDocument.h"
+#import "BibDocument_UI.h"
 #import "BibDocument_Search.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"

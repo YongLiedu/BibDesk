@@ -40,6 +40,7 @@
 #import "BDSKGroupCell.h"
 #import "BDSKGroup.h"
 #import "BibDocument_Groups.h"
+#import "BibDocument_UI.h"
 #import "BDSKMainTableView.h"
 #import "BDSKGroupOutlineView.h"
 #import "BibItem.h"

@@ -37,6 +37,7 @@
 
 #import "BibDocument_Search.h"
 #import "BibDocument.h"
+#import "BibDocument_UI.h"
 #import "BDSKTypeManager.h"
 #import <AGRegex/AGRegex.h>
 #import "BibItem.h"

@@ -38,6 +38,7 @@
 
 #import "BibDocument_Actions.h"
 #import "BibDocument_DataSource.h"
+#import "BibDocument_UI.h"
 #import "BibDocument_Groups.h"
 #import "BibDocument_Search.h"
 #import "BDSKStringConstants.h"

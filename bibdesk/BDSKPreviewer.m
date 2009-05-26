@@ -42,6 +42,7 @@
 #import "BDSKZoomableTextView.h"
 #import "BDSKZoomablePDFView.h"
 #import "BibDocument.h"
+#import "BibDocument_UI.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
