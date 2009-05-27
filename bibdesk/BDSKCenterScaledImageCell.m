@@ -98,7 +98,7 @@
                 
         CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
         CGContextSaveGState(context);
-        CGContextClipToRect(context, NSRectToCGRect(CGRect(rawFrame));
+        CGContextClipToRect(context, NSRectToCGRect(drawFrame));
         CGContextSetAllowsAntialiasing(context, true);
         CGContextSetInterpolationQuality(context, kCGInterpolationHigh);
         
