@@ -256,24 +256,27 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     uint16_t chosenPort = 0;
     
     // Here, create the socket from traditional BSD socket calls
-    NSInteger fdForListening;
+    // keep track of this so we can close it when we stop the net service
+    socketDescriptor = -1;
     struct sockaddr_in serverAddress;
     socklen_t namelen = sizeof(serverAddress);
     
-    if((fdForListening = socket(AF_INET, SOCK_STREAM, 0)) > 0) {
+    if((socketDescriptor = socket(AF_INET, SOCK_STREAM, 0)) > 0) {
         memset(&serverAddress, 0, sizeof(serverAddress));
         serverAddress.sin_family = AF_INET;
         serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
         serverAddress.sin_port = 0; // allows the kernel to choose the port for us.
         
-        if(bind(fdForListening, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) {
-            close(fdForListening);
+        if(bind(socketDescriptor, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) {
+            close(socketDescriptor);
+            socketDescriptor = -1;
             return nil;
         }
         
         // Find out what port number was chosen for us.
-        if(getsockname(fdForListening, (struct sockaddr *)&serverAddress, &namelen) < 0) {
-            close(fdForListening);
+        if(getsockname(socketDescriptor, (struct sockaddr *)&serverAddress, &namelen) < 0) {
+            close(socketDescriptor);
+            socketDescriptor = -1;
             return nil;
         }
         
@@ -323,6 +326,9 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         [netService stop];
         [netService release];
         netService = nil;
+        
+        close(socketDescriptor);
+        socketDescriptor = -1;
         
         [server stopDOServer];
         [server release];
@@ -503,14 +509,6 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         // show the error in a modal dialog
         [NSApp presentError:error];
     }
-}
-
-- (void)netServiceDidStop:(NSNetService *)sender
-{
-    // We'll need to release the NSNetService sending this, since we want to recreate it in sync with the socket at the other end. Since there's only the one NSNetService in this server, we can just release it.
-    [netService setDelegate:nil];
-    [netService release];
-    netService = nil;
 }
 
 - (void)handleApplicationWillTerminate:(NSNotification *)note;

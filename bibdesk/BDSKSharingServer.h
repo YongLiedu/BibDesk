@@ -79,6 +79,7 @@ typedef NSInteger BDSKSharingStatus;
     NSNetService *netService;
     id server;
     NSString *sharingName;
+    int socketDescriptor;
     BDSKSharingStatus status;
     NSInteger tryCount;
 }
