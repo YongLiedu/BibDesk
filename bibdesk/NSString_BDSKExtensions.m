@@ -299,9 +299,10 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     
     // read com.apple.TextEncoding on Leopard, or when reading a Tiger file saved on Leopard
     if(try && nil == string) {
-        encoding = [[NSFileManager defaultManager] appleStringEncodingAtPath:path error:NULL];
-        if (encoding > 0)
-            string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:encoding];
+        // don't clobber the encoding parameter in case this fails...
+        NSStringEncoding xattrEncoding = [[NSFileManager defaultManager] appleStringEncodingAtPath:path error:NULL];
+        if (xattrEncoding > 0)
+            string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:xattrEncoding];
     }
     
     // try the encoding passed as a parameter, if non-zero (zero encoding is never valid)
