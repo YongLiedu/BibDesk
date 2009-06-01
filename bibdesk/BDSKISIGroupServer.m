@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 07/10/07.
 /*
- This software is Copyright (c) ,2007,2008
+ This software is Copyright (c) 2007-2009
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -487,19 +487,23 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
     NSMutableDictionary *sourceTagValues = [NSMutableDictionary dictionary];
     NSString *isiURL = nil;
     
-    // fallback values
-    NSString *pubType = BDSKMiscString;
-    NSString *sourceField = @"Note";
+    // default values
+    NSString *pubType = BDSKArticleString;
+    NSString *sourceField = BDSKJournalString;
     
-    // I've only seen "Meeting Abstract" and "Article" as types
+    /*
+     I've seen "Meeting Abstract" and "Article" as common types.  However, "Geomorphology" and 
+     "Estuarine Coastal and Shelf Science" articles are sometimes listed as "Proceedings Paper"
+     which is clearly wrong.  Likewise, any journal with "Review" in the name is listed as a 
+     "Review" type, when it should probably be a journal (e.g., "Earth Science Reviews").
+     */
     NSString *docType =[[[record nodesForXPath:@"doctype" error:NULL] lastObject] stringValue];
-    if ([docType isEqualToString:@"Article"] || [docType isEqualToString:@"Review"] || 
-        [docType isEqualToString:@"Editorial Material"] || [docType isEqualToString:@"Software Review"]) {
-        pubType = BDSKArticleString;
-        sourceField = BDSKJournalString;
-    } else if ([docType isEqualToString:@"Meeting Abstract"]) {
+    if ([docType isEqualToString:@"Meeting Abstract"]) {
         pubType = BDSKInproceedingsString;
         sourceField = BDSKBooktitleString;
+    } else {
+        // preserve the type
+        addStringToDictionaryIfNotNil(docType, BDSKTypeString, pubFields);
     }
     
     addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"timescited"] stringValue], @"Timescited", pubFields);
@@ -528,7 +532,7 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
         }
         else if ([name isEqualToString:@"article_nos"])
             // for current journals, these are DOI strings, which doesn't follow from the name or the description
-            addStringValueOfNodeForField([[child nodesForXPath:@"./article_no[1]" error:NULL] lastObject], BDSKDoiString, pubFields);
+            addStringValueOfNodeForField([[child nodesForXPath:@"./article_no[starts-with(., 'DOI')]" error:NULL] lastObject], BDSKDoiString, pubFields);
         else if ([name isEqualToString:@"source_series"])
             addStringValueOfNodeForField(child, BDSKSeriesString, pubFields);
         
