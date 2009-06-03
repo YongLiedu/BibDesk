@@ -669,6 +669,9 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
     
     // from profiling: optimize for the single quoted string node case; avoids the array, node, and complex string overhead
     if (1 == nodeCount && simple_value->nodetype == BTAST_STRING) {
+        // collapse whitespace in single-node strings
+        bt_postprocess_field(field, BTO_COLLAPSE, true);
+        
         s = copyCheckedString(simple_value->text, field->line, filePath, parserEncoding);
         NSString *translatedString = nil;
         
