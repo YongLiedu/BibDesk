@@ -50,7 +50,7 @@
         return NO;
     }
     
-    NSString *containsBibTexLinkNode = @"//a[contains(text(),'BibTex')]";
+    NSString *containsBibTexLinkNode = @"//a[contains(text(),'BibTeX')]";
     
     NSError *error = nil;    
 
@@ -65,15 +65,15 @@
 // and follow links two levels deep to get bibitems from each citation in the list.
 
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
-
+log_method();
     NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
     
     
-    NSString *BibTexLinkNodePath = @"//a[contains(text(),'BibTex')]";
+    NSString *BibTeXLinkNodePath = @"//a[contains(text(),'BibTeX')]";
     
     NSError *error = nil;    
 
-    NSArray *BibTeXLinkNodes = [[xmlDocument rootElement] nodesForXPath:BibTexLinkNodePath
+    NSArray *BibTeXLinkNodes = [[xmlDocument rootElement] nodesForXPath:BibTeXLinkNodePath
                                                     error:&error];
     
     if ([BibTeXLinkNodes count] < 1) {
