@@ -124,7 +124,11 @@ New Features\
 {\listtext	\'95	}Fix text layout after zooming in preview\
 {\listtext	\'95	}Perform full Entrez search asynchronously, so it won't block when the server is inaccessible\
 {\listtext	\'95	}Fix status bar icon shown when an item needs to be filed\
-{\listtext	\'95	}Make sure the web group tries to parse plain text as a last resort\
+\pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
+\ls3\ilvl0\cf0 {\listtext	\'95	}Make sure the web group tries to parse plain text as a last resort\
+\pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
+\ls3\ilvl0\cf0 {\listtext	\'95	}Collapse whitespace in simple bibtex fields\
+{\listtext	\'95	}Fix ACMDL web group parser\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f0\b\fs28 \cf0 \
@@ -1854,9 +1858,8 @@ Changes since 1.1.9
   
 \f0\i\b\fs26 \
 New Features\
-\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f1\i0\b0\fs22 \cf0   \'95  Groups are now compared case-insensitively\
+\f1\i0\b0\fs22   \'95  Groups are now compared case-insensitively\
   \'95  Status views now use nice gradients\
   \'95  Arrow keys can be used to switch between group and publication list\
   \'95  File content search view now fades in and out using NSViewAnimation\
@@ -2321,9 +2324,8 @@ Bugs Fixed\
   \'95  Fixed a possible crasher in the regex framework that we use for searching\
  
 \f0\b\fs28 \
-\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f1\fs22 \cf0 IMPORTANT
+\f1\fs22 IMPORTANT
 \b0 :  This is the first release of the 1.1 series, with a major new feature (BibTeX crossref support).  Please back up your files before testing and saving, especially if you use the new feature which sorts for crossrefs!  Any problems should be reported on the {\field{\*\fldinst{HYPERLINK "http://sourceforge.net/tracker/?group_id=61487&atid=497423"}}{\fldrslt SourceForge Tracker}}.
 \f0\b\fs28 \
 \
@@ -2629,9 +2631,8 @@ Parser notes
 \f0\i\b\fs26 \
 \
 New Features\
-\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f1\i0\b0\fs22 \cf0   \'95  Option added to save author names as normalized (off by default); see "Defaults" pref pane.  This converts names to "von Last, Jr., First" format.\
+\f1\i0\b0\fs22   \'95  Option added to save author names as normalized (off by default); see "Defaults" pref pane.  This converts names to "von Last, Jr., First" format.\
   \'95  Option added to generate all-lowercase Local-Urls\
   \'95  Optional parameters for separators and etal in format for author names (see online help for details)\
   \'95  Added an option to display Abstract in preview pane\
