@@ -1880,9 +1880,10 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     [s appendString:@"\n</titleInfo>\n"];
     // note: may in the future want to output subtitles.
 
-    NSArray *pubAuthors = [self pubAuthors];
+    NSEnumerator *authEnum = [[self pubAuthors] objectEnumerator];
+    BibAuthor *author;
     
-    foreach (author, pubAuthors){
+    while (author = [authEnum nextObject]) {
         [s appendString:[author MODSStringWithRole:BDSKAuthorString]];
         [s appendString:@"\n"];
     }
