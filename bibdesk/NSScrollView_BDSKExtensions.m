@@ -169,7 +169,7 @@ static CFMutableDictionaryRef scrollViewPlacardViews = NULL;
     NSView *view = [viewEnum nextObject];
     CGFloat f = [[self window] isMainWindow] || [[self window] isKeyWindow] ? 1.0 : 0.33333;
     while (view = [viewEnum nextObject]) {
-        divRect.origin.x = NSMinX([view frame]) - 1;
+        divRect.origin.x = NSMinX([view frame]);
         [divImage drawInRect:divRect fromRect:divSrcRect operation:NSCompositeSourceOver fraction:f];
     }
 }
@@ -184,8 +184,9 @@ static CFMutableDictionaryRef scrollViewPlacardViews = NULL;
         rect.origin.y = 0.0;
         rect.size.height = size.height;
         [view setFrame:rect];
-        size.width += NSWidth(rect) + 1.0;
+        size.width += NSWidth(rect) - 1.0;
     }
+    size.width += 1.0;
     [self setFrameSize:size];
 }
 
