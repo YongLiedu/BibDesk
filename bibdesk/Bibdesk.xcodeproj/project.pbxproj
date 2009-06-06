@@ -202,6 +202,7 @@
 		CE7EA95D0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7EA95B0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.m */; };
 		CE7F5E480B3F5F1800A919D0 /* searchGroup.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7F5E470B3F5F1800A919D0 /* searchGroup.tiff */; };
 		CE7F64C40B41694A00A919D0 /* BDSKSearchGroupView.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE7F64C20B41694A00A919D0 /* BDSKSearchGroupView.nib */; };
+		CE80A8760FDAB27D0086A46C /* BDSKHighlightingPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE80A8740FDAB27D0086A46C /* BDSKHighlightingPopUpButton.m */; };
 		CE820EC90C8AE2F60020E6B0 /* BDSKPersonWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE820EC20C8AE2F60020E6B0 /* BDSKPersonWindow.nib */; };
 		CE82B2D20D57AE0B00A2E8C5 /* BDSKSharingClient.m in Sources */ = {isa = PBXBuildFile; fileRef = CE82B2D00D57AE0B00A2E8C5 /* BDSKSharingClient.m */; };
 		CE82B4740D57EECF00A2E8C5 /* BDSKGroup+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CE82B4720D57EECF00A2E8C5 /* BDSKGroup+Scripting.m */; };
@@ -1088,6 +1089,8 @@
 		CE7EA95B0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSWindowController_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE7F5E470B3F5F1800A919D0 /* searchGroup.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = searchGroup.tiff; sourceTree = "<group>"; };
 		CE7F64C30B41694A00A919D0 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKSearchGroupView.nib; sourceTree = "<group>"; };
+		CE80A8730FDAB27D0086A46C /* BDSKHighlightingPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHighlightingPopUpButton.h; sourceTree = "<group>"; };
+		CE80A8740FDAB27D0086A46C /* BDSKHighlightingPopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKHighlightingPopUpButton.m; sourceTree = "<group>"; };
 		CE820EC30C8AE2F60020E6B0 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKPersonWindow.nib; sourceTree = "<group>"; };
 		CE820ECC0C8AE30F0020E6B0 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKPersonWindow.nib; sourceTree = "<group>"; };
 		CE82B2CF0D57AE0B00A2E8C5 /* BDSKSharingClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSharingClient.h; sourceTree = "<group>"; };
@@ -1994,6 +1997,7 @@
 				CE1EF3880F8E6190004E7AE8 /* BDSKGradientTableView.m */,
 				CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */,
 				F97BE8F00907321F0063504B /* BDSKGroupOutlineView.m */,
+				CE80A8740FDAB27D0086A46C /* BDSKHighlightingPopUpButton.m */,
 				CEC7D0240F680C970051794E /* BDSKIconTextFieldCell.m */,
 				CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */,
 				CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */,
@@ -2579,6 +2583,7 @@
 				CEEFE6C10B0403E700668BB0 /* BDSKGroupsArray.h */,
 				F97BE8EF0907321F0063504B /* BDSKGroupOutlineView.h */,
 				457538280B70170D00C0E49B /* BDSKHCiteParser.h */,
+				CE80A8730FDAB27D0086A46C /* BDSKHighlightingPopUpButton.h */,
 				45DB3E8C0CAAFED5001EACDA /* BDSKHubmedParser.h */,
 				CEC7D0230F680C970051794E /* BDSKIconTextFieldCell.h */,
 				CE3B682609D1B0190017D339 /* BDSKImagePopUpButton.h */,
@@ -3722,6 +3727,7 @@
 				6CAEE4CD0F98EC63009EA5FE /* BDSKCOinSParser.m in Sources */,
 				CE73BAD10FB1CE9600A43716 /* BDSKPubMedXMLParser.m in Sources */,
 				CE15E6230FCC28B1009FCBF1 /* BibDocument_UI.m in Sources */,
+				CE80A8760FDAB27D0086A46C /* BDSKHighlightingPopUpButton.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

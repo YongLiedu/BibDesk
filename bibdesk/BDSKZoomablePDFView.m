@@ -41,6 +41,7 @@
 #import "NSURL_BDSKExtensions.h"
 #import "NSScrollView_BDSKExtensions.h"
 #import "NSView_BDSKExtensions.h"
+#import "BDSKHighlightingPopUpButton.h"
 
 
 @interface NSResponder (BDSKGesturesPrivate)
@@ -196,7 +197,7 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
         [scrollView setHasHorizontalScroller:YES];
         
         // create it        
-        scalePopUpButton = [[NSPopUpButton allocWithZone:[self zone]] initWithFrame:NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown:NO];
+        scalePopUpButton = [[BDSKHighlightingPopUpButton allocWithZone:[self zone]] initWithFrame:NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown:NO];
         
         NSControlSize controlSize = [[scrollView horizontalScroller] controlSize];
         [[scalePopUpButton cell] setControlSize:controlSize];
