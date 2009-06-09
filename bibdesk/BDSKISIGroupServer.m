@@ -501,8 +501,8 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
     if ([docType isEqualToString:@"Meeting Abstract"]) {
         pubType = BDSKInproceedingsString;
         sourceField = BDSKBooktitleString;
-    } else {
-        // preserve the type
+    } else if ([docType isEqualToString:@"Article"] == NO && [docType isEqualToString:@"Review"] == NO) {
+        // preserve the type if it's unclear
         addStringToDictionaryIfNotNil(docType, BDSKTypeString, pubFields);
     }
     
@@ -535,16 +535,44 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
             addStringValueOfNodeForField([[child nodesForXPath:@"./article_no[starts-with(., 'DOI')]" error:NULL] lastObject], BDSKDoiString, pubFields);
         else if ([name isEqualToString:@"source_series"])
             addStringValueOfNodeForField(child, BDSKSeriesString, pubFields);
+        else if ([name isEqualToString:@"bib_date"] && [child kind] == NSXMLElementKind) {
+            /* 
+             There are at least 3 variants of this, so it's not always possible to get something
+             truly useful from it.
+             
+             <bib_date date="AUG" year="2008">AUG 2008</bib_date>
+             <bib_date date="JUN 19" year="2008">JUN 19 2008</bib_date>
+             <bib_date date="MAR-APR" year="2007">MAR-APR 2007</bib_date>
+             */
+            NSString *possibleMonthString = [[(NSXMLElement *)child attributeForName:@"date"] stringValue];
+            NSString *monthString;
+            NSScanner *scanner = nil;
+            if (possibleMonthString)
+                scanner = [[NSScanner alloc] initWithString:possibleMonthString];
+            static NSCharacterSet *monthSet = nil;
+            if (nil == monthSet) {
+                NSMutableCharacterSet *cset = [[NSCharacterSet letterCharacterSet] mutableCopy];
+                [cset addCharactersInString:@"-"];
+                monthSet = [cset copy];
+                [cset release];
+            }
+            if ([scanner scanCharactersFromSet:monthSet intoString:&monthString]) {
+                if ([monthString rangeOfString:@"-"].length == 0)
+                    monthString = [NSString stringWithBibTeXString:[monthString lowercaseString] macroResolver:nil error:NULL];
+                else
+                    monthString = [monthString titlecaseString];
+                addStringToDictionaryIfNotNil(monthString, BDSKMonthString, pubFields);
+            }
+            else
+                addStringToDictionaryIfNotNil(possibleMonthString, BDSKDateString, pubFields);
+        }
         
         // @@ remainder are untested (they're empty in all of my search results) so may be NSXMLElements
         else if ([name isEqualToString:@"pub_url"])
             addStringValueOfNodeForField(child, BDSKUrlString, pubFields);
         else if ([name isEqualToString:@"bib_vol"])
             addStringToDictionaryIfNotNil([[(NSXMLElement *)child attributeForName:@"issue"] stringValue], BDSKNumberString, pubFields);
-        else if ([name isEqualToString:@"bib_date"]) {
-            addStringValueOfNodeForField(child, BDSKDateString, pubFields);
-            addStringToDictionaryIfNotNil([[(NSXMLElement *)child attributeForName:@"date"] stringValue], BDSKMonthString, pubFields);
-        } else if ([name isEqualToString:@"publisher"])
+        else if ([name isEqualToString:@"publisher"])
             addStringValueOfNodeForField(child, BDSKPublisherString, pubFields);
         else if ([name isEqualToString:@"pub_address"])
             addStringValueOfNodeForField(child, BDSKAddressString, pubFields);
