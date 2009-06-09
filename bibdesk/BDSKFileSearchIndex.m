@@ -108,7 +108,7 @@
         
         flags.shouldKeepRunning = 1;
         flags.finishedInitialIndexing = 0;
-        flags.updateScheduled = 1;
+        flags.updateScheduled = 0;
         
         // maintain dictionaries mapping URL -> identifierURL, since SKIndex properties are slow; this should be accessed with the rwlock
         identifierURLs = [[BDSKManyToManyDictionary alloc] init];
