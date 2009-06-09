@@ -329,8 +329,8 @@ static id sharedController = nil;
                 [pane willSelect];
                 if ([[[self window] firstResponder] isKindOfClass:[NSText class]] && [(NSView *)[[self window] firstResponder] isDescendantOf:[oldPane view]])
                     [[self window] makeFirstResponder:nil];
-                [self changeContentView:view display:[[self window] isVisible]];
                 [[self window] setTitle:pane ? [self localizedTitleForIdentifier:identifier] : [self defaultWindowTitle]];
+                [self changeContentView:view display:[[self window] isVisible]];
                 [oldPane didUnselect];
                 [pane didSelect];
                 [self setSelectedPaneIdentifier:identifier];
