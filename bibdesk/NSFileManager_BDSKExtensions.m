@@ -443,12 +443,12 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     
     // this method is always invoked from the main thread, but we don't want multiple threads in temporaryBaseDirectory (which may be passed as directory here); could make the lock conditional, but performance isn't a concern here
     @synchronized(self) {
-    // if the file exists, try /directory/filename-i.extension
-    while([self fileExistsAtPath:fullPath])
-        fullPath = [directory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%lu", baseName, (unsigned long)++i]];
-        if (extension)
-            fullPath = [fullPath stringByAppendingPathExtension:extension];
-        
+        // if the file exists, try /directory/filename-i.extension
+        while([self fileExistsAtPath:fullPath]) {
+            fullPath = [directory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%lu", baseName, (unsigned long)++i]];
+            if (extension)
+                fullPath = [fullPath stringByAppendingPathExtension:extension];
+        }
     }
 
 	return fullPath;
