@@ -38,6 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKPreferencePane.h"
+#import "BDSKOutlineView.h"
 
 enum {
     BDSKExportTemplateList = 0,
@@ -74,7 +75,7 @@ typedef NSUInteger BDSKTemplateListType;
 @end
 
 
-@interface BDSKTemplateOutlineView : NSOutlineView
+@interface BDSKTemplateOutlineView : BDSKOutlineView
 @end
 
 
