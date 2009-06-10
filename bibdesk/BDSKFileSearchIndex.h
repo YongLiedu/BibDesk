@@ -39,6 +39,7 @@
 #import <Cocoa/Cocoa.h>
 
 @class BDSKFileSearchIndex, BDSKManyToManyDictionary, BDSKReadWriteLock, BibDocument;
+@protocol BDSKOwner;
 
 @protocol BDSKFileSearchIndexDelegate <NSObject>
 
@@ -74,8 +75,7 @@ typedef struct _BDSKSearchIndexFlags
     CFAbsoluteTime lastUpdateTime;
 }
 
-// aDocument must respond to -publications; this should generally be called on the main thread
-- (id)initForDocument:(BibDocument *)aDocument;
+- (id)initForOwner:(id <BDSKOwner>)owner;
 
 // Warning:  it is /not/ safe to write to this SKIndexRef directly; use it only for reading.
 - (SKIndexRef)index;

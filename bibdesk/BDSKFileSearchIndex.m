@@ -37,7 +37,7 @@
  */
 
 #import "BDSKFileSearchIndex.h"
-#import "BibDocument.h"
+#import "BDSKOwnerProtocol.h"
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
 #import "BDSKManyToManyDictionary.h"
@@ -74,7 +74,7 @@
 
 #pragma mark API
 
-- (id)initForDocument:(BibDocument *)aDocument
+- (id)initForOwner:(id <BDSKOwner>)owner
 {
     BDSKASSERT([NSThread isMainThread]);
 
@@ -87,8 +87,8 @@
         index = NULL;
         
         // new document won't have a URL, so we'll have to wait for the controller to set it
-        NSURL *documentURL = [aDocument fileURL];
-        NSArray *items = [[aDocument publications] arrayByPerformingSelector:@selector(searchIndexInfo)];
+        NSURL *documentURL = [owner fileURL];
+        NSArray *items = [[owner publications] arrayByPerformingSelector:@selector(searchIndexInfo)];
         NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:items, @"items", documentURL, @"documentURL", nil];
         
         // setting up the cache folder is not thread safe, so make sure it's done on the main thread
@@ -102,9 +102,9 @@
         
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
         SEL handler = @selector(processNotification:);
-        [nc addObserver:self selector:handler name:BDSKFileSearchIndexInfoChangedNotification object:aDocument];
-        [nc addObserver:self selector:handler name:BDSKDocAddItemNotification object:aDocument];
-        [nc addObserver:self selector:handler name:BDSKDocDelItemNotification object:aDocument];
+        [nc addObserver:self selector:handler name:BDSKFileSearchIndexInfoChangedNotification object:owner];
+        [nc addObserver:self selector:handler name:BDSKDocAddItemNotification object:owner];
+        [nc addObserver:self selector:handler name:BDSKDocDelItemNotification object:owner];
         
         flags.shouldKeepRunning = 1;
         flags.finishedInitialIndexing = 0;

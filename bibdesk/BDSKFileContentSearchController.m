@@ -77,7 +77,7 @@
     NSParameterAssert([aDocument respondsToSelector:@selector(removeFileContentSearch:)]);
     [self setDocument:aDocument];
     
-    searchIndex = [[BDSKFileSearchIndex alloc] initForDocument:aDocument];
+    searchIndex = [[BDSKFileSearchIndex alloc] initForOwner:aDocument];
     search = [[BDSKFileSearch alloc] initWithIndex:searchIndex delegate:self];
     searchFieldDidEndEditing = NO;
     
