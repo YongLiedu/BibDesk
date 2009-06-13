@@ -537,7 +537,10 @@ static BDSKTypeManager *sharedInstance = nil;
 }
 
 - (NSString *)RISTagForBibTeXFieldName:(NSString *)name{
-    return [RISTagForFieldNameDict objectForKey:name];
+    NSString *tag = [RISTagForFieldNameDict objectForKey:name];
+    if (tag == nil && [name length] == 2)
+        tag = [name uppercaseString]; // this is probably a saved RIS tag for which no bibtex tag could be constructed
+    return tag;
 }
 
 - (NSString *)RISTypeForBibTeXType:(NSString *)type{
