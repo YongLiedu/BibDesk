@@ -1830,6 +1830,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     
     while(k = [e nextObject]){
 		tag = [btm RISTagForBibTeXFieldName:k];
+        // ignore fields that have no RIS tag, we should not contruct invalid or wrong RIS
+        if (tag == nil) continue;
+        
         v = [self valueOfField:k inherit:NO];
         
         if ([k isEqualToString:BDSKAuthorString] || [k isEqualToString:BDSKEditorString]) {

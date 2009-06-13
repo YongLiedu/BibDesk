@@ -471,8 +471,6 @@
         Url = UR; 
         Volume = VL; 
         Year = PY; 
-        Timescited = TC; 
-        "Times-Cited" = TC; 
     }; 
     RequiredTypesForFileType = {
         BibTeX = (

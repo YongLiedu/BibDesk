@@ -537,11 +537,7 @@ static BDSKTypeManager *sharedInstance = nil;
 }
 
 - (NSString *)RISTagForBibTeXFieldName:(NSString *)name{
-    NSString *tag = [RISTagForFieldNameDict objectForKey:name];
-    if(tag)
-        return tag;
-    else
-        return [[name stringByPaddingToLength:2 withString:@"1" startingAtIndex:0] uppercaseString]; // manufacture a guess
+    return [RISTagForFieldNameDict objectForKey:name];
 }
 
 - (NSString *)RISTypeForBibTeXType:(NSString *)type{
