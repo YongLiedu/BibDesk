@@ -506,7 +506,7 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
         addStringToDictionaryIfNotNil(docType, BDSKTypeString, pubFields);
     }
     
-    addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"timescited"] stringValue], @"Timescited", pubFields);
+    addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"timescited"] stringValue], @"Times-Cited", pubFields);
     addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"recid"] stringValue], @"Isi-Recid", pubFields);
         
     while (nil != child) {
