@@ -1563,7 +1563,7 @@ You can turn on sharing in the @ref{Sharing Preferences,Sharing Preferences}.
 
 @b{Script Groups} generate their items using a script, either a shell script or an AppleScript.  
 For example, the script can download content from a remote location and parse the content to get the items.  
-The script should return valid BibTeX. 
+The script should return valid BibTeX, or any other text format BibDesk can import. 
 
 @ref{Searching External Databases, @b{Search Groups}} contain items obtained from searching an external database, 
 such as PubMed or libraries allowing z39.50 searches. 
