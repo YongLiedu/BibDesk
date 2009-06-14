@@ -1569,9 +1569,10 @@ The script should return valid BibTeX, or any other text format BibDesk can impo
 such as PubMed or libraries allowing z39.50 searches. 
 
 Items in external groups are not included in the Library and can not be edited.  
-You can add external items to your Library by dragging them to the Library group.  
-You can also use the @menutitle{Merge In External Publications} menu item in the 
-@menutitle{File} menu. This wil only add items that are not yet in your Library. 
+You can add external items to your Library by pressing the @buttontitle{Import} 
+button or dragging them to the Library group.  You can also use the 
+@menutitle{Merge In External Publications} menu item in the @menutitle{File} menu. 
+This wil only add items that are not yet in your Library. 
 
 @c
 
