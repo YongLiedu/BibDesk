@@ -189,7 +189,7 @@
     delegate = anObject;
 }
 
-- (NSSet *)allIdentifierURLsForURL:(NSURL *)theURL
+- (NSSet *)identifierURLsForURL:(NSURL *)theURL
 {
     [rwLock lockForReading];
     NSSet *set = [[[identifierURLs allObjectsForKey:theURL] copy] autorelease];
@@ -226,7 +226,7 @@ static inline id signatureForURL(NSURL *aURL) {
             signature = [NSDate dateWithTimeIntervalSinceReferenceDate:(NSTimeInterval)absoluteTime];
         }
     }
-    return signature ? signature : [NSData data];
+    return signature ?: [NSData data];
 }
 
 + (NSString *)indexCacheFolder

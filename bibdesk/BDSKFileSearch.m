@@ -225,7 +225,7 @@
             maxValue = MAX(score, maxValue);
             
             NSURL *theURL = (NSURL *)SKDocumentCopyURL(skDocument);
-            NSSet *identifierURLs = [searchIndex allIdentifierURLsForURL:theURL];
+            NSSet *identifierURLs = [searchIndex identifierURLsForURL:theURL];
             NSString *title = nil;
             NSEnumerator *idURLEnum = [identifierURLs objectEnumerator];
             NSURL *idURL;

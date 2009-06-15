@@ -84,7 +84,7 @@ typedef struct _BDSKSearchIndexFlags
 - (void)cancelForDocumentURL:(NSURL *)documentURL;
 - (BOOL)finishedInitialIndexing;
 - (void)setDelegate:(id <BDSKFileSearchIndexDelegate>)anObject;
-- (NSSet *)allIdentifierURLsForURL:(NSURL *)theURL;
+- (NSSet *)identifierURLsForURL:(NSURL *)theURL;
 
 // Poll this for progress bar updates during indexing
 - (double)progressValue;
