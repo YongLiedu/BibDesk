@@ -255,7 +255,7 @@
     categoryGroupImage = [[NSImage alloc] initWithSize:smallSize];
     [categoryGroupImage lockFocus];
     CIImage *ciImage = [CIImage imageWithData:[smartGroupImage TIFFRepresentation]];
-    ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.2 brightnessBias:0.3];
+    ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.3 brightnessBias:0.3];
     [ciImage drawInRect:smallRect fromRect:smallRect operation:NSCompositeSourceOver fraction:1.0];
     [categoryGroupImage unlockFocus];
     NSImage *tinyImage = [[NSImage alloc] initWithSize:tinySize];
@@ -264,7 +264,7 @@
     [tinySmartFolder setSize:tinySize];
     [tinyImage lockFocus];
     ciImage = [CIImage imageWithData:[tinySmartFolder TIFFRepresentation]];
-    ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.2 brightnessBias:0.3];
+    ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.3 brightnessBias:0.3];
     [ciImage drawInRect:tinyRect fromRect:tinyRect operation:NSCompositeSourceOver fraction:1.0];
     [tinyImage unlockFocus];
     [categoryGroupImage addRepresentation:[[tinyImage representations] lastObject]];
