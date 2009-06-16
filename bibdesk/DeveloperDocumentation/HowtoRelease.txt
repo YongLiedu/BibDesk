@@ -18,7 +18,7 @@ How To Release BibDesk
 
 - recompile the "BibDesk" target in Release configuration
 
-- build the "DiskImage" target, which should drop a disk image and an appcast XML on your desktop
+- build the "DiskImage" target, which should drop a disk image and an (partial) appcast XML on your desktop
 
 - follow the sf.net release instructions
   *  in the BibDesk project, follow the "Feature Settings" item in the "Project Admin" menu, and click Manage for the "File Release System"
@@ -28,13 +28,14 @@ How To Release BibDesk
   *  web upload:  https://frs.sourceforge.net/webupload
 
 - edit the web page (sidebar.html) to point to the new release
-  *  download URL
   *  release notes URL
 
-- update the release notes lines in the appcast XML using <li> elements
+- update the release notes lines in the generated appcast XML using <li> elements
 
-- insert the <item> from the appcast XML in bibdesk.xml on the web server
+- insert the <item> from the generated and edited appcast XML in bibdesk.xml on the web server, above the older <item>s
 
-- test the new download from the home page
+- test the new download from the sourceforge.net downloads
+
+- copy the edited bibdesk.xml back to the server
 
 - post appropriate messages to bibdesk-announce and bibdesk-users (someone should also post to macosx-tex)
