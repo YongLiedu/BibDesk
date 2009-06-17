@@ -92,7 +92,7 @@
 #import <Sparkle/Sparkle.h>
 
 #define WEB_URL @"http://bibdesk.sourceforge.net/"
-#define WIKI_URL @"http://apps.sourceforge.net/mediawiki/bibdesk/"
+#define WIKI_URL @"http://sourceforge.net/apps/mediawiki/bibdesk/"
 
 @implementation BDSKAppController
 
