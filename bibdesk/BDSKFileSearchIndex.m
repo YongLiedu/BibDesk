@@ -331,8 +331,10 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
 {
     BDSKASSERT([NSThread isMainThread]);
     // Make sure we send frequently enough to update a progress bar, but not too frequently to avoid beachball on single-core systems; too many search updates slow down indexing due to repeated flushes. 
+    OSMemoryBarrier();
     if (0 == flags.updateScheduled) {
-        [self performSelector:@selector(notifyDelegate) withObject:nil afterDelay:0.5];
+        const double updateDelay = flags.finishedInitialIndexing ? 0.1 : 1.0;
+        [self performSelector:@selector(_notifyDelegate) withObject:nil afterDelay:updateDelay];
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.updateScheduled);
     }
 }
@@ -451,6 +453,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
         [pool release];
         pool = [NSAutoreleasePool new];
         
+        OSMemoryBarrier();
         if (0 == flags.updateScheduled)
             [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
     }
@@ -503,6 +506,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
         [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
 	}
 	
+    OSMemoryBarrier();
     if (0 == flags.updateScheduled)
         [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
 }
@@ -531,6 +535,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     [removedURLs release];
     [newURLs release];
     
+    OSMemoryBarrier();
     if (0 == flags.updateScheduled)
         [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
 }    
@@ -624,6 +629,7 @@ static void addItemFunction(const void *value, void *context) {
             [rwLock unlock];
         }
         
+        OSMemoryBarrier();
         if (0 == flags.updateScheduled)
             [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
         
@@ -662,6 +668,7 @@ static void addItemFunction(const void *value, void *context) {
                     progressValue = (numberIndexed / totalObjectCount) * 100;
                 }
                 
+                OSMemoryBarrier();
                 if (0 == flags.updateScheduled)
                     [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
             }
@@ -678,6 +685,7 @@ static void addItemFunction(const void *value, void *context) {
         }
         [URLsToRemove release];
         
+        OSMemoryBarrier();
         if (0 == flags.updateScheduled)
             [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
         
