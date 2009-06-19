@@ -334,7 +334,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     OSMemoryBarrier();
     if (0 == flags.updateScheduled) {
         const double updateDelay = flags.finishedInitialIndexing ? 0.1 : 1.0;
-        [self performSelector:@selector(_notifyDelegate) withObject:nil afterDelay:updateDelay];
+        [self performSelector:@selector(notifyDelegate) withObject:nil afterDelay:updateDelay];
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.updateScheduled);
     }
 }
