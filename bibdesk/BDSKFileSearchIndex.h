@@ -82,8 +82,12 @@ typedef struct _BDSKSearchIndexFlags
 
 // Required before disposing of the index.  After calling cancel, the index is no longer viable.
 - (void)cancelForDocumentURL:(NSURL *)documentURL;
+
 - (BOOL)finishedInitialIndexing;
+
+- (id)delegate;
 - (void)setDelegate:(id <BDSKFileSearchIndexDelegate>)anObject;
+
 - (NSSet *)identifierURLsForURL:(NSURL *)theURL;
 
 // Poll this for progress bar updates during indexing

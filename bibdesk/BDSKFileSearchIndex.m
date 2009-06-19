@@ -181,6 +181,11 @@
     return flags.finishedInitialIndexing == 1;
 }
 
+- (id)delegate
+{
+    return delegate;
+}
+
 - (void)setDelegate:(id <BDSKFileSearchIndexDelegate>)anObject
 {
     if(anObject)
