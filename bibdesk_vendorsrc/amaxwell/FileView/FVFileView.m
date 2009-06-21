@@ -2387,7 +2387,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
 {
     NSPoint dragLoc = [self convertPoint:[sender draggingLocation] fromView:nil];
     NSPoint p = dragLoc;
-    NSUInteger r, c;
+    NSUInteger r, c, dropOp;
     BOOL found;
     NSDragOperation dragOp = [sender draggingSourceOperationMask] & ~NSDragOperationMove;
     BOOL isCopy = [self allowsDownloading] && dragOp == NSDragOperationCopy;
@@ -2398,9 +2398,10 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     
     // First determine the drop location, drop between rows in column mode, and between columns otherwise
     if (_fvFlags.displayMode == FVDisplayModeColumn)
-        found = [self _getGridRow:&r column:&c rowOperation:&_fvFlags.dropOperation columnOperation:NULL atPoint:p];
+        found = [self _getGridRow:&r column:&c rowOperation:&dropOp columnOperation:NULL atPoint:p];
     else
-        found = [self _getGridRow:&r column:&c rowOperation:NULL columnOperation:&_fvFlags.dropOperation atPoint:p];
+        found = [self _getGridRow:&r column:&c rowOperation:NULL columnOperation:&dropOp atPoint:p];
+    _fvFlags.dropOperation = dropOp;
     _dropIndex = found ? [self _indexForGridRow:r column:c] : NSNotFound;
     // Check whether the index is not NSNotFound, because the grid cell can be empty
     if (_dropIndex == NSNotFound)
