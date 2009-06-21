@@ -89,10 +89,9 @@ static CGLayerRef   _pageLayer = NULL;
     }
     OSSpinLockUnlock(&_releaseLock);
     
-    if (oldObjects) {
+    if ([oldObjects count])
         [oldObjects makeObjectsPerformSelector:@selector(_releaseMappedResources)];
-        [oldObjects release];
-    }
+    [oldObjects release];
 }
 
 + (void)_removeIconForMappedRelease:(FVPDFIcon *)anIcon;
