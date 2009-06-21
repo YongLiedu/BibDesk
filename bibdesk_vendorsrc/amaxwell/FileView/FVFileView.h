@@ -95,11 +95,11 @@ typedef NSInteger FVDisplayMode;
     NSMutableIndexSet      *_selectionIndexes;
     CGLayerRef              _selectionOverlay;
     NSUInteger              _lastClickedIndex;
-    NSUInteger              _dropOperation;
     NSUInteger              _dropIndex;
     NSRect                  _rubberBandRect;
     struct __fvFlags {
         unsigned int displayMode : 2;
+        unsigned int dropOperation : 2;
         unsigned int isEditable : 1;
         unsigned int isMouseDown : 1;
         unsigned int isRescaling: 1;

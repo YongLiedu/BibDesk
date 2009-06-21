@@ -192,7 +192,7 @@ static char _FVFileViewContentObservationContext;
     _lastMouseDownLocInView = NSZeroPoint;
     // the next two are set to an illegal combination to indicate that no drop is in progress
     _dropIndex = NSNotFound;
-    _dropOperation = FVDropBefore;
+    _fvFlags.dropOperation = FVDropBefore;
     _fvFlags.isRescaling = NO;
     _fvFlags.scheduledLiveResize = NO;
     _selectionIndexes = [[NSIndexSet alloc] init];
@@ -1714,7 +1714,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     NSRect aRect = NSZeroRect;
     BOOL isColumn = (_fvFlags.displayMode == FVDisplayModeColumn);
     
-    switch (_dropOperation) {
+    switch (_fvFlags.dropOperation) {
         case FVDropOn:
             if (_dropIndex == NSNotFound) {
                 aRect = [self visibleRect];
@@ -1757,7 +1757,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         [[[NSColor alternateSelectedControlColor] colorWithAlphaComponent:0.2] setFill];
         [[[NSColor alternateSelectedControlColor] colorWithAlphaComponent:0.8] setStroke];
         
-        if (_dropOperation == FVDropOn) {
+        if (_fvFlags.dropOperation == FVDropOn) {
             // it's either a drop on the whole table or on top of a cell
             p = [NSBezierPath fv_bezierPathWithRoundRect:NSInsetRect(aRect, 0.5 * lineWidth, 0.5 * lineWidth) xRadius:7 yRadius:7];
             [p fill];
@@ -2274,7 +2274,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
         }
         
         // drop highlight and rubber band are mutually exclusive
-        if (_dropIndex != NSNotFound || _dropOperation == FVDropOn) {
+        if (_dropIndex != NSNotFound || _fvFlags.dropOperation == FVDropOn) {
             [self _drawDropHighlight];
         }
         else if (NSIsEmptyRect(_rubberBandRect) == NO) {
@@ -2373,7 +2373,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
 - (void)setDropIndex:(NSUInteger)anIndex dropOperation:(FVDropOperation)anOperation
 {
     _dropIndex = anIndex;
-    _dropOperation = anOperation;
+    _fvFlags.dropOperation = anOperation;
 }
 
 - (BOOL)_isLocalDraggingInfo:(id <NSDraggingInfo>)sender
@@ -2398,13 +2398,13 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     
     // First determine the drop location, drop between rows in column mode, and between columns otherwise
     if (_fvFlags.displayMode == FVDisplayModeColumn)
-        found = [self _getGridRow:&r column:&c rowOperation:&_dropOperation columnOperation:NULL atPoint:p];
+        found = [self _getGridRow:&r column:&c rowOperation:&_fvFlags.dropOperation columnOperation:NULL atPoint:p];
     else
-        found = [self _getGridRow:&r column:&c rowOperation:NULL columnOperation:&_dropOperation atPoint:p];
+        found = [self _getGridRow:&r column:&c rowOperation:NULL columnOperation:&_fvFlags.dropOperation atPoint:p];
     _dropIndex = found ? [self _indexForGridRow:r column:c] : NSNotFound;
     // Check whether the index is not NSNotFound, because the grid cell can be empty
     if (_dropIndex == NSNotFound)
-        _dropOperation = FVDropOn;
+        _fvFlags.dropOperation = FVDropOn;
     
     // We won't reset the drop location info when we propose NSDragOperationNone, because the delegate may want to override our decision, we will reset it at the end
     
@@ -2414,13 +2414,13 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     }
     else if ([self _isLocalDraggingInfo:sender] && isCopy == NO) {
         // invalidate some local drags, otherwise make sure we use a Move operation
-        if (FVDropOn == _dropOperation) {
+        if (FVDropOn == _fvFlags.dropOperation) {
             // drop on the whole view (add operation) or an icon (replace operation) makes no sense for a local drag, but the delegate may override
             dragOp = NSDragOperationNone;
         } 
-        else if (FVDropBefore == _dropOperation || FVDropAfter == _dropOperation) {
+        else if (FVDropBefore == _fvFlags.dropOperation || FVDropAfter == _fvFlags.dropOperation) {
             // inserting inside the block we're dragging doesn't make sense; this does allow dropping a disjoint selection at some locations within the selection; the delegate may override
-            insertIndex = FVDropAfter == _dropOperation ? _dropIndex + 1 : _dropIndex;
+            insertIndex = FVDropAfter == _fvFlags.dropOperation ? _dropIndex + 1 : _dropIndex;
             firstIndex = [_selectionIndexes firstIndex], endIndex = [_selectionIndexes lastIndex] + 1;
             if ([_selectionIndexes containsIndexesInRange:NSMakeRange(firstIndex, endIndex - firstIndex)] &&
                 insertIndex >= firstIndex && insertIndex <= endIndex) {
@@ -2435,14 +2435,14 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
         dragOp = NSDragOperationLink;
     }
     
-    // we could allow the delegate to change the _dropIndex and _dropOperation as NSTableView does, but we don't use that at present
+    // we could allow the delegate to change the _dropIndex and _fvFlags.dropOperation as NSTableView does, but we don't use that at present
     if ([[self delegate] respondsToSelector:@selector(fileView:validateDrop:proposedIndex:proposedDropOperation:proposedDragOperation:)])
-        dragOp = [[self delegate] fileView:self validateDrop:sender proposedIndex:_dropIndex proposedDropOperation:_dropOperation proposedDragOperation:dragOp];
+        dragOp = [[self delegate] fileView:self validateDrop:sender proposedIndex:_dropIndex proposedDropOperation:_fvFlags.dropOperation proposedDragOperation:dragOp];
     
     // make sure we're consistent, also see comment above
     if (dragOp == NSDragOperationNone) {
         _dropIndex = NSNotFound;
-        _dropOperation = FVDropBefore;
+        _fvFlags.dropOperation = FVDropBefore;
     }
     
     [self setNeedsDisplay:YES];
@@ -2458,7 +2458,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
 - (void)draggingExited:(id <NSDraggingInfo>)sender
 {
     _dropIndex = NSNotFound;
-    _dropOperation = FVDropBefore;
+    _fvFlags.dropOperation = FVDropBefore;
     [self setNeedsDisplay:YES];
 }
 
@@ -2466,7 +2466,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
 - (void)concludeDragOperation:(id <NSDraggingInfo>)sender;
 {
     _dropIndex = NSNotFound;
-    _dropOperation = FVDropBefore;
+    _fvFlags.dropOperation = FVDropBefore;
     [self reloadIcons];
 }
 
@@ -2501,9 +2501,9 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     NSMutableArray *downloads = nil;
     NSUInteger insertIndex = 0;
     
-    if (FVDropBefore == _dropOperation) {
+    if (FVDropBefore == _fvFlags.dropOperation) {
         insertIndex = _dropIndex;
-    } else if (FVDropAfter == _dropOperation) {
+    } else if (FVDropAfter == _fvFlags.dropOperation) {
         insertIndex = _dropIndex + 1;
     } else if (_dropIndex == NSNotFound) {
         insertIndex = [self numberOfIcons];
@@ -2536,13 +2536,13 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     
     if (isMove) {
         
-        didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:_dropIndex forDrop:sender dropOperation:_dropOperation];
+        didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:_dropIndex forDrop:sender dropOperation:_fvFlags.dropOperation];
         
-    } else if (FVDropBefore == _dropOperation || FVDropAfter == _dropOperation || NSNotFound == _dropIndex) {
+    } else if (FVDropBefore == _fvFlags.dropOperation || FVDropAfter == _fvFlags.dropOperation || NSNotFound == _dropIndex) {
            
         // drop on the whole view
         NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(insertIndex, [allURLs count])];
-        [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet forDrop:sender dropOperation:_dropOperation];
+        [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet forDrop:sender dropOperation:_fvFlags.dropOperation];
         didPerform = YES;
 
     }
@@ -2557,7 +2557,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
             aURL = [NSURL fileURLWithPath:[[pboard propertyListForType:NSFilenamesPboardType] lastObject]];
         }
         if (aURL)
-            didPerform = [[self dataSource] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:_dropIndex] withURLs:[NSArray arrayWithObject:aURL] forDrop:sender dropOperation:_dropOperation];
+            didPerform = [[self dataSource] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:_dropIndex] withURLs:[NSArray arrayWithObject:aURL] forDrop:sender dropOperation:_fvFlags.dropOperation];
     }
     
     if ([downloads count]) {
@@ -2573,7 +2573,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     
     // if we return NO, concludeDragOperation doesn't get called
     _dropIndex = NSNotFound;
-    _dropOperation = FVDropBefore;
+    _fvFlags.dropOperation = FVDropBefore;
     [self setNeedsDisplay:YES];
     
     // reload is handled in concludeDragOperation:
