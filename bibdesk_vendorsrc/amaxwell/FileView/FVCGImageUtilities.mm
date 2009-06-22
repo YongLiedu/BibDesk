@@ -36,13 +36,15 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <vector>
 #import "FVCGImageUtilities.h"
 #import "FVBitmapContext.h"
 #import "FVUtilities.h" /* for FVLog */
-#import <Accelerate/Accelerate.h>
 #import "FVImageBuffer.h"
+
+#import <Accelerate/Accelerate.h>
+#import <libkern/OSAtomic.h>
 #import <sys/time.h>
+#import <vector>
 
 // http://lists.apple.com/archives/perfoptimization-dev/2005/Mar/msg00041.html
 
@@ -76,16 +78,21 @@
 // monitor cached tile memory consumption by blocking render threads
 #define FV_LIMIT_TILEMEMORY_USAGE 1
 
-// this is an advisory limit: actual usage will grow as needed
-#define FV_TILEMEMORY_MEGABYTES 15
+// this is an advisory limit: actual usage will grow as needed, but this prevents scaling images simultaneously
+#define FV_TILEMEMORY_MEGABYTES 100
 
 #if FV_LIMIT_TILEMEMORY_USAGE
 // Sadly, NSCondition is apparently buggy pre-10.5: http://www.cocoabuilder.com/archive/message/cocoa/2008/4/4/203257
 static pthread_mutex_t _memoryMutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t _memoryCond = PTHREAD_COND_INITIALIZER;
-#endif
+static pthread_cond_t  _memoryCond = PTHREAD_COND_INITIALIZER;
+static uint64_t        _allocatedBytes = 0;
 
-static NSLock *_copyLock = [NSLock new];
+static inline size_t __FVCGImageCurrentBytesUsed(void)
+{
+    return (_allocatedBytes + [FVImageBuffer allocatedBytes]);
+}
+
+#endif /* FV_LIMIT_TILEMEMORY_USAGE */
 
 NSSize FVCGImageSize(CGImageRef image)
 {
@@ -95,9 +102,45 @@ NSSize FVCGImageSize(CGImageRef image)
     return s;
 }
 
+// cheap and consistent way to compute the number of bytes in an image without hitting the data provider
+static size_t __FVCGImageGetDataSize(CGImageRef image)
+{
+    return (CGImageGetBytesPerRow(image) * CGImageGetHeight(image));
+}
+
+#if FV_LIMIT_TILEMEMORY_USAGE
+
+static void __FVCGImageRequestAllocationSize(const size_t allocSize)
+{
+    int ret = pthread_mutex_lock(&_memoryMutex);
+    while (__FVCGImageCurrentBytesUsed() > FV_TILEMEMORY_MEGABYTES * 1024 * 1024 && 0 == ret) {
+        ret = pthread_cond_wait(&_memoryCond, &_memoryMutex);
+    }
+
+    // if we increase before checking the condition, it may never be true
+    _allocatedBytes += allocSize;
+    pthread_mutex_unlock(&_memoryMutex);    
+}
+
+static void __FVCGImageDiscardAllocationSize(const size_t allocSize)
+{
+    pthread_mutex_lock(&_memoryMutex);
+    _allocatedBytes -= allocSize;
+    pthread_cond_broadcast(&_memoryCond);
+    pthread_mutex_unlock(&_memoryMutex);    
+}
+
+#endif
+
 static CGImageRef __FVCopyImageUsingCacheColorspace(CGImageRef image, NSSize size)
 {
-    [_copyLock lock];
+    
+#if FV_LIMIT_TILEMEMORY_USAGE
+    // worst case: load entire source image, and allocate memory for new image
+    const size_t allocSize = __FVCGImageGetDataSize(image) + FVPaddedRowBytesForWidth(4, size.width) * size.height;
+    __FVCGImageRequestAllocationSize(allocSize);
+#endif
+    
     FVBitmapContextRef ctxt = FVIconBitmapContextCreateWithSize(size.width, size.height);
     CGContextClearRect(ctxt, CGRectMake(0, 0, size.width, size.height));
 
@@ -108,7 +151,11 @@ static CGImageRef __FVCopyImageUsingCacheColorspace(CGImageRef image, NSSize siz
     
     CGImageRef toReturn = CGBitmapContextCreateImage(ctxt);
     FVIconBitmapContextRelease(ctxt);
-    [_copyLock unlock];
+    
+#if FV_LIMIT_TILEMEMORY_USAGE
+    __FVCGImageDiscardAllocationSize(allocSize);
+#endif
+    
     return toReturn;
 }
 
@@ -377,6 +424,7 @@ static vImage_Error __FVConvertRGB888ImageRegionToPlanar8_buffers(CGImageRef ima
 // the image's byte pointer is passed in as a parameter in case we're copying from the data provider (which can be really slow)
 static vImage_Error __FVConvertARGB8888ImageRegionToPlanar8_buffers(CGImageRef image, const uint8_t *srcBytes, const size_t rowBytes, const FVRegion region, FVImageBuffer *destBuffer, NSArray *buffers)
 {
+    NSCParameterAssert(destBuffer);
     const size_t bytesPerSample = 4;
     vImage_Buffer *dstBuffer = destBuffer->buffer;
     if (region.h * FVPaddedRowBytesForWidth(bytesPerSample, region.w) > [destBuffer bufferSize]) {
@@ -574,21 +622,42 @@ static vImage_Error __FVConvertPlanar8To8888Host(NSArray *planarBuffers, const v
 
 static NSUInteger __FVAddRowOfARGB8888BuffersToImage(NSArray *buffers, const NSUInteger previousRowIndex, vImage_Buffer *destImage)
 {
-    NSUInteger bufCount = [buffers count];
+    const NSUInteger bufCount = [buffers count];
     NSCParameterAssert(bufCount > 0);
-    FVImageBuffer *imageBuffer = [buffers objectAtIndex:0];
+    FVImageBuffer *imageBuffer;
+    id (*objectAtIndex)(id, SEL, NSUInteger);
+    objectAtIndex = (id (*)(id, SEL, NSUInteger))[buffers methodForSelector:@selector(objectAtIndex:)];
+    imageBuffer = objectAtIndex(buffers, @selector(objectAtIndex:), 0);
     const size_t lastRowIndex = imageBuffer->buffer->height + previousRowIndex;
     NSUInteger sourceRow = 0;        
     
-    // !!! avoid overflow; should check this elsewhere and assert here
+#if DEBUG
+    // check for overflow before copying is already done by __FVCheckAndTrimRow
+    size_t requiredWidth = 0;
+    for (NSUInteger bufIndex = 0; bufIndex < bufCount; bufIndex++) {
+        imageBuffer = objectAtIndex(buffers, @selector(objectAtIndex:), bufIndex);
+        requiredWidth += (imageBuffer->buffer->width * 4);
+    }
+    if (requiredWidth > destImage->rowBytes) {
+        FVLog(@"%s invalid destination: %lu > %lu rowBytes", __func__, imageBuffer->buffer->width * 4, destImage->rowBytes);
+        HALT;
+    }
+#endif
+    
     for (NSUInteger destRow = previousRowIndex; destRow < lastRowIndex && destRow < destImage->height; destRow++) {
         
         uint8_t *rowPtr = (uint8_t *)destImage->data + destRow * destImage->rowBytes;
         
         for (NSUInteger bufIndex = 0; bufIndex < bufCount; bufIndex++) {
-            imageBuffer = [buffers objectAtIndex:bufIndex];
+            imageBuffer = objectAtIndex(buffers, @selector(objectAtIndex:), bufIndex);
             size_t widthToCopy = imageBuffer->buffer->width * 4;
             uint8_t *srcPtr = (uint8_t *)imageBuffer->buffer->data + sourceRow * imageBuffer->buffer->rowBytes;
+            /*
+             For certain large allocations in 32-bit, we'll get a non-NULL allocation and then die
+             in memcpy with EXC_BAD_ACCESS, but there's no way to catch this without crashing, as 
+             far as I can tell.  I don't think it's a buffer overrun, since the checks are in place 
+             to catch that here, and the problem doesn't occur in 64-bit.
+             */
             memcpy(rowPtr, srcPtr, widthToCopy);
             rowPtr = rowPtr + widthToCopy;
         }
@@ -629,7 +698,7 @@ static size_t __FVScaledHeightOfRegions(std::vector <FVRegion> regions, const do
  
  Note that an additional problem occurs when the image buffers have a zero width, although this should not occur after r355.  Subtracting the shrinkage in that case leads to integer wraparound on the height/width and another buffer overflow (now asserted against).
  */
-static void __FVCheckAndTrimRow(NSArray *regionRow, vImage_Buffer *destinationBuffer, size_t accumulatedRows)
+static vImage_Error __FVCheckAndTrimRow(NSArray *regionRow, vImage_Buffer *destinationBuffer, size_t accumulatedRows)
 {
     NSUInteger regionIndex, regionCount = [regionRow count];
     size_t accumulatedColumns = 0;
@@ -651,6 +720,8 @@ static void __FVCheckAndTrimRow(NSArray *regionRow, vImage_Buffer *destinationBu
         // FVLog(@"horizontal shrinkage: %ld pixel(s)", (long)shrinkage);
         imageBuffer = [regionRow lastObject];
         NSCParameterAssert(imageBuffer->buffer->width >= (size_t)shrinkage);
+        if (imageBuffer->buffer->width < (size_t)shrinkage)
+            return kvImageBufferSizeMismatch;
         imageBuffer->buffer->width -= shrinkage;
     }
     
@@ -661,55 +732,67 @@ static void __FVCheckAndTrimRow(NSArray *regionRow, vImage_Buffer *destinationBu
         for (regionIndex = 0; regionIndex < regionCount; regionIndex++) {
             imageBuffer = objectAtIndex(regionRow, @selector(objectAtIndex:), regionIndex);
             NSCParameterAssert(imageBuffer->buffer->height >= (size_t)shrinkage);
+            if (imageBuffer->buffer->height < (size_t)shrinkage)
+                return kvImageBufferSizeMismatch;
             imageBuffer->buffer->height -= shrinkage;
         }
     }
+    
+    return kvImageNoError;
 }
 
 static CGImageRef __FVTileAndScale_8888_or_888_Image(CGImageRef image, const NSSize desiredSize)
 {
-    // make this call early so we avoid other allocations on this thread in case we have to wait on _copyLock
+    NSCParameterAssert(image);
+    NSCParameterAssert(desiredSize.width >= 1 && desiredSize.height >= 1);
+    
+    // make this call early to increase the allocation size record if needed
     CFDataRef originalImageData = NULL;
     const uint8_t *srcBytes = __FVCGImageGetBytePtr(image, NULL);   
     if (NULL == srcBytes) {
-        // block other threads from copying at the same time; this tends to be a large memory hit
-        [_copyLock lock];
+        
         originalImageData = CGDataProviderCopyData(CGImageGetDataProvider(image));
         srcBytes = CFDataGetBytePtr(originalImageData);
+        
+        // !!! early return
+        if (NULL == srcBytes) {
+#if FV_LIMIT_TILEMEMORY_USAGE
+            __FVCGImageDiscardAllocationSize(__FVCGImageGetDataSize(image));           
+#endif
+            return NULL;
+        }
     }
-    
-    size_t originalWidth = CGImageGetWidth(image);
-    CGImageAlphaInfo alphaInfo = CGImageGetAlphaInfo(image);
-    
-    bool isIndexedImage = false;
-    if (kCGColorSpaceModelIndexed == __FVGetColorSpaceModelOfColorSpace(CGImageGetColorSpace(image))) {
+        
+    const bool isIndexedImage = (kCGColorSpaceModelIndexed == __FVGetColorSpaceModelOfColorSpace(CGImageGetColorSpace(image)));
+    if (isIndexedImage) {
         // we'd better not reach this on 10.4...
         FVAPIAssert(floor(NSAppKitVersionNumber > NSAppKitVersionNumber10_4), @"indexed color space functions not available on 10.4");
-        isIndexedImage = true;
     }
+    
+    /*
+     Check this as needed to avoid NULL pointer dereference and other errors; anything that causes
+     this to be nonzero is potentially a fatal error, so all we want to do is clean up and return
+     NULL whenever it occurs.
+     */
+    vImage_Error ret = kvImageNoError;
     
     size_t destRowBytes = FVPaddedRowBytesForWidth(4, desiredSize.width);
     FVImageBuffer *interleavedImageBuffer = [[FVImageBuffer alloc] initWithWidth:desiredSize.width height:desiredSize.height rowBytes:destRowBytes];
-    
-    // this is the most likely to fail, since it's the largest contiguous allocation
-    if (nil == interleavedImageBuffer) {
-        if (originalImageData) {
-            CFRelease(originalImageData);
-            [_copyLock unlock];
-        }
-        FVLog(@"Unable to allocate memory for image of size %.0f x %.0f", desiredSize.width, desiredSize.height);
-        return NULL;
+    if (nil == interleavedImageBuffer) 
+        ret = kvImageMemoryAllocationError;
+        
+    vImage_Buffer *interleavedBuffer = NULL;
+    if (kvImageNoError == ret) {
+        interleavedBuffer = interleavedImageBuffer->buffer;
+        /*
+         !!! Not all columns are being filled when scaling; need to work around that somehow.  
+         There is at least a partial workaround in place as of r205.
+         */
+        uint8_t fillColor = 0xaf;
+        memset(interleavedBuffer->data, fillColor, interleavedBuffer->rowBytes * interleavedBuffer->height);
     }
     
-    vImage_Buffer *interleavedBuffer = interleavedImageBuffer->buffer;
-
-    /*
-     !!! Not all columns are being filled when scaling; need to work around that somehow.  
-     There is at least a partial workaround in place as of r205.
-     */
-    uint8_t fillColor = 0xaf;
-    memset(interleavedBuffer->data, fillColor, interleavedBuffer->rowBytes * interleavedBuffer->height);
-    const double scale = desiredSize.width / (double)originalWidth;
+    const double scale = desiredSize.width / double(CGImageGetWidth(image));
     ResamplingFilter filter = vImageNewResamplingFilter(scale, SCALE_QUALITY);
     
     std::vector <FVRegion> regions = __FVTileRegionsForImage(image, scale);
@@ -734,19 +817,27 @@ static CGImageRef __FVTileAndScale_8888_or_888_Image(CGImageRef image, const NSS
         
     FVImageBuffer *imageBuffer;
     NSUInteger i;
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < 4 && kvImageNoError == ret; i++) {
         imageBuffer = [[FVImageBuffer alloc] initWithWidth:maxWidth height:maxHeight bytesPerSample:1];
-        [planarTilesA addObject:imageBuffer];
-        [imageBuffer release];
-        
+        if (imageBuffer) {
+            [planarTilesA addObject:imageBuffer];
+            [imageBuffer release];
+        }
+        else {
+            ret = kvImageMemoryAllocationError;
+        }
+
         imageBuffer = [[FVImageBuffer alloc] initWithWidth:maxWidth height:maxHeight bytesPerSample:1];
-        [planarTilesB addObject:imageBuffer];
-        [imageBuffer release];
+        if (imageBuffer) {
+            [planarTilesB addObject:imageBuffer];
+            [imageBuffer release];
+        }
+        else {
+            ret = kvImageMemoryAllocationError;
+        }
     }
     imageBuffer = nil;
-    
-    NSUInteger tileCount = regions.size();
-    
+        
     const FVImageBuffer *planarA[4];
     [planarTilesA getObjects:planarA];
     
@@ -762,39 +853,49 @@ static CGImageRef __FVTileAndScale_8888_or_888_Image(CGImageRef image, const NSS
     
     // NB: not required for the indexed images, since we copy those directly to the planar buffers
     // this is a temporary buffer passed to the planar conversion function
-    FVImageBuffer *regionBuffer = isIndexedImage ? nil : [[FVImageBuffer alloc] initWithWidth:maxWidth height:maxHeight bytesPerSample:4];
+    FVImageBuffer *regionBuffer = nil;
+    if (false == isIndexedImage) {
+        regionBuffer = [[FVImageBuffer alloc] initWithWidth:maxWidth height:maxHeight bytesPerSample:4];
+        if (nil == regionBuffer)
+            ret = kvImageMemoryAllocationError;
+    }
     
     // maintain these instead of creating new buffers on each pass through the loop
     NSUInteger regionColumnIndex = __FVGetNumberOfColumnsInRegionVector(regions);
-    for (NSUInteger j = 0; j < regionColumnIndex; j++) {
+    for (NSUInteger j = 0; j < regionColumnIndex && kvImageNoError == ret; j++) {
         imageBuffer = [[FVImageBuffer alloc] initWithWidth:(regions[j].w * ceil(scale)) height:(regions[j].h * ceil(scale)) bytesPerSample:4];
-        [currentRegionRow addObject:imageBuffer];
-        [imageBuffer release];
+        if (imageBuffer) {
+            [currentRegionRow addObject:imageBuffer];
+            [imageBuffer release];
+        }
+        else {
+            ret = kvImageMemoryAllocationError;
+        }
     }
     
     // reset to zero so we can use this as index into currentRegionRow
     regionColumnIndex = 0;
     
     const size_t imageBytesPerRow = CGImageGetBytesPerRow(image);
+    const CGImageAlphaInfo alphaInfo = CGImageGetAlphaInfo(image);
     size_t accumulatedRows = 0;
-    
-    for (NSUInteger tileIndex = 0; tileIndex < tileCount; tileIndex++) {
+    const NSUInteger tileCount = regions.size();
+
+    for (NSUInteger tileIndex = 0; tileIndex < tileCount && kvImageNoError == ret; tileIndex++) {
         
         FVRegion region = regions[tileIndex];
         
         if (region.row != regionRowIndex) {
             // these FVImageBuffers have correct values for width/height, and represent a series of scanlines 
             accumulatedRows += imageBuffer->buffer->height;
-            __FVCheckAndTrimRow(currentRegionRow, interleavedBuffer, accumulatedRows);
+            ret = __FVCheckAndTrimRow(currentRegionRow, interleavedBuffer, accumulatedRows);
             nextScanline = __FVAddRowOfARGB8888BuffersToImage(currentRegionRow, nextScanline, interleavedBuffer);
             regionRowIndex++;
             regionColumnIndex = 0;
         }
-        
-        vImage_Error ret;
-        
+                
         // reset from the scaled values, so the region extraction knows the tiles are large enough
-        size_t rowBytes = FVPaddedRowBytesForWidth(1, region.w);
+        const size_t rowBytes = FVPaddedRowBytesForWidth(1, region.w);
         for (i = 0; i < 4; i++) {
             planarA[i]->buffer->rowBytes = rowBytes;
             planarB[i]->buffer->rowBytes = rowBytes;
@@ -812,9 +913,9 @@ static CGImageRef __FVTileAndScale_8888_or_888_Image(CGImageRef image, const NSS
         float offset = 0;
         
         // do horizontal shear for all channels, with A as source and B as destination
-        size_t scaledWidth = round(scale * (double)region.w);
-        size_t scaledRowBytes = FVPaddedRowBytesForWidth(1, scaledWidth);
-        for (i = 0; i < 4; i++) {
+        const size_t scaledWidth = round(scale * double(region.w));
+        const size_t scaledRowBytes = FVPaddedRowBytesForWidth(1, scaledWidth);
+        for (i = 0; i < 4 && kvImageNoError == ret; i++) {
             planarB[i]->buffer->width = scaledWidth;
             planarB[i]->buffer->height = region.h;
             planarB[i]->buffer->rowBytes = scaledRowBytes;
@@ -825,9 +926,9 @@ static CGImageRef __FVTileAndScale_8888_or_888_Image(CGImageRef image, const NSS
         }
         
         // do vertical shear for all channels, with B as source and A as destination
-        offset = scale * ((float)region.h - round((float)region.h * scale));
-        size_t scaledHeight = round(scale * (double)region.h);
-        for (i = 0; i < 4; i++) {
+        offset = scale * (float(region.h) - round(float(region.h) * scale));
+        const size_t scaledHeight = round(scale * double(region.h));
+        for (i = 0; i < 4 && kvImageNoError == ret; i++) {
             // use the scaled value from the buffer
             planarA[i]->buffer->width = planarB[i]->buffer->width;
             planarA[i]->buffer->rowBytes = planarB[i]->buffer->rowBytes;
@@ -840,8 +941,9 @@ static CGImageRef __FVTileAndScale_8888_or_888_Image(CGImageRef image, const NSS
         
         // premultiply alpha in place if it wasn't previously premultiplied (A is now the source)
         if (alphaInfo != kCGImageAlphaPremultipliedFirst && alphaInfo != kCGImageAlphaPremultipliedLast) {
-            for (i = 1; i < 4; i++)
-                vImagePremultiplyData_Planar8(planarA[i]->buffer, planarA[0]->buffer, planarA[i]->buffer, DEFAULT_OPTIONS);
+            for (i = 1; i < 4 && kvImageNoError == ret; i++)
+                ret = vImagePremultiplyData_Planar8(planarA[i]->buffer, planarA[0]->buffer, planarA[i]->buffer, DEFAULT_OPTIONS);
+            if (kvImageNoError != ret) FVLog(@"vImagePremultiplyData_Planar8 failed with error %d", ret);
         }    
         
         // now convert to a mesh format, using the appropriate column buffer as destination
@@ -856,9 +958,9 @@ static CGImageRef __FVTileAndScale_8888_or_888_Image(CGImageRef image, const NSS
         
     }
     
-    if ([currentRegionRow count]) {
+    if ([currentRegionRow count] && kvImageNoError == ret) {
         accumulatedRows += imageBuffer->buffer->height;
-        __FVCheckAndTrimRow(currentRegionRow, interleavedBuffer, accumulatedRows);
+        ret = __FVCheckAndTrimRow(currentRegionRow, interleavedBuffer, accumulatedRows);
         __FVAddRowOfARGB8888BuffersToImage(currentRegionRow, nextScanline, interleavedBuffer);
     }
     
@@ -866,13 +968,18 @@ static CGImageRef __FVTileAndScale_8888_or_888_Image(CGImageRef image, const NSS
     
     if (originalImageData) {
         CFRelease(originalImageData);
-        [_copyLock unlock];
+#if FV_LIMIT_TILEMEMORY_USAGE
+        __FVCGImageDiscardAllocationSize(__FVCGImageGetDataSize(image));
+#endif
     }
     
     // tell this buffer not to call free() when it deallocs, so we avoid copying the data
-    [interleavedImageBuffer setFreeBufferOnDealloc:NO];
-    CFAllocatorRef alloc = [interleavedImageBuffer allocator];
-    CFDataRef data = CFDataCreateWithBytesNoCopy(alloc, (uint8_t *)interleavedBuffer->data, interleavedBuffer->rowBytes * interleavedBuffer->height, alloc);
+    CFDataRef data = NULL;
+    if (kvImageNoError == ret) {
+        [interleavedImageBuffer setFreeBufferOnDealloc:NO];
+        CFAllocatorRef alloc = [interleavedImageBuffer allocator];
+        data = CFDataCreateWithBytesNoCopy(alloc, (uint8_t *)interleavedBuffer->data, interleavedBuffer->rowBytes * interleavedBuffer->height, alloc);
+    }
     
     // cleanup is safe now
     
@@ -885,29 +992,35 @@ static CGImageRef __FVTileAndScale_8888_or_888_Image(CGImageRef image, const NSS
     [regionBuffer release];
     
 #if FV_LIMIT_TILEMEMORY_USAGE
-    pthread_mutex_lock(&_memoryMutex);
-    pthread_cond_broadcast(&_memoryCond);
-    pthread_mutex_unlock(&_memoryMutex);
+    __FVCGImageDiscardAllocationSize(0);
 #endif
     
-    CGDataProviderRef provider = CGDataProviderCreateWithCFData(data);
-    if (data) CFRelease(data);
+    CGDataProviderRef provider = NULL;
+    if (data) {
+        provider = CGDataProviderCreateWithCFData(data);
+        CFRelease(data);
+    }
     
     // ignore most of the details from the original image
-    size_t bitsPerComponent = 8;
-    size_t bitsPerPixel = 32;
+    const size_t bitsPerComponent = 8;
+    const size_t bitsPerPixel = 32;
     CGColorSpaceRef cspace = isIndexedImage ? CGColorSpaceRetain(CGColorSpaceGetBaseColorSpace(CGImageGetColorSpace(image))) : CGColorSpaceCreateDeviceRGB();
-    CGColorRenderingIntent intent = CGImageGetRenderingIntent(image);
+    const CGColorRenderingIntent intent = CGImageGetRenderingIntent(image);
     
     // meshed data is premultiplied ARGB (ppc) or BGRA (i386)
-    CGBitmapInfo bitmapInfo = (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Host);    
+    const CGBitmapInfo bitmapInfo = (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Host);    
     
-    image = CGImageCreate(interleavedBuffer->width, interleavedBuffer->height, bitsPerComponent, bitsPerPixel, interleavedBuffer->rowBytes, cspace, bitmapInfo, provider, NULL, true, intent);
+    image = NULL;
+    if (kvImageNoError == ret)
+        image = CGImageCreate(interleavedBuffer->width, interleavedBuffer->height, bitsPerComponent, bitsPerPixel, interleavedBuffer->rowBytes, cspace, bitmapInfo, provider, NULL, true, intent);
     CGDataProviderRelease(provider);
     CGColorSpaceRelease(cspace);
     
     // memory is now transferred to NSData
     [interleavedImageBuffer release];
+    
+    if (kvImageNoError != ret)
+        FVLog(@"%s: error %d scaling image to %ld x %ld pixels", __func__, ret, ssize_t(desiredSize.width), ssize_t(desiredSize.height));
     
     return image; 
 }
@@ -973,19 +1086,11 @@ CGImageRef FVCreateResampledImageOfSize(CGImageRef image, const NSSize desiredSi
         if (CGImageGetAlphaInfo(image) != kCGImageAlphaNone || false == __FVCanUseIndexedColorSpaces())
             return __FVCopyImageUsingCacheColorspace(image, desiredSize);
     }
-    
+        
 #if FV_LIMIT_TILEMEMORY_USAGE
-    // see http://www.opengroup.org/onlinepubs/009695399/functions/pthread_cond_timedwait.html for notes on timed wait
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    struct timespec ts;
-    TIMEVAL_TO_TIMESPEC(&tv, &ts);
-    ts.tv_nsec += 50000000;
-    pthread_mutex_lock(&_memoryMutex);
-    int ret = 0;
-    while ([FVImageBuffer allocatedBytes] > FV_TILEMEMORY_MEGABYTES * 1024 * 1024 && 0 == ret)
-        ret = pthread_cond_timedwait(&_memoryCond, &_memoryMutex, &ts);
-    pthread_mutex_unlock(&_memoryMutex);
+    const size_t allocSize =  __FVCGImageGetBytePtr(image, NULL) == NULL ? __FVCGImageGetDataSize(image) : 0;
+    // increase before calling __FVTileAndScale_8888_or_888_Image; will be decreased after releasing copied data
+    __FVCGImageRequestAllocationSize(allocSize);
 #endif
     return __FVTileAndScale_8888_or_888_Image(image, desiredSize);
 }
