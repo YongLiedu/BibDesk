@@ -651,9 +651,9 @@ static void addItemFunction(const void *value, void *context) {
             
             while (url = [urlEnum nextObject]) {
                 signature = [signatures objectForKey:url];
-                if (signature && [signature isEqual:signatureForURL(url)]) {
+                if (signature)
                     [URLsToRemove removeObject:url];
-                } else {
+                if (signature == nil || [signature isEqual:signatureForURL(url)] == NO) {
                     if (missingURLs == nil)
                         missingURLs = [NSMutableArray array];
                     [missingURLs addObject:url];
