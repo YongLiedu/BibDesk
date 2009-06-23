@@ -44,9 +44,7 @@
 - (void)beginSheetModalForWindow:(NSWindow *)window;
 - (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
 
-- (void)prepare;
 - (IBAction)dismiss:(id)sender;
 - (void)didEndSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-- (void)endSheetWithReturnCode:(NSInteger)returnCode;
 
 @end
