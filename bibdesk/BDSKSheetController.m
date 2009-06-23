@@ -58,12 +58,11 @@ typedef struct _BDSKCallbackInfo {
 - (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
 	[self prepare];
 	
-    BDSKCallbackInfo *info = NULL;
+    NSInvocation *invocation = nil;
     if (delegate != nil && didEndSelector != NULL) {
-        info = (BDSKCallbackInfo *)NSZoneMalloc(NSDefaultMallocZone(), sizeof(BDSKCallbackInfo));
-        info->delegate = delegate;
-        info->selector = didEndSelector;
-        info->contextInfo = contextInfo;
+        invocation = [NSInvocation invocationWithTarget:delegate selector:didEndSelector];
+		[invocation setArgument:&self atIndex:2];
+		[invocation setArgument:&contextInfo atIndex:4];
 	}
     
 	[self retain]; // make sure we stay around long enough
@@ -72,7 +71,7 @@ typedef struct _BDSKCallbackInfo {
 	   modalForWindow:window
 		modalDelegate:self
 	   didEndSelector:@selector(didEndSheet:returnCode:contextInfo:)
-		  contextInfo:info];
+		  contextInfo:[invocation retain]];
 }
 
 #pragma mark Prepare, dismiss and end the sheet
@@ -86,14 +85,10 @@ typedef struct _BDSKCallbackInfo {
 }
 
 - (void)didEndSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-	BDSKCallbackInfo *info = (BDSKCallbackInfo *)contextInfo;
-    if(info != NULL){
-		NSInvocation *invocation = [NSInvocation invocationWithTarget:info->delegate selector:info->selector];
-		[invocation setArgument:&self atIndex:2];
+	NSInvocation *invocation = [(NSInvocation *)invocation autorelease];
+    if (invocation) {
 		[invocation setArgument:&returnCode atIndex:3];
-		[invocation setArgument:&(info->contextInfo) atIndex:4];
 		[invocation invoke];
-        NSZoneFree(NSDefaultMallocZone(), info);
 	}
 }
 
