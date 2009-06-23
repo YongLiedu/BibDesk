@@ -67,6 +67,15 @@
 #import "BDSKCompletionManager.h"
 #import "BDSKApplication.h"
 
+
+typedef struct _BDSKForwardedCallbackInfo {
+    NSWindow *window;
+    id delegate;
+	SEL selector;
+    void *contextInfo;
+} BDSKForwardedCallbackInfo;
+
+
 @interface BDSKTextImportController (Private)
 
 - (void)handleFlagsChangedNotification:(NSNotification *)notification;
@@ -207,9 +216,11 @@
 	[self setShowingWebView:YES];
 	
 	// remember the arguments to pass in the callback later
-	theModalDelegate = modalDelegate;
-	theDidEndSelector = didEndSelector;
-	theContextInfo = contextInfo;
+    BDSKForwardedCallbackInfo *info = (BDSKForwardedCallbackInfo *)NSZoneMalloc(NSDefaultMallocZone(), sizeof(BDSKForwardedCallbackInfo));
+    info->window = [docWindow retain];
+    info->delegate = modalDelegate;
+	info->selector = didEndSelector;
+    info->contextInfo = contextInfo;
 	
 	[self retain]; // make sure we stay around till we are done
 	
@@ -218,7 +229,7 @@
 	   modalForWindow:docWindow
 		modalDelegate:self
 	   didEndSelector:@selector(initialUrlSheetDidEnd:returnCode:contextInfo:)
-		  contextInfo:[docWindow retain]];
+		  contextInfo:info];
 }
 		
 - (void)beginSheetForFileModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
@@ -227,10 +238,13 @@
     [self window];
 	
 	// remember the arguments to pass in the callback later
-	theModalDelegate = modalDelegate;
-	theDidEndSelector = didEndSelector;
-	theContextInfo = contextInfo;
 	
+    BDSKForwardedCallbackInfo *info = (BDSKForwardedCallbackInfo *)NSZoneMalloc(NSDefaultMallocZone(), sizeof(BDSKForwardedCallbackInfo));
+    info->window = [docWindow retain];
+    info->delegate = modalDelegate;
+	info->selector = didEndSelector;
+    info->contextInfo = contextInfo;
+    
 	[self retain]; // make sure we stay around till we are done
 	
 	NSOpenPanel *oPanel = [NSOpenPanel openPanel];
@@ -243,7 +257,7 @@
 					modalForWindow:docWindow
 					 modalDelegate:self 
 					didEndSelector:@selector(initialOpenPanelDidEnd:returnCode:contextInfo:) 
-					   contextInfo:[docWindow retain]];
+					   contextInfo:info];
 }
 
 #pragma mark Actions
@@ -804,26 +818,28 @@
 
 - (void)initialOpenPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     // this is the initial file load, the main window is not yet there
-    NSWindow *docWindow = [(NSWindow *)contextInfo autorelease];
+    BDSKForwardedCallbackInfo *info = (BDSKForwardedCallbackInfo *)contextInfo;
+    NSWindow *docWindow = [info->window autorelease];
     
     if (returnCode == NSOKButton) {
         NSString *fileName = [sheet filename];
         // first try to parse the file
         if([document addPublicationsFromFile:fileName verbose:NO error:NULL]){
             // succeeded to parse the file, we return immediately
-            [self didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
+            [self didEndSheet:sheet returnCode:returnCode contextInfo:info->contextInfo];
         }else{
             // show the main window
-            [super beginSheetModalForWindow:docWindow modalDelegate:theModalDelegate didEndSelector:theDidEndSelector contextInfo:theContextInfo];
+            [super beginSheetModalForWindow:docWindow modalDelegate:info->delegate didEndSelector:info->selector contextInfo:info->contextInfo];
             [self release];
             
             // then load the data from the file
-            [self openPanelDidEnd:sheet returnCode:returnCode contextInfo:contextInfo];
+            [self openPanelDidEnd:sheet returnCode:returnCode contextInfo:NULL];
         }
     } else {
         // the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
-        [self didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
+        [self didEndSheet:sheet returnCode:returnCode contextInfo:info->contextInfo];
     }
+    NSZoneFree(NSDefaultMallocZone(), info);
 }
 	
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
@@ -851,20 +867,22 @@
 
 - (void)initialUrlSheetDidEnd:(NSPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     // this is the initial web load, the main window is not yet there
-    NSWindow *docWindow = [(NSWindow *)contextInfo autorelease];
+    BDSKForwardedCallbackInfo *info = (BDSKForwardedCallbackInfo *)contextInfo;
+    NSWindow *docWindow = [info->window autorelease];
     
     if (returnCode == NSOKButton) {
         // show the main window
-        [super beginSheetModalForWindow:docWindow modalDelegate:theModalDelegate didEndSelector:theDidEndSelector contextInfo:theContextInfo];
+        [super beginSheetModalForWindow:docWindow modalDelegate:info->delegate didEndSelector:info->selector contextInfo:info->contextInfo];
         [self release];
         
         // then load the data from the file
-        [self urlSheetDidEnd:sheet returnCode:returnCode contextInfo:contextInfo];
+        [self urlSheetDidEnd:sheet returnCode:returnCode contextInfo:NULL];
         
     } else {
         // the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
-        [self didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
+        [self didEndSheet:sheet returnCode:returnCode contextInfo:info->contextInfo];
     }
+    NSZoneFree(NSDefaultMallocZone(), info);
 }
 
 - (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{

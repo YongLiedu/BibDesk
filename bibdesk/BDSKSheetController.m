@@ -40,6 +40,13 @@
 #import "NSInvocation_BDSKExtensions.h"
 
 
+typedef struct _BDSKCallbackInfo {
+    id delegate;
+	SEL selector;
+    void *contextInfo;
+} BDSKCallbackInfo;
+
+
 @implementation BDSKSheetController
 
 #pragma mark Begin/run modal sheet
@@ -51,9 +58,10 @@
 - (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
 	[self prepare];
 	
-    theModalDelegate = delegate;
-	theDidEndSelector = didEndSelector;
-    theContextInfo = contextInfo;
+    BDSKCallbackInfo *info = (BDSKCallbackInfo *)NSZoneMalloc(NSDefaultMallocZone(), sizeof(BDSKCallbackInfo));
+    info->delegate = delegate;
+	info->selector = didEndSelector;
+    info->contextInfo = contextInfo;
 	
 	[self retain]; // make sure we stay around long enough
 	
@@ -61,7 +69,7 @@
 	   modalForWindow:window
 		modalDelegate:self
 	   didEndSelector:@selector(didEndSheet:returnCode:contextInfo:)
-		  contextInfo:NULL];
+		  contextInfo:info];
 }
 
 #pragma mark Prepare, dismiss and end the sheet
@@ -75,22 +83,20 @@
 }
 
 - (void)didEndSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-	if(theModalDelegate != nil && theDidEndSelector != NULL){
-		NSInvocation *invocation = [NSInvocation invocationWithTarget:theModalDelegate selector:theDidEndSelector];
+	BDSKCallbackInfo *info = (BDSKCallbackInfo *)contextInfo;
+    if(info->delegate != nil && info->selector != NULL){
+		NSInvocation *invocation = [NSInvocation invocationWithTarget:info->delegate selector:info->selector];
 		[invocation setArgument:&self atIndex:2];
 		[invocation setArgument:&returnCode atIndex:3];
-		[invocation setArgument:&theContextInfo atIndex:4];
+		[invocation setArgument:&(info->contextInfo) atIndex:4];
 		[invocation invoke];
 	}
+    NSZoneFree(NSDefaultMallocZone(), info);
 }
 
 - (void)endSheetWithReturnCode:(NSInteger)returnCode {
     [NSApp endSheet:[self window] returnCode:returnCode];
     [[self window] orderOut:self];
-    
-    theModalDelegate = nil;
-    theDidEndSelector = NULL;
-    theContextInfo = NULL;
 }
 
 @end

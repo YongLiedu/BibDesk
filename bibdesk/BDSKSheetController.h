@@ -39,12 +39,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKSheetController : NSWindowController {
-    id theModalDelegate;
-    SEL theDidEndSelector;
-    SEL theDidDismissSelector;
-    void *theContextInfo;
-}
+@interface BDSKSheetController : NSWindowController
 
 - (void)beginSheetModalForWindow:(NSWindow *)window;
 - (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
