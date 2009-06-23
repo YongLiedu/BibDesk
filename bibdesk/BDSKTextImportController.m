@@ -1884,7 +1884,7 @@ typedef struct _BDSKForwardedCallbackInfo {
         
         if (c >= '0' && c <= '9') {
         
-            NSUInteger idx = c == '0' ? 10 : (NSUInteger)(c - '1');
+            NSUInteger idx = c == '0' ? 9 : (NSUInteger)(c - '1');
             BOOL rv = YES;
             if (flags & NSAlternateKeyMask)
                 idx += 10;
