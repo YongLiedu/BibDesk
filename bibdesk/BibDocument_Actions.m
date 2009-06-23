@@ -1334,21 +1334,21 @@ static BOOL changingColors = NO;
     
     BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
 
-    [tic beginSheetForPasteboardModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+    [tic beginSheetForPasteboardModalForWindow:documentWindow];
 	[tic release];
 }
 
 - (IBAction)importFromFileAction:(id)sender{
     BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
 
-    [tic beginSheetForFileModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+    [tic beginSheetForFileModalForWindow:documentWindow];
 	[tic release];
 }
 
 - (IBAction)importFromWebAction:(id)sender{
     BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
 
-    [tic beginSheetForWebModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+    [tic beginSheetForWebModalForWindow:documentWindow];
 	[tic release];
 }
 

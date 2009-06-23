@@ -100,9 +100,9 @@
 
 - (id)initWithDocument:(BibDocument *)doc;
 
-- (void)beginSheetForPasteboardModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
-- (void)beginSheetForFileModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
-- (void)beginSheetForWebModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
+- (void)beginSheetForPasteboardModalForWindow:(NSWindow *)docWindow;
+- (void)beginSheetForFileModalForWindow:(NSWindow *)docWindow;
+- (void)beginSheetForWebModalForWindow:(NSWindow *)docWindow;
 
 - (IBAction)addItemAction:(id)sender;
 - (IBAction)closeAction:(id)sender;
