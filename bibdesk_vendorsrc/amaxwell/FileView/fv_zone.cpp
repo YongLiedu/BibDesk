@@ -220,16 +220,14 @@ static inline void __fv_zone_record_allocation(fv_allocation_t *alloc, fv_zone_t
 }
 
 /*
- Layout of memory allocated by __FVAllocateFromVMSystem().  The padding at the beginning is for page alignment.  Caller is responsible for passing the result of __fv_zone_round_size() to this function.
+ Layout of memory allocated by __fv_zone_vm_allocation().  The padding at the beginning is for page alignment.  
+ Caller is responsible for passing the result of __fv_zone_round_size() to this function.
  
- |<-- page boundary
- |<---------- ptrSize ---------->|
- |<--ptr
- | padding | fv_allocation_t | data data data data data data |
- |<-- pointer returned by __FVAllocateFromSystem()
- |<--base                   
- |<------------------------ allocSize ---------------------->|
- 
+ |<-- base (page boundary)                  
+ |<------------------------------ allocSize ---------------------------->|
+ |<- padding ->|<- fv_allocation_t ->|<- data data data data data data ->|
+ |                                   |<------------ ptrSize ------------>|
+ |                                   |<- ptr (writeable)
  */
 
 static fv_allocation_t *__fv_zone_vm_allocation(const size_t requestedSize, fv_zone_t *zone)
@@ -761,25 +759,28 @@ static void *__fv_zone_collector_thread(void *unused)
         struct timeval tv;
         struct timespec ts;
         
-        gettimeofday(&tv, NULL);
-        TIMEVAL_TO_TIMESPEC(&tv, &ts);
+        (void)gettimeofday(&tv, NULL);
+        TIMEVAL_TO_TIMESPEC(&tv, &ts);     
         ts.tv_sec += FV_COLLECT_TIMEINTERVAL;
         
-#if DEBUG
-        static double lastCollectSeconds = tv.tv_sec + double(tv.tv_usec) / 1000000;
-        static unsigned int collectionCount = 0;
-#endif        
         // see http://www.opengroup.org/onlinepubs/009695399/functions/pthread_cond_timedwait.html for notes on timed wait    
         ret = pthread_cond_timedwait(&_collectorCond, &_allZonesLock, &ts);
         for_each(_allZones->begin(), _allZones->end(), __fv_zone_collect_zone);
 
 #if DEBUG
+        (void)gettimeofday(&tv, NULL);
+        TIMEVAL_TO_TIMESPEC(&tv, &ts);
+
+        static double lastCollectSeconds = tv.tv_sec + double(tv.tv_usec) / 1000000;
+        static unsigned int collectionCount = 0;
+        
         collectionCount++;
-        fprintf(stderr, "%s collection %u, %.2f seconds since previous\n", ETIMEDOUT == ret ? "TIMED" : "FORCED", collectionCount, tv.tv_sec - lastCollectSeconds);
-        lastCollectSeconds = tv.tv_sec + double(tv.tv_usec) / 1000000;
+        const double currentCollectSeconds = tv.tv_sec + double(tv.tv_usec) / 1000000;
+        fprintf(stderr, "%s collection %u, %.2f seconds since previous\n", ETIMEDOUT == ret ? "TIMED" : "FORCED", collectionCount, currentCollectSeconds - lastCollectSeconds);
+        lastCollectSeconds = currentCollectSeconds;
 #endif
     }
-    pthread_mutex_unlock(&_allZonesLock);
+    (void)pthread_mutex_unlock(&_allZonesLock);
     
     return NULL;
 }
