@@ -66,6 +66,7 @@
 #import "BDSKLinkedFile.h"
 #import "BDSKCompletionManager.h"
 #import "BDSKApplication.h"
+#import "NSInvocation_BDSKExtensions.h"
 
 
 typedef struct _BDSKForwardedCallbackInfo {
@@ -826,7 +827,14 @@ typedef struct _BDSKForwardedCallbackInfo {
         // first try to parse the file
         if([document addPublicationsFromFile:fileName verbose:NO error:NULL]){
             // succeeded to parse the file, we return immediately
-            [self didEndSheet:sheet returnCode:returnCode contextInfo:info->contextInfo];
+            NSInvocation *invocation = nil;
+            if (info->delegate != nil && info->selector != NULL) {
+                invocation = [NSInvocation invocationWithTarget:info->delegate selector:info->selector];
+                [invocation setArgument:&self atIndex:2];
+                [invocation setArgument:&returnCode atIndex:3];
+                [invocation setArgument:&(info->contextInfo) atIndex:4];
+            }
+            [self didEndSheet:sheet returnCode:returnCode contextInfo:[invocation retain]];
         }else{
             // show the main window
             [super beginSheetModalForWindow:docWindow modalDelegate:info->delegate didEndSelector:info->selector contextInfo:info->contextInfo];
@@ -837,7 +845,14 @@ typedef struct _BDSKForwardedCallbackInfo {
         }
     } else {
         // the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
-        [self didEndSheet:sheet returnCode:returnCode contextInfo:info->contextInfo];
+        NSInvocation *invocation = nil;
+        if (info->delegate != nil && info->selector != NULL) {
+            invocation = [NSInvocation invocationWithTarget:info->delegate selector:info->selector];
+            [invocation setArgument:&self atIndex:2];
+            [invocation setArgument:&returnCode atIndex:3];
+            [invocation setArgument:&(info->contextInfo) atIndex:4];
+        }
+        [self didEndSheet:sheet returnCode:returnCode contextInfo:[invocation retain]];
     }
     NSZoneFree(NSDefaultMallocZone(), info);
 }
@@ -880,7 +895,14 @@ typedef struct _BDSKForwardedCallbackInfo {
         
     } else {
         // the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
-        [self didEndSheet:sheet returnCode:returnCode contextInfo:info->contextInfo];
+        NSInvocation *invocation = nil;
+        if (info->delegate != nil && info->selector != NULL) {
+            invocation = [NSInvocation invocationWithTarget:info->delegate selector:info->selector];
+            [invocation setArgument:&self atIndex:2];
+            [invocation setArgument:&returnCode atIndex:3];
+            [invocation setArgument:&(info->contextInfo) atIndex:4];
+        }
+        [self didEndSheet:sheet returnCode:returnCode contextInfo:[invocation retain]];
     }
     NSZoneFree(NSDefaultMallocZone(), info);
 }

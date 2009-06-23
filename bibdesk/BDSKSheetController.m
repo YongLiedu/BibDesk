@@ -40,13 +40,6 @@
 #import "NSInvocation_BDSKExtensions.h"
 
 
-typedef struct _BDSKCallbackInfo {
-    id delegate;
-	SEL selector;
-    void *contextInfo;
-} BDSKCallbackInfo;
-
-
 @implementation BDSKSheetController
 
 #pragma mark Begin/run modal sheet
@@ -85,7 +78,7 @@ typedef struct _BDSKCallbackInfo {
 }
 
 - (void)didEndSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-	NSInvocation *invocation = [(NSInvocation *)invocation autorelease];
+	NSInvocation *invocation = [(NSInvocation *)contextInfo autorelease];
     if (invocation) {
 		[invocation setArgument:&returnCode atIndex:3];
 		[invocation invoke];
