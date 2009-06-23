@@ -208,7 +208,7 @@ static char BDSKTableViewFontDefaultsObservationContext;
     unichar eventChar = [characters length] > 0 ? [characters characterAtIndex:0] : 0;
     NSUInteger modifierFlags = [theEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
     
-	if ((eventChar == NSEnterCharacter || eventChar == NSFormFeedCharacter || eventChar == NSNewlineCharacter || eventChar == NSCarriageReturnCharacter) && modifierFlags == 0) {
+	if ((eventChar == NSEnterCharacter || eventChar == NSFormFeedCharacter || eventChar == NSNewlineCharacter || eventChar == NSCarriageReturnCharacter) && (modifierFlags & ~NSFunctionKeyMask) == 0) {
         [self insertNewline:self];
     } else if (eventChar == 0x0020 && modifierFlags == 0) {
         [self insertSpace:self];
