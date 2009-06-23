@@ -2764,6 +2764,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     // close so it's not hanging around by itself; this works if the doc window closes, also
     [complexStringEditor close];
     
+    // make sure we're not registered as editor because we will be invalid, this shouldn't be necessary but there have been reports of crashes
+    [[self document] objectDidEndEditing:self];
+    
 	// this can give errors when the application quits when an editor window is open
 	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKCloseEditorWindowScriptHookName 
 												 forPublications:[NSArray arrayWithObject:publication]
