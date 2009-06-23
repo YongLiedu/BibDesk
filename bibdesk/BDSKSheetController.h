@@ -40,20 +40,14 @@
 
 
 @interface BDSKSheetController : NSWindowController {
-	BOOL runAppModal;
     id theModalDelegate;
     SEL theDidEndSelector;
     SEL theDidDismissSelector;
     void *theContextInfo;
 }
 
-- (NSInteger)runModal;
 - (void)beginSheetModalForWindow:(NSWindow *)window;
 - (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
-- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector didDismissSelector:(SEL)didDismissSelector contextInfo:(void *)contextInfo;
-- (NSInteger)runSheetModalForWindow:(NSWindow *)window;
-- (NSInteger)runSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
-- (NSInteger)runSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector didDismissSelector:(SEL)didDismissSelector contextInfo:(void *)contextInfo;
 
 - (void)prepare;
 - (IBAction)dismiss:(id)sender;

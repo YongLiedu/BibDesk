@@ -42,37 +42,17 @@
 
 @implementation BDSKSheetController
 
-#pragma mark Run modal dialog
-
-- (NSInteger)runModal {
-	[self prepare];
-	
-	runAppModal = YES;
-	
-	[[self window] makeKeyAndOrderFront:self];
-	NSInteger returnCode = [NSApp runModalForWindow:[self window]];
-	[[self window] orderOut:self];
-	
-	return returnCode;
-}
-
 #pragma mark Begin/run modal sheet
 
 - (void)beginSheetModalForWindow:(NSWindow *)window {
-	[self beginSheetModalForWindow:window modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
+	[self beginSheetModalForWindow:window modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 }
 
 - (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
-	[self beginSheetModalForWindow:window modalDelegate:delegate didEndSelector:didEndSelector didDismissSelector:NULL contextInfo:contextInfo];
-}
-
-- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector didDismissSelector:(SEL)didDismissSelector contextInfo:(void *)contextInfo {
 	[self prepare];
 	
-	runAppModal = NO;
     theModalDelegate = delegate;
 	theDidEndSelector = didEndSelector;
-	theDidDismissSelector = didDismissSelector;
     theContextInfo = contextInfo;
 	
 	[self retain]; // make sure we stay around long enough
@@ -84,45 +64,14 @@
 		  contextInfo:NULL];
 }
 
-- (NSInteger)runSheetModalForWindow:(NSWindow *)window {
-	return [self runSheetModalForWindow:window modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
-}
-
-- (NSInteger)runSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
-	return [self runSheetModalForWindow:window modalDelegate:delegate didEndSelector:didEndSelector didDismissSelector:NULL contextInfo:contextInfo];
-}
-
-- (NSInteger)runSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector didDismissSelector:(SEL)didDismissSelector contextInfo:(void *)contextInfo {
-	[self prepare];
-	
-	runAppModal = YES;
-    theModalDelegate = delegate;
-	theDidEndSelector = didEndSelector;
-	theDidDismissSelector = didDismissSelector;
-    theContextInfo = contextInfo;
-	
-	[NSApp beginSheet:[self window]
-	   modalForWindow:window
-		modalDelegate:self
-	   didEndSelector:@selector(didEndSheet:returnCode:contextInfo:)
-		  contextInfo:NULL];
-	NSInteger returnCode = [NSApp runModalForWindow:[self window]];
-    [self endSheetWithReturnCode:returnCode];
-	return returnCode;
-}
-
 #pragma mark Prepare, dismiss and end the sheet
 
 - (void)prepare {}
 
 - (IBAction)dismiss:(id)sender {
 	NSInteger returnCode = [sender tag];
-	if (runAppModal) {
-		[NSApp stopModalWithCode:returnCode];
-	} else {
-        [self endSheetWithReturnCode:returnCode];
-        [self release];
-	}
+	[self endSheetWithReturnCode:returnCode];
+    [self autorelease];
 }
 
 - (void)didEndSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
@@ -139,17 +88,8 @@
     [NSApp endSheet:[self window] returnCode:returnCode];
     [[self window] orderOut:self];
     
-	if(theModalDelegate != nil && theDidDismissSelector != NULL){
-		NSInvocation *invocation = [NSInvocation invocationWithTarget:theModalDelegate selector:theDidDismissSelector];
-		[invocation setArgument:&self atIndex:2];
-		[invocation setArgument:&returnCode atIndex:3];
-		[invocation setArgument:&theContextInfo atIndex:4];
-		[invocation invoke];
-	}
-    
     theModalDelegate = nil;
     theDidEndSelector = NULL;
-    theDidDismissSelector = NULL;
     theContextInfo = NULL;
 }
 

@@ -790,6 +790,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         return; // the user canceled
     
 	if([newGroupField isInvalidGroupField] || [newGroupField isEqualToString:@""]){
+        [[addFieldController window] orderOut:nil];
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Field", @"Message in alert dialog when choosing an invalid group field")
                                          defaultButton:nil
                                        alternateButton:nil
@@ -822,8 +823,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
                                                                                               fieldsArray:colNames];
 	[addFieldController beginSheetModalForWindow:documentWindow
                                    modalDelegate:self
-                                  didEndSelector:NULL
-                              didDismissSelector:@selector(addGroupFieldSheetDidEnd:returnCode:contextInfo:)
+                                  didEndSelector:@selector(addGroupFieldSheetDidEnd:returnCode:contextInfo:)
                                      contextInfo:NULL];
     [addFieldController release];
 }
