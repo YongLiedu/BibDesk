@@ -94,6 +94,14 @@
 #define WEB_URL @"http://bibdesk.sourceforge.net/"
 #define WIKI_URL @"http://sourceforge.net/apps/mediawiki/bibdesk/"
 
+enum {
+    BDSKStartupOpenUntitledFile,
+    BDSKStartupDoNothing,
+    BDSKStartupOpenDialog,
+    BDSKStartupOpenDefaultFile,
+    BDSKStartupOpenLastOpenFiles
+};
+
 @implementation BDSKAppController
 
 // remove legacy comparisons of added/created/modified strings in table column code from prefs
@@ -421,14 +429,14 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 {
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     switch ([[sud objectForKey:BDSKStartupBehaviorKey] intValue]) {
-        case 0:
+        case BDSKStartupOpenUntitledFile:
             return YES;
-        case 1:
+        case BDSKStartupDoNothing:
             return NO;
-        case 2:
+        case BDSKStartupOpenDialog:
             [[NSDocumentController sharedDocumentController] openDocument:nil];
             return NO;
-        case 3:
+        case BDSKStartupOpenDefaultFile:
             {
                 NSData *data = [sud objectForKey:BDSKDefaultBibFileAliasKey];
                 BDAlias *alias = nil;
@@ -439,7 +447,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
                     [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:fileURL display:YES error:NULL];
             }
             return NO;
-        case 4:
+        case BDSKStartupOpenLastOpenFiles:
             {
                 NSArray *files = [sud objectForKey:BDSKLastOpenFileNamesKey];
                 NSEnumerator *fileEnum = [files objectEnumerator];
@@ -457,10 +465,10 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     }
 }
 
-// we don't want to reopen last open files when re-activating the app
+// we don't want to reopen last open files or show an Open dialog when re-activating the app
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag {
     NSInteger startupOption = [[[NSUserDefaults standardUserDefaults] objectForKey:BDSKStartupBehaviorKey] intValue];
-    return flag == NO && (startupOption == 0 || startupOption == 3);
+    return flag || startupOption == BDSKStartupOpenUntitledFile || startupOption == BDSKStartupOpenDefaultFile;
 }
 
 - (void)openRecentItemFromDock:(id)sender{
