@@ -59,6 +59,7 @@
     IBOutlet BDSKEdgeView *controlView;
     IBOutlet BDSKCollapsibleView *collapsibleView;
     IBOutlet NSProgressIndicator *indexProgressBar;
+    IBOutlet NSTextField *statusField;
     BOOL canceledSearch;
     BOOL searchFieldDidEndEditing;
     

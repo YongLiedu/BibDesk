@@ -46,15 +46,22 @@
 // Sent on the main thread at periodic intervals to inform the delegate that new files have been added to the index, and that any searches in progress need to be updated.
 - (void)searchIndexDidUpdate:(BDSKFileSearchIndex *)index;
 
-// Sent on the main thread after the initial indexing phase has finished.  This allows the delegate to update its search for the last time.
-- (void)searchIndexDidFinish:(BDSKFileSearchIndex *)index;
+// Sent on the main thread when the status changed.  This allows the delegate to update the UI.
+- (void)searchIndexDidUpdateStatus:(BDSKFileSearchIndex *)index;
 @end
+
+enum {
+    BDSKSearchIndexStatusStarting,
+    BDSKSearchIndexStatusVerifying,
+    BDSKSearchIndexStatusIndexing,
+    BDSKSearchIndexStatusRunning
+};
 
 typedef struct _BDSKSearchIndexFlags
 {
     volatile int32_t shouldKeepRunning;
-    volatile int32_t finishedInitialIndexing;
     volatile int32_t updateScheduled;
+    volatile int32_t status;
 } BDSKSearchIndexFlags;
 
 @interface BDSKFileSearchIndex : NSObject {
@@ -83,7 +90,7 @@ typedef struct _BDSKSearchIndexFlags
 // Required before disposing of the index.  After calling cancel, the index is no longer viable.
 - (void)cancelForDocumentURL:(NSURL *)documentURL;
 
-- (BOOL)finishedInitialIndexing;
+- (NSUInteger)status;
 
 - (id)delegate;
 - (void)setDelegate:(id <BDSKFileSearchIndexDelegate>)anObject;

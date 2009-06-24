@@ -43,11 +43,11 @@
 
 @protocol BDSKSearchDelegate <NSObject>
 
-// sent as the search is in progress (not all matches returned); anArray includes all results
+// sent as the search is in progress; anArray includes all results
 - (void)search:(BDSKFileSearch *)aSearch didUpdateWithResults:(NSArray *)anArray;
 
-// sent when the search is complete (all matches returned); anArray includes all results
-- (void)search:(BDSKFileSearch *)aSearch didFinishWithResults:(NSArray *)anArray;
+// sent when the search index status changed
+- (void)search:(BDSKFileSearch *)aSearch didUpdateStatus:(NSUInteger)status;
 
 // sent to get the title for the BibItem used for display
 - (NSString *)search:(BDSKFileSearch *)aSearch titleForIdentifierURL:(NSURL *)identifierURL;

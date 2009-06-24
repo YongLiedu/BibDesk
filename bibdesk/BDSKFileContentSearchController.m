@@ -153,7 +153,7 @@
 
 - (BOOL)shouldShowControlView
 {
-    return [searchIndex finishedInitialIndexing] == NO;
+    return [searchIndex status] < BDSKSearchIndexStatusRunning;
 }
 
 - (NSTableView *)tableView
@@ -247,7 +247,7 @@
         canceledSearch = NO;
         
         // may be hidden if we called restoreDocumentState while indexing
-        if ([searchIndex finishedInitialIndexing] == NO && [indexProgressBar isHiddenOrHasHiddenAncestor]) {
+        if ([self shouldShowControlView] && [indexProgressBar isHiddenOrHasHiddenAncestor]) {
             // setHidden:NO doesn't seem to apply to subviews
             [indexProgressBar setHidden:NO];
         }
@@ -387,17 +387,28 @@
     }
 }
 
-- (void)search:(BDSKFileSearch *)aSearch didFinishWithResults:(NSArray *)anArray;
+- (void)search:(BDSKFileSearch *)aSearch didUpdateStatus:(NSUInteger)status;
 {
     if ([search isEqual:aSearch]) {
-        // don't reset the array if we canceled updates
-        if (NO == canceledSearch)
-            [self setResults:anArray];
-        [indexProgressBar setDoubleValue:[searchIndex progressValue]];
-        
-        // hides progress bar and text
-        [indexProgressBar setHidden:YES];
-        [[self document] removeControlView:[self controlView]];
+        switch (status) {
+            case BDSKSearchIndexStatusStarting:
+                [statusField setStringValue:[NSLocalizedString(@"Starting Index", @"status message") stringByAppendingEllipsis]];
+                break;
+            case BDSKSearchIndexStatusVerifying:
+                [statusField setStringValue:[NSLocalizedString(@"Verifying Index", @"status message") stringByAppendingEllipsis]];
+                break;
+            case BDSKSearchIndexStatusIndexing:
+                [statusField setStringValue:[NSLocalizedString(@"Indexing Files", @"status message") stringByAppendingEllipsis]];
+                break;
+            case BDSKSearchIndexStatusRunning:
+                // hides progress bar and text
+                [indexProgressBar setHidden:YES];
+                [statusField setStringValue:@""];
+                [[self document] removeControlView:[self controlView]];
+                break;
+            default:
+                break;
+        }
     }
 }
 

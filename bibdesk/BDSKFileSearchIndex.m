@@ -107,8 +107,8 @@
         [nc addObserver:self selector:handler name:BDSKDocDelItemNotification object:owner];
         
         flags.shouldKeepRunning = 1;
-        flags.finishedInitialIndexing = 0;
         flags.updateScheduled = 0;
+        flags.status = BDSKSearchIndexStatusStarting;
         
         // maintain dictionaries mapping URL -> identifierURL, since SKIndex properties are slow; this should be accessed with the rwlock
         identifierURLs = [[BDSKManyToManyDictionary alloc] init];
@@ -175,10 +175,10 @@
     return index;
 }
 
-- (BOOL)finishedInitialIndexing
+- (NSUInteger)status
 {
     OSMemoryBarrier();
-    return flags.finishedInitialIndexing == 1;
+    return flags.status;
 }
 
 - (id)delegate
@@ -333,19 +333,19 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     // Make sure we send frequently enough to update a progress bar, but not too frequently to avoid beachball on single-core systems; too many search updates slow down indexing due to repeated flushes. 
     OSMemoryBarrier();
     if (0 == flags.updateScheduled) {
-        const double updateDelay = flags.finishedInitialIndexing ? 0.1 : 1.0;
+        const double updateDelay = flags.status == BDSKSearchIndexStatusRunning ? 1.0 : 0.1;
         [self performSelector:@selector(notifyDelegate) withObject:nil afterDelay:updateDelay];
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.updateScheduled);
     }
 }
 
 // @@ only sent after the initial indexing so the controller knows to remove the progress bar; can possibly be removed entirely and delegate can check finishedInitialIndexing when it gets searchIndexDidUpdate:
-- (void)searchIndexDidFinish
+- (void)searchIndexDidUpdateStatus
 {
     BDSKASSERT([NSThread isMainThread]);
     OSMemoryBarrier();
     if ([self shouldKeepRunning])
-        [delegate searchIndexDidFinish:self];
+        [delegate searchIndexDidUpdateStatus:self];
 }
 
 #pragma mark Indexing
@@ -597,6 +597,9 @@ static void addItemFunction(const void *value, void *context) {
     [items retain];
     
     if (indexCachePath) {
+        OSAtomicCompareAndSwap32Barrier(flags.status, BDSKSearchIndexStatusVerifying, &flags.status);
+        [self performSelectorOnMainThread:@selector(searchIndexDidUpdateStatus) withObject:nil waitUntilDone:NO];
+        
         NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:[NSData dataWithContentsOfFile:indexCachePath]];
         indexData = (CFMutableDataRef)[[unarchiver decodeObjectForKey:@"indexData"] mutableCopy];
         if (indexData != NULL) {
@@ -696,13 +699,16 @@ static void addItemFunction(const void *value, void *context) {
     
     // add items that were not yet indexed
     if ([self shouldKeepRunning] && [items count]) {
+        OSAtomicCompareAndSwap32Barrier(flags.status, BDSKSearchIndexStatusIndexing, &flags.status);
+        [self performSelectorOnMainThread:@selector(searchIndexDidUpdateStatus) withObject:nil waitUntilDone:NO];
+        
         [self indexFilesForItems:items numberPreviouslyIndexed:numberIndexed totalCount:totalObjectCount];
     }
     
     [items release];
 
-    OSAtomicCompareAndSwap32Barrier(0, 1, &flags.finishedInitialIndexing);
-    [self performSelectorOnMainThread:@selector(searchIndexDidFinish) withObject:nil waitUntilDone:NO];
+    OSAtomicCompareAndSwap32Barrier(flags.status, BDSKSearchIndexStatusRunning, &flags.status);
+    [self performSelectorOnMainThread:@selector(searchIndexDidUpdateStatus) withObject:nil waitUntilDone:NO];
 }
 
 - (void)runIndexThreadWithInfo:(NSDictionary *)info

@@ -113,10 +113,7 @@
     [self setOptions:opts];
     [self updateSearchResults];
     // If initial indexing is complete, all results are available immediately after the call to updateSearchResults and the controller can remove its progress indicator.  Future changes to the index will call searchIndexDidUpdate:.
-    if ([searchIndex finishedInitialIndexing])
-        [[self delegate] search:self didFinishWithResults:[searchResults allObjects]];
-    else
-        [[self delegate] search:self didUpdateWithResults:[searchResults allObjects]];
+    [[self delegate] search:self didUpdateWithResults:[searchResults allObjects]];
 }
 
 - (void)searchIndexDidUpdate:(BDSKFileSearchIndex *)anIndex;
@@ -133,11 +130,10 @@
     }
 }
 
-- (void)searchIndexDidFinish:(BDSKFileSearchIndex *)anIndex;
+- (void)searchIndexDidUpdateStatus:(BDSKFileSearchIndex *)anIndex;
 {
     if ([anIndex isEqual:searchIndex]) {
-        [self searchIndexDidUpdate:anIndex];
-        [[self delegate] search:self didFinishWithResults:[searchResults allObjects]];
+        [[self delegate] search:self didUpdateStatus:[searchIndex status]];
     }
 }
 
