@@ -343,7 +343,6 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
 - (void)searchIndexDidUpdateStatus
 {
     BDSKASSERT([NSThread isMainThread]);
-    OSMemoryBarrier();
     if ([self shouldKeepRunning])
         [delegate searchIndexDidUpdateStatus:self];
 }
