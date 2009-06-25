@@ -339,7 +339,6 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     }
 }
 
-// @@ only sent after the initial indexing so the controller knows to remove the progress bar; can possibly be removed entirely and delegate can check finishedInitialIndexing when it gets searchIndexDidUpdate:
 - (void)searchIndexDidUpdateStatus
 {
     BDSKASSERT([NSThread isMainThread]);
