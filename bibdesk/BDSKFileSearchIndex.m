@@ -348,6 +348,19 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
         [delegate searchIndexDidUpdateStatus:self];
 }
 
+- (void)didUpdate
+{
+    OSMemoryBarrier();
+    if (0 == flags.updateScheduled)
+        [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
+}
+
+- (void)updateStatus:(NSUInteger)status
+{
+    OSAtomicCompareAndSwap32Barrier(flags.status, status, &flags.status);
+    [self performSelectorOnMainThread:@selector(searchIndexDidUpdateStatus) withObject:nil waitUntilDone:NO];
+}
+
 #pragma mark Indexing
 
 - (void)indexFileURL:(NSURL *)aURL{
@@ -453,9 +466,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
         [pool release];
         pool = [NSAutoreleasePool new];
         
-        OSMemoryBarrier();
-        if (0 == flags.updateScheduled)
-            [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
+        [self didUpdate];
     }
         
     // caller queues a final update
@@ -506,9 +517,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
         [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
 	}
 	
-    OSMemoryBarrier();
-    if (0 == flags.updateScheduled)
-        [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
+    [self didUpdate];
 }
 
 - (void)processSearchIndexInfoChanged:(NSArray *)searchIndexInfo
@@ -535,9 +544,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     [removedURLs release];
     [newURLs release];
     
-    OSMemoryBarrier();
-    if (0 == flags.updateScheduled)
-        [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
+    [self didUpdate];
 }    
 
 - (void)processNextNotification
@@ -597,8 +604,7 @@ static void addItemFunction(const void *value, void *context) {
     [items retain];
     
     if (indexCachePath) {
-        OSAtomicCompareAndSwap32Barrier(flags.status, BDSKSearchIndexStatusVerifying, &flags.status);
-        [self performSelectorOnMainThread:@selector(searchIndexDidUpdateStatus) withObject:nil waitUntilDone:NO];
+        [self updateStatus:BDSKSearchIndexStatusVerifying];
         
         NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:[NSData dataWithContentsOfFile:indexCachePath]];
         indexData = (CFMutableDataRef)[[unarchiver decodeObjectForKey:@"indexData"] mutableCopy];
@@ -632,9 +638,7 @@ static void addItemFunction(const void *value, void *context) {
             [rwLock unlock];
         }
         
-        OSMemoryBarrier();
-        if (0 == flags.updateScheduled)
-            [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
+        [self didUpdate];
         
         NSMutableSet *URLsToRemove = [[NSMutableSet alloc] initWithArray:[signatures allKeys]];
         NSMutableArray *itemsToAdd = [[NSMutableArray alloc] init];
@@ -671,9 +675,7 @@ static void addItemFunction(const void *value, void *context) {
                     progressValue = (numberIndexed / totalObjectCount) * 100;
                 }
                 
-                OSMemoryBarrier();
-                if (0 == flags.updateScheduled)
-                    [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
+                [self didUpdate];
             }
             
             [pool release];
@@ -688,9 +690,7 @@ static void addItemFunction(const void *value, void *context) {
         }
         [URLsToRemove release];
         
-        OSMemoryBarrier();
-        if (0 == flags.updateScheduled)
-            [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
+        [self didUpdate];
         
         [items release];
         items = itemsToAdd;
@@ -699,16 +699,13 @@ static void addItemFunction(const void *value, void *context) {
     
     // add items that were not yet indexed
     if ([self shouldKeepRunning] && [items count]) {
-        OSAtomicCompareAndSwap32Barrier(flags.status, BDSKSearchIndexStatusIndexing, &flags.status);
-        [self performSelectorOnMainThread:@selector(searchIndexDidUpdateStatus) withObject:nil waitUntilDone:NO];
-        
+        [self updateStatus:BDSKSearchIndexStatusIndexing];
         [self indexFilesForItems:items numberPreviouslyIndexed:numberIndexed totalCount:totalObjectCount];
     }
     
     [items release];
 
-    OSAtomicCompareAndSwap32Barrier(flags.status, BDSKSearchIndexStatusRunning, &flags.status);
-    [self performSelectorOnMainThread:@selector(searchIndexDidUpdateStatus) withObject:nil waitUntilDone:NO];
+    [self updateStatus:BDSKSearchIndexStatusRunning];
 }
 
 - (void)runIndexThreadWithInfo:(NSDictionary *)info
