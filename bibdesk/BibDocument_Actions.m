@@ -229,7 +229,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)removeSelectedPubs:(id)sender{
-	[self removePublicationsFromSelectedGroups:[self selectedGroups]];
+	[self removePublicationsFromSelectedGroups:[self selectedPublications]];
 }
 
 - (void)deletePubsAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
