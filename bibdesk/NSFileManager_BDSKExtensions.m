@@ -624,6 +624,79 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     return exists;
 }
 
+// The following function is copied from Apple's MoreFilesX sample project
+
+struct FSDeleteContainerGlobals
+{
+	OSErr							result;			/* result */
+	ItemCount						actualObjects;	/* number of objects returned */
+	FSCatalogInfo					catalogInfo;	/* FSCatalogInfo */
+};
+typedef struct FSDeleteContainerGlobals FSDeleteContainerGlobals;
+
+static
+void
+FSDeleteContainerLevel(
+	const FSRef *container,
+	FSDeleteContainerGlobals *theGlobals)
+{
+	/* level locals */
+	FSIterator					iterator;
+	FSRef						itemToDelete;
+	UInt16						nodeFlags;
+	
+	/* Open FSIterator for flat access and give delete optimization hint */
+	theGlobals->result = FSOpenIterator(container, kFSIterateFlat + kFSIterateDelete, &iterator);
+	require_noerr(theGlobals->result, FSOpenIterator);
+	
+	/* delete the contents of the directory */
+	do
+	{
+		/* get 1 item to delete */
+		theGlobals->result = FSGetCatalogInfoBulk(iterator, 1, &theGlobals->actualObjects,
+								NULL, kFSCatInfoNodeFlags, &theGlobals->catalogInfo,
+								&itemToDelete, NULL, NULL);
+		if ( (noErr == theGlobals->result) && (1 == theGlobals->actualObjects) )
+		{
+			/* save node flags in local in case we have to recurse */
+			nodeFlags = theGlobals->catalogInfo.nodeFlags;
+			
+			/* is it a file or directory? */
+			if ( 0 != (nodeFlags & kFSNodeIsDirectoryMask) )
+			{
+				/* it's a directory -- delete its contents before attempting to delete it */
+				FSDeleteContainerLevel(&itemToDelete, theGlobals);
+			}
+			/* are we still OK to delete? */
+			if ( noErr == theGlobals->result )
+			{
+				/* is item locked? */
+				if ( 0 != (nodeFlags & kFSNodeLockedMask) )
+				{
+					/* then attempt to unlock it (ignore result since FSDeleteObject will set it correctly) */
+					theGlobals->catalogInfo.nodeFlags = nodeFlags & ~kFSNodeLockedMask;
+					(void) FSSetCatalogInfo(&itemToDelete, kFSCatInfoNodeFlags, &theGlobals->catalogInfo);
+				}
+				/* delete the item */
+				theGlobals->result = FSDeleteObject(&itemToDelete);
+			}
+		}
+	} while ( noErr == theGlobals->result );
+	
+	/* we found the end of the items normally, so return noErr */
+	if ( errFSNoMoreItems == theGlobals->result )
+	{
+		theGlobals->result = noErr;
+	}
+	
+	/* close the FSIterator (closing an open iterator should never fail) */
+	verify_noerr(FSCloseIterator(iterator));
+
+FSOpenIterator:
+
+	return;
+}
+
 - (BOOL)deleteObjectAtFileURL:(NSURL *)fileURL error:(NSError **)error{
     NSParameterAssert(fileURL != nil);
     NSParameterAssert([fileURL isFileURL]);
@@ -642,13 +715,28 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
         }
     }
     
-    if(NO == success && error != nil)
+    if(NO == success && error != NULL)
         *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"File does not exist.", @"Error description") forKey:NSLocalizedDescriptionKey]];
     
     if(success){
-        success = (noErr == FSDeleteObject(&fileRef));
-        if(NO == success && error != nil)
+        FSCatalogInfo catalogInfo;
+        success = (noErr == FSGetCatalogInfo(&fileRef, kFSCatInfoNodeFlags, &catalogInfo, NULL, NULL, NULL));
+        if(NO == success && error != NULL)
             *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete file.", @"Error description") forKey:NSLocalizedDescriptionKey]];
+        
+        if(success && 0 != (catalogInfo.nodeFlags & kFSNodeIsDirectoryMask)){
+            FSDeleteContainerGlobals theGlobals;
+            FSDeleteContainerLevel(&fileRef, &theGlobals);
+            success = (noErr == theGlobals.result);
+            if(NO == success && error != NULL)
+                *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete directory contents.", @"Error description") forKey:NSLocalizedDescriptionKey]];
+        }
+        
+        if(success){
+            success = (noErr == FSDeleteObject(&fileRef));
+            if(NO == success && error != NULL)
+                *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete file.", @"Error description") forKey:NSLocalizedDescriptionKey]];
+        }
     }
     
     return success;
