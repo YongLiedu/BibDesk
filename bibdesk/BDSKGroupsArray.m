@@ -71,22 +71,27 @@
         parent = [[BDSKLibraryParentGroup alloc] init];
         [parent setDocument:aDocument];
         [parents addObject:parent];
+        [parent release];
         
         parent = [[BDSKExternalParentGroup alloc] init];
         [parent setDocument:aDocument];
         [parents addObject:parent];
+        [parent release];
         
         parent = [[BDSKSmartParentGroup alloc] init];
         [parent setDocument:aDocument];
         [parents addObject:parent];
+        [parent release];
         
         parent = [[BDSKStaticParentGroup alloc] init];
         [parent setDocument:aDocument];
         [parents addObject:parent];
+        [parent release];
         
         parent = [[BDSKCategoryParentGroup alloc] init];
         [parent setDocument:aDocument];
         [parents addObject:parent];
+        [parent release];
         
         groups = [parents copy];
         [parents release];
