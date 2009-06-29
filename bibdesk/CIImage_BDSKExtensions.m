@@ -105,7 +105,7 @@ static NSString *endColorKey = @"inputColor1";
 
 + (CIColor *)colorWithWhiteOne;
 {
-    CIColor *color = nil;
+    static CIColor *color = nil;
     if (nil == color)
         color = [[CIColor colorWithWhite:1.0] retain];
     return color;
