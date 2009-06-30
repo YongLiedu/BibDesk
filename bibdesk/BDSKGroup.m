@@ -162,7 +162,7 @@ static NSString *createUniqueID(void)
 }
 
 - (id)name {
-    return [[name retain] autorelease];
+    return name;
 }
 
 - (NSInteger)count {
