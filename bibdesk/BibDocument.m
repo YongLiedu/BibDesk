@@ -283,6 +283,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [promiseDragColumnIdentifier release];
     [tableColumnWidths release];
     [sortKey release];
+    [previousSortKey release];
     [sortGroupsKey release];
     [currentGroupField release];
     [searchGroupViewController release];
