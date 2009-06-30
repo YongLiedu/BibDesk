@@ -172,6 +172,15 @@
     return [[self categoryParent] categoryGroups];
 }
 
+- (NSArray *)allChildren{
+    NSEnumerator *groupEnum = [groups objectEnumerator];
+    BDSKParentGroup *group;
+    NSMutableArray *children = [NSMutableArray array];
+    while (group = [groupEnum nextObject])
+        [children addObjectsFromArray:[group children]];
+    return children;
+}
+
 #pragma mark Containment
 
 - (BOOL)containsGroup:(id)group {

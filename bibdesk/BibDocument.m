@@ -329,7 +329,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     NSData *groupData = [xattrDefaults objectForKey:BDSKSelectedGroupsKey];
     if ([groupData length]) {
-        NSSet *allGroups = [NSSet setWithArray:[groups valueForKeyPath:@"@unionOfArrays.children"]];
+        NSSet *allGroups = [NSSet setWithArray:[groups allChildren]];
         NSMutableArray *groupsToSelect = [NSMutableArray array];
         NSEnumerator *groupEnum = [[NSKeyedUnarchiver unarchiveObjectWithData:groupData] objectEnumerator];
         BDSKGroup *group;

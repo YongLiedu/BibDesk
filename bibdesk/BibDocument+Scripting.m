@@ -235,7 +235,7 @@
 #pragma mark Groups
 
 - (NSArray *)scriptingGroups {
-    return [groups valueForKeyPath:@"@unionOfArrays.children"];
+    return [groups allChildren];
 }
 
 - (BDSKGroup *)valueInScriptingGroupsWithUniqueID:(NSString *)aUniqueID {

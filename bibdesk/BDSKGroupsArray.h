@@ -74,6 +74,8 @@ enum {
 - (NSArray *)staticGroups;
 - (NSArray *)categoryGroups;
 
+- (NSArray *)allChildren;
+
 - (BOOL)containsGroup:(id)group;
 
 - (void)setLastImportedPublications:(NSArray *)pubs;
