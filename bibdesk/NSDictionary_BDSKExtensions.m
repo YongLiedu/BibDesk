@@ -93,7 +93,7 @@
 
 - (CGFloat)floatForKey:(NSString *)key defaultValue:(CGFloat)defaultValue {
     id value = [self objectForKey:key];
-    return value ? [value floatValue] : defaultValue;
+    return [value respondsToSelector:@selector(floatValue)] ? [value floatValue] : defaultValue;
 }
 
 - (CGFloat)floatForKey:(NSString *)key {
@@ -102,7 +102,7 @@
 
 - (double)doubleForKey:(NSString *)key defaultValue:(double)defaultValue {
     id value = [self objectForKey:key];
-    return value ? [value doubleValue] : defaultValue;
+    return [value respondsToSelector:@selector(doubleValue)] ? [value doubleValue] : defaultValue;
 }
 
 - (double)doubleForKey:(NSString *)key {
@@ -164,7 +164,7 @@
 // Just to make life easier
 - (int)intForKey:(NSString *)key defaultValue:(int)defaultValue {
     id value = [self objectForKey:key];
-    return value ? [value intValue] : defaultValue;
+    return [value respondsToSelector:@selector(intValue)] ? [value intValue] : defaultValue;
 }
 
 - (int)intForKey:(NSString *)key {
@@ -173,7 +173,7 @@
 
 - (unsigned int)unsignedIntForKey:(NSString *)key defaultValue:(unsigned int)defaultValue {
     id value = [self objectForKey:key];
-    return value ? [value unsignedIntValue] : defaultValue;
+    return [value respondsToSelector:@selector(unsignedIntValue)] ? [value unsignedIntValue] : defaultValue;
 }
 
 - (unsigned int)unsignedIntForKey:(NSString *)key {
