@@ -546,7 +546,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     }
 
     iconScale = [xattrDefaults floatForKey:BDSKBottomFileViewIconScaleKey defaultValue:[sud floatForKey:BDSKBottomFileViewIconScaleKey]];
-    displayMode = [xattrDefaults floatForKey:BDSKBottomFileViewDisplayModeKey defaultValue:[sud floatForKey:BDSKBottomFileViewDisplayModeKey]];
+    displayMode = [xattrDefaults intForKey:BDSKBottomFileViewDisplayModeKey defaultValue:[sud integerForKey:BDSKBottomFileViewDisplayModeKey]];
     [bottomFileView setDisplayMode:displayMode];
     if (displayMode == FVDisplayModeGrid) {
         if (iconScale < 0.00001)
