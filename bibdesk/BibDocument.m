@@ -1032,8 +1032,16 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     // set com.apple.TextEncoding for other apps
     NSString *UTI = [[NSWorkspace sharedWorkspace] UTIForURL:absoluteURL];
-    if (success && UTI && UTTypeConformsTo((CFStringRef)UTI, kUTTypePlainText)) 
-        [[NSFileManager defaultManager] setAppleStringEncoding:[self documentStringEncoding] atPath:[absoluteURL path] error:NULL];
+    if (success && UTI && UTTypeConformsTo((CFStringRef)UTI, kUTTypePlainText)) {
+        NSStringEncoding encoding = NSUTF8StringEncoding;
+        if ([[NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKMinimalBibTeXDocumentType, BDSKRISDocumentType, BDSKLTBDocumentType, nil] containsObject:typeName]) {
+            if ((NSSaveAsOperation == saveOperation || NSSaveToOperation == saveOperation) && [saveTextEncodingPopupButton encoding] != 0)
+                encoding = [saveTextEncodingPopupButton encoding];
+            else
+                encoding = [self documentStringEncoding];
+        }
+        [[NSFileManager defaultManager] setAppleStringEncoding:encoding atPath:[absoluteURL path] error:NULL];
+    }
     
     [saveTargetURL release];
     saveTargetURL = nil;
