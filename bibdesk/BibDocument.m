@@ -767,16 +767,27 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         }
         [dictionary setObject:groupsToExpand forKey:BDSKDocumentGroupsToExpandKey];
         
+        [mainWindowSetupDictionary release];
+        mainWindowSetupDictionary = [dictionary copy];
+        
         NSError *error;
         
         if ([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey 
                                                   toPropertyListValue:dictionary
                                                                atPath:path options:0 error:&error] == NO) {
-            NSLog(@"%@: %@", self, error);
+            NSLog(@"failed to save EAs for %@: %@", self, error);
+            if ([[error domain] isEqualToString:NSPOSIXErrorDomain] && [error code] == E2BIG) {
+                // the dictionary was too big, remove the items that are most likely to cause this as they can grow indefinitely
+                [dictionary removeObjectForKey:BDSKSelectedPublicationsKey]; 
+                [dictionary removeObjectForKey:BDSKSelectedGroupsKey]; 
+                if ([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey 
+                                                          toPropertyListValue:dictionary
+                                                                       atPath:path options:0 error:&error] == NO) {
+                    NSLog(@"failed to save partial EAs for %@: %@", self, error);
+                }
+            }
         }
         
-        [mainWindowSetupDictionary release];
-        mainWindowSetupDictionary = [dictionary copy];
         [dictionary release];
     } 
 }
