@@ -650,7 +650,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     if([drawerController isDrawerOpen])
         [drawerController toggle:nil];
     [self saveSortOrder];
-    [self saveWindowSetupInExtendedAttributesAtURL:[self fileURL] forEncoding:[self documentStringEncoding]];
+    [self saveWindowSetupInExtendedAttributesAtURL:[self fileURL] forEncoding:0];
     
     // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey] &&
@@ -723,7 +723,8 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
         
         // we can't just use -documentStringEncoding, because that may be different for SaveTo
-        [dictionary setUnsignedIntValue:encoding forKey:BDSKDocumentStringEncodingKey];
+        if (encoding)
+            [dictionary setUnsignedIntValue:encoding forKey:BDSKDocumentStringEncodingKey];
         
         // encode groups so we can select them later with isEqual: (saving row indexes would not be as reliable)
         [dictionary setObject:([self hasExternalGroupsSelected] ? [NSData data] : [NSKeyedArchiver archivedDataWithRootObject:[self selectedGroups]]) forKey:BDSKSelectedGroupsKey];
