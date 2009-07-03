@@ -650,7 +650,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     if([drawerController isDrawerOpen])
         [drawerController toggle:nil];
     [self saveSortOrder];
-    [self saveWindowSetupInExtendedAttributesAtURL:[self fileURL] forSave:NO];
+    [self saveWindowSetupInExtendedAttributesAtURL:[self fileURL] forEncoding:[self documentStringEncoding]];
     
     // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey] &&
@@ -692,7 +692,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     return mainWindowSetupDictionary;
 }
 
-- (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL forSave:(BOOL)isSave{
+- (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL forEncoding:(NSStringEncoding)encoding {
     
     NSString *path = [anURL path];
     if (path && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableDocumentExtendedAttributes"] == NO) {
@@ -722,9 +722,8 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         [dictionary setFloatValue:docState.lastWebViewFraction forKey:BDSKWebViewFractionKey];
         [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
         
-        // if this isn't a save operation, the encoding in xattr is already correct, while our encoding might be different from the actual file encoding, if the user might ignored an encoding warning without saving
-        if(isSave)
-            [dictionary setUnsignedIntValue:[self documentStringEncoding] forKey:BDSKDocumentStringEncodingKey];
+        // we can't just use -documentStringEncoding, because that may be different for SaveTo
+        [dictionary setUnsignedIntValue:encoding forKey:BDSKDocumentStringEncodingKey];
         
         // encode groups so we can select them later with isEqual: (saving row indexes would not be as reliable)
         [dictionary setObject:([self hasExternalGroupsSelected] ? [NSData data] : [NSKeyedArchiver archivedDataWithRootObject:[self selectedGroups]]) forKey:BDSKSelectedGroupsKey];
@@ -1030,18 +1029,19 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     BOOL success = [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
     
+    // compare -dataOfType:forPublications:error:
+    NSStringEncoding encoding = [self documentStringEncoding];
+    if (NSSaveToOperation == saveOperation) {
+        if (NO == [[NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKMinimalBibTeXDocumentType, BDSKRISDocumentType, BDSKLTBDocumentType, nil] containsObject:typeName])
+            encoding = NSUTF8StringEncoding;
+        else
+            encoding = [saveTextEncodingPopupButton encoding] ?: [BDSKStringEncodingManager defaultEncoding];
+    }
+    
     // set com.apple.TextEncoding for other apps
     NSString *UTI = [[NSWorkspace sharedWorkspace] UTIForURL:absoluteURL];
-    if (success && UTI && UTTypeConformsTo((CFStringRef)UTI, kUTTypePlainText)) {
-        NSStringEncoding encoding = NSUTF8StringEncoding;
-        if ([[NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKMinimalBibTeXDocumentType, BDSKRISDocumentType, BDSKLTBDocumentType, nil] containsObject:typeName]) {
-            if ((NSSaveAsOperation == saveOperation || NSSaveToOperation == saveOperation) && [saveTextEncodingPopupButton encoding] != 0)
-                encoding = [saveTextEncodingPopupButton encoding];
-            else
-                encoding = [self documentStringEncoding];
-        }
+    if (success && UTI && UTTypeConformsTo((CFStringRef)UTI, kUTTypePlainText))
         [[NSFileManager defaultManager] setAppleStringEncoding:encoding atPath:[absoluteURL path] error:NULL];
-    }
     
     [saveTargetURL release];
     saveTargetURL = nil;
@@ -1065,9 +1065,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             }
         }
         
-        // save our window setup if we export to BibTeX or RIS
+        // save our window setup if we export to BibTeX
         if([[self class] isNativeType:typeName] || [typeName isEqualToString:BDSKMinimalBibTeXDocumentType])
-            [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forSave:YES];
+            [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forEncoding:encoding];
         
     }else if(saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation){
         [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
@@ -1097,7 +1097,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [infoDict release];
         
         // save window setup to extended attributes, so it is set also if we use saveAs
-        [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forSave:YES];
+        [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forEncoding:[self documentStringEncoding]];
     }
     
     return YES;
