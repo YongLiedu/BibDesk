@@ -64,6 +64,12 @@
 + (NSString *)parseFormatForLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub
 {
 	NSString *localFileFormat = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKLocalFileFormatKey];
+    
+    return [self parseFormat:localFileFormat forLinkedFile:file ofItem:pub];
+}
+
++ (NSString *)parseFormat:(NSString *)format forLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub
+{
 	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub owner]];
     
     NSString *oldPath = [[file URL] path];
@@ -72,7 +78,7 @@
     else
         oldPath = nil;
       
-    return [self parseFormat:localFileFormat forField:BDSKLocalFileString linkedFile:file ofItem:pub suggestion:oldPath];
+    return [self parseFormat:format forField:BDSKLocalFileString linkedFile:file ofItem:pub suggestion:oldPath];
 }
 
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName linkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion

@@ -159,7 +159,7 @@
 	NSString *string = nil;
     
     if (isFile)
-        string = [BDSKFormatParser parseFormatForLinkedFile:file ofItem:pub];
+        string = [BDSKFormatParser parseFormat:formatString forLinkedFile:file ofItem:pub];
     else
         string = [BDSKFormatParser parseFormat:formatString forField:field ofItem:pub suggestion:suggestion];
 	

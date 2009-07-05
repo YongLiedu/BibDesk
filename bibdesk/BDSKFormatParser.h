@@ -72,6 +72,8 @@
 
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion;
 
++ (NSString *)parseFormat:(NSString *)format forLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub;
+
 + (NSString *)parseFormatForLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub;
 
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName linkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion;
