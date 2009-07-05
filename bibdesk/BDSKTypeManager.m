@@ -676,10 +676,10 @@ static BDSKTypeManager *sharedInstance = nil;
 	if( [fieldName isEqualToString:BDSKCiteKeyString]){
 		return invalidCiteKeyCharSet;
 	}
-	if([localFileFieldsSet containsObject:fieldName]){
+	if([localFileFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKLocalFileString]){
 		return invalidLocalUrlCharSet;
 	}
-	if([remoteURLFieldsSet containsObject:fieldName]){
+	if([remoteURLFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKRemoteURLString]){
 		return invalidRemoteUrlCharSet;
 	}
 	return invalidGeneralCharSet;
@@ -689,17 +689,17 @@ static BDSKTypeManager *sharedInstance = nil;
 	if( [fieldName isEqualToString:BDSKCiteKeyString]){
 		return strictInvalidCiteKeyCharSet;
 	}
-	if([localFileFieldsSet containsObject:fieldName]){
+	if([localFileFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKLocalFileString]){
 		return strictInvalidLocalUrlCharSet;
 	}
-	if([remoteURLFieldsSet containsObject:fieldName]){
+	if([remoteURLFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKRemoteURLString]){
 		return strictInvalidRemoteUrlCharSet;
 	}
 	return strictInvalidGeneralCharSet;
 }
 
 - (NSCharacterSet *)veryStrictInvalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
-	if([localFileFieldsSet containsObject:fieldName]){
+	if([localFileFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKLocalFileString]){
 		return veryStrictInvalidLocalUrlCharSet;
 	}
 	return [self strictInvalidCharactersForField:fieldName inFileType:type];
