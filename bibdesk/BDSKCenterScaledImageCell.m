@@ -79,8 +79,23 @@
             ciImage = [[CIImage alloc] initWithBitmapImageRep:(NSBitmapImageRep *)rep];
         }
         else {
-            // image->TIFF->image is not so great for performance...
-            ciImage = [[CIImage alloc] initWithData:[img TIFFRepresentation]];            
+            // draw as a bitmap at the source image resolution
+            NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL
+                                                                                  pixelsWide:[rep pixelsWide]
+                                                                                  pixelsHigh:[rep pixelsHigh]
+                                                                               bitsPerSample:8 
+                                                                             samplesPerPixel:4 
+                                                                                    hasAlpha:[rep hasAlpha] 
+                                                                                    isPlanar:NO 
+                                                                              colorSpaceName:[rep colorSpaceName] 
+                                                                                 bytesPerRow:0 
+                                                                                bitsPerPixel:0];
+            [NSGraphicsContext saveGraphicsState];
+            [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithBitmapImageRep:bitmapRep]];
+            [rep drawInRect:NSMakeRect(0, 0, [bitmapRep pixelsWide], [bitmapRep pixelsHigh])];
+            [NSGraphicsContext restoreGraphicsState];
+            ciImage = [[CIImage alloc] initWithBitmapImageRep:bitmapRep];
+            [bitmapRep release];          
         }
         rep = [NSCIImageRep imageRepWithCIImage:[ciImage invertedImage]];
         [ciImage release];
