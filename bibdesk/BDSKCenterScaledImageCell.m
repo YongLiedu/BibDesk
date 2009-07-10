@@ -83,6 +83,7 @@
             ciImage = [[CIImage alloc] initWithData:[img TIFFRepresentation]];            
         }
         rep = [NSCIImageRep imageRepWithCIImage:[ciImage invertedImage]];
+        [ciImage release];
     }
     
     if (rep) srcRect.size = [rep size];
