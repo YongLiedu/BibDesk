@@ -168,7 +168,8 @@
     // get visibility and directory flags
     [enumerator setDesiredInfo:(kFSCatInfoFinderInfo | kFSCatInfoNodeFlags)];
     
-    BOOL isDir, isHidden;
+    BOOL isDir, isHidden, isPackage;
+    LSItemInfoRecord infoRec;
     BDSKFile *aFile;
     OSMemoryBarrier();
     
@@ -181,12 +182,16 @@
         
         isDir = [enumerator isDirectory];
         isHidden = [enumerator isInvisible] || CFStringHasPrefix((CFStringRef)[aFile fileName], CFSTR("."));
+        isPackage = NO;
         
+        if (noErr == LSCopyItemInfoForRef([aFile fsRef], kLSRequestBasicFlagsOnly, &infoRec))
+            isPackage = (infoRec.flags & kLSItemInfoIsPackage) != 0;
+
         // ignore hidden files
         if (isHidden)
             continue;
         
-        if (isDir){
+        if (isDir && NO == isPackage){
             
             // resolve aliases in parent directories, since that's what BibItem does
             NSURL *resolvedURL = (NSURL *)BDCopyFileURLResolvingAliases((CFURLRef)[aFile fileURL]);
