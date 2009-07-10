@@ -340,6 +340,25 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     return string;
 }
 
+- (NSString *)stringByConvertingTripleHyphenToEmdash{
+    NSString *string = self;
+    NSString *tripleHyphen = @"---";
+    NSRange range = [self rangeOfString:tripleHyphen];
+    if (range.location != NSNotFound) {
+        NSMutableString *mutString = [[self mutableCopy] autorelease];
+        do {
+            [mutString replaceCharactersInRange:range withString:[NSString emdashString]];
+            range = [mutString rangeOfString:tripleHyphen];
+        } while (range.location != NSNotFound);
+        string = mutString;
+    }
+    return string;
+}
+
+- (NSString *)stringByConvertingHyphensToDashes{
+    return [[stringstringByConvertingTripleHyphenToEmdash] stringByConvertingDoubleHyphenToEndash];
+}
+
 - (NSString *)stringByRemovingCurlyBraces{
     return [self stringByReplacingCharactersInSet:[NSCharacterSet curlyBraceCharacterSet] withString:@""];
 }

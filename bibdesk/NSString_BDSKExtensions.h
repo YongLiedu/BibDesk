@@ -179,6 +179,22 @@
 */
 - (NSString *)stringByConvertingDoubleHyphenToEndash;
 
+/*!
+    @method     stringByConvertingTripleHyphenToEmdash
+    @abstract   Converts "---" to em dash.  See http://en.wikipedia.org/wiki/Dash for info on dashes.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSString *)stringByConvertingTripleHyphenToEmdash;
+
+/*!
+    @method     stringByConvertingHyphensToDashes
+    @abstract   Converts "---" to em dash and "--" to en dash.  See http://en.wikipedia.org/wiki/Dash for info on dashes.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSString *)stringByConvertingHyphensToDashes;
+
     /*!
     @method     stringByRemovingCurlyBraces
      @abstract   Removes curly braces from a string
