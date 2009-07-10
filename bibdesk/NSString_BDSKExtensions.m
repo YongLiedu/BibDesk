@@ -356,7 +356,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 }
 
 - (NSString *)stringByConvertingHyphensToDashes{
-    return [[stringstringByConvertingTripleHyphenToEmdash] stringByConvertingDoubleHyphenToEndash];
+    return [[self stringByConvertingTripleHyphenToEmdash] stringByConvertingDoubleHyphenToEndash];
 }
 
 - (NSString *)stringByRemovingCurlyBraces{
