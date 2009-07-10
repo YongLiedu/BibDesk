@@ -565,6 +565,7 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
             }
             else
                 addStringToDictionaryIfNotNil(possibleMonthString, BDSKDateString, pubFields);
+            [scanner release];
         }
         
         // @@ remainder are untested (they're empty in all of my search results) so may be NSXMLElements
