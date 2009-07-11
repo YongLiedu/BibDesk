@@ -92,6 +92,9 @@
                                                                                 bitsPerPixel:0];
             [NSGraphicsContext saveGraphicsState];
             [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithBitmapImageRep:bitmapRep]];
+            unsigned char *bitmapData = [bitmapRep bitmapData];
+            if (bitmapData)
+                bzero(bitmapData, [bitmapRep bytesPerRow] * [bitmapRep pixelsHigh]);
             [rep drawInRect:NSMakeRect(0, 0, [bitmapRep pixelsWide], [bitmapRep pixelsHigh])];
             [NSGraphicsContext restoreGraphicsState];
             ciImage = [[CIImage alloc] initWithBitmapImageRep:bitmapRep];
