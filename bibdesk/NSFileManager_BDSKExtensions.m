@@ -860,11 +860,13 @@ static OSType finderSignatureBytes = 'MACS';
         success = CFURLGetFSRef((CFURLRef)dstURL, &dstDirRef);
     
     OSErr err = noErr;
-    NSString *comment = [self commentForURL:srcURL];
+    NSString *comment = nil
     FSRef newObjectRef;
     
-
-    // unfortunately, FSCopyObjectSync does not copy Spotlight comments (and neither does NSFileManager) rdar://problem/4531819
+    // unfortunately, FSCopyObjectSync does not copy Spotlight comments on Tiger (and neither does NSFileManager) rdar://problem/4531819
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+        comment = [self commentForURL:srcURL];
+    
     err = FSCopyObjectSync(&srcFileRef, &dstDirRef, NULL, &newObjectRef, 0);
     
     // set the file comment if necessary
@@ -876,8 +878,8 @@ static OSType finderSignatureBytes = 'MACS';
         } else {
             err = coreFoundationUnknownErr;
         }
-    }        
-
+    }
+    
     if(NO == success && error != nil){
         NSString *errorMessage = nil;
         if(noErr != err)
