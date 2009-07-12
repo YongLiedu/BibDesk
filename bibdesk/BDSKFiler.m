@@ -550,8 +550,9 @@ static BDSKFiler *sharedFiler = nil;
             }
         }
         if(statusFlag == BDSKNoError && ignoreMove == NO){
-            // get the Finder comment (spotlight comment)
-            comment = [self commentForURL:[NSURL fileURLWithPath:resolvedPath]];
+            // get the Finder comment (spotlight comment), as NSFileManager does not move this on Tiger
+            if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+                comment = [self commentForURL:[NSURL fileURLWithPath:resolvedPath]];
             NSString *fileType = [[self fileAttributesAtPath:resolvedPath traverseLink:NO] fileType];
  
             // create parent directories if necessary (OmniFoundation)

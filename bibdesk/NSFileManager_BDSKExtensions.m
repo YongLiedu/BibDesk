@@ -860,7 +860,7 @@ static OSType finderSignatureBytes = 'MACS';
         success = CFURLGetFSRef((CFURLRef)dstURL, &dstDirRef);
     
     OSErr err = noErr;
-    NSString *comment = nil
+    NSString *comment = nil;
     FSRef newObjectRef;
     
     // unfortunately, FSCopyObjectSync does not copy Spotlight comments on Tiger (and neither does NSFileManager) rdar://problem/4531819
