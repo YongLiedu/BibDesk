@@ -95,13 +95,13 @@
 // Converts a COins String to a BibItem. All sorts of heuristics and attempts to interpret the format in there. 
 + (BibItem *) parseCOinSString: (NSString *) COinSString {
 	NSString * inputString = COinSString;
-	if ([inputString rangeOfString:@" "].location == NSNotFound) {
+	if ([inputString rangeOfString:@"%20"].location == NSNotFound) {
 		// COinS has a laughable 'specification' but even that is quite clear about spaces being percent escaped to %20. It seems microformat geeks seem to be even lazier/stupider than the people who failed to write an actual spec and suffer from the misconception that 'URL Encoding' is the same as 'Percent Escaping', leading to + being used for a space on many sites. To minimise the impact of that, replace all + by spaces if no occurrences of %20 are found.
 		inputString = [inputString stringByReplacingOccurrencesOfString:@"+" withString:@" "];
 	}
 	
 	
-	NSArray * components = [inputString componentsSeparatedByString:@"&"];
+	NSArray * components = [inputString componentsSeparatedByString:@"&amp;"];
 	if ([components count] < 2 ) { return nil; }
 	NSEnumerator * myEnum = [components objectEnumerator];
 	NSString * component;
@@ -331,7 +331,8 @@
     BibItem *bibItem;
     
     while (node = [nodeEnum nextObject]) {
-        if ((title = [node stringValueOfAttribute:@"title"]) &&
+        if ([node kind] == NSXMLElementKind &&
+            (title = [[(NSXMLElement *)node attributeForName:@"title"] XMLString]) &&
             (bibItem = [BDSKCOinSParser parseCOinSString:title]))
             [results addObject:bibItem];
     }
