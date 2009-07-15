@@ -40,6 +40,7 @@
 #import "BDSKCOinSParser.h"
 #import <AGRegex/AGRegex.h>
 #import "NSXMLNode_BDSKExtensions.h"
+#import "BDSKLinkedFile.h"
 
 /*
  The COinS or Z3988 format is a microformat which is embedded in web pages to include bibliographic information there.
@@ -105,7 +106,8 @@
 	NSEnumerator * myEnum = [components objectEnumerator];
 	NSString * component;
 
-	BibItem * bibItem = [[[BibItem alloc] init] autorelease];
+    NSMutableDictionary *fieldsDict = [NSMutableDictionary dictionary];
+    NSMutableArray *files = [NSMutableArray array];
 	NSString * publicationType = BDSKMiscString;
 	NSString * startPage = nil;
 	NSString * endPage = nil;
@@ -143,7 +145,7 @@
 				fieldName = BDSKJournalString;				
 			}
 			else if ([key isEqualToString:@"rft.stitle"]) { // short journal title: only use it if no full journal title is present
-				if ([[bibItem valueOfField:BDSKJournalString] length] == 0) {
+				if ([NSString isEmptyString:[fieldsDict objectForKey:BDSKJournalString]]) {
 					fieldName = BDSKJournalString;
 				}
 			}
@@ -218,9 +220,9 @@
 				// these are most likely URLs or DOI type information
 				NSURL * URL = [NSURL URLWithString:value];
 				if (URL) {
-					if ( [[URL scheme] rangeOfString:@"http" options:NSLiteralSearch].location != NSNotFound ) {
+					if ( [[URL scheme] rangeOfString:@"http" options:NSLiteralSearch|NSAnchoredSearch].location != NSNotFound ) {
 						// add http/https URLs to the FileView items only, rather than the Url field. This lets us process more than one of them and avoid adding links to library catalogue entries to the BibTeX record. I haven't seen other usable URL typese yet.
-						[bibItem addFileForURL:URL autoFile:NO runScriptHook:NO];
+						[files addObject:[BDSKLinkedFile linkedFileWithURL:URL delegate:nil]];
 					}
 				}
 				else {
@@ -232,7 +234,7 @@
 					AGRegexMatch * match = [DOIRegex findInString:value];
 					if (match) {
 						NSString * DOI = [match group];
-						[bibItem setField:BDSKDoiString toValue:DOI];
+						[fieldsDict setObject:DOI forKey:BDSKDoiString];
 					}
 				}
 			}
@@ -252,8 +254,8 @@
 			// ignored items which apparently may exist: rft.artnum (kind of ID), rft.part, rft.coden (no clue), rft.sici (no clue), rft.chron (free-style dates), rft.ssn (Seasonal Dates), rft.quarter
 			
 			if ( fieldName ) {
-				NSString * previousValue = [bibItem valueOfField:fieldName];
-				BOOL wasNonEmpty = ([previousValue length] > 0);
+				NSString * previousValue = [fieldsDict objectForKey:fieldName];
+				BOOL wasNonEmpty = ([NSString isEmptyString:previousValue] == NO);
 				
 				/* now treat a few cases specially */
 				if ( [fieldName isEqualToString:BDSKAuthorString] && wasNonEmpty ) {
@@ -268,7 +270,7 @@
 				}
 							
 				if (value) {
-					[bibItem setField:fieldName toValue:value];
+					[fieldsDict setObject:value forKey:fieldName];
 				}
 			}			
 			
@@ -277,10 +279,11 @@
 		}
 	}
 	
-	if ( ([[bibItem valueOfField:BDSKPagesString] length] == 0) && (startPage != nil)) {
+	if ( [NSString isEmptyString:[fieldsDict objectForKey:BDSKPagesString]] && (startPage != nil)) {
 		NSString * pages = startPage;
-		if (endPage) { pages = [startPage stringByAppendingFormat:@"--%@", endPage]; }
-		[bibItem setField:BDSKPagesString toValue:pages];
+		if (endPage)
+            pages = [startPage stringByAppendingFormat:@"--%@", endPage];
+		[fieldsDict setObject:pages forKey:BDSKPagesString];
 	}
 	
 	if (auFirst || auLast || auInitials || auSuffix) {
@@ -301,17 +304,20 @@
 			name = [name stringByAppendingFormat:@", %@", auSuffix];
 		}
 		
-		NSString * authors = [bibItem valueOfField:BDSKAuthorString];
+		NSString * authors = [fieldsDict objectForKey:BDSKAuthorString];
 		if ([authors length] > 0) {
 			name = [name stringByAppendingFormat:@" and %@", authors];
 		}
 		
-		[bibItem setField:BDSKAuthorString toValue:name];
+		[fieldsDict setObject:name forKey:BDSKAuthorString];
 	}
 	
-	[bibItem setPubType:publicationType];
-		
-	return bibItem;
+    return [[[BibItem alloc] initWithType:publicationType
+                                 fileType:BDSKBibtexString
+                                  citeKey:nil
+                                pubFields:fieldsDict
+                                    files:files
+                                    isNew:YES] autorelease];
 }
 
 // Process the document. 
