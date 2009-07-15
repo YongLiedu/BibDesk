@@ -39,7 +39,6 @@
 
 #import "BDSKCOinSParser.h"
 #import <AGRegex/AGRegex.h>
-#import "NSXMLNode_BDSKExtensions.h"
 
 /*
  The COinS or Z3988 format is a microformat which is embedded in web pages to include bibliographic information there.
@@ -59,6 +58,7 @@
  . Wikipedia articles with references in them, e.g. http://en.wikipedia.org/wiki/Library feature poor quality COinS tags (whose author names appear in duplicate because of the "spec"'s ambiguity.
 */
 
+
 @implementation BDSKCOinSParser
 
 
@@ -67,12 +67,36 @@
 	The xmlDocument parameter cannot be used for this as its parsing automatically removes empty elements such as the spans used by COinS.
 */
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
-    NSString *containsZ3988Node = @".//span[@class='Z3988']";
-   
-    NSError *error = nil;    
-    BOOL nodecountisok =  [[[xmlDocument rootElement] nodesForXPath:containsZ3988Node error:&error] count] > 0;
+	if (!domDocument) return NO;
+	BOOL result = NO;
 	
-	return nodecountisok;
+	// result = ([[BDSKCOinSParser Z3988Matches:domDocument] count] > 0);
+	NSString * htmlString = [(id)[domDocument documentElement] outerHTML];
+	if (htmlString) {
+		result = ([htmlString rangeOfString:@"Z3988" options:NSLiteralSearch].location !=NSNotFound);
+	}
+	return result;
+}
+
+
+
+/*
+	Process the document. 
+*/
++ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
+	NSArray * entries = [BDSKCOinSParser Z3988Matches:domDocument];
+	NSString * entry;
+	NSEnumerator * myEnum = [entries objectEnumerator];
+	NSMutableArray * results = [NSMutableArray arrayWithCapacity:[entries count]];
+
+	while (entry = [myEnum nextObject]) {
+		BibItem * bibItem = [BDSKCOinSParser parseCOinSString:entry];
+		if (bibItem) {
+			[results addObject:bibItem];
+		}
+	}
+	
+	return results;	
 }
 
 
@@ -84,43 +108,28 @@
 	The xmlDocument variable cannot be used for this as its parsing automatically removes empty elements such as the spans used by COinS.
 	Matching of the relevant spans isn't theoretically perfect yet. If someone can write a regexp matching the title attribute of a span tag only if the class attribute of the tag contains the word Z3988, that may be more elegant. 
 */
-+ (NSArray *) Z3988MatchesForDocument: (NSXMLDocument *) xmlDocument {
-    NSError *error;
-    NSString *Z3988Path = @".//span[@class='Z3988']";
-    NSArray *Z3988Nodes = [[xmlDocument rootElement] nodesForXPath:Z3988Path error:&error];
-	NSEnumerator *nodeEnum = [Z3988Nodes objectEnumerator];
-	NSXMLNode *node;
-	NSMutableArray *dataArray = [NSMutableArray arrayWithCapacity:[Z3988Nodes count]];
++ (NSArray *) Z3988Matches: (DOMDocument *) domDocument {
+	NSString * htmlString = [(id)[domDocument documentElement] outerHTML];
 	
-	while (node = [nodeEnum nextObject]) {
-		NSString *title = [node stringValueOfAttribute:@"title"];
-        if ([NSString isEmptyString:title])
-            [dataArray addObject:title];
+	// regex matching the title element of a span
+	AGRegex * regEx = [AGRegex regexWithPattern:@"<span[^>]*title=\"([^\">]+)\"[^>]*>" options:AGRegexMultiline];	
+	NSArray * regexpResults = [regEx findAllInString:htmlString];
+	NSEnumerator * myEnum = [regexpResults objectEnumerator];
+	AGRegexMatch * match;
+	NSMutableArray * dataArray = [NSMutableArray arrayWithCapacity:[regexpResults count]];
+	
+	while (match = [myEnum nextObject]) {
+		NSString * matchedString = [match group];
+		// require span-tag to contain the string Z3988 to be processed.
+		if ([matchedString rangeOfString:@"Z3988" options:NSLiteralSearch].location != NSNotFound) {
+			NSString * result = [match groupAtIndex:1];
+			if (result) {
+				[dataArray addObject:result];
+			}
+		}
 	}
 	
 	return dataArray;
-}
-
-
-
-/*
-	Convert publication type name from COinS to BibTeX names.
-*/
-+ (NSString *) convertType:(NSString *) type {
-	// default to misc. For unknown values as well as 'document', 'unknown',   
-	NSString * BibTeXType = @"GEN";
-	
-	if ([type isEqualToString:@"article"]) { BibTeXType = BDSKArticleString; }
-	else if ([type isEqualToString:@"book"]) { BibTeXType = BDSKBookString; }
-	else if ([type isEqualToString:@"bookitem"]) { BibTeXType = BDSKInbookString; }
-	else if ([type isEqualToString:@"conference"]) { BibTeXType = BDSKProceedingsString; }
-	else if ([type isEqualToString:@"issue"]) { BibTeXType = @"periodical"; } // ?? correct
-	else if ([type isEqualToString:@"preprint"]) { BibTeXType = BDSKUnpublishedString; }
-	else if ([type isEqualToString:@"proceeding"]) { BibTeXType = BDSKInproceedingsString; }
-	else if ([type isEqualToString:@"report"]) { BibTeXType = BDSKTechreportString; }
-//	else if ([type isEqualToString:@"info:ofi/fmt:kev:mtx:dissertation"]) { BibTeXType = @"phdthesis"; }
-	
-	return BibTeXType;
 }
 
 
@@ -354,22 +363,23 @@
 
 
 /*
-	Process the document. 
+	Convert publication type name from COinS to BibTeX names.
 */
-+ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
-	NSArray * entries = [BDSKCOinSParser Z3988MatchesForDocument:xmlDocument];
-	NSString * entry;
-	NSEnumerator * myEnum = [entries objectEnumerator];
-	NSMutableArray * results = [NSMutableArray arrayWithCapacity:[entries count]];
-
-	while (entry = [myEnum nextObject]) {
-		BibItem * bibItem = [BDSKCOinSParser parseCOinSString:entry];
-		if (bibItem) {
-			[results addObject:bibItem];
-		}
-	}
++ (NSString *) convertType:(NSString *) type {
+	// default to misc. For unknown values as well as 'document', 'unknown',   
+	NSString * BibTeXType = @"GEN";
 	
-	return results;	
+	if ([type isEqualToString:@"article"]) { BibTeXType = BDSKArticleString; }
+	else if ([type isEqualToString:@"book"]) { BibTeXType = BDSKBookString; }
+	else if ([type isEqualToString:@"bookitem"]) { BibTeXType = BDSKInbookString; }
+	else if ([type isEqualToString:@"conference"]) { BibTeXType = BDSKProceedingsString; }
+	else if ([type isEqualToString:@"issue"]) { BibTeXType = @"periodical"; } // ?? correct
+	else if ([type isEqualToString:@"preprint"]) { BibTeXType = BDSKUnpublishedString; }
+	else if ([type isEqualToString:@"proceeding"]) { BibTeXType = BDSKInproceedingsString; }
+	else if ([type isEqualToString:@"report"]) { BibTeXType = BDSKTechreportString; }
+//	else if ([type isEqualToString:@"info:ofi/fmt:kev:mtx:dissertation"]) { BibTeXType = @"phdthesis"; }
+	
+	return BibTeXType;
 }
 
 
