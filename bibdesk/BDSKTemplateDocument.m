@@ -802,7 +802,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         return YES;
     }
 }
-/*
+
 - (BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem {
     if ([anItem action] == @selector(saveDocument:)) {
         return YES;
@@ -812,7 +812,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         return YES;
     }
 }
-*/
+
 #pragma mark Setup and Update
 
 - (void)setupOptionsMenu:(NSMenu *)parentMenu forKeys:(NSString *)firstKey, ... {
