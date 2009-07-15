@@ -98,11 +98,11 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 }
 
 + (NSArray *)writableTypes {
-    return [NSArray arrayWithObjects:@"Text Template", @"Rich Text Template", nil];
+    return [NSArray arrayWithObjects:BDSKTextTemplateDocumentType, BDSKRichTextTemplateDocumentType, nil];
 }
 
 + (NSArray *)nativeTypes {
-    return [NSArray arrayWithObjects:@"Text Template", @"Rich Text Template", nil];
+    return [NSArray arrayWithObjects:BDSKTextTemplateDocumentType, BDSKRichTextTemplateDocumentType, nil];
 }
 
 - (id)init {
@@ -334,7 +334,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     NSRange startRange, endRange = { NSNotFound, 0 }, sepRange = { NSNotFound, 0 };
     NSUInteger length, startLoc = NSNotFound, tmpLoc;
     
-    [self setRichText:[typeName isEqualToString:BDSKRichTextTemplateDocumentType]];
+    richText = [typeName isEqualToString:BDSKRichTextTemplateDocumentType];
     
     if ([self isRichText]) {
         attrString = [[[NSAttributedString alloc] initWithData:data options:nil documentAttributes:NULL error:NULL] autorelease];
@@ -418,6 +418,8 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         BDSKTypeTemplate *template;
         NSEnumerator *typeEnum;
         NSString *type;
+        NSArray *currentTypes = [typeTemplates valueForKey:@"pubType"];
+        NSUInteger currentIndex;
         
         if (itemTemplate) {
             [[typeTemplates objectAtIndex:defaultTypeIndex] setItemTemplate:itemTemplate];
@@ -438,7 +440,11 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
             template = [[[BDSKTypeTemplate alloc] initWithPubType:type forDocument:self] autorelease];
             [template setItemTemplate:itemTemplate];
             [template setIncluded:YES];
-            [[self mutableArrayValueForKey:@"typeTemplates"] addObject:template];
+            currentIndex = [currentTypes indexOfObject:type];
+            if (currentIndex == NSNotFound)
+                [[self mutableArrayValueForKey:@"typeTemplates"] addObject:template];
+            else
+                [[self mutableArrayValueForKey:@"typeTemplates"] replaceObjectAtIndex:currentIndex withObject:template];
         }
         
         [[self undoManager] removeAllActions];
@@ -796,7 +802,17 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         return YES;
     }
 }
-
+/*
+- (BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem {
+    if ([anItem action] == @selector(saveDocument:)) {
+        return YES;
+    } else if ([[BDSKTemplateDocument superclass] instancesRespondToSelector:_cmd]) {
+        return [super validateUserInterfaceItem:anItem];
+    } else {
+        return YES;
+    }
+}
+*/
 #pragma mark Setup and Update
 
 - (void)setupOptionsMenu:(NSMenu *)parentMenu forKeys:(NSString *)firstKey, ... {
