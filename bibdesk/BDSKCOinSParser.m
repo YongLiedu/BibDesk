@@ -68,14 +68,11 @@
 */
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
 	if (!domDocument) return NO;
-	BOOL result = NO;
 	
-	// result = ([[BDSKCOinSParser Z3988Matches:domDocument] count] > 0);
 	NSString * htmlString = [(id)[domDocument documentElement] outerHTML];
-	if (htmlString) {
-		result = ([htmlString rangeOfString:@"Z3988" options:NSLiteralSearch].location !=NSNotFound);
-	}
-	return result;
+	AGRegex * regex = [AGRegex regexWithPattern:@"<span[^>]*class=\"Z3988\"[^>]*>" options:AGRegexMultiline];
+    
+    return nil != [regex findInString:htmlString];
 }
 
 
