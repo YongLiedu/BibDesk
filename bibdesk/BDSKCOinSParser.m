@@ -67,15 +67,12 @@
 	The xmlDocument parameter cannot be used for this as its parsing automatically removes empty elements such as the spans used by COinS.
 */
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
-	if (!domDocument) return NO;
-	BOOL result = NO;
+    NSString *containsZ3988Node = @".//span[@class='Z3988']";
+   
+    NSError *error = nil;    
+    BOOL nodecountisok =  [[[xmlDocument rootElement] nodesForXPath:containsZ3988Node error:&error] count] > 0;
 	
-	// result = ([[BDSKCOinSParser Z3988Matches:domDocument] count] > 0);
-	NSString * htmlString = [(id)[domDocument documentElement] outerHTML];
-	if (htmlString) {
-		result = ([htmlString rangeOfString:@"Z3988" options:NSLiteralSearch].location !=NSNotFound);
-	}
-	return result;
+	return nodecountisok;
 }
 
 
