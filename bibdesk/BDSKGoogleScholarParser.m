@@ -40,6 +40,8 @@
 #import "BibItem.h"
 #import "BDSKBibTeXParser.h"
 #import "NSError_BDSKExtensions.h"
+#import "BDSKBibTeXParser.h"
+#import "NSXMLNode_BDSKExtensions.h"
 
 @implementation BDSKGoogleScholarParser
 
