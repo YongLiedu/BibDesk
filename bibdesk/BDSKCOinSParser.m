@@ -274,7 +274,7 @@
 				}
 				if ([value rangeOfString:@"doi" options:NSCaseInsensitiveSearch].location != NSNotFound) {
 					// the value contains doi, so assume it's DOI information and also add it to the DOI field. There should only be a single occurrence of those, so add it right here to make sure the format isn't messed up in case multiple fields contain that substring
-					AGRegex * DOIRegex = [AGRegex regexWithPattern:@"10.[0-9/.]+" options:0];
+					AGRegex * DOIRegex = [AGRegex regexWithPattern:@"10.[0-9/.%a-zA-Z]+" options:0];
 					AGRegexMatch * match = [DOIRegex findInString:value];
 					if (match) {
 						NSString * DOI = [match group];
