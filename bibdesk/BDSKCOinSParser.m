@@ -39,6 +39,7 @@
 
 #import "BDSKCOinSParser.h"
 #import <AGRegex/AGRegex.h>
+#import "NSXMLNode_BDSKExtensions.h"
 
 /*
  The COinS or Z3988 format is a microformat which is embedded in web pages to include bibliographic information there.
@@ -62,88 +63,44 @@
 @implementation BDSKCOinSParser
 
 
-/*
-	Claim that the can parse the document if its markup contains the string Z3988.
-	The xmlDocument parameter cannot be used for this as its parsing automatically removes empty elements such as the spans used by COinS.
-*/
+// Claim that the can parse the document if its markup contains the string Z3988.
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
 	if (!domDocument) return NO;
 	
-	NSString * htmlString = [(id)[domDocument documentElement] outerHTML];
-	AGRegex * regex = [AGRegex regexWithPattern:@"<span[^>]*class=\"Z3988\"[^>]*>" options:AGRegexMultiline];
+    NSError *error;
+    NSArray *nodes = [[xmlDocument rootElement] nodesForXPath:@".//span[@class='Z3988']" error:&error];
     
-    return nil != [regex findInString:htmlString];
+    return [nodes count] > 0;
 }
 
-
-
-/*
-	Process the document. 
-*/
-+ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
-	NSArray * entries = [BDSKCOinSParser Z3988Matches:domDocument];
-	NSString * entry;
-	NSEnumerator * myEnum = [entries objectEnumerator];
-	NSMutableArray * results = [NSMutableArray arrayWithCapacity:[entries count]];
-
-	while (entry = [myEnum nextObject]) {
-		BibItem * bibItem = [BDSKCOinSParser parseCOinSString:entry];
-		if (bibItem) {
-			[results addObject:bibItem];
-		}
-	}
+// Convert publication type name from COinS to BibTeX names.
++ (NSString *) convertType:(NSString *) type {
+	// default to misc. For unknown values as well as 'document', 'unknown',   
+	NSString * BibTeXType = @"GEN";
 	
-	return results;	
+	if ([type isEqualToString:@"article"]) { BibTeXType = BDSKArticleString; }
+	else if ([type isEqualToString:@"book"]) { BibTeXType = BDSKBookString; }
+	else if ([type isEqualToString:@"bookitem"]) { BibTeXType = BDSKInbookString; }
+	else if ([type isEqualToString:@"conference"]) { BibTeXType = BDSKProceedingsString; }
+	else if ([type isEqualToString:@"issue"]) { BibTeXType = @"periodical"; } // ?? correct
+	else if ([type isEqualToString:@"preprint"]) { BibTeXType = BDSKUnpublishedString; }
+	else if ([type isEqualToString:@"proceeding"]) { BibTeXType = BDSKInproceedingsString; }
+	else if ([type isEqualToString:@"report"]) { BibTeXType = BDSKTechreportString; }
+//	else if ([type isEqualToString:@"info:ofi/fmt:kev:mtx:dissertation"]) { BibTeXType = @"phdthesis"; }
+	
+	return BibTeXType;
 }
 
-
-
-/*
-	Returns the content of the relevant title attributes in the document.
-	
-	Get the source code of the DOMDocument and match things which vaguely look like COinS records in there.
-	The xmlDocument variable cannot be used for this as its parsing automatically removes empty elements such as the spans used by COinS.
-	Matching of the relevant spans isn't theoretically perfect yet. If someone can write a regexp matching the title attribute of a span tag only if the class attribute of the tag contains the word Z3988, that may be more elegant. 
-*/
-+ (NSArray *) Z3988Matches: (DOMDocument *) domDocument {
-	NSString * htmlString = [(id)[domDocument documentElement] outerHTML];
-	
-	// regex matching the title element of a span
-	AGRegex * regEx = [AGRegex regexWithPattern:@"<span[^>]*title=\"([^\">]+)\"[^>]*>" options:AGRegexMultiline];	
-	NSArray * regexpResults = [regEx findAllInString:htmlString];
-	NSEnumerator * myEnum = [regexpResults objectEnumerator];
-	AGRegexMatch * match;
-	NSMutableArray * dataArray = [NSMutableArray arrayWithCapacity:[regexpResults count]];
-	
-	while (match = [myEnum nextObject]) {
-		NSString * matchedString = [match group];
-		// require span-tag to contain the string Z3988 to be processed.
-		if ([matchedString rangeOfString:@"Z3988" options:NSLiteralSearch].location != NSNotFound) {
-			NSString * result = [match groupAtIndex:1];
-			if (result) {
-				[dataArray addObject:result];
-			}
-		}
-	}
-	
-	return dataArray;
-}
-
-
-
-/*
-	Converts a COins String to a BibItem.
- 	All sorts of heuristics and attempts to interpret the format in there. 
-*/
+// Converts a COins String to a BibItem. All sorts of heuristics and attempts to interpret the format in there. 
 + (BibItem *) parseCOinSString: (NSString *) COinSString {
 	NSString * inputString = COinSString;
-	if ([inputString rangeOfString:@"%20"].location == NSNotFound) {
+	if ([inputString rangeOfString:@" "].location == NSNotFound) {
 		// COinS has a laughable 'specification' but even that is quite clear about spaces being percent escaped to %20. It seems microformat geeks seem to be even lazier/stupider than the people who failed to write an actual spec and suffer from the misconception that 'URL Encoding' is the same as 'Percent Escaping', leading to + being used for a space on many sites. To minimise the impact of that, replace all + by spaces if no occurrences of %20 are found.
 		inputString = [inputString stringByReplacingOccurrencesOfString:@"+" withString:@" "];
 	}
 	
 	
-	NSArray * components = [inputString componentsSeparatedByString:@"&amp;"];
+	NSArray * components = [inputString componentsSeparatedByString:@"&"];
 	if ([components count] < 2 ) { return nil; }
 	NSEnumerator * myEnum = [components objectEnumerator];
 	NSString * component;
@@ -357,39 +314,31 @@
 	return bibItem;
 }
 
-
-
-/*
-	Convert publication type name from COinS to BibTeX names.
-*/
-+ (NSString *) convertType:(NSString *) type {
-	// default to misc. For unknown values as well as 'document', 'unknown',   
-	NSString * BibTeXType = @"GEN";
+// Process the document. 
++ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
+	NSError *error;
+    NSArray *nodes = [[xmlDocument rootElement] nodesForXPath:@".//span[@class='Z3988']" error:&error];
+    NSEnumerator *nodeEnum = [nodes objectEnumerator];
+    NSXMLNode *node;
+	NSMutableArray *results = [NSMutableArray arrayWithCapacity:[nodes count]];
+    NSString *title;
+    BibItem *bibItem;
+    
+    while (node = [nodeEnum nextObject]) {
+        if ((title = [node stringValueOfAttribute:@"title"]) &&
+            (bibItem = [BDSKCOinSParser parseCOinSString:title]))
+            [results addObject:bibItem];
+    }
 	
-	if ([type isEqualToString:@"article"]) { BibTeXType = BDSKArticleString; }
-	else if ([type isEqualToString:@"book"]) { BibTeXType = BDSKBookString; }
-	else if ([type isEqualToString:@"bookitem"]) { BibTeXType = BDSKInbookString; }
-	else if ([type isEqualToString:@"conference"]) { BibTeXType = BDSKProceedingsString; }
-	else if ([type isEqualToString:@"issue"]) { BibTeXType = @"periodical"; } // ?? correct
-	else if ([type isEqualToString:@"preprint"]) { BibTeXType = BDSKUnpublishedString; }
-	else if ([type isEqualToString:@"proceeding"]) { BibTeXType = BDSKInproceedingsString; }
-	else if ([type isEqualToString:@"report"]) { BibTeXType = BDSKTechreportString; }
-//	else if ([type isEqualToString:@"info:ofi/fmt:kev:mtx:dissertation"]) { BibTeXType = @"phdthesis"; }
-	
-	return BibTeXType;
+	return results;	
 }
 
-
-
-/*
-	Array with feature description dictionary for the COinS microformat.
-*/
+// Array with feature description dictionary for the COinS microformat.
 + (NSArray *) parserInfos {
 	NSString * parserDescription = NSLocalizedString(@"The COinS microformat can be used to embed bibliographic information in web pages.", @"Description for COinS mircoformat");
 	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"COinS" address:@"http://ocoins.info/" description: parserDescription flags: BDSKParserFeatureAllPagesMask];
 	
 	return [NSArray arrayWithObject:parserInfo];
 }
-
 
 @end

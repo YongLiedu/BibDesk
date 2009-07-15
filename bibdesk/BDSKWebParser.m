@@ -139,7 +139,8 @@ static Class webParserClassForType(NSInteger stringType)
     }
     
     NSXMLDocument *xmlDoc = [[NSXMLDocument alloc] initWithXMLString:htmlString
-                                                             options:NSXMLDocumentTidyHTML error:&error];
+                                                             options:NSXMLDocumentTidyXML|NSXMLNodePreserveEmptyElements
+                                                               error:&error];
     [xmlDoc autorelease];
     if(xmlDoc == nil){
         if(outError) *outError = error;
