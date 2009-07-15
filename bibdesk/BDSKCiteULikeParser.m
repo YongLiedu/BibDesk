@@ -49,11 +49,11 @@
     }
     
     
-    NSString *containsPreNode = @".//pre";
+    NSString *containsBibtexNode = @".//textarea[@id='bibtex-body']";
    
     NSError *error = nil;    
 
-    bool nodecountisok =  [[[xmlDocument rootElement] nodesForXPath:containsPreNode error:&error] count] > 0;
+    bool nodecountisok =  [[[xmlDocument rootElement] nodesForXPath:containsBibtexNode error:&error] count] > 0;
 
     return nodecountisok;
 }
@@ -63,19 +63,19 @@
     NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
     
     
-    NSString *prePath = @".//pre";
+    NSString *bibtexPath = @".//textarea[@id='bibtex-body']";
     
     NSError *error = nil;    
 
-    NSArray *preNodes = [[xmlDocument rootElement] nodesForXPath:prePath
+    NSArray *bibtexNodes = [[xmlDocument rootElement] nodesForXPath:bibtexPath
                                                     error:&error];
     
-    if ([preNodes count] < 1) {
+    if ([bibtexNodes count] < 1) {
         if (outError) *outError = error;
         return nil;
     }
     
-    NSString *preString = [[preNodes objectAtIndex:0] stringValue];
+    NSString *preString = [[bibtexNodes objectAtIndex:0] stringValue];
     
     BOOL isPartialData = NO;
     
