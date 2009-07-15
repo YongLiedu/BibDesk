@@ -41,13 +41,5 @@
 #import "BibItem.h"
 #import "BDSKWebParser.h"
 
-@interface BDSKCOinSParser : BDSKWebParser {
-
-}
-
-+ (NSArray *) Z3988Matches: (DOMDocument *) domDocument;
-+ (BibItem *) parseCOinSString: (NSString *) COinSString;
-
-+ (NSString *) convertType:(NSString *) type;
-
+@interface BDSKCOinSParser : BDSKWebParser
 @end
