@@ -219,24 +219,16 @@
 			else if ([key isEqualToString:@"rft_id"] || [key isEqualToString:@"rft.identifier"]) { 
 				// these are most likely URLs or DOI type information
 				NSURL * URL = [NSURL URLWithString:value];
-				if (URL) {
-					if ( [[URL scheme] rangeOfString:@"http" options:NSLiteralSearch|NSAnchoredSearch].location != NSNotFound ) {
-						// add http/https URLs to the FileView items only, rather than the Url field. This lets us process more than one of them and avoid adding links to library catalogue entries to the BibTeX record. I haven't seen other usable URL typese yet.
-						[files addObject:[BDSKLinkedFile linkedFileWithURL:URL delegate:nil]];
-					}
-				}
-				else {
-					// it's not a URL, what now? ignore?
+				if (URL && [[URL scheme] rangeOfString:@"http" options:NSLiteralSearch|NSAnchoredSearch].location != NSNotFound ) {
+                    // add http/https URLs to the FileView items only, rather than the Url field. This lets us process more than one of them and avoid adding links to library catalogue entries to the BibTeX record. I haven't seen other usable URL typese yet.
+                    [files addObject:[BDSKLinkedFile linkedFileWithURL:URL delegate:nil]];
 				}
 				if ([value rangeOfString:@"doi" options:NSCaseInsensitiveSearch].location != NSNotFound) {
 					// the value contains doi, so assume it's DOI information and also add it to the DOI field. There should only be a single occurrence of those, so add it right here to make sure the format isn't messed up in case multiple fields contain that substring
-					AGRegex * DOIRegex = [AGRegex regexWithPattern:@"10.[0-9/.%a-zA-Z]+" options:0];
-					AGRegexMatch * match = [DOIRegex findInString:value];
-					if (match) {
-						NSString * DOI = [match group];
-						[fieldsDict setObject:DOI forKey:BDSKDoiString];
-					}
-				}
+					NSRange range = [value rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet]];
+                    if (range.length && range.location > 0)
+						[fieldsDict setObject:[value substringFromIndex:range.location] forKey:BDSKDoiString];
+                }
 			}
 			else if ([key isEqualToString:@"rft.isbn"]) { 
 				fieldName = @"ISBN";
