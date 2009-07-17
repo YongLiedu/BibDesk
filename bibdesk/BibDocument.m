@@ -1170,7 +1170,21 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (BOOL)writeSafelyToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError;
 {
-    BOOL didSave = [super writeSafelyToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
+    /*
+     Apple's safe-saving is broken on NFS http://sourceforge.net/tracker/index.php?func=detail&aid=2822780&group_id=61487&atid=497423
+     Always use the workaround path in that case, based on the mount type.  Tested by automounting an RHEL5 export on 10.5.7.
+     Unknown whether this is needed on 10.4, but NSAppKitVersionNumber check is needed because of the condition below.
+     */
+     NSString *fsType = nil;
+     if ([[NSWorkspace sharedWorkspace] getFileSystemInfoForPath:[absoluteURL path] isRemovable:NULL isWritable:NULL isUnmountable:NULL description:NULL type:&fsType] == NO)
+         fsType = nil;
+     BOOL didSave;
+
+     // same conditional as used for workaround code path
+     if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 && [absoluteURL isFileURL] && NSAutosaveOperation != saveOperation && [[fsType lowercaseString] isEqualToString:@"nfs"])
+         didSave = NO;
+     else
+         didSave = [super writeSafelyToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
     
 #if defined(MAC_OS_X_VERSION_10_5) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
     
