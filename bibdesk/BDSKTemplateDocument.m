@@ -437,6 +437,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         typeEnum = [includedTypes objectEnumerator];
         while (type = [typeEnum nextObject]) {
             itemTemplate = [templateDict objectForKey:type];
+            type = [type entryType];
             template = [[[BDSKTypeTemplate alloc] initWithPubType:type forDocument:self] autorelease];
             [template setItemTemplate:itemTemplate];
             [template setIncluded:YES];
