@@ -105,7 +105,7 @@ static id sharedController = nil;
         helpBookName = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleHelpBookName"] retain];
         [self loadPreferences];
     }
-    return self;
+    return sharedController;
 }
 
 - (id)retain { return self; }
