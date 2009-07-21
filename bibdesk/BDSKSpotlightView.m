@@ -78,7 +78,7 @@
     
     if (highlightCircleRects == nil) {
         [[NSColor clearColor] setFill];
-        NSRectFill(aRect);
+        [NSBezierPath fillRect:aRect];
         return;
     }
     
@@ -123,7 +123,7 @@
     [transform concat];
     // fill the entire space with clear
     [[NSColor clearColor] setFill];
-    NSRectFill(maskRect);
+    [NSBezierPath fillRect:maskRect];
     // draw the mask
     [[NSColor colorWithCalibratedWhite:0.0 alpha:MASK_ALPHA] setFill];
     [path fill];
@@ -142,7 +142,7 @@
     [cropFilter setValue:[CIVector vectorWithX:blurPadding Y:blurPadding Z:NSWidth(bounds) W:NSHeight(bounds)] forKey:@"inputRectangle"];
     [cropFilter setValue:[gaussianBlurFilter valueForKey:@"outputImage"] forKey:@"inputImage"];
     
-    [[cropFilter valueForKey:@"outputImage"] drawInRect:[self bounds] fromRect:NSMakeRect(blurPadding, blurPadding, NSWidth(bounds), NSHeight(bounds)) operation:NSCompositeCopy fraction:1.0];
+    [[cropFilter valueForKey:@"outputImage"] drawInRect:[self bounds] fromRect:NSMakeRect(blurPadding, blurPadding, NSWidth(bounds), NSHeight(bounds)) operation:NSCompositeSourceOver fraction:1.0];
 }
 
 @end
