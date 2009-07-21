@@ -30,19 +30,19 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSControl</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
 			<string>NSMenu</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSControl</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -224,6 +224,8 @@
 				<string>NSProgressIndicator</string>
 				<key>resultsArrayController</key>
 				<string>BDSKSelectionPreservingArrayController</string>
+				<key>statusField</key>
+				<string>NSTextField</string>
 				<key>tableView</key>
 				<string>BDSKTableView</string>
 			</dict>

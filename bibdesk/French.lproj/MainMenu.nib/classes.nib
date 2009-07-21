@@ -307,6 +307,22 @@
 			<string>NSResponder</string>
 		</dict>
 		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSControl</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
 			<key>ACTIONS</key>
 			<dict>
 				<key>editPublication</key>
@@ -338,19 +354,11 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSControl</string>
+			<string>BDSKEncodingPopUpButton</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSMenu</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSObject</string>
+			<string>NSPopUpButton</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -366,14 +374,6 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSResponder</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKEncodingPopUpButton</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSPopUpButton</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -706,14 +706,6 @@
 			<string>NSDocumentController</string>
 		</dict>
 		<dict>
-			<key>CLASS</key>
-			<string>BDSKEditorTableView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSTableView</string>
-		</dict>
-		<dict>
 			<key>ACTIONS</key>
 			<dict>
 				<key>alternateCut</key>
@@ -727,6 +719,14 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>BDSKTableView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKEditorTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTableView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>

@@ -5,24 +5,12 @@
 	<key>IBClasses</key>
 	<array>
 		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>chooseURL</key>
-				<string>id</string>
-			</dict>
 			<key>CLASS</key>
-			<string>BDSKURLGroupSheetController</string>
+			<string>NSApplication</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>objectController</key>
-				<string>NSObjectController</string>
-				<key>urlField</key>
-				<string>BDSKDragTextField</string>
-			</dict>
 			<key>SUPERCLASS</key>
-			<string>BDSKSheetController</string>
+			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -57,17 +45,33 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSWindow</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>FirstResponder</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSObject</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSObject</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -89,11 +93,31 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSWindow</string>
+			<string>NSCell</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>chooseURL</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BDSKURLGroupSheetController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>objectController</key>
+				<string>NSObjectController</string>
+				<key>urlField</key>
+				<string>BDSKDragTextField</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>BDSKSheetController</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
