@@ -43,7 +43,7 @@
     id delegate;
     BOOL flipped;
 }
-- (id)initWithFrame:(NSRect)frameRectb flipped:(BOOL)isFlipped;
+- (id)initWithFrame:(NSRect)frameRect flipped:(BOOL)isFlipped;
 - (id)initFlipped:(BOOL)isFlipped;
 - (id)delegate;
 - (void)setDelegate:(id)newDelegate;
