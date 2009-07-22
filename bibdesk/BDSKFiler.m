@@ -148,16 +148,11 @@ static BDSKFiler *sharedFiler = nil;
         [NSException raise:BDSKUnimplementedException format:@"%@ is only implemented for local files for initial moves.",NSStringFromSelector(_cmd)];
 	
 	if (numberOfPapers > 1) {
-        if (progressSheet == nil)
+        if (progressWindow == nil)
             [NSBundle loadNibNamed:@"AutoFileProgress" owner:self];
 		[progressIndicator setMaxValue:numberOfPapers];
 		[progressIndicator setDoubleValue:0.0];
-        [progressCloseButton setEnabled:NO];
-		[NSApp beginSheet:progressSheet
-		   modalForWindow:[doc windowForSheet]
-			modalDelegate:nil
-		   didEndSelector:NULL
-			  contextInfo:nil];
+        [progressWindow orderFront:nil];
 	}
 	
 	paperEnum = [paperInfos objectEnumerator];
@@ -246,12 +241,8 @@ static BDSKFiler *sharedFiler = nil;
         }
 	}
 	
-	if (numberOfPapers > 1) {
-		[progressSheet orderOut:nil];
-		[NSApp endSheet:progressSheet returnCode:0];
-        // enable the close button in case the progress sheet was queued and is not attached at this point
-        [progressCloseButton setEnabled:YES];
-	}
+	if (numberOfPapers > 1)
+		[progressWindow orderOut:nil];
 	
 	NSUndoManager *undoManager = [doc undoManager];
 	[[undoManager prepareWithInvocationTarget:self] 
@@ -263,11 +254,6 @@ static BDSKFiler *sharedFiler = nil;
         options = mask;
 		[self showProblems];
     }
-}
-
-- (IBAction)closeProgress:(id)sender{
-    [progressSheet orderOut:nil];
-    [NSApp endSheet:progressSheet returnCode:0];
 }
 
 #pragma mark Error reporting
