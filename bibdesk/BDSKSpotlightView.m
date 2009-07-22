@@ -114,18 +114,18 @@
                                                                        bitmapFormat:0 
                                                                         bytesPerRow:0 /*(4 * NSWidth(maskRect)) */
                                                                        bitsPerPixel:32];
-
+    unsigned char *bitmapData = [imageRep bitmapData];
+    if (bitmapData)
+        bzero(bitmapData, [imageRep bytesPerRow] * [imageRep pixelsHigh]);
+    
     [NSGraphicsContext saveGraphicsState];
     [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithBitmapImageRep:imageRep]];
     // we need to shift because canvas of the image is at positive values
     NSAffineTransform *transform = [NSAffineTransform transform];
     [transform translateXBy:blurPadding yBy:blurPadding];
     [transform concat];
-    // fill the entire space with clear
-    [[NSColor clearColor] setFill];
-    [NSBezierPath fillRect:maskRect];
     // draw the mask
-    [[NSColor colorWithCalibratedWhite:0.0 alpha:MASK_ALPHA] setFill];
+    [[NSColor colorWithCalibratedRed:0.0 green:0.0 blue:0.0 alpha:MASK_ALPHA] setFill];
     [path fill];
     [NSGraphicsContext restoreGraphicsState];
     
@@ -142,7 +142,8 @@
     [cropFilter setValue:[CIVector vectorWithX:blurPadding Y:blurPadding Z:NSWidth(bounds) W:NSHeight(bounds)] forKey:@"inputRectangle"];
     [cropFilter setValue:[gaussianBlurFilter valueForKey:@"outputImage"] forKey:@"inputImage"];
     
-    [[cropFilter valueForKey:@"outputImage"] drawInRect:[self bounds] fromRect:NSMakeRect(blurPadding, blurPadding, NSWidth(bounds), NSHeight(bounds)) operation:NSCompositeSourceOver fraction:1.0];
+    CIImage *image = [cropFilter valueForKey:@"outputImage"];
+    [image drawInRect:[self bounds] fromRect:NSRectFromCGRect([image extent]) operation:NSCompositeCopy fraction:1.0];
 }
 
 @end
