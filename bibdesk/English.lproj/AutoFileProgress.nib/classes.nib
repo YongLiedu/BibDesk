@@ -14,19 +14,19 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSMenu</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSObject</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
 			<string>NSControl</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -104,6 +104,8 @@
 				<key>progressIndicator</key>
 				<string>NSProgressIndicator</string>
 				<key>progressSheet</key>
+				<string>NSPanel</string>
+				<key>progressWindow</key>
 				<string>NSPanel</string>
 				<key>tv</key>
 				<string>NSTableView</string>
