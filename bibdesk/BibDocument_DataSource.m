@@ -256,16 +256,31 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     return YES;
 }
 
+static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
+    NSMenu *submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
+    NSEnumerator *urlEnum = [urls objectEnumerator];
+    NSURL *url;
+    while (url = [urlEnum nextObject]) {
+        NSString *title = [url isFileURL] ? [[NSFileManager defaultManager] displayNameAtPath:[url path]] : [url absoluteString];
+        NSMenuItem *item = [submenu addItemWithTitle:title action:[item action] keyEquivalent:@""];
+        [item setTarget:[item target]];
+        [item setRepresentedObject:url];
+    }
+    [anItem setSubmenu:submenu];
+}
+
 - (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
 	if (tv != tableView || tableColumn == nil || row == -1) 
 		return nil;
     
     // autorelease when creating an instance, since there are multiple exit points from this method
 	NSMenu *menu = nil;
+    NSMenu *submenu;
     NSMenuItem *item = nil;
     NSString *tcId = [tableColumn identifier];
     NSArray *linkedURLs;
     NSURL *theURL;
+    NSEnumerator *urlEnum;
     
     if([tcId isURLField] || [tcId isEqualToString:BDSKLocalFileString] || [tcId isEqualToString:BDSKRemoteURLString]){
         menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
@@ -302,12 +317,20 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
                 [item setRepresentedObject:linkedURLs];
                 item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked Files", @"Menu item title") action:@selector(openLinkedFile:) keyEquivalent:@""];
                 [item setTarget:self];
+                if ([linkedURLs count] > 1)
+                    addSubmenuForURLsToItem(linkedURLs, item);
                 item = [menu addItemWithTitle:NSLocalizedString(@"Reveal Linked Files in Finder", @"Menu item title") action:@selector(revealLinkedFile:) keyEquivalent:@""];
                 [item setTarget:self];
+                if ([linkedURLs count] > 1)
+                    addSubmenuForURLsToItem(linkedURLs, item);
                 item = [menu addItemWithTitle:NSLocalizedString(@"Show Skim Notes For Linked Files", @"Menu item title") action:@selector(showNotesForLinkedFile:) keyEquivalent:@""];
                 [item setTarget:self];
+                if ([linkedURLs count] > 1)
+                    addSubmenuForURLsToItem(linkedURLs, item);
                 item = [menu addItemWithTitle:NSLocalizedString(@"Copy Skim Notes For Linked Files", @"Menu item title") action:@selector(copyNotesForLinkedFile:) keyEquivalent:@""];
                 [item setTarget:self];
+                if ([linkedURLs count] > 1)
+                    addSubmenuForURLsToItem(linkedURLs, item);
                 if([linkedURLs count] == 1 && (theURL = [linkedURLs lastObject]) && [theURL isEqual:[NSNull null]] == NO){
                     item = [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") 
                                         andSubmenuOfApplicationsForURL:theURL atIndex:1];
@@ -323,6 +346,8 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
                 [item setRepresentedObject:linkedURLs];
                 item = [menu addItemWithTitle:NSLocalizedString(@"Open URLs in Browser", @"Menu item title") action:@selector(openLinkedURL:) keyEquivalent:@""];
                 [item setTarget:self];
+                if ([linkedURLs count] > 1)
+                    addSubmenuForURLsToItem(linkedURLs, item);
                 if([linkedURLs count] == 1 && (theURL = [linkedURLs lastObject]) && [theURL isEqual:[NSNull null]] == NO){
                     item = [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") 
                                         andSubmenuOfApplicationsForURL:theURL atIndex:1];
