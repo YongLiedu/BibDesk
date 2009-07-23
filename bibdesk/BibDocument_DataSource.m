@@ -262,8 +262,8 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     NSURL *url;
     while (url = [urlEnum nextObject]) {
         NSString *title = [url isFileURL] ? [[NSFileManager defaultManager] displayNameAtPath:[url path]] : [url absoluteString];
-        NSMenuItem *item = [submenu addItemWithTitle:title action:[item action] keyEquivalent:@""];
-        [item setTarget:[item target]];
+        NSMenuItem *item = [submenu addItemWithTitle:title action:[anItem action] keyEquivalent:@""];
+        [item setTarget:[anItem target]];
         [item setRepresentedObject:url];
     }
     [anItem setSubmenu:submenu];
