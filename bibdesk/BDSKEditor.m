@@ -300,7 +300,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [ratingButtonCell release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 	[dragFieldEditor release];
-	[statusBar release];
 	[complexStringEditor release];
     [tableCellFormatter release];
     [crossrefFormatter release];
