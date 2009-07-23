@@ -297,11 +297,9 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
             linkedURLs = [self selectedFileURLs];
             
             if([linkedURLs count]){
-                if([linkedURLs count] == 1){
-                    item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
-                    [item setTarget:self];
-                    [item setRepresentedObject:linkedURLs];
-                }
+                item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
+                [item setTarget:self];
+                [item setRepresentedObject:linkedURLs];
                 item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked Files", @"Menu item title") action:@selector(openLinkedFile:) keyEquivalent:@""];
                 [item setTarget:self];
                 item = [menu addItemWithTitle:NSLocalizedString(@"Reveal Linked Files in Finder", @"Menu item title") action:@selector(revealLinkedFile:) keyEquivalent:@""];
@@ -320,11 +318,9 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
             
             if([linkedURLs count]){
                 menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
-                if([linkedURLs count] == 1){
-                    item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
-                    [item setTarget:self];
-                    [item setRepresentedObject:linkedURLs];
-                }
+                item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
+                [item setTarget:self];
+                [item setRepresentedObject:linkedURLs];
                 item = [menu addItemWithTitle:NSLocalizedString(@"Open URLs in Browser", @"Menu item title") action:@selector(openLinkedURL:) keyEquivalent:@""];
                 [item setTarget:self];
                 if([linkedURLs count] == 1 && (theURL = [linkedURLs lastObject]) && [theURL isEqual:[NSNull null]] == NO){
