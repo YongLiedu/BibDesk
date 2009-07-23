@@ -149,8 +149,6 @@
 - (IBAction)dismissChooseURLSheet:(id)sender;
 - (void)chooseRemoteURLSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 
-- (IBAction)toggleStatusBar:(id)sender;
-
 - (IBAction)raiseAddField:(id)sender;
 - (IBAction)raiseDelField:(id)sender;
 - (IBAction)raiseChangeFieldName:(id)sender;

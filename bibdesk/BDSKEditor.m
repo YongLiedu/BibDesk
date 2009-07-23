@@ -180,10 +180,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [self setupButtonCells];
     
     // Setup the statusbar
-	[statusBar retain]; // we need to retain, as we might remove it from the window
-	if (![[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowEditorStatusBarKey]) {
-		[self toggleStatusBar:nil];
-	}
 	[statusBar setDelegate:self];
     [statusBar setTextOffset:NSMaxX([actionButton frame])];
     
@@ -427,11 +423,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 #pragma mark Actions
-
-- (IBAction)toggleStatusBar:(id)sender{
-	[statusBar toggleBelowView:mainSplitView offset:1.0];
-	[[NSUserDefaults standardUserDefaults] setBool:[statusBar isVisible] forKey:BDSKShowEditorStatusBarKey];
-}
 
 - (IBAction)openLinkedFile:(id)sender{
     NSEnumerator *urlEnum = nil;
@@ -1524,14 +1515,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         NSInteger row = [tableView editedRow];
 		return (row != -1 && [complexStringEditor isEditing] == NO && 
                 [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] == NO && [[fields objectAtIndex:row] isCitationField] == NO);
-    }
-    else if (theAction == @selector(toggleStatusBar:)) {
-		if ([statusBar isVisible]) {
-			[menuItem setTitle:NSLocalizedString(@"Hide Status Bar", @"Menu item title")];
-		} else {
-			[menuItem setTitle:NSLocalizedString(@"Show Status Bar", @"Menu item title")];
-		}
-		return YES;
     }
     else if (theAction == @selector(raiseAddField:) || 
              theAction == @selector(raiseDelField:) || 
