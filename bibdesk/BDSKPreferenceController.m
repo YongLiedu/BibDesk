@@ -131,7 +131,7 @@ static id sharedController = nil;
     [iconView setTarget:self];
     [self changeContentView:iconView display:NO];
     
-    overlay = [[BDSKOverlayWindow alloc] initWithContentRect:NSZeroRect styleMask:[[self window] styleMask] backing:[[self window] backingType] defer:YES];
+    overlay = [[BDSKOverlayWindow alloc] initWithContentRect:[[self window] contentRectForFrameRect:[[self window] frame]] styleMask:[[self window] styleMask] backing:[[self window] backingType] defer:YES];
     BDSKSpotlightView *spotlightView = [[BDSKSpotlightView alloc] initFlipped:[iconView isFlipped]];
     [spotlightView setDelegate:self];
     [overlay setContentView:spotlightView];
