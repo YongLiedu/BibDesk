@@ -452,6 +452,24 @@
 		<dict>
 			<key>ACTIONS</key>
 			<dict>
+				<key>checkForUpdates</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>SUUpdater</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>delegate</key>
+				<string>id</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
 				<key>changeFont</key>
 				<string>id</string>
 				<key>copy</key>
@@ -487,24 +505,6 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSTableView</string>
-		</dict>
-		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>checkForUpdates</key>
-				<string>id</string>
-			</dict>
-			<key>CLASS</key>
-			<string>SUUpdater</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>delegate</key>
-				<string>id</string>
-			</dict>
-			<key>SUPERCLASS</key>
-			<string>NSObject</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -724,6 +724,14 @@
 			<string>NSDocumentController</string>
 		</dict>
 		<dict>
+			<key>CLASS</key>
+			<string>BDSKEditorTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTableView</string>
+		</dict>
+		<dict>
 			<key>ACTIONS</key>
 			<dict>
 				<key>alternateCut</key>
@@ -737,14 +745,6 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>BDSKTableView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKEditorTableView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSTableView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
