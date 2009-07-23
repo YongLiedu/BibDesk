@@ -78,7 +78,7 @@
     
     if (highlightCircleRects == nil) {
         [[NSColor clearColor] setFill];
-        [NSBezierPath fillRect:aRect];
+        NSRectFill(aRect);
         return;
     }
     
@@ -114,16 +114,15 @@
                                                                        bitmapFormat:0 
                                                                         bytesPerRow:0 /*(4 * NSWidth(maskRect)) */
                                                                        bitsPerPixel:32];
-    unsigned char *bitmapData = [imageRep bitmapData];
-    if (bitmapData)
-        bzero(bitmapData, [imageRep bytesPerRow] * [imageRep pixelsHigh]);
-    
     [NSGraphicsContext saveGraphicsState];
     [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithBitmapImageRep:imageRep]];
     // we need to shift because canvas of the image is at positive values
     NSAffineTransform *transform = [NSAffineTransform transform];
     [transform translateXBy:blurPadding yBy:blurPadding];
     [transform concat];
+    // fill the entire space with clear
+    [[NSColor clearColor] setFill];
+    NSRectFill(maskRect);
     // draw the mask
     [[NSColor colorWithCalibratedRed:0.0 green:0.0 blue:0.0 alpha:MASK_ALPHA] setFill];
     [path fill];
