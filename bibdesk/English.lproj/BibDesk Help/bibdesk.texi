@@ -1835,15 +1835,15 @@ Complete documentation of the extensions is provided at
 
 The default syntax for searching the ISI Web of Knowledge is described 
 on the ``Search Rules'' section of the 
-@uref{http://images.isiknowledge.com/help/WOS/h_toc.html, Web of Knowledge help page}.
+@uref{http://images.isiknowledge.com/WOK46/help/WOS/h_toc.html, Web of Knowledge help page}.
 
 A more complete description of specific options used for BibDesk is given on the
-@uref{http://images.isiknowledge.com/help/WOS/h_advanced.html, Advanced Search page} 
-and the @uref{http://images.isiknowledge.com/help/WOS/h_advanced_examples.html, Advanced Search Examples page}.
+@uref{http://images.isiknowledge.com/WOK46/help/WOS/h_advanced.html, Advanced Search page} 
+and the @uref{http://images.isiknowledge.com/WOK46/help/WOS/h_advanced_examples.html, Advanced Search Examples page}.
 
 If you just type a search term or group of terms in the search field, BibDesk will
 automatically convert it to a ``Topic Search'' (TS=), unless you specify the 
-@uref{http://images.isiknowledge.com/help/WOS/h_advanced_fieldtags.html, field tag}
+@uref{http://images.isiknowledge.com/WOK46/help/WOS/h_advanced_fieldtags.html, field tag}
 manually.  This is an easy way of searching Title, Abstract, and Keywords, but won't work for authors.
 
 @c ======================================================================================
