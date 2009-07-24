@@ -631,7 +631,8 @@ static id sharedController = nil;
         } else if ([[[self iconView] window] isEqual:[self window]]) {
             // the view will now ask us which icons to highlight
             [[overlay contentView] setNeedsDisplay:YES];
-            [overlay overlayView:[self iconView]];
+            if ([[overlay parentWindow] isEqual:[self window]] == NO)
+                [overlay overlayView:[self iconView]];
         }
     } else {
         [overlay remove];
