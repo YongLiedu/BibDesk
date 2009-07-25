@@ -976,13 +976,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 	return nil;
 }
 
-static void logViews(NSView *view) {
-    NSLog(@"%@",view);
-    NSEnumerator *vEnum = [[view subviews] objectEnumerator];
-    while (view = [vEnum nextObject])
-        logViews(view);
-}
-
 // if the user is saving in one of our plain text formats, give them an encoding option as well
 // this also requires overriding saveToURL:ofType:forSaveOperation:error:
 // to set the document's encoding before writing to the file
@@ -1008,7 +1001,6 @@ static void logViews(NSView *view) {
         [saveFormatPopupButton setFrame:popupFrame];
         [exportAccessoryView addSubview:saveFormatPopupButton];
         [savePanel setAccessoryView:exportAccessoryView];
-        logViews(exportAccessoryView);
     }else{
         [savePanel setAccessoryView:saveAccessoryView];
     }
