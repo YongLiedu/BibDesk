@@ -1031,12 +1031,28 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [exportSelectionCheckButton setState:NSOffState];
     [saveFormatPopupButton removeFromSuperview];
     saveFormatPopupButton = nil;
+    if (contextInfo != NULL) {
+        NSInvocation *invocation = [(NSInvocation *)contextInfo autorelease];
+        [invocation setArgument:&doc atIndex:2];
+        [invocation setArgument:&didSave atIndex:3];
+        [invocation invoke];
+    }
 }
 
 - (void)runModalSavePanelForSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
     // Override so we can determine if this is a save, saveAs or export operation, so we can prepare the correct accessory view
     docState.currentSaveOperationType = saveOperation;
-    [super runModalSavePanelForSaveOperation:saveOperation delegate:self didSaveSelector:@selector(document:didSave:contextInfo:) contextInfo:NULL];
+    
+    NSInvocation *invocation = nil;
+    if (delegate && didSaveSelector) {
+        NSMethodSignature *ms = [[delegate methodSignatureForSelector:didSaveSelector] retain];
+        invocation = [NSInvocation invocationWithMethodSignature:ms];
+        [invocation setTarget:delegate];
+        [invocation setSelector:didSaveSelector];
+        [invocation setArgument:&contextInfo atIndex:4];
+    }
+    
+    [super runModalSavePanelForSaveOperation:saveOperation delegate:self didSaveSelector:@selector(document:didSave:contextInfo:) contextInfo:invocation];
 }
 
 - (BOOL)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError{
