@@ -196,6 +196,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSView *exportAccessoryView;
     IBOutlet BDSKEncodingPopUpButton *saveTextEncodingPopupButton;
     IBOutlet NSButton *exportSelectionCheckButton;
+    NSPopUpButton *saveFormatPopupButton;
     
 #pragma mark Publications and Groups variables
 

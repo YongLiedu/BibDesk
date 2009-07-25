@@ -976,6 +976,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 	return nil;
 }
 
+static void logViews(NSView *view) {
+    NSLog(@"%@",view);
+    NSEnumerator *vEnum = [[view subviews] objectEnumerator];
+    while (view = [vEnum nextObject])
+        logViews(view);
+}
+
 // if the user is saving in one of our plain text formats, give them an encoding option as well
 // this also requires overriding saveToURL:ofType:forSaveOperation:error:
 // to set the document's encoding before writing to the file
@@ -986,7 +993,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if(NSSaveToOperation == docState.currentSaveOperationType){
         NSView *accessoryView = [savePanel accessoryView];
         BDSKASSERT(accessoryView != nil);
-        NSPopUpButton *saveFormatPopupButton = popUpButtonSubview(accessoryView);
+        BDSKASSERT(saveFormatPopupButton == nil);
+        saveFormatPopupButton = popUpButtonSubview(accessoryView);
         BDSKASSERT(saveFormatPopupButton != nil);
         NSRect savFrame = [saveAccessoryView frame];
         NSRect exportFrame = [exportAccessoryView frame];
@@ -1000,6 +1008,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [saveFormatPopupButton setFrame:popupFrame];
         [exportAccessoryView addSubview:saveFormatPopupButton];
         [savePanel setAccessoryView:exportAccessoryView];
+        logViews(exportAccessoryView);
     }else{
         [savePanel setAccessoryView:saveAccessoryView];
     }
@@ -1024,10 +1033,18 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [super changeSaveType:sender];
 }
 
+- (void)document:(NSDocument *)doc didSave:(BOOL)didSave contextInfo:(void *)contextInfo {
+    // reset the encoding popup so we know when it wasn't shown to the user next time
+    [saveTextEncodingPopupButton setEncoding:0];
+    [exportSelectionCheckButton setState:NSOffState];
+    [saveFormatPopupButton removeFromSuperview];
+    saveFormatPopupButton = nil;
+}
+
 - (void)runModalSavePanelForSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
     // Override so we can determine if this is a save, saveAs or export operation, so we can prepare the correct accessory view
     docState.currentSaveOperationType = saveOperation;
-    [super runModalSavePanelForSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
+    [super runModalSavePanelForSaveOperation:saveOperation delegate:self didSaveSelector:@selector(document:didSave:contextInfo:) contextInfo:NULL];
 }
 
 - (BOOL)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError{
@@ -1057,10 +1074,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     [saveTargetURL release];
     saveTargetURL = nil;
-    
-    // reset the encoding popup so we know when it wasn't shown to the user next time
-    [saveTextEncodingPopupButton setEncoding:0];
-    [exportSelectionCheckButton setState:NSOffState];
     
     if(success == NO)
         return NO;
