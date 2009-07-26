@@ -103,7 +103,7 @@
 - (NSData *) welcomeHTMLData {
 	NSError * error;
 	NSString * baseStringPath = [[NSBundle mainBundle] pathForResource:@"WebGroupStartPage" ofType:@"html"];
-	NSString * baseString = [NSString stringWithContentsOfFile:baseStringPath encoding:NSUTF8StringEncoding error:&error];
+	NSMutableString * baseString = [NSMutableString stringWithContentsOfFile:baseStringPath encoding:NSUTF8StringEncoding error:&error];
 	if (!baseString) return nil;
 	
 	NSMutableArray * parserFeatures = [NSMutableArray array];
@@ -141,12 +141,13 @@
 	}
 	
 	NSString * publicFeatureMarkup = [self markupForSiteArray:publicFeatures];
+	[baseString replaceOccurrencesOfString:@"PUBLICLIST" withString:publicFeatureMarkup options:NSLiteralSearch range:NSMakeRange(0, [baseString length])];
 	NSString * subscriptionFeatureMarkup = [self markupForSiteArray:subscriptionFeatures];
+	[baseString replaceOccurrencesOfString:@"SUBSCRIPTIONLIST" withString:subscriptionFeatureMarkup options:NSLiteralSearch range:NSMakeRange(0, [baseString length])];
 	NSString * generalFeatureMarkup = [self markupForSiteArray:generalFeatures];
+	[baseString replaceOccurrencesOfString:@"GENERALLIST" withString:generalFeatureMarkup options:NSLiteralSearch range:NSMakeRange(0, [baseString length])];
 	
-	NSString * result = [NSString stringWithFormat:baseString, publicFeatureMarkup, subscriptionFeatureMarkup, generalFeatureMarkup];
-	NSData * data = [result dataUsingEncoding:NSUTF8StringEncoding];
-	
+	NSData * data = [baseString dataUsingEncoding:NSUTF8StringEncoding];
 	return data;
 }
 
@@ -160,6 +161,7 @@
 	NSEnumerator * myEnum = [siteArray objectEnumerator];
 	NSMutableArray * linkStrings = [NSMutableArray arrayWithCapacity:[siteArray count] * 2];
 	NSDictionary * siteInfo;
+	NSXMLElement * ulElement = [NSXMLElement elementWithName:@"ul"];
 	
 	while (siteInfo = [myEnum nextObject]) {
 		NSXMLElement * aElement = [NSXMLElement elementWithName:@"a" stringValue:[siteInfo objectForKey:NAME_KEY]];
@@ -173,11 +175,13 @@
 			NSXMLNode * titleNode = [NSXMLNode attributeWithName:@"title" stringValue:titleString];
 			[aElement addAttribute:titleNode];
 		}
-		
-		[linkStrings addObject:[aElement XMLString]];
+
+		NSXMLElement * liElement = [NSXMLElement elementWithName:@"li"];
+		[liElement addChild:aElement];
+		[ulElement addChild:liElement];
 	}
 	
-	NSString * result = [[linkStrings componentsJoinedByString:@", "] stringByAppendingString:@"."];
+	NSString * result = [ulElement XMLString];
 	return result;
 }
 
