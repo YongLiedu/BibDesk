@@ -104,6 +104,7 @@ static BDSKTypeManager *sharedInstance = nil;
         // see the URI specifications for the valid characters
         NSMutableCharacterSet *validSet = [[NSCharacterSet characterSetWithRange:NSMakeRange( (NSUInteger)'a', 26)] mutableCopy];
         [validSet addCharactersInRange:NSMakeRange( (NSUInteger)'A', 26)];
+        [validSet addCharactersInRange:NSMakeRange( (NSUInteger)'0', 10)];
         [validSet addCharactersInString:@"-._~:/?#[]@!$&'()*+,;="];
         
         // this set is used for warning the user on manual entry of a remote url

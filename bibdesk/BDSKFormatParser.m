@@ -952,7 +952,7 @@
 		
 		return newString;
 	}
-	else if ([[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRemoteURLFieldsKey] containsObject:fieldName]) {
+	else if ([fieldName isEqualToString:BDSKRemoteURLString] || [fieldName isRemoteURLField]) {
 		if ([NSString isEmptyString:string]) {
 			return @"";
 		}
