@@ -2056,6 +2056,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     
     AddXMLField(@"volume",BDSKVolumeString);
     AddXMLField(@"number",numberField);
+    AddXMLField(@"num-vols",@"Num-Vols");
     AddXMLField(@"edition",@"Edition");
     AddXMLField(@"pages",BDSKPagesString);
     AddXMLField(@"section",BDSKChapterString);
@@ -2063,6 +2064,10 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     AddXMLField(@"publisher",publisherField);
     AddXMLField(@"isbn",isbnField);
     AddXMLField(@"work-type",BDSKPubTypeString);
+    AddXMLField(@"accession-num",@"Accession-Num");
+    AddXMLField(@"call-num",@"Call-Num");
+    AddXMLField(@"label",@"Label");
+    AddXMLField(@"caption",@"Caption");
     
     // dates
     
@@ -2119,6 +2124,17 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     AddXMLField(@"custom4",@"Custom4");
     AddXMLField(@"custom5",@"Custom5");
     AddXMLField(@"custom6",@"Custom6");
+    AddXMLField(@"custom7",@"Custom7");
+    AddXMLField(@"custom8",@"Custom8");
+    
+    NSDate *date = [self dateAdded];
+    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+    [formatter setDateFormat:@"dd/MM/yyyy"];
+    if (date = [self dateAdded])
+        [s appendStrings:@"<added-date>", [formatter stringFromDate:date], @"</added-date>", nil];
+    if (date = [self dateModified])
+        [s appendStrings:@"<modified-date>", [formatter stringFromDate:date], @"</modified-date>", nil];
     
     [s appendString:@"</record>\n"];
     
