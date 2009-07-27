@@ -130,6 +130,7 @@ static NSSet *standardStyles = nil;
     }else{
         [sud setBool:YES forKey:BDSKUsesTeXKey];
     }
+    [bibTeXStyleField setEnabled:[sud boolForKey:BDSKUsesTeXKey]];
 }
 
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error
