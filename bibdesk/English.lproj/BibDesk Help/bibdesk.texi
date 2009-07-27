@@ -4224,6 +4224,16 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @item fileOrder
 @tab 
+@item bibTeXString
+@tab 
+@item RISStringValue
+@tab 
+@item EndNoteString
+@tab 
+@item RSSStringValue
+@tab 
+@item MODSString
+@tab 
 @item localUrlPath
 @tab deprecated, use the localFiles collection key
 @item localURL
