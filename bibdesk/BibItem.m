@@ -1953,10 +1953,10 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     }else if([entryType isEqualToString:BDSKInbookString]){
         refTypeID = 5; // book section
     }else if([entryType isEqualToString:BDSKIncollectionString]){
-        refTypeID = 5; // book section
+        refTypeID = 40; // unused 1
     }else if([entryType isEqualToString:BDSKInproceedingsString]){
-        refTypeID = 10; // conference proceedings
-    }else if([entryType isEqualToString:BDSKProceedingsString]){
+        refTypeID = 47; // conference paper
+    }else if([entryType isEqualToString:BDSKProceedingsString] || [entryType isEqualToString:BDSKConferenceString]){
         refTypeID = 10; // conference proceedings
     }else if([entryType isEqualToString:BDSKManualString]){
         refTypeID = 9; // computer program
@@ -1988,6 +1988,12 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
             authorField = BDSKEditorString;
             editorField = @"";
         }
+    }else if([entryType isEqualToString:BDSKBookletString]){
+        refTypeID = 6; // book
+    }else if([entryType isEqualToString:@"electronic"]){
+        refTypeID = 43; // electronic article
+    }else if([entryType isEqualToString:@"webpage"]){
+        refTypeID = 12; // web page
     }else{
         refTypeID = 13;
     }
