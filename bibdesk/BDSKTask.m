@@ -67,6 +67,7 @@ struct BDSKTaskInternal {
 @implementation BDSKTask
 
 static int _kqueue = -1;
+static NSLock *_forkLock = nil;
 
 + (void)initialize
 {
@@ -74,6 +75,7 @@ static int _kqueue = -1;
     _kqueue = kqueue();
     // persistent thread to watch all tasks
     [NSThread detachNewThreadSelector:@selector(_watchQueue) toTarget:self withObject:nil];
+    _forkLock = [NSLock new];
 }
 
 #define ASSERT_LAUNCH do { if (!_internal->_launched) { [NSException raise:@"BDSKTaskException" format:@"Task has not been launched"]; } } while (0)
@@ -173,7 +175,7 @@ static void __BDSKTaskNotify(void *info)
 {
     // note: we have a hard retain at this point, so -dealloc and _disableNotification can't be called
     BDSKTask *task = info;    
-    [[NSNotificationCenter defaultCenter] postNotificationName:NSTaskDidTerminateNotification object:task];  
+    [[NSNotificationCenter defaultCenter] postNotificationName:NSTaskDidTerminateNotification object:task];    
     
     pthread_mutex_lock(&task->_internal->_lock);
     
@@ -196,7 +198,7 @@ static void __BDSKTaskNotify(void *info)
 - (void)launch;
 {
     ASSERT_NOTLAUNCHED;
-
+    
     NSInteger argCount = [_arguments count];
     const char *workingDir = [_currentDirectoryPath fileSystemRepresentation];
     char **args = NSZoneCalloc([self zone], (argCount + 2), sizeof(char *));
@@ -258,10 +260,22 @@ static void __BDSKTaskNotify(void *info)
     }
 
     // avoid a race between exec and setting up our kqueue
-    NSPipe *blockPipe = [NSPipe new];
-    int fd_block_rd = [[blockPipe fileHandleForReading] fileDescriptor];
-    int fd_block_wr = [[blockPipe fileHandleForWriting] fileDescriptor];
-
+    int blockpipe[2] = { -1, -1 };
+    if (pipe(blockpipe))
+        perror("failed to create blockpipe");
+    
+    /*
+     Unfortunately, a side effect of blocking on a pipe is that other processes inherit our blockpipe
+     descriptors as well.  Consequently, if taskB calls fork() while taskA is still setting up its
+     kevent, taskB inherits the pipe for taskA, and taskA will never launch since taskB doesn't close
+     them.  This was a very confusing race to debug, and it resulted in a bunch of orphaned child
+     processes.
+     
+     A more serious problem is that NSTask doesn't use this lock, so it's subject to the same race
+     condition.  Consequently, mixing BDSKTask and NSTask could be problematic.
+     */
+    [_forkLock lock];
+    
     // !!! No CF or Cocoa after this point in the child process!
     _processIdentifier = fork();
     
@@ -275,13 +289,14 @@ static void __BDSKTaskNotify(void *info)
         if (-1 != fd_inp) dup2(fd_inp, STDIN_FILENO);        
         if (-1 != fd_out) dup2(fd_out, STDOUT_FILENO);
         if (-1 != fd_err) dup2(fd_err, STDERR_FILENO);  
-                
+        
         if (workingDir) chdir(workingDir);
         
-        close(fd_block_wr);
+        close(blockpipe[1]);
         char ignored;
         // block until the parent has setup complete
-        read(fd_block_rd, &ignored, 1);
+        read(blockpipe[0], &ignored, 1);
+        close(blockpipe[0]);
 
         int ret = execve(args[0], args, env);
         _exit(ret);
@@ -300,7 +315,7 @@ static void __BDSKTaskNotify(void *info)
         
         // NSTask docs say that these descriptors are closed in the parent task; required to make pipes work properly
         [handlesToClose makeObjectsPerformSelector:@selector(closeFile)];
-        
+
         if (-1 != fd_null) close(fd_null);
 
         /*
@@ -321,11 +336,15 @@ static void __BDSKTaskNotify(void *info)
         CFRelease(_internal->_rlsource);
         
         // all setup is complete, so now widow the pipe and exec in the child
-        [[blockPipe fileHandleForWriting] closeFile];
+        close(blockpipe[0]);   
+        close(blockpipe[1]);
+        
+        // okay to fork again now
+        [_forkLock unlock];
+        
     }
     
     // executed by child and parent
-    [blockPipe release];
     [handlesToClose release];
     NSZoneFree(NSZoneFromPointer(args), args);
     if (*nsEnvironment != env) NSZoneFree(NSZoneFromPointer(env), env);
@@ -391,9 +410,9 @@ static void __BDSKTaskNotify(void *info)
         struct kevent evt;
         
         if (kevent(_kqueue, NULL, 0, &evt, 1, NULL)) {
-                        
+            
             BDSKTask *task = evt.udata;
-
+            
             // can only fail if _disableNotification is called immediately after kevent unblocks
             if (pthread_mutex_trylock(&task->_internal->_lock) == 0) {
                 
@@ -466,7 +485,7 @@ static void __BDSKTaskNotify(void *info)
     NSParameterAssert(_internal->_launched);
     NSParameterAssert(_internal->_running);
     NSParameterAssert(_internal->_event.udata == self);
-
+        
     _internal->_event.flags = EV_DELETE;
     kevent(_kqueue, &_internal->_event, 1, NULL, 0, NULL);   
     
@@ -484,7 +503,7 @@ static void __BDSKTaskNotify(void *info)
         swap = OSAtomicCompareAndSwap32Barrier(_internal->_terminationStatus, ret, &_internal->_terminationStatus);
     } while (false == swap);
     
-    do {	
+    do {
         swap = OSAtomicCompareAndSwap32Barrier(_internal->_running, 0, &_internal->_running);
     } while (false == swap);    
         
