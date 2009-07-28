@@ -55,6 +55,7 @@
 #import "BDSKGroupsArray.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKTemplateDocument.h"
+#import "BDSKTask.h"
 
 @implementation BDSKDocumentController
 
@@ -353,7 +354,7 @@
     if (nil == fileInputString){
         [self presentError:error];
     } else {
-        NSString *filterOutput = [NSTask runShellCommand:shellCommand withInputString:fileInputString];
+        NSString *filterOutput = [BDSKTask runShellCommand:shellCommand withInputString:fileInputString];
         
         if ([NSString isEmptyString:filterOutput]){
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable To Open With Filter", @"Message in alert dialog when unable to open a document with filter")

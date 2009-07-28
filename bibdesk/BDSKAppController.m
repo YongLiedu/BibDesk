@@ -89,6 +89,7 @@
 #import "BDSKWebGroup.h"
 #import "BDSKWebGroupViewController.h"
 #import "KFASHandlerAdditions-TypeTranslation.h"
+#import "BDSKTask.h"
 #import <Sparkle/Sparkle.h>
 
 #define WEB_URL @"http://bibdesk.sourceforge.net/"
@@ -1406,7 +1407,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         if (runImporter) {
             NSString *mdimportPath = @"/usr/bin/mdimport";
             if ([[NSFileManager defaultManager] isExecutableFileAtPath:mdimportPath]) {
-                NSTask *importerTask = [[[NSTask alloc] init] autorelease];
+                NSTask *importerTask = [[[BDSKTask alloc] init] autorelease];
                 [importerTask setLaunchPath:mdimportPath];
                 [importerTask setArguments:[NSArray arrayWithObjects:@"-r", importerPath, nil]];
                 [importerTask launch];

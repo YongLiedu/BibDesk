@@ -123,6 +123,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSView_BDSKExtensions.h"
 #import "NSColor_BDSKExtensions.h"
+#import "BDSKTask.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -1376,7 +1377,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         }
         
         if (success) {
-            NSTask *task = [[[NSTask alloc] init] autorelease];
+            NSTask *task = [[[BDSKTask alloc] init] autorelease];
             [task setLaunchPath:@"/usr/bin/tar"];
             [task setArguments:[NSArray arrayWithObjects:@"czf", [[fileURL path] lastPathComponent], [path lastPathComponent], nil]];
             [task setCurrentDirectoryPath:[path stringByDeletingLastPathComponent]];

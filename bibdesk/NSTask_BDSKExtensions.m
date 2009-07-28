@@ -48,6 +48,7 @@ volatile int caughtSignal = 0;
     // data used to store stdOut from the filter
     NSData *stdoutData;
 }
+- (id)initWithTask:(NSTask *)aTask;
 // Note: the returned data is not autoreleased
 - (NSData *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input;
 - (NSData *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input;
@@ -58,7 +59,7 @@ volatile int caughtSignal = 0;
 @implementation NSTask (BDSKExtensions)
 
 + (NSString *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input{
-    BDSKShellTask *shellTask = [[BDSKShellTask alloc] init];
+    BDSKShellTask *shellTask = [[BDSKShellTask alloc] initWithTask:[[[self alloc] init] autorelease]];
     NSString *output = nil;
     NSData *outputData = [shellTask runShellCommand:cmd withInputString:input];
     if(outputData){
@@ -73,14 +74,14 @@ volatile int caughtSignal = 0;
 }
 
 + (NSData *)runRawShellCommand:(NSString *)cmd withInputString:(NSString *)input{
-    BDSKShellTask *shellTask = [[BDSKShellTask alloc] init];
+    BDSKShellTask *shellTask = [[BDSKShellTask alloc] initWithTask:[[[self alloc] init] autorelease]];
     NSData *output = [[shellTask runShellCommand:cmd withInputString:input] retain];
     [shellTask release];
     return [output autorelease];
 }
 
 + (NSString *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input{
-    BDSKShellTask *shellTask = [[BDSKShellTask alloc] init];
+    BDSKShellTask *shellTask = [[BDSKShellTask alloc] initWithTask:[[[self alloc] init] autorelease]];
     NSString *output = nil;
     NSData *outputData = [shellTask executeBinary:executablePath inDirectory:currentDirPath withArguments:args environment:env inputString:input];
     if(outputData){
@@ -100,8 +101,12 @@ volatile int caughtSignal = 0;
 @implementation BDSKShellTask
 
 - (id)init{
+    return [self initWithTask:nil];
+}
+
+- (id)initWithTask:(NSTask *)aTask{
     if (self = [super init]) {
-        task = [[NSTask alloc] init];
+        task = [aTask retain] ?: [[NSTask alloc] init];
     }
     return self;
 }

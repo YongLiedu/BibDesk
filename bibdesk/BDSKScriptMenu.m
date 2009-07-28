@@ -39,6 +39,7 @@
 #import "BDSKScriptMenu.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSMenu_BDSKExtensions.h"
+#import "BDSKTask.h"
 
 @interface BDSKScriptMenu (Private)
 - (NSArray *)scriptPaths;
@@ -329,7 +330,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
             }
         }
     } else if ([fm isExecutableFileAtPath:scriptFilename]) {
-        [NSTask launchedTaskWithLaunchPath:scriptFilename arguments:[NSArray array]];
+        [BDSKTask launchedTaskWithLaunchPath:scriptFilename arguments:[NSArray array]];
     }
 }
 

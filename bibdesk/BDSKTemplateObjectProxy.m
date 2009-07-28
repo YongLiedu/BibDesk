@@ -40,6 +40,7 @@
 #import "BDSKTemplate.h"
 #import "BibItem.h"
 #import "NSTask_BDSKExtensions.h"
+#import "BDSKTask.h"
 
 
 @implementation BDSKTemplateObjectProxy
@@ -55,7 +56,7 @@
     string = [BDSKTemplateParser stringByParsingTemplateString:string usingObject:objectProxy delegate:objectProxy];
     [objectProxy release];
     if(scriptPath)
-        string = [NSTask runShellCommand:scriptPath withInputString:string];
+        string = [BDSKTask runShellCommand:scriptPath withInputString:string];
     return string;
 }
 
@@ -102,7 +103,7 @@
     BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items publicationsContext:itemsContext template:template];
     string = [BDSKTemplateParser stringByParsingTemplateString:string usingObject:objectProxy delegate:objectProxy];
     [objectProxy release];
-    return [NSTask runRawShellCommand:scriptPath withInputString:string];
+    return [BDSKTask runRawShellCommand:scriptPath withInputString:string];
 }
 
 - (id)initWithObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext template:(BDSKTemplate *)aTemplate {
