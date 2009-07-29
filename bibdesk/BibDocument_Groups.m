@@ -685,12 +685,14 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         array = filteredArray;
     }
     
-    [groupedPublications setArray:array];
-    
-    if ([self isDisplayingFileContentSearch])
-        [fileSearchController filterUsingURLs:[groupedPublications valueForKey:@"identifierURL"]];
-    
-    [searchField sendAction:[searchField action] to:[searchField target]]; // redo the search to update the table
+    if ([array isEqualToArray:groupedPublications] == NO) {
+        [groupedPublications setArray:array];
+        
+        if ([self isDisplayingFileContentSearch])
+            [fileSearchController filterUsingURLs:[groupedPublications valueForKey:@"identifierURL"]];
+        
+        [searchField sendAction:[searchField action] to:[searchField target]]; // redo the search to update the table
+    }
 }
 
 - (BOOL)selectGroups:(NSArray *)theGroups{
