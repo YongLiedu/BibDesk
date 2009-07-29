@@ -682,7 +682,9 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     if (docState.isDocumentClosed)
         return;
     
-    if ((docState.itemChangeMask & BDSKItemChangedFilesMask) != 0)
+    BOOL displayingLocal = (NO == [self hasExternalGroupsSelected]);
+    
+    if (displayingLocal && (docState.itemChangeMask & BDSKItemChangedFilesMask) != 0)
         [self updateFileViews];
 
     BOOL shouldUpdateGroups = [NSString isEmptyString:[self currentGroupField]] == NO && (docState.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0;
@@ -693,10 +695,10 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     if(shouldUpdateGroups){
         // this handles all UI updates if we call it, so don't bother with any others
         [self updateCategoryGroupsPreservingSelection:YES];
-    } else if ((docState.itemChangeMask & BDSKItemChangedSearchKeyMask) != 0) {
+    } else if (displayingLocal && (docState.itemChangeMask & BDSKItemChangedSearchKeyMask) != 0) {
         // this handles all UI updates if we call it, so don't bother with any others
         [searchField sendAction:[searchField action] to:[searchField target]];
-    } else {
+    } else if (displayingLocal) {
         // groups and quicksearch won't update for us
         if ((docState.itemChangeMask & BDSKItemChangedSortKeyMask) != 0)
             [self sortPubsByKey:nil];
