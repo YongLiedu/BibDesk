@@ -2775,6 +2775,13 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     [[self document] removeWindowController:self];
 }
 
+- (void)setDocument:(NSDocument *)document {
+    // in case the document is reset before windowWillClose: is called, I think this can happen on Tiger
+    if ([self document] && document == nil)
+        [[self document] objectDidEndEditing:self];
+    [super setDocument:document];
+}
+
 #pragma mark undo manager
 
 - (NSUndoManager *)undoManager {
