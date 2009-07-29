@@ -3194,7 +3194,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	NSRange selection = NSMakeRange(0, 0);
 	if(fieldEditor){
 		selection = [fieldEditor selectedRange];
-		editedTitle = [fields objectAtIndex:[tableView editedRow]];
+		editedTitle = [[fields objectAtIndex:[tableView editedRow]] retain];
 		if ([[self window] makeFirstResponder:[self window]] == NO)
             [NSException raise:NSInternalInconsistencyException format:@"Failed to commit edits in %s, trouble ahead", __func__];
 	}
@@ -3243,6 +3243,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             if ([[fieldEditor string] length] >= NSMaxRange(selection))
                 [fieldEditor setSelectedRange:selection];
         }
+        [editedTitle release];
 	}
 }
 
