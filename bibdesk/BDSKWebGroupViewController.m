@@ -536,8 +536,8 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
         }
         if (nil == newPubs) {
             // !!! logs are here to help diagnose problems that users are reporting
-            NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
-            NSLog(@"loaded MIME type %@", [[dataSource mainResource] MIMEType]);
+            //NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
+            //NSLog(@"loaded MIME type %@", [[dataSource mainResource] MIMEType]);
             // !!! what to do here? if user clicks on a PDF, we're loading application/pdf, which is clearly not an error from the user perspective...so should the error only be presented for text/plain?
             //[NSApp presentError:error];
         }
