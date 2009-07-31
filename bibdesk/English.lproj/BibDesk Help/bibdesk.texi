@@ -3518,7 +3518,7 @@ select the @menutitle{Sample Script Hook} menu item with the Option key held dow
 @abstract{Where to get Scripts for BibDesk.}
 
 Various user-contributed scripts are located or linked from the BibDesk website here:
-@uref{http://bibdesk.sourceforge.net/scripts.html, BibDesk AppleScript Repository}.
+@uref{http://sourceforge.net/apps/mediawiki/bibdesk/index.php?title=BibDesk_Applescripts, BibDesk AppleScript Repository}.
 If you have a contribution that you would like to share, please e-mail the
 @uref{mailto:bibdesk-users@@lists.sourceforge.net, BibDesk Users} mailing list with
 a link to your page, and we'll make sure it gets added!
