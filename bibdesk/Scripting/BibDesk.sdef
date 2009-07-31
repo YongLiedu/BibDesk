@@ -282,6 +282,8 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				description="to the new object. Returns nothing for 'with data'."/>
 		</command>
         
+		<!--
+		    Disable the move command, as it is dangerous to move publications between documents
 		<command name="move" code="coremove"
 			description="Move object(s) to a new location.">
 			<cocoa class="NSMoveCommand"/>
@@ -294,6 +296,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			<result type="specifier"
 				description="the moved object(s)"/>
 		</command>
+		-->
         
     </suite>
     
