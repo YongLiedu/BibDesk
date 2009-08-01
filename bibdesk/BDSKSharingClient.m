@@ -59,7 +59,7 @@ typedef struct _BDSKSharingClientFlags {
 
 @protocol BDSKSharingClientServerMainThread <BDSKAsyncDOServerMainThread>
 
-- (void)setArchivedPublications:(bycopy NSData *)publicationsArchive archivedMacros:(bycopy NSData *)macrosArchive;
+- (void)setArchivedPublicationsAndMacros:(bycopy NSDictionary *)dictionary;
 - (NSInteger)runAuthenticationFailedAlert;
 
 @end
@@ -136,32 +136,29 @@ typedef struct _BDSKSharingClientFlags {
     return archivedPublications;
 }
 
-- (void)setArchivedPublications:(NSData *)newArchivedPublications {
+- (void)setArchivedPublicationsAndMacros:(NSDictionary *)dictionary {
+    NSData *newArchivedPublications = [dictionary objectForKey:BDSKSharedArchivedDataKey];
+    NSData *newArchivedMacros = [dictionary objectForKey:BDSKSharedArchivedMacroDataKey];
+    
     if (archivedPublications != newArchivedPublications) {
         [archivedPublications release];
         archivedPublications = [newArchivedPublications retain];
-        
-        [self setNeedsUpdate:NO];
-        
-        // we need to do this after setting the archivedPublications but before sending the notification
-        [server setRetrieving:NO];
-        
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"archivedPublications", @"key", nil];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientUpdatedNotification object:self userInfo:userInfo];
     }
+    if (archivedMacros != newArchivedMacros) {
+        [archivedMacros release];
+        archivedMacros = [newArchivedMacros retain];
+    }
+    
+    [self setNeedsUpdate:NO];
+    
+    // we need to do this after setting the archivedPublications but before sending the notification
+    [server setRetrieving:NO];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientUpdatedNotification object:self];
 }
 
 - (NSData *)archivedMacros {
     return archivedMacros;
-}
-
-- (void)setArchivedMacros:(NSData *)newArchivedMacros {
-    if (archivedMacros != newArchivedMacros) {
-        [archivedMacros release];
-        archivedMacros = [newArchivedMacros retain];
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"archivedMacros", @"key", nil];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientUpdatedNotification object:self userInfo:userInfo];
-    }
 }
 
 - (BOOL)needsUpdate {
@@ -412,11 +409,9 @@ typedef struct _BDSKSharingClientFlags {
 - (Protocol *)protocolForServerThread { return @protocol(BDSKSharingClientServerLocalThread); }
 - (Protocol *)protocolForMainThread { return @protocol(BDSKSharingClientServerMainThread); }
 
-- (void)setArchivedPublications:(bycopy NSData *)publicationsArchive archivedMacros:(bycopy NSData *)macrosArchive;
+- (void)setArchivedPublicationsAndMacros:(bycopy NSDictionary *)setArchivedPublicationsAndMacros;
 {
-    if (macrosArchive)
-        [client setArchivedMacros:macrosArchive];
-    [client setArchivedPublications:publicationsArchive];
+    [client setArchivedPublicationsAndMacros:setArchivedPublicationsAndMacros];
 }
 
 - (void)retrievePublicationsInBackground{ [[self serverOnServerThread] retrievePublications]; }
@@ -430,26 +425,22 @@ typedef struct _BDSKSharingClientFlags {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
     @try {
-        NSData *archive = nil;
-        NSData *macroArchive = nil;
+        NSDictionary *archive = nil;
         NSData *proxyData = [[self remoteServer] archivedSnapshotOfPublications];
         
         if([proxyData length] != 0){
             if([proxyData mightBeCompressed])
                 proxyData = [proxyData decompressedData];
             NSString *errorString = nil;
-            NSDictionary *dictionary = [NSPropertyListSerialization propertyListFromData:proxyData mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:&errorString];
+            archive = [NSPropertyListSerialization propertyListFromData:proxyData mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:&errorString];
             if(errorString != nil){
                 NSString *errorStr = [NSString stringWithFormat:@"Error reading shared data: %@", errorString];
                 [errorString release];
                 @throw errorStr;
-            } else {
-                archive = [dictionary objectForKey:BDSKSharedArchivedDataKey];
-                macroArchive = [dictionary objectForKey:BDSKSharedArchivedMacroDataKey];
             }
         }
         // use the main thread; this avoids an extra (un)archiving between threads and it ends up posting notifications for UI updates
-        [[self serverOnMainThread] setArchivedPublications:archive archivedMacros:macroArchive];
+        [[self serverOnMainThread] setArchivedPublicationsAndMacros:archive];
         // the client will reset the isRetriving flag when the data is set
     }
     @catch(id exception){
@@ -457,7 +448,7 @@ typedef struct _BDSKSharingClientFlags {
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
         
         // this posts a notification that the publications of the client changed, forcing a redisplay of the table cell
-        [client performSelectorOnMainThread:@selector(setArchivedPublications:) withObject:nil waitUntilDone:NO];
+        [client performSelectorOnMainThread:@selector(setArchivedPublicationsAndMacros:) withObject:nil waitUntilDone:NO];
         // the client will reset the isRetriving flag when the data is set
     }
     @finally{

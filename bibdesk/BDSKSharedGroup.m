@@ -280,30 +280,24 @@ static NSImage *unlockedIcon = nil;
 #pragma mark notification handlers
 
 - (void)handleClientUpdatedNotification:(NSNotification *)notification {
-    NSString *key = [[notification userInfo] objectForKey:@"key"];
-    if ([key isEqualToString:@"archivedPublications"] || notification == nil) {
-        NSData *archive = [client archivedPublications];
-        NSArray *pubs = nil;
-        if (archive) {
-            [NSString setMacroResolverForUnarchiving:[self macroResolver]];
-            pubs = [NSKeyedUnarchiver unarchiveObjectWithData:archive];
-            [NSString setMacroResolverForUnarchiving:nil];
-        }
-        [self setPublications:pubs];
-    }
-    if ([key isEqualToString:@"archivedMacros"] || notification == nil) {
-        NSData *archive = [client archivedMacros];
-        NSDictionary *macros = nil;
-        if (archive) {
-            [NSString setMacroResolverForUnarchiving:[self macroResolver]];
-            macros = [NSKeyedUnarchiver unarchiveObjectWithData:archive];
-            [NSString setMacroResolverForUnarchiving:nil];
-        }
-        NSEnumerator *macroEnum = [macros keyEnumerator];
-        NSString *macro;
-        while(macro = [macroEnum nextObject])
-            [[self macroResolver] setMacroDefinition:[macros objectForKey:macro] forMacro:macro];
-    }
+    NSData *pubsArchive = [client archivedPublications];
+    NSData *macrosArchive = [client archivedMacros];
+    NSArray *pubs = nil;
+    NSDictionary *macros = nil;
+    
+    [NSString setMacroResolverForUnarchiving:[self macroResolver]];
+    if (pubsArchive)
+        pubs = [NSKeyedUnarchiver unarchiveObjectWithData:pubsArchive];
+    if (macrosArchive)
+        macros = [NSKeyedUnarchiver unarchiveObjectWithData:macrosArchive];
+    [NSString setMacroResolverForUnarchiving:nil];
+    
+    [self setPublications:pubs];
+    
+    NSEnumerator *macroEnum = [macros keyEnumerator];
+    NSString *macro;
+    while (macro = [macroEnum nextObject])
+        [[self macroResolver] setMacroDefinition:[macros objectForKey:macro] forMacro:macro];
 }
 
 @end

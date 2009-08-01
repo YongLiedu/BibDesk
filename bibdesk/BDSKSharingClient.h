@@ -51,10 +51,7 @@
 - (id)initWithService:(NSNetService *)aService;
 
 - (NSData *)archivedPublications;
-- (void)setArchivedPublications:(NSData *)newArchivedPublications;
-
 - (NSData *)archivedMacros;
-- (void)setArchivedMacros:(NSData *)newArchivedMacros;
 
 - (BOOL)needsUpdate;
 - (void)setNeedsUpdate:(BOOL)flag;
