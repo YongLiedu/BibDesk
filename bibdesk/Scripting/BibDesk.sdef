@@ -804,8 +804,8 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="Annotations for the publication as seen in the Annote tab.">
                 <cocoa key="annotation"/>
             </property>  
-            <property name="BibTeX string" code="BTeX" type="text"
-                description="String for BibTeX entry. Can be set only at or immediately after initialization.">
+            <property name="BibTeX string" code="BTeX" type="text" access="r"
+                description="BibTeX string for publication.">
                 <cocoa key="bibTeXString"/>
             </property>
             <property name="RIS string" code="RISs" type="text" access="r"

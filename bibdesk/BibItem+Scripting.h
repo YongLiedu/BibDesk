@@ -68,8 +68,6 @@
 
 - (BOOL)isExternal;
 
-- (void)setBibTeXString:(NSString*) btString;
-
 - (NSString *)scriptingCiteKey;
 - (void)setScriptingCiteKey:(NSString *)newKey;
 
