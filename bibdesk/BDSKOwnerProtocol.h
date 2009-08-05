@@ -44,6 +44,7 @@
 @protocol BDSKOwner <NSObject>
 
 - (BOOL)isDocument;
+- (NSString *)uniqueID;
 - (BDSKPublicationsArray *)publications;
 - (BDSKMacroResolver *)macroResolver;
 - (NSUndoManager *)undoManager;

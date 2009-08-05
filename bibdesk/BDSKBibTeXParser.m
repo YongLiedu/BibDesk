@@ -282,7 +282,8 @@ error:(NSError **)outError{
                                                       citeKey:citeKey
                                                     pubFields:dictionary
                                                         isNew:isPasteOrDrag];
-
+                        [newBI setOwnerID:[document uniqueID]];
+                        
                         [citeKey release];
                         
                         [returnArray addObject:newBI];

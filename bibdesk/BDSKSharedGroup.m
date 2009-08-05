@@ -246,6 +246,8 @@ static NSImage *unlockedIcon = nil;
 
 - (void)setNeedsUpdate:(BOOL)flag { needsUpdate = flag; }
 
+- (NSString *)uniqueID { return [super uniqueID]; }
+
 // BDSKGroup overrides
 
 - (NSImage *)icon {

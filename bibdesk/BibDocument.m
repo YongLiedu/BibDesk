@@ -165,6 +165,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     [NSImage makePreviewDisplayImages];
 }
+ 
+static NSString *createUniqueID(void)
+{
+    CFUUIDRef uuid = CFUUIDCreate(NULL);
+    NSString *uuidStr = (id)CFUUIDCreateString(NULL, uuid);
+    CFRelease(uuid);
+    return uuidStr;
+}    
 
 - (id)init{
     if(self = [super init]){
@@ -173,6 +181,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         shownPublications = [[NSMutableArray alloc] initWithCapacity:1];
         groupedPublications = [[NSMutableArray alloc] initWithCapacity:1];
         groups = [(BDSKGroupsArray *)[BDSKGroupsArray alloc] initWithDocument:self];
+        
+        uniqueID = createUniqueID();
         
         frontMatter = [[NSMutableString alloc] initWithString:@""];
         documentInfo = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
@@ -296,6 +306,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [mainWindowSetupDictionary release];
     if (groupSpinners)
         CFRelease(groupSpinners);
+    [uniqueID release];
     [super dealloc];
 }
 
@@ -2315,6 +2326,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     [NSString setMacroResolverForUnarchiving:nil];
     
+    [newPubs makeObjectsPerformSelector:@selector(setOwnerID:) withObject:[self uniqueID]];
+    
     return newPubs;
 }
 
@@ -2864,6 +2877,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (BOOL)isDocument{
     return YES;
+}
+
+- (NSString *)uniqueID {
+    return uniqueID;
 }
 
 @end

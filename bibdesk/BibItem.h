@@ -84,6 +84,7 @@ enum {
     BOOL hasBeenEdited;
     NSMutableSet *filesToBeFiled;
 	id<BDSKOwner> owner;
+    NSString *ownerID;
     BDSKFieldCollection *templateFields;
     NSInteger currentIndex;
     BOOL spotlightMetadataChanged;
@@ -156,6 +157,9 @@ enum {
 
 - (id<BDSKOwner>)owner;
 - (void)setOwner:(id<BDSKOwner>)newOwner;
+
+- (NSString *)ownerID;
+- (void)setOwnerID:(NSString *)newOwnerID;
 
 - (NSUndoManager *)undoManager;
 

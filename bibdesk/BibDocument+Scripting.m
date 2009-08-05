@@ -167,8 +167,8 @@
 
 #pragma mark Publications
 
-- (id)valueInScriptingPublicationsWithUniqueID:(NSString *)uniqueID {
-	NSURL *identifierURL = [NSURL URLWithString:uniqueID];
+- (id)valueInScriptingPublicationsWithUniqueID:(NSString *)aUniqueID {
+	NSURL *identifierURL = [NSURL URLWithString:aUniqueID];
     id item = identifierURL ? [[self publications] itemForIdentifierURL:identifierURL] : nil;
     return item ?: [NSNull null];
 }
@@ -178,7 +178,7 @@
 }
 
 - (void)insertInScriptingPublications:(BibItem *)pub {
-	if ([pub owner] == nil) {
+	if ([pub ownerID] == nil || [[pub ownerID] isEqualToString:[self uniqueID]]) {
         [self addPublication:pub];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([[pub owner] isEqual:self] == NO) {
@@ -189,7 +189,7 @@
 }
 
 - (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
-	if ([pub owner] == nil) {
+	if ([pub ownerID] == nil || [[pub ownerID] isEqualToString:[self uniqueID]]) {
         [self insertPublication:pub atIndex:idx];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([[pub owner] isEqual:self] == NO) {

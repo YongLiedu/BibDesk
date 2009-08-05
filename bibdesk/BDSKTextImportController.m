@@ -600,6 +600,10 @@
 
 - (BDSKItemSearchIndexes *)searchIndexes { return nil; }
 
+- (NSString *)uniqueID {
+    return [document uniqueID];
+}
+
 @end
 
 

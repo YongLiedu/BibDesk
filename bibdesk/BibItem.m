@@ -292,6 +292,7 @@ static CFDictionaryRef selectorTable = NULL;
         people = nil;
         
         owner = nil;
+        ownerID = nil;
         
         fileOrder = nil;
         identifierURL = createUniqueURL();
@@ -349,6 +350,8 @@ static CFDictionaryRef selectorTable = NULL;
         if ([container respondsToSelector:@selector(macroResolver)])
             macroResolver = [container macroResolver];
         theCopy = [self copyWithMacroResolver:macroResolver];
+        if ([container respondsToSelector:@selector(uniqueID)])
+            [theCopy setOwnerID:[(id<BDSKOwner>)container uniqueID]];
     } else {
         // We set isNew to YES because this is used for duplicate, either from the menu or AppleScript, and these items are supposed to be newly added to the document so who0uld have their Date-Added field set to now
         // Note that unless someone uses Date-Added or Date-Modified as a default field, a copy is equal according to isEqualToItem:
@@ -389,6 +392,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
             [files makeObjectsPerformSelector:@selector(setDelegate:) withObject:self];
             // set by the document, which we don't archive
             owner = nil;
+            ownerID = nil;
             fileOrder = nil;
             hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
             // we don't bother encoding this
@@ -436,6 +440,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     [dateModified release];
     [fileOrder release];
     [identifierURL release];
+    [ownerID release];
     [files release];
     [filesToBeFiled release];
     [super dealloc];
@@ -581,10 +586,24 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 - (void)setOwner:(id<BDSKOwner>)newOwner {
     if (owner != newOwner) {
 		owner = newOwner;
+        if (newOwner)
+            [self setOwnerID:[owner uniqueID]];
         // !!! TODO: check this
         if (owner)
             [self createFilesArray];
 	}
+}
+
+- (NSString *)ownerID {
+    return ownerID;
+}
+
+- (void)setOwnerID:(NSString *)newOwnerID {
+    if (ownerID != newOwnerID) {
+        BDSKASSERT(ownerID == nil || [ownerID isEqualToString:newOwnerID]);
+        [ownerID release];
+        ownerID == [newOwnerID retain];
+    }
 }
 
 - (NSUndoManager *)undoManager { // this may be nil

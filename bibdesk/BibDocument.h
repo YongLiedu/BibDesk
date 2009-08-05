@@ -262,6 +262,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     
     BDSKFileMigrationController *migrationController;
     
+    NSString *uniqueID;
 }
 
 
