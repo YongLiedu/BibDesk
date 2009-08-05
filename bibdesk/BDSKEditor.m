@@ -206,7 +206,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         [fileSplitView setPositionAutosaveName:nil];
     }
     
-    tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[[publication owner] macroResolver]];
+    tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[publication macroResolver]];
     crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
     citationFormatter = [[BDSKCitationFormatter alloc] initWithDelegate:self];
     
@@ -1810,7 +1810,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     if ([complexStringEditor isEditing] || row == -1) 
         return NO;
 	if (complexStringEditor == nil) {
-    	complexStringEditor = [[BDSKComplexStringEditor alloc] initWithMacroResolver:[[publication owner] macroResolver]];
+    	complexStringEditor = [[BDSKComplexStringEditor alloc] initWithMacroResolver:[publication macroResolver]];
         [complexStringEditor setEditable:isEditable];
 	}
     NSString *value = [publication valueOfField:[fields objectAtIndex:row]];
@@ -2400,7 +2400,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     if (control != tableView) {
 		return words;
 	} else if ([complexStringEditor isEditing]) {
-		return [[BDSKCompletionManager sharedManager] possibleMatches:[[[publication owner] macroResolver] allMacroDefinitions] 
+		return [[BDSKCompletionManager sharedManager] possibleMatches:[[publication macroResolver] allMacroDefinitions] 
 						   forBibTeXString:[textView string] 
 								partialWordRange:charRange 
 								indexOfBestMatch:idx];

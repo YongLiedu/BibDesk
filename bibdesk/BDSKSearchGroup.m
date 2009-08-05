@@ -346,8 +346,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 - (BOOL)isDocument { return NO; }
 
-- (NSString *)uniqueID { return [super uniqueID]; }
-
 - (BDSKItemSearchIndexes *)searchIndexes { return searchIndexes; }
 
 #pragma mark Searching

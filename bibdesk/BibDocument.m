@@ -182,8 +182,6 @@ static NSString *createUniqueID(void)
         groupedPublications = [[NSMutableArray alloc] initWithCapacity:1];
         groups = [(BDSKGroupsArray *)[BDSKGroupsArray alloc] initWithDocument:self];
         
-        uniqueID = createUniqueID();
-        
         frontMatter = [[NSMutableString alloc] initWithString:@""];
         documentInfo = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
         macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
@@ -306,7 +304,6 @@ static NSString *createUniqueID(void)
     [mainWindowSetupDictionary release];
     if (groupSpinners)
         CFRelease(groupSpinners);
-    [uniqueID release];
     [super dealloc];
 }
 
@@ -2326,7 +2323,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     [NSString setMacroResolverForUnarchiving:nil];
     
-    [newPubs makeObjectsPerformSelector:@selector(setOwnerID:) withObject:[self uniqueID]];
+    // we set the macroResolver so we know the fields of this item may refer to it, so we can prevent scripting from adding this to the wrong document
+    [newPubs makeObjectsPerformSelector:@selector(setMacroResolver:) withObject:macroResolver];
     
     return newPubs;
 }
@@ -2877,10 +2875,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (BOOL)isDocument{
     return YES;
-}
-
-- (NSString *)uniqueID {
-    return uniqueID;
 }
 
 @end

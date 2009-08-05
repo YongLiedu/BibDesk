@@ -246,8 +246,6 @@ static NSImage *unlockedIcon = nil;
 
 - (void)setNeedsUpdate:(BOOL)flag { needsUpdate = flag; }
 
-- (NSString *)uniqueID { return [super uniqueID]; }
-
 // BDSKGroup overrides
 
 - (NSImage *)icon {
@@ -293,6 +291,9 @@ static NSImage *unlockedIcon = nil;
     if (macrosArchive)
         macros = [NSKeyedUnarchiver unarchiveObjectWithData:macrosArchive];
     [NSString setMacroResolverForUnarchiving:nil];
+    
+    // we set the macroResolver so we know the fields of this item may refer to it, so we can prevent scripting from adding this to the wrong document
+    [pubs makeObjectsPerformSelector:@selector(setMacroResolver:) withObject:macroResolver];
     
     [self setPublications:pubs];
     

@@ -185,6 +185,4 @@
 
 - (BOOL)isDocument { return NO; }
 
-- (NSString *)uniqueID { return [super uniqueID]; }
-
 @end

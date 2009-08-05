@@ -84,7 +84,7 @@ enum {
     BOOL hasBeenEdited;
     NSMutableSet *filesToBeFiled;
 	id<BDSKOwner> owner;
-    NSString *ownerID;
+    BDSKMacroResolver *macroResolver;
     BDSKFieldCollection *templateFields;
     NSInteger currentIndex;
     BOOL spotlightMetadataChanged;
@@ -147,8 +147,6 @@ enum {
 
 - (id)initWithType:(NSString *)type fileType:(NSString *)inFileType citeKey:(NSString *)key pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew;
 
-- (id)copyWithMacroResolver:(BDSKMacroResolver *)macroResolver;
-
 /*!
     @method dealloc
     @abstract deallocates the receiver and its data objects.
@@ -158,8 +156,8 @@ enum {
 - (id<BDSKOwner>)owner;
 - (void)setOwner:(id<BDSKOwner>)newOwner;
 
-- (NSString *)ownerID;
-- (void)setOwnerID:(NSString *)newOwnerID;
+- (BDSKMacroResolver *)macroResolver;
+- (void)setMacroResolver:(BDSKMacroResolver *)newMacroResolver;
 
 - (NSUndoManager *)undoManager;
 

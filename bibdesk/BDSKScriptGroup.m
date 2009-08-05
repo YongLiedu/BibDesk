@@ -343,8 +343,6 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
 
 - (BOOL)isDocument { return NO; }
 
-- (NSString *)uniqueID { return [super uniqueID]; }
-
 - (NSString *)scriptPath;
 {
     return scriptPath;

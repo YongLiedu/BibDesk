@@ -193,8 +193,6 @@
 
 - (BDSKItemSearchIndexes *)searchIndexes { return nil; }
 
-- (NSString *)uniqueID { return @""; }
-
 @end
 
 

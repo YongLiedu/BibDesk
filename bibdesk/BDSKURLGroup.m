@@ -318,8 +318,6 @@
     return macroResolver;
 }
 
-- (NSString *)uniqueID { return [super uniqueID]; }
-
 - (NSUndoManager *)undoManager { return [super undoManager]; }
 
 - (NSURL *)fileURL { return [NSURL fileURLWithPath:filePath]; }

@@ -109,7 +109,7 @@ A wrapper object around the fields to access them in AppleScript.
 
 - (void)setBibTeXString:(NSString *)newValue {
     if ([[bibItem owner] isDocument]) {
-        NSString *value = [NSString stringWithBibTeXString:newValue macroResolver:[[bibItem owner] macroResolver] error:NULL];
+        NSString *value = [NSString stringWithBibTeXString:newValue macroResolver:[bibItem macroResolver] error:NULL];
         if (value) {
             [bibItem setField:name toValue:value];
             [[bibItem undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];

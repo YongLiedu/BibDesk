@@ -282,7 +282,8 @@ error:(NSError **)outError{
                                                       citeKey:citeKey
                                                     pubFields:dictionary
                                                         isNew:isPasteOrDrag];
-                        [newBI setOwnerID:[document uniqueID]];
+                        // we set the macroResolver so we know the fields were parsed with this macroResolver, mostly to prevent scripting to add the item to the wrong document
+                        [newBI setMacroResolver:macroResolver];
                         
                         [citeKey release];
                         
