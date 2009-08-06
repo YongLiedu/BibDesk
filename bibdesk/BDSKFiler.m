@@ -101,22 +101,30 @@ static BDSKFiler *sharedFiler = nil;
 #pragma mark Auto file methods
 
 - (void)filePapers:(NSArray *)papers fromDocument:(BibDocument *)doc check:(BOOL)check{
-	NSFileManager *fm = [NSFileManager defaultManager];
 	NSString *papersFolderPath = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKPapersFolderPathKey];
-	BOOL isDir;
 
-	if(![NSString isEmptyString:papersFolderPath] && !([fm fileExistsAtPath:[fm resolveAliasesInPath:papersFolderPath] isDirectory:&isDir] && isDir)){
-		// The directory isn't there or isn't a directory, so pop up an alert.
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Papers Folder doesn't exist", @"Message in alert dialog when unable to find Papers Folder")
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Go to Preferences", @"Button title")
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The Papers Folder you've chosen either doesn't exist or isn't a folder. Any files you have dragged in will be linked to in their original location. Press \"Go to Preferences\" to set the Papers Folder.", @"Informative text in alert dialog")];
-		if ([alert runModal] == NSAlertAlternateReturn){
-            [[BDSKPreferenceController sharedPreferenceController] showWindow:self];
-            [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.autofile"];
-		}
-		return;
+	if (NO == [NSString isEmptyString:papersFolderPath]) {
+        NSFileManager *fm = [NSFileManager defaultManager];
+        BOOL isDir, exists;
+        
+        papersFolderPath = [fm resolveAliasesInPath:papersFolderPath];
+        exists = [fm fileExistsAtPath:papersFolderPath isDirectory:&isDir];
+        if (exists == NO)
+            isDir = exists = [fm createPathToFile:[papersFolderPath stringByAppendingPathComponent:@"0"] attributes:nil];
+        
+        if (exists == NO || isDir == NO) {
+            // The directory isn't there or isn't a directory, so pop up an alert.
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Papers Folder doesn't exist", @"Message in alert dialog when unable to find Papers Folder")
+                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                           alternateButton:NSLocalizedString(@"Go to Preferences", @"Button title")
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"The Papers Folder you've chosen either doesn't exist or isn't a folder. Any files you have dragged in will be linked to in their original location. Press \"Go to Preferences\" to set the Papers Folder.", @"Informative text in alert dialog")];
+            if ([alert runModal] == NSAlertAlternateReturn){
+                [[BDSKPreferenceController sharedPreferenceController] showWindow:self];
+                [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.autofile"];
+            }
+            return;
+        }
 	}
 	
     NSInteger mask = BDSKInitialAutoFileOptionMask;
