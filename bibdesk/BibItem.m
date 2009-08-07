@@ -2007,8 +2007,6 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
             authorField = BDSKEditorString;
             editorField = @"";
         }
-    }else if([entryType isEqualToString:BDSKBookletString]){
-        refTypeID = 6; // book
     }else if([entryType isEqualToString:@"electronic"]){
         refTypeID = 43; // electronic article
     }else if([entryType isEqualToString:@"webpage"]){
