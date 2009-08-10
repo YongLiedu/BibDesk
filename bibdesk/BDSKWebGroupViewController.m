@@ -386,7 +386,7 @@
     [menu removeAllItems];
     WebHistoryItem *item;
     while (item = [itemEnum nextObject]) {
-        NSMenuItem *menuItem = [menu addItemWithTitle:[item title] action:@selector(goBackForwardInHistory:) keyEquivalent:@""];
+        NSMenuItem *menuItem = [menu addItemWithTitle:([item title] ?: @"") action:@selector(goBackForwardInHistory:) keyEquivalent:@""];
         [menuItem setTarget:self];
         [menuItem setRepresentedObject:item];
     }
