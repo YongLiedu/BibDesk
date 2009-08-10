@@ -2537,7 +2537,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     
     if (isMove) {
         
-        didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:_dropIndex forDrop:sender dropOperation:_fvFlags.dropOperation];
+        didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:insertIndex forDrop:sender dropOperation:_fvFlags.dropOperation];
         
     } else if (FVDropBefore == _fvFlags.dropOperation || FVDropAfter == _fvFlags.dropOperation || NSNotFound == _dropIndex) {
            
