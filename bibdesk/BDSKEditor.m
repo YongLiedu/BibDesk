@@ -358,7 +358,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         // should never happen
         fprintf(stderr, "%s, unhandled firstResponder = %s\n", __func__, [[[[[self window] firstResponder] class] description] UTF8String]);
     }
-    [[self document] objectDidEndEditing:self];
+    if (isEditing) {
+        [[self document] objectDidEndEditing:self];
+        isEditing = NO;
+    }
 }
 
 - (void)commitEditingWithDelegate:(id)delegate didCommitSelector:(SEL)didCommitSelector contextInfo:(void *)contextInfo
@@ -1863,7 +1866,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (void)controlTextDidBeginEditing:(NSNotification *)note {
-    [[self document] objectDidBeginEditing:self];
+    if (isEditing == NO) {
+        [[self document] objectDidBeginEditing:self];
+        isEditing = YES;
+    }
 }
 
 // send by the formatter when validation failed
@@ -2024,7 +2030,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             
         }
     }
-    [[self document] objectDidEndEditing:self];
+    if (isEditing) {
+        [[self document] objectDidEndEditing:self];
+        isEditing = NO;
+    }
 }
 
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
@@ -2093,7 +2102,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     // save off the old value in case abortEditing gets called
     [self setPreviousValueForCurrentEditedNotesView:[currentEditedView string]];
-    [[self document] objectDidBeginEditing:self];
+    if (isEditing == NO) {
+        [[self document] objectDidBeginEditing:self];
+        isEditing = YES;
+    }
 }
 
 // Clear all the undo actions when changing tab items, just in case; otherwise we
@@ -2140,7 +2152,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         NSParameterAssert([self validateCurrentEditedView]);
         currentEditedView = nil;
         [self setPreviousValueForCurrentEditedNotesView:nil];
+    }
+    if (isEditing) {
         [[self document] objectDidEndEditing:self];
+        isEditing = NO;
     }
 }
 
@@ -2749,7 +2764,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     [complexStringEditor close];
     
     // make sure we're not registered as editor because we will be invalid, this shouldn't be necessary but there have been reports of crashes
-    [[self document] objectDidEndEditing:self];
+    if (isEditing && [self commitEditing] == NO)
+        [self discardEditing];
     
 	// this can give errors when the application quits when an editor window is open
 	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKCloseEditorWindowScriptHookName 
@@ -2777,8 +2793,14 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)setDocument:(NSDocument *)document {
     // in case the document is reset before windowWillClose: is called, I think this can happen on Tiger
-    if ([self document] && document == nil)
-        [[self document] objectDidEndEditing:self];
+    if ([self document] && document == nil && isEditing) {
+        if ([self commitEditing] == NO)
+            [self discardEditing];
+        if (isEditing) {
+            [[self document] objectDidEndEditing:self];
+            isEditing = NO;
+        }
+    }
     [super setDocument:document];
 }
 

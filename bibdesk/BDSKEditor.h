@@ -92,6 +92,8 @@
     BibItem *publication;
     BOOL isEditable;
     
+    BOOL isEditing;
+    
     NSMutableArray *fields;
     
     NSMutableSet *addedFields;
