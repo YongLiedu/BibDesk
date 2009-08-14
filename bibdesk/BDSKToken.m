@@ -248,16 +248,6 @@ NSString *BDSKRichTextString = @"Rich Text";
 // Needed as any option control binds to any type of token
 - (id)valueForUndefinedKey:(NSString *)key { return nil; }
 
-#pragma mark NSEditorRegistration
-
-- (void)objectDidBeginEditing:(id)editor {
-    [document objectDidBeginEditing:editor];
-}
-
-- (void)objectDidEndEditing:(id)editor {
-    [document objectDidEndEditing:editor];
-}
-
 @end
 
 #pragma mark -

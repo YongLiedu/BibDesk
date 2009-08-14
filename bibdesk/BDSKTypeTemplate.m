@@ -190,14 +190,4 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
     return attrString;
 }
 
-#pragma mark NSEditorRegistration
-
-- (void)objectDidBeginEditing:(id)editor {
-    [document objectDidBeginEditing:editor];
-}
-
-- (void)objectDidEndEditing:(id)editor {
-    [document objectDidEndEditing:editor];
-}
-
 @end
