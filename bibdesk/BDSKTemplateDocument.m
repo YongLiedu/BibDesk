@@ -277,9 +277,6 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 
 - (NSData *)dataOfType:(NSString *)typeName error:(NSError **)outError {
     NSData *data = nil;
-    
-    [ownerController commitEditing];
-    
     if (richText) {
         NSAttributedString *attrString = [self attributedString];
         data = [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil];
