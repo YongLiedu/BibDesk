@@ -797,8 +797,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
         [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:[[menuItem menu] title]]] isEqualToString:[menuItem representedObject]]];
         return YES;
-    } else if (action == @selector(printDocument:)) {
-        return NO;
     } else if ([[BDSKTemplateDocument superclass] instancesRespondToSelector:_cmd]) {
         return [super validateMenuItem:menuItem];
     } else {
@@ -809,6 +807,8 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 - (BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem {
     if ([anItem action] == @selector(saveDocument:)) {
         return YES;
+    } else if ([anItem action] == @selector(printDocument:)) {
+        return NO;
     } else if ([[BDSKTemplateDocument superclass] instancesRespondToSelector:_cmd]) {
         return [super validateUserInterfaceItem:anItem];
     } else {
