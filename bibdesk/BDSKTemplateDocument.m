@@ -253,6 +253,8 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
     
 	[fieldField setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
     
+    [ownerController setContent:self];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
                                                  name:BDSKTokenFieldDidChangeSelectionNotification object:itemTemplateTokenField];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
@@ -277,6 +279,9 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 
 - (NSData *)dataOfType:(NSString *)typeName error:(NSError **)outError {
     NSData *data = nil;
+    
+    [ownerController commitEditing];
+    
     if (richText) {
         NSAttributedString *attrString = [self attributedString];
         data = [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil];
@@ -1015,8 +1020,12 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         [self updateStrings];
 }
 
+- (BOOL)windowShouldClose:(id)window {
+    return [ownerController commitEditing];
+}
+
 - (void)windowWillClose:(NSNotification *)notification {
-    [ownerController unbind:@"contentObject"];
+    [ownerController setContent:nil];
 }
 
 #pragma mark NSTokenField delegate
