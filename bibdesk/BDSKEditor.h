@@ -84,9 +84,6 @@
 	IBOutlet BDSKImagePopUpButton *actionButton;
     IBOutlet NSMenu *actionMenu;
 	IBOutlet NSButton *addFieldButton;
-	
-	IBOutlet NSWindow *chooseURLSheet;
-	IBOutlet NSTextField *chooseURLField;
     
     // ----------------------------------------------------------------------------------------
     BibItem *publication;
@@ -145,11 +142,9 @@
 - (void)show;
 
 - (IBAction)chooseLocalFile:(id)sender;
-- (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)chooseRemoteURL:(id)sender;
 - (IBAction)dismissChooseURLSheet:(id)sender;
-- (void)chooseRemoteURLSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)raiseAddField:(id)sender;
 - (IBAction)raiseDelField:(id)sender;

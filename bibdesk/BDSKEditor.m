@@ -83,6 +83,7 @@
 #import "BDSKCompletionManager.h"
 #import "BDSKApplication.h"
 #import "NSColor_BDSKExtensions.h"
+#import "BDSKURLSheetController.h"
 
 #define WEAK_NULL NULL
 
@@ -559,6 +560,32 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     }
 }
 
+- (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+
+    if(returnCode == NSOKButton){
+        NSUInteger anIndex = (NSUInteger)contextInfo;
+        NSURL *aURL = [[sheet URLs] objectAtIndex:0];
+        BOOL shouldAutoFile = [disableAutoFileButton state] == NSOffState && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey];
+        if (anIndex != NSNotFound) {
+            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
+            if (aFile == nil)
+                return;
+            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
+            [publication removeObjectFromFilesAtIndex:anIndex];
+            if (oldURL)
+                [[self document] userRemovedURL:oldURL forPublication:publication];
+            [oldURL release];
+            [publication insertObject:aFile inFilesAtIndex:anIndex];
+            [[self document] userAddedURL:aURL forPublication:publication];
+            if (shouldAutoFile)
+                [publication autoFileLinkedFile:aFile];
+        } else {
+            [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
+        }
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+    }        
+}
+
 - (IBAction)chooseLocalFile:(id)sender{
     NSUInteger anIndex = NSNotFound;
     NSNumber *indexNumber = [sender representedObject];
@@ -594,32 +621,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
   
 }
 
-- (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-
-    if(returnCode == NSOKButton){
-        NSUInteger anIndex = (NSUInteger)contextInfo;
-        NSURL *aURL = [[sheet URLs] objectAtIndex:0];
-        BOOL shouldAutoFile = [disableAutoFileButton state] == NSOffState && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey];
-        if (anIndex != NSNotFound) {
-            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
-            if (aFile == nil)
-                return;
-            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
-            [publication removeObjectFromFilesAtIndex:anIndex];
-            if (oldURL)
-                [[self document] userRemovedURL:oldURL forPublication:publication];
-            [oldURL release];
-            [publication insertObject:aFile inFilesAtIndex:anIndex];
-            [[self document] userAddedURL:aURL forPublication:publication];
-            if (shouldAutoFile)
-                [publication autoFileLinkedFile:aFile];
-        } else {
-            [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
-        }
-        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-    }        
-}
-
 - (void)addLinkedFileFromMenuItem:(NSMenuItem *)sender{
 	NSString *path = [sender representedObject];
     NSURL *aURL = [NSURL fileURLWithPath:path];
@@ -627,27 +628,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
-- (IBAction)chooseRemoteURL:(id)sender{
-    NSUInteger anIndex = NSNotFound;
-    NSNumber *indexNumber = [sender representedObject];
-    NSString *urlString = @"http://";
-    if (indexNumber) {
-        anIndex = [indexNumber unsignedIntValue];
-        urlString = [[[publication objectInFilesAtIndex:anIndex] URL] absoluteString];
-    }
-	[chooseURLField setStringValue:urlString];
-    
-    [NSApp beginSheet:chooseURLSheet
-       modalForWindow:[self window] 
-        modalDelegate:self 
-       didEndSelector:@selector(chooseRemoteURLSheetDidEnd:returnCode:contextInfo:) 
-          contextInfo:(void *)anIndex];
-}
-
-- (void)chooseRemoteURLSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+- (void)chooseRemoteURLSheetDidEnd:(BDSKURLSheetController *)urlController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
 
     if (returnCode == NSOKButton) {
-        NSString *aURLString = [chooseURLField stringValue];
+        NSString *aURLString = [urlController urlString];
         if ([NSString isEmptyString:aURLString])
             return;
         NSURL *aURL = [NSURL URLWithStringByNormalizingPercentEscapes:aURLString];
@@ -673,9 +657,23 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     }        
 }
 
-- (IBAction)dismissChooseURLSheet:(id)sender{
-    [NSApp endSheet:chooseURLSheet returnCode:[sender tag]];
-    [chooseURLSheet orderOut:self];
+- (IBAction)chooseRemoteURL:(id)sender{
+    NSUInteger anIndex = NSNotFound;
+    NSNumber *indexNumber = [sender representedObject];
+    NSString *urlString = @"http://";
+    if (indexNumber) {
+        anIndex = [indexNumber unsignedIntValue];
+        urlString = [[[publication objectInFilesAtIndex:anIndex] URL] absoluteString];
+    }
+    
+    BDSKURLSheetController *urlController = [[BDSKURLSheetController alloc] init];
+    
+    [urlController setUrlString:urlString];
+    [urlController beginSheetModalForWindow:[self window]
+                              modalDelegate:self
+                             didEndSelector:@selector(chooseRemoteURLSheetDidEnd:returnCode:contextInfo:)
+                                contextInfo:(void *)anIndex];
+    [urlController release];
 }
 
 - (void)addRemoteURLFromMenuItem:(NSMenuItem *)sender{
