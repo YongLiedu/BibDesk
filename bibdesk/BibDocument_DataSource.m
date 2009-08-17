@@ -1797,6 +1797,18 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             [item setRepresentedObject:theURL];
         }
     }
+    
+    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO && [[self selectedPublications] count] == 1) {
+        [menu addItem:[NSMenuItem separatorItem]];
+        
+        [menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis]
+                        action:@selector(chooseLinkedFile:)
+                 keyEquivalent:@""];
+        
+        [menu addItemWithTitle:[NSLocalizedString(@"Choose URL", @"Menu item title") stringByAppendingEllipsis]
+                        action:@selector(chooseLinkedURL:)
+                 keyEquivalent:@""];
+    }
 }
 
 - (BOOL)fileView:(FVFileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation {

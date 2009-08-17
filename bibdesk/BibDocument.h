@@ -483,6 +483,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (IBAction)openLinkedURL:(id)sender;
 - (IBAction)showNotesForLinkedFile:(id)sender;
 - (IBAction)copyNotesForLinkedFile:(id)sender;
+- (IBAction)chooseLinkedFile:(id)sender;
+- (IBAction)chooseLinkedURL:(id)sender;
 - (IBAction)previewAction:(id)sender;
 - (IBAction)migrateFiles:(id)sender;
 - (IBAction)selectAllPublications:(id)sender;

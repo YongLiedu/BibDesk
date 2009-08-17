@@ -172,6 +172,9 @@
 
 - (void)copyNotesForLocalURLForField:(NSString *)field;
 
+- (IBAction)chooseLinkedFile:(id)sender;
+- (IBAction)chooseLinkedURL:(id)sender;
+
 #pragma mark | Linked File and URL actions
 
 - (void)openLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;

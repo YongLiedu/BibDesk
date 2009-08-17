@@ -91,6 +91,7 @@
 #import "BDSKAppController.h"
 #import "BDSKApplication.h"
 #import "NSIndexSet_BDSKExtensions.h"
+#import "BDSKURLSheetController.h"
 
 @implementation BibDocument (Actions)
 
@@ -1109,6 +1110,97 @@ static BOOL changingColors = NO;
         [qlPreviewer setWebViewContextMenuDelegate:nil];
         [qlPreviewer previewFileURLs:theURLs];
     }
+}
+
+- (void)chooseLinkedFilePanelDidEnd:(NSOpenPanel *)oPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSOKButton) {
+        BibItem *publication = nil;
+        if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+            NSArray *selPubs = [self selectedPublications];
+            if ([selPubs count] == 1)
+                publication = [selPubs lastObject];
+        }
+        if (publication == nil) {
+            NSBeep();
+            return;
+        }
+        
+        NSURL *aURL = [[oPanel URLs] objectAtIndex:0];
+        BOOL shouldAutoFile = [(NSButton *)[oPanel accessoryView] state] == NSOffState && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey];
+        [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+    }        
+}
+
+- (IBAction)chooseLinkedFile:(id)sender {
+    if ([self isDisplayingFileContentSearch] || [self hasExternalGroupsSelected] || [[self selectedPublications] count] != 1) {
+        NSBeep();
+        return;
+    }
+    
+    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
+    [oPanel setAllowsMultipleSelection:NO];
+    [oPanel setResolvesAliases:NO];
+    [oPanel setCanChooseDirectories:YES];
+    [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
+    
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]) {
+        NSButton *disableAutoFileButton = [[[NSButton alloc] init] autorelease];
+        [disableAutoFileButton setBezelStyle:NSRoundedBezelStyle];
+        [disableAutoFileButton setButtonType:NSSwitchButton];
+        [disableAutoFileButton setTitle:NSLocalizedString(@"Disable Auto File", @"Choose local file button title")];
+        [disableAutoFileButton sizeToFit];
+        [oPanel setAccessoryView:disableAutoFileButton];
+	}
+    
+    [oPanel beginSheetForDirectory:nil 
+                              file:nil 
+                    modalForWindow:documentWindow 
+                     modalDelegate:self 
+                    didEndSelector:@selector(chooseLinkedFilePanelDidEnd:returnCode:contextInfo:) 
+                       contextInfo:NULL];
+  
+}
+
+- (void)chooseLinkedURLSheetDidEnd:(BDSKURLSheetController *)urlController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+    if (returnCode == NSOKButton) {
+        BibItem *publication = nil;
+        if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+            NSArray *selPubs = [self selectedPublications];
+            if ([selPubs count] == 1)
+                publication = [selPubs lastObject];
+        }
+        if (publication == nil) {
+            NSBeep();
+            return;
+        }
+        
+        NSString *aURLString = [urlController urlString];
+        if ([NSString isEmptyString:aURLString])
+            return;
+        NSURL *aURL = [NSURL URLWithStringByNormalizingPercentEscapes:aURLString];
+        if (aURL == nil)
+            return;
+        [publication addFileForURL:aURL autoFile:NO runScriptHook:YES];
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+    }        
+}
+
+- (IBAction)chooseLinkedURL:(id)sender{
+    if ([self isDisplayingFileContentSearch] || [self hasExternalGroupsSelected] || [[self selectedPublications] count] != 1) {
+        NSBeep();
+        return;
+    }
+    
+    NSString *urlString = @"http://";
+    BDSKURLSheetController *urlController = [[BDSKURLSheetController alloc] init];
+    
+    [urlController setUrlString:urlString];
+    [urlController beginSheetModalForWindow:documentWindow
+                              modalDelegate:self
+                             didEndSelector:@selector(chooseLinkedURLSheetDidEnd:returnCode:contextInfo:)
+                                contextInfo:NULL];
+    [urlController release];
 }
 
 - (IBAction)migrateFiles:(id)sender {
