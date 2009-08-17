@@ -144,7 +144,6 @@
 - (IBAction)chooseLocalFile:(id)sender;
 
 - (IBAction)chooseRemoteURL:(id)sender;
-- (IBAction)dismissChooseURLSheet:(id)sender;
 
 - (IBAction)raiseAddField:(id)sender;
 - (IBAction)raiseDelField:(id)sender;
