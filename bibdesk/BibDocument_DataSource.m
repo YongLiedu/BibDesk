@@ -1799,6 +1799,23 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     }
     
     if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO && [[self selectedPublications] count] == 1) {
+        i = [menu indexOfItemWithTag:FVRemoveMenuItemTag];
+        if (i != NSNotFound && theURL && [[aFileView selectionIndexes] count] == 1) {
+            if ([theURL isFileURL]) {
+                item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace File", @"Menu item title") stringByAppendingEllipsis]
+                                          action:@selector(chooseLinkedFile:)
+                                   keyEquivalent:@""
+                                         atIndex:++i];
+                [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+            } else {
+                item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace URL", @"Menu item title") stringByAppendingEllipsis]
+                                          action:@selector(chooseLinkedURL:)
+                                   keyEquivalent:@""
+                                         atIndex:++i];
+                [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+            }
+        }
+        
         [menu addItem:[NSMenuItem separatorItem]];
         
         [menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis]

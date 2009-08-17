@@ -92,6 +92,7 @@
 #import "BDSKApplication.h"
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKURLSheetController.h"
+#import "BDSKLinkedFile.h"
 
 @implementation BibDocument (Actions)
 
@@ -1125,9 +1126,25 @@ static BOOL changingColors = NO;
             return;
         }
         
+        NSUInteger anIndex = (NSUInteger)contextInfo;
         NSURL *aURL = [[oPanel URLs] objectAtIndex:0];
         BOOL shouldAutoFile = [(NSButton *)[oPanel accessoryView] state] == NSOffState && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey];
-        [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
+        if (anIndex != NSNotFound) {
+            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
+            if (aFile == nil)
+                return;
+            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
+            [publication removeObjectFromFilesAtIndex:anIndex];
+            if (oldURL)
+                [self userRemovedURL:oldURL forPublication:publication];
+            [oldURL release];
+            [publication insertObject:aFile inFilesAtIndex:anIndex];
+            [self userAddedURL:aURL forPublication:publication];
+            if (shouldAutoFile)
+                [publication autoFileLinkedFile:aFile];
+        } else {
+            [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
+        }
         [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     }        
 }
@@ -1138,6 +1155,13 @@ static BOOL changingColors = NO;
         return;
     }
     
+    NSUInteger anIndex = NSNotFound;
+    NSNumber *indexNumber = [sender representedObject];
+    NSString *path = nil;
+    if (indexNumber) {
+        anIndex = [indexNumber unsignedIntValue];
+        path = [[[[self shownFiles] objectAtIndex:anIndex] URL] path];
+    }
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setResolvesAliases:NO];
@@ -1153,12 +1177,12 @@ static BOOL changingColors = NO;
         [oPanel setAccessoryView:disableAutoFileButton];
 	}
     
-    [oPanel beginSheetForDirectory:nil 
-                              file:nil 
+    [oPanel beginSheetForDirectory:[path stringByDeletingLastPathComponent] 
+                              file:[path lastPathComponent] 
                     modalForWindow:documentWindow 
                      modalDelegate:self 
                     didEndSelector:@selector(chooseLinkedFilePanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:NULL];
+                       contextInfo:(void *)anIndex];
   
 }
 
@@ -1181,7 +1205,22 @@ static BOOL changingColors = NO;
         NSURL *aURL = [NSURL URLWithStringByNormalizingPercentEscapes:aURLString];
         if (aURL == nil)
             return;
-        [publication addFileForURL:aURL autoFile:NO runScriptHook:YES];
+        NSUInteger anIndex = (NSUInteger)contextInfo;
+        if (anIndex != NSNotFound) {
+            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
+            if (aFile == nil)
+                return;
+            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
+            [publication removeObjectFromFilesAtIndex:anIndex];
+            if (oldURL)
+                [self userRemovedURL:oldURL forPublication:publication];
+            [oldURL release];
+            [publication insertObject:aFile inFilesAtIndex:anIndex];
+            [self userAddedURL:aURL forPublication:publication];
+            [publication autoFileLinkedFile:aFile];
+        } else {
+            [publication addFileForURL:aURL autoFile:NO runScriptHook:YES];
+        }
         [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     }        
 }
@@ -1192,14 +1231,21 @@ static BOOL changingColors = NO;
         return;
     }
     
+    NSUInteger anIndex = NSNotFound;
+    NSNumber *indexNumber = [sender representedObject];
     NSString *urlString = @"http://";
+    if (indexNumber) {
+        anIndex = [indexNumber unsignedIntValue];
+        urlString = [[[[self shownFiles] objectAtIndex:anIndex] URL] absoluteString];
+    }
+    
     BDSKURLSheetController *urlController = [[BDSKURLSheetController alloc] init];
     
     [urlController setUrlString:urlString];
     [urlController beginSheetModalForWindow:documentWindow
                               modalDelegate:self
                              didEndSelector:@selector(chooseLinkedURLSheetDidEnd:returnCode:contextInfo:)
-                                contextInfo:NULL];
+                                contextInfo:(void *)anIndex];
     [urlController release];
 }
 
