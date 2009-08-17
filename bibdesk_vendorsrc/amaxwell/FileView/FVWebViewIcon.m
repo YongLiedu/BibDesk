@@ -341,7 +341,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
     
     // display the main frame's view directly to avoid showing the scrollers
     WebFrameView *view = [[_webView mainFrame] frameView];
-    [view setAllowsScrolling:NO];
+    //[view setAllowsScrolling:NO];
     
     // actual size of the view
     NSSize size = [[self class] _webViewSize];
