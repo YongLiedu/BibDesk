@@ -185,14 +185,19 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
             if (shortVersionString == nil)
                 shortVersionString = versionString;
             // we always include the default app and any version in Applications or System
-            BOOL isPreferred = [defaultAppURL isEqual:appURL] || fileIsInApplicationsOrSystem(appURL);
+            BOOL isDefault = [defaultAppURL isEqual:appURL];
+            BOOL isInApplications = fileIsInApplicationsOrSystem(appURL);
+            BOOL isPreferred = isDefault || isInApplications;
             if (isPreferred) {
                 // if it's preferred, remove any alternative
                 NSUInteger idx = [[uniqueNamesAndURLs valueForKey:@"versionString"] indexOfObject:versionString];
                 if (idx != NSNotFound) {
                     NSURL *altURL = [[uniqueNamesAndURLs objectAtIndex:idx] objectForKey:@"appURL"];
-                    if ([defaultAppURL isEqual:altURL] == NO && fileIsInApplicationsOrSystem(altURL) == NO)
+                    BOOL altIsInApplications = fileIsInApplicationsOrSystem(altURL);
+                    if ([defaultAppURL isEqual:altURL] == NO && altIsInApplications == NO)
                         [uniqueNamesAndURLs removeObjectAtIndex:idx];
+                    else if (isDefault == NO && altIsInApplications)
+                        isPreferred = NO;
                 }
             }
             if ([versionStrings containsObject:versionString ?: (id)[NSNull null]] == NO || isPreferred) {
