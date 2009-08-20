@@ -632,26 +632,27 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
 
 // Bug #1436631 indicates that "Pomies, M.-P." was displayed as "M. -. Pomies", so we'll grab the first letter character instead of substringToIndex:1.  The technically correct solution may be to use "M. Pomies" in this case, but we split the first name at "." boundaries to generate the firstNames array.
 // RFE #2840696, double-names using dashes should be displayed as above, we get this either as a single name fragment Mark-Peter or two initial fragments from M.-P.
-static inline void appendFirstLetterCharacters(CFMutableStringRef string, CFMutableStringRef shortString, CFStringRef fragment, Boolean isFirst)
+static inline void appendFirstLetterCharacters(CFAllocatorRef alloc, CFMutableStringRef string, CFMutableStringRef shortString, CFStringRef fragment, Boolean isFirst)
 {
     CFIndex end = CFStringGetLength(fragment);
     CFRange searchRange = CFRangeMake(0, end);
     CFRange dashRange, letterRange;
-    UniChar ch;
+    CFStringRef ch;
     if (false == CFStringFindCharacterFromSet(fragment, dashSet, searchRange, 0, &dashRange))
         dashRange = CFRangeMake(end, 0);
     while (searchRange.length) {
         searchRange.length = dashRange.location - searchRange.location;
         if (CFStringFindCharacterFromSet(fragment, (CFCharacterSetRef)[NSCharacterSet letterCharacterSet], searchRange, 0, &letterRange)) {
-            ch = CFStringGetCharacterAtIndex(fragment, letterRange.location);
+            ch = CFStringCreateWithSubstring(alloc, fragment, letterRange);
             if (searchRange.location > 0)
                 CFStringAppend(string, CFSTR("-"));
             else if (isFirst == FALSE)
                 CFStringAppend(string, CFSTR(" "));
-            CFStringAppendCharacters(string, &ch, 1);
+            CFStringAppend(string, ch);
             CFStringAppend(string, CFSTR("."));
             if (searchRange.location == 0)
-                CFStringAppendCharacters(shortString, &ch, 1);
+                CFStringAppend(shortString, ch);
+            CFRelease(ch);
         }
         searchRange = CFRangeMake(dashRange.location + dashRange.length, end - dashRange.location - dashRange.length);
         if (false == CFStringFindCharacterFromSet(fragment, dashSet, searchRange, 0, &dashRange))
@@ -687,7 +688,7 @@ static inline void appendFirstLetterCharacters(CFMutableStringRef string, CFMuta
         // loop through the first name parts (which includes middle names)
         CFIndex lastIdx = firstNameCount - 1;
         for(idx = 0; idx <= lastIdx; idx++){
-            appendFirstLetterCharacters(abbrevFirstName, shortAbbrevFirstName, CFArrayGetValueAtIndex(theFirstNames, idx), idx == 0);
+            appendFirstLetterCharacters(alloc, abbrevFirstName, shortAbbrevFirstName, CFArrayGetValueAtIndex(theFirstNames, idx), idx == 0);
         }
     }
     
