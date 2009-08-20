@@ -620,7 +620,19 @@ static id sharedController = nil;
     contentRect = [[self window] contentRectForFrameRect:[[self window] frame]];
     contentRect.origin.y = NSMaxY(contentRect) - winSize.height;
     contentRect.size = winSize;
-	[[self window] setFrame:[[self window] frameRectForContentRect:contentRect] display:display animate:display];
+    contentRect = [[self window] frameRectForContentRect:contentRect];
+    
+    NSRect screenRect = [([[self window] screen] ?: [NSScreen mainScreen]) visibleFrame];
+    if (NSMaxX(contentRect) > NSMaxX(screenRect))
+        contentRect.origin.y = NSMaxX(screenRect) - NSWidth(contentRect);
+    if (NSMinX(contentRect) < NSMinX(screenRect))
+        contentRect.origin.y = NSMinY(screenRect);
+    if (NSMinY(contentRect) < NSMinY(screenRect))
+        contentRect.origin.y = NSMinY(screenRect);
+    if (NSMaxY(contentRect) > NSMaxY(screenRect))
+        contentRect.origin.y = NSMaxY(screenRect) - NSHeight(contentRect);
+        
+	[[self window] setFrame:contentRect display:display animate:display];
 }
 
 - (void)updateSearchAndShowAll:(BOOL)showAll {
