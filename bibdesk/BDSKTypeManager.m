@@ -92,10 +92,9 @@ static BDSKTypeManager *sharedInstance = nil;
         
         // this is used for generated local urls
         strictInvalidLocalUrlCharSet = [invalidLocalUrlCharSet copy];  // don't release this
-
         
         tmpSet = [[NSCharacterSet characterSetWithRange:NSMakeRange(1,31)] mutableCopy];
-        [tmpSet addCharactersInString:@"/?<>\\:*|\""];
+        [tmpSet addCharactersInString:@"?<>\\:*|\""];
         
         // this is used for generated local urls, stricted for use of windoze-compatible file names
         veryStrictInvalidLocalUrlCharSet = [tmpSet copy];
