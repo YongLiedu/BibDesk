@@ -54,12 +54,16 @@
 @end
 
 static BibAuthor *emptyAuthorInstance = nil;
+static CFCharacterSetRef separatorSet = NULL;
+static CFCharacterSetRef dashSet = NULL;
 
 @implementation BibAuthor
 
 + (void)initialize{
     
     BDSKINITIALIZE;
+    separatorSet = CFCharacterSetCreateWithCharactersInString(CFAllocatorGetDefault(), CFSTR(" ."));
+    dashSet = CFCharacterSetCreateWithCharactersInString(CFAllocatorGetDefault(), CFSTR("-"));
     emptyAuthorInstance = [[BibAuthor alloc] initWithName:@"" andPub:nil forField:BDSKAuthorString];
 }
     
@@ -610,10 +614,6 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
     
     // components of the first name used in fuzzy comparisons
     
-    static CFCharacterSetRef separatorSet = NULL;
-    if(separatorSet == NULL)
-        separatorSet = CFCharacterSetCreateWithCharactersInString(CFAllocatorGetDefault(), CFSTR(" ."));
-    
     // @@ see note on firstLetterCharacterString() function for possible issues with this
     firstNames = flags.hasFirst ? (id)BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAllocatorGetDefault(), (CFStringRef)firstName, separatorSet, FALSE) : [[NSArray alloc] init];
 
@@ -631,11 +631,31 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
 }
 
 // Bug #1436631 indicates that "Pomies, M.-P." was displayed as "M. -. Pomies", so we'll grab the first letter character instead of substringToIndex:1.  The technically correct solution may be to use "M. Pomies" in this case, but we split the first name at "." boundaries to generate the firstNames array.
-static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, CFStringRef string)
+// RFE #2840696, double-names using dashes should be displayed as above, we get this either as a single name fragment Mark-Peter or two initial fragments from M.-P.
+static inline void appendFirstLetterCharacters(CFMutableStringRef string, CFMutableStringRef shortString, CFStringRef fragment)
 {
-    CFRange letterRange;
-    Boolean hasChar = CFStringFindCharacterFromSet(string, (CFCharacterSetRef)[NSCharacterSet letterCharacterSet], CFRangeMake(0, CFStringGetLength(string)), 0, &letterRange);
-    return hasChar ? CFStringCreateWithSubstring(alloc, string, letterRange) : NULL;
+    CFIndex end = CFStringGetLength(fragment);
+    CFRange searchRange = CFRangeMake(0, end);
+    CFRange dashRange, letterRange;
+    UniChar spaceOrDash = 0, period = '.', ch;
+    if (false == CFStringFindCharacterFromSet(fragment, dashSet, searchRange, 0, &dashRange))
+        dashRange = CFRangeMake(end, 0);
+    while (searchRange.length) {
+        searchRange = CFRangeMake(searchRange.location, dashRange.location - searchRange.location);
+        if (CFStringFindCharacterFromSet(fragment, (CFCharacterSetRef)[NSCharacterSet letterCharacterSet], searchRange, 0, &letterRange)) {
+            ch = CFStringGetCharacterAtIndex(fragment, letterRange.location);
+            if (spaceOrDash == 0)
+                CFStringAppendCharacters(shortString, &ch, 1);
+            else
+                CFStringAppendCharacters(string, &spaceOrDash, 1);
+            CFStringAppendCharacters(string, &ch, 1);
+            CFStringAppendCharacters(string, &period, 1);
+        }
+        spaceOrDash = dashRange.length > 0 ? '-' : spaceOrDash ;
+        searchRange = CFRangeMake(dashRange.location + dashRange.length, end - dashRange.location - dashRange.length);
+        if (false == CFStringFindCharacterFromSet(fragment, dashSet, searchRange, 0, &dashRange))
+            dashRange = CFRangeMake(CFStringGetLength(fragment), 0);
+    }
 }
 
 - (void)setupAbbreviatedNames
@@ -646,7 +666,6 @@ static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, C
     
     CFArrayRef theFirstNames = (CFArrayRef)firstNames;
     CFIndex idx, firstNameCount = CFArrayGetCount(theFirstNames);
-    CFStringRef fragment = nil;
     CFStringRef firstLetter = nil;
     
     CFAllocatorRef alloc = CFAllocatorGetDefault();
@@ -667,14 +686,7 @@ static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, C
         // loop through the first name parts (which includes middle names)
         CFIndex lastIdx = firstNameCount - 1;
         for(idx = 0; idx <= lastIdx; idx++){
-            fragment = CFArrayGetValueAtIndex(theFirstNames, idx);
-            firstLetter = copyFirstLetterCharacterString(alloc, fragment);
-            if (firstLetter != nil) {
-                CFStringAppend(abbrevFirstName, firstLetter);
-                CFStringAppend(abbrevFirstName, (idx < lastIdx ? CFSTR(". ") : CFSTR(".")) );
-                CFStringAppend(shortAbbrevFirstName, firstLetter);
-                CFRelease(firstLetter);
-            }
+            appendFirstLetterCharacters(abbrevFirstName, shortAbbrevFirstName, CFArrayGetValueAtIndex(theFirstNames, idx));
         }
     }
     
