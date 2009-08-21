@@ -526,6 +526,7 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
             }
             else {
                 // no animation or frame was set to zero rect (if not previously in defaults database)
+                [[self window] setFrame:newWindowFrame display:YES];
                 [[self windowAnimator] setAlphaValue:1.0];
             }
         }
