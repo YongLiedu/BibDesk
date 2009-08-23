@@ -50,6 +50,7 @@
 #import "NSCharacterSet_BDSKExtensions.h"
 #import "BDSKRuntime.h"
 #import "NSInvocation_BDSKExtensions.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 static CGFloat BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
 
@@ -276,6 +277,13 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 
 - (NSArray *)writableTypesForSaveOperation:(NSSaveOperationType)saveOperation {
     return [NSArray arrayWithObjects:richText ? BDSKRichTextTemplateDocumentType : BDSKTextTemplateDocumentType, nil];
+}
+
+- (BOOL)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError {
+    BOOL success = [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
+    if (success && richText == NO)
+        [[NSFileManager defaultManager] setAppleStringEncoding:NSUTF8StringEncoding atPath:[absoluteURL path] error:NULL];
+    return success;
 }
 
 - (NSData *)dataOfType:(NSString *)typeName error:(NSError **)outError {
