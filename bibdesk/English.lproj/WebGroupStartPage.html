@@ -7,10 +7,11 @@
 		* { margin: 0px; padding: 0px; }
 		body { font-family: "Lucida Grande"; font-size: 13px; padding: 1em; }
 		h1 { font-size: 16px; display:none; }
+		.help {display: block; float:right; margin-left:1em;}
 		p, .columns { max-width:50em; margin:auto;}
-		.columns { margin-top:1em; position: relative;}
-		.column { width:33%; float:left; display:block; }
-		.column.c1>* { margin-right: .66em; }
+		.columns { margin-top:1em; }
+		.column { width:33.3333%; float:left; display:block; }
+		.column.c1>* { margin-right: .66em;}
 		.column.c2>* { margin: 0em 0.33em; }
 		.column.c3>* { margin-left: .66em; }		
 		.column h2 { font-size: 13px; background: #ccc; padding: 0.5em 0.66em;}
@@ -29,13 +30,15 @@
 	
 		<h1>Web Group</h1>	
 		<p>
-			BibDesk recognises bibliographic information on some web pages and processes them for easy searching and single-click import. Supported sites and formats are:
+			<a class="help" href="help:anchor=Web-Group">[Help]</a>BibDesk recognises bibliographic information on some web pages and processes them for easy searching and single-click import. Supported sites and formats: 
+			
 		</p>
 		
 		<div class="columns">
 		<div class="column c1">
 			<h2 title="These sites are fully accessible for anyone.">Free Sites</h2>
 			PUBLICLIST
+
 		</div>
 		
 		<div class="column c2">
@@ -46,10 +49,6 @@
 		<div class="column c3">
 			<h2 title="Formats which can be embedded in web pages and extracted from there.">General formats</h2>
 			GENERALLIST
-
-			<p>
-			Please refer to the <a href="help:anchor=Web-Group">Web Group Help page</a> for further information on the supported sites and formats.
-			</p>
 		</div>
 		</div>
 	</body>
