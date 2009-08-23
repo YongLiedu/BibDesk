@@ -1843,7 +1843,7 @@ static BOOL changingColors = NO;
                                          defaultButton:NSLocalizedString(@"All Candidates", @"Button title")
                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
                                           otherButton:NSLocalizedString(@"Only Duplicates", @"Button title")
-                            informativeTextWithFormat:NSLocalizedString(@"Do you want to select all duplicate items, or only strict duplicates? If you choose \"Only Duplicates\", one randomly selected duplicate will be not be selected." , @"Informative text in alert dialog")];
+                            informativeTextWithFormat:NSLocalizedString(@"Do you want to select all duplicate items, or only strict duplicates? If you choose \"Only Duplicates\", one randomly selected duplicate will not be selected." , @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
                          didEndSelector:@selector(selectDuplicatesAlertDidEnd:returnCode:contextInfo:) 
