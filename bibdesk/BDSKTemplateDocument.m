@@ -472,23 +472,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 }
 
 - (NSPrintOperation *)printOperationWithSettings:(NSDictionary *)printSettings error:(NSError **)outError {
-    NSPrintInfo *info = [[self printInfo] copy];
-    [[info dictionary] addEntriesFromDictionary:printSettings];
-    [info setHorizontalPagination:NSFitPagination];
-    [info setHorizontallyCentered:NO];
-    [info setVerticallyCentered:NO];
-    
-    NSTextView *printableView = [[BDSKPrintableView alloc] initWithAttributedString:[self attributedString] printInfo:info];
-    
-    NSPrintOperation *printOperation = [NSPrintOperation printOperationWithView:printableView printInfo:info];
-    [printableView release];
-    [info release];
-    
-    NSPrintPanel *printPanel = [printOperation printPanel];
-    if ([printPanel respondsToSelector:@selector(setOptions:)])
-        [printPanel setOptions:NSPrintPanelShowsCopies | NSPrintPanelShowsPageRange | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling | NSPrintPanelShowsPreview];
-    
-    return printOperation;
+    return [NSPrintOperation printOperationWithAttributedString:[self attributedString] printInfo:[self printInfo] settings:printSettings];
 }
 
 - (BDSKToken *)tokenForField:(NSString *)field {

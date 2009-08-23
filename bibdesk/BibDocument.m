@@ -2739,30 +2739,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     else
         // this occurs only when both FileViews are displayed, probably never happens
         string = [self bibTeXStringForPublications:[self selectedPublications]];
-    
-    NSPrintInfo *info = [[self printInfo] copy];
-    [[info dictionary] addEntriesFromDictionary:printSettings];
-    [info setHorizontalPagination:NSFitPagination];
-    [info setHorizontallyCentered:NO];
-    [info setVerticallyCentered:NO];
-    
-    NSTextView *printableView = nil;
-    if (attrString)
-        printableView = [[BDSKPrintableView alloc] initWithAttributedString:attrString printInfo:info];
-    else
-        printableView = [[BDSKPrintableView alloc] initWithString:string printInfo:info];
-    if (attrString == nil && string == nil)
-        string = NSLocalizedString(@"Error: nothing to print from document preview", @"printing error");
-    
-    NSPrintOperation *printOperation = [NSPrintOperation printOperationWithView:printableView printInfo:info];
-    [printableView release];
-    [info release];
-    
-    NSPrintPanel *printPanel = [printOperation printPanel];
-    if ([printPanel respondsToSelector:@selector(setOptions:)])
-        [printPanel setOptions:NSPrintPanelShowsCopies | NSPrintPanelShowsPageRange | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling | NSPrintPanelShowsPreview];
-    
-    return printOperation;
+    if (attrString) {
+        return [NSPrintOperation printOperationWithAttributedString:attrString printInfo:[self printInfo] settings:printSettings];
+    } else {
+        if (string == nil)
+            string = NSLocalizedString(@"Error: nothing to print from document preview", @"printing error");
+        return [NSPrintOperation printOperationWithString:string printInfo:[self printInfo] settings:printSettings];
+    }
 }
 
 #pragma mark -

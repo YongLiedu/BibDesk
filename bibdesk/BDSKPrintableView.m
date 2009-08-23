@@ -85,3 +85,47 @@
 }
 
 @end
+
+
+@implementation NSPrintOperation (BDSKPrintableView)
+
++ (NSPrintOperation *)printOperationWithAttributedString:(NSAttributedString *)attributedString printInfo:(NSPrintInfo *)printInfo settings:(NSDictionary *)printSettings {
+    NSPrintInfo *info = [(printInfo ?: [NSPrintInfo sharedPrintInfo]) copy];
+    [[info dictionary] addEntriesFromDictionary:printSettings];
+    [info setHorizontalPagination:NSFitPagination];
+    [info setHorizontallyCentered:NO];
+    [info setVerticallyCentered:NO];
+    
+    NSTextView *printableView = [[BDSKPrintableView alloc] initWithAttributedString:attributedString printInfo:info];
+    NSPrintOperation *printOperation = [NSPrintOperation printOperationWithView:printableView printInfo:info];
+    [printableView release];
+    [info release];
+    
+    NSPrintPanel *printPanel = [printOperation printPanel];
+    if ([printPanel respondsToSelector:@selector(setOptions:)])
+        [printPanel setOptions:NSPrintPanelShowsCopies | NSPrintPanelShowsPageRange | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling | NSPrintPanelShowsPreview];
+    
+    return printOperation;
+}
+
++ (NSPrintOperation *)printOperationWithString:(NSString *)string printInfo:(NSPrintInfo *)printInfo settings:(NSDictionary *)printSettings {
+    NSPrintInfo *info = [(printInfo ?: [NSPrintInfo sharedPrintInfo]) copy];
+    [[info dictionary] addEntriesFromDictionary:printSettings];
+    [info setHorizontalPagination:NSFitPagination];
+    [info setHorizontallyCentered:NO];
+    [info setVerticallyCentered:NO];
+    
+    NSTextView *printableView = [[BDSKPrintableView alloc] initWithString:string printInfo:info];
+    NSPrintOperation *printOperation = [NSPrintOperation printOperationWithView:printableView printInfo:info];
+    [printableView release];
+    [info release];
+    
+    NSPrintPanel *printPanel = [printOperation printPanel];
+    if ([printPanel respondsToSelector:@selector(setOptions:)])
+        [printPanel setOptions:NSPrintPanelShowsCopies | NSPrintPanelShowsPageRange | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling | NSPrintPanelShowsPreview];
+    
+    return printOperation;
+}
+
+@end
+

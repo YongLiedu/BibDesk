@@ -44,3 +44,9 @@
 - (id)initWithString:(NSString *)string color:(NSColor *)color printInfo:(NSPrintInfo *)printInfo;
 - (id)initWithString:(NSString *)string printInfo:(NSPrintInfo *)printInfo;
 @end
+
+
+@interface NSPrintOperation (BDSKPrintableView)
++ (NSPrintOperation *)printOperationWithAttributedString:(NSAttributedString *)attributedString printInfo:(NSPrintInfo *)printInfo settings:(NSDictionary *)printSettings;
++ (NSPrintOperation *)printOperationWithString:(NSString *)string printInfo:(NSPrintInfo *)printInfo settings:(NSDictionary *)printSettings;
+@end
