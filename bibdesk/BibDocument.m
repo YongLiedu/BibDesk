@@ -165,14 +165,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     [NSImage makePreviewDisplayImages];
 }
- 
-static NSString *createUniqueID(void)
-{
-    CFUUIDRef uuid = CFUUIDCreate(NULL);
-    NSString *uuidStr = (id)CFUUIDCreateString(NULL, uuid);
-    CFRelease(uuid);
-    return uuidStr;
-}    
 
 - (id)init{
     if(self = [super init]){

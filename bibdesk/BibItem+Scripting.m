@@ -523,7 +523,6 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     id doc = [self owner];
     if ([cmd isKindOfClass:[NSCreateCommand class]]) {
         // if this is called from AppleScript 'make', we need to use the correct macroResolver, as we may be copying from another source
-        BDSKMacroResolver *macroResolver = nil;
         id container = [[cmd arguments] valueForKey:@"ToLocation"];
         if (container == nil) {
             container = [cmd evaluatedReceivers];

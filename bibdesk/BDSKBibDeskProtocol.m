@@ -159,7 +159,6 @@
 */
 - (NSString *) markupForSiteArray: (NSArray *) siteArray {
 	NSEnumerator * myEnum = [siteArray objectEnumerator];
-	NSMutableArray * linkStrings = [NSMutableArray arrayWithCapacity:[siteArray count] * 2];
 	NSDictionary * siteInfo;
 	NSXMLElement * ulElement = [NSXMLElement elementWithName:@"ul"];
 	

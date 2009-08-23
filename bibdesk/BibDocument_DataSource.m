@@ -275,12 +275,10 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     
     // autorelease when creating an instance, since there are multiple exit points from this method
 	NSMenu *menu = nil;
-    NSMenu *submenu;
     NSMenuItem *item = nil;
     NSString *tcId = [tableColumn identifier];
     NSArray *linkedURLs;
     NSURL *theURL;
-    NSEnumerator *urlEnum;
     
     if([tcId isURLField] || [tcId isEqualToString:BDSKLocalFileString] || [tcId isEqualToString:BDSKRemoteURLString]){
         menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];

@@ -668,7 +668,6 @@ static inline void appendFirstLetterCharacters(CFAllocatorRef alloc, CFMutableSt
     
     CFArrayRef theFirstNames = (CFArrayRef)firstNames;
     CFIndex idx, firstNameCount = CFArrayGetCount(theFirstNames);
-    CFStringRef firstLetter = nil;
     
     CFAllocatorRef alloc = CFAllocatorGetDefault();
     CFIndex nameLength = CFStringGetLength((CFStringRef)name);
