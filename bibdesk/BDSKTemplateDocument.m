@@ -51,6 +51,7 @@
 #import "BDSKRuntime.h"
 #import "NSInvocation_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "BDSKPrintableView.h"
 
 static CGFloat BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
 
@@ -288,9 +289,6 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 
 - (NSData *)dataOfType:(NSString *)typeName error:(NSError **)outError {
     NSData *data = nil;
-    
-    [ownerController commitEditing];
-    
     if (richText) {
         NSAttributedString *attrString = [self attributedString];
         data = [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil];
@@ -300,7 +298,12 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
     return data;
 }
 
-#define MAKE_RANGE(start, end) NSMakeRange(start, end - start)
+static inline NSRange makeRange(NSUInteger start, NSUInteger end) {
+    NSRange r;
+    r.location = start;
+    r.location = end - start;
+    return r;
+}
 
 static inline NSUInteger startOfTrailingEmptyLine(NSString *string, NSRange range, BOOL requireNL) {
     NSRange lastCharRange = [string rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:NSBackwardsSearch range:range];
@@ -360,31 +363,31 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         if (startRange.location != NSNotFound) {
             startLoc = startRange.location;
             
-            tmpLoc = startOfTrailingEmptyLine(str, MAKE_RANGE(0, startRange.location), NO);
+            tmpLoc = startOfTrailingEmptyLine(str, makeRange(0, startRange.location), NO);
             if (tmpLoc != NSNotFound)
-                startRange = MAKE_RANGE(tmpLoc, NSMaxRange(startRange));
-            tmpLoc = endOfLeadingEmptyLine(str, MAKE_RANGE(NSMaxRange(startRange), length), YES);
+                startRange = makeRange(tmpLoc, NSMaxRange(startRange));
+            tmpLoc = endOfLeadingEmptyLine(str, makeRange(NSMaxRange(startRange), length), YES);
             if (tmpLoc != NSNotFound)
-                startRange = MAKE_RANGE(startRange.location, tmpLoc);
+                startRange = makeRange(startRange.location, tmpLoc);
             
-            endRange = [str rangeOfString:@"</$publications>" options:NSBackwardsSearch range:MAKE_RANGE(NSMaxRange(startRange), length)];
+            endRange = [str rangeOfString:@"</$publications>" options:NSBackwardsSearch range:makeRange(NSMaxRange(startRange), length)];
             
             if (endRange.location != NSNotFound) {
-                tmpLoc = startOfTrailingEmptyLine(str, MAKE_RANGE(NSMaxRange(startRange), endRange.location), YES);
+                tmpLoc = startOfTrailingEmptyLine(str, makeRange(NSMaxRange(startRange), endRange.location), YES);
                 if (tmpLoc != NSNotFound)
-                    endRange = MAKE_RANGE(tmpLoc, NSMaxRange(endRange));
-                tmpLoc = endOfLeadingEmptyLine(str, MAKE_RANGE(NSMaxRange(endRange), length), NO);
+                    endRange = makeRange(tmpLoc, NSMaxRange(endRange));
+                tmpLoc = endOfLeadingEmptyLine(str, makeRange(NSMaxRange(endRange), length), NO);
                 if (tmpLoc != NSNotFound)
-                    endRange = MAKE_RANGE(endRange.location, tmpLoc);
+                    endRange = makeRange(endRange.location, tmpLoc);
                 
-                sepRange = [str rangeOfString:@"<?$publications>" options:NSBackwardsSearch range:MAKE_RANGE(NSMaxRange(startRange), endRange.location)];
+                sepRange = [str rangeOfString:@"<?$publications>" options:NSBackwardsSearch range:makeRange(NSMaxRange(startRange), endRange.location)];
                 if (sepRange.location != NSNotFound) {
-                    tmpLoc = startOfTrailingEmptyLine(str, MAKE_RANGE(NSMaxRange(startRange), sepRange.location), YES);
+                    tmpLoc = startOfTrailingEmptyLine(str, makeRange(NSMaxRange(startRange), sepRange.location), YES);
                     if (tmpLoc != NSNotFound)
-                        sepRange = MAKE_RANGE(tmpLoc, NSMaxRange(sepRange));
-                    tmpLoc = endOfLeadingEmptyLine(str, MAKE_RANGE(NSMaxRange(sepRange), endRange.location), YES);
+                        sepRange = makeRange(tmpLoc, NSMaxRange(sepRange));
+                    tmpLoc = endOfLeadingEmptyLine(str, makeRange(NSMaxRange(sepRange), endRange.location), YES);
                     if (tmpLoc != NSNotFound)
-                        sepRange = MAKE_RANGE(sepRange.location, tmpLoc);
+                        sepRange = makeRange(sepRange.location, tmpLoc);
                 }
             }
         }
@@ -392,13 +395,13 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         if (endRange.location != NSNotFound) {
             if ([self isRichText]) {
                 if (startRange.location > 0)
-                   [self setPrefixTemplate:[attrString attributedSubstringFromRange:MAKE_RANGE(0, startRange.location)]];
+                   [self setPrefixTemplate:[attrString attributedSubstringFromRange:makeRange(0, startRange.location)]];
                 if (NSMaxRange(endRange) < length)
-                    [self setSuffixTemplate:[attrString attributedSubstringFromRange:MAKE_RANGE(NSMaxRange(endRange), length)]];
+                    [self setSuffixTemplate:[attrString attributedSubstringFromRange:makeRange(NSMaxRange(endRange), length)]];
                 if (NSMaxRange(sepRange) < endRange.location)
-                    [self setSeparatorTemplate:[attrString attributedSubstringFromRange:MAKE_RANGE(NSMaxRange(sepRange), endRange.location)]];
+                    [self setSeparatorTemplate:[attrString attributedSubstringFromRange:makeRange(NSMaxRange(sepRange), endRange.location)]];
                 
-                parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateAttributedString:[attrString attributedSubstringFromRange:MAKE_RANGE(NSMaxRange(startRange), (sepRange.location == NSNotFound ? endRange.location : sepRange.location))]];
+                parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateAttributedString:[attrString attributedSubstringFromRange:makeRange(NSMaxRange(startRange), (sepRange.location == NSNotFound ? endRange.location : sepRange.location))]];
                 
                 font = [attrString attribute:NSFontAttributeName atIndex:startLoc effectiveRange:NULL] ?: [NSFont userFontOfSize:0.0];
                 NSInteger traits = [[NSFontManager sharedFontManager] traitsOfFont:font];
@@ -409,13 +412,13 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
             } else {
                 NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:[NSFont userFontOfSize:0.0], NSFontAttributeName, nil];
                 if (startRange.location > 0)
-                    [self setPrefixTemplate:[[[NSAttributedString alloc] initWithString:[str substringWithRange:MAKE_RANGE(0, startRange.location)] attributes:attrs] autorelease]];
+                    [self setPrefixTemplate:[[[NSAttributedString alloc] initWithString:[str substringWithRange:makeRange(0, startRange.location)] attributes:attrs] autorelease]];
                 if (NSMaxRange(endRange) < length)
-                    [self setSuffixTemplate:[[[NSAttributedString alloc] initWithString:[str substringWithRange:MAKE_RANGE(NSMaxRange(endRange), length)] attributes:attrs] autorelease]];
+                    [self setSuffixTemplate:[[[NSAttributedString alloc] initWithString:[str substringWithRange:makeRange(NSMaxRange(endRange), length)] attributes:attrs] autorelease]];
                 if (NSMaxRange(sepRange) < endRange.location)
-                    [self setSeparatorTemplate:[[[NSAttributedString alloc] initWithString:[str substringWithRange:MAKE_RANGE(NSMaxRange(sepRange), endRange.location)] attributes:attrs] autorelease]];
+                    [self setSeparatorTemplate:[[[NSAttributedString alloc] initWithString:[str substringWithRange:makeRange(NSMaxRange(sepRange), endRange.location)] attributes:attrs] autorelease]];
                 
-                parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateString:[str substringWithRange:MAKE_RANGE(NSMaxRange(startRange), (sepRange.location == NSNotFound ? endRange.location : sepRange.location))]];
+                parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateString:[str substringWithRange:makeRange(NSMaxRange(startRange), (sepRange.location == NSNotFound ? endRange.location : sepRange.location))]];
             }
         }
     }
@@ -466,6 +469,26 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         *outError = [NSError errorWithDomain:@"BDSKTemplateDocumentErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to open file.", @"Error description"), NSLocalizedDescriptionKey, NSLocalizedString(@"This template cannot be opened by BibDesk. You should edit it manually.", @"Error description"), NSLocalizedRecoverySuggestionErrorKey, nil]];
     }
     return NO;
+}
+
+- (NSPrintOperation *)printOperationWithSettings:(NSDictionary *)printSettings error:(NSError **)outError {
+    NSPrintInfo *info = [[self printInfo] copy];
+    [[info dictionary] addEntriesFromDictionary:printSettings];
+    [info setHorizontalPagination:NSFitPagination];
+    [info setHorizontallyCentered:NO];
+    [info setVerticallyCentered:NO];
+    
+    NSTextView *printableView = [[BDSKPrintableView alloc] initWithAttributedString:[self attributedString] printInfo:info];
+    
+    NSPrintOperation *printOperation = [NSPrintOperation printOperationWithView:printableView printInfo:info];
+    [printableView release];
+    [info release];
+    
+    NSPrintPanel *printPanel = [printOperation printPanel];
+    if ([printPanel respondsToSelector:@selector(setOptions:)])
+        [printPanel setOptions:NSPrintPanelShowsCopies | NSPrintPanelShowsPageRange | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling | NSPrintPanelShowsPreview];
+    
+    return printOperation;
 }
 
 - (BDSKToken *)tokenForField:(NSString *)field {
@@ -774,6 +797,26 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 #pragma mark Actions
 
+- (IBAction)saveDocument:(id)sender {
+    if ([ownerController commitEditing])
+        [super saveDocument:sender];
+}
+
+- (IBAction)saveDocumentAs:(id)sender {
+    if ([ownerController commitEditing])
+        [super saveDocumentAs:sender];
+}
+
+- (IBAction)saveDocumentTo:(id)sender {
+    if ([ownerController commitEditing])
+        [super saveDocumentTo:sender];
+}
+
+- (IBAction)printDocument:(id)sender {
+    if ([ownerController commitEditing])
+        [super printDocument:sender];
+}
+
 - (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSOKButton) {
         BDSKToken *token = [self tokenForField:[addFieldController field]];
@@ -816,8 +859,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 - (BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem {
     if ([anItem action] == @selector(saveDocument:)) {
         return YES;
-    } else if ([anItem action] == @selector(printDocument:)) {
-        return NO;
     } else if ([[BDSKTemplateDocument superclass] instancesRespondToSelector:_cmd]) {
         return [super validateUserInterfaceItem:anItem];
     } else {
@@ -1432,7 +1473,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     
     for (i = 0; i < count; i++) {
         for (j = count; j > i; j--) {
-            key = [[keys subarrayWithRange:MAKE_RANGE(i, j)] componentsJoinedByString:@"."];
+            key = [[keys subarrayWithRange:makeRange(i, j)] componentsJoinedByString:@"."];
             if (property = [self propertyForKey:key tokenType:type])
                 break;
         }
