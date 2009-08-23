@@ -49,6 +49,7 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSCharacterSet_BDSKExtensions.h"
 #import "BDSKRuntime.h"
+#import "NSInvocation_BDSKExtensions.h"
 
 static CGFloat BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
 
@@ -1028,6 +1029,24 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 - (void)windowWillClose:(NSNotification *)notification {
     [ownerController setContent:nil];
+}
+
+- (void)canCloseDocumentWithDelegate:(id)delegate shouldCloseSelector:(SEL)shouldCloseSelector contextInfo:(void *)contextInfo {
+    if ([ownerController commitEditing]) {
+        if ([[self undoManager] groupingLevel] > 0) {
+            [self updateChangeCount:NSChangeDone];
+            [super canCloseDocumentWithDelegate:delegate shouldCloseSelector:shouldCloseSelector contextInfo:contextInfo];
+            [self updateChangeCount:NSChangeUndone];
+        } else {
+            [super canCloseDocumentWithDelegate:delegate shouldCloseSelector:shouldCloseSelector contextInfo:contextInfo];
+        }
+    } else if (delegate && shouldCloseSelector) {
+        NSInvocation *invocation = [NSInvocation invocationWithTarget:delegate selector:shouldCloseSelector argument:self];
+        BOOL no = NO;
+        [invocation setArgument:&no atIndex:3];
+        [invocation setArgument:&contextInfo atIndex:4];
+        [invocation invoke]; 
+    }
 }
 
 #pragma mark NSTokenField delegate
