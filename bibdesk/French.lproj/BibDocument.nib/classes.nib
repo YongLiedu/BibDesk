@@ -43,6 +43,10 @@
 				<string>id</string>
 				<key>changeSidePreviewDisplay</key>
 				<string>id</string>
+				<key>chooseLinkedFile</key>
+				<string>id</string>
+				<key>chooseLinkedURL</key>
+				<string>id</string>
 				<key>consolidateLinkedFiles</key>
 				<string>id</string>
 				<key>copyAsAction</key>
@@ -284,11 +288,11 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>BDSKEncodingPopUpButton</string>
+			<string>NSControl</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSPopUpButton</string>
+			<string>NSView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -300,11 +304,11 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSControl</string>
+			<string>BDSKEncodingPopUpButton</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSView</string>
+			<string>NSPopUpButton</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -360,6 +364,19 @@
 			<string>NSResponder</string>
 		</dict>
 		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>changeFinderLabel</key>
+				<string>id</string>
+				<key>delete</key>
+				<string>id</string>
+				<key>openSelectedURLs</key>
+				<string>id</string>
+				<key>selectNextIcon</key>
+				<string>id</string>
+				<key>selectPreviousIcon</key>
+				<string>id</string>
+			</dict>
 			<key>CLASS</key>
 			<string>FVFileView</string>
 			<key>LANGUAGE</key>
@@ -373,6 +390,8 @@
 				<key>dragDataSource</key>
 				<string>id</string>
 			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -546,7 +565,7 @@
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>OAGradientTableView</string>
+			<string>BDSKGradientTableView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -566,6 +585,14 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>BDSKGradientTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>BDSKTableView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>BDSKImagePopUpButton</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -576,14 +603,6 @@
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSPopUpButton</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>OAGradientTableView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSTableView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>

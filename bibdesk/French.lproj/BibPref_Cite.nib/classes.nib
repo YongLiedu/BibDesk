@@ -136,8 +136,6 @@
 				<string>NSPopUpButton</string>
 				<key>prependTildeCheckButton</key>
 				<string>NSButton</string>
-				<key>separateCiteCheckButton</key>
-				<string>NSButton</string>
 				<key>separateCiteRadio</key>
 				<string>NSMatrix</string>
 			</dict>

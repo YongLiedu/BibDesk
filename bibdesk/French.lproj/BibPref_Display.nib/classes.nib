@@ -30,8 +30,6 @@
 			<string>ObjC</string>
 			<key>OUTLETS</key>
 			<dict>
-				<key>addButton</key>
-				<string>NSButton</string>
 				<key>authorAbbreviateButton</key>
 				<string>NSButton</string>
 				<key>authorFirstNameButton</key>
@@ -48,13 +46,17 @@
 				<string>NSTextField</string>
 				<key>previewMaxNumberComboBox</key>
 				<string>NSComboBox</string>
-				<key>removeButton</key>
-				<string>NSButton</string>
-				<key>tableView</key>
-				<string>NSTableView</string>
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>BDSKPreferencePane</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -63,6 +65,27 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenuItem</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKPreferencePane</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>view</key>
+				<string>NSView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSWindowController</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -96,36 +119,6 @@
 			<string>NSResponder</string>
 		</dict>
 		<dict>
-			<key>CLASS</key>
-			<string>NSObject</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSWindow</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSMenuItem</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSObject</string>
-		</dict>
-		<dict>
 			<key>ACTIONS</key>
 			<dict>
 				<key></key>
@@ -140,6 +133,12 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>NSCell</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -148,31 +147,11 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>BDSKPreferencePane</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>view</key>
-				<string>NSView</string>
-			</dict>
-			<key>SUPERCLASS</key>
-			<string>NSWindowController</string>
-		</dict>
-		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>changeFont</key>
-				<string>id</string>
-				<key>invertSelection</key>
-				<string>id</string>
-			</dict>
-			<key>CLASS</key>
-			<string>NSTableView</string>
+			<string>NSWindow</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSControl</string>
+			<string>NSResponder</string>
 		</dict>
 	</array>
 	<key>IBVersion</key>

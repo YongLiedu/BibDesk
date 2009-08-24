@@ -19,10 +19,6 @@
 			<string>ObjC</string>
 			<key>OUTLETS</key>
 			<dict>
-				<key>newFieldsComboBox</key>
-				<string>NSComboBox</string>
-				<key>newPromptField</key>
-				<string>NSTextField</string>
 				<key>replaceFieldsComboBox</key>
 				<string>NSComboBox</string>
 				<key>replacePromptField</key>
