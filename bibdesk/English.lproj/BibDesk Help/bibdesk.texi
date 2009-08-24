@@ -1404,15 +1404,15 @@ desirable for printed output, so you may wish to edit the LaTeX template file
 @subheading Selecting Duplicates
 
 To identify duplicate references in your database, use the @menutitle{Select Duplicates} item
-of the @menutitle{Publication} menu.  BibDesk compares all standard fields of each item and
+of the @menutitle{Database} menu.  BibDesk compares all standard fields of each item and
 selects possible duplicates and the ``original'' item.  
-Cite-key and type are compared case-insensitively, while other
+Crossref and type are compared case-insensitively, while other
 fields are compared case-sensitively without removing any @TeX{}-specific commands.
 
-For a less rigorous comparison, choose @menutitle{Select Possible Duplicates} from the @menutitle{Publication} menu.  
+For a less rigorous comparison, choose @menutitle{Select Duplicates by <Field>} from the @menutitle{Database} menu.  
 With this option, similar to the functionality of BibTool, BibDesk compares adjacent values in the currently 
 sorted column of the main publications list; if it finds an item whose value is identical in the succeeding cell, it selects
-both items.  For instance, if you sort by first author and use @menutitle{Select Possible Duplicates}
+both items.  For instance, if you sort by first author and use @menutitle{Select Duplicates by First Author}
 and have four publications with the same first author, all of the four publications by that
 author will be selected.  Obviously, author may not be the best choice in this case if you are
 searching for duplicate publications!
