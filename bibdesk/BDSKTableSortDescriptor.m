@@ -320,7 +320,7 @@ static inline void __GetValuesUsingCache(BDSKTableSortDescriptor *sort, id objec
     }
     
     
-    return ascending ? result : (result *= -1);
+    return ascending ? result : -result;
 }
 
 - (NSComparisonResult)compareObject:(id)object1 toObject:(id)object2 {

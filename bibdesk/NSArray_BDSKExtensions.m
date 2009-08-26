@@ -416,7 +416,7 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
     compareIMP comparator = (compareIMP)[object1 methodForSelector:theSelector];
     NSComparisonResult result = comparator(object1, theSelector, object2);
     
-    return isAscending ? result : (result *= -1);
+    return isAscending ? result : -result;
 }
 
 @end

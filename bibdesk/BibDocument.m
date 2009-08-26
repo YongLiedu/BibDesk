@@ -1033,6 +1033,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [saveFormatPopupButton removeFromSuperview];
     saveFormatPopupButton = nil;
     if (contextInfo != NULL) {
+#warning overrelease invocation?
         NSInvocation *invocation = [(NSInvocation *)contextInfo autorelease];
         [invocation setArgument:&doc atIndex:2];
         [invocation setArgument:&didSave atIndex:3];
@@ -1046,6 +1047,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     NSInvocation *invocation = nil;
     if (delegate && didSaveSelector) {
+#warning this leaks ms, does not retain target
         NSMethodSignature *ms = [[delegate methodSignatureForSelector:didSaveSelector] retain];
         invocation = [NSInvocation invocationWithMethodSignature:ms];
         [invocation setTarget:delegate];

@@ -1339,6 +1339,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     if (LSSharedFileListCreate != WEAK_NULL) {
         
         LSSharedFileListRef fileList = LSSharedFileListCreate(kCFAllocatorDefault, kLSSharedFileListRecentDocumentItems, NULL);
+#warning leak of globalRecentPaths on return
         if (NULL == fileList) return;
         UInt32 seed;
         CFArrayRef fileListItems = LSSharedFileListCopySnapshot(fileList, &seed);

@@ -1426,7 +1426,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 - (BOOL)emailTo:(NSString *)receiver subject:(NSString *)subject body:(NSString *)body attachments:(NSArray *)files {
     NSMutableString *scriptString = nil;
     
-    NSString *mailAppName = nil;
+    NSString *mailAppName = @"";
     CFURLRef mailAppURL = NULL;
     OSStatus status = LSGetApplicationForURL((CFURLRef)[NSURL URLWithString:@"mailto:"], kLSRolesAll, NULL, &mailAppURL);
     if (status == noErr)

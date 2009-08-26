@@ -528,6 +528,7 @@ static id sharedController = nil;
         NSDictionary *paneDict;
         
         while (paneDict = [paneEnum nextObject]) {
+#warning leak record?
             BDSKPreferenceRecord *record = [[BDSKPreferenceRecord alloc] initWithDictionary:paneDict];
             NSString *identifier = [record identifier];
             // should we register defaults for panes that are not loaded?

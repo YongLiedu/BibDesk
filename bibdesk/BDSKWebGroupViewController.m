@@ -235,6 +235,7 @@
     [self setRetrieving:NO];
     
     id oldCell = [urlField cell];
+#warning leak of cell?
     BDSKConcreteIconTextFieldCell *cell = [[BDSKConcreteIconTextFieldCell alloc] initTextCell:[oldCell stringValue]];
     [cell setEditable:[oldCell isEditable]];
     [cell setSelectable:[oldCell isSelectable]];

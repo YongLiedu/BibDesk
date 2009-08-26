@@ -169,7 +169,7 @@ static char BDSKBibPrefCrossrefDefaultsObservationContext;
 	return [tv isEnabled];
 }
 
-- (void)tableViewSelectionDidChange:(NSTableView *)tv{
+- (void)tableViewSelectionDidChange:(NSNotification *)aNote{
     [self updateDuplicateBooktitleUI];
 }
 
