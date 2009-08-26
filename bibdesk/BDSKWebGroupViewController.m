@@ -235,7 +235,6 @@
     [self setRetrieving:NO];
     
     id oldCell = [urlField cell];
-#warning leak of cell?
     BDSKConcreteIconTextFieldCell *cell = [[BDSKConcreteIconTextFieldCell alloc] initTextCell:[oldCell stringValue]];
     [cell setEditable:[oldCell isEditable]];
     [cell setSelectable:[oldCell isSelectable]];
@@ -252,6 +251,7 @@
     [cell setPlaceholderString:[oldCell placeholderString]];
     [cell setIcon:[NSImage smallMissingFileImage]];
     [urlField setCell:cell];
+    [cell release];
     
     [urlField registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil]];
     

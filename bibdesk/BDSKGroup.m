@@ -222,7 +222,7 @@ static NSString *createUniqueID(void)
     return [[self name] description];
 }
 
-- (NSDictionary *)cellValue {
+- (id)cellValue {
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKHideGroupCountKey])
         return [self dictionaryWithValuesForKeys:noCountCellValueKeys];
     else

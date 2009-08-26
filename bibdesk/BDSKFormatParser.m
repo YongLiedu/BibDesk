@@ -964,9 +964,8 @@
 		return newString;
 	}
 	else {
-#warning newString unused
 		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
-		return string;
+		return newString;
 	}
 }
 

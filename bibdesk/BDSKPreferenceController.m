@@ -528,12 +528,12 @@ static id sharedController = nil;
         NSDictionary *paneDict;
         
         while (paneDict = [paneEnum nextObject]) {
-#warning leak record?
             BDSKPreferenceRecord *record = [[BDSKPreferenceRecord alloc] initWithDictionary:paneDict];
             NSString *identifier = [record identifier];
             // should we register defaults for panes that are not loaded?
             [initialValues addEntriesFromDictionary:[record initialValues]];
             [records setObject:record forKey:identifier];
+            [record release];
             BDSKVersionNumber *minimumSystemVersion = [BDSKVersionNumber versionNumberWithVersionString:[paneDict valueForKey:MINIMUM_SYSTEM_VERSION_KEY]];
             BDSKVersionNumber *maximumSystemVersion = [BDSKVersionNumber versionNumberWithVersionString:[paneDict valueForKey:MAXIMUM_SYSTEM_VERSION_KEY]];
             if ((minimumSystemVersion == nil || [systemVersion compareToVersionNumber:minimumSystemVersion] != NSOrderedAscending) &&

@@ -211,7 +211,7 @@
 
 - (NSString *)editingStringValue;
 
-- (NSDictionary *)cellValue;
+- (id)cellValue;
 
 - (NSString *)toolTip;
 

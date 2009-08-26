@@ -76,8 +76,7 @@
 
 - (BOOL)isParent { return YES; }
 
-#warning superclass declares NSDictionary
-- (NSString *)cellValue { return [self name]; }
+- (id)cellValue { return [self name]; }
 
 - (NSArray *)children {
     return children;

@@ -124,6 +124,7 @@
 #import "NSView_BDSKExtensions.h"
 #import "NSColor_BDSKExtensions.h"
 #import "BDSKTask.h"
+#import "NSInvocation_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -1033,7 +1034,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [saveFormatPopupButton removeFromSuperview];
     saveFormatPopupButton = nil;
     if (contextInfo != NULL) {
-#warning overrelease invocation?
         NSInvocation *invocation = [(NSInvocation *)contextInfo autorelease];
         [invocation setArgument:&doc atIndex:2];
         [invocation setArgument:&didSave atIndex:3];
@@ -1047,11 +1047,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     NSInvocation *invocation = nil;
     if (delegate && didSaveSelector) {
-#warning this leaks ms, does not retain target
-        NSMethodSignature *ms = [[delegate methodSignatureForSelector:didSaveSelector] retain];
-        invocation = [NSInvocation invocationWithMethodSignature:ms];
-        [invocation setTarget:delegate];
-        [invocation setSelector:didSaveSelector];
+        invocation = [[NSInvocation invocationWithTarget:delegate selector:didSaveSelector] retain];
         [invocation setArgument:&contextInfo atIndex:4];
     }
     
