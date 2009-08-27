@@ -21,9 +21,12 @@ How To Release BibDesk
 - build the "DiskImage" target, which should drop a disk image and an (partial) appcast XML on your desktop
 
 - follow the sf.net release instructions
-  *  in the BibDesk project, follow the "Feature Settings" item in the "Project Admin" menu, and click Manage for the "File Release System"
-  *  you want to use "Add Release" for BibDesk
-  *  name the release the same as the disk image (without the dmg part)
+  *  in the BibDesk project, follow the "File Manager" item in the "Project Admin" menu
+  *  click the BibDesk folder
+  *  right-click the BibDesk folder and choose "New folder", name it the same as the disk image (without the dmg part)
+  *  right-click the new folder and choose "Uploads here"
+  *  click the "Upload File" link, and select the disk image
+  *  click the uploaded disk image file, and check the "Mac (OSX)" button, hit Save
   *  file release docs:  http://apps.sourceforge.net/trac/sourceforge/wiki/Release%20files%20for%20download
   *  web upload:  https://frs.sourceforge.net/webupload
 
