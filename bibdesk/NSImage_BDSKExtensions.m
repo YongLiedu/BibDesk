@@ -259,17 +259,18 @@
     [ciImage drawInRect:smallRect fromRect:smallRect operation:NSCompositeSourceOver fraction:1.0];
     [categoryGroupImage unlockFocus];
     NSImage *tinyImage = [[NSImage alloc] initWithSize:tinySize];
-    NSImage *tinySmartFolder = [[NSImage imageNamed:@"NSFolderSmart"] copy];
-    [tinySmartFolder setScalesWhenResized:YES];
-    [tinySmartFolder setSize:tinySize];
     [tinyImage lockFocus];
-    ciImage = [CIImage imageWithData:[tinySmartFolder TIFFRepresentation]];
+    [[NSImage imageNamed:@"NSFolderSmart"] drawInRect:tinyRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    [tinyImage unlockFocus];
+    ciImage = [CIImage imageWithData:[tinyImage TIFFRepresentation]];
     ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.3 brightnessBias:0.3];
+    [tinyImage release];
+    tinyImage = [[NSImage alloc] initWithSize:tinySize];
+    [tinyImage lockFocus];
     [ciImage drawInRect:tinyRect fromRect:tinyRect operation:NSCompositeSourceOver fraction:1.0];
     [tinyImage unlockFocus];
     [categoryGroupImage addRepresentation:[[tinyImage representations] lastObject]];
     [tinyImage release];
-    [tinySmartFolder release];
     [categoryGroupImage setName:@"categoryGroup"];
     
     importGroupImage = [[NSImage alloc] initWithSize:smallSize];
