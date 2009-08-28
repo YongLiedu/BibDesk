@@ -301,7 +301,7 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 static inline NSRange makeRange(NSUInteger start, NSUInteger end) {
     NSRange r;
     r.location = start;
-    r.location = end - start;
+    r.length = end - start;
     return r;
 }
 
