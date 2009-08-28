@@ -855,6 +855,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = FileView_Prefix.pch;
+				IBC_STRIP_NIBS = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
@@ -876,6 +877,7 @@
 				GCC_PREFIX_HEADER = FileView_Prefix.pch;
 				GCC_VERSION = 4.0;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				IBC_STRIP_NIBS = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
