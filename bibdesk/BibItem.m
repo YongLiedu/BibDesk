@@ -1961,8 +1961,8 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     NSString *authorField = BDSKAuthorString;
     NSString *editorField = BDSKEditorString;
     NSString *isbnField = @"Isbn";
-    NSString *numberField = BDSKNumberString;
     NSString *booktitleField = BDSKBooktitleString;
+    NSString *dateField = BDSKMonthString;
     
     // EndNote officially does not allow returns between tags
     
@@ -1977,28 +1977,28 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         refTypeID = 47; // conference paper
     }else if([entryType isEqualToString:BDSKProceedingsString] || [entryType isEqualToString:BDSKConferenceString]){
         refTypeID = 10; // conference proceedings
+        authorField = BDSKEditorString;
     }else if([entryType isEqualToString:BDSKManualString]){
         refTypeID = 9; // computer program
         publisherField = @"Organization";
         organizationField = @"";
     }else if([entryType isEqualToString:BDSKTechreportString]){
         refTypeID = 27; // report
-        isbnField = BDSKNumberString;
-        numberField = @"";
         publisherField = BDSKInstitutionString;
-    }else if([entryType isEqualToString:BDSKMastersThesisString]){
+    }else if([entryType isEqualToString:BDSKMastersThesisString] || [entryType isEqualToString:BDSKPhDThesisString]){
         refTypeID = 32; // thesis
         publisherField = BDSKSchoolString;
-    }else if([entryType isEqualToString:BDSKPhDThesisString]){
-        refTypeID = 32; // thesis
     }else if([entryType isEqualToString:BDSKUnpublishedString]){
         refTypeID = 34;
     }else if([entryType isEqualToString:BDSKArticleString]){
         refTypeID = 17; // journal article
         isbnField = @"Issn";
         booktitleField = BDSKJournalString;
-        if ([NSString isEmptyString:[self valueOfField:BDSKVolumeString]] && [NSString isEmptyString:[self valueOfField:BDSKNumberString]])
+        if ([NSString isEmptyString:[self valueOfField:BDSKVolumeString]] && [NSString isEmptyString:[self valueOfField:BDSKNumberString]]) {
             refTypeID = 23; // newspaper article
+            if ([NSString isEmptyString:[self valueOfField:BDSKJournalString]])
+                booktitleField = @"Newspaper";
+        }
     }else if([entryType isEqualToString:BDSKBookString]){
         refTypeID = 6; // book
         booktitleField = BDSKSeriesString;
@@ -2007,10 +2007,15 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
             authorField = BDSKEditorString;
             editorField = @"";
         }
+    }else if([entryType isEqualToString:BDSKBookletString]){
+        refTypeID = 13;
+        publisherField = @"Howpublished";
     }else if([entryType isEqualToString:@"electronic"]){
         refTypeID = 43; // electronic article
+        dateField = @"Urldate";
     }else if([entryType isEqualToString:@"webpage"]){
         refTypeID = 12; // web page
+        dateField = @"Lastchecked";
     }else{
         refTypeID = 13;
     }
@@ -2078,7 +2083,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     // publication info
     
     AddXMLField(@"volume",BDSKVolumeString);
-    AddXMLField(@"number",numberField);
+    AddXMLField(@"number",BDSKNumberString);
     AddXMLField(@"num-vols",@"Num-Vols");
     AddXMLField(@"edition",@"Edition");
     AddXMLField(@"pages",BDSKPagesString);
@@ -2097,7 +2102,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     [s appendString:@"<dates>"];
     AddXMLField(@"year",BDSKYearString);
     [s appendString:@"<pub-dates>"];
-    AddXMLField(@"date",BDSKMonthString);
+    AddXMLField(@"date",dateField);
     [s appendString:@"</pub-dates></dates>"];
     
     // meta-data
