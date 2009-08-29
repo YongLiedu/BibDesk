@@ -572,6 +572,9 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
     }
     // closing the window will animate back to this frame
     previousIconFrame = screenRect;
+    
+    // if currently on screen, this will screw up the saved frame
+    if ([[self window] isVisible] == NO)
     [[self window] setFrame:screenRect display:NO];
     [self _previewURL:absoluteURL];
 }
