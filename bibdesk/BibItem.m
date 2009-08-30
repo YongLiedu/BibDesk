@@ -1969,7 +1969,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     if([entryType isEqualToString:BDSKMiscString]){
         refTypeID = 13; // generic
         publisherField = @"Howpublished";
-        if([self numberOfAuthors] == 0 && [[self peopleArrayForField:@"Cartographer"] count]){
+        if([self numberOfAuthors] == 0 && [NSString isEmptyString:[self valueOfField:@"Cartographer"]] == NO){
             refTypeID = 20; // map
             authorField = @"Cartographer";
         }
@@ -1982,6 +1982,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     }else if([entryType isEqualToString:BDSKProceedingsString] || [entryType isEqualToString:BDSKConferenceString]){
         refTypeID = 10; // conference proceedings
         authorField = BDSKEditorString;
+        editorField = @"";
         booktitleField = BDSKJournalString; // to support "Edited Article" (Unused 3)
     }else if([entryType isEqualToString:BDSKManualString]){
         refTypeID = 9; // computer program
@@ -1993,6 +1994,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         if([self numberOfAuthors] == 0 && [self numberOfAuthorsOrEditors]){
             refTypeID = 41; // edited report
             authorField = BDSKEditorString;
+            editorField = @"";
         }
     }else if([entryType isEqualToString:BDSKMastersThesisString] || [entryType isEqualToString:BDSKPhDThesisString]){
         refTypeID = 32; // thesis
@@ -2048,33 +2050,45 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     
     [s appendString:@"<contributors>"];
     
-    authorE = [[self peopleArrayForField:authorField] objectEnumerator];
     [s appendString:@"<authors>"];
-    while (author = [authorE nextObject]){
-        value = [author normalizedName];
-        if ([value length] && [value characterAtIndex:0] == '{' && [value characterAtIndex:[value length] - 1] == '}')
-            value = [[value substringWithRange:NSMakeRange(1, [value length] - 2)] stringByAppendingString:@","];
-        [s appendStrings:@"<author>", [[value stringByRemovingCurlyBraces] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
+    if([authorField isPersonField]){
+        authorE = [[self peopleArrayForField:authorField] objectEnumerator];
+        while (author = [authorE nextObject]){
+            value = [author normalizedName];
+            if ([value length] && [value characterAtIndex:0] == '{' && [value characterAtIndex:[value length] - 1] == '}')
+                value = [[value substringWithRange:NSMakeRange(1, [value length] - 2)] stringByAppendingString:@","];
+            [s appendStrings:@"<author>", [[value stringByRemovingCurlyBraces] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
+        }
+    }else{
+        AddXMLField(@"author",authorField);
     }
     [s appendString:@"</authors>"];
     
-    authorE = [[self peopleArrayForField:editorField] objectEnumerator];
     [s appendString:@"<secondary-authors>"];
-    while (author = [authorE nextObject]){
-        value = [author normalizedName];
-        if ([value length] && [value characterAtIndex:0] == '{' && [value characterAtIndex:[value length] - 1] == '}')
-            value = [[value substringWithRange:NSMakeRange(1, [value length] - 2)] stringByAppendingString:@","];
-        [s appendStrings:@"<author>", [[value stringByRemovingCurlyBraces] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
+    if([editorField isPersonField]){
+        authorE = [[self peopleArrayForField:editorField] objectEnumerator];
+        while (author = [authorE nextObject]){
+            value = [author normalizedName];
+            if ([value length] && [value characterAtIndex:0] == '{' && [value characterAtIndex:[value length] - 1] == '}')
+                value = [[value substringWithRange:NSMakeRange(1, [value length] - 2)] stringByAppendingString:@","];
+            [s appendStrings:@"<author>", [[value stringByRemovingCurlyBraces] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
+        }
+    }else{
+        AddXMLField(@"author",editorField);
     }
     [s appendString:@"</secondary-authors>"];
     
-    authorE = [[self peopleArrayForField:organizationField] objectEnumerator];
     [s appendString:@"<subsidiary-authors>"];
-    while (author = [authorE nextObject]){
-        value = [author normalizedName];
-        if ([value length] && [value characterAtIndex:0] == '{' && [value characterAtIndex:[value length] - 1] == '}')
-            value = [[value substringWithRange:NSMakeRange(1, [value length] - 2)] stringByAppendingString:@","];
-        [s appendStrings:@"<author>", [[value stringByRemovingCurlyBraces] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
+    if([organizationField isPersonField]){
+        authorE = [[self peopleArrayForField:organizationField] objectEnumerator];
+        while (author = [authorE nextObject]){
+            value = [author normalizedName];
+            if ([value length] && [value characterAtIndex:0] == '{' && [value characterAtIndex:[value length] - 1] == '}')
+                value = [[value substringWithRange:NSMakeRange(1, [value length] - 2)] stringByAppendingString:@","];
+            [s appendStrings:@"<author>", [[value stringByRemovingCurlyBraces] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
+        }
+    }else{
+        AddXMLField(@"author",organizationField);
     }
     [s appendString:@"</subsidiary-authors>"];
     
