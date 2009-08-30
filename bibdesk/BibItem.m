@@ -825,7 +825,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 - (NSInteger)numberOfAuthorsOrEditorsInheriting:(BOOL)inherit{
-    return [[self pubAuthorsInheriting:inherit] count];
+    return [[self pubAuthorsOrEditorsInheriting:inherit] count];
 }
 
 - (BibAuthor *)firstAuthorOrEditor{ 
@@ -1969,6 +1969,10 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     if([entryType isEqualToString:BDSKMiscString]){
         refTypeID = 13; // generic
         publisherField = @"Howpublished";
+        if([self numberOfAuthors] == 0 && [[self peopleArrayForField:@"Cartographer"] count]){
+            refTypeID = 20; // map
+            authorField = @"Cartographer";
+        }
     }else if([entryType isEqualToString:BDSKInbookString]){
         refTypeID = 5; // book section
     }else if([entryType isEqualToString:BDSKIncollectionString]){
@@ -1978,6 +1982,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     }else if([entryType isEqualToString:BDSKProceedingsString] || [entryType isEqualToString:BDSKConferenceString]){
         refTypeID = 10; // conference proceedings
         authorField = BDSKEditorString;
+        booktitleField = BDSKJournalString; // to support "Edited Article" (Unused 3)
     }else if([entryType isEqualToString:BDSKManualString]){
         refTypeID = 9; // computer program
         publisherField = @"Organization";
@@ -1985,6 +1990,10 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     }else if([entryType isEqualToString:BDSKTechreportString]){
         refTypeID = 27; // report
         publisherField = BDSKInstitutionString;
+        if([self numberOfAuthors] == 0 && [self numberOfAuthorsOrEditors]){
+            refTypeID = 41; // edited report
+            authorField = BDSKEditorString;
+        }
     }else if([entryType isEqualToString:BDSKMastersThesisString] || [entryType isEqualToString:BDSKPhDThesisString]){
         refTypeID = 32; // thesis
         publisherField = BDSKSchoolString;
@@ -1994,15 +2003,14 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         refTypeID = 17; // journal article
         isbnField = @"Issn";
         booktitleField = BDSKJournalString;
-        if ([NSString isEmptyString:[self valueOfField:BDSKVolumeString]] && [NSString isEmptyString:[self valueOfField:BDSKNumberString]]) {
+        if([NSString isEmptyString:[self valueOfField:BDSKJournalString]] && [NSString isEmptyString:[self valueOfField:@"Newspaper"]] == NO){
             refTypeID = 23; // newspaper article
-            if ([NSString isEmptyString:[self valueOfField:BDSKJournalString]])
-                booktitleField = @"Newspaper";
+            booktitleField = @"Newspaper";
         }
     }else if([entryType isEqualToString:BDSKBookString]){
         refTypeID = 6; // book
         booktitleField = BDSKSeriesString;
-        if([self numberOfAuthors] == 0){
+        if([self numberOfAuthors] == 0 && [self numberOfAuthorsOrEditors]){
             refTypeID = 28; // edited book
             authorField = BDSKEditorString;
             editorField = @"";
@@ -2061,14 +2069,14 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     [s appendString:@"</secondary-authors>"];
     
     authorE = [[self peopleArrayForField:organizationField] objectEnumerator];
-    [s appendString:@"<tertiary-authors>"];
+    [s appendString:@"<subsidiary-authors>"];
     while (author = [authorE nextObject]){
         value = [author normalizedName];
         if ([value length] && [value characterAtIndex:0] == '{' && [value characterAtIndex:[value length] - 1] == '}')
             value = [[value substringWithRange:NSMakeRange(1, [value length] - 2)] stringByAppendingString:@","];
         [s appendStrings:@"<author>", [[value stringByRemovingCurlyBraces] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
     }
-    [s appendString:@"</tertiary-authors>"];
+    [s appendString:@"</subsidiary-authors>"];
     
     [s appendString:@"</contributors>"];
     
@@ -2091,7 +2099,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     AddXMLField(@"pub-location",BDSKAddressString);
     AddXMLField(@"publisher",publisherField);
     AddXMLField(@"isbn",isbnField);
-    AddXMLField(@"work-type",BDSKPubTypeString);
+    AddXMLField(@"work-type",BDSKTypeString);
     AddXMLField(@"accession-num",@"Accession-Num");
     AddXMLField(@"call-num",@"Call-Num");
     AddXMLField(@"label",@"Label");
