@@ -112,6 +112,7 @@
 #import "BDSKFiler.h"
 #import "BibItem_PubMedLookup.h"
 #import "BDSKItemSearchIndexes.h"
+#import "BDSKNotesSearchIndex.h"
 #import "PDFDocument_BDSKExtensions.h"
 #import <FileView/FileView.h>
 #import "BDSKLinkedFile.h"
@@ -229,6 +230,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [self registerForNotifications];
         
         searchIndexes = [[BDSKItemSearchIndexes alloc] init];   
+        //notesSearchIndex = [[BDSKNotesSearchIndex alloc] init];   
         documentSearch = [[BDSKDocumentSearch alloc] initWithDocument:(id)self];
         rowToSelectAfterDelete = -1;
     }
@@ -291,6 +293,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [searchGroupViewController release];
     [webGroupViewController release];
     [searchIndexes release];
+    [notesSearchIndex release];
     [searchButtonController release];
     [migrationController release];
     [documentSearch release];
@@ -804,6 +807,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
     
     [searchIndexes resetWithPublications:newPubs];
+    [notesSearchIndex resetWithPublications:newPubs];
 }    
 
 - (void)setPublications:(NSArray *)newPubs{
@@ -838,6 +842,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 	[pubs makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
 	
     [searchIndexes addPublications:pubs];
+    [notesSearchIndex addPublications:pubs];
 
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocAddItemNotification
@@ -869,6 +874,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [[groups lastImportGroup] removePublicationsInArray:pubs];
     [[groups staticGroups] makeObjectsPerformSelector:@selector(removePublicationsInArray:) withObject:pubs];
     [searchIndexes removePublications:pubs];
+    [notesSearchIndex removePublications:pubs];
     
 	[publications removeObjectsAtIndexes:indexes];
 	

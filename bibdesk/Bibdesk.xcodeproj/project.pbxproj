@@ -264,6 +264,7 @@
 		CEE23BF10BFBA827002B746B /* fonts.cfg in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D510758073E00C3F701 /* fonts.cfg */; };
 		CEE23BF20BFBA827002B746B /* ignore.cfg in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D560758073E00C3F701 /* ignore.cfg */; };
 		CEE23BF30BFBA827002B746B /* style.cfg in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D690758073E00C3F701 /* style.cfg */; };
+		CEE50487104D662500636237 /* BDSKNotesSearchIndex.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE50486104D662500636237 /* BDSKNotesSearchIndex.m */; };
 		CEE8DD470E5C3F5B00EFA97F /* yaz.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5950BEA3C9400D65C7F /* yaz.framework */; };
 		CEE8DD480E5C3F5B00EFA97F /* AGRegex.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
 		CEE8DD490E5C3F5B00EFA97F /* FileView.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
@@ -1192,6 +1193,8 @@
 		CEDBE0580F4CDAD900190AF5 /* NSView_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSView_BDSKExtensions.m; sourceTree = "<group>"; };
 		CEDBE08F0F4CE06600190AF5 /* ScriptMenu.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = ScriptMenu.tiff; sourceTree = "<group>"; };
 		CEE23BD50BFBA6D6002B746B /* Scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Scripts; sourceTree = "<group>"; };
+		CEE50486104D662500636237 /* BDSKNotesSearchIndex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKNotesSearchIndex.m; sourceTree = "<group>"; };
+		CEE50488104D664200636237 /* BDSKNotesSearchIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKNotesSearchIndex.h; sourceTree = "<group>"; };
 		CEEA4C680B57B0D400434059 /* BDSKBooleanValueTransformer.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKBooleanValueTransformer.m; sourceTree = "<group>"; };
 		CEEA4C690B57B0D400434059 /* BDSKBooleanValueTransformer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKBooleanValueTransformer.h; sourceTree = "<group>"; };
 		CEEA5E9F0B595EE200434059 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/ChangeFieldSheet.nib; sourceTree = "<group>"; };
@@ -2222,6 +2225,7 @@
 				CE7A313E0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m */,
 				F9936CC40BC746C300A32DC4 /* BDSKItemSearchIndexes.m */,
 				CE3B5E7B09CEDE470017D339 /* BDSKMacroResolver.m */,
+				CEE50486104D662500636237 /* BDSKNotesSearchIndex.m */,
 				F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */,
 				CEC1CEA60F51D2CE00D18921 /* BDSKReadWriteLock.m */,
 				CED65AB50906BCC6003EED90 /* BDSKScriptHookManager.m */,
@@ -2615,6 +2619,7 @@
 				6C5DE3E50F8FC33B00E02D5F /* BDSKMathSiteParser.h */,
 				F9D0E5340BF92768001C6C22 /* BDSKMODSParser.h */,
 				CEED2C120F4DA0E00078E87A /* BDSKMultiValueDictionary.h */,
+				CEE50488104D664200636237 /* BDSKNotesSearchIndex.h */,
 				CEF71AD80B91BBCB003A2771 /* BDSKNotesWindowController.h */,
 				CE22E1CB0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.h */,
 				F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */,
@@ -3741,6 +3746,7 @@
 				CE15E6230FCC28B1009FCBF1 /* BibDocument_UI.m in Sources */,
 				CE80A8760FDAB27D0086A46C /* BDSKHighlightingPopUpButton.m in Sources */,
 				CE90BAFD103978D300992D50 /* BDSKURLSheetController.m in Sources */,
+				CEE50487104D662500636237 /* BDSKNotesSearchIndex.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

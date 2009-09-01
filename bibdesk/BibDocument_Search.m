@@ -56,6 +56,7 @@
 #import "BDSKFindController.h"
 #import "BDSKSearchButtonController.h"
 #import "BDSKItemSearchIndexes.h"
+#import "BDSKNotesSearchIndex.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKGroup.h"
 #import "BDSKSharedGroup.h"
@@ -288,11 +289,16 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
         
 - (void)displayPublicationsMatchingSearchString:(NSString *)searchString indexName:(NSString *)field {
     searchString = BDSKSearchKitExpressionWithString(searchString);
-        
-    // we need the correct BDSKPublicationsArray for access to the identifierURLs
-    id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;
-    SKIndexRef skIndex = [[owner searchIndexes] indexForField:field];
     
+    SKIndexRef skIndex = NULL;
+    
+    if ([field isEqualToString:BDSKSkimNotesString] && notesSearchIndex) {
+        skIndex = [notesSearchIndex index];
+    } else {
+        // we need the correct BDSKPublicationsArray for access to the identifierURLs
+        id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;
+        skIndex = [[owner searchIndexes] indexForField:field];
+    }
     [documentSearch searchForString:searchString index:skIndex selectedPublications:[self selectedPublications] scrollPositionAsPercentage:[tableView scrollPositionAsPercentage]];
 }
 
