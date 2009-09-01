@@ -40,6 +40,7 @@
 #import "BibItem.h"
 #import "BDSKStringConstants.h"
 #import "NSURL_BDSKExtensions.h"
+#import <libkern/OSAtomic.h>
 
 
 @interface BDSKNotesSearchIndex (BDSKPrivate)
