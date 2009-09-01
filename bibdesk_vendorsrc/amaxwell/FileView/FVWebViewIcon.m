@@ -314,10 +314,13 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
     // if a frame fails to load and the webview isn't loading anything else, bail out
     if (NO == [_webView fv_isLoading]) {
         [self _releaseWebView];
-        [self lock];
-        // return to -renderOffscreen to handle the failure
-        [_condLock unlockWithCondition:LOADED];
-    }    
+        
+        // condition should always be LOADING, but -releaseResources may have the lock
+        if ([_condLock tryLockWhenCondition:LOADING]) {
+            // return to -renderOffscreen to handle the failure
+            [_condLock unlockWithCondition:LOADED];
+        }    
+    }
 }
 
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame;
@@ -468,11 +471,12 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
         }
     }
     else if (NULL != theUTI && FALSE == UTTypeConformsTo(theUTI, kUTTypeText)) {
-        [self lock];
-        NSParameterAssert([_condLock condition] == LOADING);
-        [_fallbackIcon release];
-        _fallbackIcon = [FVMIMEIcon newIconWithMIMEType:type];
-        [self unlock];
+        // condition should always be LOADING, but -releaseResources may have the lock
+        if ([_condLock tryLockWhenCondition:LOADING]) {
+            [_fallbackIcon release];
+            _fallbackIcon = [FVMIMEIcon newIconWithMIMEType:type];
+            [self unlock];
+        }
         // this triggers webView:didFailProvisionalLoadWithError:forFrame:
         [listener ignore];        
     }
