@@ -30,8 +30,7 @@ How To Release BibDesk
   *  file release docs:  http://apps.sourceforge.net/trac/sourceforge/wiki/Release%20files%20for%20download
   *  web upload:  https://frs.sourceforge.net/webupload
 
-- edit the web page (sidebar.html) to point to the new release
-  *  release notes URL
+- edit the release notes at relnotes.html
 
 - update the release notes lines in the generated appcast XML using <li> elements
 
