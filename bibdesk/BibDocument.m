@@ -651,6 +651,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     
     [documentSearch terminate];
     [fileSearchController terminate];
+    [notesSearchIndex terminate];
     
     if([drawerController isDrawerOpen])
         [drawerController toggle:nil];
