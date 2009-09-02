@@ -1984,6 +1984,8 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         authorField = BDSKEditorString;
         editorField = @"";
         booktitleField = BDSKJournalString; // to support "Edited Article" (Unused 3)
+        if ([NSString isEmptyString:[self valueOfField:@"Isbn"]])
+            isbnField = @"Issn";
     }else if([entryType isEqualToString:BDSKManualString]){
         refTypeID = 9; // computer program
         publisherField = @"Organization";
