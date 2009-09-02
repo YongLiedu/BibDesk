@@ -2025,6 +2025,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     }else if([entryType isEqualToString:@"electronic"]){
         refTypeID = 43; // electronic article
         dateField = @"Urldate";
+        isbnField = @"Issn";
     }else if([entryType isEqualToString:@"webpage"]){
         refTypeID = 12; // web page
         dateField = @"Lastchecked";
