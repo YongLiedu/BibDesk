@@ -469,7 +469,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 // we don't want to reopen last open files or show an Open dialog when re-activating the app
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag {
     NSInteger startupOption = [[[NSUserDefaults standardUserDefaults] objectForKey:BDSKStartupBehaviorKey] intValue];
-    return flag || startupOption == BDSKStartupOpenUntitledFile || startupOption == BDSKStartupOpenDefaultFile;
+    return flag == NO && (startupOption == BDSKStartupOpenUntitledFile || startupOption == BDSKStartupOpenDefaultFile);
 }
 
 - (void)openRecentItemFromDock:(id)sender{
