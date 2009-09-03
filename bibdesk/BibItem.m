@@ -2026,6 +2026,8 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         refTypeID = 43; // electronic article
         dateField = @"Urldate";
         isbnField = @"Issn";
+        if ([NSString isEmptyString:[self valueOfField:BDSKBooktitleString]])
+            booktitleField = BDSKJournalString;
     }else if([entryType isEqualToString:@"webpage"]){
         refTypeID = 12; // web page
         dateField = @"Lastchecked";
