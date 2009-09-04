@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 42;
+	objectVersion = 44;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -152,7 +152,7 @@
 		089C1669FE841209C02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = F95CC105087F54B2002C5694 /* Build configuration list for PBXProject "BibImporter" */;
-			compatibilityVersion = "Xcode 2.4";
+			compatibilityVersion = "Xcode 3.0";
 			hasScannedForEncodings = 1;
 			mainGroup = 089C166AFE841209C02AAC07 /* BibImporter */;
 			projectDirPath = "";
@@ -251,9 +251,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CEB10D610D7446E50053B916 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH)";
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 			};
 			name = Debug;
 		};
@@ -261,12 +259,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CEB10D620D7446E50053B916 /* BibDesk-Release.xcconfig */;
 			buildSettings = {
-				ARCHS = (
-					i386,
-					ppc,
-				);
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				WARNING_CFLAGS = (
 					"-Wall",
 					"-Wno-parentheses",

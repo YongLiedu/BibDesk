@@ -4619,6 +4619,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CEEBA6870D746DD7000204B8 /* BibDesk-Release.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
 			};
 			name = Release;
 		};
