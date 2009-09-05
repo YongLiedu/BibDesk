@@ -4486,7 +4486,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 1602;
+				CURRENT_PROJECT_VERSION = 1603;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -4495,7 +4495,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 1602;
+				CURRENT_PROJECT_VERSION = 1603;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../BuildProducts/Debug\"",
@@ -4617,7 +4617,7 @@
 		};
 		F993F20408553A61007A7657 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CEEBA6870D746DD7000204B8 /* BibDesk-Release.xcconfig */;
+			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
 				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
