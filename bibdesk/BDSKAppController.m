@@ -95,6 +95,8 @@
 #define WEB_URL @"http://bibdesk.sourceforge.net/"
 #define WIKI_URL @"http://sourceforge.net/apps/mediawiki/bibdesk/"
 
+#define BDSKIsRelaunchKey @"BDSKIsRelaunch"
+
 enum {
     BDSKStartupOpenUntitledFile,
     BDSKStartupDoNothing,
@@ -429,7 +431,10 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender
 {
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-    switch ([[sud objectForKey:BDSKStartupBehaviorKey] intValue]) {
+    NSInteger option = [[sud objectForKey:BDSKStartupBehaviorKey] intValue];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKIsRelaunchKey])
+        option = BDSKStartupOpenLastOpenFiles;
+    switch (option) {
         case BDSKStartupOpenUntitledFile:
             return YES;
         case BDSKStartupDoNothing:
@@ -464,6 +469,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         default:
             return NO;
     }
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:BDSKIsRelaunchKey];
 }
 
 // we don't want to reopen last open files or show an Open dialog when re-activating the app
@@ -539,6 +545,10 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         return NO;
     }
     return YES;
+}
+
+- (void)updaterWillRelaunchApplication:(SUUpdater *)updater {
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:BDSKIsRelaunchKey];
 }
 
 #pragma mark Menu stuff
