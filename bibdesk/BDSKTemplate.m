@@ -461,7 +461,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 - (NSString *)scriptPath;
 {
     BDSKASSERT([self parent] == nil);
-    return [NSString stringWithContentsOfURL:[self scriptURL] encoding:NSUTF8StringEncoding error:NULL];
+    return [[self scriptURL] path];
 }
 
 - (NSURL *)mainPageTemplateURL;
