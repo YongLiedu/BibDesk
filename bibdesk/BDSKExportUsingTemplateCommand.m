@@ -42,6 +42,9 @@
 #import "BDSKPublicationsArray.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BibItem.h"
+#import "NSFileManager_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
+
 
 @implementation BDSKExportUsingTemplateCommand
 
@@ -178,6 +181,12 @@
     
     if (fileURL) {
         [fileData writeToURL:fileURL atomically:YES];
+        
+        NSEnumerator *accessoryFileEnum = [[template accessoryFileURLs] objectEnumerator];
+        NSURL *accessoryURL = nil;
+        NSURL *destDirURL = [fileURL URLByDeletingLastPathComponent];
+        while(accessoryURL = [accessoryFileEnum nextObject])
+            [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
     } else {
         NSPasteboard *pboard = [NSPasteboard generalPasteboard];
         NSString *string = nil;
