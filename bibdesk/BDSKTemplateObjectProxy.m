@@ -56,7 +56,7 @@
     string = [BDSKTemplateParser stringByParsingTemplateString:string usingObject:objectProxy delegate:objectProxy];
     [objectProxy release];
     if(scriptPath)
-        string = [BDSKTask runShellCommand:scriptPath withInputString:string];
+        string = [BDSKTask runShellCommand:[NSString stringWithFormat:@"\"%@\"", scriptPath] withInputString:string];
     return string;
 }
 
