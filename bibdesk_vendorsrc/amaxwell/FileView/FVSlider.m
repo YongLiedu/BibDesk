@@ -151,7 +151,6 @@
         
         id animation = [NSClassFromString(@"CABasicAnimation") animation];
         if (animation && [self respondsToSelector:@selector(setAnimations:)]) {
-            [animation setDelegate:self];
             [self setAnimations:[NSDictionary dictionaryWithObject:animation forKey:@"alphaValue"]];
         }
 
@@ -173,6 +172,7 @@
 
 - (void)fadeOut:(id)sender {
     if ([self isVisible] && [self respondsToSelector:@selector(animator)]) {
+        [[self animationForKey:@"alphaValue"] setDelegate:self];
         [[self animator] setAlphaValue:0.0];
     } else {
         [self orderOut:sender];
@@ -185,9 +185,8 @@
 }
 
 - (void)animationDidStop:(id)animation finished:(BOOL)flag  {
-    if ([self alphaValue] < 0.0001 && [self isVisible]) {
-        [self orderOut:self];
-    }
+    [self orderOut:self];
+    [animation setDelegate:nil];
 }
 
 @end
