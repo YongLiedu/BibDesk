@@ -218,7 +218,7 @@ volatile int caughtSignal = 0;
             [inputFileHandle closeFile];
             
             // run the runloop and pick up our notifications
-            while (nil == stdoutData)
+            while (nil == stdoutData && ([task isRunning] || [task terminationStatus] == 0))
                 [[NSRunLoop currentRunLoop] runMode:@"BDSKSpecialPipeServiceRunLoopMode" beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
             [task waitUntilExit];
             
@@ -237,7 +237,7 @@ volatile int caughtSignal = 0;
     // reset signal handling to default behavior
     signal(SIGPIPE, previousSignalMask);
 
-    return [stdoutData length] ? stdoutData : nil;
+    return [task terminationStatus] == 0 && [stdoutData length] ? stdoutData : nil;
 }
 
 - (void)stdoutNowAvailable:(NSNotification *)notification {
