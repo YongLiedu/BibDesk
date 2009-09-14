@@ -103,22 +103,38 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super init]) {
-        title = [[decoder decodeObjectForKey:@"title"] retain];
-        fontName = [[decoder decodeObjectForKey:@"fontName"] retain];
-        fontSize = [decoder decodeFloatForKey:@"fontSize"];
-        bold = [decoder decodeIntForKey:@"bold"];
-        italic = [decoder decodeIntForKey:@"italic"];
+    if ([decoder allowsKeyedCoding]) {
+        if (self = [self initWithTitle:[decoder decodeObjectForKey:@"title"]]) {
+            fontName = [[decoder decodeObjectForKey:@"fontName"] retain];
+            fontSize = [decoder decodeFloatForKey:@"fontSize"];
+            bold = [decoder decodeIntForKey:@"bold"];
+            italic = [decoder decodeIntForKey:@"italic"];
+        }
+    } else {
+        if (self = [self initWithTitle:[decoder decodeObject]]) {
+            fontName = [[decoder decodeObject] retain];
+            [decoder decodeValueOfObjCType:@encode(float) at:&fontSize];
+            [decoder decodeValueOfObjCType:@encode(int) at:&bold];
+            [decoder decodeValueOfObjCType:@encode(int) at:&italic];
+        }
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
-    [encoder encodeObject:title forKey:@"title"];
-    [encoder encodeObject:fontName forKey:@"fontName"];
-    [encoder encodeFloat:fontSize forKey:@"fontSize"];
-    [encoder encodeInt:bold forKey:@"bold"];
-    [encoder encodeInt:italic forKey:@"italic"];
+    if ([encoder allowsKeyedCoding]) {
+        [encoder encodeObject:title forKey:@"title"];
+        [encoder encodeObject:fontName forKey:@"fontName"];
+        [encoder encodeFloat:fontSize forKey:@"fontSize"];
+        [encoder encodeInt:bold forKey:@"bold"];
+        [encoder encodeInt:italic forKey:@"italic"];
+    } else {
+        [encoder encodeObject:title];
+        [encoder encodeObject:fontName];
+        [encoder encodeValueOfObjCType:@encode(float) at:&fontSize];
+        [encoder encodeValueOfObjCType:@encode(int) at:&bold];
+        [encoder encodeValueOfObjCType:@encode(int) at:&italic];
+    }
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -145,7 +161,7 @@ NSString *BDSKRichTextString = @"Rich Text";
            italic == [other italic];
 }
 */
-- (NSInteger)type {
+- (int)type {
     return -1;
 }
 
@@ -166,23 +182,23 @@ NSString *BDSKRichTextString = @"Rich Text";
     }
 }
 
-- (CGFloat)fontSize {
+- (float)fontSize {
     return fontSize;
 }
 
-- (void)setFontSize:(CGFloat)newFontSize {
-    if (BDSKAbs(fontSize - newFontSize) > 0.0) {
+- (void)setFontSize:(float)newFontSize {
+    if (fabs(fontSize - newFontSize) > 0.0) {
         [[[self undoManager] prepareWithInvocationTarget:self] setFontSize:fontSize];
         fontSize = newFontSize;
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
-- (NSInteger)bold {
+- (int)bold {
     return bold;
 }
 
-- (void)setBold:(NSInteger)newBold {
+- (void)setBold:(int)newBold {
     if (bold != newBold) {
         [(BDSKToken *)[[self undoManager] prepareWithInvocationTarget:self] setBold:bold];
         bold = newBold;
@@ -190,11 +206,11 @@ NSString *BDSKRichTextString = @"Rich Text";
     }
 }
 
-- (NSInteger)italic {
+- (int)italic {
     return italic;
 }
 
-- (void)setItalic:(NSInteger)newItalic {
+- (void)setItalic:(int)newItalic {
     if (italic != newItalic) {
         [(BDSKToken *)[[self undoManager] prepareWithInvocationTarget:self] setItalic:italic];
         italic = newItalic;
@@ -223,7 +239,7 @@ NSString *BDSKRichTextString = @"Rich Text";
     NSAttributedString *attrString = nil;
     NSMutableDictionary *attrs = [attributes mutableCopy];
     NSFont *font = [attrs objectForKey:NSFontAttributeName];
-    NSInteger traits = [fm traitsOfFont:font];
+    int traits = [fm traitsOfFont:font];
     BOOL wasBold = (traits & NSBoldFontMask) != 0;
     BOOL wasItalic = (traits & NSItalicFontMask) != 0;
     BOOL useBold = bold == NSMixedState ? wasBold : bold;
@@ -247,6 +263,16 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 // Needed as any option control binds to any type of token
 - (id)valueForUndefinedKey:(NSString *)key { return nil; }
+
+#pragma mark NSEditorRegistration
+
+- (void)objectDidBeginEditing:(id)editor {
+    [document objectDidBeginEditing:editor];
+}
+
+- (void)objectDidEndEditing:(id)editor {
+    [document objectDidEndEditing:editor];
+}
 
 @end
 
@@ -525,7 +551,7 @@ NSString *BDSKRichTextString = @"Rich Text";
            EQUAL_OR_NIL_STRINGS(cleaningKey, [other cleaningKey]);
 }
 */
-- (NSInteger)type {
+- (int)type {
     return BDSKFieldTokenType;
 }
 
@@ -644,7 +670,7 @@ NSString *BDSKRichTextString = @"Rich Text";
            EQUAL_OR_NIL_STRINGS(urlFormatKey, [other urlFormatKey]);
 }
 */
-- (NSInteger)type {
+- (int)type {
     return BDSKURLTokenType;
 }
 
@@ -738,7 +764,7 @@ NSString *BDSKRichTextString = @"Rich Text";
            EQUAL_OR_NIL_STRINGS(joinStyleKey, [other joinStyleKey]);
 }
 */
-- (NSInteger)type {
+- (int)type {
     return BDSKPersonTokenType;
 }
 
@@ -846,7 +872,7 @@ NSString *BDSKRichTextString = @"Rich Text";
            EQUAL_OR_NIL_STRINGS(linkedFileJoinStyleKey, [other linkedFileJoinStyleKey]);
 }
 */
-- (NSInteger)type {
+- (int)type {
     return BDSKLinkedFileTokenType;
 }
 
@@ -944,7 +970,7 @@ NSString *BDSKRichTextString = @"Rich Text";
            EQUAL_OR_NIL_STRINGS(dateFormatKey, [other dateFormatKey]);
 }
 */
-- (NSInteger)type {
+- (int)type {
     return BDSKDateTokenType;
 }
 
@@ -1038,7 +1064,7 @@ NSString *BDSKRichTextString = @"Rich Text";
            EQUAL_OR_NIL_STRINGS(counterCasingKey, [other counterCasingKey]);
 }
 */
-- (NSInteger)type {
+- (int)type {
     return BDSKNumberTokenType;
 }
 
@@ -1145,7 +1171,7 @@ NSString *BDSKRichTextString = @"Rich Text";
            EQUAL_OR_NIL_STRINGS(altText, [other altText]);
 }
 */
-- (NSInteger)type {
+- (int)type {
     return BDSKTextTokenType;
 }
 

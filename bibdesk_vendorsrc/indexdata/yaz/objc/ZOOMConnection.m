@@ -142,16 +142,13 @@
 }
 
 // no need to have this in the API at present
-- (BOOL)connect
+- (void)connect
 {
     ZOOM_connection_connect(_connection, [_connectHost UTF8String], 0);
+    int error;
     const char *errmsg, *addinfo;
-    int error = ZOOM_connection_error(_connection, &errmsg, &addinfo);
-    if (ZOOM_ERROR_NONE != error) {
-        NSLog(@"ZOOM_connection_error: %s (%d) %s\n", errmsg, error, addinfo);    
-        return NO;
-    }
-    return YES;
+    if ((error = ZOOM_connection_error(_connection, &errmsg, &addinfo)))
+        NSLog(@"Error: %s (%d) %s\n", errmsg, error, addinfo);    
 }
 
 - (void)setOption:(NSString *)option forKey:(NSString *)key;
@@ -201,22 +198,18 @@
 {
     NSParameterAssert(nil != query);
     ZOOMResultSet *resultSet = [_results objectForKey:query];
-    if (nil == resultSet && [self connect]) {
-
+    if (nil == resultSet) {
+        [self connect];
         ZOOM_resultset r = ZOOM_connection_search(_connection, [query zoomQuery]);
 
         int error;
         const char *errmsg, *addinfo;
-        // Note: if -connect failed, this call doesn't return an error, so always check the -connect return value first.
-        if ((error = ZOOM_connection_error(_connection, &errmsg, &addinfo))) {
-            NSLog(@"ZOOM_connection_error: %s (%d) %s\n", errmsg, error, addinfo);
-            // could add NSNull record, but it's possible that this is only a temporary failure (e.g. network outage)
-        }
-        else {
-            resultSet = [[ZOOMResultSet allocWithZone:[self zone]] initWithZoomResultSet:r charSet:_charSetName];
-            [_results setObject:resultSet forKey:query];
-            [resultSet release];
-        }
+        if ((error = ZOOM_connection_error(_connection, &errmsg, &addinfo)))
+            NSLog(@"Error: %s (%d) %s\n", errmsg, error, addinfo);
+
+        resultSet = [[ZOOMResultSet allocWithZone:[self zone]] initWithZoomResultSet:r charSet:_charSetName];
+        [_results setObject:resultSet forKey:query];
+        [resultSet release];
     }
     return resultSet;
 }

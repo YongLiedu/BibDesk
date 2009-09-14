@@ -42,59 +42,25 @@
 #import "BDSKWebParser.h"
 #import "BDSKStringParser.h"
 #import "BDSKWebGroup.h"
-#import "BDSKBibDeskProtocol.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKEdgeView.h"
-#import "BDSKDragTextField.h"
-#import "BDSKIconTextFieldCell.h"
-#import "BDSKFieldEditor.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BibDocument.h"
-#import "BibDocument_UI.h"
 #import "BDSKBookmarkController.h"
-#import "BDSKBookmark.h"
-#import "NSMenu_BDSKExtensions.h"
-#import "NSImage_BDSKExtensions.h"
-#import "NSString_BDSKExtensions.h"
 
-#define MAX_HISTORY 50
-
-// workaround for loading a URL from a javasecript window.open event http://stackoverflow.com/questions/270458/cocoa-webkit-having-window-open-javascipt-links-opening-in-an-instance-of-safa
-@interface BDSKNewWebWindowHandler : NSObject {
-    WebView *webView;
-}
-- (WebView *)webView;
-@end
-
-#pragma mark -
 
 @implementation BDSKWebGroupViewController
 
 + (void)initialize {
-    BDSKINITIALIZE;
+    OBINITIALIZE;
     
     static NSImage *backAdornImage = nil;
     static NSImage *forwardAdornImage = nil;
     static NSImage *reloadAdornImage = nil;
     static NSImage *stopAdornImage = nil;
     
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-        
-        backAdornImage = [[NSImage imageNamed:NSImageNameGoLeftTemplate] copy];
-        [backAdornImage setName:@"BackAdorn"];
-        
-        forwardAdornImage = [[NSImage imageNamed:NSImageNameGoRightTemplate] copy];
-        [forwardAdornImage setName:@"ForwardAdorn"];
-        
-        reloadAdornImage = [[NSImage imageNamed:NSImageNameRefreshTemplate] copy];
-        [reloadAdornImage setName:@"ReloadAdorn"];
-        
-        stopAdornImage = [[NSImage imageNamed:NSImageNameStopProgressTemplate] copy];
-        [stopAdornImage setName:@"StopAdorn"];
-        
-    } else {
-        
+    if (backAdornImage == nil) {
         NSSize size = NSMakeSize(25.0, 13.0);
         NSBezierPath *path;
         
@@ -160,10 +126,6 @@
         [stopAdornImage unlockFocus];
         [stopAdornImage setName:@"StopAdorn"];
     }
-	
-	// register for bibdesk: protocol, so we can display a help page on start
-	[NSURLProtocol registerClass:[BDSKBibDeskProtocol class]];
-	[WebView registerURLSchemeAsLocal:BDSKBibDeskProtocolName];	
 }
 
 - (id)initWithGroup:(BDSKWebGroup *)aGroup document:(BibDocument *)aDocument {
@@ -182,8 +144,6 @@
     [group release];
     [undoManager release];
     [downloads release];
-    [fieldEditor release];
-    [newWindowHandler release];
     [super dealloc];
 }
 
@@ -192,74 +152,20 @@
     [downloads removeAllObjects];
 }
 
-- (void)setRetrieving:(BOOL)retrieving {
-    [group setRetrieving:retrieving];
-    [backForwardButton setEnabled:[webView canGoBack] forSegment:0];
-    [backForwardButton setEnabled:[webView canGoForward] forSegment:1];
-    [stopOrReloadButton setEnabled:YES];
-    if (retrieving) {
-        [stopOrReloadButton setImage:[NSImage imageNamed:@"StopAdorn"]];
-        [stopOrReloadButton setToolTip:NSLocalizedString(@"Cancel download", @"Tool tip message")];
-        [stopOrReloadButton setKeyEquivalent:@"."];
-    } else {
-        [stopOrReloadButton setImage:[NSImage imageNamed:@"ReloadAdorn"]];
-        [stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page", @"Tool tip message")];
-        [stopOrReloadButton setKeyEquivalent:@"r"];
-    }
-}
-
 - (void)windowDidLoad {
-    // navigation views
     [collapsibleView setMinSize:[collapsibleView frame].size];
     [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
-    
     [view setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
-    [view setEdgeColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
-    
+    [view setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
+    [webEdgeView setEdges:BDSKEveryEdgeMask];
     NSRect frame = [backForwardButton frame];
     frame.size.height = 25.0;
     [backForwardButton setFrame:frame];
     if ([backForwardButton respondsToSelector:@selector(setSegmentStyle:)])
         [backForwardButton setSegmentStyle:NSSegmentStyleTexturedRounded];
-    backMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
-    [backMenu setDelegate:self];
-    [backForwardButton setMenu:backMenu forSegment:0];
-    forwardMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
-    [forwardMenu setDelegate:self];
-    [backForwardButton setMenu:forwardMenu forSegment:1];
-    
     [stopOrReloadButton setImagePosition:NSImageOnly];
     [stopOrReloadButton setImage:[NSImage imageNamed:@"ReloadAdorn"]];
-    
-    // update the buttons, we should not be retrieving at this point
-    [self setRetrieving:NO];
-    
-    id oldCell = [urlField cell];
-    BDSKConcreteIconTextFieldCell *cell = [[BDSKConcreteIconTextFieldCell alloc] initTextCell:[oldCell stringValue]];
-    [cell setEditable:[oldCell isEditable]];
-    [cell setSelectable:[oldCell isSelectable]];
-    [cell setEnabled:[oldCell isEnabled]];
-    [cell setScrollable:[oldCell isScrollable]];
-    [cell setWraps:[oldCell wraps]];
-    [cell setAlignment:[oldCell alignment]];
-    [cell setLineBreakMode:[oldCell lineBreakMode]];
-    [cell setBezeled:[oldCell isBezeled]];
-    [cell setBezelStyle:[oldCell bezelStyle]];
-    [cell setTarget:[oldCell target]];
-    [cell setAction:[oldCell action]];
-    [cell setSendsActionOnEndEditing:[oldCell sendsActionOnEndEditing]];
-    [cell setPlaceholderString:[oldCell placeholderString]];
-    [cell setIcon:[NSImage smallMissingFileImage]];
-    [urlField setCell:cell];
-    [cell release];
-    
-    [urlField registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil]];
-    
-    // webview
-    [webEdgeView setEdges:BDSKEveryEdgeMask];
     [webView setEditingDelegate:self];
-    [self loadURL: BDSKBibDeskWebGroupURL];
-	
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleApplicationWillTerminateNotification:)
                                                  name:NSApplicationWillTerminateNotification
@@ -299,10 +205,8 @@
 }
 
 - (void)loadURL:(NSURL *)theURL {
-    if (theURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:theURL] == NO) {
-        [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:[NSImage smallMissingFileImage]];
+    if (theURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:theURL] == NO)
         [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:theURL]];
-    }
 }
 
 - (IBAction)changeURL:(id)sender {
@@ -367,119 +271,19 @@
         [[NSWorkspace sharedWorkspace] openLinkedURL:theURL];
 }
 
-- (void)goBackForwardInHistory:(id)sender {
-    WebHistoryItem *item = [sender representedObject];
-    if (item)
-        [webView goToBackForwardItem:item];
-}
-
-#pragma mark NSMenu delegate protocol
-
-- (void)menuNeedsUpdate:(NSMenu *)menu {
-    WebBackForwardList *backForwardList = [webView backForwardList];
-    NSEnumerator *itemEnum = nil;
-    if (menu == backMenu)
-        itemEnum = [[backForwardList backListWithLimit:MAX_HISTORY] reverseObjectEnumerator];
-    else if (menu == forwardMenu)
-        itemEnum = [[backForwardList forwardListWithLimit:MAX_HISTORY] objectEnumerator];
-    else
-        return;
-    [menu removeAllItems];
-    WebHistoryItem *item;
-    while (item = [itemEnum nextObject]) {
-        NSMenuItem *menuItem = [menu addItemWithTitle:([item title] ?: @"") action:@selector(goBackForwardInHistory:) keyEquivalent:@""];
-        [menuItem setTarget:self];
-        [menuItem setRepresentedObject:item];
-    }
-}
-
-#pragma mark TextField delegates
-
-- (id)windowWillReturnFieldEditor:(NSWindow *)sender toObject:(id)anObject {
-    if (anObject == urlField) {
-        if (fieldEditor == nil) {
-            fieldEditor = [[BDSKFieldEditor alloc] init];
-            // we could support dragging here as well, but NSTextView already handles URLs, and it's probably better not to commit when we're editing
-        }
-        return fieldEditor;
-	}
-    return nil;
-}
-
-- (NSDragOperation)dragTextField:(BDSKDragTextField *)textField validateDrop:(id <NSDraggingInfo>)sender {
-    if ([sender draggingSource] != textField && 
-        [[sender draggingPasteboard] availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]])
-        return NSDragOperationEvery;
-    return NSDragOperationNone;
-}
-
-- (BOOL)dragTextField:(BDSKDragTextField *)textField acceptDrop:(id <NSDraggingInfo>)sender {
-    NSPasteboard *pboard = [sender draggingPasteboard];
-	NSString *dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]];
-    NSURL *url = nil;
-    
-    if ([dragType isEqualToString:NSURLPboardType])
-        url = [NSURL URLFromPasteboard:pboard];
-    else if ([dragType isEqualToString:BDSKWeblocFilePboardType])
-        url = [NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]];
-    if (url) {
-        [self setURLString:[url absoluteString]];
-        return YES;
-    }
-    return NO;
-}
-
-- (BOOL)dragTextField:(BDSKDragTextField *)textField writeDataToPasteboard:(NSPasteboard *)pboard {
-    NSString *urlString = [self URLString];
-    if ([NSString isEmptyString:urlString] == NO) {
-        NSURL *url = [NSURL URLWithString:urlString];
-        if (url) {
-            [pboard declareTypes:[NSArray arrayWithObjects:NSURLPboardType, nil] owner:nil];
-            [url writeToPasteboard:pboard];
-            return YES;
-        }
-    }
-    return NO;
-}
-
-- (BOOL)control:(NSControl *)control textViewShouldAutoComplete:(NSTextView *)textView {
-    return control == urlField;
-}
-
-- (NSRange)control:(NSControl *)control textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
-    if (control == urlField) {
-        // always complete the whole string
-        return NSMakeRange(0, [[textView string] length]);
+- (void)setRetrieving:(BOOL)retrieving {
+    [group setRetrieving:retrieving];
+    [backForwardButton setEnabled:[webView canGoBack] forSegment:0];
+    [backForwardButton setEnabled:[webView canGoForward] forSegment:1];
+    [stopOrReloadButton setEnabled:YES];
+    if (retrieving) {
+        [stopOrReloadButton setImage:[NSImage imageNamed:@"StopAdorn"]];
+        [stopOrReloadButton setToolTip:NSLocalizedString(@"Cancel download", @"Tool tip message")];
+        [stopOrReloadButton setKeyEquivalent:@"."];
     } else {
-        return charRange;
-    }
-}
-
-static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookmark *bookmark, NSString *string) {
-    if ([bookmark bookmarkType] == BDSKBookmarkTypeBookmark) {
-        NSURL *url = [bookmark URL];
-        NSString *urlString = [url absoluteString];
-        NSUInteger loc = [urlString rangeOfString:string options:NSCaseInsensitiveSearch].location;
-        if (loc == NSNotFound && [string rangeOfString:@"//:"].length == 0)
-            loc = [urlString rangeOfString:[@"www." stringByAppendingString:string] options:NSCaseInsensitiveSearch].location;
-        if (loc <= [[url scheme] length] + 3)
-            [bookmarks addObject:urlString];
-    } else if ([bookmark bookmarkType] == BDSKBookmarkTypeFolder) {
-        NSUInteger i, iMax = [bookmark countOfChildren];
-        for (i = 0; i < iMax; i++)
-            addMatchesFromBookmarks(bookmarks, [bookmark objectInChildrenAtIndex:i], string);
-    }
-}
-
-- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(NSInteger *)anIndex {
-    if (control == urlField) {
-        NSMutableArray *matches = [NSMutableArray array];
-        NSString *string = [textView string];
-        if ([@"http://" hasPrefix:string] == NO && [@"https://" hasPrefix:string] == NO)
-            addMatchesFromBookmarks(matches, [[BDSKBookmarkController sharedBookmarkController] bookmarkRoot], string);
-        return matches;
-    } else {
-        return words;
+        [stopOrReloadButton setImage:[NSImage imageNamed:@"ReloadAdorn"]];
+        [stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page", @"Tool tip message")];
+        [stopOrReloadButton setKeyEquivalent:@"r"];
     }
 }
 
@@ -489,17 +293,14 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     
     if (frame == [sender mainFrame]) {
         
-        BDSKASSERT(loadingWebFrame == nil);
+        OBASSERT(loadingWebFrame == nil);
         
         [self setRetrieving:YES];
         [group setPublications:nil];
         loadingWebFrame = frame;
         
-        WebDataSource *dataSource = [frame provisionalDataSource];
-        if ([dataSource unreachableURL] == nil) {
-            NSString *url = [[[dataSource request] URL] absoluteString];
-            [urlField setStringValue:url];
-        }
+        NSString *url = [[[[frame provisionalDataSource] request] URL] absoluteString];
+        [urlField setStringValue:url];
         
     } else if (loadingWebFrame == nil) {
         
@@ -516,7 +317,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     
     NSError *error = nil;
     NSArray *newPubs = [BDSKWebParser itemsFromDocument:domDocument fromURL:url error:&error];
-    if ([newPubs count] == 0) {
+    if (nil == newPubs) {
         WebDataSource *dataSource = [frame dataSource];
         if ([[[dataSource mainResource] MIMEType] isEqualToString:@"text/plain"]) { 
             NSString *string = [[dataSource representation] documentSource];
@@ -531,24 +332,19 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
                     nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
                 string = [[[NSString alloc] initWithData:[dataSource data] encoding:nsEncoding] autorelease];
             }
-            NSInteger type = [string contentStringType];
+            int type = [string contentStringType];
             if(type != BDSKUnknownStringType)
                 newPubs = [document publicationsForString:string type:type verbose:NO error:&error];
         }
         if (nil == newPubs) {
             // !!! logs are here to help diagnose problems that users are reporting
-            //NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
-            //NSLog(@"loaded MIME type %@", [[dataSource mainResource] MIMEType]);
+            NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
+            NSLog(@"loaded MIME type %@", [[dataSource mainResource] MIMEType]);
             // !!! what to do here? if user clicks on a PDF, we're loading application/pdf, which is clearly not an error from the user perspective...so should the error only be presented for text/plain?
             //[NSApp presentError:error];
         }
     }
-    
-    if (frame == [sender mainFrame]) {
-        if ([[(BDSKConcreteIconTextFieldCell *)[urlField cell] icon] isEqual:[NSImage smallMissingFileImage]])
-            [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:[NSImage imageNamed:@"Bookmark"]];
-    }
-    
+        
     if (frame == loadingWebFrame) {
         [self setRetrieving:NO];
         [group addPublications:newPubs ?: [NSArray array]];
@@ -564,13 +360,6 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
         [group addPublications:nil];
         loadingWebFrame = nil;
     }
-    
-    // !!! logs are here to help diagnose problems that users are reporting
-    NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
-    
-    NSURL *url = [[[frame provisionalDataSource] request] URL];
-    NSString *errorHTML = [NSString stringWithFormat:@"<html><body><h1>%@</h1></body></html>", [error localizedDescription]];
-    [frame loadAlternateHTMLString:errorHTML baseURL:nil forUnreachableURL:url];
 }
 
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
@@ -579,34 +368,18 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
         [group addPublications:nil];
         loadingWebFrame = nil;
     }
-    
     // !!! logs are here to help diagnose problems that users are reporting
     NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
-    
-    NSURL *url = [[[frame provisionalDataSource] request] URL];
-    NSString *errorHTML = [NSString stringWithFormat:@"<html><body><h1>%@</h1></body></html>", [error localizedDescription]];
-    [frame loadAlternateHTMLString:errorHTML baseURL:nil forUnreachableURL:url];
+    [NSApp presentError:error];
 }
 
 - (void)webView:(WebView *)sender didReceiveServerRedirectForProvisionalLoadForFrame:(WebFrame *)frame{
-    if (frame == [sender mainFrame]) { 
+    if (frame == loadingWebFrame){ 
         NSString *url = [[[[frame provisionalDataSource] request] URL] absoluteString];
         [urlField setStringValue:url];
     }
 }
 
-- (void)webView:(WebView *)sender didReceiveIcon:(NSImage *)image forFrame:(WebFrame *)frame{
-    if (frame == [sender mainFrame]) { 
-        [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:image];
-    }
-}
-
-#pragma mark WebPolicyDelegate protocol
-
-- (void)webView:(WebView *)sender decidePolicyForNewWindowAction:(NSDictionary *)actionInformation request:(NSURLRequest *)request newFrameName:(NSString *)frameName decisionListener:(id < WebPolicyDecisionListener >)listener {
-    [listener ignore];
-    [[NSWorkspace sharedWorkspace] openURL:[request URL]];
-}
 
 #pragma mark WebUIDelegate protocol
 
@@ -621,9 +394,9 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     [self setStatus:text];
 }
 
-- (void)webView:(WebView *)sender mouseDidMoveOverElement:(NSDictionary *)elementInformation modifierFlags:(NSUInteger)modifierFlags {
+- (void)webView:(WebView *)sender mouseDidMoveOverElement:(NSDictionary *)elementInformation modifierFlags:(unsigned int)modifierFlags {
     NSURL *aLink = [elementInformation objectForKey:WebElementLinkURLKey];
-    [self setStatus:[[aLink absoluteString] stringByReplacingPercentEscapes]];
+    [self setStatus:[aLink absoluteString]];
 }
 
 - (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems;
@@ -636,12 +409,12 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     NSNumber *n;
     NSEnumerator *removeEnum = [itemsToRemove objectEnumerator];
     while (n = [removeEnum nextObject]) {
-        NSUInteger toRemove = [[menuItems valueForKey:@"tag"] indexOfObject:n];
+        unsigned int toRemove = [[menuItems valueForKey:@"tag"] indexOfObject:n];
         if (toRemove != NSNotFound)
             [menuItems removeObjectAtIndex:toRemove];
     }
 	
-    NSUInteger i = [[menuItems valueForKey:@"tag"] indexOfObject:[NSNumber numberWithInt:WebMenuItemTagCopyLinkToClipboard]];
+    unsigned int i = [[menuItems valueForKey:@"tag"] indexOfObject:[NSNumber numberWithInt:WebMenuItemTagCopyLinkToClipboard]];
     
     if (i != NSNotFound) {
         
@@ -712,13 +485,6 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 	return menuItems;
 }
 
-- (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request {
-    // due to a known WebKit bug the request is always nil https://bugs.webkit.org/show_bug.cgi?id=23432
-    if (newWindowHandler == nil)
-        newWindowHandler = [[BDSKNewWebWindowHandler alloc] init];
-    return [newWindowHandler webView];
-}
-
 #pragma mark WebEditingDelegate protocol
 
 // this is needed because WebView uses the document's undo manager by default, rather than the one from the window.
@@ -745,7 +511,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     [sPanel setCanSelectHiddenExtension:YES];
 	
     // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
-    NSInteger returnCode = [sPanel runModalForDirectory:nil file:filename];
+    int returnCode = [sPanel runModalForDirectory:nil file:filename];
     if (returnCode == NSOKButton) {
         [download setDestination:[sPanel filename] allowOverwrite:YES];
     } else {
@@ -777,32 +543,3 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 }
 
 @end
-
-#pragma mark -
-
-@implementation BDSKNewWebWindowHandler
-
-- (id)init {
-    if (self = [super init]) {
-        webView = [[WebView alloc] init];
-        [webView setPolicyDelegate:self];  
-    }
-    return self;
-}
-
-- (void)webView:(WebView *)sender decidePolicyForNavigationAction:(NSDictionary *)actionInformation request:(NSURLRequest *)request frame:(WebFrame *)frame decisionListener:(id<WebPolicyDecisionListener>)listener {
-    [[NSWorkspace sharedWorkspace] openURL:[actionInformation objectForKey:WebActionOriginalURLKey]];
-    [listener ignore];
-}
-
--(WebView *)webView {
-    return webView;
-}
-
-- (void)dealloc {
-    [webView release];
-    [super dealloc];
-}
-
-@end
-

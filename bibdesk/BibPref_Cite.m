@@ -35,80 +35,51 @@
  */
 
 #import "BibPref_Cite.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKTemplate.h"
 #import "BibDocument.h"
 #import "BDSKStringConstants.h"
 
 #define MAX_PREVIEW_WIDTH	465.0
 
-static char BDSKBibPrefCiteDefaultsObservationContext;
-
-
-@interface BibPref_Cite (Private)
-- (void)updateTemplates;
-- (void)updateDragCopyUI;
-- (void)updateCiteCommandUI;
-@end
-
-
 @implementation BibPref_Cite
 
 - (void)awakeFromNib{
+    [super awakeFromNib];
+    
     BDSKDragCopyCiteKeyFormatter *formatter = [[BDSKDragCopyCiteKeyFormatter alloc] init];
     [citeStringField setFormatter:formatter];
     [citeStringField setDelegate:self];
     [formatter release];
     
-    [self updateTemplates];
-    [self updateDragCopyUI];
-    [self updateCiteCommandUI];
-    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree] options:0 context:&BDSKBibPrefCiteDefaultsObservationContext];
-}
-
-- (void)defaultsDidRevert {
-    // reset UI, but only if we loaded the nib
-    if ([self isWindowLoaded]) {
-        //[self updateTemplates]; this should be done by KVO
-        [self updateDragCopyUI];
-        [self updateCiteCommandUI];
-    }
-}
-
-- (void)dealloc{
-    @try { [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree]]; }
-    @catch (id e) {}
-    [super dealloc];
+    [self handleTemplatePrefsChangedNotification:nil];
+    [OFPreference addObserver:self 
+                     selector:@selector(handleTemplatePrefsChangedNotification:) 
+                forPreference:[OFPreference preferenceForKey:BDSKExportTemplateTree]];
 }
 
 - (void)updateDragCopyUI{
-    [defaultDragCopyPopup selectItemWithTag:[sud integerForKey:BDSKDefaultDragCopyTypeKey]];
-    [alternateDragCopyPopup selectItemWithTag:[sud integerForKey:BDSKAlternateDragCopyTypeKey]];
-    [defaultDragCopyTemplatePopup setEnabled:[sud integerForKey:BDSKDefaultDragCopyTypeKey] == BDSKTemplateDragCopyType];
-    [alternateDragCopyTemplatePopup setEnabled:[sud integerForKey:BDSKAlternateDragCopyTypeKey] == BDSKTemplateDragCopyType];
+    [defaultDragCopyPopup selectItemWithTag:[defaults integerForKey:BDSKDefaultDragCopyTypeKey]];
+    [alternateDragCopyPopup selectItemWithTag:[defaults integerForKey:BDSKAlternateDragCopyTypeKey]];
+    [defaultDragCopyTemplatePopup setEnabled:[defaults integerForKey:BDSKDefaultDragCopyTypeKey] == BDSKTemplateDragCopyType];
+    [alternateDragCopyTemplatePopup setEnabled:[defaults integerForKey:BDSKAlternateDragCopyTypeKey] == BDSKTemplateDragCopyType];
 }
 
 - (void)updateCiteCommandUI{
-    NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
-	NSString *startCiteBracket = [sud stringForKey:BDSKCiteStartBracketKey]; 
-	NSString *endCiteBracket = [sud stringForKey:BDSKCiteEndBracketKey]; 
-	BOOL prependTilde = [sud boolForKey:BDSKCitePrependTildeKey];
+    NSString *citeString = [defaults stringForKey:BDSKCiteStringKey];
+	NSString *startCiteBracket = [defaults stringForKey:BDSKCiteStartBracketKey]; 
+	NSString *endCiteBracket = [defaults stringForKey:BDSKCiteEndBracketKey]; 
+	BOOL prependTilde = [defaults boolForKey:BDSKCitePrependTildeKey];
 	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", (prependTilde? @"~" : @""), citeString, startCiteBracket];
 	
-    [separateCiteRadio selectCellWithTag:[sud integerForKey:BDSKSeparateCiteKey]];
-    [prependTildeCheckButton setState:[sud boolForKey:BDSKCitePrependTildeKey] ? NSOnState : NSOffState];
-    [citeBracketRadio selectCellWithTag:[[sud objectForKey:BDSKCiteStartBracketKey] isEqualToString:@"{"] ? 1 : 2];
+    [separateCiteCheckButton setState:[defaults boolForKey:BDSKSeparateCiteKey] ? NSOnState : NSOffState];
+    [prependTildeCheckButton setState:[defaults boolForKey:BDSKCitePrependTildeKey] ? NSOnState : NSOffState];
+    [citeBracketRadio selectCellWithTag:[[defaults objectForKey:BDSKCiteStartBracketKey] isEqualToString:@"{"] ? 1 : 2];
     [citeStringField setStringValue:[NSString stringWithFormat:@"\\%@", citeString]];
-    switch([[separateCiteRadio selectedCell] tag]){
-        case 2:
-        [citeBehaviorLine setStringValue:[NSString stringWithFormat:@"%@key1%@%@key2%@", startCite, endCiteBracket, startCiteBracket, endCiteBracket]];
-        break;
-        case 1:
+    if([separateCiteCheckButton state] == NSOnState){
         [citeBehaviorLine setStringValue:[NSString stringWithFormat:@"%@key1%@%@key2%@", startCite, endCiteBracket, startCite, endCiteBracket]];
-        break;
-        case 0:
-        default:
+	}else{
 		[citeBehaviorLine setStringValue:[NSString stringWithFormat:@"%@key1,key2%@", startCite, endCiteBracket]];
-        break;
 	}
 	[citeBehaviorLine sizeToFit];
 	NSRect frame = [citeBehaviorLine frame];
@@ -116,12 +87,17 @@ static char BDSKBibPrefCiteDefaultsObservationContext;
 		frame.size.width = MAX_PREVIEW_WIDTH;
 		[citeBehaviorLine setFrame:frame];
 	}
-	[[self view] setNeedsDisplay:YES];
+	[controlBox setNeedsDisplay:YES];
 }
 
-- (void)updateTemplates {
-    NSString *currentDefaultStyle = [sud stringForKey:BDSKDefaultDragCopyTemplateKey];
-    NSString *currentAlternateStyle = [sud stringForKey:BDSKAlternateDragCopyTemplateKey];
+- (void)updateUI{
+    [self updateDragCopyUI];
+    [self updateCiteCommandUI];
+}
+
+- (void)handleTemplatePrefsChangedNotification:(NSNotification *)notification{
+    NSString *currentDefaultStyle = [defaults stringForKey:BDSKDefaultDragCopyTemplateKey];
+    NSString *currentAlternateStyle = [defaults stringForKey:BDSKAlternateDragCopyTemplateKey];
     NSArray *styles = [BDSKTemplate allStyleNames];
     [defaultDragCopyTemplatePopup removeAllItems];
     [defaultDragCopyTemplatePopup addItemsWithTitles:styles];
@@ -132,68 +108,78 @@ static char BDSKBibPrefCiteDefaultsObservationContext;
     } else if ([styles count]) {
         [defaultDragCopyTemplatePopup selectItemAtIndex:0];
         currentDefaultStyle = [styles objectAtIndex:0];
-        [sud setObject:currentDefaultStyle forKey:BDSKDefaultDragCopyTemplateKey];
+        [defaults setObject:currentDefaultStyle forKey:BDSKDefaultDragCopyTemplateKey];
+        [defaults autoSynchronize];
     }
     if ([styles containsObject:currentAlternateStyle]) {
         [alternateDragCopyTemplatePopup selectItemWithTitle:currentAlternateStyle];
     } else if ([styles count]) {
         [alternateDragCopyTemplatePopup selectItemAtIndex:0];
         currentAlternateStyle = [styles objectAtIndex:0];
-        [sud setObject:currentAlternateStyle forKey:BDSKAlternateDragCopyTemplateKey];
+        [defaults setObject:currentAlternateStyle forKey:BDSKAlternateDragCopyTemplateKey];
+        [defaults autoSynchronize];
     }
 }
 
 - (IBAction)changeDefaultDragCopyFormat:(id)sender{
-    [sud setInteger:[[sender selectedItem] tag] forKey:BDSKDefaultDragCopyTypeKey];
+    [defaults setInteger:[[sender selectedItem] tag] forKey:BDSKDefaultDragCopyTypeKey];
     [self updateDragCopyUI];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeDefaultDragCopyTemplate:(id)sender{
     NSString *style = [sender title];
-    if ([style isEqualToString:[sud stringForKey:BDSKDefaultDragCopyTemplateKey]] == NO) {
-        [sud setObject:style forKey:BDSKDefaultDragCopyTemplateKey];
+    if ([style isEqualToString:[defaults stringForKey:BDSKDefaultDragCopyTemplateKey]] == NO) {
+        [defaults setObject:style forKey:BDSKDefaultDragCopyTemplateKey];
+        [defaults autoSynchronize];
     }
 }
 
 - (IBAction)changeAlternateDragCopyFormat:(id)sender{
-    [sud setInteger:[[sender selectedItem] tag] forKey:BDSKAlternateDragCopyTypeKey];
+    [defaults setInteger:[[sender selectedItem] tag] forKey:BDSKAlternateDragCopyTypeKey];
     [self updateDragCopyUI];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeAlternateDragCopyTemplate:(id)sender{
     NSString *style = [sender title];
-    if ([style isEqualToString:[sud stringForKey:BDSKAlternateDragCopyTemplateKey]] == NO) {
-        [sud setObject:style forKey:BDSKAlternateDragCopyTemplateKey];
+    if ([style isEqualToString:[defaults stringForKey:BDSKAlternateDragCopyTemplateKey]] == NO) {
+        [defaults setObject:style forKey:BDSKAlternateDragCopyTemplateKey];
+        [defaults autoSynchronize];
     }
 }
 
 - (IBAction)changeSeparateCite:(id)sender{
-    [sud setInteger:[[sender selectedCell] tag] forKey:BDSKSeparateCiteKey];
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKSeparateCiteKey];
 	[self updateCiteCommandUI];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changePrependTilde:(id)sender{
-    [sud setBool:([sender state] == NSOnState) forKey:BDSKCitePrependTildeKey];
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKCitePrependTildeKey];
 	[self updateCiteCommandUI];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)citeStringFieldChanged:(id)sender{
-    [sud setObject:[[sender stringValue] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\\"]]
+    [defaults setObject:[[sender stringValue] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\\"]]
                  forKey:BDSKCiteStringKey];
 	[self updateCiteCommandUI];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)setCitationBracketStyle:(id)sender{
 	// 1 - tex 2 - context
-	NSInteger tag = [[sender selectedCell] tag];
+	int tag = [[sender selectedCell] tag];
 	if(tag == 1){
-		[sud setObject:@"{" forKey:BDSKCiteStartBracketKey];
-		[sud setObject:@"}" forKey:BDSKCiteEndBracketKey];
+		[defaults setObject:@"{" forKey:BDSKCiteStartBracketKey];
+		[defaults setObject:@"}" forKey:BDSKCiteEndBracketKey];
 	}else if(tag == 2){
-		[sud setObject:@"[" forKey:BDSKCiteStartBracketKey];
-		[sud setObject:@"]" forKey:BDSKCiteEndBracketKey];
+		[defaults setObject:@"[" forKey:BDSKCiteStartBracketKey];
+		[defaults setObject:@"]" forKey:BDSKCiteEndBracketKey];
 	}
 	[self updateCiteCommandUI];
+    [defaults autoSynchronize];
 }
 
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error{
@@ -203,22 +189,9 @@ static char BDSKBibPrefCiteDefaultsObservationContext;
                                        alternateButton:nil
                                            otherButton:nil
                              informativeTextWithFormat:@"%@", error];
-        [alert beginSheetModalForWindow:[[self view] window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+        [alert beginSheetModalForWindow:[[self controlBox] window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
     return NO;
-}
-
-#pragma mark KVO
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == &BDSKBibPrefCiteDefaultsObservationContext) {
-        NSString *key = [keyPath substringFromIndex:7];
-        if ([key isEqualToString:BDSKExportTemplateTree]) {
-            [self updateTemplates];
-        }
-    } else {
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-    }
 }
 
 @end
@@ -228,7 +201,7 @@ static char BDSKBibPrefCiteDefaultsObservationContext;
 @implementation BDSKDragCopyCiteKeyFormatter
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
-    if([string rangeOfString:@"~"].length){
+    if([string containsString:@"~"]){
         // some people apparently can't see the checkbox for adding a tilde (bug #1422451)
         if(error) *error = NSLocalizedString(@"Use the checkbox below to prepend a tilde.", @"Error description");
         return NO;

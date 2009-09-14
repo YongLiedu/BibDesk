@@ -127,10 +127,12 @@ static inline id *__FVPriorityQueueHeapEnd(FVPriorityQueue *self)
 {
     self = [super init];
     if (self) {
-                
+        
+        CFAllocatorRef alloc = CFAllocatorGetDefault();
+        
         // queue does not retain its objects, so always add/remove from the set last
         
-        _set = CFSetCreateMutable(CFAllocatorGetDefault(), 0, &FVNSObjectSetCallBacks);
+        _set = CFSetCreateMutable(alloc, 0, &FVNSObjectSetCallBacks);
         
         capacity = __FVPriorityQueueRoundUpCapacity(capacity);
         _values = (id *)NSZoneCalloc([self zone], capacity, sizeof(id));
@@ -141,9 +143,7 @@ static inline id *__FVPriorityQueueHeapEnd(FVPriorityQueue *self)
         _mutations = 0;
         
         if (NULL == _values || NULL == _set) {
-            if (_set) CFRelease(_set);
-            NSZoneFree([self zone], _values);
-            [super dealloc];
+            [self release];
             self = nil;
         }
         
@@ -189,29 +189,20 @@ static inline id *__FVPriorityQueueHeapEnd(FVPriorityQueue *self)
     _mutations++;
 }
 
-#define FV_STACK_MAX 256
-
 - (void)pushMultiple:(NSArray *)objects;
 {
     CFArrayRef cfObjects = reinterpret_cast <CFArrayRef>(objects);
-    const CFIndex iMax = CFArrayGetCount(cfObjects);
-    CFIndex i, numberAdded = 0;
-    
-    id stackBuf[FV_STACK_MAX] = { nil };
+    CFIndex i, iMax = CFArrayGetCount(cfObjects);
+    NSUInteger numberAdded = 0;
     id *buffer = NULL;
 
-    if (iMax > FV_STACK_MAX) {
-        try {
-            buffer = new id[iMax];
-        }
-        catch (std::bad_alloc&) {
-            // !!! early return
-            NSLog(@"*** ERROR *** unable to allocate space for %d objects", iMax);
-            return;
-        }
+    try {
+        buffer = new id[iMax];
     }
-    else {
-        buffer = stackBuf;
+    catch (std::bad_alloc&) {
+        NSLog(@"*** ERROR *** unable to allocate space for %d objects", iMax);
+        buffer = NULL;
+        iMax = 0;
     }
     
     NSUInteger count = __FVPriorityQueueCount(self);
@@ -237,7 +228,7 @@ static inline id *__FVPriorityQueueHeapEnd(FVPriorityQueue *self)
         
         _mutations++;
     }
-    if (stackBuf != buffer) delete buffer;
+    delete buffer;
     NSAssert(self->_count == (NSUInteger)CFSetGetCount(self->_set), @"set and queue must have the same count");
 }
 
@@ -331,9 +322,9 @@ static inline id *__FVPriorityQueueHeapEnd(FVPriorityQueue *self)
 
 void FVPriorityQueueApplyFunction(FVPriorityQueue *queue, FVPriorityQueueApplierFunction applier, void *context)
 {
-    [queue _sortQueueForEnumeration];
     const void **values = (const void **)__FVPriorityQueueHeapStart(queue);
-    CFArrayRef array = CFArrayCreate(CFGetAllocator(queue), values, __FVPriorityQueueCount(queue), NULL);
+    CFArrayRef array = CFArrayCreate(CFAllocatorGetDefault(), values, __FVPriorityQueueCount(queue), NULL);
+    [queue _sortQueueForEnumeration];
     CFArrayApplyFunction(array, CFRangeMake(0, CFArrayGetCount(array)), applier, context);
     CFRelease(array);
 }

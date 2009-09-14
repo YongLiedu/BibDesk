@@ -42,7 +42,7 @@
 @interface BDSKConditionsView : NSView {
 }
 
-- (void)insertView:(NSView *)view atIndex:(NSUInteger)index;
+- (void)insertView:(NSView *)view atIndex:(unsigned int)index;
 - (void)addView:(NSView *)view;
 - (void)removeView:(NSView *)view;
 - (void)removeAllSubviews;

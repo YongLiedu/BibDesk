@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>IBDocumentLocation</key>
+	<string>69 58 356 240 0 0 1440 938 </string>
+	<key>IBEditorPositions</key>
+	<dict>
+		<key>25</key>
+		<string>660 477 120 328 0 0 1440 938 </string>
+	</dict>
 	<key>IBFramework Version</key>
-	<string>677</string>
-	<key>IBLastKnownRelativeProjectPath</key>
-	<string>../Bibdesk.xcodeproj</string>
-	<key>IBOldestOS</key>
-	<integer>4</integer>
+	<string>446.1</string>
 	<key>IBOpenObjects</key>
 	<array>
 		<integer>25</integer>
 	</array>
 	<key>IBSystem Version</key>
-	<string>9J61</string>
-	<key>targetFramework</key>
-	<string>IBCocoaFramework</string>
+	<string>8L127</string>
 </dict>
 </plist>

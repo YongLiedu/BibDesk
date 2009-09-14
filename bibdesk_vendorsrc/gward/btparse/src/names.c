@@ -819,10 +819,6 @@ bt_split_name (char *  name,
          split_name->parts[i] = NULL;
          split_name->part_len[i] = 0;
       }
-      if (name != NULL)
-      {
-        free (name);
-      }
       return split_name;
    }
 

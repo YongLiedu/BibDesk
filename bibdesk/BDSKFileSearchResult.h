@@ -51,7 +51,7 @@
 }
 
 // This class is designed to be used in a hashing container (NSSet, NSDictionary) when you want the isEqual: and hash to be based on file comparison
-- (id)initWithURL:(NSURL *)aURL identifierURL:(NSURL *)anIdentifierURL title:(NSString *)aTitle score:(CGFloat)aScore;
+- (id)initWithURL:(NSURL *)aURL identifierURL:(NSURL *)anIdentifierURL title:(NSString *)aTitle score:(float)aScore;
 
 // used by the table cell
 - (NSImage *)image;

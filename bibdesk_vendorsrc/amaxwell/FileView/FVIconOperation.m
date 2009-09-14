@@ -40,12 +40,12 @@
 #import "FVOperationQueue.h"
 #import "FVInvocationOperation.h"
 #import "FVIcon.h"
-#import "FVFileView.h"
+#import "FileView.h"
 #import <pthread.h>
 
 @implementation FVIconOperation
 
-- (id)initWithIcon:(FVIcon *)icon view:(FVFileView *)view;
+- (id)initWithIcon:(FVIcon *)icon view:(FileView *)view;
 {
     NSParameterAssert(nil != icon);
     NSParameterAssert(nil == view || [view respondsToSelector:@selector(iconUpdated:)]);
@@ -69,8 +69,7 @@
 - (void)dealloc
 {
     [_icon release];
-    // release is thread safe, but we don't want to trigger dealloc on this thread
-    [_view performSelectorOnMainThread:@selector(release) withObject:nil waitUntilDone:NO];
+    [_view release];
     [super dealloc];
 }
 
@@ -97,7 +96,7 @@
 @interface FVIconUpdateOperation : FVIconOperation
 @end
 
-@interface FVFileView (Update)
+@interface FileView (Update)
 - (void)iconUpdated:(FVIcon *)anIcon;
 @end
 
@@ -107,7 +106,7 @@
 
 - (void)main
 {
-    NSAssert(pthread_main_np() != 0, @"incorrect thread for FVIconUpdateOperation");        
+    NSAssert(pthread_main_np() != 0, @"incorrect thread for FVIconUpdateOperation");
     [_view iconUpdated:_icon];
     [self finished];
 }

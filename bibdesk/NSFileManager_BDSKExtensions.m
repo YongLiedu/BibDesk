@@ -36,46 +36,15 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
-/*
- Some methods in this category are copied from OmniFoundation 
- and are subject to the following licence:
- 
- Omni Source License 2007
-
- OPEN PERMISSION TO USE AND REPRODUCE OMNI SOURCE CODE SOFTWARE
-
- Omni Source Code software is available from The Omni Group on their 
- web site at http://www.omnigroup.com/www.omnigroup.com. 
-
- Permission is hereby granted, free of charge, to any person obtaining 
- a copy of this software and associated documentation files (the 
- "Software"), to deal in the Software without restriction, including 
- without limitation the rights to use, copy, modify, merge, publish, 
- distribute, sublicense, and/or sell copies of the Software, and to 
- permit persons to whom the Software is furnished to do so, subject to 
- the following conditions:
-
- Any original copyright notices and this permission notice shall be 
- included in all copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, 
- EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
- MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
- IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
- CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
- TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
- SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
+#import <OmniFoundation/OFResourceFork.h>
 #import "NSURL_BDSKExtensions.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKVersionNumber.h"
 #import "NSError_BDSKExtensions.h"
 #import <SkimNotes/SKNExtendedAttributeManager.h>
-#import <CoreServices/CoreServices.h>
 
 #define OPEN_META_TAGS_KEY @"com.apple.metadata:kOMUserTags"
 #define OPEN_META_RATING_KEY @"com.apple.metadata:kOMStarRating"
@@ -112,12 +81,20 @@ typedef struct WLDragMapEntryStruct
     ResID _resID;
 }
 
-+ (id)entryWithType:(OSType)type resID:(NSInteger)resID;
++ (id)entryWithType:(OSType)type resID:(int)resID;
 + (NSData*)dragDataWithEntries:(NSArray*)entries;
 
 - (OSType)type;
 - (ResID)resID;
 - (NSData*)entryData;
+
+@end
+
+
+@interface OFResourceFork (BDSKExtensions)
+
+// the setData:forResourceType: method apparently sets the wrong resID, so we use this method to override that
+- (void)setData:(NSData *)contentData forResourceType:(ResType)resType resID:(short)resID;
 
 @end
 
@@ -170,34 +147,29 @@ static void destroyTemporaryDirectory()
     [pool release];
 }
 
-static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boolean createFolder) {
-    FSRef foundRef;
-    OSStatus err = noErr;
-    CFURLRef url = NULL;
-    NSString *path = nil;
-    
-    err = FSFindFolder(domain, folderType, createFolder, &foundRef);
-    if (err != noErr)
-        NSLog(@"Error %d:  the system was unable to find your folder of type %i in domain %i.", err, folderType, domain);
-    else
-        url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
-    
-    if(url != NULL){
-        path = [(NSURL *)url path];
-        CFRelease(url);
-    }
-    
-    return path;
-}
-
 - (NSString *)currentApplicationSupportPathForCurrentUser{
     
     static NSString *path = nil;
     
     if(path == nil){
-        path = findSpecialFolder(kUserDomain, kApplicationSupportFolderType, kCreateFolder);
+        FSRef foundRef;
+        OSStatus err = noErr;
+        
+        err = FSFindFolder(kUserDomain,  kApplicationSupportFolderType, kCreateFolder, &foundRef);
+        if(err != noErr){
+            NSLog(@"Error %d:  the system was unable to find your Application Support folder.", err);
+            return nil;
+        }
+        
+        CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
+        
+        if(url != nil){
+            path = [(NSURL *)url path];
+            CFRelease(url);
+        }
         
         NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleNameKey];
+        
         if(appName == nil)
             [NSException raise:NSObjectNotAvailableException format:NSLocalizedString(@"Unable to find CFBundleIdentifier for %@", @"Exception message"), [NSApp description]];
         
@@ -220,15 +192,47 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
 }
 
 - (NSString *)applicationSupportDirectory:(SInt16)domain{
-    return findSpecialFolder(domain, kApplicationSupportFolderType, kCreateFolder);
+    
+    FSRef foundRef;
+    OSStatus err = noErr;
+    
+    err = FSFindFolder(domain,
+                       kApplicationSupportFolderType,
+                       kCreateFolder,
+                       &foundRef);
+    NSAssert1( err == noErr, @"Error %d:  the system was unable to find your Application Support folder.", err);
+    
+    CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
+    NSString *retStr = nil;
+    
+    if(url != nil){
+        retStr = [(NSURL *)url path];
+        CFRelease(url);
+    }
+    
+    return retStr;
 }
 
 - (NSString *)applicationsDirectory{
-    NSString *path = findSpecialFolder(kLocalDomain, kApplicationSupportFolderType, kDontCreateFolder);
+    
+    NSString *path = nil;
+    FSRef foundRef;
+    OSStatus err = noErr;
+    CFURLRef url = NULL;
+    BOOL isDir = YES;
+    
+    err = FSFindFolder(kLocalDomain,  kApplicationsFolderType, kDontCreateFolder, &foundRef);
+    if(err == noErr){
+        url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
+    }
+    
+    if(url != NULL){
+        path = [(NSURL *)url path];
+        CFRelease(url);
+    }
     
     if(path == nil){
         path = @"/Applications";
-        BOOL isDir;
         if([self fileExistsAtPath:path isDirectory:&isDir] == NO || isDir == NO){
             NSLog(@"The system was unable to find your Applications folder.", @"");
             return nil;
@@ -238,8 +242,59 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     return path;
 }
 
-- (NSString *)desktopDirectory {
-    return findSpecialFolder(kUserDomain, kDesktopFolderType, kCreateFolder);
+#pragma mark Temporary files and directories
+
+- (NSString *)temporaryFileWithBasename:(NSString *)fileName;
+{
+	if(nil == fileName)
+        fileName = [[NSProcessInfo processInfo] globallyUniqueString];
+	return [self uniqueFilePathWithName:fileName atPath:temporaryBaseDirectory];
+}
+
+// This method is subject to a race condition in our temporary directory if we pass the same baseName to this method and temporaryFileWithBasename: simultaneously; hence the lock in uniqueFilePathWithName:atPath:, even though it and temporaryFileWithBasename: are not thread safe or secure.
+- (NSString *)makeTemporaryDirectoryWithBasename:(NSString *)baseName {
+    NSString *finalPath = nil;
+    
+    @synchronized(self) {
+        if (baseName == nil) {
+            CFUUIDRef uuid = CFUUIDCreate(NULL);
+            baseName = [(NSString *)CFUUIDCreateString(NULL, uuid) autorelease];
+            CFRelease(uuid);
+        }
+        
+        unsigned i = 0;
+        NSURL *fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:baseName]];
+        while ([self objectExistsAtFileURL:fileURL]) {
+            fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%i", baseName, ++i]]];
+        }
+        finalPath = [fileURL path];
+        
+        // raise if we can't create a file in the chewable folder?
+        if (NO == [self createDirectoryAtPathWithNoAttributes:finalPath])
+            finalPath = nil;
+    }
+    return finalPath;
+}
+
+- (NSString *)uniqueFilePathWithName:(NSString *)fileName atPath:(NSString *)directory {
+    // could expand this path?
+    NSParameterAssert([directory isAbsolutePath]);
+    NSParameterAssert([fileName isAbsolutePath] == NO);
+    NSString *baseName = [fileName stringByDeletingPathExtension];
+    NSString *extension = [fileName pathExtension];
+    
+    // optimistically assume we can just return the sender's guess of /directory/filename
+    NSString *fullPath = [directory stringByAppendingPathComponent:fileName];
+    int i = 0;
+    
+    // this method is always invoked from the main thread, but we don't want multiple threads in temporaryBaseDirectory (which may be passed as directory here); could make the lock conditional, but performance isn't a concern here
+    @synchronized(self) {
+    // if the file exists, try /directory/filename-i.extension
+    while([self fileExistsAtPath:fullPath])
+        fullPath = [directory stringByAppendingPathComponent:[[NSString stringWithFormat:@"%@-%i", baseName, ++i] stringByAppendingPathExtension:extension]];
+    }
+
+	return fullPath;
 }
 
 // note: IC is not thread safe
@@ -330,259 +385,6 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     return [self copyPath:sourcePath toPath:targetPath handler:nil];
 }
 
-#pragma mark Temporary files and directories
-
-// This method is copied and modified from NSFileManager-OFExtensions.m
-// Note that due to the permissions behavior of FSFindFolder, this shouldn't have the security problems that raw calls to -uniqueFilenameFromName: may have.
-- (NSString *)temporaryPathForWritingToPath:(NSString *)path error:(NSError **)outError
-/*" Returns a unique filename in the -temporaryDirectoryForFileSystemContainingPath: for the filesystem containing the given path.  The returned path is suitable for writing to and then replacing the input path using -replaceFileAtPath:withFileAtPath:handler:.  This means that the result should never be equal to the input path.  If no suitable temporary items folder is found and allowOriginalDirectory is NO, this will raise.  If allowOriginalDirectory is YES, on the other hand, this will return a file name in the same folder.  Note that passing YES for allowOriginalDirectory could potentially result in security implications of the form noted with -uniqueFilenameFromName:. "*/
-{
-    BDSKPRECONDITION(![NSString isEmptyString:path]);
-    
-    NSString *tempFileName = nil;
-    
-    // first find the Temporary Items folder for the volume containing path
-    // The file in question might not exist yet.  This loop assumes that it will terminate due to '/' always being valid.
-    OSErr err;
-    FSRef ref;
-    NSString *attempt = path;
-    while (YES) {
-        CFURLRef url = (CFURLRef)[NSURL fileURLWithPath:attempt];
-        if (CFURLGetFSRef((CFURLRef)url, &ref))
-            break;
-        attempt = [attempt stringByDeletingLastPathComponent];
-    }
-    
-    FSCatalogInfo catalogInfo;
-    err = FSGetCatalogInfo(&ref, kFSCatInfoVolume, &catalogInfo, NULL, NULL, NULL);
-    if (err != noErr) {
-        NSError *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:nil]; // underlying error
-        if(outError)
-            *outError = [NSError localErrorWithCode:kBDSKCannotFindTemporaryDirectoryError localizedDescription:[NSString stringWithFormat:@"Unable to get catalog info for '%@'", path] underlyingError:error];
-        return nil;
-    }
-    
-    NSString *tempItemsPath = findSpecialFolder(catalogInfo.volume, kTemporaryFolderType, kCreateFolder);
-    if (tempItemsPath == nil) {
-        NSError *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:nil]; // underlying error
-        if (outError)
-            *outError = [NSError localErrorWithCode:kBDSKCannotFindTemporaryDirectoryError localizedDescription:[NSString stringWithFormat:@"Unable to find temporary items directory for '%@'", path] underlyingError:error];
-    }
-    
-    if (tempItemsPath) {
-        // Don't pass in paths that are already inside Temporary Items or you might get back the same path you passed in.
-        if (tempFileName = [self uniqueFilePathWithName:[path lastPathComponent] atPath:tempItemsPath]) {
-            NSInteger fd = open((const char *)[self fileSystemRepresentationWithPath:tempFileName], O_EXCL | O_WRONLY | O_CREAT | O_TRUNC, 0666);
-            if (fd != -1)
-                close(fd); // no unlink, were are on the 'create' branch
-            else if (errno != EEXIST)
-                tempFileName = nil;
-        }
-    }
-    
-    if (tempFileName == nil) {
-        if (outError)
-            *outError = nil; // Ignore any previous error
-        // Try to use the same directory.  Can't just call -uniqueFilenameFromName:path since we want a NEW file name (-uniqueFilenameFromName: would just return the input path and the caller expecting a path where it can put something temporarily, i.e., different from the input path).
-        if (tempFileName = [self uniqueFilePathWithName:[path lastPathComponent] atPath:[path stringByDeletingLastPathComponent]]) {
-            NSInteger fd = open((const char *)[self fileSystemRepresentationWithPath:tempFileName], O_EXCL | O_WRONLY | O_CREAT | O_TRUNC, 0666);
-            if (fd != -1)
-                close(fd); // no unlink, were are on the 'create' branch
-            else if (errno != EEXIST)
-                tempFileName = nil;
-        }
-    }
-    
-    if (tempFileName == nil && outError)
-        *outError = [NSError localErrorWithCode:kBDSKCannotCreateTemporaryFileError localizedDescription:[NSString stringWithFormat:@"Unable to create unique file for %@.", path]];
-    
-    BDSKPOSTCONDITION(!tempFileName || [self fileExistsAtPath:tempFileName] || ![path isEqualToString:tempFileName]);
-    
-    return tempFileName;
-}
-
-- (NSString *)temporaryFileWithBasename:(NSString *)fileName {
-	return [self uniqueFilePathWithName:fileName atPath:temporaryBaseDirectory ?: [[NSProcessInfo processInfo] globallyUniqueString]];
-}
-
-// This method is subject to a race condition in our temporary directory if we pass the same baseName to this method and temporaryFileWithBasename: simultaneously; hence the lock in uniqueFilePathWithName:atPath:, even though it and temporaryFileWithBasename: are not thread safe or secure.
-- (NSString *)makeTemporaryDirectoryWithBasename:(NSString *)baseName {
-    NSString *finalPath = nil;
-    
-    @synchronized(self) {
-        if (baseName == nil) {
-            CFUUIDRef uuid = CFUUIDCreate(NULL);
-            baseName = [(NSString *)CFUUIDCreateString(NULL, uuid) autorelease];
-            CFRelease(uuid);
-        }
-        
-        NSUInteger i = 0;
-        NSURL *fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:baseName]];
-        while ([self objectExistsAtFileURL:fileURL]) {
-            fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%lu", baseName, (unsigned long)++i]]];
-        }
-        finalPath = [fileURL path];
-        
-        // raise if we can't create a file in the chewable folder?
-        if (NO == [self createDirectoryAtPathWithNoAttributes:finalPath])
-            finalPath = nil;
-    }
-    return finalPath;
-}
-
-- (NSString *)uniqueFilePathWithName:(NSString *)fileName atPath:(NSString *)directory {
-    // could expand this path?
-    NSParameterAssert([directory isAbsolutePath]);
-    NSParameterAssert([fileName isAbsolutePath] == NO);
-    NSString *baseName = [fileName stringByDeletingPathExtension];
-    NSString *extension = [fileName pathExtension];
-    
-    // optimistically assume we can just return the sender's guess of /directory/filename
-    NSString *fullPath = [directory stringByAppendingPathComponent:fileName];
-    NSInteger i = 0;
-    
-    // this method is always invoked from the main thread, but we don't want multiple threads in temporaryBaseDirectory (which may be passed as directory here); could make the lock conditional, but performance isn't a concern here
-    @synchronized(self) {
-        // if the file exists, try /directory/filename-i.extension
-        while([self fileExistsAtPath:fullPath]) {
-            fullPath = [directory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%lu", baseName, (unsigned long)++i]];
-            if (extension)
-                fullPath = [fullPath stringByAppendingPathExtension:extension];
-        }
-    }
-
-	return fullPath;
-}
-
-#pragma mark Creating paths
-
-- (BOOL)createPathToFile:(NSString *)path attributes:(NSDictionary *)attributes;
-    // Creates any directories needed to be able to create a file at the specified path.  Returns NO on failure.
-{
-    NSString *directory = [path stringByDeletingLastPathComponent];
-    BOOL isDir;
-    BOOL success = NO;
-    if ([directory length] == 0)
-        success = YES;
-    else if ([self fileExistsAtPath:directory isDirectory:&isDir] == NO)
-        success = [self createPathToFile:directory attributes:attributes] && [self createDirectoryAtPath:directory attributes:attributes];
-    else if (isDir)
-        success = YES;
-    return success;
-}
-
-#pragma mark Resoving aliases
-
-// This method is copied and modified from NSFileManager-OFExtensions.m
-- (NSString *)resolveAliasesInPath:(NSString *)originalPath
-{
-    FSRef ref, originalRefOfPath;
-    OSErr err;
-    char *buffer;
-    UInt32 bufferSize;
-    Boolean isFolder, wasAliased;
-    NSMutableArray *strippedComponents;
-    NSString *path;
-
-    if ([NSString isEmptyString:originalPath])
-        return nil;
-    
-    path = [originalPath stringByStandardizingPath]; // maybe use stringByExpandingTildeInPath instead?
-    strippedComponents = [[NSMutableArray alloc] init];
-    [strippedComponents autorelease];
-
-    /* First convert the path into an FSRef. If necessary, strip components from the end of the pathname until we reach a resolvable path. */
-    for(;;) {
-        bzero(&ref, sizeof(ref));
-        err = FSPathMakeRef((const unsigned char *)[path fileSystemRepresentation], &ref, &isFolder);
-        if (err == noErr)
-            break;  // We've resolved the first portion of the path to an FSRef.
-        else if (err == fnfErr || err == nsvErr || err == dirNFErr) {  // Not found --- try walking up the tree.
-            NSString *stripped;
-
-            stripped = [path lastPathComponent];
-            if ([NSString isEmptyString:stripped])
-                return nil;
-
-            [strippedComponents addObject:stripped];
-            path = [path stringByDeletingLastPathComponent];
-        } else
-            return nil;  // Some other error; return nil.
-    }
-    /* Stash a copy of the FSRef we got from 'path'. In the common case, we'll be converting this very same FSRef back into a path, in which case we can just re-use the original path. */
-    bcopy(&ref, &originalRefOfPath, sizeof(FSRef));
-
-    /* Repeatedly resolve aliases and add stripped path components until done. */
-    for(;;) {
-        
-        /* Resolve any aliases. */
-        /* TODO: Verify that we don't need to repeatedly call FSResolveAliasFile(). We're passing TRUE for resolveAliasChains, which suggests that the call will continue resolving aliases until it reaches a non-alias, but that parameter's meaning is not actually documented in the Apple File Manager API docs. However, I can't seem to get the finder to *create* an alias to an alias in the first place, so this probably isn't much of a problem.
-        (Why not simply call FSResolveAliasFile() repeatedly since I don't know if it's necessary? Because it can be a fairly time-consuming call if the volume is e.g. a remote WebDAVFS volume.) */
-        err = FSResolveAliasFile(&ref, TRUE, &isFolder, &wasAliased);
-        /* if it's a regular file and not an alias, FSResolveAliasFile() will return noErr and set wasAliased to false */
-        if (err != noErr)
-            return nil;
-
-        /* Append one stripped path component. */
-        if ([strippedComponents count] > 0) {
-            UniChar *componentName;
-            UniCharCount componentNameLength;
-            NSString *nextComponent;
-            FSRef newRef;
-            
-            if (!isFolder) {
-                // Whoa --- we've arrived at a non-folder. Can't continue.
-                // (A volume root is considered a folder, as you'd expect.)
-                return nil;
-            }
-            
-            nextComponent = [strippedComponents lastObject];
-            componentNameLength = [nextComponent length];
-            componentName = malloc(componentNameLength * sizeof(UniChar));
-            BDSKASSERT(sizeof(UniChar) == sizeof(unichar));
-            [nextComponent getCharacters:componentName];
-            bzero(&newRef, sizeof(newRef));
-            err = FSMakeFSRefUnicode(&ref, componentNameLength, componentName, kTextEncodingUnknown, &newRef);
-            free(componentName);
-
-            if (err == fnfErr) {
-                /* The current ref is a directory, but it doesn't contain anything with the name of the next component. Quit walking the filesystem and append the unresolved components to the name of the directory. */
-                break;
-            } else if (err != noErr) {
-                /* Some other error. Give up. */
-                return nil;
-            }
-
-            bcopy(&newRef, &ref, sizeof(ref));
-            [strippedComponents removeLastObject];
-        } else {
-            /* If we don't have any path components to re-resolve, we're done. */
-            break;
-        }
-    }
-
-    if (FSCompareFSRefs(&originalRefOfPath, &ref) != noErr) {
-        /* Convert our FSRef back into a path. */
-        /* PATH_MAX*4 is a generous guess as to the largest path we can expect. CoreFoundation appears to just use PATH_MAX, so I'm pretty confident this is big enough. */
-        buffer = malloc(bufferSize = (PATH_MAX * 4));
-        err = FSRefMakePath(&ref, (unsigned char *)buffer, bufferSize);
-        if (err == noErr) {
-            path = [NSString stringWithUTF8String:buffer];
-        } else {
-            path = nil;
-        }
-        free(buffer);
-    }
-
-    /* Append any unresolvable path components to the resolved directory. */
-    while ([strippedComponents count] > 0) {
-        path = [path stringByAppendingPathComponent:[strippedComponents lastObject]];
-        [strippedComponents removeLastObject];
-    }
-
-    return path;
-}
-
 #pragma mark Thread safe methods
 
 - (BOOL)createDirectoryAtPathWithNoAttributes:(NSString *)path
@@ -591,7 +393,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     
     NSURL *parent = [NSURL fileURLWithPath:[path stringByDeletingLastPathComponent]];
     NSString *fileName = [path lastPathComponent];
-    NSUInteger length = [fileName length];
+    unsigned length = [fileName length];
     UniChar *name = (UniChar *)NSZoneMalloc(NULL, length * sizeof(UniChar));
     [fileName getCharacters:name];
     
@@ -624,79 +426,6 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     return exists;
 }
 
-// The following function is copied from Apple's MoreFilesX sample project
-
-struct FSDeleteContainerGlobals
-{
-	OSErr							result;			/* result */
-	ItemCount						actualObjects;	/* number of objects returned */
-	FSCatalogInfo					catalogInfo;	/* FSCatalogInfo */
-};
-typedef struct FSDeleteContainerGlobals FSDeleteContainerGlobals;
-
-static
-void
-FSDeleteContainerLevel(
-	const FSRef *container,
-	FSDeleteContainerGlobals *theGlobals)
-{
-	/* level locals */
-	FSIterator					iterator;
-	FSRef						itemToDelete;
-	UInt16						nodeFlags;
-	
-	/* Open FSIterator for flat access and give delete optimization hint */
-	theGlobals->result = FSOpenIterator(container, kFSIterateFlat + kFSIterateDelete, &iterator);
-	require_noerr(theGlobals->result, FSOpenIterator);
-	
-	/* delete the contents of the directory */
-	do
-	{
-		/* get 1 item to delete */
-		theGlobals->result = FSGetCatalogInfoBulk(iterator, 1, &theGlobals->actualObjects,
-								NULL, kFSCatInfoNodeFlags, &theGlobals->catalogInfo,
-								&itemToDelete, NULL, NULL);
-		if ( (noErr == theGlobals->result) && (1 == theGlobals->actualObjects) )
-		{
-			/* save node flags in local in case we have to recurse */
-			nodeFlags = theGlobals->catalogInfo.nodeFlags;
-			
-			/* is it a file or directory? */
-			if ( 0 != (nodeFlags & kFSNodeIsDirectoryMask) )
-			{
-				/* it's a directory -- delete its contents before attempting to delete it */
-				FSDeleteContainerLevel(&itemToDelete, theGlobals);
-			}
-			/* are we still OK to delete? */
-			if ( noErr == theGlobals->result )
-			{
-				/* is item locked? */
-				if ( 0 != (nodeFlags & kFSNodeLockedMask) )
-				{
-					/* then attempt to unlock it (ignore result since FSDeleteObject will set it correctly) */
-					theGlobals->catalogInfo.nodeFlags = nodeFlags & ~kFSNodeLockedMask;
-					(void) FSSetCatalogInfo(&itemToDelete, kFSCatInfoNodeFlags, &theGlobals->catalogInfo);
-				}
-				/* delete the item */
-				theGlobals->result = FSDeleteObject(&itemToDelete);
-			}
-		}
-	} while ( noErr == theGlobals->result );
-	
-	/* we found the end of the items normally, so return noErr */
-	if ( errFSNoMoreItems == theGlobals->result )
-	{
-		theGlobals->result = noErr;
-	}
-	
-	/* close the FSIterator (closing an open iterator should never fail) */
-	verify_noerr(FSCloseIterator(iterator));
-
-FSOpenIterator:
-
-	return;
-}
-
 - (BOOL)deleteObjectAtFileURL:(NSURL *)fileURL error:(NSError **)error{
     NSParameterAssert(fileURL != nil);
     NSParameterAssert([fileURL isFileURL]);
@@ -715,28 +444,13 @@ FSOpenIterator:
         }
     }
     
-    if(NO == success && error != NULL)
+    if(NO == success && error != nil)
         *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"File does not exist.", @"Error description") forKey:NSLocalizedDescriptionKey]];
     
-    if(success){
-        FSCatalogInfo catalogInfo;
-        success = (noErr == FSGetCatalogInfo(&fileRef, kFSCatInfoNodeFlags, &catalogInfo, NULL, NULL, NULL));
-        if(NO == success && error != NULL)
+    if(YES == success){
+        success = (noErr == FSDeleteObject(&fileRef));
+        if(NO == success && error != nil)
             *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete file.", @"Error description") forKey:NSLocalizedDescriptionKey]];
-        
-        if(success && 0 != (catalogInfo.nodeFlags & kFSNodeIsDirectoryMask)){
-            FSDeleteContainerGlobals theGlobals;
-            FSDeleteContainerLevel(&fileRef, &theGlobals);
-            success = (noErr == theGlobals.result);
-            if(NO == success && error != NULL)
-                *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete directory contents.", @"Error description") forKey:NSLocalizedDescriptionKey]];
-        }
-        
-        if(success){
-            success = (noErr == FSDeleteObject(&fileRef));
-            if(NO == success && error != NULL)
-                *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete file.", @"Error description") forKey:NSLocalizedDescriptionKey]];
-        }
     }
     
     return success;
@@ -860,13 +574,11 @@ static OSType finderSignatureBytes = 'MACS';
         success = CFURLGetFSRef((CFURLRef)dstURL, &dstDirRef);
     
     OSErr err = noErr;
-    NSString *comment = nil;
+    NSString *comment = [self commentForURL:srcURL];
     FSRef newObjectRef;
     
-    // unfortunately, FSCopyObjectSync does not copy Spotlight comments on Tiger (and neither does NSFileManager) rdar://problem/4531819
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
-        comment = [self commentForURL:srcURL];
-    
+
+    // unfortunately, FSCopyObjectSync does not copy Spotlight comments (and neither does NSFileManager) rdar://problem/4531819
     err = FSCopyObjectSync(&srcFileRef, &dstDirRef, NULL, &newObjectRef, 0);
     
     // set the file comment if necessary
@@ -878,11 +590,11 @@ static OSType finderSignatureBytes = 'MACS';
         } else {
             err = coreFoundationUnknownErr;
         }
-    }
-    
+    }        
+
     if(NO == success && error != nil){
         NSString *errorMessage = nil;
-        if(noErr != err)
+        if(GetMacOSStatusCommentString != NULL && noErr != err)
             errorMessage = [NSString stringWithUTF8String:GetMacOSStatusCommentString(err)];
         if(nil == errorMessage)
             errorMessage = NSLocalizedString(@"Unable to copy file.", @"Error description");
@@ -978,73 +690,41 @@ static OSType finderSignatureBytes = 'MACS';
     // create an empty file, since weblocs are just a resource
     NSURL *parent = [NSURL fileURLWithPath:[fullPath stringByDeletingLastPathComponent]];
     NSString *fileName = [fullPath lastPathComponent];
-    NSUInteger length = [fileName length];
+    unsigned length = [fileName length];
     UniChar *name = (UniChar *)NSZoneMalloc(NULL, length * sizeof(UniChar));
     [fileName getCharacters:name];
     
     FSRef parentFileRef, newFileRef;
     success = CFURLGetFSRef((CFURLRef)parent, &parentFileRef);
     OSErr err = noErr;
-    if (success)    
+    if(success)    
         err = FSCreateFileUnicode(&parentFileRef, (UniCharCount)length, name, kFSCatInfoNone, NULL, &newFileRef, NULL);
     NSZoneFree(NULL, name);
-    if (noErr != err)
+    if(noErr != err)
         success = NO;
     
-    // open the resource fork
-    HFSUniStr255 forkName;
-    SInt16 refNum;
-    
-    if (success)
-        err = FSGetResourceForkName(&forkName);
-    if (err != noErr)
-        success = NO;
-    
-    if (success) {
-        err = FSOpenResourceFile(&newFileRef, forkName.length, forkName.unicode, fsCurPerm, &refNum);
-        if (err != noErr) {
-            err = FSCreateResourceFork(&newFileRef, forkName.length, forkName.unicode, 0);
-            if (err == noErr)
-                err = FSOpenResourceFile(&newFileRef, forkName.length, forkName.unicode, fsCurPerm, &refNum);
-        }
-        if (err == noErr)
-            success = NO;
-    }
-    
-    if (success) {
-        // at this point we have opened the resource fork, remember the current resource file
-        SInt16 oldCurRsrcMap;
-        oldCurRsrcMap = CurResFile();
-        UseResFile(refNum);
-        
-        // get the data we should write to the resource fork
+    if(success){
+        NSURL *newFile = [(id)CFURLCreateFromFSRef(CFAllocatorGetDefault(), &newFileRef) autorelease];
+        OBASSERT([[newFile path] isEqual:fullPath]);
+        fullPath = [newFile path];
+                
+        OFResourceFork *resourceFork = [[OFResourceFork alloc] initWithContentsOfFile:fullPath forkType:OFResourceForkType createFork:YES];
+
         NSString *urlString = [destURL absoluteString];
         NSData *data = [NSData dataWithBytes:[urlString UTF8String] length:strlen([urlString UTF8String])];
         NSMutableArray *entries = [[NSMutableArray alloc] initWithCapacity:2];
-        NSData *entriesData;
-        
+
+        // write out the same data for text and url resources
+        [resourceFork setData:data forResourceType:'TEXT' resID:256];
+        [resourceFork setData:data forResourceType:'url ' resID:256];
+
         [entries addObject:[WLDragMapEntry entryWithType:'TEXT' resID:256]];
         [entries addObject:[WLDragMapEntry entryWithType:'url ' resID:256]];
-        entriesData = [WLDragMapEntry dragDataWithEntries:entries];
+
+        // add the drag map entry resources, since we get a corrupt file without them
+        [resourceFork setData:[WLDragMapEntry dragDataWithEntries:entries] forResourceType:'drag' resID:128];
         [entries release];
-        
-        Handle dataHandle;
-        Str255 dst;
-        
-        CFStringGetPascalString(CFSTR("BDSKResourceForkData"), dst, 256, kCFStringEncodingASCII);
-        
-        // write out the same data for text and url resources
-        PtrToHand((const void *)[data bytes], &dataHandle, [data length]);
-        AddResource(dataHandle, 'TEXT', 256, dst);
-        PtrToHand((const void *)[data bytes], &dataHandle, [data length]);
-        AddResource(dataHandle, 'url ', 256, dst);
-        PtrToHand((const void *)[entriesData bytes], &dataHandle, [entriesData length]);
-        AddResource(dataHandle, 'drag', 128, dst);
-        
-        // reset the current resource file and close the resource fork
-        UpdateResFile(refNum);
-        UseResFile(oldCurRsrcMap);
-        CloseResFile(refNum);
+        [resourceFork release];
     }
         
     return success;
@@ -1101,7 +781,7 @@ static OSType finderSignatureBytes = 'MACS';
     NSParameterAssert(0 != nsEncoding);
     CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(nsEncoding);
     CFStringRef name = CFStringConvertEncodingToIANACharSetName(cfEncoding);
-    NSString *encodingString = [NSString stringWithFormat:@"%@;%u", name, cfEncoding];
+    NSString *encodingString = [NSString stringWithFormat:@"%@;%d", name, cfEncoding];
     return [[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:@"com.apple.TextEncoding" toValue:[encodingString dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:error];
 }
 
@@ -1129,7 +809,7 @@ static OSType finderSignatureBytes = 'MACS';
     
     // currently only two elements, but may become arbitrarily long in future
     if ([array count] >= 2) {
-        CFStringEncoding cfEncoding = [[array objectAtIndex:1] intValue];
+        CFStringEncoding cfEncoding = [[array objectAtIndex:1] unsignedIntValue];
         nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
     }
     else if ([array count] > 0) {
@@ -1178,7 +858,7 @@ static OSType finderSignatureBytes = 'MACS';
 
 @implementation WLDragMapEntry
 
-- (id)initWithType:(OSType)type resID:(NSInteger)resID;
+- (id)initWithType:(OSType)type resID:(int)resID;
 {
     self = [super init];
     
@@ -1188,7 +868,7 @@ static OSType finderSignatureBytes = 'MACS';
     return self;
 }
 
-+ (id)entryWithType:(OSType)type resID:(NSInteger)resID;
++ (id)entryWithType:(OSType)type resID:(int)resID;
 {
     WLDragMapEntry* result = [[WLDragMapEntry alloc] initWithType:type resID:resID];
     
@@ -1234,6 +914,28 @@ static OSType finderSignatureBytes = 'MACS';
     [result performSelector:@selector(appendData:) withObjectsByMakingObjectsFromArray:entries performSelector:@selector(entryData)];
     
     return result;
+}
+
+@end
+
+@implementation OFResourceFork (BDSKExtensions)
+
+- (void)setData:(NSData *)contentData forResourceType:(ResType)resType resID:(short)resID;
+{
+    SInt16 oldCurRsrcMap;
+    
+    oldCurRsrcMap = CurResFile();
+    UseResFile(refNum);
+    
+    const void *data = [contentData bytes];
+    Handle dataHandle;
+    PtrToHand(data, &dataHandle, [contentData length]);
+    Str255 dst;
+    CFStringGetPascalString(CFSTR("OFResourceForkData"), dst, 256, kCFStringEncodingASCII);
+    AddResource(dataHandle, resType, resID, dst);
+    
+    UpdateResFile(refNum);
+    UseResFile(oldCurRsrcMap);
 }
 
 @end

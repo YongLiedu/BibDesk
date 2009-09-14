@@ -37,48 +37,22 @@
  */
 
 #import "BibPref_Display.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKTemplate.h"
 #import "BibAuthor.h"
 #import "BDSKStringConstants.h"
-#import "BDSKPreferenceController.h"
-#import "BDSKStringArrayFormatter.h"
-
-
-@interface BibPref_Display (Private)
-- (void)updatePreviewDisplayUI;
-- (void)updateAuthorNameDisplayUI;
-- (void)updateSortWordsDisplayUI;
-- (NSFont *)currentFont;
-- (void)setCurrentFont:(NSFont *)font;
-- (void)updateFontPanel:(NSNotification *)notification;
-- (void)resetFontPanel:(NSNotification *)notification;
-@end
 
 
 @implementation BibPref_Display
 
 - (void)awakeFromNib{
-    [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"Display all items in preview"), @"1", @"5", @"10", @"20", nil]];
-    [ignoredSortTermsField setFormatter:[[[BDSKStringArrayFormatter alloc] init] autorelease]];
+    [super awakeFromNib];
     
-    [displayGroupCountButton setState:[sud boolForKey:BDSKHideGroupCountKey] ? NSOffState : NSOnState];
-    [self updatePreviewDisplayUI];
-    [self updateAuthorNameDisplayUI];
-    [self updateSortWordsDisplayUI];
-}
-
-- (void)defaultsDidRevert {
-    // reset UI, but only if we loaded the nib
-    if ([self isWindowLoaded]) {
-        [displayGroupCountButton setState:[sud boolForKey:BDSKHideGroupCountKey] ? NSOffState : NSOnState];
-        [self updatePreviewDisplayUI];
-        [self updateAuthorNameDisplayUI];
-        [self updateSortWordsDisplayUI];
-    }
+    [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"Display all items in preview"), @"1", @"5", @"10", @"20", nil]];
 }
 
 - (void)updatePreviewDisplayUI{
-    NSInteger maxNumber = [sud integerForKey:BDSKPreviewMaxNumberKey];
+    int maxNumber = [defaults integerForKey:BDSKPreviewMaxNumberKey];
 	if (maxNumber == 0)
 		[previewMaxNumberComboBox setStringValue:NSLocalizedString(@"All",@"Display all items in preview")];
 	else 
@@ -86,7 +60,7 @@
 }
 
 - (void)updateAuthorNameDisplayUI{
-    NSInteger mask = [sud integerForKey:BDSKAuthorNameDisplayKey];
+    int mask = [defaults integerForKey:BDSKAuthorNameDisplayKey];
     [authorFirstNameButton setState:(mask & BDSKAuthorDisplayFirstNameMask) ? NSOnState : NSOffState];
     [authorAbbreviateButton setState:(mask & BDSKAuthorAbbreviateFirstNameMask) ? NSOnState : NSOffState];
     [authorLastNameFirstButton setState:(mask & BDSKAuthorLastNameFirstMask) ? NSOnState : NSOffState];
@@ -94,38 +68,93 @@
     [authorLastNameFirstButton setEnabled:mask & BDSKAuthorDisplayFirstNameMask];
 }
 
-- (void)updateSortWordsDisplayUI{
-    [ignoredSortTermsField setObjectValue:[sud stringArrayForKey:BDSKIgnoredSortTermsKey]];
-}
+- (void)updateUI{
+    [self updatePreviewDisplayUI];
+    [self updateAuthorNameDisplayUI];
+}    
 
 - (IBAction)changePreviewMaxNumber:(id)sender{
-    NSInteger maxNumber = [[[sender cell] objectValueOfSelectedItem] intValue]; // returns 0 if not a number (as in @"All")
-    if(maxNumber != [sud integerForKey:BDSKPreviewMaxNumberKey]){
-		[sud setInteger:maxNumber forKey:BDSKPreviewMaxNumberKey];
+    int maxNumber = [[[sender cell] objectValueOfSelectedItem] intValue]; // returns 0 if not a number (as in @"All")
+    if(maxNumber != [defaults integerForKey:BDSKPreviewMaxNumberKey]){
+		[defaults setInteger:maxNumber forKey:BDSKPreviewMaxNumberKey];
+        [defaults autoSynchronize];
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
 	}
 }
 
-- (IBAction)changeIgnoredSortTerms:(id)sender{
-    [sud setObject:[sender objectValue] forKey:BDSKIgnoredSortTermsKey];
+//
+// sorting prefs code
+//
+
+- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+{
+    return [[defaults arrayForKey:BDSKIgnoredSortTermsKey] objectAtIndex:rowIndex];
+}
+
+- (int)numberOfRowsInTableView:(NSTableView *)aTableView
+{
+    return [[defaults arrayForKey:BDSKIgnoredSortTermsKey] count];
+}
+
+- (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+{
+    NSMutableArray *mutableArray = [[defaults arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
+    [mutableArray replaceObjectAtIndex:rowIndex withObject:anObject];
+    [defaults setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
+    [mutableArray release];
+    [defaults autoSynchronize];
     CFNotificationCenterPostNotification(CFNotificationCenterGetLocalCenter(), CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, NULL, FALSE);
 }
 
-- (IBAction)changeDisplayGroupCount:(id)sender{
-    [sud setBool:[sender state] == NSOffState forKey:BDSKHideGroupCountKey];
+- (IBAction)addTerm:(id)sender
+{
+    NSMutableArray *mutableArray = [[defaults arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
+    if(!mutableArray)
+        mutableArray = [[NSMutableArray alloc] initWithCapacity:1];
+    [mutableArray addObject:NSLocalizedString(@"Edit or delete this text", @"")];
+    [defaults setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
+    [tableView reloadData];
+    [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:[mutableArray count] - 1] byExtendingSelection:NO];
+    [tableView editColumn:0 row:[tableView selectedRow] withEvent:nil select:YES];
+    [mutableArray release];
+    [defaults autoSynchronize];
+    CFNotificationCenterPostNotification(CFNotificationCenterGetLocalCenter(), CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, NULL, FALSE);
+}
+
+- (void)tableViewSelectionDidChange:(NSNotification *)aNotification
+{
+    [removeButton setEnabled:([tableView numberOfSelectedRows] > 0)];
+}
+
+- (IBAction)removeSelectedTerm:(id)sender
+{
+    [[[BDSKPreferenceController sharedPreferenceController] window] makeFirstResponder:tableView];  // end editing 
+    NSMutableArray *mutableArray = [[defaults arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
+    
+    int selRow = [tableView selectedRow];
+    NSAssert(selRow >= 0, @"row must be selected in order to delete");
+    
+    [mutableArray removeObjectAtIndex:selRow];
+    [defaults setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
+    [mutableArray release];
+    [tableView reloadData];
+    [defaults autoSynchronize];
+    CFNotificationCenterPostNotification(CFNotificationCenterGetLocalCenter(), CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, NULL, FALSE);
 }
 
 - (IBAction)changeAuthorDisplay:(id)sender;
 {
-    NSInteger itemMask = 1 << [sender tag];
-    NSInteger prefMask = [sud integerForKey:BDSKAuthorNameDisplayKey];
+    int itemMask = 1 << [sender tag];
+    int prefMask = [defaults integerForKey:BDSKAuthorNameDisplayKey];
     if([sender state] == NSOnState)
         prefMask |= itemMask;
     else
         prefMask &= ~itemMask;
-    [sud setInteger:prefMask forKey:BDSKAuthorNameDisplayKey];
+    [defaults setInteger:prefMask forKey:BDSKAuthorNameDisplayKey];
+    [defaults autoSynchronize];
     [self updateAuthorNameDisplayUI];
 }
+
 
 - (NSFont *)currentFont{
     NSString *fontNameKey = nil;
@@ -150,7 +179,7 @@
         default:
             return nil;
     }
-    return [NSFont fontWithName:[sud objectForKey:fontNameKey] size:[sud floatForKey:fontSizeKey]];
+    return [NSFont fontWithName:[defaults objectForKey:fontNameKey] size:[defaults floatForKey:fontSizeKey]];
 }
 
 - (void)setCurrentFont:(NSFont *)font{
@@ -177,11 +206,12 @@
             return;
     }
     // set the name last, as that is observed for changes
-    [sud setFloat:[font pointSize] forKey:fontSizeKey];
-    [sud setObject:[font fontName] forKey:fontNameKey];
+    [defaults setFloat:[font pointSize] forKey:fontSizeKey];
+    [defaults setObject:[font fontName] forKey:fontNameKey];
+    [defaults autoSynchronize];
 }
 
-- (IBAction)changeFont:(id)sender{
+- (void)changeFont:(id)sender{
 	NSFontManager *fontManager = [NSFontManager sharedFontManager];
 	NSFont *font = [self currentFont] ?: [NSFont systemFontOfSize:[NSFont systemFontSize]];
     font = [fontManager convertFont:font];
@@ -204,49 +234,37 @@
 	[[NSFontManager sharedFontManager] setAction:@selector(changeFont:)];
 }
 
-- (void)didSelect{
-    [super didSelect];
+- (void)didBecomeCurrentPreferenceClient{
     [self updateFontPanel:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updateFontPanel:)
                                                  name:NSWindowDidBecomeMainNotification
-                                               object:[[self view] window]];
+                                               object:[[self controlBox] window]];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(resetFontPanel:)
                                                  name:NSWindowDidResignMainNotification
-                                               object:[[self view] window]];
+                                               object:[[self controlBox] window]];
 }
 
-- (void)willUnselect{
-    [super willUnselect];
+- (void)resignCurrentPreferenceClient{
     [self resetFontPanel:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:NSWindowDidBecomeMainNotification
-                                                  object:[[self view] window]];
+                                                  object:[[self controlBox] window]];
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:NSWindowDidResignMainNotification
-                                                  object:[[self view] window]];
+                                                  object:[[self controlBox] window]];
     
-}
-
-- (void)didShowWindow {
-    [super didShowWindow];
-    [self didSelect];
-}
-
-- (void)willCloseWindow {
-    [super willCloseWindow];
-    [self willUnselect];
 }
 
 @end
 
 
-@implementation BDSKPreferenceController (BDSKFontExtension)
+@implementation OAPreferenceController (BDSKFontExtension)
 
 - (void)localChangeFont:(id)sender{
-    if ([[self selectedPane] respondsToSelector:@selector(changeFont:)])
-        [(id)[self selectedPane] performSelector:@selector(changeFont:) withObject:sender];
+    if ([nonretained_currentClient respondsToSelector:@selector(changeFont:)])
+        [nonretained_currentClient performSelector:@selector(changeFont:) withObject:sender];
 }
 
 @end

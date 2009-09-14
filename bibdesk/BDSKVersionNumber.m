@@ -22,18 +22,13 @@
 
 // This allows version numbers like "1.3", "v1.3", "1.0b2", "1.0rc1", "198v3", "1.0-alpha-5", and ignores spaces
 
-+ (id)versionNumberWithVersionString:(NSString *)versionString;
-{
-    return [versionString isKindOfClass:[NSString class]] ? [[[self alloc] initWithVersionString:versionString] autorelease] : nil;
-}
-
 // Initializes the receiver from a string representation of a version number.  The input string may have an optional leading 'v' or 'V' followed by a sequence of positive integers separated by '.'s.  Any trailing component of the input string that doesn't match this pattern is ignored.  If no portion of this string matches the pattern, nil is returned.
 - (id)initWithVersionString:(NSString *)versionString;
 {
     
     if (self = [super init]) {
         // Input might be from a NSBundle info dictionary that could be misconfigured, so check at runtime too
-        if ([versionString isKindOfClass:[NSString class]] == NO) {
+        if (versionString == nil || [versionString isKindOfClass:[NSString class]] == NO) {
             [self release];
             return nil;
         }
@@ -52,11 +47,11 @@
             [scanner scanString:@"-" intoString:NULL];
         
         while ([scanner isAtEnd] == NO && sep != nil) {
-            NSInteger component;
+            int component;
             
             if ([scanner scanInt:&component] && component >= 0) {
             
-                [mutableVersionString appendFormat:@"%@%ld", sep, (long)component];
+                [mutableVersionString appendFormat:@"%@%i", sep, component];
                 
                 componentCount++;
                 components = realloc(components, sizeof(*components) * componentCount);
@@ -140,12 +135,12 @@
     return cleanVersionString;
 }
 
-- (NSUInteger)componentCount;
+- (unsigned int)componentCount;
 {
     return componentCount;
 }
 
-- (NSInteger)componentAtIndex:(NSUInteger)componentIndex;
+- (int)componentAtIndex:(unsigned int)componentIndex;
 {
     // This treats the version as a infinite sequence ending in "...0.0.0.0", making comparison easier
     if (componentIndex < componentCount)
@@ -153,7 +148,7 @@
     return 0;
 }
 
-- (NSInteger)releaseType;
+- (int)releaseType;
 {
     return releaseType;
 }
@@ -192,7 +187,7 @@
 
 #pragma mark Comparison
 
-- (NSUInteger)hash;
+- (unsigned)hash;
 {
     return [cleanVersionString hash];
 }
@@ -209,10 +204,10 @@
     if (otherVersion == nil)
         return NSOrderedDescending;
 
-    NSUInteger i, count = MAX(componentCount, [otherVersion componentCount]);
+    unsigned int i, count = MAX(componentCount, [otherVersion componentCount]);
     for (i = 0; i < count; i++) {
-        NSInteger component = [self componentAtIndex:i];
-        NSInteger otherComponent = [otherVersion componentAtIndex:i];
+        int component = [self componentAtIndex:i];
+        int otherComponent = [otherVersion componentAtIndex:i];
 
         if (component < otherComponent)
             return NSOrderedAscending;

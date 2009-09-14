@@ -40,13 +40,25 @@
 #import "BibAuthor.h"
 #import "BibItem.h"
 
-static CFStringRef searchIndexCopyDescription(const void *value)
+static CFTypeRef searchIndexDictionaryRetain(CFAllocatorRef alloc, const void *value) { return CFRetain(value); }
+// Note: SKIndexClose() is supposed to dispose of indexes.  However, it leaks on both Tiger and Leopard unless you're using GC on Leopard.  For non-GC apps, we need to use CFRelease() on Leopard, according to the response to my bug report on the leaks.  This is still not documented, though.
+static void searchIndexDictionaryRelease(CFAllocatorRef alloc, const void *value) { CFRelease((SKIndexRef)value); }
+static CFStringRef searchIndexDictionaryCopyDescription(const void *value)
 {
     CFStringRef cfDesc = CFCopyDescription(value);
-    CFStringRef desc = (CFStringRef)[[NSString alloc] initWithFormat:@"%@: type %ld, %ld documents", cfDesc, (long)SKIndexGetIndexType((SKIndexRef)value), (long)SKIndexGetDocumentCount((SKIndexRef)value)];
+    CFStringRef desc = (CFStringRef)[[NSString alloc] initWithFormat:@"%@: type %d, %d documents", cfDesc, SKIndexGetIndexType((SKIndexRef)value), SKIndexGetDocumentCount((SKIndexRef)value)];
     CFRelease(cfDesc);
     return desc;
 }
+static Boolean searchIndexDictionaryEqual(const void *value1, const void *value2) { return CFEqual(value1, value2); }
+
+const CFDictionaryValueCallBacks BDSKSearchIndexDictionaryValueCallBacks = {
+    0,
+    searchIndexDictionaryRetain,
+    searchIndexDictionaryRelease,
+    searchIndexDictionaryCopyDescription,
+    searchIndexDictionaryEqual
+};
 
 @implementation BDSKItemSearchIndexes
 
@@ -63,18 +75,10 @@ static CFStringRef searchIndexCopyDescription(const void *value)
 {
     self = [super init];
     if (self) {
+        searchIndexes = CFDictionaryCreateMutable(NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &BDSKSearchIndexDictionaryValueCallBacks);
         
-        // Note: SKIndexClose() is supposed to dispose of indexes, which was the original reason for using these custom callbacks.  However, it leaks on both Tiger and Leopard unless you're using GC on Leopard.  For non-GC apps, we need to use CFRelease() on Leopard, according to the response to my bug report on the leaks.  This is still not documented, though.
-        CFDictionaryValueCallBacks dcb = kCFTypeDictionaryValueCallBacks;
-        dcb.copyDescription = searchIndexCopyDescription;
-        searchIndexes = CFDictionaryCreateMutable(NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &dcb);        
-        
-        // pointer equality set
-        CFSetCallBacks scb = kCFTypeSetCallBacks;
-        scb.copyDescription = searchIndexCopyDescription;
-        scb.equal = NULL;
-        scb.hash = NULL;
-        indexesToFlush = CFSetCreateMutable(NULL, 0, &scb);
+        // pointer equality, nonretained; indexes are retained by the dictionary
+        indexesToFlush = CFSetCreateMutable(NULL, 0, NULL);
         
         // ensure that we never hand out a NULL search index unless someone asks for a field that isn't indexed
         [self resetWithPublications:nil];
@@ -97,7 +101,6 @@ static void addIndexToSet(const void *key, const void *value, void *context)
 // Index flushing is fairly expensive, especially with thousands of pubs added; here we just mark all indexes as dirty (which is negligible) and flush each index when requested.
 - (void)scheduleIndexFlush
 {
-    CFSetRemoveAllValues(indexesToFlush);
     CFDictionaryApplyFunction(searchIndexes, addIndexToSet, indexesToFlush);    
 }
 
@@ -114,6 +117,7 @@ static void appendNormalizedNames(const void *value, void *context)
 {
     NSEnumerator *pubsEnum = [pubs objectEnumerator];
     BibItem *pub;
+    NSMutableString *names = [[NSMutableString alloc] initWithCapacity:100];
     
     while (pub = [pubsEnum nextObject]) {
         SKDocumentRef doc = SKDocumentCreateWithURL((CFURLRef)[pub identifierURL]);
@@ -140,12 +144,11 @@ static void appendNormalizedNames(const void *value, void *context)
                 SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)searchText, TRUE);
             
             // just remove curly braces from names
-            NSMutableString *names = [[NSMutableString alloc] initWithCapacity:100];
+            [names replaceCharactersInRange:NSMakeRange(0, [names length]) withString:@""];
             CFSetApplyFunction((CFSetRef)[pub allPeople], appendNormalizedNames, names);
             skIndex = (void *)CFDictionaryGetValue(searchIndexes, BDSKPersonString);
             if (skIndex)
                 SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)names, TRUE);  
-            [names release];
             
             skIndex = (void *)CFDictionaryGetValue(searchIndexes, (CFStringRef)BDSKSkimNotesString);
             if (skimNotes && skIndex)
@@ -156,6 +159,7 @@ static void appendNormalizedNames(const void *value, void *context)
         
     }
     
+    [names release];
     [self scheduleIndexFlush];
 }
 
@@ -183,7 +187,6 @@ static void removeFromIndex(const void *key, const void *value, void *context)
 {
     
     CFDictionaryRemoveAllValues(searchIndexes);
-    CFSetRemoveAllValues(indexesToFlush);
     
     CFMutableDataRef indexData;
     SKIndexRef skIndex;
@@ -213,7 +216,7 @@ static void removeFromIndex(const void *key, const void *value, void *context)
         SKIndexFlush(anIndex);
         CFSetRemoveValue(indexesToFlush, anIndex);
     }
-    return (SKIndexRef)[[(id)anIndex retain] autorelease];
+    return anIndex;
 }
 
 @end

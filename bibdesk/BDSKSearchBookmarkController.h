@@ -39,10 +39,10 @@
 #import <Cocoa/Cocoa.h>
 
 
-@class BDSKSearchBookmark, BDSKBookmarkOutlineView;
+@class BDSKSearchBookmark;
 
 @interface BDSKSearchBookmarkController : NSWindowController {
-    IBOutlet BDSKBookmarkOutlineView *outlineView;
+    IBOutlet NSOutlineView *outlineView;
     BDSKSearchBookmark *bookmarkRoot;
     NSArray *draggedBookmarks;
     NSMutableDictionary *toolbarItems;

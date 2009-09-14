@@ -39,6 +39,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKFormatParser.h"
 
 enum {
@@ -70,7 +71,7 @@ enum {
 @discussion This is the data model class that encapsulates each Bibtex entry. BibItems are created for each entry in a file, and a BibDocument keeps collections of BibItems. They are also created in response to drag-in or paste operations containing BibTeX source. Their textvalue method is used to provide the text that is written to a file on saves.
 
 */
-@interface BibItem : NSObject <NSCopying, NSCoding, BDSKParseableItem>{
+@interface BibItem : OFObject <NSCopying, NSCoding, BDSKParseableItem>{
     NSString *fileType;
     NSString *citeKey;
 	NSString *pubType;
@@ -84,15 +85,14 @@ enum {
     BOOL hasBeenEdited;
     NSMutableSet *filesToBeFiled;
 	id<BDSKOwner> owner;
-    BDSKMacroResolver *macroResolver;
     BDSKFieldCollection *templateFields;
-    NSInteger currentIndex;
+    int currentIndex;
     BOOL spotlightMetadataChanged;
     BOOL isImported;
-    CGFloat searchScore;
+    float searchScore;
     NSURL *identifierURL;
     NSMutableArray *files;
-    NSUInteger colorLabel;
+    unsigned int colorLabel;
 }
 
 - (NSArray *)files;
@@ -106,7 +106,7 @@ enum {
 
 - (void)noteFilesChanged:(BOOL)isFile;
 
-- (BOOL)migrateFilesWithRemoveOptions:(NSInteger)removeMask numberOfAddedFiles:(NSInteger *)numberOfAddedFiles numberOfRemovedFields:(NSInteger *)numberOfRemovedFields error:(NSError **)outError;
+- (BOOL)migrateFilesWithRemoveOptions:(int)removeMask numberOfAddedFiles:(int *)numberOfAddedFiles numberOfRemovedFields:(int *)numberOfRemovedFields error:(NSError **)outError;
 
 - (NSString *)basePath;
 
@@ -147,6 +147,8 @@ enum {
 
 - (id)initWithType:(NSString *)type fileType:(NSString *)inFileType citeKey:(NSString *)key pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew;
 
+- (id)copyWithMacroResolver:(BDSKMacroResolver *)macroResolver;
+
 /*!
     @method dealloc
     @abstract deallocates the receiver and its data objects.
@@ -155,9 +157,6 @@ enum {
 
 - (id<BDSKOwner>)owner;
 - (void)setOwner:(id<BDSKOwner>)newOwner;
-
-- (BDSKMacroResolver *)macroResolver;
-- (void)setMacroResolver:(BDSKMacroResolver *)newMacroResolver;
 
 - (NSUndoManager *)undoManager;
 
@@ -204,7 +203,7 @@ enum {
     @discussion (discussion)
     
 */
-- (NSInteger)numberOfAuthors;
+- (int)numberOfAuthors;
 
 /*!
     @method numberOfAuthorsInheriting:
@@ -213,7 +212,7 @@ enum {
     @discussion (discussion)
     
 */
-- (NSInteger)numberOfAuthorsInheriting:(BOOL)inherit;
+- (int)numberOfAuthorsInheriting:(BOOL)inherit;
 
 /*!
     @method pubAuthors
@@ -255,7 +254,7 @@ enum {
     @discussion zero-based indexing
     
 */
-- (BibAuthor *)authorAtIndex:(NSUInteger)index;
+- (BibAuthor *)authorAtIndex:(unsigned int)index;
 
 /*!
     @method authorAtIndex:inherit:
@@ -265,7 +264,7 @@ enum {
     @discussion zero-based indexing
     
 */
-- (BibAuthor *)authorAtIndex:(NSUInteger)index inherit:(BOOL)inherit;
+- (BibAuthor *)authorAtIndex:(unsigned int)index inherit:(BOOL)inherit;
 
 - (BibAuthor *)firstAuthor;
 - (BibAuthor *)secondAuthor;
@@ -318,7 +317,7 @@ enum {
     @discussion (discussion)
     
 */
-- (NSInteger)numberOfAuthorsOrEditors;
+- (int)numberOfAuthorsOrEditors;
 
 /*!
     @method numberOfAuthorsOrEditorsInheriting:
@@ -327,7 +326,7 @@ enum {
     @discussion (discussion)
     
 */
-- (NSInteger)numberOfAuthorsOrEditorsInheriting:(BOOL)inherit;
+- (int)numberOfAuthorsOrEditorsInheriting:(BOOL)inherit;
 
 /*!
     @method pubAuthorsOrEditors
@@ -369,7 +368,7 @@ enum {
     @discussion zero-based indexing
     
 */
-- (BibAuthor *)authorOrEditorAtIndex:(NSUInteger)index;
+- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)index;
 
 /*!
     @method authorOrEditorAtIndex:inherit:
@@ -379,7 +378,7 @@ enum {
     @discussion zero-based indexing
     
 */
-- (BibAuthor *)authorOrEditorAtIndex:(NSUInteger)index inherit:(BOOL)inherit;
+- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)index inherit:(BOOL)inherit;
 
 - (BibAuthor *)firstAuthorOrEditor;
 - (BibAuthor *)secondAuthorOrEditor;
@@ -462,7 +461,7 @@ enum {
     @abstract   The value of the rating field as an integer.
     @discussion (comprehensive description)
 */
-- (NSUInteger)rating;
+- (unsigned int)rating;
 
 /*!
     @method     setRating:
@@ -470,7 +469,7 @@ enum {
     @discussion (comprehensive description)
     @param      rating The new value for the rating.
 */
-- (void)setRating:(NSUInteger)rating;
+- (void)setRating:(unsigned int)rating;
 
 - (NSColor *)color;
 - (void)setColor:(NSColor *)label;
@@ -482,7 +481,7 @@ enum {
     @param      field (description)
     @param      rating (description)
 */
-- (void)setField:(NSString *)field toRatingValue:(NSInteger)rating;
+- (void)setField:(NSString *)field toRatingValue:(unsigned int)rating;
 
 /*!
     @method     ratingValueOfField:
@@ -491,7 +490,7 @@ enum {
     @param      field (description)
     @result     (description)
 */
-- (NSInteger)ratingValueOfField:(NSString *)field;
+- (int)ratingValueOfField:(NSString *)field;
 
 /*!
     @method     boolValueOfField:
@@ -533,12 +532,12 @@ enum {
     
 /*!
     @method     intValueOfField:
-    @abstract   Returns the value of a string stored in the item's pubFields dictionary as an NSInteger. Only for boolean, rating or tri-state fields.
+    @abstract   Returns the value of a string stored in the item's pubFields dictionary as an int. Only for boolean, rating or tri-state fields.
     @discussion (comprehensive description)
     @param      field (description)
     @result     (description)
 */
-- (NSInteger)intValueOfField:(NSString *)field;
+- (int)intValueOfField:(NSString *)field;
 
 /*!
     @method     stringValueOfField:
@@ -609,7 +608,7 @@ enum {
     @discussion -
     @result 0: no problem, 1: crossref to self, 2: crossref to item with crossref, 3: self is crossreffed
 */
-- (NSInteger)canSetCrossref:(NSString *)aCrossref andCiteKey:(NSString *)aCiteKey;
+- (int)canSetCrossref:(NSString *)aCrossref andCiteKey:(NSString *)aCiteKey;
 
 /*!
 	@method     setCiteKeyString
@@ -681,13 +680,16 @@ enum {
 - (NSArray *)allFieldNames;
 
 /*!
-    @method     matchesSubstring:inField:
+    @method     matchesSubstring:withOptions:inField:removeDiacritics:
     @abstract   Used for searching methods; handles various field types.
     @discussion (comprehensive description)
-    @param      substring The string to search for, which may be a string representation of a boolean or date    @param      field The BibItem field
+    @param      substring The string to search for, which may be a string representation of a boolean or date
+    @param      searchOptions NSString search option (e.g. NSCaseInsensitiveSearch)
+    @param      field The BibItem field
+    @param      flag Whether a lossy search is to be performed (by removing diacritic marks)
     @result     (description)
 */
-- (BOOL)matchesSubstring:(NSString *)substring inField:(NSString *)field;
+- (BOOL)matchesSubstring:(NSString *)substring withOptions:(unsigned)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
 
 - (NSDictionary *)searchIndexInfo;
 - (NSDictionary *)metadataCacheInfoForUpdate:(BOOL)update;
@@ -699,9 +701,9 @@ enum {
 */
 - (NSString *)bibTeXString;
 
-- (NSString *)bibTeXStringWithOptions:(NSInteger)options;
+- (NSString *)bibTeXStringWithOptions:(int)options;
 
-- (NSData *)bibTeXDataWithOptions:(NSInteger)options relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError;
+- (NSData *)bibTeXDataWithOptions:(int)options relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 
 - (NSString *)RISStringValue;
 - (NSString *)MODSString;
@@ -735,8 +737,8 @@ enum {
 - (id)authors;
 - (id)editors;
 - (id)authorsOrEditors;
-- (NSInteger)itemIndex;
-- (void)setItemIndex:(NSInteger)index;
+- (int)itemIndex;
+- (void)setItemIndex:(int)index;
 - (NSCalendarDate *)currentDate;
 - (NSString *)textSkimNotes;
 - (NSAttributedString *)richTextSkimNotes;
@@ -804,17 +806,17 @@ enum {
 
 - (NSSet *)groupsForField:(NSString *)field;
 - (BOOL)isContainedInGroupNamed:(id)group forField:(NSString *)field;
-- (NSInteger)addToGroup:(BDSKGroup *)group handleInherited:(NSInteger)operation;
-- (NSInteger)removeFromGroup:(BDSKGroup *)group handleInherited:(NSInteger)operation;
-- (NSInteger)replaceGroup:(BDSKGroup *)group withGroupNamed:(NSString *)newGroupName handleInherited:(NSInteger)operation;
+- (int)addToGroup:(BDSKGroup *)group handleInherited:(int)operation;
+- (int)removeFromGroup:(BDSKGroup *)group handleInherited:(int)operation;
+- (int)replaceGroup:(BDSKGroup *)group withGroupNamed:(NSString *)newGroupName handleInherited:(int)operation;
 - (void)invalidateGroupNames;
 
 - (BOOL)isImported;
 - (void)setImported:(BOOL)flag;
 
 - (NSURL *)identifierURL;
-- (void)setSearchScore:(CGFloat)val;
-- (CGFloat)searchScore;
+- (void)setSearchScore:(float)val;
+- (float)searchScore;
 - (NSString *)skimNotesForLocalURL;
 
 - (NSURL *)bdskURL;
@@ -829,5 +831,5 @@ enum {
 - (void)addPDFMetadataToFileForLocalURLField:(NSString *)field;
 @end
 
-extern const CFSetCallBacks kBDSKBibItemEqualitySetCallBacks;
-extern const CFSetCallBacks kBDSKBibItemEquivalenceSetCallBacks;
+extern const CFSetCallBacks BDSKBibItemEqualityCallBacks;
+extern const CFSetCallBacks BDSKBibItemEquivalenceCallBacks;

@@ -51,7 +51,7 @@
     return [NSNumber numberWithInt:[self intValue] - 1];
 }
 
-inline static NSString *romanNumeralForDigit(NSUInteger digit, NSString *i, NSString *v, NSString *x) {
+inline static NSString *romanNumeralForDigit(unsigned digit, NSString *i, NSString *v, NSString *x) {
     switch (digit) {
         case 1: return i;
         case 2: return [NSString stringWithFormat:@"%@%@", i, i];
@@ -70,10 +70,10 @@ inline static NSString *romanNumeralForDigit(NSUInteger digit, NSString *i, NSSt
     static NSString *symbols[9] = {@"i", @"v", @"x", @"l", @"c", @"d", @"m", @"mmm", @""};
     
     NSMutableString *string = [NSMutableString string];
-    NSUInteger digit, offset, number = [self unsignedIntValue];
+    unsigned digit, offset, number = [self unsignedIntValue];
     
     if (number >= 5000)
-        [NSException raise:@"Roman Numeral Exception" format:@"The number %lu is too big to represent as a roman numeral.", (unsigned long)number];
+        [NSException raise:@"Roman Numeral Exception" format:@"The number %i is too big to represent as a roman numeral.", number];
     
     for (offset = 0; number > 0 && offset < 7; offset += 2) {
         digit = number % 10;
@@ -85,7 +85,7 @@ inline static NSString *romanNumeralForDigit(NSUInteger digit, NSString *i, NSSt
 
 - (NSString *)alphaCounterValue{
     NSMutableString *string = [NSMutableString string];
-    NSUInteger letter, number = [self unsignedIntValue];
+    unsigned letter, number = [self unsignedIntValue];
     
     while (number > 0) {
         letter = number % 26;
@@ -97,7 +97,7 @@ inline static NSString *romanNumeralForDigit(NSUInteger digit, NSString *i, NSSt
 
 - (NSString *)greekCounterValue{
     NSMutableString *string = [NSMutableString string];
-    NSUInteger letter, number = [self unsignedIntValue];
+    unsigned letter, number = [self unsignedIntValue];
     
     while (number > 0) {
         letter = number % 24;

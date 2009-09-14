@@ -39,34 +39,34 @@
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "BibDocument_DataSource.h"
-#import "BibDocument_UI.h"
 #import "BibDocument_Actions.h"
-#import "BibDocument_Toolbar.h"
+#import "BibDocumentView_Toolbar.h"
 #import "BDSKAppController.h"
 #import "BDSKStringConstants.h"
 #import "BDSKGroup.h"
-#import "BDSKParentGroup.h"
 #import "BDSKStaticGroup.h"
 #import "BDSKSearchGroup.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKGroupsArray.h"
-#import "BDSKApplication.h"
 
 #import "BDSKUndoManager.h"
 #import "BDSKPrintableView.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringEncodingManager.h"
+#import "BDSKHeaderPopUpButtonCell.h"
 #import "BDSKGroupCell.h"
 #import "BDSKScriptHookManager.h"
+#import "BDSKCountedSet.h"
 #import "BDSKFilterController.h"
 #import "BibDocument_Groups.h"
 #import "BibDocument_Search.h"
 #import "BDSKTableSortDescriptor.h"
-#import "BDSKTableSortDescriptor.h"
-#import "NSAlert_BDSKExtensions.h"
+#import "BDSKAlert.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKPreviewer.h"
+#import "BDSKTeXTask.h"
+#import "BDSKOverlay.h"
 #import "BDSKEditor.h"
 
 #import "BDSKItemPasteboardHelper.h"
@@ -78,18 +78,19 @@
 #import <ApplicationServices/ApplicationServices.h>
 #import "BDSKImagePopUpButton.h"
 #import "BDSKRatingButton.h"
-#import "BDSKGradientSplitView.h"
+#import "BDSKSplitView.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKZoomablePDFView.h"
 #import "BDSKZoomableTextView.h"
 
 #import "BDSKMacroResolver.h"
 #import "BDSKErrorObjectController.h"
-#import "BDSKGroupOutlineView.h"
+#import "BDSKGroupTableView.h"
 #import "BDSKFileContentSearchController.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKStatusBar.h"
 #import "NSArray_BDSKExtensions.h"
+#import "NSTextView_BDSKExtensions.h"
 #import "NSTableView_BDSKExtensions.h"
 #import "NSDictionary_BDSKExtensions.h"
 #import "NSSet_BDSKExtensions.h"
@@ -97,7 +98,8 @@
 #import "BDSKSharingServer.h"
 #import "BDSKSharingBrowser.h"
 #import "BDSKTemplate.h"
-#import "BDSKGroupOutlineView.h"
+#import "BDSKGroupTableView.h"
+#import "BDSKFileContentSearchController.h"
 #import "BDSKTemplateParser.h"
 #import "BDSKTemplateObjectProxy.h"
 #import "NSMenu_BDSKExtensions.h"
@@ -105,27 +107,23 @@
 #import "NSData_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
-#import "BDSKColoredView.h"
+#import "BDSKColoredBox.h"
 #import "BDSKCustomCiteDrawerController.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKDocumentController.h"
 #import "BDSKFiler.h"
 #import "BibItem_PubMedLookup.h"
 #import "BDSKItemSearchIndexes.h"
-#import "BDSKNotesSearchIndex.h"
 #import "PDFDocument_BDSKExtensions.h"
 #import <FileView/FileView.h>
 #import "BDSKLinkedFile.h"
 #import "NSDate_BDSKExtensions.h"
 #import "BDSKFileMigrationController.h"
+#import "NSViewAnimation_BDSKExtensions.h"
 #import "BDSKDocumentSearch.h"
 #import "NSImage_BDSKExtensions.h"
 #import <SkimNotes/SkimNotes.h>
 #import "NSWorkspace_BDSKExtensions.h"
-#import "NSView_BDSKExtensions.h"
-#import "NSColor_BDSKExtensions.h"
-#import "BDSKTask.h"
-#import "NSInvocation_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -142,18 +140,59 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 // private keys used for storing window information in xattrs
-#define BDSKMainWindowExtendedAttributeKey @"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes"
-#define BDSKGroupSplitViewFractionKey @"BDSKGroupSplitViewFractionKey"
-#define BDSKMainTableSplitViewFractionKey @"BDSKMainTableSplitViewFractionKey"
-#define BDSKWebViewFractionKey @"BDSKWebViewFractionKey"
-#define BDSKDocumentWindowFrameKey @"BDSKDocumentWindowFrameKey"
-#define BDSKSelectedPublicationsKey @"BDSKSelectedPublicationsKey"
-#define BDSKDocumentStringEncodingKey @"BDSKDocumentStringEncodingKey"
-#define BDSKDocumentScrollPercentageKey @"BDSKDocumentScrollPercentageKey"
-#define BDSKSelectedGroupsKey @"BDSKSelectedGroupsKey"
-#define BDSKDocumentGroupsToExpandKey @"BDSKDocumentGroupsToExpandKey"
+static NSString *BDSKMainWindowExtendedAttributeKey = @"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes";
+static NSString *BDSKGroupSplitViewFractionKey = @"BDSKGroupSplitViewFractionKey";
+static NSString *BDSKMainTableSplitViewFractionKey = @"BDSKMainTableSplitViewFractionKey";
+static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
+static NSString *BDSKSelectedPublicationsKey = @"BDSKSelectedPublicationsKey";
+static NSString *BDSKDocumentStringEncodingKey = @"BDSKDocumentStringEncodingKey";
+static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentageKey";
+static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 
-#pragma mark -
+static NSString *BDSKDocumentObservationContext = @"BDSKDocumentObservationContext";
+
+enum {
+    BDSKItemChangedGroupFieldMask = 1,
+    BDSKItemChangedSearchKeyMask = 2,
+    BDSKItemChangedSortKeyMask = 4,
+    BDSKItemChangedFilesMask = 8
+};
+
+@interface BDSKFileViewObject : NSObject {
+    NSURL *URL;
+    NSString *string;
+}
+- (id)initWithURL:(NSURL *)aURL string:(NSString *)aString;
+- (NSURL *)URL;
+- (NSString *)string;
+@end
+
+@implementation BDSKFileViewObject
+
+- (id)initWithURL:(NSURL *)aURL string:(NSString *)aString {
+    if (self = [super init]) {
+        URL = [aURL copy];
+        string = [aString copy];
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [URL release];
+    [string release];
+    [super dealloc];
+}
+
+- (NSURL *)URL { return URL; }
+
+- (NSString *)string { return string; }
+
+@end
+
+
+@interface NSFileWrapper (BDSKExtensions)
+- (NSFileWrapper *)addFileWrapperWithPath:(NSString *)path relativeTo:(NSString *)basePath recursive:(BOOL)recursive;
+@end
 
 @interface NSDocument (BDSKPrivateExtensions)
 // declare a private NSDocument method so we can override it
@@ -163,7 +202,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 @implementation BibDocument
 
 + (void)initialize {
-    BDSKINITIALIZE;
+    OBINITIALIZE;
     
     [NSImage makePreviewDisplayImages];
 }
@@ -203,7 +242,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         sortGroupsKey = nil;
         currentGroupField = nil;
         docState.sortDescending = NO;
-        docState.previousSortDescending = NO;
         docState.sortGroupsDescending = NO;
         docState.didImport = NO;
         docState.itemChangeMask = 0;
@@ -220,7 +258,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         docState.lastPreviewHeight = 0.0;
         docState.lastGroupViewWidth = 0.0;
         docState.lastFileViewWidth = 0.0;
-        docState.lastWebViewFraction = 0.0;
         
         // these are temporary state variables
         promiseDragColumnIdentifier = nil;
@@ -230,21 +267,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [self registerForNotifications];
         
         searchIndexes = [[BDSKItemSearchIndexes alloc] init];   
-        //notesSearchIndex = [[BDSKNotesSearchIndex alloc] init];   
         documentSearch = [[BDSKDocumentSearch alloc] initWithDocument:(id)self];
         rowToSelectAfterDelete = -1;
     }
     return self;
 }
-
-// implement a dummy implementation for NSCoding, as the Action popup toolbar item can call this because we're the delegate of a menu item
-// I consider this an AppKit bug
-- (id)initWithCoder:(NSCoder *)coder {
-    [self release];
-    return nil;
-}
-
-- (void)encodeWithCoder:(NSCoder *)encoder {}
 
 - (void)invalidateSearchFieldCellTimer{
     // AppKit bug workarounds:  NSSearchFieldCell's timer creates a retain cycle after typing in it, so we manually invalidate it when the document is deallocated to avoid leaking the cell and timer.  Further, if the insertion point is in the searchfield cell when the window closes, the field editor (and associated text system) and undo manager also leak, so we send -[documentWindow endEditingFor:nil] in windowWillClose:.
@@ -261,6 +288,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [[self undoManager] removeAllActions];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[NSDistributedNotificationCenter defaultCenter] removeObserver:self];
+    [OFPreference removeObserver:self forPreference:nil];
     // workaround for crash: to reproduce, create empty doc, hit cmd-n for new editor window, then cmd-q to quit, choose "don't save"; this results in an -undoManager message to the dealloced document
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [groups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
@@ -287,19 +315,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [promiseDragColumnIdentifier release];
     [tableColumnWidths release];
     [sortKey release];
-    [previousSortKey release];
     [sortGroupsKey release];
-    [currentGroupField release];
     [searchGroupViewController release];
     [webGroupViewController release];
     [searchIndexes release];
-    [notesSearchIndex release];
     [searchButtonController release];
     [migrationController release];
     [documentSearch release];
     [mainWindowSetupDictionary release];
-    if (groupSpinners)
-        CFRelease(groupSpinners);
     [super dealloc];
 }
 
@@ -307,9 +330,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         return @"BibDocument";
 }
 
-- (void)migrationAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)unused {
+- (void)migrationAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)unused {
     
-    if ([alert suppressionButtonState] == NSOnState)
+    if ([alert checkValue] == YES)
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"BDSKDisableMigrationWarning"];
     
     if (NSAlertDefaultReturn == returnCode)
@@ -322,31 +345,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     // some xattr setup has to be done after the window is on-screen
     NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
     
-    NSArray *groupsToExpand = [xattrDefaults objectForKey:BDSKDocumentGroupsToExpandKey];
-    NSEnumerator *parentEnum = [groups objectEnumerator];
-    BDSKParentGroup *parent;
-    [parentEnum nextObject];
-    while (parent = [parentEnum nextObject]) {
-        if (groupsToExpand == nil || [groupsToExpand containsObject:NSStringFromClass([parent class])])
-            [groupOutlineView expandItem:parent];
-    }
-    // make sure the groups are sorted and have their sort descriptors set
-    [self sortGroupsByKey:nil];
-    
     NSData *groupData = [xattrDefaults objectForKey:BDSKSelectedGroupsKey];
-    if ([groupData length]) {
-        NSSet *allGroups = [NSSet setWithArray:[groups allChildren]];
-        NSMutableArray *groupsToSelect = [NSMutableArray array];
-        NSEnumerator *groupEnum = [[NSKeyedUnarchiver unarchiveObjectWithData:groupData] objectEnumerator];
-        BDSKGroup *group;
-        while (group = [groupEnum nextObject]) {
-            if (group = [allGroups member:group])
-                [groupsToSelect addObject:group];
-        }
-        if ([groupsToSelect count])
-            [self selectGroups:groupsToSelect];
-    }
-    
+    if ([groupData length])
+        [self selectGroups:[NSKeyedUnarchiver unarchiveObjectWithData:groupData]];
+
     [self selectItemsForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey defaultObject:[NSArray array]] selectLibrary:NO];
     NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
     [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
@@ -363,7 +365,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         if(hfsPath == nil) NSLog(@"No path available from event %@ (descriptor %@)", event, [event descriptorForKeyword:keyAEResult]);
         NSURL *fileURL = (hfsPath == nil ? nil : [(id)CFURLCreateWithFileSystemPath(CFAllocatorGetDefault(), (CFStringRef)hfsPath, kCFURLHFSPathStyle, FALSE) autorelease]);
         
-        BDSKPOSTCONDITION(fileURL != nil);
+        OBPOSTCONDITION(fileURL != nil);
         if(fileURL == nil || [[[NSWorkspace sharedWorkspace] UTIForURL:fileURL] isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"] == NO){
             // strip extra search criteria
             NSRange range = [searchString rangeOfString:@":"];
@@ -383,14 +385,15 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         docState.displayMigrationAlert = NO;
         // If a single file was migrated, this alert will be shown even if all other BibItems already use BDSKLinkedFile.  However, I think that's an edge case, since the user had to manually add that pub in a text editor or by setting the local-url field.  Items imported or added in BD will already use BDSKLinkedFile, so this notification won't be posted.
         NSString *verify = NSLocalizedString(@"Verify", @"button title for migration alert");
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Local File and URL fields have been automatically converted", @"warning in document")
-                                          defaultButton:verify 
-                                        alternateButton:NSLocalizedString(@"Later", @"") 
-                                            otherButton:nil
-                              informativeTextWithFormat:NSLocalizedString(@"These fields are being deprecated.  BibDesk now uses a more flexible storage format in place of these fields.  Choose \"%@\" to manually verify the conversion and optionally remove the old fields.  Conversion can be done at any time from the \"%@\" menu.  See the Defaults preferences for more options.", @"alert text"), verify, NSLocalizedString(@"Database", @"Database main menu title")];
+        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Local File and URL fields have been automatically converted", @"warning in document")
+                                             defaultButton:verify 
+                                           alternateButton:NSLocalizedString(@"Later", @"") 
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"These fields are being deprecated.  BibDesk now uses a more flexible storage format in place of these fields.  Choose \"%@\" to manually verify the conversion and optionally remove the old fields.  Conversion can be done at any time from the \"%@\" menu.  See the Defaults preferences for more options.", @"alert text"), verify, NSLocalizedString(@"Database", @"Database main menu title")];
         
         // @@ Should we show a check button? If the user saves the doc as-is, it'll have local-url and bdsk-file fields in it, and there will be no warning the next time it's opened.  Someone who uses a script hook to convert bdsk-file back to local-url won't want to see it, though.
-        [alert setShowsSuppressionButton:YES];
+        [alert setHasCheckButton:YES];
+        [alert setCheckValue:NO];
         [alert setShowsHelp:YES];
         [alert setHelpAnchor:@"FileMigration"];
         [alert beginSheetModalForWindow:[self windowForSheet] modalDelegate:self didEndSelector:@selector(migrationAlertDidEnd:returnCode:contextInfo:) contextInfo:NULL];
@@ -405,9 +408,6 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
 {
-    [groupOutlineView expandItem:[groupOutlineView itemAtRow:0]];
-    [self selectLibraryGroup:nil];
-    
     [super windowControllerDidLoadNib:aController];
     
     // this is the controller for the main window
@@ -420,18 +420,18 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     
     // get document-specific attributes (returns empty dictionary if there are none, so defaultValue works correctly)
     NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
-    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     
     [self setupToolbar];
     
     replaceSplitViewSubview(bottomPreviewTabView, splitView, 1);
-    replaceSplitViewSubview([[groupOutlineView enclosingScrollView] superview], groupSplitView, 0);
+    replaceSplitViewSubview([[groupTableView enclosingScrollView] superview], groupSplitView, 0);
     replaceSplitViewSubview([mainBox superview], groupSplitView, 1);
     replaceSplitViewSubview([sidePreviewTabView superview], groupSplitView, 2);
     
     // First remove the statusbar if we should, as it affects proper resizing of the window and splitViews
 	[statusBar retain]; // we need to retain, as we might remove it from the window
-	if (![sud boolForKey:BDSKShowStatusBarKey]) {
+	if (![pw boolForKey:BDSKShowStatusBarKey]) {
 		[self toggleStatusBar:nil];
 	} else {
 		// make sure they are ordered correctly, mainly for the focus ring
@@ -441,15 +441,15 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 	[statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
     [statusBar setTextOffset:NSMaxX([bottomPreviewButton frame]) - 2.0];
     
-    bottomPreviewDisplay = [xattrDefaults intForKey:BDSKBottomPreviewDisplayKey defaultValue:[sud integerForKey:BDSKBottomPreviewDisplayKey]];
-    bottomPreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKBottomPreviewDisplayTemplateKey defaultObject:[sud stringForKey:BDSKBottomPreviewDisplayTemplateKey]] retain];
-    sidePreviewDisplay = [xattrDefaults intForKey:BDSKSidePreviewDisplayKey defaultValue:[sud integerForKey:BDSKSidePreviewDisplayKey]];
-    sidePreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKSidePreviewDisplayTemplateKey defaultObject:[sud stringForKey:BDSKSidePreviewDisplayTemplateKey]] retain];
+    bottomPreviewDisplay = [xattrDefaults intForKey:BDSKBottomPreviewDisplayKey defaultValue:[pw integerForKey:BDSKBottomPreviewDisplayKey]];
+    bottomPreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKBottomPreviewDisplayTemplateKey defaultObject:[pw stringForKey:BDSKBottomPreviewDisplayTemplateKey]] retain];
+    sidePreviewDisplay = [xattrDefaults intForKey:BDSKSidePreviewDisplayKey defaultValue:[pw integerForKey:BDSKSidePreviewDisplayKey]];
+    sidePreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKSidePreviewDisplayTemplateKey defaultObject:[pw stringForKey:BDSKSidePreviewDisplayTemplateKey]] retain];
         
     bottomTemplatePreviewMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
     [bottomTemplatePreviewMenu setDelegate:self];
     [bottomPreviewButton setMenu:bottomTemplatePreviewMenu forSegment:0];
-    [bottomPreviewButton setEnabled:[sud boolForKey:BDSKUsesTeXKey] forSegment:BDSKPreviewDisplayTeX];
+    [bottomPreviewButton setEnabled:[pw boolForKey:BDSKUsesTeXKey] forSegment:BDSKPreviewDisplayTeX];
     [bottomPreviewButton selectSegmentWithTag:bottomPreviewDisplay];
     
     sideTemplatePreviewMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
@@ -459,20 +459,21 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     
     // This must also be done before we resize the window and the splitViews
     [groupCollapsibleView setCollapseEdges:BDSKMinXEdgeMask];
-    [groupCollapsibleView setMinSize:NSMakeSize(57.0, 22.0)];
+    [groupCollapsibleView setMinSize:NSMakeSize(56.0, 20.0)];
     [groupGradientView setUpperColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
     [groupGradientView setLowerColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
 
     // make sure they are ordered correctly, mainly for the focus ring
 	[groupCollapsibleView retain];
     [groupCollapsibleView removeFromSuperview];
-    [[[groupOutlineView enclosingScrollView] superview] addSubview:groupCollapsibleView positioned:NSWindowBelow relativeTo:nil];
+    [[[groupTableView enclosingScrollView] superview] addSubview:groupCollapsibleView positioned:NSWindowBelow relativeTo:nil];
 	[groupCollapsibleView release];
 
     NSRect frameRect = [xattrDefaults rectForKey:BDSKDocumentWindowFrameKey defaultValue:NSZeroRect];
     
     [aController setWindowFrameAutosaveNameOrCascade:@"Main Window Frame Autosave" setFrame:frameRect];
             
+    [documentWindow setAutorecalculatesKeyViewLoop:YES];
     [documentWindow makeFirstResponder:tableView];	
     
     // SplitViews setup
@@ -480,8 +481,8 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [splitView setBlendStyle:BDSKMinBlendStyleMask | BDSKMaxBlendStyleMask];
     
     // set autosave names first
-	[splitView setPositionAutosaveName:@"Main Window"];
-    [groupSplitView setPositionAutosaveName:@"Group Table"];
+	[splitView setPositionAutosaveName:@"OASplitView Position Main Window"];
+    [groupSplitView setPositionAutosaveName:@"OASplitView Position Group Table"];
     if ([aController windowFrameAutosaveName] == nil) {
         // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
         [splitView setPositionAutosaveName:nil];
@@ -489,15 +490,13 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     }
     
     // set previous splitview frames
-    CGFloat fract;
+    float fract;
     fract = [xattrDefaults floatForKey:BDSKGroupSplitViewFractionKey defaultValue:-1.0];
     if (fract >= 0)
         [groupSplitView setFraction:fract];
     fract = [xattrDefaults floatForKey:BDSKMainTableSplitViewFractionKey defaultValue:-1.0];
     if (fract >= 0)
         [splitView setFraction:fract];
-    
-    docState.lastWebViewFraction = [xattrDefaults floatForKey:BDSKWebViewFractionKey defaultValue:0.0];
     
     [mainBox setBackgroundColor:[NSColor controlBackgroundColor]];
     
@@ -508,108 +507,116 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     // TableView setup
     [tableView removeAllTableColumns];
     
-    [tableView setFontNamePreferenceKey:BDSKMainTableViewFontNameKey];
-    [tableView setFontSizePreferenceKey:BDSKMainTableViewFontSizeKey];
-    [groupOutlineView setFontNamePreferenceKey:BDSKGroupTableViewFontNameKey];
-    [groupOutlineView setFontSizePreferenceKey:BDSKGroupTableViewFontSizeKey];
-    
     tableColumnWidths = [[xattrDefaults objectForKey:BDSKColumnWidthsKey] retain];
-    [tableView setupTableColumnsWithIdentifiers:[xattrDefaults objectForKey:BDSKShownColsNamesKey defaultObject:[sud objectForKey:BDSKShownColsNamesKey]]];
-    sortKey = [[xattrDefaults objectForKey:BDSKDefaultSortedTableColumnKey defaultObject:[sud objectForKey:BDSKDefaultSortedTableColumnKey]] retain];
+    [tableView setupTableColumnsWithIdentifiers:[xattrDefaults objectForKey:BDSKShownColsNamesKey defaultObject:[pw objectForKey:BDSKShownColsNamesKey]]];
+    sortKey = [[xattrDefaults objectForKey:BDSKDefaultSortedTableColumnKey defaultObject:[pw objectForKey:BDSKDefaultSortedTableColumnKey]] retain];
     previousSortKey = [sortKey retain];
-    docState.sortDescending = [xattrDefaults  boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey defaultValue:[sud boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey]];
-    docState.previousSortDescending = docState.sortDescending;
+    docState.sortDescending = [xattrDefaults  boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey defaultValue:[pw boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey]];
     [tableView setHighlightedTableColumn:[tableView tableColumnWithIdentifier:sortKey]];
     
     [sortGroupsKey autorelease];
-    sortGroupsKey = [[xattrDefaults objectForKey:BDSKSortGroupsKey defaultObject:[sud objectForKey:BDSKSortGroupsKey]] retain];
-    docState.sortGroupsDescending = [xattrDefaults boolForKey:BDSKSortGroupsDescendingKey defaultValue:[sud boolForKey:BDSKSortGroupsDescendingKey]];
-    [self setCurrentGroupField:[xattrDefaults objectForKey:BDSKCurrentGroupFieldKey defaultObject:[sud objectForKey:BDSKCurrentGroupFieldKey]]];
+    sortGroupsKey = [[xattrDefaults objectForKey:BDSKSortGroupsKey defaultObject:[pw objectForKey:BDSKSortGroupsKey]] retain];
+    docState.sortGroupsDescending = [xattrDefaults boolForKey:BDSKSortGroupsDescendingKey defaultValue:[pw boolForKey:BDSKSortGroupsDescendingKey]];
+    [self setCurrentGroupField:[xattrDefaults objectForKey:BDSKCurrentGroupFieldKey defaultObject:[pw objectForKey:BDSKCurrentGroupFieldKey]]];
     
     [tableView setDoubleAction:@selector(editPubOrOpenURLAction:)];
     NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil];
     [tableView registerForDraggedTypes:dragTypes];
-    [groupOutlineView registerForDraggedTypes:dragTypes];
+    [groupTableView registerForDraggedTypes:dragTypes];
     
-    [[sideFileView enclosingScrollView] setBackgroundColor:[sideFileView backgroundColor]];
-    [bottomFileView setBackgroundColor:[[NSColor controlAlternatingRowBackgroundColors] lastObject]];
-    [[bottomFileView enclosingScrollView] setBackgroundColor:[bottomFileView backgroundColor]];
+    [sideFileView setBackgroundColor:[[sideFileView enclosingScrollView] backgroundColor]];
+    [bottomFileView setBackgroundColor:[[bottomFileView enclosingScrollView] backgroundColor]];
     
     [fileCollapsibleView setCollapseEdges:BDSKMaxXEdgeMask];
-    [fileCollapsibleView setMinSize:NSMakeSize(65.0, 22.0)];
+    [fileCollapsibleView setMinSize:NSMakeSize(65.0, 20.0)];
     [fileGradientView setUpperColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
     [fileGradientView setLowerColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
     
-    CGFloat iconScale = [xattrDefaults floatForKey:BDSKSideFileViewIconScaleKey defaultValue:[sud floatForKey:BDSKSideFileViewIconScaleKey]];
-    FVDisplayMode displayMode = [xattrDefaults floatForKey:BDSKSideFileViewDisplayModeKey defaultValue:[sud floatForKey:BDSKSideFileViewDisplayModeKey]];
-    [sideFileView setDisplayMode:displayMode];
-    if (displayMode == FVDisplayModeGrid) {
-        if (iconScale < 0.00001)
-            [sideFileView setDisplayMode:FVDisplayModeColumn];
-        else
-            [sideFileView setIconScale:iconScale];
+    float iconScale = [xattrDefaults floatForKey:BDSKSideFileViewIconScaleKey defaultValue:[pw floatForKey:BDSKSideFileViewIconScaleKey]];
+    if (iconScale < 0.00001) {
+        [sideFileView setAutoScales:YES];
+    } else {
+        [sideFileView setAutoScales:NO];
+        [sideFileView setIconScale:iconScale];
     }
+    [sideFileView setAutoScales:YES];
+    [sideFileView addObserver:self forKeyPath:@"iconScale" options:0 context:BDSKDocumentObservationContext];
 
-    iconScale = [xattrDefaults floatForKey:BDSKBottomFileViewIconScaleKey defaultValue:[sud floatForKey:BDSKBottomFileViewIconScaleKey]];
-    displayMode = [xattrDefaults intForKey:BDSKBottomFileViewDisplayModeKey defaultValue:[sud integerForKey:BDSKBottomFileViewDisplayModeKey]];
-    [bottomFileView setDisplayMode:displayMode];
-    if (displayMode == FVDisplayModeGrid) {
-        if (iconScale < 0.00001)
-            [bottomFileView setDisplayMode:FVDisplayModeRow];
-        else
-            [bottomFileView setIconScale:iconScale];
+    iconScale = [xattrDefaults floatForKey:BDSKBottomFileViewIconScaleKey defaultValue:[pw floatForKey:BDSKBottomFileViewIconScaleKey]];
+    if (iconScale < 0.00001) {
+        [bottomFileView setAutoScales:YES];
+    } else {
+        [bottomFileView setAutoScales:NO];
+        [bottomFileView setIconScale:iconScale];
     }
+    [bottomFileView addObserver:self forKeyPath:@"iconScale" options:0 context:BDSKDocumentObservationContext];
     
     [(BDSKZoomableTextView *)sidePreviewTextView setScaleFactor:[xattrDefaults floatForKey:BDSKSidePreviewScaleFactorKey defaultValue:1.0]];
     [(BDSKZoomableTextView *)bottomPreviewTextView setScaleFactor:[xattrDefaults floatForKey:BDSKBottomPreviewScaleFactorKey defaultValue:1.0]];
     
 	// ImagePopUpButtons setup
+	[actionMenuButton setShowsMenuWhenIconClicked:YES];
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
+	[[actionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
 	[[actionMenuButton cell] setUsesItemFromMenu:NO];
-	[actionMenuButton setMenu:actionMenu];
+	[[actionMenuButton cell] setRefreshesMenu:YES];
+	[actionMenuButton setDelegate:self];
 	
+	[groupActionMenuButton setShowsMenuWhenIconClicked:YES];
 	[[groupActionMenuButton cell] setAltersStateOfSelectedItem:NO];
+	[[groupActionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
 	[[groupActionMenuButton cell] setUsesItemFromMenu:NO];
-	[groupActionMenuButton setMenu:groupMenu];
+	[[groupActionMenuButton cell] setRefreshesMenu:NO];
 	
+	[groupActionButton setArrowImage:nil];
+	[groupActionButton setAlternateImage:[NSImage imageNamed:@"GroupAction_Pressed"]];
+	[groupActionButton setShowsMenuWhenIconClicked:YES];
 	[[groupActionButton cell] setAltersStateOfSelectedItem:NO];
+	[[groupActionButton cell] setAlwaysUsesFirstItemAsSelected:NO];
 	[[groupActionButton cell] setUsesItemFromMenu:NO];
-	[groupActionButton setMenu:groupMenu];
+	[[groupActionButton cell] setRefreshesMenu:NO];
+    
+	BDSKHeaderPopUpButtonCell *headerCell = (BDSKHeaderPopUpButtonCell *)[groupTableView popUpHeaderCell];
+	[headerCell setAction:@selector(changeGroupFieldAction:)];
+	[headerCell setTarget:self];
+	[headerCell setMenu:[self groupFieldsMenu]];
+	[headerCell setIndicatorImage:[NSImage imageNamed:docState.sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
+    [headerCell setUsesItemFromMenu:NO];
+	[headerCell setTitle:[currentGroupField localizedFieldName]];
+    if([headerCell indexOfItemWithRepresentedObject:currentGroupField] != -1)
+        [headerCell selectItemAtIndex:[headerCell indexOfItemWithRepresentedObject:currentGroupField]];
+    else
+        [headerCell selectItemAtIndex:0];
     
     // array of BDSKSharedGroup objects and zeroconf support, doesn't do anything when already enabled
     // we don't do this in appcontroller as we want our data to be loaded
-    if([sud boolForKey:BDSKShouldLookForSharedFilesKey]){
+    if([pw boolForKey:BDSKShouldLookForSharedFilesKey]){
         if([[BDSKSharingBrowser sharedBrowser] isBrowsing])
             // force an initial update of the tableview, if browsing is already in progress
             [self handleSharedGroupsChangedNotification:nil];
         else
             [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
     }
-    if([sud boolForKey:BDSKShouldShareFilesKey])
+    if([pw boolForKey:BDSKShouldShareFilesKey])
         [[BDSKSharingServer defaultServer] enableSharing];
     
     // The UI update from setPublications is too early when loading a new document
-    [self updateSmartGroupsCount];
+    [self updateSmartGroupsCountAndContent:NO];
     [self updateCategoryGroupsPreservingSelection:NO];
     
     [saveTextEncodingPopupButton setEncoding:0];
     
-    // this shouldn't be necessary
-    [documentWindow recalculateKeyViewLoop];
-    [documentWindow makeFirstResponder:tableView];
-    
-    [self startObserving];
 }
 
 - (BOOL)undoManagerShouldUndoChange:(id)sender{
 	if (![self isDocumentEdited]) {
-		NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog") 
-                                         defaultButton:NSLocalizedString(@"Yes", @"Button title") 
-                                       alternateButton:NSLocalizedString(@"No", @"Button title") 
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"You are about to undo past the last point this file was saved. Do you want to do this?", @"Informative text in alert dialog") ];
+		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog") 
+											 defaultButton:NSLocalizedString(@"Yes", @"Button title") 
+										   alternateButton:NSLocalizedString(@"No", @"Button title") 
+											   otherButton:nil
+								 informativeTextWithFormat:NSLocalizedString(@"You are about to undo past the last point this file was saved. Do you want to do this?", @"Informative text in alert dialog") ];
 
-		NSInteger rv = [alert runModal];
+		int rv = [alert runSheetModalForWindow:documentWindow];
 		if (rv == NSAlertAlternateReturn)
 			return NO;
 	}
@@ -625,17 +632,6 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     return [[[NSDocumentController sharedDocumentController] mainDocument] isEqual:self];
 }
 
-- (BOOL)commitPendingEdits {
-    NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
-    id editor;
-    while (editor = [wcEnum nextObject]) {
-        // not all window controllers are editors...
-        if ([editor respondsToSelector:@selector(commitEditing)] && [editor commitEditing] == NO)
-            return NO;
-    }
-    return YES;
-}
-
 - (void)windowWillClose:(NSNotification *)notification{
         
     // see comment in invalidateSearchFieldCellTimer
@@ -643,23 +639,19 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         [documentWindow endEditingFor:nil];
         [self invalidateSearchFieldCellTimer];
     }
-    
+
     docState.isDocumentClosed = YES;
-    
-    // remove all queued invocations
-    [[self class] cancelPreviousPerformRequestsWithTarget:self];
-    
+
     [documentSearch terminate];
     [fileSearchController terminate];
-    [notesSearchIndex terminate];
     
     if([drawerController isDrawerOpen])
         [drawerController toggle:nil];
     [self saveSortOrder];
-    [self saveWindowSetupInExtendedAttributesAtURL:[self fileURL] forEncoding:0];
+    [self saveWindowSetupInExtendedAttributesAtURL:[self fileURL] forSave:NO];
     
     // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
-    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey] &&
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
        [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
        [self isMainDocument] &&
        [self numberOfSelectedPubs] != 0)
@@ -669,22 +661,16 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [pboardHelper release];
     pboardHelper = nil;
     
+    [sideFileView removeObserver:self forKeyPath:@"iconScale"];
     [sideFileView setDataSource:nil];
     [sideFileView setDelegate:nil];
     
+    [bottomFileView removeObserver:self forKeyPath:@"iconScale"];
     [bottomFileView setDataSource:nil];
     [bottomFileView setDelegate:nil];
     
-    [self endObserving];
-    
     // safety call here, in case the pasteboard is retaining the document; we don't want notifications after the window closes, since all the pointers to UI elements will be garbage
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (id)windowWillReturnFieldEditor:(NSWindow *)sender toObject:(id)anObject {
-    if ([self isDisplayingWebGroupView] && [[self webGroupViewController] respondsToSelector:_cmd])
-        return [[self webGroupViewController] windowWillReturnFieldEditor:sender toObject:anObject];
-    return nil;
 }
 
 // returns empty dictionary if no attributes set
@@ -698,7 +684,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     return mainWindowSetupDictionary;
 }
 
-- (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL forEncoding:(NSStringEncoding)encoding {
+- (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL forSave:(BOOL)isSave{
     
     NSString *path = [anURL path];
     if (path && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableDocumentExtendedAttributes"] == NO) {
@@ -725,12 +711,11 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         // of the 3 splitviews, the fraction of the first divider would be considered, so fallback to the fraction from the nib
         if (NO == [self hasWebGroupSelected])
             [dictionary setFloatValue:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
-        [dictionary setFloatValue:docState.lastWebViewFraction forKey:BDSKWebViewFractionKey];
         [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
         
-        // we can't just use -documentStringEncoding, because that may be different for SaveTo
-        if (encoding)
-            [dictionary setUnsignedIntValue:encoding forKey:BDSKDocumentStringEncodingKey];
+        // if this isn't a save operation, the encoding in xattr is already correct, while our encoding might be different from the actual file encoding, if the user might ignored an encoding warning without saving
+        if(isSave)
+            [dictionary setUnsignedIntValue:[self documentStringEncoding] forKey:BDSKDocumentStringEncodingKey];
         
         // encode groups so we can select them later with isEqual: (saving row indexes would not be as reliable)
         [dictionary setObject:([self hasExternalGroupsSelected] ? [NSData data] : [NSKeyedArchiver archivedDataWithRootObject:[self selectedGroups]]) forKey:BDSKSelectedGroupsKey];
@@ -746,10 +731,8 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         [dictionary setIntValue:sidePreviewDisplay forKey:BDSKSidePreviewDisplayKey];
         [dictionary setObject:sidePreviewDisplayTemplate forKey:BDSKSidePreviewDisplayTemplateKey];
         
-        [dictionary setIntValue:[bottomFileView displayMode] forKey:BDSKBottomFileViewDisplayModeKey];
-        [dictionary setFloatValue:([bottomFileView displayMode] == FVDisplayModeGrid ? [bottomFileView iconScale] : 0.0) forKey:BDSKBottomFileViewIconScaleKey];
-        [dictionary setIntValue:[sideFileView displayMode] forKey:BDSKSideFileViewDisplayModeKey];
-        [dictionary setFloatValue:([sideFileView displayMode] == FVDisplayModeGrid ? [sideFileView iconScale] : 0.0) forKey:BDSKSideFileViewIconScaleKey];
+        [dictionary setFloatValue:[bottomFileView autoScales] ? 0.0 : [bottomFileView iconScale] forKey:BDSKBottomFileViewIconScaleKey];
+        [dictionary setFloatValue:[sideFileView autoScales] ? 0.0 : [sideFileView iconScale] forKey:BDSKSideFileViewIconScaleKey];
         
         [dictionary setFloatValue:[(BDSKZoomableTextView *)bottomPreviewTextView scaleFactor] forKey:BDSKBottomPreviewScaleFactorKey];
         [dictionary setFloatValue:[(BDSKZoomableTextView *)sidePreviewTextView scaleFactor] forKey:BDSKSidePreviewScaleFactorKey];
@@ -763,38 +746,16 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
             [dictionary setObject:[fileSearchController sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
         }
         
-        NSMutableArray *groupsToExpand = [NSMutableArray array];
-        NSEnumerator *groupEnum = [groups objectEnumerator];
-        BDSKParentGroup *parent;
-        [groupEnum nextObject];
-        while (parent = [groupEnum nextObject]) {
-            if ([groupOutlineView isItemExpanded:parent])
-                [groupsToExpand addObject:NSStringFromClass([parent class])];
-            
-        }
-        [dictionary setObject:groupsToExpand forKey:BDSKDocumentGroupsToExpandKey];
-        
-        [mainWindowSetupDictionary release];
-        mainWindowSetupDictionary = [dictionary copy];
-        
         NSError *error;
         
         if ([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey 
                                                   toPropertyListValue:dictionary
                                                                atPath:path options:0 error:&error] == NO) {
-            NSLog(@"failed to save EAs for %@: %@", self, error);
-            if ([[error domain] isEqualToString:NSPOSIXErrorDomain] && [error code] == E2BIG) {
-                // the dictionary was too big, remove the items that are most likely to cause this as they can grow indefinitely
-                [dictionary removeObjectForKey:BDSKSelectedPublicationsKey]; 
-                [dictionary removeObjectForKey:BDSKSelectedGroupsKey]; 
-                if ([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey 
-                                                          toPropertyListValue:dictionary
-                                                                       atPath:path options:0 error:&error] == NO) {
-                    NSLog(@"failed to save partial EAs for %@: %@", self, error);
-                }
-            }
+            NSLog(@"%@: %@", self, error);
         }
         
+        [mainWindowSetupDictionary release];
+        mainWindowSetupDictionary = [dictionary copy];
         [dictionary release];
     } 
 }
@@ -808,7 +769,6 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
     
     [searchIndexes resetWithPublications:newPubs];
-    [notesSearchIndex resetWithPublications:newPubs];
 }    
 
 - (void)setPublications:(NSArray *)newPubs{
@@ -843,15 +803,14 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 	[pubs makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
 	
     [searchIndexes addPublications:pubs];
-    [notesSearchIndex addPublications:pubs];
 
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", [pubs arrayByPerformingSelector:@selector(searchIndexInfo)], @"searchIndexInfo", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocAddItemNotification
 														object:self
 													  userInfo:notifInfo];
 }
 
-- (void)insertPublication:(BibItem *)pub atIndex:(NSUInteger)idx {
+- (void)insertPublication:(BibItem *)pub atIndex:(unsigned int)idx {
     [self insertPublications:[NSArray arrayWithObject:pub] atIndexes:[NSIndexSet indexSetWithIndex:idx]];
 }
 
@@ -875,14 +834,13 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [[groups lastImportGroup] removePublicationsInArray:pubs];
     [[groups staticGroups] makeObjectsPerformSelector:@selector(removePublicationsInArray:) withObject:pubs];
     [searchIndexes removePublications:pubs];
-    [notesSearchIndex removePublications:pubs];
     
 	[publications removeObjectsAtIndexes:indexes];
 	
 	[pubs makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [[NSFileManager defaultManager] removeSpotlightCacheFilesForCiteKeys:[pubs arrayByPerformingSelector:@selector(citeKey)]];
 	
-	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", nil];
+	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", [pubs arrayByPerformingSelector:@selector(searchIndexInfo)], @"searchIndexInfo", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocDelItemNotification
 														object:self
 													  userInfo:notifInfo];
@@ -907,6 +865,28 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 
 - (BDSKItemSearchIndexes *)searchIndexes{
     return searchIndexes;
+}
+
+#pragma mark -
+
+- (void)getCopyOfPublicationsOnMainThread:(NSMutableArray *)dstArray{
+    if([NSThread inMainThread] == NO){
+        [self performSelectorOnMainThread:_cmd withObject:dstArray waitUntilDone:YES];
+    } else {
+        NSArray *array = [[NSArray alloc] initWithArray:[self publications] copyItems:YES];
+        [dstArray addObjectsFromArray:array];
+        [array release];
+    }
+}
+
+- (void)getCopyOfMacrosOnMainThread:(NSMutableDictionary *)dstDict{
+    if([NSThread inMainThread] == NO){
+        [self performSelectorOnMainThread:_cmd withObject:dstDict waitUntilDone:YES];
+    } else {
+        NSDictionary *dict = [[NSDictionary alloc] initWithDictionary:[macroResolver macroDefinitions] copyItems:YES];
+        [dstDict addEntriesFromDictionary:dict];
+        [dict release];
+    }
 }
 
 #pragma mark Document Info
@@ -994,11 +974,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     if(NSSaveToOperation == docState.currentSaveOperationType){
         NSView *accessoryView = [savePanel accessoryView];
-        BDSKASSERT(accessoryView != nil);
-        BDSKASSERT(saveFormatPopupButton == nil);
-        saveFormatPopupButton = popUpButtonSubview(accessoryView);
-        BDSKASSERT(saveFormatPopupButton != nil);
+        OBASSERT(accessoryView != nil);
+        NSPopUpButton *saveFormatPopupButton = popUpButtonSubview(accessoryView);
+        OBASSERT(saveFormatPopupButton != nil);
         NSRect savFrame = [saveAccessoryView frame];
+        savFrame.size.width = NSWidth([accessoryView frame]);
         NSRect exportFrame = [exportAccessoryView frame];
         savFrame.origin = NSMakePoint(0.0, SAVE_ENCODING_VIEW_OFFSET);
         [saveAccessoryView setFrame:savFrame];
@@ -1034,31 +1014,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [super changeSaveType:sender];
 }
 
-- (void)document:(NSDocument *)doc didSave:(BOOL)didSave contextInfo:(void *)contextInfo {
-    // reset the encoding popup so we know when it wasn't shown to the user next time
-    [saveTextEncodingPopupButton setEncoding:0];
-    [exportSelectionCheckButton setState:NSOffState];
-    [saveFormatPopupButton removeFromSuperview];
-    saveFormatPopupButton = nil;
-    if (contextInfo != NULL) {
-        NSInvocation *invocation = [(NSInvocation *)contextInfo autorelease];
-        [invocation setArgument:&doc atIndex:2];
-        [invocation setArgument:&didSave atIndex:3];
-        [invocation invoke];
-    }
-}
-
 - (void)runModalSavePanelForSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
     // Override so we can determine if this is a save, saveAs or export operation, so we can prepare the correct accessory view
     docState.currentSaveOperationType = saveOperation;
-    
-    NSInvocation *invocation = nil;
-    if (delegate && didSaveSelector) {
-        invocation = [[NSInvocation invocationWithTarget:delegate selector:didSaveSelector] retain];
-        [invocation setArgument:&contextInfo atIndex:4];
-    }
-    
-    [super runModalSavePanelForSaveOperation:saveOperation delegate:self didSaveSelector:@selector(document:didSave:contextInfo:) contextInfo:invocation];
+    [super runModalSavePanelForSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
 }
 
 - (BOOL)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError{
@@ -1072,22 +1031,17 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     BOOL success = [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
     
-    // compare -dataOfType:forPublications:error:
-    NSStringEncoding encoding = [self documentStringEncoding];
-    if (NSSaveToOperation == saveOperation) {
-        if (NO == [[NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKMinimalBibTeXDocumentType, BDSKRISDocumentType, BDSKLTBDocumentType, nil] containsObject:typeName])
-            encoding = NSUTF8StringEncoding;
-        else
-            encoding = [saveTextEncodingPopupButton encoding] ?: [BDSKStringEncodingManager defaultEncoding];
-    }
-    
     // set com.apple.TextEncoding for other apps
     NSString *UTI = [[NSWorkspace sharedWorkspace] UTIForURL:absoluteURL];
-    if (success && UTI && UTTypeConformsTo((CFStringRef)UTI, kUTTypePlainText))
-        [[NSFileManager defaultManager] setAppleStringEncoding:encoding atPath:[absoluteURL path] error:NULL];
+    if (success && UTI && UTTypeConformsTo((CFStringRef)UTI, kUTTypePlainText)) 
+        [[NSFileManager defaultManager] setAppleStringEncoding:[self documentStringEncoding] atPath:[absoluteURL path] error:NULL];
     
     [saveTargetURL release];
     saveTargetURL = nil;
+    
+    // reset the encoding popup so we know when it wasn't shown to the user next time
+    [saveTextEncodingPopupButton setEncoding:0];
+    [exportSelectionCheckButton setState:NSOffState];
     
     if(success == NO)
         return NO;
@@ -1104,9 +1058,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             }
         }
         
-        // save our window setup if we export to BibTeX
+        // save our window setup if we export to BibTeX or RIS
         if([[self class] isNativeType:typeName] || [typeName isEqualToString:BDSKMinimalBibTeXDocumentType])
-            [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forEncoding:encoding];
+            [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forSave:YES];
         
     }else if(saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation){
         [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
@@ -1121,13 +1075,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         BOOL update = (saveOperation == NSSaveOperation); // for saveTo we should update all items, as our path changes
         
         while(anItem = [pubsE nextObject]){
-            NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-            @try {
+            OMNI_POOL_START {
                 if(info = [anItem metadataCacheInfoForUpdate:update])
                     [pubsInfo addObject:info];
-            }
-            @catch (id e) { @throw(e); }
-            @finally { [pool release]; }
+            } OMNI_POOL_END;
         }
         
         NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:pubsInfo, @"publications", absoluteURL, @"fileURL", nil];
@@ -1136,7 +1087,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [infoDict release];
         
         // save window setup to extended attributes, so it is set also if we use saveAs
-        [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forEncoding:[self documentStringEncoding]];
+        [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forSave:YES];
     }
     
     return YES;
@@ -1159,8 +1110,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSError *nsError = nil;
     NSArray *items = publications;
     
-    // callers are responsible for making sure all edits are committed
-    NSParameterAssert([self commitPendingEdits]);
+    // first we make sure all edits are committed
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionary]];
     
     if(docState.currentSaveOperationType == NSSaveToOperation && [exportSelectionCheckButton state] == NSOnState)
         items = [self numberOfSelectedPubs] > 0 ? [self selectedPublications] : groupedPublications;
@@ -1188,6 +1141,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         nsError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:errTitle underlyingError:nsError];
         [nsError setValue:errMsg forKey:NSLocalizedRecoverySuggestionErrorKey];        
     }
+    // needed because of finalize changes; don't send -clearChangeCount if the save failed for any reason, or if we're autosaving!
+    else if (docState.currentSaveOperationType != NSAutosaveOperation && docState.currentSaveOperationType != NSSaveToOperation)
+        [self performSelector:@selector(clearChangeCount) withObject:nil afterDelay:0.01];
     
     // setting to nil is okay
     if (outError) *outError = nsError;
@@ -1197,21 +1153,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (BOOL)writeSafelyToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError;
 {
-    /*
-     Apple's safe-saving is broken on NFS http://sourceforge.net/tracker/index.php?func=detail&aid=2822780&group_id=61487&atid=497423
-     Always use the workaround path in that case, based on the mount type.  Tested by automounting an RHEL5 export on 10.5.7.
-     Unknown whether this is needed on 10.4, but NSAppKitVersionNumber check is needed because of the condition below.
-     */
-     NSString *fsType = nil;
-     if ([[NSWorkspace sharedWorkspace] getFileSystemInfoForPath:[absoluteURL path] isRemovable:NULL isWritable:NULL isUnmountable:NULL description:NULL type:&fsType] == NO)
-         fsType = nil;
-     BOOL didSave;
-
-     // same conditional as used for workaround code path
-     if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 && [absoluteURL isFileURL] && NSAutosaveOperation != saveOperation && [[fsType lowercaseString] isEqualToString:@"nfs"])
-         didSave = NO;
-     else
-         didSave = [super writeSafelyToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
+    BOOL didSave = [super writeSafelyToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
     
 #if defined(MAC_OS_X_VERSION_10_5) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
     
@@ -1234,7 +1176,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         
         // this will create a new file on the same volume as the original file, which we will overwrite
         // FSExchangeObjects requires both files to be on the same volume
-        NSString *tmpPath = [fileManager temporaryPathForWritingToPath:[absoluteURL path] error:outError];
+        NSString *tmpPath = [fileManager temporaryPathForWritingToPath:[absoluteURL path] allowOriginalDirectory:YES error:outError];
         NSURL *saveToURL = nil;
         
         // at this point, we're guaranteed that absoluteURL is non-nil and is a fileURL, but the file may not exist
@@ -1354,7 +1296,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 if (filePath = [[file URL] path]) {
                     [localFiles addObject:filePath];
                     if (commonParent)
-                        commonParent = [[filePath stringByDeletingLastPathComponent] commonRootPathOfFile:commonParent];
+                        commonParent = [NSString commonRootPathOfFilename:[filePath stringByDeletingLastPathComponent] andFilename:commonParent];
                     else
                         commonParent = [filePath stringByDeletingLastPathComponent];
                 }
@@ -1370,19 +1312,19 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         
         while (success && (filePath = [itemEnum nextObject])) {
             if ([fm fileExistsAtPath:filePath]) {
-                NSString *relativePath = commonParent ? [filePath relativePathFromPath:commonParent] : [filePath lastPathComponent];
+                NSString *relativePath = commonParent ? [commonParent relativePathToFilename:filePath] : [filePath lastPathComponent];
                 NSString *targetPath = [path stringByAppendingPathComponent:relativePath];
                 
                 if ([fm fileExistsAtPath:targetPath])
                     targetPath = [fm uniqueFilePathWithName:[targetPath stringByDeletingLastPathComponent] atPath:[targetPath lastPathComponent]];
-                success = [fm createPathToFile:targetPath attributes:nil];
+                success = [fm createPathToFile:targetPath attributes:nil error:NULL];
                 if (success)
                 success = [fm copyPath:filePath toPath:targetPath handler:nil];
             }
         }
         
         if (success) {
-            NSTask *task = [[[BDSKTask alloc] init] autorelease];
+            NSTask *task = [[[NSTask alloc] init] autorelease];
             [task setLaunchPath:@"/usr/bin/tar"];
             [task setArguments:[NSArray arrayWithObjects:@"czf", [[fileURL path] lastPathComponent], [path lastPathComponent], nil]];
             [task setCurrentDirectoryPath:[path stringByDeletingLastPathComponent]];
@@ -1417,7 +1359,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"Error description")];
         }
     }else if ([aType isEqualToString:BDSKArchiveDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"tgz"]]){
-        BDSKASSERT_NOT_REACHED("Should not save a fileWrapper for archive");
+        OBASSERT_NOT_REACHED("Should not save a fileWrapper for archive");
     }else{
         NSError *error = nil;
         NSData *data = [self dataOfType:aType forPublications:items error:&error];
@@ -1450,7 +1392,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         encoding = [saveTextEncodingPopupButton encoding] ?: [BDSKStringEncodingManager defaultEncoding];
     
     if (isBibTeX){
-        if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKAutoSortForCrossrefsKey])
+        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey])
             [self performSortForCrossrefs];
         data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeToPath:[[saveTargetURL path] stringByDeletingLastPathComponent] error:&error];
     }else if ([aType isEqualToString:BDSKRISDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"ris"]]){
@@ -1499,7 +1441,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             
             // see if TeX conversion is enabled; it will help for ASCII, and possibly other encodings, but not UTF-8
             // only for BibTeX, though!
-            if (isBibTeX && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] == NO) {
+            if (isBibTeX && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] == NO) {
                 [message appendFormat:NSLocalizedString(@"You should enable accented character conversion in the Files preference pane or save using an encoding such as %@.", @"Error informative text"), [NSString localizedNameOfStringEncoding:NSUTF8StringEncoding]];
             } else if (NSUTF8StringEncoding != usedEncoding){
                 // could suggest disabling TeX conversion, but the error might be from something out of the range of what we try to convert, so combining TeXify && UTF-8 would work
@@ -1585,20 +1527,20 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSString *encodingName = [NSString localizedNameOfStringEncoding:encoding];
     NSStringEncoding groupsEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
     
-    NSInteger options = 0;
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey])
+    int options = 0;
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey])
         options |= BDSKBibTeXOptionTeXifyMask;
     if (drop)
         options |= BDSKBibTeXOptionDropInternalMask;
     
-    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldUseTemplateFileKey]){
-        NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[NSUserDefaults standardUserDefaults] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath] usedEncoding:NULL error:NULL] ?: [NSMutableString string];
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUseTemplateFileKey]){
+        NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath] usedEncoding:NULL error:NULL] ?: [NSMutableString string];
         
         NSString *userName = NSFullUserName();
         if ([userName canBeConvertedToEncoding:encoding] == NO)
             userName = [[[NSString alloc] initWithData:[userName dataUsingEncoding:encoding allowLossyConversion:YES] encoding:encoding] autorelease];
         
-        [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", userName, [[NSDate date] standardDescription]];
+        [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", userName, [NSCalendarDate calendarDate]];
 
         [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
         
@@ -1607,7 +1549,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         NSString *collapsedFrontMatter = [frontMatter stringByRemovingWhitespace];
         if([NSString isEmptyString:collapsedFrontMatter]){
             shouldAppendFrontMatter = NO;
-        }else if([collapsedTemplate rangeOfString:collapsedFrontMatter].length){
+        }else if([collapsedTemplate containsString:collapsedFrontMatter]){
             NSLog(@"*** WARNING! *** Found duplicate preamble %@.  Using template from preferences.", frontMatter);
             shouldAppendFrontMatter = NO;
         }
@@ -1701,8 +1643,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSString *RISString = [self RISStringForPublications:items];
     NSData *data = [RISString dataUsingEncoding:encoding allowLossyConversion:NO];
     if (nil == data && error) {
-        *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]]];
-        [*error setValue:[NSNumber numberWithInt:encoding] forKey:NSStringEncodingErrorKey];
+        OFErrorWithInfo(error, kBDSKStringEncodingError, NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
     }
 	return data;
 }
@@ -1718,8 +1659,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSString *ltbString = [pboard stringForType:NSStringPboardType];
     [pboardHelper clearPromisedTypesForPasteboard:pboard];
 	if(ltbString == nil){
-        if (error)
-            *error = [NSError localErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to run TeX processes for these publications", @"Error description")];
+        if (error) OFErrorWithInfo(error, kBDSKDocumentSaveError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to run TeX processes for these publications", @"Error description"), nil);
 		return nil;
     }
     
@@ -1729,8 +1669,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     NSData *data = [s dataUsingEncoding:encoding allowLossyConversion:NO];
     if (nil == data && error) {
-        *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]]];
-        [*error setValue:[NSNumber numberWithInt:encoding] forKey:NSStringEncodingErrorKey];
+        OFErrorWithInfo(error, kBDSKStringEncodingError, NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
     }        
 	return data;
 }
@@ -1742,7 +1681,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSData *)stringDataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
-    BDSKPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
+    OBPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
     
     NSString *fileTemplate = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext];
     return [fileTemplate dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
@@ -1755,9 +1694,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSData *)attributedStringDataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
-    BDSKPRECONDITION(nil != template);
+    OBPRECONDITION(nil != template);
     BDSKTemplateFormat format = [template templateFormat];
-    BDSKPRECONDITION(format & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKDocxTemplateFormat | BDSKOdtTemplateFormat | BDSKRichHTMLTemplateFormat));
+    OBPRECONDITION(format & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKDocxTemplateFormat | BDSKOdtTemplateFormat | BDSKRichHTMLTemplateFormat));
     NSDictionary *docAttributes = nil;
     NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext documentAttributes:&docAttributes];
     NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionaryWithDictionary:docAttributes];
@@ -1793,7 +1732,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSData *)dataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
-    BDSKPRECONDITION(nil != template && nil != [template scriptPath]);
+    OBPRECONDITION(nil != template && nil != [template scriptPath]);
     
     NSData *fileTemplate = [BDSKTemplateObjectProxy dataByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext];
     return fileTemplate;
@@ -1806,7 +1745,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
-    BDSKPRECONDITION(nil != template && [template templateFormat] & BDSKRTFDTemplateFormat);
+    OBPRECONDITION(nil != template && [template templateFormat] & BDSKRTFDTemplateFormat);
     NSDictionary *docAttributes = nil;
     NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext documentAttributes:&docAttributes];
     
@@ -1819,15 +1758,15 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (BOOL)revertToContentsOfURL:(NSURL *)absoluteURL ofType:(NSString *)aType error:(NSError **)outError
 {
 	// first remove all editor windows, as they will be invalid afterwards
-    NSUInteger idx = [[self windowControllers] count];
+    unsigned int idx = [[self windowControllers] count];
     while(--idx)
         [[[self windowControllers] objectAtIndex:idx] close];
     
     if([super revertToContentsOfURL:absoluteURL ofType:aType error:outError]){
         [self setSearchString:@""];
-        [self updateSmartGroupsCount];
+        [self updateSmartGroupsCountAndContent:NO];
         [self updateCategoryGroupsPreservingSelection:YES];
-        [self sortGroupsByKey:nil]; // resort
+        [self sortGroupsByKey:sortGroupsKey]; // resort
 		[tableView deselectAll:self]; // clear before resorting
 		[self search:searchField]; // redo the search
         [self sortPubsByKey:nil]; // resort
@@ -1855,16 +1794,14 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     // make sure we clear all macros and groups that are saved in the file, should only have those for revert
     // better do this here, so we don't remove them when reading the data fails
     [macroResolver removeAllMacros];
-    [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:[groups URLGroups]];
-    [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:[groups scriptGroups]];
-    [groups removeAllUndoableGroups]; // this also removes editor windows for external groups
+    [groups removeAllNonSharedGroups]; // this also removes spinners and editor windows for external groups
     [frontMatter setString:@""];
     
     // This is only a sanity check; an encoding of 0 is not valid, so is a signal we should ignore xattrs; could only check for public.text UTIs, but it will be zero if it was never written (and we don't warn in that case).  The user can do many things to make the attribute incorrect, so this isn't very robust.
     NSStringEncoding encodingFromFile = [[self mainWindowSetupDictionaryFromExtendedAttributes] unsignedIntForKey:BDSKDocumentStringEncodingKey defaultValue:0];
     if (encodingFromFile != 0 && encodingFromFile != encoding) {
         
-        NSInteger rv;
+        int rv;
         
         error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:NSLocalizedString(@"Incorrect encoding", @"Message in alert dialog when opening a document with different encoding")];
         [error setValue:[NSString stringWithFormat:NSLocalizedString(@"BibDesk tried to open the document using encoding %@, but it should have been opened with encoding %@.", @"Informative text in alert dialog when opening a document with different encoding"), [NSString localizedNameOfStringEncoding:encoding], [NSString localizedNameOfStringEncoding:encodingFromFile]] forKey:NSLocalizedRecoverySuggestionErrorKey];
@@ -1897,26 +1834,23 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		// sniff the string to see what format we got
 		NSString *string = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
 		if(string == nil){
-            error = [NSError mutableLocalErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unable To Open Document", @"Error description")];
-            [error setValue:NSLocalizedString(@"This document does not appear to be a text file.", @"Error informative text") forKey:NSLocalizedRecoverySuggestionErrorKey];
+            OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @"Error description"), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This document does not appear to be a text file.", @"Error informative text"), nil);
             if(outError) *outError = error;
             
             // bypass the partial data warning, since we have no data
 			return NO;
         }
-        NSInteger type = [string contentStringType];
+        int type = [string contentStringType];
         if(type == BDSKBibTeXStringType){
             success = [self readFromBibTeXData:data fromURL:absoluteURL encoding:encoding error:&error];
 		}else if (type == BDSKNoKeyBibTeXStringType){
-            error = [NSError mutableLocalErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unable To Open Document", @"Error description")];
-            [error setValue:NSLocalizedString(@"This file appears to contain invalid BibTeX because of missing cite keys. Try to open using temporary cite keys to fix this.", @"Error informative text") forKey:NSLocalizedRecoverySuggestionErrorKey];
+            OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @"Error description"), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This file appears to contain invalid BibTeX because of missing cite keys. Try to open using temporary cite keys to fix this.", @"Error informative text"), nil);
             if (outError) *outError = error;
             
             // bypass the partial data warning; we have no data in this case
             return NO;
 		}else if (type == BDSKUnknownStringType){
-            error = [NSError mutableLocalErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unable To Open Document", @"Error description")];
-            [error setValue:NSLocalizedString(@"This text file does not contain a recognized data type.", @"Error informative text") forKey:NSLocalizedRecoverySuggestionErrorKey];
+            OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @"Error description"), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This text file does not contain a recognized data type.", @"Error informative text"), nil);
             if (outError) *outError = error;
             
             // bypass the partial data warning; we have no data in this case
@@ -1929,7 +1863,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     // @@ move this to NSDocumentController; need to figure out where to add it, though
     if(success == NO){
-        NSInteger rv;
+        int rv;
         // run a modal dialog asking if we want to use partial data or give up
         NSAlert *alert = [NSAlert alertWithMessageText:[error localizedDescription] ?: NSLocalizedString(@"Error reading file!", @"Message in alert dialog when unable to read file")
                                          defaultButton:NSLocalizedString(@"Give Up", @"Button title")
@@ -1978,23 +1912,18 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	if(isPartialData && outError) *outError = error;	
     [self setPublicationsWithoutUndo:newPubs];
     
-    // update the publications of all static groups from the archived keys
-    [[groups staticGroups] makeObjectsPerformSelector:@selector(update)];
-    
     return isPartialData == NO;
 }
 
-- (BOOL)readFromData:(NSData *)data ofStringType:(NSInteger)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
+- (BOOL)readFromData:(NSData *)data ofStringType:(int)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
     
     NSError *error = nil;    
     NSString *dataString = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
     NSArray *newPubs = nil;
     
     if(dataString == nil){
-        error = [NSError mutableLocalErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unable to Interpret", @"Error description")];
-        [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Unable to interpret data as %@.  Try a different encoding.", @"Error informative text"), [NSString localizedNameOfStringEncoding:encoding]] forKey:NSLocalizedRecoverySuggestionErrorKey];
-        [error setValue:[NSNumber numberWithInt:encoding] forKey:NSStringEncodingErrorKey];
-        if(outError) *outError = error;
+        OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Interpret", @"Error description"), NSLocalizedRecoverySuggestionErrorKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to interpret data as %@.  Try a different encoding.", @"Error informative text"), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
+        if(outError)    *outError = error;
         return NO;
     }
     
@@ -2022,7 +1951,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 #pragma mark -
 
-- (void)temporaryCiteKeysAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)temporaryCiteKeysAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     NSString *tmpKey = [(NSString *)contextInfo autorelease];
     if(returnCode == NSAlertDefaultReturn){
         NSArray *selItems = [self selectedPublications];
@@ -2070,9 +1999,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSMutableString *s = [NSMutableString string];
 	NSEnumerator *e = [items objectEnumerator];
 	BibItem *pub;
-	NSInteger options = 0;
+	int options = 0;
     
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey])
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey])
         options |= BDSKBibTeXOptionTeXifyMask;
     if (drop)
         options |= BDSKBibTeXOptionDropInternalMask;
@@ -2087,11 +2016,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
-	NSUInteger numberOfPubs = [items count];
+	unsigned numberOfPubs = [items count];
 	NSMutableString *bibString = [[NSMutableString alloc] initWithCapacity:(numberOfPubs * 100)];
     
-    NSInteger options = BDSKBibTeXOptionDropLinkedURLsMask;
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey])
+    int options = BDSKBibTeXOptionDropLinkedURLsMask;
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey])
         options |= BDSKBibTeXOptionTeXifyMask;
     
 	// in case there are @preambles in it
@@ -2147,12 +2076,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (NSString *)citeStringForPublications:(NSArray *)items citeString:(NSString *)citeString{
-	NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-    NSString *startBracket = [sud stringForKey:BDSKCiteStartBracketKey];
-	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", ([sud boolForKey:BDSKCitePrependTildeKey] ? @"~" : @""), citeString, startBracket]; 
-	NSString *endCite = [sud stringForKey:BDSKCiteEndBracketKey]; 
-	NSInteger separateCite = [sud integerForKey:BDSKSeparateCiteKey];
-    NSString *separator = separateCite == 1 ? [endCite stringByAppendingString:startCite] : separateCite == 2 ? [endCite stringByAppendingString:startBracket] : @",";
+	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", ([pw boolForKey:BDSKCitePrependTildeKey] ? @"~" : @""), citeString, [pw stringForKey:BDSKCiteStartBracketKey]]; 
+	NSString *endCite = [pw stringForKey:BDSKCiteEndBracketKey]; 
+	NSString *separator = [pw boolForKey:BDSKSeparateCiteKey] ? [endCite stringByAppendingString:startCite] : @",";
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
@@ -2178,28 +2105,25 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             [pub performSelector:@selector(autoFileLinkedFile:) withObjectsFromArray:[pub localFiles]];
     }
     
-    BOOL autoGenerate = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyAutogenerateKey];
-    NSMutableArray *autogeneratePubs = [NSMutableArray arrayWithCapacity:[newPubs count]];
-    BOOL hasDuplicateCiteKey = NO;
+    BOOL autoGenerate = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey];
+    NSMutableArray *pubs = [NSMutableArray arrayWithCapacity:[newPubs count]];
     
     pubEnum = [newPubs objectEnumerator];
     
     while (pub = [pubEnum nextObject]) {
         if ((autoGenerate == NO && [pub hasEmptyOrDefaultCiteKey]) ||
-            (autoGenerate && [pub canGenerateAndSetCiteKey])) { // @@ or should we check for hasEmptyOrDefaultCiteKey ?
-            [autogeneratePubs addObject:pub];
-        } else if ([pub isValidCiteKey:[pub citeKey]] == NO) {
-            hasDuplicateCiteKey = YES;
-        }
+            (autoGenerate && [pub canGenerateAndSetCiteKey])) // @@ or should we check for hasEmptyOrDefaultCiteKey ?
+            [pubs addObject:pub];
     }
-    [self generateCiteKeysForPublications:autogeneratePubs];
+    [self generateCiteKeysForPublications:pubs];
     
     // set Date-Added to the current date, since unarchived items will have their own (incorrect) date
     NSCalendarDate *importDate = [NSCalendarDate date];
     [newPubs makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
 	
-	if(shouldEdit)
+	if(shouldEdit) {
 		[self editPublications:newPubs]; // this will ask the user when there are many pubs
+	}
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication", @"Undo action name")];
     
@@ -2215,17 +2139,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKImportPublicationsScriptHookName forPublications:newPubs document:self];
     
-    if (tmpCiteKey != nil) {
+    if(tmpCiteKey != nil)
         [self reportTemporaryCiteKeys:tmpCiteKey forNewDocument:NO];
-    } else if (hasDuplicateCiteKey) { // should we do this when we don't edit?
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Cite Key", @"Message in alert dialog when duplicate citye key was found") 
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"One or more items you added have a cite key which is either already used in this document. You should provide a unique one.", @"Informative text in alert dialog")];
-        // don't begin a sheet, because the edit command may have one put up already
-        [alert runModal];
-    }
 }
 
 - (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)shouldSelect verbose:(BOOL)verbose error:(NSError **)outError{
@@ -2235,7 +2150,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSArray *newFilePubs = nil;
 	NSError *error = nil;
     NSString *temporaryCiteKey = nil;
-    BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
+    BOOL shouldEdit = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey];
     
     if([type isEqualToString:BDSKBibItemPboardType]){
         NSData *pbData = [pb dataForType:BDSKBibItemPboardType];
@@ -2278,7 +2193,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             newPubs = [self publicationsForURLFromPasteboard:pb error:&error];
 	}else{
         // errors are key, value
-        error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"Error description")];
+        OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"Error description"), nil);
 	}
     
     if (newPubs == nil){
@@ -2294,7 +2209,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSError *error = nil;
     NSString *temporaryCiteKey = nil;
     NSArray *newPubs = [self extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:nil verbose:verbose error:&error];
-    BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
+    BOOL shouldEdit = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey];
     
     if(temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"])
         error = nil; // accept temporary cite keys, but show a warning later
@@ -2320,14 +2235,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     [NSString setMacroResolverForUnarchiving:nil];
     
-    // we set the macroResolver so we know the fields of this item may refer to it, so we can prevent scripting from adding this to the wrong document
-    [newPubs makeObjectsPerformSelector:@selector(setMacroResolver:) withObject:macroResolver];
-    
     return newPubs;
 }
 
 // pass BDSKUnkownStringType to allow BDSKStringParser to sniff the text and determine the format
-- (NSArray *)publicationsForString:(NSString *)string type:(NSInteger)type verbose:(BOOL)verbose error:(NSError **)outError {
+- (NSArray *)publicationsForString:(NSString *)string type:(int)type verbose:(BOOL)verbose error:(NSError **)outError {
     NSArray *newPubs = nil;
     NSError *parseError = nil;
     BOOL isPartialData = NO;
@@ -2354,7 +2266,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         NSString *alternateButton = nil;
         NSString *otherButton = nil;
         NSString *alertTitle = NSLocalizedString(@"Error Reading String", @"Message in alert dialog when failing to parse dropped or copied string");
-        NSInteger errorCode = [parseError code];
+        int errorCode = [parseError code];
         
         // the partial data alert only applies to BibTeX; we could show the editor window for non-BibTeX data (I think...), but we also have to deal with alerts being shown twice if NSError is involved
         if(type == BDSKBibTeXStringType || type == BDSKNoKeyBibTeXStringType){
@@ -2378,7 +2290,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                                            alternateButton:alternateButton
                                                otherButton:otherButton
                                  informativeTextWithFormat:message];
-            NSInteger rv = [alert runModal];
+            int rv = [alert runModal];
             
             if(rv == NSAlertDefaultReturn && errorCode != kBDSKParserIgnoredFrontMatter){
                 // the user said to give up
@@ -2402,12 +2314,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         
 	}else if(type == BDSKNoKeyBibTeXStringType){
         
-        BDSKASSERT(parseError == nil);
+        OBASSERT(parseError == nil);
         
         // return an error when we inserted temporary keys, let the caller decide what to do with it
         // don't override a parseError though, as that is probably more relevant
-        parseError = [NSError mutableLocalErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Temporary Cite Keys", @"Error description")];
-        [parseError setValue:@"FixMe" forKey:@"temporaryCiteKey"];
+        OFErrorWithInfo(&parseError, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Temporary Cite Keys", @"Error description"), @"temporaryCiteKey", @"FixMe", nil);
     }
     
 	if(outError) *outError = parseError;
@@ -2420,10 +2331,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSString *fileName;
     NSString *contentString;
     NSMutableArray *array = [NSMutableArray array];
-    NSInteger type = BDSKUnknownStringType;
+    int type = BDSKUnknownStringType;
     
     // some common types that people might use as attachments; we don't need to sniff these
-    NSSet *unreadableTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
+    NSSet *unreadableTypes = [NSSet caseInsensitiveStringSetWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
     
     while(fileName = [e nextObject]){
         type = BDSKUnknownStringType;
@@ -2490,8 +2401,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             BibItem *newBI = nil;
             
             // most reliable metadata should be our private EA
-            if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKReadExtendedAttributesKey]){
-                NSData *btData = [[SKNExtendedAttributeManager sharedNoSplitManager] extendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" atPath:fnStr traverseLink:NO error:&xerror];
+            if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKReadExtendedAttributesKey]){
+                NSData *btData = [[SKNExtendedAttributeManager sharedNoSplitManager] extendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" atPath:fnStr traverseLink:NO error:&xerror];
                 if(btData){
                     NSString *btString = [[NSString alloc] initWithData:btData encoding:NSUTF8StringEncoding];
                     BOOL isPartialData;
@@ -2502,11 +2413,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             }
             
 			// GJ try parsing pdf to extract info that is then used to get a PubMed record
-			if(newBI == nil && [[[NSWorkspace sharedWorkspace] UTIForURL:url] isEqualToUTI:(NSString *)kUTTypePDF] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTermKey])
+			if(newBI == nil && [[[NSWorkspace sharedWorkspace] UTIForURL:url] isEqualToUTI:(NSString *)kUTTypePDF] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTermKey])
 				newBI = [BibItem itemByParsingPDFFile:fnStr];			
 			
             // fall back on the least reliable metadata source (hidden pref)
-            if(newBI == nil && [[[NSWorkspace sharedWorkspace] UTIForURL:url] isEqualToUTI:(NSString *)kUTTypePDF] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldUsePDFMetadataKey])
+            if(newBI == nil && [[[NSWorkspace sharedWorkspace] UTIForURL:url] isEqualToUTI:(NSString *)kUTTypePDF] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadataKey])
                 newBI = [BibItem itemWithPDFMetadata:[PDFMetadata metadataForURL:url error:&xerror]];
 			
             if(newBI == nil)
@@ -2535,8 +2446,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if (title)
             [newBI setField:BDSKTitleString toValue:title];
         [pubs addObject:newBI];
-    } else if (error) {
-        *error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Did not find expected URL on the pasteboard", @"Error description")];
+    } else {
+        OFErrorWithInfo(error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Did not find expected URL on the pasteboard", @"Error description"), nil);
     }
     
 	return pubs;
@@ -2563,63 +2474,62 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark Sorting
 
 - (void)sortPubsByKey:(NSString *)key{
-    if (key == nil && sortKey == nil)
-        return;
     
-    NSTableColumn *tableColumn = [tableView tableColumnWithIdentifier:key ?: sortKey];
+    NSTableColumn *tableColumn = nil;
     
-    if (key == nil) {
-        // a nil argument means resort the current column in the same order
-    } else if ([sortKey isEqualToString:key]) {
+    // cache the selection; this works for multiple publications
+    NSArray *pubsToSelect = nil;
+    if([tableView numberOfSelectedRows])
+        pubsToSelect = [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
+    
+    // a nil argument means resort the current column in the same order
+    if(key == nil){
+        if(sortKey == nil)
+            return;
+        key = sortKey;
+        docState.sortDescending = !docState.sortDescending; // we'll reverse this again in the next step
+    }
+    
+    tableColumn = [tableView tableColumnWithIdentifier:key];
+    
+    if ([sortKey isEqualToString:key]) {
         // User clicked same column, change sort order
         docState.sortDescending = !docState.sortDescending;
     } else {
         // User clicked new column, change old/new column headers,
         // save new sorting selector, and re-sort the array.
+        docState.sortDescending = [key isEqualToString:BDSKRelevanceString];
         if (sortKey)
             [tableView setIndicatorImage:nil inTableColumn:[tableView tableColumnWithIdentifier:sortKey]];
-        if ([sortKey isEqualToString:BDSKImportOrderString] || [sortKey isEqualToString:BDSKRelevanceString]) {
-            // this is probably after removing an ImportOrder or Relevance column, try to reinstate the previous sort order
-            if ([key isEqualToString:previousSortKey])
-                docState.sortDescending = docState.previousSortDescending;
-            else
-                docState.sortDescending = [key isEqualToString:BDSKRelevanceString];
-        } else {
-            if ([previousSortKey isEqualToString:sortKey] == NO) {
-                [previousSortKey release];
-                previousSortKey = [sortKey retain];
-            }
-            docState.previousSortDescending = docState.sortDescending;
-            docState.sortDescending = [key isEqualToString:BDSKRelevanceString];
+        if([previousSortKey isEqualToString:sortKey] == NO){
+            [previousSortKey release];
+            previousSortKey = sortKey; // this is retained
+        }else{
+            [sortKey release];
         }
-        [sortKey release];
         sortKey = [key retain];
         [tableView setHighlightedTableColumn:tableColumn]; 
 	}
     
-    if (previousSortKey == nil) {
+    if(previousSortKey == nil)
         previousSortKey = [sortKey retain];
-        docState.previousSortDescending = docState.sortDescending;
-    }
     
     NSString *userInfo = [self fileName];
-    NSArray *sortDescriptors = [NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:sortKey ascending:!docState.sortDescending userInfo:userInfo], [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:previousSortKey ascending:!docState.previousSortDescending userInfo:userInfo], nil];
+    NSArray *sortDescriptors = [NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:sortKey ascending:!docState.sortDescending userInfo:userInfo], [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:previousSortKey ascending:!docState.sortDescending userInfo:userInfo], nil];
     [tableView setSortDescriptors:sortDescriptors]; // just using this to store them; it's really a no-op
     
+
     // @@ DON'T RETURN WITHOUT RESETTING THIS!
     // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
     [tableView setDelegate:nil];
-    
-    // cache the selection; this works for multiple publications
-    NSArray *pubsToSelect = nil;
-    if ([tableView numberOfSelectedRows])
-        pubsToSelect = [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
     
     // sort by new primary column, subsort with previous primary column
     [shownPublications mergeSortUsingDescriptors:sortDescriptors];
 
     // Set the graphic for the new column header
-    [tableView setIndicatorImage: [NSImage imageNamed:(docState.sortDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator")]
+    [tableView setIndicatorImage: (docState.sortDescending ?
+                                   [NSImage imageNamed:@"NSDescendingSortIndicator"] :
+                                   [NSImage imageNamed:@"NSAscendingSortIndicator"])
                    inTableColumn: tableColumn];
 
     // have to reload so the rows get set up right, but a full updateStatus flashes the preview, which is annoying (and the preview won't change if we're maintaining the selection)
@@ -2635,7 +2545,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (void)saveSortOrder{ 
     // @@ if we switch to NSArrayController, we should just archive the sort descriptors (see BDSKFileContentSearchController)
-    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     NSString *savedSortKey = nil;
     if ([sortKey isEqualToString:BDSKImportOrderString] || [sortKey isEqualToString:BDSKRelevanceString]) {
         if ([previousSortKey isEqualToString:BDSKImportOrderString] == NO && [previousSortKey isEqualToString:BDSKRelevanceString] == NO) 
@@ -2644,16 +2554,16 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         savedSortKey = sortKey;
     }
     if (savedSortKey)
-        [sud setObject:savedSortKey forKey:BDSKDefaultSortedTableColumnKey];
-    [sud setBool:docState.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
-    [sud setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
-    [sud setBool:docState.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];    
+        [pw setObject:savedSortKey forKey:BDSKDefaultSortedTableColumnKey];
+    [pw setBool:docState.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+    [pw setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
+    [pw setBool:docState.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];    
 }  
 
 #pragma mark -
 #pragma mark Selection
 
-- (NSInteger)numberOfSelectedPubs{
+- (int)numberOfSelectedPubs{
     if ([self isDisplayingFileContentSearch])
         return [[fileSearchController selectedIdentifierURLs] count];
     else
@@ -2663,8 +2573,17 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSArray *)selectedPublications{
     NSArray *selPubs = nil;
     if ([self isDisplayingFileContentSearch]) {
-        if ([[fileSearchController tableView] numberOfSelectedRows])
-            selPubs =  [publications itemsForIdentifierURLs:[fileSearchController selectedIdentifierURLs]];
+        if ([[fileSearchController tableView] numberOfSelectedRows]) {
+            NSMutableArray *tmpArray = [NSMutableArray array];
+            NSEnumerator *itemEnum = [[fileSearchController selectedIdentifierURLs] objectEnumerator];
+            NSURL *idURL;
+            BibItem *pub;
+            while (idURL = [itemEnum nextObject]) {
+                if (pub = [publications itemForIdentifierURL:idURL])
+                    [tmpArray addObject:pub];
+            }
+            selPubs = tmpArray;
+        }
     } else if ([tableView numberOfSelectedRows]) {
         selPubs = [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
     }
@@ -2725,6 +2644,851 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 #pragma mark -
+#pragma mark Notification handlers
+
+- (void)registerForNotifications{
+        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+        
+		[nc addObserver:self
+               selector:@selector(handleGroupFieldChangedNotification:)
+	               name:BDSKGroupFieldChangedNotification
+                 object:self];
+		[nc addObserver:self
+               selector:@selector(handleGroupFieldAddRemoveNotification:)
+	               name:BDSKGroupFieldAddRemoveNotification
+                 object:nil];
+		[nc addObserver:self
+               selector:@selector(handleTableSelectionChangedNotification:)
+	               name:BDSKTableSelectionChangedNotification
+                 object:self];
+		[nc addObserver:self
+               selector:@selector(handleGroupTableSelectionChangedNotification:)
+	               name:BDSKGroupTableSelectionChangedNotification
+                 object:self];
+		[nc addObserver:self
+               selector:@selector(handleBibItemChangedNotification:)
+	               name:BDSKBibItemChangedNotification
+                 object:nil];
+		[nc addObserver:self
+               selector:@selector(handleBibItemAddDelNotification:)
+	               name:BDSKDocSetPublicationsNotification
+                 object:self];
+		[nc addObserver:self
+               selector:@selector(handleBibItemAddDelNotification:)
+	               name:BDSKDocAddItemNotification
+                 object:self];
+		[nc addObserver:self
+               selector:@selector(handleBibItemAddDelNotification:)
+	               name:BDSKDocDelItemNotification
+                 object:self];
+        [nc addObserver:self
+               selector:@selector(handleMacroChangedNotification:)
+                   name:BDSKMacroDefinitionChangedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleFilterChangedNotification:)
+                   name:BDSKFilterChangedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleGroupNameChangedNotification:)
+                   name:BDSKGroupNameChangedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleStaticGroupChangedNotification:)
+                   name:BDSKStaticGroupChangedNotification
+                 object:nil];
+		[nc addObserver:self
+               selector:@selector(handleSharedGroupUpdatedNotification:)
+	               name:BDSKSharedGroupUpdatedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleSharedGroupsChangedNotification:)
+                   name:BDSKSharingClientsChangedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleURLGroupUpdatedNotification:)
+                   name:BDSKURLGroupUpdatedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleScriptGroupUpdatedNotification:)
+                   name:BDSKScriptGroupUpdatedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleSearchGroupUpdatedNotification:)
+                   name:BDSKSearchGroupUpdatedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleWebGroupUpdatedNotification:)
+                   name:BDSKWebGroupUpdatedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleWillAddRemoveGroupNotification:)
+                   name:BDSKWillAddRemoveGroupNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleDidAddRemoveGroupNotification:)
+                   name:BDSKDidAddRemoveGroupNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleFlagsChangedNotification:)
+                   name:OAFlagsChangedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleApplicationWillTerminateNotification:)
+                   name:NSApplicationWillTerminateNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleTemporaryFileMigrationNotification:)
+                   name:BDSKTemporaryFileMigrationNotification
+                 object:self];
+        // observe this on behalf of our BibItems, or else all BibItems register for these notifications and -[BibItem dealloc] gets expensive when unregistering; this means that (shared) items without a document won't get these notifications
+        [nc addObserver:self
+               selector:@selector(handleCustomFieldsDidChangeNotification:)
+                   name:BDSKCustomFieldsChangedNotification
+                 object:nil];
+        // Header says NSNotificationSuspensionBehaviorCoalesce is the default if suspensionBehavior isn't specified, but at least on 10.5 it appears to be NSNotificationSuspensionBehaviorDeliverImmediately.
+        [[NSDistributedNotificationCenter defaultCenter] 
+            addObserver:self
+               selector:@selector(handleSkimFileDidSaveNotification:)
+                   name:@"SKSkimFileDidSaveNotification"
+                 object:nil
+     suspensionBehavior:NSNotificationSuspensionBehaviorCoalesce];
+        [OFPreference addObserver:self
+                         selector:@selector(handleIgnoredSortTermsChangedNotification:)
+                    forPreference:[OFPreference preferenceForKey:BDSKIgnoredSortTermsKey]];
+        [OFPreference addObserver:self
+                         selector:@selector(handleNameDisplayChangedNotification:)
+                    forPreference:[OFPreference preferenceForKey:BDSKAuthorNameDisplayKey]];
+        [OFPreference addObserver:self
+                         selector:@selector(handleTeXPreviewNeedsUpdateNotification:)
+                    forPreference:[OFPreference preferenceForKey:BDSKBTStyleKey]];
+		[OFPreference addObserver:self
+                         selector:@selector(handleUsesTeXChangedNotification:)
+                    forPreference:[OFPreference preferenceForKey:BDSKUsesTeXKey]];
+}           
+
+- (void)handleTeXPreviewNeedsUpdateNotification:(NSNotification *)notification{
+    if([previewer isVisible])
+        [self updatePreviews];
+    else if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
+            [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
+            [self isMainDocument])
+        [self updatePreviewer:[BDSKPreviewer sharedPreviewer]];
+}
+
+- (void)handleUsesTeXChangedNotification:(NSNotification *)notification{
+    [bottomPreviewButton setEnabled:[[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] forSegment:BDSKPreviewDisplayTeX];
+}
+
+- (void)handleBibItemAddDelNotification:(NSNotification *)notification{
+    // NB: this method gets called for setPublications: also, so checking for AddItemNotification might not do what you expect
+	BOOL isDelete = [[notification name] isEqualToString:BDSKDocDelItemNotification];
+    if(isDelete == NO && [self hasLibraryGroupSelected])
+		[self setSearchString:@""]; // clear the search when adding
+
+    // update smart group counts
+    [self updateSmartGroupsCountAndContent:NO];
+    // this handles the remaining UI updates necessary (tableView and previews)
+	[self updateCategoryGroupsPreservingSelection:YES];
+    
+    NSArray *pubs = [[notification userInfo] objectForKey:@"pubs"];
+    [self setImported:isDelete == NO forPublications:pubs inGroup:nil];
+}
+
+- (BOOL)sortKeyDependsOnKey:(NSString *)key{
+    if (key == nil)
+        return YES;
+    else if([sortKey isEqualToString:BDSKTitleString])
+        return [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKChapterString] || [key isEqualToString:BDSKPagesString] || [key isEqualToString:BDSKPubTypeString];
+    else if([sortKey isEqualToString:BDSKContainerString])
+        return [key isEqualToString:BDSKContainerString] || [key isEqualToString:BDSKJournalString] || [key isEqualToString:BDSKBooktitleString] || [key isEqualToString:BDSKVolumeString] || [key isEqualToString:BDSKSeriesString] || [key isEqualToString:BDSKPubTypeString];
+    else if([sortKey isEqualToString:BDSKPubDateString])
+        return [key isEqualToString:BDSKYearString] || [key isEqualToString:BDSKMonthString];
+    else if([sortKey isEqualToString:BDSKFirstAuthorString] || [sortKey isEqualToString:BDSKSecondAuthorString] || [sortKey isEqualToString:BDSKThirdAuthorString] || [sortKey isEqualToString:BDSKLastAuthorString])
+        return [key isEqualToString:BDSKAuthorString];
+    else if([sortKey isEqualToString:BDSKFirstAuthorEditorString] || [sortKey isEqualToString:BDSKSecondAuthorEditorString] || [sortKey isEqualToString:BDSKThirdAuthorEditorString] || [sortKey isEqualToString:BDSKLastAuthorEditorString])
+        return [key isEqualToString:BDSKAuthorString] || [key isEqualToString:BDSKEditorString];
+    else
+        return [sortKey isEqualToString:key];
+}
+
+- (BOOL)searchKeyDependsOnKey:(NSString *)key{
+    NSString *searchKey = [[searchField stringValue] isEqualToString:@""] ? nil : [searchButtonController selectedItemIdentifier];
+    if ([searchKey isEqualToString:BDSKSkimNotesString] || [searchKey isEqualToString:BDSKFileContentSearchString])
+        return [key isEqualToString:BDSKLocalFileString];
+    else if (key == nil)
+        return YES;
+    else if ([searchKey isEqualToString:BDSKAllFieldsString])
+        return [key isEqualToString:BDSKLocalFileString] == NO && [key isEqualToString:BDSKRemoteURLString] == NO;
+    else if ([searchKey isEqualToString:BDSKPersonString])
+        return [key isPersonField];
+    else
+        return [key isEqualToString:searchKey];
+}
+
+- (void)handlePrivateBibItemChanged{
+    // we can be called from a queue after the document was closed
+    if (docState.isDocumentClosed)
+        return;
+    
+    if ((docState.itemChangeMask & BDSKItemChangedFilesMask) != 0)
+        [self updateFileViews];
+
+    BOOL shouldUpdateGroups = [NSString isEmptyString:[self currentGroupField]] == NO && (docState.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0;
+    
+    // allow updating a smart group if it's selected
+	[self updateSmartGroupsCountAndContent:YES];
+    
+    if(shouldUpdateGroups){
+        // this handles all UI updates if we call it, so don't bother with any others
+        [self updateCategoryGroupsPreservingSelection:YES];
+    } else if ((docState.itemChangeMask & BDSKItemChangedSearchKeyMask) != 0) {
+        // this handles all UI updates if we call it, so don't bother with any others
+        [searchField sendAction:[searchField action] to:[searchField target]];
+    } else {
+        // groups and quicksearch won't update for us
+        if ((docState.itemChangeMask & BDSKItemChangedSortKeyMask) != 0)
+            [self sortPubsByKey:nil];
+        else
+            [tableView reloadData];
+        [self updateStatus];
+        [self updatePreviews];
+    }
+    
+    docState.itemChangeMask = 0;
+}
+
+// this structure is only used in the following CFSetApplierFunction
+typedef struct __BibItemCiteKeyChangeInfo {
+    BibItem *pub;
+    NSCharacterSet *invalidSet;
+    NSString *key;
+    NSString *oldKey;
+} _BibItemCiteKeyChangeInfo;
+
+static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *context)
+{
+    NSString *field = (NSString *)citeField;
+    _BibItemCiteKeyChangeInfo *changeInfo = context;
+    NSString *value = [changeInfo->pub valueOfField:field inherit:NO];
+    // value may be nil, so check before calling rangeOfString:
+    if (nil != value) {
+        NSRange range = [value rangeOfString:changeInfo->oldKey];
+        if (range.location != NSNotFound &&
+            (range.location == 0 || [changeInfo->invalidSet characterIsMember:[value characterAtIndex:range.location]]) &&
+            (NSMaxRange(range) == [value length] || [changeInfo->invalidSet characterIsMember:[value characterAtIndex:NSMaxRange(range)]])) {
+            NSMutableString *tmpString = [value mutableCopy];
+            [tmpString replaceCharactersInRange:range withString:changeInfo->key];
+            [changeInfo->pub setField:field toValue:tmpString];
+            [tmpString release];
+        }
+    }
+}
+
+- (void)handleBibItemChangedNotification:(NSNotification *)notification{
+
+    // note: userInfo is nil if -[BibItem setFields:] is called
+	NSDictionary *userInfo = [notification userInfo];
+    BibItem *pub = [notification object];
+    
+    // see if it's ours
+	if([pub owner] != self)
+        return;
+
+	NSString *changedKey = [userInfo objectForKey:@"key"];
+    NSString *key = [pub citeKey];
+    NSString *oldKey = nil;
+    NSEnumerator *pubEnum = [publications objectEnumerator];
+    
+    // need to handle cite keys and crossrefs if a cite key changed
+    if([changedKey isEqualToString:BDSKCiteKeyString]){
+        oldKey = [userInfo objectForKey:@"oldValue"];
+        [publications changeCiteKey:oldKey toCiteKey:key forItem:pub];
+        if([NSString isEmptyString:oldKey])
+            oldKey = nil;
+    }
+    
+    // -[BDSKItemSearchIndexes addPublications:] will overwrite previous values for this pub
+    if ([changedKey isIntegerField] == NO && [changedKey isURLField] == NO)
+        [searchIndexes addPublications:[NSArray arrayWithObject:pub]];
+    
+    // access type manager outside the enumerator, since it's @synchronized...
+    BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
+    NSCharacterSet *invalidSet = [typeManager invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString];
+    NSSet *citeFields = [typeManager citationFieldsSet];
+    
+    _BibItemCiteKeyChangeInfo changeInfo;
+    changeInfo.invalidSet = invalidSet;
+    changeInfo.key = key;
+    changeInfo.oldKey = oldKey;
+    
+    while (pub = [pubEnum nextObject]) {
+        NSString *crossref = [pub valueOfField:BDSKCrossrefString inherit:NO];
+        if([NSString isEmptyString:crossref])
+            continue;
+        
+        // invalidate groups that depend on inherited values
+        if ([key caseInsensitiveCompare:crossref] == NSOrderedSame)
+            [pub invalidateGroupNames];
+        
+        // change the crossrefs if we change the parent cite key
+        if (oldKey) {
+            if ([oldKey caseInsensitiveCompare:crossref] == NSOrderedSame)
+                [pub setField:BDSKCrossrefString toValue:key];
+            changeInfo.pub = pub;
+            
+            // faster than creating an enumerator for what's typically a tiny set (helpful when generating keys for an entire file)
+            CFSetApplyFunction((CFSetRef)citeFields, applyChangesToCiteFieldsWithInfo, &changeInfo);
+        }
+    }
+    
+    if ([changedKey isEqualToString:[self currentGroupField]] || changedKey == nil)
+        docState.itemChangeMask |= BDSKItemChangedGroupFieldMask;
+    if ([self sortKeyDependsOnKey:changedKey])
+        docState.itemChangeMask |= BDSKItemChangedSortKeyMask;
+    if ([self searchKeyDependsOnKey:changedKey])
+        docState.itemChangeMask |= BDSKItemChangedSearchKeyMask;
+    if ([changedKey isEqualToString:BDSKLocalFileString] || [changedKey isEqualToString:BDSKRemoteURLString])
+        docState.itemChangeMask |= BDSKItemChangedFilesMask;
+    
+    
+    // queue for UI updating, in case the item is changed as part of a batch process such as Find & Replace or AutoFile
+    [self queueSelectorOnce:@selector(handlePrivateBibItemChanged)];
+}
+
+- (void)handleMacroChangedNotification:(NSNotification *)aNotification{
+	id changedOwner = [[aNotification object] owner];
+	if(changedOwner && changedOwner != self)
+		return; // only macro changes for ourselves or the global macros
+	
+    [tableView reloadData];
+    [self updatePreviews];
+}
+
+- (void)handleTableSelectionChangedNotification:(NSNotification *)notification{
+    [self updateFileViews];
+    [self updatePreviews];
+    [groupTableView updateHighlights];
+}
+
+- (void)handleIgnoredSortTermsChangedNotification:(NSNotification *)notification{
+    [self sortPubsByKey:nil];
+}
+
+- (void)handleNameDisplayChangedNotification:(NSNotification *)notification{
+    [tableView reloadData];
+    if([currentGroupField isPersonField])
+        [groupTableView reloadData];
+}
+
+- (void)handleFlagsChangedNotification:(NSNotification *)notification{
+    BOOL isOptionKeyState = ([NSApp currentModifierFlags] & NSAlternateKeyMask) != 0;
+    
+    if (docState.inOptionKeyState != isOptionKeyState) {
+        docState.inOptionKeyState = isOptionKeyState;
+        
+        NSToolbarItem *toolbarItem = [toolbarItems objectForKey:@"BibDocumentToolbarNewItemIdentifier"];
+        
+        if (isOptionKeyState) {
+            [groupAddButton setImage:[NSImage imageNamed:@"GroupAddSmart"]];
+            [groupAddButton setAlternateImage:[NSImage imageNamed:@"GroupAddSmart_Pressed"]];
+            [groupAddButton setToolTip:NSLocalizedString(@"Add new smart group.", @"Tool tip message")];
+            
+            static NSImage *alternateNewToolbarImage = nil;
+            if (alternateNewToolbarImage == nil) {
+                alternateNewToolbarImage = [[NSImage alloc] initWithSize:NSMakeSize(32, 32)];
+                [alternateNewToolbarImage lockFocus];
+                NSImage *srcImage = [NSImage imageNamed:@"newdoc"];
+                [srcImage drawInRect:NSMakeRect(0, 0, 32, 32) fromRect:NSMakeRect(0, 0, [srcImage size].width, [srcImage size].height) operation:NSCompositeSourceOver fraction:1.0]; 
+                [[NSImage imageWithSmallIconForToolboxCode:kAliasBadgeIcon] compositeToPoint:NSMakePoint(8,-10) operation:NSCompositeSourceOver];
+                [alternateNewToolbarImage unlockFocus];
+            }
+            
+            [toolbarItem setLabel:NSLocalizedString(@"New with Crossref", @"Toolbar item label")];
+            [toolbarItem setToolTip:NSLocalizedString(@"Create new publication with crossref", @"Tool tip message")];
+            [toolbarItem setImage:alternateNewToolbarImage];
+            [toolbarItem setAction:@selector(createNewPubUsingCrossrefAction:)];
+        } else {
+            [groupAddButton setImage:[NSImage imageNamed:@"GroupAdd"]];
+            [groupAddButton setAlternateImage:[NSImage imageNamed:@"GroupAdd_Pressed"]];
+            [groupAddButton setToolTip:NSLocalizedString(@"Add new group.", @"Tool tip message")];
+            
+            [toolbarItem setLabel:NSLocalizedString(@"New", @"Toolbar item label")];
+            [toolbarItem setToolTip:NSLocalizedString(@"Create new publication", @"Tool tip message")];
+            [toolbarItem setImage:[NSImage imageNamed: @"newdoc"]];
+            [toolbarItem setAction:@selector(newPub:)];
+        }
+    }
+}
+
+- (void)handleApplicationWillTerminateNotification:(NSNotification *)notification{
+    [self saveSortOrder];
+}
+
+- (void)handleCustomFieldsDidChangeNotification:(NSNotification *)notification{
+    [publications makeObjectsPerformSelector:@selector(customFieldsDidChange:) withObject:notification];
+    [tableView setupTableColumnsWithIdentifiers:[tableView tableColumnIdentifiers]];
+    // current group field may have changed its type (string->person)
+    [self updateSmartGroupsCountAndContent:YES];
+    [self updateCategoryGroupsPreservingSelection:YES];
+    [self updatePreviews];
+}
+
+- (void)handleTemporaryFileMigrationNotification:(NSNotification *)notification{
+    // display after the window loads so we can use a sheet, and the migration controller window is in front
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableMigrationWarning"] == NO)
+        docState.displayMigrationAlert = YES;
+}
+
+- (void)handleSkimFileDidSaveNotification:(NSNotification *)notification{
+    NSString *path = [notification object];
+    NSEnumerator *pubEnum = [publications objectEnumerator];
+    BibItem *pub;
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
+    
+    while (pub = [pubEnum nextObject]) {
+        if ([[[pub existingLocalFiles] valueForKey:@"path"] containsObject:path])
+            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification object:pub userInfo:notifInfo];
+    }
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (context == BDSKDocumentObservationContext) {
+        if (object == sideFileView) {
+            float iconScale = [sideFileView autoScales] ? 0.0 : [sideFileView iconScale];
+            [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:iconScale forKey:BDSKSideFileViewIconScaleKey];
+        } else if (object == bottomFileView) {
+            float iconScale = [bottomFileView autoScales] ? 0.0 : [bottomFileView iconScale];
+            [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:iconScale forKey:BDSKBottomFileViewIconScaleKey];
+        }
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
+
+#pragma mark -
+#pragma mark Preview updating
+
+- (void)doUpdatePreviews{
+    // we can be called from a queue after the document was closed
+    if (docState.isDocumentClosed)
+        return;
+
+    OBASSERT([NSThread inMainThread]);
+    
+    //take care of the preview field (NSTextView below the pub table); if the enumerator is nil, the view will get cleared out
+    [self updateBottomPreviewPane];
+    [self updateSidePreviewPane];
+    
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
+	   [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
+       [self isMainDocument])
+        [self updatePreviewer:[BDSKPreviewer sharedPreviewer]];
+}
+
+- (void)updatePreviews{
+    // Coalesce these messages here, since something like select all -> generate cite keys will force a preview update for every
+    // changed key, so we have to update all the previews each time.  This should be safer than using cancelPrevious... since those
+    // don't get performed on the main thread (apparently), and can lead to problems.
+    if (docState.isDocumentClosed == NO && [documentWindow isVisible])
+        [self queueSelectorOnce:@selector(doUpdatePreviews)];
+}
+
+- (void)updatePreviewer:(BDSKPreviewer *)aPreviewer{
+    NSArray *items = [self selectedPublications];
+    NSString *bibString = [items count] ? [self previewBibTeXStringForPublications:items] : nil;
+    [aPreviewer updateWithBibTeXString:bibString citeKeys:[items valueForKey:@"citeKey"]];
+}
+
+- (void)displayTemplatedPreview:(NSString *)templateStyle inTextView:(NSTextView *)textView{
+    
+    if([textView isHidden] || NSIsEmptyRect([textView visibleRect]))
+        return;
+    
+    NSArray *items = [self selectedPublications];
+    unsigned int maxItems = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewMaxNumberKey];
+    
+    if (maxItems > 0 && [items count] > maxItems)
+        items = [items subarrayWithRange:NSMakeRange(0, maxItems)];
+    
+    BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle] ?: [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
+    NSAttributedString *templateString = nil;
+    
+    // make sure this is really one of the attributed string types...
+    if([template templateFormat] & BDSKRichTextTemplateFormat){
+        templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:NULL];
+    } else if([template templateFormat] & BDSKPlainTextTemplateFormat){
+        // parse as plain text, so the HTML is interpreted properly by NSAttributedString
+        NSString *str = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items];
+        // we generally assume UTF-8 encoding for all template-related files
+        if ([template templateFormat] == BDSKPlainHTMLTemplateFormat)
+            templateString = [[[NSAttributedString alloc] initWithHTML:[str dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL] autorelease];
+        else
+            templateString = [[[NSAttributedString alloc] initWithString:str attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSFont userFontOfSize:0.0], NSFontAttributeName, nil]] autorelease];
+    }
+    
+    // do this _before_ messing with the text storage; otherwise you can have a leftover selection that ends up being out of range
+    static NSArray *zeroRanges = nil;
+    if (zeroRanges == nil) zeroRanges = [[NSArray alloc] initWithObjects:[NSValue valueWithRange: NSMakeRange(0, 0)], nil];
+    
+    NSTextStorage *textStorage = [textView textStorage];
+    [textView setSelectedRanges:zeroRanges];
+    [textStorage beginEditing];
+    if (templateString)
+        [textStorage setAttributedString:templateString];
+    else
+        [[textStorage mutableString] setString:@""];
+    [textStorage endEditing];
+    
+    if([NSString isEmptyString:[searchField stringValue]] == NO)
+        [textView highlightComponentsOfSearchString:[searchField stringValue]];    
+}
+
+- (void)prepareForTeXPreview {
+    if(previewer == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey]){
+        previewer = [[BDSKPreviewer alloc] init];
+        NSDictionary *xatrrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
+        [previewer setPDFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0]];
+        [previewer setRTFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0]];
+        [previewer setGeneratedTypes:BDSKGeneratePDF];
+        BDSKEdgeView *previewerBox = [[[BDSKEdgeView alloc] init] autorelease];
+        [previewerBox setEdges:BDSKEveryEdgeMask];
+        [previewerBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
+        [previewerBox setContentView:[previewer pdfView]];
+        [[bottomPreviewTabView tabViewItemAtIndex:BDSKPreviewDisplayTeX] setView:previewerBox];
+    }
+    
+    [[previewer progressOverlay] overlayView:bottomPreviewTabView];
+}
+
+- (void)cleanupAfterTeXPreview {
+    [[previewer progressOverlay] remove];
+    [previewer updateWithBibTeXString:nil];
+}
+
+- (void)updateBottomPreviewPane{
+    int tabIndex = [bottomPreviewTabView indexOfTabViewItem:[bottomPreviewTabView selectedTabViewItem]];
+    if (bottomPreviewDisplay != tabIndex) {
+        if (bottomPreviewDisplay == BDSKPreviewDisplayTeX)
+            [self prepareForTeXPreview];
+        else if (tabIndex == BDSKPreviewDisplayTeX)
+            [self cleanupAfterTeXPreview];
+        [bottomPreviewTabView selectTabViewItemAtIndex:bottomPreviewDisplay];
+    }
+    
+    if (bottomPreviewDisplay == BDSKPreviewDisplayTeX)
+        [self updatePreviewer:previewer];
+    else if (bottomPreviewDisplay == BDSKPreviewDisplayFiles)
+        [bottomFileView reloadIcons];
+    else
+        [self displayTemplatedPreview:bottomPreviewDisplayTemplate inTextView:bottomPreviewTextView];
+}
+
+- (void)updateSidePreviewPane{
+    int tabIndex = [sidePreviewTabView indexOfTabViewItem:[sidePreviewTabView selectedTabViewItem]];
+    if (sidePreviewDisplay != tabIndex) {
+        [sidePreviewTabView selectTabViewItemAtIndex:sidePreviewDisplay];
+    }
+    
+    if (sidePreviewDisplay == BDSKPreviewDisplayFiles)
+        [sideFileView reloadIcons];
+    else
+        [self displayTemplatedPreview:sidePreviewDisplayTemplate inTextView:sidePreviewTextView];
+}
+
+#pragma mark FileView
+
+typedef struct _fileViewObjectContext {
+    CFMutableArrayRef array;
+    NSString *title;
+} fileViewObjectContext;
+
+static void addFileViewObjectForURLToArray(const void *value, void *context)
+{
+    fileViewObjectContext *ctxt = context;
+    // value is BDSKLinkedFile *
+    BDSKFileViewObject *obj = [[BDSKFileViewObject alloc] initWithURL:[(BDSKLinkedFile *)value displayURL] string:ctxt->title];
+    CFArrayAppendValue(ctxt->array, obj);
+    [obj release];
+}
+
+static void addAllFileViewObjectsForItemToArray(const void *value, void *context)
+{
+    CFArrayRef allURLs = (CFArrayRef)[(BibItem *)value files];
+    if (CFArrayGetCount(allURLs)) {
+        fileViewObjectContext ctxt;
+        ctxt.array = context;
+        ctxt.title = [(BibItem *)value displayTitle];
+        CFArrayApplyFunction(allURLs, CFRangeMake(0, CFArrayGetCount(allURLs)), addFileViewObjectForURLToArray, &ctxt);
+    }
+}
+
+- (NSArray *)shownFiles {
+    if (shownFiles == nil) {
+        if ([self isDisplayingFileContentSearch]) {
+            shownFiles = [[fileSearchController selectedResults] mutableCopy];
+        } else {
+            NSArray *selPubs = [self selectedPublications];
+            if (selPubs) {
+                shownFiles = [[NSMutableArray alloc] initWithCapacity:[selPubs count]];
+                CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllFileViewObjectsForItemToArray, shownFiles);
+            }
+        }
+    }
+    return shownFiles;
+}
+
+- (void)updateFileViews {
+    [shownFiles release];
+    shownFiles = nil;
+    
+    [sideFileView reloadIcons];
+    [bottomFileView reloadIcons];
+}
+
+#pragma mark -
+#pragma mark Status bar
+
+- (void)setStatus:(NSString *)status {
+	[self setStatus:status immediate:YES];
+}
+
+- (void)setStatus:(NSString *)status immediate:(BOOL)now {
+	if(now)
+		[statusBar setStringValue:status];
+	else
+		[statusBar performSelector:@selector(setStringValue:) withObject:status afterDelay:0.01];
+}
+
+- (void)updateStatus{
+	NSMutableString *statusStr = [[NSMutableString alloc] init];
+	NSString *ofStr = NSLocalizedString(@"of", @"partial status message: [number] of [number] publications");
+    
+    if ([self isDisplayingFileContentSearch]) {
+        
+        int shownItemsCount = [[fileSearchController filteredResults] count];
+        int totalItemsCount = [[fileSearchController results] count];
+        
+        [statusStr appendFormat:@"%i %@", shownItemsCount, (shownItemsCount == 1) ? NSLocalizedString(@"item", @"item, in status message") : NSLocalizedString(@"items", @"items, in status message")];
+        
+        if (shownItemsCount != totalItemsCount) {
+            NSString *groupStr = ([groupTableView numberOfSelectedRows] == 1) ?
+                [NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"in group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]] :
+                NSLocalizedString(@"in multiple groups", @"Partial status message");
+            [statusStr appendFormat:@" %@ (%@ %i)", groupStr, ofStr, totalItemsCount];
+        }
+        
+    } else {
+
+        int shownPubsCount = [shownPublications count];
+        int groupPubsCount = [groupedPublications count];
+        int totalPubsCount = [publications count];
+        
+        if (shownPubsCount != groupPubsCount) { 
+            [statusStr appendFormat:@"%i %@ ", shownPubsCount, ofStr];
+        }
+        [statusStr appendFormat:@"%i %@", groupPubsCount, (groupPubsCount == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message")];
+        // we can have only a single external group selected at a time
+        if ([self hasWebGroupSelected] == YES) {
+            [statusStr appendFormat:@" %@", NSLocalizedString(@"in web group", @"Partial status message")];
+        } else if ([self hasSharedGroupsSelected] == YES) {
+            [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in shared group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
+        } else if ([self hasURLGroupsSelected] == YES) {
+            [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in external file group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
+        } else if ([self hasScriptGroupsSelected] == YES) {
+            [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in script group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
+        } else if ([self hasSearchGroupsSelected] == YES) {
+            BDSKSearchGroup *group = [[self selectedGroups] firstObject];
+            [statusStr appendFormat:NSLocalizedString(@" in \"%@\" search group", @"Partial status message"), [[group serverInfo] name]];
+            int matchCount = [group numberOfAvailableResults];
+            if (matchCount == 1)
+                [statusStr appendFormat:NSLocalizedString(@". There was 1 match.", @"Partial status message")];
+            else if (matchCount > 1)
+                [statusStr appendFormat:NSLocalizedString(@". There were %i matches.", @"Partial status message"), matchCount];
+            if ([group hasMoreResults])
+                [statusStr appendString:NSLocalizedString(@" Hit \"Search\" to load more.", @"Partial status message")];
+            else if (groupPubsCount < matchCount)
+                [statusStr appendString:NSLocalizedString(@" Some results could not be parsed.", @"Partial status message")];
+        } else if (groupPubsCount != totalPubsCount) {
+            NSString *groupStr = ([groupTableView numberOfSelectedRows] == 1) ?
+                [NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"in group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]] :
+                NSLocalizedString(@"in multiple groups", @"Partial status message");
+            [statusStr appendFormat:@" %@ (%@ %i)", groupStr, ofStr, totalPubsCount];
+        }
+        
+    }
+    
+	[self setStatus:statusStr];
+    [statusStr release];
+}
+
+#pragma mark -
+#pragma mark Control view animation
+
+- (BOOL)isDisplayingSearchButtons { return [documentWindow isEqual:[[searchButtonController view] window]]; }
+- (BOOL)isDisplayingFileContentSearch { return [documentWindow isEqual:[[fileSearchController tableView] window]]; }
+- (BOOL)isDisplayingSearchGroupView { return [documentWindow isEqual:[[searchGroupViewController view] window]]; }
+- (BOOL)isDisplayingWebGroupView { return [documentWindow isEqual:[[webGroupViewController view] window]]; }
+
+- (void)insertControlView:(NSView *)controlView atTop:(BOOL)insertAtTop {
+    if ([documentWindow isEqual:[controlView window]])
+        return;
+    
+    NSArray *views = [[[mainBox contentView] subviews] copy];
+    NSEnumerator *viewEnum;
+    NSView *view;
+    NSRect controlFrame = [controlView frame];
+    NSRect startRect, endRect = [splitView frame];
+    
+    if (insertAtTop) {
+        viewEnum = [views objectEnumerator];
+        while (view = [viewEnum nextObject])
+            endRect = NSUnionRect(endRect, [view frame]);
+    }
+    startRect = endRect;
+    startRect.size.height += NSHeight(controlFrame);
+    controlFrame.size.width = NSWidth(endRect);
+    controlFrame.origin.x = NSMinX(endRect);
+    controlFrame.origin.y = NSMaxY(endRect);
+    [controlView setFrame:controlFrame];
+    
+    NSView *clipView = [[[NSView alloc] initWithFrame:endRect] autorelease];
+    NSView *resizeView = [[[NSView alloc] initWithFrame:startRect] autorelease];
+    
+    [mainBox addSubview:clipView];
+    [clipView addSubview:resizeView];
+    if (insertAtTop) {
+        viewEnum = [views objectEnumerator];
+        while (view = [viewEnum nextObject])
+            [resizeView addSubview:view];
+    } else {
+        [resizeView addSubview:splitView];
+    }
+    [resizeView addSubview:controlView];
+    [views release];
+    
+    [NSViewAnimation animateResizeView:resizeView toRect:endRect];
+    
+    views = [[resizeView subviews] copy];
+    viewEnum = [views objectEnumerator];
+    while (view = [viewEnum nextObject])
+        [mainBox addSubview:view];
+    [clipView removeFromSuperview];
+    
+    [views release];
+    
+    [mainBox setNeedsDisplay:YES];
+    [documentWindow displayIfNeeded];
+}
+
+- (void)removeControlView:(NSView *)controlView {
+    if ([documentWindow isEqual:[controlView window]] == NO)
+        return;
+    
+    NSArray *views = [[NSArray alloc] initWithArray:[[mainBox contentView] subviews] copyItems:NO];
+    NSRect controlFrame = [controlView frame];
+    NSRect endRect, startRect = NSUnionRect([splitView frame], controlFrame);
+    
+    endRect = startRect;
+    endRect.size.height += NSHeight(controlFrame);
+    
+    NSView *clipView = [[[NSView alloc] initWithFrame:startRect] autorelease];
+    NSView *resizeView = [[[NSView alloc] initWithFrame:startRect] autorelease];
+    
+    /* Retaining the graphics context is a workaround for our bug #1714565.
+        
+        To reproduce:
+        1) search LoC for "Bob Dylan"
+        2) enter "ab" in the document's searchfield
+        3) click the "Import" button for any one of the items
+        4) crash when trying to retain a dealloced instance of NSWindowGraphicsContext (enable zombies) in [resizeView addSubview:]
+
+       This seems to be an AppKit focus stack bug.  Something still isn't quite correct, since the button for -[BDSKMainTableView importItem:] is in the wrong table column momentarily, but I think that's unrelated to the crasher.
+    */
+    [[[NSGraphicsContext currentContext] retain] autorelease];
+    
+    [mainBox addSubview:clipView];
+    [clipView addSubview:resizeView];
+    NSEnumerator *viewEnum = [views objectEnumerator];
+    NSView *view;
+
+    while (view = [viewEnum nextObject]) {
+        if (NSContainsRect(startRect, [view frame]))
+            [resizeView addSubview:view];
+    }
+    [resizeView addSubview:controlView];
+    [views release];
+    
+    [NSViewAnimation animateResizeView:resizeView toRect:endRect];
+    
+    [controlView removeFromSuperview];
+    views = [[resizeView subviews] copy];
+    viewEnum = [views objectEnumerator];
+    while (view = [viewEnum nextObject])
+        [mainBox addSubview:view];
+    [clipView removeFromSuperview];
+    
+    [views release];
+    
+    [mainBox setNeedsDisplay:YES];
+    [documentWindow displayIfNeeded];
+}
+
+#pragma mark -
+#pragma mark Columns Menu
+
+- (NSMenu *)columnsMenu{
+    return [tableView columnsMenu];
+}
+
+- (NSMenu *)menuForImagePopUpButton:(BDSKImagePopUpButton *)view{
+    NSMenu *menu = actionMenu;
+    NSMenu *submenu = nil;
+    int i, count = [menu numberOfItems];
+    
+    for (i = 0; submenu == nil && i < count; i++)
+        submenu = [[menu itemAtIndex:i] submenu];
+    if (submenu) {
+        while ([submenu numberOfItems])
+            [submenu removeItemAtIndex:0];
+        NSArray *styles = [BDSKTemplate allStyleNames];
+        count = [styles count];
+        for (i = 0; i < count; i++) {
+            NSMenuItem *item = [submenu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
+            [item setTarget:self];
+            [item setTag:BDSKTemplateDragCopyType + i];
+        }
+    }
+    return menu;
+}
+
+#pragma mark Template Menu
+
+- (void)menuNeedsUpdate:(NSMenu *)menu {
+    if (menu == bottomTemplatePreviewMenu || menu == sideTemplatePreviewMenu) {
+        NSMutableArray *styles = [NSMutableArray arrayWithArray:[BDSKTemplate allStyleNamesForFileType:@"rtf"]];
+        [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"rtfd"]];
+        [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"doc"]];
+        [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"html"]];
+        
+        while ([menu numberOfItems])
+            [menu removeItemAtIndex:0];
+        
+        NSEnumerator *styleEnum = [styles objectEnumerator];
+        NSString *style;
+        NSMenuItem *item;
+        SEL action = menu == bottomTemplatePreviewMenu ? @selector(changePreviewDisplay:) : @selector(changeSidePreviewDisplay:);
+        
+        while (style = [styleEnum nextObject]) {
+            item = [menu addItemWithTitle:style action:action keyEquivalent:@""];
+            [item setTarget:self];
+            [item setTag:BDSKPreviewDisplayText];
+            [item setRepresentedObject:style];
+        }
+    }
+}
+
+#pragma mark -
 #pragma mark Printing support
 
 - (IBAction)printDocument:(id)sender{
@@ -2744,20 +3508,161 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     else
         // this occurs only when both FileViews are displayed, probably never happens
         string = [self bibTeXStringForPublications:[self selectedPublications]];
-    if (attrString) {
-        return [NSPrintOperation printOperationWithAttributedString:attrString printInfo:[self printInfo] settings:printSettings];
-    } else {
-        if (string == nil)
-            string = NSLocalizedString(@"Error: nothing to print from document preview", @"printing error");
-        return [NSPrintOperation printOperationWithString:string printInfo:[self printInfo] settings:printSettings];
+    
+    NSPrintInfo *info = [[self printInfo] copy];
+    [[info dictionary] addEntriesFromDictionary:printSettings];
+    [info setHorizontalPagination:NSFitPagination];
+    [info setHorizontallyCentered:NO];
+    [info setVerticallyCentered:NO];
+    
+    NSTextView *printableView = nil;
+    if (attrString)
+        printableView = [[BDSKPrintableView alloc] initWithAttributedString:attrString printInfo:info];
+    else
+        printableView = [[BDSKPrintableView alloc] initWithString:string printInfo:info];
+    if (attrString == nil && string == nil)
+        string = NSLocalizedString(@"Error: nothing to print from document preview", @"printing error");
+    
+    NSPrintOperation *printOperation = [NSPrintOperation printOperationWithView:printableView printInfo:info];
+    [printableView release];
+    [info release];
+    
+    NSPrintPanel *printPanel = [printOperation printPanel];
+    if ([printPanel respondsToSelector:@selector(setOptions:)])
+        [printPanel setOptions:NSPrintPanelShowsCopies | NSPrintPanelShowsPageRange | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling | NSPrintPanelShowsPreview];
+    
+    return printOperation;
+}
+
+#pragma mark SplitView delegate
+
+- (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize {
+    int i = [[sender subviews] count] - 2;
+    OBASSERT(i >= 0);
+	NSView *zerothView = i == 0 ? nil : [[sender subviews] objectAtIndex:0];
+	NSView *firstView = [[sender subviews] objectAtIndex:i];
+	NSView *secondView = [[sender subviews] objectAtIndex:++i];
+	NSRect zerothFrame = zerothView ? [zerothView frame] : NSZeroRect;
+	NSRect firstFrame = [firstView frame];
+	NSRect secondFrame = [secondView frame];
+	
+	if (sender == splitView) {
+		// first = table, second = preview, zeroth = web
+        float contentHeight = NSHeight([sender frame]) - i * [sender dividerThickness];
+        float factor = contentHeight / (oldSize.height - i * [sender dividerThickness]);
+        secondFrame = NSIntegralRect(secondFrame);
+        zerothFrame.size.height = floorf(factor * NSHeight(zerothFrame));
+        firstFrame.size.height = floorf(factor * NSHeight(firstFrame));
+        secondFrame.size.height = floorf(factor * NSHeight(secondFrame));
+        if (NSHeight(zerothFrame) < 1.0)
+            zerothFrame.size.height = 0.0;
+        if (NSHeight(firstFrame) < 1.0)
+            firstFrame.size.height = 0.0;
+        if (NSHeight(secondFrame) < 1.0)
+            secondFrame.size.height = 0.0;
+        // randomly divide the remaining gap over the two views; NSSplitView dumps it all over the last view, which grows that one more than the others
+        int gap = (int)(contentHeight - NSHeight(zerothFrame) - NSHeight(firstFrame) - NSHeight(secondFrame));
+        while (gap > 0) {
+            i = floorf((3.0f * rand()) / RAND_MAX);
+            if (i == 0 && NSHeight(zerothFrame) > 0.0) {
+                zerothFrame.size.height += 1.0;
+                gap--;
+            } else if (i == 1 && NSHeight(firstFrame) > 0.0) {
+                firstFrame.size.height += 1.0;
+                gap--;
+            } else if (i == 2 && NSHeight(secondFrame) > 0.0) {
+                secondFrame.size.height += 1.0;
+                gap--;
+            }
+        }
+        zerothFrame.size.width = firstFrame.size.width = secondFrame.size.width = NSWidth([sender frame]);
+        if (zerothView)
+            firstFrame.origin.y = NSMaxY(zerothFrame) + [sender dividerThickness];
+        secondFrame.origin.y = NSMaxY(firstFrame) + [sender dividerThickness];
+	} else {
+		// zeroth = group, first = table+preview, second = fileview
+        float contentWidth = NSWidth([sender frame]) - 2 * [sender dividerThickness];
+        if (NSWidth(zerothFrame) < 1.0)
+            zerothFrame.size.width = 0.0;
+        if (NSWidth(secondFrame) < 1.0)
+            secondFrame.size.width = 0.0;
+        if (contentWidth < NSWidth(zerothFrame) + NSWidth(secondFrame)) {
+            float factor = contentWidth / (oldSize.width - [sender dividerThickness]);
+            zerothFrame.size.width = floorf(factor * NSWidth(zerothFrame));
+            secondFrame.size.width = floorf(factor * NSWidth(secondFrame));
+        }
+        firstFrame.size.width = contentWidth - NSWidth(zerothFrame) - NSWidth(secondFrame);
+        firstFrame.origin.x = NSMaxX(zerothFrame) + [sender dividerThickness];
+        secondFrame.origin.x = NSMaxX(firstFrame) + [sender dividerThickness];
+        zerothFrame.size.height = firstFrame.size.height = secondFrame.size.height = NSHeight([sender frame]);
     }
+	
+	[zerothView setFrame:zerothFrame];
+	[firstView setFrame:firstFrame];
+	[secondView setFrame:secondFrame];
+    [sender adjustSubviews];
+}
+
+- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset {
+    int i = [[sender subviews] count] - 2;
+    OBASSERT(i >= 0);
+	NSView *zerothView = i == 0 ? nil : [[sender subviews] objectAtIndex:0];
+	NSView *firstView = [[sender subviews] objectAtIndex:i];
+	NSView *secondView = [[sender subviews] objectAtIndex:++i];
+	NSRect zerothFrame = zerothView ? [zerothView frame] : NSZeroRect;
+	NSRect firstFrame = [firstView frame];
+	NSRect secondFrame = [secondView frame];
+	
+	if (sender == splitView && offset == i - 1) {
+		// first = table, second = preview, zeroth = web
+		if(NSHeight(secondFrame) > 0){ // can't use isSubviewCollapsed, because implementing splitView:canCollapseSubview: prevents uncollapsing
+			docState.lastPreviewHeight = NSHeight(secondFrame); // cache this
+			firstFrame.size.height += docState.lastPreviewHeight;
+			secondFrame.size.height = 0;
+		} else {
+			if(docState.lastPreviewHeight <= 0)
+				docState.lastPreviewHeight = floorf(NSHeight([sender frame]) / 3); // a reasonable value for uncollapsing the first time
+			firstFrame.size.height = NSHeight(firstFrame) + NSHeight(secondFrame) - docState.lastPreviewHeight;
+			secondFrame.size.height = docState.lastPreviewHeight;
+		}
+	} else if (sender == groupSplitView) {
+		// zeroth = group, first = table+preview, second = fileview
+        if (offset == 0) {
+            if(NSWidth(zerothFrame) > 0){
+                docState.lastGroupViewWidth = NSWidth(zerothFrame); // cache this
+                firstFrame.size.width += docState.lastGroupViewWidth;
+                zerothFrame.size.width = 0;
+            } else {
+                if(docState.lastGroupViewWidth <= 0)
+                    docState.lastGroupViewWidth = fminf(120, NSWidth(firstFrame)); // a reasonable value for uncollapsing the first time
+                firstFrame.size.width -= docState.lastGroupViewWidth;
+                zerothFrame.size.width = docState.lastGroupViewWidth;
+            }
+        } else {
+            if(NSWidth(secondFrame) > 0){
+                docState.lastFileViewWidth = NSWidth(secondFrame); // cache this
+                firstFrame.size.width += docState.lastFileViewWidth;
+                secondFrame.size.width = 0;
+            } else {
+                if(docState.lastFileViewWidth <= 0)
+                    docState.lastFileViewWidth = fminf(120, NSWidth(firstFrame)); // a reasonable value for uncollapsing the first time
+                firstFrame.size.width -= docState.lastFileViewWidth;
+                secondFrame.size.width = docState.lastFileViewWidth;
+            }
+        }
+	} else return;
+	
+	[zerothView setFrame:zerothFrame];
+	[firstView setFrame:firstFrame];
+	[secondView setFrame:secondFrame];
+    [sender adjustSubviews];
+    [[sender window] invalidateCursorRectsForView:sender];
 }
 
 #pragma mark -
-#pragma mark Auto handling of changes
 
-- (NSInteger)userChangedField:(NSString *)fieldName ofPublications:(NSArray *)pubs from:(NSArray *)oldValues to:(NSArray *)newValues{
-    NSInteger rv = 0;
+- (int)userChangedField:(NSString *)fieldName ofPublications:(NSArray *)pubs from:(NSArray *)oldValues to:(NSArray *)newValues{
+    int rv = 0;
     
     NSEnumerator *pubEnum = [pubs objectEnumerator];
     BibItem *pub;
@@ -2765,17 +3670,14 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSMutableArray *autofileFiles = [NSMutableArray arrayWithCapacity:[pubs count]];
     
     while(pub = [pubEnum nextObject]){
-        
-        // ??? will this ever happen?
-        if ([[self editorForPublication:pub create:NO] commitEditing] == NO)
-            continue;
+        [[self editorForPublication:pub create:NO] finalizeChanges:nil];
         
         // generate cite key if we have enough information
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyAutogenerateKey] && [pub canGenerateAndSetCiteKey])
+        if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey] && [pub canGenerateAndSetCiteKey])
             [generateKeyPubs addObject:pub];
         
         // autofile paper if we have enough information
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]){
+        if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
             NSEnumerator *fileEnum = [[pub localFiles] objectEnumerator];
             BDSKLinkedFile *file;
             while (file = [fileEnum nextObject])
@@ -2830,6 +3732,26 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	}
 }
 
+#pragma mark -
+#pragma mark Protocols forwarding
+
+// Declaring protocol conformance in the category headers shuts the compiler up, but causes a hang in -[NSObject conformsToProtocol:], which sucks.  Therefore, we use wrapper methods here to call the real (category) implementations.
+- (void)removeFileContentSearch:(BDSKFileContentSearchController *)controller{ 
+    [self privateRemoveFileContentSearch:controller]; 
+}
+
+- (NSIndexSet *)indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview{
+    return [self _indexesOfRowsToHighlightInRange:indexRange tableView:tview];
+}
+
+- (NSIndexSet *)tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview{
+    return [self _tableViewSingleSelectionIndexes:tview];
+}
+
+- (void)tableView:(BDSKGroupTableView *)tview doubleClickedOnIconOfRow:(int)row{
+    [self editGroupAtRow:row];
+}
+
 #pragma mark DisplayName KVO
 
 - (void)setFileURL:(NSURL *)absoluteURL{ 
@@ -2855,6 +3777,44 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (BOOL)isDocument{
     return YES;
+}
+
+@end
+
+#pragma mark -
+
+@implementation NSFileWrapper (BDSKExtensions)
+
+- (NSFileWrapper *)addFileWrapperWithPath:(NSString *)path relativeTo:(NSString *)basePath recursive:(BOOL)recursive {
+    NSFileWrapper *fileWrapper = nil;
+    BOOL isDir;
+    if ([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir]) {
+        NSString *filename = [path lastPathComponent];
+        NSString *relativePath = basePath ? [basePath relativePathToFilename:path] : filename;
+        NSFileWrapper *container = self;
+        
+        if ([relativePath isEqualToString:filename] == NO)
+            container = [self addFileWrapperWithPath:[path stringByDeletingLastPathComponent] relativeTo:basePath recursive:NO];
+        
+        fileWrapper = [[container fileWrappers] objectForKey:filename];
+        if (fileWrapper == nil || [fileWrapper isDirectory] != isDir) {
+            if (isDir)
+                fileWrapper = [[NSFileWrapper alloc] initDirectoryWithFileWrappers:[NSDictionary dictionary]];
+            else
+                fileWrapper = [[NSFileWrapper alloc] initRegularFileWithContents:[NSData dataWithContentsOfFile:path]];
+            [fileWrapper setPreferredFilename:filename];
+            [container addFileWrapper:fileWrapper];
+            [fileWrapper release];
+        }
+        
+        if (isDir && recursive) {
+            NSEnumerator *fileEnum = [[[NSFileManager defaultManager] subpathsAtPath:path] objectEnumerator];
+            NSString *file;
+            while (file = [fileEnum nextObject])
+                [self addFileWrapperWithPath:[path stringByAppendingPathComponent:file] relativeTo:path recursive:YES];
+        }
+    }
+    return fileWrapper;
 }
 
 @end

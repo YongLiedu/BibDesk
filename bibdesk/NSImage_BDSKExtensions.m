@@ -35,77 +35,13 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
-/*
- Some methods in this category are copied from OmniAppKit 
- and are subject to the following licence:
- 
- Omni Source License 2007
-
- OPEN PERMISSION TO USE AND REPRODUCE OMNI SOURCE CODE SOFTWARE
-
- Omni Source Code software is available from The Omni Group on their 
- web site at http://www.omnigroup.com/www.omnigroup.com. 
-
- Permission is hereby granted, free of charge, to any person obtaining 
- a copy of this software and associated documentation files (the 
- "Software"), to deal in the Software without restriction, including 
- without limitation the rights to use, copy, modify, merge, publish, 
- distribute, sublicense, and/or sell copies of the Software, and to 
- permit persons to whom the Software is furnished to do so, subject to 
- the following conditions:
-
- Any original copyright notices and this permission notice shall be 
- included in all copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, 
- EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
- MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
- IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
- CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
- TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
- SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 
 #import "NSImage_BDSKExtensions.h"
-#import "IconFamily.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "NSBezierPath_BDSKExtensions.h"
-#import "NSAttributedString_BDSKExtensions.h"
-#import "CIImage_BDSKExtensions.h"
+#import <OmniAppKit/IconFamily.h>
 
 @implementation NSImage (BDSKExtensions)
-
-+ (void)drawAddBadgeAtPoint:(NSPoint)point {
-    NSBezierPath *path = [NSBezierPath bezierPath];
-    [path moveToPoint:NSMakePoint(point.x + 2.5, point.y + 6.5)];
-    [path relativeLineToPoint:NSMakePoint(4.0, 0.0)];
-    [path relativeLineToPoint:NSMakePoint(0.0, -4.0)];
-    [path relativeLineToPoint:NSMakePoint(3.0, 0.0)];
-    [path relativeLineToPoint:NSMakePoint(0.0, 4.0)];
-    [path relativeLineToPoint:NSMakePoint(4.0, 0.0)];
-    [path relativeLineToPoint:NSMakePoint(0.0, 3.0)];
-    [path relativeLineToPoint:NSMakePoint(-4.0, 0.0)];
-    [path relativeLineToPoint:NSMakePoint(0.0, 4.0)];
-    [path relativeLineToPoint:NSMakePoint(-3.0, 0.0)];
-    [path relativeLineToPoint:NSMakePoint(0.0, -4.0)];
-    [path relativeLineToPoint:NSMakePoint(-4.0, 0.0)];
-    [path closePath];
-    
-    NSShadow *shadow1 = [[NSShadow alloc] init];
-    [shadow1 setShadowBlurRadius:1.0];
-    [shadow1 setShadowOffset:NSMakeSize(0.0, 0.0)];
-    [shadow1 setShadowColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.5]];
-    
-    [NSGraphicsContext saveGraphicsState];
-    [[NSColor colorWithCalibratedWhite:1.0 alpha:1.0] setFill];
-    [path fill];
-    [shadow1 set];
-    [[NSColor colorWithCalibratedRed:0.257 green:0.351 blue:0.553 alpha:1.0] setStroke];
-    [path stroke];
-    [NSGraphicsContext restoreGraphicsState];
-    
-    [shadow1 release];
-}
 
 + (void)makePreviewDisplayImages {
     static NSImage *previewDisplayTextImage = nil;
@@ -160,183 +96,9 @@
     }
 }
 
-+ (void)makeBookmarkImages {
-    static NSImage *newBookmarkImage = nil;
-    static NSImage *newFolderImage = nil;
-    static NSImage *newSeparatorImage = nil;
-    static NSImage *tinyBookmarkImage = nil;
-    static NSImage *tinyFolderImage = nil;
-    static NSImage *tinySearchBookmarkImage = nil;
-    
-    if (newFolderImage)
-        return;
-    
-    newBookmarkImage = [[self imageNamed:@"Bookmark"] copy];
-    [newBookmarkImage lockFocus];
-    [[self class] drawAddBadgeAtPoint:NSMakePoint(18.0, 18.0)];
-    [newBookmarkImage unlockFocus];
-    [newBookmarkImage setName:@"NewBookmark"];
-    
-    newFolderImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] retain];
-    [newFolderImage lockFocus];
-    [[self class] drawAddBadgeAtPoint:NSMakePoint(18.0, 18.0)];
-    [newFolderImage unlockFocus];
-    [newFolderImage setName:@"NewFolder"];
-    
-    newSeparatorImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
-    [newSeparatorImage lockFocus];
-    [NSGraphicsContext saveGraphicsState];
-    [[NSColor clearColor] setFill];
-    NSRectFill(NSMakeRect(0.0, 0.0, 32.0, 32.0));
-    NSShadow *shadow1 = [[[NSShadow alloc] init] autorelease];
-    [shadow1 setShadowBlurRadius:2.0];
-    [shadow1 setShadowOffset:NSMakeSize(0.0, -1.0)];
-    [shadow1 setShadowColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.5]];
-    [shadow1 set];
-    [[NSColor colorWithCalibratedWhite:0.35 alpha:1.0] setFill];
-    NSBezierPath *path = [NSBezierPath bezierPathWithRect:NSMakeRect(2.0, 14.0, 28.0, 4.0)];
-    [path fill];
-    [NSGraphicsContext restoreGraphicsState];
-    [NSGraphicsContext saveGraphicsState];
-    [[NSColor colorWithCalibratedWhite:0.65 alpha:1.0] setFill];
-    path = [NSBezierPath bezierPathWithRect:NSMakeRect(3.0, 15.0, 26.0, 2.0)];
-    [path fill];
-    [[NSColor colorWithCalibratedWhite:0.8 alpha:1.0] setFill];
-    path = [NSBezierPath bezierPathWithRect:NSMakeRect(4.0, 16.0, 24.0, 1.0)];
-    [path fill];
-    [[NSColor colorWithCalibratedWhite:0.45 alpha:1.0] setFill];
-    path = [NSBezierPath bezierPathWithRect:NSMakeRect(3.0, 17.0, 26.0, 1.0)];
-    [path fill];
-    [[self class] drawAddBadgeAtPoint:NSMakePoint(18.0, 14.0)];
-    [NSGraphicsContext restoreGraphicsState];
-    [newSeparatorImage unlockFocus];
-    [newSeparatorImage setName:@"NewSeparator"];
-    
-    tinyFolderImage = [[self iconWithSize:NSMakeSize(16.0, 16.0) forToolboxCode:kGenericFolderIcon] retain];
-    [tinyFolderImage setName:@"TinyFolder"];
-    
-    tinyBookmarkImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
-    [tinyBookmarkImage lockFocus];
-    [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-    [[self imageNamed:@"Bookmark"] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) operation:NSCompositeCopy fraction:1.0];
-    [tinyBookmarkImage unlockFocus];
-    [tinyBookmarkImage setName:@"TinyBookmark"];
-    
-    tinySearchBookmarkImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
-    [tinySearchBookmarkImage lockFocus];
-    [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-    [[self imageNamed:@"searchGroup"] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) operation:NSCompositeCopy fraction:1.0];
-    [tinySearchBookmarkImage unlockFocus];
-    [tinySearchBookmarkImage setName:@"TinySearchBookmark"];
-}
-    
-+ (void)makeGroupImages {
-    static NSImage *categoryGroupImage = nil;
-    static NSImage *staticGroupImage = nil;
-    static NSImage *smartGroupImage = nil;
-    static NSImage *importGroupImage = nil;
-    static NSImage *sharedGroupImage = nil;
-    
-    if (categoryGroupImage || floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
-        return;
-    
-    NSSize smallSize = NSMakeSize(32.0, 32.0);
-    NSSize tinySize = NSMakeSize(16.0, 16.0);
-    NSRect smallRect = {NSZeroPoint, smallSize};
-    NSRect tinyRect = {NSZeroPoint, tinySize};
-    
-    smartGroupImage = [[NSImage imageNamed:@"NSFolderSmart"] copy];
-    [smartGroupImage setName:@"smartGroup"];
-    
-    staticGroupImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] copy];
-    [staticGroupImage addRepresentation:[[[self iconWithSize:tinySize forToolboxCode:kGenericFolderIcon] representations] objectAtIndex:0]];
-    [staticGroupImage setName:@"staticGroup"];
-    
-    categoryGroupImage = [[NSImage alloc] initWithSize:smallSize];
-    [categoryGroupImage lockFocus];
-    CIImage *ciImage = [CIImage imageWithData:[smartGroupImage TIFFRepresentation]];
-    ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.3 brightnessBias:0.3];
-    [ciImage drawInRect:smallRect fromRect:smallRect operation:NSCompositeSourceOver fraction:1.0];
-    [categoryGroupImage unlockFocus];
-    NSImage *tinyImage = [[NSImage alloc] initWithSize:tinySize];
-    [tinyImage lockFocus];
-    [[NSImage imageNamed:@"NSFolderSmart"] drawInRect:tinyRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [tinyImage unlockFocus];
-    ciImage = [CIImage imageWithData:[tinyImage TIFFRepresentation]];
-    ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.3 brightnessBias:0.3];
-    [tinyImage release];
-    tinyImage = [[NSImage alloc] initWithSize:tinySize];
-    [tinyImage lockFocus];
-    [ciImage drawInRect:tinyRect fromRect:tinyRect operation:NSCompositeSourceOver fraction:1.0];
-    [tinyImage unlockFocus];
-    [categoryGroupImage addRepresentation:[[tinyImage representations] lastObject]];
-    [tinyImage release];
-    [categoryGroupImage setName:@"categoryGroup"];
-    
-    importGroupImage = [[NSImage alloc] initWithSize:smallSize];
-    [importGroupImage lockFocus];
-    [[NSImage imageNamed:@"NSFolderSmart"] drawInRect:smallRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [[NSImage imageNamed:@"importBadge"] drawInRect:smallRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [importGroupImage unlockFocus];
-    tinyImage = [[NSImage alloc] initWithSize:tinySize];
-    [tinyImage lockFocus];
-    [[NSImage imageNamed:@"NSFolderSmart"] drawInRect:tinyRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [[NSImage imageNamed:@"importBadge"] drawInRect:tinyRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [tinyImage unlockFocus];
-    [importGroupImage addRepresentation:[[tinyImage representations] lastObject]];
-    [tinyImage release];
-    [importGroupImage setName:@"importGroup"];
-    
-    sharedGroupImage = [[NSImage imageNamed:@"NSBonjour"] copy];
-    [sharedGroupImage setName:@"sharedGroup"];
-}
-
-// This methods and the following dependent methods are copied from OmniAppKit/NSImage-OAExtensions.m
-+ (NSImage *)systemIconWithCode:(OSType)code {
-    IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:code];
-    NSImage *image = [iconFamily imageWithAllReps];
-    [iconFamily release];
-    return image;
-}
-
-+ (NSImage *)httpInternetLocationImage {
-    static NSImage *image = nil;
-    if (image == nil)
-        image = [[self systemIconWithCode:kInternetLocationHTTPIcon] retain];
-    return image;
-}
-
-+ (NSImage *)ftpInternetLocationImage {
-    static NSImage *image = nil;
-    if (image == nil)
-        image = [[self systemIconWithCode:kInternetLocationFTPIcon] retain];
-    return image;
-}
-
-+ (NSImage *)mailInternetLocationImage {
-    static NSImage *image = nil;
-    if (image == nil)
-        image = [[self systemIconWithCode:kInternetLocationMailIcon] retain];
-    return image;
-}
-
-+ (NSImage *)newsInternetLocationImage {
-    static NSImage *image = nil;
-    if (image == nil)
-        image = [[self systemIconWithCode:kInternetLocationNewsIcon] retain];
-    return image;
-}
-
-+ (NSImage *)genericInternetLocationImage {
-    static NSImage *image = nil;
-    if (image == nil)
-        image = [[self systemIconWithCode:kInternetLocationGenericIcon] retain];
-    return image;
-}
-
 + (NSImage *)iconWithSize:(NSSize)iconSize forToolboxCode:(OSType) code {
-	NSInteger width = iconSize.width;
-	NSInteger height = iconSize.height;
+	int width = iconSize.width;
+	int height = iconSize.height;
 	IconRef iconref;
 	OSErr myErr = GetIconRef (kOnSystemDisk, kSystemIconsCreator, code, &iconref);
 	
@@ -399,10 +161,6 @@
         return [self httpInternetLocationImage];
     else if([scheme isEqualToString:@"ftp"])
         return [self ftpInternetLocationImage];
-    else if([scheme isEqualToString:@"mailto"])
-        return [self mailInternetLocationImage];
-    else if([scheme isEqualToString:@"news"])
-        return [self newsInternetLocationImage];
     else return [self genericInternetLocationImage];
 }
 
@@ -430,6 +188,29 @@
     
     NSString *pathExtension = [path pathExtension];
     
+#if defined(MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5  // Uses API deprecated on 10.5
+#warning Omni disables IconFamily on 10.5
+   // .app is a valid path extension to pass here, but we must not cache the icon based on that extension!
+    if(![pathExtension isEqualToString:@""] && ![@"app" isEqualToString:pathExtension]) {
+        image = [imageDictionary objectForKey:pathExtension];
+        if (image == nil) {
+            image = [[NSWorkspace sharedWorkspace] iconForFileType:pathExtension];
+            [image setFlipped:NO];
+            if (image == nil)
+                image = [NSNull null];
+            [imageDictionary setObject:image forKey:pathExtension];
+        }
+    } else {    
+        image = [imageDictionary objectForKey:path];
+        if (image == nil) {
+            image = [[NSWorkspace sharedWorkspace] iconForFile:path];
+            [image setFlipped:NO];
+            if (image == nil)
+                image = [NSNull null];
+            [imageDictionary setObject:image forKey:path];
+        }
+    }
+#else
     // .app is a valid path extension to pass here, but we must not cache the icon based on that extension!
     if(![pathExtension isEqualToString:@""] && ![@"app" isEqualToString:pathExtension]) {
         image = [imageDictionary objectForKey:pathExtension];
@@ -454,27 +235,7 @@
             [iconFamily release];
         }
     }
-    return image != [NSNull null] ? image : nil;
-}
-
-+ (NSImage *)imageForFileType:(NSString *)fileType {
-    static NSMutableDictionary *imageDictionary = nil;
-    
-    if (!fileType)
-        return nil;
-   
-    // if no file type, we'll just cache the path and waste some memory
-    if (imageDictionary == nil)
-        imageDictionary = [[NSMutableDictionary alloc] init];
-    
-    id image = [imageDictionary objectForKey:fileType];
-    if (image == nil) {
-        image = [[NSWorkspace sharedWorkspace] iconForFileType:fileType];
-        [image setFlipped:NO];
-        if (image == nil)
-            image = [NSNull null];
-        [imageDictionary setObject:image forKey:fileType];
-    }
+#endif
     return image != [NSNull null] ? image : nil;
 }
 
@@ -509,11 +270,8 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
 + (NSImage *)paperclipImage;
 {
     static NSImage *image = nil;
-    if(image == nil) {
+    if(image == nil)
         image = createPaperclipImageWithColor([NSColor blackColor]);
-        if ([image respondsToSelector:@selector(setTemplate:)])
-            [image setTemplate:YES];
-    }
     return image;
 }
 
@@ -573,22 +331,12 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
     return [newImage autorelease];
 }
 
-- (NSImage *)invertedImage {
-    CIImage *ciImage = [CIImage imageWithData:[self TIFFRepresentation]];
-    NSRect rect = {NSZeroPoint, [self size]};
-    NSImage *image = [[[NSImage alloc] initWithSize:rect.size] autorelease];
-    [image lockFocus];
-    [[ciImage invertedImage] drawInRect:rect fromRect:rect operation:NSCompositeCopy fraction:1.0];
-    [image unlockFocus];
-    return image;
-}
-
-- (NSImage *)dragImageWithCount:(NSInteger)count;
+- (NSImage *)dragImageWithCount:(int)count;
 {
     return [self dragImageWithCount:count inside:NO isIcon:YES];
 }
 
-- (NSImage *)dragImageWithCount:(NSInteger)count inside:(BOOL)inside isIcon:(BOOL)isIcon;
+- (NSImage *)dragImageWithCount:(int)count inside:(BOOL)inside isIcon:(BOOL)isIcon;
 {
     NSImage *labeledImage;
     NSRect sourceRect = {NSZeroPoint, [self size]};
@@ -597,12 +345,12 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
     
     if (count > 1) {
         
-        NSAttributedString *countString = [[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%ld", (long)count]
+        NSAttributedString *countString = [[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%i", count]
                                             attributeName:NSForegroundColorAttributeName attributeValue:[NSColor whiteColor]] autorelease];
         NSRect countRect = {NSZeroPoint, [countString size]};
-        CGFloat countOffset;
+        float countOffset;
         
-        countOffset = BDSKFloor(0.5f * NSHeight(countRect)); // make sure the cap radius is integral
+        countOffset = floorf(0.5f * NSHeight(countRect)); // make sure the cap radius is integral
         countRect.size.height = 2.0 * countOffset;
         
         if (inside) {
@@ -624,7 +372,7 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
         
         // draw a count of the rows being dragged, similar to Mail.app
         [[NSColor redColor] setFill];
-        [NSBezierPath fillHorizontalOvalInRect:NSInsetRect(countRect, -0.5 * NSHeight(countRect), 0.0)];
+        [NSBezierPath fillHorizontalOvalAroundRect:countRect];
         [countString drawInRect:countRect];
         
         [labeledImage unlockFocus];
@@ -665,7 +413,7 @@ static NSComparisonResult compareImageRepWidths(NSBitmapImageRep *r1, NSBitmapIm
     // sort the image reps by increasing width, so we can easily pick the next largest one
     NSMutableArray *reps = [[self representations] mutableCopy];
     [reps sortUsingFunction:compareImageRepWidths context:NULL];
-    NSUInteger i, iMax = [reps count];
+    unsigned i, iMax = [reps count];
     NSBitmapImageRep *toReturn = nil;
     
     for (i = 0; i < iMax && nil == toReturn; i++) {
@@ -682,26 +430,6 @@ static NSComparisonResult compareImageRepWidths(NSBitmapImageRep *r1, NSBitmapIm
     }
     [reps release];
     return toReturn;    
-}
-
-// Modified and generalized from OmniAppKit/NSImage-OAExtensions
-- (void)drawFlippedInRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(CGFloat)delta {
-    [NSGraphicsContext saveGraphicsState];
-    NSAffineTransform *transform = [NSAffineTransform transform];
-    [transform translateXBy:0.0 yBy:NSMaxY(dstRect)];
-    [transform scaleXBy:1.0 yBy:-1.0];
-    [transform translateXBy:0.0 yBy:-NSMinY(dstRect)];
-    [transform concat];
-    [self drawInRect:dstRect fromRect:srcRect operation:op fraction:delta];
-    [NSGraphicsContext restoreGraphicsState];
-}
-
-- (void)drawFlipped:(BOOL)isFlipped inRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(CGFloat)delta {
-    if (isFlipped) {
-        [self drawFlippedInRect:dstRect fromRect:srcRect operation:op fraction:delta];
-    } else {
-        [self drawInRect:dstRect fromRect:srcRect operation:op fraction:delta];
-    }
 }
 
 @end

@@ -37,21 +37,27 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "FVBaseIcon.h"
+#import "FVIcon.h"
+#import "FVIcon_Private.h"
 
-@interface FVTextIcon : FVBaseIcon
+@interface FVTextIcon : FVIcon
 {
-@protected
+@private
     CGImageRef      _fullImage;
     NSSize          _fullSize;
     CGImageRef      _thumbnail;
     NSSize          _thumbnailSize;
     NSSize          _desiredSize;
-    BOOL            _isPlainText;
+    NSURL          *_fileURL;
+    char           *_diskCacheName;
+    BOOL            _isHTML;
+    BOOL            _drawsLinkBadge;
+    pthread_mutex_t _mutex;
 }
 
 + (BOOL)canInitWithUTI:(NSString *)aUTI;
 + (BOOL)canInitWithURL:(NSURL *)aURL;
-- (id)initWithURL:(NSURL *)aURL isPlainText:(BOOL)isPlainText;
+- (id)initWithTextAtURL:(NSURL *)aURL;
+- (id)initWithHTMLAtURL:(NSURL *)aURL;
 
 @end

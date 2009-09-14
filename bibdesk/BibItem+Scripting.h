@@ -53,13 +53,13 @@
 
 - (NSArray *)linkedFiles;
 - (void)insertInLinkedFiles:(NSURL *)newURL;
-- (void)insertObject:(NSURL *)newURL inLinkedFilesAtIndex:(NSUInteger)idx;
-- (void)removeObjectFromLinkedFilesAtIndex:(NSUInteger)idx;
+- (void)insertObject:(NSURL *)newURL inLinkedFilesAtIndex:(unsigned int)idx;
+- (void)removeObjectFromLinkedFilesAtIndex:(unsigned int)idx;
 
 - (NSArray *)linkedURLs;
 - (void)insertInLinkedURLs:(NSString *)newURLString;
-- (void)insertObject:(NSString *)newURLString inLinkedURLsAtIndex:(NSUInteger)idx;
-- (void)removeObjectFromLinkedURLsAtIndex:(NSUInteger)idx;
+- (void)insertObject:(NSString *)newURLString inLinkedURLsAtIndex:(unsigned int)idx;
+- (void)removeObjectFromLinkedURLsAtIndex:(unsigned int)idx;
 
 - (id)uniqueID;
 
@@ -67,6 +67,8 @@
 - (id)group;
 
 - (BOOL)isExternal;
+
+- (void)setBibTeXString:(NSString*) btString;
 
 - (NSString *)scriptingCiteKey;
 - (void)setScriptingCiteKey:(NSString *)newKey;
@@ -106,8 +108,8 @@
 - (NSString *)keywords;
 - (void)setKeywords:(NSString *)keywords;
 
-- (NSInteger)scriptingRating;
-- (void)setScriptingRating:(NSInteger)rating;
+- (int)scriptingRating;
+- (void)setScriptingRating:(int)rating;
 
 - (NSScriptObjectSpecifier *) objectSpecifier;
 

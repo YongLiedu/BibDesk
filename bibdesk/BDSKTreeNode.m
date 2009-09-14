@@ -127,7 +127,7 @@
     [anObject setParent:self];
 }
 
-- (void)insertChild:(BDSKTreeNode *)anObject atIndex:(NSUInteger)idx;
+- (void)insertChild:(BDSKTreeNode *)anObject atIndex:(unsigned int)idx;
 {
     [children insertObject:anObject atIndex:idx];
     
@@ -135,7 +135,7 @@
     [anObject setParent:self];
 }
 
-- (id)childAtIndex:(NSUInteger)idx;
+- (id)childAtIndex:(unsigned int)idx;
 {
     return [children objectAtIndex:idx];
 }
@@ -159,14 +159,14 @@
     }
 }
 
-- (void)sortChildrenUsingFunction:(NSInteger (*)(id, id, void *))compare context:(void *)context;
+- (void)sortChildrenUsingFunction:(int (*)(id, id, void *))compare context:(void *)context;
 {
     [children sortUsingFunction:compare context:context];
 }
 
 - (NSArray *)children { return children; }
 
-- (NSUInteger)numberOfChildren { return [children count]; }
+- (unsigned int)numberOfChildren { return [children count]; }
 
 - (BOOL)isLeaf { return [self numberOfChildren] > 0 ? NO : YES; }
 

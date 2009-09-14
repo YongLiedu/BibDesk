@@ -37,9 +37,9 @@
  */
 
 #import "BDSKZoomableTextView.h"
+#import <OmniAppKit/OmniAppKit.h>
+#import "BDSKHeaderPopUpButton.h"
 #import "NSScrollview_BDSKExtensions.h"
-#import "NSView_BDSKExtensions.h"
-#import "BDSKHighlightingPopUpButton.h"
 
 
 @interface NSResponder (BDSKGesturesPrivate)
@@ -49,18 +49,14 @@
 @end
 
 @interface NSEvent (BDSKGesturesPrivate)
-- (CGFloat)magnification;
+- (float)magnification;
 @end
 
 @implementation BDSKZoomableTextView
 
 static NSString *BDSKDefaultScaleMenuLabels[] = {@"10%", @"20%", @"25%", @"35%", @"50%", @"60%", @"71%", @"85%", @"100%", @"120%", @"141%", @"170%", @"200%", @"300%", @"400%", @"600%", @"800%"};
-static CGFloat BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 0.71, 0.85, 1.0, 1.2, 1.41, 1.7, 2.0, 3.0, 4.0, 6.0, 8.0};
-
-#define BDSKMinDefaultScaleMenuFactor (BDSKDefaultScaleMenuFactors[1])
-#define BDSKDefaultScaleMenuFactorsCount (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(CGFloat))
-
-#define BDSKScaleMenuFontSize ((CGFloat)11.0)
+static float BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 0.71, 0.85, 1.0, 1.2, 1.41, 1.7, 2.0, 3.0, 4.0, 6.0, 8.0};
+static float BDSKScaleMenuFontSize = 11.0;
 
 #pragma mark Instance methods
 
@@ -89,39 +85,25 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 
 
 #pragma mark Instance methods - scaling related
 
-static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anIndex) {
-    NSUInteger i = [popUpButton indexOfSelectedItem];
-    [popUpButton selectItemAtIndex:anIndex];
-    [popUpButton sizeToFit];
-    NSSize frameSize = [popUpButton frame].size;
-    frameSize.width -= 22.0 + 2 * [[popUpButton cell] controlSize];
-    [popUpButton setFrameSize:frameSize];
-    [popUpButton selectItemAtIndex:i];
-}
-
 - (void)makeScalePopUpButton {
     if (scalePopUpButton == nil) {
         [[self enclosingScrollView] setHasHorizontalScroller:YES];
         
         // create it
-        scalePopUpButton = [[BDSKHighlightingPopUpButton allocWithZone:[self zone]] initWithFrame:NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown:NO];
+        scalePopUpButton = [[BDSKHeaderPopUpButton allocWithZone:[self zone]] initWithFrame:NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown:NO];
         [[scalePopUpButton cell] setControlSize:[[[self enclosingScrollView] horizontalScroller] controlSize]];
-		[scalePopUpButton setBordered:NO];
-		[scalePopUpButton setEnabled:YES];
-		[scalePopUpButton setRefusesFirstResponder:YES];
-		[[scalePopUpButton cell] setUsesItemFromMenu:YES];
-        
+
         // set a suitable font, the control size is 0, 1 or 2
         [scalePopUpButton setFont:[NSFont toolTipsFontOfSize: BDSKScaleMenuFontSize - [[scalePopUpButton cell] controlSize]]];
 		
-        NSUInteger cnt, numberOfDefaultItems = BDSKDefaultScaleMenuFactorsCount;
+        unsigned cnt, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuLabels) / sizeof(NSString *));
         id curItem;
         NSString *label;
-        CGFloat width, maxWidth = 0.0;
+        float width, maxWidth = 0.0;
         NSSize size = NSMakeSize(1000.0, 1000.0);
         NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:[scalePopUpButton font], NSFontAttributeName, nil];
-        NSUInteger maxIndex = 0;
-        
+        unsigned maxIndex = 0;
+
         // fill it
         for (cnt = 0; cnt < numberOfDefaultItems; cnt++) {
             label = [[NSBundle mainBundle] localizedStringForKey:BDSKDefaultScaleMenuLabels[cnt] value:@"" table:@"ZoomValues"];
@@ -136,17 +118,19 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
         }
         // select the appropriate item, adjusting the scaleFactor if necessary
 		[self setScaleFactor:scaleFactor adjustPopup:YES];
-        
+
         // hook it up
         [scalePopUpButton setTarget:self];
         [scalePopUpButton setAction:@selector(scalePopUpAction:)];
-        
+
         // Make sure the popup is big enough to fit the largest cell
-        sizePopUpToItemAtIndex(scalePopUpButton, maxIndex);
-        
+        [scalePopUpButton setTitle:[[scalePopUpButton itemAtIndex:maxIndex] title]];
+        [scalePopUpButton sizeToFit];
+        [scalePopUpButton synchronizeTitleAndSelectedItem];
+
 		// don't let it become first responder
 		[scalePopUpButton setRefusesFirstResponder:YES];
-        
+
         // put it in the scrollview
         [[self enclosingScrollView] setPlacards:[NSArray arrayWithObject:scalePopUpButton]];
         [scalePopUpButton release];
@@ -164,8 +148,8 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
     }
 }
 
-- (NSUInteger)lowerIndexForScaleFactor:(CGFloat)scale {
-    NSUInteger i, count = BDSKDefaultScaleMenuFactorsCount;
+- (unsigned int)lowerIndexForScaleFactor:(float)scale {
+    unsigned int i, count = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
     for (i = count - 1; i > 0; i--) {
         if (scale * 1.01 > BDSKDefaultScaleMenuFactors[i])
             return i;
@@ -173,8 +157,8 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
     return 1;
 }
 
-- (NSUInteger)upperIndexForScaleFactor:(CGFloat)scale {
-    NSUInteger i, count = BDSKDefaultScaleMenuFactorsCount;
+- (unsigned int)upperIndexForScaleFactor:(float)scale {
+    unsigned int i, count = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
     for (i = 1; i < count; i++) {
         if (scale * 0.99 < BDSKDefaultScaleMenuFactors[i])
             return i;
@@ -182,37 +166,37 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
     return count - 1;
 }
 
-- (NSUInteger)indexForScaleFactor:(CGFloat)scale {
-    NSUInteger lower = [self lowerIndexForScaleFactor:scaleFactor], upper = [self upperIndexForScaleFactor:scale];
+- (unsigned int)indexForScaleFactor:(float)scale {
+    unsigned int lower = [self lowerIndexForScaleFactor:scaleFactor], upper = [self upperIndexForScaleFactor:scale];
     if (upper > lower && scale < 0.5 * (BDSKDefaultScaleMenuFactors[lower] + BDSKDefaultScaleMenuFactors[upper]))
         return lower;
     return upper;
 }
 
-- (CGFloat)scaleFactor {
+- (float)scaleFactor {
     return scaleFactor;
 }
 
-- (void)setScaleFactor:(CGFloat)newScaleFactor {
+- (void)setScaleFactor:(float)newScaleFactor {
 	[self setScaleFactor:newScaleFactor adjustPopup:YES];
 }
 
-- (void)setScaleFactor:(CGFloat)newScaleFactor adjustPopup:(BOOL)flag {
+- (void)setScaleFactor:(float)newScaleFactor adjustPopup:(BOOL)flag {
 	if (flag) {
-            NSUInteger i = [self indexForScaleFactor:newScaleFactor];
+            unsigned int i = [self indexForScaleFactor:newScaleFactor];
             [scalePopUpButton selectItemAtIndex:i];
             newScaleFactor = BDSKDefaultScaleMenuFactors[i];
     }
 	
-	if (BDSKAbs(scaleFactor - newScaleFactor) > 0.01) {
+	if (fabsf(scaleFactor - newScaleFactor) > 0.01) {
         NSPoint scrollPoint = [self scrollPositionAsPercentage];
 		
 		scaleFactor = newScaleFactor;
 		
-        [self scaleUnitSquareToSize:[self convertSize:NSMakeSize(scaleFactor, scaleFactor) fromView:nil]];
+        [self scaleUnitSquareToSize:[self convertSize:NSMakeSize(1.0, 1.0) fromView:nil]];
+        [self scaleUnitSquareToSize:NSMakeSize(scaleFactor, scaleFactor)];
         [self sizeToFit];
-		[[NSNotificationCenter defaultCenter] postNotificationName:NSViewFrameDidChangeNotification object:self];
-        [self setScrollPositionAsPercentage:scrollPoint]; // maintain approximate scroll position
+		[self setScrollPositionAsPercentage:scrollPoint]; // maintain approximate scroll position
         [[self superview] setNeedsDisplay:YES];
     }
 }
@@ -222,30 +206,30 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
 }
 
 - (IBAction)zoomIn:(id)sender{
-    NSUInteger numberOfDefaultItems = BDSKDefaultScaleMenuFactorsCount;
-    NSUInteger i = [self lowerIndexForScaleFactor:[self scaleFactor]];
+    unsigned int numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    unsigned int i = [self lowerIndexForScaleFactor:[self scaleFactor]];
     if (i < numberOfDefaultItems - 1) i++;
     [self setScaleFactor:BDSKDefaultScaleMenuFactors[i]];
 }
 
 - (IBAction)zoomOut:(id)sender{
-    NSUInteger i = [self upperIndexForScaleFactor:[self scaleFactor]];
+    unsigned int i = [self upperIndexForScaleFactor:[self scaleFactor]];
     if (i > 1) i--;
     [self setScaleFactor:BDSKDefaultScaleMenuFactors[i]];
 }
 
 - (BOOL)canZoomToActualSize{
-    return BDSKAbs(scaleFactor - 1.0) > 0.01;
+    return fabsf(scaleFactor - 1.0) > 0.01;
 }
 
 - (BOOL)canZoomIn{
-    NSUInteger numberOfDefaultItems = BDSKDefaultScaleMenuFactorsCount;
-    NSUInteger i = [self lowerIndexForScaleFactor:[self scaleFactor]];
+    unsigned int numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    unsigned int i = [self lowerIndexForScaleFactor:[self scaleFactor]];
     return i < numberOfDefaultItems - 1;
 }
 
 - (BOOL)canZoomOut{
-    NSUInteger i = [self upperIndexForScaleFactor:[self scaleFactor]];
+    unsigned int i = [self upperIndexForScaleFactor:[self scaleFactor]];
     return i > 1;
 }
 
@@ -280,7 +264,7 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
 
 - (void)endGestureWithEvent:(NSEvent *)theEvent {
     if (pinchZoomFactor > 1.1 || pinchZoomFactor < 0.9)
-        [self setScaleFactor:BDSKMax(pinchZoomFactor * [self scaleFactor], BDSKMinDefaultScaleMenuFactor)];
+        [self setScaleFactor:fmaxf(pinchZoomFactor * [self scaleFactor], BDSKDefaultScaleMenuFactors[1])];
     pinchZoomFactor = 1.0;
     if ([[BDSKZoomableTextView superclass] instancesRespondToSelector:_cmd])
         [super endGestureWithEvent:theEvent];
@@ -288,9 +272,9 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
 
 - (void)magnifyWithEvent:(NSEvent *)theEvent {
     if ([theEvent respondsToSelector:@selector(magnification)]) {
-        pinchZoomFactor *= 1.0 + BDSKMax(-0.5, BDSKMin(1.0 , [theEvent magnification]));
-        CGFloat scale = pinchZoomFactor * [self scaleFactor];
-        NSUInteger i = [self indexForScaleFactor:BDSKMax(scale, BDSKMinDefaultScaleMenuFactor)];
+        pinchZoomFactor *= 1.0 + fmaxf(-0.5, fminf(1.0 , [theEvent magnification]));
+        float scale = pinchZoomFactor * [self scaleFactor];
+        unsigned int i = [self indexForScaleFactor:fmaxf(scale, BDSKDefaultScaleMenuFactors[1])];
         if (i != [self indexForScaleFactor:[self scaleFactor]]) {
             [self setScaleFactor:BDSKDefaultScaleMenuFactors[i]];
             pinchZoomFactor = scale / [self scaleFactor];

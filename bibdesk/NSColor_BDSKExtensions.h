@@ -37,6 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <OmniFoundation/OmniFoundation.h>
 
 
 @interface NSColor (BDSKExtensions)
@@ -46,9 +47,7 @@
 + (NSColor *)colorWithFourByteString:(NSString *)string;
 - (id)fourByteStringValue;
 
-- (BOOL)isBlackOrWhiteOrTransparentForMargin:(CGFloat)margin;
-
-- (NSComparisonResult)colorCompare:(id)other;
+- (BOOL)isBlackOrWhiteOrTransparentForMargin:(float)margin;
 
 + (id)scriptingRgbaColorWithDescriptor:(NSAppleEventDescriptor *)descriptor;
 - (id)scriptingRgbaColorDescriptor;

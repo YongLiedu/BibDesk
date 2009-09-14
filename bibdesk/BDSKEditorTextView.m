@@ -39,12 +39,11 @@
 #import "BDSKEditorTextView.h"
 #import "NSURL_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
-
-static char BDSKEditorTextViewDefaultsObservationContext;
+#import <OmniFoundation/OmniFoundation.h>
 
 @interface BDSKEditorTextView (Private)
 
-- (void)updateFontFromPreferences;
+- (void)handleFontChangedNotification:(NSNotification *)note;
 - (NSString *)URLStringFromRange:(NSRange *)startRange inString:(NSString *)string;
 - (void)fixAttributesForURLs;
 - (void)updateFontFromPreferences;
@@ -71,8 +70,7 @@ static char BDSKEditorTextViewDefaultsObservationContext;
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    @try { [[NSUserDefaultsController sharedUserDefaultsController] removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKEditorFontNameKey]]; }
-    @catch (id e) {}
+    [OFPreference removeObserver:self forPreference:nil];
     [super dealloc];
 }
 
@@ -83,8 +81,8 @@ static char BDSKEditorTextViewDefaultsObservationContext;
     NSFont *font = [[NSFontManager sharedFontManager] convertFont:[self font]];
     
     // save it to prefs for next time
-    [[NSUserDefaults standardUserDefaults] setFloat:[font pointSize] forKey:BDSKEditorFontSizeKey];
-    [[NSUserDefaults standardUserDefaults] setObject:[font fontName] forKey:BDSKEditorFontNameKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[font pointSize] forKey:BDSKEditorFontSizeKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[font fontName] forKey:BDSKEditorFontNameKey];
 }
 
 - (void)textStorageDidProcessEditing:(NSNotification *)notification
@@ -115,25 +113,18 @@ static char BDSKEditorTextViewDefaultsObservationContext;
 // make sure the font and other attributes get fixed when pasting text
 - (void)paste:(id)sender {  [self pasteAsPlainText:sender]; }
 
-#pragma mark KVO
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == &BDSKEditorTextViewDefaultsObservationContext) {
-        NSString *key = [keyPath substringFromIndex:7];
-        if ([key isEqualToString:BDSKEditorFontNameKey]) {
-            [self updateFontFromPreferences];
-        }
-    } else {
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-    }
-}
-
 @end
 
 @implementation BDSKEditorTextView (Private)
 
+// We get this notification when some other textview changes the font prefs
+- (void)handleFontChangedNotification:(NSNotification *)note;
+{
+    [self updateFontFromPreferences];
+}
+
 // Determine if a % character is followed by two digits (valid in a URL)
-static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, NSUInteger startIndex)
+static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned startIndex)
 {
     static NSCharacterSet *hexadecimalCharacterSet = nil;
     if (hexadecimalCharacterSet == nil) {
@@ -159,7 +150,7 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, NSUInteger s
 */
 - (NSString *)URLStringFromRange:(NSRange *)startRange inString:(NSString *)string
 {
-    NSUInteger startIdx = NSNotFound, endIdx = NSNotFound;
+    unsigned startIdx = NSNotFound, endIdx = NSNotFound;
     NSRange range = NSMakeRange(0, startRange->location);
     
     do {
@@ -215,7 +206,7 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, NSUInteger s
     NSTextStorage *textStorage = [self textStorage];
     NSString *string = [textStorage string];
     
-    NSInteger start, length = [string length];
+    int start, length = [string length];
     NSRange range = NSMakeRange(0, 0);
     NSString *urlString;
     NSURL *url;
@@ -237,8 +228,8 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, NSUInteger s
 // used only for reading the default font from prefs and then changing the font of the text storage
 - (void)updateFontFromPreferences;
 {
-    NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKEditorFontNameKey];
-    CGFloat fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:BDSKEditorFontSizeKey];
+    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKEditorFontNameKey];
+    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKEditorFontSizeKey];
     NSFont *font = nil;
     
     if(fontName != nil)
@@ -254,7 +245,7 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, NSUInteger s
 
 - (void)doCommonSetup;
 {
-    BDSKPRECONDITION([self textStorage]);
+    OBPRECONDITION([self textStorage]);
 #if defined(MAC_OS_X_VERSION_10_5) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
 #warning 10.5: remove URL detection
 #endif
@@ -264,10 +255,7 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, NSUInteger s
     else
         [self setAutomaticLinkDetectionEnabled:YES];
     [self updateFontFromPreferences];
-    [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self
-        forKeyPath:[@"values." stringByAppendingString:BDSKEditorFontNameKey]
-           options:0
-           context:&BDSKEditorTextViewDefaultsObservationContext];
+    [OFPreference addObserver:self selector:@selector(handleFontChangedNotification:) forPreference:[OFPreference preferenceForKey:BDSKEditorFontNameKey]];
 }    
 
 @end

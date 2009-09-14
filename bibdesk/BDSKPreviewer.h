@@ -40,15 +40,14 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class PDFView, BDSKZoomablePDFView, BDSKTeXTask, BDSKOverlayPanel, BDSKPreviewerServer;
+@class PDFView, BDSKZoomablePDFView, BDSKTeXTask, BDSKOverlay, BDSKPreviewerServer;
 
-enum {
+typedef enum {
 	BDSKUnknownPreviewState = -1,
 	BDSKEmptyPreviewState   =  0,
 	BDSKWaitingPreviewState =  1,
 	BDSKShowingPreviewState =  2
-};
-typedef NSInteger BDSKPreviewState;
+} BDSKPreviewState;
 
 /*!
     @class BDSKPreviewer
@@ -61,13 +60,13 @@ typedef NSInteger BDSKPreviewState;
     IBOutlet NSTextView *logView;
     IBOutlet NSTabView *tabView;
     IBOutlet NSProgressIndicator *progressIndicator;
-    IBOutlet BDSKOverlayPanel *progressOverlay;
+    IBOutlet BDSKOverlay *progressOverlay;
     IBOutlet NSImageView *warningImageView;
     IBOutlet NSView *warningView;
     
     BDSKPreviewerServer *server;
     BDSKPreviewState previewState;
-    NSInteger generatedTypes;
+    int generatedTypes;
 }
 
 /*!
@@ -79,19 +78,19 @@ typedef NSInteger BDSKPreviewState;
 
 - (PDFView *)pdfView;
 - (NSTextView *)textView;
-- (BDSKOverlayPanel *)progressOverlay;
+- (BDSKOverlay *)progressOverlay;
 
-- (CGFloat)PDFScaleFactor;
-- (void)setPDFScaleFactor:(CGFloat)scaleFactor;
-- (CGFloat)RTFScaleFactor;
-- (void)setRTFScaleFactor:(CGFloat)scaleFactor;
+- (float)PDFScaleFactor;
+- (void)setPDFScaleFactor:(float)scaleFactor;
+- (float)RTFScaleFactor;
+- (void)setRTFScaleFactor:(float)scaleFactor;
 
-- (NSInteger)generatedTypes;
-- (void)setGeneratedTypes:(NSInteger)newGeneratedTypes;
+- (int)generatedTypes;
+- (void)setGeneratedTypes:(int)newGeneratedTypes;
 
 - (BOOL)isVisible;
 - (void)handleMainDocumentDidChangeNotification:(NSNotification *)notification;
-- (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+- (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 /*!
     @method updateWithBibTeXString:

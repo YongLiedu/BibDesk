@@ -39,14 +39,13 @@
 #import <Cocoa/Cocoa.h>
 
 
-enum {
-    BDSKStringNodeString = 0,
-    BDSKStringNodeNumber = 1,
-    BDSKStringNodeMacro = 2
-};
-typedef NSUInteger BDSKStringNodeType;
+typedef enum{
+    BSN_STRING = 0,
+    BSN_NUMBER = 1,
+    BSN_MACRODEF = 2
+} BDSKStringNodeType;
 
-@interface BDSKStringNode : NSObject <NSCopying, NSCoding>{
+@interface BDSKStringNode : OFObject <NSCopying, NSCoding>{
     @public
     BDSKStringNodeType type; 
     NSString *value;
@@ -142,11 +141,11 @@ typedef NSUInteger BDSKStringNodeType;
      @param		mask The search options used in the comparison. These are the same as for string compare methods. 
      @result     -
      */
-- (NSComparisonResult)compareNode:(BDSKStringNode *)aNode options:(NSUInteger)mask;
+- (NSComparisonResult)compareNode:(BDSKStringNode *)aNode options:(unsigned)mask;
 
     /*!
     @method     type
-     @abstract   The type of the string node. This can be BDSKStringNodeString, BDSKStringNodeNumber, or BDSKStringNodeMacro. 
+     @abstract   The type of the string node. This can be BSN_STRING, BSN_NUMBER, or BSN_MACRODEF. 
      @discussion (description)
      @result     -
      */

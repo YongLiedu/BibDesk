@@ -42,8 +42,9 @@
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKBooleanValueTransformer.h"
 #import "BDSKRatingButton.h"
+#import <OmniBase/OmniBase.h>
 
-static char BDSKConditionControllerObservationContext;
+static NSString *BDSKConditionControllerObservationContext = @"BDSKConditionControllerObservationContext";
 
 @interface BDSKConditionController (BDSKPrivate)
 - (void)startObserving;
@@ -56,7 +57,6 @@ static char BDSKConditionControllerObservationContext;
 
 + (void)initialize
 {
-    BDSKINITIALIZE;
     [NSValueTransformer setValueTransformer:[[[BDSKBooleanValueTransformer alloc] init] autorelease] forName:@"BDSKBooleanValueTransformer"];
     [NSValueTransformer setValueTransformer:[[[BDSKTriStateValueTransformer alloc] init] autorelease] forName:@"BDSKTriStateValueTransformer"];
 }
@@ -133,7 +133,7 @@ static char BDSKConditionControllerObservationContext;
     [[triStateButton superview] retain];
     [[ratingButton superview] retain];
     
-    [ratingButton setRating:[[condition stringValue] intValue]];
+    [ratingButton setRating:[[condition stringValue] unsignedIntValue]];
     
     NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
     [formatter setDateStyle:NSDateFormatterShortStyle];
@@ -188,7 +188,7 @@ static char BDSKConditionControllerObservationContext;
 
 // we could implement binding in BDSKRatingButton, but that's a lot of hassle and exposes us to the binding-to-owner bug
 - (IBAction)changeRating:(id)sender {
-    [condition setStringValue:[NSString stringWithFormat:@"%ld", (long)[sender rating]]];
+    [condition setStringValue:[NSString stringWithFormat:@"%i", [sender rating]]];
 }
 
 - (BDSKCondition *)condition {
@@ -303,8 +303,8 @@ static char BDSKConditionControllerObservationContext;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == &BDSKConditionControllerObservationContext) {
-        BDSKASSERT(object == condition);
+    if (context == BDSKConditionControllerObservationContext) {
+        OBASSERT(object == condition);
         if(object == condition) {
             NSUndoManager *undoManager = [filterController undoManager];
             id oldValue = [change objectForKey:NSKeyValueChangeOldKey];
@@ -312,8 +312,8 @@ static char BDSKConditionControllerObservationContext;
                 oldValue = nil;
             if ([keyPath isEqualToString:@"key"]){
                 NSString *newValue = [change objectForKey:NSKeyValueChangeNewKey];
-                NSInteger oldFieldType = [oldValue fieldType];
-                NSInteger newFieldType = [newValue fieldType];
+                int oldFieldType = [oldValue fieldType];
+                int newFieldType = [newValue fieldType];
                 if(MIN(oldFieldType, BDSKStringField) != MIN(newFieldType, BDSKStringField))
                     [self layoutComparisonControls];
                 if(oldFieldType != newFieldType)
@@ -329,7 +329,7 @@ static char BDSKConditionControllerObservationContext;
                 [[undoManager prepareWithInvocationTarget:condition] setStringComparison:[oldValue intValue]];
             } else if ([keyPath isEqualToString:@"stringValue"]) {
                 [[undoManager prepareWithInvocationTarget:condition] setStringValue:oldValue];
-                [ratingButton setRating:[[condition stringValue] intValue]];
+                [ratingButton setRating:[[condition stringValue] unsignedIntValue]];
             } else if ([keyPath isEqualToString:@"countValue"]) {
                 [[undoManager prepareWithInvocationTarget:condition] setCountValue:[oldValue intValue]];
             } else if ([keyPath isEqualToString:@"numberValue"]) {
@@ -350,17 +350,17 @@ static char BDSKConditionControllerObservationContext;
 }
 
 - (void)startObserving {
-    [condition addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:&BDSKConditionControllerObservationContext];
-    [condition addObserver:self forKeyPath:@"dateComparison" options: NSKeyValueObservingOptionOld  context:&BDSKConditionControllerObservationContext];
-    [condition addObserver:self forKeyPath:@"attachmentComparison" options:NSKeyValueObservingOptionOld  context:&BDSKConditionControllerObservationContext];
-    [condition addObserver:self forKeyPath:@"stringComparison" options:NSKeyValueObservingOptionOld  context:&BDSKConditionControllerObservationContext];
-    [condition addObserver:self forKeyPath:@"stringValue" options:NSKeyValueObservingOptionOld  context:&BDSKConditionControllerObservationContext];
-    [condition addObserver:self forKeyPath:@"countValue" options:NSKeyValueObservingOptionOld  context:&BDSKConditionControllerObservationContext];
-    [condition addObserver:self forKeyPath:@"numberValue" options:NSKeyValueObservingOptionOld  context:&BDSKConditionControllerObservationContext];
-    [condition addObserver:self forKeyPath:@"andNumberValue" options:NSKeyValueObservingOptionOld  context:&BDSKConditionControllerObservationContext];
-    [condition addObserver:self forKeyPath:@"periodValue" options:NSKeyValueObservingOptionOld  context:&BDSKConditionControllerObservationContext];
-    [condition addObserver:self forKeyPath:@"dateValue" options:NSKeyValueObservingOptionOld  context:&BDSKConditionControllerObservationContext];
-    [condition addObserver:self forKeyPath:@"toDateValue" options:NSKeyValueObservingOptionOld  context:&BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"dateComparison" options: NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"attachmentComparison" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"stringComparison" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"stringValue" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"countValue" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"numberValue" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"andNumberValue" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"periodValue" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"dateValue" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"toDateValue" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
     isObserving = YES;
 }
 
@@ -381,16 +381,12 @@ static char BDSKConditionControllerObservationContext;
     }
 }
 
-- (void)discardEditing {
-    [objectController discardEditing];
-}
-
 - (BOOL)commitEditing {
     return [objectController commitEditing];
 }
 
-- (void)commitEditingWithDelegate:(id)delegate didCommitSelector:(SEL)didCommitSelector contextInfo:(void *)contextInfo {
-    return [objectController commitEditingWithDelegate:delegate didCommitSelector:didCommitSelector contextInfo:contextInfo];
+- (void)discardEditing {
+    [objectController discardEditing];
 }
 
 @end

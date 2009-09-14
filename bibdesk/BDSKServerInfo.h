@@ -38,25 +38,20 @@
 
 #import <Cocoa/Cocoa.h>
 
-enum {
-    BDSKServerTypeEntrez,
-    BDSKServerTypeZoom,
-    BDSKServerTypeISI,
-    BDSKServerTypeDBLP
-};
 
 @interface BDSKServerInfo : NSObject <NSCopying, NSMutableCopying> {
     NSString *type;
     NSString *name;
-    NSString *database;
     NSString *host;
     NSString *port;
+    NSString *database;
     NSMutableDictionary *options;
 }
 
 + (id)defaultServerInfoWithType:(NSString *)aType;
 
-- (id)initWithType:(NSString *)aType name:(NSString *)aName database:(NSString *)aDbase host:(NSString *)aHost port:(NSString *)aPort options:(NSDictionary *)options;
+- (id)initWithType:(NSString *)aType name:(NSString *)aName host:(NSString *)aHost port:(NSString *)aPort database:(NSString *)aDbase options:(NSDictionary *)options;
+- (id)initWithType:(NSString *)aType name:(NSString *)aName host:(NSString *)aHost port:(NSString *)aPort database:(NSString *)aDbase;
 
 - (id)initWithType:(NSString *)aType dictionary:(NSDictionary *)info;
 
@@ -64,9 +59,9 @@ enum {
 
 - (NSString *)type;
 - (NSString *)name;
-- (NSString *)database;
 - (NSString *)host;
 - (NSString *)port;
+- (NSString *)database;
 - (NSString *)password;
 - (NSString *)username;
 - (NSString *)recordSyntax;
@@ -79,17 +74,19 @@ enum {
 - (BOOL)isISI;
 - (BOOL)isDBLP;
 
-- (NSInteger)serverType;
-
 @end
 
-@interface BDSKMutableServerInfo : BDSKServerInfo
+@interface BDSKMutableServerInfo : BDSKServerInfo {
+    id delegate;
+}
 
-- (void)setType:(NSString *)newType;
+- (void)setDelegate:(id)newDelegate;
+- (id)delegate;
+
 - (void)setName:(NSString *)newName;
-- (void)setDatabase:(NSString *)newDbase;
 - (void)setPort:(NSString *)newPort;
 - (void)setHost:(NSString *)newHost;
+- (void)setDatabase:(NSString *)newDbase;
 - (void)setPassword:(NSString *)newPassword;
 - (void)setUsername:(NSString *)newUser;
 - (void)setRecordSyntax:(NSString *)newSyntax;

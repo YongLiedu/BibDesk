@@ -54,7 +54,9 @@ static NSString *endColorKey = @"inputColor1";
 
 + (CIImage *)imageWithConstantColor:(CIColor *)color;
 {
-    CIFilter *colorFilter = [CIFilter filterWithName:@"CIConstantColorGenerator"];    
+    static CIFilter *colorFilter = nil;
+    if (colorFilter == nil)
+        colorFilter = [[CIFilter filterWithName:@"CIConstantColorGenerator"] retain];    
     
     [colorFilter setValue:color forKey:@"inputColor"];
     
@@ -63,7 +65,9 @@ static NSString *endColorKey = @"inputColor1";
 
 + (CIImage *)imageInRect:(CGRect)aRect withLinearGradientFromPoint:(CGPoint)startPoint toPoint:(CGPoint)endPoint fromColor:(CIColor *)startColor toColor:(CIColor *)endColor;
 {
-    CIFilter *linearFilter = [CIFilter filterWithName:@"CILinearGradient"];    
+    static CIFilter *linearFilter = nil;
+    if (linearFilter == nil)
+        linearFilter = [[CIFilter filterWithName:@"CILinearGradient"] retain];    
     
     [linearFilter setValue:startColor forKey:startColorKey];
     [linearFilter setValue:endColor forKey:endColorKey];
@@ -90,9 +94,11 @@ static NSString *endColorKey = @"inputColor1";
     return [self imageInRect:aRect withLinearGradientFromPoint:startPoint toPoint:endPoint fromColor:startColor toColor:endColor];
 }
 
-+ (CIImage *)imageWithGaussianGradientWithCenter:(CGPoint)center radius:(CGFloat)radius fromColor:(CIColor *)startColor toColor:(CIColor *)endColor;
++ (CIImage *)imageWithGaussianGradientWithCenter:(CGPoint)center radius:(float)radius fromColor:(CIColor *)startColor toColor:(CIColor *)endColor;
 {
-    CIFilter *gaussianFilter = [CIFilter filterWithName:@"CIGaussianGradient"];    
+    static CIFilter *gaussianFilter = nil;
+    if (gaussianFilter == nil)
+        gaussianFilter = [[CIFilter filterWithName:@"CIGaussianGradient"] retain];    
     
     [gaussianFilter setValue:startColor forKey:@"inputColor0"];
     [gaussianFilter setValue:endColor forKey:@"inputColor1"];
@@ -121,7 +127,7 @@ static NSString *endColorKey = @"inputColor1";
 
 + (CIImage *)imageInRect:(CGRect)aRect withHorizontalGradientFromColor:(CIColor *)fgStartColor toColor:(CIColor *)fgEndColor blendedAtTop:(BOOL)top ofVerticalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 {
-    CGFloat radius = 0.5f * CGRectGetWidth(aRect);
+    float radius = 0.5f * CGRectGetWidth(aRect);
     CGPoint center = CGPointMake(CGRectGetMidX(aRect), top ? CGRectGetMaxY(aRect) : CGRectGetMinY(aRect));
     
     CIImage *foreground = [self imageInRect:aRect withHorizontalGradientFromColor:fgStartColor toColor:fgEndColor];
@@ -133,7 +139,7 @@ static NSString *endColorKey = @"inputColor1";
 
 + (CIImage *)imageInRect:(CGRect)aRect withVerticalGradientFromColor:(CIColor *)fgStartColor toColor:(CIColor *)fgEndColor blendedAtRight:(BOOL)right ofHorizontalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 {
-    CGFloat radius = 0.5f * CGRectGetHeight(aRect);
+    float radius = 0.5f * CGRectGetHeight(aRect);
     CGPoint center = CGPointMake(right ? CGRectGetMaxX(aRect) : CGRectGetMinX(aRect), CGRectGetMidY(aRect));
     
     CIImage *foreground = [self imageInRect:aRect withVerticalGradientFromColor:fgStartColor toColor:fgEndColor];
@@ -181,7 +187,9 @@ static NSString *endColorKey = @"inputColor1";
 
 - (CIImage *)blendedImageWithBackground:(CIImage *)background usingMask:(CIImage *)mask;
 {
-    CIFilter *blendFilter = [CIFilter filterWithName:@"CIBlendWithMask"];    
+    static CIFilter *blendFilter = nil;
+    if (blendFilter == nil)
+        blendFilter = [[CIFilter filterWithName:@"CIBlendWithMask"] retain];    
     
     [blendFilter setValue:self forKey:@"inputImage"];
     [blendFilter setValue:background forKey:@"inputBackgroundImage"];
@@ -190,9 +198,11 @@ static NSString *endColorKey = @"inputColor1";
     return [blendFilter valueForKey:@"outputImage"];
 }
 
-- (CIImage *)blurredImageWithBlurRadius:(CGFloat)radius;
+- (CIImage *)blurredImageWithBlurRadius:(float)radius;
 {
-    CIFilter *gaussianBlurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];    
+    static CIFilter *gaussianBlurFilter = nil;
+    if (gaussianBlurFilter == nil)
+        gaussianBlurFilter = [[CIFilter filterWithName:@"CIGaussianBlur"] retain];    
     
     [gaussianBlurFilter setValue:[NSNumber numberWithFloat:radius] forKey:@"inputRadius"];
     [gaussianBlurFilter setValue:self forKey:@"inputImage"];
@@ -202,8 +212,13 @@ static NSString *endColorKey = @"inputColor1";
 
 - (CIImage *)croppedImageWithRect:(CGRect)aRect;
 {
-    CIFilter *transformFilter = [CIFilter filterWithName:@"CIAffineTransform"];
-    CIFilter *cropFilter = [CIFilter filterWithName:@"CICrop"];
+    static CIFilter *transformFilter = nil;
+    static CIFilter *cropFilter = nil;
+    if (transformFilter == nil)
+        transformFilter = [[CIFilter filterWithName:@"CIAffineTransform"] retain];    
+    if (cropFilter == nil)
+        cropFilter = [[CIFilter filterWithName:@"CICrop"] retain];    
+    
     CIImage *image = self;
     
     if (CGPointEqualToPoint(aRect.origin, CGPointZero) == NO) {
@@ -224,36 +239,12 @@ static NSString *endColorKey = @"inputColor1";
     return [cropFilter valueForKey:@"outputImage"];
 }
 
-- (CIImage *)imageWithAdjustedHueAngle:(CGFloat)hue saturationFactor:(CGFloat)saturation brightnessBias:(CGFloat)brightness;
-{
-    CIFilter *hueAdjustFilter = [CIFilter filterWithName:@"CIHueAdjust"];
-    CIFilter *colorControlsFilter = [CIFilter filterWithName:@"CIColorControls"];
-    
-    [hueAdjustFilter setValue:[NSNumber numberWithFloat:hue * M_PI] forKey:@"inputAngle"];
-    [hueAdjustFilter setValue:self forKey:@"inputImage"];
-    
-    [colorControlsFilter setDefaults];
-    [colorControlsFilter setValue:[NSNumber numberWithFloat:saturation] forKey:@"inputSaturation"];
-    [colorControlsFilter setValue:[NSNumber numberWithFloat:brightness] forKey:@"inputBrightness"];
-    [colorControlsFilter setValue:[hueAdjustFilter valueForKey:@"outputImage"] forKey:@"inputImage"];
-    
-    return [colorControlsFilter valueForKey:@"outputImage"];
-}
-
-- (CIImage *)invertedImage {
-    CIFilter *invertFilter = [CIFilter filterWithName:@"CIColorInvert"];
-    
-    [invertFilter setValue:self forKey:@"inputImage"];
-    
-    return [invertFilter valueForKey:@"outputImage"];
-}
-
 @end 
 
 
 @implementation CIColor (BDSKExtensions)
 
-+ (CIColor *)colorWithWhite:(CGFloat)white
++ (CIColor *)colorWithWhite:(float)white
 {
     return [self colorWithRed:white green:white blue:white];
 }

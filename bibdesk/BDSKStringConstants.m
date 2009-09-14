@@ -39,7 +39,7 @@
 
 @implementation NSString (BDSKStringConstants)
 
-+ (void)initializeStringConstants
++ (void)didLoad
 {    
     // Hidden default to allow for JabRef interoperability; (RFE #1546931) this is an all-or-nothing switch.  Alternate would be to use a script hook to copy annote->review when closing an editor, but then you have lots of duplication.
     if ([[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKAnnoteFieldName"] != nil)
@@ -104,6 +104,7 @@ NSString *BDSKSortGroupsKey = @"BDSKSortGroupsKey";
 NSString *BDSKSortGroupsDescendingKey = @"BDSKSortGroupsDescendingKey";
 
 NSString *BDSKShowStatusBarKey = @"Show Status Bar";
+NSString *BDSKShowEditorStatusBarKey = @"Show Editor Status Bar";
 NSString *BDSKShowFindStatusBarKey = @"Show Find Status Bar";
 
 NSString *BDSKMainTableViewFontNameKey = @"BDSKMainTableViewFontNameKey";
@@ -119,6 +120,7 @@ NSString *BDSKFileContentSearchTableViewFontSizeKey = @"BDSKFileContentSearchTab
 NSString *BDSKOrphanedFilesTableViewFontNameKey = @"BDSKOrphanedFilesTableViewFontNameKey";
 NSString *BDSKOrphanedFilesTableViewFontSizeKey = @"BDSKOrphanedFilesTableViewFontSizeKey";
 NSString *BDSKPreviewMaxNumberKey = @"Maximum Number of Items in Preview Pane";
+NSString *BDSKPreviewTemplateStyleKey = @"BDSKPreviewTemplateStyleKey";
 NSString *BDSKBottomPreviewDisplayKey = @"BDSKBottomPreviewDisplayKey";
 NSString *BDSKBottomPreviewDisplayTemplateKey = @"BDSKBottomPreviewDisplayTemplateKey";
 NSString *BDSKSidePreviewDisplayKey = @"BDSKSidePreviewDisplayKey";
@@ -131,11 +133,8 @@ NSString *BDSKPreviewLinkedFileScaleFactorKey = @"Preview Linked File Scale Fact
 NSString *BDSKBottomPreviewScaleFactorKey = @"BDSKBottomPreviewScaleFactorKey";
 NSString *BDSKSidePreviewScaleFactorKey = @"BDSKSidePreviewScaleFactorKey";
 NSString *BDSKBottomFileViewIconScaleKey = @"BDSKBottomFileViewIconScaleKey";
-NSString *BDSKBottomFileViewDisplayModeKey = @"BDSKBottomFileViewDisplayModeKey";
 NSString *BDSKSideFileViewIconScaleKey = @"BDSKSideFileViewIconScaleKey";
-NSString *BDSKSideFileViewDisplayModeKey = @"BDSKSideFileViewDisplayModeKey";
 NSString *BDSKEditorFileViewIconScaleKey = @"BDSKEditorFileViewIconScaleKey";
-NSString *BDSKEditorFileViewDisplayModeKey = @"BDSKEditorFileViewDisplayModeKey";
 
 NSString *BDSKDefaultFieldsKey = @"Default Fields";
 NSString *BDSKLocalFileFieldsKey = @"Local File Fields";
@@ -203,12 +202,15 @@ NSString *BDSKTableHeaderTitlesKey = @"BDSKTableHeaderTitles";
 NSString *BDSKCiteseerHostKey = @"BDSKCiteseerHostKey";
 
 NSString *BDSKAuthorNameDisplayKey = @"BDSKAuthorNameDisplayKey";
-NSString *BDSKHideGroupCountKey = @"BDSKHideGroupCount";
+NSString *BDSKShouldDisplayLastNameFirstKey = @"BDSKShouldDisplayLastNameFirstKey";
 NSString *BDSKShouldShareFilesKey = @"BDSKShouldShareFilesKey";
 NSString *BDSKShouldLookForSharedFilesKey = @"BDSKShouldLookForSharedFilesKey";
 NSString *BDSKSharingRequiresPasswordKey = @"BDSKBrowsingRequiresPasswordKey";
 NSString *BDSKSharingNameKey = @"BDSKSharingNameKey";
 NSString *BDSKWarnOnCiteKeyChangeKey = @"BDSKWarnOnCiteKeyChangeKey";
+NSString *BDSKUpdateCheckIntervalKey = @"BDSKUpdateCheckIntervalKey";
+NSString *BDSKUpdateCheckLastDateKey = @"BDSKUpdateCheckLastDateKey";
+NSString *BDSKUpdateLatestNotifiedVersionKey = @"BDSKUpdateLatestNotifiedVersionKey";
 NSString *BDSKSpotlightVersionInfoKey = @"BDSKSpotlightVersionInfo";
 
 NSString *BDSKShouldShowWebGroupPrefKey = @"BDSKShouldShowWebGroup";
@@ -267,7 +269,6 @@ NSString *BDSKRelevanceString = @"Search Relevance";
 NSString *BDSKPubTypeString = @"BibTeX Type"; // this is used for -[BibItem setPubType:], not equivalent to @"Type"
 NSString *BDSKCiteKeyString = @"Cite Key";
 NSString *BDSKColorString = @"Bdsk-Color";
-NSString *BDSKColorLabelString = @"Color Label";
 NSString *BDSKLocalFileString = @"Local File";
 NSString *BDSKRemoteURLString = @"Remote URL";
 NSString *BDSKAllFieldsString = @"Any Field";
@@ -300,6 +301,7 @@ NSString *BDSKPreviewDisplayChangedNotification = @"Preview Pane Preference Chan
 NSString *BDSKTableSelectionChangedNotification = @"TableSelectionChangedNotification";
 NSString *BDSKGroupTableSelectionChangedNotification = @"GroupTableSelectionChangedNotification";
 NSString *BDSKGroupFieldChangedNotification = @"GroupFieldChangedNotification";
+NSString *BDSKGroupFieldAddRemoveNotification = @"BDSKGroupFieldAddRemoveNotification";
 NSString *BDSKBibItemChangedNotification = @"BibItem Changed notification";
 NSString *BDSKNeedsToBeFiledChangedNotification = @"BibItem NeedsToBeFiled Flag Changed notification";
 NSString *BDSKDocSetPublicationsNotification = @"Set the publications of a document";
@@ -322,9 +324,8 @@ NSString *BDSKScriptGroupUpdatedNotification = @"BDSKScriptGroupUpdatedNotificat
 NSString *BDSKSearchGroupUpdatedNotification = @"BDSKSearchGroupUpdatedNotification";
 NSString *BDSKWebGroupUpdatedNotification = @"BDSKWebGroupUpdatedNotification";
 NSString *BDSKDidAddRemoveGroupNotification = @"BDSKDidAddRemoveGroupNotification";
-NSString *BDSKWillRemoveGroupsNotification = @"BDSKWillRemoveGroupsNotification";
+NSString *BDSKWillAddRemoveGroupNotification = @"BDSKWillAddRemoveGroupNotification";
 NSString *BDSKClientConnectionsChangedNotification = @"BDSKClientConnectionsChangedNotification";
-NSString *BDSKSharingStatusChangedNotification = @"BDSKSharingStatusChangedNotification";
 NSString *BDSKSharingPasswordChangedNotification = @"BDSKSharingPasswordChangedNotification";
 NSString *BDSKDocumentControllerAddDocumentNotification = @"BDSKDocumentControllerAddDocumentNotification";
 NSString *BDSKDocumentControllerRemoveDocumentNotification = @"BDSKDocumentControllerRemoveDocumentNotification";
@@ -332,7 +333,6 @@ NSString *BDSKDocumentControllerDidChangeMainDocumentNotification = @"BDSKDocume
 NSString *BDSKFileSearchIndexInfoChangedNotification = @"BDSKFileSearchIndexInfoChangedNotification";
 NSString *BDSKEncodingsListChangedNotification = @"BDSKEncodingsListChangedNotification";
 NSString *BDSKTemporaryFileMigrationNotification = @"BDSKTemporaryFileMigrationNotification";
-NSString *BDSKFlagsChangedNotification = @"BDSKFlagsChangedNotification";
 
 #pragma mark Exception name strings
 
@@ -359,7 +359,7 @@ NSString *BDSKUnimplementedException = @"BDSKUnimplementedException";
  BDSKDisableBackgroundColorForGroupTable         bool    false
  BDSKScriptMenuDisabled                          bool    false
  BDSKAnnoteFieldName                             string  nil
- BDSKDefaultAnimationTimeInterval                CGFloat   0.15    // set to zero to disable
+ BDSKDefaultAnimationTimeInterval                float   0.15    // set to zero to disable
  BDSKTableHeaderImages                           dict    nil
  BDSKTableHeaderTitles                           dict    nil
  BDSKGroupFieldSeparatorCharactersKey            string  ";:,"

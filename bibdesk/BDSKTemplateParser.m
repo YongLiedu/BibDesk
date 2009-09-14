@@ -76,7 +76,7 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
 
 + (void)initialize {
     
-    BDSKINITIALIZE;
+    OBINITIALIZE;
     
     NSMutableCharacterSet *tmpSet = [[NSCharacterSet alphanumericCharacterSet] mutableCopy];
     [tmpSet addCharactersInString:@".-_:;@#"];
@@ -152,7 +152,7 @@ static inline NSRange altConditionTagRange(NSString *template, NSString *altTag,
     return altTagRange;
 }
 
-static id templateValueForKeyPath(id object, NSString *keyPath, NSInteger anIndex) {
+static id templateValueForKeyPath(id object, NSString *keyPath, int anIndex) {
     if ([keyPath hasPrefix:@"#"] && anIndex > 0) {
         object = [NSNumber numberWithInt:anIndex];
         if ([keyPath length] == 1)
@@ -165,9 +165,9 @@ static id templateValueForKeyPath(id object, NSString *keyPath, NSInteger anInde
         return nil;
     id value = nil;
     NSString *trailingKeyPath = nil;
-    NSUInteger atIndex = [keyPath rangeOfString:@"@"].location;
+    unsigned int atIndex = [keyPath rangeOfString:@"@"].location;
     if (atIndex != NSNotFound) {
-        NSUInteger dotIndex = [keyPath rangeOfString:@"." options:0 range:NSMakeRange(atIndex + 1, [keyPath length] - atIndex - 1)].location;
+        unsigned int dotIndex = [keyPath rangeOfString:@"." options:0 range:NSMakeRange(atIndex + 1, [keyPath length] - atIndex - 1)].location;
         if (dotIndex != NSNotFound) {
             static NSSet *arrayOperators = nil;
             if (arrayOperators == nil)
@@ -220,7 +220,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
         NSRange lastCharRange = [string rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:NSBackwardsSearch range:range];
         if (lastCharRange.location != NSNotFound) {
             unichar lastChar = [string characterAtIndex:lastCharRange.location];
-            NSUInteger rangeEnd = NSMaxRange(lastCharRange);
+            unsigned int rangeEnd = NSMaxRange(lastCharRange);
             if ([[NSCharacterSet newlineCharacterSet] characterIsMember:lastChar])
                 range.length = rangeEnd;
         } else if (isSubtemplate == NO && typeBefore == -1) {
@@ -232,7 +232,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
         NSRange firstCharRange = [string rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:0 range:range];
         if (firstCharRange.location != NSNotFound) {
             unichar firstChar = [string characterAtIndex:firstCharRange.location];
-            NSUInteger rangeEnd = NSMaxRange(firstCharRange);
+            unsigned int rangeEnd = NSMaxRange(firstCharRange);
             if([[NSCharacterSet newlineCharacterSet] characterIsMember:firstChar]) {
                 if (firstChar == NSCarriageReturnCharacter && rangeEnd < NSMaxRange(range) && [string characterAtIndex:rangeEnd] == NSNewlineCharacter)
                     range = NSMakeRange(rangeEnd + 1, NSMaxRange(range) - rangeEnd - 1);
@@ -271,7 +271,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
     while (![scanner isAtEnd]) {
         NSString *beforeText = nil;
         NSString *keyPath = @"";
-        NSInteger start;
+        int start;
                 
         if ([scanner scanUpToString:START_TAG_OPEN_DELIM intoString:&beforeText]) {
             if (currentTag && [(BDSKTemplateTag *)currentTag type] == BDSKTextTemplateTagType) {
@@ -398,7 +398,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
     [scanner release];
     
     // remove whitespace before and after collection and condition tags up till newlines
-    NSInteger i, count = [result count];
+    int i, count = [result count];
     
     for (i = count - 1; i >= 0; i--) {
         BDSKTemplateTag *tag = [result objectAtIndex:i];
@@ -417,11 +417,11 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
     return [result autorelease];    
 }
 
-+ (NSString *)stringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(NSInteger)anIndex {
++ (NSString *)stringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(int)anIndex {
     return [self stringFromTemplateArray:template usingObject:object atIndex:anIndex delegate:nil];
 }
 
-+ (NSString *)stringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(NSInteger)anIndex delegate:(id <BDSKTemplateParserDelegate>)delegate {
++ (NSString *)stringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(int)anIndex delegate:(id <BDSKTemplateParserDelegate>)delegate {
     NSEnumerator *tagEnum = [template objectEnumerator];
     id tag;
     NSMutableString *result = [[NSMutableString alloc] init];
@@ -449,7 +449,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                     NSEnumerator *itemE = [keyValue objectEnumerator];
                     id nextItem, item = [itemE nextObject];
                     NSArray *itemTemplate = [[tag itemTemplate] arrayByAddingObjectsFromArray:[tag separatorTemplate]];
-                    NSInteger idx = 0;
+                    int idx = 0;
                     while (item) {
                         nextItem = [itemE nextObject];
                         if (nextItem == nil)
@@ -467,7 +467,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 
                 NSString *matchString = nil;
                 NSArray *matchStrings = [tag matchStrings];
-                NSUInteger i, count = [matchStrings count];
+                unsigned int i, count = [matchStrings count];
                 NSArray *subtemplate = nil;
                 
                 for (i = 0; i < count; i++) {
@@ -519,7 +519,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
     while (![scanner isAtEnd]) {
         NSString *beforeText = nil;
         NSString *keyPath = @"";
-        NSInteger start;
+        int start;
         NSDictionary *attr = nil;
         
         start = [scanner scanLocation];
@@ -660,7 +660,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
     [scanner release];
     
     // remove whitespace before and after collection and condition tags up till newlines
-    NSInteger i, count = [result count];
+    int i, count = [result count];
     
     for (i = count - 1; i >= 0; i--) {
         BDSKTemplateTag *tag = [result objectAtIndex:i];
@@ -680,11 +680,11 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
     return [result autorelease];    
 }
 
-+ (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(NSInteger)anIndex {
++ (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(int)anIndex {
     return [self attributedStringFromTemplateArray:template usingObject:object atIndex:anIndex delegate:nil];
 }
 
-+ (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(NSInteger)anIndex delegate:(id <BDSKTemplateParserDelegate>)delegate {
++ (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(int)anIndex delegate:(id <BDSKTemplateParserDelegate>)delegate {
     NSEnumerator *tagEnum = [template objectEnumerator];
     id tag;
     NSMutableAttributedString *result = [[NSMutableAttributedString alloc] init];
@@ -713,7 +713,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                     NSEnumerator *itemE = [keyValue objectEnumerator];
                     id nextItem, item = [itemE nextObject];
                     NSArray *itemTemplate = [[tag itemTemplate] arrayByAddingObjectsFromArray:[tag separatorTemplate]];
-                    NSInteger idx = 0;
+                    int idx = 0;
                     while (item) {
                         nextItem = [itemE nextObject];
                         if (nextItem == nil)
@@ -731,7 +731,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 
                 NSString *matchString = nil;
                 NSArray *matchStrings = [tag matchStrings];
-                NSUInteger i, count = [matchStrings count];
+                unsigned int i, count = [matchStrings count];
                 NSArray *subtemplate = nil;
                             
                 count = [matchStrings count];
@@ -815,7 +815,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
 
 - (NSAttributedString *)templateAttributedStringValueWithAttributes:(NSDictionary *)attributes {
     NSMutableAttributedString *attributedString = [self mutableCopy];
-    NSUInteger idx = 0, length = [self length];
+    unsigned idx = 0, length = [self length];
     NSRange range = NSMakeRange(0, length);
     NSDictionary *attrs;
     [attributedString addAttributes:attributes range:range];

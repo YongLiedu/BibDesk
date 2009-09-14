@@ -36,7 +36,6 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #import <Cocoa/Cocoa.h>
-#import "BDSKTableView.h"
 
 @class BDSKMacroResolver, BDSKComplexStringFormatter, BDSKComplexStringEditor;
 
@@ -60,11 +59,11 @@
 
 - (NSArray *)macros;
 - (void)setMacros:(NSArray *)newMacros;
-- (NSUInteger)countOfMacros;
-- (id)objectInMacrosAtIndex:(NSUInteger)idx;
-- (void)insertObject:(id)obj inMacrosAtIndex:(NSUInteger)idx;
-- (void)removeObjectFromMacrosAtIndex:(NSUInteger)idx;
-- (void)replaceObjectInMacrosAtIndex:(NSUInteger)idx withObject:(id)obj;
+- (unsigned)countOfMacros;
+- (id)objectInMacrosAtIndex:(unsigned)idx;
+- (void)insertObject:(id)obj inMacrosAtIndex:(unsigned)idx;
+- (void)removeObjectFromMacrosAtIndex:(unsigned)idx;
+- (void)replaceObjectInMacrosAtIndex:(unsigned)idx withObject:(id)obj;
 
 - (IBAction)addMacro:(id)sender;
 - (IBAction)removeSelectedMacros:(id)sender;
@@ -93,6 +92,9 @@
 
 @end
 
+@class BDSKTypeSelectHelper;
 
-@interface BDSKMacroTableView : BDSKTableView
+@interface BDSKMacroTableView : NSTableView{
+    BDSKTypeSelectHelper *typeSelectHelper;
+}
 @end

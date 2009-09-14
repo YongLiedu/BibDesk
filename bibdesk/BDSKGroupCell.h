@@ -39,17 +39,17 @@
 #import <Cocoa/Cocoa.h>
 
 extern NSString *BDSKGroupCellStringKey;
-extern NSString *BDSKGroupCellEditingStringKey;
 extern NSString *BDSKGroupCellImageKey;
 extern NSString *BDSKGroupCellCountKey;
-extern NSString *BDSKGroupCellIsRetrievingKey;
-extern NSString *BDSKGroupCellFailedDownloadKey;
 
 @class BDSKGroup;
 
-@interface BDSKGroupCell : NSTextFieldCell {
-    NSMutableAttributedString *countString;
+@interface BDSKGroupCell : NSTextFieldCell
+{
     BOOL settingUpFieldEditor;
+    NSMutableDictionary *countAttributes;
+    NSMutableAttributedString *label;
+    NSMutableAttributedString *countString;
 }
 
 - (NSRect)textRectForBounds:(NSRect)theRect;

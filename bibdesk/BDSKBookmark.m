@@ -43,9 +43,9 @@
 #define URL_KEY         @"URLString"
 #define TYPE_KEY        @"Type"
 
-#define BOOKMARK_STRING  @"bookmark"
-#define FOLDER_STRING    @"folder"
-#define SEPARATOR_STRING @"separator"
+static NSString *BDSKBookmarkTypeBookmarkString = @"bookmark";
+static NSString *BDSKBookmarkTypeFolderString = @"folder";
+static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
 
 
 @interface BDSKPlaceholderBookmark : BDSKBookmark
@@ -74,7 +74,7 @@ static BDSKPlaceholderBookmark *defaultPlaceholderBookmark = nil;
 static Class BDSKBookmarkClass = Nil;
 
 + (void)initialize {
-    BDSKINITIALIZE;
+    OBINITIALIZE;
     BDSKBookmarkClass = self;
     defaultPlaceholderBookmark = (BDSKPlaceholderBookmark *)NSAllocateObject([BDSKPlaceholderBookmark class], 0, NSDefaultMallocZone());
 }
@@ -135,7 +135,7 @@ static Class BDSKBookmarkClass = Nil;
 
 - (NSDictionary *)dictionaryValue { return nil; }
 
-- (NSInteger)bookmarkType { return 0; }
+- (int)bookmarkType { return 0; }
 
 - (NSString *)name { return nil; }
 - (void)setName:(NSString *)newName {}
@@ -147,10 +147,10 @@ static Class BDSKBookmarkClass = Nil;
 - (void)setUrlString:(NSString *)newUrlString {}
 
 - (NSArray *)children { return nil; }
-- (NSUInteger)countOfChildren { return 0; }
-- (BDSKBookmark *)objectInChildrenAtIndex:(NSUInteger)idx { return nil; }
-- (void)insertObject:(BDSKBookmark *)child inChildrenAtIndex:(NSUInteger)idx {}
-- (void)removeObjectFromChildrenAtIndex:(NSUInteger)idx {}
+- (unsigned int)countOfChildren { return 0; }
+- (BDSKBookmark *)objectInChildrenAtIndex:(unsigned int)idx { return nil; }
+- (void)insertObject:(BDSKBookmark *)child inChildrenAtIndex:(unsigned int)idx {}
+- (void)removeObjectFromChildrenAtIndex:(unsigned int)idx {}
 
 - (BDSKBookmark *)parent {
     return parent;
@@ -208,14 +208,14 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
-    if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:FOLDER_STRING]) {
+    if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:BDSKBookmarkTypeFolderString]) {
         NSEnumerator *dictEnum = [[dictionary objectForKey:CHILDREN_KEY] objectEnumerator];
         NSDictionary *dict;
         NSMutableArray *newChildren = [NSMutableArray array];
         while (dict = [dictEnum nextObject])
             [newChildren addObject:[[[[self class] alloc] initWithDictionary:dict] autorelease]];
         return [self initFolderWithChildren:newChildren name:[dictionary objectForKey:TITLE_KEY]];
-    } else if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:SEPARATOR_STRING]) {
+    } else if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:BDSKBookmarkTypeSeparatorString]) {
         return [self initSeparator];
     } else {
         return [self initWithUrlString:[dictionary objectForKey:URL_KEY] name:[dictionary objectForKey:TITLE_KEY]];
@@ -228,7 +228,7 @@ static Class BDSKBookmarkClass = Nil;
 
 - (void)release {}
 
-- (NSUInteger)retainCount { return NSUIntegerMax; }
+- (unsigned)retainCount { return UINT_MAX; }
 
 @end
 
@@ -259,10 +259,10 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (NSDictionary *)dictionaryValue {
-    return [NSDictionary dictionaryWithObjectsAndKeys:BOOKMARK_STRING, TYPE_KEY, urlString, URL_KEY, name, TITLE_KEY, nil];
+    return [NSDictionary dictionaryWithObjectsAndKeys:BDSKBookmarkTypeBookmarkString, TYPE_KEY, urlString, URL_KEY, name, TITLE_KEY, nil];
 }
 
-- (NSInteger)bookmarkType {
+- (int)bookmarkType {
     return BDSKBookmarkTypeBookmark;
 }
 
@@ -321,7 +321,7 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (NSImage *)icon {
-    return [NSImage imageNamed:@"TinyBookmark"];
+    return [NSImage imageNamed:@"SmallBookmark"];
 }
 
 @end
@@ -354,15 +354,15 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (NSDictionary *)dictionaryValue {
-    return [NSDictionary dictionaryWithObjectsAndKeys:FOLDER_STRING, TYPE_KEY, [children valueForKey:@"dictionaryValue"], CHILDREN_KEY, name, TITLE_KEY, nil];
+    return [NSDictionary dictionaryWithObjectsAndKeys:BDSKBookmarkTypeFolderString, TYPE_KEY, [children valueForKey:@"dictionaryValue"], CHILDREN_KEY, name, TITLE_KEY, nil];
 }
 
-- (NSInteger)bookmarkType {
+- (int)bookmarkType {
     return BDSKBookmarkTypeFolder;
 }
 
 - (NSImage *)icon {
-    return [NSImage imageNamed:@"TinyFolder"];
+    return [NSImage imageNamed:@"SmallFolder"];
 }
 
 - (NSString *)name {
@@ -394,20 +394,20 @@ static Class BDSKBookmarkClass = Nil;
     return [[children copy] autorelease];
 }
 
-- (NSUInteger)countOfChildren {
+- (unsigned int)countOfChildren {
     return [children count];
 }
 
-- (BDSKBookmark *)objectInChildrenAtIndex:(NSUInteger)idx {
+- (BDSKBookmark *)objectInChildrenAtIndex:(unsigned int)idx {
     return [children objectAtIndex:idx];
 }
 
-- (void)insertObject:(BDSKBookmark *)child inChildrenAtIndex:(NSUInteger)idx {
+- (void)insertObject:(BDSKBookmark *)child inChildrenAtIndex:(unsigned int)idx {
     [children insertObject:child atIndex:idx];
     [child setParent:self];
 }
 
-- (void)removeObjectFromChildrenAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromChildrenAtIndex:(unsigned int)idx {
     [[children objectAtIndex:idx] setParent:nil];
     [children removeObjectAtIndex:idx];
 }
@@ -427,10 +427,10 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (NSDictionary *)dictionaryValue {
-    return [NSDictionary dictionaryWithObjectsAndKeys:SEPARATOR_STRING, TYPE_KEY, nil];
+    return [NSDictionary dictionaryWithObjectsAndKeys:BDSKBookmarkTypeSeparatorString, TYPE_KEY, nil];
 }
 
-- (NSInteger)bookmarkType {
+- (int)bookmarkType {
     return BDSKBookmarkTypeSeparator;
 }
 

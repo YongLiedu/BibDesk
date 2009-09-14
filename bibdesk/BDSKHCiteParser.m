@@ -76,7 +76,7 @@
     NSArray *mainNodes = [[xmlDocument rootElement] nodesForXPath:containsCitationPath
                                                     error:&error];
     
-    NSUInteger i, count = [mainNodes count];
+    unsigned int i, count = [mainNodes count];
     
     if(mainNodes == nil){
         if(outError) *outError = error;
@@ -116,7 +116,7 @@
     NSMutableDictionary *rd = [NSMutableDictionary dictionaryWithCapacity:0];
     
     NSError *err = nil;
-    NSUInteger i = 0;
+    unsigned int i = 0;
     
     // find type but not type that's a descendant of 'container'.
     NSArray *typeNodes = [citationNode descendantOrSelfNodesWithClassName:@"type" error:&err];
@@ -359,12 +359,6 @@
     return d;
 }
 
-
-
-+ (NSArray *) parserInfos {
-	NSString * parserDescription = NSLocalizedString(@"HCite is meant to become a microformat for adding bibliographic information to web pages. It is unlikely to be relevant or useful at the moment.", @"Description for the HCite microformat");
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"HCite" address:@"http://microformats.org/wiki/citation" description:parserDescription flags: BDSKParserFeatureAllPagesMask];
-	return [NSArray arrayWithObject:parserInfo];
-}
-
 @end
+
+

@@ -44,6 +44,7 @@
 #import "BDSKTypeManager.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKOwnerProtocol.h"
 #import "BDSKLinkedFile.h"
 
@@ -113,7 +114,7 @@
     return (value != nil) ? value : field;
 }
 
-- (NSInteger)intValueOfField:(NSString *)field { 
+- (int)intValueOfField:(NSString *)field { 
     if ([field isBooleanField] || [field isRatingField])
         return 0;
     else if ([field isTriStateField])
@@ -137,20 +138,20 @@
 - (BOOL)isValidLocalFilePath:(NSString *)path { return YES; }
 
 - (NSString *)suggestedLocalFilePath {
-    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-	NSString *localFileFormat = [sud objectForKey:BDSKLocalFileFormatKey];
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+	NSString *localFileFormat = [pw objectForKey:BDSKLocalFileFormatKey];
 	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
 	NSString *relativeFile = [BDSKFormatParser parseFormat:localFileFormat forField:BDSKLocalFileString linkedFile:linkedFile ofItem:self suggestion:nil];
-	if ([sud boolForKey:BDSKLocalFileLowercaseKey])
+	if ([pw boolForKey:BDSKLocalFileLowercaseKey])
 		relativeFile = [relativeFile lowercaseString];
     return [[papersFolderPath stringByAppendingPathComponent:relativeFile] stringByAbbreviatingWithTildeInPath];
 }
 
 - (NSString *)suggestedCiteKey {
-    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-	NSString *citeKeyFormat = [sud objectForKey:BDSKCiteKeyFormatKey];
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+	NSString *citeKeyFormat = [pw objectForKey:BDSKCiteKeyFormatKey];
 	NSString *ck = [BDSKFormatParser parseFormat:citeKeyFormat forField:BDSKCiteKeyString ofItem:self];
-	if ([sud boolForKey:BDSKCiteKeyLowercaseKey])
+	if ([pw boolForKey:BDSKCiteKeyLowercaseKey])
 		ck = [ck lowercaseString];
 	return ck;
 }

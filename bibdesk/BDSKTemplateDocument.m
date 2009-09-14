@@ -47,28 +47,28 @@
 #import "BDSKTemplateParser.h"
 #import "BDSKTemplateTag.h"
 #import "NSString_BDSKExtensions.h"
-#import "NSCharacterSet_BDSKExtensions.h"
-#import "BDSKRuntime.h"
-#import "NSInvocation_BDSKExtensions.h"
-#import "NSFileManager_BDSKExtensions.h"
-#import "BDSKPrintableView.h"
+#import <OmniBase/OmniBase.h>
 
-static CGFloat BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
+static float BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
 
 NSString *BDSKTextTemplateDocumentType = @"Text Template";
 NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 
-#define BDSKTemplateDocumentFrameAutosaveName @"BDSKTemplateDocument"
+static NSString *BDSKTemplateDocumentFrameAutosaveName = @"BDSKTemplateDocument";
 
-#define BDSKTokenFieldDidChangeSelectionNotification @"BDSKTokenFieldDidChangeSelectionNotification"
+static NSString *BDSKTokenFieldDidChangeSelectionNotification = @"BDSKTokenFieldDidChangeSelectionNotification";
 
-#define BDSKTemplateTokensPboardType @"BDSKTemplateTokensPboardType"
-#define BDSKTypeTemplateRowsPboardType @"BDSKTypeTemplateRowsPboardType"
-#define BDSKValueOrNoneTransformerName @"BDSKValueOrNone"
+static NSString *BDSKTemplateTokensPboardType = @"BDSKTemplateTokensPboardType";
+static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardType";
+static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 @interface BDSKValueOrNoneTransformer : NSValueTransformer @end
 
 @interface BDSKFlippedClipView : NSClipView @end
+
+@interface NSTokenFieldCell (BDSKPrivateDeclarations)
++ (id)_sharedFieldEditor;
+@end
 
 @interface BDSKTemplateDocument (BDSKPrivate)
 - (void)updateTextViews;
@@ -85,7 +85,7 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 - (NSArray *)tokensForTextTag:(BDSKTemplateTag *)tag allowText:(BOOL)allowText defaultFont:(NSFont *)defaultFont;
 - (id)tokenForConditionTag:(BDSKConditionTemplateTag *)tag defaultFont:(NSFont *)defaultFont;
 - (id)tokenForValueTag:(BDSKValueTemplateTag *)tag defaultFont:(NSFont *)defaultFont;
-- (NSString *)propertyForKey:(NSString *)key tokenType:(NSInteger)type;
+- (NSString *)propertyForKey:(NSString *)key tokenType:(int)type;
 - (void)setFont:(NSFont *)font ofToken:(BDSKToken *)token defaultFont:(NSFont *)defaultFont;
 @end
 
@@ -94,18 +94,18 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 + (void)initialize {
     [self setKeys:[NSArray arrayWithObject:@"attributedString"] triggerChangeNotificationsForDependentKey:@"previewAttributedString"];
     
-    BDSKINITIALIZE;
+    OBINITIALIZE;
     
 	[NSValueTransformer setValueTransformer:[[[BDSKValueOrNoneTransformer alloc] init] autorelease]
 									forName:BDSKValueOrNoneTransformerName];
 }
 
 + (NSArray *)writableTypes {
-    return [NSArray arrayWithObjects:BDSKTextTemplateDocumentType, BDSKRichTextTemplateDocumentType, nil];
+    return [NSArray arrayWithObjects:@"Text Template", @"Rich Text Template", nil];
 }
 
 + (NSArray *)nativeTypes {
-    return [NSArray arrayWithObjects:BDSKTextTemplateDocumentType, BDSKRichTextTemplateDocumentType, nil];
+    return [NSArray arrayWithObjects:@"Text Template", @"Rich Text Template", nil];
 }
 
 - (id)init {
@@ -148,6 +148,8 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
         }
         templateOptions = [tmpDict copy];
         [tmpDict release];
+        
+        editors = CFArrayCreateMutable(kCFAllocatorMallocZone, 0, NULL);
         
         NSEnumerator *typeEnum = [[[BDSKTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString] objectEnumerator];
         NSString *type;
@@ -204,6 +206,7 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
     [tokenFonts release];
     [string release];
     [attributedString release];
+    CFRelease(editors);
     [super dealloc];
 }
 
@@ -280,15 +283,11 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
     return [NSArray arrayWithObjects:richText ? BDSKRichTextTemplateDocumentType : BDSKTextTemplateDocumentType, nil];
 }
 
-- (BOOL)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError {
-    BOOL success = [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
-    if (success && richText == NO)
-        [[NSFileManager defaultManager] setAppleStringEncoding:NSUTF8StringEncoding atPath:[absoluteURL path] error:NULL];
-    return success;
-}
-
 - (NSData *)dataOfType:(NSString *)typeName error:(NSError **)outError {
     NSData *data = nil;
+    
+    [self commitEditing];
+    
     if (richText) {
         NSAttributedString *attrString = [self attributedString];
         data = [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil];
@@ -298,19 +297,14 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
     return data;
 }
 
-static inline NSRange makeRange(NSUInteger start, NSUInteger end) {
-    NSRange r;
-    r.location = start;
-    r.length = end - start;
-    return r;
-}
+#define MAKE_RANGE(start, end) NSMakeRange(start, end - start)
 
-static inline NSUInteger startOfTrailingEmptyLine(NSString *string, NSRange range, BOOL requireNL) {
+static inline unsigned int startOfTrailingEmptyLine(NSString *string, NSRange range, BOOL requireNL) {
     NSRange lastCharRange = [string rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:NSBackwardsSearch range:range];
-    NSUInteger start = NSNotFound;
+    unsigned int start = NSNotFound;
     if (lastCharRange.location != NSNotFound) {
         unichar lastChar = [string characterAtIndex:lastCharRange.location];
-        NSUInteger rangeEnd = NSMaxRange(lastCharRange);
+        unsigned int rangeEnd = NSMaxRange(lastCharRange);
         if ([[NSCharacterSet newlineCharacterSet] characterIsMember:lastChar])
             start = rangeEnd;
     } else if (requireNL == NO) {
@@ -319,12 +313,12 @@ static inline NSUInteger startOfTrailingEmptyLine(NSString *string, NSRange rang
     return start;
 }
 
-static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, BOOL requireNL) {
+static inline unsigned int endOfLeadingEmptyLine(NSString *string, NSRange range, BOOL requireNL) {
     NSRange firstCharRange = [string rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:0 range:range];
-    NSUInteger end = NSNotFound;
+    unsigned int end = NSNotFound;
     if (firstCharRange.location != NSNotFound) {
         unichar firstChar = [string characterAtIndex:firstCharRange.location];
-        NSUInteger rangeEnd = NSMaxRange(firstCharRange);
+        unsigned int rangeEnd = NSMaxRange(firstCharRange);
         if ([[NSCharacterSet newlineCharacterSet] characterIsMember:firstChar]) {
             if (firstChar == NSCarriageReturnCharacter && rangeEnd < NSMaxRange(range) && [string characterAtIndex:rangeEnd] == NSNewlineCharacter)
                 end = rangeEnd + 1;
@@ -344,9 +338,9 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     NSAttributedString *attrString = nil;
     NSString *str = nil;
     NSRange startRange, endRange = { NSNotFound, 0 }, sepRange = { NSNotFound, 0 };
-    NSUInteger length, startLoc = NSNotFound, tmpLoc;
+    unsigned int length, startLoc = NSNotFound, tmpLoc;
     
-    richText = [typeName isEqualToString:BDSKRichTextTemplateDocumentType];
+    [self setRichText:[typeName isEqualToString:BDSKRichTextTemplateDocumentType]];
     
     if ([self isRichText]) {
         attrString = [[[NSAttributedString alloc] initWithData:data options:nil documentAttributes:NULL error:NULL] autorelease];
@@ -363,31 +357,31 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         if (startRange.location != NSNotFound) {
             startLoc = startRange.location;
             
-            tmpLoc = startOfTrailingEmptyLine(str, makeRange(0, startRange.location), NO);
+            tmpLoc = startOfTrailingEmptyLine(str, MAKE_RANGE(0, startRange.location), NO);
             if (tmpLoc != NSNotFound)
-                startRange = makeRange(tmpLoc, NSMaxRange(startRange));
-            tmpLoc = endOfLeadingEmptyLine(str, makeRange(NSMaxRange(startRange), length), YES);
+                startRange = MAKE_RANGE(tmpLoc, NSMaxRange(startRange));
+            tmpLoc = endOfLeadingEmptyLine(str, MAKE_RANGE(NSMaxRange(startRange), length), YES);
             if (tmpLoc != NSNotFound)
-                startRange = makeRange(startRange.location, tmpLoc);
+                startRange = MAKE_RANGE(startRange.location, tmpLoc);
             
-            endRange = [str rangeOfString:@"</$publications>" options:NSBackwardsSearch range:makeRange(NSMaxRange(startRange), length)];
+            endRange = [str rangeOfString:@"</$publications>" options:NSBackwardsSearch range:MAKE_RANGE(NSMaxRange(startRange), length)];
             
             if (endRange.location != NSNotFound) {
-                tmpLoc = startOfTrailingEmptyLine(str, makeRange(NSMaxRange(startRange), endRange.location), YES);
+                tmpLoc = startOfTrailingEmptyLine(str, MAKE_RANGE(NSMaxRange(startRange), endRange.location), YES);
                 if (tmpLoc != NSNotFound)
-                    endRange = makeRange(tmpLoc, NSMaxRange(endRange));
-                tmpLoc = endOfLeadingEmptyLine(str, makeRange(NSMaxRange(endRange), length), NO);
+                    endRange = MAKE_RANGE(tmpLoc, NSMaxRange(endRange));
+                tmpLoc = endOfLeadingEmptyLine(str, MAKE_RANGE(NSMaxRange(endRange), length), NO);
                 if (tmpLoc != NSNotFound)
-                    endRange = makeRange(endRange.location, tmpLoc);
+                    endRange = MAKE_RANGE(endRange.location, tmpLoc);
                 
-                sepRange = [str rangeOfString:@"<?$publications>" options:NSBackwardsSearch range:makeRange(NSMaxRange(startRange), endRange.location)];
+                sepRange = [str rangeOfString:@"<?$publications>" options:NSBackwardsSearch range:MAKE_RANGE(NSMaxRange(startRange), endRange.location)];
                 if (sepRange.location != NSNotFound) {
-                    tmpLoc = startOfTrailingEmptyLine(str, makeRange(NSMaxRange(startRange), sepRange.location), YES);
+                    tmpLoc = startOfTrailingEmptyLine(str, MAKE_RANGE(NSMaxRange(startRange), sepRange.location), YES);
                     if (tmpLoc != NSNotFound)
-                        sepRange = makeRange(tmpLoc, NSMaxRange(sepRange));
-                    tmpLoc = endOfLeadingEmptyLine(str, makeRange(NSMaxRange(sepRange), endRange.location), YES);
+                        sepRange = MAKE_RANGE(tmpLoc, NSMaxRange(sepRange));
+                    tmpLoc = endOfLeadingEmptyLine(str, MAKE_RANGE(NSMaxRange(sepRange), endRange.location), YES);
                     if (tmpLoc != NSNotFound)
-                        sepRange = makeRange(sepRange.location, tmpLoc);
+                        sepRange = MAKE_RANGE(sepRange.location, tmpLoc);
                 }
             }
         }
@@ -395,16 +389,16 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         if (endRange.location != NSNotFound) {
             if ([self isRichText]) {
                 if (startRange.location > 0)
-                   [self setPrefixTemplate:[attrString attributedSubstringFromRange:makeRange(0, startRange.location)]];
+                   [self setPrefixTemplate:[attrString attributedSubstringFromRange:MAKE_RANGE(0, startRange.location)]];
                 if (NSMaxRange(endRange) < length)
-                    [self setSuffixTemplate:[attrString attributedSubstringFromRange:makeRange(NSMaxRange(endRange), length)]];
+                    [self setSuffixTemplate:[attrString attributedSubstringFromRange:MAKE_RANGE(NSMaxRange(endRange), length)]];
                 if (NSMaxRange(sepRange) < endRange.location)
-                    [self setSeparatorTemplate:[attrString attributedSubstringFromRange:makeRange(NSMaxRange(sepRange), endRange.location)]];
+                    [self setSeparatorTemplate:[attrString attributedSubstringFromRange:MAKE_RANGE(NSMaxRange(sepRange), endRange.location)]];
                 
-                parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateAttributedString:[attrString attributedSubstringFromRange:makeRange(NSMaxRange(startRange), (sepRange.location == NSNotFound ? endRange.location : sepRange.location))]];
+                parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateAttributedString:[attrString attributedSubstringFromRange:MAKE_RANGE(NSMaxRange(startRange), (sepRange.location == NSNotFound ? endRange.location : sepRange.location))]];
                 
                 font = [attrString attribute:NSFontAttributeName atIndex:startLoc effectiveRange:NULL] ?: [NSFont userFontOfSize:0.0];
-                NSInteger traits = [[NSFontManager sharedFontManager] traitsOfFont:font];
+                int traits = [[NSFontManager sharedFontManager] traitsOfFont:font];
                 [self setFontName:[font familyName]];
                 [self setFontSize:[font pointSize]];
                 [self setBold:(traits & NSBoldFontMask) != 0];
@@ -412,13 +406,13 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
             } else {
                 NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:[NSFont userFontOfSize:0.0], NSFontAttributeName, nil];
                 if (startRange.location > 0)
-                    [self setPrefixTemplate:[[[NSAttributedString alloc] initWithString:[str substringWithRange:makeRange(0, startRange.location)] attributes:attrs] autorelease]];
+                    [self setPrefixTemplate:[[[NSAttributedString alloc] initWithString:[str substringWithRange:MAKE_RANGE(0, startRange.location)] attributes:attrs] autorelease]];
                 if (NSMaxRange(endRange) < length)
-                    [self setSuffixTemplate:[[[NSAttributedString alloc] initWithString:[str substringWithRange:makeRange(NSMaxRange(endRange), length)] attributes:attrs] autorelease]];
+                    [self setSuffixTemplate:[[[NSAttributedString alloc] initWithString:[str substringWithRange:MAKE_RANGE(NSMaxRange(endRange), length)] attributes:attrs] autorelease]];
                 if (NSMaxRange(sepRange) < endRange.location)
-                    [self setSeparatorTemplate:[[[NSAttributedString alloc] initWithString:[str substringWithRange:makeRange(NSMaxRange(sepRange), endRange.location)] attributes:attrs] autorelease]];
+                    [self setSeparatorTemplate:[[[NSAttributedString alloc] initWithString:[str substringWithRange:MAKE_RANGE(NSMaxRange(sepRange), endRange.location)] attributes:attrs] autorelease]];
                 
-                parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateString:[str substringWithRange:makeRange(NSMaxRange(startRange), (sepRange.location == NSNotFound ? endRange.location : sepRange.location))]];
+                parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateString:[str substringWithRange:MAKE_RANGE(NSMaxRange(startRange), (sepRange.location == NSNotFound ? endRange.location : sepRange.location))]];
             }
         }
     }
@@ -430,8 +424,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         BDSKTypeTemplate *template;
         NSEnumerator *typeEnum;
         NSString *type;
-        NSArray *currentTypes = [typeTemplates valueForKey:@"pubType"];
-        NSUInteger currentIndex;
         
         if (itemTemplate) {
             [[typeTemplates objectAtIndex:defaultTypeIndex] setItemTemplate:itemTemplate];
@@ -449,15 +441,10 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         typeEnum = [includedTypes objectEnumerator];
         while (type = [typeEnum nextObject]) {
             itemTemplate = [templateDict objectForKey:type];
-            type = [type entryType];
             template = [[[BDSKTypeTemplate alloc] initWithPubType:type forDocument:self] autorelease];
             [template setItemTemplate:itemTemplate];
             [template setIncluded:YES];
-            currentIndex = [currentTypes indexOfObject:type];
-            if (currentIndex == NSNotFound)
-                [[self mutableArrayValueForKey:@"typeTemplates"] addObject:template];
-            else
-                [[self mutableArrayValueForKey:@"typeTemplates"] replaceObjectAtIndex:currentIndex withObject:template];
+            [[self mutableArrayValueForKey:@"typeTemplates"] addObject:template];
         }
         
         [[self undoManager] removeAllActions];
@@ -469,10 +456,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         *outError = [NSError errorWithDomain:@"BDSKTemplateDocumentErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to open file.", @"Error description"), NSLocalizedDescriptionKey, NSLocalizedString(@"This template cannot be opened by BibDesk. You should edit it manually.", @"Error description"), NSLocalizedRecoverySuggestionErrorKey, nil]];
     }
     return NO;
-}
-
-- (NSPrintOperation *)printOperationWithSettings:(NSDictionary *)printSettings error:(NSError **)outError {
-    return [NSPrintOperation printOperationWithAttributedString:[self attributedString] printInfo:[self printInfo] settings:printSettings];
 }
 
 - (BDSKToken *)tokenForField:(NSString *)field {
@@ -497,35 +480,35 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     }
 }
 
-- (NSUInteger)countOfTypeTemplates {
+- (unsigned)countOfTypeTemplates {
     return [typeTemplates count];
 }
 
-- (id)objectInTypeTemplatesAtIndex:(NSUInteger)idx {
+- (id)objectInTypeTemplatesAtIndex:(unsigned)idx {
     return [typeTemplates objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inTypeTemplatesAtIndex:(NSUInteger)idx {
+- (void)insertObject:(id)obj inTypeTemplatesAtIndex:(unsigned)idx {
     [typeTemplates insertObject:obj atIndex:idx];
 }
 
-- (void)removeObjectFromTypeTemplatesAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromTypeTemplatesAtIndex:(unsigned)idx {
     [typeTemplates removeObjectAtIndex:idx];
 }
 
-- (NSUInteger)countOfSizes {
-    return sizeof(BDSKDefaultFontSizes) / sizeof(CGFloat);
+- (unsigned)countOfSizes {
+    return sizeof(BDSKDefaultFontSizes) / sizeof(float);
 }
 
-- (id)objectInSizesAtIndex:(NSUInteger)idx {
+- (id)objectInSizesAtIndex:(unsigned)idx {
     return [NSNumber numberWithFloat:BDSKDefaultFontSizes[idx]];
 }
 
-- (NSUInteger)countOfTokenSizes {
-    return 1 + sizeof(BDSKDefaultFontSizes) / sizeof(CGFloat);
+- (unsigned)countOfTokenSizes {
+    return 1 + sizeof(BDSKDefaultFontSizes) / sizeof(float);
 }
 
-- (id)objectInTokenSizesAtIndex:(NSUInteger)idx {
+- (id)objectInTokenSizesAtIndex:(unsigned)idx {
     return [NSNumber numberWithFloat:idx == 0 ? 0.0 : BDSKDefaultFontSizes[idx - 1]];
 }
 
@@ -603,12 +586,12 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     }
 }
 
-- (CGFloat)fontSize {
+- (float)fontSize {
     return fontSize;
 }
 
-- (void)setFontSize:(CGFloat)newFontSize {
-    if (BDSKAbs(fontSize - newFontSize) > 0.0) {
+- (void)setFontSize:(float)newFontSize {
+    if (fabsf(fontSize - newFontSize) > 0.0) {
         [[[self undoManager] prepareWithInvocationTarget:self] setFontSize:fontSize];
         fontSize = newFontSize;
         [self updateStrings];
@@ -654,14 +637,14 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     }
 }
 
-- (NSUInteger)defaultTypeIndex {
+- (unsigned int)defaultTypeIndex {
     return defaultTypeIndex;
 }
 
-- (void)setDefaultTypeIndex:(NSUInteger)newDefaultTypeIndex {
+- (void)setDefaultTypeIndex:(unsigned int)newDefaultTypeIndex {
     if (defaultTypeIndex != newDefaultTypeIndex) {
         [[[self undoManager] prepareWithInvocationTarget:self] setDefaultTypeIndex:defaultTypeIndex];
-        NSUInteger oldDefaultTypeIndex = defaultTypeIndex;
+        unsigned int oldDefaultTypeIndex = defaultTypeIndex;
         [[typeTemplates objectAtIndex:oldDefaultTypeIndex] willChangeValueForKey:@"default"];
         [[typeTemplates objectAtIndex:newDefaultTypeIndex] willChangeValueForKey:@"default"];
         defaultTypeIndex = newDefaultTypeIndex;
@@ -781,27 +764,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 #pragma mark Actions
 
-- (IBAction)saveDocument:(id)sender {
-    if ([ownerController commitEditing])
-        [super saveDocument:sender];
-}
-
-- (IBAction)saveDocumentAs:(id)sender {
-    if ([ownerController commitEditing])
-        [super saveDocumentAs:sender];
-}
-
-- (IBAction)saveDocumentTo:(id)sender {
-    if ([ownerController commitEditing])
-        [super saveDocumentTo:sender];
-}
-
-- (IBAction)printDocument:(id)sender {
-    if ([ownerController commitEditing])
-        [super printDocument:sender];
-}
-
-- (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSOKButton) {
         BDSKToken *token = [self tokenForField:[addFieldController field]];
         [self setDefaultTokens:[[self defaultTokens] arrayByAddingObject:token]];
@@ -840,22 +803,12 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     }
 }
 
-- (BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem {
-    if ([anItem action] == @selector(saveDocument:)) {
-        return YES;
-    } else if ([[BDSKTemplateDocument superclass] instancesRespondToSelector:_cmd]) {
-        return [super validateUserInterfaceItem:anItem];
-    } else {
-        return YES;
-    }
-}
-
 #pragma mark Setup and Update
 
 - (void)setupOptionsMenu:(NSMenu *)parentMenu forKeys:(NSString *)firstKey, ... {
     va_list keyList;
     NSString *key = firstKey;
-    NSUInteger i = 0;
+    unsigned int i = 0;
     va_start(keyList, firstKey);
     while (key) {
         NSMenu *menu = [[parentMenu itemAtIndex:i] submenu];
@@ -908,14 +861,14 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 - (void)updateTokenFields {
     NSRect frame;
-    CGFloat width = 0.0;
+    float width = 0.0;
     NSEnumerator *tfEnum = [[NSArray arrayWithObjects:specialTokenField, requiredTokenField, optionalTokenField, defaultTokenField, nil] objectEnumerator];
     NSTokenField *tokenField;
     
     while (tokenField = [tfEnum nextObject]) {
         [tokenField sizeToFit];
         frame = [tokenField frame];
-        width = BDSKMax(width, NSWidth(frame));
+        width = fmaxf(width, NSWidth(frame));
         // NSTokenField bug: add 10px to the width, because otherwise the tracking rect for the last token is broken
         frame.size.width += 10.0;
         [tokenField setFrame:frame];
@@ -1056,30 +1009,8 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         [self updateStrings];
 }
 
-- (BOOL)windowShouldClose:(id)window {
-    return [ownerController commitEditing];
-}
-
 - (void)windowWillClose:(NSNotification *)notification {
     [ownerController setContent:nil];
-}
-
-- (void)canCloseDocumentWithDelegate:(id)delegate shouldCloseSelector:(SEL)shouldCloseSelector contextInfo:(void *)contextInfo {
-    if ([ownerController commitEditing]) {
-        if ([[self undoManager] groupingLevel] > 0) {
-            [self updateChangeCount:NSChangeDone];
-            [super canCloseDocumentWithDelegate:delegate shouldCloseSelector:shouldCloseSelector contextInfo:contextInfo];
-            [self updateChangeCount:NSChangeUndone];
-        } else {
-            [super canCloseDocumentWithDelegate:delegate shouldCloseSelector:shouldCloseSelector contextInfo:contextInfo];
-        }
-    } else if (delegate && shouldCloseSelector) {
-        NSInvocation *invocation = [NSInvocation invocationWithTarget:delegate selector:shouldCloseSelector argument:self];
-        BOOL no = NO;
-        [invocation setArgument:&no atIndex:3];
-        [invocation setArgument:&contextInfo atIndex:4];
-        [invocation invoke]; 
-    }
 }
 
 #pragma mark NSTokenField delegate
@@ -1154,7 +1085,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     return menu;
 }
 
-- (NSArray *)tokenField:(NSTokenField *)tokenField shouldAddObjects:(NSArray *)tokens atIndex:(NSUInteger)idx {
+- (NSArray *)tokenField:(NSTokenField *)tokenField shouldAddObjects:(NSArray *)tokens atIndex:(unsigned)idx {
     if (tokenField == itemTemplateTokenField) {
         NSEnumerator *tokenEnum = [tokens objectEnumerator];
         id token;
@@ -1182,24 +1113,24 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     [self updateTokenFields];
 }
 
-- (NSString *)tableView:(NSTableView *)tableView toolTipForCell:(NSCell *)cell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation {
+- (NSString *)tableView:(NSTableView *)tableView toolTipForCell:(NSCell *)cell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation {
     if ([[tableColumn identifier] isEqualToString:@"included"])
         return NSLocalizedString(@"Check to include an item template for this type", @"Tool tip message");
     return nil;
 }
 
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)tv{ return 0; }
+- (int)numberOfRowsInTableView:(NSTableView *)tv{ return 0; }
 
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row { return nil; }
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row { return nil; }
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard {
-    NSInteger idx = [rowIndexes firstIndex];
+    int idx = [rowIndexes firstIndex];
     [pboard declareTypes:[NSArray arrayWithObjects:BDSKTypeTemplateRowsPboardType, nil] owner:nil];
     [pboard setPropertyList:[NSArray arrayWithObjects:[NSNumber numberWithInt:idx], nil] forType:BDSKTypeTemplateRowsPboardType];
     return YES;
 }
 
-- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op {
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op {
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKTypeTemplateRowsPboardType, nil]];
     
@@ -1209,12 +1140,12 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     return type ? NSDragOperationCopy : NSDragOperationNone;
 }
 
-- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
+- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op{
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKTypeTemplateRowsPboardType, nil]];
     
     if (type) {
-        NSInteger idx = [[[pboard propertyListForType:BDSKTypeTemplateRowsPboardType] lastObject] intValue];
+        int idx = [[[pboard propertyListForType:BDSKTypeTemplateRowsPboardType] lastObject] intValue];
         BDSKTypeTemplate *sourceTemplate = [typeTemplates objectAtIndex:idx];
         BDSKTypeTemplate *targetTemplate = [typeTemplates objectAtIndex:row];
         [targetTemplate setItemTemplate:[[[NSArray alloc] initWithArray:[sourceTemplate itemTemplate] copyItems:YES] autorelease]];
@@ -1232,12 +1163,12 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         NSRect frame1 = [view1 frame];
         NSRect frame2 = [view2 frame];
         
-        CGFloat contentWidth = NSWidth([sender frame]) - [sender dividerThickness];
+        float contentWidth = NSWidth([sender frame]) - [sender dividerThickness];
         
         if (NSWidth(frame1) <= 1.0)
             frame1.size.width = 0.0;
         if (contentWidth < NSWidth(frame1))
-            frame1.size.width = BDSKFloor(NSWidth(frame1) * contentWidth / (oldSize.width - [sender dividerThickness]));
+            frame1.size.width = floorf(NSWidth(frame1) * contentWidth / (oldSize.width - [sender dividerThickness]));
         
         frame2.size.width = contentWidth - NSWidth(frame1);
         frame2.origin.x = NSMaxX(frame1) + [sender dividerThickness];
@@ -1248,13 +1179,13 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     } else {
         NSView *views[3];
         NSRect frames[3];
-        CGFloat factor = (NSWidth([sender frame]) - 2 * [sender dividerThickness]) / (oldSize.width - 2 * [sender dividerThickness]);
-        NSInteger i, gap;
+        float factor = (NSWidth([sender frame]) - 2 * [sender dividerThickness]) / (oldSize.width - 2 * [sender dividerThickness]);
+        int i, gap;
         
         [[sender subviews] getObjects:views];
         for (i = 0; i < 3; i++) {
             frames[i] = [views[i] frame];
-            frames[i].size.width = BDSKFloor(factor * NSWidth(frames[i]));
+            frames[i].size.width = floorf(factor * NSWidth(frames[i]));
         }
         
         // randomly divide the remaining gap over the three views; NSSplitView dumps it all over the last view, which grows that one more than the others
@@ -1276,12 +1207,35 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     }
 }
 
-- (CGFloat)splitView:(NSSplitView *)sender constrainMaxCoordinate:(CGFloat)proposedMax ofSubviewAt:(NSInteger)offset {
+- (float)splitView:(NSSplitView *)sender constrainMaxCoordinate:(float)proposedMax ofSubviewAt:(int)offset {
     if (sender == tableViewSplitView) {
         return proposedMax - 600.0;
     } else {
         return proposedMax;
     }
+}
+
+#pragma mark NSEditorRegistration
+
+- (void)objectDidBeginEditing:(id)editor {
+    if (CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor) == -1)
+		CFArrayAppendValue((CFMutableArrayRef)editors, editor);		
+}
+
+- (void)objectDidEndEditing:(id)editor {
+    CFIndex idx = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
+    if (idx != -1)
+		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, idx);		
+}
+
+- (BOOL)commitEditing {
+    CFIndex idx = CFArrayGetCount(editors);
+    
+	while (idx--)
+		if([(NSObject *)(CFArrayGetValueAtIndex(editors, idx)) commitEditing] == NO)
+			return NO;
+    
+    return YES;
 }
 
 #pragma mark Reading
@@ -1296,7 +1250,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
             return nil;
         
         NSArray *matchStrings = [(BDSKConditionTemplateTag *)tag matchStrings];
-        NSUInteger i = 0, keyCount = [matchStrings count], count = [[(BDSKConditionTemplateTag *)tag subtemplates] count];
+        unsigned int i = 0, keyCount = [matchStrings count], count = [[(BDSKConditionTemplateTag *)tag subtemplates] count];
         
         for (i = 0; i < count; i++) {
             if (itemTemplate = [self convertItemTemplate:[(BDSKConditionTemplateTag *)tag subtemplateAtIndex:i] defaultFont:defaultFont])
@@ -1347,7 +1301,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     NSMutableArray *tokens = [NSMutableArray array];
     if (defaultFont) {
         NSAttributedString *text = [(BDSKRichTextTemplateTag *)tag attributedText];
-        NSUInteger length = [text length];
+        unsigned int length = [text length];
         NSRange range = NSMakeRange(0, 0);
         
         while (NSMaxRange(range) < length) {
@@ -1370,7 +1324,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 }
 
 - (id)tokenForConditionTag:(BDSKConditionTemplateTag *)tag defaultFont:(NSFont *)defaultFont {
-    NSInteger count = [[tag subtemplates] count];
+    int count = [[tag subtemplates] count];
     if ([(BDSKConditionTemplateTag *)tag matchType] != BDSKTemplateTagMatchOther || count > 2)
         return nil;
     
@@ -1396,7 +1350,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
             } else return nil;
         } else return nil;
     } else if ([emptyTemplate count] == 0 && [nonemptyTemplate count] < 4) {
-        NSInteger i = 0;
+        int i = 0;
         BDSKTemplateTag *subtag = [nonemptyTemplate objectAtIndex:i];
         NSString *prefix = nil, *suffix = nil;
         count = [nonemptyTemplate count];
@@ -1427,9 +1381,9 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     NSArray *keys = [[tag keyPath] componentsSeparatedByString:@"."];
     NSString *key = [keys count] ? [keys objectAtIndex:0] : nil;
     BDSKToken *token = nil;
-    NSInteger type;
+    int type;
     NSString *field = nil;
-    NSInteger i = 0, j;
+    int i = 0, j;
     
     if ([key isEqualToString:@"fields"] || [key isEqualToString:@"urls"] || [key isEqualToString:@"persons"])
         field = [keys objectAtIndex:++i];
@@ -1449,7 +1403,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     token = [BDSKToken tokenWithField:field];
     type = [(BDSKToken *)token type];
     keys = [keys subarrayWithRange:NSMakeRange(i + 1, [keys count] - i - 1)];
-    NSInteger count = [keys count];
+    int count = [keys count];
     NSString *property;
     
     if (type == BDSKPersonTokenType && [keys firstObjectCommonWithArray:[templateOptions valueForKeyPath:@"joinStyle.key"]] == nil)
@@ -1457,7 +1411,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     
     for (i = 0; i < count; i++) {
         for (j = count; j > i; j--) {
-            key = [[keys subarrayWithRange:makeRange(i, j)] componentsJoinedByString:@"."];
+            key = [[keys subarrayWithRange:MAKE_RANGE(i, j)] componentsJoinedByString:@"."];
             if (property = [self propertyForKey:key tokenType:type])
                 break;
         }
@@ -1475,7 +1429,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     return token;
 }
 
-- (NSString *)propertyForKey:(NSString *)key tokenType:(NSInteger)type {
+- (NSString *)propertyForKey:(NSString *)key tokenType:(int)type {
     switch (type) {
         case BDSKFieldTokenType:
             if ([[templateOptions valueForKeyPath:@"casing.key"] containsObject:key])
@@ -1524,8 +1478,8 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 - (void)setFont:(NSFont *)font ofToken:(BDSKToken *)token defaultFont:(NSFont *)defaultFont{
     if ([font isEqual:defaultFont] == NO) {
-        NSInteger defaultTraits = [[NSFontManager sharedFontManager] traitsOfFont:defaultFont];
-        NSInteger traits = [[NSFontManager sharedFontManager] traitsOfFont:font];
+        int defaultTraits = [[NSFontManager sharedFontManager] traitsOfFont:defaultFont];
+        int traits = [[NSFontManager sharedFontManager] traitsOfFont:font];
         BOOL defaultBold = (defaultTraits & NSBoldFontMask) != 0;
         BOOL defaultItalic = (defaultTraits & NSItalicFontMask) != 0;
         BOOL isBold = (traits & NSBoldFontMask) != 0;
@@ -1533,7 +1487,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         
         if ([[font familyName] isEqualToString:[defaultFont familyName]] == NO)
             [token setFontName:[font familyName]];
-        if (BDSKAbs([font pointSize] - [defaultFont pointSize]) > 0.0)
+        if (fabsf([font pointSize] - [defaultFont pointSize]) > 0.0)
             [token setFontSize:[font pointSize]];
         if (isBold != defaultBold)
             [token setBold:isBold];
@@ -1546,13 +1500,51 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 #pragma mark -
 
-@implementation BDSKTokenField
+@implementation NSTokenField (BDSKExtensions)
 
-- (void)textViewDidChangeSelection:(NSNotification *)notification {
-    if ([[BDSKTokenField superclass] instancesRespondToSelector:_cmd])
-        [super textViewDidChangeSelection:notification];
+static void (*originalTextViewDidChangeSelection)(id, SEL, id) = NULL;
+
+- (void)replacementTextViewDidChangeSelection:(NSNotification *)notification {
+    if (originalTextViewDidChangeSelection != NULL)
+        originalTextViewDidChangeSelection(self, _cmd, notification);
     if ([[self delegate] respondsToSelector:@selector(tokenField:textViewDidChangeSelection:)])
         [[self delegate] tokenField:self textViewDidChangeSelection:[notification object]];
+}
+
++ (void)load {
+    originalTextViewDidChangeSelection = (void (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(textViewDidChangeSelection:), @selector(replacementTextViewDidChangeSelection:));
+    // if it was returning NULL nothing was replaced, so we just register the method because we want to use it
+    if (originalTextViewDidChangeSelection == NULL)
+        OBRegisterInstanceMethodWithSelector(self, @selector(replacementTextViewDidChangeSelection:), @selector(textViewDidChangeSelection:));
+}
+
+@end
+
+#pragma mark -
+
+@interface NSTokenFieldCell (BDSKExtensions)
+@end
+
+@implementation NSTokenFieldCell (BDSKExtensions)
+
+static void (*originalSetObjectValue)(id, SEL, id) = NULL;
+
+- (void)replacementSetObjectValue:(id)value {
+    originalSetObjectValue(self, _cmd, value);
+    // updating in NSTokenField binding does not work for drop of tokens
+	NSDictionary *valueBindingInformation = [[self controlView] infoForBinding:@"value"];
+	if (valueBindingInformation != nil) {
+		id valueBindingObject = [valueBindingInformation objectForKey:NSObservedObjectKey];
+		NSString *valueBindingKeyPath = [valueBindingInformation objectForKey:NSObservedKeyPathKey];
+		
+		[valueBindingObject setValue:[self objectValue] forKeyPath:valueBindingKeyPath];
+	}
+}
+
++ (void)load {
+    // in later versions, messing with the binding info causes an infinite loop and crash 
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+        originalSetObjectValue = (void (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(setObjectValue:), @selector(replacementSetObjectValue:));
 }
 
 @end

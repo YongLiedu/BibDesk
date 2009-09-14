@@ -66,7 +66,7 @@
 	ItemCount			foundItems;		// Number of entries in cache that are used.
 	ItemCount			currIndex;		// Index into cache for next item to get. If this is >= foundItems, we need to re-cache.
 	FSCatalogInfoBitmap whichInfo;		// Additional info to get for files (setDesiredInfo:/desiredInfo).
-    NSInteger                 prefixlen;      // The number of characters to remove from files' pathnames to make them relative to the folder's path.
+    int                 prefixlen;      // The number of characters to remove from files' pathnames to make them relative to the folder's path.
 }
 
 +(id)					enumeratorWithPath: (NSString*)fpath;

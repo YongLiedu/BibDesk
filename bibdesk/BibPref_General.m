@@ -35,55 +35,35 @@
  */
 
 #import "BibPref_General.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStringConstants.h"
 #import "BDSKAppController.h"
+#import "BDSKUpdateChecker.h"
 #import "BDSKTemplate.h"
 #import "BDAlias.h"
-#import <Sparkle/Sparkle.h>
-
-static char BDSKBibPrefGeneralDefaultsObservationContext;
-static char BDSKBibPrefGeneralUpdaterObservationContext;
-
-
-@interface BibPref_General (Private)
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-- (void)updateUpdaterUI;
-- (void)updateEmailTemplateUI;
-- (void)updateStartupBehaviorUI;
-- (void)updateDefaultBibFileUI;
-- (void)updateWarningsUI;
-@end
-
 
 @implementation BibPref_General
 
 - (void)awakeFromNib{
-    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnDeleteKey] options:0 context:&BDSKBibPrefGeneralDefaultsObservationContext];
-    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRemovalFromGroupKey] options:0 context:&BDSKBibPrefGeneralDefaultsObservationContext];
-    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRenameGroupKey] options:0 context:&BDSKBibPrefGeneralDefaultsObservationContext];
-    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnCiteKeyChangeKey] options:0 context:&BDSKBibPrefGeneralDefaultsObservationContext];
-    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKAskToTrashFilesKey] options:0 context:&BDSKBibPrefGeneralDefaultsObservationContext];
-    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree] options:0 context:&BDSKBibPrefGeneralDefaultsObservationContext];
-    [[SUUpdater sharedUpdater] addObserver:self forKeyPath:@"automaticallyChecksForUpdates" options:0 context:&BDSKBibPrefGeneralUpdaterObservationContext];
-    [[SUUpdater sharedUpdater] addObserver:self forKeyPath:@"updateCheckInterval" options:0 context:&BDSKBibPrefGeneralUpdaterObservationContext];
-    [self updateEmailTemplateUI];
-    [self updateStartupBehaviorUI];
-    [self updateDefaultBibFileUI];
-	[self updateWarningsUI];
-	[self updateUpdaterUI];
-    
-    [editOnPasteButton setState:[sud boolForKey:BDSKEditOnPasteKey] ? NSOnState : NSOffState];
+    [super awakeFromNib];
+    [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnDeleteKey]];
+    [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnRemovalFromGroupKey]];
+    [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnRenameGroupKey]];
+    [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnCiteKeyChangeKey]];
+    [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKAskToTrashFilesKey]];
+    [OFPreference addObserver:self selector:@selector(handleTemplatePrefsChanged:) forPreference:[OFPreference preferenceForKey:BDSKExportTemplateTree]];
+    [self handleTemplatePrefsChanged:nil];
 }
 
 - (void)updateStartupBehaviorUI {
-    NSInteger startupBehavior = [[sud objectForKey:BDSKStartupBehaviorKey] intValue];
+    int startupBehavior = [[defaults objectForKey:BDSKStartupBehaviorKey] intValue];
     [startupBehaviorRadio selectCellWithTag:startupBehavior];
     [defaultBibFileTextField setEnabled:startupBehavior == 3];
     [defaultBibFileButton setEnabled:startupBehavior == 3];
 }
 
 - (void)updateDefaultBibFileUI {
-    NSData *aliasData = [sud objectForKey:BDSKDefaultBibFileAliasKey];
+    NSData *aliasData = [defaults objectForKey:BDSKDefaultBibFileAliasKey];
     BDAlias *alias;
     if([aliasData length] && (alias = [BDAlias aliasWithData:aliasData]))
         [defaultBibFileTextField setStringValue:[[alias fullPath] stringByAbbreviatingWithTildeInPath]];
@@ -92,56 +72,50 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
 }
 
 - (void)updateWarningsUI {
-    [warnOnDeleteButton setState:[sud boolForKey:BDSKWarnOnDeleteKey] ? NSOnState : NSOffState];
-    [warnOnRemovalFromGroupButton setState:[sud boolForKey:BDSKWarnOnRemovalFromGroupKey] ? NSOnState : NSOffState];
-    [warnOnRenameGroupButton setState:[sud boolForKey:BDSKWarnOnRenameGroupKey] ? NSOnState : NSOffState];
-    [warnOnGenerateCiteKeysButton setState:[sud boolForKey:BDSKWarnOnCiteKeyChangeKey] ? NSOnState : NSOffState];
-    [askToTrashFilesButton setState:[sud boolForKey:BDSKAskToTrashFilesKey] ? NSOnState : NSOffState];
+    [warnOnDeleteButton setState:[defaults boolForKey:BDSKWarnOnDeleteKey] ? NSOnState : NSOffState];
+    [warnOnRemovalFromGroupButton setState:[defaults boolForKey:BDSKWarnOnRemovalFromGroupKey] ? NSOnState : NSOffState];
+    [warnOnRenameGroupButton setState:[defaults boolForKey:BDSKWarnOnRenameGroupKey] ? NSOnState : NSOffState];
+    [warnOnGenerateCiteKeysButton setState:[defaults boolForKey:BDSKWarnOnCiteKeyChangeKey] ? NSOnState : NSOffState];
+    [askToTrashFilesButton setState:[defaults boolForKey:BDSKAskToTrashFilesKey] ? NSOnState : NSOffState];
 }
 
-- (void)updateUpdaterUI {
-    NSInteger interval = 0;
-    if ([[SUUpdater sharedUpdater] automaticallyChecksForUpdates])
-        interval = [[SUUpdater sharedUpdater] updateCheckInterval];
-    if (NO == [checkForUpdatesButton selectItemWithTag:interval]) {
-        NSInteger i, iMax = [checkForUpdatesButton numberOfItems];
-        for (i = 1; i < iMax; i++) {
-            if (interval > [[checkForUpdatesButton itemAtIndex:i] tag] / 2) {
-                [checkForUpdatesButton selectItemAtIndex:i];
-                break;
-            }
-        }
-        if (i == iMax)
-            [checkForUpdatesButton selectItemAtIndex:iMax - 1];
-        [self changeUpdateInterval:checkForUpdatesButton];
-    }
+- (void)updateUI{
+    [self updateStartupBehaviorUI];
+    [self updateDefaultBibFileUI];
+	[self updateWarningsUI];
+    
+    [editOnPasteButton setState:[defaults boolForKey:BDSKEditOnPasteKey] ? NSOnState : NSOffState];
+    [checkForUpdatesButton selectItemWithTag:[defaults integerForKey:BDSKUpdateCheckIntervalKey]];
 }
 
-- (void)defaultsDidRevert {
-    NSTimeInterval interval = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"SUScheduledCheckInterval"] doubleValue];
-    [[SUUpdater sharedUpdater] setUpdateCheckInterval:interval];
-    [[SUUpdater sharedUpdater] setAutomaticallyChecksForUpdates:interval > 0.0];
-}
-
-
+// tags correspond to BDSKUpdateCheckInterval enum
 - (IBAction)changeUpdateInterval:(id)sender{
-    NSInteger interval = [[sender selectedItem] tag];
-    if (interval > 0)
-        [[SUUpdater sharedUpdater] setUpdateCheckInterval:interval];
-    [[SUUpdater sharedUpdater] setAutomaticallyChecksForUpdates:interval > 0];
+    BDSKUpdateCheckInterval interval = [[sender selectedItem] tag];
+    [defaults setInteger:interval forKey:BDSKUpdateCheckIntervalKey];
+    [defaults autoSynchronize];
+    
+    // an annoying dialog to be seen by annoying users...
+    if (BDSKCheckForUpdatesNever == interval || BDSKCheckForUpdatesMonthly == interval) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Are you sure this is wise?", @"Message in alert dialog when setting long auto-update interval") 
+                                         defaultButton:nil alternateButton:nil otherButton:nil 
+                             informativeTextWithFormat:NSLocalizedString(@"Some BibDesk users complain of too-frequent updates.  However, updates generally fix bugs that affect the integrity of your data.  If you value your data, a daily or weekly interval is a better choice.", @"Informative text in alert dialog")];
+        [alert beginSheetModalForWindow:[controlBox window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+    }
 }
 
 - (IBAction)setAutoOpenFilePath:(id)sender{
     BDAlias *alias = [BDAlias aliasWithPath:[[sender stringValue] stringByStandardizingPath]];
     if(alias)
-        [sud setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
+        [defaults setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
     [self updateDefaultBibFileUI];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeStartupBehavior:(id)sender{
-    NSInteger n = [[sender selectedCell] tag];
-    [sud setObject:[NSNumber numberWithInt:n] forKey:BDSKStartupBehaviorKey];
+    int n = [[sender selectedCell] tag];
+    [defaults setObject:[NSNumber numberWithInt:n] forKey:BDSKStartupBehaviorKey];
     [self updateStartupBehaviorUI];
+    [defaults autoSynchronize];
     if(n == 3 && [[defaultBibFileTextField stringValue] isEqualToString:@""])
         [self chooseAutoOpenFile:nil];
 }
@@ -154,74 +128,76 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
     [openPanel beginSheetForDirectory:nil 
 								 file:nil 
 								types:[NSArray arrayWithObject:@"bib"] 
-					   modalForWindow:[[self view] window] 
+					   modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
 						modalDelegate:self 
 					   didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
 						  contextInfo:NULL];
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSCancelButton)
         return;
     
     BDAlias *alias = [BDAlias aliasWithURL:[sheet URL]];
     
-    [sud setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
-    [sud setObject:[NSNumber numberWithInt:3] forKey:BDSKStartupBehaviorKey];
+    [defaults setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
+    [defaults setObject:[NSNumber numberWithInt:3] forKey:BDSKStartupBehaviorKey];
     [self updateDefaultBibFileUI];
     [self updateStartupBehaviorUI];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeEmailTemplate:(id)sender{
-    NSInteger idx = [sender indexOfSelectedItem];
+    int idx = [sender indexOfSelectedItem];
     NSString *style = idx == 0 ? @"" : [sender titleOfSelectedItem];
-    if ([style isEqualToString:[sud stringForKey:BDSKEmailTemplateKey]] == NO) {
-        [sud setObject:style forKey:BDSKEmailTemplateKey];
+    if ([style isEqualToString:[defaults stringForKey:BDSKEmailTemplateKey]] == NO) {
+        [defaults setObject:style forKey:BDSKEmailTemplateKey];
+        [defaults autoSynchronize];
     }
 }
 
 - (IBAction)changeEditOnPaste:(id)sender{
-    [sud setBool:([sender state] == NSOnState) forKey:BDSKEditOnPasteKey];
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKEditOnPasteKey];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeWarnOnDelete:(id)sender{
-    [sud setBool:([sender state] == NSOnState) forKey:BDSKWarnOnDeleteKey];
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnDeleteKey];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeWarnOnRemovalFromGroup:(id)sender{
-    [sud setBool:([sender state] == NSOnState) forKey:BDSKWarnOnRemovalFromGroupKey];
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnRemovalFromGroupKey];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeWarnOnRenameGroup:(id)sender{
-    [sud setBool:([sender state] == NSOnState) forKey:BDSKWarnOnRenameGroupKey];
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnRenameGroupKey];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeWarnOnGenerateCiteKeys:(id)sender{
-    [sud setBool:([sender state] == NSOnState) forKey:BDSKWarnOnCiteKeyChangeKey];
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnCiteKeyChangeKey];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeAskToTrashFiles:(id)sender{
-    [sud setBool:([sender state] == NSOnState) forKey:BDSKAskToTrashFilesKey];
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKAskToTrashFilesKey];
+    [defaults autoSynchronize];
 }
 
 - (void)dealloc{
-    @try {
-        [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnDeleteKey]];
-        [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRemovalFromGroupKey]];
-        [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRenameGroupKey]];
-        [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnCiteKeyChangeKey]];
-        [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKAskToTrashFilesKey]];
-        [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree]];
-        [[SUUpdater sharedUpdater] removeObserver:self forKeyPath:@"automaticallyChecksForUpdates"];
-        [[SUUpdater sharedUpdater] removeObserver:self forKeyPath:@"updateCheckInterval"];
-    }
-    @catch (id e) {}
+    [OFPreference removeObserver:self forPreference:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
 
-- (void)updateEmailTemplateUI {
-    NSString *currentStyle = [sud stringForKey:BDSKEmailTemplateKey];
+- (void)handleWarningPrefChanged:(NSNotification *)notification {
+    [self updateWarningsUI];
+}
+
+- (void)handleTemplatePrefsChanged:(NSNotification *)notification {
+    NSString *currentStyle = [defaults stringForKey:BDSKEmailTemplateKey];
     NSArray *styles = [BDSKTemplate allStyleNames];
     [emailTemplatePopup removeAllItems];
     [emailTemplatePopup addItemWithTitle:NSLocalizedString(@"Default BibTeX Format", @"Popup menu title for email format")];
@@ -232,26 +208,8 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
         [emailTemplatePopup selectItemWithTitle:currentStyle];
     } else {
         [emailTemplatePopup selectItemAtIndex:0];
-        [sud setObject:[styles objectAtIndex:0] forKey:BDSKEmailTemplateKey];
-    }
-}
-
-#pragma mark KVO
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == &BDSKBibPrefGeneralDefaultsObservationContext) {
-        NSString *key = [keyPath substringFromIndex:7];
-        if ([key isEqualToString:BDSKWarnOnDeleteKey] || [key isEqualToString:BDSKWarnOnRemovalFromGroupKey] || 
-            [key isEqualToString:BDSKWarnOnRenameGroupKey] || [key isEqualToString:BDSKWarnOnCiteKeyChangeKey] || 
-            [key isEqualToString:BDSKAskToTrashFilesKey]) {
-            [self updateWarningsUI];
-        } else if ([key isEqualToString:BDSKExportTemplateTree]) {
-            [self updateEmailTemplateUI];
-        }
-    } else if (context == &BDSKBibPrefGeneralUpdaterObservationContext) {
-        [self updateUpdaterUI];
-    } else {
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+        [defaults setObject:[styles objectAtIndex:0] forKey:BDSKEmailTemplateKey];
+        [defaults autoSynchronize];
     }
 }
 

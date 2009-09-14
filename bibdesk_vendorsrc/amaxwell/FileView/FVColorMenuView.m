@@ -38,115 +38,75 @@
 
 #import "FVColorMenuView.h"
 #import "FVUtilities.h"
-#import "FVFinderLabel.h"
+#import <FileView/FVFinderLabel.h>
 
 static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotification";
 
-@interface FVColorMenuCell : NSButtonCell
-@end
-
-@interface FVColorMenuMatrix : NSMatrix
-{
-    NSInteger _boxedRow;
-    NSInteger _boxedColumn;
-}
-- (NSString *)boxedLabelName;
-@end
-
-@interface FVColorMenuView (FVPrivate)
-- (void)_handleColorNameUpdate:(NSNotification *)note;
-- (void)fvLabelColorAction:(id)sender;
-@end
-
 @implementation FVColorMenuView
 
-#define DEFAULT_FRAME        ((NSRect) { 0.0, 0.0, 188.0, 68.0 })
-#define DEFAULT_SIZE         ((NSSize) { 188.0, 68.0 })
-#define DEFAULT_HEIGHT       ((CGFloat) 68.0)
-#define DEFAULT_MATRIX_FRAME ((NSRect) { 20.0, 28.0, 158.0, 18.0 })
-#define LABEL_MARGIN         ((CGFloat) 20.0)
-
-+ (FVColorMenuView *)menuView;
+- (void)encodeWithCoder:(NSCoder *)coder
 {
-    return [[[self alloc] initWithFrame:DEFAULT_FRAME] autorelease];
+    [super encodeWithCoder:coder];
+    [coder encodeConditionalObject:_matrix forKey:@"_matrix"];
+    [coder encodeConditionalObject:_labelField forKey:@"_labelField"];
+    [coder encodeConditionalObject:_labelNameField forKey:@"_labelNameField"];
+    [coder encodeConditionalObject:_target forKey:@"_target"];
+    if (_action)
+        [coder encodeObject:NSStringFromSelector(_action) forKey:@"_action"];
 }
 
-- (void)_createMatrix
+- (void)setupSubviews
 {
-    _matrix = [[FVColorMenuMatrix alloc] initWithFrame:DEFAULT_MATRIX_FRAME];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleColorNameUpdate:) name:FVColorNameUpdateNotification object:nil];
+    [_labelNameField setStringValue:@""];
+    [[_labelField cell] setFont:[NSFont menuBarFontOfSize:0]];
+    NSBundle *bundle = [NSBundle bundleForClass:[FVColorMenuView self]];
+    [_labelField setStringValue:NSLocalizedStringFromTableInBundle(@"Label:", @"FileView", bundle, @"Finder label menu item title")];
+    [_labelField sizeToFit];
+    
     [_matrix setTarget:self];
     [_matrix setAction:@selector(fvLabelColorAction:)];
-    [self addSubview:_matrix];
-    [_matrix release];
 }
 
 - (id)initWithFrame:(NSRect)aRect
 {
     self = [super initWithFrame:aRect];
     if (self) {
-        NSBundle *bundle = [NSBundle bundleForClass:[FVColorMenuView self]];
-        _labelCell = [[NSTextFieldCell alloc] initTextCell:NSLocalizedStringFromTableInBundle(@"Label:", @"FileView", bundle, @"Finder label menu item title")];
-        [_labelCell setFont:[NSFont menuBarFontOfSize:0.0]];
-        
-        _labelNameCell = [[NSTextFieldCell alloc] initTextCell:@""];
-        [_labelNameCell setAlignment:NSCenterTextAlignment];
-        [_labelNameCell setFont:[NSFont boldSystemFontOfSize:[NSFont smallSystemFontSize]]];
-        [_labelNameCell setTextColor:[NSColor disabledControlTextColor]];
-        
-        [self _createMatrix];
-        
         _target = nil;
         _action = nil;
-        
-        if (_matrix)
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleColorNameUpdate:) name:FVColorNameUpdateNotification object:_matrix];
     }
     return self;
-}
-
-- (void)encodeWithCoder:(NSCoder *)coder
-{
-    [super encodeWithCoder:coder];
-    [coder encodeConditionalObject:_matrix forKey:@"_matrix"];
-    [coder encodeObject:_labelCell forKey:@"_labelCell"];
-    [coder encodeObject:_labelNameCell forKey:@"_labelNameCell"];
-    [coder encodeConditionalObject:_target forKey:@"_target"];
-    [coder encodeObject:NSStringFromSelector(_action) forKey:@"_action"];
 }
 
 - (id)initWithCoder:(NSCoder *)coder
 {
     if (self = [super initWithCoder:coder]) {
-        // the following should be unarchived as a subview, so no need to retain them
         _matrix = [coder decodeObjectForKey:@"_matrix"];
-        _labelCell = [[coder decodeObjectForKey:@"_labelCell"] retain];
-        _labelNameCell = [[coder decodeObjectForKey:@"_labelNameCell"] retain];
+        _labelField = [coder decodeObjectForKey:@"_labelField"];
+        _labelNameField = [coder decodeObjectForKey:@"_labelNameField"];
         _target = [coder decodeObjectForKey:@"_target"];
         _action = NSSelectorFromString([coder decodeObjectForKey:@"_action"]);
-        
-        [_labelNameCell setStringValue:@""];
-        
-        if (_matrix == nil)
-            [self _createMatrix];
-        if (_matrix)
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleColorNameUpdate:) name:FVColorNameUpdateNotification object:_matrix];
+        [self setupSubviews];
     }
     return self;
+}
+
+- (void)awakeFromNib
+{
+    [self setupSubviews];
 }
 
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_labelCell release];
-    [_labelNameCell release];
     [super dealloc];
 }
 
-- (BOOL)isFlipped { return YES; }
-
-- (void)sizeToFit
+// notification posted in response to a mouseover so we can update the label name
+- (void)_handleColorNameUpdate:(NSNotification *)note
 {
-    [self setFrameSize:DEFAULT_SIZE];
+    if ([note object] == _matrix)
+        [_labelNameField setStringValue:[_matrix boxedLabelName]];
 }
 
 - (void)setTarget:(id)target { _target = target; }
@@ -156,6 +116,15 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 - (SEL)action { return _action; }
 
 - (void)setAction:(SEL)action { _action = action; }
+
+- (void)fvLabelColorAction:(id)sender
+{
+    [NSApp sendAction:[self action] to:[self target] from:self];
+    
+    // we have to close the menu manually
+    if ([self respondsToSelector:@selector(enclosingMenuItem)] && [[[self enclosingMenuItem] menu] respondsToSelector:@selector(cancelTracking)])
+        [[[self enclosingMenuItem] menu] cancelTracking];
+}
 
 - (void)selectLabel:(NSUInteger)label;
 {
@@ -175,72 +144,55 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
     return [self selectedTag];
 }
 
-- (void)drawRect:(NSRect)aRect {
-    NSRect bounds = [self bounds];
-    NSRect labelRect = NSZeroRect;
-    
-    // draw the label
-    labelRect.size = [_labelCell cellSize];
-    labelRect.origin.x = LABEL_MARGIN;
-    labelRect.origin.y = LABEL_MARGIN - NSHeight(labelRect);
-    [_labelCell drawWithFrame:labelRect inView:self];
-    
-    // draw the label name
-    labelRect.size.width = NSWidth(bounds) - 2 * LABEL_MARGIN;
-    labelRect.size.height = [_labelNameCell cellSize].height;
-    labelRect.origin.y = DEFAULT_HEIGHT - NSHeight(labelRect);
-    [_labelNameCell drawWithFrame:labelRect inView:self];
-}
-
-
-// notification posted in response to a mouseover so we can update the label name
-- (void)_handleColorNameUpdate:(NSNotification *)note
++ (FVColorMenuView *)menuView;
 {
-    [_labelNameCell setStringValue:[_matrix boxedLabelName]];
-    [self setNeedsDisplay:YES];
-}
-
-- (void)fvLabelColorAction:(id)sender
-{
-    [NSApp sendAction:[self action] to:[self target] from:self];
+    FVColorMenuView *menuView = nil;
     
-    // we have to close the menu manually
-    if ([self respondsToSelector:@selector(enclosingMenuItem)] && [[[self enclosingMenuItem] menu] respondsToSelector:@selector(cancelTracking)])
-        [[[self enclosingMenuItem] menu] cancelTracking];
+    NSNib *nib = [[NSNib alloc] initWithNibNamed:@"FVColorMenuView" bundle:[NSBundle bundleForClass:[FVColorMenuView class]]];
+    NSArray *objects;
+    
+    if ([nib instantiateNibWithOwner:nil topLevelObjects:&objects]) {
+        NSParameterAssert([objects count] > 0);
+        NSUInteger i = [objects count];
+        while (i--) {
+            if ([[objects objectAtIndex:i] isKindOfClass:[FVColorMenuView class]]) {
+                menuView = [objects objectAtIndex:i];
+                break;
+            }
+        }
+    }
+    [nib release];
+    // top level objects in a nib are implicitly retained, but we should return an autoreleased object
+    return [menuView autorelease];
 }
 
 @end
 
 @implementation FVColorMenuCell
 
-#define CELL_SIZE ((NSSize) { 18.0, 18.0 })
+static NSShadow *_shadow = nil;
 
-- (id)initTextCell:(NSString *)aString
-{
-    if (self = [super initTextCell:aString]) {
-        [self setButtonType:NSRadioButton];
-        [self setBordered:NO];
-    }
-    return self;
-}
+#define NO_BOX -1
 
-- (NSSize)cellSize
++ (void)initialize
 {
-    return CELL_SIZE;
+    _shadow = [[NSShadow alloc] init];
+    [_shadow setShadowOffset:NSMakeSize(0, -1)];
+    [_shadow setShadowBlurRadius:2.0];
 }
 
 static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
 {
     // determine aspect ratio (copy paste from FVIcon)
-    const NSSize s = (NSSize){ 128.0, 128.0 };
+    NSSize s = (NSSize){ 128, 128 };
     
     CGFloat ratio = MIN(NSWidth(iconRect) / s.width, NSHeight(iconRect) / s.height);
     NSRect dstRect = iconRect;
     dstRect.size.width = ratio * s.width;
     dstRect.size.height = ratio * s.height;
     
-    CGFloat dx = (NSHeight(iconRect) - NSHeight(dstRect)) / 2.0;
-    CGFloat dy = (NSHeight(iconRect) - NSHeight(dstRect)) / 2.0;
+    CGFloat dx = (iconRect.size.width - dstRect.size.width) / 2;
+    CGFloat dy = (iconRect.size.height - dstRect.size.height) / 2;
     dstRect.origin.x += dx;
     dstRect.origin.y += dy;
     
@@ -257,7 +209,7 @@ static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
     [NSGraphicsContext saveGraphicsState];
 
     if (0 == tag) {
-        interiorFrame = NSInsetRect(interiorFrame, 2.0, 2.0);
+        interiorFrame = NSInsetRect(interiorFrame, 2, 2);
         NSBezierPath *p = [NSBezierPath bezierPath];
         [p moveToPoint:interiorFrame.origin];
         [p lineToPoint:NSMakePoint(NSMaxX(interiorFrame), NSMaxY(interiorFrame))];
@@ -269,12 +221,8 @@ static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
         [p stroke];
     }
     else {
-        NSShadow *labelShadow = [NSShadow new];
-        [labelShadow setShadowOffset:NSMakeSize(0.0, -1.0)];
-        [labelShadow setShadowBlurRadius:2.0];
-        [labelShadow set];
+        [_shadow set];
         [FVFinderLabel drawFinderLabel:tag inRect:interiorFrame roundEnds:NO];
-        [labelShadow release];
     }
     
     [NSGraphicsContext restoreGraphicsState];
@@ -283,31 +231,6 @@ static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
 @end
 
 @implementation FVColorMenuMatrix
-
-#define NO_BOX -1
-
-#define FINDER_LABELS { 0, 6, 7, 5, 2, 4, 3, 1 }
-
-#define BOX_WIDTH 1.5
-#define BOX_RADIUS 2
-
-- (id)initWithFrame:(NSRect)frameRect
-{
-    if (self = [super initWithFrame:frameRect]) {
-        [self setPrototype:[[[FVColorMenuCell alloc] initTextCell:@""] autorelease]];
-        [self setCellSize:CELL_SIZE];
-        [self setIntercellSpacing:NSMakeSize(2.0, 4.0)];
-        [self setMode:NSRadioModeMatrix];
-        [self renewRows:1 columns:8];
-        [self sizeToCells];
-        int column, tags[8] = FINDER_LABELS;
-        for (column = 0; column < 8; column++)
-            [[self cellAtRow:0 column:column] setTag:tags[column]];
-        _boxedRow = NO_BOX;
-        _boxedColumn = NO_BOX;
-    }
-    return self;
-}
 
 - (void)removeTrackingAreas
 {
@@ -351,36 +274,29 @@ static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
 {
     NSRect boxRect = [self cellFrameAtRow:r column:c];
     boxRect = __FVSquareRectCenteredInRect(boxRect);
-    return [self centerScanRect:NSInsetRect(boxRect, 1.0, 1.0)];
+    return NSInsetRect([self centerScanRect:boxRect], 1.0, 1.0);
 }
-
-
-- (BOOL)_isBoxedCellSelected { return ([self selectedRow] == _boxedRow && [self selectedColumn] == _boxedColumn); }
-
-- (BOOL)_isFirstCellSelected { return ([self selectedRow] == 0 && [self selectedColumn] == 0); }
 
 - (void)drawRect:(NSRect)aRect
 {
     [super drawRect:aRect];
         
-    // draw a box around the moused-over cell (unless it's selected); the X cell always gets highlighted, since it's never drawn as selected
-    if (NO_BOX != _boxedRow && NO_BOX != _boxedColumn && (NO == [self _isBoxedCellSelected] || [self _isFirstCellSelected])) {
-        [[NSColor lightGrayColor] setStroke];
-        NSRect boxRect = [self boxRectForCellAtRow:_boxedRow column:_boxedColumn];
-        NSBezierPath *boxPath = [NSBezierPath fv_bezierPathWithRoundRect:boxRect xRadius:BOX_RADIUS yRadius:BOX_RADIUS];
-        [[NSColor colorWithCalibratedWhite:0.5 alpha:0.3] setFill];
-        [boxPath fill];
-        [boxPath setLineWidth:BOX_WIDTH];
-        [boxPath stroke];
+    // draw a box around the moused-over cell (unless it's selected)
+    if (NO_BOX != _boxedRow && NO_BOX != _boxedColumn && ([self selectedRow] != _boxedRow || [self selectedColumn] != _boxedColumn || ([self selectedRow] == 0 && [self selectedColumn] == 0))) {
+        [[NSColor colorWithCalibratedWhite:0.5 alpha:0.6] setStroke];
+        NSBezierPath *path = [NSBezierPath fv_bezierPathWithRoundRect:[self boxRectForCellAtRow:_boxedRow column:_boxedColumn] xRadius:1.5 yRadius:1.5];
+        [path setLineWidth:1.0];
+        [[NSColor colorWithCalibratedWhite:0.5 alpha:0.2] setFill];
+        [path fill];
+        [path stroke];
     }
     
     // the X doesn't show as selected
     if ([self selectedRow] != 0 || [self selectedColumn] != 0) {
-        [[NSColor lightGrayColor] setStroke];
-        NSRect boxRect = [self boxRectForCellAtRow:[self selectedRow] column:[self selectedColumn]];
-        NSBezierPath *boxPath = [NSBezierPath fv_bezierPathWithRoundRect:boxRect xRadius:BOX_RADIUS yRadius:BOX_RADIUS];
-        [boxPath setLineWidth:BOX_WIDTH];
-        [boxPath stroke];
+        [[NSColor colorWithCalibratedWhite:0.5 alpha:0.6] setStroke];
+        NSBezierPath *path = [NSBezierPath fv_bezierPathWithRoundRect:[self boxRectForCellAtRow:[self selectedRow] column:[self selectedColumn]] xRadius:1.5 yRadius:1.5];
+        [path setLineWidth:1.0];
+        [path stroke];
     }
 }
 
@@ -419,6 +335,13 @@ static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
     
     // Finder uses curly quotes around the name, and displays nothing for the X item
     return 0 == [cell tag] ? @"" : [NSString stringWithFormat:@"%C%@%C", 0x201C, [FVFinderLabel localizedNameForLabel:[cell tag]], 0x201D];
+}
+
+- (NSString *)accessibilityAttributeValue:(NSString *)attribute {
+    if ([attribute isEqualToString:NSAccessibilityTitleAttribute])
+        return [self boxedLabelName];
+    else
+        return [super accessibilityAttributeValue:attribute];
 }
 
 @end

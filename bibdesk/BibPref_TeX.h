@@ -35,11 +35,11 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKPreferencePane.h"
+#import <OmniAppKit/OmniAppKit.h>
 
 @class BDSKEncodingPopUpButton;
 
-@interface BibPref_TeX : BDSKPreferencePane
+@interface BibPref_TeX : OAPreferenceClient
 {
     IBOutlet NSButton *usesTeXButton;
     IBOutlet NSTextField *texBinaryPathField;

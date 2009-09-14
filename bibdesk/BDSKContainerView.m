@@ -53,16 +53,15 @@
 
 - (id)initWithCoder:(NSCoder *)decoder {
 	if (self = [super initWithCoder:decoder]) {
-		// this decodes only the reference, the actual view should already be decoded as a subview
-        contentView = [decoder decodeObjectForKey:@"contentView"];
+		if ([[super subviews] count]) { // not sure if this works OK, but we're not using it now as IB calls initWithFrame
+			[self setContentView:[[super subviews] objectAtIndex:0]];
+		} else {
+			contentView = [[NSView alloc] initWithFrame:[self contentRect]];
+			[super addSubview:contentView];
+			[contentView release];
+		}
 	}
 	return self;
-}
-
-- (void)encodeWithCoder:(NSCoder *)coder {
-  [super encodeWithCoder:coder];
-  // this encodes only a reference, the actual contentView should already be encoded because it's a subview
-  [coder encodeConditionalObject:contentView forKey:@"contentView"];
 }
 
 - (id)contentView {

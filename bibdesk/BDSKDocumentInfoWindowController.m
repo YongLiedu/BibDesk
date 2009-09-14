@@ -129,16 +129,16 @@
 
 - (IBAction)addKey:(id)sender{
     // find a unique new key
-    NSInteger i = 0;
+    int i = 0;
     NSString *newKey = @"key";
     while([info objectForKey:newKey] != nil)
-        newKey = [NSString stringWithFormat:@"key%ld", (long)++i];
+        newKey = [NSString stringWithFormat:@"key%i", ++i];
     
     [info setObject:@"" forKey:newKey];
     [self refreshKeys];
     [tableView reloadData];
     
-    NSInteger row = [keys indexOfObject:newKey];
+    int row = [keys indexOfObject:newKey];
     [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     [tableView editColumn:0 row:row withEvent:nil select:YES];
 }
@@ -155,11 +155,11 @@
 
 #pragma mark TableView DataSource methods
 
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)tv{
+- (int)numberOfRowsInTableView:(NSTableView *)tv{
     return [keys count];
 }
 
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     NSString *key = [keys objectAtIndex:row];
     
     if([[tableColumn identifier] isEqualToString:@"key"]){
@@ -170,7 +170,7 @@
     
 }
 
-- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     if (ignoreEdit) return;
     
     NSString *key = [keys objectAtIndex:row];

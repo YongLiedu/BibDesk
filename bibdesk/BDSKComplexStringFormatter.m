@@ -48,6 +48,9 @@
 
 - (id)initWithDelegate:(id)anObject macroResolver:(BDSKMacroResolver *)aMacroResolver {
     if (self = [super init]) {
+		parsedString = nil;
+		parseError = nil;
+		highlighted = NO;
 		editAsComplexString = NO;
 		[self setMacroResolver:aMacroResolver];
 		[self setDelegate:anObject];
@@ -57,6 +60,8 @@
 
 - (void)dealloc {
     [macroResolver release];
+    [parsedString release];
+    [parseError release];
     [super dealloc];
 }
 
@@ -68,24 +73,31 @@
 
 - (NSString *)editingStringForObjectValue:(id)obj {
 	NSString *string = [self stringForObjectValue:obj];
-	if ([obj isComplex] && editAsComplexString == NO) {
+	[parsedString release];
+	parsedString = [obj retain];
+	[parseError release];
+	parseError = nil;
+	if ([obj isComplex] == YES && editAsComplexString == NO) {
 		if ([delegate respondsToSelector:@selector(formatter:shouldEditAsComplexString:)])
 			editAsComplexString = [delegate formatter:self shouldEditAsComplexString:obj];
 	}
-	return editAsComplexString ? [string stringAsBibTeXString] : string;
+	if (editAsComplexString)
+		return [string stringAsBibTeXString];
+	else
+		return string;
 }
 
 - (NSAttributedString *)attributedStringForObjectValue:(id)obj withDefaultAttributes:(NSDictionary *)defaultAttrs{
 
-    if ([obj isComplex] == NO && [obj isInherited] == NO)
+    if(![obj isComplex] && ![obj isInherited])
         return nil;
     
     NSMutableDictionary *attrs = [[NSMutableDictionary alloc] initWithDictionary:defaultAttrs];
-	NSColor *color = nil;
-	BOOL highlighted = [[[attrs objectForKey:NSForegroundColorAttributeName] colorUsingColorSpaceName:NSDeviceRGBColorSpace] isEqual:[NSColor colorWithDeviceRed:1 green:1 blue:1 alpha:1]];
-    
-	if ([obj isComplex]) {
-		if ([obj isInherited]) {
+	NSColor *color;
+	NSString *string = (NSString *)obj;
+	
+	if ([string isComplex]) {
+		if ([string isInherited]) {
 			if (highlighted)
 				color = [[NSColor blueColor] blendedColorWithFraction:0.5 ofColor:[NSColor controlBackgroundColor]];
 			else
@@ -96,49 +108,94 @@
 			else
 				color = [NSColor blueColor];
 		}
-	} else if ([obj isInherited]) {
-        if (highlighted)
-            color = [NSColor lightGrayColor];
-        else
-            color = [NSColor disabledControlTextColor];
+	} else {
+		if ([string isInherited]) {
+			if (highlighted)
+				color = [NSColor lightGrayColor];
+			else
+				color = [NSColor disabledControlTextColor];
+		} else {
+			color = [NSColor controlTextColor];
+		}
 	}
-	if (color)
-        [attrs setObject:color forKey:NSForegroundColorAttributeName];
-    NSAttributedString *attStr = [[[NSAttributedString alloc] initWithString:obj attributes:attrs] autorelease];
+	[attrs setObject:color forKey:NSForegroundColorAttributeName];
+    NSAttributedString *attStr = [[[NSAttributedString alloc] initWithString:[self stringForObjectValue:obj] attributes:attrs] autorelease];
     [attrs release];
 	return attStr;
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
     
+    [self setParseError:nil];
+    [self setParsedString:nil];
+    
     // convert newlines to a single space, then collapse (mainly for paste/drag text, RFE #1457532)
-    if([string rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet]].length){
+    if([string containsCharacterInSet:[NSCharacterSet newlineCharacterSet]]){
         string = [string stringByReplacingCharactersInSet:[NSCharacterSet newlineCharacterSet] withString:@" "];
-        string = [string stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        string = [string fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
     }
     // remove control and other non-characters (mainly for paste/drag text, BUG #1481675)
     string = [string stringByReplacingCharactersInSet:[NSCharacterSet controlCharacterSet] withString:@""];
     string = [string stringByReplacingCharactersInSet:[NSCharacterSet illegalCharacterSet] withString:@""];
     
-    if (editAsComplexString) {
-        NSError *complexError = nil;
-        string = [NSString stringWithBibTeXString:string macroResolver:macroResolver error:&complexError];
-        if (string == nil && error)
-            *error = [complexError localizedDescription];
-    } else if ([string isStringTeXQuotingBalancedWithBraces:YES connected:NO] == NO) {
-        string = nil;
-        if (error)
-            *error = NSLocalizedString(@"Unbalanced braces", @"error description");
-    }
+    NSError *complexError = nil;
     
-    if (string == nil)
-        return NO;
-    else if (obj)
-        *obj = string;
-    return YES;
+    if (editAsComplexString) {
+        NSString *complexString = [NSString stringWithBibTeXString:string macroResolver:macroResolver error:&complexError];
+        if (complexString)
+            [self setParsedString:complexString];
+    } else if ([string isStringTeXQuotingBalancedWithBraces:YES connected:NO] == NO) {
+        // not really a complex string exception, but we'll handle it the same way
+        complexError = [NSError mutableLocalErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Unbalanced braces", @"error description")];
+    } else {
+        [self setParsedString:string];
+    }
+
+    if (complexError)
+        [self setParseError:[complexError localizedDescription]];
+    
+    if(error)
+        *error = [self parseError];
+    if(obj)
+        *obj = [self parsedString];
+
+    return (parseError ? NO : YES);
+}
+
+- (BOOL)isPartialStringValid:(NSString **)partialStringPtr     
+	   proposedSelectedRange:(NSRangePointer)proposedSelRangePtr  
+			  originalString:(NSString *)origString 
+	   originalSelectedRange:(NSRange)origSelRange
+            errorDescription:(NSString **)error{
+	// this sets the parsed string or the parse error
+	[self getObjectValue:NULL forString:*partialStringPtr errorDescription:NULL];
+    // return YES even if not valid or we won't be able to edit
+	return YES;
 }
 
 #pragma mark Accessors
+
+- (NSString *)parseError {
+    return [[parseError retain] autorelease];
+}
+
+- (void)setParseError:(NSString *)newError{
+    if(parseError != newError){
+        [parseError release];
+        parseError = [newError copy];
+    }
+}
+
+- (NSString *)parsedString {
+    return [[parsedString retain] autorelease];
+}
+
+- (void)setParsedString:(NSString *)newString{
+    if(parsedString != newString){
+        [parsedString release];
+        parsedString = [newString copy];
+    }
+}
 
 - (id)macroResolver {
     return macroResolver;
@@ -166,8 +223,16 @@
 }
 
 - (void)setDelegate:(id)newDelegate {
-    BDSKPRECONDITION([newDelegate respondsToSelector:@selector(formatter:shouldEditAsComplexString:)]);
+    OBPRECONDITION([newDelegate respondsToSelector:@selector(formatter:shouldEditAsComplexString:)]);
 	delegate = newDelegate;
+}
+
+- (BOOL)isHighlighted{
+	return highlighted;
+}
+
+- (void)setHighlighted:(BOOL)flag{
+	highlighted = flag;
 }
 
 @end

@@ -37,8 +37,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 
-@interface BDSKApplication : NSApplication 
-- (NSUInteger)currentModifierFlags;
+@interface BDSKApplication : OAApplication 
 @end

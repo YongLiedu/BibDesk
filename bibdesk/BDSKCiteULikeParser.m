@@ -49,11 +49,11 @@
     }
     
     
-    NSString *containsBibtexNode = @".//textarea[@id='bibtex-body']";
+    NSString *containsPreNode = @".//pre";
    
     NSError *error = nil;    
 
-    bool nodecountisok =  [[[xmlDocument rootElement] nodesForXPath:containsBibtexNode error:&error] count] > 0;
+    bool nodecountisok =  [[[xmlDocument rootElement] nodesForXPath:containsPreNode error:&error] count] > 0;
 
     return nodecountisok;
 }
@@ -63,19 +63,19 @@
     NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
     
     
-    NSString *bibtexPath = @".//textarea[@id='bibtex-body']";
+    NSString *prePath = @".//pre";
     
     NSError *error = nil;    
 
-    NSArray *bibtexNodes = [[xmlDocument rootElement] nodesForXPath:bibtexPath
+    NSArray *preNodes = [[xmlDocument rootElement] nodesForXPath:prePath
                                                     error:&error];
     
-    if ([bibtexNodes count] < 1) {
+    if ([preNodes count] < 1) {
         if (outError) *outError = error;
         return nil;
     }
     
-    NSString *preString = [[bibtexNodes objectAtIndex:0] stringValue];
+    NSString *preString = [[preNodes objectAtIndex:0] stringValue];
     
     BOOL isPartialData = NO;
     
@@ -95,14 +95,6 @@
     return items;  
     
 }
-
-
-
-+ (NSArray *) parserInfos {
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"CiteULike" address:@"http://www.citeulike.org/" description:nil flags: BDSKParserFeatureNone];
-	return [NSArray arrayWithObject:parserInfo];
-}
-
 
 @end 
 

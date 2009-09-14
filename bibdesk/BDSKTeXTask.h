@@ -38,6 +38,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <OmniFoundation/OmniFoundation.h>
 
 enum {
 	BDSKGenerateLTB = 0,
@@ -53,7 +54,7 @@ typedef struct _BDSKTeXTaskFlags {
     volatile int32_t hasRTFData;
 } BDSKTeXTaskFlags;
 
-@class BDSKTeXPath, BDSKTask, BDSKReadWriteLock;
+@class BDSKTeXPath, BDSKTask;
 
 @interface BDSKTeXTask : NSObject {	
     NSString *texTemplatePath;
@@ -67,12 +68,13 @@ typedef struct _BDSKTeXTaskFlags {
 	
     BDSKTeXTaskFlags flags;
 
-    NSLock *processingLock;    
-    BDSKReadWriteLock *dataFileLock;
+    OFSimpleLockType processingLock;    
+    pthread_rwlock_t dataFileLock;
 }
 
 - (id)init;
 - (id)initWithFileName:(NSString *)fileName;
+- (id)initWithWorkingDirPath:(NSString *)dirPath fileName:(NSString *)fileName;
 
 - (id)delegate;
 - (void)setDelegate:(id)newDelegate;
@@ -81,8 +83,8 @@ typedef struct _BDSKTeXTaskFlags {
 
 - (BOOL)runWithBibTeXString:(NSString *)bibStr;
 - (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys;
-- (BOOL)runWithBibTeXString:(NSString *)bibStr generatedTypes:(NSInteger)flag;
-- (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys generatedTypes:(NSInteger)flag;
+- (BOOL)runWithBibTeXString:(NSString *)bibStr generatedTypes:(int)flag;
+- (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys generatedTypes:(int)flag;
 
 - (void)terminate;
 

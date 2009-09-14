@@ -37,9 +37,8 @@
  */
 
 #import "BDSKFile.h"
-#import "BDSKRuntime.h"
+#import <OmniBase/OmniBase.h>
 #import "NSURL_BDSKExtensions.h"
-#import "CFString_BDSKExtensions.h"
 
 // private placeholder subclass
 
@@ -58,7 +57,7 @@
 @interface BDSKURLFile : BDSKFile
 {
     NSURL *fileURL;
-    NSUInteger hash;
+    unsigned int hash;
 }
 @end
 
@@ -81,7 +80,7 @@ static Class BDSKFileClass = Nil;
 
 + (void)initialize
 {
-    BDSKINITIALIZE;
+    OBINITIALIZE;
     BDSKFileClass = self;
     defaultPlaceholderFile = (BDSKPlaceholderFile *)NSAllocateObject([BDSKPlaceholderFile class], 0, NSDefaultMallocZone());
 }
@@ -96,20 +95,20 @@ static Class BDSKFileClass = Nil;
 // returns an FSRef wrapper
 - (id)initWithFSRef:(FSRef *)aRef;
 {
-    BDSKRequestConcreteImplementation(self, _cmd);
+    OBRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 // This is a common, convenient initializer, but we prefer to return the FSRef variant so we can use FSCompareFSRefs and survive external name changes.  If the file doesn't exist (yet), though, we return an NSURL variant.
 - (id)initWithURL:(NSURL *)aURL;
 {
-    BDSKRequestConcreteImplementation(self, _cmd);
+    OBRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (id)initWithPath:(NSString *)aPath;
 {
-    BDSKRequestConcreteImplementation(self, _cmd);
+    OBRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
@@ -147,13 +146,13 @@ static Class BDSKFileClass = Nil;
 
 - (id)initWithCoder:(NSCoder *)coder
 {
-    BDSKRequestConcreteImplementation(self, _cmd);
+    OBRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (id)copyWithZone:(NSZone *)aZone
 {
-    BDSKRequestConcreteImplementation(self, _cmd);
+    OBRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
@@ -161,13 +160,13 @@ static Class BDSKFileClass = Nil;
 
 - (NSURL *)fileURL;
 {
-    BDSKRequestConcreteImplementation(self, _cmd);
+    OBRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (const FSRef *)fsRef;
 {
-    BDSKRequestConcreteImplementation(self, _cmd);
+    OBRequestConcreteImplementation(self, _cmd);
     return NULL;
 }
 
@@ -236,7 +235,7 @@ static Class BDSKFileClass = Nil;
 
 - (void)release {}
 
-- (NSUInteger)retainCount { return NSUIntegerMax; }
+- (unsigned)retainCount { return UINT_MAX; }
 
 @end
 
@@ -268,7 +267,7 @@ static Class BDSKFileClass = Nil;
     return [self retain];
 }
 
-- (NSUInteger)hash
+- (unsigned int)hash
 { 
     return hash; 
 }
@@ -282,7 +281,7 @@ static Class BDSKFileClass = Nil;
         // always return NO if comparing against an instance with a valid FSRef, since self isn't a valid file (or wasn't when instantiated) and hashes aren't guaranteed to be the same for differend subclasses
         isEqual = [fileURL isEqualToFileURL:[other fileURL]];
     }
-#ifdef DEBUG
+#if OMNI_FORCE_ASSERTIONS
     if(isEqual)
         NSAssert([self hash] == [other hash], @"inconsistent hash and isEqual:");
 #endif
@@ -345,14 +344,14 @@ static Class BDSKFileClass = Nil;
         // only compare with a subclass that has an fsRef; URL variant always returns NULL
         isEqual = (noErr == FSCompareFSRefs(fileRef, otherFSRef));
     }
-#ifdef DEBUG
+#if OMNI_FORCE_ASSERTIONS
     if(isEqual)
         NSAssert([self hash] == [other hash], @"inconsistent hash and isEqual:");
 #endif
     return isEqual;
 }
 
-- (NSUInteger)hash
+- (unsigned int)hash
 {
     return hash;
 }

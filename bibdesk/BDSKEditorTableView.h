@@ -45,7 +45,7 @@
 @end
 
 @interface NSObject (BDSKEditorTableViewDelegate)
-- (BOOL)tableView:(NSTableView *)aTableView textViewShouldLinkKeys:(NSTextView *)textView forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row;
-- (BOOL)tableView:(NSTableView *)aTableView textView:(NSTextView *)textView isValidKey:(NSString *)key forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row;
-- (BOOL)tableView:(NSTableView *)aTableView textView:(NSTextView *)textView clickedOnLink:(id)link atIndex:(NSUInteger)charIndex forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row;
+- (BOOL)tableView:(NSTableView *)aTableView textViewShouldLinkKeys:(NSTextView *)textView forTableColumn:(NSTableColumn *)aTableColumn row:(int)row;
+- (BOOL)tableView:(NSTableView *)aTableView textView:(NSTextView *)textView isValidKey:(NSString *)key forTableColumn:(NSTableColumn *)aTableColumn row:(int)row;
+- (BOOL)tableView:(NSTableView *)aTableView textView:(NSTextView *)textView clickedOnLink:(id)link atIndex:(unsigned)charIndex forTableColumn:(NSTableColumn *)aTableColumn row:(int)row;
 @end

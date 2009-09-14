@@ -39,6 +39,7 @@
 #import "BDSKScriptHookManager.h"
 #import "BibDocument.h"
 #import "BDSKStringConstants.h"
+#import <OmniFoundation/OmniFoundation.h>
 
 #define MAX_RUNNING_SCRIPT_HOOKS	100
 
@@ -97,7 +98,7 @@ static NSArray *scriptHookNames = nil;
 
 - (void)release {}
 
-- (NSUInteger)retainCount { return NSUIntegerMax; }
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (BDSKScriptHook *)scriptHookWithUniqueID:(NSNumber *)uniqueID {
 	return [scriptHooks objectForKey:uniqueID];
@@ -116,7 +117,7 @@ static NSArray *scriptHookNames = nil;
 		return nil;
 	}
 	// We could also build a cache of scripts for each name.
-	NSString *path = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
+	NSString *path = [[[OFPreferenceWrapper sharedPreferenceWrapper] dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 	NSAppleScript *script = nil;
 	
 	if ([NSString isEmptyString:path]) {

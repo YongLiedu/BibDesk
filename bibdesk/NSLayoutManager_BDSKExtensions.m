@@ -41,7 +41,7 @@
 
 @implementation NSLayoutManager (BDSKExtensions)
 
-+ (CGFloat)defaultViewLineHeightForFont:(NSFont *)theFont {
++ (float)defaultViewLineHeightForFont:(NSFont *)theFont {
     static NSLayoutManager *layoutManager = nil;
     if (layoutManager == nil) {
         layoutManager = [[NSLayoutManager alloc] init];

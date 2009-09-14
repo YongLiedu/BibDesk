@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 07/10/07.
 /*
- This software is Copyright (c) 2007-2009
+ This software is Copyright (c) ,2007,2008
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -44,10 +44,10 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
-#import "BDSKReadWriteLock.h"
+#import <OmniFoundation/OmniFoundation.h>
 
 #define MAX_RESULTS 100
-#ifdef DEBUG
+#if(OMNI_FORCE_ASSERTIONS)
 static BOOL addXMLStringToAnnote = YES;
 #else
 static BOOL addXMLStringToAnnote = NO;
@@ -68,6 +68,10 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 @end
 
 @protocol BDSKISIGroupServerLocalThread <BDSKAsyncDOServerThread>
+- (int)availableResults;
+- (void)setAvailableResults:(int)value;
+- (int)fetchedResults;
+- (void)setFetchedResults:(int)value;
 - (oneway void)downloadWithSearchTerm:(NSString *)searchTerm;
 @end
 
@@ -92,7 +96,6 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 
 + (void)initialize
 {
-    BDSKINITIALIZE;
     // this is messy, but may be useful for debugging
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKAddISIXMLStringToAnnote"])
         addXMLStringToAnnote = YES;
@@ -119,7 +122,8 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
         flags.isRetrieving = 0;
         availableResults = 0;
         fetchedResults = 0;
-        infoLock = [[BDSKReadWriteLock alloc] init];
+        pthread_rwlock_init(&infolock, NULL);
+        resultCounterLock = [[NSLock alloc] init];
     
         [self startDOServerSync];
     }
@@ -127,9 +131,10 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 }
 
 - (void)dealloc {
-    [infoLock release];
+    pthread_rwlock_destroy(&infolock);
     [serverInfo release];
     serverInfo = nil;
+    [resultCounterLock release];
     [super dealloc];
 }
 
@@ -140,24 +145,24 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 - (void)terminate
 {
     [self stopDOServer];
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
 }
 
 - (void)stop
 {
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
 }
 
 - (void)retrievePublications
 {
     if ([[self class] canConnect]) {
-        OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
+        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedDownload);
     
-        OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
         [[self serverOnServerThread] downloadWithSearchTerm:[group searchTerm]];
 
     } else {
-        OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedDownload);
         NSError *presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to connect to server", @"")];
         [NSApp presentError:presentableError];
     }
@@ -165,40 +170,50 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
 {
-    [infoLock lockForWriting];
+    pthread_rwlock_wrlock(&infolock);
     if (serverInfo != info) {
         [serverInfo release];
         serverInfo = [info copy];
     }
-    [infoLock unlock];
+    pthread_rwlock_unlock(&infolock);
 }
 
 - (BDSKServerInfo *)serverInfo;
 {
-    [infoLock lockForReading];
+    pthread_rwlock_rdlock(&infolock);
     BDSKServerInfo *info = [[serverInfo copy] autorelease];
-    [infoLock unlock];
+    pthread_rwlock_unlock(&infolock);
     return info;
 }
 
-- (void)setNumberOfAvailableResults:(NSInteger)value;
+- (void)setNumberOfAvailableResults:(int)value;
 {
-    OSAtomicCompareAndSwap32Barrier(availableResults, value, &availableResults);
+    [resultCounterLock lock];
+    availableResults = value;
+    [resultCounterLock unlock];
 }
 
-- (NSInteger)numberOfAvailableResults;
+- (int)numberOfAvailableResults;
 {
-    return availableResults;
+    [resultCounterLock lock];
+    int value = availableResults;
+    [resultCounterLock unlock];
+    return value;
 }
 
-- (void)setNumberOfFetchedResults:(NSInteger)value;
+- (void)setNumberOfFetchedResults:(int)value;
 {
-    OSAtomicCompareAndSwap32Barrier(fetchedResults, value, &fetchedResults);
+    [resultCounterLock lock];
+    fetchedResults = value;
+    [resultCounterLock unlock];
 }
 
-- (NSInteger)numberOfFetchedResults;
+- (int)numberOfFetchedResults;
 {
-    return fetchedResults;
+    [resultCounterLock lock];
+    int value = fetchedResults;
+    [resultCounterLock unlock];
+    return value;
 }
 
 - (BOOL)failedDownload { OSMemoryBarrier(); return 1 == flags.failedDownload; }
@@ -210,13 +225,13 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 
 - (void)addPublicationsToGroup:(bycopy NSArray *)pubs;
 {
-    BDSKASSERT([NSThread isMainThread]);
+    OBASSERT([NSThread inMainThread]);
     [group addPublications:pubs];
 }
 
 - (void)setPublicationsOfGroup:(bycopy NSArray *)pubs;
 {
-    BDSKASSERT([NSThread isMainThread]);
+    OBASSERT([NSThread inMainThread]);
     [group setPublications:pubs];
 }
 
@@ -227,8 +242,8 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
     NSArray *pubs = nil;
     NSMutableArray *identifiers = nil;
     enum operationTypes { search, retrieve, retrieveRecid, citedReferences, citingArticles, citingArticlesByRecids } operation = search;
-    NSInteger availableResultsLocal = [self numberOfAvailableResults];
-    NSInteger fetchedResultsLocal = [self numberOfFetchedResults];
+    int availableResultsLocal = [self numberOfAvailableResults];
+    int fetchedResultsLocal = [self numberOfFetchedResults];
     
     if (NO == [NSString isEmptyString:searchTerm]){
         
@@ -309,7 +324,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
                 pubs = publicationsWithISIRefXMLString(resultString, hotRecids);
                 NSRange retrieveRange = {0, 0};
                 while ([hotRecids count] > retrieveRange.location) {
-                    retrieveRange.length = MIN((NSUInteger)MAX_RESULTS, [hotRecids count] - retrieveRange.location);
+                    retrieveRange.length = MIN((unsigned)MAX_RESULTS, [hotRecids count] - retrieveRange.location);
                     NSArray *subHotRecids = [hotRecids subarrayWithRange:retrieveRange];
                     NSString *fullString;
                     fullString = [BDSKISISearchRetrieveService retrieveRecid:@"WOS"
@@ -354,13 +369,13 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
         }
         
         if (nil == resultString && nil == resultInfo && operation != retrieveRecid) {
-            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
+            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedDownload);
             // we already know that a connection can be made, so we likely don't have permission to read this edition or database
             NSError *presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database.", @"Error message when connection to Web of Science fails.")];
             [NSApp performSelectorOnMainThread:@selector(presentError:) withObject:presentableError waitUntilDone:NO];
         }
         
-        NSInteger numResults = MIN(availableResultsLocal - fetchedResultsLocal, MAX_RESULTS);
+        int numResults = MIN(availableResultsLocal - fetchedResultsLocal, MAX_RESULTS);
         //NSAssert(numResults >= 0, @"number of results to get must be non-negative");
         
         if(numResults > 0) {
@@ -428,10 +443,10 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
     [self setNumberOfFetchedResults:fetchedResultsLocal];
     
     // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
     
     // this will create the array if it doesn't exist
-    if (availableResultsLocal == (NSInteger)[pubs count]) {
+    if (availableResultsLocal == (int)[pubs count]) {
         [[self serverOnMainThread] setPublicationsOfGroup:pubs];
     } else {
     [[self serverOnMainThread] addPublicationsToGroup:pubs];
@@ -483,30 +498,26 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
     // this is now a field/value set for a particular publication record
     NSXMLNode *child = [record childCount] ? [record childAtIndex:0] : nil;
     NSMutableDictionary *pubFields = [NSMutableDictionary new];
-    NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+    NSString *keywordSeparator = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
     NSMutableDictionary *sourceTagValues = [NSMutableDictionary dictionary];
     NSString *isiURL = nil;
     
-    // default values
-    NSString *pubType = BDSKArticleString;
-    NSString *sourceField = BDSKJournalString;
+    // fallback values
+    NSString *pubType = BDSKMiscString;
+    NSString *sourceField = @"Note";
     
-    /*
-     I've seen "Meeting Abstract" and "Article" as common types.  However, "Geomorphology" and 
-     "Estuarine Coastal and Shelf Science" articles are sometimes listed as "Proceedings Paper"
-     which is clearly wrong.  Likewise, any journal with "Review" in the name is listed as a 
-     "Review" type, when it should probably be a journal (e.g., "Earth Science Reviews").
-     */
+    // I've only seen "Meeting Abstract" and "Article" as types
     NSString *docType =[[[record nodesForXPath:@"doctype" error:NULL] lastObject] stringValue];
-    if ([docType isEqualToString:@"Meeting Abstract"]) {
+    if ([docType isEqualToString:@"Article"] || [docType isEqualToString:@"Review"] || 
+        [docType isEqualToString:@"Editorial Material"] || [docType isEqualToString:@"Software Review"]) {
+        pubType = BDSKArticleString;
+        sourceField = BDSKJournalString;
+    } else if ([docType isEqualToString:@"Meeting Abstract"]) {
         pubType = BDSKInproceedingsString;
         sourceField = BDSKBooktitleString;
-    } else if ([docType isEqualToString:@"Article"] == NO && [docType isEqualToString:@"Review"] == NO) {
-        // preserve the type if it's unclear
-        addStringToDictionaryIfNotNil(docType, BDSKTypeString, pubFields);
     }
     
-    addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"timescited"] stringValue], @"Times-Cited", pubFields);
+    addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"timescited"] stringValue], @"Timescited", pubFields);
     addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"recid"] stringValue], @"Isi-Recid", pubFields);
         
     while (nil != child) {
@@ -532,48 +543,19 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
         }
         else if ([name isEqualToString:@"article_nos"])
             // for current journals, these are DOI strings, which doesn't follow from the name or the description
-            addStringValueOfNodeForField([[child nodesForXPath:@"./article_no[starts-with(., 'DOI')]" error:NULL] lastObject], BDSKDoiString, pubFields);
+            addStringValueOfNodeForField([[child nodesForXPath:@"./article_no[1]" error:NULL] lastObject], BDSKDoiString, pubFields);
         else if ([name isEqualToString:@"source_series"])
             addStringValueOfNodeForField(child, BDSKSeriesString, pubFields);
-        else if ([name isEqualToString:@"bib_date"] && [child kind] == NSXMLElementKind) {
-            /* 
-             There are at least 3 variants of this, so it's not always possible to get something
-             truly useful from it.
-             
-             <bib_date date="AUG" year="2008">AUG 2008</bib_date>
-             <bib_date date="JUN 19" year="2008">JUN 19 2008</bib_date>
-             <bib_date date="MAR-APR" year="2007">MAR-APR 2007</bib_date>
-             */
-            NSString *possibleMonthString = [[(NSXMLElement *)child attributeForName:@"date"] stringValue];
-            NSString *monthString;
-            NSScanner *scanner = nil;
-            if (possibleMonthString)
-                scanner = [[NSScanner alloc] initWithString:possibleMonthString];
-            static NSCharacterSet *monthSet = nil;
-            if (nil == monthSet) {
-                NSMutableCharacterSet *cset = [[NSCharacterSet letterCharacterSet] mutableCopy];
-                [cset addCharactersInString:@"-"];
-                monthSet = [cset copy];
-                [cset release];
-            }
-            if ([scanner scanCharactersFromSet:monthSet intoString:&monthString]) {
-                if ([monthString rangeOfString:@"-"].length == 0)
-                    monthString = [NSString stringWithBibTeXString:[monthString lowercaseString] macroResolver:nil error:NULL];
-                else
-                    monthString = [monthString titlecaseString];
-                addStringToDictionaryIfNotNil(monthString, BDSKMonthString, pubFields);
-            }
-            else
-                addStringToDictionaryIfNotNil(possibleMonthString, BDSKDateString, pubFields);
-            [scanner release];
-        }
         
         // @@ remainder are untested (they're empty in all of my search results) so may be NSXMLElements
         else if ([name isEqualToString:@"pub_url"])
             addStringValueOfNodeForField(child, BDSKUrlString, pubFields);
         else if ([name isEqualToString:@"bib_vol"])
             addStringToDictionaryIfNotNil([[(NSXMLElement *)child attributeForName:@"issue"] stringValue], BDSKNumberString, pubFields);
-        else if ([name isEqualToString:@"publisher"])
+        else if ([name isEqualToString:@"bib_date"]) {
+            addStringValueOfNodeForField(child, BDSKDateString, pubFields);
+            addStringToDictionaryIfNotNil([[(NSXMLElement *)child attributeForName:@"date"] stringValue], BDSKMonthString, pubFields);
+        } else if ([name isEqualToString:@"publisher"])
             addStringValueOfNodeForField(child, BDSKPublisherString, pubFields);
         else if ([name isEqualToString:@"pub_address"])
             addStringValueOfNodeForField(child, BDSKAddressString, pubFields);

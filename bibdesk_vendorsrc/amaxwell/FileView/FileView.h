@@ -1,9 +1,9 @@
+//
+//  FileView.h
+//  FileViewTest
+//
+//  Created by Adam Maxwell on 06/23/07.
 /*
- *  FileView.h
- *  FileView
- *
- *  Created by Christiaan Hofman on 3/12/09.
- *
  This software is Copyright (c) 2007-2009
  Adam Maxwell. All rights reserved.
  
@@ -36,6 +36,9 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#import <Cocoa/Cocoa.h>
+
+// define here, since this is the only public header for the project
 // From NSObjCRuntime.h
 #ifndef NSINTEGER_DEFINED
 typedef int NSInteger;
@@ -55,11 +58,166 @@ typedef float CGFloat;
 #define CGFLOAT_DEFINED 1
 #endif /* CGFLOAT_DEFINED */
 
-// from 10.5 header
 #ifndef NSAppKitVersionNumber10_4
 #define NSAppKitVersionNumber10_4 824
 #endif
 
-#import <FileView/FVFileView.h>
-#import <FileView/FVPreviewer.h>
-#import <FileView/FVFinderLabel.h>
+enum {
+    FVZoomInMenuItemTag = 1001,
+    FVZoomOutMenuItemTag = 1002,
+    FVAutoScalesMenuItemTag = 1003,
+    FVQuickLookMenuItemTag = 1004,
+    FVOpenMenuItemTag = 1005,
+    FVRevealMenuItemTag = 1006,
+    FVChangeLabelMenuItemTag = 1007,
+    FVDownloadMenuItemTag    = 1008,
+    FVRemoveMenuItemTag = 1009
+};
+
+typedef enum _FVDropOperation {
+    FVDropOn,
+    FVDropBefore,
+    FVDropAfter
+} FVDropOperation;
+
+@class FVSliderWindow, FVOperationQueue;
+
+@interface FileView : NSView 
+{
+@private
+    id                      _delegate;
+    id                      _dataSource;
+    NSMutableDictionary    *_iconCache;
+    CFMutableDictionaryRef  _iconIndexMap;
+    NSUInteger              _numberOfColumns;
+    NSUInteger              _numberOfRows;
+    NSColor                *_backgroundColor;
+    CFRunLoopTimerRef       _zombieTimer;
+    NSMutableIndexSet      *_selectedIndexes;
+    CGLayerRef              _selectionOverlay;
+    NSUInteger              _lastClickedIndex;
+    NSUInteger              _dropOperation;
+    NSUInteger              _dropIndex;
+    NSRect                  _rubberBandRect;
+    BOOL                    _isMouseDown;
+    NSSize                  _padding;
+    NSSize                  _iconSize;
+    NSPoint                 _lastMouseDownLocInView;
+    BOOL                    _isEditable;
+    BOOL                    _isRescaling;
+    BOOL                    _isDrawingDragImage;
+    CFAbsoluteTime          _timeOfLastOrigin;
+    NSPoint                 _lastOrigin;
+    CFMutableDictionaryRef  _trackingRectMap;
+    NSButtonCell           *_leftArrow;
+    NSButtonCell           *_rightArrow;
+    NSRect                  _leftArrowFrame;
+    NSRect                  _rightArrowFrame;
+    FVSliderWindow         *_sliderWindow;
+    NSTrackingRectTag       _topSliderTag;
+    NSTrackingRectTag       _bottomSliderTag;
+    FVOperationQueue       *_operationQueue;
+    
+    CFMutableDictionaryRef  _activeDownloads;
+    CFRunLoopTimerRef       _progressTimer;
+    NSArray                *_iconURLs;
+    
+    BOOL                    _autoScales;
+}
+
+// bindings compatibility, although this can be set directly
+- (void)setIconURLs:(NSArray *)anArray;
+- (NSArray *)iconURLs;
+
+// this is the only way to get selection information at present
+- (NSIndexSet *)selectionIndexes;
+- (void)setSelectionIndexes:(NSIndexSet *)indexSet;
+
+// bind a slider or other control to this
+- (CGFloat)iconScale;
+- (void)setIconScale:(CGFloat)scale;
+
+- (BOOL)autoScales;
+- (void)setAutoScales:(BOOL)flag;
+
+- (NSUInteger)numberOfRows;
+- (NSUInteger)numberOfColumns;
+- (void)reloadIcons;
+
+// default is Mail's source list color
+- (NSColor *)backgroundColor;
+- (void)setBackgroundColor:(NSColor *)aColor;
+
+// actions that NSResponder doesn't declare
+- (IBAction)selectPreviousIcon:(id)sender;
+- (IBAction)selectNextIcon:(id)sender;
+- (IBAction)delete:(id)sender;
+
+// sender must implement -tag to return a valid Finder label integer (0-7); non-file URLs are ignored
+- (IBAction)changeFinderLabel:(id)sender;
+- (IBAction)openSelectedURLs:(id)sender;
+
+- (BOOL)isEditable;
+- (void)setEditable:(BOOL)flag;
+
+- (void)setDropIndex:(NSUInteger)anIndex dropOperation:(FVDropOperation)anOperation;
+
+// required for drag-and-drop support
+- (void)setDataSource:(id)obj;
+- (id)dataSource;
+
+- (void)setDelegate:(id)obj;
+- (id)delegate;
+
+- (BOOL)allowsDownloading;
+- (void)setAllowsDownloading:(BOOL)flag;
+
+@end
+
+
+// dataSource must conform to this
+@interface NSObject (FileViewDataSource)
+
+// delegate must return an NSURL or nil (a missing value) for each index < numberOfFiles
+- (NSUInteger)numberOfURLsInFileView:(FileView *)aFileView;
+- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)anIndex;
+
+// optional method for a subtitle
+- (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
+
+@end
+
+// datasource must implement all of these methods or dropping/rearranging will be disabled
+@interface NSObject (FileViewDragDataSource)
+
+// implement to do something (or nothing) with the dropped URLs
+- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+
+// the datasource may replace the files at the given indexes
+- (BOOL)fileView:(FileView *)aFileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+
+// rearranging files in the view
+- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+
+// does not delete the file from disk; this is the datasource's responsibility
+- (BOOL)fileView:(FileView *)aFileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
+
+@end
+
+@interface NSObject (FileViewDelegate)
+
+// Called immediately before display.   The anIndex parameter will be NSNotFound if there is not a URL at the mouse event location.  If you remove all items, the menu will not be shown.
+- (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)aMenu onIconAtIndex:(NSUInteger)anIndex;
+
+// In addition, it can be sent the WebUIDelegate method webView:contextMenuItemsForElement:defaultMenuItems:
+
+// If unimplemented or returns YES, fileview will open the URL using NSWorkspace
+- (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL;
+
+// If unimplemented, fileview will use a system temporary directory; if returns nil, cancels download.  Used with FVDownloadMenuItemTag menu item.
+- (NSURL *)fileView:(FileView *)aFileView downloadDestinationWithSuggestedFilename:(NSString *)filename;
+
+// If unimplemented, uses the proposedDragOperation
+- (NSDragOperation)fileView:(FileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation;
+
+@end

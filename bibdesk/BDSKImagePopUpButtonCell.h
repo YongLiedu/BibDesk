@@ -42,16 +42,33 @@
 @interface BDSKImagePopUpButtonCell : NSPopUpButtonCell
 {
     NSButtonCell *buttonCell;
-    NSImage *icon;
     NSSize iconSize;
+    BOOL showsMenuWhenIconClicked;
+    NSImage *iconImage;
+    NSImage *arrowImage;
+	BOOL iconActionEnabled;
+	BOOL alwaysUsesFirstItemAsSelected;
+	BOOL refreshesMenu;
 }
 
-+ (NSImage *)arrowImage;
-
-- (NSImage *)icon;
-- (void)setIcon:(NSImage *)anImage;
+- (BOOL)iconActionEnabled;
+- (void)setIconActionEnabled:(BOOL)flag;
 
 - (NSSize)iconSize;
-- (void)setIconSize:(NSSize)newIconSize;
+- (void)setIconSize:(NSSize)aSize;
+
+- (BOOL)showsMenuWhenIconClicked;
+- (void)setShowsMenuWhenIconClicked:(BOOL)flag;
+
+- (NSImage *)iconImage;
+- (void)setIconImage:(NSImage *)anImage;
+- (NSImage *) arrowImage;
+- (void)setArrowImage:(NSImage *)anImage;
+
+- (BOOL)alwaysUsesFirstItemAsSelected;
+- (void)setAlwaysUsesFirstItemAsSelected:(BOOL)flag;
+
+- (BOOL)refreshesMenu;
+- (void)setRefreshesMenu:(BOOL)flag;
 
 @end

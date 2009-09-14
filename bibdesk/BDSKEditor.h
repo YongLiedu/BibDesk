@@ -41,9 +41,21 @@
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
 
-@class BDSKRatingButton, BDSKRatingButtonCell, BDSKImagePopUpButton, BDSKStatusBar, BDSKZoomablePDFView, FVFileView, BDSKGradientSplitView, BDSKEditorTableView;
-@class BDSKComplexStringFormatter, BDSKCrossrefFormatter, BDSKCitationFormatter, BDSKComplexStringEditor;
-@class BibItem, BibAuthor;
+@class BDSKRatingButton;
+@class BDSKRatingButtonCell;
+@class BDSKComplexStringFormatter;
+@class BDSKCrossrefFormatter;
+@class BDSKCitationFormatter;
+@class BDSKComplexStringEditor;
+@class BDSKImagePopUpButton;
+@class BibItem;
+@class BDSKStatusBar;
+@class BDSKAlert;
+@class BibAuthor;
+@class BDSKZoomablePDFView;
+@class FileView;
+@class BDSKSplitView;
+@class BDSKEditorTableView;
 
 /*!
     @class BDSKEditor
@@ -51,8 +63,8 @@
     @discussion Subclass of the NSWindowController class, This handles making, reversing and keeping track of changes to the BibItem, and displaying a nice GUI.
 */
 @interface BDSKEditor : NSWindowController {
-	IBOutlet BDSKGradientSplitView *mainSplitView;
-	IBOutlet BDSKGradientSplitView *fileSplitView;
+	IBOutlet BDSKSplitView *mainSplitView;
+	IBOutlet BDSKSplitView *fileSplitView;
     IBOutlet NSPopUpButton *bibTypeButton;
     IBOutlet BDSKEditorTableView *tableView;
     IBOutlet NSMatrix *matrix;
@@ -60,20 +72,14 @@
     IBOutlet NSTextView *notesView;
     IBOutlet NSTextView *abstractView;
     IBOutlet NSTextView *rssDescriptionView;
-	
-    // one of the three previous textviews:
-    NSTextView *currentEditedView;
-    NSString *previousValueForCurrentEditedView;
-    
-    // each textview gets its own undo manager
+	NSTextView *currentEditedView;
     NSUndoManager *notesViewUndoManager;
     NSUndoManager *abstractViewUndoManager;
     NSUndoManager *rssDescriptionViewUndoManager;
-    
     BOOL ignoreFieldChange;
     // for the splitview double-click handling
-	CGFloat lastFileViewWidth;
-    CGFloat lastAuthorsHeight;
+	float lastFileViewWidth;
+    float lastAuthorsHeight;
     
 	NSButtonCell *booleanButtonCell;
 	NSButtonCell *triStateButtonCell;
@@ -84,12 +90,13 @@
 	IBOutlet BDSKImagePopUpButton *actionButton;
     IBOutlet NSMenu *actionMenu;
 	IBOutlet NSButton *addFieldButton;
+	
+	IBOutlet NSWindow *chooseURLSheet;
+	IBOutlet NSTextField *chooseURLField;
     
     // ----------------------------------------------------------------------------------------
     BibItem *publication;
     BOOL isEditable;
-    
-    BOOL isEditing;
     
     NSMutableArray *fields;
     
@@ -115,11 +122,14 @@
     BDSKComplexStringEditor *complexStringEditor;
 
 	// edit field stuff
+	BOOL forceEndEditing;
+	BOOL ignoreEdit;
+
     BOOL didSetupFields;
 	
 	NSTextView *dragFieldEditor;
     
-    IBOutlet FVFileView *fileView;
+    IBOutlet FileView *fileView;
     
     NSButton *disableAutoFileButton;
 }
@@ -142,8 +152,13 @@
 - (void)show;
 
 - (IBAction)chooseLocalFile:(id)sender;
+- (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)chooseRemoteURL:(id)sender;
+- (IBAction)dismissChooseURLSheet:(id)sender;
+- (void)chooseRemoteURLSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
+- (IBAction)toggleStatusBar:(id)sender;
 
 - (IBAction)raiseAddField:(id)sender;
 - (IBAction)raiseDelField:(id)sender;
@@ -171,11 +186,19 @@
 
 - (void)updateCiteKeyAutoGenerateStatus;
 
-- (NSInteger)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue;
-- (NSInteger)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue didAutoGenerate:(NSInteger)mask;
+- (int)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue;
+- (int)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue didAutoGenerate:(int)mask;
 
 - (NSString *)status;
 - (void)setStatus:(NSString *)status;
+
+/*!
+    @method     finalizeChanges:
+    @abstract   Makes sure that edits of fields are submitted.
+    @discussion (comprehensive description)
+    @param      aNotification Unused
+*/
+- (void)finalizeChanges:(NSNotification *)aNotification;
 
 - (IBAction)openLinkedFile:(id)sender;
 
@@ -297,16 +320,18 @@
 
 - (IBAction)tableButtonAction:(id)sender;
 
+- (void)editInheritedAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
 - (NSUndoManager *)undoManager;
 
-- (void)deleteURLsAtIndexes:(NSIndexSet *)indexSet moveToTrash:(NSInteger)moveToTrash;
+- (void)deleteURLsAtIndexes:(NSIndexSet *)indexSet moveToTrash:(int)moveToTrash;
 
 #pragma mark Person controller
 
 - (IBAction)showPersonDetail:(id)sender;
 
-- (NSInteger)numberOfPersons;
-- (BibAuthor *)personAtIndex:(NSUInteger)anIndex;
+- (int)numberOfPersons;
+- (BibAuthor *)personAtIndex:(unsigned int)anIndex;
 - (NSArray *)persons;
 
 #pragma mark Macro support

@@ -37,6 +37,7 @@
  */
 
 #import "BDSKAppController+Scripting.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKScriptHookManager.h"
 #import "BDSKTypeManager.h"
 #import "BDSKMacroResolver.h"
@@ -55,15 +56,15 @@ Category on BDSKAppController making the papers folder readable for scripting
 }
 
 - (NSString *)papersFolder {
-	return [[[NSUserDefaults standardUserDefaults] stringForKey:BDSKPapersFolderPathKey] stringByStandardizingPath];
+	return [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey] stringByStandardizingPath];
 }
 
 - (NSString *)citeKeyFormat {
-	return [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteKeyFormatKey];
+	return [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteKeyFormatKey];
 }
 
 - (NSString *)localFileFormat {
-	return [[NSUserDefaults standardUserDefaults] stringForKey:BDSKLocalFileFormatKey];
+	return [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKLocalFileFormatKey];
 }
 
 - (NSArray *)allTypes {

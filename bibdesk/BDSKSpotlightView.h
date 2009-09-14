@@ -38,19 +38,29 @@
 
 #import <Cocoa/Cocoa.h>
 
-
-@interface BDSKSpotlightView : NSView {
-    id delegate;
-    BOOL flipped;
+@interface BDSKSpotlightCircle : NSObject
+{
+    NSPoint center;
+    float radius;
 }
-- (id)initWithFrame:(NSRect)frameRect flipped:(BOOL)isFlipped;
-- (id)initFlipped:(BOOL)isFlipped;
-- (id)delegate;
-- (void)setDelegate:(id)newDelegate;
+- (id)initWithCenterPoint:(NSPoint)p radius:(float)r;
+- (float)radius;
+- (NSPoint)center;
+@end
+
+@protocol BDSKSpotlightViewDelegate <NSObject>
+
+- (NSArray *)highlightCirclesInScreenCoordinates;
+- (BOOL)isSearchActive;
+
 @end
 
 
-@interface NSObject (BDSKSpotlightViewDelegate)
-// required, return nil for no highlights
-- (NSArray *)spotlightViewCircleRects:(BDSKSpotlightView *)spotlightView;
+@interface BDSKSpotlightView : NSView
+{
+    id delegate;
+}
+- (id)initWithFrame:(NSRect)frameRect delegate:(id)anObject;
+- (void)setDelegate:(id)anObject;
+
 @end

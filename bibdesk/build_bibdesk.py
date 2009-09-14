@@ -31,10 +31,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import os, sys
+import os
 import subprocess
 import tempfile
-import glob
 import shutil
 
 import datetime
@@ -131,7 +130,6 @@ def runSvnUpdate():
     except Exception, e:
         rc = 1
         logFile.write('svn update failed')
-    logFile.close()
     return rc
 
 def runVersionBump():
@@ -143,7 +141,6 @@ def runVersionBump():
     except Exception, e:
         rc = 1
         logFile.write('agvtool failed')
-    logFile.close()
     return rc
     
 def runXcodeBuild():
@@ -155,7 +152,6 @@ def runXcodeBuild():
     except Exception, e:
         rc = 1
         logFile.write('xcodebuild failed')
-    logFile.close()
     return rc
 
 def runXcodeUnitTest():
@@ -168,32 +164,7 @@ def runXcodeUnitTest():
     except Exception, e:
         rc = 1
         logFile.write('xcodebuild unit tests failed')
-    logFile.close()
     return rc
-
-# disable all localizations except English, since they're usually broken before release
-def disableLocalizations(pathToApplicationBundle):
-    
-    disabledResourcesPath = os.path.join(pathToApplicationBundle, "Contents", "Resources Disabled")
-    
-    if os.path.exists(disabledResourcesPath) is False:
-        os.mkdir(disabledResourcesPath)
-
-    resourcesPath = os.path.join(pathToApplicationBundle, "Contents", "Resources")    
-    allLocalizations = glob.glob(resourcesPath + "/*.lproj")
-    
-    logFile = open(LOG_PATH, "a")
-    
-    for loc in allLocalizations:
-        
-        if loc.endswith(("en.lproj", "English.lproj")) is False:
-            loc = os.path.join(resourcesPath, loc)
-            dst = os.path.join(disabledResourcesPath, os.path.basename(loc))
-            shutil.move(loc, dst)
-            logFile.write("moving %s to %s\n" % (loc, dst))
-            #print "moving %s to %s" % (loc, dst)
-            
-    logFile.close()
 
 def createDiskImage(imageName):
             
@@ -204,7 +175,6 @@ def createDiskImage(imageName):
         x = subprocess.Popen(cmd, cwd=TEMP_DIR, stdout=logFile, stderr=logFile)
         if x.wait() != 0:
             logFile.write("Failure: " + cmd)
-            logFile.close()
             sendEmailAndRemoveTemporaryDirectory()
             exit(1)
     
@@ -213,7 +183,6 @@ def createDiskImage(imageName):
         x = subprocess.Popen(cmd, cwd=TEMP_DIR, stdout=logFile, stderr=logFile)
         if x.wait() != 0:
             logFile.write("Failure: " + cmd)
-            logFile.close()
             sendEmailAndRemoveTemporaryDirectory()
             exit(1)
         
@@ -222,12 +191,9 @@ def createDiskImage(imageName):
         x = subprocess.Popen(cmd, cwd=TEMP_DIR, stdout=logFile, stderr=logFile)
         if x.wait() != 0:
             logFile.write("Failure: " + cmd)
-            logFile.close()
             sendEmailAndRemoveTemporaryDirectory()
             exit(1)
-        logFile.close()
     except Exception, e:
-        logFile.close()
         sendEmailAndRemoveTemporaryDirectory()
         exit(1)
     
@@ -259,12 +225,9 @@ if rc != 0:
 if os.access(BUILT_APP, os.F_OK) == False:
     logFile = open(LOG_PATH, "a")
     logFile.write("No application at " + BUILT_APP)
-    logFile.close()
     sendEmailAndRemoveTemporaryDirectory()
     exit(1)
-
-disableLocalizations(BUILT_APP)      
-
+    
 # create a name for the disk image based on today's date
 imageName = datetime.date.today().strftime("%Y%m%d")
 imageName = os.path.join(TEMP_DIR, "BibDesk-" + imageName + ".dmg")
@@ -300,10 +263,8 @@ def removeOldFiles(ftp):
 # get user/pass from keychain
 d = getUserAndPass()
 if len(d["username"]) == 0 or len(d["password"]) == 0:
-    # truncate the log file
-    logFile = open(LOG_PATH, "w")
+    logFile = open(LOG_PATH, "a")
     logFile.write("Failed getting username and password from keychain")
-    logFile.close()
     sendEmailAndRemoveTemporaryDirectory()
     exit(1)
 
@@ -321,12 +282,7 @@ try:
     sftp.chdir(SERVER_PATH)
     sftp.put(imageName, os.path.basename(imageName))
 except Exception, e:
-    # truncate the log file
-    logFile = open(LOG_PATH, "w")
-    logFile.write("Failed to upload file with exception " + str(e) + "\n")
-    logFile.write("File was " + imageName)
-    logFile.close()
-    sendEmailAndRemoveTemporaryDirectory()
+    print "Failed to upload file", e
 finally:
     sftp.close()
     # close the connection or else we don't exit because of a select() loop hanging around

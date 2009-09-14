@@ -56,7 +56,7 @@
 	NSNumber *indexNumber = [params objectForKey:@"index"];
 	BibItem *pub = [params objectForKey:@"from"];
 	BOOL check = [[params objectForKey:@"check"] boolValue];
-    NSUInteger i = indexNumber ? [indexNumber unsignedIntValue] - 1 : 0;
+    unsigned int i = indexNumber ? [indexNumber unsignedIntValue] - 1 : 0;
     BOOL isFile = field == nil;
     
 	if (formatString == nil || params == nil) {
@@ -112,7 +112,7 @@
         NSArray *requiredFields = [BDSKFormatParser requiredFieldsForFormat:formatString];
         
         if ((isFileField || isFile) &&
-            ([NSString isEmptyString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKPapersFolderPathKey]] && 
+            ([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey]] && 
              [NSString isEmptyString:[[[[pub owner] fileURL] path] stringByDeletingLastPathComponent]]))
             return [NSNull null];
         
@@ -159,7 +159,7 @@
 	NSString *string = nil;
     
     if (isFile)
-        string = [BDSKFormatParser parseFormat:formatString forLinkedFile:file ofItem:pub];
+        string = [BDSKFormatParser parseFormatForLinkedFile:file ofItem:pub];
     else
         string = [BDSKFormatParser parseFormat:formatString forField:field ofItem:pub suggestion:suggestion];
 	

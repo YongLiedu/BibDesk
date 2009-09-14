@@ -37,10 +37,11 @@
  */
 
 #import "NSWorkspace_BDSKExtensions.h"
+#import <OmniBase/OmniBase.h>
 #import <Carbon/Carbon.h>
 #import "NSURL_BDSKExtensions.h"
 
-#define BDSKDefaultBrowserKey @"BDSKDefaultBrowserKey"
+static NSString *BDSKDefaultBrowserKey = @"BDSKDefaultBrowserKey";
 
 @implementation NSWorkspace (BDSKExtensions)
 
@@ -85,7 +86,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     
     // FSRefs are now valid across processes, so we can pass them directly
     fileURL = [fileURL fileURLByResolvingAliases]; 
-    BDSKASSERT(fileURL != nil);
+    OBASSERT(fileURL != nil);
     if(fileURL == nil)
         err = fnfErr;
     else if(CFURLGetFSRef((CFURLRef)fileURL, &fileRef) == NO)
@@ -98,7 +99,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     FSSpec appSpec;
 	if(noErr == err){
         NSString *extension = [[[fileURL path] pathExtension] lowercaseString];
-        NSDictionary *defaultViewers = [[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey];
+        NSDictionary *defaultViewers = [[OFPreferenceWrapper sharedPreferenceWrapper] dictionaryForKey:BDSKDefaultViewersKey];
         NSString *bundleID = [defaultViewers objectForKey:extension];
 		if (bundleID)
             err = LSFindApplicationForInfo(kLSUnknownCreator, (CFStringRef)bundleID, NULL, NULL, &appURL);
@@ -123,8 +124,8 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
         
         if (err == noErr){
             appCreator = lsRecord.creator;
-            BDSKASSERT(appCreator != 0); 
-            BDSKASSERT(appCreator != invalidCreator); 
+            OBASSERT(appCreator != 0); 
+            OBASSERT(appCreator != invalidCreator); 
             // if the app has an invalid creator, our AppleEvent stuff won't work
             if (appCreator == 0 || appCreator == invalidCreator)
                 err = fnfErr;
@@ -227,7 +228,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
 
 - (BOOL)openLinkedFile:(NSString *)fullPath {
     NSString *extension = [[fullPath pathExtension] lowercaseString];
-    NSDictionary *defaultViewers = [[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey];
+    NSDictionary *defaultViewers = [[OFPreferenceWrapper sharedPreferenceWrapper] dictionaryForKey:BDSKDefaultViewersKey];
     NSString *appID = [defaultViewers objectForKey:extension];
     NSString *appPath = appID ? [self absolutePathForAppBundleWithIdentifier:appID] : nil;
     BOOL rv = NO;
@@ -361,7 +362,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
 {
     NSError *error;
     NSString *theUTI = [self UTIForURL:fileURL error:&error];
-#ifdef DEBUG
+#if defined (OMNI_ASSERTIONS_ON)
     if (nil == theUTI)
         NSLog(@"%@", error);
 #endif

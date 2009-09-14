@@ -38,95 +38,14 @@
 
 #import "FVIcon_Private.h"
 #import "FVPlaceholderImage.h"
-#import "FVAliasBadge.h"
-
-#import <objc/runtime.h>
-
-static inline Class fv_class_getSuperclass(Class aClass)
-{
-#if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
-    return aClass->super_class;
-#elif MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-    return class_getSuperclass != NULL ? class_getSuperclass(aClass) : aClass->super_class;
-#else
-    return class_getSuperclass(aClass);
-#endif
-}
-
-@interface _FVQueuedKeys : NSObject
-{
-    NSCountedSet   *_keys;
-    pthread_mutex_t _keyLock;
-    pthread_cond_t  _keyCondition;
-}
-- (void)startRenderingForKey:(id)aKey;
-- (void)stopRenderingForKey:(id)aKey;
-@end
-
 
 @implementation FVIcon (Private)
-
-// key = Class, object = _FVQueuedKeys
-static CFDictionaryRef _queuedKeysByClass = NULL;
-
-// Walk the runtime's class list and get all subclasses of FVIcon, then add an _FVQueuedKeys instance to _queuedKeysByClass for each subclass.  This avoids adding them lazily, which would require locking around the dictionary, but also means that all classes must be loaded by this time.  Since +initialize is pretty late, and bundles are loaded first, this assumption is safe.
-+ (void)_processIconSubclasses
-{
-    int numClasses = objc_getClassList(NULL, 0);
-    
-    CFMutableDictionaryRef queuedKeysByClass;
-    queuedKeysByClass = CFDictionaryCreateMutable(NULL, 0, NULL, &kCFTypeDictionaryValueCallBacks);
-    
-    if (numClasses > 0) {
-        Class *classes = NSZoneCalloc([self zone], numClasses, sizeof(Class));
-        numClasses = objc_getClassList(classes, numClasses);
-        
-        Class FVIconClass = [FVIcon self];
-        int classIndex;
-        
-        for (classIndex = 0; classIndex < numClasses; classIndex++) {
-            Class aClass = classes[classIndex];
-            Class superClass = fv_class_getSuperclass(aClass);
-            
-            while (Nil != superClass) {
-
-                if (superClass == FVIconClass) {
-                    _FVQueuedKeys *qkeys = [_FVQueuedKeys new];
-                    CFDictionaryAddValue(queuedKeysByClass, aClass, qkeys);
-                    [qkeys release];
-                    break;
-                }
-                superClass = fv_class_getSuperclass(superClass);
-            }
-        }
-        NSZoneFree([self zone], classes);
-    }
-    _queuedKeysByClass = CFDictionaryCreateCopy(CFGetAllocator(queuedKeysByClass), queuedKeysByClass);
-    CFRelease(queuedKeysByClass);
-}
 
 + (void)_initializeCategory;
 {
     static bool didInit = false;
     NSAssert(false == didInit, @"attempt to initialize category again");
-    didInit = true;    
-
-    // This is called /after/ +[FVIcon initialize] has set up statics and loaded the Leopard bundle, so all subclasses should be available by now.  If a plugin architecture is ever implemented, the class will have to register for NSBundleDidLoadNotification and add new classes.
-    [self _processIconSubclasses];
-}
-
-+ (void)_startRenderingForKey:(id)aKey;
-{
-    _FVQueuedKeys *qkeys = [(NSDictionary *)_queuedKeysByClass objectForKey:self];
-    NSParameterAssert(nil != qkeys);
-    [qkeys startRenderingForKey:aKey];
-}
-
-+ (void)_stopRenderingForKey:(id)aKey;
-{
-    _FVQueuedKeys *qkeys = [(NSDictionary *)_queuedKeysByClass objectForKey:self];
-    NSParameterAssert(nil != qkeys);
-    [qkeys stopRenderingForKey:aKey];   
+    didInit = true;
 }
 
 + (BOOL)_shouldDrawBadgeForURL:(NSURL *)aURL copyTargetURL:(NSURL **)linkTarget;
@@ -150,11 +69,9 @@ static CFDictionaryRef _queuedKeysByClass = NULL;
     if (absolutePath) CFRelease(absolutePath);
     
     // kLSItemContentType returns a CFStringRef, according to the header
-    CFTypeRef theUTI = NULL;
-    
-    // theUTI will be NULL on error
+    CFStringRef theUTI = NULL;
     if (noErr == err)
-        LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, &theUTI);
+        err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
     
     BOOL drawBadge = (NULL != theUTI && UTTypeConformsTo(theUTI, kUTTypeResolvable));
     
@@ -178,18 +95,33 @@ static CFDictionaryRef _queuedKeysByClass = NULL;
     return drawBadge;
 }
 
+- (BOOL)tryLock { [self doesNotRecognizeSelector:_cmd]; return NO; }
+- (void)lock { [self doesNotRecognizeSelector:_cmd]; }
+- (void)unlock { [self doesNotRecognizeSelector:_cmd]; }
+
 - (NSSize)size { [self doesNotRecognizeSelector:_cmd]; return NSZeroSize; }
 
 - (void)_badgeIconInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
 {
-    CGContextDrawLayerInRect(context, NSRectToCGRect(dstRect), [FVAliasBadge aliasBadgeWithSize:dstRect.size]);
+    IconRef linkBadge;
+    OSStatus err;
+    err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kAliasBadgeIcon, &linkBadge);
+    
+    // rect needs to be a square, or else the aspect ratio of the arrow is wrong
+    // rect needs to be the same size as the full icon, or the scale of the arrow is wrong
+    
+    // We don't know the size of the actual link arrow (and it changes with the size of dstRect), so fine-tuning the drawing isn't really possible as far as I can see.
+    if (noErr == err) {
+        PlotIconRefInContext(context, (CGRect *)&dstRect, kAlignBottomLeft, kTransformNone, NULL, kPlotIconRefNormalFlags, linkBadge);
+        ReleaseIconRef(linkBadge);
+    }
 }
 
 // handles centering and aspect ratio, since most of our icons have weird sizes, but they'll be drawn in a square box
 - (CGRect)_drawingRectWithRect:(NSRect)iconRect;
 {
     // lockless classes return NO specifically to avoid hitting this assertion
-    NSAssert1(NO == [self respondsToSelector:@selector(tryLock)] || [(id)self tryLock] == NO, @"%@ failed to acquire lock before calling -size", [self class]);
+    NSAssert1([self tryLock] == NO, @"%@ failed to acquire lock before calling -size", [self class]);
     NSSize s = [self size];
     
     NSParameterAssert(s.width > 0);
@@ -199,7 +131,7 @@ static CFDictionaryRef _queuedKeysByClass = NULL;
     if (s.width <= 0 || s.height <= 0) s = (NSSize) { 1, 1 };
     
     CGFloat ratio = MIN(NSWidth(iconRect) / s.width, NSHeight(iconRect) / s.height);
-    CGRect dstRect = NSRectToCGRect(iconRect);
+    CGRect dstRect = *(CGRect *)&iconRect;
     dstRect.size.width = ratio * s.width;
     dstRect.size.height = ratio * s.height;
     
@@ -216,116 +148,73 @@ static CFDictionaryRef _queuedKeysByClass = NULL;
 {
     CGContextSaveGState(context);
     CGContextSetShadowWithColor(context, CGSizeZero, 0, NULL);
-    CGContextDrawLayerInRect(context, NSRectToCGRect(dstRect), [FVPlaceholderImage placeholderWithSize:dstRect.size]);
+    CGContextDrawLayerInRect(context, *(CGRect *)&dstRect, [FVPlaceholderImage placeholderWithSize:dstRect.size]);
     CGContextRestoreGState(context);
 }
 
 @end
 
-#pragma mark Image sizing
-
-bool FVShouldDrawFullImageWithThumbnailSize(const NSSize desiredSize, const NSSize thumbnailSize)
-{
-    return (desiredSize.height > 1.4 * thumbnailSize.height || desiredSize.width > 1.4 * thumbnailSize.width);
-}
-
-// these are compromises based on memory constraints and readability at high magnification
 const size_t FVMaxThumbnailDimension = 200;
-const size_t FVMaxImageDimension     = 512;
-
-/*
- Global variables are evil, but NSPrintInfo and CUPS are more evil.  Since NSPrintInfo must be used from the main thread and it can block for a long time in +initialize if CUPS is jacked up, we'll just assume some values since the main need is to have page-like proportions.  The default for CGPDFContextCreate is 612x792 pts, and NSPrintInfo on my system has 1" left and 1.25" top margins.
- */
-const NSSize FVDefaultPaperSize = { 612, 792 };
-const CGFloat FVSideMargin      = 72.0;
-const CGFloat FVTopMargin       = 90.0;
+const size_t FVMaxImageDimension = 512;
 
 // used to constrain thumbnail size for huge pages
 bool FVIconLimitThumbnailSize(NSSize *size)
 {
-    CGFloat dimension = MAX(size->width, size->height);
+    CGFloat dimension = MIN(size->width, size->height);
     if (dimension <= FVMaxThumbnailDimension)
         return false;
     
     while (dimension > FVMaxThumbnailDimension) {
         size->width *= 0.9;
         size->height *= 0.9;
-        dimension = MAX(size->width, size->height);
+        dimension = MIN(size->width, size->height);
     }
     return true;
 }
 
 bool FVIconLimitFullImageSize(NSSize *size)
 {
-    CGFloat dimension = MAX(size->width, size->height);
+    CGFloat dimension = MIN(size->width, size->height);
     if (dimension <= FVMaxImageDimension)
         return false;
     
     while (dimension > FVMaxImageDimension) {
         size->width *= 0.9;
         size->height *= 0.9;
-        dimension = MAX(size->width, size->height);
+        dimension = MIN(size->width, size->height);
     }
     return true;
 }
 
-CGImageRef FVCreateResampledThumbnail(CGImageRef image)
+static CGImageRef __FVCreateResampledImageOfSize(CGImageRef image, const NSSize size, const bool useContextCache)
+{
+    CGContextRef ctxt;
+    if (useContextCache)
+        ctxt = [FVBitmapContextCache newBitmapContextOfWidth:size.width height:size.height];
+    else
+        ctxt = FVIconBitmapContextCreateWithSize(size.width, size.height);
+    
+    CGContextSaveGState(ctxt);
+    CGContextSetInterpolationQuality(ctxt, kCGInterpolationHigh);
+    CGContextDrawImage(ctxt, CGRectMake(0, 0, CGBitmapContextGetWidth(ctxt), CGBitmapContextGetHeight(ctxt)), image);
+    CGContextRestoreGState(ctxt);
+    
+    CGImageRef toReturn = CGBitmapContextCreateImage(ctxt);
+    if (useContextCache)
+        [FVBitmapContextCache disposeOfBitmapContext:ctxt];
+    else
+        FVIconBitmapContextDispose(ctxt);
+    return toReturn;
+}
+
+CGImageRef FVCreateResampledThumbnail(CGImageRef image, bool useContextCache)
 {
     NSSize size = FVCGImageSize(image);
-    return (FVIconLimitThumbnailSize(&size) || FVImageIsIncompatible(image)) ? FVCreateResampledImageOfSize(image, size) : CGImageRetain(image);
+    return (FVIconLimitThumbnailSize(&size)) ? __FVCreateResampledImageOfSize(image, size, useContextCache) : CGImageRetain(image);
 }
 
-CGImageRef FVCreateResampledFullImage(CGImageRef image)
+CGImageRef FVCreateResampledFullImage(CGImageRef image, bool useContextCache)
 {
     NSSize size = FVCGImageSize(image);
-    return (FVIconLimitFullImageSize(&size) || FVImageIsIncompatible(image)) ? FVCreateResampledImageOfSize(image, size) : CGImageRetain(image);    
+    return (FVIconLimitFullImageSize(&size)) ? __FVCreateResampledImageOfSize(image, size, useContextCache) : CGImageRetain(image);    
 }
-
-#pragma mark -
-
-@implementation _FVQueuedKeys
-
-- (id)init
-{
-    self = [super init];
-    if (self) {
-        _keys = [NSCountedSet new];
-        pthread_mutex_init(&_keyLock, NULL);
-        pthread_cond_init(&_keyCondition, NULL);
-    }
-    return self;
-}
-
-- (void)dealloc
-{
-    pthread_mutex_destroy(&_keyLock);
-    pthread_cond_destroy(&_keyCondition);
-    [_keys release];
-    [super dealloc];
-}
-
-- (void)startRenderingForKey:(id)aKey
-{
-    int ret = 0;
-    pthread_mutex_lock(&_keyLock);
-    // block this thread while the key we need is being rendered
-    while ([_keys countForObject:aKey] > 0 && 0 == ret) {
-        ret = pthread_cond_wait(&_keyCondition, &_keyLock);
-    }
-    [_keys addObject:aKey];
-    pthread_mutex_unlock(&_keyLock);
-}
-
-- (void)stopRenderingForKey:(id)aKey
-{
-    pthread_mutex_lock(&_keyLock);
-    // there should be only a single instance rendering at any given time
-    FVAPIParameterAssert([_keys countForObject:aKey] == 1);
-    [_keys removeObject:aKey];
-    pthread_mutex_unlock(&_keyLock);
-    // wake up any threads waiting in startRenderingForKey:
-    pthread_cond_broadcast(&_keyCondition);
-}
-
-@end
-

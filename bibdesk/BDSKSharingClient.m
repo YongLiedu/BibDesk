@@ -40,7 +40,6 @@
 #import "BDSKAsynchronousDOServer.h"
 #import "BDSKSharingServer.h"
 #import "BDSKPasswordController.h"
-#import "NSData_BDSKExtensions.h"
 
 typedef struct _BDSKSharingClientFlags {
     volatile int32_t isRetrieving;
@@ -59,21 +58,21 @@ typedef struct _BDSKSharingClientFlags {
 
 @protocol BDSKSharingClientServerMainThread <BDSKAsyncDOServerMainThread>
 
-- (void)setArchivedPublicationsAndMacros:(bycopy NSDictionary *)dictionary;
-- (NSInteger)runAuthenticationFailedAlert;
+- (oneway void)setArchivedPublications:(bycopy NSData *)publicationsArchive archivedMacros:(bycopy NSData *)macrosArchive;
+- (int)runPasswordPrompt;
+- (int)runAuthenticationFailedAlert;
 
 @end
 
 #pragma mark -
 
 // private class for DO server. We have it as a separate object so we don't get a retain loop, we remove it from the thread runloop in the client's dealloc
-@interface BDSKSharingClientServer : BDSKAsynchronousDOServer {
-    NSNetService *service;          // service with information about the remote server (BDSKSharingServer)
-    BDSKSharingClient *client;      // the owner of the local server (BDSKSharingClient)
-    id remoteServer;                // proxy for the remote sharing server to which we connect
-    id protocolChecker;             // proxy wrapping self for security
-    BDSKSharingClientFlags flags;   // state variables
-    NSString *uniqueIdentifier;     // used by the remote server
+@interface BDSKSharingClientServer : BDSKAsynchronousDOServer <BDSKSharingClientServerLocalThread, BDSKSharingClientServerMainThread, BDSKClientProtocol> {
+    NSNetService *service;              // service with information about the remote server (BDSKSharingServer)
+    BDSKSharingClient *client;             // the owner of the local server (BDSKSharingClient)
+    id remoteServer;
+    BDSKSharingClientFlags flags;         // state variables
+    NSString *uniqueIdentifier;         // used by the remote server
 }
 
 + (NSString *)supportedProtocolVersion;
@@ -81,12 +80,11 @@ typedef struct _BDSKSharingClientFlags {
 - (id)initWithClient:(BDSKSharingClient *)aClient andService:(NSNetService *)aService;
 
 - (BOOL)isRetrieving;
-- (void)setRetrieving:(BOOL)flag;
 - (BOOL)needsAuthentication;
 - (BOOL)failedDownload;
 
 // proxy object for messaging the remote server
-- (id <BDSKSharingServer>)remoteServer;
+- (id <BDSKSharingProtocol>)remoteServer;
 
 - (void)retrievePublicationsInBackground;
 
@@ -111,7 +109,8 @@ typedef struct _BDSKSharingClientFlags {
 }
 
 - (void)dealloc {
-    [self terminate];
+    [server stopDOServer];
+    [server release];
     [archivedPublications release];
     [archivedMacros release];
     [name release];
@@ -122,12 +121,6 @@ typedef struct _BDSKSharingClientFlags {
     return [NSString stringWithFormat:@"<%@ %p>: {\n\tneeds update: %@\n\tname: %@\n }", [self class], self, (needsUpdate ? @"yes" : @"no"), name];
 }
 
-- (void)terminate {
-    [server stopDOServer];
-    [server release];
-    server = nil;
-}
-
 - (void)retrievePublications {
     [server retrievePublicationsInBackground];
 }
@@ -136,29 +129,29 @@ typedef struct _BDSKSharingClientFlags {
     return archivedPublications;
 }
 
-- (void)setArchivedPublicationsAndMacros:(NSDictionary *)dictionary {
-    NSData *newArchivedPublications = [dictionary objectForKey:BDSKSharedArchivedDataKey];
-    NSData *newArchivedMacros = [dictionary objectForKey:BDSKSharedArchivedMacroDataKey];
-    
+- (void)setArchivedPublications:(NSData *)newArchivedPublications {
     if (archivedPublications != newArchivedPublications) {
         [archivedPublications release];
         archivedPublications = [newArchivedPublications retain];
+        
+        [self setNeedsUpdate:NO];
+        
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"archivedPublications", @"key", nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientUpdatedNotification object:self userInfo:userInfo];
     }
-    if (archivedMacros != newArchivedMacros) {
-        [archivedMacros release];
-        archivedMacros = [newArchivedMacros retain];
-    }
-    
-    [self setNeedsUpdate:NO];
-    
-    // we need to do this after setting the archivedPublications but before sending the notification
-    [server setRetrieving:NO];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientUpdatedNotification object:self];
 }
 
 - (NSData *)archivedMacros {
     return archivedMacros;
+}
+
+- (void)setArchivedMacros:(NSData *)newArchivedMacros {
+    if (archivedMacros != newArchivedMacros) {
+        [archivedMacros release];
+        archivedMacros = [newArchivedMacros retain];
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"archivedMacros", @"key", nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientUpdatedNotification object:self userInfo:userInfo];
+    }
 }
 
 - (BOOL)needsUpdate {
@@ -193,10 +186,6 @@ typedef struct _BDSKSharingClientFlags {
 
 // If we introduce incompatible changes in future, bump this to avoid sharing breakage
 + (NSString *)supportedProtocolVersion { return @"0"; }
-
-+ (NSString *)keychainServiceNameWithComputerName:(NSString *)computerName {
-    return [NSString stringWithFormat:@"%@ - %@", computerName, BDSKServiceNameForKeychain];
-}
 
 - (id)initWithClient:(BDSKSharingClient *)aClient andService:(NSNetService *)aService;
 {
@@ -237,7 +226,7 @@ typedef struct _BDSKSharingClientFlags {
 
 #pragma mark Accessors
 
-// BDSKSharingClient
+// BDSKClientProtocol
 - (oneway void)setNeedsUpdate:(BOOL)flag { 
     // don't message the client during cleanup
     if([self shouldKeepRunning])
@@ -249,11 +238,6 @@ typedef struct _BDSKSharingClientFlags {
 - (BOOL)isRetrieving { 
     OSMemoryBarrier();
     return flags.isRetrieving == 1; 
-}
-
-- (void)setRetrieving:(BOOL)flag {
-    int32_t old = flag ? 0 : 1, new = flag ? 1 : 0;
-    OSAtomicCompareAndSwap32Barrier(old, new, &flags.isRetrieving);
 }
 
 - (BOOL)needsAuthentication { 
@@ -268,7 +252,7 @@ typedef struct _BDSKSharingClientFlags {
 
 #pragma mark Proxies
 
-- (id <BDSKSharingServer>)remoteServer;
+- (id <BDSKSharingProtocol>)remoteServer;
 {
     if (remoteServer != nil)
         return remoteServer;
@@ -302,7 +286,7 @@ typedef struct _BDSKSharingClientFlags {
             // if the user didn't cancel, set an auth failure flag and show an alert
             OSMemoryBarrier();
             if(flags.canceledAuthentication == 0){
-                OSAtomicCompareAndSwap32Barrier(0, 1, &flags.authenticationFailed);
+                OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.authenticationFailed);
                 // don't show the alert when we couldn't authenticate when cleaning up
                 if([self shouldKeepRunning]){
                     [[self serverOnMainThread] runAuthenticationFailedAlert];
@@ -315,7 +299,7 @@ typedef struct _BDSKSharingClientFlags {
     }
 
     if (proxy != nil) {
-        [proxy setProtocolForProxy:@protocol(BDSKSharingServer)];
+        [proxy setProtocolForProxy:@protocol(BDSKSharingProtocol)];
         
         if(uniqueIdentifier == nil){
             // use uniqueIdentifier as the notification identifier for this host on the other end
@@ -323,8 +307,8 @@ typedef struct _BDSKSharingClientFlags {
             uniqueIdentifier = (id)CFUUIDCreateString(NULL, uuid);
             CFRelease(uuid);
             @try {
-                protocolChecker = [[NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKSharingClient)] retain];
-                [proxy registerClient:protocolChecker forIdentifier:uniqueIdentifier version:[BDSKSharingClientServer supportedProtocolVersion]];
+                NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKClientProtocol)];
+                [proxy registerClient:checker forIdentifier:uniqueIdentifier version:[BDSKSharingClientServer supportedProtocolVersion]];
             }
             @catch(id exception) {
                 [uniqueIdentifier release];
@@ -341,15 +325,19 @@ typedef struct _BDSKSharingClientFlags {
 
 #pragma mark Authentication
 
-- (NSData *)runPasswordPrompt;
+- (int)runPasswordPrompt;
 {
-    NSAssert([NSThread isMainThread] == 1, @"password controller must be run from the main thread");
-    return [BDSKPasswordController runModalPanelForKeychainServiceName:[[self class] keychainServiceNameWithComputerName:[service name]] message:[NSString stringWithFormat:NSLocalizedString(@"Enter password for %@", @"Prompt for Password dialog"), [service name]]];
+    NSAssert([NSThread inMainThread] == 1, @"password controller must be run from the main thread");
+    BDSKPasswordController *pwc = [[BDSKPasswordController alloc] init];
+    int rv = [pwc runModalForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]] message:[NSString stringWithFormat:NSLocalizedString(@"Enter password for %@", @"Prompt for Password dialog"), [service name]]];
+    [pwc close];
+    [pwc release];
+    return rv;
 }
 
-- (NSInteger)runAuthenticationFailedAlert;
+- (int)runAuthenticationFailedAlert;
 {
-    NSAssert([NSThread isMainThread] == 1, @"runAuthenticationFailedAlert must be run from the main thread");
+    NSAssert([NSThread inMainThread] == 1, @"runAuthenticationFailedAlert must be run from the main thread");
     NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Authentication Failed", @"Message in alert dialog when authentication failed")
                                      defaultButton:nil
                                    alternateButton:nil
@@ -366,23 +354,25 @@ typedef struct _BDSKSharingClientFlags {
         return [[NSData data] sha1Signature];
     
     NSData *password = nil;
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.canceledAuthentication);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.canceledAuthentication);
     
+    int rv = 1;
     OSMemoryBarrier();
     if(flags.authenticationFailed == 0)
-        password = [BDSKPasswordController passwordHashedForKeychainServiceName:[[self class] keychainServiceNameWithComputerName:[service name]]];
+        password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]]];
     
     if(password == nil && [self shouldKeepRunning]){   
         
         // run the prompt on the main thread
-        password = [[self serverOnMainThread] runPasswordPrompt];
+        rv = [[self serverOnMainThread] runPasswordPrompt];
         
         // retry from the keychain
-        if (password){
+        if (rv == BDSKPasswordReturn){
+            password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]]];
             // assume we succeeded; the exception handler for the connection will change it back if we fail again
-            OSAtomicCompareAndSwap32Barrier(1, 0, &flags.authenticationFailed);
+            OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.authenticationFailed);
         }else{
-            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.canceledAuthentication);
+            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.canceledAuthentication);
         }
     }
     
@@ -393,14 +383,14 @@ typedef struct _BDSKSharingClientFlags {
 // monitor the TXT record in case the server changes password requirements
 - (void)netService:(NSNetService *)sender didUpdateTXTRecordData:(NSData *)data;
 {
-    BDSKASSERT(sender == service);
-    BDSKASSERT(data != nil);
+    OBASSERT(sender == service);
+    OBASSERT(data != nil);
     if(data){
         NSDictionary *dict = [NSNetService dictionaryFromTXTRecordData:data];
-        int32_t val = [[[[NSString alloc] initWithData:[dict objectForKey:BDSKTXTAuthenticateKey] encoding:NSUTF8StringEncoding] autorelease] intValue];
+        int32_t val = [[NSString stringWithData:[dict objectForKey:BDSKTXTAuthenticateKey] encoding:NSUTF8StringEncoding] intValue];
         OSMemoryBarrier();
         int32_t oldVal = flags.needsAuthentication;
-        OSAtomicCompareAndSwap32Barrier(oldVal, val, &flags.needsAuthentication);
+        OSAtomicCompareAndSwap32Barrier(oldVal, val, (int32_t *)&flags.needsAuthentication);
     }
 }
 
@@ -409,9 +399,11 @@ typedef struct _BDSKSharingClientFlags {
 - (Protocol *)protocolForServerThread { return @protocol(BDSKSharingClientServerLocalThread); }
 - (Protocol *)protocolForMainThread { return @protocol(BDSKSharingClientServerMainThread); }
 
-- (void)setArchivedPublicationsAndMacros:(bycopy NSDictionary *)setArchivedPublicationsAndMacros;
+- (oneway void)setArchivedPublications:(bycopy NSData *)publicationsArchive archivedMacros:(bycopy NSData *)macrosArchive;
 {
-    [client setArchivedPublicationsAndMacros:setArchivedPublicationsAndMacros];
+    if (macrosArchive)
+        [client setArchivedMacros:macrosArchive];
+    [client setArchivedPublications:publicationsArchive];
 }
 
 - (void)retrievePublicationsInBackground{ [[self serverOnServerThread] retrievePublications]; }
@@ -419,37 +411,41 @@ typedef struct _BDSKSharingClientFlags {
 - (oneway void)retrievePublications;
 {
     // set so we don't try calling this multiple times
-    OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedDownload);
     
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
     @try {
-        NSDictionary *archive = nil;
+        NSData *archive = nil;
+        NSData *macroArchive = nil;
         NSData *proxyData = [[self remoteServer] archivedSnapshotOfPublications];
         
         if([proxyData length] != 0){
             if([proxyData mightBeCompressed])
                 proxyData = [proxyData decompressedData];
             NSString *errorString = nil;
-            archive = [NSPropertyListSerialization propertyListFromData:proxyData mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:&errorString];
+            NSDictionary *dictionary = [NSPropertyListSerialization propertyListFromData:proxyData mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:&errorString];
             if(errorString != nil){
                 NSString *errorStr = [NSString stringWithFormat:@"Error reading shared data: %@", errorString];
                 [errorString release];
                 @throw errorStr;
+            } else {
+                archive = [dictionary objectForKey:BDSKSharedArchivedDataKey];
+                macroArchive = [dictionary objectForKey:BDSKSharedArchivedMacroDataKey];
             }
         }
+        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
         // use the main thread; this avoids an extra (un)archiving between threads and it ends up posting notifications for UI updates
-        [[self serverOnMainThread] setArchivedPublicationsAndMacros:archive];
-        // the client will reset the isRetriving flag when the data is set
+        [[self serverOnMainThread] setArchivedPublications:archive archivedMacros:macroArchive];
     }
     @catch(id exception){
         NSLog(@"%@: discarding exception \"%@\" while retrieving publications", [self class], exception);
-        OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
+        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedDownload);
         
         // this posts a notification that the publications of the client changed, forcing a redisplay of the table cell
-        [client performSelectorOnMainThread:@selector(setArchivedPublicationsAndMacros:) withObject:nil waitUntilDone:NO];
-        // the client will reset the isRetriving flag when the data is set
+        [client performSelectorOnMainThread:@selector(setArchivedPublications:) withObject:nil waitUntilDone:NO];
     }
     @finally{
         [pool release];
@@ -475,8 +471,6 @@ typedef struct _BDSKSharingClientFlags {
         [conn invalidate];
         [remoteServer release];
         remoteServer = nil;
-        [protocolChecker release];
-        protocolChecker = nil;
     }
 }
 

@@ -38,7 +38,7 @@
 
 #import "NSError_BDSKExtensions.h"
 
-#define BDSKErrorDomain @"net.sourceforge.bibdesk.errors"
+static NSString *BDSKErrorDomain = @"net.sourceforge.bibdesk.errors";
 NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
 
 @interface BDSKMutableError : NSError
@@ -50,7 +50,7 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
 
 @implementation BDSKMutableError
 
-- (id)initWithDomain:(NSString *)domain code:(NSInteger)code userInfo:(NSDictionary *)dict;
+- (id)initWithDomain:(NSString *)domain code:(int)code userInfo:(NSDictionary *)dict;
 {
     if (self = [super initWithDomain:domain code:code userInfo:nil]) {
         mutableUserInfo = [[NSMutableDictionary alloc] init];
@@ -61,7 +61,7 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
     return self;
 }
 
-- (id)initLocalErrorWithCode:(NSInteger)code localizedDescription:(NSString *)description;
+- (id)initLocalErrorWithCode:(int)code localizedDescription:(NSString *)description;
 {
     if (self = [self initWithDomain:[NSError localErrorDomain] code:code userInfo:nil]) {
         [self setValue:description forKey:NSLocalizedDescriptionKey];
@@ -102,12 +102,12 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
     [self setValue:underlyingError forKey:NSUnderlyingErrorKey];
 }
 
-- (void)setCode:(NSInteger)code;
+- (void)setCode:(int)code;
 {
     [self setValue:[NSNumber numberWithInt:code] forKey:@"__BDSKErrorCode"];
 }
 
-- (NSInteger)code;
+- (int)code;
 {
     return [[self valueForKey:@"__BDSKErrorCode"] intValue];
 }
@@ -123,29 +123,23 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
     return [[self domain] isEqualToString:[NSError localErrorDomain]];
 }
 
-+ (id)localErrorWithCode:(NSInteger)code localizedDescription:(NSString *)description;
++ (id)localErrorWithCode:(int)code localizedDescription:(NSString *)description;
 {
     NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, nil];
     return [[[self alloc] initWithDomain:[NSError localErrorDomain] code:code userInfo:userInfo] autorelease];
 }
 
-+ (id)localErrorWithCode:(NSInteger)code localizedDescription:(NSString *)description underlyingError:(NSError *)underlyingError;
-{
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, underlyingError, NSUnderlyingErrorKey, nil];
-    return [[[self alloc] initWithDomain:[NSError localErrorDomain] code:code userInfo:userInfo] autorelease];
-}
-
-+ (id)mutableLocalErrorWithCode:(NSInteger)code localizedDescription:(NSString *)description;
++ (id)mutableLocalErrorWithCode:(int)code localizedDescription:(NSString *)description;
 {
     return [[[BDSKMutableError alloc] initLocalErrorWithCode:code localizedDescription:description] autorelease];
 }
 
-+ (id)mutableErrorWithDomain:(NSString *)domain code:(NSInteger)code userInfo:(NSDictionary *)dict;
++ (id)mutableErrorWithDomain:(NSString *)domain code:(int)code userInfo:(NSDictionary *)dict;
 {
     return [[[BDSKMutableError alloc] initWithDomain:domain code:code userInfo:dict] autorelease];
 }
 
-+ (id)mutableLocalErrorWithCode:(NSInteger)code localizedDescription:(NSString *)description underlyingError:(NSError *)underlyingError;
++ (id)mutableLocalErrorWithCode:(int)code localizedDescription:(NSString *)description underlyingError:(NSError *)underlyingError;
 {
     id error = [NSError mutableLocalErrorWithCode:code localizedDescription:description];
     [error embedError:underlyingError];
@@ -162,7 +156,7 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
     [NSException raise:NSInternalInconsistencyException format:@"Mutating method sent to immutable NSError instance"];
 }
 
-- (void)setCode:(NSInteger)code;
+- (void)setCode:(int)code;
 {
     [NSException raise:NSInternalInconsistencyException format:@"Mutating method sent to immutable NSError instance"];
 }

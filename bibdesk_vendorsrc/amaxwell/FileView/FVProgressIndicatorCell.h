@@ -54,9 +54,6 @@ typedef NSInteger FVProgressIndicatorStyle;
 
 @interface FVProgressIndicatorCell : NSCell
 {
-@private
-    CGColorRef               _fillColor;
-    CGColorRef               _strokeColor;
     CGFloat                  _currentProgress;
     CGFloat                  _currentRotation;
     FVProgressIndicatorStyle _style;

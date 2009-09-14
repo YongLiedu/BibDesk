@@ -10,9 +10,9 @@
 #import "AMButtonBarItem.h"
 #import "AMButtonBarCell.h"
 
-static CGFloat const AM_START_GAP_WIDTH = 8.0;
-static CGFloat const AM_BUTTON_GAP_WIDTH = 2.0;
-static CGFloat const AM_BUTTON_HEIGHT = 17.0;
+static float const AM_START_GAP_WIDTH = 8.0;
+static float const AM_BUTTON_GAP_WIDTH = 2.0;
+static float const AM_BUTTON_HEIGHT = 17.0;
 
 NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelectionDidChangeNotification";
 
@@ -131,12 +131,12 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 #pragma mark 		public methods
 //====================================================================
 
-- (AMButtonBarItem *)itemAtIndex:(NSInteger)idx
+- (AMButtonBarItem *)itemAtIndex:(int)idx
 {
 	return [items objectAtIndex:idx];
 }
 
-- (void)insertItem:(AMButtonBarItem *)item atIndex:(NSInteger)idx
+- (void)insertItem:(AMButtonBarItem *)item atIndex:(int)idx
 {
 	[items insertObject:item atIndex:idx];
     [item setTarget:self];
@@ -153,7 +153,7 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 	[self setNeedsDisplay:YES];
 }
 
-- (void)removeItemAtIndex:(NSInteger)idx
+- (void)removeItemAtIndex:(int)idx
 {
 	[self removeItem:[items objectAtIndex:idx]];
 }

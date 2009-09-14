@@ -13,22 +13,6 @@
 			<string>BDSKContainerView</string>
 		</dict>
 		<dict>
-			<key>CLASS</key>
-			<string>NSView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSApplication</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
-		</dict>
-		<dict>
 			<key>ACTIONS</key>
 			<dict>
 				<key>scalePopUpAction</key>
@@ -126,7 +110,7 @@
 				<key>progressIndicator</key>
 				<string>NSProgressIndicator</string>
 				<key>progressOverlay</key>
-				<string>BDSKOverlayPanel</string>
+				<string>BDSKOverlay</string>
 				<key>rtfPreviewView</key>
 				<string>NSTextView</string>
 				<key>tabView</key>
@@ -141,11 +125,11 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSCell</string>
+			<string>BDSKOverlay</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSObject</string>
+			<string>NSPanel</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -189,14 +173,6 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKOverlayPanel</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSPanel</string>
 		</dict>
 	</array>
 	<key>IBVersion</key>

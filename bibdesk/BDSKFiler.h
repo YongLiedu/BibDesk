@@ -65,12 +65,13 @@ enum {
 	IBOutlet NSButton *forceCheckButton;
 	IBOutlet NSMenu *contextMenu;
 	
-	IBOutlet NSPanel *progressWindow;
+	IBOutlet NSPanel *progressSheet;
 	IBOutlet NSProgressIndicator *progressIndicator;
+	IBOutlet NSButton *progressCloseButton;
 	
     BibDocument *document;
     NSString *fieldName;
-    NSInteger options;
+    int options;
     
 	NSMutableArray *errorInfoDicts;
 }
@@ -103,7 +104,14 @@ BDSKInitialAutoFileOptionMask should be used for initial autofile moves, the new
 BDSKCheckCompleteAutoFileOptionMask indicates that for initial moves a check will be done whether all required fields are set. 
 BDSKForceAutoFileOptionMask forces AutoFiling, even if there may be problems moving the file. 
 */
-- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(NSInteger)masks;
+- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(int)masks;
+
+/*!
+	@method		closeProgress:
+	@abstract	Action to close the progress sheet
+	@discussion -
+*/
+- (IBAction)closeProgress:(id)sender;
 
 /*!
 	@method		showProblems
@@ -141,10 +149,10 @@ BDSKForceAutoFileOptionMask forces AutoFiling, even if there may be problems mov
 - (IBAction)showFile:(id)sender;
 
 - (NSArray *)errorInfoDicts;
-- (NSUInteger)countOfErrorInfoDicts;
-- (id)objectInErrorInfoDictsAtIndex:(NSUInteger)index;
-- (void)insertObject:(id)obj inErrorInfoDictsAtIndex:(NSUInteger)index;
-- (void)removeObjectFromErrorInfoDictsAtIndex:(NSUInteger)index;
+- (unsigned)countOfErrorInfoDicts;
+- (id)objectInErrorInfoDictsAtIndex:(unsigned)index;
+- (void)insertObject:(id)obj inErrorInfoDictsAtIndex:(unsigned)index;
+- (void)removeObjectFromErrorInfoDictsAtIndex:(unsigned)index;
 
 @end
 

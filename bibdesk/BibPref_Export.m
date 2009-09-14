@@ -37,6 +37,7 @@
  */
 
 #import "BibPref_Export.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStringConstants.h"
 #import "BDSKTypeManager.h"
 #import "BDAlias.h"
@@ -44,25 +45,15 @@
 #import "BDSKTemplate.h"
 #import "BDSKAppController.h"
 #import "NSMenu_BDSKExtensions.h"
-#import "BDSKPreferenceRecord.h"
 
-#define BDSKTemplateRowsPboardType @"BDSKTemplateRowsPboardType"
-
-
-@interface BibPref_Export (Private)
-- (void)updateUI;
-- (void)setItemNodes:(NSArray *)array;
-- (BOOL)canAddItem;
-- (BOOL)canDeleteSelectedItem;
-@end
-
+static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
 @implementation BibPref_Export
 
-- (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController {
-	if(self = [super initWithRecord:aRecord forPreferenceController:aController]){
+- (id)initWithTitle:(NSString *)newTitle defaultsArray:(NSArray *)newDefaultsArray controller:(OAPreferenceController *)controller{
+	if(self = [super initWithTitle:newTitle defaultsArray:newDefaultsArray controller:controller]){
         
-        NSData *data = [sud objectForKey:BDSKExportTemplateTree];
+        NSData *data = [defaults objectForKey:BDSKExportTemplateTree];
         if([data length])
             [self setItemNodes:[NSKeyedUnarchiver unarchiveObjectWithData:data]];
         else 
@@ -73,7 +64,7 @@
         else
             fileTypes = [[NSArray alloc] initWithObjects:@"html", @"rss", @"csv", @"txt", @"rtf", @"rtfd", @"doc", nil];
         
-        roles = [[NSMutableArray alloc] initWithObjects:[BDSKTemplate localizedMainPageString], [BDSKTemplate localizedDefaultItemString], [BDSKTemplate localizedAccessoryString], [BDSKTemplate localizedScriptString], nil];
+        roles = [[NSMutableArray alloc] initWithObjects:BDSKTemplateLocalizedMainPageString, BDSKTemplateLocalizedDefaultItemString, BDSKTemplateLocalizedAccessoryString, BDSKTemplateLocalizedScriptString, nil];
         [roles addObjectsFromArray:[[BDSKTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString]];
         
         templatePrefList = BDSKExportTemplateList;
@@ -81,7 +72,9 @@
 	return self;
 }
 
-- (void)defaultsDidRevert {
+- (void)restoreDefaultsNoPrompt;
+{
+    [super restoreDefaultsNoPrompt];
     if (templatePrefList == BDSKExportTemplateList) {
         [self setItemNodes:[BDSKTemplate defaultExportTemplates]];
     } else {
@@ -92,6 +85,8 @@
 
 - (void)awakeFromNib
 {    
+    [super awakeFromNib];
+
     [outlineView setAutosaveExpandedItems:YES];
     
     // Default behavior is to expand column 0, which slides column 1 outside the clip view; since we only have one expandable column, this is more annoying than helpful.
@@ -100,8 +95,6 @@
     [outlineView registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
     [outlineView setDoubleAction:@selector(chooseFileDoubleAction:)];
     [outlineView setTarget:self];
-    
-    [self updateUI];
 }
 
 - (void)dealloc
@@ -116,7 +109,7 @@
 {
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:itemNodes];
     if(nil != data)
-        [sud setObject:data forKey:(templatePrefList == BDSKExportTemplateList) ? BDSKExportTemplateTree : BDSKServiceTemplateTree];
+        [defaults setObject:data forKey:(templatePrefList == BDSKExportTemplateList) ? BDSKExportTemplateTree : BDSKServiceTemplateTree];
     else
         NSLog(@"Unable to archive %@", itemNodes);
 }
@@ -140,7 +133,7 @@
 
 - (IBAction)changePrefList:(id)sender{
     templatePrefList = [[sender selectedCell] tag];
-    NSData *data = [sud objectForKey:(templatePrefList == BDSKExportTemplateList) ? BDSKExportTemplateTree : BDSKServiceTemplateTree];
+    NSData *data = [defaults objectForKey:(templatePrefList == BDSKExportTemplateList) ? BDSKExportTemplateTree : BDSKServiceTemplateTree];
     if([data length])
         [self setItemNodes:[NSKeyedUnarchiver unarchiveObjectWithData:data]];
     else if (templatePrefList == BDSKExportTemplateList)
@@ -151,7 +144,7 @@
     [self updateUI];
 }
 
-- (void)alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+- (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     if (NSAlertDefaultReturn == returnCode)
         [[NSApp delegate] copyAllExportTemplatesToApplicationSupportAndOverwrite:YES];
 }
@@ -163,7 +156,7 @@
 								   alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
 									   otherButton:nil 
 						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset Default Files will restore the original content of all the standard export and service template files.", @"Informative text in alert dialog")];
-	[alert beginSheetModalForWindow:[[self view] window] 
+	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
 					  modalDelegate:self
 					 didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) 
 						contextInfo:NULL];
@@ -172,8 +165,7 @@
 - (IBAction)addNode:(id)sender;
 {
     // may be nil
-    NSInteger row = [outlineView selectedRow];
-    BDSKTreeNode *selectedNode = row == -1 ? nil : [outlineView itemAtRow:row];
+    BDSKTreeNode *selectedNode = [outlineView selectedItem];
     BDSKTemplate *newNode = [[BDSKTemplate alloc] init];
 
     if([selectedNode isLeaf]){
@@ -199,15 +191,13 @@
         [outlineView expandItem:newNode];
     }
     
-    [self updateUI];
+    [self valuesHaveChanged];
     [newNode release];
 }
 
 - (IBAction)removeNode:(id)sender;
 {
-    
-    NSInteger row = [outlineView selectedRow];
-    BDSKTreeNode *selectedNode = row == -1 ? nil : [outlineView itemAtRow:row];
+    BDSKTreeNode *selectedNode = [outlineView selectedItem];
     if(nil != selectedNode){
         if([selectedNode isLeaf])
             [[selectedNode parent] removeChild:selectedNode];
@@ -216,7 +206,7 @@
     } else {
         NSBeep();
     }
-    [self updateUI];
+    [self valuesHaveChanged];
 }
 
 #pragma mark Outline View
@@ -226,20 +216,20 @@
     return item ? (NO == [item isLeaf]) : YES;
 }
 
-- (NSInteger)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item
+- (int)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item
 { 
     return item ? [item numberOfChildren] : [itemNodes count];
 }
 
 - (id)outlineView:(NSOutlineView *)ov objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
 {
-    NSString *columnID = [tableColumn identifier];
-    id value = [item valueForKey:columnID];
+    NSString *identifier = [tableColumn identifier];
+    id value = [item valueForKey:identifier];
     if (value == nil) {
         // set some placeholder message, this will show up in red
-        if ([columnID isEqualToString:BDSKTemplateRoleString])
+        if ([identifier isEqualToString:BDSKTemplateRoleString])
             value = ([item isLeaf]) ? NSLocalizedString(@"Choose role", @"Default text for template role") : NSLocalizedString(@"Choose file type", @"Default text for template type");
-        else if ([columnID isEqualToString:BDSKTemplateNameString]) {
+        else if ([identifier isEqualToString:BDSKTemplateNameString]) {
             if ([item isLeaf])
                 value = NSLocalizedString(@"Double-click to choose file", @"Default text for template file");
             else if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
@@ -247,13 +237,13 @@
             else
                 value = NSLocalizedString(@"Click twice to change name", @"Default text for template name");
         }
-    } else if ([columnID isEqualToString:BDSKTemplateRoleString]) {
+    } else if ([identifier isEqualToString:BDSKTemplateRoleString]) {
         value = [BDSKTemplate localizedRoleString:value];
     }
     return value;
 }
 
-- (id)outlineView:(NSOutlineView *)ov child:(NSInteger)idx ofItem:(id)item
+- (id)outlineView:(NSOutlineView *)ov child:(int)idx ofItem:(id)item
 {
     return nil == item ? [itemNodes objectAtIndex:idx] : [[item children] objectAtIndex:idx];
 }
@@ -269,7 +259,7 @@
     return [NSKeyedArchiver archivedDataWithRootObject:item];
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(NSInteger)returnCode contextInfo:(BDSKTemplate *)aNode
+- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(int)returnCode contextInfo:(BDSKTemplate *)aNode
 {
     NSURL *fileURL = [[panel URLs] lastObject];
     if(NSOKButton == returnCode && nil != fileURL){
@@ -278,19 +268,19 @@
     }
     [aNode release];
     [panel orderOut:nil];
-    [self updateUI];
+    [self valuesHaveChanged];
 }
 
 // Formerly implemented in outlineView:shouldEditTableColumn:item:, but on Leopard a second click on the selected row (outside the double click interval) would cause the open panel to run.  This was highly annoying.
 - (IBAction)chooseFileDoubleAction:(id)sender
 {
-    NSInteger row = [outlineView clickedRow];
-    NSInteger column = [outlineView clickedColumn];
+    int row = [outlineView clickedRow];
+    int column = [outlineView clickedColumn];
     if (row >= 0 && column >= 0) {
         
-        NSString *columnID = [[[outlineView tableColumns] objectAtIndex:column] identifier];
+        NSString *identifier = [[[outlineView tableColumns] objectAtIndex:column] identifier];
         BDSKTemplate *node = [outlineView itemAtRow:row];
-        if ([node isLeaf] && [columnID isEqualToString:BDSKTemplateNameString])
+        if ([node isLeaf] && [identifier isEqualToString:BDSKTemplateNameString])
             [self chooseFile:sender];
     }
 }
@@ -299,14 +289,14 @@
 {
     // leaf items are fully editable, but you can only edit the name of a parent item
 
-    NSString *columnID = [tableColumn identifier];
+    NSString *identifier = [tableColumn identifier];
     if([item isLeaf]){
-        if([columnID isEqualToString:BDSKTemplateNameString]){            
+        if([identifier isEqualToString:BDSKTemplateNameString]){            
             return NO;
-        } else if([columnID isEqualToString:BDSKTemplateRoleString]){
+        } else if([identifier isEqualToString:BDSKTemplateRoleString]){
             if([[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString])
                 return NO;
-        } else [NSException raise:NSInternalInconsistencyException format:@"Unexpected table column identifier %@", columnID];
+        } else [NSException raise:NSInternalInconsistencyException format:@"Unexpected table column identifier %@", identifier];
     }else if(templatePrefList == BDSKServiceTemplateList){
         return NO;
     }
@@ -314,14 +304,14 @@
 }
 
 // return NO to avoid popping the NSOpenPanel unexpectedly
-- (BOOL)outlineViewShouldEditNextItemWhenEditingEnds:(BDSKTemplateOutlineView *)ov { return NO; }
+- (BOOL)tableViewShouldEditNextItemWhenEditingEnds:(NSTableView *)tv { return NO; }
 
 // this seems to be called when editing the NSComboBoxCell as well as the parent name
 - (void)outlineView:(NSOutlineView *)ov setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item{
-    NSString *columnID = [tableColumn identifier];
-    if ([columnID isEqualToString:BDSKTemplateRoleString])
+    NSString *identifier = [tableColumn identifier];
+    if ([identifier isEqualToString:BDSKTemplateRoleString])
         object = [BDSKTemplate unlocalizedRoleString:object];
-    if([columnID isEqualToString:BDSKTemplateRoleString] && [item isLeaf] && [object isEqualToString:BDSKTemplateAccessoryString] == NO && [(BDSKTemplate *)[item parent] childForRole:object] != nil) {
+    if([identifier isEqualToString:BDSKTemplateRoleString] && [item isLeaf] && [object isEqualToString:BDSKTemplateAccessoryString] == NO && [(BDSKTemplate *)[item parent] childForRole:object] != nil) {
         [outlineView reloadData];
     } else if (object != nil) { // object can be nil when a NSComboBoxCell is edited while the options are shown, looks like an AppKit bug
         [item setValue:object forKey:[tableColumn identifier]];
@@ -330,10 +320,10 @@
 }
 
 - (void)outlineView:(NSOutlineView *)ov willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item{
-    NSString *columnID = [tableColumn identifier];
+    NSString *identifier = [tableColumn identifier];
     if ([cell respondsToSelector:@selector(setTextColor:)])
-        [cell setTextColor:[item representedColorForKey:columnID]];
-    if([columnID isEqualToString:BDSKTemplateRoleString]) {
+        [cell setTextColor:[item representedColorForKey:identifier]];
+    if([identifier isEqualToString:BDSKTemplateRoleString]) {
         [cell removeAllItems];
         [cell addItemsWithObjectValues:([item isLeaf]) ? roles : fileTypes];
         if(([item isLeaf] && [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString]) || 
@@ -344,24 +334,19 @@
     }
 }
 
-- (BOOL)canDeleteItem:(BDSKTreeNode *)item
-{
-    return ((templatePrefList == BDSKExportTemplateList && [item isLeaf] == NO) || 
-            ([item isLeaf]  && [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO));
-}
-
 - (BOOL)canDeleteSelectedItem
 {
-    NSInteger row = [outlineView selectedRow];
-    if (row == -1)
+    BDSKTreeNode *selItem = [outlineView selectedItem];
+    if (selItem == nil)
         return NO;
-    return [self canDeleteItem:[outlineView itemAtRow:row]];
+    return ((templatePrefList == BDSKExportTemplateList && [selItem isLeaf] == NO) || 
+            ([selItem isLeaf]  && [[selItem valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO));
 }
 
 // we can't add items to the services outline view
 - (BOOL)canAddItem
 {
-    return ((templatePrefList == BDSKExportTemplateList) || -1 != [outlineView selectedRow]);
+    return ((templatePrefList == BDSKExportTemplateList) || nil != [outlineView selectedItem]);
 }
 
 - (void)outlineViewSelectionDidChange:(NSNotification *)notification;
@@ -370,35 +355,20 @@
     [addButton setEnabled:[self canAddItem]];
 }
 
-- (void)outlineView:(NSOutlineView *)ov deleteItems:(NSArray *)items;
+- (void)tableView:(NSTableView *)tableView deleteRows:(NSArray *)rows;
 {
-    // currently we don't allow multiple selection
-    BDSKTreeNode *item = [items lastObject];
-    if(item && [self canDeleteItem:item]) {
+    // currently we don't allow multiple selection, so we'll ignore the rows argument
+    if([self canDeleteSelectedItem])
         [self removeNode:nil];
-        if ([item isLeaf])
-            [[item parent] removeChild:item];
-        else
-            [itemNodes removeObjectIdenticalTo:item];
-        [self updateUI];
-    } else
+    else
         NSBeep();
-}
-
-- (BOOL)outlineView:(NSOutlineView *)ov canDeleteItems:(NSArray *)items {
-    // currently we don't allow multiple selection
-    return [self canDeleteItem:[items lastObject]];
-}
-
-- (BOOL)outlineView:(NSOutlineView *)ov isGroupItem:(id)item {
-    return [item isLeaf] == NO;
 }
 
 #pragma mark Drag / drop
 
 - (BOOL)outlineView:(NSOutlineView *)ov writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard{
     BDSKTemplate *item = [items lastObject];
-    if (pboard == [NSPasteboard pasteboardWithName:NSDragPboard] && ([item isLeaf] == NO || [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO)) {
+    if ([item isLeaf] == NO || [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO) {
         [pboard declareTypes:[NSArray arrayWithObject:BDSKTemplateRowsPboardType] owner:nil];
         [pboard setData:[NSKeyedArchiver archivedDataWithRootObject:[items lastObject]] forType:BDSKTemplateRowsPboardType];
         return YES;
@@ -406,11 +376,7 @@
     return NO;
 }
 
-- (BOOL)outlineView:(NSOutlineView *)ov canCopyItems:(NSArray *)items {
-    return NO;
-}
-
-- (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx{
+- (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)idx{
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
     
@@ -444,16 +410,16 @@
     [NSApp endSheet:chooseMainPageSheet returnCode:[sender tag]];
 }
 
-- (void)chooseMainPageSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+- (void)chooseMainPageSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     if (returnCode == NSCancelButton)
         return;
     
     NSDictionary *info = [(NSDictionary *)contextInfo autorelease];
     NSArray *fileNames = [info objectForKey:@"fileNames"];
-    NSInteger idx = [[info objectForKey:@"index"] intValue];
+    int idx = [[info objectForKey:@"index"] intValue];
     
-    NSInteger mainIndex = [chooseMainPagePopup indexOfSelectedItem] - 1;
-    NSInteger i, count = [fileNames count];
+    int mainIndex = [chooseMainPagePopup indexOfSelectedItem] - 1;
+    int i, count = [fileNames count];
     id newNode = nil;
     id childNode = nil;
     NSMutableArray *addedItems = [NSMutableArray array];
@@ -476,7 +442,7 @@
         [childNode setValue:[NSURL fileURLWithPath:[fileNames objectAtIndex:i]] forKey:BDSKTemplateFileURLString];
     }
     
-    [self updateUI];
+    [self valuesHaveChanged];
     count = [addedItems count];
     for (i = 0; i < count; i++)
         [outlineView expandItem:[addedItems objectAtIndex:i]];
@@ -484,7 +450,7 @@
 }
 
 
-- (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(NSInteger)idx{
+- (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(int)idx{
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
     
@@ -515,7 +481,7 @@
                 [chooseMainPagePopup addItemsWithTitles:[fileNames valueForKey:@"lastPathComponent"]];
                 [chooseMainPagePopup selectItemAtIndex:0];
                 NSDictionary *contextInfo = [[NSDictionary alloc] initWithObjectsAndKeys:fileNames, @"fileNames", [NSNumber numberWithInt:idx], @"index", nil];
-                [NSApp beginSheet:chooseMainPageSheet modalForWindow:[[self view] window]
+                [NSApp beginSheet:chooseMainPageSheet modalForWindow:[[self controlBox] window]
                                                        modalDelegate:self
                                                       didEndSelector:@selector(chooseMainPageSheetDidEnd:returnCode:contextInfo:)
                                                          contextInfo:contextInfo];
@@ -529,7 +495,7 @@
                 [newNode setValue:[NSURL fileURLWithPath:fileName] forKey:BDSKTemplateFileURLString];
             }
         } else return NO;
-        [self updateUI];
+        [self valuesHaveChanged];
         [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:[outlineView rowForItem:newNode]] byExtendingSelection:NO];
         if ([newNode isLeaf] == NO)
             [outlineView expandItem:newNode];
@@ -537,7 +503,7 @@
     } else if ([type isEqualToString:BDSKTemplateRowsPboardType]) {
         id dropItem = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKTemplateRowsPboardType]];
         if ([dropItem isLeaf]) {
-            NSInteger sourceIndex = [[item children] indexOfObject:dropItem];
+            int sourceIndex = [[item children] indexOfObject:dropItem];
             if (sourceIndex == NSNotFound)
                 return NO;
             if (sourceIndex < idx)
@@ -545,7 +511,7 @@
             [(BDSKTreeNode *)item removeChild:dropItem];
             [item insertChild:dropItem atIndex:idx];
         } else {
-            NSInteger sourceIndex = [itemNodes indexOfObject:dropItem];
+            int sourceIndex = [itemNodes indexOfObject:dropItem];
             if (sourceIndex == NSNotFound)
                 return NO;
             if (sourceIndex < idx)
@@ -554,7 +520,7 @@
             [itemNodes removeObjectAtIndex:sourceIndex];
             [itemNodes insertObject:dropItem atIndex:idx];
         }
-        [self updateUI];
+        [self valuesHaveChanged];
         [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:[outlineView rowForItem:dropItem]] byExtendingSelection:NO];
         return YES;
     }
@@ -571,25 +537,25 @@
     return tooltip;
 }
 
-- (NSMenu *)outlineView:(NSOutlineView *)ov menuForTableColumn:(NSTableColumn *)tableColumn item:(id)item;
+- (NSMenu *)tableView:(NSOutlineView *)tv contextMenuForRow:(int)row column:(int)column;
 {
     NSMenu *menu = nil;
     
-    if([[tableColumn identifier] isEqualToString:BDSKTemplateNameString] && [item isLeaf]){
+    if(0 == column && row >= 0 && [[outlineView itemAtRow:row] isLeaf]){
         menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
         
-        NSURL *theURL = [item representedFileURL];
-        NSMenuItem *menuItem = nil;
+        NSURL *theURL = [[tv itemAtRow:row] representedFileURL];
+        NSMenuItem *item = nil;
     
         if(nil != theURL){
-            menuItem = [menu addItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") andSubmenuOfApplicationsForURL:theURL];
+            item = [menu addItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") andSubmenuOfApplicationsForURL:theURL];
             
-            menuItem = [menu addItemWithTitle:NSLocalizedString(@"Reveal in Finder", @"Menu item title") action:@selector(revealInFinder:) keyEquivalent:@""];
-            [menuItem setTarget:self];
+            item = [menu addItemWithTitle:NSLocalizedString(@"Reveal in Finder", @"Menu item title") action:@selector(revealInFinder:) keyEquivalent:@""];
+            [item setTarget:self];
         }
         
-        menuItem = [menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis] action:@selector(chooseFile:) keyEquivalent:@""];
-        [menuItem setTarget:self];
+        item = [menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis] action:@selector(chooseFile:) keyEquivalent:@""];
+        [item setTarget:self];
     }
     
     return menu;
@@ -599,8 +565,10 @@
 {
     SEL action = [menuItem action];
     BOOL validate = NO;
-    if (@selector(revealInFinder:) == action || @selector(chooseFile:) == action) {
-        NSInteger row = [outlineView selectedRow];
+    if(@selector(delete:) == action){
+        validate = [self canDeleteSelectedItem];
+    } else if(@selector(revealInFinder:) == action || @selector(chooseFile:) == action){
+        int row = [outlineView selectedRow];
         if(row >= 0)
             validate = [[outlineView itemAtRow:row] isLeaf];
     }
@@ -609,14 +577,14 @@
 
 - (IBAction)revealInFinder:(id)sender;
 {
-    NSInteger row = [outlineView selectedRow];
+    int row = [outlineView selectedRow];
     if(row >= 0)
         [[NSWorkspace sharedWorkspace] selectFile:[[[outlineView itemAtRow:row] representedFileURL] path] inFileViewerRootedAtPath:@""];
 }
 
 - (IBAction)chooseFile:(id)sender;
 {
-    NSInteger row = [outlineView selectedRow];
+    int row = [outlineView selectedRow];
     id item = [outlineView itemAtRow:row];
     
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
@@ -629,35 +597,9 @@
     [openPanel beginSheetForDirectory:dirPath 
                                  file:nil 
                                 types:nil 
-                       modalForWindow:[[self view] window] 
+                       modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
                         modalDelegate:self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
                           contextInfo:[item retain]];
 }
 
 @end
-
-
-@implementation BDSKTemplateOutlineView
-
-- (void)textDidEndEditing:(NSNotification *)notification {
-    NSInteger textMovement = [[[notification userInfo] objectForKey:@"NSTextMovement"] intValue];
-    if ((textMovement == NSReturnTextMovement || textMovement == NSTabTextMovement) && 
-        [[self delegate] respondsToSelector:@selector(outlineViewShouldEditNextItemWhenEditingEnds:)] && [[self delegate] outlineViewShouldEditNextItemWhenEditingEnds:self] == NO) {
-        // This is ugly, but just about the only way to do it. NSTableView is determined to select and edit something else, even the text field that it just finished editing, unless we mislead it about what key was pressed to end editing.
-        NSMutableDictionary *newUserInfo;
-        NSNotification *newNotification;
-
-        newUserInfo = [NSMutableDictionary dictionaryWithDictionary:[notification userInfo]];
-        [newUserInfo setObject:[NSNumber numberWithInt:NSIllegalTextMovement] forKey:@"NSTextMovement"];
-        newNotification = [NSNotification notificationWithName:[notification name] object:[notification object] userInfo:newUserInfo];
-        [super textDidEndEditing:notification];
-
-        // For some reason we lose firstResponder status when we do the above.
-        [[self window] makeFirstResponder:self];
-    } else {
-        [super textDidEndEditing:notification];
-    }
-}
-
-@end
-

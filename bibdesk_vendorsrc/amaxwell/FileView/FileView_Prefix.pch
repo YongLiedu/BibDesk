@@ -5,13 +5,10 @@
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
 
-// docs say not to send [super initialize], but that's a bug
+// docs say not to send [super initialize]
 #if !defined(FVINITIALIZE)
 #define FVINITIALIZE(aClass) \
-    do { \
-        [super initialize]; \
-        if ([aClass self] != self) return; \
-    } while (0);
+do { if ([aClass self] != self) return; } while(0)
 #endif /* FVINITIALIZE */
 
 // From NSObjCRuntime.h
@@ -45,42 +42,21 @@ typedef float CGFloat;
 #endif /* DEBUG */
 
 #if !defined(_FVAPIAssertBody)
-#define _FVAPIAssertBody(condition, desc, arg1, arg2, arg3) \
-do { if(!(condition)) { [NSException raise:NSInvalidArgumentException format:(desc), (arg1), (arg2), (arg3)]; } } while(0)
+#define _FVAPIAssertBody(condition, desc, arg1, arg2) \
+do { if(!(condition)) { [NSException raise:NSInvalidArgumentException format:(desc), (arg1), (arg2)]; } } while(0)
 #endif /* _FVAPIAssertBody */
 
 // use NSAssert internally for debugging; these asserts are to enforce public API usage for framework clients
 #define FVAPIAssert(condition, desc) \
-_FVAPIAssertBody((condition), desc, 0, 0, 0)
+_FVAPIAssertBody((condition), desc, 0, 0)
 
 #define FVAPIAssert1(condition, desc, arg1) \
-_FVAPIAssertBody((condition), (desc), (arg1), 0, 0)
+_FVAPIAssertBody((condition), (desc), (arg1), 0)
 
 #define FVAPIAssert2(condition, desc, arg1, arg2) \
-_FVAPIAssertBody((condition), (desc), (arg1), (arg2), 0)
-
-#define FVAPIAssert3(condition, desc, arg1, arg2, arg3) \
-_FVAPIAssertBody((condition), (desc), (arg1), (arg2), (arg3))
-
-#define FVAPIParameterAssert(condition)			\
-_FVAPIAssertBody((condition), @"Invalid parameter not satisfying: %s", #condition, 0, 0)
-
-/* workaround for gcc warning about CFSTR usage when using strict aliasing */
-#define FVSTR(cStr) ((CFStringRef)@cStr)
+_FVAPIAssertBody((condition), (desc), (arg1), (arg2))
 
 #endif /* __OBJC__ */
-
-#if defined(__ppc__) || defined(__ppc64__)
-    #define HALT __asm__ __volatile__("trap")
-#elif defined(__i386__) || defined(__x86_64__)
-    #if defined(__GNUC__)
-        #define HALT __asm__ __volatile__("int3")
-    #elif defined(_MSC_VER)
-        #define HALT __asm int 3;
-    #else
-        #error Compiler not supported
-    #endif
-#endif
 
 // copied from AppKit
 #if defined(__MACH__)

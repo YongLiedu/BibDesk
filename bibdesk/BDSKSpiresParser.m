@@ -59,7 +59,7 @@
     
     NSError *error = nil;    
 
-    NSInteger nodecount = [[[xmlDocument rootElement] nodesForXPath:containsBibTexLinkNode error:&error] count];
+    int nodecount = [[[xmlDocument rootElement] nodesForXPath:containsBibTexLinkNode error:&error] count];
 
     return nodecount > 0;
 }
@@ -87,7 +87,7 @@
         return nil;
     }
     
-    NSUInteger i, iMax = [BibTeXLinkNodes count];
+    unsigned int i, iMax = [BibTeXLinkNodes count];
     
     // check the number of nodes first
     if (0 == iMax) {
@@ -144,15 +144,5 @@
     return items;  
     
 }
-
-
-
-+ (NSArray *) parserInfos {
-	NSString * parserDescription = NSLocalizedString(@"SPIRES database of literature on particle physics.", @"Description for SPIRES site");
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"SPIRES" address:@"http://www.slac.stanford.edu/spires/"  description:parserDescription flags:BDSKParserFeatureNone];
-	
-	return [NSArray arrayWithObject:parserInfo];
-}
-
 
 @end 

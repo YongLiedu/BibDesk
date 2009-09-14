@@ -44,7 +44,7 @@
 #import "NSWindowController_BDSKExtensions.h"
 
 
-static char BDSKErrorManagerObservationContext;
+static NSString *BDSKErrorManagerObservationContext = @"BDSKErrorManagerObservationContext";
 
 @interface BDSKAllItemsErrorManager : BDSKErrorManager @end
 
@@ -112,13 +112,13 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
         document = [newDocument retain];
         [self updateDisplayName];
         if(document){
-            [document addObserver:self forKeyPath:@"displayName" options:0 context:&BDSKErrorManagerObservationContext];
-            [document addObserver:self forKeyPath:@"documentStringEncoding" options:0 context:&BDSKErrorManagerObservationContext];
+            [document addObserver:self forKeyPath:@"displayName" options:0 context:BDSKErrorManagerObservationContext];
+            [document addObserver:self forKeyPath:@"documentStringEncoding" options:0 context:BDSKErrorManagerObservationContext];
         }
     }
 }
 
-- (NSInteger)uniqueNumber;
+- (int)uniqueNumber;
 {
     return uniqueNumber;
 }
@@ -138,7 +138,7 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 
 - (NSString *)displayName;
 {
-    return (uniqueNumber == 0) ? documentDisplayName : [NSString stringWithFormat:@"%@ (%ld)", documentDisplayName, (long)uniqueNumber];
+    return (uniqueNumber == 0) ? documentDisplayName : [NSString stringWithFormat:@"%@ (%d)", documentDisplayName, uniqueNumber];
 }
 
 
@@ -172,7 +172,7 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
-    if (context == &BDSKErrorManagerObservationContext) {
+    if (context == BDSKErrorManagerObservationContext) {
         if(object == document && [keyPath isEqualToString:@"displayName"])
             [self updateDisplayName];
         else if(object == document && document && [keyPath isEqualToString:@"documentStringEncoding"])
@@ -213,7 +213,7 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 
 - (void)removeClosedEditors;
 {
-    NSUInteger idx = [editors count];
+    unsigned idx = [editors count];
     BDSKErrorEditor *editor;
     
     while(idx--){

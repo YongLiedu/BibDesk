@@ -45,7 +45,7 @@
 @implementation BDSKSmartGroup
 
 // super's designated initializer
-- (id)initWithName:(id)aName count:(NSInteger)aCount {
+- (id)initWithName:(id)aName count:(int)aCount {
     BDSKFilter *aFilter = [[BDSKFilter alloc] init];
 	self = [self initWithName:aName count:aCount filter:aFilter];
 	[aFilter release];
@@ -53,7 +53,7 @@
 }
 
 // designated initializer
-- (id)initWithName:(id)aName count:(NSInteger)aCount filter:(BDSKFilter *)aFilter {
+- (id)initWithName:(id)aName count:(int)aCount filter:(BDSKFilter *)aFilter {
     if (self = [super initWithName:aName count:aCount]) {
         filter = [aFilter copy];
         [filter setGroup:self];
@@ -99,10 +99,6 @@
     [coder encodeObject:filter forKey:@"filter"];
 }
 
-- (id)copyWithZone:(NSZone *)aZone {
-	return [[[self class] allocWithZone:aZone] initWithName:name count:count filter:filter];
-}
-
 - (void)dealloc {
     [filter setGroup:nil];
     [filter release];
@@ -126,7 +122,7 @@
 - (BOOL)isEditable { return YES; }
 
 - (NSImage *)icon {
-	return [NSImage imageNamed:@"smartGroup"];
+	return [NSImage imageNamed:@"smartFolderIcon"];
 }
 
 // accessors

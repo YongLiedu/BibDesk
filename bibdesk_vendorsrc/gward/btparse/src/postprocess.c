@@ -274,7 +274,7 @@ bt_postprocess_value (AST * value, ushort options, boolean replace)
     * new_string.
     */
 
-   simple_value = value;   
+   simple_value = value;
    while (simple_value)
    {
       tmp_string = NULL;
@@ -346,9 +346,7 @@ bt_postprocess_value (AST * value, ushort options, boolean replace)
          if (simple_value->text)
          {
             if (replace)
-            {
                tmp_string = simple_value->text;
-            }
             else
             {
                tmp_string = strdup (simple_value->text);
@@ -361,11 +359,8 @@ bt_postprocess_value (AST * value, ushort options, boolean replace)
       {
          if (tmp_string)
              strncat (new_string, tmp_string, sizeof(new_string) - strlen(new_string) - 1);
-         if (free_tmp) 
-         {
+         if (free_tmp)
             free (tmp_string);
-            tmp_string = NULL;
-         }
       }
       else
       {
@@ -380,19 +375,7 @@ bt_postprocess_value (AST * value, ushort options, boolean replace)
           * afternoon...
           */
 
-          if (NULL != tmp_string) 
-          {
-              new_string = tmp_string;
-          }
-          else if (FALSE == replace)
-          {
-              /* 
-               * arm: added if(!replace) as a fix for the leak noted above, so we                           
-               * only copy if replacing, as the caller won't free the string.
-               * We could probably skip this outer else if !replace ?           
-               */
-              new_string = strdup("");
-          }
+         new_string = (tmp_string != NULL) ? tmp_string : strdup ("");
       }
 
       simple_value = simple_value->right;

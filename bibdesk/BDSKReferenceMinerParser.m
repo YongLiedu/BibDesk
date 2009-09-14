@@ -57,7 +57,7 @@
 @implementation BDSKReferenceMinerParser
 
 + (BOOL)canParseString:(NSString *)string{
-    string = [[string substringToIndex:MIN([string length], (NSUInteger)100)] stringByNormalizingSpacesAndLineBreaks];
+    string = [[string substringToIndex:MIN([string length], (unsigned)100)] stringByNormalizingSpacesAndLineBreaks];
     return [string isRefMinerPubMedString] || [string isRefMinerLoCString] || [string isRefMinerAmazonString];
 }
 
@@ -84,7 +84,7 @@
         return [BDSKMARCParser itemsFromString:itemString error:outError];
     }else{
         if(outError)
-            *outError = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unknown Reference Miner format.", @"Error description")];
+            OFErrorWithInfo(outError, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown Reference Miner format.", @"Error description"), nil);
         return [NSArray array];
     }
 }

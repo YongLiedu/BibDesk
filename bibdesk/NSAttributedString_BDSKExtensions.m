@@ -41,11 +41,11 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSCharacterSet_BDSKExtensions.h"
 
-#define BDSKRangeKey @"__BDSKRange"
+static NSString *BDSKRangeKey = @"__BDSKRange";
 
 static void BDSKGetAttributeDictionariesAndFixString(NSMutableArray *attributeDictionaries, NSMutableString *mutableString, NSDictionary *attributes, NSRange *rangePtr)
 {
-    BDSKASSERT(nil != mutableString);
+    OBASSERT(nil != mutableString);
     
     // we need something to copy and add to the array
     if (nil == attributes)
@@ -60,8 +60,8 @@ static void BDSKGetAttributeDictionariesAndFixString(NSMutableArray *attributeDi
     NSRange searchRange = range;
     NSRange cmdRange;
     NSRange styleRange;
-    NSUInteger startLoc; // starting character index to apply tex attributes
-    NSUInteger endLoc;   // ending index to apply tex attributes
+    unsigned startLoc; // starting character index to apply tex attributes
+    unsigned endLoc;   // ending index to apply tex attributes
     
     CFAllocatorRef alloc = CFGetAllocator(mutableString);
     
@@ -144,20 +144,16 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
 
 @implementation NSAttributedString (BDSKExtensions)
 
-- (id)initWithString:(NSString *)string attributeName:(NSString *)attributeName attributeValue:(id)attributeValue{
-    NSDictionary *attributes = [[NSDictionary alloc] initWithObjectsAndKeys:attributeValue, attributeName, nil];
-    self = [self initWithString:string attributes:attributes];
-    [attributes release];
-    return self;
-}
-
 - (id)initWithTeXString:(NSString *)string attributes:(NSDictionary *)attributes collapseWhitespace:(BOOL)collapse{
 
     NSMutableAttributedString *mas;
     
     // get rid of whitespace if we have to; we can't use this on the attributed string's content store, though
-    if (collapse)
-        string = [[string expandedString] stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    if(collapse){
+        if([string isComplex])
+            string = [NSString stringWithString:string];
+        string = [string fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
+    }
     
     NSMutableString *mutableString = [string mutableCopy];
     
@@ -166,7 +162,7 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
     NSRange range = NSMakeRange(0, [mutableString length]);
     BDSKGetAttributeDictionariesAndFixString(attributeDictionaries, mutableString, attributes, &range);
     
-    NSUInteger numberOfDictionaries = [attributeDictionaries count];
+    unsigned numberOfDictionaries = [attributeDictionaries count];
     if (numberOfDictionaries > 0) {
 
         // discard the result of +alloc, since we're going to create a new object
@@ -237,17 +233,6 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
 
 - (id)scriptingRtfDescriptor {
     return [NSAppleEventDescriptor descriptorWithDescriptorType:'RTF ' data:[self RTFFromRange:NSMakeRange(0, [self length]) documentAttributes:nil]];
-}
-
-@end
-
-
-@implementation NSMutableAttributedString (BDSKExtensions)
-
-- (void)appendString:(NSString *)string attributes:(NSDictionary *)attributes {
-    NSAttributedString *attrString = [[NSAttributedString alloc] initWithString:string attributes:attributes];
-    [self appendAttributedString:attrString];
-    [attrString release];
 }
 
 @end

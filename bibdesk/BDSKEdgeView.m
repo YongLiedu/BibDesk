@@ -44,9 +44,8 @@
 
 - (id)initWithFrame:(NSRect)frame {
     if (self = [super initWithFrame:frame]) {
-       NSColor *lightColor = [NSColor colorWithCalibratedWhite:0.75 alpha:1.0];
-       NSColor *darkColor = [NSColor colorWithCalibratedWhite:0.55 alpha:1.0];
-	   edgeColors = [[NSMutableArray alloc] initWithObjects:lightColor, lightColor, lightColor, darkColor, nil];
+       NSColor *color = [NSColor colorWithCalibratedWhite:0.75 alpha:1.0];
+	   edgeColors = [[NSMutableArray alloc] initWithObjects:color, color, color, color, nil];
 	   edges = BDSKNoEdgeMask; // we start with no edge, so we can use this in IB without getting weird offsets
     }
     return self;
@@ -75,7 +74,7 @@
 - (void)drawRect:(NSRect)aRect {
 	NSRect rect = [self bounds];
 	NSRect edgeRect;
-	NSInteger edge = 4;
+	int edge = 4;
 	
 	while (--edge >= 0) {
 		if ((edges & (1 << edge)) == 0)
@@ -86,11 +85,11 @@
 	}
 }
 
-- (NSInteger)edges {
+- (int)edges {
 	return edges;
 }
 
-- (void)setEdges:(NSInteger)mask {
+- (void)setEdges:(int)mask {
 	if (mask != edges) {
 		edges = mask;
 		[contentView setFrame:[self contentRect]];
@@ -111,7 +110,7 @@
 }
 
 - (void)setEdgeColor:(NSColor *)aColor {
-	NSInteger count = 4;
+	int count = 4;
 	[edgeColors removeAllObjects];
 	while (count--) 
 		[edgeColors addObject:aColor];
@@ -132,7 +131,7 @@
 - (NSRect)contentRect {
 	NSRect rect = [self bounds];
 	NSRect edgeRect;
-	NSInteger edge = 4;
+	int edge = 4;
 	
 	while (--edge >= 0) {
 		if (edges & (1 << edge))

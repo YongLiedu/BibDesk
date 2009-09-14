@@ -57,12 +57,12 @@
 #import "NSInvocation_BDSKExtensions.h"
 
 #define MAX_SEARCHKIT_RESULTS 10
-static CGFloat LEAF_ROW_HEIGHT = 20.0;
-static CGFloat GROUP_ROW_HEIGHT = 24.0;
+static float LEAF_ROW_HEIGHT = 20.0;
+static float GROUP_ROW_HEIGHT = 24.0;
 
 @interface BDSKCountOvalCell : NSTextFieldCell
 @end
-@interface BDSKBoldShadowFormatter : BDSKTextWithIconFormatter
+@interface BDSKBoldShadowFormatter : NSFormatter
 @end
 
 @interface BDSKFileMatcher (Private)
@@ -208,7 +208,7 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
     [[self window] makeKeyAndOrderFront:self];
     [abortButton setEnabled:YES];
 
-    OSAtomicCompareAndSwap32Barrier(0, 1, &_matchFlags.shouldAbortThread);
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&_matchFlags.shouldAbortThread);
     
     // block if necessary until the thread aborts
     [indexingLock lock];
@@ -218,7 +218,7 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
 
     // okay to set pubs here, since we have the lock
     [self setCurrentPublications:pubs];
-    OSAtomicCompareAndSwap32Barrier(1, 0, &_matchFlags.shouldAbortThread);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&_matchFlags.shouldAbortThread);
     [NSThread detachNewThreadSelector:@selector(indexFiles:) toTarget:self withObject:absoluteURLs];
     
     // the first thing the thread will do is block until it acquires the lock, so let it go
@@ -238,12 +238,12 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
 
 - (IBAction)abort:(id)sender;
 {
-    if (false == OSAtomicCompareAndSwap32Barrier(0, 1, &_matchFlags.shouldAbortThread))
+    if (false == OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&_matchFlags.shouldAbortThread))
         NSBeep();
     [abortButton setEnabled:NO];
 }
 
-- (void)configSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)code contextInfo:(void *)context;
+- (void)configSheetDidEnd:(NSWindow *)sheet returnCode:(int)code contextInfo:(void *)context;
 {
     BDSKFileMatchConfigController *config = (id)context;
     [config autorelease];
@@ -269,7 +269,7 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
     return NO;
 }
 
-- (NSDragOperation)outlineView:(NSOutlineView*)olv validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx;
+- (NSDragOperation)outlineView:(NSOutlineView*)olv validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)idx;
 {
     if ([[info draggingSource] isEqual:outlineView] && [item isLeaf] == NO) {
         [olv setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
@@ -278,7 +278,7 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
     return NSDragOperationNone;
 }
 
-- (BOOL)outlineView:(NSOutlineView*)olv acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(NSInteger)idx;
+- (BOOL)outlineView:(NSOutlineView*)olv acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(int)idx;
 {
     NSArray *types = [[info draggingPasteboard] types];
     NSURL *fileURL = ([types containsObject:NSURLPboardType] ? [NSURL URLFromPasteboard:[info draggingPasteboard]] : nil);
@@ -294,57 +294,48 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
 #pragma mark Delegate display methods
 
 // return a larger row height for the items; tried using a spotlight controller image, but row size is too large to be practical
-- (CGFloat)outlineView:(NSOutlineView *)ov heightOfRowByItem:(id)item
+- (float)outlineView:(NSOutlineView *)outlineView heightOfRowByItem:(id)item
 {
     return [item isLeaf] ? LEAF_ROW_HEIGHT : GROUP_ROW_HEIGHT;
 }
 
-- (BOOL)outlineView:(NSOutlineView *)ov shouldSelectItem:(id)item;
+- (BOOL)outlineView:(NSOutlineView *)outlineView shouldSelectItem:(id)item;
 {
     return [item isLeaf];
 }
 
 // this allows us to return the count cell for top-level rows, since they have a count instead of a score
-- (NSCell *)outlineView:(NSOutlineView *)ov dataCellForTableColumn:(NSTableColumn *)tableColumn item:(id)item
+- (NSCell *)tableView:(NSTableView *)tableView column:(OADataSourceTableColumn *)tableColumn dataCellForRow:(int)row;
 {
-    NSCell *cell = [tableColumn dataCell];
-    if ([[tableColumn identifier] isEqualToString:@"score"]) {
-        static id prototype = nil;
-        if (nil == prototype) {
-            prototype = [[BDSKCountOvalCell alloc] initTextCell:@""];
-            [prototype setFont:[outlineView font]];
-            [prototype setBordered:NO];
-            [prototype setControlSize:[cell controlSize]];
-        }
-        if ([item isLeaf])
-            cell = prototype;
+    NSCell *defaultCell = [tableColumn dataCell];
+    static NSCell *prototype = nil;
+    if (nil == prototype) {
+        prototype = [[BDSKCountOvalCell alloc] initTextCell:@""];
+        [prototype setFont:[tableView font]];
+        [prototype setBordered:NO];
+        [prototype setControlSize:[defaultCell controlSize]];
     }
-    return cell;
+    return [[(NSOutlineView *)tableView itemAtRow:row] isLeaf] ? defaultCell : [[prototype copy] autorelease];
 }
 
 // change text appearance in top-level rows via a formatter, so we don't have to mess with custom text/icon cells
 - (void)outlineView:(NSOutlineView *)ov willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item;
 {
-    if ([[tableColumn identifier] isEqualToString:@"title"]) {
-        if ([item isLeaf]) {
-            static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
-            if (nil == textWithIconFormatter)
-                textWithIconFormatter = [[BDSKTextWithIconFormatter alloc] init];
-            [cell setFormatter:textWithIconFormatter];
-            [cell setTextColor:[NSColor blackColor]];
-        } else {
-            static BDSKBoldShadowFormatter *boldShadowFormatter = nil;
-            if (nil == boldShadowFormatter)
-                boldShadowFormatter = [[BDSKBoldShadowFormatter alloc] init];
-            [cell setFormatter:boldShadowFormatter];
-            [cell setTextColor:[NSColor whiteColor]];
-        }
+    if (NO == [item isLeaf]) {
+        static BDSKBoldShadowFormatter *fm = nil;
+        if (nil == fm)
+            fm = [[BDSKBoldShadowFormatter alloc] init];
+        [cell setFormatter:fm];
+        [cell setTextColor:[NSColor whiteColor]];
+    } else if ([[tableColumn identifier] isEqualToString:@"title"]) {
+        [cell setFormatter:nil];
+        [cell setTextColor:[NSColor blackColor]];
     }
 }
 
 #pragma mark Outline view datasource
 
-- (id)outlineView:(NSOutlineView *)ov child:(NSInteger)idx ofItem:(id)item;
+- (id)outlineView:(NSOutlineView *)ov child:(int)idx ofItem:(id)item;
 {
     return nil == item ? [matches objectAtIndex:idx] : [item childAtIndex:idx];
 }
@@ -354,7 +345,7 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
     return item ? (NO == [item isLeaf]) : YES;
 }
 
-- (NSInteger)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item;
+- (int)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item;
 {
     return item ? [item numberOfChildren] : [matches count];
 }
@@ -395,7 +386,7 @@ static NSString *searchStringWithPub(BibItem *pub)
     NSMutableString *searchString = [NSMutableString stringWithString:[[pub title] stringByRemovingTeX]];
     NSString *name = [[pub firstAuthorOrEditor] lastName];
     if (name)
-        [searchString appendStrings:@" AND ", name, nil];
+        [searchString appendFormat:@" AND %@", [[pub firstAuthor] lastName]];
     return searchString;
 }
 
@@ -407,7 +398,7 @@ static NSString *titleStringWithPub(BibItem *pub)
 // caller is reponsible for releasing the array, since the autorelease pool on the main thread may pop before the invocation's return value is requested
 - (NSArray *)copyTreeNodesWithCurrentPublications;
 {
-    NSAssert([NSThread isMainThread], @"method must be called from the main thread");
+    NSAssert([NSThread inMainThread], @"method must be called from the main thread");
 
     NSEnumerator *pubE = [[self currentPublications] objectEnumerator];
     BibItem *pub;
@@ -431,15 +422,15 @@ static NSString *titleStringWithPub(BibItem *pub)
 }
 
 // normalize scores on a per-parent basis
-static void normalizeScoresForItem(BDSKTreeNode *parent, CGFloat maxScore)
+static void normalizeScoresForItem(BDSKTreeNode *parent, float maxScore)
 {
     // nodes are shallow, so we only traverse 1 deep
-    NSUInteger i, iMax = [parent numberOfChildren];
+    unsigned i, iMax = [parent numberOfChildren];
     for (i = 0; i < iMax; i++) {
         BDSKTreeNode *child = [parent childAtIndex:i];
         NSNumber *score = [child valueForKey:@"score"];
         if (score) {
-            CGFloat oldValue = [score floatValue];
+            float oldValue = [score floatValue];
             double newValue = oldValue/maxScore;
             [child setValue:[NSNumber numberWithDouble:newValue] forKey:@"score"];
         }
@@ -461,7 +452,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
     [invocation getReturnValue:&treeNodes];
     [treeNodes autorelease];
     
-    BDSKPOSTCONDITION([treeNodes count]);
+    OBPOSTCONDITION([treeNodes count]);
         
     NSParameterAssert(NULL != searchIndex);
     SKIndexFlush(searchIndex);
@@ -485,12 +476,12 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
         
         // if we get more than 10 matches back per pub, the results will be pretty useless anyway
         SKDocumentID docID[MAX_SEARCHKIT_RESULTS];
-        CGFloat scores[MAX_SEARCHKIT_RESULTS];
+        float scores[MAX_SEARCHKIT_RESULTS];
         
         CFIndex numFound;
         
         Boolean moreToFind;
-        CGFloat thisScore, maxScore = 0.0f;
+        float thisScore, maxScore = 0.0f;
         
         do {
             
@@ -501,7 +492,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
                 CFURLRef urls[MAX_SEARCHKIT_RESULTS];
                 SKIndexCopyDocumentURLsForDocumentIDs(searchIndex, numFound, docID, urls);
                 
-                NSInteger i, iMax = numFound;
+                int i, iMax = numFound;
                 
                 // now we have a matching file; we could remove it from the index, but multiple matches are reasonable
                 for (i =  0; i < iMax; i++) {
@@ -526,7 +517,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
         CFRelease(search);
         
         normalizeScoresForItem(node, maxScore);
-        [node setValue:[NSString stringWithFormat:@"%ld", (long)[node numberOfChildren]] forKey:@"score"];
+        [node setValue:[NSString stringWithFormat:@"%d", [node numberOfChildren]] forKey:@"score"];
         [node sortChildrenUsingFunction:scoreComparator context:NULL];
         
         val++;
@@ -630,25 +621,33 @@ static NSDictionary *attributes = nil;
 
 + (void)initialize
 {
-    BDSKINITIALIZE;
-    NSMutableDictionary *newAttrs = [[NSMutableDictionary alloc] initWithCapacity:10];
-    
-    [newAttrs setObject:[NSFont boldSystemFontOfSize:[NSFont systemFontSize]] forKey:NSFontAttributeName];
-    [newAttrs setObject:[NSColor colorWithCalibratedWhite:1.0 alpha:1.0] forKey:NSForegroundColorAttributeName];
-    [newAttrs setObject:[NSParagraphStyle defaultTruncatingTailParagraphStyle] forKey:NSParagraphStyleAttributeName];
+    if (nil == attributes) {
+        NSMutableDictionary *newAttrs = [[NSMutableDictionary alloc] initWithCapacity:10];
+        
+        [newAttrs setObject:[NSFont boldSystemFontOfSize:[NSFont systemFontSize]] forKey:NSFontAttributeName];
+        [newAttrs setObject:[NSColor colorWithCalibratedWhite:1.0 alpha:1.0] forKey:NSForegroundColorAttributeName];
+        [newAttrs setObject:[NSParagraphStyle defaultTruncatingTailParagraphStyle] forKey:NSParagraphStyleAttributeName];
 
-    attributes = [newAttrs copy];
-    [newAttrs release];
+        attributes = [newAttrs copy];
+        [newAttrs release];
+    }
 }
 
 - (NSAttributedString *)attributedStringForObjectValue:(id)obj withDefaultAttributes:(NSDictionary *)attrs;
 {
-    NSMutableAttributedString *attrString = [[[NSMutableAttributedString alloc] initWithString:[self stringForObjectValue:obj]] autorelease];
+    NSMutableAttributedString *attrString = [[[NSMutableAttributedString alloc] initWithString:obj] autorelease];
     NSMutableDictionary *newAttrs = [attrs mutableCopy];
     [newAttrs addEntriesFromDictionary:attributes];
     [attrString addAttributes:newAttrs range:NSMakeRange(0, [attrString length])];
     [newAttrs release];
     return attrString;
+}
+    
+- (NSString *)stringForObjectValue:(id)obj { return obj; }
+- (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error;
+{
+    *obj = string;
+    return YES;
 }
 
 @end
@@ -662,8 +661,8 @@ static NSColor *fillColor = nil;
 
 + (void)initialize
 {
-    BDSKINITIALIZE;
-    fillColor = [[[NSColor keyboardFocusIndicatorColor] colorWithAlphaComponent:0.8] copy];
+    if (nil == fillColor)
+        fillColor = [[[NSColor keyboardFocusIndicatorColor] colorWithAlphaComponent:0.8] copy];
 }
 
 - (id)initTextCell:(NSString *)string;
@@ -688,7 +687,7 @@ static NSColor *fillColor = nil;
     NSSize textSize = [self cellSizeForBounds:theRect];
     
     // Center that in the proposed rect
-    CGFloat heightDelta = newRect.size.height - textSize.height;	
+    float heightDelta = newRect.size.height - textSize.height;	
     if (heightDelta > 0) {
         newRect.size.height -= heightDelta;
         newRect.origin.y += (heightDelta / 2);
@@ -699,7 +698,15 @@ static NSColor *fillColor = nil;
 
 @end
 
-#pragma mark -
+/* Groups items under the top-level outline, and uses a gradient fill for the top level row background.  Grid lines are drawn when the outline has data.
+*/
+
+@interface BDSKGroupingOutlineView : NSOutlineView
+{
+    CIColor *topColor;
+    CIColor *bottomColor;
+}
+@end
 
 @implementation BDSKGroupingOutlineView
 
@@ -717,8 +724,8 @@ static NSColor *fillColor = nil;
     
     // colors similar to Spotlight's window: darker blue at bottom, lighter at top
     CGColorSpaceRef cspace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
-    const CGFloat upper[4] = { 106.0/255.0, 158.0/255.0, 238.0/255.0, 1.0 };
-    const CGFloat lower[4] = {  72.0/255.0, 139.0/255.0, 244.0/255.0, 1.0 };
+    const float upper[4] = { 106.0/255.0, 158.0/255.0, 238.0/255.0, 1.0 };
+    const float lower[4] = {  72.0/255.0, 139.0/255.0, 244.0/255.0, 1.0 };
     
     CGColorRef cgColor;
     
@@ -763,7 +770,7 @@ static NSColor *fillColor = nil;
         [super drawGridInClipRect:rect];
 }
 
-- (void)drawRow:(NSInteger)rowIndex clipRect:(NSRect)clipRect
+- (void)drawRow:(int)rowIndex clipRect:(NSRect)clipRect
 {
     if ([self isExpandable:[self itemAtRow:rowIndex]]) {
 
@@ -776,7 +783,7 @@ static NSColor *fillColor = nil;
     [super drawRow:rowIndex clipRect:clipRect];
 }
 
--(void)_drawDropHighlightOnRow:(NSInteger)rowIndex{
+-(void)_drawDropHighlightOnRow:(int)rowIndex{
     NSRect drawRect = (rowIndex == -1) ? [self visibleRect] : [self rectOfRow:rowIndex];
     
     [self lockFocus];

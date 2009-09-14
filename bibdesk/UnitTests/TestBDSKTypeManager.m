@@ -36,6 +36,7 @@
 */
 
 #import "TestBDSKTypeManager.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKTypeManager.h"
 
 

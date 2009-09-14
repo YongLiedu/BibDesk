@@ -43,7 +43,7 @@
 #import "NSImage_BDSKExtensions.h"
 
 
-#define SEGMENTED_CONTROL_HEIGHT 22.0
+#define SEGMENTED_CONTROL_HEIGHT 20.0
 #define SEGMENTED_CONTROL_MARGIN 2.0
 
 
@@ -58,7 +58,7 @@
         if ([[self cell] isKindOfClass:[[self class] cellClass]] == NO) {
             id cell = [[[[[self class] cellClass] alloc] init] autorelease];
             id oldCell = [self cell];
-            NSUInteger i, count = [self segmentCount];
+            unsigned int i, count = [self segmentCount];
             
             [cell setSegmentCount:count];
             [cell setTrackingMode:[oldCell trackingMode]];
@@ -104,8 +104,7 @@
 
 
 @interface NSSegmentedCell (BDSKApplePrivateDeclarations)
-- (NSInteger)_trackingSegment;
-- (NSInteger)_keySegment;
+- (int)_trackingSegment;
 - (NSRect)_boundsForCellFrame:(NSRect)frame;
 @end
 
@@ -123,9 +122,7 @@
 
 - (void)drawWithFrame:(NSRect)frame inView:(NSView *)controlView {
     NSRect rect = NSInsetRect(frame, SEGMENTED_CONTROL_MARGIN, 0.0);
-    NSInteger i, count = [self segmentCount];
-    NSInteger keySegment = [self respondsToSelector:@selector(_keySegment)] && [[controlView window] isKeyWindow] && [[controlView window] firstResponder] == controlView ? [self _keySegment] : -1;
-    NSRect keyRect = NSZeroRect;
+    NSUInteger i, count = [self segmentCount];
     
     [NSGraphicsContext saveGraphicsState];
     [[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] setFill];
@@ -135,17 +132,8 @@
     rect = NSInsetRect(rect, 1.0, 0.0);
     for (i = 0; i < count; i++) {
         rect.size.width = [self widthForSegment:i];
-        if (i == keySegment)
-            keyRect = rect;
         [self drawSegment:i inFrame:rect withView:controlView];
         rect.origin.x = NSMaxX(rect) + 1.0;
-    }
-    
-    if (NSIsEmptyRect(keyRect) == NO) {
-		[NSGraphicsContext saveGraphicsState];
-		NSSetFocusRingStyle(NSFocusRingOnly);
-        [NSBezierPath fillRect:keyRect];
-		[NSGraphicsContext restoreGraphicsState];
     }
 }
 
@@ -162,9 +150,9 @@
         CIColor *startColor;
         CIColor *endColor;
         
-        layer = CGLayerCreateWithContext(viewContext, NSSizeToCGSize(layerSize), NULL);
-        selectedLayer = CGLayerCreateWithContext(viewContext, NSSizeToCGSize(layerSize), NULL);
-        highlightedLayer = CGLayerCreateWithContext(viewContext, NSSizeToCGSize(layerSize), NULL);
+        layer = CGLayerCreateWithContext(viewContext, *(CGSize *)&layerSize, NULL);
+        selectedLayer = CGLayerCreateWithContext(viewContext, *(CGSize *)&layerSize, NULL);
+        highlightedLayer = CGLayerCreateWithContext(viewContext, *(CGSize *)&layerSize, NULL);
         
         if ([controlView isFlipped]) {
             startColor = [CIColor colorWithWhite:0.9];
@@ -211,7 +199,7 @@
     
     [NSGraphicsContext saveGraphicsState];
     CGContextSetBlendMode(viewContext, kCGBlendModeNormal);
-    CGContextDrawLayerInRect(viewContext, NSRectToCGRect(frame), [self _trackingSegment] == segment ? highlightedLayer : [self isSelectedForSegment:segment] ? selectedLayer : layer);
+    CGContextDrawLayerInRect(viewContext, *(CGRect *)&frame, [self _trackingSegment] == segment ? highlightedLayer : [self isSelectedForSegment:segment] ? selectedLayer : layer);
     [NSGraphicsContext restoreGraphicsState];
     
     NSImage *image = [self imageForSegment:segment];
@@ -219,17 +207,20 @@
     NSRect fromRect = NSZeroRect;
     CGFloat f = [self isEnabledForSegment:segment] ? 1.0 : 0.5;
     fromRect.size = [image size];
-    [image drawFlipped:[controlView isFlipped] inRect:rect fromRect:fromRect operation:NSCompositeSourceOver fraction:f];
+    if ([controlView isFlipped])
+        [image drawFlippedInRect:rect fromRect:fromRect operation:NSCompositeSourceOver fraction:f];
+    else
+        [image drawInRect:rect fromRect:fromRect operation:NSCompositeSourceOver fraction:f];
     
     if ([self menuForSegment:segment]) {
         CGFloat x = NSMaxX(frame) - 2.0;
         CGFloat z = -3.0, y = NSMidY(frame);
         
         if ([controlView isFlipped]) {
-            y = BDSKCeil(y) + 1.0;
+            y = ceil(y) + 1.0;
             z = 3.0;
         } else {
-            y = BDSKFloor(y) - 1.0;
+            y = floor(y) - 1.0;
         }
         
         NSBezierPath *arrowPath = [NSBezierPath bezierPath];

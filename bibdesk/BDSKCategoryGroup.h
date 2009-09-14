@@ -52,7 +52,7 @@
 	@param aKey The key for the group.
 	@param count The count for the group.
 */
-- (id)initWithName:(id)aName key:(NSString *)aKey count:(NSInteger)aCount;
+- (id)initWithName:(id)aName key:(NSString *)aKey count:(int)aCount;
 
 /*!
     @method     initEmptyGroupWithKey:count:
@@ -60,7 +60,7 @@
 	@param      aKey The key for the group.
 	@param      count The count for the group.
 */
-- (id)initEmptyGroupWithKey:(NSString *)aKey count:(NSInteger)aCount;
+- (id)initEmptyGroupWithKey:(NSString *)aKey count:(int)aCount;
 
 /*!
 	@method key
@@ -76,7 +76,5 @@
 	@discussion This is only used to preserve the selection after an edit
 */
 - (void)setName:(id)newName;
-
-- (BOOL)isEmpty;
 
 @end

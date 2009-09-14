@@ -40,7 +40,7 @@
 #import "BibItem.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSXMLNode_BDSKExtensions.h"
-#import <AGRegex/AGRegex.h>
+#import <AGRegEx/AGRegEx.h>
 
 
 @implementation BDSKArxivParser
@@ -52,12 +52,11 @@
         return NO;
     }
     
-    BOOL isAbstract = [[[url path] lowercaseString] hasPrefix:@"/abs/"];
-    NSString *containsArxivLinkNode = isAbstract ? @"//td[@class='tablecell arxivid']" : @"//span[@class='list-identifier']"; 
+    NSString *containsArxivLinkNode = @"//span[@class='list-identifier']"; 
     
     NSError *error = nil;    
 
-    NSInteger nodecount = [[[xmlDocument rootElement] nodesForXPath:containsArxivLinkNode error:&error] count];
+    int nodecount = [[[xmlDocument rootElement] nodesForXPath:containsArxivLinkNode error:&error] count];
 
     return nodecount > 0;
 }
@@ -71,34 +70,16 @@
 
     NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
     
-    BOOL isAbstract = [[[url path] lowercaseString] hasPrefix:@"/abs/"];
-    
     NSString *arxivSearchResultNodePath = @"//dl/dt";
     
     NSString *arxivLinkNodePath = @".//span[@class='list-identifier']";
     NSString *arxivIDNodePath = @"./a[contains(text(),'arXiv:')]";
     NSString *pdfURLNodePath = @"./a[contains(text(),'pdf')]";
-    
+
     NSString *titleNodePath = @".//div[@class='list-title']";
     NSString *authorsNodePath = @".//div[@class='list-authors']/a";
     NSString *journalNodePath = @".//div[@class='list-journal-ref']";
     NSString *abstractNodePath = @".//p";
-    
-    if (isAbstract) {
-        arxivLinkNodePath = @".//td[@class='tablecell arxivid']";
-        arxivIDNodePath = @"./a[contains(text(),'arXiv:')]";
-        
-        pdfURLNodePath = @".//div[@class='full-text']//a[contains(text(),'PDF')]";
-        titleNodePath = @".//h1[@class='title']";
-        authorsNodePath = @".//div[@class='authors']/a";
-        journalNodePath = @".//td[@class='tablecell jref']";
-        abstractNodePath = @".//blockquote[@class='abstract']";
-    }
-    
-    AGRegex *eprintRegex1 = [AGRegex regexWithPattern:@"([0-9]{2})([0-9]{2})\\.([0-9]{4})"
-                                              options:AGRegexMultiline];
-    AGRegex *eprintRegex2 = [AGRegex regexWithPattern:@"([0-9]{2})([0-9]{2})([0-9]{3})"
-                                              options:AGRegexMultiline];
     
     AGRegex *journalRegex1 = [AGRegex regexWithPattern:@"(.+) +([^ ]+) +\\(([0-9]{4})\\) +([^ ]+)"
                                                options:AGRegexMultiline];
@@ -110,11 +91,8 @@
     NSError *error = nil;
             
     // fetch the arxiv search results
-    NSArray *arxivSearchResults = nil;
-    if (isAbstract)
-        arxivSearchResults = [NSArray arrayWithObjects:[xmlDocument rootElement], nil];
-    else
-        arxivSearchResults = [[xmlDocument rootElement] nodesForXPath:arxivSearchResultNodePath error:&error];
+    NSArray *arxivSearchResults = [[xmlDocument rootElement] nodesForXPath:arxivSearchResultNodePath
+                                                                     error:&error];
     
     // bail out with an XML error if the Xpath query fails
     if (nil == arxivSearchResults) {
@@ -122,7 +100,7 @@
         return nil;
     }    
     
-    NSUInteger i, iMax = [arxivSearchResults count];
+    unsigned int i, iMax = [arxivSearchResults count];
     
     // check the number of nodes first
     if (0 == iMax) {
@@ -145,39 +123,26 @@
 
             // This is an error since this method isn't supposed to be called if the bibtex
             // links don't appear on the page
-            NSLog(@"ArXiv Error: unable to parse bibtex url from search result %lu due to xpath error", (unsigned long)i);
+            NSLog(@"ArXiv Error: unable to parse bibtex url from search result %u due to xpath error", i);
             continue;
 
         } else if (1 != [arxivLinkNodes count]) {
 
             // If Google ever start providing multiple alternative bibtex links for a
             // single item we will need to deal with that
-            NSLog(@"ArXiv Error: unable to parse bibtex url from search result %lu, found %lu bibtex urls (expected 1)", (unsigned long)i, (unsigned long)[arxivLinkNodes count]);
+            NSLog(@"ArXiv Error: unable to parse bibtex url from search result %u, found %u bibtex urls (expected 1)", i, [arxivLinkNodes count]);
             continue;
 
         }
         
         NSXMLNode *arxivLinkNode = [arxivLinkNodes objectAtIndex:0];
-        NSXMLNode *arxivMetaNode = isAbstract ? arxivSearchResult : [arxivSearchResult nextSibling];
+        NSXMLNode *arxivMetaNode = [arxivSearchResult nextSibling];
         NSArray *nodes;
         
         NSMutableDictionary *pubFields = [NSMutableDictionary dictionary];
         NSString *string = nil;
         
-        // search for arXiv ID
-        nodes = [arxivLinkNode nodesForXPath:arxivIDNodePath error:&error];
-        if (nil != nodes && 1 == [nodes count]) {
-            if (string = [[nodes objectAtIndex:0] stringValue]) {
-                string = [string stringByRemovingSurroundingWhitespaceAndNewlines];
-                if ([string hasCaseInsensitivePrefix:@"arXiv:"])
-                    string = [string substringFromIndex:6];
-                [pubFields setValue:string forKey:@"Eprint"];
-            }
-        }
-        
-        if (isAbstract)
-            arxivLinkNode = arxivSearchResult;
-        
+        nodes = [arxivLinkNode nodesForXPath:pdfURLNodePath error:&error];
         if (nil != nodes && 1 == [nodes count]) {
             // successfully found the result PDF url
             if (string = [[nodes objectAtIndex:0] stringValueOfAttribute:@"href"]) {
@@ -188,21 +153,28 @@
             }
         }
         
+        // search for arXiv ID
+        nodes = [arxivLinkNode nodesForXPath:arxivIDNodePath error:&error];
+        if (nil != nodes && 1 == [nodes count]) {
+            if (string = [[nodes objectAtIndex:0] stringValue]) {
+                if ([string hasCaseInsensitivePrefix:@"arXiv:"])
+                    string = [string substringFromIndex:6];
+                [pubFields setValue:string forKey:@"Eprint"];
+            }
+        }
+        
         // search for title
         nodes = [arxivMetaNode nodesForXPath:titleNodePath error:&error];
         if (nil != nodes && 1 == [nodes count]) {
-            if (string = [[[nodes objectAtIndex:0] childAtIndex:1] stringValue]) {
-                string = [string stringByRemovingSurroundingWhitespaceAndNewlines];
+            if (string = [[[nodes objectAtIndex:0] childAtIndex:1] stringValue])
                 [pubFields setValue:string forKey:BDSKTitleString];
-            }
         }
         
         // search for authors
         nodes = [arxivMetaNode nodesForXPath:authorsNodePath error:&error];
         if (nil != nodes && 0 < [nodes count]) {
-            if (string = [[nodes valueForKeyPath:@"stringValue.stringByRemovingSurroundingWhitespaceAndNewlines"] componentsJoinedByString:@" and "]) {
+            if (string = [[nodes valueForKey:@"stringValue"] componentsJoinedByString:@" and "])
                 [pubFields setValue:string forKey:BDSKAuthorString];
-            }
         }
         
         // search for journal ref
@@ -212,7 +184,6 @@
             // actual journal ref comes after a span containing a label
             if ([journalRefNode childCount] > 1) {
                 if (string = [[journalRefNode childAtIndex:1] stringValue]) {
-                    string = [string stringByRemovingSurroundingWhitespaceAndNewlines];
                     // try to get full journal ref components, as "Journal Volume (Year) Pages"
                     AGRegexMatch *match = [journalRegex1 findInString:string];
                     if ([match groupAtIndex:0]) {
@@ -243,35 +214,8 @@
         // search for abstract
         nodes = [arxivMetaNode nodesForXPath:abstractNodePath error:&error];
         if (nil != nodes && 1 == [nodes count]) {
-            NSXMLNode *abstractNode = [nodes objectAtIndex:0];
-            if (isAbstract && [abstractNode childCount] > 1)
-                abstractNode = [abstractNode childAtIndex:1];
-            if (string = [abstractNode stringValue]) {
-                string = [string stringByRemovingSurroundingWhitespaceAndNewlines];
+            if (string = [[nodes objectAtIndex:0] stringValue])
                 [pubFields setValue:string forKey:BDSKAbstractString];
-            }
-        }
-        
-        // fill year+month from the arxiv ID if we did not get it from a journal
-        if ([pubFields valueForKey:BDSKYearString] == nil && (string = [pubFields valueForKey:@"Eprint"])) {
-            // try new format, yymm.nnnn
-            AGRegexMatch *match = [eprintRegex1 findInString:string];
-            if (string = [match groupAtIndex:1]) {
-                [pubFields setValue:[@"20" stringByAppendingString:string] forKey:BDSKYearString];
-                [pubFields setValue:[match groupAtIndex:2] forKey:BDSKMonthString];
-            } else {
-                // try old format, yymmnnn
-                match = [eprintRegex2 findInString:string];
-                if (string = [match groupAtIndex:1]) {
-                    [pubFields setValue:[([string intValue] < 90 ? @"20" : @"19") stringByAppendingString:string] forKey:BDSKYearString];
-                    [pubFields setValue:[match groupAtIndex:2] forKey:BDSKMonthString];
-                }
-            }
-        }
-        
-        // fill URL from arxiv ID if we did not find a link
-        if ([pubFields valueForKey:BDSKUrlString] == nil && (string = [pubFields valueForKey:@"Eprint"])) {
-            [pubFields setValue:[NSString stringWithFormat:@"http://%@/pdf/%@", [url host], string] forKey:BDSKUrlString];
         }
         
         BibItem *item = [[BibItem alloc] initWithType:BDSKArticleString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];
@@ -288,14 +232,6 @@
     
     return items;  
     
-}
-
-
-+ (NSArray *) parserInfos {
-	NSString * parserDescription = NSLocalizedString(@"E-Print archive used frequently in mathematics and physics but also containing sections for non-linear science, computer science, quantitative biology and statistics.", @"Description for arXiv site");
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"arXiv" address:@"http://arxiv.org/" description:parserDescription flags:BDSKParserFeatureNone];
-	
-	return [NSArray arrayWithObject: parserInfo];
 }
 
 @end

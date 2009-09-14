@@ -133,7 +133,7 @@ static NSArray *dcProperties(NSXMLNode *node, NSString *key)
 
         if (array = dcProperties(node, @"description")) {
             NSString *cleanString = joinedArrayComponents(array, @"; ");
-            cleanString = [cleanString stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+            cleanString = [cleanString fastStringByCollapsingWhitespaceAndNewlinesAndRemovingSurroundingWhitespaceAndNewlines];
             if (cleanString)
                 [pubDict setObject:cleanString forKey:BDSKAbstractString];
         }

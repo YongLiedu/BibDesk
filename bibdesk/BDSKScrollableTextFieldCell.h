@@ -41,8 +41,8 @@
 
 
 @interface BDSKScrollableTextFieldCell : NSTextFieldCell {
-	NSInteger scrollStep;
-	NSInteger maxScrollStep;
+	int scrollStep;
+	int maxScrollStep;
 	BOOL isLeftButtonHighlighted;
 	BOOL isRightButtonHighlighted;
 	BOOL isClipped;
@@ -59,7 +59,7 @@
 - (NSRect)buttonRect:(BDSKScrollButton)button forBounds:(NSRect)theRect;
 - (NSRect)textRectForBounds:(NSRect)theRect;
 
-- (CGFloat)stringWidth;
+- (float)stringWidth;
 - (void)stringHasChanged;
 
 @end

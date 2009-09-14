@@ -44,7 +44,6 @@ extern NSString *BDSKNetServiceDomain;
     NSMutableSet *sharingClients;
     NSNetServiceBrowser *browser;
     NSMutableArray *unresolvedNetServices;
-    NSMutableSet *undecidedNetServices;
 }
 
 + (id)sharedBrowser;

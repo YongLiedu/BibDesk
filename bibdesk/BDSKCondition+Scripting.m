@@ -91,7 +91,7 @@ enum {
 
 - (NSScriptObjectSpecifier *)objectSpecifier {
 	NSArray *conditions = [[[self group] filter] conditions];
-	NSUInteger idx = [conditions indexOfObjectIdenticalTo:self];
+	unsigned idx = [conditions indexOfObjectIdenticalTo:self];
     if ([self group] && idx != NSNotFound) {
         NSScriptObjectSpecifier *containerRef = [(id)[self group] objectSpecifier];
         return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"conditions" index:idx] autorelease];
@@ -112,7 +112,7 @@ enum {
     }
 }
 
-- (NSInteger)scriptingComparison {
+- (int)scriptingComparison {
     if ([self isDateCondition]) {
         switch ([self dateComparison]) {
             case BDSKToday:         return BDSKASToday;
@@ -158,7 +158,7 @@ enum {
     }
 }
 
-- (void)setScriptingComparison:(NSInteger)newComparison {
+- (void)setScriptingComparison:(int)newComparison {
     NSScriptCommand *cmd = [NSScriptCommand currentCommand];
     if ([cmd isKindOfClass:[NSCreateCommand class]] == NO) {
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
@@ -221,7 +221,7 @@ enum {
 
 - (id)scriptingValue {
     if ([self isDateCondition]) {
-        NSInteger scriptingPeriodValue = BDSKASPeriodDay;
+        int scriptingPeriodValue = BDSKASPeriodDay;
         switch ([self periodValue]) {
             case BDSKPeriodDay:     scriptingPeriodValue = BDSKASPeriodDay;     break;
             case BDSKPeriodWeek:    scriptingPeriodValue = BDSKASPeriodWeek;    break;

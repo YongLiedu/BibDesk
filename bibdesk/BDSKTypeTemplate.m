@@ -48,7 +48,6 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
 
 + (void)initialize {
     [self setKeys:[NSArray arrayWithObjects:@"itemTemplate", @"included", @"default", nil] triggerChangeNotificationsForDependentKey:@"textColor"];
-    BDSKINITIALIZE;
 }
 
 - (id)initWithPubType:(NSString *)aPubType forDocument:(BDSKTemplateDocument *)aDocument {
@@ -188,6 +187,16 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
     [attrString fixAttributesInRange:NSMakeRange(0, [attrString length])];
     
     return attrString;
+}
+
+#pragma mark NSEditorRegistration
+
+- (void)objectDidBeginEditing:(id)editor {
+    [document objectDidBeginEditing:editor];
+}
+
+- (void)objectDidEndEditing:(id)editor {
+    [document objectDidEndEditing:editor];
 }
 
 @end

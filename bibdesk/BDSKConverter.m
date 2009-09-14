@@ -37,6 +37,7 @@
 #import "NSString_BDSKExtensions.h"
 #import "BDSKComplexString.h"
 #import "BDSKAppController.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringNode.h"
 #import "NSObject_BDSKExtensions.h"
@@ -81,7 +82,7 @@ static BDSKConverter *sharedConverter = nil;
 
 - (void)release {}
 
-- (NSUInteger)retainCount { return NSUIntegerMax; }
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (void)loadDict{
     
@@ -143,7 +144,7 @@ static BDSKConverter *sharedConverter = nil;
     NSString *string;
     
     while(node = [nodeEnum nextObject]){
-        if([node type] == BDSKStringNodeString){
+        if([node type] == BSN_STRING){
             string = [self performSelector:copySelector withObject:[node value]];
             newNode = [[BDSKStringNode alloc] initWithQuotedString:string];
             [string release];
@@ -177,11 +178,11 @@ static BDSKConverter *sharedConverter = nil;
     NSMutableString *tmpConv = nil;
     NSMutableString *convertedSoFar = [precomposedString mutableCopy];
 
-    CFIndex offset = 0;
+    int offset = 0;
     NSString *TEXString = nil;
     
     UniChar ch;
-    CFIndex idx, numberOfCharacters = CFStringGetLength((CFStringRef)precomposedString);
+    unsigned int idx, numberOfCharacters = CFStringGetLength((CFStringRef)precomposedString);
     NSRange r;
     CFStringInlineBuffer inlineBuffer;
     CFStringInitInlineBuffer((CFStringRef)precomposedString, &inlineBuffer, CFRangeMake(0, numberOfCharacters));
@@ -229,7 +230,7 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 {        
     // decompose to canonical form
     CFStringNormalize((CFMutableStringRef)charString, kCFStringNormalizationFormD);
-    NSUInteger decomposedLength = [charString length];
+    unsigned decomposedLength = [charString length];
     
     // first check if we can convert this, we should have a base character + an accent we know
     if (decomposedLength == 0 || [baseCharacterSetForTeX characterIsMember:[charString characterAtIndex:0]] == NO)
@@ -284,7 +285,7 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
     NSString *TEXString = nil;
 
     NSMutableString *convertedSoFar = nil;
-    NSUInteger start, length = [s length];
+    unsigned int start, length = [s length];
     NSRange range = [s rangeOfString:@"{\\" options:0 range:NSMakeRange(0, length)];
     
     if (range.length){
@@ -327,7 +328,7 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
         // if there was no character, we don't bother creating a mutable copy of the string
         convertedSoFar = [s copy];
     }
-    BDSKPOSTCONDITION(nil != convertedSoFar);
+    OBPOSTCONDITION(nil != convertedSoFar);
     return convertedSoFar; 
 }
 
@@ -341,7 +342,7 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
     
 	NSString *texAccent = nil;
 	NSString *accent = nil;
-    CFIndex idx = 0, length = [texString length];
+    unsigned int idx = 0, length = [texString length];
     
     CFStringInlineBuffer inlineBuffer;
     CFStringInitInlineBuffer((CFStringRef)texString, &inlineBuffer, CFRangeMake(0, length));
@@ -369,7 +370,7 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
     else if (ch == ' ')
         idx++;      // TeX accepts {\' i} or {\'i}, but space shouldn't be included in the letter token
     
-    CFIndex letterStart = idx;
+    unsigned letterStart = idx;
     NSString *character = nil;
     
     for (idx = letterStart; idx < length; idx++) {

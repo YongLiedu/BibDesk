@@ -39,12 +39,25 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKSheetController : NSWindowController
+@interface BDSKSheetController : NSWindowController {
+	BOOL runAppModal;
+    id theModalDelegate;
+    SEL theDidEndSelector;
+    SEL theDidDismissSelector;
+    void *theContextInfo;
+}
 
+- (int)runModal;
 - (void)beginSheetModalForWindow:(NSWindow *)window;
 - (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
+- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector didDismissSelector:(SEL)didDismissSelector contextInfo:(void *)contextInfo;
+- (int)runSheetModalForWindow:(NSWindow *)window;
+- (int)runSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
+- (int)runSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector didDismissSelector:(SEL)didDismissSelector contextInfo:(void *)contextInfo;
 
+- (void)prepare;
 - (IBAction)dismiss:(id)sender;
-- (void)didEndSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+- (void)didEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)endSheetWithReturnCode:(int)returnCode;
 
 @end

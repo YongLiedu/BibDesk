@@ -39,12 +39,11 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKGradientView.h"
 
-enum {
+typedef enum {
    BDSKProgressIndicatorNone = -1,
    BDSKProgressIndicatorBarStyle = NSProgressIndicatorBarStyle,
    BDSKProgressIndicatorSpinningStyle = NSProgressIndicatorSpinningStyle
-};
-typedef NSInteger BDSKProgressIndicatorStyle;
+} BDSKProgressIndicatorStyle;
 
 
 @interface BDSKStatusBar : BDSKGradientView {
@@ -53,7 +52,7 @@ typedef NSInteger BDSKProgressIndicatorStyle;
 	NSProgressIndicator *progressIndicator;
 	NSMutableArray *icons;
 	id delegate;
-    CGFloat textOffset;
+    float textOffset;
 }
 
 + (CIColor *)lowerColor;
@@ -67,7 +66,7 @@ typedef NSInteger BDSKProgressIndicatorStyle;
 	@param view The view that should be resized.
 	@param offset The extra amount by which the view should resize over the receivers height.
 */
-- (void)toggleBelowView:(NSView *)view offset:(CGFloat)offset;
+- (void)toggleBelowView:(NSView *)view offset:(float)offset;
 
 /*!
 	@method toggleInWindow:offset:
@@ -76,7 +75,7 @@ typedef NSInteger BDSKProgressIndicatorStyle;
 	@param window The window that should be resized.
 	@param offset The extra amount by which the window should resize over the receivers height.
 */
-- (void)toggleInWindow:(NSWindow *)window offset:(CGFloat)offset;
+- (void)toggleInWindow:(NSWindow *)window offset:(float)offset;
 
 /*!
 	@method isVisible
@@ -97,8 +96,8 @@ typedef NSInteger BDSKProgressIndicatorStyle;
 - (id)textCell;
 - (void)setTextCell:(NSCell *)aCell;
 
-- (CGFloat)textOffset;
-- (void)setTextOffset:(CGFloat)offset;
+- (float)textOffset;
+- (void)setTextOffset:(float)offset;
 
 - (NSProgressIndicator *)progressIndicator;
 

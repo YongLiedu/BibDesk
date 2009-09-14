@@ -58,17 +58,15 @@
 #import "NSScanner_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "BDSKCompletionManager.h"
-#import "NSData_BDSKExtensions.h"
-#import "CFString_BDSKExtensions.h"
 
 static NSLock *parserLock = nil;
 
 @interface BDSKBibTeXParser (Private)
 
 // private function to check the string for encoding.
-static inline BOOL checkStringForEncoding(NSString *s, NSInteger line, NSString *filePath, NSStringEncoding parserEncoding);
+static inline BOOL checkStringForEncoding(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding);
 // private function to do create a string from a c-string with encoding checking.
-static inline NSString *copyCheckedString(const char *cstring, NSInteger line, NSString *filePath, NSStringEncoding parserEncoding);
+static inline NSString *copyCheckedString(const char *cstring, int line, NSString *filePath, NSStringEncoding parserEncoding);
 
 // private function to get array value from field:
 // "foo" # macro # {string} # 19
@@ -80,18 +78,18 @@ static BOOL addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
 static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, NSString *filePath, BibDocument *document, NSStringEncoding encoding);
 
 // private function for preserving newlines in annote/abstract fields; does not lock the parser
-static NSString *copyStringFromNoteField(AST *field, const char *data, NSUInteger inputDataLength, NSString *filePath, NSStringEncoding encoding, NSString **error);
+static NSString *copyStringFromNoteField(AST *field, const char *data, unsigned inputDataLength, NSString *filePath, NSStringEncoding encoding, NSString **error);
 
 // parses an individual entry and adds it's field/value pairs to the dictionary
-static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, NSUInteger inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding);
+static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, unsigned inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding);
 
 @end
 
 @implementation BDSKBibTeXParser
 
 + (void)initialize{
-    BDSKINITIALIZE;
-    parserLock = [[NSLock alloc] init];
+    if(nil == parserLock)
+        parserLock = [[NSLock alloc] init];
 }
 
 + (BOOL)canParseString:(NSString *)string{
@@ -138,7 +136,7 @@ error:(NSError **)outError{
 
 + (NSArray *)itemsFromData:(NSData *)inData frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(id<BDSKOwner>)anOwner encoding:(NSStringEncoding)parserEncoding isPartialData:(BOOL *)isPartialData error:(NSError **)outError{
     
-    NSUInteger inputDataLength = [inData length];
+    unsigned inputDataLength = [inData length];
     
     // btparse will crash if we pass it a zero-length data, so we'll return here for empty files
     if (isPartialData)
@@ -151,7 +149,7 @@ error:(NSError **)outError{
     
     // btparse chokes on classic Macintosh line endings, so we'll replace all returns with a newline; this takes < 0.01 seconds on a 1000+ item file with Unix line endings, so performance is not affected.  Windows line endings will be replaced by a single newline.
     NSMutableData *fixedData = [[inData mutableCopy] autorelease];
-    NSUInteger currIndex, nextIndex;
+    unsigned currIndex, nextIndex;
     NSRange replaceRange;
     const char lf[1] = {'\n'};
     unsigned char *bytePtr = [fixedData mutableBytes];
@@ -202,13 +200,16 @@ error:(NSError **)outError{
     
     NSError *error = nil;
     
-    if (isPasteOrDrag || [[NSFileManager defaultManager] fileExistsAtPath:filePath] == NO) {
+    if(isPasteOrDrag || [[NSFileManager defaultManager] fileExistsAtPath:filePath] == NO){
         fs_path = NULL; // used for error context in libbtparse
-        infile = [inData openReadStream];
-    } else {
+        infile = [inData openReadOnlyStandardIOFile];
+    }else if(didReplaceNewlines){
         fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
-        infile = didReplaceNewlines ? [inData openReadStream] : fopen(fs_path, "r");
-    }
+        infile = [inData openReadOnlyStandardIOFile];
+    }else{
+        fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
+        infile = fopen(fs_path, "r");
+    }    
 
     buf = (const char *) [inData bytes];
 
@@ -282,9 +283,7 @@ error:(NSError **)outError{
                                                       citeKey:citeKey
                                                     pubFields:dictionary
                                                         isNew:isPasteOrDrag];
-                        // we set the macroResolver so we know the fields were parsed with this macroResolver, mostly to prevent scripting to add the item to the wrong document
-                        [newBI setMacroResolver:macroResolver];
-                        
+
                         [citeKey release];
                         
                         [returnArray addObject:newBI];
@@ -313,7 +312,7 @@ error:(NSError **)outError{
         
     // generic error message; the error tableview will have specific errors and context
     if(parsed_ok == 0 || hadProblems){
-        error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unable to parse string as BibTeX", @"Error description") underlyingError:error];
+        OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @"Error description"), nil);
         
     // If no critical errors, warn about ignoring macros or frontmatter; callers can ignore this by passing a valid NSMutableString for frontmatter (or ignoring the partial data flag).  Mainly relevant for paste/drag on the document.
     } else if (ignoredMacros && ignoredFrontmatter) {
@@ -325,7 +324,7 @@ error:(NSError **)outError{
         [error setValue:NSLocalizedString(@"Macros must be added via the macro editor (cmd-shift-M)", @"") forKey:NSLocalizedRecoverySuggestionErrorKey];
         hadProblems = YES;
     } else if (ignoredFrontmatter) {
-        error = [NSError mutableLocalErrorWithCode:kBDSKParserIgnoredFrontMatter localizedDescription:NSLocalizedString(@"Macros ignored while parsing BibTeX", @"")];
+         error = [NSError mutableLocalErrorWithCode:kBDSKParserIgnoredFrontMatter localizedDescription:NSLocalizedString(@"Macros ignored while parsing BibTeX", @"")];
         [error setValue:NSLocalizedString(@"Frontmatter from pasted data should be added via a text editor", @"") forKey:NSLocalizedRecoverySuggestionErrorKey];
         hadProblems = YES;
     }
@@ -356,7 +355,7 @@ error:(NSError **)outError{
     BOOL quoted = NO;
 
 	NSString *s;
-	NSInteger nesting;
+	int nesting;
 	unichar ch;
     
     NSError *error= nil;
@@ -416,7 +415,7 @@ error:(NSError **)outError{
                         endOfValue = YES;
                 }
                 if (endOfValue == NO) // we don't include the outer braces or the separating commas
-                    [value appendFormat:@"%C", ch];
+                    [value appendCharacter:ch];
             }
             if(endOfValue == NO)
                 break;
@@ -448,7 +447,7 @@ error:(NSError **)outError{
     BOOL quoted = NO;
 
 	NSString *s;
-	NSInteger nesting;
+	int nesting;
 	unichar ch;
     
     NSError *error = nil;
@@ -624,10 +623,10 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
 
 /// private functions used with libbtparse code
 
-static inline NSInteger numberOfValuesInField(AST *field)
+static inline int numberOfValuesInField(AST *field)
 {
     AST *simple_value = field->down;
-    NSInteger cnt = 0;
+    int cnt = 0;
     while (simple_value && simple_value->text) {
         simple_value = simple_value->right;
         cnt++;
@@ -635,7 +634,7 @@ static inline NSInteger numberOfValuesInField(AST *field)
     return cnt;
 }
 
-static inline BOOL checkStringForEncoding(NSString *s, NSInteger line, NSString *filePath, NSStringEncoding parserEncoding){
+static inline BOOL checkStringForEncoding(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding){
     if(![s canBeConvertedToEncoding:parserEncoding]){
         NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Unable to convert characters to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:parserEncoding]];
         [BDSKErrorObject reportError:message forFile:filePath line:line];      
@@ -645,7 +644,7 @@ static inline BOOL checkStringForEncoding(NSString *s, NSInteger line, NSString 
     return YES;
 }
 
-static inline NSString *copyCheckedString(const char *cstring, NSInteger line, NSString *filePath, NSStringEncoding parserEncoding){
+static inline NSString *copyCheckedString(const char *cstring, int line, NSString *filePath, NSStringEncoding parserEncoding){
     NSString *nsString = cstring ? [[NSString alloc] initWithCString:cstring encoding:parserEncoding] : nil;
     if (nsString && checkStringForEncoding(nsString, line, filePath, parserEncoding) == NO) {
         [nsString release];
@@ -667,13 +666,10 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
 	simple_value = field->down;
     
     // traverse the AST and find out how many fields we have
-    NSInteger nodeCount = numberOfValuesInField(field);
+    int nodeCount = numberOfValuesInField(field);
     
     // from profiling: optimize for the single quoted string node case; avoids the array, node, and complex string overhead
     if (1 == nodeCount && simple_value->nodetype == BTAST_STRING) {
-        // collapse whitespace in single-node strings
-        bt_postprocess_field(field, BTO_COLLAPSE, true);
-        
         s = copyCheckedString(simple_value->text, field->line, filePath, parserEncoding);
         NSString *translatedString = nil;
         
@@ -789,8 +785,8 @@ static BOOL addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
         if([macroResolver macroDefinition:macroString dependsOnMacro:macroKey]){
             NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"Error description");            
             [BDSKErrorObject reportError:message forFile:filePath line:field->line];
-            if (error)
-                *error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Circular macro ignored.", @"Error description")];
+            
+            OFErrorWithInfo(error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Circular macro ignored.", @"Error description"), nil);
         }else if(nil != macroString){
             [macroResolver addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
         }else {
@@ -830,7 +826,7 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     
     while(field = bt_next_value(entry, field, NULL, &text)){
         if(text){
-            if(firstValue){
+            if(firstValue == TRUE){
                 firstValue = FALSE;
                 if(strlen(text) >= smartGroupStrLength && strncmp(text, smartGroupStr, smartGroupStrLength) == 0)
                     isSmartGroup = TRUE;
@@ -881,11 +877,11 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     return success;
 }
 
-static NSString *copyStringFromNoteField(AST *field, const char *data, NSUInteger inputDataLength, NSString *filePath, NSStringEncoding encoding, NSString **errorString)
+static NSString *copyStringFromNoteField(AST *field, const char *data, unsigned inputDataLength, NSString *filePath, NSStringEncoding encoding, NSString **errorString)
 {
     NSString *returnString = nil;
     unsigned long cidx = 0; // used to scan through buf for annotes.
-    NSInteger braceDepth = 0;
+    int braceDepth = 0;
     BOOL lengthOverrun = NO;
     if(field->down){
         cidx = field->down->offset;
@@ -935,7 +931,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSUIntege
     return returnString;
 }
 
-static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, NSUInteger inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding)
+static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, unsigned inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding)
 {
     AST *field = NULL;
     NSString *fieldName, *fieldValue, *tmpStr;

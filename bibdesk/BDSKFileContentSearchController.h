@@ -40,7 +40,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKFileSearch.h"
 
-@class BDSKFileSearchIndex, BDSKTableView, BDSKCollapsibleView, BDSKEdgeView, BibDicument;
+@class BDSKFileSearchIndex, BDSKCollapsibleView, BDSKEdgeView;
 
 @interface BDSKSelectionPreservingArrayController : NSArrayController
 @end
@@ -54,12 +54,11 @@
     BDSKFileSearchIndex *searchIndex;
     
     IBOutlet BDSKSelectionPreservingArrayController *resultsArrayController;
-    IBOutlet BDSKTableView *tableView;
+    IBOutlet NSTableView *tableView;
     
     IBOutlet BDSKEdgeView *controlView;
     IBOutlet BDSKCollapsibleView *collapsibleView;
     IBOutlet NSProgressIndicator *indexProgressBar;
-    IBOutlet NSTextField *statusField;
     BOOL canceledSearch;
     BOOL searchFieldDidEndEditing;
     
@@ -67,7 +66,7 @@
 }
 
 // Use this method to instantiate a search controller for use within a document window
-- (id)initForDocument:(BibDocument *)aDocument;
+- (id)initForDocument:(id)aDocument;
 - (NSView *)controlView;
 - (NSTableView *)tableView;
 // Use this to connect a search field and initiate a search
@@ -77,10 +76,6 @@
 - (NSArray *)selectedIdentifierURLs;
 - (NSArray *)selectedURLs;
 - (NSArray *)selectedResults;
-
-- (NSArray *)identifierURLsAtIndexes:(NSIndexSet *)indexes;
-- (NSArray *)URLsAtIndexes:(NSIndexSet *)indexes;
-- (NSArray *)resultsAtIndexes:(NSIndexSet *)indexes;
 
 - (NSArray *)results;
 - (void)setResults:(NSArray *)newResults;
@@ -106,6 +101,7 @@
 @end
 
 
-@interface NSObject (BDSKSearchControllerDocument)
+@protocol BDSKSearchContentView <NSObject>
+// Single method required by the BDSKSearchContentView protocol; the implementor is responsible for restoring its state by removing the views and resetting search field target/action.  It is sent to the document in response to a search field action with an empty string as search string.
 - (void)removeFileContentSearch:(BDSKFileContentSearchController *)fileContentSearchController;
 @end

@@ -46,8 +46,5 @@
     IconRef         _icon;
     BOOL            _drawsLinkBadge;
 }
-
-// pass nil URL to get missing file icon
-- (id)initWithURL:(NSURL *)theURL;
-
+- (id)initWithFinderIconOfURL:(NSURL *)theURL;
 @end

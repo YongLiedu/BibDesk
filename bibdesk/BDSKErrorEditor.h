@@ -50,8 +50,8 @@
     NSString *fileName;
     NSString *displayName;
     NSData *data;
-    NSInteger changeCount;
-    NSUInteger invalidSyntaxHighlightMark;
+    int changeCount;
+    unsigned int invalidSyntaxHighlightMark;
     BOOL enableSyntaxHighlighting;
     BOOL isPasteDrag;
 }
@@ -79,7 +79,7 @@
 - (IBAction)changeSyntaxHighlighting:(id)sender;
 - (IBAction)changeLineNumber:(id)sender;
 
-- (void)gotoLine:(NSInteger)lineNumber;
+- (void)gotoLine:(int)lineNumber;
 
 - (void)handleSelectionDidChangeNotification:(NSNotification *)notification;
 - (void)handleUndoManagerChangeUndoneNotification:(NSNotification *)notification;

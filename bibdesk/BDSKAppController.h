@@ -56,7 +56,6 @@
     
 	IBOutlet NSMenu *columnsMenu;
 	IBOutlet NSMenu *groupSortMenu;
-	IBOutlet NSMenu *groupFieldMenu;
 	IBOutlet NSMenu *copyAsTemplateMenu;
 	IBOutlet NSMenu *previewDisplayMenu;
 	IBOutlet NSMenu *sidePreviewDisplayMenu;
@@ -65,13 +64,13 @@
 
     NSLock *metadataCacheLock;
     int32_t canWriteMetadata;
+    OFMessageQueue *metadataMessageQueue;
     NSConnection *completionConnection;
 }
 
 - (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite;
 
 - (NSMenu *)groupSortMenu;
-- (NSMenu *)groupFieldMenu;
 	
 - (NSArray *)requiredFieldsForCiteKey;
 - (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;
@@ -85,6 +84,9 @@
 - (IBAction)reportBug:(id)sender;
 - (IBAction)requestFeature:(id)sender;
 
+- (IBAction)checkForUpdates:(id)sender;
+
+- (IBAction)showPreferencePanel:(id)sender;
 - (IBAction)toggleShowingErrorPanel:(id)sender;
 - (IBAction)toggleShowingPreviewPanel:(id)sender;
 
@@ -156,6 +158,13 @@
     @param      document (description)
 */
 - (void)rebuildMetadataCache:(id)userInfo;
+/*!
+    @method     privateRebuildMetadataCache:
+    @abstract   Private method; do not use this, but use the public rebuildMetadataCache which queues this method properly.
+    @discussion (comprehensive description)
+    @param      userInfo (description)
+*/
+- (void)privateRebuildMetadataCache:(id)userInfo;
 
 /*!
     @method     doSpotlightImportIfNeeded

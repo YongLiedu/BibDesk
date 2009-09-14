@@ -48,7 +48,7 @@
 - (id)delegate;
 - (void)setDelegate:(id)newDelegate;
 
-- (void)declareType:(NSString *)type dragCopyType:(NSInteger)dragCopyType forItems:(NSArray *)items forPasteboard:(NSPasteboard *)pboard;
+- (void)declareType:(NSString *)type dragCopyType:(int)dragCopyType forItems:(NSArray *)items forPasteboard:(NSPasteboard *)pboard;
 - (void)addTypes:(NSArray *)newTypes forPasteboard:(NSPasteboard *)pboard;
 - (BOOL)setString:(NSString *)string forType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;
 - (BOOL)setData:(NSData *)data forType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;

@@ -115,7 +115,7 @@
     // suggestion from Scott Thompson on quartz-dev was to use a CGLayer; based on docs, this should be a good win
     if (NULL == layer) {
         NSSize layerSize = bounds.size;
-        layer = CGLayerCreateWithContext(viewContext, NSSizeToCGSize(layerSize), NULL);
+        layer = CGLayerCreateWithContext(viewContext, *(CGSize *)&layerSize, NULL);
         
         CGContextRef layerContext = CGLayerGetContext(layer);
         [NSGraphicsContext saveGraphicsState];
@@ -129,7 +129,7 @@
     
     // normal blend mode is copy
     CGContextSetBlendMode(viewContext, kCGBlendModeNormal);
-    CGContextDrawLayerInRect(viewContext, NSRectToCGRect(bounds), layer);
+    CGContextDrawLayerInRect(viewContext, *(CGRect *)&bounds, layer);
 }
 
 // -[CIColor initWithColor:] fails (returns nil) with +[NSColor gridColor] rdar://problem/4789043

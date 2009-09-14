@@ -37,6 +37,7 @@
  */
 
 #import "BDSKRatingButton.h"
+#import <OmniBase/OmniBase.h>
 
 
 @implementation BDSKRatingButton
@@ -48,7 +49,7 @@
 // designated initializer
 - (id)initWithFrame:(NSRect)frameRect{
 	if ([super initWithFrame:frameRect]) {
-		BDSKPOSTCONDITION([self cell] == nil || [[self cell] isKindOfClass:[BDSKRatingButtonCell class]]);
+		OBPOSTCONDITION([self cell] == nil || [[self cell] isKindOfClass:[BDSKRatingButtonCell class]]);
 	}
 	return self;
 }
@@ -67,32 +68,32 @@
 			[self setCell:newCell];
 			[newCell release];
 		}
-		BDSKPOSTCONDITION([self cell] == nil || [[self cell] isKindOfClass:[BDSKRatingButtonCell class]]);
+		OBPOSTCONDITION([self cell] == nil || [[self cell] isKindOfClass:[BDSKRatingButtonCell class]]);
 	}
 	return self;
 }
 
-- (NSUInteger)rating {
+- (unsigned int)rating {
 	id cell = [self cell];
-    BDSKPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
+    OBPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
     return [cell rating];
 }
 
-- (void)setRating:(NSUInteger)newRating {
+- (void)setRating:(unsigned int)newRating {
 	id cell = [self cell];
-    BDSKPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
+    OBPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
 	[cell setRating:newRating];
 }
 
-- (NSUInteger)maxRating {
+- (unsigned int)maxRating {
 	id cell = [self cell];
-    BDSKPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
+    OBPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
     return [cell maxRating];
 }
 
-- (void)setMaxRating:(NSUInteger)newRating {
+- (void)setMaxRating:(unsigned int)newRating {
 	id cell = [self cell];
-    BDSKPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
+    OBPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
     [cell setMaxRating:newRating];
 }
 
@@ -107,7 +108,7 @@
 		
 		// Handle number keys to set the rating
 		if (character >= '0' && character <= '9' && character <= '0' + [self maxRating]) {
-			[self setRating:(NSInteger)(character - '0')];
+			[self setRating:(int)(character - '0')];
             [self sendAction:[self action] to:[self target]];
 			return;
 		}   

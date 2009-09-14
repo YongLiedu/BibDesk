@@ -38,13 +38,14 @@
 
 #import "BDSKStatusBar.h"
 #import "NSGeometry_BDSKExtensions.h"
+#import <OmniBase/OmniBase.h>
 #import "CIImage_BDSKExtensions.h"
 #import "BDSKCenterScaledImageCell.h"
 
 #define LEFT_MARGIN				5.0
 #define RIGHT_MARGIN			15.0
 #define MARGIN_BETWEEN_ITEMS	2.0
-#define VERTICAL_OFFSET         1.0
+#define VERTICAL_OFFSET         0.0
 
 
 @implementation BDSKStatusBar
@@ -68,8 +69,6 @@
     if (self) {
         textCell = [[NSTextFieldCell alloc] initTextCell:@""];
 		[textCell setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
-        if ([textCell respondsToSelector:@selector(setBackgroundStyle:)])
-            [textCell setBackgroundStyle:NSBackgroundStyleRaised];
 		
         iconCell = [[BDSKCenterScaledImageCell alloc] init];
 		
@@ -104,14 +103,14 @@
 
 - (NSSize)cellSizeForIcon:(NSImage *)icon {
     NSSize iconSize = [icon size];
-    CGFloat cellHeight = NSHeight([self bounds]) - 2.0;
-    CGFloat cellWidth = iconSize.width * cellHeight / iconSize.height;
+    float cellHeight = NSHeight([self bounds]) - 2.0;
+    float cellWidth = iconSize.width * cellHeight / iconSize.height;
 	return NSMakeSize(cellWidth, cellHeight);
 }
 
 - (void)drawRect:(NSRect)rect {
 	NSRect textRect, ignored;
-    CGFloat rightMargin = RIGHT_MARGIN;
+    float rightMargin = RIGHT_MARGIN;
 	
 	[super drawRect:rect];
     
@@ -149,17 +148,17 @@
 	return [self superview]  && [self isHidden] == NO;
 }
 
-- (void)toggleBelowView:(NSView *)view offset:(CGFloat)offset {
+- (void)toggleBelowView:(NSView *)view offset:(float)offset {
 	NSRect viewFrame = [view frame];
 	NSView *contentView = [view superview];
 	NSRect statusRect = [contentView bounds];
-	CGFloat shiftHeight = NSHeight([self frame]) + offset;
+	float shiftHeight = NSHeight([self frame]) + offset;
 	statusRect.size.height = NSHeight([self frame]);
 	
-	BDSKASSERT(contentView != nil);
+	OBASSERT(contentView != nil);
 	
 	if ([self superview]) {
-		BDSKASSERT([[self superview] isEqual:contentView]);
+		OBASSERT([[self superview] isEqual:contentView]);
 		viewFrame.size.height += shiftHeight;
 		if ([contentView isFlipped] == NO)
 			viewFrame.origin.y -= shiftHeight;
@@ -177,18 +176,18 @@
 	[contentView setNeedsDisplay:YES];
 }
 
-- (void)toggleInWindow:(NSWindow *)window offset:(CGFloat)offset {
+- (void)toggleInWindow:(NSWindow *)window offset:(float)offset {
 	NSRect winFrame = [window frame];
 	NSSize minSize = [window minSize];
 	NSSize maximumSize = [window maxSize];
 	NSView *contentView = [window contentView];
-	CGFloat shiftHeight = NSHeight([self frame]) + offset;
+	float shiftHeight = NSHeight([self frame]) + offset;
 	BOOL autoresizes = [contentView autoresizesSubviews];
 	NSEnumerator *viewEnum = [[contentView subviews] objectEnumerator];
 	NSView *view;
 	NSRect viewFrame;
 	
-	BDSKASSERT(contentView != nil);
+	OBASSERT(contentView != nil);
 	
 	if ([self superview])
 		shiftHeight = -shiftHeight;
@@ -213,7 +212,7 @@
 	} else {
 		NSRect statusRect = [contentView bounds];
 		statusRect.size.height = NSHeight([self frame]);
-		if ([contentView isFlipped])
+		if ([contentView isFlipped] == YES)
 			statusRect.origin.y = NSMaxY([contentView bounds]) - NSHeight(statusRect);
 		[self setFrame:statusRect];
 		[contentView addSubview:self positioned:NSWindowBelow relativeTo:nil];
@@ -266,11 +265,11 @@
 	}
 }
 
-- (CGFloat)textOffset {
+- (float)textOffset {
     return textOffset;
 }
 
-- (void)setTextOffset:(CGFloat)offset {
+- (void)setTextOffset:(float)offset {
     textOffset = offset;
     [self setNeedsDisplay:YES];
 }
@@ -302,7 +301,7 @@
 }
 
 - (void)removeIconWithIdentifier:(NSString *)identifier {
-	NSUInteger i = [icons count];
+	unsigned i = [icons count];
 	while (i--) {
 		if ([[[icons objectAtIndex:i] objectForKey:@"identifier"] isEqualToString:identifier]) {
 			[icons removeObjectAtIndex:i];
@@ -330,7 +329,7 @@
 
 - (void)rebuildToolTips {
 	NSRect ignored, rect;
-    CGFloat rightMargin = RIGHT_MARGIN;
+    float rightMargin = RIGHT_MARGIN;
 	
 	if (progressIndicator != nil) 
 		rightMargin += NSMinX([progressIndicator frame]) + MARGIN_BETWEEN_ITEMS;
@@ -387,7 +386,7 @@
 		[progressIndicator removeFromSuperview];
 		progressIndicator = nil;
 	} else {
-		if ((NSInteger)[progressIndicator style] == style)
+		if ((int)[progressIndicator style] == style)
 			return;
 		if(progressIndicator == nil) {
             progressIndicator = [[NSProgressIndicator alloc] init];
@@ -449,7 +448,7 @@
     NSDivideRect(rect, &ignored, &rect, RIGHT_MARGIN, NSMaxXEdge);
     if (progressIndicator) {
         NSDivideRect(rect, &childRect, &rect, NSWidth([progressIndicator frame]), NSMaxXEdge);
-        if (NSMouseInRect(localPoint, childRect, [self isFlipped]))
+        if (NSPointInRect(localPoint, childRect))
             return NSAccessibilityUnignoredAncestor(progressIndicator);
         NSDivideRect(rect, &ignored, &rect, MARGIN_BETWEEN_ITEMS, NSMaxXEdge);
 	}

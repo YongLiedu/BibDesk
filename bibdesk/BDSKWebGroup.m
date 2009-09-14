@@ -42,16 +42,10 @@
 #import "BDSKMacroResolver.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKItemSearchIndexes.h"
-#import "BibItem.h"
 
 @implementation BDSKWebGroup
-
-// old designated initializer
-- (id)initWithName:(NSString *)aName count:(NSInteger)aCount{
-    return [self initWithName:aName];
-}
-
 - (id)initWithName:(NSString *)aName{
+    
     NSAssert(aName != nil, @"BDSKWebGroup requires a name");
 
     if (self = [super initWithName:aName count:0]) {
@@ -72,10 +66,6 @@
     [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
 }
 
-- (id)copyWithZone:(NSZone *)aZone {
-	return [[[self class] allocWithZone:aZone] initWithName:name];
-}
-
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
@@ -87,8 +77,8 @@
 
 - (BOOL)isEqual:(id)other { return self == other; }
 
-- (NSUInteger)hash {
-    return( ((NSUInteger) self >> 4) | (NSUInteger) self << (32 - 4));
+- (unsigned int)hash {
+    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
 }
 
 - (BDSKItemSearchIndexes *)searchIndexes{
@@ -99,7 +89,7 @@
 
 // note that pointer equality is used for these groups, so names can overlap
 
-- (NSImage *)icon { return [NSImage imageNamed:@"webGroup"]; }
+- (NSImage *)icon { return [NSImage imageNamed:@"webFolderIcon"]; }
 
 - (BOOL)isSearch { return NO; }
 
@@ -121,8 +111,6 @@
 
 #pragma mark BDSKOwner protocol
 
-- (BDSKPublicationsArray *)publicationsWithoutUpdating { return publications; }
- 
 - (BDSKPublicationsArray *)publications{
     
     if([self isRetrieving] == NO && publications == nil){

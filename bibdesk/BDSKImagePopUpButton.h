@@ -38,14 +38,55 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKImagePopUpButtonCell.h"
 
+@class BDSKImageFadeAnimation;
 
 @interface BDSKImagePopUpButton : NSPopUpButton
-
-- (NSImage *)icon;
-- (void)setIcon:(NSImage *)anImage;
-
+{
+	BOOL highlight;
+	id delegate;
+    BDSKImageFadeAnimation *animation;
+}
 - (NSSize)iconSize;
-- (void)setIconSize:(NSSize)newIconSize;
+- (void)setIconSize:(NSSize)iconSize;
 
+- (BOOL)showsMenuWhenIconClicked;
+- (void)setShowsMenuWhenIconClicked:(BOOL)showsMenuWhenIconClicked;
+
+- (NSImage *)iconImage;
+- (void)setIconImage:(NSImage *)iconImage;
+- (void)fadeIconImageToImage:(NSImage *)iconImage;
+
+- (NSImage *)arrowImage;
+- (void) setArrowImage:(NSImage *)arrowImage;
+
+- (BOOL)iconActionEnabled;
+- (void)setIconActionEnabled:(BOOL)iconActionEnabled;
+
+- (BOOL)refreshesMenu;
+- (void)setRefreshesMenu:(BOOL)refreshesMenu;
+
+- (id)delegate;
+- (void)setDelegate:(id)newDelegate;
+
+- (NSMenu *)menuForCell:(id)cell;
+
+- (BOOL)startDraggingWithEvent:(NSEvent *)theEvent;
+
+@end
+
+@interface NSObject (BDSKImagePopUpButtonDelegate)
+- (NSMenu *)menuForImagePopUpButton:(BDSKImagePopUpButton *)view;
+@end
+
+@interface NSObject (BDSKImagePopUpButtonDraggingDestination)
+- (NSDragOperation)imagePopUpButton:(BDSKImagePopUpButton *)view canReceiveDrag:(id <NSDraggingInfo>)sender;
+- (BOOL)imagePopUpButton:(BDSKImagePopUpButton *)view receiveDrag:(id <NSDraggingInfo>)sender;
+@end
+
+@interface NSObject (BDSKImagePopUpButtonDraggingSource)
+- (BOOL)imagePopUpButton:(BDSKImagePopUpButton *)view writeDataToPasteboard:(NSPasteboard *)pasteboard;
+- (NSArray *)imagePopUpButton:(BDSKImagePopUpButton *)view namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination;
+- (void)imagePopUpButton:(BDSKImagePopUpButton *)view cleanUpAfterDragOperation:(NSDragOperation)operation;
 @end

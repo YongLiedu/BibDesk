@@ -37,9 +37,10 @@
  */
 
 #import "BDSKPublicationsArray.h"
-#import "BDSKMultiValueDictionary.h"
+#import "BDSKCountedSet.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "NSObject_BDSKExtensions.h"
 
 
@@ -59,19 +60,19 @@
     if (self = [super init]) {
         NSZone *zone = [self zone];
         publications = [[NSMutableArray allocWithZone:zone] init];
-        itemsForCiteKeys = [[BDSKMultiValueDictionary allocWithZone:zone] initWithCaseInsensitiveKeys:YES];
+        itemsForCiteKeys = [[OFMultiValueDictionary allocWithZone:zone] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
         itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] init];
     }
     return self;
 }
 
 // this is called from initWithArray:
-- (id)initWithObjects:(id *)objects count:(NSUInteger)count;
+- (id)initWithObjects:(id *)objects count:(unsigned)count;
 {
     if (self = [super init]) {
         NSZone *zone = [self zone];
         publications = [[NSMutableArray allocWithZone:zone] initWithObjects:objects count:count];
-        itemsForCiteKeys = [[BDSKMultiValueDictionary allocWithZone:zone] initWithCaseInsensitiveKeys:YES];
+        itemsForCiteKeys = [[OFMultiValueDictionary allocWithZone:zone] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
         itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] init];
         [self performSelector:@selector(addToItemsForCiteKeys:) withObjectsFromArray:publications];
         [self updateFileOrder];
@@ -79,12 +80,12 @@
     return self;
 }
 
-- (id)initWithCapacity:(NSUInteger)numItems;
+- (id)initWithCapacity:(unsigned)numItems;
 {
     if (self = [super init]) {
         NSZone *zone = [self zone];
         publications = [[NSMutableArray allocWithZone:zone] initWithCapacity:numItems];
-        itemsForCiteKeys = [[BDSKMultiValueDictionary allocWithZone:zone] initWithCaseInsensitiveKeys:YES];
+        itemsForCiteKeys = [[OFMultiValueDictionary allocWithZone:zone] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
         itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] initWithCapacity:numItems];
     }
     return self;
@@ -107,12 +108,12 @@
 
 #pragma mark NSMutableArray primitive methods
 
-- (NSUInteger)count;
+- (unsigned)count;
 {
     return [publications count];
 }
 
-- (id)objectAtIndex:(NSUInteger)idx;
+- (id)objectAtIndex:(unsigned)idx;
 {
     return [publications objectAtIndex:idx];
 }
@@ -124,7 +125,7 @@
     [anObject setFileOrder:[NSNumber numberWithInt:[publications count]]];
 }
 
-- (void)insertObject:(id)anObject atIndex:(NSUInteger)idx;
+- (void)insertObject:(id)anObject atIndex:(unsigned)idx;
 {
     [publications insertObject:anObject atIndex:idx];
     [self addToItemsForCiteKeys:anObject];
@@ -140,14 +141,14 @@
     }
 }
 
-- (void)removeObjectAtIndex:(NSUInteger)idx;
+- (void)removeObjectAtIndex:(unsigned)idx;
 {
     [self removeFromItemsForCiteKeys:[publications objectAtIndex:idx]];
     [publications removeObjectAtIndex:idx];
     [self updateFileOrder];
 }
 
-- (void)replaceObjectAtIndex:(NSUInteger)idx withObject:(id)anObject;
+- (void)replaceObjectAtIndex:(unsigned)idx withObject:(id)anObject;
 {
     BibItem *oldObject = [publications objectAtIndex:idx];
     [anObject setFileOrder:[oldObject fileOrder]];
@@ -210,7 +211,7 @@
 	if ([NSString isEmptyString:key]) 
 		return nil;
     
-	NSArray *items = [itemsForCiteKeys allObjectsForKey:key];
+	NSArray *items = [itemsForCiteKeys arrayForKey:key];
 	
 	if ([items count] == 0)
 		return nil;
@@ -222,13 +223,13 @@
 {
 	NSArray *items = nil;
     if ([NSString isEmptyString:key] == NO) 
-		items = [itemsForCiteKeys allObjectsForKey:key];
+		items = [itemsForCiteKeys arrayForKey:key];
     return items ?: [NSArray array];
 }
 
 - (BOOL)citeKeyIsUsed:(NSString *)key byItemOtherThan:(BibItem *)anItem;
 {
-    NSArray *items = [itemsForCiteKeys allObjectsForKey:key];
+    NSArray *items = [itemsForCiteKeys arrayForKey:key];
     
 	if ([items count] > 1)
 		return YES;
@@ -260,19 +261,6 @@
     return [itemsForIdentifierURLs objectForKey:aURL];   
 }
 
-- (NSArray *)itemsForIdentifierURLs:(NSArray *)anArray;
-{
-    NSMutableArray *array = [NSMutableArray array];
-    NSEnumerator *urlEnum = [anArray objectEnumerator];
-    NSURL *idURL;
-    BibItem *pub;
-    while (idURL = [urlEnum nextObject]) {
-        if (pub = [itemsForIdentifierURLs objectForKey:idURL])
-            [array addObject:pub];
-    }
-    return array;
-}
-
 #pragma mark Authors support
 
 - (NSArray *)itemsForAuthor:(BibAuthor *)anAuthor;
@@ -287,7 +275,7 @@
 
 - (NSArray *)itemsForPerson:(BibAuthor *)aPerson forField:(NSString *)field;
 {
-    NSMutableSet *auths = [[NSMutableSet alloc] initForFuzzyAuthors];
+    NSMutableSet *auths = BDSKCreateFuzzyAuthorCompareMutableSet();
     NSEnumerator *pubEnum = [publications objectEnumerator];
     BibItem *bi;
     NSMutableArray *thePubs = [NSMutableArray array];
@@ -320,8 +308,8 @@
 }
 
 - (void)updateFileOrder{
-    NSUInteger i, count = [publications count];
-    NSInteger fileOrder = 1;
+    unsigned i, count = [publications count];
+    int fileOrder = 1;
     CFAllocatorRef alloc = CFAllocatorGetDefault();
     for(i = 0; i < count; i++, fileOrder++) {
         CFNumberRef n = CFNumberCreate(alloc, kCFNumberIntType, &fileOrder);

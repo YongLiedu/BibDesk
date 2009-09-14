@@ -43,8 +43,8 @@
 
 - (NSString *)scriptingKey;
 - (void)setScriptingKey:(NSString *)newKey;
-- (NSInteger)scriptingComparison;
-- (void)setScriptingComparison:(NSInteger)newComparison;
+- (int)scriptingComparison;
+- (void)setScriptingComparison:(int)newComparison;
 - (id)scriptingValue;
 - (void)setScriptingValue:(id)newValue;
 

@@ -37,157 +37,104 @@
  */
 
 #import "NSScrollView_BDSKExtensions.h"
-#import "BDSKRuntime.h"
-#import "NSView_BDSKExtensions.h"
-#import "BDSKCFCallBacks.h"
-
-
-@interface BDSKPlacardView : NSView
-- (void)tile;
-@end
+#import <OmniBase/OmniBase.h>
+#import "BDSKEdgeView.h"
 
 
 @implementation NSScrollView (BDSKExtensions)
 
-static void (*original_setHasHorizontalScroller)(id, SEL, BOOL) = NULL;
-static void (*original_setAutohidesScrollers)(id, SEL, BOOL) = NULL;
-static void (*original_dealloc)(id, SEL) = NULL;
-static void (*original_tile)(id, SEL) = NULL;
+static void (*originalSetHasHorizontalScroller)(id, SEL, BOOL) = NULL;
+static void (*originalSetAutohidesScrollers)(id, SEL, BOOL) = NULL;
+static void (*originalDealloc)(id, SEL) = NULL;
+static void (*originalTile)(id, SEL) = NULL;
 
-static CFMutableDictionaryRef scrollViewPlacardViews = NULL;
+static CFMutableDictionaryRef scrollViewPlacards = NULL;
 
-- (void)replacement_dealloc;
+- (void)replacementDealloc;
 {
-    CFDictionaryRemoveValue(scrollViewPlacardViews, self);
-    original_dealloc(self, _cmd);
+    CFDictionaryRemoveValue(scrollViewPlacards, self);
+    originalDealloc(self, _cmd);
 }
 
-- (void)replacement_setHasHorizontalScroller:(BOOL)flag;
+- (void)replacementSetHasHorizontalScroller:(BOOL)flag;
 {
-    if (CFDictionaryContainsKey(scrollViewPlacardViews, self) == FALSE)
-        original_setHasHorizontalScroller(self, _cmd, flag);
+    if ([[self placards] count] == 0)
+        originalSetHasHorizontalScroller(self, _cmd, flag);
 }
 
-- (void)replacement_setAutohidesScrollers:(BOOL)flag;
+- (void)replacementSetAutohidesScrollers:(BOOL)flag;
 {
-    if (CFDictionaryContainsKey(scrollViewPlacardViews, self) == FALSE)
-        original_setAutohidesScrollers(self, _cmd, flag);
+    if ([[self placards] count] == 0)
+        originalSetAutohidesScrollers(self, _cmd, flag);
 }
 
-- (void)replacement_tile {
-    original_tile(self, _cmd);
+- (void)replacementTile {
+    originalTile(self, _cmd);
     
-    BDSKPlacardView *placardView = (BDSKPlacardView *)CFDictionaryGetValue(scrollViewPlacardViews, self);
-    if (placardView) {
-        NSScroller *scroller = [self horizontalScroller];
-        NSRect placardFrame, scrollerFrame = [scroller frame];
-        [placardView tile];
-        NSDivideRect(scrollerFrame, &placardFrame, &scrollerFrame, NSWidth([placardView frame]), NSMaxXEdge);
-        [scroller setFrame:scrollerFrame];
-        [placardView setFrame:placardFrame];
-        if ([placardView isDescendantOf:self] == NO)
-            [self addSubview:placardView];
+    NSArray *placards = [self placards];
+    
+    if ([placards count]) {
+        NSEnumerator *viewEnum = [placards objectEnumerator];
+        NSView *view;
+        NSScroller *horizScroller = [self horizontalScroller];
+        NSRect viewFrame, horizScrollerFrame = [horizScroller frame];
+        float height = NSHeight(horizScrollerFrame) - 1.0, totalWidth = 0.0;
+        BDSKEdgeView *edgeView = (BDSKEdgeView *)[[[placards lastObject] superview] superview];
+        
+        if ([edgeView isDescendantOf:self] == NO) {
+            edgeView = [[[BDSKEdgeView alloc] init] autorelease];
+            [edgeView setEdgeColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
+            [edgeView setEdges:BDSKMinXEdgeMask | BDSKMaxYEdgeMask];
+            [self addSubview:edgeView];
+        }
+        
+        while (view = [viewEnum nextObject]) {
+            viewFrame = NSMakeRect(totalWidth, 0.0, NSWidth([view frame]), height);
+            totalWidth += NSWidth(viewFrame);
+            [view setFrame:viewFrame];
+            if ([view isDescendantOf:edgeView] == NO)
+                [edgeView addSubview:view];
+        }
+        
+        NSDivideRect(horizScrollerFrame, &viewFrame, &horizScrollerFrame, totalWidth + 1.0, NSMaxXEdge);
+        [horizScroller setFrame:horizScrollerFrame];
+        [edgeView setFrame:viewFrame];
     }
 }
 
 + (void)load{
-    original_setHasHorizontalScroller = (void (*)(id, SEL, BOOL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(setHasHorizontalScroller:), @selector(replacement_setHasHorizontalScroller:));
-    original_setAutohidesScrollers = (void (*)(id, SEL, BOOL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(setAutohidesScrollers:), @selector(replacement_setAutohidesScrollers:));
-    original_dealloc = (void (*)(id, SEL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(dealloc), @selector(replacement_dealloc));
-    original_tile = (void (*)(id, SEL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(tile), @selector(replacement_tile));
+    originalSetHasHorizontalScroller = (void (*)(id, SEL, BOOL))OBReplaceMethodImplementationWithSelector(self, @selector(setHasHorizontalScroller:), @selector(replacementSetHasHorizontalScroller:));
+    originalSetAutohidesScrollers = (void (*)(id, SEL, BOOL))OBReplaceMethodImplementationWithSelector(self, @selector(setAutohidesScrollers:), @selector(replacementSetAutohidesScrollers:));
+    originalDealloc = (void (*)(id, SEL))OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
+    originalTile = (void (*)(id, SEL))OBReplaceMethodImplementationWithSelector(self, @selector(tile), @selector(replacementTile));
     
     // dictionary doesn't retain keys, so no retain cycles; pointer equality used to compare views
-    scrollViewPlacardViews = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, NULL, &kCFTypeDictionaryValueCallBacks);
+    scrollViewPlacards = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, NULL, &kCFTypeDictionaryValueCallBacks);
 }
 
 - (NSArray *)placards {
-    return [(NSView *)CFDictionaryGetValue(scrollViewPlacardViews, self) subviews];
+    return (NSArray *)CFDictionaryGetValue(scrollViewPlacards, self);
 }
 
 - (void)setPlacards:(NSArray *)newPlacards {
-    BDSKPlacardView *placardView = [(BDSKPlacardView *)CFDictionaryGetValue(scrollViewPlacardViews, self) retain];
-    if (placardView == nil && [newPlacards count]) {
-        placardView = [[BDSKPlacardView alloc] init];
-        CFDictionarySetValue(scrollViewPlacardViews, self, placardView);
+    NSMutableArray *placards = (NSMutableArray *)CFDictionaryGetValue(scrollViewPlacards, self);
+    if (placards == nil && [newPlacards count]) {
+        placards = [NSMutableArray array];
+        CFDictionarySetValue(scrollViewPlacards, self, placards);
     }
     
-    NSEnumerator *viewEnum = [newPlacards objectEnumerator];
-    NSView *view;
-    [placardView removeFromSuperview];
-    [[[[placardView subviews] copy] autorelease] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    while (view = [viewEnum nextObject])
-        [placardView addSubview:view];
+    [[[[placards lastObject] superview] superview] removeFromSuperview];
+    [placards setArray:newPlacards];
     
-    if ([newPlacards count] != 0) {
-        original_setHasHorizontalScroller(self, @selector(setHasHorizontalScroller:), YES);
-        original_setAutohidesScrollers(self, @selector(setAutohidesScrollers:), NO);
-    } else if (placardView) {
-        CFDictionaryRemoveValue(scrollViewPlacardViews, self);
+    if ([placards count] != 0) {
+        originalSetHasHorizontalScroller(self, @selector(setHasHorizontalScroller:), YES);
+        originalSetAutohidesScrollers(self, @selector(setAutohidesScrollers:), NO);
+    } else if (placards) {
+        CFDictionaryRemoveValue(scrollViewPlacards, self);
+        placards = nil;
     }
-    [placardView release];
     
     [self tile];
-}
-
-- (NSPoint)scrollPositionAsPercentage {
-    return [[self documentView] scrollPositionAsPercentage];
-}
-
-- (void)setScrollPositionAsPercentage:(NSPoint)scrollPosition {
-    [[self documentView] setScrollPositionAsPercentage:scrollPosition];
-}
-
-@end
-
-
-@implementation BDSKPlacardView
-
-- (void)drawRect:(NSRect)aRect {
-    NSImage *bgImage = [NSImage imageNamed:@"Scroller_Background"];
-    NSImage *divImage = [NSImage imageNamed:@"Scroller_Divider"];
-    NSRect bgSrcRect = {NSZeroPoint, [bgImage size]};
-    NSRect divSrcRect = {NSZeroPoint, [divImage size]};
-    NSRect leftRect, rightRect, leftSrcRect, rightSrcRect, midSrcRect = bgSrcRect;
-    NSRect midRect = [self bounds];
-    NSRect divRect = midRect;
-    CGFloat width = NSHeight(bgSrcRect);
-    
-    divRect.size.width = 1.0;
-    midSrcRect.origin.x = BDSKFloor(NSWidth(midSrcRect) / 2.0);
-    midSrcRect.size.width = 1.0;
-    NSDivideRect(bgSrcRect, &rightSrcRect, &bgSrcRect, width, NSMaxXEdge);
-    NSDivideRect(bgSrcRect, &leftSrcRect, &bgSrcRect, width, NSMinXEdge);
-    NSDivideRect(midRect, &rightRect, &midRect, width, NSMaxXEdge);
-    NSDivideRect(midRect, &leftRect, &midRect, width, NSMinXEdge);
-    
-    [bgImage drawInRect:leftRect fromRect:leftSrcRect operation:NSCompositeSourceOver fraction:1.0];
-    [bgImage drawInRect:rightRect fromRect:rightSrcRect operation:NSCompositeSourceOver fraction:1.0];
-    if (NSWidth(midRect) > 0)
-        [bgImage drawInRect:midRect fromRect:midSrcRect operation:NSCompositeSourceOver fraction:1.0];
-    
-    NSEnumerator *viewEnum = [[self subviews] objectEnumerator];
-    NSView *view = [viewEnum nextObject];
-    CGFloat f = [[self window] isMainWindow] || [[self window] isKeyWindow] ? 1.0 : 0.33333;
-    while (view = [viewEnum nextObject]) {
-        divRect.origin.x = NSMinX([view frame]);
-        [divImage drawInRect:divRect fromRect:divSrcRect operation:NSCompositeSourceOver fraction:f];
-    }
-}
-
-- (void)tile {
-    NSSize size = NSMakeSize(1.0, [NSScroller scrollerWidth]);
-    NSEnumerator *viewEnum = [[self subviews] objectEnumerator];
-    NSView *view;
-    while (view = [viewEnum nextObject]) {
-        NSRect rect = [view frame];
-        rect.origin.x = size.width;
-        rect.origin.y = 0.0;
-        rect.size.height = size.height;
-        [view setFrame:rect];
-        size.width += NSWidth(rect) - 1.0;
-    }
-    size.width += 1.0;
-    [self setFrameSize:size];
 }
 
 @end

@@ -39,5 +39,5 @@
 #import <Foundation/Foundation.h>
 
 extern NSRect BDSKCenterRect(NSRect rect, NSSize size, BOOL flipped);
-extern NSRect BDSKCenterRectVertically(NSRect rect, CGFloat height, BOOL flipped);
-extern NSRect BDSKCenterRectHorizontally(NSRect rect, CGFloat width);
+extern NSRect BDSKCenterRectVertically(NSRect rect, float height, BOOL flipped);
+extern NSRect BDSKCenterRectHorizontally(NSRect rect, float width);

@@ -33,42 +33,10 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
-/*
- Some methods in this category are copied from OmniFoundation 
- and are subject to the following licence:
- 
- Omni Source License 2007
-
- OPEN PERMISSION TO USE AND REPRODUCE OMNI SOURCE CODE SOFTWARE
-
- Omni Source Code software is available from The Omni Group on their 
- web site at http://www.omnigroup.com/www.omnigroup.com. 
-
- Permission is hereby granted, free of charge, to any person obtaining 
- a copy of this software and associated documentation files (the 
- "Software"), to deal in the Software without restriction, including 
- without limitation the rights to use, copy, modify, merge, publish, 
- distribute, sublicense, and/or sell copies of the Software, and to 
- permit persons to whom the Software is furnished to do so, subject to 
- the following conditions:
-
- Any original copyright notices and this permission notice shall be 
- included in all copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, 
- EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
- MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
- IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
- CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
- TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
- SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 
 #import "NSString_BDSKExtensions.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import <Cocoa/Cocoa.h>
-#import "NSCharacterSet_BDSKExtensions.h"
-#import "CFString_BDSKExtensions.h"
 #import <AGRegex/AGRegex.h>
 #import "BDSKStringConstants.h"
 #import "CFString_BDSKExtensions.h"
@@ -80,102 +48,21 @@
 #import "BDSKStringEncodingManager.h"
 #import "BDSKTypeManager.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "NSAttributedString_BDSKExtensions.h"
-#import "BDSKRuntime.h"
 
+static NSString *yesString = nil;
+static NSString *noString = nil;
+static NSString *mixedString = nil;
 
 @implementation NSString (BDSKExtensions)
 
-+ (NSString *)yesString {
-    static NSString *yesString = nil;
-    if (yesString == nil)
-        yesString = [NSLocalizedString(@"Yes", @"") copy];
-    return yesString;
-}
-
-+ (NSString *)noString {
-    static NSString *noString = nil;
-    if (noString == nil)
-        noString = [NSLocalizedString(@"No", @"") copy];
-    return noString;
-}
-
-+ (NSString *)mixedString {
-    static NSString *mixedString = nil;
-    if (mixedString == nil)
-        mixedString = [NSLocalizedString(@"-", @"indeterminate or mixed value indicator") copy];
-    return mixedString;
-}
-
-// This method is copied from NSString-OFStringExtensions.m
-+ (BOOL)isEmptyString:(NSString *)string {
-    return string == nil || [string isEqualToString:@""];
-}
-
-// This method is copied from NSString-OFStringExtensions.m
-+ (NSString *)horizontalEllipsisString; // '...'
++ (void)didLoad
 {
-    static NSString *string = nil;
-    if (string == nil)
-        string = [[self stringWithFormat:@"%C", 0x2026] retain];
-    return string;
+    yesString = [NSLocalizedString(@"Yes", @"") copy];
+    noString = [NSLocalizedString(@"No", @"") copy];
+    mixedString = [NSLocalizedString(@"-", @"indeterminate or mixed value indicator") copy];
+    
 }
 
-// This method is copied from NSString-OFStringExtensions.m
-+ (NSString *)emdashString; // '---'
-{
-    static NSString *string = nil;
-    if (string == nil)
-        string = [[self stringWithFormat:@"%C", 0x2014] retain];
-    return string;
-}
-
-// This method is copied from NSString-OFStringExtensions.m
-+ (NSString *)endashString; // '--'
-{
-    static NSString *string = nil;
-    if (string == nil)
-        string = [[self stringWithFormat:@"%C", 0x2013] retain];
-    return string;
-}
-
-// This method is copied from NSString-OFStringExtensions.m
-+ (NSString *)commandKeyIndicatorString;
-{
-    static NSString *string = nil;
-    if (string == nil)
-        string = [[self stringWithFormat:@"%C", 0x2318] retain];
-    return string;
-}
-
-// This method is copied from NSString-OFStringExtensions.m
-+ (NSString *)controlKeyIndicatorString;
-{
-    static NSString *string = nil;
-    if (string == nil)
-        string = [[self stringWithFormat:@"%C", 0x2303] retain];
-    return string;
-}
-
-// This method is copied from NSString-OFStringExtensions.m
-+ (NSString *)alternateKeyIndicatorString;
-{
-    static NSString *string = nil;
-    if (string == nil)
-        string = [[self stringWithFormat:@"%C", 0x2325] retain];
-    return string;
-}
-
-// This method is copied from NSString-OFStringExtensions.m
-+ (NSString *)shiftKeyIndicatorString;
-{
-    static NSString *string = nil;
-    if (string == nil)
-        string = [[self stringWithFormat:@"%C", 0x21E7] retain];
-    return string;
-}
-
-// This method is copied from NSString-OFStringExtensions.m
 + (NSString *)hexStringForCharacter:(unichar)ch{
     NSMutableString *string = [NSMutableString stringWithCapacity:4];
     [string appendFormat:@"%X", ch];
@@ -185,32 +72,31 @@
     return string;
 }
 
-static NSInteger MAX_RATING = 5;
-+ (NSString *)ratingStringWithInteger:(NSInteger)rating;
+static int MAX_RATING = 5;
++ (NSString *)ratingStringWithInteger:(int)rating;
 {
-    NSParameterAssert(rating >= 0 && rating <= MAX_RATING);
-    static NSString **ratingStrings = NULL;
-    if(ratingStrings == NULL){
-        ratingStrings = NSZoneMalloc(NULL, (MAX_RATING + 1) * sizeof(NSString *));
-        NSInteger i = 0;
+    NSParameterAssert(rating <= MAX_RATING);
+    static CFMutableDictionaryRef ratings = NULL;
+    if(ratings == NULL){
+        ratings = CFDictionaryCreateMutable(CFAllocatorGetDefault(), MAX_RATING + 1, &OFIntegerDictionaryKeyCallbacks, &OFNSObjectDictionaryValueCallbacks);
+        int i = 0;
         NSMutableString *ratingString = [NSMutableString string];
         do {
-            ratingStrings[rating] = [ratingString copy];
-            [ratingString appendFormat:@"%C", (0x278A + i)];
+            CFDictionaryAddValue(ratings, (const void *)i, (const void *)[[ratingString copy] autorelease]);
+            [ratingString appendCharacter:(0x278A + i)];
         } while(i++ < MAX_RATING);
+        OBPOSTCONDITION((int)[(id)ratings count] == MAX_RATING + 1);
     }
-    if (rating >= 0 && rating <= MAX_RATING)
-        return ratingStrings[rating];
-    return nil;
+    return (NSString *)CFDictionaryGetValue(ratings, (const void *)rating);
 }
 
 + (NSString *)stringWithBool:(BOOL)boolValue {
-	return boolValue ? [self yesString] : [self noString];
+	return boolValue ? yesString : noString;
 }
 
 + (NSString *)stringWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
 {
-    return [[[self alloc] initWithContentsOfFile:path encoding:encoding guessEncoding:try] autorelease];
+    return [[self alloc] initWithContentsOfFile:path encoding:encoding guessEncoding:try];
 }
 
 + (NSString *)stringWithFileSystemRepresentation:(const char *)cstring;
@@ -222,14 +108,14 @@ static NSInteger MAX_RATING = 5;
 + (NSString *)stringWithTriStateValue:(NSCellStateValue)triStateValue {
     switch (triStateValue) {
         case NSOffState:
-            return [self noString];
+            return noString;
             break;
         case NSOnState:
-            return [self yesString];
+            return yesString;
             break;
         case NSMixedState:
         default:
-            return [self mixedString];
+            return mixedString;
             break;
     }
 }
@@ -270,7 +156,7 @@ static NSInteger MAX_RATING = 5;
 
 static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 {
-    NSUInteger len = [data length];
+    unsigned len = [data length];
     size_t size = sizeof(UniChar);
     BOOL rv = NO;
     if(len >= size){
@@ -299,10 +185,9 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     
     // read com.apple.TextEncoding on Leopard, or when reading a Tiger file saved on Leopard
     if(try && nil == string) {
-        // don't clobber the encoding parameter in case this fails...
-        NSStringEncoding xattrEncoding = [[NSFileManager defaultManager] appleStringEncodingAtPath:path error:NULL];
-        if (xattrEncoding > 0)
-            string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:xattrEncoding];
+        encoding = [[NSFileManager defaultManager] appleStringEncodingAtPath:path error:NULL];
+        if (encoding > 0)
+            string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:encoding];
     }
     
     // try the encoding passed as a parameter, if non-zero (zero encoding is never valid)
@@ -323,6 +208,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     return string;
 }
 
+
 #pragma mark TeX cleaning
 
 - (NSString *)stringByConvertingDoubleHyphenToEndash{
@@ -338,25 +224,6 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         string = mutString;
     }
     return string;
-}
-
-- (NSString *)stringByConvertingTripleHyphenToEmdash{
-    NSString *string = self;
-    NSString *tripleHyphen = @"---";
-    NSRange range = [self rangeOfString:tripleHyphen];
-    if (range.location != NSNotFound) {
-        NSMutableString *mutString = [[self mutableCopy] autorelease];
-        do {
-            [mutString replaceCharactersInRange:range withString:[NSString emdashString]];
-            range = [mutString rangeOfString:tripleHyphen];
-        } while (range.location != NSNotFound);
-        string = mutString;
-    }
-    return string;
-}
-
-- (NSString *)stringByConvertingHyphensToDashes{
-    return [[self stringByConvertingTripleHyphenToEmdash] stringByConvertingDoubleHyphenToEndash];
 }
 
 - (NSString *)stringByRemovingCurlyBraces{
@@ -419,12 +286,12 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     return self;
 }
 
-- (NSUInteger)indexOfRightBraceMatchingLeftBraceAtIndex:(NSUInteger)startLoc
+- (unsigned)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned int)startLoc
 {
     return [self indexOfRightBraceMatchingLeftBraceInRange:NSMakeRange(startLoc, [self length] - startLoc)];
 }
 
-- (NSUInteger)indexOfRightBraceMatchingLeftBraceInRange:(NSRange)range
+- (unsigned)indexOfRightBraceMatchingLeftBraceInRange:(NSRange)range
 {
     
     CFStringInlineBuffer inlineBuffer;
@@ -436,10 +303,10 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     
     CFStringInitInlineBuffer((CFStringRef)self, &inlineBuffer, CFRangeMake(0, length));
     UniChar ch;
-    NSInteger nesting = 0;
+    int nesting = 0;
     
     if(CFStringGetCharacterFromInlineBuffer(&inlineBuffer, startLoc) != '{')
-        [NSException raise:NSInternalInconsistencyException format:@"character at index %ld is not a brace", (long)startLoc];
+        [NSException raise:NSInternalInconsistencyException format:@"character at index %i is not a brace", startLoc];
     
     // we don't consider escaped braces yet
     for(cnt = startLoc; cnt < endLoc; cnt++){
@@ -451,13 +318,13 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         else if(ch == '}')
             nesting--;
         if(nesting == 0){
-            //NSLog(@"match found at index %ld", (long)cnt);
+            //NSLog(@"match found at index %i", cnt);
             matchFound = YES;
             break;
         }
     }
     
-    return (matchFound) ? cnt : NSNotFound;    
+    return (matchFound == YES) ? cnt : NSNotFound;    
 }
 
 - (BOOL)isStringTeXQuotingBalancedWithBraces:(BOOL)braces connected:(BOOL)connected{
@@ -465,7 +332,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 }
 
 - (BOOL)isStringTeXQuotingBalancedWithBraces:(BOOL)braces connected:(BOOL)connected range:(NSRange)range{
-	NSInteger nesting = 0;
+	int nesting = 0;
 	NSCharacterSet *delimCharSet;
 	unichar rightDelim;
 	
@@ -478,7 +345,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 	}
 	
 	NSRange delimRange = [self rangeOfCharacterFromSet:delimCharSet options:NSLiteralSearch range:range];
-	NSInteger delimLoc = delimRange.location;
+	int delimLoc = delimRange.location;
 	
 	while (delimLoc != NSNotFound) {
 		if (delimLoc == 0 || braces || [self characterAtIndex:delimLoc - 1] != '\\') {
@@ -515,31 +382,36 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 		// replace with "@type{FixMe,eol" (add the comma in, since we remove it if present)
 		NSCharacterSet *newlineCharacterSet = [NSCharacterSet newlineCharacterSet];
 		
-		NSScanner *scanner = [NSScanner scannerWithString:self];
+		// do not use NSCharacterSets with OFStringScanners!
+		OFCharacterSet *newlineOFCharset = [[[OFCharacterSet alloc] initWithCharacterSet:newlineCharacterSet] autorelease];
+		
+		OFStringScanner *scanner = [[[OFStringScanner alloc] initWithString:self] autorelease];
 		NSMutableString *mutableFileString = [NSMutableString stringWithCapacity:[self length]];
 		NSString *tmp = nil;
-		NSInteger scanLocation = 0;
+		int scanLocation = 0;
         NSString *replaceRegex = [NSString stringWithFormat:@"$1%@,", tmpKey];
-        
-        [scanner setCharactersToBeSkipped:nil];
 		
 		// we scan up to an (newline@) sequence, then to a newline; we then replace only in that line using theRegex, which is much more efficient than using AGRegex to find/replace in the entire string
 		do {
 			// append the previous part to the mutable string
-            if ([scanner scanUpToString:@"@" intoString:&tmp])
-                [mutableFileString appendString:tmp];
+			tmp = [scanner readFullTokenWithDelimiterCharacter:'@'];
+			if(tmp) [mutableFileString appendString:tmp];
 			
-			scanLocation = [scanner scanLocation];
+			scanLocation = scannerScanLocation(scanner);
 			if(scanLocation == 0 || [newlineCharacterSet characterIsMember:[self characterAtIndex:scanLocation - 1]]){
+				
+				tmp = [scanner readFullTokenWithDelimiterOFCharacterSet:newlineOFCharset];
+				
 				// if we read something between the @ and newline, see if we can do the regex find/replace
-				if([scanner scanUpToCharactersFromSet:newlineCharacterSet intoString:&tmp]){
+				if(tmp){
 					// this should be a noop if the pattern isn't matched
-					[mutableFileString appendString:[theRegex replaceWithString:replaceRegex inString:tmp]]; // guaranteed non-nil result from AGRegex
+					tmp = [theRegex replaceWithString:replaceRegex inString:tmp];
+					[mutableFileString appendString:tmp]; // guaranteed non-nil result from AGRegex
 				}
 			} else
-				[scanner scanCharacter:NULL];
+				scannerReadCharacter(scanner);
                         
-		} while([scanner isAtEnd] == NO);
+		} while(scannerHasData(scanner));
 		
 		NSString *toReturn = [NSString stringWithString:mutableFileString];
 		
@@ -594,7 +466,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     
     NSMutableString *toReturn = [self mutableCopy];
     while (r.length) {
-        NSUInteger start;
+        unsigned start;
         if (r.location == 0 || [toReturn characterAtIndex:(r.location - 1)] != '\\') {
             // insert the backslash, then advance the search range by two characters
             [toReturn replaceCharactersInRange:NSMakeRange(r.location, 0) withString:@"\\"];
@@ -724,13 +596,13 @@ http://home.planet.nl/~faase009/GNU.txt
     
 	for(; *str; str++)
 	{   BOOL special = NO;
-		NSInteger v = 0;
+		int v = 0;
 		char ch = '\0';
 		char html_ch[10];
 		html_ch[0] = '\0';
 
             if (*str == '&')
-            {   NSInteger i = 0;
+            {   int i = 0;
                 BOOL correct = NO;
                 
                 if (isalpha(str[1]))
@@ -750,7 +622,7 @@ http://home.planet.nl/~faase009/GNU.txt
                         }
                 }
                     else if (str[1] == '#')
-                    {   NSInteger code = 0;
+                    {   int code = 0;
                         html_ch[0] = '#';
                         for (i = 1; i < 9; i++)
                             if (isdigit(str[i+1]))
@@ -885,10 +757,10 @@ http://home.planet.nl/~faase009/GNU.txt
     // ARM:  This code came from Art Isbell to cocoa-dev on Tue Jul 10 22:13:11 2001.  Comments are his.
     //       We were using componentsSeparatedByString:@"\r", but this is not robust.  Files from ScienceDirect
     //       have \n as newlines, so this code handles those cases as well as PubMed.
-    NSUInteger stringLength = [self length];
-    NSUInteger startIndex;
-    NSUInteger lineEndIndex = 0;
-    NSUInteger contentsEndIndex;
+    unsigned stringLength = [self length];
+    unsigned startIndex;
+    unsigned lineEndIndex = 0;
+    unsigned contentsEndIndex;
     NSRange range;
     NSMutableArray *sourceLines = [NSMutableArray array];
     
@@ -913,37 +785,27 @@ http://home.planet.nl/~faase009/GNU.txt
 - (NSString *)stringByEscapingGroupPlistEntities{
 	NSMutableString *escapedValue = [self mutableCopy];
 	// escape braces as they can give problems with btparse
-	[escapedValue replaceOccurrencesOfString:@"%" withString:@"%25" options:0 range:NSMakeRange(0, [escapedValue length])]; // this should come first
-	[escapedValue replaceOccurrencesOfString:@"{" withString:@"%7B" options:0 range:NSMakeRange(0, [escapedValue length])];
-	[escapedValue replaceOccurrencesOfString:@"}" withString:@"%7D" options:0 range:NSMakeRange(0, [escapedValue length])];
-	[escapedValue replaceOccurrencesOfString:@"<" withString:@"%3C" options:0 range:NSMakeRange(0, [escapedValue length])];
-	[escapedValue replaceOccurrencesOfString:@">" withString:@"%3E" options:0 range:NSMakeRange(0, [escapedValue length])];
+	[escapedValue replaceAllOccurrencesOfString:@"%" withString:@"%25"]; // this should come first
+	[escapedValue replaceAllOccurrencesOfString:@"{" withString:@"%7B"];
+	[escapedValue replaceAllOccurrencesOfString:@"}" withString:@"%7D"];
+	[escapedValue replaceAllOccurrencesOfString:@"<" withString:@"%3C"];
+	[escapedValue replaceAllOccurrencesOfString:@">" withString:@"%3E"];
 	return [escapedValue autorelease];
 }
 
 - (NSString *)stringByUnescapingGroupPlistEntities{
 	NSMutableString *escapedValue = [self mutableCopy];
 	// escape braces as they can give problems with btparse, and angles as they can give problems with the plist xml
-	[escapedValue replaceOccurrencesOfString:@"%7B" withString:@"{" options:0 range:NSMakeRange(0, [escapedValue length])];
-	[escapedValue replaceOccurrencesOfString:@"%7D" withString:@"}" options:0 range:NSMakeRange(0, [escapedValue length])];
-	[escapedValue replaceOccurrencesOfString:@"%3C" withString:@"<" options:0 range:NSMakeRange(0, [escapedValue length])];
-	[escapedValue replaceOccurrencesOfString:@"%3E" withString:@">" options:0 range:NSMakeRange(0, [escapedValue length])];
-	[escapedValue replaceOccurrencesOfString:@"%25" withString:@"%" options:0 range:NSMakeRange(0, [escapedValue length])]; // this should come last
+	[escapedValue replaceAllOccurrencesOfString:@"%7B" withString:@"{"];
+	[escapedValue replaceAllOccurrencesOfString:@"%7D" withString:@"}"];
+	[escapedValue replaceAllOccurrencesOfString:@"%3C" withString:@"<"];
+	[escapedValue replaceAllOccurrencesOfString:@"%3E" withString:@">"];
+	[escapedValue replaceAllOccurrencesOfString:@"%25" withString:@"%"]; // this should come last
 	return [escapedValue autorelease];
 }
 
 - (NSString *)lossyASCIIString{
-    NSData *asciiData = [self dataUsingEncoding:NSASCIIStringEncoding];
-    if (asciiData == nil) {
-        NSMutableString *ms = [self mutableCopyWithZone:[self zone]];
-        // do as much transliteration as possible, then strip all combining marks; works with ideographs as well
-        CFStringTransform((CFMutableStringRef)ms, NULL, kCFStringTransformToLatin, FALSE);
-        CFStringTransform((CFMutableStringRef)ms, NULL, kCFStringTransformStripCombiningMarks, FALSE);
-        // final step to guarantee ASCII
-        asciiData = [ms dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
-        [ms release];
-    }
-    return asciiData ? [[[NSString alloc] initWithData:asciiData encoding:NSASCIIStringEncoding] autorelease] : nil;
+    return [[[NSString alloc] initWithData:[self dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] encoding:NSASCIIStringEncoding] autorelease];
 }
 
 #pragma mark Comparisons
@@ -989,8 +851,8 @@ http://home.planet.nl/~faase009/GNU.txt
     BDDeleteTeXForSorting(modifiedOther);
     
     // the mutating functions above should only create an empty string, not a nil string
-    BDSKASSERT(modifiedSelf != nil);
-    BDSKASSERT(modifiedOther != nil);
+    OBASSERT(modifiedSelf != nil);
+    OBASSERT(modifiedOther != nil);
     
     // CFComparisonResult returns same values as NSComparisonResult
     CFComparisonResult result = CFStringCompare(modifiedSelf, modifiedOther, kCFCompareCaseInsensitive | kCFCompareLocalized);
@@ -1023,8 +885,8 @@ http://home.planet.nl/~faase009/GNU.txt
 
 - (NSComparisonResult)triStateCompare:(NSString *)other{
     // we order increasingly as 0, -1, 1
-    NSInteger myValue = [self triStateValue];
-    NSInteger otherValue = [other triStateValue];
+    int myValue = [self triStateValue];
+    int otherValue = [other triStateValue];
     if (myValue == otherValue)
         return NSOrderedSame;
     else if (myValue == 0 || otherValue == 1)
@@ -1100,7 +962,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 }
 
 - (NSCellStateValue)triStateValue{
-    if([self booleanValue]){
+    if([self booleanValue] == YES){
         return NSOnState;
     }else if([self isEqualToString:@""] ||
              [self compare:[NSString stringWithBool:NO] options:NSCaseInsensitiveSearch] == NSOrderedSame ||
@@ -1113,12 +975,12 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     }
 }
 
-- (NSString *)acronymValueIgnoringWordLength:(NSUInteger)ignoreLength{
+- (NSString *)acronymValueIgnoringWordLength:(unsigned int)ignoreLength{
     NSMutableString *result = [NSMutableString string];
     NSArray *allComponents = [self componentsSeparatedByString:@" "]; // single whitespace
     NSEnumerator *e = [allComponents objectEnumerator];
     NSString *component = nil;
-	NSUInteger currentIgnoreLength;
+	unsigned int currentIgnoreLength;
     
     while(component = [e nextObject]){
 		currentIgnoreLength = ignoreLength;
@@ -1136,6 +998,10 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 }
 
 #pragma mark -
+
+- (BOOL)containsString:(NSString *)searchString options:(unsigned int)mask range:(NSRange)aRange{
+    return !searchString || [searchString length] == 0 || [self rangeOfString:searchString options:mask range:aRange].length > 0;
+}
 
 - (BOOL)containsWord:(NSString *)aWord{
     
@@ -1185,7 +1051,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 - (BOOL)hasCaseInsensitivePrefix:(NSString *)prefix;
 {
-    NSUInteger length = [prefix length];
+    unsigned int length = [prefix length];
     if(prefix == nil || length > [self length])
         return NO;
     
@@ -1207,7 +1073,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 - (NSArray *)componentsSeparatedByFieldSeparators;
 {
     NSCharacterSet *acSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:BDSKKeywordsString];
-    if([self rangeOfCharacterFromSet:acSet].length)
+    if([self containsCharacterInSet:acSet])
         return [self componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES];
     else 
         return [self componentsSeparatedByStringCaseInsensitive:@" and "];
@@ -1223,9 +1089,14 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return [self componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@","] trimWhitespace:YES];
 }
 
-- (NSString *)stringByCollapsingAndTrimmingCharactersInSet:(NSCharacterSet *)charSet;
+- (NSString *)fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
 {
-    return [(id)BDStringCreateByCollapsingAndTrimmingCharactersInSet(CFAllocatorGetDefault(), (CFStringRef)self, (CFCharacterSetRef)charSet) autorelease];
+    return [(id)BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorGetDefault(), (CFStringRef)self) autorelease];
+}
+
+- (NSString *)fastStringByCollapsingWhitespaceAndNewlinesAndRemovingSurroundingWhitespaceAndNewlines;
+{
+    return [(id)BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAllocatorGetDefault(), (CFStringRef)self) autorelease];
 }
 
 - (NSString *)stringByNormalizingSpacesAndLineBreaks;
@@ -1330,7 +1201,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
         @"and",
     };
     
-    NSUInteger i, j, iMax = sizeof(uppercaseWords) / sizeof(NSString *);
+    unsigned i, j, iMax = sizeof(uppercaseWords) / sizeof(NSString *);
     
     for (i = 0; i < iMax; i++) {
         
@@ -1376,213 +1247,6 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return string ?: self;
 }
 
-- (NSString *)stringByDeletingCharactersInSet:(NSCharacterSet *)removeSet;
-{
-    if ([self rangeOfCharacterFromSet:removeSet].length == 0)
-        return self;
-    NSMutableString *string = [self mutableCopy];
-    [string deleteCharactersInCharacterSet:removeSet];
-    return [string autorelease];
-}
-
-- (NSString *)stringByReplacingCharactersInSet:(NSCharacterSet *)set withString:(NSString *)replaceString;
-{
-    if ([self rangeOfCharacterFromSet:set].length == 0)
-        return self;
-    NSMutableString *string = [self mutableCopy];
-    [string replaceOccurrencesOfCharactersInSet:set withString:replaceString];
-    return [string autorelease];
-}
-
-- (NSString *)stringByRemovingWhitespace {
-    return [self stringByDeletingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-}
-
-- (NSString *)stringByRemovingReturns {
-    return [self stringByDeletingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-}
-
-- (NSString *)stringByRemovingString:(NSString *)removeString {
-    if ([removeString length] == 0 || [self rangeOfString:removeString].length == 0)
-        return self;
-    return [[self componentsSeparatedByString:removeString] componentsJoinedByString:@""];
-}
-
-// This method is copied from NSString-OFStringExtensions.m
-- (NSString *)stringByRemovingPrefix:(NSString *)prefix {
-    NSUInteger length = [prefix length];
-    if (length && [self hasPrefix:prefix])
-        return [self substringFromIndex:length];
-    return self;
-}
-
-// This method is copied from NSString-OFStringExtensions.m
-- (NSString *)stringByRemovingSuffix:(NSString *)suffix {
-    NSUInteger length = [suffix length];
-    if (length && [self hasSuffix:suffix])
-        return [self substringToIndex:[self length] - length];
-    return self;
-}
-
-- (NSString *)stringByRemovingSurroundingWhitespaceAndNewlines {
-    return [self stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-}
-
-- (NSString *)stringByRemovingSurroundingWhitespace {
-    return [self stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-}
-
-- (NSString *)stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace {
-    return [self stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-}
-
-// This method is copied and modified from NSString-OFStringExtensions.m
-- (NSString *)fullyEncodeAsIURI {
-    static const char hexDigits[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-    static NSCharacterSet *unsafeCharacterSet = nil;
-    if (unsafeCharacterSet == nil) {
-        // unsafeCharacterSet is approximately the inverse of the set of characters that may appear in a URI according to RFC2396.  Note that it's a bit different from AcceptableCharacterSet; it has a different purpose.
-        NSMutableCharacterSet *tmpSet = [[NSMutableCharacterSet alloc] initWithString:@"!$%&'()*+,-./0123456789:;=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz~"];
-        // Note: RFC2396 requires us to escape backslashes, carets, and pipes, which we don't do because this prevents us from interoperating with some web servers which don't correctly decode their requests.  See <bug://bugs/4467>: Should we stop escaping the pipe | char in URLs? (breaks counters, lycos.de).
-        [tmpSet addCharactersInString:@"\\^|"];
-        [tmpSet invert];
-        unsafeCharacterSet = [tmpSet copy];
-        [tmpSet release];
-    }
-    
-    // Omni uses the inverse check here, which seems to completely negate the use of this method
-    if ([self rangeOfCharacterFromSet:unsafeCharacterSet].length == 0)
-        return self;
-    
-    NSData *utf8Data = [self dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
-    const unsigned char *source = [utf8Data bytes];
-    NSUInteger sourceSize = [utf8Data length];
-    NSUInteger destSize = sourceSize;
-    
-    if (destSize < 20)
-        destSize *= 3;
-    else
-        destSize += ( destSize >> 1 );
-    
-    unsigned char *dest = NSZoneMalloc(NULL, destSize);
-    NSUInteger i, j = 0;
-    
-    for (i = 0; i < sourceSize; i++) {
-        unsigned char ch = source[i];
-        
-        // Headroom: we may insert up to three bytes into destination.
-        if (j + 3 >= destSize) {
-            NSInteger newSize = destSize + ( destSize >> 1 );
-            dest = NSZoneRealloc(NULL, dest, newSize);
-            destSize = newSize;
-        }
-        
-        if ([unsafeCharacterSet characterIsMember:ch]) {
-            dest[j++] = '%';
-            dest[j++] = (unichar)hexDigits[((ch & 0xF0) >> 4)];
-            dest[j++] = (unichar)hexDigits[(ch & 0x0F)];
-        } else {
-            dest[j++] = ch;
-        }
-    }
-    
-    NSString *resultString = (NSString *)CFStringCreateWithBytes(kCFAllocatorDefault, dest, j, kCFStringEncodingASCII, FALSE);
-    NSZoneFree(NULL, dest);
-    
-    return [resultString autorelease];
-}
-
-#pragma mark Paths
-
-// These methods are copied and modified from NSString-OFStringExtensions.m
-
-+ (NSString *)pathSeparator {
-    return [NSOpenStepRootDirectory() substringToIndex:1];
-}
-
-- (NSArray *)commonRootPathComponentsOfFilename:(NSString *)filename components:(NSArray **)components otherComponents:(NSArray **)otherComponents {
-    NSArray *array = [self pathComponents];
-    NSArray *otherArray = [[filename stringByStandardizingPath] pathComponents];
-    NSUInteger i, minLength = MIN([array count], [otherArray count]);
-    NSMutableArray *resultArray = [NSMutableArray arrayWithCapacity:minLength];
-
-    for (i = 0; i < minLength; i++) {
-        if ([[array objectAtIndex:i] isEqualToString:[otherArray objectAtIndex:i]])
-            [resultArray addObject:[array objectAtIndex:i]];
-        else
-            break;
-    }
-        
-    if ([resultArray count] == 0)
-        return nil;
-
-    if (components)
-        *components = [array subarrayWithRange:NSMakeRange(i, [array count] - i)];
-    if (otherComponents)
-        *otherComponents = [otherArray subarrayWithRange:NSMakeRange(i, [otherArray count] - i)];
-    
-    return resultArray;
-}
-
-- (NSString *)commonRootPathOfFile:(NSString *)filename {
-    NSArray *components = [self commonRootPathComponentsOfFilename:filename components:NULL otherComponents:NULL];
-    return components ? [NSString pathWithComponents:components] : nil;
-}
-
-- (NSString *)relativePathFromPath:(NSString *)basePath {
-    NSArray *commonRoot, *myUniquePart, *baseUniquePart;
-    NSInteger numberOfStepsUp, i;
-
-    basePath = [basePath stringByStandardizingPath];
-    commonRoot = [[self stringByStandardizingPath] commonRootPathComponentsOfFilename:basePath components:&myUniquePart otherComponents:&baseUniquePart];
-    if (commonRoot == nil || [commonRoot count] == 0)
-        return self;
-    
-    numberOfStepsUp = [baseUniquePart count];
-    if (numberOfStepsUp == 0)
-        return [NSString pathWithComponents:myUniquePart];
-    if ([[baseUniquePart lastObject] isEqualToString:@""])
-        numberOfStepsUp --;
-    if (numberOfStepsUp == 0)
-        return [NSString pathWithComponents:myUniquePart];
-    
-    NSMutableArray *stepsUpArray = [[myUniquePart mutableCopy] autorelease];
-    for (i = 0; i < numberOfStepsUp; i++) {
-        NSString *steppingUpPast = [baseUniquePart objectAtIndex:i];
-        if ([steppingUpPast isEqualToString:@".."]) {
-            if ([[stepsUpArray objectAtIndex:0] isEqualToString:@".."])
-                [stepsUpArray removeObjectAtIndex:0];
-            else {
-                // Gack! Just give up.
-                return nil;
-            }
-        } else
-            [stepsUpArray insertObject:@".." atIndex:0];
-    }
-
-    return [[NSString pathWithComponents:stepsUpArray] stringByStandardizingPath];
-}
-
-- (NSString *)stringByNormalizingPath {
-    // Split on slashes and chop out '.' and '..' correctly.
-    NSArray *pathElements = [self pathComponents];
-    NSUInteger i, count = [pathElements count], preserveCount;
-    NSMutableArray *newPathElements = [NSMutableArray arrayWithCapacity:count];
-    if (count > 0 && [[pathElements objectAtIndex:0] isEqualToString:@"/"])
-        preserveCount = 1;
-    else
-        preserveCount = 0;
-    for (i = 0; i < count; i++) {
-        NSString *pathElement = [pathElements objectAtIndex:i];
-        if ([pathElement isEqualToString:@".."]) {
-            if (count > preserveCount)
-                [newPathElements removeLastObject];
-        } else if ([pathElement isEqualToString:@"."] == NO)
-            [newPathElements addObject:pathElement];
-    }
-    return [NSString pathWithComponents:newPathElements];
-}
-
 #pragma mark HTML/XML
 
 - (NSString *)stringByConvertingHTMLLineBreaks{
@@ -1596,7 +1260,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 - (NSString *)stringByEscapingBasicXMLEntitiesUsingUTF8;
 {
-    return [(NSString *)BDXMLCreateStringWithEntityReferencesInCFEncoding((CFStringRef)self, kCFStringEncodingUTF8) autorelease];
+    return [OFXMLCreateStringWithEntityReferencesInCFEncoding(self, OFXMLBasicEntityMask, nil, kCFStringEncodingUTF8) autorelease];
 }
     
 #define APPEND_PREVIOUS() \
@@ -1606,12 +1270,12 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
                 begin = ptr + 1;
 
 // Stolen and modified from the OmniFoundation -htmlString.
-- (NSString *)htmlStringEscapingBreak:(BOOL)escapeBreak;
+- (NSString *)xmlString;
 {
     unichar *ptr, *begin, *end;
     NSMutableString *result;
     NSString *string;
-    NSInteger length;
+    int length;
     
     length = [self length];
     ptr = NSZoneMalloc([self zone], length * sizeof(unichar));
@@ -1632,16 +1296,14 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
             APPEND_PREVIOUS();
             [result appendString:@"&quot;"];
         } else if (*ptr == '<') {
-             APPEND_PREVIOUS();
+            APPEND_PREVIOUS();
             [result appendString:@"&lt;"];
         } else if (*ptr == '>') {
             APPEND_PREVIOUS();
             [result appendString:@"&gt;"];
         } else if (*ptr == '\n') {
             APPEND_PREVIOUS();
-            if (escapeBreak == NO)
-                [result appendString:@"<br/>"];
-            else if (ptr + 1 != end && *(ptr + 1) == '\n') {
+            if (ptr + 1 != end && *(ptr + 1) == '\n') {
                 [result appendString:@"&lt;p&gt;"];
                 ptr++;
             } else
@@ -1654,20 +1316,12 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return result;
 }
 
-- (NSString *)htmlString {
-    return [self htmlStringEscapingBreak:NO];
-}
-
-- (NSString *)xmlString {
-    return [self htmlStringEscapingBreak:YES];
-}
-
 - (NSString *)csvString;
 {
     unichar *ptr, *begin, *end;
     NSMutableString *result;
     NSString *string;
-    NSInteger length;
+    int length;
     BOOL isQuoted, needsSpace;
     
     length = [self length];
@@ -1679,7 +1333,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     isQuoted = length > 0 && (*ptr == ' ' || *(end-1) == ' ');
     needsSpace = NO;
     
-    if(isQuoted == NO && [self rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@"\n\r\t\","]].length == 0) {
+    if(isQuoted == NO && [self containsCharacterInSet:[NSCharacterSet characterSetWithCharactersInString:@"\n\r\t\","]] == NO) {
         NSZoneFree([self zone], originalPtr);
         return self;
     }
@@ -1718,13 +1372,13 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 - (NSString *)tsvString;
 {
-    if([self rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@"\t\n\r"]].length == 0)
+    if([self containsCharacterInSet:[NSCharacterSet characterSetWithCharactersInString:@"\t\n\r"]] == NO)
         return self;
     
     unichar *ptr, *begin, *end;
     NSMutableString *result;
     NSString *string;
-    NSInteger length;
+    int length;
     BOOL needsSpace;
     
     length = [self length];
@@ -1880,9 +1534,9 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     NSScanner *scanner = [[NSScanner alloc] initWithString:self];
     NSString *s = nil;
     NSMutableString *returnString = [NSMutableString stringWithCapacity:[self length]];
-    NSInteger nesting = 0;
+    int nesting = 0;
     unichar ch;
-    NSUInteger location;
+    unsigned location;
     NSRange range;
     BOOL foundFirstLetter = NO;
     
@@ -1932,47 +1586,16 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return [self stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 }
 
-- (unichar)firstCharacter{
-    return [self length] ? [self characterAtIndex:0] : '\0';
-}
-
-- (unichar)lastCharacter{
-    return [self length] ? [self characterAtIndex:[self length] - 1] : '\0';
-}
-
-- (NSString *)lowercaseFirst{
-    return [[[self substringToIndex:1] lowercaseString] stringByAppendingString:[self substringFromIndex:1]];
-}
-
-- (NSString *)uppercaseFirst{
-    return [[[self substringToIndex:1] uppercaseString] stringByAppendingString:[self substringFromIndex:1]];
-}
-
-#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
-- (NSString *)Tiger_stringByReplacingOccurrencesOfString:(NSString *)stringToReplace withString:(NSString *)replacement {
-    if ([stringToReplace length] == 0 || [self rangeOfString:stringToReplace].length == 0)
-        return self;
-    return [[self componentsSeparatedByString:stringToReplace] componentsJoinedByString:replacement];
-}
-
-+ (void)load {
-    // this does nothing when the method is already defined, i.e. on Leopard
-    BDSKAddInstanceMethodImplementationFromSelector(self, @selector(stringByReplacingOccurrencesOfString:withString:), @selector(Tiger_stringByReplacingOccurrencesOfString:withString:));
-}
-#else
-#warning fixme: remove NSString category implementation
-#endif
-
 @end
 
 
 @implementation NSMutableString (BDSKExtensions)
 
-- (BOOL)isMutableString {
-    BOOL isMutable = YES;
+- (BOOL)isMutableString;
+{
+    int isMutable = YES;
     @try{
-        unichar ch = 'X';
-        CFStringAppendCharacters((CFMutableStringRef)self, &ch, 1);
+        [self appendCharacter:'X'];
     }
     @catch(NSException *localException){
         if([[localException name] isEqual:NSInvalidArgumentException])
@@ -1988,25 +1611,9 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return isMutable;
 }
 
-- (void)deleteCharactersInCharacterSet:(NSCharacterSet *)characterSet {
+- (void)deleteCharactersInCharacterSet:(NSCharacterSet *)characterSet;
+{
     BDDeleteCharactersInCharacterSet((CFMutableStringRef)self, (CFCharacterSetRef)characterSet);
-}
-
-- (void)replaceOccurrencesOfCharactersInSet:(NSCharacterSet *)set withString:(NSString *)replaceString {
-    BDReplaceCharactersInCharacterSet((CFMutableStringRef)self, (CFCharacterSetRef)set, (CFStringRef)replaceString);
-}
-
-// This method is copied from NSMutableString-OFStringExtensions.m
-- (void)appendStrings:(NSString *)first, ... {
-    va_list argList;
-    NSString *next;
-    if (first == nil)
-        return;
-    [self appendString:first];
-    va_start(argList, first);
-    while ((next = va_arg(argList, NSString *)))
-        [self appendString:next];
-    va_end(argList);
 }
 
 @end

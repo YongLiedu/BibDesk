@@ -37,248 +37,172 @@
  */
 
 #import "FVWebViewIcon.h"
+#import "FVTextIcon.h"
 #import "FVFinderIcon.h"
 #import "FVMIMEIcon.h"
 #import <WebKit/WebKit.h>
 
-@interface WebView (FVExtensions)
-- (BOOL)fv_isLoading;
-@end
-
-@implementation WebView (FVExtensions)
-
-- (BOOL)fv_isLoading;
-{
-    // available in 10.4.11 and later
-    if ([self respondsToSelector:@selector(isLoading)])
-        return [self isLoading];
-    
-    // Modified from http://trac.webkit.org/browser/trunk/WebKit/mac/WebView/WebView.mm implementation of -[WebView _isLoading].
-    WebFrame *mainFrame = [self mainFrame];
-    return [[mainFrame dataSource] isLoading] || [[mainFrame provisionalDataSource] isLoading];
-}
-
-@end
-
 @implementation FVWebViewIcon
 
-// limit number of loading views to keep memory usage down; size is tunable
-static int8_t _maxWebViews = 0;
-static int8_t _numberOfWebViews = 0;
-static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconWebViewAvailableNotificationName";
+static BOOL FVWebIconDisabled = NO;
 
-#define IDLE    0
-#define LOADING 1
-#define LOADED  2
+// webview pool variables to keep memory usage down; pool size is tunable
+static NSInteger _maxWebViews = 5;
+static NSMutableArray *_availableWebViews = nil;
+static NSArray *_commonModes = nil;
+static NSInteger _numberOfWebViews = 0;
+static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconWebViewAvailableNotificationName";
+static NSSet *_webViewSchemes = nil;
+
+// size of the view frame; large enough to fit a reasonably sized page
+static const NSSize _webViewSize = (NSSize){ 1000, 900 };
+
+// framework private; notifies the file view that a webkit-async load has finished
+NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificationName";
 
 + (void)initialize
 {
     FVINITIALIZE(FVWebViewIcon);
-
-    NSNumber *maxViews = [[NSUserDefaults standardUserDefaults] objectForKey:@"FVWebIconMaximumNumberOfWebViews"];
     
-    // default value of 5, with valid range (0, 50)
-    if (nil == maxViews) {
-        _maxWebViews = 5;
-    }
-    else if ([maxViews intValue] > 50) {
-        FVLog(@"Limiting number of webviews to 50 (FVWebIconMaximumNumberOfWebViews = %d)", maxViews);
-        _maxWebViews = 50;
-    }
-    else if ([maxViews intValue] >= 0) {
-        _maxWebViews = [maxViews intValue];
-    }
-    else {
-        // negative values
-        _maxWebViews = 0;
-    }
+    NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
+    
+    //if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+    //    [sud registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:NO], @"FVWebIconDisabled", nil]];
+    
+    FVWebIconDisabled = [sud boolForKey:@"FVWebIconDisabled"];
+    NSInteger maxViews = [sud integerForKey:@"FVWebIconMaximumNumberOfWebViews"];
+    if (maxViews > 0)
+        _maxWebViews = maxViews;
+    
+    _availableWebViews = [[NSMutableArray alloc] initWithCapacity:_maxWebViews];
+    _commonModes = [[NSArray alloc] initWithObjects:(id)kCFRunLoopCommonModes, nil];
+    _webViewSchemes = [[NSSet alloc] initWithObjects:@"http", @"https", @"ftp", nil];
 }
-
-// size of the view frame; large enough to fit a reasonably sized page
-+ (NSSize)_webViewSize { return NSMakeSize(1000, 900); }
 
 // return nil if _maxWebViews is exceeded
-+ (WebView *)_newWebView
++ (WebView *)popWebView 
 {
-    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
-    FVAPIParameterAssert(_maxWebViews > 0);
-    WebView *view = nil;
-    if (_numberOfWebViews < _maxWebViews) {
-        NSSize size = [self _webViewSize];
-        view = [[WebView alloc] initWithFrame:NSMakeRect(0, 0, size.width, size.height)];
-        _numberOfWebViews++;
-        
-        
-        NSString *prefIdentifier = [NSString stringWithFormat:@"%@.%@", [[NSBundle bundleForClass:self] bundleIdentifier], self];
-        [view setPreferencesIdentifier:prefIdentifier];
-        
-        WebPreferences *prefs = [view preferences];
-        [prefs setPlugInsEnabled:NO];
-        [prefs setJavaEnabled:NO];
-        [prefs setJavaScriptCanOpenWindowsAutomatically:NO];
-        [prefs setJavaScriptEnabled:NO];
-        [prefs setAllowsAnimatedImages:NO];
-        
-        /*
-         WebCacheModelDocumentViewer is the most memory-efficient setting; remote resources are still cached to disk,
-         supposedly, but in practice this doesn't seem to happen (or else they're pruned too early).  Using 
-         WebCacheModelDocumentBrowser gives much better performance, and memory usage is the same or less, particularly
-         if you have multiple pages loading the same resources (e.g., many ScienceDirect thumbnails).
-         */
-        if ([prefs respondsToSelector:@selector(setCacheModel:)])
-            [prefs setCacheModel:WebCacheModelDocumentBrowser];
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    WebView *nextView = nil;
+    if ([_availableWebViews count]) {
+        nextView = [[_availableWebViews lastObject] retain];
+        [_availableWebViews removeLastObject];
     }
-    return view;
+    else if (_numberOfWebViews <= _maxWebViews) {
+        nextView = [[WebView alloc] initWithFrame:NSMakeRect(0, 0, _webViewSize.width, _webViewSize.height)];
+        _numberOfWebViews++;
+    }
+    return [nextView autorelease];
 }
 
-+ (BOOL)_isSupportedScheme:(NSString *)scheme
++ (void)pushWebView:(WebView *)aView
 {
-    NSString *lcString = [scheme lowercaseString];
-    return [lcString isEqualToString:@"http"] || [lcString isEqualToString:@"https"] || [lcString isEqualToString:@"ftp"];
+    NSParameterAssert(nil != aView);
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    [_availableWebViews insertObject:aView atIndex:0];
+    [[NSNotificationCenter defaultCenter] postNotificationName:FVWebIconWebViewAvailableNotificationName object:self];
 }
 
 - (id)initWithURL:(NSURL *)aURL;
 {    
     NSParameterAssert(nil != [aURL scheme]);
     
-    // if webviews are disabled, return a finder icon to avoid problems with looping notifications
     // if this is not an http or file URL, return a finder icon instead
-    if (0 == _maxWebViews || (NO == [[self class] _isSupportedScheme:[aURL scheme]] && NO == [aURL isFileURL])) {
+    if (FVWebIconDisabled || (NO == [_webViewSchemes containsObject:[aURL scheme]] && NO == [aURL isFileURL])) {
         NSZone *zone = [self zone];
-        [super dealloc];
-        self = [[FVFinderIcon allocWithZone:zone] initWithURL:aURL];
+        [self release];
+        if ([aURL isFileURL]) 	 
+            self = [[FVTextIcon allocWithZone:zone] initWithHTMLAtURL:aURL]; 	 
+        else
+            self = [[FVFinderIcon allocWithZone:zone] initWithFinderIconOfURL:aURL];
     }
     else if ((self = [super init])) {
-        _httpURL = [aURL copyWithZone:[self zone]];
+        _httpURL = [aURL copy];
         _fullImage = NULL;
         _thumbnail = NULL;
-        _viewImage = NULL;
         _fallbackIcon = nil;
-        _webView = nil;
-        _redirectedFrames = [NSCountedSet new];
-
+        
         // we can predict these sizes ahead of time since we have a fixed aspect ratio
-        _thumbnailSize = [[self class] _webViewSize];
+        _thumbnailSize = _webViewSize;
         FVIconLimitThumbnailSize(&_thumbnailSize);
-        _fullImageSize = _thumbnailSize;
+        _fullImageSize = _webViewSize;
         FVIconLimitFullImageSize(&_fullImageSize);
         _desiredSize = NSZeroSize;
-                
-        _cacheKey = [FVIconCache newKeyForURL:_httpURL];
-        _condLock = [[NSConditionLock allocWithZone:[self zone]] initWithCondition:IDLE];
-        _cancelledLoad = false;
+        
+        // track failure messages via the delegate
+        _webviewFailed = NO;
+        
+        // keeps track of whether a webview has been created
+        _isRendering = NO;
+        _diskCacheName = [FVIconCache createDiskCacheNameWithURL:_httpURL];
+
+        if (pthread_mutex_init(&_mutex, NULL) != 0)
+            perror("pthread_mutex_init");
     }
     return self;
 }
 
 - (void)_releaseWebView
 {
-    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
-
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
     // in case we get -releaseResources or -dealloc while waiting for another webview
     [[NSNotificationCenter defaultCenter] removeObserver:self name:FVWebIconWebViewAvailableNotificationName object:[self class]];
     if (nil != _webView) {
         [_webView setPolicyDelegate:nil];
         [_webView setFrameLoadDelegate:nil];
-        [_webView setResourceLoadDelegate:nil];
         [_webView stopLoading:nil];
-        FVAPIAssert([_webView downloadDelegate] == nil, @"downloadDelegate non-nil");
-        FVAPIAssert([_webView UIDelegate] == nil, @"UIDelegate non-nil");
+        [[self class] pushWebView:_webView];
         [_webView release];
-        // may have frames if the load was cancelled?
-        [_redirectedFrames removeAllObjects];
-        _numberOfWebViews--;
         _webView = nil;
-        // notify observers that _numberOfWebViews has been decremented
-        [[NSNotificationCenter defaultCenter] postNotificationName:FVWebIconWebViewAvailableNotificationName object:[self class]];
     }
 }
 
 - (void)dealloc
 {
-    // typically on the main thread here, but not guaranteed; can never be called during a load anyway
-    if (pthread_main_np() != 0) {
-        [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES modes:[NSArray arrayWithObject:(id)kCFRunLoopCommonModes]];
-    }
-    else {
-        // make sure to deregister for notification
-        [self _releaseWebView];
-    }
-    [_redirectedFrames release];
-    [_condLock release];
-    CGImageRelease(_viewImage);
-    CGImageRelease(_fullImage);
-    CGImageRelease(_thumbnail);
+    // it's very unlikely that we'll see this on a non-main thread, but just in case...
+    [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES modes:_commonModes];
+    
+    pthread_mutex_destroy(&_mutex);
+        CGImageRelease(_fullImage);
+        CGImageRelease(_thumbnail);
     [_httpURL release];
     [_fallbackIcon release];
-    [_cacheKey release];
+    NSZoneFree([self zone], _diskCacheName);
     [super dealloc];
 }
 
 - (BOOL)canReleaseResources;
 {
-    return ([_condLock condition] == LOADING || NULL != _fullImage || NULL != _thumbnail || [_fallbackIcon canReleaseResources]);
+    return (nil != _webView || NULL != _fullImage || NULL != _thumbnail || [_fallbackIcon canReleaseResources]);
 }
 
 - (void)releaseResources
 {     
-    // allow current waiters on LOADING to exit
-    if ([_condLock tryLockWhenCondition:LOADING]) {
-                
-        /*
-         Cancel any pending loads (only occur inside LOADING condition)
-         
-         If webview is non-nil, we need to cancel the load.
-         If webview is nil, we need to unregister for the notification.         
-         */
-        [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES modes:[NSArray arrayWithObject:(id)kCFRunLoopCommonModes]];
-        
-        // should never happen, but make sure we can't cache garbage...
-        if (_viewImage) {
-            FVLog(@"%s found a non-NULL _viewImage, and is disposing of it", __func__);
-            CFRelease(_viewImage);
-            _viewImage = NULL;
-        }        
-        // need to avoid creating the fallback icon in this case, so we know to retry later
-        _cancelledLoad = true;
-        [_condLock unlockWithCondition:LOADED];
-    }
-    // could possibly fail to take the lock during a callout to _pageDidFinishLoading, and in that case we should just wait
+    // Cancel any pending loads; set _isRendering to NO or -renderOffscreenOnMainThread will never complete if it gets called again
+    [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES modes:_commonModes];
 
-    // block until IDLE is set, so current waiters don't get hosed by resetting the condition to IDLE
-    [_condLock lockWhenCondition:IDLE];
+    [self lock];
+    _isRendering = NO;
     
-    CGImageRelease(_fullImage);
+        CGImageRelease(_fullImage);
     _fullImage = NULL;
-    CGImageRelease(_thumbnail);
+        CGImageRelease(_thumbnail);
     _thumbnail = NULL;
     
     // currently a noop
     [_fallbackIcon releaseResources];
-        
-    // reset condition so -renderOffscreen will complete if it's called again
-    [_condLock unlockWithCondition:IDLE];    
+    [self unlock];    
 }
 
-- (void)recache;
-{
-    [FVIconCache invalidateCachesForKey:_cacheKey];
-    [self releaseResources];
-    
-    // this is a sentinel value for needsRenderForSize:
-    [self lock];    
-    _cancelledLoad = false;
-    [_fallbackIcon release];
-    _fallbackIcon = nil;
-    [self unlock];
-}
-
-- (BOOL)tryLock { return [_condLock tryLock]; }
-- (void)lock { [_condLock lock]; }
-- (void)unlock { [_condLock unlock]; }
+- (BOOL)tryLock { return pthread_mutex_trylock(&_mutex) == 0; }
+- (void)lock { pthread_mutex_lock(&_mutex); }
+- (void)unlock { pthread_mutex_unlock(&_mutex); }
 
 // size of the _fullImage
 - (NSSize)size { return _fullImageSize; }
+
+// actual size of the webview
+- (NSSize)_webviewSize { return _webViewSize; }
 
 // size of the _thumbnail (1/5 of webview size)
 - (NSSize)_thumbnailSize { return _thumbnailSize; }
@@ -286,7 +210,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
 - (BOOL)needsRenderForSize:(NSSize)size
 {
     BOOL needsRender = NO;
-    if ([_condLock tryLockWhenCondition:IDLE]) {
+    if ([self tryLock]) {
         
         /*
          1) if we know the web view failed, the only thing we can use is the fallback icon
@@ -295,161 +219,132 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
          */
         _desiredSize = size;
         
-        if (nil != _fallbackIcon)
-            needsRender = [_fallbackIcon needsRenderForSize:size];
-        else if (FVShouldDrawFullImageWithThumbnailSize(size, [self _thumbnailSize]))
+        if (YES == _webviewFailed)
+            needsRender = (nil == _fallbackIcon || [_fallbackIcon needsRenderForSize:size]);
+        else if (FVShouldDrawFullImageWithThumbnailSize(size, [self _thumbnailSize]) && NO == _isRendering)
             needsRender = (NULL == _fullImage);
         else
-            needsRender = (NULL == _thumbnail);
+            needsRender = (NULL == _thumbnail && NO == _isRendering);
         [self unlock];
     }
     return needsRender;
 }
 
-- (void)_handleWebView:(WebView *)sender loadError:(NSError *)error forFrame:(WebFrame *)frame;
+- (void)_postIconFinishedNotification
 {
-    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
-    FVAPIParameterAssert([sender isEqual:_webView]);
-    
-    // if a frame fails to load and the webview isn't loading anything else, bail out
-    if (NO == [_webView fv_isLoading]) {
-        [self _releaseWebView];
-        
-        // condition should always be LOADING, but -releaseResources may have the lock
-        if ([_condLock tryLockWhenCondition:LOADING]) {
-            // return to -renderOffscreen to handle the failure
-            [_condLock unlockWithCondition:LOADED];
-        }    
-    }
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    // All of the other FVIcon subclasses render synchronously in the FVOperationQueue, which then calls back to the view when each batch is finished.  FVWebViewIcon loads asynchronously via WebKit, which runs its own threading; this worked better than the original attempt at a synchronous load, which blocked for too long.  The problem is that if we return YES from needsRenderForSize: while the webview is trying to load, the view keeps sending the web icons to the queue for rendering, and ultimately ends up drawing the placeholders at a fairly high rate until needsRenderForSize: finally returns NO.  This private notification is about the cleanest thing I can think of.
+    [[NSNotificationCenter defaultCenter] postNotificationName:FVWebIconUpdatedNotificationName object:self];
 }
 
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame;
 {
-    [self _handleWebView:sender loadError:error forFrame:frame];
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    NSParameterAssert([sender isEqual:_webView]);
+    
+    [self _releaseWebView];
+    [self lock];
+    _webviewFailed = YES;
+    _isRendering = NO;
+    [self unlock];
+    [self _postIconFinishedNotification];
 }
 
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame;
 {
-    [self _handleWebView:sender loadError:error forFrame:frame];
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    NSParameterAssert([sender isEqual:_webView]);
+
+    [self _releaseWebView];
+    [self lock];
+    _webviewFailed = YES;
+     _isRendering = NO;
+    [self unlock];
+    [self _postIconFinishedNotification];
 }
 
-- (void)_pageDidFinishLoading
+- (void)_mainFrameDidFinishLoading
 {
-    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
-    FVAPIAssert1([_webView fv_isLoading] == NO, @"%s called while webview was loading", __func__);
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
 
-    // release resources called after page finished loading; it calls main thread to cancel webview and we deadlock
-    if ([_condLock tryLockWhenCondition:LOADING] == NO)
-        return;
+    // the delegate methods will tell us if the load failed; I see no other way to ask for status    
+    [self lock];
+    BOOL didFail = _webviewFailed;
+    [self unlock];
     
-    // display the main frame's view directly to avoid showing the scrollers
-    WebFrameView *view = [[_webView mainFrame] frameView];
-    [view setAllowsScrolling:NO];
-    
-    // actual size of the view
-    NSSize size = [[self class] _webViewSize];
-    FVBitmapContextRef context = FVIconBitmapContextCreateWithSize(size.width, size.height);
-    CGContextClearRect(context, CGRectMake(0, 0, size.width, size.height));
-    NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:context flipped:[_webView isFlipped]];
-    
-    [NSGraphicsContext saveGraphicsState];
-    
-    [NSGraphicsContext setCurrentContext:nsContext];
-    [nsContext saveGraphicsState];
-    [[NSColor whiteColor] setFill];
-    NSRect rect = NSMakeRect(0, 0, size.width, size.height);
-    [[NSBezierPath fv_bezierPathWithRoundRect:rect xRadius:5 yRadius:5] fill];
-    [nsContext restoreGraphicsState];
+    if (NO == didFail) {
+        // display the main frame's view directly to avoid showing the scrollers
+        
+        WebFrameView *view = [[_webView mainFrame] frameView];
+        [view setAllowsScrolling:NO];
+        
+        NSSize size = [self _webviewSize];
+        CGContextRef context = [FVBitmapContextCache newBitmapContextOfWidth:size.width height:size.height];
+        NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:context flipped:[view isFlipped]];
+        
+        [NSGraphicsContext saveGraphicsState]; // save previous context
+        
+        [NSGraphicsContext setCurrentContext:nsContext];
+        [nsContext saveGraphicsState];
+        [[NSColor whiteColor] setFill];
+        NSRect rect = NSMakeRect(0, 0, size.width, size.height);
+        [[NSBezierPath fv_bezierPathWithRoundRect:rect xRadius:5 yRadius:5] fill];
+        [nsContext restoreGraphicsState];
 
-    [_webView setFrame:NSInsetRect(rect, 10, 10)];
-    
-    CGContextSaveGState(context);
-    CGContextTranslateCTM(context, 10, 10);
-    
-    /*
-     Force document layout.  This was added as a workaround for a bug introduced with Safari 4.0.3 on 10.5.8, 
-     where setAllowsScrolling:NO caused a white page to be drawn.  Interestingly, it also fixes some prior
-     display problems with sciencedirect.com thumbnails, so it's likely that setAllowsScrolling: has never
-     worked correctly.  Note that [[view documentView] setNeedsLayout:] is not sufficient, so I conclude that
-     displayRectIgnoringOpacity:inContext: doesn't go through drawRect: (impossible), or the WebDocumentView
-     protocol is not correctly implemented.
-     */
-    [[view documentView] layout];
-    [_webView displayRectIgnoringOpacity:[_webView bounds] inContext:nsContext];
-    CGContextRestoreGState(context);
-    
-    [NSGraphicsContext restoreGraphicsState];
-    
-    // temporary CGImage from the full webview
-    CGImageRelease(_viewImage);
-    _viewImage = CGBitmapContextCreateImage(context);
-    
-    FVIconBitmapContextRelease(context);
+        [_webView setFrame:NSInsetRect(rect, 10, 10)];
+        
+        CGContextSaveGState(context);
+        CGContextTranslateCTM(context, 10, 10);
+        [view displayRectIgnoringOpacity:[view bounds] inContext:nsContext];
+        CGContextRestoreGState(context);
+        
+        [NSGraphicsContext restoreGraphicsState]; // restore previous context
+        
+        // temporary CGImage from the full webview
+        CGImageRef largeImage = CGBitmapContextCreateImage(context);
+                 
+        [self lock];
+        // full image is large, so cache it to disk in case we get a -releaseResources or another view needs it
+        CGImageRelease(_fullImage);
+        _fullImage = FVCreateResampledFullImage(largeImage, true);
+        [FVIconCache cacheImage:_fullImage withName:_diskCacheName];
+        
+        // resample to a thumbnail size that will draw quickly
+        CGImageRelease(_thumbnail);
+        _thumbnail = FVCreateResampledThumbnail(largeImage, true);
+        [FVIconCache cacheThumbnail:_thumbnail withName:_diskCacheName];
+        
+        [self unlock];
+
+        CGImageRelease(largeImage);
+        [FVBitmapContextCache disposeOfBitmapContext:context];        
+    }
     
     // clear out the webview, since we won't need it again
     [self _releaseWebView];
-    [_condLock unlockWithCondition:LOADED];
+
+    [self lock];
+    // sets _isRendering before notifying observers we're done
+    _isRendering = NO;
+    [self unlock];
     
-    // return to -renderOffscreen for scaling and caching
-}
-
-/*
- 
- Notes on workarounds for rdar://problem/7025679
- 
- Redirect and -isLoading don't work as I expected.  As an example, this page
- 
- http://dx.doi.org/10.1175/1520-0426(2003)20%3C730:AACEAF%3E2.0.CO;2
- 
- does a server side redirect to
- 
- http://journals.allenpress.com/jrnlserv/?request=get-abstract&doi=10.1175/1520-0426(2003)20%3C730:AACEAF%3E2.0.CO;2
- 
- which then does a client side redirect to
- 
- http://ams.allenpress.com/perlserv/?request=get-abstract&doi=10.1175%2F1520-0426(2003)20%3C730:AACEAF%3E2.0.CO%3B2
- 
- -[WebView isLoading] returns NO after the journals.allenpress.com URL has loaded, but that's before the ams.allenpress.com
- URL has started loading.  Hence, we track client side redirected frames between the redirect and their provisional load,
- and use that in conjunction with -[WebView isLoading].  This is essentially Apple's suggested workaround, and they say
- WebKit works as designed here so 7025679 was marked "Behaves Correctly."
- 
- Related: rdar://problem/7046376 (add API or callback for complete loading)
-          rdar://problem/7046354 (improve documentation for willPerformClientRedirectToURL:)
- 
- */
-
-- (void)webView:(WebView *)sender willPerformClientRedirectToURL:(NSURL *)URL delay:(NSTimeInterval)seconds fireDate:(NSDate *)date forFrame:(WebFrame *)frame
-{
-    // client redirect is delayed, and -[WebView isLoading] returns NO until the provisional load starts
-    [_redirectedFrames addObject:frame];
-}
-
-- (void)webView:(WebView *)sender didCancelClientRedirectForFrame:(WebFrame *)frame;
-{
-    [_redirectedFrames removeObject:frame];
-}
-
-- (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame;
-{
-    // once a provisional load has started, -[WebView isLoading] will return correct status
-    [_redirectedFrames removeObject:frame];
+    // post this regardless of failure, but webView:didFinishLoadForFrame: doesn't seem to be called in a failure case
+    [self _postIconFinishedNotification];
 }
 
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame
 {
-    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
-    FVAPIParameterAssert([sender isEqual:_webView]);
-
-    // wait until all frames are loaded; perform after a delay because of redirect problems
-    if (NO == [_webView fv_isLoading] && [_redirectedFrames count] == 0)
-        [self _pageDidFinishLoading];
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    NSParameterAssert([sender isEqual:_webView]);
+    // wait for the main frame
+    if ([frame isEqual:[_webView mainFrame]])
+        [self _mainFrameDidFinishLoading];
 }
 
 - (void)webView:(WebView *)sender decidePolicyForMIMEType:(NSString *)type request:(NSURLRequest *)request frame:(WebFrame *)frame decisionListener:(id < WebPolicyDecisionListener >)listener
 {
-    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
-    FVAPIParameterAssert([sender isEqual:_webView]);
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    NSParameterAssert([sender isEqual:_webView]);
     
     // !!! Better to just load text/html and ignore everything else?  The point of implementing this method is to ignore PDF.  It doesn't show up in the thumbnail and it's slow to load, so there's no point in loading it.  Plugins are disabled, so stuff like Flash should be ignored anyway, and WebKit doesn't try to display PostScript AFAIK.
     
@@ -458,7 +353,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
     
     CFStringRef theUTI = type == nil ? NULL : UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, (CFStringRef)type, NULL);
     
-    // FVWebViewIcon handles .webarchive files, so implement the standard file: URL handler
+    // This class should never get a file URL, but we'll implement it in the standard way for consistency.
     if ([[request URL] isFileURL]) {
         BOOL isDirectory = NO;
         [[NSFileManager defaultManager] fileExistsAtPath:[[request URL] path] isDirectory:&isDirectory];
@@ -471,12 +366,10 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
         }
     }
     else if (NULL != theUTI && FALSE == UTTypeConformsTo(theUTI, kUTTypeText)) {
-        // condition should always be LOADING, but -releaseResources may have the lock
-        if ([_condLock tryLockWhenCondition:LOADING]) {
-            [_fallbackIcon release];
-            _fallbackIcon = [FVMIMEIcon newIconWithMIMEType:type];
-            [self unlock];
-        }
+        [self lock];
+        [_fallbackIcon release];
+        _fallbackIcon = [[FVMIMEIcon allocWithZone:[self zone]] initWithMIMEType:type];
+        [self unlock];
         // this triggers webView:didFailProvisionalLoadWithError:forFrame:
         [listener ignore];        
     }
@@ -490,69 +383,64 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
     if (theUTI) CFRelease(theUTI);
 }
 
-// should only be relevant for clicking links, but implement it anyway
-- (void)webView:(WebView *)sender decidePolicyForNewWindowAction:(NSDictionary *)actionInformation request:(NSURLRequest *)request newFrameName:(NSString *)frameName decisionListener:(id < WebPolicyDecisionListener >)listener
-{
-    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);        
-    FVAPIParameterAssert([sender isEqual:_webView]);
-    [listener ignore];
-}
-
-- (void)webView:(WebView *)sender resource:(id)identifier didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge fromDataSource:(WebDataSource *)dataSource
-{
-    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);        
-    FVAPIParameterAssert([sender isEqual:_webView]);
-    /*
-     Causes rendering of a 401 (unauthorized) page here.  Callout to stopLoading: 
-     or _handleWebView:loadError:forFrame: will cause a crash in the URL loader.
-     */
-    [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
-}
-
 - (void)renderOffscreenOnMainThread 
 { 
-    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);   
-    // !!! Was seeing occasional assertion failures here with the new operation queue setup; it's likely to be a race with releaseResources:.  Should be eliminated with the new condition lock scheme.
-    NSAssert(nil == _webView, @"*** Render error *** renderOffscreenOnMainThread called when _webView already exists");
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));   
+    // !!! I'm seeing occasional assertion failures here with the new operation queue setup; it's likely to be a race with releaseResources:.
+    // NSAssert(nil == _webView, @"*** Render error *** renderOffscreenOnMainThread called when _webView already exists");
     
     if (nil == _webView)
-        _webView = [[self class] _newWebView];
+        _webView = [[[self class] popWebView] retain];
 
     if (nil == _webView) {
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleWebViewAvailableNotification:) name:FVWebIconWebViewAvailableNotificationName object:[self class]];
     }
     else {
+        // always use the WebKit cache, and use a short timeout (default is 60 seconds)
+        NSURLRequest *request = [NSURLRequest requestWithURL:_httpURL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:10.0];
         
         // See also http://lists.apple.com/archives/quicklook-dev/2007/Nov/msg00047.html
-        // Note: changed from blocking to non-blocking; we now just keep state and rely on the delegate methods.
+        // Note: changed from blocking to non-blocking; we now just keep state and rely on the
+        // delegate methods.
+        
+        Class cls = [self class];
+        NSString *prefIdentifier = [NSString stringWithFormat:@"%@.%@", [[NSBundle bundleForClass:cls] bundleIdentifier], cls];
+        [_webView setPreferencesIdentifier:prefIdentifier];
+        
+        WebPreferences *prefs = [_webView preferences];
+        [prefs setPlugInsEnabled:NO];
+        [prefs setJavaEnabled:NO];
+        [prefs setJavaScriptCanOpenWindowsAutomatically:NO];
+        [prefs setJavaScriptEnabled:NO];
+        [prefs setAllowsAnimatedImages:NO];
+        
+        // most memory-efficient setting; remote resources are still cached to disk
+        if ([prefs respondsToSelector:@selector(setCacheModel:)])
+            [prefs setCacheModel:WebCacheModelDocumentViewer];
         
         [_webView setFrameLoadDelegate:self];
         [_webView setPolicyDelegate:self];
-        [_webView setResourceLoadDelegate:self];
-        
-        NSURLRequest *request = [NSURLRequest requestWithURL:_httpURL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:60.0];
         [[_webView mainFrame] loadRequest:request];        
     }
 }
 
 - (void)_handleWebViewAvailableNotification:(NSNotification *)aNotification
 {
-    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
     [[NSNotificationCenter defaultCenter] removeObserver:self name:FVWebIconWebViewAvailableNotificationName object:[self class]];
     [self renderOffscreenOnMainThread];
 }
 
 - (NSString *)debugDescription
 {
-    NSAssert1([self tryLock], @"*** threading violation *** failed to lock before %@", NSStringFromSelector(_cmd));
-    return [NSString stringWithFormat:@"%@: { \n\tURL = %@\n\tWebView = %@\n\tFull image = %@\n\tThumbnail = %@\n }", [self description], _httpURL, _webView, _fullImage, _thumbnail];
+    NSAssert1(pthread_mutex_trylock(&_mutex) == EBUSY, @"*** threading violation *** failed to lock before %@", NSStringFromSelector(_cmd));
+    return [NSString stringWithFormat:@"%@: { \n\tURL = %@\n\tFailed = %d\n\tRendering = %d\n\tWebView = %@\n\tFull image = %@\n\tThumbnail = %@\n }", [self description], _httpURL, _webviewFailed, _isRendering, _webView, _fullImage, _thumbnail];
 }
     
+
 - (void)renderOffscreen
 {
-    [[self class] _startRenderingForKey:_cacheKey];
-
-    [_condLock lockWhenCondition:IDLE];
+    [self lock];
     
     if ([NSThread instancesRespondToSelector:@selector(setName:)] && pthread_main_np() == 0)
         [[NSThread currentThread] setName:[_httpURL absoluteString]];
@@ -561,72 +449,34 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
     
     // note that _fullImage may be non-NULL if we were added to the FVOperationQueue multiple times before renderOffscreen was called
     if (NULL == _fullImage && FVShouldDrawFullImageWithThumbnailSize(_desiredSize, [self _thumbnailSize]))
-        _fullImage = [FVIconCache newImageForKey:_cacheKey];
+        _fullImage = [FVIconCache newImageNamed:_diskCacheName];
     
     // always load for the fast drawing path
     if (NULL == _thumbnail)
-        _thumbnail = [FVIconCache newThumbnailForKey:_cacheKey];
+        _thumbnail = [FVIconCache newThumbnailNamed:_diskCacheName];
 
     // unlock before calling performSelectorOnMainThread:... since it could cause a callout that tries to acquire the lock (one of the delegate methods)
     
-    if (NULL == _thumbnail && NULL == _fullImage) {
-        
+    if (NULL == _thumbnail && NULL == _fullImage && NO == _webviewFailed && NO == _isRendering) {
         // make sure needsRenderForSize: knows that we're actively rendering, so renderOffscreen doesn't get called again
-        [_condLock unlockWithCondition:LOADING];
-        [self performSelectorOnMainThread:@selector(renderOffscreenOnMainThread) withObject:nil waitUntilDone:NO modes:[NSArray arrayWithObject:(id)kCFRunLoopCommonModes]];        
-        [_condLock lockWhenCondition:LOADED];
-        
-        CGImageRef fullImage = NULL, thumbnail = NULL;
-        
-        /*
-         Possible states:
-         1) non-NULL _viewImage: successfull load
-         2) NULL view image
-            a) cancelled load
-            b) failed to load
-         */
-        
-        if (NULL != _viewImage) {
-            
-            CGImageRelease(_fullImage);
-            _fullImage = FVCreateResampledFullImage(_viewImage);
-            
-            // resample to a thumbnail size that will draw quickly
-            CGImageRelease(_thumbnail);
-            _thumbnail = FVCreateResampledThumbnail(_viewImage);
-            
-            // get rid of the original image
-            CGImageRelease(_viewImage);
-            _viewImage = NULL;
-            
-            // keep local references for caching, so we can unlock and notify observers for drawing (can't draw if we're holding the lock)
-            fullImage = CGImageRetain(_fullImage);
-            thumbnail = CGImageRetain(_thumbnail);
-        }
-        else if (nil == _fallbackIcon && false == _cancelledLoad) {
-            _fallbackIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithURL:_httpURL];
-        }
-        // don't allocate anything for a load that was cancelled (releaseResources called during load)
-        
-        // unlock before caching images so drawing can take place
-        [_condLock unlockWithCondition:IDLE];
-        
-        if (fullImage) [FVIconCache cacheImage:fullImage forKey:_cacheKey];
-        if (thumbnail) [FVIconCache cacheThumbnail:thumbnail forKey:_cacheKey];
-        
-        CGImageRelease(fullImage);
-        CGImageRelease(thumbnail);
+        _isRendering = YES;
+        [self unlock];
+        [self performSelectorOnMainThread:@selector(renderOffscreenOnMainThread) withObject:nil waitUntilDone:YES modes:_commonModes];
+    }
+    else if (YES == _webviewFailed && nil == _fallbackIcon) {
+        _fallbackIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:_httpURL];
+        [self unlock];
     }
     else {
-        [_condLock unlockWithCondition:IDLE];
+        // no condition on this branch; we always unlock
+        [_fallbackIcon renderOffscreen];
+        [self unlock];
     }
-    
-    [[self class] _stopRenderingForKey:_cacheKey];
 }
 
 - (void)fastDrawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
 {
-    if ([_condLock tryLockWhenCondition:IDLE]) {
+    if ([self tryLock]) {
         if (_thumbnail) {
             CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _thumbnail);
             [self unlock];
@@ -644,7 +494,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
 
 - (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context 
 { 
-    if ([_condLock tryLockWhenCondition:IDLE]) {
+    if ([self tryLock]) {
         
         CGRect drawRect = [self _drawingRectWithRect:dstRect];
         
@@ -654,7 +504,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
             CGContextDrawImage(context, drawRect, _fullImage);
         else if (_thumbnail)
             CGContextDrawImage(context, drawRect, _thumbnail);
-        else if (nil == _fallbackIcon)
+        else if (NO == _webviewFailed || nil == _fallbackIcon)
             [self _drawPlaceholderInRect:dstRect ofContext:context];
         else
             [_fallbackIcon drawInRect:dstRect ofContext:context];

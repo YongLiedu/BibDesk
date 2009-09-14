@@ -76,7 +76,7 @@
     NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
     if ( r.location != NSNotFound) {
         NSMutableString *new = [[partialString mutableCopy] autorelease];
-        [new replaceOccurrencesOfCharactersInSet:invalidSet withString:@""];
+        [new replaceAllOccurrencesOfCharactersInSet:invalidSet withString:@""];
         if ([new length]) {
             *partialStringPtr = new;
             if (NSMaxRange(*proposedSelRangePtr) > [new length])

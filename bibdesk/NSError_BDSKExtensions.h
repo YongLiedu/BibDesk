@@ -57,8 +57,6 @@ enum {
     kBDSKFileOperationFailed,                    /* Generic file operation failure          */
     kBDSKURLOperationFailed,                     /* Generic URL operation failure           */
     kBDSKComplexStringError,                     /* Complex string parsing failed           */
-    kBDSKCannotFindTemporaryDirectoryError,      /* Cannot find temporary directory         */
-    kBDSKCannotCreateTemporaryFileError,         /* Cannot create a temporary file          */
 };
 
 extern NSString *BDSKUnderlyingItemErrorKey;
@@ -69,19 +67,18 @@ extern NSString *BDSKUnderlyingItemErrorKey;
 + (NSString *)localErrorDomain;
 
 // returns BibDesk-specific errors that don't allow valueForKey: and setValue:forKey: usage
-+ (id)localErrorWithCode:(NSInteger)code localizedDescription:(NSString *)description;
-+ (id)localErrorWithCode:(NSInteger)code localizedDescription:(NSString *)description underlyingError:(NSError *)underlyingError;
++ (id)localErrorWithCode:(int)code localizedDescription:(NSString *)description;
 
 // returns BibDesk-specific errors that can allow valueForKey: and setValue:forKey: usage
-+ (id)mutableErrorWithDomain:(NSString *)domain code:(NSInteger)code userInfo:(NSDictionary *)dict;
-+ (id)mutableLocalErrorWithCode:(NSInteger)code localizedDescription:(NSString *)description;
-+ (id)mutableLocalErrorWithCode:(NSInteger)code localizedDescription:(NSString *)description underlyingError:(NSError *)underlyingError;
++ (id)mutableErrorWithDomain:(NSString *)domain code:(int)code userInfo:(NSDictionary *)dict;
++ (id)mutableLocalErrorWithCode:(int)code localizedDescription:(NSString *)description;
++ (id)mutableLocalErrorWithCode:(int)code localizedDescription:(NSString *)description underlyingError:(NSError *)underlyingError;
 
 // see if it has our local domain
 - (BOOL)isLocalError;
 
 // embed an underlying error; if this isn't a mutable subclass, raises an exception
 - (void)embedError:(NSError *)underlyingError;
-- (void)setCode:(NSInteger)code;
+- (void)setCode:(int)code;
 
 @end

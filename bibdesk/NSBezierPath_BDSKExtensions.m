@@ -44,26 +44,26 @@
 // code from http://www.cocoadev.com/index.pl?NSBezierPathCategory
 // removed UK rect function calls, changed spacing/alignment
 
-+ (void)fillRoundRectInRect:(NSRect)rect radius:(CGFloat)radius
++ (void)fillRoundRectInRect:(NSRect)rect radius:(float)radius
 {
     NSBezierPath *p = [self bezierPathWithRoundRectInRect:rect radius:radius];
     [p fill];
 }
 
 
-+ (void)strokeRoundRectInRect:(NSRect)rect radius:(CGFloat)radius
++ (void)strokeRoundRectInRect:(NSRect)rect radius:(float)radius
 {
     NSBezierPath *p = [self bezierPathWithRoundRectInRect:rect radius:radius];
     [p stroke];
 }
 
-+ (NSBezierPath*)bezierPathWithRoundRectInRect:(NSRect)rect radius:(CGFloat)radius
++ (NSBezierPath*)bezierPathWithRoundRectInRect:(NSRect)rect radius:(float)radius
 {
-    BDSKASSERT([NSThread isMainThread]);
+    OBASSERT([NSThread inMainThread]);
     
     // Make sure radius doesn't exceed a maximum size to avoid artifacts:
-    CGFloat rectLimit = BDSKMin(NSHeight(rect), NSWidth(rect));
-    radius = BDSKMin(radius, 0.5f * rectLimit);
+    float rectLimit = fminf(NSHeight(rect), NSWidth(rect));
+    radius = fminf(radius, 0.5f * rectLimit);
     
     // Make sure silly values simply lead to un-rounded corners:
     if( radius <= 0 )
@@ -91,7 +91,7 @@
     return path;
 }
 
-+ (void)drawHighlightInRect:(NSRect)rect radius:(CGFloat)radius lineWidth:(CGFloat)lineWidth color:(NSColor *)color
++ (void)drawHighlightInRect:(NSRect)rect radius:(float)radius lineWidth:(float)lineWidth color:(NSColor *)color
 {
     NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:NSInsetRect(rect, 0.5 * lineWidth, 0.5 * lineWidth) radius:radius];
     [path setLineWidth:lineWidth];
@@ -101,36 +101,35 @@
     [path stroke];
 }
 
-+ (void)fillHorizontalOvalInRect:(NSRect)rect
++ (void)fillHorizontalOvalAroundRect:(NSRect)rect
 {
-    NSBezierPath *p = [self bezierPathWithHorizontalOvalInRect:rect];
+    NSBezierPath *p = [self bezierPathWithHorizontalOvalAroundRect:rect];
     [p fill];
 }
 
 
-+ (void)strokeHorizontalOvalInRect:(NSRect)rect
++ (void)strokeHorizontalOvalAroundRect:(NSRect)rect
 {
-    NSBezierPath *p = [self bezierPathWithHorizontalOvalInRect:rect];
+    NSBezierPath *p = [self bezierPathWithHorizontalOvalAroundRect:rect];
     [p stroke];
 }
 
-+ (NSBezierPath*)bezierPathWithHorizontalOvalInRect:(NSRect)rect
++ (NSBezierPath*)bezierPathWithHorizontalOvalAroundRect:(NSRect)rect
 {
-    BDSKASSERT([NSThread isMainThread]);
-    BDSKPRECONDITION(NSWidth(rect) >= NSHeight(rect));
-    
-    CGFloat radius = 0.5f * NSHeight(rect);
+    OBASSERT([NSThread inMainThread]);
+
+    float radius = 0.5f * rect.size.height;
     NSBezierPath *path = [self bezierPath];
     
     [path removeAllPoints];
     
     // Now draw our rectangle:
-    [path moveToPoint: NSMakePoint(NSMinX(rect) + radius, NSMaxY(rect))];
+    [path moveToPoint: NSMakePoint(NSMinX(rect), NSMaxY(rect))];
     
     // Left half circle:
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rect) + radius, NSMidY(rect)) radius:radius startAngle:90.0 endAngle:270.0];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rect), NSMidY(rect)) radius:radius startAngle:90.0 endAngle:270.0];
     // Bottom edge and right half circle:
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rect) - radius, NSMidY(rect)) radius:radius startAngle:-90.0 endAngle:90.0];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rect), NSMidY(rect)) radius:radius startAngle:-90.0 endAngle:90.0];
     // Top edge:
     [path closePath];
     
@@ -146,11 +145,11 @@
 }
 
 + (NSBezierPath *)bezierPathWithStarInRect:(NSRect)rect{
-    CGFloat centerX = NSMidX(rect);
-    CGFloat centerY = NSMidY(rect);
-    CGFloat radiusX = 0.5 * NSWidth(rect);
-    CGFloat radiusY = 0.5 * NSHeight(rect);
-    NSInteger i = 0;
+    float centerX = NSMidX(rect);
+    float centerY = NSMidY(rect);
+    float radiusX = 0.5 * NSWidth(rect);
+    float radiusY = 0.5 * NSHeight(rect);
+    int i = 0;
     NSBezierPath *path = [self bezierPath];
     
     [path removeAllPoints];
@@ -164,11 +163,11 @@
 }
 
 + (NSBezierPath *)bezierPathWithInvertedStarInRect:(NSRect)rect{
-    CGFloat centerX = NSMidX(rect);
-    CGFloat centerY = NSMidY(rect);
-    CGFloat radiusX = 0.5 * NSWidth(rect);
-    CGFloat radiusY = 0.5 * NSHeight(rect);
-    NSInteger i;
+    float centerX = NSMidX(rect);
+    float centerY = NSMidY(rect);
+    float radiusX = 0.5 * NSWidth(rect);
+    float radiusY = 0.5 * NSHeight(rect);
+    int i;
     NSBezierPath *path = [self bezierPath];
     
     [path removeAllPoints];

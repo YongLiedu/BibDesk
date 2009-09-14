@@ -50,7 +50,7 @@
 
 - (NSSize)minimumSize { 
     NSArray *subviews = [self subviews];
-    CGFloat height = ([subviews count] > 0) ? NSMaxY([[subviews lastObject] frame]) : 10.0f;
+    float height = ([subviews count] > 0) ? NSMaxY([[subviews lastObject] frame]) : 10.0f;
     return NSMakeSize(NSWidth([self frame]), height);
 }
 
@@ -62,9 +62,9 @@
 
 - (void)updateSize {
     NSSize newSize = [self minimumSize];
-    CGFloat oldHeight = NSHeight([self frame]);
-    CGFloat newHeight = newSize.height;
-    CGFloat dh = BDSKMin(newHeight, MAX_HEIGHT) - BDSKMin(oldHeight, MAX_HEIGHT);
+    float oldHeight = NSHeight([self frame]);
+    float newHeight = newSize.height;
+    float dh = fminf(newHeight, MAX_HEIGHT) - fminf(oldHeight, MAX_HEIGHT);
     
     if (newHeight < oldHeight)
         [self setFrameSize:newSize];
@@ -79,12 +79,12 @@
         [self setFrameSize:newSize];
 }
 
-- (void)insertView:(NSView *)view atIndex:(NSUInteger)idx{
+- (void)insertView:(NSView *)view atIndex:(unsigned int)idx{
     NSArray *subviews = [[self subviews] copy];
     
-    CGFloat yPosition = (idx > 0) ? NSMaxY([[subviews objectAtIndex:idx - 1] frame]) + SEPARATION : 0.0f;
+    float yPosition = (idx > 0) ? NSMaxY([[subviews objectAtIndex:idx - 1] frame]) + SEPARATION : 0.0f;
     NSSize size = [view frame].size;
-    NSInteger i, count = [subviews count];
+    int i, count = [subviews count];
     
     for (i = idx; i < count; i++) 
         [[subviews objectAtIndex:i] removeFromSuperview];
@@ -112,16 +112,16 @@
 
 - (void)removeView:(NSView *)view {
     NSArray *subviews = [[[self subviews] copy] autorelease];
-    NSUInteger idx = [subviews indexOfObjectIdenticalTo:view];
+    unsigned int idx = [subviews indexOfObjectIdenticalTo:view];
     
     if (idx != NSNotFound) {
 
         NSPoint newPoint = [view frame].origin;
-        CGFloat dy = NSHeight([view frame]) + SEPARATION;
+        float dy = NSHeight([view frame]) + SEPARATION;
         
         [view removeFromSuperview];
         
-        NSUInteger count = [subviews count];
+        unsigned int count = [subviews count];
         
         for (idx++; idx < count; idx++) {
             view = [subviews objectAtIndex:idx];

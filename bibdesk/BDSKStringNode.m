@@ -42,34 +42,34 @@
 @implementation BDSKStringNode
 
 + (BDSKStringNode *)nodeWithQuotedString:(NSString *)s{
-    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BDSKStringNodeString value:s];
+    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BSN_STRING value:s];
 	return [node autorelease];
 }
 
 + (BDSKStringNode *)nodeWithNumberString:(NSString *)s{
-    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BDSKStringNodeNumber value:s];
+    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BSN_NUMBER value:s];
 	return [node autorelease];
 }
 
 + (BDSKStringNode *)nodeWithMacroString:(NSString *)s{
-    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BDSKStringNodeMacro value:s];
+    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BSN_MACRODEF value:s];
 	return [node autorelease];
 }
 
 - (BDSKStringNode *)initWithQuotedString:(NSString *)s{
-    return [self initWithType:BDSKStringNodeString value:s];
+    return [self initWithType:BSN_STRING value:s];
 }
 
 - (BDSKStringNode *)initWithNumberString:(NSString *)s{
-    return [self initWithType:BDSKStringNodeNumber value:s];
+    return [self initWithType:BSN_NUMBER value:s];
 }
 
 - (BDSKStringNode *)initWithMacroString:(NSString *)s{
-    return [self initWithType:BDSKStringNodeMacro value:s];
+    return [self initWithType:BSN_MACRODEF value:s];
 }
 
 - (id)init{
-	self = [self initWithType:BDSKStringNodeString value:@""];
+	self = [self initWithType:BSN_STRING value:@""];
 	return self;
 }
 
@@ -128,7 +128,7 @@
 	return [self compareNode:aNode options:0];
 }
 
-- (NSComparisonResult)compareNode:(BDSKStringNode *)aNode options:(NSUInteger)mask{
+- (NSComparisonResult)compareNode:(BDSKStringNode *)aNode options:(unsigned)mask{
 	if (type < [aNode type])
 		return NSOrderedAscending;
 	if (type > [aNode type])
@@ -145,7 +145,7 @@
 }
 
 - (NSString *)description{
-    return [NSString stringWithFormat:@"type: %ld, %@", (long)type, value];
+    return [NSString stringWithFormat:@"type: %d, %@", type, value];
 }
 
 @end

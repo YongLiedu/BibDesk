@@ -52,7 +52,7 @@
 - (void)windowWillClose:(NSNotification *)aNotification
 {
     [_slider unbind:@"value"];
-    [_fileView unbind:@"content"];
+    [_fileView unbind:@"iconURLs"];
     [_fileView unbind:@"selectionIndexes"];
     [_fileView setDataSource:nil];
     [_fileView setDelegate:nil];
@@ -78,24 +78,16 @@
     }
     
     NSUInteger insertIndex = floor(iMax / 2);
-    
     [arrayController insertObject:[NSNull null] atArrangedObjectIndex:insertIndex++];
     [arrayController insertObject:[NSURL URLWithString:@"http://www.macintouch.com/"] atArrangedObjectIndex:insertIndex++];
     [arrayController insertObject:[NSURL URLWithString:@"http://bibdesk.sf.net/"] atArrangedObjectIndex:insertIndex++];
     [arrayController insertObject:[NSURL URLWithString:@"http://www-chaos.engr.utk.edu/pap/crg-aiche2000daw-paper.pdf"] atArrangedObjectIndex:insertIndex++];
     [arrayController insertObject:[NSURL URLWithString:@"http://dx.doi.org/10.1023/A:1018361121952"] atArrangedObjectIndex:insertIndex++];
-    [arrayController insertObject:[NSURL URLWithString:@"http://searchenginewatch.com/_static/example1.html"] atArrangedObjectIndex:insertIndex++];
-    
-    // this scheme is seldom (if ever) defined by any app; the delegate implementation demonstrates opening them
-    [arrayController insertObject:[NSURL URLWithString:@"doi:10.2112/06-0677.1"] atArrangedObjectIndex:insertIndex++];
-    [arrayController insertObject:[NSURL URLWithString:@"mailto:amaxwell@users.sourceforge.net"] atArrangedObjectIndex:insertIndex++];
-    
-    [arrayController insertObject:[NSURL URLWithString:@"http://192.168.0.1"] atArrangedObjectIndex:insertIndex++];
     
     // nonexistent domain
     [arrayController insertObject:[NSURL URLWithString:@"http://bibdesk.sourceforge.tld/"] atArrangedObjectIndex:insertIndex++];
     
-    [_fileView bind:@"content" toObject:arrayController withKeyPath:@"arrangedObjects" options:nil];
+    [_fileView bind:@"iconURLs" toObject:arrayController withKeyPath:@"arrangedObjects" options:nil];
     [_fileView bind:@"selectionIndexes" toObject:arrayController withKeyPath:@"selectionIndexes" options:nil];
     
     // for optional datasource method
@@ -110,21 +102,21 @@
     [super dealloc];
 }
 
-- (NSUInteger)numberOfURLsInFileView:(FVFileView *)aFileView { return 0; }
+- (NSUInteger)numberOfURLsInFileView:(FileView *)aFileView { return 0; }
 
-- (NSURL *)fileView:(FVFileView *)aFileView URLAtIndex:(NSUInteger)idx { return nil; }
+- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx { return nil; }
 
-- (NSString *)fileView:(FVFileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
+- (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
 {
-    return [NSString stringWithFormat:@"Check pq for %d", anIndex];
+    return @"This is only a test.";
 }
 
-- (void)fileView:(FVFileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     [arrayController insertObjects:absoluteURLs atArrangedObjectIndexes:aSet];
 }
 
-- (BOOL)fileView:(FVFileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     if ([_filePaths count] > [aSet count]) {
         [arrayController removeObjectsAtArrangedObjectIndexes:aSet];
@@ -134,7 +126,7 @@
     return NO;
 }
 
-- (BOOL)fileView:(FVFileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     NSArray *toMove = [[[arrayController arrangedObjects] objectsAtIndexes:aSet] copy];
     // reduce idx by the number of smaller indexes in aSet
@@ -150,7 +142,7 @@
     return YES;
 }    
 
-- (BOOL)fileView:(FVFileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexes;
 {
     if ([_filePaths count] >= [indexes count]) {
         [arrayController removeObjectsAtArrangedObjectIndexes:indexes];
@@ -159,30 +151,9 @@
     return NO;
 }
 
-- (NSDragOperation)fileView:(FVFileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation;
+- (NSDragOperation)fileView:(FileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation;
 {
     return dragOperation;
-}
-
-- (BOOL)fileView:(FVFileView *)aFileView shouldOpenURL:(NSURL *)aURL
-{
-    if ([[aURL scheme] caseInsensitiveCompare:@"doi"] == NSOrderedSame) {
-        // DOI manual says this is a safe URL to resolve with for the foreseeable future
-        NSURL *baseURL = [NSURL URLWithString:@"http://dx.doi.org/"];
-        // remove any text prefix, which is not required for a valid DOI, but may be present; DOI starts with "10"
-        // http://www.doi.org/handbook_2000/enumeration.html#2.2
-        NSString *path = [aURL resourceSpecifier];
-        NSRange range = [path rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet]];
-        if(range.length && range.location > 0)
-            path = [path substringFromIndex:range.location];
-        aURL = [NSURL URLWithString:path relativeToURL:baseURL];
-        
-        // if we could create a new URL and NSWorkspace can open it, return NO so the view doesn't try
-        if (aURL && [[NSWorkspace sharedWorkspace] openURL:aURL])
-            return NO;
-    }
-    // let the view handle it
-    return YES;
 }
 
 @end

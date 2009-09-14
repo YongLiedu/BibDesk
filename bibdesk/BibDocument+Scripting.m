@@ -40,6 +40,7 @@
 #import "BibAuthor.h"
 #import "BibItem.h"
 #import "BDSKMacro.h"
+#import "BDSKTeXTask.h"
 #import "BDSKItemPasteboardHelper.h"
 #import "BDSKOwnerProtocol.h"
 #import "BDSKPublicationsArray.h"
@@ -63,8 +64,16 @@
 #import "BibAuthor+Scripting.h"
 #import "BDSKTypeManager.h"
 #import <Quartz/Quartz.h>
-#import "BDSKCFCallBacks.h"
+#import <OmniFoundation/OmniFoundation.h>
 
+
+const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
+    0,
+    OFNSObjectRetain,
+    OFCFTypeRelease,
+    OFCFTypeCopyDescription,
+    OFCaseInsensitiveStringIsEqual
+};
 
 @implementation BibDocument (Scripting)
 
@@ -167,8 +176,8 @@
 
 #pragma mark Publications
 
-- (id)valueInScriptingPublicationsWithUniqueID:(NSString *)aUniqueID {
-	NSURL *identifierURL = [NSURL URLWithString:aUniqueID];
+- (id)valueInScriptingPublicationsWithUniqueID:(NSString *)uniqueID {
+	NSURL *identifierURL = [NSURL URLWithString:uniqueID];
     id item = identifierURL ? [[self publications] itemForIdentifierURL:identifierURL] : nil;
     return item ?: [NSNull null];
 }
@@ -178,7 +187,7 @@
 }
 
 - (void)insertInScriptingPublications:(BibItem *)pub {
-	if ([pub macroResolver] == nil || [pub macroResolver] == macroResolver) {
+	if ([pub owner] == nil) {
         [self addPublication:pub];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([[pub owner] isEqual:self] == NO) {
@@ -188,8 +197,8 @@
     } 
 }
 
-- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
-	if ([pub macroResolver] == nil || [pub macroResolver] == macroResolver) {
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx {
+	if ([pub owner] == nil) {
         [self insertPublication:pub atIndex:idx];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([[pub owner] isEqual:self] == NO) {
@@ -199,7 +208,7 @@
     } 
 }
 
-- (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx {
 	[self removePublicationsAtIndexes:[NSIndexSet indexSetWithIndex:idx]];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
@@ -234,48 +243,42 @@
 
 #pragma mark Groups
 
-- (NSArray *)scriptingGroups {
-    return [groups allChildren];
+- (BDSKGroup *)valueInGroupsWithUniqueID:(NSString *)aUniqueID {
+    unsigned int idx = [[groups valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    return idx == NSNotFound ? nil : [groups objectAtIndex:idx];
 }
 
-- (BDSKGroup *)valueInScriptingGroupsWithUniqueID:(NSString *)aUniqueID {
-    NSArray *allGroups = [self scriptingGroups];
-    NSUInteger idx = [[allGroups valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
-    return idx == NSNotFound ? nil : [allGroups objectAtIndex:idx];
-}
-
-- (BDSKGroup *)valueInScriptingGroupsWithName:(NSString *)name {
-    NSArray *allGroups = [self scriptingGroups];
-    NSArray *names = [allGroups valueForKey:@"stringValue"];
-    NSUInteger idx = [names indexOfObject:name];
+- (BDSKGroup *)valueInGroupsWithName:(NSString *)name {
+    NSArray *names = [groups valueForKey:@"stringValue"];
+    unsigned int idx = [names indexOfObject:name];
     if (idx == NSNotFound) {
-        NSMutableArray *fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &kBDSKCaseInsensitiveStringArrayCallBacks);
+        NSMutableArray *fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &BDSKCaseInsensitiveStringArrayCallBacks);
         [fuzzyNames addObjectsFromArray:names];
         idx = [fuzzyNames indexOfObject:name];
         [fuzzyNames release];
     }
-    return idx == NSNotFound ? nil : [allGroups objectAtIndex:idx];
+    return idx == NSNotFound ? nil : [groups objectAtIndex:idx];
 }
 
-- (void)insertInScriptingGroups:(BDSKGroup *)group {
+- (void)insertInGroups:(BDSKGroup *)group {
     if ([group document]) {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
         [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
         return;
-    } else if ([group isSmart]) {
+    } else if ([group isSmart] == YES) {
         [groups addSmartGroup:(BDSKSmartGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isStatic] && [group isKindOfClass:[BDSKLastImportGroup class]] == NO) {
+    } else if ([group isStatic] == YES && [group isKindOfClass:[BDSKLastImportGroup class]] == NO) {
         [groups addStaticGroup:(BDSKStaticGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isURL]) {
+    } else if ([group isURL] == YES) {
         [groups addURLGroup:(BDSKURLGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isScript]) {
+    } else if ([group isScript] == YES) {
         [groups addScriptGroup:(BDSKScriptGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isSearch]) {
+    } else if ([group isSearch] == YES) {
         [groups addSearchGroup:(BDSKSearchGroup *)group];
     } else {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
@@ -285,25 +288,25 @@
     }
 }
 
-- (void)insertObject:(BDSKGroup *)group inScriptingGroupsAtIndex:(NSUInteger)idx {
-    [self insertInScriptingGroups:group];
+- (void)insertObject:(BDSKGroup *)group inGroupsAtIndex:(unsigned int)idx {
+    [self insertInGroups:group];
 }
 
-- (void)removeObjectFromScriptingGroupsAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromGroupsAtIndex:(unsigned int)idx {
     BDSKGroup *group = [[groups staticGroups] objectAtIndex:idx];
-    if ([group isSmart]) {
+    if ([group isSmart] == YES) {
         [groups removeSmartGroup:(BDSKSmartGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isStatic] && [group isEqual:[groups lastImportGroup]] == NO) {
+    } else if ([group isStatic] == YES && [group isEqual:[groups lastImportGroup]] == NO) {
         [groups removeStaticGroup:(BDSKStaticGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isURL]) {
+    } else if ([group isURL] == YES) {
         [groups removeURLGroup:(BDSKURLGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isScript]) {
+    } else if ([group isScript] == YES) {
         [groups removeScriptGroup:(BDSKScriptGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isSearch]) {
+    } else if ([group isSearch] == YES) {
         [groups removeSearchGroup:(BDSKSearchGroup *)group];
     } else {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
@@ -321,12 +324,12 @@
 }
 
 - (BDSKStaticGroup *)valueInStaticGroupsWithUniqueID:(NSString *)aUniqueID {
-    NSUInteger idx = [[[groups staticGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    unsigned int idx = [[[groups staticGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [[groups staticGroups] objectAtIndex:idx];
 }
 
 - (BDSKStaticGroup *)valueInStaticGroupsWithName:(NSString *)name {
-    NSUInteger idx = [[[groups staticGroups] valueForKey:@"name"] indexOfObject:name];
+    unsigned int idx = [[[groups staticGroups] valueForKey:@"name"] indexOfObject:name];
     return idx == NSNotFound ? nil : [[groups staticGroups] objectAtIndex:idx];
 }
 
@@ -341,11 +344,11 @@
     }
 }
 
-- (void)insertObject:(BDSKStaticGroup *)group inStaticGroupsAtIndex:(NSUInteger)idx {
+- (void)insertObject:(BDSKStaticGroup *)group inStaticGroupsAtIndex:(unsigned int)idx {
     [self insertInStaticGroups:group];
 }
 
-- (void)removeObjectFromStaticGroupsAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromStaticGroupsAtIndex:(unsigned int)idx {
 	[groups removeStaticGroup:[[groups staticGroups] objectAtIndex:idx]];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
@@ -357,12 +360,12 @@
 }
 
 - (BDSKSmartGroup *)valueInSmartGroupsWithUniqueID:(NSString *)aUniqueID {
-    NSUInteger idx = [[[groups smartGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    unsigned int idx = [[[groups smartGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [[groups smartGroups] objectAtIndex:idx];
 }
 
 - (BDSKSmartGroup *)valueInSmartGroupsWithName:(NSString *)name {
-    NSUInteger idx = [[[groups smartGroups] valueForKey:@"name"] indexOfObject:name];
+    unsigned int idx = [[[groups smartGroups] valueForKey:@"name"] indexOfObject:name];
     return idx == NSNotFound ? nil : [[groups smartGroups] objectAtIndex:idx];
 }
 
@@ -377,11 +380,11 @@
     }
 }
 
-- (void)insertObject:(BDSKSmartGroup *)group inSmartGroupsAtIndex:(NSUInteger)idx {
+- (void)insertObject:(BDSKSmartGroup *)group inSmartGroupsAtIndex:(unsigned int)idx {
     [self insertInSmartGroups:group];
 }
 
-- (void)removeObjectFromSmartGroupsAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromSmartGroupsAtIndex:(unsigned int)idx {
 	[groups removeSmartGroup:[[groups smartGroups] objectAtIndex:idx]];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
@@ -393,7 +396,7 @@
 }
 
 - (BDSKCategoryGroup *)valueInFieldGroupsWithUniqueID:(NSString *)aUniqueID {
-    NSUInteger idx = [[[groups categoryGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    unsigned int idx = [[[groups categoryGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [[groups categoryGroups] objectAtIndex:idx];
 }
 
@@ -403,13 +406,13 @@
     id fuzzyName = name;
     NSMutableArray *fuzzyNames = nil;
     if ([field isPersonField]) {
-        fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &kBDSKAuthorFuzzyArrayCallBacks);
+        fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &BDSKAuthorFuzzyArrayCallBacks);
         fuzzyName = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name andPub:nil];
     } else {
-        fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &kBDSKCaseInsensitiveStringArrayCallBacks);
+        fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &BDSKCaseInsensitiveStringArrayCallBacks);
     }
     [fuzzyNames addObjectsFromArray:names];
-    NSUInteger idx = [fuzzyNames indexOfObject:fuzzyName];
+    unsigned int idx = [fuzzyNames indexOfObject:fuzzyName];
     [fuzzyNames release];
     return idx == NSNotFound ? nil : [[groups categoryGroups] objectAtIndex:idx];
 }
@@ -421,12 +424,12 @@
 }
 
 - (BDSKURLGroup *)valueInExternalFileGroupsWithUniqueID:(NSString *)aUniqueID {
-    NSUInteger idx = [[[groups URLGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    unsigned int idx = [[[groups URLGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [[groups URLGroups] objectAtIndex:idx];
 }
 
 - (BDSKURLGroup *)valueInExternalFileGroupsWithName:(NSString *)name {
-    NSUInteger idx = [[[groups URLGroups] valueForKey:@"name"] indexOfObject:name];
+    unsigned int idx = [[[groups URLGroups] valueForKey:@"name"] indexOfObject:name];
     return idx == NSNotFound ? nil : [[groups URLGroups] objectAtIndex:idx];
 }
 
@@ -441,11 +444,11 @@
     }
 }
 
-- (void)insertObject:(BDSKURLGroup *)group inExternalFileGroupsAtIndex:(NSUInteger)idx {
+- (void)insertObject:(BDSKURLGroup *)group inExternalFileGroupsAtIndex:(unsigned int)idx {
     [self insertInExternalFileGroups:group];
 }
 
-- (void)removeObjectFromExternalFileGroupsAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromExternalFileGroupsAtIndex:(unsigned int)idx {
 	[groups removeURLGroup:[[groups scriptGroups] objectAtIndex:idx]];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
@@ -457,12 +460,12 @@
 }
 
 - (BDSKScriptGroup *)valueInScriptGroupsWithUniqueID:(NSString *)aUniqueID {
-    NSUInteger idx = [[[groups scriptGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    unsigned int idx = [[[groups scriptGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [[groups scriptGroups] objectAtIndex:idx];
 }
 
 - (BDSKScriptGroup *)valueInScriptGroupsWithName:(NSString *)name {
-    NSUInteger idx = [[[groups scriptGroups] valueForKey:@"name"] indexOfObject:name];
+    unsigned int idx = [[[groups scriptGroups] valueForKey:@"name"] indexOfObject:name];
     return idx == NSNotFound ? nil : [[groups scriptGroups] objectAtIndex:idx];
 }
 
@@ -477,11 +480,11 @@
     }
 }
 
-- (void)insertObject:(BDSKScriptGroup *)group inScriptGroupsAtIndex:(NSUInteger)idx {
+- (void)insertObject:(BDSKScriptGroup *)group inScriptGroupsAtIndex:(unsigned int)idx {
     [self insertInScriptGroups:group];
 }
 
-- (void)removeObjectFromScriptGroupsAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromScriptGroupsAtIndex:(unsigned int)idx {
 	[groups removeScriptGroup:[[groups scriptGroups] objectAtIndex:idx]];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
@@ -493,12 +496,12 @@
 }
 
 - (BDSKSearchGroup *)valueInSearchGroupsWithUniqueID:(NSString *)aUniqueID {
-    NSUInteger idx = [[[groups searchGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    unsigned int idx = [[[groups searchGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [[groups searchGroups] objectAtIndex:idx];
 }
 
 - (BDSKSearchGroup *)valueInSearchGroupsWithName:(NSString *)name {
-    NSUInteger idx = [[[groups searchGroups] valueForKey:@"name"] indexOfObject:name];
+    unsigned int idx = [[[groups searchGroups] valueForKey:@"name"] indexOfObject:name];
     return idx == NSNotFound ? nil : [[groups searchGroups] objectAtIndex:idx];
 }
 
@@ -512,11 +515,11 @@
     }
 }
 
-- (void)insertObject:(BDSKSearchGroup *)group inSearchGroupsAtIndex:(NSUInteger)idx {
+- (void)insertObject:(BDSKSearchGroup *)group inSearchGroupsAtIndex:(unsigned int)idx {
     [self insertInSearchGroups:group];
 }
 
-- (void)removeObjectFromSearchGroupsAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromSearchGroupsAtIndex:(unsigned int)idx {
 	[groups removeSearchGroup:[[groups searchGroups] objectAtIndex:idx]];
 }
 
@@ -527,12 +530,12 @@
 }
 
 - (BDSKSharedGroup *)valueInSharedGroupsWithUniqueID:(NSString *)aUniqueID {
-    NSUInteger idx = [[[groups sharedGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    unsigned int idx = [[[groups sharedGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [[groups sharedGroups] objectAtIndex:idx];
 }
 
 - (BDSKSharedGroup *)valueInSharedGroupsWithName:(NSString *)name {
-    NSUInteger idx = [[[groups sharedGroups] valueForKey:@"name"] indexOfObject:name];
+    unsigned int idx = [[[groups sharedGroups] valueForKey:@"name"] indexOfObject:name];
     return idx == NSNotFound ? nil : [[groups sharedGroups] objectAtIndex:idx];
 }
 
@@ -638,19 +641,18 @@
         NSScriptObjectSpecifier *endSpec = [rangeSpec endSpecifier];
         NSString *startKey = [startSpec key];
         NSString *endKey = [endSpec key];
-        NSArray *allGroups = [self scriptingGroups];
-        
+
         if ((startSpec == nil) && (endSpec == nil))
             // We need to have at least one of these...
             return nil;
         
-        if ([allGroups count] == 0)
+        if ([groups count] == 0)
             // If there are no groups, there can be no match.  Just return now.
             return [NSArray array];
 
         if ((startSpec == nil || [groupKeys containsObject:startKey]) && (endSpec == nil || [groupKeys containsObject:endKey])) {
-            NSInteger startIndex;
-            NSInteger endIndex;
+            int startIndex;
+            int endIndex;
 
             // The start and end keys are also ones we want to handle.
 
@@ -666,7 +668,7 @@
                     // Oops.  We could not find the start object.
                     return nil;
                 
-                startIndex = [allGroups indexOfObjectIdenticalTo:startObject];
+                startIndex = [groups indexOfObjectIdenticalTo:startObject];
                 if (startIndex == NSNotFound)
                     // Oops.  We couldn't find the start object in the groups array.  This should not happen.
                     return nil;
@@ -685,18 +687,18 @@
                     // Oops.  We could not find the end object.
                     return nil;
                 
-                endIndex = [allGroups indexOfObjectIdenticalTo:endObject];
+                endIndex = [groups indexOfObjectIdenticalTo:endObject];
                 if (endIndex == NSNotFound)
                     // Oops.  We couldn't find the end object in the groups array.  This should not happen.
                     return nil;
                 
             } else {
-                endIndex = [allGroups count] - 1;
+                endIndex = [groups count] - 1;
             }
 
             if (endIndex < startIndex) {
                 // Accept backwards ranges gracefully
-                NSInteger temp = endIndex;
+                int temp = endIndex;
                 endIndex = startIndex;
                 startIndex = temp;
             }
@@ -708,14 +710,14 @@
             BOOL keyIsGroups = [key isEqual:@"groups"];
             NSArray *rangeKeyObjects = (keyIsGroups ? nil : [self valueForKey:key]);
             id curObj;
-            NSUInteger curKeyIndex;
-            NSInteger i;
+            unsigned int curKeyIndex;
+            int i;
 
             for (i = startIndex; i <= endIndex; i++) {
                 if (keyIsGroups) {
                     [result addObject:[NSNumber numberWithInt:i]];
                 } else {
-                    curObj = [allGroups objectAtIndex:i];
+                    curObj = [groups objectAtIndex:i];
                     curKeyIndex = [rangeKeyObjects indexOfObjectIdenticalTo:curObj];
                     if (curKeyIndex != NSNotFound)
                         [result addObject:[NSNumber numberWithInt:curKeyIndex]];
@@ -736,18 +738,17 @@
         NSScriptObjectSpecifier *baseSpec = [relSpec baseSpecifier];
         NSString *baseKey = [baseSpec key];
         NSRelativePosition relPos = [relSpec relativePosition];
-        NSArray *allGroups = [self scriptingGroups];
-        
+
         if (baseSpec == nil)
             // We need to have one of these...
             return nil;
         
-        if ([allGroups count] == 0)
+        if ([groups count] == 0)
             // If there are no groups, there can be no match.  Just return now.
             return [NSArray array];
 
         if ([groupKeys containsObject:baseKey]) {
-            NSInteger baseIndex;
+            int baseIndex;
 
             // The base key is also one we want to handle.
 
@@ -764,7 +765,7 @@
                 baseObject = (relPos == NSRelativeBefore ? [baseObject objectAtIndex:0] : [baseObject lastObject]);
             }
 
-            baseIndex = [allGroups indexOfObjectIdenticalTo:baseObject];
+            baseIndex = [groups indexOfObjectIdenticalTo:baseObject];
             if (baseIndex == NSNotFound)
                 // Oops.  We couldn't find the base object in the groups array.  This should not happen.
                 return nil;
@@ -776,8 +777,8 @@
             BOOL keyIsGroups = [key isEqual:@"groups"];
             NSArray *relKeyObjects = (keyIsGroups ? nil : [self valueForKey:key]);
             id curObj;
-            NSUInteger curKeyIndex;
-            NSInteger groupCount = [allGroups count];
+            unsigned curKeyIndex;
+            int groupCount = [groups count];
 
             if (relPos == NSRelativeBefore)
                 baseIndex--;
@@ -789,7 +790,7 @@
                     [result addObject:[NSNumber numberWithInt:baseIndex]];
                     break;
                 } else {
-                    curObj = [allGroups objectAtIndex:baseIndex];
+                    curObj = [groups objectAtIndex:baseIndex];
                     curKeyIndex = [relKeyObjects indexOfObjectIdenticalTo:curObj];
                     if (curKeyIndex != NSNotFound) {
                         [result addObject:[NSNumber numberWithInt:curKeyIndex]];

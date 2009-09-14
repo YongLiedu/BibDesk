@@ -14,14 +14,6 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSControl</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
 			<string>NSMenu</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -29,19 +21,12 @@
 			<string>NSObject</string>
 		</dict>
 		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>hideWindow</key>
-				<string>id</string>
-				<key>toggleShowingWindow</key>
-				<string>id</string>
-			</dict>
 			<key>CLASS</key>
-			<string>NSWindowController</string>
+			<string>NSControl</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
+			<string>NSView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -66,47 +51,6 @@
 			<string>NSView</string>
 		</dict>
 		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>changeFont</key>
-				<string>id</string>
-				<key>copy</key>
-				<string>id</string>
-				<key>cut</key>
-				<string>id</string>
-				<key>delete</key>
-				<string>id</string>
-				<key>duplicate</key>
-				<string>id</string>
-				<key>insertNewline</key>
-				<string>id</string>
-				<key>moveDown</key>
-				<string>id</string>
-				<key>moveUp</key>
-				<string>id</string>
-				<key>paste</key>
-				<string>id</string>
-				<key>scrollToBeginningOfDocument</key>
-				<string>id</string>
-				<key>scrollToEndOfDocument</key>
-				<string>id</string>
-			</dict>
-			<key>CLASS</key>
-			<string>BDSKOutlineView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSOutlineView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
-		</dict>
-		<dict>
 			<key>CLASS</key>
 			<string>NSMenuItem</string>
 			<key>LANGUAGE</key>
@@ -129,11 +73,35 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSCell</string>
+			<string>OFObject</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSObject</string>
+			<string>OBObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>restoreDefaults</key>
+				<string>id</string>
+				<key>setValueForSender</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>OAPreferenceClient</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>controlBox</key>
+				<string>NSView</string>
+				<key>initialFirstResponder</key>
+				<string>NSView</string>
+				<key>lastKeyView</key>
+				<string>NSView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>OFObject</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -187,28 +155,15 @@
 				<string>NSMatrix</string>
 			</dict>
 			<key>SUPERCLASS</key>
-			<string>BDSKPreferencePane</string>
+			<string>OAPreferenceClient</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>BDSKPreferencePane</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>view</key>
-				<string>NSView</string>
-			</dict>
-			<key>SUPERCLASS</key>
-			<string>NSWindowController</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKTemplateOutlineView</string>
+			<string>OBObject</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>BDSKOutlineView</string>
+			<string>NSObject</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>

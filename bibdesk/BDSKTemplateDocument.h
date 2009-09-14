@@ -122,25 +122,27 @@ extern NSString *BDSKRichTextTemplateDocumentType;
     NSMutableAttributedString *separatorTemplate;
     BOOL richText;
     NSString *fontName;
-    CGFloat fontSize;
+    float fontSize;
     BOOL bold;
     BOOL italic;
     BDSKToken *selectedToken;
     BDSKToken *menuToken;
-    NSUInteger defaultTypeIndex;
+    unsigned int defaultTypeIndex;
     
     NSString *string;
     NSAttributedString *attributedString;
+    
+    CFArrayRef editors;
 }
 
 - (BDSKToken *)tokenForField:(NSString *)field;
 
 - (NSArray *)typeTemplates;
 - (void)setTypeTemplates:(NSArray *)newTypeTemplates;
-- (NSUInteger)countOfTypeTemplates;
-- (id)objectInTypeTemplatesAtIndex:(NSUInteger)index;
-- (void)insertObject:(id)obj inTypeTemplatesAtIndex:(NSUInteger)index;
-- (void)removeObjectFromTypeTemplatesAtIndex:(NSUInteger)index;
+- (unsigned)countOfTypeTemplates;
+- (id)objectInTypeTemplatesAtIndex:(unsigned)index;
+- (void)insertObject:(id)obj inTypeTemplatesAtIndex:(unsigned)index;
+- (void)removeObjectFromTypeTemplatesAtIndex:(unsigned)index;
 
 - (NSArray *)specialTokens;
 - (void)setSpecialTokens:(NSArray *)newSpecialTokens;
@@ -163,8 +165,8 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 - (NSString *)fontName;
 - (void)setFontName:(NSString *)newFontName;
 
-- (CGFloat)fontSize;
-- (void)setFontSize:(CGFloat)newFontSize;
+- (float)fontSize;
+- (void)setFontSize:(float)newFontSize;
 
 - (BOOL)isBold;
 - (void)setBold:(BOOL)newBold;
@@ -175,8 +177,8 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 - (BDSKToken *)selectedToken;
 - (void)setSelectedToken:(BDSKToken *)newSelectedToken;
 
-- (NSUInteger)defaultTypeIndex;
-- (void)setDefaultTypeIndex:(NSUInteger)newDefaultTypeIndex;
+- (unsigned int)defaultTypeIndex;
+- (void)setDefaultTypeIndex:(unsigned int)newDefaultTypeIndex;
 
 - (NSAttributedString *)attributedString;
 - (NSString *)string;
@@ -185,11 +187,13 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 
 - (IBAction)addField:(id)sender;
 
+- (BOOL)commitEditing;
+
 @end
 
 #pragma mark -
 
-@interface BDSKTokenField : NSTokenField
+@interface NSTokenField (BDSKExtensions)
 @end
 
 @interface NSObject (BDSKTokenFieldDelegate)

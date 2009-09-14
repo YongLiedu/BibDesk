@@ -42,9 +42,9 @@
 #import "BDSKGroupCell.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKFilterController.h"
-#import "BDSKGroupOutlineView.h"
+#import "BDSKGroupTableView.h"
+#import "BDSKHeaderPopUpButtonCell.h"
 #import "BibDocument_Search.h"
-#import "BibDocument_UI.h"
 #import "BDSKGroup.h"
 #import "BDSKSharedGroup.h"
 #import "BDSKURLGroup.h"
@@ -53,8 +53,9 @@
 #import "BDSKStaticGroup.h"
 #import "BDSKCategoryGroup.h"
 #import "BDSKWebGroup.h"
-#import "BDSKParentGroup.h"
+#import "BDSKAlert.h"
 #import "BDSKFieldSheetController.h"
+#import "BDSKCountedSet.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "BDSKAppController.h"
@@ -67,6 +68,7 @@
 #import "BDSKScriptGroupSheetController.h"
 #import "BDSKEditor.h"
 #import "BDSKPersonController.h"
+#import "BDSKColoredBox.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKSearchGroup.h"
 #import "BDSKMainTableView.h"
@@ -81,55 +83,50 @@
 #import "BDSKSharingClient.h"
 #import "WebURLsWithTitles.h"
 #import "NSColor_BDSKExtensions.h"
-#import "NSView_BDSKExtensions.h"
-#import "BDSKApplication.h"
-#import "BDSKCFCallBacks.h"
-#import "BDSKFileContentSearchController.h"
-#import "BDSKSplitView.h"
-#import "BDSKGradientSplitView.h"
+
 
 @implementation BibDocument (Groups)
 
 #pragma mark Selected group types
 
 - (BOOL)hasLibraryGroupSelected{
-    return [[self selectedGroups] lastObject] == [groups libraryGroup];
+    return [groupTableView selectedRow] == 0;
 }
 
 - (BOOL)hasWebGroupSelected{
-    return [[self selectedGroups] lastObject] == [groups webGroup];
+    return [groups webGroup] && [groupTableView selectedRow] == 1;
 }
 
 - (BOOL)hasSharedGroupsSelected{
-    return [[[self selectedGroups] lastObject] isShared];
+    return [groups hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 - (BOOL)hasURLGroupsSelected{
-    return [[[self selectedGroups] lastObject] isURL];
+    return [groups hasURLGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 - (BOOL)hasScriptGroupsSelected{
-    return [[[self selectedGroups] lastObject] isScript];
+    return [groups hasScriptGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 - (BOOL)hasSearchGroupsSelected{
-    return [[[self selectedGroups] lastObject] isSearch];
+    return [groups hasSearchGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 - (BOOL)hasSmartGroupsSelected{
-    return [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isSmart == YES"]] count] > 0;
+    return [groups hasSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 - (BOOL)hasStaticGroupsSelected{
-    return [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isStatic == YES"]] count] > 0;
+    return [groups hasStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 - (BOOL)hasCategoryGroupsSelected{
-    return [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isCategory == YES"]] count] > 0;
+    return [groups hasCategoryGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 - (BOOL)hasExternalGroupsSelected{
-    return [[[self selectedGroups] lastObject] isExternal];
+    return [groups hasExternalGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 /* 
@@ -140,7 +137,6 @@ The groupedPublications array is a subset of the publications array, developed b
 	if (field != currentGroupField) {
 		[currentGroupField release];
 		currentGroupField = [field copy];
-		[[groups categoryParent] setName:[NSString isEmptyString:field] ? NSLocalizedString(@"FIELD", @"source list group row title") : [field uppercaseString]];
 	}
 }	
 
@@ -149,7 +145,9 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (NSArray *)selectedGroups {
-    return [groupOutlineView selectedItems];
+    NSIndexSet *indexSet = [groupTableView selectedRowIndexes];
+    // returns nil when groupTableView doesn't exist yet
+	return nil == indexSet ? nil : [groups objectsAtIndexes:indexSet];
 }
 
 #pragma mark Search group view
@@ -164,7 +162,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [self insertControlView:[searchGroupViewController view] atTop:NO];
     
     BDSKSearchGroup *group = [[self selectedGroups] firstObject];
-    BDSKASSERT([group isSearch]);
+    OBASSERT([group isSearch]);
     [searchGroupViewController setGroup:group];
 }
 
@@ -178,17 +176,17 @@ The groupedPublications array is a subset of the publications array, developed b
 #pragma mark Web Group 
 
 - (BDSKWebGroupViewController *)webGroupViewController {
-    if (webGroupViewController == nil)
+    if (webGroupViewController == nil && [groups webGroup])
         webGroupViewController = [[BDSKWebGroupViewController alloc] initWithGroup:[groups webGroup] document:self];
     return webGroupViewController;
 }
 
 - (void)showWebGroupView {
+    NSAssert([groups webGroup], @"tried to show WebGroupView when web group pref was false");
     NSView *webGroupView = [[self webGroupViewController] view];
     NSView *webView = [[self webGroupViewController] webView];
     
     if ([self isDisplayingWebGroupView] == NO) {
-        
         [self insertControlView:webGroupView atTop:NO];
         
         NSView *view1 = [[splitView subviews] objectAtIndex:0];
@@ -197,14 +195,11 @@ The groupedPublications array is a subset of the publications array, developed b
         NSRect webFrame = svFrame;
         NSRect tableFrame = svFrame;
         NSRect previewFrame = svFrame;
-        CGFloat height = NSHeight(svFrame) - 2 * [splitView dividerThickness];
-        CGFloat oldFraction = [splitView fraction];
+        float height = NSHeight(svFrame) - 2 * [splitView dividerThickness];
+        float factor = NSHeight([view2 frame]) / (NSHeight([view1 frame]) + NSHeight([view2 frame]));
         
-        if (docState.lastWebViewFraction <= 0.0)
-            docState.lastWebViewFraction = 0.4;
-        
-        webFrame.size.height = BDSKRound(height * docState.lastWebViewFraction);
-        previewFrame.size.height = BDSKRound((height - NSHeight(webFrame)) * oldFraction);
+        webFrame.size.height = roundf(0.4 * height);
+        previewFrame.size.height = roundf(0.6 * height * factor);
         tableFrame.size.height = height - NSHeight(webFrame) - NSHeight(previewFrame);
         tableFrame.origin.y = NSMaxY(previewFrame) + [splitView dividerThickness];
         webFrame.origin.y = NSMaxY(tableFrame) + [splitView dividerThickness];
@@ -226,7 +221,6 @@ The groupedPublications array is a subset of the publications array, developed b
         id firstResponder = [documentWindow firstResponder];
         if ([firstResponder respondsToSelector:@selector(isDescendantOf:)] && [firstResponder isDescendantOf:webGroupView])
             [documentWindow makeFirstResponder:tableView];
-        docState.lastWebViewFraction = NSHeight([webView frame]) / BDSKMax(1.0, NSHeight([splitView frame]) - 2 * [splitView dividerThickness]);
         [self removeControlView:webGroupView];
         [webView removeFromSuperview];
         [splitView adjustSubviews];
@@ -239,13 +233,13 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification{
     // use the most recently changed group as default for newly opened documents; could also store on a per-document basis
-    [[NSUserDefaults standardUserDefaults] setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
 	[self updateCategoryGroupsPreservingSelection:NO];
 }
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification{
-    if (NSNotFound != [[groups smartGroups] indexOfObjectIdenticalTo:[notification object]])
-        [self updateSmartGroups];
+    if ([[groups smartGroups] containsObjectIdenticalTo:[notification object]])
+        [self updateSmartGroupsCountAndContent:YES];
 }
 
 - (void)handleGroupTableSelectionChangedNotification:(NSNotification *)notification{
@@ -272,6 +266,7 @@ The groupedPublications array is a subset of the publications array, developed b
         }else{
             if ([sortKey isEqualToString:BDSKImportOrderString] == NO) {
                 newSortKey = BDSKImportOrderString;
+                docState.sortDescending = NO;
             }  
             [self showWebGroupView];
         }
@@ -279,6 +274,7 @@ The groupedPublications array is a subset of the publications array, developed b
         if ([self hasSearchGroupsSelected]) {
             if ([sortKey isEqualToString:BDSKImportOrderString] == NO) {
                 newSortKey = BDSKImportOrderString;
+                docState.sortDescending = NO;
             }
             [self showSearchGroupView];
         } 
@@ -297,10 +293,10 @@ The groupedPublications array is a subset of the publications array, developed b
         if ([previousSortKey isEqualToString:BDSKImportOrderString]) {
             [previousSortKey release];
             previousSortKey = [BDSKTitleString retain];
-            docState.previousSortDescending = NO;
         }
         if ([sortKey isEqualToString:BDSKImportOrderString]) {
             newSortKey = [[previousSortKey retain] autorelease];
+            docState.sortDescending = NO;
         }
         [self hideSearchGroupView];
         [self hideWebGroupView];
@@ -314,12 +310,12 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)handleGroupNameChangedNotification:(NSNotification *)notification{
-    if([groups containsGroup:[notification object]] == NO)
+    if([groups containsObjectIdenticalTo:[notification object]] == NO)
         return;
     if([sortGroupsKey isEqualToString:BDSKGroupCellStringKey])
-        [self sortGroupsByKey:nil];
+        [self sortGroupsByKey:sortGroupsKey];
     else
-        [groupOutlineView setNeedsDisplay:YES];
+        [groupTableView setNeedsDisplay:YES];
 }
 
 
@@ -330,7 +326,7 @@ The groupedPublications array is a subset of the publications array, developed b
     if ([[groups webGroup] isEqual:group] == NO)
         return; // must be from another document
     
-    [groupOutlineView reloadData];
+    [groupTableView reloadData];
     if ([[self selectedGroups] containsObject:group])
         [self displaySelectedGroups];
     
@@ -345,24 +341,20 @@ The groupedPublications array is a subset of the publications array, developed b
     if ([[groups staticGroups] containsObject:group] == NO)
         return; /// must be from another document
     
-    [groupOutlineView reloadData];
+    [groupTableView reloadData];
     if ([[self selectedGroups] containsObject:group])
         [self displaySelectedGroups];
 }
 
 - (void)handleSharedGroupUpdatedNotification:(NSNotification *)notification{
     BDSKGroup *group = [notification object];
-    
-    if ([[groups sharedGroups] containsObject:group] == NO)
-        return; /// must be from another document
-    
     BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
     
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
-        [self sortGroupsByKey:nil];
+        [self sortGroupsByKey:sortGroupsKey];
     }else{
-        [groupOutlineView reloadData];
-        if ([[self selectedGroups] containsObject:group] && succeeded)
+        [groupTableView reloadData];
+        if ([[self selectedGroups] containsObject:group] && succeeded == YES)
             [self displaySelectedGroups];
     }
     
@@ -373,7 +365,7 @@ The groupedPublications array is a subset of the publications array, developed b
 - (void)handleSharedGroupsChangedNotification:(NSNotification *)notification{
 
     // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
-    [groupOutlineView setDelegate:nil];
+    [groupTableView setDelegate:nil];
 	NSArray *selectedGroups = [self selectedGroups];
 	
     NSMutableSet *clients = [[[BDSKSharingBrowser sharedBrowser] sharingClients] mutableCopy];
@@ -391,12 +383,11 @@ The groupedPublications array is a subset of the publications array, developed b
     NSEnumerator *clientEnum = [clientsToAdd objectEnumerator];
     BDSKSharingClient *client;
     
-    while (client = [clientEnum nextObject]) {
-        BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithClient:client];
-        [currentGroups addObject:group];
-        [group release];
-    }
+    while (client = [clientEnum nextObject])
+        [currentGroups addObject:[[[BDSKSharedGroup alloc] initWithClient:client] autorelease]];
     
+    SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ? @selector(countCompare:) : @selector(nameCompare:);
+    [currentGroups sortUsingSelector:sortSelector ascending:!docState.sortGroupsDescending];
     [groups setSharedGroups:currentGroups];
     
     [clients release];
@@ -404,11 +395,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [clientsToAdd release];
     [currentGroups release];
     
-    [[(NSMutableDictionary *)groupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [groupOutlineView reloadData];
-    
-	// reset ourself as delegate
-    [groupOutlineView setDelegate:self];
+    [groupTableView reloadData];
 	
 	// select the current groups, if still around. Otherwise this selects Library
     [self selectGroups:selectedGroups];
@@ -417,6 +404,9 @@ The groupedPublications array is a subset of the publications array, developed b
     [self displaySelectedGroups]; 
         
     // Don't flag as imported here, since that forces a (re)load of the shared groups, and causes the spinners to start when just opening a document.  The handleSharedGroupUpdatedNotification: should be enough.
+    
+	// reset ourself as delegate
+    [groupTableView setDelegate:self];
 }
 
 - (void)handleURLGroupUpdatedNotification:(NSNotification *)notification{
@@ -427,10 +417,10 @@ The groupedPublications array is a subset of the publications array, developed b
         return; /// must be from another document
     
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
-        [self sortGroupsByKey:nil];
+        [self sortGroupsByKey:sortGroupsKey];
     }else{
-        [groupOutlineView reloadData];
-        if ([[self selectedGroups] containsObject:group] && succeeded)
+        [groupTableView reloadData];
+        if ([[self selectedGroups] containsObject:group] && succeeded == YES)
             [self displaySelectedGroups];
     }
     
@@ -446,10 +436,10 @@ The groupedPublications array is a subset of the publications array, developed b
         return; /// must be from another document
     
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
-        [self sortGroupsByKey:nil];
+        [self sortGroupsByKey:sortGroupsKey];
     }else{
-        [groupOutlineView reloadData];
-        if ([[self selectedGroups] containsObject:group] && succeeded)
+        [groupTableView reloadData];
+        if ([[self selectedGroups] containsObject:group] && succeeded == YES)
             [self displaySelectedGroups];
     }
     
@@ -464,8 +454,8 @@ The groupedPublications array is a subset of the publications array, developed b
     if ([[groups searchGroups] containsObject:group] == NO)
         return; /// must be from another document
     
-    [groupOutlineView reloadData];
-    if ([[self selectedGroups] containsObject:group] && succeeded)
+    [groupTableView reloadData];
+    if ([[self selectedGroups] containsObject:group] && succeeded == YES)
         [self displaySelectedGroups];
     
     if (succeeded)
@@ -473,30 +463,17 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 
-- (void)handleWillRemoveGroupsNotification:(NSNotification *)notification{
-    if([groupOutlineView editedRow] != -1 && [documentWindow makeFirstResponder:nil] == NO)
-        [documentWindow endEditingFor:groupOutlineView];
-    [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:[[notification userInfo] valueForKey:@"groups"]];
+- (void)handleWillAddRemoveGroupNotification:(NSNotification *)notification{
+    if([groupTableView editedRow] != -1 && [documentWindow makeFirstResponder:nil] == NO)
+        [documentWindow endEditingFor:groupTableView];
 }
 
 - (void)handleDidAddRemoveGroupNotification:(NSNotification *)notification{
-    [[(NSMutableDictionary *)groupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [groupOutlineView reloadData];
+    [groupTableView reloadData];
     [self handleGroupTableSelectionChangedNotification:notification];
 }
 
 #pragma mark UI updating
-
-typedef struct _setAndBagContext {
-    CFMutableSetRef set;
-    CFMutableBagRef bag;
-} setAndBagContext;
-
-static void addObjectToSetAndBag(const void *value, void *context) {
-    setAndBagContext *ctxt = context;
-    CFSetAddValue(ctxt->set, value);
-    CFBagAddValue(ctxt->bag, value);
-}
 
 // this method uses counted sets to compute the number of publications per group; each group object is just a name
 // and a count, and a group knows how to compare itself with other groups for sorting/equality, but doesn't know 
@@ -504,7 +481,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 - (void)updateCategoryGroupsPreservingSelection:(BOOL)preserve{
 
     // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
-    [groupOutlineView setDelegate:nil];
+    [groupTableView setDelegate:nil];
     
     NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];    
     
@@ -518,72 +495,54 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         
     } else {
         
-        setAndBagContext setAndBag;
-        if([groupField isPersonField]) {
-            setAndBag.set = CFSetCreateMutable(kCFAllocatorDefault, 0, &kBDSKAuthorFuzzySetCallBacks);
-            setAndBag.bag = CFBagCreateMutable(kCFAllocatorDefault, 0, &kBDSKAuthorFuzzyBagCallBacks);
-        } else {
-            setAndBag.set = CFSetCreateMutable(kCFAllocatorDefault, 0, &kBDSKCaseInsensitiveStringSetCallBacks);
-            setAndBag.bag = CFBagCreateMutable(kCFAllocatorDefault, 0, &kBDSKCaseInsensitiveStringBagCallBacks);
-        }
-        
-        NSArray *oldGroups = [groups categoryGroups];
-        NSArray *oldGroupNames = [NSArray array];
-        
-        if ([groupField isEqualToString:[[oldGroups lastObject] key]] && [groupField isPersonField] == [[oldGroups lastObject] isKindOfClass:[BibAuthor class]])
-            oldGroupNames = [oldGroups valueForKey:@"name"];
+        BDSKCountedSet *countedSet;
+        if([groupField isPersonField])
+            countedSet = [[BDSKCountedSet alloc] initFuzzyAuthorCountedSet];
         else
-            oldGroups = nil;
+            countedSet = [[BDSKCountedSet alloc] initCaseInsensitive:YES];
         
-        NSInteger emptyCount = 0;
+        int emptyCount = 0;
         
         NSEnumerator *pubEnum = [publications objectEnumerator];
         BibItem *pub;
         
         NSSet *tmpSet = nil;
-        while (pub = [pubEnum nextObject]) {
+        while(pub = [pubEnum nextObject]){
             tmpSet = [pub groupsForField:groupField];
             if([tmpSet count])
-                CFSetApplyFunction((CFSetRef)tmpSet, addObjectToSetAndBag, &setAndBag);
+                [countedSet unionSet:tmpSet];
             else
                 emptyCount++;
         }
         
-        NSMutableArray *mutableGroups = [[NSMutableArray alloc] initWithCapacity:CFSetGetCount(setAndBag.set) + 1];
-        NSEnumerator *groupEnum = [(NSSet *)(setAndBag.set) objectEnumerator];
+        NSMutableArray *mutableGroups = [[NSMutableArray alloc] initWithCapacity:[countedSet count] + 1];
+        NSEnumerator *groupEnum = [countedSet objectEnumerator];
         id groupName;
         BDSKGroup *group;
                 
         // now add the group names that we found from our BibItems, using a generic folder icon
         // use BDSKTextWithIconCell keys
-        while (groupName = [groupEnum nextObject]) {
-            NSUInteger idx = [oldGroupNames indexOfObject:groupName];
-            if (idx == NSNotFound) {
-                group = [[BDSKCategoryGroup alloc] initWithName:groupName key:groupField count:CFBagGetCountOfValue(setAndBag.bag, groupName)];
-            } else {
-                group = [[oldGroups objectAtIndex:idx] retain];
-                [group setCount:CFBagGetCountOfValue(setAndBag.bag, groupName)];
-            }
+        while(groupName = [groupEnum nextObject]){
+            group = [[BDSKCategoryGroup alloc] initWithName:groupName key:groupField count:[countedSet countForObject:groupName]];
             [mutableGroups addObject:group];
             [group release];
         }
         
+        // now sort using the current column and order
+        SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ?
+                            @selector(countCompare:) : @selector(nameCompare:);
+        [mutableGroups sortUsingSelector:sortSelector ascending:!docState.sortGroupsDescending];
+        
         // add the "empty" group at index 0; this is a group of pubs whose value is empty for this field, so they
         // will not be contained in any of the other groups for the currently selected group field (hence multiple selection is desirable)
-        if (emptyCount > 0) {
-            if ([oldGroups count] && [[oldGroups objectAtIndex:0] isEmpty]) {
-                group = [[oldGroups objectAtIndex:0] retain];
-                [group setCount:emptyCount];
-            } else {
-                group = [[BDSKCategoryGroup alloc] initEmptyGroupWithKey:groupField count:emptyCount];
-            }
+        if(emptyCount > 0){
+            group = [[BDSKCategoryGroup alloc] initEmptyGroupWithKey:groupField count:emptyCount];
             [mutableGroups insertObject:group atIndex:0];
             [group release];
         }
         
         [groups setCategoryGroups:mutableGroups];
-        CFRelease(setAndBag.set);
-        CFRelease(setAndBag.bag);
+        [countedSet release];
         [mutableGroups release];
         
     }
@@ -591,8 +550,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     // update the count for the first item, not sure if it should be done here
     [[groups libraryGroup] setCount:[publications count]];
 	
-    [[(NSMutableDictionary *)groupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [groupOutlineView reloadData];
+    [groupTableView reloadData];
 	
 	// select the current groups, if still around. Otherwise select Library
 	BOOL didSelect = [self selectGroups:selectedGroups];
@@ -604,46 +562,36 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
     
 	// reset ourself as delegate
-    [groupOutlineView setDelegate:self];
+    [groupTableView setDelegate:self];
 }
 
 // force the smart groups to refilter their items, so the group content and count get redisplayed
 // if this becomes slow, we could make filters thread safe and update them in the background
 - (void)updateSmartGroupsCountAndContent:(BOOL)shouldUpdate{
+
+	NSRange smartRange = [groups rangeOfSmartGroups];
+    unsigned int row = NSMaxRange(smartRange);
+	BOOL needsUpdate = NO;
     
-	// !!! early return if not expanded in outline view
-    if ([groupOutlineView isItemExpanded:[groups smartParent]] == NO)
-        return;
-    
-    BOOL needsUpdate = shouldUpdate && [self hasSmartGroupsSelected];
-    BOOL hideCount = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKHideGroupCountKey];
-    BOOL sortByCount = [sortGroupsKey isEqualToString:BDSKGroupCellCountKey];
-    NSArray *smartGroups = [groups smartGroups];
-    
-    if (hideCount == NO || sortByCount)
-        [smartGroups makeObjectsPerformSelector:@selector(filterItems:) withObject:publications];
-    
-    if (sortByCount) {
-        NSPoint scrollPoint = [[groupOutlineView enclosingScrollView] scrollPositionAsPercentage];
-        [self sortGroupsByKey:nil];
-        [[groupOutlineView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
-    } else if (needsUpdate) {
-        [groupOutlineView reloadData];
-        // fix for bug #1362191: after changing a checkbox that removed an item from a smart group, the table scrolled to the top
-        NSPoint scrollPoint = [[groupOutlineView enclosingScrollView] scrollPositionAsPercentage];
-        [self displaySelectedGroups];
-        [[groupOutlineView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
-    } else if (hideCount == NO) {
-        [groupOutlineView reloadData];
+    while(NSLocationInRange(--row, smartRange)){
+		[(BDSKSmartGroup *)[groups objectAtIndex:row] filterItems:publications];
+		if([groupTableView isRowSelected:row])
+			needsUpdate = shouldUpdate;
     }
-}
-
-- (void)updateSmartGroupsCount {
-    [self updateSmartGroupsCountAndContent:NO];
-}
-
-- (void)updateSmartGroups {
-    [self updateSmartGroupsCountAndContent:YES];
+    
+    if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
+        NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];
+        [self sortGroupsByKey:sortGroupsKey];
+        [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
+    }else{
+        [groupTableView reloadData];
+        if(needsUpdate == YES){
+            // fix for bug #1362191: after changing a checkbox that removed an item from a smart group, the table scrolled to the top
+            NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];
+            [self displaySelectedGroups];
+            [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
+        }
+    }
 }
 
 - (void)displaySelectedGroups{
@@ -654,7 +602,9 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     if ([selectedGroups count] == 1 && [self hasLibraryGroupSelected]) {
         array = publications;
     } else if ([selectedGroups count] == 1 && ([self hasExternalGroupsSelected] || [self hasStaticGroupsSelected])) {
-        array = [(id)[selectedGroups lastObject] publications];
+        unsigned int rowIndex = [[groupTableView selectedRowIndexes] firstIndex];
+        BDSKGroup *group = [groups objectAtIndex:rowIndex];
+        array = [(id)group publications];
     } else {
         // multiple selections are never shared groups, so they are contained in the publications
         NSEnumerator *pubEnum = [publications objectEnumerator];
@@ -662,7 +612,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         NSEnumerator *groupEnum;
         BDSKGroup *group;
         NSMutableArray *filteredArray = [NSMutableArray arrayWithCapacity:[publications count]];
-        BOOL intersectGroups = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKIntersectGroupsKey];
+        BOOL intersectGroups = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKIntersectGroupsKey];
         
         // to take union, we add the items contained in a selected group
         // to intersect, we remove the items not contained in a selected group
@@ -694,27 +644,13 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (BOOL)selectGroups:(NSArray *)theGroups{
-    // expand the parents, or rowForItem: will return -1
-    NSEnumerator *parentEnum = [[NSSet setWithArray:[theGroups arrayByPerformingSelector:@selector(parent)]] objectEnumerator];
-    id parent;
-    while (parent = [parentEnum nextObject])
-        [groupOutlineView expandItem:parent];
-
-    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
-    NSEnumerator *groupEnum = [theGroups objectEnumerator];
-    id group;
-    while (group = [groupEnum nextObject]) {
-        NSInteger r = [groupOutlineView rowForItem:group];
-        if (r != -1) [indexes addIndex:r];
-    }
+    NSIndexSet *indexes = [groups indexesOfObjects:theGroups];
     
     if([indexes count] == 0) {
-        // was deselectAll:nil, but that selects the group item...
-        [indexes addIndex:1];
-        [groupOutlineView selectRowIndexes:indexes byExtendingSelection:NO];
+        [groupTableView deselectAll:nil];
         return NO;
     } else {
-        [groupOutlineView selectRowIndexes:indexes byExtendingSelection:NO];
+        [groupTableView selectRowIndexes:indexes byExtendingSelection:NO];
         return YES;
     }
 }
@@ -723,74 +659,200 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     return [self selectGroups:[NSArray arrayWithObject:aGroup]];
 }
 
-#pragma mark Spinners
-
-- (NSProgressIndicator *)spinnerForGroup:(BDSKGroup *)group{
-    NSProgressIndicator *spinner = groupSpinners == NULL ? nil : (id)CFDictionaryGetValue(groupSpinners, group);
+- (NSIndexSet *)_indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview{
+   
+    if([self numberOfSelectedPubs] == 0 || 
+       [self hasExternalGroupsSelected] == YES)
+        return [NSIndexSet indexSet];
     
-    if ([group isRetrieving]) {
-        if (spinner == nil) {
-            // don't use NSMutableDictionary because that copies the groups
-            if (groupSpinners == NULL)
-                groupSpinners = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-            spinner = [[NSProgressIndicator alloc] init];
-            [spinner setControlSize:NSSmallControlSize];
-            [spinner setStyle:NSProgressIndicatorSpinningStyle];
-            [spinner setDisplayedWhenStopped:NO];
-            [spinner sizeToFit];
-            [spinner setUsesThreadedAnimation:YES];
-            CFDictionarySetValue(groupSpinners, group, spinner);
-            [spinner release];
-        }
-        [spinner startAnimation:nil];
-    } else if (spinner) {
-        [spinner stopAnimation:nil];
-        [spinner removeFromSuperview];
-        CFDictionaryRemoveValue(groupSpinners, group);
-        spinner = nil;
+    // This allows us to be slightly lazy, only putting the visible group rows in the dictionary
+    NSMutableIndexSet *visibleIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:indexRange];
+    [visibleIndexes removeIndexes:[groupTableView selectedRowIndexes]];
+    
+    NSMutableIndexSet *categoryIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:[groups rangeOfCategoryGroups]];
+    unsigned int cnt = [categoryIndexes count];
+    NSString *groupField = [self currentGroupField];
+
+    // Mutable dictionary with fixed capacity using NSObjects for keys with ints for values; this gives us a fast lookup of row name->index.  Dictionaries can use any pointer-size element for a key or value; see /Developer/Examples/CoreFoundation/Dictionary.  Keys are retained rather than copied for efficiency.  Shark says that BibAuthors are created with alloc/init when using the copy callbacks, so NSShouldRetainWithZone() must be returning NO?
+    CFMutableDictionaryRef rowDict;
+    
+    // group objects are either BibAuthors or NSStrings; we need to use case-insensitive or fuzzy author matching, since that's the way groups are checked for containment
+    if([groupField isPersonField]){
+        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &BDSKFuzzyDictionaryKeyCallBacks, &OFIntegerDictionaryValueCallbacks);
+    } else {
+        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &BDSKCaseInsensitiveStringKeyDictionaryCallBacks, &OFIntegerDictionaryValueCallbacks);
     }
     
-    return spinner;
+    unsigned int groupIndex = [categoryIndexes firstIndex];
+    
+    // exclude smart and shared groups
+    while(groupIndex != NSNotFound){
+		if([visibleIndexes containsIndex:groupIndex])
+			CFDictionaryAddValue(rowDict, (void *)[[groups objectAtIndex:groupIndex] name], (void *)groupIndex);
+        groupIndex = [visibleIndexes indexGreaterThanIndex:groupIndex];
+    }
+    
+    // Use this for the indexes we're going to return
+    NSMutableIndexSet *indexSet = [NSMutableIndexSet indexSet];
+    
+    // Unfortunately, we have to check all of the items in the main table, since hidden items may have a visible group
+    NSArray *selectedPubs = [self selectedPublications];
+    NSEnumerator *pubEnum = [selectedPubs objectEnumerator];
+    BibItem *pub;
+    CFSetRef possibleGroups;
+    
+    id *groupNamePtr;
+    
+    // use a static pointer to a buffer, with initial size of 10
+    static id *groupValues = NULL;
+    static int groupValueMaxSize = 10;
+    if(NULL == groupValues)
+        groupValues = (id *)NSZoneMalloc(NSDefaultMallocZone(), groupValueMaxSize * sizeof(id));
+    int groupCount = 0;
+    
+    // we could iterate the dictionary in the outer loop and publications in the inner loop, but there are generally more publications than groups (and we only check visible groups), so this should be more efficient
+    while(pub = [pubEnum nextObject]){ 
+        
+        // here are all the groups that this item can be a part of
+        possibleGroups = (CFSetRef)[pub groupsForField:groupField];
+        
+        groupCount = CFSetGetCount(possibleGroups);
+        if(groupCount > groupValueMaxSize){
+            NSAssert1(groupCount < 1024, @"insane number of groups for %@", [pub citeKey]);
+            groupValues = NSZoneRealloc(NSDefaultMallocZone(), groupValues, sizeof(id) * groupCount);
+            groupValueMaxSize = groupCount;
+        }
+        
+        // get all the groups (authors or strings)
+        if(groupCount > 0){
+            
+            // this is the only way to enumerate a set with CF, apparently
+            CFSetGetValues(possibleGroups, (const void **)groupValues);
+            groupNamePtr = groupValues;
+            
+            while(groupCount--){
+                // The dictionary only has visible group rows, so not all of the keys (potential groups) will exist in the dictionary
+                if(CFDictionaryGetValueIfPresent(rowDict, (void *)*groupNamePtr++, (const void **)&cnt))
+                    [indexSet addIndex:cnt];
+            }
+        }
+    }
+    
+    CFRelease(rowDict);
+    
+    // handle smart and static groups separately, since they have a different approach to containment
+    NSMutableIndexSet *staticAndSmartIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:[groups rangeOfSmartGroups]];
+    [staticAndSmartIndexes addIndexesInRange:[groups rangeOfStaticGroups]];
+    
+    if([staticAndSmartIndexes count]){
+        groupIndex = [staticAndSmartIndexes firstIndex];
+        id aGroup;
+        
+        while(groupIndex != NSNotFound){
+            if([visibleIndexes containsIndex:groupIndex]){
+                
+                aGroup = [groups objectAtIndex:groupIndex];
+                pubEnum = [selectedPubs objectEnumerator];
+                
+                while(pub = [pubEnum nextObject]){
+                
+                    if([(BDSKGroup *)aGroup containsItem:pub]){
+                        [indexSet addIndex:groupIndex];
+                        break;
+                    }
+                }
+            }
+            groupIndex = [staticAndSmartIndexes indexGreaterThanIndex:groupIndex];
+        }
+    }
+    
+    return indexSet;
 }
 
-- (void)removeSpinnerForGroup:(BDSKGroup *)group{
-    NSProgressIndicator *spinner = groupSpinners == NULL ? nil : (id)CFDictionaryGetValue(groupSpinners, group);
-    if (spinner) {
-        [spinner stopAnimation:nil];
-        [spinner removeFromSuperview];
-        CFDictionaryRemoveValue(groupSpinners, group);
-    }
+- (NSIndexSet *)_tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview{
+    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSetWithIndexesInRange:[groups rangeOfSharedGroups]];
+    [indexes addIndexesInRange:[groups rangeOfURLGroups]];
+    [indexes addIndexesInRange:[groups rangeOfScriptGroups]];
+    [indexes addIndexesInRange:[groups rangeOfSearchGroups]];
+    [indexes addIndex:0];
+    if ([groups webGroup])
+        [indexes addIndex:1];
+    return indexes;
+}
+
+- (NSMenu *)groupFieldsMenu {
+	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+	NSMenuItem *menuItem;
+	NSEnumerator *fieldEnum = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] objectEnumerator];
+	NSString *field;
+	
+    [menu addItemWithTitle:NSLocalizedString(@"No Field", @"Menu item title") action:NULL keyEquivalent:@""];
+	
+	while (field = [fieldEnum nextObject]) {
+		menuItem = [menu addItemWithTitle:field action:NULL keyEquivalent:@""];
+        [menuItem setRepresentedObject:field];
+	}
+    
+    [menu addItem:[NSMenuItem separatorItem]];
+	
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Add Field", @"Menu item title") stringByAppendingEllipsis]
+										  action:@selector(addGroupFieldAction:)
+								   keyEquivalent:@""];
+	[menuItem setTarget:self];
+	[menu addItem:menuItem];
+    [menuItem release];
+	
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Remove Field", @"Menu item title") stringByAppendingEllipsis]
+										  action:@selector(removeGroupFieldAction:)
+								   keyEquivalent:@""];
+	[menuItem setTarget:self];
+	[menu addItem:menuItem];
+    [menuItem release];
+	
+	return [menu autorelease];
+}
+
+- (NSMenu *)tableView:(BDSKGroupTableView *)aTableView menuForTableHeaderColumn:(NSTableColumn *)tableColumn onPopUp:(BOOL)flag{
+	if ([[tableColumn identifier] isEqualToString:@"group"] && flag == NO) {
+		return [[NSApp delegate] groupSortMenu];
+	}
+	return nil;
 }
 
 #pragma mark Actions
 
 - (IBAction)sortGroupsByGroup:(id)sender{
+	if ([sortGroupsKey isEqualToString:BDSKGroupCellStringKey]) return;
 	[self sortGroupsByKey:BDSKGroupCellStringKey];
 }
 
 - (IBAction)sortGroupsByCount:(id)sender{
+	if ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) return;
 	[self sortGroupsByKey:BDSKGroupCellCountKey];
 }
 
 - (IBAction)changeGroupFieldAction:(id)sender{
-    NSString *field = [sender representedObject] ?: @"";
+	NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
+	NSString *field = ([headerCell indexOfSelectedItem] == 0) ? @"" : [[headerCell selectedItem] representedObject];
     
 	if(![field isEqualToString:currentGroupField]){
 		[self setCurrentGroupField:field];
-        
-		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification object:self];
+        [headerCell setTitle:[headerCell indexOfSelectedItem] == 0 ? @"" : [headerCell titleOfSelectedItem]];
+		
+		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
+															object:self
+														  userInfo:[NSDictionary dictionary]];
 	}
 }
 
 // for adding/removing groups, we use the searchfield sheets
     
-- (void)addGroupFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+- (void)addGroupFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *newGroupField = [addFieldController field];
     if(returnCode == NSCancelButton || newGroupField == nil)
         return; // the user canceled
     
 	if([newGroupField isInvalidGroupField] || [newGroupField isEqualToString:@""]){
-        [[addFieldController window] orderOut:nil];
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Field", @"Message in alert dialog when choosing an invalid group field")
                                          defaultButton:nil
                                        alternateButton:nil
@@ -800,12 +862,21 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 		return;
 	}
 	
-	NSMutableArray *array = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
-	if ([array indexOfObject:newGroupField] == NSNotFound)
-        [array addObject:newGroupField];
-	[[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];	
+	NSMutableArray *array = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
+	[array addObject:newGroupField];
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKGroupFieldsKey];	
     
-    [self setCurrentGroupField:newGroupField];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldAddRemoveNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionaryWithObjectsAndKeys:newGroupField, NSKeyValueChangeNewKey, [NSNumber numberWithInt:NSKeyValueChangeInsertion], NSKeyValueChangeKindKey, nil]];        
+    
+	NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
+	
+	[headerCell insertItemWithTitle:newGroupField atIndex:[array count]];
+	[[headerCell itemAtIndex:[array count]] setRepresentedObject:newGroupField];
+	[self setCurrentGroupField:newGroupField];
+	[headerCell selectItemAtIndex:[headerCell indexOfItemWithRepresentedObject:currentGroupField]];
+    [headerCell setTitle:[headerCell indexOfSelectedItem] == 0 ? @"" : [headerCell titleOfSelectedItem]];
 	
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
 														object:self
@@ -814,8 +885,18 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }    
 
 - (IBAction)addGroupFieldAction:(id)sender{
+	NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
+	
+    if ([currentGroupField isEqualToString:@""]) {
+        [headerCell selectItemAtIndex:0];
+        [headerCell setTitle:@""];
+    } else  {
+        [headerCell selectItemAtIndex:[headerCell indexOfItemWithRepresentedObject:currentGroupField]];
+        [headerCell setTitle:[headerCell titleOfSelectedItem]];
+    }
+    
 	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-	NSArray *groupFields = [[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey];
+	NSArray *groupFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey];
     NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCrossrefString, nil]
                                               excluding:[[[typeMan invalidGroupFieldsSet] allObjects] arrayByAddingObjectsFromArray:groupFields]];
     
@@ -823,40 +904,84 @@ static void addObjectToSetAndBag(const void *value, void *context) {
                                                                                               fieldsArray:colNames];
 	[addFieldController beginSheetModalForWindow:documentWindow
                                    modalDelegate:self
-                                  didEndSelector:@selector(addGroupFieldSheetDidEnd:returnCode:contextInfo:)
+                                  didEndSelector:NULL
+                              didDismissSelector:@selector(addGroupFieldSheetDidEnd:returnCode:contextInfo:)
                                      contextInfo:NULL];
     [addFieldController release];
 }
 
-- (void)removeGroupFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+- (void)removeGroupFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *oldGroupField = [removeFieldController field];
     if(returnCode == NSCancelButton || [NSString isEmptyString:oldGroupField])
         return;
     
-    NSMutableArray *array = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
+    NSMutableArray *array = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
     [array removeObject:oldGroupField];
-    [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKGroupFieldsKey];
     [array release];
     
+	NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
+	
+    [headerCell removeItemWithTitle:oldGroupField];
     if([oldGroupField isEqualToString:currentGroupField]){
         [self setCurrentGroupField:@""];
-		[[groups categoryParent] setName:NSLocalizedString(@"FIELD", @"")];
+        [headerCell selectItemAtIndex:0];
+        [headerCell setTitle:@""];
         
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
                                                             object:self
                                                           userInfo:[NSDictionary dictionary]];
     }
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldAddRemoveNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionaryWithObjectsAndKeys:oldGroupField, NSKeyValueChangeNewKey, [NSNumber numberWithInt:NSKeyValueChangeRemoval], NSKeyValueChangeKindKey, nil]];        
 }
 
 - (IBAction)removeGroupFieldAction:(id)sender{
+	NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
+	
+    if ([currentGroupField isEqualToString:@""]) {
+        [headerCell selectItemAtIndex:0];
+        [headerCell setTitle:@""];
+    } else  {
+        [headerCell selectItemAtIndex:[headerCell indexOfItemWithRepresentedObject:currentGroupField]];
+        [headerCell setTitle:[headerCell titleOfSelectedItem]];
+    }
+    
     BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field to remove:", @"Label for removing group field")
-                                                                                                       fieldsArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey]];
+                                                                                                       fieldsArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey]];
 	[removeFieldController beginSheetModalForWindow:documentWindow
                                       modalDelegate:self
                                      didEndSelector:@selector(removeGroupFieldSheetDidEnd:returnCode:contextInfo:)
                                         contextInfo:NULL];
     [removeFieldController release];
 }    
+
+- (void)handleGroupFieldAddRemoveNotification:(NSNotification *)notification{
+    // Handle changes to the popup from other documents.  The userInfo for this notification uses key-value observing keys: NSKeyValueChangeNewKey is the affected field (whether add/remove), and NSKeyValueChangeKindKey will be either insert/remove
+    if([notification object] != self){
+        NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
+        
+        id userInfo = [notification userInfo];
+        NSParameterAssert(userInfo && [userInfo valueForKey:NSKeyValueChangeKindKey]);
+
+        NSString *field = [userInfo valueForKey:NSKeyValueChangeNewKey];
+        NSParameterAssert(field);
+        
+        // Ignore this change if we already have that field (shouldn't happen), or are removing the current group field; in the latter case, it's already removed in prefs, so it'll be gone next time the document is opened.  Removing all fields means we have to deal with the add/remove menu items and separator, so avoid that.
+        if([[[headerCell selectedItem] representedObject] isEqualToString:field] == NO){
+            int changeType = [[userInfo valueForKey:NSKeyValueChangeKindKey] intValue];
+            
+            if(changeType == NSKeyValueChangeInsertion) {
+                [headerCell insertItemWithTitle:field atIndex:0];
+                [[headerCell itemAtIndex:0] setRepresentedObject:field];
+            } else if(changeType == NSKeyValueChangeRemoval) {
+                [headerCell removeItemAtIndex:[headerCell indexOfItemWithRepresentedObject:field]];
+            } else [NSException raise:NSInvalidArgumentException format:@"Unrecognized change type %d", changeType];
+        }
+    }
+}
 
 - (IBAction)addSmartGroupAction:(id)sender {
 	BDSKFilterController *filterController = [[BDSKFilterController alloc] init];
@@ -867,27 +992,16 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	[filterController release];
 }
 
-- (void)editGroupWithoutWarning:(BDSKGroup *)group {
-    [groupOutlineView expandItem:[group parent]];
-    NSInteger i = [groupOutlineView rowForItem:group];
-    BDSKASSERT(i != -1);
-    
-    if(i != -1){
-        [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
-        [groupOutlineView scrollRowToVisible:i];
-        
-        // don't show the warning sheet, since presumably the user wants to change the group name
-        [groupOutlineView editColumn:0 row:i withEvent:nil select:YES];
-    }
-}
-
-- (void)smartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo{
+- (void)smartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
 		BDSKSmartGroup *group = [[BDSKSmartGroup alloc] initWithFilter:[filterController filter]];
+        unsigned int insertIndex = NSMaxRange([groups rangeOfSmartGroups]);
 		[groups addSmartGroup:group];
-        [self editGroupWithoutWarning:group];
 		[group release];
-        [[self undoManager] setActionName:NSLocalizedString(@"Add Smart Group", @"Undo action name")];
+		
+		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
+		[groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
+		[[self undoManager] setActionName:NSLocalizedString(@"Add Smart Group", @"Undo action name")];
 		// updating of the tables is done when finishing the edit of the name
 	}
 	
@@ -895,21 +1009,22 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (IBAction)addStaticGroupAction:(id)sender {
     BDSKStaticGroup *group = [[BDSKStaticGroup alloc] init];
+    unsigned int insertIndex = NSMaxRange([groups rangeOfStaticGroups]);
     [groups addStaticGroup:group];
-    [self editGroupWithoutWarning:group];
     [group release];
+    
+    [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
+    [groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
     [[self undoManager] setActionName:NSLocalizedString(@"Add Static Group", @"Undo action name")];
     // updating of the tables is done when finishing the edit of the name
 }
 
-- (void)searchGroupSheetDidEnd:(BDSKSearchGroupSheetController *)sheetController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo{
+- (void)searchGroupSheetDidEnd:(BDSKSearchGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
+        unsigned int insertIndex = NSMaxRange([groups rangeOfSearchGroups]);
         BDSKGroup *group = [sheetController group];
-		[groups addSearchGroup:(id)group];
-        [groupOutlineView expandItem:[group parent]];
-        NSInteger row = [groupOutlineView rowForItem:group];
-        if (row != -1)
-            [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+		[groups addSearchGroup:(id)group];        
+		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
 	}
 }
 
@@ -925,17 +1040,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 - (IBAction)newSearchGroupFromBookmark:(id)sender {
     NSDictionary *dict = [sender representedObject];
     BDSKSearchGroup *group = [[[BDSKSearchGroup alloc] initWithDictionary:dict] autorelease];
-    if (group) {
-        [groups addSearchGroup:(id)group];        
-        [groupOutlineView expandItem:[group parent]];
-        NSInteger row = [groupOutlineView rowForItem:group];
-        if (row != -1)
-            [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-    } else
-        NSBeep();
+    unsigned int insertIndex = NSMaxRange([groups rangeOfSearchGroups]);
+    [groups addSearchGroup:(id)group];        
+    [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
 }
 
-- (void)searchBookmarkSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)searchBookmarkSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSOKButton) {
         BDSKGroup *group = [[self selectedGroups] lastObject];
         BDSKSearchBookmark *folder = [[searchBookmarkPopUp selectedItem] representedObject];
@@ -943,8 +1053,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     }
 }
 
-- (void)addMenuItemsForBookmarks:(NSArray *)bookmarksArray level:(NSInteger)level toMenu:(NSMenu *)menu {
-    NSInteger i, iMax = [bookmarksArray count];
+- (void)addMenuItemsForBookmarks:(NSArray *)bookmarksArray level:(int)level toMenu:(NSMenu *)menu {
+    int i, iMax = [bookmarksArray count];
     for (i = 0; i < iMax; i++) {
         BDSKSearchBookmark *bm = [bookmarksArray objectAtIndex:i];
         if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
@@ -996,13 +1106,16 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [sheetController release];
 }
 
-- (void)URLGroupSheetDidEnd:(BDSKURLGroupSheetController *)sheetController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo{
+- (void)URLGroupSheetDidEnd:(BDSKURLGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
+        unsigned int insertIndex = NSMaxRange([groups rangeOfURLGroups]);
         BDSKURLGroup *group = [sheetController group];
 		[groups addURLGroup:group];
         [group publications];
-        [self editGroupWithoutWarning:group];
-        [[self undoManager] setActionName:NSLocalizedString(@"Add External File Group", @"Undo action name")];
+        
+		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
+		[groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
+		[[self undoManager] setActionName:NSLocalizedString(@"Add External File Group", @"Undo action name")];
 		// updating of the tables is done when finishing the edit of the name
 	}
 }
@@ -1016,13 +1129,16 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [sheetController release];
 }
 
-- (void)scriptGroupSheetDidEnd:(BDSKScriptGroupSheetController *)sheetController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo{
+- (void)scriptGroupSheetDidEnd:(BDSKScriptGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
+        unsigned int insertIndex = NSMaxRange([groups rangeOfScriptGroups]);
         BDSKScriptGroup *group = [sheetController group];
 		[groups addScriptGroup:group];
         [group publications];
-        [self editGroupWithoutWarning:group];
-        [[self undoManager] setActionName:NSLocalizedString(@"Add Script Group", @"Undo action name")];
+        
+		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
+		[groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
+		[[self undoManager] setActionName:NSLocalizedString(@"Add Script Group", @"Undo action name")];
 		// updating of the tables is done when finishing the edit of the name
 	}
 	
@@ -1035,39 +1151,40 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         [self addStaticGroupAction:sender];
 }
 
-- (void)removeGroups:(NSArray *)theGroups {
-    NSEnumerator *groupEnum = [theGroups objectEnumerator];
+- (IBAction)removeSelectedGroups:(id)sender {
+	NSIndexSet *rowIndexes = [groupTableView selectedRowIndexes];
+    unsigned int rowIndex = [rowIndexes lastIndex];
 	BDSKGroup *group;
-    BOOL didRemove = NO;
+	unsigned int count = 0;
 	
-	while (group = [groupEnum nextObject]) {
-		if ([group isSmart]) {
+	while (rowIndexes != nil && rowIndex != NSNotFound) {
+		group = [groups objectAtIndex:rowIndex];
+		if ([group isSmart] == YES) {
 			[groups removeSmartGroup:(BDSKSmartGroup *)group];
-			didRemove = YES;
-		} else if ([group isStatic] && [group isEqual:[groups lastImportGroup]] == NO) {
+			count++;
+		} else if ([group isStatic] == YES && [group isEqual:[groups lastImportGroup]] == NO) {
 			[groups removeStaticGroup:(BDSKStaticGroup *)group];
-			didRemove = YES;
-		} else if ([group isURL]) {
+			count++;
+		} else if ([group isURL] == YES) {
 			[groups removeURLGroup:(BDSKURLGroup *)group];
-			didRemove = YES;
-		} else if ([group isScript]) {
+			count++;
+		} else if ([group isScript] == YES) {
 			[groups removeScriptGroup:(BDSKScriptGroup *)group];
-			didRemove = YES;
-		} else if ([group isSearch]) {
+			count++;
+		} else if ([group isSearch] == YES) {
 			[groups removeSearchGroup:(BDSKSearchGroup *)group];
         }
+		rowIndex = [rowIndexes indexLessThanIndex:rowIndex];
 	}
-	if (didRemove) {
+	if (count > 0) {
 		[[self undoManager] setActionName:NSLocalizedString(@"Remove Groups", @"Undo action name")];
         [self displaySelectedGroups];
 	}
 }
 
-- (IBAction)removeSelectedGroups:(id)sender {
-    [self removeGroups:[self selectedGroups]];
-}
-
-- (void)editGroup:(BDSKGroup *)group {
+- (void)editGroupAtRow:(int)row {
+	OBASSERT(row != -1);
+	BDSKGroup *group = [groups objectAtIndex:row];
     
     if ([group isEditable] == NO) {
 		NSBeep();
@@ -1081,7 +1198,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         [filterController release];
 	} else if ([group isCategory]) {
         // this must be a person field
-        BDSKASSERT([[group name] isKindOfClass:[BibAuthor class]]);
+        OBASSERT([[group name] isKindOfClass:[BibAuthor class]]);
 		[self showPerson:(BibAuthor *)[group name]];
 	} else if ([group isURL]) {
         BDSKURLGroupSheetController *sheetController = [(BDSKURLGroupSheetController *)[BDSKURLGroupSheetController alloc] initWithGroup:(BDSKURLGroup *)group];
@@ -1099,26 +1216,28 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)editGroupAction:(id)sender {
-    NSArray *selectedGroups = [self selectedGroups];
-	if ([selectedGroups count] != 1) {
-		NSBeep();
-		return;
-	} 
-	[self editGroup:[selectedGroups lastObject]];
-}
-
-- (IBAction)renameGroupAction:(id)sender {
-	if ([groupOutlineView numberOfSelectedRows] != 1) {
+	if ([groupTableView numberOfSelectedRows] != 1) {
 		NSBeep();
 		return;
 	} 
 	
-	NSInteger row = [groupOutlineView selectedRow];
-	BDSKASSERT(row != -1);
+	int row = [groupTableView selectedRow];
+	OBASSERT(row != -1);
+	if(row > 0) [self editGroupAtRow:row];
+}
+
+- (IBAction)renameGroupAction:(id)sender {
+	if ([groupTableView numberOfSelectedRows] != 1) {
+		NSBeep();
+		return;
+	} 
+	
+	int row = [groupTableView selectedRow];
+	OBASSERT(row != -1);
 	if (row <= 0) return;
     
-    if([self outlineView:groupOutlineView shouldEditTableColumn:[[groupOutlineView tableColumns] objectAtIndex:0] item:[groupOutlineView itemAtRow:row]])
-		[groupOutlineView editColumn:0 row:row withEvent:nil select:YES];
+    if([self tableView:groupTableView shouldEditTableColumn:[[groupTableView tableColumns] objectAtIndex:0] row:row])
+		[groupTableView editColumn:0 row:row withEvent:nil select:YES];
 	
 }
 
@@ -1174,14 +1293,27 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)selectLibraryGroup:(id)sender {
-	[groupOutlineView deselectAll:sender];
+	[groupTableView deselectAll:sender];
 }
 
 - (IBAction)changeIntersectGroupsAction:(id)sender {
     BOOL flag = (BOOL)[sender tag];
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKIntersectGroupsKey] != flag) {
-        [[NSUserDefaults standardUserDefaults] setBool:flag forKey:BDSKIntersectGroupsKey];
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKIntersectGroupsKey] != flag) {
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:flag forKey:BDSKIntersectGroupsKey];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupTableSelectionChangedNotification object:self];
+    }
+}
+
+- (void)editGroupWithoutWarning:(BDSKGroup *)group {
+    unsigned i = [groups indexOfObject:group];
+    OBASSERT(i != NSNotFound);
+    
+    if(i != NSNotFound){
+        [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
+        [groupTableView scrollRowToVisible:i];
+        
+        // don't show the warning sheet, since presumably the user wants to change the group name
+        [groupTableView editColumn:0 row:i withEvent:nil select:YES];
     }
 }
 
@@ -1191,9 +1323,9 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSString *baseName = NSLocalizedString(@"Untitled", @"");
     NSString *name = baseName;
     BDSKStaticGroup *group;
-    NSUInteger i = 1;
+    unsigned int i = 1;
     while([names containsObject:name]){
-        name = [NSString stringWithFormat:@"%@%lu", baseName, (unsigned long)i++];
+        name = [NSString stringWithFormat:@"%@%d", baseName, i++];
     }
     
     // first merge in shared groups
@@ -1203,7 +1335,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     group = [[[BDSKStaticGroup alloc] initWithName:name publications:pubs] autorelease];
     
     [groups addStaticGroup:group];    
-    [groupOutlineView deselectAll:nil];
+    [groupTableView deselectAll:nil];
     
     [self performSelector:@selector(editGroupWithoutWarning:) withObject:group afterDelay:0.0];
 }
@@ -1220,10 +1352,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSString *baseName = NSLocalizedString(@"Untitled", @"");
     id name = baseName;
     BDSKCategoryGroup *group;
-    NSUInteger i = 1;
+    unsigned int i = 1;
     
     while ([names containsObject:name])
-        name = [NSString stringWithFormat:@"%@%lu", baseName, (unsigned long)i++];
+        name = [NSString stringWithFormat:@"%@%d", baseName, i++];
     if (isAuthor)
         name = [BibAuthor authorWithName:name andPub:nil];
     group = [[[BDSKCategoryGroup alloc] initWithName:name key:currentGroupField count:[pubs count]] autorelease];
@@ -1233,7 +1365,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         pubs = [self mergeInPublications:pubs];
     
     [self addPublications:pubs toGroup:group];
-    [groupOutlineView deselectAll:nil];
+    [groupTableView deselectAll:nil];
     [self updateCategoryGroupsPreservingSelection:NO];
     
     [self performSelector:@selector(editGroupWithoutWarning:) withObject:group afterDelay:0.0];
@@ -1292,7 +1424,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             return;
         }
     }
-    [[self webGroupViewController] setURLString:[[sender representedObject] absoluteString]];
+    [[self webGroupViewController] loadURL:[sender representedObject]];
 }
 
 - (IBAction)addBookmark:(id)sender {
@@ -1309,7 +1441,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     CFIndex countOfItems = [publications count];
     BibItem **pubs = (BibItem **)NSZoneMalloc([self zone], sizeof(BibItem *) * countOfItems);
     [publications getObjects:pubs];
-    NSSet *currentPubs = [(NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &kBDSKBibItemEquivalenceSetCallBacks) autorelease];
+    NSSet *currentPubs = [(NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &BDSKBibItemEquivalenceCallBacks) autorelease];
     NSZoneFree([self zone], pubs);
     
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:[items count]];
@@ -1343,7 +1475,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group{
-    BDSKPRECONDITION(([group isStatic] && [group isEqual:[groups lastImportGroup]] == NO) || [group isCategory]);
+	OBASSERT([group isSmart] == NO && [group isExternal] == NO && [group isEqual:[groups libraryGroup]] == NO && [group isEqual:[groups lastImportGroup]] == NO);
     
     if ([group isStatic]) {
         [(BDSKStaticGroup *)group addPublicationsFromArray:pubs];
@@ -1358,12 +1490,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSMutableArray *newValues = [NSMutableArray arrayWithCapacity:[pubs count]];
     NSString *oldValue = nil;
     NSString *field = [group isCategory] ? [(BDSKCategoryGroup *)group key] : nil;
-    NSInteger count = 0;
-    NSInteger handleInherited = BDSKOperationAsk;
-	NSInteger rv;
+    int count = 0;
+    int handleInherited = BDSKOperationAsk;
+	int rv;
     
     while(pub = [pubEnum nextObject]){
-        BDSKASSERT([pub isKindOfClass:[BibItem class]]);        
+        OBASSERT([pub isKindOfClass:[BibItem class]]);        
         
         if(field && [field isEqualToString:BDSKPubTypeString] == NO)
             oldValue = [[[pub valueOfField:field] retain] autorelease];
@@ -1381,12 +1513,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 			if([[self currentGroupField] isSingleValuedGroupField] == NO)
 				otherButton = NSLocalizedString(@"Append", @"Button title");
 			
-			NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
-                                             defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
-                                           alternateButton:NSLocalizedString(@"Set", @"Button title")
-                                               otherButton:otherButton
-                                 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
-			rv = [alert runModal];
+			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
+												 defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
+											   alternateButton:NSLocalizedString(@"Set", @"Button title")
+												   otherButton:otherButton
+									 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
+			rv = [alert runSheetModalForWindow:documentWindow];
 			handleInherited = rv;
 			if(handleInherited != BDSKOperationIgnore){
                 [pub addToGroup:group handleInherited:handleInherited];
@@ -1412,12 +1544,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 - (BOOL)removePublications:(NSArray *)pubs fromGroups:(NSArray *)groupArray{
     NSEnumerator *groupEnum = [groupArray objectEnumerator];
 	BDSKGroup *group;
-	NSInteger count = 0;
-	NSInteger handleInherited = BDSKOperationAsk;
+	int count = 0;
+	int handleInherited = BDSKOperationAsk;
 	NSString *groupName = nil;
     
     while(group = [groupEnum nextObject]){
-		if([group isCategory] == NO && ([group isStatic] == NO || group == [groups lastImportGroup]))
+		if([group isSmart] == YES || [group isExternal] == YES || group == [groups libraryGroup] || group == [groups lastImportGroup])
 			continue;
 		
 		if (groupName == nil)
@@ -1430,23 +1562,25 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             [[self undoManager] setActionName:NSLocalizedString(@"Remove From Group", @"Undo action name")];
             count = [pubs count];
             continue;
+        } else if ([group isCategory] && [[(BDSKCategoryGroup *)group key] isSingleValuedGroupField]) {
+            continue;
         }
-        
+		
 		NSEnumerator *pubEnum = [pubs objectEnumerator];
 		BibItem *pub;
         NSMutableArray *changedPubs = [NSMutableArray arrayWithCapacity:[pubs count]];
         NSMutableArray *oldValues = [NSMutableArray arrayWithCapacity:[pubs count]];
         NSMutableArray *newValues = [NSMutableArray arrayWithCapacity:[pubs count]];
         NSString *oldValue = nil;
-        NSString *field = [(BDSKCategoryGroup *)group key];
-		NSInteger rv;
-        NSInteger tmpCount = 0;
+        NSString *field = [group isCategory] ? [(BDSKCategoryGroup *)group key] : nil;
+		int rv;
+        int tmpCount = 0;
 		
-        if([field isSingleValuedGroupField] || [field isEqualToString:BDSKPubTypeString])
+        if([field isEqualToString:BDSKPubTypeString])
             continue;
         
 		while(pub = [pubEnum nextObject]){
-			BDSKASSERT([pub isKindOfClass:[BibItem class]]);        
+			OBASSERT([pub isKindOfClass:[BibItem class]]);        
 			
             if(field)
                 oldValue = [[[pub valueOfField:field] retain] autorelease];
@@ -1460,12 +1594,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
                     [newValues addObject:[pub valueOfField:field]];
                 }
 			}else if(rv == BDSKOperationAsk){
-				NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
-                                                 defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
-                                               alternateButton:nil
-                                                   otherButton:NSLocalizedString(@"Remove", @"Button title")
-                                     informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
-				rv = [alert runModal];
+				BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
+													 defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
+												   alternateButton:nil
+													   otherButton:NSLocalizedString(@"Remove", @"Button title")
+										 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
+				rv = [alert runSheetModalForWindow:documentWindow];
 				handleInherited = rv;
 				if(handleInherited != BDSKOperationIgnore){
 					[pub removeFromGroup:group handleInherited:handleInherited];
@@ -1491,18 +1625,18 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 			pubSingularPlural = NSLocalizedString(@"publication", @"publication, in status message");
 		else
 			pubSingularPlural = NSLocalizedString(@"publications", @"publications, in status message");
-		[self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Removed %ld %@ from %@", @"Status message: Removed [number] publications(s) from selected group(s)"), (long)count, pubSingularPlural, groupName] immediate:NO];
+		[self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Removed %i %@ from %@", @"Status message: Removed [number] publications(s) from selected group(s)"), count, pubSingularPlural, groupName] immediate:NO];
 	}
     
     return YES;
 }
 
 - (BOOL)movePublications:(NSArray *)pubs fromGroup:(BDSKGroup *)group toGroupNamed:(NSString *)newGroupName{
-	NSInteger count = 0;
-	NSInteger handleInherited = BDSKOperationAsk;
+	int count = 0;
+	int handleInherited = BDSKOperationAsk;
 	NSEnumerator *pubEnum = [pubs objectEnumerator];
 	BibItem *pub;
-	NSInteger rv;
+	int rv;
 	
 	if([group isCategory] == NO)
 		return NO;
@@ -1514,7 +1648,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSString *field = [(BDSKCategoryGroup *)group key];
 	
 	while(pub = [pubEnum nextObject]){
-		BDSKASSERT([pub isKindOfClass:[BibItem class]]);        
+		OBASSERT([pub isKindOfClass:[BibItem class]]);        
 		
         oldValue = [[[pub valueOfField:field] retain] autorelease];
 		rv = [pub replaceGroup:group withGroupNamed:newGroupName handleInherited:handleInherited];
@@ -1525,12 +1659,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             [oldValues addObject:oldValue ?: @""];
             [newValues addObject:[pub valueOfField:field]];
         }else if(rv == BDSKOperationAsk){
-			NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
-                                             defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
-                                           alternateButton:nil
-                                               otherButton:NSLocalizedString(@"Remove", @"Button title")
-                                 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
-			rv = [alert runModal];
+			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
+												 defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
+											   alternateButton:nil
+												   otherButton:NSLocalizedString(@"Remove", @"Button title")
+									 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
+			rv = [alert runSheetModalForWindow:documentWindow];
 			handleInherited = rv;
 			if(handleInherited != BDSKOperationIgnore){
 				[pub replaceGroup:group withGroupNamed:newGroupName handleInherited:handleInherited];
@@ -1555,10 +1689,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (void)sortGroupsByKey:(NSString *)key{
     if (key == nil) {
-		// nil key indicates resort
-    } else if ([key isEqualToString:sortGroupsKey]) {
         // clicked the sort arrow in the table header, change sort order
         docState.sortGroupsDescending = !docState.sortGroupsDescending;
+    } else if ([key isEqualToString:sortGroupsKey]) {
+		// same key, resort
     } else {
         // change key
         // save new sorting selector, and re-sort the array.
@@ -1568,44 +1702,48 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 			docState.sortGroupsDescending = YES; // more appropriate for default count sort
 		[sortGroupsKey release];
         sortGroupsKey = [key retain];
-        if ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKHideGroupCountKey]) {
-            // the smart group counts were not updated, so we need to do that now; this will get back to us, so just return here.
-            [self updateSmartGroupsCount];
-            return;
-        }
 	}
     
     // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
-    [groupOutlineView setDelegate:nil];
+    [groupTableView setDelegate:nil];
 	
     // cache the selection
 	NSArray *selectedGroups = [self selectedGroups];
     
+	NSSortDescriptor *countSort = [[NSSortDescriptor alloc] initWithKey:@"numberValue" ascending:!docState.sortGroupsDescending  selector:@selector(compare:)];
+    [countSort autorelease];
+
+    // could use "name" as key path, but then we'd still have to deal with names that are not NSStrings
+    NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"self" ascending:!docState.sortGroupsDescending  selector:@selector(nameCompare:)];
+    [nameSort autorelease];
+
     NSArray *sortDescriptors;
     
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
-        NSSortDescriptor *countSort = [[NSSortDescriptor alloc] initWithKey:@"numberValue" ascending:!docState.sortGroupsDescending  selector:@selector(compare:)];
-        NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"self" ascending:docState.sortGroupsDescending  selector:@selector(nameCompare:)];
+        if(docState.sortGroupsDescending)
+            // doc bug: this is supposed to return a copy of the receiver, but sending -release results in a zombie error
+            nameSort = [nameSort reversedSortDescriptor];
         sortDescriptors = [NSArray arrayWithObjects:countSort, nameSort, nil];
-        [countSort release];
-        [nameSort release];
     } else {
-        NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"self" ascending:!docState.sortGroupsDescending  selector:@selector(nameCompare:)];
-        sortDescriptors = [NSArray arrayWithObjects:nameSort, nil];
-        [nameSort release];
+        if(docState.sortGroupsDescending == NO)
+            countSort = [countSort reversedSortDescriptor];
+        sortDescriptors = [NSArray arrayWithObjects:nameSort, countSort, nil];
     }
     
     [groups sortUsingDescriptors:sortDescriptors];
     
-    [[(NSMutableDictionary *)groupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [groupOutlineView reloadData];
+    // Set the graphic for the new column header
+	BDSKHeaderPopUpButtonCell *headerPopup = (BDSKHeaderPopUpButtonCell *)[groupTableView popUpHeaderCell];
+	[headerPopup setIndicatorImage:[NSImage imageNamed:docState.sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
+
+    [groupTableView reloadData];
 	
 	// select the current groups. Otherwise select Library
 	[self selectGroups:selectedGroups];
 	[self displaySelectedGroups];
 	
     // reset ourself as delegate
-    [groupOutlineView setDelegate:self];
+    [groupTableView setDelegate:self];
 }
 
 #pragma mark Importing
@@ -1614,27 +1752,29 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     CFIndex countOfItems = [pubs count];
     BibItem **items = (BibItem **)NSZoneMalloc([self zone], sizeof(BibItem *) * countOfItems);
     [pubs getObjects:items];
-    NSSet *pubSet = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)items, countOfItems, &kBDSKBibItemEquivalenceSetCallBacks);
+    NSSet *pubSet = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)items, countOfItems, &BDSKBibItemEquivalenceCallBacks);
     NSZoneFree([self zone], items);
     
-    NSMutableArray *groupsToTest = [NSMutableArray array];
-        
+    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
+    
     if (aGroup) {
-        [groupsToTest addObject:aGroup];
+        [indexes addIndex:[groups indexOfObjectIdenticalTo:aGroup]];
     } else {
-        [groupsToTest addObject:[groups webGroup]];
-        [groupsToTest addObjectsFromArray:[groups sharedGroups]];
-        [groupsToTest addObjectsFromArray:[groups URLGroups]];
-        [groupsToTest addObjectsFromArray:[groups scriptGroups]];
-        [groupsToTest addObjectsFromArray:[groups searchGroups]];
+        if ([groups webGroup])
+            [indexes addIndex:1];
+        [indexes addIndexesInRange:[groups rangeOfSharedGroups]];
+        [indexes addIndexesInRange:[groups rangeOfURLGroups]];
+        [indexes addIndexesInRange:[groups rangeOfScriptGroups]];
+        [indexes addIndexesInRange:[groups rangeOfSearchGroups]];
     }
     
-    NSEnumerator *groupEnum = [groupsToTest objectEnumerator];
-    id group;
+    unsigned idx = [indexes firstIndex];
     
-    while (group = [groupEnum nextObject]) {
-        // publicationsWithoutUpdating avoids triggering a load or update of external groups every time you add/remove a pub
-        NSEnumerator *pubEnum = [[group publicationsWithoutUpdating] objectEnumerator];
+    while (idx != NSNotFound) {
+        id group = [groups objectAtIndex:idx];
+        idx = [indexes indexGreaterThanIndex:idx];
+        if ([group count] == 0) continue; // otherwise the group will load
+        NSEnumerator *pubEnum = [[group publications] objectEnumerator];
         BibItem *pub;
         while (pub = [pubEnum nextObject]) {
             if ([pubSet containsObject:pub])
@@ -1648,7 +1788,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         [tableView setNeedsDisplayInRect:[tableView rectOfColumn:[[tableView tableColumns] indexOfObject:tc]]];
 }
 
-- (void)tableView:(NSTableView *)aTableView importItemAtRow:(NSInteger)rowIndex{
+- (void)tableView:(NSTableView *)aTableView importItemAtRow:(int)rowIndex{
     BibItem *pub = [shownPublications objectAtIndex:rowIndex];
     // also import a possible crossref parent if that wasn't already present
     BibItem *parent = [pub crossrefParent];

@@ -38,20 +38,16 @@
 
 #import <Cocoa/Cocoa.h>
 
-
 @interface BDSKDocumentSearch : NSObject {
     @private;
     SKSearchRef search;                       // active search
     NSInvocation *callback;                   // encapsulates document target for callback messages
-    CGFloat maxScore;                         // maximum score encountered
+    float maxScore;                           // maximum score encountered
     NSMutableDictionary *originalScores;      // non-normalized scores, identifier URLs as keys
     volatile int32_t isSearching;
-    volatile int32_t shouldKeepRunning;
     NSString *currentSearchString;            // avoids duplicate searches
     NSLock *searchLock;                       // for currentSearchString and invocation
-    NSConditionLock *queueLock;               // for queued invocations
-    NSMutableArray *queue;
-    
+
     // main thread access only
     NSArray *previouslySelectedPublications;  // convenience for the document
     NSPoint previousScrollPositionAsPercentage;
@@ -72,5 +68,5 @@
 @interface NSObject (BDSKDocumentSearchCallback)
 - (void)searchDidStart:(BDSKDocumentSearch *)aSearch;
 - (void)searchDidStop:(BDSKDocumentSearch *)aSearch;
-- (void)search:(BDSKDocumentSearch *)aSearch foundIdentifiers:(NSSet *)identifierURLs normalizedScores:(NSDictionary *)scores;
+- (void)handleSearchCallbackWithIdentifiers:(NSSet *)identifierURLs normalizedScores:(NSDictionary *)scores;
 @end

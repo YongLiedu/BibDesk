@@ -22,22 +22,6 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSApplication</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
 			<string>NSMenuItem</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -62,11 +46,19 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>BDSKSplitView</string>
+			<string>OASplitView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSSplitView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKSplitView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>OASplitView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -108,6 +100,32 @@
 			<string>NSObject</string>
 		</dict>
 		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>delete</key>
+				<string>id</string>
+				<key>selectNextIcon</key>
+				<string>id</string>
+				<key>selectPreviousIcon</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>FileView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>dataSource</key>
+				<string>id</string>
+				<key>delegate</key>
+				<string>id</string>
+				<key>dragDataSource</key>
+				<string>id</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
 			<key>CLASS</key>
 			<string>NSObject</string>
 			<key>LANGUAGE</key>
@@ -120,19 +138,6 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSTextFieldCell</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKContainerView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>contentView</key>
-				<string>id</string>
-			</dict>
-			<key>SUPERCLASS</key>
-			<string>NSView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -149,6 +154,19 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>BDSKContainerView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>contentView</key>
+				<string>id</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>BDSKEdgeView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -162,22 +180,6 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSTabView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSCell</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSObject</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKGradientSplitView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>BDSKSplitView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -244,8 +246,6 @@
 				<string>id</string>
 				<key>showPersonDetailCmd</key>
 				<string>id</string>
-				<key>tableButtonAction</key>
-				<string>id</string>
 				<key>toggleStatusBar</key>
 				<string>id</string>
 				<key>trashLinkedFiles</key>
@@ -282,11 +282,11 @@
 				<key>citeKeyWarningButton</key>
 				<string>NSButton</string>
 				<key>fileSplitView</key>
-				<string>BDSKGradientSplitView</string>
+				<string>BDSKSplitView</string>
 				<key>fileView</key>
-				<string>FVFileView</string>
+				<string>FileView</string>
 				<key>mainSplitView</key>
-				<string>BDSKGradientSplitView</string>
+				<string>BDSKSplitView</string>
 				<key>matrix</key>
 				<string>NSMatrix</string>
 				<key>notesView</key>
@@ -324,36 +324,6 @@
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>BDSKGradientView</string>
-		</dict>
-		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>changeFinderLabel</key>
-				<string>id</string>
-				<key>delete</key>
-				<string>id</string>
-				<key>openSelectedURLs</key>
-				<string>id</string>
-				<key>selectNextIcon</key>
-				<string>id</string>
-				<key>selectPreviousIcon</key>
-				<string>id</string>
-			</dict>
-			<key>CLASS</key>
-			<string>FVFileView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>dataSource</key>
-				<string>id</string>
-				<key>delegate</key>
-				<string>id</string>
-				<key>dragDataSource</key>
-				<string>id</string>
-			</dict>
-			<key>SUPERCLASS</key>
-			<string>NSView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>

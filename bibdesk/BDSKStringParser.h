@@ -51,15 +51,14 @@ enum {
 	BDSKDublinCoreStringType,
     BDSKReferStringType,
     BDSKMODSStringType,
-    BDSKSciFinderStringType,
-    BDSKPubMedXMLStringType
+    BDSKSciFinderStringType
 };
 
 // these methods are valid for the abstract class, and should not be used or defined for a concrete subclass
 // for BDSKUnknownStringType, type will be determined using [string contentStringType]
 @interface BDSKStringParser : NSObject
-+ (BOOL)canParseString:(NSString *)string ofType:(NSInteger)stringType;
-+ (NSArray *)itemsFromString:(NSString *)string ofType:(NSInteger)stringType error:(NSError **)outError;
++ (BOOL)canParseString:(NSString *)string ofType:(int)stringType;
++ (NSArray *)itemsFromString:(NSString *)string ofType:(int)stringType error:(NSError **)outError;
 @end
 
 // these methods must be implemented by the concrete subclasses
@@ -71,5 +70,5 @@ enum {
 
 
 @interface NSString (BDSKStringParserExtensions)
-- (NSInteger)contentStringType;
+- (int)contentStringType;
 @end

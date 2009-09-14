@@ -59,13 +59,12 @@ static const NSUInteger _sizes[] = { 32, 64, 128, 256, 512 };
         NSGraphicsContext *windowContext = FVWindowGraphicsContextWithSize(dstRect.size);
         NSParameterAssert(nil != windowContext);
 
-        CGLayerRef layer = CGLayerCreateWithContext([windowContext graphicsPort], NSRectToCGRect(dstRect).size, NULL);
+        CGLayerRef layer = CGLayerCreateWithContext([windowContext graphicsPort], ((CGRect *)&dstRect)->size, NULL);
         CGContextRef context = CGLayerGetContext(layer);
-        NSParameterAssert(nil != context);
-
+        
         // don't use CGContextClearRect with non-window/bitmap contexts
         CGContextSetRGBFillColor(context, 0, 0, 0, 0);
-        CGContextFillRect(context, NSRectToCGRect(dstRect));
+        CGContextFillRect(context, *(CGRect *)&dstRect);
         
         NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:context flipped:YES];
         [NSGraphicsContext saveGraphicsState];
@@ -73,11 +72,11 @@ static const NSUInteger _sizes[] = { 32, 64, 128, 256, 512 };
         [nsContext saveGraphicsState];
         
         CGFloat radius = MIN(NSWidth(dstRect) / 4.0, 10.0);
-        CGFloat lineWidth = MIN((CGFloat)_sizes[i] / 64, 2.0);
-        dstRect = NSInsetRect(dstRect, 2.0, 2.0);
+        CGFloat lineWidth = MIN(_sizes[i] / 64, 2.0);
+        dstRect = NSInsetRect(dstRect, lineWidth / 2, lineWidth / 2);
         
         NSBezierPath *path = [NSBezierPath fv_bezierPathWithRoundRect:dstRect xRadius:radius yRadius:radius];
-        CGFloat pattern[2] = { 6.0, 3.0 };
+        CGFloat pattern[2] = { 12.0, 6.0 };
         
         [path setLineWidth:lineWidth];
         [path setLineDash:pattern count:2 phase:0.0];

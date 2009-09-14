@@ -36,22 +36,29 @@
 
 #import "NSTextView_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
+#import <OmniFoundation/OmniFoundation.h>
+#import <OmniAppKit/OmniAppKit.h>
+#import "BDSKTextViewFindController.h"
 #import "NSObject_BDSKExtensions.h"
 
 @implementation NSTextView (BDSKExtensions)
 
+- (IBAction)performFindPanelAction:(id)sender{
+	[[BDSKTextViewFindController sharedFindController] performFindPanelAction:sender];
+}
+
 // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
 - (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
     // there is not original implementation
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:NSApp];
+    [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
 }
 
-- (void)selectLineNumber:(NSInteger) line;
+- (void)selectLineNumber:(int) line;
 {
-    NSInteger i;
+    int i;
     NSString *string;
-    NSUInteger start;
-    NSUInteger end;
+    unsigned start;
+    unsigned end;
     NSRange myRange;
 
     string = [self string];
@@ -74,18 +81,20 @@
 // allows persistent spell checking in text views
 
 - (void)toggleContinuousSpellChecking:(id)sender{
-    BOOL state = ![[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
+    BOOL state = ![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
     [sender setState:state];
-    [[NSUserDefaults standardUserDefaults] setBool:state forKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:state forKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
 }
 
 - (BOOL)isContinuousSpellCheckingEnabled{
-    return [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
+    return [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
 }
 
 - (void)highlightComponentsOfSearchString:(NSString *)searchString;
 {
     NSParameterAssert(searchString != nil);
+    NSTextStorage *textStorage = [self textStorage];
+
     static NSCharacterSet *charactersToRemove = nil;
     if (nil == charactersToRemove) {
         // SearchKit ignores punctuation, so results can be surprising.  In bug #1779548 the user was trying to search for a literal "ic.8" with the default wildcard expansion.  This translated into a large number of matches, but nothing was highlighted in the textview because we only removed SearchKit special characters.
@@ -115,41 +124,42 @@
     NSArray *allComponents = [mutableString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet] trimWhitespace:YES];
     [mutableString release];
 
-    if ([allComponents count])
+    if ([allComponents count]) {
+        [textStorage beginEditing];
         [self performSelector:@selector(highlightOccurrencesOfString:) withObjectsFromArray:allComponents];
+        [textStorage endEditing];
+    }
 }
 
 - (void)highlightOccurrencesOfString:(NSString *)substring;
 {
     NSParameterAssert(substring != nil);
     NSString *string = [self string];
+    NSTextStorage *textStorage = [self textStorage];
     NSRange range = [string rangeOfString:substring options:NSCaseInsensitiveSearch];
-    NSUInteger maxRangeLoc;
-    NSUInteger length = [string length];
+    unsigned int maxRangeLoc;
+    unsigned int length = [string length];
     
     // Mail.app appears to use a light gray highlight, which is rather ugly, but we don't want to use the selected text highlight
-    NSDictionary *highlightAttributes = [NSDictionary dictionaryWithObjectsAndKeys:[NSColor lightGrayColor], NSBackgroundColorAttributeName, nil];
+    static NSDictionary *highlightAttributes = nil;
+    if(highlightAttributes == nil)
+        highlightAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSColor lightGrayColor], NSBackgroundColorAttributeName, nil];
     
     // use the layout manager to add temporary attributes; the advantage for our purpose is that temporary attributes don't print
     NSLayoutManager *layoutManager = [self layoutManager];
-    BDSKPRECONDITION(layoutManager);
+    OBPRECONDITION(layoutManager);
     if(layoutManager == nil)
         return;
     
-    /*
-     Using beginEditing/endEditing here can result in the following exception:
-     
-     -[NSLayoutManager _fillGlyphHoleForCharacterRange:startGlyphIndex:desiredNumberOfCharacters:] *** attempted glyph generation while textStorage is editing.  It is not valid to cause the layoutManager to do glyph generation while the textStorage is editing (ie the textStorage has been sent a beginEditing message without a matching endEditing.
-     
-     That's supposed to be a legitimate call before changes to attributes, and temporary attributes aren't supposed to affect layout...so it's odd that glyph generation is happening.  Maybe background layout is happening at the same time?
-     
-     */
+    // docs say we can nest beginEditing/endEditing messages, so we'll make sure the changes are processed in a batch
+    [textStorage beginEditing];
     while(range.location != NSNotFound){
         
         [layoutManager addTemporaryAttributes:highlightAttributes forCharacterRange:range];        
         maxRangeLoc = NSMaxRange(range);
         range = [string rangeOfString:substring options:NSCaseInsensitiveSearch range:NSMakeRange(maxRangeLoc, length - maxRangeLoc)];
     }
+    [textStorage endEditing];
 }
 
 - (IBAction)invertSelection:(id)sender;
@@ -157,7 +167,7 @@
     // Note the guarantees in the header for -selectedRanges and requirements for setSelectedRanges:
     NSArray *ranges = [self selectedRanges];
     NSMutableArray *newRanges = [NSMutableArray array];
-    NSUInteger i, iMax = [ranges count];
+    unsigned i, iMax = [ranges count];
     
     // this represents the entire string
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [[self string] length])];
@@ -173,7 +183,7 @@
         [newRanges addObject:[NSValue valueWithRange:NSMakeRange(0, 0)]];
     } else {
         
-        NSUInteger start, next;
+        unsigned start, next;
         start = i;
         
         while (NSNotFound != i) {
@@ -235,8 +245,8 @@
     point.y += tcOrigin.y;
     
     // make sure we have integral coordinates
-    point.x = BDSKCeil(point.x);
-    point.y = BDSKCeil(point.y);
+    point.x = ceilf(point.x);
+    point.y = ceilf(point.y);
     
     // make sure we don't put the window before the textfield when the text is scrolled
     if (point.x < [self visibleRect].origin.x) 

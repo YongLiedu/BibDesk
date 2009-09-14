@@ -38,11 +38,11 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKPreferencePane.h"
+#import <OmniAppKit/OmniAppKit.h>
 
 @class BDSKFormatStringFieldEditor;
 
-@interface BibPref_AutoFile : BDSKPreferencePane {
+@interface BibPref_AutoFile : OAPreferenceClient {
     IBOutlet NSPanel *formatSheet;
 	IBOutlet NSTextField* papersFolderLocationTextField;
 	IBOutlet NSButton* choosePapersFolderLocationButton;
@@ -78,5 +78,7 @@
 - (IBAction)localUrlHelp:(id)sender;
 - (IBAction)formatHelp:(id)sender;
 - (IBAction)showLocalUrlFormatWarning:(id)sender;
+- (void)setLocalUrlFormatInvalidWarning:(BOOL)set message:(NSString *)message;
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 @end

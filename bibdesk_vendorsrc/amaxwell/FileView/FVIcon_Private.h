@@ -40,106 +40,54 @@
 
 #import <Cocoa/Cocoa.h>
 #import "FVIcon.h"
-
-// subclasses use various functions from these headers
-#import "FVBitmapContext.h"
+#import "FVBitmapContextCache.h"
 #import "FVIconCache.h"
 #import <pthread.h>
 #import <libkern/OSAtomic.h>
-#import "FVCGImageUtilities.h"
 #import "FVUtilities.h"
 
-/** @file FVIcon_Private.h  FVIcon internal methods. */
+// Desired size: should be the same size passed to -[FVIcon needsRenderForSize:] and -[FVIcon _drawingRectWithRect:], not the return value of _drawingRectWithRect:.  Thumbnail size: current size of the instance's thumbnail image, if it has one (and if not, it shouldn't be calling this).
+static inline bool FVShouldDrawFullImageWithThumbnailSize(const NSSize desiredSize, const NSSize thumbnailSize)
+{
+    return (desiredSize.height > 1.2 * thumbnailSize.height || desiredSize.width > 1.2 * thumbnailSize.width);
+}
 
-/** @internal 
- 
- @brief For FVIcon subclass usage only.
- 
- Most icon subclasses use these methods, but should not invoke locking methods or methods with a leading underscore on each other.
- */
-@interface FVIcon (Private)
+static inline NSSize FVCGImageSize(CGImageRef image)
+{
+    NSSize s;
+    s.width = CGImageGetWidth(image);
+    s.height = CGImageGetHeight(image);
+    return s;
+}
 
-/** @internal Called after FVIcon::initialize */
+// best not to use these at all...
+extern const size_t FVMaxThumbnailDimension;
+extern const size_t FVMaxImageDimension;
+
+// returns true if the size pointer was modified; these are used by the resampling functions below
+FV_PRIVATE_EXTERN bool FVIconLimitFullImageSize(NSSize *size);
+FV_PRIVATE_EXTERN bool FVIconLimitThumbnailSize(NSSize *size);
+
+// both of these functions will simply retain the argument and return it if possible
+FV_PRIVATE_EXTERN CGImageRef FVCreateResampledThumbnail(CGImageRef image, const bool useContextCache);
+FV_PRIVATE_EXTERN CGImageRef FVCreateResampledFullImage(CGImageRef image, const bool useContextCache);
+
+@interface FVIcon (Private) <NSLocking>
+
+// called from +initialize
 + (void)_initializeCategory;
 
-/** @internal
- 
- \warning Subclasses should never have a need to override this method.
- 
- Call FVIcon::_startRenderingForKey: for classes that should avoid multiple render requests for the same icon; useful for multiple views, since the operation queue only ensures uniqueness of rendering requests per-view.  Requires synchronous caching to be effective, and must be called as @code [[self class] _startRenderingForKey:aKey] @endcode rather than @code [FVIcon _startRenderingForKey:aKey] @endcode in order to achieve proper granularity.  Each FVIcon::_startRenderingForKey: must be matched by FVIcon::_stopRenderingForKey: or bad things will happen. */
-+ (void)_startRenderingForKey:(id)aKey;
-
-/** @internal Call when bitmap caching to disk is complete */
-+ (void)_stopRenderingForKey:(id)aKey;
-
-/** @internal Determine if the file needs a badge.
- Always returns a copy of the correct target URL by reference (which makes it a simple ivar initializer for most subclasses, which copy the URL anyway).
- @param aURL The original URL as passed to FVIcon::iconWithURL: (which may be an alias or symlink).
- @param linkTarget The URL that will be rendered (aliases/links will be fully resolved).
- @return YES if the file at aURL needs a badge. */
+// returns YES if the file at aURL needs a badge, and always returns a copy of the correct target URL by reference (which makes it a simple initializer for most subclasses, which retain the URL anyway)
 + (BOOL)_shouldDrawBadgeForURL:(NSURL *)aURL copyTargetURL:(NSURL **)linkTarget;
 
-/** @internal
- @return FVIcon::size should only be used for computing an aspect ratio; don't rely on it as a pixel size. */
+// size should only be used for computing an aspect ratio; don't rely on it as a pixel size
 - (NSSize)size;
 
 - (CGRect)_drawingRectWithRect:(NSRect)iconRect;
 - (void)_drawPlaceholderInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
 - (void)_badgeIconInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
 
+// add to NSLocking; NSLocking is private to FVIcon instances themselves
+- (BOOL)tryLock;
+
 @end
-
-/** @internal 
- @warning Exported only for FVQuickLookIcon bundle linkage.
- Determine which image should be drawn, based on the desired size and the thumbnail representation's size.
- @param desiredSize Should be the same size passed to FVIcon::needsRenderForSize: and FVIcon::_drawingRectWithRect:, not the return value of FVIcon::_drawingRectWithRect:.  
- @param thumbnailSize Current size of the instance's thumbnail image, if it has one (and if not, it shouldn't be calling this).
- @return true if the full (largest) image representation should be drawn. */
-FV_EXTERN bool FVShouldDrawFullImageWithThumbnailSize(const NSSize desiredSize, const NSSize thumbnailSize);
-
-// best not to use these at all, but FVMaxThumbnailDimension is exported for the QL icon bundle
-
-/** @internal @var FVMaxThumbnailDimension
- Maximum dimension of a thumbnail image. 
- @warning Exported only for FVQuickLookIcon bundle linkage. */
-extern const size_t FVMaxThumbnailDimension;
-
-/** @internal @var FVMaxImageDimension
- Maximum dimension of a full image. */
-FV_PRIVATE_EXTERN const size_t FVMaxImageDimension;
-
-/** @internal @var FVDefaultPaperSize
- Nominal paper size to avoid using NSPrintInfo. */
-FV_PRIVATE_EXTERN const NSSize FVDefaultPaperSize;
-
-/** @internal @var FVTopMargin
- Nominal top margin to avoid using NSPrintInfo. */
-FV_PRIVATE_EXTERN const CGFloat FVTopMargin;
-
-/** @internal @var FVSideMargin
- Nominal side margin to avoid using NSPrintInfo. */
-FV_PRIVATE_EXTERN const CGFloat FVSideMargin;
-
-/** @internal 
- Determine if a full image needs to be resampled.  Used by the resampling functions below.
- @param size On input, current image size.  On return, the required size.
- @return true if size pointer was modified. */
-FV_PRIVATE_EXTERN bool FVIconLimitFullImageSize(NSSize *size);
-
-/** @internal 
- Determine if a thumbnail image needs to be resampled.  Used by the resampling functions below.
- @param size On input, current image size.  On return, the required size.
- @return true if size pointer was modified. */
-FV_PRIVATE_EXTERN bool FVIconLimitThumbnailSize(NSSize *size);
-
-/** @internal
- Create a thumbnail image with maximum dimension of FVIcon_Private.h::FVMaxThumbnailDimension.
- @param image The image to scale.
- @return Will simply retain the argument and return it if possible. */
-FV_PRIVATE_EXTERN CGImageRef FVCreateResampledThumbnail(CGImageRef image);
-
-/** @internal
- Create a full size image with maximum dimension of FVIcon_Private.h::FVMaxImageDimension.  
- @param image The image to scale.
- @return Will simply retain the argument and return it if possible. */
-FV_PRIVATE_EXTERN CGImageRef FVCreateResampledFullImage(CGImageRef image);

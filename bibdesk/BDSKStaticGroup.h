@@ -43,7 +43,6 @@
 
 @interface BDSKStaticGroup : BDSKMutableGroup {
 	NSMutableArray *publications;
-    NSArray *tmpKeys;
 }
 
 /*!
@@ -109,8 +108,6 @@
 	@param items The publications to remove.
 */
 - (void)removePublicationsInArray:(NSArray *)items;
-
-- (void)update;
 
 @end
 

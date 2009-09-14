@@ -39,8 +39,6 @@
 #import "BDSKCompletionManager.h"
 #import "BDSKStringConstants.h"
 #import "BDSKTypeManager.h"
-#import "NSArray_BDSKExtensions.h"
-#import "CFString_BDSKExtensions.h"
 
 
 @implementation BDSKCompletionManager
@@ -70,7 +68,7 @@ static id sharedManager = nil;
 
 - (void)release {}
 
-- (NSUInteger)retainCount { return NSUIntegerMax; }
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (void)addNamesForCompletion:(NSArray *)names {
     NSMutableSet *nameSet = [autoCompletionDict objectForKey:BDSKAuthorString];
@@ -79,7 +77,7 @@ static id sharedManager = nil;
         [autoCompletionDict setObject:nameSet forKey:BDSKAuthorString];
         [nameSet release];
     }
-    NSUInteger i, iMax = [names count];
+    unsigned i, iMax = [names count];
     NSString *name;
     for (i = 0; i < iMax; i++) {
         name = [names objectAtIndex:i];
@@ -108,7 +106,7 @@ static id sharedManager = nil;
     if([string isComplex]) string = [NSString stringWithString:string];
 
     if([entry isSingleValuedField]){ // add the whole string 
-        [completionSet addObject:[string stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+        [completionSet addObject:[string fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]];
         return;
     }
     
@@ -117,9 +115,9 @@ static id sharedManager = nil;
         [completionSet addObjectsFromArray:[string componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES]];
     } else if([entry isEqualToString:BDSKKeywordsString]){
         // if it wasn't punctuated, try this; Elsevier uses "and" as a separator, and it's annoying to have the whole string autocomplete on you
-        [completionSet addObjectsFromArray:[[string componentsSeparatedByString:@" and "] arrayByPerformingSelector:@selector(stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace)]];
+        [completionSet addObjectsFromArray:[[string componentsSeparatedByString:@" and "] arrayByPerformingSelector:@selector(fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace)]];
     } else {
-        [completionSet addObject:[string stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+        [completionSet addObject:[string fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]];
     }
 }
 
@@ -149,7 +147,7 @@ static id sharedManager = nil;
     NSRange andRange = [fullString rangeOfString:@" and "
 										 options:NSBackwardsSearch | NSLiteralSearch
 										   range:searchRange];
-	NSUInteger matchStart = 0;
+	unsigned matchStart = 0;
 	// now find the beginning of the match, reflecting addString:forCompletionEntry:. We might be more sophisticated, like in groups
     if ([entry isPersonField]) {
 		// these are delimited by "and"
@@ -170,7 +168,7 @@ static id sharedManager = nil;
 	return NSMakeRange(matchStart, NSMaxRange(charRange) - matchStart);
 }
 
-- (NSArray *)entry:(NSString *)entry completions:(NSArray *)words forPartialWordRange:(NSRange)charRange ofString:(NSString *)fullString indexOfSelectedItem:(NSInteger *)idx {
+- (NSArray *)entry:(NSString *)entry completions:(NSArray *)words forPartialWordRange:(NSRange)charRange ofString:(NSString *)fullString indexOfSelectedItem:(int *)idx {
     // all persons are keyed to author
 	if ([entry isPersonField])	
 		entry = BDSKAuthorString;
@@ -197,7 +195,7 @@ static id sharedManager = nil;
     
     [completions sortUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     
-	NSInteger i, count = [completions count];
+	int i, count = [completions count];
 	for (i = 0; i < count; i++) {
         string = [completions objectAtIndex:i];
 		if ([[string stringByRemovingCurlyBraces] caseInsensitiveCompare:matchString]) {
@@ -218,7 +216,7 @@ static id sharedManager = nil;
 		[tmpSet release];
 	}
 	// we extend, as we use a different set of punctuation characters as Apple does
-	NSUInteger prefixLength = 0;
+	unsigned int prefixLength = 0;
 	while (charRange.location > prefixLength && ![punctuationCharSet characterIsMember:[fullString characterAtIndex:charRange.location - prefixLength - 1]]) 
 		prefixLength++;
 	if (prefixLength > 0) {
@@ -228,7 +226,7 @@ static id sharedManager = nil;
 	return charRange;
 }
 
-- (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(NSInteger *)idx{
+- (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(int *)idx{
     NSString *partialString = [fullString substringWithRange:charRange];
     NSMutableArray *matches = [NSMutableArray arrayWithCapacity:[definitions count]];
     NSEnumerator *keyE = [definitions keyEnumerator];
@@ -242,7 +240,7 @@ static id sharedManager = nil;
     }
     [matches sortUsingSelector:@selector(caseInsensitiveCompare:)];
 
-    NSInteger i, count = [matches count];
+    int i, count = [matches count];
     for (i = 0; i < count; i++) {
         key = [matches objectAtIndex:i];
         if ([key hasPrefix:partialString]) {

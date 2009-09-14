@@ -34,11 +34,11 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKPreferencePane.h"
+#import <OmniAppKit/OmniAppKit.h>
 
-@class BDSKMacroWindowController, BDSKTableView;
+@class BDSKMacroWindowController;
 
-@interface BibPref_Defaults : BDSKPreferencePane
+@interface BibPref_Defaults : OAPreferenceClient
 {
     IBOutlet NSButton* convertURLFieldsButton;
     IBOutlet NSButton* removeLocalFileFieldsButton;
@@ -46,7 +46,7 @@
     IBOutlet NSButton* delSelectedDefaultFieldButton;
     IBOutlet NSButton* addDefaultFieldButton;
     IBOutlet NSWindow* globalMacroFileSheet;
-    IBOutlet BDSKTableView* globalMacroFilesTableView;
+    IBOutlet NSTableView* globalMacroFilesTableView;
     IBOutlet NSTableView* defaultFieldsTableView;
     IBOutlet NSButton *editGlobalMacroDefsButton;
     IBOutlet NSMenu *fieldTypeMenu;
@@ -64,6 +64,7 @@
 - (IBAction)delSelectedDefaultField:(id)sender;
 - (IBAction)addDefaultField:(id)sender;
 - (IBAction)showTypeInfoEditor:(id)sender;
+- (void)addGlobalMacroFilePanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)showMacrosWindow:(id)sender;
 - (IBAction)showMacroFileWindow:(id)sender;
@@ -73,3 +74,5 @@
 - (IBAction)changeDefaultPDFViewer:(id)sender;
 
 @end
+
+@interface MacroFileTableView : NSTableView {} @end

@@ -53,9 +53,8 @@
     BOOL failedDownload;
     BOOL isRetrieving;
     BOOL needsReset;
-    NSInteger availableResults;
-    NSInteger fetchedResults;
-    NSInteger downloadState;
+    int availableResults;
+    int fetchedResults;
 }
 + (NSString *)baseURLString;
 + (BOOL)canConnect;

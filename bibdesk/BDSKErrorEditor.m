@@ -37,6 +37,8 @@
  */
 
 #import "BDSKErrorEditor.h"
+#import <OmniBase/OmniBase.h>
+#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKErrorManager.h"
 #import "NSTextView_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
@@ -46,14 +48,14 @@
 #import "BDSKStringEncodingManager.h"
 #import "NSWindowController_BDSKExtensions.h"
 
-static char BDSKErrorEditorObservationContext;
+static NSString *BDSKErrorEditorObservationContext = @"BDSKErrorEditorObservationContext";
 
 @implementation BDSKErrorEditor
 
 + (void)initialize;
 {
+    OBINITIALIZE;
     [self setKeys:[NSArray arrayWithObjects:@"manager", nil] triggerChangeNotificationsForDependentKey:@"displayName"];
-    BDSKINITIALIZE;
 }
 
 - (id)initWithFileName:(NSString *)aFileName pasteDragData:(NSData *)aData;
@@ -116,7 +118,7 @@ static char BDSKErrorEditorObservationContext;
     
     NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Partial window title") : NSLocalizedString(@"Edit Source", @"Partial window title");
     
-    BDSKASSERT(fileName);
+    OBASSERT(fileName);
     [[self window] setRepresentedFilename:fileName];
 	[[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [manager displayName]]];
     
@@ -158,7 +160,7 @@ static char BDSKErrorEditorObservationContext;
         manager = newManager;
         [self updateDisplayName];
         if(manager)
-            [manager addObserver:self forKeyPath:@"displayName" options:0 context:&BDSKErrorEditorObservationContext];
+            [manager addObserver:self forKeyPath:@"displayName" options:0 context:BDSKErrorEditorObservationContext];
     }
 }
 
@@ -193,7 +195,7 @@ static char BDSKErrorEditorObservationContext;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
-    if (context == &BDSKErrorEditorObservationContext) {
+    if (context == BDSKErrorEditorObservationContext) {
         if(object == manager && [keyPath isEqualToString:@"displayName"]){
             [self updateDisplayName];
             
@@ -217,11 +219,13 @@ static char BDSKErrorEditorObservationContext;
 
 #pragma mark Editing
 
+- (id <OAFindControllerTarget>)omniFindControllerTarget { return textView; }
+
 - (IBAction)loadFile:(id)sender{
     BibDocument *document = [manager sourceDocument];
     
     if(fileName == nil){
-        BDSKASSERT(data != nil && document != nil);
+        OBASSERT(data != nil && document != nil);
         [self setFileName:[[NSFileManager defaultManager] temporaryFileWithBasename:[document displayName]]];
         [data writeToFile:fileName atomically:YES];
         [data release];
@@ -279,19 +283,19 @@ static char BDSKErrorEditorObservationContext;
 }
 
 - (IBAction)changeLineNumber:(id)sender{
-    NSInteger lineNumber = [sender intValue];
+    int lineNumber = [sender intValue];
     if (lineNumber > 0)
         [self gotoLine:lineNumber];
     else
         NSBeep();
 }
 
-- (void)gotoLine:(NSInteger)lineNumber{
-    NSInteger i = 0;
+- (void)gotoLine:(int)lineNumber{
+    int i = 0;
     NSString *string = [textView string];
-    NSUInteger start = 0;
-    NSUInteger end = 0;
-    NSUInteger length = [string length];
+    unsigned start = 0;
+    unsigned end = 0;
+    unsigned length = [string length];
     NSRange range;
     
     while (i++ < lineNumber && end < length) {
@@ -307,12 +311,12 @@ static char BDSKErrorEditorObservationContext;
 - (void)handleSelectionDidChangeNotification:(NSNotification *)notification{
     NSRange selectedRange = [textView selectedRange];
     
-    NSInteger lineNumber = 0;
+    int lineNumber = 0;
     NSString *string = [textView string];
-    NSUInteger length = [string length];
-    NSUInteger location = selectedRange.location;
-    NSUInteger end = 0;
-    NSUInteger contentsEnd = 0;
+    unsigned length = [string length];
+    unsigned location = selectedRange.location;
+    unsigned end = 0;
+    unsigned contentsEnd = 0;
     
     while (end <= location) {
         ++lineNumber;
@@ -372,9 +376,9 @@ static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isE
     
     NSCharacterSet *newlineSet = [NSCharacterSet newlineCharacterSet];
     
-    NSUInteger start = MIN(proposedRange.location, invalidSyntaxHighlightMark);
-    NSUInteger end = NSMaxRange(proposedRange);
-    NSUInteger length = [string length];
+    unsigned start = MIN(proposedRange.location, invalidSyntaxHighlightMark);
+    unsigned end = NSMaxRange(proposedRange);
+    unsigned length = [string length];
     
     // quoted or commented text can have multiple lines
     do {

@@ -40,8 +40,6 @@
 #import "BibItem.h"
 #import "BDSKBibTeXParser.h"
 #import "NSError_BDSKExtensions.h"
-#import "BDSKBibTeXParser.h"
-#import "NSXMLNode_BDSKExtensions.h"
 
 @implementation BDSKGoogleScholarParser
 
@@ -57,7 +55,7 @@
     
     NSError *error = nil;    
 
-    NSUInteger nodecount = [[[xmlDocument rootElement] nodesForXPath:containsBibTexLinkNode error:&error] count];
+    int nodecount = [[[xmlDocument rootElement] nodesForXPath:containsBibTexLinkNode error:&error] count];
 
     return nodecount > 0;
 }
@@ -71,18 +69,16 @@
 
     NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
     
-    
-    //searching recursivley to containing <p class=g> doesn't work anymore wince google degraded from xhtml to html
-    //NSString *googSearchResultNodePath = @"//p[@class='g']";
+    NSString *googSearchResultNodePath = @"//p[@class='g']";
     
     NSString *BibTexLinkNodePath = @".//a[contains(text(),'BibTeX')]";
 	
-    //NSString *targetUrlNodePath = @".//span[@class='w']/a";
+    NSString *targetUrlNodePath = @".//span[@class='w']/a";
     
     NSError *error = nil;
             
     // fetch the google search results
-    NSArray *googSearchResults = [[xmlDocument rootElement] nodesForXPath:BibTexLinkNodePath
+    NSArray *googSearchResults = [[xmlDocument rootElement] nodesForXPath:googSearchResultNodePath
                                                                     error:&error];
     
     // bail out with an XML error if the Xpath query fails
@@ -91,7 +87,7 @@
         return nil;
     }    
     
-    NSUInteger i, iMax = [googSearchResults count];
+    unsigned int i, iMax = [googSearchResults count];
     
     // check the number of nodes first
     if (0 == iMax) {
@@ -105,8 +101,6 @@
         
         NSXMLNode *googSearchResult = [googSearchResults objectAtIndex:i];
         
-        /*
-        
         NSString *targetUrlHrefValue = nil;
         
         // fetch the bibtex link
@@ -118,14 +112,14 @@
 
             // This is an error since this method isn't supposed to be called if the bibtex
             // links don't appear on the page
-            NSLog(@"Google Scholar Error: unable to parse bibtex url from search result %lu due to xpath error", (unsigned long)i);
+            NSLog(@"Google Scholar Error: unable to parse bibtex url from search result %u due to xpath error", i);
             continue;
 
         } else if (1 != [BibTeXLinkNodes count]) {
 
             // If Google ever start providing multiple alternative bibtex links for a
             // single item we will need to deal with that
-            NSLog(@"Google Scholar Error: unable to parse bibtex url from search result %lu, found %lu bibtex urls (expected 1)", (unsigned long)i, (unsigned long)[BibTeXLinkNodes count]);
+            NSLog(@"Google Scholar Error: unable to parse bibtex url from search result %u, found %u bibtex urls (expected 1)", i, [BibTeXLinkNodes count]);
             continue;
 
         }
@@ -147,9 +141,8 @@
         }
         
         NSXMLNode *btlinknode = [BibTeXLinkNodes objectAtIndex:0];
-        */
         
-        NSString *hrefValue = [googSearchResult stringValueOfAttribute:@"href"];
+        NSString *hrefValue = [btlinknode stringValueOfAttribute:@"href"];
         
         
         NSURL *btURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@%@", [url host], hrefValue]];
@@ -203,8 +196,8 @@
 				[mutableTitle release];
 			}
             
-            /*
             NSString *itemUrlField = [bibtexItem valueOfField:BDSKUrlString inherit:NO];
+            
             if (
                 nil != targetUrlHrefValue &&
                 (nil == itemUrlField || 0 == [itemUrlField length])
@@ -213,7 +206,6 @@
                 // target url was found successfully & is not explicitly set in the entry
                 [bibtexItem setField:BDSKUrlString toValue:targetUrlHrefValue];
             }
-            */
         }
         else {
             // display a fake item in the table so the user knows one of the items failed to parse, but still gets the rest of the data
@@ -237,14 +229,6 @@
     return items;  
     
 }
-
-
-+ (NSArray *) parserInfos {
-	NSString * parserDescription = NSLocalizedString(@"Google\342\200\231s attempt to provide a universal search for and in research related literature. Please go to \342\200\230Scholar Preferences\342\200\231 and set the \342\200\230Bibliography Manager\342\200\231 option to \342\200\230Show links to import citations to BibTeX\342\200\231 for it to work.", @"Description for Google Scholar site");
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"Google Scholar" address:@"http://scholar.google.com/" description: parserDescription flags: BDSKParserFeatureNone ];
-	return [NSArray arrayWithObject: parserInfo];
-}
-
 
 @end 
 

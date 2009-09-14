@@ -38,6 +38,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStatusBar.h"
 
 @class BibDocument;
@@ -66,15 +67,15 @@
 	NSMutableArray *replaceHistory;
 	NSString *findString;
 	NSString *replaceString;
-	NSInteger searchType;
-	NSInteger searchScope;
+	int searchType;
+	int searchScope;
 	BOOL ignoreCase;
 	BOOL wrapAround;
 	BOOL searchSelection;
 	BOOL findAsMacro;
 	BOOL replaceAsMacro;
 	BOOL shouldSetWhenEmpty;
-    NSInteger operation;
+    int operation;
 	NSString *replaceLabel;
 	NSString *replaceAllTooltip;
 }
@@ -118,8 +119,8 @@
 
 - (IBAction)openHelp:(id)sender;
 
-- (NSInteger)operation;
-- (void)setOperation:(NSInteger)newOperation;
+- (int)operation;
+- (void)setOperation:(int)newOperation;
 
 - (NSString *)field;
 - (void)setField:(NSString *)newFieldName;
@@ -130,11 +131,11 @@
 - (NSString *)replaceString;
 - (void)setReplaceString:(NSString *)newReplaceString;
 
-- (NSInteger)searchType;
-- (void)setSearchType:(NSInteger)newSearchType;
+- (int)searchType;
+- (void)setSearchType:(int)newSearchType;
 
-- (NSInteger)searchScope;
-- (void)setSearchScope:(NSInteger)newSearchScope;
+- (int)searchScope;
+- (void)setSearchScope:(int)newSearchScope;
 
 - (BOOL)ignoreCase;
 - (void)setIgnoreCase:(BOOL)newIgnoreCase;
@@ -172,16 +173,16 @@
 - (BOOL)validateOperation:(id *)value error:(NSError **)error;
 
 - (NSArray *)findHistory;
-- (NSUInteger)countOfFindHistory;
-- (id)objectInFindHistoryAtIndex:(NSUInteger)index;
-- (void)insertObject:(id)obj inFindHistoryAtIndex:(NSUInteger)index;
-- (void)removeObjectFromFindHistoryAtIndex:(NSUInteger)index;
+- (unsigned)countOfFindHistory;
+- (id)objectInFindHistoryAtIndex:(unsigned)index;
+- (void)insertObject:(id)obj inFindHistoryAtIndex:(unsigned)index;
+- (void)removeObjectFromFindHistoryAtIndex:(unsigned)index;
 
 - (NSArray *)replaceHistory;
-- (NSUInteger)countOfReplaceHistory;
-- (id)objectInReplaceHistoryAtIndex:(NSUInteger)index;
-- (void)insertObject:(id)obj inReplaceHistoryAtIndex:(NSUInteger)index;
-- (void)removeObjectFromReplaceHistoryAtIndex:(NSUInteger)index;
+- (unsigned)countOfReplaceHistory;
+- (id)objectInReplaceHistoryAtIndex:(unsigned)index;
+- (void)insertObject:(id)obj inReplaceHistoryAtIndex:(unsigned)index;
+- (void)removeObjectFromReplaceHistoryAtIndex:(unsigned)index;
 
 - (IBAction)toggleStatusBar:(id)sender;
 
@@ -233,6 +234,6 @@
     @param      theDocument The document containing the publications
     @result     The number of replacements made
 */
-- (NSUInteger)findAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument;
+- (unsigned int)findAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument;
 
 @end

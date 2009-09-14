@@ -58,19 +58,25 @@ enum {
     @result     (description)
 */
 - (id)initWithMonthDayYearString:(NSString *)dateString;
-// used for field values, tries to clean the month first and then uses initWithMonthDayYearString:
-- (id)initWithMonthString:(NSString *)monthString yearString:(NSString *)yearString;
 
 - (NSString *)dateDescription;
 - (NSString *)shortDateDescription;
 - (NSString *)rssDescription;
 - (NSString *)standardDescription;
 
+- (NSDate *)startOfHour;
+- (NSDate *)endOfHour;
 - (NSDate *)startOfDay;
 - (NSDate *)endOfDay;
 - (NSDate *)startOfWeek;
 - (NSDate *)endOfWeek;
-- (NSDate *)dateByAddingNumber:(NSInteger)number ofPeriod:(NSInteger)period;
+- (NSDate *)startOfMonth;
+- (NSDate *)endOfMonth;
+- (NSDate *)startOfYear;
+- (NSDate *)endOfYear;
+- (NSDate *)startOfPeriod:(int)period;
+- (NSDate *)endOfPeriod:(int)period;
+- (NSDate *)dateByAddingNumber:(int)number ofPeriod:(int)period;
 
 @end
 
@@ -81,5 +87,5 @@ enum {
 @end
 
 @interface NSDateComponents (BDSKExtensions)
-+ (NSDateComponents *)dateComponentsWithYear:(NSInteger)year month:(NSInteger)month day:(NSInteger)day hour:(NSInteger)hour minute:(NSInteger)minute second:(NSInteger)second;
++ (NSDateComponents *)dateComponentsWithYear:(int)year month:(int)month day:(int)day hour:(int)hour minute:(int)minute second:(int)second;
 @end

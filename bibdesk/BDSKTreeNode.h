@@ -49,16 +49,16 @@
 - (id)init;
 // uses isEqual:
 - (void)removeChild:(BDSKTreeNode *)anObject;
-- (void)insertChild:(BDSKTreeNode *)anObject atIndex:(NSUInteger)index;
-- (id)childAtIndex:(NSUInteger)index;
+- (void)insertChild:(BDSKTreeNode *)anObject atIndex:(unsigned int)index;
+- (id)childAtIndex:(unsigned int)index;
 - (void)addChild:(BDSKTreeNode *)anObject;
 - (void)setChildren:(NSArray *)theChildren;
 - (NSArray *)children;
-- (NSUInteger)numberOfChildren;
+- (unsigned int)numberOfChildren;
 - (BDSKTreeNode *)parent;
 - (void)setParent:(BDSKTreeNode *)aParent;
 - (BOOL)isLeaf;
-- (void)sortChildrenUsingFunction:(NSInteger (*)(id, id, void *))compare context:(void *)context;
+- (void)sortChildrenUsingFunction:(int (*)(id, id, void *))compare context:(void *)context;
 
 - (void)setColumnValues:(NSDictionary *)values;
 

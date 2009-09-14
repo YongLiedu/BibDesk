@@ -141,7 +141,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     [self insertObject:newURL inLinkedFilesAtIndex:[[self localFiles] count]];
 }
 
-- (void)insertObject:(NSURL *)newURL inLinkedFilesAtIndex:(NSUInteger)idx {
+- (void)insertObject:(NSURL *)newURL inLinkedFilesAtIndex:(unsigned int)idx {
     if ([[self owner] isDocument]) {
         BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURL:newURL delegate:self];
         if (file) {
@@ -162,7 +162,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     }
 }
 
-- (void)removeObjectFromLinkedFilesAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromLinkedFilesAtIndex:(unsigned int)idx {
     [[self mutableArrayValueForKey:@"files"] removeObject:[[self localFiles] objectAtIndex:idx]];
 }
 
@@ -174,7 +174,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     [self insertObject:newURLString inLinkedURLsAtIndex:[[self remoteURLs] count]];
 }
 
-- (void)insertObject:(NSString *)newURLString inLinkedURLsAtIndex:(NSUInteger)idx {
+- (void)insertObject:(NSString *)newURLString inLinkedURLsAtIndex:(unsigned int)idx {
     if ([[self owner] isDocument]) {
         NSURL *newURL = [NSURL URLWithStringByNormalizingPercentEscapes:newURLString];
         BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURL:newURL delegate:self];
@@ -196,7 +196,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     }
 }
 
-- (void)removeObjectFromLinkedURLsAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromLinkedURLsAtIndex:(unsigned int)idx {
     [[self mutableArrayValueForKey:@"files"] removeObject:[[self remoteURLs] objectAtIndex:idx]];
 }
 
@@ -345,7 +345,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
         if (file == nil)
             return;
         NSArray *remoteURLs = [self remoteURLs];
-        NSUInteger idx = [self countOfFiles];
+        unsigned int idx = [self countOfFiles];
         if ([remoteURLs count]) {
             idx = [files indexOfObject:[remoteURLs objectAtIndex:0]];
             if (idx == NSNotFound)
@@ -376,7 +376,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
         if (file == nil)
             return;
         NSArray *localFiles = [self localFiles];
-        NSUInteger idx = 0;
+        unsigned int idx = 0;
         if ([localFiles count]) {
             idx = [files indexOfObject:[localFiles objectAtIndex:0]];
             if (idx == NSNotFound)
@@ -449,7 +449,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (NSTextStorage *)styledTextValue {
-    NSString *templateStyle = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKBottomPreviewDisplayTemplateKey];
+    NSString *templateStyle = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKBottomPreviewDisplayTemplateKey];
     BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle] ?: [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
     
     NSAttributedString *attrString = nil;
@@ -484,11 +484,11 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     }
 }
 
-- (NSInteger)scriptingRating{
+- (int)scriptingRating{
     return [self rating];
 }
 
-- (void)setScriptingRating:(NSInteger)rating{
+- (void)setScriptingRating:(int)rating{
     if ([[self owner] isDocument]) {
         [self setRating:rating];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
@@ -519,32 +519,10 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 		}
 		return;
 	}
-    
-    id doc = [self owner];
-    if ([cmd isKindOfClass:[NSCreateCommand class]]) {
-        // if this is called from AppleScript 'make', we need to use the correct macroResolver, as we may be copying from another source
-        id container = [[cmd arguments] valueForKey:@"ToLocation"];
-        if (container == nil) {
-            container = [cmd evaluatedReceivers];
-        } else {
-            [container insertionContainer];
-            if ([container respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
-                container = [container objectsByEvaluatingSpecifier];
-        }
-        if ([container isKindOfClass:[NSArray class]]) {
-            if ([container count] > 1) {
-                [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
-                return;
-            }
-            container = [container lastObject];
-        }
-        if ([container isKindOfClass:[BibDocument class]])
-            doc = container;
-    }
-    
+
     NSError *error = nil;
     BOOL isPartialData;
-    NSArray *newPubs = [BDSKBibTeXParser itemsFromString:btString document:doc isPartialData:&isPartialData error:&error];
+    NSArray *newPubs = [BDSKBibTeXParser itemsFromString:btString document:[self owner] isPartialData:&isPartialData error:&error];
 	
 	// try to do some error handling for AppleScript
 	if(isPartialData) {

@@ -38,10 +38,7 @@
 
 #import "BDSKLinkedFile.h"
 #import <CoreServices/CoreServices.h>
-#import "BDSKRuntime.h"
-#import "NSData_BDSKExtensions.h"
-
-#define WEAK_NULL NULL
+#import <OmniFoundation/OmniFoundation.h>
 
 static void BDSKDisposeAliasHandle(AliasHandle inAlias)
 {
@@ -107,10 +104,7 @@ static Boolean BDSKAliasHandleToFSRef(const AliasHandle inAlias, const FSRef *in
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
 #warning fixme: FSMatchAliasNoUI is deprecated, use FSMatchAliasBulk instead
 #endif
-    if (FSMatchAliasBulk != WEAK_NULL)
-        err = FSMatchAliasBulk(inBaseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst | kARMTryFileIDFirst, inAlias, &aliasCount, outRef, shouldUpdate, NULL, NULL);
-    else
-        err = FSMatchAliasNoUI(inBaseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst | kARMTryFileIDFirst, inAlias, &aliasCount, outRef, shouldUpdate, NULL, NULL);
+    err = FSMatchAliasNoUI(inBaseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst | kARMTryFileIDFirst, inAlias, &aliasCount, outRef, shouldUpdate, NULL, NULL);
     
     return noErr == err;
 }
@@ -171,8 +165,6 @@ static AliasHandle BDSKPathToAliasHandle(CFStringRef inPath, CFStringRef inBaseP
     AliasHandle alias;
     const FSRef *fileRef;
     NSString *relativePath;
-    NSURL *lastURL;
-    BOOL isInitial;
     id delegate;
 }
 
@@ -204,7 +196,7 @@ static Class BDSKLinkedFileClass = Nil;
 
 + (void)initialize
 {
-    BDSKINITIALIZE;
+    OBINITIALIZE;
     BDSKLinkedFileClass = self;
     defaultPlaceholderLinkedFile = (BDSKPlaceholderLinkedFile *)NSAllocateObject([BDSKPlaceholderLinkedFile class], 0, NSDefaultMallocZone());
 }
@@ -231,37 +223,37 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (id)initWithURL:(NSURL *)aURL delegate:(id)aDelegate;
 {
-    BDSKRequestConcreteImplementation(self, _cmd);
+    OBRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (id)initWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
 {
-    BDSKRequestConcreteImplementation(self, _cmd);
+    OBRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (id)initWithURLString:(NSString *)aString;
 {
-    BDSKRequestConcreteImplementation(self, _cmd);
+    OBRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (id)copyWithZone:(NSZone *)aZone
 {
-    BDSKRequestConcreteImplementation(self, _cmd);
+    OBRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (id)initWithCoder:(NSCoder *)coder
 {
-    BDSKRequestConcreteImplementation(self, _cmd);
+    OBRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    BDSKRequestConcreteImplementation(self, _cmd);
+    OBRequestConcreteImplementation(self, _cmd);
 }
 
 - (NSString *)description {
@@ -270,7 +262,7 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (NSURL *)URL
 {
-    BDSKRequestConcreteImplementation(self, _cmd);
+    OBRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
@@ -286,7 +278,7 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (NSString *)stringRelativeToPath:(NSString *)newBasePath;
 {
-    BDSKRequestConcreteImplementation(self, _cmd);
+    OBRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
@@ -341,7 +333,7 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (void)release {}
 
-- (NSUInteger)retainCount { return NSUIntegerMax; }
+- (unsigned)retainCount { return UINT_MAX; }
 
 @end
 
@@ -354,7 +346,7 @@ static Class BDSKLinkedFileClass = Nil;
 // takes possession of anAlias, even if it fails
 - (id)initWithAlias:(AliasHandle)anAlias relativePath:(NSString *)relPath delegate:(id)aDelegate;
 {
-    BDSKASSERT(nil == aDelegate || [aDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
+    OBASSERT(nil == aDelegate || [aDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
     self = [super init];
     if (anAlias == NULL) {
         [self release];
@@ -366,15 +358,13 @@ static Class BDSKLinkedFileClass = Nil;
         alias = anAlias;
         relativePath = [relPath copy];
         delegate = aDelegate;
-        lastURL = nil;
-        isInitial = YES;
     }
     return self;    
 }
 
 - (id)initWithAliasData:(NSData *)data relativePath:(NSString *)relPath delegate:(id)aDelegate;
 {
-    BDSKASSERT(nil != data);
+    OBASSERT(nil != data);
     
     AliasHandle anAlias = BDSKDataToAliasHandle((CFDataRef)data);
     return [self initWithAlias:anAlias relativePath:relPath delegate:aDelegate];
@@ -382,12 +372,12 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (id)initWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
 {
-    BDSKASSERT(nil != base64String);
+    OBASSERT(nil != base64String);
     
     if ([base64String rangeOfCharacterFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].location != NSNotFound || ([base64String length] % 4) != 0) {
         // make a valid base64 string: remove newline and white space characters, and add padding "=" if necessary
         NSMutableString *tmpString = [[base64String mutableCopy] autorelease];
-        [tmpString replaceOccurrencesOfCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] withString:@""];
+        [tmpString replaceAllOccurrencesOfCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] withString:@""];
         while (([tmpString length] % 4) != 0)
             [tmpString appendString:@"="];
         base64String = tmpString;
@@ -415,11 +405,11 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (id)initWithPath:(NSString *)aPath delegate:(id)aDelegate;
 {
-    BDSKASSERT(nil != aPath);
-    BDSKASSERT(nil == aDelegate || [aDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
+    OBASSERT(nil != aPath);
+    OBASSERT(nil == aDelegate || [aDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
     
     NSString *basePath = [aDelegate basePathForLinkedFile:self];
-    NSString *relPath = [aPath relativePathFromPath:basePath];
+    NSString *relPath = [basePath relativePathToFilename:aPath];
     AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
     
     if (self = [self initWithAlias:anAlias relativePath:relPath delegate:aDelegate]) {
@@ -432,14 +422,14 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (id)initWithURL:(NSURL *)aURL delegate:(id)aDelegate;
 {
-    BDSKASSERT([aURL isFileURL]);
+    OBASSERT([aURL isFileURL]);
     
     return [self initWithPath:[aURL path] delegate:aDelegate];
 }
 
 - (id)initWithURLString:(NSString *)aString;
 {
-    BDSKASSERT_NOT_REACHED("Attempt to initialize BDSKLinkedAliasFile with a URL string");
+    OBASSERT_NOT_REACHED("Attempt to initialize BDSKLinkedAliasFile with a URL string");
     return nil;
 }
 
@@ -473,7 +463,6 @@ static Class BDSKLinkedFileClass = Nil;
     NSZoneFree([self zone], (void *)fileRef);
     BDSKDisposeAliasHandle(alias);
     [relativePath release];
-    [lastURL release];
     [super dealloc];
 }
 
@@ -498,7 +487,7 @@ static Class BDSKLinkedFileClass = Nil;
 }
 
 - (void)setDelegate:(id)newDelegate {
-    BDSKASSERT(nil == newDelegate || [newDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
+    OBASSERT(nil == newDelegate || [newDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
     
     delegate = newDelegate;
 }
@@ -578,14 +567,6 @@ static Class BDSKLinkedFileClass = Nil;
         if ([self fileRef] != NULL)
             aURL = CFURLCreateFromFSRef(NULL, fileRef);
     }
-    BOOL changed = [(NSURL *)aURL isEqual:lastURL] == NO && (aURL != NULL || lastURL != nil);
-    if (changed) {
-        [lastURL release];
-        lastURL = [(NSURL *)aURL retain];
-        if (isInitial == NO)
-            [delegate performSelector:@selector(linkedFileURLChanged:) withObject:self afterDelay:0.0];
-    }
-    isInitial = NO;
     return [(NSURL *)aURL autorelease];
 }
 
@@ -627,7 +608,7 @@ static Class BDSKLinkedFileClass = Nil;
 {
     NSData *data = [self aliasDataRelativeToPath:newBasePath];
     NSString *path = [self path];
-    path = path && newBasePath ? [path relativePathFromPath:newBasePath] : relativePath;
+    path = path && newBasePath ? [newBasePath relativePathToFilename:path] : relativePath;
     NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:data, @"aliasData", path, @"relativePath", nil];
     return [[NSKeyedArchiver archivedDataWithRootObject:dictionary] base64String];
 }
@@ -690,10 +671,10 @@ static Class BDSKLinkedFileClass = Nil;
 }
 
 - (void)updateWithPath:(NSString *)path basePath:(NSString *)basePath baseRef:(const FSRef *)baseRef {
-    BDSKASSERT(path != nil);
-    BDSKASSERT(basePath != nil);
-    BDSKASSERT(baseRef != NULL);
-    BDSKASSERT(fileRef != NULL);
+    OBASSERT(path != nil);
+    OBASSERT(basePath != nil);
+    OBASSERT(baseRef != NULL);
+    OBASSERT(fileRef != NULL);
     
     Boolean didUpdate;
     
@@ -705,7 +686,7 @@ static Class BDSKLinkedFileClass = Nil;
     
     // update the relative path
     [relativePath autorelease];
-    relativePath = [[path relativePathFromPath:basePath] retain];
+    relativePath = [[basePath relativePathToFilename:path] retain];
 }
 
 @end
@@ -737,7 +718,7 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (id)initWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
 {
-    BDSKASSERT_NOT_REACHED("Attempt to initialize BDSKLinkedURL with a base 64 string");
+    OBASSERT_NOT_REACHED("Attempt to initialize BDSKLinkedURL with a base 64 string");
     return nil;
 }
 

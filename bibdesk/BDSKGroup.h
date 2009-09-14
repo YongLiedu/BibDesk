@@ -38,14 +38,13 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BibItem, BibDocument, BDSKMacroResolver, BDSKParentGroup;
+@class BibItem, BibDocument, BDSKMacroResolver;
 
 /* note that NSCoding support is presently limited in some cases */
 
 @interface BDSKGroup : NSObject <NSCopying, NSCoding> {
 	id name;
-	NSInteger count;
-    BDSKParentGroup *parent;
+	int count;
     BibDocument *document;
     NSString *uniqueID;
 }
@@ -57,7 +56,7 @@
 	@param aName The name for the group.
 	@param count The count for the group.
 */
-- (id)initWithName:(id)aName count:(NSInteger)aCount;
+- (id)initWithName:(id)aName count:(int)aCount;
 
 /*!
 	@method initLibraryGroup
@@ -70,6 +69,7 @@
 - (NSDictionary *)dictionaryValue;
 
 - (NSString *)uniqueID;
+- (void)setUniqueID:(NSString *)newID;
 
 /*!
 	@method name
@@ -83,7 +83,7 @@
 	@abstract Returns the count of the group.
 	@discussion -
 */
-- (NSInteger)count;
+- (int)count;
 
 /*!
 	@method setCount:
@@ -91,7 +91,7 @@
 	@discussion -
 	@param newCount The new count to set.
 */
-- (void)setCount:(NSInteger)newCount;
+- (void)setCount:(int)newCount;
 
 /*!
 	@method count
@@ -99,13 +99,6 @@
 	@discussion -
 */
 - (NSImage *)icon;
-
-/*!
-	@method isParent
-	@abstract Boolean, returns whether the receiver is a parent group. 
-	@discussion -
-*/
-- (BOOL)isParent;
 
 /*!
 	@method isStatic
@@ -209,14 +202,7 @@
 */
 - (NSNumber *)numberValue;
 
-- (NSString *)editingStringValue;
-
-- (id)cellValue;
-
 - (NSString *)toolTip;
-
-- (BDSKParentGroup *)parent;
-- (void)setParent:(BDSKParentGroup *)newParent;
 
 - (BibDocument *)document;
 - (void)setDocument:(BibDocument *)newDocument;

@@ -58,11 +58,8 @@
 #import "BDSKServerInfo.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "BDSKPubMedXMLParser.h"
 
 @implementation BDSKEntrezGroupServer
-
-enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
 
 + (NSString *)baseURLString { return @"http://eutils.ncbi.nlm.nih.gov/entrez/eutils"; }
 
@@ -92,11 +89,11 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
         serverInfo = [info copy];
         searchTerm = nil;
         failedDownload = NO;
+        isRetrieving = NO;
         needsReset = NO;
         availableResults = 0;
         filePath = nil;
         URLDownload = nil;
-        downloadState = BDSKIdleState;
     }
     return self;
 }
@@ -122,12 +119,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     [URLDownload cancel];
     [URLDownload release];
     URLDownload = nil;
-    downloadState = BDSKIdleState;
-    if (filePath) {
-        [[NSFileManager defaultManager] removeFileAtPath:filePath handler:nil];
-        [filePath release];
-        filePath = nil;
-    }
+    isRetrieving = NO;
 }
 
 - (void)retrievePublications {
@@ -135,8 +127,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
         isRetrieving = YES;
         if ([[self searchTerm] isEqualToString:[group searchTerm]] == NO || needsReset)
             [self resetSearch];
-        else if ([self isRetrieving] == NO)
-            [self fetch];
+        [self fetch];
     } else {
         failedDownload = YES;
         
@@ -156,23 +147,23 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     }
 }
 
-- (void)setNumberOfAvailableResults:(NSInteger)value;
+- (void)setNumberOfAvailableResults:(int)value;
 {
     availableResults = value;
 }
 
-- (NSInteger)numberOfFetchedResults { return fetchedResults; }
+- (int)numberOfFetchedResults { return fetchedResults; }
 
-- (void)setNumberOfFetchedResults:(NSInteger)value;
+- (void)setNumberOfFetchedResults:(int)value;
 {
     fetchedResults = value;
 }
 
-- (NSInteger)numberOfAvailableResults { return availableResults; }
+- (int)numberOfAvailableResults { return availableResults; }
 
 - (BOOL)failedDownload { return failedDownload; }
 
-- (BOOL)isRetrieving { return BDSKIdleState != downloadState; }
+- (BOOL)isRetrieving { return isRetrieving; }
 
 - (NSFormatter *)searchStringFormatter { return nil; }
 
@@ -218,14 +209,48 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     [self setNumberOfAvailableResults:0];
     [self setNumberOfFetchedResults:0];
     
+    NSXMLDocument *document = nil;
+    
     if(NO == [NSString isEmptyString:[self searchTerm]]){
         // get the initial XML document with our search parameters in it
         NSString *esearch = [[[self class] baseURLString] stringByAppendingFormat:@"/esearch.fcgi?db=%@&retmax=1&usehistory=y&term=%@&tool=bibdesk", [[self serverInfo] database], [[self searchTerm] stringByAddingPercentEscapesIncludingReserved]];
         NSURL *initialURL = [NSURL URLWithString:esearch]; 
-        BDSKPRECONDITION(initialURL);
+        OBPRECONDITION(initialURL);
         
-        downloadState = BDSKEsearchState;
-        [self startDownloadFromURL:initialURL];
+        NSURLRequest *request = [NSURLRequest requestWithURL:initialURL];
+        NSURLResponse *response;
+        NSError *error;
+        NSData *esearchResult = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+        
+        if (nil == esearchResult)
+            NSLog(@"failed to download %@ with error %@", initialURL, error);
+        else
+            document = [[NSXMLDocument alloc] initWithData:esearchResult options:NSXMLNodeOptionsNone error:&error];
+        
+        if (nil != document) {
+            NSXMLElement *root = [document rootElement];
+            
+            // we need to extract WebEnv, Count, and QueryKey to construct our final URL
+            [self setWebEnv:[[[root nodesForXPath:@"/eSearchResult[1]/WebEnv[1]" error:NULL] lastObject] stringValue]];
+            [self setQueryKey:[[[root nodesForXPath:@"/eSearchResult[1]/QueryKey[1]" error:NULL] lastObject] stringValue]];
+            NSString *countString = [[[root nodesForXPath:@"/eSearchResult[1]/Count[1]" error:NULL] lastObject] stringValue];
+            [self setNumberOfAvailableResults:[countString intValue]];
+            
+            [document release];
+            
+        } else {
+            
+            // no document, or zero length data from the server
+            failedDownload = YES;
+            
+            NSError *presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to connect to server", @"error when pubmed connection fails")];
+            
+            // make sure error was actually initialized by NSXMLDocument
+            if (esearchResult)
+                [presentableError embedError:error];
+            [NSApp presentError:presentableError];
+        }
+        
         needsReset = NO;
     }
 }
@@ -233,21 +258,20 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
 - (void)fetch;
 {
     if ([self webEnv] == nil || [self queryKey] == nil || [self numberOfAvailableResults] <= [self numberOfFetchedResults]) {
+        isRetrieving = NO;
         [group addPublications:[NSArray array]];
         return;
     }
     
-    BDSKPRECONDITION(downloadState == BDSKIdleState);
-    NSInteger numResults = MIN([self numberOfAvailableResults] - [self numberOfFetchedResults], MAX_RESULTS);
+    int numResults = MIN([self numberOfAvailableResults] - [self numberOfFetchedResults], MAX_RESULTS);
     
     // need to escape queryKey, but the rest should be valid for a URL
-    NSString *efetch = [[[self class] baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=abstract&retmode=xml&retstart=%ld&retmax=%ld&db=%@&query_key=%@&WebEnv=%@&tool=bibdesk", (long)[self numberOfFetchedResults], (long)numResults, [[self serverInfo] database], [[self queryKey] stringByAddingPercentEscapesIncludingReserved], [self webEnv]];
+    NSString *efetch = [[[self class] baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=medline&retmode=text&retstart=%d&retmax=%d&db=%@&query_key=%@&WebEnv=%@&tool=bibdesk", [self numberOfFetchedResults], numResults, [[self serverInfo] database], [[self queryKey] stringByAddingPercentEscapesIncludingReserved], [self webEnv]];
     NSURL *theURL = [NSURL URLWithString:efetch];
-    BDSKPOSTCONDITION(theURL);
+    OBPOSTCONDITION(theURL);
     
     [self setNumberOfFetchedResults:[self numberOfFetchedResults] + numResults];
     
-    downloadState = BDSKEfetchState;
     [self startDownloadFromURL:theURL];
 }
 
@@ -272,6 +296,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
 
 - (void)downloadDidFinish:(NSURLDownload *)download
 {
+    isRetrieving = NO;
     failedDownload = NO;
     NSError *presentableError;
     
@@ -279,92 +304,49 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
         [URLDownload release];
         URLDownload = nil;
     }
-    
-    NSURL *downloadURL = filePath ? [NSURL fileURLWithPath:filePath] : nil;
-    [filePath release];
-    filePath = nil;
-    
-    switch (downloadState) {
-        case BDSKEsearchState:
-        {
-            // okay to reset state before calling -fetch
-            downloadState = BDSKIdleState;
 
-            NSError *error;
-            NSXMLDocument *document = nil;
-            if (downloadURL)
-                document = [[NSXMLDocument alloc] initWithContentsOfURL:downloadURL options:NSXMLNodeOptionsNone error:&error];
-
-            if (nil != document) {
-                NSXMLElement *root = [document rootElement];
-                
-                // we need to extract WebEnv, Count, and QueryKey to construct our final URL
-                [self setWebEnv:[[[root nodesForXPath:@"/eSearchResult[1]/WebEnv[1]" error:NULL] lastObject] stringValue]];
-                [self setQueryKey:[[[root nodesForXPath:@"/eSearchResult[1]/QueryKey[1]" error:NULL] lastObject] stringValue]];
-                NSString *countString = [[[root nodesForXPath:@"/eSearchResult[1]/Count[1]" error:NULL] lastObject] stringValue];
-                [self setNumberOfAvailableResults:[countString intValue]];
-                
-                [document release];
-                [self fetch];
-                
-            } else {
-                
-                // no document, or zero length data from the server
-                failedDownload = YES;
-
-                presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to connect to server", @"error when pubmed connection fails")];
-                
-                [presentableError embedError:error];
-                [NSApp presentError:presentableError];
-            }
-            
-            break;
+    // tried using -[NSString stringWithContentsOfFile:usedEncoding:error:] but it fails too often
+    NSString *contentString = [NSString stringWithContentsOfFile:filePath encoding:0 guessEncoding:YES];
+    NSArray *pubs = nil;
+    if (nil == contentString) {
+        failedDownload = YES;
+        presentableError = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:NSLocalizedString(@"Empty search result", @"error when pubmed search fails")];
+        [presentableError setValue:NSLocalizedString(@"Either the server didn't return any data, or BibDesk was unable to read it as text.", @"Error informative text") forKey:NSLocalizedRecoverySuggestionErrorKey];
+    } else {
+        int type = [contentString contentStringType];
+        BOOL isPartialData = NO;
+        NSError *error;
+        if (type == BDSKBibTeXStringType) {
+            NSMutableString *frontMatter = [NSMutableString string];
+            pubs = [BDSKBibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:filePath document:group encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
+        } else if (type != BDSKUnknownStringType && type != BDSKNoKeyBibTeXStringType){
+            pubs = [BDSKStringParser itemsFromString:contentString ofType:type error:&error];
+        } else {
+            // this branch exists strictly to ensure that the error is initialized before being embedded
+            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Unknown data type", @"")];
         }
-        case BDSKEfetchState:
-        {
-            // specifically requested the XML type, so go straight to the correct parser
-            NSArray *pubs = [BDSKPubMedXMLParser itemsFromData:[NSData dataWithContentsOfMappedFile:[downloadURL path]] error:&presentableError];
-            
-            // set before addPublications:
-            downloadState = BDSKIdleState;
-            
-            if (nil == pubs) {
-                failedDownload = YES;
-                [NSApp presentError:presentableError];
-            }
-            else {
-                [group addPublications:pubs];
-            }
-            break;
+        if (pubs == nil || isPartialData) {
+            failedDownload = YES;
         }
-        case BDSKIdleState:
-            break;
-        default:
-            [NSException raise:NSInternalInconsistencyException format:@"Unhandled case %d", downloadState];
-            break;
+        presentableError = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Incorrect result type", @"error when pubmed parse fails")];
+        [presentableError setValue:NSLocalizedString(@"The server did not return a recognized data format.  This is likely a server problem.", @"error when pubmed parse fails") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        [presentableError embedError:error];
     }
     
-    // don't reset downloadState here, or we clobber the value that -fetch sets
-    
-    // it's always okay to delete the original download, but filePath will be reset at some point as a side effect of -fetch
-    if (downloadURL)
-        [[NSFileManager defaultManager] removeFileAtPath:[downloadURL path] handler:nil];
+    if (failedDownload)
+        [NSApp presentError:presentableError];
+
+    [group addPublications:pubs];
 }
 
 - (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error
 {
-    downloadState = BDSKIdleState;
+    isRetrieving = NO;
     failedDownload = YES;
     
     if (URLDownload) {
         [URLDownload release];
         URLDownload = nil;
-    }
-    
-    if (filePath) {
-        [[NSFileManager defaultManager] removeFileAtPath:filePath handler:nil];
-        [filePath release];
-        filePath = nil;
     }
     
     // redraw 

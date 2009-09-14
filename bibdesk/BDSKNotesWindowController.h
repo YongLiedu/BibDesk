@@ -37,19 +37,18 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKOutlineView.h"
 
-@class BDSKGradientSplitView;
+@class BDSKSplitView;
 
 @interface BDSKNotesWindowController : NSWindowController {
     NSURL *url;
     NSMutableArray *notes;
     NSArray *tags;
     double rating;
-    CGFloat lastTagsHeight;
+    float lastTagsHeight;
     IBOutlet NSOutlineView *outlineView;
     IBOutlet NSTokenField *tokenField;
-    IBOutlet BDSKGradientSplitView *splitView;
+    IBOutlet BDSKSplitView *splitView;
     IBOutlet NSObjectController *ownerController;
 }
 
@@ -66,11 +65,12 @@
 @end
 
 
-@interface BDSKNotesOutlineView : BDSKOutlineView
+@interface BDSKNotesOutlineView : NSOutlineView
 @end
 
 
 @interface NSObject(BDSKNotesOutlineViewDelegate)
 - (BOOL)outlineView:(NSOutlineView *)ov canResizeRowByItem:(id)item;
-- (void)outlineView:(NSOutlineView *)ov setHeightOfRow:(NSInteger)newHeight byItem:(id)item;
+- (void)outlineView:(NSOutlineView *)ov setHeightOfRow:(int)newHeight byItem:(id)item;
+- (void)outlineView:(NSOutlineView *)ov copyItems:(NSArray *)items;
 @end

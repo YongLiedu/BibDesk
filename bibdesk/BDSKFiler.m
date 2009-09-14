@@ -42,13 +42,13 @@
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKScriptHookManager.h"
 #import "BDSKPathColorTransformer.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
 #import "BDSKAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "NSAlert_BDSKExtensions.h"
+#import "BDSKAlert.h"
 #import "BDSKLinkedFile.h"
-#import "BDSKPreferenceController.h"
 
 // these keys should correspond to the table column identifiers
 #define FILE_KEY           @"file"
@@ -63,7 +63,6 @@
 @implementation BDSKFiler
 
 + (void)initialize {
-    BDSKINITIALIZE;
 	// register transformer class
 	[NSValueTransformer setValueTransformer:[[[BDSKOldPathColorTransformer alloc] init] autorelease]
 									forName:@"BDSKOldPathColorTransformer"];
@@ -96,45 +95,37 @@ static BDSKFiler *sharedFiler = nil;
 
 - (void)release {}
 
-- (NSUInteger)retainCount { return NSUIntegerMax; }
+- (unsigned)retainCount { return UINT_MAX; }
 
 #pragma mark Auto file methods
 
 - (void)filePapers:(NSArray *)papers fromDocument:(BibDocument *)doc check:(BOOL)check{
-	NSString *papersFolderPath = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKPapersFolderPathKey];
+	NSFileManager *fm = [NSFileManager defaultManager];
+	NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
+	BOOL isDir;
 
-	if (NO == [NSString isEmptyString:papersFolderPath]) {
-        NSFileManager *fm = [NSFileManager defaultManager];
-        BOOL isDir, exists;
-        
-        papersFolderPath = [fm resolveAliasesInPath:papersFolderPath];
-        exists = [fm fileExistsAtPath:papersFolderPath isDirectory:&isDir];
-        if (exists == NO)
-            isDir = exists = [fm createPathToFile:[papersFolderPath stringByAppendingPathComponent:@"0"] attributes:nil];
-        
-        if (exists == NO || isDir == NO) {
-            // The directory isn't there or isn't a directory, so pop up an alert.
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Papers Folder doesn't exist", @"Message in alert dialog when unable to find Papers Folder")
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                           alternateButton:NSLocalizedString(@"Go to Preferences", @"Button title")
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The Papers Folder you've chosen either doesn't exist or isn't a folder. Any files you have dragged in will be linked to in their original location. Press \"Go to Preferences\" to set the Papers Folder.", @"Informative text in alert dialog")];
-            if ([alert runModal] == NSAlertAlternateReturn){
-                [[BDSKPreferenceController sharedPreferenceController] showWindow:self];
-                [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.autofile"];
-            }
-            return;
-        }
+	if(![NSString isEmptyString:papersFolderPath] && !([fm fileExistsAtPath:[fm resolveAliasesInPath:papersFolderPath] isDirectory:&isDir] && isDir)){
+		// The directory isn't there or isn't a directory, so pop up an alert.
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Papers Folder doesn't exist", @"Message in alert dialog when unable to find Papers Folder")
+                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Go to Preferences", @"Button title")
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The Papers Folder you've chosen either doesn't exist or isn't a folder. Any files you have dragged in will be linked to in their original location. Press \"Go to Preferences\" to set the Papers Folder.", @"Informative text in alert dialog")];
+		if ([alert runModal] == NSAlertAlternateReturn){
+            [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+            [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
+		}
+		return;
 	}
 	
-    NSInteger mask = BDSKInitialAutoFileOptionMask;
-    if (check) mask |= BDSKCheckCompleteAutoFileOptionMask;
+    int mask = BDSKInitialAutoFileOptionMask;
+    if (check == YES) mask |= BDSKCheckCompleteAutoFileOptionMask;
 	[self movePapers:papers forField:BDSKLocalFileString fromDocument:doc options:mask];
 }
 
-- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(NSInteger)mask{
+- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(int)mask{
 	NSFileManager *fm = [NSFileManager defaultManager];
-    NSInteger numberOfPapers = [paperInfos count];
+    int numberOfPapers = [paperInfos count];
 	NSEnumerator *paperEnum = [paperInfos objectEnumerator];
 	id paperInfo = nil;
 	BibItem *pub = nil;
@@ -147,7 +138,7 @@ static BDSKFiler *sharedFiler = nil;
     
     BOOL initial = (mask & BDSKInitialAutoFileOptionMask);
     BOOL force = (mask & BDSKForceAutoFileOptionMask);
-    BOOL check = (initial) && (force == NO) && (mask & BDSKCheckCompleteAutoFileOptionMask);
+    BOOL check = (initial == YES) && (force == NO) && (mask & BDSKCheckCompleteAutoFileOptionMask);
     
 	if (numberOfPapers == 0)
 		return;
@@ -156,11 +147,16 @@ static BDSKFiler *sharedFiler = nil;
         [NSException raise:BDSKUnimplementedException format:@"%@ is only implemented for local files for initial moves.",NSStringFromSelector(_cmd)];
 	
 	if (numberOfPapers > 1) {
-        if (progressWindow == nil)
+        if (progressSheet == nil)
             [NSBundle loadNibNamed:@"AutoFileProgress" owner:self];
 		[progressIndicator setMaxValue:numberOfPapers];
 		[progressIndicator setDoubleValue:0.0];
-        [progressWindow orderFront:nil];
+        [progressCloseButton setEnabled:NO];
+		[NSApp beginSheet:progressSheet
+		   modalForWindow:[doc windowForSheet]
+			modalDelegate:nil
+		   didEndSelector:NULL
+			  contextInfo:nil];
 	}
 	
 	paperEnum = [paperInfos objectEnumerator];
@@ -249,8 +245,12 @@ static BDSKFiler *sharedFiler = nil;
         }
 	}
 	
-	if (numberOfPapers > 1)
-		[progressWindow orderOut:nil];
+	if (numberOfPapers > 1) {
+		[progressSheet orderOut:nil];
+		[NSApp endSheet:progressSheet returnCode:0];
+        // enable the close button in case the progress sheet was queued and is not attached at this point
+        [progressCloseButton setEnabled:YES];
+	}
 	
 	NSUndoManager *undoManager = [doc undoManager];
 	[[undoManager prepareWithInvocationTarget:self] 
@@ -262,6 +262,11 @@ static BDSKFiler *sharedFiler = nil;
         options = mask;
 		[self showProblems];
     }
+}
+
+- (IBAction)closeProgress:(id)sender{
+    [progressSheet orderOut:nil];
+    [NSApp endSheet:progressSheet returnCode:0];
 }
 
 #pragma mark Error reporting
@@ -301,12 +306,12 @@ static BDSKFiler *sharedFiler = nil;
 
 - (IBAction)tryAgain:(id)sender{
 	NSDictionary *info = nil;
-    NSInteger i, count = [self countOfErrorInfoDicts];
+    int i, count = [self countOfErrorInfoDicts];
 	NSMutableArray *fileInfoDicts = [NSMutableArray arrayWithCapacity:count];
     
     for (i = 0; i < count; i++) {
         info = [self objectInErrorInfoDictsAtIndex:i];
-        if ([[info objectForKey:SELECT_KEY] boolValue]) {
+        if ([[info objectForKey:SELECT_KEY] boolValue] == YES) {
             if (options & BDSKInitialAutoFileOptionMask) {
                 [fileInfoDicts addObject:[info objectForKey:PUBLICATION_KEY]];
             } else {
@@ -330,7 +335,7 @@ static BDSKFiler *sharedFiler = nil;
     
     BibDocument *doc = [[document retain] autorelease];
     NSString *field = [[fieldName retain] autorelease];
-    NSInteger mask = (options & BDSKInitialAutoFileOptionMask);
+    int mask = (options & BDSKInitialAutoFileOptionMask);
     mask |= ([forceCheckButton state]) ? BDSKForceAutoFileOptionMask : (options & BDSKCheckCompleteAutoFileOptionMask);
     
     [window close];
@@ -341,7 +346,7 @@ static BDSKFiler *sharedFiler = nil;
 - (IBAction)dump:(id)sender{
     NSMutableString *string = [NSMutableString string];
 	NSDictionary *info = nil;
-    NSInteger i, count = [self countOfErrorInfoDicts];
+    int i, count = [self countOfErrorInfoDicts];
     
     for (i = 0; i < count; i++) {
         info = [self objectInErrorInfoDictsAtIndex:i];
@@ -385,29 +390,29 @@ static BDSKFiler *sharedFiler = nil;
     return errorInfoDicts;
 }
 
-- (NSUInteger)countOfErrorInfoDicts {
+- (unsigned)countOfErrorInfoDicts {
     return [errorInfoDicts count];
 }
 
-- (id)objectInErrorInfoDictsAtIndex:(NSUInteger)idx {
+- (id)objectInErrorInfoDictsAtIndex:(unsigned)idx {
     return [errorInfoDicts objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inErrorInfoDictsAtIndex:(NSUInteger)idx {
+- (void)insertObject:(id)obj inErrorInfoDictsAtIndex:(unsigned)idx {
     [errorInfoDicts insertObject:obj atIndex:idx];
 }
 
-- (void)removeObjectFromErrorInfoDictsAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromErrorInfoDictsAtIndex:(unsigned)idx {
     [errorInfoDicts removeObjectAtIndex:idx];
 }
 
 #pragma mark table view stuff
 
 // dummy dataSource implementation
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)tView{ return 0; }
-- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{ return nil; }
+- (int)numberOfRowsInTableView:(NSTableView *)tView{ return 0; }
+- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{ return nil; }
 
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation{
+- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
 	NSString *tcid = [tableColumn identifier];
     if ([tcid isEqualToString:SELECT_KEY]) {
         return NSLocalizedString(@"Select items to Try Again or to Force.", @"Tool tip message");
@@ -416,18 +421,18 @@ static BDSKFiler *sharedFiler = nil;
 }
 
 - (IBAction)showFile:(id)sender{
-    NSInteger row = [tv selectedRow];
+    int row = [tv selectedRow];
     if (row == -1)
         return;
     NSDictionary *dict = [self objectInErrorInfoDictsAtIndex:row];
-    NSInteger statusFlag = [[dict objectForKey:FLAG_KEY] intValue];
+    int statusFlag = [[dict objectForKey:FLAG_KEY] intValue];
     NSString *tcid = nil;
     NSString *path = nil;
     BibItem *pub = nil;
-    NSInteger type = -1;
+    int type = -1;
 
     if(sender == tv){
-        NSInteger column = [tv clickedColumn];
+        int column = [tv clickedColumn];
         if(column == -1)
             return;
         tcid = [[[tv tableColumns] objectAtIndex:column] identifier];
@@ -463,7 +468,7 @@ static BDSKFiler *sharedFiler = nil;
 	}
 }
 
-- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex {
+- (NSMenu *)tableView:(NSTableView *)tableView contextMenuForRow:(int)row column:(int)column{
     return contextMenu;
 }
 
@@ -478,7 +483,7 @@ static BDSKFiler *sharedFiler = nil;
     NSString *comment = nil;
     NSString *status = nil;
     NSString *fix = nil;
-    NSInteger statusFlag = BDSKNoError;
+    int statusFlag = BDSKNoError;
     BOOL ignoreMove = NO;
     BOOL isDir;
     
@@ -544,28 +549,28 @@ static BDSKFiler *sharedFiler = nil;
             }
         }
         if(statusFlag == BDSKNoError && ignoreMove == NO){
-            // get the Finder comment (spotlight comment), as NSFileManager does not move this on Tiger
-            if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
-                comment = [self commentForURL:[NSURL fileURLWithPath:resolvedPath]];
+            // get the Finder comment (spotlight comment)
+            comment = [self commentForURL:[NSURL fileURLWithPath:resolvedPath]];
             NSString *fileType = [[self fileAttributesAtPath:resolvedPath traverseLink:NO] fileType];
  
             // create parent directories if necessary (OmniFoundation)
-            if (NO == [self createPathToFile:resolvedNewPath attributes:nil]) {
+            if (NO == [self createPathToFile:resolvedNewPath attributes:nil error:NULL]) {
                 status = NSLocalizedString(@"Unable to create parent directory.", @"AutoFile error message");
                 statusFlag = BDSKCannotCreateParentErrorMask;
             }
             if(statusFlag == BDSKNoError){
                 if([fileType isEqualToString:NSFileTypeDirectory] && [[NSWorkspace sharedWorkspace] isFilePackageAtPath:resolvedPath] == NO && force == NO && 
-                   [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnMoveFolderKey]){
-                    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Really Move Folder?", @"Message in alert dialog when trying to auto file a folder")
-                                                     defaultButton:NSLocalizedString(@"Move", @"Button title")
-                                                   alternateButton:NSLocalizedString(@"Don't Move", @"Button title") 
-                                                       otherButton:nil
-                                         informativeTextWithFormat:NSLocalizedString(@"AutoFile is about to move the folder \"%@\" to \"%@\". Do you want to move the folder?", @"Informative text in alert dialog"), path, newPath];
-                    [alert setShowsSuppressionButton:YES];
+                   [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnMoveFolderKey]){
+                    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Really Move Folder?", @"Message in alert dialog when trying to auto file a folder")
+                                                         defaultButton:NSLocalizedString(@"Move", @"Button title")
+                                                       alternateButton:NSLocalizedString(@"Don't Move", @"Button title") 
+                                                           otherButton:nil
+                                             informativeTextWithFormat:NSLocalizedString(@"AutoFile is about to move the folder \"%@\" to \"%@\". Do you want to move the folder?", @"Informative text in alert dialog"), path, newPath];
+                    [alert setHasCheckButton:YES];
+                    [alert setCheckValue:NO];
                     ignoreMove = (NSAlertAlternateReturn == [alert runModal]);
-                    if([alert suppressionButtonState] == NSOnState)
-                        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnMoveFolderKey];
+                    if([alert checkValue] == YES)
+                        [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnMoveFolderKey];
                 }
                 if(ignoreMove){
                     status = NSLocalizedString(@"Shouldn't move folder.", @"AutoFile error message");
@@ -576,7 +581,7 @@ static BDSKFiler *sharedFiler = nil;
                     NSString *pathContent = [self pathContentOfSymbolicLinkAtPath:resolvedPath];
                     if([pathContent isAbsolutePath] == NO){// it links to a relative path
                         pathContent = [[[resolvedPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:pathContent] stringByStandardizingPath];
-                        pathContent = [pathContent relativePathFromPath:[resolvedNewPath stringByDeletingLastPathComponent]];
+                        pathContent = [[resolvedNewPath stringByDeletingLastPathComponent] relativePathToFilename:pathContent];
                     }
                     if(![self createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
                         status = NSLocalizedString(@"Unable to move symbolic link.", @"AutoFile error message");

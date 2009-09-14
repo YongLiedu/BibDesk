@@ -39,21 +39,20 @@
 #import "BibItem_PubMedLookup.h"
 #import <WebKit/WebKit.h>
 #import "BDSKStringParser.h"
-#import "BDSKPubMedXMLParser.h"
 #import <AGRegex/AGRegex.h>
 #import "NSURL_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
 #import "PDFMetadata.h"
 
 @interface BDSKPubMedLookupHelper : NSObject
-+ (NSData *)xmlReferenceDataForSearchTerm:(NSString *)searchTerm;
++ (NSString *)referenceForPubMedSearchTerm:(NSString *)searchTerm;
 @end
 
 @implementation NSString (PubMedLookup)
 
 // here is another exampled of a doi regex = /(10\.[0-9]+\/[a-z0-9\.\-\+\/\(\)]+)/i;
 // from http://userscripts.org/scripts/review/8939
-#define doiRegexString @"doi[:\\s/]{1,2}(10\\.[0-9]{3,4})[\\s/0]{1,3}(\\S+)"
+static NSString *doiRegexString = @"doi[:\\s/]{1,2}(10\\.[0-9]{3,4})[\\s/0]{1,3}(\\S+)";
 
 - (NSString *) stringByExtractingDOIFromString;
 {
@@ -346,8 +345,8 @@ static void removeAliens(NSMutableString *string)
 
 + (id)itemWithPubMedSearchTerm:(NSString *)searchTerm;
 {
-    NSData *data = [BDSKPubMedLookupHelper xmlReferenceDataForSearchTerm:searchTerm];
-    return [data length] ? [[BDSKPubMedXMLParser itemsFromData:data error:NULL] lastObject] : nil;
+    NSString *string = [BDSKPubMedLookupHelper referenceForPubMedSearchTerm:searchTerm];
+    return string ? [[BDSKStringParser itemsFromString:string ofType:BDSKUnknownStringType error:NULL] lastObject] : nil;
 }
 
 @end
@@ -382,12 +381,12 @@ static void removeAliens(NSMutableString *string)
     return canConnect;
 }
 
-+ (NSData *)xmlReferenceDataForSearchTerm:(NSString *)searchTerm;
++ (NSString *)referenceForPubMedSearchTerm:(NSString *) searchTerm;
 {
     NSParameterAssert(searchTerm != nil);
     
-    NSData *toReturn = nil;
-        
+    NSString *toReturn = nil;
+    
     if ([self canConnect] == NO)
         return toReturn;
         
@@ -398,7 +397,7 @@ static void removeAliens(NSMutableString *string)
     // get the initial XML document with our search parameters in it; we ask for 2 results at most
     NSString *esearch = [[[self class] baseURLString] stringByAppendingFormat:@"/esearch.fcgi?db=pubmed&retmax=2&usehistory=y&term=%@&tool=bibdesk", searchTerm];
 	NSURL *theURL = [NSURL URLWithStringByNormalizingPercentEscapes:esearch];
-    BDSKPRECONDITION(theURL);
+    OBPRECONDITION(theURL);
     
     NSURLRequest *request = [NSURLRequest requestWithURL:theURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
     NSURLResponse *response;
@@ -420,12 +419,29 @@ static void removeAliens(NSMutableString *string)
         if ([count intValue] == 1) {  
             
             // get the first result (zero-based indexing)
-            NSString *efetch = [[[self class] baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=abstract&retmode=xml&retstart=0&retmax=1&db=pubmed&query_key=%@&WebEnv=%@&tool=bibdesk", queryKey, webEnv];
+            NSString *efetch = [[[self class] baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=medline&retmode=text&retstart=0&retmax=1&db=pubmed&query_key=%@&WebEnv=%@&tool=bibdesk", queryKey, webEnv];
             theURL = [NSURL URLWithString:efetch];
-            BDSKPOSTCONDITION(theURL);
+            OBPOSTCONDITION(theURL);
             
             request = [NSURLRequest requestWithURL:theURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
-            toReturn = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+            NSData *efetchResult = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+            
+            if (efetchResult) {
+                
+                // try to get encoding from the http headers; returned nil when I tried
+                NSString *encodingName = [response textEncodingName];
+                NSStringEncoding encoding = encodingName ? CFStringConvertEncodingToNSStringEncoding(CFStringConvertIANACharSetNameToEncoding((CFStringRef)encodingName)) : kCFStringEncodingInvalidId;
+                
+                if (encoding != kCFStringEncodingInvalidId)
+                    toReturn = [[NSString alloc] initWithData:efetchResult encoding:encoding];
+                else
+                    toReturn = [[NSString alloc] initWithData:efetchResult encoding:NSUTF8StringEncoding];
+                
+                if (nil == toReturn)
+                    toReturn = [[NSString alloc] initWithData:efetchResult encoding:NSISOLatin1StringEncoding];
+                
+                [toReturn autorelease];
+            }
         }
         [document release];
     }

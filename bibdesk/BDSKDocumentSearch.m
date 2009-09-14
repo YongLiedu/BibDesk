@@ -40,40 +40,34 @@
 #import "BibDocument.h"
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
-#import "NSInvocation_BDSKExtensions.h"
 
-
-@interface BDSKDocumentSearch (BDSKPrivate)
-- (void)runSearchThread;
-
-@end
+static OFMessageQueue *searchQueue = nil;
 
 @implementation BDSKDocumentSearch
 
-#define QUEUE_EMPTY 0
-#define QUEUE_HAS_INVOCATIONS 1
++ (void)initialize
+{
+    if (nil == searchQueue) {
+        searchQueue = [[OFMessageQueue alloc] init];
+        [searchQueue startBackgroundProcessors:1];
+    }
+}
 
 - (id)initWithDocument:(id)doc;
 {
     self = [super init];
     if (self) {
-        SEL cb = @selector(search:foundIdentifiers:normalizedScores:);
+        SEL cb = @selector(handleSearchCallbackWithIdentifiers:normalizedScores:);
         NSMethodSignature *sig = [doc methodSignatureForSelector:cb];
         NSParameterAssert(nil != sig);
         NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
         [invocation setTarget:doc];
         [invocation setSelector:cb];
-        [invocation setArgument:&self atIndex:2];
-        searchLock = [[NSLock alloc] init];
-        queueLock = [[NSConditionLock alloc] initWithCondition:QUEUE_EMPTY];
-        queue = [[NSMutableArray alloc] init];
+        searchLock = [NSLock new];
         
         callback = [invocation retain];
         originalScores = [NSMutableDictionary new];
         isSearching = 0;
-        shouldKeepRunning = 1;
-        
-        [NSThread detachNewThreadSelector:@selector(runSearchThread) toTarget:self withObject:nil];
     }
     return self;
 }
@@ -81,8 +75,6 @@
 // owner should have already sent -terminate; sending it from -dealloc causes resurrection
 - (void)dealloc
 {
-	[queue release];
-	[queueLock release];
     [currentSearchString release];
     [originalScores release];
     [callback release];
@@ -91,24 +83,11 @@
     [super dealloc];
 }
 
-- (BOOL)shouldKeepRunning {
-    OSMemoryBarrier();
-    return shouldKeepRunning;
-}
-
-- (void)queueInvocation:(NSInvocation *)invocation {
-    if ([self shouldKeepRunning]) {
-        [queueLock lock];
-        [queue addObject:invocation];
-        [queueLock unlockWithCondition:QUEUE_HAS_INVOCATIONS];
-    }
-}
-
 - (void)_cancelSearch;
 {
     if (NULL != search) {
         // set first in case this is called while we're working
-        OSAtomicCompareAndSwap32Barrier(1, 0, &isSearching);
+        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&isSearching);
         SKSearchCancel(search);
         CFRelease(search);
         search = NULL;
@@ -117,17 +96,12 @@
 
 - (void)cancelSearch;
 {
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(_cancelSearch)];
-    [self queueInvocation:invocation];
+    [searchQueue queueSelector:@selector(_cancelSearch) forObject:self];
 }
 
 - (void)terminate;
 {
-    OSAtomicCompareAndSwap32Barrier(1, 0, &shouldKeepRunning);
-    [queueLock lock];
-    [queue removeAllObjects];
-    // make sure the worker thread wakes up
-    [queueLock unlockWithCondition:QUEUE_HAS_INVOCATIONS];
+    [self cancelSearch];
     [searchLock lock];
     NSInvocation *cb = callback;
     callback = nil;
@@ -149,7 +123,7 @@
     while (aKey = [keyEnum nextObject]) {
         NSNumber *nsScore = [originalScores objectForKey:aKey];
         NSParameterAssert(nil != nsScore);
-        CGFloat score = [nsScore floatValue];
+        float score = [nsScore floatValue];
         [scores setObject:[NSNumber numberWithFloat:(score/maxScore)] forKey:aKey];
     }
     return scores;
@@ -167,18 +141,21 @@
 
 #define SEARCH_BUFFER_MAX 1024
 
-- (void)_searchForString:(NSString *)searchString index:(SKIndexRef)skIndex
+// array argument is so OFInvocation doesn't barf when it tries to retain the SKIndexRef
+- (void)backgroundSearchForString:(NSString *)searchString indexArray:(NSArray *)skIndexArray
 {
-    OSAtomicCompareAndSwap32Barrier(0, 1, &isSearching);
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&isSearching);
     [self performSelectorOnMainThread:@selector(invokeStartedCallback) withObject:nil waitUntilDone:YES];
 
     // note that the add/remove methods flush the index, so we don't have to do it again
+    SKIndexRef skIndex = (void *)[skIndexArray objectAtIndex:0];
     NSParameterAssert(NULL == search);
     search = SKSearchCreate(skIndex, (CFStringRef)searchString, kSKSearchOptionDefault);
     
-    SKDocumentID documents[SEARCH_BUFFER_MAX] = { 0 };
-    CGFloat scores[SEARCH_BUFFER_MAX] = { 0.0 };
+    SKDocumentID documents[SEARCH_BUFFER_MAX];
+    float scores[SEARCH_BUFFER_MAX];
     CFIndex i, foundCount;
+    NSMutableSet *foundURLSet = [NSMutableSet set];
     
     Boolean more, keepGoing;
     maxScore = 0.0f;
@@ -189,24 +166,15 @@
         
         more = SKSearchFindMatches(search, SEARCH_BUFFER_MAX, documents, scores, 1.0, &foundCount);
         
-        NSMutableSet *foundURLSet = nil;
-
-        if (foundCount > 0) {
-            
-            NSParameterAssert(foundCount <= SEARCH_BUFFER_MAX);
-            id documentURLs[SEARCH_BUFFER_MAX] = { nil };
-            SKIndexCopyDocumentURLsForDocumentIDs(skIndex, foundCount, documents, (CFURLRef *)documentURLs);
-            foundURLSet = [NSMutableSet setWithCapacity:foundCount];
+        if (foundCount) {
+            CFURLRef documentURLs[SEARCH_BUFFER_MAX];
+            SKIndexCopyDocumentURLsForDocumentIDs(skIndex, foundCount, documents, documentURLs);
             
             for (i = 0; i < foundCount; i++) {
-                
-                // Array may contain NULL values from initialization; before adding the initialization step, it was possible to pass garbage pointers as documentURL (bug #2124370) and non-finite values for the score (bug #1932040).  This is actually a gap in the returned values, so appears to be a Search Kit bug.
-                if (documentURLs[i] != nil) {
-                    [originalScores setObject:[NSNumber numberWithFloat:scores[i]] forKey:documentURLs[i]];
-                    [foundURLSet addObject:documentURLs[i]];
-                    [documentURLs[i] release];
-                    maxScore = MAX(maxScore, scores[i]);
-                }
+                [foundURLSet addObject:(id)documentURLs[i]];
+                [originalScores setObject:[NSNumber numberWithFloat:scores[i]] forKey:(id)documentURLs[i]];
+                CFRelease(documentURLs[i]);
+                maxScore = MAX(maxScore, scores[i]);
             }
         }
         
@@ -219,11 +187,13 @@
 
         if (keepGoing) {
             NSDictionary *normalizedScores = [self normalizedScores];
-            [callback setArgument:&foundURLSet atIndex:3];
-            [callback setArgument:&normalizedScores atIndex:4];
+            [callback setArgument:&foundURLSet atIndex:2];
+            [callback setArgument:&normalizedScores atIndex:3];
             [callback performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
         }
-                
+        
+        [foundURLSet removeAllObjects];
+        
         [searchLock lock];
         keepGoing = (nil != callback && [searchString isEqualToString:currentSearchString]);
         [searchLock unlock];
@@ -254,57 +224,16 @@
     [self setPreviouslySelectedPublications:selPubs];
     [self setPreviousScrollPositionAsPercentage:scrollPoint];
     
-    [searchLock lock];
-    [currentSearchString autorelease];
-    currentSearchString = [searchString copy];
-    [searchLock unlock];
+        [searchLock lock];
+        [currentSearchString autorelease];
+        currentSearchString = [searchString copy];
+        [searchLock unlock];
 
-    if ([self isSearching])
-        [self cancelSearch];
-    
+        if ([self isSearching])
+            [self cancelSearch];
+        
     // always queue a search, since the index content may be changing (in case of a search group)
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(_searchForString:index:)];
-    [invocation retainArguments];
-    [invocation setArgument:&searchString atIndex:2];
-    [invocation setArgument:&skIndex atIndex:3];
-    [self queueInvocation:invocation];
-}
-
-- (void)runSearchThread
-{
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
-	while ([self shouldKeepRunning]) {
-        NSInvocation *invocation = nil;
-        
-        // get the next invocation from the queue as soon as it's available
-        [queueLock lockWhenCondition:QUEUE_HAS_INVOCATIONS];
-        NSUInteger count = [queue count];
-        if (count) {
-            invocation = [[queue objectAtIndex:0] retain];
-            [queue removeObjectAtIndex:0];
-            count--;
-        }
-        [queueLock unlockWithCondition:count > 0 ? QUEUE_HAS_INVOCATIONS : QUEUE_EMPTY];
-        
-        if (invocation) {
-            @try {
-                [invocation invoke];
-                [invocation release];
-            }
-            @catch(id e) {
-                NSLog(@"Ignored exception %@ when executing a document search", e);
-            }
-		}
-        
-		[pool release];
-		pool = [[NSAutoreleasePool alloc] init];
+        [searchQueue queueSelector:@selector(backgroundSearchForString:indexArray:) forObject:self withObject:searchString withObject:[NSArray arrayWithObject:(id)skIndex]];
     }
-	
-    // make sure the last search was canceled
-    [self _cancelSearch];
-	
-	[pool release];
-}
 
 @end

@@ -37,9 +37,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKPreferencePane.h"
+#import <OmniAppKit/OmniAppKit.h>
 
-@interface BibPref_Crossref : BDSKPreferencePane
+@interface BibPref_Crossref : OAPreferenceClient
 {
     IBOutlet NSButton* autoSortCheckButton;
     IBOutlet NSButton* warnOnEditInheritedCheckButton;
@@ -51,6 +51,8 @@
 	NSMutableArray *typesArray;
 }
 
+- (void)updateUI;
+- (void)handleEditInheritedChanged:(NSNotification *)notification;
 - (IBAction)changeAutoSort:(id)sender;
 - (IBAction)changeWarnOnEditInherited:(id)sender;
 - (IBAction)changeDuplicateBooktitle:(id)sender;
@@ -60,5 +62,5 @@
 
 @end
 
-@interface BDSKDisablingTableView : NSTableView
+@interface NSTableView (BDSKDisablingTableView)
 @end

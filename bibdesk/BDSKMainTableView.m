@@ -34,6 +34,8 @@
  */
 
 #import "BDSKMainTableView.h"
+#import <OmniFoundation/OmniFoundation.h>
+#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKStringConstants.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
@@ -50,37 +52,36 @@
 #import "NSBezierPath_CoreImageExtensions.h"
 #import "BDSKCenterScaledImageCell.h"
 #import "BDSKLevelIndicatorCell.h"
+#import "BDSKImageFadeAnimation.h"
+#import "NSViewAnimation_BDSKExtensions.h"
 #import <QuartzCore/QuartzCore.h>
 #import "BDSKTextWithIconCell.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
-#import "NSMenu_BDSKExtensions.h"
-#import "NSArray_BDSKExtensions.h"
 
 enum {
     BDSKColumnTypeText,
     BDSKColumnTypeURL,
-    BDSKColumnTypeLinkedFile,
+    BDSKColumnTypeLocalFile,
     BDSKColumnTypeRating,
     BDSKColumnTypeBoolean,
     BDSKColumnTypeTriState,
     BDSKColumnTypeCrossref,
     BDSKColumnTypeImportOrder,
-    BDSKColumnTypeRelevance,
-    BDSKColumnTypeColor
+    BDSKColumnTypeRelevance
 };
 
 @interface BDSKTableColumn : NSTableColumn {
-    NSInteger columnType;
+    int columnType;
 }
-- (NSInteger)columnType;
-- (void)setColumnType:(NSInteger)type;
+- (int)columnType;
+- (void)setColumnType:(int)type;
 @end
 
 @interface BDSKMainTableHeaderView : NSTableHeaderView {
-    NSInteger columnForMenu;
+    int columnForMenu;
 }
-- (NSInteger)columnForMenu;
+- (int)columnForMenu;
 @end
 
 @interface BDSKMainTableView (Private)
@@ -89,7 +90,7 @@ enum {
 - (NSString *)headerTitleForField:(NSString *)field;
 - (void)columnsMenuSelectTableColumn:(id)sender;
 - (void)columnsMenuAddTableColumn:(id)sender;
-- (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+- (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)updateColumnsMenu;
 - (IBAction)importItem:(id)sender;
 - (IBAction)openParentItem:(id)sender;
@@ -99,122 +100,91 @@ enum {
 
 @implementation BDSKMainTableView
 
-+ (BOOL)shouldQueueTypeSelectHelper { return YES; }
-
-+ (NSImage *)cornerColumnsImage {
-    static NSImage *cornerColumnsImage = nil;
-    if (cornerColumnsImage == nil) {
-        cornerColumnsImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 17.0)];
-        [cornerColumnsImage lockFocus];
-        NSCell *cell = [[[NSTableHeaderCell alloc] initTextCell:@""] autorelease];
-        [cell drawWithFrame:NSMakeRect(0.0, 0.0, 16.0, 17.0) inView:nil];
-        [cell drawWithFrame:NSMakeRect(0.0, 0.0, 1.0, 17.0) inView:nil];
-        NSBezierPath *path = [NSBezierPath bezierPath];
-        [path moveToPoint:NSMakePoint(7.0, 5.5)];
-        [path lineToPoint:NSMakePoint(3.5, 5.5)];
-        [path lineToPoint:NSMakePoint(3.5, 12.5)];
-        [path lineToPoint:NSMakePoint(11.5, 12.5)];
-        [path lineToPoint:NSMakePoint(11.5, 8.0)];
-        [path moveToPoint:NSMakePoint(3.0, 10.5)];
-        [path lineToPoint:NSMakePoint(12.0, 10.5)];
-        [path moveToPoint:NSMakePoint(7.5, 8.0)];
-        [path lineToPoint:NSMakePoint(7.5, 13.0)];
-        [[NSColor colorWithDeviceWhite:0.38 alpha:1.0] set];
-        [path stroke];
-        path = [NSBezierPath bezierPath];
-        [path moveToPoint:NSMakePoint(7.5, 7.0)];
-        [path lineToPoint:NSMakePoint(13.5, 7.0)];
-        [path lineToPoint:NSMakePoint(10.5, 3.5)];
-        [path fill];
-        [cornerColumnsImage unlockFocus];
-    }
-    return cornerColumnsImage;
-}
-
 - (void)awakeFromNib{
+    [super awakeFromNib]; // this updates the font
+	
 	[self setHeaderView:[[[BDSKMainTableHeaderView alloc] initWithFrame:[[self headerView] frame]] autorelease]];	
+    
     NSRect cornerViewFrame = [[self cornerView] frame];
     BDSKImagePopUpButton *cornerViewButton = [[BDSKImagePopUpButton alloc] initWithFrame:cornerViewFrame];
-    [cornerViewButton setPullsDown:YES];
     [cornerViewButton setIconSize:cornerViewFrame.size];
-    [cornerViewButton setIcon:[[self class] cornerColumnsImage]];
-    [[cornerViewButton cell] setArrowPosition:NSPopUpNoArrow];
+    [cornerViewButton setIconImage:[NSImage imageNamed:@"cornerColumns"]];
+    [cornerViewButton setArrowImage:nil];
+    [cornerViewButton setAlternateImage:[NSImage imageNamed:@"cornerColumns_Pressed"]];
+    [cornerViewButton setShowsMenuWhenIconClicked:YES];
     [[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
+    [[cornerViewButton cell] setAlwaysUsesFirstItemAsSelected:NO];
     [[cornerViewButton cell] setUsesItemFromMenu:NO];
+    [cornerViewButton setRefreshesMenu:NO];
     [self setCornerView:cornerViewButton];
     [cornerViewButton release];
     
-    BDSKTypeSelectHelper *aTypeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
-    [aTypeSelectHelper setCyclesSimilarResults:YES];
-    [aTypeSelectHelper setMatchesPrefix:NO];
-    [self setTypeSelectHelper:aTypeSelectHelper];
-    [aTypeSelectHelper release];
+    typeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
+    [typeSelectHelper setDataSource:[self delegate]]; // which is the bibdocument
+    [typeSelectHelper setCyclesSimilarResults:YES];
+    [typeSelectHelper setMatchesPrefix:NO];
 }
 
 - (void)dealloc{
+    [typeSelectHelper setDataSource:nil];
+    [typeSelectHelper release];
     [alternatingRowBackgroundColors release];
     [super dealloc];
 }
 
-- (BOOL)canAlternateDelete {
-    if ([self numberOfSelectedRows] == 0 || [[self dataSource] respondsToSelector:@selector(tableView:alternateDeleteRowsWithIndexes:)] == NO)
-        return NO;
-    else if ([[self dataSource] respondsToSelector:@selector(tableView:canAlternateDeleteRowsWithIndexes:)])
-        return [[self dataSource] tableView:self canAlternateDeleteRowsWithIndexes:[self selectedRowIndexes]];
-    else
-        return YES;
+- (void)reloadData{
+    [super reloadData];
+    [typeSelectHelper queueSelectorOnce:@selector(rebuildTypeSelectSearchCache)]; // if we resorted or searched, the cache is stale
 }
 
-- (void)alternateDelete:(id)sender {
-    if ([self canDelete]) {
-        NSUInteger originalNumberOfRows = [self numberOfRows];
-        // -selectedRow is last row of multiple selection, no good for trying to select the row before the selection.
-        NSUInteger selectedRow = [[self selectedRowIndexes] firstIndex];
-        [[self dataSource] tableView:self alternateDeleteRowsWithIndexes:[self selectedRowIndexes]];
-        [self reloadData];
-        NSUInteger newNumberOfRows = [self numberOfRows];
-        
-        // Maintain an appropriate selection after deletions
-        if (originalNumberOfRows != newNumberOfRows) {
-            if (selectedRow == 0) {
-                if ([[self delegate] respondsToSelector:@selector(tableView:shouldSelectRow:)]) {
-                    if ([[self delegate] tableView:self shouldSelectRow:0])
-                        [self selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
-                    else
-                        [self moveDown:nil];
-                } else {
-                    [self selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
-                }
-            } else {
-                // Don't try to go past the new # of rows
-                selectedRow = MIN(selectedRow - 1, newNumberOfRows - 1);
-                
-                // Skip all unselectable rows if the delegate responds to -tableView:shouldSelectRow:
-                if ([[self delegate] respondsToSelector:@selector(tableView:shouldSelectRow:)]) {
-                    while (selectedRow > 0 && [[self delegate] tableView:self shouldSelectRow:selectedRow] == NO)
-                        selectedRow--;
-                }
-                
-                // If nothing was selected, move down (so that the top row is selected)
-                if (selectedRow < 0)
-                    [self moveDown:nil];
-                else
-                    [self selectRowIndexes:[NSIndexSet indexSetWithIndex:selectedRow] byExtendingSelection:NO];
-            }
-        }
-    } else
-        NSBeep();
+- (BDSKTypeSelectHelper *)typeSelectHelper{
+    return typeSelectHelper;
 }
 
-- (BOOL)canAlternateCut {
-    return [self canAlternateDelete] && [self canCopy];
+- (void)keyDown:(NSEvent *)event{
+    if ([[event characters] length] == 0)
+        return;
+    unichar c = [[event characters] characterAtIndex:0];
+    unsigned int flags = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask & ~NSAlphaShiftKeyMask);
+    if (c == 0x0020){ // spacebar to page down in the lower pane of the BibDocument splitview, shift-space to page up
+        if(flags & NSShiftKeyMask)
+            [[self delegate] pageUpInPreview:nil];
+        else
+            [[self delegate] pageDownInPreview:nil];
+	// somehow alternate menu item shortcuts are not available globally, so we catch them here
+	}else if((c == NSDeleteCharacter) &&  (flags & NSAlternateKeyMask)) {
+		[[self delegate] alternateDelete:nil];
+    // following methods should solve the mysterious problem of arrow/page keys not working for some users
+    }else if(c == NSPageDownFunctionKey){
+        [[self enclosingScrollView] pageDown:self];
+    }else if(c == NSPageUpFunctionKey){
+        [[self enclosingScrollView] pageUp:self];
+    }else if(c == NSUpArrowFunctionKey){
+        int row = [[self selectedRowIndexes] firstIndex];
+		if (row == NSNotFound)
+			row = 0;
+		else if (row > 0)
+			row--;
+        [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:([event modifierFlags] | NSShiftKeyMask)];
+        [self scrollRowToVisible:row];
+    }else if(c == NSDownArrowFunctionKey){
+        int row = [[self selectedRowIndexes] lastIndex];
+		if (row == NSNotFound)
+			row = 0;
+		else if (row < [self numberOfRows] - 1)
+			row++;
+        [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:([event modifierFlags] | NSShiftKeyMask)];
+        [self scrollRowToVisible:row];
+    // pass it on the typeahead selector
+    }else if ([typeSelectHelper processKeyDownEvent:event] == NO){
+        [super keyDown:event];
+    }
 }
 
-- (void)alternateCut:(id)sender {
-    if ([self canAlternateCut] && [[self dataSource] tableView:self writeRowsWithIndexes:[self selectedRowIndexes] toPasteboard:[NSPasteboard generalPasteboard]])
-        [self alternateDelete:sender];
-    else
-        NSBeep();
+- (IBAction)deleteForward:(id)sender{
+    // we use the same for Delete and the Backspace
+    // Omni's implementation of deleteForward: selects the next item, which selects the wrong item too early because we may delay for the warning
+    [self deleteBackward:sender];
 }
 
 - (void)highlightSelectionInClipRect:(NSRect)clipRect{
@@ -222,7 +192,7 @@ enum {
     
     if ([[self delegate] respondsToSelector:@selector(tableView:highlightColorForRow:)]) {
         NSRange visibleRows = [self rowsInRect:clipRect];
-        NSUInteger row;
+        unsigned int row;
         NSColor *color;
         NSRect ignored, rect;
         for (row = visibleRows.location; row < NSMaxRange(visibleRows); row++) {
@@ -232,24 +202,15 @@ enum {
                 NSDivideRect([self rectOfRow:row], &ignored, &rect, 1.0, NSMaxYEdge);
                 if ([self isRowSelected:row]) {
                     [NSBezierPath setDefaultLineWidth:2.0];
-                    [NSBezierPath strokeHorizontalOvalInRect:NSInsetRect(rect, 2.0, 1.0)];
+                    [NSBezierPath strokeHorizontalOvalAroundRect:NSInsetRect(rect, 2.0 + 0.5 * NSHeight(rect), 1.0)];
                     [NSBezierPath setDefaultLineWidth:1.0];
                 } else {
-                    [NSBezierPath fillHorizontalOvalInRect:NSInsetRect(rect, 1.0, 0.0)];
+                    [NSBezierPath fillHorizontalOvalAroundRect:NSInsetRect(rect, 1.0 + 0.5 * NSHeight(rect), 0.0)];
                 }
                 [NSGraphicsContext restoreGraphicsState];
             }
         }
     }
-}
-
-- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
-    if ([menuItem action] == @selector(alternateDelete:))
-        return [self canAlternateDelete];
-    else if ([menuItem action] == @selector(alternateCut:))
-        return [self canAlternateCut];
-    else
-        return [super validateMenuItem:menuItem];
 }
 
 #pragma mark Alternating row color
@@ -275,12 +236,12 @@ enum {
 
 #pragma mark TableColumn setup
 
-- (NSInteger)columnTypeForField:(NSString *)colName {
-    NSInteger type = 0;
+- (int)columnTypeForField:(NSString *)colName {
+    int type = 0;
     if([colName isURLField])
         type = BDSKColumnTypeURL;
     else if([colName isEqualToString:BDSKLocalFileString] || [colName isEqualToString:BDSKRemoteURLString])
-        type = BDSKColumnTypeLinkedFile;
+        type = BDSKColumnTypeLocalFile;
     else if([colName isRatingField])
         type = BDSKColumnTypeRating;
     else if([colName isBooleanField])
@@ -293,21 +254,19 @@ enum {
         type = BDSKColumnTypeImportOrder;
     else if ([colName isEqualToString:BDSKRelevanceString])
         type = BDSKColumnTypeRelevance;
-    else if ([colName isEqualToString:BDSKColorString] || [colName isEqualToString:BDSKColorLabelString])
-        type = BDSKColumnTypeColor;
     else
         type = BDSKColumnTypeText;
     return type;
 }
 
-- (id)dataCellForColumnType:(NSInteger)columnType {
+- (id)dataCellForColumnType:(int)columnType {
     id cell = nil;
     
     switch(columnType) {
         case BDSKColumnTypeURL:
             cell = [[[BDSKCenterScaledImageCell alloc] init] autorelease];
             break;
-        case BDSKColumnTypeLinkedFile:
+        case BDSKColumnTypeLocalFile:
             cell = [[[BDSKTextWithIconCell alloc] init] autorelease];
             [cell setLineBreakMode:NSLineBreakByClipping];
             break;
@@ -353,9 +312,6 @@ enum {
             [cell setEnabled:NO];
             [(BDSKLevelIndicatorCell *)cell setMaxHeight:(17.0 * 0.7)];
             break;
-        case BDSKColumnTypeColor: 
-            cell = [[[BDSKColorCell alloc] initImageCell:nil] autorelease];
-            break;
         case BDSKColumnTypeText:
         default:
             cell = [[[BDSKTextFieldCell alloc] initTextCell:@""] autorelease];
@@ -370,7 +326,7 @@ enum {
 - (NSTableColumn *)configuredTableColumnForField:(NSString *)colName {
     BDSKTableColumn *tc = (BDSKTableColumn *)[self tableColumnWithIdentifier:colName];
     id dataCell = [tc dataCell];
-    NSInteger columnType = [self columnTypeForField:colName];
+    int columnType = [self columnTypeForField:colName];
     
     if(tc == nil){
         // it is a new column, so create it
@@ -398,8 +354,8 @@ enum {
     else
         [headerCell setStringValue:[[NSBundle mainBundle] localizedStringForKey:colName value:@"" table:@"BibTeXKeys"]];
     
-    if (columnType != BDSKColumnTypeText && columnType != BDSKColumnTypeLinkedFile && columnType != BDSKColumnTypeRelevance)
-        [tc setWidth:BDSKMax([dataCell cellSize].width, [headerCell cellSize].width)];
+    if (columnType != BDSKColumnTypeText && columnType != BDSKColumnTypeLocalFile && columnType != BDSKColumnTypeRelevance)
+        [tc setWidth:fmaxf([dataCell cellSize].width, [headerCell cellSize].width)];
     
     return tc;
 }
@@ -435,13 +391,69 @@ enum {
     [self performSelector:@selector(addTableColumn:) withObjectsFromArray:columns];
     [self selectRowIndexes:selectedRows byExtendingSelection:NO];
     [self setHighlightedTableColumn:highlightedColumn]; 
-    [self tableViewFontChanged];
+    [self tableViewFontChanged:nil];
     [self updateColumnsMenu];
 }
 
-- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(NSUInteger)idx {
+- (void)changeTableColumnsWithIdentifiers:(NSArray *)identifiers {
+    // Store the new column in the preferences
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[identifiers arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
+                                                      forKey:BDSKShownColsNamesKey];
+    
+    if (BDSKDefaultAnimationTimeInterval > 0.0) {
+        NSView *cacheView = [self enclosingScrollView];
+        NSImage *initialImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
+        NSBitmapImageRep *imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
+        [cacheView cacheDisplayInRect:[cacheView frame] toBitmapImageRep:imageRep];
+        [initialImage addRepresentation:imageRep];
+        
+        // set the view up with the new columns; don't force a redraw, though
+        [self setupTableColumnsWithIdentifiers:identifiers];
+        
+        // the added table column's content is not correct during the transition; -reloadData doesn't help
+        NSImage *finalImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
+        imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
+        [cacheView cacheDisplayInRect:[cacheView frame] toBitmapImageRep:imageRep];
+        [finalImage addRepresentation:imageRep];
+        
+        // block until this is done, so we can handle drawing manually
+        BDSKImageFadeAnimation *animation = [[BDSKImageFadeAnimation alloc] initWithDuration:BDSKDefaultAnimationTimeInterval animationCurve:NSAnimationEaseInOut];
+        [animation setDelegate:self];
+        [animation setAnimationBlockingMode:NSAnimationBlocking];
+        
+        [animation setTargetImage:finalImage];
+        [animation setStartingImage:initialImage];
+        [animation startAnimation];
+        
+        [finalImage release];
+        [initialImage release];
+        
+        [animation autorelease];
+    } else {
+        // set the view up with the new columns
+        [self setupTableColumnsWithIdentifiers:identifiers];
+    }
+}
+
+- (void)imageAnimationDidUpdate:(BDSKImageFadeAnimation *)anAnimation {
+    NSView *scrollView = [self enclosingScrollView];
+    NSGraphicsContext *ctxt = [NSGraphicsContext graphicsContextWithWindow:[scrollView window]];
+    [NSGraphicsContext setCurrentContext:ctxt];
+    
+    [ctxt saveGraphicsState];
+    NSRectClip([scrollView convertRect:[scrollView visibleRect] toView:nil]);
+    
+    // we're drawing the scrollview as well as the tableview
+    NSRect frameRect = [scrollView convertRect:[scrollView frame] toView:nil];
+    CIImage *ciImage = [anAnimation currentCIImage];
+    [[ctxt CIContext] drawImage:ciImage atPoint:*(CGPoint *)&(frameRect.origin) fromRect:[ciImage extent]];
+    [ctxt flushGraphics];
+    [ctxt restoreGraphicsState];
+}
+
+- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(unsigned)idx {
     NSMutableArray *shownColumns = [NSMutableArray arrayWithArray:[self tableColumnIdentifiers]];
-    NSUInteger oldIndex = [shownColumns indexOfObject:identifier];
+    unsigned oldIndex = [shownColumns indexOfObject:identifier];
     
     // Check if an object already exists in the tableview, remove the old one if it does
     // This means we can't have a column more than once.
@@ -455,7 +467,7 @@ enum {
     
     [shownColumns insertObject:identifier atIndex:idx];
     
-    [self setupTableColumnsWithIdentifiers:shownColumns];
+    [self changeTableColumnsWithIdentifiers:shownColumns];
 }
 
 - (void)removeTableColumnWithIdentifier:(NSString *)identifier {
@@ -467,7 +479,7 @@ enum {
     
     [shownColumns removeObject:identifier];
     
-    [self setupTableColumnsWithIdentifiers:shownColumns];
+    [self changeTableColumnsWithIdentifiers:shownColumns];
 }
 
 - (NSMenu *)columnsMenu{
@@ -490,7 +502,7 @@ enum {
 - (NSArray *)tableColumnIdentifiers { return [[self tableColumns] valueForKey:@"identifier"]; }
 
 // copied from -[NSTableView (OAExtensions) scrollSelectedRowsToVisibility:]
-- (void)scrollRowToCenter:(NSUInteger)row;
+- (void)scrollRowToCenter:(unsigned int)row;
 {
     NSRect rowRect = [self rectOfRow:row];
     
@@ -498,7 +510,7 @@ enum {
         return;
     
     NSRect visibleRect;
-    CGFloat heightDifference;
+    float heightDifference;
     
     visibleRect = [self visibleRect];
     
@@ -526,16 +538,11 @@ enum {
 	static NSDictionary *headerImageCache = nil;
 	
 	if (headerImageCache == nil) {
-		NSDictionary *paths = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKTableHeaderImagesKey];
+		NSDictionary *paths = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableHeaderImagesKey];
         NSImage *paperclip = [[[NSImage paperclipImage] copy] autorelease];
         [paperclip setScalesWhenResized:YES];
         [paperclip setSize:NSMakeSize(16, 16)];
-        if ([paperclip respondsToSelector:@selector(setTemplate:)])
-            [paperclip setTemplate:NO];
-        NSImage *color = [[[NSImage imageNamed:@"colors"] copy] autorelease];
-        [color setScalesWhenResized:YES];
-        [color setSize:NSMakeSize(16, 16)];
-		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, paperclip, BDSKLocalFileString, [NSImage arrowImage], BDSKCrossrefString, color, BDSKColorString, color, BDSKColorLabelString, nil];
+		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, paperclip, BDSKLocalFileString, [NSImage arrowImage], BDSKCrossrefString, nil];
 		if (paths) {
 			NSEnumerator *keyEnum = [paths keyEnumerator];
 			NSString *key, *path;
@@ -562,7 +569,7 @@ enum {
 	
 	if (headerTitleCache == nil) {
         NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:@"@", BDSKUrlString, @"@", BDSKRemoteURLString, @"#", BDSKItemNumberString, @"#", BDSKImportOrderString, nil];
-		[tmpDict addEntriesFromDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKTableHeaderTitlesKey]];
+		[tmpDict addEntriesFromDictionary:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableHeaderTitlesKey]];
         headerTitleCache = [tmpDict copy];
         [tmpDict release];
 	}
@@ -577,7 +584,7 @@ enum {
         [self insertTableColumnWithIdentifier:[sender representedObject] atIndex:[self numberOfColumns]];
 }
 
-- (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+- (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSString *newColumnName = [addFieldController field];
     
     if(newColumnName && returnCode == NSOKButton)
@@ -587,7 +594,7 @@ enum {
 - (void)columnsMenuAddTableColumn:(id)sender{
     // first we fill the popup
 	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-    NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKPubDateString, BDSKDateAddedString, BDSKDateModifiedString, BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKLastAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKLastAuthorEditorString, BDSKItemNumberString, BDSKContainerString, BDSKCrossrefString, BDSKLocalFileString, BDSKRemoteURLString, BDSKColorLabelString, nil]
+    NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKPubDateString, BDSKDateAddedString, BDSKDateModifiedString, BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKLastAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKLastAuthorEditorString, BDSKItemNumberString, BDSKContainerString, BDSKCrossrefString, BDSKLocalFileString, BDSKRemoteURLString, nil]
                                               excluding:[self tableColumnIdentifiers]];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of column to add:", @"Label for adding column")
@@ -640,11 +647,8 @@ enum {
 		[item setState:NSOnState];
 	}
     
-	if([[self cornerView] isKindOfClass:[BDSKImagePopUpButton class]] && menu != nil) {
-        menu = [self columnsMenu]; // this is already a copy
-        [menu insertItemWithTitle:@"" action:NULL keyEquivalent:@"" atIndex:0];
-        [(BDSKImagePopUpButton *)[self cornerView] setMenu:menu];
-    }
+	if([[self cornerView] isKindOfClass:[BDSKImagePopUpButton class]] && menu != nil)
+        [(BDSKImagePopUpButton *)[self cornerView] setMenu:[self columnsMenu]];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
@@ -663,8 +667,8 @@ enum {
 }
 
 - (void)importItem:(id)sender {
-    NSInteger row = [self clickedRow];
-    BDSKASSERT(row != -1);
+    int row = [self clickedRow];
+    OBASSERT(row != -1);
     if (row == -1)
         return;
     if([[self delegate] respondsToSelector:@selector(tableView:importItemAtRow:)])
@@ -672,19 +676,19 @@ enum {
 }
 
 - (void)openParentItem:(id)sender {
-    NSInteger row = [self clickedRow];
-    BDSKASSERT(row != -1);
+    int row = [self clickedRow];
+    OBASSERT(row != -1);
     if (row == -1)
         return;
     if([[self delegate] respondsToSelector:@selector(tableView:openParentForItemAtRow:)])
         [[self delegate] tableView:self openParentForItemAtRow:row];
 }
 
-- (void)doAutosizeColumn:(NSUInteger)column {
-    NSInteger row, numRows = [self numberOfRows];
+- (void)doAutosizeColumn:(unsigned int)column {
+    int row, numRows = [self numberOfRows];
     NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
     id cell;
-    CGFloat width = 0.0;
+    float width = 0.0;
     
     for (row = 0; row < numRows; row++) {
         if ([self respondsToSelector:@selector(preparedCellAtColumn:row:)]) {
@@ -695,20 +699,20 @@ enum {
                 [[self delegate] tableView:self willDisplayCell:cell forTableColumn:tableColumn row:row];
             [cell setObjectValue:[[self dataSource] tableView:self objectValueForTableColumn:tableColumn row:row]];
         }
-        width = BDSKMax(width, [cell cellSize].width);
+        width = fmaxf(width, [cell cellSize].width);
     }
-    width = BDSKMin([tableColumn maxWidth], BDSKMax([tableColumn minWidth], width));
+    width = fminf([tableColumn maxWidth], fmaxf([tableColumn minWidth], width));
     [tableColumn setWidth:width];
 }
 
 - (void)autosizeColumn:(id)sender {
-    NSInteger clickedColumn = [(BDSKMainTableHeaderView *)[self headerView] columnForMenu];
+    int clickedColumn = [(BDSKMainTableHeaderView *)[self headerView] columnForMenu];
     if (clickedColumn >= 0)
         [self doAutosizeColumn:clickedColumn];
 }
 
 - (void)autosizeAllColumns:(id)sender {
-    NSUInteger column, numColumns = [self numberOfColumns];
+    unsigned int column, numColumns = [self numberOfColumns];
     for (column = 0; column < numColumns; column++)
         [self doAutosizeColumn:column];
 }
@@ -718,9 +722,9 @@ enum {
 
 @implementation BDSKTableColumn
 
-- (NSInteger)columnType { return columnType; }
+- (int)columnType { return columnType; }
 
-- (void)setColumnType:(NSInteger)type { columnType = type; }
+- (void)setColumnType:(int)type { columnType = type; }
 
 @end
 
@@ -737,13 +741,13 @@ enum {
 }
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView{
-    CGFloat startWhite = [self isHighlighted] ? 0.9 : 1.0;
-    CGFloat endWhite = [self isHighlighted] ? 0.95 : 0.9;
-    CGFloat alpha = [self isEnabled] ? 1.0 : 0.6;
+    float startWhite = [self isHighlighted] ? 0.9 : 1.0;
+    float endWhite = [self isHighlighted] ? 0.95 : 0.9;
+    float alpha = [self isEnabled] ? 1.0 : 0.6;
     NSRect rect = cellFrame;
     rect.size.height -= 1.0;
-    rect = NSInsetRect(rect, 0.0, 0.5);
-    NSBezierPath *path = [NSBezierPath bezierPathWithHorizontalOvalInRect:rect];
+    rect = NSInsetRect(rect, 0.5 * NSHeight(rect), 0.5);
+    NSBezierPath *path = [NSBezierPath bezierPathWithHorizontalOvalAroundRect:rect];
 
     [path fillPathVerticallyWithStartColor:[CIColor colorWithRed:startWhite green:startWhite blue:startWhite alpha:alpha] endColor:[CIColor colorWithRed:endWhite green:endWhite blue:endWhite alpha:alpha]];
     [[NSColor colorWithCalibratedWhite:0.8 alpha:alpha] set];
@@ -756,37 +760,6 @@ enum {
 #pragma mark -
 
 @implementation BDSKTextFieldCell
-
-- (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-    return nil;
-}
-
-// Tiger inverts the text color based on the highlight color, which is lame
-- (NSColor *)textColor {
-    if ([self respondsToSelector:@selector(backgroundStyle)] == NO && [self isHighlighted] && 
-        [[[self controlView] window] isKeyWindow] && [[[[self controlView] window] firstResponder] isEqual:[self controlView]])
-        return [NSColor textBackgroundColor];
-    return [super textColor];
-}
-
-@end
-
-#pragma mark -
-
-@implementation BDSKColorCell
-
-- (NSSize)cellSize {
-    return NSMakeSize(16.0, 16.0);
-}
-
-- (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-    NSColor *color = [self objectValue];
-    if ([color respondsToSelector:@selector(drawSwatchInRect:)]) {
-        NSRect rect, ignored;
-        NSDivideRect(cellFrame, &ignored, &rect, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
-        [color drawSwatchInRect:rect];
-    }
-}
 
 - (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     return nil;
@@ -812,7 +785,7 @@ enum {
     return menu;
 }
 
-- (NSInteger)columnForMenu {
+- (int)columnForMenu {
     return columnForMenu;
 }
 

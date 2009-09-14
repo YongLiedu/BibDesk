@@ -34,9 +34,9 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #import <Cocoa/Cocoa.h>
-#import "BDSKPreferencePane.h"
+#import <OmniAppKit/OmniAppKit.h>
 
-@interface BibPref_Cite : BDSKPreferencePane
+@interface BibPref_Cite : OAPreferenceClient
 {
     IBOutlet NSPopUpButton* defaultDragCopyPopup;
     IBOutlet NSPopUpButton* defaultDragCopyTemplatePopup;
@@ -45,7 +45,7 @@
     
     IBOutlet NSTextField* citeBehaviorLine; /*! for feedback */
     IBOutlet NSTextField* citeStringField; /*! for user input */
-    IBOutlet NSMatrix* separateCiteRadio;
+    IBOutlet NSButton* separateCiteCheckButton;
     IBOutlet NSButton* prependTildeCheckButton;
 	IBOutlet NSMatrix* citeBracketRadio;
 }
@@ -58,6 +58,8 @@
 - (IBAction)changePrependTilde:(id)sender;
 - (IBAction)citeStringFieldChanged:(id)sender;
 - (IBAction)setCitationBracketStyle:(id)sender;
+
+- (void)handleTemplatePrefsChangedNotification:(NSNotification *)notification;
 
 @end
 

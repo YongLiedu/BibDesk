@@ -38,7 +38,6 @@
 
 #import "FVConcreteOperation.h"
 #import "FVOperationQueue.h"
-#import "FVThread.h"
 #import <libkern/OSAtomic.h>
 
 struct FVOpFlags {
@@ -66,7 +65,7 @@ struct FVOpFlags {
 
 - (void)dealloc
 {
-    NSZoneFree([self zone], (void *)_flags);
+    NSZoneFree([self zone], _flags);
     [_queue release];
     [super dealloc];
 }
@@ -81,6 +80,7 @@ struct FVOpFlags {
 
 - (FVOperationQueuePriority)queuePriority;
 {
+    OSMemoryBarrier();
     return _flags->_priority;
 }
 
@@ -103,7 +103,7 @@ struct FVOpFlags {
     OSAtomicIncrement32Barrier(&(_flags->_executing));
     
     if ([self isConcurrent])
-        [FVThread detachNewThreadSelector:@selector(main) toTarget:self withObject:nil];
+        [NSThread detachNewThreadSelector:@selector(main) toTarget:self withObject:nil];
     else
         [self main];
 }
@@ -122,21 +122,25 @@ struct FVOpFlags {
 
 - (BOOL)isCancelled;
 {
+    OSMemoryBarrier();
     return 0 != _flags->_cancelled;
 }
 
 - (BOOL)isExecuting;
 {
+    OSMemoryBarrier();
     return 1 == _flags->_executing;
 }
 
 - (BOOL)isFinished;
 {
+    OSMemoryBarrier();
     return 1 == _flags->_finished;
 }
 
 - (BOOL)isConcurrent;
 {
+    OSMemoryBarrier();
     return 1 == _flags->_concurrent;
 }
 
@@ -148,7 +152,7 @@ struct FVOpFlags {
         [NSException raise:NSInternalInconsistencyException format:@"attempt to modify a previously executed operation"];
     
     bool didSwap;
-    int32_t val = flag ? 1 : 0;
+    int32_t val = (YES == flag) ? 1 : 0;
     do {
         didSwap = OSAtomicCompareAndSwap32Barrier(_flags->_concurrent, val, &(_flags->_concurrent));
     } while (false == didSwap);

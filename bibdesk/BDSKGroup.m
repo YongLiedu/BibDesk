@@ -37,26 +37,14 @@
  */
 
 #import "BDSKGroup.h"
-#import "BDSKParentGroup.h"
 #import "BibItem.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import "BDSKMacroResolver.h"
-#import "BDSKRuntime.h"
+#import <OmniBase/OmniBase.h>
 
 
-@implementation BDSKGroup
-
-static NSArray *cellValueKeys = nil;
-static NSArray *noCountCellValueKeys = nil;
-
-+ (void)initialize {
-    BDSKINITIALIZE;
-    cellValueKeys = [[NSArray alloc] initWithObjects:@"stringValue", @"editingStringValue", @"numberValue", @"icon", @"isRetrieving", @"failedDownload", nil];
-    noCountCellValueKeys = [[NSArray alloc] initWithObjects:@"stringValue", @"editingStringValue", @"icon", @"isRetrieving", @"failedDownload", nil];
-}
- 
 static NSString *createUniqueID(void)
 {
     CFUUIDRef uuid = CFUUIDCreate(NULL);
@@ -64,6 +52,8 @@ static NSString *createUniqueID(void)
     CFRelease(uuid);
     return uuidStr;
 }    
+
+@implementation BDSKGroup
 
 // super's designated initializer
 - (id)init {
@@ -89,7 +79,7 @@ static NSString *createUniqueID(void)
 }
 
 // designated initializer
-- (id)initWithName:(id)aName count:(NSInteger)aCount {
+- (id)initWithName:(id)aName count:(int)aCount {
     if (self = [super init]) {
         name = [aName copy];
         count = aCount;
@@ -126,10 +116,10 @@ static NSString *createUniqueID(void)
     [coder encodeInt:count forKey:@"count"];
 }
 
-// NSCopying protocol, may be used by the duplicate script command
+// NSCopying protocol, may be used in -[NSCell setObjectValue:] at some point
 
 - (id)copyWithZone:(NSZone *)aZone {
-	return [[[self class] allocWithZone:aZone] initWithName:name count:count];
+	return [self retain];
 }
 
 - (void)dealloc {
@@ -138,7 +128,7 @@ static NSString *createUniqueID(void)
     [super dealloc];
 }
 
-- (NSUInteger)hash {
+- (unsigned int)hash {
     return [name hash];
 }
 
@@ -152,7 +142,7 @@ static NSString *createUniqueID(void)
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"%@<%p>: name=\"%@\",count=%ld", [self class], self, name, (long)count];
+    return [NSString stringWithFormat:@"%@<%p>: name=\"%@\",count=%d", [self class], self, name, count];
 }
 
 // accessors
@@ -161,26 +151,31 @@ static NSString *createUniqueID(void)
     return uniqueID;
 }
 
-- (id)name {
-    return name;
+- (void)setUniqueID:(NSString *)newID {
+    if (uniqueID != newID) {
+        [uniqueID release];
+        uniqueID = [newID retain];
+    }
 }
 
-- (NSInteger)count {
+- (id)name {
+    return [[name retain] autorelease];
+}
+
+- (int)count {
     return count;
 }
 
-- (void)setCount:(NSInteger)newCount {
+- (void)setCount:(int)newCount {
 	count = newCount;
 }
 
 // "static" accessors
 
 - (NSImage *)icon {
-    BDSKRequestConcreteImplementation(self, _cmd);
+    OBRequestConcreteImplementation(self, _cmd);
 	return nil;
 }
-
-- (BOOL)isParent { return NO; }
 
 - (BOOL)isStatic { return NO; }
 
@@ -215,30 +210,11 @@ static NSString *createUniqueID(void)
 }
 
 - (NSNumber *)numberValue {
-	return [NSNumber numberWithInt:[self count]];
-}
-
-- (NSString *)editingStringValue {
-    return [[self name] description];
-}
-
-- (id)cellValue {
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKHideGroupCountKey])
-        return [self dictionaryWithValuesForKeys:noCountCellValueKeys];
-    else
-        return [self dictionaryWithValuesForKeys:cellValueKeys];
+	return [NSNumber numberWithInt:count];
 }
 
 - (NSString *)toolTip {
     return [self stringValue];
-}
-
-- (BDSKParentGroup *)parent {
-    return parent;
-}
-
-- (void)setParent:(BDSKParentGroup *)newParent {
-    parent = newParent;
 }
 
 - (BibDocument *)document{
@@ -274,7 +250,7 @@ static NSString *createUniqueID(void)
 static NSString *BDSKLibraryLocalizedString = nil;
 
 + (void)initialize{
-    BDSKINITIALIZE;
+    OBINITIALIZE;
     BDSKLibraryLocalizedString = [NSLocalizedString(@"Library", @"Group name for library") copy];
 }
 
@@ -284,7 +260,12 @@ static NSString *BDSKLibraryLocalizedString = nil;
 }
 
 - (NSImage *)icon {
-	return [NSImage imageNamed:@"NSApplicationIcon"];
+    // this icon looks better than the one we get from +[NSImage imageNamed:@"FolderPenIcon"] or imageNamed:
+    static NSImage *image = nil;
+    if(nil == image)
+        image = [[[NSWorkspace sharedWorkspace] iconForFile:[[NSBundle mainBundle] bundlePath]] copy];
+    
+	return image;
 }
 
 - (BOOL)containsItem:(BibItem *)item {
@@ -293,8 +274,8 @@ static NSString *BDSKLibraryLocalizedString = nil;
 
 - (BOOL)isEqual:(id)other { return self == other; }
 
-- (NSUInteger)hash {
-    return( ((NSUInteger) self >> 4) | (NSUInteger) self << (32 - 4));
+- (unsigned int)hash {
+    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
 }
 
 - (BOOL)isValidDropTarget { return YES; }

@@ -40,57 +40,39 @@
 
 @class FVColorMenuMatrix;
 
-/** @internal @brief Finder label menu view.
- 
- FVColorMenuView provides an NSView subclass that is a close approximation of the Finder label color control.  Presently it's only available directly in code, but is easy to set up in code:
- @code
- NSMenuItem *anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:@"Finder Label" 
-                                                                           action:@selector(changeFinderLabel:)
-                                                                    keyEquivalent:@""];
- FVColorMenuView *menuView = [FVColorMenuView menuView];
- // target will be first responder
- [menuView setTarget:nil]; 
- [menuView setAction:@selector(changeFinderLabel:)];
- [anItem setView:menuView];
- // add anItem to a menu
- @endcode
- 
- Although this class is marked for internal use only, it should be useful elsewhere.
- 
- */
 @interface FVColorMenuView : NSControl
 {
-    FVColorMenuMatrix *_matrix;
-    NSTextFieldCell   *_labelCell;
-    NSTextFieldCell   *_labelNameCell;
-    SEL                _action;
-    id                 _target;
+    IBOutlet FVColorMenuMatrix *_matrix;
+    IBOutlet NSTextField       *_labelField;
+    IBOutlet NSTextField       *_labelNameField;
+    SEL                         _action;
+    id                          _target;
 }
 
-/** @brief Returns a new, autoreleased instance.
- 
- This is the primary interface for returning a new menu view.  It handles loading UI elements from the nib and setting up connections. */
+// returns a new instance of the view
 + (FVColorMenuView *)menuView;
 
-/** @brief Select a given Finder label.
- 
- For programmatic selection changes.
- @param label An index between 0 and 7. */
+// select a given Finder label
 - (void)selectLabel:(NSUInteger)label;
 
-/** @brief Target for control action.
- 
- Target must implement @code -(NSInteger)tag @endcode to return the selected Finder label.
- @param target The receiver of the view's action selector. */
-- (void)setTarget:(id)target;
-/** The control's target. */
-- (id)target;
+// implements -tag to return the selected Finder label
 
-/** Action for selection changes. */
+- (id)target;
+- (void)setTarget:(id)target;
+
 - (SEL)action;
-/** Sets the action for selection changes.
- 
- @param action Action will be sent to the control's target. */
 - (void)setAction:(SEL)action;
+
+@end
+
+@interface FVColorMenuCell : NSButtonCell
+@end
+
+@interface FVColorMenuMatrix : NSMatrix
+{
+    NSInteger _boxedRow;
+    NSInteger _boxedColumn;
+}
+- (NSString *)boxedLabelName;
 
 @end

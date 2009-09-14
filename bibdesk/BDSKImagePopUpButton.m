@@ -38,9 +38,9 @@
  */
 
 #import "BDSKImagePopUpButton.h"
-#import "BDSKImagePopUpButtonCell.h"
 #import "NSBezierPath_BDSKExtensions.h"
-
+#import <OmniAppKit/OmniAppKit.h>
+#import "BDSKImageFadeAnimation.h"
 
 @implementation BDSKImagePopUpButton
 
@@ -48,38 +48,246 @@
     return [BDSKImagePopUpButtonCell class];
 }
 
+- (id)initWithFrame:(NSRect)frameRect {
+	if (self = [super initWithFrame:frameRect]) {
+		highlight = NO;
+		delegate = nil;
+	}
+	return self;
+}
+
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
-		if ([[self cell] isKindOfClass:[[self class] cellClass]] == NO) {
-			id oldCell = [self cell];
-			id cell = [[[[[self class] cellClass] alloc] initImageCell:[oldCell image]] autorelease];
-            
-			[cell setEnabled:[oldCell isEnabled]];
-			[cell setShowsFirstResponder:[oldCell showsFirstResponder]];
-			[cell setUsesItemFromMenu:[oldCell usesItemFromMenu]];
-            [cell setArrowPosition:[oldCell arrowPosition]];
-			[cell setMenu:[oldCell menu]];
-            
+		highlight = NO;
+		[self setDelegate:[coder decodeObjectForKey:@"delegate"]];
+		
+		if (![[self cell] isKindOfClass:[BDSKImagePopUpButtonCell class]]) {
+			BDSKImagePopUpButtonCell *cell = [[[BDSKImagePopUpButtonCell alloc] init] autorelease];
+			
+			if ([self image] != nil) {
+				[cell setIconImage:[self image]];
+				[cell setIconSize:[[self image] size]];
+			}
+			if ([self menu] != nil) {
+				if ([self pullsDown])	
+					[[self menu] removeItemAtIndex:0];
+				[cell setMenu:[self menu]];
+			}
 			[self setCell:cell];
 		}
 	}
 	return self;
 }
 
-- (NSImage *)icon {
-    return [[self cell] icon];
+- (void)encodeWithCoder:(NSCoder *)encoder{
+	[super encodeWithCoder:encoder];
+	[encoder encodeConditionalObject:delegate forKey:@"delegate"];
 }
 
-- (void)setIcon:(NSImage *)anImage {
-    [[self cell] setIcon:anImage];
+- (void)dealloc{
+    [animation setDelegate:nil];
+    [animation stopAnimation];
+    [animation release];
+	[super dealloc];
 }
 
-- (NSSize)iconSize {
+#pragma mark Accessors
+
+- (id)delegate {
+    return delegate;
+}
+
+- (void)setDelegate:(id)newDelegate {
+	delegate = newDelegate;
+}
+
+- (NSSize)iconSize{
     return [[self cell] iconSize];
 }
 
-- (void)setIconSize:(NSSize)newIconSize {
-    [[self cell] setIconSize:newIconSize];
+- (void) setIconSize:(NSSize)iconSize{
+    [[self cell] setIconSize:iconSize];
+}
+
+- (BOOL)showsMenuWhenIconClicked{
+    return [[self cell] showsMenuWhenIconClicked];
+}
+
+- (void)setShowsMenuWhenIconClicked:(BOOL)showsMenuWhenIconClicked{
+    [[self cell] setShowsMenuWhenIconClicked: showsMenuWhenIconClicked];
+}
+
+- (NSImage *)iconImage{
+    return [[self cell] iconImage];
+}
+
+- (void)animationDidStop:(BDSKImageFadeAnimation *)anAnimation {
+    OBASSERT(anAnimation == animation);
+    [animation setDelegate:nil];
+    [animation autorelease];
+    animation = nil;
+}
+
+- (void)animationDidEnd:(BDSKImageFadeAnimation *)anAnimation {
+    OBASSERT(anAnimation == animation);
+    [self setIconImage:[anAnimation finalImage]];
+    [animation setDelegate:nil];
+    [animation autorelease];
+    animation = nil;
+}
+
+- (void)imageAnimationDidUpdate:(BDSKImageFadeAnimation *)anAnimation {
+    [self setIconImage:[anAnimation currentImage]];
+}
+
+- (void)fadeIconImageToImage:(NSImage *)newImage {
+    
+    if ([animation isAnimating])
+        [animation stopAnimation];
+        
+    NSImage *iconImage = [self iconImage];
+    
+    if (nil != iconImage && nil != newImage) {
+        animation = [[BDSKImageFadeAnimation alloc] initWithDuration:1.0f animationCurve:NSAnimationEaseInOut];
+        [animation setDelegate:self];
+        [animation setAnimationBlockingMode:NSAnimationNonblocking];
+        
+        [animation setTargetImage:newImage];
+        [animation setStartingImage:iconImage];
+        [animation startAnimation];
+    } else {
+        [self setIconImage:newImage];
+    }
+}
+
+- (void)setIconImage:(NSImage *)iconImage{
+    [[self cell] setIconImage: iconImage];
+}
+
+- (NSImage *)arrowImage{
+    return [[self cell] arrowImage];
+}
+
+- (void)setArrowImage:(NSImage *)arrowImage{
+    [[self cell] setArrowImage: arrowImage];
+}
+
+- (BOOL)iconActionEnabled{
+    return [[self cell] iconActionEnabled];
+}
+
+- (void)setIconActionEnabled:(BOOL)iconActionEnabled{
+    [[self cell] setIconActionEnabled: iconActionEnabled];
+}
+- (BOOL)refreshesMenu{
+    return [[self cell] refreshesMenu];
+}
+
+- (void)setRefreshesMenu:(BOOL)refreshesMenu{
+    [[self cell] setRefreshesMenu:refreshesMenu];
+}
+
+- (NSMenu *)menuForCell:(id)cell{
+	if ([self refreshesMenu] && 
+		[delegate respondsToSelector:@selector(menuForImagePopUpButton:)]) {
+		return [delegate menuForImagePopUpButton:self];
+	} else {
+		return [cell menu];
+	}
+}
+
+#pragma mark Dragging source
+
+- (unsigned int)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
+    return (isLocal) ? NSDragOperationEvery : NSDragOperationCopy;
+}
+
+- (BOOL)startDraggingWithEvent:(NSEvent *)theEvent {
+	NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
+	
+	if ([delegate respondsToSelector:@selector(imagePopUpButton:writeDataToPasteboard:)] == NO ||
+		[delegate imagePopUpButton:self writeDataToPasteboard:pboard] == NO) 
+		return NO;
+		
+	NSImage *iconImage;
+	NSSize size = [[self cell] iconSize];
+	NSImage *dragImage = [[[NSImage alloc] initWithSize:size] autorelease];
+	NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+	
+	mouseLoc.x -= 0.5f * size.width;
+	mouseLoc.y += 0.5f * size.height;
+	
+	if ([[self cell] usesItemFromMenu] == NO) {
+		iconImage = [self iconImage];
+	} else {
+		iconImage = [[self selectedItem] image];
+	}
+    NSSize srcSize = [iconImage size];
+	[dragImage lockFocus];
+    [iconImage drawInRect:NSMakeRect(0, 0, size.width, size.height) fromRect:NSMakeRect(0, 0, srcSize.width, srcSize.height) operation:NSCompositeCopy fraction:0.6];
+	[dragImage unlockFocus];
+
+	[self dragImage:dragImage at:mouseLoc offset:NSZeroSize event:theEvent pasteboard:pboard source:self slideBack:YES];
+	
+	return YES;
+}
+
+- (NSArray *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination {
+	if ([delegate respondsToSelector:@selector(imagePopUpButton:namesOfPromisedFilesDroppedAtDestination:)])
+		return [delegate imagePopUpButton:self namesOfPromisedFilesDroppedAtDestination:dropDestination];
+	return nil;
+}
+
+- (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
+	if ([delegate respondsToSelector:@selector(imagePopUpButton:cleanUpAfterDragOperation:)])
+		[delegate imagePopUpButton:self cleanUpAfterDragOperation:operation];
+    // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
+    [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
+}
+
+#pragma mark Dragging destination
+
+- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender {
+    NSDragOperation dragOp = NSDragOperationNone;
+    if ([delegate respondsToSelector:@selector(imagePopUpButton:receiveDrag:)] && 
+        [delegate respondsToSelector:@selector(imagePopUpButton:canReceiveDrag:)]) {
+        
+        dragOp = [delegate imagePopUpButton:self canReceiveDrag:sender];
+        if (dragOp != NSDragOperationNone) {	
+            highlight = YES;
+            [self setNeedsDisplay:YES];
+        }
+    }
+    return dragOp;
+}
+
+- (void)draggingExited:(id <NSDraggingInfo>)sender {
+    highlight = NO;
+	[self setNeedsDisplay:YES];
+}
+
+- (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender {
+	highlight = NO;
+	[self setNeedsDisplay:YES];
+	return YES;
+} 
+
+- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
+    if(delegate == nil) return NO;
+    
+    return [delegate imagePopUpButton:self receiveDrag:sender];
+}
+
+#pragma mark Drawing and Highlighting
+
+-(void)drawRect:(NSRect)rect {
+	[super drawRect:rect];
+	
+	if (highlight)  {
+        [NSGraphicsContext saveGraphicsState];
+        [NSBezierPath drawHighlightInRect:[self bounds] radius:4.0 lineWidth:2.0 color:[NSColor alternateSelectedControlColor]];
+        [NSGraphicsContext restoreGraphicsState];
+	}
 }
 
 @end

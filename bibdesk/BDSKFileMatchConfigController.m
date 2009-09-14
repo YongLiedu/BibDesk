@@ -35,7 +35,6 @@
 #import "BibDocument.h"
 #import "BDSKOrphanedFilesFinder.h"
 #import "BDSKTextWithIconCell.h"
-#import "NSImage_BDSKExtensions.h"
 
 @implementation BDSKFileMatchConfigController
 
@@ -94,7 +93,7 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
             } else {
                 // shallow directory traversal: only add the (non-folder) contents of a folder that was dropped, since an arbitrarily deep traversal would have performance issues for file listing and for the search kit indexing
                 NSArray *dirContent = [fm directoryContentsAtPath:path];
-                NSUInteger i, iMax = [dirContent count];
+                unsigned i, iMax = [dirContent count];
                 for (i = 0; i < iMax; i++) {
                     // directoryContentsAtPath returns relative paths with the starting directory as base
                     NSString *subpath = [path stringByAppendingPathComponent:[dirContent objectAtIndex:i]];
@@ -109,7 +108,7 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
     return URLs;
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	if (returnCode == NSOKButton)
 		[[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromPathsAndDirectories:[panel filenames]]];
 }
@@ -202,13 +201,13 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
     
 - (NSString *)windowNibName { return @"FileMatcherConfigSheet"; }
 
-- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op
 {
     [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
     return NSDragOperationLink;
 }
 
-- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op;
+- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op;
 {
     NSPasteboard *pboard = [info draggingPasteboard];
     NSArray *types = [pboard types];
@@ -221,7 +220,7 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
     return NO;
 }
 
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView { return 0; }
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tc row:(NSInteger)r { return nil; }
+- (int)numberOfRowsInTableView:(NSTableView *)tableView { return 0; }
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tc row:(int)r { return nil; }
 
 @end

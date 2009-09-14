@@ -39,14 +39,17 @@
 */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKGroupTableView.h"
+#import "BDSKFileContentSearchController.h"
+#import "BDSKTemplateParser.h"
 #import "BDSKOwnerProtocol.h"
 
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
-@class AGRegex, BDSKMacroResolver, BDSKItemPasteboardHelper;
+@class AGRegex, BDSKTeXTask, BDSKMacroResolver, BDSKItemPasteboardHelper;
 @class BDSKEditor, BDSKMacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController, BDSKSearchGroupViewController;
-@class BDSKStatusBar, BDSKMainTableView, BDSKGroupOutlineView, BDSKGradientView, BDSKGradientSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredView, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FVFileView;
+@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredBox, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FileView;
 @class BDSKWebGroupViewController, BDSKSearchButtonController;
-@class BDSKItemSearchIndexes, BDSKNotesSearchIndex, BDSKFileMigrationController, BDSKDocumentSearch;
+@class BDSKItemSearchIndexes, BDSKFileMigrationController, BDSKDocumentSearch;
 
 enum {
 	BDSKOperationIgnore = NSAlertDefaultReturn, // 1
@@ -106,14 +109,14 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @discussion This is the document class. It keeps an array of BibItems (called (NSMutableArray *)publications) and handles the quick search box. It delegates PDF generation to a BDSKPreviewer.
 */
 
-@interface BibDocument : NSDocument <BDSKOwner>
+@interface BibDocument : NSDocument <BDSKGroupTableDelegate, BDSKSearchContentView, BDSKOwner>
 {
 #pragma mark Main tableview pane variables
 
     IBOutlet NSWindow *documentWindow;
     IBOutlet BDSKMainTableView *tableView;
-    IBOutlet BDSKGradientSplitView *splitView;
-    IBOutlet BDSKColoredView *mainBox;
+    IBOutlet BDSKSplitView *splitView;
+    IBOutlet BDSKColoredBox *mainBox;
     IBOutlet NSView *mainView;
     
     IBOutlet BDSKStatusBar *statusBar;
@@ -128,20 +131,19 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     
 #pragma mark Group pane variables
 
-    IBOutlet BDSKGroupOutlineView *groupOutlineView;
-    IBOutlet BDSKGradientSplitView *groupSplitView;
+    IBOutlet BDSKGroupTableView *groupTableView;
+    IBOutlet BDSKSplitView *groupSplitView;
     IBOutlet BDSKImagePopUpButton *groupActionButton;
     IBOutlet NSButton *groupAddButton;
     IBOutlet BDSKCollapsibleView *groupCollapsibleView;
     IBOutlet BDSKGradientView *groupGradientView;
 	NSString *currentGroupField;
-    CFMutableDictionaryRef groupSpinners;
     
 #pragma mark Side preview variables
 
     IBOutlet NSTabView *sidePreviewTabView;
     IBOutlet NSTextView *sidePreviewTextView;
-    IBOutlet FVFileView *sideFileView;
+    IBOutlet FileView *sideFileView;
     
     IBOutlet BDSKCollapsibleView *fileCollapsibleView;
     IBOutlet BDSKGradientView *fileGradientView;
@@ -149,20 +151,20 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSSegmentedControl *sidePreviewButton;
     NSMenu *sideTemplatePreviewMenu;
     
-    NSInteger sidePreviewDisplay;
+    int sidePreviewDisplay;
     NSString *sidePreviewDisplayTemplate;
     
 #pragma mark Bottom preview variables
 
     IBOutlet NSTabView *bottomPreviewTabView;
     IBOutlet NSTextView *bottomPreviewTextView;
-    IBOutlet FVFileView *bottomFileView;
+    IBOutlet FileView *bottomFileView;
     BDSKPreviewer *previewer;
 	
     IBOutlet NSSegmentedControl *bottomPreviewButton;
     NSMenu *bottomTemplatePreviewMenu;
     
-    NSInteger bottomPreviewDisplay;
+    int bottomPreviewDisplay;
     NSString *bottomPreviewDisplayTemplate;
     
 #pragma mark Toolbar variables
@@ -188,7 +190,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 	IBOutlet NSMenu * groupMenu;
 	IBOutlet NSMenu * actionMenu;
-	IBOutlet NSMenu * copyAsMenu;
 
 #pragma mark Accessory view variables
 
@@ -196,7 +197,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSView *exportAccessoryView;
     IBOutlet BDSKEncodingPopUpButton *saveTextEncodingPopupButton;
     IBOutlet NSButton *exportSelectionCheckButton;
-    NSPopUpButton *saveFormatPopupButton;
     
 #pragma mark Publications and Groups variables
 
@@ -233,19 +233,17 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 #pragma mark Scalar state variables
 
     struct _docState {
-        CGFloat               lastPreviewHeight;  // for the splitview double-click handling
-        CGFloat               lastGroupViewWidth;
-        CGFloat               lastFileViewWidth;
-        CGFloat               lastWebViewFraction;
+        float               lastPreviewHeight;  // for the splitview double-click handling
+        float               lastGroupViewWidth;
+        float               lastFileViewWidth;
         NSStringEncoding    documentStringEncoding;
         NSSaveOperationType currentSaveOperationType; // used to check for autosave during writeToFile:ofType:
         BOOL                sortDescending;
-        BOOL                previousSortDescending;
         BOOL                sortGroupsDescending;
         BOOL                dragFromExternalGroups;
         BOOL                isDocumentClosed;
         BOOL                didImport;
-        NSInteger                 itemChangeMask;
+        int                 itemChangeMask;
         BOOL                displayMigrationAlert;
         BOOL                inOptionKeyState;
     } docState;
@@ -255,15 +253,13 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     NSURL *saveTargetURL;
     
     BDSKItemSearchIndexes *searchIndexes;
-    BDSKNotesSearchIndex *notesSearchIndex;
     BDSKSearchButtonController *searchButtonController;
     BDSKDocumentSearch *documentSearch;
-    NSInteger rowToSelectAfterDelete;
+    int rowToSelectAfterDelete;
     NSPoint scrollLocationAfterDelete;
     
     BDSKFileMigrationController *migrationController;
     
-    NSString *uniqueID;
 }
 
 
@@ -276,10 +272,9 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
  */
 - (id)init;
 
-- (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL forEncoding:(NSStringEncoding)encoding;
+- (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL forSave:(BOOL)isSave;
 - (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes;
 - (BOOL)isMainDocument;
-- (BOOL)commitPendingEdits;
 
 /*!
     @method     clearChangeCount
@@ -312,9 +307,31 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 
 - (BOOL)readFromBibTeXData:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
-- (BOOL)readFromData:(NSData *)data ofStringType:(NSInteger)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
+- (BOOL)readFromData:(NSData *)data ofStringType:(int)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 
 - (void)reportTemporaryCiteKeys:(NSString *)tmpKey forNewDocument:(BOOL)isNewFile;
+
+// Responses to UI actions
+
+/*!
+    @method updatePreviews
+    @abstract Updates the document and/or shared previewer if needed. 
+    @discussion The actual messages are queued and coalesced, so bulk actions will only update the previews once.
+    
+*/
+- (void)updatePreviews;
+
+/*!
+    @method updatePreviewer:
+    @abstract Handles updating a previewer.
+    @discussion -
+    @param aPreviewer The previewer to update
+    
+*/
+- (void)updatePreviewer:(BDSKPreviewer *)aPreviewer;
+
+- (void)updateBottomPreviewPane;
+- (void)updateSidePreviewPane;
 
 /*!
 	@method bibTeXStringForPublications
@@ -370,8 +387,10 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (NSArray *)shownPublications;
 
 - (BDSKGroupsArray *)groups;
+- (void)getCopyOfPublicationsOnMainThread:(NSMutableArray *)dstArray;
+- (void)getCopyOfMacrosOnMainThread:(NSMutableDictionary *)dstDict;
 - (void)insertPublications:(NSArray *)pubs atIndexes:(NSIndexSet *)indexes;
-- (void)insertPublication:(BibItem *)pub atIndex:(NSUInteger)index;
+- (void)insertPublication:(BibItem *)pub atIndex:(unsigned int)index;
 
 - (void)addPublications:(NSArray *)pubArray;
 - (void)addPublication:(BibItem *)pub;
@@ -391,17 +410,26 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 - (BDSKMacroResolver *)macroResolver;
 
+- (void)handleMacroChangedNotification:(NSNotification *)aNotification;
+
 /* Paste related methods */
 - (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect edit:(BOOL)shouldEdit;
 - (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)select verbose:(BOOL)verbose error:(NSError **)error;
 - (BOOL)addPublicationsFromFile:(NSString *)fileName verbose:(BOOL)verbose error:(NSError **)outError;
 - (NSArray *)publicationsFromArchivedData:(NSData *)data;
-- (NSArray *)publicationsForString:(NSString *)string type:(NSInteger)type verbose:(BOOL)verbose error:(NSError **)error;
+- (NSArray *)publicationsForString:(NSString *)string type:(int)type verbose:(BOOL)verbose error:(NSError **)error;
 - (NSArray *)publicationsForFiles:(NSArray *)filenames error:(NSError **)error;
 - (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSMutableArray *)unparseableFiles verbose:(BOOL)verbose error:(NSError **)error;
 - (NSArray *)publicationsForURLFromPasteboard:(NSPasteboard *)pboard error:(NSError **)error;
 
 // Private methods
+
+/*!
+    @method updateStatus
+    @abstract Updates the status message
+    @discussion -
+*/
+- (void)updateStatus;
 
 /*!
     @method     sortPubsByKey:
@@ -412,12 +440,52 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)sortPubsByKey:(NSString *)key;
 
 /*!
+    @method     columnsMenu
+    @abstract   Returnes the columns menu
+    @discussion (comprehensive description)
+*/
+- (NSMenu *)columnsMenu;
+
+- (void)registerForNotifications;
+
+- (void)handleTeXPreviewNeedsUpdateNotification:(NSNotification *)notification;
+- (void)handleUsesTeXChangedNotification:(NSNotification *)notification;
+- (void)handleIgnoredSortTermsChangedNotification:(NSNotification *)notification;
+- (void)handleNameDisplayChangedNotification:(NSNotification *)notification;
+- (void)handleFlagsChangedNotification:(NSNotification *)notification;
+- (void)handleApplicationWillTerminateNotification:(NSNotification *)notification;
+- (void)handleTableSelectionChangedNotification:(NSNotification *)notification;
+
+// notifications observed on behalf of owned BibItems for efficiency
+- (void)handleCustomFieldsDidChangeNotification:(NSNotification *)notification;
+
+- (void)handleTemporaryFileMigrationNotification:(NSNotification *)notification;
+
+/*!
+    @method     handleBibItemAddDelNotification:
+    @abstract   this method gets called for setPublications: also
+    @discussion (comprehensive description)
+    @param      notification (description)
+*/
+- (void)handleBibItemAddDelNotification:(NSNotification *)notification;
+
+	
+/*!
+    @method handleBibItemChangedNotification
+	 @abstract responds to changing bib data
+	 @discussion 
+*/
+- (void)handleBibItemChangedNotification:(NSNotification *)notification;
+
+- (void)handleSkimFileDidSaveNotification:(NSNotification *)notification;
+
+/*!
     @method     numberOfSelectedPubs
     @abstract   (description)
     @discussion (description)
     @result     the number of currently selected pubs in the doc
 */
-- (NSInteger)numberOfSelectedPubs;
+- (int)numberOfSelectedPubs;
 
 /*!
     @method     selectedPublications
@@ -436,6 +504,20 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 - (NSArray *)selectedFileURLs;
 
+- (NSArray *)shownFiles;
+- (void)updateFileViews;
+
+- (void)setStatus:(NSString *)status;
+- (void)setStatus:(NSString *)status immediate:(BOOL)now;
+
+- (BOOL)isDisplayingSearchButtons;
+- (BOOL)isDisplayingFileContentSearch;
+- (BOOL)isDisplayingSearchGroupView;
+- (BOOL)isDisplayingWebGroupView;
+
+- (void)insertControlView:(NSView *)controlView atTop:(BOOL)atTop;
+- (void)removeControlView:(NSView *)controlView;
+
 - (NSStringEncoding)documentStringEncoding;
 - (void)setDocumentStringEncoding:(NSStringEncoding)encoding;
 
@@ -452,7 +534,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @discussion (comprehensive description)
     @result     Mask indicating what was autogenerated: 1 for autogenerating cite key, 2 for autofile
 */
-- (NSInteger)userChangedField:(NSString *)fieldName ofPublications:(NSArray *)pubs from:(NSArray *)oldValues to:(NSArray *)newValues;
+- (int)userChangedField:(NSString *)fieldName ofPublications:(NSArray *)pubs from:(NSArray *)oldValues to:(NSArray *)newValues;
 
 - (void)userAddedURL:(NSURL *)aURL forPublication:(BibItem *)pub;
 - (void)userRemovedURL:(NSURL *)aURL forPublication:(BibItem *)pub;
@@ -468,6 +550,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (IBAction)newPub:(id)sender;
 - (IBAction)deleteSelectedPubs:(id)sender;
 - (IBAction)removeSelectedPubs:(id)sender;
+- (IBAction)alternateCut:(id)sender;
 - (IBAction)copyAsAction:(id)sender;
 - (IBAction)duplicate:(id)sender;
 - (IBAction)editPubCmd:(id)sender;
@@ -484,8 +567,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (IBAction)openLinkedURL:(id)sender;
 - (IBAction)showNotesForLinkedFile:(id)sender;
 - (IBAction)copyNotesForLinkedFile:(id)sender;
-- (IBAction)chooseLinkedFile:(id)sender;
-- (IBAction)chooseLinkedURL:(id)sender;
 - (IBAction)previewAction:(id)sender;
 - (IBAction)migrateFiles:(id)sender;
 - (IBAction)selectAllPublications:(id)sender;
@@ -548,5 +629,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (IBAction)changeSearchType:(id)sender;
 - (IBAction)search:(id)sender;
 - (IBAction)searchByContent:(id)sender;
+- (IBAction)performFindPanelAction:(id)sender;
 
 @end

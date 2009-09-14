@@ -40,7 +40,6 @@
 #import "BDSKTemplate.h"
 #import "BibItem.h"
 #import "NSTask_BDSKExtensions.h"
-#import "BDSKTask.h"
 
 
 @implementation BDSKTemplateObjectProxy
@@ -56,7 +55,7 @@
     string = [BDSKTemplateParser stringByParsingTemplateString:string usingObject:objectProxy delegate:objectProxy];
     [objectProxy release];
     if(scriptPath)
-        string = [BDSKTask runShellCommand:[NSString stringWithFormat:@"\"%@\"", scriptPath] withInputString:string];
+        string = [NSTask runShellCommand:scriptPath withInputString:string];
     return string;
 }
 
@@ -103,7 +102,7 @@
     BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items publicationsContext:itemsContext template:template];
     string = [BDSKTemplateParser stringByParsingTemplateString:string usingObject:objectProxy delegate:objectProxy];
     [objectProxy release];
-    return [BDSKTask runRawShellCommand:scriptPath withInputString:string];
+    return [NSTask runRawShellCommand:scriptPath withInputString:string];
 }
 
 - (id)initWithObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext template:(BDSKTemplate *)aTemplate {
@@ -129,7 +128,7 @@
 - (NSArray *)publications {
     NSEnumerator *e = [publications objectEnumerator];
     BibItem *pub;
-    NSUInteger idx = 0;
+    unsigned int idx = 0;
     
     while (pub = [e nextObject]) {
         if (publicationsContext) {
@@ -148,13 +147,13 @@
     NSEnumerator *e = [[self publications] objectEnumerator];
     BibItem *pub = nil;
     
-    BDSKPRECONDITION(nil != template);
+    OBPRECONDITION(nil != template);
     BDSKTemplateFormat format = [template templateFormat];
     id returnString = nil;
     NSAutoreleasePool *pool = nil;
     NSMutableDictionary *parsedTemplates = [NSMutableDictionary dictionary];
     NSArray *parsedTemplate;
-    NSInteger currentIndex = 0;
+    int currentIndex = 0;
     
     if (format & BDSKPlainTextTemplateFormat) {
         
@@ -169,11 +168,11 @@
                     parsedTemplate = [parsedTemplates objectForKey:BDSKTemplateDefaultItemString];
                     if (parsedTemplate == nil) {
                         parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateString:[template stringForType:BDSKTemplateDefaultItemString]];
-                        BDSKPRECONDITION(nil != parsedTemplate);
+                        OBPRECONDITION(nil != parsedTemplate);
                         [parsedTemplates setObject:parsedTemplate forKey:BDSKTemplateDefaultItemString];
                     }
                 }
-                BDSKPRECONDITION(nil != parsedTemplate);
+                OBPRECONDITION(nil != parsedTemplate);
                 if (parsedTemplate)
                     [parsedTemplates setObject:parsedTemplate forKey:[pub pubType]];
             }

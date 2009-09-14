@@ -11,13 +11,9 @@
 				<string>id</string>
 				<key>changeAuthorDisplay</key>
 				<string>id</string>
-				<key>changeDisplayGroupCount</key>
-				<string>id</string>
 				<key>changeFont</key>
 				<string>id</string>
 				<key>changeFontElement</key>
-				<string>id</string>
-				<key>changeIgnoredSortTerms</key>
 				<string>id</string>
 				<key>changePreviewMaxNumber</key>
 				<string>id</string>
@@ -30,41 +26,27 @@
 			<string>ObjC</string>
 			<key>OUTLETS</key>
 			<dict>
+				<key>addButton</key>
+				<string>NSButton</string>
 				<key>authorAbbreviateButton</key>
 				<string>NSButton</string>
 				<key>authorFirstNameButton</key>
 				<string>NSButton</string>
 				<key>authorLastNameFirstButton</key>
 				<string>NSButton</string>
-				<key>displayGroupCountButton</key>
-				<string>NSButton</string>
 				<key>fontButton</key>
 				<string>NSButton</string>
 				<key>fontElementPopup</key>
 				<string>NSPopUpButton</string>
-				<key>ignoredSortTermsField</key>
-				<string>NSTextField</string>
 				<key>previewMaxNumberComboBox</key>
 				<string>NSComboBox</string>
+				<key>removeButton</key>
+				<string>NSButton</string>
+				<key>tableView</key>
+				<string>NSTableView</string>
 			</dict>
 			<key>SUPERCLASS</key>
-			<string>BDSKPreferencePane</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSApplication</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
+			<string>OAPreferenceClient</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -73,19 +55,6 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSObject</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKPreferencePane</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>view</key>
-				<string>NSView</string>
-			</dict>
-			<key>SUPERCLASS</key>
-			<string>NSWindowController</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -102,21 +71,6 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
-		</dict>
-		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>hideWindow</key>
-				<string>id</string>
-				<key>toggleShowingWindow</key>
-				<string>id</string>
-			</dict>
-			<key>CLASS</key>
-			<string>NSWindowController</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -139,7 +93,7 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSCell</string>
+			<string>OBObject</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
@@ -147,11 +101,58 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSWindow</string>
+			<string>NSScrollView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>changeFont</key>
+				<string>id</string>
+				<key>invertSelection</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>NSTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSControl</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>OFObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>OBObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>restoreDefaults</key>
+				<string>id</string>
+				<key>setValueForSender</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>OAPreferenceClient</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>controlBox</key>
+				<string>NSView</string>
+				<key>initialFirstResponder</key>
+				<string>NSView</string>
+				<key>lastKeyView</key>
+				<string>NSView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>OFObject</string>
 		</dict>
 	</array>
 	<key>IBVersion</key>

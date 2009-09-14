@@ -33,7 +33,7 @@
 
 // information about a case modifier
 typedef struct {
-	NSUInteger location;
+	unsigned location;
 	char type;
 } case_modifier_t;
 
@@ -41,8 +41,8 @@ typedef struct {
 // count the number of UTF-8 characters in a string
 // there is probably a better way to do this but this works for now
 static inline
-NSInteger utf8charcount(UInt8 *str, NSInteger len) {
-	NSInteger chars, pos;
+int utf8charcount(UInt8 *str, int len) {
+	int chars, pos;
 	unsigned char c;
 	for (pos = chars = 0; pos < len; pos++) {
 		c = str[pos];
@@ -60,14 +60,14 @@ NSInteger utf8charcount(UInt8 *str, NSInteger len) {
 @end
 
 @interface AGRegexMatch (Private)
-- (id)initWithRegex:(AGRegex *)re string:(NSString *)str vector:(int *)mv count:(NSInteger)c;
+- (id)initWithRegex:(AGRegex *)re string:(NSString *)str vector:(int *)mv count:(int)c;
 @end
 
 @interface AGRegexMatchEnumerator : NSEnumerator {
     AGRegex *regex;
     NSString *string;
     NSRange range;
-    NSUInteger end;
+    unsigned end;
 }
 - (id)initWithRegex:(AGRegex *)re string:(NSString *)s range:(NSRange)r;
 @end
@@ -87,7 +87,7 @@ static AGRegex *backrefPattern;
 
 + (id)regexWithPattern:(NSString *)pat { return [[[self alloc] initWithPattern:pat] autorelease]; }
 
-+ (id)regexWithPattern:(NSString *)pat options:(NSInteger)opts { return [[[self alloc] initWithPattern:pat options:opts ] autorelease]; }
++ (id)regexWithPattern:(NSString *)pat options:(int)opts { return [[[self alloc] initWithPattern:pat options:opts ] autorelease]; }
 
 - (id)init {
 	return [self initWithPattern:@""];
@@ -97,7 +97,7 @@ static AGRegex *backrefPattern;
 	return [self initWithPattern:pat options:0];
 }
 
-- (id)initWithPattern:(NSString *)pat options:(NSInteger)opts {
+- (id)initWithPattern:(NSString *)pat options:(int)opts {
 	if (self = [super init]) {
 		const char *emsg;
 		int eloc, copts = 0;
@@ -142,9 +142,8 @@ static AGRegex *backrefPattern;
     if(!str)
         return nil; // we crash when calling strlen(nil)
     
-	int error, options, *matchv;
-	NSUInteger length;
-    length = [str length];
+	int error, length, options, *matchv;
+	length = [str length];
 	options = 0;
 #ifndef SUPPORT_UTF8
 	// check for valid ASCII string
@@ -224,13 +223,13 @@ static AGRegex *backrefPattern;
 	return [self replaceWithString:rep inString:str limit:0];
 }
 
-- (NSString *)replaceWithString:(NSString *)rep inString:(NSString *)str limit:(NSInteger)lim {
+- (NSString *)replaceWithString:(NSString *)rep inString:(NSString *)str limit:(int)lim {
 	NSMutableString *repBuffer, *result = [NSMutableString string];
 	AGRegexMatch *match, *backref;
 	NSArray *allMatches, *allBackrefs;
 	NSRange remainRange, matchRange, backrefRemainRange, backrefMatchRange;
 	case_modifier_t *caseModVector;
-	NSInteger i, j, k, l, length, repLength, allCount, allBackrefsCount, caseModIdx;
+	int i, j, k, l, length, repLength, allCount, allBackrefsCount, caseModIdx;
 	// set remaining range to full range of receiver
 	length = [str length];
 	remainRange = NSMakeRange(0, length);
@@ -350,13 +349,13 @@ static AGRegex *backrefPattern;
 	return [self splitString:str limit:0];
 }
 
-- (NSArray *)splitString:(NSString *)str limit:(NSInteger)lim {
+- (NSArray *)splitString:(NSString *)str limit:(int)lim {
 	NSMutableArray *result = [NSMutableArray array];
 	AGRegexMatch *match;
 	NSArray *allMatches;
 	NSString *group;
 	NSRange remainRange, matchRange;
-	NSInteger i, j, count, allCount, length = [str length];
+	int i, j, count, allCount, length = [str length];
 	// find all matches
 	allMatches = [self findAllInString:str]; 
 	allCount = [allMatches count];
@@ -389,7 +388,7 @@ static AGRegex *backrefPattern;
 @implementation AGRegexMatch
 
 // takes ownership of the passed match vector, free on dealloc
-- (id)initWithRegex:(AGRegex *)re string:(NSString *)str vector:(int *)mv count:(NSInteger)c {
+- (id)initWithRegex:(AGRegex *)re string:(NSString *)str vector:(int *)mv count:(int)c {
 	if (self = [super init]) {
 		regex = [re retain];
 		string = [str copy]; // really only copies if the string is mutable, immutable strings are just retained
@@ -406,7 +405,7 @@ static AGRegex *backrefPattern;
 	[super dealloc];
 }
 
-- (NSInteger)count {
+- (int)count {
 	return count;
 }
 
@@ -414,13 +413,13 @@ static AGRegex *backrefPattern;
 	return [self groupAtIndex:0];
 }
 
-- (NSString *)groupAtIndex:(NSInteger)idx {
+- (NSString *)groupAtIndex:(int)idx {
 	NSRange r = [self rangeAtIndex:idx];
 	return r.location == NSNotFound ? nil : [string substringWithRange:r];
 }
 
 - (NSString *)groupNamed:(NSString *)name {
-	NSInteger idx = pcre_get_stringnumber([regex pcre], [name UTF8String]);
+	int idx = pcre_get_stringnumber([regex pcre], [name UTF8String]);
 	if (idx == PCRE_ERROR_NOSUBSTRING)
 		[NSException raise:NSInvalidArgumentException format:@"no group named %@", name];
 	return [self groupAtIndex:idx];
@@ -430,8 +429,8 @@ static AGRegex *backrefPattern;
 	return [self rangeAtIndex:0];
 }
 
-- (NSRange)rangeAtIndex:(NSInteger)idx {
-	NSInteger start, end;
+- (NSRange)rangeAtIndex:(int)idx {
+	int start, end;
 	if (idx >= count)
 		[NSException raise:NSRangeException format:@"index %d out of bounds", idx];
 	start = matchv[2 * idx];
@@ -466,7 +465,7 @@ static AGRegex *backrefPattern;
 }
 
 - (NSRange)rangeNamed:(NSString *)name {
-	NSInteger idx = pcre_get_stringnumber([regex pcre], [name UTF8String]);
+	int idx = pcre_get_stringnumber([regex pcre], [name UTF8String]);
 	if (idx == PCRE_ERROR_NOSUBSTRING)
 		[NSException raise:NSInvalidArgumentException format:@"no group named %@", name];
 	return [self rangeAtIndex:idx];
@@ -478,9 +477,9 @@ static AGRegex *backrefPattern;
 
 - (NSString *)description {
 	NSMutableString *desc = [NSMutableString stringWithFormat:@"%@ {\n", [super description]];
-	NSInteger i;
+	int i;
 	for (i = 0; i < count; i++)
-		[desc appendFormat:@"\t%ld %@ %@\n", (long)i, NSStringFromRange([self rangeAtIndex:i]), [self groupAtIndex:i]];
+		[desc appendFormat:@"\t%d %@ %@\n", i, NSStringFromRange([self rangeAtIndex:i]), [self groupAtIndex:i]];
 	[desc appendString:@"}"];
 	return desc;
 }

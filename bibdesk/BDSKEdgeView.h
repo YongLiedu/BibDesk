@@ -50,7 +50,7 @@ enum {
 };
 
 @interface BDSKEdgeView : BDSKContainerView {
-	NSInteger edges;
+	int edges;
 	NSMutableArray *edgeColors;
 }
 
@@ -59,7 +59,7 @@ enum {
 	@abstract Returns the mask for the edges that the view should draw
 	@discussion (discussion)
 */
-- (NSInteger)edges;
+- (int)edges;
 
 /*!
 	@method setEdges:
@@ -68,7 +68,7 @@ enum {
 	@discussion (discussion)
 	@param mask The mask to set
 */
-- (void)setEdges:(NSInteger)mask;
+- (void)setEdges:(int)mask;
 
 /*!
 	@method setEdgeColor

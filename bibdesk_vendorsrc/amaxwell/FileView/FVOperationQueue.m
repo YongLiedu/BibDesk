@@ -42,10 +42,6 @@
 
 NSString * const FVMainQueueRunLoopMode = @"FVMainQueueRunLoopMode";
 
-
-@interface FVPlaceholderOperationQueue : FVOperationQueue
-@end
-
 @implementation FVOperationQueue
 
 static id _mainThreadQueue = nil;
@@ -61,13 +57,13 @@ static Class FVOperationQueueClass = Nil;
 {
     FVINITIALIZE(FVOperationQueue);  
     FVOperationQueueClass = self;
-    defaultPlaceholderQueue = (FVOperationQueue *)NSAllocateObject([FVPlaceholderOperationQueue self], 0, [self zone]);
+    defaultPlaceholderQueue = (FVOperationQueue *)NSAllocateObject(FVOperationQueueClass, 0, [self zone]);
     _mainThreadQueue = [FVMainThreadOperationQueue new];
 }
 
 + (id)allocWithZone:(NSZone *)aZone
 {
-    return FVOperationQueueClass == self ? defaultPlaceholderQueue : [super allocWithZone:aZone];
+    return FVOperationQueueClass == self ? defaultPlaceholderQueue : NSAllocateObject(self, 0, aZone);
 }
 
 // ensure that alloc always calls through to allocWithZone:
@@ -78,13 +74,18 @@ static Class FVOperationQueueClass = Nil;
 
 - (id)init
 {
-    self = [super init];
-    return self;
+    return ([self class] == FVOperationQueueClass) ? [[FVConcreteOperationQueue allocWithZone:[self zone]] init] : [super init];
+}
+
+- (void)dealloc
+{
+    if ([self class] != FVOperationQueueClass)
+        [super dealloc];
 }
 
 - (void)subclassResponsibility:(SEL)selector
 {
-    [NSException raise:@"FVAbstractClassException" format:@"Abstract class %@ does not implement %@", [self class], NSStringFromSelector(selector)];
+    [NSException raise:@"FVAbstractClassException" format:[NSString stringWithFormat:@"Abstract class %@ does not implement %@", [self class], NSStringFromSelector(selector)]];
 }
 
 - (void)cancel;
@@ -116,22 +117,5 @@ static Class FVOperationQueueClass = Nil;
 {
     [self subclassResponsibility:_cmd];
 }
-
-@end
-
-
-@implementation FVPlaceholderOperationQueue
-
-- (id)init {
-    return [[FVConcreteOperationQueue allocWithZone:[self zone]] init];
-}
-
-- (id)retain { return self; }
-
-- (id)autorelease { return self; }
-
-- (void)release {}
-
-- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 @end

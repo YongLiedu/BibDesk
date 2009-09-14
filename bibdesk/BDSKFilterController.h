@@ -58,17 +58,16 @@
 - (void)updateUI;
 - (BDSKFilter *)filter;
 - (void)insertNewConditionAfter:(BDSKConditionController *)aConditionController;
-- (void)insertConditionController:(BDSKConditionController *)newController atIndex:(NSUInteger)index;
+- (void)insertConditionController:(BDSKConditionController *)newController atIndex:(unsigned int)index;
 - (void)removeConditionController:(BDSKConditionController *)aConditionController;
-- (void)removeConditionControllerAtIndex:(NSUInteger)index;
+- (void)removeConditionControllerAtIndex:(unsigned int)index;
 - (BOOL)canRemoveCondition;
 - (NSArray *)conditionControllers;
 - (BDSKConjunction)conjunction;
 - (void)setConjunction:(BDSKConjunction)newConjunction;
 
-- (void)discardEditing;
 - (BOOL)commitEditing;
-- (void)commitEditingWithDelegate:(id)delegate didCommitSelector:(SEL)didCommitSelector contextInfo:(void *)contextInfo;
+- (void)discardEditing;
 
 - (NSUndoManager *)undoManager;
 

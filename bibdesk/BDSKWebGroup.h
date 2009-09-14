@@ -51,7 +51,6 @@
 
 - (id)initWithName:(NSString *)aName;
 
-- (BDSKPublicationsArray *)publicationsWithoutUpdating; 
 - (BDSKPublicationsArray *)publications;
 - (void)setPublications:(NSArray *)newPublications;
 - (void)addPublications:(NSArray *)newPublications;

@@ -35,67 +35,13 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/*
- Omni Source License 2007
-
- OPEN PERMISSION TO USE AND REPRODUCE OMNI SOURCE CODE SOFTWARE
-
- Omni Source Code software is available from The Omni Group on their 
- web site at http://www.omnigroup.com/www.omnigroup.com. 
-
- Permission is hereby granted, free of charge, to any person obtaining 
- a copy of this software and associated documentation files (the 
- "Software"), to deal in the Software without restriction, including 
- without limitation the rights to use, copy, modify, merge, publish, 
- distribute, sublicense, and/or sell copies of the Software, and to 
- permit persons to whom the Software is furnished to do so, subject to 
- the following conditions:
-
- Any original copyright notices and this permission notice shall be 
- included in all copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, 
- EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
- MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
- IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
- CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
- TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
- SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 
 #import <Cocoa/Cocoa.h>
 
 
-@interface NSDictionary (BDSKExtensions)
-- (id)objectForKey:(NSString *)key defaultObject:(id)defaultObject;
-- (CGFloat)floatForKey:(NSString *)key defaultValue:(CGFloat)defaultValue;
-- (CGFloat)floatForKey:(NSString *)key;
-- (double)doubleForKey:(NSString *)key defaultValue:(double)defaultValue;
-- (double)doubleForKey:(NSString *)key;
-- (NSPoint)pointForKey:(NSString *)key defaultValue:(NSPoint)defaultValue;
-- (NSPoint)pointForKey:(NSString *)key;
-- (NSSize)sizeForKey:(NSString *)key defaultValue:(NSSize)defaultValue;
-- (NSSize)sizeForKey:(NSString *)key;
-- (NSRect)rectForKey:(NSString *)key defaultValue:(NSRect)defaultValue;
-- (NSRect)rectForKey:(NSString *)key;
-- (BOOL)boolForKey:(NSString *)key defaultValue:(BOOL)defaultValue;
-- (BOOL)boolForKey:(NSString *)key;
-- (int)intForKey:(NSString *)key defaultValue:(int)defaultValue;
-- (int)intForKey:(NSString *)key;
-- (unsigned int)unsignedIntForKey:(NSString *)key defaultValue:(unsigned int)defaultValue;
-- (unsigned int)unsignedIntForKey:(NSString *)key;
-@end
-
-#pragma mark -
-
 @interface NSMutableDictionary (BDSKExtensions)
 - (id)initForCaseInsensitiveKeys;
-- (void)setFloatValue:(CGFloat)value forKey:(NSString *)key;
-- (void)setDoubleValue:(double)value forKey:(NSString *)key;
-- (void)setIntValue:(int)value forKey:(NSString *)key;
-- (void)setUnsignedIntValue:(unsigned int)value forKey:(NSString *)key;
-- (void)setBoolValue:(BOOL)value forKey:(NSString *)key;
-- (void)setPointValue:(NSPoint)value forKey:(NSString *)key;
-- (void)setSizeValue:(NSSize)value forKey:(NSString *)key;
-- (void)setRectValue:(NSRect)value forKey:(NSString *)key;
+@end
+
+@interface NSDictionary (BDSKExtensions)
 @end

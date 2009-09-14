@@ -60,8 +60,8 @@
 - (NSAttributedString *)richTextSkimNotes;
 - (NSArray *)scriptingSkimNotes;
 
-- (NSInteger)finderLabel;
-- (void)setFinderLabel:(NSInteger)label;
+- (int)finderLabel;
+- (void)setFinderLabel:(int)label;
 - (NSArray *)openMetaTags;
 - (double)openMetaRating;
 

@@ -38,30 +38,21 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKFileSearchIndex, BDSKManyToManyDictionary, BDSKReadWriteLock, BibDocument;
-@protocol BDSKOwner;
+@class BDSKFileSearchIndex, BDSKThreadSafeMutableArray, BDSKManyToManyDictionary;
 
 @protocol BDSKFileSearchIndexDelegate <NSObject>
 
 // Sent on the main thread at periodic intervals to inform the delegate that new files have been added to the index, and that any searches in progress need to be updated.
 - (void)searchIndexDidUpdate:(BDSKFileSearchIndex *)index;
 
-// Sent on the main thread when the status changed.  This allows the delegate to update the UI.
-- (void)searchIndexDidUpdateStatus:(BDSKFileSearchIndex *)index;
+// Sent on the main thread after the initial indexing phase has finished.  This allows the delegate to update its search for the last time.
+- (void)searchIndexDidFinish:(BDSKFileSearchIndex *)index;
 @end
-
-enum {
-    BDSKSearchIndexStatusStarting,
-    BDSKSearchIndexStatusVerifying,
-    BDSKSearchIndexStatusIndexing,
-    BDSKSearchIndexStatusRunning
-};
 
 typedef struct _BDSKSearchIndexFlags
 {
     volatile int32_t shouldKeepRunning;
-    volatile int32_t updateScheduled;
-    volatile int32_t status;
+    volatile int32_t finishedInitialIndexing;
 } BDSKSearchIndexFlags;
 
 @interface BDSKFileSearchIndex : NSObject {
@@ -71,10 +62,10 @@ typedef struct _BDSKSearchIndexFlags
     NSMutableDictionary *signatures;
     id delegate;
     
-    BDSKReadWriteLock *rwLock;
+    pthread_rwlock_t rwlock;
     
-    NSMutableArray *notificationQueue;
-    NSConditionLock *noteLock;
+    BDSKThreadSafeMutableArray *notificationQueue;
+    NSMachPort *notificationPort;
     NSThread *notificationThread;
     NSConditionLock *setupLock;
     BDSKSearchIndexFlags flags;
@@ -82,20 +73,18 @@ typedef struct _BDSKSearchIndexFlags
     CFAbsoluteTime lastUpdateTime;
 }
 
-- (id)initForOwner:(id <BDSKOwner>)owner;
+// aDocument must respond to -publications; this should generally be called on the main thread
+- (id)initWithDocument:(id)aDocument;
 
 // Warning:  it is /not/ safe to write to this SKIndexRef directly; use it only for reading.
 - (SKIndexRef)index;
 
 // Required before disposing of the index.  After calling cancel, the index is no longer viable.
 - (void)cancelForDocumentURL:(NSURL *)documentURL;
-
-- (NSUInteger)status;
-
-- (id)delegate;
+- (BOOL)finishedInitialIndexing;
 - (void)setDelegate:(id <BDSKFileSearchIndexDelegate>)anObject;
-
-- (NSSet *)identifierURLsForURL:(NSURL *)theURL;
+- (NSURL *)identifierURLForURL:(NSURL *)theURL;
+- (NSSet *)allIdentifierURLsForURL:(NSURL *)theURL;
 
 // Poll this for progress bar updates during indexing
 - (double)progressValue;

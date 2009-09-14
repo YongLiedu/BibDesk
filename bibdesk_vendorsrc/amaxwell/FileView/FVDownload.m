@@ -38,7 +38,7 @@
 
 #import "FVDownload.h"
 #import "FVProgressIndicatorCell.h"
-#import <WebKit/WebKit.h>
+
 
 /*
  FVDownload associates a URL/index combination, and stores the download destination (temp directory) for a given download, along with some other data (download progress, progress indicator rotation angle for indeterminate indicators).
@@ -54,7 +54,7 @@
     NSParameterAssert(NSNotFound != indexInView);
     self = [super init];
     if (self) {
-        _downloadURL = [aURL copyWithZone:[self zone]];
+        _downloadURL = [aURL copy];
         _indexInView = indexInView;
         _fileURL = nil;
         _expectedLength = 0;
@@ -96,11 +96,8 @@
 - (NSURL *)fileURL { return _fileURL; }
 - (void)setFileURL:(NSURL *)fileURL
 {
-    NSAssert1(nil == _fileURL, @"Error: attempt to set _fileURL when it is already set to %@", _fileURL);
-    NSParameterAssert([fileURL isFileURL]);
     [_fileURL autorelease];
     _fileURL = [fileURL copy];
-    [_download setDestination:[_fileURL path] allowOverwrite:NO];
 }
 
 - (void)setExpectedLength:(long long)expectedLength
@@ -131,63 +128,6 @@
 
 - (FVProgressIndicatorCell *)progressIndicator { return _progressIndicator; }
 
-- (void)start
-{
-    NSAssert1(nil == _download, @"Error: already called -start on %@", self);
-    _download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:_downloadURL] delegate:self];
-}
-
-- (void)cancel
-{
-    [_download cancel];
-    [_download release];
-    _download = nil;
-}
-
-- (void)download:(NSURLDownload *)download decideDestinationWithSuggestedFilename:(NSString *)filename;
-{
-    if ([_delegate respondsToSelector:@selector(download:setDestinationWithSuggestedFilename:)])
-        [_delegate download:self setDestinationWithSuggestedFilename:filename];
-}
-
-- (void)download:(NSURLDownload *)download didReceiveResponse:(NSURLResponse *)response;
-{
-    long long expectedLength = [response expectedContentLength];
-    [self setExpectedLength:expectedLength];
-    if ([_delegate respondsToSelector:@selector(downloadUpdated:)])
-        [_delegate downloadUpdated:self];
-}
-
-- (void)download:(NSURLDownload *)download didReceiveDataOfLength:(NSUInteger)length;
-{
-    [self incrementReceivedLengthBy:length];
-    if ([_delegate respondsToSelector:@selector(downloadUpdated:)])
-        [_delegate downloadUpdated:self];
-}
-
-- (void)downloadDidFinish:(NSURLDownload *)download;
-{
-    if ([_delegate respondsToSelector:@selector(downloadFinished:)])
-        [_delegate downloadFinished:self];
-}
-
-- (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error;
-{
-    if ([_delegate respondsToSelector:@selector(downloadFailed:)])
-        [_delegate downloadFailed:self];
-}
-
-- (NSWindow *)downloadWindowForAuthenticationSheet:(WebDownload *)download;
-{
-    if ([_delegate respondsToSelector:@selector(downloadWindowForSheet:)])
-        return [_delegate downloadWindowForSheet:self];
-    else
-        return nil;
-}
-
-- (id)delegate { return _delegate; }
-
-- (void)setDelegate:(id)obj { _delegate = obj; }
 
 @end
 

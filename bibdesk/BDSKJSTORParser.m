@@ -41,6 +41,7 @@
 #import "BDSKTypeManager.h"
 #import "BibItem.h"
 #import "BDSKAppController.h"
+#import <OmniBase/OmniBase.h>
 #import "NSError_BDSKExtensions.h"
 
 //
@@ -88,12 +89,12 @@ static void splitDateString(NSMutableDictionary *pubDict)
     
 	NSRange startRange = [itemString rangeOfString:@"--------------------------------------------------------------------------------\n" options:NSLiteralSearch];
 	if (startRange.location == NSNotFound){
-        error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"JSTOR delimiter not found", @"Error description")];
+        OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"JSTOR delimiter not found", @"Error description"), nil);
         if(outError) *outError = error;
 		return returnArray;
     }
 	
-	NSInteger startLoc = NSMaxRange(startRange);
+	int startLoc = NSMaxRange(startRange);
 	NSRange endRange = [itemString rangeOfString:@"--------------------------------------------------------------------------------\n" options:NSLiteralSearch range:NSMakeRange(startLoc, [itemString length] - startLoc)];
 	if (endRange.location == NSNotFound)
 		endRange = NSMakeRange([itemString length], 0);
@@ -143,10 +144,10 @@ static void splitDateString(NSMutableDictionary *pubDict)
 			
 			NSArray *valueArray = [sourceLine componentsSeparatedByString:@"\t"];
 			
-			BDSKPRECONDITION([valueArray count] == [keyArray count]);
+			OBPRECONDITION([valueArray count] == [keyArray count]);
 			
-			NSInteger count = [keyArray count];
-			NSInteger i;
+			int count = [keyArray count];
+			int i;
 			
 			if(count == 0)
 				continue;
@@ -159,7 +160,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
 					value = [value stringByConvertingHTMLToTeX];
 				
 				if([authorTags containsObject:tag])
-					value = [value stringByReplacingOccurrencesOfString:@";" withString:@" and "];
+					value = [value stringByReplacingAllOccurrencesOfString:@";" withString:@" and "];
 				
 				[pubDict setObject:value forKey:key];
 			}
@@ -224,7 +225,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
 				value = [value stringByConvertingHTMLToTeX];
 			
 			if([authorTags containsObject:tag])
-				value = [value stringByReplacingOccurrencesOfString:@";" withString:@" and "];
+				value = [value stringByReplacingAllOccurrencesOfString:@";" withString:@" and "];
 			
 			[pubDict setObject:value forKey:key];
 			
@@ -252,7 +253,5 @@ static void splitDateString(NSMutableDictionary *pubDict)
     [pubDict release];
     return returnArray;
 }
-
-
 
 @end

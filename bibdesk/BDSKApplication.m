@@ -39,9 +39,6 @@
 #import "BDSKApplication.h"
 #import "BibDocument.h"
 #import "BDAlias.h"
-#import "BDSKRunTime.h"
-#import <Carbon/Carbon.h>
-
 
 @interface NSWindow (BDSKApplication)
 // these are implemented in AppKit as private methods
@@ -49,22 +46,7 @@
 - (void)redo:(id)obj;
 @end
 
-
-@interface NSThread (BDSKExtensions)
-+ (void)assignMainThread;
-@end
-
-
 @implementation BDSKApplication
-
-+ (id)sharedApplication {
-    static id sharedApplication = nil;
-    if (sharedApplication == nil) {
-        sharedApplication = [super sharedApplication];
-        [NSThread assignMainThread];
-    }
-    return sharedApplication;
-}
 
 - (IBAction)terminate:(id)sender {
     NSArray *fileNames = [[[NSDocumentController sharedDocumentController] documents] valueForKeyPath:@"@distinctUnionOfObjects.fileName"];
@@ -73,32 +55,14 @@
     NSString *fileName;
     while(fileName = [fEnum nextObject]){
         NSData *data = [[BDAlias aliasWithPath:fileName] aliasData];
-        [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:fileName, @"fileName", data, @"_BDAlias", nil]];
+        if(data)
+            [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:fileName, @"fileName", data, @"_BDAlias", nil]];
+        else
+            [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:fileName, @"fileName", nil]];
     }
-    [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKLastOpenFileNamesKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKLastOpenFileNamesKey];
     
     [super terminate:sender];
-}
-
-- (void)sendEvent:(NSEvent *)event {
-    [super sendEvent:event];
-    if ([event type] == NSFlagsChanged)
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:self];
-}
-
-- (NSUInteger)currentModifierFlags {
-    NSUInteger flags = 0;
-    UInt32 currentKeyModifiers = GetCurrentKeyModifiers();
-    if (currentKeyModifiers & cmdKey)
-        flags |= NSCommandKeyMask;
-    if (currentKeyModifiers & shiftKey)
-        flags |= NSShiftKeyMask;
-    if (currentKeyModifiers & optionKey)
-        flags |= NSAlternateKeyMask;
-    if (currentKeyModifiers & controlKey)
-        flags |= NSControlKeyMask;
-    
-    return flags;
 }
 
 // workaround for Tiger AppKit bug in target determination for undo in sheets, compare 
@@ -126,15 +90,15 @@
     NSMenu *windowsMenu = [self windowsMenu];
     NSWindowController *windowController = [aWindow windowController];
     NSWindowController *mainWindowController = [[[[aWindow windowController] document] windowControllers] objectAtIndex:0];
-    NSInteger numberOfItems = [windowsMenu numberOfItems];
-    NSInteger itemIndex = [windowsMenu indexOfItemWithTarget:aWindow andAction:@selector(makeKeyAndOrderFront:)];
+    int numberOfItems = [windowsMenu numberOfItems];
+    int itemIndex = [windowsMenu indexOfItemWithTarget:aWindow andAction:@selector(makeKeyAndOrderFront:)];
     
     if (itemIndex != -1) {
         NSMenuItem *item = [windowsMenu itemAtIndex:itemIndex];
         NSString *title = [item title];
         
         if ([windowController document] == nil) {
-            NSInteger idx = numberOfItems;
+            int idx = numberOfItems;
             while (idx--) {
                 NSMenuItem *anItem = [windowsMenu itemAtIndex:idx];
                 if ([anItem isSeparatorItem] ||
@@ -156,8 +120,8 @@
         } else if ([windowController isEqual:mainWindowController]) {
             NSMutableArray *subitems = [NSMutableArray array];
             NSMenuItem *anItem;
-            NSInteger idx = numberOfItems;
-            NSInteger nextIndex = numberOfItems;
+            int idx = numberOfItems;
+            int nextIndex = numberOfItems;
             
             while (idx--) {
                 anItem = [windowsMenu itemAtIndex:idx];
@@ -208,8 +172,8 @@
                 [windowsMenu insertItem:[NSMenuItem separatorItem] atIndex:nextIndex];
             
         } else {
-            NSInteger mainIndex = [windowsMenu indexOfItemWithTarget:[mainWindowController window] andAction:@selector(makeKeyAndOrderFront:)];
-            NSInteger idx = mainIndex;
+            int mainIndex = [windowsMenu indexOfItemWithTarget:[mainWindowController window] andAction:@selector(makeKeyAndOrderFront:)];
+            int idx = mainIndex;
             
             [item setIndentationLevel:1];
             
@@ -233,7 +197,7 @@
 }
 
 - (void)addWindowsItem:(NSWindow *)aWindow title:(NSString *)aString filename:(BOOL)isFilename {
-    NSInteger itemIndex = [[self windowsMenu] indexOfItemWithTarget:aWindow andAction:@selector(makeKeyAndOrderFront:)];
+    int itemIndex = [[self windowsMenu] indexOfItemWithTarget:aWindow andAction:@selector(makeKeyAndOrderFront:)];
     
     [super addWindowsItem:aWindow title:aString filename:isFilename];
     
@@ -250,7 +214,7 @@
 - (void)removeWindowsItem:(NSWindow *)aWindow {
     [super removeWindowsItem:aWindow];
     
-    NSInteger idx = [[self windowsMenu] numberOfItems];
+    int idx = [[self windowsMenu] numberOfItems];
     BOOL wasSeparator = YES;
     
     while (idx--) {
@@ -269,36 +233,13 @@
 
 - (NSArray *)orderedDocuments {
     NSMutableArray *orderedDocuments = [[[super orderedDocuments] mutableCopy] autorelease];
-    NSInteger i = [orderedDocuments count];
+    int i = [orderedDocuments count];
     
     while (i--)
         if ([[orderedDocuments objectAtIndex:i] isKindOfClass:[BibDocument class]] == NO)
             [orderedDocuments removeObjectAtIndex:i];
     
     return orderedDocuments;
-}
-
-@end
-
-
-@implementation NSThread (BDSKExtensions)
-
-static NSThread *mainThread = nil;
-
-+ (void)assignMainThread {
-    BDSKPRECONDITION(mainThread == nil);
-    mainThread = [[NSThread currentThread] retain];
-}
-
-+ (BOOL)Tiger_isMainThread {
-    if (mainThread == nil)
-        [self assignMainThread];
-    return [self currentThread] == mainThread;
-}
-
-+ (void)load {
-    // this does nothing when +isMainThread is already implemented, that is, on Leopard
-    BDSKAddClassMethodImplementationFromSelector(self, @selector(isMainThread), @selector(Tiger_isMainThread));
 }
 
 @end

@@ -116,7 +116,6 @@
         AB = Abstract; 
         AR = Pages; 
         AU = Author; 
-        DI = Doi; 
         ED = Editor; 
         ID = Keywords; 
         IS = Number; 
@@ -303,7 +302,6 @@
         C1 = "Author address"; 
         CA = "Group authors"; 
         CR = "Cited references"; 
-        DI = "Digital Object Identifier"; 
         DE = "Author keywords"; 
         DT = "Document type"; 
         ED = "Editors"; 

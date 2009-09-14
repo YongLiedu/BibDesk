@@ -40,11 +40,12 @@
 #import "BibItem.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSDate_BDSKExtensions.h"
+#import <OmniBase/OmniBase.h>
 #import "BDSKTypeManager.h"
 #import "BDSKSmartGroup.h"
 #import "BDSKCondition+Scripting.h"
 
-static char BDSKConditionObservationContext;
+static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationContext";
 
 @interface BDSKCondition (Private)
 - (NSDate *)cachedEndDate;
@@ -64,7 +65,6 @@ static char BDSKConditionObservationContext;
 + (void)initialize {
     [self setKeys:[NSArray arrayWithObjects:@"stringComparison", @"attachmentComparison", @"dateComparison", nil] triggerChangeNotificationsForDependentKey:@"comparison"];
     [self setKeys:[NSArray arrayWithObjects:@"stringValue", @"countValue", @"numberValue", @"andNumberValue", @"periodValue", @"dateValue", @"toDateValue", nil] triggerChangeNotificationsForDependentKey:@"value"];
-    BDSKINITIALIZE;
 }
 
 + (NSString *)dictionaryVersion {
@@ -147,8 +147,8 @@ static char BDSKConditionObservationContext;
 		[self setKey:[decoder decodeObjectForKey:@"key"]];
 		[self setComparison:[decoder decodeIntForKey:@"comparison"]];
 		[self setValue:[decoder decodeObjectForKey:@"value"]];
-		BDSKASSERT(key != nil);
-		BDSKASSERT([self value] != nil);
+		OBASSERT(key != nil);
+		OBASSERT([self value] != nil);
 	}
 	return self;
 }
@@ -197,7 +197,7 @@ static char BDSKConditionObservationContext;
 }
 
 - (BOOL)isSatisfiedByItem:(BibItem *)item {
-	if ([NSString isEmptyString:key]) 
+	if ([NSString isEmptyString:key] == YES) 
 		return YES; // empty condition matches anything
 	
     if ([self isDateCondition]) {
@@ -212,7 +212,7 @@ static char BDSKConditionObservationContext;
         
     } else if ([self isAttachmentCondition]) {
         
-        NSInteger count = 0;
+        int count = 0;
         if ([key isEqualToString:BDSKLocalFileString])
             count = [[item localFiles] count];
         else if ([key isEqualToString:BDSKRemoteURLString])
@@ -255,7 +255,7 @@ static char BDSKConditionObservationContext;
         
     } else {
         
-        BDSKASSERT(stringValue != nil);
+        OBASSERT(stringValue != nil);
         
         if (stringComparison == BDSKGroupContain || stringComparison == BDSKGroupNotContain) {
             if ([key isEqualToString:BDSKAllFieldsString]) {
@@ -269,19 +269,20 @@ static char BDSKConditionObservationContext;
                 return NO == isContain;
             } else {
                 if (stringComparison == BDSKGroupContain) 
-                    return ([item isContainedInGroupNamed:stringValue forField:key]);
+                    return ([item isContainedInGroupNamed:stringValue forField:key] == YES);
                 if (stringComparison == BDSKGroupNotContain) 
                     return ([item isContainedInGroupNamed:stringValue forField:key] == NO);
             }
         }
         
         // use local values, as we may change them to support "Any Field"
-        NSInteger comparison = stringComparison;
+        int comparison = stringComparison;
         NSString *value = stringValue;
         // unset values are considered empty strings
         NSString *itemValue = [item stringValueOfField:key] ?: @"";
         // to speed up comparisons
-        itemValue = [itemValue expandedString];
+        if ([itemValue isComplex] || [itemValue isInherited])
+            itemValue = [NSString stringWithString:itemValue];
         
         if (comparison == BDSKEqual || comparison == BDSKNotEqual) {
             if ([key isEqualToString:BDSKAllFieldsString]) {
@@ -338,7 +339,7 @@ static char BDSKConditionObservationContext;
         
     }
     
-    BDSKASSERT_NOT_REACHED("undefined comparison");
+    OBASSERT_NOT_REACHED("undefined comparison");
     return NO;
 }
 
@@ -358,11 +359,11 @@ static char BDSKConditionObservationContext;
     }
 }
 
-- (NSInteger)comparison {
+- (int)comparison {
     return [self isDateCondition] ? dateComparison : [self isAttachmentCondition] ? attachmentComparison : stringComparison;
 }
 
-- (void)setComparison:(NSInteger)newComparison {
+- (void)setComparison:(int)newComparison {
     if ([self isDateCondition])
         [self setDateComparison:(BDSKDateComparison)newComparison];
     if ([self isAttachmentCondition])
@@ -377,9 +378,9 @@ static char BDSKConditionObservationContext;
             case BDSKExactly: 
             case BDSKInLast: 
             case BDSKNotInLast: 
-                return [NSString stringWithFormat:@"%ld %ld", (long)numberValue, (long)periodValue];
+                return [NSString stringWithFormat:@"%i %i", numberValue, periodValue];
             case BDSKBetween: 
-                return [NSString stringWithFormat:@"%ld %ld %ld", (long)numberValue, (long)andNumberValue, (long)periodValue];
+                return [NSString stringWithFormat:@"%i %i %i", numberValue, andNumberValue, periodValue];
             case BDSKDate: 
             case BDSKAfterDate: 
             case BDSKBeforeDate: 
@@ -395,7 +396,7 @@ static char BDSKConditionObservationContext;
             case BDSKCountNotEqual: 
             case BDSKCountLarger: 
             case BDSKCountSmaller: 
-                return [NSString stringWithFormat:@"%ld", (long)countValue];
+                return [NSString stringWithFormat:@"%i", countValue];
             case BDSKAttachmentContain: 
             case BDSKAttachmentNotContain: 
             case BDSKAttachmentStartWith: 
@@ -418,13 +419,13 @@ static char BDSKConditionObservationContext;
             case BDSKInLast: 
             case BDSKNotInLast: 
                 values = [newValue componentsSeparatedByString:@" "];
-                BDSKASSERT([values count] == 2);
+                OBASSERT([values count] == 2);
                 [self setNumberValue:[[values objectAtIndex:0] intValue]];
                 [self setPeriodValue:[[values objectAtIndex:1] intValue]];
                 break;
             case BDSKBetween: 
                 values = [newValue componentsSeparatedByString:@" "];
-                BDSKASSERT([values count] == 3);
+                OBASSERT([values count] == 3);
                 [self setNumberValue:[[values objectAtIndex:0] intValue]];
                 [self setAndNumberValue:[[values objectAtIndex:1] intValue]];
                 [self setPeriodValue:[[values objectAtIndex:2] intValue]];
@@ -436,7 +437,7 @@ static char BDSKConditionObservationContext;
                 break;
             case BDSKInDateRange:
                 values = [newValue componentsSeparatedByString:@" to "];
-                BDSKASSERT([values count] == 2);
+                OBASSERT([values count] == 2);
                 [self setDateValue:[NSDate dateWithString:[values objectAtIndex:0]]];
                 [self setToDateValue:[NSDate dateWithString:[values objectAtIndex:1]]];
                 break;
@@ -497,11 +498,11 @@ static char BDSKConditionObservationContext;
     attachmentComparison = newComparison;
 }
 
-- (NSInteger)countValue {
+- (int)countValue {
     return countValue;
 }
 
-- (void)setCountValue:(NSInteger)newValue {
+- (void)setCountValue:(int)newValue {
     countValue = newValue;
 }
 
@@ -515,27 +516,27 @@ static char BDSKConditionObservationContext;
     dateComparison = newComparison;
 }
 
-- (NSInteger)numberValue {
+- (int)numberValue {
     return numberValue;
 }
 
-- (void)setNumberValue:(NSInteger)newNumber {
+- (void)setNumberValue:(int)newNumber {
     numberValue = newNumber;
 }
 
-- (NSInteger)andNumberValue {
+- (int)andNumberValue {
     return andNumberValue;
 }
 
-- (void)setAndNumberValue:(NSInteger)newNumber {
+- (void)setAndNumberValue:(int)newNumber {
     andNumberValue = newNumber;
 }
 
-- (NSInteger)periodValue {
+- (int)periodValue {
     return periodValue;
 }
 
-- (void)setPeriodValue:(NSInteger)newPeriod {
+- (void)setPeriodValue:(int)newPeriod {
     periodValue = newPeriod;
 }
 
@@ -765,9 +766,9 @@ static char BDSKConditionObservationContext;
 #pragma mark KVO
 
 - (void)startObserving {
-    [self addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:&BDSKConditionObservationContext];
-    [self addObserver:self forKeyPath:@"comparison" options:0  context:&BDSKConditionObservationContext];
-    [self addObserver:self forKeyPath:@"value" options:0  context:&BDSKConditionObservationContext];
+    [self addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:BDSKConditionObservationContext];
+    [self addObserver:self forKeyPath:@"comparison" options:0  context:BDSKConditionObservationContext];
+    [self addObserver:self forKeyPath:@"value" options:0  context:BDSKConditionObservationContext];
 }
 
 - (void)endObserving {
@@ -777,12 +778,12 @@ static char BDSKConditionObservationContext;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == &BDSKConditionObservationContext) {
+    if (context == BDSKConditionObservationContext) {
         if ([keyPath isEqualToString:@"key"]) {
             NSString *oldKey = [change objectForKey:NSKeyValueChangeOldKey];
             NSString *newKey = [change objectForKey:NSKeyValueChangeNewKey];
-            NSInteger oldFieldType = [oldKey fieldType];
-            NSInteger newFieldType = [newKey fieldType];
+            int oldFieldType = [oldKey fieldType];
+            int newFieldType = [newKey fieldType];
             if(oldFieldType != newFieldType){
                 if (oldFieldType == BDSKDateField)
                     [self updateCachedDates]; // remove the cached date and stop the timer
@@ -802,7 +803,7 @@ static char BDSKConditionObservationContext;
 
 @implementation NSString (BDSKConditionExtensions)
 
-- (NSInteger)fieldType {
+- (int)fieldType {
     if ([self isEqualToString:BDSKDateAddedString] || [self isEqualToString:BDSKDateModifiedString])
         return BDSKDateField;
     else if ([self isEqualToString:BDSKLocalFileString] || [self isEqualToString:BDSKRemoteURLString])

@@ -37,11 +37,11 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKPreferencePane.h"
+#import <OmniAppKit/OmniAppKit.h>
 
 @class BDSKFormatStringFieldEditor;
 
-@interface BibPref_CiteKey : BDSKPreferencePane
+@interface BibPref_CiteKey : OAPreferenceClient
 {
     IBOutlet NSPanel *formatSheet;
     IBOutlet NSTextField *citeKeyLine;
@@ -68,6 +68,8 @@
 - (IBAction)changeCiteKeyAutogenerate:(id)sender;
 - (IBAction)changeCiteKeyLowercase:(id)sender;
 - (IBAction)setFormatCleanOption:(id)sender;
+- (void)updateUI;
 - (IBAction)showCiteKeyFormatWarning:(id)sender;
+- (void)setCiteKeyFormatInvalidWarning:(BOOL)set message:(NSString *)message;
 
 @end

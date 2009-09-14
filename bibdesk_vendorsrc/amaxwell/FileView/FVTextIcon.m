@@ -37,82 +37,59 @@
  */
 
 #import "FVTextIcon.h"
-#import "FVCoreTextIcon.h"
 #import "FVIcon_Private.h"
-#import "FVConcreteOperation.h"
-#import "FVOperationQueue.h"
-
-@interface _FVAttributedStringOperation : FVConcreteOperation
-{
-@private;
-    NSURL                     *_fileURL;
-    NSDictionary              *_documentAttributes;
-    NSMutableAttributedString *_attributedString;
-}
-
-- (id)initWithURL:(NSURL *)aURL;
-- (NSMutableAttributedString *)attributedString;
-- (NSDictionary *)documentAttributes;
-
-@end
 
 @implementation FVTextIcon
 
-static Class FVTextIconClass = Nil;
+// cache these so we avoid hitting NSPrintInfo; we only care to have something that approximates a page size, anyway
+static NSSize _paperSize;
+static NSSize _containerSize;
+static CGAffineTransform _paperTransform;
 static NSMutableSet *_cachedTextSystems = nil;
 static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
 
 #define MAX_CACHED_TEXT_SYSTEMS 10
-#define USE_CORE_TEXT 1
 
 + (void)initialize
 {
     FVINITIALIZE(FVTextIcon);
+
+    NSPrintInfo *pInfo = [NSPrintInfo sharedPrintInfo];
+    _paperSize = [pInfo paperSize];
+    CGAffineTransform t1 = CGAffineTransformMakeTranslation([pInfo leftMargin], _paperSize.height - [pInfo topMargin]);
+    CGAffineTransform t2 = CGAffineTransformMakeScale(1, -1);
+    _paperTransform = CGAffineTransformConcat(t2, t1);
+    // could add in NSTextContainer's default lineFragmentPadding
+    _containerSize = _paperSize;
+    _containerSize.width -= 2 * [pInfo leftMargin];
+    _containerSize.height -= 2* [pInfo topMargin];
     
-    FVTextIconClass = self;
     // make sure we compare with pointer equality; all I really want is a bag
     _cachedTextSystems = (NSMutableSet *)CFSetCreateMutable(NULL, MAX_CACHED_TEXT_SYSTEMS, &FVNSObjectPointerSetCallBacks);
-}
-
-#if USE_CORE_TEXT && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
-+ (id)allocWithZone:(NSZone *)aZone
-{
-    if (floor(NSAppKitVersionNumber > NSAppKitVersionNumber10_4) && self == FVTextIconClass)
-        return [FVCoreTextIcon allocWithZone:aZone];
-    else
-        return [super allocWithZone:aZone];
-}
-#endif
-
-+ (NSSize)_containerSize
-{
-    // could add in NSTextContainer's default lineFragmentPadding
-    NSSize containerSize = FVDefaultPaperSize;
-    containerSize.width -= 2 * FVSideMargin;
-    containerSize.height -= 2* FVTopMargin;
-    return containerSize;
 }
 
 // A particular layout manager/text storage combination is not thread safe, so the AppKit string drawing routines must only be used from the main thread.  We're using the thread dictionary to cache our string drawing machinery on a per-thread basis.  Update:  for the record, Aki Inoue says that NSStringDrawing is supposed to be thread safe, so the crash I experienced may be something else.
 + (NSTextStorage *)_newTextStorage;
 {
-    NSTextStorage *textStorage = [[NSTextStorage allocWithZone:[self zone]] init];
-    NSLayoutManager *lm = [[NSLayoutManager allocWithZone:[self zone]] init];
+    NSTextStorage *textStorage = [[NSTextStorage alloc] init];
+    NSLayoutManager *lm = [[NSLayoutManager alloc] init];
+    NSTextContainer *tc = [[NSTextContainer alloc] init];
+    [tc setContainerSize:_containerSize];
+    [lm addTextContainer:tc];
     // don't let the layout manager use its threaded layout (see header)
     [lm setBackgroundLayoutEnabled:NO];
     [textStorage addLayoutManager:lm];
+    // retained by layout manager
+    [tc release];
     // retained by text storage
     [lm release];
     // see header; the CircleView example sets it to NO
     [lm setUsesScreenFonts:YES];
-    NSTextContainer *tc = [[NSTextContainer allocWithZone:[self zone]] initWithContainerSize:[self _containerSize]];
-    [lm addTextContainer:tc];
-    // retained by layout manager
-    [tc release];    
     return textStorage;
 }
 
-+ (NSTextStorage *)popTextStorage
+// caller will own the returned object
++ (NSTextStorage *)newTextStorage
 {
     OSSpinLockLock(&_cacheLock);
     NSTextStorage *textStorage = [_cachedTextSystems anyObject];
@@ -123,20 +100,19 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
     OSSpinLockUnlock(&_cacheLock);
     if (nil == textStorage)
         textStorage = [self _newTextStorage];
-    return [textStorage autorelease];
+    return textStorage;
 }
 
+// assumes the object was retrieved from +newTextStorage and /not/ (auto)released
 + (void)pushTextStorage:(NSTextStorage *)textStorage
 {
     OSSpinLockLock(&_cacheLock);
-    if ([_cachedTextSystems count] < MAX_CACHED_TEXT_SYSTEMS) {
+    if ([_cachedTextSystems count] < MAX_CACHED_TEXT_SYSTEMS)
         [_cachedTextSystems addObject:textStorage];
-        // no point in keeping this around in memory; deleteCharactersInRange: seems to leak an NSConcreteAttributedString
-        NSAttributedString *empty = [NSAttributedString new];
-        [textStorage replaceCharactersInRange:NSMakeRange(0, [textStorage length]) withAttributedString:empty];
-        [empty release];
-    }
     OSSpinLockUnlock(&_cacheLock);
+    
+    // either retained by the set, or we'll just let it go away
+    [textStorage release];
 }
 
 // allows a crude sniffing, so initWithTextAtURL: doesn't have to immediately instantiate an attributed string ivar and return nil if that fails
@@ -176,10 +152,8 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
     if (nil == types) {
         NSMutableArray *a = [NSMutableArray arrayWithArray:[self _supportedUTIs]];
         // avoid threading issues on 10.4; this class should never be asked to render HTML anyway, since that's now handled by FVWebViewIcon
-        if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
+        if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
             [a removeObject:(id)kUTTypeHTML];
-            [a removeObject:(id)kUTTypeWebArchive];
-        }
         types = [a copyWithZone:[self zone]];
     }
 
@@ -193,39 +167,57 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
 // This is mainly useful to prove that the file cannot be opened; as in the case of OmniGraffle files (see comment above), it returns YES.
 + (BOOL)canInitWithURL:(NSURL *)aURL;
 {
-    NSAttributedString *attributedString = [[NSAttributedString allocWithZone:[self zone]] initWithURL:aURL documentAttributes:NULL];
+    NSAttributedString *attributedString = [[NSAttributedString alloc] initWithURL:aURL documentAttributes:NULL];
     BOOL canInit = (nil != attributedString);
     [attributedString release];
     return canInit;
 }
 
-- (id)initWithURL:(NSURL *)aURL isPlainText:(BOOL)isPlainText
+- (id)initWithTextAtURL:(NSURL *)aURL;
 {
-    self = [super initWithURL:aURL];
+    self = [super init];
     if (self) {
-        _fullSize = FVDefaultPaperSize;
-        _thumbnailSize = FVDefaultPaperSize;
+        
+        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:aURL copyTargetURL:&_fileURL];                
+        _fullSize = _paperSize;
+        _thumbnailSize = _paperSize;
         // first approximation
         FVIconLimitThumbnailSize(&_thumbnailSize);
         _desiredSize = NSZeroSize;
         _fullImage = NULL;
         _thumbnail = NULL;
-        _isPlainText = isPlainText;
+        _diskCacheName = [FVIconCache createDiskCacheNameWithURL:_fileURL];
+        _isHTML = NO;
+                
+        NSInteger rc = pthread_mutex_init(&_mutex, NULL);
+        if (rc)
+            perror("pthread_mutex_init");
     }
     return self;
 }
 
-- (id)initWithURL:(NSURL *)aURL;
+// return the same thing as text; just a container for the URL, until actually asked to render the text file
+- (id)initWithHTMLAtURL:(NSURL *)aURL;
 {
-    return [self initWithURL:aURL isPlainText:NO];
+    if (self = [self initWithTextAtURL:aURL]) {
+        _isHTML = YES;
+    }
+    return self;
 }
 
 - (void)dealloc
 {
+    pthread_mutex_destroy(&_mutex);
+    [_fileURL release];
     CGImageRelease(_fullImage);
     CGImageRelease(_thumbnail);
+    free(_diskCacheName);
     [super dealloc];
 }
+
+- (BOOL)tryLock { return pthread_mutex_trylock(&_mutex) == 0; }
+- (void)lock { pthread_mutex_lock(&_mutex); }
+- (void)unlock { pthread_mutex_unlock(&_mutex); }
 
 - (NSSize)size { return _fullSize; }
 
@@ -309,62 +301,128 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
     [self unlock];
 }
 
-- (void)recache;
-{
-    [FVIconCache invalidateCachesForKey:_cacheKey];
-    [self releaseResources];
+- (void)_loadHTML:(NSMutableDictionary *)HTMLDict {
+    NSDictionary *documentAttributes = nil;
+    NSAttributedString *attrString = [[NSAttributedString alloc] initWithURL:_fileURL documentAttributes:&documentAttributes];
+    if (attrString)
+        [HTMLDict setObject:attrString forKey:@"attributedString"];
+    if (documentAttributes)
+        [HTMLDict setObject:documentAttributes forKey:@"documentAttributes"];
+    [attrString release];
 }
 
-- (CGImageRef)_newImageWithAttributedString:(NSMutableAttributedString *)attrString documentAttributes:(NSDictionary *)documentAttributes
+- (void)renderOffscreen
 {
-    NSParameterAssert(attrString);
-    FVBitmapContextRef ctxt = FVIconBitmapContextCreateWithSize(FVDefaultPaperSize.width, FVDefaultPaperSize.height);    
-
-    // set up default page layout parameters
-    CGAffineTransform t1 = CGAffineTransformMakeTranslation(FVSideMargin, FVDefaultPaperSize.height - FVTopMargin);
-    CGAffineTransform t2 = CGAffineTransformMakeScale(1, -1);
-    CGAffineTransform pageTransform = CGAffineTransformConcat(t2, t1);    
-    NSSize containerSize = [[self class] _containerSize];
-    NSSize paperSize = FVDefaultPaperSize;
+    // hold the lock to let needsRenderForSize: know that this icon doesn't need rendering
+    [self lock];
     
-    // default to white background
-    CGFloat backgroundComps[4] = { 1.0, 1.0, 1.0, 1.0 };
+    // !!! two early returns here after a cache check
 
+    if (NULL != _fullImage) {
+        // note that _fullImage may be non-NULL if we were added to the FVOperationQueue multiple times before renderOffscreen was called
+        [self unlock];
+        return;
+    } 
+    else {
+        
+        if (NULL == _thumbnail) {
+            _thumbnail = [FVIconCache newThumbnailNamed:_diskCacheName];
+            _thumbnailSize = FVCGImageSize(_thumbnail);
+        }
+        
+        if (_thumbnail && FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize)) {
+            _fullImage = [FVIconCache newImageNamed:_diskCacheName];
+            if (NULL != _fullImage) {
+                [self unlock];
+                return;
+            }
+        }
+        
+        if (NULL != _thumbnail) {
+            [self unlock];
+            return;
+        }
+    }
+
+    NSParameterAssert(NULL == _fullImage);
+    NSParameterAssert(NULL == _thumbnail);
+    
+    // definitely use the context cache for this, since these bitmaps are pretty huge
+    CGContextRef ctxt = [FVBitmapContextCache newBitmapContextOfWidth:_paperSize.width height:_paperSize.height];
+    
+    NSTextStorage *textStorage = [FVTextIcon newTextStorage];
+    
+    // originally kept the attributed string as an ivar, but it's not worth it in most cases
+    
+    // no need to lock for -fileURL since it's invariant
+    NSDictionary *documentAttributes = nil;
+    NSMutableAttributedString *attrString = nil;
+    
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4 && _isHTML) {
+        NSMutableDictionary *HTMLDict = [NSMutableDictionary dictionary];
+        [self performSelectorOnMainThread:@selector(_loadHTML:) withObject:HTMLDict waitUntilDone:YES];
+        attrString = [[HTMLDict objectForKey:@"attributedString"] mutableCopy];
+        documentAttributes = [HTMLDict objectForKey:@"documentAttributes"];
+    } else {
+        attrString = [[NSMutableAttributedString alloc] initWithURL:_fileURL documentAttributes:&documentAttributes];
+    }
+    
+    CGAffineTransform pageTransform = _paperTransform;
+    NSSize containerSize = _containerSize;
+    NSSize paperSize = _paperSize;
+    
     // use a monospaced font for plain text
-    if (nil == documentAttributes || [[documentAttributes objectForKey:NSDocumentTypeDocumentAttribute] isEqualToString:NSPlainTextDocumentType]) {
-        NSFont *plainFont = [NSFont userFixedPitchFontOfSize:10.0f];
-        [attrString addAttribute:NSFontAttributeName value:plainFont range:NSMakeRange(0, [attrString length])];
+    if (nil != attrString) {
+        if (nil == documentAttributes || [[documentAttributes objectForKey:NSDocumentTypeDocumentAttribute] isEqualToString:NSPlainTextDocumentType]) {
+            NSFont *plainFont = [NSFont userFixedPitchFontOfSize:10.0f];
+            [attrString addAttribute:NSFontAttributeName value:plainFont range:NSMakeRange(0, [attrString length])];
+        }
+        else if (nil != documentAttributes) {
+            
+            CGFloat left, right, top, bottom;
+            
+            left = [[documentAttributes objectForKey:NSLeftMarginDocumentAttribute] floatValue];
+            right = [[documentAttributes objectForKey:NSRightMarginDocumentAttribute] floatValue];
+            top = [[documentAttributes objectForKey:NSTopMarginDocumentAttribute] floatValue];
+            bottom = [[documentAttributes objectForKey:NSBottomMarginDocumentAttribute] floatValue];
+            paperSize = [[documentAttributes objectForKey:NSPaperSizeDocumentAttribute] sizeValue];
+            
+            CGAffineTransform t1 = CGAffineTransformMakeTranslation(0, paperSize.height);
+            CGAffineTransform t2 = CGAffineTransformMakeScale(1, -1);
+            pageTransform = CGAffineTransformConcat(t2, t1);
+            t1 = CGAffineTransformMakeTranslation(left, -bottom);
+            pageTransform = CGAffineTransformConcat(pageTransform, t1);
+            containerSize.width = paperSize.width - left - right;
+            containerSize.height = paperSize.height - top - bottom;
+        }
     }
-    else if (nil != documentAttributes) {
+    
+    [textStorage beginEditing];
+    if (attrString) {
+        [textStorage setAttributedString:attrString];
+        [attrString release];
         
-        CGFloat left, right, top, bottom;
-        
-        left = [[documentAttributes objectForKey:NSLeftMarginDocumentAttribute] floatValue];
-        right = [[documentAttributes objectForKey:NSRightMarginDocumentAttribute] floatValue];
-        top = [[documentAttributes objectForKey:NSTopMarginDocumentAttribute] floatValue];
-        bottom = [[documentAttributes objectForKey:NSBottomMarginDocumentAttribute] floatValue];
-        paperSize = [[documentAttributes objectForKey:NSPaperSizeDocumentAttribute] sizeValue];
-        
-        t1 = CGAffineTransformMakeTranslation(0, paperSize.height);
-        t2 = CGAffineTransformMakeScale(1, -1);
-        pageTransform = CGAffineTransformConcat(t2, t1);
-        t1 = CGAffineTransformMakeTranslation(left, -bottom);
-        pageTransform = CGAffineTransformConcat(pageTransform, t1);
-        containerSize.width = paperSize.width - left - right;
-        containerSize.height = paperSize.height - top - bottom;
-        
-        NSColor *nsColor = [documentAttributes objectForKey:NSBackgroundColorDocumentAttribute];
-        nsColor = [nsColor colorUsingColorSpaceName:NSDeviceRGBColorSpace];  
-        [nsColor getRed:&backgroundComps[0] green:&backgroundComps[1] blue:&backgroundComps[2] alpha:&backgroundComps[3]];
+        // these will be garbage from here on, so set to nil in case I forget and try using them
+        attrString = nil;
+        documentAttributes = nil;
     }
+    else {
+        // avoid setting the text storage to nil, and display a mildly unhelpful error message
+        NSBundle *bundle = [NSBundle bundleForClass:[FVTextIcon class]];
         
+        NSString *err = [NSLocalizedStringFromTableInBundle(@"Unable to read text file ", @"FileView", bundle, @"error message with single trailing space") stringByAppendingString:[_fileURL path]];
+        [[textStorage mutableString] setString:err];
+    }  
+    [textStorage endEditing];
+    
     NSRect stringRect = NSZeroRect;
     stringRect.size = paperSize;
     
     CGContextSaveGState(ctxt);
-    
-    CGContextSetRGBFillColor(ctxt, backgroundComps[0], backgroundComps[1], backgroundComps[2], backgroundComps[3]);
-    CGContextFillRect(ctxt, NSRectToCGRect(stringRect));
+
+    // assume a white page background; could maybe read from the attributed string's background color?
+    CGContextSetRGBFillColor(ctxt, 1.0, 1.0, 1.0, 1.0);
+    CGContextFillRect(ctxt, *(CGRect *)&stringRect);
     
     CGContextConcatCTM(ctxt, pageTransform);
     
@@ -375,16 +433,15 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
     [NSGraphicsContext saveGraphicsState];
     [NSGraphicsContext setCurrentContext:nsCtxt];
     
-    NSTextStorage *textStorage = [FVTextIcon popTextStorage];
-    [textStorage setAttributedString:attrString];
-    
     // objectAtIndex:0 is safe, since we added these to the text storage (so there's at least one)
     NSLayoutManager *lm = [[textStorage layoutManagers] objectAtIndex:0];
     NSTextContainer *tc = [[lm textContainers] objectAtIndex:0];
     [tc setContainerSize:containerSize];
-        
+    
+    NSRange glyphRange;
+    
     // we now have a properly flipped graphics context, so force layout and then draw the text
-    NSRange glyphRange = [lm glyphRangeForBoundingRect:stringRect inTextContainer:tc];
+    glyphRange = [lm glyphRangeForBoundingRect:stringRect inTextContainer:tc];
     NSRect usedRect = [lm usedRectForTextContainer:tc];
     
     // NSRunStorage raises if we try drawing a zero length range (happens if you have an empty text file)
@@ -393,193 +450,42 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
         [lm drawGlyphsForGlyphRange:glyphRange atPoint:usedRect.origin];
     }
     
-    // text is drawn, so we're done with this
+    // no point in keeping this around in memory
+    [textStorage deleteCharactersInRange:NSMakeRange(0, [textStorage length])];
     [FVTextIcon pushTextStorage:textStorage];
     textStorage = nil;
     
     // restore the previous context
     [NSGraphicsContext restoreGraphicsState];
     
-    // restore the bitmap context's state (although it's gone after this operation)
-    CGContextRestoreGState(ctxt);
-    
-    CGImageRef image = CGBitmapContextCreateImage(ctxt);
-    FVIconBitmapContextRelease(ctxt);
-    
-    return image;
-    
-}    
-
-- (void)renderOffscreen
-{
-    [[self class] _startRenderingForKey:_cacheKey];
-
-    // hold the lock to let needsRenderForSize: know that this icon doesn't need rendering
-    [self lock];
-    
-    if ([NSThread instancesRespondToSelector:@selector(setName:)] && pthread_main_np() == 0)
-        [[NSThread currentThread] setName:[_fileURL path]];
-    
-    // !!! two early returns here after a cache check
-
-    if (NULL != _fullImage) {
-        // note that _fullImage may be non-NULL if we were added to the FVOperationQueue multiple times before renderOffscreen was called
-        [self unlock];
-        [[self class] _stopRenderingForKey:_cacheKey];
-        return;
-    } 
-    else {
-        
-        if (NULL == _thumbnail) {
-            _thumbnail = [FVIconCache newThumbnailForKey:_cacheKey];
-            _thumbnailSize = FVCGImageSize(_thumbnail);
-        }
-        
-        if (_thumbnail && FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize)) {
-            _fullImage = [FVIconCache newImageForKey:_cacheKey];
-            if (NULL != _fullImage) {
-                [self unlock];
-                [[self class] _stopRenderingForKey:_cacheKey];
-                return;
-            }
-        }
-        
-        if (NULL != _thumbnail) {
-            [self unlock];
-            [[self class] _stopRenderingForKey:_cacheKey];
-            return;
-        }
-    }
-
-    /*
-     At this point, neither icon should be present, unless ImageIO failed previously or caching failed.  
-     However, if multiple views are caching icons at the same time, we can end up here with a thumbnail 
-     but no full image.
-     */
-    NSParameterAssert(NULL == _fullImage);
-        
-    // originally kept the attributed string as an ivar, but it's not worth it in most cases
-    
-    // no need to lock for -fileURL since it's invariant
-    NSDictionary *documentAttributes = nil;
-    NSMutableAttributedString *attrString = nil;
-    
-    /* 
-     This is a minor optimization: NSAttributedString creates a bunch of temporary objects for pasteboard 
-     translation when reading a file, but we avoid that by loading with NSString directly.  Interestingly, 
-     this also appears to be at least a partial workaround for rdar://problem/5775728 (CoreGraphics memory leaks), 
-     since Instruments shows I'm only leaking a single NSConcreteAttributedString here now.
-     */
-    if (_isPlainText) {
-        NSStringEncoding enc;
-        NSString *text = [[NSString allocWithZone:[self zone]] initWithContentsOfURL:_fileURL usedEncoding:&enc error:NULL];
-        if (nil == text)
-            text = [[NSString allocWithZone:[self zone]] initWithContentsOfURL:_fileURL encoding:NSMacOSRomanStringEncoding error:NULL];
-        
-        if (text) {
-            attrString = [[NSMutableAttributedString allocWithZone:[self zone]] initWithString:text];
-            [text release];
-        }
-    }
-
-    // not plain text, so try to load with NSAttributedString
-    if (nil == attrString) {
-        /*
-         Occasionally NSAttributedString might end up calling NSHTMLReader/WebKit to load a file, which raises 
-         an exception and crashes on 10.4.  The workaround is to always load on the main thread on 10.4.
-         */
-        if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
-            [attrString release];
-            _FVAttributedStringOperation *operation = [[_FVAttributedStringOperation allocWithZone:[self zone]] initWithURL:_fileURL];
-            [[FVOperationQueue mainQueue] addOperation:operation];
-            while (NO == [operation isFinished])
-                [[NSRunLoop currentRunLoop] runMode:FVMainQueueRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
-            attrString = [[operation attributedString] retain];
-            documentAttributes = [[[operation documentAttributes] retain] autorelease];
-            [operation release];
-        }
-        else {
-            attrString = [[NSMutableAttributedString allocWithZone:[self zone]] initWithURL:_fileURL documentAttributes:&documentAttributes];
-        }
-    }
-    
-    // plain text failed and so did NSAttributedString, so display a mildly unhelpful error message
-    if (nil == attrString) {
-        NSBundle *bundle = [NSBundle bundleForClass:[FVTextIcon class]];        
-        NSString *err = [NSLocalizedStringFromTableInBundle(@"Unable to read text file ", @"FileView", bundle, @"error message with single trailing space") stringByAppendingString:[_fileURL path]];
-        attrString = [[NSMutableAttributedString alloc] initWithString:err];
-    }
-    FVAPIParameterAssert(nil != attrString);
-    
     CGImageRelease(_fullImage);
-    _fullImage = [self _newImageWithAttributedString:attrString documentAttributes:documentAttributes];
-    [attrString release];
-        
-    if (NULL != _fullImage) {        
-        // reset size while we have the lock, since it may be different now that we've read the string
-        _fullSize = FVCGImageSize(_fullImage);
-    }
-        
-    // resample the existing bitmap to create a thumbnail image
+    _fullImage = CGBitmapContextCreateImage(ctxt);
+    if (NULL != _fullImage)
+        [FVIconCache cacheImage:_fullImage withName:_diskCacheName];
+    
+    // now restore our cached bitmap context and push it back into the cache
+    CGContextRestoreGState(ctxt);
+    [FVBitmapContextCache disposeOfBitmapContext:ctxt];
+    
+    // repeat for the thumbnail image as needed, but this time just draw our bitmap again
     if (NULL == _thumbnail)
-        _thumbnail = FVCreateResampledThumbnail(_fullImage);
-        
-    // local copies for caching
-    CGImageRef fullImage = CGImageRetain(_fullImage), thumbnail = CGImageRetain(_thumbnail);
+        _thumbnail = FVCreateResampledThumbnail(_fullImage, true);
 
-    if (NULL != _thumbnail) 
+    // reset size while we have the lock, since it may be different now that we've read the string
+    _fullSize = paperSize;
+    
+    if (NULL != _thumbnail) {
         _thumbnailSize = FVCGImageSize(_thumbnail);
+        [FVIconCache cacheThumbnail:_thumbnail withName:_diskCacheName];
+    }
     
     // get rid of this to save memory if we aren't drawing it right away
     if (FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize) == NO) {
         CGImageRelease(_fullImage);
         _fullImage = NULL;
     }
-    
-    // can draw now
-    [self unlock];    
-    
-    // cache and release
-    if (fullImage) [FVIconCache cacheImage:fullImage forKey:_cacheKey];
-    CGImageRelease(fullImage);
-    if (thumbnail) [FVIconCache cacheThumbnail:thumbnail forKey:_cacheKey];
-    CGImageRelease(thumbnail);
 
-    [[self class] _stopRenderingForKey:_cacheKey];
-}
-
-@end
-
-@implementation _FVAttributedStringOperation
-
-- (id)initWithURL:(NSURL *)aURL;
-{
-    self = [super init];
-    if (self) {
-        _fileURL = [aURL copyWithZone:[self zone]];
-        [self setConcurrent:NO];
-    }
-    return self;
-}
-
-- (void)dealloc
-{
-    [_fileURL release];
-    [_documentAttributes release];
-    [_attributedString release];
-    [super dealloc];
-}
-
-- (void)main
-{
-    NSAssert(pthread_main_np() != 0, @"incorrect thread for _FVAttributedStringOperation");        
-    NSDictionary *documentAttributes;
-    _attributedString = [[NSMutableAttributedString allocWithZone:[self zone]] initWithURL:_fileURL documentAttributes:&documentAttributes];
-    _documentAttributes = [documentAttributes copyWithZone:[self zone]];
-    [self finished];
-}
-
-- (NSMutableAttributedString *)attributedString { return _attributedString; }
-- (NSDictionary *)documentAttributes { return _documentAttributes; }
+    [self unlock];
+}    
 
 @end

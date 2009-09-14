@@ -37,10 +37,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKOutlineView.h"
 
 
-@interface BDSKBookmarkOutlineView : BDSKOutlineView
+@interface BDSKBookmarkOutlineView : NSOutlineView
 @end
 
 

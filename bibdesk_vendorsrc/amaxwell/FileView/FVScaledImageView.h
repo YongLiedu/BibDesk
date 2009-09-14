@@ -45,6 +45,7 @@
 @private
     FVIcon             *_icon;
     NSURL              *_fileURL;
+    NSBox              *_box;
     NSAttributedString *_text;
 }
 

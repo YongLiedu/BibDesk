@@ -45,10 +45,10 @@
 #import "BDSKBibTeXParser.h"
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "NSObject_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 
-static char BDSKMacroResolverDefaultsObservationContext;
 
 @interface BDSKGlobalMacroResolver : BDSKMacroResolver {
     NSMutableDictionary *standardMacroDefinitions;
@@ -58,6 +58,7 @@ static char BDSKMacroResolverDefaultsObservationContext;
 - (NSDictionary *)fileMacroDefinitions;
 - (void)loadMacrosFromFiles;
 - (void)synchronize;
+- (void)handleMacroFilesChanged:(NSNotification *)notification;
 
 @end
 
@@ -121,7 +122,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     
     [self performSelector:@selector(addMacro:toArray:) withObjectsFromArray:macros withObject:orderedMacros];
     
-    BOOL shouldTeXify = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
+    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
 	NSMutableString *macroString = [NSMutableString string];
     NSEnumerator *macroEnum = [orderedMacros objectEnumerator];
     NSString *macro;
@@ -141,13 +142,13 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     if ([macroDef isComplex] == NO) 
         return NO;
     
-    BDSKASSERT([[macroDef macroResolver] isEqual:self]);
+    OBASSERT([[macroDef macroResolver] isEqual:self]);
     
     NSEnumerator *nodeE = [[macroDef nodes] objectEnumerator];
     BDSKStringNode *node;
     
     while(node = [nodeE nextObject]){
-        if([node type] != BDSKStringNodeMacro)
+        if([node type] != BSN_MACRODEF)
             continue;
         
         NSString *key = [node value];
@@ -312,7 +313,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         BDSKStringNode *node;
         
         while(node = [nodeE nextObject]){
-            if([node type] == BDSKStringNodeMacro)
+            if([node type] == BSN_MACRODEF)
                 [self addMacro:[node value] toArray:array];
         }
     }
@@ -327,12 +328,11 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 - (id)initWithOwner:(id<BDSKOwner>)anOwner{
     if (self = [super initWithOwner:nil]) {
         // store system-defined macros for the months.
-        NSArray *monthNames = nil;
-        if ([NSDateFormatter instancesRespondToSelector:@selector(standaloneMonthSymbols)])
-            monthNames = [[[[NSDateFormatter alloc] init] autorelease] standaloneMonthSymbols];
-        else
-            monthNames = [[NSUserDefaults standardUserDefaults] arrayForKey:NSMonthNameArray];
-        NSDictionary *standardDefs = [NSDictionary dictionaryWithObjects:monthNames
+        // we grab their localized versions for display.
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
+#warning fixme: NSMonthNameArray is deprecated, use NSLocale instead
+#endif
+        NSDictionary *standardDefs = [NSDictionary dictionaryWithObjects:[[NSUserDefaults standardUserDefaults] objectForKey:NSMonthNameArray]
                                                                  forKeys:[NSArray arrayWithObjects:@"jan", @"feb", @"mar", @"apr", @"may", @"jun", @"jul", @"aug", @"sep", @"oct", @"nov", @"dec", nil]];
         standardMacroDefinitions = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
         [standardMacroDefinitions addEntriesFromDictionary:standardDefs];
@@ -340,32 +340,31 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         fileMacroDefinitions = nil; 
 		
         
-        [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self
-            forKeyPath:[@"values." stringByAppendingString:BDSKGlobalMacroFilesKey]
-               options:0
-               context:&BDSKMacroResolverDefaultsObservationContext];
+        [OFPreference addObserver:self
+                         selector:@selector(handleMacroFilesChanged:)
+                    forPreference:[OFPreference preferenceForKey:BDSKGlobalMacroFilesKey]];
     }
     return self;
 }
 
 - (void)dealloc {
-    [[NSUserDefaultsController sharedUserDefaultsController] removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKGlobalMacroFilesKey]];
+    [OFPreference removeObserver:self forPreference:nil];
     [standardMacroDefinitions release];
     [fileMacroDefinitions release];
     [super dealloc];
 }
 
 - (void)loadMacroDefinitions{
-    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     
     macroDefinitions = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
     
     // legacy, load old style prefs
-    NSDictionary *oldMacros = [sud dictionaryForKey:BDSKBibStyleMacroDefinitionsKey];
+    NSDictionary *oldMacros = [pw dictionaryForKey:BDSKBibStyleMacroDefinitionsKey];
     if ([oldMacros count])
         [macroDefinitions addEntriesFromDictionary:oldMacros];
     
-    NSDictionary *macros = [sud dictionaryForKey:BDSKGlobalMacroDefinitionsKey];
+    NSDictionary *macros = [pw dictionaryForKey:BDSKGlobalMacroDefinitionsKey];
     NSEnumerator *keyEnum = [macros keyEnumerator];
     NSString *key;
     NSString *value;
@@ -380,15 +379,15 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     }
     if ([oldMacros count]) {
         // we remove the old style prefs, as they are now merged with the new ones
-        [sud removeObjectForKey:BDSKBibStyleMacroDefinitionsKey];
+        [pw removeObjectForKey:BDSKBibStyleMacroDefinitionsKey];
         [self synchronize];
     }
     modification++;
 }
 
 - (void)loadMacrosFromFiles{
-    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-    NSEnumerator *fileE = [[sud stringArrayForKey:BDSKGlobalMacroFilesKey] objectEnumerator];
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    NSEnumerator *fileE = [[pw stringArrayForKey:BDSKGlobalMacroFilesKey] objectEnumerator];
     NSString *file;
     
     fileMacroDefinitions = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
@@ -426,8 +425,15 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     while (key = [keyEnum nextObject]) {
         [macros setObject:[[[self macroDefinitions] objectForKey:key] stringAsBibTeXString] forKey:key];
     }
-    [[NSUserDefaults standardUserDefaults] setObject:macros forKey:BDSKGlobalMacroDefinitionsKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:macros forKey:BDSKGlobalMacroDefinitionsKey];
     [macros release];
+}
+
+- (void)handleMacroFilesChanged:(NSNotification *)notification{
+    [fileMacroDefinitions release];
+    fileMacroDefinitions = nil;
+    modification++;
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
 }
 
 - (NSDictionary *)allMacroDefinitions {
@@ -447,18 +453,6 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     return ([[self macroDefinitions] objectForKey:macroString] ?:
             [[self fileMacroDefinitions] objectForKey:macroString]) ?:
             [standardMacroDefinitions objectForKey:macroString];
-}
-#pragma mark KVO
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == &BDSKMacroResolverDefaultsObservationContext) {
-        [fileMacroDefinitions release];
-        fileMacroDefinitions = nil;
-        modification++;
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
-    } else {
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-    }
 }
 
 @end

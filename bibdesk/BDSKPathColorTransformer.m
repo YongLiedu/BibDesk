@@ -51,7 +51,7 @@
 }
 
 - (id)transformedValue:(id)flag {
-	NSInteger statusFlag = [flag intValue];
+	int statusFlag = [flag intValue];
 	if (statusFlag & BDSKSourceFileDoesNotExistErrorMask) {
 		return [NSColor grayColor];
 	} else {
@@ -73,7 +73,7 @@
 }
 
 - (id)transformedValue:(id)flag {
-	NSInteger statusFlag = [flag intValue];
+	int statusFlag = [flag intValue];
 	if (statusFlag & BDSKTargetFileExistsErrorMask) {
 		return [NSColor controlTextColor];
 	} else if (statusFlag & BDSKIncompleteFieldsErrorMask) {

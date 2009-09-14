@@ -44,10 +44,10 @@
     CFMutableDictionaryRef inverseDictionary;
 }
 
-- (NSUInteger)keyCount;
-- (NSUInteger)objectCount;
-- (NSUInteger)countForKey:(id)aKey;
-- (NSUInteger)countForObject:(id)anObject;
+- (unsigned int)keyCount;
+- (unsigned int)objectCount;
+- (unsigned int)countForKey:(id)aKey;
+- (unsigned int)countForObject:(id)anObject;
 - (NSSet *)allObjectsForKey:(id)aKey;
 - (NSSet *)allKeysForObject:(id)anObject;
 - (id)anyObjectForKey:(id)aKey;

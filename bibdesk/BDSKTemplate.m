@@ -40,7 +40,6 @@
 #import "BDAlias.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
-#import "NSCharacterSet_BDSKExtensions.h"
 
 // do not localized these strings
 NSString *BDSKTemplateRoleString = @"role";
@@ -55,9 +54,15 @@ NSString *BDSKTemplateMainPageString = @"Main Page";
 NSString *BDSKTemplateDefaultItemString = @"Default Item";
 NSString *BDSKTemplateScriptString = @"Postprocess Script";
 
+// these strings are presented in the UI, so they're localized
+NSString *BDSKTemplateLocalizedAccessoryString = nil;
+NSString *BDSKTemplateLocalizedMainPageString = nil;
+NSString *BDSKTemplateLocalizedDefaultItemString = nil;
+NSString *BDSKTemplateLocalizedScriptString = nil;
+
 static inline NSString *itemTemplateSubstring(NSString *templateString){
-    NSInteger start, end, length = [templateString length];
-    NSUInteger nonwsLoc;
+    int start, end, length = [templateString length];
+    unsigned int nonwsLoc;
     NSRange range = [templateString rangeOfString:@"<$publications>"];
     start = NSMaxRange(range);
     if (start != NSNotFound) {
@@ -65,7 +70,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
         if (nonwsLoc != NSNotFound) {
             unichar firstChar = [templateString characterAtIndex:nonwsLoc];
             if ([[NSCharacterSet newlineCharacterSet] characterIsMember:firstChar]) {
-                if (firstChar == NSCarriageReturnCharacter && (NSInteger)nonwsLoc + 1 < length && [templateString characterAtIndex:nonwsLoc + 1] == NSNewlineCharacter)
+                if (firstChar == NSCarriageReturnCharacter && (int)nonwsLoc + 1 < length && [templateString characterAtIndex:nonwsLoc + 1] == NSNewlineCharacter)
                     start = nonwsLoc + 2;
                 else 
                     start = nonwsLoc + 1;
@@ -91,54 +96,37 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 @implementation BDSKTemplate
 
-+ (NSString *)localizedAccessoryString {
-    static NSString *localizedAccessoryString = nil;
-    if (localizedAccessoryString == nil)
-        localizedAccessoryString = [NSLocalizedString(@"Accessory File", @"additional file used with export template") copy];
-    return localizedAccessoryString;
-}
-
-+ (NSString *)localizedMainPageString {
-    static NSString *localizedMainPageString = nil;
-    if (localizedMainPageString == nil)
-        localizedMainPageString = [NSLocalizedString(@"Main Page", @"template file used for the main page") copy];
-    return localizedMainPageString;
-}
-
-+ (NSString *)localizedDefaultItemString {
-    static NSString *localizedDefaultItemString = nil;
-    if (localizedDefaultItemString == nil)
-        localizedDefaultItemString = [NSLocalizedString(@"Default Item", @"template file used for a generic pub type") copy];
-    return localizedDefaultItemString;
-}
-
-+ (NSString *)localizedScriptString {
-    static NSString *localizedScriptString = nil;
-    if (localizedScriptString == nil)
-        localizedScriptString = [NSLocalizedString(@"Postprocess Script", @"script for postprocessing template") copy];
-    return localizedScriptString;
+// use +didLoad instead of +initialize since other classes depend on these globals; maybe someday we can convert them to class methods instead of globals
++ (void)didLoad
+{
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+    BDSKTemplateLocalizedAccessoryString = [NSLocalizedString(@"Accessory File", @"additional file used with export template") copy];
+    BDSKTemplateLocalizedMainPageString = [NSLocalizedString(@"Main Page", @"template file used for the main page") copy];
+    BDSKTemplateLocalizedDefaultItemString = [NSLocalizedString(@"Default Item", @"template file used for a generic pub type") copy];
+    BDSKTemplateLocalizedScriptString = [NSLocalizedString(@"Postprocess Script", @"script for postprocessing template") copy];
+    [pool release];
 }
 
 + (NSString *)localizedRoleString:(NSString *)string {
     if ([string isEqualToString:BDSKTemplateAccessoryString])
-        string = [self localizedAccessoryString];
+        string = BDSKTemplateLocalizedAccessoryString;
     else if ([string isEqualToString:BDSKTemplateMainPageString])
-        string = [self localizedMainPageString];
+        string = BDSKTemplateLocalizedMainPageString;
     else if ([string isEqualToString:BDSKTemplateDefaultItemString])
-        string = [self localizedDefaultItemString];
+        string = BDSKTemplateLocalizedDefaultItemString;
     else if ([string isEqualToString:BDSKTemplateScriptString])
-        string = [self localizedScriptString];
+        string = BDSKTemplateLocalizedScriptString;
     return string;
 }
 
 + (NSString *)unlocalizedRoleString:(NSString *)string {
-    if ([string isEqualToString:[self localizedAccessoryString]])
+    if ([string isEqualToString:BDSKTemplateLocalizedAccessoryString])
         string = BDSKTemplateAccessoryString;
-    else if ([string isEqualToString:[self localizedMainPageString]])
+    else if ([string isEqualToString:BDSKTemplateLocalizedMainPageString])
         string = BDSKTemplateMainPageString;
-    else if ([string isEqualToString:[self localizedDefaultItemString]])
+    else if ([string isEqualToString:BDSKTemplateLocalizedDefaultItemString])
         string = BDSKTemplateDefaultItemString;
-    else if ([string isEqualToString:[self localizedScriptString]])
+    else if ([string isEqualToString:BDSKTemplateLocalizedScriptString])
         string = BDSKTemplateScriptString;
     return string;
 }
@@ -217,7 +205,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 }
 
 + (NSArray *)exportTemplates{
-    NSData *prefData = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKExportTemplateTree];
+    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree];
     if ([prefData length])
         return [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
     else 
@@ -225,7 +213,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 }
 
 + (NSArray *)serviceTemplates{
-    NSData *prefData = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKServiceTemplateTree];
+    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKServiceTemplateTree];
     if ([prefData length])
         return [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
     else 
@@ -364,7 +352,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (BDSKTemplateFormat)templateFormat;
 {
-    BDSKASSERT([self parent] == nil);
+    OBASSERT([self parent] == nil);
     NSString *extension = [[self valueForKey:BDSKTemplateRoleString] lowercaseString];
     BDSKTemplateFormat format = BDSKUnknownTemplateFormat;
     NSURL *url = [self mainPageTemplateURL];
@@ -402,13 +390,13 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSString *)fileExtension;
 {
-    BDSKASSERT([self parent] == nil);
+    OBASSERT([self parent] == nil);
     return [self valueForKey:BDSKTemplateRoleString];
 }
 
 - (NSString *)mainPageString;
 {
-    BDSKASSERT([self parent] == nil);
+    OBASSERT([self parent] == nil);
     NSURL *mainPageURL = [self mainPageTemplateURL];
     if (mainPageURL) {
         return [NSString stringWithContentsOfURL:[self mainPageTemplateURL] encoding:NSUTF8StringEncoding error:NULL];
@@ -419,7 +407,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSAttributedString *)mainPageAttributedStringWithDocumentAttributes:(NSDictionary **)docAttributes;
 {
-    BDSKASSERT([self parent] == nil);
+    OBASSERT([self parent] == nil);
     NSURL *mainPageURL = [self mainPageTemplateURL];
     if (mainPageURL) {
         return [[[NSAttributedString alloc] initWithURL:[self mainPageTemplateURL] documentAttributes:docAttributes] autorelease];
@@ -431,7 +419,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSString *)stringForType:(NSString *)type;
 {
-    BDSKASSERT([self parent] == nil);
+    OBASSERT([self parent] == nil);
     NSURL *theURL = nil;
     if(nil != type)
         theURL = [self templateURLForType:type];
@@ -448,7 +436,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSAttributedString *)attributedStringForType:(NSString *)type;
 {
-    BDSKASSERT([self parent] == nil);
+    OBASSERT([self parent] == nil);
     NSURL *theURL = nil;
     if(nil != type)
         theURL = [self templateURLForType:type];
@@ -460,32 +448,32 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSString *)scriptPath;
 {
-    BDSKASSERT([self parent] == nil);
-    return [[self scriptURL] path];
+    OBASSERT([self parent] == nil);
+    return [NSString stringWithContentsOfURL:[self scriptURL] encoding:NSUTF8StringEncoding error:NULL];
 }
 
 - (NSURL *)mainPageTemplateURL;
 {
-    BDSKASSERT([self parent] == nil);
+    OBASSERT([self parent] == nil);
     return [self templateURLForType:BDSKTemplateMainPageString];
 }
 
 - (NSURL *)defaultItemTemplateURL;
 {
-    BDSKASSERT([self parent] == nil);
+    OBASSERT([self parent] == nil);
     return [self templateURLForType:BDSKTemplateDefaultItemString];
 }
 
 - (NSURL *)templateURLForType:(NSString *)pubType;
 {
-    BDSKASSERT([self parent] == nil);
+    OBASSERT([self parent] == nil);
     NSParameterAssert(nil != pubType);
     return [[self childForRole:pubType] representedFileURL];
 }
 
 - (NSArray *)accessoryFileURLs;
 {
-    BDSKASSERT([self parent] == nil);
+    OBASSERT([self parent] == nil);
     NSMutableArray *fileURLs = [NSMutableArray array];
     NSEnumerator *childE = [[self children] objectEnumerator];
     BDSKTemplate *aChild;
@@ -502,7 +490,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSURL *)scriptURL;
 {
-    BDSKASSERT([self parent] == nil);
+    OBASSERT([self parent] == nil);
     return [[self childForRole:BDSKTemplateScriptString] representedFileURL];
 }
 
@@ -523,7 +511,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (id)childForRole:(NSString *)role;
 {
-    BDSKASSERT([self parent] == nil);
+    OBASSERT([self parent] == nil);
     NSParameterAssert(nil != role);
     NSEnumerator *nodeE = [[self children] objectEnumerator];
     id aNode = nil;
@@ -538,7 +526,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (void)setRepresentedFileURL:(NSURL *)aURL;
 {
-    BDSKASSERT([self isLeaf]);
+    OBASSERT([self isLeaf]);
     BDAlias *alias = nil;
     alias = [[BDAlias alloc] initWithURL:aURL];
     
@@ -556,7 +544,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSURL *)representedFileURL;
 {
-    BDSKASSERT([self isLeaf]);
+    OBASSERT([self isLeaf]);
     BDAlias *alias = [[BDAlias alloc] initWithData:[self valueForKey:@"_BDAlias"]];
     NSURL *theURL = [alias fileURLNoUI];
     [alias release];

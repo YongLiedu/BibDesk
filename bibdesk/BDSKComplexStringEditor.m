@@ -36,16 +36,23 @@
 
 #import "BDSKComplexStringEditor.h"
 #import "BDSKComplexString.h"
-#import "BDSKMacroResolver.h"
+#import "BDSKComplexStringFormatter.h"
 #import "BDSKBackgroundView.h"
+#import <OmniBase/OmniBase.h>
 #import "NSWindowController_BDSKExtensions.h"
 
 @interface BDSKComplexStringEditor (Private)
 
 - (void)endEditingAndOrderOut;
 
+- (void)attachWindow;
+- (void)hideWindow;
+
+- (NSRect)currentCellFrame;
+- (id)currentCell;
+
 - (void)setExpandedValue:(NSString *)expandedValue;
-- (void)setError:(NSError *)error;
+- (void)setErrorReason:(NSString *)reason errorMessage:(NSString *)message;
 
 - (void)cellFrameDidChange:(NSNotification *)notification;
 - (void)cellWindowDidBecomeKey:(NSNotification *)notification;
@@ -58,56 +65,36 @@
 
 @implementation BDSKComplexStringEditor
 
-- (id)initWithMacroResolver:(BDSKMacroResolver *)aMacroResolver {
-	if (self = [super initWithWindowNibName:@"ComplexStringEditor"]) {
+- (id)init {
+	if (self = [super initWithWindowNibName:[self windowNibName]]) {
 		tableView = nil;
-        macroResolver = [aMacroResolver retain];
+        formatter = nil;
 		row = -1;
 		column = -1;
-        editable = YES;
 	}
 	return self;
 }
 
-- (id)init {
-    return [self initWithMacroResolver:nil];
-}
-
 - (void)dealloc {
-    [macroResolver release];
-    [super dealloc];
+	[super dealloc];
 }
 
-- (BOOL)isEditable {
-    return editable;
+- (NSString *)windowNibName {
+    return @"ComplexStringEditor";
 }
 
-- (void)setEditable:(BOOL)flag {
-    editable = flag;
-}
-
-- (BDSKMacroResolver *)macroResolver {
-    return macroResolver;
-}
-
-- (void)setMacroResolver:(BDSKMacroResolver *)newMacroResolver {
-    if (macroResolver != newMacroResolver) {
-        [macroResolver release];
-        macroResolver = [newMacroResolver retain];
-    }
-}
-
-- (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(NSInteger)aRow column:(NSInteger)aColumn withValue:(NSString *)aString {
+- (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString formatter:(BDSKComplexStringFormatter *)aFormatter {
 	if ([self isEditing]) 
 		return NO; // we are already busy editing
     
 	tableView = [aTableView retain];
+	formatter = [aFormatter retain];
 	row = aRow;
 	column = aColumn;
 	
 	[self window]; // make sure we loaded the nib
 	
-	[tableView scrollRowToVisible:row];
+	[tableView scrollRectToVisible:[self currentCellFrame]];
 	[self setExpandedValue:aString];
 	[self cellWindowDidBecomeKey:nil]; //draw the focus ring we are covering
 	[self cellFrameDidChange:nil]; // reset the frame and show the window
@@ -185,14 +172,33 @@
 - (void)endEditingAndOrderOut {
     // we're going away now, so we can unregister for the notifications we registered for earlier
 	[self unregisterForNotifications];
-    [[tableView window] removeChildWindow:[self window]];
-    [[self window] orderOut:self];
+    [self hideWindow];
 	
 	// release the temporary objects
 	[tableView release];
 	tableView = nil; // we should set this to nil, as we use this as a flag that we are editing
+	[formatter release];
+	formatter = nil;
 	row = -1;
 	column = -1;
+}
+
+- (void)attachWindow {
+	[[tableView window] addChildWindow:[self window] ordered:NSWindowAbove];
+    [[self window] orderFront:self];
+}
+
+- (void)hideWindow {
+    [[tableView window] removeChildWindow:[self window]];
+    [[self window] orderOut:self];
+}
+
+- (id)currentCell {
+    return [[[tableView tableColumns] objectAtIndex:column] dataCellForRow:row];
+}
+
+- (NSRect)currentCellFrame {
+	return [tableView frameOfCellAtColumn:column row:row];
 }
 
 - (void)setExpandedValue:(NSString *)expandedValue {
@@ -204,9 +210,7 @@
 	[expandedValueTextField setToolTip:NSLocalizedString(@"This field contains macros and is being edited as it would appear in a BibTeX file. This is the expanded value.", @"Tool tip message")];
 }
 
-- (void)setError:(NSError *)error {
-    NSString *reason = [error localizedDescription];
-    NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Invalid BibTeX string: %@. This change will not be recorded.", @"Tool tip message"), reason];
+- (void)setErrorReason:(NSString *)reason errorMessage:(NSString *)message {
 	[expandedValueTextField setTextColor:[NSColor redColor]];
 	[expandedValueTextField setStringValue:reason];
 	[expandedValueTextField setToolTip:message]; 
@@ -218,36 +222,32 @@
 	NSRectEdge lowerEdge = [tableView isFlipped] ? NSMaxYEdge : NSMinYEdge;
 	NSRect lowerEdgeRect, ignored;
 	NSRect winFrame = [[self window] frame];
-	CGFloat margin = 4.0; // for the shadow and focus ring
-	CGFloat minWidth = 16.0; // minimal width of the window without margins, so subviews won't get shifted
+	float margin = 4.0; // for the shadow and focus ring
+	float minWidth = 16.0; // minimal width of the window without margins, so subviews won't get shifted
 	NSView *contentView = (NSView *)[[tableView enclosingScrollView] contentView] ?: (NSView *)tableView;
 	
-	NSDivideRect([tableView frameOfCellAtColumn:column row:row], &lowerEdgeRect, &ignored, 1.0, lowerEdge);
+	NSDivideRect([self currentCellFrame], &lowerEdgeRect, &ignored, 1.0, lowerEdge);
 	lowerEdgeRect = NSIntersectionRect(lowerEdgeRect, [contentView visibleRect]);
 	// see if the cell's lower edge is scrolled out of sight
 	if (NSIsEmptyRect(lowerEdgeRect)) {
-		if ([self isWindowVisible]) {
-            [[tableView window] removeChildWindow:[self window]];
-            [[self window] orderOut:self];
-        }
+		if ([self isWindowVisible] == YES) 
+			[self hideWindow];
 		return;
 	}
 	
 	lowerEdgeRect = [tableView convertRect:lowerEdgeRect toView:nil]; // takes into account isFlipped
     winFrame.origin = [[tableView window] convertBaseToScreen:lowerEdgeRect.origin];
 	winFrame.origin.y -= NSHeight(winFrame);
-	winFrame.size.width = BDSKMax(NSWidth(lowerEdgeRect), minWidth);
+	winFrame.size.width = fmaxf(NSWidth(lowerEdgeRect), minWidth);
 	winFrame = NSInsetRect(winFrame, -margin, 0.0);
 	[[self window] setFrame:winFrame display:YES];
 	
-	if ([self isWindowVisible] == NO) {
-    	[[tableView window] addChildWindow:[self window] ordered:NSWindowAbove];
-        [[self window] orderFront:self];
-    }
+	if ([self isWindowVisible] == NO) 
+		[self attachWindow];
 }
 
 - (void)cellWindowDidBecomeKey:(NSNotification *)notification {
-	[backgroundView setShowFocusRing:[self isEditable]];
+	[backgroundView setShowFocusRing:[[self currentCell] isEditable]];
 }
 
 - (void)cellWindowDidResignKey:(NSNotification *)notification {
@@ -259,7 +259,7 @@
 - (void)windowWillClose:(NSNotification *)notification {
 	// this gets called whenever an editor window closes
 	if ([self isEditing]){
-        BDSKASSERT_NOT_REACHED("macro textfield window closed while editing");
+        OBASSERT_NOT_REACHED("macro textfield window closed while editing");
 		[self endEditingAndOrderOut];
     }
 }
@@ -270,14 +270,12 @@
     [self endEditingAndOrderOut];
 }
 
-- (void)controlTextDidChange:(NSNotification *)notification {
-	NSString *string = [[[notification userInfo] objectForKey:@"NSFieldEditor"] string];
-    NSError *error = nil;
-    NSString *complexString = [NSString stringWithBibTeXString:string macroResolver:macroResolver error:&error];
-	if (complexString)
-		[self setExpandedValue:complexString];
+- (void)controlTextDidChange:(NSNotification*)notification { 
+	NSString *error = [formatter parseError];
+	if (error)
+		[self setErrorReason:error errorMessage:[NSString stringWithFormat:NSLocalizedString(@"Invalid BibTeX string: %@. This change will not be recorded.", @"Tool tip message"),error]];
 	else
-		[self setError:error];
+		[self setExpandedValue:[formatter parsedString]];
 }
 
 #pragma mark NSTableView notification handlers
@@ -288,15 +286,15 @@
 
 - (void)tableViewColumnDidMove:(NSNotification *)notification {
 	NSDictionary *userInfo = [notification userInfo];
-	NSInteger oldColumn = [[userInfo objectForKey:@"oldColumn"] intValue];
-	NSInteger newColumn = [[userInfo objectForKey:@"newColumn"] intValue];
+	int oldColumn = [[userInfo objectForKey:@"oldColumn"] intValue];
+	int newColumn = [[userInfo objectForKey:@"newColumn"] intValue];
 	if (oldColumn == column) {
 		column = newColumn;
 	} else if (oldColumn < column) {
 		if (newColumn >= column)
 			column--;
 	} else if (oldColumn > column) {
-		if (newColumn <= column)
+		if (newColumn < column)
 			column++;
 	}
 	[self cellFrameDidChange:nil];

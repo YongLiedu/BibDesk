@@ -39,114 +39,79 @@
 #import "BDSKCenterScaledImageCell.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
-#import "CIImage_BDSKExtensions.h"
 
 @implementation BDSKCenterScaledImageCell
 
 // limitation: this assumes you always want a proportionally scaled, centered image (hence the class name)
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
 {
-    if ([self image]) 
-        [self drawIcon:[self image] withFrame:cellFrame inView:controlView];
-}
-
-@end
-
-#pragma mark -
-
-@implementation NSCell (BDSKCenterScaling)
-
-- (void)drawIcon:(NSImage *)img withFrame:(NSRect)iconRect inView:(NSView *)controlView
-{    
-    NSParameterAssert(img);
+    NSImage *img = [self image];
     
-    NSRect srcRect = NSZeroRect;
-    srcRect.size = [img size];
-    
-    NSRect drawFrame = iconRect;
-    
-    /*
-     NSImage will use the largest rep if it doesn't find an exact size match; we can improve on 
-     that by choosing the next larger one with respect to our drawing rect, and scaling it down.
-     */
-    NSImageRep *rep = [img bestImageRepForSize:drawFrame.size device:nil];
-    
-    // invert a template image as needed (e.g. paperclip)
-    if ([self respondsToSelector:@selector(interiorBackgroundStyle)] && [img respondsToSelector:@selector(isTemplate)] &&
-        [self backgroundStyle] == NSBackgroundStyleDark && [img isTemplate]) {
-        CIImage *ciImage = nil;
-        if ([rep isKindOfClass:[NSBitmapImageRep class]]) {
-            ciImage = [[CIImage alloc] initWithBitmapImageRep:(NSBitmapImageRep *)rep];
-        }
-        else {
-            // draw as a bitmap at the source image resolution
-            NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL
-                                                                                  pixelsWide:[rep pixelsWide]
-                                                                                  pixelsHigh:[rep pixelsHigh]
-                                                                               bitsPerSample:8 
-                                                                             samplesPerPixel:4 
-                                                                                    hasAlpha:[rep hasAlpha] 
-                                                                                    isPlanar:NO 
-                                                                              colorSpaceName:[rep colorSpaceName] 
-                                                                                 bytesPerRow:0 
-                                                                                bitsPerPixel:0];
-            [NSGraphicsContext saveGraphicsState];
-            [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithBitmapImageRep:bitmapRep]];
-            unsigned char *bitmapData = [bitmapRep bitmapData];
-            if (bitmapData)
-                bzero(bitmapData, [bitmapRep bytesPerRow] * [bitmapRep pixelsHigh]);
-            [rep drawInRect:NSMakeRect(0, 0, [bitmapRep pixelsWide], [bitmapRep pixelsHigh])];
-            [NSGraphicsContext restoreGraphicsState];
-            ciImage = [[CIImage alloc] initWithBitmapImageRep:bitmapRep];
-            [bitmapRep release];          
-        }
-        rep = [NSCIImageRep imageRepWithCIImage:[ciImage invertedImage]];
-        [ciImage release];
-    }
-    
-    if (rep) srcRect.size = [rep size];
-    
-    CGFloat ratio = MIN(NSWidth(drawFrame) / srcRect.size.width, NSHeight(drawFrame) / srcRect.size.height);
-    drawFrame.size.width = ratio * srcRect.size.width;
-    drawFrame.size.height = ratio * srcRect.size.height;
-    
-    drawFrame = BDSKCenterRect(drawFrame, drawFrame.size, [controlView isFlipped]);
-    
-    // draw the image rep directly to avoid creating a new NSImage and adding the rep to it
-    if (rep) {
+    if (nil != img) {
+        
+        NSRect srcRect = NSZeroRect;
+        srcRect.size = [img size];
+        
+        NSRect drawFrame = [self drawingRectForBounds:cellFrame];
                 
-        CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
-        CGContextSaveGState(context);
-        CGContextClipToRect(context, NSRectToCGRect(drawFrame));
-        CGContextSetAllowsAntialiasing(context, true);
-        CGContextSetInterpolationQuality(context, kCGInterpolationHigh);
+        // NSImage will use the largest rep if it doesn't find an exact size match; we can improve on that by choosing the next larger one with respect to our drawing rect, and scaling it down.
+        NSBitmapImageRep *rep = [img bestImageRepForSize:drawFrame.size device:nil];
         
-        // draw into a new layer so we preserve the background of the tableview
-        CGContextBeginTransparencyLayer(context, NULL);
-        
-        if ([controlView isFlipped]) {
-            CGContextTranslateCTM(context, 0, NSMaxY(drawFrame));
-            CGContextScaleCTM(context, 1, -1);
-            drawFrame.origin.y = 0;
-            [rep drawInRect:drawFrame];
+        // draw the image rep directly to avoid creating a new NSImage and adding the rep to it
+        if (rep) {
+            
+            srcRect.size = [rep size];
+            float ratio = fminf(NSWidth(drawFrame) / srcRect.size.width, NSHeight(drawFrame) / srcRect.size.height);
+            drawFrame.size.width = ratio * srcRect.size.width;
+            drawFrame.size.height = ratio * srcRect.size.height;
+            
+            drawFrame = BDSKCenterRect(drawFrame, drawFrame.size, [controlView isFlipped]);
+            
+            CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
+            CGContextSaveGState(context);
+            CGContextClipToRect(context, *(CGRect *)&drawFrame);
+            CGContextSetAllowsAntialiasing(context, true);
+            CGContextSetInterpolationQuality(context, kCGInterpolationHigh);
+            
+            // draw into a new layer so we preserve the background of the tableview
+            CGContextBeginTransparencyLayer(context, NULL);
+            
+            if ([controlView isFlipped]) {
+                CGContextTranslateCTM(context, 0, NSMaxY(drawFrame));
+                CGContextScaleCTM(context, 1, -1);
+                drawFrame.origin.y = 0;
+                [rep drawInRect:drawFrame];
+            } else {
+                [rep drawInRect:drawFrame];
+            }
+            
+            CGContextEndTransparencyLayer(context);
+            CGContextRestoreGState(context);
+            
         } else {
-            [rep drawInRect:drawFrame];
+            
+            float ratio = MIN(NSWidth(drawFrame) / srcRect.size.width, NSHeight(drawFrame) / srcRect.size.height);
+            drawFrame.size.width = ratio * srcRect.size.width;
+            drawFrame.size.height = ratio * srcRect.size.height;
+            
+            drawFrame = BDSKCenterRect(drawFrame, drawFrame.size, [controlView isFlipped]);
+            
+            NSGraphicsContext *ctxt = [NSGraphicsContext currentContext];
+            [ctxt saveGraphicsState];
+            
+            // this is the critical part that NSImageCell doesn't do
+            [ctxt setImageInterpolation:NSImageInterpolationHigh];
+            
+            if ([controlView isFlipped])
+                [img drawFlippedInRect:drawFrame fromRect:srcRect operation:NSCompositeSourceOver fraction:1.0];
+            else
+                [img drawInRect:drawFrame fromRect:srcRect operation:NSCompositeSourceOver fraction:1.0];
+            
+            [ctxt restoreGraphicsState];
         }
-        
-        CGContextEndTransparencyLayer(context);
-        CGContextRestoreGState(context);
         
     } else {
-                
-        NSGraphicsContext *ctxt = [NSGraphicsContext currentContext];
-        [ctxt saveGraphicsState];
-        
-        // this is the critical part that NSImageCell doesn't do
-        [ctxt setImageInterpolation:NSImageInterpolationHigh];
-        
-        [img drawFlipped:[controlView isFlipped] inRect:drawFrame fromRect:srcRect operation:NSCompositeSourceOver fraction:1.0];
-        
-        [ctxt restoreGraphicsState];
+        [super drawInteriorWithFrame:cellFrame inView:controlView];
     }
 }
 

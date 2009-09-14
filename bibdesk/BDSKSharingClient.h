@@ -38,6 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
+
 @class BDSKSharingClientServer;
 
 @interface BDSKSharingClient : NSObject {
@@ -51,7 +52,10 @@
 - (id)initWithService:(NSNetService *)aService;
 
 - (NSData *)archivedPublications;
+- (void)setArchivedPublications:(NSData *)newArchivedPublications;
+
 - (NSData *)archivedMacros;
+- (void)setArchivedMacros:(NSData *)newArchivedMacros;
 
 - (BOOL)needsUpdate;
 - (void)setNeedsUpdate:(BOOL)flag;
@@ -63,7 +67,5 @@
 - (NSString *)name;
 
 - (void)retrievePublications;
-
-- (void)terminate;
 
 @end

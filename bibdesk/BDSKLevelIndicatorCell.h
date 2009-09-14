@@ -41,7 +41,7 @@
 
 @interface BDSKLevelIndicatorCell : NSLevelIndicatorCell
 {
-    CGFloat maxHeight;
+    float maxHeight;
 }
-- (void)setMaxHeight:(CGFloat)h;
+- (void)setMaxHeight:(float)h;
 @end

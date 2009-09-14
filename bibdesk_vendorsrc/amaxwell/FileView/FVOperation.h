@@ -38,8 +38,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-/** @file FVOperation.h  Abstract operation. */
-
 enum {
     FVOperationQueuePriorityVeryLow  = -8,
     FVOperationQueuePriorityLow      = -4,
@@ -49,146 +47,56 @@ enum {
 };
 typedef int32_t FVOperationQueuePriority;
 
-/** FVOperation abstract class.
- 
- This is an abstract class.  A subclass must override FVOperation::main to actually do work. 
- The lifecycle of an operation goes like this:
- 
- - owner does [FVOperationSubclass new]
- - owner adds operation to queue
- - queue checks for uniqueness, and adds the operation to the queue if it's not present
- - queue calls FVOperation::setQueue: with itself as the argument
- - when a task slot is free, the queue calls FVOperation::start and puts the operation in a bag of running tasks
- - when FVOperation::start finishes, the task calls FVOperation::finished
- - FVOperation::finished checks to see if the operation wasn't cancelled, and calls FVOperationQueue::finishedOperation: with self as the argument
- - the queue then releases the operation and it's gone
- 
- The queue maintains a set of active oprations so they can be cancelled even when running FVOperation::start (which could prevent callbacks from being invoked in an operation subclass). */
 @interface FVOperation : NSObject
 
-/** Designated initializer. */
+/* 
+ This is an abstract class.  A subclass must override -main to actually do work. 
+ The lifecycle of an operation goes like this:
+ 
+ - owner does [[FVOperationSubclass alloc] initWithCallbackTarget:self action:@selector(didSomething:)]
+ - owner adds operation to queue
+ - queue checks for uniqueness, and adds the operation to the queue if it's not present
+ - queue calls -[op setQueue:self]
+ - when a task slot is free, the queue calls -start and puts the operation in a bag of running tasks
+ - when -start finishes, the task calls [self finished]
+ - -finished checks to see if the operation wasn't cancelled, and calls [_queue finishedOperation:self]
+ - the queue then releases the operation and it's gone
+ 
+ The queue maintains a set of active oprations so they can be cancelled even when running -start.
+ 
+ */
 - (id)init;
 
-/** Hash value.
- 
- Subclasses should override hash and isEqual: for correct coalescing semantics.  Default implementation uses pointer equality, so returns the object's address cast to an NSUInteger as hash.
- @return The hash value. */
+// Subclasses should override hash and isEqual: for correct coalescing semantics.  Default implementation uses pointer equality.
 - (NSUInteger)hash;
-/** Equality test.
- 
- Subclasses should override hash and isEqual: for correct coalescing semantics.  Default implementation uses pointer equality.
- @return YES if instances are equal as determined by the implementor. */
 - (BOOL)isEqual:(id)object;
 
-/** Compares priority.
- 
- If receiver's priority is higher than other, returns NSOrderedDescending.  If receiver's priority is lower than other, returns NSOrderedAscending.  If same priority, returns NSOrderedSame.
- @param other The FVOperation to compare against.
- @return The result of the comparison test. */
+// If receiver's priority is higher than other, returns NSOrderedDescending.  If receiver's priority is lower than other, returns NSOrderedAscending.  If same priority, returns NSOrderedSame.
 - (NSComparisonResult)compare:(FVOperation *)other;
 
-/** Starts the operation.
- 
- If FVOperation::isConcurrent returns YES, detaches a thread to call FVOperation::main.  If not concurrent, calls FVOperation::main from whatever thread called FVOperation::start.  Raises if the operation was previously cancelled or executed. */
+// If -isConcurrent returns YES, detaches a thread to call -main.  If not concurrent, calls -main from whatever thread called -start.  Raises if the operation was previously cancelled or executed.
 - (void)start;
 
-/** Check to see if the operation is concurrent.
- 
- This method returns NO by default for consistency with NSOperation.  Subclasses may override this.
- @return YES if it detaches a new thread in FVOperation::start, NO otherwise. */
+// Returns NO by default for consistency with NSOperation.
 - (BOOL)isConcurrent;
 
-/** Notification that an operation is finished.
- 
- A subclass must call this when FVOperation::main completes in order to avoid leaking FVOperation instances in the queue. */
+// subclass must call this when main completes
 - (void)finished;
 
 //
 // subclasses must implement all of the following; do not call super
 //
-
-/** Sets the FVOperationQueue.
- 
- Required for subclassers.  Do not call super.
- @param aQueue The queue that will execute this task. */
 - (void)setQueue:(id)aQueue;
-
-/** The queue that will execute the task.
- 
- Required for subclassers.  Do not call super.
- @return An instance of FVOperationQueue or nil. */
 - (id)queue;
-
-/** Priority of this task.
- 
- Required for subclassers.  Do not call super. */
-
-/** Priority of this task.
- 
- Required for subclassers.  Do not call super. 
- @return The operation's priority. */
 - (FVOperationQueuePriority)queuePriority;
-
-/** Set priority of this task.
- 
- Required for subclassers.  Do not call super.
- @param queuePriority An integral value from the FVOperation.h::FVOperationQueuePriority enum. */
 - (void)setQueuePriority:(FVOperationQueuePriority)queuePriority;
-
-/** Cancel this task.
- 
- Required for subclassers.  Do not call super. */
 - (void)cancel;
-
-/** Cancellation status of this task.
- 
- Required for subclassers.  Do not call super.
- @return YES if FVOperation::cancel was called previously. */
 - (BOOL)isCancelled;
-
-/** Whether the task is running.
- 
- Required for subclassers.  Do not call super.
- @return YES if the task is currently executing. */
 - (BOOL)isExecuting;
-
-/** Whether the task is finished.
- 
- Required for subclassers.  Do not call super.
- @return YES if the task has finished executing. */
 - (BOOL)isFinished;
-
-/** Primary work entry point.
- 
- Required for subclassers.  Do not call super.
- The operation queue calls this in order to execute the task, if it has not previously been cancelled. */
 - (void)main;
 
-/** Change concurrency.
- 
- Required for subclassers.  Do not call super.
- This is not part of the NSOperation API, but it's useful.  Raises an exception if the operation was previously cancelled or executed.
- @param flag YES if the operation should detach its own thread to call FVOperation::main. */
+// Not part of NSOperation API.  Raises if the operation was previously cancelled or executed.
 - (void)setConcurrent:(BOOL)flag;
 
 @end
-
-/** @typedef int32_t FVOperationQueuePriority 
- Operation queue priority enum.
- */
-
-/** @var FVOperationQueuePriorityVeryLow 
- Lowest priority. 
- */
-/** @var FVOperationQueuePriorityLow 
- Low priority.
- */
-/** @var FVOperationQueuePriorityNormal 
- Normal priority.
- */
-/** @var FVOperationQueuePriorityHigh 
- High priority.
- */
-/** @var FVOperationQueuePriorityVeryHigh 
- Highest priority.
- */

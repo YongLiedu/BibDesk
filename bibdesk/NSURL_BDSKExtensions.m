@@ -40,11 +40,10 @@
 #import "CFString_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSAppleEventDescriptor_BDSKExtensions.h"
-#import <FileView/FileView.h>
+#import <FileView/FVFinderLabel.h>
 #import "NSWorkspace_BDSKExtensions.h"
 #import <SkimNotes/SkimNotes.h>
 #import "NSFileManager_BDSKExtensions.h"
-#import "NSAttributedString_BDSKExtensions.h"
 
 @implementation NSURL (BDSKExtensions)
 
@@ -312,11 +311,11 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
 
 #pragma mark Metadata
 
-- (NSInteger)finderLabel{
+- (int)finderLabel{
     return [FVFinderLabel finderLabelForURL:self];
 }
 
-- (void)setFinderLabel:(NSInteger)label{
+- (void)setFinderLabel:(int)label{
     if (label < 0 || label > 7) label = 0;
     [FVFinderLabel setFinderLabel:label forURL:self];
 }
@@ -422,10 +421,10 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
         if (value = [note objectForKey:SKNPDFAnnotationBoundsKey]) {
             NSRect nsBounds = NSRectFromString(value);
             Rect qdBounds;
-            qdBounds.left = BDSKRound(NSMinX(nsBounds));
-            qdBounds.bottom = BDSKRound(NSMinY(nsBounds));
-            qdBounds.right = BDSKRound(NSMaxX(nsBounds));
-            qdBounds.top = BDSKRound(NSMaxY(nsBounds));
+            qdBounds.left = round(NSMinX(nsBounds));
+            qdBounds.bottom = round(NSMinY(nsBounds));
+            qdBounds.right = round(NSMaxX(nsBounds));
+            qdBounds.top = round(NSMaxY(nsBounds));
             [note setValue:[NSData dataWithBytes:&qdBounds length:sizeof(Rect)] forKey:SKNPDFAnnotationBoundsKey];
         }
         if (value = [note objectForKey:SKNPDFAnnotationPageIndexKey]) {
@@ -445,15 +444,15 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
         if (value = [note objectForKey:SKNPDFAnnotationStartPointKey]) {
             NSPoint nsPoint = NSPointFromString(value);
             Point qdPoint;
-            qdPoint.h = BDSKRound(nsPoint.x);
-            qdPoint.v = BDSKRound(nsPoint.y);
+            qdPoint.h = round(nsPoint.x);
+            qdPoint.v = round(nsPoint.y);
             [note setValue:[NSData dataWithBytes:&qdPoint length:sizeof(Point)] forKey:SKNPDFAnnotationStartPointKey];
         }
         if (value = [note objectForKey:SKNPDFAnnotationEndPointKey]) {
             NSPoint nsPoint = NSPointFromString(value);
             Point qdPoint;
-            qdPoint.h = BDSKRound(nsPoint.x);
-            qdPoint.v = BDSKRound(nsPoint.y);
+            qdPoint.h = round(nsPoint.x);
+            qdPoint.v = round(nsPoint.y);
             [note setValue:[NSData dataWithBytes:&qdPoint length:sizeof(Point)] forKey:SKNPDFAnnotationEndPointKey];
         }
         if (value = [note objectForKey:SKNPDFAnnotationStartLineStyleKey]) {
@@ -507,8 +506,8 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
             while (pointString = [pointEnum nextObject]) {
                 NSPoint nsPoint = NSPointFromString(pointString);
                 Point qdPoint;
-                qdPoint.h = BDSKRound(nsPoint.x);
-                qdPoint.v = BDSKRound(nsPoint.y);
+                qdPoint.h = round(nsPoint.x);
+                qdPoint.v = round(nsPoint.y);
                 [points addObject:[NSData dataWithBytes:&qdPoint length:sizeof(Point)]];
                 if ([points count] == 4) {
                     [pathList addObject:points];
@@ -529,8 +528,8 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
                 while (pointString = [pointEnum nextObject]) {
                     NSPoint nsPoint = NSPointFromString(pointString);
                     Point qdPoint;
-                    qdPoint.h = BDSKRound(nsPoint.x);
-                    qdPoint.v = BDSKRound(nsPoint.y);
+                    qdPoint.h = round(nsPoint.x);
+                    qdPoint.v = round(nsPoint.y);
                     [points addObject:[NSData dataWithBytes:&qdPoint length:sizeof(Point)]];
                 }
                 [pathList addObject:points];

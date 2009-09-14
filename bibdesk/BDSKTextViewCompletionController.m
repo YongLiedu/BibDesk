@@ -97,7 +97,7 @@ static id sharedController = nil;
 
 - (void)tableViewSelectionDidChange:(NSNotification *)notification;
 {  
-    NSInteger row = [tableView selectedRow];
+    int row = [tableView selectedRow];
     if(row != -1){
         NSString *string = [completions objectAtIndex:row];
         
@@ -125,20 +125,12 @@ static id sharedController = nil;
 
 - (void)moveUp:(id)sender {
     movement = NSUpTextMovement;
-    NSInteger row = [tableView selectedRow] - 1;
-    if (row >= 0 && [tableView numberOfRows] > 0) {
-        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-        [tableView scrollRowToVisible:row];
-    }
+    [tableView moveUp:nil];
 }
 
 - (void)moveDown:(id)sender {
     movement = NSDownTextMovement;
-    NSInteger row = [tableView selectedRow] + 1;
-    if (row < [tableView numberOfRows]) {
-        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-        [tableView scrollRowToVisible:row];
-    }
+    [tableView moveDown:nil];
 }
 
 - (void)insertTab:(id)sender {
@@ -169,7 +161,7 @@ static id sharedController = nil;
     [self displayCompletions:array indexOfSelectedItem:-1 forPartialWordRange:partialWordRange originalString:origString atPoint:point forTextView:tv];
 }
 
-- (void)displayCompletions:(NSArray *)array indexOfSelectedItem:(NSInteger)indexOfSelectedItem forPartialWordRange:(NSRange)partialWordRange originalString:(NSString *)origString atPoint:(NSPoint)point forTextView:(NSTextView *)tv;
+- (void)displayCompletions:(NSArray *)array indexOfSelectedItem:(int)indexOfSelectedItem forPartialWordRange:(NSRange)partialWordRange originalString:(NSString *)origString atPoint:(NSPoint)point forTextView:(NSTextView *)tv;
 {
     // do nothing; displaying an empty window can lead to oddities when typing, since we get keystrokes as well as the editor
     if([array count] == 0 || NSEqualPoints(point, NSZeroPoint))
@@ -178,7 +170,7 @@ static id sharedController = nil;
     // don't automatically insert when updating if we're not supposed to insert now
     shouldInsert = (indexOfSelectedItem >= 0);
     
-    NSParameterAssert(indexOfSelectedItem == 0 || indexOfSelectedItem < (NSInteger)[array count]); // need a cast here or the assertion fails when indexOfSelectedItem == -1
+    NSParameterAssert(indexOfSelectedItem == 0 || indexOfSelectedItem < (int)[array count]); // need a cast here or the assertion fails when indexOfSelectedItem == -1
     NSParameterAssert(tv != nil);
     NSParameterAssert(origString != nil);
 	
@@ -218,8 +210,8 @@ static id sharedController = nil;
 
 - (void)endDisplayAndComplete:(BOOL)complete;
 {
-	BOOL shouldComplete = (complete && [tableView selectedRow] >= 0);
-    if(shouldComplete || movement == NSCancelTextMovement){  
+	BOOL shouldComplete = (complete == YES && [tableView selectedRow] >= 0);
+    if(shouldComplete == YES || movement == NSCancelTextMovement){  
         // first revert to the original state, so undo will register the full change
         // if we do this when shouldComplete == NO, it restores the original string and effectively prevents modifying the text (i.e. all non-completable text is deleted when you tab out)
         [[textView undoManager] disableUndoRegistration];
@@ -252,20 +244,20 @@ static id sharedController = nil;
 
 #pragma mark table datasource
 
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)column row:(NSInteger)row { return [completions objectAtIndex:row]; }
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)column row:(int)row { return [completions objectAtIndex:row]; }
 
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)tv { return [completions count]; }
+- (int)numberOfRowsInTableView:(NSTableView *)tv { return [completions count]; }
 
 @end
 
 @implementation BDSKTextViewCompletionController (Private)
 
 // constants for determining the window height, which we adjust based on parent window location and screen size
-static NSInteger BDSKCompletionMaxWidth = 350;
-static NSInteger BDSKCompletionMaxHeight = 200;
-static NSInteger BDSKCompletionRowHeight = 17;
-static NSInteger BDSKCompletionMinWidth = 50;
-static NSInteger BDSKCompletionMinHeight = 20;
+static int BDSKCompletionMaxWidth = 350;
+static int BDSKCompletionMaxHeight = 200;
+static int BDSKCompletionRowHeight = 17;
+static int BDSKCompletionMinWidth = 50;
+static int BDSKCompletionMinHeight = 20;
 
 
 - (void)setupWindow;
@@ -307,7 +299,7 @@ static NSInteger BDSKCompletionMinHeight = 20;
 // At present, reselecting on a delete keeps you from typing anything
 - (void)updateCompletionsAndInsert:(BOOL)insert{
 
-    NSInteger idx = -1;
+    int idx = -1;
     NSArray *newCompletions = nil;
     // may return { NSNotFound, 0 }
     NSRange charRange = [textView rangeForUserCompletion];
@@ -342,7 +334,7 @@ static NSInteger BDSKCompletionMinHeight = 20;
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:idx] byExtendingSelection:NO];
         
         // originalString changes as we update; the range can be incorrect if we have an accent character being replaced
-        BDSKPRECONDITION([[textView string] length] >= NSMaxRange(charRange));
+        OBPRECONDITION([[textView string] length] >= NSMaxRange(charRange));
         [self setOriginalString:([[textView string] length] >= NSMaxRange(charRange) ? [[textView string] substringWithRange:charRange] : nil)];
         
     }
@@ -353,13 +345,13 @@ static NSInteger BDSKCompletionMinHeight = 20;
     NSRect screenFrame = [[NSScreen mainScreen] visibleFrame];
     
     // get the remaining space on the screen
-    CGFloat hSize = NSMaxX(screenFrame) - BDSKCompletionMaxWidth - topLeftPoint.x;
+    float hSize = NSMaxX(screenFrame) - BDSKCompletionMaxWidth - topLeftPoint.x;
     hSize = hSize <= 0.0f ? BDSKCompletionMaxWidth + hSize : BDSKCompletionMaxWidth;
-    hSize = BDSKFloor(BDSKMax(hSize, BDSKCompletionMinWidth));
+    hSize = floorf(fmaxf(hSize, BDSKCompletionMinWidth));
     
-    CGFloat vSize = topLeftPoint.y - BDSKCompletionMaxHeight;
+    float vSize = topLeftPoint.y - BDSKCompletionMaxHeight;
     vSize = vSize <= 0.0f ? BDSKCompletionMaxHeight + vSize : BDSKCompletionMaxHeight;
-    vSize = BDSKFloor(BDSKMax(vSize, BDSKCompletionMinHeight));
+    vSize = floorf(fmaxf(vSize, BDSKCompletionMinHeight));
     
     NSSize adjustedSize = [self windowContentSize];
     if(adjustedSize.width > hSize)
@@ -372,18 +364,18 @@ static NSInteger BDSKCompletionMinHeight = 20;
 
 - (NSSize)windowContentSize
 {
-	CGFloat hSize = 0.0f;
-    NSUInteger count = [tableView numberOfRows];
+	float hSize = 0.0f;
+    unsigned count = [tableView numberOfRows];
 	NSCell *cell = [[[tableView tableColumns] objectAtIndex:0] dataCell];
 	while(count--){
 		[cell setStringValue:[completions objectAtIndex:count]];
-		hSize = BDSKMax(hSize, [cell cellSize].width);
+		hSize = fmaxf(hSize, [cell cellSize].width);
 	}
 	hSize += [NSScroller scrollerWidth] + [tableView intercellSpacing].width;
     
-	CGFloat vSize = NSHeight(NSUnionRect([tableView rectOfRow:0], [tableView rectOfRow:[tableView numberOfRows] - 1]));
+	float vSize = NSHeight(NSUnionRect([tableView rectOfRow:0], [tableView rectOfRow:[tableView numberOfRows] - 1]));
 	
-	return NSMakeSize(BDSKCeil(hSize), BDSKCeil(vSize));
+	return NSMakeSize(ceilf(hSize), ceilf(vSize));
 }
 
 
@@ -452,7 +444,7 @@ static NSInteger BDSKCompletionMinHeight = 20;
 
 - (BOOL)hasShadow { return YES; }
 
-- (CGFloat)alphaValue { return 0.9; }
+- (float)alphaValue { return 0.9; }
 
 // explicitly note that we want these to return NO, even though that's the default for windows created in code
 - (BOOL)canBecomeKeyWindow { return NO; }

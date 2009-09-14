@@ -43,12 +43,12 @@
 
 @interface BDSKCollapsibleView : BDSKContainerView {
 	NSSize minSize;
-	NSInteger collapseEdges;
+	int collapseEdges;
 }
 
 - (NSSize)minSize;
 - (void)setMinSize:(NSSize)size;
-- (NSInteger)collapseEdges;
-- (void)setCollapseEdges:(NSInteger)mask;
+- (int)collapseEdges;
+- (void)setCollapseEdges:(int)mask;
 
 @end

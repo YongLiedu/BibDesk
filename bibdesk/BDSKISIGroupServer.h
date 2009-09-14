@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 07/10/07.
 /*
- This software is Copyright (c) 2007-2009
+ This software is Copyright (c) ,2007,2008
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -45,16 +45,15 @@ typedef struct _BDSKISIGroupFlags {
     volatile int32_t failedDownload;
 } BDSKISIGroupFlags;
 
-@class BDSKReadWriteLock;
-
-@interface BDSKISIGroupServer : BDSKAsynchronousDOServer 
+@interface BDSKISIGroupServer : BDSKAsynchronousDOServer <BDSKSearchGroupServer> 
 {
     BDSKSearchGroup *group;
     BDSKServerInfo *serverInfo;
-    volatile int32_t availableResults;
-    volatile int32_t fetchedResults;
+    int availableResults;
+    int fetchedResults;
     BDSKISIGroupFlags flags;
-    BDSKReadWriteLock *infoLock;
+    pthread_rwlock_t infolock;
+    NSLock *resultCounterLock;
 }
 
 @end

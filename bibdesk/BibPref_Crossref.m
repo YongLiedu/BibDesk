@@ -37,98 +37,83 @@
  */
 
 #import "BibPref_Crossref.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKTypeNameFormatter.h"
 #import "BDSKStringConstants.h"
-
-static char BDSKBibPrefCrossrefDefaultsObservationContext;
-
-
-@interface BibPref_Crossref (Private)
-- (void)updateDuplicateBooktitleUI;
-- (void)updateDuplicateTypes;
-@end
-
 
 @implementation BibPref_Crossref
 
 - (void)awakeFromNib{
+    [super awakeFromNib];
+	
     typesArray = [[NSMutableArray alloc] initWithCapacity:4];
-	[typesArray setArray:[sud arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
+	[typesArray setArray:[defaults arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
     BDSKTypeNameFormatter *typeNameFormatter = [[BDSKTypeNameFormatter alloc] init];
     [[[[tableView tableColumns] objectAtIndex:0] dataCell] setFormatter:typeNameFormatter];
     [typeNameFormatter release];
     
-    [warnOnEditInheritedCheckButton setState:[sud boolForKey:BDSKWarnOnEditInheritedKey] ? NSOnState : NSOffState];
-    [autoSortCheckButton setState:[sud boolForKey:BDSKAutoSortForCrossrefsKey] ? NSOnState : NSOffState];
-    
-    [duplicateBooktitleCheckButton setState:[sud boolForKey:BDSKDuplicateBooktitleKey] ? NSOnState : NSOffState];
-    [forceDuplicateBooktitleCheckButton setState:[sud boolForKey:BDSKForceDuplicateBooktitleKey] ? NSOnState : NSOffState];
-    
-    [self updateDuplicateBooktitleUI];
-    [self updateDuplicateTypes];
-    
-    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnEditInheritedKey] options:0 context:&BDSKBibPrefCrossrefDefaultsObservationContext];
-}
-
-- (void)defaultsDidRevert {
-    // reset UI, but only if we loaded the nib
-    if ([self isWindowLoaded]) {
-        [typesArray setArray:[sud arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
-        
-        //[warnOnEditInheritedCheckButton setState:[sud boolForKey:BDSKWarnOnEditInheritedKey] ? NSOnState : NSOffState]; this should be done by KVO
-        [autoSortCheckButton setState:[sud boolForKey:BDSKAutoSortForCrossrefsKey] ? NSOnState : NSOffState];
-        
-        [duplicateBooktitleCheckButton setState:[sud boolForKey:BDSKDuplicateBooktitleKey] ? NSOnState : NSOffState];
-        [forceDuplicateBooktitleCheckButton setState:[sud boolForKey:BDSKForceDuplicateBooktitleKey] ? NSOnState : NSOffState];
-        
-        [self updateDuplicateBooktitleUI];
-        [self updateDuplicateTypes];
-    }
+    [OFPreference addObserver:self selector:@selector(handleEditInheritedChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnEditInheritedKey]];
 }
 
 - (void)dealloc{
-    @try { [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnEditInheritedKey]]; }
-    @catch (id e) {}
+    [OFPreference removeObserver:self forPreference:nil];
     [typesArray release];
     [super dealloc];
 }
 
 - (void)updateDuplicateTypes {
-    [sud setObject:typesArray forKey:BDSKTypesForDuplicateBooktitleKey];
+    [defaults setObject:typesArray forKey:BDSKTypesForDuplicateBooktitleKey];
 	[tableView reloadData];
 }
 
 - (void)updateDuplicateBooktitleUI{
-	BOOL duplicate = [sud boolForKey:BDSKDuplicateBooktitleKey];
+	BOOL duplicate = [defaults boolForKey:BDSKDuplicateBooktitleKey];
+    [duplicateBooktitleCheckButton setState:duplicate ? NSOnState : NSOffState];
+    [forceDuplicateBooktitleCheckButton setState:[defaults boolForKey:BDSKForceDuplicateBooktitleKey] ? NSOnState : NSOffState];
     [forceDuplicateBooktitleCheckButton setEnabled:duplicate];
 	[tableView setEnabled:duplicate];
 	[addTypeButton setEnabled:duplicate];
-	[deleteTypeButton setEnabled:duplicate && [tableView numberOfSelectedRows] > 0];
+	[deleteTypeButton setEnabled:duplicate];
+}
+
+- (void)updateUI{
+    [self updateDuplicateBooktitleUI];
+    [self updateDuplicateTypes];
+    [warnOnEditInheritedCheckButton setState:[defaults boolForKey:BDSKWarnOnEditInheritedKey] ? NSOnState : NSOffState];
+    [autoSortCheckButton setState:[defaults boolForKey:BDSKAutoSortForCrossrefsKey] ? NSOnState : NSOffState];
+}
+
+- (void)handleEditInheritedChanged:(NSNotification *)notification {
+    [warnOnEditInheritedCheckButton setState:[defaults boolForKey:BDSKWarnOnEditInheritedKey] ? NSOnState : NSOffState];
 }
 
 - (IBAction)changeAutoSort:(id)sender{
-    [sud setBool:([sender state] == NSOnState) forKey:BDSKAutoSortForCrossrefsKey];
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKAutoSortForCrossrefsKey];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeWarnOnEditInherited:(id)sender{
-    [sud setBool:([sender state] == NSOnState) forKey:BDSKWarnOnEditInheritedKey];
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnEditInheritedKey];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeDuplicateBooktitle:(id)sender{
     BOOL duplicate = [sender state] == NSOnState;
-    [sud setBool:duplicate forKey:BDSKDuplicateBooktitleKey];
+    [defaults setBool:duplicate forKey:BDSKDuplicateBooktitleKey];
     [self updateDuplicateBooktitleUI];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeForceDuplicateBooktitle:(id)sender{
-    [sud setBool:([sender state] == NSOnState) forKey:BDSKForceDuplicateBooktitleKey];
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKForceDuplicateBooktitleKey];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)deleteType:(id)sender{
-    NSInteger row = [tableView selectedRow];
+    int row = [tableView selectedRow];
     if(row != -1){
         if ([tableView editedRow] != -1)
-            [[[self view] window] makeFirstResponder:tableView];
+            [[controlBox window] makeFirstResponder:tableView];
         [typesArray removeObjectAtIndex:row];
         [self updateDuplicateTypes];
     }
@@ -137,7 +122,7 @@ static char BDSKBibPrefCrossrefDefaultsObservationContext;
 - (IBAction)addType:(id)sender{
     NSString *newType = @"type"; // do not localize
     [typesArray addObject:newType];
-    NSInteger row = [typesArray count] - 1;
+    int row = [typesArray count] - 1;
     [tableView reloadData];
     [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     [tableView editColumn:0 row:row withEvent:nil select:YES];
@@ -145,15 +130,15 @@ static char BDSKBibPrefCrossrefDefaultsObservationContext;
 
 #pragma mark TableView datasource methods
 
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)tv{
+- (int)numberOfRowsInTableView:(NSTableView *)tv{
     return [typesArray count];
 }
 
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     return [typesArray objectAtIndex:row];
 }
 
-- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     if([object isEqualToString:@""])
         [typesArray removeObjectAtIndex:row];
     else
@@ -161,42 +146,25 @@ static char BDSKBibPrefCrossrefDefaultsObservationContext;
     [self updateDuplicateTypes];
 }
 
-- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
+- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
 	return [tv isEnabled];
 }
 
-- (BOOL)tableView:(NSTableView *)tv shouldSelectRow:(NSInteger)row{
+- (BOOL)tableView:(NSTableView *)tv shouldSelectRow:(int)row{
 	return [tv isEnabled];
-}
-
-- (void)tableViewSelectionDidChange:(NSNotification *)aNote{
-    [self updateDuplicateBooktitleUI];
-}
-
-#pragma mark KVO
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == &BDSKBibPrefCrossrefDefaultsObservationContext) {
-        NSString *key = [keyPath substringFromIndex:7];
-        if ([key isEqualToString:BDSKWarnOnEditInheritedKey]) {
-            [warnOnEditInheritedCheckButton setState:[sud boolForKey:BDSKWarnOnEditInheritedKey] ? NSOnState : NSOffState];
-        }
-    } else {
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-    }
 }
 
 @end
 
-@implementation BDSKDisablingTableView
+@implementation NSTableView (BDSKDisablingTableView)
 
 - (void)setEnabled:(BOOL)flag{
 	[super setEnabled:flag];
-	if (flag == NO) [self deselectAll:nil];
+	if (!flag) [self deselectAll:nil];
 }
 
 - (BOOL)acceptsFirstResponder{
-	return [self isEnabled] && [super acceptsFirstResponder];
+	return [self isEnabled];
 }
 
 @end

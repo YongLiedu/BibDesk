@@ -33,48 +33,14 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/*
- Omni Source License 2007
-
- OPEN PERMISSION TO USE AND REPRODUCE OMNI SOURCE CODE SOFTWARE
-
- Omni Source Code software is available from The Omni Group on their 
- web site at http://www.omnigroup.com/www.omnigroup.com. 
-
- Permission is hereby granted, free of charge, to any person obtaining 
- a copy of this software and associated documentation files (the 
- "Software"), to deal in the Software without restriction, including 
- without limitation the rights to use, copy, modify, merge, publish, 
- distribute, sublicense, and/or sell copies of the Software, and to 
- permit persons to whom the Software is furnished to do so, subject to 
- the following conditions:
-
- Any original copyright notices and this permission notice shall be 
- included in all copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, 
- EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
- MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
- IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
- CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
- TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
- SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 
 #import <Foundation/Foundation.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import <CoreFoundation/CoreFoundation.h>
+#import "NSCharacterSet_BDSKExtensions.h"
+#import "CFString_BDSKExtensions.h"
 
 @interface NSString (BDSKExtensions)
-
-+ (BOOL)isEmptyString:(NSString *)string;
-
-+ (NSString *)horizontalEllipsisString; // '...'
-+ (NSString *)emdashString; // '---'
-+ (NSString *)endashString; // '--'
-+ (NSString *)commandKeyIndicatorString;
-+ (NSString *)controlKeyIndicatorString;
-+ (NSString *)alternateKeyIndicatorString;
-+ (NSString *)shiftKeyIndicatorString;
 
 /*!
     @method     hexStringForCharacter:
@@ -92,7 +58,7 @@
     @param      rating (description)
     @result     (description)
 */
-+ (NSString *)ratingStringWithInteger:(NSInteger)rating;
++ (NSString *)ratingStringWithInteger:(int)rating;
 
 /*!
  @method     stringWithBool:
@@ -179,22 +145,6 @@
 */
 - (NSString *)stringByConvertingDoubleHyphenToEndash;
 
-/*!
-    @method     stringByConvertingTripleHyphenToEmdash
-    @abstract   Converts "---" to em dash.  See http://en.wikipedia.org/wiki/Dash for info on dashes.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (NSString *)stringByConvertingTripleHyphenToEmdash;
-
-/*!
-    @method     stringByConvertingHyphensToDashes
-    @abstract   Converts "---" to em dash and "--" to en dash.  See http://en.wikipedia.org/wiki/Dash for info on dashes.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (NSString *)stringByConvertingHyphensToDashes;
-
     /*!
     @method     stringByRemovingCurlyBraces
      @abstract   Removes curly braces from a string
@@ -245,9 +195,9 @@ An inline buffer is used for speed in accessing each character.
 @param      range The range to search for matching braces, the first character should be the left brace.
 @result     The index of the matching brace character.
 */
-- (NSUInteger)indexOfRightBraceMatchingLeftBraceInRange:(NSRange)range;
+- (unsigned)indexOfRightBraceMatchingLeftBraceInRange:(NSRange)range;
 
-- (NSUInteger)indexOfRightBraceMatchingLeftBraceAtIndex:(NSUInteger)startLoc;
+- (unsigned)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned int)startLoc;
     
     /*!
     @method     isStringTeXQuotingBalancedWithBraces:connected:
@@ -393,7 +343,7 @@ An inline buffer is used for speed in accessing each character.
  */
 - (NSCellStateValue)triStateValue;
 
-- (NSString *)acronymValueIgnoringWordLength:(NSUInteger)ignoreLength;
+- (NSString *)acronymValueIgnoringWordLength:(unsigned int)ignoreLength;
 
 #pragma mark -
 
@@ -422,6 +372,17 @@ An inline buffer is used for speed in accessing each character.
 - (NSArray *)componentsSeparatedByFieldSeparators;
 
 /*!
+    @method     containsString:options:range:
+    @abstract   Determine whether a string contains searchString in aRange using mask as search options.
+    @discussion (comprehensive description)
+    @param      searchString (description)
+    @param      mask (description)
+    @param      aRange (description)
+    @result     (description)
+*/
+- (BOOL)containsString:(NSString *)searchString options:(unsigned int)mask range:(NSRange)aRange;
+
+/*!
 @method     containsWord:
 @abstract   Determine whether a string contains the argument aWord; if it contains aWord as a substring, it then tests to see if it is bounded by null, punctuation, or whitespace.
 @discussion (comprehensive description)
@@ -430,7 +391,23 @@ An inline buffer is used for speed in accessing each character.
 */
 - (BOOL)containsWord:(NSString *)aWord;
 
-- (NSString *)stringByCollapsingAndTrimmingCharactersInSet:(NSCharacterSet *)charSet;
+/*!
+@method     fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace
+@abstract   Copy of one of the OmniFoundation methods, with CF calls to create and append to the mutable string instead of Cocoa methods.
+            Faster and more memory efficient than the OF equivalent.
+@discussion (comprehensive description)
+@result     (description)
+*/
+- (NSString *)fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
+
+/*!
+@method     fastStringByCollapsingWhitespaceAndNewlinesAndRemovingSurroundingWhitespaceAndNewlines
+@abstract   Similar to fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace, but treats newlines the same as whitespace characters.
+            All newline characters will be replaced by a single whitespace. 
+@discussion (comprehensive description)
+@result     (description)
+*/
+- (NSString *)fastStringByCollapsingWhitespaceAndNewlinesAndRemovingSurroundingWhitespaceAndNewlines;
 
 - (BOOL)hasCaseInsensitivePrefix:(NSString *)prefix;
 
@@ -469,33 +446,10 @@ An inline buffer is used for speed in accessing each character.
 */
 - (NSString *)titlecaseString;
 
-- (NSString *)stringByDeletingCharactersInSet:(NSCharacterSet *)removeSet;
-- (NSString *)stringByReplacingCharactersInSet:(NSCharacterSet *)set withString:(NSString *)replaceString;
-
-- (NSString *)stringByRemovingWhitespace;
-- (NSString *)stringByRemovingReturns;
-
-- (NSString *)stringByRemovingString:(NSString *)removeString;
-
-- (NSString *)stringByRemovingPrefix:(NSString *)prefix;
-- (NSString *)stringByRemovingSuffix:(NSString *)suffix;
-
-- (NSString *)stringByRemovingSurroundingWhitespace;
-- (NSString *)stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
-- (NSString *)stringByRemovingSurroundingWhitespaceAndNewlines;
-
-- (NSString *)fullyEncodeAsIURI;
-
-+ (NSString *)pathSeparator;
-- (NSString *)commonRootPathOfFile:(NSString *)filename;
-- (NSString *)relativePathFromPath:(NSString *)basePath;
-- (NSString *)stringByNormalizingPath;
-
 #pragma mark HTML/XML
 
 - (NSString *)stringByConvertingHTMLLineBreaks;
 - (NSString *)stringByEscapingBasicXMLEntitiesUsingUTF8;
-- (NSString *)htmlString;
 - (NSString *)xmlString;
 
 - (NSString *)csvString;
@@ -525,18 +479,11 @@ An inline buffer is used for speed in accessing each character.
 - (NSString *)stringByAddingPercentEscapes;
 - (NSString *)stringByReplacingPercentEscapes;
 
-- (unichar)firstCharacter;
-- (unichar)lastCharacter;
-- (NSString *)lowercaseFirst;
-- (NSString *)uppercaseFirst;
-
 @end
 
 @interface NSMutableString (BDSKExtensions)
 
 - (BOOL)isMutableString;
 - (void)deleteCharactersInCharacterSet:(NSCharacterSet *)characterSet;
-- (void)replaceOccurrencesOfCharactersInSet:(NSCharacterSet *)set withString:(NSString *)replaceString;
-- (void)appendStrings:(NSString *)first, ...;
 
 @end

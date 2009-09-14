@@ -594,7 +594,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			</element>
 			<element type="group"
 				description="Groups in the document">
-				<cocoa key="scriptingGroups"/>
+				<cocoa key="groups"/>
 			</element>
 			<element type="library group"
 				description="The library group in the document">
@@ -802,7 +802,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <cocoa key="annotation"/>
             </property>  
             <property name="BibTeX string" code="BTeX" type="text"
-                description="BibTeX string for publication. Should be read-only.">
+                description="String for BibTeX entry. Can be set only at or immediately after initialization.">
                 <cocoa key="bibTeXString"/>
             </property>
             <property name="RIS string" code="RISs" type="text" access="r"

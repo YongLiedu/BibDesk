@@ -37,86 +37,30 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <Quartz/Quartz.h>
 
 @class FVScaledImageView, QTMovieView, PDFView, WebView;
-/** FVPreviewer displays and manages a single-window preview.
- 
- Quick Look is one of the great new features in Mac OS X Leopard.  Unfortunately, it doesn't allow copy-paste from text windows (including PDF).  While understandable in some respects, it's a serious limitation.  FVPreviewer uses Quick Look as a fallback on 10.5, and uses a pseudo-Quick Look the rest of the time (which allows copy-paste).  The list of supported types is essentially the union of all types supported by FVIcon and all types supported by Quick Look.
- 
- Note that using FVPreviewer implies some risk due to using qlmanage to display the previewer window, also: http://lists.apple.com/archives/quicklook-dev/2008/Jun/msg00020.html gives some reasons for not doing this.  In the absence of a real API, it's presently the best workaround, since I do not consider linking against a private framework an acceptable alternative. 
- 
- Note for 10.6: now that the Quick Look panel has a real API, qlmanage should only be used on 10.5.  Messing with the responder chain in FVPreviewer was too problematic to use it for control of the QLPreviewPanel, and the delegate/datasource implementation was much better suited to FileView itself.  Hence, FVPreviewer now has the role of a fallback viewer only.
- 
- */
+
 @interface FVPreviewer : NSWindowController {
-@private;
-    IBOutlet NSTabView         *contentView;
-    IBOutlet NSImageView       *animationView;
     IBOutlet QTMovieView       *movieView;
     IBOutlet PDFView           *pdfView;
+    IBOutlet NSImageView       *imageView;
     IBOutlet NSScrollView      *textView;
     IBOutlet WebView           *webView;
-    IBOutlet FVScaledImageView *imageView;
-    IBOutlet NSButton          *fullScreenButton;
+    IBOutlet FVScaledImageView *fvImageView;
     NSProgressIndicator        *spinner;
     id                         webviewContextMenuDelegate;
-    NSRect                     previousIconFrame;
-    BOOL                       windowLoaded;
+    
     NSTask                     *qlTask;
 }
 
-/** Shared instance.
- 
- @warning FVPreviewer may only be used on the main thread, due to usage of various Cocoa views. */
-+ (FVPreviewer *)sharedPreviewer;
+// this uses Quick Look as a fallback on 10.5, and uses our pseudo-Quick Look the rest of the time (which allows copy-paste)
++ (void)previewURL:(NSURL *)absoluteURL;
 
-/** Determine if Quick Look will/should be used.
- 
- Currently returns NO for non-file: URLs, and documents that can be loaded in PDFView or NSTextView, since those views allow copying whereas Quick Look's raster preview does not.  Returns YES for all other types.  Use this in a controller to determine if FVPreviewer or QLPreviewPanel should be used (on 10.4 and 10.5, FVPreviewer should always be used).  FVPreviewer will still function on 10.6, as well, regardless of what this method returns.
- 
- @return YES if FVPreviewer would use qlmanage for previewing. */
-+ (BOOL)useQuickLookForURL:(NSURL *)aURL;
+// on 10.5, this uses Quick Look unconditionally to preview all items, so you get the cool slideshow features (but no copy-paste)
+// on 10.4, it just previews the first URL in the list
+// non file: URLs are ignored in either case
++ (void)previewFileURLs:(NSArray *)absoluteURLs;
 
-/** Display a preview for a single URL.
- @deprecated Clients should use FVPreviewer::previewURL:forIconInRect: instead, passing NSZeroRect for @a screenRect.
- @param absoluteURL Any URL that can be displayed (see FVPreviewer class notes). */
-- (void)previewURL:(NSURL *)absoluteURL DEPRECATED_ATTRIBUTE;
-
-/** Display a preview of multiple URLs.
- 
- On 10.5, this uses Quick Look unconditionally to preview all items, so you get the cool slideshow features (but no copy-paste).  On 10.4, it just previews the first URL in the list.
- @param absoluteURLs A list of URLs to display.  Non-file: URLs are ignored. */
-- (void)previewFileURLs:(NSArray *)absoluteURLs;
-
-/** Test to see if the previewer is active.
- @return YES if QL preview is on screen or the custom preview window is showing. */
-- (BOOL)isPreviewing;
-
-/** Override of FileView::previewAction:
- This is implemented to send FVPreviewer::stopPreviewing: if the previewer window is the first responder.  You should never call this method directly. */
-- (void)previewAction:(id)sender;
-
-/** Close the previewer window.
- You may need to send this manually if the Quick Look preview is showing (i.e. FVPreviewer::isPreviewing returns YES). */
-- (void)stopPreviewing;
-
-/** Set a WebView contextual menu delegate.
- Delegate methods for the WebView context menu will be forwarded to this object, which may be useful for e.g. custom downloading. 
- @param anObject Not retained. */
-- (void)setWebViewContextMenuDelegate:(id)anObject;
-
-/** Primary API for displaying the preview window.
- 
- This is the primary interface for previewing a single URL.  It correctly (FSVO correctly) handles transitions between icon rects and view animations.  It also chooses the appropriate view for the given URL.
- @param absoluteURL Any URL that can be displayed (see FVPreviewer class notes).
- @param screenRect The rect of the icon to display, in screen coordinates.  Pass NSZeroRect to use the center of the main screen. */
-- (void)previewURL:(NSURL *)absoluteURL forIconInRect:(NSRect)screenRect;
-
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
-/** For Interface Builder only.
- @warning Do not call directly. */
-- (void)toggleFullscreen:(id)sender;
-#endif
-
++ (BOOL)isPreviewing;
++ (void)setWebViewContextMenuDelegate:(id)anObject;
 @end

@@ -38,17 +38,17 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BibDocument, BibItem, BDSKErrorObject, BDSKErrorManager, BDSKErrorEditor, BDSKFilteringArrayController, BDSKTableView;
+@class BibDocument, BibItem, BDSKErrorObject, BDSKErrorManager, BDSKErrorEditor, BDSKFilteringArrayController;
 
 @interface BDSKErrorObjectController : NSWindowController {
     NSMutableArray *errors;
     NSMutableArray *managers;
     NSMutableArray *currentErrors;
     
-    NSUInteger lastIndex;
+    unsigned int lastIndex;
     
     // error-handling stuff:
-    IBOutlet BDSKTableView *errorTableView;
+    IBOutlet NSTableView *errorTableView;
     IBOutlet BDSKFilteringArrayController *errorsController;
     BOOL handledNonIgnorableError;
 }
@@ -56,16 +56,16 @@
 + (BDSKErrorObjectController *)sharedErrorObjectController;
 
 - (NSArray *)errors;
-- (NSUInteger)countOfErrors;
-- (id)objectInErrorsAtIndex:(NSUInteger)index;
-- (void)insertObject:(id)obj inErrorsAtIndex:(NSUInteger)index;
-- (void)removeObjectFromErrorsAtIndex:(NSUInteger)index;
+- (unsigned)countOfErrors;
+- (id)objectInErrorsAtIndex:(unsigned)index;
+- (void)insertObject:(id)obj inErrorsAtIndex:(unsigned)index;
+- (void)removeObjectFromErrorsAtIndex:(unsigned)index;
 
 - (NSArray *)managers;
-- (NSUInteger)countOfManagers;
-- (id)objectInManagersAtIndex:(NSUInteger)theIndex;
-- (void)insertObject:(id)obj inManagersAtIndex:(NSUInteger)theIndex;
-- (void)removeObjectFromManagersAtIndex:(NSUInteger)theIndex;
+- (unsigned)countOfManagers;
+- (id)objectInManagersAtIndex:(unsigned)theIndex;
+- (void)insertObject:(id)obj inManagersAtIndex:(unsigned)theIndex;
+- (void)removeObjectFromManagersAtIndex:(unsigned)theIndex;
 - (void)addManager:(BDSKErrorManager *)manager;
 - (void)removeManager:(BDSKErrorManager *)manager;
 

@@ -37,17 +37,21 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "FVBaseIcon.h"
+#import "FVIcon.h"
+#import "FVIcon_Private.h"
 
-@interface FVQuickLookIcon : FVBaseIcon
+@interface FVQuickLookIcon : FVIcon
 {
 @private
+    NSURL          *_fileURL;
     CGImageRef      _fullImage;
     CGImageRef      _thumbnail;
     NSSize          _thumbnailSize;
     NSSize          _desiredSize;
     FVIcon         *_fallbackIcon;
     BOOL            _quickLookFailed;
-    CGColorRef      _backgroundColor;
+    BOOL            _drawsLinkBadge;
+    pthread_mutex_t _mutex;
 }
+- (id)initWithURL:(NSURL *)theURL;
 @end

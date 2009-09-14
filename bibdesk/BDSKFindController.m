@@ -48,6 +48,7 @@
 #import <AGRegex/AGRegex.h>
 #import "BibItem.h"
 #import "BDSKFiler.h"
+#import "BDSKAlert.h"
 #import "BDSKFindFieldEditor.h"
 #import "BDSKLinkedFile.h"
 
@@ -135,7 +136,7 @@ enum {
     [formatter release];
 	
 	[statusBar retain]; // we need to retain, as we might remove it from the window
-	if (![[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowFindStatusBarKey]) {
+	if (![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowFindStatusBarKey]) {
 		[self toggleStatusBar:nil];
 	}
 	[statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
@@ -146,8 +147,8 @@ enum {
 	[[self window] setMaxSize:maxWindowSize];
 	
 	// this fixes a bug with initialization of the menuItem states when using bindings
-	NSInteger numItems = [searchTypePopUpButton numberOfItems];
-	NSInteger i;
+	int numItems = [searchTypePopUpButton numberOfItems];
+	int i;
 	for (i = 0; i < numItems; i++) 
 		if ([searchTypePopUpButton indexOfSelectedItem] != i)
 			[[searchTypePopUpButton itemAtIndex:i] setState:NSOffState];
@@ -216,11 +217,11 @@ enum {
 
 #pragma mark Accessors
 
-- (NSInteger)operation {
+- (int)operation {
     return operation;
 }
 
-- (void)setOperation:(NSInteger)newOperation {
+- (void)setOperation:(int)newOperation {
     if (operation != newOperation) {
         operation = newOperation;
 		if (FCOperationFindAndReplace != operation) {
@@ -237,11 +238,11 @@ enum {
 }
 
 - (NSString *)field {
-    return [[NSUserDefaults standardUserDefaults] objectForKey:BDSKFindControllerLastFindAndReplaceFieldKey];
+    return [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKFindControllerLastFindAndReplaceFieldKey];
 }
 
 - (void)setField:(NSString *)newField {
-    [[NSUserDefaults standardUserDefaults] setObject:newField forKey:BDSKFindControllerLastFindAndReplaceFieldKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:newField forKey:BDSKFindControllerLastFindAndReplaceFieldKey];
     if ([newField isEqualToString:BDSKRemoteURLString]) {
         [self setFindAsMacro:NO];
         [self setReplaceAsMacro:NO];
@@ -277,21 +278,21 @@ enum {
     }
 }
 
-- (NSInteger)searchType {
+- (int)searchType {
     return searchType;
 }
 
-- (void)setSearchType:(NSInteger)newSearchType {
+- (void)setSearchType:(int)newSearchType {
     if (searchType != newSearchType) {
         searchType = newSearchType;
     }
 }
 
-- (NSInteger)searchScope {
+- (int)searchScope {
     return searchScope;
 }
 
-- (void)setSearchScope:(NSInteger)newSearchScope {
+- (void)setSearchScope:(int)newSearchScope {
     if (searchScope != newSearchScope) {
         searchScope = newSearchScope;
     }
@@ -388,24 +389,24 @@ enum {
     return [[findHistory retain] autorelease];
 }
 
-- (NSUInteger)countOfFindHistory {
+- (unsigned)countOfFindHistory {
     return [findHistory count];
 }
 
-- (id)objectInFindHistoryAtIndex:(NSUInteger)idx {
+- (id)objectInFindHistoryAtIndex:(unsigned)idx {
     return [findHistory objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inFindHistoryAtIndex:(NSUInteger)idx {
+- (void)insertObject:(id)obj inFindHistoryAtIndex:(unsigned)idx {
     if ([NSString isEmptyString:obj] || [findHistory containsObject:obj])
 		return;
 	[findHistory insertObject:obj atIndex:idx];
-	NSInteger count = [findHistory count];
+	int count = [findHistory count];
 	if (count > MAX_HISTORY_COUNT)
 		[findHistory removeObjectAtIndex:count - 1];
 }
 
-- (void)removeObjectFromFindHistoryAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromFindHistoryAtIndex:(unsigned)idx {
     [findHistory removeObjectAtIndex:idx];
 }
 
@@ -413,24 +414,24 @@ enum {
     return [[replaceHistory retain] autorelease];
 }
 
-- (NSUInteger)countOfReplaceHistory {
+- (unsigned)countOfReplaceHistory {
     return [replaceHistory count];
 }
 
-- (id)objectInReplaceHistoryAtIndex:(NSUInteger)idx {
+- (id)objectInReplaceHistoryAtIndex:(unsigned)idx {
     return [replaceHistory objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inReplaceHistoryAtIndex:(NSUInteger)idx {
+- (void)insertObject:(id)obj inReplaceHistoryAtIndex:(unsigned)idx {
     if ([NSString isEmptyString:obj] || [replaceHistory containsObject:obj])
 		return;
 	[replaceHistory insertObject:obj atIndex:idx];
-	NSInteger count = [findHistory count];
+	int count = [findHistory count];
 	if (count > MAX_HISTORY_COUNT)
 		[replaceHistory removeObjectAtIndex:count - 1];
 }
 
-- (void)removeObjectFromReplaceHistoryAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromReplaceHistoryAtIndex:(unsigned)idx {
     [replaceHistory removeObjectAtIndex:idx];
 }
 
@@ -452,7 +453,7 @@ enum {
             }
 			return NO;
 		}
-	} else if([self findAsMacro]) { // check the "find" complex string
+	} else if([self findAsMacro] == YES) { // check the "find" complex string
 		NSString *reason = nil;
 		if ([self stringIsValidAsComplexString:*value errorMessage:&reason] == NO) {
             if(error != nil){
@@ -468,7 +469,7 @@ enum {
 
 - (BOOL)validateReplaceString:(id *)value error:(NSError **)error {
 	NSString *reason = nil;
-	if ([self searchType] == FCTextualSearch && [self replaceAsMacro] && 
+	if ([self searchType] == FCTextualSearch && [self replaceAsMacro] == YES && 
 		[self stringIsValidAsComplexString:*value errorMessage:&reason] == NO) {
         if(error != nil){
             NSString *description = NSLocalizedString(@"Invalid BibTeX Macro.", @"Error description");
@@ -509,7 +510,7 @@ enum {
 
 - (BOOL)validateFindAsMacro:(id *)value error:(NSError **)error {
 	NSString *reason = nil;
-    if ([*value boolValue] && [self searchType] == FCTextualSearch &&
+    if ([*value boolValue] == YES && [self searchType] == FCTextualSearch &&
 	    [self stringIsValidAsComplexString:[self findString] errorMessage:&reason] == NO) {
         if(error != nil){
             NSString *description = NSLocalizedString(@"Invalid BibTeX Macro", @"Error description");
@@ -524,7 +525,7 @@ enum {
 
 - (BOOL)validateReplaceAsMacro:(id *)value error:(NSError **)error {
 	NSString *reason = nil;
-    if([*value boolValue] && [self searchType] == FCTextualSearch &&
+    if([*value boolValue] == YES && [self searchType] == FCTextualSearch &&
 	   [self stringIsValidAsComplexString:[self replaceString] errorMessage:&reason] == NO){
         if(error != nil){
             NSString *description = NSLocalizedString(@"Invalid BibTeX Macro", @"Error description");
@@ -604,7 +605,7 @@ enum {
 
 - (IBAction)toggleStatusBar:(id)sender{
 	[statusBar toggleInWindow:[self window] offset:1.0];
-	[[NSUserDefaults standardUserDefaults] setBool:[statusBar isVisible] forKey:BDSKShowFindStatusBarKey];
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowFindStatusBarKey];
 }
 
 #pragma mark Find and Replace Action methods
@@ -711,7 +712,7 @@ enum {
 
     NSEnumerator *selPubE = [[theDocument selectedPublications] objectEnumerator];
     BibItem *selItem = [selPubE nextObject];
-    NSUInteger indexOfSelectedItem;
+    unsigned indexOfSelectedItem;
     if(selItem == nil){ // no selection, so select the first one
         indexOfSelectedItem = 0;
     } else {        
@@ -748,7 +749,7 @@ enum {
 }
 
 - (void)replaceAllInSelection:(BOOL)selection{
-	if (selection)
+	if (selection == YES)
 		[self setSearchSelection:YES];
 	[statusBar setStringValue:@""];
 	
@@ -796,16 +797,16 @@ enum {
 	// set string and/or node boundaries in the regex
 	switch(searchScope){
 		case FCContainsSearch:
-			regexFormat = (findAsMacro) ? @"(?:?<=^|\\s#\\s)%@(?:?=$|\\s#\\s)" : @"%@";
+			regexFormat = (findAsMacro) ? @"(?<=^|\\s#\\s)%@(?=$|\\s#\\s)" : @"%@";
 			break;
 		case FCStartsWithSearch:
-			regexFormat = (findAsMacro) ? @"(?:?<=^)%@(?:?=$|\\s#\\s)" : @"(?:?<=^)%@";
+			regexFormat = (findAsMacro) ? @"(?<=^)%@(?=$|\\s#\\s)" : @"(?<=^)%@";
 			break;
 		case FCWholeFieldSearch:
-			regexFormat = @"(?:?<=^)%@(?:?=$)";
+			regexFormat = @"(?<=^)%@(?=$)";
 			break;
 		case FCEndsWithSearch:
-			regexFormat = (findAsMacro) ? @"(?:?<=^|\\s#\\s)%@(?:?=$)" : @"%@(?:?=$)";
+			regexFormat = (findAsMacro) ? @"(?<=^|\\s#\\s)%@(?=$)" : @"%@(?=$)";
 			break;
 	}
 	
@@ -818,7 +819,7 @@ enum {
     NSString *findStr = [self findString];
 	// get the current search option settings
     NSString *field = [self field];
-    NSUInteger searchOpts = (ignoreCase ? NSCaseInsensitiveSearch : 0);
+    unsigned searchOpts = (ignoreCase ? NSCaseInsensitiveSearch : 0);
 	
 	switch(searchScope){
 		case FCEndsWithSearch:
@@ -865,7 +866,7 @@ enum {
             
         } else {
             
-            origStr = [bibItem stringValueOfField:field inherit:NO];
+            origStr = [bibItem valueOfField:field inherit:NO];
             
             if(origStr == nil || findAsMacro != [origStr isComplex])
                 continue; // we don't want to add a field or set it to nil, or find expanded values of a complex string, or interpret an ordinary string as a macro
@@ -915,7 +916,7 @@ enum {
             
         } else {
             
-            origStr = [bibItem stringValueOfField:field inherit:NO];
+            origStr = [bibItem valueOfField:field inherit:NO];
             
             if(origStr == nil || findAsMacro != [origStr isComplex])
                 continue; // we don't want to add a field or set it to nil, or find expanded values of a complex string, or interpret an ordinary string as a macro
@@ -939,14 +940,14 @@ enum {
 	return nil;
 }
 
-- (NSUInteger)stringFindAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
+- (unsigned int)stringFindAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
 	// find and replace using BDSKComplexString methods
     // first we setup all the search settings
     NSString *findStr = [self findString];
     NSString *replStr = [self replaceString];
 	// get the current search option settings
     NSString *field = [self field];
-    NSUInteger searchOpts = (ignoreCase ? NSCaseInsensitiveSearch : 0);
+    unsigned searchOpts = (ignoreCase ? NSCaseInsensitiveSearch : 0);
 	
 	if(!findAsMacro && replaceAsMacro)
 		searchScope = FCWholeFieldSearch; // we can only reliably replace a complete string by a macro
@@ -968,8 +969,8 @@ enum {
     BibItem *bibItem;
     NSString *origStr;
     NSString *newStr;
-	NSUInteger numRepl = 0;
-	NSUInteger number = 0;
+	unsigned int numRepl = 0;
+	unsigned number = 0;
 	
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -981,7 +982,7 @@ enum {
             NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
             BDSKLinkedFile *file;
             BDSKLinkedFile *replFile;
-            NSUInteger idx;
+            unsigned int idx;
             
             while (file = [fileEnum nextObject]) {
                 idx = [[bibItem files] indexOfObjectIdenticalTo:file];
@@ -1005,20 +1006,20 @@ enum {
             
         } else {
             
-            origStr = [bibItem stringValueOfField:field inherit:NO];
+            origStr = [bibItem valueOfField:field inherit:NO];
             
             if(origStr == nil || findAsMacro != [origStr isComplex])
                 continue; // we don't want to add a field or set it to nil, or replace expanded values of a complex string, or interpret an ordinary string as a macro
             
             if(searchScope == FCWholeFieldSearch){
                 if([findStr compareAsComplexString:origStr options:searchOpts] == NSOrderedSame){
-                    [bibItem setField:field toStringValue:replStr];
+                    [bibItem setField:field toValue:replStr];
                     number++;
                 }
             }else{
                 newStr = [origStr stringByReplacingOccurrencesOfString:findStr withString:replStr options:searchOpts replacements:&numRepl];
                 if(numRepl > 0){
-                    [bibItem setField:field toStringValue:newStr];
+                    [bibItem setField:field toValue:newStr];
                     number++;
                 }
             }
@@ -1029,7 +1030,7 @@ enum {
 	return number;
 }
 
-- (NSUInteger)regexFindAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
+- (unsigned int)regexFindAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
 	// find and replace using AGRegex
     // first we setup all the search settings
     NSString *replStr = [self replaceString];
@@ -1045,7 +1046,7 @@ enum {
     BibItem *bibItem;
     NSString *origStr;
 	NSString *complexStr;
-	NSUInteger number = 0;
+	unsigned number = 0;
 	
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -1057,7 +1058,7 @@ enum {
             NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
             BDSKLinkedFile *file;
             BDSKLinkedFile *replFile;
-            NSUInteger idx;
+            unsigned int idx;
             
             while (file = [fileEnum nextObject]) {
                 idx = [[bibItem files] indexOfObjectIdenticalTo:file];
@@ -1075,7 +1076,7 @@ enum {
             
         } else {
             
-            origStr = [bibItem stringValueOfField:field inherit:NO];
+            origStr = [bibItem valueOfField:field inherit:NO];
             
             if(origStr == nil || findAsMacro != [origStr isComplex])
                 continue; // we don't want to add a field or set it to nil, or replace expanded values of a complex string, or interpret an ordinary string as a macro
@@ -1086,11 +1087,11 @@ enum {
                 origStr = [theRegex replaceWithString:replStr inString:origStr];
                 if(replaceAsMacro || findAsMacro){
                     if (complexStr = [NSString stringWithBibTeXString:origStr macroResolver:[theDocument macroResolver] error:NULL]) {
-                        [bibItem setField:field toStringValue:complexStr];
+                        [bibItem setField:field toValue:complexStr];
                         number++;
                     }
                 } else {
-                    [bibItem setField:field toStringValue:origStr];
+                    [bibItem setField:field toValue:origStr];
                     number++;
                 }            
             }
@@ -1101,7 +1102,7 @@ enum {
 	return number;
 }
 
-- (NSUInteger)overwriteInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
+- (unsigned int)overwriteInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
 	// overwrite using BDSKComplexString methods
     // first we setup all the search settings
     NSString *replStr = [self replaceString];
@@ -1115,7 +1116,7 @@ enum {
     NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
     BibItem *bibItem;
     NSString *origStr;
-	NSUInteger number = 0;
+	unsigned number = 0;
 
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -1144,14 +1145,14 @@ enum {
             
         } else {
             
-            origStr = [bibItem stringValueOfField:field inherit:NO];
+            origStr = [bibItem valueOfField:field inherit:NO];
             if(origStr == nil || [origStr isEqualAsComplexString:@""]){
                 if(shouldSetWhenEmpty == NO) continue;
                 origStr = @"";
             }
             
             if([replStr compareAsComplexString:origStr] != NSOrderedSame){
-                [bibItem setField:field toStringValue:replStr];
+                [bibItem setField:field toValue:replStr];
                 number++;
             }
             
@@ -1161,7 +1162,7 @@ enum {
 	return number;
 }
 
-- (NSUInteger)prependInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
+- (unsigned int)prependInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
 	// prepend using BDSKComplexString methods
     // first we setup all the search settings
     NSString *replStr = [self replaceString];
@@ -1178,7 +1179,7 @@ enum {
     NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
     BibItem *bibItem;
     NSString *origStr;
-	NSUInteger number = 0;
+	unsigned number = 0;
 
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -1190,7 +1191,7 @@ enum {
             NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
             BDSKLinkedFile *file;
             BDSKLinkedFile *replFile;
-            NSUInteger idx;
+            unsigned int idx;
             
             while (file = [fileEnum nextObject]) {
                 idx = [[bibItem files] indexOfObjectIdenticalTo:file];
@@ -1205,13 +1206,13 @@ enum {
             
         } else {
                 
-            origStr = [bibItem stringValueOfField:field inherit:NO];
+            origStr = [bibItem valueOfField:field inherit:NO];
             if(origStr == nil || [origStr isEqualAsComplexString:@""]){
                 if(shouldSetWhenEmpty == NO) continue;
                 origStr = @"";
             }
             
-            [bibItem setField:field toStringValue:[replStr complexStringByAppendingString:origStr]];
+            [bibItem setField:field toValue:[replStr complexStringByAppendingString:origStr]];
             number++;
             
         }
@@ -1220,7 +1221,7 @@ enum {
 	return number;
 }
 
-- (NSUInteger)appendInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
+- (unsigned int)appendInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
 	// prepend using BDSKComplexString methods
     // first we setup all the search settings
     NSString *replStr = [self replaceString];
@@ -1237,7 +1238,7 @@ enum {
     NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
     BibItem *bibItem;
     NSString *origStr;
-	NSUInteger number = 0;
+	unsigned number = 0;
 
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -1249,7 +1250,7 @@ enum {
             NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
             BDSKLinkedFile *file;
             BDSKLinkedFile *replFile;
-            NSUInteger idx;
+            unsigned int idx;
             
             while (file = [fileEnum nextObject]) {
                 idx = [[bibItem files] indexOfObjectIdenticalTo:file];
@@ -1264,13 +1265,13 @@ enum {
             
         } else {
                 
-            origStr = [bibItem stringValueOfField:field inherit:NO];
+            origStr = [bibItem valueOfField:field inherit:NO];
             if(origStr == nil || [origStr isEqualAsComplexString:@""]){
                 if(shouldSetWhenEmpty == NO) continue;
                 origStr = @"";
             }
             
-            [bibItem setField:field toStringValue:[origStr complexStringByAppendingString:replStr]];
+            [bibItem setField:field toValue:[origStr complexStringByAppendingString:replStr]];
             number++;
             
         }
@@ -1279,8 +1280,8 @@ enum {
 	return number;
 }
 
-- (NSUInteger)findAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
-	NSUInteger number;
+- (unsigned int)findAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
+	unsigned int number;
     
 	if(FCOperationOverwrite == [self operation])
 		number = [self overwriteInItems:arrayOfPubs ofDocument:theDocument];
@@ -1296,7 +1297,7 @@ enum {
 		number = 0;
 	
 	NSString *fieldString = (number == 1)? NSLocalizedString(@"field",@"field") : NSLocalizedString(@"fields",@"fields");
-	[statusBar setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Replaced in %lu %@",@"Status message: Replaced in [number] field(s)"), (unsigned long)number, fieldString]];
+	[statusBar setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Replaced in %i %@",@"Status message: Replaced in [number] field(s)"), number, fieldString]];
 	
 	return number;
 }

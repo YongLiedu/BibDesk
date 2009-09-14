@@ -14,13 +14,9 @@ static NSString *BDSKISIEndpoint = nil;
 
 + (void)initialize
 {
-    BDSKINITIALIZE;
-    BDSKISIEndpoint = [[[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKISIEndpoint"] copy];
-    if (nil == BDSKISIEndpoint)
-        BDSKISIEndpoint = @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve";
-    BDSKISINamespace = [[[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKISINamespace"] copy];
-    if (nil == BDSKISINamespace)
-        BDSKISINamespace = @"http://esti.isinet.com/soap/search";
+    OBINITIALIZE;
+    BDSKISIEndpoint = [([[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKISIEndpoint"] ?: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve") copy];
+    BDSKISINamespace = [([[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKISINamespace"] ?: @"http://esti.isinet.com/soap/search") copy];
 }
 
 @end
@@ -699,7 +695,7 @@ static NSString *BDSKISIEndpoint = nil;
     [_invocation setParameters: in_databaseID in_primaryKey:in_primaryKey];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return [result autorelease];    
+    return result;    
 }
 
 
@@ -710,7 +706,7 @@ static NSString *BDSKISIEndpoint = nil;
     [_invocation setParameters: in_query in_jsetList:in_jsetList];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return [result autorelease];    
+    return result;    
 }
 
 
@@ -721,7 +717,7 @@ static NSString *BDSKISIEndpoint = nil;
     [_invocation setParameters: in_databaseID in_recids:in_recids in_depth:in_depth in_editions:in_editions in_sort:in_sort in_firstRec:in_firstRec in_numRecs:in_numRecs in_fields:in_fields];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return [result autorelease];    
+    return result;    
 }
 
 
@@ -732,7 +728,7 @@ static NSString *BDSKISIEndpoint = nil;
     [_invocation setParameters: in_databaseID in_recid:in_recid in_sort:in_sort in_fields:in_fields];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return [result autorelease];    
+    return result;    
 }
 
 
@@ -743,7 +739,7 @@ static NSString *BDSKISIEndpoint = nil;
     [_invocation setParameters: in_databaseID in_primaryKeys:in_primaryKeys];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return [result autorelease];    
+    return result;    
 }
 
 
@@ -754,7 +750,7 @@ static NSString *BDSKISIEndpoint = nil;
     [_invocation setParameters: in_databaseID in_term:in_term in_index:in_index in_linesBefore:in_linesBefore in_linesAfter:in_linesAfter in_pageNumber:in_pageNumber in_depth:in_depth in_editions:in_editions];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return [result autorelease];    
+    return result;    
 }
 
 
@@ -765,7 +761,7 @@ static NSString *BDSKISIEndpoint = nil;
     [_invocation setParameters: in_databaseID in_index:in_index in_terms:in_terms];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return [result autorelease];    
+    return result;    
 }
 
 
@@ -776,7 +772,7 @@ static NSString *BDSKISIEndpoint = nil;
     [_invocation setParameters: in_databaseID in_query:in_query in_depth:in_depth in_editions:in_editions in_sort:in_sort in_firstRec:in_firstRec in_numRecs:in_numRecs];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return [result autorelease];    
+    return result;    
 }
 
 
@@ -787,7 +783,7 @@ static NSString *BDSKISIEndpoint = nil;
     [_invocation setParameters: in_databaseID in_primaryKeys:in_primaryKeys in_sort:in_sort in_fields:in_fields];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return [result autorelease];    
+    return result;    
 }
 
 
@@ -798,7 +794,7 @@ static NSString *BDSKISIEndpoint = nil;
     [_invocation setParameters: in_databaseID in_query:in_query in_depth:in_depth in_editions:in_editions in_sort:in_sort in_firstRec:in_firstRec in_numRecs:in_numRecs in_fields:in_fields];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return [result autorelease];    
+    return result;    
 }
 
 
@@ -809,7 +805,7 @@ static NSString *BDSKISIEndpoint = nil;
     [_invocation setParameters: in_databaseID in_query:in_query in_depth:in_depth in_editions:in_editions in_firstRec:in_firstRec in_numRecs:in_numRecs];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return [result autorelease];    
+    return result;    
 }
 
 
@@ -820,7 +816,7 @@ static NSString *BDSKISIEndpoint = nil;
     [_invocation setParameters: in_databaseID in_format:in_format];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return [result autorelease];    
+    return result;    
 }
 
 
@@ -831,7 +827,7 @@ static NSString *BDSKISIEndpoint = nil;
     [_invocation setParameters: in_databaseID in_primaryKey:in_primaryKey in_depth:in_depth in_editions:in_editions in_sort:in_sort in_firstRec:in_firstRec in_numRecs:in_numRecs in_fields:in_fields];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return [result autorelease];    
+    return result;    
 }
 
 
@@ -842,7 +838,7 @@ static NSString *BDSKISIEndpoint = nil;
     [_invocation setParameters: in_query in_jsetList:in_jsetList in_include:in_include in_exclude:in_exclude in_options:in_options];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return [result autorelease];    
+    return result;    
 }
 
 
@@ -853,7 +849,7 @@ static NSString *BDSKISIEndpoint = nil;
     [_invocation setParameters: in_databaseID in_primaryKey:in_primaryKey in_depth:in_depth in_editions:in_editions in_sort:in_sort in_firstRec:in_firstRec in_numRecs:in_numRecs in_fields:in_fields];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
-    return [result autorelease];    
+    return result;    
 }
 
 

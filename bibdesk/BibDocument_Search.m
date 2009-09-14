@@ -37,39 +37,36 @@
 
 #import "BibDocument_Search.h"
 #import "BibDocument.h"
-#import "BibDocument_UI.h"
 #import "BDSKTypeManager.h"
 #import <AGRegex/AGRegex.h>
 #import "BibItem.h"
 #import "CFString_BDSKExtensions.h"
 #import "BDSKFieldSheetController.h"
-#import "BDSKGradientSplitView.h"
+#import "BDSKSplitView.h"
 #import "BDSKFileContentSearchController.h"
-#import "BDSKGroupOutlineView.h"
+#import "BDSKGroupTableView.h"
 #import "NSTableView_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKZoomablePDFView.h"
 #import "BDSKPreviewer.h"
-#import "BDSKOverlayWindow.h"
+#import "BDSKOverlay.h"
 #import "BibDocument_Groups.h"
 #import "BDSKMainTableView.h"
 #import "BDSKFindController.h"
+#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKSearchButtonController.h"
 #import "BDSKItemSearchIndexes.h"
-#import "BDSKNotesSearchIndex.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKGroup.h"
 #import "BDSKSharedGroup.h"
 #import "BDSKOwnerProtocol.h"
 #import "NSViewAnimation_BDSKExtensions.h"
 #import "BDSKDocumentSearch.h"
-#import "NSView_BDSKExtensions.h"
-#import "NSDictionary_BDSKExtensions.h"
 
 @implementation BibDocument (Search)
 
 - (IBAction)changeSearchType:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setInteger:[sender tag] forKey:BDSKSearchMenuTagKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:[sender tag] forKey:BDSKSearchMenuTagKey];
     [self search:searchField];
 }
 
@@ -100,7 +97,7 @@
 {
     NSString *field = [searchButtonController selectedItemIdentifier];
     if (searchButtonController && nil == field) {
-        BDSKASSERT_NOT_REACHED("the search button controller should always have a selected field");
+        OBASSERT_NOT_REACHED("the search button controller should always have a selected field");
         [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
         field = BDSKAllFieldsString;
     }
@@ -192,10 +189,11 @@ Ensure that views are always ordered vertically from top to bottom as
         if ([previousSortKey isEqualToString:BDSKRelevanceString]) {
             [previousSortKey release];
             previousSortKey = [BDSKTitleString retain];
-            docState.previousSortDescending = NO;
         }
         if ([sortKey isEqualToString:BDSKRelevanceString]) {
-            [self sortPubsByKey:[[previousSortKey retain] autorelease]];
+            NSString *newSortKey = [[previousSortKey retain] autorelease];
+            docState.sortDescending = NO;
+            [self sortPubsByKey:newSortKey];
         }
         
     } else {
@@ -215,11 +213,11 @@ Ensure that views are always ordered vertically from top to bottom as
 
 // simplified search used by BDSKAppController's Service for legacy compatibility
 - (NSArray *)publicationsMatchingSubstring:(NSString *)searchString inField:(NSString *)field{
-    NSUInteger i, iMax = [publications count];
+    unsigned i, iMax = [publications count];
     NSMutableArray *results = [NSMutableArray arrayWithCapacity:100];
     for (i = 0; i < iMax; i++) {
         BibItem *pub = [publications objectAtIndex:i];
-        if ([pub matchesSubstring:searchString inField:field])
+        if ([pub matchesSubstring:searchString withOptions:NSCaseInsensitiveSearch inField:field removeDiacritics:YES])
             [results addObject:pub];
     }
     return results;
@@ -229,7 +227,7 @@ Ensure that views are always ordered vertically from top to bottom as
 NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 {
     // surround with wildcards for substring search; should we check for any operators?
-    if ([[NSUserDefaults standardUserDefaults] integerForKey:BDSKSearchMenuTagKey] == 0)
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSearchMenuTagKey] == 0)
         searchFieldString = [NSString stringWithFormat:@"*%@*", searchFieldString];
     return searchFieldString;
 }
@@ -265,7 +263,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [self updateStatus];
 }
 
-- (void)search:(BDSKDocumentSearch *)aSearch foundIdentifiers:(NSSet *)identifierURLs normalizedScores:(NSDictionary *)scores;
+- (void)handleSearchCallbackWithIdentifiers:(NSSet *)identifierURLs normalizedScores:(NSDictionary *)scores;
 {
     id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;    
     BDSKPublicationsArray *pubArray = [owner publications];    
@@ -275,12 +273,22 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     NSMutableSet *identifierURLsToKeep = [NSMutableSet setWithArray:[groupedPublications valueForKey:@"identifierURL"]];
     [foundURLSet intersectSet:identifierURLsToKeep];
     
-    [shownPublications addObjectsFromArray:[pubArray itemsForIdentifierURLs:[foundURLSet allObjects]]];
-    
-    NSEnumerator *pubEnum = [shownPublications objectEnumerator];
+    NSEnumerator *keyEnum = [foundURLSet objectEnumerator];
+    NSURL *aURL;
     BibItem *aPub;
-    while (aPub = [pubEnum nextObject])
+
+    // iterate and normalize search scores
+    while (aURL = [keyEnum nextObject]) {
+        aPub = [pubArray itemForIdentifierURL:aURL];
+        if (aPub) {
+            [shownPublications addObject:aPub];
+        }
+    }
+            
+    NSEnumerator *pubEnum = [shownPublications objectEnumerator];
+    while (aPub = [pubEnum nextObject]) {
         [aPub setSearchScore:[[scores objectForKey:[aPub identifierURL]] floatValue]];
+    }
     
     [self sortPubsByKey:nil];
     [self selectPublications:[documentSearch previouslySelectedPublications]];    
@@ -289,16 +297,11 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
         
 - (void)displayPublicationsMatchingSearchString:(NSString *)searchString indexName:(NSString *)field {
     searchString = BDSKSearchKitExpressionWithString(searchString);
+        
+    // we need the correct BDSKPublicationsArray for access to the identifierURLs
+    id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;
+    SKIndexRef skIndex = [[owner searchIndexes] indexForField:field];
     
-    SKIndexRef skIndex = NULL;
-    
-    if ([field isEqualToString:BDSKSkimNotesString] && notesSearchIndex) {
-        skIndex = [notesSearchIndex index];
-    } else {
-        // we need the correct BDSKPublicationsArray for access to the identifierURLs
-        id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;
-        skIndex = [[owner searchIndexes] indexForField:field];
-    }
     [documentSearch searchForString:searchString index:skIndex selectedPublications:[self selectedPublications] scrollPositionAsPercentage:[tableView scrollPositionAsPercentage]];
 }
 
@@ -333,8 +336,8 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [self handleTableSelectionChangedNotification:nil];
 }
 
-// Method required by the BDSKFileContentSearchController; the implementor is responsible for restoring its state by removing the view passed as an argument and resetting search field target/action.
-- (void)removeFileContentSearch:(BDSKFileContentSearchController *)controller
+// Method required by the BDSKSearchContentView protocol; the implementor is responsible for restoring its state by removing the view passed as an argument and resetting search field target/action.
+- (void)privateRemoveFileContentSearch:(BDSKFileContentSearchController *)controller
 {
     NSView *oldView = [[fileSearchController tableView] enclosingScrollView];
     NSView *newView = [tableView enclosingScrollView];
@@ -350,7 +353,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [searchField setTarget:self];
     [searchField setDelegate:self];
     
-    // removeFileContentSearch may be called after the user clicks a different search type, without changing the searchfield; in that case, we want to leave the search button view in place, and refilter the list.  Otherwise, select the pubs corresponding to the file content selection.
+    // privateRemoveFileContentSearch may be called after the user clicks a different search type, without changing the searchfield; in that case, we want to leave the search button view in place, and refilter the list.  Otherwise, select the pubs corresponding to the file content selection.
     if ([[searchField stringValue] isEqualToString:@""]) {
         [self hideSearchButtonView];
         
@@ -363,7 +366,14 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
             [tableView deselectAll:nil];
             
             // we match based on title, since that's all the index knows about the BibItem at present
-            [self selectPublications:[publications itemsForIdentifierURLs:itemsToSelect]];
+            NSMutableArray *pubsToSelect = [NSMutableArray array];
+            NSEnumerator *itemEnum = [itemsToSelect objectEnumerator];
+            NSURL *aURL;
+            BibItem *pub;
+            while(aURL = [itemEnum nextObject])
+                if (pub = [publications itemForIdentifierURL:aURL])
+                    [pubsToSelect addObject:pub];
+            [self selectPublications:pubsToSelect];
             [tableView scrollRowToCenter:[tableView selectedRow]];
             
             // if searchfield doesn't have focus (user clicked cancel button), switch to the tableview
@@ -395,6 +405,53 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
         return [[textView string] substringWithRange:selRange];
     }
     return nil;
+}
+
+// OAFindControllerAware informal protocol
+- (id <OAFindControllerTarget>)omniFindControllerTarget;
+{
+    if (bottomPreviewDisplay == BDSKPreviewDisplayText)
+        return bottomPreviewTextView;
+    else if (sidePreviewDisplay == BDSKPreviewDisplayText)
+        return sidePreviewTextView;
+    else
+        return nil;
+}
+
+- (IBAction)performFindPanelAction:(id)sender{
+    NSString *selString = nil;
+
+	switch ([sender tag]) {
+        case NSFindPanelActionShowFindPanel:
+        case NSFindPanelActionNext:
+        case NSFindPanelActionPrevious:
+            if (bottomPreviewDisplay == BDSKPreviewDisplayText)
+                [bottomPreviewTextView performFindPanelAction:sender];
+            else if (sidePreviewDisplay == BDSKPreviewDisplayText)
+                [sidePreviewTextView performFindPanelAction:sender];
+            else
+                NSBeep();
+            break;
+		case NSFindPanelActionSetFindString:
+            selString = [self selectedStringForFind];
+            if ([NSString isEmptyString:selString])
+                return;
+            id firstResponder = [documentWindow firstResponder];
+            if (firstResponder == searchField || ([firstResponder isKindOfClass:[NSText class]] && [firstResponder delegate] == searchField)) {
+                [searchField setStringValue:selString];
+                [searchField selectText:nil];
+            } else {
+                [[BDSKFindController sharedFindController] setFindString:selString];
+                if (bottomPreviewDisplay == BDSKPreviewDisplayText)
+                    [bottomPreviewTextView performFindPanelAction:sender];
+                else if (sidePreviewDisplay == BDSKPreviewDisplayText)
+                    [sidePreviewTextView performFindPanelAction:sender];
+            }
+            break;
+        default:
+            NSBeep();
+            break;
+	}
 }
 
 @end

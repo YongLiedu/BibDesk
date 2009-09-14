@@ -43,17 +43,17 @@
 #import "BDSKBookmarkOutlineView.h"
 #import "BDSKTextWithIconCell.h"
 
-#define BDSKSearchBookmarkRowsPboardType @"BDSKSearchBookmarkRowsPboardType"
+static NSString *BDSKSearchBookmarkRowsPboardType = @"BDSKSearchBookmarkRowsPboardType";
 
-#define BDSKSearchBookmarksToolbarIdentifier                    @"BDSKSearchBookmarksToolbarIdentifier"
-#define BDSKSearchBookmarksNewFolderToolbarItemIdentifier       @"BDSKSearchBookmarksNewFolderToolbarItemIdentifier"
-#define BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier    @"BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier"
-#define BDSKSearchBookmarksDeleteToolbarItemIdentifier          @"BDSKSearchBookmarksDeleteToolbarItemIdentifier"
+static NSString *BDSKSearchBookmarksToolbarIdentifier = @"BDSKSearchBookmarksToolbarIdentifier";
+static NSString *BDSKSearchBookmarksNewFolderToolbarItemIdentifier = @"BDSKSearchBookmarksNewFolderToolbarItemIdentifier";
+static NSString *BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier = @"BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier";
+static NSString *BDSKSearchBookmarksDeleteToolbarItemIdentifier = @"BDSKSearchBookmarksDeleteToolbarItemIdentifier";
 
-#define CHILDREN_KEY @"children"
-#define LABEL_KEY    @"label"
+static NSString *BDSKSearchBookmarkChildrenKey = @"children";
+static NSString *BDSKSearchBookmarkLabelKey = @"label";
 
-static char BDSKSearchBookmarkPropertiesObservationContext;
+static NSString *BDSKSearchBookmarkPropertiesObservationContext = @"BDSKSearchBookmarkPropertiesObservationContext";
 
 
 @interface BDSKSearchBookmarkController (BDSKPrivate)
@@ -79,7 +79,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 
 - (id)init {
     if ((sharedBookmarkController == nil) && (sharedBookmarkController = self = [super initWithWindowNibName:@"SearchBookmarksWindow"])) {
-        NSEnumerator *dictEnum = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKSearchGroupBookmarksKey] objectEnumerator];
+        NSEnumerator *dictEnum = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKSearchGroupBookmarksKey] objectEnumerator];
         NSDictionary *dict;
         
         NSMutableArray *bookmarks = [NSMutableArray array];
@@ -101,7 +101,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 
 - (void)release {}
 
-- (NSUInteger)retainCount { return NSUIntegerMax; }
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (void)windowDidLoad {
     [self setupToolbar];
@@ -114,7 +114,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     return bookmarkRoot;
 }
 
-static NSArray *minimumCoverForBookmarks(NSArray *items) {
+- (NSArray *)minimumCoverForBookmarks:(NSArray *)items {
     NSEnumerator *bmEnum = [items objectEnumerator];
     BDSKSearchBookmark *bm;
     BDSKSearchBookmark *lastBm = nil;
@@ -149,16 +149,16 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 }
 
 - (void)saveBookmarks {
-    [[NSUserDefaults standardUserDefaults] setObject:[[bookmarkRoot children] valueForKey:@"dictionaryValue"] forKey:BDSKSearchGroupBookmarksKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[bookmarkRoot children] valueForKey:@"dictionaryValue"] forKey:BDSKSearchGroupBookmarksKey];
 }
 
 #pragma mark Actions
 
 - (IBAction)insertBookmarkFolder:(id)sender {
     BDSKSearchBookmark *folder = [BDSKSearchBookmark searchBookmarkFolderWithLabel:NSLocalizedString(@"Folder", @"default folder name")];
-    NSInteger rowIndex = [[outlineView selectedRowIndexes] lastIndex];
+    int rowIndex = [[outlineView selectedRowIndexes] lastIndex];
     BDSKSearchBookmark *item = bookmarkRoot;
-    NSUInteger idx = [[bookmarkRoot children] count];
+    unsigned int idx = [[bookmarkRoot children] count];
     
     if (rowIndex != NSNotFound) {
         BDSKSearchBookmark *selectedItem = [outlineView itemAtRow:rowIndex];
@@ -172,16 +172,16 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     }
     [item insertObject:folder inChildrenAtIndex:idx];
     
-    NSInteger row = [outlineView rowForItem:folder];
+    int row = [outlineView rowForItem:folder];
     [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     [outlineView editColumn:0 row:row withEvent:nil select:YES];
 }
 
 - (IBAction)insertBookmarkSeparator:(id)sender {
     BDSKSearchBookmark *separator = [BDSKSearchBookmark searchBookmarkSeparator];
-    NSInteger rowIndex = [[outlineView selectedRowIndexes] lastIndex];
+    int rowIndex = [[outlineView selectedRowIndexes] lastIndex];
     BDSKSearchBookmark *item = bookmarkRoot;
-    NSUInteger idx = [[bookmarkRoot children] count];
+    unsigned int idx = [[bookmarkRoot children] count];
     
     if (rowIndex != NSNotFound) {
         BDSKSearchBookmark *selectedItem = [outlineView itemAtRow:rowIndex];
@@ -195,7 +195,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     }
     [item insertObject:separator inChildrenAtIndex:idx];
     
-    NSInteger row = [outlineView rowForItem:separator];
+    int row = [outlineView rowForItem:separator];
     [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 }
 
@@ -225,9 +225,9 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     BDSKSearchBookmark *bm;
     while (bm = [bmEnum nextObject]) {
         if ([bm bookmarkType] != BDSKSearchBookmarkTypeSeparator) {
-            [bm addObserver:self forKeyPath:LABEL_KEY options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKSearchBookmarkPropertiesObservationContext];
+            [bm addObserver:self forKeyPath:BDSKSearchBookmarkLabelKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:BDSKSearchBookmarkPropertiesObservationContext];
             if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
-                [bm addObserver:self forKeyPath:CHILDREN_KEY options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKSearchBookmarkPropertiesObservationContext];
+                [bm addObserver:self forKeyPath:BDSKSearchBookmarkChildrenKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:BDSKSearchBookmarkPropertiesObservationContext];
                 [self startObservingBookmarks:[bm children]];
             }
         }
@@ -239,9 +239,9 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     BDSKSearchBookmark *bm;
     while (bm = [bmEnum nextObject]) {
         if ([bm bookmarkType] != BDSKSearchBookmarkTypeSeparator) {
-            [bm removeObserver:self forKeyPath:LABEL_KEY];
+            [bm removeObserver:self forKeyPath:BDSKSearchBookmarkLabelKey];
             if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
-                [bm removeObserver:self forKeyPath:CHILDREN_KEY];
+                [bm removeObserver:self forKeyPath:BDSKSearchBookmarkChildrenKey];
                 [self stopObservingBookmarks:[bm children]];
             }
         }
@@ -249,21 +249,21 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 }
 
 - (void)setChildren:(NSArray *)newChildren ofBookmark:(BDSKSearchBookmark *)bookmark {
-    [[bookmark mutableArrayValueForKey:CHILDREN_KEY] setArray:newChildren];
+    [[bookmark mutableArrayValueForKey:BDSKSearchBookmarkChildrenKey] setArray:newChildren];
 }
 
 - (void)insertObjects:(NSArray *)newChildren inChildrenOfBookmark:(BDSKSearchBookmark *)bookmark atIndexes:(NSIndexSet *)indexes {
-    [[bookmark mutableArrayValueForKey:CHILDREN_KEY] insertObjects:newChildren atIndexes:indexes];
+    [[bookmark mutableArrayValueForKey:BDSKSearchBookmarkChildrenKey] insertObjects:newChildren atIndexes:indexes];
 }
 
 - (void)removeObjectsFromChildrenOfBookmark:(BDSKSearchBookmark *)bookmark atIndexes:(NSIndexSet *)indexes {
-    [[bookmark mutableArrayValueForKey:CHILDREN_KEY] removeObjectsAtIndexes:indexes];
+    [[bookmark mutableArrayValueForKey:BDSKSearchBookmarkChildrenKey] removeObjectsAtIndexes:indexes];
 }
 
 #pragma mark KVO
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == &BDSKSearchBookmarkPropertiesObservationContext) {
+    if (context == BDSKSearchBookmarkPropertiesObservationContext) {
         BDSKSearchBookmark *bookmark = (BDSKSearchBookmark *)object;
         id newValue = [change objectForKey:NSKeyValueChangeNewKey];
         id oldValue = [change objectForKey:NSKeyValueChangeOldKey];
@@ -274,7 +274,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
         
         switch ([[change objectForKey:NSKeyValueChangeKindKey] unsignedIntValue]) {
             case NSKeyValueChangeSetting:
-                if ([keyPath isEqualToString:CHILDREN_KEY]) {
+                if ([keyPath isEqualToString:BDSKSearchBookmarkChildrenKey]) {
                     NSMutableArray *old = [NSMutableArray arrayWithArray:oldValue];
                     NSMutableArray *new = [NSMutableArray arrayWithArray:newValue];
                     [old removeObjectsInArray:newValue];
@@ -282,24 +282,24 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
                     [self stopObservingBookmarks:old];
                     [self startObservingBookmarks:new];
                     [[[self undoManager] prepareWithInvocationTarget:self] setChildren:oldValue ofBookmark:bookmark];
-                } else if ([keyPath isEqualToString:LABEL_KEY]) {
+                } else if ([keyPath isEqualToString:BDSKSearchBookmarkLabelKey]) {
                     [[[self undoManager] prepareWithInvocationTarget:bookmark] setLabel:oldValue];
                 }
                 break;
             case NSKeyValueChangeInsertion:
-                if ([keyPath isEqualToString:CHILDREN_KEY]) {
+                if ([keyPath isEqualToString:BDSKSearchBookmarkChildrenKey]) {
                     [self startObservingBookmarks:newValue];
                     [[[self undoManager] prepareWithInvocationTarget:self] removeObjectsFromChildrenOfBookmark:bookmark atIndexes:indexes];
                 }
                 break;
             case NSKeyValueChangeRemoval:
-                if ([keyPath isEqualToString:CHILDREN_KEY]) {
+                if ([keyPath isEqualToString:BDSKSearchBookmarkChildrenKey]) {
                     [self stopObservingBookmarks:oldValue];
                     [[[self undoManager] prepareWithInvocationTarget:self] insertObjects:oldValue inChildrenOfBookmark:bookmark atIndexes:indexes];
                 }
                 break;
             case NSKeyValueChangeReplacement:
-                if ([keyPath isEqualToString:CHILDREN_KEY]) {
+                if ([keyPath isEqualToString:BDSKSearchBookmarkChildrenKey]) {
                     [self stopObservingBookmarks:oldValue];
                     [self startObservingBookmarks:newValue];
                     [[[self undoManager] prepareWithInvocationTarget:self] removeObjectsFromChildrenOfBookmark:bookmark atIndexes:indexes];
@@ -317,7 +317,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 
 #pragma mark NSOutlineView datasource methods
 
-- (NSInteger)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item {
+- (int)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item {
     return [[(item ?: bookmarkRoot) children] count];
 }
 
@@ -325,7 +325,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     return [item bookmarkType] == BDSKSearchBookmarkTypeFolder;
 }
 
-- (id)outlineView:(NSOutlineView *)ov child:(NSInteger)idx ofItem:(id)item {
+- (id)outlineView:(NSOutlineView *)ov child:(int)idx ofItem:(id)item {
     return [[(item ?: bookmarkRoot) children] objectAtIndex:idx];
 }
 
@@ -335,8 +335,8 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
         return [NSDictionary dictionaryWithObjectsAndKeys:[item label], BDSKTextWithIconCellStringKey, [item icon], BDSKTextWithIconCellImageKey, nil];
     } else if ([tcID isEqualToString:@"server"]) {
         if ([item bookmarkType] == BDSKSearchBookmarkTypeFolder) {
-            NSInteger count = [[item children] count];
-            return count == 1 ? NSLocalizedString(@"1 item", @"Bookmark folder description") : [NSString stringWithFormat:NSLocalizedString(@"%ld items", @"Bookmark folder description"), (long)count];
+            int count = [[item children] count];
+            return count == 1 ? NSLocalizedString(@"1 item", @"Bookmark folder description") : [NSString stringWithFormat:NSLocalizedString(@"%i items", @"Bookmark folder description"), count];
         } else {
             return [[item info] valueForKey:@"name"];
         }
@@ -349,24 +349,21 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 - (void)outlineView:(NSOutlineView *)ov setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
     NSString *tcID = [tableColumn identifier];
     if ([tcID isEqualToString:@"label"]) {
-        // the editied object is always an NSDictionary, see BDSKTextWithIconFormatter
-        NSString *newLabel = [object valueForKey:BDSKTextWithIconCellStringKey] ?: @"";
-        if ([newLabel isEqualToString:[item label]] == NO)
-            [item setLabel:newLabel];
+        if (object == nil)
+            object = @"";
+        if ([object isEqualToString:[item label]] == NO)
+            [item setLabel:object];
     }
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard {
-    if (pboard == [NSPasteboard pasteboardWithName:NSDragPboard]) {
-        [self setDraggedBookmarks:minimumCoverForBookmarks(items)];
-        [pboard declareTypes:[NSArray arrayWithObjects:BDSKSearchBookmarkRowsPboardType, nil] owner:nil];
-        [pboard setData:[NSData data] forType:BDSKSearchBookmarkRowsPboardType];
-        return YES;
-    }
-    return NO;
+    [self setDraggedBookmarks:[self minimumCoverForBookmarks:items]];
+    [pboard declareTypes:[NSArray arrayWithObjects:BDSKSearchBookmarkRowsPboardType, nil] owner:nil];
+    [pboard setData:[NSData data] forType:BDSKSearchBookmarkRowsPboardType];
+    return YES;
 }
 
-- (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx {
+- (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKSearchBookmarkRowsPboardType, nil]];
     
@@ -385,7 +382,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     return NSDragOperationNone;
 }
 
-- (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(NSInteger)idx {
+- (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(int)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKSearchBookmarkRowsPboardType, nil]];
     
@@ -399,7 +396,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
         
 		while (bookmark = [bmEnum nextObject]) {
             BDSKSearchBookmark *parent = [bookmark parent];
-            NSInteger bookmarkIndex = [[parent children] indexOfObject:bookmark];
+            int bookmarkIndex = [[parent children] indexOfObject:bookmark];
             if (item == parent) {
                 if (idx > bookmarkIndex)
                     idx--;
@@ -414,12 +411,8 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     return NO;
 }
 
-- (void)outlineView:(NSOutlineView *)ov concludeDragOperation:(NSDragOperation)operation {
+- (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation {
     [self setDraggedBookmarks:nil];
-}
-
-- (BOOL)outlineView:(NSOutlineView *)ov canCopyItems:(NSArray *)items {
-    return NO;
 }
 
 #pragma mark NSOutlineView delegate methods
@@ -437,15 +430,22 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     return [[tableColumn identifier] isEqualToString:@"label"] && [item bookmarkType] != BDSKSearchBookmarkTypeSeparator;
 }
 
-- (void)outlineView:(NSOutlineView *)ov deleteItems:(NSArray *)items {
-    NSEnumerator *itemEnum = [minimumCoverForBookmarks(items) reverseObjectEnumerator];
+- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows {
+    NSMutableArray *items = [NSMutableArray array];
+    NSEnumerator *rowEnum = [rows objectEnumerator];
+    NSNumber *row;
+    
+    while (row = [rowEnum nextObject])
+        [items addObject:[outlineView itemAtRow:[row intValue]]];
+    
+    NSEnumerator *itemEnum = [[self minimumCoverForBookmarks:items] reverseObjectEnumerator];
     BDSKSearchBookmark *item;
     
     [self endEditing];
     
     while (item = [itemEnum  nextObject]) {
         BDSKSearchBookmark *parent = [item parent];
-        NSUInteger itemIndex = [[parent children] indexOfObject:item];
+        unsigned int itemIndex = [[parent children] indexOfObject:item];
         if (itemIndex != NSNotFound)
             [parent removeObjectFromChildrenAtIndex:itemIndex];
     }

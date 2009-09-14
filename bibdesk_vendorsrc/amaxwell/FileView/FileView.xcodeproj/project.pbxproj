@@ -3,20 +3,39 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 42;
 	objects = {
+
+/* Begin PBXAggregateTarget section */
+		F9F04CE10CE260EB00F28ED2 /* FileView + Leopard */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = F9F04CE80CE2612D00F28ED2 /* Build configuration list for PBXAggregateTarget "FileView + Leopard" */;
+			buildPhases = (
+				F9F04CE00CE260EB00F28ED2 /* CopyFiles */,
+			);
+			comments = "This target just copies the plugin into the framework's bundle, since the bundle needs to link against the framework.";
+			dependencies = (
+				F9F04CE50CE260F400F28ED2 /* PBXTargetDependency */,
+			);
+			name = "FileView + Leopard";
+			productName = "Bundle QL plugin";
+		};
+/* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
 		8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 		8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
 		CE05D35B0D7B0D4A0034C2A8 /* FVUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D3250D7AFC830034C2A8 /* FVUtilities.m */; };
 		CE05D35E0D7B0D750034C2A8 /* FVUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D3240D7AFC830034C2A8 /* FVUtilities.h */; };
+		CE05D3AD0D7B21DC0034C2A8 /* FVColorMenuView.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE05D3AC0D7B21DC0034C2A8 /* FVColorMenuView.nib */; };
 		CE05D3B10D7B22170034C2A8 /* FVColorMenuView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D3AF0D7B22170034C2A8 /* FVColorMenuView.h */; };
 		CE05D3B20D7B22170034C2A8 /* FVColorMenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D3B00D7B22170034C2A8 /* FVColorMenuView.m */; };
 		CE05D3C60D7B272A0034C2A8 /* FVDownload.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D3C40D7B272A0034C2A8 /* FVDownload.h */; };
 		CE05D3C70D7B272A0034C2A8 /* FVDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D3C50D7B272A0034C2A8 /* FVDownload.m */; };
 		CE05D3D00D7B27FC0034C2A8 /* FVProgressIndicatorCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D3CE0D7B27FC0034C2A8 /* FVProgressIndicatorCell.h */; };
 		CE05D3D10D7B27FC0034C2A8 /* FVProgressIndicatorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D3CF0D7B27FC0034C2A8 /* FVProgressIndicatorCell.m */; };
+		CE05D43A0D7B31A80034C2A8 /* FVCGImageHeader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CE05D4380D7B31A80034C2A8 /* FVCGImageHeader.cpp */; };
+		CE05D43B0D7B31A80034C2A8 /* FVCGImageHeader.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D4390D7B31A80034C2A8 /* FVCGImageHeader.h */; };
 		CE05D4700D7B36DD0034C2A8 /* FVIcon_Private.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D4690D7B36DD0034C2A8 /* FVIcon_Private.m */; };
 		CE05D4710D7B36DD0034C2A8 /* FVMIMEIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D46A0D7B36DD0034C2A8 /* FVMIMEIcon.h */; };
 		CE05D4720D7B36DD0034C2A8 /* FVMIMEIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D46B0D7B36DD0034C2A8 /* FVMIMEIcon.m */; };
@@ -26,10 +45,6 @@
 		CE05D4760D7B36DD0034C2A8 /* FVPlaceholderImage.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D46F0D7B36DD0034C2A8 /* FVPlaceholderImage.m */; };
 		CE05D5A20D7C10FD0034C2A8 /* FVSlider.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D5A00D7C10FD0034C2A8 /* FVSlider.h */; };
 		CE05D5A30D7C10FD0034C2A8 /* FVSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D5A10D7C10FD0034C2A8 /* FVSlider.m */; };
-		CE65FC5C0F72578D0089F9DC /* _FVMappedDataProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = CE65FC580F72578D0089F9DC /* _FVMappedDataProvider.h */; };
-		CE65FC5D0F72578D0089F9DC /* _FVMappedDataProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = CE65FC590F72578D0089F9DC /* _FVMappedDataProvider.m */; };
-		CE65FC5E0F72578D0089F9DC /* _FVSplitSet.h in Headers */ = {isa = PBXBuildFile; fileRef = CE65FC5A0F72578D0089F9DC /* _FVSplitSet.h */; };
-		CE65FC5F0F72578D0089F9DC /* _FVSplitSet.m in Sources */ = {isa = PBXBuildFile; fileRef = CE65FC5B0F72578D0089F9DC /* _FVSplitSet.m */; };
 		CE8923300D7CBB0C006D514C /* FVConcreteOperationQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D5D40D7C223E0034C2A8 /* FVConcreteOperationQueue.h */; };
 		CE8923310D7CBB0D006D514C /* FVConcreteOperationQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D5D50D7C223E0034C2A8 /* FVConcreteOperationQueue.m */; };
 		CE8923320D7CBB0E006D514C /* FVMainThreadOperationQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D5CE0D7C223E0034C2A8 /* FVMainThreadOperationQueue.h */; };
@@ -48,68 +63,76 @@
 		CE89233F0D7CBB1A006D514C /* FVOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D5E90D7C22550034C2A8 /* FVOperation.m */; };
 		CEA831140DC1FAB500B551D1 /* FVAccessibilityIconElement.h in Headers */ = {isa = PBXBuildFile; fileRef = CEA831120DC1FAB500B551D1 /* FVAccessibilityIconElement.h */; };
 		CEA831150DC1FAB500B551D1 /* FVAccessibilityIconElement.m in Sources */ = {isa = PBXBuildFile; fileRef = CEA831130DC1FAB500B551D1 /* FVAccessibilityIconElement.m */; };
-		CEF33C210F76F15F0026452B /* FVPreviewer.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEF33C1F0F76F15F0026452B /* FVPreviewer.nib */; };
-		CEFC19B10F693E8B00B2AEE6 /* FileView.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC19B00F693E8B00B2AEE6 /* FileView.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		CEFC1CF60F6AB84000B2AEE6 /* _FVDocumentDescription.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1CE90F6AB84000B2AEE6 /* _FVDocumentDescription.h */; };
-		CEFC1CF70F6AB84000B2AEE6 /* _FVDocumentDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1CEA0F6AB84000B2AEE6 /* _FVDocumentDescription.m */; };
-		CEFC1CFC0F6AB84000B2AEE6 /* FVCacheFile.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1CEF0F6AB84000B2AEE6 /* FVCacheFile.h */; };
-		CEFC1CFD0F6AB84000B2AEE6 /* FVCacheFile.mm in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1CF00F6AB84000B2AEE6 /* FVCacheFile.mm */; };
-		CEFC1CFE0F6AB84000B2AEE6 /* FVCGColorSpaceDescription.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1CF10F6AB84000B2AEE6 /* FVCGColorSpaceDescription.h */; };
-		CEFC1CFF0F6AB84000B2AEE6 /* FVCGColorSpaceDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1CF20F6AB84000B2AEE6 /* FVCGColorSpaceDescription.m */; };
-		CEFC1D000F6AB84000B2AEE6 /* FVCGImageDescription.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1CF30F6AB84000B2AEE6 /* FVCGImageDescription.h */; };
-		CEFC1D010F6AB84000B2AEE6 /* FVCGImageDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1CF40F6AB84000B2AEE6 /* FVCGImageDescription.m */; };
-		CEFC1D020F6AB84000B2AEE6 /* FVIconCache.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1CF50F6AB84000B2AEE6 /* FVIconCache.m */; };
-		CEFC1D090F6AB8AD00B2AEE6 /* FVBitmapContext.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1D030F6AB8AD00B2AEE6 /* FVBitmapContext.h */; };
-		CEFC1D0A0F6AB8AD00B2AEE6 /* FVBitmapContext.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1D040F6AB8AD00B2AEE6 /* FVBitmapContext.m */; };
-		CEFC1D0B0F6AB8AD00B2AEE6 /* FVCGImageUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1D050F6AB8AD00B2AEE6 /* FVCGImageUtilities.h */; };
-		CEFC1D0C0F6AB8AD00B2AEE6 /* FVCGImageUtilities.mm in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1D060F6AB8AD00B2AEE6 /* FVCGImageUtilities.mm */; };
-		CEFC1D0D0F6AB8AD00B2AEE6 /* FVImageBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1D070F6AB8AD00B2AEE6 /* FVImageBuffer.h */; };
-		CEFC1D0E0F6AB8AD00B2AEE6 /* FVImageBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1D080F6AB8AD00B2AEE6 /* FVImageBuffer.m */; };
-		CEFC1D170F6AB94F00B2AEE6 /* FVObject.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1D110F6AB94F00B2AEE6 /* FVObject.h */; };
-		CEFC1D180F6AB94F00B2AEE6 /* FVObject.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1D120F6AB94F00B2AEE6 /* FVObject.m */; };
-		CEFC1D190F6AB94F00B2AEE6 /* FVAllocator.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1D130F6AB94F00B2AEE6 /* FVAllocator.h */; };
-		CEFC1D1A0F6AB94F00B2AEE6 /* FVAllocator.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1D140F6AB94F00B2AEE6 /* FVAllocator.m */; };
-		CEFC1D1B0F6AB94F00B2AEE6 /* fv_zone.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1D150F6AB94F00B2AEE6 /* fv_zone.h */; };
-		CEFC1D1C0F6AB94F00B2AEE6 /* fv_zone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1D160F6AB94F00B2AEE6 /* fv_zone.cpp */; };
-		CEFC1D210F6AB99100B2AEE6 /* FVThread.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1D1F0F6AB99100B2AEE6 /* FVThread.h */; };
-		CEFC1D220F6AB99100B2AEE6 /* FVThread.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1D200F6AB99100B2AEE6 /* FVThread.m */; };
-		CEFC1D290F6ABA2300B2AEE6 /* FVAliasBadge.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1D250F6ABA2300B2AEE6 /* FVAliasBadge.m */; };
-		CEFC1D2A0F6ABA2300B2AEE6 /* FVAliasBadge.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1D260F6ABA2300B2AEE6 /* FVAliasBadge.h */; };
-		CEFC1D2B0F6ABA2300B2AEE6 /* FVBaseIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1D270F6ABA2300B2AEE6 /* FVBaseIcon.h */; };
-		CEFC1D2C0F6ABA2300B2AEE6 /* FVBaseIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1D280F6ABA2300B2AEE6 /* FVBaseIcon.m */; };
-		CEFC1D2F0F6ABA3C00B2AEE6 /* FVCoreTextIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1D2D0F6ABA3C00B2AEE6 /* FVCoreTextIcon.h */; };
-		CEFC1D300F6ABA3C00B2AEE6 /* FVCoreTextIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1D2E0F6ABA3C00B2AEE6 /* FVCoreTextIcon.m */; };
-		CEFC1F410F6AD24600B2AEE6 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEFC1F400F6AD24600B2AEE6 /* Accelerate.framework */; };
-		CEFC1F690F6AD46D00B2AEE6 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F946922F0CA5710500AC2772 /* QuickLook.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
-		CEFC1F6E0F6AD4B300B2AEE6 /* FVQuickLookIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F946921C0CA5700800AC2772 /* FVQuickLookIcon.m */; };
 		F92C7BC70D280D0E004409D8 /* FVWebViewIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */; };
 		F92C7BC80D280D0F004409D8 /* FVWebViewIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */; };
 		F92C7C4F0D282503004409D8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */; };
 		F92C7C500D28250F004409D8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */; };
 		F93C3AEB0D39473C006EB558 /* FVFinderLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = F93C3AE90D39473C006EB558 /* FVFinderLabel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F93C3AEC0D39473C006EB558 /* FVFinderLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = F93C3AEA0D39473C006EB558 /* FVFinderLabel.m */; };
-		F94692020CA56EC500AC2772 /* FVFileView.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691F70CA56EC500AC2772 /* FVFileView.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		F94692030CA56EC500AC2772 /* FVFileView.m in Sources */ = {isa = PBXBuildFile; fileRef = F94691F80CA56EC500AC2772 /* FVFileView.m */; };
+		F94692020CA56EC500AC2772 /* FileView.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691F70CA56EC500AC2772 /* FileView.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		F94692030CA56EC500AC2772 /* FileView.m in Sources */ = {isa = PBXBuildFile; fileRef = F94691F80CA56EC500AC2772 /* FileView.m */; };
 		F94692040CA56EC500AC2772 /* FVArrowButtonCell.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691F90CA56EC500AC2772 /* FVArrowButtonCell.h */; };
 		F94692050CA56EC500AC2772 /* FVArrowButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F94691FA0CA56EC500AC2772 /* FVArrowButtonCell.m */; };
 		F94692060CA56EC500AC2772 /* FVIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691FB0CA56EC500AC2772 /* FVIcon.h */; };
 		F94692070CA56EC500AC2772 /* FVIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F94691FC0CA56EC500AC2772 /* FVIcon.m */; };
 		F946920A0CA56EC500AC2772 /* FVPreviewer.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691FF0CA56EC500AC2772 /* FVPreviewer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F946920B0CA56EC500AC2772 /* FVPreviewer.m in Sources */ = {isa = PBXBuildFile; fileRef = F94692000CA56EC500AC2772 /* FVPreviewer.m */; };
+		F946921D0CA5700800AC2772 /* FVQuickLookIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F946921C0CA5700800AC2772 /* FVQuickLookIcon.m */; };
+		F946921E0CA5701F00AC2772 /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DC2EF5B0486A6940098B216 /* FileView.framework */; };
 		F94692310CA5710500AC2772 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F946922D0CA5710500AC2772 /* QTKit.framework */; };
 		F94692320CA5710500AC2772 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F946922E0CA5710500AC2772 /* Quartz.framework */; };
 		F94692340CA5710500AC2772 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F94692300CA5710500AC2772 /* WebKit.framework */; };
+		F94692370CA5712800AC2772 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F946922F0CA5710500AC2772 /* QuickLook.framework */; };
 		F946926A0CA5767700AC2772 /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DC2EF5B0486A6940098B216 /* FileView.framework */; };
 		F946926E0CA5769100AC2772 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
 		F94692830CA5777300AC2772 /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = F946927D0CA5777300AC2772 /* Controller.m */; };
 		F94692840CA5777300AC2772 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F946927E0CA5777300AC2772 /* InfoPlist.strings */; };
 		F94692850CA5777300AC2772 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = F94692800CA5777300AC2772 /* MainMenu.nib */; };
+		F94692860CA5777300AC2772 /* FileView Program-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F94692820CA5777300AC2772 /* FileView Program-Info.plist */; };
 		F946928F0CA5784700AC2772 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F946928E0CA5784700AC2772 /* main.m */; };
+		F94692A60CA5793B00AC2772 /* FVPreviewer.nib in Resources */ = {isa = PBXBuildFile; fileRef = F94692A50CA5793B00AC2772 /* FVPreviewer.nib */; };
 		F94693FF0CA583A300AC2772 /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8DC2EF5B0486A6940098B216 /* FileView.framework */; };
 		F94694500CA59AF100AC2772 /* FVScaledImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = F946944E0CA59AF100AC2772 /* FVScaledImageView.h */; };
 		F94694510CA59AF100AC2772 /* FVScaledImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = F946944F0CA59AF100AC2772 /* FVScaledImageView.m */; };
 		F980F0930CCC3C2E0067C1DF /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F980F0920CCC3C2E0067C1DF /* libz.dylib */; };
+		F9A2D2E20CCA76B6002F517B /* DTFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D2E00CCA76B6002F517B /* DTFile.cpp */; };
+		F9A2D2E30CCA76B6002F517B /* DTFile.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D2E10CCA76B6002F517B /* DTFile.h */; };
+		F9A2D2EB0CCA772A002F517B /* DTError.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D2E90CCA772A002F517B /* DTError.h */; };
+		F9A2D2EC0CCA772A002F517B /* DTError.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D2EA0CCA772A002F517B /* DTError.cpp */; };
+		F9A2D2FE0CCA7783002F517B /* DTArray.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D2ED0CCA7783002F517B /* DTArray.h */; };
+		F9A2D2FF0CCA7783002F517B /* DTArrayConversion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D2EE0CCA7783002F517B /* DTArrayConversion.cpp */; };
+		F9A2D3000CCA7783002F517B /* DTArrayConversion.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D2EF0CCA7783002F517B /* DTArrayConversion.h */; };
+		F9A2D3010CCA7783002F517B /* DTCharArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D2F00CCA7783002F517B /* DTCharArray.cpp */; };
+		F9A2D3020CCA7783002F517B /* DTCharArray.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D2F10CCA7783002F517B /* DTCharArray.h */; };
+		F9A2D3030CCA7783002F517B /* DTDoubleArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D2F20CCA7783002F517B /* DTDoubleArray.cpp */; };
+		F9A2D3040CCA7783002F517B /* DTDoubleArray.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D2F30CCA7783002F517B /* DTDoubleArray.h */; };
+		F9A2D3050CCA7783002F517B /* DTFloatArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D2F40CCA7783002F517B /* DTFloatArray.cpp */; };
+		F9A2D3060CCA7783002F517B /* DTFloatArray.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D2F50CCA7783002F517B /* DTFloatArray.h */; };
+		F9A2D3070CCA7783002F517B /* DTIntArray.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D2F60CCA7783002F517B /* DTIntArray.h */; };
+		F9A2D3080CCA7783002F517B /* DTIntArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D2F70CCA7783002F517B /* DTIntArray.cpp */; };
+		F9A2D3090CCA7783002F517B /* DTShortIntArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D2F80CCA7783002F517B /* DTShortIntArray.cpp */; };
+		F9A2D30A0CCA7783002F517B /* DTShortIntArray.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D2F90CCA7783002F517B /* DTShortIntArray.h */; };
+		F9A2D30B0CCA7783002F517B /* DTUCharArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D2FA0CCA7783002F517B /* DTUCharArray.cpp */; };
+		F9A2D30C0CCA7783002F517B /* DTUCharArray.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D2FB0CCA7783002F517B /* DTUCharArray.h */; };
+		F9A2D30D0CCA7783002F517B /* DTUShortIntArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D2FC0CCA7783002F517B /* DTUShortIntArray.cpp */; };
+		F9A2D30E0CCA7783002F517B /* DTUShortIntArray.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D2FD0CCA7783002F517B /* DTUShortIntArray.h */; };
+		F9A2D3150CCA77B3002F517B /* DTLock.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D3140CCA77B3002F517B /* DTLock.h */; };
+		F9A2D31B0CCA77DF002F517B /* DTUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D3190CCA77DF002F517B /* DTUtilities.cpp */; };
+		F9A2D31C0CCA77DF002F517B /* DTUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D31A0CCA77DF002F517B /* DTUtilities.h */; };
+		F9A2D31F0CCA7803002F517B /* DTArrayTemplates.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D31E0CCA7803002F517B /* DTArrayTemplates.h */; };
+		F9A2D33A0CCA78F5002F517B /* DTDataFile.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D3380CCA78F5002F517B /* DTDataFile.h */; };
+		F9A2D33B0CCA78F5002F517B /* DTDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D3390CCA78F5002F517B /* DTDataFile.cpp */; };
+		F9A2D3440CCA7993002F517B /* DTDataStorage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D3420CCA7993002F517B /* DTDataStorage.cpp */; };
+		F9A2D3450CCA7993002F517B /* DTDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D3430CCA7993002F517B /* DTDataStorage.h */; };
+		F9A2D34A0CCA79F1002F517B /* DTPointer.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D3480CCA79F1002F517B /* DTPointer.h */; };
+		F9A2D34B0CCA79F1002F517B /* DTList.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D3490CCA79F1002F517B /* DTList.h */; };
+		F9A2D34E0CCA7A09002F517B /* DTEndianSwap.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D34C0CCA7A09002F517B /* DTEndianSwap.h */; };
+		F9A2D34F0CCA7A09002F517B /* DTEndianSwap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D34D0CCA7A09002F517B /* DTEndianSwap.cpp */; };
 		F9A2D39D0CCBB3B5002F517B /* FVIconCache.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D39B0CCBB3B5002F517B /* FVIconCache.h */; };
+		F9A2D39E0CCBB3B5002F517B /* FVIconCache.mm in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D39C0CCBB3B5002F517B /* FVIconCache.mm */; };
+		F9A2D3B30CCBB7A7002F517B /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F9A2D3B20CCBB7A7002F517B /* libbz2.dylib */; };
+		F9A2D3DA0CCBDDDF002F517B /* FVBitmapContextCache.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D3D80CCBDDDF002F517B /* FVBitmapContextCache.h */; };
+		F9A2D3DB0CCBDDDF002F517B /* FVBitmapContextCache.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D3D90CCBDDDF002F517B /* FVBitmapContextCache.m */; };
 		F9A2D3E80CCBE12B002F517B /* FVImageIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D3E60CCBE12B002F517B /* FVImageIcon.h */; };
 		F9A2D3E90CCBE12B002F517B /* FVImageIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D3E70CCBE12B002F517B /* FVImageIcon.m */; };
 		F9A2D3EC0CCBE13F002F517B /* FVFinderIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D3EA0CCBE13F002F517B /* FVFinderIcon.h */; };
@@ -121,16 +144,31 @@
 		F9A2D3FF0CCBE321002F517B /* FVIcon_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D3FE0CCBE321002F517B /* FVIcon_Private.h */; };
 		F9A2D4280CCBE6BA002F517B /* FVQuickLookIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D4270CCBE6BA002F517B /* FVQuickLookIcon.h */; };
 		F9E469370CFF6D12003E6C0A /* FileView.strings in Resources */ = {isa = PBXBuildFile; fileRef = F9E469350CFF6D12003E6C0A /* FileView.strings */; };
+		F9F04CEF0CE2618200F28ED2 /* FileView-Leopard.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = F94692130CA56F4300AC2772 /* FileView-Leopard.bundle */; };
 		F9F22DE90CDAD53300A9D449 /* License in Resources */ = {isa = PBXBuildFile; fileRef = F9F22DE80CDAD53300A9D449 /* License */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		CE2A3CAC0F8129BB005BD1CD /* PBXContainerItemProxy */ = {
+		CE3A673E0D60F24200D20AC7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F9F04CE10CE260EB00F28ED2;
+			remoteInfo = "Framework + Plugin";
+		};
+		F9F04CDA0CE260AC00F28ED2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = FileView;
+		};
+		F9F04CE40CE260F400F28ED2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F94692120CA56F4300AC2772;
+			remoteInfo = "FileView-Leopard";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -142,6 +180,16 @@
 			dstSubfolderSpec = 10;
 			files = (
 				F94693FF0CA583A300AC2772 /* FileView.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F9F04CE00CE260EB00F28ED2 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = FileView.framework/Resources;
+			dstSubfolderSpec = 16;
+			files = (
+				F9F04CEF0CE2618200F28ED2 /* FileView-Leopard.bundle in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -157,12 +205,16 @@
 		8DC2EF5B0486A6940098B216 /* FileView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FileView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE05D3240D7AFC830034C2A8 /* FVUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVUtilities.h; sourceTree = "<group>"; };
 		CE05D3250D7AFC830034C2A8 /* FVUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVUtilities.m; sourceTree = "<group>"; };
+		CE05D3A70D7B21A70034C2A8 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/FVColorMenuView.nib; sourceTree = "<group>"; };
+		CE05D3AE0D7B21EF0034C2A8 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/FVColorMenuView.nib; sourceTree = "<group>"; };
 		CE05D3AF0D7B22170034C2A8 /* FVColorMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVColorMenuView.h; sourceTree = "<group>"; };
 		CE05D3B00D7B22170034C2A8 /* FVColorMenuView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVColorMenuView.m; sourceTree = "<group>"; };
 		CE05D3C40D7B272A0034C2A8 /* FVDownload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVDownload.h; sourceTree = "<group>"; };
 		CE05D3C50D7B272A0034C2A8 /* FVDownload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVDownload.m; sourceTree = "<group>"; };
 		CE05D3CE0D7B27FC0034C2A8 /* FVProgressIndicatorCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVProgressIndicatorCell.h; sourceTree = "<group>"; };
 		CE05D3CF0D7B27FC0034C2A8 /* FVProgressIndicatorCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVProgressIndicatorCell.m; sourceTree = "<group>"; };
+		CE05D4380D7B31A80034C2A8 /* FVCGImageHeader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FVCGImageHeader.cpp; sourceTree = "<group>"; };
+		CE05D4390D7B31A80034C2A8 /* FVCGImageHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVCGImageHeader.h; sourceTree = "<group>"; };
 		CE05D4690D7B36DD0034C2A8 /* FVIcon_Private.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVIcon_Private.m; sourceTree = "<group>"; };
 		CE05D46A0D7B36DD0034C2A8 /* FVMIMEIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVMIMEIcon.h; sourceTree = "<group>"; };
 		CE05D46B0D7B36DD0034C2A8 /* FVMIMEIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVMIMEIcon.m; sourceTree = "<group>"; };
@@ -188,59 +240,27 @@
 		CE05D5E70D7C22550034C2A8 /* FVInvocationOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVInvocationOperation.m; sourceTree = "<group>"; };
 		CE05D5E80D7C22550034C2A8 /* FVOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVOperation.h; sourceTree = "<group>"; };
 		CE05D5E90D7C22550034C2A8 /* FVOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVOperation.m; sourceTree = "<group>"; };
-		CE65FC580F72578D0089F9DC /* _FVMappedDataProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _FVMappedDataProvider.h; sourceTree = "<group>"; };
-		CE65FC590F72578D0089F9DC /* _FVMappedDataProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _FVMappedDataProvider.m; sourceTree = "<group>"; };
-		CE65FC5A0F72578D0089F9DC /* _FVSplitSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _FVSplitSet.h; sourceTree = "<group>"; };
-		CE65FC5B0F72578D0089F9DC /* _FVSplitSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _FVSplitSet.m; sourceTree = "<group>"; };
 		CEA831120DC1FAB500B551D1 /* FVAccessibilityIconElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVAccessibilityIconElement.h; sourceTree = "<group>"; };
 		CEA831130DC1FAB500B551D1 /* FVAccessibilityIconElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVAccessibilityIconElement.m; sourceTree = "<group>"; };
-		CEF33C1F0F76F15F0026452B /* FVPreviewer.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; path = FVPreviewer.nib; sourceTree = "<group>"; };
-		CEFC19B00F693E8B00B2AEE6 /* FileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileView.h; sourceTree = "<group>"; };
-		CEFC1CE90F6AB84000B2AEE6 /* _FVDocumentDescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _FVDocumentDescription.h; sourceTree = "<group>"; };
-		CEFC1CEA0F6AB84000B2AEE6 /* _FVDocumentDescription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _FVDocumentDescription.m; sourceTree = "<group>"; };
-		CEFC1CEF0F6AB84000B2AEE6 /* FVCacheFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVCacheFile.h; sourceTree = "<group>"; };
-		CEFC1CF00F6AB84000B2AEE6 /* FVCacheFile.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FVCacheFile.mm; sourceTree = "<group>"; };
-		CEFC1CF10F6AB84000B2AEE6 /* FVCGColorSpaceDescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVCGColorSpaceDescription.h; sourceTree = "<group>"; };
-		CEFC1CF20F6AB84000B2AEE6 /* FVCGColorSpaceDescription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVCGColorSpaceDescription.m; sourceTree = "<group>"; };
-		CEFC1CF30F6AB84000B2AEE6 /* FVCGImageDescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVCGImageDescription.h; sourceTree = "<group>"; };
-		CEFC1CF40F6AB84000B2AEE6 /* FVCGImageDescription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVCGImageDescription.m; sourceTree = "<group>"; };
-		CEFC1CF50F6AB84000B2AEE6 /* FVIconCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVIconCache.m; sourceTree = "<group>"; };
-		CEFC1D030F6AB8AD00B2AEE6 /* FVBitmapContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVBitmapContext.h; sourceTree = "<group>"; };
-		CEFC1D040F6AB8AD00B2AEE6 /* FVBitmapContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVBitmapContext.m; sourceTree = "<group>"; };
-		CEFC1D050F6AB8AD00B2AEE6 /* FVCGImageUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVCGImageUtilities.h; sourceTree = "<group>"; };
-		CEFC1D060F6AB8AD00B2AEE6 /* FVCGImageUtilities.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FVCGImageUtilities.mm; sourceTree = "<group>"; };
-		CEFC1D070F6AB8AD00B2AEE6 /* FVImageBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVImageBuffer.h; sourceTree = "<group>"; };
-		CEFC1D080F6AB8AD00B2AEE6 /* FVImageBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVImageBuffer.m; sourceTree = "<group>"; };
-		CEFC1D110F6AB94F00B2AEE6 /* FVObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVObject.h; sourceTree = "<group>"; };
-		CEFC1D120F6AB94F00B2AEE6 /* FVObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVObject.m; sourceTree = "<group>"; };
-		CEFC1D130F6AB94F00B2AEE6 /* FVAllocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVAllocator.h; sourceTree = "<group>"; };
-		CEFC1D140F6AB94F00B2AEE6 /* FVAllocator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVAllocator.m; sourceTree = "<group>"; };
-		CEFC1D150F6AB94F00B2AEE6 /* fv_zone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fv_zone.h; sourceTree = "<group>"; };
-		CEFC1D160F6AB94F00B2AEE6 /* fv_zone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fv_zone.cpp; sourceTree = "<group>"; };
-		CEFC1D1F0F6AB99100B2AEE6 /* FVThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVThread.h; sourceTree = "<group>"; };
-		CEFC1D200F6AB99100B2AEE6 /* FVThread.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVThread.m; sourceTree = "<group>"; };
-		CEFC1D250F6ABA2300B2AEE6 /* FVAliasBadge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVAliasBadge.m; sourceTree = "<group>"; };
-		CEFC1D260F6ABA2300B2AEE6 /* FVAliasBadge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVAliasBadge.h; sourceTree = "<group>"; };
-		CEFC1D270F6ABA2300B2AEE6 /* FVBaseIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVBaseIcon.h; sourceTree = "<group>"; };
-		CEFC1D280F6ABA2300B2AEE6 /* FVBaseIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVBaseIcon.m; sourceTree = "<group>"; };
-		CEFC1D2D0F6ABA3C00B2AEE6 /* FVCoreTextIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVCoreTextIcon.h; sourceTree = "<group>"; };
-		CEFC1D2E0F6ABA3C00B2AEE6 /* FVCoreTextIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVCoreTextIcon.m; sourceTree = "<group>"; };
-		CEFC1F400F6AD24600B2AEE6 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = /System/Library/Frameworks/Accelerate.framework; sourceTree = "<absolute>"; };
 		F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVWebViewIcon.h; sourceTree = "<group>"; };
 		F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVWebViewIcon.m; sourceTree = "<group>"; };
 		F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
 		F93C351E0D35D214006EB558 /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/FileView.strings; sourceTree = "<group>"; };
 		F93C351F0D35D221006EB558 /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F93C35200D35D23E006EB558 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/FVPreviewer.nib; sourceTree = "<group>"; };
 		F93C3AE90D39473C006EB558 /* FVFinderLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVFinderLabel.h; sourceTree = "<group>"; };
 		F93C3AEA0D39473C006EB558 /* FVFinderLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVFinderLabel.m; sourceTree = "<group>"; };
-		F94691F70CA56EC500AC2772 /* FVFileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVFileView.h; sourceTree = "<group>"; };
-		F94691F80CA56EC500AC2772 /* FVFileView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVFileView.m; sourceTree = "<group>"; };
+		F94691F70CA56EC500AC2772 /* FileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileView.h; sourceTree = "<group>"; };
+		F94691F80CA56EC500AC2772 /* FileView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileView.m; sourceTree = "<group>"; };
 		F94691F90CA56EC500AC2772 /* FVArrowButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVArrowButtonCell.h; sourceTree = "<group>"; };
 		F94691FA0CA56EC500AC2772 /* FVArrowButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVArrowButtonCell.m; sourceTree = "<group>"; };
 		F94691FB0CA56EC500AC2772 /* FVIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVIcon.h; sourceTree = "<group>"; };
 		F94691FC0CA56EC500AC2772 /* FVIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVIcon.m; sourceTree = "<group>"; };
 		F94691FF0CA56EC500AC2772 /* FVPreviewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVPreviewer.h; sourceTree = "<group>"; };
 		F94692000CA56EC500AC2772 /* FVPreviewer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVPreviewer.m; sourceTree = "<group>"; };
+		F94692010CA56EC500AC2772 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/FVPreviewer.nib; sourceTree = "<group>"; };
+		F94692130CA56F4300AC2772 /* FileView-Leopard.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "FileView-Leopard.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F94692140CA56F4300AC2772 /* FileView-Leopard-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "FileView-Leopard-Info.plist"; sourceTree = "<group>"; };
 		F946921C0CA5700800AC2772 /* FVQuickLookIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVQuickLookIcon.m; sourceTree = "<group>"; };
 		F946922D0CA5710500AC2772 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = /System/Library/Frameworks/QTKit.framework; sourceTree = "<absolute>"; };
 		F946922E0CA5710500AC2772 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = /System/Library/Frameworks/Quartz.framework; sourceTree = "<absolute>"; };
@@ -256,7 +276,44 @@
 		F946944E0CA59AF100AC2772 /* FVScaledImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVScaledImageView.h; sourceTree = "<group>"; };
 		F946944F0CA59AF100AC2772 /* FVScaledImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVScaledImageView.m; sourceTree = "<group>"; };
 		F980F0920CCC3C2E0067C1DF /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
+		F9A2D2E00CCA76B6002F517B /* DTFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DTFile.cpp; sourceTree = "<group>"; };
+		F9A2D2E10CCA76B6002F517B /* DTFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTFile.h; sourceTree = "<group>"; };
+		F9A2D2E90CCA772A002F517B /* DTError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTError.h; sourceTree = "<group>"; };
+		F9A2D2EA0CCA772A002F517B /* DTError.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DTError.cpp; sourceTree = "<group>"; };
+		F9A2D2ED0CCA7783002F517B /* DTArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTArray.h; sourceTree = "<group>"; };
+		F9A2D2EE0CCA7783002F517B /* DTArrayConversion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DTArrayConversion.cpp; sourceTree = "<group>"; };
+		F9A2D2EF0CCA7783002F517B /* DTArrayConversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTArrayConversion.h; sourceTree = "<group>"; };
+		F9A2D2F00CCA7783002F517B /* DTCharArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DTCharArray.cpp; sourceTree = "<group>"; };
+		F9A2D2F10CCA7783002F517B /* DTCharArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTCharArray.h; sourceTree = "<group>"; };
+		F9A2D2F20CCA7783002F517B /* DTDoubleArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DTDoubleArray.cpp; sourceTree = "<group>"; };
+		F9A2D2F30CCA7783002F517B /* DTDoubleArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTDoubleArray.h; sourceTree = "<group>"; };
+		F9A2D2F40CCA7783002F517B /* DTFloatArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DTFloatArray.cpp; sourceTree = "<group>"; };
+		F9A2D2F50CCA7783002F517B /* DTFloatArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTFloatArray.h; sourceTree = "<group>"; };
+		F9A2D2F60CCA7783002F517B /* DTIntArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTIntArray.h; sourceTree = "<group>"; };
+		F9A2D2F70CCA7783002F517B /* DTIntArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DTIntArray.cpp; sourceTree = "<group>"; };
+		F9A2D2F80CCA7783002F517B /* DTShortIntArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DTShortIntArray.cpp; sourceTree = "<group>"; };
+		F9A2D2F90CCA7783002F517B /* DTShortIntArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTShortIntArray.h; sourceTree = "<group>"; };
+		F9A2D2FA0CCA7783002F517B /* DTUCharArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DTUCharArray.cpp; sourceTree = "<group>"; };
+		F9A2D2FB0CCA7783002F517B /* DTUCharArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTUCharArray.h; sourceTree = "<group>"; };
+		F9A2D2FC0CCA7783002F517B /* DTUShortIntArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DTUShortIntArray.cpp; sourceTree = "<group>"; };
+		F9A2D2FD0CCA7783002F517B /* DTUShortIntArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTUShortIntArray.h; sourceTree = "<group>"; };
+		F9A2D3140CCA77B3002F517B /* DTLock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTLock.h; sourceTree = "<group>"; };
+		F9A2D3190CCA77DF002F517B /* DTUtilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DTUtilities.cpp; sourceTree = "<group>"; };
+		F9A2D31A0CCA77DF002F517B /* DTUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTUtilities.h; sourceTree = "<group>"; };
+		F9A2D31E0CCA7803002F517B /* DTArrayTemplates.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTArrayTemplates.h; sourceTree = "<group>"; };
+		F9A2D3380CCA78F5002F517B /* DTDataFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTDataFile.h; sourceTree = "<group>"; };
+		F9A2D3390CCA78F5002F517B /* DTDataFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DTDataFile.cpp; sourceTree = "<group>"; };
+		F9A2D3420CCA7993002F517B /* DTDataStorage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DTDataStorage.cpp; sourceTree = "<group>"; };
+		F9A2D3430CCA7993002F517B /* DTDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTDataStorage.h; sourceTree = "<group>"; };
+		F9A2D3480CCA79F1002F517B /* DTPointer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTPointer.h; sourceTree = "<group>"; };
+		F9A2D3490CCA79F1002F517B /* DTList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTList.h; sourceTree = "<group>"; };
+		F9A2D34C0CCA7A09002F517B /* DTEndianSwap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTEndianSwap.h; sourceTree = "<group>"; };
+		F9A2D34D0CCA7A09002F517B /* DTEndianSwap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DTEndianSwap.cpp; sourceTree = "<group>"; };
 		F9A2D39B0CCBB3B5002F517B /* FVIconCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVIconCache.h; sourceTree = "<group>"; };
+		F9A2D39C0CCBB3B5002F517B /* FVIconCache.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FVIconCache.mm; sourceTree = "<group>"; };
+		F9A2D3B20CCBB7A7002F517B /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = /usr/lib/libbz2.dylib; sourceTree = "<absolute>"; };
+		F9A2D3D80CCBDDDF002F517B /* FVBitmapContextCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVBitmapContextCache.h; sourceTree = "<group>"; };
+		F9A2D3D90CCBDDDF002F517B /* FVBitmapContextCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVBitmapContextCache.m; sourceTree = "<group>"; };
 		F9A2D3E60CCBE12B002F517B /* FVImageIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVImageIcon.h; sourceTree = "<group>"; };
 		F9A2D3E70CCBE12B002F517B /* FVImageIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVImageIcon.m; sourceTree = "<group>"; };
 		F9A2D3EA0CCBE13F002F517B /* FVFinderIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVFinderIcon.h; sourceTree = "<group>"; };
@@ -278,13 +335,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				F92C7C500D28250F004409D8 /* SystemConfiguration.framework in Frameworks */,
+				F9A2D3B30CCBB7A7002F517B /* libbz2.dylib in Frameworks */,
 				8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */,
 				F94692310CA5710500AC2772 /* QTKit.framework in Frameworks */,
 				F94692320CA5710500AC2772 /* Quartz.framework in Frameworks */,
 				F94692340CA5710500AC2772 /* WebKit.framework in Frameworks */,
-				CEFC1F410F6AD24600B2AEE6 /* Accelerate.framework in Frameworks */,
 				F980F0930CCC3C2E0067C1DF /* libz.dylib in Frameworks */,
-				CEFC1F690F6AD46D00B2AEE6 /* QuickLook.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F94692110CA56F4300AC2772 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F94692370CA5712800AC2772 /* QuickLook.framework in Frameworks */,
+				F946921E0CA5701F00AC2772 /* FileView.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -305,6 +370,7 @@
 			isa = PBXGroup;
 			children = (
 				8DC2EF5B0486A6940098B216 /* FileView.framework */,
+				F94692130CA56F4300AC2772 /* FileView-Leopard.bundle */,
 				F94692510CA575F000AC2772 /* FileView Program.app */,
 			);
 			name = Products;
@@ -315,12 +381,14 @@
 			children = (
 				F9F22DE80CDAD53300A9D449 /* License */,
 				F9F22E180CDAD9B900A9D449 /* Notes */,
+				F9A2D2D90CCA7670002F517B /* DTSource */,
 				08FB77AEFE84172EC02AAC07 /* Classes */,
 				32C88DFF0371C24200C91783 /* Other Sources */,
 				089C1665FE841158C02AAC07 /* Resources */,
 				0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */,
 				034768DFFF38A50411DB9C8B /* Products */,
 				F946927B0CA5777300AC2772 /* FileView Program */,
+				F94692140CA56F4300AC2772 /* FileView-Leopard-Info.plist */,
 			);
 			name = FileView;
 			sourceTree = "<group>";
@@ -330,11 +398,11 @@
 			children = (
 				F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */,
 				F980F0920CCC3C2E0067C1DF /* libz.dylib */,
+				F9A2D3B20CCBB7A7002F517B /* libbz2.dylib */,
 				F946922D0CA5710500AC2772 /* QTKit.framework */,
 				F946922E0CA5710500AC2772 /* Quartz.framework */,
 				F946922F0CA5710500AC2772 /* QuickLook.framework */,
 				F94692300CA5710500AC2772 /* WebKit.framework */,
-				CEFC1F400F6AD24600B2AEE6 /* Accelerate.framework */,
 				1058C7B0FEA5585E11CA2CBB /* Linked Frameworks */,
 				1058C7B2FEA5585E11CA2CBB /* Other Frameworks */,
 			);
@@ -344,10 +412,11 @@
 		089C1665FE841158C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				F9E469350CFF6D12003E6C0A /* FileView.strings */,
+				CE05D3AC0D7B21DC0034C2A8 /* FVColorMenuView.nib */,
+				F94692A50CA5793B00AC2772 /* FVPreviewer.nib */,
 				8DC2EF5A0486A6940098B216 /* Info.plist */,
 				089C1666FE841158C02AAC07 /* InfoPlist.strings */,
-				F9E469350CFF6D12003E6C0A /* FileView.strings */,
-				CEF33C1F0F76F15F0026452B /* FVPreviewer.nib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -355,16 +424,19 @@
 		08FB77AEFE84172EC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				CE05D48A0D7B388C0034C2A8 /* FileView */,
-				CED643780F6F107B00283709 /* Previewer */,
 				CE05D4840D7B37A80034C2A8 /* Icons */,
+				CE05D48A0D7B388C0034C2A8 /* Views */,
 				CE05D5CC0D7C21E30034C2A8 /* Queueing */,
 				CE05D5CD0D7C22070034C2A8 /* Operations */,
 				CE05D48B0D7B38B20034C2A8 /* Caching */,
-				CEFC1CE30F6AB77D00B2AEE6 /* Scaling */,
-				CEFC1F760F6AD52A00B2AEE6 /* Download */,
-				CEFC1F750F6AD52000B2AEE6 /* FinderLabel */,
-				CEFC1F770F6AD54500B2AEE6 /* Utilities */,
+				CEA831120DC1FAB500B551D1 /* FVAccessibilityIconElement.h */,
+				CEA831130DC1FAB500B551D1 /* FVAccessibilityIconElement.m */,
+				CE05D3C40D7B272A0034C2A8 /* FVDownload.h */,
+				CE05D3C50D7B272A0034C2A8 /* FVDownload.m */,
+				F93C3AE90D39473C006EB558 /* FVFinderLabel.h */,
+				F93C3AEA0D39473C006EB558 /* FVFinderLabel.m */,
+				CE05D3240D7AFC830034C2A8 /* FVUtilities.h */,
+				CE05D3250D7AFC830034C2A8 /* FVUtilities.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -390,7 +462,6 @@
 			isa = PBXGroup;
 			children = (
 				32DBCF5E0370ADEE00C91783 /* FileView_Prefix.pch */,
-				CEFC19B00F693E8B00B2AEE6 /* FileView.h */,
 			);
 			name = "Other Sources";
 			sourceTree = "<group>";
@@ -398,12 +469,6 @@
 		CE05D4840D7B37A80034C2A8 /* Icons */ = {
 			isa = PBXGroup;
 			children = (
-				CEFC1D250F6ABA2300B2AEE6 /* FVAliasBadge.m */,
-				CEFC1D260F6ABA2300B2AEE6 /* FVAliasBadge.h */,
-				CEFC1D270F6ABA2300B2AEE6 /* FVBaseIcon.h */,
-				CEFC1D280F6ABA2300B2AEE6 /* FVBaseIcon.m */,
-				CEFC1D2D0F6ABA3C00B2AEE6 /* FVCoreTextIcon.h */,
-				CEFC1D2E0F6ABA3C00B2AEE6 /* FVCoreTextIcon.m */,
 				F9A2D3EA0CCBE13F002F517B /* FVFinderIcon.h */,
 				F9A2D3EB0CCBE13F002F517B /* FVFinderIcon.m */,
 				F94691FB0CA56EC500AC2772 /* FVIcon.h */,
@@ -430,38 +495,36 @@
 			name = Icons;
 			sourceTree = "<group>";
 		};
-		CE05D48A0D7B388C0034C2A8 /* FileView */ = {
+		CE05D48A0D7B388C0034C2A8 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				F94691F70CA56EC500AC2772 /* FVFileView.h */,
-				F94691F80CA56EC500AC2772 /* FVFileView.m */,
+				F94691F70CA56EC500AC2772 /* FileView.h */,
+				F94691F80CA56EC500AC2772 /* FileView.m */,
 				F94691F90CA56EC500AC2772 /* FVArrowButtonCell.h */,
 				F94691FA0CA56EC500AC2772 /* FVArrowButtonCell.m */,
+				CE05D3AF0D7B22170034C2A8 /* FVColorMenuView.h */,
+				CE05D3B00D7B22170034C2A8 /* FVColorMenuView.m */,
+				F94691FF0CA56EC500AC2772 /* FVPreviewer.h */,
+				F94692000CA56EC500AC2772 /* FVPreviewer.m */,
+				CE05D3CE0D7B27FC0034C2A8 /* FVProgressIndicatorCell.h */,
+				CE05D3CF0D7B27FC0034C2A8 /* FVProgressIndicatorCell.m */,
+				F946944E0CA59AF100AC2772 /* FVScaledImageView.h */,
+				F946944F0CA59AF100AC2772 /* FVScaledImageView.m */,
 				CE05D5A00D7C10FD0034C2A8 /* FVSlider.h */,
 				CE05D5A10D7C10FD0034C2A8 /* FVSlider.m */,
-				CEA831120DC1FAB500B551D1 /* FVAccessibilityIconElement.h */,
-				CEA831130DC1FAB500B551D1 /* FVAccessibilityIconElement.m */,
 			);
-			name = FileView;
+			name = Views;
 			sourceTree = "<group>";
 		};
 		CE05D48B0D7B38B20034C2A8 /* Caching */ = {
 			isa = PBXGroup;
 			children = (
-				CEFC1CE90F6AB84000B2AEE6 /* _FVDocumentDescription.h */,
-				CEFC1CEA0F6AB84000B2AEE6 /* _FVDocumentDescription.m */,
-				CE65FC580F72578D0089F9DC /* _FVMappedDataProvider.h */,
-				CE65FC590F72578D0089F9DC /* _FVMappedDataProvider.m */,
-				CE65FC5A0F72578D0089F9DC /* _FVSplitSet.h */,
-				CE65FC5B0F72578D0089F9DC /* _FVSplitSet.m */,
-				CEFC1CEF0F6AB84000B2AEE6 /* FVCacheFile.h */,
-				CEFC1CF00F6AB84000B2AEE6 /* FVCacheFile.mm */,
-				CEFC1CF10F6AB84000B2AEE6 /* FVCGColorSpaceDescription.h */,
-				CEFC1CF20F6AB84000B2AEE6 /* FVCGColorSpaceDescription.m */,
-				CEFC1CF30F6AB84000B2AEE6 /* FVCGImageDescription.h */,
-				CEFC1CF40F6AB84000B2AEE6 /* FVCGImageDescription.m */,
-				CEFC1CF50F6AB84000B2AEE6 /* FVIconCache.m */,
+				F9A2D3D80CCBDDDF002F517B /* FVBitmapContextCache.h */,
+				F9A2D3D90CCBDDDF002F517B /* FVBitmapContextCache.m */,
+				CE05D4380D7B31A80034C2A8 /* FVCGImageHeader.cpp */,
+				CE05D4390D7B31A80034C2A8 /* FVCGImageHeader.h */,
 				F9A2D39B0CCBB3B5002F517B /* FVIconCache.h */,
+				F9A2D39C0CCBB3B5002F517B /* FVIconCache.mm */,
 			);
 			name = Caching;
 			sourceTree = "<group>";
@@ -492,71 +555,8 @@
 				CE05D5E70D7C22550034C2A8 /* FVInvocationOperation.m */,
 				CE05D5E80D7C22550034C2A8 /* FVOperation.h */,
 				CE05D5E90D7C22550034C2A8 /* FVOperation.m */,
-				CEFC1D1F0F6AB99100B2AEE6 /* FVThread.h */,
-				CEFC1D200F6AB99100B2AEE6 /* FVThread.m */,
 			);
 			name = Operations;
-			sourceTree = "<group>";
-		};
-		CED643780F6F107B00283709 /* Previewer */ = {
-			isa = PBXGroup;
-			children = (
-				F946944E0CA59AF100AC2772 /* FVScaledImageView.h */,
-				F946944F0CA59AF100AC2772 /* FVScaledImageView.m */,
-				F94691FF0CA56EC500AC2772 /* FVPreviewer.h */,
-				F94692000CA56EC500AC2772 /* FVPreviewer.m */,
-			);
-			name = Previewer;
-			sourceTree = "<group>";
-		};
-		CEFC1CE30F6AB77D00B2AEE6 /* Scaling */ = {
-			isa = PBXGroup;
-			children = (
-				CEFC1D030F6AB8AD00B2AEE6 /* FVBitmapContext.h */,
-				CEFC1D040F6AB8AD00B2AEE6 /* FVBitmapContext.m */,
-				CEFC1D050F6AB8AD00B2AEE6 /* FVCGImageUtilities.h */,
-				CEFC1D060F6AB8AD00B2AEE6 /* FVCGImageUtilities.mm */,
-				CEFC1D070F6AB8AD00B2AEE6 /* FVImageBuffer.h */,
-				CEFC1D080F6AB8AD00B2AEE6 /* FVImageBuffer.m */,
-			);
-			name = Scaling;
-			sourceTree = "<group>";
-		};
-		CEFC1F750F6AD52000B2AEE6 /* FinderLabel */ = {
-			isa = PBXGroup;
-			children = (
-				F93C3AE90D39473C006EB558 /* FVFinderLabel.h */,
-				F93C3AEA0D39473C006EB558 /* FVFinderLabel.m */,
-				CE05D3AF0D7B22170034C2A8 /* FVColorMenuView.h */,
-				CE05D3B00D7B22170034C2A8 /* FVColorMenuView.m */,
-			);
-			name = FinderLabel;
-			sourceTree = "<group>";
-		};
-		CEFC1F760F6AD52A00B2AEE6 /* Download */ = {
-			isa = PBXGroup;
-			children = (
-				CE05D3C40D7B272A0034C2A8 /* FVDownload.h */,
-				CE05D3C50D7B272A0034C2A8 /* FVDownload.m */,
-				CE05D3CE0D7B27FC0034C2A8 /* FVProgressIndicatorCell.h */,
-				CE05D3CF0D7B27FC0034C2A8 /* FVProgressIndicatorCell.m */,
-			);
-			name = Download;
-			sourceTree = "<group>";
-		};
-		CEFC1F770F6AD54500B2AEE6 /* Utilities */ = {
-			isa = PBXGroup;
-			children = (
-				CE05D3240D7AFC830034C2A8 /* FVUtilities.h */,
-				CE05D3250D7AFC830034C2A8 /* FVUtilities.m */,
-				CEFC1D110F6AB94F00B2AEE6 /* FVObject.h */,
-				CEFC1D120F6AB94F00B2AEE6 /* FVObject.m */,
-				CEFC1D130F6AB94F00B2AEE6 /* FVAllocator.h */,
-				CEFC1D140F6AB94F00B2AEE6 /* FVAllocator.m */,
-				CEFC1D150F6AB94F00B2AEE6 /* fv_zone.h */,
-				CEFC1D160F6AB94F00B2AEE6 /* fv_zone.cpp */,
-			);
-			name = Utilities;
 			sourceTree = "<group>";
 		};
 		F946927B0CA5777300AC2772 /* FileView Program */ = {
@@ -572,6 +572,54 @@
 			path = "FileView Program";
 			sourceTree = "<group>";
 		};
+		F9A2D2D90CCA7670002F517B /* DTSource */ = {
+			isa = PBXGroup;
+			children = (
+				F9A2D3110CCA7791002F517B /* DTArray */,
+				F9A2D3190CCA77DF002F517B /* DTUtilities.cpp */,
+				F9A2D31A0CCA77DF002F517B /* DTUtilities.h */,
+				F9A2D3140CCA77B3002F517B /* DTLock.h */,
+				F9A2D2E90CCA772A002F517B /* DTError.h */,
+				F9A2D2EA0CCA772A002F517B /* DTError.cpp */,
+				F9A2D2E00CCA76B6002F517B /* DTFile.cpp */,
+				F9A2D2E10CCA76B6002F517B /* DTFile.h */,
+				F9A2D3380CCA78F5002F517B /* DTDataFile.h */,
+				F9A2D3390CCA78F5002F517B /* DTDataFile.cpp */,
+				F9A2D3420CCA7993002F517B /* DTDataStorage.cpp */,
+				F9A2D3430CCA7993002F517B /* DTDataStorage.h */,
+				F9A2D3480CCA79F1002F517B /* DTPointer.h */,
+				F9A2D3490CCA79F1002F517B /* DTList.h */,
+				F9A2D34C0CCA7A09002F517B /* DTEndianSwap.h */,
+				F9A2D34D0CCA7A09002F517B /* DTEndianSwap.cpp */,
+			);
+			name = DTSource;
+			sourceTree = "<group>";
+		};
+		F9A2D3110CCA7791002F517B /* DTArray */ = {
+			isa = PBXGroup;
+			children = (
+				F9A2D31E0CCA7803002F517B /* DTArrayTemplates.h */,
+				F9A2D2ED0CCA7783002F517B /* DTArray.h */,
+				F9A2D2EE0CCA7783002F517B /* DTArrayConversion.cpp */,
+				F9A2D2EF0CCA7783002F517B /* DTArrayConversion.h */,
+				F9A2D2F00CCA7783002F517B /* DTCharArray.cpp */,
+				F9A2D2F10CCA7783002F517B /* DTCharArray.h */,
+				F9A2D2F20CCA7783002F517B /* DTDoubleArray.cpp */,
+				F9A2D2F30CCA7783002F517B /* DTDoubleArray.h */,
+				F9A2D2F40CCA7783002F517B /* DTFloatArray.cpp */,
+				F9A2D2F50CCA7783002F517B /* DTFloatArray.h */,
+				F9A2D2F60CCA7783002F517B /* DTIntArray.h */,
+				F9A2D2F70CCA7783002F517B /* DTIntArray.cpp */,
+				F9A2D2F80CCA7783002F517B /* DTShortIntArray.cpp */,
+				F9A2D2F90CCA7783002F517B /* DTShortIntArray.h */,
+				F9A2D2FA0CCA7783002F517B /* DTUCharArray.cpp */,
+				F9A2D2FB0CCA7783002F517B /* DTUCharArray.h */,
+				F9A2D2FC0CCA7783002F517B /* DTUShortIntArray.cpp */,
+				F9A2D2FD0CCA7783002F517B /* DTUShortIntArray.h */,
+			);
+			name = DTArray;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -579,12 +627,32 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F94692020CA56EC500AC2772 /* FVFileView.h in Headers */,
+				F94692020CA56EC500AC2772 /* FileView.h in Headers */,
 				F94692040CA56EC500AC2772 /* FVArrowButtonCell.h in Headers */,
 				F94692060CA56EC500AC2772 /* FVIcon.h in Headers */,
 				F946920A0CA56EC500AC2772 /* FVPreviewer.h in Headers */,
 				F94694500CA59AF100AC2772 /* FVScaledImageView.h in Headers */,
+				F9A2D2E30CCA76B6002F517B /* DTFile.h in Headers */,
+				F9A2D2EB0CCA772A002F517B /* DTError.h in Headers */,
+				F9A2D2FE0CCA7783002F517B /* DTArray.h in Headers */,
+				F9A2D3000CCA7783002F517B /* DTArrayConversion.h in Headers */,
+				F9A2D3020CCA7783002F517B /* DTCharArray.h in Headers */,
+				F9A2D3040CCA7783002F517B /* DTDoubleArray.h in Headers */,
+				F9A2D3060CCA7783002F517B /* DTFloatArray.h in Headers */,
+				F9A2D3070CCA7783002F517B /* DTIntArray.h in Headers */,
+				F9A2D30A0CCA7783002F517B /* DTShortIntArray.h in Headers */,
+				F9A2D30C0CCA7783002F517B /* DTUCharArray.h in Headers */,
+				F9A2D30E0CCA7783002F517B /* DTUShortIntArray.h in Headers */,
+				F9A2D3150CCA77B3002F517B /* DTLock.h in Headers */,
+				F9A2D31C0CCA77DF002F517B /* DTUtilities.h in Headers */,
+				F9A2D31F0CCA7803002F517B /* DTArrayTemplates.h in Headers */,
+				F9A2D33A0CCA78F5002F517B /* DTDataFile.h in Headers */,
+				F9A2D3450CCA7993002F517B /* DTDataStorage.h in Headers */,
+				F9A2D34A0CCA79F1002F517B /* DTPointer.h in Headers */,
+				F9A2D34B0CCA79F1002F517B /* DTList.h in Headers */,
+				F9A2D34E0CCA7A09002F517B /* DTEndianSwap.h in Headers */,
 				F9A2D39D0CCBB3B5002F517B /* FVIconCache.h in Headers */,
+				F9A2D3DA0CCBDDDF002F517B /* FVBitmapContextCache.h in Headers */,
 				F9A2D3E80CCBE12B002F517B /* FVImageIcon.h in Headers */,
 				F9A2D3EC0CCBE13F002F517B /* FVFinderIcon.h in Headers */,
 				F9A2D3F00CCBE14E002F517B /* FVPDFIcon.h in Headers */,
@@ -597,6 +665,7 @@
 				CE05D3B10D7B22170034C2A8 /* FVColorMenuView.h in Headers */,
 				CE05D3C60D7B272A0034C2A8 /* FVDownload.h in Headers */,
 				CE05D3D00D7B27FC0034C2A8 /* FVProgressIndicatorCell.h in Headers */,
+				CE05D43B0D7B31A80034C2A8 /* FVCGImageHeader.h in Headers */,
 				CE05D4710D7B36DD0034C2A8 /* FVMIMEIcon.h in Headers */,
 				CE05D4730D7B36DD0034C2A8 /* FVMovieIcon.h in Headers */,
 				CE05D4750D7B36DD0034C2A8 /* FVPlaceholderImage.h in Headers */,
@@ -610,23 +679,6 @@
 				CE89233C0D7CBB17006D514C /* FVInvocationOperation.h in Headers */,
 				CE89233E0D7CBB19006D514C /* FVOperation.h in Headers */,
 				CEA831140DC1FAB500B551D1 /* FVAccessibilityIconElement.h in Headers */,
-				CEFC19B10F693E8B00B2AEE6 /* FileView.h in Headers */,
-				CEFC1CF60F6AB84000B2AEE6 /* _FVDocumentDescription.h in Headers */,
-				CEFC1CFC0F6AB84000B2AEE6 /* FVCacheFile.h in Headers */,
-				CEFC1CFE0F6AB84000B2AEE6 /* FVCGColorSpaceDescription.h in Headers */,
-				CEFC1D000F6AB84000B2AEE6 /* FVCGImageDescription.h in Headers */,
-				CEFC1D090F6AB8AD00B2AEE6 /* FVBitmapContext.h in Headers */,
-				CEFC1D0B0F6AB8AD00B2AEE6 /* FVCGImageUtilities.h in Headers */,
-				CEFC1D0D0F6AB8AD00B2AEE6 /* FVImageBuffer.h in Headers */,
-				CEFC1D170F6AB94F00B2AEE6 /* FVObject.h in Headers */,
-				CEFC1D190F6AB94F00B2AEE6 /* FVAllocator.h in Headers */,
-				CEFC1D1B0F6AB94F00B2AEE6 /* fv_zone.h in Headers */,
-				CEFC1D210F6AB99100B2AEE6 /* FVThread.h in Headers */,
-				CEFC1D2A0F6ABA2300B2AEE6 /* FVAliasBadge.h in Headers */,
-				CEFC1D2B0F6ABA2300B2AEE6 /* FVBaseIcon.h in Headers */,
-				CEFC1D2F0F6ABA3C00B2AEE6 /* FVCoreTextIcon.h in Headers */,
-				CE65FC5C0F72578D0089F9DC /* _FVMappedDataProvider.h in Headers */,
-				CE65FC5E0F72578D0089F9DC /* _FVSplitSet.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -653,6 +705,24 @@
 			productReference = 8DC2EF5B0486A6940098B216 /* FileView.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		F94692120CA56F4300AC2772 /* FileView-Leopard */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F94692170CA56F4600AC2772 /* Build configuration list for PBXNativeTarget "FileView-Leopard" */;
+			buildPhases = (
+				F946920F0CA56F4300AC2772 /* Resources */,
+				F94692100CA56F4300AC2772 /* Sources */,
+				F94692110CA56F4300AC2772 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F9F04CDB0CE260AC00F28ED2 /* PBXTargetDependency */,
+			);
+			name = "FileView-Leopard";
+			productName = "FileView-Leopard";
+			productReference = F94692130CA56F4300AC2772 /* FileView-Leopard.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
 		F94692500CA575F000AC2772 /* FileView Program */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F94692560CA575F200AC2772 /* Build configuration list for PBXNativeTarget "FileView Program" */;
@@ -665,7 +735,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				CE2A3CAD0F8129BB005BD1CD /* PBXTargetDependency */,
+				CE3A673F0D60F24200D20AC7 /* PBXTargetDependency */,
 			);
 			name = "FileView Program";
 			productName = "FileView Program";
@@ -678,7 +748,7 @@
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB91B108733DA50010E9CD /* Build configuration list for PBXProject "FileView" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 0867D691FE84028FC02AAC07 /* FileView */;
 			productRefGroup = 034768DFFF38A50411DB9C8B /* Products */;
@@ -686,6 +756,8 @@
 			projectRoot = "";
 			targets = (
 				8DC2EF4F0486A6940098B216 /* FileView */,
+				F94692120CA56F4300AC2772 /* FileView-Leopard */,
+				F9F04CE10CE260EB00F28ED2 /* FileView + Leopard */,
 				F94692500CA575F000AC2772 /* FileView Program */,
 			);
 		};
@@ -697,9 +769,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */,
+				F94692A60CA5793B00AC2772 /* FVPreviewer.nib in Resources */,
 				F9F22DE90CDAD53300A9D449 /* License in Resources */,
 				F9E469370CFF6D12003E6C0A /* FileView.strings in Resources */,
-				CEF33C210F76F15F0026452B /* FVPreviewer.nib in Resources */,
+				CE05D3AD0D7B21DC0034C2A8 /* FVColorMenuView.nib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F946920F0CA56F4300AC2772 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -709,6 +789,7 @@
 			files = (
 				F94692840CA5777300AC2772 /* InfoPlist.strings in Resources */,
 				F94692850CA5777300AC2772 /* MainMenu.nib in Resources */,
+				F94692860CA5777300AC2772 /* FileView Program-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -735,11 +816,27 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F94692030CA56EC500AC2772 /* FVFileView.m in Sources */,
+				F94692030CA56EC500AC2772 /* FileView.m in Sources */,
 				F94692050CA56EC500AC2772 /* FVArrowButtonCell.m in Sources */,
 				F94692070CA56EC500AC2772 /* FVIcon.m in Sources */,
 				F946920B0CA56EC500AC2772 /* FVPreviewer.m in Sources */,
 				F94694510CA59AF100AC2772 /* FVScaledImageView.m in Sources */,
+				F9A2D2E20CCA76B6002F517B /* DTFile.cpp in Sources */,
+				F9A2D2EC0CCA772A002F517B /* DTError.cpp in Sources */,
+				F9A2D2FF0CCA7783002F517B /* DTArrayConversion.cpp in Sources */,
+				F9A2D3010CCA7783002F517B /* DTCharArray.cpp in Sources */,
+				F9A2D3030CCA7783002F517B /* DTDoubleArray.cpp in Sources */,
+				F9A2D3050CCA7783002F517B /* DTFloatArray.cpp in Sources */,
+				F9A2D3080CCA7783002F517B /* DTIntArray.cpp in Sources */,
+				F9A2D3090CCA7783002F517B /* DTShortIntArray.cpp in Sources */,
+				F9A2D30B0CCA7783002F517B /* DTUCharArray.cpp in Sources */,
+				F9A2D30D0CCA7783002F517B /* DTUShortIntArray.cpp in Sources */,
+				F9A2D31B0CCA77DF002F517B /* DTUtilities.cpp in Sources */,
+				F9A2D33B0CCA78F5002F517B /* DTDataFile.cpp in Sources */,
+				F9A2D3440CCA7993002F517B /* DTDataStorage.cpp in Sources */,
+				F9A2D34F0CCA7A09002F517B /* DTEndianSwap.cpp in Sources */,
+				F9A2D39E0CCBB3B5002F517B /* FVIconCache.mm in Sources */,
+				F9A2D3DB0CCBDDDF002F517B /* FVBitmapContextCache.m in Sources */,
 				F9A2D3E90CCBE12B002F517B /* FVImageIcon.m in Sources */,
 				F9A2D3ED0CCBE13F002F517B /* FVFinderIcon.m in Sources */,
 				F9A2D3F10CCBE14E002F517B /* FVPDFIcon.m in Sources */,
@@ -750,6 +847,7 @@
 				CE05D3B20D7B22170034C2A8 /* FVColorMenuView.m in Sources */,
 				CE05D3C70D7B272A0034C2A8 /* FVDownload.m in Sources */,
 				CE05D3D10D7B27FC0034C2A8 /* FVProgressIndicatorCell.m in Sources */,
+				CE05D43A0D7B31A80034C2A8 /* FVCGImageHeader.cpp in Sources */,
 				CE05D4700D7B36DD0034C2A8 /* FVIcon_Private.m in Sources */,
 				CE05D4720D7B36DD0034C2A8 /* FVMIMEIcon.m in Sources */,
 				CE05D4740D7B36DD0034C2A8 /* FVMovieIcon.m in Sources */,
@@ -764,24 +862,14 @@
 				CE89233D0D7CBB18006D514C /* FVInvocationOperation.m in Sources */,
 				CE89233F0D7CBB1A006D514C /* FVOperation.m in Sources */,
 				CEA831150DC1FAB500B551D1 /* FVAccessibilityIconElement.m in Sources */,
-				CEFC1CF70F6AB84000B2AEE6 /* _FVDocumentDescription.m in Sources */,
-				CEFC1CFD0F6AB84000B2AEE6 /* FVCacheFile.mm in Sources */,
-				CEFC1CFF0F6AB84000B2AEE6 /* FVCGColorSpaceDescription.m in Sources */,
-				CEFC1D010F6AB84000B2AEE6 /* FVCGImageDescription.m in Sources */,
-				CEFC1D020F6AB84000B2AEE6 /* FVIconCache.m in Sources */,
-				CEFC1D0A0F6AB8AD00B2AEE6 /* FVBitmapContext.m in Sources */,
-				CEFC1D0C0F6AB8AD00B2AEE6 /* FVCGImageUtilities.mm in Sources */,
-				CEFC1D0E0F6AB8AD00B2AEE6 /* FVImageBuffer.m in Sources */,
-				CEFC1D180F6AB94F00B2AEE6 /* FVObject.m in Sources */,
-				CEFC1D1A0F6AB94F00B2AEE6 /* FVAllocator.m in Sources */,
-				CEFC1D1C0F6AB94F00B2AEE6 /* fv_zone.cpp in Sources */,
-				CEFC1D220F6AB99100B2AEE6 /* FVThread.m in Sources */,
-				CEFC1D290F6ABA2300B2AEE6 /* FVAliasBadge.m in Sources */,
-				CEFC1D2C0F6ABA2300B2AEE6 /* FVBaseIcon.m in Sources */,
-				CEFC1D300F6ABA3C00B2AEE6 /* FVCoreTextIcon.m in Sources */,
-				CEFC1F6E0F6AD4B300B2AEE6 /* FVQuickLookIcon.m in Sources */,
-				CE65FC5D0F72578D0089F9DC /* _FVMappedDataProvider.m in Sources */,
-				CE65FC5F0F72578D0089F9DC /* _FVSplitSet.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F94692100CA56F4300AC2772 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F946921D0CA5700800AC2772 /* FVQuickLookIcon.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -797,10 +885,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		CE2A3CAD0F8129BB005BD1CD /* PBXTargetDependency */ = {
+		CE3A673F0D60F24200D20AC7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F9F04CE10CE260EB00F28ED2 /* FileView + Leopard */;
+			targetProxy = CE3A673E0D60F24200D20AC7 /* PBXContainerItemProxy */;
+		};
+		F9F04CDB0CE260AC00F28ED2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8DC2EF4F0486A6940098B216 /* FileView */;
-			targetProxy = CE2A3CAC0F8129BB005BD1CD /* PBXContainerItemProxy */;
+			targetProxy = F9F04CDA0CE260AC00F28ED2 /* PBXContainerItemProxy */;
+		};
+		F9F04CE50CE260F400F28ED2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F94692120CA56F4300AC2772 /* FileView-Leopard */;
+			targetProxy = F9F04CE40CE260F400F28ED2 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -812,6 +910,15 @@
 				F93C351F0D35D221006EB558 /* French */,
 			);
 			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		CE05D3AC0D7B21DC0034C2A8 /* FVColorMenuView.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CE05D3A70D7B21A70034C2A8 /* English */,
+				CE05D3AE0D7B21EF0034C2A8 /* French */,
+			);
+			name = FVColorMenuView.nib;
 			sourceTree = "<group>";
 		};
 		F946927E0CA5777300AC2772 /* InfoPlist.strings */ = {
@@ -828,6 +935,15 @@
 				F94692810CA5777300AC2772 /* English */,
 			);
 			name = MainMenu.nib;
+			sourceTree = "<group>";
+		};
+		F94692A50CA5793B00AC2772 /* FVPreviewer.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F94692010CA56EC500AC2772 /* English */,
+				F93C35200D35D23E006EB558 /* French */,
+			);
+			name = FVPreviewer.nib;
 			sourceTree = "<group>";
 		};
 		F9E469350CFF6D12003E6C0A /* FileView.strings */ = {
@@ -855,8 +971,6 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = FileView_Prefix.pch;
-				GCC_VERSION = 4.0;
-				IBC_STRIP_NIBS = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
@@ -876,9 +990,7 @@
 				GCC_MODEL_TUNING = G4;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = FileView_Prefix.pch;
-				GCC_VERSION = 4.0;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				IBC_STRIP_NIBS = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
@@ -910,7 +1022,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				PREBINDING = NO;
-				SDKROOT = macosx10.5;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Debug;
 		};
@@ -935,7 +1047,60 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				PREBINDING = NO;
-				SDKROOT = macosx10.5;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+			};
+			name = Release;
+		};
+		F94692150CA56F4600AC2772 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = FileView_Prefix.pch;
+				INFOPLIST_FILE = "FileView-Leopard-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = "FileView-Leopard";
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				WRAPPER_EXTENSION = bundle;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		F94692160CA56F4600AC2772 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = FileView_Prefix.pch;
+				INFOPLIST_FILE = "FileView-Leopard-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = "FileView-Leopard";
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				WRAPPER_EXTENSION = bundle;
+				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -988,6 +1153,27 @@
 			};
 			name = Release;
 		};
+		F9F04CE20CE260EB00F28ED2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Bundle QL plugin";
+			};
+			name = Debug;
+		};
+		F9F04CE30CE260EB00F28ED2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = "Bundle QL plugin";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1009,11 +1195,29 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		F94692170CA56F4600AC2772 /* Build configuration list for PBXNativeTarget "FileView-Leopard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F94692150CA56F4600AC2772 /* Debug */,
+				F94692160CA56F4600AC2772 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		F94692560CA575F200AC2772 /* Build configuration list for PBXNativeTarget "FileView Program" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F94692540CA575F100AC2772 /* Debug */,
 				F94692550CA575F100AC2772 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F9F04CE80CE2612D00F28ED2 /* Build configuration list for PBXAggregateTarget "FileView + Leopard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F9F04CE20CE260EB00F28ED2 /* Debug */,
+				F9F04CE30CE260EB00F28ED2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

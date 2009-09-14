@@ -42,6 +42,7 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class OFScheduledEvent;
 
 @interface BDSKTypeSelectHelper : NSObject {
     id dataSource;
@@ -50,7 +51,7 @@
     
     NSArray *searchCache;
     NSString *searchString;
-    NSTimer *timer;
+    OFScheduledEvent *timeoutEvent;
     BOOL processing;
 }
 
@@ -86,8 +87,8 @@
 @interface NSObject (BDSKTypeSelectDataSource)
 
 - (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper; // required
-- (NSUInteger)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper; // required
-- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(NSUInteger)itemIndex; // required
+- (unsigned int)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper; // required
+- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(unsigned int)itemIndex; // required
 
 - (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString; // optional
 - (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString; // optional

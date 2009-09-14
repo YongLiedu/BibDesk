@@ -36,14 +36,11 @@
 
 #import "BibAuthor.h"
 #import "BibItem.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStringConstants.h"
 #import "BDSKBibTeXParser.h"
 #import <BTParse/btparse.h>
 #import "BDSKErrorObjectController.h"
-#import "BDSKCFCallBacks.h"
-#import "NSCharacterSet_BDSKExtensions.h"
-#import "CFString_BDSKExtensions.h"
-#import "NSString_BDSKExtensions.h"
 
 @interface BibAuthor (Private)
 
@@ -54,16 +51,12 @@
 @end
 
 static BibAuthor *emptyAuthorInstance = nil;
-static CFCharacterSetRef separatorSet = NULL;
-static CFCharacterSetRef dashSet = NULL;
 
 @implementation BibAuthor
 
 + (void)initialize{
     
-    BDSKINITIALIZE;
-    separatorSet = CFCharacterSetCreateWithCharactersInString(CFAllocatorGetDefault(), CFSTR(" ."));
-    dashSet = CFCharacterSetCreateWithCharactersInString(CFAllocatorGetDefault(), CFSTR("-"));
+    OBINITIALIZE;
     emptyAuthorInstance = [[BibAuthor alloc] initWithName:@"" andPub:nil forField:BDSKAuthorString];
 }
     
@@ -98,7 +91,7 @@ static CFCharacterSetRef dashSet = NULL;
     
 
 + (id)emptyAuthor{
-    BDSKASSERT(emptyAuthorInstance != nil);
+    OBASSERT(emptyAuthorInstance != nil);
     return emptyAuthorInstance;
 }
 
@@ -178,7 +171,7 @@ static CFCharacterSetRef dashSet = NULL;
     return obj == self ? YES : [normalizedName isEqualToString:[obj normalizedName]];
 }
 
-- (NSUInteger)hash{
+- (unsigned int)hash{
     // @@ assumes that these objects will not be modified while contained in a hashing collection
     return hash;
 }
@@ -203,8 +196,8 @@ static CFCharacterSetRef dashSet = NULL;
 static inline BOOL
 __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames)
 {
-    BDSKASSERT(myFirstNames);
-    BDSKASSERT(otherFirstNames);
+    OBASSERT(myFirstNames);
+    OBASSERT(otherFirstNames);
     
     CFIndex i, cnt = MIN(CFArrayGetCount(myFirstNames), CFArrayGetCount(otherFirstNames));
     CFStringRef myName;
@@ -244,7 +237,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 - (BOOL)fuzzyEqual:(BibAuthor *)otherAuth{
     
     // required for access to flags; could also raise an exception
-    BDSKASSERT([otherAuth isKindOfClass:[self class]]); 
+    OBASSERT([otherAuth isKindOfClass:[self class]]); 
         
     // check to see if last names match; if not, we can return immediately
     if(CFStringCompare((CFStringRef)fuzzyName, (CFStringRef)otherAuth->fuzzyName, kCFCompareCaseInsensitive|kCFCompareLocalized) != kCFCompareEqualTo)
@@ -283,12 +276,12 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 }
 
 // Automatically called by collection classes; override OBObject's implementation for templating, although the output still won't generally be appropriate for users.
-- (NSString *)descriptionWithLocale:(NSDictionary *)locale indent:(NSUInteger)level{
+- (NSString *)descriptionWithLocale:(NSDictionary *)locale indent:(unsigned)level{
     return [self description];
 }
 
 - (NSString *)displayName{
-    NSInteger mask = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKAuthorNameDisplayKey];
+    int mask = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAuthorNameDisplayKey];
 
     NSString *theName = nil;
 
@@ -298,7 +291,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
         theName = mask & BDSKAuthorAbbreviateFirstNameMask ? [self abbreviatedNormalizedName] : normalizedName;
     else
         theName = mask & BDSKAuthorAbbreviateFirstNameMask ? [self abbreviatedName] : name;
-    return [theName stringByRemovingTeX];
+    return theName;
 }
 
 
@@ -415,7 +408,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 // creates an NSString from the given bt_name and bt_namepart, which were parsed with the given encoding; returns nil if no such name component exists
 static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *theName, bt_namepart thePart, CFStringEncoding encoding)
 {
-    NSInteger i, numberOfTokens = theName->part_len[thePart];
+    int i, numberOfTokens = theName->part_len[thePart];
     CFStringRef theString = NULL;
  
     // typical for some parts; let's not bother with a mutable string in this case
@@ -423,7 +416,7 @@ static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *the
         theString = CFStringCreateWithCString(alloc, theName->parts[thePart][0], encoding);
     } else if (numberOfTokens > 1){
         CFMutableStringRef mutableString = CFStringCreateMutable(alloc, 0);
-        NSInteger stopTokenIndex = numberOfTokens - 1;
+        int stopTokenIndex = numberOfTokens - 1;
         
         for (i = 0; i < numberOfTokens; i++){
             theString = CFStringCreateWithCString(alloc, theName->parts[thePart][i], encoding);
@@ -445,15 +438,15 @@ static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *the
     if(name != nil)
         @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Attempt to modify non-nil attribute of immutable object %@", self] userInfo:nil];
     
-    BDSKASSERT(firstName == nil);
-    BDSKASSERT(vonPart == nil);
-    BDSKASSERT(lastName == nil);
-    BDSKASSERT(jrPart == nil);
+    OBASSERT(firstName == nil);
+    OBASSERT(vonPart == nil);
+    OBASSERT(lastName == nil);
+    OBASSERT(jrPart == nil);
     
     CFAllocatorRef alloc = CFAllocatorGetDefault();
     
     // we need to remove newlines and collapse whitespace before using bt_split_name 
-    newName = (NSString *)BDStringCreateByCollapsingAndTrimmingCharactersInSet(alloc, (CFStringRef)newName, (CFCharacterSetRef)[NSCharacterSet whitespaceAndNewlineCharacterSet]);
+    newName = (NSString *)BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(alloc, (CFStringRef)newName);
     
     // get the fastest encoding, since it usually allows us to get a pointer to the contents
     // the main reason for using CFString here is that it offers cString create/get for any encoding
@@ -542,10 +535,10 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
 
 - (void)setupNames{
     
-    BDSKASSERT(name == nil);
-    BDSKASSERT(fullLastName == nil);
-    BDSKASSERT(normalizedName == nil);
-    BDSKASSERT(sortableName == nil);
+    OBASSERT(name == nil);
+    OBASSERT(fullLastName == nil);
+    OBASSERT(normalizedName == nil);
+    OBASSERT(sortableName == nil);
 	
 	// temporary string storage
     NSMutableString *theName = [[NSMutableString alloc] initWithCapacity:14];
@@ -614,6 +607,10 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
     
     // components of the first name used in fuzzy comparisons
     
+    static CFCharacterSetRef separatorSet = NULL;
+    if(separatorSet == NULL)
+        separatorSet = CFCharacterSetCreateWithCharactersInString(CFAllocatorGetDefault(), CFSTR(" ."));
+    
     // @@ see note on firstLetterCharacterString() function for possible issues with this
     firstNames = flags.hasFirst ? (id)BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAllocatorGetDefault(), (CFStringRef)firstName, separatorSet, FALSE) : [[NSArray alloc] init];
 
@@ -631,43 +628,23 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
 }
 
 // Bug #1436631 indicates that "Pomies, M.-P." was displayed as "M. -. Pomies", so we'll grab the first letter character instead of substringToIndex:1.  The technically correct solution may be to use "M. Pomies" in this case, but we split the first name at "." boundaries to generate the firstNames array.
-// RFE #2840696, double-names using dashes should be displayed as above, we get this either as a single name fragment Mark-Peter or two initial fragments from M.-P.
-static inline void appendFirstLetterCharacters(CFAllocatorRef alloc, CFMutableStringRef string, CFMutableStringRef shortString, CFStringRef fragment, Boolean isFirst)
+static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, CFStringRef string)
 {
-    CFIndex end = CFStringGetLength(fragment);
-    CFRange searchRange = CFRangeMake(0, end);
-    CFRange dashRange, letterRange;
-    CFStringRef ch;
-    if (false == CFStringFindCharacterFromSet(fragment, dashSet, searchRange, 0, &dashRange))
-        dashRange = CFRangeMake(end, 0);
-    while (searchRange.length) {
-        searchRange.length = dashRange.location - searchRange.location;
-        if (CFStringFindCharacterFromSet(fragment, (CFCharacterSetRef)[NSCharacterSet letterCharacterSet], searchRange, 0, &letterRange)) {
-            ch = CFStringCreateWithSubstring(alloc, fragment, letterRange);
-            if (searchRange.location > 0)
-                CFStringAppend(string, CFSTR("-"));
-            else if (isFirst == FALSE)
-                CFStringAppend(string, CFSTR(" "));
-            CFStringAppend(string, ch);
-            CFStringAppend(string, CFSTR("."));
-            if (searchRange.location == 0)
-                CFStringAppend(shortString, ch);
-            CFRelease(ch);
-        }
-        searchRange = CFRangeMake(dashRange.location + dashRange.length, end - dashRange.location - dashRange.length);
-        if (false == CFStringFindCharacterFromSet(fragment, dashSet, searchRange, 0, &dashRange))
-            dashRange = CFRangeMake(end, 0);
-    }
+    CFRange letterRange;
+    Boolean hasChar = CFStringFindCharacterFromSet(string, (CFCharacterSetRef)[NSCharacterSet letterCharacterSet], CFRangeMake(0, CFStringGetLength(string)), 0, &letterRange);
+    return hasChar ? CFStringCreateWithSubstring(alloc, string, letterRange) : NULL;
 }
 
 - (void)setupAbbreviatedNames
 {
-    BDSKASSERT(abbreviatedName == nil);
-    BDSKASSERT(abbreviatedNormalizedName == nil);
-    BDSKASSERT(unpunctuatedAbbreviatedNormalizedName == nil);
+    OBASSERT(abbreviatedName == nil);
+    OBASSERT(abbreviatedNormalizedName == nil);
+    OBASSERT(unpunctuatedAbbreviatedNormalizedName == nil);
     
     CFArrayRef theFirstNames = (CFArrayRef)firstNames;
     CFIndex idx, firstNameCount = CFArrayGetCount(theFirstNames);
+    CFStringRef fragment = nil;
+    CFStringRef firstLetter = nil;
     
     CFAllocatorRef alloc = CFAllocatorGetDefault();
     CFIndex nameLength = CFStringGetLength((CFStringRef)name);
@@ -687,7 +664,14 @@ static inline void appendFirstLetterCharacters(CFAllocatorRef alloc, CFMutableSt
         // loop through the first name parts (which includes middle names)
         CFIndex lastIdx = firstNameCount - 1;
         for(idx = 0; idx <= lastIdx; idx++){
-            appendFirstLetterCharacters(alloc, abbrevFirstName, shortAbbrevFirstName, CFArrayGetValueAtIndex(theFirstNames, idx), idx == 0);
+            fragment = CFArrayGetValueAtIndex(theFirstNames, idx);
+            firstLetter = copyFirstLetterCharacterString(alloc, fragment);
+            if (firstLetter != nil) {
+                CFStringAppend(abbrevFirstName, firstLetter);
+                CFStringAppend(abbrevFirstName, (idx < lastIdx ? CFSTR(". ") : CFSTR(".")) );
+                CFStringAppend(shortAbbrevFirstName, firstLetter);
+                CFRelease(firstLetter);
+            }
         }
     }
     
@@ -750,59 +734,55 @@ static inline void appendFirstLetterCharacters(CFAllocatorRef alloc, CFMutableSt
 // fuzzy equality requires that last names be equal case-insensitively, so equal objects are guaranteed the same hash
 CFHashCode BibAuthorFuzzyHash(const void *item)
 {
-    BDSKASSERT([(id)item isKindOfClass:[BibAuthor class]]);
+    OBASSERT([(id)item isKindOfClass:[BibAuthor class]]);
     return BDCaseInsensitiveStringHash([(BibAuthor *)item lastName]);
 }
 
 Boolean BibAuthorFuzzyEqual(const void *value1, const void *value2)
 {        
-    BDSKASSERT([(id)value1 isKindOfClass:[BibAuthor class]] && [(id)value2 isKindOfClass:[BibAuthor class]]);
+    OBASSERT([(id)value1 isKindOfClass:[BibAuthor class]] && [(id)value2 isKindOfClass:[BibAuthor class]]);
     return [(BibAuthor *)value1 fuzzyEqual:(BibAuthor *)value2];
 }
 
-const CFDictionaryKeyCallBacks kBDSKAuthorFuzzyDictionaryKeyCallBacks = {
+const CFSetCallBacks BDSKAuthorFuzzySetCallbacks = {
+    0,    // version
+    OFNSObjectRetain,  // retain
+    OFNSObjectRelease, // release
+    OFNSObjectCopyDescription,
+    BibAuthorFuzzyEqual,
+    BibAuthorFuzzyHash,
+};
+
+const CFDictionaryKeyCallBacks BDSKFuzzyDictionaryKeyCallBacks = {
     0,
-    BDSKNSObjectRetain,
-    BDSKNSObjectRelease,
-    BDSKNSObjectCopyDescription,
+    OFNSObjectRetain,
+    OFNSObjectRelease,
+    OFNSObjectCopyDescription,
     BibAuthorFuzzyEqual,
     BibAuthorFuzzyHash,
 };
 
-const CFArrayCallBacks kBDSKAuthorFuzzyArrayCallBacks = {
+const CFArrayCallBacks BDSKAuthorFuzzyArrayCallBacks = {
     0,    // version
-    BDSKNSObjectRetain,  // retain
-    BDSKNSObjectRelease, // release
-    BDSKNSObjectCopyDescription,
+    OFNSObjectRetain,  // retain
+    OFNSObjectRelease, // release
+    OFNSObjectCopyDescription,
     BibAuthorFuzzyEqual,
 };
 
-const CFSetCallBacks kBDSKAuthorFuzzySetCallBacks = {
-    0,    // version
-    BDSKNSObjectRetain,  // retain
-    BDSKNSObjectRelease, // release
-    BDSKNSObjectCopyDescription,
-    BibAuthorFuzzyEqual,
-    BibAuthorFuzzyHash,
-};
-
-const CFBagCallBacks kBDSKAuthorFuzzyBagCallBacks = {
-    0,    // version
-    BDSKNSObjectRetain,  // retain
-    BDSKNSObjectRelease, // release
-    BDSKNSObjectCopyDescription,
-    BibAuthorFuzzyEqual,
-    BibAuthorFuzzyHash,
-};
-
-
-@implementation NSMutableSet (BibAuthor)
-- (id)initForFuzzyAuthors {
-    [[self init] release];
-    return (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKAuthorFuzzySetCallBacks);
+NSMutableSet *BDSKCreateFuzzyAuthorCompareMutableSet()
+{
+    return (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &BDSKAuthorFuzzySetCallbacks);
 }
-@end
 
+@implementation BDSKCountedSet (BibAuthor)
+
+- (id)initFuzzyAuthorCountedSet
+{
+    return [self initWithKeyCallBacks:&BDSKFuzzyDictionaryKeyCallBacks];
+}
+
+@end
 
 @implementation ABPerson (BibAuthor)
 

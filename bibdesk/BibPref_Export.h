@@ -37,16 +37,14 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKPreferencePane.h"
-#import "BDSKOutlineView.h"
+#import <OmniAppKit/OmniAppKit.h>
 
-enum {
+typedef enum {
     BDSKExportTemplateList = 0,
     BDSKServiceTemplateList = 1
-};
-typedef NSUInteger BDSKTemplateListType;
+} BDSKTemplateListType;
 
-@interface BibPref_Export : BDSKPreferencePane {
+@interface BibPref_Export : OAPreferenceClient {
     IBOutlet NSOutlineView *outlineView;
     NSMutableArray *itemNodes;
     NSMutableArray *roles;    
@@ -63,8 +61,12 @@ typedef NSUInteger BDSKTemplateListType;
 
 - (IBAction)resetDefaultFiles:(id)sender;
 
+- (void)setItemNodes:(NSArray *)array;
+
 - (IBAction)addNode:(id)sender;
 - (IBAction)removeNode:(id)sender;
+- (BOOL)canAddItem;
+- (BOOL)canDeleteSelectedItem;
 
 - (IBAction)revealInFinder:(id)sender;
 - (IBAction)chooseFile:(id)sender;
@@ -72,13 +74,4 @@ typedef NSUInteger BDSKTemplateListType;
 
 - (IBAction)dismissChooseMainPageSheet:(id)sender;
 
-@end
-
-
-@interface BDSKTemplateOutlineView : BDSKOutlineView
-@end
-
-
-@interface NSObject (BDSKTemplateOutlineViewDelegate)
-- (BOOL)outlineViewShouldEditNextItemWhenEditingEnds:(BDSKTemplateOutlineView *)anOutlineView;
 @end

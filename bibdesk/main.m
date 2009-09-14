@@ -15,7 +15,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 #import <Cocoa/Cocoa.h>
-#import <Carbon/Carbon.h>
 int main(int argc, const char *argv[])
 {
     // Runtime check for system version

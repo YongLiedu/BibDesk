@@ -68,8 +68,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     if ((sharedBrowser == nil) && (sharedBrowser = self = [super init])) {
         sharingClients = nil;
         browser = nil;
-        unresolvedNetServices = nil;
-        undecidedNetServices = nil;
+        unresolvedNetServices = nil;        
     }
     return sharedBrowser;
 }
@@ -80,7 +79,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 
 - (void)release {}
 
-- (NSUInteger)retainCount { return NSUIntegerMax; }
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (NSSet *)sharingClients{
     return sharingClients;
@@ -94,7 +93,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     NSString *version = nil;
     // check the version for compatibility; this is our own versioning system
     if(TXTData)
-        version = [[[NSString alloc] initWithData:[[NSNetService dictionaryFromTXTRecordData:TXTData] objectForKey:BDSKTXTVersionKey] encoding:NSUTF8StringEncoding] autorelease];
+        version = [NSString stringWithData:[[NSNetService dictionaryFromTXTRecordData:TXTData] objectForKey:BDSKTXTVersionKey] encoding:NSUTF8StringEncoding];
     return [version numericCompare:[BDSKSharingBrowser requiredProtocolVersion]] != NSOrderedAscending;
 }
 
@@ -122,46 +121,22 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     [unresolvedNetServices removeObject:aNetService];
 }
 
-- (void)resolveService:(NSNetService *)aNetService {
-    if ([undecidedNetServices containsObject:aNetService] == NO)
-        // the service was removed in the meantime
-        return;
+- (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindService:(NSNetService *)aNetService moreComing:(BOOL)moreComing 
+{
     // In general, we want to ignore our own shared services, although this doesn't cause problems with the run loop anymore (since the DO servers have their own threads)  Since SystemConfiguration guarantees that we have a unique computer name, this should be safe.
-    if ([[aNetService name] isEqualToString:[[BDSKSharingServer defaultServer] sharingName]] && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelf"] == NO) {
-        switch ([[BDSKSharingServer defaultServer] status]) {
-            case BDSKSharingStatusOff:
-            case BDSKSharingStatusStarting:
-                // we're not sharing, so it can't be ours
-                break;
-            case BDSKSharingStatusPublishing:
-                // we may be sharing, but it may still find a name collision, so check again after a second
-                [self performSelector:@selector(resolveService:) withObject:aNetService afterDelay:1.0];
-                return;
-            case BDSKSharingStatusSharing:
-                // yes, it's our own service, ignore
-                [undecidedNetServices removeObject:aNetService];
-                return;
-        }
-    }
+    if([[BDSKSharingServer sharingName] isEqualToString:[aNetService name]] == YES && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelf"] == NO)
+        return;
+
     // set as delegate and resolve, so we can find out if this originated from the localhost or a remote machine
     // we can't access TXT records until the service is resolved (this is documented in CFNetService, not NSNetService)
     [aNetService setDelegate:self];
     [aNetService resolveWithTimeout:5.0];
-    [undecidedNetServices removeObject:aNetService];
     [unresolvedNetServices addObject:aNetService];
-}
-
-- (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindService:(NSNetService *)aNetService moreComing:(BOOL)moreComing 
-{
-    [undecidedNetServices addObject:aNetService];
-    [self resolveService:aNetService];
 }
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didRemoveService:(NSNetService *)aNetService moreComing:(BOOL)moreComing
 {
-    if([undecidedNetServices containsObject:aNetService]){
-        [undecidedNetServices removeObject:aNetService];
-    }else if([unresolvedNetServices containsObject:aNetService]){
+    if([unresolvedNetServices containsObject:aNetService]){
         [aNetService setDelegate:nil];
         [unresolvedNetServices removeObject:aNetService];
     }else{
@@ -169,13 +144,12 @@ static BDSKSharingBrowser *sharedBrowser = nil;
         NSEnumerator *e = [sharingClients objectEnumerator];
         BDSKSharingClient *client = nil;
         
-        // find the client we should remove
+        // find the group we should remove
         while(client = [e nextObject]){
             if([[client name] isEqualToString:name])
                 break;
         }
         if(client != nil){
-            [client terminate];
             [sharingClients removeObject:client];
             [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientsChangedNotification object:self];
         }
@@ -187,56 +161,37 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     return sharingClients != nil;
 }
 
-- (void)handleApplicationWillTerminate:(NSNotification *)note;
-{
-    [self disableSharedBrowsing];
-}
-
 - (void)enableSharedBrowsing;
 {
-    // only restart when there's a document to display the shared groups, the next document that's opened will otherwise call again if necessary
-    if([self isBrowsing] == NO && [[NSApp orderedDocuments] count] > 0){
+    if([self isBrowsing] == NO){
         sharingClients = [[NSMutableSet alloc] initWithCapacity:5];
         browser = [[NSNetServiceBrowser alloc] init];
         [browser setDelegate:self];
         [browser searchForServicesOfType:BDSKNetServiceDomain inDomain:@""];    
         unresolvedNetServices = [[NSMutableArray alloc] initWithCapacity:5];
-        undecidedNetServices = [[NSMutableSet alloc] initWithCapacity:1];
         
-        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-        [nc postNotificationName:BDSKSharingClientsChangedNotification object:self];
-        [nc addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientsChangedNotification object:self];
     }
 }
 
 - (void)disableSharedBrowsing;
 {
     if([self isBrowsing]){
-        [sharingClients makeObjectsPerformSelector:@selector(terminate)];
         [sharingClients release];
         sharingClients = nil;
-        
         [browser release];
         browser = nil;
-        
         [unresolvedNetServices makeObjectsPerformSelector:@selector(setDelegate:) withObject:nil];
         [unresolvedNetServices release];
         unresolvedNetServices = nil;
         
-        if ([undecidedNetServices count])
-            [[self class] cancelPreviousPerformRequestsWithTarget:self];
-        [undecidedNetServices release];
-        undecidedNetServices = nil;
-        
-        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-        [nc postNotificationName:BDSKSharingClientsChangedNotification object:self];
-        [nc removeObserver:self name:NSApplicationWillTerminateNotification object:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientsChangedNotification object:self];
     }
 }
 
 - (void)restartSharedBrowsingIfNeeded;
 {
-    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldLookForSharedFilesKey]){
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey]){
         [self disableSharedBrowsing];
         [self enableSharedBrowsing];
     }

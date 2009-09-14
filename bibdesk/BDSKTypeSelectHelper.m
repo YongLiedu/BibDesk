@@ -37,15 +37,16 @@
  */
 
 #import "BDSKTypeSelectHelper.h"
-#import "BDSKRuntime.h"
+#import <OmniFoundation/OmniFoundation.h>
+#import <OmniBase/OmniBase.h>
 
-#define REPEAT_CHARACTER 0x2F
+#define REPEAT_CHARACTER '/'
 #define CANCEL_CHARACTER 0x1B
 
-#define BDSKWindowDidChangeFirstResponderNotification @"BDSKWindowDidChangeFirstResponderNotification"
+static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDidChangeFirstResponderNotification";
 
 @interface NSString (BDSKTypeAheadHelperExtensions)
-- (BOOL)containsStringStartingAtWord:(NSString *)string options:(NSInteger)mask range:(NSRange)range;
+- (BOOL)containsStringStartingAtWord:(NSString *)string options:(int)mask range:(NSRange)range;
 @end
 
 @interface NSWindow (BDSKTypeAheadHelperExtensions)
@@ -57,9 +58,10 @@
 - (void)searchWithStickyMatch:(BOOL)allowUpdate;
 - (void)stopTimer;
 - (void)startTimer;
-- (void)typeSelectSearchTimeout:(id)sender;
+- (void)typeSelectSearchTimeout;
+- (void)handleTimeoutNotification:(NSNotification *)notification;
 - (NSTimeInterval)timeoutInterval;
-- (NSUInteger)indexOfMatchedItemAfterIndex:(NSUInteger)selectedIndex;
+- (unsigned int)indexOfMatchedItemAfterIndex:(unsigned int)selectedIndex;
 
 @end
 
@@ -74,8 +76,6 @@
         searchString = nil;
         cycleResults = YES;
         matchPrefix = YES;
-        processing = NO;
-        timer = nil;
     }
     return self;
 }
@@ -176,9 +176,9 @@
     
     if (processing == NO) {
         [[NSNotificationCenter defaultCenter] removeObserver:self];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(typeSelectSearchTimeout:) name:BDSKWindowDidChangeFirstResponderNotification object:window];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(typeSelectSearchTimeout:) name:NSWindowDidResignKeyNotification object:window];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(typeSelectSearchTimeout:) name:NSWindowWillCloseNotification object:window];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTimeoutNotification:) name:BDSKWindowDidChangeFirstResponderNotification object:window];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTimeoutNotification:) name:NSWindowDidResignKeyNotification object:window];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTimeoutNotification:) name:NSWindowWillCloseNotification object:window];
         [fieldEditor setDelegate:self];
         [fieldEditor setString:@""];
     }
@@ -212,8 +212,8 @@
 
 - (void)cancelSearch;
 {
-    if (timer)
-        [self typeSelectSearchTimeout:timer];
+    if (timeoutEvent)
+        [self typeSelectSearchTimeout];
 }
 
 - (BOOL)isTypeSelectEvent:(NSEvent *)keyEvent;
@@ -244,7 +244,7 @@
     
     NSString *characters = [keyEvent charactersIgnoringModifiers];
     unichar character = [characters length] > 0 ? [characters characterAtIndex:0] : 0;
-	NSUInteger modifierFlags = [keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+	unsigned modifierFlags = [keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
     
     return modifierFlags == 0 && character == REPEAT_CHARACTER;
 }
@@ -258,7 +258,7 @@
     
     NSString *characters = [keyEvent charactersIgnoringModifiers];
     unichar character = [characters length] > 0 ? [characters characterAtIndex:0] : 0;
-	NSUInteger modifierFlags = [keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+	unsigned modifierFlags = [keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
     
     return modifierFlags == 0 && character == CANCEL_CHARACTER;
 }
@@ -277,19 +277,20 @@
 
 - (void)stopTimer;
 {
-    [timer invalidate];
-    [timer release];
-    timer = nil;
+    if (timeoutEvent != nil) {
+        [[OFScheduler mainScheduler] abortEvent:timeoutEvent];
+        [timeoutEvent release];
+        timeoutEvent = nil;
+    }
 }
 
 - (void)startTimer;
 {
     [self stopTimer];
-    timer = [[NSTimer alloc] initWithFireDate:[NSDate dateWithTimeIntervalSinceNow:[self timeoutInterval]] interval:0 target:self selector:@selector(typeSelectSearchTimeout:) userInfo:NULL repeats:NO];
-    [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+    timeoutEvent = [[[OFScheduler mainScheduler] scheduleSelector:@selector(typeSelectSearchTimeout) onObject:self afterTime:[self timeoutInterval]] retain];
 }
 
-- (void)typeSelectSearchTimeout:(id)sender;
+- (void)typeSelectSearchTimeout;
 {
     if([dataSource respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
         [dataSource typeSelectHelper:self updateSearchString:nil];
@@ -298,28 +299,31 @@
     processing = NO;
     
     NSTextView *fieldEditor = (NSTextView *)[[NSApp keyWindow] fieldEditor:YES forObject:self];
-    if ([fieldEditor delegate] == self) {
-        if ([fieldEditor hasMarkedText]) {
-            // we pass a dummy key event to the field editor to clear any hanging dead keys (marked text)
-            NSEvent *keyEvent = [NSEvent keyEventWithType:NSKeyDown
-                                                 location:NSZeroPoint
-                                            modifierFlags:0
-                                                timestamp:0
-                                             windowNumber:0
-                                                  context:nil
-                                               characters:@""
-                              charactersIgnoringModifiers:@""
-                                                isARepeat:NO
-                                                  keyCode:0];
-            [fieldEditor interpretKeyEvents:[NSArray arrayWithObject:keyEvent]];
-        }
+    if ([fieldEditor delegate] == self && [fieldEditor hasMarkedText]) {
+        // we pass a dummy key event to the field editor to clear any hanging dead keys (marked text)
+        NSEvent *keyEvent = [NSEvent keyEventWithType:NSKeyDown
+                                             location:NSZeroPoint
+                                        modifierFlags:0
+                                            timestamp:0
+                                         windowNumber:0
+                                              context:nil
+                                           characters:@""
+                          charactersIgnoringModifiers:@""
+                                            isARepeat:NO
+                                              keyCode:0];
+        [fieldEditor interpretKeyEvents:[NSArray arrayWithObject:keyEvent]];
         [fieldEditor setDelegate:nil];
     }
 }
 
+- (void)handleTimeoutNotification:(NSNotification *)notification;
+{
+    [self typeSelectSearchTimeout];
+}
+
 // See http://www.mactech.com/articles/mactech/Vol.18/18.10/1810TableTechniques/index.html
 - (NSTimeInterval)timeoutInterval {
-    NSInteger keyThreshTicks = [[NSUserDefaults standardUserDefaults] integerForKey:@"InitialKeyRepeat"];
+    int keyThreshTicks = [[NSUserDefaults standardUserDefaults] integerForKey:@"InitialKeyRepeat"];
     if (0 == keyThreshTicks)
         keyThreshTicks = 35;	// apparent default value, translates to 1.17 sec timeout.
     
@@ -328,10 +332,10 @@
 
 - (void)searchWithStickyMatch:(BOOL)sticky;
 {
-    BDSKPRECONDITION(dataSource != nil);
+    OBPRECONDITION(dataSource != nil);
     
     if ([searchString length]) {
-        NSUInteger selectedIndex, startIndex, foundIndex;
+        unsigned int selectedIndex, startIndex, foundIndex;
         
         if (cycleResults) {
             selectedIndex = [dataSource typeSelectHelperCurrentlySelectedIndex:self];
@@ -357,9 +361,9 @@
     }
 }
 
-- (NSUInteger)indexOfMatchedItemAfterIndex:(NSUInteger)selectedIndex;
+- (unsigned int)indexOfMatchedItemAfterIndex:(unsigned int)selectedIndex;
 {
-    NSUInteger labelCount = [[self searchCache] count];
+    unsigned int labelCount = [[self searchCache] count];
     
     if (labelCount == NO)
         return NSNotFound;
@@ -367,9 +371,9 @@
     if (selectedIndex == NSNotFound)
         selectedIndex = labelCount - 1;
 
-    NSUInteger labelIndex = selectedIndex;
+    unsigned int labelIndex = selectedIndex;
     BOOL looped = NO;
-    NSInteger options = NSCaseInsensitiveSearch;
+    int options = NSCaseInsensitiveSearch;
     
     if (matchPrefix)
         options |= NSAnchoredSearch;
@@ -396,8 +400,8 @@
 
 @implementation NSString (BDSKTypeAheadHelperExtensions)
 
-- (BOOL)containsStringStartingAtWord:(NSString *)string options:(NSInteger)mask range:(NSRange)range {
-    NSUInteger stringLength = [string length];
+- (BOOL)containsStringStartingAtWord:(NSString *)string options:(int)mask range:(NSRange)range {
+    unsigned int stringLength = [string length];
     if (stringLength == 0 || stringLength > range.length)
         return NO;
     while (range.length >= stringLength) {
@@ -425,18 +429,18 @@
 
 @implementation NSWindow (BDSKTypeAheadHelperExtensions)
 
-static BOOL (*original_makeFirstResponder)(id, SEL, id) = NULL;
+static BOOL (*originalMakeFirstResponder)(id, SEL, id) = NULL;
 
-- (BOOL)replacement_makeFirstResponder:(NSResponder *)aResponder {
+- (BOOL)replacementMakeFirstResponder:(NSResponder *)aResponder {
     id oldFirstResponder = [self firstResponder];
-    BOOL success = original_makeFirstResponder(self, _cmd, aResponder);
+    BOOL success = originalMakeFirstResponder(self, _cmd, aResponder);
     if (oldFirstResponder != [self firstResponder])
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWindowDidChangeFirstResponderNotification object:self];
     return success;
 }
 
 + (void)load {
-    original_makeFirstResponder = (typeof(original_makeFirstResponder))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(makeFirstResponder:), @selector(replacement_makeFirstResponder:));
+    originalMakeFirstResponder = (typeof(originalMakeFirstResponder))OBReplaceMethodImplementationWithSelector(self, @selector(makeFirstResponder:), @selector(replacementMakeFirstResponder:));
 }
 
 @end

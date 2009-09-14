@@ -40,7 +40,6 @@
 #import "BibItem.h"
 #import "BDSKBibTeXParser.h"
 #import "NSError_BDSKExtensions.h"
-#import "NSArray_BDSKExtensions.h"
 
 @implementation BDSKACMDLParser
 
@@ -50,7 +49,7 @@
         return NO;
     }
     
-    NSString *containsBibTexLinkNode = @"//a[contains(text(),'BibTeX')]";
+    NSString *containsBibTexLinkNode = @"//a[contains(text(),'BibTex')]";
     
     NSError *error = nil;    
 
@@ -65,15 +64,15 @@
 // and follow links two levels deep to get bibitems from each citation in the list.
 
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
-log_method();
+
     NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
     
     
-    NSString *BibTeXLinkNodePath = @"//a[contains(text(),'BibTeX')]";
+    NSString *BibTexLinkNodePath = @"//a[contains(text(),'BibTex')]";
     
     NSError *error = nil;    
 
-    NSArray *BibTeXLinkNodes = [[xmlDocument rootElement] nodesForXPath:BibTeXLinkNodePath
+    NSArray *BibTeXLinkNodes = [[xmlDocument rootElement] nodesForXPath:BibTexLinkNodePath
                                                     error:&error];
     
     if ([BibTeXLinkNodes count] < 1) {
@@ -156,10 +155,5 @@ log_method();
     
 }
 
-
-+ (NSArray *) parserInfos {
-	NSDictionary * parserInfos = [BDSKWebParser parserInfoWithName:@"ACM" address:@"http://portal.acm.org/" description:nil flags:BDSKParserFeatureNone];
-	return [NSArray arrayWithObject:parserInfos];
-}
-
 @end 
+

@@ -34,12 +34,21 @@
 
 #import <Foundation/Foundation.h>
 
+#pragma mark Global CPP macros
+
+#define foreach(object, enumerator) \
+id mjtForeachEnumerator ## object = (enumerator); \
+if ( [mjtForeachEnumerator ## object respondsToSelector:@selector(objectEnumerator)] ) \
+mjtForeachEnumerator ## object = [mjtForeachEnumerator ## object objectEnumerator]; \
+SEL mjtNextObjectSEL ## object = @selector(nextObject); \
+IMP mjtNextObjectIMP ## object = [mjtForeachEnumerator ## object methodForSelector:mjtNextObjectSEL ## object]; \
+id object; \
+while ( object = mjtNextObjectIMP ## object(mjtForeachEnumerator ## object, mjtNextObjectSEL ## object) )
+
+#pragma mark ||  User Defaults Key String Declarations
 
 @interface NSString (BDSKStringConstants)
-+ (void)initializeStringConstants;
 @end
-
-# pragma mark User default keys
 
 extern NSString *BDSKTeXBinPathKey;
 extern NSString *BDSKBibTeXBinPathKey;
@@ -62,6 +71,7 @@ extern NSString *BDSKEditOnPasteKey;
 extern NSString *BDSKSeparateCiteKey;
 extern NSString *BDSKShownColsNamesKey;
 extern NSString *BDSKShowStatusBarKey;
+extern NSString *BDSKShowEditorStatusBarKey;
 extern NSString *BDSKShowFindStatusBarKey;
 extern NSString *BDSKDefaultFieldsKey;
 extern NSString *BDSKLocalFileFieldsKey;
@@ -86,6 +96,7 @@ extern NSString *BDSKFileContentSearchTableViewFontSizeKey;
 extern NSString *BDSKOrphanedFilesTableViewFontNameKey;
 extern NSString *BDSKOrphanedFilesTableViewFontSizeKey;
 extern NSString *BDSKPreviewMaxNumberKey;
+extern NSString *BDSKPreviewTemplateStyleKey;
 extern NSString *BDSKBottomPreviewDisplayKey;
 extern NSString *BDSKBottomPreviewDisplayTemplateKey;
 extern NSString *BDSKSidePreviewDisplayKey;
@@ -182,24 +193,69 @@ extern NSString *BDSKRemoveConvertedRemoteURLFieldsKey;
 
 extern NSString *BDSKAuthorNameDisplayKey;
 
-extern NSString *BDSKHideGroupCountKey;
-
+extern NSString *BDSKUpdateCheckIntervalKey;
+extern NSString *BDSKUpdateCheckLastDateKey;
+extern NSString *BDSKUpdateLatestNotifiedVersionKey;
 extern NSString *BDSKSpotlightVersionInfoKey;
 
 extern NSString *BDSKShouldShowWebGroupPrefKey;
 extern NSString *BDSKDefaultArrayJoinStringKey;
 
 extern NSString *BDSKBottomFileViewIconScaleKey;
-extern NSString *BDSKBottomFileViewDisplayModeKey;
 extern NSString *BDSKSideFileViewIconScaleKey;
-extern NSString *BDSKSideFileViewDisplayModeKey;
 extern NSString *BDSKEditorFileViewIconScaleKey;
-extern NSString *BDSKEditorFileViewDisplayModeKey;
 
-#pragma mark BibTeX types strings
+#pragma mark Field name strings
 
+extern NSString *BDSKCiteKeyString;
+extern NSString *BDSKColorString;
+extern NSString *BDSKLocalFileString;
+extern NSString *BDSKRemoteURLString;
+extern NSString *BDSKAnnoteString;
+extern NSString *BDSKAbstractString;
+extern NSString *BDSKRssDescriptionString;
+extern NSString *BDSKLocalUrlString;
+extern NSString *BDSKUrlString;
+extern NSString *BDSKAuthorString;
+extern NSString *BDSKEditorString;
+extern NSString *BDSKTitleString;
+extern NSString *BDSKChapterString;
+extern NSString *BDSKContainerString;
+extern NSString *BDSKYearString;
+extern NSString *BDSKMonthString;
+extern NSString *BDSKKeywordsString;
+extern NSString *BDSKJournalString;
+extern NSString *BDSKVolumeString;
+extern NSString *BDSKNumberString;
+extern NSString *BDSKSeriesString;
+extern NSString *BDSKPagesString;
+extern NSString *BDSKBooktitleString;
+extern NSString *BDSKVolumetitleString;
+extern NSString *BDSKPublisherString;
+extern NSString *BDSKDateAddedString;
+extern NSString *BDSKDateModifiedString;
+extern NSString *BDSKDateString;
+extern NSString *BDSKPubDateString;
+extern NSString *BDSKCrossrefString;
+extern NSString *BDSKRatingString;
+extern NSString *BDSKReadString;
 extern NSString *BDSKBibtexString;
-
+extern NSString *BDSKFirstAuthorString;
+extern NSString *BDSKSecondAuthorString;
+extern NSString *BDSKThirdAuthorString;
+extern NSString *BDSKLastAuthorString;
+extern NSString *BDSKFirstAuthorEditorString;
+extern NSString *BDSKSecondAuthorEditorString;
+extern NSString *BDSKThirdAuthorEditorString;
+extern NSString *BDSKAuthorEditorString;
+extern NSString *BDSKLastAuthorEditorString;
+extern NSString *BDSKItemNumberString;
+extern NSString *BDSKImportOrderString;
+extern NSString *BDSKTypeString;
+extern NSString *BDSKAddressString;
+extern NSString *BDSKDoiString;
+extern NSString *BDSKCiteseerUrlString;
+extern NSString *BDSKPubTypeString;
 extern NSString *BDSKArticleString;
 extern NSString *BDSKBookString;
 extern NSString *BDSKInbookString;
@@ -218,77 +274,14 @@ extern NSString *BDSKUnpublishedString;
 extern NSString *BDSKMastersThesisString;
 extern NSString *BDSKPhDThesisString;
 
-#pragma mark Field name strings
-
-extern NSString *BDSKAuthorString;
-extern NSString *BDSKEditorString;
-extern NSString *BDSKTitleString;
-extern NSString *BDSKChapterString;
-extern NSString *BDSKContainerString;
-extern NSString *BDSKYearString;
-extern NSString *BDSKMonthString;
-extern NSString *BDSKKeywordsString;
-extern NSString *BDSKJournalString;
-extern NSString *BDSKVolumeString;
-extern NSString *BDSKNumberString;
-extern NSString *BDSKSeriesString;
-extern NSString *BDSKPagesString;
-extern NSString *BDSKBooktitleString;
-extern NSString *BDSKVolumetitleString;
-extern NSString *BDSKPublisherString;
-
-extern NSString *BDSKCrossrefString;
-extern NSString *BDSKRatingString;
-extern NSString *BDSKReadString;
-extern NSString *BDSKDateAddedString;
-extern NSString *BDSKDateModifiedString;
-extern NSString *BDSKDateString;
-extern NSString *BDSKLocalUrlString;
-extern NSString *BDSKUrlString;
-extern NSString *BDSKTypeString;
-extern NSString *BDSKAddressString;
-extern NSString *BDSKDoiString;
-extern NSString *BDSKCiteseerUrlString;
-extern NSString *BDSKColorString;
-extern NSString *BDSKAnnoteString;
-extern NSString *BDSKAbstractString;
-extern NSString *BDSKRssDescriptionString;
-
-#pragma mark | Pseudo field name strings
-
-extern NSString *BDSKCiteKeyString;
-extern NSString *BDSKPubDateString;
-extern NSString *BDSKPubTypeString;
-extern NSString *BDSKColorLabelString;
-extern NSString *BDSKLocalFileString;
-extern NSString *BDSKRemoteURLString;
-extern NSString *BDSKFirstAuthorString;
-extern NSString *BDSKSecondAuthorString;
-extern NSString *BDSKThirdAuthorString;
-extern NSString *BDSKLastAuthorString;
-extern NSString *BDSKFirstAuthorEditorString;
-extern NSString *BDSKSecondAuthorEditorString;
-extern NSString *BDSKThirdAuthorEditorString;
-extern NSString *BDSKAuthorEditorString;
-extern NSString *BDSKLastAuthorEditorString;
-extern NSString *BDSKItemNumberString;
-extern NSString *BDSKImportOrderString;
-extern NSString *BDSKAllFieldsString;
-extern NSString *BDSKFileContentSearchString;
-extern NSString *BDSKRelevanceString;
-extern NSString *BDSKPersonString;
-extern NSString *BDSKSkimNotesString;
-
-extern NSString *BDSKParserPasteDragString;
-
-#pragma mark Notification name strings
-
+#pragma mark ||  Notification name strings
 extern NSString *BDSKFinalizeChangesNotification;
 extern NSString *BDSKDocumentFileURLDidChangeNotification;
 extern NSString *BDSKPreviewDisplayChangedNotification;
 extern NSString *BDSKTableSelectionChangedNotification;
 extern NSString *BDSKGroupTableSelectionChangedNotification;
 extern NSString *BDSKGroupFieldChangedNotification;
+extern NSString *BDSKGroupFieldAddRemoveNotification;
 extern NSString *BDSKBibItemChangedNotification;
 extern NSString *BDSKNeedsToBeFiledChangedNotification;
 extern NSString *BDSKDocSetPublicationsNotification;
@@ -310,9 +303,8 @@ extern NSString *BDSKScriptGroupUpdatedNotification;
 extern NSString *BDSKSearchGroupUpdatedNotification;
 extern NSString *BDSKWebGroupUpdatedNotification;
 extern NSString *BDSKDidAddRemoveGroupNotification;
-extern NSString *BDSKWillRemoveGroupsNotification;
+extern NSString *BDSKWillAddRemoveGroupNotification;
 extern NSString *BDSKClientConnectionsChangedNotification;
-extern NSString *BDSKSharingStatusChangedNotification;
 extern NSString *BDSKSharingNameChangedNotification;
 extern NSString *BDSKSharingPasswordChangedNotification;
 extern NSString *BDSKDocumentControllerAddDocumentNotification;
@@ -321,8 +313,14 @@ extern NSString *BDSKDocumentControllerDidChangeMainDocumentNotification;
 extern NSString *BDSKFileSearchIndexInfoChangedNotification;
 extern NSString *BDSKEncodingsListChangedNotification;
 extern NSString *BDSKTemporaryFileMigrationNotification;
-extern NSString *BDSKFlagsChangedNotification;
 
 #pragma mark Exception name strings
-
 extern NSString *BDSKUnimplementedException;
+
+
+extern NSString *BDSKParserPasteDragString;
+extern NSString *BDSKAllFieldsString;
+extern NSString *BDSKFileContentSearchString;
+extern NSString *BDSKRelevanceString;
+extern NSString *BDSKPersonString;
+extern NSString *BDSKSkimNotesString;

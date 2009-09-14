@@ -54,7 +54,7 @@
 @end
 
 
-@interface BDSKOrphanedFileServer : BDSKAsynchronousDOServer
+@interface BDSKOrphanedFileServer : BDSKAsynchronousDOServer <BDSKOrphanedFileServerThread, BDSKOrphanedFileServerMainThread>
 {
     NSMutableArray *foundFiles;     // cache of file URLs from UKDirectoryEnumerator minus knownFiles
     NSSet *knownFiles;              // file paths from BibItem

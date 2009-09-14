@@ -38,7 +38,6 @@
 
 #import "BDSKFileMigrationController.h"
 #import "BibDocument.h"
-#import "BibDocument_UI.h"
 #import "BibDocument_Actions.h"
 #import "BibDocument_Groups.h"
 #import "BDSKPublicationsArray.h"
@@ -47,7 +46,7 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKTextWithIconCell.h"
 
-#define BDSKFileMigrationFrameAutosaveName @"BDSKFileMigrationWindow"
+static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow";
 
 @interface BDSKURLTransformer : NSValueTransformer
 @end
@@ -62,7 +61,7 @@
 
 + (void)initialize
 {
-    BDSKINITIALIZE;
+    OBINITIALIZE;
     [NSValueTransformer setValueTransformer:[[[BDSKURLTransformer alloc] init] autorelease] forName:@"BDSKURLTransformer"];
     [NSValueTransformer setValueTransformer:[[[BDSKBibItemTransformer alloc] init] autorelease] forName:@"BDSKBibItemTransformer"];
 }
@@ -71,10 +70,10 @@
 {
     self = [self initWithWindowNibName:[self windowNibName]];
     if (self) {
-        NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
+        OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
         results = [NSMutableArray new];
-        keepLocalFileFields = NO == [sud boolForKey:BDSKRemoveConvertedLocalFileFieldsKey];
-        keepRemoteURLFields = NO == [sud boolForKey:BDSKRemoveConvertedRemoteURLFieldsKey];
+        keepLocalFileFields = NO == [pw boolForKey:BDSKRemoveConvertedLocalFileFieldsKey];
+        keepRemoteURLFields = NO == [pw boolForKey:BDSKRemoveConvertedRemoteURLFieldsKey];
         useSelection = NO;
     }
     return self;
@@ -104,6 +103,25 @@
     return title;
 }
 
+- (int)numberOfRowsInTableView:(NSTableView *)tableView { return 0; }
+- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row { return nil; }
+- (NSMenu *)tableView:(NSTableView *)tv contextMenuForRow:(int)row column:(int)column;
+{
+    NSZone *zone = [NSMenu menuZone];
+    NSMenu *menu = [[[NSMenu allocWithZone:zone] initWithTitle:@""] autorelease];
+    if (row >= 0 && column >=0) {
+        NSMenuItem *anItem = [[NSMenuItem allocWithZone:zone] initWithTitle:NSLocalizedString(@"Open Parent Directory in Finder", @"") action:@selector(openParentDirectory:) keyEquivalent:@""];
+        [anItem setRepresentedObject:[[self mutableArrayValueForKey:@"results"] objectAtIndex:row]];
+        [menu addItem:anItem];
+        [anItem release];
+        anItem = [[NSMenuItem allocWithZone:zone] initWithTitle:NSLocalizedString(@"Edit Publication", @"") action:@selector(editPublication:) keyEquivalent:@""];
+        [anItem setRepresentedObject:[[self mutableArrayValueForKey:@"results"] objectAtIndex:row]];
+        [menu addItem:anItem];
+        [anItem release];
+    }
+    return [menu numberOfItems] > 0 ? menu : nil;
+}
+
 - (IBAction)migrate:(id)sender;
 {
     NSMutableArray *observedResults = [self mutableArrayValueForKey:@"results"];
@@ -129,11 +147,11 @@
     [progressBar setHidden:NO];
     [migrateButton setEnabled:NO];
     
-    NSInteger current = 0, final = [pubs count];
-    NSInteger numberOfAddedFiles = 0, numberOfRemovedFields = 0, addedFiles, removedFields;
+    int current = 0, final = [pubs count];
+    int numberOfAddedFiles = 0, numberOfRemovedFields = 0, addedFiles, removedFields;
     NSEnumerator *pubEnum = [pubs objectEnumerator];
     BibItem *aPub;
-    NSInteger mask = BDSKRemoveNoFields;
+    int mask = BDSKRemoveNoFields;
     if (keepLocalFileFields == NO)
         mask |= BDSKRemoveLocalFileFieldsMask;
     if (keepRemoteURLFields == NO)
@@ -160,7 +178,7 @@
         numberOfAddedFiles += addedFiles;
         numberOfRemovedFields += removedFields;
         [progressBar incrementBy:1.0];
-        [statusField setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%ld of %ld", @"Status message"), (long)current, (long)final]];
+        [statusField setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%i of %i", @"Status message"), current, final]];
     }
     
     [progressBar setHidden:YES];
@@ -168,10 +186,10 @@
     
     NSString *messageFormat = nil;
     if (mask == BDSKRemoveNoFields)
-        messageFormat = NSLocalizedString(@"Converted %ld files or URLs.", @"Status message");
+        messageFormat = NSLocalizedString(@"Converted %i files or URLs.", @"Status message");
     else
-        messageFormat = NSLocalizedString(@"Converted %ld files or URLs, removed %ld fields.", @"Status message");
-    [statusField setStringValue:[NSString stringWithFormat:messageFormat, (long)numberOfAddedFiles, (long)numberOfRemovedFields]];
+        messageFormat = NSLocalizedString(@"Converted %i files or URLs, removed %i fields.", @"Status message");
+    [statusField setStringValue:[NSString stringWithFormat:messageFormat, numberOfAddedFiles, numberOfRemovedFields]];
     
     // BibItem change notifications are only posted if the old fields are removed, so this ensures that the file view is updated
     if (numberOfAddedFiles > 0)
@@ -180,7 +198,7 @@
 
 - (IBAction)editPublication:(id)sender;
 {
-    NSInteger row = [tableView clickedRow];
+    int row = [tableView clickedRow];
     BibItem *pub = nil;
     if ([sender respondsToSelector:@selector(representedObject)])
         pub = [[sender representedObject] valueForKey:@"publication"];
@@ -208,7 +226,7 @@
 
 - (IBAction)openParentDirectory:(id)sender;
 {
-    NSInteger row = [tableView clickedRow];
+    int row = [tableView clickedRow];
     NSURL *theURL = nil;
     NSString *path = nil;
     if ([sender respondsToSelector:@selector(representedObject)])
@@ -222,14 +240,6 @@
     else NSBeep();
 }
 
-- (void)showHelp:(id)sender
-{
-    NSString *helpBookName = [[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleHelpBookName"];
-	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"FileMigration" inBook:helpBookName];
-}
-
-#pragma mark TableView delegate
-
 - (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tc row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation
 {
     NSString *tooltip = nil;
@@ -240,21 +250,10 @@
     return tooltip;
 }
 
-- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row;
+- (void)showHelp:(id)sender
 {
-    NSZone *zone = [NSMenu menuZone];
-    NSMenu *menu = [[[NSMenu allocWithZone:zone] initWithTitle:@""] autorelease];
-    if (row >= 0 && tableColumn) {
-        NSMenuItem *anItem = [[NSMenuItem allocWithZone:zone] initWithTitle:NSLocalizedString(@"Open Parent Directory in Finder", @"") action:@selector(openParentDirectory:) keyEquivalent:@""];
-        [anItem setRepresentedObject:[[self mutableArrayValueForKey:@"results"] objectAtIndex:row]];
-        [menu addItem:anItem];
-        [anItem release];
-        anItem = [[NSMenuItem allocWithZone:zone] initWithTitle:NSLocalizedString(@"Edit Publication", @"") action:@selector(editPublication:) keyEquivalent:@""];
-        [anItem setRepresentedObject:[[self mutableArrayValueForKey:@"results"] objectAtIndex:row]];
-        [menu addItem:anItem];
-        [anItem release];
-    }
-    return [menu numberOfItems] > 0 ? menu : nil;
+    NSString *helpBookName = [[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleHelpBookName"];
+	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"FileMigration" inBook:helpBookName];
 }
 
 @end

@@ -37,23 +37,40 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKIconTextFieldCell.h"
 
 extern NSString *BDSKTextWithIconCellStringKey;
 extern NSString *BDSKTextWithIconCellImageKey;
 
 
-@interface BDSKTextWithIconCell : BDSKIconTextFieldCell {
+@interface BDSKTextWithIconCell : NSTextFieldCell
+{
+    NSImage *icon;
     BOOL hasDarkHighlight;
     BOOL settingUpFieldEditor;
 }
 
+// API
+- (NSImage *)icon;
+- (void)setIcon:(NSImage *)anIcon;
+
 - (BOOL)hasDarkHighlight;
 - (void)setHasDarkHighlight:(BOOL)flag;
 
+- (NSRect)textRectForBounds:(NSRect)aRect;
+- (NSRect)iconRectForBounds:(NSRect)aRect;
+
 @end
 
-#pragma mark -
 
-@interface BDSKTextWithIconFormatter : NSFormatter
+enum {
+    BDSKFilePathDisplayFullPath,
+    BDSKFilePathDisplayTildeAbbreviatedPath,
+    BDSKFilePathDisplayFilename    
+};
+
+@interface BDSKFilePathCell : BDSKTextWithIconCell {
+    int displayType;
+}
+- (int)displayType;
+- (void)setDisplayType:(int)type;
 @end

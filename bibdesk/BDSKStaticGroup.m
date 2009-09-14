@@ -39,9 +39,7 @@
 #import "BDSKStaticGroup.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BibItem.h"
-#import "BibDocument.h"
-#import "BDSKOwnerProtocol.h"
-#import "BDSKPublicationsArray.h"
+#import <OmniBase/OmniBase.h>
 
 
 @implementation BDSKStaticGroup
@@ -49,7 +47,7 @@
 static NSString *BDSKLastImportLocalizedString = nil;
 
 + (void)initialize{
-    BDSKINITIALIZE;
+    OBINITIALIZE;
     BDSKLastImportLocalizedString = [NSLocalizedString(@"Last Import", @"Group name for last import") copy];
 }
 
@@ -63,45 +61,37 @@ static NSString *BDSKLastImportLocalizedString = nil;
 // designated initializer
 - (id)initWithName:(id)aName publications:(NSArray *)array {
     if (self = [super initWithName:aName count:[array count]]) {
-        publications = [[NSMutableArray alloc] initWithArray:array];
+        publications = [array mutableCopy];
     }
     return self;
 }
 
 // super's designated initializer
-- (id)initWithName:(id)aName count:(NSInteger)aCount {
-    self = [self initWithName:aName publications:nil];
+- (id)initWithName:(id)aName count:(int)aCount {
+    self = [self initWithName:aName publications:[NSArray array]];
     return self;
 }
 
 - (id)initWithDictionary:(NSDictionary *)groupDict {
     NSString *aName = [[groupDict objectForKey:@"group name"] stringByUnescapingGroupPlistEntities];
-    NSArray *keys = [[groupDict objectForKey:@"keys"] componentsSeparatedByString:@","];
-    if (self = [self initWithName:aName publications:nil]) {
-        tmpKeys = [keys retain];
-    }
+    self = [self initWithName:aName count:0];
     return self;
 }
 
 - (NSDictionary *)dictionaryValue {
     NSString *aName = [[self stringValue] stringByEscapingGroupPlistEntities];
-	NSString *keys = [(tmpKeys ?: [[self publications] valueForKeyPath:@"@distinctUnionOfObjects.citeKey"]) componentsJoinedByString:@","];
+	NSString *keys = [[[self publications] valueForKeyPath:@"@distinctUnionOfObjects.citeKey"] componentsJoinedByString:@","];
     return [NSDictionary dictionaryWithObjectsAndKeys:aName, @"group name", keys, @"keys", nil];
-}
-
-- (id)copyWithZone:(NSZone *)aZone {
-	return [[[self class] allocWithZone:aZone] initWithName:name publications:publications];
 }
 
 - (void)dealloc {
 	[[self undoManager] removeAllActionsWithTarget:self];
     [publications release];
-    [tmpKeys release];
     [super dealloc];
 }
 
 - (NSImage *)icon {
-	return [NSImage imageNamed:@"staticGroup"];
+	return [NSImage imageNamed:@"staticFolderIcon"];
 }
 
 - (BOOL)isStatic { return YES; }
@@ -162,18 +152,6 @@ static NSString *BDSKLastImportLocalizedString = nil;
 	return [publications containsObject:item];
 }
 
-- (void)update {
-    if (tmpKeys) {
-        NSEnumerator *keyEnum = [tmpKeys objectEnumerator];
-        NSString *key;
-        while (key = [keyEnum nextObject]) 
-            [publications addObjectsFromArray:[[document publications] allItemsForCiteKey:key]];
-        [self setCount:[publications count]];
-        [tmpKeys release];
-        tmpKeys = nil;
-    }
-}
-
 @end
 
 #pragma mark -
@@ -181,7 +159,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
 @implementation BDSKLastImportGroup
 
 - (NSImage *)icon {
-	return [NSImage imageNamed:@"importGroup"];
+	return [NSImage imageNamed:@"importFolderIcon"];
 }
 
 - (void)setName:(NSString *)newName {}
@@ -194,8 +172,8 @@ static NSString *BDSKLastImportLocalizedString = nil;
 
 - (BOOL)isEqual:(id)other { return other == self; }
 
-- (NSUInteger)hash {
-    return( ((NSUInteger) self >> 4) | (NSUInteger) self << (32 - 4));
+- (unsigned int)hash {
+    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
 }
 
 @end

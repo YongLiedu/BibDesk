@@ -37,6 +37,7 @@
  */
 
 #import "BDSKStringParser.h"
+#import <OmniBase/OmniBase.h>
 #import "NSError_BDSKExtensions.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKPubMedParser.h"
@@ -49,12 +50,10 @@
 #import "BDSKReferParser.h"
 #import "BDSKMODSParser.h"
 #import "BDSKSciFinderParser.h"
-#import "BDSKPubMedXMLParser.h"
-#import "BDSKRuntime.h"
 
 @implementation BDSKStringParser
 
-static Class classForType(NSInteger stringType)
+static Class classForType(int stringType)
 {
     Class parserClass = Nil;
     switch(stringType){
@@ -88,32 +87,29 @@ static Class classForType(NSInteger stringType)
         case BDSKSciFinderStringType:
             parserClass = [BDSKSciFinderParser class];
             break;
-        case BDSKPubMedXMLStringType:
-            parserClass = [BDSKPubMedXMLParser class];
-            break;
         default:
             parserClass = Nil;
     }    
     return parserClass;
 }
 
-+ (BOOL)canParseString:(NSString *)string ofType:(NSInteger)stringType{
-    BDSKASSERT(self == [BDSKStringParser class]);
++ (BOOL)canParseString:(NSString *)string ofType:(int)stringType{
+    OBASSERT(self == [BDSKStringParser class]);
     if (stringType == BDSKUnknownStringType)
         stringType = [string contentStringType];
     Class parserClass = classForType(stringType);
-    BDSKASSERT(parserClass != [BDSKStringParser class]);
+    OBASSERT(parserClass != [BDSKStringParser class]);
     return [parserClass canParseString:string];
 }
 
-+ (NSArray *)itemsFromString:(NSString *)string ofType:(NSInteger)stringType error:(NSError **)outError{
-    BDSKASSERT(self == [BDSKStringParser class]);
++ (NSArray *)itemsFromString:(NSString *)string ofType:(int)stringType error:(NSError **)outError{
+    OBASSERT(self == [BDSKStringParser class]);
     if (stringType == BDSKUnknownStringType)
         stringType = [string contentStringType];
-    BDSKASSERT(stringType != BDSKBibTeXStringType);
-    BDSKASSERT(stringType != BDSKNoKeyBibTeXStringType);
+    OBASSERT(stringType != BDSKBibTeXStringType);
+    OBASSERT(stringType != BDSKNoKeyBibTeXStringType);
     Class parserClass = classForType(stringType);
-    BDSKASSERT(parserClass != [BDSKStringParser class]);
+    OBASSERT(parserClass != [BDSKStringParser class]);
     if (Nil == parserClass && outError){
         *outError = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Unsupported or invalid format", @"error when parsing text fails")];
         [*outError setValue:NSLocalizedString(@"BibDesk was not able to determine the syntax of this data.  It may be incorrect or an unsupported type of text.", @"error description when parsing text fails") forKey:NSLocalizedRecoverySuggestionErrorKey];
@@ -125,7 +121,7 @@ static Class classForType(NSInteger stringType)
     if([self class] == [BDSKStringParser class]){
         return [self canParseString:string ofType:BDSKUnknownStringType];
     }else{
-        BDSKRequestConcreteImplementation(self, _cmd);
+        OBRequestConcreteImplementation(self, _cmd);
         return NO;
     }
 }
@@ -134,7 +130,7 @@ static Class classForType(NSInteger stringType)
     if([self class] == [BDSKStringParser class]){
         return [self itemsFromString:string ofType:BDSKUnknownStringType error:outError];
     }else{
-        BDSKRequestConcreteImplementation(self, _cmd);
+        OBRequestConcreteImplementation(self, _cmd);
         return nil;
     }
 }
@@ -144,31 +140,29 @@ static Class classForType(NSInteger stringType)
 
 @implementation NSString (BDSKStringParserExtensions)
 
-- (NSInteger)contentStringType{
-    if([BDSKBibTeXParser canParseString:self])
-        return BDSKBibTeXStringType;
-    if([BDSKReferenceMinerParser canParseString:self])
-        return BDSKReferenceMinerStringType;
-    if([BDSKPubMedParser canParseString:self])
-        return BDSKPubMedStringType;
-    if([BDSKRISParser canParseString:self])
-        return BDSKRISStringType;
-    if([BDSKMARCParser canParseString:self])
-        return BDSKMARCStringType;
-    if([BDSKJSTORParser canParseString:self])
-        return BDSKJSTORStringType;
-    if([BDSKWebOfScienceParser canParseString:self])
-        return BDSKWOSStringType;
-    if([BDSKBibTeXParser canParseStringAfterFixingKeys:self])
-        return BDSKNoKeyBibTeXStringType;
+- (int)contentStringType{
+	if([BDSKBibTeXParser canParseString:self])
+		return BDSKBibTeXStringType;
+	if([BDSKReferenceMinerParser canParseString:self])
+		return BDSKReferenceMinerStringType;
+	if([BDSKPubMedParser canParseString:self])
+		return BDSKPubMedStringType;
+	if([BDSKRISParser canParseString:self])
+		return BDSKRISStringType;
+	if([BDSKMARCParser canParseString:self])
+		return BDSKMARCStringType;
+	if([BDSKJSTORParser canParseString:self])
+		return BDSKJSTORStringType;
+	if([BDSKWebOfScienceParser canParseString:self])
+		return BDSKWOSStringType;
+	if([BDSKBibTeXParser canParseStringAfterFixingKeys:self])
+		return BDSKNoKeyBibTeXStringType;
     if([BDSKReferParser canParseString:self])
         return BDSKReferStringType;
     if([BDSKMODSParser canParseString:self])
         return BDSKMODSStringType;
     if([BDSKSciFinderParser canParseString:self])
         return BDSKSciFinderStringType;
-    if([BDSKPubMedXMLParser canParseString:self])
-        return BDSKPubMedXMLStringType;
 	// don't check DC, as the check is too unreliable
     return BDSKUnknownStringType;
 }

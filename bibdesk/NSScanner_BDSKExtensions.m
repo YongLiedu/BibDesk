@@ -41,9 +41,9 @@
 
 @implementation NSScanner (BDSKExtensions)
 
-- (BOOL)scanUnsignedInteger:(NSUInteger *)unsignedValue{
-    NSUInteger rewindLocation = [self scanLocation];
-    NSInteger intValue = 0;
+- (BOOL)scanUnsignedInt:(unsigned int *)unsignedValue{
+    unsigned rewindLocation = [self scanLocation];
+    int intValue = 0;
     BOOL returnValue = [self scanInt:&intValue];
     if (returnValue && intValue < 0) {
         [self setScanLocation:rewindLocation];
@@ -57,7 +57,7 @@
 - (BOOL)scanCharacter:(unichar *)ch {
     if ([self isAtEnd])
         return NO;
-    NSInteger location = [self scanLocation];
+    int location = [self scanLocation];
     if (ch != NULL)
         *ch = [[self string] characterAtIndex:location];
     [self setScanLocation:location + 1];
@@ -125,7 +125,7 @@
         }
     } else if ([numberChars characterIsMember:ch]) {
         // explicit number, should we check for integers?
-        CGFloat tmpFloat = 0;
+        float tmpFloat = 0;
         if ([self scanFloat:&tmpFloat])
             tmpObject = [NSNumber numberWithFloat:tmpFloat];
     } else if (ch == '{') {

@@ -152,11 +152,11 @@
     [[self document] insertInScriptingPublications:pub];
 }
 
-- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx {
     [[self document] insertObject:pub inScriptingPublicationsAtIndex:idx];
 }
 
-- (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx {
     [[self document] removeObjectFromScriptingPublicationsAtIndex:idx];
 }
 
@@ -202,11 +202,11 @@
     }
 }
 
-- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx {
     [self insertInScriptingPublications:pub];
 }
 
-- (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx {
     [self removePublication:[publications objectAtIndex:idx]];
     [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
@@ -235,13 +235,13 @@
     [cmd setScriptErrorString:NSLocalizedString(@"Cannot modify publications of last import group.",@"Error description")];
 }
 
-- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx {
     NSScriptCommand *cmd = [NSScriptCommand currentCommand];
     [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
     [cmd setScriptErrorString:NSLocalizedString(@"Cannot modify publications of last import group.",@"Error description")];
 }
 
-- (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx {
     NSScriptCommand *cmd = [NSScriptCommand currentCommand];
     [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
     [cmd setScriptErrorString:NSLocalizedString(@"Cannot modify publications of last import group.",@"Error description")];
@@ -267,7 +267,7 @@
     [self insertObject:condition inConditionsAtIndex:[[[self filter] conditions] count]];
 }
 
-- (void)insertObject:(BDSKCondition *)condition inConditionsAtIndex:(NSUInteger)idx {
+- (void)insertObject:(BDSKCondition *)condition inConditionsAtIndex:(unsigned int)idx {
 	if ([condition group]) {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
@@ -281,7 +281,7 @@
     }
 }
 
-- (void)removeObjectFromConditionsAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromConditionsAtIndex:(unsigned int)idx {
 	NSMutableArray *conditions = [[[self filter] conditions] mutableCopy];
     [conditions removeObjectAtIndex:idx];
     [[self filter] setConditions:conditions];
@@ -322,11 +322,11 @@
     }
 }
 
-- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx {
     [self insertInScriptingPublications:pub];
 }
 
-- (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx {
     [[self document] removePublications:[[self scriptingPublications] subarrayWithRange:NSMakeRange(idx, 1)] fromGroups:[NSArray arrayWithObject:self]];
     [[[self document] undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
@@ -418,7 +418,7 @@
 - (NSDictionary *)scriptingServerInfo {
     BDSKServerInfo *serverInfo = [self serverInfo];
     NSMutableDictionary *info = [NSMutableDictionary dictionary];
-    NSInteger serverType = 0;
+    int serverType = 0;
     
     if ([serverInfo isEntrez])
         serverType = BDSKScriptingSearchGroupEntrez;
@@ -510,7 +510,7 @@
             [options setValue:[info valueForKey:@"removeDiacritics"] forKey:@"removeDiacritics"];
         }
         
-        serverInfo = [[BDSKMutableServerInfo alloc] initWithType:serverType name:serverName database:database host:host port:port options:options];
+        serverInfo = [[BDSKMutableServerInfo alloc] initWithType:serverType name:serverName host:host port:port database:database options:options];
     }
     
     BOOL isValid = YES;
@@ -540,7 +540,7 @@
     [serverInfo release];
 }
 
-- (NSInteger)scriptingServerType {
+- (int)scriptingServerType {
     if ([type isEqualToString:BDSKSearchGroupEntrez])
         return BDSKScriptingSearchGroupEntrez;
     else if ([type isEqualToString:BDSKSearchGroupZoom])

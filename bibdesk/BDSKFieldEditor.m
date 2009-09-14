@@ -92,7 +92,7 @@
     NSTextStorage *textStorage = [self textStorage];
     NSString *string = [textStorage string];
     
-    NSUInteger start, length = [string length];
+    unsigned start, length = [string length];
     NSRange range = NSMakeRange(0, 0);
     NSString *keyString;
     
@@ -217,7 +217,7 @@ static inline BOOL completionWindowIsVisibleForTextView(NSTextView *textView)
 
 static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextView *textView)
 {
-    BDSKPRECONDITION([[BDSKTextViewCompletionController sharedController] respondsToSelector:selector]);
+    OBPRECONDITION([[BDSKTextViewCompletionController sharedController] respondsToSelector:selector]);
     if(completionWindowIsVisibleForTextView(textView)){
         [[BDSKTextViewCompletionController sharedController] performSelector:selector withObject:nil];
         return YES;
@@ -274,7 +274,7 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
 
 - (NSRange)rangeForUserCompletion {
     // @@ check this if we have problems inserting accented characters; super's implementation can mess that up
-    BDSKPRECONDITION([self markedRange].length == 0);    
+    OBPRECONDITION([self markedRange].length == 0);    
     NSRange charRange = [super rangeForUserCompletion];
 	if ([[self delegate] respondsToSelector:@selector(textView:rangeForUserCompletion:)]) 
 		return [[self delegate] textView:self rangeForUserCompletion:charRange];
@@ -283,12 +283,18 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
 
 #pragma mark Auto-completion methods
 
-- (NSArray *)completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(NSInteger *)idx;
+- (NSArray *)completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)idx;
 {
+    id delegate = [self delegate];
+    SEL delegateSEL = @selector(control:textView:completions:forPartialWordRange:indexOfSelectedItem:);
+    OBPRECONDITION(delegate == nil || [delegate isKindOfClass:[NSControl class]]); // typically the NSForm
+    
     NSArray *completions = nil;
     
-    if([[self delegate] respondsToSelector:@selector(textView:completions:forPartialWordRange:indexOfSelectedItem:)])
-        completions = [[self delegate] textView:self completions:nil forPartialWordRange:charRange indexOfSelectedItem:idx];
+    if([delegate respondsToSelector:delegateSEL])
+        completions = [delegate control:delegate textView:self completions:nil forPartialWordRange:charRange indexOfSelectedItem:idx];
+    else if([[[self window] delegate] respondsToSelector:delegateSEL])
+        completions = [[[self window] delegate] control:delegate textView:self completions:nil forPartialWordRange:charRange indexOfSelectedItem:idx];
     
     // Default is to call -[NSSpellChecker completionsForPartialWordRange:inString:language:inSpellDocumentWithTag:], but this apparently sends a DO message to CocoAspell (in a separate process), and we block the main runloop until it returns a long time later.  Lacking a way to determine whether the system speller (which works fine) or CocoAspell is in use, we'll just return our own completions.
     return completions;
@@ -306,7 +312,7 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
         return;
 
     // make sure to initialize this
-    NSInteger idx = 0;
+    int idx = 0;
     NSArray *completions = [self completionsForPartialWordRange:selRange indexOfSelectedItem:&idx];
     
     if(sender == self) // auto-complete, don't select an item
@@ -335,7 +341,6 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
 
 @end
 
-#pragma mark -
 
 @implementation BDSKFieldEditor (Private)
 
@@ -348,7 +353,7 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
 - (void)doAutoCompleteIfPossible {
 	if (completionWindowIsVisibleForTextView(self) == NO && isEditing) {
         if ([[self delegate] respondsToSelector:@selector(textViewShouldAutoComplete:)] &&
-            [[self delegate] textViewShouldAutoComplete:self])
+            [[self delegate] textViewShouldAutoComplete:self] == YES)
             [self complete:self]; // NB: the self argument is critical here (see comment in complete:)
     }
 } 
@@ -356,77 +361,5 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
 - (void)handleTextDidBeginEditingNotification:(NSNotification *)note { isEditing = YES; }
 
 - (void)handleTextDidEndEditingNotification:(NSNotification *)note { isEditing = NO; }
-
-@end
-
-#pragma mark -
-
-@implementation NSTextField (BDSKFieldEditorDelegate)
-
-- (NSRange)textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
-	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textView:rangeForUserCompletion:)]) 
-		return [[self delegate] control:self textView:textView rangeForUserCompletion:charRange];
-	return charRange;
-}
-
-- (BOOL)textViewShouldAutoComplete:(NSTextView *)textView {
-	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textViewShouldAutoComplete:)]) 
-		return [(id)[self delegate] control:self textViewShouldAutoComplete:textView];
-	return NO;
-}
-
-- (BOOL)textViewShouldLinkKeys:(NSTextView *)textView {
-    return textView == [self currentEditor] && 
-           [[self delegate] respondsToSelector:@selector(control:textViewShouldLinkKeys:)] &&
-           [[self delegate] control:self textViewShouldLinkKeys:textView];
-}
-
-- (BOOL)textView:(NSTextView *)textView isValidKey:(NSString *)key{
-    return textView == [self currentEditor] && 
-           [[self delegate] respondsToSelector:@selector(control:textView:isValidKey:)] &&
-           [[self delegate] control:self textView:textView isValidKey:key];
-}
-
-- (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex{
-    return textView == [self currentEditor] && 
-           [[self delegate] respondsToSelector:@selector(control:textView:clickedOnLink:atIndex:)] &&
-           [[self delegate] control:self textView:textView clickedOnLink:aLink atIndex:charIndex];
-}
-
-@end
-
-#pragma mark -
-
-@implementation NSTableView (BDSKFieldEditorDelegate)
-
-- (NSRange)textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
-	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textView:rangeForUserCompletion:)]) 
-		return [[self delegate] control:self textView:textView rangeForUserCompletion:charRange];
-	return charRange;
-}
-
-- (BOOL)textViewShouldAutoComplete:(NSTextView *)textView {
-	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textViewShouldAutoComplete:)]) 
-		return [(id)[self delegate] control:self textViewShouldAutoComplete:textView];
-	return NO;
-}
-
-- (BOOL)textViewShouldLinkKeys:(NSTextView *)textView {
-    return textView == [self currentEditor] && 
-           [[self delegate] respondsToSelector:@selector(control:textViewShouldLinkKeys:)] &&
-           [[self delegate] control:self textViewShouldLinkKeys:textView];
-}
-
-- (BOOL)textView:(NSTextView *)textView isValidKey:(NSString *)key{
-    return textView == [self currentEditor] && 
-           [[self delegate] respondsToSelector:@selector(control:textView:isValidKey:)] &&
-           [[self delegate] control:self textView:textView isValidKey:key];
-}
-
-- (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex{
-    return textView == [self currentEditor] && 
-           [[self delegate] respondsToSelector:@selector(control:textView:clickedOnLink:atIndex:)] &&
-           [[self delegate] control:self textView:textView clickedOnLink:aLink atIndex:charIndex];
-}
 
 @end

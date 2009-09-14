@@ -47,7 +47,7 @@
 	NSWindow *completionWindow;
 	NSArray *completions;
 	NSString *originalString;
-	NSInteger movement;
+	int movement;
 	NSTableView *tableView;
 	NSTextView *textView;
 	NSWindow *textViewWindow;
@@ -59,7 +59,7 @@
 - (NSWindow *)completionWindow;
 - (NSTextView *)currentTextView;
 - (void)displayCompletions:(NSArray *)completions forPartialWordRange:(NSRange)partialWordRange originalString:(NSString *)origString atPoint:(NSPoint)point forTextView:(NSTextView *)textView;
-- (void)displayCompletions:(NSArray *)completions indexOfSelectedItem:(NSInteger)indexOfSelectedItem forPartialWordRange:(NSRange)partialWordRange originalString:(NSString *)originalString atPoint:(NSPoint)point forTextView:(NSTextView *)textView;
+- (void)displayCompletions:(NSArray *)completions indexOfSelectedItem:(int)indexOfSelectedItem forPartialWordRange:(NSRange)partialWordRange originalString:(NSString *)originalString atPoint:(NSPoint)point forTextView:(NSTextView *)textView;
 - (void)endDisplay;
 - (void)endDisplayAndComplete:(BOOL)complete;
 - (void)endDisplayNoComplete;

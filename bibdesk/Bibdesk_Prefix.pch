@@ -19,71 +19,47 @@
 
 #endif
 
-#define BDSK_BUNDLE_IDENTIFIER @"edu.ucsd.cs.mmccrack.bibdesk"
+#define OMNI_BUNDLE_IDENTIFIER @"edu.ucsd.cs.mmccrack.bibdesk"
 
 #ifdef __OBJC__
     #import <Cocoa/Cocoa.h>
+    #import <OmniBase/OmniBase.h>
+    #import <OmniFoundation/OmniFoundation.h>
+    #import <OmniAppKit/OmniAppKit.h>
     #import "NSString_BDSKExtensions.h"
     #import "BDSKComplexString.h"
     #import "BDSKStringConstants.h"
+    #import "BDSKPreferenceController.h"
 
 #define __FILENAMEASNSSTRING__ \
 [[NSString stringWithFileSystemRepresentation:__FILE__] lastPathComponent]
 
-#if defined (DEBUG)
+#if defined(MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
+#warning 10.5: remove ASL hacks
+#else
+BDSK_PRIVATE_EXTERN void BDSKLog(NSString *format, ...);
+BDSK_PRIVATE_EXTERN void BDSKLogv(NSString *format, va_list argList);
+
+// these are only needed on Tiger; Leopard logs to asl by default
+#define NSLog BDSKLog
+#define NSLogv BDSKLogv
+#endif
+
+#if defined (OMNI_ASSERTIONS_ON)
 
 #define log_method() \
-    NSLog(@"%@[%@ %@] (%@ line %d)", (id)[self class] == (id)self ? @"+" : @"-", [self class], NSStringFromSelector(_cmd), __FILENAMEASNSSTRING__, __LINE__)
+NSLog(@"%@[%@ %@] (%@ line %d)", OBPointerIsClass(self) ? @"+" : @"-", \
+      [self class], NSStringFromSelector(_cmd), __FILENAMEASNSSTRING__, __LINE__)
 
 #define log_function() \
-    NSLog(@"%s (%@ line %d)", __PRETTY_FUNCTION__, __FILENAMEASNSSTRING__, __LINE__)
-
-#define BDSKPRECONDITION(expression) \
-    do { if (!(expression)) fprintf(stderr, "PRECONDITION failed: requires '%s', file %s, line %d\n", #expression, __FILE__, __LINE__); } while (NO)
-#define BDSKPOSTCONDITION(expression) \
-    do { if (!(expression)) fprintf(stderr, "POSTCONDITION failed: requires '%s', file %s, line %d\n", #expression, __FILE__, __LINE__); } while (NO)
-#define BDSKASSERT(expression) \
-    do { if (!(expression)) fprintf(stderr, "ASSERT failed: requires '%s', file %s, line %d\n", #expression, __FILE__, __LINE__); } while (NO)
-#define BDSKASSERT_NOT_REACHED(reason) \
-    do { fprintf(stderr, "NOTREACHED failed: requires '%s', file %s, line %d\n", reason, __FILE__, __LINE__); } while (NO)
+NSLog(@"%s (%@ line %d)", __PRETTY_FUNCTION__, __FILENAMEASNSSTRING__, __LINE__)
 
 #else
 
 #define log_method();
 #define log_function();
 
-#define BDSKPRECONDITION(expression)
-#define BDSKPOSTCONDITION(expression)
-#define BDSKASSERT(expression)
-#define BDSKASSERT_NOT_REACHED(reason)
-
 #endif
 
-#define BDSKINITIALIZE \
-    do { \
-        static BOOL hasBeenInitialized = NO; \
-        [super initialize]; \
-        if (hasBeenInitialized) return; \
-        hasBeenInitialized = YES;\
-    } while (0);
-
-#endif
-
-#if __LP64__
-#define BDSKRound(f)    round(f)
-#define BDSKFloor(f)    floor(f)
-#define BDSKCeil(f)     ceil(f)
-#define BDSKTrunc(f)    trunc(f)
-#define BDSKAbs(f)      fabs(f)
-#define BDSKMin(f1, f2) fmin(f1, f2)
-#define BDSKMax(f1, f2) fmax(f1, f2)
-#else
-#define BDSKRound(f)    roundf(f)
-#define BDSKFloor(f)    floorf(f)
-#define BDSKCeil(f)     ceilf(f)
-#define BDSKTrunc(f)    truncf(f)
-#define BDSKAbs(f)      fabsf(f)
-#define BDSKMin(f1, f2) fminf(f1, f2)
-#define BDSKMax(f1, f2) fmaxf(f1, f2)
 #endif
 

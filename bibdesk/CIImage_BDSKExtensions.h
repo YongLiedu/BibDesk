@@ -50,7 +50,7 @@
 
 + (CIImage *)imageInRect:(CGRect)aRect withVerticalGradientFromColor:(CIColor *)startColor toColor:(CIColor *)endColor;
 
-+ (CIImage *)imageWithGaussianGradientWithCenter:(CGPoint)center radius:(CGFloat)radius fromColor:(CIColor *)startColor toColor:(CIColor *)endColor;
++ (CIImage *)imageWithGaussianGradientWithCenter:(CGPoint)center radius:(float)radius fromColor:(CIColor *)startColor toColor:(CIColor *)endColor;
 
 + (CIImage *)imageInRect:(CGRect)aRect withHorizontalGradientFromColor:(CIColor *)fgStartColor toColor:(CIColor *)fgEndColor blendedAtTop:(BOOL)top ofVerticalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 
@@ -62,20 +62,16 @@
 
 - (CIImage *)blendedImageWithBackground:(CIImage *)background usingMask:(CIImage *)mask;
 
-- (CIImage *)blurredImageWithBlurRadius:(CGFloat)radius;
+- (CIImage *)blurredImageWithBlurRadius:(float)radius;
 
 - (CIImage *)croppedImageWithRect:(CGRect)aRect;
-
-- (CIImage *)imageWithAdjustedHueAngle:(CGFloat)hue saturationFactor:(CGFloat)saturation brightnessBias:(CGFloat)brightness;
-
-- (CIImage *)invertedImage;
 
 @end
 
 
 @interface CIColor (BDSKExtensions)
 
-+ (CIColor *)colorWithWhite:(CGFloat)white;
++ (CIColor *)colorWithWhite:(float)white;
 
 + (CIColor *)colorWithNSColor:(NSColor *)color;
 

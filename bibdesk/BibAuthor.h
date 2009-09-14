@@ -38,6 +38,7 @@
     @discussion declares an interface to author model objects
 */
 #import <Cocoa/Cocoa.h>
+#import "BDSKCountedSet.h"
 #import <AddressBook/AddressBook.h>
 
 @class BDSKPersonController;
@@ -62,7 +63,7 @@ enum {
     @abstract Modeling authors as objects that can have interesting relationships
     @discussion none.
 */
-@interface BibAuthor : NSObject <NSCopying, NSCoding> {
+@interface BibAuthor : OFObject <NSCopying, NSCoding> {
     NSString *originalName;
     NSString *name;
     NSString *firstName;
@@ -77,7 +78,7 @@ enum {
     NSString *unpunctuatedAbbreviatedNormalizedName;
     BibItem *publication;
     NSString *field;
-    NSUInteger hash;
+    unsigned hash;
    
 @private
     NSArray *firstNames;  // always non-nil
@@ -138,14 +139,14 @@ enum {
 
 @end
 
-extern const CFDictionaryKeyCallBacks kBDSKAuthorFuzzyDictionaryKeyCallBacks;
-extern const CFArrayCallBacks kBDSKAuthorFuzzyArrayCallBacks;
-extern const CFSetCallBacks kBDSKAuthorFuzzySetCallBacks;
-extern const CFBagCallBacks kBDSKAuthorFuzzyBagCallBacks;
+extern const CFSetCallBacks BDSKAuthorFuzzySetCallbacks;
+extern const CFDictionaryKeyCallBacks BDSKFuzzyDictionaryKeyCallBacks;
+extern const CFArrayCallBacks BDSKAuthorFuzzyArrayCallBacks;
 
+extern NSMutableSet *BDSKCreateFuzzyAuthorCompareMutableSet();
 
-@interface NSMutableSet (BibAuthor)
-- (id)initForFuzzyAuthors;
+@interface BDSKCountedSet (BibAuthor)
+- (id)initFuzzyAuthorCountedSet;
 @end
 
 @interface ABPerson (BibAuthor)

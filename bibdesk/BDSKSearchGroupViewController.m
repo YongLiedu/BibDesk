@@ -56,11 +56,11 @@
     [collapsibleView setMinSize:[collapsibleView frame].size];
     [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     [view setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
-    [view setEdgeColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
+    [view setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
 }
 
 - (void)updateSearchView {
-    BDSKASSERT(group);
+    OBASSERT(group);
     [self window];
     NSString *name = [[group serverInfo] name];
     [searchField setStringValue:[group searchTerm] ?: @""];

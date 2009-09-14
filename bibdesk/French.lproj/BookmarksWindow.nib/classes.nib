@@ -10,44 +10,11 @@
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>BDSKIconTextFieldCell</string>
+			<string>NSTextFieldCell</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
 			<string>BDSKBookmarkOutlineView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>BDSKOutlineView</string>
-		</dict>
-		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>changeFont</key>
-				<string>id</string>
-				<key>copy</key>
-				<string>id</string>
-				<key>cut</key>
-				<string>id</string>
-				<key>delete</key>
-				<string>id</string>
-				<key>duplicate</key>
-				<string>id</string>
-				<key>insertNewline</key>
-				<string>id</string>
-				<key>moveDown</key>
-				<string>id</string>
-				<key>moveUp</key>
-				<string>id</string>
-				<key>paste</key>
-				<string>id</string>
-				<key>scrollToBeginningOfDocument</key>
-				<string>id</string>
-				<key>scrollToEndOfDocument</key>
-				<string>id</string>
-			</dict>
-			<key>CLASS</key>
-			<string>BDSKOutlineView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
@@ -80,18 +47,10 @@
 				<key>folderPopUp</key>
 				<string>NSPopUpButton</string>
 				<key>outlineView</key>
-				<string>BDSKBookmarkOutlineView</string>
+				<string>NSOutlineView</string>
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSWindowController</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -100,14 +59,6 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSApplication</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -161,22 +112,6 @@
 			<string>NSObject</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKIconTextFieldCell</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSTextFieldCell</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSCell</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSObject</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>

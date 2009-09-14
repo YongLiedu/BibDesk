@@ -39,44 +39,25 @@
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
 
-
-enum {
-    BDSKParserFeatureNone = 0,
-// flag indicating that full usage of the parser's feature requires some sort of subscription
-    BDSKParserFeatureSubscriptionMask = 1 << 0,
-// flag indicating that the parser's feature looks for specific data on all pages:
-    BDSKParserFeatureAllPagesMask = 1 << 1
-};
-
 enum {
 	BDSKUnknownWebType = -1, 
+    BDSKHCiteWebType,
     BDSKCiteULikeWebType,
     BDSKACMDLWebType,
     BDSKHubmedWebType,
     BDSKGoogleScholarWebType,
     BDSKSpiresWebType,
-    BDSKArxivWebType,
-	BDSKMathSciNetWebType,
-	BDSKZentralblattWebType,
-	BDSKProjectEuclidWebType,
-	BDSKNumdamWebType,
-	// parsers for microformats which are not site-specific should better be at the end 
-	BDSKCOinSWebType,
-    BDSKHCiteWebType
+    BDSKArxivWebType
 };
 
+// this method is the main entry point for the BDSKWebParser class
+// it should not be overridden by the concrete subclasses
 @interface BDSKWebParser : NSObject
-+ (Class) webParserClassForType: (NSInteger) stringType;
-// this method is the main entry point for the BDSKWebParser class it should not be overridden by the concrete subclasses
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument fromURL:(NSURL *)url error:(NSError **)outError;
-// Helper method for creating a correctly formatted parser feature information dictionary. 
-+ (NSDictionary *) parserInfoWithName: (NSString *) name address: (NSString *) address description: (NSString *) description flags:(NSUInteger) flags;
 @end
 
-@interface BDSKWebParser (SubclassResponsibility)
 // these methods must be implemented by the concrete subclasses, and are invalid for the BDSKWebParser class
+@interface BDSKWebParser (SubclassResponsibility)
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url;
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError;
-// Subclasses return an array of parser feature information dictionaries which are used to create the Web Group start page.
-+ (NSArray *) parserInfos;
 @end

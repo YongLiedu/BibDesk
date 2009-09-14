@@ -47,10 +47,8 @@ extern NSString *BDSKSharedArchivedMacroDataKey;
 extern NSString *BDSKComputerNameChangedNotification;
 extern NSString *BDSKHostNameChangedNotification;
 
-extern NSString *BDSKServiceNameForKeychain;
-
-// implemented by the client
-@protocol BDSKSharingClient
+// implemented by the shared group
+@protocol BDSKClientProtocol
 
 - (oneway void)setNeedsUpdate:(BOOL)flag;
 - (BOOL)isAlive;
@@ -59,7 +57,7 @@ extern NSString *BDSKServiceNameForKeychain;
 @end
 
 // implemented by the server
-@protocol BDSKSharingServer
+@protocol BDSKSharingProtocol
 
 - (bycopy NSData *)archivedSnapshotOfPublications;
 - (oneway void)registerClient:(byref id)clientObject forIdentifier:(bycopy NSString *)identifier version:(bycopy NSString *)version;
@@ -67,31 +65,16 @@ extern NSString *BDSKServiceNameForKeychain;
 
 @end
 
-enum {
-    BDSKSharingStatusOff,
-    BDSKSharingStatusStarting,
-    BDSKSharingStatusPublishing,
-    BDSKSharingStatusSharing
-};
-typedef NSInteger BDSKSharingStatus;
 
 @interface BDSKSharingServer : NSObject {    
     NSNetService *netService;
     id server;
-    NSString *sharingName;
-    int socketDescriptor;
-    BDSKSharingStatus status;
-    NSInteger tryCount;
 }
 
 + (id)defaultServer;
-+ (NSString *)defaultSharingName;
++ (NSString *)sharingName;
 + (NSString *)supportedProtocolVersion;
-
-- (NSString *)sharingName;
-- (BDSKSharingStatus)status;
-
-- (NSUInteger)numberOfConnections;
+- (unsigned int)numberOfConnections;
 
 - (void)queueDataChangedNotification:(NSNotification *)note;
 - (void)handleComputerNameChangedNotification:(NSNotification *)note;

@@ -38,11 +38,11 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKMultiValueDictionary, BibItem, BibAuthor;
+@class OFMultiValueDictionary, BibItem, BibAuthor;
 
 @interface BDSKPublicationsArray : NSMutableArray {
     NSMutableArray *publications;
-    BDSKMultiValueDictionary *itemsForCiteKeys;
+    OFMultiValueDictionary *itemsForCiteKeys;
     NSMutableDictionary *itemsForIdentifierURLs;
 }
 
@@ -53,7 +53,6 @@
 
 - (BOOL)citeKeyIsCrossreffed:(NSString *)key;
 - (id)itemForIdentifierURL:(NSURL *)aURL;
-- (NSArray *)itemsForIdentifierURLs:(NSArray *)anArray;
 - (NSArray *)itemsForAuthor:(BibAuthor *)anAuthor;
 - (NSArray *)itemsForEditor:(BibAuthor *)anEditor;
 - (NSArray *)itemsForPerson:(BibAuthor *)aPerson forField:(NSString *)field;

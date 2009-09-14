@@ -36,7 +36,7 @@
 
 #import "BDSKDocumentController.h"
 #import "BDSKStringConstants.h"
-#import "BDSKRuntime.h"
+#import <OmniBase/OmniBase.h>
 #import <AGRegex/AGRegex.h>
 #import "BDSKStringEncodingManager.h"
 #import "BDSKAppController.h"
@@ -47,6 +47,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "BDAlias.h"
 #import "NSWorkspace_BDSKExtensions.h"
+#import "BDSKAlert.h"
 #import "BibItem.h"
 #import "BDSKTemplate.h"
 #import "NSString_BDSKExtensions.h"
@@ -55,13 +56,15 @@
 #import "BDSKGroupsArray.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKTemplateDocument.h"
-#import "BDSKTask.h"
 
 @implementation BDSKDocumentController
 
 - (id)init
 {
     if(self = [super init]){
+		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldAutosaveDocumentKey])
+		    [self setAutosavingDelay:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAutosaveTimeIntervalKey]];
+        
 		[[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleWindowDidBecomeMainNotification:)
                                                      name:NSWindowDidBecomeMainNotification
@@ -118,7 +121,7 @@
     // may need to revisit this for new document classes
     
     if ([aDocument respondsToSelector:@selector(documentStringEncoding)]) {
-        BDSKPRECONDITION([aDocument isKindOfClass:[BibDocument class]]);
+        OBPRECONDITION([aDocument isKindOfClass:[BibDocument class]]);
         
         NSStringEncoding encoding = [(BibDocument *)aDocument documentStringEncoding];
         
@@ -155,7 +158,7 @@
     [openTextEncodingPopupButton setEncoding:[BDSKStringEncodingManager defaultEncoding]];
     [oPanel setDirectory:[self currentDirectory]];
 		
-    NSInteger result = [self runModalOpenPanel:oPanel forTypes:types];
+    int result = [self runModalOpenPanel:oPanel forTypes:types];
     if(result == NSOKButton){
         *encoding = [openTextEncodingPopupButton encoding];
         return [oPanel URLs];
@@ -187,7 +190,7 @@
 
 - (IBAction)openDocumentUsingFilter:(id)sender
 {
-    NSInteger result;
+    int result;
     
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:YES];
@@ -198,7 +201,7 @@
     [openUsingFilterAccessoryView addSubview:openTextEncodingAccessoryView];
     [oPanel setAccessoryView:openUsingFilterAccessoryView];
 
-    NSMutableArray *commandHistory = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKFilterFieldHistoryKey]];
+    NSMutableArray *commandHistory = [NSMutableArray arrayWithArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKFilterFieldHistoryKey]];
     NSSet *uniqueCommandHistory = [NSSet setWithArray:commandHistory];
     
     // this is a workaround for older versions which added the same command multiple times; it screws up the order
@@ -206,7 +209,7 @@
         commandHistory = [NSMutableArray arrayWithArray:[uniqueCommandHistory allObjects]];
     
     // this is also a workaround for older versions
-    NSUInteger MAX_HISTORY = 7;
+    unsigned MAX_HISTORY = 7;
     if([commandHistory count] > MAX_HISTORY)
         [commandHistory removeObjectsInRange:NSMakeRange(MAX_HISTORY, [commandHistory count] - MAX_HISTORY)];
     [openUsingFilterComboBox addItemsWithObjectValues:commandHistory];
@@ -227,7 +230,7 @@
             [self openDocumentWithContentsOfURL:aURL usingFilter:shellCommand encoding:encoding];
         }
         
-        NSUInteger commandIndex = [commandHistory indexOfObject:shellCommand];
+        unsigned commandIndex = [commandHistory indexOfObject:shellCommand];
         // already in the array, so move it to the head of the list
         if(commandIndex != NSNotFound && commandIndex != 0) {
             [[shellCommand retain] autorelease];
@@ -238,7 +241,7 @@
             [commandHistory insertObject:shellCommand atIndex:0];
             [commandHistory removeLastObject];
         }
-        [[NSUserDefaults standardUserDefaults] setObject:commandHistory forKey:BDSKFilterFieldHistoryKey];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:commandHistory forKey:BDSKFilterFieldHistoryKey];
     }
 }
 
@@ -354,7 +357,7 @@
     if (nil == fileInputString){
         [self presentError:error];
     } else {
-        NSString *filterOutput = [BDSKTask runShellCommand:shellCommand withInputString:fileInputString];
+        NSString *filterOutput = [NSTask runShellCommand:shellCommand withInputString:fileInputString];
         
         if ([NSString isEmptyString:filterOutput]){
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable To Open With Filter", @"Message in alert dialog when unable to open a document with filter")
@@ -456,7 +459,7 @@
     [oPanel setAllowsMultipleSelection:YES];
     [oPanel setDirectory:[self currentDirectory]];
 		
-    NSInteger result = [self runModalOpenPanel:oPanel forTypes:[NSArray arrayWithObjects:@"txt", @"rtf", nil]];
+    int result = [self runModalOpenPanel:oPanel forTypes:[NSArray arrayWithObjects:@"txt", @"rtf", nil]];
     if(result == NSOKButton){
         NSEnumerator *urlEnum = [[oPanel URLs] objectEnumerator];
         NSURL *aURL;
@@ -560,10 +563,10 @@
 
 @implementation NSSavePanel (BDSKAppleBugFixes)
 
-static BOOL (*original_canShowGoTo)(id, SEL) = NULL;
+static BOOL (*originalCanShowGoTo)(id, SEL) = NULL;
 
 // hack around an acknowledged Apple bug (http://www.cocoabuilder.com/archive/message/cocoa/2006/4/14/161080) that causes the goto panel to be displayed when trying to enter a leading / in "Open Using Filter" accessory view (our bug #1480815)
-- (BOOL)replacement_canShowGoto;
+- (BOOL)replacementCanShowGoto;
 {
     id firstResponder = [self firstResponder];
     // this is likely a field editor, but we have to make sure
@@ -573,13 +576,12 @@ static BOOL (*original_canShowGoTo)(id, SEL) = NULL;
         if (accessoryView != nil && [accessoryView ancestorSharedWithView:[firstResponder delegate]] == accessoryView)
             return NO;
     }
-    return original_canShowGoTo(self, _cmd);
+    return originalCanShowGoTo(self, _cmd);
 }
 
 + (void)load
 {
-     if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
-        original_canShowGoTo = (BOOL (*)(id, SEL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(_canShowGoto), @selector(replacement_canShowGoto));
+     originalCanShowGoTo = (BOOL (*)(id, SEL))OBReplaceMethodImplementationWithSelector(self, @selector(_canShowGoto), @selector(replacementCanShowGoto));
 }
 
 @end

@@ -47,7 +47,7 @@
 - (id)initForDocument:(BibDocument *)aDocument{
     if(self = [super init]){
 		customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
-		[customStringArray setArray:[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKCustomCiteStringsKey]];
+		[customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
         document = aDocument;
     }
     return self;
@@ -76,7 +76,7 @@
 - (BOOL)isDrawerOpen{
     if(drawer == nil)
         return NO;
-    NSInteger state = [drawer state];
+    int state = [drawer state];
     return state == NSDrawerOpenState || state == NSDrawerOpeningState;
 }
 
@@ -88,12 +88,12 @@
 }
 
 - (IBAction)addCustomCiteString:(id)sender{
-    NSInteger row = [customStringArray count];
+    int row = [customStringArray count];
 	[customStringArray addObject:@"citeCommand"];
     [tableView reloadData];
 	[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 	[tableView editColumn:0 row:row withEvent:nil select:YES];
-    [[NSUserDefaults standardUserDefaults] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
 }
 
 - (IBAction)removeCustomCiteString:(id)sender{
@@ -104,23 +104,23 @@
 		[[drawer parentWindow] makeFirstResponder:tableView];
 	[customStringArray removeObjectAtIndex:[tableView selectedRow]];
 	[tableView reloadData];
-    [[NSUserDefaults standardUserDefaults] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
 }
 
 #pragma mark -
 #pragma mark TableView data source
 
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)tView{
+- (int)numberOfRowsInTableView:(NSTableView *)tView{
     return [customStringArray count];
 }
 
-- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
+- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     return [customStringArray objectAtIndex:row];
 }
 
-- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     [customStringArray replaceObjectAtIndex:row withObject:object];
-    [[NSUserDefaults standardUserDefaults] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
 }
 
 #pragma mark TableView delegate
@@ -131,11 +131,17 @@
 
 #pragma mark TableView dragging source
 
+// for 10.3 compatibility and OmniAppKit dataSource methods
+- (BOOL)tableView:(NSTableView *)tv writeRows:(NSArray*)rows toPasteboard:(NSPasteboard*)pboard{
+	NSMutableIndexSet *rowIndexes = [NSIndexSet indexSetWithIndexesInArray:rows];
+	return [self tableView:tv writeRowsWithIndexes:rowIndexes toPasteboard:pboard];
+}
+
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
 	NSString *citeString = [customStringArray objectAtIndex:[rowIndexes firstIndex]];
     NSArray *pubs = [document selectedPublications];
     
-	BDSKPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
+	OBPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
 
     [document setDragFromExternalGroups:[document hasExternalGroupsSelected]];
     

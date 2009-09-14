@@ -62,7 +62,7 @@ enum {
 
 - (NSDictionary *)dictionaryValue;
 
-- (NSInteger)bookmarkType;
+- (int)bookmarkType;
 
 - (NSURL *)URL;
 
@@ -77,10 +77,10 @@ enum {
 - (BDSKBookmark *)parent;
 - (void)setParent:(BDSKBookmark *)newParent;
 - (NSArray *)children;
-- (NSUInteger)countOfChildren;
-- (BDSKBookmark *)objectInChildrenAtIndex:(NSUInteger)idx;
-- (void)insertObject:(BDSKBookmark *)child inChildrenAtIndex:(NSUInteger)idx;
-- (void)removeObjectFromChildrenAtIndex:(NSUInteger)idx;
+- (unsigned int)countOfChildren;
+- (BDSKBookmark *)objectInChildrenAtIndex:(unsigned int)idx;
+- (void)insertObject:(BDSKBookmark *)child inChildrenAtIndex:(unsigned int)idx;
+- (void)removeObjectFromChildrenAtIndex:(unsigned int)idx;
 
 - (BOOL)isDescendantOf:(BDSKBookmark *)bookmark;
 - (BOOL)isDescendantOfArray:(NSArray *)bookmarks;

@@ -43,7 +43,6 @@
 #import "BDSKBibTeXParser.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
-#import "BDSKReadWriteLock.h"
 
 // private protocols for inter-thread messaging
 @protocol BDSKDBLPGroupServerMainThread <BDSKAsyncDOServerMainThread>
@@ -51,6 +50,10 @@
 @end
 
 @protocol BDSKDBLPGroupServerLocalThread <BDSKAsyncDOServerThread>
+- (int)availableResults;
+- (void)setAvailableResults:(int)value;
+- (int)fetchedResults;
+- (void)setFetchedResults:(int)value;
 - (oneway void)downloadWithSearchTerm:(NSString *)searchTerm;
 @end
 
@@ -87,7 +90,7 @@
         flags.isRetrieving = 0;
         availableResults = 0;
         fetchedResults = 0;
-        infoLock = [[BDSKReadWriteLock alloc] init];
+        pthread_rwlock_init(&infolock, NULL);
         
         [self startDOServerSync];
     }
@@ -95,7 +98,7 @@
 }
 
 - (void)dealloc {
-    [infoLock release];
+    pthread_rwlock_destroy(&infolock);
     [serverInfo release];
     serverInfo = nil;
     [scheduledService release];
@@ -109,27 +112,27 @@
 - (void)terminate
 {
     [self stopDOServer];
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
 }
 
 - (void)stop
 {
     [scheduledService cancel];
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
 }
 
 - (void)retrievePublications
 {
     if ([[self class] canConnect]) {
-        OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
+        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedDownload);
         
         // stop the current service (if any); -cancel is thread safe, and so is calling it multiple times
         [scheduledService cancel];
-        OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
         [[self serverOnServerThread] downloadWithSearchTerm:[group searchTerm]];
         
     } else {
-        OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedDownload);
         NSError *presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to connect to server", @"")];
         [NSApp presentError:presentableError];
     }
@@ -137,40 +140,40 @@
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
 {
-    [infoLock lockForWriting];
+    pthread_rwlock_wrlock(&infolock);
     if (serverInfo != info) {
         [serverInfo release];
         serverInfo = [info copy];
     }
-    [infoLock unlock];
+    pthread_rwlock_unlock(&infolock);
 }
 
 - (BDSKServerInfo *)serverInfo;
 {
-    [infoLock lockForReading];
+    pthread_rwlock_rdlock(&infolock);
     BDSKServerInfo *info = [[serverInfo copy] autorelease];
-    [infoLock unlock];
+    pthread_rwlock_unlock(&infolock);
     return info;
 }
 
-- (void)setNumberOfAvailableResults:(NSInteger)value;
+- (void)setNumberOfAvailableResults:(int)value;
 {
-    OSAtomicCompareAndSwap32Barrier(availableResults, value, &availableResults);
+    [[self serverOnServerThread] setAvailableResults:value];
 }
 
-- (NSInteger)numberOfAvailableResults;
+- (int)numberOfAvailableResults;
 {
-    return availableResults;
+    return [[self serverOnServerThread] availableResults];
 }
 
-- (void)setNumberOfFetchedResults:(NSInteger)value;
+- (void)setNumberOfFetchedResults:(int)value;
 {
-    OSAtomicCompareAndSwap32Barrier(fetchedResults, value, &fetchedResults);
+    [[self serverOnServerThread] setFetchedResults:value];
 }
 
-- (NSInteger)numberOfFetchedResults;
+- (int)numberOfFetchedResults;
 {
-    return fetchedResults;
+    return [[self serverOnServerThread] fetchedResults];
 }
 
 - (BOOL)failedDownload { OSMemoryBarrier(); return 1 == flags.failedDownload; }
@@ -182,11 +185,31 @@
 
 - (void)addPublicationsToGroup:(bycopy NSArray *)pubs;
 {
-    BDSKASSERT([NSThread isMainThread]);
+    OBASSERT([NSThread inMainThread]);
     [group addPublications:pubs];
 }
 
 #pragma mark Server thread
+
+- (void)setAvailableResults:(int)value;
+{
+    availableResults = value;
+}
+
+- (int)availableResults;
+{
+    return availableResults;
+}
+
+- (void)setFetchedResults:(int)value;
+{
+    fetchedResults = value;
+}
+
+- (int)fetchedResults;
+{
+    return fetchedResults;
+}
 
 - (NSArray *)resultsWithSearchTerm:(NSString *)searchTerm
 {
@@ -245,7 +268,7 @@ static void fixEEURL(BibItem *pub)
     if (NO == [NSString isEmptyString:searchTerm]){
         
         NSArray *dblpKeys = [[self resultsWithSearchTerm:searchTerm] valueForKeyPath:@"dblp_key"];
-        [self setNumberOfAvailableResults:[dblpKeys count]];
+        [self setAvailableResults:[dblpKeys count]];
 
         NSMutableSet *btEntries = [NSMutableSet set];
         NSMutableDictionary *abstracts = [NSMutableDictionary dictionary];
@@ -289,13 +312,13 @@ static void fixEEURL(BibItem *pub)
         if (flags.isRetrieving == 0)
             pubs = [NSArray array];
         
-        [self setNumberOfAvailableResults:[pubs count]];
-        [self setNumberOfFetchedResults:[pubs count]];
+        [self setAvailableResults:[pubs count]];
+        [self setFetchedResults:[pubs count]];
         
     }
     
     // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
     
     // this will create the array if it doesn't exist
     [[self serverOnMainThread] addPublicationsToGroup:pubs];

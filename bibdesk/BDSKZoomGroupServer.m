@@ -41,36 +41,34 @@
 #import "BDSKStringParser.h"
 #import "BDSKServerInfo.h"
 #import "BibItem.h"
-#import "CFString_BDSKExtensions.h"
 #import <SystemConfiguration/SystemConfiguration.h>
-#import "BDSKReadWriteLock.h"
 
 #define MAX_RESULTS 100
 
-#define USMARC_STRING   @"US MARC"
-#define UNIMARC_STRING  @"UNIMARC"
-#define MARCXML_STRING  @"MARC XML"
-#define DCXML_STRING    @"DC XML"
-#define MODS_STRING     @"MODS"
+static NSString *BDSKUSMARCString = @"US MARC";
+static NSString *BDSKUNIMARCString = @"UNIMARC";
+static NSString *BDSKMARCXMLString = @"MARC XML";
+static NSString *BDSKDCXMLString = @"DC XML";
+static NSString *BDSKMODSString = @"MODS";
 
 @implementation BDSKZoomGroupServer
 
 + (void)initialize
 {
-    BDSKINITIALIZE;
+    OBINITIALIZE;
     [ZOOMRecord setFallbackEncoding:NSISOLatin1StringEncoding];
 }
 
 + (NSArray *)supportedRecordSyntaxes {
-    return [NSArray arrayWithObjects:USMARC_STRING, UNIMARC_STRING, MARCXML_STRING, DCXML_STRING, MODS_STRING, nil];
+    return [NSArray arrayWithObjects:BDSKUSMARCString, BDSKUNIMARCString, BDSKMARCXMLString, BDSKDCXMLString, BDSKMODSString, nil];
 }
 
 + (ZOOMSyntaxType)zoomRecordSyntaxForRecordSyntaxString:(NSString *)syntax{
-    if ([syntax isEqualToString:USMARC_STRING]) 
+    if ([syntax isEqualToString:BDSKUSMARCString]) 
         return USMARC;
-    else if ([syntax isEqualToString:UNIMARC_STRING]) 
+    else if ([syntax isEqualToString:BDSKUNIMARCString]) 
         return UNIMARC;
-    else if ([syntax isEqualToString:MARCXML_STRING] || [syntax isEqualToString:DCXML_STRING] || [syntax isEqualToString:MODS_STRING]) 
+    else if ([syntax isEqualToString:BDSKMARCXMLString] || [syntax isEqualToString:BDSKDCXMLString] || [syntax isEqualToString:BDSKMODSString]) 
         return XML;
     else
         return UNKNOWN;
@@ -87,7 +85,7 @@
         flags.needsReset = 1;
         availableResults = 0;
         fetchedResults = 0;
-        infoLock = [[BDSKReadWriteLock alloc] init];
+        pthread_rwlock_init(&infolock, NULL);
         [self startDOServerSync];
     }
     return self;
@@ -95,7 +93,7 @@
 
 - (void)dealloc
 {
-    [infoLock release];
+    pthread_rwlock_destroy(&infolock);
     group = nil;
     [connection release], connection = nil;
     [serverInfo release], serverInfo = nil;
@@ -112,60 +110,60 @@
 - (void)terminate
 {
     [self stopDOServer];
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
 }
 
 - (void)stop
 {
     [[self serverOnServerThread] terminateConnection];
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
 }
 
 - (void)retrievePublications
 {
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedDownload);
     
-    OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
     [[self serverOnServerThread] downloadWithSearchTerm:[group searchTerm]];
 }
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
 {
-    [infoLock lockForWriting];
+    pthread_rwlock_wrlock(&infolock);
     if (serverInfo != info) {
         [serverInfo release];
         serverInfo = [info copy];
     }
-    [infoLock unlock];
-    OSAtomicCompareAndSwap32Barrier(0, 1, &flags.needsReset);
+    pthread_rwlock_unlock(&infolock);
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.needsReset);
 }
 
 - (BDSKServerInfo *)serverInfo;
 {
-    [infoLock lockForReading];
+    pthread_rwlock_rdlock(&infolock);
     BDSKServerInfo *info = [[serverInfo copy] autorelease];
-    [infoLock unlock];
+    pthread_rwlock_unlock(&infolock);
     return info;
 }
 
-- (void)setNumberOfAvailableResults:(NSInteger)value;
+- (void)setNumberOfAvailableResults:(int)value;
 {
-    OSAtomicCompareAndSwap32Barrier(availableResults, value, &availableResults);
+    [[self serverOnServerThread] setAvailableResults:value];
 }
 
-- (NSInteger)numberOfAvailableResults;
+- (int)numberOfAvailableResults;
 {
-    return availableResults;
+    return [[self serverOnServerThread] availableResults];
 }
 
-- (void)setNumberOfFetchedResults:(NSInteger)value;
+- (void)setNumberOfFetchedResults:(int)value;
 {
-    OSAtomicCompareAndSwap32Barrier(fetchedResults, value, &fetchedResults);
+    [[self serverOnServerThread] setFetchedResults:value];
 }
 
-- (NSInteger)numberOfFetchedResults;
+- (int)numberOfFetchedResults;
 {
-    return fetchedResults;
+    return [[self serverOnServerThread] fetchedResults];
 }
 
 - (BOOL)failedDownload { OSMemoryBarrier(); return 1 == flags.failedDownload; }
@@ -178,7 +176,7 @@
 
 - (void)addPublicationsToGroup:(bycopy NSArray *)pubs;
 {
-    BDSKASSERT([NSThread isMainThread]);
+    OBASSERT([NSThread inMainThread]);
     [group addPublications:pubs];
 }
 
@@ -188,7 +186,7 @@
 {
     BDSKServerInfo *info = [self serverInfo];
     
-    BDSKASSERT([info host] != nil);
+    OBASSERT([info host] != nil);
     
     [connection release];
     if ([info host] != nil) {
@@ -210,38 +208,38 @@
                 [connection setOption:[[info options] objectForKey:key] forKey:key];
         }
         
-        OSAtomicCompareAndSwap32Barrier(1, 0, &flags.needsReset);
+        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.needsReset);
     }else {
         connection = nil;
     }
-    
-    [self setNumberOfAvailableResults:0];
-    [self setNumberOfFetchedResults:0];
+    // we're on the server thread, so call the server thread setters
+    [self setAvailableResults:0];
+    [self setFetchedResults:0];
 } 
 
 - (oneway void)terminateConnection;
 {
     [connection release];
     connection = nil;
-    OSAtomicCompareAndSwap32Barrier(0, 1, &flags.needsReset);
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.needsReset);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
 } 
 
-- (NSInteger)stringTypeForRecordString:(NSString *)string
+- (int)stringTypeForRecordString:(NSString *)string
 {
     NSString *recordSyntax = [serverInfo recordSyntax];
-    NSInteger stringType = BDSKUnknownStringType;
-    if([recordSyntax isEqualToString:USMARC_STRING] || [recordSyntax isEqualToString:UNIMARC_STRING]) {
+    int stringType = BDSKUnknownStringType;
+    if([recordSyntax isEqualToString:BDSKUSMARCString] || [recordSyntax isEqualToString:BDSKUNIMARCString]) {
         stringType = BDSKMARCStringType;
-    } else if([recordSyntax isEqualToString:MARCXML_STRING]) {
+    } else if([recordSyntax isEqualToString:BDSKMARCXMLString]) {
         stringType = BDSKMARCStringType;
         if ([BDSKStringParser canParseString:string ofType:stringType] == NO)
             stringType = BDSKDublinCoreStringType;
-    } else if([recordSyntax isEqualToString:DCXML_STRING]) {
+    } else if([recordSyntax isEqualToString:BDSKDCXMLString]) {
         stringType = BDSKDublinCoreStringType;
         if ([BDSKStringParser canParseString:string ofType:stringType] == NO)
             stringType = BDSKMARCStringType;
-    } else if([recordSyntax isEqualToString:MODS_STRING]) {
+    } else if([recordSyntax isEqualToString:BDSKMODSString]) {
         stringType = BDSKMODSStringType;
     }
     if (NO == [BDSKStringParser canParseString:string ofType:stringType])
@@ -275,22 +273,22 @@
         ZOOMResultSet *resultSet = query ? [connection resultsForQuery:query] : nil;
         
         if (nil == resultSet)
-            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
+            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedDownload);
         
-        [self setNumberOfAvailableResults:[resultSet countOfRecords]];
+        [self setAvailableResults:[resultSet countOfRecords]];
         
-        NSInteger numResults = MIN([self numberOfAvailableResults] - [self numberOfFetchedResults], MAX_RESULTS);
+        int numResults = MIN([self availableResults] - [self fetchedResults], MAX_RESULTS);
         //NSAssert(numResults >= 0, @"number of results to get must be non-negative");
         
         if(numResults > 0){
-            NSArray *records = [resultSet recordsInRange:NSMakeRange([self numberOfFetchedResults], numResults)];
+            NSArray *records = [resultSet recordsInRange:NSMakeRange([self fetchedResults], numResults)];
             
-            [self setNumberOfFetchedResults:[self numberOfFetchedResults] + numResults];
+            [self setFetchedResults:[self fetchedResults] + numResults];
             
             pubs = [NSMutableArray array];
-            NSInteger i, iMax = [records count];
+            int i, iMax = [records count];
             NSString *record;
-            NSInteger stringType;
+            int stringType;
             BibItem *anItem;
             for (i = 0; i < iMax; i++) {
                 record = [[records objectAtIndex:i] rawString];
@@ -311,7 +309,7 @@
         
     }
     // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
 
     // this will create the array if it doesn't exist
     [[self serverOnMainThread] addPublicationsToGroup:pubs];
@@ -319,6 +317,26 @@
 
 - (void)serverDidFinish{
     [self terminateConnection];
+}
+
+- (void)setAvailableResults:(int)value;
+{
+    availableResults = value;
+}
+
+- (int)availableResults;
+{
+    return availableResults;
+}
+
+- (void)setFetchedResults:(int)value;
+{
+    fetchedResults = value;
+}
+
+- (int)fetchedResults;
+{
+    return fetchedResults;
 }
 
 @end

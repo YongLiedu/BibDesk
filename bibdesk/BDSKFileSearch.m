@@ -50,7 +50,7 @@
 {
  @private
     SKDocumentID *ids;
-    CGFloat *scores;
+    float *scores;
     size_t indexSize;
     
     SKDocumentRef *docs;
@@ -58,7 +58,7 @@
 }
 
 - (SKDocumentID *)documentIDBuffer;
-- (CGFloat *)scoreBuffer;
+- (float *)scoreBuffer;
 - (SKDocumentRef *)documentRefBuffer;
 - (BOOL)changeIndexSize:(size_t)size;
 - (BOOL)changeResultSize:(size_t)size;
@@ -113,7 +113,10 @@
     [self setOptions:opts];
     [self updateSearchResults];
     // If initial indexing is complete, all results are available immediately after the call to updateSearchResults and the controller can remove its progress indicator.  Future changes to the index will call searchIndexDidUpdate:.
-    [[self delegate] search:self didUpdateWithResults:[searchResults allObjects]];
+    if ([searchIndex finishedInitialIndexing])
+        [[self delegate] search:self didFinishWithResults:[searchResults allObjects]];
+    else
+        [[self delegate] search:self didUpdateWithResults:[searchResults allObjects]];
 }
 
 - (void)searchIndexDidUpdate:(BDSKFileSearchIndex *)anIndex;
@@ -130,10 +133,11 @@
     }
 }
 
-- (void)searchIndexDidUpdateStatus:(BDSKFileSearchIndex *)anIndex;
+- (void)searchIndexDidFinish:(BDSKFileSearchIndex *)anIndex;
 {
     if ([anIndex isEqual:searchIndex]) {
-        [[self delegate] search:self didUpdateStatus:[searchIndex status]];
+        [self searchIndexDidUpdate:anIndex];
+        [[self delegate] search:self didFinishWithResults:[searchResults allObjects]];
     }
 }
 
@@ -180,15 +184,15 @@
     CFIndex maxCount = SKIndexGetDocumentCount(skIndex);
     
     BOOL changeSize = [data changeIndexSize:maxCount];
-    NSAssert1(changeSize, @"Unable to allocate memory for index of size %ld", (long)maxCount);
+    NSAssert1(changeSize, @"Unable to allocate memory for index of size %d", maxCount);
     if (NO == changeSize) {
-        NSLog(@"*** ERROR: unable to allocate memory for index of size %ld", (long)maxCount);
+        NSLog(@"*** ERROR: unable to allocate memory for index of size %d", maxCount);
         return;
     }
 
     CFIndex actualCount;
     
-    CGFloat *scores = [data scoreBuffer];
+    float *scores = [data scoreBuffer];
     SKDocumentID *documentIDs = [data documentIDBuffer];
     
     SKSearchFindMatches(search, maxCount, documentIDs, scores, 10, &actualCount);
@@ -198,9 +202,9 @@
     if (actualCount > 0) {
         
         changeSize = [data changeResultSize:actualCount];
-        NSAssert1(changeSize, @"Unable to allocate memory for results of size %ld", (long)actualCount);
+        NSAssert1(changeSize, @"Unable to allocate memory for results of size %d", actualCount);
         if (NO == changeSize) {
-            NSLog(@"*** ERROR: unable to allocate memory for results of size %ld", (long)actualCount);
+            NSLog(@"*** ERROR: unable to allocate memory for results of size %d", actualCount);
             return;
         }
         
@@ -214,14 +218,14 @@
                 
         while (actualCount--) {
             
-            CGFloat score = *scores++;
+            float score = *scores++;
             skDocument = *skDocuments++;
             
             // these scores are arbitrarily scaled, so we'll keep track of the search kit's max/min values
             maxValue = MAX(score, maxValue);
             
             NSURL *theURL = (NSURL *)SKDocumentCopyURL(skDocument);
-            NSSet *identifierURLs = [searchIndex identifierURLsForURL:theURL];
+            NSSet *identifierURLs = [searchIndex allIdentifierURLsForURL:theURL];
             NSString *title = nil;
             NSEnumerator *idURLEnum = [identifierURLs objectEnumerator];
             NSURL *idURL;
@@ -298,7 +302,7 @@
 {
     if ((!ids && !scores) || indexSize < size) {
         ids = (SKDocumentID *)NSZoneRealloc([self zone], ids, size * sizeof(SKDocumentID));
-        scores = (CGFloat *)NSZoneRealloc([self zone], scores, size * sizeof(CGFloat));
+        scores = (float *)NSZoneRealloc([self zone], scores, size * sizeof(float));
         indexSize = size;
     } 
     return NULL != scores && NULL != ids;
@@ -314,7 +318,7 @@
 }
 
 - (SKDocumentID *)documentIDBuffer { return ids; }
-- (CGFloat *)scoreBuffer { return scores; }
+- (float *)scoreBuffer { return scores; }
 - (SKDocumentRef *)documentRefBuffer { return docs; }
 
 @end

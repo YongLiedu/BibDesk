@@ -41,110 +41,105 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 
-#define DEFAULT_NAME     NSLocalizedString(@"New Server", @"")
-#define DEFAULT_DATABASE @"database" 
-#define DEFAULT_HOST     @"host.domain.com"
-#define DEFAULT_PORT     @"0"
-
-// IMPORTANT WARNING:
-// When anything changes about server infos, e.g. a new type is added, this should be carefully considered, as it has many consequences for data integrity and and the editing sheet.
-// Assumptions are made in BDSKSearchGroup and BDSKSearchGroupSheetController.
-// Currently, anything other than zoom is expected to have just a type, name, and database.
-// Also when other validations are necessary, changing the type must make sure that the data validates properly for the new type, if necessary adding missing values.
-
 @implementation BDSKServerInfo
 
 + (id)defaultServerInfoWithType:(NSString *)aType;
 {
+    BOOL isEntrez = [aType isEqualToString:BDSKSearchGroupEntrez];
     BOOL isZoom = [aType isEqualToString:BDSKSearchGroupZoom];
+    BOOL isISI = [aType isEqualToString:BDSKSearchGroupISI];
+    BOOL isDBLP = [aType isEqualToString:BDSKSearchGroupDBLP];
     
-    return [[[[self class] alloc] initWithType:aType
-                                          name:DEFAULT_NAME
-                                      database:DEFAULT_DATABASE
-                                          host:isZoom ? DEFAULT_HOST : nil
-                                          port:isZoom ? DEFAULT_PORT : nil
+    return [[[[self class] alloc] initWithType:aType 
+                                          name:NSLocalizedString(@"New Server", @"")
+                                          host:(isEntrez || isISI || isDBLP) ? nil : @"host.domain.com"
+                                          port:isZoom ? @"0" : nil 
+                                      database:@"database" 
                                        options:isZoom ? [NSDictionary dictionary] : nil] autorelease];
 }
 
-- (id)initWithType:(NSString *)aType name:(NSString *)aName database:(NSString *)aDbase host:(NSString *)aHost port:(NSString *)aPort options:(NSDictionary *)opts;
+- (id)initWithType:(NSString *)aType name:(NSString *)aName host:(NSString *)aHost port:(NSString *)aPort database:(NSString *)aDbase options:(NSDictionary *)opts;
 {
     if (self = [super init]) {
         type = [aType copy];
         name = [aName copy];
-        database = [aDbase copy];
         if ([self isEntrez] || [self isISI] || [self isDBLP]) {
             host = nil;
             port = nil;
+            database = [aDbase copy];
             options = nil;
         } else if ([self isZoom]) {
             host = [aHost copy];
             port = [aPort copy];
+            database = [aDbase copy];
             options = [opts mutableCopy];
         } else {
-            [self release];
-            self = nil;
+            host = [aHost copy];
+            // unknown type; you'll get a surprise if these are set to nil, so maybe we should just raise here...
+            OBPRECONDITION(nil == aDbase);
+            OBPRECONDITION(nil == opts);
+            OBPRECONDITION(nil == aPort);
+            port = nil;
+            database = nil;
+            options = nil;
         }
     }
     return self;
+}
+
+- (id)initWithType:(NSString *)aType name:(NSString *)aName host:(NSString *)aHost port:(NSString *)aPort database:(NSString *)aDbase;
+{
+    return [self initWithType:aType name:aName host:aHost port:aPort database:aDbase options:[NSDictionary dictionary]];
 }
 
 - (id)initWithType:(NSString *)aType dictionary:(NSDictionary *)info;
 {    
     self = [self initWithType:aType ?: [info objectForKey:@"type"]
                          name:[info objectForKey:@"name"]
-                     database:[info objectForKey:@"database"]
                          host:[info objectForKey:@"host"]
                          port:[info objectForKey:@"port"]
+                     database:[info objectForKey:@"database"]
                       options:[info objectForKey:@"options"]];
     return self;
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
-    id copy = [[BDSKServerInfo allocWithZone:aZone] initWithType:[self type] name:[self name] database:[self database] host:[self host] port:[self port] options:[self options]];
+    id copy = [[BDSKServerInfo allocWithZone:aZone] initWithType:[self type] name:[self name] host:[self host] port:[self port] database:[self database] options:[self options]];
     return copy;
 }
 
 - (id)mutableCopyWithZone:(NSZone *)aZone {
-    id copy = [[BDSKMutableServerInfo allocWithZone:aZone] initWithType:[self type] name:[self name] database:[self database] host:[self host] port:[self port] options:[self options]];
+    id copy = [[BDSKMutableServerInfo allocWithZone:aZone] initWithType:[self type] name:[self name] host:[self host] port:[self port] database:[self database] options:[self options]];
     return copy;
 }
 
 - (void)dealloc {
     [type release];
     [name release];
-    [database release];
     [host release];
     [port release];
+    [database release];
     [options release];
     [super dealloc];
 }
 
-static inline BOOL isEqualOrBothNil(id object1, id object2) {
-    return (object1 == nil && object2 == nil) || [object1 isEqual:object2];
-}
-
 - (BOOL)isEqual:(id)other {
-    BOOL isEqual = YES;
+    BOOL isEqual = NO;
     // we don't compare the name, as that is just a label
-    if ([self isKindOfClass:[BDSKServerInfo self]] == NO ||
-        [[self type] isEqualToString:[(BDSKServerInfo *)other type]] == NO ||
-        isEqualOrBothNil([self database], [other database]) == NO)
+    if ([self isMemberOfClass:[other class]] == NO || [[self type] isEqualToString:[(BDSKServerInfo *)other type]] == NO)
         isEqual = NO;
+    else if ([self isEntrez] || [self isISI] || [self isDBLP])
+        isEqual = OFISEQUAL([self database], [other database]);
     else if ([self isZoom])
-        isEqual = isEqualOrBothNil([self host], [other host]) && 
-                  isEqualOrBothNil([self port], [(BDSKServerInfo *)other port]) && 
-                  (isEqualOrBothNil([self options], [(BDSKServerInfo *)other options]) || ([[self options] count] == 0 && [[(BDSKServerInfo *)other options] count] == 0));
+        isEqual = OFISEQUAL([self host], [other host]) && 
+                  OFISEQUAL([self port], [(BDSKServerInfo *)other port]) && 
+                  OFISEQUAL([self database], [other database]) && 
+                  OFISEQUAL([self password], [other password]) && 
+                  OFISEQUAL([self username], [other username]) && 
+                  (OFISEQUAL([self options], [(BDSKServerInfo *)other options]) || ([[self options] count] == 0 && [[(BDSKServerInfo *)other options] count] == 0));
+    else
+        isEqual = OFISEQUAL([self host], [other host]);
     return isEqual;
-}
-
-- (NSUInteger)hash {
-    NSUInteger hash = [[self type] hash] + [[self database] hash];
-    if ([self isZoom]) {
-        hash += [[self host] hash] + [[self port] hash] + [[self password] hash];
-        if ([options count])
-            hash += [[self options] hash];
-    }
-    return hash;
 }
 
 - (NSDictionary *)dictionaryValue {
@@ -164,92 +159,42 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 
 - (NSString *)name { return name; }
 
+- (NSString *)host { return host; }
+
+- (NSString *)port { return port; }
+
 - (NSString *)database { return database; }
 
-- (NSString *)host { return [self isZoom] ? host : nil; }
+- (NSString *)password { return [options objectForKey:@"password"]; }
 
-- (NSString *)port { return [self isZoom] ? port : nil; }
+- (NSString *)username { return [options objectForKey:@"username"]; }
 
-- (NSString *)password { return [[self options] objectForKey:@"password"]; }
+- (NSString *)recordSyntax { return [options objectForKey:@"recordSyntax"]; }
 
-- (NSString *)username { return [[self options] objectForKey:@"username"]; }
+- (NSString *)resultEncoding { return [options objectForKey:@"resultEncoding"]; }
 
-- (NSString *)recordSyntax { return [[self options] objectForKey:@"recordSyntax"]; }
+- (BOOL)removeDiacritics { return [[options objectForKey:@"removeDiacritics"] boolValue]; }
 
-- (NSString *)resultEncoding { return [[self options] objectForKey:@"resultEncoding"]; }
-
-- (BOOL)removeDiacritics { return [[[self options] objectForKey:@"removeDiacritics"] boolValue]; }
-
-- (NSDictionary *)options { return [self isZoom] ? options : nil; }
+- (NSDictionary *)options { return options; }
 
 - (BOOL)isEntrez { return [[self type] isEqualToString:BDSKSearchGroupEntrez]; }
 - (BOOL)isZoom { return [[self type] isEqualToString:BDSKSearchGroupZoom]; }
 - (BOOL)isISI { return [[self type] isEqualToString:BDSKSearchGroupISI]; }
 - (BOOL)isDBLP { return [[self type] isEqualToString:BDSKSearchGroupDBLP]; }
 
-- (NSInteger)serverType {
-    if ([self isEntrez])
-        return BDSKServerTypeEntrez;
-    if ([self isZoom])
-        return BDSKServerTypeZoom;
-    if ([self isISI])
-        return BDSKServerTypeISI;
-    if ([self isDBLP])
-        return BDSKServerTypeDBLP;
-    BDSKASSERT_NOT_REACHED("Unknown search type");
-    return BDSKServerTypeEntrez;
-}
-
 @end
 
 
 @implementation BDSKMutableServerInfo
 
-+ (void)initialize{
-    NSArray *typeKeys = [NSArray arrayWithObject:@"type"];
-    NSArray *optionsKeys = [NSArray arrayWithObject:@"options"];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"serverType"];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"host"];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"port"];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"options"];
-    [self setKeys:optionsKeys triggerChangeNotificationsForDependentKey:@"password"];
-    [self setKeys:optionsKeys triggerChangeNotificationsForDependentKey:@"username"];
-    [self setKeys:optionsKeys triggerChangeNotificationsForDependentKey:@"recordSyntax"];
-    [self setKeys:optionsKeys triggerChangeNotificationsForDependentKey:@"resultEncoding"];
-    [self setKeys:optionsKeys triggerChangeNotificationsForDependentKey:@"removeDiacritics"];
-    BDSKINITIALIZE;
-}
+- (void)setDelegate:(id)newDelegate { delegate = newDelegate; }
 
-// When changing the type, all data must be properly updated to be valid, taking into account the condition implict in the validation methods
-- (void)setType:(NSString *)newType {
-    if ([type isEqualToString:newType] == NO) {
-        [type release];
-        type = [newType retain];
-        if ([self isZoom]) {
-            if (host == nil)
-                [self setHost:DEFAULT_HOST];
-            if (port == nil)
-                [self setPort:DEFAULT_PORT];
-        }
-    }
-}
+- (id)delegate { return delegate; }
 
 - (void)setName:(NSString *)newName;
 {
     [name autorelease];
     name = [newName copy];
-}
-
-- (void)setDatabase:(NSString *)newDbase;
-{
-    [database autorelease];
-    database = [newDbase copy];
-}
-
-- (void)setHost:(NSString *)newHost;
-{
-    [host autorelease];
-    host = [newHost copy];
 }
 
 - (void)setPort:(NSString *)newPort;
@@ -258,36 +203,60 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
     port = [newPort copy];
 }
 
-- (void)setOptionValue:(id)value forKey:(NSString *)key {
-    if (options)
-        [options setValue:value forKey:key];
-    else if (value)
-        [self setOptions:[NSDictionary dictionaryWithObjectsAndKeys:value, key, nil]];
+- (void)setHost:(NSString *)newHost;
+{
+    [host autorelease];
+    host = [newHost copy];
+}
+
+- (void)setDatabase:(NSString *)newDbase;
+{
+    [database autorelease];
+    database = [newDbase copy];
 }
 
 - (void)setPassword:(NSString *)newPassword;
 {
-    [self setOptionValue:newPassword forKey:@"password"];
+    if (options)
+        [options setValue:newPassword forKey:@"password"];
+    else if (newPassword)
+        [self setOptions:[NSDictionary dictionaryWithObjectsAndKeys:newPassword, @"password", nil]];
 }
 
 - (void)setUsername:(NSString *)newUser;
 {
-    [self setOptionValue:newUser forKey:@"username"];
+    if (options)
+        [options setValue:newUser forKey:@"username"];
+    else if (newUser)
+        [self setOptions:[NSDictionary dictionaryWithObjectsAndKeys:newUser, @"username", nil]];
 }
 
 - (void)setRecordSyntax:(NSString *)newSyntax;
 {
-    [self setOptionValue:newSyntax forKey:@"recordSyntax"];
+    if (options)
+        [options setValue:newSyntax forKey:@"recordSyntax"];
+    else if (newSyntax)
+        [self setOptions:[NSDictionary dictionaryWithObjectsAndKeys:newSyntax, @"recordSyntax", nil]];
 }
 
 - (void)setResultEncoding:(NSString *)newEncoding;
 {
-    [self setOptionValue:newEncoding forKey:@"resultEncoding"];
+    if (options)
+        [options setValue:newEncoding forKey:@"resultEncoding"];
+    else if (newEncoding)
+        [self setOptions:[NSDictionary dictionaryWithObjectsAndKeys:newEncoding, @"resultEncoding", nil]];
 }
 
 - (void)setRemoveDiacritics:(BOOL)flag;
 {
-    [self setOptionValue:(flag ? @"YES" : nil) forKey:@"removeDiacritics"];
+    if (flag) {
+        if (options)
+            [options setValue:@"YES" forKey:@"removeDiacritics"];
+        else
+            [self setOptions:[NSDictionary dictionaryWithObjectsAndKeys:@"YES", @"removeDiacritics", nil]];
+    } else if (options) {
+        [options setValue:nil forKey:@"removeDiacritics"];
+    }
 }
 
 - (void)setOptions:(NSDictionary *)newOptions;
@@ -298,8 +267,8 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 
 - (BOOL)validateHost:(id *)value error:(NSError **)error {
     NSString *string = *value;
+    NSRange range = [string rangeOfString:@"://"];
     if ([self isZoom]) {
-        NSRange range = [string rangeOfString:@"://"];
         if(range.location != NSNotFound){
             // ZOOM gets confused when the host has a protocol
             string = [string substringFromIndex:NSMaxRange(range)];
@@ -346,6 +315,16 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
         [*error setValue:NSLocalizedString(@"See http://www.iana.org/assignments/character-sets for recognized values.", @"error suggestion for setting zoom result encoding") forKey:NSLocalizedRecoverySuggestionErrorKey];
     }
     return isValid;
+}
+
+- (void)objectDidBeginEditing:(id)editor {
+    if ([delegate respondsToSelector:@selector(objectDidBeginEditing:)])
+        [delegate objectDidBeginEditing:editor];
+}
+
+- (void)objectDidEndEditing:(id)editor {
+    if ([delegate respondsToSelector:@selector(objectDidEndEditing:)])
+        [delegate objectDidEndEditing:editor];
 }
 
 @end

@@ -40,7 +40,7 @@
 #import "BDSKAppController.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
-#import "BDSKGradientSplitView.h"
+#import "BDSKSplitView.h"
 
 
 @interface BDSKNotesWindowController (Private)
@@ -83,7 +83,7 @@
 - (void)windowDidLoad {
     [self setWindowFrameAutosaveNameOrCascade:@"NotesWindow"];
     
-    [splitView setPositionAutosaveName:@"BDSKNotesWindow"];
+    [splitView setPositionAutosaveName:@"BDSKSplitView Frame BDSKNotesWindow"];
     if ([self windowFrameAutosaveName] == nil) {
         // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
         [splitView setPositionAutosaveName:nil];
@@ -154,7 +154,7 @@
 
 #pragma mark NSOutlineView datasource and delegate methods
 
-- (NSInteger)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item {
+- (int)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item {
     if (item == nil)
         return [notes count];
     else if ([[item valueForKey:@"type"] isEqualToString:@"Note"])
@@ -166,7 +166,7 @@
     return [[item valueForKey:@"type"] isEqualToString:@"Note"];
 }
 
-- (id)outlineView:(NSOutlineView *)ov child:(NSInteger)idx ofItem:(id)item {
+- (id)outlineView:(NSOutlineView *)ov child:(int)idx ofItem:(id)item {
     if (item == nil) {
         return [notes objectAtIndex:idx];
     } else {
@@ -185,12 +185,12 @@
     return nil;
 }
 
-- (CGFloat)outlineView:(NSOutlineView *)ov heightOfRowByItem:(id)item {
+- (float)outlineView:(NSOutlineView *)ov heightOfRowByItem:(id)item {
     NSNumber *heightNumber = [item valueForKey:@"rowHeight"];
     return heightNumber ? [heightNumber floatValue] : 17.0;
 }
 
-- (void)outlineView:(NSOutlineView *)ov setHeightOfRow:(NSInteger)newHeight byItem:(id)item {
+- (void)outlineView:(NSOutlineView *)ov setHeightOfRow:(int)newHeight byItem:(id)item {
     [item setObject:[NSNumber numberWithFloat:newHeight] forKey:@"rowHeight"];
 }
 
@@ -233,6 +233,14 @@
 
 #pragma mark NSTokenField deldegate methods
 
+- (NSString *)tokenField:(NSTokenField *)tokenField editingStringForRepresentedObject:(id)representedObject {
+    return [representedObject stringByReplacingCharactersInSet:[NSCharacterSet whitespaceCharacterSet] withString:@"_"];
+}
+
+- (id)tokenField:(NSTokenField *)tokenField representedObjectForEditingString:(NSString *)editingString {
+    return [editingString stringByReplacingOccurrencesOfString:@"_" withString:@" "];
+}
+
 - (BOOL)tokenField:(NSTokenField *)tokenField writeRepresentedObjects:(NSArray *)objects toPasteboard:(NSPasteboard *)pboard {
     if (objects) {
         [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
@@ -244,7 +252,7 @@
 
 #pragma mark NSSplitView deldegate methods
 
-- (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(NSInteger)offset {
+- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset {
     NSView *notesView = [[sender subviews] objectAtIndex:0]; // outlineView
     NSView *tagsView = [[sender subviews] objectAtIndex:1]; // tokenField
     NSRect notesFrame = [notesView frame];
@@ -298,10 +306,10 @@
 
 @implementation BDSKNotesOutlineView
 
-- (void)resizeRow:(NSInteger)row withEvent:(NSEvent *)theEvent {
+- (void)resizeRow:(int)row withEvent:(NSEvent *)theEvent {
     id item = [self itemAtRow:row];
     NSPoint startPoint = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-    CGFloat startHeight = [[self delegate] outlineView:self heightOfRowByItem:item];
+    float startHeight = [[self delegate] outlineView:self heightOfRowByItem:item];
 	BOOL keepGoing = YES;
 	
     [[NSCursor resizeUpDownCursor] push];
@@ -312,7 +320,7 @@
 			case NSLeftMouseDragged:
             {
                 NSPoint currentPoint = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-                CGFloat currentHeight = BDSKMax([self rowHeight], startHeight + currentPoint.y - startPoint.y);
+                float currentHeight = fmaxf([self rowHeight], startHeight + currentPoint.y - startPoint.y);
                 
                 [[self delegate] outlineView:self setHeightOfRow:currentHeight byItem:item];
                 [self noteHeightOfRowsWithIndexesChanged:[NSIndexSet indexSetWithIndex:row]];
@@ -334,12 +342,12 @@
 - (void)mouseDown:(NSEvent *)theEvent {
     if ([theEvent clickCount] == 1 && [[self delegate] respondsToSelector:@selector(outlineView:canResizeRowByItem:)] && [[self delegate] respondsToSelector:@selector(outlineView:setHeightOfRow:byItem:)]) {
         NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-        NSInteger row = [self rowAtPoint:mouseLoc];
+        int row = [self rowAtPoint:mouseLoc];
         
         if (row != -1 && [[self delegate] outlineView:self canResizeRowByItem:[self itemAtRow:row]]) {
             NSRect ignored, rect;
             NSDivideRect([self rectOfRow:row], &rect, &ignored, 5.0, [self isFlipped] ? NSMaxYEdge : NSMinYEdge);
-            if (NSMouseInRect(mouseLoc, rect, [self isFlipped]) && NSLeftMouseDragged == [[NSApp nextEventMatchingMask:(NSLeftMouseUpMask | NSLeftMouseDraggedMask) untilDate:[NSDate distantFuture] inMode:NSEventTrackingRunLoopMode dequeue:NO] type]) {
+            if (NSPointInRect(mouseLoc, rect) && NSLeftMouseDragged == [[NSApp nextEventMatchingMask:(NSLeftMouseUpMask | NSLeftMouseDraggedMask) untilDate:[NSDate distantFuture] inMode:NSEventTrackingRunLoopMode dequeue:NO] type]) {
                 [self resizeRow:row withEvent:theEvent];
                 return;
             }
@@ -356,7 +364,7 @@
         if (visibleRows.length == 0)
             return;
         
-        NSUInteger row;
+        unsigned int row;
         BOOL isFirstResponder = [[self window] isKeyWindow] && [[self window] firstResponder] == self;
         
         [NSGraphicsContext saveGraphicsState];
@@ -370,8 +378,8 @@
             BOOL isHighlighted = isFirstResponder && [self isRowSelected:row];
             NSColor *color = [NSColor colorWithCalibratedWhite:isHighlighted ? 1.0 : 0.5 alpha:0.7];
             NSRect rect = [self rectOfRow:row];
-            CGFloat x = BDSKCeil(NSMidX(rect));
-            CGFloat y = NSMaxY(rect) - 1.5;
+            float x = ceilf(NSMidX(rect));
+            float y = NSMaxY(rect) - 1.5;
             
             [color set];
             [NSBezierPath strokeLineFromPoint:NSMakePoint(x - 1.0, y) toPoint:NSMakePoint(x + 1.0, y)];
@@ -401,7 +409,7 @@
         [super resetCursorRects];
 
         NSRange visibleRows = [self rowsInRect:[self visibleRect]];
-        NSUInteger row;
+        unsigned int row;
         
         if (visibleRows.length == 0)
             return;

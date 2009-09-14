@@ -41,7 +41,6 @@
 #import "NSString_BDSKExtensions.h"
 #import "BDSKTypeManager.h"
 #import "NSError_BDSKExtensions.h"
-#import "CFString_BDSKExtensions.h"
 
 /*
  For format, see http://www.ecst.csuchico.edu/~jacobsd/bib/formats/endnote.html and the man page for refer(1).  There's apparently an old-style refer format, and one that's bastardized for EndNote.  I'm adding this parser solely because this file format is returned by AGU's search at the moment, so supporting the version described by the man page for refer(1) isn't a high priority.
@@ -101,22 +100,22 @@
 		if (isAuthor) {
             newString = [[NSString alloc] initWithFormat:@"%@ and %@", oldString, value];
             // This next step isn't strictly necessary for splitting the names, since the name parsing will do it for us, but you still see duplicate whitespace when editing the author field
-            NSString *collapsedWhitespaceString = (NSString *)BDStringCreateByCollapsingAndTrimmingCharactersInSet(NULL, (CFStringRef)newString, (CFCharacterSetRef)[NSCharacterSet whitespaceCharacterSet]);
+            NSString *collapsedWhitespaceString = (NSString *)BDStringCreateByCollapsingAndTrimmingWhitespace(NULL, (CFStringRef)newString);
             [newString release];
             newString = collapsedWhitespaceString;
         } else if([key isSingleValuedField] || [key isURLField]) {
             // for single valued and URL fields, create a new field name
-            NSInteger i = 1;
-            NSString *newKey = [key stringByAppendingFormat:@"%ld", (long)i];
+            int i = 1;
+            NSString *newKey = [key stringByAppendingFormat:@"%d", i];
             while ([pubDict objectForKey:newKey] != nil) {
                 i++;
-                newKey = [key stringByAppendingFormat:@"%ld", (long)i];
+                newKey = [key stringByAppendingFormat:@"%d", i];
             }
             key = newKey;
             newString = [value copy];
         } else {
 			// append to old value, using separator from prefs
-            newString = [[NSString alloc] initWithFormat:@"%@%@%@", oldString, [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey], value];
+            newString = [[NSString alloc] initWithFormat:@"%@%@%@", oldString, [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey], value];
 		}
     } else {
         // the default, just set the value
@@ -134,9 +133,9 @@ static void fixDateInDictionary(NSMutableDictionary *pubDict)
     if (dateString) {
         NSScanner *scanner = [[NSScanner alloc] initWithString:dateString];
         [scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL];
-        NSInteger year;
+        int year;
         if ([scanner scanInt:&year])
-            [pubDict setObject:[NSString stringWithFormat:@"%ld", (long)year] forKey:BDSKYearString];
+            [pubDict setObject:[NSString stringWithFormat:@"%d", year] forKey:BDSKYearString];
         [scanner release];
     }
 }
@@ -170,13 +169,13 @@ static inline BOOL isTagLine(NSString *sourceLine)
     
     NSRange startRange = [itemString rangeOfString:@"%" options:NSLiteralSearch];
 	if (startRange.location == NSNotFound){
-        error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"This is not a Refer string", @"Error description")];
+        OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"This is not a Refer string", @"Error description"), nil);
         if(outError) *outError = error;
 		return returnArray;
     }
 	
     // this basically trims whitespace and newlines
-	NSInteger startLoc = startRange.location;
+	int startLoc = startRange.location;
 	NSRange endRange = NSMakeRange([itemString length], 0);
 	itemString = [itemString substringWithRange:NSMakeRange(startLoc, endRange.location - startLoc)];
     
@@ -223,7 +222,7 @@ static inline BOOL isTagLine(NSString *sourceLine)
             
 			[mutableValue setString:value];                
 			
-		} else if ([sourceLine isEqualToString:@""] || [sourceLine rangeOfCharacterFromSet:invertedWhitespaceAndNewlineSet].length == 0) {
+		} else if ([sourceLine isEqualToString:@""] || [sourceLine containsCharacterInSet:invertedWhitespaceAndNewlineSet] == NO) {
             
             // add the last line, if available; different from other parsers, since we don't have a real end tag
             if (tag && mutableValue) {

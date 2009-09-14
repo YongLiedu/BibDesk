@@ -38,7 +38,6 @@
 
 #import "BibDocument_Actions.h"
 #import "BibDocument_DataSource.h"
-#import "BibDocument_UI.h"
 #import "BibDocument_Groups.h"
 #import "BibDocument_Search.h"
 #import "BDSKStringConstants.h"
@@ -61,11 +60,10 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSTableView_BDSKExtensions.h"
-#import "NSView_BDSKExtensions.h"
 
 #import "BDSKTypeManager.h"
 #import "BDSKScriptHookManager.h"
-#import "NSAlert_BDSKExtensions.h"
+#import "BDSKAlert.h"
 #import "BDSKFiler.h"
 #import "BDSKTextImportController.h"
 #import "BDSKStatusBar.h"
@@ -74,10 +72,10 @@
 #import "BDSKTemplate.h"
 #import "BDSKTemplateObjectProxy.h"
 #import "BDSKMainTableView.h"
-#import "BDSKGroupOutlineView.h"
-#import "BDSKGradientSplitView.h"
+#import "BDSKGroupTableView.h"
+#import "BDSKSplitView.h"
 #import "NSTask_BDSKExtensions.h"
-#import "BDSKColoredView.h"
+#import "BDSKColoredBox.h"
 #import "BDSKStringParser.h"
 #import "BDSKZoomablePDFView.h"
 #import "BDSKCustomCiteDrawerController.h"
@@ -86,17 +84,10 @@
 #import "BDSKPreviewer.h"
 #import "BDSKFileMigrationController.h"
 #import <sys/stat.h>
-#import <FileView/FileView.h>
+#import <FileView/FVPreviewer.h>
 #import "BDSKMacro.h"
-#import "BDSKAppController.h"
-#import "BDSKApplication.h"
-#import "NSIndexSet_BDSKExtensions.h"
-#import "BDSKURLSheetController.h"
-#import "BDSKLinkedFile.h"
 
 @implementation BibDocument (Actions)
-
-static BOOL changingColors = NO;
 
 #pragma mark -
 #pragma mark Publication actions
@@ -110,9 +101,9 @@ static BOOL changingColors = NO;
     NSEnumerator *groupEnum = [[self selectedGroups] objectEnumerator];
 	BDSKGroup *group;
 	BOOL isSingleValued = [[self currentGroupField] isSingleValuedGroupField];
-    NSInteger count = 0;
+    int count = 0;
     // we don't overwrite inherited single valued fields, they already have the field set through inheritance
-    NSInteger op, handleInherited = isSingleValued ? BDSKOperationIgnore : BDSKOperationAsk;
+    int op, handleInherited = isSingleValued ? BDSKOperationIgnore : BDSKOperationAsk;
     
     while (group = [groupEnum nextObject]) {
 		if ([group isCategory]){
@@ -122,12 +113,12 @@ static BOOL changingColors = NO;
             if(op == BDSKOperationSet || op == BDSKOperationAppend){
                 count++;
             }else if(op == BDSKOperationAsk){
-                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
-                                                 defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
-                                               alternateButton:nil // "Set" would end up choosing an arbitrary one
-                                                   otherButton:NSLocalizedString(@"Append", @"Button title")
-                                     informativeTextWithFormat:NSLocalizedString(@"The new item has a group value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
-                handleInherited = [alert runModal];
+                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
+                                                     defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
+                                                   alternateButton:nil // "Set" would end up choosing an arbitrary one
+                                                       otherButton:NSLocalizedString(@"Append", @"Button title")
+                                         informativeTextWithFormat:NSLocalizedString(@"The new item has a group value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
+                handleInherited = [alert runSheetModalForWindow:documentWindow];
                 if(handleInherited != BDSKOperationIgnore){
                     [newBI addToGroup:group handleInherited:handleInherited];
                     count++;
@@ -138,7 +129,7 @@ static BOOL changingColors = NO;
         }
     }
 	
-	if (isSingleValued && [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isCategory == YES"]] count] > 1) {
+	if (isSingleValued && [groups numberOfCategoryGroupsAtIndexes:[groupTableView selectedRowIndexes]] > 1) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Cannot Add to All Groups", @"Message in alert dialog when trying to add to multiple single-valued field groups")
                                          defaultButton:nil
                                        alternateButton:nil
@@ -167,7 +158,7 @@ static BOOL changingColors = NO;
 			   [parentType isEqualToString:BDSKBookletString] || 
 			   [parentType isEqualToString:BDSKTechreportString] || 
 			   [parentType isEqualToString:BDSKManualString]) {
-		if (![[[NSUserDefaults standardUserDefaults] stringForKey:BDSKPubTypeStringKey] isEqualToString:BDSKInbookString]) 
+		if (![[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPubTypeStringKey] isEqualToString:BDSKInbookString]) 
 			[newBI setPubType:BDSKIncollectionString];
 	}
     [self addNewPubAndEdit:newBI];
@@ -187,68 +178,66 @@ static BOOL changingColors = NO;
     }
 }
 
-- (void)removePubsAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-	NSArray *pubs = [(NSArray *)contextInfo autorelease];
-    if ([alert suppressionButtonState] == NSOnState)
-		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnRemovalFromGroupKey];
+- (void)removePubsAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if ([alert checkValue] == YES)
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnRemovalFromGroupKey];
     if (returnCode == NSAlertDefaultReturn)
-        [self removePublications:pubs fromGroups:[self selectedGroups]];
+        [self removePublications:[self selectedPublications] fromGroups:[self selectedGroups]];
 }
 
 // this method is called for the main table; it's a wrapper for delete or remove from group
-- (void)removePublicationsFromSelectedGroups:(NSArray *)pubs{
+- (IBAction)removeSelectedPubs:(id)sender{
 	NSArray *selectedGroups = [self selectedGroups];
 	
-	if ([self hasLibraryGroupSelected]) {
-		[self deletePublications:pubs];
-	} else {
+	if([self hasLibraryGroupSelected]){
+		[self deleteSelectedPubs:sender];
+	}else{
 		BOOL canRemove = NO;
         if ([self hasStaticGroupsSelected])
             canRemove = YES;
         else if ([[self currentGroupField] isSingleValuedGroupField] == NO)
             canRemove = [self hasCategoryGroupsSelected];
-		if (canRemove == NO) {
+		if(canRemove == NO){
 			NSBeep();
+			return;
 		}
         // the items may not belong to the groups that you're trying to remove them from, but we'll warn as if they were
-        else if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRemovalFromGroupKey]) {
+        if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnRemovalFromGroupKey]) {
             NSString *groupName = ([selectedGroups count] > 1 ? NSLocalizedString(@"multiple groups", @"multiple groups") : [NSString stringWithFormat:NSLocalizedString(@"group \"%@\"", @"group \"Name\""), [[selectedGroups firstObject] stringValue]]);
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
-                                             defaultButton:NSLocalizedString(@"Yes", @"Button title")
-                                           alternateButton:nil
-                                               otherButton:NSLocalizedString(@"No", @"Button title")
-                                 informativeTextWithFormat:NSLocalizedString(@"You are about to remove %ld %@ from %@.  Do you want to proceed?", @"Informative text in alert dialog: You are about to remove [number] item(s) from [group \"Name\"]."), (long)[self numberOfSelectedPubs], ([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"items", @"") : NSLocalizedString(@"item", @"")), groupName];
-            [alert setShowsSuppressionButton:YES];
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
+                                                 defaultButton:NSLocalizedString(@"Yes", @"Button title")
+                                               alternateButton:nil
+                                                   otherButton:NSLocalizedString(@"No", @"Button title")
+                                     informativeTextWithFormat:NSLocalizedString(@"You are about to remove %i %@ from %@.  Do you want to proceed?", @"Informative text in alert dialog: You are about to remove [number] item(s) from [group \"Name\"]."), [self numberOfSelectedPubs], ([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"items", @"") : NSLocalizedString(@"item", @"")), groupName];
+            [alert setHasCheckButton:YES];
+            [alert setCheckValue:NO];
             // use didDismissSelector because the action may pop up its own sheet
             [alert beginSheetModalForWindow:documentWindow
                               modalDelegate:self 
-                             didEndSelector:@selector(removePubsAlertDidEnd:returnCode:contextInfo:) 
-                                contextInfo:[pubs retain]];
+                             didEndSelector:NULL 
+                         didDismissSelector:@selector(removePubsAlertDidEnd:returnCode:contextInfo:) 
+                                contextInfo:NULL];
+            return;
         } else {
-            [self removePublications:pubs fromGroups:selectedGroups];
+            [self removePublications:[self selectedPublications] fromGroups:selectedGroups];
         }
 	}
 }
 
-- (IBAction)removeSelectedPubs:(id)sender{
-	[self removePublicationsFromSelectedGroups:[self selectedPublications]];
-}
-
-- (void)deletePubsAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-	NSArray *pubs = [(NSArray *)contextInfo autorelease];
-	if (alert != nil && [alert suppressionButtonState] == NSOnState)
-		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnDeleteKey];
+- (void)deletePubsAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if (alert != nil && [alert checkValue] == YES)
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnDeleteKey];
     if (returnCode == NSAlertOtherReturn)
         return;
     
     // deletion changes the scroll position
     NSTableView *tv = [self isDisplayingFileContentSearch] ? [fileSearchController tableView] : tableView;
-	NSInteger numPubs = [pubs count];
+	int numSelectedPubs = [self numberOfSelectedPubs];
     
     // This is preserved as an ivar; since removePublications: triggers an async search as a UI update, restoring the selection/scroll position here will no longer work if a search is active.  Storing a row is safe since sort order should be stable.
     rowToSelectAfterDelete = [[tv selectedRowIndexes] lastIndex];
     scrollLocationAfterDelete = [[tv enclosingScrollView] scrollPositionAsPercentage];
-	[self removePublications:pubs];
+	[self removePublications:[self selectedPublications]];
     
     if([NSString isEmptyString:[self searchString]]) {
         if(rowToSelectAfterDelete >= [tv numberOfRows])
@@ -261,7 +250,7 @@ static BOOL changingColors = NO;
     }
     
 	NSString * pubSingularPlural;
-	if (numPubs == 1) {
+	if (numSelectedPubs == 1) {
 		pubSingularPlural = NSLocalizedString(@"publication", @"publication, in status message");
 	} else {
 		pubSingularPlural = NSLocalizedString(@"publications", @"publications, in status message");
@@ -270,45 +259,80 @@ static BOOL changingColors = NO;
 	[[self undoManager] setActionName:[NSString stringWithFormat:NSLocalizedString(@"Delete %@", @"Undo action name: Delete Publication(s)"),pubSingularPlural]];
 }
 
-- (void)deletePublications:(NSArray *)pubs {
-	NSInteger numPubs = [pubs count];
-    if (numPubs == 0 || [self hasExternalGroupsSelected]) {
+- (IBAction)deleteSelectedPubs:(id)sender{
+	int numSelectedPubs = [self numberOfSelectedPubs];
+    if (numSelectedPubs == 0 ||
+        [self hasExternalGroupsSelected] == YES) {
         return;
     }
 	
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnDeleteKey]) {
+	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnDeleteKey]) {
         NSString *info;
-        if (numPubs > 1)
-            info = [NSString stringWithFormat:NSLocalizedString(@"You are about to delete %ld publications. Do you want to proceed?", @"Informative text in alert dialog"), (long)numPubs];
+        if (numSelectedPubs > 1)
+            info = [NSString stringWithFormat:NSLocalizedString(@"You are about to delete %i publications. Do you want to proceed?", @"Informative text in alert dialog"), numSelectedPubs];
         else
             info = NSLocalizedString(@"You are about to delete a publication. Do you want to proceed?", @"Informative text in alert dialog");
-		NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                       alternateButton:nil
-                                           otherButton:NSLocalizedString(@"Cancel", @"Button title")
-                             informativeTextWithFormat:info];
-		[alert setShowsSuppressionButton:YES];
+		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
+											 defaultButton:NSLocalizedString(@"OK", @"Button title")
+										   alternateButton:nil
+											   otherButton:NSLocalizedString(@"Cancel", @"Button title")
+								 informativeTextWithFormat:info];
+		[alert setHasCheckButton:YES];
+		[alert setCheckValue:NO];
         // use didDismissSelector because the action may pop up its own sheet
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self 
-                         didEndSelector:@selector(deletePubsAlertDidEnd:returnCode:contextInfo:) 
-                            contextInfo:[pubs retain]];
+                         didEndSelector:NULL 
+                     didDismissSelector:@selector(deletePubsAlertDidEnd:returnCode:contextInfo:) 
+                            contextInfo:NULL];
 	} else {
-        [self deletePubsAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:[pubs retain]];
+        [self deletePubsAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
     }
 }
 
-- (IBAction)deleteSelectedPubs:(id)sender{
-    [self deletePublications:[self selectedPublications]];
+- (IBAction)alternateDelete:(id)sender {
+	id firstResponder = [documentWindow firstResponder];
+	if (firstResponder == tableView || firstResponder == [fileSearchController tableView]) {
+		[self deleteSelectedPubs:sender];
+	}
 }
 
-// -delete:,  -alternateDelete:, -copy:, -cut:, -alternateCut:, -paste:, and -duplicate are defined in BDSKTableView and BDSKMainTableView using dataSource methods
+// -delete:, -insertNewline:, -cut:, -copy: and -paste: are defined indirectly in NSTableView-OAExtensions using our dataSource method
+// Note: cut: calls delete:
+
+- (IBAction)alternateCut:(id)sender {
+	id firstResponder = [documentWindow firstResponder];
+	if (firstResponder == tableView) {
+		[tableView copy:sender];
+		[self alternateDelete:sender];
+	}
+}
 
 - (IBAction)copyAsAction:(id)sender{
-	NSInteger copyType = [sender tag];
+	int copyType = [sender tag];
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-	NSString *citeString = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey];
+	NSString *citeString = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey];
 	[self writePublications:[self selectedPublications] forDragCopyType:copyType citeString:citeString toPasteboard:pboard];
+}
+
+// Don't use the default action in NSTableView-OAExtensions here, as it uses another pasteboard and some more overhead
+- (IBAction)duplicate:(id)sender{
+	if ([documentWindow firstResponder] != tableView ||
+		[self numberOfSelectedPubs] == 0 ||
+        [self hasExternalGroupsSelected] == YES) {
+		NSBeep();
+		return;
+	}
+	
+    NSArray *newPubs = [[NSArray alloc] initWithArray:[self selectedPublications] copyItems:YES];
+    
+    [self addPublications:newPubs]; // notification will take care of clearing the search/sorting
+    [self selectPublications:newPubs];
+    [newPubs release];
+	
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
+        [self editPubCmd:nil]; // this will aske the user when there are many pubs
+    }
 }
 
 - (BDSKEditor *)editorForPublication:(BibItem *)pub create:(BOOL)createNew{
@@ -337,7 +361,7 @@ static BOOL changingColors = NO;
 }
 
 - (BDSKEditor *)editPubBeforePub:(BibItem *)pub{
-    NSUInteger idx = [shownPublications indexOfObject:pub];
+    unsigned int idx = [shownPublications indexOfObject:pub];
     if(idx == NSNotFound){
         NSBeep();
         return nil;
@@ -348,7 +372,7 @@ static BOOL changingColors = NO;
 }
 
 - (BDSKEditor *)editPubAfterPub:(BibItem *)pub{
-    NSUInteger idx = [shownPublications indexOfObject:pub];
+    unsigned int idx = [shownPublications indexOfObject:pub];
     if(idx == NSNotFound){
         NSBeep();
         return nil;
@@ -358,7 +382,7 @@ static BOOL changingColors = NO;
     return [self editPub:[shownPublications objectAtIndex:idx]];
 }
 
-- (void)editPubAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)editPubAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     NSArray *pubs = (NSArray *)contextInfo;
     if (returnCode == NSAlertAlternateReturn) {
         [self performSelector:@selector(editPub:) withObjectsFromArray:pubs];
@@ -367,14 +391,14 @@ static BOOL changingColors = NO;
 }
 
 - (void)editPublications:(NSArray *)pubs{
-    NSInteger n = [pubs count];
+    int n = [pubs count];
     if (n > 6) {
         // Do we really want a gazillion of editor windows?
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Edit publications", @"Message in alert dialog when trying to open a lot of publication editors")
                                          defaultButton:NSLocalizedString(@"No", @"Button title")
                                       alternateButton:NSLocalizedString(@"Yes", @"Button title")
                                           otherButton:nil
-                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %ld editor windows.  Is this really what you want?" , @"Informative text in alert dialog"), (long)n]];
+                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i editor windows.  Is this really what you want?" , @"Informative text in alert dialog"), n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
                          didEndSelector:@selector(editPubAlertDidEnd:returnCode:contextInfo:) 
@@ -393,12 +417,12 @@ static BOOL changingColors = NO;
 	id firstResponder = [documentWindow firstResponder];
     if (firstResponder == tableView || firstResponder == [fileSearchController tableView])
 		[self editPubCmd:sender];
-	else if (firstResponder == groupOutlineView)
+	else if (firstResponder == groupTableView)
 		[self editGroupAction:sender];
 }
 
 - (IBAction)editPubOrOpenURLAction:(id)sender{
-    NSInteger column = [tableView clickedColumn];
+    int column = [tableView clickedColumn];
     NSString *colID = column != -1 ? [[[tableView tableColumns] objectAtIndex:column] identifier] : nil;
     
     if([colID isLocalFileField]) {
@@ -415,22 +439,13 @@ static BOOL changingColors = NO;
         NSArray *theURLs = [[pub remoteURLs] valueForKey:@"URL"];
         if ([theURLs count])
             [self openLinkedURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[theURLs retain]];
-    } else if([colID isEqualToString:BDSKColorString] || [colID isEqualToString:BDSKColorLabelString]) {
-        NSInteger row = [tableView clickedRow];
-        NSColor *color = row != -1 ? [[[self shownPublications] objectAtIndex:row] color] : nil;
-        if (color) {
-            changingColors = YES;
-            [[NSColorPanel sharedColorPanel] setColor:color];
-            changingColors = NO;
-        }
-        [[NSColorPanel sharedColorPanel] makeKeyAndOrderFront:nil];
     } else {
         [self editPubCmd:sender];
     }
 }
 
 - (void)showPerson:(BibAuthor *)person{
-    BDSKASSERT(person != nil && [person isKindOfClass:[BibAuthor class]]);
+    OBASSERT(person != nil && [person isKindOfClass:[BibAuthor class]]);
     BDSKPersonController *pc = nil;
 	NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
 	NSWindowController *wc;
@@ -461,7 +476,7 @@ static BOOL changingColors = NO;
     NSMutableString *body = [NSMutableString string];
     NSMutableArray *files = [NSMutableArray array];
     
-    NSString *templateName = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKEmailTemplateKey];
+    NSString *templateName = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKEmailTemplateKey];
     BDSKTemplate *template = nil;
     
     if ([NSString isEmptyString:templateName] == NO)
@@ -491,7 +506,7 @@ static BOOL changingColors = NO;
         e = [items objectEnumerator];
         while (pub = [e nextObject]) {
             // use the detexified version without internal fields, since TeXification introduces things that 
-            // AppleScript can't deal with (emailTo:... may end up using AS)
+            // AppleScript can't deal with (OAInternetConfig may end up using AS)
             [body appendString:[pub bibTeXStringWithOptions:BDSKBibTeXOptionDropInternalMask]];
             [body appendString:@"\n\n"];
         }
@@ -505,7 +520,15 @@ static BOOL changingColors = NO;
     // escape double quotes
     [body replaceOccurrencesOfString:@"\"" withString:@"\\\"" options:NSLiteralSearch range:NSMakeRange(0, [body length])];
 
-    [[NSApp delegate] emailTo:nil subject:@"BibDesk references" body:body attachments:files];
+    // OAInternetConfig will use the default mail helper (at least it works with Mail.app and Entourage)
+    OAInternetConfig *ic = [OAInternetConfig internetConfig];
+    [ic launchMailTo:@""
+          carbonCopy:nil
+     blindCarbonCopy:nil
+             subject:@"BibDesk references"
+                body:body
+         attachments:files];
+
 }
 
 - (IBAction)sendToLyX:(id)sender {
@@ -514,7 +537,7 @@ static BOOL changingColors = NO;
     
     NSString *lyxPipePath = [[NSUserDefaults standardUserDefaults] stringForKey:@"BDSKLyXPipePath"];
     NSFileManager *fm = [NSFileManager defaultManager];
-    NSInteger fd = 0;
+    int fd = 0;
     
     if (lyxPipePath && [[lyxPipePath pathExtension] length] == 0)
         lyxPipePath = [lyxPipePath stringByAppendingPathExtension:@"in"];
@@ -554,14 +577,14 @@ static BOOL changingColors = NO;
             NSData *data = [cites dataUsingEncoding:[self documentStringEncoding]];
             
             sig_t sig = signal(SIGPIPE, SIG_IGN);
-            ssize_t len = write(fd, [data bytes], (ssize_t)[data length]);
+            ssize_t len = write(fd, [data bytes], [data length]);
             if (len != (ssize_t)[data length])
-                NSLog(@"Failed to write all data to LyX pipe \"%@\" (%d of %d bytes written)", lyxPipePath, len, (ssize_t)[data length]);
+                NSLog(@"Failed to write all data to LyX pipe \"%@\" (%d of %d bytes written)", lyxPipePath, len, [data length]);
             signal(SIGPIPE, sig);
             
             // Now read the reply message from the server's output pipe; no stat() check on this, since it's not critical.
             lyxPipePath = [[lyxPipePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"out"];
-            NSInteger reader = open([lyxPipePath fileSystemRepresentation], O_RDONLY | O_NONBLOCK);
+            int reader = open([lyxPipePath fileSystemRepresentation], O_RDONLY | O_NONBLOCK);
             
             if (-1 != reader) {
                 
@@ -609,7 +632,7 @@ static BOOL changingColors = NO;
         
     } else if (-1 == fd) {
         // local copy of errno since Foundation calls can overwrite it...
-        NSInteger err = errno;
+        int err = errno;
         // not clear why this happens, but a user reported it and the fix was removing the fifo manually in Terminal
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid LyX Pipe", @"Alert dialog title") 
                                          defaultButton:nil 
@@ -652,17 +675,15 @@ static BOOL changingColors = NO;
 }
 
 - (void)changeColor:(id)sender {
-    if ([self hasExternalGroupsSelected] == NO && [self isDisplayingFileContentSearch] == NO && [[self selectedPublications] count] && changingColors == NO) {
-        changingColors = YES;
+    if ([self hasExternalGroupsSelected] == NO && [self isDisplayingFileContentSearch] == NO && [[self selectedPublications] count]) {
         [[self selectedPublications] makeObjectsPerformSelector:@selector(setColor:) withObject:[sender color]];
-        changingColors = NO;
         [[self undoManager] setActionName:NSLocalizedString(@"Change Color", @"Undo action name")];
     }
 }
 
 #pragma mark URL actions
 
-- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex
+- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex
 {
     if ([aLink respondsToSelector:@selector(isFileURL)] && [aLink isFileURL]) {
         NSString *searchString;
@@ -687,7 +708,7 @@ static BOOL changingColors = NO;
     [self openLocalURLForField:field];
 }
 
-- (void)openLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)openLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     NSString *field = (NSString *)contextInfo;
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *e = [[self selectedPublications] objectEnumerator];
@@ -711,7 +732,7 @@ static BOOL changingColors = NO;
 }
 
 - (void)openLocalURLForField:(NSString *)field{
-	NSInteger n = [self numberOfSelectedPubs];
+	int n = [self numberOfSelectedPubs];
     
     if (n > 6) {
 		// Do we really want a gazillion of files open?
@@ -719,7 +740,7 @@ static BOOL changingColors = NO;
                                          defaultButton:NSLocalizedString(@"No", @"Button title")
                                        alternateButton:NSLocalizedString(@"Open", @"Button title")
                                            otherButton:nil
-                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %ld linked files. Do you want to proceed?" , @"Informative text in alert dialog"), (long)n]];
+                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
                          didEndSelector:@selector(openLocalURLAlertDidEnd:returnCode:contextInfo:) 
@@ -734,7 +755,7 @@ static BOOL changingColors = NO;
     [self revealLocalURLForField:field];
 }
 
-- (void)revealLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)revealLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     NSString *field = (NSString *)contextInfo;
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *e = [[self selectedPublications] objectEnumerator];
@@ -750,7 +771,7 @@ static BOOL changingColors = NO;
 }
 
 - (void)revealLocalURLForField:(NSString *)field{
-	NSInteger n = [self numberOfSelectedPubs];
+	int n = [self numberOfSelectedPubs];
     
     if (n > 6) {
 		// Do we really want a gazillion of Finder windows?
@@ -758,7 +779,7 @@ static BOOL changingColors = NO;
                                          defaultButton:NSLocalizedString(@"No", @"Button title")
                                        alternateButton:NSLocalizedString(@"Reveal", @"Button title")
                                            otherButton:nil
-                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to reveal %ld linked files. Do you want to proceed?" , @"Informative text in alert dialog"), (long)n]];
+                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to reveal %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
                          didEndSelector:@selector(revealLocalURLAlertDidEnd:returnCode:contextInfo:) 
@@ -773,7 +794,7 @@ static BOOL changingColors = NO;
     [self openRemoteURLForField:field];
 }
 
-- (void)openRemoteURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)openRemoteURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	NSString *field = (NSString *)contextInfo;
     if(returnCode == NSAlertAlternateReturn){
         NSEnumerator *e = [[self selectedPublications] objectEnumerator];
@@ -787,7 +808,7 @@ static BOOL changingColors = NO;
 }
 
 - (void)openRemoteURLForField:(NSString *)field{
-	NSInteger n = [self numberOfSelectedPubs];
+	int n = [self numberOfSelectedPubs];
     
     if (n > 6) {
 		// Do we really want a gazillion of browser windows?
@@ -795,7 +816,7 @@ static BOOL changingColors = NO;
                                          defaultButton:NSLocalizedString(@"No", @"Button title")
                                       alternateButton:NSLocalizedString(@"Open", @"Button title")
                                           otherButton:nil
-                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %ld URLs. Do you want to proceed?" , @"Informative text in alert dialog"), (long)n]];
+                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i URLs. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
                          didEndSelector:@selector(openRemoteURLAlertDidEnd:returnCode:contextInfo:) 
@@ -810,7 +831,7 @@ static BOOL changingColors = NO;
     [self showNotesForLocalURLForField:field];
 }
 
-- (void)showNotesForLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)showNotesForLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     NSString *field = (NSString *)contextInfo;
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *e = [[self selectedPublications] objectEnumerator];
@@ -831,7 +852,7 @@ static BOOL changingColors = NO;
 }
 
 - (void)showNotesForLocalURLForField:(NSString *)field{
-	NSInteger n = [self numberOfSelectedPubs];
+	int n = [self numberOfSelectedPubs];
     
     if (n > 6) {
 		// Do we really want a gazillion of files open?
@@ -839,7 +860,7 @@ static BOOL changingColors = NO;
                                          defaultButton:NSLocalizedString(@"No", @"Button title")
                                        alternateButton:NSLocalizedString(@"Open", @"Button title")
                                            otherButton:nil
-                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open windows for notes for %ld linked files. Do you want to proceed?" , @"Informative text in alert dialog"), (long)n]];
+                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open windows for notes for %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
                          didEndSelector:@selector(showNotesForLocalURLAlertDidEnd:returnCode:contextInfo:) 
@@ -882,7 +903,7 @@ static BOOL changingColors = NO;
 
 #pragma mark | Linked File actions
 
-- (void)openLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)openLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *urlEnum;
         NSURL *fileURL;
@@ -913,7 +934,7 @@ static BOOL changingColors = NO;
     if (fileURL) {
         [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[[NSArray alloc] initWithObjects:fileURL, nil]];
     } else {
-        NSInteger n = [[self selectedFileURLs] count];
+        int n = [[self selectedFileURLs] count];
         
         if (n > 6) {
             // Do we really want a gazillion of files open?
@@ -921,7 +942,7 @@ static BOOL changingColors = NO;
                                              defaultButton:NSLocalizedString(@"No", @"Button title")
                                            alternateButton:NSLocalizedString(@"Open", @"Button title")
                                                otherButton:nil
-                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %ld linked files. Do you want to proceed?" , @"Informative text in alert dialog"), (long)n]];
+                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
             [alert beginSheetModalForWindow:documentWindow
                               modalDelegate:self
                              didEndSelector:@selector(openLinkedFileAlertDidEnd:returnCode:contextInfo:) 
@@ -932,7 +953,7 @@ static BOOL changingColors = NO;
     }
 }
 
-- (void)revealLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)revealLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *urlEnum;
         NSURL *fileURL;
@@ -956,7 +977,7 @@ static BOOL changingColors = NO;
     if (fileURL) {
         [self revealLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[[NSArray alloc] initWithObjects:fileURL, nil]];
     } else {
-        NSInteger n = [[self selectedFileURLs] count];
+        int n = [[self selectedFileURLs] count];
         
         if (n > 6) {
             // Do we really want a gazillion of Finder windows?
@@ -964,7 +985,7 @@ static BOOL changingColors = NO;
                                              defaultButton:NSLocalizedString(@"No", @"Button title")
                                            alternateButton:NSLocalizedString(@"Reveal", @"Button title")
                                                otherButton:nil
-                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to reveal %ld linked files. Do you want to proceed?" , @"Informative text in alert dialog"), (long)n]];
+                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to reveal %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
             [alert beginSheetModalForWindow:documentWindow
                               modalDelegate:self
                              didEndSelector:@selector(revealLinkedFileAlertDidEnd:returnCode:contextInfo:) 
@@ -975,7 +996,7 @@ static BOOL changingColors = NO;
     }
 }
 
-- (void)openLinkedURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)openLinkedURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if(returnCode == NSAlertAlternateReturn){
         NSEnumerator *urlEnum;
         NSURL *remoteURL;
@@ -999,7 +1020,7 @@ static BOOL changingColors = NO;
     if (remoteURL) {
         [self openLinkedURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[[NSArray alloc] initWithObjects:remoteURL, nil]];
     } else {
-        NSInteger n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count];
+        int n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count];
         
         if (n > 6) {
             // Do we really want a gazillion of browser windows?
@@ -1007,7 +1028,7 @@ static BOOL changingColors = NO;
                                              defaultButton:NSLocalizedString(@"No", @"Button title")
                                           alternateButton:NSLocalizedString(@"Open", @"Button title")
                                               otherButton:nil
-                                informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %ld URLs. Do you want to proceed?" , @"Informative text in alert dialog"), (long)n]];
+                                informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i URLs. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
             [alert beginSheetModalForWindow:documentWindow
                               modalDelegate:self
                              didEndSelector:@selector(openLinkedURLAlertDidEnd:returnCode:contextInfo:) 
@@ -1018,7 +1039,7 @@ static BOOL changingColors = NO;
     }
 }
 
-- (void)showNotesForLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)showNotesForLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *urlEnum;
         NSURL *fileURL;
@@ -1045,7 +1066,7 @@ static BOOL changingColors = NO;
     if (fileURL) {
         [self showNotesForLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[[NSArray alloc] initWithObjects:fileURL, nil]];
     } else {
-        NSInteger n = [[self selectedFileURLs] count];
+        int n = [[self selectedFileURLs] count];
         
         if (n > 6) {
             // Do we really want a gazillion of files open?
@@ -1053,7 +1074,7 @@ static BOOL changingColors = NO;
                                              defaultButton:NSLocalizedString(@"No", @"Button title")
                                            alternateButton:NSLocalizedString(@"Open", @"Button title")
                                                otherButton:nil
-                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open windows for notes for %ld linked files. Do you want to proceed?" , @"Informative text in alert dialog"), (long)n]];
+                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open windows for notes for %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
             [alert beginSheetModalForWindow:documentWindow
                               modalDelegate:self
                              didEndSelector:@selector(showNotesForLinkedFileAlertDidEnd:returnCode:contextInfo:) 
@@ -1096,157 +1117,18 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)previewAction:(id)sender {
-    NSArray *theURLs = [sender representedObject];
-    if (theURLs == nil) {
-        theURLs = [self selectedFileURLs];
-        if ([theURLs count] == 0)
-            theURLs = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
+    NSURL *theURL = [sender representedObject];
+    if (theURL == nil) {
+        NSArray *selectedURLs = [self selectedFileURLs];
+        if ([selectedURLs count])
+            theURL = [selectedURLs firstObject];
+        else
+            theURL = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"] firstObject];
     }
-    FVPreviewer *qlPreviewer = [FVPreviewer sharedPreviewer];
-    if ([theURLs count] == 1) {
-        [qlPreviewer setWebViewContextMenuDelegate:self];
-        [qlPreviewer previewURL:[theURLs lastObject] forIconInRect:NSZeroRect];
+    if (theURL && [theURL isEqual:[NSNull null]] == NO) {
+        [FVPreviewer setWebViewContextMenuDelegate:self];
+        [FVPreviewer previewURL:theURL];
     }
-    else if ([theURLs count] > 0) {
-        [qlPreviewer setWebViewContextMenuDelegate:nil];
-        [qlPreviewer previewFileURLs:theURLs];
-    }
-}
-
-- (void)chooseLinkedFilePanelDidEnd:(NSOpenPanel *)oPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSOKButton) {
-        BibItem *publication = nil;
-        if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
-            NSArray *selPubs = [self selectedPublications];
-            if ([selPubs count] == 1)
-                publication = [selPubs lastObject];
-        }
-        if (publication == nil) {
-            NSBeep();
-            return;
-        }
-        
-        NSUInteger anIndex = (NSUInteger)contextInfo;
-        NSURL *aURL = [[oPanel URLs] objectAtIndex:0];
-        BOOL shouldAutoFile = [(NSButton *)[oPanel accessoryView] state] == NSOffState && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey];
-        if (anIndex != NSNotFound) {
-            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
-            if (aFile == nil)
-                return;
-            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
-            [publication removeObjectFromFilesAtIndex:anIndex];
-            if (oldURL)
-                [self userRemovedURL:oldURL forPublication:publication];
-            [oldURL release];
-            [publication insertObject:aFile inFilesAtIndex:anIndex];
-            [self userAddedURL:aURL forPublication:publication];
-            if (shouldAutoFile)
-                [publication autoFileLinkedFile:aFile];
-        } else {
-            [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
-        }
-        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-    }        
-}
-
-- (IBAction)chooseLinkedFile:(id)sender {
-    if ([self isDisplayingFileContentSearch] || [self hasExternalGroupsSelected] || [[self selectedPublications] count] != 1) {
-        NSBeep();
-        return;
-    }
-    
-    NSUInteger anIndex = NSNotFound;
-    NSNumber *indexNumber = [sender representedObject];
-    NSString *path = nil;
-    if (indexNumber) {
-        anIndex = [indexNumber unsignedIntValue];
-        path = [[[[self shownFiles] objectAtIndex:anIndex] URL] path];
-    }
-    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
-    [oPanel setAllowsMultipleSelection:NO];
-    [oPanel setResolvesAliases:NO];
-    [oPanel setCanChooseDirectories:YES];
-    [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
-    
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]) {
-        NSButton *disableAutoFileButton = [[[NSButton alloc] init] autorelease];
-        [disableAutoFileButton setBezelStyle:NSRoundedBezelStyle];
-        [disableAutoFileButton setButtonType:NSSwitchButton];
-        [disableAutoFileButton setTitle:NSLocalizedString(@"Disable Auto File", @"Choose local file button title")];
-        [disableAutoFileButton sizeToFit];
-        [oPanel setAccessoryView:disableAutoFileButton];
-	}
-    
-    [oPanel beginSheetForDirectory:[path stringByDeletingLastPathComponent] 
-                              file:[path lastPathComponent] 
-                    modalForWindow:documentWindow 
-                     modalDelegate:self 
-                    didEndSelector:@selector(chooseLinkedFilePanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:(void *)anIndex];
-  
-}
-
-- (void)chooseLinkedURLSheetDidEnd:(BDSKURLSheetController *)urlController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSOKButton) {
-        BibItem *publication = nil;
-        if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
-            NSArray *selPubs = [self selectedPublications];
-            if ([selPubs count] == 1)
-                publication = [selPubs lastObject];
-        }
-        if (publication == nil) {
-            NSBeep();
-            return;
-        }
-        
-        NSString *aURLString = [urlController urlString];
-        if ([NSString isEmptyString:aURLString])
-            return;
-        NSURL *aURL = [NSURL URLWithStringByNormalizingPercentEscapes:aURLString];
-        if (aURL == nil)
-            return;
-        NSUInteger anIndex = (NSUInteger)contextInfo;
-        if (anIndex != NSNotFound) {
-            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
-            if (aFile == nil)
-                return;
-            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
-            [publication removeObjectFromFilesAtIndex:anIndex];
-            if (oldURL)
-                [self userRemovedURL:oldURL forPublication:publication];
-            [oldURL release];
-            [publication insertObject:aFile inFilesAtIndex:anIndex];
-            [self userAddedURL:aURL forPublication:publication];
-            [publication autoFileLinkedFile:aFile];
-        } else {
-            [publication addFileForURL:aURL autoFile:NO runScriptHook:YES];
-        }
-        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-    }        
-}
-
-- (IBAction)chooseLinkedURL:(id)sender{
-    if ([self isDisplayingFileContentSearch] || [self hasExternalGroupsSelected] || [[self selectedPublications] count] != 1) {
-        NSBeep();
-        return;
-    }
-    
-    NSUInteger anIndex = NSNotFound;
-    NSNumber *indexNumber = [sender representedObject];
-    NSString *urlString = @"http://";
-    if (indexNumber) {
-        anIndex = [indexNumber unsignedIntValue];
-        urlString = [[[[self shownFiles] objectAtIndex:anIndex] URL] absoluteString];
-    }
-    
-    BDSKURLSheetController *urlController = [[BDSKURLSheetController alloc] init];
-    
-    [urlController setUrlString:urlString];
-    [urlController beginSheetModalForWindow:documentWindow
-                              modalDelegate:self
-                             didEndSelector:@selector(chooseLinkedURLSheetDidEnd:returnCode:contextInfo:)
-                                contextInfo:(void *)anIndex];
-    [urlController release];
 }
 
 - (IBAction)migrateFiles:(id)sender {
@@ -1274,12 +1156,12 @@ static BOOL changingColors = NO;
 
 - (IBAction)toggleStatusBar:(id)sender{
 	[statusBar toggleBelowView:mainBox offset:1.0];
-	[[NSUserDefaults standardUserDefaults] setBool:[statusBar isVisible] forKey:BDSKShowStatusBarKey];
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowStatusBarKey];
 }
 
 - (IBAction)changeMainTableFont:(id)sender{
-    NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKMainTableViewFontNameKey];
-    CGFloat fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:BDSKMainTableViewFontSizeKey];
+    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKMainTableViewFontNameKey];
+    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKMainTableViewFontSizeKey];
 	[[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
     [[NSFontManager sharedFontManager] orderFrontFontPanel:sender];
     
@@ -1289,18 +1171,18 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)changeGroupTableFont:(id)sender{
-    NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKGroupTableViewFontNameKey];
-    CGFloat fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:BDSKGroupTableViewFontSizeKey];
+    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKGroupTableViewFontNameKey];
+    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKGroupTableViewFontSizeKey];
 	[[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
     [[NSFontManager sharedFontManager] orderFrontFontPanel:sender];
     
     id firstResponder = [documentWindow firstResponder];
-    if (firstResponder != groupOutlineView)
-        [documentWindow makeFirstResponder:groupOutlineView];
+    if (firstResponder != groupTableView)
+        [documentWindow makeFirstResponder:groupTableView];
 }
 
 - (IBAction)changePreviewDisplay:(id)sender{
-    NSInteger tag = [sender respondsToSelector:@selector(selectedSegment)] ? [[sender cell] tagForSegment:[sender selectedSegment]] : [sender tag];
+    int tag = [sender respondsToSelector:@selector(selectedSegment)] ? [[sender cell] tagForSegment:[sender selectedSegment]] : [sender tag];
     NSString *style = [sender respondsToSelector:@selector(representedObject)] ? [sender representedObject] : nil;
     BOOL changed = NO;
     
@@ -1317,13 +1199,13 @@ static BOOL changingColors = NO;
         [self updateBottomPreviewPane];
         if ([sender isEqual:bottomPreviewButton] == NO)
             [bottomPreviewButton selectSegmentWithTag:bottomPreviewDisplay];
-        [[NSUserDefaults standardUserDefaults] setInteger:bottomPreviewDisplay forKey:BDSKBottomPreviewDisplayKey];
-        [[NSUserDefaults standardUserDefaults] setObject:bottomPreviewDisplayTemplate forKey:BDSKBottomPreviewDisplayTemplateKey];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:bottomPreviewDisplay forKey:BDSKBottomPreviewDisplayKey];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:bottomPreviewDisplayTemplate forKey:BDSKBottomPreviewDisplayTemplateKey];
     }
 }
 
 - (IBAction)changeSidePreviewDisplay:(id)sender{
-    NSInteger tag = [sender respondsToSelector:@selector(selectedSegment)] ? [[sender cell] tagForSegment:[sender selectedSegment]] : [sender tag];
+    int tag = [sender respondsToSelector:@selector(selectedSegment)] ? [[sender cell] tagForSegment:[sender selectedSegment]] : [sender tag];
     NSString *style = [sender respondsToSelector:@selector(representedObject)] ? [sender representedObject] : nil;
     BOOL changed = NO;
     
@@ -1340,8 +1222,8 @@ static BOOL changingColors = NO;
         [self updateSidePreviewPane];
         if ([sender isEqual:sidePreviewButton] == NO)
             [sidePreviewButton selectSegmentWithTag:sidePreviewDisplay];
-        [[NSUserDefaults standardUserDefaults] setInteger:sidePreviewDisplay forKey:BDSKSidePreviewDisplayKey];
-        [[NSUserDefaults standardUserDefaults] setObject:sidePreviewDisplayTemplate forKey:BDSKSidePreviewDisplayTemplateKey];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:sidePreviewDisplay forKey:BDSKSidePreviewDisplayKey];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:sidePreviewDisplayTemplate forKey:BDSKSidePreviewDisplayTemplateKey];
     }
 }
 
@@ -1358,7 +1240,7 @@ static BOOL changingColors = NO;
     NSPoint p = [[scrollView documentView] scrollPositionAsPercentage];
     
     if(p.y > 0.99 || NSHeight([scrollView documentVisibleRect]) >= NSHeight([[scrollView documentView] bounds])){ // select next row if the last scroll put us at the end
-        NSInteger i = [[tableView selectedRowIndexes] lastIndex];
+        int i = [[tableView selectedRowIndexes] lastIndex];
         if (i == NSNotFound)
             i = 0;
         else if (i < [tableView numberOfRows])
@@ -1383,7 +1265,7 @@ static BOOL changingColors = NO;
     NSPoint p = [[scrollView documentView] scrollPositionAsPercentage];
     
     if(p.y < 0.01){ // select previous row if we're already at the top
-        NSInteger i = [[tableView selectedRowIndexes] firstIndex];
+        int i = [[tableView selectedRowIndexes] firstIndex];
 		if (i == NSNotFound)
 			i = 0;
 		else if (i > 0)
@@ -1413,7 +1295,7 @@ static BOOL changingColors = NO;
 
 - (IBAction)showMacrosWindow:(id)sender{
     if ([self hasExternalGroupsSelected]) {
-        BDSKMacroResolver *resolver = [[[self selectedGroups] lastObject] macroResolver];
+        BDSKMacroResolver *resolver = [(id<BDSKOwner>)[groups objectAtIndex:[groupTableView selectedRow]] macroResolver];
         BDSKMacroWindowController *controller = nil;
         NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
         NSWindowController *wc;
@@ -1472,69 +1354,77 @@ static BOOL changingColors = NO;
     
     BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
 
-    [tic beginSheetForPasteboardModalForWindow:documentWindow];
+    [tic beginSheetForPasteboardModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 	[tic release];
 }
 
 - (IBAction)importFromFileAction:(id)sender{
     BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
 
-    [tic beginSheetForFileModalForWindow:documentWindow];
+    [tic beginSheetForFileModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 	[tic release];
 }
 
 - (IBAction)importFromWebAction:(id)sender{
     BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
 
-    [tic beginSheetForWebModalForWindow:documentWindow];
+    [tic beginSheetForWebModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 	[tic release];
 }
 
 #pragma mark AutoFile stuff
 
+- (void)consolidateAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    BOOL check = (returnCode == NSAlertDefaultReturn);
+    if (returnCode == NSAlertAlternateReturn)
+        return;
+
+    // first we make sure all edits are committed
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionary]];
+    NSArray *selectedFiles = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"];
+    [[BDSKFiler sharedFiler] filePapers:selectedFiles fromDocument:self check:check];
+	
+	[[self undoManager] setActionName:NSLocalizedString(@"AutoFile Files", @"Undo action name")];
+}
+
 - (IBAction)consolidateLinkedFiles:(id)sender{
-    if ([self hasExternalGroupsSelected]) {
+    if ([self hasExternalGroupsSelected] == YES) {
         NSBeep();
         return;
     }
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"AutoFile Linked Files", @"Message in alert dialog when consolidating files")
-                                     defaultButton:NSLocalizedString(@"Move Complete Only", @"Button title")
-                                   alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                       otherButton:NSLocalizedString(@"Move All", @"Button title")
-                         informativeTextWithFormat:NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?", @"Informative text in alert dialog")];
+    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"AutoFile Linked Files", @"Message in alert dialog when consolidating files")
+                                         defaultButton:NSLocalizedString(@"Move Complete Only", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+                                           otherButton:NSLocalizedString(@"Move All", @"Button title")
+                             informativeTextWithFormat:NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?", @"Informative text in alert dialog")];
+    // we need the callback in the didDismissSelector, because the sheet must be removed from the document before we call BDSKFiler 
+    // as that will use a sheet as well, see bug # 1526145
+	[alert beginSheetModalForWindow:documentWindow
+                      modalDelegate:self
+                     didEndSelector:NULL
+                 didDismissSelector:@selector(consolidateAlertDidEnd:returnCode:contextInfo:)
+                        contextInfo:NULL];
     
-	NSInteger rv = [alert runModal];
-    
-    if (rv != NSAlertSecondButtonReturn) {
-        // first we make sure all edits are committed
-        if ([self commitPendingEdits]) {
-            NSArray *selectedFiles = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"];
-            [[BDSKFiler sharedFiler] filePapers:selectedFiles fromDocument:self check:(rv == NSAlertDefaultReturn)];
-            
-            [[self undoManager] setActionName:NSLocalizedString(@"AutoFile Files", @"Undo action name")];
-        } else {
-            NSBeep();
-        }
-    }
 }
 
 #pragma mark Cite Keys and Crossref support
 
 - (void)generateCiteKeysForPublications:(NSArray *)pubs{
-        
-    // !!! early return
-    if ([self commitPendingEdits] == NO) {
-        NSBeep();
-        return;
-    }
     
-    NSUInteger numberOfPubs = [pubs count];
+    unsigned int numberOfPubs = [pubs count];
     NSEnumerator *selEnum = [pubs objectEnumerator];
     BibItem *aPub;
     NSMutableArray *arrayOfPubs = [NSMutableArray arrayWithCapacity:numberOfPubs];
     NSMutableArray *arrayOfOldValues = [NSMutableArray arrayWithCapacity:numberOfPubs];
     NSMutableArray *arrayOfNewValues = [NSMutableArray arrayWithCapacity:numberOfPubs];
     BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKWillGenerateCiteKeyScriptHookName];
+    
+    // first we make sure all edits are committed
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionary]];
     
     // put these pubs into an array, since the indices can change after we set the cite key, due to sorting or searching
     while (aPub = [selEnum nextObject]) {
@@ -1598,9 +1488,9 @@ static BOOL changingColors = NO;
     [[self undoManager] setActionName:(numberOfPubs > 1 ? NSLocalizedString(@"Generate Cite Keys", @"Undo action name") : NSLocalizedString(@"Generate Cite Key", @"Undo action name"))];
 }    
 
-- (void)generateCiteKeyAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-	if([alert suppressionButtonState] == NSOnState)
-		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
+- (void)generateCiteKeyAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if([alert checkValue] == YES)
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
     
     if(returnCode == NSAlertDefaultReturn)
         [self generateCiteKeysForPublications:[self selectedPublications]];
@@ -1608,19 +1498,20 @@ static BOOL changingColors = NO;
 
 - (IBAction)generateCiteKey:(id)sender
 {
-    NSUInteger numberOfSelectedPubs = [self numberOfSelectedPubs];
+    unsigned int numberOfSelectedPubs = [self numberOfSelectedPubs];
 	if (numberOfSelectedPubs == 0 ||
-        [self hasExternalGroupsSelected]) return;
+        [self hasExternalGroupsSelected] == YES) return;
     
-    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
         NSString *alertTitle = numberOfSelectedPubs > 1 ? NSLocalizedString(@"Really Generate Cite Keys?", @"Message in alert dialog when generating cite keys") : NSLocalizedString(@"Really Generate Cite Key?", @"Message in alert dialog when generating cite keys");
-        NSString *message = numberOfSelectedPubs > 1 ? [NSString stringWithFormat:NSLocalizedString(@"This action will generate cite keys for %lu publications.  This action is undoable.", @"Informative text in alert dialog"), (unsigned long)numberOfSelectedPubs] : NSLocalizedString(@"This action will generate a cite key for the selected publication.  This action is undoable.", @"Informative text in alert dialog");
-        NSAlert *alert = [NSAlert alertWithMessageText:alertTitle
-                                         defaultButton:NSLocalizedString(@"Generate", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
-                                           otherButton:nil
-                             informativeTextWithFormat:message];
-        [alert setShowsSuppressionButton:YES];
+        NSString *message = numberOfSelectedPubs > 1 ? [NSString stringWithFormat:NSLocalizedString(@"This action will generate cite keys for %d publications.  This action is undoable.", @"Informative text in alert dialog"), numberOfSelectedPubs] : NSLocalizedString(@"This action will generate a cite key for the selected publication.  This action is undoable.", @"Informative text in alert dialog");
+        BDSKAlert *alert = [BDSKAlert alertWithMessageText:alertTitle
+                                             defaultButton:NSLocalizedString(@"Generate", @"Button title")
+                                           alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
+                                               otherButton:nil
+                                 informativeTextWithFormat:message];
+        [alert setHasCheckButton:YES];
+        [alert setCheckValue:NO];
         [alert beginSheetModalForWindow:documentWindow 
                           modalDelegate:self 
                          didEndSelector:@selector(generateCiteKeyAlertDidEnd:returnCode:contextInfo:) 
@@ -1681,24 +1572,22 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)selectCrossrefParentAction:(id)sender{
-    BDSKASSERT([self isDisplayingFileContentSearch] == NO);
+    OBASSERT([self isDisplayingFileContentSearch] == NO);
     BibItem *selectedBI = [[self selectedPublications] lastObject];
     [self selectCrossrefParentForItem:selectedBI];
 }
 
-- (void)dublicateTitleToBooktitleAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    
-    // !!! early return
-    if ([self commitPendingEdits] == NO) {
-        NSBeep();
-        return;
-    }
-    
+- (void)dublicateTitleToBooktitleAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	BOOL overwrite = (returnCode == NSAlertAlternateReturn);
 	
-	NSSet *parentTypes = [NSSet setWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
+	NSSet *parentTypes = [NSSet setWithArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
 	NSEnumerator *selEnum = [[self selectedPublications] objectEnumerator];
 	BibItem *aPub;
+	
+    // first we make sure all edits are committed
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionary]];
 	
 	while (aPub = [selEnum nextObject]) {
 		if([parentTypes containsObject:[aPub pubType]])
@@ -1709,7 +1598,7 @@ static BOOL changingColors = NO;
 
 - (IBAction)duplicateTitleToBooktitle:(id)sender{
 	if ([self numberOfSelectedPubs] == 0 ||
-        [self hasExternalGroupsSelected]) return;
+        [self hasExternalGroupsSelected] == YES) return;
 	
 	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Overwrite Booktitle?", @"Message in alert dialog when duplicating Title to Booktitle")
                                      defaultButton:NSLocalizedString(@"Don't Overwrite", @"Button title: overwrite Booktitle")
@@ -1734,7 +1623,7 @@ static BOOL changingColors = NO;
     CFIndex idx = [shownPublications count];
     id object1 = nil, object2 = nil;
     
-    BDSKASSERT(sortKey);
+    OBASSERT(sortKey);
     
     NSMutableIndexSet *rowsToSelect = [NSMutableIndexSet indexSet];
     CFIndex countOfItems = 0;
@@ -1758,10 +1647,10 @@ static BOOL changingColors = NO;
     
 	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message");
     // update status line after the updateStatus notification, or else it gets overwritten
-    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%ld duplicate %@ found.", @"Status message: [number] duplicate publication(s) found"), (long)countOfItems, pubSingularPlural]];
+    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"Status message: [number] duplicate publication(s) found"), countOfItems, pubSingularPlural]];
 }
 
-- (void)selectDuplicatesAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)selectDuplicatesAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn)
         return;
     
@@ -1773,14 +1662,14 @@ static BOOL changingColors = NO;
     NSZone *zone = [self zone];
     CFIndex countOfItems = 0;
     BibItem **pubs;
-    CFSetCallBacks callBacks = kBDSKBibItemEqualitySetCallBacks;
+    CFSetCallBacks callBacks = BDSKBibItemEqualityCallBacks;
     
     if ([self hasExternalGroupsSelected]) {
         countOfItems = [publications count];
         pubs = (BibItem **)NSZoneMalloc(zone, sizeof(BibItem *) * countOfItems);
         [publications getObjects:pubs];
         pubsToRemove = [[NSMutableArray alloc] initWithArray:groupedPublications];
-        callBacks = kBDSKBibItemEquivalenceSetCallBacks;
+        callBacks = BDSKBibItemEquivalenceCallBacks;
     } else {
         pubsToRemove = [[NSMutableArray alloc] initWithArray:publications];
         countOfItems = [publications count];
@@ -1829,7 +1718,7 @@ static BOOL changingColors = NO;
         NSBeep();
     
 	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message");
-    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%ld duplicate %@ found.", @"Status message: [number] duplicate publication(s) found"), (long)countOfItems, pubSingularPlural]];
+    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"Status message: [number] duplicate publication(s) found"), countOfItems, pubSingularPlural]];
 }
 
 // select duplicates, then allow user to delete/copy/whatever
@@ -1843,7 +1732,7 @@ static BOOL changingColors = NO;
                                          defaultButton:NSLocalizedString(@"All Candidates", @"Button title")
                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
                                           otherButton:NSLocalizedString(@"Only Duplicates", @"Button title")
-                            informativeTextWithFormat:NSLocalizedString(@"Do you want to select all duplicate items, or only strict duplicates? If you choose \"Only Duplicates\", one randomly selected duplicate will not be selected." , @"Informative text in alert dialog")];
+                            informativeTextWithFormat:NSLocalizedString(@"Do you want to select all duplicate items, or only strict duplicates? If you choose \"Only Duplicates\", one randomly selected duplicate will be not be selected." , @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
                          didEndSelector:@selector(selectDuplicatesAlertDidEnd:returnCode:contextInfo:) 
@@ -1882,7 +1771,7 @@ static BOOL changingColors = NO;
         NSBeep();
     
 	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message");
-    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%ld incomplete %@ found.", @"Status message: [number] incomplete publication(s) found"), (long)countOfItems, pubSingularPlural]];
+    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i incomplete %@ found.", @"Status message: [number] incomplete publication(s) found"), countOfItems, pubSingularPlural]];
 }
 
 @end

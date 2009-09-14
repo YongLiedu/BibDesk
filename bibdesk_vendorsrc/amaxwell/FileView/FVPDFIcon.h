@@ -37,28 +37,28 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "FVBaseIcon.h"
+#import "FVIcon.h"
+#import "FVIcon_Private.h"
 
-@interface FVPDFIcon : FVBaseIcon
+@interface FVPDFIcon : FVIcon
 {
 @private
+    NSURL            *_fileURL;
     CGPDFDocumentRef  _pdfDoc;
-    BOOL              _isMapped;
     CGPDFPageRef      _pdfPage;
     NSSize            _fullSize;
     CGImageRef        _thumbnail;
     NSSize            _thumbnailSize;
     NSSize            _desiredSize;
+    BOOL              _isPostscript;
+    BOOL              _inDiskCache;
+    char             *_diskCacheName;
+    pthread_mutex_t   _mutex;
     NSUInteger        _currentPage;
     NSUInteger        _pageCount;
+    BOOL              _drawsLinkBadge;
 }
-@end
-
-@interface FVPDFDIcon : FVPDFIcon
-@end
-
-@interface FVPostScriptIcon : FVPDFIcon
-{
-    BOOL _converted;
-}
+- (id)initWithPDFAtURL:(NSURL *)aURL;
+- (id)initWithPDFDAtURL:(NSURL *)aURL;
+- (id)initWithPostscriptAtURL:(NSURL *)aURL;
 @end

@@ -43,11 +43,11 @@
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKServerInfo.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKItemSearchIndexes.h"
 #import "BDSKISIGroupServer.h"
 #import "BDSKDBLPGroupServer.h"
 #import "BDSKGroup+Scripting.h"
-#import "BibItem.h"
 
 NSString *BDSKSearchGroupEntrez = @"entrez";
 NSString *BDSKSearchGroupZoom = @"zoom";
@@ -57,7 +57,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 @implementation BDSKSearchGroup
 
 // old designated initializer
-- (id)initWithName:(NSString *)aName count:(NSInteger)aCount;
+- (id)initWithName:(NSString *)aName count:(int)aCount;
 {
     // ignore the name, because if this is called it's a dummy name anyway
     NSScriptCommand *cmd = [NSScriptCommand currentCommand];
@@ -82,19 +82,14 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 {
     NSString *aName = (([info name] ?: [info database]) ?: string) ?: NSLocalizedString(@"Empty", @"Name for empty search group");
     if (self = [super initWithName:aName count:0]) {
-        if (aType == nil || info == nil) {
-            [self release];
-            self = nil;
-        } else {
-            type = [aType copy];
-            searchTerm = [string copy];
-            history = nil;
-            publications = nil;
-            macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
-            searchIndexes = [[BDSKItemSearchIndexes alloc] init];
-            [self resetServerWithInfo:info];
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
-        }
+        type = [aType copy];
+        searchTerm = [string copy];
+        history = nil;
+        publications = nil;
+        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
+        searchIndexes = [[BDSKItemSearchIndexes alloc] init];
+        [self resetServerWithInfo:info];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     }
     return self;
 }
@@ -115,7 +110,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 }
 
 - (id)initWithURL:(NSURL *)bdsksearchURL {
-    BDSKPRECONDITION([[bdsksearchURL scheme] isEqualToString:@"x-bdsk-search"]);
+    OBPRECONDITION([[bdsksearchURL scheme] isEqualToString:@"x-bdsk-search"]);
     
     NSString *aHost = [[bdsksearchURL host] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSString *aPort = [[bdsksearchURL port] stringValue];
@@ -141,7 +136,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     }
     
     while (query = [queryEnum nextObject]) {
-        NSUInteger idx = [query rangeOfString:@"="].location;
+        unsigned int idx = [query rangeOfString:@"="].location;
         if (idx != NSNotFound && idx > 0) {
             NSString *key = [query substringToIndex:idx];
             NSString *value = [[query substringFromIndex:idx + 1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -207,10 +202,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
 }
 
-- (id)copyWithZone:(NSZone *)aZone {
-	return [[[self class] allocWithZone:aZone] initWithType:type serverInfo:[self serverInfo] searchTerm:searchTerm];
-}
-
 - (void)dealloc
 {
     [server terminate];
@@ -231,8 +222,8 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 - (BOOL)isEqual:(id)other { return self == other; }
 
-- (NSUInteger)hash {
-    return( ((NSUInteger) self >> 4) | (NSUInteger) self << (32 - 4));
+- (unsigned int)hash {
+    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
 }
 
 // Logging
@@ -252,7 +243,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 // note that pointer equality is used for these groups, so names can overlap, and users can have duplicate searches
 
-- (NSImage *)icon { return [NSImage imageNamed:@"searchGroup"]; }
+- (NSImage *)icon { return [NSImage imageNamed:@"searchFolderIcon"]; }
 
 - (NSString *)name {
     return [NSString isEmptyString:[self searchTerm]] ? NSLocalizedString(@"Empty", @"Name for empty search group") : [self searchTerm];
@@ -282,8 +273,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 #pragma mark BDSKOwner protocol
 
-- (BDSKPublicationsArray *)publicationsWithoutUpdating { return publications; }
- 
 - (BDSKPublicationsArray *)publications;
 {
     if([self isRetrieving] == NO && publications == nil && [NSString isEmptyString:[self searchTerm]] == NO){
@@ -363,7 +352,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     else if ([type isEqualToString:BDSKSearchGroupDBLP])
         serverClass = [BDSKDBLPGroupServer class];
     else
-        BDSKASSERT_NOT_REACHED("unknown search group type");
+        OBASSERT_NOT_REACHED("unknown search group type");
     server = [[serverClass alloc] initWithGroup:self serverInfo:info];
 }
 
@@ -436,12 +425,12 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 - (NSArray *)history {return history; }
 
-- (void)setNumberOfAvailableResults:(NSInteger)value;
+- (void)setNumberOfAvailableResults:(int)value;
 {
     [server setNumberOfAvailableResults:value];
 }
 
-- (NSInteger)numberOfAvailableResults { return [server numberOfAvailableResults]; }
+- (int)numberOfAvailableResults { return [server numberOfAvailableResults]; }
 
 - (BOOL)hasMoreResults;
 {

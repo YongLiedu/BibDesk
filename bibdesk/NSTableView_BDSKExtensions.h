@@ -40,5 +40,34 @@
 
 
 @interface NSTableView (BDSKExtensions)
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem;
+
+- (void)awakeFromNib;
+
+- (void)changeFont:(id)sender;
+- (void)tableViewFontChanged:(NSNotification *)notification;
+- (void)updateFontPanel:(NSNotification *)notification;
+- (NSString *)fontNamePreferenceKey;
+- (NSString *)fontSizePreferenceKey;
+
 - (IBAction)invertSelection:(id)sender;
+- (NSControlSize)cellControlSize;
+
+@end
+
+
+@interface NSObject (NSTableBDSKExtendedDataSource)
+
+- (NSImage *)tableView:(NSTableView *)aTableView dragImageForRowsWithIndexes:(NSIndexSet *)dragRows;
+- (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation;
+
+@end
+
+
+@interface NSObject (NSTableBDSKExtendedDelegate)
+
+- (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)aTableView;
+- (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)aTableView;
+
 @end

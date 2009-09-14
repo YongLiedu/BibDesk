@@ -71,20 +71,20 @@
 @end
 
 @interface BDSKChangeFieldSheetController : BDSKRemoveFieldSheetController {
-    IBOutlet NSComboBox *replaceFieldsComboBox;
-    IBOutlet NSTextField *replacePromptField;
-    NSString *replacePrompt;
-    NSArray *replaceFieldsArray;
-    NSString *replaceField;
+    IBOutlet NSComboBox *newFieldsComboBox;
+    IBOutlet NSTextField *newPromptField;
+    NSString *addedPrompt;
+    NSArray *addedFieldsArray;
+    NSString *newField;
 }
 
-- (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields replacePrompt:(NSString *)newPromptString replaceFieldsArray:(NSArray *)newFields;
+- (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields addedPrompt:(NSString *)newPromptString addedFieldsArray:(NSArray *)newFields;
 
-- (NSString *)replaceField;
-- (void)setReplaceField:(NSString *)newField;
-- (NSArray *)replaceFieldsArray;
-- (void)setReplaceFieldsArray:(NSArray *)array;
-- (NSString *)replacePrompt;
-- (void)setReplacePrompt:(NSString *)promptString;
+- (NSString *)newField;
+- (void)setNewField:(NSString *)newField;
+- (NSArray *)addedFieldsArray;
+- (void)setAddedFieldsArray:(NSArray *)array;
+- (NSString *)addedPrompt;
+- (void)setAddedPrompt:(NSString *)promptString;
 
 @end

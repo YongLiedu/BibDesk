@@ -38,6 +38,7 @@
 
 #import "BDSKCitationFormatter.h"
 #import "BDSKTypeManager.h"
+#import <OmniBase/OmniBase.h>
 
 
 @implementation BDSKCitationFormatter
@@ -47,7 +48,7 @@ static NSCharacterSet *keySepCharSet = nil;
 static NSCharacterSet *keyCharSet = nil;
 
 + (void)initialize {
-    BDSKINITIALIZE;
+    OBINITIALIZE;
     
     // comma and space are used to separate the keys
     
@@ -85,7 +86,7 @@ static NSCharacterSet *keyCharSet = nil;
     
     NSString *string = [attrString string];
     
-    NSUInteger start, length = [string length];
+    unsigned start, length = [string length];
     NSRange range = NSMakeRange(0, 0);
     NSString *keyString;
     
@@ -133,7 +134,7 @@ static NSCharacterSet *keyCharSet = nil;
     NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
     if (r.location != NSNotFound) {
         NSMutableString *new = [[partialString mutableCopy] autorelease];
-        [new replaceOccurrencesOfCharactersInSet:invalidSet withString:@""];
+        [new replaceAllOccurrencesOfCharactersInSet:invalidSet withString:@""];
         if ([new length]) {
             *partialStringPtr = new;
             if (NSMaxRange(*proposedSelRangePtr) > [new length])

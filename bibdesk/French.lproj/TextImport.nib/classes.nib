@@ -10,7 +10,7 @@
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>BDSKTableView</string>
+			<string>NSTableView</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -59,22 +59,6 @@
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSPanel</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSApplication</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -157,6 +141,19 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>BDSKImagePopUpButton</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>delegate</key>
+				<string>id</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSPopUpButton</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>BDSKContainerView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -170,16 +167,11 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>BDSKImagePopUpButton</string>
+			<string>BDSKEdgeView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>delegate</key>
-				<string>id</string>
-			</dict>
 			<key>SUPERCLASS</key>
-			<string>NSPopUpButton</string>
+			<string>BDSKContainerView</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -237,8 +229,6 @@
 			<string>ObjC</string>
 			<key>OUTLETS</key>
 			<dict>
-				<key>actionMenu</key>
-				<string>NSMenu</string>
 				<key>actionMenuButton</key>
 				<string>BDSKImagePopUpButton</string>
 				<key>addAndCloseButton</key>
@@ -286,61 +276,6 @@
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>BDSKSheetController</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKEdgeView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>BDSKContainerView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSCell</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSObject</string>
-		</dict>
-		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>changeFont</key>
-				<string>id</string>
-				<key>copy</key>
-				<string>id</string>
-				<key>cut</key>
-				<string>id</string>
-				<key>delete</key>
-				<string>id</string>
-				<key>duplicate</key>
-				<string>id</string>
-				<key>insertNewline</key>
-				<string>id</string>
-				<key>insertShiftSpace</key>
-				<string>id</string>
-				<key>insertSpace</key>
-				<string>id</string>
-				<key>invertSelection</key>
-				<string>id</string>
-				<key>moveDown</key>
-				<string>id</string>
-				<key>moveUp</key>
-				<string>id</string>
-				<key>paste</key>
-				<string>id</string>
-				<key>scrollToBeginningOfDocument</key>
-				<string>id</string>
-				<key>scrollToEndOfDocument</key>
-				<string>id</string>
-			</dict>
-			<key>CLASS</key>
-			<string>BDSKTableView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSTableView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>

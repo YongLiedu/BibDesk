@@ -38,8 +38,8 @@
 #import <Cocoa/Cocoa.h>
 
 extern CFArrayRef BDStringCreateArrayBySeparatingStringsWithOptions(CFAllocatorRef allocator, CFStringRef string, CFStringRef separatorString, CFOptionFlags compareOptions);
-// supposed to be used only for ASCII-only character sets
-extern CFStringRef BDStringCreateByCollapsingAndTrimmingCharactersInSet(CFAllocatorRef allocator, CFStringRef string, CFCharacterSetRef charSet);
+extern CFStringRef BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorRef allocator, CFStringRef string);
+extern CFStringRef BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAllocatorRef allocator, CFStringRef string);
 extern CFStringRef BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef allocator, CFStringRef string);
 extern CFArrayRef BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAllocatorRef allocator, CFStringRef string, CFCharacterSetRef charSet, Boolean trim);
 extern Boolean BDStringFindCharacter(CFStringRef string, UniChar character, CFRange searchRange, CFRange *resultRange);
@@ -47,12 +47,9 @@ extern Boolean BDStringFindCharacter(CFStringRef string, UniChar character, CFRa
 extern void BDDeleteTeXForSorting(CFMutableStringRef mutableString);
 extern void BDDeleteArticlesForSorting(CFMutableStringRef mutableString);
 extern void BDDeleteCharactersInCharacterSet(CFMutableStringRef mutableString, CFCharacterSetRef charSet);
-extern void BDReplaceCharactersInCharacterSet(CFMutableStringRef mutableString, CFCharacterSetRef charSet, CFStringRef replacement);
 extern CFHashCode BDCaseInsensitiveStringHash(const void *value);
 extern Boolean  BDIsNewlineCharacter(UniChar c);
 extern Boolean BDStringHasAccentedCharacters(CFStringRef string);
-
-extern CFStringRef BDXMLCreateStringWithEntityReferencesInCFEncoding(CFStringRef string, CFStringEncoding encoding);
 
 static inline Boolean BDIsEmptyString(CFStringRef aString)
 { 

@@ -62,7 +62,6 @@
 - (NSURL *)URL;
 - (void)setURL:(NSURL *)newURL;
 
-- (BDSKPublicationsArray *)publicationsWithoutUpdating; 
 - (BDSKPublicationsArray *)publications;
 - (void)setPublications:(NSArray *)newPublications;
 

@@ -46,7 +46,7 @@
 - (NSString *)title;
 - (NSString *)container;
 - (NSString *)stringValueOfField:(NSString *)field;
-- (NSInteger)intValueOfField:(NSString *)field;
+- (int)intValueOfField:(NSString *)field;
 - (NSArray *)peopleArrayForField:(NSString *)field;
 - (NSURL *)localFileURLForField:(NSString *)field;
 - (BOOL)isValidCiteKey:(NSString *)key;
@@ -72,8 +72,6 @@
 
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion;
 
-+ (NSString *)parseFormat:(NSString *)format forLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub;
-
 + (NSString *)parseFormatForLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub;
 
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName linkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion;
@@ -97,7 +95,7 @@
                  separator:(NSString *)separator
 				  forField:(NSString *)fieldName 
 					ofItem:(id <BDSKParseableItem>)pub
-			 numberOfChars:(NSUInteger)number 
+			 numberOfChars:(unsigned int)number 
 					  from:(unichar)fromChar 
 						to:(unichar)toChar 
 					 force:(BOOL)force;

@@ -50,7 +50,7 @@
 @implementation BDSKCategoryGroup
 
 // designated initializer
-- (id)initWithName:(id)aName key:(NSString *)aKey count:(NSInteger)aCount {
+- (id)initWithName:(id)aName key:(NSString *)aKey count:(int)aCount {
     if (self = [super initWithName:aName count:aCount]) {
         key = [aKey copy];
     }
@@ -58,12 +58,12 @@
 }
 
 // super's designated initializer
-- (id)initWithName:(id)aName count:(NSInteger)aCount {
+- (id)initWithName:(id)aName count:(int)aCount {
     self = [self initWithName:aName key:nil count:aCount];
     return self;
 }
 
-- (id)initEmptyGroupWithKey:(NSString *)aKey count:(NSInteger)aCount {
+- (id)initEmptyGroupWithKey:(NSString *)aKey count:(int)aCount {
     NSZone *zone = [self zone];
 	[[super init] release];
     id aName = ([aKey isPersonField]) ? [BibAuthor emptyAuthor] : @"";
@@ -95,17 +95,13 @@
     [coder encodeObject:key forKey:@"key"];
 }
 
-- (id)copyWithZone:(NSZone *)aZone {
-	return [[[self class] allocWithZone:aZone] initWithName:name key:key count:count];
-}
-
 - (void)dealloc {
     [key release];
     [super dealloc];
 }
 
 // name can change, but key doesn't change, and it's also required for equality
-- (NSUInteger)hash {
+- (unsigned int)hash {
     return [key hash];
 }
 
@@ -132,7 +128,7 @@
 }
 
 - (NSImage *)icon {
-	return [NSImage imageNamed:@"categoryGroup"];
+	return [NSImage imageNamed:@"genericFolderIcon"];
 }
 
 - (void)setName:(id)newName {
@@ -140,10 +136,6 @@
         [name release];
         name = [newName retain];
     }
-}
-
-- (NSString *)editingStringValue {
-    return [name isKindOfClass:[BibAuthor class]] ? [name originalName] : [super editingStringValue];
 }
 
 - (BOOL)isCategory { return YES; }
@@ -156,8 +148,6 @@
 
 - (BOOL)isValidDropTarget { return YES; }
 
-- (BOOL)isEmpty { return NO; }
-
 @end
 
 #pragma mark -
@@ -167,28 +157,16 @@
 - (NSImage *)icon {
     static NSImage *image = nil;
     if(image == nil){
-        image = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
-        NSImage *genericImage = [NSImage imageNamed:@"categoryGroup"];
-        NSImage *questionMark = [NSImage iconWithSize:NSMakeSize(20.0, 20.0) forToolboxCode:kQuestionMarkIcon];
-        NSUInteger i;
+        image = [[NSImage alloc] initWithSize:NSMakeSize(16, 16)];
+        NSImage *genericImage = [NSImage imageNamed:@"genericFolderIcon"];
+        NSImage *questionMark = [NSImage iconWithSize:NSMakeSize(12, 12) forToolboxCode:kQuestionMarkIcon];
+        unsigned i;
         [image lockFocus];
-        [genericImage drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        [genericImage drawInRect:NSMakeRect(0, 0, 16, 16) fromRect:NSMakeRect(0, 0, [genericImage size].width, [genericImage size].height) operation:NSCompositeCopy fraction:1.0];
         // hack to make the question mark dark enough to be visible
         for(i = 0; i < 3; i++)
-            [questionMark compositeToPoint:NSMakePoint(6.0, 4.0) operation:NSCompositeSourceOver];
+            [questionMark compositeToPoint:NSMakePoint(3, 1) operation:NSCompositeSourceOver];
         [image unlockFocus];
-        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-            NSImage *tinyImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
-            questionMark = [NSImage iconWithSize:NSMakeSize(10.0, 10.0) forToolboxCode:kQuestionMarkIcon];
-            [tinyImage lockFocus];
-            [genericImage drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-            // hack to make the question mark dark enough to be visible
-            for(i = 0; i < 3; i++)
-                [questionMark compositeToPoint:NSMakePoint(3.0, 2.0) operation:NSCompositeSourceOver];
-            [tinyImage unlockFocus];
-            [image addRepresentation:[[tinyImage representations] lastObject]];
-            [tinyImage release];
-        }
     }
     return image;
 }
@@ -207,6 +185,10 @@
 
 - (BOOL)isEditable { return NO; }
 
-- (BOOL)isEmpty { return YES; }
+- (BOOL)isEqual:(id)other { return self == other; }
+
+- (unsigned int)hash {
+    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
+}
 
 @end

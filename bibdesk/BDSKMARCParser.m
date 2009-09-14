@@ -41,7 +41,7 @@
 #import "BDSKTypeManager.h"
 #import "BibItem.h"
 #import "BDSKAppController.h"
-#import "NSScanner_BDSKExtensions.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import <AGRegex/AGRegex.h>
 #import "NSError_BDSKExtensions.h"
 
@@ -82,17 +82,17 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 	
     itemString = [itemString stringByFixingFormattedMARCStart];
     
-    AGRegex *regex = [AGRegex regexWithPattern:@"^([ \t]*)1[013]{2}[ \t]*[0-9]{0,1}[0 \t#\\-][ \t]*[^ \t[:alnum:]]a" options:AGRegexMultiline];
+    AGRegex *regex = [AGRegex regexWithPattern:@"^([ \t]*)1[013]{2}[ \t]*[0-9]{0,1}[ \t]+[^ \t[:alnum:]]a" options:AGRegexMultiline];
     AGRegexMatch *match = [regex findInString:itemString];
     
     if(match == nil){
         if(outError)
-            *outError = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unknown MARC format.", @"Error description")];
+            OFErrorWithInfo(outError, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown MARC format.", @"Error description"), nil);
         return [NSArray array];
     }
     
-    NSUInteger tagStartIndex = [match rangeAtIndex:1].length;
-    NSUInteger fieldStartIndex = [match range].length - 2;
+    unsigned tagStartIndex = [match rangeAtIndex:1].length;
+    unsigned fieldStartIndex = [match range].length - 2;
     NSString *subFieldIndicator = [[match group] substringWithRange:NSMakeRange(fieldStartIndex, 1)];
     
     BibItem *newBI = nil;
@@ -210,7 +210,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     
     NSArray *fields;
     NSString *tag = nil, *field = nil, *value = nil, *dir = nil;
-    NSUInteger base, fieldsStart, i, dirLength;
+    unsigned base, fieldsStart, i, dirLength;
     BOOL isControlField;
     
     while(record = [recordEnum nextObject]){
@@ -246,7 +246,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
             addStringToDictionary(value, pubDict, tag, subFieldIndicator, isUNIMARC);
             
             [formattedString appendStrings:tag, @" ", isControlField ? @"  " : [field substringToIndex:2], @" ", nil];
-            [formattedString appendStrings:[value stringByReplacingOccurrencesOfString:subFieldIndicator withString:@"$"], @"\n", nil];
+            [formattedString appendStrings:[value stringByReplacingAllOccurrencesOfString:subFieldIndicator withString:@"$"], @"\n", nil];
         }
         
         if([pubDict count] > 0){
@@ -295,7 +295,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
         return [self itemsFromMARCXMLString:itemString error:outError];
     }else {
         if(outError)
-            *outError = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unknown MARC format.", @"Error description")];
+            OFErrorWithInfo(outError, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown MARC format.", @"Error description"), nil);
         return [NSArray array];
     }
 }
@@ -306,7 +306,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 @implementation BDSKMARCParser (Private)
 
 static void addStringToDictionary(NSString *value, NSMutableDictionary *pubDict, NSString *tag, NSString *subFieldIndicator, BOOL isUNIMARC){
-	unichar subTag = 0;
+	NSString *subTag = nil;
     NSString *subValue = nil;
 	
     NSScanner *scanner = [[NSScanner alloc] initWithString:value];
@@ -314,23 +314,23 @@ static void addStringToDictionary(NSString *value, NSMutableDictionary *pubDict,
     [scanner setCharactersToBeSkipped:nil];
     
     while([scanner isAtEnd] == NO){
-        if(NO == [scanner scanString:subFieldIndicator intoString:NULL] || NO == [scanner scanCharacter:&subTag])
+        if(NO == [scanner scanString:subFieldIndicator intoString:NULL] || NO == [scanner scanStringOfLength:1 intoString:&subTag])
             break;
         
         if([scanner scanUpToString:subFieldIndicator intoString:&subValue]){
             subValue = [subValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            addSubstringToDictionary(subValue, pubDict, tag, [NSString stringWithFormat:@"%C", subTag], isUNIMARC);
+            addSubstringToDictionary(subValue, pubDict, tag, subTag, isUNIMARC);
         }
     }
     
     [scanner release];
 }
 
-#define MARCTitleTag @"245"
-#define MARCSubtitleSubTag @"b"
-#define MARCPersonTag @"700"
-#define MARCNameSubTag @"a"
-#define MARCRelatorSubTag @"e"
+static NSString *MARCTitleTag = @"245";
+static NSString *MARCSubtitleSubTag = @"b";
+static NSString *MARCPersonTag = @"700";
+static NSString *MARCNameSubTag = @"a";
+static NSString *MARCRelatorSubTag = @"e";
 
 static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pubDict, NSString *tag, NSString *subTag, BOOL isUNIMARC){
     NSString *key = [[[BDSKTypeManager sharedManager] fieldNamesForMARCTag:tag] objectForKey:subTag];
@@ -408,7 +408,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 // Formatted MARC: @"^[ \t]*LDR[ \t]+[ \\-0-9]{5}[a-z]{3}[ \\-a][ a\\-0-9]22[ \\-0-9]{5}[ \\-1-8uz][ \\-a-z][ \\-r]45[ 0A-Z]0\n{1,2}[ \t]*[0-9]{3}[ \t]+"
 
 - (BOOL)isMARCString{
-    NSUInteger fieldTerminator = 0x1E;
+    unsigned fieldTerminator = 0x1E;
     NSString *pattern = [NSString stringWithFormat:@"^[0-9]{5}[0-9a-zA-Z \\-\\.]{19}([0-9]{12})+%C", fieldTerminator];
     AGRegex *MARCRegex = [AGRegex regexWithPattern:pattern];
     
@@ -417,19 +417,19 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 
 - (BOOL)isFormattedMARCString{
     AGRegex *regex = [AGRegex regexWithPattern:@"^[ \t]*LDR[ \t]+[ \\-0-9]{5}[a-z]{3}[ \\-a][ a\\-0-9]22[ \\-0-9]{5}[ \\-1-8uz][ \\-a-z][ \\-r]45[ 0A-Z]0\n{1,2}[ \t]*[0-9]{3}[ \t]+" options:AGRegexMultiline];
-    NSUInteger maxLen = MIN([self length], (NSUInteger)100);
+    unsigned maxLen = MIN([self length], (unsigned)100);
     return nil != [regex findInString:[[self substringToIndex:maxLen] stringByNormalizingSpacesAndLineBreaks]];
 }
 
 - (BOOL)isMARCXMLString{
     AGRegex *regex = [AGRegex regexWithPattern:@"<record( xmlns=\"[^<>\"]*\")?>\n *<leader>[ 0-9]{5}[a-z]{3}[ a]{2}22[ 0-9]{5}[ 1-8uz][ a-z][ r]45[ 0A-Z]0</leader>\n *<controlfield tag=\"00[0-9]\">"];
-    NSUInteger maxLen = MIN([self length], (NSUInteger)100);
+    unsigned maxLen = MIN([self length], (unsigned)100);
     return nil != [regex findInString:[[self substringToIndex:maxLen] stringByNormalizingSpacesAndLineBreaks]];
 }
 
 - (NSString *)stringByFixingFormattedMARCStart{
     AGRegex *regex = [AGRegex regexWithPattern:@"^[ \t]*LDR[ \t]+[ \\-0-9]{5}[a-z]{3}[ \\-a][ a\\-0-9]22[ \\-0-9]{5}[ \\-1-8uz][ \\-a-z][ \\-r]45[ 0A-Z]0\n{1,2}[ \t]*[0-9]{3}[ \t]+" options:AGRegexMultiline];
-    NSUInteger start = [[regex findInString:self] range].location;
+    unsigned start = [[regex findInString:self] range].location;
     return start == 0 || start == NSNotFound ? self : [self substringFromIndex:start];
 }
 
@@ -442,9 +442,9 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
         bracketCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"[]"] retain];
     
     NSString *string = self;
-    NSUInteger length = [string length];
+    unsigned length = [string length];
     NSRange range = [self rangeOfString:@"["];
-    NSUInteger start = range.location;
+    unsigned start = range.location;
     if(start != NSNotFound){
         range = [self rangeOfString:@"]" options:0 range:NSMakeRange(start, length - start)];
         if(range.location != NSNotFound){

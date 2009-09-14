@@ -37,6 +37,8 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKWebParser.h"
+#import "BDSKBibTeXParser.h"
+#import "NSXMLNode_BDSKExtensions.h"
 
 
 @interface BDSKGoogleScholarParser : BDSKWebParser

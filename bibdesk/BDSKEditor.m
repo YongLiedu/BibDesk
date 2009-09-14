@@ -45,7 +45,7 @@
 #import "BDSKScriptHookManager.h"
 #import "BDSKEdgeView.h"
 #import "NSString_BDSKExtensions.h"
-#import "NSAlert_BDSKExtensions.h"
+#import "BDSKAlert.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKFiler.h"
 #import "BDSKDragWindow.h"
@@ -74,29 +74,23 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKCitationFormatter.h"
 #import "BDSKNotesWindowController.h"
-#import "BDSKGradientSplitView.h"
+#import "BDSKSplitView.h"
 #import <FileView/FileView.h>
 #import "BDSKLinkedFile.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKEditorTableView.h"
 #import "BDSKEditorTextFieldCell.h"
 #import "BDSKCompletionManager.h"
-#import "BDSKApplication.h"
-#import "NSColor_BDSKExtensions.h"
-#import "BDSKURLSheetController.h"
+#import <FileView/FVPreviewer.h>
 
-#define WEAK_NULL NULL
-
-#define BDSKEditorFrameAutosaveName @"BDSKEditor window autosave name"
-static char BDSKEditorObservationContext;
+static NSString *BDSKEditorFrameAutosaveName = @"BDSKEditor window autosave name";
+static NSString *BDSKEditorObservationContext = @"BDSKEditorObservationContext";
 
 // offset of the table from the left window edge
 #define TABLE_OFFSET 13.0
 
 // this was copied verbatim from a Finder saved search for all items of kind document modified in the last week
 static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'public.content') && (kMDItemFSContentChangeDate >= $time.today(-7)) && (kMDItemContentType != com.apple.mail.emlx) && (kMDItemContentType != public.vcard)";
-
-enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 @interface BDSKEditor (Private)
 
@@ -120,7 +114,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 + (void)initialize
 {
-    BDSKINITIALIZE;
+    OBINITIALIZE;
     
     // limit the scope to the default downloads directory (from Internet Config)        
     NSURL *downloadURL = [[NSFileManager defaultManager] downloadFolderURL];
@@ -140,6 +134,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         fields = [[NSMutableArray alloc] init];
         isEditable = [[publication owner] isDocument];
                 
+        forceEndEditing = NO;
         didSetupFields = NO;
     }
     return self;
@@ -158,7 +153,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 - (void)windowDidLoad{
 	
     // we should have a document at this point, as the nib is not loaded before -window is called, which shouldn't happen before the document shows us
-    BDSKASSERT([self document]);
+    OBASSERT([self document]);
     
     [[self window] setBackgroundColor:[NSColor colorWithCalibratedWhite:0.935 alpha:1.0]];
     
@@ -181,6 +176,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [self setupButtonCells];
     
     // Setup the statusbar
+	[statusBar retain]; // we need to retain, as we might remove it from the window
+	if (![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowEditorStatusBarKey]) {
+		[self toggleStatusBar:nil];
+	}
 	[statusBar setDelegate:self];
     [statusBar setTextOffset:NSMaxX([actionButton frame])];
     
@@ -192,22 +191,21 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     edgeView = (BDSKEdgeView *)[[[matrix enclosingScrollView] superview] superview];
 	[edgeView setEdges:BDSKMaxYEdgeMask];
-	[edgeView setEdgeColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
     
     [fileSplitView setBlendStyle:BDSKMinBlendStyleMask];
     
     [self setWindowFrameAutosaveNameOrCascade:BDSKEditorFrameAutosaveName];
     
     // Setup the splitview autosave frames, should be done after the statusBar and splitViews are setup
-    [mainSplitView setPositionAutosaveName:@"BDSKEditorMainSplitView"];
-    [fileSplitView setPositionAutosaveName:@"BDSKEditorFileSplitView"];
+    [mainSplitView setPositionAutosaveName:@"BDSKSplitView Frame BDSKEditorMainSplitView"];
+    [fileSplitView setPositionAutosaveName:@"BDSKSplitView Frame BDSKEditorFileSplitView"];
     if ([self windowFrameAutosaveName] == nil) {
         // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
         [mainSplitView setPositionAutosaveName:nil];
         [fileSplitView setPositionAutosaveName:nil];
     }
     
-    tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[publication macroResolver]];
+    tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[[publication owner] macroResolver]];
     crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
     citationFormatter = [[BDSKCitationFormatter alloc] initWithDelegate:self];
     
@@ -265,11 +263,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	
     [self updateCiteKeyDuplicateWarning];
     
-    [[fileView enclosingScrollView] setBackgroundColor:[fileView backgroundColor]];
-    [fileView setDisplayMode:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKEditorFileViewDisplayModeKey]];
-    [fileView setIconScale:[[NSUserDefaults standardUserDefaults] floatForKey:BDSKEditorFileViewIconScaleKey]];
-    [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:&BDSKEditorObservationContext];
-    [fileView addObserver:self forKeyPath:@"displayMode" options:0 context:&BDSKEditorObservationContext];
+    [fileView setIconScale:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKEditorFileViewIconScaleKey]];
+    [fileView setAutoScales:YES];
+    [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:BDSKEditorObservationContext];
     [fileView setEditable:isEditable];
     [fileView setAllowsDownloading:isEditable];
 }
@@ -292,7 +288,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [publication release];
     [fields release];
     [addedFields release];
-    [previousValueForCurrentEditedView release];
+	[authorTableView setDelegate:nil];
+    [authorTableView setDataSource:nil];
     [notesViewUndoManager release];
     [abstractViewUndoManager release];
     [rssDescriptionViewUndoManager release];   
@@ -301,6 +298,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [ratingButtonCell release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 	[dragFieldEditor release];
+	[statusBar release];
 	[complexStringEditor release];
     [tableCellFormatter release];
     [crossrefFormatter release];
@@ -313,119 +311,62 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [self showWindow:self];
 }
 
-- (BOOL)validateCurrentEditedView
-{
-    NSParameterAssert(currentEditedView);
-    BOOL rv = ([[currentEditedView string] isStringTeXQuotingBalancedWithBraces:YES connected:NO]);
-    if (NO == rv) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"Informative text in alert dialog")];
-        
-        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];   
-    }
-    return rv;
-}
+// note that we don't want the - document accessor! It messes us up by getting called for other stuff.
 
-- (void)discardEditing
-{
-    // check textviews first
-    if (currentEditedView == [[self window] firstResponder]) {
-        // need some reasonable state for annote et al. textviews
-        NSParameterAssert(nil != previousValueForCurrentEditedView);
-        [currentEditedView setString:previousValueForCurrentEditedView];
-    }
-    // now handle any field editor(s)
-    else if ([[[self window] firstResponder] isKindOfClass:[NSText class]]) {
-     
-        /*
-         Omit the standard check for [[self window] fieldEditor:NO forObject:nil],
-         since that returns nil for the tableview's field editor.
-         */
-        
-        NSControl *control = [(NSText *)[[self window] firstResponder] delegate];
-        
-        // may be self, if a textview was being edited (but we should have taken the first branch in that case)
-        if ([control respondsToSelector:@selector(abortEditing)]) {
-            [control abortEditing];
-        }
-        else {
-            fprintf(stderr, "%s, control does not respond to abortEditing\n", __func__);
-        }
-    }
-    else {
-        // should never happen
-        fprintf(stderr, "%s, unhandled firstResponder = %s\n", __func__, [[[[[self window] firstResponder] class] description] UTF8String]);
-    }
-    if (isEditing) {
-        [[self document] objectDidEndEditing:self];
-        isEditing = NO;
-    }
-}
+- (void)finalizeChangesPreservingSelection:(BOOL)shouldPreserveSelection{
 
-- (void)commitEditingWithDelegate:(id)delegate didCommitSelector:(SEL)didCommitSelector contextInfo:(void *)contextInfo
-{
-    BOOL didCommit = [self commitEditing];
-    if (delegate && didCommitSelector) {
-        // - (void)editor:(id)editor didCommit:(BOOL)didCommit contextInfo:(void *)contextInfo
-        NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:didCommitSelector]];
-        [invocation setTarget:delegate];
-        [invocation setSelector:didCommitSelector];
-        [invocation setArgument:&self atIndex:2];
-        [invocation setArgument:&didCommit atIndex:3];
-        [invocation setArgument:&contextInfo atIndex:4];
-        [invocation invoke];
-    }
-}
-
-- (BOOL)commitEditing
-{
     NSResponder *firstResponder = [[self window] firstResponder];
     
-	/*
-     Need to finalize text field cells being edited or the abstract/annote text views, since the 
-     text views bypass the normal undo mechanism for speed, and won't cause the doc to be marked 
-     dirty on subsequent edits.
-     */
+	// need to finalize text field cells being edited or the abstract/annote text views, since the text views bypass the normal undo mechanism for speed, and won't cause the doc to be marked dirty on subsequent edits
 	if([firstResponder isKindOfClass:[NSText class]]){
         
         NSTextView *textView = (NSTextView *)firstResponder;
-		NSInteger editedRow = -1;
+		int editedRow = -1;
 		NSRange selection = [textView selectedRange];
-        if ([textView isFieldEditor]) {
+        if (shouldPreserveSelection && [textView isFieldEditor]) {
             firstResponder = [textView delegate];
             if (firstResponder == tableView)
                 editedRow = [tableView editedRow];
         }
         
+		forceEndEditing = YES; // make sure the validation will always allow the end of the edit
 		didSetupFields = NO; // if we we rebuild the fields, the selection will become meaningless
         
-        // check textviews for balanced braces as needed
-        if (currentEditedView && [self validateCurrentEditedView] == NO)
-            return NO;
+		// now make sure we submit the edit
+		if ([[self window] makeFirstResponder:[self window]] == NO) {
+            // this will remove the field editor from the view, set its delegate to nil, and empty it of text
+			[[self window] endEditingFor:nil];
+            forceEndEditing = NO;
+            return;
+        }
         
-        // commit edits (formatters may refuse to allow this)
-        if ([[self window] makeFirstResponder:[self window]] == NO)
-            return NO;
+		forceEndEditing = NO;
+        
+        if(shouldPreserveSelection == NO)
+            return;
         
         // for inherited fields, we should do something here to make sure the user doesn't have to go through the warning sheet
 		
-		if ([[self window] makeFirstResponder:firstResponder] && didSetupFields == NO) {
+		if (shouldPreserveSelection && [[self window] makeFirstResponder:firstResponder] && didSetupFields == NO) {
             if (firstResponder == tableView && editedRow != -1)
                 [tableView editColumn:1 row:editedRow withEvent:nil select:NO];
             if ([[textView string] length] >= NSMaxRange(selection)) // check range for safety
                 [textView setSelectedRange:selection];
         }
-        return YES;
-        
-	} else {
-        return [[self window] makeFirstResponder:nil];
-    }
+            
+	}
+}
+
+- (void)finalizeChanges:(NSNotification *)aNotification{
+    [self finalizeChangesPreservingSelection:YES];
 }
 
 #pragma mark Actions
+
+- (IBAction)toggleStatusBar:(id)sender{
+	[statusBar toggleBelowView:mainSplitView offset:1.0];
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowEditorStatusBarKey];
+}
 
 - (IBAction)openLinkedFile:(id)sender{
     NSEnumerator *urlEnum = nil;
@@ -524,15 +465,17 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (IBAction)previewAction:(id)sender {
-    NSArray *theURLs = [publication valueForKeyPath:@"files.URL"];
-    FVPreviewer *previewer = [FVPreviewer sharedPreviewer];
-    if ([theURLs count] == 1) {
-        [previewer setWebViewContextMenuDelegate:self];
-        [previewer previewURL:[theURLs lastObject] forIconInRect:NSZeroRect];
+    NSURL *theURL = [sender representedObject];
+    if (theURL == nil) {
+        NSArray *theURLs = [publication valueForKeyPath:@"localFiles.URL"];
+        if ([theURLs count])
+            theURL = [theURLs firstObject];
+        else
+            theURL = [[publication valueForKeyPath:@"remoteURLs.URL"] firstObject];
     }
-    else if ([theURLs count] > 0) {
-        [previewer setWebViewContextMenuDelegate:nil];
-        [previewer previewFileURLs:theURLs];
+    if (theURL && [theURL isEqual:[NSNull null]] == NO) {
+        [FVPreviewer setWebViewContextMenuDelegate:self];
+        [FVPreviewer previewURL:theURL];
     }
 }
 
@@ -560,34 +503,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     }
 }
 
-- (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-
-    if(returnCode == NSOKButton){
-        NSUInteger anIndex = (NSUInteger)contextInfo;
-        NSURL *aURL = [[sheet URLs] objectAtIndex:0];
-        BOOL shouldAutoFile = [disableAutoFileButton state] == NSOffState && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey];
-        if (anIndex != NSNotFound) {
-            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
-            if (aFile == nil)
-                return;
-            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
-            [publication removeObjectFromFilesAtIndex:anIndex];
-            if (oldURL)
-                [[self document] userRemovedURL:oldURL forPublication:publication];
-            [oldURL release];
-            [publication insertObject:aFile inFilesAtIndex:anIndex];
-            [[self document] userAddedURL:aURL forPublication:publication];
-            if (shouldAutoFile)
-                [publication autoFileLinkedFile:aFile];
-        } else {
-            [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
-        }
-        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-    }        
-}
-
 - (IBAction)chooseLocalFile:(id)sender{
-    NSUInteger anIndex = NSNotFound;
+    unsigned int anIndex = NSNotFound;
     NSNumber *indexNumber = [sender representedObject];
     NSString *path = nil;
     if (indexNumber) {
@@ -600,7 +517,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [oPanel setCanChooseDirectories:YES];
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
     
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]) {
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]) {
         if (disableAutoFileButton == nil) {
             disableAutoFileButton = [[NSButton alloc] init];
             [disableAutoFileButton setBezelStyle:NSRoundedBezelStyle];
@@ -621,6 +538,32 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
   
 }
 
+- (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+
+    if(returnCode == NSOKButton){
+        unsigned int anIndex = (unsigned int)contextInfo;
+        NSURL *aURL = [[sheet URLs] objectAtIndex:0];
+        BOOL shouldAutoFile = [disableAutoFileButton state] == NSOffState && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey];
+        if (anIndex != NSNotFound) {
+            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
+            if (aFile == nil)
+                return;
+            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
+            [publication removeObjectFromFilesAtIndex:anIndex];
+            if (oldURL)
+                [[self document] userRemovedURL:oldURL forPublication:publication];
+            [oldURL release];
+            [publication insertObject:aFile inFilesAtIndex:anIndex];
+            [[self document] userAddedURL:aURL forPublication:publication];
+            if (shouldAutoFile)
+                [publication autoFileLinkedFile:aFile];
+        } else {
+            [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
+        }
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+    }        
+}
+
 - (void)addLinkedFileFromMenuItem:(NSMenuItem *)sender{
 	NSString *path = [sender representedObject];
     NSURL *aURL = [NSURL fileURLWithPath:path];
@@ -628,16 +571,33 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
-- (void)chooseRemoteURLSheetDidEnd:(BDSKURLSheetController *)urlController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+- (IBAction)chooseRemoteURL:(id)sender{
+    unsigned int anIndex = NSNotFound;
+    NSNumber *indexNumber = [sender representedObject];
+    NSString *urlString = @"http://";
+    if (indexNumber) {
+        anIndex = [indexNumber unsignedIntValue];
+        urlString = [[[publication objectInFilesAtIndex:anIndex] URL] absoluteString];
+    }
+	[chooseURLField setStringValue:urlString];
+    
+    [NSApp beginSheet:chooseURLSheet
+       modalForWindow:[self window] 
+        modalDelegate:self 
+       didEndSelector:@selector(chooseRemoteURLSheetDidEnd:returnCode:contextInfo:) 
+          contextInfo:(void *)anIndex];
+}
+
+- (void)chooseRemoteURLSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 
     if (returnCode == NSOKButton) {
-        NSString *aURLString = [urlController urlString];
+        NSString *aURLString = [chooseURLField stringValue];
         if ([NSString isEmptyString:aURLString])
             return;
         NSURL *aURL = [NSURL URLWithStringByNormalizingPercentEscapes:aURLString];
         if (aURL == nil)
             return;
-        NSUInteger anIndex = (NSUInteger)contextInfo;
+        unsigned int anIndex = (unsigned int)contextInfo;
         if (anIndex != NSNotFound) {
             BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
             if (aFile == nil)
@@ -657,23 +617,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     }        
 }
 
-- (IBAction)chooseRemoteURL:(id)sender{
-    NSUInteger anIndex = NSNotFound;
-    NSNumber *indexNumber = [sender representedObject];
-    NSString *urlString = @"http://";
-    if (indexNumber) {
-        anIndex = [indexNumber unsignedIntValue];
-        urlString = [[[publication objectInFilesAtIndex:anIndex] URL] absoluteString];
-    }
-    
-    BDSKURLSheetController *urlController = [[BDSKURLSheetController alloc] init];
-    
-    [urlController setUrlString:urlString];
-    [urlController beginSheetModalForWindow:[self window]
-                              modalDelegate:self
-                             didEndSelector:@selector(chooseRemoteURLSheetDidEnd:returnCode:contextInfo:)
-                                contextInfo:(void *)anIndex];
-    [urlController release];
+- (IBAction)dismissChooseURLSheet:(id)sender{
+    [NSApp endSheet:chooseURLSheet returnCode:[sender tag]];
+    [chooseURLSheet orderOut:self];
 }
 
 - (void)addRemoteURLFromMenuItem:(NSMenuItem *)sender{
@@ -683,10 +629,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (IBAction)trashLinkedFiles:(id)sender{
-    [self deleteURLsAtIndexes:[sender representedObject] moveToTrash:BDSKMoveToTrashYes];
+    [self deleteURLsAtIndexes:[sender representedObject] moveToTrash:1];
 }
 
-- (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+- (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSArray *currentFields = [(NSArray *)contextInfo autorelease];
 	NSString *newField = [addFieldController field];
     if(returnCode == NSCancelButton || newField == nil)
@@ -719,16 +665,14 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:", @"Label for adding field")
                                                                                               fieldsArray:fieldNames];
-    if ([self commitEditing]) {
-        [addFieldController beginSheetModalForWindow:[self window]
-                                       modalDelegate:self
-                                      didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
-                                         contextInfo:currentFields];
-    }
+	[addFieldController beginSheetModalForWindow:[self window]
+                                   modalDelegate:self
+                                  didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
+                                     contextInfo:currentFields];
     [addFieldController release];
 }
 
-- (void)removeFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+- (void)removeFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *oldField = [removeFieldController field];
     NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
     NSArray *removableFields = [removeFieldController fieldsArray];
@@ -760,31 +704,28 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt
                                                                                                        fieldsArray:removableFields];
-    NSInteger selectedRow = [tableView selectedRow];
+    int selectedRow = [tableView selectedRow];
     NSString *selectedField = selectedRow == -1 ? nil : [fields objectAtIndex:selectedRow];
-    BOOL didValidate = YES;
     if([removableFields containsObject:selectedField]){
         [removeFieldController setField:selectedField];
         // if we don't deselect this cell, we can't remove it from the form
-        didValidate = [self commitEditing];
+        [self finalizeChangesPreservingSelection:NO];
     }
     
 	[removableFields release];
 	
-    if (didValidate) {
-        [removeFieldController beginSheetModalForWindow:[self window]
-                                          modalDelegate:self
-                                         didEndSelector:@selector(removeFieldSheetDidEnd:returnCode:contextInfo:)
-                                            contextInfo:NULL];
-    }
+	[removeFieldController beginSheetModalForWindow:[self window]
+                                      modalDelegate:self
+                                     didEndSelector:@selector(removeFieldSheetDidEnd:returnCode:contextInfo:)
+                                        contextInfo:NULL];
     [removeFieldController release];
 }
 
-- (void)changeFieldSheetDidEnd:(BDSKChangeFieldSheetController *)changeFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+- (void)changeFieldSheetDidEnd:(BDSKChangeFieldSheetController *)changeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *oldField = [changeFieldController field];
-    NSString *newField = [changeFieldController replaceField];
+    NSString *newField = [changeFieldController newField];
     NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
-    NSInteger autoGenerateStatus = 0;
+    int autoGenerateStatus = 0;
     
     if (returnCode == NSOKButton && [NSString isEmptyString:newField] == NO  && 
         [newField isEqualToString:oldField] == NO && [fields containsObject:newField] == NO) {
@@ -802,10 +743,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (void)raiseChangeFieldSheetForField:(NSString *)field{
-    
-    if ([self commitEditing] == NO)
-        return;
-    
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     NSArray *fieldNames;
     NSMutableArray *currentFields = [fields mutableCopy];
@@ -825,12 +762,16 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     BDSKChangeFieldSheetController *changeFieldController = [[BDSKChangeFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to change:", @"Label for changing field name")
                                                                                                        fieldsArray:fields
-                                                                                                     replacePrompt:NSLocalizedString(@"New field name:", @"Label for changing field name")
-                                                                                                replaceFieldsArray:fieldNames];
+                                                                                                         addedPrompt:NSLocalizedString(@"New field name:", @"Label for changing field name")
+                                                                                                    addedFieldsArray:fieldNames];
     if (field == nil)
         field = [tableView selectedRow] == -1 ? nil : [fields objectAtIndex:[tableView selectedRow]];
     
-    BDSKASSERT(field == nil || [fields containsObject:field]);
+    OBASSERT(field == nil || [fields containsObject:field]);
+    
+    // if we don't deselect this cell, we can't remove it from the form
+    [self finalizeChangesPreservingSelection:NO];
+    
     [changeFieldController setField:field];
     
 	[changeFieldController beginSheetModalForWindow:[self window]
@@ -844,7 +785,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 - (IBAction)raiseChangeFieldName:(id)sender{
     NSString *field = nil;
     if (sender == tableView) {
-        NSInteger clickedRow = [tableView clickedRow];
+        int clickedRow = [tableView clickedRow];
         if (clickedRow == -1)
             return;
         field = [fields objectAtIndex:clickedRow];
@@ -852,15 +793,18 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [self raiseChangeFieldSheetForField:field];
 }
 
-- (void)generateCiteKeyAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-	if([alert suppressionButtonState] == NSOnState)
-		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
+- (void)generateCiteKeyAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+	if([alert checkValue] == YES)
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
     
     if(returnCode == NSAlertAlternateReturn)
         return;
     
     // could use [[alert window] orderOut:nil] here, but we're using the didDismissSelector instead
-    BDSKPRECONDITION([self commitEditing]);
+    // This is problematic, since finalizeChangesPreservingSelection: ends up triggering a format failure sheet if the user deleted the citekey and then chose to generate (this might be common in case of duplicating an item, for instance).  Therefore, we'll catch that case here and reset the control to the publication's current value, since we're going to generate a new one anyway.
+    if ([NSString isEmptyString:[citeKeyField stringValue]])
+        [citeKeyField setStringValue:[publication citeKey]];
+	[self finalizeChangesPreservingSelection:YES];
 	
 	BDSKScriptHook *scriptHook = nil;
 	NSString *oldKey = [publication citeKey];
@@ -906,39 +850,30 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (IBAction)generateCiteKey:(id)sender{
-    
-    /*
-     If citekey is being edited, abort that edit, which avoids any validation for whatever is
-     currently in the field.  If any other field is being edited, validate pending changes to 
-     other controls before trying to generate a key.
-     */
-    if (([citeKeyField currentEditor] && [citeKeyField abortEditing] == NO) || [self commitEditing] == NO) {
-        NSBeep();
-        return;
-    }
-    
     if([publication hasEmptyOrDefaultCiteKey] == NO && 
-       [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Really Generate Cite Key?", @"Message in alert dialog when generating cite keys")
-                                         defaultButton:NSLocalizedString(@"Generate", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"This action will generate a new cite key for the publication.  This action is undoable.", @"Informative text in alert dialog")];
-        [alert setShowsSuppressionButton:YES];
-        
+       [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
+        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Really Generate Cite Key?", @"Message in alert dialog when generating cite keys")
+                                             defaultButton:NSLocalizedString(@"Generate", @"Button title")
+                                           alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"This action will generate a new cite key for the publication.  This action is undoable.", @"Informative text in alert dialog")];
+        [alert setHasCheckButton:YES];
+        [alert setCheckValue:NO];
+           
         // use didDismissSelector or else we can have sheets competing for the window
         [alert beginSheetModalForWindow:[self window] 
                           modalDelegate:self 
-                         didEndSelector:@selector(generateCiteKeyAlertDidEnd:returnCode:contextInfo:) 
+                         didEndSelector:NULL
+                     didDismissSelector:@selector(generateCiteKeyAlertDidEnd:returnCode:contextInfo:) 
                             contextInfo:NULL];
     } else {
         [self generateCiteKeyAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
     }
 }
 
-- (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     NSArray *files = nil;
-    NSUInteger anIndex = (NSUInteger)contextInfo;
+    unsigned int anIndex = (unsigned int)contextInfo;
     
     if (anIndex == NSNotFound)
         files = [publication localFiles];
@@ -972,13 +907,11 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (IBAction)consolidateLinkedFiles:(id)sender{
-    
-    if ([self commitEditing] == NO)
-        return;
+	[self finalizeChangesPreservingSelection:YES];
 	
     // context menu sets item index as represented object; otherwise we try to autofile everything
     NSNumber *indexNumber = [sender representedObject];
-    NSUInteger anIndex = NSNotFound;
+    unsigned int anIndex = NSNotFound;
 	BOOL canSet = YES;
     
     if (indexNumber) {
@@ -999,7 +932,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	if (canSet == NO){
 		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set.  Do you want me to file the paper now using the available fields, or cancel autofile for this paper?",@"");
 		NSString *otherButton = nil;
-		if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]){
+		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
 			message = NSLocalizedString(@"Not all fields needed for generating the file location are set. Do you want me to file the paper now using the available fields, cancel autofile for this paper, or wait until the necessary fields are set?", @"Informative text in alert dialog"),
 			otherButton = NSLocalizedString(@"Wait", @"Button title");
 		}
@@ -1018,25 +951,22 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (IBAction)duplicateTitleToBooktitle:(id)sender{
-	if ([self commitEditing]) {
-        [publication duplicateTitleToBooktitleOverwriting:YES];
-        [[self undoManager] setActionName:NSLocalizedString(@"Duplicate Title", @"Undo action name")];
-    }
+	[self finalizeChangesPreservingSelection:YES];
+	
+	[publication duplicateTitleToBooktitleOverwriting:YES];
+	
+	[[self undoManager] setActionName:NSLocalizedString(@"Duplicate Title", @"Undo action name")];
 }
 
 - (IBAction)bibTypeDidChange:(id)sender{
-	if ([self commitEditing]) {
-        NSString *newType = [bibTypeButton titleOfSelectedItem];
-        if(![[publication pubType] isEqualToString:newType]){
-            [publication setPubType:newType];
-            [[NSUserDefaults standardUserDefaults] setObject:newType
-                                                              forKey:BDSKPubTypeStringKey];
-            
-            [[self undoManager] setActionName:NSLocalizedString(@"Change Type", @"Undo action name")];
-        }
-    } else {
-        // revert to previous
-        [bibTypeButton selectItemWithTitle:[publication pubType]];
+    [self finalizeChangesPreservingSelection:YES];
+    NSString *newType = [bibTypeButton titleOfSelectedItem];
+    if(![[publication pubType] isEqualToString:newType]){
+        [publication setPubType:newType];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:newType
+                                                          forKey:BDSKPubTypeStringKey];
+		
+		[[self undoManager] setActionName:NSLocalizedString(@"Change Type", @"Undo action name")];
     }
 }
 
@@ -1047,12 +977,12 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 - (IBAction)changeRating:(id)sender{
 	BDSKRatingButtonCell *cell = [sender selectedCell];
 	NSString *field = [cell representedObject];
-	NSInteger oldRating = [publication ratingValueOfField:field];
-	NSInteger newRating = [cell rating];
+	int oldRating = [publication ratingValueOfField:field];
+	int newRating = [cell rating];
 		
 	if(newRating != oldRating) {
 		[publication setField:field toRatingValue:newRating];
-        [self userChangedField:field from:[NSString stringWithFormat:@"%ld", (long)oldRating] to:[NSString stringWithFormat:@"%ld", (long)newRating]];
+        [self userChangedField:field from:[NSString stringWithFormat:@"%i", oldRating] to:[NSString stringWithFormat:@"%i", newRating]];
 		[[self undoManager] setActionName:NSLocalizedString(@"Change Rating", @"Undo action name")];
 	}
 }
@@ -1060,7 +990,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 - (IBAction)changeFlag:(id)sender{
 	NSButtonCell *cell = [sender selectedCell];
 	NSString *field = [cell representedObject];
-    BOOL isTriState = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:field];
+    BOOL isTriState = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:field];
     
     if(isTriState){
         NSCellStateValue oldState = [publication triStateValueOfField:field];
@@ -1110,7 +1040,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (IBAction)showPersonDetail:(id)sender{
-    NSInteger i = [authorTableView clickedRow];
+    int i = [authorTableView clickedRow];
     
     if(i == -1)
         NSBeep();
@@ -1136,12 +1066,12 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     return NO;
 }
 
-- (void)fileView:(FVFileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
+- (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
     
     NSURL *theURL = anIndex == NSNotFound ? nil : [[publication objectInFilesAtIndex:anIndex] URL];
 	NSMenu *submenu;
 	NSMenuItem *item;
-    NSInteger i = 0;
+    int i = 0;
     
     if (theURL && [[aFileView selectionIndexes] count] <= 1) {
         i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
@@ -1274,8 +1204,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 - (void)updateSafariRecentDownloadsMenu:(NSMenu *)menu{
 	NSArray *historyArray = [self safariDownloadHistory];
 		
-	NSUInteger i = 0;
-	NSUInteger numberOfItems = [historyArray count];
+	unsigned int i = 0;
+	unsigned numberOfItems = [historyArray count];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     
     [menu removeAllItems];
@@ -1305,8 +1235,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 - (void)updateSafariRecentURLsMenu:(NSMenu *)menu{
 	NSArray *historyArray = [self safariDownloadHistory];
-	NSUInteger numberOfItems = [historyArray count];
-	NSUInteger i = 0;
+	unsigned numberOfItems = [historyArray count];
+	unsigned int i = 0;
     
     [menu removeAllItems];
 	
@@ -1329,94 +1259,75 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 - (void)updatePreviewRecentDocumentsMenu:(NSMenu *)menu{
     // get all of the items from the Apple menu (works on 10.4, anyway), and build a set of the file paths for easy comparison as strings
-    NSMutableArray *globalRecentPaths = [[NSMutableArray alloc] initWithCapacity:10];
-    NSDictionary *itemDict;
-    NSData *aliasData;
-    NSString *filePath;
-    BDAlias *alias;
-    NSEnumerator *e;
+    NSMutableSet *globalRecentPaths = [[NSMutableSet alloc] initWithCapacity:10];
+    CFDictionaryRef globalRecentDictionary = CFPreferencesCopyAppValue(CFSTR("Documents"), CFSTR("com.apple.recentitems"));
+    NSArray *globalItems = [(NSDictionary *)globalRecentDictionary objectForKey:@"CustomListItems"];
+    [(id)globalRecentDictionary autorelease];
     
-    if (LSSharedFileListCreate != WEAK_NULL) {
-        
-        LSSharedFileListRef fileList = LSSharedFileListCreate(kCFAllocatorDefault, kLSSharedFileListRecentDocumentItems, NULL);
-        if (NULL == fileList) {
-            [globalRecentPaths release];
-            return;
-        }
-        UInt32 seed;
-        CFArrayRef fileListItems = LSSharedFileListCopySnapshot(fileList, &seed);
-        CFRelease(fileList);
-        
-        if (fileListItems) {
-            
-            CFIndex idx;
-            for (idx = 0; idx < CFArrayGetCount(fileListItems); idx++) {
-                
-                LSSharedFileListItemRef item = (void *)CFArrayGetValueAtIndex(fileListItems, idx);
-                CFURLRef itemURL;
-                if (noErr != LSSharedFileListItemResolve(item, 0, &itemURL, NULL))
-                    [globalRecentPaths addObject:[(NSURL *)itemURL path]];
-            }
-            CFRelease(fileListItems);
-        }
-        
-    } else {
-        
-        CFDictionaryRef globalRecentDictionary = CFPreferencesCopyAppValue(CFSTR("Documents"), CFSTR("com.apple.recentitems"));
-        NSArray *globalItems = [(NSDictionary *)globalRecentDictionary objectForKey:@"CustomListItems"];
-        [(id)globalRecentDictionary autorelease];
-        
-        e = [globalItems objectEnumerator];
-        
-        while (itemDict = [e nextObject]) {
-            aliasData = [itemDict objectForKey:@"Alias"];
-            alias = [[BDAlias alloc] initWithData:aliasData];
-            filePath = [alias fullPathNoUI];
-            if(filePath)
-                [globalRecentPaths addObject:filePath];
-            [alias release];
-        }
-        
+    NSEnumerator *e = [globalItems objectEnumerator];
+    NSDictionary *itemDict = nil;
+    NSData *aliasData = nil;
+    NSString *filePath = nil;
+    BDAlias *alias = nil;
+    
+    while(itemDict = [e nextObject]){
+        aliasData = [itemDict objectForKey:@"Alias"];
+        alias = [[BDAlias alloc] initWithData:aliasData];
+        filePath = [alias fullPathNoUI];
+        if(filePath)
+            [globalRecentPaths addObject:filePath];
+        [alias release];
     }
     
-    // now get all of the recent items from the default PDF viewer; this does not include items opened since the viewer's last launch, unfortunately, regardless of the call to CFPreferencesSynchronize
-    NSMutableArray *previewRecentPaths = [[NSMutableArray alloc] initWithCapacity:10];
+    // now get all of the recent items from the default PDF viewer, Preview.app and Skim.app; this does not include items opened since Preview's last launch, unfortunately, regardless of the call to CFPreferencesSynchronize
+    NSMutableArray *historyArray = [[NSMutableArray alloc] initWithCapacity:10];
+    NSMutableSet *previewRecentPaths = [[NSMutableSet alloc] initWithCapacity:10];
+	CFArrayRef tmpArray;
     
     CFURLRef appURL;
     NSString *appIdentifier = nil;
-    
     if (noErr == LSGetApplicationForInfo('PDF ', kLSUnknownCreator, CFSTR("pdf"), kLSRolesEditor | kLSRolesViewer, NULL, &appURL)) {
-        appIdentifier = [[NSBundle bundleWithPath:[(NSURL *)appURL path]] bundleIdentifier];
-        CFRelease(appURL);
-    }
-    if (appIdentifier == nil)
-        appIdentifier = @"com.apple.Preview";
-    
-    CFArrayRef tmpArray = CFPreferencesCopyAppValue(CFSTR("NSRecentDocumentRecords"), (CFStringRef)appIdentifier);
-    
-    if (tmpArray) {
-        e = [(NSArray *)tmpArray objectEnumerator];
-        
-        while (itemDict = [e nextObject]) {
-            aliasData = [[itemDict objectForKey:@"_NSLocator"] objectForKey:@"_NSAlias"];
-            alias = [[BDAlias alloc] initWithData:aliasData];
-            filePath = [alias fullPathNoUI];
-            if(filePath)
-                [previewRecentPaths addObject:filePath];
-            [alias release];
+        if (appIdentifier = [[NSBundle bundleWithPath:[(NSURL *)appURL path]] bundleIdentifier]) {
+            tmpArray = CFPreferencesCopyAppValue(CFSTR("NSRecentDocumentRecords"), CFSTR("com.apple.Preview"));
+            [historyArray addObjectsFromArray:(NSArray *)tmpArray];
+            if(tmpArray) CFRelease(tmpArray);
         }
-        
-        CFRelease(tmpArray);
+        if (appURL) CFRelease(appURL);
     }
+    if (appIdentifier && [appIdentifier caseInsensitiveCompare:@"com.apple.Preview"] != NSOrderedSame) {
+        tmpArray = CFPreferencesCopyAppValue(CFSTR("NSRecentDocumentRecords"), CFSTR("com.apple.Preview"));
+        [historyArray addObjectsFromArray:(NSArray *)tmpArray];
+        if(tmpArray) CFRelease(tmpArray);
+	}
+    if (appIdentifier && [appIdentifier caseInsensitiveCompare:@"net.sourceforge.skim-app.Skim"] != NSOrderedSame) {
+        tmpArray = CFPreferencesCopyAppValue(CFSTR("NSRecentDocumentRecords"), CFSTR("net.sourceforge.skim-app.Skim"));
+        [historyArray addObjectsFromArray:(NSArray *)tmpArray];
+        if(tmpArray) CFRelease(tmpArray);
+    }
+    
+	unsigned int i = 0;
+	unsigned numberOfItems = [(NSArray *)historyArray count];
+	for (i = 0; i < numberOfItems; i ++){
+		itemDict = [(NSArray *)historyArray objectAtIndex:i];
+		aliasData = [[itemDict objectForKey:@"_NSLocator"] objectForKey:@"_NSAlias"];
+		
+        alias = [[BDAlias alloc] initWithData:aliasData];
+        filePath = [alias fullPathNoUI];
+        if(filePath)
+            [previewRecentPaths addObject:filePath];
+        [alias release];
+	}
+    
+    [historyArray release];
     
     NSString *fileName;
     NSMenuItem *item;
     
     [menu removeAllItems];
-    
+
     // now add all of the items from Preview, which are most likely what we want
     e = [previewRecentPaths objectEnumerator];
-    while (filePath = [e nextObject]) {
+    while(filePath = [e nextObject]){
         if([[NSFileManager defaultManager] fileExistsAtPath:filePath]){
             fileName = [filePath lastPathComponent];            
             item = [menu addItemWithTitle:fileName
@@ -1428,7 +1339,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     }
     
     // add a separator between Preview and global recent items, unless Preview has never been used
-    if ([previewRecentPaths count])
+    if([previewRecentPaths count])
         [menu addItem:[NSMenuItem separatorItem]];
 
     // now add all of the items that /were not/ in Preview's recent items path; this works for files opened from Preview's open panel, as well as from the Finder
@@ -1445,9 +1356,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         }
     }  
     
-    if ([globalRecentPaths count] == 0)
+    if ([globalRecentPaths count] == 0) {
         [menu addItemWithTitle:NSLocalizedString(@"No Recent Documents", @"Menu item title") action:NULL keyEquivalent:@""];
-    
+    }
+        
     [globalRecentPaths release];
     [previewRecentPaths release];
 }
@@ -1494,7 +1406,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         return ([NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == NO);
 	}
 	else if (theAction == @selector(createNewPubUsingCrossrefAction:)) {
-        return (isEditable && [NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]]);
+        return (isEditable && [NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == YES);
 	}
 	else if (theAction == @selector(openLinkedFile:)) {
 		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
@@ -1512,14 +1424,22 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
 	}
 	else if (theAction == @selector(previewAction:)) {
-		return [[publication files] count];
+		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] || [[publication valueForKey:@"linkedURLs"] count];
 	}
     else if (theAction == @selector(editSelectedFieldAsRawBibTeX:)) {
         if (isEditable == NO)
             return NO;
-        NSInteger row = [tableView editedRow];
+        int row = [tableView editedRow];
 		return (row != -1 && [complexStringEditor isEditing] == NO && 
                 [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] == NO && [[fields objectAtIndex:row] isCitationField] == NO);
+    }
+    else if (theAction == @selector(toggleStatusBar:)) {
+		if ([statusBar isVisible]) {
+			[menuItem setTitle:NSLocalizedString(@"Hide Status Bar", @"Menu item title")];
+		} else {
+			[menuItem setTitle:NSLocalizedString(@"Show Status Bar", @"Menu item title")];
+		}
+		return YES;
     }
     else if (theAction == @selector(raiseAddField:) || 
              theAction == @selector(raiseDelField:) || 
@@ -1534,23 +1454,23 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	return YES;
 }
 
-#pragma mark FVFileView support
+#pragma mark FileView support
 
-- (NSUInteger)numberOfURLsInFileView:(FVFileView *)aFileView { return [publication countOfFiles]; }
+- (NSUInteger)numberOfURLsInFileView:(FileView *)aFileView { return [publication countOfFiles]; }
 
-- (NSURL *)fileView:(FVFileView *)aFileView URLAtIndex:(NSUInteger)idx;
+- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
 {
     return [[publication objectInFilesAtIndex:idx] displayURL];
 }
 
-- (BOOL)fileView:(FVFileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
-    BDSKASSERT(anIndex != NSNotFound);
+    OBASSERT(anIndex != NSNotFound);
     [publication moveFilesAtIndexes:aSet toIndex:anIndex];
     return YES;
 }
 
-- (BOOL)fileView:(FVFileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     BDSKLinkedFile *aFile = nil;
     NSEnumerator *enumerator = [newURLs objectEnumerator];
@@ -1575,7 +1495,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     return YES;
 }
 
-- (void)fileView:(FVFileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
+- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     BDSKLinkedFile *aFile;
     NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
@@ -1597,21 +1517,21 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     }
 }
 
-- (BOOL)fileView:(FVFileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
+- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
 {
-    NSInteger moveToTrash = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKAskToTrashFilesKey] ? BDSKMoveToTrashAsk : BDSKMoveToTrashNo;
+    int moveToTrash = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAskToTrashFilesKey] ? -1 : 0;
     [self deleteURLsAtIndexes:indexSet moveToTrash:moveToTrash];
     return YES;
 }
 
-- (BOOL)fileView:(FVFileView *)aFileView shouldOpenURL:(NSURL *)aURL {
+- (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL {
     if ([aURL isFileURL])
         return [[NSWorkspace sharedWorkspace] openLinkedFile:[aURL path]] == NO;
     else
         return [[NSWorkspace sharedWorkspace] openLinkedURL:aURL] == NO;
 }
 
-- (NSDragOperation)fileView:(FVFileView *)aFileView validateDrop:(id <NSDraggingInfo>)info proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation {
+- (NSDragOperation)fileView:(FileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation {
     NSDragOperation dragOp = dragOperation;
     if ([[info draggingSource] isEqual:fileView] && dropOperation == FVDropOn && dragOperation != NSDragOperationCopy) {
         // redirect local drop on icon and drop on view
@@ -1633,13 +1553,13 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     return dragOp;
 }
 
-- (NSURL *)fileView:(FVFileView *)aFileView downloadDestinationWithSuggestedFilename:(NSString *)filename {
+- (NSURL *)fileView:(FileView *)aFileView downloadDestinationWithSuggestedFilename:(NSString *)filename {
     NSURL *fileURL = nil;
     NSString *extension = [filename pathExtension];
     NSString *downloadsDirectory = [[[NSUserDefaults standardUserDefaults] stringForKey:@"BDSKDownloadsDirectory"] stringByExpandingTildeInPath];
     BOOL isDir;
     
-    if (downloadsDirectory == nil && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey] && [NSString isEmptyString:extension] == NO)
+    if (downloadsDirectory == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] && [NSString isEmptyString:extension] == NO)
         downloadsDirectory = [NSSearchPathForDirectoriesInDomains(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 ? NSDownloadsDirectory : NSDesktopDirectory, NSUserDomainMask, YES) firstObject];
     
     if ([NSString isEmptyString:extension] == NO && [[NSFileManager defaultManager] fileExistsAtPath:downloadsDirectory isDirectory:&isDir] && isDir) {
@@ -1658,10 +1578,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     return fileURL;
 }
 
-- (void)trashAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
+- (void)trashAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo
 {
-    if (alert && [alert suppressionButtonState] == NSOnState)
-        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKAskToTrashFilesKey];
+    if (alert && [alert checkValue])
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKAskToTrashFilesKey];
     NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *urlEnum = [fileURLs objectEnumerator];
@@ -1670,13 +1590,14 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             NSString *path = [url path];
             NSString *folderPath = [path stringByDeletingLastPathComponent];
             NSString *fileName = [path lastPathComponent];
-            NSInteger tag = 0;
+            int tag = 0;
             [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
         }
     }
 }
 
-- (void)deleteURLsAtIndexes:(NSIndexSet *)indexSet moveToTrash:(NSInteger)moveToTrash{
+// moveToTrash: 0 = no, 1 = yes, -1 = ask
+- (void)deleteURLsAtIndexes:(NSIndexSet *)indexSet moveToTrash:(int)moveToTrash{
     NSUInteger idx = [indexSet lastIndex];
     NSMutableArray *fileURLs = [NSMutableArray array];
     while (NSNotFound != idx) {
@@ -1690,27 +1611,28 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         idx = [indexSet indexLessThanIndex:idx];
     }
     if ([fileURLs count]) {
-        if (moveToTrash == BDSKMoveToTrashYes) {
+        if (moveToTrash == 1) {
             [self trashAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[fileURLs retain]];
-        } else if (moveToTrash == BDSKMoveToTrashAsk) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
-                                             defaultButton:NSLocalizedString(@"No", @"Button title")
-                                           alternateButton:NSLocalizedString(@"Yes", @"Button title")
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
-            [alert setShowsSuppressionButton:YES];
+        } else if (moveToTrash == -1) {
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
+                                                 defaultButton:NSLocalizedString(@"No", @"Button title")
+                                               alternateButton:NSLocalizedString(@"Yes", @"Button title")
+                                                   otherButton:nil
+                                     informativeTextWithFormat:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
+            [alert setHasCheckButton:YES];
+            [alert setCheckValue:NO];
             [alert beginSheetModalForWindow:[self window]
                               modalDelegate:self 
                              didEndSelector:@selector(trashAlertDidEnd:returnCode:contextInfo:)  
+                         didDismissSelector:NULL 
                                 contextInfo:[fileURLs retain]];
         }
     }
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == &BDSKEditorObservationContext) {
-        [[NSUserDefaults standardUserDefaults] setInteger:[fileView displayMode] forKey:BDSKEditorFileViewDisplayModeKey];
-        [[NSUserDefaults standardUserDefaults] setFloat:[fileView iconScale] forKey:BDSKEditorFileViewIconScaleKey];
+    if (context == BDSKEditorObservationContext) {
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[fileView iconScale] forKey:BDSKEditorFileViewIconScaleKey];
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
@@ -1718,9 +1640,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 #pragma mark People
 
-- (NSInteger)numberOfPersons {
+- (int)numberOfPersons {
     NSArray *allArrays = [[publication people] allValues];
-    NSUInteger count = 0, i = [allArrays count];
+    unsigned count = 0, i = [allArrays count];
     
     while(i--)
         count += [[allArrays objectAtIndex:i] count];
@@ -1728,7 +1650,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     return count;
 }
 
-- (BibAuthor *)personAtIndex:(NSUInteger)anIndex {
+- (BibAuthor *)personAtIndex:(unsigned int)anIndex {
     return [[self persons] objectAtIndex:anIndex];
 }
 
@@ -1775,7 +1697,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     }else if([fieldName isEqualToString:BDSKCiteKeyString]){
         [citeKeyField selectText:nil];
     }else if([fieldName isIntegerField]){
-        NSInteger i, j, numRows = [matrix numberOfRows], numCols = [matrix numberOfColumns];
+        int i, j, numRows = [matrix numberOfRows], numCols = [matrix numberOfColumns];
         id cell;
         
         for (i = 0; i < numRows; i++) {
@@ -1789,7 +1711,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             }
         }
     }else{
-        NSUInteger row = [fields indexOfObject:fieldName];
+        unsigned int row = [fields indexOfObject:fieldName];
         if (row != NSNotFound) {
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:1 row:row withEvent:nil select:YES];
@@ -1800,36 +1722,33 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 #pragma mark Text Change handling
 
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender{
-	NSInteger row = [tableView selectedRow];
+	int row = [tableView selectedRow];
 	if (row == -1) 
 		return;
     [self editSelectedCellAsMacro];
-	if ([tableView editedRow] != row)
+	if([tableView editedRow] != row)
 		[tableView editColumn:1 row:row withEvent:nil select:YES];
 }
 
 - (BOOL)editSelectedCellAsMacro{
-	NSInteger row = [tableView selectedRow];
-    // this should never happen
-    if ([complexStringEditor isEditing] || row == -1) 
-        return NO;
-	if (complexStringEditor == nil) {
-    	complexStringEditor = [[BDSKComplexStringEditor alloc] initWithMacroResolver:[publication macroResolver]];
-        [complexStringEditor setEditable:isEditable];
-	}
-    NSString *value = [publication valueOfField:[fields objectAtIndex:row]];
+	int row = [tableView selectedRow];
+	if ([complexStringEditor isEditing] || row == -1) 
+		return NO;
+	if (complexStringEditor == nil)
+    	complexStringEditor = [[BDSKComplexStringEditor alloc] init];
+	NSString *value = [publication valueOfField:[fields objectAtIndex:row]];
 	NSText *fieldEditor = [tableView currentEditor];
 	[tableCellFormatter setEditAsComplexString:YES];
 	if (fieldEditor) {
 		[fieldEditor setString:[tableCellFormatter editingStringForObjectValue:value]];
+		[[[tableView tableColumnWithIdentifier:@"value"] dataCellForRow:row] setObjectValue:value];
 		[fieldEditor selectAll:self];
 	}
-	[complexStringEditor attachToTableView:tableView atRow:row column:1 withValue:value];
-    return YES;
+	return [complexStringEditor attachToTableView:tableView atRow:row column:1 withValue:value formatter:tableCellFormatter];
 }
 
 - (BOOL)formatter:(BDSKComplexStringFormatter *)formatter shouldEditAsComplexString:(NSString *)object {
-    return [self editSelectedCellAsMacro];
+	return [self editSelectedCellAsMacro];
 }
 
 // this is called when the user actually starts editing
@@ -1842,19 +1761,19 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         NSString *value = [publication valueOfField:field];
         
         if([value isInherited] &&
-           [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnEditInheritedKey]){
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
+           [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnEditInheritedKey]){
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
                                                  defaultButton:NSLocalizedString(@"OK", @"Button title")
                                                alternateButton:NSLocalizedString(@"Cancel", @"Button title")
                                                    otherButton:NSLocalizedString(@"Edit Parent", @"Button title")
                                      informativeTextWithFormat:NSLocalizedString(@"The value was inherited from the item linked to by the Crossref field. Do you want to overwrite the inherited value?", @"Informative text in alert dialog")];
-            [alert setShowsSuppressionButton:YES];
-            
-            if ([alert suppressionButtonState] == NSOnState)
-                [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnEditInheritedKey];
-            
-            NSInteger rv = [alert runModal];
-            
+            [alert setHasCheckButton:YES];
+            [alert setCheckValue:NO];
+            int rv = [alert runSheetModalForWindow:[self window]
+                                     modalDelegate:self 
+                                    didEndSelector:@selector(editInheritedAlertDidEnd:returnCode:contextInfo:)  
+                                didDismissSelector:NULL 
+                                       contextInfo:NULL];
             if (rv == NSAlertAlternateReturn) {
                 canEdit = NO;
             } else if (rv == NSAlertOtherReturn) {
@@ -1866,11 +1785,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     return canEdit;
 }
 
-- (void)controlTextDidBeginEditing:(NSNotification *)note {
-    if (isEditing == NO) {
-        [[self document] objectDidBeginEditing:self];
-        isEditing = YES;
-    }
+- (void)editInheritedAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if ([alert checkValue] == YES)
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnEditInheritedKey];
 }
 
 // send by the formatter when validation failed
@@ -1880,51 +1797,78 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 // send by the formatter when formatting in getObjectValue... failed
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)aString errorDescription:(NSString *)error{
-	BOOL accept = NO;
+	BOOL accept = forceEndEditing;
     
-    if (nil == error) {
-        // shouldn't get here
-        NSLog(@"%@:%d formatter failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__);
-    } else if (control == tableView) {
-        
+    if (control == tableView) {
         NSString *fieldName = [fields objectAtIndex:[tableView editedRow]];
 		if ([fieldName isEqualToString:BDSKCrossrefString]) {
             // this may occur if the cite key formatter fails to format
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Key", @"Message in alert dialog when entering invalid Crossref key") 
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:@"%@", error];
-            
-            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+            if(error != nil){
+                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Key", @"Message in alert dialog when entering invalid Crossref key") 
+                                                     defaultButton:nil
+                                                   alternateButton:nil
+                                                       otherButton:nil
+                                         informativeTextWithFormat:@"%@", error];
+                
+                [alert runSheetModalForWindow:[self window]];
+            }else{
+                NSLog(@"%@:%d formatter for control %@ failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__, control);
+            }
 		} else if ([fieldName isCitationField]) {
             // this may occur if the citation formatter fails to format
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Citation Key", @"Message in alert dialog when entering invalid Crossref key") 
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:@"%@", error];
-            
-            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+            if(error != nil){
+                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Citation Key", @"Message in alert dialog when entering invalid Crossref key") 
+                                                     defaultButton:nil
+                                                   alternateButton:nil
+                                                       otherButton:nil
+                                         informativeTextWithFormat:@"%@", error];
+                
+                [alert runSheetModalForWindow:[self window]];
+            }else{
+                NSLog(@"%@:%d formatter for control %@ failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__, control);
+            }
         } else if (NO == [tableCellFormatter editAsComplexString]) {
 			// this is a simple string, an error means that there are unbalanced braces
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"Informative text in alert dialog")];
-            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-        }
-        
+			NSString *message = nil;
+			NSString *cancelButton = nil;
+			
+			if (forceEndEditing) {
+				message = NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"Informative text in alert dialog");
+			} else {
+				message = NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved. Do you want to keep editing?", @"Informative text in alert dialog");
+				cancelButton = NSLocalizedString(@"Cancel", @"Button title");
+			}
+			
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
+                                                 defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                               alternateButton:cancelButton
+                                                   otherButton:nil
+                                     informativeTextWithFormat:message];
+            
+            int rv = [alert runSheetModalForWindow:[self window]];
+			
+			accept = (forceEndEditing || rv == NSAlertAlternateReturn);
+		}
+        if(accept)
+            ignoreEdit = YES;
 	} else if (control == citeKeyField) {
-        // !!! may have to revisit this with strict invalid keys?
         // this may occur if the cite key formatter fails to format
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key", @"Message in alert dialog when enetring invalid cite key") 
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:@"%@", error];        
-        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+        if(error != nil){
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key", @"Message in alert dialog when enetring invalid cite key") 
+                                                 defaultButton:nil
+                                               alternateButton:nil
+                                                   otherButton:nil
+                                     informativeTextWithFormat:@"%@", error];
+            
+            [alert runSheetModalForWindow:[self window]];
+		}else{
+            NSLog(@"%@:%d formatter for control %@ failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__, control);
+		}
+        if (accept)
+            [citeKeyField setStringValue:[publication citeKey]];
+    } else {
+        // shouldn't get here
+        NSLog(@"%@:%d formatter failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__);
     }
     return accept;
 }
@@ -1943,7 +1887,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             NSString *message = nil;
             
             // check whether we won't get a crossref chain
-            NSInteger errorCode = [publication canSetCrossref:value andCiteKey:[publication citeKey]];
+            int errorCode = [publication canSetCrossref:value andCiteKey:[publication citeKey]];
             if (errorCode == BDSKSelfCrossrefError)
                 message = NSLocalizedString(@"An item cannot cross reference to itself.", @"Informative text in alert dialog");
             else if (errorCode == BDSKChainCrossrefError)
@@ -1952,14 +1896,14 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
                 message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"Informative text in alert dialog");
             
             if (message) {
-                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key") 
-                                                 defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                     informativeTextWithFormat:message];
+                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key") 
+                                                     defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                                   alternateButton:nil
+                                                       otherButton:nil
+                                         informativeTextWithFormat:message];
                 
-                [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-                endEdit = NO;
+                [alert runSheetModalForWindow:[self window]];
+                ignoreEdit = YES;
             }
         }
         
@@ -1967,40 +1911,42 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 		
         NSString *message = nil;
         NSString *cancelButton = nil;
-        NSString *defaultButton = nil;
         NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] fragileCiteKeyCharacterSet];
         NSRange r = [[control stringValue] rangeOfCharacterFromSet:invalidSet];
         
-        // check for fragile invalid characters, as the formatter doesn't do this
         if (r.location != NSNotFound) {
             
-            message = NSLocalizedString(@"The cite key you entered contains characters that could be invalid in TeX. Do you want to keep them or remove them?", @"Informative text in alert dialog");
-            defaultButton = NSLocalizedString(@"Remove", @"Button title");
-            cancelButton = NSLocalizedString(@"Keep", @"Button title");
+            if (forceEndEditing) {
+                message = NSLocalizedString(@"The cite key you entered contains characters that could be invalid in TeX.", @"Informative text in alert dialog");
+            } else {
+                message = NSLocalizedString(@"The cite key you entered contains characters that could be invalid in TeX. Do you want to continue editing with the invalid characters removed?", @"Informative text in alert dialog");
+                cancelButton = NSLocalizedString(@"Cancel", @"Button title");
+            }
             
         } else {
             // check whether we won't crossref to the new citekey
-            NSInteger errorCode = [publication canSetCrossref:[publication valueOfField:BDSKCrossrefString inherit:NO] andCiteKey:[control stringValue]];
+            int errorCode = [publication canSetCrossref:[publication valueOfField:BDSKCrossrefString inherit:NO] andCiteKey:[control stringValue]];
             if (errorCode == BDSKSelfCrossrefError)
                 message = NSLocalizedString(@"An item cannot cross reference to itself.", @"Informative text in alert dialog");
             else if (errorCode != BDSKNoCrossrefError) // shouldn't happen
                 message = NSLocalizedString(@"Cannot set this cite key as this would lead to a crossreff chain.", @"Informative text in alert dialog");
         }
         
+        // @@ fixme: button titles don't correspond to message options
         if (message) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
-                                             defaultButton:defaultButton
-                                           alternateButton:cancelButton
-                                               otherButton:nil
-                                 informativeTextWithFormat:message];
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
+                                                 defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                               alternateButton:cancelButton
+                                                   otherButton:nil
+                                     informativeTextWithFormat:message];
             
-            NSInteger rv = [alert runModal];
+            int rv = [alert runSheetModalForWindow:[self window]];
             
-            if (rv == NSAlertDefaultReturn) {
+            if (forceEndEditing || rv == NSAlertAlternateReturn) {
+                [citeKeyField setStringValue:[publication citeKey]];
+             } else {
                 [control setStringValue:[[control stringValue] stringByReplacingCharactersInSet:invalidSet withString:@""]];
                 endEdit = NO;
-            } else {
-                 [citeKeyField setStringValue:[control stringValue]];
             }
 		}
 	}
@@ -2031,10 +1977,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             
         }
     }
-    if (isEditing) {
-        [[self document] objectDidEndEditing:self];
-        isEditing = NO;
-    }
 }
 
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
@@ -2049,7 +1991,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
-- (NSInteger)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue didAutoGenerate:(NSInteger)mask{
+- (int)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue didAutoGenerate:(int)mask{
     mask |= [[self document] userChangedField:fieldName ofPublications:[NSArray arrayWithObject:publication] from:[NSArray arrayWithObject:oldValue ?: @""] to:[NSArray arrayWithObject:newValue]];
     
     if (mask != 0) {
@@ -2066,18 +2008,11 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     return mask;
 }
 
-- (NSInteger)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue{
+- (int)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue{
     return [self userChangedField:fieldName from:oldValue to:newValue didAutoGenerate:0];
 }
 
 #pragma mark annote/abstract/rss
- 
-- (void)setPreviousValueForCurrentEditedNotesView:(NSString *)aString {
-    if (aString != previousValueForCurrentEditedView) {
-        [previousValueForCurrentEditedView release];
-        previousValueForCurrentEditedView = [aString copy];
-    }
-}
 
 - (void)textDidBeginEditing:(NSNotification *)aNotification{
     // Add the mutableString of the text storage to the item's pubFields, so changes
@@ -2100,13 +2035,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     if(selRange.location != NSNotFound && selRange.location < [[currentEditedView string] length])
         [currentEditedView setSelectedRange:selRange];
     ignoreFieldChange = NO;
-    
-    // save off the old value in case abortEditing gets called
-    [self setPreviousValueForCurrentEditedNotesView:[currentEditedView string]];
-    if (isEditing == NO) {
-        [[self document] objectDidBeginEditing:self];
-        isEditing = YES;
-    }
 }
 
 // Clear all the undo actions when changing tab items, just in case; otherwise we
@@ -2119,19 +2047,21 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (BOOL)tabView:(NSTabView *)tabView shouldSelectTabViewItem:(NSTabViewItem *)tabViewItem{
-    return [self commitEditing];
-}
-
-- (BOOL)textShouldEndEditing:(NSText *)aTextObject {
-    BDSKASSERT(aTextObject == currentEditedView);
-    if (aTextObject == currentEditedView)
-        return [self validateCurrentEditedView];
+    if (currentEditedView && [[currentEditedView string] isStringTeXQuotingBalancedWithBraces:YES connected:NO] == NO) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
+                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"Informative text in alert dialog")];
+    
+        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+        return NO;
+    }
     return YES;
 }
 
 // sent by the textViews
 - (void)textDidEndEditing:(NSNotification *)aNotification{
-    
     NSString *field = nil;
     if(currentEditedView == notesView)
         field = BDSKAnnoteString;
@@ -2148,15 +2078,16 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
                                                           userInfo:notifInfo];
     }
     
-    // this is called multiple times when switching tabs
-    if (currentEditedView) {
-        NSParameterAssert([self validateCurrentEditedView]);
-        currentEditedView = nil;
-        [self setPreviousValueForCurrentEditedNotesView:nil];
-    }
-    if (isEditing) {
-        [[self document] objectDidEndEditing:self];
-        isEditing = NO;
+	currentEditedView = nil;
+    
+    if ([[[aNotification object] string] isStringTeXQuotingBalancedWithBraces:YES connected:NO] == NO) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
+                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The value you entered contains unbalanced braces. If you save you might not be able to reopen the file.", @"Informative text in alert dialog")];
+    
+        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
 }
 
@@ -2183,13 +2114,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 							 [crossref caseInsensitiveCompare:[userInfo objectForKey:@"oldValue"]] == NSOrderedSame));
 	
     // If it is not our item or his crossref parent, we don't care, but our parent may have changed his cite key
-	if (sender != publication && NO == parentDidChange) {
-        // though a change of the cite key of another item may change the duplicate status
-        if ([changeKey isEqualToString:BDSKCiteKeyString])
-            [self updateCiteKeyDuplicateWarning];
+	if (sender != publication && NO == parentDidChange)
 		return;
-	}
-    
+	
 	if([changeKey isEqualToString:BDSKLocalFileString]){
         [fileView reloadIcons];
         [self synchronizeWindowTitleWithDocumentName];
@@ -2202,7 +2129,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 		[self updateTypePopup];
 	}
 	else if([changeKey isEqualToString:BDSKCiteKeyString]){
-		[citeKeyField setStringValue:[publication citeKey]];
+		[citeKeyField setStringValue:newValue];
 		[self updateCiteKeyAutoGenerateStatus];
         [self updateCiteKeyDuplicateWarning];
 	}
@@ -2210,7 +2137,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	   (parentDidChange && [changeKey isEqualToString:BDSKCiteKeyString])){
         // Reset if the crossref changed, or our parent's cite key changed.
         // If we are editing a crossref field, we should first set the new value, because resetFields will set the edited value. This happens when it is set through drag/drop
-		NSInteger editedRow = [tableView editedRow];
+		int editedRow = [tableView editedRow];
         if (editedRow != -1 && [[fields objectAtIndex:editedRow] isEqualToString:changeKey])
             [[tableView currentEditor] setString:newValue ?: @""];
         if ([changeKey isEqualToString:BDSKCrossrefString] && [NSString isEmptyString:newValue] == [fields containsObject:changeKey]) {
@@ -2271,7 +2198,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             [authorTableView reloadData];
         
         if ([tableView editedRow] != -1 && [[fields objectAtIndex:[tableView editedRow]] isEqualToString:changeKey]) {
-            NSString *tmpValue = [publication valueOfField:changeKey] ?: @"";
+            NSString *tmpValue = newValue ?: @"";
             if ([changeKey isCitationField] == NO && [tableCellFormatter editAsComplexString])
                 tmpValue = [tmpValue stringAsBibTeXString];
             [[tableView currentEditor] setString:tmpValue];
@@ -2335,20 +2262,16 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
  
 - (void)typeInfoDidChange:(NSNotification *)aNotification{
-    if ([self commitEditing]) {
-        [self setupTypePopUp];
-        [self resetFieldsIfNeeded];
-    }
+	[self setupTypePopUp];
+	[self resetFieldsIfNeeded];
 }
  
 - (void)customFieldsDidChange:(NSNotification *)aNotification{
     // ensure that the pub updates first, since it observes this notification also
     [publication customFieldsDidChange:aNotification];
-    if ([self commitEditing]) {
-        [self resetFieldsIfNeeded];
-        [self setupMatrix];
-        [authorTableView reloadData];
-    }
+	[self resetFieldsIfNeeded];
+    [self setupMatrix];
+    [authorTableView reloadData];
 }
 
 - (void)macrosDidChange:(NSNotification *)notification{
@@ -2357,7 +2280,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         NSEnumerator *fieldEnum = [fields objectEnumerator];
         NSString *field;
         while (field = [fieldEnum nextObject]) {
-            if ([[publication valueOfField:field] isComplex] && [self commitEditing]) {
+            if ([[publication valueOfField:field] isComplex]) {
                 [self reloadTable];
                 break;
             }
@@ -2367,11 +2290,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 - (void)fileURLDidChange:(NSNotification *)notification{
     [fileView reloadIcons];
-}
-
-- (void)appDidBecomeActive:(NSNotification *)notification{
-    // resolve all the URLs, when a file was renamed on disk this will trigger an update notification
-    [[publication files] valueForKey:@"URL"];
 }
 
 #pragma mark document interaction
@@ -2408,15 +2326,15 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 - (BOOL)control:(NSControl *)control textViewShouldAutoComplete:(NSTextView *)textview {
     if (control == tableView)
-		return [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditorFormShouldAutoCompleteKey];
+		return [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditorFormShouldAutoCompleteKey];
 	return NO;
 }
 
-- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(NSInteger *)idx{
+- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)idx{
     if (control != tableView) {
 		return words;
 	} else if ([complexStringEditor isEditing]) {
-		return [[BDSKCompletionManager sharedManager] possibleMatches:[[publication macroResolver] allMacroDefinitions] 
+		return [[BDSKCompletionManager sharedManager] possibleMatches:[[[publication owner] macroResolver] allMacroDefinitions] 
 						   forBibTeXString:[textView string] 
 								partialWordRange:charRange 
 								indexOfBestMatch:idx];
@@ -2460,7 +2378,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return NO;
 }
 
-- (BOOL)control:(NSControl *)control textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex {
+- (BOOL)control:(NSControl *)control textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex {
     if ([control isEqual:tableView]) {
         BibItem *pub = [[[publication owner] publications] itemForCiteKey:aLink];
         if (nil == pub) {
@@ -2532,7 +2450,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 		[self setStatus:NSLocalizedString(@"Linked file needs to be filed.",@"Linked file needs to be filed.")];
 		if ([[statusBar iconIdentifiers] containsObject:@"NeedsToBeFiled"] == NO) {
 			NSString *tooltip = NSLocalizedString(@"The linked file needs to be filed.", @"Tool tip message");
-			[statusBar addIcon:[NSImage imageNamed:@"staticGroup"] withIdentifier:@"NeedsToBeFiled" toolTip:tooltip];
+			[statusBar addIcon:[NSImage imageNamed:@"genericFolderIcon"] withIdentifier:@"NeedsToBeFiled" toolTip:tooltip];
 		}
 	} else {
 		[self setStatus:@""];
@@ -2541,7 +2459,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)updateCiteKeyAutoGenerateStatus{
-	if ([publication hasEmptyOrDefaultCiteKey] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyAutogenerateKey]) {
+	if ([publication hasEmptyOrDefaultCiteKey] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey]) {
 		if ([[statusBar iconIdentifiers] containsObject:@"NeedsToGenerateCiteKey"] == NO) {
 			NSString *tooltip = NSLocalizedString(@"The cite key needs to be generated.", @"Tool tip message");
 			[statusBar addIcon:[NSImage imageNamed:@"key"] withIdentifier:@"NeedsToGenerateCiteKey" toolTip:tooltip];
@@ -2612,7 +2530,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	// create a crossref (cmd-option), or fill empty fields (no modifiers)
     
     // uses the Carbon function since [NSApp modifierFlags] won't work if we're not the front app
-	NSUInteger modifierFlags = [NSApp currentModifierFlags];
+	unsigned modifierFlags = [NSApp currentModifierFlags];
 	
 	// we always have sourceDragMask & NSDragOperationLink here for some reason, so test the mask manually
 	if((modifierFlags & (NSAlternateKeyMask | NSCommandKeyMask)) == (NSAlternateKeyMask | NSCommandKeyMask)){
@@ -2622,7 +2540,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 		NSString *message = nil;
 		
 		// first check if we don't create a Crossref chain
-        NSInteger errorCode = [publication canSetCrossref:crossref andCiteKey:[publication citeKey]];
+        int errorCode = [publication canSetCrossref:crossref andCiteKey:[publication citeKey]];
 		if (errorCode == BDSKSelfCrossrefError)
 			message = NSLocalizedString(@"An item cannot cross reference to itself.", @"Informative text in alert dialog");
 		else if (errorCode == BDSKChainCrossrefError)
@@ -2653,7 +2571,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         NSString *oldValue = nil;
         NSString *newValue = nil;
         BOOL shouldOverwrite = (modifierFlags & NSAlternateKeyMask) != 0;
-        NSInteger autoGenerateStatus = 0;
+        int autoGenerateStatus = 0;
         
         [publication setPubType:[tempBI pubType]]; // do we want this always?
         
@@ -2702,14 +2620,13 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	return dragFieldEditor;
 }
 
-- (void)shouldCloseAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+- (void)shouldCloseAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     switch (returnCode){
         case NSAlertOtherReturn:
             break; // do nothing
         case NSAlertAlternateReturn:
-            // we have a hard retain until -[BDSKEditor dealloc]
-            [[self document] removePublication:publication];
-            // now fall through to default
+            [[publication retain] autorelease]; // make sure it stays around till we're closed
+            [[self document] removePublication:publication]; // now fall through to default
         default:
             [[alert window] orderOut:nil];
             [self close];
@@ -2717,9 +2634,13 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (BOOL)windowShouldClose:(id)sender{
+    // User may have started editing some field, e.g. deleted the citekey and not tabbed out; if the user then chooses to discard, the finalizeChangesPreservingSelection: in windowWillClose: ultimately results in a crash due to OAApplication's sheet queue interaction with modal BDSKAlerts.  Hence, we need to call it earlier.  
+    [self finalizeChangesPreservingSelection:NO];
     
-    // this may trigger warning sheets, so we can't close the window
-    if ([self commitEditing] == NO)
+    // @@ Some of this might be handled automatically for us if we didn't use endEditingFor: to basically override formatter return values.  Forcing the field editor to end editing has always been problematic (see the comments in some of the sheet callbacks).  Perhaps we should just return NO here if [[self window] makeFirstResponder:[self window]] fails, rather than using finalizeChangesPreservingSelection:'s brute force behavior.
+
+    // finalizeChangesPreservingSelection: may end up triggering other sheets, as well (move file, for example; bug #1565645), and we don't want to close the window when it has a sheet attached, since it's waiting for user input at that point.  This is sort of a hack, but there's too much state for us to keep track of and decide if the window should really close.
+    if ([[self window] attachedSheet] != nil)
         return NO;
     
 	// we shouldn't further check external items, though they could have had a macro editor
@@ -2727,18 +2648,19 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         return YES;
         
     NSString *errMsg = nil;
-    NSString *discardMsg = nil;
+    NSString *discardMsg = NSLocalizedString(@"Discard", @"Button title");
     
     // case 1: the item has not been edited
     if(![publication hasBeenEdited]){
         errMsg = NSLocalizedString(@"The item has not been edited.  Would you like to keep it?", @"Informative text in alert dialog");
-        discardMsg = NSLocalizedString(@"Discard", @"Button title");
     // case 2: cite key hasn't been set, and paper needs to be filed
-    }else if([publication hasEmptyOrDefaultCiteKey] && [[publication filesToBeFiled] count] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]){
+    }else if([publication hasEmptyOrDefaultCiteKey] && [[publication filesToBeFiled] count] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set, and AutoFile did not have enough information to file the paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
+        discardMsg = nil; // this item has some fields filled out and has a paper associated with it; no discard option
     // case 3: only the paper needs to be filed
-    }else if([[publication filesToBeFiled] count] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]){
+    }else if([[publication filesToBeFiled] count] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"AutoFile did not have enough information to file this paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
+        discardMsg = nil; // this item has some fields filled out and has a paper associated with it; no discard option
     // case 4: only the cite key needs to be set
     }else if([publication hasEmptyOrDefaultCiteKey]){
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set.  Would you like to cancel and edit the cite key, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
@@ -2764,10 +2686,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     // close so it's not hanging around by itself; this works if the doc window closes, also
     [complexStringEditor close];
     
-    // make sure we're not registered as editor because we will be invalid, this shouldn't be necessary but there have been reports of crashes
-    if (isEditing && [self commitEditing] == NO)
-        [self discardEditing];
-    
 	// this can give errors when the application quits when an editor window is open
 	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKCloseEditorWindowScriptHookName 
 												 forPublications:[NSArray arrayWithObject:publication]
@@ -2776,33 +2694,12 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     // see method for notes
     [self breakTextStorageConnections];
     
-    @try {
-        [fileView removeObserver:self forKeyPath:@"iconScale"];
-        [fileView removeObserver:self forKeyPath:@"displayMode"];
-    }
-    @catch (id e) {}
+    [fileView removeObserver:self forKeyPath:@"iconScale"];
     [fileView setDataSource:nil];
     [fileView setDelegate:nil];
-    [tableView setDataSource:nil];
-    [tableView setDelegate:nil];
-    [authorTableView setDataSource:nil];
-    [authorTableView setDelegate:nil];
     
-    // document still has a retain up to this point
-    [[self document] removeWindowController:self];
-}
-
-- (void)setDocument:(NSDocument *)document {
-    // in case the document is reset before windowWillClose: is called, I think this can happen on Tiger
-    if ([self document] && document == nil && isEditing) {
-        if ([self commitEditing] == NO)
-            [self discardEditing];
-        if (isEditing) {
-            [[self document] objectDidEndEditing:self];
-            isEditing = NO;
-        }
-    }
-    [super setDocument:document];
+    // @@ problem here:  BDSKEditor is the delegate for a lot of things, and if they get messaged before the window goes away, but after the editor goes away, we have crashes.  In particular, the finalizeChanges (or something?) ends up causing the window and form to be redisplayed if a form cell is selected when you close the window, and the form sends formCellHasArrowButton to a garbage editor.  Rather than set the delegate of all objects to nil here, we'll just hang around a bit longer.
+    [[self retain] autorelease];
 }
 
 #pragma mark undo manager
@@ -2836,7 +2733,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 #pragma mark TableView datasource methods
 
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)tv{
+- (int)numberOfRowsInTableView:(NSTableView *)tv{
 	if ([tv isEqual:tableView]) {
         return [fields count];
 	} else if ([tv isEqual:authorTableView]) {
@@ -2845,7 +2742,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return 0;
 }
 
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
 	if ([tv isEqual:tableView]) {
         NSString *tcID = [tableColumn identifier];
         NSString *field = [fields objectAtIndex:row];
@@ -2860,32 +2757,34 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return nil;
 }
 
-- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
     if ([tv isEqual:tableView] && [[tableColumn identifier] isEqualToString:@"value"]) {
-        NSString *field = [fields objectAtIndex:row];
-        NSString *oldValue = [publication valueOfField:field] ?: @"";
-        if (object == nil)
-            object = @"";
-        
-        if (NO == [object isEqualAsComplexString:oldValue])
-            [self recordChangingField:field toValue:object];
+        if (ignoreEdit == NO) {
+            NSString *field = [fields objectAtIndex:row];
+            NSString *oldValue = [publication valueOfField:field] ?: @"";
+            if (object == nil)
+                object = @"";
+            
+            if (NO == [object isEqualAsComplexString:oldValue])
+                [self recordChangingField:field toValue:object];
+        }
+        // tableView:shouldEditTableColumn:row: may not be called when the user continues editing
+        ignoreEdit = NO;
     }
 }
 
-- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op{
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
     if ([tv isEqual:tableView]) {
         if (row == -1)
             row = [tableView numberOfRows] - 1;
         else if (op ==  NSTableViewDropAbove)
-            row = BDSKMin(row, [tableView numberOfRows] - 1);
+            row = fminf(row, [tableView numberOfRows] - 1);
         [tableView setDropRow:row dropOperation:NSTableViewDropOn];
         
         NSPasteboard *pboard = [info draggingPasteboard];
         NSString *field = [fields objectAtIndex:row];
         
-        if ([info draggingSource] == tableView) {
-            return NSDragOperationNone;
-        } else if ([field isCitationField] || [field isEqualToString:BDSKCrossrefString]) {
+        if ([field isCitationField] || [field isEqualToString:BDSKCrossrefString]) {
             if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]])
                 return NSDragOperationEvery;
         } else if ([field isLocalFileField]) {
@@ -2903,7 +2802,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return NSDragOperationNone;
 }
 
-- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
+- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op{
     if ([tv isEqual:tableView]) {
         NSPasteboard *pboard = [info draggingPasteboard];
         NSString *field = [fields objectAtIndex:row];
@@ -2920,7 +2819,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                     return NO;
                 
                 // first check if we don't create a Crossref chain
-                NSInteger errorCode = [publication canSetCrossref:crossref andCiteKey:[publication citeKey]];
+                int errorCode = [publication canSetCrossref:crossref andCiteKey:[publication citeKey]];
                 NSString *message = nil;
                 if (errorCode == BDSKSelfCrossrefError)
                     message = NSLocalizedString(@"An item cannot cross reference to itself.", @"Informative text in alert dialog");
@@ -2979,7 +2878,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                         if (filename == nil)
                             filename = [url path];
                         if (basePath)
-                            filename = [filename relativePathFromPath:basePath];
+                            filename = [basePath relativePathToFilename:filename];
                     } else if (mask == NSDragOperationCopy) {
                         if (filename == nil)
                             filename = [url path];
@@ -3015,15 +2914,16 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 #pragma mark TableView delegate methods
 
-- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
+- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
 	if ([tv isEqual:tableView] && [[tableColumn identifier] isEqualToString:@"value"]) {
+        ignoreEdit = NO;
         // we always want to "edit" even when we are not editable, so we can always select, and the cell will prevent editing when isEditable == NO
         return YES;
     }
     return NO;
 }
 
-- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
+- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
 	if ([tv isEqual:tableView]) {
         NSString *field = [fields objectAtIndex:row];
         if([[tableColumn identifier] isEqualToString:@"field"]){
@@ -3042,7 +2942,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     }
 }
 
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation{
+- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
 	if ([tv isEqual:authorTableView]) {
         BibAuthor *person = [self personAtIndex:row];
         return [NSString stringWithFormat:@"%@ (%@)", [person displayName], [[person field] localizedFieldName]];
@@ -3050,9 +2950,16 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return nil;
 }
 
+- (NSDragOperation)tableView:(NSTableView *)tv draggingSourceOperationMaskForLocal:(BOOL)isLocal {
+	if ([tv isEqual:tableView]) {
+        return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
+    }
+    return NSDragOperationNone;
+}
+
 #pragma mark Splitview delegate methods
 
-- (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(NSInteger)offset {
+- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset {
     if ([sender isEqual:mainSplitView]) {
         NSView *tabs = [[mainSplitView subviews] objectAtIndex:0]; // tabs
         NSView *files = [[mainSplitView subviews] objectAtIndex:1]; // files+authors
@@ -3110,9 +3017,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     }
 }
 
-- (CGFloat)splitView:(NSSplitView *)sender constrainMinCoordinate:(CGFloat)proposedMin ofSubviewAt:(NSInteger)offset{
+- (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)offset{
     if ([sender isEqual:mainSplitView]) {
-        return BDSKMax(proposedMin, 390.0);
+        return fmaxf(proposedMin, 390.0);
     }
     return proposedMin;
 }
@@ -3217,9 +3124,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	NSRange selection = NSMakeRange(0, 0);
 	if(fieldEditor){
 		selection = [fieldEditor selectedRange];
-		editedTitle = [[fields objectAtIndex:[tableView editedRow]] retain];
+		editedTitle = [fields objectAtIndex:[tableView editedRow]];
+		forceEndEditing = YES;
 		if ([[self window] makeFirstResponder:[self window]] == NO)
-            [NSException raise:NSInternalInconsistencyException format:@"Failed to commit edits in %s, trouble ahead", __func__];
+			[[self window] endEditingFor:nil];
+		forceEndEditing = NO;
 	}
 	
     if (newFields && [fields isEqualToArray:newFields] == NO) {
@@ -3230,23 +3139,23 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         if([fields count] > 0){
             NSTableColumn *tableColumn = [tableView tableColumnWithIdentifier:@"field"];
             id cell;
-            NSInteger numberOfRows = [fields count];
-            NSInteger row;
-            CGFloat maxWidth = NSWidth([citeKeyTitle frame]) + 4.0;
+            int numberOfRows = [fields count];
+            int row;
+            float maxWidth = NSWidth([citeKeyTitle frame]) + 4.0;
             
             for (row = 0; row < numberOfRows; row++) {
                 cell = [tableColumn dataCellForRow:row];
                 [self tableView:tableView willDisplayCell:cell forTableColumn:tableColumn row:row];
                 [cell setObjectValue:[fields objectAtIndex:row]];
-                maxWidth = BDSKMax(maxWidth, [cell cellSize].width);
+                maxWidth = fmaxf(maxWidth, [cell cellSize].width);
             }
-            maxWidth = BDSKCeil(maxWidth);
+            maxWidth = ceilf(maxWidth);
             [tableColumn setMinWidth:maxWidth];
             [tableColumn setMaxWidth:maxWidth];
             [tableView sizeToFit];
             NSRect frame = [citeKeyField frame];
             NSRect oldFrame = frame;
-            CGFloat offset = BDSKMin(NSMaxX(frame) - 20.0, maxWidth + NSMinX([citeKeyTitle frame]) + 4.0);
+            float offset = fminf(NSMaxX(frame) - 20.0, maxWidth + NSMinX([citeKeyTitle frame]) + 4.0);
             frame.size.width = NSMaxX(frame) - offset;
             frame.origin.x = offset;
             [citeKeyField setFrame:frame];
@@ -3258,7 +3167,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     
 	// restore the edited cell and its selection
 	if(editedTitle){
-        NSUInteger editedRow = [fields indexOfObject:editedTitle];
+        unsigned int editedRow = [fields indexOfObject:editedTitle];
         if (editedRow != NSNotFound) {
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:editedRow] byExtendingSelection:NO];
             [tableView editColumn:1 row:editedRow withEvent:nil select:NO];
@@ -3266,7 +3175,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             if ([[fieldEditor string] length] >= NSMaxRange(selection))
                 [fieldEditor setSelectedRange:selection];
         }
-        [editedTitle release];
 	}
 }
 
@@ -3289,17 +3197,17 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	didSetupFields = YES;
 }
 
-- (void)getNumberOfRows:(NSInteger *)rows columns:(NSInteger *)columns forMatrixCellSize:(NSSize)cellSize {
+- (void)getNumberOfRows:(int *)rows columns:(int *)columns forMatrixCellSize:(NSSize)cellSize {
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-    NSInteger numEntries = [[typeMan booleanFieldsSet] count] + [[typeMan triStateFieldsSet] count] + [[typeMan ratingFieldsSet] count];
+    int numEntries = [[typeMan booleanFieldsSet] count] + [[typeMan triStateFieldsSet] count] + [[typeMan ratingFieldsSet] count];
     NSSize size = [[matrix enclosingScrollView] frame].size;
     NSSize spacing = [matrix intercellSpacing];
-    NSInteger numRows, numCols = MIN(BDSKFloor((size.width + spacing.width) / (cellSize.width + spacing.width)), numEntries);
+    int numRows, numCols = MIN(floor((size.width + spacing.width) / (cellSize.width + spacing.width)), numEntries);
     numCols = MAX(numCols, 1);
-    numRows = BDSKCeil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
+    numRows = ceil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
     if (numRows * (cellSize.height + spacing.height) > 190.0 + spacing.height) {
-        numCols = MIN(BDSKFloor((size.width - [NSScroller scrollerWidth] + spacing.width) / (cellSize.width + spacing.width)), numEntries);
-        numRows = BDSKCeil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
+        numCols = MIN(floor((size.width - [NSScroller scrollerWidth] + spacing.width) / (cellSize.width + spacing.width)), numEntries);
+        numRows = ceil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
     }
     if (columns)
         *columns = numCols;
@@ -3320,11 +3228,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)setupMatrix{
-	NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-    NSArray *ratingFields = [sud stringArrayForKey:BDSKRatingFieldsKey];
-    NSArray *booleanFields = [sud stringArrayForKey:BDSKBooleanFieldsKey];
-    NSArray *triStateFields = [sud stringArrayForKey:BDSKTriStateFieldsKey];
-    NSInteger numRows, numCols, numEntries = [ratingFields count] + [booleanFields count] + [triStateFields count], i;
+	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    NSArray *ratingFields = [pw stringArrayForKey:BDSKRatingFieldsKey];
+    NSArray *booleanFields = [pw stringArrayForKey:BDSKBooleanFieldsKey];
+    NSArray *triStateFields = [pw stringArrayForKey:BDSKTriStateFieldsKey];
+    int numRows, numCols, numEntries = [ratingFields count] + [booleanFields count] + [triStateFields count], i;
     NSPoint origin = [matrix frame].origin;
 	NSEnumerator *e;
     NSString *field;
@@ -3335,19 +3243,19 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     e = [ratingFields objectEnumerator];
     while (field = [e nextObject]) {
 		size = [self addMatrixButtonCell:ratingButtonCell toArray:cells forField:field];
-        cellSize = NSMakeSize(BDSKMax(size.width, cellSize.width), BDSKMax(size.height, cellSize.height));
+        cellSize = NSMakeSize(fmaxf(size.width, cellSize.width), fmaxf(size.height, cellSize.height));
     }
 	
     e = [booleanFields objectEnumerator];
     while (field = [e nextObject]) {
 		size = [self addMatrixButtonCell:booleanButtonCell toArray:cells forField:field];
-        cellSize = NSMakeSize(BDSKMax(size.width, cellSize.width), BDSKMax(size.height, cellSize.height));
+        cellSize = NSMakeSize(fmaxf(size.width, cellSize.width), fmaxf(size.height, cellSize.height));
     }
 	
     e = [triStateFields objectEnumerator];
     while (field = [e nextObject]) {
 		size = [self addMatrixButtonCell:triStateButtonCell toArray:cells forField:field];
-        cellSize = NSMakeSize(BDSKMax(size.width, cellSize.width), BDSKMax(size.height, cellSize.height));
+        cellSize = NSMakeSize(fmaxf(size.width, cellSize.width), fmaxf(size.height, cellSize.height));
     }
     
     if ([[self window] firstResponder] == matrix)
@@ -3369,10 +3277,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSView *tableScrollView = [tableView enclosingScrollView];
     NSRect tableFrame = [tableScrollView frame];
     NSRect matrixFrame = [matrixEdgeView frame];
-    CGFloat dh = BDSKMin(NSHeight([matrix frame]), 190.0) + 1.0 - NSHeight(matrixFrame);
+    float dh = fminf(NSHeight([matrix frame]), 190.0) + 1.0 - NSHeight(matrixFrame);
     if ([cells count] == 0)
         dh -= 1.0;
-    if (BDSKAbs(dh) > 0.1) {
+    if (fabsf(dh) > 0.1) {
         tableFrame.size.height -= dh;
         tableFrame.origin.y += dh;
         matrixFrame.size.height += dh;
@@ -3385,7 +3293,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     
 	// restore the edited cell
     if (editedTitle) {
-        NSUInteger editedIndex = [[cells valueForKey:@"representedObject"] indexOfObject:editedTitle];
+        unsigned int editedIndex = [[cells valueForKey:@"representedObject"] indexOfObject:editedTitle];
         if (editedIndex != NSNotFound) {
             [[self window] makeFirstResponder:matrix];
             [matrix selectCellAtRow:editedIndex / numCols column:editedIndex % numCols];
@@ -3417,16 +3325,20 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)matrixFrameDidChange:(NSNotification *)notification {
-    NSInteger numberOfColumns;
+    int numberOfColumns;
     [self getNumberOfRows:NULL columns:&numberOfColumns forMatrixCellSize:[matrix cellSize]];
     if (numberOfColumns != [matrix numberOfColumns])
         [self setupMatrix];
 }
 
 - (void)setupActionButton {
+	[actionButton setAlternateImage:[NSImage imageNamed:@"GroupAction_Pressed"]];
+	[actionButton setArrowImage:nil];
+	[actionButton setShowsMenuWhenIconClicked:YES];
 	[[actionButton cell] setAltersStateOfSelectedItem:NO];
+	[[actionButton cell] setAlwaysUsesFirstItemAsSelected:NO];
 	[[actionButton cell] setUsesItemFromMenu:NO];
-    [actionButton setMenu:actionMenu];
+	[[actionButton cell] setRefreshesMenu:NO];
 }    
 
 - (void)setupTypePopUp{
@@ -3438,10 +3350,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)registerForNotifications {
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-    [nc addObserver:self
-           selector:@selector(appDidBecomeActive:)
-               name:NSApplicationDidBecomeActiveNotification
-             object:NSApp];
     [nc addObserver:self
            selector:@selector(bibDidChange:)
                name:BDSKBibItemChangedNotification
@@ -3467,6 +3375,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                    selector:@selector(groupWillBeRemoved:)
                        name:BDSKDidAddRemoveGroupNotification
                      object:nil];
+    [nc addObserver:self
+           selector:@selector(finalizeChanges:)
+               name:BDSKFinalizeChangesNotification
+             object:[self document]];
     [nc addObserver:self
            selector:@selector(fileURLDidChange:)
                name:BDSKDocumentFileURLDidChangeNotification
@@ -3528,7 +3440,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if (type != NSKeyDown && type != NSKeyUp)
         return NO;
     unichar c = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
-    NSUInteger flags = [theEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+    unsigned int flags = [theEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
     
     if((c == NSRightArrowFunctionKey || c == NSDownArrowFunctionKey) && (flags & NSCommandKeyMask) && (flags & NSAlternateKeyMask)){
         if([self indexOfTabViewItem:[self selectedTabViewItem]] == [self numberOfTabViewItems] - 1)

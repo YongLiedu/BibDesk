@@ -44,8 +44,8 @@
 + (id)commaCharacterSet;
 + (id)searchStringSeparatorCharacterSet;
 + (id)upAndDownArrowCharacterSet;
++ (id)newlineCharacterSet;
 + (id)nonWhitespaceCharacterSet;
-+ (id)nonLetterCharacterSet;
 + (id)nonDecimalDigitCharacterSet;
 
 @end

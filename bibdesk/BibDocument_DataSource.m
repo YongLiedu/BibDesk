@@ -37,7 +37,6 @@
 #import "BibDocument_DataSource.h"
 #import <SkimNotes/SkimNotes.h>
 #import "BibDocument.h"
-#import "BibDocument_UI.h"
 #import "BibDocument_Actions.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
@@ -45,16 +44,15 @@
 #import "BDSKGroupCell.h"
 #import "BDSKGroup.h"
 #import "BDSKStaticGroup.h"
-#import "BDSKWebGroup.h"
-#import "BDSKWebGroupViewController.h"
 #import "BDSKScriptHookManager.h"
 #import "BibDocument_Groups.h"
 #import "BibDocument_Search.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import "BDSKPreviewer.h"
+#import "BDSKTeXTask.h"
 #import "BDSKMainTableView.h"
-#import "BDSKGroupOutlineView.h"
-#import "NSAlert_BDSKExtensions.h"
+#import "BDSKGroupTableView.h"
+#import "BDSKAlert.h"
 #import "BDSKTypeManager.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
@@ -79,9 +77,6 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import <FileView/FileView.h>
-#import "BDSKApplication.h"
-#import "BDSKAppController.h"
-#import "BDSKFileContentSearchController.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
@@ -95,32 +90,36 @@
 
 #pragma mark TableView data source
 
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)tv{
-    if(tv == (NSTableView *)tableView) {
+- (int)numberOfRowsInTableView:(NSTableView *)tv{
+    if(tv == (NSTableView *)tableView){
         return [shownPublications count];
+    }else if(tv == groupTableView){
+        return [groups count];
+    }else{
+// should raise an exception or something
+        return 0;
     }
-    // should raise an exception or something
-    return 0;
 }
 
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     if(tv == tableView){
         return [[shownPublications objectAtIndex:row] displayValueOfField:[tableColumn identifier]];
-    }
-    return nil;
+    }else if(tv == groupTableView){
+		return [groups objectAtIndex:row];
+    }else return nil;
 }
 
-- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     if(tv == tableView){
 
 		NSString *tcID = [tableColumn identifier];
 		if([tcID isRatingField]){
 			BibItem *pub = [shownPublications objectAtIndex:row];
-			NSInteger oldRating = [pub ratingValueOfField:tcID];
-			NSInteger newRating = [object intValue];
+			int oldRating = [pub ratingValueOfField:tcID];
+			int newRating = [object intValue];
 			if(newRating != oldRating) {
 				[pub setField:tcID toRatingValue:newRating];
-                [self userChangedField:tcID ofPublications:[NSArray arrayWithObject:pub] from:[NSArray arrayWithObject:[NSString stringWithFormat:@"%ld", (long)oldRating]] to:[NSArray arrayWithObject:[NSString stringWithFormat:@"%ld", (long)newRating]]];
+                [self userChangedField:tcID ofPublications:[NSArray arrayWithObject:pub] from:[NSArray arrayWithObject:[NSString stringWithFormat:@"%i", oldRating]] to:[NSArray arrayWithObject:[NSString stringWithFormat:@"%i", newRating]]];
 				[[pub undoManager] setActionName:NSLocalizedString(@"Change Rating", @"Undo action name")];
 			}
 		}else if([tcID isBooleanField]){
@@ -142,10 +141,29 @@
 				[[pub undoManager] setActionName:NSLocalizedString(@"Change Check Box", @"Undo action name")];
 			}
 		}
+	}else if(tv == groupTableView){
+		BDSKGroup *group = [groups objectAtIndex:row];
+        // object is always a group, see BDSKGroupCellFormatter
+        OBASSERT([object isKindOfClass:[BDSKGroup class]]);
+        id newName = [object name];
+		if([[group name] isEqual:newName])
+			return;
+		if([group isCategory]){
+			NSArray *pubs = [groupedPublications copy];
+            // change the name of the group first, so we can preserve the selection; we need to old group info to move though
+            BDSKCategoryGroup *oldGroup = [[[BDSKCategoryGroup alloc] initWithName:[group name] key:[(BDSKCategoryGroup *)group key] count:[group count]] autorelease];
+            id name = [[self currentGroupField] isPersonField] ? [BibAuthor authorWithName:newName andPub:[[group name] publication]] : newName;
+            [(BDSKCategoryGroup *)group setName:name];
+			[self movePublications:pubs fromGroup:oldGroup toGroupNamed:newName];
+			[pubs release];
+		}else if([group hasEditableName]){
+			[(BDSKMutableGroup *)group setName:newName];
+			[[self undoManager] setActionName:NSLocalizedString(@"Rename Group", @"Undo action name")];
+		}
 	}
 }
 
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation{
+- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
     if (tv == tableView) {
         NSString *tcID = [tableColumn identifier];
         if ([tcID isEqualToString:BDSKImportOrderString]) {
@@ -160,6 +178,8 @@
         } else if ([tcID isEqualToString:BDSKRemoteURLString]) {
             return [[[shownPublications objectAtIndex:row] remoteURLs] valueForKeyPath:@"URL.absoluteString.@componentsJoinedByComma"];
         }
+    } else if (tv == groupTableView) {
+        return [[groups objectAtIndex:row] toolTip];
     }
     return nil;
 }
@@ -167,7 +187,40 @@
 
 #pragma mark TableView delegate
 
-- (void)tableView:(NSTableView *)tv willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row{
+- (void)disableGroupRenameWarningAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if ([alert checkValue] == YES) {
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnRenameGroupKey];
+	}
+}
+
+- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)aTableColumn row:(int)row{
+    if(tv == groupTableView){
+		if ([[groups objectAtIndex:row] hasEditableName] == NO) 
+			return NO;
+		else if (NSLocationInRange(row, [groups rangeOfCategoryGroups]) &&
+				 [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnRenameGroupKey]) {
+			
+			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
+												 defaultButton:NSLocalizedString(@"OK", @"Button title")
+											   alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+												   otherButton:nil
+									 informativeTextWithFormat:NSLocalizedString(@"This action will change the %@ field in %i items. Do you want to proceed?", @"Informative text in alert dialog"), [currentGroupField localizedFieldName], [groupedPublications count]];
+			[alert setHasCheckButton:YES];
+			[alert setCheckValue:NO];
+			int rv = [alert runSheetModalForWindow:documentWindow
+									 modalDelegate:self 
+									didEndSelector:@selector(disableGroupRenameWarningAlertDidEnd:returnCode:contextInfo:) 
+								didDismissSelector:NULL 
+									   contextInfo:NULL];
+			if (rv == NSAlertAlternateReturn)
+				return NO;
+		}
+		return YES;
+	}
+    return NO;
+}
+
+- (void)tableView:(NSTableView *)tv willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)row{
     if (row == -1) return;
     if (tv == tableView) {
         if([aCell isKindOfClass:[NSButtonCell class]]){
@@ -185,9 +238,22 @@
             } else {
                 [aCell setEnabled:[self hasExternalGroupsSelected] == NO];
             }
-        } else if ([[aTableColumn identifier] isEqualToString:BDSKCiteKeyString]) {
-            BibItem *pub = [[self shownPublications] objectAtIndex:row];
-            [aCell setTextColor:[pub isValidCiteKey:[pub citeKey]] ? [NSColor controlTextColor] : [NSColor redColor]];
+        }
+    } else if (tv == groupTableView) {
+        BDSKGroup *group = [groups objectAtIndex:row];
+        NSProgressIndicator *spinner = [groups spinnerForGroup:group];
+        
+        if (spinner) {
+            int column = [[tv tableColumns] indexOfObject:aTableColumn];
+            NSRect ignored, rect = [tv frameOfCellAtColumn:column row:row];
+            NSSize size = [spinner frame].size;
+            NSDivideRect(rect, &ignored, &rect, 3.0f, NSMaxXEdge);
+            NSDivideRect(rect, &rect, &ignored, size.width, NSMaxXEdge);
+            rect = BDSKCenterRectVertically(rect, size.height, [tv isFlipped]);
+            
+            [spinner setFrame:rect];
+            if ([spinner isDescendantOf:tv] == NO)
+                [tv addSubview:spinner];
         }
     }
 }
@@ -197,11 +263,15 @@
     if(tv == tableView || ([self isDisplayingFileContentSearch] && tv == [fileSearchController tableView])){
         NSNotification *note = [NSNotification notificationWithName:BDSKTableSelectionChangedNotification object:self];
         [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
+	}else if(tv == groupTableView){
+        NSNotification *note = [NSNotification notificationWithName:BDSKGroupTableSelectionChangedNotification object:self];
+        [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
+        docState.didImport = NO;
     }
 }
 
 - (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView{
-    NSMutableDictionary *defaultTableColumnWidths = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKColumnWidthsKey]];
+    NSMutableDictionary *defaultTableColumnWidths = [NSMutableDictionary dictionaryWithDictionary:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey]];
     [defaultTableColumnWidths addEntriesFromDictionary:tableColumnWidths];
     return defaultTableColumnWidths;
 }
@@ -219,191 +289,260 @@
 }    
 
 - (void)tableViewColumnDidResize:(NSNotification *)notification{
-	if ([notification object] == tableView) {
-        // current setting will override those already in the prefs; we may not be displaying all the columns in prefs right now, but we want to preserve their widths
-        NSMutableDictionary *defaultWidths = [[[NSUserDefaults standardUserDefaults] objectForKey:BDSKColumnWidthsKey] mutableCopy];
-        [tableColumnWidths release];
-        tableColumnWidths = [[self currentTableColumnWidthsAndIdentifiers] retain];
-        [defaultWidths addEntriesFromDictionary:tableColumnWidths];
-        [[NSUserDefaults standardUserDefaults] setObject:defaultWidths forKey:BDSKColumnWidthsKey];
-        [defaultWidths release];
-    }
+	if([notification object] != tableView) return;
+      
+    // current setting will override those already in the prefs; we may not be displaying all the columns in prefs right now, but we want to preserve their widths
+    NSMutableDictionary *defaultWidths = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey] mutableCopy];
+    [tableColumnWidths release];
+    tableColumnWidths = [[self currentTableColumnWidthsAndIdentifiers] retain];
+    [defaultWidths addEntriesFromDictionary:tableColumnWidths];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:defaultWidths forKey:BDSKColumnWidthsKey];
+    [defaultWidths release];
 }
 
 
 - (void)tableViewColumnDidMove:(NSNotification *)notification{
-	if ([notification object] != tableView) {
-        [[NSUserDefaults standardUserDefaults] setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
-                                                          forKey:BDSKShownColsNamesKey];
-    }
+	if([notification object] != tableView) return;
+    
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
+                                                      forKey:BDSKShownColsNamesKey];
 }
 
 - (void)tableView:(NSTableView *)tv didClickTableColumn:(NSTableColumn *)tableColumn{
 	// check whether this is the right kind of table view and don't re-sort when we have a contextual menu click
-    if (tableView == tv && [[NSApp currentEvent] type] != NSRightMouseDown) {
+    if ([[NSApp currentEvent] type] == NSRightMouseDown) 
+        return;
+    if (tableView == tv){
         [self sortPubsByKey:[tableColumn identifier]];
+	}else if (groupTableView == tv){
+        [self sortGroupsByKey:nil];
 	}
 
 }
 
-static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
-    NSInteger i = [menu numberOfItems];
-	while (--i >= 0) {
-        NSMenuItem *item = [menu itemAtIndex:i];
-        if ([item isSeparatorItem] == NO && [validator validateMenuItem:item])
-            return NO;
-    }
-    return YES;
-}
-
-static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
-    NSMenu *submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
-    NSEnumerator *urlEnum = [urls objectEnumerator];
-    NSURL *url;
-    while (url = [urlEnum nextObject]) {
-        NSString *title = [url isFileURL] ? [[NSFileManager defaultManager] displayNameAtPath:[url path]] : [url absoluteString];
-        NSMenuItem *item = [submenu addItemWithTitle:title action:[anItem action] keyEquivalent:@""];
-        [item setTarget:[anItem target]];
-        [item setRepresentedObject:url];
-    }
-    [anItem setSubmenu:submenu];
-}
-
-- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
-	if (tv != tableView || tableColumn == nil || row == -1) 
-		return nil;
+- (NSMenu *)tableView:(NSTableView *)tv contextMenuForRow:(int)row column:(int)column {
     
     // autorelease when creating an instance, since there are multiple exit points from this method
 	NSMenu *menu = nil;
     NSMenuItem *item = nil;
-    NSString *tcId = [tableColumn identifier];
-    NSArray *linkedURLs;
-    NSURL *theURL;
     
-    if([tcId isURLField] || [tcId isEqualToString:BDSKLocalFileString] || [tcId isEqualToString:BDSKRemoteURLString]){
-        menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
-        if([tcId isURLField]){
-            if([tcId isLocalFileField]){
-                item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked File", @"Menu item title") action:@selector(openLocalURL:) keyEquivalent:@""];
-                [item setTarget:self];
-                [item setRepresentedObject:tcId];
-                item = [menu addItemWithTitle:NSLocalizedString(@"Reveal Linked File in Finder", @"Menu item title") action:@selector(revealLocalURL:) keyEquivalent:@""];
-                [item setTarget:self];
-                [item setRepresentedObject:tcId];
-                item = [menu addItemWithTitle:NSLocalizedString(@"Show Skim Notes For Linked File", @"Menu item title") action:@selector(showNotesForLocalURL:) keyEquivalent:@""];
-                [item setTarget:self];
-                [item setRepresentedObject:tcId];
-                item = [menu addItemWithTitle:NSLocalizedString(@"Copy Skim Notes For Linked File", @"Menu item title") action:@selector(copyNotesForLocalURL:) keyEquivalent:@""];
-                [item setTarget:self];
-                [item setRepresentedObject:tcId];
-            }else{
-                item = [menu addItemWithTitle:NSLocalizedString(@"Open URL in Browser", @"Menu item title") action:@selector(openRemoteURL:) keyEquivalent:@""];
-                [item setTarget:self];
-                [item setRepresentedObject:tcId];
-            }
-            if([tableView numberOfSelectedRows] == 1 &&
-               (theURL = [[shownPublications objectAtIndex:row] URLForField:tcId])){
-                item = [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") 
-                                    andSubmenuOfApplicationsForURL:theURL atIndex:1];
-            }
-        }else if([tcId isEqualToString:BDSKLocalFileString]){
-            linkedURLs = [self selectedFileURLs];
-            
-            if([linkedURLs count]){
-                item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
-                [item setTarget:self];
-                [item setRepresentedObject:linkedURLs];
-                item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked Files", @"Menu item title") action:@selector(openLinkedFile:) keyEquivalent:@""];
-                [item setTarget:self];
-                if ([linkedURLs count] > 1)
-                    addSubmenuForURLsToItem(linkedURLs, item);
-                item = [menu addItemWithTitle:NSLocalizedString(@"Reveal Linked Files in Finder", @"Menu item title") action:@selector(revealLinkedFile:) keyEquivalent:@""];
-                [item setTarget:self];
-                if ([linkedURLs count] > 1)
-                    addSubmenuForURLsToItem(linkedURLs, item);
-                item = [menu addItemWithTitle:NSLocalizedString(@"Show Skim Notes For Linked Files", @"Menu item title") action:@selector(showNotesForLinkedFile:) keyEquivalent:@""];
-                [item setTarget:self];
-                if ([linkedURLs count] > 1)
-                    addSubmenuForURLsToItem(linkedURLs, item);
-                item = [menu addItemWithTitle:NSLocalizedString(@"Copy Skim Notes For Linked Files", @"Menu item title") action:@selector(copyNotesForLinkedFile:) keyEquivalent:@""];
-                [item setTarget:self];
-                if ([linkedURLs count] > 1)
-                    addSubmenuForURLsToItem(linkedURLs, item);
-                if([linkedURLs count] == 1 && (theURL = [linkedURLs lastObject]) && [theURL isEqual:[NSNull null]] == NO){
+	if (column == -1 || row == -1) 
+		return nil;
+	
+	if(tv == tableView){
+		
+		NSString *tcId = [[[tableView tableColumns] objectAtIndex:column] identifier];
+        NSArray *linkedURLs;
+        NSURL *theURL;
+        
+		if([tcId isURLField] || [tcId isEqualToString:BDSKLocalFileString] || [tcId isEqualToString:BDSKRemoteURLString]){
+            menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
+            if([tcId isURLField]){
+                if([tcId isLocalFileField]){
+                    item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked File", @"Menu item title") action:@selector(openLocalURL:) keyEquivalent:@""];
+                    [item setTarget:self];
+                    [item setRepresentedObject:tcId];
+                    item = [menu addItemWithTitle:NSLocalizedString(@"Reveal Linked File in Finder", @"Menu item title") action:@selector(revealLocalURL:) keyEquivalent:@""];
+                    [item setTarget:self];
+                    [item setRepresentedObject:tcId];
+                    item = [menu addItemWithTitle:NSLocalizedString(@"Show Skim Notes For Linked File", @"Menu item title") action:@selector(showNotesForLocalURL:) keyEquivalent:@""];
+                    [item setTarget:self];
+                    [item setRepresentedObject:tcId];
+                    item = [menu addItemWithTitle:NSLocalizedString(@"Copy Skim Notes For Linked File", @"Menu item title") action:@selector(copyNotesForLocalURL:) keyEquivalent:@""];
+                    [item setTarget:self];
+                    [item setRepresentedObject:tcId];
+                }else{
+                    item = [menu addItemWithTitle:NSLocalizedString(@"Open URL in Browser", @"Menu item title") action:@selector(openRemoteURL:) keyEquivalent:@""];
+                    [item setTarget:self];
+                    [item setRepresentedObject:tcId];
+                }
+                if([tableView numberOfSelectedRows] == 1 &&
+                   (theURL = [[shownPublications objectAtIndex:row] URLForField:tcId])){
                     item = [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") 
                                         andSubmenuOfApplicationsForURL:theURL atIndex:1];
                 }
-            }
-        }else if([tcId isEqualToString:BDSKRemoteURLString]){
-            linkedURLs = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
-            
-            if([linkedURLs count]){
-                menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
-                item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
-                [item setTarget:self];
-                [item setRepresentedObject:linkedURLs];
-                item = [menu addItemWithTitle:NSLocalizedString(@"Open URLs in Browser", @"Menu item title") action:@selector(openLinkedURL:) keyEquivalent:@""];
-                [item setTarget:self];
-                if ([linkedURLs count] > 1)
-                    addSubmenuForURLsToItem(linkedURLs, item);
-                if([linkedURLs count] == 1 && (theURL = [linkedURLs lastObject]) && [theURL isEqual:[NSNull null]] == NO){
-                    item = [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") 
-                                        andSubmenuOfApplicationsForURL:theURL atIndex:1];
+            }else if([tcId isEqualToString:BDSKLocalFileString]){
+                linkedURLs = [self selectedFileURLs];
+                
+                if([linkedURLs count]){
+                    if([linkedURLs count] == 1){
+                        item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
+                        [item setTarget:self];
+                        [item setRepresentedObject:[linkedURLs lastObject]];
+                    }
+                    item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked Files", @"Menu item title") action:@selector(openLinkedFile:) keyEquivalent:@""];
+                    [item setTarget:self];
+                    item = [menu addItemWithTitle:NSLocalizedString(@"Reveal Linked Files in Finder", @"Menu item title") action:@selector(revealLinkedFile:) keyEquivalent:@""];
+                    [item setTarget:self];
+                    item = [menu addItemWithTitle:NSLocalizedString(@"Show Skim Notes For Linked Files", @"Menu item title") action:@selector(showNotesForLinkedFile:) keyEquivalent:@""];
+                    [item setTarget:self];
+                    item = [menu addItemWithTitle:NSLocalizedString(@"Copy Skim Notes For Linked Files", @"Menu item title") action:@selector(copyNotesForLinkedFile:) keyEquivalent:@""];
+                    [item setTarget:self];
+                    if([linkedURLs count] == 1 && (theURL = [linkedURLs lastObject]) && [theURL isEqual:[NSNull null]] == NO){
+                        item = [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") 
+                                            andSubmenuOfApplicationsForURL:theURL atIndex:1];
+                    }
+                }
+            }else if([tcId isEqualToString:BDSKRemoteURLString]){
+                linkedURLs = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
+                
+                if([linkedURLs count]){
+                    menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
+                    if([linkedURLs count] == 1){
+                        item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
+                        [item setTarget:self];
+                        [item setRepresentedObject:[linkedURLs lastObject]];
+                    }
+                    item = [menu addItemWithTitle:NSLocalizedString(@"Open URLs in Browser", @"Menu item title") action:@selector(openLinkedURL:) keyEquivalent:@""];
+                    [item setTarget:self];
+                    if([linkedURLs count] == 1 && (theURL = [linkedURLs lastObject]) && [theURL isEqual:[NSNull null]] == NO){
+                        item = [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") 
+                                            andSubmenuOfApplicationsForURL:theURL atIndex:1];
+                    }
                 }
             }
-        }
-        [menu addItem:[NSMenuItem separatorItem]];
-        item = [menu addItemWithTitle:NSLocalizedString(@"Get Info", @"Menu item title") action:@selector(editPubCmd:) keyEquivalent:@""];
-        [item setTarget:self];
-        item = [menu addItemWithTitle:NSLocalizedString(@"Remove", @"Menu item title") action:@selector(removeSelectedPubs:) keyEquivalent:@""];
-        [item setTarget:self];
-        item = [menu addItemWithTitle:NSLocalizedString(@"Delete", @"Menu item title") action:@selector(deleteSelectedPubs:) keyEquivalent:@""];
-        [item setTarget:self];
-        [item setKeyEquivalentModifierMask:NSAlternateKeyMask];
-        [item setAlternate:YES];
-    }else{
-        [self menuNeedsUpdate:copyAsMenu];
-        menu = [[actionMenu copyWithZone:[NSMenu menuZone]] autorelease];
-        [menu removeItemAtIndex:0];
-    }
-    
+            [menu addItem:[NSMenuItem separatorItem]];
+            item = [menu addItemWithTitle:NSLocalizedString(@"Get Info", @"Menu item title") action:@selector(editPubCmd:) keyEquivalent:@""];
+            [item setTarget:self];
+            item = [menu addItemWithTitle:NSLocalizedString(@"Remove", @"Menu item title") action:@selector(removeSelectedPubs:) keyEquivalent:@""];
+            [item setTarget:self];
+            item = [menu addItemWithTitle:NSLocalizedString(@"Delete", @"Menu item title") action:@selector(deleteSelectedPubs:) keyEquivalent:@""];
+            [item setTarget:self];
+            [item setKeyEquivalentModifierMask:NSAlternateKeyMask];
+            [item setAlternate:YES];
+		}else{
+			menu = [[actionMenu copyWithZone:[NSMenu menuZone]] autorelease];
+            
+            NSMenu *submenu = nil;
+            int i, count = [menu numberOfItems];
+            
+            for (i = 0; submenu == nil && i < count; i++)
+                submenu = [[menu itemAtIndex:i] submenu];
+            if (submenu) {
+                while ([submenu numberOfItems])
+                    [submenu removeItemAtIndex:0];
+                NSArray *styles = [BDSKTemplate allStyleNames];
+                count = [styles count];
+                for (i = 0; i < count; i++) {
+                    item = [submenu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
+                    [item setTarget:self];
+                    [item setTag:BDSKTemplateDragCopyType + i];
+                }
+            }
+		}
+		
+	}else if (tv == groupTableView){
+		menu = [[groupMenu copyWithZone:[NSMenu menuZone]] autorelease];
+	}else{
+		return nil;
+	}
+	
 	// kick out every item we won't need:
-	NSInteger i = [menu numberOfItems];
+	int i = [menu numberOfItems];
     BOOL wasSeparator = YES;
 	
 	while (--i >= 0) {
 		item = (NSMenuItem*)[menu itemAtIndex:i];
-		if ([self validateMenuItem:item] == NO || ((wasSeparator || i == 0) && [item isSeparatorItem]) || ([item submenu] && menuHasNoValidItems(self, [item submenu])))
+		if ([self validateMenuItem:item] == NO || ((wasSeparator || i == 0) && [item isSeparatorItem]))
 			[menu removeItem:item];
         else
             wasSeparator = [item isSeparatorItem];
 	}
-	while ([menu numberOfItems] > 0 && [(NSMenuItem*)[menu itemAtIndex:0] isSeparatorItem])	
+	while([menu numberOfItems] > 0 && [(NSMenuItem*)[menu itemAtIndex:0] isSeparatorItem])	
 		[menu removeItemAtIndex:0];
 	
-	return [menu numberOfItems] ? menu : nil;
+	if([menu numberOfItems] == 0)
+		return nil;
+	
+	return menu;
 }
 
-- (NSColor *)tableView:(NSTableView *)tv highlightColorForRow:(NSInteger)row {
+- (BOOL)tableViewShouldEditNextItemWhenEditingEnds:(NSTableView *)tv{
+	if (tv == groupTableView && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnRenameGroupKey])
+		return NO;
+	return YES;
+}
+
+- (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
+    if (tv == tableView)
+        return BDSKMainTableViewFontNameKey;
+    else if (tv == groupTableView)
+        return BDSKGroupTableViewFontNameKey;
+    else 
+        return nil;
+}
+
+- (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)tv {
+    if (tv == tableView)
+        return BDSKMainTableViewFontSizeKey;
+    else if (tv == groupTableView)
+        return BDSKGroupTableViewFontSizeKey;
+    else 
+        return nil;
+}
+
+- (NSColor *)tableView:(NSTableView *)tv highlightColorForRow:(int)row {
     return [[[self shownPublications] objectAtIndex:row] color];
 }
 
 #pragma mark TableView dragging source
 
+// for 10.3 compatibility and OmniAppKit dataSource methods
+- (BOOL)tableView:(NSTableView *)tv writeRows:(NSArray*)rows toPasteboard:(NSPasteboard*)pboard{
+	NSMutableIndexSet *rowIndexes = [NSIndexSet indexSetWithIndexesInArray:rows];
+	return [self tableView:tv writeRowsWithIndexes:rowIndexes toPasteboard:pboard];
+}
+
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
-    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
-	NSInteger dragCopyType = [sud integerForKey:dragCopyTypeKey];
+	int dragCopyType = [pw integerForKey:dragCopyTypeKey];
     BOOL success = NO;
-	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
+	NSString *citeString = [pw stringForKey:BDSKCiteStringKey];
     NSArray *pubs = nil;
     NSArray *additionalFilenames = nil;
     
-	BDSKPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
+	OBPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
 
     docState.dragFromExternalGroups = NO;
 	
-    if(tv == tableView){
+    if(tv == groupTableView){
+		if([rowIndexes containsIndex:0]){
+			pubs = [NSArray arrayWithArray:publications];
+		}else if([rowIndexes count] > 1){
+			// multiple dragged rows always are the selected rows
+			pubs = [NSArray arrayWithArray:groupedPublications];
+		}else if([rowIndexes count] == 1){
+            // a single row, not necessarily the selected one
+            BDSKGroup *group = [groups objectAtIndex:[rowIndexes firstIndex]];
+            if ([group isExternal]) {
+                pubs = [NSArray arrayWithArray:[(id)group publications]];
+                if ([group isSearch])
+                    additionalFilenames = [NSArray arrayWithObject:[[[(BDSKSearchGroup *)group serverInfo] name] stringByAppendingPathExtension:@"bdsksearch"]];
+			} else {
+                NSMutableArray *pubsInGroup = [NSMutableArray arrayWithCapacity:[publications count]];
+                NSEnumerator *pubEnum = [publications objectEnumerator];
+                BibItem *pub;
+                
+                while (pub = [pubEnum nextObject]) {
+                    if ([group containsItem:pub]) 
+                        [pubsInGroup addObject:pub];
+                }
+                pubs = pubsInGroup;
+            }
+            docState.dragFromExternalGroups = [groups hasExternalGroupsAtIndexes:rowIndexes];
+		}
+		if([pubs count] == 0 && [self hasSearchGroupsSelected] == NO){
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty Groups", @"Message in alert dialog when dragging from empty groups")
+                                             defaultButton:nil
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"The groups you want to drag do not contain any items.", @"Informative text in alert dialog")];
+            [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+            return NO;
+        }
+			
+    }else if(tv == tableView){
 		// drag from the main table
 		pubs = [shownPublications objectsAtIndexes:rowIndexes];
         
@@ -419,7 +558,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 			if([rowIndexes count]){
 				NSPoint eventPt = [[tv window] mouseLocationOutsideOfEventStream];
 				NSPoint dragPosition = [tv convertPoint:eventPt fromView:nil];
-				NSInteger dragColumn = [tv columnAtPoint:dragPosition];
+				int dragColumn = [tv columnAtPoint:dragPosition];
 				NSString *dragColumnId = nil;
 						
 				if(dragColumn == -1)
@@ -430,7 +569,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 				if([dragColumnId isLocalFileField]){
 
                     // if we have more than one row, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
-                    NSUInteger row = [rowIndexes firstIndex];
+                    unsigned row = [rowIndexes firstIndex];
                     BibItem *pub = nil;
                     NSString *path;
                     NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
@@ -441,7 +580,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                             [filePaths addObject:path];
                             NSError *xerror = nil;
                             // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
-                            if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:&xerror] == NO)
+                            if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:&xerror] == NO)
                                 NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
                         }
                         row = [rowIndexes indexGreaterThanIndex:row];
@@ -458,7 +597,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 					[self setPromiseDragColumnIdentifier:dragColumnId];
 
                     // if we have more than one row, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
-                    NSUInteger row = [rowIndexes firstIndex];
+                    unsigned row = [rowIndexes firstIndex];
                     BibItem *pub = nil;
                     NSURL *url, *theURL = nil;
                     NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
@@ -484,7 +623,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                 }else if([dragColumnId isEqualToString:BDSKLocalFileString]){
 
                     // if we have more than one files, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
-                    NSUInteger row = [rowIndexes firstIndex];
+                    unsigned row = [rowIndexes firstIndex];
                     BibItem *pub = nil;
                     NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
                     NSEnumerator *fileEnum;
@@ -500,7 +639,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                                 [filePaths addObject:path];
                                 NSError *xerror = nil;
                                 // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
-                                if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:&xerror] == NO)
+                                if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:&xerror] == NO)
                                     NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
                             }
                         }
@@ -516,7 +655,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 					// cache this so we know which column (field) was dragged
 					[self setPromiseDragColumnIdentifier:dragColumnId];
                     
-                    NSUInteger row = [rowIndexes firstIndex];
+                    unsigned row = [rowIndexes firstIndex];
                     BibItem *pub = nil;
                     NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
                     NSString *fileName;
@@ -548,14 +687,12 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 				}
 			}
 		}
-    } else {
-        return NO;
     }
     
     if (dragCopyType == BDSKTemplateDragCopyType) {
         NSString *dragCopyTemplateKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
-        NSString *template = [sud stringForKey:dragCopyTemplateKey];
-        NSUInteger templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
+        NSString *template = [pw stringForKey:dragCopyTemplateKey];
+        unsigned templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
         if (templateIdx != NSNotFound)
             dragCopyType += templateIdx;
     }
@@ -570,7 +707,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     return success;
 }
 	
-- (BOOL)writePublications:(NSArray *)pubs forDragCopyType:(NSInteger)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard{
+- (BOOL)writePublications:(NSArray *)pubs forDragCopyType:(int)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard{
 	NSString *mainType = nil;
 	NSString *string = nil;
 	NSData *data = nil;
@@ -580,12 +717,12 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 		case BDSKBibTeXDragCopyType:
 			mainType = NSStringPboardType;
 			string = [self bibTeXStringForPublications:pubs];
-			BDSKASSERT(string != nil);
+			OBASSERT(string != nil);
 			break;
 		case BDSKCiteDragCopyType:
 			mainType = NSStringPboardType;
 			string = [self citeStringForPublications:pubs citeString:citeString];
-			BDSKASSERT(string != nil);
+			OBASSERT(string != nil);
 			break;
 		case BDSKPDFDragCopyType:
 			mainType = NSPDFPboardType;
@@ -600,7 +737,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 		case BDSKMinimalBibTeXDragCopyType:
 			mainType = NSStringPboardType;
 			string = [self bibTeXStringDroppingInternal:YES forPublications:pubs];
-			BDSKASSERT(string != nil);
+			OBASSERT(string != nil);
 			break;
 		case BDSKRISDragCopyType:
 			mainType = NSStringPboardType;
@@ -659,7 +796,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 }
 
 - (NSImage *)tableView:(NSTableView *)tv dragImageForRowsWithIndexes:(NSIndexSet *)dragRows{
-    return [self dragImageForPromisedItemsUsingCiteString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey]];
+    return [self dragImageForPromisedItemsUsingCiteString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey]];
 }
 
 - (NSImage *)dragImageForPromisedItemsUsingCiteString:(NSString *)citeString{
@@ -668,8 +805,8 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     NSPasteboard *pb = [NSPasteboard pasteboardWithName:NSDragPboard];
     NSString *dragType = [pb availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, NSFilesPromisePboardType, NSPDFPboardType, NSRTFPboardType, NSStringPboardType, nil]];
 	NSArray *promisedDraggedItems = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
-	NSInteger dragCopyType = -1;
-	NSInteger count = 0;
+	int dragCopyType = -1;
+	int count = 0;
     BOOL inside = NO;
     BOOL isIcon = NO;
 	
@@ -684,9 +821,9 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         image = [NSImage imageForURL:[NSURL URLFromPasteboard:pb]];
         isIcon = YES;
         if ([pb availableTypeFromArray:[NSArray arrayWithObject:NSFilesPromisePboardType]])
-            count = MAX(1, (NSInteger)[[pb propertyListForType:NSFilesPromisePboardType] count]);
+            count = MAX(1, (int)[[pb propertyListForType:NSFilesPromisePboardType] count]);
         else if ([pb availableTypeFromArray:[NSArray arrayWithObject:@"WebURLsWithTitlesPboardType"]])
-            count = MAX(1, (NSInteger)[[pboardHelper promisedItemsForPasteboard:pb] count]);
+            count = MAX(1, (int)[[pboardHelper promisedItemsForPasteboard:pb] count]);
     
 	} else if ([dragType isEqualToString:NSFilesPromisePboardType]) {
 		NSArray *fileNames = [pb propertyListForType:NSFilesPromisePboardType];
@@ -697,11 +834,11 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         isIcon = YES;
     
 	} else {
-		NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
+		OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 		NSMutableString *s = [NSMutableString string];
         NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
         
-        dragCopyType = [sud integerForKey:dragCopyTypeKey];
+        dragCopyType = [pw integerForKey:dragCopyTypeKey];
         
 		// don't depend on this being non-zero; this method gets called for drags where promisedDraggedItems is nil
 		count = [promisedDraggedItems count];
@@ -754,7 +891,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                     image = [NSImage imageForURL:[NSURL URLFromPasteboard:pb]];
                     isIcon = YES;
                     if ([pb availableTypeFromArray:[NSArray arrayWithObject:@"WebURLsWithTitlesPboardType"]])
-                        count = MAX(1, (NSInteger)[[pboardHelper promisedItemsForPasteboard:pb] count]);
+                        count = MAX(1, (int)[[pboardHelper promisedItemsForPasteboard:pb] count]);
                     break;
                 default:
                     [s appendString:@"["];
@@ -799,11 +936,14 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 
 #pragma mark TableView dragging destination
 
-- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op{
+- (NSDragOperation)tableView:(NSTableView*)tv
+                validateDrop:(id <NSDraggingInfo>)info
+                 proposedRow:(int)row
+       proposedDropOperation:(NSTableViewDropOperation)op{
     
     NSPasteboard *pboard = [info draggingPasteboard];
     BOOL isDragFromMainTable = [[info draggingSource] isEqual:tableView];
-    BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupOutlineView];
+    BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupTableView];
     BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
     
     if(tv == tableView){
@@ -839,61 +979,61 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             return NSDragOperationCopy;
         else
             return NSDragOperationEvery;
+    }else if(tv == groupTableView){
+        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSStringPboardType, nil]];
+		
+        if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromExternalGroups) {
+            if (row != 0)
+                return NSDragOperationNone;
+            [tv setDropRow:row dropOperation:NSTableViewDropOn];
+            return NSDragOperationCopy;
+        } else if (isDragFromDrawer || isDragFromGroupTable || type == nil) {
+            return NSDragOperationNone;
+        }
+        
+        if (op == NSTableViewDropAbove || (row >= 0 && [[groups objectAtIndex:row] isValidDropTarget] == NO)) {
+            // here we actually target the whole table, as we don't insert in a specific location
+            row = -1;
+            [tv setDropRow:row dropOperation:NSTableViewDropOn];
+        }
+        
+        if (isDragFromMainTable) {
+            if([type isEqualToString:BDSKBibItemPboardType] && row > 0)
+                return NSDragOperationLink;
+            else
+                return NSDragOperationNone;
+        } else if([type isEqualToString:BDSKBibItemPboardType]){
+            return NSDragOperationCopy; // @@ can't drag row indexes from another document; should use NSArchiver instead
+        } else if (row == -1 && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil] containsObject:type]){
+            [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+            return NSDragOperationLink;
+        } else {
+            return NSDragOperationEvery;
+        }
     }
     return NSDragOperationNone;
 }
 
-- (BOOL)selectItemsInAuxFileAtPath:(NSString *)auxPath {
-    NSString *auxString = [NSString stringWithContentsOfFile:auxPath encoding:[self documentStringEncoding] guessEncoding:YES];
-    NSString *command = @"\\bibcite{"; // we used to get the command by looking at the line after \bibdata, but that's unreliable as there can be other stuff in between the \bibcite commands
+// This method is called when the mouse is released over a table view that previously decided to allow a drop via the validateDrop method.  The data source should incorporate the data from the dragging pasteboard at this time.
 
-    if (auxString == nil)
-        return NO;
-    
-    if ([auxString rangeOfString:command].length == 0) {
-        // if there are no \bibcite commands we'll use the cite's, which are usualy added as \citation commands to the .aux file
-        command = @"\\citation{";
-        if ([auxString rangeOfString:command].length == 0)
-            return NO;
-    }
-    
-    NSScanner *scanner = [NSScanner scannerWithString:auxString];
-    NSString *key = nil;
-    NSArray *items = nil;
-    NSMutableArray *selItems = [NSMutableArray array];
-    
-    [scanner setCharactersToBeSkipped:nil];
-    
-    do {
-        if ([scanner scanString:command intoString:NULL] &&
-            [scanner scanUpToString:@"}" intoString:&key] &&
-            (items = [publications allItemsForCiteKey:key]))
-            [selItems addObjectsFromArray:items];
-        [scanner scanUpToCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
-        [scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
-    } while ([scanner isAtEnd] == NO);
-    
-    if ([selItems count])
-        [self selectPublications:selItems];
-    
-    return YES;
-}
-
-- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
+- (BOOL)tableView:(NSTableView*)tv
+       acceptDrop:(id <NSDraggingInfo>)info
+              row:(int)row
+    dropOperation:(NSTableViewDropOperation)op{
 	
     NSPasteboard *pboard = [info draggingPasteboard];
     
-    if (tv == tableView) {
+    if(tv == tableView){
         NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil]];
         
-        if ([self hasExternalGroupsSelected])
+        if([self hasExternalGroupsSelected])
             return NO;
-		if (row != -1) {
+		if(row != -1){
             BibItem *pub = [shownPublications objectAtIndex:row];
             NSMutableArray *urlsToAdd = [NSMutableArray array];
             NSURL *theURL = nil;
             
-            if ([type isEqualToString:NSFilenamesPboardType]) {
+            if([type isEqualToString:NSFilenamesPboardType]){
                 NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
                 if ([fileNames count] == 0)
                     return NO;
@@ -901,14 +1041,14 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                 NSString *aPath;
                 while (aPath = [fileEnum nextObject])
                     [urlsToAdd addObject:[NSURL fileURLWithPath:[aPath stringByExpandingTildeInPath]]];
-            } else if([type isEqualToString:BDSKWeblocFilePboardType]) {
+            }else if([type isEqualToString:BDSKWeblocFilePboardType]){
                 [urlsToAdd addObject:[NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]]];
-            } else if([type isEqualToString:NSURLPboardType]) {
+            }else if([type isEqualToString:NSURLPboardType]){
                 [urlsToAdd addObject:[NSURL URLFromPasteboard:pboard]];
-            } else if([type isEqualToString:NSColorPboardType]) {
+            }else if([type isEqualToString:NSColorPboardType]){
                 [[[self shownPublications] objectAtIndex:row] setColor:[NSColor colorFromPasteboard:pboard]];
                 return YES;
-            } else
+            }else
                 return NO;
             
             if([urlsToAdd count] == 0)
@@ -922,21 +1062,157 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
             return YES;
             
-        } else {
+        }else{
             
             [self selectLibraryGroup:nil];
             
-            if ([type isEqualToString:NSFilenamesPboardType]) {
+            if([type isEqualToString:NSFilenamesPboardType]){
                 NSArray *filenames = [pboard propertyListForType:NSFilenamesPboardType];
-                if ([filenames count] == 1) {
+                if([filenames count] == 1){
                     NSString *file = [filenames lastObject];
-                    if([[file pathExtension] caseInsensitiveCompare:@"aux"] == NSOrderedSame)
-                        return [self selectItemsInAuxFileAtPath:file];
+                    if([[file pathExtension] caseInsensitiveCompare:@"aux"] == NSOrderedSame){
+                        NSString *auxString = [NSString stringWithContentsOfFile:file encoding:[self documentStringEncoding] guessEncoding:YES];
+                        NSString *command = @"\\bibcite{"; // we used to get the command by looking at the line after \bibdata, but that's unreliable as there can be other stuff in between the \bibcite commands
+                        
+                        if (auxString == nil)
+                            return NO;
+                        if ([auxString rangeOfString:command].length == 0) {
+                            // if there are no \bibcite commands we'll use the cite's, which are usualy added as \citation commands to the .aux file
+                            command = @"\\citation{";
+                            if ([auxString rangeOfString:command].length == 0)
+                                return NO;
+                        }
+                        
+                        NSScanner *scanner = [NSScanner scannerWithString:auxString];
+                        NSString *key = nil;
+                        NSArray *items = nil;
+                        NSMutableArray *selItems = [NSMutableArray array];
+                        
+                        [scanner setCharactersToBeSkipped:nil];
+                        
+                        do {
+                            if ([scanner scanString:command intoString:NULL] &&
+                                [scanner scanUpToString:@"}" intoString:&key] &&
+                                (items = [publications allItemsForCiteKey:key]))
+                                [selItems addObjectsFromArray:items];
+                            [scanner scanUpToCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
+                            [scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
+                        } while ([scanner isAtEnd] == NO);
+                        
+                        if ([selItems count])
+                            [self selectPublications:selItems];
+                        
+                        return YES;
+                    }
                 }
             }
             
             return [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL];
         }
+    } else if(tv == groupTableView){
+        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSStringPboardType, nil]];
+        NSArray *pubs = nil;
+        BOOL isDragFromMainTable = [[info draggingSource] isEqual:tableView];
+        BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupTableView];
+        BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
+        
+        // retain is required to fix bug #1356183
+        BDSKGroup *group = row == -1 ? nil : [[[groups objectAtIndex:row] retain] autorelease];
+        BOOL shouldSelect = row == -1 || [[self selectedGroups] containsObject:group];
+        
+		if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromExternalGroups && row == 0) {
+            return [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
+        } else if(isDragFromGroupTable || isDragFromDrawer || (row >= 0 && [group isValidDropTarget] == NO)) {
+            return NO;
+        } else if(isDragFromMainTable){
+            // we already have these publications, so we just want to add them to the group, not the document
+            
+			pubs = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
+        } else if (row == -1 && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil] containsObject:type]){
+            NSArray *urls = nil;
+            
+            if ([type isEqualToString:BDSKWeblocFilePboardType]) {
+                urls = [NSArray arrayWithObjects:[NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]], nil]; 	
+            } else if ([type isEqualToString:NSURLPboardType]) {
+                urls = [NSArray arrayWithObjects:[NSURL URLFromPasteboard:pboard], nil];
+            } else if ([type isEqualToString:NSFilenamesPboardType]) {
+                NSEnumerator *fileEnum = [[pboard propertyListForType:NSFilenamesPboardType] objectEnumerator];
+                NSString *file;
+                urls = [NSMutableArray array];
+                while (file = [fileEnum nextObject])
+                    [(NSMutableArray *)urls addObject:[NSURL fileURLWithPath:file]];
+            }
+            
+            NSEnumerator *urlEnum = [urls objectEnumerator];
+            NSURL *url;
+            group = nil;
+            
+            while (url = [urlEnum nextObject]) {
+                if ([url isFileURL] && [[[url path] pathExtension] isEqualToString:@"bdsksearch"]) {
+                    NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:url];
+                    Class groupClass = NSClassFromString([dictionary objectForKey:@"class"]);
+                    group = [[[(groupClass ?: [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease];
+                    if(group)
+                        [groups addSearchGroup:(BDSKSearchGroup *)group];
+                } else if ([[url scheme] isEqualToString:@"x-bdsk-search"]) {
+                    group = [[[BDSKSearchGroup alloc] initWithURL:url] autorelease];
+                    if(group)
+                        [groups addSearchGroup:(BDSKSearchGroup *)group];
+                } else {
+                    group = [[[BDSKURLGroup alloc] initWithURL:url] autorelease];
+                    [groups addURLGroup:(BDSKURLGroup *)group];
+                }
+            }
+            if (group)
+                [self selectGroup:group];
+            if ([urls count]) {
+                [[self undoManager] setActionName:NSLocalizedString(@"Add Group", @"Undo action name")];
+                return YES;
+            } else {
+                return NO;
+            }
+            
+        } else {
+            
+            if([self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL] == NO)
+                return NO;
+            
+            pubs = [self selectedPublications];            
+        }
+
+        if(row == -1 && [pubs count]){
+            // add a new static groups with the added items, use a common author name or keyword if available
+            NSEnumerator *pubEnum = [pubs objectEnumerator];
+            BibItem *pub = [pubEnum nextObject];
+            NSMutableSet *auths = BDSKCreateFuzzyAuthorCompareMutableSet();
+            NSMutableSet *keywords = [[NSMutableSet alloc] initWithSet:[pub groupsForField:BDSKKeywordsString]];
+            [auths setSet:[pub allPeople]];
+            while(pub = [pubEnum nextObject]){
+                [auths intersectSet:[pub allPeople]];
+                [keywords intersectSet:[pub groupsForField:BDSKKeywordsString]];
+            }
+            group = [[BDSKStaticGroup alloc] init];
+            if([auths count])
+                [(BDSKStaticGroup *)group setName:[[auths anyObject] displayName]];
+            else if([keywords count])
+                [(BDSKStaticGroup *)group setName:[keywords anyObject]];
+            [auths release];
+            [keywords release];
+            [groups addStaticGroup:(BDSKStaticGroup *)group];
+            [group release];
+        }
+        
+        // add to the group we're dropping on, /not/ the currently selected group; no need to add to all pubs group, though
+        if(group != nil && row != 0 && [pubs count]){
+            
+            [self addPublications:pubs toGroup:group];
+            
+            // Reselect if necessary, or we default to selecting the all publications group (which is really annoying when creating a new pub by dropping a PDF on a group).  Don't use row, because we might have added the Last Import group.  Also, note that a side effect of addPublicationsFromPasteboard:selectLibrary:verbose:error: may create a new group (if dropping on a selected category group), so [groups indexOfObjectIdenticalTo:group] == NSNotFound.
+            if(shouldSelect) 
+                [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:[groups indexOfObject:group]] byExtendingSelection:NO];
+        }
+        
+        return YES;
     }
       
     return NO;
@@ -945,10 +1221,11 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 #pragma mark HFS Promise drags
 
 // promise drags (currently used for webloc files)
-- (NSArray *)tableView:(NSTableView *)tv namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forDraggedRowsWithIndexes:(NSIndexSet *)indexSet {
+- (NSArray *)tableView:(NSTableView *)tv namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forDraggedRowsWithIndexes:(NSIndexSet *)indexSet;
+{
 
     if ([tv isEqual:tableView]) {
-        NSUInteger rowIdx = [indexSet firstIndex];
+        unsigned rowIdx = [indexSet firstIndex];
         NSMutableDictionary *fullPathDict = [NSMutableDictionary dictionaryWithCapacity:[indexSet count]];
         
         // We're supposed to return this to our caller (usually the Finder); just an array of file names, not full paths
@@ -965,9 +1242,9 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         BDSKLinkedFile *file;
         NSString *fileName;
         NSString *basePath = [dropDestination path];
-        NSInteger i = 0;
+        int i = 0;
         
-        BDSKASSERT(isRemoteURLField || [fieldName isEqualToString:BDSKRemoteURLString]);
+        OBASSERT(isRemoteURLField || [fieldName isEqualToString:BDSKRemoteURLString]);
         
         while(rowIdx != NSNotFound){
             theBib = [shownPublications objectAtIndex:rowIdx];
@@ -984,7 +1261,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                     if (url = [file URL]) {
                         fileName = [theBib displayTitle];
                         if (i > 0)
-                            fileName = [fileName stringByAppendingFormat:@"-%ld", (long)i];
+                            fileName = [fileName stringByAppendingFormat:@"-%i", i];
                         i++;
                         fullPath = [[basePath stringByAppendingPathComponent:fileName] stringByAppendingPathExtension:@"webloc"];
                         [fullPathDict setValue:url forKey:fullPath];
@@ -999,42 +1276,134 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         [[NSFileManager defaultManager] createWeblocFilesInBackgroundThread:fullPathDict];
 
         return fileNames;
+    } else if ([tv isEqual:groupTableView]) {
+        BDSKGroup *group = [groups objectAtIndex:[indexSet firstIndex]];
+        NSMutableDictionary *plist = [[[group dictionaryValue] mutableCopy] autorelease];
+        if (plist) {
+            // we probably don't want to share this info with anyone else
+            [plist removeObjectForKey:@"search term"];
+            [plist removeObjectForKey:@"history"];
+            
+            NSString *fileName = [group respondsToSelector:@selector(serverInfo)] ? [[(BDSKSearchGroup *)group serverInfo] name] : [group name];
+            fileName = [fileName stringByAppendingPathExtension:@"bdsksearch"];
+            NSString *fullPath = [[dropDestination path] stringByAppendingPathComponent:fileName];
+            
+            // make sure the filename is unique
+            fullPath = [[NSFileManager defaultManager] uniqueFilePathWithName:fileName atPath:[dropDestination path]];
+            return ([plist writeToFile:fullPath atomically:YES]) ? [NSArray arrayWithObject:fileName] : nil;
+        } else
+            return nil;
     }
     NSAssert(0, @"code path should be unreached");
     return nil;
 }
 
-- (void)setPromiseDragColumnIdentifier:(NSString *)identifier {
+- (void)setPromiseDragColumnIdentifier:(NSString *)identifier;
+{
     if(promiseDragColumnIdentifier != identifier){
         [promiseDragColumnIdentifier release];
         promiseDragColumnIdentifier = [identifier copy];
     }
 }
 
-- (NSString *)promiseDragColumnIdentifier {
+- (NSString *)promiseDragColumnIdentifier;
+{
     return promiseDragColumnIdentifier;
 }
 
+#pragma mark -
+
+- (BOOL)isDragFromExternalGroups;
+{
+    return docState.dragFromExternalGroups;
+}
+
+- (void)setDragFromExternalGroups:(BOOL)flag;
+{
+    docState.dragFromExternalGroups = flag;
+}
+
+#pragma mark TableView actions
+
+// the next 3 are called from tableview actions defined in NSTableView_OAExtensions
+
+- (void)tableView:(NSTableView *)tv insertNewline:(id)sender{
+	if (tv == tableView || tv == [fileSearchController tableView]) {
+		[self editPubCmd:sender];
+	} else if (tv == groupTableView) {
+		[self renameGroupAction:sender];
+	}
+}
+
+- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows{
+	// the rows are always the selected rows
+	if (tv == tableView || tv == [fileSearchController tableView]) {
+		[self removeSelectedPubs:nil];
+	} else if (tv == groupTableView) {
+		[self removeSelectedGroups:nil];
+	}
+}
+
+- (BOOL)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
+
+	if (tv != tableView) {
+		NSBeep();
+		return NO;
+	}
+
+    NSError *error = nil;
+	if ([self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:&error] == NO) {
+        [tv presentError:error];
+	}
+    return YES;
+}
+
+// as the window delegate, we receive these from NSInputManager and doCommandBySelector:
+- (void)moveLeft:(id)sender{
+    if([documentWindow firstResponder] != groupTableView && [documentWindow makeFirstResponder:groupTableView])
+        if([groupTableView numberOfSelectedRows] == 0)
+            [self selectLibraryGroup:nil];
+}
+
+- (void)moveRight:(id)sender{
+    if([documentWindow firstResponder] != tableView && [documentWindow makeFirstResponder:tableView]){
+        if([tableView numberOfSelectedRows] == 0)
+            [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+    } else if([documentWindow firstResponder] == tableView)
+        [self editPubCmd:nil];
+}
+
+- (void)tableView:(NSTableView *)tv openParentForItemAtRow:(int)row{
+    BibItem *parent = [[shownPublications objectAtIndex:row] crossrefParent];
+    if (parent)
+        [self editPub:parent];
+}
+
+#pragma mark -
 #pragma mark TypeSelectHelper delegate
 
 // used for status bar
-- (void)tableView:(NSTableView *)tv typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
+- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
     if(searchString == nil || sortKey == nil)
         [self updateStatus]; // resets the status line to its default value
-    else if([tv isEqual:tableView]) 
+    else if(typeSelectHelper == [tableView typeSelectHelper]) 
         [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding item with %@: \"%@\"", @"Status message:Finding item with [sorting field]: \"[search string]\""), [sortKey localizedFieldName], searchString]];
+    else if(typeSelectHelper == [groupTableView typeSelectHelper]) 
+        [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding group: \"%@\"", @"Status message:Finding group: \"[search string]\""), searchString]];
 }
 
-- (void)tableView:(NSTableView *)tv typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString{
+- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString{
     if(sortKey == nil)
         [self updateStatus]; // resets the status line to its default value
-    else if([tv isEqual:tableView]) 
+    else if(typeSelectHelper == [tableView typeSelectHelper]) 
         [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"No item with %@: \"%@\"", @"Status message:No item with [sorting field]: \"[search string]\""), [sortKey localizedFieldName], searchString]];
+    else if(typeSelectHelper == [groupTableView typeSelectHelper]) 
+        [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"No group: \"%@\"", @"Status message:No group: \"[search string]\""), searchString]];
 }
 
 // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
-- (NSArray *)tableView:(NSTableView *)tv typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
-    if([tv isEqual:tableView]){    
+- (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
+    if(typeSelectHelper == [tableView typeSelectHelper]){    
         
         // Some users seem to expect that the currently sorted table column is used for typeahead;
         // since the datasource method already knows how to convert columns to BibItem values, we
@@ -1042,7 +1411,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         // to avoid calling it twice on -reloadData, but that will only work if -reloadData reloads
         // all rows instead of just visible rows.
         
-        NSUInteger i, count = [shownPublications count];
+        unsigned int i, count = [shownPublications count];
         NSMutableArray *a = [NSMutableArray arrayWithCapacity:count];
 
         // table datasource returns an NSImage for URL fields, so we'll ignore those columns
@@ -1063,702 +1432,61 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         }
         return a;
         
-    }
-    return [NSArray array];
-}
-
-#pragma mark TableView actions
-
-// the next 3 are called from tableview actions defined in NSTableView_OAExtensions
-
-- (void)tableViewInsertNewline:(NSTableView *)tv {
-	if (tv == tableView || tv == [fileSearchController tableView]) {
-		[self editPubCmd:nil];
-	}
-}
-
-- (void)tableViewInsertSpace:(NSTableView *)tv {
-	if (tv == tableView || tv == [fileSearchController tableView]) {
-		[self pageDownInPreview:nil];
-	}
-}
-
-- (void)tableViewInsertShiftSpace:(NSTableView *)tv {
-	if (tv == tableView || tv == [fileSearchController tableView]) {
-		[self pageUpInPreview:nil];
-	}
-}
-
-- (void)tableView:(NSTableView *)tv deleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
-	if (tv == tableView) {
-		[self removePublicationsFromSelectedGroups:[shownPublications objectsAtIndexes:rowIndexes]];
-	} else if (tv == [fileSearchController tableView]) {
-        [self removePublicationsFromSelectedGroups:[publications itemsForIdentifierURLs:[fileSearchController identifierURLsAtIndexes:rowIndexes]]];
-	}
-}
-
-- (BOOL)tableView:(NSTableView *)tv canDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
-	if (tv == tableView || tv == [fileSearchController tableView]) {
-		return [self hasExternalGroupsSelected] == NO && [rowIndexes count] > 0;
-	}
-    return NO;
-}
-
-- (void)tableView:(NSTableView *)tv alternateDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
-	if (tv == tableView) {
-		[self deletePublications:[shownPublications objectsAtIndexes:rowIndexes]];
-	} else if (tv == [fileSearchController tableView]) {
-        [self deletePublications:[publications itemsForIdentifierURLs:[fileSearchController identifierURLsAtIndexes:rowIndexes]]];
-	}
-}
-
-- (BOOL)tableView:(NSTableView *)tv canAlternateDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
-	if (tv == tableView || tv == [fileSearchController tableView]) {
-		return [self hasExternalGroupsSelected] == NO && [rowIndexes count] > 0;
-	}
-    return NO;
-}
-
-- (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
-	if (tv == tableView) {
-        NSError *error = nil;
-        if ([self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:&error] == NO)
-            [tv presentError:error];
-    } else {
-		NSBeep();
-	}
-}
-
-- (BOOL)tableViewCanPasteFromPasteboard:(NSTableView *)tv {
-    if (tv == tableView) {
-        return [self hasExternalGroupsSelected] == NO;
-    }
-    return NO;
-}
-
-// Don't use the default copy+paste here, as it uses another pasteboard and some more overhead
-- (void)tableView:(NSTableView *)tv duplicateRowsWithIndexes:(NSIndexSet *)rowIndexes {
-	// the rows are always the selected rows
-	if (tv == tableView) {
-        NSArray *newPubs = [[NSArray alloc] initWithArray:[self selectedPublications] copyItems:YES];
+    } else if(typeSelectHelper == [groupTableView typeSelectHelper]){
         
-        [self addPublications:newPubs]; // notification will take care of clearing the search/sorting
-        [self selectPublications:newPubs];
-        [newPubs release];
-        
-        if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey])
-            [self editPubCmd:nil]; // this will aske the user when there are many pubs
-    } else {
-        NSBeep();
-    }
-}
-
-- (BOOL)tableView:(NSTableView *)tv canDuplicateRowsWithIndexes:(NSIndexSet *)rowIndexes {
-    if (tv == tableView) {
-		return [self hasExternalGroupsSelected] == NO && [rowIndexes count] > 0;
-    }
-    return NO;
-}
-
-- (void)tableView:(NSTableView *)tv openParentForItemAtRow:(NSInteger)row{
-    BibItem *parent = [[shownPublications objectAtIndex:row] crossrefParent];
-    if (parent)
-        [self editPub:parent];
-}
-
-#pragma mark-
-#pragma mark OutlineView data source
-
-- (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item {
-    return item ? [item numberOfChildren] : [groups count];
-}
-
-- (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)idx ofItem:(id)item {
-    return item ? [item childAtIndex:idx] : [groups objectAtIndex:idx];
-}
-
-- (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item {
-    return [item isParent];
-}
-
-- (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
-    return [item cellValue];
-}
-
-- (void)outlineView:(NSOutlineView *)outlineView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
-    // should never receive this for parent groups
-    if ([item isParent])
-        return;
-    
-    BDSKGroup *group = item;
-    // object is always a group, see BDSKGroupCellFormatter
-    BDSKASSERT([object isKindOfClass:[NSDictionary class]]);
-    NSString *newName = [object valueForKey:BDSKGroupCellStringKey];
-    if([[group editingStringValue] isEqualToString:newName])  
-        return;
-    if ([group isCategory]) {
-        NSArray *pubs = [groupedPublications copy];
-        // change the name of the group first, so we can preserve the selection; we need to old group info to move though
-        id name = [[self currentGroupField] isPersonField] ? (id)[BibAuthor authorWithName:newName andPub:[[group name] publication]] : (id)newName;
-        BDSKCategoryGroup *oldGroup = [[[BDSKCategoryGroup alloc] initWithName:[group name] key:[(BDSKCategoryGroup *)group key] count:[group count]] autorelease];
-        [(BDSKCategoryGroup *)group setName:name];
-        [self movePublications:pubs fromGroup:oldGroup toGroupNamed:newName];
-        [pubs release];
-    } else if([group hasEditableName]) {
-        [(BDSKMutableGroup *)group setName:newName];
-        [[self undoManager] setActionName:NSLocalizedString(@"Rename Group", @"Undo action name")];
-    }
-}
-
-#pragma mark OutlineView delegate
-
-- (BOOL)outlineView:(NSOutlineView *)outlineView shouldCollapseItem:(id)item {
-    return [item isEqual:[groups libraryParent]] == NO;
-}
-
-- (NSCell *)outlineView:(NSOutlineView *)outlineView dataCellForTableColumn:(NSTableColumn *)tableColumn item:(id)item {
-    // return nil to avoid getting called elsewhere with nil table column
-    if (nil == tableColumn) return nil;
-    
-    /*
-     Returning a static NSTextFieldCell instance causes a zombie crash on close/reopen, 
-     so return a new instance each time.  NSOutlineView must be setting some state on the
-     cell before or instead of copying it.
-     */
-    return [item isParent] ? [groupOutlineView parentCell] : [tableColumn dataCell];
-}
-
-- (BOOL)outlineView:(NSOutlineView *)outlineView shouldSelectItem:(id)item {
-    return [item isParent] == NO;
-}
-
-- (BOOL)outlineView:(NSOutlineView *)outlineView isGroupItem:(id)item {
-    return [item isParent];
-}
-
-- (BOOL)outlineView:(NSOutlineView *)outlineView shouldEditTableColumn:(NSTableColumn *)tableColumn item:(id)item {
-    if ([item isParent] || [item hasEditableName] == NO) {
-        return NO;
-    } else if ([item isCategory] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRenameGroupKey]) {
-        
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"This action will change the %@ field in %ld items. Do you want to proceed?", @"Informative text in alert dialog"), [currentGroupField localizedFieldName], (long)[groupedPublications count]];
-        [alert setShowsSuppressionButton:YES];
-        NSInteger rv = [alert runModal];
-        if ([alert suppressionButtonState] == NSOnState)
-            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnRenameGroupKey];
-        if (rv == NSAlertAlternateReturn)
-            return NO;
-    }
-    return YES;
-}
-
-- (void)outlineViewItemDidExpand:(NSNotification *)notification {
-    // call this with a delay, otherwise we'll crash on Tiger, probbaly due to an AppKit bug
-    if ([[[notification userInfo] objectForKey:@"NSObject"] isEqual:[groups smartParent]])   
-        [self performSelector:@selector(updateSmartGroupsCount) withObject:nil afterDelay:0.0];
-}
-
-- (void)outlineViewItemDidCollapse:(NSNotification *)notification {
-    if ([[groupOutlineView selectedRowIndexes] count] == 0)
-        [self selectLibraryGroup:nil];
-}
-
-- (void)outlineView:(NSOutlineView *)outlineView willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item {
-    BDSKGroup *group = item;
-    NSProgressIndicator *spinner = nil;
-    if ([item isParent] == NO)
-        spinner = [self spinnerForGroup:group];
-    
-    if (spinner) {
-        NSInteger column = [[outlineView tableColumns] indexOfObject:tableColumn];
-        NSRect ignored, rect = [outlineView frameOfCellAtColumn:column row:[outlineView rowForItem:item]];
-        NSSize size = [spinner frame].size;
-        NSDivideRect(rect, &ignored, &rect, 2.0f, NSMaxXEdge);
-        NSDivideRect(rect, &rect, &ignored, size.width, NSMaxXEdge);
-        rect = BDSKCenterRectVertically(rect, size.height, [outlineView isFlipped]);
-        
-        [spinner setFrame:rect];
-        if ([spinner isDescendantOf:outlineView] == NO)
-            [outlineView addSubview:spinner];
-    } 
-}
-
-- (void)outlineViewSelectionDidChange:(NSNotification *)notification {
-    NSNotification *note = [NSNotification notificationWithName:BDSKGroupTableSelectionChangedNotification object:self];
-    [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
-    docState.didImport = NO;
-}
-
-- (NSMenu *)outlineView:(NSOutlineView *)ov menuForTableColumn:(NSTableColumn *)tableColumn item:(id)item {
-	if (ov != groupOutlineView || tableColumn == nil || item == nil) 
-		return nil;
-    
-    if (item == [groups categoryParent])
-        return [[NSApp delegate] groupFieldMenu];
-    
-    NSMenu *menu = [[groupMenu copyWithZone:[NSMenu menuZone]] autorelease];
-    [menu removeItemAtIndex:0];
-    
-	// kick out every item we won't need:
-	NSInteger i = [menu numberOfItems];
-    BOOL wasSeparator = YES;
-	
-	while (--i >= 0) {
-		NSMenuItem *menuItem = [menu itemAtIndex:i];
-		if ([self validateMenuItem:menuItem] == NO || ((wasSeparator || i == 0) && [menuItem isSeparatorItem]))
-			[menu removeItem:menuItem];
-        else
-            wasSeparator = [menuItem isSeparatorItem];
-	}
-	while ([menu numberOfItems] > 0 && [(NSMenuItem*)[menu itemAtIndex:0] isSeparatorItem])	
-		[menu removeItemAtIndex:0];
-	
-	return [menu numberOfItems] ? menu : nil;
-}
-
-- (NSIndexSet *)outlineView:(BDSKGroupOutlineView *)outlineView indexesOfRowsToHighlightInRange:(NSRange)indexRange {
-    if([self numberOfSelectedPubs] == 0 || [self hasExternalGroupsSelected])
-        return [NSIndexSet indexSet];
-    
-    // Use this for the indexes we're going to return
-    NSMutableIndexSet *indexSet = [NSMutableIndexSet indexSet];
-    
-    // This allows us to be slightly lazy, only putting the visible group rows in the dictionary
-    NSMutableIndexSet *visibleIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:indexRange];
-    [visibleIndexes removeIndexes:[groupOutlineView selectedRowIndexes]];
-    
-    NSArray *selectedPubs = [self selectedPublications];
-    NSUInteger groupIndex = [visibleIndexes firstIndex];
-    
-    while (groupIndex != NSNotFound) {
-        BDSKGroup *group = [groupOutlineView itemAtRow:groupIndex];
-        if ([group isExternal] == NO) {
-            NSEnumerator *pubEnum = [selectedPubs objectEnumerator];
-            BibItem *pub;
-            while(pub = [pubEnum nextObject]){
-                if ([group containsItem:pub]) {
-                    [indexSet addIndex:groupIndex];
-                    break;
-                }
-            }
-        }
-        groupIndex = [visibleIndexes indexGreaterThanIndex:groupIndex];
-    }
-    
-    return indexSet;
-}
-
-- (BOOL)outlineView:(BDSKGroupOutlineView *)ov isSingleSelectionItem:(id)item {
-    return [item isEqual:[groups libraryGroup]] || [item isExternal];
-}
-
-- (void)outlineView:(BDSKGroupOutlineView *)aTableView doubleClickedOnIconOfItem:(id)item {
-    [self editGroup:item];
-}
-
-- (BOOL)outlineViewShouldEditNextItemWhenEditingEnds:(BDSKGroupOutlineView *)ov{
-	if (ov == groupOutlineView && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRenameGroupKey])
-		return NO;
-	return YES;
-}
-
-#pragma mark OutlineView dragging source
-
-- (BOOL)outlineView:(NSOutlineView *)outlineView writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard {
-    NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
-    NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
-	NSInteger dragCopyType = [sud integerForKey:dragCopyTypeKey];
-    BOOL success = NO;
-	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
-    NSArray *pubs = nil;
-    NSArray *additionalFilenames = nil;
-    
-	BDSKPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
-    
-    docState.dragFromExternalGroups = NO;
-	
-    if ([items containsObject:[groups libraryGroup]]) {
-        pubs = [NSArray arrayWithArray:publications];
-    } else if ([items count] > 1) {
-        // multiple dragged rows always are the selected rows
-        pubs = [NSArray arrayWithArray:groupedPublications];
-    } else if ([items count] == 1) {
-        // a single row, not necessarily the selected one
-        BDSKGroup *group = [items firstObject];
-        if ([group isExternal]) {
-            pubs = [NSArray arrayWithArray:[(id)group publications]];
-            if ([group isSearch])
-                additionalFilenames = [NSArray arrayWithObject:[[[(BDSKSearchGroup *)group serverInfo] name] stringByAppendingPathExtension:@"bdsksearch"]];
-            docState.dragFromExternalGroups = YES;
-        } else {
-            NSMutableArray *pubsInGroup = [NSMutableArray arrayWithCapacity:[publications count]];
-            NSEnumerator *pubEnum = [publications objectEnumerator];
-            BibItem *pub;
-            
-            while (pub = [pubEnum nextObject]) {
-                if ([group containsItem:pub]) 
-                    [pubsInGroup addObject:pub];
-            }
-            pubs = pubsInGroup;
-        }
-    }
-    if ([pubs count] == 0 && [self hasSearchGroupsSelected] == NO) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty Groups", @"Message in alert dialog when dragging from empty groups")
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The groups you want to drag do not contain any items.", @"Informative text in alert dialog")];
-        [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-        return NO;
-    }
-    
-    if (dragCopyType == BDSKTemplateDragCopyType) {
-        NSString *dragCopyTemplateKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
-        NSString *template = [sud stringForKey:dragCopyTemplateKey];
-        NSUInteger templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
-        if (templateIdx != NSNotFound)
-            dragCopyType += templateIdx;
-    }
-	
-	success = [self writePublications:pubs forDragCopyType:dragCopyType citeString:citeString toPasteboard:pboard];
-	
-    if(success && additionalFilenames){
-        [pboardHelper addTypes:[NSArray arrayWithObject:NSFilesPromisePboardType] forPasteboard:pboard];
-        [pboardHelper setPropertyList:additionalFilenames forType:NSFilesPromisePboardType forPasteboard:pboard];
-    }
-    
-    return success;
-}
-
-- (void)outlineView:(NSOutlineView *)ov concludeDragOperation:(NSDragOperation)operation {
-    [self clearPromisedDraggedItems];
-}
-
-- (NSDragOperation)outlineView:(NSOutlineView *)ov draggingSourceOperationMaskForLocal:(BOOL)isLocal {
-    return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
-}
-
-- (NSImage *)outlineView:(NSOutlineView *)ov dragImageForItems:(NSArray *)items{ 
-    return [self dragImageForPromisedItemsUsingCiteString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey]];
-}
-
-#pragma mark OutlineView dragging destination
-
-- (NSDragOperation)outlineView:(NSOutlineView *)outlineView validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx {
-    NSPasteboard *pboard = [info draggingPasteboard];
-    
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
-    
-    // bail out if no recognizable types
-    if (nil == type)
-        return NSDragOperationNone;
-    
-    BOOL isDragFromMainTable = [[info draggingSource] isEqual:tableView];
-    BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupOutlineView];
-    BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
-    
-    // drop of items from external groups is allowed only on the Library
-    if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromExternalGroups) {
-        if ([item isEqual:[groups libraryGroup]] == NO && [item isEqual:[groups libraryParent]] == NO)
-            return NSDragOperationNone;
-        [outlineView setDropItem:[groups libraryGroup] dropChildIndex:NSOutlineViewDropOnItemIndex];
-        return NSDragOperationCopy;
-    }
-    
-    // we don't allow local drags unless they're targeted on a specific group
-    if (isDragFromDrawer || isDragFromGroupTable)
-        return NSDragOperationNone;
-    
-    // drop a file or URL on external groups
-    if ([item isEqual:[groups webGroup]] && idx == NSOutlineViewDropOnItemIndex && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil] containsObject:type]) {
-        return NSDragOperationEvery;
-    } else if (([item isExternal] || [item isEqual:[groups externalParent]]) && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil] containsObject:type]) {
-        [outlineView setDropItem:[groups externalParent] dropChildIndex:NSOutlineViewDropOnItemIndex];
-        return NSDragOperationLink;
-    }
-    
-    // we don't insert in a particular location
-    if (idx != NSOutlineViewDropOnItemIndex) {
-        if (nil == item || [(BDSKParentGroup *)item numberOfChildren] == 0) {
-            // here we actually target the whole table or the parent
-            [outlineView setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
-        } else {
-            // redirect to a drop on the closest child
-            item = [(BDSKParentGroup *)item childAtIndex:MIN((NSInteger)[(BDSKParentGroup *)item numberOfChildren] - 1, idx)];
-            [outlineView setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
-        }
-        idx = NSOutlineViewDropOnItemIndex;
-    }
-    
-    // no dropping on shared groups or parents other than the static parent
-    if (item && [item isValidDropTarget] == NO)
-        return NSDragOperationNone;
-    
-    if (isDragFromMainTable) {
-        if ([type isEqualToString:BDSKBibItemPboardType] == NO || item == nil || [item isEqual:[groups libraryGroup]])
-            return NSDragOperationNone;
-        return NSDragOperationLink;
-    } else if ([type isEqualToString:BDSKBibItemPboardType]) {
-        return NSDragOperationCopy;
-    } else {
-        return NSDragOperationEvery;
-    }
-    return NSDragOperationNone;
-}
-
-- (BOOL)outlineView:(NSOutlineView *)outlineView acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(NSInteger)idx {
-	
-    NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSStringPboardType, nil]];
-    NSArray *pubs = nil;
-    BOOL isDragFromMainTable = [[info draggingSource] isEqual:tableView];
-    BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupOutlineView];
-    BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
-    
-    if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromExternalGroups) {
-        
-        return [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
-        
-    } else if (idx == NSOutlineViewDropOnItemIndex && [item isEqual:[groups webGroup]] && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil] containsObject:type]) {
-        
-        NSURL *url = nil;
-        
-        if ([type isEqualToString:BDSKWeblocFilePboardType])
-            url = [NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]]; 	
-        else if ([type isEqualToString:NSURLPboardType])
-            url = [NSURL URLFromPasteboard:pboard];
-        if (url) {
-            // switch to the web group
-            if ([self hasWebGroupSelected] == NO) {
-                // make sure the controller and its nib are loaded
-                [[self webGroupViewController] window];
-                [self selectGroup:[groups webGroup]];
-            }
-            [[self webGroupViewController] setURLString:[url absoluteString]];
-            return YES;
-        } else {
-            return NO;
-        }
-        
-    } else if (([item isExternal] || [item isEqual:[groups externalParent]]) && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil] containsObject:type]){
-        
-        NSArray *urls = nil;
-        
-        if ([type isEqualToString:BDSKWeblocFilePboardType]) {
-            urls = [NSArray arrayWithObjects:[NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]], nil]; 	
-        } else if ([type isEqualToString:NSURLPboardType]) {
-            urls = [NSArray arrayWithObjects:[NSURL URLFromPasteboard:pboard], nil];
-        } else if ([type isEqualToString:NSFilenamesPboardType]) {
-            NSEnumerator *fileEnum = [[pboard propertyListForType:NSFilenamesPboardType] objectEnumerator];
-            NSString *file;
-            urls = [NSMutableArray array];
-            while (file = [fileEnum nextObject])
-                [(NSMutableArray *)urls addObject:[NSURL fileURLWithPath:file]];
-        }
-        
-        NSEnumerator *urlEnum = [urls objectEnumerator];
-        NSURL *url;
-        BDSKGroup *group = nil;
-        
-        while (url = [urlEnum nextObject]) {
-            if ([url isFileURL] && [[[url path] pathExtension] isEqualToString:@"bdsksearch"]) {
-                NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:url];
-                Class groupClass = NSClassFromString([dictionary objectForKey:@"class"]);
-                group = [[[(groupClass ?: [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease];
-                if(group)
-                    [groups addSearchGroup:(BDSKSearchGroup *)group];
-            } else if ([[url scheme] isEqualToString:@"x-bdsk-search"]) {
-                group = [[[BDSKSearchGroup alloc] initWithURL:url] autorelease];
-                if(group)
-                    [groups addSearchGroup:(BDSKSearchGroup *)group];
-            } else {
-                group = [[[BDSKURLGroup alloc] initWithURL:url] autorelease];
-                [groups addURLGroup:(BDSKURLGroup *)group];
-            }
-        }
-        if (group)
-            [self selectGroup:group];
-        
-        if ([urls count]) {
-            [[self undoManager] setActionName:NSLocalizedString(@"Add Group", @"Undo action name")];
-            return YES;
-        } else {
-            return NO;
-        }
-        
-    }
-    
-    if (idx != NSOutlineViewDropOnItemIndex) {
-        // we shouldn't get here at this point
-        if (item && [(BDSKParentGroup *)item numberOfChildren])
-            item = [(BDSKParentGroup *)item childAtIndex:MIN((NSInteger)[(BDSKParentGroup *)item numberOfChildren] - 1, idx)];
-        idx = NSOutlineViewDropOnItemIndex;
-    }
-    
-    if (isDragFromGroupTable || isDragFromDrawer || (item && [item isValidDropTarget] == NO)) {
-        // shouldn't get here at this point
-        return NO;
-    } else if (isDragFromMainTable) {
-        // we already have these publications, so we just want to add them to the group, not the document
-        pubs = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
-    } else {
-        if ([self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL])
-            pubs = [self selectedPublications];     
-    }
-    
-    if ([pubs count] == 0)
-        return NO;
-    
-    BOOL shouldSelect = (item == nil || [item isParent] || [[self selectedGroups] containsObject:item]);
-    
-    // if dropping on the static group parent, create a new static groups using a common author name or keyword if available
-    if ([item isEqual:[groups staticParent]]) {
-        NSEnumerator *pubEnum = [pubs objectEnumerator];
-        BibItem *pub = [pubEnum nextObject];
-        NSMutableSet *auths = [[NSMutableSet alloc] initForFuzzyAuthors];
-        NSMutableSet *keywords = [[NSMutableSet alloc] initWithSet:[pub groupsForField:BDSKKeywordsString]];
-        
-        [auths setSet:[pub allPeople]];
-        while (pub = [pubEnum nextObject]) {
-            [auths intersectSet:[pub allPeople]];
-            [keywords intersectSet:[pub groupsForField:BDSKKeywordsString]];
-        }
-        
-        item = [[[BDSKStaticGroup alloc] init] autorelease];
-        if ([auths count])
-            [(BDSKStaticGroup *)item setName:[[auths anyObject] displayName]];
-        else if ([keywords count])
-            [(BDSKStaticGroup *)item setName:[keywords anyObject]];
-        [auths release];
-        [keywords release];
-        [groups addStaticGroup:(BDSKStaticGroup *)item];
-    }
-    
-    // add to the group we're dropping on, /not/ the currently selected group; no need to add to all pubs group, though
-    if (item && [item isParent] == NO && [item isEqual:[groups libraryGroup]] == NO) {
-        
-        [self addPublications:pubs toGroup:item];
-        // Reselect if necessary, or we default to selecting the all publications group (which is really annoying when creating a new pub by dropping a PDF on a group).
-        if (shouldSelect)
-            [self selectGroup:item];
-    }
-    
-    return YES;
-}
-
-#pragma mark HFS Promise drags
-
-- (NSArray *)outlineView:(NSOutlineView *)outlineView namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forDraggedItems:(NSArray *)items {
-    NSMutableArray *droppedFiles = [NSMutableArray array];
-    NSEnumerator *itemEnum = [items objectEnumerator];
-    BDSKGroup *group;
-    
-    while (group = [itemEnum nextObject]) {
-        NSMutableDictionary *plist = [[[group dictionaryValue] mutableCopy] autorelease];
-
-        // we probably don't want to share this info with anyone else
-        [plist removeObjectForKey:@"search term"];
-        [plist removeObjectForKey:@"history"];
-        
-        NSString *fileName = [group respondsToSelector:@selector(serverInfo)] ? [[(BDSKSearchGroup *)group serverInfo] name] : [group name];
-        fileName = [fileName stringByAppendingPathExtension:@"bdsksearch"];
-        
-        // make sure the filename is unique
-        NSString *fullPath = [[NSFileManager defaultManager] uniqueFilePathWithName:fileName atPath:[dropDestination path]];
-        if([plist writeToFile:fullPath atomically:YES])
-            [droppedFiles addObject:[fullPath lastPathComponent]];
-        
-    }
-    return droppedFiles;
-}
-
-#pragma mark TypeSelectHelper delegate
-
-// used for status bar
-- (void)outlineView:(NSOutlineView *)ov typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
-    if (searchString == nil || sortKey == nil)
-        [self updateStatus]; // resets the status line to its default value
-    else if ([ov isEqual:groupOutlineView]) 
-        [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding group: \"%@\"", @"Status message:Finding group: \"[search string]\""), searchString]];
-}
-
-- (void)outlineView:(NSOutlineView *)ov typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString{
-    if (sortKey == nil)
-        [self updateStatus]; // resets the status line to its default value
-    else if ([ov isEqual:groupOutlineView]) 
-        [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"No group: \"%@\"", @"Status message:No group: \"[search string]\""), searchString]];
-}
-
-// This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
-- (NSArray *)outlineView:(NSOutlineView *)ov typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
-    if ([ov isEqual:groupOutlineView]) {
-        
-        NSInteger i;
-		NSInteger groupCount = [ov numberOfRows];
+        int i;
+		int groupCount = [groups count];
         NSMutableArray *array = [NSMutableArray arrayWithCapacity:groupCount];
         BDSKGroup *group;
         
-		BDSKPRECONDITION(groupCount);
+		OBPRECONDITION(groupCount);
         for(i = 0; i < groupCount; i++){
-			group = [ov itemAtRow:i];
-            [array addObject:[group isParent] ? @"" : [group stringValue]];
+			group = [groups objectAtIndex:i];
+            [array addObject:[group stringValue]];
 		}
         return array;
         
     } else return [NSArray array];
 }
 
-#pragma mark OutlineView actions
-
-- (void)outlineViewInsertNewline:(NSOutlineView *)ov {
-	if (ov == groupOutlineView) {
-		[self renameGroupAction:nil];
-	}
+// Type-ahead-selection behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
+- (unsigned int)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper{
+    if(typeSelectHelper == [tableView typeSelectHelper]){   
+        return [[tableView selectedRowIndexes] lastIndex];
+    } else if(typeSelectHelper == [groupTableView typeSelectHelper]){
+        return [[groupTableView selectedRowIndexes] lastIndex];
+    } else return NSNotFound;
 }
 
-- (void)outlineView:(NSOutlineView *)ov deleteItems:(NSArray *)items {
-	if (ov == groupOutlineView) {
-		[self removeGroups:items];
-	}
+// We call this when a type-ahead-selection match has been made; you should select the item based on its index in the array you provided in -typeAheadSelectionItems.
+- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(unsigned int)itemIndex{
+    NSTableView *tv = nil;
+    if(typeSelectHelper == [tableView typeSelectHelper])
+        tv = tableView;
+    else if(typeSelectHelper == [groupTableView typeSelectHelper])
+        tv = groupTableView;
+    else
+        return;
+    [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
+    [tv scrollRowToVisible:itemIndex];
 }
 
-- (BOOL)outlineView:(NSOutlineView *)ov canDeleteItems:(NSArray *)items {
-	if (ov == groupOutlineView) {
-		return [[items filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isStatic == YES OR isSmart == YES OR isSearch == YES OR isURL == YES OR isScript == YES"]] count] > 0;
-	}
-    return NO;
-}
+#pragma mark FileView data source and delegate
 
-#pragma mark -
-
-- (BOOL)isDragFromExternalGroups {
-    return docState.dragFromExternalGroups;
-}
-
-- (void)setDragFromExternalGroups:(BOOL)flag {
-    docState.dragFromExternalGroups = flag;
-}
-
-#pragma mark -
-#pragma mark FVFileView data source and delegate
-
-- (NSString *)fileView:(FVFileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex {
+- (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
+{
     return [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"string"];
 }
 
-- (NSUInteger)numberOfURLsInFileView:(FVFileView *)aFileView {
+- (NSUInteger)numberOfURLsInFileView:(FileView *)aFileView {
     return [[self shownFiles] count];
 }
 
-- (NSURL *)fileView:(FVFileView *)aFileView URLAtIndex:(NSUInteger)anIndex {
+- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)anIndex {
     return [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"URL"];
 }
 
-- (BOOL)fileView:(FVFileView *)aFileView shouldOpenURL:(NSURL *)aURL {
+- (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL {
     if ([aURL isFileURL]) {
         NSString *searchString = @"";
         // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
@@ -1770,9 +1498,9 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     }
 }
 
-- (void)fileView:(FVFileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
+- (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
     NSURL *theURL = anIndex == NSNotFound ? nil : [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"URL"];
-    NSInteger i;
+    int i;
     NSMenuItem *item;
     
     if (theURL && [[aFileView selectionIndexes] count] <= 1) {
@@ -1795,206 +1523,6 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             [item setRepresentedObject:theURL];
         }
     }
-    
-    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO && [[self selectedPublications] count] == 1) {
-        i = [menu indexOfItemWithTag:FVRemoveMenuItemTag];
-        if (i != NSNotFound && theURL && [[aFileView selectionIndexes] count] == 1) {
-            if ([theURL isFileURL]) {
-                item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace File", @"Menu item title") stringByAppendingEllipsis]
-                                          action:@selector(chooseLinkedFile:)
-                                   keyEquivalent:@""
-                                         atIndex:++i];
-                [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
-            } else {
-                item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace URL", @"Menu item title") stringByAppendingEllipsis]
-                                          action:@selector(chooseLinkedURL:)
-                                   keyEquivalent:@""
-                                         atIndex:++i];
-                [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
-            }
-        }
-        
-        [menu addItem:[NSMenuItem separatorItem]];
-        
-        [menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis]
-                        action:@selector(chooseLinkedFile:)
-                 keyEquivalent:@""];
-        
-        [menu addItemWithTitle:[NSLocalizedString(@"Choose URL", @"Menu item title") stringByAppendingEllipsis]
-                        action:@selector(chooseLinkedURL:)
-                 keyEquivalent:@""];
-    }
-}
-
-- (BOOL)fileView:(FVFileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation {
-    BDSKASSERT(anIndex != NSNotFound);
-    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
-        NSArray *selPubs = [self selectedPublications];
-        if ([selPubs count] == 1) {
-            [[selPubs lastObject] moveFilesAtIndexes:aSet toIndex:anIndex];
-            return YES;
-        }
-    }
-    return NO;
-}
-
-- (BOOL)fileView:(FVFileView *)aFileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation {
-    BibItem *publication = nil;
-    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
-        NSArray *selPubs = [self selectedPublications];
-        if ([selPubs count] == 1)
-            publication = [selPubs lastObject];
-    }
-    if (publication == nil)
-        return NO;
-    
-    BDSKLinkedFile *aFile = nil;
-    NSEnumerator *enumerator = [newURLs objectEnumerator];
-    NSURL *aURL;
-    NSUInteger idx = [aSet firstIndex];
-    
-    while (NSNotFound != idx) {
-        if ((aURL = [enumerator nextObject]) && 
-            (aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication])) {
-            NSURL *oldURL = [[[publication objectInFilesAtIndex:idx] URL] retain];
-            [publication removeObjectFromFilesAtIndex:idx];
-            if (oldURL)
-                [self userRemovedURL:oldURL forPublication:publication];
-            [oldURL release];
-            [publication insertObject:aFile inFilesAtIndex:idx];
-            [self userAddedURL:aURL forPublication:publication];
-            if (([NSApp currentModifierFlags] & NSCommandKeyMask) == 0)
-                [publication autoFileLinkedFile:aFile];
-        }
-        idx = [aSet indexGreaterThanIndex:idx];
-    }
-    return YES;
-}
-
-- (void)fileView:(FVFileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation {
-    BibItem *publication = nil;
-    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
-        NSArray *selPubs = [self selectedPublications];
-        if ([selPubs count] == 1)
-            publication = [selPubs lastObject];
-    }
-    if (publication == nil)
-        return;
-    
-    BDSKLinkedFile *aFile;
-    NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
-    NSURL *aURL;
-    NSUInteger idx = [aSet firstIndex], offset = 0;
-    
-    while (NSNotFound != idx) {
-        if ((aURL = [enumerator nextObject]) && 
-            (aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication])) {
-            [publication insertObject:aFile inFilesAtIndex:idx - offset];
-            [self userAddedURL:aURL forPublication:publication];
-            if (([NSApp currentModifierFlags] & NSCommandKeyMask) == 0)
-                [publication autoFileLinkedFile:aFile];
-        } else {
-            // the indexes in aSet assume that we inserted the file
-            offset++;
-        }
-        idx = [aSet indexGreaterThanIndex:idx];
-    }
-}
-
-- (void)trashAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
-{
-    if (alert && [alert suppressionButtonState] == NSOnState)
-        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKAskToTrashFilesKey];
-    NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
-    if (returnCode == NSAlertAlternateReturn) {
-        NSEnumerator *urlEnum = [fileURLs objectEnumerator];
-        NSURL *url;
-        while (url = [urlEnum nextObject]) {
-            NSString *path = [url path];
-            NSString *folderPath = [path stringByDeletingLastPathComponent];
-            NSString *fileName = [path lastPathComponent];
-            NSInteger tag = 0;
-            [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
-        }
-    }
-}
-
-// moveToTrash: 0 = no, 1 = yes, -1 = ask
-- (void)publication:(BibItem *)publication deleteURLsAtIndexes:(NSIndexSet *)indexSet moveToTrash:(NSInteger)moveToTrash{
-    NSUInteger idx = [indexSet lastIndex];
-    NSMutableArray *fileURLs = [NSMutableArray array];
-    while (NSNotFound != idx) {
-        NSURL *aURL = [[[publication objectInFilesAtIndex:idx] URL] retain];
-        if ([aURL isFileURL])
-            [fileURLs addObject:aURL];
-        [publication removeObjectFromFilesAtIndex:idx];
-        if (aURL)
-            [self userRemovedURL:aURL forPublication:publication];
-        [aURL release];
-        idx = [indexSet indexLessThanIndex:idx];
-    }
-    if ([fileURLs count]) {
-        if (moveToTrash == 1) {
-            [self trashAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[fileURLs retain]];
-        } else if (moveToTrash == -1) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
-                                             defaultButton:NSLocalizedString(@"No", @"Button title")
-                                           alternateButton:NSLocalizedString(@"Yes", @"Button title")
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
-            [alert setShowsSuppressionButton:YES];
-            [alert beginSheetModalForWindow:documentWindow
-                              modalDelegate:self 
-                             didEndSelector:@selector(trashAlertDidEnd:returnCode:contextInfo:)  
-                                contextInfo:[fileURLs retain]];
-        }
-    }
-}
-
-- (BOOL)fileView:(FVFileView *)aFileView deleteURLsAtIndexes:(NSIndexSet *)indexSet {
-    BibItem *publication = nil;
-    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
-        NSArray *selPubs = [self selectedPublications];
-        if ([selPubs count] == 1)
-            publication = [selPubs lastObject];
-    }
-    if (publication == nil)
-        return NO;
-    
-    NSInteger moveToTrash = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKAskToTrashFilesKey] ? -1 : 0;
-    [self publication:publication deleteURLsAtIndexes:indexSet moveToTrash:moveToTrash];
-    return YES;
-}
-
-- (NSDragOperation)fileView:(FVFileView *)aFileView validateDrop:(id <NSDraggingInfo>)info proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation {
-    BibItem *publication = nil;
-    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
-        NSArray *selPubs = [self selectedPublications];
-        if ([selPubs count] == 1)
-            publication = [selPubs lastObject];
-    }
-    if (publication == nil)
-        return NSDragOperationNone;
-    
-    NSDragOperation dragOp = dragOperation;
-    if ([[info draggingSource] isEqual:aFileView] && dropOperation == FVDropOn && dragOperation != NSDragOperationCopy) {
-        // redirect local drop on icon and drop on view
-        NSIndexSet *dragIndexes = [aFileView selectionIndexes];
-        NSUInteger firstIndex = [dragIndexes firstIndex], endIndex = [dragIndexes lastIndex] + 1, count = [publication countOfFiles];
-        if (anIndex == NSNotFound)
-            anIndex = count;
-        // if we're dragging a continuous range, don't move when we drop on that range
-        if ([dragIndexes count] != endIndex - firstIndex || anIndex < firstIndex || anIndex > endIndex) {
-            dragOp = NSDragOperationMove;
-            if (anIndex == count) // note that the count must be > 0, or we wouldn't have a local drag
-                [aFileView setDropIndex:count - 1 dropOperation:FVDropAfter];
-            else
-                [aFileView setDropIndex:anIndex dropOperation:FVDropBefore];
-        }
-    } else if (dragOperation == NSDragOperationLink && ([NSApp currentModifierFlags] & NSCommandKeyMask) == 0) {
-        dragOp = NSDragOperationGeneric;
-    }
-    return dragOp;
 }
 
 @end
@@ -2015,8 +1543,8 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         return NO;
         
     NSString *fileName = [fileNames lastObject];
-    NSSet *unreadableTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
-    NSSet *readableTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"bib", @"aux", @"ris", @"fcgi", @"refman", nil];
+    NSSet *unreadableTypes = [NSSet caseInsensitiveStringSetWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
+    NSSet *readableTypes = [NSSet caseInsensitiveStringSetWithObjects:@"bib", @"aux", @"ris", @"fcgi", @"refman", nil];
     
     if([unreadableTypes containsObject:[fileName pathExtension]])
         return YES;

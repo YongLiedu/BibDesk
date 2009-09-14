@@ -48,20 +48,51 @@ enum {
 	BDSKCategoryGroupType
 };
 
-@class BDSKGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BDSKSearchGroup, BDSKWebGroup, BDSKLibraryParentGroup, BDSKExternalParentGroup, BDSKSmartParentGroup, BDSKStaticParentGroup, BDSKCategoryParentGroup, BibDocument;
+@class BDSKGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BDSKSearchGroup, BDSKWebGroup, BibDocument;
 
 @interface BDSKGroupsArray : NSArray {
-    NSArray *groups;
+    BDSKGroup *libraryGroup;
+    BDSKWebGroup *webGroup;
+    BDSKStaticGroup *lastImportGroup;
+    NSMutableArray *sharedGroups;
+    NSMutableArray *urlGroups;
+    NSMutableArray *scriptGroups;
+    NSMutableArray *searchGroups;
+    NSMutableArray *smartGroups;
+    NSMutableArray *staticGroups;
+    NSArray *tmpStaticGroups;
+    NSMutableArray *categoryGroups;
+    NSMutableDictionary *spinners;
     BibDocument *document;
 }
 
 - (id)initWithDocument:(BibDocument *)aDocument;
 
-- (BDSKLibraryParentGroup *)libraryParent;
-- (BDSKExternalParentGroup *)externalParent;
-- (BDSKSmartParentGroup *)smartParent;
-- (BDSKStaticParentGroup *)staticParent;
-- (BDSKCategoryParentGroup *)categoryParent;
+- (NSRange)rangeOfSharedGroups;
+- (NSRange)rangeOfURLGroups;
+- (NSRange)rangeOfScriptGroups;
+- (NSRange)rangeOfSearchGroups;
+- (NSRange)rangeOfSmartGroups;
+- (NSRange)rangeOfStaticGroups;
+- (NSRange)rangeOfCategoryGroups;
+
+- (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes;
+- (unsigned int)numberOfURLGroupsAtIndexes:(NSIndexSet *)indexes;
+- (unsigned int)numberOfScriptGroupsAtIndexes:(NSIndexSet *)indexes;
+- (unsigned int)numberOfSearchGroupsAtIndexes:(NSIndexSet *)indexes;
+- (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes;
+- (unsigned int)numberOfStaticGroupsAtIndexes:(NSIndexSet *)indexes;
+- (unsigned int)numberOfCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
+
+- (BOOL)hasWebGroupAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasSharedGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasURLGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasScriptGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasSearchGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasSmartGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasStaticGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasExternalGroupsAtIndexes:(NSIndexSet *)indexes;
 
 - (BDSKGroup *)libraryGroup;
 - (BDSKWebGroup *)webGroup;
@@ -73,10 +104,6 @@ enum {
 - (NSArray *)smartGroups;
 - (NSArray *)staticGroups;
 - (NSArray *)categoryGroups;
-
-- (NSArray *)allChildren;
-
-- (BOOL)containsGroup:(id)group;
 
 - (void)setLastImportedPublications:(NSArray *)pubs;
 - (void)setSharedGroups:(NSArray *)array;
@@ -91,13 +118,16 @@ enum {
 - (void)addStaticGroup:(BDSKStaticGroup *)group;
 - (void)removeStaticGroup:(BDSKStaticGroup *)group;
 - (void)setCategoryGroups:(NSArray *)array;
-- (void)removeAllUndoableGroups;
+- (void)removeAllNonSharedGroups;
 
 - (void)sortUsingDescriptors:(NSArray *)sortDescriptors;
 
+- (NSProgressIndicator *)spinnerForGroup:(BDSKGroup *)group;
+- (void)removeSpinnerForGroup:(BDSKGroup *)group;
+
 - (BibDocument *)document;
 
-- (void)setGroupsOfType:(NSInteger)groupType fromSerializedData:(NSData *)data;
-- (NSData *)serializedGroupsDataOfType:(NSInteger)groupType;
+- (void)setGroupsOfType:(int)groupType fromSerializedData:(NSData *)data;
+- (NSData *)serializedGroupsDataOfType:(int)groupType;
 
 @end

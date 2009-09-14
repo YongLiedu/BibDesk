@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 
 // this should correspond to the tags of the items in the popup
-enum {
+typedef enum {
 	BDSKGroupContain = 0,
 	BDSKGroupNotContain,
 	BDSKContain,
@@ -50,11 +50,10 @@ enum {
 	BDSKEndWith,
 	BDSKSmaller,
 	BDSKLarger
-};
-typedef NSUInteger BDSKStringComparison;
+} BDSKStringComparison;
 
 // this should correspond to the tags of the items in the popup
-enum {
+typedef enum {
 	BDSKCountEqual = 0,
 	BDSKCountNotEqual,
 	BDSKCountLarger,
@@ -63,11 +62,10 @@ enum {
 	BDSKAttachmentNotContain,
 	BDSKAttachmentStartWith,
 	BDSKAttachmentEndWith
-};
-typedef NSUInteger BDSKAttachmentComparison;
+} BDSKAttachmentComparison;
 
 // this should correspond to the tags of the items in the popup
-enum {
+typedef enum {
     BDSKToday = 0, 
     BDSKYesterday, 
     BDSKThisWeek, 
@@ -80,8 +78,7 @@ enum {
     BDSKAfterDate, 
     BDSKBeforeDate, 
     BDSKInDateRange
-};
-typedef NSUInteger BDSKDateComparison;
+} BDSKDateComparison;
 
 enum {
     BDSKDateField,
@@ -100,10 +97,10 @@ enum {
 	BDSKAttachmentComparison attachmentComparison;
 	BDSKDateComparison dateComparison;
 	NSString *stringValue;
-    NSInteger countValue;
-    NSInteger numberValue;
-    NSInteger andNumberValue;
-    NSInteger periodValue;
+    int countValue;
+    int numberValue;
+    int andNumberValue;
+    int periodValue;
     NSDate *dateValue;
     NSDate *toDateValue;
     BDSKSmartGroup *group;
@@ -125,8 +122,8 @@ enum {
 - (void)setKey:(NSString *)newKey;
 - (NSString *)value;
 - (void)setValue:(NSString *)newValue;
-- (NSInteger)comparison;
-- (void)setComparison:(NSInteger)newComparison;
+- (int)comparison;
+- (void)setComparison:(int)newComparison;
 
 // String accessors
 - (BDSKStringComparison)stringComparison;
@@ -137,18 +134,18 @@ enum {
 // Count accessors
 - (BDSKAttachmentComparison)attachmentComparison;
 - (void)setAttachmentComparison:(BDSKAttachmentComparison)newComparison;
-- (NSInteger)countValue;
-- (void)setCountValue:(NSInteger)newValue;
+- (int)countValue;
+- (void)setCountValue:(int)newValue;
 
 // Date accessors
 - (BDSKDateComparison)dateComparison;
 - (void)setDateComparison:(BDSKDateComparison)newComparison;
-- (NSInteger)numberValue;
-- (void)setNumberValue:(NSInteger)value;
-- (NSInteger)andNumberValue;
-- (void)setAndNumberValue:(NSInteger)value;
-- (NSInteger)periodValue;
-- (void)setPeriodValue:(NSInteger)value;
+- (int)numberValue;
+- (void)setNumberValue:(int)value;
+- (int)andNumberValue;
+- (void)setAndNumberValue:(int)value;
+- (int)periodValue;
+- (void)setPeriodValue:(int)value;
 - (NSDate *)dateValue;
 - (void)setDateValue:(NSDate *)value;
 - (NSDate *)toDateValue;
@@ -167,5 +164,5 @@ enum {
 
 
 @interface NSString (BDSKConditionExtensions)
-- (NSInteger)fieldType;
+- (int)fieldType;
 @end

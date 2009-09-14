@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKTreeNode.h"
 
-enum {
+typedef enum _BDSKTemplateFormat {
     BDSKUnknownTemplateFormat = 0,
     BDSKTextTemplateFormat = 1, // generic plain text template
     BDSKPlainHTMLTemplateFormat = 2, // HTML template edited as plain text
@@ -51,28 +51,28 @@ enum {
     BDSKDocxTemplateFormat = 64,
     BDSKOdtTemplateFormat = 128,
     BDSKRichTextTemplateFormat = 188 // Rich HTML, RTF, RTFD, Doc, Docx, or ODT
-};
-typedef NSUInteger BDSKTemplateFormat;
+} BDSKTemplateFormat;
 
 extern NSString *BDSKTemplateRoleString;
 extern NSString *BDSKTemplateNameString;
 extern NSString *BDSKTemplateFileURLString;
 extern NSString *BDSKExportTemplateTree;
 extern NSString *BDSKServiceTemplateTree;
+
 extern NSString *BDSKTemplateAccessoryString;
 extern NSString *BDSKTemplateMainPageString;
 extern NSString *BDSKTemplateDefaultItemString;
 extern NSString *BDSKTemplateScriptString;
 
+extern NSString *BDSKTemplateLocalizedAccessoryString;
+extern NSString *BDSKTemplateLocalizedMainPageString;
+extern NSString *BDSKTemplateLocalizedDefaultItemString;
+extern NSString *BDSKTemplateLocalizedScriptString;
+
 // concrete subclass with specific accessors for the template tree
 @interface BDSKTemplate : BDSKTreeNode
 {
 }
-
-+ (NSString *)localizedAccessoryString;
-+ (NSString *)localizedMainPageString;
-+ (NSString *)localizedDefaultItemString;
-+ (NSString *)localizedScriptString;
 
 + (NSString *)localizedRoleString:(NSString *)string; 
 + (NSString *)unlocalizedRoleString:(NSString *)string; 

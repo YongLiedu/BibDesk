@@ -41,6 +41,9 @@
 
 /* Subclass of NSLevelIndicatorCell.  The default relevancy cell draws bars the entire vertical height of the table row, which looks bad.  Using setControlSize: seems to have no effect.
 */
+@interface NSLevelIndicatorCell (BDSKPrivateOverrideBecauseApplesSubclassingIsBroken)
+- (void)_drawRelevancyWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
+@end
 
 @implementation BDSKLevelIndicatorCell
 
@@ -61,16 +64,16 @@
 - (NSSize)cellSize {
     // this is used for column auto-resizing, and NSLevelIndicatorCell seems to return an insanely large size
     NSSize cellSize = [super cellSize];
-    cellSize.width = BDSKMin(100.0, cellSize.width);
+    cellSize.width = fminf(100.0, cellSize.width);
     return cellSize;
 }
 
-- (void)setMaxHeight:(CGFloat)h;
+- (void)setMaxHeight:(float)h;
 {
     maxHeight = h;
 }
 
-- (CGFloat)indicatorHeight { return maxHeight; }
+- (float)indicatorHeight { return maxHeight; }
 
 // DigitalColor Meter indicates 0.7 and 0.5 are the approximate values for a deselected level indicator cell (relevancy mode).  This looks really bad when selected in a gradient tableview, though, particularly when the table doesn't have focus.
 #define WIDTH 2
@@ -116,12 +119,6 @@
     return layer;    
 }
 
-- (void)setDoubleValue:(double)v
-{
-    NSParameterAssert(isfinite(v));
-    [super setDoubleValue:v];
-}
-
 /*
  This method and -drawingRectForBounds: are never called as of 10.4.8 rdar://problem/4998206
  
@@ -151,12 +148,12 @@
     
     // Could happen if the search scores have issues?  See bug #1932040.
     double ratio = [self doubleValue] / [self maxValue];
-    if (ratio > 1 || isfinite(ratio) == false) {
-        NSLog(@"BDSKLevelIndicatorCell: %.3f / %.3f = %.3f, clipping to 1.0", [self doubleValue], [self maxValue], ratio);
+    if (ratio > 1) {
+        NSLog(@"BDSKLevelIndicatorCell: doubleValue / maxValue = %.2f, clipping to 1.0", ratio);
         ratio = 1.0;
     }
     
-    NSUInteger i, iMax = floor(ratio * (NSWidth(r) / 2));
+    unsigned i, iMax = floor(ratio * (NSWidth(r) / 2));
     CGLayerRef toDraw;
     
     if ([self respondsToSelector:@selector(backgroundStyle)]) {
@@ -181,14 +178,14 @@
     CGContextSaveGState(ctxt);
     
     // clip since doubleValue may exceed maxValue
-    CGContextClipToRect(ctxt, NSRectToCGRect(cellFrame));
+    CGContextClipToRect(ctxt, *(CGRect *)&cellFrame);
     
     NSRect drawRect = r;
     drawRect.size.width = 2;
     CGContextSetBlendMode(ctxt, kCGBlendModeNormal);
     for (i = 0; i < iMax; i++) {
         drawRect.origin.x += 2;
-        CGContextDrawLayerInRect(ctxt, NSRectToCGRect(drawRect), toDraw);
+        CGContextDrawLayerInRect(ctxt, *(CGRect *)&drawRect, toDraw);
     }
     CGContextRestoreGState(ctxt);
 }

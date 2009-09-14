@@ -51,7 +51,7 @@
 + (BOOL)copyKey:(NSString **)key value:(NSString **)value fromLine:(NSString *)line;
 {
     NSRange r = [line rangeOfString:@":"];
-    NSUInteger len = [line length];
+    unsigned len = [line length];
     if (r.location != NSNotFound && (r.location + 1) < len) {
         CFAllocatorRef alloc = CFGetAllocator((CFStringRef)line);
         *key = (id)CFStringCreateWithSubstring(alloc, (CFStringRef)line, CFRangeMake(0, r.location));
@@ -77,7 +77,7 @@ static NSString *__documentTypeString = @"Doc-Type";
 
 + (void)initialize
 {
-    BDSKINITIALIZE;
+    OBINITIALIZE;
     correctFields = [[NSSet alloc] initWithObjects:BDSKVolumeString, @"Language", BDSKAbstractString, nil];
     shortJournalNameString = [[[[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKShortJournalNameField"] fieldName] copy];
 }
@@ -97,7 +97,7 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
     // We could move some of this into TypeInfo.plist, but we only have three fields that don't need special handling, so it's not really worthwhile.  This function has multiple early returns, so be careful when debugging.
     
     if ([key isEqualToString:BDSKAuthorString]) {
-        value = [value stringByReplacingOccurrencesOfString:@"; " withString:@" and "];
+        value = [value stringByReplacingAllOccurrencesOfString:@"; " withString:@" and "];
         // this sucks; some entries have "Last, Middle, First.", and some have "Last, M. F."
         if ([value hasSuffix:@"."] && [value length] > 2 && 
             [[NSCharacterSet lowercaseLetterCharacterSet] characterIsMember:[value characterAtIndex:([value length] - 2)]])
@@ -155,7 +155,7 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
     else if ([key isEqualToString:@"Page"]) {
         key = BDSKPagesString;
         if ([value rangeOfString:@"--"].location == NSNotFound)
-            value = [value stringByReplacingOccurrencesOfString:@"-" withString:@"--"];
+            value = [value stringByReplacingAllOccurrencesOfString:@"-" withString:@"--"];
     }
     else if ([key isEqualToString:@"Issue"]) {
         key = BDSKNumberString;
@@ -180,7 +180,7 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
 {        
     // initial sanity check to make sure we have start/end tags
     NSRange r = [itemString rangeOfString:@"START_RECORD"];
-    NSUInteger nStart = 0, nStop = 0;
+    unsigned nStart = 0, nStop = 0;
     while (r.length) {
         nStart++;
         r = [itemString rangeOfString:@"START_RECORD" options:0 range:NSMakeRange(NSMaxRange(r), [itemString length] - NSMaxRange(r))];
@@ -215,7 +215,7 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
         // split each record up into field/value lines
         NSArray *lines = [str componentsSeparatedByString:@"\nFIELD "];
         
-        NSUInteger i, iMax = [lines count];
+        unsigned i, iMax = [lines count];
         for (i = 0; i < iMax; i++) {
             
             NSString *line = [lines objectAtIndex:i];

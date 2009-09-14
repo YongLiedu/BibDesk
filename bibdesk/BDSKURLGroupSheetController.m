@@ -107,7 +107,7 @@
     [super dismiss:sender];
 }
 
-- (void)chooseURLPanelDidEnd:(NSOpenPanel *)oPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)chooseURLPanelDidEnd:(NSOpenPanel *)oPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSOKButton) {
         NSURL *url = [[oPanel URLs] firstObject];
         [self setUrlString:[url absoluteString]];

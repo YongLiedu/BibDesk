@@ -145,7 +145,7 @@
     if ([aConditionController condition] == nil)
         [self removeConditionController:[[aConditionController retain] autorelease]];
 	
-    NSUInteger idx = [conditionControllers indexOfObject:aConditionController];
+    unsigned int idx = [conditionControllers indexOfObject:aConditionController];
 	if (idx == NSNotFound) 
 		idx = [conditionControllers count];
     else
@@ -154,10 +154,10 @@
     [self insertConditionController:newController atIndex:idx];
 }
 
-- (void)insertConditionController:(BDSKConditionController *)newController atIndex:(NSUInteger)idx {
+- (void)insertConditionController:(BDSKConditionController *)newController atIndex:(unsigned int)idx {
     [[[self undoManager] prepareWithInvocationTarget:self] removeConditionControllerAtIndex:idx];
 	
-    NSUInteger count = [conditionControllers count];
+    unsigned int count = [conditionControllers count];
     [conditionControllers insertObject:newController atIndex:idx];
     [conditionsView insertView:[newController view] atIndex:idx];
     [newController setCanRemove:(count > 0)];
@@ -170,11 +170,11 @@
 }
 
 - (void)removeConditionController:(BDSKConditionController *)aConditionController {
-	NSUInteger idx = [conditionControllers indexOfObject:aConditionController];
+	unsigned int idx = [conditionControllers indexOfObject:aConditionController];
     [self removeConditionControllerAtIndex:idx];
 }
 
-- (void)removeConditionControllerAtIndex:(NSUInteger)idx {
+- (void)removeConditionControllerAtIndex:(unsigned int)idx {
     BDSKConditionController *aConditionController = [conditionControllers objectAtIndex:idx];
     
     [[[self undoManager] prepareWithInvocationTarget:self] insertConditionController:aConditionController atIndex:idx];
@@ -206,10 +206,6 @@
 
 #pragma mark NSEditor
 
-- (void)discardEditing {
-	[conditionControllers makeObjectsPerformSelector:@selector(discardEditing)];
-}
-
 - (BOOL)commitEditing {
 	NSEnumerator *cEnum = [conditionControllers objectEnumerator];
 	BDSKConditionController *controller;
@@ -221,18 +217,8 @@
     return YES;
 }
 
-- (void)commitEditingWithDelegate:(id)delegate didCommitSelector:(SEL)didCommitSelector contextInfo:(void *)contextInfo {
-    BOOL didCommit = [self commitEditing];
-    if (delegate && didCommitSelector) {
-        // - (void)editor:(id)editor didCommit:(BOOL)didCommit contextInfo:(void *)contextInfo
-        NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:didCommitSelector]];
-        [invocation setTarget:delegate];
-        [invocation setSelector:didCommitSelector];
-        [invocation setArgument:&self atIndex:2];
-        [invocation setArgument:&didCommit atIndex:3];
-        [invocation setArgument:&contextInfo atIndex:4];
-        [invocation invoke];
-    }
+- (void)discardEditing {
+	[conditionControllers makeObjectsPerformSelector:@selector(discardEditing)];
 }
 
 #pragma mark Undo support

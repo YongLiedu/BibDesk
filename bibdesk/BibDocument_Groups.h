@@ -38,7 +38,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
 
-@class BDSKGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BDSKWebGroup, BDSKFilterController, BDSKURLGroupSheetController, BDSKScriptGroupSheetController, BDSKWebGroupViewController;
+@class BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BDSKWebGroup, BDSKFilterController, BDSKURLGroupSheetController, BDSKScriptGroupSheetController, BDSKWebGroupViewController;
 
 @interface BibDocument (Groups)
 
@@ -58,8 +58,7 @@
 
 - (NSArray *)selectedGroups;
 - (void)updateCategoryGroupsPreservingSelection:(BOOL)preserve;
-- (void)updateSmartGroupsCount;
-- (void)updateSmartGroups;
+- (void)updateSmartGroupsCountAndContent:(BOOL)shouldUpdate;
 - (void)displaySelectedGroups;
 - (BOOL)selectGroup:(BDSKGroup *)aGroup;
 - (BOOL)selectGroups:(NSArray *)theGroups;
@@ -67,6 +66,7 @@
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group;
 - (BOOL)removePublications:(NSArray *)pubs fromGroups:(NSArray *)groupArray;
 - (BOOL)movePublications:(NSArray *)pubs fromGroup:(BDSKGroup *)group toGroupNamed:(NSString *)newGroupName;
+- (NSMenu *)groupFieldsMenu;
 
 - (IBAction)changeGroupFieldAction:(id)sender;
 - (IBAction)addGroupFieldAction:(id)sender;
@@ -81,6 +81,7 @@
 - (void)hideSearchGroupView;
 
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification;
+- (void)handleGroupFieldAddRemoveNotification:(NSNotification *)notification;
 - (void)handleGroupNameChangedNotification:(NSNotification *)notification;
 - (void)handleWebGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleStaticGroupChangedNotification:(NSNotification *)notification;
@@ -90,11 +91,8 @@
 - (void)handleURLGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleScriptGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleSearchGroupUpdatedNotification:(NSNotification *)notification;
-- (void)handleWillRemoveGroupsNotification:(NSNotification *)notification;
+- (void)handleWillAddRemoveGroupNotification:(NSNotification *)notification;
 - (void)handleDidAddRemoveGroupNotification:(NSNotification *)notification;
-
-- (NSProgressIndicator *)spinnerForGroup:(BDSKGroup *)group;
-- (void)removeSpinnerForGroup:(BDSKGroup *)group;
 
 - (IBAction)sortGroupsByGroup:(id)sender;
 - (IBAction)sortGroupsByCount:(id)sender;
@@ -108,9 +106,8 @@
 - (IBAction)addSearchBookmark:(id)sender;
 - (IBAction)dismissSearchBookmarkSheet:(id)sender;
 - (IBAction)addGroupButtonAction:(id)sender;
-- (void)removeGroups:(NSArray *)theGroups;
 - (IBAction)removeSelectedGroups:(id)sender;
-- (void)editGroup:(BDSKGroup *)group;
+- (void)editGroupAtRow:(int)row;
 - (IBAction)editGroupAction:(id)sender;
 - (IBAction)renameGroupAction:(id)sender;
 - (IBAction)copyGroupURLAction:(id)sender;
@@ -118,9 +115,9 @@
 - (IBAction)changeIntersectGroupsAction:(id)sender;
 - (IBAction)editNewStaticGroupWithSelection:(id)sender;
 - (IBAction)editNewCategoryGroupWithSelection:(id)sender;
-- (void)smartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo;
-- (void)URLGroupSheetDidEnd:(BDSKURLGroupSheetController *)sheetController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo;
-- (void)scriptGroupSheetDidEnd:(BDSKScriptGroupSheetController *)sheetController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo;
+- (void)smartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
+- (void)URLGroupSheetDidEnd:(BDSKURLGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
+- (void)scriptGroupSheetDidEnd:(BDSKScriptGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)mergeInExternalGroup:(id)sender;
 - (IBAction)mergeInExternalPublications:(id)sender;
@@ -137,5 +134,8 @@
 - (void)sortGroupsByKey:(NSString *)key;
 
 - (void)setImported:(BOOL)flag forPublications:(NSArray *)pubs inGroup:(BDSKGroup *)aGroup;
+
+- (NSIndexSet *)_indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview;
+- (NSIndexSet *)_tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview;
 
 @end

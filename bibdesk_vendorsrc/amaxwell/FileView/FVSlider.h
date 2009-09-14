@@ -38,6 +38,9 @@
 
 #import <Cocoa/Cocoa.h>
 
+// Notification posted when the slider receives mouseExited:
+NSString * const FVSliderMouseExitedNotificationName;
+
 @interface FVSlider : NSSlider 
 {
     NSTrackingRectTag _trackingTag;
@@ -51,10 +54,6 @@
 }
 
 - (id)init;
-
 - (FVSlider *)slider;
-
-- (void)fadeIn:(id)sender;
-- (void)fadeOut:(id)sender;
 
 @end

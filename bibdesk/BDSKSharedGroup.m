@@ -39,12 +39,12 @@
 #import "BDSKSharedGroup.h"
 #import "BDSKSharingClient.h"
 #import "BDSKOwnerProtocol.h"
+#import "BDSKPasswordController.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKItemSearchIndexes.h"
-#import "BibItem.h"
 
 
 @implementation BDSKSharedGroup
@@ -57,38 +57,22 @@ static NSImage *lockedIcon = nil;
 static NSImage *unlockedIcon = nil;
 
 + (NSImage *)icon{
-    return [NSImage imageNamed:@"sharedGroup"];
+    return [NSImage imageNamed:@"sharedFolderIcon"];
 }
 
 + (NSImage *)lockedIcon {
     if(lockedIcon == nil){
-        NSRect iconRect = NSMakeRect(0.0, 0.0, 32.0, 32.0);
-        NSRect iconSrcRect = {NSZeroPoint, [[self icon] size]};
-        NSRect badgeRect = NSMakeRect(20.0, 0.0, 12.0, 16.0);
-        NSRect badgeSrcRect = NSMakeRect(0.0, 0.0, 9.0, 12.0);
+        NSRect iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
+        NSRect badgeRect = NSMakeRect(7.0, 0.0, 11.0, 11.0);
         NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
-        NSImage *badge = [NSImage imageNamed:@"locked"];
+        NSImage *badge = [NSImage imageNamed:@"SmallLock_Locked"];
+        NSSize srcSize = [[self icon] size];
         
         [image lockFocus];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-        [[self icon] drawInRect:iconRect fromRect:iconSrcRect operation:NSCompositeSourceOver fraction:1.0];
-        [badge drawInRect:badgeRect fromRect:badgeSrcRect operation:NSCompositeSourceOver fraction:0.65];
+        [[self icon] drawInRect:iconRect fromRect:NSMakeRect(0, 0, srcSize.width, srcSize.height) operation:NSCompositeSourceOver  fraction:1.0];
+        [badge drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
         [image unlockFocus];
-        
-        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-            iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
-            badgeRect = NSMakeRect(10.0, 0.0, 6.0, 8.0);
-            
-            NSImage *tinyImage = [[NSImage alloc] initWithSize:iconRect.size];
-            
-            [tinyImage lockFocus];
-            [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-            [[self icon] drawInRect:iconRect fromRect:iconSrcRect operation:NSCompositeSourceOver fraction:1.0];
-            [badge drawInRect:badgeRect fromRect:badgeSrcRect operation:NSCompositeSourceOver fraction:0.65];
-            [tinyImage unlockFocus];
-            [image addRepresentation:[[tinyImage representations] lastObject]];
-            [tinyImage release];
-        }
         
         lockedIcon = image;
     }
@@ -97,33 +81,17 @@ static NSImage *unlockedIcon = nil;
 
 + (NSImage *)unlockedIcon {
     if(unlockedIcon == nil){
-        NSRect iconRect = NSMakeRect(0.0, 0.0, 32.0, 32.0);
-        NSRect iconSrcRect = {NSZeroPoint, [[self icon] size]};
-        NSRect badgeRect = NSMakeRect(20.0, 0.0, 12.0, 16.0);
-        NSRect badgeSrcRect = NSMakeRect(0.0, 0.0, 9.0, 12.0);
+        NSRect iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
+        NSRect badgeRect = NSMakeRect(6.0, 0.0, 11.0, 11.0);
         NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
-        NSImage *badge = [NSImage imageNamed:@"unlocked"];
+        NSImage *badge = [NSImage imageNamed:@"SmallLock_Unlocked"];
+        NSSize srcSize = [[self icon] size];
         
         [image lockFocus];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-        [[self icon] drawInRect:iconRect fromRect:iconSrcRect operation:NSCompositeSourceOver fraction:1.0];
-        [badge drawInRect:badgeRect fromRect:badgeSrcRect operation:NSCompositeSourceOver fraction:0.65];
+        [[self icon] drawInRect:iconRect fromRect:NSMakeRect(0, 0, srcSize.width, srcSize.height) operation:NSCompositeSourceOver  fraction:1.0];
+        [badge drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
         [image unlockFocus];
-        
-        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-            iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
-            badgeRect = NSMakeRect(10.0, 0.0, 6.0, 8.0);
-            
-            NSImage *tinyImage = [[NSImage alloc] initWithSize:iconRect.size];
-            
-            [tinyImage lockFocus];
-            [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-            [[self icon] drawInRect:iconRect fromRect:iconSrcRect operation:NSCompositeSourceOver fraction:1.0];
-            [badge drawInRect:badgeRect fromRect:badgeSrcRect operation:NSCompositeSourceOver fraction:0.65];
-            [tinyImage unlockFocus];
-            [image addRepresentation:[[tinyImage representations] lastObject]];
-            [tinyImage release];
-        }
         
         unlockedIcon = image;
     }
@@ -157,7 +125,6 @@ static NSImage *unlockedIcon = nil;
 - (void)dealloc;
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [client release];
     [publications release];
     [macroResolver release];
@@ -176,10 +143,6 @@ static NSImage *unlockedIcon = nil;
     [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
 }
 
-- (id)copyWithZone:(NSZone *)aZone {
-	return [[[self class] allocWithZone:aZone] initWithClient:client];
-}
-
 // Logging
 
 - (NSString *)description;
@@ -193,11 +156,9 @@ static NSImage *unlockedIcon = nil;
     return client;
 }
 
-- (BDSKPublicationsArray *)publicationsWithoutUpdating { return publications; }
- 
 - (BDSKPublicationsArray *)publications;
 {
-    if([self isRetrieving] == NO && ([self needsUpdate] || publications == nil)){
+    if([self isRetrieving] == NO && ([self needsUpdate] == YES || publications == nil)){
         // let the server get the publications asynchronously
         [client retrievePublications]; 
         
@@ -269,8 +230,8 @@ static NSImage *unlockedIcon = nil;
 
 - (BOOL)isEqual:(id)other { return self == other; }
 
-- (NSUInteger)hash {
-    return( ((NSUInteger) self >> 4) | (NSUInteger) self << (32 - 4));
+- (unsigned int)hash {
+    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
 }
 
 - (BDSKItemSearchIndexes *)searchIndexes {
@@ -280,27 +241,29 @@ static NSImage *unlockedIcon = nil;
 #pragma mark notification handlers
 
 - (void)handleClientUpdatedNotification:(NSNotification *)notification {
-    NSData *pubsArchive = [client archivedPublications];
-    NSData *macrosArchive = [client archivedMacros];
-    NSArray *pubs = nil;
-    NSDictionary *macros = nil;
-    
-    [NSString setMacroResolverForUnarchiving:[self macroResolver]];
-    if (pubsArchive)
-        pubs = [NSKeyedUnarchiver unarchiveObjectWithData:pubsArchive];
-    if (macrosArchive)
-        macros = [NSKeyedUnarchiver unarchiveObjectWithData:macrosArchive];
-    [NSString setMacroResolverForUnarchiving:nil];
-    
-    // we set the macroResolver so we know the fields of this item may refer to it, so we can prevent scripting from adding this to the wrong document
-    [pubs makeObjectsPerformSelector:@selector(setMacroResolver:) withObject:macroResolver];
-    
-    [self setPublications:pubs];
-    
-    NSEnumerator *macroEnum = [macros keyEnumerator];
-    NSString *macro;
-    while (macro = [macroEnum nextObject])
-        [[self macroResolver] setMacroDefinition:[macros objectForKey:macro] forMacro:macro];
+    NSString *key = [[notification userInfo] objectForKey:@"key"];
+    if ([key isEqualToString:@"archivedPublications"] || notification == nil) {
+        NSData *archive = [client archivedPublications];
+        NSArray *pubs = nil;
+        if (archive) {
+            [NSString setMacroResolverForUnarchiving:[self macroResolver]];
+            pubs = [NSKeyedUnarchiver unarchiveObjectWithData:archive];
+            [NSString setMacroResolverForUnarchiving:nil];
+        }
+        [self setPublications:pubs];
+    } else if ([key isEqualToString:@"archivedMacros"]) {
+        NSData *archive = [client archivedMacros];
+        NSDictionary *macros = nil;
+        if (archive) {
+            [NSString setMacroResolverForUnarchiving:[self macroResolver]];
+            macros = [NSKeyedUnarchiver unarchiveObjectWithData:archive];
+            [NSString setMacroResolverForUnarchiving:nil];
+        }
+        NSEnumerator *macroEnum = [macros keyEnumerator];
+        NSString *macro;
+        while(macro = [macroEnum nextObject])
+            [[self macroResolver] setMacroDefinition:[macros objectForKey:macro] forMacro:macro];
+    }
 }
 
 @end

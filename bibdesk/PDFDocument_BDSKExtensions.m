@@ -37,7 +37,7 @@
  */
 
 #import "PDFDocument_BDSKExtensions.h"
-#import "BDSKRuntime.h"
+#import <OmniBase/OmniBase.h>
 
 
 @interface PDFDocument (BDSKPrivateDeclarations)
@@ -47,10 +47,10 @@
 
 @implementation PDFDocument (BDSKExtensions)
 
-static id (*original_getPrintOperationForPrintInfo_autoRotate)(id, SEL, id, BOOL) = NULL;
+static id (*originalGetPrintOperationForPrintInfo)(id, SEL, id, BOOL) = NULL;
 
-- (NSPrintOperation *)replacement_getPrintOperationForPrintInfo:(NSPrintInfo *)printInfo autoRotate:(BOOL)autoRotate {
-    NSPrintOperation *printOperation = original_getPrintOperationForPrintInfo_autoRotate(self, _cmd, printInfo, autoRotate);
+- (NSPrintOperation *)replacementGetPrintOperationForPrintInfo:(NSPrintInfo *)printInfo autoRotate:(BOOL)autoRotate {
+    NSPrintOperation *printOperation = originalGetPrintOperationForPrintInfo(self, _cmd, printInfo, autoRotate);
     NSPrintPanel *printPanel = [printOperation printPanel];
     if ([printPanel respondsToSelector:@selector(setOptions:)])
         [printPanel setOptions:NSPrintPanelShowsCopies | NSPrintPanelShowsPageRange | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling | NSPrintPanelShowsPreview];
@@ -58,7 +58,7 @@ static id (*original_getPrintOperationForPrintInfo_autoRotate)(id, SEL, id, BOOL
 }
 
 + (void)load {
-    original_getPrintOperationForPrintInfo_autoRotate = (id (*)(id, SEL, id, BOOL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(getPrintOperationForPrintInfo:autoRotate:), @selector(replacement_getPrintOperationForPrintInfo:autoRotate:));
+    originalGetPrintOperationForPrintInfo = (id (*)(id, SEL, id, BOOL))OBReplaceMethodImplementationWithSelector(self, @selector(getPrintOperationForPrintInfo:autoRotate:), @selector(replacementGetPrintOperationForPrintInfo:autoRotate:));
 }
 
 + (NSData *)PDFDataWithPostScriptData:(NSData *)psData;

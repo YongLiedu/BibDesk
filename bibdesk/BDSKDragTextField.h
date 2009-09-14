@@ -48,6 +48,4 @@
 @interface NSObject (BDSKDragTextFieldDelegate)
 - (NSDragOperation)dragTextField:(BDSKDragTextField *)textField validateDrop:(id <NSDraggingInfo>)sender;
 - (BOOL)dragTextField:(BDSKDragTextField *)textField acceptDrop:(id <NSDraggingInfo>)sender;
-- (BOOL)dragTextField:(BDSKDragTextField *)textField writeDataToPasteboard:(NSPasteboard *)pasteboard;
-- (NSImage *)dragImageForDragTextField:(BDSKDragTextField *)textField;
 @end

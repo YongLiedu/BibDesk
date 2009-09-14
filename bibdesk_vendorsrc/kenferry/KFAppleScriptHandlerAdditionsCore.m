@@ -113,7 +113,7 @@ NSString *KFASException = @"KFASException";
 			NSAppleEventDescriptor *theUserRecord = [NSAppleEventDescriptor listDescriptor];
 			if( theUserRecord )
 			{
-				NSInteger theIndex = 1;
+				unsigned int theIndex = 1;
 				do
 				{
 					NSString* theKey = va_arg( anArgList, id );

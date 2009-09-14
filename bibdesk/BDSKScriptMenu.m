@@ -37,9 +37,10 @@
  */
 
 #import "BDSKScriptMenu.h"
+#import <OmniBase/OmniBase.h>
+#import <OmniFoundation/OmniFoundation.h>
+#import <OmniAppKit/OmniAppKit.h>
 #import "NSWorkspace_BDSKExtensions.h"
-#import "NSMenu_BDSKExtensions.h"
-#import "BDSKTask.h"
 
 @interface BDSKScriptMenu (Private)
 - (NSArray *)scriptPaths;
@@ -52,11 +53,11 @@
 @implementation BDSKScriptMenu
 
 static NSArray *sortDescriptors = nil;
-static NSInteger recursionDepth = 0;
+static int recursionDepth = 0;
 
 + (void)initialize
 {
-    BDSKINITIALIZE;
+    OBINITIALIZE;
     sortDescriptors = [[NSArray alloc] initWithObjects:[[[NSSortDescriptor alloc] initWithKey:@"filename" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease], nil];
 }
 
@@ -66,11 +67,11 @@ static NSInteger recursionDepth = 0;
     NSString *scriptMenuTitle = @"Scripts";
     NSMenu *newMenu = [[self allocWithZone:[self menuZone]] initWithTitle:scriptMenuTitle];
     NSMenuItem *scriptItem = [[NSMenuItem allocWithZone:[self menuZone]] initWithTitle:scriptMenuTitle action:NULL keyEquivalent:@""];
-    [scriptItem setImage:[NSImage imageNamed:@"ScriptMenu"]];
+    [scriptItem setImage:[NSImage imageNamed:@"OAScriptMenu"]];
     [scriptItem setSubmenu:newMenu];
     [newMenu setDelegate:newMenu];
     [newMenu release];
-    NSInteger itemIndex = [[NSApp mainMenu] numberOfItems] - 1;
+    int itemIndex = [[NSApp mainMenu] numberOfItems] - 1;
     if (itemIndex > 0)
         [[NSApp mainMenu] insertItem:scriptItem atIndex:itemIndex];
     [scriptItem release];
@@ -94,7 +95,7 @@ static NSInteger recursionDepth = 0;
 
 static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
 {
-    NSUInteger i, count = [folders count];
+    unsigned i, count = [folders count];
     NSDate *date = [NSDate distantPast];
     for(i = 0; i < count; i++){
         NSDate *modDate = [[[NSFileManager defaultManager] fileAttributesAtPath:[folders objectAtIndex:i] traverseLink:YES] objectForKey:NSFileModificationDate];
@@ -112,7 +113,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
     NSMutableArray *scripts;
     NSMutableArray *defaultScripts;
     NSArray *scriptFolders;
-    NSUInteger i, count;
+    unsigned int i, count;
     
     scripts = [[NSMutableArray alloc] init];
     scriptFolders = [self scriptPaths];
@@ -268,7 +269,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
         NSString *appSupportDirectory = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleNameKey];
         
         NSArray *libraries = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSAllDomainsMask, YES);
-        NSUInteger libraryIndex, libraryCount;
+        unsigned int libraryIndex, libraryCount;
         libraryCount = [libraries count];
         NSMutableArray *result = [[NSMutableArray alloc] initWithCapacity:libraryCount + 1];
         for (libraryIndex = 0; libraryIndex < libraryCount; libraryIndex++) {
@@ -330,7 +331,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
             }
         }
     } else if ([fm isExecutableFileAtPath:scriptFilename]) {
-        [BDSKTask launchedTaskWithLaunchPath:scriptFilename arguments:[NSArray array]];
+        [NSTask launchedTaskWithLaunchPath:scriptFilename arguments:[NSArray array]];
     }
 }
 

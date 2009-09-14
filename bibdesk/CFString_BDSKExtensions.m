@@ -37,6 +37,7 @@
  */
 
 #import "CFString_BDSKExtensions.h"
+#import <OmniFoundation/OmniFoundation.h>
 
 // This object is a cache for our stop words, so we don't have to hit user defaults every time __BDDeleteArticlesForSorting() is called (which is fairly often).
 
@@ -85,26 +86,29 @@ static inline CFIndex __BDSKGetStopwordCount(void) { return stopWordCache->numbe
 #define STACK_BUFFER_SIZE 256
 
 static CFCharacterSetRef whitespaceCharacterSet = NULL;
+static CFCharacterSetRef whitespaceAndNewlineCharacterSet = NULL;
 static CFCharacterSetRef punctuationCharacterSet = NULL;
 
 __attribute__((constructor))
 static void initializeStaticCharacterSets(void)
 {
     whitespaceCharacterSet = CFRetain(CFCharacterSetGetPredefined(kCFCharacterSetWhitespace));
+    whitespaceAndNewlineCharacterSet = CFRetain(CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline));
     punctuationCharacterSet = CFRetain(CFCharacterSetGetPredefined(kCFCharacterSetPunctuation));
-}
-
-static inline
-BOOL __BDCharacterIsContainedInASCIISet(UniChar c, CFCharacterSetRef charSet)
-{
-    // minor optimization: check for an ASCII character, since those are most common in TeX
-    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(charSet, c) );
 }
 
 static inline
 BOOL __BDCharacterIsWhitespace(UniChar c)
 {
-    return __BDCharacterIsContainedInASCIISet(c, whitespaceCharacterSet);
+    // minor optimization: check for an ASCII character, since those are most common in TeX
+    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(whitespaceCharacterSet, c) );
+}
+
+static inline
+BOOL __BDCharacterIsWhitespaceOrNewline(UniChar c)
+{
+    // minor optimization: check for an ASCII character, since those are most common in TeX
+    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(whitespaceAndNewlineCharacterSet, c) );
 }
 
 static inline
@@ -114,20 +118,19 @@ BOOL __BDCharacterIsPunctuation(UniChar c)
 }
 
 static inline
-Boolean __BDStringContainsCharacterFromSet(CFStringRef string, CFIndex length, CFCharacterSetRef charSet)
+Boolean __BDStringContainsWhitespace(CFStringRef string, CFIndex length)
 {
-    // we assume that charSet only contains ASCII characters to allow some optimzation; this is OK as we will only use this for whitespace and whitespaceAndNewlines
     const UniChar *ptr = CFStringGetCharactersPtr(string);
     if(ptr != NULL){
         while(length--)
-            if(__BDCharacterIsContainedInASCIISet(ptr[length], charSet))
+            if(__BDCharacterIsWhitespace(ptr[length]))
                 return TRUE;
     } else {
         CFStringInlineBuffer inlineBuffer;
         CFStringInitInlineBuffer(string, &inlineBuffer, CFRangeMake(0, length));
         
         while(length--)
-            if(__BDCharacterIsContainedInASCIISet(CFStringGetCharacterFromInlineBuffer(&inlineBuffer, length), charSet))
+            if(__BDCharacterIsWhitespace(CFStringGetCharacterFromInlineBuffer(&inlineBuffer, length)))
                 return TRUE;
     }
 
@@ -135,7 +138,7 @@ Boolean __BDStringContainsCharacterFromSet(CFStringRef string, CFIndex length, C
 }
 
 static inline
-CFStringRef __BDStringCreateByCollapsingAndTrimmingCharactersInSet(CFAllocatorRef allocator, CFStringRef aString, CFCharacterSetRef charSet)
+CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorRef allocator, CFStringRef aString)
 {
     
     CFIndex length = CFStringGetLength(aString);
@@ -144,7 +147,7 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingCharactersInSet(CFAllocatorRe
         return CFRetain(CFSTR(""));
     
     // improves efficiency somewhat when adding autocomplete strings, since we can completely avoid allocation
-    if(__BDStringContainsCharacterFromSet(aString, length, charSet) == FALSE)
+    if(__BDStringContainsWhitespace(aString, length) == FALSE)
         return CFRetain(aString);
     
     // set up the buffer to fetch the characters
@@ -162,13 +165,87 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingCharactersInSet(CFAllocatorRe
         buffer = stackBuffer;
     }
     
-    NSCAssert1(buffer != NULL, @"failed to allocate memory for string of length %ld", (long)length);
+    NSCAssert1(buffer != NULL, @"failed to allocate memory for string of length %d", length);
     
     BOOL isFirst = NO;
     int bufCnt = 0;
     for(cnt = 0; cnt < length; cnt++){
         ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
-        if(!__BDCharacterIsContainedInASCIISet(ch, charSet)){
+        if(!__BDCharacterIsWhitespace(ch)){
+            isFirst = YES;
+            buffer[bufCnt++] = ch; // not whitespace, so we want to keep it
+        } else {
+            if(isFirst){
+                buffer[bufCnt++] = ' '; // if it's the first whitespace, we add a single space
+                isFirst = NO;
+            }
+        }
+    }
+    
+    if(buffer[(bufCnt-1)] == ' ') // we've collapsed any trailing whitespace, so disregard it
+        bufCnt--;
+    
+    retStr = CFStringCreateWithCharacters(allocator, buffer, bufCnt);
+    if(buffer != stackBuffer) CFAllocatorDeallocate(allocator, buffer);
+    return retStr;
+}
+
+static inline
+Boolean __BDStringContainsWhitespaceOrNewline(CFStringRef string, CFIndex length)
+{
+    const UniChar *ptr = CFStringGetCharactersPtr(string);
+    if(ptr != NULL){
+        while(length--)
+            if(__BDCharacterIsWhitespaceOrNewline(ptr[length]))
+                return TRUE;
+    } else {
+        CFStringInlineBuffer inlineBuffer;
+        CFStringInitInlineBuffer(string, &inlineBuffer, CFRangeMake(0, length));
+        
+        while(length--)
+            if(__BDCharacterIsWhitespaceOrNewline(CFStringGetCharacterFromInlineBuffer(&inlineBuffer, length)))
+                return TRUE;
+    }
+
+    return FALSE;
+}
+
+static inline
+CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAllocatorRef allocator, CFStringRef aString)
+{
+    
+    CFIndex length = CFStringGetLength(aString);
+    
+    if(length == 0)
+        return CFRetain(CFSTR(""));
+    
+    // improves efficiency somewhat when adding autocomplete strings, since we can completely avoid allocation
+    if(__BDStringContainsWhitespaceOrNewline(aString, length) == FALSE)
+        return CFRetain(aString);
+    
+    // set up the buffer to fetch the characters
+    CFIndex cnt = 0;
+    CFStringInlineBuffer inlineBuffer;
+    CFStringInitInlineBuffer(aString, &inlineBuffer, CFRangeMake(0, length));
+    UniChar ch;
+    UniChar *buffer, stackBuffer[STACK_BUFFER_SIZE];
+    CFStringRef retStr;
+
+    allocator = (allocator == NULL) ? CFGetAllocator(aString) : allocator;
+
+    if(length >= STACK_BUFFER_SIZE) {
+        buffer = (UniChar *)CFAllocatorAllocate(allocator, length * sizeof(UniChar), 0);
+    } else {
+        buffer = stackBuffer;
+    }
+    
+    NSCAssert1(buffer != NULL, @"failed to allocate memory for string of length %d", length);
+    
+    BOOL isFirst = NO;
+    int bufCnt = 0;
+    for(cnt = 0; cnt < length; cnt++){
+        ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
+        if(!__BDCharacterIsWhitespaceOrNewline(ch)){
             isFirst = YES;
             buffer[bufCnt++] = ch; // not whitespace, so we want to keep it
         } else {
@@ -278,7 +355,7 @@ void __BDDeleteTeXCommandsForSorting(CFMutableStringRef mutableString)
     
     NSRange searchRange = NSMakeRange(0, CFStringGetLength(mutableString));
     NSRange cmdRange;
-    NSUInteger startLoc;
+    unsigned startLoc;
         
     // This will find and remove the commands such as \textit{some word} that can confuse the sort order;
     // unfortunately, we can't remove things like {\textit some word}, since it could also be something
@@ -298,14 +375,14 @@ uint32_t __BDFastHash(CFStringRef aString)
     
     // Golden ratio - arbitrary start value to avoid mapping all 0's to all 0's
     // or anything like that.
-    uint32_t PHI = 0x9e3779b9U;
+    unsigned PHI = 0x9e3779b9U;
     
     // Paul Hsieh's SuperFastHash
     // http://www.azillionmonkeys.com/qed/hash.html
     // Implementation from Apple's WebCore/khtml/xml/dom_stringimpl.cpp, designed
     // to hash UTF-16 characters.
     
-    unsigned int l = CFStringGetLength(aString);
+    unsigned l = CFStringGetLength(aString);
     uint32_t fastHash = PHI;
     uint32_t tmp;
     
@@ -317,7 +394,7 @@ uint32_t __BDFastHash(CFStringRef aString)
         
         if(l > STACK_BUFFER_SIZE){
             allocator = CFGetAllocator(aString);
-            buf = (UniChar *)CFAllocatorAllocate(allocator, l * sizeof(UniChar), 0);
+            buf = (UniChar *)CFAllocatorAllocate(allocator, l * sizeof(UniChar), 0);;
             NSCAssert(buf != NULL, @"unable to allocate memory");
         } else {
             buf = stackBuffer;
@@ -386,7 +463,7 @@ CFStringRef __BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef al
         buffer = stackBuffer;
     }
     
-    NSCAssert1(buffer != NULL, @"failed to allocate memory for string of length %ld", (long)length);
+    NSCAssert1(buffer != NULL, @"failed to allocate memory for string of length %d", length);
     
     int bufCnt = 0;
     BOOL ignoreNextNewline = NO;
@@ -443,34 +520,6 @@ __BDDeleteCharactersInCharacterSet(CFMutableStringRef theString, CFCharacterSetR
     CFRelease(myCopy); // dispose of our temporary copy
 }
 
-static inline void
-__BDReplaceCharactersInCharacterSet(CFMutableStringRef theString, CFCharacterSetRef charSet, CFStringRef replacement)
-{    
-    CFStringInlineBuffer inlineBuffer;
-    CFIndex length = CFStringGetLength(theString);
-    CFIndex replacementLength = CFStringGetLength(replacement);
-    CFIndex cnt = 0;
-    
-    // create an immutable copy to use with the inline buffer
-    CFStringRef myCopy = CFStringCreateCopy(kCFAllocatorDefault, theString);
-    CFStringInitInlineBuffer(myCopy, &inlineBuffer, CFRangeMake(0, length));
-    UniChar ch;
-    
-    CFIndex delCnt = 0;
-    while(cnt < length){
-        ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
-        if(CFCharacterSetIsCharacterMember(charSet, ch)){
-            // replace in the mutable string; we have to keep track of our index in the copy and the original
-            CFStringReplace(theString, CFRangeMake(delCnt, 1), replacement);
-            delCnt += replacementLength;
-        } else {
-            delCnt++;
-        }
-        cnt++;
-    }
-    CFRelease(myCopy); // dispose of our temporary copy
-}
-
 /* This is very similar to CFStringTrimWhitespace from CF-368.1.  It takes a buffer of unichars, and removes the whitespace characters from each end, then returns the contents in the original buffer (the pointer is unchanged).  The length returned is the new length, and the length passed is the buffer length. */
 static inline CFIndex __BDCharactersTrimmingWhitespace(UniChar *chars, CFIndex length)
 {
@@ -496,175 +545,6 @@ static inline CFIndex __BDCharactersTrimmingWhitespace(UniChar *chars, CFIndex l
     }
     
     return length;
-}
-
-#pragma mark XML cleaning
-
-// This code is mostly copied from OFXMLString
-
-// Replace characters with basic entities
-CFStringRef __BDXMLCreateStringWithEntityReferences(CFStringRef sourceString) {
-    static CFCharacterSetRef entityCharacters = NULL;
-    if (entityCharacters == nil) {
-        // XML doesn't allow low ASCII characters.  See the 'Char' production in section 2.2 of the spec:
-        //
-        // Char := #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]	/* any Unicode character, excluding the surrogate blocks, FFFE, and FFFF. */
-        CFMutableCharacterSetRef set = CFCharacterSetCreateMutable(kCFAllocatorDefault);
-        CFCharacterSetAddCharactersInRange(set, (CFRange){0, 0x20});
-        CFCharacterSetRemoveCharactersInRange(set, (CFRange){0x9, 1});
-        CFCharacterSetRemoveCharactersInRange(set, (CFRange){0xA, 1});
-        CFCharacterSetRemoveCharactersInRange(set, (CFRange){0xD, 1});
-        
-        // Additionally, XML uses a few special characters for elements, entities and quoting.  We'll write character entities for all of these (unless some quoting flags tell us differently)
-        CFCharacterSetAddCharactersInString(set, CFSTR("&<>\"'\n"));
-        
-        entityCharacters = CFCharacterSetCreateCopy(kCFAllocatorDefault, set);
-        CFRelease(set);
-    }
-    
-    CFIndex charIndex, charCount = CFStringGetLength(sourceString);
-    CFRange fullRange = (CFRange){0, charCount};
-
-    // Early out check
-    if (false == CFStringFindCharacterFromSet(sourceString, entityCharacters, fullRange, 0/*options*/, NULL)) {
-        CFRetain(sourceString);
-        return sourceString;
-    }
-    
-    CFStringInlineBuffer charBuffer;
-    CFStringInitInlineBuffer(sourceString, &charBuffer, fullRange);
-
-    CFMutableStringRef result = CFStringCreateMutable(kCFAllocatorDefault, 0);
-
-    for (charIndex = 0; charIndex < charCount; charIndex++) {
-        unichar c = CFStringGetCharacterFromInlineBuffer(&charBuffer, charIndex);
-        if (c == '&') {
-            CFStringAppend(result, CFSTR("&amp;"));
-        } else if (c == '<') {
-            CFStringAppend(result, CFSTR("&lt;"));
-        } else if (c == '>') {
-            CFStringAppend(result, CFSTR("&gt;"));
-        } else if (c == '\"') {
-             CFStringAppend(result, CFSTR("&quot;"));
-        } else if (c == '\'') {
-             CFStringAppend(result, CFSTR("&apos;"));
-        } else if (c == '\n') { // 0xA
-            CFStringAppendCharacters(result, &c, 1);
-        } else if (c == '\t' || c == '\r') { // 0x9 || 0xD
-                CFStringAppendCharacters(result, &c, 1);
-        } else if (CFCharacterSetIsCharacterMember(entityCharacters, c)) {
-            // This is a low-ascii, non-whitespace byte and isn't allowed in XML character at all.  Drop it.
-            BDSKASSERT(c < 0x20 && c != 0x9 && c != 0xA && c != 0xD);
-        } else {
-            CFStringAppendCharacters(result, &c, 1);
-        }
-    }
-
-    return result;
-}
-
-CFIndex __BDIndexOfCharacterNotRepresentableInCFEncoding(CFStringRef string, CFStringEncoding anEncoding, CFRange scanningRange) {
-    CFIndex usedBufLen;
-    CFIndex thisBufferCharacters;
-    CFIndex bufLen = 1024;  // warning: this routine will fail if any single character requires more than 1024 bytes to represent! (ha, ha)
-    
-    while (1) {
-        if (scanningRange.length == 0)
-            return NSNotFound;
-            
-        usedBufLen = 0;
-        thisBufferCharacters = CFStringGetBytes(string, scanningRange, anEncoding, 0, FALSE, NULL, bufLen, &usedBufLen);
-        if (thisBufferCharacters == 0)
-            break;
-        BDSKASSERT(thisBufferCharacters <= scanningRange.length);
-        scanningRange.location += thisBufferCharacters;
-        scanningRange.length -= thisBufferCharacters;
-    }
-    
-    return scanningRange.location;
-}
-
-enum _BDSurrogate { BDNoSurrogate, BDHighSurrogate, BDLowSurrogate };
-
-// The surrogate ranges are conveniently lined up on power-of-two boundaries.
-// Since the common case is that a character is not a surrogate at all, we
-// test for that first.
-static inline enum _BDSurrogate BDCharacterIsSurrogate(unichar ch) {
-    if ((ch & 0xF800) != 0xD800) return BDNoSurrogate;
-    else if ((ch & 0x0400) == 0) return BDHighSurrogate;
-    else return BDLowSurrogate;
-}
-
-/* Combines a high and a low surrogate character into a 21-bit Unicode character value */
-static inline UnicodeScalarValue BDCharacterFromSurrogatePair(unichar high, unichar low) {
-    return 0x10000 + ( ( (UnicodeScalarValue)(high & 0x3FF) << 10 ) | (UnicodeScalarValue)(low & 0x3FF) );
-}
-
-// Replace characters not representable in string encoding with numbered character references
-CFStringRef __BDXMLCreateStringInCFEncoding(CFStringRef sourceString, CFStringEncoding anEncoding)
-{
-    CFMutableStringRef resultString;
-    CFStringRef substring;
-    CFIndex badIndex;
-    CFRange scanningRange, range, composedRange;
-    unichar *composedCharacter;
-    CFIndex componentIndex;
-
-    resultString = nil;
-
-    scanningRange.location = 0;
-    scanningRange.length = CFStringGetLength(sourceString);
-    while (scanningRange.length > 0) {
-        badIndex = __BDIndexOfCharacterNotRepresentableInCFEncoding(sourceString, anEncoding, scanningRange);
-        if (badIndex == NSNotFound) {
-            if (scanningRange.location == 0) {
-                CFRetain(sourceString);
-                return sourceString;  // Shortcut for common case
-            } else if (!resultString)
-                // Remainder of string has no characters needing quoting
-                resultString = CFStringCreateMutable(kCFAllocatorDefault, 0);
-            substring = CFStringCreateWithSubstring(kCFAllocatorDefault, sourceString, scanningRange);
-            CFStringAppend(resultString, substring);
-            CFRelease(substring);
-            break;
-        } else if (!resultString)
-            // Some character of string needs quoting
-            resultString = CFStringCreateMutable(kCFAllocatorDefault, 0);
-        
-        range.location = scanningRange.location;
-        range.length = badIndex - range.location;
-        if (range.length > 0) {
-            substring = CFStringCreateWithSubstring(kCFAllocatorDefault, sourceString, range);
-            CFStringAppend(resultString, substring);
-            CFRelease(substring);
-        }
-        
-        composedRange = CFStringGetRangeOfComposedCharactersAtIndex(sourceString, badIndex);
-        composedCharacter = malloc(composedRange.length * sizeof(*composedCharacter));
-        CFStringGetCharacters(sourceString, composedRange, composedCharacter);
-        for (componentIndex = 0; componentIndex < composedRange.length; componentIndex++) {
-            UnicodeScalarValue ch;  // this is a full 32-bit Unicode value
-
-            if (BDCharacterIsSurrogate(composedCharacter[componentIndex]) == BDHighSurrogate &&
-                (componentIndex + 1 < composedRange.length) &&
-                BDCharacterIsSurrogate(composedCharacter[componentIndex+1]) == BDLowSurrogate) {
-                ch = BDCharacterFromSurrogatePair(composedCharacter[componentIndex], composedCharacter[componentIndex+1]);
-                componentIndex ++;
-            } else {
-                ch = composedCharacter[componentIndex];
-            }
-
-            CFStringAppendFormat(resultString, NULL, CFSTR("&#%u;"), ch);
-        }
-        free(composedCharacter);
-        composedCharacter = NULL;
-        scanningRange.location = composedRange.location + composedRange.length;
-        scanningRange.length -= range.length + composedRange.length;
-    }
-
-    // (this point is not reached if no changes are necessary to the source string)
-    // resultString can be nil if the input was zero length.  Returning [sourceString retain] would work too, but static strings can be sent -release w/o doing anything, so this is ever-so-slightly faster.
-    return resultString ? resultString : CFSTR("");
 }
 
 #pragma mark API
@@ -783,8 +663,9 @@ CFHashCode BDCaseInsensitiveStringHash(const void *value)
     return hash;
 }
     
-CFStringRef BDStringCreateByCollapsingAndTrimmingCharactersInSet(CFAllocatorRef allocator, CFStringRef string, CFCharacterSetRef charSet){ return __BDStringCreateByCollapsingAndTrimmingCharactersInSet(allocator, string, charSet); }
 
+CFStringRef BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorRef allocator, CFStringRef string){ return __BDStringCreateByCollapsingAndTrimmingWhitespace(allocator, string); }
+CFStringRef BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAllocatorRef allocator, CFStringRef string){ return __BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(allocator, string); }
 CFStringRef BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef allocator, CFStringRef string){ return __BDStringCreateByNormalizingWhitespaceAndNewlines(allocator, string); }
 
 // useful when you want the range of a single character without messing with character sets, or just to know if a character exists in a string (pass NULL for resultRange if you don't care where the result is located)
@@ -824,16 +705,6 @@ Boolean BDStringHasAccentedCharacters(CFStringRef string)
     return success;
 }
 
-// 1. Replace characters with basic entities
-// 2. Replace characters not representable in string encoding with numbered character references
-CFStringRef BDXMLCreateStringWithEntityReferencesInCFEncoding(CFStringRef string, CFStringEncoding encoding) {
-    CFStringRef tmpString = __BDXMLCreateStringWithEntityReferences(string);
-    BDSKASSERT(tmpString);
-    CFStringRef result = __BDXMLCreateStringInCFEncoding(tmpString, encoding);
-    CFRelease(tmpString);
-    return result;
-}
-
 #pragma mark Mutable Strings
 
 void BDDeleteTeXForSorting(CFMutableStringRef mutableString){ 
@@ -841,13 +712,7 @@ void BDDeleteTeXForSorting(CFMutableStringRef mutableString){
     // get rid of braces and such...
     __BDDeleteTeXCharactersForSorting(mutableString);
 }
-
 void BDDeleteArticlesForSorting(CFMutableStringRef mutableString){ __BDDeleteArticlesForSorting(mutableString); }
-
 void BDDeleteCharactersInCharacterSet(CFMutableStringRef mutableString, CFCharacterSetRef charSet){
     __BDDeleteCharactersInCharacterSet(mutableString, charSet);
-}
-
-void BDReplaceCharactersInCharacterSet(CFMutableStringRef mutableString, CFCharacterSetRef charSet, CFStringRef replacement){
-    __BDReplaceCharactersInCharacterSet(mutableString, charSet, replacement);
 }

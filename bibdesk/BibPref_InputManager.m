@@ -39,6 +39,7 @@
 
 
 #import "BibPref_InputManager.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStringConstants.h"
 #import "BDSKTypeManager.h"
 #import "NSImage_BDSKExtensions.h"
@@ -48,26 +49,18 @@
 #import "NSURL_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "BDSKGradientTableView.h"
 
 CFStringRef BDSKInputManagerID = CFSTR("net.sourceforge.bibdesk.inputmanager");
 CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles that we recognize");
 
-#define BDSKBundleIdentifierKey @"bundleIdentifierKey"
-#define tableIconSize 24
-
-
-@interface BibPref_InputManager (Private)
-- (void)updateUI;
-- (void)addApplicationsWithIdentifiers:(NSArray *)identifiers;
-- (void)synchronizePreferences;
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-@end
-
+static NSString *BDSKBundleIdentifierKey = @"bundleIdentifierKey";
+static int tableIconSize = 24;
 
 @implementation BibPref_InputManager
 
 - (void)awakeFromNib{
+    [super awakeFromNib];
+    
     NSString *libraryPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     inputManagerPath = [[libraryPath stringByAppendingPathComponent:@"/InputManagers/BibDeskInputManager"] retain];
 
@@ -84,26 +77,11 @@ CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles th
     [cell setHasDarkHighlight:YES];
     [[tableView tableColumnWithIdentifier:@"AppList"] setDataCell:cell];
     [tableView setRowHeight:(tableIconSize + 2)];
-    [tableView setBackgroundColor:[NSColor controlBackgroundColor]];
 
     NSSortDescriptor *sort = [[[NSSortDescriptor alloc] initWithKey:BDSKTextWithIconCellStringKey ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease];
     [arrayController setSortDescriptors:[NSArray arrayWithObject:sort]];
     
     [self updateUI];
-}
-
-- (void)defaultsDidRevert {
-    // reset UI and prefs on disk, because the pref controller won't do this as these are not our prefs
-    if ([self isWindowLoaded]) {
-        [arrayController setContent:[NSArray array]];
-        [self synchronizePreferences];
-        [self updateUI];
-    } else {
-        CFPreferencesSetAppValue(BDSKInputManagerLoadableApplications, (CFArrayRef)[NSArray array], BDSKInputManagerID);
-        BOOL success = CFPreferencesAppSynchronize( (CFStringRef)BDSKInputManagerID );
-        if(success == NO)
-            NSLog(@"Failed to synchronize preferences for %@", BDSKInputManagerID);
-    }
 }
 
 - (void)addApplicationsWithIdentifiers:(NSArray *)identifiers{
@@ -112,7 +90,7 @@ CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles th
     NSString *bundleID;
 
     // use a set so we don't add duplicate items to the array (not that it's particularly harmful)
-    NSMutableSet *currentBundleIdentifiers = [NSMutableSet setForCaseInsensitiveStrings];
+    NSMutableSet *currentBundleIdentifiers = [NSMutableSet caseInsensitiveStringSet];
     [currentBundleIdentifiers addObjectsFromArray:[[arrayController content] valueForKey:BDSKTextWithIconCellStringKey]];
     
     NSEnumerator *identifierE = [identifiers objectEnumerator];
@@ -151,7 +129,7 @@ CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles th
 - (void)synchronizePreferences{
     
     // this should be a unique list of the identifiers that we previously had in prefs; bundles are compared case-insensitively
-    NSMutableSet *applicationSet = [NSMutableSet setForCaseInsensitiveStrings];
+    NSMutableSet *applicationSet = [NSMutableSet caseInsensitiveStringSet];
     [applicationSet addObjectsFromArray:[[arrayController content] valueForKey:BDSKBundleIdentifierKey]];
     
     CFPreferencesSetAppValue(BDSKInputManagerLoadableApplications, (CFArrayRef)[applicationSet allObjects], BDSKInputManagerID);
@@ -174,12 +152,12 @@ CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles th
         [enableButton setTitle:isCurrent ? NSLocalizedString(@"Reinstall",@"Button title") : NSLocalizedString(@"Update", @"Button title")];
     
     // this is a hack to show the blue highlight for the tableview, since it keeps losing first responder status
-    [[[self view] window] makeFirstResponder:tableView];
+    [[controlBox window] makeFirstResponder:tableView];
 }
 
 #pragma mark Citekey autocompletion
 
-- (void)enableCompletionSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+- (void)enableCompletionSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     
     if(returnCode == NSAlertAlternateReturn){
         // set tableview as first responder
@@ -211,7 +189,7 @@ CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles th
 					 alternateButton:nil
 					     otherButton:nil
 			       informativeTextWithFormat:NSLocalizedString(@"Unable to install plugin at %@, please check file or directory permissions.", @"Informative text in alert dialog"), inputManagerPath];
-	[anAlert beginSheetModalForWindow:[[self view] window]
+	[anAlert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
 			    modalDelegate:nil
 			   didEndSelector:nil
 			      contextInfo:nil];    
@@ -226,7 +204,7 @@ CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles th
                                    alternateButton:NSLocalizedString(@"Cancel", @"Button title")
                                        otherButton:nil
                          informativeTextWithFormat:NSLocalizedString(@"This will install a plugin bundle in ~/Library/InputManagers/BibDeskInputManager.  If you experience text input problems or strange application behavior after installing the plugin, try removing the \"BibDeskInputManager\" subfolder.", @"Informative text in alert dialog")];
-    [alert beginSheetModalForWindow:[[self view] window]
+    [alert beginSheetModalForWindow:[[self controlBox] window]
                       modalDelegate:self
                      didEndSelector:@selector(enableCompletionSheetDidEnd:returnCode:contextInfo:)
                         contextInfo:NULL];
@@ -241,13 +219,13 @@ CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles th
     [op beginSheetForDirectory:[[NSFileManager defaultManager] applicationsDirectory]
 			  file:nil
 			 types:[NSArray arrayWithObject:@"app"]
-		modalForWindow:[[self view] window]
+		modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
 		 modalDelegate:self
 		didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:)
 		   contextInfo:nil];
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     if(returnCode == NSOKButton){
 	
         // check to see if it's a Cocoa application (returns no for BBEdit Lite and MS Word, but yes for Carbon Emacs and Aqua LyX, so it's not foolproof)
@@ -262,7 +240,7 @@ CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles th
                              alternateButton:nil
                              otherButton:nil
                        informativeTextWithFormat:NSLocalizedString(@"%@ is not a Cocoa application.", @"Informative text in alert dialog"), [[sheet filenames] objectAtIndex:0]];
-            [anAlert beginSheetModalForWindow:[[self view] window]
+            [anAlert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
                     modalDelegate:nil
                        didEndSelector:nil
                       contextInfo:nil];
@@ -278,7 +256,7 @@ CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles th
                              alternateButton:nil
                              otherButton:nil
                        informativeTextWithFormat:NSLocalizedString(@"The selected application does not have a bundle identifier.  Please inform the author of %@.", @"Informative text in alert dialog"), [[sheet filenames] objectAtIndex:0]];
-            [anAlert beginSheetModalForWindow:[[self view] window]
+            [anAlert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
                     modalDelegate:nil
                        didEndSelector:nil
                       contextInfo:nil];
@@ -293,7 +271,7 @@ CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles th
 }
 
 - (IBAction)removeApplication:(id)sender{
-    NSUInteger selIndex = [arrayController selectionIndex];
+    unsigned int selIndex = [arrayController selectionIndex];
     if (NSNotFound != selIndex)
         [arrayController removeObjectAtArrangedObjectIndex:selIndex];
     [self synchronizePreferences];

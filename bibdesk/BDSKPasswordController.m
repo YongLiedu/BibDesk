@@ -40,34 +40,84 @@
 
 #import "BDSKPasswordController.h"
 #import <Security/Security.h>
-#import "NSData_BDSKExtensions.h"
+#import "BDSKSharingBrowser.h"
+#import "BDSKSharingServer.h"
 
+NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 
 @implementation BDSKPasswordController
 
-+ (NSData *)passwordForKeychainServiceName:(NSString *)name {
-    // use the service name to get password from keychain and hash it with sha1 for comparison purposes
+- (void)awakeFromNib
+{
+    [self setStatus:@""];
+}
+
+- (void)dealloc
+{
+    [self setName:nil];
+    [super dealloc];
+}
+
+- (void)setName:(NSString *)aName;
+{
+    if(name != aName){
+        [name release];
+        name = [aName retain];
+    }
+}
+
+- (BDSKPasswordControllerStatus)runModalForKeychainServiceName:(NSString *)aName message:(NSString *)status;
+{
+    [self setName:aName];    
+    [self window]; // load window before setStatus
+    [self setStatus:([NSString isEmptyString:status] ? @"" : status)];
+    int returnValue = [NSApp runModalForWindow:[self window]];
+    [[self window] orderOut:self];    
+    [self setName:nil];
+    
+    return returnValue;
+}
+
+- (void)setStatus:(NSString *)status { [statusField setStringValue:status]; }
+
+- (NSString *)windowNibName { return @"BDSKPasswordController"; }
+
+- (IBAction)buttonAction:(id)sender
+{    
+    int returnValue = [sender tag];
+    if (returnValue == BDSKPasswordReturn) {
+        NSAssert(name != nil, @"name is nil");
+        
+        NSString *password = [passwordField stringValue];
+        NSParameterAssert(password != nil);
+        
+        [BDSKPasswordController addOrModifyPassword:password name:name userName:nil];
+    }
+    [NSApp stopModalWithCode:returnValue];
+}
+
+// convenience method for keychain
++ (NSData *)sharingPasswordForCurrentUserUnhashed;
+{
+    // find password from keychain
     OSStatus err;
     
-    const char *nameCString = [name UTF8String];
-    void *password = NULL;
+    void *passwordData = NULL;
     UInt32 passwordLength = 0;
-    NSData *pwData = nil;
+    NSData *data = nil;
     
-    err = SecKeychainFindGenericPassword(NULL, strlen(nameCString), nameCString, 0, NULL, &passwordLength, &password, NULL);
-    if(err == noErr){
-        pwData = [NSData dataWithBytes:password length:passwordLength];
-        SecKeychainItemFreeContent(NULL, password);
-    }
-    return pwData;
+    const char *serviceName = [BDSKServiceNameForKeychain UTF8String];
+    const char *userName = [NSUserName() UTF8String];
+    
+    err = SecKeychainFindGenericPassword(NULL, strlen(serviceName), serviceName, strlen(userName), userName, &passwordLength, &passwordData, NULL);
+    data = [NSData dataWithBytes:passwordData length:passwordLength];
+    SecKeychainItemFreeContent(NULL, passwordData);
+    
+    return data;
 }
 
-// hash it for comparison, since we hash before putting it in the TXT
-+ (NSData *)passwordHashedForKeychainServiceName:(NSString *)name {
-    return [[self passwordForKeychainServiceName:name] sha1Signature];
-}
-
-+ (void)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName {
++ (void)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName;
+{
     // default is to use current user's username
     const char *userNameCString = userName == nil ? [NSUserName() UTF8String] : [userName UTF8String];
     
@@ -102,31 +152,30 @@
         NSLog(@"Error %d occurred setting password", err);
 }
 
-- (NSData *)runModalForKeychainServiceName:(NSString *)name message:(NSString *)status {
-    NSString *password = nil;
-    [self window]; // load window before seting the status
-    [statusField setStringValue:status];
-    if (NSOKButton == [NSApp runModalForWindow:[self window]]) {
-        NSAssert(name != nil, @"name is nil");
-        password = [[[passwordField stringValue] retain] autorelease];
-        NSParameterAssert(password != nil);
-        [[self class] addOrModifyPassword:password name:name userName:nil];
-    }
-    [[self window] orderOut:self];    
++ (NSData *)passwordHashedForKeychainServiceName:(NSString *)name;
+{
+    // use the service name to get password from keychain and hash it with sha1 for comparison purposes
+    OSStatus err;
     
-    if (password == nil)
-        return nil;
-    const void *passwordBytes = [password UTF8String];
-    return [[NSData dataWithBytes:passwordBytes length:strlen(passwordBytes)] sha1Signature];
+    const char *nameCString = [name UTF8String];
+    void *password = NULL;
+    UInt32 passwordLength = 0;
+    NSData *pwData = nil;
+    
+    err = SecKeychainFindGenericPassword(NULL, strlen(nameCString), nameCString, 0, NULL, &passwordLength, &password, NULL);
+    if(err == noErr){
+        pwData = [NSData dataWithBytes:password length:passwordLength];
+        SecKeychainItemFreeContent(NULL, password);
+        
+        // hash it for comparison, since we hash before putting it in the TXT
+        pwData = [pwData sha1Signature];
+    }
+    return pwData;
 }
 
-+ (NSData *)runModalPanelForKeychainServiceName:(NSString *)name message:(NSString *)status {
-    BDSKPasswordController *pwc = [[[self alloc] initWithWindowNibName:@"BDSKPasswordController"] autorelease];
-    return [pwc runModalForKeychainServiceName:name message:status];
-}
-
-- (IBAction)buttonAction:(id)sender {    
-    [NSApp stopModalWithCode:[sender tag]];
++ (NSString *)keychainServiceNameWithComputerName:(NSString *)computerName;
+{
+    return [NSString stringWithFormat:@"%@ - %@", computerName, BDSKServiceNameForKeychain];
 }
 
 @end

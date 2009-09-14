@@ -37,60 +37,20 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <OmniAppKit/OmniAppKit.h>
+#import "BDSKSpotlightView.h"
 
-@class BDSKPreferenceIconView, BDSKOverlayWindow;
+@class BDSKOverlayWindow;
 
-@interface BDSKPreferenceController : NSWindowController {
-    IBOutlet NSView *contentView;
-    IBOutlet NSView *controlView;
-    IBOutlet NSButton *revertButton;
-    IBOutlet NSButton *revertAllButton;
-    IBOutlet NSButton *helpButton;
-    IBOutlet NSSearchField *searchField;
-    BDSKPreferenceIconView *iconView;
+@interface BDSKPreferenceController : OAPreferenceController <BDSKSpotlightViewDelegate>
+{
     BDSKOverlayWindow *overlay;
-    NSMutableArray *categories;
-    NSMutableDictionary *categoryDicts;
-    NSMutableDictionary *records;
-    NSMutableDictionary *panes;
-    NSString *selectedPaneIdentifier;
-    NSString *delayedPaneIdentifier;
-    NSMutableDictionary *toolbarItems;
-    NSString *helpBookName;
-    NSMutableDictionary *identifierSearchTerms;
+    NSString *searchTerm;
+    BOOL isSearchActive;
+    NSDictionary *clientIdentiferSearchTerms;
 }
 
-+ (id)sharedPreferenceController;
-
-- (NSString *)defaultWindowTitle;
-
-- (IBAction)revertPaneDefaults:(id)sender;
-- (IBAction)revertAllDefaults:(id)sender;
-- (IBAction)showHelp:(id)sender;
-- (IBAction)showAll:(id)sender;
-- (IBAction)showPane:(id)sender;
-- (IBAction)showNextPane:(id)sender;
-- (IBAction)showPreviousPane:(id)sender;
+- (void)awakeFromNib;
 - (IBAction)search:(id)sender;
-
-- (NSArray *)categories;
-- (NSArray *)panesForCategory:(NSString *)category;
-- (NSArray *)allPaneIdentifiers;
-
-- (id)paneForIdentifier:(NSString *)identifier;
-
-- (NSString *)selectedPaneIdentifier;
-- (id)selectedPane;
-
-- (void)selectPaneWithIdentifier:(NSString *)identifier;
-
-- (void)replyToShouldUnselect:(BOOL)shouldUnselect;
-
-- (NSString *)titleForCategory:(NSString *)category;
-- (NSString *)localizedTitleForCategory:(NSString *)category;
-- (NSImage *)iconForIdentifier:(NSString *)identifier;
-- (NSString *)localizedTitleForIdentifier:(NSString *)identifier;
-- (NSString *)localizedLabelForIdentifier:(NSString *)identifier;
-- (NSString *)localizedToolTipForIdentifier:(NSString *)identifier;
 
 @end

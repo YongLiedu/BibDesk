@@ -68,12 +68,10 @@
 - (NSArray *)arraySortedByAuthorOrEditor;
 - (NSArray *)arraySortedByTitle;
 
-- (NSString *)componentsJoinedByComma;
 - (NSString *)componentsJoinedByAnd;
 - (NSString *)componentsJoinedByForwardSlash;
 - (NSString *)componentsJoinedBySemicolon;
 - (NSString *)componentsJoinedByDefaultJoinString;
-- (NSString *)componentsJoinedByCommaAndAnd;
 - (NSString *)componentsJoinedByCommaAndAmpersand;
 - (NSString *)componentsWithEtAlAfterOne;
 - (NSString *)componentsJoinedByAndWithSingleEtAlAfterTwo;
@@ -86,13 +84,6 @@
 
 - (NSArray *)indexRanges;
 - (NSArray *)indexRangeStrings;
-
-- (NSArray *)arrayByRemovingObject:(id)anObject;
-
-- (void)makeObjectsPerformSelector:(SEL)selector withObject:(id)arg1 withObject:(id)arg2;
-
-- (NSArray *)arrayByPerformingSelector:(SEL)aSelector;
-- (NSArray *)arrayByPerformingSelector:(SEL)aSelector withObject:(id)anObject;
 
 - (NSIndexSet *)indexesOfObjects:(NSArray *)objects;
 - (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;

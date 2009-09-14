@@ -87,9 +87,9 @@ static NSString *fixedAuthorName(NSString *name)
     
     NSMutableString *newName = [[lastName mutableCopy] autorelease];    
     
-    NSUInteger idx, maxIdx = [firstNames length];
+    unsigned idx, maxIdx = [firstNames length];
     for(idx = 0; idx < maxIdx; idx++){
-        [newName appendString:[firstNames substringWithRange:NSMakeRange(idx, 1)]];
+        [newName appendCharacter:[firstNames characterAtIndex:idx]];
         [newName appendString:(idx == maxIdx - 1 ? @"." : @". ")];
     }
     
@@ -156,12 +156,12 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
     // for now, we'll only support version 1.0
     NSRange startRange = [itemString rangeOfString:@"VR 1.0\n" options:NSLiteralSearch];
 	if (startRange.location == NSNotFound){
-        error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"This Web of Science version is not supported", @"Error description")];
+        OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"This Web of Science version is not supported", @"Error description"), nil);
         if(outError) *outError = error;
 		return returnArray;
     }
 	
-	NSInteger startLoc = NSMaxRange(startRange);
+	int startLoc = NSMaxRange(startRange);
 	NSRange endRange = [itemString rangeOfString:@"\nEF" options:NSLiteralSearch|NSBackwardsSearch range:NSMakeRange(startLoc, [itemString length] - startLoc)];
 	if (endRange.location == NSNotFound)
 		endRange = NSMakeRange([itemString length], 0);
@@ -187,7 +187,7 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
     
     while(sourceLine = [sourceLineE nextObject]){
         
-        BDSKPRECONDITION([sourceLine hasPrefix:@"FN"] == NO && [sourceLine hasPrefix:@"VR"] == NO && [sourceLine hasPrefix:@"EF"] == NO);
+        OBPRECONDITION([sourceLine hasPrefix:@"FN"] == NO && [sourceLine hasPrefix:@"VR"] == NO && [sourceLine hasPrefix:@"EF"] == NO);
         
         if([sourceLine length] >= 2 && isTagLine(sourceLine)){
  			

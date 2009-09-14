@@ -38,21 +38,24 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKPreferencePane.h"
+#import <OmniAppKit/OmniAppKit.h>
 
-@class BDSKGradientTableView;
-
-@interface BibPref_InputManager : BDSKPreferencePane
+@interface BibPref_InputManager : OAPreferenceClient
 {
-    IBOutlet BDSKGradientTableView *tableView;
+    IBOutlet OAGradientTableView *tableView;
     IBOutlet NSButton *enableButton;
     IBOutlet NSArrayController *arrayController;
     NSString *inputManagerPath;
     NSMutableArray *applications;
 }
 
+- (void)addApplicationsWithIdentifiers:(NSArray *)identifiers;
+- (void)synchronizePreferences;
+
 - (IBAction)enableAutocompletion:(id)sender;
 - (IBAction)addApplication:(id)sender;
 - (IBAction)removeApplication:(id)sender;
+
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 @end

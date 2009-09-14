@@ -41,54 +41,95 @@
 @implementation FVMIMEIcon
 
 static IconRef _networkIcon = NULL;
-static NSMutableDictionary *_iconTable = nil;
+static NSMutableDictionary *_fallbackTable = nil;
+static NSLock *_fallbackTableLock = nil;
+static Class FVMIMEIconClass = Nil;
+static FVMIMEIcon *defaultPlaceholderIcon = nil;
 
 + (void)initialize
 {
     FVINITIALIZE(FVMIMEIcon);
     
-    GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericNetworkIcon, &_networkIcon);
-    _iconTable = [NSMutableDictionary new];
-}
-
-+ (id)newIconWithMIMEType:(NSString *)type;
-{
-    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** +[%@ %@] requires main thread", self, NSStringFromSelector(_cmd));
-    NSParameterAssert(nil != type);
-    FVMIMEIcon *icon = [[_iconTable objectForKey:type] retain];
-    if (nil == icon) {
-        icon = [[[self class] allocWithZone:[self zone]] initWithMIMEType:type];
-        if (icon)
-            [_iconTable setObject:icon forKey:type];
+    if ([FVMIMEIcon class] == self) {
+        FVMIMEIconClass = self;
+        GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericNetworkIcon, &_networkIcon);
+        _fallbackTable = [NSMutableDictionary new];
+        _fallbackTableLock = [[NSLock alloc] init];
+        defaultPlaceholderIcon = (FVMIMEIcon *)NSAllocateObject(FVMIMEIconClass, 0, [self zone]);
     }
-    return icon;
+    
 }
 
-- (id)initWithMIMEType:(NSString *)type;
++ (id)allocWithZone:(NSZone *)aZone
 {
-    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** +[%@ %@] requires main thread", self, NSStringFromSelector(_cmd));
-    if (self = [super init]) {
+    return defaultPlaceholderIcon;
+}
+
+- (id)_initWithMIMEType:(NSString *)type;
+{
+    NSParameterAssert(defaultPlaceholderIcon != self);
+    self = [super init];
+    if (self) {
         OSStatus err;
         err = GetIconRefFromTypeInfo(0, 0, NULL, (CFStringRef)type, kIconServicesNormalUsageFlag, &_icon);
         if (err) _icon = NULL;
-        // don't return nil; we'll just draw the network icon
     }
     return self;
 }
 
++ (void)_addNewItemInLockedTableWithMIMEType:(NSString *)type;
+{
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** +[%@ %@] requires main thread", self, NSStringFromSelector(_cmd));
+    NSAssert([_fallbackTableLock tryLock] == NO, @"caller failed to acquire lock first");
+    
+    id icon = (FVMIMEIcon *)NSAllocateObject(FVMIMEIconClass, 0, [self zone]);
+    icon = [icon _initWithMIMEType:type];
+    // should only return nil if NSAllocateObject fails
+    if (icon) {
+        [_fallbackTable setObject:icon forKey:type];
+        [icon release];
+    }
+}
+
 - (void)dealloc
 {
-    FVAPIAssert1(0, @"attempt to deallocate %@", self);
-    [super dealloc];
+#if DEBUG
+    NSLog(@"*** memory error *** dealloc of %@", [self class]);
+#endif
+    // stop compiler warning about missing [super dealloc]
+    if (0) [super dealloc];
 }
 
 - (BOOL)tryLock { return NO; }
 - (void)lock { /* do nothing */ }
 - (void)unlock { /* do nothing */ }
 
-- (void)renderOffscreen { /* no-op */ }
+// we always return a cached object owned solely by the _fallbackTable, which should never be deallocated
+- (id)retain { return self; }
+- (oneway void)release { }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
-- (NSSize)size { return (NSSize){ FVMaxThumbnailDimension, FVMaxThumbnailDimension }; }   
+- (void)renderOffscreen
+{
+    // no-op
+}
+
+- (NSSize)size { return (NSSize){ FVMaxThumbnailDimension, FVMaxThumbnailDimension }; }
+
+// self here is the placeholder; we always discard the result of +allocWithZone: here, since the actual +alloc has to occur on the main thread in _addNewItemInLockedTableWithMIMEType, or we're just returning a previously allocated instance.
+- (id)initWithMIMEType:(NSString *)type;
+{
+    NSParameterAssert(nil != type);
+    NSParameterAssert(defaultPlaceholderIcon == self);
+    [_fallbackTableLock lock];
+    self = [_fallbackTable objectForKey:type];
+    if (nil == self) {
+        [FVMIMEIconClass performSelectorOnMainThread:@selector(_addNewItemInLockedTableWithMIMEType:) withObject:type waitUntilDone:YES modes:[NSArray arrayWithObject:(id)kCFRunLoopCommonModes]];
+        self = [_fallbackTable objectForKey:type];
+    }
+    [_fallbackTableLock unlock];    
+    return self;
+}
 
 - (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
 {

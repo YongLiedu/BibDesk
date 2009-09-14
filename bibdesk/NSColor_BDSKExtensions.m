@@ -62,7 +62,7 @@ typedef union _BDSKRGBAInt {
     NSColor *color = nil;
     if ([NSString isEmptyString:string] == NO) {
         BDSKRGBAInt u;
-        u.uintValue = CFSwapInt32BigToHost(strtoul([string UTF8String], NULL, 10));
+        u.uintValue = CFSwapInt32BigToHost([string unsignedIntValue]);
         color = [NSColor colorWithCalibratedRed:u.rgba.r / 255.0 green:u.rgba.g / 255.0 blue:u.rgba.b / 255.0 alpha:u.rgba.a / 255.0];
     }
     return color;
@@ -72,7 +72,7 @@ typedef union _BDSKRGBAInt {
     NSString *string = nil;
     NSColor *rgbColor = [self colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
     if (rgbColor) {
-        CGFloat r = 0.0, g = 0.0, b = 0.0, a = 0.0;
+        float r = 0.0, g = 0.0, b = 0.0, a = 0.0;
         [rgbColor getRed:&r green:&g blue:&b alpha:&a];
         // store a 32 bit color instead of the floating point values
         BDSKRGBAInt u;
@@ -85,73 +85,24 @@ typedef union _BDSKRGBAInt {
     return string;
 }
 
-- (BOOL)isBlackOrWhiteOrTransparentForMargin:(CGFloat)margin {
-    CGFloat r = 0.0, g = 0.0, b = 0.0, a = 0.0;
+- (BOOL)isBlackOrWhiteOrTransparentForMargin:(float)margin {
+    float r = 0.0, g = 0.0, b = 0.0, a = 0.0;
     [[self colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getRed:&r green:&g blue:&b alpha:&a];
     return ((r > 1.0-margin && g > 1.0-margin && b > 1.0-margin) || (r < margin && g < margin && b < margin) || a < margin);
 }
 
-- (NSComparisonResult)colorCompare:(id)other {
-    if (NO == [other isKindOfClass:[NSColor class]])
-        return NSOrderedAscending;
-    CGFloat hue1 = 0.0, saturation1 = 0.0, brightness1 = 0.0, alpha1 = 0.0, hue2 = 0.0, saturation2 = 0.0, brightness2 = 0.0, alpha2 = 0.0;
-    [[self colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getHue:&hue1 saturation:&saturation1 brightness:&brightness1 alpha:&alpha1];
-    [[other colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getHue:&hue2 saturation:&saturation2 brightness:&brightness2 alpha:&alpha2];
-    uint32_t h1 = (uint32_t)(hue1 * 255);
-    uint32_t s1 = (uint32_t)(saturation1 * 255);
-    uint32_t b1 = (uint32_t)(brightness1 * 255);
-    uint32_t a1 = (uint32_t)(alpha1 * 255);
-    uint32_t h2 = (uint32_t)(hue2 * 255);
-    uint32_t s2 = (uint32_t)(saturation2 * 255);
-    uint32_t b2 = (uint32_t)(brightness2 * 255);
-    uint32_t a2 = (uint32_t)(alpha2 * 255);
-    if (h1 < h2)
-        return NSOrderedAscending;
-    if (h1 > h2)
-        return NSOrderedDescending;
-    if (s1 < s2)
-        return NSOrderedAscending;
-    if (s1 > s2)
-        return NSOrderedDescending;
-    if (b1 < b2)
-        return NSOrderedAscending;
-    if (b1 > b2)
-        return NSOrderedDescending;
-    if (a1 < a2)
-        return NSOrderedAscending;
-    if (a1 > a2)
-        return NSOrderedDescending;
-    if (hue1 < hue2)
-        return NSOrderedAscending;
-    if (hue1 > hue2)
-        return NSOrderedDescending;
-    if (saturation1 < saturation2)
-        return NSOrderedAscending;
-    if (saturation1 > saturation2)
-        return NSOrderedDescending;
-    if (brightness1 < b2)
-        return NSOrderedAscending;
-    if (brightness1 > brightness2)
-        return NSOrderedDescending;
-    if (alpha1 < alpha2)
-        return NSOrderedAscending;
-    if (alpha1 > alpha2)
-        return NSOrderedDescending;
-    return NSOrderedSame;
-}
-
 + (id)scriptingRgbaColorWithDescriptor:(NSAppleEventDescriptor *)descriptor {
     if ([descriptor numberOfItems] > 0) {
-        CGFloat red, green, blue, alpha;
-        red = green = blue = (CGFloat)[[descriptor descriptorAtIndex:1] int32Value] / 65535.0f;
+        float red, green, blue, alpha;
+        red = green = blue = (float)[[descriptor descriptorAtIndex:1] int32Value] / 65535.0f;
         if ([descriptor numberOfItems] > 2) {
-            green = (CGFloat)[[descriptor descriptorAtIndex:2] int32Value] / 65535.0f;
-            blue = (CGFloat)[[descriptor descriptorAtIndex:3] int32Value] / 65535.0f;
+            green = (float)[[descriptor descriptorAtIndex:2] int32Value] / 65535.0f;
+            blue = (float)[[descriptor descriptorAtIndex:3] int32Value] / 65535.0f;
         }
         if ([descriptor numberOfItems] == 2)
-            alpha = (CGFloat)[[descriptor descriptorAtIndex:2] int32Value] / 65535.0f;
+            alpha = (float)[[descriptor descriptorAtIndex:2] int32Value] / 65535.0f;
         else if ([descriptor numberOfItems] > 3)
-            alpha = (CGFloat)[[descriptor descriptorAtIndex:4] int32Value] / 65535.0f;
+            alpha = (float)[[descriptor descriptorAtIndex:4] int32Value] / 65535.0f;
         else
             alpha= 1.0;
         return [NSColor colorWithCalibratedRed:red green:green blue:blue alpha:alpha];
@@ -165,14 +116,14 @@ typedef union _BDSKRGBAInt {
 }
 
 - (id)scriptingRgbaColorDescriptor {
-    CGFloat red, green, blue, alpha;
+    float red, green, blue, alpha;
     [[self colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getRed:&red green:&green blue:&blue alpha:&alpha];
     
     NSAppleEventDescriptor *descriptor = [NSAppleEventDescriptor listDescriptor];
-    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:BDSKRound(65535 * red)] atIndex:1];
-    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:BDSKRound(65535 * green)] atIndex:2];
-    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:BDSKRound(65535 * blue)] atIndex:3];
-    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:BDSKRound(65535 * alpha)] atIndex:4];
+    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:round(65535 * red)] atIndex:1];
+    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:round(65535 * green)] atIndex:2];
+    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:round(65535 * blue)] atIndex:3];
+    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:round(65535 * alpha)] atIndex:4];
     
     return descriptor;
 }

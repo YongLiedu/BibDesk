@@ -51,7 +51,7 @@
 @implementation BDSKRatingButtonCell
 
 // designated initializer
-- (id)initWithMaxRating:(NSUInteger)aRating {
+- (id)initWithMaxRating:(unsigned int)aRating {
 	if (self = [super initTextCell:@""]) {
 		rating = 0;
 		maxRating = aRating;
@@ -83,11 +83,11 @@
     return cellCopy;
 }
 
-- (NSUInteger)rating {
+- (unsigned int)rating {
     return rating;
 }
 
-- (void)setRating:(NSUInteger)newRating {
+- (void)setRating:(unsigned int)newRating {
 	if (newRating > maxRating)
 		newRating = maxRating;
 	if (rating != newRating) {
@@ -96,11 +96,11 @@
     }
 }
 
-- (NSUInteger)maxRating {
+- (unsigned int)maxRating {
     return maxRating;
 }
 
-- (void)setMaxRating:(NSUInteger)newRating {
+- (void)setMaxRating:(unsigned int)newRating {
     if (maxRating != newRating) {
         maxRating = newRating;
         [(NSControl *)[self controlView] updateCell:self];
@@ -115,11 +115,11 @@
 	return [NSNumber numberWithInt:rating];
 }
 
-- (NSInteger)intValue {
+- (int)intValue {
 	return rating;
 }
 
-- (void)setIntValue:(NSInteger)anInt {
+- (void)setIntValue:(int)anInt {
 	[self setRating:anInt];
 }
 
@@ -127,7 +127,7 @@
 	[self setRating:[self nextState]];
 }
 
-- (NSInteger)nextState {
+- (int)nextState {
 	if (rating < maxRating)
 		return rating + 1;
 	else
@@ -143,12 +143,12 @@
 	BOOL keepOn = YES;
     BOOL mouseWentUp = NO;
     NSPoint lastLoc = mouseLoc;
-	CGFloat border = ([self isBordered] ? 1 : 0);
-	CGFloat margin = 0;
-	CGFloat offset;
-	NSUInteger newRating;
+	float border = ([self isBordered] ? 1 : 0);
+	float margin = 0;
+	float offset;
+	unsigned int newRating;
 
-	CGFloat innerWidth = OUTER_SIZE * maxRating;
+	float innerWidth = OUTER_SIZE * maxRating;
 	NSSize buttonSize = NSMakeSize(innerWidth, OUTER_SIZE);
 	NSRect buttonRect = cellFrame;
 	
@@ -173,11 +173,11 @@
 	if (margin < border)
 		margin = border;
 	
-	if (!NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped]))
+	if (!NSPointInRect(mouseLoc, buttonRect))
 		return NO;
 	
 	offset = mouseLoc.x - buttonRect.origin.x - margin;
-	newRating = (offset < 2) ? 0 : BDSKCeil(offset / OUTER_SIZE);
+	newRating = (offset < 2) ? 0 : ceil(offset / OUTER_SIZE);
 	if (newRating > maxRating)
 		newRating = maxRating;
 	if (rating != newRating) {
@@ -197,7 +197,7 @@
                 keepOn = NO;
                 mouseWentUp = YES;
             case NSLeftMouseDragged:
-                newRating = (offset < 2) ? 0 : BDSKCeil(offset / OUTER_SIZE);
+                newRating = (offset < 2) ? 0 : ceil(offset / OUTER_SIZE);
                 if (newRating > maxRating)
                     newRating = maxRating;
                 if (rating != newRating) {
@@ -232,7 +232,7 @@
 		case NSImageLeft:
 		case NSImageRight:
 			size.width = buttonSize.width + titleSize.width + BUTTON_TEXT_X_SEP;
-			size.height = BDSKMax(buttonSize.height, titleSize.height);
+			size.height = fmaxf(buttonSize.height, titleSize.height);
 			if ([self isBordered])
 				size.width -= EXTRA_BORDER_MARGIN;
 			break;
@@ -275,9 +275,9 @@
 }
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-	CGFloat margin = 0;
-	CGFloat border = ([self isBordered] ? 1 : 0);
-	CGFloat innerWidth = OUTER_SIZE * maxRating;
+	float margin = 0;
+	float border = ([self isBordered] ? 1 : 0);
+	float innerWidth = OUTER_SIZE * maxRating;
 
 	NSAttributedString *titleToDisplay = [self attributedTitle];
 	NSSize titleSize = [titleToDisplay size];
@@ -315,7 +315,7 @@
 	NSRect rect = NSMakeRect(NSMinX(buttonRect) + margin + 0.5f * (OUTER_SIZE - MARKER_SIZE), NSMinY(buttonRect) + 0.5f * (NSHeight(buttonRect) - MARKER_SIZE), MARKER_SIZE, MARKER_SIZE);
 	NSColor *color = ([self isEnabled]) ? [NSColor grayColor] : [NSColor lightGrayColor];
 	BOOL selected = NO;
-	NSUInteger i = 0;
+	unsigned int i = 0;
 	
 	if ([controlView isKindOfClass:[NSTableView class]]) {
 		NSTableView *tv = (NSTableView *)controlView;
@@ -407,7 +407,7 @@
         return [NSNumber numberWithUnsignedInt:maxRating];
     } else if ([attribute isEqualToString:NSAccessibilityAllowedValuesAttribute]) {
         NSMutableArray *values = [NSMutableArray array];
-        NSUInteger i;
+        unsigned i;
         for (i = 0; i <= maxRating; i++)
             [values addObject:[NSNumber numberWithUnsignedInt:i]];
         return values;

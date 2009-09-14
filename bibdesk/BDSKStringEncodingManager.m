@@ -52,7 +52,7 @@ enum {
 @implementation BDSKEncodingPopUpButtonCell
 
 // Do not allow selecting the "Customize" item and the separator before it. (Note that the customize item can be chosen and an action will be sent, but the selection doesn't change to it.)
-- (void)selectItemAtIndex:(NSInteger)idx {
+- (void)selectItemAtIndex:(int)idx {
     if (idx + 2 <= [self numberOfItems]) [super selectItemAtIndex:idx];
 }
 
@@ -114,7 +114,7 @@ enum {
 
 // Update contents based on encodings list customization
 - (void)handleEncodingsListChanged:(NSNotification *)notification {
-    NSInteger tag = [[self selectedItem] tag];
+    int tag = [[self selectedItem] tag];
     defaultEncoding = tag;
     [[BDSKStringEncodingManager sharedEncodingManager] setupPopUp:self selectedEncoding:defaultEncoding];
 }
@@ -135,7 +135,7 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
 
 + (NSStringEncoding)defaultEncoding;
 {
-    return [[NSUserDefaults standardUserDefaults] integerForKey:BDSKDefaultStringEncodingKey];
+    return [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey];
 }
 
 + (id)allocWithZone:(NSZone *)zone {
@@ -154,7 +154,7 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
 
 - (void)release {}
 
-- (NSUInteger)retainCount { return NSUIntegerMax; }
+- (unsigned)retainCount { return UINT_MAX; }
 
 #pragma mark -
 
@@ -176,7 +176,7 @@ extern CFStringEncoding BDStringGetMostCompatibleMacStringEncoding(CFStringEncod
 }
 
 // Sort using the equivalent Mac encoding as the major key. Secondary key is the actual encoding value, which works well enough. We treat Unicode encodings as special case, putting them at top of the list.
-static NSInteger encodingCompare(const void *firstPtr, const void *secondPtr) {
+static int encodingCompare(const void *firstPtr, const void *secondPtr) {
     CFStringEncoding first = *(CFStringEncoding *)firstPtr;
     CFStringEncoding second = *(CFStringEncoding *)secondPtr;
     CFStringEncoding macEncodingForFirst = BDStringGetMostCompatibleMacStringEncoding(first);
@@ -196,7 +196,7 @@ static NSInteger encodingCompare(const void *firstPtr, const void *secondPtr) {
     if (allEncodings == nil) {	// Build list of encodings, sorted, and including only those with human readable names
         const CFStringEncoding *cfEncodings = CFStringGetListOfAvailableEncodings();
         CFStringEncoding *tmp;
-        NSInteger cnt, num = 0;
+        int cnt, num = 0;
         while (cfEncodings[num] != kCFStringEncodingInvalidId) num++;	// Count
         tmp = malloc(sizeof(CFStringEncoding) * num);
         memcpy(tmp, cfEncodings, sizeof(CFStringEncoding) * num);	// Copy the list
@@ -226,7 +226,7 @@ static NSInteger encodingCompare(const void *firstPtr, const void *secondPtr) {
 // Called once (when the UI is first brought up) to properly setup the encodings list in the "Customize Encodings List" panel.
 - (void)setupEncodingsList {
     NSArray *allEncodings = [[self class] allAvailableStringEncodings];
-    NSInteger cnt, numEncodings = [allEncodings count];
+    int cnt, numEncodings = [allEncodings count];
 
     for (cnt = 0; cnt < numEncodings; cnt++) {
         NSStringEncoding encoding = [[allEncodings objectAtIndex:cnt] unsignedIntValue];
@@ -243,9 +243,9 @@ static NSInteger encodingCompare(const void *firstPtr, const void *secondPtr) {
 
 
 // This method initializes the provided popup with list of encodings; it also sets up the selected encoding as indicated and if includeDefaultItem is YES, includes an initial item for selecting "Automatic" choice.  These non-encoding items all have 0 as their tags. Otherwise the tags are set to the NSStringEncoding value for the encoding.
-- (void)setupPopUp:(BDSKEncodingPopUpButton *)popup selectedEncoding:(NSUInteger)selectedEncoding {
+- (void)setupPopUp:(BDSKEncodingPopUpButton *)popup selectedEncoding:(unsigned)selectedEncoding {
     NSArray *encs = [self enabledEncodings];
-    NSUInteger cnt, numEncodings, itemToSelect = 0;
+    unsigned cnt, numEncodings, itemToSelect = 0;
         
     // Put the encodings in the popup
     [popup removeAllItems];
@@ -281,16 +281,16 @@ static NSInteger encodingCompare(const void *firstPtr, const void *secondPtr) {
 // Returns the actual enabled list of encodings.
 - (NSArray *)enabledEncodings {
     // see CFStringEncodingExt.h for CF encodings
-    static const NSInteger defaultStringEncodings[] = {
+    static const int defaultStringEncodings[] = {
         kCFStringEncodingUTF8, kCFStringEncodingMacRoman, kCFStringEncodingWindowsLatin1, kCFStringEncodingASCII, kCFStringEncodingMacJapanese, kCFStringEncodingShiftJIS, kCFStringEncodingMacChineseTrad, kCFStringEncodingMacKorean, kCFStringEncodingMacChineseSimp, kCFStringEncodingGB_18030_2000, -1
     };
     if (encodings == nil) {
-        NSMutableArray *encs = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKStringEncodingsKey] mutableCopy];
+        NSMutableArray *encs = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKStringEncodingsKey] mutableCopy];
         if ([encs count] == 0) {
             NSStringEncoding defaultEncoding = [NSString defaultCStringEncoding];
             NSStringEncoding encoding;
             BOOL hasDefault = NO;
-            NSInteger cnt = 0;
+            int cnt = 0;
             if (encs == nil)
                 encs = [[NSMutableArray alloc] init];
             while (defaultStringEncodings[cnt] != -1) {
@@ -309,10 +309,10 @@ static NSInteger encodingCompare(const void *firstPtr, const void *secondPtr) {
 
 // Should be called after any customization to the encodings list. Writes the new list out to defaults; updates the UI; also posts notification to get all encoding popups to update.
 - (void)noteEncodingListChange:(BOOL)writeDefault updateList:(BOOL)updateList postNotification:(BOOL)post {
-    if (writeDefault) [[NSUserDefaults standardUserDefaults] setObject:encodings forKey:BDSKStringEncodingsKey];
+    if (writeDefault) [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:encodings forKey:BDSKStringEncodingsKey];
 
     if (updateList) {
-        NSInteger cnt, numEncodings = [encodingMatrix numberOfRows];
+        int cnt, numEncodings = [encodingMatrix numberOfRows];
         for (cnt = 0; cnt < numEncodings; cnt++) {
             NSCell *cell = [encodingMatrix cellAtRow:cnt column:0];
             [cell setState:[encodings containsObject:[NSNumber numberWithUnsignedInt:[cell tag]]] ? NSOnState : NSOffState];
@@ -344,12 +344,12 @@ static NSInteger encodingCompare(const void *firstPtr, const void *secondPtr) {
 }
 
 - (IBAction)encodingListChanged:(id)sender {
-    NSInteger cnt, numRows = [encodingMatrix numberOfRows];
+    int cnt, numRows = [encodingMatrix numberOfRows];
     NSMutableArray *encs = [[NSMutableArray alloc] init];
 
     for (cnt = 0; cnt < numRows; cnt++) {
         NSCell *cell = [encodingMatrix cellAtRow:cnt column:0];
-        if (((NSUInteger)[cell tag] != 0) && ([cell state] == NSOnState)) [encs addObject:[NSNumber numberWithUnsignedInt:[cell tag]]];
+        if (((unsigned)[cell tag] != 0) && ([cell state] == NSOnState)) [encs addObject:[NSNumber numberWithUnsignedInt:[cell tag]]];
     }
 
     [encodings autorelease];
@@ -373,7 +373,7 @@ static NSInteger encodingCompare(const void *firstPtr, const void *secondPtr) {
 - (IBAction)revertToDefault:(id)sender {
     [encodings autorelease];
     encodings = nil;
-    [[NSUserDefaults standardUserDefaults] setObject:[[[NSUserDefaultsController sharedUserDefaultsController] initialValues] objectForKey:BDSKStringEncodingsKey] forKey:BDSKStringEncodingsKey];
+    [[OFPreference preferenceForKey:BDSKStringEncodingsKey] restoreDefaultValue];
     (void)[self enabledEncodings];					// Regenerate default list
     [self noteEncodingListChange:NO updateList:YES postNotification:YES];
 }

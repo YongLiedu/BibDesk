@@ -46,11 +46,11 @@
 - (void)mouseDown:(NSEvent *)theEvent {
     
     NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-    NSInteger clickedColumn = [self columnAtPoint:location];
-    NSInteger clickedRow = [self rowAtPoint:location];
+    int clickedColumn = [self columnAtPoint:location];
+    int clickedRow = [self rowAtPoint:location];
+    NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:clickedColumn];
     
     if (clickedRow != -1 && clickedColumn != -1) {
-        NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:clickedColumn];
         NSRect cellFrame = [self frameOfCellAtColumn:clickedColumn row:clickedRow];
         id cell = [tableColumn dataCellForRow:clickedRow];
         BOOL isEditable = [tableColumn isEditable] && 
@@ -76,8 +76,8 @@
 }
 
 - (void)textDidEndEditing:(NSNotification *)aNotification {
-    NSInteger editedRow = [self editedRow];
-    NSInteger editedColumn = [self editedColumn];
+    int editedRow = [self editedRow];
+    int editedColumn = [self editedColumn];
     
     endEditing = YES;
     [super textDidEndEditing:aNotification];
@@ -87,12 +87,12 @@
     // http://www.cocoabuilder.com/archive/message/cocoa/2007/10/31/191866
     
     if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-        NSInteger movement = [[[aNotification userInfo] objectForKey:@"NSTextMovement"] intValue];
+        int movement = [[[aNotification userInfo] objectForKey:@"NSTextMovement"] intValue];
         if ((editedRow != -1 && editedColumn != -1) && 
             (NSTabTextMovement == movement || NSBacktabTextMovement == movement || NSReturnTextMovement == movement)) {
             
             // assume NSReturnTextMovement
-            NSInteger nextRow = editedRow;
+            int nextRow = editedRow;
             if (NSBacktabTextMovement == movement)
                 nextRow = editedRow - 1;
             else if (NSTabTextMovement == movement)
@@ -119,7 +119,7 @@
 - (BOOL)becomeFirstResponder {
     if ([super becomeFirstResponder]) {
         if ([self editedRow] == -1 && endEditing == NO) {
-            NSInteger row = -1, column, numRows = [self numberOfRows], numCols = [self numberOfColumns];
+            int row = -1, column, numRows = [self numberOfRows], numCols = [self numberOfColumns];
             switch ([[self window] keyViewSelectionDirection]) {
                 case NSSelectingNext:
                     row = 0;
@@ -148,10 +148,6 @@
     } else {
         return NO;
     }
-}
-
-- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
-    return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
 }
 
 @end

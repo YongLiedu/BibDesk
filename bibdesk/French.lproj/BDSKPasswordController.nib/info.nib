@@ -2,17 +2,23 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>IBDocumentLocation</key>
+	<string>93 79 356 240 0 0 1600 1178 </string>
 	<key>IBFramework Version</key>
-	<string>677</string>
-	<key>IBLastKnownRelativeProjectPath</key>
-	<string>../Bibdesk.xcodeproj</string>
-	<key>IBOldestOS</key>
-	<integer>4</integer>
-	<key>IBOpenObjects</key>
-	<array/>
+	<string>489.0</string>
 	<key>IBSystem Version</key>
-	<string>9L30</string>
-	<key>targetFramework</key>
-	<string>IBCocoaFramework</string>
+	<string>9E6</string>
+	<key>IBUserGuides</key>
+	<dict>
+		<key>5</key>
+		<dict>
+			<key>guideLocations</key>
+			<array>
+				<string>Vertical:7.000000</string>
+			</array>
+			<key>guidesLocked</key>
+			<false/>
+		</dict>
+	</dict>
 </dict>
 </plist>

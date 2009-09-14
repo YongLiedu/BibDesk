@@ -48,8 +48,6 @@
 #import "BDSKPublicationsArray.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
-#import "BDSKSplitView.h"
-#import "BDSKTableView.h"
 #import <AddressBook/AddressBook.h>
 
 @implementation BDSKPersonController
@@ -58,7 +56,6 @@
 
 + (void)initialize{
     [self setKeys:[NSArray arrayWithObject:@"document"] triggerChangeNotificationsForDependentKey:@"publications"];
-    BDSKINITIALIZE;
 }
 
 - (NSString *)windowNibName{return @"BDSKPersonWindow";}
@@ -90,13 +87,10 @@
 	if ([NSWindowController instancesRespondToSelector:@selector(awakeFromNib)]){
         [super awakeFromNib];
 	}
-    
-    [publicationTableView setFontNamePreferenceKey:BDSKPersonTableViewFontNameKey];
-    [publicationTableView setFontSizePreferenceKey:BDSKPersonTableViewFontSizeKey];
 	
 	[collapsibleView setMinSize:NSMakeSize(0.0, 38.0)];
 	[imageView setDelegate:self];
-	[splitView setPositionAutosaveName:@"BibPersonView"];
+	[splitView setPositionAutosaveName:@"OASplitView Position BibPersonView"];
 
     if (isEditable && nil != owner) {
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -164,7 +158,6 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     // make sure we won't try to access this, e.g. in a delayed setPublicationItems:
     owner = nil;
-    [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(setPublicationItems:) object:nil];
 }
 
 - (void)updateFilter {
@@ -190,17 +183,16 @@
         [publicationItems release];
     publicationItems = [[NSMutableArray alloc] init];
     
+    // @@ note that if a person is author and editor (in a collection, for instance), the same pub can appear twice in publicationItems
+    
     NSMutableSet *theNames = [[NSMutableSet alloc] init];
-    NSMutableSet *peopleSet = [[NSMutableSet alloc] initForFuzzyAuthors];
+    NSMutableSet *peopleSet = BDSKCreateFuzzyAuthorCompareMutableSet();
     NSEnumerator *pubEnum = [[owner publications] objectEnumerator];
     BibItem *pub;
     
     while (pub = [pubEnum nextObject]) {
         NSEnumerator *fieldEnum = [fields objectEnumerator];
         NSString *field;
-        NSDictionary *info = nil;
-        NSMutableSet *fieldSet = nil;
-        NSMutableSet *nameSet = nil;
         
         while (field = [fieldEnum nextObject]) {
             NSArray *people = [pub peopleArrayForField:field];
@@ -208,22 +200,14 @@
             [peopleSet addObjectsFromArray:people];
             
             if ([peopleSet containsObject:person]) {
+                NSMutableSet *fieldSet = [[NSMutableSet alloc] init];
+                NSMutableSet *nameSet = [[NSMutableSet alloc] init];
                 NSEnumerator *personEnum = [people objectEnumerator];
                 BibAuthor *aPerson;
                 NSString *name;
                 
                 while (aPerson = [personEnum nextObject]) {
                     if ([aPerson fuzzyEqual:person]) {
-                        if (info == nil) {
-                            fieldSet = [[NSMutableSet alloc] init];
-                            nameSet = [[NSMutableSet alloc] init];
-                            info = [[NSDictionary alloc] initWithObjectsAndKeys:pub, @"publication", nameSet, @"names", fieldSet, @"fields", nil];
-                            [publicationItems addObject:info];
-                            [info release];
-                            [nameSet release];
-                            [fieldSet release];
-                        }
-                        
                         name = [aPerson originalName];
                         [nameSet addObject:name];
                         [fieldSet addObject:field];
@@ -231,6 +215,12 @@
                     }
                 }
                 
+                NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:
+                    pub, @"publication", nameSet, @"names", fieldSet, @"fields", nil];
+                [publicationItems addObject:info];
+                [info release];
+                [nameSet release];
+                [fieldSet release];
             }
             [peopleSet removeAllObjects];
         }
@@ -300,7 +290,7 @@
 
 #pragma mark actions
 
-- (void)editSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)editSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSOKButton) {
         NSString *newName = [editField stringValue];
         if ([NSString isEmptyString:newName] == NO)
@@ -343,18 +333,13 @@
 
 - (void)handleBibItemChanged:(NSNotification *)note{
     NSString *key = [[note userInfo] valueForKey:@"key"];
-    if (([key isPersonField] || key == nil) && owner) {
-        [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(setPublicationItems:) object:nil];
-        [self performSelector:@selector(setPublicationItems:) withObject:nil afterDelay:0.0];
-    }
+    if ([key isPersonField] || key == nil)
+        [self queueSelectorOnce:@selector(setPublicationItems:) withObject:nil];
 }
 
 - (void)handleBibItemAddDel:(NSNotification *)note{
     // we may be adding or removing items, so we can't check publications for containment
-    if (owner) {
-        [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(setPublicationItems:) object:nil];
-        [self performSelector:@selector(setPublicationItems:) withObject:nil afterDelay:0.0];
-    }
+    [self queueSelectorOnce:@selector(setPublicationItems:) withObject:nil];
 }
 
 - (void)handleGroupWillBeRemoved:(NSNotification *)note{
@@ -365,9 +350,9 @@
 }
 
 - (void)openSelectedPub:(id)sender{
-    NSInteger row = [publicationTableView selectedRow];
-    if (row != -1)
-        [(BibDocument *)[self document] editPub:[[[publicationArrayController arrangedObjects] objectAtIndex:row] valueForKey:@"publication"]];
+    int row = [publicationTableView selectedRow];
+    NSAssert(row >= 0, @"Cannot perform double-click action when no row is selected");
+    [(BibDocument *)[self document] editPub:[[[publicationArrayController arrangedObjects] objectAtIndex:row] valueForKey:@"publication"]];
 }
 
 - (void)changeNameToString:(NSString *)newNameString{
@@ -440,6 +425,20 @@
     }
 }
 
+- (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
+    if (tv == publicationTableView)
+        return BDSKPersonTableViewFontNameKey;
+    else 
+        return nil;
+}
+
+- (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)tv {
+    if (tv == publicationTableView)
+        return BDSKPersonTableViewFontSizeKey;
+    else 
+        return nil;
+}
+
 #pragma mark Dragging delegate methods
 
 - (NSDragOperation)dragImageView:(BDSKDragImageView *)view validateDrop:(id <NSDraggingInfo>)sender {
@@ -490,7 +489,7 @@
 
 	// if we don't have a match in the address book, this will create a new person record
 	NSData *data = [[ABPerson personWithAuthor:person] vCardRepresentation];
-	BDSKPOSTCONDITION(data);
+	OBPOSTCONDITION(data);
 
 	if(data == nil)
 		return NO;
@@ -519,14 +518,14 @@
         
         NSView *views[2];
         NSRect frames[2];
-        CGFloat contentHeight = NSHeight([sender frame]) - [sender dividerThickness];
-        CGFloat factor = contentHeight / (oldSize.height - [sender dividerThickness]);
-        NSInteger i, gap;
+        float contentHeight = NSHeight([sender frame]) - [sender dividerThickness];
+        float factor = contentHeight / (oldSize.height - [sender dividerThickness]);
+        int i, gap;
         
         [[sender subviews] getObjects:views];
         for (i = 0; i < 2; i++) {
             frames[i] = [views[i] frame];
-            frames[i].size.height = BDSKFloor(factor * NSHeight(frames[i]));
+            frames[i].size.height = floorf(factor * NSHeight(frames[i]));
         }
         
         // randomly divide the remaining gap over the two views; NSSplitView dumps it all over the last view, which grows that one more than the others
@@ -549,14 +548,14 @@
         NSView *rightView = [[sender subviews] objectAtIndex:1];
         NSRect leftFrame = [leftView frame];
         NSRect rightFrame = [rightView frame];
-        CGFloat contentWidth = NSWidth([sender frame]) - [sender dividerThickness];
+        float contentWidth = NSWidth([sender frame]) - [sender dividerThickness];
         
         if (NSWidth(rightFrame) <= 1.0)
             rightFrame.size.width = 0.0;
         else if (NSWidth(leftFrame) <= 1.0)
             rightFrame.size.width = contentWidth;
         else if (contentWidth < NSWidth(rightFrame))
-            rightFrame.size.width = BDSKFloor(NSWidth(rightFrame) * contentWidth / (oldSize.width - [sender dividerThickness]));
+            rightFrame.size.width = floorf(NSWidth(rightFrame) * contentWidth / (oldSize.width - [sender dividerThickness]));
         
         leftFrame.size.width = contentWidth - NSWidth(rightFrame);
         rightFrame.origin.x = NSMaxX(leftFrame) + [sender dividerThickness];
@@ -568,7 +567,7 @@
     [sender adjustSubviews];
 }
 
-- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(NSInteger)offset {
+- (void)splitView:(OASplitView *)sender multipleClick:(NSEvent *)mouseEvent{
     if ([sender isEqual:splitView]) {
         
         NSView *pickerView = [[sender subviews] objectAtIndex:0];

@@ -41,7 +41,7 @@
 
 @interface Controller : NSObject {
     IBOutlet NSWindow *_window;
-    IBOutlet FVFileView *_fileView;
+    IBOutlet FileView *_fileView;
     NSMutableArray *_filePaths;
     IBOutlet NSSlider *_slider;
     IBOutlet NSArrayController *arrayController;

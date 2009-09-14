@@ -37,6 +37,7 @@
  */
 
 #import "BDSKErrorObjectController.h"
+#import <OmniBase/OmniBase.h>
 #import <BTParse/btparse.h>
 #import <BTParse/BDSKErrorObject.h>
 #import "BDSKErrorManager.h"
@@ -49,7 +50,6 @@
 #import "BDSKEditor.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
-#import "BDSKTableView.h"
 
 // put it here because IB chokes on it
 @interface BDSKLineNumberTransformer : NSValueTransformer @end
@@ -62,7 +62,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 + (void)initialize;
 {
-    BDSKINITIALIZE;
+    OBINITIALIZE;
 	[NSValueTransformer setValueTransformer:[[[BDSKLineNumberTransformer alloc] init] autorelease]
 									forName:@"BDSKLineNumberTransformer"];
 }
@@ -111,7 +111,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 - (void)release {}
 
-- (NSUInteger)retainCount { return NSUIntegerMax; }
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (void)awakeFromNib;
 {
@@ -129,19 +129,19 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     return errors;
 }
 
-- (NSUInteger)countOfErrors {
+- (unsigned)countOfErrors {
     return [errors count];
 }
 
-- (id)objectInErrorsAtIndex:(NSUInteger)idx {
+- (id)objectInErrorsAtIndex:(unsigned)idx {
     return [errors objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inErrorsAtIndex:(NSUInteger)idx {
+- (void)insertObject:(id)obj inErrorsAtIndex:(unsigned)idx {
     [errors insertObject:obj atIndex:idx];
 }
 
-- (void)removeObjectFromErrorsAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromErrorsAtIndex:(unsigned)idx {
     [errors removeObjectAtIndex:idx];
 }
 
@@ -151,19 +151,19 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     return managers;
 }
 
-- (NSUInteger)countOfManagers {
+- (unsigned)countOfManagers {
     return [managers count];
 }
 
-- (id)objectInManagersAtIndex:(NSUInteger)theIndex {
+- (id)objectInManagersAtIndex:(unsigned)theIndex {
     return [managers objectAtIndex:theIndex];
 }
 
-- (void)insertObject:(id)obj inManagersAtIndex:(NSUInteger)theIndex {
+- (void)insertObject:(id)obj inManagersAtIndex:(unsigned)theIndex {
     [managers insertObject:obj atIndex:theIndex];
 }
 
-- (void)removeObjectFromManagersAtIndex:(NSUInteger)theIndex {
+- (void)removeObjectFromManagersAtIndex:(unsigned)theIndex {
     [managers removeObjectAtIndex:theIndex];
 }
 
@@ -213,7 +213,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (BDSKErrorEditor *)editorForPasteDragData:(NSData *)data document:(BibDocument *)document{
-    BDSKASSERT(document != nil);
+    OBASSERT(document != nil);
     
     BDSKErrorManager *manager = [self managerForDocument:document create:YES];
     
@@ -245,7 +245,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (void)showEditorForLastPasteDragError{
     if(lastIndex < [self countOfErrors]){
         BDSKErrorObject *errObj = [self objectInErrorsAtIndex:lastIndex];
-        BDSKASSERT([[errObj editor] isPasteDrag]);
+        OBASSERT([[errObj editor] isPasteDrag]);
         [self showWindow:self];
         [self showEditorForErrorObject:errObj];
         NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(lastIndex, [self countOfErrors] - lastIndex)];
@@ -261,7 +261,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
         [self showWindow:self];
 	
     // remove any earlier failed load editors unless we're editing them
-    NSUInteger idx = [managers count];
+    unsigned idx = [managers count];
     BDSKErrorManager *manager;
     
     while (idx--) {
@@ -283,7 +283,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (void)handleRemoveDocumentNotification:(NSNotification *)notification{
     BibDocument *document = [notification object];
     // clear reference to document in its editors and close it when it is not editing
-    NSUInteger idx = [managers count];
+    unsigned idx = [managers count];
     BDSKErrorManager *manager;
     
     while (idx--) {
@@ -305,7 +305,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (void)removeErrorsForPublications:(NSArray *)pubs{
-	NSUInteger idx = [self countOfErrors];
+	unsigned idx = [self countOfErrors];
     BibItem *pub;
     
     NSMutableIndexSet *indexesToRemove = [NSMutableIndexSet indexSet];
@@ -323,7 +323,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (void)removeErrorsForEditor:(BDSKErrorEditor *)editor{
-	NSUInteger idx = [self countOfErrors];
+	unsigned idx = [self countOfErrors];
     BDSKErrorObject *errObj;
     
     NSMutableIndexSet *indexesToRemove = [NSMutableIndexSet indexSet];
@@ -344,14 +344,40 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 // copy error messages
 - (IBAction)copy:(id)sender{
-    if ([errorTableView canCopy])
-        [errorTableView copy:nil];
-    else
-        NSBeep();
+    if([[self window] isKeyWindow] && [errorTableView numberOfSelectedRows] > 0){
+        NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+        NSMutableString *s = [[NSMutableString string] retain];
+        NSEnumerator *objEnumerator = [[errorsController selectedObjects] objectEnumerator];
+		int lineNumber;
+        
+        // Columns order:  @"File Name\t\tLine Number\t\tMessage Type\t\tMessage Text\n"];
+		BDSKErrorObject *errObj;
+		
+        while(errObj = [objEnumerator nextObject]){
+            [s appendString:[[errObj editor] displayName]];
+            [s appendString:@"\t\t"];
+            
+			lineNumber = [errObj lineNumber];
+			if(lineNumber == -1)
+				[s appendString:NSLocalizedString(@"Unknown line number", @"Error message for error window")];
+			else
+				[s appendFormat:@"%i", lineNumber];
+            [s appendString:@"\t\t"];
+            
+            [s appendString:[errObj errorClassName]];
+            [s appendString:@"\t\t"];
+            
+            [s appendString:[errObj errorMessage]];
+            [s appendString:@"\n\n"];
+        }
+        [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+        [pasteboard setString:s forType:NSStringPboardType];
+    }
+    
 }
 
 - (IBAction)gotoError:(id)sender{
-    NSInteger clickedRow = [sender clickedRow];
+    int clickedRow = [sender clickedRow];
     if(clickedRow != -1)
         [self showEditorForErrorObject:[[errorsController arrangedObjects] objectAtIndex:clickedRow]];
 }
@@ -362,7 +388,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     if(currentErrors == nil){
         currentErrors = [[NSMutableArray alloc] initWithCapacity:10];
     } else {
-        BDSKASSERT([currentErrors count] == 0);
+        OBASSERT([currentErrors count] == 0);
         [currentErrors removeAllObjects];
     }
     lastIndex = [self countOfErrors];
@@ -376,7 +402,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
             if(pub)
                 [currentErrors makeObjectsPerformSelector:@selector(setPublication:) withObject:pub];
             [[self mutableArrayValueForKey:@"errors"] addObjectsFromArray:currentErrors];
-            if([self isWindowVisible] == NO && (handledNonIgnorableError || [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowWarningsKey]))
+            if([self isWindowVisible] == NO && (handledNonIgnorableError || [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowWarningsKey]))
                 [self showWindow:self];
             handledNonIgnorableError = NO;
         }
@@ -406,50 +432,10 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     
 }
 
-#pragma mark TableView delegate
+#pragma mark TableView tooltips
 
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation{
+- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)aTableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
 	return [[[errorsController arrangedObjects] objectAtIndex:row] errorMessage];
-}
-
-#pragma mark TableView dataSource
-
-// dummy, we use bindings
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)tv { return 0; }
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row { return nil; }
-
-- (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard {
-    NSMutableString *s = [[NSMutableString string] retain];
-    NSEnumerator *objEnumerator = [[errorsController selectedObjects] objectEnumerator];
-    NSInteger lineNumber;
-    
-    // Columns order:  @"File Name\t\tLine Number\t\tMessage Type\t\tMessage Text\n"];
-    BDSKErrorObject *errObj;
-    
-    while(errObj = [objEnumerator nextObject]){
-        [s appendString:[[errObj editor] displayName]];
-        [s appendString:@"\t\t"];
-        
-        lineNumber = [errObj lineNumber];
-        if(lineNumber == -1)
-            [s appendString:NSLocalizedString(@"Unknown line number", @"Error message for error window")];
-        else
-            [s appendFormat:@"%ld", (long)lineNumber];
-        [s appendString:@"\t\t"];
-        
-        [s appendString:[errObj errorClassName]];
-        [s appendString:@"\t\t"];
-        
-        [s appendString:[errObj errorMessage]];
-        [s appendString:@"\n\n"];
-    }
-    [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-    [pboard setString:s forType:NSStringPboardType];
-    return YES;
-}
-
-- (NSDragOperation)tableView:(NSTableView *)aTableView draggingSourceOperationMaskForLocal:(BOOL)flag {
-    return NSDragOperationEvery;
 }
 
 @end

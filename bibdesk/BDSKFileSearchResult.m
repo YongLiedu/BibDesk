@@ -42,7 +42,7 @@
 
 @implementation BDSKFileSearchResult
 
-- (id)initWithURL:(NSURL *)aURL identifierURL:(NSURL *)anIdentifierURL title:(NSString *)aTitle score:(CGFloat)aScore;
+- (id)initWithURL:(NSURL *)aURL identifierURL:(NSURL *)anIdentifierURL title:(NSString *)aTitle score:(float)aScore;
 {
     
     NSParameterAssert(nil != aURL);
@@ -88,7 +88,7 @@
     return [NSString stringWithFormat:@"File: %@ \n\t string = \"%@\"", file, string];
 }
 
-- (NSUInteger)hash
+- (unsigned int)hash
 {
     return [file hash];
 }

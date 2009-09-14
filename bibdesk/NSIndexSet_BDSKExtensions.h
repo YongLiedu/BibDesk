@@ -42,5 +42,5 @@
 @interface NSIndexSet (BDSKExtensions)
 + (id)indexSetWithIndexesInArray:(NSArray *)indexArray;
 - (BOOL)intersectsIndexSet:(NSIndexSet *)indexSet;
-- (NSUInteger)numberOfIndexesInRange:(NSRange)range;
+- (unsigned int)numberOfIndexesInRange:(NSRange)range;
 @end

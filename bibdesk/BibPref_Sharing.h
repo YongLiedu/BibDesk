@@ -38,9 +38,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKPreferencePane.h"
+#import <OmniAppKit/OmniAppKit.h>
 
-@interface BibPref_Sharing : BDSKPreferencePane
+@interface BibPref_Sharing : OAPreferenceClient
 {
     IBOutlet NSButton *enableBrowsingButton;
     IBOutlet NSButton *enableSharingButton;
@@ -48,7 +48,6 @@
     IBOutlet NSSecureTextField *passwordField;
     IBOutlet NSTextField *sharedNameField;
     IBOutlet NSTextField *statusField;
-    IBOutlet NSTextField *usedNameField;
 }
 
 - (IBAction)changePassword:(id)sender;
@@ -56,5 +55,8 @@
 - (IBAction)toggleBrowsing:(id)sender;
 - (IBAction)togglePassword:(id)sender;
 - (IBAction)toggleSharing:(id)sender;
+
+- (void)handleSharingNameChanged:(NSNotification *)aNotification;
+- (void)handleClientConnectionsChanged:(NSNotification *)aNotification;
 
 @end

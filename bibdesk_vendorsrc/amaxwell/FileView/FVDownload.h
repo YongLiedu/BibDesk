@@ -49,14 +49,8 @@
     long long                _expectedLength;
     long long                _receivedLength;
     FVProgressIndicatorCell *_progressIndicator;
-    id                       _delegate;
-    NSURLDownload           *_download;
 }
 - (id)initWithDownloadURL:(NSURL *)aURL indexInView:(NSUInteger)indexInView;
-
-- (void)setDelegate:(id)obj;
-- (id)delegate;
-
 - (NSURL *)downloadURL;
 - (NSUInteger)indexInView;
 
@@ -69,15 +63,4 @@
 - (void)incrementReceivedLengthBy:(NSUInteger)length;
 - (FVProgressIndicatorCell *)progressIndicator;
 
-- (void)start;
-- (void)cancel;
-
-@end
-
-@interface NSObject (FVDownloadDelegate)
-- (void)downloadUpdated:(FVDownload *)download;
-- (void)downloadFinished:(FVDownload *)download;
-- (void)downloadFailed:(FVDownload *)download;
-- (void)download:(FVDownload *)download setDestinationWithSuggestedFilename:(NSString *)filename;
-- (NSWindow *)downloadWindowForSheet:(FVDownload *)download;
 @end

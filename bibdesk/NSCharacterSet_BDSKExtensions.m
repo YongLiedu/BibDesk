@@ -36,95 +36,119 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #import "NSCharacterSet_BDSKExtensions.h"
-#import "BDSKRuntime.h"
-
 
 @implementation NSCharacterSet (BDSKExtensions)
 
+static NSCharacterSet *curlyBraceCharacterSet = nil;
+static NSCharacterSet *commaCharacterSet = nil;
+static NSCharacterSet *searchStringSeparatorCharacterSet = nil;
+static NSCharacterSet *upAndDownArrowCharacterSet = nil;
+static NSCharacterSet *newlineCharacterSet = nil;
+static NSCharacterSet *nonWhitespaceCharacterSet = nil;
+static NSCharacterSet *nonDecimalDigitCharacterSet = nil;
+
++ (void)didLoad;
+{
+    curlyBraceCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"{}"] copy];
+    commaCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@","] copy];
+    searchStringSeparatorCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"+| "] copy];
+    nonDecimalDigitCharacterSet = [[[NSCharacterSet decimalDigitCharacterSet] invertedSet] copy];
+        
+    // up arrow and down arrow character set
+    unichar upAndDownArrowCharacters[2];
+    upAndDownArrowCharacters[0] = NSUpArrowFunctionKey;
+    upAndDownArrowCharacters[1] = NSDownArrowFunctionKey;
+    NSString *upAndDownArrowString = [NSString stringWithCharacters: upAndDownArrowCharacters  length: 2];
+    upAndDownArrowCharacterSet = [[NSCharacterSet characterSetWithCharactersInString: upAndDownArrowString] copy];
+    
+    // This will be a character set with all newline characters (including the weird Unicode ones)
+    CFMutableCharacterSetRef newlineCFCharacterSet = NULL;
+    // get all whitespace characters (does not include newlines)
+    newlineCFCharacterSet = CFCharacterSetCreateMutableCopy(CFAllocatorGetDefault(), CFCharacterSetGetPredefined(kCFCharacterSetWhitespace));
+    // invert the whitespace-only set to get all non-whitespace chars (the inverted set will include newlines)
+    CFCharacterSetInvert(newlineCFCharacterSet);
+    // now get only the characters that are common to kCFCharacterSetWhitespaceAndNewline and our non-whitespace set
+    CFCharacterSetIntersect(newlineCFCharacterSet, CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline));
+    newlineCharacterSet = [(id)newlineCFCharacterSet copy];
+    CFRelease(newlineCFCharacterSet);
+    
+    nonWhitespaceCharacterSet = [[[NSCharacterSet whitespaceCharacterSet] invertedSet] copy];
+}
+
 + (id)curlyBraceCharacterSet;
 {  
-    static NSCharacterSet *curlyBraceCharacterSet = nil;
-    if (curlyBraceCharacterSet == nil)
-        curlyBraceCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"{}"] copy];
     return curlyBraceCharacterSet; 
 }    
 
 + (id)commaCharacterSet;
 {
-    static NSCharacterSet *commaCharacterSet = nil;
-    if (commaCharacterSet == nil)
-        commaCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@","] copy];
     return commaCharacterSet;
 }
 
 + (id)searchStringSeparatorCharacterSet;
 {
-    static NSCharacterSet *searchStringSeparatorCharacterSet = nil;
-    if (searchStringSeparatorCharacterSet == nil)
-        searchStringSeparatorCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"+| "] copy];
     return searchStringSeparatorCharacterSet;
 }
 
 + (id)upAndDownArrowCharacterSet;
 {
-    static NSCharacterSet *upAndDownArrowCharacterSet = nil;
-    if (upAndDownArrowCharacterSet == nil) {
-        unichar upAndDownArrowCharacters[2] = {NSUpArrowFunctionKey, NSDownArrowFunctionKey};
-        NSString *upAndDownArrowString = [NSString stringWithCharacters: upAndDownArrowCharacters length:2];
-        upAndDownArrowCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:upAndDownArrowString] copy];
-    }
     return upAndDownArrowCharacterSet;
+}
+
++ (id)newlineCharacterSet;
+{
+    return newlineCharacterSet;
 }
 
 + (id)nonWhitespaceCharacterSet;
 {
-    static NSCharacterSet *nonWhitespaceCharacterSet = nil;
-    if (nonWhitespaceCharacterSet == nil)
-        nonWhitespaceCharacterSet = [[[NSCharacterSet whitespaceCharacterSet] invertedSet] copy];
     return nonWhitespaceCharacterSet;
-}
-
-+ (id)nonLetterCharacterSet;
-{
-    static NSCharacterSet *nonLetterCharacterSet = nil;
-    if (nonLetterCharacterSet == nil)
-        nonLetterCharacterSet = [[[NSCharacterSet letterCharacterSet] invertedSet] copy];
-    return nonLetterCharacterSet;
 }
 
 + (id)nonDecimalDigitCharacterSet;
 {
-    static NSCharacterSet *nonDecimalDigitCharacterSet = nil;
-    if (nonDecimalDigitCharacterSet == nil)
-        nonDecimalDigitCharacterSet = [[[NSCharacterSet decimalDigitCharacterSet] invertedSet] copy];
     return nonDecimalDigitCharacterSet;
 }
 
-#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
-+ (id)Tiger_newlineCharacterSet;
+@end
+/*
+    No point in keeping mutable copies of these; this category is just insurance in case we need +[NSMutableCharacterSet someClassMethod].
+ */
+@implementation NSMutableCharacterSet (BDSKExtensions)
+
++ (id)curlyBraceCharacterSet;
+{  
+    return [[curlyBraceCharacterSet mutableCopy] autorelease]; 
+}    
+
++ (id)commaCharacterSet;
 {
-    static NSCharacterSet *newlineCharacterSet = nil;
-    if (newlineCharacterSet == nil) {
-        // This will be a character set with all newline characters (including the weird Unicode ones)
-        CFMutableCharacterSetRef newlineCFCharacterSet = NULL;
-        // get all whitespace characters (does not include newlines)
-        newlineCFCharacterSet = CFCharacterSetCreateMutableCopy(CFAllocatorGetDefault(), CFCharacterSetGetPredefined(kCFCharacterSetWhitespace));
-        // invert the whitespace-only set to get all non-whitespace chars (the inverted set will include newlines)
-        CFCharacterSetInvert(newlineCFCharacterSet);
-        // now get only the characters that are common to kCFCharacterSetWhitespaceAndNewline and our non-whitespace set
-        CFCharacterSetIntersect(newlineCFCharacterSet, CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline));
-        newlineCharacterSet = [(id)newlineCFCharacterSet copy];
-        CFRelease(newlineCFCharacterSet);
-    }
-    return newlineCharacterSet;
+    return [[commaCharacterSet mutableCopy] autorelease];
 }
 
-+ (void)load {
-    // this does nothing when the method is already defined, i.e. on Leopard
-    BDSKAddClassMethodImplementationFromSelector(self, @selector(newlineCharacterSet), @selector(Tiger_newlineCharacterSet));
++ (id)searchStringSeparatorCharacterSet;
+{
+    return [[searchStringSeparatorCharacterSet mutableCopy] autorelease];
 }
-#else
-#warning fixme: remove NSCharacterSet category implementation
-#endif
+
++ (id)upAndDownArrowCharacterSet;
+{
+    return [[upAndDownArrowCharacterSet mutableCopy] autorelease];
+}
+
++ (id)newlineCharacterSet;
+{
+    return [[newlineCharacterSet mutableCopy] autorelease];
+}
+
++ (id)nonWhitespaceCharacterSet;
+{
+    return [[nonWhitespaceCharacterSet mutableCopy] autorelease];
+}
+
++ (id)nonDecimalDigitCharacterSet;
+{
+    return [[nonDecimalDigitCharacterSet mutableCopy] autorelease];
+}
 
 @end

@@ -38,9 +38,10 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroup.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKOwnerProtocol.h"
 
-@class BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes, BDSKTask;
+@class OFMessageQueue, BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes, BDSKTask;
 
 enum {
     BDSKShellScriptType,
@@ -53,19 +54,20 @@ enum {
     NSString *scriptPath;
     NSString *scriptArguments;
     NSArray *argsArray;
-    NSInteger scriptType;
+    int scriptType;
     BOOL isRetrieving;
     BOOL failedDownload;
     BDSKTask *currentTask;
     NSString *workingDirPath;
     NSData *stdoutData;
+    OFSimpleLockType processingLock;    
+    OFSimpleLockType currentTaskLock;
     BDSKItemSearchIndexes *searchIndexes;
 }
 
-- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
-- (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
+- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(int)type;
+- (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(int)type;
 
-- (BDSKPublicationsArray *)publicationsWithoutUpdating;
 - (BDSKPublicationsArray *)publications;
 - (void)setPublications:(NSArray *)newPubs;
 
@@ -75,15 +77,15 @@ enum {
 - (NSString *)scriptArguments;
 - (void)setScriptArguments:(NSString *)newArguments;
 
-- (NSInteger)scriptType;
-- (void)setScriptType:(NSInteger)newType;
+- (int)scriptType;
+- (void)setScriptType:(int)newType;
 
 - (void)startRunningScript;
 - (void)scriptDidFinishWithResult:(NSString *)outputString;
 - (void)scriptDidFailWithError:(NSError *)error;
-- (void)runShellScript;
-- (void)runAppleScript;
+- (void)runShellScriptAtPath:(NSString *)path withArguments:(NSArray *)args;
 - (void)terminate;
+- (BOOL)isProcessing;
 - (void)stdoutNowAvailable:(NSNotification *)notification;
 
 @end

@@ -42,7 +42,6 @@
 #import "BDSKAppController.h"
 #import <AGRegex/AGRegex.h>
 #import "NSString_BDSKExtensions.h"
-#import "CFString_BDSKExtensions.h"
 
 
 @interface BDSKPubMedParser (Private)
@@ -181,7 +180,7 @@
 			options:NSLiteralSearch range:NSMakeRange(0, [value length])];
         // see bug #1584054, PubMed now doesn't use a comma between the lastName and the firstName
         // this should be OK for valid RIS, as that should be in the format "last, first"
-        NSInteger lastSpace = [value rangeOfString:@" " options:NSBackwardsSearch].location;
+        int lastSpace = [value rangeOfString:@" " options:NSBackwardsSearch].location;
         if([value rangeOfString:@","].location == NSNotFound && lastSpace != NSNotFound)
             [value insertString:@"," atIndex:lastSpace];
     }
@@ -203,22 +202,22 @@
 		if(isAuthor){
             newString = [[NSString alloc] initWithFormat:@"%@ and %@", oldString, value];
             // This next step isn't strictly necessary for splitting the names, since the name parsing will do it for us, but you still see duplicate whitespace when editing the author field
-            NSString *collapsedWhitespaceString = (NSString *)BDStringCreateByCollapsingAndTrimmingCharactersInSet(NULL, (CFStringRef)newString, (CFCharacterSetRef)[NSCharacterSet whitespaceCharacterSet]);
+            NSString *collapsedWhitespaceString = (NSString *)BDStringCreateByCollapsingAndTrimmingWhitespace(NULL, (CFStringRef)newString);
             [newString release];
             newString = collapsedWhitespaceString;
         } else if([key isSingleValuedField] || [key isURLField]) {
             // for single valued and URL fields, create a new field name
-            NSInteger i = 1;
-            NSString *newKey = [key stringByAppendingFormat:@"%ld", (long)i];
+            int i = 1;
+            NSString *newKey = [key stringByAppendingFormat:@"%d", i];
             while ([pubDict objectForKey:newKey] != nil) {
                 i++;
-                newKey = [key stringByAppendingFormat:@"%ld", (long)i];
+                newKey = [key stringByAppendingFormat:@"%d", i];
             }
             key = newKey;
             newString = [value copy];
         } else {
 			// append to old value, using separator from prefs
-            newString = [[NSString alloc] initWithFormat:@"%@%@%@", oldString, [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey], value];
+            newString = [[NSString alloc] initWithFormat:@"%@%@%@", oldString, [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey], value];
 		}
     }else{
         // the default, just set the value

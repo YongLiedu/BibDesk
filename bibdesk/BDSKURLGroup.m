@@ -51,12 +51,11 @@
 #import "BDSKMacroResolver.h"
 #import "BDSKItemSearchIndexes.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "BibItem.h"
 
 @implementation BDSKURLGroup
 
 // old designated initializer
-- (id)initWithName:(NSString *)aName count:(NSInteger)aCount;
+- (id)initWithName:(NSString *)aName count:(int)aCount;
 {
     // ignore the name, because if this is called it's a dummy name anyway
     NSURL *theURL = [NSURL URLWithString:@"http://"];
@@ -125,10 +124,6 @@
     [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
 }
 
-- (id)copyWithZone:(NSZone *)aZone {
-	return [[[self class] allocWithZone:aZone] initWithName:name URL:URL];
-}
-
 - (void)dealloc;
 {
     [self terminate];
@@ -151,8 +146,8 @@
 
 - (BOOL)isEqual:(id)other { return self == other; }
 
-- (NSUInteger)hash {
-    return( ((NSUInteger) self >> 4) | (NSUInteger) self << (32 - 4));
+- (unsigned int)hash {
+    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
 }
 
 // Logging
@@ -221,7 +216,7 @@
     if (nil == contentString) {
         failedDownload = YES;
     } else {
-        NSInteger type = [contentString contentStringType];
+        int type = [contentString contentStringType];
         BOOL isPartialData = NO;
         if (type == BDSKBibTeXStringType) {
             NSMutableString *frontMatter = [NSMutableString string];
@@ -275,8 +270,6 @@
     }
 }
 
-- (BDSKPublicationsArray *)publicationsWithoutUpdating { return publications; }
- 
 - (BDSKPublicationsArray *)publications;
 {
     if([self isRetrieving] == NO && publications == nil){
@@ -333,7 +326,7 @@
 // BDSKGroup overrides
 
 - (NSImage *)icon {
-    return [NSImage imageNamed:@"urlGroup"];
+    return [NSImage imageNamed:@"urlFolderIcon"];
 }
 
 - (BOOL)isURL { return YES; }

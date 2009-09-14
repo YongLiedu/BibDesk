@@ -33,51 +33,44 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKTableView.h"
+
+@class BDSKTypeSelectHelper;
 
 /*!
     @class BDSKMainTableView
     @abstract Drag n' Droppable Tableview
     @discussion Subclass of NSTableview that allows drag n' drop.
 */
-@interface BDSKMainTableView : BDSKTableView
+@interface BDSKMainTableView : NSTableView
 {
+    // for supporting type-ahead in the tableview:
+    // datasource methods to support this are over in BibDocument_DataSource
+    BDSKTypeSelectHelper *typeSelectHelper;
     NSArray *alternatingRowBackgroundColors;
 }
 
 - (void)setAlternatingRowBackgroundColors:(NSArray *)colorArray;
 - (NSArray *)alternatingRowBackgroundColors;
 
+- (BDSKTypeSelectHelper *)typeSelectHelper;
+
 - (void)setupTableColumnsWithIdentifiers:(NSArray *)identifiers;
 - (NSMenu *)columnsMenu;
-- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(NSUInteger)index;
+- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(unsigned)index;
 - (void)removeTableColumnWithIdentifier:(NSString *)identifier;
 
 - (void)removeAllTableColumns;
 - (NSArray *)tableColumnIdentifiers;
-- (void)scrollRowToCenter:(NSUInteger)row;
-
-- (void)alternateDelete:(id)sender;
-- (void)alternateCut:(id)sender;
-
-- (BOOL)canAlternateDelete;
-- (BOOL)canAlternateCut;
+- (void)scrollRowToCenter:(unsigned int)row;
 
 @end
 
 
 @interface NSObject (BDSKMainTableViewDelegate)
 - (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView;
-- (void)tableView:(NSTableView *)aTableView importItemAtRow:(NSInteger)rowIndex;
-- (void)tableView:(NSTableView *)aTableView openParentForItemAtRow:(NSInteger)rowIndex;
-- (NSColor *)tableView:(NSTableView *)aTableView highlightColorForRow:(NSInteger)rowIndex;
-@end
-
-
-@interface NSObject (BDSKMainTableViewDataSource)
-- (void)tableView:(NSTableView *)aTableView alternateDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes;
-- (BOOL)tableView:(NSTableView *)aTableView canAlternateDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes;
-- (void)tableView:(NSTableView *)aTableView alternateCutRowsWithIndexes:(NSIndexSet *)rowIndexes;
+- (void)tableView:(NSTableView *)aTableView importItemAtRow:(int)rowIndex;
+- (void)tableView:(NSTableView *)aTableView openParentForItemAtRow:(int)rowIndex;
+- (NSColor *)tableView:(NSTableView *)aTableView highlightColorForRow:(int)rowIndex;
 @end
 
 
@@ -86,8 +79,4 @@
 
 
 @interface BDSKTextFieldCell : NSTextFieldCell
-@end
-
-
-@interface BDSKColorCell : NSCell
 @end

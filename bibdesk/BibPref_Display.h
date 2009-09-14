@@ -37,18 +37,18 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKPreferencePane.h"
-#import "BDSKPreferenceController.h"
+#import <OmniAppKit/OmniAppKit.h>
 
-@interface BibPref_Display : BDSKPreferencePane {
+@interface BibPref_Display : OAPreferenceClient {
     IBOutlet NSComboBox *previewMaxNumberComboBox;
     
     IBOutlet NSPopUpButton *fontElementPopup;
     IBOutlet NSButton *fontButton;
     
-    IBOutlet NSTextField *ignoredSortTermsField;
-
-    IBOutlet NSButton *displayGroupCountButton;
+    // sorting
+    IBOutlet NSButton *addButton;
+    IBOutlet NSButton *removeButton;
+    IBOutlet NSTableView *tableView;
     
     IBOutlet NSButton *authorFirstNameButton;
     IBOutlet NSButton *authorAbbreviateButton;
@@ -57,19 +57,23 @@
 
 - (IBAction)changePreviewMaxNumber:(id)sender;
 
+- (IBAction)addTerm:(id)sender;
+- (IBAction)removeSelectedTerm:(id)sender;
+
 - (IBAction)changeAuthorDisplay:(id)sender;
 
-- (IBAction)changeDisplayGroupCount:(id)sender;
-
-- (IBAction)changeIgnoredSortTerms:(id)sender;
-
-- (IBAction)changeFont:(id)sender;
+- (void)changeFont:(id)sender;
 - (IBAction)changeFontElement:(id)sender;
+
+- (NSFont *)currentFont;
+- (void)setCurrentFont:(NSFont *)font;
+- (void)updateFontPanel:(NSNotification *)notification;
+- (void)resetFontPanel:(NSNotification *)notification;
 
 @end
 
 
-@interface BDSKPreferenceController (BDSKFontExtension)
+@interface OAPreferenceController (BDSKFontExtension)
 
 - (void)localChangeFont:(id)sender;
 

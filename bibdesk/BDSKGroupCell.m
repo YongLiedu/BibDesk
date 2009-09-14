@@ -37,46 +37,49 @@
  */
 
 #import "BDSKGroupCell.h"
+#import "BDSKGroup.h"
+#import <OmniBase/OmniBase.h>
 #import "NSBezierPath_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSGeometry_BDSKExtensions.h"
-#import "NSString_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
-#import "BDSKCenterScaledImageCell.h"
 
+static CFMutableDictionaryRef integerStringDictionary = NULL;
 
 // names of these globals were changed to support key-value coding on BDSKGroup
 NSString *BDSKGroupCellStringKey = @"stringValue";
-NSString *BDSKGroupCellEditingStringKey = @"editingStringValue";
 NSString *BDSKGroupCellImageKey = @"icon";
 NSString *BDSKGroupCellCountKey = @"numberValue";
-NSString *BDSKGroupCellIsRetrievingKey = @"isRetrieving";
-NSString *BDSKGroupCellFailedDownloadKey = @"failedDownload";
 
-@interface BDSKGroupCellFormatter : NSFormatter
+@interface BDSKGroupCell (Private)
+- (void)recacheCountAttributes;
 @end
-
-#pragma mark
 
 @implementation BDSKGroupCell
 
-static NSMutableDictionary *numberStringDictionary = nil;
-static BDSKGroupCellFormatter *groupCellFormatter = nil;
-
-+ (void)initialize {
-    BDSKINITIALIZE;
-    numberStringDictionary = [[NSMutableDictionary alloc] initWithObjectsAndKeys:@"", [NSNumber numberWithInt:0], nil];
-    groupCellFormatter = [[BDSKGroupCellFormatter alloc] init];
++ (void)initialize;
+{
+    OBINITIALIZE;
+    
+    if (NULL == integerStringDictionary) {
+        integerStringDictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &OFIntegerDictionaryKeyCallbacks, &kCFTypeDictionaryValueCallBacks);
+        CFDictionaryAddValue(integerStringDictionary,  (const void *)0, CFSTR(""));
+    }
     
 }
 
 - (id)init {
-    if (self = [super initTextCell:@""]) {
+    if (self = [super initTextCell:[[[BDSKGroup alloc] initWithName:@"" count:0] autorelease]]) {
+        
         [self setEditable:YES];
         [self setScrollable:YES];
-        [self setWraps:NO];
-        countString = [[NSMutableAttributedString alloc] init];
-        [self setFormatter:groupCellFormatter];
+        
+        label = [[NSMutableAttributedString alloc] initWithString:@""];
+        countString = [[NSMutableAttributedString alloc] initWithString:@""];
+        
+        countAttributes = [[NSMutableDictionary alloc] initWithCapacity:5];
+        [self recacheCountAttributes];
+
     }
     return self;
 }
@@ -85,107 +88,99 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 
 - (id)initWithCoder:(NSCoder *)coder {
 	if (self = [super initWithCoder:coder]) {
-        countString = [[NSMutableAttributedString alloc] init];
-        if ([self formatter] == nil)
-            [self setFormatter:groupCellFormatter];
+        // recreates the dictionary
+        countAttributes = [[NSMutableDictionary alloc] initWithCapacity:5];
+        [self recacheCountAttributes];
+        
+        // could encode these, but presumably we want a fresh string
+        label = [[NSMutableAttributedString alloc] initWithString:@""];
+        countString = [[NSMutableAttributedString alloc] initWithString:@""];
 	}
 	return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+	[super encodeWithCoder:encoder];
 }
 
 // NSCopying
 
 - (id)copyWithZone:(NSZone *)zone {
     BDSKGroupCell *copy = [super copyWithZone:zone];
-    copy->countString = [countString mutableCopyWithZone:zone];
+
+    // count attributes are shared between this cell and all copies, but not with new instances
+    copy->countAttributes = [countAttributes retain];
+    copy->label = [label mutableCopy];
+    copy->countString = [countString mutableCopy];
+
     return copy;
 }
 
 - (void)dealloc {
+    [label release];
     [countString release];
+    [countAttributes release];
 	[super dealloc];
 }
 
-- (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+- (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
+{
     return nil;
 }
 
-- (void)updateCountAttributes {
-	NSFont *countFont = [NSFont fontWithName:@"Helvetica-Bold" size:[[self font] pointSize]] ?: [NSFont boldSystemFontOfSize:[[self font] pointSize]];
-	BDSKPRECONDITION(countFont);     
-    [countString addAttribute:NSFontAttributeName value:countFont range:NSMakeRange(0, [countString length])];
+- (NSColor *)textColor;
+{
+    if (settingUpFieldEditor)
+        return [NSColor textColor];
+    else if (_cFlags.highlighted)
+        return [NSColor textBackgroundColor];
+    else
+        return [super textColor];
 }
 
 - (void)setFont:(NSFont *)font {
     [super setFont:font];
-    [self updateCountAttributes];
+    [self recacheCountAttributes];
 }
+
 
 // all the -[NSNumber stringValue] does is create a string with a localized format description, so we'll cache more strings than Foundation does, since this shows up in Shark as a bottleneck
-static NSString *stringWithNumber(NSNumber *number)
+static NSString *stringWithInteger(int count)
 {
-    if (number == nil)
-        return @"";
-    NSString *string = [numberStringDictionary objectForKey:number];
-    if (string == nil) {
-        string = [number stringValue];
-        [numberStringDictionary setObject:string forKey:number];
+    CFStringRef string;
+    if (CFDictionaryGetValueIfPresent(integerStringDictionary, (const void *)count, (const void **)&string) == FALSE) {
+        string = CFStringCreateWithFormat(CFAllocatorGetDefault(), NULL, CFSTR("%d"), count);
+        CFDictionaryAddValue(integerStringDictionary, (const void *)count, (const void *)string);
+        CFRelease(string);
     }
-    return string;
+    return (NSString *)string;
 }
 
-static id nonNullObjectValueForKey(id object, NSString *key) {
-    id value = [object valueForKey:key];
-    return [value isEqual:[NSNull null]] ? nil : value;
-}
-
-- (void)setObjectValue:(id <NSCopying>)obj {
+- (void)setObjectValue:(id <NSObject, NSCopying>)obj {
     // we should not set a derived value such as the group name here, otherwise NSTableView will call tableView:setObjectValue:forTableColumn:row: whenever a cell is selected
-    
-    // this can happen initially from the init, as there's no initializer passing an objectValue
-    if ([(id)obj isKindOfClass:[NSString class]])
-        obj = [NSDictionary dictionaryWithObjectsAndKeys:obj, BDSKGroupCellStringKey, nil];
+    OBASSERT([obj isKindOfClass:[BDSKGroup class]]);
     
     [super setObjectValue:obj];
     
-    [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithNumber(nonNullObjectValueForKey(obj, BDSKGroupCellCountKey))];
-    [self updateCountAttributes];
-}
-
-- (NSImage *)icon {
-    return nonNullObjectValueForKey([self objectValue], BDSKGroupCellImageKey);
-}
-
-- (NSInteger)count {
-    return [nonNullObjectValueForKey([self objectValue], BDSKGroupCellCountKey) intValue];
-}
-
-- (BOOL)isRetrieving {
-    return [nonNullObjectValueForKey([self objectValue], BDSKGroupCellIsRetrievingKey) boolValue];
-}
-
-- (BOOL)failedDownload {
-    return [nonNullObjectValueForKey([self objectValue], BDSKGroupCellFailedDownloadKey) boolValue];
+    [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:obj == nil ? @"" : [(BDSKGroup *)obj stringValue]];
+    [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithInteger([(BDSKGroup *)obj count])];
 }
 
 #pragma mark Drawing
 
-#define BORDER_BETWEEN_EDGE_AND_IMAGE (3.0)
+#define BORDER_BETWEEN_EDGE_AND_IMAGE (2.0)
 #define BORDER_BETWEEN_IMAGE_AND_TEXT (3.0)
+#define SIZE_OF_TEXT_FIELD_BORDER (1.0)
 #define BORDER_BETWEEN_EDGE_AND_COUNT (2.0)
 #define BORDER_BETWEEN_COUNT_AND_TEXT (1.0)
-#define TEXT_INSET                    (2.0)
-#define IMAGE_SIZE_OFFSET             (2.0)
 
-- (CGFloat)countPaddingForSize:(NSSize)countSize {
-    NSInteger count = [self count];
-    return (count < 10 ? 1.0 : count < 100 ? 0.9 : 0.7) * countSize.height;
+- (NSSize)iconSizeForBounds:(NSRect)aRect;
+{
+    return NSMakeSize(NSHeight(aRect) + 1, NSHeight(aRect) + 1);
 }
 
-- (NSSize)iconSizeForBounds:(NSRect)aRect {
-    return NSMakeSize(NSHeight(aRect) - IMAGE_SIZE_OFFSET, NSHeight(aRect) - IMAGE_SIZE_OFFSET);
-}
-
-- (NSRect)iconRectForBounds:(NSRect)aRect {
+- (NSRect)iconRectForBounds:(NSRect)aRect;
+{
     NSSize imageSize = [self iconSizeForBounds:aRect];
     NSRect imageRect, ignored;
     NSDivideRect(aRect, &ignored, &imageRect, BORDER_BETWEEN_EDGE_AND_IMAGE, NSMinXEdge);
@@ -193,187 +188,152 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     return imageRect;
 }
 
-- (NSRect)countRectForBounds:(NSRect)aRect {
+// compute the oval padding based on the overall height of the cell
+- (float)countPaddingForCellSize:(NSSize)aSize;
+{
+    return ([[self objectValue] failedDownload] || [[self objectValue] isRetrieving]) ? 1.0 : 0.5 * aSize.height + 0.5;
+}
+
+- (NSRect)countRectForBounds:(NSRect)aRect;
+{
     NSSize countSize = NSZeroSize;
     
-    if ([self isRetrieving]) {
-        countSize = NSMakeSize(16.0, 16.0);
-    } else if ([self failedDownload]) {
-        countSize = [self iconSizeForBounds:aRect];
-    } else if ([self count] > 0) {
+    float countSep = [self countPaddingForCellSize:aRect.size];
+    if([[self objectValue] failedDownload] || [[self objectValue] isRetrieving]) {
+        countSize = NSMakeSize(16, 16);
+    }
+    else if([[self objectValue] count] > 0) {
         countSize = [countString boundingRectWithSize:aRect.size options:0].size;
-        countSize.width += [self countPaddingForSize:countSize]; // add oval pading around count
     }
     NSRect countRect, ignored;
-    if (countSize.width > 0.0) {
-        NSDivideRect(aRect, &ignored, &countRect, BORDER_BETWEEN_EDGE_AND_COUNT, NSMaxXEdge);
-        NSDivideRect(countRect, &countRect, &ignored, countSize.width, NSMaxXEdge);
-        // now set the size of it to the string size
-        countRect = BDSKCenterRect(countRect, countSize, YES);
-    } else {
-        NSDivideRect(aRect, &countRect, &ignored, 0.0, NSMaxXEdge);
-    }
+    // set countRect origin to the string drawing origin (number has countSep on either side for oval padding)
+    NSDivideRect(aRect, &countRect, &ignored, countSize.width + countSep + BORDER_BETWEEN_EDGE_AND_COUNT, NSMaxXEdge);
+    // now set the size of it to the string size
+    countRect.size = countSize;
     return countRect;
 }    
 
-- (NSRect)textRectForBounds:(NSRect)aRect {
-    NSRect textRect = aRect, countRect = [self countRectForBounds:aRect];
+- (NSRect)textRectForBounds:(NSRect)aRect;
+{
+    NSRect textRect = aRect;
     textRect.origin.x = NSMaxX([self iconRectForBounds:aRect]) + BORDER_BETWEEN_IMAGE_AND_TEXT;
-    if (NSWidth(countRect) > 0.0)
-        textRect.size.width = NSMinX(countRect) - BORDER_BETWEEN_COUNT_AND_TEXT - NSMinX(textRect);
-    else
-        textRect.size.width = NSMaxX(aRect) - NSMinX(textRect);
-    return NSInsetRect(textRect, 0.0, TEXT_INSET);
+    textRect.size.width = NSMinX([self countRectForBounds:aRect]) - BORDER_BETWEEN_COUNT_AND_TEXT - [self countPaddingForCellSize:aRect.size] - NSMinX(textRect);
+    return textRect;
 }
 
-- (NSSize)cellSize {
+- (NSSize)cellSize;
+{
     NSSize cellSize = [super cellSize];
     NSSize countSize = NSZeroSize;
-    if ([self isRetrieving] || [self failedDownload]) {
+    float countSep = [self countPaddingForCellSize:cellSize];
+    if ([[self objectValue] isRetrieving] || [[self objectValue] failedDownload]) {
         countSize = NSMakeSize(16, 16);
-    } else if ([self count] > 0) {
-        countSize = [countString boundingRectWithSize:cellSize options:0].size;
-        countSize.width += [self countPaddingForSize:countSize]; // add oval pading around count
     }
+    else if ([[self objectValue] count] > 0) {
+        countSize = [countString boundingRectWithSize:cellSize options:0].size;
+    }
+    float countWidth = countSize.width + 2 * countSep + BORDER_BETWEEN_EDGE_AND_COUNT;
     // cellSize.height approximates the icon size
-    cellSize.width += BORDER_BETWEEN_EDGE_AND_IMAGE + cellSize.height + BORDER_BETWEEN_IMAGE_AND_TEXT;
-    if (countSize.width > 0.0)
-        cellSize.width += BORDER_BETWEEN_COUNT_AND_TEXT + countSize.width + BORDER_BETWEEN_EDGE_AND_COUNT;
+    cellSize.width += cellSize.height + countWidth;
+    cellSize.width += BORDER_BETWEEN_EDGE_AND_IMAGE + BORDER_BETWEEN_IMAGE_AND_TEXT + BORDER_BETWEEN_COUNT_AND_TEXT;
     return cellSize;
 }
 
-- (NSColor *)textColor {
-    if ([self respondsToSelector:@selector(backgroundStyle)] == NO) {
-        if (settingUpFieldEditor)
-            return [NSColor blackColor];
-        else if ([self isHighlighted])
-            return [NSColor textBackgroundColor];
-    }
-    return [super textColor];
-}
-
-static CGFloat keyColorBlue[3]          = {14135.0/65535.0, 29298.0/65535.0, 48830.0/65535.0};
-static CGFloat mainColorBlue[3]         = {34695.0/65535.0, 39064.0/65535.0, 48316.0/65535.0};
-static CGFloat disabledColorBlue[3]     = {40606.0/65535.0, 40606.0/65535.0, 40606.0/65535.0};
-static CGFloat keyColorGraphite[3]      = {24672.0/65535.0, 29812.0/65535.0, 35466.0/65535.0};
-static CGFloat mainColorGraphite[3]     = {37779.0/65535.0, 41634.0/65535.0, 45489.0/65535.0};
-static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 40606.0/65535.0};
-
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView {
-    BOOL isHighlighted;
-    if ([self respondsToSelector:@selector(backgroundStyle)])
-        isHighlighted = ([self backgroundStyle] == NSBackgroundStyleDark || [self backgroundStyle] == NSBackgroundStyleLowered);
-    else
-        isHighlighted = [self isHighlighted];
-    
+
+    NSRange labelRange = NSMakeRange(0, [label length]);
+    [label addAttribute:NSFontAttributeName value:[self font] range:labelRange];
+    [label addAttribute:NSForegroundColorAttributeName value:[self textColor] range:labelRange];
+        	
+	NSColor *highlightColor = [self highlightColorWithFrame:aRect inView:controlView];
+	BOOL highlighted = [self isHighlighted];
+	NSColor *bgColor = [NSColor disabledControlTextColor];
+    NSRange countRange = NSMakeRange(0, [countString length]);
+    [countString addAttributes:countAttributes range:countRange];
+
+	if (highlighted) {
+		// add the alternate text color attribute.
+		if ([highlightColor isEqual:[NSColor alternateSelectedControlColor]])
+			[label addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:labelRange];
+		[countString addAttribute:NSForegroundColorAttributeName value:[NSColor disabledControlTextColor] range:countRange];
+		bgColor = [[NSColor alternateSelectedControlTextColor] colorWithAlphaComponent:0.8];
+	} else {
+		[countString addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:countRange];
+		bgColor = [bgColor colorWithAlphaComponent:0.7];
+	}
+
     // Draw the text
-    NSRect textRect = [self textRectForBounds:aRect]; 
-    NSFont *font = nil;
-    if (isHighlighted) {
-        // source list draws selected text bold, but only when the passing an NSString to setObjectValue:
-        font = [[self font] retain];
-        [super setFont:[[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSBoldFontMask]];
-    }
-    [super drawInteriorWithFrame:textRect inView:controlView];
-    if (font) {
-        [super setFont:font];
-        [font release];
-    }
+    // @@ Mail.app uses NSLineBreakByTruncatingTail for this
+    [label addAttribute:NSParagraphStyleAttributeName value:[NSParagraphStyle defaultTruncatingTailParagraphStyle] range:labelRange];
+    NSRect textRect = NSInsetRect([self textRectForBounds:aRect], SIZE_OF_TEXT_FIELD_BORDER, 0.0); 
     
-    // Draw the count bubble or caution icon, when we're retrieving we don't draw to leave space for the spinner
-    if ([self isRetrieving] == NO) {
-        NSRect countRect = [self countRectForBounds:aRect];
-        NSInteger count = [self count];
-        if ([self failedDownload]) {
-            [self drawIcon:[NSImage imageNamed:@"BDSKSmallCautionIcon"] withFrame:countRect inView:controlView];
-        } else if (count > 0) {
-            CGFloat countInset = 0.5 * [self countPaddingForSize:countRect.size];
-            NSColor *fgColor;
-            NSColor *bgColor;
-            if ([controlView respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
-                // On Leopard, use the blue or gray color taken from the center of the gradient highlight
-                CGFloat *color;
-                BOOL isGraphite = [NSColor currentControlTint] == NSGraphiteControlTint;
-                if ([[controlView window] isKeyWindow] && [[controlView window] firstResponder] == controlView)
-                    // the key state color does not look nice for the count bubble background
-                    color = isHighlighted ? (isGraphite ? keyColorGraphite : keyColorBlue) : (isGraphite ? mainColorGraphite : mainColorBlue);
-                else if ([[controlView window] isMainWindow] || [[controlView window] isKeyWindow])
-                    color = isGraphite ? mainColorGraphite : mainColorBlue;
-                else
-                    color = isGraphite ? disabledColorGraphite : disabledColorBlue;
-                if (isHighlighted) {
-                    fgColor = [NSColor colorWithDeviceRed:color[0] green:color[1] blue:color[2] alpha:1.0];
-                    bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
-                } else {
-                    fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
-                    bgColor = [NSColor colorWithDeviceRed:color[0] green:color[1] blue:color[2] alpha:0.95];
-                }
-            } else {
-                // On Tiger use gray
-                if (isHighlighted) {
-                    fgColor = [NSColor disabledControlTextColor];
-                    bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.8];
-                } else {
-                    fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
-                    bgColor = [[NSColor disabledControlTextColor] colorWithAlphaComponent:0.7];
-                }
-            }
-            
+    [label drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin];
+    
+    BOOL controlViewIsFlipped = [controlView isFlipped];
+    NSRect countRect = [self countRectForBounds:aRect];
+    
+    if ([[self objectValue] isRetrieving] == NO) {
+        if ([[self objectValue] failedDownload]) {
+            NSImage *cautionImage = [NSImage imageNamed:@"BDSKSmallCautionIcon"];
+            NSSize cautionImageSize = [cautionImage size];
+            NSRect cautionIconRect = NSMakeRect(0, 0, cautionImageSize.width, cautionImageSize.height);
+            if(controlViewIsFlipped)
+                [cautionImage drawFlippedInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
+            else
+                [cautionImage drawInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
+        } else if ([[self objectValue] count] > 0) {
             [NSGraphicsContext saveGraphicsState];
             [bgColor setFill];
-            [NSBezierPath fillHorizontalOvalInRect:countRect];
+            [NSBezierPath fillHorizontalOvalAroundRect:countRect];
             [NSGraphicsContext restoreGraphicsState];
-            
-            [countString addAttribute:NSForegroundColorAttributeName value:fgColor range:NSMakeRange(0, [countString length])];
-            [countString drawWithRect:NSInsetRect(countRect, countInset, 0.0) options:NSStringDrawingUsesLineFragmentOrigin];
+
+            [countString drawWithRect:countRect options:NSStringDrawingUsesLineFragmentOrigin];
         }
     }
     
     // Draw the image
-    NSRect imageRect = BDSKCenterRect([self iconRectForBounds:aRect], [self iconSizeForBounds:aRect], [controlView isFlipped]);
-    if ([self icon])
-        [self drawIcon:[self icon] withFrame:imageRect inView:controlView];
+    NSRect imageRect = BDSKCenterRect([self iconRectForBounds:aRect], [self iconSizeForBounds:aRect], controlViewIsFlipped);
+    [NSGraphicsContext saveGraphicsState];
+    [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
+	if (controlViewIsFlipped)
+		[[[self objectValue] icon] drawFlippedInRect:imageRect operation:NSCompositeSourceOver];
+	else
+		[[[self objectValue] icon] drawInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    [NSGraphicsContext restoreGraphicsState];
 }
 
-- (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(NSInteger)selStart length:(NSInteger)selLength {
+- (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength;
+{
+    
     settingUpFieldEditor = YES;
     [super selectWithFrame:[self textRectForBounds:aRect] inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
     settingUpFieldEditor = NO;
 }
 
-- (NSUInteger)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView {
-    NSRect textRect = [self textRectForBounds:cellFrame];
+- (NSUInteger)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView
+{
+    NSUInteger hit = [super hitTestForEvent:event inRect:cellFrame ofView:controlView];
+    // super returns 0 for button clicks, so -[NSTableView mouseDown:] doesn't track the cell
+    NSRect iconRect = [self iconRectForBounds:cellFrame];
     NSPoint mouseLoc = [controlView convertPoint:[event locationInWindow] fromView:nil];
-    NSUInteger hit = NSCellHitNone;
-    if (NSMouseInRect(mouseLoc, textRect, [controlView isFlipped]))
-        hit = [super hitTestForEvent:event inRect:textRect ofView:controlView];
-    else if (NSMouseInRect(mouseLoc, [self iconRectForBounds:cellFrame], [controlView isFlipped]))
+    if (NSMouseInRect(mouseLoc, iconRect, [controlView isFlipped]))
         hit = NSCellHitContentArea;
     return hit;
 }
 
 @end
 
-#pragma mark -
+@implementation BDSKGroupCell (Private)
 
-@implementation BDSKGroupCellFormatter
+- (void)recacheCountAttributes {
+	NSFont *countFont = [NSFont fontWithName:@"Helvetica-Bold" size:([[self font] pointSize] - 1)] ?: [NSFont boldSystemFontOfSize:([[self font] pointSize] - 1)];
+	OBPRECONDITION(countFont);     
 
-// this is actually never used, as BDSKGroupCell doesn't go through the formatter for display
-- (NSString *)stringForObjectValue:(id)obj {
-    //BDSKASSERT([obj isKindOfClass:[NSDictionary class]]);
-    return [obj isKindOfClass:[NSString class]] ? obj : nonNullObjectValueForKey(obj, BDSKGroupCellStringKey);
-}
-
-- (NSString *)editingStringForObjectValue:(id)obj {
-    BDSKASSERT([obj isKindOfClass:[NSDictionary class]]);
-    return nonNullObjectValueForKey(obj, BDSKGroupCellEditingStringKey) ?: nonNullObjectValueForKey(obj, BDSKGroupCellStringKey);
-}
-
-- (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error {
-    // even though 'string' is reported as immutable, it's actually changed after this method returns and before it's returned by the control!
-    string = [[string copy] autorelease];
-    *obj = [NSDictionary dictionaryWithObjectsAndKeys:string, BDSKGroupCellStringKey, string, BDSKGroupCellEditingStringKey, nil];
-    return YES;
+	[countAttributes removeAllObjects];
+    [countAttributes setObject:[NSColor alternateSelectedControlTextColor] forKey:NSForegroundColorAttributeName];
+    [countAttributes setObject:countFont forKey:NSFontAttributeName];
+    [countAttributes setObject:[NSNumber numberWithFloat:-1.0] forKey:NSKernAttributeName];
+    [countAttributes setObject:[NSParagraphStyle defaultClippingParagraphStyle] forKey:NSParagraphStyleAttributeName];
 }
 
 @end

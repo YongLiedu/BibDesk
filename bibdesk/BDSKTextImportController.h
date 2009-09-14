@@ -39,10 +39,9 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKSheetController.h"
 #import "BDSKOwnerProtocol.h"
-#import "BDSKTableView.h"
 
 @class BibDocument, BibItem, BDSKEdgeView, WebView, WebDownload, BDSKImagePopUpButton, BDSKComplexStringEditor;
-@class BDSKComplexStringFormatter, BDSKCiteKeyFormatter, BDSKCrossrefFormatter, BDSKCitationFormatter;
+@class BDSKComplexStringFormatter, BDSKCiteKeyFormatter, BDSKCrossrefFormatter, BDSKCitationFormatter, BDSKTypeSelectHelper;
 
 @interface BDSKTextImportController : BDSKSheetController <BDSKOwner> {
     IBOutlet NSTextView* sourceTextView;
@@ -55,7 +54,6 @@
     IBOutlet NSButton *clearButton;
     IBOutlet NSPopUpButton* itemTypeButton;
     IBOutlet BDSKImagePopUpButton *actionMenuButton;
-    IBOutlet NSMenu *actionMenu;
     IBOutlet NSSplitView* splitView;
     IBOutlet NSBox* sourceBox;
     IBOutlet WebView* webView;
@@ -89,8 +87,8 @@
 	
 	WebDownload *download;
 	NSString *downloadFileName;
-    NSInteger receivedContentLength;
-    NSInteger expectedContentLength;
+    int receivedContentLength;
+    int expectedContentLength;
 	
 	BDSKComplexStringEditor *complexStringEditor;
     
@@ -100,9 +98,9 @@
 
 - (id)initWithDocument:(BibDocument *)doc;
 
-- (void)beginSheetForPasteboardModalForWindow:(NSWindow *)docWindow;
-- (void)beginSheetForFileModalForWindow:(NSWindow *)docWindow;
-- (void)beginSheetForWebModalForWindow:(NSWindow *)docWindow;
+- (void)beginSheetForPasteboardModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
+- (void)beginSheetForFileModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
+- (void)beginSheetForWebModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
 
 - (IBAction)addItemAction:(id)sender;
 - (IBAction)closeAction:(id)sender;
@@ -133,7 +131,9 @@
 
 #pragma mark -
 
-@interface TextImportItemTableView : BDSKTableView
+@interface TextImportItemTableView : NSTableView {
+    BDSKTypeSelectHelper *typeSelectHelper;
+}
 @end
 
 #pragma mark -
@@ -141,7 +141,7 @@
 @interface NSObject (TextImportItemTableViewDelegate)
 - (BOOL)tableView:(NSTableView *)tView textViewShouldLinkKeys:(NSTextView *)textView;
 - (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)textView isValidKey:(NSString *)key;
-- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(NSUInteger)charIndex;
+- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(unsigned)charIndex;
 @end
 
 #pragma mark -

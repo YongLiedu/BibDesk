@@ -133,7 +133,7 @@
     [super dismiss:sender];
 }
 
-- (void)chooseScriptPathPanelDidEnd:(NSOpenPanel *)oPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)chooseScriptPathPanelDidEnd:(NSOpenPanel *)oPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSOKButton) {
         NSURL *url = [[oPanel URLs] firstObject];
         [self setPath:[url path]];

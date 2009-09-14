@@ -159,8 +159,8 @@ about the BibTeX file format.
 @heading Online Resources
 @itemize
 @item @uref{http://bibdesk.sourceforge.net, BibDesk Website}
-@item @uref{http://sourceforge.net/apps/mediawiki/bibdesk/index.php?title=Main_Page, BibDesk Wiki}
-@item @uref{http://sourceforge.net/apps/mediawiki/bibdesk/index.php?title=FAQ, BibDesk FAQ}
+@item @uref{http://apps.sourceforge.net/mediawiki/bibdesk/index.php?title=Main_Page, BibDesk Wiki}
+@item @uref{http://apps.sourceforge.net/mediawiki/bibdesk/index.php?title=FAQ, BibDesk FAQ}
 @item @uref{http://bibdesk.sourceforge.net/scripts.html, BibDesk AppleScript Repository}
 @item @uref{http://bibdesk.sourceforge.net/manual/, Online Copy of This Manual}
 @end itemize
@@ -1404,15 +1404,15 @@ desirable for printed output, so you may wish to edit the LaTeX template file
 @subheading Selecting Duplicates
 
 To identify duplicate references in your database, use the @menutitle{Select Duplicates} item
-of the @menutitle{Database} menu.  BibDesk compares all standard fields of each item and
+of the @menutitle{Publication} menu.  BibDesk compares all standard fields of each item and
 selects possible duplicates and the ``original'' item.  
-Crossref and type are compared case-insensitively, while other
+Cite-key and type are compared case-insensitively, while other
 fields are compared case-sensitively without removing any @TeX{}-specific commands.
 
-For a less rigorous comparison, choose @menutitle{Select Duplicates by <Field>} from the @menutitle{Database} menu.  
+For a less rigorous comparison, choose @menutitle{Select Possible Duplicates} from the @menutitle{Publication} menu.  
 With this option, similar to the functionality of BibTool, BibDesk compares adjacent values in the currently 
 sorted column of the main publications list; if it finds an item whose value is identical in the succeeding cell, it selects
-both items.  For instance, if you sort by first author and use @menutitle{Select Duplicates by First Author}
+both items.  For instance, if you sort by first author and use @menutitle{Select Possible Duplicates}
 and have four publications with the same first author, all of the four publications by that
 author will be selected.  Obviously, author may not be the best choice in this case if you are
 searching for duplicate publications!
@@ -1446,7 +1446,6 @@ into distinct categories without managing many small files scattered around your
 * Smart Groups::     Grouping references based on specific criteria.
 * Static Groups::    Grouping arbitrary sets of references.
 * External Groups::  Importing groups of items from an external source.
-* Web Group::		 Detecting bibliographic information in web pages.
 @end menu
 
 @node Field Groups
@@ -1456,15 +1455,14 @@ into distinct categories without managing many small files scattered around your
 
 @subheading Features
 
-Field Groups organize entries based on the contents of a certain field, 
-the @samp{group field,} such as e.g. the @samp{Keywords}, @samp{Author}, or @samp{Journal} field.
+Field Groups groups organize entries based on the contents of a certain field, 
+the @samp{group field,} such as the @samp{Group} or @samp{Keywords} field.
 
-In order to select a field to use as a group field, use the @menutitle{Group Field} menu 
-from the @menutitle{View} menu, or the contextual menu of the field group header item.
-Add a new BibTeX field name to this menu, or use one of the existing options.
-When you choose a group field from the @menutitle{Group Field} menu, a list of all
-possible groups is automatically constructed and updated, using the contents of the selected 
-field for all entries in your file.  
+In order to select a field to use as a group field, use the popup menu at the top of the list
+on the left-hand side of BibDesk's window.  Add a BibTeX field name to this menu, or use one
+of the existing options.  When you choose a group field from the popup menu, a list of all
+possible groups is constructed, using the contents of the selected field for all entries in
+your file.  
 
 @subheading Example
 
@@ -1549,66 +1547,26 @@ To add publications to the group, just drag the items and drop them on the group
 @subsection External Groups
 
 @cindex external group
-@cindex shared group
-@cindex script group
+
 BibDesk can automatically fetch publications from external sources.  There are four types of external groups.  
 
-The @ref{Web Group,@b{Web Group}} provides a web browser inside BibDesk which attempts to find bibliographic information in web pages. 
-
-@b{Shared Groups} contain items that others share on your local network.  
-They are discovered using Bonjour.  This is similar to sharing of music files in iTunes.  
+Shared Groups contain items that others share on your local network.  
+They are fetched using Bonjour.  This is similar to sharing of music files in iTunes.  
 You can turn on sharing in the @ref{Sharing Preferences,Sharing Preferences}.  
 
-@b{External File Groups} get their items from a remote URL on the internet or from a local file on your computer. 
+External File Groups get their items from a remote URL on the internet or from a local file on your computer. 
 
-@b{Script Groups} generate their items using a script, either a shell script or an AppleScript.  
+Script Groups generate their items using a script, either a shell script or an AppleScript.  
 For example, the script can download content from a remote location and parse the content to get the items.  
-The script should return valid BibTeX, or any other text format BibDesk can import. 
+The script should return valid BibTeX. 
 
-@ref{Searching External Databases, @b{Search Groups}} contain items obtained from searching an external database, 
+@ref{Searching External Databases, Search Groups} contain items obtained from searching an external database, 
 such as PubMed or libraries allowing z39.50 searches. 
 
 Items in external groups are not included in the Library and can not be edited.  
-You can add external items to your Library by pressing the @buttontitle{Import} 
-button or dragging them to the Library group.  You can also use the 
-@menutitle{Merge In External Publications} menu item in the @menutitle{File} menu. 
-This wil only add items that are not yet in your Library. 
-
-@c
-
-@node Web Group
-@subsection Web Group
-
-@cindex web group
-BibDesk's Web Group attempts to detect bibliographic information in web pages. The detection will only work if BibDesk recognises the current web page or the formats therein. Once detected, the publications are displayed in the group for easy import into the Library.
-
-The Web Group supports a number of web sites as well as a few bibliographic formats which may be used on all web pages. Sometimes additional services which may require a subscription are used to provide a full bibliographic record.
-
-@subheading Supported Web Sites
-@uref{http://portal.acm.org/,ACM}
-
-@uref{http://arxiv.org/,arXiv}: E-Print archive used frequently in mathematics and physics but also containing sections for non-linear science, computer science, quantitative biology and statistics.
-
-@uref{http://www.citeulike.org/,CiteULike}
-
-@uref{http://scholar.google.com/,Google Scholar}: Google's attempt to provide a universal search for and in research related literature. Please go to 'Scholar Preferences' and set the 'Bibliography Manager' option to 'Show links to import citations to BibTeX' for it to work.
-
-@uref{http://www.hubmed.org/,HubMed}: Alternative interface for queries to the PubMed database of medical literature.
-
-@uref{http://ams.org/mathscinet/,MathSciNet}: Database of Mathematical Reviews by the American Mathematical Society. Requires a subscription to be accessed. 
-
-@uref{http://www.numdam.org/?lang=en,NUMDAM} (Num@'erisation de documents anciens math@'ematiques): Digital versions of old mathematical papers. The site itself is public but BibDesk's support for it requires access to the Zentralblatt Math service.
-
-@uref{http://projecteuclid.org/,Project Euclid}: A publishing platform for 'independent and society journals' in mathematics and statistics. BibDesk can provide bibliographic information for those articles and references mentioed on the site if MathSciNet or Zentralblatt Math IDs are listed for them and you   have access to those sites.
-
-@uref{http://www.slac.stanford.edu/spires/,SPIRES}: Database of literature on particle physics.
-
-@uref{http://www.zentralblatt-math.org/zmath/en/,Zentralblatt Math}: Database of Zentralblatt Mathematik with reviews of mathematical papers. Only the first three search results are displayed without a subscription.
-
-@subheading Supported General Formats
-@uref{http://ocoins.info/,COinS}: A microformat which adds bibliographic information to a web page by placing it into the title attribute of a span element with class 'Z3988'. A number of web sites ranging from blogs to library catalogues insert these elements into their web pages. Examples: @uref{http://citeseerx.ist.psu.edu/,CiteSeerX}, @uref{http://suche3.suub.uni-bremen.de/index.html,Uni Bremen Library}, @uref{https://kataloge.uni-hamburg.de/,Some OPACs}.
-
-@uref{http://microformats.org/wiki/citation,HCite}: Another microformat for adding bibliographic information to web pages. Hardly used.
+You can add external items to your Library by dragging them to the Library group.  
+You can also use the @menutitle{Merge In External Publications} menu item in the 
+@menutitle{File} menu. This wil only add items that are not yet in your Library. 
 
 @c --------------------------------------------------------------------------------------
 
@@ -1835,15 +1793,15 @@ Complete documentation of the extensions is provided at
 
 The default syntax for searching the ISI Web of Knowledge is described 
 on the ``Search Rules'' section of the 
-@uref{http://images.isiknowledge.com/WOK46/help/WOS/h_toc.html, Web of Knowledge help page}.
+@uref{http://images.isiknowledge.com/help/WOS/h_toc.html, Web of Knowledge help page}.
 
 A more complete description of specific options used for BibDesk is given on the
-@uref{http://images.isiknowledge.com/WOK46/help/WOS/h_advanced.html, Advanced Search page} 
-and the @uref{http://images.isiknowledge.com/WOK46/help/WOS/h_advanced_examples.html, Advanced Search Examples page}.
+@uref{http://images.isiknowledge.com/help/WOS/h_advanced.html, Advanced Search page} 
+and the @uref{http://images.isiknowledge.com/help/WOS/h_advanced_examples.html, Advanced Search Examples page}.
 
 If you just type a search term or group of terms in the search field, BibDesk will
 automatically convert it to a ``Topic Search'' (TS=), unless you specify the 
-@uref{http://images.isiknowledge.com/WOK46/help/WOS/h_advanced_fieldtags.html, field tag}
+@uref{http://images.isiknowledge.com/help/WOS/h_advanced_fieldtags.html, field tag}
 manually.  This is an easy way of searching Title, Abstract, and Keywords, but won't work for authors.
 
 @c ======================================================================================
@@ -2214,7 +2172,7 @@ For @uref{http://www.lyx.org/, LyX} users, Mark Reid has written an AppleScript 
 to LyX, and his script is available at @uref{http://www.threewordslong.com/projects/misc/bibdesktolyx/}.
 
 BibDesk also provides a Distributed Objects API for developers to search for publications.  
-See the @uref{http://sourceforge.net/apps/mediawiki/bibdesk/index.php?title=Other_Applications, BibDesk Wiki} for details and examples.
+See the @uref{http://apps.sourceforge.net/mediawiki/bibdesk/index.php?title=Other_Applications, BibDesk Wiki} for details and examples.
 
 @c --------------------------------------------------------------------------------------
 
@@ -3518,7 +3476,7 @@ select the @menutitle{Sample Script Hook} menu item with the Option key held dow
 @abstract{Where to get Scripts for BibDesk.}
 
 Various user-contributed scripts are located or linked from the BibDesk website here:
-@uref{http://sourceforge.net/apps/mediawiki/bibdesk/index.php?title=BibDesk_Applescripts, BibDesk AppleScript Repository}.
+@uref{http://bibdesk.sourceforge.net/scripts.html, BibDesk AppleScript Repository}.
 If you have a contribution that you would like to share, please e-mail the
 @uref{mailto:bibdesk-users@@lists.sourceforge.net, BibDesk Users} mailing list with
 a link to your page, and we'll make sure it gets added!
@@ -3761,9 +3719,6 @@ The specifiers are displayed in blue, the optional parameters in green.
 @item @specargparam{%f, Field, [/]0 }
 @tab Arbitrary field, also @samp{Cite Key} or @samp{BibTeX Type}
 @tab slash replacement, max length
-@item @specargparam{%w, Field, [ ][/]0 }
-@tab Words of arbitrary field
-@tab separator characters, slash replacement, max number of words
 @item @specargparam{%c, Field, 3}
 @tab Arbitrary field as initials (acronym)
 @tab max length of words to ignore
@@ -3822,7 +3777,7 @@ In the local file format the slash-character (/) has a special meaning, as it is
 to build the (UNIX style) folder hierarchy. This is usually not what you want generated 
 parts of the format to do. Therefore in the @samp{author} and @samp{title} slashes 
 are always replaced by dashes (-) for the local file format. The same replacement is also 
-performed by default for the @samp{keyword}, @samp{field} or @samp{words} specifiers. 
+performed by default for the @samp{keyword} or @samp{field} specifiers. 
 These latter two however can have an optional parameters delimited by square brackets, 
 which can be used to set the replacement string to another value. In particular, setting 
 the argument between brackets to slash (/), no replacement will be made. This is also 
@@ -4224,26 +4179,16 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @item fileOrder
 @tab 
-@item bibTeXString
-@tab 
-@item RISStringValue
-@tab 
-@item EndNoteString
-@tab 
-@item RSSStringValue
-@tab 
-@item MODSString
-@tab 
 @item localUrlPath
-@tab deprecated, use the localFiles collection key
+@tab deprecated, use the localURLs collection key
 @item localURL
-@tab deprecated, use the localFiles collection key
+@tab deprecated, use the localURLs collection key
 @item remoteURL
 @tab deprecated, use the remoteURLs collection key
 @item textSkimNotes
-@tab deprecated, use the localFiles collection key
+@tab deprecated, use the localURLs collection key
 @item richTextSkimNotes
-@tab deprecated, use the localFiles collection key
+@tab deprecated, use the localURLs collection key
 @item fields.FieldName
 @tab FieldName can be the name of any field
 @item urls.FieldName
@@ -4405,10 +4350,6 @@ Below are lists of collection keys that could be used in BibDesk export template
 @item fullyEncodeAsIURI
 @tab 
 @item stringByConvertingDoubleHyphenToEndash
-@tab 
-@item stringByConvertingTripleHyphenToEmdash
-@tab 
-@item stringByConvertingHyphensToDashes
 @tab 
 @item stringByTeXifyingString
 @tab 

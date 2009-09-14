@@ -57,13 +57,38 @@
 */
 - (IBAction)newPub:(id)sender; // new pub button pressed.
 
-- (void)deletePublications:(NSArray *)pubs;
-
+/*!
+    @method deleteSelectedPubs:
+    @abstract Deletes the selected publications from the document
+    @discussion Action of the Delete button. It removes the selected items of the tableview from the publications array. It assumes that there is at least one selected item -- the worst that could happen should be that the change count is wrong if it's called otherwise.
+ @param sender The sending object - not used.
+    
+*/
 - (IBAction)deleteSelectedPubs:(id)sender;
-
-- (void)removePublicationsFromSelectedGroups:(NSArray *)pubs;
-
+/*!
+    @method removeSelectedPubs:
+    @abstract Removes the selected publications from the selected groups
+    @discussion It removes the selected items of the tableview from the groups selected in the group tableview, or deletes them if the first group is selected. It assumes that there is at least one selected item -- the worst that could happen should be that the change count is wrong if it's called otherwise.
+ @param sender The sending object - not used.
+    
+*/
 - (IBAction)removeSelectedPubs:(id)sender;
+
+/*!
+    @method alternateDelete:
+    @abstract General alternate delete action. Deletes the selected publications or the selected smart groups, depending on the selected tableView. 
+    @discussion - 
+    @param sender The sender. Not used.
+*/
+- (void)alternateDelete:(id)sender;
+
+/*!
+    @method alternateCut:
+    @abstract Cuts using alternateDelete: action.
+    @discussion - 
+    @param sender The sender. Not used.
+*/
+- (IBAction)alternateCut:(id)sender;
 
 /*!
     @method copyAsAction:
@@ -72,6 +97,8 @@
     @param sender The sender.
 */
 - (IBAction)copyAsAction:(id)sender;
+
+- (IBAction)duplicate:(id)sender;
 
 - (BDSKEditor *)editorForPublication:(BibItem *)pub create:(BOOL)createNew;
 
@@ -172,13 +199,10 @@
 
 - (void)copyNotesForLocalURLForField:(NSString *)field;
 
-- (IBAction)chooseLinkedFile:(id)sender;
-- (IBAction)chooseLinkedURL:(id)sender;
-
 #pragma mark | Linked File and URL actions
 
-- (void)openLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-- (void)openLinkedURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+- (void)openLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)openLinkedURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)openLinkedFile:(id)sender;
 

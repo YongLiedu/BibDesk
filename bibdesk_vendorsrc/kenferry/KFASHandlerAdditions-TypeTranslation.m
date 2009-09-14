@@ -26,9 +26,9 @@
 @end
 
 @interface NSNumber (KFAppleScriptHandlerAdditionsPrivate)
-+ (id) kfNumberWithSignedIntP:(void *)int_p byteCount:(NSUInteger)bytes;
-+ (id) kfNumberWithUnsignedIntP:(void *)int_p byteCount:(NSUInteger)bytes;
-+ (id) kfNumberWithFloatP:(void *)float_p byteCount:(NSUInteger)bytes;
++ (id) kfNumberWithSignedIntP:(void *)int_p byteCount:(unsigned int)bytes;
++ (id) kfNumberWithUnsignedIntP:(void *)int_p byteCount:(unsigned int)bytes;
++ (id) kfNumberWithFloatP:(void *)float_p byteCount:(unsigned int)bytes;
 @end
 
 @implementation NSObject (KFAppleScriptHandlerAdditions)
@@ -40,7 +40,7 @@
     if ([self respondsToSelector:@selector(objectEnumerator)]) 
     {
         id currentObject;
-        NSInteger i;
+        int i;
         
         resultDesc = [NSAppleEventDescriptor listDescriptor];
         NSEnumerator *objectEnumerator = [(id)self objectEnumerator];
@@ -81,7 +81,7 @@
 {
     NSAppleEventDescriptor *listDesc;
     NSMutableArray *resultArray;
-    NSInteger i, listCount;
+    int i, listCount;
     
     listDesc = [desc coerceToDescriptorType:typeAEList];
     resultArray = [NSMutableArray array];
@@ -103,7 +103,7 @@
     NSAppleEventDescriptor *resultDesc;
     NSMutableArray *userFields;
     NSArray *keys;
-    NSInteger keyCount, i;
+    int keyCount, i;
     
     resultDesc = [NSAppleEventDescriptor recordDescriptor];
     userFields = [NSMutableArray array];
@@ -143,7 +143,7 @@
 {
     NSMutableDictionary *resultDict;
     NSAppleEventDescriptor *recDescriptor, *listDescriptor;
-    NSInteger recordIndex, recordCount, listIndex, listCount, keyword;
+    int recordIndex, recordCount, listIndex, listCount, keyword;
     id keyObj, valObj;
         
     recDescriptor = [desc coerceToDescriptorType:typeAERecord];
@@ -249,7 +249,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
 
 @implementation NSNumber (KFAppleScriptHandlerAdditions)
 
--(id)kfDescriptorValueWithFloatP:(void *)float_p byteCount:(NSUInteger)bytes
+-(id)kfDescriptorValueWithFloatP:(void *)float_p byteCount:(unsigned int)bytes
 {
     NSAppleEventDescriptor *resultDesc = nil;
     float floatVal;
@@ -280,13 +280,13 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     else
     {
         [NSException raise:NSInvalidArgumentException 
-                    format:@"Cannot create an NSAppleEventDescriptor for float with %lu bytes of data.", (unsigned long)bytes];
+                    format:@"Cannot create an NSAppleEventDescriptor for float with %d bytes of data.",  bytes];
     }
     
     return resultDesc;
 }
 
--(id)kfDescriptorValueWithSignedIntP:(void *)int_p byteCount:(NSUInteger)bytes
+-(id)kfDescriptorValueWithSignedIntP:(void *)int_p byteCount:(unsigned int)bytes
 {
     NSAppleEventDescriptor *resultDesc;
     int intVal;
@@ -315,7 +315,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     return resultDesc;
 }
 
--(id)kfDescriptorValueWithUnsignedIntP:(void *)int_p byteCount:(NSUInteger)bytes
+-(id)kfDescriptorValueWithUnsignedIntP:(void *)int_p byteCount:(unsigned int)bytes
 {
     NSAppleEventDescriptor *resultDesc;
     unsigned int uIntVal;
@@ -477,7 +477,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     return resultNumber;
 }
 
-+ (id) kfNumberWithSignedIntP:(void *)int_p byteCount:(NSUInteger)bytes
++ (id) kfNumberWithSignedIntP:(void *)int_p byteCount:(unsigned int)bytes
 {
     NSNumber *resultNumber = nil;
     
@@ -504,13 +504,13 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     else 
     {
         [NSException raise:NSInvalidArgumentException 
-                    format:@"NSNumber kfNumberWithSignedIntP:byteCount: number with %lu bytes not supported.", (unsigned long)bytes];
+                    format:@"NSNumber kfNumberWithSignedIntP:byteCount: number with %i bytes not supported.", bytes];
     }    
     
     return resultNumber;
 }
 
-+ (id) kfNumberWithUnsignedIntP:(void *)int_p byteCount:(NSUInteger)bytes
++ (id) kfNumberWithUnsignedIntP:(void *)int_p byteCount:(unsigned int)bytes
 {
     NSNumber *resultNumber = nil;
     
@@ -537,13 +537,13 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     else 
     {
         [NSException raise:NSInvalidArgumentException 
-                    format:@"NSNumber numberWithUnsignedInt:byteCount: number with %lu bytes not supported.", (unsigned long)bytes];
+                    format:@"NSNumber numberWithUnsignedInt:byteCount: number with %i bytes not supported.", bytes];
     }
     
     return resultNumber;
 }
 
-+ (id) kfNumberWithFloatP:(void *)float_p byteCount:(NSUInteger)bytes
++ (id) kfNumberWithFloatP:(void *)float_p byteCount:(unsigned int)bytes
 {
     NSNumber *resultNumber= nil;
     
@@ -558,7 +558,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     else 
     {
         [NSException raise:NSInvalidArgumentException 
-                    format:@"NSNumber numberWithFloat:byteCount: floating point number with %lu bytes not supported.", (unsigned long)bytes];
+                    format:@"NSNumber numberWithFloat:byteCount: floating point number with %i bytes not supported.", bytes];
     }
     
     return resultNumber;

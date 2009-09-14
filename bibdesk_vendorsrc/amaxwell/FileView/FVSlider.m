@@ -40,6 +40,8 @@
 #import "FVUtilities.h"
 #import <QuartzCore/QuartzCore.h>
 
+NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNotificationName";
+
 @interface FVSliderCell : NSSliderCell
 @end
 
@@ -128,8 +130,7 @@
 - (void)mouseExited:(NSEvent *)event
 {
     [super mouseExited:event];
-    [[[self window] parentWindow] removeChildWindow:[self window]];
-    [(FVSliderWindow *)[self window] fadeOut:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:FVSliderMouseExitedNotificationName object:self];
 }
 
 @end
@@ -151,6 +152,7 @@
         
         id animation = [NSClassFromString(@"CABasicAnimation") animation];
         if (animation && [self respondsToSelector:@selector(setAnimations:)]) {
+            [animation setDelegate:self];
             [self setAnimations:[NSDictionary dictionaryWithObject:animation forKey:@"alphaValue"]];
         }
 
@@ -160,33 +162,29 @@
 
 - (FVSlider *)slider { return _slider; }
 
-- (void)fadeIn:(id)sender {
+- (void)orderFront:(id)sender {
     if ([self isVisible] == NO && [self respondsToSelector:@selector(animator)]) {
         [self setAlphaValue:0.0];
-        [self orderFront:sender];
+        [super orderFront:sender];
         [[self animator] setAlphaValue:1.0];
     } else {
-        [self orderFront:sender];
-    }
-}
-
-- (void)fadeOut:(id)sender {
-    if ([self isVisible] && [self respondsToSelector:@selector(animator)]) {
-        [[self animationForKey:@"alphaValue"] setDelegate:self];
-        [[self animator] setAlphaValue:0.0];
-    } else {
-        [self orderOut:sender];
+        [super orderFront:sender];
     }
 }
 
 - (void)orderOut:(id)sender {
-    [[self parentWindow] removeChildWindow:self];
-    [super orderOut:self];
+    if ([self isVisible] && [self respondsToSelector:@selector(animator)]) {
+        [[self animator] setAlphaValue:0.0];
+    } else {
+        [super orderOut:sender];
+    }
 }
 
 - (void)animationDidStop:(id)animation finished:(BOOL)flag  {
-    [self orderOut:self];
-    [animation setDelegate:nil];
+    if ([self alphaValue] < 0.0001 && [self isVisible]) {
+        [[self parentWindow] removeChildWindow:self];
+        [super orderOut:self];
+    }
 }
 
 @end

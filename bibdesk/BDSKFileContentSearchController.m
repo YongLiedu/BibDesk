@@ -51,17 +51,14 @@
 #import "BDSKFileSearch.h"
 #import "BDSKFileSearchResult.h"
 #import "BDSKLevelIndicatorCell.h"
-#import "BibDocument.h"
-#import "BibDocument_UI.h"
 #import "BibDocument_Search.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
-#import "BDSKTableView.h"
 
 
 @implementation BDSKFileContentSearchController
 
-- (id)initForDocument:(BibDocument *)aDocument
+- (id)initForDocument:(id)aDocument
 {    
     self = [super init];
     if(!self) return nil;
@@ -74,10 +71,10 @@
         
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     
-    NSParameterAssert([aDocument respondsToSelector:@selector(removeFileContentSearch:)]);
+    NSParameterAssert([aDocument conformsToProtocol:@protocol(BDSKSearchContentView)]);
     [self setDocument:aDocument];
     
-    searchIndex = [[BDSKFileSearchIndex alloc] initForOwner:aDocument];
+    searchIndex = [[BDSKFileSearchIndex alloc] initWithDocument:aDocument];
     search = [[BDSKFileSearch alloc] initWithIndex:searchIndex delegate:self];
     searchFieldDidEndEditing = NO;
     
@@ -103,9 +100,6 @@
     [tableView setTarget:self];
     [tableView setDoubleAction:@selector(tableAction:)];
     
-    [tableView setFontNamePreferenceKey:BDSKFileContentSearchTableViewFontNameKey];
-    [tableView setFontSizePreferenceKey:BDSKFileContentSearchTableViewFontSizeKey];
-    
     BDSKLevelIndicatorCell *cell = [[tableView tableColumnWithIdentifier:@"score"] dataCell];
     [cell setEnabled:NO]; // this is required to make it non-editable
     [cell setMaxHeight:17.0 * 0.7];
@@ -113,7 +107,7 @@
     // set up the image/text cell combination
     [(BDSKTextWithIconCell *)[[tableView tableColumnWithIdentifier:@"title"] dataCell] setHasDarkHighlight:YES];
     
-    BDSKPRECONDITION([[tableView enclosingScrollView] contentView]);
+    OBPRECONDITION([[tableView enclosingScrollView] contentView]);
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleClipViewFrameChangedNotification:)
                                                  name:NSViewFrameDidChangeNotification
@@ -125,6 +119,7 @@
     [collapsibleView setMinSize:frame.size];
     [collapsibleView setCollapseEdges:BDSKMinXEdgeMask | BDSKMinYEdgeMask];
     [controlView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
+    [controlView setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
 
     // we might remove this, so keep a retained reference
     [[tableView enclosingScrollView] retain];
@@ -153,7 +148,7 @@
 
 - (BOOL)shouldShowControlView
 {
-    return [searchIndex status] < BDSKSearchIndexStatusRunning;
+    return [searchIndex finishedInitialIndexing] == NO;
 }
 
 - (NSTableView *)tableView
@@ -174,15 +169,15 @@
 
 - (IBAction)tableAction:(id)sender
 {
-    NSInteger row = [tableView clickedRow];
+    int row = [tableView clickedRow];
     if(row == -1)
         return;
     
     BOOL isDir;
     NSURL *fileURL = [[[resultsArrayController arrangedObjects] objectAtIndex:row] URL];
     
-    BDSKASSERT(fileURL);
-    BDSKASSERT(searchField);
+    OBASSERT(fileURL);
+    OBASSERT(searchField);
 
     if(![[NSFileManager defaultManager] fileExistsAtPath:[fileURL path] isDirectory:&isDir]){
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"File Does Not Exist", @"Message in alert dialog when file could not be found")
@@ -247,7 +242,7 @@
         canceledSearch = NO;
         
         // may be hidden if we called restoreDocumentState while indexing
-        if ([self shouldShowControlView] && [indexProgressBar isHiddenOrHasHiddenAncestor]) {
+        if ([searchIndex finishedInitialIndexing] == NO && [indexProgressBar isHiddenOrHasHiddenAncestor]) {
             // setHidden:NO doesn't seem to apply to subviews
             [indexProgressBar setHidden:NO];
         }
@@ -335,7 +330,7 @@
     [self window];
     NSMutableArray *sortDescriptors = [NSMutableArray array];
     [sortDescriptors addObjectsFromArray:[NSUnarchiver unarchiveObjectWithData:data]];
-    NSUInteger i = [sortDescriptors count];
+    unsigned i = [sortDescriptors count];
     // see https://sourceforge.net/tracker/index.php?func=detail&aid=1837498&group_id=61487&atid=497423
     // We changed BDSKFileSearchResult and started saving sort descriptors in EA at about the same time, so apparently a user ended up with a sort key of @"dictionary.string" in EA; this caused a bunch of ignored exceptions, and content search failed.  Another possibility (remote) is that the EA were corrupted somehow.  Anyway, check for the correct keys to avoid this in future.
     NSSet *keys = [NSSet setWithObjects:@"string", @"score", nil];
@@ -360,19 +355,6 @@
     return [resultsArrayController selectedObjects];
 }
 
-- (NSArray *)identifierURLsAtIndexes:(NSIndexSet *)indexes
-{
-    return [[[resultsArrayController arrangedObjects] objectsAtIndexes:indexes] valueForKeyPath:@"@distinctUnionOfObjects.identifierURL"];
-}
-
-- (NSArray *)URLsAtIndexes:(NSIndexSet *)indexes {
-    return [[[resultsArrayController arrangedObjects] objectsAtIndexes:indexes] valueForKeyPath:@"@distinctUnionOfObjects.URL"];
-}
-
-- (NSArray *)resultsAtIndexes:(NSIndexSet *)indexes {
-    return [[resultsArrayController arrangedObjects] objectsAtIndexes:indexes];
-}
-
 #pragma mark -
 #pragma mark SearchKit methods
 
@@ -387,28 +369,17 @@
     }
 }
 
-- (void)search:(BDSKFileSearch *)aSearch didUpdateStatus:(NSUInteger)status;
+- (void)search:(BDSKFileSearch *)aSearch didFinishWithResults:(NSArray *)anArray;
 {
     if ([search isEqual:aSearch]) {
-        switch (status) {
-            case BDSKSearchIndexStatusStarting:
-                [statusField setStringValue:[NSLocalizedString(@"Starting Index", @"status message") stringByAppendingEllipsis]];
-                break;
-            case BDSKSearchIndexStatusVerifying:
-                [statusField setStringValue:[NSLocalizedString(@"Verifying Index", @"status message") stringByAppendingEllipsis]];
-                break;
-            case BDSKSearchIndexStatusIndexing:
-                [statusField setStringValue:[NSLocalizedString(@"Indexing Files", @"status message") stringByAppendingEllipsis]];
-                break;
-            case BDSKSearchIndexStatusRunning:
-                // hides progress bar and text
-                [indexProgressBar setHidden:YES];
-                [statusField setStringValue:@""];
-                [[self document] removeControlView:[self controlView]];
-                break;
-            default:
-                break;
-        }
+        // don't reset the array if we canceled updates
+        if (NO == canceledSearch)
+            [self setResults:anArray];
+        [indexProgressBar setDoubleValue:[searchIndex progressValue]];
+        
+        // hides progress bar and text
+        [indexProgressBar setHidden:YES];
+        [[self document] removeControlView:[self controlView]];
     }
 }
 
@@ -447,7 +418,7 @@
 
 - (void)saveSortDescriptors
 {
-    [[NSUserDefaults standardUserDefaults] setObject:[self sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[self sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
 }
 
 - (void)windowWillClose:(NSNotification *)notification
@@ -468,10 +439,18 @@
         [[self document] tableViewSelectionDidChange:notification];
 }
 
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation {
+- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation {
     CFStringRef displayName = NULL;
     LSCopyDisplayNameForURL((CFURLRef)[[[resultsArrayController arrangedObjects] objectAtIndex:row] URL], &displayName);
     return [(id)displayName autorelease];
+}
+
+- (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
+    return BDSKFileContentSearchTableViewFontNameKey;
+}
+
+- (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)tv {
+    return BDSKFileContentSearchTableViewFontSizeKey;
 }
 
 - (void)tableView:(NSTableView *)tv insertNewline:(id)sender{
@@ -479,15 +458,9 @@
         [[self document] tableView:tv insertNewline:sender];
 }
 
-- (void)tableView:(NSTableView *)tv deleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
+- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows{
     if ([[self document] respondsToSelector:_cmd])
-        [[self document] tableView:tv deleteRowsWithIndexes:rowIndexes];
-}
-
-- (BOOL)tableView:(NSTableView *)tv canDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
-    if ([[self document] respondsToSelector:_cmd])
-        return [[self document] tableView:tv canDeleteRowsWithIndexes:rowIndexes];
-    return NO;
+        [[self document] tableView:tv deleteRows:rows];
 }
 
 @end
@@ -501,12 +474,12 @@
     NSArray *previouslySelectedObjects = [[NSArray alloc] initWithArray:[self selectedObjects] copyItems:NO];
     [super setContent:object];
     
-    NSUInteger cnt = [previouslySelectedObjects count];
+    unsigned cnt = [previouslySelectedObjects count];
     NSArray *arrangedObjects = [self arrangedObjects];
     NSMutableIndexSet *indexesToSelect = [NSMutableIndexSet indexSet];
     while (cnt--) {
         id oldObject = [previouslySelectedObjects objectAtIndex:cnt];
-        NSUInteger i = [arrangedObjects indexOfObject:oldObject];
+        unsigned i = [arrangedObjects indexOfObject:oldObject];
         if (NSNotFound != i)
             [indexesToSelect addIndex:i];
     }

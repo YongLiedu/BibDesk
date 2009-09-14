@@ -41,7 +41,7 @@
 */
 @interface BibDocument (DataSource)
 
-- (BOOL)writePublications:(NSArray*)pubs forDragCopyType:(NSInteger)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard;
+- (BOOL)writePublications:(NSArray*)pubs forDragCopyType:(int)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard;
 - (void)setPromiseDragColumnIdentifier:(NSString *)identifier;
 - (NSImage *)dragImageForPromisedItemsUsingCiteString:(NSString *)citeString;
 - (void)clearPromisedDraggedItems;
