@@ -2382,6 +2382,15 @@ publication types (like article or book) you can add separate template files for
 Furthermore, a template can have any number of Accessory Files, which are copied directly when exported. 
 For example for HTML export, this could be an external CSS style file. 
 
+Finally, a template can have a post processing script that furthermanipulates the export. 
+Such a script has to be a shell script which expects the export on standard input, 
+changes it and writes the result to standard output. For instance the following shell script 
+would replace any occurrence of the placeholder @code{<!-- CURRENT-DATE -->} in the template 
+with the actual current date:
+
+@code{#!/bin/sh@*
+sed -e "s/<!-- CURRENT-DATE -->/`date`/g"}
+
 If you want to use separate item template files, your Main Page template should 
 contain the @code{<$publicationsUsingTemplate/>} tag. Otherwise, the Main Page template should contain the 
 @code{<$publications>...</$publications>} collection tags.
