@@ -46,9 +46,7 @@ extern NSString *BDSKEncodingConversionException;
 
 - (NSData *)sha1Signature;
 
-- (id)initWithBase64String:(NSString *)base64String withNewlines:(BOOL)encodedWithNewlines;
 - (id)initWithBase64String:(NSString *)base64String;
-- (NSString *)base64StringWithNewlines:(BOOL)encodeWithNewlines;
 - (NSString *)base64String;
 
 - (BOOL)mightBeCompressed;

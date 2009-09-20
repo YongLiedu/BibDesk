@@ -130,17 +130,12 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
 // base 64 encoding/decoding methods modified from sample code on CocoaDev http://www.cocoadev.com/index.pl?BaseSixtyFour
 
 - (id)initWithBase64String:(NSString *)base64String {
-    return [self initWithBase64String:base64String withNewlines:NO];
-}
-
-- (id)initWithBase64String:(NSString *)base64String withNewlines:(BOOL)encodedWithNewlines {
     // Create a memory buffer containing Base64 encoded string data
     BIO *mem = BIO_new_mem_buf((void *)[base64String cStringUsingEncoding:NSASCIIStringEncoding], [base64String lengthOfBytesUsingEncoding:NSASCIIStringEncoding]);
     
     // Push a Base64 filter so that reading from the buffer decodes it
     BIO *b64 = BIO_new(BIO_f_base64());
-    if (encodedWithNewlines == NO)
-        BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
     mem = BIO_push(b64, mem);
     
     // Decode into an NSMutableData
@@ -160,17 +155,12 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
 }
 
 - (NSString *)base64String {
-    return [self base64StringWithNewlines:NO];
-}
-
-- (NSString *)base64StringWithNewlines:(BOOL)encodeWithNewlines {
     // Create a memory buffer which will contain the Base64 encoded string
     BIO *mem = BIO_new(BIO_s_mem());
     
     // Push on a Base64 filter so that writing to the buffer encodes the data
     BIO *b64 = BIO_new(BIO_f_base64());
-    if (encodeWithNewlines == NO)
-        BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
     mem = BIO_push(b64, mem);
     
     // Encode all the data
