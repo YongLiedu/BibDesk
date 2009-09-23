@@ -242,13 +242,13 @@
     NSEnumerator *itemEnum = [[self sortedArrayUsingSelector:@selector(compare:)] objectEnumerator];
     id item;
     NSMutableArray *array = [NSMutableArray array];
-    NSInteger start = INT_MIN, end = INT_MIN;
+    NSInteger start = NSIntegerMin, end = NSIntegerMin;
     
     while (item = [itemEnum nextObject]) {
         if ([item respondsToSelector:@selector(intValue)] == NO) continue;
         NSInteger value = [item intValue];
         if (value != end + 1) {
-            if (start != INT_MIN) {
+            if (start != NSIntegerMin) {
                 NSArray *range = [[NSArray alloc] initWithObjects:[NSNumber numberWithInt:start], start == end ? nil : [NSNumber numberWithInt:end], nil];
                 [array addObject:range];
                 [range release];
@@ -257,7 +257,7 @@
         }
         end = value;
     }
-    if (start != INT_MIN) {
+    if (start != NSIntegerMin) {
         NSArray *range = [[NSArray alloc] initWithObjects:[NSNumber numberWithInt:start], start == end ? nil : [NSNumber numberWithInt:end], nil];
         [array addObject:range];
         [range release];
@@ -270,13 +270,13 @@
     NSEnumerator *itemEnum = [[self sortedArrayUsingSelector:@selector(compare:)] objectEnumerator];
     id item;
     NSMutableArray *array = [NSMutableArray array];
-    NSInteger start = INT_MIN, end = INT_MIN;
+    NSInteger start = NSIntegerMin, end = NSIntegerMin;
     
     while (item = [itemEnum nextObject]) {
         if ([item respondsToSelector:@selector(intValue)] == NO) continue;
         NSInteger value = [item intValue];
         if (value != end + 1) {
-            if (start != INT_MIN) {
+            if (start != NSIntegerMin) {
                 NSString *string = [[NSString alloc] initWithFormat:(start == end ? @"%ld" : @"%ld-%ld"), (long)start, (long)end];
                 [array addObject:string];
                 [string release];
@@ -285,7 +285,7 @@
         }
         end = value;
     }
-    if (start != INT_MIN) {
+    if (start != NSIntegerMin) {
         NSString *string = [[NSString alloc] initWithFormat:(start == end ? @"%ld" : @"%ld-%ld"), (long)start, (long)end];
         [array addObject:string];
         [string release];
