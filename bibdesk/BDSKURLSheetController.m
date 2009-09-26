@@ -37,6 +37,7 @@
  */
 
 #import "BDSKURLSheetController.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 
 @implementation BDSKURLSheetController

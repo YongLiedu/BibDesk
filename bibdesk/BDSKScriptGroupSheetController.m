@@ -42,6 +42,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKFieldEditor.h"
 #import "BDSKDragTextField.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 @implementation BDSKScriptGroupSheetController
 

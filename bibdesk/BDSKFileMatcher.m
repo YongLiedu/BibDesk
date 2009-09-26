@@ -55,6 +55,7 @@
 #import "BDSKLinkedFile.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
 #import "NSInvocation_BDSKExtensions.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 #define MAX_SEARCHKIT_RESULTS 10
 static CGFloat LEAF_ROW_HEIGHT = 20.0;

@@ -32,9 +32,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKSheetController.h"
 
-@interface BDSKFileMatchConfigController : BDSKSheetController
+@interface BDSKFileMatchConfigController : NSWindowController
 {
     IBOutlet NSTableView *documentTableView;
     IBOutlet NSTableView *fileTableView;

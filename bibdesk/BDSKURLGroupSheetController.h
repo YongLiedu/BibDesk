@@ -37,11 +37,10 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKSheetController.h"
 
 @class BDSKURLGroup, BDSKDragTextField, BDSKFieldEditor;
 
-@interface BDSKURLGroupSheetController : BDSKSheetController
+@interface BDSKURLGroupSheetController : NSWindowController
 {
     IBOutlet BDSKDragTextField *urlField;
     IBOutlet NSObjectController *objectController;

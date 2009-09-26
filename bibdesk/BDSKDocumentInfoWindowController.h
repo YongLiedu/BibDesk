@@ -37,11 +37,10 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKSheetController.h"
 
 @class BibDocument;
 
-@interface BDSKDocumentInfoWindowController : BDSKSheetController {
+@interface BDSKDocumentInfoWindowController : NSWindowController {
     IBOutlet NSTableView *tableView;
     IBOutlet NSButton *addButton;
     IBOutlet NSButton *removeButton;

@@ -37,9 +37,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKSheetController.h"
 
-@interface BDSKFieldSheetController : BDSKSheetController
+@interface BDSKFieldSheetController : NSWindowController
 {
     IBOutlet NSObjectController *objectController;
     IBOutlet NSControl *fieldsControl;

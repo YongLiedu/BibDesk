@@ -37,10 +37,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKSheetController.h"
 
 
-@interface BDSKCharacterConversion : BDSKSheetController {
+@interface BDSKCharacterConversion : NSWindowController {
 	IBOutlet NSPopUpButton *listButton;
 	IBOutlet NSTableView *tableView;
 	IBOutlet NSButton *addButton;

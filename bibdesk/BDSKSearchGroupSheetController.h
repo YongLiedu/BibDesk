@@ -37,11 +37,10 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKSheetController.h"
 
 @class BDSKSearchGroup, BDSKServerInfo, BDSKMutableServerInfo, BDSKCollapsibleView;
 
-@interface BDSKSearchGroupSheetController : BDSKSheetController {
+@interface BDSKSearchGroupSheetController : NSWindowController {
     BDSKSearchGroup *group;
     NSUndoManager *undoManager;
     BDSKMutableServerInfo *serverInfo;

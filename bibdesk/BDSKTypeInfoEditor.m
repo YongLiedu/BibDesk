@@ -43,6 +43,7 @@
 #import "BDSKTypeManager.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSIndexSet_BDSKExtensions.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 #define BDSKTypeInfoRowsPboardType	@"BDSKTypeInfoRowsPboardType"
 #define BDSKTypeInfoPboardType @"BDSKTypeInfoPboardType"

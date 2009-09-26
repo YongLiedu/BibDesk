@@ -37,10 +37,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKSheetController.h"
 
 
-@interface BDSKTypeInfoEditor : BDSKSheetController {
+@interface BDSKTypeInfoEditor : NSWindowController {
 	IBOutlet NSTableView *typeTableView;
 	IBOutlet NSTableView *requiredTableView;
 	IBOutlet NSTableView *optionalTableView;

@@ -37,10 +37,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKSheetController.h"
 
 
-@interface BDSKURLSheetController : BDSKSheetController {
+@interface BDSKURLSheetController : NSWindowController {
     IBOutlet NSTextField *urlField;
 }
 

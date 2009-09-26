@@ -56,6 +56,7 @@
 #import "NSParagraphStyle_BDSKExtensions.h"
 #import "NSMenu_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 enum {
     BDSKColumnTypeText,

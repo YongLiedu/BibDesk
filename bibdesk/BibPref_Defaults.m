@@ -46,6 +46,7 @@
 #import "BDSKMacroWindowController.h"
 #import "BDSKPreferenceRecord.h"
 #import "BDSKTableView.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 // this corresponds with the menu item order in the nib
 enum {

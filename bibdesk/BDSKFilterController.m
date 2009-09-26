@@ -40,6 +40,7 @@
 #import "BDSKConditionController.h"
 #import "BDSKConditionsView.h"
 #import "NSArray_BDSKExtensions.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 
 @implementation BDSKFilterController

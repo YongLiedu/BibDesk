@@ -292,19 +292,18 @@
     [super showWindow:sender];
 }
 
-- (void)beginSheetModalForWindow:(NSWindow *)modalWindow{
+- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
     [self window]; // make sure we loaded the nib
     [tableView reloadData];
     [closeButton setKeyEquivalent:@"\E"];
     
-    [NSApp beginSheet:[self window] modalForWindow:modalWindow modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+    [super beginSheetModalForWindow:window modalDelegate:delegate didEndSelector:didEndSelector contextInfo:contextInfo];
 }
 
 - (IBAction)closeAction:(id)sender{
 	if ([[self window] isSheet]) {
 		[self windowWillClose:nil];
-		[[self window] orderOut:sender];
-		[NSApp endSheet:[self window] returnCode:[sender tag]];
+        [self dismiss:sender];
 	} else {
 		[[self window] performClose:sender];
 	}

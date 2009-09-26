@@ -43,6 +43,7 @@
 #import "BDSKCollapsibleView.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 #define SERVERS_FILENAME @"SearchGroupServers"
 #define SERVERS_DIRNAME @"SearchGroupServers"

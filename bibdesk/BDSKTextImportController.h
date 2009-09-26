@@ -37,14 +37,13 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKSheetController.h"
 #import "BDSKOwnerProtocol.h"
 #import "BDSKTableView.h"
 
 @class BibDocument, BibItem, BDSKEdgeView, WebView, WebDownload, BDSKImagePopUpButton, BDSKComplexStringEditor;
 @class BDSKComplexStringFormatter, BDSKCiteKeyFormatter, BDSKCrossrefFormatter, BDSKCitationFormatter;
 
-@interface BDSKTextImportController : BDSKSheetController <BDSKOwner> {
+@interface BDSKTextImportController : NSWindowController <BDSKOwner> {
     IBOutlet NSTextView* sourceTextView;
     IBOutlet NSTableView* itemTableView;
     IBOutlet NSTextField* citeKeyField;

@@ -39,6 +39,7 @@
 #import "BDSKDocumentInfoWindowController.h"
 #import "BibDocument.h"
 #import "NSDictionary_BDSKExtensions.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 
 @implementation BDSKDocumentInfoWindowController

@@ -39,6 +39,7 @@
 #import "BDSKAppController.h"
 #import "BDSKConverter.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 
 @implementation BDSKCharacterConversion

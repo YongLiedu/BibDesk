@@ -67,6 +67,7 @@
 #import "BDSKCompletionManager.h"
 #import "BDSKApplication.h"
 #import "NSInvocation_BDSKExtensions.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 
 @interface BDSKTextImportController (Private)

@@ -70,7 +70,6 @@
 - (IBAction)removeSelectedMacros:(id)sender;
 - (BOOL)addMacrosFromBibTeXString:(NSString *)aString;
 
-- (void)beginSheetModalForWindow:(NSWindow *)modalWindow;
 - (IBAction)closeAction:(id)sender;
 
 - (IBAction)search:(id)sender;

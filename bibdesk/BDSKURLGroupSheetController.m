@@ -43,6 +43,7 @@
 #import "BibDocument.h"
 #import "BDSKFieldEditor.h"
 #import "BDSKDragTextField.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 @implementation BDSKURLGroupSheetController
 
