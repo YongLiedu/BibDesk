@@ -1502,8 +1502,12 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <cocoa key="subsort"/>
             </parameter>
             <parameter name="ascending" code="Ascn" type="boolean" optional="yes"
-                description="Is the sort ascending?">
+                description="Is the sort ascending? Defaults to true.">
                 <cocoa key="ascending"/>
+            </parameter>
+            <parameter name="subsort ascending" code="SAsc" type="boolean" optional="yes"
+                description="Is the subsort ascending? Defaults to the value of ascending.">
+                <cocoa key="subsortAscending"/>
             </parameter>
             <result description="sorted list of publications">
                 <type type="publication" list="yes"/>

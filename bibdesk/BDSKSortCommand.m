@@ -87,12 +87,14 @@ static NSString *normalizedKey(NSString *key) {
     NSString *key = [args objectForKey:@"by"];
     NSString *subKey = [args objectForKey:@"subsort"];
     NSNumber *ascending = [args objectForKey:@"ascending"];
+    NSNumber *subAscending = [args objectForKey:@"subsortAscending"];
     BOOL isAscending = ascending ? [ascending boolValue] : YES;
+    BOOL isSubAscending = subAscending ? [subAscending boolValue] : isAscending;
     
     BDSKTableSortDescriptor *sortDescriptor = [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:normalizedKey(key) ascending:isAscending];
     BDSKTableSortDescriptor *subSortDescriptor = nil;
     if (subKey)
-        [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:normalizedKey(subKey) ascending:isAscending];
+        [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:normalizedKey(subKey) ascending:isSubAscending];
     
     return [dP sortedArrayUsingMergesortWithDescriptors:[NSArray arrayWithObjects:sortDescriptor, subSortDescriptor, nil]];
 }
