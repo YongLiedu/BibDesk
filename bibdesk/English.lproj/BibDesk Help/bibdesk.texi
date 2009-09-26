@@ -1404,10 +1404,16 @@ desirable for printed output, so you may wish to edit the LaTeX template file
 @subheading Selecting Duplicates
 
 To identify duplicate references in your database, use the @menutitle{Select Duplicates} item
-of the @menutitle{Database} menu.  BibDesk compares all standard fields of each item and
-selects possible duplicates and the ``original'' item.  
+of the @menutitle{Database} menu.  BibDesk compares the type and all standard fields for that type,
+and selects all publications for which a duplicate with the same values for those type and fields
+can be found.  You can choose whether you want to select all the duplicates, or to leave out
+one duplicate for each set (the "original", which will be chosen at random).
+  
 Crossref and type are compared case-insensitively, while other
 fields are compared case-sensitively without removing any @TeX{}-specific commands.
+
+For duplicates in the main database, also the cite key and default fields are included for comparison.
+For duplicates in external groups, those are ignored. 
 
 For a less rigorous comparison, choose @menutitle{Select Duplicates by <Field>} from the @menutitle{Database} menu.  
 With this option, similar to the functionality of BibTool, BibDesk compares adjacent values in the currently 
