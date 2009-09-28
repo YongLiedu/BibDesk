@@ -466,7 +466,6 @@
 		F9937E250AD82690001D1DFB /* PDFDocument_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F947A01B09AA80E4004C27FF /* PDFDocument_BDSKExtensions.m */; };
 		F9937E290AD826AA001D1DFB /* BDSKSpotlightView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A411F00A0B1FEF008493C0 /* BDSKSpotlightView.m */; };
 		F9937E2A0AD826AB001D1DFB /* CIImage_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */; };
-		F9937E2B0AD826AE001D1DFB /* NSBezierPath_CoreImageExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE28346209176C88006B4C63 /* NSBezierPath_CoreImageExtensions.m */; };
 		F9937E4E0AD826EB001D1DFB /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9B9E17E089479FC00C21B17 /* Quartz.framework */; };
 		F9937E6C0AD82700001D1DFB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9706DB909102DA800526FC8 /* QuartzCore.framework */; };
 		F99BC25F095A5C7000E018C3 /* NSArray_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F99BC25D095A5C7000E018C3 /* NSArray_BDSKExtensions.m */; };
@@ -904,8 +903,6 @@
 		CE26481B0B5AB4B700D4B5B8 /* BDSKDragTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKDragTextField.m; sourceTree = "<group>"; };
 		CE27D9590AF92BFD00419879 /* BDSKZoomableTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKZoomableTextView.h; sourceTree = "<group>"; };
 		CE27D95A0AF92BFD00419879 /* BDSKZoomableTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKZoomableTextView.m; sourceTree = "<group>"; };
-		CE28346109176C88006B4C63 /* NSBezierPath_CoreImageExtensions.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NSBezierPath_CoreImageExtensions.h; sourceTree = "<group>"; };
-		CE28346209176C88006B4C63 /* NSBezierPath_CoreImageExtensions.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = NSBezierPath_CoreImageExtensions.m; sourceTree = "<group>"; };
 		CE28373F0917D31D006B4C63 /* BDSKEdgeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKEdgeView.h; sourceTree = "<group>"; };
 		CE2837400917D31D006B4C63 /* BDSKEdgeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKEdgeView.m; sourceTree = "<group>"; };
 		CE2A198D0CE499AD00A0499B /* SmallMenu.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = SmallMenu.tiff; sourceTree = "<group>"; };
@@ -2006,7 +2003,6 @@
 			children = (
 				CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */,
 				F97BF0B8090AE7520063504B /* NSBezierPath_BDSKExtensions.m */,
-				CE28346209176C88006B4C63 /* NSBezierPath_CoreImageExtensions.m */,
 				CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */,
 				F9022C9D0758038000C3F701 /* NSImage_BDSKExtensions.m */,
 				CE6C047F0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m */,
@@ -2700,7 +2696,6 @@
 				F99BC25C095A5C7000E018C3 /* NSArray_BDSKExtensions.h */,
 				CEB772E80A34529D00B8A299 /* NSAttributedString_BDSKExtensions.h */,
 				F97BF0B7090AE7520063504B /* NSBezierPath_BDSKExtensions.h */,
-				CE28346109176C88006B4C63 /* NSBezierPath_CoreImageExtensions.h */,
 				F9025DC70969AD2C008A551C /* NSCharacterSet_BDSKExtensions.h */,
 				CEF2EEE40F3462A900A7989E /* NSColor_BDSKExtensions.h */,
 				F96F11940AAF4FD100815D06 /* NSData_BDSKExtensions.h */,
@@ -3544,7 +3539,6 @@
 				F9937E250AD82690001D1DFB /* PDFDocument_BDSKExtensions.m in Sources */,
 				F9937E290AD826AA001D1DFB /* BDSKSpotlightView.m in Sources */,
 				F9937E2A0AD826AB001D1DFB /* CIImage_BDSKExtensions.m in Sources */,
-				F9937E2B0AD826AE001D1DFB /* NSBezierPath_CoreImageExtensions.m in Sources */,
 				CE95AF180ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m in Sources */,
 				CE7596000ADDB0E1009C1329 /* BDSKContainerView.m in Sources */,
 				F9A2245D0AE02C8E0046CA3D /* BDSKFileSearch.m in Sources */,
