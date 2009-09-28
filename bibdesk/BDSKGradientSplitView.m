@@ -38,8 +38,6 @@
 
 #import "BDSKGradientSplitView.h"
 #import "BDSKStatusBar.h"
-#import "NSBezierPath_CoreImageExtensions.h"
-#import "CIImage_BDSKExtensions.h"
 
 #define END_JOIN_WIDTH 3.0f
 #define END_JOIN_HEIGHT 22.0f
@@ -56,17 +54,17 @@
 
 @implementation BDSKGradientSplitView
 
-+ (CIColor *)startColor{
-    static CIColor *startColor = nil;
++ (NSColor *)startColor{
+    static NSColor *startColor = nil;
     if (startColor == nil)
-        startColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]] retain];
+        startColor = [[NSColor colorWithCalibratedWhite:0.95 alpha:1.0] retain];
     return startColor;
 }
 
-+ (CIColor *)endColor{
-    static CIColor *endColor = nil;
++ (NSColor *)endColor{
+    static NSColor *endColor = nil;
     if (endColor == nil)
-        endColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.85 alpha:1.0]] retain];
+        endColor = [[NSColor colorWithCalibratedWhite:0.85 alpha:1.0] retain];
     return endColor;
 }
 
@@ -77,81 +75,30 @@
     return self;
 }
 
-- (void)dealloc {
-    CGLayerRelease(dividerLayer);
-    CGLayerRelease(minBlendLayer);
-    CGLayerRelease(maxBlendLayer);
-    [super dealloc];
-}
-
 - (void)drawDividerInRect:(NSRect)aRect {
-    // Draw gradient
-    CGContextRef currentContext = [[NSGraphicsContext currentContext] graphicsPort];
-    
-    if (NULL == dividerLayer) {
-        CGSize dividerSize = CGSizeMake(aRect.size.width, aRect.size.height);
-        dividerLayer = CGLayerCreateWithContext(currentContext, dividerSize, NULL);
-        [NSGraphicsContext saveGraphicsState];
-        NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:CGLayerGetContext(dividerLayer) flipped:NO];
-        [NSGraphicsContext setCurrentContext:nsContext];
-        NSRect rectToFill = aRect;
-        rectToFill.origin = NSZeroPoint;
-        [[NSBezierPath bezierPathWithRect:rectToFill] fillPathVertically:NO == [self isVertical] withStartColor:[[self class] startColor] endColor:[[self class] endColor]];
-        [NSGraphicsContext restoreGraphicsState];
-    }
-    CGContextDrawLayerInRect(currentContext, NSRectToCGRect(aRect), dividerLayer);
-    
+    NSGradient *gradient = [[[NSGradient alloc] initWithStartingColor:[[self class] startColor] endingColor:[[self class] endColor]] autorelease];
+    [gradient drawInRect:aRect angle:[self isVertical] ? 0.0 : 90.0];
+
     if (blendStyle) {
         NSRect endRect, ignored;
         
         if (blendStyle & BDSKMinBlendStyleMask) {
             NSDivideRect(aRect, &endRect, &ignored, END_JOIN_WIDTH, [self isVertical] ? NSMinYEdge : NSMinXEdge);
-            if (NULL == minBlendLayer) {
-                CGSize blendSize = CGSizeMake(endRect.size.width, endRect.size.height);
-                minBlendLayer = CGLayerCreateWithContext(currentContext, blendSize, NULL);
-                [NSGraphicsContext saveGraphicsState];
-                NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:CGLayerGetContext(minBlendLayer) flipped:NO];
-                [NSGraphicsContext setCurrentContext:nsContext];
-                NSRect rectToFill = endRect;
-                rectToFill.origin = NSZeroPoint;
-                [[NSBezierPath bezierPathWithRect:rectToFill] fillPathVertically:[self isVertical] withStartColor:[[self class] endColor] endColor:[CIColor clearColor]];
-                [NSGraphicsContext restoreGraphicsState];
-            }
-            CGContextDrawLayerInRect(currentContext, NSRectToCGRect(endRect), minBlendLayer);
+            gradient = [[[NSGradient alloc] initWithStartingColor:[[self class] endColor] endingColor:[[[self class] endColor] colorWithAlphaComponent:0.0]] autorelease];
+            [gradient drawInRect:endRect angle:[self isVertical] ? 90.0 : 0.0];
         }
         
         if (blendStyle & BDSKMaxBlendStyleMask) {
             NSDivideRect(aRect, &endRect, &ignored, END_JOIN_WIDTH, [self isVertical] ? NSMaxYEdge : NSMaxXEdge);
-            if (NULL == maxBlendLayer) {
-                CGSize blendSize = CGSizeMake(endRect.size.width, endRect.size.height);
-                maxBlendLayer = CGLayerCreateWithContext(currentContext, blendSize, NULL);
-                [NSGraphicsContext saveGraphicsState];
-                NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:CGLayerGetContext(maxBlendLayer) flipped:NO];
-                [NSGraphicsContext setCurrentContext:nsContext];
-                NSRect rectToFill = endRect;
-                rectToFill.origin = NSZeroPoint;
-                [[NSBezierPath bezierPathWithRect:rectToFill] fillPathVertically:[self isVertical] withStartColor:[CIColor clearColor] endColor:[[self class] startColor]];
-                [NSGraphicsContext restoreGraphicsState];
-            }
-            CGContextDrawLayerInRect(currentContext, NSRectToCGRect(endRect), maxBlendLayer);
+            gradient = [[[NSGradient alloc] initWithStartingColor:[[self class] startColor] endingColor:[[[self class] startColor] colorWithAlphaComponent:0.0]] autorelease];
+            [gradient drawInRect:endRect angle:[self isVertical] ? 270.0 : 180.0];
         } else if ([self isVertical] && (blendStyle & BDSKStatusBarBlendStyleMask)) {
             NSDivideRect(aRect, &endRect, &ignored, END_JOIN_HEIGHT, NSMaxYEdge);
-            if (NULL == maxBlendLayer) {
-                CGSize blendSize = CGSizeMake(endRect.size.width, endRect.size.height);
-                maxBlendLayer = CGLayerCreateWithContext(currentContext, blendSize, NULL);
-                [NSGraphicsContext saveGraphicsState];
-                NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:CGLayerGetContext(maxBlendLayer) flipped:NO];
-                [NSGraphicsContext setCurrentContext:nsContext];
-                NSRect rectToFill = endRect;
-                rectToFill.origin = NSZeroPoint;
-                [[NSBezierPath bezierPathWithRect:rectToFill] fillPathWithHorizontalGradientFromColor:[[self class] startColor]
-                                                                                              toColor:[[self class] endColor]
-                                                                                         blendedAtTop:NO
-                                                                          ofVerticalGradientFromColor:[BDSKStatusBar upperColor]
-                                                                                              toColor:[BDSKStatusBar lowerColor]];
-                [NSGraphicsContext restoreGraphicsState];
-            }
-            CGContextDrawLayerInRect(currentContext, NSRectToCGRect(endRect), maxBlendLayer);
+            gradient = [[[NSGradient alloc] initWithStartingColor:[BDSKStatusBar lowerColor] endingColor:[BDSKStatusBar upperColor]] autorelease];
+            [gradient drawInRect:endRect angle:270.0];
+            NSDivideRect(ignored, &endRect, &ignored, END_JOIN_WIDTH, NSMaxYEdge);
+            gradient = [[[NSGradient alloc] initWithStartingColor:[BDSKStatusBar upperColor] endingColor:[[BDSKStatusBar upperColor] colorWithAlphaComponent:0.0]] autorelease];
+            [gradient drawInRect:endRect angle:270.0];
         }
     }
     // Draw dimple
@@ -176,23 +123,7 @@
 - (void)setBlendStyle:(NSInteger)mask {
     if (blendStyle != mask) {
         blendStyle = mask;
-        CGLayerRelease(minBlendLayer);
-        minBlendLayer = NULL;
-        CGLayerRelease(maxBlendLayer);
-        maxBlendLayer = NULL;
     }
-}
-
-- (void)setVertical:(BOOL)flag {
-    if ([self isVertical] != flag) {
-        CGLayerRelease(dividerLayer);
-        dividerLayer = NULL;
-        CGLayerRelease(minBlendLayer);
-        minBlendLayer = NULL;
-        CGLayerRelease(maxBlendLayer);
-        maxBlendLayer = NULL;
-    }
-    [super setVertical:flag];
 }
 
 @end

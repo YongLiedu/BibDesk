@@ -49,8 +49,6 @@
 #import "BDSKFileMatchConfigController.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSBezierPath_BDSKExtensions.h"
-#import "NSBezierPath_CoreImageExtensions.h"
-#import "CIImage_BDSKExtensions.h"
 #import "BDSKLevelIndicatorCell.h"
 #import "BDSKLinkedFile.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
@@ -716,44 +714,35 @@ static NSColor *fillColor = nil;
         [super awakeFromNib];
     
     // colors similar to Spotlight's window: darker blue at bottom, lighter at top
-    CGColorSpaceRef cspace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
-    const CGFloat upper[4] = { 106.0/255.0, 158.0/255.0, 238.0/255.0, 1.0 };
-    const CGFloat lower[4] = {  72.0/255.0, 139.0/255.0, 244.0/255.0, 1.0 };
-    
-    CGColorRef cgColor;
-    
-    cgColor = CGColorCreate(cspace, upper);
-    topColor = [[CIColor alloc] initWithCGColor:cgColor];
-    CGColorRelease(cgColor);
-    
-    cgColor = CGColorCreate(cspace, lower);
-    bottomColor = [[CIColor alloc] initWithCGColor:cgColor];
-    CGColorRelease(cgColor);
-    
-    CGColorSpaceRelease(cspace);
+    topColor = [[NSColor colorWithCalibratedRed:106.0/255.0 green:158.0/255.0 blue:238.0/255.0 alpha:1.0] retain];
+    bottomColor = [[NSColor colorWithCalibratedRed:72.0/255.0 green:139.0/255.0 blue:244.0/255.0 alpha:1.0] retain];
 }
 
 // these accessors are bound to the hidden color wells in the nib, which allow playing with the colors easily
 - (NSColor *)topColor
 {
-    return [NSColor colorWithCalibratedRed:[topColor red] green:[topColor green] blue:[topColor blue] alpha:[topColor alpha]];
+    return topColor;
 }
 
-- (void)setTopColor:(NSColor *)tc
+- (void)setTopColor:(NSColor *)color
 {
-    [topColor release];
-    topColor = [[CIColor colorWithNSColor:tc] retain];
+    if (topColor != color) {
+        [topColor release];
+        topColor = [color retain];
+    }
 }
 
-- (void)setBottomColor:(NSColor *)bc
+- (void)setBottomColor:(NSColor *)color
 {
-    [bottomColor release];
-    bottomColor = [[CIColor colorWithNSColor:bc] retain];
+    if (bottomColor != color) {
+        [bottomColor release];
+        bottomColor = [color retain];
+    }
 }
 
 - (NSColor *)bottomColor 
 { 
-    return [NSColor colorWithCalibratedRed:[bottomColor red] green:[bottomColor green] blue:[bottomColor blue] alpha:[bottomColor alpha]]; 
+    return bottomColor;
 }
 
 // grid looks silly when the table is empty
@@ -767,11 +756,12 @@ static NSColor *fillColor = nil;
 {
     if ([self isExpandable:[self itemAtRow:rowIndex]]) {
 
-        NSBezierPath *p = [NSBezierPath bezierPathWithRect:[self rectOfRow:rowIndex]];
+        NSGradient *gradient;
         if ([self isFlipped])
-            [p fillPathVerticallyWithStartColor:topColor endColor:bottomColor];
+            gradient = [[[NSGradient alloc] initWithStartingColor:topColor endingColor:bottomColor] autorelease];
         else
-            [p fillPathVerticallyWithStartColor:bottomColor endColor:topColor];
+            gradient = [[[NSGradient alloc] initWithStartingColor:bottomColor endingColor:topColor] autorelease];
+        [gradient drawInRect:[self rectOfRow:rowIndex] angle:90.0];
     }
     [super drawRow:rowIndex clipRect:clipRect];
 }

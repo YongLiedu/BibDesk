@@ -37,8 +37,6 @@
  */
 
 #import "BDSKGradientView.h"
-#import "NSBezierPath_CoreImageExtensions.h"
-#import "CIImage_BDSKExtensions.h"
 
 @interface BDSKGradientView (Private)
 
@@ -51,102 +49,43 @@
 - (id)initWithFrame:(NSRect)frame
 {
     self = [super initWithFrame:frame];
-        [self setDefaultColors];
-    layer = NULL;
+    [self setDefaultColors];
     return self;
 }
 
 - (void)dealloc
 {
-    CGLayerRelease(layer);
     [lowerColor release];
     [upperColor release];
     [super dealloc];
-}
-
-- (void)setBounds:(NSRect)aRect
-{
-    // since the gradient is vertical, we only have to reset the layer if the height changes; for most of our gradient views, this isn't likely to happen
-    if (ABS(NSHeight(aRect) - NSHeight([self bounds])) > 0.01) {
-        CGLayerRelease(layer);
-        layer = NULL;
-    }
-    [super setBounds:aRect];
-}
-
-- (void)setBoundsSize:(NSSize)aSize
-{
-    // since the gradient is vertical, we only have to reset the layer if the height changes; for most of our gradient views, this isn't likely to happen
-    if (ABS(aSize.height - NSHeight([self bounds])) > 0.01) {
-        CGLayerRelease(layer);
-        layer = NULL;
-    }
-    [super setBoundsSize:aSize];
-}
-
-- (void)setFrame:(NSRect)aRect
-{
-    // since the gradient is vertical, we only have to reset the layer if the height changes; for most of our gradient views, this isn't likely to happen
-    if (ABS(NSHeight(aRect) - NSHeight([self frame])) > 0.01) {
-        CGLayerRelease(layer);
-        layer = NULL;
-    }
-    [super setFrame:aRect];
-}
-
-- (void)setFrameSize:(NSSize)aSize
-{
-    // since the gradient is vertical, we only have to reset the layer if the height changes; for most of our gradient views, this isn't likely to happen
-    if (ABS(aSize.height - NSHeight([self frame])) > 0.01) {
-        CGLayerRelease(layer);
-        layer = NULL;
-    }
-    [super setFrameSize:aSize];
 }
 
 // fill entire view, not just the (possibly clipped) aRect
 
 - (void)drawRect:(NSRect)aRect
 {
-    CGContextRef viewContext = [[NSGraphicsContext currentContext] graphicsPort];
-    NSRect bounds = [self bounds];
-    
-    // see bug #1834337; drawing the status bar gradient is apparently really expensive on some hardware
-    // suggestion from Scott Thompson on quartz-dev was to use a CGLayer; based on docs, this should be a good win
-    if (NULL == layer) {
-        NSSize layerSize = bounds.size;
-        layer = CGLayerCreateWithContext(viewContext, NSSizeToCGSize(layerSize), NULL);
-        
-        CGContextRef layerContext = CGLayerGetContext(layer);
-        [NSGraphicsContext saveGraphicsState];
-        [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithGraphicsPort:layerContext flipped:NO]];
-        NSRect layerRect = NSZeroRect;
-        layerRect.size = layerSize;
-                
-                [[NSBezierPath bezierPathWithRect:bounds] fillPathVerticallyWithStartColor:[self lowerColor] endColor:[self upperColor]];
-        [NSGraphicsContext restoreGraphicsState];
-    }
-    
-    // normal blend mode is copy
-    CGContextSetBlendMode(viewContext, kCGBlendModeNormal);
-    CGContextDrawLayerInRect(viewContext, NSRectToCGRect(bounds), layer);
+    NSGradient *gradient = [[[NSGradient alloc] initWithStartingColor:[self lowerColor] endingColor:[self upperColor]] autorelease];
+    [gradient drawInRect:[self bounds] angle:90.0];
 }
 
-// -[CIColor initWithColor:] fails (returns nil) with +[NSColor gridColor] rdar://problem/4789043
 - (void)setLowerColor:(NSColor *)color
 {
-    [lowerColor autorelease];
-    lowerColor = [[CIColor colorWithNSColor:color] retain];
+    if (lowerColor != color) {
+        [lowerColor release];
+        lowerColor = [color retain];
+    }
 }
 
 - (void)setUpperColor:(NSColor *)color
 {
-    [upperColor autorelease];
-    upperColor = [[CIColor colorWithNSColor:color] retain];
+    if (upperColor != color) {
+        [upperColor release];
+        upperColor = [color retain];
+    }
 }    
 
-- (CIColor *)lowerColor { return lowerColor; }
-- (CIColor *)upperColor { return upperColor; }
+- (NSColor *)lowerColor { return lowerColor; }
+- (NSColor *)upperColor { return upperColor; }
 
 // required in order for redisplay to work properly with the controls
 - (BOOL)isOpaque{  return YES; }

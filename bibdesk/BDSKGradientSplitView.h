@@ -47,9 +47,6 @@ enum {
 
 @interface BDSKGradientSplitView : BDSKSplitView {
     NSInteger blendStyle;
-    CGLayerRef dividerLayer;
-    CGLayerRef minBlendLayer;
-    CGLayerRef maxBlendLayer;
 }
 
 - (NSInteger)blendStyle;

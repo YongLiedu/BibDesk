@@ -72,7 +72,7 @@
 
 @interface BDSKGroupingOutlineView : BDSKOutlineView
 {
-    CIColor *topColor;
-    CIColor *bottomColor;
+    NSColor *topColor;
+    NSColor *bottomColor;
 }
 @end

@@ -56,8 +56,8 @@ typedef NSInteger BDSKProgressIndicatorStyle;
     CGFloat textOffset;
 }
 
-+ (CIColor *)lowerColor;
-+ (CIColor *)upperColor;
++ (NSColor *)lowerColor;
++ (NSColor *)upperColor;
 
 /*!
 	@method toggleBelowView:offset:

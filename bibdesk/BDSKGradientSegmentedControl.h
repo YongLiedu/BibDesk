@@ -42,9 +42,5 @@
 @interface BDSKGradientSegmentedControl : NSSegmentedControl
 @end
 
-@interface BDSKGradientSegmentedCell : NSSegmentedCell {
-    CGLayerRef layer;
-    CGLayerRef selectedLayer;
-    CGLayerRef highlightedLayer;
-}
+@interface BDSKGradientSegmentedCell : NSSegmentedCell
 @end

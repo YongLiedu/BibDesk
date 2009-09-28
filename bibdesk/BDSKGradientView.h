@@ -42,8 +42,8 @@
 @interface BDSKGradientView : NSView
 {
     @private
-    CIColor *lowerColor;
-    CIColor *upperColor;
+    NSColor *lowerColor;
+    NSColor *upperColor;
     CGLayerRef layer;
 }
 
@@ -51,7 +51,7 @@
 - (void)setUpperColor:(NSColor *)color;
 
 // for subclassers
-- (CIColor *)lowerColor;
-- (CIColor *)upperColor;
+- (NSColor *)lowerColor;
+- (NSColor *)upperColor;
 
 @end
