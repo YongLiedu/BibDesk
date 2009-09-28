@@ -255,14 +255,8 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, NSUInteger s
 - (void)doCommonSetup;
 {
     BDSKPRECONDITION([self textStorage]);
-#if defined(MAC_OS_X_VERSION_10_5) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
-#warning 10.5: remove URL detection
-#endif
     // use Apple's link detection on 10.5 and later
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
-        [[self textStorage] setDelegate:self];
-    else
-        [self setAutomaticLinkDetectionEnabled:YES];
+    [self setAutomaticLinkDetectionEnabled:YES];
     [self updateFontFromPreferences];
     [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self
         forKeyPath:[@"values." stringByAppendingString:BDSKEditorFontNameKey]

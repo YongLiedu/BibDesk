@@ -291,47 +291,23 @@
     [sharedGroupImage setName:@"sharedGroup"];
 }
 
-// This methods and the following dependent methods are copied from OmniAppKit/NSImage-OAExtensions.m
-+ (NSImage *)systemIconWithCode:(OSType)code {
-    IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:code];
-    NSImage *image = [iconFamily imageWithAllReps];
-    [iconFamily release];
-    return image;
-}
-
 + (NSImage *)httpInternetLocationImage {
-    static NSImage *image = nil;
-    if (image == nil)
-        image = [[self systemIconWithCode:kInternetLocationHTTPIcon] retain];
-    return image;
-}
+    return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationHTTPIcon)];}
 
 + (NSImage *)ftpInternetLocationImage {
-    static NSImage *image = nil;
-    if (image == nil)
-        image = [[self systemIconWithCode:kInternetLocationFTPIcon] retain];
-    return image;
+    return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationFTPIcon)];
 }
 
 + (NSImage *)mailInternetLocationImage {
-    static NSImage *image = nil;
-    if (image == nil)
-        image = [[self systemIconWithCode:kInternetLocationMailIcon] retain];
-    return image;
+    return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationMailIcon)];
 }
 
 + (NSImage *)newsInternetLocationImage {
-    static NSImage *image = nil;
-    if (image == nil)
-        image = [[self systemIconWithCode:kInternetLocationNewsIcon] retain];
-    return image;
+    return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationNewsIcon)];
 }
 
 + (NSImage *)genericInternetLocationImage {
-    static NSImage *image = nil;
-    if (image == nil)
-        image = [[self systemIconWithCode:kInternetLocationGenericIcon] retain];
-    return image;
+    return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationGenericIcon)];
 }
 
 + (NSImage *)iconWithSize:(NSSize)iconSize forToolboxCode:(OSType) code {
@@ -391,7 +367,7 @@
     if(!aURL) return nil;
 
     if([aURL isFileURL])
-        return [self imageForFile:[aURL path]];
+        return [[NSWorkspace sharedWorkspace] iconForFile:[aURL path]];
     
     NSString *scheme = [aURL scheme];
     
@@ -404,78 +380,6 @@
     else if([scheme isEqualToString:@"news"])
         return [self newsInternetLocationImage];
     else return [self genericInternetLocationImage];
-}
-
-+ (NSImage *)imageForFile:(NSString *)path{
-    
-    /* It turns out that -[NSWorkspace iconForFileType:] doesn't cache previously returned values, so we cache them here.  Mainly useful for tableview datasource methods.  
-     
-     This caching is problematic in that it 
-     a) doesn't allow for per-file application bindings 
-     b) if the user changes a LS binding while this app is open, we still show the stale value
-     c) custom icons are not handled correctly
-     d) it doesn't consider the custom file opening pref that overrides LS (there's no way to account for that)
-     
-     */
-    
-    static NSMutableDictionary *imageDictionary = nil;
-    id image = nil;
-    
-    if (!path)
-        return nil;
-   
-    // if no file type, we'll just cache the path and waste some memory
-    if (imageDictionary == nil)
-        imageDictionary = [[NSMutableDictionary alloc] init];
-    
-    NSString *pathExtension = [path pathExtension];
-    
-    // .app is a valid path extension to pass here, but we must not cache the icon based on that extension!
-    if(![pathExtension isEqualToString:@""] && ![@"app" isEqualToString:pathExtension]) {
-        image = [imageDictionary objectForKey:pathExtension];
-        if (image == nil) {
-            IconFamily *iconFamily = [[IconFamily alloc] initWithIconOfFile:path];
-            image = [iconFamily imageWithAllReps];
-            [image setFlipped:NO];
-            if (image == nil)
-                image = [NSNull null];
-            [imageDictionary setObject:image forKey:pathExtension];
-            [iconFamily release];
-        }
-    } else {    
-        image = [imageDictionary objectForKey:path];
-        if (image == nil) {
-            IconFamily *iconFamily = [[IconFamily alloc] initWithIconOfFile:path];
-            image = [iconFamily imageWithAllReps];
-            [image setFlipped:NO];
-            if (image == nil)
-                image = [NSNull null];
-            [imageDictionary setObject:image forKey:path];
-            [iconFamily release];
-        }
-    }
-    return image != [NSNull null] ? image : nil;
-}
-
-+ (NSImage *)imageForFileType:(NSString *)fileType {
-    static NSMutableDictionary *imageDictionary = nil;
-    
-    if (!fileType)
-        return nil;
-   
-    // if no file type, we'll just cache the path and waste some memory
-    if (imageDictionary == nil)
-        imageDictionary = [[NSMutableDictionary alloc] init];
-    
-    id image = [imageDictionary objectForKey:fileType];
-    if (image == nil) {
-        image = [[NSWorkspace sharedWorkspace] iconForFileType:fileType];
-        [image setFlipped:NO];
-        if (image == nil)
-            image = [NSNull null];
-        [imageDictionary setObject:image forKey:fileType];
-    }
-    return image != [NSNull null] ? image : nil;
 }
 
 static NSImage *createPaperclipImageWithColor(NSColor *color) {

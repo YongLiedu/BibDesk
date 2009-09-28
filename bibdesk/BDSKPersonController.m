@@ -295,7 +295,7 @@
 
 // binding directly to person.personFromAddressBook.imageData in IB doesn't work for some reason
 - (NSData *)imageData{
-    return [[person personFromAddressBook] imageData] ?: [[NSImage imageForFileType:@"vcf"] TIFFRepresentation];
+    return [[person personFromAddressBook] imageData] ?: [[[NSWorkspace sharedWorkspace] iconForFileType:@"vcf"] TIFFRepresentation];
 }
 
 #pragma mark actions
@@ -509,7 +509,7 @@
 }
  
 - (NSImage *)dragImageForDragImageView:(BDSKDragImageView *)view {
-	return [[NSImage imageForFileType:@"vcf"] dragImageWithCount:1];
+	return [[[NSWorkspace sharedWorkspace] iconForFileType:@"vcf"] dragImageWithCount:1];
 }
 
 #pragma mark Splitview delegate methods

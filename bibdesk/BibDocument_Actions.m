@@ -66,7 +66,6 @@
 
 #import "BDSKTypeManager.h"
 #import "BDSKScriptHookManager.h"
-#import "NSAlert_BDSKExtensions.h"
 #import "BDSKFiler.h"
 #import "BDSKTextImportController.h"
 #import "BDSKStatusBar.h"
@@ -190,7 +189,7 @@ static BOOL changingColors = NO;
 
 - (void)removePubsAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
 	NSArray *pubs = [(NSArray *)contextInfo autorelease];
-    if ([alert suppressionButtonState] == NSOnState)
+    if ([[alert suppressionButton]state] == NSOnState)
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnRemovalFromGroupKey];
     if (returnCode == NSAlertDefaultReturn)
         [self removePublications:pubs fromGroups:[self selectedGroups]];
@@ -237,7 +236,7 @@ static BOOL changingColors = NO;
 
 - (void)deletePubsAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
 	NSArray *pubs = [(NSArray *)contextInfo autorelease];
-	if (alert != nil && [alert suppressionButtonState] == NSOnState)
+	if (alert != nil && [[alert suppressionButton] state] == NSOnState)
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnDeleteKey];
     if (returnCode == NSAlertOtherReturn)
         return;
@@ -1600,7 +1599,7 @@ static BOOL changingColors = NO;
 }    
 
 - (void)generateCiteKeyAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-	if([alert suppressionButtonState] == NSOnState)
+	if([[alert suppressionButton] state] == NSOnState)
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
     
     if(returnCode == NSAlertDefaultReturn)

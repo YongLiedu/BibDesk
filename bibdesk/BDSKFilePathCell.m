@@ -76,7 +76,7 @@ static BDSKFilePathFormatter *filePathFormatter = nil;
     if ([(id)obj isKindOfClass:[NSString class]]) {
         NSString *path = [(NSString *)obj stringByStandardizingPath];
         if(path && [[NSFileManager defaultManager] fileExistsAtPath:path])
-            image = [NSImage imageForFile:path];
+            image = [[NSWorkspace sharedWorkspace] iconForFile:path];
     } else if ([(id)obj isKindOfClass:[NSURL class]]) {
         NSURL *fileURL = (NSURL *)obj;
         if([[NSFileManager defaultManager] objectExistsAtFileURL:fileURL])

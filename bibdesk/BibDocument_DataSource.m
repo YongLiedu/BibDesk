@@ -54,7 +54,6 @@
 #import "BDSKPreviewer.h"
 #import "BDSKMainTableView.h"
 #import "BDSKGroupOutlineView.h"
-#import "NSAlert_BDSKExtensions.h"
 #import "BDSKTypeManager.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
@@ -1248,7 +1247,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                              informativeTextWithFormat:NSLocalizedString(@"This action will change the %@ field in %ld items. Do you want to proceed?", @"Informative text in alert dialog"), [currentGroupField localizedFieldName], (long)[groupedPublications count]];
         [alert setShowsSuppressionButton:YES];
         NSInteger rv = [alert runModal];
-        if ([alert suppressionButtonState] == NSOnState)
+        if ([[alert suppressionButton] state] == NSOnState)
             [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnRenameGroupKey];
         if (rv == NSAlertAlternateReturn)
             return NO;
@@ -1903,7 +1902,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 
 - (void)trashAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
-    if (alert && [alert suppressionButtonState] == NSOnState)
+    if (alert && [[alert suppressionButton] state] == NSOnState)
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKAskToTrashFilesKey];
     NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
     if (returnCode == NSAlertAlternateReturn) {

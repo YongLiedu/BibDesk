@@ -296,7 +296,7 @@ static void removeAliens(NSMutableString *string)
 	BibItem *bi=nil ;
 
 	NSString *pubMedSearch;
-	NSString *pdfTitle = [[pdfd documentAttributes] valueForKey:BDSKPDFDocumentTitleAttribute];	
+	NSString *pdfTitle = [[pdfd documentAttributes] valueForKey:PDFDocumentTitleAttribute];	
 	pubMedSearch=[pdfTitle stringByMakingPubmedSearchFromAnyBibliographicIDsInString];
 	if(pubMedSearch!=nil){
 		bi=[BibItem itemWithPubMedSearchTerm:pubMedSearch];

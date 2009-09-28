@@ -69,46 +69,8 @@ static BOOL (*original_validateUserInterfaceItem)(id, SEL, id) = NULL;
 
 #pragma mark Drop highlight
 
-#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
-// we override this private method to draw something nicer than the default ugly black square
-// from http://www.cocoadev.com/index.pl?UglyBlackHighlightRectWhenDraggingToNSTableView
-// modified to use -intercellSpacing and save/restore graphics state
--(void)replacement_drawDropHighlightOnRow:(NSInteger)rowIndex{
-    NSRect drawRect = (rowIndex == -1) ? [self visibleRect] : [self rectOfRow:rowIndex];
-    [self lockFocus];
-    [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:2.0 color:[NSColor alternateSelectedControlColor]];
-    [self unlockFocus];
-}
-#else
-#warning fixme: remove NSTableView highlights
-#endif
-
 + (void)load {
     original_validateUserInterfaceItem = (BOOL (*)(id, SEL, id))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(validateUserInterfaceItem:), @selector(replacement_validateUserInterfaceItem:));
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
-        BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(_drawDropHighlightOnRow:), @selector(replacement_drawDropHighlightOnRow:));
 }
 
 @end
-
-#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
-@implementation NSTableColumn (BDSKExtensions)
-- (id)replacement_dataCellForRow:(NSInteger)row {
-    id cell = [self dataCell];
-    id tableView = [self tableView];
-    if ([tableView isKindOfClass:[NSOutlineView class]] && [[tableView delegate] respondsToSelector:@selector(outlineView:dataCellForTableColumn:item:)])
-        cell = [[tableView delegate] outlineView:tableView dataCellForTableColumn:self item:[tableView itemAtRow:row]];
-    else if ([tableView isKindOfClass:[NSTableView class]] && [[tableView delegate] respondsToSelector:@selector(tableView:dataCellForTableColumn:row:)])
-        cell = [[tableView delegate] tableView:tableView dataCellForTableColumn:self row:row];
-    return cell;
-}
-
-+ (void)load {
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
-        BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(dataCellForRow:), @selector(replacement_dataCellForRow:));
-}
-
-@end
-#else
-#warning fixme: remove NSTableColumn category
-#endif

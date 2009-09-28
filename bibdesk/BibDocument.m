@@ -64,7 +64,6 @@
 #import "BibDocument_Search.h"
 #import "BDSKTableSortDescriptor.h"
 #import "BDSKTableSortDescriptor.h"
-#import "NSAlert_BDSKExtensions.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKPreviewer.h"
 #import "BDSKEditor.h"
@@ -309,7 +308,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (void)migrationAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)unused {
     
-    if ([alert suppressionButtonState] == NSOnState)
+    if ([[alert suppressionButton] state] == NSOnState)
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"BDSKDisableMigrationWarning"];
     
     if (NSAlertDefaultReturn == returnCode)

@@ -42,18 +42,6 @@
 
 static NSDictionary *translator = nil;
 
-// The key names were taken from the Voyeur sample code, since the linker fails using the PDFKit constant names
-// rdar://problem/4450214
-// note: fixed in 10.5
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
-#warning use PDFKit constants
-#endif
-
-NSString *BDSKPDFDocumentTitleAttribute = @"Title";				        // NSString containing document title.
-NSString *BDSKPDFDocumentAuthorAttribute = @"Author";			        // NSString containing document author.
-NSString *BDSKPDFDocumentCreationDateAttribute = @"CreationDate";		// NSDate representing document creation date.
-NSString *BDSKPDFDocumentKeywordsAttribute = @"Keywords";			    // NSArray of NSStrings containing document keywords.
-
 /* The purpose of this class is to provide an easy interface to set and get the attributes of a PDF document in bulk, acting an an intermediary between our model objects and the PDFDocument (or whatever we eventually use). */
 
 @implementation PDFMetadata
@@ -62,7 +50,7 @@ NSString *BDSKPDFDocumentKeywordsAttribute = @"Keywords";			    // NSArray of NS
 {
     BDSKINITIALIZE;
     // provides a dictionary of key paths matched to the PDFDocument keys
-    translator = [[NSDictionary alloc] initWithObjectsAndKeys:@"pubAuthorsForDisplay", BDSKPDFDocumentAuthorAttribute, @"keywordsArray", BDSKPDFDocumentKeywordsAttribute, @"title.stringByRemovingTeX", BDSKPDFDocumentTitleAttribute, @"date", BDSKPDFDocumentCreationDateAttribute, nil];
+    translator = [[NSDictionary alloc] initWithObjectsAndKeys:@"pubAuthorsForDisplay", PDFDocumentAuthorAttribute, @"keywordsArray", PDFDocumentKeywordsAttribute, @"title.stringByRemovingTeX", PDFDocumentTitleAttribute, @"date", PDFDocumentCreationDateAttribute, nil];
 }
 
 // an "item" is some object that is KVC compliant for the keys in the translator; nominally a BibItem
@@ -71,22 +59,22 @@ NSString *BDSKPDFDocumentKeywordsAttribute = @"Keywords";			    // NSArray of NS
     PDFMetadata *metadata = [[[self allocWithZone:[self zone]] init] autorelease];
     id value = nil;
     
-    value = [anItem valueForKeyPath:[translator objectForKey:BDSKPDFDocumentTitleAttribute]];
+    value = [anItem valueForKeyPath:[translator objectForKey:PDFDocumentTitleAttribute]];
     if(value != nil)
-        [metadata setValue:value forKey:BDSKPDFDocumentTitleAttribute];
+        [metadata setValue:value forKey:PDFDocumentTitleAttribute];
     
-    value = [anItem valueForKeyPath:[translator objectForKey:BDSKPDFDocumentAuthorAttribute]];
+    value = [anItem valueForKeyPath:[translator objectForKey:PDFDocumentAuthorAttribute]];
     if(value != nil)
-        [metadata setValue:value forKey:BDSKPDFDocumentAuthorAttribute];
+        [metadata setValue:value forKey:PDFDocumentAuthorAttribute];
     
-    value = [anItem valueForKeyPath:[translator objectForKey:BDSKPDFDocumentKeywordsAttribute]];
+    value = [anItem valueForKeyPath:[translator objectForKey:PDFDocumentKeywordsAttribute]];
     if(value != nil)
-        [metadata setValue:value forKey:BDSKPDFDocumentKeywordsAttribute];
+        [metadata setValue:value forKey:PDFDocumentKeywordsAttribute];
     
     // docs say this is an NSString, but the PDFDocument returns an NSCFDate (header says it's an NSDate) rdar://problem:/4450219
-    value = [anItem valueForKeyPath:[translator objectForKey:BDSKPDFDocumentCreationDateAttribute]];
+    value = [anItem valueForKeyPath:[translator objectForKey:PDFDocumentCreationDateAttribute]];
     if(value != nil)
-        [metadata setValue:value forKey:BDSKPDFDocumentCreationDateAttribute];
+        [metadata setValue:value forKey:PDFDocumentCreationDateAttribute];
     
     return metadata;
 }

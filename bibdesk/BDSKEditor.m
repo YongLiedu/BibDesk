@@ -45,7 +45,6 @@
 #import "BDSKScriptHookManager.h"
 #import "BDSKEdgeView.h"
 #import "NSString_BDSKExtensions.h"
-#import "NSAlert_BDSKExtensions.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKFiler.h"
 #import "BDSKDragWindow.h"
@@ -853,7 +852,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (void)generateCiteKeyAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-	if([alert suppressionButtonState] == NSOnState)
+	if([[alert suppressionButton] state] == NSOnState)
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
     
     if(returnCode == NSAlertAlternateReturn)
@@ -1293,7 +1292,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
                                                action:@selector(addLinkedFileFromMenuItem:)
                                         keyEquivalent:@""];
 			[item setRepresentedObject:filePath];
-			[item setImageAndSize:[NSImage imageForFile:filePath]];
+			[item setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFile:filePath]];
 		}
 	}
     
@@ -1423,7 +1422,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
                                    action:@selector(addLinkedFileFromMenuItem:)
                             keyEquivalent:@""];
             [item setRepresentedObject:filePath];
-            [item setImageAndSize:[NSImage imageForFile:filePath]];
+            [item setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFile:filePath]];
         }
     }
     
@@ -1441,7 +1440,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
                                    action:@selector(addLinkedFileFromMenuItem:)
                             keyEquivalent:@""];
             [item setRepresentedObject:filePath];
-            [item setImageAndSize:[NSImage imageForFile:filePath]];
+            [item setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFile:filePath]];
         }
     }  
     
@@ -1466,7 +1465,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
                                action:@selector(addLinkedFileFromMenuItem:)
                         keyEquivalent:@""];
         [item setRepresentedObject:filePath];
-        [item setImageAndSize:[NSImage imageForFile:filePath]];
+        [item setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFile:filePath]];
     }
     
     if ([menu numberOfItems] == 0) {
@@ -1660,7 +1659,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 - (void)trashAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
-    if (alert && [alert suppressionButtonState] == NSOnState)
+    if (alert && [[alert suppressionButton] state] == NSOnState)
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKAskToTrashFilesKey];
     NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
     if (returnCode == NSAlertAlternateReturn) {
@@ -1850,7 +1849,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
                                      informativeTextWithFormat:NSLocalizedString(@"The value was inherited from the item linked to by the Crossref field. Do you want to overwrite the inherited value?", @"Informative text in alert dialog")];
             [alert setShowsSuppressionButton:YES];
             
-            if ([alert suppressionButtonState] == NSOnState)
+            if ([[alert suppressionButton] state] == NSOnState)
                 [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnEditInheritedKey];
             
             NSInteger rv = [alert runModal];

@@ -36,7 +36,6 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #import "NSCharacterSet_BDSKExtensions.h"
-#import "BDSKRuntime.h"
 
 
 @implementation NSCharacterSet (BDSKExtensions)
@@ -99,32 +98,5 @@
         nonDecimalDigitCharacterSet = [[[NSCharacterSet decimalDigitCharacterSet] invertedSet] copy];
     return nonDecimalDigitCharacterSet;
 }
-
-#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
-+ (id)Tiger_newlineCharacterSet;
-{
-    static NSCharacterSet *newlineCharacterSet = nil;
-    if (newlineCharacterSet == nil) {
-        // This will be a character set with all newline characters (including the weird Unicode ones)
-        CFMutableCharacterSetRef newlineCFCharacterSet = NULL;
-        // get all whitespace characters (does not include newlines)
-        newlineCFCharacterSet = CFCharacterSetCreateMutableCopy(CFAllocatorGetDefault(), CFCharacterSetGetPredefined(kCFCharacterSetWhitespace));
-        // invert the whitespace-only set to get all non-whitespace chars (the inverted set will include newlines)
-        CFCharacterSetInvert(newlineCFCharacterSet);
-        // now get only the characters that are common to kCFCharacterSetWhitespaceAndNewline and our non-whitespace set
-        CFCharacterSetIntersect(newlineCFCharacterSet, CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline));
-        newlineCharacterSet = [(id)newlineCFCharacterSet copy];
-        CFRelease(newlineCFCharacterSet);
-    }
-    return newlineCharacterSet;
-}
-
-+ (void)load {
-    // this does nothing when the method is already defined, i.e. on Leopard
-    BDSKAddClassMethodImplementationFromSelector(self, @selector(newlineCharacterSet), @selector(Tiger_newlineCharacterSet));
-}
-#else
-#warning fixme: remove NSCharacterSet category implementation
-#endif
 
 @end

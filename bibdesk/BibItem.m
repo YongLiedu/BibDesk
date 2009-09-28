@@ -79,6 +79,7 @@
 #import "CFString_BDSKExtensions.h"
 #import "BDSKCFCallBacks.h"
 #import "NSCharacterSet_BDSKExtensions.h"
+#import <Quartz/Quartz.h>
 
 #define DEFAULT_CITEKEY @"cite-key"
 static NSSet *fieldsToWriteIfEmpty = nil;
@@ -3255,20 +3256,20 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         NSString *value = nil;
         
         // setting to nil can remove some fields (e.g. keywords), so check first
-        value = [metadata valueForKey:BDSKPDFDocumentAuthorAttribute];
+        value = [metadata valueForKey:PDFDocumentAuthorAttribute];
         if(value)
             [item setField:BDSKAuthorString toValue:value];
         
-        value = [metadata valueForKey:BDSKPDFDocumentTitleAttribute];
+        value = [metadata valueForKey:PDFDocumentTitleAttribute];
         if(value)
             [item setField:BDSKTitleString toValue:value];
         
         // @@ this seems to be set by the filesystem, not as metadata?
-        value = [[[metadata valueForKey:BDSKPDFDocumentCreationDateAttribute] dateWithCalendarFormat:@"%B %Y" timeZone:[NSTimeZone defaultTimeZone]] description];
+        value = [[[metadata valueForKey:PDFDocumentCreationDateAttribute] dateWithCalendarFormat:@"%B %Y" timeZone:[NSTimeZone defaultTimeZone]] description];
         if(value)
             [item setField:BDSKDateString toValue:value];
         
-        value = [[metadata valueForKey:BDSKPDFDocumentKeywordsAttribute] componentsJoinedByString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey]];
+        value = [[metadata valueForKey:PDFDocumentKeywordsAttribute] componentsJoinedByString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey]];
         if(value)
             [item setField:BDSKKeywordsString toValue:value];
     }

@@ -38,11 +38,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-extern NSString *BDSKPDFDocumentTitleAttribute;				 
-extern NSString *BDSKPDFDocumentAuthorAttribute;			 
-extern NSString *BDSKPDFDocumentCreationDateAttribute;
-extern NSString *BDSKPDFDocumentKeywordsAttribute;			
-
 @interface PDFMetadata : NSObject {
     NSMutableDictionary *dictionary;
 }

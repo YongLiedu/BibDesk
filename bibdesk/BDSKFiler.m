@@ -46,7 +46,6 @@
 #import "BibDocument_Actions.h"
 #import "BDSKAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "NSAlert_BDSKExtensions.h"
 #import "BDSKLinkedFile.h"
 #import "BDSKPreferenceController.h"
 
@@ -564,7 +563,7 @@ static BDSKFiler *sharedFiler = nil;
                                          informativeTextWithFormat:NSLocalizedString(@"AutoFile is about to move the folder \"%@\" to \"%@\". Do you want to move the folder?", @"Informative text in alert dialog"), path, newPath];
                     [alert setShowsSuppressionButton:YES];
                     ignoreMove = (NSAlertAlternateReturn == [alert runModal]);
-                    if([alert suppressionButtonState] == NSOnState)
+                    if([[alert suppressionButton] state] == NSOnState)
                         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnMoveFolderKey];
                 }
                 if(ignoreMove){

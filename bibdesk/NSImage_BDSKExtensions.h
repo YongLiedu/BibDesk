@@ -72,7 +72,6 @@
 + (void)makeBookmarkImages;
 + (void)makeGroupImages;
 
-+ (NSImage *)systemIconWithCode:(OSType)code;
 + (NSImage *)httpInternetLocationImage;
 + (NSImage *)ftpInternetLocationImage;
 + (NSImage *)mailInternetLocationImage;
@@ -84,8 +83,6 @@
 + (NSImage *)smallMissingFileImage;
 
 + (NSImage *)imageForURL:(NSURL *)aURL;
-+ (NSImage *)imageForFile:(NSString *)path;
-+ (NSImage *)imageForFileType:(NSString *)fileType;
 + (NSImage *)paperclipImage;
 + (NSImage *)redPaperclipImage;
 

@@ -91,20 +91,8 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
 
 - (NSColor *)textColor {
     // this allows the expansion tooltips on 10.5 to draw with the correct color
-#if defined(MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
-    // on 10.5, we can just check background style instead of messing around with flags and checking the highlight color, which accounts for much of the code in this class
-#warning 10.5 fixme
-#endif
-    
-    if (settingUpFieldEditor == NO) {
-        if ([self respondsToSelector:@selector(backgroundStyle)]) {
-            if (hasDarkHighlight && [self isHighlighted])
-                return [NSColor textBackgroundColor];
-        } else if ([self isHighlighted]) {
-            if (hasDarkHighlight || ([[[self controlView] window] isKeyWindow] && [[[[self controlView] window] firstResponder] isEqual:[self controlView]]))
-                return [NSColor textBackgroundColor];
-        }
-    }
+    if (settingUpFieldEditor == NO && hasDarkHighlight && [self isHighlighted])
+        return [NSColor textBackgroundColor];
     return [super textColor];
 }
 

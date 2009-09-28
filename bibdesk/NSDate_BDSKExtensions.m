@@ -54,17 +54,7 @@
     
     static id locale = nil;
     if (nil == locale) {
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
-#warning remove this
-#endif
-        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-            locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en"];
-        } else {
-            NSArray *monthNames = [NSArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December", nil];
-            NSArray *shortMonthNames = [NSArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec", nil];
-        
-            locale = [[NSDictionary alloc] initWithObjectsAndKeys:@"MDYH", NSDateTimeOrdering, monthNames, NSMonthNameArray, shortMonthNames, NSShortMonthNameArray, nil];
-        }
+        locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en"];
     }
     static CFDateFormatterRef dateFormatter = nil;
     if (NULL == dateFormatter) {

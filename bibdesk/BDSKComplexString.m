@@ -178,14 +178,14 @@ NSString *__BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolv
     [super dealloc];
 }
 
-/* NSCopying protocol */
-// NSShouldRetainWithZone returns NO on 10.4.4 for NULL or NSDefaultMallocZone rdar://problem/4409099
-// note: this radar is fixed in 10.5.0, but probably not worth checking the version here
 - (id)copyWithZone:(NSZone *)zone{
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
-#warning use NSShouldRetainWithZone
-#endif
-    return [self retain];
+    if (NSShouldRetainWithZone(self, zone))
+        return [self retain];
+    else if (inherited)
+        return [[BDSKComplexString allocWithZone:zone] initWithInheritedValue:self];
+    else
+        return [[BDSKComplexString allocWithZone:zone] initWithNodes:nodes macroResolver:macroResolver];
+
 }
 
 /* NSCoding protocol */

@@ -81,7 +81,6 @@
 #import "BDSKTypeManager.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
-#import "BDSKRuntime.h"
 
 
 @implementation NSString (BDSKExtensions)
@@ -1947,21 +1946,6 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 - (NSString *)uppercaseFirst{
     return [[[self substringToIndex:1] uppercaseString] stringByAppendingString:[self substringFromIndex:1]];
 }
-
-#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
-- (NSString *)Tiger_stringByReplacingOccurrencesOfString:(NSString *)stringToReplace withString:(NSString *)replacement {
-    if ([stringToReplace length] == 0 || [self rangeOfString:stringToReplace].length == 0)
-        return self;
-    return [[self componentsSeparatedByString:stringToReplace] componentsJoinedByString:replacement];
-}
-
-+ (void)load {
-    // this does nothing when the method is already defined, i.e. on Leopard
-    BDSKAddInstanceMethodImplementationFromSelector(self, @selector(stringByReplacingOccurrencesOfString:withString:), @selector(Tiger_stringByReplacingOccurrencesOfString:withString:));
-}
-#else
-#warning fixme: remove NSString category implementation
-#endif
 
 @end
 
