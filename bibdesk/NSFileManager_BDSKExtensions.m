@@ -249,33 +249,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     FSRef pathRef;
     CFURLRef downloadsURL = NULL;
     
-#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-#endif
-        err = FSFindFolder(kUserDomain, kDownloadsFolderType, TRUE, &pathRef);
-#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
-    } else {
-        ICInstance inst;
-        ICAttr junk = 0;
-        ICFileSpec spec;
-        long size = sizeof(ICFileSpec);
-        
-        err = ICStart(&inst, 'SKim');
-        if (noErr == err) {
-            err = ICBegin(inst, icReadOnlyPerm);
-            
-            if (err == noErr) {
-                err = ICGetPref(inst, kICDownloadFolder, &junk, &spec, &size);
-                ICEnd(inst);
-                if (err == noErr)
-                    err = FSpMakeFSRef(&(spec.fss), &pathRef);
-            }
-            
-            ICStop(inst);
-        }
-    }
-#endif
-    if(err == noErr)
+    if (noErr == FSFindFolder(kUserDomain, kDownloadsFolderType, TRUE, &pathRef))
         downloadsURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &pathRef);
     
     return [(NSURL *)downloadsURL autorelease];
@@ -860,25 +834,9 @@ static OSType finderSignatureBytes = 'MACS';
         success = CFURLGetFSRef((CFURLRef)dstURL, &dstDirRef);
     
     OSErr err = noErr;
-    NSString *comment = nil;
     FSRef newObjectRef;
     
-    // unfortunately, FSCopyObjectSync does not copy Spotlight comments on Tiger (and neither does NSFileManager) rdar://problem/4531819
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
-        comment = [self commentForURL:srcURL];
-    
     err = FSCopyObjectSync(&srcFileRef, &dstDirRef, NULL, &newObjectRef, 0);
-    
-    // set the file comment if necessary
-    if(noErr == err && nil != comment){
-        CFURLRef newFileURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &newObjectRef);
-        if(newFileURL){
-            [self setComment:comment forURL:(NSURL *)newFileURL];
-            CFRelease(newFileURL);
-        } else {
-            err = coreFoundationUnknownErr;
-        }
-    }
     
     if(NO == success && error != nil){
         NSString *errorMessage = nil;

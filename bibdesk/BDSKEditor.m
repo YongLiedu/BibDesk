@@ -1639,7 +1639,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     BOOL isDir;
     
     if (downloadsDirectory == nil && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey] && [NSString isEmptyString:extension] == NO)
-        downloadsDirectory = [NSSearchPathForDirectoriesInDomains(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 ? NSDownloadsDirectory : NSDesktopDirectory, NSUserDomainMask, YES) firstObject];
+        downloadsDirectory = [NSSearchPathForDirectoriesInDomains(NSDownloadsDirectory, NSUserDomainMask, YES) firstObject];
     
     if ([NSString isEmptyString:extension] == NO && [[NSFileManager defaultManager] fileExistsAtPath:downloadsDirectory isDirectory:&isDir] && isDir) {
         fileURL = [NSURL fileURLWithPath:[downloadsDirectory stringByAppendingPathComponent:filename]];

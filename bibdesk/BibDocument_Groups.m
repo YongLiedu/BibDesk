@@ -1153,9 +1153,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     if (NO == [WebURLsWithTitlesClass respondsToSelector:@selector(writeURLs:andTitles:toPasteboard:)])
         WebURLsWithTitlesClass = Nil;
     
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 &&
-        (data = [(NSData *)CFURLCreateData(nil, (CFURLRef)url, kCFStringEncodingUTF8, true) autorelease]))
-            theUTI = (NSString *)([url isFileURL] ? kUTTypeFileURL : kUTTypeURL);
+    if (data = [(NSData *)CFURLCreateData(nil, (CFURLRef)url, kCFStringEncodingUTF8, true) autorelease])
+        theUTI = (NSString *)([url isFileURL] ? kUTTypeFileURL : kUTTypeURL);
     
     if (WebURLsWithTitlesClass) {
         [pboard declareTypes:[NSArray arrayWithObjects:@"WebURLsWithTitlesPboardType", NSURLPboardType, NSStringPboardType, theUTI, @"public.url-name", nil] owner:nil];

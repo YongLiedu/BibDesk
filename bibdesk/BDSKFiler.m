@@ -474,7 +474,6 @@ static BDSKFiler *sharedFiler = nil;
 - (BOOL)movePath:(NSString *)path toPath:(NSString *)newPath force:(BOOL)force error:(NSError **)error{
     NSString *resolvedPath = nil;
     NSString *resolvedNewPath = nil;
-    NSString *comment = nil;
     NSString *status = nil;
     NSString *fix = nil;
     NSInteger statusFlag = BDSKNoError;
@@ -543,9 +542,6 @@ static BDSKFiler *sharedFiler = nil;
             }
         }
         if(statusFlag == BDSKNoError && ignoreMove == NO){
-            // get the Finder comment (spotlight comment), as NSFileManager does not move this on Tiger
-            if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
-                comment = [self commentForURL:[NSURL fileURLWithPath:resolvedPath]];
             NSString *fileType = [[self fileAttributesAtPath:resolvedPath traverseLink:NO] fileType];
  
             // create parent directories if necessary (OmniFoundation)
@@ -592,10 +588,6 @@ static BDSKFiler *sharedFiler = nil;
                         }
                     }
                 }else if([self movePath:resolvedPath toPath:resolvedNewPath handler:nil]){
-                    if([NSString isEmptyString:comment] == NO){
-                        // set the Finder comment (spotlight comment)
-                        [self setComment:comment forURL:[NSURL fileURLWithPath:resolvedNewPath]];
-                    }
                     if([[resolvedPath pathExtension] caseInsensitiveCompare:@"pdf"] == NSOrderedSame){
                         NSString *notesPath = [[resolvedPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"skim"];
                         NSString *newNotesPath = [[resolvedNewPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"skim"];

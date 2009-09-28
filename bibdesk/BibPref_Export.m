@@ -68,10 +68,7 @@
         else 
             [self setItemNodes:[BDSKTemplate defaultExportTemplates]];
         
-        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4)
-            fileTypes = [[NSArray alloc] initWithObjects:@"html", @"rss", @"csv", @"txt", @"rtf", @"rtfd", @"doc", @"docx", @"odt", nil];
-        else
-            fileTypes = [[NSArray alloc] initWithObjects:@"html", @"rss", @"csv", @"txt", @"rtf", @"rtfd", @"doc", nil];
+        fileTypes = [[NSArray alloc] initWithObjects:@"html", @"rss", @"csv", @"txt", @"rtf", @"rtfd", @"doc", @"docx", @"odt", nil];
         
         roles = [[NSMutableArray alloc] initWithObjects:[BDSKTemplate localizedMainPageString], [BDSKTemplate localizedDefaultItemString], [BDSKTemplate localizedAccessoryString], [BDSKTemplate localizedScriptString], nil];
         [roles addObjectsFromArray:[[BDSKTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString]];
@@ -242,8 +239,6 @@
         else if ([columnID isEqualToString:BDSKTemplateNameString]) {
             if ([item isLeaf])
                 value = NSLocalizedString(@"Double-click to choose file", @"Default text for template file");
-            else if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
-                value = NSLocalizedString(@"Double-click to change name", @"Default text for template name");
             else
                 value = NSLocalizedString(@"Click twice to change name", @"Default text for template name");
         }

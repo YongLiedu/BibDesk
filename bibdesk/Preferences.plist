@@ -456,37 +456,6 @@
 					<string>Password</string>
 				</array>
 			</dict>
-			<dict>
-				<key>identifier</key>
-				<string>edu.ucsd.cs.mmccrack.bibdesk.prefpane.inputmanager</string>
-				<key>class</key>
-				<string>BibPref_InputManager</string>
-				<key>nibName</key>
-				<string>BibPref_InputManager</string>
-				<key>label</key>
-				<string>Completion [SHORT]</string>
-				<key>title</key>
-				<string>Completion [LONG]</string>
-				<key>icon</key>
-				<string>inputmanager</string>
-				<key>helpAnchor</key>
-				<string>AutocompletionPreferences</string>
-				<key>maximumSystemVersion</key>
-				<string>10.4.15</string>
-				<key>initialValues</key>
-				<dict>
-					<key>BDSKEditorFormShouldAutoCompleteKey</key>
-					<true/>
-				</dict>
-				<key>searchTerms</key>
-				<array>
-					<string>InputManager (input manager)</string>
-					<string>External completion</string>
-					<string>Autocomplete</string>
-					<string>TeXShop, iTeXMac, TextEdit, Xcode</string>
-					<string>Update or reinstall</string>
-				</array>
-			</dict>
 		</array>
 	</dict>
 	<dict>

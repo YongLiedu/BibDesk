@@ -40,18 +40,6 @@
 
 @implementation CIImage (BDSKExtensions)
 
-static NSString *startColorKey = @"inputColor0";
-static NSString *endColorKey = @"inputColor1";
-
-+ (void)load {
-    
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
-        // in Tiger the input colors are backwards
-        startColorKey = @"inputColor1";
-        endColorKey = @"inputColor0";
-    }
-}
-
 + (CIImage *)imageWithConstantColor:(CIColor *)color;
 {
     CIFilter *colorFilter = [CIFilter filterWithName:@"CIConstantColorGenerator"];    
@@ -65,8 +53,8 @@ static NSString *endColorKey = @"inputColor1";
 {
     CIFilter *linearFilter = [CIFilter filterWithName:@"CILinearGradient"];    
     
-    [linearFilter setValue:startColor forKey:startColorKey];
-    [linearFilter setValue:endColor forKey:endColorKey];
+    [linearFilter setValue:startColor forKey:@"inputColor0"];
+    [linearFilter setValue:endColor forKey:@"inputColor1"];
     
     [linearFilter setValue:[CIVector vectorWithX:startPoint.x Y:startPoint.y] forKey:@"inputPoint0"];
     [linearFilter setValue:[CIVector vectorWithX:endPoint.x Y:endPoint.y] forKey:@"inputPoint1"];

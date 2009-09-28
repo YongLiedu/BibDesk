@@ -177,18 +177,16 @@
         for(i = 0; i < 3; i++)
             [questionMark compositeToPoint:NSMakePoint(6.0, 4.0) operation:NSCompositeSourceOver];
         [image unlockFocus];
-        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-            NSImage *tinyImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
-            questionMark = [NSImage iconWithSize:NSMakeSize(10.0, 10.0) forToolboxCode:kQuestionMarkIcon];
-            [tinyImage lockFocus];
-            [genericImage drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-            // hack to make the question mark dark enough to be visible
-            for(i = 0; i < 3; i++)
-                [questionMark compositeToPoint:NSMakePoint(3.0, 2.0) operation:NSCompositeSourceOver];
-            [tinyImage unlockFocus];
-            [image addRepresentation:[[tinyImage representations] lastObject]];
-            [tinyImage release];
-        }
+        NSImage *tinyImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
+        questionMark = [NSImage iconWithSize:NSMakeSize(10.0, 10.0) forToolboxCode:kQuestionMarkIcon];
+        [tinyImage lockFocus];
+        [genericImage drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        // hack to make the question mark dark enough to be visible
+        for(i = 0; i < 3; i++)
+            [questionMark compositeToPoint:NSMakePoint(3.0, 2.0) operation:NSCompositeSourceOver];
+        [tinyImage unlockFocus];
+        [image addRepresentation:[[tinyImage representations] lastObject]];
+        [tinyImage release];
     }
     return image;
 }

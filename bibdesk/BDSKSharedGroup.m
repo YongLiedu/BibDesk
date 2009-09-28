@@ -75,20 +75,18 @@ static NSImage *unlockedIcon = nil;
         [badge drawInRect:badgeRect fromRect:badgeSrcRect operation:NSCompositeSourceOver fraction:0.65];
         [image unlockFocus];
         
-        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-            iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
-            badgeRect = NSMakeRect(10.0, 0.0, 6.0, 8.0);
-            
-            NSImage *tinyImage = [[NSImage alloc] initWithSize:iconRect.size];
-            
-            [tinyImage lockFocus];
-            [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-            [[self icon] drawInRect:iconRect fromRect:iconSrcRect operation:NSCompositeSourceOver fraction:1.0];
-            [badge drawInRect:badgeRect fromRect:badgeSrcRect operation:NSCompositeSourceOver fraction:0.65];
-            [tinyImage unlockFocus];
-            [image addRepresentation:[[tinyImage representations] lastObject]];
-            [tinyImage release];
-        }
+        iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
+        badgeRect = NSMakeRect(10.0, 0.0, 6.0, 8.0);
+        
+        NSImage *tinyImage = [[NSImage alloc] initWithSize:iconRect.size];
+        
+        [tinyImage lockFocus];
+        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
+        [[self icon] drawInRect:iconRect fromRect:iconSrcRect operation:NSCompositeSourceOver fraction:1.0];
+        [badge drawInRect:badgeRect fromRect:badgeSrcRect operation:NSCompositeSourceOver fraction:0.65];
+        [tinyImage unlockFocus];
+        [image addRepresentation:[[tinyImage representations] lastObject]];
+        [tinyImage release];
         
         lockedIcon = image;
     }
@@ -110,20 +108,18 @@ static NSImage *unlockedIcon = nil;
         [badge drawInRect:badgeRect fromRect:badgeSrcRect operation:NSCompositeSourceOver fraction:0.65];
         [image unlockFocus];
         
-        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-            iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
-            badgeRect = NSMakeRect(10.0, 0.0, 6.0, 8.0);
-            
-            NSImage *tinyImage = [[NSImage alloc] initWithSize:iconRect.size];
-            
-            [tinyImage lockFocus];
-            [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-            [[self icon] drawInRect:iconRect fromRect:iconSrcRect operation:NSCompositeSourceOver fraction:1.0];
-            [badge drawInRect:badgeRect fromRect:badgeSrcRect operation:NSCompositeSourceOver fraction:0.65];
-            [tinyImage unlockFocus];
-            [image addRepresentation:[[tinyImage representations] lastObject]];
-            [tinyImage release];
-        }
+        iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
+        badgeRect = NSMakeRect(10.0, 0.0, 6.0, 8.0);
+        
+        NSImage *tinyImage = [[NSImage alloc] initWithSize:iconRect.size];
+        
+        [tinyImage lockFocus];
+        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
+        [[self icon] drawInRect:iconRect fromRect:iconSrcRect operation:NSCompositeSourceOver fraction:1.0];
+        [badge drawInRect:badgeRect fromRect:badgeSrcRect operation:NSCompositeSourceOver fraction:0.65];
+        [tinyImage unlockFocus];
+        [image addRepresentation:[[tinyImage representations] lastObject]];
+        [tinyImage release];
         
         unlockedIcon = image;
     }

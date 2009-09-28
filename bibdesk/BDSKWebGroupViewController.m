@@ -79,87 +79,17 @@
     static NSImage *reloadAdornImage = nil;
     static NSImage *stopAdornImage = nil;
     
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-        
-        backAdornImage = [[NSImage imageNamed:NSImageNameGoLeftTemplate] copy];
-        [backAdornImage setName:@"BackAdorn"];
-        
-        forwardAdornImage = [[NSImage imageNamed:NSImageNameGoRightTemplate] copy];
-        [forwardAdornImage setName:@"ForwardAdorn"];
-        
-        reloadAdornImage = [[NSImage imageNamed:NSImageNameRefreshTemplate] copy];
-        [reloadAdornImage setName:@"ReloadAdorn"];
-        
-        stopAdornImage = [[NSImage imageNamed:NSImageNameStopProgressTemplate] copy];
-        [stopAdornImage setName:@"StopAdorn"];
-        
-    } else {
-        
-        NSSize size = NSMakeSize(25.0, 13.0);
-        NSBezierPath *path;
-        
-        backAdornImage = [[NSImage alloc] initWithSize:size];
-        [backAdornImage lockFocus];
-        [[NSGraphicsContext currentContext] saveGraphicsState];
-        [[NSColor colorWithCalibratedWhite:0.1 alpha:1.0] setFill];
-        path = [NSBezierPath bezierPath];
-        [path moveToPoint:NSMakePoint(16.0, 2.5)];
-        [path lineToPoint:NSMakePoint(7.5, 7.0)];
-        [path lineToPoint:NSMakePoint(16.0, 11.5)];
-        [path closePath];
-        [path fill];
-        [[NSGraphicsContext currentContext] restoreGraphicsState];
-        [backAdornImage unlockFocus];
-        [backAdornImage setName:@"BackAdorn"];
-        
-        forwardAdornImage = [[NSImage alloc] initWithSize:size];
-        [forwardAdornImage lockFocus];
-        [[NSGraphicsContext currentContext] saveGraphicsState];
-        [[NSColor colorWithCalibratedWhite:0.1 alpha:1.0] setFill];
-        path = [NSBezierPath bezierPath];
-        [path moveToPoint:NSMakePoint(9.0, 2.5)];
-        [path lineToPoint:NSMakePoint(17.5, 7.0)];
-        [path lineToPoint:NSMakePoint(9.0, 11.5)];
-        [path closePath];
-        [path fill];
-        [[NSGraphicsContext currentContext] restoreGraphicsState];
-        [forwardAdornImage unlockFocus];
-        [forwardAdornImage setName:@"ForwardAdorn"];
-        
-        reloadAdornImage = [[NSImage alloc] initWithSize:size];
-        [reloadAdornImage lockFocus];
-        [[NSGraphicsContext currentContext] saveGraphicsState];
-        [[NSColor colorWithCalibratedWhite:0.1 alpha:1.0] set];
-        path = [NSBezierPath bezierPath];
-        [path appendBezierPathWithArcWithCenter:NSMakePoint(12.0, 6.0) radius:4.0 startAngle:0.0 endAngle:90.0 clockwise:YES];
-        [path setLineWidth:2.0];
-        [path stroke];
-        path = [NSBezierPath bezierPath];
-        [path moveToPoint:NSMakePoint(12.0, 12.5)];
-        [path lineToPoint:NSMakePoint(17.0, 9.5)];
-        [path lineToPoint:NSMakePoint(12.0, 7.0)];
-        [path closePath];
-        [path fill];
-        [[NSGraphicsContext currentContext] restoreGraphicsState];
-        [reloadAdornImage unlockFocus];
-        [reloadAdornImage setName:@"ReloadAdorn"];
-        
-        stopAdornImage = [[NSImage alloc] initWithSize:size];
-        [stopAdornImage lockFocus];
-        [[NSGraphicsContext currentContext] saveGraphicsState];
-        [[NSColor colorWithCalibratedWhite:0.1 alpha:1.0] setStroke];
-        path = [NSBezierPath bezierPath];
-        [path moveToPoint:NSMakePoint(8.0, 11.0)];
-        [path lineToPoint:NSMakePoint(16.0, 3.0)];
-        [path moveToPoint:NSMakePoint(8.0, 3.0)];
-        [path lineToPoint:NSMakePoint(16.0, 11.0)];
-        [path setLineWidth:2.5];
-        [path setLineCapStyle:NSRoundLineCapStyle];
-        [path stroke];
-        [[NSGraphicsContext currentContext] restoreGraphicsState];
-        [stopAdornImage unlockFocus];
-        [stopAdornImage setName:@"StopAdorn"];
-    }
+    backAdornImage = [[NSImage imageNamed:NSImageNameGoLeftTemplate] copy];
+    [backAdornImage setName:@"BackAdorn"];
+    
+    forwardAdornImage = [[NSImage imageNamed:NSImageNameGoRightTemplate] copy];
+    [forwardAdornImage setName:@"ForwardAdorn"];
+    
+    reloadAdornImage = [[NSImage imageNamed:NSImageNameRefreshTemplate] copy];
+    [reloadAdornImage setName:@"ReloadAdorn"];
+    
+    stopAdornImage = [[NSImage imageNamed:NSImageNameStopProgressTemplate] copy];
+    [stopAdornImage setName:@"StopAdorn"];
 	
 	// register for bibdesk: protocol, so we can display a help page on start
 	[NSURLProtocol registerClass:[BDSKBibDeskProtocol class]];

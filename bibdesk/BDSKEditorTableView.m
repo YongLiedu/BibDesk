@@ -86,29 +86,27 @@
     // on Leopard, we have to manually handle tab/return movements to avoid losing focus
     // http://www.cocoabuilder.com/archive/message/cocoa/2007/10/31/191866
     
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-        NSInteger movement = [[[aNotification userInfo] objectForKey:@"NSTextMovement"] intValue];
-        if ((editedRow != -1 && editedColumn != -1) && 
-            (NSTabTextMovement == movement || NSBacktabTextMovement == movement || NSReturnTextMovement == movement)) {
+    NSInteger movement = [[[aNotification userInfo] objectForKey:@"NSTextMovement"] intValue];
+    if ((editedRow != -1 && editedColumn != -1) && 
+        (NSTabTextMovement == movement || NSBacktabTextMovement == movement || NSReturnTextMovement == movement)) {
+        
+        // assume NSReturnTextMovement
+        NSInteger nextRow = editedRow;
+        if (NSBacktabTextMovement == movement)
+            nextRow = editedRow - 1;
+        else if (NSTabTextMovement == movement)
+            nextRow = editedRow + 1;
+        
+        if (nextRow < [self numberOfRows] && nextRow >= 0) {
+        
+            NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:editedColumn];
+            BOOL isEditable = [tableColumn isEditable] && 
+                              ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
+                               [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:nextRow]);
             
-            // assume NSReturnTextMovement
-            NSInteger nextRow = editedRow;
-            if (NSBacktabTextMovement == movement)
-                nextRow = editedRow - 1;
-            else if (NSTabTextMovement == movement)
-                nextRow = editedRow + 1;
-            
-            if (nextRow < [self numberOfRows] && nextRow >= 0) {
-            
-                NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:editedColumn];
-                BOOL isEditable = [tableColumn isEditable] && 
-                                  ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
-                                   [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:nextRow]);
-                
-                if (isEditable) {
-                    [self selectRowIndexes:[NSIndexSet indexSetWithIndex:nextRow] byExtendingSelection:NO];
-                    [self editColumn:editedColumn row:nextRow withEvent:nil select:YES];
-                }
+            if (isEditable) {
+                [self selectRowIndexes:[NSIndexSet indexSetWithIndex:nextRow] byExtendingSelection:NO];
+                [self editColumn:editedColumn row:nextRow withEvent:nil select:YES];
             }
         }
     }

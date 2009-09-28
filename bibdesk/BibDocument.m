@@ -637,12 +637,6 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 
 - (void)windowWillClose:(NSNotification *)notification{
         
-    // see comment in invalidateSearchFieldCellTimer
-    if (floor(NSAppKitVersionNumber <= NSAppKitVersionNumber10_4)) {
-        [documentWindow endEditingFor:nil];
-        [self invalidateSearchFieldCellTimer];
-    }
-    
     docState.isDocumentClosed = YES;
     
     // remove all queued invocations
@@ -1207,12 +1201,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
      BOOL didSave;
 
      // same conditional as used for workaround code path
-     if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 && [absoluteURL isFileURL] && NSAutosaveOperation != saveOperation && [[fsType lowercaseString] isEqualToString:@"nfs"])
+     if ([absoluteURL isFileURL] && NSAutosaveOperation != saveOperation && [[fsType lowercaseString] isEqualToString:@"nfs"])
          didSave = NO;
      else
          didSave = [super writeSafelyToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
-    
-#if defined(MAC_OS_X_VERSION_10_5) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
     
     /* 
      This is a workaround for https://sourceforge.net/tracker/index.php?func=detail&aid=1867790&group_id=61487&atid=497423
@@ -1227,7 +1219,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
      
      */
     
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 && NO == didSave && [absoluteURL isFileURL] && NSAutosaveOperation != saveOperation) {
+    if (NO == didSave && [absoluteURL isFileURL] && NSAutosaveOperation != saveOperation) {
         
         NSFileManager *fileManager = [NSFileManager defaultManager];
         
@@ -1323,8 +1315,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             }
         }
     }
-    
-#endif
     
     return didSave;
 }
@@ -1774,11 +1764,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:&error];
     } else if (format & BDSKDocTemplateFormat) {
         return [fileTemplate docFormatFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes];
-    } else if ((format & BDSKDocxTemplateFormat) && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+    } else if (format & BDSKDocxTemplateFormat) {
         [mutableAttributes setObject:@"NSOfficeOpenXML" forKey:NSDocumentTypeDocumentAttribute];
         NSError *error = nil;
         return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:&error];
-    } else if ((format & BDSKOdtTemplateFormat) && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+    } else if (format & BDSKOdtTemplateFormat) {
         [mutableAttributes setObject:@"NSOpenDocument" forKey:NSDocumentTypeDocumentAttribute];
         NSError *error = nil;
         return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:&error];

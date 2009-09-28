@@ -68,7 +68,6 @@
  */
 
 #import "NSImage_BDSKExtensions.h"
-#import "IconFamily.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
 #import "CIImage_BDSKExtensions.h"
@@ -237,7 +236,7 @@
     static NSImage *importGroupImage = nil;
     static NSImage *sharedGroupImage = nil;
     
-    if (categoryGroupImage || floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+    if (categoryGroupImage)
         return;
     
     NSSize smallSize = NSMakeSize(32.0, 32.0);
@@ -432,13 +431,9 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
 + (NSImage *)arrowImage {
     static NSImage *arrowImage = nil;
     if (arrowImage == nil) {
-        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-            arrowImage = [[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate] copy];
-            [arrowImage setScalesWhenResized:YES];
-            [arrowImage setSize:NSMakeSize(12, 12)];
-        } else {
-            arrowImage = [[NSImage imageNamed:@"ArrowImage"] retain];
-        }
+        arrowImage = [[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate] copy];
+        [arrowImage setScalesWhenResized:YES];
+        [arrowImage setSize:NSMakeSize(12, 12)];
     }
     return arrowImage;
 }

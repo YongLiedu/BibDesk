@@ -155,12 +155,10 @@ static void fixLegacyTableColumnIdentifiers()
         [BDSKScriptMenu addScriptsToMainMenu];
     }
     
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-        NSMenu *fileMenu = [[[NSApp mainMenu] itemAtIndex:1] submenu];
-        NSUInteger idx = [fileMenu indexOfItemWithTarget:nil andAction:@selector(runPageLayout:)];
-        if (idx != NSNotFound)
-            [fileMenu removeItemAtIndex:idx];
-    }
+    NSMenu *fileMenu = [[[NSApp mainMenu] itemAtIndex:1] submenu];
+    NSUInteger idx = [fileMenu indexOfItemWithTarget:nil andAction:@selector(runPageLayout:)];
+    if (idx != NSNotFound)
+        [fileMenu removeItemAtIndex:idx];
 }
 
 - (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite{
@@ -369,10 +367,6 @@ static void fixLegacyTableColumnIdentifiers()
     if([[NSUserDefaults standardUserDefaults] objectForKey:BDSKLastVersionLaunchedKey] == nil) // show new users the readme file; others just see the release notes
         [self showReadMeFile:nil];
     [[NSUserDefaults standardUserDefaults] setObject:versionString forKey:BDSKLastVersionLaunchedKey];
-    
-    BOOL inputManagerIsCurrent;
-    if([self isInputManagerInstalledAndCurrent:&inputManagerIsCurrent] && inputManagerIsCurrent == NO)
-        [self showInputManagerUpdateAlert];
     
     // Ensure the previewer and TeX task get created now in order to avoid a spurious "unable to copy helper file" warning when quit->document window closes->first call to [BDSKPreviewer sharedPreviewer]
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey])
@@ -807,55 +801,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             [theURLs addObject:[aDoc fileURL]];
     }
     return theURLs;
-}
-
-#pragma mark Input manager
-
-- (BOOL)isInputManagerInstalledAndCurrent:(BOOL *)current{
-    NSParameterAssert(current != NULL);
-    
-    // Someone may be mad enough to install this in NSLocalDomain or NSNetworkDomain, but we don't support that since it would require admin rights.  As of 10.5, input managers must be installed in NSLocalDomain, and have certain permissions set.  Because of this, and because the input manager has been a PITA to support, we ignore it on 10.5.
-    NSString *inputManagerBundlePath = [[NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"/InputManagers/BibDeskInputManager/BibDeskInputManager.bundle"];
-
-    NSString *bundlePath = [[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"BibDeskInputManager/BibDeskInputManager.bundle"];
-    NSString *bundledVersion = [[[NSBundle bundleWithPath:bundlePath] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey];
-    NSString *installedVersion = [[[NSBundle bundleWithPath:inputManagerBundlePath] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey];
-    
-    // one-time alert when launching on Leopard
-    if (nil != installedVersion && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-        
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShowedLeopardInputManagerAlert"] == NO) {
-            
-            NSString *folderPath = [inputManagerBundlePath stringByDeletingLastPathComponent];
-            
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Completion Plugin is Disabled", @"Leopard warning") defaultButton:NSLocalizedString(@"Show", @"") alternateButton:NSLocalizedString(@"Ignore",@"") otherButton:nil informativeTextWithFormat:NSLocalizedString(@"Due to security restrictions in Mac OS X 10.5, the completion plugin located in %@ is now disabled and will no longer be supported.  Show in Finder?", @"input manager warning"), [folderPath stringByAbbreviatingWithTildeInPath]];
-            NSInteger rv = [alert runModal];
-            if (NSAlertDefaultReturn == rv)
-                [[NSWorkspace sharedWorkspace] selectFile:folderPath inFileViewerRootedAtPath:@""];
-        }
-        
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"BDSKShowedLeopardInputManagerAlert"];
-        
-        // set installed version to nil, so we never display an update alert
-        installedVersion = nil;
-    }
-    
-    *current = [bundledVersion isEqualToString:installedVersion];
-    return installedVersion == nil ? NO : YES;
-}
-
-- (void)showInputManagerUpdateAlert{
-    NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Autocomplete Plugin Needs Update", @"Message in alert dialog when plugin version")
-                                       defaultButton:[NSLocalizedString(@"Open", @"Button title") stringByAppendingString:[NSString horizontalEllipsisString]]
-                                     alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                         otherButton:nil
-                           informativeTextWithFormat:NSLocalizedString(@"You appear to be using the BibDesk autocompletion plugin, and a newer version is available.  Would you like to open the completion preferences so that you can update the plugin?", @"Informative text in alert dialog")];
-    NSInteger rv = [anAlert runModal];
-    if(rv == NSAlertDefaultReturn){
-        [[BDSKPreferenceController sharedPreferenceController] showWindow:nil];
-        [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.inputmanager"];
-    }
-    
 }
 
 #pragma mark Panels

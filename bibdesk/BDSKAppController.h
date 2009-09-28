@@ -95,9 +95,6 @@
 
 - (IBAction)showBookmarks:(id)sender;
 
-- (BOOL)isInputManagerInstalledAndCurrent:(BOOL *)current;
-- (void)showInputManagerUpdateAlert;
-
 - (IBAction)toggleShowingOrphanedFilesPanel:(id)sender;
 
 // ----------------------------------------------------------------------------------------

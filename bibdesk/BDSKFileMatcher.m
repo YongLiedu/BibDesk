@@ -556,8 +556,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
     CFDictionaryAddValue(opts, kSKMaximumTerms, (CFNumberRef)[NSNumber numberWithInt:200]);
     
     // kSKProximityIndexing is unused for now, since it slows things down and caused a crash on one of my files rdar://problem/4988691 (fixed in 10.5)
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4)
-        CFDictionaryAddValue(opts, kSKProximityIndexing, kCFBooleanTrue);
+    CFDictionaryAddValue(opts, kSKProximityIndexing, kCFBooleanTrue);
     searchIndex = SKIndexCreateWithMutableData(indexData, NULL, kSKIndexInverted, opts);
     CFRelease(opts);
     CFRelease(indexData);
