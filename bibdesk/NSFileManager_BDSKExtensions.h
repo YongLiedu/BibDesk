@@ -128,7 +128,7 @@
 - (NSNumber *)openMetaRatingAtPath:(NSString *)path error:(NSError **)error;
 - (BOOL)setOpenMetaRating:(NSNumber *)rating atPath:(NSString *)path error:(NSError **)error;
 
-// uses createDirectoryAtPath:withIntermediateDirectories:attributes:error: recursively for all parent components if necessary
+// uses createDirectoryAtPath:withIntermediateDirectories:attributes:error: for the containing directory if necessary
 - (BOOL)createPathToFile:(NSString *)path attributes:(NSDictionary *)attributes;
 
 - (NSString *)resolveAliasesInPath:(NSString *)path;
@@ -136,10 +136,6 @@
 //
 // Thread safe API
 //
-
-// Finder comments
-- (BOOL)setComment:(NSString *)comment forURL:(NSURL *)fileURL;
-- (NSString *)commentForURL:(NSURL *)fileURL;
 
 - (BOOL)createDirectoryAtPathWithNoAttributes:(NSString *)path;
 - (BOOL)objectExistsAtFileURL:(NSURL *)fileURL;
