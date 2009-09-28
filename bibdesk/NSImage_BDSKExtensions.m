@@ -414,8 +414,7 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
     static NSImage *image = nil;
     if(image == nil) {
         image = createPaperclipImageWithColor([NSColor blackColor]);
-        if ([image respondsToSelector:@selector(setTemplate:)])
-            [image setTemplate:YES];
+        [image setTemplate:YES];
     }
     return image;
 }

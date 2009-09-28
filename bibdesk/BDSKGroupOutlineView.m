@@ -87,12 +87,7 @@
 
 - (NSTextFieldCell *)parentCell {
     if (parentCell == nil) {
-        if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
-            parentCell = [[NSTextFieldCell alloc] init];
-        } else {
-            parentCell = [[BDSKParentGroupCell alloc] init];
-            [parentCell setTextColor:[NSColor disabledControlTextColor]];
-        }
+        parentCell = [[NSTextFieldCell alloc] init];
         [parentCell setFont:[[NSFontManager sharedFontManager] convertFont:[self font] toHaveTrait:NSBoldFontMask]];
     }
     return parentCell;
@@ -120,19 +115,10 @@
     NSInteger column = [self columnAtPoint:point];
     if (row != -1 && column == 0 && [self isRowSelected:row]) {
         id cell = nil;
-        if ([self respondsToSelector:@selector(preparedCellAtColumn:row:)])
-            cell = [self preparedCellAtColumn:column row:row];
-        else
-            cell = [[[self tableColumns] objectAtIndex:0] dataCellForRow:row];
+        cell = [self preparedCellAtColumn:column row:row];
         if ([cell isKindOfClass:[BDSKGroupCell class]]) {
             NSRect cellFrame = [self frameOfCellAtColumn:column row:row];
-            NSUInteger hit = NSCellHitNone;
-            if ([NSCell instancesRespondToSelector:@selector(hitTestForEvent:inRect:ofView:)])
-                hit = [cell hitTestForEvent:theEvent inRect:cellFrame ofView:self];
-            else if (NSMouseInRect(point, [cell iconRectForBounds:cellFrame], [self isFlipped]))
-                hit = NSCellHitContentArea;
-            else if (NSMouseInRect(point, [cell textRectForBounds:cellFrame], [self isFlipped]))
-                hit = NSCellHitContentArea | NSCellHitEditableTextArea;
+            NSUInteger hit = [cell hitTestForEvent:theEvent inRect:cellFrame ofView:self];
             if ((hit & NSCellHitEditableTextArea) == 0) {
                 if ((hit & NSCellHitContentArea) != 0 && [theEvent clickCount] == 2 && 
                     [[self delegate] respondsToSelector:@selector(outlineView:doubleClickedOnIconOfItem:)])
@@ -157,17 +143,13 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
     CGFloat heightOffset = BDSKMax(1.0f, BDSKRound(0.25 * [self intercellSpacing].height) - lineWidth);
     NSColor *highlightColor;
     
-    if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
-        CGFloat *color;
-        BOOL isGraphite = [NSColor currentControlTint] == NSGraphiteControlTint;
-        if ([[self window] isMainWindow] || [[self window] isKeyWindow])
-            color = isGraphite ? mainColorGraphite : mainColorBlue;
-        else
-            color = isGraphite ? disabledColorGraphite : disabledColorBlue;
-        highlightColor = [NSColor colorWithDeviceRed:color[0] green:color[1] blue:color[2] alpha:1.0];
-    } else {
-        highlightColor = [NSColor disabledControlTextColor];
-    }
+    CGFloat *color;
+    BOOL isGraphite = [NSColor currentControlTint] == NSGraphiteControlTint;
+    if ([[self window] isMainWindow] || [[self window] isKeyWindow])
+        color = isGraphite ? mainColorGraphite : mainColorBlue;
+    else
+        color = isGraphite ? disabledColorGraphite : disabledColorBlue;
+    highlightColor = [NSColor colorWithDeviceRed:color[0] green:color[1] blue:color[2] alpha:1.0];
     
     NSUInteger rowIndex = [rows firstIndex];
     NSRect drawRect;

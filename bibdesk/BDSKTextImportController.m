@@ -531,8 +531,7 @@
     NSSavePanel *sPanel = [NSSavePanel savePanel];
     if (![extension isEqualToString:@""]) 
 		[sPanel setRequiredFileType:extension];
-    if([sPanel respondsToSelector:@selector(setCanCreateDirectories:)])
-		[sPanel setCanCreateDirectories:YES];
+    [sPanel setCanCreateDirectories:YES];
 
     [sPanel beginSheetForDirectory:nil 
                               file:fileName 

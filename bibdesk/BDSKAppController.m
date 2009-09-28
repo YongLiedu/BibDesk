@@ -388,10 +388,7 @@ static void fixLegacyTableColumnIdentifiers()
     
     [self doSpotlightImportIfNeeded];
     
-    // Improve web group perf on 10.5: http://lists.apple.com/archives/cocoa-dev/2007/Dec/msg00261.html
-    // header does't say this is 10.5 only, but it doesn't show up in the 10.4u header
-    if ([WebPreferences instancesRespondToSelector:@selector(setCacheModel:)])
-        [[WebPreferences standardPreferences] setCacheModel:WebCacheModelDocumentBrowser];
+    [[WebPreferences standardPreferences] setCacheModel:WebCacheModelDocumentBrowser];
     
     [[NSColorPanel sharedColorPanel] setShowsAlpha:YES];
 }

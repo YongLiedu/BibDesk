@@ -47,7 +47,6 @@
 #import "BDSKImagePopUpButtonCell.h"
 #import "NSObject_BDSKExtensions.h"
 #import "NSBezierPath_BDSKExtensions.h"
-#import "NSBezierPath_CoreImageExtensions.h"
 #import "BDSKCenterScaledImageCell.h"
 #import "BDSKLevelIndicatorCell.h"
 #import <QuartzCore/QuartzCore.h>
@@ -531,8 +530,7 @@ enum {
         NSImage *paperclip = [[[NSImage paperclipImage] copy] autorelease];
         [paperclip setScalesWhenResized:YES];
         [paperclip setSize:NSMakeSize(16, 16)];
-        if ([paperclip respondsToSelector:@selector(setTemplate:)])
-            [paperclip setTemplate:NO];
+        [paperclip setTemplate:NO];
         NSImage *color = [[[NSImage imageNamed:@"colors"] copy] autorelease];
         [color setScalesWhenResized:YES];
         [color setSize:NSMakeSize(16, 16)];
@@ -688,14 +686,7 @@ enum {
     CGFloat width = 0.0;
     
     for (row = 0; row < numRows; row++) {
-        if ([self respondsToSelector:@selector(preparedCellAtColumn:row:)]) {
-            cell = [self preparedCellAtColumn:column row:row];
-        } else {
-            cell = [tableColumn dataCellForRow:row];
-            if ([[self delegate] respondsToSelector:@selector(tableView:willDisplayCell:forTableColumn:row:)])
-                [[self delegate] tableView:self willDisplayCell:cell forTableColumn:tableColumn row:row];
-            [cell setObjectValue:[[self dataSource] tableView:self objectValueForTableColumn:tableColumn row:row]];
-        }
+        cell = [self preparedCellAtColumn:column row:row];
         width = BDSKMax(width, [cell cellSize].width);
     }
     width = BDSKMin([tableColumn maxWidth], BDSKMax([tableColumn minWidth], width));
@@ -744,11 +735,11 @@ enum {
     NSRect rect = cellFrame;
     rect.size.height -= 1.0;
     rect = NSInsetRect(rect, 0.0, 0.5);
-    NSBezierPath *path = [NSBezierPath bezierPathWithHorizontalOvalInRect:rect];
+    NSGradient *gradient = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:startWhite alpha:alpha] endingColor:[NSColor colorWithCalibratedWhite:endWhite alpha:alpha]] autorelease];
 
-    [path fillPathVerticallyWithStartColor:[CIColor colorWithRed:startWhite green:startWhite blue:startWhite alpha:alpha] endColor:[CIColor colorWithRed:endWhite green:endWhite blue:endWhite alpha:alpha]];
+    [gradient drawInRect:rect angle:90.0];
     [[NSColor colorWithCalibratedWhite:0.8 alpha:alpha] set];
-    [path stroke];
+    [NSBezierPath strokeRect:rect];
     [super drawInteriorWithFrame:cellFrame inView:controlView];
 }
 
@@ -760,14 +751,6 @@ enum {
 
 - (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     return nil;
-}
-
-// Tiger inverts the text color based on the highlight color, which is lame
-- (NSColor *)textColor {
-    if ([self respondsToSelector:@selector(backgroundStyle)] == NO && [self isHighlighted] && 
-        [[[self controlView] window] isKeyWindow] && [[[[self controlView] window] firstResponder] isEqual:[self controlView]])
-        return [NSColor textBackgroundColor];
-    return [super textColor];
 }
 
 @end

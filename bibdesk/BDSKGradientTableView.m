@@ -66,140 +66,21 @@
 #import "BDSKGradientTableView.h"
 #import "NSLayoutManager_BDSKExtensions.h"
 
-// The main gradient code for these classes is basically copied from OAGradientTableView
-// These classes are only effectively used on Tiger, on Leopard they simply use the built-in source list highlight style
-
-typedef struct {
-    CGFloat red1, green1, blue1, alpha1;
-    CGFloat red2, green2, blue2, alpha2;
-} _twoColorsType;
-
-static void _linearColorBlendFunction(void *info, const CGFloat *in, CGFloat *out) {
-    _twoColorsType *twoColors = info;
-    
-    out[0] = (1.0 - *in) * twoColors->red1 + *in * twoColors->red2;
-    out[1] = (1.0 - *in) * twoColors->green1 + *in * twoColors->green2;
-    out[2] = (1.0 - *in) * twoColors->blue1 + *in * twoColors->blue2;
-    out[3] = (1.0 - *in) * twoColors->alpha1 + *in * twoColors->alpha2;
-}
-
-static void _linearColorReleaseInfoFunction(void *info) { free(info); }
-
-static const CGFunctionCallbacks linearFunctionCallbacks = {0, &_linearColorBlendFunction, &_linearColorReleaseInfoFunction};
-
-static NSColor *highlightColor = nil;
-static NSColor *highlightLightColor = nil;
-static NSColor *highlightDarkColor = nil;
-static NSColor *secondaryHighlightColor = nil;
-static NSColor *secondaryHighlightLightColor = nil;
-static NSColor *secondaryHighlightDarkColor = nil;
-
-static void initializeHighlightColors() {
-    if (highlightColor == nil) {
-        highlightColor = [[NSColor alternateSelectedControlColor] retain];
-        // If this view isn't key, use the gray version of the dark color. Note that this varies from the standard gray version that NSCell returns as its highlightColorWithFrame: when the cell is not in a key view, in that this is a lot darker. Mike and I think this is justified for this kind of view -- if you're using the dark selection color to show the selected status, it makes sense to leave it dark.
-        secondaryHighlightColor = [[[highlightColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
-        
-        // Take the color apart
-        CGFloat hue, saturation, brightness, alpha;
-        [[highlightColor colorUsingColorSpaceName:NSDeviceRGBColorSpace] getHue:&hue saturation:&saturation brightness:&brightness alpha:&alpha];
-
-        // Create synthetic darker and lighter versions
-        highlightLightColor = [[NSColor colorWithDeviceHue:hue saturation:MAX(0.0, saturation-.12) brightness:MIN(1.0, brightness+0.30) alpha:alpha] retain];
-        highlightDarkColor = [[NSColor colorWithDeviceHue:hue saturation:MIN(1.0, (saturation > .04) ? saturation+0.12 : 0.0) brightness:MAX(0.0, brightness-0.045) alpha:alpha] retain];
-        secondaryHighlightLightColor = [[[highlightLightColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
-        secondaryHighlightDarkColor = [[[highlightDarkColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
-    }
-}
-
-static void highlightSelectionUsingGradient(NSTableView *tableView) {
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    
-    NSColor *color, *lightColor, *darkColor;
-    CGFunctionRef linearBlendFunctionRef;
-    
-    if ([[[tableView window] firstResponder] isEqual:tableView] && [[tableView window] isKeyWindow]) {
-        color = highlightColor;
-        lightColor = highlightLightColor;
-        darkColor = highlightDarkColor;
-    } else {
-        color = secondaryHighlightColor;
-        lightColor = secondaryHighlightLightColor;
-        darkColor = secondaryHighlightDarkColor;
-    }
-    
-    static const CGFloat domainAndRange[8] = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
-    
-    _twoColorsType *twoColors = malloc(sizeof(_twoColorsType)); // We malloc() the helper data because we may draw this wash during printing, in which case it won't necessarily be evaluated immediately. We need for all the data the shading function needs to draw to potentially outlive us.
-    [lightColor getRed:&twoColors->red1 green:&twoColors->green1 blue:&twoColors->blue1 alpha:&twoColors->alpha1];
-    [darkColor getRed:&twoColors->red2 green:&twoColors->green2 blue:&twoColors->blue2 alpha:&twoColors->alpha2];
-    linearBlendFunctionRef = CGFunctionCreate(twoColors, 1, domainAndRange, 4, domainAndRange, &linearFunctionCallbacks);
-    
-    NSIndexSet *selectedRowIndexes = [tableView selectedRowIndexes];
-    NSUInteger rowIndex = [selectedRowIndexes firstIndex], prevRowIndex = NSNotFound;
-    
-    while (rowIndex != NSNotFound) {
-        NSRect rowRect = [tableView rectOfRow:rowIndex];
-        
-        NSRect topBar, washRect;
-        NSDivideRect(rowRect, &topBar, &washRect, 1.0, NSMinYEdge);
-        
-        // Draw the top line of pixels of the selected row in the alternateSelectedControlColor
-        if (rowIndex == 0 || rowIndex - 1 != prevRowIndex) {
-            [color setFill];
-            NSRectFill(topBar);
-        }
-        
-        // Draw a soft wash underneath it
-        CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
-        CGContextSaveGState(context);
-        CGContextClipToRect(context, NSRectToCGRect(washRect));
-        CGShadingRef cgShading = CGShadingCreateAxial(colorSpace, CGPointMake(0, NSMinY(washRect)), CGPointMake(0, NSMaxY(washRect)), linearBlendFunctionRef, NO, NO);
-        CGContextDrawShading(context, cgShading);
-        CGShadingRelease(cgShading);
-        CGContextRestoreGState(context);
-
-        prevRowIndex = rowIndex;
-        rowIndex = [selectedRowIndexes indexGreaterThanIndex:rowIndex];
-    }
-    CGFunctionRelease(linearBlendFunctionRef);
-    CGColorSpaceRelease(colorSpace);
-}
-
-#pragma mark -
 
 @implementation BDSKGradientTableView
 
-+ (void)initialize {
-    BDSKINITIALIZE;
-    initializeHighlightColors();
-}
-
 - (id)initWithFrame:(NSRect)frameRect {
     if (self = [super initWithFrame:frameRect]) {
-        if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)])
-            [self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
-        else // from Mail.app on 10.4
-            [self setBackgroundColor:[[NSColor colorWithCalibratedRed:231.0f/255.0f green:237.0f/255.0f blue:246.0f/255.0f alpha:1.0] colorUsingColorSpaceName:NSDeviceRGBColorSpace]];
+        [self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
     }
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)coder {
     if (self = [super initWithCoder:coder]) {
-        if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)])
-            [self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
-        else // from Mail.app on 10.4
-            [self setBackgroundColor:[[NSColor colorWithCalibratedRed:231.0f/255.0f green:237.0f/255.0f blue:246.0f/255.0f alpha:1.0] colorUsingColorSpaceName:NSDeviceRGBColorSpace]];
+        [self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
     }
     return self;
-}
-
-- (void)highlightSelectionInClipRect:(NSRect)rect {
-    if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)])
-        [super highlightSelectionInClipRect:rect];
-    else
-        highlightSelectionUsingGradient(self);
 }
 
 - (CGFloat)rowHeightForFont:(NSFont *)font {
@@ -212,40 +93,18 @@ static void highlightSelectionUsingGradient(NSTableView *tableView) {
 
 @implementation BDSKGradientOutlineView
 
-+ (void)initialize {
-    BDSKINITIALIZE;
-    initializeHighlightColors();
-}
-
 - (id)initWithFrame:(NSRect)frameRect {
     if (self = [super initWithFrame:frameRect]) {
-        if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
-            [self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
-        } else {// from Mail.app on 10.4
-            [self setBackgroundColor:[[NSColor colorWithCalibratedRed:231.0f/255.0f green:237.0f/255.0f blue:246.0f/255.0f alpha:1.0] colorUsingColorSpaceName:NSDeviceRGBColorSpace]];
-            [self setIndentationPerLevel:14.0];
-        }
+        [self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
     }
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)coder {
     if (self = [super initWithCoder:coder]) {
-        if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
-            [self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
-        } else { // from Mail.app on 10.4
-            [self setBackgroundColor:[[NSColor colorWithCalibratedRed:231.0f/255.0f green:237.0f/255.0f blue:246.0f/255.0f alpha:1.0] colorUsingColorSpaceName:NSDeviceRGBColorSpace]];
-            [self setIndentationPerLevel:14.0];
-        }
+        [self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
     }
     return self;
-}
-
-- (void)highlightSelectionInClipRect:(NSRect)rect {
-    if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)])
-        [super highlightSelectionInClipRect:rect];
-    else
-        highlightSelectionUsingGradient(self);
 }
 
 - (CGFloat)rowHeightForFont:(NSFont *)font {

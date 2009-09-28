@@ -72,8 +72,7 @@
     NSImageRep *rep = [img bestImageRepForSize:drawFrame.size device:nil];
     
     // invert a template image as needed (e.g. paperclip)
-    if ([self respondsToSelector:@selector(interiorBackgroundStyle)] && [img respondsToSelector:@selector(isTemplate)] &&
-        [self backgroundStyle] == NSBackgroundStyleDark && [img isTemplate]) {
+    if ([self backgroundStyle] == NSBackgroundStyleDark && [img isTemplate]) {
         CIImage *ciImage = nil;
         if ([rep isKindOfClass:[NSBitmapImageRep class]]) {
             ciImage = [[CIImage alloc] initWithBitmapImageRep:(NSBitmapImageRep *)rep];

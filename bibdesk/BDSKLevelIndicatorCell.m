@@ -159,23 +159,11 @@
     NSUInteger i, iMax = floor(ratio * (NSWidth(r) / 2));
     CGLayerRef toDraw;
     
-    if ([self respondsToSelector:@selector(backgroundStyle)]) {
-        NSBackgroundStyle style = [self backgroundStyle];
-        if (NSBackgroundStyleLight == style)
-            toDraw = [self darkRelevancyLayer];
-        else
-            toDraw = [self lightRelevancyLayer];
-    } else {            
-        if ([self isHighlighted]) {
-            // this is what NSCell does prior to 10.5, but it doesn't work with gradient tableviews
-            if ([[self highlightColorWithFrame:cellFrame inView:controlView] isEqual:[NSColor alternateSelectedControlColor]])
-                toDraw = [self lightRelevancyLayer];
-            else
-                toDraw = [self darkRelevancyLayer];
-        } else {
-            toDraw = [self darkRelevancyLayer];
-        }
-    }
+    NSBackgroundStyle style = [self backgroundStyle];
+    if (NSBackgroundStyleLight == style)
+        toDraw = [self darkRelevancyLayer];
+    else
+        toDraw = [self lightRelevancyLayer];
     
     CGContextRef ctxt = [[NSGraphicsContext currentContext] graphicsPort];
     CGContextSaveGState(ctxt);

@@ -149,8 +149,7 @@
     NSRect frame = [backForwardButton frame];
     frame.size.height = 25.0;
     [backForwardButton setFrame:frame];
-    if ([backForwardButton respondsToSelector:@selector(setSegmentStyle:)])
-        [backForwardButton setSegmentStyle:NSSegmentStyleTexturedRounded];
+    [backForwardButton setSegmentStyle:NSSegmentStyleTexturedRounded];
     backMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
     [backMenu setDelegate:self];
     [backForwardButton setMenu:backMenu forSegment:0];

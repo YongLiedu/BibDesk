@@ -242,16 +242,6 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     return cellSize;
 }
 
-- (NSColor *)textColor {
-    if ([self respondsToSelector:@selector(backgroundStyle)] == NO) {
-        if (settingUpFieldEditor)
-            return [NSColor blackColor];
-        else if ([self isHighlighted])
-            return [NSColor textBackgroundColor];
-    }
-    return [super textColor];
-}
-
 static CGFloat keyColorBlue[3]          = {14135.0/65535.0, 29298.0/65535.0, 48830.0/65535.0};
 static CGFloat mainColorBlue[3]         = {34695.0/65535.0, 39064.0/65535.0, 48316.0/65535.0};
 static CGFloat disabledColorBlue[3]     = {40606.0/65535.0, 40606.0/65535.0, 40606.0/65535.0};
@@ -260,11 +250,7 @@ static CGFloat mainColorGraphite[3]     = {37779.0/65535.0, 41634.0/65535.0, 454
 static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 40606.0/65535.0};
 
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView {
-    BOOL isHighlighted;
-    if ([self respondsToSelector:@selector(backgroundStyle)])
-        isHighlighted = ([self backgroundStyle] == NSBackgroundStyleDark || [self backgroundStyle] == NSBackgroundStyleLowered);
-    else
-        isHighlighted = [self isHighlighted];
+    BOOL isHighlighted = ([self backgroundStyle] == NSBackgroundStyleDark || [self backgroundStyle] == NSBackgroundStyleLowered);
     
     // Draw the text
     NSRect textRect = [self textRectForBounds:aRect]; 
@@ -290,33 +276,22 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
             CGFloat countInset = 0.5 * [self countPaddingForSize:countRect.size];
             NSColor *fgColor;
             NSColor *bgColor;
-            if ([controlView respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
-                // On Leopard, use the blue or gray color taken from the center of the gradient highlight
-                CGFloat *color;
-                BOOL isGraphite = [NSColor currentControlTint] == NSGraphiteControlTint;
-                if ([[controlView window] isKeyWindow] && [[controlView window] firstResponder] == controlView)
-                    // the key state color does not look nice for the count bubble background
-                    color = isHighlighted ? (isGraphite ? keyColorGraphite : keyColorBlue) : (isGraphite ? mainColorGraphite : mainColorBlue);
-                else if ([[controlView window] isMainWindow] || [[controlView window] isKeyWindow])
-                    color = isGraphite ? mainColorGraphite : mainColorBlue;
-                else
-                    color = isGraphite ? disabledColorGraphite : disabledColorBlue;
-                if (isHighlighted) {
-                    fgColor = [NSColor colorWithDeviceRed:color[0] green:color[1] blue:color[2] alpha:1.0];
-                    bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
-                } else {
-                    fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
-                    bgColor = [NSColor colorWithDeviceRed:color[0] green:color[1] blue:color[2] alpha:0.95];
-                }
+            // On Leopard, use the blue or gray color taken from the center of the gradient highlight
+            CGFloat *color;
+            BOOL isGraphite = [NSColor currentControlTint] == NSGraphiteControlTint;
+            if ([[controlView window] isKeyWindow] && [[controlView window] firstResponder] == controlView)
+                // the key state color does not look nice for the count bubble background
+                color = isHighlighted ? (isGraphite ? keyColorGraphite : keyColorBlue) : (isGraphite ? mainColorGraphite : mainColorBlue);
+            else if ([[controlView window] isMainWindow] || [[controlView window] isKeyWindow])
+                color = isGraphite ? mainColorGraphite : mainColorBlue;
+            else
+                color = isGraphite ? disabledColorGraphite : disabledColorBlue;
+            if (isHighlighted) {
+                fgColor = [NSColor colorWithDeviceRed:color[0] green:color[1] blue:color[2] alpha:1.0];
+                bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
             } else {
-                // On Tiger use gray
-                if (isHighlighted) {
-                    fgColor = [NSColor disabledControlTextColor];
-                    bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.8];
-                } else {
-                    fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
-                    bgColor = [[NSColor disabledControlTextColor] colorWithAlphaComponent:0.7];
-                }
+                fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
+                bgColor = [NSColor colorWithDeviceRed:color[0] green:color[1] blue:color[2] alpha:0.95];
             }
             
             [NSGraphicsContext saveGraphicsState];

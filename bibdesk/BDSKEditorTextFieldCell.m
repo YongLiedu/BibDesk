@@ -54,8 +54,7 @@
     [buttonCell setButtonType:NSMomentaryChangeButton];
     [buttonCell setBordered:NO];
     [buttonCell setImagePosition:NSImageOnly];
-    if ([buttonCell respondsToSelector:@selector(setImageScaling:)])
-        [buttonCell setImageScaling:NSImageScaleProportionallyDown];
+    [buttonCell setImageScaling:NSImageScaleProportionallyDown];
     url = nil;
 }
 
@@ -204,14 +203,6 @@
 	if ([self hasButton] || [self URL]) {
         NSRect buttonRect = [self buttonRectForBounds:cellFrame];
         NSImage *theImage = [self URL] ? [NSImage imageForURL:[self URL]] : [NSImage arrowImage];
-        if ([buttonCell respondsToSelector:@selector(setImageScaling:)] == NO && NSEqualSizes([theImage size], buttonRect.size) == NO) {
-            NSImage *scaledImage = [[[NSImage alloc] initWithSize:buttonRect.size] autorelease];
-            NSRect targetRect = {NSZeroPoint, buttonRect.size};
-            [scaledImage lockFocus];
-            [theImage drawInRect:targetRect fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-            [scaledImage unlockFocus];
-            theImage = scaledImage;
-        }
         [buttonCell setImage:theImage];
         [buttonCell drawWithFrame:buttonRect inView:controlView];
     }

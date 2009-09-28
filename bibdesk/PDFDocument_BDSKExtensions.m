@@ -52,8 +52,7 @@ static id (*original_getPrintOperationForPrintInfo_autoRotate)(id, SEL, id, BOOL
 - (NSPrintOperation *)replacement_getPrintOperationForPrintInfo:(NSPrintInfo *)printInfo autoRotate:(BOOL)autoRotate {
     NSPrintOperation *printOperation = original_getPrintOperationForPrintInfo_autoRotate(self, _cmd, printInfo, autoRotate);
     NSPrintPanel *printPanel = [printOperation printPanel];
-    if ([printPanel respondsToSelector:@selector(setOptions:)])
-        [printPanel setOptions:NSPrintPanelShowsCopies | NSPrintPanelShowsPageRange | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling | NSPrintPanelShowsPreview];
+    [printPanel setOptions:NSPrintPanelShowsCopies | NSPrintPanelShowsPageRange | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling | NSPrintPanelShowsPreview];
     return printOperation;
 }
 
