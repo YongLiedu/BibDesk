@@ -598,7 +598,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 if ([scanner scanString:CONDITION_TAG_CLOSE_DELIM intoString:NULL]) {
                     
                     NSMutableArray *subTemplates, *matchStrings;
-                    NSAttributedString *subTemplate = @"";
+                    NSAttributedString *subTemplate = nil;
                     NSString *subTemplateString, *endTag, *altTag;
                     NSRange altTagRange;
                     
