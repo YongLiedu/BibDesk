@@ -271,7 +271,7 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
             [dict release];
             
             // use NSWorkspace to get an image; using [NSImage imageForURL:] doesn't work for some reason
-            [item setImageAndSize:[workspace iconForFileURL:appURL]];
+            [item setImageAndSize:[workspace iconForFile:[appURL path]]];
             if ([appURL isEqual:defaultAppURL]) {
                 [self insertItem:[NSMenuItem separatorItem] atIndex:0];
                 [self insertItem:item atIndex:0];

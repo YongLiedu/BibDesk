@@ -197,34 +197,6 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     return (err == noErr);
 }
 
-- (NSString *)UTIForURL:(NSURL *)fileURL resolveAliases:(BOOL)resolve error:(NSError **)error;
-{
-    NSParameterAssert([fileURL isFileURL]);
-    
-    NSURL *resolvedURL = resolve ? [fileURL fileURLByResolvingAliases] : fileURL;
-    OSStatus err = noErr;
-    
-    if (nil == resolvedURL)
-        err = fnfErr;
-    
-    FSRef fileRef;
-    
-    if (noErr == err && FALSE == CFURLGetFSRef((CFURLRef)resolvedURL, &fileRef))
-        err = coreFoundationUnknownErr; /* should never happen unless fileURLByResolvingAliases returned nil */
-    
-    // kLSItemContentType returns a CFStringRef, according to the header
-    CFTypeRef theUTI = NULL;
-    if (noErr == err)
-        err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, &theUTI);
-    
-    if (noErr != err && NULL != error) {
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:fileURL, NSURLErrorKey, NSLocalizedString(@"Unable to create UTI", @"Error description"), NSLocalizedDescriptionKey, nil];
-        *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:userInfo];
-    }
-    
-    return [(NSString *)theUTI autorelease];
-}
-
 - (BOOL)openLinkedFile:(NSString *)fullPath {
     NSString *extension = [[fullPath pathExtension] lowercaseString];
     NSDictionary *defaultViewers = [[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey];
@@ -341,53 +313,26 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     return applications;
 }
 
-- (NSImage *)iconForFileURL:(NSURL *)fileURL;
-{
-    NSImage *image = nil;
-    if(nil != fileURL){
-        NSString *filePath = (NSString *)CFURLCopyFileSystemPath((CFURLRef)fileURL, kCFURLPOSIXPathStyle);
-        image = [self iconForFile:filePath];
-        [filePath release];
-    }
-    return image;
-}
-
-- (NSString *)UTIForURL:(NSURL *)fileURL error:(NSError **)error;
-{
-    return [self UTIForURL:fileURL resolveAliases:YES error:error];
-}
-
-- (NSString *)UTIForURL:(NSURL *)fileURL;
-{
-    NSError *error;
-    NSString *theUTI = [self UTIForURL:fileURL error:&error];
-#ifdef DEBUG
-    if (nil == theUTI)
-        NSLog(@"%@", error);
-#endif
-    return theUTI;
-}
-
 - (NSString *)UTIForPathExtension:(NSString *)extension;
 {
     return [(id)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, NULL) autorelease];
 }
 
 - (BOOL)isAppleScriptFileAtPath:(NSString *)path {
-    NSString *theUTI = [self UTIForURL:[NSURL fileURLWithPath:[path stringByStandardizingPath]]];
-    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.script")) ||
-                     UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.text")) ||
-                     UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.script-bundle")) ) : NO;
+    NSString *theUTI = [self typeOfFile:[path stringByStandardizingPath] error:NULL];
+    return theUTI ? ([self type:theUTI conformsToType:@"com.apple.applescript.script"] ||
+                     [self type:theUTI conformsToType:@"com.apple.applescript.text"] ||
+                     [self type:theUTI conformsToType:@"com.apple.applescript.script-bundle"] ) : NO;
 }
 
 - (BOOL)isApplicationAtPath:(NSString *)path {
-    NSString *theUTI = [self UTIForURL:[NSURL fileURLWithPath:[path stringByStandardizingPath]]];
+    NSString *theUTI = [self typeOfFile:[path stringByStandardizingPath] error:NULL];
     return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, kUTTypeApplication)) : NO;
 }
 
 - (BOOL)isFolderAtPath:(NSString *)path {
-    NSString *theUTI = [self UTIForURL:[NSURL fileURLWithPath:[path stringByStandardizingPath]]];
-    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, kUTTypeFolder)) : NO;
+    NSString *theUTI = [self typeOfFile:[path stringByStandardizingPath] error:NULL];
+    return theUTI ? [self type:theUTI conformsToType:(id)kUTTypeFolder] : NO;
 }
 
 @end

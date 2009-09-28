@@ -58,18 +58,6 @@
 - (NSArray *)editorAndViewerURLsForURL:(NSURL *)aURL;
 - (NSURL *)defaultEditorOrViewerURLForURL:(NSURL *)aURL;
 - (NSArray *)editorAndViewerNamesAndBundleIDsForPathExtension:(NSString *)extension;
-- (NSImage *)iconForFileURL:(NSURL *)fileURL;
-
-/*!
-    @method     UTIForURL:
-    @abstract   Uses LaunchServices to find the UTI for a given file URL.
-    @discussion (comprehensive description)
-    @param      fileURL (description)
-    @result     (description)
-*/
-- (NSString *)UTIForURL:(NSURL *)fileURL;
-- (NSString *)UTIForURL:(NSURL *)fileURL error:(NSError **)error;
-- (NSString *)UTIForURL:(NSURL *)fileURL resolveAliases:(BOOL)resolve error:(NSError **)error;
 
 /*!
     @method     UTIForPathExtension:
