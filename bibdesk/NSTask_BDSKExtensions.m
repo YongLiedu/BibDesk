@@ -148,7 +148,7 @@ volatile int caughtSignal = 0;
         NSLog(@"Filter Pipes: Failed to write temporary script file. (%@)", shellScriptPath);
         return nil;
     }
-    currentAttributes = [[[fm fileAttributesAtPath:shellScriptPath traverseLink:NO] mutableCopyWithZone:[self zone]] autorelease];
+    currentAttributes = [[[fm attributesOfItemAtPath:shellScriptPath error:NULL] mutableCopyWithZone:[self zone]] autorelease];
     if (!currentAttributes) {
         NSLog(@"Filter Pipes: Failed to get attributes of temporary script file. (%@)", shellScriptPath);
         return nil;
@@ -156,7 +156,7 @@ volatile int caughtSignal = 0;
     currentMode = [currentAttributes filePosixPermissions];
     currentMode |= S_IRWXU;
     [currentAttributes setObject:[NSNumber numberWithUnsignedLong:currentMode] forKey:NSFilePosixPermissions];
-    if (![fm changeFileAttributes:currentAttributes atPath:shellScriptPath]) {
+    if (![fm setAttributes:currentAttributes ofItemAtPath:shellScriptPath error:NULL]) {
         NSLog(@"Filter Pipes: Failed to get attributes of temporary script file. (%@)", shellScriptPath);
         return nil;
     }
@@ -167,7 +167,7 @@ volatile int caughtSignal = 0;
     output = [self executeBinary:shellScriptPath inDirectory:[shellScriptPath stringByDeletingLastPathComponent] withArguments:nil environment:nil inputString:input];
 
     // ---------- Remove the script file ----------
-    if (![fm removeFileAtPath:shellScriptPath handler:nil]) {
+    if (![fm removeItemAtPath:shellScriptPath error:NULL]) {
         NSLog(@"Filter Pipes: Failed to delete temporary script file. (%@)", shellScriptPath);
     }
 

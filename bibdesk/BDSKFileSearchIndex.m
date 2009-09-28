@@ -241,10 +241,10 @@ static inline id signatureForURL(NSURL *aURL) {
         cacheFolder = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
         cacheFolder = [cacheFolder stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
         if (cacheFolder && [[NSFileManager defaultManager] fileExistsAtPath:cacheFolder] == NO)
-            [[NSFileManager defaultManager] createDirectoryAtPath:cacheFolder attributes:nil];
+            [[NSFileManager defaultManager] createDirectoryAtPath:cacheFolder withIntermediateDirectories:NO attributes:nil error:NULL];
         cacheFolder = [cacheFolder stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-v%@", NSStringFromClass(self), CACHE_VERSION]];
         if (cacheFolder && [[NSFileManager defaultManager] fileExistsAtPath:cacheFolder] == NO)
-            [[NSFileManager defaultManager] createDirectoryAtPath:cacheFolder attributes:nil];
+            [[NSFileManager defaultManager] createDirectoryAtPath:cacheFolder withIntermediateDirectories:NO attributes:nil error:NULL];
         cacheFolder = [cacheFolder copy];
     }
     return cacheFolder;

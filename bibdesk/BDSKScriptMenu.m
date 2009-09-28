@@ -97,7 +97,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
     NSUInteger i, count = [folders count];
     NSDate *date = [NSDate distantPast];
     for(i = 0; i < count; i++){
-        NSDate *modDate = [[[NSFileManager defaultManager] fileAttributesAtPath:[folders objectAtIndex:i] traverseLink:YES] objectForKey:NSFileModificationDate];
+        NSDate *modDate = [[[NSFileManager defaultManager] attributesOfItemAtPath:[folders objectAtIndex:i] error:NULL] objectForKey:NSFileModificationDate];
         
         // typically these don't even exist for the other domains
         if(modDate)
@@ -164,13 +164,13 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
         
         NSFileManager *fm = [NSFileManager defaultManager];
         NSWorkspace *wm = [NSWorkspace sharedWorkspace];
-        NSEnumerator *fileEnum = [[fm directoryContentsAtPath:path] objectEnumerator];
+        NSEnumerator *fileEnum = [[fm contentsOfDirectoryAtPath:path error:NULL] objectEnumerator];
         NSString *file;
         
         // avoid recursing too many times (and creating an excessive number of submenus)
         while (file = [fileEnum nextObject]) {
             NSString *filePath = [path stringByAppendingPathComponent:file];
-            NSDictionary *fileAttributes = [fm fileAttributesAtPath:filePath traverseLink:YES];
+            NSDictionary *fileAttributes = [fm attributesOfItemAtPath:filePath error:NULL];
             NSString *fileType = [fileAttributes valueForKey:NSFileType];
             BOOL isDir = [fileType isEqualToString:NSFileTypeDirectory];
             

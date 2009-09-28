@@ -130,10 +130,10 @@
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString *templateFilePath = [[sud stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath];
     if([fileManager fileExistsAtPath:templateFilePath])
-        [fileManager removeFileAtPath:templateFilePath handler:nil];
+        [fileManager removeItemAtPath:templateFilePath error:NULL];
     // copy template.txt file from the bundle
-    [fileManager copyPath:[[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"template.txt"]
-                   toPath:templateFilePath handler:nil];
+    [fileManager copyItemAtPath:[[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"template.txt"]
+                   toPath:templateFilePath error:NULL];
 }
 
 - (IBAction)resetTemplateFile:(id)sender{
@@ -158,7 +158,7 @@
     NSFileManager *fileManager = [NSFileManager defaultManager];
 	NSString *conversionsFilePath = [[fileManager currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
     if([fileManager fileExistsAtPath:conversionsFilePath])
-        [fileManager removeFileAtPath:conversionsFilePath handler:nil];
+        [fileManager removeItemAtPath:conversionsFilePath error:NULL];
 	// tell the converter to reload its dictionaries
 	[[BDSKConverter sharedConverter] loadDict];
 }

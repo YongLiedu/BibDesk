@@ -135,7 +135,7 @@ static BOOL isSearchFileAtPath(NSString *path)
         NSString *serversPath = [applicationSupportPath stringByAppendingPathComponent:SERVERS_DIRNAME];
         BOOL isDir = NO;
         if ([[NSFileManager defaultManager] fileExistsAtPath:serversPath isDirectory:&isDir] == NO) {
-            if ([[NSFileManager defaultManager] createDirectoryAtPath:serversPath attributes:nil] == NO) {
+            if ([[NSFileManager defaultManager] createDirectoryAtPath:serversPath withIntermediateDirectories:NO attributes:nil error:NULL] == NO) {
                 NSLog(@"Unable to save server info");
                 return;
             }
@@ -146,7 +146,7 @@ static BOOL isSearchFileAtPath(NSString *path)
         
         NSString *path = [searchGroupServerFiles objectForKey:[serverInfo name]];
         if (path)
-            [[NSFileManager defaultManager] removeFileAtPath:path handler:nil];
+            [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
         path = [serversPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%@.bdsksearch", [serverInfo name], [serverInfo type]]];
         [data writeToFile:path atomically:YES];
         [searchGroupServerFiles setObject:path forKey:[serverInfo name]];
@@ -157,7 +157,7 @@ static BOOL isSearchFileAtPath(NSString *path)
 {
     NSString *path = [searchGroupServerFiles objectForKey:[serverInfo name]];
     if (path) {
-        [[NSFileManager defaultManager] removeFileAtPath:path handler:nil];
+        [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
         [searchGroupServerFiles removeObjectForKey:[serverInfo name]];
     }
 }

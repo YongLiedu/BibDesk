@@ -505,12 +505,12 @@ static BDSKFiler *sharedFiler = nil;
                     backupPath = [self uniqueFilePathWithName:[resolvedNewPath lastPathComponent] atPath:[self desktopDirectory]];
                     if(![self movePath:resolvedNewPath toPath:backupPath force:NO error:NULL] && 
                         [self fileExistsAtPath:resolvedNewPath] && 
-                        ![self removeFileAtPath:resolvedNewPath handler:nil]){
+                        ![self removeItemAtPath:resolvedNewPath error:NULL]){
                         status = NSLocalizedString(@"Unable to remove existing file at target location.", @"AutoFile error message");
                         statusFlag = BDSKTargetFileExistsErrorMask | BDSKCannotRemoveFileErrorMask;
                         // cleanup: move back backup
-                        if(![self movePath:backupPath toPath:resolvedNewPath handler:nil] && [self fileExistsAtPath:resolvedNewPath]){
-                            [self removeFileAtPath:backupPath handler:nil];
+                        if(![self moveItemAtPath:backupPath toPath:resolvedNewPath error:NULL] && [self fileExistsAtPath:resolvedNewPath]){
+                            [self removeItemAtPath:backupPath error:NULL];
                         }
                     }
                 }else{
@@ -542,7 +542,7 @@ static BDSKFiler *sharedFiler = nil;
             }
         }
         if(statusFlag == BDSKNoError && ignoreMove == NO){
-            NSString *fileType = [[self fileAttributesAtPath:resolvedPath traverseLink:NO] fileType];
+            NSString *fileType = [[self attributesOfItemAtPath:resolvedPath error:NULL] fileType];
  
             // create parent directories if necessary (OmniFoundation)
             if (NO == [self createPathToFile:resolvedNewPath attributes:nil]) {
@@ -568,31 +568,31 @@ static BDSKFiler *sharedFiler = nil;
                     statusFlag = BDSKCannotMoveFileErrorMask;
                 }else if([fileType isEqualToString:NSFileTypeSymbolicLink]){
                     // unfortunately NSFileManager cannot reliably move symlinks...
-                    NSString *pathContent = [self pathContentOfSymbolicLinkAtPath:resolvedPath];
+                    NSString *pathContent = [self destinationOfSymbolicLinkAtPath:resolvedPath error:NULL];
                     if([pathContent isAbsolutePath] == NO){// it links to a relative path
                         pathContent = [[[resolvedPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:pathContent] stringByStandardizingPath];
                         pathContent = [pathContent relativePathFromPath:[resolvedNewPath stringByDeletingLastPathComponent]];
                     }
-                    if(![self createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
+                    if(![self createSymbolicLinkAtPath:resolvedNewPath withDestinationPath:pathContent error:NULL]){
                         status = NSLocalizedString(@"Unable to move symbolic link.", @"AutoFile error message");
                         statusFlag = BDSKCannotMoveFileErrorMask;
                     }else{
-                        if(![self removeFileAtPath:resolvedPath handler:nil]){
+                        if(![self removeItemAtPath:resolvedPath error:NULL]){
                             if (force == NO){
                                 status = NSLocalizedString(@"Unable to remove original.", @"AutoFile error message");
                                 fix = NSLocalizedString(@"Copy original file.", @"AutoFile fix");
                                 statusFlag = BDSKCannotRemoveFileErrorMask;
                                 //cleanup: remove new file
-                                [self removeFileAtPath:resolvedNewPath handler:nil];
+                                [self removeItemAtPath:resolvedNewPath error:NULL];
                             }
                         }
                     }
-                }else if([self movePath:resolvedPath toPath:resolvedNewPath handler:nil]){
+                }else if([self moveItemAtPath:resolvedPath toPath:resolvedNewPath error:NULL]){
                     if([[resolvedPath pathExtension] caseInsensitiveCompare:@"pdf"] == NSOrderedSame){
                         NSString *notesPath = [[resolvedPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"skim"];
                         NSString *newNotesPath = [[resolvedNewPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"skim"];
                         if([self fileExistsAtPath:notesPath] && [self fileExistsAtPath:newNotesPath] == NO){
-                            [self movePath:notesPath toPath:newNotesPath handler:nil];
+                            [self moveItemAtPath:notesPath toPath:newNotesPath error:NULL];
                         }
                     }
                 }else if([self fileExistsAtPath:resolvedNewPath]){ // error remove original file
@@ -601,8 +601,8 @@ static BDSKFiler *sharedFiler = nil;
                         fix = NSLocalizedString(@"Copy original file.", @"AutoFile fix");
                         statusFlag = BDSKCannotRemoveFileErrorMask;
                         // cleanup: move back
-                        if(![self movePath:resolvedNewPath toPath:resolvedPath handler:nil] && [self fileExistsAtPath:resolvedPath]){
-                            [self removeFileAtPath:resolvedNewPath handler:nil];
+                        if(![self moveItemAtPath:resolvedNewPath toPath:resolvedPath error:NULL] && [self fileExistsAtPath:resolvedPath]){
+                            [self removeItemAtPath:resolvedNewPath error:NULL];
                         }
                     }
                 }else{ // other error while moving file

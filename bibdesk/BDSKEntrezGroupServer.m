@@ -124,7 +124,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     URLDownload = nil;
     downloadState = BDSKIdleState;
     if (filePath) {
-        [[NSFileManager defaultManager] removeFileAtPath:filePath handler:nil];
+        [[NSFileManager defaultManager] removeItemAtPath:filePath error:NULL];
         [filePath release];
         filePath = nil;
     }
@@ -348,7 +348,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     
     // it's always okay to delete the original download, but filePath will be reset at some point as a side effect of -fetch
     if (downloadURL)
-        [[NSFileManager defaultManager] removeFileAtPath:[downloadURL path] handler:nil];
+        [[NSFileManager defaultManager] removeItemAtPath:[downloadURL path] error:NULL];
 }
 
 - (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error
@@ -362,7 +362,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     }
     
     if (filePath) {
-        [[NSFileManager defaultManager] removeFileAtPath:filePath handler:nil];
+        [[NSFileManager defaultManager] removeItemAtPath:filePath error:NULL];
         [filePath release];
         filePath = nil;
     }

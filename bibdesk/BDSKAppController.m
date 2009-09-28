@@ -169,7 +169,7 @@ static void fixLegacyTableColumnIdentifiers()
     BOOL success = NO;
     
     if ([fileManager fileExistsAtPath:templatesPath isDirectory:&success] == NO) {
-        success = [fileManager createDirectoryAtPath:templatesPath attributes:nil];
+        success = [fileManager createDirectoryAtPath:templatesPath withIntermediateDirectories:NO attributes:nil error:NULL];
     }
     
     if (success) {
@@ -384,7 +384,7 @@ static void fixLegacyTableColumnIdentifiers()
 
     NSString *scriptsPath = [[fileManager currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"Scripts"];
     if ([fileManager fileExistsAtPath:scriptsPath] == NO)
-        [fileManager createDirectoryAtPath:scriptsPath attributes:nil];
+        [fileManager createDirectoryAtPath:scriptsPath withIntermediateDirectories:NO attributes:nil error:NULL];
     
     [self doSpotlightImportIfNeeded];
     

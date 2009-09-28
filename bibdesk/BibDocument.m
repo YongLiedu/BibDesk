@@ -1248,14 +1248,14 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             NSNumber *posixPerms = nil;
             
             if ([fileManager fileExistsAtPath:[absoluteURL path]])
-                posixPerms = [[fileManager fileAttributesAtPath:[absoluteURL path] traverseLink:YES] objectForKey:NSFilePosixPermissions];
+                posixPerms = [[fileManager attributesOfItemAtPath:[absoluteURL path] error:NULL] objectForKey:NSFilePosixPermissions];
             
             if (nil != posixPerms)
                 [fattrs setObject:posixPerms forKey:NSFilePosixPermissions];
             
             // not checking return value here; non-critical
             if ([fattrs count])
-                [fileManager changeFileAttributes:fattrs atPath:[saveToURL path]];
+                [fileManager setAttributes:fattrs ofItemAtPath:[saveToURL path] error:NULL];
         }
         
         // If this is not an overwriting operation, we already saved to absoluteURL, and we're done
@@ -1311,7 +1311,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             }
             else if ([self keepBackupFile] == NO) {
                 // not checking return value here; non-critical, and fails if rename() was used
-                [fileManager removeFileAtPath:[saveToURL path] handler:nil];
+                [fileManager removeItemAtPath:[saveToURL path] error:NULL];
             }
         }
     }
@@ -1335,7 +1335,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     BOOL success = YES;
     NSMutableSet *localFiles = [NSMutableSet set];
     
-    if (success = [fm createDirectoryAtPath:path attributes:nil]) {
+    if (success = [fm createDirectoryAtPath:path withIntermediateDirectories:NO attributes:nil error:NULL]) {
         while (item = [itemEnum nextObject]) {
             NSEnumerator *fileEnum = [[item localFiles] objectEnumerator];
             BDSKLinkedFile *file;
@@ -1366,7 +1366,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                     targetPath = [fm uniqueFilePathWithName:[targetPath stringByDeletingLastPathComponent] atPath:[targetPath lastPathComponent]];
                 success = [fm createPathToFile:targetPath attributes:nil];
                 if (success)
-                success = [fm copyPath:filePath toPath:targetPath handler:nil];
+                success = [fm copyItemAtPath:filePath toPath:targetPath error:NULL];
             }
         }
         
@@ -1379,7 +1379,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             if ([task isRunning])
                 [task waitUntilExit];
             success = [task terminationStatus] == 0;
-            [fm removeFileAtPath:path handler:nil];
+            [fm removeItemAtPath:path error:NULL];
         }
     }
     

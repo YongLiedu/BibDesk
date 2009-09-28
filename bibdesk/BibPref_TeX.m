@@ -225,10 +225,10 @@ static NSSet *standardStyles = nil;
     NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
     NSString *previewTemplatePath = [applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"];
     if([fileManager fileExistsAtPath:previewTemplatePath])
-        [fileManager removeFileAtPath:previewTemplatePath handler:nil];
+        [fileManager removeItemAtPath:previewTemplatePath error:NULL];
     // copy previewtemplate.tex file from the bundle
-    [fileManager copyPath:[[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"previewtemplate.tex"]
-                   toPath:previewTemplatePath handler:nil];
+    [fileManager copyItemAtPath:[[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"previewtemplate.tex"]
+                   toPath:previewTemplatePath error:NULL];
 }
 
 - (IBAction)resetTeXPreviewFile:(id)sender{

@@ -163,7 +163,7 @@ static void destroyTemporaryDirectory()
 {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     // clean up at exit; should never be used after this, but set to nil anyway
-    if (NO == [[NSFileManager defaultManager] removeFileAtPath:temporaryBaseDirectory handler:nil]) {
+    if (NO == [[NSFileManager defaultManager] removeItemAtPath:temporaryBaseDirectory error:NULL]) {
         NSLog(@"Unable to remove temp directory %@", temporaryBaseDirectory);
         temporaryBaseDirectory = nil;
     }
@@ -209,7 +209,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
             BOOL pathIsDir;
             dirExists = [self fileExistsAtPath:path isDirectory:&pathIsDir];
             if(dirExists == NO || pathIsDir == NO)
-                [self createDirectoryAtPath:path attributes:nil];
+                [self createDirectoryAtPath:path withIntermediateDirectories:NO attributes:nil error:NULL];
             // make sure it was created
             dirExists = [self fileExistsAtPath:path isDirectory:&pathIsDir];
             NSAssert1(dirExists && pathIsDir, @"Unable to create folder %@", path);
@@ -264,7 +264,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     
     while (file = [dirEnum nextObject]) {
         NSString *fullPath = [appSupportPath stringByAppendingPathComponent:file];
-        NSDictionary *fileAttributes = [self fileAttributesAtPath:fullPath traverseLink:YES];
+        NSDictionary *fileAttributes = [self attributesOfItemAtPath:fullPath error:NULL];
         if ([[fileAttributes fileType] isEqualToString:NSFileTypeDirectory]) {
             [dirEnum skipDescendents];
             NSString *pipePath = [fullPath stringByAppendingPathComponent:@".lyxpipe.in"];
@@ -299,9 +299,9 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     if ([self fileExistsAtPath:targetPath]) {
         if (overwrite == NO)
             return NO;
-        [self removeFileAtPath:targetPath handler:nil];
+        [self removeItemAtPath:targetPath error:NULL];
     }
-    return [self copyPath:sourcePath toPath:targetPath handler:nil];
+    return [self copyItemAtPath:sourcePath toPath:targetPath error:NULL];
 }
 
 #pragma mark Temporary files and directories
@@ -439,7 +439,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     if ([directory length] == 0)
         success = YES;
     else if ([self fileExistsAtPath:directory isDirectory:&isDir] == NO)
-        success = [self createPathToFile:directory attributes:attributes] && [self createDirectoryAtPath:directory attributes:attributes];
+        success = [self createDirectoryAtPath:directory withIntermediateDirectories:YES attributes:attributes error:NULL];
     else if (isDir)
         success = YES;
     return success;
@@ -755,7 +755,7 @@ static OSType finderSignatureBytes = 'MACS';
     NSParameterAssert(comment != nil);
     NSParameterAssert([fileURL isFileURL]);
     NSString *path = [fileURL path];
-    BOOL isSymLink = [[[self fileAttributesAtPath:path traverseLink:NO] objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink];
+    BOOL isSymLink = [[[self attributesOfItemAtPath:path error:NULL] objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink];
     BOOL success = YES;
     NSAppleEventDescriptor *commentTextDesc;
     OSErr err;

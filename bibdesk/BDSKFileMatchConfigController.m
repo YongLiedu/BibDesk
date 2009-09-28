@@ -94,7 +94,7 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
                 [URLs addObject:[NSURL fileURLWithPath:path]];
             } else {
                 // shallow directory traversal: only add the (non-folder) contents of a folder that was dropped, since an arbitrarily deep traversal would have performance issues for file listing and for the search kit indexing
-                NSArray *dirContent = [fm directoryContentsAtPath:path];
+                NSArray *dirContent = [fm contentsOfDirectoryAtPath:path error:NULL];
                 NSUInteger i, iMax = [dirContent count];
                 for (i = 0; i < iMax; i++) {
                     // directoryContentsAtPath returns relative paths with the starting directory as base
