@@ -163,7 +163,7 @@
 	
 	[[NSColor alternateSelectedControlColor] set];
 	[NSBezierPath setDefaultLineWidth:2.0];
-	[NSBezierPath strokeRoundRectInRect:NSInsetRect(aRect, 2.0, 2.0) radius:5.0];
+	[[NSBezierPath bezierPathWithRoundedRect:NSInsetRect(aRect, 2.0, 2.0) xRadius:5.0 yRadius:5.0] stroke];
 }
 
 @end

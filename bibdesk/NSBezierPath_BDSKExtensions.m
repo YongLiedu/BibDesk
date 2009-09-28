@@ -41,59 +41,9 @@
 
 @implementation NSBezierPath (BDSKExtensions)
 
-// code from http://www.cocoadev.com/index.pl?NSBezierPathCategory
-// removed UK rect function calls, changed spacing/alignment
-
-+ (void)fillRoundRectInRect:(NSRect)rect radius:(CGFloat)radius
-{
-    NSBezierPath *p = [self bezierPathWithRoundRectInRect:rect radius:radius];
-    [p fill];
-}
-
-
-+ (void)strokeRoundRectInRect:(NSRect)rect radius:(CGFloat)radius
-{
-    NSBezierPath *p = [self bezierPathWithRoundRectInRect:rect radius:radius];
-    [p stroke];
-}
-
-+ (NSBezierPath*)bezierPathWithRoundRectInRect:(NSRect)rect radius:(CGFloat)radius
-{
-    BDSKASSERT([NSThread isMainThread]);
-    
-    // Make sure radius doesn't exceed a maximum size to avoid artifacts:
-    CGFloat rectLimit = BDSKMin(NSHeight(rect), NSWidth(rect));
-    radius = BDSKMin(radius, 0.5f * rectLimit);
-    
-    // Make sure silly values simply lead to un-rounded corners:
-    if( radius <= 0 )
-        return [self bezierPathWithRect:rect];
-    
-    NSRect innerRect = NSInsetRect(rect, radius, radius); // Make rect with corners being centers of the corner circles.
-    NSBezierPath *path = [self bezierPath];
-    
-    [path removeAllPoints];    
-    
-    // Now draw our rectangle:
-    [path moveToPoint: NSMakePoint(NSMinX(innerRect) - radius, NSMinY(innerRect))];
-    
-    // Bottom left (origin):
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(innerRect), NSMinY(innerRect)) radius:radius startAngle:180.0 endAngle:270.0];
-    // Bottom edge and bottom right:
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(innerRect), NSMinY(innerRect)) radius:radius startAngle:270.0 endAngle:360.0];
-    // Left edge and top right:
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(innerRect), NSMaxY(innerRect)) radius:radius startAngle:0.0  endAngle:90.0 ];
-    // Top edge and top left:
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(innerRect), NSMaxY(innerRect)) radius:radius startAngle:90.0  endAngle:180.0];
-    // Left edge:
-    [path closePath];
-    
-    return path;
-}
-
 + (void)drawHighlightInRect:(NSRect)rect radius:(CGFloat)radius lineWidth:(CGFloat)lineWidth color:(NSColor *)color
 {
-    NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:NSInsetRect(rect, 0.5 * lineWidth, 0.5 * lineWidth) radius:radius];
+    NSBezierPath *path = [NSBezierPath bezierPathWithRoundedRect:NSInsetRect(rect, 0.5 * lineWidth, 0.5 * lineWidth) xRadius:radius yRadius:radius];
     [path setLineWidth:lineWidth];
     [[color colorWithAlphaComponent:0.2] setFill];
     [[color colorWithAlphaComponent:0.8] setStroke];
