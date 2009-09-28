@@ -53,22 +53,4 @@
 
 - (BOOL)isOpaque { return NO; }
 
-- (void)viewDidMoveToWindow {
-    // fix for a Tiger bug when a button is swapped in, it does not reset the tracking rects
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4 && [self showsBorderOnlyWhileMouseInside]) {
-        [self setShowsBorderOnlyWhileMouseInside:NO];
-        [self setShowsBorderOnlyWhileMouseInside:YES];
-    }
-    [super viewDidMoveToWindow];
-}
-
-- (void)viewDidMoveToSuperview {
-    // fix for a Tiger bug when a button is swapped in, it does not reset the tracking rects
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4 && [self showsBorderOnlyWhileMouseInside]) {
-        [self setShowsBorderOnlyWhileMouseInside:NO];
-        [self setShowsBorderOnlyWhileMouseInside:YES];
-    }
-    [super viewDidMoveToSuperview];
-}
-
 @end
