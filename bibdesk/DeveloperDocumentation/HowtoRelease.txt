@@ -28,7 +28,6 @@ How To Release BibDesk
   *  click the "Upload File" link, and select the disk image
   *  click the uploaded disk image file, and check the "Mac (OSX)" button, hit Save
   *  file release docs:  http://apps.sourceforge.net/trac/sourceforge/wiki/Release%20files%20for%20download
-  *  web upload:  https://frs.sourceforge.net/webupload
 
 - edit the release notes at relnotes.html
 
