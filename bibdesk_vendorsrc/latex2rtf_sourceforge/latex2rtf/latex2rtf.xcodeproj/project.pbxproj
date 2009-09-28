@@ -281,7 +281,6 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = UNIX;
-				GCC_VERSION = 4.0;
 				INSTALL_PATH = "$(HOME)/bin";
 				OTHER_CFLAGS = "-fsigned-char";
 				PRODUCT_NAME = latex2rtf;
@@ -299,7 +298,6 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PREPROCESSOR_DEFINITIONS = UNIX;
-				GCC_VERSION = 4.0;
 				INSTALL_PATH = "$(HOME)/bin";
 				OTHER_CFLAGS = "-fsigned-char";
 				PRODUCT_NAME = latex2rtf;
@@ -311,7 +309,6 @@
 			buildSettings = {
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
@@ -322,7 +319,6 @@
 			buildSettings = {
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};

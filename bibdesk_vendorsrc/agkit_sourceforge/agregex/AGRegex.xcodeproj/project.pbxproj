@@ -326,7 +326,6 @@
 					SUPPORT_UTF8,
 					"POSIX_MALLOC_THRESHOLD=10",
 				);
-				GCC_VERSION = 4.0;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "Info-AGRegex.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks/";
@@ -358,7 +357,6 @@
 					SUPPORT_UTF8,
 					"POSIX_MALLOC_THRESHOLD=10",
 				);
-				GCC_VERSION = 4.0;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "Info-AGRegex.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks/";
@@ -426,7 +424,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH)";
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Debug;
@@ -438,7 +435,6 @@
 					ppc,
 					i386,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Release;
