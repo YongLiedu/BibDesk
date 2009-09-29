@@ -40,17 +40,6 @@
 
 @implementation CIImage (BDSKExtensions)
 
-- (CIImage *)blendedImageWithBackground:(CIImage *)background usingMask:(CIImage *)mask;
-{
-    CIFilter *blendFilter = [CIFilter filterWithName:@"CIBlendWithMask"];    
-    
-    [blendFilter setValue:self forKey:@"inputImage"];
-    [blendFilter setValue:background forKey:@"inputBackgroundImage"];
-    [blendFilter setValue:mask forKey:@"inputMaskImage"];
-    
-    return [blendFilter valueForKey:@"outputImage"];
-}
-
 - (CIImage *)blurredImageWithBlurRadius:(CGFloat)radius;
 {
     CIFilter *gaussianBlurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];    

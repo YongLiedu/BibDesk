@@ -42,8 +42,6 @@
 
 @interface CIImage (BDSKExtensions)
 
-- (CIImage *)blendedImageWithBackground:(CIImage *)background usingMask:(CIImage *)mask;
-
 - (CIImage *)blurredImageWithBlurRadius:(CGFloat)radius;
 
 - (CIImage *)croppedImageWithRect:(CGRect)aRect;
