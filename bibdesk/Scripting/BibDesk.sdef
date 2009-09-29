@@ -344,9 +344,6 @@
 				description="The clipboard">
 				<cocoa key="clipboard"/>
 			</property>
-			<responds-to name="bibliography for">
-				<cocoa method=""/>
-			</responds-to>
 			<responds-to name="templated text">
 				<cocoa method=""/>
 			</responds-to>
