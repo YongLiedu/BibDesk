@@ -330,7 +330,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
         expandedString = __BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
         if (macroResolver)
             modification = [macroResolver modification];
-        defaultModification != [[BDSKMacroResolver defaultMacroResolver] modification];
+        defaultModification = [[BDSKMacroResolver defaultMacroResolver] modification];
     }
     return expandedString;
 }

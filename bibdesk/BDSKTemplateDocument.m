@@ -153,7 +153,6 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
         
         NSMutableArray *tmpFonts = [NSMutableArray array];
         NSMutableArray *fontNames = [[[[NSFontManager sharedFontManager] availableFontFamilies] mutableCopy] autorelease];
-        NSEnumerator *fontEnum;
         
         [fontNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
         for (NSString *name in fontNames) {
@@ -414,7 +413,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         NSArray *itemTemplate = [templateDict objectForKey:@""];
         NSMutableSet *includedTypes = [[[NSMutableSet alloc] initWithArray:[templateDict allKeys]] autorelease];
         BDSKTypeTemplate *template;
-        NSEnumerator *typeEnum;
         NSString *type;
         NSArray *currentTypes = [typeTemplates valueForKey:@"pubType"];
         NSUInteger currentIndex;
@@ -1165,7 +1163,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 - (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row { return nil; }
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard {
-    NSInteger idx = [rowIndexes firstIndex];
     [pboard declareTypes:[NSArray arrayWithObjects:BDSKTypeTemplateRowsPboardType, nil] owner:nil];
     [pboard setData:[NSKeyedArchiver archivedDataWithRootObject:rowIndexes] forType:BDSKTypeTemplateRowsPboardType];
     return YES;

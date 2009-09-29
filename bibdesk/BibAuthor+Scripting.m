@@ -56,10 +56,8 @@
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
     BibAuthor *newAuth = [BibAuthor authorWithName:aName andPub:nil];
+    BibAuthor *author = nil;
     
-	NSEnumerator *authEnum;
-	BibAuthor *author = nil;
-
 	for (BibItem *pub in publications) {
 		for (BibAuthor *auth in [pub pubAuthors]) {
 			if ([auth isEqual:newAuth]) {
@@ -83,7 +81,6 @@
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
     BibAuthor *newAuth = [BibAuthor authorWithName:aName andPub:nil];
-    
     BibAuthor *editor = nil;
 
 	for (BibItem *pub in publications) {

@@ -245,7 +245,6 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
 // note: IC is not thread safe
 - (NSURL *)downloadFolderURL;
 {
-    OSStatus err = fnfErr;
     FSRef pathRef;
     CFURLRef downloadsURL = NULL;
     
@@ -714,36 +713,6 @@ FSOpenIterator:
     }
     
     return success;
-}
-
-// Sets a file ref descriptor from a path, without following symlinks
-// Based on OAAppKit's fillAEDescFromPath and an example in http://www.cocoadev.com/index.pl?FSMakeFSSpec
-static OSErr BDSKFillAEDescFromPath(AEDesc *fileRefDescPtr, NSString *path, BOOL isSymLink)
-{
-    FSRef fileRef;
-    AEDesc fileRefDesc;
-    OSErr err;
-
-    bzero(&fileRef, sizeof(fileRef));
-
-    err = FSPathMakeRefWithOptions((UInt8 *)[path fileSystemRepresentation], kFSPathMakeRefDoNotFollowLeafSymlink, &fileRef, NULL);
-    
-    if (err != noErr) 
-        return err;
-
-    AEInitializeDesc(&fileRefDesc);
-    err = AECreateDesc(typeFSRef, &fileRef, sizeof(fileRef), &fileRefDesc);
-
-    // Omni says the Finder isn't very good at coercions, so we have to do this ourselves; however we don't want to lose symlinks
-    if (err == noErr){
-        if(isSymLink == NO)
-            err = AECoerceDesc(&fileRefDesc, typeAlias, fileRefDescPtr);
-        else
-            err = AEDuplicateDesc(&fileRefDesc, fileRefDescPtr);
-    }
-    AEDisposeDesc(&fileRefDesc);
-    
-    return err;
 }
 
 - (BOOL)copyObjectAtURL:(NSURL *)srcURL toDirectoryAtURL:(NSURL *)dstURL error:(NSError **)error;

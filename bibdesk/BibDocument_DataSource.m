@@ -482,14 +482,12 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                     NSUInteger row = [rowIndexes firstIndex];
                     BibItem *pub = nil;
                     NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
-                    NSEnumerator *fileEnum;
-                    BDSKLinkedFile *file;
                     NSString *path;
                     
                     while(row != NSNotFound){
                         pub = [shownPublications objectAtIndex:row];
                         
-                        for (file in [pub localFiles]) {
+                        for (BDSKLinkedFile *file in [pub localFiles]) {
                             if (path = [file path]) {
                                 [filePaths addObject:path];
                                 NSError *xerror = nil;
@@ -514,15 +512,13 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                     BibItem *pub = nil;
                     NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
                     NSString *fileName;
-                    NSEnumerator *fileEnum;
-                    BDSKLinkedFile *file;
                     NSURL *url, *theURL = nil;
                     
                     while(row != NSNotFound){
                         pub = [shownPublications objectAtIndex:row];
                         fileName = [[pub displayTitle] stringByAppendingPathExtension:@"webloc"];
                         
-                        for (file in [pub remoteURLs]) {
+                        for (BDSKLinkedFile *file in [pub remoteURLs]) {
                             if (url = [file URL]) {
                                 if (theURL == nil)
                                     theURL = url;

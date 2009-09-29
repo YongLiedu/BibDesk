@@ -60,7 +60,6 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
         document = aDocument;
         
         BDSKTypeManager *tm = [BDSKTypeManager sharedManager];
-        NSEnumerator *fieldEnum;
         NSString *field;
         
         for (field in [tm requiredFieldsForType:pubType])

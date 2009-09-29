@@ -883,7 +883,6 @@ enum {
 	
 	// loop through the pubs to replace
     NSMutableArray *arrayOfItems = [NSMutableArray array];
-    NSEnumerator *pubE; // an enumerator of BibItems
     NSString *origStr;
     
     // use all shown pubs; not just selection, since our caller is going to change the selection
