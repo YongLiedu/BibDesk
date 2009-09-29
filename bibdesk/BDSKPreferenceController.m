@@ -283,9 +283,7 @@ static id sharedController = nil;
 
 - (NSArray *)allPaneIdentifiers {
     NSMutableArray *result = [NSMutableArray array];
-    NSEnumerator *catEnum = [categories objectEnumerator];
-    NSString *cat;
-    while (cat = [catEnum nextObject])
+    for (NSString *cat in categories)
         [result addObjectsFromArray:[self panesForCategory:cat]];
     return result;
 }
@@ -513,8 +511,6 @@ static id sharedController = nil;
 
 - (void)loadPreferences {
     NSString *plistPath = [[NSBundle mainBundle] pathForResource:DEFAULTS_TABLE ofType:@"plist"];
-    NSEnumerator *catEnum = [[NSArray arrayWithContentsOfFile:plistPath] objectEnumerator];
-    NSDictionary *dict;
     NSMutableDictionary *initialValues = [NSMutableDictionary dictionary];
 	
     SInt32 major = 0, minor = 0, bugfix = 0;
@@ -522,12 +518,10 @@ static id sharedController = nil;
     if (noErr == Gestalt(gestaltSystemVersionMajor, &major) && noErr == Gestalt(gestaltSystemVersionMinor, &minor) && noErr == Gestalt(gestaltSystemVersionBugFix, &bugfix))
         systemVersion = [BDSKVersionNumber versionNumberWithVersionString:[NSString stringWithFormat:@"%i.%i.%i", major, minor, bugfix]];
     
-    while (dict = [catEnum nextObject]) {
+    for (NSDictionary *dict in [NSArray arrayWithContentsOfFile:plistPath]) {
         NSMutableArray *paneArray = [[NSMutableArray alloc] init];
-        NSEnumerator *paneEnum = [[dict valueForKey:PANES_KEY] objectEnumerator];
-        NSDictionary *paneDict;
         
-        while (paneDict = [paneEnum nextObject]) {
+        for (NSDictionary *paneDict in [dict valueForKey:PANES_KEY]) {
             BDSKPreferenceRecord *record = [[BDSKPreferenceRecord alloc] initWithDictionary:paneDict];
             NSString *identifier = [record identifier];
             // should we register defaults for panes that are not loaded?
@@ -561,14 +555,8 @@ static id sharedController = nil;
 }
 
 - (void)loadPanes {
-    NSEnumerator *catEnum = [categories objectEnumerator];
-    NSString *category;
-	
-    while (category = [catEnum nextObject]) {
-        NSEnumerator *paneEnum = [[[categoryDicts objectForKey:category] valueForKey:PANES_KEY] objectEnumerator];
-        NSString *identifier;
-        
-        while (identifier = [paneEnum nextObject]) {
+    for (NSString *category in categories) {
+        for (NSString *identifier in [[categoryDicts objectForKey:category] valueForKey:PANES_KEY]) {
             BDSKPreferenceRecord *record = [records objectForKey:identifier];
             BDSKPreferencePane *pane = [[[record paneClass] alloc] initWithRecord:record forPreferenceController:self];
             BDSKPOSTCONDITION(pane != nil);
@@ -577,9 +565,7 @@ static id sharedController = nil;
             NSArray *searchTerms = [record searchTerms];
             if ([searchTerms count]) {
                 NSMutableString *searchString = [[NSMutableString alloc] init];
-                NSEnumerator *stringEnum = [searchTerms objectEnumerator];
-                NSString *string;
-                while (string = [stringEnum nextObject])
+                for (NSString *string in searchTerms)
                     [searchString appendFormat:@"%@%C", [[NSBundle mainBundle] localizedStringForKey:string value:@"" table:DEFAULTS_TABLE], 0x1E];
                 [identifierSearchTerms setObject:searchString forKey:identifier];
                 [searchString release];

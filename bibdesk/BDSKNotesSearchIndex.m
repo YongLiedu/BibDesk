@@ -121,17 +121,13 @@
 
 - (void)addPublications:(NSArray *)pubs
 {
-    NSEnumerator *pubsEnum = [pubs objectEnumerator];
-    BibItem *pub;
-    while (pub = [pubsEnum nextObject])
+    for (BibItem *pub in pubs)
         [self queueItemForIdentifierURL:[pub identifierURL] fileURLs:[[pub existingLocalFiles] valueForKey:@"URL"]];
 }
 
 - (void)removePublications:(NSArray *)pubs
 {
-    NSEnumerator *pubsEnum = [pubs objectEnumerator];
-    BibItem *pub;
-    while (pub = [pubsEnum nextObject])
+    for (BibItem *pub in pubs)
         [self queueItemForIdentifierURL:[pub identifierURL] fileURLs:nil];
 }
 
@@ -172,10 +168,8 @@
         NSArray *fileURLs = [info valueForKey:@"fileURLs"];
         NSMutableString *searchText = nil;
         if ([fileURLs count]) {
-            NSEnumerator *fileEnum = [fileURLs objectEnumerator];
-            NSURL *fileURL;
             searchText = [NSMutableString string];
-            while (fileURL = [fileEnum nextObject]) {
+            for (NSURL *fileURL in fileURLs) {
                 NSString *notes = [fileURL textSkimNotes];
                 if ([notes length]) {
                     if ([searchText length])

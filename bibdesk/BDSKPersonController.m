@@ -192,27 +192,21 @@
     
     NSMutableSet *theNames = [[NSMutableSet alloc] init];
     NSMutableSet *peopleSet = [[NSMutableSet alloc] initForFuzzyAuthors];
-    NSEnumerator *pubEnum = [[owner publications] objectEnumerator];
-    BibItem *pub;
     
-    while (pub = [pubEnum nextObject]) {
-        NSEnumerator *fieldEnum = [fields objectEnumerator];
-        NSString *field;
+    for (BibItem *pub in [owner publications]) {
         NSDictionary *info = nil;
         NSMutableSet *fieldSet = nil;
         NSMutableSet *nameSet = nil;
         
-        while (field = [fieldEnum nextObject]) {
+        for (NSString *field in fields) {
             NSArray *people = [pub peopleArrayForField:field];
             
             [peopleSet addObjectsFromArray:people];
             
             if ([peopleSet containsObject:person]) {
-                NSEnumerator *personEnum = [people objectEnumerator];
-                BibAuthor *aPerson;
                 NSString *name;
                 
-                while (aPerson = [personEnum nextObject]) {
+                for (BibAuthor *aPerson in people) {
                     if ([aPerson fuzzyEqual:person]) {
                         if (info == nil) {
                             fieldSet = [[NSMutableSet alloc] init];
@@ -376,10 +370,6 @@
     NSSet *selFields = [NSSet setWithArray:[fieldArrayController selectedObjects]];
     NSSet *selNames = [NSSet setWithArray:[nameArrayController selectedObjects]];
     
-    NSEnumerator *itemE = [pubs objectEnumerator];
-    NSDictionary *item;
-    NSEnumerator *fieldE;
-    NSString *field;
     BibItem *pub;
     BibAuthor *aPerson;
     
@@ -390,12 +380,11 @@
     // this is only used as a placeholder for the name, so we don't care about its pub or field
     BibAuthor *newPerson = [BibAuthor authorWithName:newNameString andPub:nil];
     
-    while (item = [itemE nextObject]) {
+    for (NSDictionary *item in pubs) {
         
         pub = [item objectForKey:@"publication"];
-        fieldE = [[item objectForKey:@"fields"] objectEnumerator];
         
-        while (field = [fieldE nextObject]) {
+        for (NSString *field in [item objectForKey:@"fields"]) {
             // we only replace in the selected fields
             if ([selFields containsObject:field]) {
                 

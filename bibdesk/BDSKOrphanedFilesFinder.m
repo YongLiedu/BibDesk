@@ -150,24 +150,16 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (NSSet *)knownFiles
 {
-    NSEnumerator *docEnum = [[[NSDocumentController sharedDocumentController] documents] objectEnumerator];
-    BibDocument *doc;
-    NSEnumerator *pubEnum;
-    BibItem *pub;
-    NSEnumerator *fileEnum;
-    BDSKLinkedFile *file;
     NSURL *fileURL;
     
     NSMutableSet *knownFiles = [NSMutableSet set];
     
-    while (doc = [docEnum nextObject]) {
+    for (BibDocument *doc in [[NSDocumentController sharedDocumentController] documents]) {
         fileURL = [doc fileURL];
         if (fileURL)
             [knownFiles addObject:[BDSKFile fileWithURL:fileURL]];
-        pubEnum = [[doc publications] objectEnumerator];
-        while (pub = [pubEnum nextObject]) {
-            fileEnum = [[pub localFiles] objectEnumerator];
-            while (file = [fileEnum nextObject]) {
+        for (BibItem *pub in [doc publications]) {
+            for (BDSKLinkedFile *file in [pub localFiles]) {
                 if (fileURL = [file URL])
                     [knownFiles addObject:[BDSKFile fileWithURL:fileURL]];
             }
@@ -259,10 +251,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
         type = [sender tag];
     }
     
-    NSString *path;
-    NSEnumerator *pathEnum = [paths objectEnumerator];
-    
-    while (path = [pathEnum nextObject]) {
+    for (NSString *path in paths) {
         if(type == 1)
             [[NSWorkspace sharedWorkspace] openLinkedFile:path];
         else
@@ -274,9 +263,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     NSArray *files = [(NSArray *)contextInfo autorelease];
     if (returnCode == NSAlertDefaultReturn) {
         [[self mutableArrayValueForKey:@"orphanedFiles"] removeObjectsInArray:files];
-        NSEnumerator *pathEnum = [[files valueForKey:@"path"] objectEnumerator];
-        NSString *path;
-        while (path = [pathEnum nextObject]) {
+        for (NSString *path in [files valueForKey:@"path"]) {
             NSString *folderPath = [path stringByDeletingLastPathComponent];
             NSString *fileName = [path lastPathComponent];
             NSInteger tag = 0;

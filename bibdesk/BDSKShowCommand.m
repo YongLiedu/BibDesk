@@ -68,10 +68,7 @@ It can be used with
 	
 	}
 	
-	NSScriptObjectSpecifier * dP = nil;
-	NSEnumerator * myEnum = [ar objectEnumerator];
-	
-	while ( dP = [myEnum nextObject]) {
+	for (NSScriptObjectSpecifier *dP in ar) {
 	
 		id dPO = [dP objectsByEvaluatingSpecifier];
 		

@@ -126,7 +126,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     NSString *aSearchTerm = nil;
     NSString *aType = BDSKSearchGroupZoom;
     NSMutableDictionary *options = [NSMutableDictionary dictionary];
-    NSEnumerator *queryEnum = [[query componentsSeparatedByString:@"&"] objectEnumerator];
     
     [options setValue:[bdsksearchURL password] forKey:@"password"];
     [options setValue:[bdsksearchURL user] forKey:@"username"];
@@ -140,7 +139,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
             aType = BDSKSearchGroupDBLP;
     }
     
-    while (query = [queryEnum nextObject]) {
+    for (query in [query componentsSeparatedByString:@"&"]) {
         NSUInteger idx = [query rangeOfString:@"="].location;
         if (idx != NSNotFound && idx > 0) {
             NSString *key = [query substringToIndex:idx];
@@ -467,9 +466,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     [string appendFormat:@"/%@", [[serverInfo database] stringByAddingPercentEscapesIncludingReserved]];
     [string appendFormat:@";%@", [[serverInfo name] stringByAddingPercentEscapesIncludingReserved]];
     if ([serverInfo isZoom]) {
-        NSEnumerator *keyEnum = [[serverInfo options] keyEnumerator];
-        NSString *key;
-        while (key = [keyEnum nextObject]) {
+        for (NSString *key in [serverInfo options]) {
             NSString *value = [[serverInfo options] objectForKey:key];
             if ([key isEqualToString:@"removeDiacritics"])
                 value = [serverInfo removeDiacritics] ? @"1" : @"0";

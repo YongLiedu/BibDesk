@@ -65,8 +65,7 @@
     while (otherAncestor = [otherAncestor superclassDescription])
         [otherAncestors addObject:otherAncestor];
     do {
-        NSEnumerator *ancestorEnum = [otherAncestors objectEnumerator];
-        while (otherAncestor = [ancestorEnum nextObject]) {
+        for (otherAncestor in otherAncestors) {
             if ([myAncestor isEqual:otherAncestor])
                 return myAncestor;
         }

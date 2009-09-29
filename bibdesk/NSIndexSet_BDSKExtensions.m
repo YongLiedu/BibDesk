@@ -44,10 +44,7 @@
 + (id)indexSetWithIndexesInArray:(NSArray *)indexArray;
 {
     NSMutableIndexSet *indexSet = [NSMutableIndexSet indexSet];
-    NSEnumerator *numberEnum = [indexArray objectEnumerator];
-    NSNumber *number;
-    
-    while(number = [numberEnum nextObject])
+    for (NSNumber *number in indexArray)
         [indexSet addIndex:[number intValue]];
     
     return indexSet;

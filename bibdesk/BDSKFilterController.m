@@ -82,14 +82,12 @@
 }
 
 - (void)awakeFromNib {
-	NSEnumerator *cEnum = [[filter conditions] objectEnumerator];
-	BDSKCondition *condition = nil;
 	BDSKConditionController *controller = nil;
     BOOL canRemove = ([[filter conditions] count] > 1);
 	
 	[conditionControllers removeAllObjects];
     if ([[filter conditions] count]) {
-        while (condition = [cEnum nextObject]) {
+        for (BDSKCondition *condition in [filter conditions]) {
             controller = [[BDSKConditionController alloc] initWithFilterController:self condition:[[condition copy] autorelease]];
             [controller setCanRemove:canRemove];
             [conditionControllers addObject:[controller autorelease]];
@@ -212,10 +210,7 @@
 }
 
 - (BOOL)commitEditing {
-	NSEnumerator *cEnum = [conditionControllers objectEnumerator];
-	BDSKConditionController *controller;
-    
-    while (controller = [cEnum nextObject]) {
+	for (BDSKConditionController *controller in conditionControllers) {
         if (NO == [controller commitEditing])
             return NO;
     }

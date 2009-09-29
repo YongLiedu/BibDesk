@@ -236,8 +236,6 @@ static char BDSKConditionObservationContext;
             itemValues = [[item existingLocalFiles] valueForKey:@"path"];
         else if ([key isEqualToString:BDSKRemoteURLString])
             itemValues = [[item remoteURLs] valueForKey:@"absoluteString"];
-        NSEnumerator *itemEnum  = [itemValues objectEnumerator];
-        NSString *itemValue;
         
         CFOptionFlags options = kCFCompareCaseInsensitive;
         if (attachmentComparison == BDSKAttachmentEndWith)
@@ -247,7 +245,7 @@ static char BDSKConditionObservationContext;
         BOOL matchReturnValue = (stringComparison != BDSKAttachmentNotContain);
         CFRange range;
         
-        while (itemValue = [itemEnum nextObject]) {
+        for (NSString *itemValue in itemValues) {
             if (CFStringFindWithOptions((CFStringRef)itemValue, (CFStringRef)stringValue, CFRangeMake(0, [itemValue length]), options, &range))
                 return matchReturnValue;
         }
@@ -259,10 +257,8 @@ static char BDSKConditionObservationContext;
         
         if (stringComparison == BDSKGroupContain || stringComparison == BDSKGroupNotContain) {
             if ([key isEqualToString:BDSKAllFieldsString]) {
-                NSEnumerator *fieldEnum = [[item allFieldNames] objectEnumerator];
-                NSString *field;
                 BOOL isContain = stringComparison == BDSKGroupContain;
-                while (field = [fieldEnum nextObject]) {
+                for (NSString *field in [item allFieldNames]) {
                     if ([field isInvalidGroupField] == NO && [item isContainedInGroupNamed:stringValue forField:field])
                         return isContain;
                 }

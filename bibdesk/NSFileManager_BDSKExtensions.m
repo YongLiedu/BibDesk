@@ -818,11 +818,9 @@ static OSErr BDSKFillAEDescFromPath(AEDesc *fileRefDescPtr, NSString *path, BOOL
 
 - (BOOL)removeSpotlightCacheFilesForCiteKeys:(NSArray *)itemNames;
 {
-	NSEnumerator *nameEnum = [itemNames objectEnumerator];
-	NSString *name;
 	BOOL removed = YES;
 	
-	while (name = [nameEnum nextObject])
+	for (NSString *name in itemNames)
 		removed = removed && [self removeSpotlightCacheFileForCiteKey:name];
 	return removed;
 }
@@ -939,10 +937,7 @@ static OSErr BDSKFillAEDescFromPath(AEDesc *fileRefDescPtr, NSString *path, BOOL
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
     @try {    
-        NSString *path;
-        NSEnumerator *pathEnum = [fullPathDict keyEnumerator];
-        
-        while(path = [pathEnum nextObject])
+        for (NSString *path in fullPathDict)
             [self createWeblocFileAtPath:path withURL:[fullPathDict objectForKey:path]];
     }
     @catch(id localException) {
@@ -958,11 +953,9 @@ static OSErr BDSKFillAEDescFromPath(AEDesc *fileRefDescPtr, NSString *path, BOOL
         
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-    NSString *originalPath;
-    NSEnumerator *pathEnum = [fullPathDict keyEnumerator];
     NSError *error;
     NSURL *dstDir;
-    while(originalPath = [pathEnum nextObject]){
+    for (NSString *originalPath in fullPathDict) {
         dstDir = [NSURL fileURLWithPath:[[fullPathDict valueForKey:originalPath] stringByDeletingLastPathComponent]];
         if([self copyObjectAtURL:[NSURL fileURLWithPath:originalPath] toDirectoryAtURL:dstDir error:&error])
             NSLog(@"Unable to copy %@ to %@.  Error %@", originalPath, [fullPathDict valueForKey:originalPath], error);

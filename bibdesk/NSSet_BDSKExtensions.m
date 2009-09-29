@@ -63,9 +63,7 @@
 
 - (id)nonEmpty {
     NSMutableSet *nonEmptySet = [NSMutableSet set];
-    NSEnumerator *objEnum = [self objectEnumerator];
-    id obj;
-    while (obj = [objEnum nextObject])
+    for (id obj in self)
         if ([obj isNotEmpty])
             [nonEmptySet addObject:obj];
     return nonEmptySet;

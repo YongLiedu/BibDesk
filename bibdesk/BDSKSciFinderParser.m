@@ -206,11 +206,9 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
 
     NSMutableArray *toReturn = [NSMutableArray arrayWithCapacity:[scfItems count]];
 
-    NSEnumerator *scfItemEnum = [scfItems objectEnumerator];
-    NSString *str;
     NSMutableDictionary *pubFields = [NSMutableDictionary new];
     
-    while (str = [scfItemEnum nextObject]) {
+    for (NSString *str in scfItems) {
 
         // split each record up into field/value lines
         NSArray *lines = [str componentsSeparatedByString:@"\nFIELD "];

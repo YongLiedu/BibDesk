@@ -85,9 +85,6 @@
     
     NSArray *sourceLines = [itemString sourceLinesBySplittingString];
     
-    NSEnumerator *sourceLineE = [sourceLines objectEnumerator];
-    NSString *sourceLine = nil;
-    
     NSString *tag = nil;
     NSString *value = nil;
     NSMutableString *mutableValue = [NSMutableString string];
@@ -95,7 +92,7 @@
     
     NSSet *tagsNotToConvert = [NSSet setWithObjects:@"UR", @"L1", @"L2", @"L3", @"L4", nil];
     
-    while(sourceLine = [sourceLineE nextObject]){
+    for (NSString *sourceLine in sourceLines) {
 
         if([sourceLine length] > 5 && [[sourceLine substringWithRange:NSMakeRange(4,2)] isEqualToString:@"- "]){
 			// this is a "key - value" line

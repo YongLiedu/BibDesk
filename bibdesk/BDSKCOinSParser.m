@@ -103,8 +103,6 @@
 	
 	NSArray * components = [inputString componentsSeparatedByString:@"&amp;"];
 	if ([components count] < 2 ) { return nil; }
-	NSEnumerator * myEnum = [components objectEnumerator];
-	NSString * component;
 
     NSMutableDictionary *fieldsDict = [NSMutableDictionary dictionary];
     NSMutableArray *files = [NSMutableArray array];
@@ -116,7 +114,7 @@
 	NSString * auInitials = nil;
 	NSString * auSuffix = nil;
 
-	while (component = [myEnum nextObject]) {
+	for (NSString *component in components) {
 		NSArray * keyValue = [component componentsSeparatedByString:@"="];
 		if ([keyValue count] == 2 ) {
 			NSString * key = [keyValue objectAtIndex:0];
@@ -316,13 +314,11 @@
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
 	NSError *error;
     NSArray *nodes = [[xmlDocument rootElement] nodesForXPath:@".//span[@class='Z3988']" error:&error];
-    NSEnumerator *nodeEnum = [nodes objectEnumerator];
-    NSXMLNode *node;
 	NSMutableArray *results = [NSMutableArray arrayWithCapacity:[nodes count]];
     NSString *title;
     BibItem *bibItem;
     
-    while (node = [nodeEnum nextObject]) {
+    for (NSXMLNode *node in nodes) {
         if ([node kind] == NSXMLElementKind &&
             (title = [[(NSXMLElement *)node attributeForName:@"title"] XMLString]) &&
             (bibItem = [BDSKCOinSParser parseCOinSString:title]))

@@ -244,9 +244,7 @@
 }
 
 - (void)clearPromisedTypesForPasteboard:(NSPasteboard *)pboard {
-    NSEnumerator *typeEnum = [[self promisedTypesForPasteboard:pboard] objectEnumerator];
-    NSString *type;
-    while (type = [typeEnum nextObject]) {
+    for (NSString *type in [self promisedTypesForPasteboard:pboard]) {
         @try {
             // can raise NSPasteboardCommunicationException
             [pboard setData:nil forType:type];
@@ -332,10 +330,7 @@
 }
 
 - (void)provideAllPromisedTypes {
-	NSEnumerator *nameEnum = [[promisedPboardTypes allKeys] objectEnumerator];
-	NSString *name;
-    
-	while(name = [nameEnum nextObject]){
+	for (NSString *name in [promisedPboardTypes allKeys]) {
         NSPasteboard *pboard = [NSPasteboard pasteboardWithName:name];
         NSArray *types = [[self promisedTypesForPasteboard:pboard] copy]; // we need to copy as types can be removed
         [self performSelector:@selector(pasteboard:provideDataForType:) withObject:pboard withObjectsFromArray:types];
@@ -347,10 +342,7 @@
     if(delegate == nil)
         return;
     
-	NSEnumerator *nameEnum = [promisedPboardTypes keyEnumerator];
-	NSString *name;
-    
-	while(name = [nameEnum nextObject]){
+	for (NSString *name in promisedPboardTypes) {
         NSPasteboard *pboard = [NSPasteboard pasteboardWithName:name];
         
         // if we have BDSKBibItemPboardType, call to pasteboard:provideDataForType: will make this array go away

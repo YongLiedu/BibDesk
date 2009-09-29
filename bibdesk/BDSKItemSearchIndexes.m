@@ -112,10 +112,7 @@ static void appendNormalizedNames(const void *value, void *context)
 
 - (void)addPublications:(NSArray *)pubs;
 {
-    NSEnumerator *pubsEnum = [pubs objectEnumerator];
-    BibItem *pub;
-    
-    while (pub = [pubsEnum nextObject]) {
+    for (BibItem *pub in pubs) {
         SKDocumentRef doc = SKDocumentCreateWithURL((CFURLRef)[pub identifierURL]);
         if (doc) {
             
@@ -167,9 +164,7 @@ static void removeFromIndex(const void *key, const void *value, void *context)
 
 - (void)removePublications:(NSArray *)pubs;
 {
-    NSEnumerator *pubsEnum = [pubs objectEnumerator];
-    BibItem *pub;
-    while (pub = [pubsEnum nextObject]) {
+    for (BibItem *pub in pubs) {
         SKDocumentRef doc = SKDocumentCreateWithURL((CFURLRef)[pub identifierURL]);
         if (doc) {
             CFDictionaryApplyFunction(searchIndexes, removeFromIndex, (void *)doc);
@@ -187,12 +182,10 @@ static void removeFromIndex(const void *key, const void *value, void *context)
     
     CFMutableDataRef indexData;
     SKIndexRef skIndex;
-    NSEnumerator *fieldEnum = [[[self class] indexedFields] objectEnumerator];
-    NSString *fieldName;
     
     // Search Kit defaults to indexing the first 2000 terms.  This is almost never what we want for BibItem searching, so set it to be unlimited (zero, of course).
     NSDictionary *options = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:0], (id)kSKMaximumTerms, nil];
-    while (fieldName = [fieldEnum nextObject]) {
+    for (NSString *fieldName in [[self class] indexedFields]) {
         indexData = CFDataCreateMutable(NULL, 0);
         skIndex = SKIndexCreateWithMutableData(indexData, (CFStringRef)fieldName, kSKIndexInverted, (CFDictionaryRef)options);
         CFDictionaryAddValue(searchIndexes, (CFStringRef)fieldName, skIndex);

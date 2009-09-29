@@ -100,9 +100,6 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 	
     NSArray *sourceLines = [itemString sourceLinesBySplittingString];
     
-    NSEnumerator *sourceLineE = [sourceLines objectEnumerator];
-    NSString *sourceLine = nil;
-    
     //dictionary is the publication entry
     NSMutableDictionary *pubDict = [[NSMutableDictionary alloc] init];
     
@@ -112,7 +109,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     NSMutableString *mutableValue = [NSMutableString string];
     NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
     
-    while(sourceLine = [sourceLineE nextObject]){
+    for (NSString *sourceLine in sourceLines) {
         
         if([sourceLine length] < tagStartIndex + 3)
             continue;
@@ -200,9 +197,6 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     
     NSArray *records = [itemString componentsSeparatedByString:recordTerminator];
     
-    NSEnumerator *recordEnum = [records objectEnumerator];
-    NSString *record = nil;
-    
     //dictionary is the publication entry
     NSMutableDictionary *pubDict = [[NSMutableDictionary alloc] init];
     
@@ -213,7 +207,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     NSUInteger base, fieldsStart, i, dirLength;
     BOOL isControlField;
     
-    while(record = [recordEnum nextObject]){
+    for (NSString *record in records) {
         
         if([record length] < 25)
             continue;

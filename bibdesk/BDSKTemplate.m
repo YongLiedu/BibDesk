@@ -235,11 +235,9 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 + (NSArray *)allStyleNames;
 {
     NSMutableArray *names = [NSMutableArray array];
-    NSEnumerator *nodeE = [[self exportTemplates] objectEnumerator];
-    id aNode;
     NSString *name;
-    while(aNode = [nodeE nextObject]){
-        if([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil){
+    for (id aNode in [self exportTemplates]) {
+        if ([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil) {
             name = [aNode valueForKey:BDSKTemplateNameString];
             if(name != nil)
                 [names addObject:name];
@@ -251,13 +249,11 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 + (NSArray *)allFileTypes;
 {
     NSMutableArray *fileTypes = [NSMutableArray array];
-    NSEnumerator *nodeE = [[self exportTemplates] objectEnumerator];
-    id aNode;
     NSString *fileType;
-    while(aNode = [nodeE nextObject]){
-        if([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil){
+    for (id aNode in [self exportTemplates]) {
+        if ([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil) {
             fileType = [aNode valueForKey:BDSKTemplateRoleString];
-            if(fileType != nil)
+            if (fileType != nil)
                 [fileTypes addObject:fileType];
         }
     }
@@ -267,15 +263,13 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 + (NSArray *)allStyleNamesForFileType:(NSString *)fileType;
 {
     NSMutableArray *names = [NSMutableArray array];
-    NSEnumerator *nodeE = [[self exportTemplates] objectEnumerator];
-    id aNode;
     NSString *aFileType;
     NSString *name;
-    while(aNode = [nodeE nextObject]){
-        if([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil){
+    for (id aNode in [self exportTemplates]) {
+        if ([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil) {
             name = [aNode valueForKey:BDSKTemplateNameString];
             aFileType = [aNode valueForKey:BDSKTemplateRoleString];
-            if([aFileType caseInsensitiveCompare:fileType] == NSOrderedSame && name != nil)
+            if ([aFileType caseInsensitiveCompare:fileType] == NSOrderedSame && name != nil)
                 [names addObject:name];
         }
     }
@@ -285,13 +279,11 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 + (NSArray *)allStyleNamesForFormat:(BDSKTemplateFormat)format;
 {
     NSMutableArray *names = [NSMutableArray array];
-    NSEnumerator *nodeE = [[self exportTemplates] objectEnumerator];
-    id aNode;
     NSString *name;
-    while(aNode = [nodeE nextObject]){
-        if([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil){
+    for (id aNode in [self exportTemplates]) {
+        if ([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil) {
             name = [aNode valueForKey:BDSKTemplateNameString];
-            if(name != nil && ([aNode templateFormat] & format))
+            if (name != nil && ([aNode templateFormat] & format))
                 [names addObject:name];
         }
     }
@@ -310,11 +302,9 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 // accesses the node array in prefs
 + (BDSKTemplate *)templateForStyle:(NSString *)styleName;
 {
-    NSEnumerator *nodeE = [[self exportTemplates] objectEnumerator];
     id aNode = nil;
-    
-    while(aNode = [nodeE nextObject]){
-        if(NO == [aNode isLeaf] && [[aNode valueForKey:BDSKTemplateNameString] isEqualToString:styleName])
+    for (aNode in [self exportTemplates]) {
+        if (NO == [aNode isLeaf] && [[aNode valueForKey:BDSKTemplateNameString] isEqualToString:styleName])
             break;
     }
     return aNode;
@@ -487,13 +477,11 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 {
     BDSKASSERT([self parent] == nil);
     NSMutableArray *fileURLs = [NSMutableArray array];
-    NSEnumerator *childE = [[self children] objectEnumerator];
-    BDSKTemplate *aChild;
     NSURL *fileURL;
-    while(aChild = [childE nextObject]){
-        if([[aChild valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateAccessoryString]){
+    for (BDSKTemplate *aChild in [self children]) {
+        if ([[aChild valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateAccessoryString]) {
             fileURL = [aChild representedFileURL];
-            if(fileURL)
+            if (fileURL)
                 [fileURLs addObject:fileURL];
         }
     }
@@ -525,12 +513,11 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 {
     BDSKASSERT([self parent] == nil);
     NSParameterAssert(nil != role);
-    NSEnumerator *nodeE = [[self children] objectEnumerator];
-    id aNode = nil;
     
     // assume roles are unique by grabbing the first one; this works for any case except the accessory files
-    while(aNode = [nodeE nextObject]){
-        if([[aNode valueForKey:BDSKTemplateRoleString] isEqualToString:role])
+    id aNode = nil;
+    for (aNode in [self children]) {
+        if ([[aNode valueForKey:BDSKTemplateRoleString] isEqualToString:role])
             break;
     }
     return aNode;

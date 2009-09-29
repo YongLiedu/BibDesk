@@ -146,9 +146,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
 
 - (void)removePublicationsInArray:(NSArray *)items {
     NSMutableArray *removedItems = [NSMutableArray array];
-    NSEnumerator *itemEnum = [items objectEnumerator];
-    BibItem *item;
-    while (item = [itemEnum nextObject]) {
+    for (BibItem *item in items) {
         if ([publications containsObject:item] == NO) continue;
         [removedItems addObject:item];
         [publications removeObject:item];
@@ -164,9 +162,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
 
 - (void)update {
     if (tmpKeys) {
-        NSEnumerator *keyEnum = [tmpKeys objectEnumerator];
-        NSString *key;
-        while (key = [keyEnum nextObject]) 
+        for (NSString *key in tmpKeys) 
             [publications addObjectsFromArray:[[document publications] allItemsForCiteKey:key]];
         [self setCount:[publications count]];
         [tmpKeys release];

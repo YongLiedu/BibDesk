@@ -256,11 +256,9 @@
     if ([item hasEmptyOrDefaultCiteKey])
         [item setCiteKey:[item suggestedCiteKey]];
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey] && [[item filesToBeFiled] count]){
-        NSEnumerator *fileEnum = [[item filesToBeFiled] objectEnumerator];
-        BDSKLinkedFile *file;
         NSMutableArray *files = [NSMutableArray array];
         
-        while(file = [fileEnum nextObject]){
+        for (BDSKLinkedFile *file in [item filesToBeFiled]) {
             if([item canSetURLForLinkedFile:file] == NO)
                 continue;
             [files addObject:file];
@@ -443,11 +441,9 @@
     if (returnCode == NSAlertAlternateReturn){
         return;
     }else if(returnCode == NSAlertOtherReturn){
-        NSEnumerator *fileEnum = [[item localFiles] objectEnumerator];
-        BDSKLinkedFile *file;
         files = [NSMutableArray array];
         
-        while(file = [fileEnum nextObject]){
+        for (BDSKLinkedFile *file in [item localFiles]){
             if([item canSetURLForLinkedFile:file] == NO)
                 [item addFileToBeFiled:file];
             else
@@ -469,11 +465,9 @@
     // make the tableview stop editing:
     [self finalizeChangesPreservingSelection:YES];
 	BOOL canSet = YES;
-    NSEnumerator *fileEnum = [[item localFiles] objectEnumerator];
-    BDSKLinkedFile *file;
     
-    while(file = [fileEnum nextObject]){
-        if([item canSetURLForLinkedFile:file] == NO){
+    for (BDSKLinkedFile *file in [item localFiles]) {
+        if ([item canSetURLForLinkedFile:file] == NO) {
             canSet = NO;
             break;
         }
@@ -1003,8 +997,7 @@
 	NSMutableArray *menuItems = [NSMutableArray arrayWithCapacity:6];
 	NSMenuItem *menuItem;
 	
-	NSEnumerator *iEnum = [defaultMenuItems objectEnumerator];
-	while (menuItem = [iEnum nextObject]) { 
+	for (menuItem in defaultMenuItems) { 
 		if ([menuItem tag] == WebMenuItemTagCopy) {
 			// copy text items
 			if ([menuItems count] > 0)
@@ -1753,13 +1746,11 @@
 - (void)autoDiscoverFromFrameAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     NSDictionary *metaTagDict = [(NSDictionary *)contextInfo autorelease];
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-    NSEnumerator *metaTagKeyE = [metaTagDict keyEnumerator];
-    NSString *metaName = nil;
     
     if(returnCode == NSAlertAlternateReturn)
         return;
     
-    while(metaName = [metaTagKeyE nextObject]){
+    for (NSString *metaName in metaTagDict) {
         NSString *fieldName = [typeMan fieldNameForDublinCoreTerm:metaName];
         fieldName = (fieldName ?: [metaName fieldName]);
         NSString *fieldValue = [metaTagDict objectForKey:metaName];

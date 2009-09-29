@@ -586,10 +586,8 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
             addStringToDictionaryIfNotNil( nodeStringsForXPathJoinedByString(child, @".//ref", @" "), @"Isi-Ref-Recids", pubFields);
         
         // check to see if the current tag name matches an item in the source XML tag priority list
-        NSString *sourceTagName;
         NSString *sourceTagValue;
-        NSEnumerator *enumerator = [sourceXMLTagPriority objectEnumerator];
-        while (sourceTagName = [enumerator nextObject]) {
+        for (NSString *sourceTagName in sourceXMLTagPriority) {
             if ([name isEqualToString:sourceTagName]) {
                 sourceTagValue = (useTitlecase ? [[child stringValue] titlecaseString] : [child stringValue]);
                 if (sourceTagValue && [sourceTagValue length])
@@ -602,10 +600,8 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
     
     // if source field value(s) are in the priority list, subtitute the first one
     if ([sourceTagValues count]) {
-        NSString *sourceTagName;
         NSString *sourceTagValue;
-        NSEnumerator *enumerator = [sourceXMLTagPriority objectEnumerator];
-        while (sourceTagName = [enumerator nextObject]) {
+        for (NSString *sourceTagName in sourceXMLTagPriority) {
             if (sourceTagValue = [sourceTagValues objectForKey:sourceTagName]) {
                 [pubFields setObject:sourceTagValue forKey:sourceField];
                 break;

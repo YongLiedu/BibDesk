@@ -406,18 +406,16 @@ enum {
 
 - (void)setupTableColumnsWithIdentifiers:(NSArray *)identifiers {
     
-    NSEnumerator *shownColNamesE = [identifiers objectEnumerator];
     NSTableColumn *tc;
-    NSString *colName;
     NSNumber *tcWidth;
     
     NSDictionary *defaultTableColumnWidths = nil;
-    if([[self delegate] respondsToSelector:@selector(defaultColumnWidthsForTableView:)])
+    if ([[self delegate] respondsToSelector:@selector(defaultColumnWidthsForTableView:)])
         defaultTableColumnWidths = [[self delegate] defaultColumnWidthsForTableView:self];
     
     NSMutableArray *columns = [NSMutableArray arrayWithCapacity:[identifiers count]];
 	
-	while(colName = [shownColNamesE nextObject]){
+	for (NSString *colName in identifiers) {
 		tc = [self configuredTableColumnForField:colName];
         
         if([colName isEqualToString:BDSKImportOrderString] == NO && (tcWidth = [defaultTableColumnWidths objectForKey:colName]))
@@ -427,7 +425,7 @@ enum {
 	}
     
     NSTableColumn *highlightedColumn = [self highlightedTableColumn];
-    if([columns containsObject:highlightedColumn] == NO)
+    if ([columns containsObject:highlightedColumn] == NO)
         highlightedColumn = nil;
 	NSIndexSet *selectedRows = [self selectedRowIndexes];
     
@@ -536,12 +534,10 @@ enum {
         [color setSize:NSMakeSize(16, 16)];
 		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, paperclip, BDSKLocalFileString, [NSImage arrowImage], BDSKCrossrefString, color, BDSKColorString, color, BDSKColorLabelString, nil];
 		if (paths) {
-			NSEnumerator *keyEnum = [paths keyEnumerator];
-			NSString *key, *path;
 			NSImage *image;
 			
-			while (key = [keyEnum nextObject]) {
-				path = [paths objectForKey:key];
+			for (NSString *key in paths) {
+				NSString *path = [paths objectForKey:key];
 				if ([[NSFileManager defaultManager] fileExistsAtPath:path] &&
 					(image = [[NSImage alloc] initWithContentsOfFile:path])) {
 					[tmpDict setObject:image forKey:key];

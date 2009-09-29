@@ -209,11 +209,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
         NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
         
         NSMutableDictionary *reverseDict = [NSMutableDictionary dictionaryWithCapacity:[twoWayDict count]];
-        NSEnumerator *rEnum = [twoWayDict keyEnumerator];
-        NSString *roman;
-        while (roman = [rEnum nextObject]) {
+        for (NSString *roman in twoWayDict)
             [reverseDict setObject:roman forKey:[twoWayDict objectForKey:roman]];
-        }
         NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:oneWayDict, ONE_WAY_CONVERSION_KEY, 
                                                                         twoWayDict, ROMAN_TO_TEX_KEY,
                                                                         reverseDict, TEX_TO_ROMAN_KEY, nil];

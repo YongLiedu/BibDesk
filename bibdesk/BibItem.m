@@ -152,13 +152,10 @@ CFHashCode BibItemEquivalenceHash(const void *item)
 	[keys addObjectsFromArray:[btm requiredFieldsForType:type]];
 	[keys addObjectsFromArray:[btm optionalFieldsForType:type]];
     [keys removeObject:BDSKLocalUrlString];
-	NSEnumerator *keyEnum = [keys objectEnumerator];
-    [keys release];
-    
-	NSString *key;
 	
-	while (key = [keyEnum nextObject])
+	for (NSString *key in keys)
         hash ^= [[(BibItem *)item stringValueOfField:key inherit:NO] hash];
+    [keys release];
     
     return hash;
 }
@@ -466,16 +463,13 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	[keys addObjectsFromArray:[btm requiredFieldsForType:[self pubType]]];
 	[keys addObjectsFromArray:[btm optionalFieldsForType:[self pubType]]];
 	[keys addObjectsFromArray:[btm userDefaultFieldsForType:[self pubType]]];
-	NSEnumerator *keyEnum = [keys objectEnumerator];
-    [keys release];
     
-	NSString *key;
-	
     // @@ remove TeX?  case-sensitive?
-	while (key = [keyEnum nextObject]) {
+	for (NSString *key in keys) {
 		if ([[self stringValueOfField:key inherit:NO] isEqualToString:[aBI stringValueOfField:key inherit:NO]] == NO)
 			return NO;
 	}
+    [keys release];
 	
 	NSString *crossref1 = [self valueOfField:BDSKCrossrefString inherit:NO];
 	NSString *crossref2 = [aBI valueOfField:BDSKCrossrefString inherit:NO];
@@ -500,16 +494,13 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	[keys addObjectsFromArray:[btm requiredFieldsForType:[self pubType]]];
 	[keys addObjectsFromArray:[btm optionalFieldsForType:[self pubType]]];
     [keys removeObject:BDSKLocalUrlString];
-	NSEnumerator *keyEnum = [keys objectEnumerator];
-    [keys release];
     
-	NSString *key;
-	
     // @@ remove TeX?  case-sensitive?
-	while (key = [keyEnum nextObject]) {
+	for (NSString *key in keys) {
 		if ([[self stringValueOfField:key inherit:NO] isEqualToString:[aBI stringValueOfField:key inherit:NO]] == NO)
 			return NO;
 	}
+    [keys release];
 	
 	NSString *crossref1 = [self valueOfField:BDSKCrossrefString inherit:NO];
 	NSString *crossref2 = [aBI valueOfField:BDSKCrossrefString inherit:NO];
@@ -531,14 +522,10 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	// compare all fields, but compare relevant values as nil might mean 0 for some keys etc.
 	NSMutableSet *keys = [[NSMutableSet alloc] initWithArray:[self allFieldNames]];
 	[keys addObjectsFromArray:[aBI allFieldNames]];
-	NSEnumerator *keyEnum = [keys objectEnumerator];
-    [keys release];
 
-	NSString *key, *value1, *value2;
-	
-	while (key = [keyEnum nextObject]) {
-		value1 = [self stringValueOfField:key inherit:NO];
-		value2 = [aBI stringValueOfField:key inherit:NO];
+	for (NSString *key in keys) {
+		NSString *value1 = [self stringValueOfField:key inherit:NO];
+		NSString *value2 = [aBI stringValueOfField:key inherit:NO];
 		if ([NSString isEmptyString:value1]) {
 			if ([NSString isEmptyString:value2])
 				continue;
@@ -550,6 +537,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 			return NO;
 		}
 	}
+    [keys release];
 	return YES;
 }
 
@@ -640,20 +628,15 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 - (void)rebuildPeopleIfNeeded{
     
     if (people == nil) {
-        
-        NSEnumerator *pEnum = [[[BDSKTypeManager sharedManager] personFieldsSet] objectEnumerator];
-        NSString *personStr;
-        NSString *personType;
-        
         people = [[NSMutableDictionary alloc] initWithCapacity:2];
         
-        while(personType = [pEnum nextObject]){
+        for (NSString *personType in [[BDSKTypeManager sharedManager] personFieldsSet]) {
             // get the string representation from pubFields
-            personStr = [pubFields objectForKey:personType];
+            NSString *personStr = [pubFields objectForKey:personType];
             
             // parse into an array of BibAuthor objects
             NSArray *tmpPeople = [BDSKBibTeXParser authorsFromBibtexString:personStr withPublication:self forField:personType];
-            if([tmpPeople count])
+            if ([tmpPeople count])
                 [people setObject:tmpPeople forKey:personType];
         }
         
@@ -1123,11 +1106,8 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	if (nil == requiredFields || [self hasEmptyOrDefaultCiteKey] == NO)
 		return NO;
 	
-	NSEnumerator *fEnum = [requiredFields objectEnumerator];
-	NSString *fieldName;
-    
     // see if we have enough fields to generate it
-	while (fieldName = [fEnum nextObject]) {
+	for (NSString *fieldName in requiredFields) {
 		if ([fieldName isEqualToString:BDSKAuthorEditorString]) {
 			if ([NSString isEmptyString:[self valueOfField:BDSKAuthorString]] && 
 				[NSString isEmptyString:[self valueOfField:BDSKEditorString]])
@@ -1465,11 +1445,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (NSString *)skimNotesForLocalURL{
     NSMutableString *string = [NSMutableString string];
-    NSEnumerator *fileEnum = [[self localFiles] objectEnumerator];
-    BDSKLinkedFile *file;
     NSURL *fileURL;
     
-    while (file = [fileEnum nextObject]) {
+    for (BDSKLinkedFile *file in [self localFiles]) {
         if (fileURL = [file URL]) {
             NSString *notes = [fileURL textSkimNotes];
             if ([notes length] == 0)
@@ -1511,13 +1489,11 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 - (NSDictionary *)searchIndexInfo{
-    NSEnumerator *fileEnum = [[self localFiles] objectEnumerator];
-    BDSKLinkedFile *file;
     NSURL *aURL;
     
     // create an array of all local-URLs this object could have
     NSMutableArray *urls = [[NSMutableArray alloc] initWithCapacity:5];
-    while(file = [fileEnum nextObject]){
+    for (BDSKLinkedFile *file in [self localFiles]) {
         if (aURL = [file URL])
             [urls addObject:aURL];
     }
@@ -1589,18 +1565,15 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
     // kMDItemWhereFroms is the closest we get to a URL field, so add our standard fields if available
     NSMutableArray *mutableArray = [[NSMutableArray alloc] initWithCapacity:2];
-    NSEnumerator *fileEnum;
-    BDSKLinkedFile *file;
     NSURL *url;
+    BDSKLinkedFile *file;
     
-    fileEnum = [[self localFiles] objectEnumerator];
-    while (file = [fileEnum nextObject]) {
+    for (file in [self localFiles]) {
         if (url = [file URL])
             [mutableArray addObject:[url absoluteString]];
     }
     
-    fileEnum = [[self remoteURLs] objectEnumerator];
-    while (file = [fileEnum nextObject]) {
+    for (file in [self remoteURLs]) {
         if (url = [file URL])
             [mutableArray addObject:[url absoluteString]];
     }
@@ -1685,7 +1658,6 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	NSString *field;
     NSString *value;
     NSMutableData *data = [NSMutableData dataWithCapacity:200];
-	NSEnumerator *e;
     NSError *error = nil;
     BOOL isOK = YES;
     BOOL shouldTeXify = (options & BDSKBibTeXOptionTeXifyMask) != 0;
@@ -1701,8 +1673,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     // add fields to be written regardless; this is a seldom-used hack for some crossref problems
     // @@ added here for sorting; the original code required the user to also add this in the default fields list, but I'm not sure if that's a distinction worth preserving since it's only a hidden pref
     if ([fieldsToWriteIfEmpty count]) {
-        NSEnumerator *emptyE = [fieldsToWriteIfEmpty objectEnumerator];
-        while (field = [emptyE nextObject]) {
+        for (field in fieldsToWriteIfEmpty) {
             if ([keys containsObject:field] == NO)
                 [keys addObject:field];
         }
@@ -1731,9 +1702,6 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         urlKeys = [btm allURLFieldsSet];
     NSSet *personFields = [btm personFieldsSet];
     
-	e = [keys objectEnumerator];
-	[keys release];
-    
     // citekey is the only thing that could fail here, and that's not likely if we read it in originally
     NSString *typeAndCiteKey = [NSString stringWithFormat:@"@%@{%@", type, [self citeKey]]; 
     isOK = [data appendDataFromString:typeAndCiteKey encoding:encoding error:&error];
@@ -1746,7 +1714,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     NSData *lineSeparator = [@",\n\t" dataUsingEncoding:encoding];
     NSData *fieldValueSeparator = [@" = " dataUsingEncoding:encoding];
     
-    while (isOK && (field = [e nextObject])) {
+    for (field in keys) {
+        
+        if (isOK == NO) break;
         
         if (NO == dropInternal || [knownKeys containsObject:field]) {
             
@@ -1783,6 +1753,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
             }
         }
     }
+	[keys release];
     [knownKeys release];
     
     // serialize BDSKLinkedFiles; make sure to add these at the end to avoid problems with BibTeX's buffers
@@ -1822,7 +1793,6 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 - (NSString *)RISStringValue{
-    NSString *k;
     NSString *v;
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
     NSMutableArray *keys = [[self allFieldNames] mutableCopy];
@@ -1842,13 +1812,11 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         risType = [btm RISTypeForBibTeXType:[self pubType]];
     
     // enumerate the remaining keys
-    NSEnumerator *e = [keys objectEnumerator];
 	NSString *tag;
-	[keys release];
 	
     [s appendFormat:@"TY  - %@\n", risType];
     
-    while(k = [e nextObject]){
+    for (NSString *k in keys) {
 		tag = [btm RISTagForBibTeXFieldName:k];
         // ignore fields that have no RIS tag, we should not contruct invalid or wrong RIS
         if (tag == nil) continue;
@@ -1886,6 +1854,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 			[s appendString:@"\n"];
 		}
     }
+	[keys release];
     [s appendString:@"ER  - \n"];
     return s;
 }
@@ -1903,10 +1872,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     [s appendString:@"\n</titleInfo>\n"];
     // note: may in the future want to output subtitles.
 
-    NSEnumerator *authEnum = [[self pubAuthors] objectEnumerator];
-    BibAuthor *author;
-    
-    while (author = [authEnum nextObject]) {
+    for (BibAuthor *author in [self pubAuthors]) {
         [s appendString:[author MODSStringWithRole:BDSKAuthorString]];
         [s appendString:@"\n"];
     }
@@ -2051,49 +2017,45 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     
     // contributors
     
-    NSEnumerator *authorE;
-    BibAuthor *author;
-    
     [s appendString:@"<contributors>"];
     
+    BibAuthor *author;
+    
     [s appendString:@"<authors>"];
-    if([authorField isPersonField]){
-        authorE = [[self peopleArrayForField:authorField] objectEnumerator];
-        while (author = [authorE nextObject]){
+    if ([authorField isPersonField]) {
+        for (author in [self peopleArrayForField:authorField]) {
             value = [author normalizedName];
             if ([value length] && [value characterAtIndex:0] == '{' && [value characterAtIndex:[value length] - 1] == '}')
                 value = [[value substringWithRange:NSMakeRange(1, [value length] - 2)] stringByAppendingString:@","];
             [s appendStrings:@"<author>", [[value stringByRemovingCurlyBraces] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
         }
-    }else{
+    } else {
         AddXMLField(@"author",authorField);
     }
     [s appendString:@"</authors>"];
     
     [s appendString:@"<secondary-authors>"];
-    if([editorField isPersonField]){
-        authorE = [[self peopleArrayForField:editorField] objectEnumerator];
-        while (author = [authorE nextObject]){
+    if ([editorField isPersonField]) {
+        for (author in [self peopleArrayForField:editorField]) {
             value = [author normalizedName];
             if ([value length] && [value characterAtIndex:0] == '{' && [value characterAtIndex:[value length] - 1] == '}')
                 value = [[value substringWithRange:NSMakeRange(1, [value length] - 2)] stringByAppendingString:@","];
             [s appendStrings:@"<author>", [[value stringByRemovingCurlyBraces] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
         }
-    }else{
+    } else {
         AddXMLField(@"author",editorField);
     }
     [s appendString:@"</secondary-authors>"];
     
     [s appendString:@"<subsidiary-authors>"];
-    if([organizationField isPersonField]){
-        authorE = [[self peopleArrayForField:organizationField] objectEnumerator];
-        while (author = [authorE nextObject]){
+    if ([organizationField isPersonField]) {
+        for (author in [self peopleArrayForField:organizationField]) {
             value = [author normalizedName];
             if ([value length] && [value characterAtIndex:0] == '{' && [value characterAtIndex:[value length] - 1] == '}')
                 value = [[value substringWithRange:NSMakeRange(1, [value length] - 2)] stringByAppendingString:@","];
             [s appendStrings:@"<author>", [[value stringByRemovingCurlyBraces] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
         }
-    }else{
+    } else {
         AddXMLField(@"author",organizationField);
     }
     [s appendString:@"</subsidiary-authors>"];
@@ -2140,22 +2102,19 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     AddXMLField(@"keyword",BDSKKeywordsString);
     [s appendString:@"</keywords>"];
     
-    NSEnumerator *fileE;
     BDSKLinkedFile *file;
     
     [s appendString:@"<urls>"];
     
-    fileE = [[self localFiles] objectEnumerator];
     [s appendString:@"<pdf-urls>"];
-    while (file = [fileE nextObject]){
+    for (file in [self localFiles]) {
         if (value = [[file URL] absoluteString])
             [s appendStrings:@"<url>", [value stringByEscapingBasicXMLEntitiesUsingUTF8], @"</url>", nil];
     }
     [s appendString:@"</pdf-urls>"];
     
-    fileE = [[self remoteURLs] objectEnumerator];
     [s appendString:@"<related-urls>"];
-    while (file = [fileE nextObject]){
+    for (file in [self remoteURLs]) {
         if (value = [[file URL] absoluteString])
             [s appendStrings:@"<url>", [value stringByEscapingBasicXMLEntitiesUsingUTF8], @"</url>", nil];
     }
@@ -2249,7 +2208,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
     // if it has a parent, find all the available keys, and use valueOfField: to get either the
     // child object or parent object value. Inherit only the fields of the parent relevant for the item.
-    if(parent){
+    if (parent) {
         BDSKTypeManager *tm = [BDSKTypeManager sharedManager];
         NSMutableArray *allFields = [NSMutableArray array];
         NSString *type = [self pubType];
@@ -2258,11 +2217,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         [allFields addNonDuplicateObjectsFromArray:[tm userDefaultFieldsForType:type]];
         [allFields addNonDuplicateObjectsFromArray:[self allFieldNames]];
         
-        NSEnumerator *keyEnum = [allFields objectEnumerator];
-        NSString *key;
         NSString *value;
         
-        while(key = [keyEnum nextObject]){
+        for (NSString *key in allFields) {
             if ([key isIntegerField] == NO && [key isURLField] == NO) {
                 value = [self valueOfField:key inherit:([key isNoteField] == NO)];
                 if ([NSString isEmptyString:value] == NO) {
@@ -2275,11 +2232,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
                 
     } else {
         NSDictionary *thePubFields = [self pubFields];
-        NSEnumerator *keyEnum = [thePubFields keyEnumerator];
-        NSString *key;
         NSString *value;
         
-        while(key = [keyEnum nextObject]){
+        for (NSString *key in thePubFields) {
             if ([key isIntegerField] == NO && [key isURLField] == NO) {
                 value = [thePubFields objectForKey:key];
                 if ([NSString isEmptyString:value] == NO) {
@@ -2369,12 +2324,10 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (NSString *)textSkimNotes {
     NSMutableString *string = [NSMutableString string];
-    NSEnumerator *fileEnum = [[self localFiles] objectEnumerator];
-    BDSKLinkedFile *file;
     NSURL *url;
     NSString *notes;
     
-    while (file = [fileEnum nextObject]) {
+    for (BDSKLinkedFile *file in [self localFiles]) {
         if (url = [file URL]) {
             notes = [url textSkimNotes];
             if ([notes length]) {
@@ -2390,13 +2343,11 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (NSAttributedString *)richTextSkimNotes {
     NSMutableAttributedString *attrString = [[[NSMutableAttributedString alloc] initWithString:@""] autorelease];
-    NSEnumerator *fileEnum = [[self localFiles] objectEnumerator];
-    BDSKLinkedFile *file;
     NSURL *url;
     NSAttributedString *notes;
     NSAttributedString *seperatorString = [[[NSMutableAttributedString alloc] initWithString:@"\n\n"] autorelease];
     
-    while (file = [fileEnum nextObject]) {
+    for (BDSKLinkedFile *file in [self localFiles]) {
         if (url = [file URL]) {
             notes = [url richTextSkimNotes];
             if ([notes length]) {
@@ -2446,13 +2397,9 @@ static void addFilesToArray(const void *value, void *context)
 
 - (NSArray *)usedMacros {
     NSMutableSet *macros = [NSMutableSet set];
-    NSEnumerator *valueEnum = [pubFields objectEnumerator];
-    NSString *value;
-    while (value = [valueEnum nextObject]) {
+    for (NSString *value in pubFields) {
         if ([value isComplex] == NO) continue;
-        NSEnumerator *nodeEnum = [[value nodes] objectEnumerator];
-        BDSKStringNode *node;
-        while (node = [nodeEnum nextObject]) {
+        for (BDSKStringNode *node in [value nodes]) {
             if ([node type] != BDSKStringNodeMacro) continue;
             BDSKMacroResolver *resolver = [[value macroResolver] valueOfMacro:[node value]] ? [value macroResolver] : [BDSKMacroResolver defaultMacroResolver];
             BDSKMacro *macro = [[BDSKMacro alloc] initWithName:[node value] macroResolver:resolver];
@@ -2784,10 +2731,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 		[NSString isEmptyString:[[[owner fileURL] path] stringByDeletingLastPathComponent]]))
 		return NO;
 	
-	NSEnumerator *fEnum = [requiredFields objectEnumerator];
-	NSString *fieldName;
-	
-	while (fieldName = [fEnum nextObject]) {
+	for (NSString *fieldName in requiredFields) {
 		if ([fieldName isEqualToString:BDSKCiteKeyString]) {
             if([self hasEmptyOrDefaultCiteKey])
 				return NO;
@@ -3018,14 +2962,12 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	}
 	
 	// handle authors separately
-    if([field isPersonField]){
+    if ([field isPersonField]) {
 		BDSKASSERT([groupName isKindOfClass:[BibAuthor class]]);
-		NSEnumerator *authEnum = [[self peopleArrayForField:field] objectEnumerator];
-		BibAuthor *auth;
 		NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[oldString length] - [[groupName lastName] length] - 5];
 		BOOL first = YES;
-		while(auth = [authEnum nextObject]){
-			if([auth fuzzyEqual:groupName] == NO){
+		for (BibAuthor *auth in [self peopleArrayForField:field]) {
+			if ([auth fuzzyEqual:groupName] == NO) {
 				if(first) 
                     first = NO;
 				else 
@@ -3146,11 +3088,9 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	// handle authors separately
     if([field isPersonField]){
 		BDSKASSERT([groupName isKindOfClass:[BibAuthor class]]);
-		NSEnumerator *authEnum = [[self peopleArrayForField:field] objectEnumerator];
-		BibAuthor *auth;
 		NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[oldString length] - [[groupName lastName] length] - 5];
 		BOOL first = YES;
-		while(auth = [authEnum nextObject]){
+		for (BibAuthor *auth in [self peopleArrayForField:field]) {
 			if(first) first = NO;
 			else [string appendString:@" and "];
 			if([auth fuzzyEqual:groupName]){
@@ -3558,9 +3498,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     if (self = [super init]) {
         fieldCollection = [collection retain];
         fieldNames = [[NSMutableArray alloc] initWithCapacity:[array count]];
-        NSEnumerator *fnEnum = [array objectEnumerator];
-        NSString *name;
-        while (name = [fnEnum nextObject]) 
+        for (NSString *name in array) 
             if ([fieldCollection isUsedField:name] == NO)
                 [fieldNames addObject:name];
     }

@@ -249,17 +249,14 @@ static void fixEEURL(BibItem *pub)
 
         NSMutableSet *btEntries = [NSMutableSet set];
         NSMutableDictionary *abstracts = [NSMutableDictionary dictionary];
-        NSEnumerator *objEnum = [dblpKeys objectEnumerator];
-        NSString *aKey;
-        while ((aKey = [objEnum nextObject]) && flags.isRetrieving) {
+        for (NSString *aKey in dblpKeys) {
+            if (flags.isRetrieving == 0) break;
             
             NSURL *theURL = [NSURL URLWithString:[@"http://dblp.uni-trier.de/rec/bibtex/" stringByAppendingString:aKey]];
             NSXMLDocument *doc = [[NSXMLDocument alloc] initWithContentsOfURL:theURL options:NSXMLDocumentTidyHTML error:NULL];
             
             NSArray *btNodes = [doc nodesForXPath:@"//pre" error:NULL];
-            NSEnumerator *nodeEnum = [btNodes objectEnumerator];
-            NSXMLNode *aNode;
-            while (aNode = [nodeEnum nextObject])
+            for (NSXMLNode *aNode in btNodes)
                 [btEntries addObject:[aNode stringValue]];
             
             [doc release];
@@ -272,11 +269,10 @@ static void fixEEURL(BibItem *pub)
         
         NSString *btString = [[btEntries allObjects] componentsJoinedByString:@"\n"];
         pubs = [BDSKBibTeXParser itemsFromString:btString document:group isPartialData:NULL error:NULL];
-        objEnum = [pubs objectEnumerator];
-        BibItem *pub;
-        while ((pub = [objEnum nextObject]) && flags.isRetrieving) {
+        for (BibItem *pub in pubs) {
+            if (flags.isRetrieving == 0) break;
             
-            aKey = [[pub citeKey] stringByRemovingPrefix:@"DBLP:"];
+            NSString *aKey = [[pub citeKey] stringByRemovingPrefix:@"DBLP:"];
             id value = [abstracts objectForKey:aKey];
             if (value && [value isEqual:[NSNull null]] == NO)
                 [pub setValue:value forKey:BDSKAbstractString];

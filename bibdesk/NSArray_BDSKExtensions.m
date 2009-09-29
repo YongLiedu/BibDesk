@@ -45,9 +45,7 @@
 
 - (id)nonEmpty {
     NSMutableArray *nonEmptyArray = [NSMutableArray array];
-    NSEnumerator *objEnum = [self objectEnumerator];
-    id obj;
-    while (obj = [objEnum nextObject])
+    for (id obj in self)
         if ([obj isNotEmpty])
             [nonEmptyArray addObject:obj];
     return nonEmptyArray;
@@ -239,12 +237,10 @@
 }
 
 - (NSArray *)indexRanges {
-    NSEnumerator *itemEnum = [[self sortedArrayUsingSelector:@selector(compare:)] objectEnumerator];
-    id item;
     NSMutableArray *array = [NSMutableArray array];
     NSInteger start = NSIntegerMin, end = NSIntegerMin;
     
-    while (item = [itemEnum nextObject]) {
+    for (id item in [self sortedArrayUsingSelector:@selector(compare:)]) {
         if ([item respondsToSelector:@selector(intValue)] == NO) continue;
         NSInteger value = [item intValue];
         if (value != end + 1) {
@@ -267,12 +263,10 @@
 }
 
 - (NSArray *)indexRangeStrings {
-    NSEnumerator *itemEnum = [[self sortedArrayUsingSelector:@selector(compare:)] objectEnumerator];
-    id item;
     NSMutableArray *array = [NSMutableArray array];
     NSInteger start = NSIntegerMin, end = NSIntegerMin;
     
-    while (item = [itemEnum nextObject]) {
+    for (id item in [self sortedArrayUsingSelector:@selector(compare:)]) {
         if ([item respondsToSelector:@selector(intValue)] == NO) continue;
         NSInteger value = [item intValue];
         if (value != end + 1) {
@@ -297,9 +291,7 @@
 - (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;
 {
     NSMutableArray *array = [NSMutableArray array];
-    NSEnumerator *isEnum = [indexes objectEnumerator];
-    NSIndexSpecifier *is;
-    while(is = [isEnum nextObject])
+    for (NSIndexSpecifier *is in indexes)
         [array addObject:[self objectAtIndex:[is index]]];
     return array;
 }
@@ -310,8 +302,6 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
 {
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
     NSUInteger idx;
-    NSEnumerator *objEnum = [objectsToFind objectEnumerator];
-	id obj;
     NSUInteger count = [arrayToSearch count];
     
     NSRange range = NSMakeRange(0, count);
@@ -319,7 +309,7 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
     typedef NSUInteger (*indexIMP)(id, SEL, id, NSRange);
     indexIMP indexOfObjectInRange = (indexIMP)[arrayToSearch methodForSelector:theSelector];
     
-    while(obj = [objEnum nextObject]){
+    for (id obj in objectsToFind) {
         
         // see if we have the first occurrence of this object
         idx = indexOfObjectInRange(arrayToSearch, theSelector, obj, range);
@@ -372,17 +362,13 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
 }
 
 - (void)makeObjectsPerformSelector:(SEL)selector withObject:(id)arg1 withObject:(id)arg2 {
-    NSEnumerator *objEnum = [self objectEnumerator];
-    id object;
-    while (object = [objEnum nextObject])
+    for (id object in self)
         [object methodForSelector:selector](object, selector, arg1, arg2);
 }
 
 - (NSArray *)arrayByPerformingSelector:(SEL)aSelector withObject:(id)anObject {
     NSMutableArray *array = [NSMutableArray array];
-    NSEnumerator *objEnum = [self objectEnumerator];
-    id object;
-    while (object = [objEnum nextObject]) {
+    for (id object in self) {
         if (object = [object performSelector:aSelector withObject:anObject])
             [array addObject:object];
     }
@@ -427,9 +413,7 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
 
 - (void)addNonDuplicateObjectsFromArray:(NSArray *)otherArray;
 {
-    NSEnumerator *objEnum = [otherArray objectEnumerator];
-    id object;
-    while(object = [objEnum nextObject]){
+    for (id object in otherArray) {
         if([self containsObject:object] == NO)
             [self addObject:object];
     }
@@ -437,9 +421,7 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
 
 - (void)addObjectsByMakingObjectsFromArray:(NSArray *)otherArray performSelector:(SEL)selector;
 {
-    NSEnumerator *objEnum = [otherArray objectEnumerator];
-    id object;
-    while(object = [objEnum nextObject])
+    for (id object in otherArray)
         [self addObject:[object performSelector:selector]];
 }
 

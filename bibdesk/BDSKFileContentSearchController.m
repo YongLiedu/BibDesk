@@ -279,10 +279,7 @@
         [self setFilteredResults:results];
     } else {
         NSMutableArray *newFilteredResults = [NSMutableArray arrayWithCapacity:[results count]];
-        NSEnumerator *resultEnum = [results objectEnumerator];
-        BDSKFileSearchResult *result;
-        
-        while (result = [resultEnum nextObject])
+        for (BDSKFileSearchResult *result in results)
             if ([filterURLs containsObject:[result identifierURL]])
                 [newFilteredResults addObject:result];
         [self setFilteredResults:newFilteredResults];

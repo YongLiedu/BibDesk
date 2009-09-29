@@ -73,11 +73,9 @@
 	
 	if (0 == [regexpResults count]) { return regexpResults; } // no matches but no error => return empty array
 
-	NSEnumerator * matchEnumerator = [regexpResults objectEnumerator];
-	AGRegexMatch * match;
 	NSMutableArray * IDArray = [NSMutableArray arrayWithCapacity:[regexpResults count]];
 	
-	while (match = [matchEnumerator nextObject]) {
+	for (AGRegexMatch * match in regexpResults) {
 		NSString * matchedString = [[match string] substringWithRange:[match rangeAtIndex:1]];
 		if (![IDArray containsObject:matchedString]) {
 			[IDArray addObject:matchedString];
@@ -157,10 +155,7 @@
 			return nil; 
 		}
 		
-		NSEnumerator * nodeEnumerator = [preArray objectEnumerator];
-		NSXMLNode * node;
-		
-		while (node = [nodeEnumerator nextObject]) {
+		for (NSXMLNode *node in preArray) {
 			NSString * preContent = [node stringValue];		
 			NSString * cleanedRecord = 	[preContent stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 			cleanedRecord = [umlautFixer replaceWithString:@"{$1}" inString:cleanedRecord];
@@ -178,10 +173,7 @@
 	
 
 	//	Add a URL reference pointing to the review's web page to each record.
-	NSEnumerator * itemEnumerator = [results objectEnumerator];	
-	BibItem * item;
-	
-	while (item = [itemEnumerator nextObject]) {
+	for (BibItem * item in results) {
 		NSString * MRNumber = [[item citeKey] stringByRemovingPrefix:@"MR"];
 		NSString * MRItemURLString = [NSString stringWithFormat:@"http://%@/mathscinet-getitem?mr=%@", serverName, MRNumber];
 		NSURL * MRItemURL = [NSURL URLWithString:MRItemURLString];

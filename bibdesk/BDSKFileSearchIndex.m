@@ -408,10 +408,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     [identifierURLs addObject:identifierURL forKeys:urlsToAdd];
     [rwLock unlock];
     
-    NSEnumerator *urlEnum = [urlsToAdd objectEnumerator];
-    NSURL *url = nil;
-    
-    while(url = [urlEnum nextObject])
+    for (NSURL *url in urlsToAdd)
         [self indexFileURL:url];
     
     // the caller is responsible for updating the delegate, so we can throttle initial indexing
@@ -423,14 +420,10 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
 
     BDSKASSERT(identifierURL);
         
-    NSEnumerator *urlEnum = nil;
-    NSURL *url = nil;
     BOOL shouldBeRemoved;
     
-    urlEnum = [urlsToRemove objectEnumerator];
-    
     // loop through the array of URLs, create a new SKDocumentRef, and try to remove it
-    while (url = [urlEnum nextObject]) {
+    for (NSURL *url in urlsToRemove) {
         
         [rwLock lockForWriting];
         [identifierURLs removeObject:identifierURL forKey:url];
@@ -448,13 +441,11 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
 {
     NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
     
-    NSEnumerator *enumerator = [items objectEnumerator];
-    id anObject = nil;
-        
     // Use a local pool since initial indexing can use a fair amount of memory, and it's not released until the thread's run loop starts
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
         
-    while([self shouldKeepRunning] && (anObject = [enumerator nextObject])) {
+    for (id anObject in items) {
+        if ([self shouldKeepRunning] == NO) break;
         [self indexFileURLs:[NSSet setWithArray:[anObject objectForKey:@"urls"]] forIdentifierURL:[anObject objectForKey:@"identifierURL"]];
         numberIndexed++;
         @synchronized(self) {
@@ -499,13 +490,10 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
 {
     BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
-	NSEnumerator *itemEnumerator = [searchIndexInfo objectEnumerator];
-    id anItem;
-        
     NSURL *identifierURL = nil;
     NSSet *urlsToRemove;
     	
-    while (anItem = [itemEnumerator nextObject]) {
+    for (id anItem in searchIndexInfo) {
         identifierURL = [anItem valueForKey:@"identifierURL"];
         
         [rwLock lockForReading];
@@ -640,21 +628,18 @@ static void addItemFunction(const void *value, void *context) {
         
         NSMutableSet *URLsToRemove = [[NSMutableSet alloc] initWithArray:[signatures allKeys]];
         NSMutableArray *itemsToAdd = [[NSMutableArray alloc] init];
-        NSEnumerator *itemEnum = [items objectEnumerator];
-        id anItem = nil;
         
         // find URLs in the database that needs to be indexed, and URLs that were indexeed but are not in the database anymore
-        while([self shouldKeepRunning] && (anItem = [itemEnum nextObject])) {
+        for (id anItem in items) {
+            if ([self shouldKeepRunning] == NO) break;
             
             NSAutoreleasePool *pool = [NSAutoreleasePool new];
             
             NSURL *identifierURL = [anItem objectForKey:@"identifierURL"];
-            NSEnumerator *urlEnum = [[anItem objectForKey:@"urls"] objectEnumerator];
-            NSURL *url;
             NSMutableArray *missingURLs = nil;
             id signature;
             
-            while (url = [urlEnum nextObject]) {
+            for (NSURL *url in [anItem objectForKey:@"urls"]) {
                 signature = [signatures objectForKey:url];
                 if (signature)
                     [URLsToRemove removeObject:url];
@@ -681,9 +666,7 @@ static void addItemFunction(const void *value, void *context) {
             
         // remove URLs we could not find in the database
         if ([self shouldKeepRunning] && [URLsToRemove count]) {
-            NSEnumerator *urlEnum = [URLsToRemove objectEnumerator];
-            NSURL *url;
-            while (url = [urlEnum nextObject])
+            for (NSURL *url in URLsToRemove)
                 [self removeFileURL:url];
         }
         [URLsToRemove release];

@@ -86,9 +86,7 @@
             if ([removeContainer respondsToSelector:@selector(objectSpecifier)] == NO)
                 removeContainer = nil;
             containerClassDescription = [removeContainer scriptClassDescription];
-            NSEnumerator *keyEnum = [[containerClassDescription toManyRelationshipKeys] objectEnumerator];
-            NSString *key;
-            while (key = [keyEnum nextObject]) {
+            for (NSString *key in [containerClassDescription toManyRelationshipKeys]) {
                 NSScriptClassDescription *keyClassDescription = [containerClassDescription classDescriptionForKey:key];
                 if ([removeClassDescription isKindOfClassDescription:keyClassDescription]) {
                     removeKey = key;

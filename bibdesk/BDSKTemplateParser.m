@@ -422,11 +422,9 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
 }
 
 + (NSString *)stringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(NSInteger)anIndex delegate:(id <BDSKTemplateParserDelegate>)delegate {
-    NSEnumerator *tagEnum = [template objectEnumerator];
-    id tag;
     NSMutableString *result = [[NSMutableString alloc] init];
     
-    while (tag = [tagEnum nextObject]) {
+    for (id tag in template) {
         BDSKTemplateTagType type = [(BDSKTemplateTag *)tag type];
         
         if (type == BDSKTextTemplateTagType) {
@@ -685,11 +683,9 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
 }
 
 + (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(NSInteger)anIndex delegate:(id <BDSKTemplateParserDelegate>)delegate {
-    NSEnumerator *tagEnum = [template objectEnumerator];
-    id tag;
     NSMutableAttributedString *result = [[NSMutableAttributedString alloc] init];
     
-    while (tag = [tagEnum nextObject]) {
+    for (id tag in template) {
         BDSKTemplateTagType type = [(BDSKTemplateTag *)tag type];
         NSAttributedString *tmpAttrStr = nil;
         

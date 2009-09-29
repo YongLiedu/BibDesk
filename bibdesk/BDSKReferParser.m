@@ -190,9 +190,6 @@ static inline BOOL isTagLine(NSString *sourceLine)
     
     NSArray *sourceLines = [itemString sourceLinesBySplittingString];
     
-    NSEnumerator *sourceLineE = [sourceLines objectEnumerator];
-    NSString *sourceLine = nil;
-    
     NSString *tag = nil;
     NSString *value = nil;
     NSMutableString *mutableValue = [NSMutableString string];
@@ -203,7 +200,7 @@ static inline BOOL isTagLine(NSString *sourceLine)
     NSCharacterSet *invertedWhitespaceAndNewlineSet = [whitespaceAndNewlineCharacterSet invertedSet];
     NSString *type = nil;
     
-    while (sourceLine = [sourceLineE nextObject]) {
+    for (NSString *sourceLine in sourceLines) {
                 
         if ([sourceLine length] >= 3 && isTagLine(sourceLine)) {
  			

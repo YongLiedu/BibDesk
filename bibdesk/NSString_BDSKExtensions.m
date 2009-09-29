@@ -1114,12 +1114,9 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 - (NSString *)acronymValueIgnoringWordLength:(NSUInteger)ignoreLength{
     NSMutableString *result = [NSMutableString string];
-    NSArray *allComponents = [self componentsSeparatedByString:@" "]; // single whitespace
-    NSEnumerator *e = [allComponents objectEnumerator];
-    NSString *component = nil;
 	NSUInteger currentIgnoreLength;
     
-    while(component = [e nextObject]){
+    for (NSString *component in [self componentsSeparatedByString:@" "]) {
 		currentIgnoreLength = ignoreLength;
         if(![component isEqualToString:@""]) // stringByTrimmingCharactersInSet will choke on an empty string
             component = [component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -1127,9 +1124,8 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 			currentIgnoreLength = 0;
 		if(![component isEqualToString:@""])
             component = [component stringByTrimmingCharactersInSet:[[NSCharacterSet alphanumericCharacterSet] invertedSet]];
-		if([component length] > currentIgnoreLength){
+		if([component length] > currentIgnoreLength)
             [result appendString:[[component substringToIndex:1] uppercaseString]];
-        }
     }
     return result;
 }

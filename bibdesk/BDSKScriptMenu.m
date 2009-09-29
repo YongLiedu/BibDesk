@@ -164,11 +164,9 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
         
         NSFileManager *fm = [NSFileManager defaultManager];
         NSWorkspace *wm = [NSWorkspace sharedWorkspace];
-        NSEnumerator *fileEnum = [[fm contentsOfDirectoryAtPath:path error:NULL] objectEnumerator];
-        NSString *file;
         
         // avoid recursing too many times (and creating an excessive number of submenus)
-        while (file = [fileEnum nextObject]) {
+        for (NSString *file in [fm contentsOfDirectoryAtPath:path error:NULL]) {
             NSString *filePath = [path stringByAppendingPathComponent:file];
             NSDictionary *fileAttributes = [fm attributesOfItemAtPath:filePath error:NULL];
             NSString *fileType = [fileAttributes valueForKey:NSFileType];
@@ -209,13 +207,10 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
     // we call this method recursively; if the menu is nil, the stuff we add won't be retained
     NSParameterAssert(menu != nil);
     
-    NSEnumerator *scriptEnum = [scripts objectEnumerator];
-	NSDictionary *scriptInfo;
-    
     [menu setAutoenablesItems:NO];
     [menu removeAllItems];
     
-    while (scriptInfo = [scriptEnum nextObject]) {
+    for (NSDictionary *scriptInfo in scripts) {
         NSString *scriptFilename = [scriptInfo objectForKey:@"filename"];
 		NSArray *folderContent = [scriptInfo objectForKey:@"content"];
         NSString *scriptName = [scriptFilename lastPathComponent];

@@ -360,14 +360,12 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         return;
     
     NSArray *views = [[mainBox subviews] copy];
-    NSEnumerator *viewEnum;
     NSView *view;
     NSRect controlFrame = [controlView frame];
     NSRect startRect, endRect = [splitView frame];
     
     if (insertAtTop) {
-        viewEnum = [views objectEnumerator];
-        while (view = [viewEnum nextObject])
+        for (view in views)
             endRect = NSUnionRect(endRect, [view frame]);
     }
     startRect = endRect;
@@ -383,8 +381,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     [mainBox addSubview:clipView];
     [clipView addSubview:resizeView];
     if (insertAtTop) {
-        viewEnum = [views objectEnumerator];
-        while (view = [viewEnum nextObject])
+        for (view in views)
             [resizeView addSubview:view];
     } else {
         [resizeView addSubview:splitView];
@@ -395,8 +392,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     [NSViewAnimation animateResizeView:resizeView toRect:endRect];
     
     views = [[resizeView subviews] copy];
-    viewEnum = [views objectEnumerator];
-    while (view = [viewEnum nextObject])
+    for (view in views)
         [mainBox addSubview:view];
     [clipView removeFromSuperview];
     
@@ -434,10 +430,9 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     
     [mainBox addSubview:clipView];
     [clipView addSubview:resizeView];
-    NSEnumerator *viewEnum = [views objectEnumerator];
     NSView *view;
 
-    while (view = [viewEnum nextObject]) {
+    for (view in views) {
         if (NSContainsRect(startRect, [view frame]))
             [resizeView addSubview:view];
     }
@@ -448,8 +443,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     
     [controlView removeFromSuperview];
     views = [[resizeView subviews] copy];
-    viewEnum = [views objectEnumerator];
-    while (view = [viewEnum nextObject])
+    for (view in views)
         [mainBox addSubview:view];
     [clipView removeFromSuperview];
     
@@ -477,12 +471,10 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         while ([menu numberOfItems])
             [menu removeItemAtIndex:0];
         
-        NSEnumerator *styleEnum = [styles objectEnumerator];
-        NSString *style;
         NSMenuItem *item;
         SEL action = menu == bottomTemplatePreviewMenu ? @selector(changePreviewDisplay:) : @selector(changeSidePreviewDisplay:);
         
-        while (style = [styleEnum nextObject]) {
+        for (NSString *style in styles) {
             item = [menu addItemWithTitle:style action:action keyEquivalent:@""];
             [item setTarget:self];
             [item setTag:BDSKPreviewDisplayText];
@@ -751,7 +743,6 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 	NSString *changedKey = [userInfo objectForKey:@"key"];
     NSString *key = [pub citeKey];
     NSString *oldKey = nil;
-    NSEnumerator *pubEnum = [publications objectEnumerator];
     
     // need to handle cite keys and crossrefs if a cite key changed
     if([changedKey isEqualToString:BDSKCiteKeyString]){
@@ -778,7 +769,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     changeInfo.key = key;
     changeInfo.oldKey = oldKey;
     
-    while (pub = [pubEnum nextObject]) {
+    for (pub in publications) {
         NSString *crossref = [pub valueOfField:BDSKCrossrefString inherit:NO];
         if([NSString isEmptyString:crossref])
             continue;
@@ -897,11 +888,9 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 
 - (void)handleSkimFileDidSaveNotification:(NSNotification *)notification{
     NSString *path = [notification object];
-    NSEnumerator *pubEnum = [publications objectEnumerator];
-    BibItem *pub;
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
     
-    while (pub = [pubEnum nextObject]) {
+    for (BibItem *pub in publications) {
         if ([[[pub existingLocalFiles] valueForKey:@"path"] containsObject:path])
             [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification object:pub userInfo:notifInfo];
     }

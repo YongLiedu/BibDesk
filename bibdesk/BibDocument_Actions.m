@@ -107,14 +107,12 @@ static BOOL changingColors = NO;
 
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication", @"Undo action name")];
 	
-    NSEnumerator *groupEnum = [[self selectedGroups] objectEnumerator];
-	BDSKGroup *group;
 	BOOL isSingleValued = [[self currentGroupField] isSingleValuedGroupField];
     NSInteger count = 0;
     // we don't overwrite inherited single valued fields, they already have the field set through inheritance
     NSInteger op, handleInherited = isSingleValued ? BDSKOperationIgnore : BDSKOperationAsk;
     
-    while (group = [groupEnum nextObject]) {
+    for (BDSKGroup *group in [self selectedGroups]) {
 		if ([group isCategory]){
             if (isSingleValued && count > 0)
                 continue;
@@ -313,10 +311,8 @@ static BOOL changingColors = NO;
 
 - (BDSKEditor *)editorForPublication:(BibItem *)pub create:(BOOL)createNew{
     BDSKEditor *editor = nil;
-	NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
-	NSWindowController *wc;
 	
-	while(wc = [wcEnum nextObject]){
+	for (NSWindowController *wc in [self windowControllers]) {
 		if([wc isKindOfClass:[BDSKEditor class]] && [[(BDSKEditor*)wc publication] isEqual:pub]){
 			editor = (BDSKEditor*)wc;
 			break;
@@ -432,10 +428,8 @@ static BOOL changingColors = NO;
 - (void)showPerson:(BibAuthor *)person{
     BDSKASSERT(person != nil && [person isKindOfClass:[BibAuthor class]]);
     BDSKPersonController *pc = nil;
-	NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
-	NSWindowController *wc;
 	
-	while(wc = [wcEnum nextObject]){
+	for (NSWindowController *wc in [self windowControllers]) {
 		if([wc isKindOfClass:[BDSKPersonController class]] && [[(BDSKPersonController *)wc person] fuzzyEqual:person]){
 			pc = (BDSKPersonController *)wc;
 			break;
@@ -453,9 +447,6 @@ static BOOL changingColors = NO;
 - (IBAction)emailPubCmd:(id)sender{
     NSArray *pubs = [self selectedPublications];
     NSMutableArray *items = [pubs mutableCopy];
-    NSEnumerator *e = [[pubs valueForKeyPath:@"@unionOfArrays.localFiles"] objectEnumerator];
-    BDSKLinkedFile *file;
-    BibItem *pub;
     
     NSString *path = nil;
     NSMutableString *body = [NSMutableString string];
@@ -467,7 +458,7 @@ static BOOL changingColors = NO;
     if ([NSString isEmptyString:templateName] == NO)
         template = [BDSKTemplate templateForStyle:templateName];
     
-    while (file = [e nextObject]) {
+    for (BDSKLinkedFile *file in [pubs valueForKeyPath:@"@unionOfArrays.localFiles"]) {
         if (path = [[file URL] path])
             [files addObject:path];
     }
@@ -479,17 +470,14 @@ static BOOL changingColors = NO;
             [body setString:[BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items]];
     } else {
         NSArray *usedMacros = [pubs valueForKeyPath:@"@distinctUnionOfArrays.usedMacros"];
-        BDSKMacro *macro;
         if ([usedMacros count]) {
-            e = [usedMacros objectEnumerator];
-            while (macro = [e nextObject]) {
+            for (BDSKMacro *macro in usedMacros) {
                 if ([macro value] && [[macro value] isEqual:[NSNull null]] == NO)
                     [body appendFormat:@"@string{%@ = %@}\n", [macro name], [macro bibTeXString]];
             }
             [body appendString:@"\n\n"];
         }
-        e = [items objectEnumerator];
-        while (pub = [e nextObject]) {
+        for (BibItem *pub in items) {
             // use the detexified version without internal fields, since TeXification introduces things that 
             // AppleScript can't deal with (emailTo:... may end up using AS)
             [body appendString:[pub bibTeXStringWithOptions:BDSKBibTeXOptionDropInternalMask]];
@@ -690,8 +678,6 @@ static BOOL changingColors = NO;
 - (void)openLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     NSString *field = (NSString *)contextInfo;
     if (returnCode == NSAlertAlternateReturn) {
-        NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-        BibItem *pub;
         NSURL *fileURL;
         
         NSString *searchString;
@@ -702,7 +688,7 @@ static BOOL changingColors = NO;
             searchString = @"";
         
         // the user said to go ahead
-        while (pub = [e nextObject]) {
+        for (BibItem *pub in [self selectedPublications]) {
             if (fileURL = [pub localFileURLForField:field])
                 [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:searchString];
         }
@@ -737,11 +723,9 @@ static BOOL changingColors = NO;
 - (void)revealLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     NSString *field = (NSString *)contextInfo;
     if (returnCode == NSAlertAlternateReturn) {
-        NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-        BibItem *pub;
         NSURL *fileURL;
         
-        while (pub = [e nextObject]) {
+        for (BibItem *pub in [self selectedPublications]) {
             if (fileURL = [pub localFileURLForField:field])
                 [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:nil];
         }
@@ -776,10 +760,7 @@ static BOOL changingColors = NO;
 - (void)openRemoteURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
 	NSString *field = (NSString *)contextInfo;
     if(returnCode == NSAlertAlternateReturn){
-        NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-        BibItem *pub;
-        
-		while (pub = [e nextObject]) {
+        for (BibItem *pub in [self selectedPublications]) {
 			[[NSWorkspace sharedWorkspace] openLinkedURL:[pub remoteURLForField:field]];
 		}
 	}
@@ -813,13 +794,11 @@ static BOOL changingColors = NO;
 - (void)showNotesForLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     NSString *field = (NSString *)contextInfo;
     if (returnCode == NSAlertAlternateReturn) {
-        NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-        BibItem *pub;
         NSURL *fileURL;
         BDSKNotesWindowController *notesController;
         
         // the user said to go ahead
-        while (pub = [e nextObject]) {
+        for (BibItem *pub in [self selectedPublications]) {
             fileURL = [pub URLForField:field];
             if(fileURL == nil) continue;
             notesController = [[[BDSKNotesWindowController alloc] initWithURL:fileURL] autorelease];
@@ -855,13 +834,11 @@ static BOOL changingColors = NO;
 }
 
 - (void)copyNotesForLocalURLForField:(NSString *)field{
-    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-    BibItem *pub;
     NSURL *fileURL;
     NSString *string;
     NSMutableString *notes = [NSMutableString string];
     
-    while (pub = [e nextObject]) {  
+    for (BibItem *pub in [self selectedPublications]) {
         fileURL = [pub URLForField:field];
         if(fileURL == nil) continue;
         string = [fileURL textSkimNotes];
@@ -884,14 +861,7 @@ static BOOL changingColors = NO;
 
 - (void)openLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
-        NSEnumerator *urlEnum;
-        NSURL *fileURL;
-        NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
-        
-        if (fileURLs)
-            urlEnum = [fileURLs objectEnumerator];
-        else
-            urlEnum = [[self selectedFileURLs] objectEnumerator];
+        NSArray *urls = [(NSArray *)contextInfo autorelease] ?: [self selectedFileURLs];
         
         NSString *searchString;
         // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
@@ -900,7 +870,7 @@ static BOOL changingColors = NO;
         else
             searchString = @"";
         
-        while (fileURL = [urlEnum nextObject]) {
+        for (NSURL *fileURL in urls) {
             if ([fileURL isEqual:[NSNull null]] == NO) {
                 [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:searchString];
             }
@@ -934,16 +904,8 @@ static BOOL changingColors = NO;
 
 - (void)revealLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
-        NSEnumerator *urlEnum;
-        NSURL *fileURL;
-        NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
-        
-        if (fileURLs)
-            urlEnum = [fileURLs objectEnumerator];
-        else
-            urlEnum = [[self selectedFileURLs] objectEnumerator];
-        
-        while (fileURL = [urlEnum nextObject]) {
+        NSArray *urls = [(NSArray *)contextInfo autorelease] ?: [self selectedFileURLs];
+        for (NSURL *fileURL in urls) {
             if ([fileURL isEqual:[NSNull null]] == NO) {
                 [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:nil];
             }
@@ -977,16 +939,8 @@ static BOOL changingColors = NO;
 
 - (void)openLinkedURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if(returnCode == NSAlertAlternateReturn){
-        NSEnumerator *urlEnum;
-        NSURL *remoteURL;
-        NSArray *remoteURLs = [(NSArray *)contextInfo autorelease];
-        
-        if (remoteURLs)
-            urlEnum = [remoteURLs objectEnumerator];
-        else
-            urlEnum = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"] objectEnumerator];
-        
-        while (remoteURL = [urlEnum nextObject]) {
+        NSArray *urls = [(NSArray *)contextInfo autorelease] ?: [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
+        for (NSURL *remoteURL in urls) {
             if ([remoteURL isEqual:[NSNull null]] == NO) {
                 [[NSWorkspace sharedWorkspace] openLinkedURL:remoteURL];
             }
@@ -1020,19 +974,11 @@ static BOOL changingColors = NO;
 
 - (void)showNotesForLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
-        NSEnumerator *urlEnum;
-        NSURL *fileURL;
-        NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
-        BDSKNotesWindowController *notesController;
+        NSArray *urls = [(NSArray *)contextInfo autorelease] ?: [self selectedFileURLs];
         
-        if (fileURLs)
-            urlEnum = [fileURLs objectEnumerator];
-        else
-            urlEnum = [[self selectedFileURLs] objectEnumerator];
-        
-        while (fileURL = [urlEnum nextObject]) {
+        for (NSURL *fileURL in urls) {
             if ([fileURL isEqual:[NSNull null]] == NO) {
-                notesController = [[[BDSKNotesWindowController alloc] initWithURL:fileURL] autorelease];
+                BDSKNotesWindowController *notesController = [[[BDSKNotesWindowController alloc] initWithURL:fileURL] autorelease];
                 [self addWindowController:notesController];
                 [notesController showWindow:self];
             }
@@ -1065,17 +1011,17 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)copyNotesForLinkedFile:(id)sender{
-    NSEnumerator *urlEnum;
+    NSArray *urls; 
     NSURL *fileURL = [sender representedObject];
     NSMutableString *notes = [NSMutableString string];
     NSString *string;
     
     if (fileURL)
-        urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+        urls = [NSArray arrayWithObject:fileURL];
     else
-        urlEnum = [[self selectedFileURLs] objectEnumerator];
+        urls = [self selectedFileURLs];
     
-    while (fileURL = [urlEnum nextObject]) {
+    for (fileURL in urls) {
         if ([fileURL isEqual:[NSNull null]] == NO) {
             string = [fileURL textSkimNotes];
             if ([NSString isEmptyString:string] == NO) {
@@ -1415,9 +1361,8 @@ static BOOL changingColors = NO;
     if ([self hasExternalGroupsSelected]) {
         BDSKMacroResolver *resolver = [[[self selectedGroups] lastObject] macroResolver];
         BDSKMacroWindowController *controller = nil;
-        NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
-        NSWindowController *wc;
-        while(wc = [wcEnum nextObject]){
+        NSWindowController *wc = nil;
+        for (wc in [self windowControllers]) {
             if([wc isKindOfClass:[BDSKMacroWindowController class]] && [(BDSKMacroWindowController*)wc macroResolver] == resolver)
                 break;
         }
@@ -1529,7 +1474,6 @@ static BOOL changingColors = NO;
     }
     
     NSUInteger numberOfPubs = [pubs count];
-    NSEnumerator *selEnum = [pubs objectEnumerator];
     BibItem *aPub;
     NSMutableArray *arrayOfPubs = [NSMutableArray arrayWithCapacity:numberOfPubs];
     NSMutableArray *arrayOfOldValues = [NSMutableArray arrayWithCapacity:numberOfPubs];
@@ -1537,7 +1481,7 @@ static BOOL changingColors = NO;
     BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKWillGenerateCiteKeyScriptHookName];
     
     // put these pubs into an array, since the indices can change after we set the cite key, due to sorting or searching
-    while (aPub = [selEnum nextObject]) {
+    for (aPub in pubs) {
         [arrayOfPubs addObject:aPub];
         if(scriptHook){
             [arrayOfOldValues addObject:[aPub citeKey]];
@@ -1555,11 +1499,10 @@ static BOOL changingColors = NO;
     scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidGenerateCiteKeyScriptHookName];
     [arrayOfOldValues removeAllObjects];
     [arrayOfNewValues removeAllObjects];
-    selEnum = [arrayOfPubs objectEnumerator];
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-    while(aPub = [selEnum nextObject]){
+    for (aPub in arrayOfPubs){
         NSString *newKey = [aPub suggestedCiteKey];
         NSString *crossref = [aPub valueOfField:BDSKCrossrefString inherit:NO];
         if (crossref != nil && [crossref caseInsensitiveCompare:newKey] == NSOrderedSame) {
@@ -1632,18 +1575,14 @@ static BOOL changingColors = NO;
 
 - (void)performSortForCrossrefs{
     NSArray *copyOfPubs = [[NSArray alloc] initWithArray:publications];
-	NSEnumerator *pubEnum = [copyOfPubs objectEnumerator];
-	BibItem *pub = nil;
 	BibItem *parent;
 	NSString *key;
 	NSMutableSet *prevKeys = [NSMutableSet set];
 	BOOL moved = NO;
 	NSArray *selectedPubs = [self selectedPublications];
-    
-    [copyOfPubs release];
 	
 	// We only move parents that come before a child.
-	while (pub = [pubEnum nextObject]){
+	for (BibItem *pub in copyOfPubs){
 		key = [[pub valueOfField:BDSKCrossrefString inherit:NO] lowercaseString];
 		if (![NSString isEmptyString:key] && [prevKeys containsObject:key]) {
             [prevKeys removeObject:key];
@@ -1654,6 +1593,7 @@ static BOOL changingColors = NO;
 		}
 		[prevKeys addObject:[[pub citeKey] lowercaseString]];
 	}
+    [copyOfPubs release];
 	
 	if (moved) {
 		[self sortPubsByKey:nil];
@@ -1697,10 +1637,8 @@ static BOOL changingColors = NO;
 	BOOL overwrite = (returnCode == NSAlertAlternateReturn);
 	
 	NSSet *parentTypes = [NSSet setWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
-	NSEnumerator *selEnum = [[self selectedPublications] objectEnumerator];
-	BibItem *aPub;
 	
-	while (aPub = [selEnum nextObject]) {
+    for (BibItem *aPub in [self selectedPublications]) {
 		if([parentTypes containsObject:[aPub pubType]])
 			[aPub duplicateTitleToBooktitleOverwriting:overwrite];
 	}
@@ -1790,10 +1728,8 @@ static BOOL changingColors = NO;
         // Tests equality based on standard fields (high probability that these will be duplicates)
         countOfItems = [pubsToRemove count];
         NSSet *uniquePubs = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &callBacks);
-        NSEnumerator *pubEnum = [uniquePubs objectEnumerator];
-        BibItem *pub;
         // remove all unique ones based on pointer equality
-        while (pub = [pubEnum nextObject])
+        for (BibItem *pub in uniquePubs)
             [pubsToRemove removeObjectIdenticalTo:pub];
         [uniquePubs release];
         

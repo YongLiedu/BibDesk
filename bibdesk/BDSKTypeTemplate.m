@@ -63,12 +63,10 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
         NSEnumerator *fieldEnum;
         NSString *field;
         
-        fieldEnum = [[tm requiredFieldsForType:pubType] objectEnumerator];
-        while (field = [fieldEnum nextObject])
+        for (field in [tm requiredFieldsForType:pubType])
             [requiredTokens addObject:[document tokenForField:field]];
         
-        fieldEnum = [[tm optionalFieldsForType:pubType] objectEnumerator];
-        while (field = [fieldEnum nextObject])
+        for (field in [tm optionalFieldsForType:pubType])
             [optionalTokens addObject:[document tokenForField:field]];
         
     }
@@ -161,10 +159,8 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
 
 - (NSString *)string {
     NSMutableString *string = [NSMutableString string];
-    NSEnumerator *tokenEnum = [itemTemplate objectEnumerator];
-    id token;
     
-    while (token = [tokenEnum nextObject]) {
+    for (id token in itemTemplate) {
         if ([token isKindOfClass:[BDSKToken class]])
             [string appendString:[token string]];
         else if ([token isKindOfClass:[NSString class]])
@@ -176,10 +172,8 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
 
 - (NSAttributedString *)attributedStringWithDefaultAttributes:(NSDictionary *)attributes {
     NSMutableAttributedString *attrString = [[[NSMutableAttributedString alloc] init] autorelease];
-    NSEnumerator *tokenEnum = [itemTemplate objectEnumerator];
-    id token;
     
-    while (token = [tokenEnum nextObject]) {
+    for (id token in itemTemplate) {
         if ([token isKindOfClass:[BDSKToken class]])
             [attrString appendAttributedString:[token attributedStringWithDefaultAttributes:attributes]];
         else if ([token isKindOfClass:[NSString class]])

@@ -79,11 +79,8 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 
 - (id)init {
     if ((sharedBookmarkController == nil) && (sharedBookmarkController = self = [super initWithWindowNibName:@"SearchBookmarksWindow"])) {
-        NSEnumerator *dictEnum = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKSearchGroupBookmarksKey] objectEnumerator];
-        NSDictionary *dict;
-        
         NSMutableArray *bookmarks = [NSMutableArray array];
-        while (dict = [dictEnum nextObject]) {
+        for (NSDictionary *dict in [[NSUserDefaults standardUserDefaults] arrayForKey:BDSKSearchGroupBookmarksKey]) {
             BDSKSearchBookmark *bm = [BDSKSearchBookmark searchBookmarkWithDictionary:dict];
             if (bm)
                 [bookmarks addObject:bm];
@@ -115,12 +112,10 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 }
 
 static NSArray *minimumCoverForBookmarks(NSArray *items) {
-    NSEnumerator *bmEnum = [items objectEnumerator];
-    BDSKSearchBookmark *bm;
     BDSKSearchBookmark *lastBm = nil;
     NSMutableArray *minimalCover = [NSMutableArray array];
     
-    while (bm = [bmEnum nextObject]) {
+    for (BDSKSearchBookmark *bm in items) {
         if ([bm isDescendantOf:lastBm] == NO) {
             [minimalCover addObject:bm];
             lastBm = bm;
@@ -221,9 +216,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 }
 
 - (void)startObservingBookmarks:(NSArray *)newBookmarks {
-    NSEnumerator *bmEnum = [newBookmarks objectEnumerator];
-    BDSKSearchBookmark *bm;
-    while (bm = [bmEnum nextObject]) {
+    for (BDSKSearchBookmark *bm in newBookmarks) {
         if ([bm bookmarkType] != BDSKSearchBookmarkTypeSeparator) {
             [bm addObserver:self forKeyPath:LABEL_KEY options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKSearchBookmarkPropertiesObservationContext];
             if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
@@ -235,9 +228,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 }
 
 - (void)stopObservingBookmarks:(NSArray *)oldBookmarks {
-    NSEnumerator *bmEnum = [oldBookmarks objectEnumerator];
-    BDSKSearchBookmark *bm;
-    while (bm = [bmEnum nextObject]) {
+    for (BDSKSearchBookmark *bm in oldBookmarks) {
         if ([bm bookmarkType] != BDSKSearchBookmarkTypeSeparator) {
             [bm removeObserver:self forKeyPath:LABEL_KEY];
             if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
@@ -390,14 +381,11 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKSearchBookmarkRowsPboardType, nil]];
     
     if (type) {
-        NSEnumerator *bmEnum = [[self draggedBookmarks] objectEnumerator];
-        BDSKSearchBookmark *bookmark;
-        
         if (item == nil) item = bookmarkRoot;
         
         [self endEditing];
         
-		while (bookmark = [bmEnum nextObject]) {
+		for (BDSKSearchBookmark *bookmark in [self draggedBookmarks]) {
             BDSKSearchBookmark *parent = [bookmark parent];
             NSInteger bookmarkIndex = [[parent children] indexOfObject:bookmark];
             if (item == parent) {

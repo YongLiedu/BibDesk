@@ -66,11 +66,9 @@
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
 	NSMutableArray *newConditions = [NSMutableArray arrayWithCapacity:1];
-	NSEnumerator *cEnum = [[dictionary objectForKey:@"conditions"] objectEnumerator];
-	NSDictionary *dict;
 	BDSKCondition *condition;
 	
-	while (dict = [cEnum nextObject]) {
+	for (NSDictionary *dict in [dictionary objectForKey:@"conditions"]) {
 		condition = [[BDSKCondition alloc] initWithDictionary:dict];
 		[newConditions addObject:condition];
 		[condition release];
@@ -134,10 +132,7 @@
 
 - (NSArray *)filterItems:(NSArray *)items {
 	NSMutableArray *filteredItems = [NSMutableArray array];
-	NSEnumerator *itemE = [items objectEnumerator];
-	id item;
-	
-	while (item = [itemE nextObject]) {
+	for (id item in items) {
 		if ([self testItem:item]) {
 			[filteredItems addObject:item];
 		}
@@ -149,14 +144,11 @@
 	if ([conditions count] == 0)
 		return YES;
 	
-	NSEnumerator *condE = [conditions objectEnumerator];
-	BDSKCondition *condition;
 	BOOL isOr = (conjunction == BDSKOr);
 	
-	while (condition = [condE nextObject]) {
-		if ([condition isSatisfiedByItem:item] == isOr) {
+	for (BDSKCondition *condition in conditions) {
+		if ([condition isSatisfiedByItem:item] == isOr)
 			return isOr;
-		}
 	}
 	return !isOr;
 }

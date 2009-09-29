@@ -143,11 +143,7 @@
 
 - (BOOL) validateOpenLocalURLMenuItem:(NSMenuItem*) menuItem {
 	NSString *field = [menuItem representedObject] ?: BDSKLocalUrlString;
-    
-    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-	BibItem *pub = nil;
-    
-    while(pub = [e nextObject]){
+    for (BibItem *pub in [self selectedPublications]) {
         NSString *path = [[pub localFileURLForField:field] path];
         if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
             return YES;
@@ -157,11 +153,7 @@
 
 - (BOOL) validateRevealLocalURLMenuItem:(NSMenuItem*) menuItem {
 	NSString *field = [menuItem representedObject] ?: BDSKLocalUrlString;
-    
-    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-	BibItem *pub = nil;
-    
-    while(pub = [e nextObject]){
+    for (BibItem *pub in [self selectedPublications]) {
         NSString *path = [[pub localFileURLForField:field] path];
         if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
             return YES;
@@ -171,11 +163,7 @@
 
 - (BOOL) validateOpenRemoteURLMenuItem:(NSMenuItem*) menuItem {
 	NSString *field = [menuItem representedObject] ?: BDSKUrlString;
-    
-    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-	BibItem *pub = nil;
-    
-    while(pub = [e nextObject]){
+    for (BibItem *pub in [self selectedPublications]) {
         NSURL *url = [pub remoteURLForField:field];
         if (url)
             return YES;
@@ -185,11 +173,7 @@
 
 - (BOOL) validateShowNotesForLocalURLMenuItem:(NSMenuItem*) menuItem {
 	NSString *field = [menuItem representedObject] ?: BDSKLocalUrlString;
-    
-    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-	BibItem *pub = nil;
-    
-    while(pub = [e nextObject]){
+    for (BibItem *pub in [self selectedPublications]) {
         NSString *path = [[pub localFileURLForField:field] path];
         if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
             return YES;
@@ -199,11 +183,7 @@
 
 - (BOOL) validateCopyNotesForLocalURLMenuItem:(NSMenuItem*) menuItem {
 	NSString *field = [menuItem representedObject] ?: BDSKLocalUrlString;
-    
-    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-	BibItem *pub = nil;
-    
-    while(pub = [e nextObject]){
+    for (BibItem *pub in [self selectedPublications]) {
         NSString *path = [[pub localFileURLForField:field] path];
         if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
             return YES;

@@ -131,15 +131,11 @@
 
 - (NSArray *)allReadableTypesForOpenPanel {
     NSMutableArray *types = [NSMutableArray array];
-    NSEnumerator *classNamesEnumerator = [[self documentClassNames] objectEnumerator];
-    NSString *className;
-    while (className = [classNamesEnumerator nextObject])
+    for (NSString *className in [self documentClassNames])
         [types addObjectsFromArray:[NSClassFromString(className) readableTypes]];
     
     NSMutableArray *openPanelTypes = [NSMutableArray array];
-    NSEnumerator *typeE = [types objectEnumerator];
-    NSString *type;
-    while (type = [typeE nextObject])
+    for (NSString *type in types)
         [openPanelTypes addObjectsFromArray:[self fileExtensionsFromType:type]];
     
     return [openPanelTypes count] ? openPanelTypes : types;
@@ -166,10 +162,7 @@
 - (void)openDocument:(id)sender{
 
     NSStringEncoding encoding;
-    NSEnumerator *fileEnum = [[self URLsFromRunningOpenPanelForTypes:[self allReadableTypesForOpenPanel] encoding:&encoding] objectEnumerator];
-    NSURL *aURL;
-
-	while (aURL = [fileEnum nextObject]) {
+    for (NSURL *aURL in [self URLsFromRunningOpenPanelForTypes:[self allReadableTypesForOpenPanel] encoding:&encoding]) {
         if (nil == [self openDocumentWithContentsOfURL:aURL encoding:encoding])
             break;
 	}
@@ -177,10 +170,7 @@
 
 - (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender{
     NSStringEncoding encoding;
-    NSEnumerator *fileEnum = [[self URLsFromRunningOpenPanelForTypes:[NSArray arrayWithObject:@"bib"] encoding:&encoding] objectEnumerator];
-    NSURL *aURL;
-    
-	while (aURL = [fileEnum nextObject]) {
+    for (NSURL *aURL in [self URLsFromRunningOpenPanelForTypes:[NSArray arrayWithObject:@"bib"] encoding:&encoding]) {
         [self openDocumentWithContentsOfURLUsingPhonyCiteKeys:aURL encoding:encoding];
 	}
 }
@@ -220,12 +210,8 @@
     if (result == NSOKButton) {
         NSString *shellCommand = [openUsingFilterComboBox stringValue];
         NSStringEncoding encoding = [openTextEncodingPopupButton encoding];
-        NSEnumerator *fileEnum = [[oPanel URLs] objectEnumerator];
-        NSURL *aURL;
-        
-        while (aURL = [fileEnum nextObject]) {
+        for (NSURL *aURL in [oPanel URLs])
             [self openDocumentWithContentsOfURL:aURL usingFilter:shellCommand encoding:encoding];
-        }
         
         NSUInteger commandIndex = [commandHistory indexOfObject:shellCommand];
         // already in the array, so move it to the head of the list
@@ -458,10 +444,7 @@
 		
     NSInteger result = [self runModalOpenPanel:oPanel forTypes:[NSArray arrayWithObjects:@"txt", @"rtf", nil]];
     if(result == NSOKButton){
-        NSEnumerator *urlEnum = [[oPanel URLs] objectEnumerator];
-        NSURL *aURL;
-
-        while (aURL = [urlEnum nextObject]) {
+        for (NSURL *aURL in [oPanel URLs]) {
             if (nil == [self openTemplateDocumentWithContentsOfURL:aURL])
                 break;
         }

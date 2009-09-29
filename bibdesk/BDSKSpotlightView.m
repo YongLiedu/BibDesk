@@ -82,8 +82,6 @@
         return;
     }
     
-    NSEnumerator *rectEnum = [highlightCircleRects objectEnumerator];
-    
     CGFloat blurPadding = MAXIMUM_BLUR * 2.0;
     NSRect bounds = [self bounds];
 
@@ -94,9 +92,7 @@
     // this causes the paths we append to act as holes in the overall path
     [path setWindingRule:NSEvenOddWindingRule];
     
-    NSValue *rectValue;
-    
-    while (rectValue = [rectEnum nextObject]) {
+    for (NSValue *rectValue in highlightCircleRects) {
         NSRect rect = [rectValue rectValue];
         CGFloat diameter = CIRCLE_FACTOR * BDSKMax(NSHeight(rect), NSWidth(rect));
         [path appendBezierPathWithOvalInRect:NSInsetRect(rect, (NSWidth(rect) - diameter) / 2.0, (NSHeight(rect) - diameter) / 2.0)];

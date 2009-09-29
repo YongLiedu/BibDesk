@@ -116,10 +116,8 @@ static void fixLegacyTableColumnIdentifiers()
     NSUInteger idx;
     BOOL didFixIdentifier = NO;
     NSDictionary *legacyKeys = [NSDictionary dictionaryWithObjectsAndKeys:BDSKDateAddedString, @"Added", BDSKDateAddedString, @"Created", BDSKDateModifiedString, @"Modified", BDSKAuthorEditorString, @"Authors Or Editors", BDSKAuthorString, @"Authors", nil];
-    NSEnumerator *keyEnum = [legacyKeys keyEnumerator];
-    NSString *key;
     
-    while (key = [keyEnum nextObject]) {
+    for (NSString *key in legacyKeys) {
         if ((idx = [fixedTableColumnIdentifiers indexOfObject:key]) != NSNotFound) {
             didFixIdentifier = YES;
             [fixedTableColumnIdentifiers replaceObjectAtIndex:idx withObject:[legacyKeys objectForKey:key]];
@@ -447,10 +445,8 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         case BDSKStartupOpenLastOpenFiles:
             {
                 NSArray *files = [sud objectForKey:BDSKLastOpenFileNamesKey];
-                NSEnumerator *fileEnum = [files objectEnumerator];
-                NSDictionary *dict;
                 NSURL *fileURL;
-                while (dict = [fileEnum nextObject]){ 
+                for (NSDictionary *dict in files){ 
                     fileURL = [[BDAlias aliasWithData:[dict objectForKey:@"_BDAlias"]] fileURL] ?: [NSURL fileURLWithPath:[dict objectForKey:@"fileName"]];
                     if(fileURL)
                         [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:fileURL display:YES error:NULL];
@@ -484,17 +480,12 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     NSMenu *menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@""] autorelease];
     NSMenu *submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@""] autorelease];
 
-    NSArray *urls = [[NSDocumentController sharedDocumentController] recentDocumentURLs];
-    NSURL *url;
-    NSMenuItem *anItem;
-    NSEnumerator *urlE = [urls objectEnumerator];
-
-    anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open Recent",  @"Recent Documents dock menu title") action:nil keyEquivalent:@""];
+    NSMenuItem *anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open Recent",  @"Recent Documents dock menu title") action:nil keyEquivalent:@""];
     [anItem setSubmenu:submenu];
 	[menu addItem:anItem];
     [anItem release];
     
-    while(url = [urlE nextObject]){
+    for (NSURL *url in [[NSDocumentController sharedDocumentController] recentDocumentURLs]) {
         anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[url lastPathComponent] action:@selector(openRecentItemFromDock:) keyEquivalent:@""];
         [anItem setTarget:self];
         [anItem setRepresentedObject:url];
@@ -700,10 +691,8 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             [menu removeItemAtIndex:i];
         
         NSMenuItem *item;
-        NSEnumerator *styleEnum = [styles objectEnumerator];
-        NSString *style;
         SEL action = [menu isEqual:previewDisplayMenu] ? @selector(changePreviewDisplay:) : @selector(changeSidePreviewDisplay:);
-        while (style = [styleEnum nextObject]) {
+        for (NSString *style in styles) {
             item = [menu addItemWithTitle:style action:action keyEquivalent:@""];
             [item setTag:BDSKPreviewDisplayText];
             [item setRepresentedObject:style];
@@ -775,12 +764,9 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 {
 	NSMutableArray *results = [NSMutableArray array];
 
-    NSEnumerator *myEnum = [[NSApp orderedDocuments] objectEnumerator];
-    BibDocument *document = nil;
-    
     // for empty search string, return all items
 
-    while (document = [myEnum nextObject]) {
+    for (BibDocument *document in [NSApp orderedDocuments]) {
         
         NSArray *pubs = [NSString isEmptyString:searchString] ? [document publications] : [document findMatchesFor:searchString];
         [results addObjectsFromArray:[pubs arrayByPerformingSelector:@selector(completionObject)]];
@@ -791,9 +777,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 - (NSArray *)orderedDocumentURLs;
 {
     NSMutableArray *theURLs = [NSMutableArray array];
-    NSEnumerator *docE = [[NSApp orderedDocuments] objectEnumerator];
-    id aDoc;
-    while (aDoc = [docE nextObject]) {
+    for (id aDoc in [NSApp orderedDocuments]) {
         if ([aDoc fileURL])
             [theURLs addObject:[aDoc fileURL]];
     }
@@ -1103,21 +1087,14 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 // if this is ever changed, we should also change showPubWithKey:userData:error:
 - (NSSet *)itemsMatchingSearchConstraints:(NSDictionary *)constraints{
     NSArray *docs = [[NSDocumentController sharedDocumentController] documents];
-    if([docs count] == 0)
+    if ([docs count] == 0)
         return nil;
 
     NSMutableSet *itemsFound = [NSMutableSet set];
     NSMutableArray *arrayOfSets = [NSMutableArray array];
     
-    NSEnumerator *constraintsKeyEnum = [constraints keyEnumerator];
-    NSString *constraintKey = nil;
-    BibDocument *aDoc = nil;
-
-    while(constraintKey = [constraintsKeyEnum nextObject]){
-        
-        NSEnumerator *docEnum = [docs objectEnumerator];
-        
-        while(aDoc = [docEnum nextObject]){ 
+    for (NSString *constraintKey in constraints) {
+        for (BibDocument *aDoc in docs) { 
 	    // this is an array of objects matching this particular set of search constraints; add them to the set
             [itemsFound addObjectsFromArray:[aDoc publicationsMatchingSubstring:[constraints objectForKey:constraintKey] 
                                                                         inField:constraintKey]];
@@ -1177,10 +1154,8 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     NSString *pboardString = [pboard stringForType:NSStringPboardType];
 
     NSSet *items = [self itemsMatchingCiteKey:pboardString];
-	BibItem *item;
-	NSEnumerator *itemE = [items objectEnumerator];
-    
-    while(item = [itemE nextObject]){   
+	
+    for (BibItem *item in items) {   
         // these should all be items belonging to a BibDocument, see remark before itemsMatchingSearchConstraints:
 		[(BibDocument *)[item owner] editPub:item];
     }
@@ -1262,7 +1237,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         
         NSString *path;
         NSString *citeKey;
-        NSDictionary *anItem;
         
         BDAlias *alias = [[BDAlias alloc] initWithURL:documentURL];
         if(alias == nil){
@@ -1273,10 +1247,9 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         NSData *aliasData = [alias aliasData];
         [alias autorelease];
     
-        NSEnumerator *entryEnum = [publications objectEnumerator];
         NSMutableDictionary *metadata = [NSMutableDictionary dictionaryWithCapacity:10];    
         
-        while(anItem = [entryEnum nextObject]){
+        for (NSDictionary *anItem in publications) {
             OSMemoryBarrier();
             if(canWriteMetadata == 0){
                 NSLog(@"Application will quit without finishing writing metadata cache.");
@@ -1384,9 +1357,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     if (status == noErr)
         mailAppName = [[[(NSURL *)mailAppURL path] lastPathComponent] stringByDeletingPathExtension];
     
-    NSEnumerator *fileEnum = [files objectEnumerator];
-    NSString *fileName;
-    
     if ([mailAppName rangeOfString:@"Entourage" options:NSCaseInsensitiveSearch].length) {
         scriptString = [NSMutableString stringWithString:@"tell application \"Microsoft Entourage\"\n"];
         [scriptString appendString:@"activate\n"];
@@ -1396,7 +1366,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             [scriptString appendFormat:@"set recipient to {address:{address: \"%@\", display name: \"%@\"}, recipient type:to recipient}}\n", receiver, receiver];
         if (body)
             [scriptString appendFormat:@"set content to \"%@\"\n", body];
-        while (fileName = [fileEnum  nextObject])
+        for (NSString *fileName in files)
             [scriptString appendFormat:@"make new attachment with properties {file:POSIX file \"%@\"}\n", fileName];
         [scriptString appendString:@"end tell\n"];
         [scriptString appendString:@"end tell\n"];
@@ -1409,7 +1379,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             [scriptString appendFormat:@"make new to_recipient at end with properties {address: \"%@\"}\n", receiver];
         if (body)
             [scriptString appendFormat:@"set contents to \"%@\"\n", body];
-        while (fileName = [fileEnum  nextObject])
+        for (NSString *fileName in files)
             [scriptString appendFormat:@"make new enclosure with properties {file:POSIX file \"%@\"}\n", fileName];
         [scriptString appendString:@"end tell\n"];
         [scriptString appendString:@"end tell\n"];
@@ -1423,7 +1393,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         if (body)
             [scriptString appendFormat:@"set content to \"%@\"\n", body];
         [scriptString appendString:@"tell its content\n"];
-        while (fileName = [fileEnum  nextObject])
+        for (NSString *fileName in files)
             [scriptString appendFormat:@"make new attachment at after last character with properties {file name:\"%@\"}\n", fileName];
         [scriptString appendString:@"end tell\n"];
         [scriptString appendString:@"end tell\n"];

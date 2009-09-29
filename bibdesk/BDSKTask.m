@@ -214,10 +214,8 @@ static void __BDSKTaskNotify(void *info)
     if (environment) {
         // fill with pointers to autoreleased C strings
         env = NSZoneCalloc([self zone], [environment count] + 1, sizeof(char *));
-        NSEnumerator *keyEnum = [environment keyEnumerator];
-        NSString *key;
         NSUInteger envIndex = 0;
-        while (key = [keyEnum nextObject]) {
+        for (NSString *key in environment) {
             env[envIndex++] = (char *)[[NSString stringWithFormat:@"%@=%@", key, [environment objectForKey:key]] UTF8String];        
         }
         env[envIndex] = NULL;

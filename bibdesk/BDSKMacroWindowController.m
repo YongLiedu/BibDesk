@@ -158,11 +158,9 @@
 
 - (void)reloadMacros {
     NSDictionary *macroDefinitions = showAll ? [macroResolver allMacroDefinitions] : [macroResolver macroDefinitions];
-    NSEnumerator *keyEnum = [macroDefinitions keyEnumerator];
-    NSString *key;
     NSMutableArray *tmpMacros = [NSMutableArray arrayWithCapacity:[macroDefinitions count]];
     
-    while (key = [keyEnum nextObject]) {
+    for (NSString *key in macroDefinitions) {
         BDSKMacroResolver *resolver = [macroResolver valueOfMacro:key] ? macroResolver : [BDSKMacroResolver defaultMacroResolver];
         BDSKMacro *macro = [[BDSKMacro alloc] initWithName:key macroResolver:resolver];
         [tmpMacros addObject:macro];
@@ -276,10 +274,7 @@
 - (IBAction)removeSelectedMacros:(id)sender{
     BDSKASSERT(isEditable);
     NSArray *macrosToRemove = [[[arrayController arrangedObjects] objectsAtIndexes:[tableView selectedRowIndexes]] valueForKey:@"name"];
-    NSEnumerator *keyEnum = [macrosToRemove objectEnumerator];
-    NSString *key;
-    
-    while (key = [keyEnum nextObject]) {
+    for (NSString *key in macrosToRemove) {
         [macroResolver removeMacro:key];
 		[[[self window] undoManager] setActionName:NSLocalizedString(@"Delete Macro", @"Undo action name")];
     }
@@ -485,17 +480,17 @@
 
 #pragma mark || dragging operations
 
-// this is also called from the copy: action defined in NSTableView_OAExtensions
-- (BOOL)tableView:(NSTableView *)tv writeRows:(NSArray *)rows toPasteboard:(NSPasteboard *)pboard{
-    NSEnumerator *e = [rows objectEnumerator];
-    NSNumber *row;
+// this is also called from the copy: action defined in BDSKTableView
+- (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
     NSMutableString *pboardStr = [NSMutableString string];
     NSArray *arrangedMacros = [arrayController arrangedObjects];
+    NSUInteger row = [rowIndexes firstIndex];
     [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
 
-    while(row = [e nextObject]){
-        BDSKMacro *macro = [arrangedMacros objectAtIndex:[row intValue]];
+    while (row != NSNotFound) {
+        BDSKMacro *macro = [arrangedMacros objectAtIndex:row];
         [pboardStr appendStrings:@"@string{", [macro name], @" = ", [macro bibTeXString], @"}\n", nil];
+        row = [rowIndexes indexGreaterThanIndex:row];
     }
     return [pboard setString:pboardStr forType:NSStringPboardType];
     
@@ -528,12 +523,10 @@
         return [self addMacrosFromBibTeXString:pboardStr];
     } else if ([type isEqualToString:NSFilenamesPboardType]) {
         NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
-        NSEnumerator *fileEnum = [fileNames objectEnumerator];
-        NSString *file;
         NSFileManager *fm = [NSFileManager defaultManager];
         BOOL success = NO;
         
-        while (file = [fileEnum nextObject]) {
+        for (NSString *file in fileNames) {
             NSString *extension = [file pathExtension];
             file = [file stringByStandardizingPath];
             if ([fm fileExistsAtPath:file] == NO ||
@@ -631,11 +624,9 @@
     if ([defs count] == 0)
         return NO;
     
-    NSEnumerator *e = [defs keyEnumerator];
-    NSString *macroKey;
     NSString *macroString;
     
-    while(macroKey = [e nextObject]){
+    for (NSString *macroKey in defs) {
         macroString = [defs objectForKey:macroKey];
 		if([macroResolver macroDefinition:macroString dependsOnMacro:macroKey] == NO)
             [(BDSKMacroResolver *)macroResolver setMacroDefinition:macroString forMacro:macroKey];
@@ -659,21 +650,13 @@
 	NSString *findStr = [NSString stringWithBibTeXString:oldKey macroResolver:macroResolver error:NULL];
 	NSString *replStr = [NSString stringWithBibTeXString:newKey macroResolver:macroResolver error:NULL];
     NSArray *docs = [macroResolver isEqual:[BDSKMacroResolver defaultMacroResolver]] ? [NSApp orderedDocuments] : [NSArray arrayWithObjects:[macroResolver owner], nil]; 
-    NSEnumerator *docEnum = [docs objectEnumerator];
-    BibDocument *doc;
-    NSEnumerator *pubEnum;
-    BibItem *pub;
-    NSEnumerator *fieldEnum;
-    NSString *field;
     NSUInteger numRepl;
     NSString *oldValue;
     NSString *newValue;
     
-    while (doc = [docEnum nextObject]) {
-        pubEnum = [[doc publications] objectEnumerator];
-        while (pub = [pubEnum nextObject]) {
-            fieldEnum = [[pub allFieldNames] objectEnumerator];
-            while (field = [fieldEnum nextObject]) {
+    for (BibDocument *doc in docs) {
+        for (BibItem *pub in [doc publications]) {
+            for (NSString *field in [pub allFieldNames]) {
                 oldValue = [pub valueOfField:field inherit:NO];
                 if ([oldValue isComplex]) {
                     newValue = [oldValue stringByReplacingOccurrencesOfString:findStr withString:replStr options:NSCaseInsensitiveSearch replacements:&numRepl];

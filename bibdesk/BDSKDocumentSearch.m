@@ -144,9 +144,7 @@
 - (NSDictionary *)normalizedScores
 {
     NSMutableDictionary *scores = [NSMutableDictionary dictionary];
-    NSEnumerator *keyEnum = [originalScores keyEnumerator];
-    id aKey;
-    while (aKey = [keyEnum nextObject]) {
+    for (id aKey in originalScores) {
         NSNumber *nsScore = [originalScores objectForKey:aKey];
         NSParameterAssert(nil != nsScore);
         CGFloat score = [nsScore floatValue];

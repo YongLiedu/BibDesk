@@ -47,12 +47,10 @@
 }
 
 - (NSArray *)macros {
-    NSEnumerator *mEnum = [[self macroDefinitions] keyEnumerator];
-	NSString *key = nil;
 	BDSKMacro *macro = nil;
 	NSMutableArray *macros = [NSMutableArray arrayWithCapacity:5];
 	
-	while (key = [mEnum nextObject]) {
+	for (NSString *key in [self macroDefinitions]) {
 		macro = [[BDSKMacro alloc] initWithName:key macroResolver:self];
 		[macros addObject:macro];
 		[macro release];

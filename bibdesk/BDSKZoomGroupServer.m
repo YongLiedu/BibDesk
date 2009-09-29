@@ -201,11 +201,9 @@
 
         [connection setResultEncodingToIANACharSetName:[info resultEncoding]];
         
-        NSEnumerator *keyEnum = [[info options] keyEnumerator];
-        NSString *key;
         NSSet *specialKeys = [NSSet setWithObjects:@"password", @"username", @"recordSyntax", @"resultEncoding", @"removeDiacritics", @"queryConfig", nil];
         
-        while (key = [keyEnum nextObject]) {
+        for (NSString *key in [info options]) {
             if ([specialKeys containsObject:key] == NO)
                 [connection setOption:[[info options] objectForKey:key] forKey:key];
         }

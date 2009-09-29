@@ -102,9 +102,6 @@ static void splitDateString(NSMutableDictionary *pubDict)
 	
     NSArray *sourceLines = [itemString sourceLinesBySplittingString];
     
-    NSEnumerator *sourceLineE = [sourceLines objectEnumerator];
-    NSString *sourceLine = nil;
-    
     //dictionary is the publication entry
     NSMutableDictionary *pubDict = [[NSMutableDictionary alloc] init];
         
@@ -117,7 +114,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
     NSSet *fieldsNotToConvert = nil;
     NSSet *authorTags = nil;
     
-    while(sourceLine = [sourceLineE nextObject]){
+    for (NSString *sourceLine in sourceLines) {
 
         // ignore empty lines
 		if([sourceLine length] == 0)

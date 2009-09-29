@@ -136,9 +136,7 @@ static BDSKTypeManager *sharedInstance = nil;
         [self reloadGroupFields];
         
         // observe the pref changes for custom fields
-        NSEnumerator *prefKeyEnum = [[NSSet setWithObjects:BDSKDefaultFieldsKey, BDSKLocalFileFieldsKey, BDSKRemoteURLFieldsKey, BDSKRatingFieldsKey, BDSKBooleanFieldsKey, BDSKTriStateFieldsKey, BDSKCitationFieldsKey, BDSKPersonFieldsKey, nil] objectEnumerator];
-        NSString *prefKey;
-        while (prefKey = [prefKeyEnum nextObject])
+        for (NSString *prefKey in [NSSet setWithObjects:BDSKDefaultFieldsKey, BDSKLocalFileFieldsKey, BDSKRemoteURLFieldsKey, BDSKRatingFieldsKey, BDSKBooleanFieldsKey, BDSKTriStateFieldsKey, BDSKCitationFieldsKey, BDSKPersonFieldsKey, nil])
             [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self
                 forKeyPath:[@"values." stringByAppendingString:prefKey]
                    options:0
@@ -203,10 +201,8 @@ static BDSKTypeManager *sharedInstance = nil;
 
 - (void)reloadAllFieldNames {
     NSMutableSet *allFields = [NSMutableSet setWithCapacity:30];
-    NSEnumerator *typeEnum = [[self bibTypesForFileType:BDSKBibtexString] objectEnumerator];
-    NSString *type;
     
-    while (type = [typeEnum nextObject]) {
+    for (NSString *type in [self bibTypesForFileType:BDSKBibtexString]) {
         [allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY]];
         [allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY]];
     }

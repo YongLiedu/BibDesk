@@ -130,15 +130,10 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
         [self setFileType:BDSKTextTemplateDocumentType];
         
         NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"TemplateOptions" ofType:@"plist"]];
-        NSEnumerator *keyEnum = [[tmpDict allKeys] objectEnumerator];
-        NSString *key;
         
-        while (key = [keyEnum nextObject]) {
+        for (NSString *key in [tmpDict allKeys]) {
             NSMutableArray *array = [NSMutableArray array];
-            NSEnumerator *dictEnum = [[tmpDict objectForKey:key] objectEnumerator];
-            NSDictionary *dict;
-            
-            while (dict = [dictEnum nextObject]) {
+            for (NSDictionary *dict in [tmpDict objectForKey:key]) {
                 dict = [dict mutableCopy];
                 [(NSMutableDictionary *)dict setObject:[[NSBundle mainBundle] localizedStringForKey:[dict objectForKey:@"displayName"] value:@"" table:@"TemplateOptions"] forKey:@"displayName"];
                 [array addObject:dict];
@@ -149,12 +144,9 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
         templateOptions = [tmpDict copy];
         [tmpDict release];
         
-        NSEnumerator *typeEnum = [[[BDSKTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString] objectEnumerator];
-        NSString *type;
-        
-        while (type = [typeEnum nextObject]) {
+        for (NSString *type in [[BDSKTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString])
             [typeTemplates addObject:[[[BDSKTypeTemplate alloc] initWithPubType:type forDocument:self] autorelease]];
-        }
+        
         defaultTypeIndex = [[typeTemplates valueForKey:@"pubType"] indexOfObject:BDSKArticleString];
         if (defaultTypeIndex == NSNotFound)
             defaultTypeIndex = 0;
@@ -162,11 +154,9 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
         NSMutableArray *tmpFonts = [NSMutableArray array];
         NSMutableArray *fontNames = [[[[NSFontManager sharedFontManager] availableFontFamilies] mutableCopy] autorelease];
         NSEnumerator *fontEnum;
-        NSString *name;
         
         [fontNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
-        fontEnum = [fontNames objectEnumerator];
-        while (name = [fontEnum nextObject]) {
+        for (NSString *name in fontNames) {
             font = [NSFont fontWithName:name size:0.0];
             [tmpFonts addObject:[NSDictionary dictionaryWithObjectsAndKeys:[font fontName], @"fontName", [font displayName], @"displayName", nil]];
         }
@@ -174,15 +164,12 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
         [tmpFonts insertObject:[NSDictionary dictionaryWithObjectsAndKeys:@"<None>", @"fontName", NSLocalizedString(@"Same as body", @"Inerited font message in popup"), @"displayName", nil] atIndex:0];
         tokenFonts = [tmpFonts copy];
         
-        NSEnumerator *fieldEnum;
         NSString *field;
         
-        fieldEnum = [[[BDSKTypeManager sharedManager] userDefaultFieldsForType:nil] objectEnumerator];
-        while (field = [fieldEnum nextObject])
+        for (field in [[BDSKTypeManager sharedManager] userDefaultFieldsForType:nil])
             [defaultTokens addObject:[self tokenForField:field]];
         
-        fieldEnum = [[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKLocalFileString, BDSKRemoteURLString, BDSKItemNumberString, BDSKRichTextString, BDSKDateAddedString, BDSKDateModifiedString, BDSKPubDateString, nil] objectEnumerator];
-        while (field = [fieldEnum nextObject])
+        for (field in [NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKLocalFileString, BDSKRemoteURLString, BDSKItemNumberString, BDSKRichTextString, BDSKDateAddedString, BDSKDateModifiedString, BDSKPubDateString, nil])
             [specialTokens addObject:[self tokenForField:field]];
     }
     return self;
@@ -426,7 +413,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     if (parsedTemplate && (templateDict = [self convertPubTemplate:parsedTemplate defaultFont:font])) {
         NSArray *itemTemplate = [templateDict objectForKey:@""];
         NSMutableSet *includedTypes = [[[NSMutableSet alloc] initWithArray:[templateDict allKeys]] autorelease];
-        NSEnumerator *templateEnum = [typeTemplates objectEnumerator];
         BDSKTypeTemplate *template;
         NSEnumerator *typeEnum;
         NSString *type;
@@ -438,7 +424,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
             [includedTypes removeObject:@""];
         }
         
-        while (template = [templateEnum nextObject]) {
+        for (template in typeTemplates) {
             if (itemTemplate = [templateDict objectForKey:[template pubType]]) {
                 [template setItemTemplate:itemTemplate];
                 [template setIncluded:YES];
@@ -446,8 +432,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
             }
         }
         
-        typeEnum = [includedTypes objectEnumerator];
-        while (type = [typeEnum nextObject]) {
+        for (type in includedTypes) {
             itemTemplate = [templateDict objectForKey:type];
             type = [type entryType];
             template = [[[BDSKTypeTemplate alloc] initWithPubType:type forDocument:self] autorelease];
@@ -676,7 +661,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         NSMutableString *mutString = [NSMutableString string];
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"included = 1"];
         NSArray *includedTemplates = [typeTemplates filteredArrayUsingPredicate:predicate];
-        NSEnumerator *tmplEnum = [includedTemplates objectEnumerator];
         BDSKTypeTemplate *template;
         NSString *altPrefix = @"";
         BOOL isSimple = [includedTemplates count] == 0 ||
@@ -689,7 +673,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         if (isSimple) {
             [mutString appendString:[[typeTemplates objectAtIndex:defaultTypeIndex] string]];
         } else {
-            while (template = [tmplEnum nextObject]) {
+            for (template in includedTemplates) {
                 if ([template isIncluded]) {
                     [mutString appendFormat:@"<%@$pubType=%@?>\n", altPrefix, [template pubType]];
                     [mutString appendString:[template string]];
@@ -720,7 +704,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         if (richText) {
             NSPredicate *predicate = [NSPredicate predicateWithFormat:@"included = 1"];
             NSArray *includedTemplates = [typeTemplates filteredArrayUsingPredicate:predicate];
-            NSEnumerator *tmplEnum = [includedTemplates objectEnumerator];
             BDSKTypeTemplate *template;
             NSString *altPrefix = @"";
             BOOL isSimple = [includedTemplates count] == 0 ||
@@ -743,7 +726,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
             if (isSimple) {
                 [attrString appendAttributedString:[[typeTemplates objectAtIndex:defaultTypeIndex] attributedStringWithDefaultAttributes:attrs]];
             } else {
-                while (template = [tmplEnum nextObject]) {
+                for (template in includedTemplates) {
                     if ([template isIncluded]) {
                         NSString *s = [NSString stringWithFormat:@"<%@$pubType=%@?>\n", altPrefix, [template pubType]];
                         [attrString appendAttributedString:[[[NSAttributedString alloc] initWithString:s attributes:attrs] autorelease]];
@@ -860,9 +843,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     while (key) {
         NSMenu *menu = [[parentMenu itemAtIndex:i] submenu];
         [menu setTitle:[key stringByAppendingString:@"Key"]];
-        NSEnumerator *dictEnum = [[templateOptions valueForKey:key] objectEnumerator];
-        NSDictionary *dict;
-        while (dict = [dictEnum nextObject]) {
+        for (NSDictionary *dict in [templateOptions valueForKey:key]) {
             NSMenuItem *item = [menu addItemWithTitle:[[NSBundle mainBundle] localizedStringForKey:[dict objectForKey:@"displayName"] value:@"" table:@"TemplateOptions"]
                                                action:@selector(changeValueFromMenu:) keyEquivalent:@""];
             [item setTarget:self];
@@ -909,10 +890,8 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 - (void)updateTokenFields {
     NSRect frame;
     CGFloat width = 0.0;
-    NSEnumerator *tfEnum = [[NSArray arrayWithObjects:specialTokenField, requiredTokenField, optionalTokenField, defaultTokenField, nil] objectEnumerator];
-    NSTokenField *tokenField;
     
-    while (tokenField = [tfEnum nextObject]) {
+    for (NSTokenField *tokenField in [NSArray arrayWithObjects:specialTokenField, requiredTokenField, optionalTokenField, defaultTokenField, nil]) {
         [tokenField sizeToFit];
         frame = [tokenField frame];
         width = BDSKMax(width, NSWidth(frame));
@@ -974,8 +953,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     }
     
     if ([optionViews isEqualToArray:currentOptionViews] == NO) {
-        NSEnumerator *viewEnum = [optionViews objectEnumerator];
-        NSView *view;
         NSRect frame = [[tokenOptionsBox contentView] bounds];
         NSPoint point = NSMakePoint(NSMinX(frame) + 7.0, NSMaxY(frame) - 7.0);
         
@@ -983,7 +960,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         [currentOptionViews makeObjectsPerformSelector:@selector(removeFromSuperview)];
         [currentOptionViews release];
         
-        while (view = [viewEnum nextObject]) {
+        for (NSView *view in optionViews) {
             frame = [view frame];
             point.y -= NSHeight(frame);
             frame.origin = point;
@@ -1087,10 +1064,8 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 // implement pasteboard delegate methods as a workaround for not doing the string->token transformation of tokenField:representedObjectForEditingString: (apparently needed for drag-and-drop on post-10.4 systems)
 - (BOOL)tokenField:(NSTokenField *)tokenField writeRepresentedObjects:(NSArray *)objects toPasteboard:(NSPasteboard *)pboard {
     NSMutableString *str = [NSMutableString string];
-    NSEnumerator *objectEnum = [objects objectEnumerator];
-    id object;
     
-    while (object = [objectEnum nextObject])
+    for (id object in objects)
         [str appendString:[self tokenField:tokenField displayStringForRepresentedObject:object]];
     
     [pboard declareTypes:[NSArray arrayWithObjects:BDSKTemplateTokensPboardType, NSStringPboardType, nil] owner:nil];
@@ -1156,10 +1131,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 - (NSArray *)tokenField:(NSTokenField *)tokenField shouldAddObjects:(NSArray *)tokens atIndex:(NSUInteger)idx {
     if (tokenField == itemTemplateTokenField) {
-        NSEnumerator *tokenEnum = [tokens objectEnumerator];
-        id token;
-        
-        while (token = [tokenEnum nextObject]) {
+        for (id token in tokens) {
             if ([token isKindOfClass:[BDSKToken class]]) {
                 [token setDocument:self];
             }
@@ -1195,7 +1167,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard {
     NSInteger idx = [rowIndexes firstIndex];
     [pboard declareTypes:[NSArray arrayWithObjects:BDSKTypeTemplateRowsPboardType, nil] owner:nil];
-    [pboard setPropertyList:[NSArray arrayWithObjects:[NSNumber numberWithInt:idx], nil] forType:BDSKTypeTemplateRowsPboardType];
+    [pboard setData:[NSKeyedArchiver archivedDataWithRootObject:rowIndexes] forType:BDSKTypeTemplateRowsPboardType];
     return YES;
 }
 
@@ -1214,7 +1186,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKTypeTemplateRowsPboardType, nil]];
     
     if (type) {
-        NSInteger idx = [[[pboard propertyListForType:BDSKTypeTemplateRowsPboardType] lastObject] intValue];
+        NSInteger idx = [[NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKTypeTemplateRowsPboardType]] lastIndex];
         BDSKTypeTemplate *sourceTemplate = [typeTemplates objectAtIndex:idx];
         BDSKTypeTemplate *targetTemplate = [typeTemplates objectAtIndex:row];
         [targetTemplate setItemTemplate:[[[NSArray alloc] initWithArray:[sourceTemplate itemTemplate] copyItems:YES] autorelease]];
@@ -1314,11 +1286,9 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 - (NSArray *)convertItemTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont {
     NSMutableArray *result = [NSMutableArray array];
-    NSEnumerator *tagEnum = [templateArray objectEnumerator];
-    BDSKTemplateTag *tag;
     id token;
     
-    while (tag = [tagEnum nextObject]) {
+    for (BDSKTemplateTag *tag in templateArray) {
         switch ([(BDSKTemplateTag *)tag type]) {
             case BDSKTextTemplateTagType:
                 if (token = [self tokensForTextTag:tag allowText:YES defaultFont:defaultFont])

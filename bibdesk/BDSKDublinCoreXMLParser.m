@@ -97,10 +97,7 @@ static NSArray *dcProperties(NSXMLNode *node, NSString *key)
             records = [root nodesForXPath:@"//record" error:NULL];
     }
     
-    NSEnumerator *nodeEnum = [records objectEnumerator];
-    NSXMLNode *node;
-    
-    while (node = [nodeEnum nextObject]) {
+    for (NSXMLNode *node in records) {
         
         // I don't know how to include "oai_dc:dc" in an XPath
         if (isOAI)

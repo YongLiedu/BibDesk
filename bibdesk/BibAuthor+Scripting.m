@@ -57,20 +57,17 @@
     // instead of trying to do string comparisons
     BibAuthor *newAuth = [BibAuthor authorWithName:aName andPub:nil];
     
-	NSEnumerator *pubEnum = [publications objectEnumerator];
 	NSEnumerator *authEnum;
-	BibItem *pub;
-	BibAuthor *auth;
 	BibAuthor *author = nil;
 
-	while (author == nil && (pub = [pubEnum nextObject])) {
-		authEnum = [[pub pubAuthors] objectEnumerator];
-		while (auth = [authEnum nextObject]) {
+	for (BibItem *pub in publications) {
+		for (BibAuthor *auth in [pub pubAuthors]) {
 			if ([auth isEqual:newAuth]) {
 				author = auth;
                 break;
             }
 		}
+        if (author) break;
 	}
     
 	return author;
@@ -87,20 +84,16 @@
     // instead of trying to do string comparisons
     BibAuthor *newAuth = [BibAuthor authorWithName:aName andPub:nil];
     
-	NSEnumerator *pubEnum = [publications objectEnumerator];
-	NSEnumerator *authEnum;
-	BibItem *pub;
-	BibAuthor *auth;
     BibAuthor *editor = nil;
 
-	while (editor == nil && (pub = [pubEnum nextObject])) {
-		authEnum = [[pub pubEditors] objectEnumerator];
-		while (auth = [authEnum nextObject]) {
+	for (BibItem *pub in publications) {
+		for (BibAuthor *auth in [pub pubEditors]) {
 			if ([auth isEqual:newAuth]) {
 				editor = auth;
                 break;
             }
 		}
+        if (editor) break;
 	}
     
 	return editor;

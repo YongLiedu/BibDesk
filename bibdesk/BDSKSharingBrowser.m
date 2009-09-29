@@ -166,15 +166,14 @@ static BDSKSharingBrowser *sharedBrowser = nil;
         [unresolvedNetServices removeObject:aNetService];
     }else{
         NSString *name = [aNetService name];
-        NSEnumerator *e = [sharingClients objectEnumerator];
         BDSKSharingClient *client = nil;
         
         // find the client we should remove
-        while(client = [e nextObject]){
-            if([[client name] isEqualToString:name])
+        for (client in sharingClients) {
+            if ([[client name] isEqualToString:name])
                 break;
         }
-        if(client != nil){
+        if (client != nil) {
             [client terminate];
             [sharingClients removeObject:client];
             [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientsChangedNotification object:self];

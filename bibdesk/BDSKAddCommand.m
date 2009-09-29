@@ -52,7 +52,6 @@
     id receiver = [self evaluatedReceivers];
     NSArray *insertionObjects = nil;
     NSMutableArray *returnValue = nil;
-    NSEnumerator *objEnum;
     id obj;
     BOOL isArray = [directParameter isKindOfClass:[NSArray class]] || [receiver isKindOfClass:[NSArray class]];
     
@@ -97,9 +96,7 @@
                 insertionContainer = nil;
             containerClassDescription = [insertionContainer scriptClassDescription];
             if ([classDescriptions containsObject:[NSNull null]] == NO) {
-                NSEnumerator *keyEnum = [[containerClassDescription toManyRelationshipKeys] objectEnumerator];
-                NSString *key;
-                while (key = [keyEnum nextObject]) {
+                for (NSString *key in [containerClassDescription toManyRelationshipKeys]) {
                     NSScriptClassDescription *keyClassDescription = [containerClassDescription classDescriptionForKey:key];
                     if ([insertionClassDescription isKindOfClassDescription:keyClassDescription] &&
                         [containerClassDescription isLocationRequiredToCreateForKey:key] == NO) {
@@ -129,19 +126,16 @@
             } else {
                 // insert using scripting KVC
                 if (insertionIndex >= 0) {
-                    objEnum = [insertionObjects reverseObjectEnumerator];
-                    while (obj = [objEnum nextObject])
+                    for (obj in insertionObjects)
                         [insertionContainer insertValue:obj atIndex:insertionIndex inPropertyWithKey:insertionKey];
                 } else {
-                    objEnum = [insertionObjects objectEnumerator];
-                    while (obj = [objEnum nextObject])
+                    for (obj in insertionObjects)
                         [insertionContainer insertValue:obj inPropertyWithKey:insertionKey];
                 }
                 
                 // get the return value, either by getting the objectSpecifier or the AppleEventDescriptor
                 returnValue = [NSMutableArray array];
-                objEnum = [insertionObjects objectEnumerator];
-                while (obj = [objEnum nextObject]) {
+                for (obj in insertionObjects) {
                     id returnObj = nil;
                     if ([obj respondsToSelector:@selector(objectSpecifier)])
                         returnObj = [obj objectSpecifier];

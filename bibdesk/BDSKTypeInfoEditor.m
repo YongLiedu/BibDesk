@@ -116,12 +116,10 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 - (void)revertTypes {
 	BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
 	NSMutableDictionary *fieldsDict = [NSMutableDictionary dictionaryWithCapacity:2];
-	NSEnumerator *typeEnum = [[btm bibTypesForFileType:BDSKBibtexString] objectEnumerator];
-	NSString *type;
 	
 	[types removeAllObjects];
 	[fieldsForTypesDict removeAllObjects];
-	while (type = [typeEnum nextObject]) {
+	for (NSString *type in [btm bibTypesForFileType:BDSKBibtexString]) {
 		[fieldsDict setObject:[btm requiredFieldsForType:type] forKey:REQUIRED_KEY];
 		[fieldsDict setObject:[btm optionalFieldsForType:type] forKey:OPTIONAL_KEY];
 		[self addType:type withFields:fieldsDict];
@@ -333,17 +331,13 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 }
 
 - (IBAction)revertAllToDefault:(id)sender {
-	NSEnumerator *typeEnum = [defaultFieldsForTypesDict keyEnumerator];
-	NSString *type;
-	
 	// make sure we stop editing
 	[[self window] makeFirstResponder:nil];
 	
 	[fieldsForTypesDict removeAllObjects];
 	[types removeAllObjects];
-	while (type = [typeEnum nextObject]) {
+	for (NSString *type in defaultFieldsForTypesDict)
 		[self addType:type withFields:[defaultFieldsForTypesDict objectForKey:type]];
-	}
 	[types sortUsingSelector:@selector(compare:)];
 	[typeTableView reloadData];
 	[self setCurrentType:nil];
@@ -575,18 +569,15 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
     NSArray *pbtypes = [pboard types];
     if ([tv isEqual:typeTableView] && [pbtypes containsObject:BDSKTypeInfoPboardType]) {
         NSArray *newTypes = [pboard propertyListForType:BDSKTypeInfoPboardType];
-        NSEnumerator *newTypeE = [newTypes objectEnumerator];
-        NSDictionary *aType;
         NSString *newType = nil;
         
-        while (aType = [newTypeE nextObject]) {
+        for (NSDictionary *aType in [pboard propertyListForType:BDSKTypeInfoPboardType]) {
             // append "copy" here instead of in the loop
             NSString *name = [[aType objectForKey:@"name"] stringByAppendingString:@"-copy"];
             newType = name;
             NSInteger i = 0;
-            while ([types containsObject:newType]) {
+            while ([types containsObject:newType])
                 newType = [NSString stringWithFormat:@"%@-%ld", name, (long)++i];
-            }
             [self addType:newType withFields:[aType objectForKey:@"fields"]];
             
         }
@@ -609,21 +600,21 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 #pragma mark NSTableView dragging
 
-- (BOOL)tableView:(NSTableView *)tv writeRows:(NSArray *)rows toPasteboard:(NSPasteboard *)pboard {
+- (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard {
 	// we only drag our own rows
 	[pboard declareTypes: [NSArray arrayWithObjects:BDSKTypeInfoRowsPboardType, BDSKTypeInfoPboardType, nil] owner:nil];
 	// write the rows to the pasteboard
-	[pboard setPropertyList:rows forType:BDSKTypeInfoRowsPboardType];
-    if ([tv isEqual:typeTableView] && [rows count]) {
+	[pboard setData:[NSKeyedArchiver archivedDataWithRootObject:rowIndexes] forType:BDSKTypeInfoRowsPboardType];
+    if ([tv isEqual:typeTableView] && [rowIndexes count]) {
         NSMutableArray *newTypes = [NSMutableArray array];
-        NSNumber *row;
-        NSEnumerator *rowE = [rows objectEnumerator];
-        while (row = [rowE nextObject]) {
+        NSUInteger row = [rowIndexes firstIndex];
+        while (row != NSNotFound) {
             NSMutableDictionary *aType = [NSMutableDictionary dictionary];
-            NSString *name = [types objectAtIndex:[row intValue]];
+            NSString *name = [types objectAtIndex:row];
             [aType setObject:name forKey:@"name"];
             [aType setObject:[fieldsForTypesDict objectForKey:name] forKey:@"fields"];
             [newTypes addObject:aType];
+            row = [rowIndexes indexGreaterThanIndex:row];
         }
         [pboard setPropertyList:newTypes forType:BDSKTypeInfoPboardType];
     }
@@ -649,20 +640,18 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 - (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo> )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op {
 	NSPasteboard *pboard = [info draggingPasteboard];
-	NSArray *rows = [pboard propertyListForType:BDSKTypeInfoRowsPboardType];
+	NSIndexSet *rowIndexes = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKTypeInfoRowsPboardType]];
     NSIndexSet *insertIndexes;
     NSTableView *sourceTv = [info draggingSource];
 	
     if (tv == typeTableView && [info draggingSourceOperationMask] == NSDragOperationCopy) {
         
-        NSEnumerator *typeEnum = [[types objectsAtIndexes:[NSIndexSet indexSetWithIndexesInArray:rows]] objectEnumerator];
-        NSString *type;
         NSString *newType;
         NSInteger i;
         
-        insertIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(row, [rows count])];
+        insertIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(row, [rowIndexes count])];
         
-        while (type = [typeEnum nextObject]) {
+        for (NSString *type in [types objectsAtIndexes:rowIndexes]) {
             newType = [NSString stringWithFormat:@"%@-copy", type];
             i = 0;
             while ([types containsObject:newType]) {
@@ -673,9 +662,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
         
     } else {
         
-        NSEnumerator *rowEnum = [rows objectEnumerator];
-        NSNumber *rowNum;
-        NSInteger i;
+        NSInteger i = [rowIndexes firstIndex];
         NSInteger insertRow = row;
         NSMutableArray *sourceFields = nil;
         NSMutableArray *targetFields = nil;
@@ -700,14 +687,14 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
         
         NSAssert(sourceFields != nil && targetFields != nil, @"An error occurred:  fields must not be nil when dragging");
         
-        while (rowNum = [rowEnum nextObject]) {
-            i = [rowNum intValue];
+        while (i != NSNotFound) {
             if (sourceTv == tv && i < row) insertRow--;
             [removeIndexes addIndex:i];
+            i = [rowIndexes indexGreaterThanIndex:i];
         }
         
         draggedFields = [sourceFields objectsAtIndexes:removeIndexes];
-        insertIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(insertRow, [rows count])];
+        insertIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(insertRow, [rowIndexes count])];
         [sourceFields removeObjectsAtIndexes:removeIndexes];
         [targetFields insertObjects:draggedFields atIndexes:insertIndexes];
         

@@ -89,10 +89,7 @@ static id sharedBookmarkController = nil;
 		NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
 		NSString *bookmarksPath = [applicationSupportPath stringByAppendingPathComponent:@"Bookmarks.plist"];
 		if ([[NSFileManager defaultManager] fileExistsAtPath:bookmarksPath]) {
-			NSEnumerator *bEnum = [[NSArray arrayWithContentsOfFile:bookmarksPath] objectEnumerator];
-			NSDictionary *dict;
-			
-			while(dict = [bEnum nextObject]){
+			for (NSDictionary *dict in [NSArray arrayWithContentsOfFile:bookmarksPath]) {
                 BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithDictionary:dict];
                 if (bookmark)
                     [bookmarks addObject:bookmark];
@@ -127,12 +124,10 @@ static id sharedBookmarkController = nil;
 }
 
 static NSArray *minimumCoverForBookmarks(NSArray *items) {
-    NSEnumerator *bmEnum = [items objectEnumerator];
-    BDSKBookmark *bm;
     BDSKBookmark *lastBm = nil;
     NSMutableArray *minimalCover = [NSMutableArray array];
     
-    while (bm = [bmEnum nextObject]) {
+    for (BDSKBookmark *bm in items) {
         if ([bm isDescendantOf:lastBm] == NO) {
             [minimalCover addObject:bm];
             lastBm = bm;
@@ -319,9 +314,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 }
 
 - (void)startObservingBookmarks:(NSArray *)newBookmarks {
-    NSEnumerator *bmEnum = [newBookmarks objectEnumerator];
-    BDSKBookmark *bm;
-    while (bm = [bmEnum nextObject]) {
+    for (BDSKBookmark *bm in newBookmarks) {
         if ([bm bookmarkType] != BDSKBookmarkTypeSeparator) {
             [bm addObserver:self forKeyPath:NAME_KEY options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKBookmarkPropertiesObservationContext];
             [bm addObserver:self forKeyPath:URLSTRING_KEY options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKBookmarkPropertiesObservationContext];
@@ -334,9 +327,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 }
 
 - (void)stopObservingBookmarks:(NSArray *)oldBookmarks {
-    NSEnumerator *bmEnum = [oldBookmarks objectEnumerator];
-    BDSKBookmark *bm;
-    while (bm = [bmEnum nextObject]) {
+    for (BDSKBookmark *bm in oldBookmarks) {
         if ([bm bookmarkType] != BDSKBookmarkTypeSeparator) {
             [bm removeObserver:self forKeyPath:NAME_KEY];
             [bm removeObserver:self forKeyPath:URLSTRING_KEY];
@@ -517,12 +508,9 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     if (item == nil) item = bookmarkRoot;
     
     if ([type isEqualToString:BDSKBookmarkRowsPboardType]) {
-        NSEnumerator *bmEnum = [[self draggedBookmarks] objectEnumerator];
-        BDSKBookmark *bookmark;
-				
         [self endEditing];
         
-		while (bookmark = [bmEnum nextObject]) {
+		for (BDSKBookmark *bookmark in [self draggedBookmarks]) {
             BDSKBookmark *parent = [bookmark parent];
             NSInteger bookmarkIndex = [[parent children] indexOfObject:bookmark];
             if (item == parent) {

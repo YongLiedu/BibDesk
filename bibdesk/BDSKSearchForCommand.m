@@ -95,22 +95,18 @@ The command should have the form
 
 	if ([receiver isKindOfClass:[NSApplication class]] && dP == nil) {
 		// we are sent to the application and there is no direct paramter that might redirect the command
-		NSEnumerator *myEnum = [[NSApp orderedDocuments] objectEnumerator];
-		BibDocument *bd = nil;
-		while (bd = [myEnum nextObject]) {
+		for (BibDocument *bd in [NSApp orderedDocuments])
 			[results addObjectsFromArray:[bd findMatchesFor:searchterm]];
-		}
 	} else if ([receiver isKindOfClass:[BibDocument class]] || [dPO isKindOfClass:[BibDocument class]]) {
 		// the condition above might not be good enough
 		// we are sent or addressed to a document
 		[results addObjectsFromArray:[(BibDocument*)dPO findMatchesFor:searchterm]];
 	} else if ([receiver isKindOfClass:[NSArray class]]){
-        id anObject;
-        NSEnumerator *enumerator = [receiver objectEnumerator];
-
-        while((anObject = [enumerator nextObject]) && [anObject isKindOfClass:[BibDocument class]])
-            [results addObjectsFromArray:[anObject findMatchesFor:searchterm]];
-
+        for (id anObject in receiver) {
+            if ([anObject isKindOfClass:[BibDocument class]])
+                [results addObjectsFromArray:[anObject findMatchesFor:searchterm]];
+        }
+        
     } else {
 		// give up
 		[self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
@@ -164,10 +160,7 @@ There could be other extensions, like matching for every word with conjunction o
 	NSMutableArray * found = [NSMutableArray array];
 	
 	// run through all publications
-	NSEnumerator * pubEnum = [publications objectEnumerator];
-	BibItem * pub = nil;
-	
-	while (pub = [pubEnum nextObject]) {
+	for (BibItem *pub in publications) {
 		if ([pub matchesString:searchterm]) {
 			// we've got a match, so add
 			[found addObject:pub];
@@ -185,19 +178,15 @@ There could be other extensions, like matching for every word with conjunction o
 - (BOOL)matchesString:(NSString *)searchterm {
 
     // search authors and editors
-	NSEnumerator *authEnum = [[self people] objectEnumerator];
     NSMutableSet *authors = [[NSMutableSet alloc] initWithCapacity:5];
-    NSArray *array;
-    while(array = [authEnum nextObject])
+    for (NSArray *array in [[self people] allValues])
         [authors addObjectsFromArray:array];
     
-    authEnum = [authors objectEnumerator];
     [authors release];
     
-	BibAuthor *auth = nil;
 	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:20];	
 
-	while(auth = [authEnum nextObject]) {
+	for (BibAuthor *auth in [self people]) {
         NSString *name = [auth lastName] ?: [auth name];
         if (nil != name) {
             [string appendString:name];

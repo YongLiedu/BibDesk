@@ -820,43 +820,35 @@ enum {
     NSString *field = [self field];
     NSUInteger searchOpts = (ignoreCase ? NSCaseInsensitiveSearch : 0);
 	
-	switch(searchScope){
+	switch (searchScope) {
 		case FCEndsWithSearch:
 			searchOpts = searchOpts | NSBackwardsSearch;
 		case FCStartsWithSearch:
 			searchOpts = searchOpts | NSAnchoredSearch;
 	}
 	
-	if(findAsMacro)
+	if (findAsMacro)
 		findStr = [NSString stringWithBibTeXString:findStr macroResolver:[theDocument macroResolver] error:NULL];
 	
 	// loop through the pubs to replace
     NSMutableArray *arrayOfItems = [NSMutableArray array];
-    NSEnumerator *pubE; // an enumerator of BibItems
-    BibItem *bibItem;
     NSString *origStr;
     
     // use all shown pubs; not just selection, since our caller is going to change the selection
-    NSArray *publications = [theDocument shownPublications];
-
-    pubE = [publications objectEnumerator];
     
-    while(bibItem = [pubE nextObject]){
+    for (BibItem *bibItem in [theDocument shownPublications]) {
         if ([field isEqualToString:BDSKRemoteURLString]) {
             
-            NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
-            BDSKLinkedFile *file;
-            
-            while (file = [fileEnum nextObject]) {
+            for (BDSKLinkedFile *file in [bibItem remoteURLs]) {
                 origStr = [[file URL] absoluteString];
                 
-                if(searchScope == FCWholeFieldSearch){
-                    if([findStr compare:origStr options:searchOpts] == NSOrderedSame){
+                if (searchScope == FCWholeFieldSearch) {
+                    if ([findStr compare:origStr options:searchOpts] == NSOrderedSame) {
                         [arrayOfItems addObject:bibItem];
                         break;
                     }
-                }else{
-                    if([origStr hasSubstring:findStr options:searchOpts]){
+                } else {
+                    if ([origStr hasSubstring:findStr options:searchOpts]) {
                         [arrayOfItems addObject:bibItem];
                         break;
                     }
@@ -867,13 +859,13 @@ enum {
             
             origStr = [bibItem stringValueOfField:field inherit:NO];
             
-            if(origStr == nil || findAsMacro != [origStr isComplex])
+            if (origStr == nil || findAsMacro != [origStr isComplex])
                 continue; // we don't want to add a field or set it to nil, or find expanded values of a complex string, or interpret an ordinary string as a macro
             
-            if(searchScope == FCWholeFieldSearch){
-                if([findStr compareAsComplexString:origStr options:searchOpts] == NSOrderedSame)
+            if (searchScope == FCWholeFieldSearch) {
+                if ([findStr compareAsComplexString:origStr options:searchOpts] == NSOrderedSame)
                     [arrayOfItems addObject:bibItem];
-            }else{
+            } else {
                 if ([origStr hasSubstring:findStr options:searchOpts])
                     [arrayOfItems addObject:bibItem];
             }
@@ -892,20 +884,14 @@ enum {
 	// loop through the pubs to replace
     NSMutableArray *arrayOfItems = [NSMutableArray array];
     NSEnumerator *pubE; // an enumerator of BibItems
-    BibItem *bibItem;
     NSString *origStr;
     
     // use all shown pubs; not just selection, since our caller is going to change the selection
-    NSArray *publications = [theDocument shownPublications];
-    pubE = [publications objectEnumerator];
     
-    while(bibItem = [pubE nextObject]){
+    for (BibItem *bibItem in [theDocument shownPublications]) {
         if ([field isEqualToString:BDSKRemoteURLString]) {
             
-            NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
-            BDSKLinkedFile *file;
-            
-            while (file = [fileEnum nextObject]) {
+            for (BDSKLinkedFile *file in [bibItem remoteURLs]) {
                 origStr = [[file URL] absoluteString];
                 if([theRegex findInString:origStr]){
                     [arrayOfItems addObject:bibItem];
@@ -964,26 +950,22 @@ enum {
 		replStr = [NSString stringWithBibTeXString:replStr macroResolver:[theDocument macroResolver] error:NULL];
 		
 	// loop through the pubs to replace
-    NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
-    BibItem *bibItem;
     NSString *origStr;
     NSString *newStr;
 	NSUInteger numRepl = 0;
 	NSUInteger number = 0;
 	
-    while(bibItem = [pubE nextObject]){
+    for (BibItem *bibItem in arrayOfPubs) {
         // don't touch external items
         if ([bibItem owner] != theDocument) 
             continue;
         
         if ([field isEqualToString:BDSKRemoteURLString]) {
             
-            NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
-            BDSKLinkedFile *file;
             BDSKLinkedFile *replFile;
             NSUInteger idx;
             
-            while (file = [fileEnum nextObject]) {
+            for (BDSKLinkedFile *file in [bibItem remoteURLs]) {
                 idx = [[bibItem files] indexOfObjectIdenticalTo:file];
                 if (idx == NSNotFound) continue;
                 origStr = [[file URL] absoluteString];
@@ -1041,25 +1023,21 @@ enum {
 		replStr = [replStr stringAsBibTeXString];
 	
 	// loop through the pubs to replace
-    NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
-    BibItem *bibItem;
     NSString *origStr;
 	NSString *complexStr;
 	NSUInteger number = 0;
 	
-    while(bibItem = [pubE nextObject]){
+    for (BibItem *bibItem in arrayOfPubs) {
         // don't touch external items
         if ([bibItem owner] != theDocument) 
             continue;
         
         if ([field isEqualToString:BDSKRemoteURLString]) {
             
-            NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
-            BDSKLinkedFile *file;
             BDSKLinkedFile *replFile;
             NSUInteger idx;
             
-            while (file = [fileEnum nextObject]) {
+            for (BDSKLinkedFile *file in [bibItem remoteURLs]) {
                 idx = [[bibItem files] indexOfObjectIdenticalTo:file];
                 if (idx == NSNotFound) continue;
                 origStr = [[file URL] absoluteString];
@@ -1112,12 +1090,10 @@ enum {
 		replStr = [NSString stringWithBibTeXString:replStr macroResolver:[theDocument macroResolver] error:NULL];
 		
 	// loop through the pubs to replace
-    NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
-    BibItem *bibItem;
     NSString *origStr;
 	NSUInteger number = 0;
 
-    while(bibItem = [pubE nextObject]){
+    for (BibItem *bibItem in arrayOfPubs) {
         // don't touch external items
         if ([bibItem owner] != theDocument) 
             continue;
@@ -1175,24 +1151,20 @@ enum {
 		replStr = [NSString stringWithBibTeXString:replStr macroResolver:[theDocument macroResolver] error:NULL];
 		
 	// loop through the pubs to replace
-    NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
-    BibItem *bibItem;
     NSString *origStr;
 	NSUInteger number = 0;
 
-    while(bibItem = [pubE nextObject]){
+    for (BibItem *bibItem in arrayOfPubs) {
         // don't touch external items
         if ([bibItem owner] != theDocument) 
             continue;
         
         if ([field isEqualToString:BDSKRemoteURLString]) {
             
-            NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
-            BDSKLinkedFile *file;
             BDSKLinkedFile *replFile;
             NSUInteger idx;
             
-            while (file = [fileEnum nextObject]) {
+            for (BDSKLinkedFile *file in [bibItem remoteURLs]) {
                 idx = [[bibItem files] indexOfObjectIdenticalTo:file];
                 if (idx == NSNotFound) continue;
                 origStr = [[file URL] absoluteString];
@@ -1234,24 +1206,20 @@ enum {
 		replStr = [NSString stringWithBibTeXString:replStr macroResolver:[theDocument macroResolver] error:NULL];
 		
 	// loop through the pubs to replace
-    NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
-    BibItem *bibItem;
     NSString *origStr;
 	NSUInteger number = 0;
 
-    while(bibItem = [pubE nextObject]){
+    for (BibItem *bibItem in arrayOfPubs) {
         // don't touch external items
         if ([bibItem owner] != theDocument) 
             continue;
         
         if ([field isEqualToString:BDSKRemoteURLString]) {
             
-            NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
-            BDSKLinkedFile *file;
             BDSKLinkedFile *replFile;
             NSUInteger idx;
             
-            while (file = [fileEnum nextObject]) {
+            for (BDSKLinkedFile *file in [bibItem remoteURLs]) {
                 idx = [[bibItem files] indexOfObjectIdenticalTo:file];
                 if (idx == NSNotFound) continue;
                 origStr = [[file URL] absoluteString];

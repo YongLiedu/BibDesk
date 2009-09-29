@@ -163,9 +163,7 @@ static Class BDSKBookmarkClass = Nil;
 - (BOOL)isDescendantOf:(BDSKBookmark *)bookmark {
     if (self == bookmark)
         return YES;
-    NSEnumerator *childEnum = [[bookmark children] objectEnumerator];
-    BDSKBookmark *child;
-    while (child = [childEnum nextObject]) {
+    for (BDSKBookmark *child in [bookmark children]) {
         if ([self isDescendantOf:child])
             return YES;
     }
@@ -173,9 +171,7 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (BOOL)isDescendantOfArray:(NSArray *)bookmarks {
-    NSEnumerator *bmEnum = [bookmarks objectEnumerator];
-    BDSKBookmark *bm = nil;
-    while (bm = [bmEnum nextObject]) {
+    for (BDSKBookmark *bm in bookmarks) {
         if ([self isDescendantOf:bm]) return YES;
     }
     return NO;
@@ -209,10 +205,8 @@ static Class BDSKBookmarkClass = Nil;
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
     if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:FOLDER_STRING]) {
-        NSEnumerator *dictEnum = [[dictionary objectForKey:CHILDREN_KEY] objectEnumerator];
-        NSDictionary *dict;
         NSMutableArray *newChildren = [NSMutableArray array];
-        while (dict = [dictEnum nextObject])
+        for (NSDictionary *dict in [dictionary objectForKey:CHILDREN_KEY])
             [newChildren addObject:[[[[self class] alloc] initWithDictionary:dict] autorelease]];
         return [self initFolderWithChildren:newChildren name:[dictionary objectForKey:TITLE_KEY]];
     } else if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:SEPARATOR_STRING]) {

@@ -182,15 +182,13 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 #pragma mark Getting managers and editors
 
 - (BDSKErrorManager *)managerForDocument:(BibDocument *)document create:(BOOL)create{
-    NSEnumerator *mEnum = [managers objectEnumerator];
     BDSKErrorManager *manager = nil;
-    
-    while(manager = [mEnum nextObject]){
+    for (manager in managers) {
         if(document == [manager sourceDocument])
                 break;
     }
     
-    if(manager == nil && create){
+    if (manager == nil && create) {
         manager = [(BDSKErrorManager *)[BDSKErrorManager alloc] initWithDocument:document];
         [self addManager:manager];
         [manager release];
@@ -203,7 +201,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     BDSKErrorManager *manager = [self managerForDocument:document create:create];
     BDSKErrorEditor *editor = [manager mainEditor];
     
-    if(editor == nil && create){
+    if (editor == nil && create) {
         editor = [(BDSKErrorEditor *)[BDSKErrorEditor alloc] initWithFileName:[[document fileURL] path]];
         [manager addEditor:editor isMain:YES];
         [editor release];
@@ -420,13 +418,9 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard {
     NSMutableString *s = [[NSMutableString string] retain];
-    NSEnumerator *objEnumerator = [[errorsController selectedObjects] objectEnumerator];
     NSInteger lineNumber;
     
-    // Columns order:  @"File Name\t\tLine Number\t\tMessage Type\t\tMessage Text\n"];
-    BDSKErrorObject *errObj;
-    
-    while(errObj = [objEnumerator nextObject]){
+    for (BDSKErrorObject *errObj in [errorsController selectedObjects]) {
         [s appendString:[[errObj editor] displayName]];
         [s appendString:@"\t\t"];
         
@@ -463,9 +457,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     if(hideWarnings || filterManager){
         NSMutableArray *matchedObjects = [NSMutableArray arrayWithCapacity:[objects count]];
         
-        NSEnumerator *itemEnum = [objects objectEnumerator];
-        id item;	
-        while (item = [itemEnum nextObject]) {
+        for (id item in objects) {
             if(filterManager && [filterManager managesError:item] == NO)
                 continue;
             if(hideWarnings && [item isIgnorableWarning])

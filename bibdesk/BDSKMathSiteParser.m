@@ -54,7 +54,6 @@
  Tries to turn it into the best array of BibItems it can get, preferring MR records over those from Zentralblatt if both are available.
 */
 + (NSArray *) bibItemsForMRIDs:(NSArray *) MRIDs andZMathIDs:(NSArray *) ZMathIDs error:(NSError **) outError {
-	NSEnumerator * myEnum;
 	NSObject * item;
 	NSUInteger itemCount = (MRIDs) ? [MRIDs count] : [ZMathIDs count];
 	NSMutableArray * list = [NSMutableArray arrayWithCapacity:itemCount];
@@ -63,8 +62,7 @@
 	for (i = 0; i < itemCount; i++) { [result addObject:[NSNull null]]; }
 	
 	// create list of (non-Null) MRIDs and retrive BibItems for them
-	myEnum = [MRIDs objectEnumerator];
-	while (item = [myEnum nextObject]) {
+	for (item in MRIDs) {
 		if ([NSNull null] != item) {
 			[list addObject:item];
 		}
@@ -73,9 +71,7 @@
 	NSArray * bibItems = [BDSKMathSciNetParser bibItemsForMRIDs:list referrer:nil error:outError];
 	
 	// fill result array with bibItems at the correct position
-	myEnum = [bibItems objectEnumerator];
-	BibItem * bibItem;
-	while (bibItem = [myEnum nextObject]) {
+	for (BibItem * bibItem in bibItems) {
 		NSUInteger count;
 		NSString * MRID = [[[bibItem citeKey] stringByRemovingPrefix:@"MR"] stringByReplacingOccurrencesOfString:@"0" withString:@"" options: NSAnchoredSearch replacements:&count];
 		NSUInteger position = [MRIDs indexOfObject:MRID];
@@ -101,8 +97,7 @@
 		// add these new results to the result array
 		if ([list count] > 0) {
 			bibItems = [BDSKZentralblattParser bibItemsForZMathIDs:list referrer:nil error:outError];
-			myEnum = [bibItems objectEnumerator];
-			while (bibItem = [myEnum nextObject]) {
+			for (BibItem *bibItem in bibItems) {
 				NSString * ZMathID = [bibItem  citeKey];
 				NSUInteger position = [ZMathIDs indexOfObject:ZMathID];
 				[result replaceObjectAtIndex:position withObject:bibItem];
@@ -172,10 +167,7 @@
 	NSMutableArray * ZMathIDs = [NSMutableArray arrayWithCapacity:[references count]];
 	[ZMathIDs addObject:myZMathID];
 	
-	NSEnumerator * referenceEnumerator = [references objectEnumerator];
-	NSXMLElement * reference;
-	
-	while (reference = [referenceEnumerator nextObject]) {
+	for (NSXMLElement * reference in references) {
 		NSString * referenceString = [reference stringValue];
 
 		match = [MRRegexp findInString:referenceString];
@@ -266,11 +258,9 @@
 	AGRegexMatch * match;	
 
 	
-	NSEnumerator * myEnum = [rawReferences objectEnumerator];
-	NSString * item;
 	BOOL firstElementIsOwnId = NO; // to know whether the initial BibItem is for this item later on
 	BOOL inReferences = NO;
-	while (item = [myEnum nextObject]) {
+	for (NSString *item in rawReferences) {
 		if ([item rangeOfString:@"References"].location != NSNotFound) { inReferences = YES; }
 		/* 
 		match = [MRRegexp findInString:item];
@@ -304,7 +294,7 @@
 	
 	// add Numdam URL to item's own record
 	if ( [result count] > 0 && firstElementIsOwnId ) {
-		item = [result objectAtIndex:0];
+		BibItem *item = [result objectAtIndex:0];
 		if ( [item isKindOfClass:[BibItem class]] ) {
 			AGRegex * URLRegexp = [AGRegex regexWithPattern:@"stable URL: ([a-zA-Z0-9:=./?_]*)" options:0];
 			match = [URLRegexp findInString:content];

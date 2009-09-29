@@ -414,9 +414,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
 
 - (NSArray *)scriptingSkimNotes {
     NSMutableArray *notes = [NSMutableArray array];
-    NSEnumerator *noteEnum = [[self SkimNotes] objectEnumerator];
-    NSDictionary *note;
-    while (note = [noteEnum nextObject]) {
+    for (NSDictionary *note in [self SkimNotes]) {
         note = [note mutableCopy];
         id value;
         if (value = [note objectForKey:SKNPDFAnnotationBoundsKey]) {
@@ -500,11 +498,9 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
             [note setValue:[NSAppleEventDescriptor descriptorWithDescriptorType:typeTIFF data:[value TIFFRepresentation]] forKey:SKNPDFAnnotationImageKey];
         }
         if (value = [note objectForKey:SKNPDFAnnotationQuadrilateralPointsKey]) {
-            NSEnumerator *pointEnum = [value objectEnumerator];
-            NSString *pointString;
             NSMutableArray *pathList = [NSMutableArray array];
             NSMutableArray *points = [NSMutableArray array];
-            while (pointString = [pointEnum nextObject]) {
+            for (NSString *pointString in value) {
                 NSPoint nsPoint = NSPointFromString(pointString);
                 Point qdPoint;
                 qdPoint.h = BDSKRound(nsPoint.x);
@@ -519,14 +515,10 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
             [note setValue:pathList forKey:SKNPDFAnnotationPointListsKey];
         }
         if (value = [note objectForKey:SKNPDFAnnotationPointListsKey]) {
-            NSEnumerator *pathEnum = [value objectEnumerator];
-            NSArray *path;
             NSMutableArray *pathList = [NSMutableArray array];
-            while (path = [pathEnum nextObject]) {
-                NSEnumerator *pointEnum = [path objectEnumerator];
-                NSString *pointString;
+            for (NSArray *path in value) {
                 NSMutableArray *points = [NSMutableArray array];
-                while (pointString = [pointEnum nextObject]) {
+                for (NSString *pointString in path) {
                     NSPoint nsPoint = NSPointFromString(pointString);
                     Point qdPoint;
                     qdPoint.h = BDSKRound(nsPoint.x);

@@ -73,14 +73,9 @@ static BOOL isSearchFileAtPath(NSString *path)
     NSString *path = [[NSBundle mainBundle] pathForResource:SERVERS_FILENAME ofType:@"plist"];
     
     NSDictionary *serverDicts = [NSDictionary dictionaryWithContentsOfFile:path];
-    NSEnumerator *typeEnum = [[NSArray arrayWithObjects:BDSKSearchGroupEntrez, BDSKSearchGroupZoom, BDSKSearchGroupISI, BDSKSearchGroupDBLP, nil] objectEnumerator];
-    NSString *type;
-    
-    while (type = [typeEnum nextObject]) {
+    for (NSString *type in [NSArray arrayWithObjects:BDSKSearchGroupEntrez, BDSKSearchGroupZoom, BDSKSearchGroupISI, BDSKSearchGroupDBLP, nil]) {
         NSArray *dicts = [serverDicts objectForKey:type];
-        NSEnumerator *dictEnum = [dicts objectEnumerator];
-        NSDictionary *dict;
-        while (dict = [dictEnum nextObject]) {
+        for (NSDictionary *dict in dicts) {
             BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithType:type dictionary:dict];
             if (info) {
                 [searchGroupServers addObject:info];

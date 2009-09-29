@@ -293,9 +293,7 @@ static NSImage *unlockedIcon = nil;
     
     [self setPublications:pubs];
     
-    NSEnumerator *macroEnum = [macros keyEnumerator];
-    NSString *macro;
-    while (macro = [macroEnum nextObject])
+    for (NSString *macro in macros)
         [[self macroResolver] setMacroDefinition:[macros objectForKey:macro] forMacro:macro];
 }
 

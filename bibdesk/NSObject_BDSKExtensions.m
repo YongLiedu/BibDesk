@@ -48,33 +48,25 @@
 
 - (void)performSelector:(SEL)selector withObjectsFromArray:(NSArray *)objects;
 {
-    NSEnumerator *objEnum = [objects objectEnumerator];
-    id object;
-    while(object = [objEnum nextObject])
+    for (id object in objects)
         [self performSelector:selector withObject:object];
 }
 
 - (void)performSelector:(SEL)selector withObjectsFromArray:(NSArray *)objects withObject:(id)anObject;
 {
-    NSEnumerator *objEnum = [objects objectEnumerator];
-    id object;
-    while(object = [objEnum nextObject])
+    for (id object in objects)
         [self performSelector:selector withObject:object withObject:anObject];
 }
 
 - (void)performSelector:(SEL)selector withObject:(id)anObject withObjectsFromArray:(NSArray *)objects;
 {
-    NSEnumerator *objEnum = [objects objectEnumerator];
-    id object;
-    while(object = [objEnum nextObject])
+    for (id object in objects)
         [self performSelector:selector withObject:anObject withObject:object];
 }
 
 - (void)performSelector:(SEL)selector withObjectsByMakingObjectsFromArray:(NSArray *)objects performSelector:(SEL)otherSelector;
 {
-    NSEnumerator *objEnum = [objects objectEnumerator];
-    id object;
-    while(object = [objEnum nextObject])
+    for (id object in objects)
         [self performSelector:selector withObject:[object performSelector:otherSelector]];
 }
 

@@ -96,10 +96,7 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
 
 + (void)_addPubDateNode:(NSXMLNode *)dateNode toDictionary:(NSMutableDictionary *)pubFields
 {
-    NSEnumerator *compEnum = [[dateNode children] objectEnumerator];
-    NSXMLNode *comp;
-    
-    while (comp = [compEnum nextObject]) {
+    for (NSXMLNode *comp in [dateNode children]) {
         
         if ([[comp name] isEqualToString:@"Year"]) {
             addStringValueOfNodeForField(comp, BDSKYearString, pubFields);
@@ -138,10 +135,7 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
      </Journal>
      */
     
-    NSEnumerator *nodeEnum = [[journalNode children] objectEnumerator];
-    NSXMLNode *node;
-    
-    while (node = [nodeEnum nextObject]) {
+    for (NSXMLNode *node in [journalNode children]) {
         
         NSString *nodeName = [node name];
         
@@ -150,10 +144,7 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
         }
         else if ([nodeName isEqualToString:@"JournalIssue"]) {
             
-            NSEnumerator *childEnum = [[node children] objectEnumerator];
-            NSXMLNode *child;
-            
-            while (child = [childEnum nextObject]) {
+            for (NSXMLNode *child in [node children]) {
                 NSString *childName = [child name];
                 if ([childName isEqualToString:@"Volume"]) addStringValueOfNodeForField(child, BDSKVolumeString, pubFields);
                 else if ([childName isEqualToString:@"Issue"]) addStringValueOfNodeForField(child, BDSKNumberString, pubFields);
@@ -184,10 +175,8 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
      */
     
     NSMutableArray *authorNames = [NSMutableArray new];
-    NSEnumerator *authorEnum = [[authorListNode children] objectEnumerator];
-    NSXMLNode *authorNode;
     
-    while (authorNode = [authorEnum nextObject]) {
+    for (NSXMLNode *authorNode in [authorListNode children]) {
         
         // this should always be true...
         if ([[authorNode name] isEqualToString:@"Author"]) {
@@ -196,10 +185,8 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
             NSString *firstName = nil;
             NSString *middleName = nil;
             NSString *suffix = nil;
-            NSEnumerator *nameEnum = [[authorNode children] objectEnumerator];
-            NSXMLNode *name;
             
-            while (name = [nameEnum nextObject]) {
+            for (NSXMLNode *name in [authorNode children]) {
                 
                 NSString *nodeName = [name name];
                 
@@ -252,15 +239,10 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
 
     NSMutableString *meshString = [NSMutableString new];
     NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
-    NSEnumerator *meshEnum = [[listNode children] objectEnumerator];
-    NSXMLNode *meshNode;
-
-    while (meshNode = [meshEnum nextObject]) {
+    
+    for (NSXMLNode *meshNode in [listNode children]) {
         if ([[meshNode name] isEqualToString:@"MeshHeading"]) {
-            NSEnumerator *headingEnum = [[meshNode children] objectEnumerator];
-            NSXMLNode *headingNode;
-            
-            while (headingNode = [headingEnum nextObject]) {
+            for (NSXMLNode *headingNode in [meshNode children]) {
                 
                 // add descriptor name and ignore qualifier name
                 if ([[headingNode name] isEqualToString:@"DescriptorName"]) {
@@ -282,10 +264,8 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
     
     NSMutableString *keywordString = [NSMutableString new];
     NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
-    NSEnumerator *keywordEnum = [[listNode children] objectEnumerator];
-    NSXMLNode *keywordNode;
     
-    while (keywordNode = [keywordEnum nextObject]) {
+    for (NSXMLNode *keywordNode in [listNode children]) {
         
         if ([[keywordNode name] isEqualToString:@"Keyword"]) {
             if ([keywordString length])
@@ -301,10 +281,8 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
 {
     NSArray *articles = [doc nodesForXPath:@"//PubmedArticle" error:outError];
     NSMutableArray *pubs = [NSMutableArray array];
-    NSEnumerator *articleEnum = [articles objectEnumerator];
-    NSXMLNode *article;
     
-    while (article = [articleEnum nextObject]) {
+    for (NSXMLNode *article in articles) {
         
         NSXMLNode *citation = [article firstNodeForXPath:@"./MedlineCitation"];        
         NSMutableDictionary *pubFields = [NSMutableDictionary new];
@@ -335,10 +313,8 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
         
         // grab the DOI if available
         NSArray *articleIDs = [article nodesForXPath:@"./PubmedData/ArticleIdList/ArticleId" error:NULL];
-        NSEnumerator *articleIDEnum = [articleIDs objectEnumerator];
-        NSXMLElement *articleID;
         
-        while (articleID = [articleIDEnum nextObject]) {
+        for (NSXMLElement *articleID in articleIDs) {
             if ([articleID kind] == NSXMLElementKind && [[[articleID attributeForName:@"IdType"] stringValue] isEqualToString:@"doi"])
                 addStringValueOfNodeForField(articleID, BDSKDoiString, pubFields);
         }

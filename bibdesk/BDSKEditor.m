@@ -427,15 +427,15 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 #pragma mark Actions
 
 - (IBAction)openLinkedFile:(id)sender{
-    NSEnumerator *urlEnum = nil;
+    NSArray *urls;
 	NSURL *fileURL = [sender representedObject];
     
     if (fileURL)
-        urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+        urls = [NSArray arrayWithObject:fileURL];
     else
-        urlEnum = [[publication valueForKeyPath:@"localFiles.URL"] objectEnumerator];
+        urls = [publication valueForKeyPath:@"localFiles.URL"];
     
-    while (fileURL = [urlEnum nextObject]) {
+    for (fileURL in urls) {
         if ([fileURL isEqual:[NSNull null]] == NO) {
             [[NSWorkspace sharedWorkspace] openLinkedFile:[fileURL path]];
         }
@@ -443,15 +443,15 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (IBAction)revealLinkedFile:(id)sender{
-    NSEnumerator *urlEnum = nil;
+    NSArray *urls;
 	NSURL *fileURL = [sender representedObject];
     
     if (fileURL)
-        urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+        urls = [NSArray arrayWithObject:fileURL];
     else
-        urlEnum = [[publication valueForKeyPath:@"remoteURLs.URL"] objectEnumerator];
+        urls = [publication valueForKeyPath:@"remoteURLs.URL"];
     
-    while (fileURL = [urlEnum nextObject]) {
+    for (fileURL in urls) {
         if ([fileURL isEqual:[NSNull null]] == NO) {
             [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:nil];
         }
@@ -459,15 +459,15 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (IBAction)openLinkedURL:(id)sender{
-    NSEnumerator *urlEnum = nil;
+    NSArray *urls;
 	NSURL *remoteURL = [sender representedObject];
     
     if (remoteURL)
-        urlEnum = [[NSArray arrayWithObject:remoteURL] objectEnumerator];
+        urls = [NSArray arrayWithObject:remoteURL];
     else
-        urlEnum = [[publication valueForKeyPath:@"remoteURLs.URL"] objectEnumerator];
+        urls = [publication valueForKeyPath:@"remoteURLs.URL"];
     
-    while (remoteURL = [urlEnum nextObject]) {
+    for (remoteURL in urls) {
         if ([remoteURL isEqual:[NSNull null]] == NO) {
 			[[NSWorkspace sharedWorkspace] openLinkedURL:remoteURL];
         }
@@ -475,15 +475,15 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (IBAction)showNotesForLinkedFile:(id)sender{
-    NSEnumerator *urlEnum = nil;
+    NSArray *urls;
 	NSURL *fileURL = [sender representedObject];
     
     if (fileURL)
-        urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+        urls = [NSArray arrayWithObject:fileURL];
     else
-        urlEnum = [[publication valueForKeyPath:@"localFiles.URL"] objectEnumerator];
+        urls = [publication valueForKeyPath:@"localFiles.URL"];
     
-    while (fileURL = [urlEnum nextObject]) {
+    for (fileURL in urls) {
         if ([fileURL isEqual:[NSNull null]] == NO) {
             BDSKNotesWindowController *notesController = [[[BDSKNotesWindowController alloc] initWithURL:fileURL] autorelease];
         
@@ -494,16 +494,16 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (IBAction)copyNotesForLinkedFile:(id)sender{
-    NSEnumerator *urlEnum = nil;
+    NSArray *urls;
 	NSURL *fileURL = [sender representedObject];
     NSMutableString *string = [NSMutableString string];
     
     if (fileURL)
-        urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+        urls = [NSArray arrayWithObject:fileURL];
     else
-        urlEnum = [[publication valueForKeyPath:@"localFiles.URL"] objectEnumerator];
+        urls = [publication valueForKeyPath:@"localFiles.URL"];
     
-    while (fileURL = [urlEnum nextObject]) {
+    for (fileURL in urls) {
         if ([fileURL isEqual:[NSNull null]] == NO) {
             NSString *notes = [fileURL textSkimNotes];
             
@@ -947,11 +947,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     if (returnCode == NSAlertAlternateReturn){
         return;
     }else if(returnCode == NSAlertOtherReturn){
-        NSEnumerator *fileEnum = [files objectEnumerator];
-        BDSKLinkedFile *file;
         NSMutableArray *tmpFiles = [NSMutableArray array];
         
-        while(file = [fileEnum nextObject]){
+        for (BDSKLinkedFile *file in files) {
             if([publication canSetURLForLinkedFile:file])
                 [tmpFiles addObject:file];
             else if([file URL])
@@ -984,10 +982,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         anIndex = [indexNumber unsignedIntValue];
         canSet = [publication canSetURLForLinkedFile:[publication objectInFilesAtIndex:anIndex]];
     } else {
-        NSEnumerator *fileEnum = [[publication localFiles] objectEnumerator];
-        BDSKLinkedFile *file;
-        
-        while(file = [fileEnum nextObject]){
+        for (BDSKLinkedFile *file in [publication localFiles]){
             if([publication canSetURLForLinkedFile:file] == NO){
                 canSet = NO;
                 break;
@@ -1333,7 +1328,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     NSData *aliasData;
     NSString *filePath;
     BDAlias *alias;
-    NSEnumerator *e;
     
     if (LSSharedFileListCreate != WEAK_NULL) {
         
@@ -1365,9 +1359,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         NSArray *globalItems = [(NSDictionary *)globalRecentDictionary objectForKey:@"CustomListItems"];
         [(id)globalRecentDictionary autorelease];
         
-        e = [globalItems objectEnumerator];
-        
-        while (itemDict = [e nextObject]) {
+        for (itemDict in globalItems) {
             aliasData = [itemDict objectForKey:@"Alias"];
             alias = [[BDAlias alloc] initWithData:aliasData];
             filePath = [alias fullPathNoUI];
@@ -1394,9 +1386,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     CFArrayRef tmpArray = CFPreferencesCopyAppValue(CFSTR("NSRecentDocumentRecords"), (CFStringRef)appIdentifier);
     
     if (tmpArray) {
-        e = [(NSArray *)tmpArray objectEnumerator];
-        
-        while (itemDict = [e nextObject]) {
+        for (itemDict in (NSArray *)tmpArray) {
             aliasData = [[itemDict objectForKey:@"_NSLocator"] objectForKey:@"_NSAlias"];
             alias = [[BDAlias alloc] initWithData:aliasData];
             filePath = [alias fullPathNoUI];
@@ -1414,8 +1404,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [menu removeAllItems];
     
     // now add all of the items from Preview, which are most likely what we want
-    e = [previewRecentPaths objectEnumerator];
-    while (filePath = [e nextObject]) {
+    for (filePath in previewRecentPaths) {
         if([[NSFileManager defaultManager] fileExistsAtPath:filePath]){
             fileName = [filePath lastPathComponent];            
             item = [menu addItemWithTitle:fileName
@@ -1431,8 +1420,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         [menu addItem:[NSMenuItem separatorItem]];
 
     // now add all of the items that /were not/ in Preview's recent items path; this works for files opened from Preview's open panel, as well as from the Finder
-    e = [globalRecentPaths objectEnumerator];
-    while(filePath = [e nextObject]){
+    for (filePath in globalRecentPaths) {
         
         if(![previewRecentPaths containsObject:filePath] && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
             fileName = [filePath lastPathComponent];            
@@ -1455,12 +1443,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
     
     NSArray *paths = [[BDSKPersistentSearch sharedSearch] resultsForQuery:recentDownloadsQuery attribute:(NSString *)kMDItemPath];
-    NSEnumerator *e = [paths objectEnumerator];
-    
-    NSString *filePath;
     NSMenuItem *item;
     
-    while(filePath = [e nextObject]){            
+    for (NSString *filePath in paths) {            
         item = [menu addItemWithTitle:[filePath lastPathComponent]
                                action:@selector(addLinkedFileFromMenuItem:)
                         keyEquivalent:@""];
@@ -1663,9 +1648,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKAskToTrashFilesKey];
     NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
     if (returnCode == NSAlertAlternateReturn) {
-        NSEnumerator *urlEnum = [fileURLs objectEnumerator];
-        NSURL *url;
-        while (url = [urlEnum nextObject]) {
+        for (NSURL *url in fileURLs) {
             NSString *path = [url path];
             NSString *folderPath = [path stringByDeletingLastPathComponent];
             NSString *fileName = [path lastPathComponent];
@@ -2250,10 +2233,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         }
     }
 	else if([changeKey isIntegerField]){
-		
-		NSEnumerator *cellE = [[matrix cells] objectEnumerator];
-		NSButtonCell *entry = nil;
-		while(entry = [cellE nextObject]){
+		for (NSButtonCell *entry in [matrix cells]){
 			if([[entry representedObject] isEqualToString:changeKey]){
 				[entry setIntValue:[publication intValueOfField:changeKey]];
 				[matrix setNeedsDisplay:YES];
@@ -2320,10 +2300,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	NSString *crossref = [publication valueOfField:BDSKCrossrefString inherit:NO];
 	
 	if ([NSString isEmptyString:crossref] == NO) {
-        NSEnumerator *pubEnum = [[[notification userInfo] objectForKey:@"pubs"] objectEnumerator];
-        id pub;
-        
-        while (pub = [pubEnum nextObject]) {
+        for (id pub in [[notification userInfo] objectForKey:@"pubs"]) {
             if ([crossref caseInsensitiveCompare:[pub valueForKey:@"citeKey"]] == NSOrderedSame) {
                 // changes in the parent cannot change the field names, as custom fields are never inherited
                 [self reloadTable];
@@ -2353,9 +2330,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 - (void)macrosDidChange:(NSNotification *)notification{
 	id changedOwner = [[notification object] owner];
 	if(changedOwner == nil || changedOwner == [publication owner]) {
-        NSEnumerator *fieldEnum = [fields objectEnumerator];
-        NSString *field;
-        while (field = [fieldEnum nextObject]) {
+        for (NSString *field in fields) {
             if ([[publication valueOfField:field] isComplex] && [self commitEditing]) {
                 [self reloadTable];
                 break;
@@ -2502,10 +2477,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 		return nil;
 	}
 	
-	NSEnumerator *fieldEnum = [requiredFields objectEnumerator];
-	NSString *field;
-	
-	while (field = [fieldEnum nextObject]) {
+	for (NSString *field in requiredFields) {
 		if ([field isEqualToString:BDSKCiteKeyString]) {
 			if ([publication hasEmptyOrDefaultCiteKey])
 				[missingFields addObject:field];
@@ -2647,8 +2619,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	} else {
 	
         // we aren't linking, so here we decide which fields to overwrite, and just copy values over
-        NSEnumerator *newKeyE = [[tempBI allFieldNames] objectEnumerator];
-        NSString *key = nil;
         NSString *oldValue = nil;
         NSString *newValue = nil;
         BOOL shouldOverwrite = (modifierFlags & NSAlternateKeyMask) != 0;
@@ -2656,7 +2626,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         
         [publication setPubType:[tempBI pubType]]; // do we want this always?
         
-        while(key = [newKeyE nextObject]){
+        for (NSString *key in [tempBI allFieldNames]) {
             newValue = [tempBI valueOfField:key inherit:NO];
             if([newValue isEqualToString:@""])
                 continue;
@@ -3166,7 +3136,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     // build the new set of fields
     NSMutableArray *currentFields = [NSMutableArray array];
     NSMutableArray *allFields = [[NSMutableArray alloc] init];
-	NSEnumerator *e;
     NSString *field;
     BDSKTypeManager *tm = [BDSKTypeManager sharedManager];
     NSString *type = [publication pubType];
@@ -3181,8 +3150,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     [allFields addObjectsFromArray:[tm optionalFieldsForType:type]];
     [allFields addObjectsFromArray:[tm userDefaultFieldsForType:type]];
 	
-    e = [allFields objectEnumerator];
-    while (field = [e nextObject]) {
+    for (field in allFields) {
         if ([ignoredKeys containsObject:field] == NO) {
             [ignoredKeys addObject:field];
             [currentFields addObject:field];
@@ -3194,8 +3162,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     [allFields addObjectsFromArray:[addedFields allObjects]];
     [allFields sortUsingSelector:@selector(caseInsensitiveCompare:)];
     
-    e = [allFields objectEnumerator];
-    while (field = [e nextObject]) {
+    for (field in allFields) {
         if ([ignoredKeys containsObject:field] == NO) {
             [ignoredKeys addObject:field];
             if ([addedFields containsObject:field] || NO == [[publication valueOfField:field inherit:NO] isEqualAsComplexString:@""])
@@ -3325,26 +3292,22 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSArray *triStateFields = [sud stringArrayForKey:BDSKTriStateFieldsKey];
     NSInteger numRows, numCols, numEntries = [ratingFields count] + [booleanFields count] + [triStateFields count], i;
     NSPoint origin = [matrix frame].origin;
-	NSEnumerator *e;
     NSString *field;
     NSMutableArray *cells = [NSMutableArray arrayWithCapacity:numEntries];
     NSSize size, cellSize = NSZeroSize;
 	NSString *editedTitle = nil;
 	
-    e = [ratingFields objectEnumerator];
-    while (field = [e nextObject]) {
+    for (field in ratingFields) {
 		size = [self addMatrixButtonCell:ratingButtonCell toArray:cells forField:field];
         cellSize = NSMakeSize(BDSKMax(size.width, cellSize.width), BDSKMax(size.height, cellSize.height));
     }
 	
-    e = [booleanFields objectEnumerator];
-    while (field = [e nextObject]) {
+    for (field in booleanFields) {
 		size = [self addMatrixButtonCell:booleanButtonCell toArray:cells forField:field];
         cellSize = NSMakeSize(BDSKMax(size.width, cellSize.width), BDSKMax(size.height, cellSize.height));
     }
 	
-    e = [triStateFields objectEnumerator];
-    while (field = [e nextObject]) {
+    for (field in triStateFields) {
 		size = [self addMatrixButtonCell:triStateButtonCell toArray:cells forField:field];
         cellSize = NSMakeSize(BDSKMax(size.width, cellSize.width), BDSKMax(size.height, cellSize.height));
     }
@@ -3497,9 +3460,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (void)breakTextStorageConnections {
     
     // This is a fix for bug #1483613 (and others).  We set some of the BibItem's fields to -[[NSTextView textStorage] mutableString] for efficiency in tracking changes for live editing updates in the main window preview.  However, this causes a retain cycle, as the text storage retains its text view; any font changes to the editor text view will cause the retained textview to message its delegate (BDSKEditor) which is garbage in -[NSTextView _addToTypingAttributes].
-    NSEnumerator *fieldE = [[[BDSKTypeManager sharedManager] noteFieldsSet] objectEnumerator];
-    NSString *field = nil;
-    while(field = [fieldE nextObject])
+    for (NSString *field in [[BDSKTypeManager sharedManager] noteFieldsSet])
         [publication replaceValueOfFieldByCopy:field];
 }
 

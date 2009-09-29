@@ -120,6 +120,10 @@
     return [groups objectAtIndex:idx];
 }
 
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id *)stackbuf count:(NSUInteger)len {
+    return [groups countByEnumeratingWithState:state objects:stackbuf count:len];
+}
+
 #pragma mark Subarray Accessors
 
 - (BDSKLibraryParentGroup *)libraryParent { return [groups objectAtIndex:LIBRARY_PARENT_INDEX]; }
@@ -173,10 +177,8 @@
 }
 
 - (NSArray *)allChildren{
-    NSEnumerator *groupEnum = [groups objectEnumerator];
-    BDSKParentGroup *group;
     NSMutableArray *children = [NSMutableArray array];
-    while (group = [groupEnum nextObject])
+    for (BDSKParentGroup *group in groups)
         [children addObjectsFromArray:[group children]];
     return children;
 }
@@ -184,9 +186,7 @@
 #pragma mark Containment
 
 - (BOOL)containsGroup:(id)group {
-    NSEnumerator *parentEnum = [groups objectEnumerator];
-    BDSKParentGroup *parent;
-    while (parent = [parentEnum nextObject]) {
+    for (BDSKParentGroup *parent in groups) {
         if ([parent containsChild:group])
             return YES;
     }
@@ -335,11 +335,9 @@
         groupClass = [BDSKScriptGroup class];
     
     if (groupClass) {
-        NSEnumerator *groupEnum = [plist objectEnumerator];
-        NSDictionary *groupDict;
         id group = nil;
         
-        while (groupDict = [groupEnum nextObject]) {
+        for (NSDictionary *groupDict in plist) {
             @try {
                 group = [[groupClass alloc] initWithDictionary:groupDict];
                 [(BDSKGroup *)group setDocument:[self document]];

@@ -111,10 +111,9 @@
         return nil;
     } else {
         if([monthString isComplex]) {
-            NSArray *nodes = [monthString nodes];
-            NSEnumerator *nodeEnum = [nodes objectEnumerator];
             BDSKStringNode *node = nil;
-            while (node = [nodeEnum nextObject]) {
+            NSArray *nodes = [monthString nodes];
+            for (node in nodes) {
                 if ([node type] == BDSKStringNodeMacro) {
                     monthString = [node value];
                     break;

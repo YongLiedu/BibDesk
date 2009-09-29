@@ -153,12 +153,9 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
     NSString *name = [document displayName];
     [self setDocumentDisplayName:name ?: @"?"];
     
-    NSEnumerator *mEnum = [[errorController managers] objectEnumerator];
-    BDSKErrorManager *manager;
-    
     uniqueNumber = 0;
     
-    while(manager = [mEnum nextObject]){
+    for (BDSKErrorManager *manager in [errorController managers]){
         if(manager != self && [[manager documentDisplayName] isEqualToString:documentDisplayName])
             uniqueNumber = MAX(uniqueNumber, [manager uniqueNumber] + 1);
     }

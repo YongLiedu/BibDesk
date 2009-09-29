@@ -277,9 +277,7 @@ static char BDSKConditionControllerObservationContext;
     [views makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [views release];
     
-    NSEnumerator *viewEnum = [controls objectEnumerator];
-    NSView *aView;
-    while (aView = [viewEnum nextObject]) {
+    for (NSView *aView in controls) {
         aView = [aView superview];
         rect.size = [aView frame].size;
         [aView setFrameOrigin:rect.origin];

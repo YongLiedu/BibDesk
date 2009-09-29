@@ -82,11 +82,9 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
 - (NSArray *)URLsFromPathsAndDirectories:(NSArray *)filesAndDirectories
 {
     NSMutableArray *URLs = [NSMutableArray arrayWithCapacity:[filesAndDirectories count]];
-    NSEnumerator *e = [filesAndDirectories objectEnumerator];
-    NSString *path;
     BOOL isDir;
     NSFileManager *fm = [NSFileManager defaultManager];
-    while ((path = [e nextObject])) {
+    for (NSString *path in filesAndDirectories) {
         // presumably the file exists, since it arrived here because of drag-and-drop or the open panel, but we handle directories specially
         if (([fm fileExistsAtPath:path isDirectory:&isDir])) {
             // if not a directory, or it's a package, add it immediately
@@ -138,10 +136,8 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
 - (void)handleDocumentAddRemove:(NSNotification *)note
 {
     NSArray *docs = [[NSDocumentController sharedDocumentController] documents];
-    NSEnumerator *e = [docs objectEnumerator];
     NSMutableArray *array = [NSMutableArray array];
-    NSDocument *doc;
-    while (doc = [e nextObject]) {
+    for (NSDocument *doc in docs) {
         NSString *docType = [[[NSDocumentController sharedDocumentController] fileExtensionsFromType:[doc fileType]] lastObject] ?: @"";
         NSDictionary *dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:[doc displayName], BDSKTextWithIconCellStringKey, [[NSWorkspace sharedWorkspace] iconForFileType:docType], BDSKTextWithIconCellImageKey, [NSNumber numberWithBool:NO], @"useDocument", doc, @"document", nil];
         [array addObject:dict];

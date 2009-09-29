@@ -206,11 +206,9 @@
 }
 
 - (NSDictionary *)currentTableColumnWidthsAndIdentifiers {
-    NSEnumerator *tcE = [[tableView tableColumns] objectEnumerator];
-    NSTableColumn *tc = nil;
     NSMutableDictionary *columns = [NSMutableDictionary dictionaryWithCapacity:5];
     
-    while(tc = [tcE nextObject]){
+    for (NSTableColumn *tc in [tableView tableColumns]) {
         [columns setObject:[NSNumber numberWithFloat:[tc width]]
                     forKey:[tc identifier]];
     }
@@ -257,9 +255,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 
 static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     NSMenu *submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
-    NSEnumerator *urlEnum = [urls objectEnumerator];
-    NSURL *url;
-    while (url = [urlEnum nextObject]) {
+    for (NSURL *url in urls) {
         NSString *title = [url isFileURL] ? [[NSFileManager defaultManager] displayNameAtPath:[url path]] : [url absoluteString];
         NSMenuItem *item = [submenu addItemWithTitle:title action:[anItem action] keyEquivalent:@""];
         [item setTarget:[anItem target]];
@@ -492,9 +488,8 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                     
                     while(row != NSNotFound){
                         pub = [shownPublications objectAtIndex:row];
-                        fileEnum = [[pub localFiles] objectEnumerator];
                         
-                        while(file = [fileEnum nextObject]){
+                        for (file in [pub localFiles]) {
                             if (path = [file path]) {
                                 [filePaths addObject:path];
                                 NSError *xerror = nil;
@@ -526,9 +521,8 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                     while(row != NSNotFound){
                         pub = [shownPublications objectAtIndex:row];
                         fileName = [[pub displayTitle] stringByAppendingPathExtension:@"webloc"];
-                        fileEnum = [[pub remoteURLs] objectEnumerator];
                         
-                        while(file = [fileEnum nextObject]){
+                        for (file in [pub remoteURLs]) {
                             if (url = [file URL]) {
                                 if (theURL == nil)
                                     theURL = url;
@@ -890,15 +884,12 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 		if (row != -1) {
             BibItem *pub = [shownPublications objectAtIndex:row];
             NSMutableArray *urlsToAdd = [NSMutableArray array];
-            NSURL *theURL = nil;
             
             if ([type isEqualToString:NSFilenamesPboardType]) {
                 NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
                 if ([fileNames count] == 0)
                     return NO;
-                NSEnumerator *fileEnum = [fileNames objectEnumerator];
-                NSString *aPath;
-                while (aPath = [fileEnum nextObject])
+                for (NSString *aPath in fileNames)
                     [urlsToAdd addObject:[NSURL fileURLWithPath:[aPath stringByExpandingTildeInPath]]];
             } else if([type isEqualToString:BDSKWeblocFilePboardType]) {
                 [urlsToAdd addObject:[NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]]];
@@ -913,8 +904,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             if([urlsToAdd count] == 0)
                 return NO;
             
-            NSEnumerator *urlEnum = [urlsToAdd objectEnumerator];
-            while (theURL = [urlEnum nextObject])
+            for (NSURL *theURL in urlsToAdd)
                 [pub addFileForURL:theURL autoFile:YES runScriptHook:YES];
             
             [self selectPublication:pub];
@@ -960,8 +950,6 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         // this ivar stores the field name (e.g. Url, L2)
         NSString *fieldName = [self promiseDragColumnIdentifier];
         BOOL isRemoteURLField = [fieldName isRemoteURLField];
-        NSEnumerator *fileEnum;
-        BDSKLinkedFile *file;
         NSString *fileName;
         NSString *basePath = [dropDestination path];
         NSInteger i = 0;
@@ -977,9 +965,8 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                 [fullPathDict setValue:url forKey:fullPath];
                 [fileNames addObject:fileName];
             } else{
-                fileEnum = [[theBib remoteURLs] objectEnumerator];
                 i = 0;
-                while (file = [fileEnum nextObject]) {
+                for (BDSKLinkedFile *file in [theBib remoteURLs]) {
                     if (url = [file URL]) {
                         fileName = [theBib displayTitle];
                         if (i > 0)
@@ -1336,9 +1323,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     while (groupIndex != NSNotFound) {
         BDSKGroup *group = [groupOutlineView itemAtRow:groupIndex];
         if ([group isExternal] == NO) {
-            NSEnumerator *pubEnum = [selectedPubs objectEnumerator];
-            BibItem *pub;
-            while(pub = [pubEnum nextObject]){
+            for (BibItem *pub in selectedPubs) {
                 if ([group containsItem:pub]) {
                     [indexSet addIndex:groupIndex];
                     break;
@@ -1395,10 +1380,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             docState.dragFromExternalGroups = YES;
         } else {
             NSMutableArray *pubsInGroup = [NSMutableArray arrayWithCapacity:[publications count]];
-            NSEnumerator *pubEnum = [publications objectEnumerator];
-            BibItem *pub;
-            
-            while (pub = [pubEnum nextObject]) {
+            for (BibItem *pub in publications) {
                 if ([group containsItem:pub]) 
                     [pubsInGroup addObject:pub];
             }
@@ -1552,18 +1534,14 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         } else if ([type isEqualToString:NSURLPboardType]) {
             urls = [NSArray arrayWithObjects:[NSURL URLFromPasteboard:pboard], nil];
         } else if ([type isEqualToString:NSFilenamesPboardType]) {
-            NSEnumerator *fileEnum = [[pboard propertyListForType:NSFilenamesPboardType] objectEnumerator];
-            NSString *file;
             urls = [NSMutableArray array];
-            while (file = [fileEnum nextObject])
+            for (NSString *file in [pboard propertyListForType:NSFilenamesPboardType])
                 [(NSMutableArray *)urls addObject:[NSURL fileURLWithPath:file]];
         }
         
-        NSEnumerator *urlEnum = [urls objectEnumerator];
-        NSURL *url;
         BDSKGroup *group = nil;
         
-        while (url = [urlEnum nextObject]) {
+        for (NSURL *url in urls) {
             if ([url isFileURL] && [[[url path] pathExtension] isEqualToString:@"bdsksearch"]) {
                 NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:url];
                 Class groupClass = NSClassFromString([dictionary objectForKey:@"class"]);
@@ -1653,10 +1631,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 
 - (NSArray *)outlineView:(NSOutlineView *)outlineView namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forDraggedItems:(NSArray *)items {
     NSMutableArray *droppedFiles = [NSMutableArray array];
-    NSEnumerator *itemEnum = [items objectEnumerator];
-    BDSKGroup *group;
-    
-    while (group = [itemEnum nextObject]) {
+    for (BDSKGroup *group in items) {
         NSMutableDictionary *plist = [[[group dictionaryValue] mutableCopy] autorelease];
 
         // we probably don't want to share this info with anyone else
@@ -1906,9 +1881,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKAskToTrashFilesKey];
     NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
     if (returnCode == NSAlertAlternateReturn) {
-        NSEnumerator *urlEnum = [fileURLs objectEnumerator];
-        NSURL *url;
-        while (url = [urlEnum nextObject]) {
+        for (NSURL *url in fileURLs) {
             NSString *path = [url path];
             NSString *folderPath = [path stringByDeletingLastPathComponent];
             NSString *fileName = [path lastPathComponent];

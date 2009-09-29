@@ -137,13 +137,12 @@ static BDSKConverter *sharedConverter = nil;
 }
 
 - (NSString *)copyComplexString:(NSString *)cs byCopyingStringNodesUsingSelector:(SEL)copySelector {
-    NSEnumerator *nodeEnum = [[cs nodes] objectEnumerator];
-    BDSKStringNode *node, *newNode;
+    BDSKStringNode *newNode;
     NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:[[cs nodes] count]];
     NSString *string;
     
-    while(node = [nodeEnum nextObject]){
-        if([node type] == BDSKStringNodeString){
+    for (BDSKStringNode *node in [cs nodes]) {
+        if ([node type] == BDSKStringNodeString) {
             string = [self performSelector:copySelector withObject:[node value]];
             newNode = [[BDSKStringNode alloc] initWithQuotedString:string];
             [string release];

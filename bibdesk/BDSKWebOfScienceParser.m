@@ -175,9 +175,6 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
     
     NSArray *sourceLines = [itemString sourceLinesBySplittingString];
     
-    NSEnumerator *sourceLineE = [sourceLines objectEnumerator];
-    NSString *sourceLine = nil;
-    
     NSString *tag = nil;
     NSString *value = nil;
     NSMutableString *mutableValue = [NSMutableString string];
@@ -185,7 +182,7 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
     NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
     NSString *type = nil;
     
-    while(sourceLine = [sourceLineE nextObject]){
+    for (NSString *sourceLine in sourceLines) {
         
         BDSKPRECONDITION([sourceLine hasPrefix:@"FN"] == NO && [sourceLine hasPrefix:@"VR"] == NO && [sourceLine hasPrefix:@"EF"] == NO);
         

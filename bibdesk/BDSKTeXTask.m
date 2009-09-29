@@ -456,15 +456,11 @@ static double runLoopTimeout = 30;
 }
 
 - (void)writeHelperFiles{
-    
-    NSEnumerator *pathEnumerator = [[self helperFilePaths] objectEnumerator];
-    NSString *srcPath;
-    
     NSURL *dstURL = [NSURL fileURLWithPath:[texPath workingDirectory]];
     NSError *error;
 
-    while(srcPath = [pathEnumerator nextObject]){
-        if(![[NSFileManager defaultManager] copyObjectAtURL:[NSURL fileURLWithPath:srcPath] toDirectoryAtURL:dstURL error:&error])
+    for (NSString *srcPath in [self helperFilePaths]) {
+        if (![[NSFileManager defaultManager] copyObjectAtURL:[NSURL fileURLWithPath:srcPath] toDirectoryAtURL:dstURL error:&error])
             NSLog(@"unable to copy helper file %@ to %@; error %@", srcPath, [dstURL path], [error localizedDescription]);
     }
 }
@@ -543,14 +539,11 @@ static double runLoopTimeout = 30;
     // use FSDeleteObject for thread safety
     const FSRef fileRef;
     NSArray *filesToRemove = [[NSArray alloc] initWithObjects:[texPath blgFilePath], [texPath logFilePath], [texPath bblFilePath], [texPath auxFilePath], [texPath pdfFilePath], [texPath rtfFilePath], nil];
-    
-    NSEnumerator *e = [filesToRemove objectEnumerator];
-    NSString *path;
     CFURLRef fileURL;
     
-    while(path = [e nextObject]){
+    for (NSString *path in filesToRemove) {
         fileURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, (CFStringRef)path, kCFURLPOSIXPathStyle, FALSE);
-        if(fileURL){
+        if (fileURL) {
             if(CFURLGetFSRef(fileURL, (struct FSRef *)&fileRef))
                 FSDeleteObject(&fileRef);
             CFRelease(fileURL);

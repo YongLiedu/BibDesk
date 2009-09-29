@@ -87,11 +87,9 @@
     if ([self respondsToSelector:@selector(publications)]) {
         return [(id<BDSKOwner>)self publications];
     } else {
-        NSEnumerator *pubEnum = [[document publications] objectEnumerator];
-        BibItem *pub;
         NSMutableArray *scriptingPublications = [NSMutableArray array];
         
-        while (pub = [pubEnum nextObject]) {
+        for (BibItem *pub in [document publications]) {
             if ([self containsItem:pub])
                 [scriptingPublications addObject:pub];
         }
@@ -514,15 +512,14 @@
     }
     
     BOOL isValid = YES;
-    NSEnumerator *keyEnum = [info keyEnumerator];
-    NSString *key;
     id value, validatedValue;
     
     if ([NSString isEmptyString:[serverInfo name]] || [NSString isEmptyString:[serverInfo database]])
         isValid = NO;
     else if ([serverInfo isZoom] && ([NSString isEmptyString:[serverInfo host]] || [[serverInfo port] intValue] == 0))
         isValid = NO;
-    while (isValid && (key = [keyEnum nextObject])) {
+    for (NSString *key in info) {
+        if (isValid == NO) break;
         value = validatedValue = [info valueForKey:key];
         if ((isValid = [serverInfo validateValue:&validatedValue forKey:key error:NULL]) && 
             [validatedValue isEqual:value] == NO)

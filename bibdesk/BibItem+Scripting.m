@@ -82,12 +82,10 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 
 - (NSArray *)bibFields
 {
-	NSEnumerator *fEnum = [pubFields keyEnumerator];
-	NSString *name = nil;
 	BDSKField *field = nil;
 	NSMutableArray *bibFields = [NSMutableArray arrayWithCapacity:5];
 	
-	while (name = [fEnum nextObject]) {
+	for (NSString *name in pubFields) {
 		field = [[BDSKField alloc] initWithName:[name fieldName] bibItem:self];
 		[bibFields addObject:field];
 		[field release];
@@ -103,13 +101,10 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
     BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
-	NSEnumerator *authEnum = [[self pubAuthors] objectEnumerator];
-	BibAuthor *auth;
 	
-	while (auth = [authEnum nextObject]) {
-		if ([auth isEqual:newAuth]) {
+    for (BibAuthor *auth in [self pubAuthors]) {
+		if ([auth isEqual:newAuth])
 			return auth;
-		}
 	}
 	return nil;
 }
@@ -122,13 +117,10 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
     BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
-	NSEnumerator *authEnum = [[self pubEditors] objectEnumerator];
-	BibAuthor *auth;
 	
-	while (auth = [authEnum nextObject]) {
-		if ([auth isEqual:newAuth]) {
+    for (BibAuthor *auth in [self pubEditors]) {
+		if ([auth isEqual:newAuth])
 			return auth;
-		}
 	}
 	return nil;
 }

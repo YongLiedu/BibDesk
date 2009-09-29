@@ -286,13 +286,11 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     
     NSArray *bundleIDs = (NSArray *)LSCopyAllRoleHandlersForContentType((CFStringRef)theUTI, kLSRolesEditor | kLSRolesViewer);
     
-    NSEnumerator *idEnum = [bundleIDs objectEnumerator];
-    NSString *bundleID;
     NSMutableSet *set = [[NSMutableSet alloc] init];
     NSMutableArray *applications = [NSMutableArray array];
     NSFileManager *fm = [NSFileManager defaultManager];
     
-    while(bundleID = [idEnum nextObject]){
+    for (NSString *bundleID in bundleIDs) {
         if ([set containsObject:bundleID]) continue;
         NSString *name = [[fm displayNameAtPath:[self absolutePathForAppBundleWithIdentifier:bundleID]] stringByDeletingPathExtension];
         if (name == nil) continue;

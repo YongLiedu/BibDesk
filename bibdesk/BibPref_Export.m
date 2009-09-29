@@ -517,8 +517,7 @@
                 return YES;
             }
         } else if ([item isLeaf] == NO && idx != NSOutlineViewDropOnItemIndex && idx > 0) {
-            NSEnumerator *fileEnum = [fileNames objectEnumerator];
-            while (fileName = [fileEnum nextObject]) {
+            for (fileName in fileNames) {
                 newNode = [[[BDSKTemplate alloc] init] autorelease];
                 [item insertChild:newNode atIndex:idx++];
                 [newNode setValue:[NSURL fileURLWithPath:fileName] forKey:BDSKTemplateFileURLString];

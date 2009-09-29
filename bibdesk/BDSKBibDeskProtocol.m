@@ -122,9 +122,7 @@
 	NSMutableArray * subscriptionFeatures = [NSMutableArray array];
 	NSMutableArray * generalFeatures = [NSMutableArray array];
 	
-	NSEnumerator * myEnum = [parserFeatures objectEnumerator];
-	NSDictionary * parserInfo; 
-	while ( parserInfo = [myEnum nextObject] ) {
+	for (NSDictionary *parserInfo in parserFeatures) {
 		NSUInteger parserFlags = [[parserInfo objectForKey:FLAGS_KEY] unsignedIntValue];
 		if ( parserFlags & BDSKParserFeatureAllPagesMask ) {
 			// it's a 'general' parser that's not limited to particular sites
@@ -158,11 +156,9 @@
  Output: HTML markup for a list of links to the sites described in the dictionaries with list items separated by commas and ending with a full stop. If available, a description of the site is inserted in the anchor tag's title attribute.
 */
 - (NSString *) markupForSiteArray: (NSArray *) siteArray {
-	NSEnumerator * myEnum = [siteArray objectEnumerator];
-	NSDictionary * siteInfo;
 	NSXMLElement * ulElement = [NSXMLElement elementWithName:@"ul"];
 	
-	while (siteInfo = [myEnum nextObject]) {
+	for (NSDictionary *siteInfo in siteArray) {
 		NSXMLElement * aElement = [NSXMLElement elementWithName:@"a" stringValue:[siteInfo objectForKey:NAME_KEY]];
 		NSString * addressString = [siteInfo objectForKey:ADDRESS_KEY];
 		if (addressString) {

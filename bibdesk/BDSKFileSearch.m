@@ -223,10 +223,8 @@
             NSURL *theURL = (NSURL *)SKDocumentCopyURL(skDocument);
             NSSet *identifierURLs = [searchIndex identifierURLsForURL:theURL];
             NSString *title = nil;
-            NSEnumerator *idURLEnum = [identifierURLs objectEnumerator];
-            NSURL *idURL;
             
-            while (idURL = [idURLEnum nextObject]) {
+            for (NSURL *idURL in identifierURLs) {
                 title = [[self delegate] search:self titleForIdentifierURL:idURL];
                 searchResult = [[BDSKFileSearchResult alloc] initWithURL:theURL identifierURL:idURL title:title score:score];            
                 [searchResults addObject:searchResult];            
@@ -244,10 +242,7 @@
 // we need to normalize each batch of results returned from SKSearchFindMatches separately
 - (void)normalizeScoresWithMaximumValue:(double)maxValue;
 {
-    NSEnumerator *resultEnumerator = [searchResults objectEnumerator];
-    BDSKFileSearchResult *result;
-    
-    while (result = [resultEnumerator nextObject]) {
+    for (BDSKFileSearchResult *result in searchResults) {
         double score = [result score];
         double normalizedScore = score / maxValue * 5;
         [result setScore:normalizedScore];

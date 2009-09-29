@@ -165,13 +165,10 @@
 	BibItem *item1 = [testArray objectAtIndex:0];
 
     NSString *firstType = [item1 pubType];
-    NSEnumerator *typeE = [[[BDSKTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString] objectEnumerator];
-    NSString *aType = nil;
     NSString *beforeString = [item1 bibTeXString];
 	 
-    while(aType = [typeE nextObject]){
+    for (NSString *aType in [[BDSKTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString])
         [item1 setPubType:aType];
-    }
     [item1 setPubType:firstType];
     STAssertEqualObjects(beforeString, [item1 bibTeXString],nil);
 }

@@ -118,13 +118,11 @@
     NSDivideRect([self bounds], &ignored, &textRect, LEFT_MARGIN + textOffset, NSMinXEdge);
     NSDivideRect(textRect, &ignored, &textRect, rightMargin, NSMaxXEdge);
 	
-	NSEnumerator *dictEnum = [icons objectEnumerator];
-	NSDictionary *dict;
 	NSImage *icon;
 	NSRect iconRect;    
 	NSSize size;
 	
-	while (dict = [dictEnum nextObject]) {
+	for (NSDictionary *dict in icons) {
 		icon = [dict objectForKey:@"icon"];
         size = [self cellSizeForIcon:icon];
         NSDivideRect(textRect, &iconRect, &textRect, size.width, NSMaxXEdge);
@@ -182,8 +180,6 @@
 	NSView *contentView = [window contentView];
 	CGFloat shiftHeight = NSHeight([self frame]) + offset;
 	BOOL autoresizes = [contentView autoresizesSubviews];
-	NSEnumerator *viewEnum = [[contentView subviews] objectEnumerator];
-	NSView *view;
 	NSRect viewFrame;
 	
 	BDSKASSERT(contentView != nil);
@@ -192,7 +188,7 @@
 		shiftHeight = -shiftHeight;
 	
 	if ([contentView isFlipped] == NO) {
-		while (view = [viewEnum nextObject]) {
+		for (NSView *view in [contentView subviews]) {
 			viewFrame = [view frame];
 			viewFrame.origin.y += shiftHeight;
 			[view setFrame:viewFrame];
@@ -277,10 +273,7 @@
 
 - (NSArray *)iconIdentifiers {
 	NSMutableArray *IDs = [NSMutableArray arrayWithCapacity:[icons count]];
-	NSEnumerator *dictEnum = [icons objectEnumerator];
-	NSDictionary *dict;
-	
-	while (dict = [dictEnum nextObject]) {
+	for (NSDictionary *dict in icons) {
 		[IDs addObject:[dict objectForKey:@"identifier"]];
 	}
 	return IDs;
@@ -315,10 +308,7 @@
 	if ([delegate respondsToSelector:@selector(statusBar:toolTipForIdentifier:)])
 		return [delegate statusBar:self toolTipForIdentifier:(NSString *)userData];
 	
-	NSEnumerator *dictEnum = [icons objectEnumerator];
-	NSDictionary *dict;
-	
-	while (dict = [dictEnum nextObject]) {
+	for (NSDictionary *dict in icons) {
 		if ([[dict objectForKey:@"identifier"] isEqualToString:(NSString *)userData]) {
 			return [dict objectForKey:@"toolTip"];
 		}
@@ -335,14 +325,12 @@
 	
     NSDivideRect([self bounds], &ignored, &rect, rightMargin, NSMaxXEdge);
     
-	NSEnumerator *dictEnum = [icons objectEnumerator];
-	NSDictionary *dict;
 	NSRect iconRect;
     NSSize size;
 	
 	[self removeAllToolTips];
 	
-	while (dict = [dictEnum nextObject]) {
+	for (NSDictionary *dict in icons) {
         size = [self cellSizeForIcon:[dict objectForKey:@"icon"]];
         NSDivideRect(rect, &iconRect, &rect, size.width, NSMaxXEdge);
         NSDivideRect(rect, &ignored, &rect, MARGIN_BETWEEN_ITEMS, NSMaxXEdge);

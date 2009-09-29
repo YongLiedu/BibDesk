@@ -408,10 +408,8 @@ static NSString *titleStringWithPub(BibItem *pub)
 {
     NSAssert([NSThread isMainThread], @"method must be called from the main thread");
 
-    NSEnumerator *pubE = [[self currentPublications] objectEnumerator];
-    BibItem *pub;
     NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:[[self currentPublications] count]];
-    while (pub = [pubE nextObject]) {
+    for (BibItem *pub in [self currentPublications]) {
         BDSKTreeNode *theNode = [[BDSKTreeNode alloc] init];
 
         // we add the pub to the tree so it's retained, but don't touch it in the thread!
@@ -471,10 +469,9 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
     double val = 0;
     double max = [treeNodes count];
     
-    NSEnumerator *e = [treeNodes objectEnumerator];
-    BDSKTreeNode *node;
+    for (BDSKTreeNode *node in treeNodes) {
     
-    while (0 == _matchFlags.shouldAbortThread && (node = [e nextObject])) {
+        if (_matchFlags.shouldAbortThread) break;
         
         NSAutoreleasePool *pool = [NSAutoreleasePool new];
         
@@ -576,8 +573,6 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
     
     double val = 0;
     double max = [absoluteURLs count];
-    NSEnumerator *e = [absoluteURLs objectEnumerator];
-    NSURL *url;
     
     [self performSelectorOnMainThread:@selector(updateProgressIndicatorWithNumber:) withObject:[NSNumber numberWithDouble:(0.0)] waitUntilDone:NO];
     [statusField performSelectorOnMainThread:@selector(setStringValue:) withObject:[NSLocalizedString(@"Indexing files", @"") stringByAppendingEllipsis] waitUntilDone:NO];
@@ -585,7 +580,9 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
     // some HTML files cause a deadlock or crash in -[NSHTMLReader _loadUsingLibXML2] rdar://problem/4988303 (fixed in 10.5)
     BOOL shouldLog = [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldLogFilesAddedToMatchingSearchIndex"];
     
-    while (0 == _matchFlags.shouldAbortThread && (url = [e nextObject])) {
+    for (NSURL *url in absoluteURLs) {
+        if (_matchFlags.shouldAbortThread) break;
+        
         SKDocumentRef doc = SKDocumentCreateWithURL((CFURLRef)url);
         
         if (shouldLog)

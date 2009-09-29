@@ -186,11 +186,10 @@ static id sharedManager = nil;
         return [NSArray array];
     
     NSSet *strings = [self stringsForCompletionEntry:entry];
-    NSEnumerator *stringE = [strings objectEnumerator];
     NSString *string = nil;
     NSMutableArray *completions = [NSMutableArray arrayWithCapacity:[strings count]];
 
-    while (string = [stringE nextObject]) {
+    for (string in strings) {
         if ([[string stringByRemovingCurlyBraces] hasCaseInsensitivePrefix:matchString])
             [completions addObject:string];
     }
@@ -231,11 +230,10 @@ static id sharedManager = nil;
 - (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(NSInteger *)idx{
     NSString *partialString = [fullString substringWithRange:charRange];
     NSMutableArray *matches = [NSMutableArray arrayWithCapacity:[definitions count]];
-    NSEnumerator *keyE = [definitions keyEnumerator];
     NSString *key = nil;
     
     // Search the definitions case-insensitively; we match on key or value, but only return keys.
-    while (key = [keyE nextObject]) {
+    for (key in definitions) {
         if ([key rangeOfString:partialString options:NSCaseInsensitiveSearch].location != NSNotFound ||
 			([definitions valueForKey:key] != nil && [[definitions valueForKey:key] rangeOfString:partialString options:NSCaseInsensitiveSearch].location != NSNotFound))
             [matches addObject:key];

@@ -134,8 +134,6 @@ static BDSKFiler *sharedFiler = nil;
 - (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(NSInteger)mask{
 	NSFileManager *fm = [NSFileManager defaultManager];
     NSInteger numberOfPapers = [paperInfos count];
-	NSEnumerator *paperEnum = [paperInfos objectEnumerator];
-	id paperInfo = nil;
 	BibItem *pub = nil;
 	BDSKLinkedFile *file = nil;
 	NSString *oldPath = nil;
@@ -162,8 +160,7 @@ static BDSKFiler *sharedFiler = nil;
         [progressWindow orderFront:nil];
 	}
 	
-	paperEnum = [paperInfos objectEnumerator];
-	while (paperInfo = [paperEnum nextObject]) {
+	for (id paperInfo in paperInfos) {
 		
 		if (initial) {
 			// autofile action: an array of BDSKLinkedFiles

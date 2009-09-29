@@ -127,11 +127,9 @@
 - (id)valueForUndefinedKey:(NSString *)key { return [object valueForKey:key]; }
 
 - (NSArray *)publications {
-    NSEnumerator *e = [publications objectEnumerator];
-    BibItem *pub;
     NSUInteger idx = 0;
     
-    while (pub = [e nextObject]) {
+    for (BibItem *pub in publications) {
         if (publicationsContext) {
             idx = [publicationsContext indexOfObject:pub];
             if (idx == NSNotFound)
@@ -145,7 +143,6 @@
 }
 
 - (id)publicationsUsingTemplate{
-    NSEnumerator *e = [[self publications] objectEnumerator];
     BibItem *pub = nil;
     
     BDSKPRECONDITION(nil != template);
@@ -159,7 +156,7 @@
     if (format & BDSKPlainTextTemplateFormat) {
         
         returnString = [NSMutableString stringWithString:@""];        
-        while(pub = [e nextObject]){
+        for (pub in [self publications]){
             pool = [NSAutoreleasePool new];
             parsedTemplate = [parsedTemplates objectForKey:[pub pubType]];
             if (parsedTemplate == nil) {
@@ -186,7 +183,7 @@
     } else if (format & BDSKRichTextTemplateFormat) {
         
         returnString = [[[NSMutableAttributedString alloc] init] autorelease];
-        while(pub = [e nextObject]){
+        for (pub in [self publications]){
             pool = [NSAutoreleasePool new];
             parsedTemplate = [parsedTemplates objectForKey:[pub pubType]];
             if (parsedTemplate == nil) {

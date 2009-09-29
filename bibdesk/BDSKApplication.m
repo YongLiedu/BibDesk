@@ -69,9 +69,7 @@
 - (IBAction)terminate:(id)sender {
     NSArray *fileNames = [[[NSDocumentController sharedDocumentController] documents] valueForKeyPath:@"@distinctUnionOfObjects.fileName"];
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:[fileNames count]];
-    NSEnumerator *fEnum = [fileNames objectEnumerator];
-    NSString *fileName;
-    while(fileName = [fEnum nextObject]){
+    for (NSString *fileName in fileNames){
         NSData *data = [[BDAlias aliasWithPath:fileName] aliasData];
         [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:fileName, @"fileName", data, @"_BDAlias", nil]];
     }
@@ -179,8 +177,7 @@
                 nextIndex++;
             }
             
-            NSEnumerator *itemEnum = [subitems objectEnumerator];
-            while (anItem = [itemEnum nextObject])
+            for (anItem in subitems)
                 [windowsMenu insertItem:anItem atIndex:nextIndex++];
             
             if (nextIndex < [windowsMenu numberOfItems] && [[windowsMenu itemAtIndex:nextIndex] isSeparatorItem] == NO)

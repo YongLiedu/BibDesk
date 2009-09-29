@@ -123,15 +123,12 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     
     BOOL shouldTeXify = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
 	NSMutableString *macroString = [NSMutableString string];
-    NSEnumerator *macroEnum = [orderedMacros objectEnumerator];
-    NSString *macro;
     NSString *value;
     
-    while (macro = [macroEnum nextObject]){
+    for (NSString *macro in orderedMacros) {
 		value = [macroDefinitions objectForKey:macro];
-		if(shouldTeXify){
+		if (shouldTeXify)
             value = [value stringByTeXifyingString];
-		}                
         [macroString appendStrings:@"\n@string{", macro, @" = ", [value stringAsBibTeXString], @"}\n", nil];
     }
 	return macroString;
@@ -143,16 +140,13 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     
     BDSKASSERT([[macroDef macroResolver] isEqual:self]);
     
-    NSEnumerator *nodeE = [[macroDef nodes] objectEnumerator];
-    BDSKStringNode *node;
-    
-    while(node = [nodeE nextObject]){
+    for (BDSKStringNode *node in [macroDef nodes]) {
         if([node type] != BDSKStringNodeMacro)
             continue;
         
         NSString *key = [node value];
         
-        if([key caseInsensitiveCompare:macroKey] == NSOrderedSame)
+        if ([key caseInsensitiveCompare:macroKey] == NSOrderedSame)
             return YES;
         
         NSString *value = [self valueOfMacro:key];
@@ -308,11 +302,8 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     
     // if the definition is complex, we first have to add the macros that appear there
     if ([value isComplex]) {
-        NSEnumerator *nodeE = [[value nodes] objectEnumerator];
-        BDSKStringNode *node;
-        
-        while(node = [nodeE nextObject]){
-            if([node type] == BDSKStringNodeMacro)
+        for (BDSKStringNode *node in [value nodes]) {
+            if ([node type] == BDSKStringNodeMacro)
                 [self addMacro:[node value] toArray:array];
         }
     }
@@ -362,12 +353,10 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         [macroDefinitions addEntriesFromDictionary:oldMacros];
     
     NSDictionary *macros = [sud dictionaryForKey:BDSKGlobalMacroDefinitionsKey];
-    NSEnumerator *keyEnum = [macros keyEnumerator];
-    NSString *key;
     NSString *value;
     NSError *error = nil;
     
-    while (key = [keyEnum nextObject]) {
+    for (NSString *key in macros) {
         // we don't check for circular macros, there shouldn't be any. Or do we want to be paranoid?
         if (value = [NSString stringWithBibTeXString:[macros objectForKey:key] macroResolver:self error:&error])
             [macroDefinitions setObject:value forKey:key];
@@ -384,12 +373,10 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 
 - (void)loadMacrosFromFiles{
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-    NSEnumerator *fileE = [[sud stringArrayForKey:BDSKGlobalMacroFilesKey] objectEnumerator];
-    NSString *file;
     
     fileMacroDefinitions = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
     
-    while (file = [fileE nextObject]) {
+    for (NSString *file in [sud stringArrayForKey:BDSKGlobalMacroFilesKey]) {
         NSString *fileContent = [NSString stringWithContentsOfFile:file encoding:0 guessEncoding:YES];
         NSDictionary *macroDefs = nil;
         if (fileContent == nil) continue;
@@ -399,11 +386,9 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
             macroDefs = [BDSKBibTeXParser macrosFromBibTeXStyle:fileContent document:nil];
         else continue;
         if (macroDefs != nil) {
-            NSEnumerator *macroE = [macroDefs keyEnumerator];
-            NSString *macroKey;
             NSString *macroString;
             
-            while (macroKey = [macroE nextObject]) {
+            for (NSString *macroKey in macroDefs) {
                 macroString = [macroDefs objectForKey:macroKey];
                 if([self macroDefinition:macroString dependsOnMacro:macroKey])
                     NSLog(@"Macro from file %@ leads to circular definition, ignored: %@ = %@", file, macroKey, [macroString stringAsBibTeXString]);
@@ -417,11 +402,8 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 
 - (void)synchronize{
     NSMutableDictionary *macros = [[NSMutableDictionary alloc] initWithCapacity:[[self macroDefinitions] count]];
-    NSEnumerator *keyEnum = [[self macroDefinitions] keyEnumerator];
-    NSString *key;
-    while (key = [keyEnum nextObject]) {
+    for (NSString *key in [self macroDefinitions])
         [macros setObject:[[[self macroDefinitions] objectForKey:key] stringAsBibTeXString] forKey:key];
-    }
     [[NSUserDefaults standardUserDefaults] setObject:macros forKey:BDSKGlobalMacroDefinitionsKey];
     [macros release];
 }

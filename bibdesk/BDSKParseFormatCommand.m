@@ -116,10 +116,7 @@
              [NSString isEmptyString:[[[[pub owner] fileURL] path] stringByDeletingLastPathComponent]]))
             return [NSNull null];
         
-        NSEnumerator *fEnum = [requiredFields objectEnumerator];
-        NSString *fieldName;
-        
-        while (fieldName = [fEnum nextObject]) {
+        for (NSString *fieldName in requiredFields) {
             if ([fieldName isEqualToString:BDSKCiteKeyString]) {
                 if([pub hasEmptyOrDefaultCiteKey])
                     return [NSNull null];

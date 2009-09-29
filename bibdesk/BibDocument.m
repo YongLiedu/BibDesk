@@ -321,11 +321,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
     
     NSArray *groupsToExpand = [xattrDefaults objectForKey:BDSKDocumentGroupsToExpandKey];
-    NSEnumerator *parentEnum = [groups objectEnumerator];
-    BDSKParentGroup *parent;
-    [parentEnum nextObject];
-    while (parent = [parentEnum nextObject]) {
-        if (groupsToExpand == nil || [groupsToExpand containsObject:NSStringFromClass([parent class])])
+    for (BDSKParentGroup *parent in groups) {
+        if (parent != [groups libraryParent] && (groupsToExpand == nil || [groupsToExpand containsObject:NSStringFromClass([parent class])]))
             [groupOutlineView expandItem:parent];
     }
     // make sure the groups are sorted and have their sort descriptors set
@@ -335,9 +332,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     if ([groupData length]) {
         NSSet *allGroups = [NSSet setWithArray:[groups allChildren]];
         NSMutableArray *groupsToSelect = [NSMutableArray array];
-        NSEnumerator *groupEnum = [[NSKeyedUnarchiver unarchiveObjectWithData:groupData] objectEnumerator];
-        BDSKGroup *group;
-        while (group = [groupEnum nextObject]) {
+        for (BDSKGroup *group in [NSKeyedUnarchiver unarchiveObjectWithData:groupData]) {
             if (group = [allGroups member:group])
                 [groupsToSelect addObject:group];
         }
@@ -624,9 +619,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 }
 
 - (BOOL)commitPendingEdits {
-    NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
-    id editor;
-    while (editor = [wcEnum nextObject]) {
+    for (id editor in [self windowControllers]) {
         // not all window controllers are editors...
         if ([editor respondsToSelector:@selector(commitEditing)] && [editor commitEditing] == NO)
             return NO;
@@ -756,11 +749,8 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         }
         
         NSMutableArray *groupsToExpand = [NSMutableArray array];
-        NSEnumerator *groupEnum = [groups objectEnumerator];
-        BDSKParentGroup *parent;
-        [groupEnum nextObject];
-        while (parent = [groupEnum nextObject]) {
-            if ([groupOutlineView isItemExpanded:parent])
+        for (BDSKParentGroup *parent in groups) {
+            if (parent != [groups libraryParent] && [groupOutlineView isItemExpanded:parent])
                 [groupsToExpand addObject:NSStringFromClass([parent class])];
             
         }
@@ -926,10 +916,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 
 - (NSString *)documentInfoString{
     NSMutableString *string = [NSMutableString stringWithString:@"@bibdesk_info{document_info"];
-    NSEnumerator *keyEnum = [documentInfo keyEnumerator];
-    NSString *key;
-    
-    while (key = [keyEnum nextObject]) 
+    for (NSString *key in documentInfo) 
         [string appendStrings:@",\n\t", key, @" = ", [[self documentInfoForKey:key] stringAsBibTeXString], nil];
     [string appendString:@"\n}\n"];
     
@@ -966,11 +953,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 	if ([view isKindOfClass:[NSPopUpButton class]])
 		return (NSPopUpButton *)view;
 	
-	NSEnumerator *viewEnum = [[view subviews] objectEnumerator];
-	NSView *subview;
 	NSPopUpButton *popup;
 	
-	while (subview = [viewEnum nextObject]) {
+	for (NSView *subview in [view subviews]) {
 		if (popup = popUpButtonSubview(subview))
 			return popup;
 	}
@@ -1088,12 +1073,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         // write template accessory files if necessary
         BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:typeName];
         if(selectedTemplate){
-            NSEnumerator *accessoryFileEnum = [[selectedTemplate accessoryFileURLs] objectEnumerator];
-            NSURL *accessoryURL = nil;
             NSURL *destDirURL = [absoluteURL URLByDeletingLastPathComponent];
-            while(accessoryURL = [accessoryFileEnum nextObject]){
+            for (NSURL *accessoryURL in [selectedTemplate accessoryFileURLs])
                 [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
-            }
         }
         
         // save our window setup if we export to BibTeX
@@ -1106,13 +1088,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                                                             document:self];
         
         // rebuild metadata cache for this document whenever we save
-        NSEnumerator *pubsE = [[self publications] objectEnumerator];
         NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
-        BibItem *anItem;
         NSDictionary *info;
         BOOL update = (saveOperation == NSSaveOperation); // for saveTo we should update all items, as our path changes
         
-        while(anItem = [pubsE nextObject]){
+        for (BibItem *anItem in [self publications]) {
             NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
             @try {
                 if(info = [anItem metadataCacheInfoForUpdate:update])
@@ -1327,18 +1307,14 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     NSString *path = [[fileURL path] stringByDeletingPathExtension];
     NSFileManager *fm = [NSFileManager defaultManager];
-    NSEnumerator *itemEnum = [items objectEnumerator];
-    BibItem *item;
     NSString *filePath;
     NSString *commonParent = nil;
     BOOL success = YES;
     NSMutableSet *localFiles = [NSMutableSet set];
     
     if (success = [fm createDirectoryAtPath:path withIntermediateDirectories:NO attributes:nil error:NULL]) {
-        while (item = [itemEnum nextObject]) {
-            NSEnumerator *fileEnum = [[item localFiles] objectEnumerator];
-            BDSKLinkedFile *file;
-            while (file = [fileEnum nextObject]) {
+        for (BibItem *item in items) {
+            for (BDSKLinkedFile *file in [item localFiles]) {
                 if (filePath = [[file URL] path]) {
                     [localFiles addObject:filePath];
                     if (commonParent)
@@ -1354,9 +1330,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         NSString *bibtexPath = [[path stringByAppendingPathComponent:[path lastPathComponent]] stringByAppendingPathExtension:@"bib"];
         
         success = [bibtexData writeToFile:bibtexPath options:0 error:outError];
-        itemEnum = [localFiles objectEnumerator];
         
-        while (success && (filePath = [itemEnum nextObject])) {
+        for (filePath in localFiles) {
+            if (success == NO) break;
             if ([fm fileExistsAtPath:filePath]) {
                 NSString *relativePath = commonParent ? [filePath relativePathFromPath:commonParent] : [filePath lastPathComponent];
                 NSString *targetPath = [path stringByAppendingPathComponent:relativePath];
@@ -1508,8 +1484,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (NSData *)atomDataForPublications:(NSArray *)items{
-    NSEnumerator *e = [items objectEnumerator];
-	BibItem *pub = nil;
     NSMutableData *d = [NSMutableData data];
     
     [d appendUTF8DataFromString:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?><feed xmlns=\"http://purl.org/atom/ns#\">"];
@@ -1518,7 +1492,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     // TODO: output general feed info
     
-	while(pub = [e nextObject]){
+	for (BibItem *pub in items){
         [d appendUTF8DataFromString:@"<entry><title>foo</title><description>foo-2</description>"];
         [d appendUTF8DataFromString:@"<content type=\"application/xml+mods\">"];
         [d appendUTF8DataFromString:[pub MODSString]];
@@ -1531,14 +1505,12 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (NSData *)MODSDataForPublications:(NSArray *)items{
-    NSEnumerator *e = [items objectEnumerator];
-	BibItem *pub = nil;
     NSMutableData *d = [NSMutableData data];
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
     [d appendUTF8DataFromString:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?><modsCollection xmlns=\"http://www.loc.gov/mods/v3\">"];
-	while(pub = [e nextObject]){
+	for (BibItem *pub in items){
         [d appendUTF8DataFromString:[pub MODSString]];
         [d appendUTF8DataFromString:@"\n"];
     }
@@ -1562,8 +1534,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath error:(NSError **)outError{
     NSParameterAssert(encoding != 0);
 
-    NSEnumerator *e = [items objectEnumerator];
-	BibItem *pub = nil;
     NSMutableData *outputData = [NSMutableData dataWithCapacity:4096];
     NSData *pubData;
     NSError *error = nil;
@@ -1632,7 +1602,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
-    while(isOK && (pub = [e nextObject])){
+    for (BibItem *pub in items){
+        if (isOK == NO) break;
         pubData = [pub bibTeXDataWithOptions:options relativeToPath:basePath encoding:encoding error:&error];
         if(isOK = pubData != nil){
             [outputData appendData:doubleNewlineData];
@@ -2056,8 +2027,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (NSString *)bibTeXStringDroppingInternal:(BOOL)drop forPublications:(NSArray *)items{
     NSMutableString *s = [NSMutableString string];
-	NSEnumerator *e = [items objectEnumerator];
-	BibItem *pub;
 	NSInteger options = 0;
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey])
@@ -2065,8 +2034,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if (drop)
         options |= BDSKBibTeXOptionDropInternalMask;
     
-    while(pub = [e nextObject])
-            [s appendStrings:@"\n", [pub bibTeXStringWithOptions:options], @"\n", nil];
+    for (BibItem *pub in items)
+        [s appendStrings:@"\n", [pub bibTeXStringWithOptions:options], @"\n", nil];
 	
 	return s;
 }
@@ -2089,22 +2058,20 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [bibString appendString:[[BDSKMacroResolver defaultMacroResolver] bibTeXString]];
     [bibString appendString:[[self macroResolver] bibTeXString]];
 	
-	NSEnumerator *e = [items objectEnumerator];
 	BibItem *aPub = nil;
 	BibItem *aParent = nil;
 	NSMutableArray *selItems = [[NSMutableArray alloc] initWithCapacity:numberOfPubs];
 	NSMutableSet *parentItems = [[NSMutableSet alloc] initWithCapacity:numberOfPubs];
 	NSMutableArray *selParentItems = [[NSMutableArray alloc] initWithCapacity:numberOfPubs];
     
-	while(aPub = [e nextObject]){
+	for (aPub in items) {
 		[selItems addObject:aPub];
 
 		if(aParent = [aPub crossrefParent])
 			[parentItems addObject:aParent];
 	}
 	
-	e = [selItems objectEnumerator];
-	while(aPub = [e nextObject]){
+	for (aPub in selItems) {
 		if([parentItems containsObject:aPub]){
 			[parentItems removeObject:aPub];
 			[selParentItems addObject:aPub];
@@ -2113,13 +2080,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		}
 	}
 	
-	e = [selParentItems objectEnumerator];
-	while(aPub = [e nextObject]){
+	for (aPub in selParentItems) {
         [bibString appendString:[aPub bibTeXStringWithOptions:options]];
 	}
 	
-	e = [parentItems objectEnumerator];        
-	while(aPub = [e nextObject]){
+	for (aPub in parentItems) {
         [bibString appendString:[aPub bibTeXStringWithOptions:options]];
 	}
 					
@@ -2151,7 +2116,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark New publications from pasteboard
 
 - (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect edit:(BOOL)shouldEdit {
-    NSEnumerator *pubEnum;
     BibItem *pub;
     
     if (shouldSelect)
@@ -2161,8 +2125,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [self selectPublications:newPubs];
 	if (pubsToAutoFile != nil){
         // tried checking [pb isEqual:[NSPasteboard pasteboardWithName:NSDragPboard]] before using delay, but pb is a CFPasteboardUnique
-        pubEnum = [pubsToAutoFile objectEnumerator];
-        while (pub = [pubEnum nextObject])
+        for (pub in pubsToAutoFile)
             [pub performSelector:@selector(autoFileLinkedFile:) withObjectsFromArray:[pub localFiles]];
     }
     
@@ -2170,9 +2133,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSMutableArray *autogeneratePubs = [NSMutableArray arrayWithCapacity:[newPubs count]];
     BOOL hasDuplicateCiteKey = NO;
     
-    pubEnum = [newPubs objectEnumerator];
-    
-    while (pub = [pubEnum nextObject]) {
+    for (pub in newPubs) {
         if ((autoGenerate == NO && [pub hasEmptyOrDefaultCiteKey]) ||
             (autoGenerate && [pub canGenerateAndSetCiteKey])) { // @@ or should we check for hasEmptyOrDefaultCiteKey ?
             [autogeneratePubs addObject:pub];
@@ -2404,8 +2365,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 // sniff the contents of each file, returning them in an array of BibItems, while unparseable files are added to the mutable array passed as a parameter
 - (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSMutableArray *)unparseableFiles verbose:(BOOL)verbose error:(NSError **)outError {
-    NSEnumerator *e = [filenames objectEnumerator];
-    NSString *fileName;
     NSString *contentString;
     NSMutableArray *array = [NSMutableArray array];
     NSInteger type = BDSKUnknownStringType;
@@ -2413,7 +2372,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     // some common types that people might use as attachments; we don't need to sniff these
     NSSet *unreadableTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
     
-    while(fileName = [e nextObject]){
+    for (NSString *fileName in filenames){
         type = BDSKUnknownStringType;
         
         // we /can/ create a string from these (usually), but there's no point in wasting the memory
@@ -2467,11 +2426,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (NSArray *)publicationsForFiles:(NSArray *)filenames error:(NSError **)error {
     NSMutableArray *newPubs = [NSMutableArray arrayWithCapacity:[filenames count]];
-	NSEnumerator *e = [filenames objectEnumerator];
-	NSString *fnStr = nil;
 	NSURL *url = nil;
     	
-	while(fnStr = [e nextObject]){
+	for (NSString *fnStr in filenames) {
         fnStr = [fnStr stringByStandardizingPath];
 		if(url = [NSURL fileURLWithPath:fnStr]){
             NSError *xerror = nil;
@@ -2667,10 +2624,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [tableView deselectAll:self];
     [self setSearchString:@""];
 
-    NSEnumerator *keyEnum = [citeKeys objectEnumerator];
-    NSString *key;
     NSMutableArray *itemsToSelect = [NSMutableArray array];
-    while (key = [keyEnum nextObject]) {
+    for (NSString *key in citeKeys) {
         BibItem *anItem = [publications itemForCiteKey:key];
         if (anItem)
             [itemsToSelect addObject:anItem];
@@ -2747,12 +2702,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSInteger)userChangedField:(NSString *)fieldName ofPublications:(NSArray *)pubs from:(NSArray *)oldValues to:(NSArray *)newValues{
     NSInteger rv = 0;
     
-    NSEnumerator *pubEnum = [pubs objectEnumerator];
-    BibItem *pub;
     NSMutableArray *generateKeyPubs = [NSMutableArray arrayWithCapacity:[pubs count]];
     NSMutableArray *autofileFiles = [NSMutableArray arrayWithCapacity:[pubs count]];
     
-    while(pub = [pubEnum nextObject]){
+    for (BibItem *pub in pubs) {
         
         // ??? will this ever happen?
         if ([[self editorForPublication:pub create:NO] commitEditing] == NO)
@@ -2764,9 +2717,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         
         // autofile paper if we have enough information
         if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]){
-            NSEnumerator *fileEnum = [[pub localFiles] objectEnumerator];
-            BDSKLinkedFile *file;
-            while (file = [fileEnum nextObject])
+            for (BDSKLinkedFile *file in [pub localFiles])
                 if ([[pub filesToBeFiled] containsObject:file] && [pub canSetURLForLinkedFile:file])
                     [autofileFiles addObject:file];
         }

@@ -182,10 +182,8 @@
     if (fileURL) {
         [fileData writeToURL:fileURL atomically:YES];
         
-        NSEnumerator *accessoryFileEnum = [[template accessoryFileURLs] objectEnumerator];
-        NSURL *accessoryURL = nil;
         NSURL *destDirURL = [fileURL URLByDeletingLastPathComponent];
-        while(accessoryURL = [accessoryFileEnum nextObject])
+        for (NSURL *accessoryURL in [template accessoryFileURLs])
             [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
     } else {
         NSPasteboard *pboard = [NSPasteboard generalPasteboard];

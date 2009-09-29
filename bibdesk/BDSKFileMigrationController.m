@@ -131,15 +131,13 @@
     
     NSInteger current = 0, final = [pubs count];
     NSInteger numberOfAddedFiles = 0, numberOfRemovedFields = 0, addedFiles, removedFields;
-    NSEnumerator *pubEnum = [pubs objectEnumerator];
-    BibItem *aPub;
     NSInteger mask = BDSKRemoveNoFields;
     if (keepLocalFileFields == NO)
         mask |= BDSKRemoveLocalFileFieldsMask;
     if (keepRemoteURLFields == NO)
         mask |= BDSKRemoveRemoteURLFieldsMask;
         
-    while ((aPub = [pubEnum nextObject])) {
+    for (BibItem *aPub in pubs) {
         
         // Causes the progress bar and other UI to update
         if ((current++ % 5) == 0)
@@ -148,9 +146,7 @@
         NSError *error;
         if (NO == [aPub migrateFilesWithRemoveOptions:mask numberOfAddedFiles:&addedFiles numberOfRemovedFields:&removedFields error:&error]) {
             NSArray *messages = [error valueForKey:@"messages"];
-            NSEnumerator *msgEnum = [messages objectEnumerator];
-            NSDictionary *dict;
-            while (dict = [msgEnum nextObject]) {
+            for (NSDictionary *dict in messages) {
                 NSMutableDictionary *displayDict = [dict mutableCopy];
                 [displayDict setObject:aPub forKey:@"publication"];
                 [observedResults addObject:displayDict];

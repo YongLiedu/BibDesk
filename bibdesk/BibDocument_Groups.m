@@ -388,10 +388,7 @@ The groupedPublications array is a subset of the publications array, developed b
     
     [currentGroups removeObjectsAtIndexes:[currentClients indexesOfObjects:[clientsToRemove allObjects]]];
     
-    NSEnumerator *clientEnum = [clientsToAdd objectEnumerator];
-    BDSKSharingClient *client;
-    
-    while (client = [clientEnum nextObject]) {
+    for (BDSKSharingClient *client in clientsToAdd) {
         BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithClient:client];
         [currentGroups addObject:group];
         [group release];
@@ -537,11 +534,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         
         NSInteger emptyCount = 0;
         
-        NSEnumerator *pubEnum = [publications objectEnumerator];
-        BibItem *pub;
-        
         NSSet *tmpSet = nil;
-        while (pub = [pubEnum nextObject]) {
+        for (BibItem *pub in publications) {
             tmpSet = [pub groupsForField:groupField];
             if([tmpSet count])
                 CFSetApplyFunction((CFSetRef)tmpSet, addObjectToSetAndBag, &setAndBag);
@@ -550,13 +544,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         }
         
         NSMutableArray *mutableGroups = [[NSMutableArray alloc] initWithCapacity:CFSetGetCount(setAndBag.set) + 1];
-        NSEnumerator *groupEnum = [(NSSet *)(setAndBag.set) objectEnumerator];
-        id groupName;
         BDSKGroup *group;
                 
         // now add the group names that we found from our BibItems, using a generic folder icon
         // use BDSKTextWithIconCell keys
-        while (groupName = [groupEnum nextObject]) {
+        for (id groupName in (NSSet *)(setAndBag.set)) {
             NSUInteger idx = [oldGroupNames indexOfObject:groupName];
             if (idx == NSNotFound) {
                 group = [[BDSKCategoryGroup alloc] initWithName:groupName key:groupField count:CFBagGetCountOfValue(setAndBag.bag, groupName)];
@@ -657,10 +649,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         array = [(id)[selectedGroups lastObject] publications];
     } else {
         // multiple selections are never shared groups, so they are contained in the publications
-        NSEnumerator *pubEnum = [publications objectEnumerator];
-        BibItem *pub;
-        NSEnumerator *groupEnum;
-        BDSKGroup *group;
         NSMutableArray *filteredArray = [NSMutableArray arrayWithCapacity:[publications count]];
         BOOL intersectGroups = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKIntersectGroupsKey];
         
@@ -669,9 +657,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         if (intersectGroups)
             [filteredArray setArray:publications];
         
-        while (pub = [pubEnum nextObject]) {
-            groupEnum = [selectedGroups objectEnumerator];
-            while (group = [groupEnum nextObject]) {
+        for (BibItem *pub in publications) {
+            for (BDSKGroup *group in selectedGroups) {
                 if ([group containsItem:pub] == !intersectGroups) {
                     if (intersectGroups)
                         [filteredArray removeObject:pub];
@@ -695,15 +682,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (BOOL)selectGroups:(NSArray *)theGroups{
     // expand the parents, or rowForItem: will return -1
-    NSEnumerator *parentEnum = [[NSSet setWithArray:[theGroups arrayByPerformingSelector:@selector(parent)]] objectEnumerator];
-    id parent;
-    while (parent = [parentEnum nextObject])
+    for (id parent in [NSSet setWithArray:[theGroups arrayByPerformingSelector:@selector(parent)]])
         [groupOutlineView expandItem:parent];
 
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
-    NSEnumerator *groupEnum = [theGroups objectEnumerator];
-    id group;
-    while (group = [groupEnum nextObject]) {
+    for (id group in theGroups) {
         NSInteger r = [groupOutlineView rowForItem:group];
         if (r != -1) [indexes addIndex:r];
     }
@@ -1043,11 +1026,9 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (void)removeGroups:(NSArray *)theGroups {
-    NSEnumerator *groupEnum = [theGroups objectEnumerator];
-	BDSKGroup *group;
     BOOL didRemove = NO;
 	
-	while (group = [groupEnum nextObject]) {
+	for (BDSKGroup *group in theGroups) {
 		if ([group isSmart]) {
 			[groups removeSmartGroup:(BDSKSmartGroup *)group];
 			didRemove = YES;
@@ -1319,10 +1300,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSZoneFree([self zone], pubs);
     
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:[items count]];
-    NSEnumerator *pubEnum = [items objectEnumerator];
-    BibItem *pub;
     
-    while (pub = [pubEnum nextObject]) {
+    for (BibItem *pub in items) {
         if ([currentPubs containsObject:pub] == NO)
             [array addObject:pub];
     }
@@ -1357,8 +1336,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         return YES;
     }
     
-    NSEnumerator *pubEnum = [pubs objectEnumerator];
-    BibItem *pub;
     NSMutableArray *changedPubs = [NSMutableArray arrayWithCapacity:[pubs count]];
     NSMutableArray *oldValues = [NSMutableArray arrayWithCapacity:[pubs count]];
     NSMutableArray *newValues = [NSMutableArray arrayWithCapacity:[pubs count]];
@@ -1368,7 +1345,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSInteger handleInherited = BDSKOperationAsk;
 	NSInteger rv;
     
-    while(pub = [pubEnum nextObject]){
+    for (BibItem *pub in pubs) {
         BDSKASSERT([pub isKindOfClass:[BibItem class]]);        
         
         if(field && [field isEqualToString:BDSKPubTypeString] == NO)
@@ -1416,13 +1393,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (BOOL)removePublications:(NSArray *)pubs fromGroups:(NSArray *)groupArray{
-    NSEnumerator *groupEnum = [groupArray objectEnumerator];
-	BDSKGroup *group;
 	NSInteger count = 0;
 	NSInteger handleInherited = BDSKOperationAsk;
 	NSString *groupName = nil;
     
-    while(group = [groupEnum nextObject]){
+    for (BDSKGroup *group in groupArray){
 		if([group isCategory] == NO && ([group isStatic] == NO || group == [groups lastImportGroup]))
 			continue;
 		
@@ -1438,8 +1413,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             continue;
         }
         
-		NSEnumerator *pubEnum = [pubs objectEnumerator];
-		BibItem *pub;
         NSMutableArray *changedPubs = [NSMutableArray arrayWithCapacity:[pubs count]];
         NSMutableArray *oldValues = [NSMutableArray arrayWithCapacity:[pubs count]];
         NSMutableArray *newValues = [NSMutableArray arrayWithCapacity:[pubs count]];
@@ -1451,7 +1424,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         if([field isSingleValuedGroupField] || [field isEqualToString:BDSKPubTypeString])
             continue;
         
-		while(pub = [pubEnum nextObject]){
+		for (BibItem *pub in pubs) {
 			BDSKASSERT([pub isKindOfClass:[BibItem class]]);        
 			
             if(field)
@@ -1506,8 +1479,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 - (BOOL)movePublications:(NSArray *)pubs fromGroup:(BDSKGroup *)group toGroupNamed:(NSString *)newGroupName{
 	NSInteger count = 0;
 	NSInteger handleInherited = BDSKOperationAsk;
-	NSEnumerator *pubEnum = [pubs objectEnumerator];
-	BibItem *pub;
 	NSInteger rv;
 	
 	if([group isCategory] == NO)
@@ -1519,7 +1490,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSString *oldValue = nil;
     NSString *field = [(BDSKCategoryGroup *)group key];
 	
-	while(pub = [pubEnum nextObject]){
+	for (BibItem *pub in pubs){
 		BDSKASSERT([pub isKindOfClass:[BibItem class]]);        
 		
         oldValue = [[[pub valueOfField:field] retain] autorelease];
@@ -1635,14 +1606,9 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         [groupsToTest addObjectsFromArray:[groups searchGroups]];
     }
     
-    NSEnumerator *groupEnum = [groupsToTest objectEnumerator];
-    id group;
-    
-    while (group = [groupEnum nextObject]) {
+    for (id group in groupsToTest) {
         // publicationsWithoutUpdating avoids triggering a load or update of external groups every time you add/remove a pub
-        NSEnumerator *pubEnum = [[group publicationsWithoutUpdating] objectEnumerator];
-        BibItem *pub;
-        while (pub = [pubEnum nextObject]) {
+        for (BibItem *pub in [group publicationsWithoutUpdating]) {
             if ([pubSet containsObject:pub])
                 [pub setImported:flag];
         }

@@ -73,7 +73,6 @@ static NSSet *alwaysDisabledFields = nil;
 - (void)resetDefaultFields {
 		// initialize the default fields from the prefs
 		NSArray *defaultFields = [sud arrayForKey:BDSKDefaultFieldsKey];
-		NSEnumerator *e;
 		NSString *field = nil;
 		NSMutableDictionary *dict = nil;
 		NSNumber *type;
@@ -83,9 +82,8 @@ static NSSet *alwaysDisabledFields = nil;
         [customFieldsSet removeAllObjects];
         
 		// Add Local File fields
-		e = [[sud arrayForKey:BDSKLocalFileFieldsKey] objectEnumerator];
 		type = [NSNumber numberWithInt:BDSKLocalFileType];
-		while(field = [e nextObject]){
+		for (field in [sud arrayForKey:BDSKLocalFileFieldsKey]) {
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
 			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];
 			[customFieldsArray addObject:dict];
@@ -93,9 +91,8 @@ static NSSet *alwaysDisabledFields = nil;
 		}
 		
 		// Add Remote URL fields
-		e = [[sud arrayForKey:BDSKRemoteURLFieldsKey] objectEnumerator];
 		type = [NSNumber numberWithInt:BDSKRemoteURLType];
-		while(field = [e nextObject]){
+		for (field in [sud arrayForKey:BDSKRemoteURLFieldsKey]) {
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
 			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];
 			[customFieldsArray addObject:dict];
@@ -103,9 +100,8 @@ static NSSet *alwaysDisabledFields = nil;
 		}
 		
 		// Add Boolean fields
-		e = [[sud arrayForKey:BDSKBooleanFieldsKey] objectEnumerator];
 		type = [NSNumber numberWithInt:BDSKBooleanType];
-		while(field = [e nextObject]){
+		for (field in [sud arrayForKey:BDSKBooleanFieldsKey]) {
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
 			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];
 			[customFieldsArray addObject:dict];
@@ -113,9 +109,8 @@ static NSSet *alwaysDisabledFields = nil;
 		}
         
         // Add Tri-State fields
-		e = [[sud arrayForKey:BDSKTriStateFieldsKey] objectEnumerator];
 		type = [NSNumber numberWithInt:BDSKTriStateType];
-		while(field = [e nextObject]){
+		for (field in [sud arrayForKey:BDSKTriStateFieldsKey]) {
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
 			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];
 			[customFieldsArray addObject:dict];
@@ -123,9 +118,8 @@ static NSSet *alwaysDisabledFields = nil;
 		}
         
 		// Add Rating fields
-		e = [[sud arrayForKey:BDSKRatingFieldsKey] objectEnumerator];
 		type = [NSNumber numberWithInt:BDSKRatingType];
-		while(field = [e nextObject]){
+		for (field in [sud arrayForKey:BDSKRatingFieldsKey]){
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
 			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];
 			[customFieldsArray addObject:dict];
@@ -133,9 +127,8 @@ static NSSet *alwaysDisabledFields = nil;
 		}
         
 		// Add Citation fields
-		e = [[sud arrayForKey:BDSKCitationFieldsKey] objectEnumerator];
 		type = [NSNumber numberWithInt:BDSKCitationType];
-		while(field = [e nextObject]){
+		for (field in [sud arrayForKey:BDSKCitationFieldsKey]) {
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
 			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];
 			[customFieldsArray addObject:dict];
@@ -143,9 +136,8 @@ static NSSet *alwaysDisabledFields = nil;
 		}
         
 		// Add Person fields
-		e = [[sud arrayForKey:BDSKPersonFieldsKey] objectEnumerator];
 		type = [NSNumber numberWithInt:BDSKPersonType];
-		while(field = [e nextObject]){
+		for (field in [sud arrayForKey:BDSKPersonFieldsKey]) {
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
 			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];
 			[customFieldsArray addObject:dict];
@@ -153,7 +145,7 @@ static NSSet *alwaysDisabledFields = nil;
 		}        
 		
 		// Add any remaining Textual default fields at the beginning
-		e = [defaultFields reverseObjectEnumerator];
+		NSEnumerator *e = [defaultFields reverseObjectEnumerator];
 		type = [NSNumber numberWithInt:BDSKStringType];
 		isDefault = [NSNumber numberWithBool:YES];
 		while(field = [e nextObject]){
@@ -261,12 +253,10 @@ static NSSet *alwaysDisabledFields = nil;
     NSMutableArray *citationFields = [[NSMutableArray alloc] initWithCapacity:1];
     NSMutableArray *personFields = [[NSMutableArray alloc] initWithCapacity:1];
 	
-	NSEnumerator *e = [customFieldsArray objectEnumerator];
-	NSDictionary *dict = nil;
 	NSString *field;
 	NSInteger type;
 	
-	while(dict = [e nextObject]){
+	for (NSDictionary *dict in customFieldsArray) {
 		field = [dict objectForKey:@"field"]; 
 		type = [[dict objectForKey:@"type"] intValue];
 		if([[dict objectForKey:@"default"] boolValue])
@@ -429,11 +419,9 @@ static NSSet *alwaysDisabledFields = nil;
     if([pboard availableTypeFromArray:[NSArray arrayWithObject:NSFilenamesPboardType]] == nil)
         return NO;
     NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
-    NSEnumerator *fileEnum = [fileNames objectEnumerator];
-    NSString *file;
     NSFileManager *fm = [NSFileManager defaultManager];
     
-    while (file = [fileEnum nextObject]) {
+    for (NSString *file in fileNames) {
         NSString *extension = [file pathExtension];
         if ([fm fileExistsAtPath:[file stringByStandardizingPath]] == NO ||
             ([extension caseInsensitiveCompare:@"bib"] != NSOrderedSame && [extension caseInsensitiveCompare:@"bst"] != NSOrderedSame))

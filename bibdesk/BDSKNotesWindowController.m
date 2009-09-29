@@ -103,11 +103,8 @@
 }
 
 - (void)reloadNotes {
-    NSEnumerator *dictEnum = [[url SkimNotes] objectEnumerator];
-    NSDictionary *dict;
-    
     [notes removeAllObjects];
-    while (dict = [dictEnum nextObject]) {
+    for (NSDictionary *dict in [url SkimNotes]) {
         NSMutableDictionary *note = [dict mutableCopy];
         
         [note setObject:[NSNumber numberWithFloat:19.0] forKey:@"rowHeight"];
@@ -203,11 +200,10 @@
 }
 
 - (BOOL)outlineView:(NSOutlineView *)tv writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard {
-    NSEnumerator *itemEnum = [items objectEnumerator];
-    id item, lastItem = nil;
+    id lastItem = nil;
     NSMutableString *string = [NSMutableString string];
     
-    while (item = [itemEnum nextObject]) {
+    for (id item in items) {
         if ([lastItem objectForKey:@"child"] == item)
             continue;
         lastItem = item;

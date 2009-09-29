@@ -156,6 +156,10 @@
     [self addToItemsForCiteKeys:anObject];
 }
 
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id *)stackbuf count:(NSUInteger)len {
+    return [publications countByEnumeratingWithState:state objects:stackbuf count:len];
+}
+
 #pragma mark Convenience overrides
 
 - (void)getObjects:(id *)aBuffer range:(NSRange)aRange;
@@ -244,10 +248,7 @@
 	if ([NSString isEmptyString:key]) 
 		return NO;
     
-	NSEnumerator *pubEnum = [publications objectEnumerator];
-	BibItem *pub;
-	
-	while (pub = [pubEnum nextObject]) {
+	for (BibItem *pub in publications) {
 		if ([key caseInsensitiveCompare:[pub valueOfField:BDSKCrossrefString inherit:NO]] == NSOrderedSame) {
 			return YES;
         }
@@ -263,10 +264,8 @@
 - (NSArray *)itemsForIdentifierURLs:(NSArray *)anArray;
 {
     NSMutableArray *array = [NSMutableArray array];
-    NSEnumerator *urlEnum = [anArray objectEnumerator];
-    NSURL *idURL;
     BibItem *pub;
-    while (idURL = [urlEnum nextObject]) {
+    for (NSURL *idURL in anArray) {
         if (pub = [itemsForIdentifierURLs objectForKey:idURL])
             [array addObject:pub];
     }
@@ -288,11 +287,9 @@
 - (NSArray *)itemsForPerson:(BibAuthor *)aPerson forField:(NSString *)field;
 {
     NSMutableSet *auths = [[NSMutableSet alloc] initForFuzzyAuthors];
-    NSEnumerator *pubEnum = [publications objectEnumerator];
-    BibItem *bi;
     NSMutableArray *thePubs = [NSMutableArray array];
     
-    while(bi = [pubEnum nextObject]){
+    for (BibItem *bi in publications) {
         [auths addObjectsFromArray:[bi peopleArrayForField:field]];
         if([auths containsObject:aPerson]){
             [thePubs addObject:bi];

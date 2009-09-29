@@ -622,11 +622,9 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         return;
     
     // don't use [remoteClients objectEnumerator], because the remoteClients may change during enumeration
-    NSEnumerator *e = [[remoteClients allValues] objectEnumerator];
     id proxyObject;
-    NSDictionary *dict;
     
-    while(dict = [e nextObject]){
+    for (NSDictionary *dict in [remoteClients allValues]) {
         proxyObject = [dict objectForKey:@"object"];
         @try {
             [proxyObject invalidate];
@@ -716,13 +714,9 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 - (oneway void)notifyClientsOfChange;
 {
     // here is where we notify other hosts that something changed
-    NSEnumerator *e = [remoteClients keyEnumerator];
-    id proxyObject;
-    NSString *key;
-    
-    while(key = [e nextObject]){
+    for (NSString *key in remoteClients) {
         
-        proxyObject = [[remoteClients objectForKey:key] objectForKey:@"object"];
+        id proxyObject = [[remoteClients objectForKey:key] objectForKey:@"object"];
         
         @try {
             [proxyObject setNeedsUpdate:YES];
@@ -738,9 +732,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 - (void)getPublicationsAndMacros:(NSMutableDictionary *)pubsAndMacros {
     NSMutableSet *allPubs = (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKBibItemEqualitySetCallBacks);
     NSMutableDictionary *allMacros = [[NSMutableDictionary alloc] init];
-    NSEnumerator *docEnum = [[NSApp orderedDocuments] objectEnumerator];
-    BibDocument *doc = nil;
-    while (doc = [docEnum nextObject]) {
+    for (BibDocument *doc in [NSApp orderedDocuments]) {
         [allPubs addObjectsFromArray:[doc publications]];
         [allMacros addEntriesFromDictionary:[[doc macroResolver] macroDefinitions]];
     }

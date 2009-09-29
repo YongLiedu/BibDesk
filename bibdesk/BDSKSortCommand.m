@@ -54,10 +54,8 @@ static NSString *normalizedKey(NSString *key) {
 
     NSString *capKey = [key fieldName];
     if ([key isEqualToString:capKey] == NO) {
-        NSEnumerator *specialKeyEnum = [specialKeys objectEnumerator];
-        NSString *specialKey;
         BOOL isSpecial = NO;
-        while (specialKey = [specialKeyEnum nextObject]) {
+        for (NSString *specialKey in specialKeys) {
             if ([key caseInsensitiveCompare:specialKey]) {
                 key = specialKey;
                 isSpecial = YES;
