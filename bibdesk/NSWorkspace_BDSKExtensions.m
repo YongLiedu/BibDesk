@@ -282,9 +282,8 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
 {
     NSParameterAssert(extension);
     
-    NSString *theUTI = [self UTIForPathExtension:extension];
-    
-    NSArray *bundleIDs = (NSArray *)LSCopyAllRoleHandlersForContentType((CFStringRef)theUTI, kLSRolesEditor | kLSRolesViewer);
+    CFStringRef theUTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, NULL);
+    NSArray *bundleIDs = (NSArray *)LSCopyAllRoleHandlersForContentType(theUTI, kLSRolesEditor | kLSRolesViewer);
     
     NSMutableSet *set = [[NSMutableSet alloc] init];
     NSMutableArray *applications = [NSMutableArray array];
@@ -302,6 +301,8 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     [set release];
     if(bundleIDs)
         CFRelease(bundleIDs);
+    if(theUTI)
+        CFRelease(theUTI);
     
     // sort by application name
     NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)];
@@ -309,11 +310,6 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     [sort release];
     
     return applications;
-}
-
-- (NSString *)UTIForPathExtension:(NSString *)extension;
-{
-    return [(id)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, NULL) autorelease];
 }
 
 - (BOOL)isAppleScriptFileAtPath:(NSString *)path {

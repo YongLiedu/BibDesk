@@ -1066,7 +1066,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
         // fall back to extension; this is probably a relative path, so we'll assume it exists
         NSString *extension = [aPath pathExtension];
         if ([extension isEqualToString:@""] == NO)
-            theUTI = [[NSWorkspace sharedWorkspace] UTIForPathExtension:extension];
+            theUTI = [(id)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, NULL) autorelease];
     }
     return theUTI;
 }

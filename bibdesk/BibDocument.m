@@ -1137,7 +1137,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(docState.currentSaveOperationType == NSSaveToOperation && [exportSelectionCheckButton state] == NSOnState)
         items = [self numberOfSelectedPubs] > 0 ? [self selectedPublications] : groupedPublications;
     
-    if ([docType isEqualToString:BDSKArchiveDocumentType] || [docType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"tgz"]]) {
+    if ([docType isEqualToString:BDSKArchiveDocumentType]) {
         success = [self writeArchiveToURL:fileURL forPublications:items error:outError];
     } else {
         NSFileWrapper *fileWrapper = [self fileWrapperOfType:docType forPublications:items error:&nsError];
@@ -1380,7 +1380,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             if (outError) 
                 *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"Error description")];
         }
-    }else if ([aType isEqualToString:BDSKArchiveDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"tgz"]]){
+    }else if ([aType isEqualToString:BDSKArchiveDocumentType]){
         BDSKASSERT_NOT_REACHED("Should not save a fileWrapper for archive");
     }else{
         NSError *error = nil;
@@ -1407,7 +1407,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSStringEncoding encoding = [self documentStringEncoding];
     NSParameterAssert(encoding != 0);
     
-    BOOL isBibTeX = [aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]];
+    BOOL isBibTeX = [aType isEqualToString:BDSKBibTeXDocumentType];
     
     // export operations need their own encoding
     if(NSSaveToOperation == docState.currentSaveOperationType)
@@ -1417,17 +1417,17 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKAutoSortForCrossrefsKey])
             [self performSortForCrossrefs];
         data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeToPath:[[saveTargetURL path] stringByDeletingLastPathComponent] error:&error];
-    }else if ([aType isEqualToString:BDSKRISDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"ris"]]){
+    }else if ([aType isEqualToString:BDSKRISDocumentType]){
         data = [self RISDataForPublications:items encoding:encoding error:&error];
     }else if ([aType isEqualToString:BDSKMinimalBibTeXDocumentType]){
         data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:YES relativeToPath:[[saveTargetURL path] stringByDeletingLastPathComponent] error:&error];
-    }else if ([aType isEqualToString:BDSKLTBDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"ltb"]]){
+    }else if ([aType isEqualToString:BDSKLTBDocumentType]){
         data = [self LTBDataForPublications:items encoding:encoding error:&error];
     }else if ([aType isEqualToString:BDSKEndNoteDocumentType]){
         data = [self endNoteDataForPublications:items];
-    }else if ([aType isEqualToString:BDSKMODSDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"mods"]]){
+    }else if ([aType isEqualToString:BDSKMODSDocumentType]){
         data = [self MODSDataForPublications:items];
-    }else if ([aType isEqualToString:BDSKAtomDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"atom"]]){
+    }else if ([aType isEqualToString:BDSKAtomDocumentType]){
         data = [self atomDataForPublications:items];
     }else{
         BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:aType];
@@ -1850,7 +1850,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         }
     }
     
-	if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
+	if ([aType isEqualToString:BDSKBibTeXDocumentType]){
         success = [self readFromBibTeXData:data fromURL:absoluteURL encoding:encoding error:&error];
     }else{
 		// sniff the string to see what format we got

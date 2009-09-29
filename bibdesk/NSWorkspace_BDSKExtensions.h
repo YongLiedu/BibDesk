@@ -59,15 +59,6 @@
 - (NSURL *)defaultEditorOrViewerURLForURL:(NSURL *)aURL;
 - (NSArray *)editorAndViewerNamesAndBundleIDsForPathExtension:(NSString *)extension;
 
-/*!
-    @method     UTIForPathExtension:
-    @abstract   Returns the UTI for the given path extension, or nil if no UTI is found.
-    @discussion (comprehensive description)
-    @param      extension (description)
-    @result     (description)
-*/
-- (NSString *)UTIForPathExtension:(NSString *)extension;
-
 - (BOOL)isAppleScriptFileAtPath:(NSString *)path;
 - (BOOL)isApplicationAtPath:(NSString *)path;
 - (BOOL)isFolderAtPath:(NSString *)path;
