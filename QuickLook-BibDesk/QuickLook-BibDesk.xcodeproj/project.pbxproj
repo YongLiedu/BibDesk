@@ -13,7 +13,7 @@
 		8D576314048677EA00EA77CD /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AA1909FFE8422F4C02AAC07 /* CoreFoundation.framework */; };
 		8D5B49A804867FD3000E48DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8D5B49A704867FD3000E48DA /* InfoPlist.strings */; };
 		C86B05270671AA6E00DD9006 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C86B05260671AA6E00DD9006 /* CoreServices.framework */; };
-		CE078B5B0ED45B41003566CC /* SpotlightFileIconController.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE078B5A0ED45B41003566CC /* SpotlightFileIconController.nib */; };
+		CE62BC3F1072B13600AAA035 /* SpotlightFileIconController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE62BC3E1072B13600AAA035 /* SpotlightFileIconController.xib */; };
 		F28CFBFD0A3EC0AF000ABFF5 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F28CFBFC0A3EC0AF000ABFF5 /* ApplicationServices.framework */; };
 		F28CFC030A3EC0C6000ABFF5 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F28CFC020A3EC0C6000ABFF5 /* QuickLook.framework */; };
 		F920DC3E0B6C6FC500904F15 /* BDSKSpotlightIconController.h in Headers */ = {isa = PBXBuildFile; fileRef = F920DC3C0B6C6FC500904F15 /* BDSKSpotlightIconController.h */; };
@@ -35,7 +35,7 @@
 		8D576316048677EA00EA77CD /* BibDesk.qlgenerator */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BibDesk.qlgenerator; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D576317048677EA00EA77CD /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C86B05260671AA6E00DD9006 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
-		CE078B5A0ED45B41003566CC /* SpotlightFileIconController.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; path = SpotlightFileIconController.nib; sourceTree = "<group>"; };
+		CE62BC3E1072B13600AAA035 /* SpotlightFileIconController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SpotlightFileIconController.xib; sourceTree = "<group>"; };
 		F28CFBFC0A3EC0AF000ABFF5 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		F28CFC020A3EC0C6000ABFF5 /* QuickLook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLook.framework; path = /System/Library/Frameworks/QuickLook.framework; sourceTree = "<absolute>"; };
 		F920DC3C0B6C6FC500904F15 /* BDSKSpotlightIconController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSpotlightIconController.h; sourceTree = "<group>"; };
@@ -93,7 +93,7 @@
 		089C167CFE841241C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				CE078B5A0ED45B41003566CC /* SpotlightFileIconController.nib */,
+				CE62BC3E1072B13600AAA035 /* SpotlightFileIconController.xib */,
 				F9C2351E0B752C2E00BC5A84 /* FolderPenIcon.icns */,
 				F953AE330B5C9BC30053F12B /* BibDeskQuickLook.html */,
 				8D576317048677EA00EA77CD /* Info.plist */,
@@ -184,7 +184,7 @@
 				8D5B49A804867FD3000E48DA /* InfoPlist.strings in Resources */,
 				F953AE340B5C9BC30053F12B /* BibDeskQuickLook.html in Resources */,
 				F95622500CFBFEA100FE3A6C /* FolderPenIcon.icns in Resources */,
-				CE078B5B0ED45B41003566CC /* SpotlightFileIconController.nib in Resources */,
+				CE62BC3F1072B13600AAA035 /* SpotlightFileIconController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
