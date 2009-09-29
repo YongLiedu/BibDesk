@@ -253,9 +253,6 @@
 			<responds-to name="search">
 				<cocoa method=""/>
 			</responds-to>
-			<responds-to name="parse format">
-				<cocoa method=""/>
-			</responds-to>
 		</class-extension>
 
 		<class-extension extends="document"
