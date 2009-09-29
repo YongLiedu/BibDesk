@@ -689,13 +689,6 @@
 			remoteGlobalIDString = F935668E0912D570002B6957;
 			remoteInfo = RegexTest;
 		};
-		F9C7E5510BEA3C2700D65C7F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 8D5B49B6048680CD000E48DA;
-			remoteInfo = BibDeskInputManager;
-		};
 		F9C7E5940BEA3C9400D65C7F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */;
@@ -1617,7 +1610,6 @@
 		F9EF94E40D15FE7400314058 /* BDSKFileMigrationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFileMigrationController.m; sourceTree = "<group>"; };
 		F9EF94EA0D16014000314058 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKFileMigration.nib; sourceTree = "<group>"; };
 		F9F0856808247BC800812F2A /* postprocess-nontitle.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = "postprocess-nontitle.py"; path = "BibDesk Help/postprocess-nontitle.py"; sourceTree = "<group>"; };
-		F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BibDeskInputManager.xcodeproj; path = inputmanager/BibDeskInputManager.xcodeproj; sourceTree = "<group>"; };
 		F9F5E20B0AE307C0007EBB31 /* NSError_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSError_BDSKExtensions.h; sourceTree = "<group>"; };
 		F9F5E20C0AE307C0007EBB31 /* NSError_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSError_BDSKExtensions.m; sourceTree = "<group>"; };
 		F9F5ECCF0AE5E7C8007EBB31 /* BDSKURLGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKURLGroup.h; sourceTree = "<group>"; };
@@ -2797,7 +2789,6 @@
 				F95CC0C6087F53AE002C5694 /* BibImporter.xcodeproj */,
 				F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */,
 				CEB34B980F5CB2CC0037E086 /* Sparkle.xcodeproj */,
-				F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */,
 			);
 			name = Subprojects;
 			sourceTree = "<group>";
@@ -2815,14 +2806,6 @@
 			children = (
 				F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */,
 				F9C7E5490BEA3C0500D65C7F /* RegexTest.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		F9C7E54D0BEA3C2700D65C7F /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F9C7E5520BEA3C2700D65C7F /* BibDeskInputManager.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2921,10 +2904,6 @@
 				{
 					ProductGroup = F9C7E5420BEA3C0500D65C7F /* Products */;
 					ProjectRef = F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */;
-				},
-				{
-					ProductGroup = F9C7E54D0BEA3C2700D65C7F /* Products */;
-					ProjectRef = F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */;
 				},
 				{
 					ProductGroup = F95CC10F087F54BF002C5694 /* Products */;
@@ -3080,13 +3059,6 @@
 			fileType = wrapper.application;
 			path = RegexTest.app;
 			remoteRef = F9C7E5480BEA3C0500D65C7F /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F9C7E5520BEA3C2700D65C7F /* BibDeskInputManager.bundle */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = BibDeskInputManager.bundle;
-			remoteRef = F9C7E5510BEA3C2700D65C7F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		F9C7E5950BEA3C9400D65C7F /* yaz.framework */ = {
