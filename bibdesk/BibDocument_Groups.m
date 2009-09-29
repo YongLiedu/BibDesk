@@ -404,7 +404,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [clientsToAdd release];
     [currentGroups release];
     
-    [[(NSMutableDictionary *)groupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    [self removeSpinnersFromSuperview];
     [groupOutlineView reloadData];
     
 	// reset ourself as delegate
@@ -480,7 +480,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)handleDidAddRemoveGroupNotification:(NSNotification *)notification{
-    [[(NSMutableDictionary *)groupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    [self removeSpinnersFromSuperview];
     [groupOutlineView reloadData];
     [self handleGroupTableSelectionChangedNotification:notification];
 }
@@ -591,7 +591,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     // update the count for the first item, not sure if it should be done here
     [[groups libraryGroup] setCount:[publications count]];
 	
-    [[(NSMutableDictionary *)groupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    [self removeSpinnersFromSuperview];
     [groupOutlineView reloadData];
 	
 	// select the current groups, if still around. Otherwise select Library
@@ -726,27 +726,27 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 #pragma mark Spinners
 
 - (NSProgressIndicator *)spinnerForGroup:(BDSKGroup *)group{
-    NSProgressIndicator *spinner = groupSpinners == NULL ? nil : (id)CFDictionaryGetValue(groupSpinners, group);
+    NSProgressIndicator *spinner = [groupSpinners objectForKey:group];
     
     if ([group isRetrieving]) {
         if (spinner == nil) {
             // don't use NSMutableDictionary because that copies the groups
-            if (groupSpinners == NULL)
-                groupSpinners = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+            if (groupSpinners == nil)
+                groupSpinners = [[NSMapTable alloc] initWithKeyOptions:NSMapTableStrongMemory | NSMapTableObjectPointerPersonality valueOptions:NSMapTableStrongMemory | NSMapTableObjectPointerPersonality capacity:0];
             spinner = [[NSProgressIndicator alloc] init];
             [spinner setControlSize:NSSmallControlSize];
             [spinner setStyle:NSProgressIndicatorSpinningStyle];
             [spinner setDisplayedWhenStopped:NO];
             [spinner sizeToFit];
             [spinner setUsesThreadedAnimation:YES];
-            CFDictionarySetValue(groupSpinners, group, spinner);
+            [groupSpinners setObject:spinner forKey:group];
             [spinner release];
         }
         [spinner startAnimation:nil];
     } else if (spinner) {
         [spinner stopAnimation:nil];
         [spinner removeFromSuperview];
-        CFDictionaryRemoveValue(groupSpinners, group);
+        [groupSpinners removeObjectForKey:group];
         spinner = nil;
     }
     
@@ -754,12 +754,19 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (void)removeSpinnerForGroup:(BDSKGroup *)group{
-    NSProgressIndicator *spinner = groupSpinners == NULL ? nil : (id)CFDictionaryGetValue(groupSpinners, group);
+    NSProgressIndicator *spinner = [groupSpinners objectForKey:group];
     if (spinner) {
         [spinner stopAnimation:nil];
         [spinner removeFromSuperview];
-        CFDictionaryRemoveValue(groupSpinners, group);
+        [groupSpinners removeObjectForKey:group];
     }
+}
+
+- (void)removeSpinnersFromSuperview {
+    NSEnumerator *spinnerEnum = [groupSpinners objectEnumerator];
+    NSProgressIndicator *spinner;
+    while (spinner = [spinnerEnum nextObject])
+        [spinner removeFromSuperview];
 }
 
 #pragma mark Actions
@@ -1596,7 +1603,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     
     [groups sortUsingDescriptors:sortDescriptors];
     
-    [[(NSMutableDictionary *)groupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    [self removeSpinnersFromSuperview];
     [groupOutlineView reloadData];
 	
 	// select the current groups. Otherwise select Library

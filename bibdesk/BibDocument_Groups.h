@@ -95,6 +95,7 @@
 
 - (NSProgressIndicator *)spinnerForGroup:(BDSKGroup *)group;
 - (void)removeSpinnerForGroup:(BDSKGroup *)group;
+- (void)removeSpinnersFromSuperview;
 
 - (IBAction)sortGroupsByGroup:(id)sender;
 - (IBAction)sortGroupsByCount:(id)sender;

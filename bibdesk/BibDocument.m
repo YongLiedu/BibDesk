@@ -297,8 +297,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [migrationController release];
     [documentSearch release];
     [mainWindowSetupDictionary release];
-    if (groupSpinners)
-        CFRelease(groupSpinners);
+    [groupSpinners release];
     [super dealloc];
 }
 
