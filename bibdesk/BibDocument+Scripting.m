@@ -616,7 +616,7 @@
 }
 
 - (id)clipboard {
-    NSScriptClassDescription *containerClassDescription = (NSScriptClassDescription *)[NSClassDescription classDescriptionForClass:[NSApp class]];
+    NSScriptClassDescription *containerClassDescription = (NSScriptClassDescription *)[NSClassDescription classDescriptionForClass:[NSApplication class]];
     return [[[NSPropertySpecifier allocWithZone: [self zone]] 
           initWithContainerClassDescription: containerClassDescription 
                          containerSpecifier: nil // the application is the null container
