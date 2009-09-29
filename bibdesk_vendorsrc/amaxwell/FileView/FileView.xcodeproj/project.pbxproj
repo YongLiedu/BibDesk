@@ -48,7 +48,7 @@
 		CE89233F0D7CBB1A006D514C /* FVOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D5E90D7C22550034C2A8 /* FVOperation.m */; };
 		CEA831140DC1FAB500B551D1 /* FVAccessibilityIconElement.h in Headers */ = {isa = PBXBuildFile; fileRef = CEA831120DC1FAB500B551D1 /* FVAccessibilityIconElement.h */; };
 		CEA831150DC1FAB500B551D1 /* FVAccessibilityIconElement.m in Sources */ = {isa = PBXBuildFile; fileRef = CEA831130DC1FAB500B551D1 /* FVAccessibilityIconElement.m */; };
-		CEF33C210F76F15F0026452B /* FVPreviewer.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEF33C1F0F76F15F0026452B /* FVPreviewer.nib */; };
+		CEC9932D1072B6C50089F20D /* FVPreviewer.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEC9932C1072B6C50089F20D /* FVPreviewer.xib */; };
 		CEFC19B10F693E8B00B2AEE6 /* FileView.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC19B00F693E8B00B2AEE6 /* FileView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CEFC1CF60F6AB84000B2AEE6 /* _FVDocumentDescription.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFC1CE90F6AB84000B2AEE6 /* _FVDocumentDescription.h */; };
 		CEFC1CF70F6AB84000B2AEE6 /* _FVDocumentDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFC1CEA0F6AB84000B2AEE6 /* _FVDocumentDescription.m */; };
@@ -194,7 +194,7 @@
 		CE65FC5B0F72578D0089F9DC /* _FVSplitSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _FVSplitSet.m; sourceTree = "<group>"; };
 		CEA831120DC1FAB500B551D1 /* FVAccessibilityIconElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVAccessibilityIconElement.h; sourceTree = "<group>"; };
 		CEA831130DC1FAB500B551D1 /* FVAccessibilityIconElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVAccessibilityIconElement.m; sourceTree = "<group>"; };
-		CEF33C1F0F76F15F0026452B /* FVPreviewer.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; path = FVPreviewer.nib; sourceTree = "<group>"; };
+		CEC9932C1072B6C50089F20D /* FVPreviewer.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FVPreviewer.xib; sourceTree = "<group>"; };
 		CEFC19B00F693E8B00B2AEE6 /* FileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileView.h; sourceTree = "<group>"; };
 		CEFC1CE90F6AB84000B2AEE6 /* _FVDocumentDescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _FVDocumentDescription.h; sourceTree = "<group>"; };
 		CEFC1CEA0F6AB84000B2AEE6 /* _FVDocumentDescription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _FVDocumentDescription.m; sourceTree = "<group>"; };
@@ -344,10 +344,10 @@
 		089C1665FE841158C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				CEC9932C1072B6C50089F20D /* FVPreviewer.xib */,
 				8DC2EF5A0486A6940098B216 /* Info.plist */,
 				089C1666FE841158C02AAC07 /* InfoPlist.strings */,
 				F9E469350CFF6D12003E6C0A /* FileView.strings */,
-				CEF33C1F0F76F15F0026452B /* FVPreviewer.nib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -699,7 +699,7 @@
 				8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */,
 				F9F22DE90CDAD53300A9D449 /* License in Resources */,
 				F9E469370CFF6D12003E6C0A /* FileView.strings in Resources */,
-				CEF33C210F76F15F0026452B /* FVPreviewer.nib in Resources */,
+				CEC9932D1072B6C50089F20D /* FVPreviewer.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
