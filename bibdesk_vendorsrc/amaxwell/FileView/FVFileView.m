@@ -2483,7 +2483,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
         newPath = [[NSString stringWithFormat:@"%@-%i", basePath, ++i] stringByAppendingPathExtension:ext];
     } while ([fm fileExistsAtPath:newPath]);
     
-    if ([fm copyPath:path toPath:newPath handler:nil]) {
+    if ([fm copyItemAtPath:path toPath:newPath error:NULL]) {
         return [NSURL fileURLWithPath:newPath];
     } else {
         return nil;

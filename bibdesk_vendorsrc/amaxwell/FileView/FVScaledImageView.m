@@ -79,7 +79,7 @@ static NSDictionary *_textAttributes = nil;
         [kindString release];
     }
     
-    NSDictionary *fattrs = [[NSFileManager defaultManager] fileAttributesAtPath:[_fileURL path] traverseLink:NO];
+    NSDictionary *fattrs = [[NSFileManager defaultManager] attributesOfItemAtPath:[_fileURL path] error:NULL];
     if (fattrs) {
         NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
         [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
