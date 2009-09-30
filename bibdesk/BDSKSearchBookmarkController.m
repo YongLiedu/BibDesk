@@ -426,12 +426,9 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 }
 
 - (void)outlineView:(NSOutlineView *)ov deleteItems:(NSArray *)items {
-    NSEnumerator *itemEnum = [minimumCoverForBookmarks(items) reverseObjectEnumerator];
-    BDSKSearchBookmark *item;
-    
     [self endEditing];
     
-    while (item = [itemEnum  nextObject]) {
+    for (BDSKSearchBookmark *item in [minimumCoverForBookmarks(items) reverseObjectEnumerator]) {
         BDSKSearchBookmark *parent = [item parent];
         NSUInteger itemIndex = [[parent children] indexOfObject:item];
         if (itemIndex != NSNotFound)

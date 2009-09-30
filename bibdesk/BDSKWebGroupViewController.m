@@ -306,16 +306,15 @@
 
 - (void)menuNeedsUpdate:(NSMenu *)menu {
     WebBackForwardList *backForwardList = [webView backForwardList];
-    NSEnumerator *itemEnum = nil;
+    id items = nil;
     if (menu == backMenu)
-        itemEnum = [[backForwardList backListWithLimit:MAX_HISTORY] reverseObjectEnumerator];
+        items = [[backForwardList backListWithLimit:MAX_HISTORY] reverseObjectEnumerator];
     else if (menu == forwardMenu)
-        itemEnum = [[backForwardList forwardListWithLimit:MAX_HISTORY] objectEnumerator];
+        items = [backForwardList forwardListWithLimit:MAX_HISTORY];
     else
         return;
     [menu removeAllItems];
-    WebHistoryItem *item;
-    while (item = [itemEnum nextObject]) {
+    for (WebHistoryItem *item in items) {
         NSMenuItem *menuItem = [menu addItemWithTitle:([item title] ?: @"") action:@selector(goBackForwardInHistory:) keyEquivalent:@""];
         [menuItem setTarget:self];
         [menuItem setRepresentedObject:item];

@@ -596,12 +596,10 @@ enum {
 
 - (void)updateColumnsMenu{
     NSArray *shownColumns = [self tableColumnIdentifiers];
-    NSEnumerator *shownColNamesE = [shownColumns reverseObjectEnumerator];
-	NSString *colName;
 	NSMenuItem *item = nil;
     NSMenu *menu = [[self headerView] menu];
     
-    if(menu == nil){
+    if (menu == nil) {
         menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
         [menu addItem:[NSMenuItem separatorItem]];
         item = [menu addItemWithTitle:[NSLocalizedString(@"Add Other", @"Menu title") stringByAppendingEllipsis]
@@ -621,11 +619,11 @@ enum {
         [menu release];
     }
 	
-    while([[menu itemAtIndex:0] isSeparatorItem] == NO)
+    while ([[menu itemAtIndex:0] isSeparatorItem] == NO)
         [menu removeItemAtIndex:0];
     
 	// next add all the shown columns in the order they are shown
-	while(colName = [shownColNamesE nextObject]){
+	for (NSString *colName in [shownColumns reverseObjectEnumerator]) {
         item = [menu insertItemWithTitle:[colName localizedFieldName]
                                   action:@selector(columnsMenuSelectTableColumn:)
                            keyEquivalent:@""
@@ -635,7 +633,7 @@ enum {
 		[item setState:NSOnState];
 	}
     
-	if([[self cornerView] isKindOfClass:[BDSKImagePopUpButton class]] && menu != nil) {
+	if ([[self cornerView] isKindOfClass:[BDSKImagePopUpButton class]] && menu != nil) {
         menu = [self columnsMenu]; // this is already a copy
         [menu insertItemWithTitle:@"" action:NULL keyEquivalent:@"" atIndex:0];
         [(BDSKImagePopUpButton *)[self cornerView] setMenu:menu];

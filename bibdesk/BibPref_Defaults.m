@@ -145,10 +145,9 @@ static NSSet *alwaysDisabledFields = nil;
 		}        
 		
 		// Add any remaining Textual default fields at the beginning
-		NSEnumerator *e = [defaultFields reverseObjectEnumerator];
 		type = [NSNumber numberWithInt:BDSKStringType];
 		isDefault = [NSNumber numberWithBool:YES];
-		while(field = [e nextObject]){
+		for (field in [defaultFields reverseObjectEnumerator]){
 			if([customFieldsSet containsObject:field])
 				continue;
 			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];

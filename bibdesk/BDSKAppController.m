@@ -651,13 +651,10 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         
     } else if ([menu isEqual:groupFieldMenu]) {
         
-        NSEnumerator *fieldEnum = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] reverseObjectEnumerator];
-        NSString *field;
-        
         while ([[menu itemAtIndex:1] isSeparatorItem] == NO)
             [menu removeItemAtIndex:1];
         
-        while (field = [fieldEnum nextObject]) {
+        for (NSString *field in [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] reverseObjectEnumerator]) {
             NSMenuItem *menuItem = [menu insertItemWithTitle:field action:@selector(changeGroupFieldAction:) keyEquivalent:@"" atIndex:1];
             [menuItem setRepresentedObject:field];
         }
