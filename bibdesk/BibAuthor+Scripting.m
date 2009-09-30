@@ -56,19 +56,13 @@
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
     BibAuthor *newAuth = [BibAuthor authorWithName:aName andPub:nil];
-    BibAuthor *author = nil;
-    
 	for (BibItem *pub in publications) {
 		for (BibAuthor *auth in [pub pubAuthors]) {
-			if ([auth isEqual:newAuth]) {
-				author = auth;
-                break;
-            }
+			if ([auth isEqual:newAuth])
+				return auth;
 		}
-        if (author) break;
 	}
-    
-	return author;
+	return nil;
 }
 
 + (NSArray *)editorsInPublications:(NSArray *)publications {
@@ -81,19 +75,13 @@
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
     BibAuthor *newAuth = [BibAuthor authorWithName:aName andPub:nil];
-    BibAuthor *editor = nil;
-
 	for (BibItem *pub in publications) {
 		for (BibAuthor *auth in [pub pubEditors]) {
-			if ([auth isEqual:newAuth]) {
-				editor = auth;
-                break;
-            }
+			if ([auth isEqual:newAuth])
+				return auth;
 		}
-        if (editor) break;
 	}
-    
-	return editor;
+	return nil;
 }
 
 - (NSScriptObjectSpecifier *) objectSpecifier {
