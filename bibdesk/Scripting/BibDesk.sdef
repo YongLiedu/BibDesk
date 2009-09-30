@@ -1,11 +1,260 @@
 <?xml version="1.0"?>
 <!DOCTYPE dictionary SYSTEM "file://localhost/System/Library/DTDs/sdef.dtd">
 
-<!-- declare the namespace for using XInclude so we can include the standard suite -->
-<dictionary title="BibDesk Terminology" xmlns:xi="http://www.w3.org/2003/XInclude">
+<dictionary title="BibDesk Terminology">
 
-	<!-- use XInclude to include the standard suite -->
-	<xi:include href="file:///System/Library/ScriptingDefinitions/CocoaStandard.sdef" xpointer="xpointer(/dictionary/suite)"/>
+	<suite name="Standard Suite" code="????" description="Common classes and commands for all applications.">
+
+		<command name="open" code="aevtodoc" description="Open a document.">
+			<direct-parameter description="The file(s) to be opened.">
+				<type type="file"/>
+				<type type="file" list="yes"/>
+			</direct-parameter>
+			<result description="The opened document(s).">
+				<type type="document"/>
+				<type type="document" list="yes"/>
+			</result>
+		</command>
+
+		<enumeration name="save options" code="savo">
+			<enumerator name="yes" code="yes " description="Save the file."/>
+			<enumerator name="no" code="no  " description="Do not save the file."/>
+			<enumerator name="ask" code="ask " description="Ask the user whether or not to save the file."/>
+		</enumeration>
+
+		<command name="close" code="coreclos" description="Close a document.">
+			<cocoa class="NSCloseCommand"/>
+			<direct-parameter type="specifier" description="the document(s) or window(s) to close."/>
+			<parameter name="saving" code="savo" type="save options" optional="yes" description="Should changes be saved before closing?">
+				<cocoa key="SaveOptions"/>
+			</parameter>
+			<parameter name="saving in" code="kfil" type="file" optional="yes" description="The file in which to save the document, if so.">
+				<cocoa key="File"/>
+			</parameter>
+		</command>
+
+		<command name="save" code="coresave" description="Save a document.">
+			<direct-parameter type="specifier" description="The document(s) or window(s) to save."/>
+			<parameter name="in" code="kfil" type="file" optional="yes" description="The file in which to save the document. If this is supplied, works as Save As or Export.">
+				<cocoa key="File"/>
+			</parameter>
+			<parameter name="as" code="fltp" type="text" optional="yes" description="The file format to use. If this is supplied, works as Export.">
+				<cocoa key="FileType"/>
+			</parameter>
+		</command>
+
+		<enumeration name="printing error handling" code="enum">
+			<enumerator name="standard" code="lwst" description="Standard PostScript error handling">
+				<cocoa boolean-value="NO"/>
+			</enumerator>
+			<enumerator name="detailed" code="lwdt" description="print a detailed report of PostScript errors">
+				<cocoa boolean-value="YES"/>
+			</enumerator>
+		</enumeration>
+
+		<record-type name="print settings" code="pset">
+			<property name="copies" code="lwcp" type="integer" description="the number of copies of a document to be printed">
+				<cocoa key="NSCopies"/>
+			</property>
+			<property name="collating" code="lwcl" type="boolean" description="Should printed copies be collated?">
+				<cocoa key="NSMustCollate"/>
+			</property>
+			<property name="starting page" code="lwfp" type="integer" description="the first page of the document to be printed">
+				<cocoa key="NSFirstPage"/>
+			</property>
+			<property name="ending page" code="lwlp" type="integer" description="the last page of the document to be printed">
+				<cocoa key="NSLastPage"/>
+			</property>
+			<property name="pages across" code="lwla" type="integer" description="number of logical pages laid across a physical page">
+				<cocoa key="NSPagesAcross"/>
+			</property>
+			<property name="pages down" code="lwld" type="integer" description="number of logical pages laid out down a physical page">
+				<cocoa key="NSPagesDown"/>
+			</property>
+			<property name="requested print time" code="lwqt" type="date" description="the time at which the desktop printer should print the document">
+				<cocoa key="NSPrintTime"/>
+			</property>
+			<property name="error handling" code="lweh" type="printing error handling" description="how errors are handled">
+				<cocoa key="NSDetailedErrorReporting"/>
+			</property>
+			<property name="fax number" code="faxn" type="text" description="for fax number">
+				<cocoa key="NSFaxNumber"/>
+			</property>
+			<property name="target printer" code="trpr" type="text" description="for target printer">
+				<cocoa key="NSPrinterName"/>
+			</property>
+		</record-type>
+
+		<command name="print" code="aevtpdoc" description="Print a document.">
+			<direct-parameter description="The file(s), document(s), or window(s) to be printed.">
+				<type type="file" list="yes"/>
+				<type type="specifier"/>
+			</direct-parameter>
+			<parameter name="with properties" code="prdt" type="print settings" optional="yes" description="The print settings to use.">
+				<cocoa key="PrintSettings"/>
+			</parameter>
+			<parameter name="print dialog" code="pdlg" type="boolean" optional="yes" description="Should the application show the print dialog?">
+				<cocoa key="ShowPrintDialog"/>
+			</parameter>
+		</command>
+
+		<command name="quit" code="aevtquit" description="Quit the application.">
+			<cocoa class="NSQuitCommand"/>
+			<parameter name="saving" code="savo" type="save options" optional="yes" description="Should changes be saved before quitting?">
+				<cocoa key="SaveOptions"/>
+			</parameter>
+		</command>
+
+		<command name="count" code="corecnte" description="Return the number of elements of a particular class within an object.">
+			<cocoa class="NSCountCommand"/>
+			<direct-parameter type="specifier" description="The objects to be counted."/>
+			<parameter name="each" code="kocl" type="type" optional="yes" description="The class of objects to be counted." hidden="yes">
+				<cocoa key="ObjectClass"/>
+			</parameter>
+			<result type="integer" description="The count."/>
+		</command>
+
+		<command name="delete" code="coredelo" description="Delete an object.">
+			<cocoa class="NSDeleteCommand"/>
+			<direct-parameter type="specifier" description="The object(s) to delete."/>
+		</command>
+
+		<command name="duplicate" code="coreclon" description="Copy an object.">
+			<cocoa class="NSCloneCommand"/>
+			<direct-parameter type="specifier" description="The object(s) to copy."/>
+			<parameter name="to" code="insh" type="location specifier" description="The location for the new copy or copies." optional="yes">
+				<cocoa key="ToLocation"/>
+			</parameter>
+			<parameter name="with properties" code="prdt" type="record" description="Properties to set in the new copy or copies right away." optional="yes">
+				<cocoa key="WithProperties"/>
+			</parameter>
+		</command>
+
+		<command name="exists" code="coredoex" description="Verify that an object exists.">
+			<cocoa class="NSExistsCommand"/>
+			<direct-parameter type="any" description="The object(s) to check."/>
+			<result type="boolean" description="Did the object(s) exist?"/>
+		</command>
+
+		<command name="make" code="corecrel" description="Create a new object.">
+			<cocoa class="NSCreateCommand"/>
+			<parameter name="new" code="kocl" type="type" description="The class of the new object.">
+				<cocoa key="ObjectClass"/>
+			</parameter>
+			<parameter name="at" code="insh" type="location specifier" optional="yes" description="The location at which to insert the object.">
+				<cocoa key="Location"/>
+			</parameter>
+			<parameter name="with data" code="data" type="any" optional="yes" description="The initial contents of the object.">
+				<cocoa key="ObjectData"/>
+			</parameter>
+			<parameter name="with properties" code="prdt" type="record" optional="yes" description="The initial values for properties of the object.">
+				<cocoa key="KeyDictionary"/>
+			</parameter>
+			<result type="specifier" description="The new object."/>
+		</command>
+
+		<command name="move" code="coremove" description="Move an object to a new location.">
+			<cocoa class="NSMoveCommand"/>
+			<direct-parameter type="specifier" description="The object(s) to move."/>
+			<parameter name="to" code="insh" type="location specifier" description="The new location for the object(s).">
+				<cocoa key="ToLocation"/>
+			</parameter>
+		</command>
+
+		<class name="application" code="capp" description="The application's top-level scripting object.">
+			<cocoa class="NSApplication"/>
+			<property name="name" code="pnam" type="text" access="r" description="The name of the application."/>
+			<property name="frontmost" code="pisf" type="boolean" access="r" description="Is this the active application?">
+				<cocoa key="isActive"/>
+			</property>
+			<property name="version" code="vers" type="text" access="r" description="The version number of the application."/>
+			<element type="document">
+				<cocoa key="orderedDocuments"/>
+			</element>
+			<element type="window" access="r">
+				<cocoa key="orderedWindows"/>
+			</element>
+			<responds-to command="open">
+				<cocoa method="handleOpenScriptCommand:"/>
+			</responds-to>
+			<responds-to command="print">
+				<cocoa method="handlePrintScriptCommand:"/>
+			</responds-to>
+			<responds-to command="quit">
+				<cocoa method="handleQuitScriptCommand:"/>
+			</responds-to>
+		</class>
+
+		<class name="document" code="docu" description="A document.">
+			<cocoa class="NSDocument"/>
+			<property name="name" code="pnam" type="text" access="r" description="Its name.">
+				<cocoa key="displayName"/>
+			</property>
+			<property name="modified" code="imod" type="boolean" access="r" description="Has it been modified since the last save?">
+				<cocoa key="isDocumentEdited"/>
+			</property>
+			<property name="file" code="file" type="file" access="r" description="Its location on disk, if it has one.">
+				<cocoa key="fileURL"/>
+			</property>
+			<responds-to command="close">
+				<cocoa method="handleCloseScriptCommand:"/>
+			</responds-to>
+			<responds-to command="print">
+				<cocoa method="handlePrintScriptCommand:"/>
+			</responds-to>
+			<responds-to command="save">
+				<cocoa method="handleSaveScriptCommand:"/>
+			</responds-to>
+		</class>
+
+		<class name="window" code="cwin" description="A window.">
+			<cocoa class="NSWindow"/>
+			<property name="name" code="pnam" type="text" access="r" description="The title of the window.">
+				<cocoa key="title"/>
+			</property>
+			<property name="id" code="ID  " type="integer" access="r" description="The unique identifier of the window.">
+				<cocoa key="uniqueID"/>
+			</property>
+			<property name="index" code="pidx" type="integer" description="The index of the window, ordered front to back.">
+				<cocoa key="orderedIndex"/>
+			</property>
+			<property name="bounds" code="pbnd" type="rectangle" description="The bounding rectangle of the window.">
+				<cocoa key="boundsAsQDRect"/>
+			</property>
+			<property name="closeable" code="hclb" type="boolean" access="r" description="Does the window have a close button?">
+				<cocoa key="hasCloseBox"/>
+			</property>
+			<property name="miniaturizable" code="ismn" type="boolean" access="r" description="Does the window have a minimize button?">
+				<cocoa key="isMiniaturizable"/>
+			</property>
+			<property name="miniaturized" code="pmnd" type="boolean" description="Is the window minimized right now?">
+				<cocoa key="isMiniaturized"/>
+			</property>
+			<property name="resizable" code="prsz" type="boolean" access="r" description="Can the window be resized?">
+				<cocoa key="isResizable"/>
+			</property>
+			<property name="visible" code="pvis" type="boolean" description="Is the window visible right now?">
+				<cocoa key="isVisible"/>
+			</property>
+			<property name="zoomable" code="iszm" type="boolean" access="r" description="Does the window have a zoom button?">
+				<cocoa key="isZoomable"/>
+			</property>
+			<property name="zoomed" code="pzum" type="boolean" description="Is the window zoomed right now?">
+				<cocoa key="isZoomed"/>
+			</property>
+			<property name="document" code="docu" type="document" access="r" description="The document whose contents are displayed in the window."/>
+			<responds-to command="close">
+				<cocoa method="handleCloseScriptCommand:"/>
+			</responds-to>
+			<responds-to command="print">
+				<cocoa method="handlePrintScriptCommand:"/>
+			</responds-to>
+			<responds-to command="save">
+				<cocoa method="handleSaveScriptCommand:"/>
+			</responds-to>
+		</class>
+
+	</suite>
 
 	<suite name="Text Suite" code="TEXT"
 		description="A set of basic classes for text processing.">
@@ -179,6 +428,291 @@
                 <cocoa key="richText"/>
             </contents>
         </class>
+
+	</suite>
+    
+    
+    <suite name="Bibdesk Suite" code="BDSK"
+			description="Bibdesk specific commands and classes for dealing with bibliographies and publications.">
+        <cocoa name="BibDeskSuite"/>
+        
+        <command name="add" code="BDSKAdd "
+			description="Add items to a collection.">
+            <cocoa class="BDSKAddCommand"/>
+            <direct-parameter
+				description="the object(s) to add.">
+                <type type="specifier"/>
+                <type type="specifier" list="yes"/>
+                <type type="any"/>
+                <type type="any" list="yes"/>
+            </direct-parameter>
+            <parameter name="to" code="insh"
+                description="The container or location to add the item to.">
+                <cocoa key="ToLocation"/>
+                <type type="specifier"/>
+                <type type="location specifier"/>
+            </parameter>
+            <result description="the added item">
+                <type type="specifier"/>
+                <type type="specifier" list="yes"/>
+                <type type="any"/>
+                <type type="any" list="yes"/>
+            </result>
+        </command>
+        
+        <command name="remove" code="BDSKRemv"
+			description="Remove items from a collection.">
+            <cocoa class="BDSKRemoveCommand"/>
+            <direct-parameter
+				description="the object(s) to remove.">
+                <type type="specifier"/>
+                <type type="specifier" list="yes"/>
+            </direct-parameter>
+            <parameter name="from" code="from" optional="yes"
+                description="The container to remove the object(s) from.">
+                <cocoa key="FromContainer"/>
+                <type type="specifier"/>
+            </parameter>
+        </command>
+        
+        <command name="show" code="BDSKshow"
+			description="Shows an author or a publication in a separate window for editing.">
+            <cocoa class="BDSKShowCommand"/>
+            <direct-parameter description="The author or publication to show in the new window.">
+                <type type="author"/>
+                <type type="publication"/>
+            </direct-parameter>
+        </command>
+        
+        <command name="search" code="BDSKsrch"
+			description="Returns a list of publications matching the given string. Typical usage: search for string.">
+            <cocoa class="BDSKSearchForCommand"/>
+            <!-- this needs to be optional or the autocomplete script handler won't work -->
+            <direct-parameter type="specifier" optional="yes"
+                description="The object responding to the command. Either the application or a document."/>
+            <!-- type is actually application | document above -->
+            <parameter name="for" code="for " type="text"
+                description="The string to search for.">
+                <cocoa key="for"/>
+            </parameter>
+            <parameter name="for completion" code="cmpl" type="boolean" optional="yes"
+                description="Specifies whether to return a string for completion rather than a publication.">
+                <cocoa key="forCompletion"/>
+            </parameter>                
+            <result description="list of results">
+                <type type="publication" list="yes"/>
+                <type type="text" list="yes"/>
+            </result>
+        </command>
+        
+        <command name="sort" code="BDSKSort"
+			description="Returns a list of publications sorted by a field.">
+            <cocoa class="BDSKSortCommand"/>
+            <direct-parameter
+                description="The publications to sort.">
+                <type type="publication" list="yes"/>
+            </direct-parameter>
+            <parameter name="by" code="by  " type="text"
+                description="The field to sort by.">
+                <cocoa key="by"/>
+            </parameter>
+            <parameter name="subsort by" code="SubS" type="text" optional="yes"
+                description="The secondary field to subsort by.">
+                <cocoa key="subsort"/>
+            </parameter>
+            <parameter name="ascending" code="Ascn" type="boolean" optional="yes"
+                description="Is the sort ascending? Defaults to true.">
+                <cocoa key="ascending"/>
+            </parameter>
+            <parameter name="subsort ascending" code="SAsc" type="boolean" optional="yes"
+                description="Is the subsort ascending? Defaults to the value of ascending.">
+                <cocoa key="subsortAscending"/>
+            </parameter>
+            <result description="sorted list of publications">
+                <type type="publication" list="yes"/>
+            </result>
+        </command>
+
+        <command name="export" code="BDSKexpt"
+			description="Exports publications in the document using a template to file.">
+            <cocoa class="BDSKExportUsingTemplateCommand"/>
+            <direct-parameter type="document"
+                description="The object responding to the command, the document."/>
+            <parameter name="using template" code="uset" optional="yes"
+                description="The name or file of the template to use. Either this, 'using text', or 'using rich text' should be used.">
+                <type type="text"/>
+                <type type="file"/>
+                <cocoa key="using"/>
+            </parameter>
+            <parameter name="using text" code="usTx" type="text" optional="yes"
+                description="The template text to use. Either this, 'using template', or 'using rich text' should be used.">
+                <cocoa key="usingText"/>
+            </parameter>
+            <parameter name="using rich text" code="usRT" type="rich text" optional="yes"
+                description="The template rich text to use. Either this, 'using template', or 'using text' should be used.">
+                <cocoa key="usingRichText"/>
+            </parameter>
+            <parameter name="to" code="to  "
+                description="The file to export to.">
+                <type type="file"/>
+                <type type="specifier" hidden="yes"/>
+                <cocoa key="to"/>
+            </parameter>
+            <parameter name="for" code="for " optional="yes"
+                description="Specifies the publication or list of publications to export.">
+                <type type="publication" list="yes"/>
+                <type type="publication"/>
+                <cocoa key="for"/>
+            </parameter>                
+            <parameter name="in" code="in  " optional="yes"
+                description="Specifies an ordered list of publications used to provide the itemIndex of the exported publications. These must include the parsed publications themselves and defaults to the exported publications.">
+                <type type="publication" list="yes"/>
+                <cocoa key="in"/>
+            </parameter>                
+        </command>
+        
+        <command name="templated text" code="BDSKttxt"
+			description="Returns a string representation of publications in the document using a template.">
+            <cocoa class="BDSKTemplatedTextCommand"/>
+            <direct-parameter type="document"
+                description="The object responding to the command, the document."/>
+            <parameter name="using" code="usng" optional="yes"
+                description="The name or file of the template to use. Either this or 'using text' should be used.">
+                <type type="text"/>
+                <type type="file"/>
+                <cocoa key="using"/>
+            </parameter>
+            <parameter name="using text" code="usTx" type="text" optional="yes"
+                description="The template text to use. Either this or 'using' should be used.">
+                <cocoa key="usingText"/>
+            </parameter>
+            <parameter name="for" code="for " optional="yes"
+                description="Specifies the publication or list of publications to parse.">
+                <type type="publication" list="yes"/>
+                <type type="publication"/>
+                <cocoa key="for"/>
+            </parameter>                
+            <parameter name="in" code="in  " optional="yes"
+                description="Specifies an ordered list of publications used to provide the itemIndex of the parsed publications. These must include the parsed publications themselves and defaults to the parsed publications.">
+                <type type="publication" list="yes"/>
+                <cocoa key="in"/>
+            </parameter>                
+            <result description="the templated text" type="text">
+            </result>
+        </command>
+        
+        <command name="templated rich text" code="BDSKtrtx"
+			description="Returns a styled text representation of publications in the document using a template.">
+            <cocoa class="BDSKTemplatedRichTextCommand"/>
+            <direct-parameter type="document"
+                description="The object responding to the command, the document."/>
+            <parameter name="using" code="usng" optional="yes"
+                description="The name or file of the template to use. Either this or 'using rich text' should be used.">
+                <type type="text"/>
+                <type type="file"/>
+                <cocoa key="using"/>
+            </parameter>
+            <parameter name="using rich text" code="usRT" type="rich text" optional="yes"
+                description="The template rich text to use. Either this, or 'using' should be used.">
+                <cocoa key="usingRichText"/>
+            </parameter>
+            <parameter name="for" code="for " optional="yes"
+                description="Specifies the publication or list of publications to parse.">
+                <type type="publication" list="yes"/>
+                <type type="publication"/>
+                <cocoa key="for"/>
+            </parameter>                
+            <parameter name="in" code="in  " optional="yes"
+                description="Specifies an ordered list of publications used to provide the itemIndex of the parsed publications. These must include the parsed publications themselves and defaults to the parsed publications.">
+                <type type="publication" list="yes"/>
+                <cocoa key="in"/>
+            </parameter>                
+            <result description="the templated rich text" type="specifier">
+            </result>
+        </command>
+
+        <command name="import" code="BDSKImpt"
+			description="Imports publications in the document using a string format.">
+            <cocoa class="BDSKImportCommand"/>
+            <direct-parameter type="document"
+                description="The object responding to the command, the document."/>
+            <parameter name="from" code="from" optional="yes"
+                description="The string or file containing publications in a supported string format. Either this or 'for search term' must be specified.">
+                <type type="text"/>
+                <type type="file"/>
+                <cocoa key="from"/>
+            </parameter>
+            <parameter name="for search term" code="Srch" optional="yes"
+                description="The search term to search the PubMed database. Either this or 'from' must be specified.">
+                <type type="text"/>
+                <cocoa key="searchTerm"/>
+            </parameter>
+            <result description="The publications parsed from the string format and added to the document">
+                <type type="publication" list="yes"/>
+            </result>
+        </command>
+        
+        <command name="parse format" code="BDSKpfmt"
+			description="Parses a format string for a field from a publication. Does not set the field.">
+            <cocoa class="BDSKParseFormatCommand"/>
+            <direct-parameter type="text"
+                description="The format string to parse."/>
+            <parameter name="for" code="for " optional="yes"
+                description="The field or field name for which to parse the format string.">
+                <type type="field"/>
+                <type type="text"/>
+                <cocoa key="for"/>
+            </parameter>
+            <parameter name="for file at index" type="integer" code="Indx" optional="yes"
+                description="The index of the linked file for which to parse the format. Defaults to 1 if there is a is a field set.">
+                <cocoa key="index"/>
+            </parameter>
+            <parameter name="from" type="publication" code="from" optional="yes"
+                description="The publication for which to parse the format string. This is required unless a full field reference was given.">
+                <cocoa key="from"/>
+            </parameter>
+            <parameter name="check" type="boolean" code="Chck" optional="yes"
+                description="Check whether all information to parse the format is available. 'missing value' is returned when this is set and the check fails.">
+                <cocoa key="check"/>
+            </parameter>
+            <result description="the parsed format" type="text">
+            </result>
+        </command>    
+        
+        <command name="auto file" code="BDSKAfil"
+			description="Auto file a linked file.">
+            <cocoa class="BDSKAutoFileCommand"/>
+            <direct-parameter type="publication"
+                description="The pubication for which to auto file a linked file."/>
+            <parameter name="for" type="text" code="for " optional="yes" hidden="yes"
+                description="The local file field name for which to auto file. Deprecated.">
+                <cocoa key="for"/>
+            </parameter>
+            <parameter name="at index" type="integer" code="Indx" optional="yes"
+                description="The index of the linked file to auto file. Defaults to 1 if there is a location set, otherwise all linked files are auto filed.">
+                <cocoa key="index"/>
+            </parameter>
+            <parameter name="to" type="text" code="to  " optional="yes"
+                description="The URL or path to move the linked file to. If not supplied, it is generated using the Local File format.">
+                <cocoa key="to"/>
+            </parameter>
+            <parameter name="check" type="boolean" code="Chck" optional="yes"
+                description="Check whether all information to parse the Local File format is available. Ignored if a location is specified. Defaults to true.">
+                <cocoa key="check"/>
+            </parameter>
+        </command>    
+        
+        <command name="perform BibDesk action with publications" code="BDSKpAct"
+			description="Script handler invoked by script hooks.">
+            <cocoa class="NSScriptCommand"/>
+            <direct-parameter description="A list of publications that is acted upon.">
+                <type type="publication" list="yes"/>
+            </direct-parameter>
+            <parameter name="for script hook" code="fshk" type="script hook"
+                description="The script hook that was invoked.">
+                <cocoa key="forScriptHook"/>
+            </parameter>
+        </command>
         
         <command name="rich text for" code="BDSKRICt"
 			description="Convert raw RTF data to rich text.">
@@ -187,28 +721,9 @@
             <result description="The rich text" type="specifier"/>
         </command>
 
-	</suite>
-    
-    
-    <suite name="Bibdesk Suite" code="BDSK"
-			description="Bibdesk specific commands and classes for dealing with bibliographies and publications.">
-        <cocoa name="BibDeskSuite"/>
-
 		<class-extension extends="application"
 			description="Bibdesk's top level scripting object.">
 			<cocoa class="BDSKApplication"/>
-			<element type="macro" access="r"
-				description="The global macros.">
-				<cocoa key="macros"/>
-			</element>
-			<element type="script hook" access="r"
-				description="The script hook rules known by Bibdesk.">
-				<cocoa key="scriptHooks"/>
-			</element>
-            <element type="rich text format" access="r" hidden="yes"
-                description="Rich text formats.">
-                <cocoa key="richTextFormat"/>
-            </element>
 			<property name="papers folder" code="pfol" type="text" access="r"
 				description="Path to the papers folder as specified in the Auto File preference.">
 				<cocoa key="papersFolder"/>
@@ -250,6 +765,18 @@
 				description="The clipboard. Deprecated.">
 				<cocoa key="clipboard"/>
 			</property>
+			<element type="macro" access="r"
+				description="The global macros.">
+				<cocoa key="macros"/>
+			</element>
+			<element type="script hook" access="r"
+				description="The script hook rules known by Bibdesk.">
+				<cocoa key="scriptHooks"/>
+			</element>
+            <element type="rich text format" access="r" hidden="yes"
+                description="Rich text formats.">
+                <cocoa key="richTextFormat"/>
+            </element>
 			<responds-to name="search">
 				<cocoa method=""/>
 			</responds-to>
@@ -258,6 +785,29 @@
 		<class-extension extends="document"
 			description="A Bibdesk bibliography document.">
 			<cocoa class="BibDocument"/>
+			<property name="filter field" code="filt" type="text"
+				description="Only publications matching this property will be displayed">
+				<cocoa key="searchString"/>
+			</property>
+			<property name="selection" code="sele"
+				description="The selected publications.">
+				<type type="publication" list="yes"/>
+				<cocoa key="selection"/>
+			</property>
+			<property name="group selection" code="GSel"
+				description="The selected groups.">
+				<type type="group" list="yes"/>
+				<cocoa key="groupSelection"/>
+			</property>
+			<property name="displayed publications" code="disp" access="r"
+				description="The publications currently displayed. This can differ from all publications depending on the state of the filter field and recently added publications.">
+				<type type="publication" list="yes"/>
+				<cocoa key="shownPublications"/>
+			</property>
+			<property name="clipboard" code="pcli" type="specifier" access="r" hidden="yes"
+				description="The clipboard">
+				<cocoa key="clipboard"/>
+			</property>
 			<element type="publication"
 				description="Publications in the bibliography">
 				<cocoa key="scriptingPublications"/>
@@ -318,29 +868,6 @@
 				description="The web group in the document">
 				<cocoa key="webGroups"/>
 			</element>
-			<property name="filter field" code="filt" type="text"
-			description="Only publications matching this property will be displayed">
-				<cocoa key="searchString"/>
-			</property>
-			<property name="selection" code="sele"
-				description="The selected publications.">
-				<type type="publication" list="yes"/>
-				<cocoa key="selection"/>
-			</property>
-			<property name="group selection" code="GSel"
-				description="The selected groups.">
-				<type type="group" list="yes"/>
-				<cocoa key="groupSelection"/>
-			</property>
-			<property name="displayed publications" code="disp" access="r"
-				description="The publications currently displayed. This can differ from all publications depending on the state of the filter field and recently added publications.">
-				<type type="publication" list="yes"/>
-				<cocoa key="shownPublications"/>
-			</property>
-			<property name="clipboard" code="pcli" type="specifier" access="r" hidden="yes"
-				description="The clipboard">
-				<cocoa key="clipboard"/>
-			</property>
 			<responds-to name="templated text">
 				<cocoa method=""/>
 			</responds-to>
@@ -361,26 +888,6 @@
 		<class name="publication" plural="publications" code="bibi"
 			description="A publication.">
             <cocoa class="BibItem"/>
-            <element type="author" name="author" access="r"
-                description="Authors of the publication.">
-                <cocoa key="scriptingAuthors"/>
-            </element>
-            <element type="editor" name="editor" access="r"
-                description="Editors of the publication.">
-                <cocoa key="scriptingEditors"/>
-            </element>
-            <element type="field"
-                description="The fields of the publication. These should be accessed by name.">
-                <cocoa key="bibFields"/>
-            </element>
-            <element type="linked file"
-                description="The local files linked to the publication.">
-                <cocoa key="linkedFiles"/>
-            </element>
-            <element type="linked URL"
-                description="The remote URLs linked to the publication.">
-                <cocoa key="linkedURLs"/>
-            </element>
             <property name="id" code="ID  " type="text" access="r"
                 description="Unique ID of the publication.">
                 <cocoa key="uniqueID"/>
@@ -482,6 +989,26 @@
                 description="The color for the publication.">
                 <cocoa key="scriptingColor"/>
             </property>  
+            <element type="author" name="author" access="r"
+                description="Authors of the publication.">
+                <cocoa key="scriptingAuthors"/>
+            </element>
+            <element type="editor" name="editor" access="r"
+                description="Editors of the publication.">
+                <cocoa key="scriptingEditors"/>
+            </element>
+            <element type="field"
+                description="The fields of the publication. These should be accessed by name.">
+                <cocoa key="bibFields"/>
+            </element>
+            <element type="linked file"
+                description="The local files linked to the publication.">
+                <cocoa key="linkedFiles"/>
+            </element>
+            <element type="linked URL"
+                description="The remote URLs linked to the publication.">
+                <cocoa key="linkedURLs"/>
+            </element>
             <responds-to name="add">
                 <cocoa method=""/>
             </responds-to>
@@ -499,10 +1026,6 @@
         <class name="author" plural="authors" code="auth"
 			description="Contains the name of an author, tries to analyze it and list all publications of that author. Author names can be split into four e.g. '(Jean) (de la) (Fontaine) (Jr.)'">
             <cocoa class="BibAuthor"/>
-            <element type="publication" access="r"
-                description="Publications of the author.">
-                <cocoa key="scriptingPublications"/>
-            </element>
             <property name="name" code="pnam" type="text" access="r"
                 description="The author's name. This name is normalized as 'von Last, Jr, First'.">
                 <cocoa key="normalizedName"/>
@@ -539,6 +1062,10 @@
                 description="Whether the author is external.">
                 <cocoa key="isExternal"/>
             </property>  
+            <element type="publication" access="r"
+                description="Publications of the author.">
+                <cocoa key="scriptingPublications"/>
+            </element>
             <responds-to name="show">
                 <cocoa method=""/>
             </responds-to>
@@ -652,22 +1179,6 @@
         <class name="group" plural="groups" code="Grup"
 			description="A group containing publications.">
             <cocoa class="BDSKGroup"/>
-            <element type="publication"
-                description="Publications in the group.">
-                <cocoa key="scriptingPublications"/>
-            </element>
-			<element type="author" access="r"
-				description="Authors of publications in the group">
-				<cocoa key="authors"/>
-			</element>
-            <element type="editor" name="editor" access="r"
-                description="Editors of publications in the group.">
-                <cocoa key="editors"/>
-            </element>
-			<element type="macro" access="r"
-				description="Macros defined in the group">
-				<cocoa key="macros"/>
-			</element>
             <property name="id" code="ID  " type="text" access="r"
                 description="Unique ID of the group.">
                 <cocoa key="scriptingUniqueID"/>
@@ -688,6 +1199,22 @@
                 description="Whether the group is busy retrieving publications">
                 <cocoa key="isRetrieving"/>
             </property>  
+            <element type="publication"
+                description="Publications in the group.">
+                <cocoa key="scriptingPublications"/>
+            </element>
+			<element type="author" access="r"
+				description="Authors of publications in the group">
+				<cocoa key="authors"/>
+			</element>
+            <element type="editor" name="editor" access="r"
+                description="Editors of publications in the group.">
+                <cocoa key="editors"/>
+            </element>
+			<element type="macro" access="r"
+				description="Macros defined in the group">
+				<cocoa key="macros"/>
+			</element>
         </class>
         
         <class name="library group" plural="library groups" code="Libr" inherits="group"
@@ -708,14 +1235,14 @@
         <class name="smart group" plural="smart groups" code="SmGp" inherits="group"
 			description="A smart group containing publications.">
             <cocoa class="BDSKSmartGroup"/>
-            <element type="condition"
-                description="Conditions of the smart group.">
-                <cocoa key="conditions"/>
-            </element>
             <property name="satisfy all" code="SAll" type="boolean"
                 description="Whether the publications in the smart group should satisfy all conditions, as opposed to any condition.">
                 <cocoa key="satisfyAll"/>
             </property>  
+            <element type="condition"
+                description="Conditions of the smart group.">
+                <cocoa key="conditions"/>
+            </element>
         </class>
         
         <class name="field group" plural="field groups" code="FdGp" inherits="group"
@@ -1073,284 +1600,6 @@
                 <cocoa key="pointLists"/>
             </property>
         </record-type>
-        
-        <command name="add" code="BDSKAdd "
-			description="Add items to a collection.">
-            <cocoa class="BDSKAddCommand"/>
-            <direct-parameter
-				description="the object(s) to add.">
-                <type type="specifier"/>
-                <type type="specifier" list="yes"/>
-                <type type="any"/>
-                <type type="any" list="yes"/>
-            </direct-parameter>
-            <parameter name="to" code="insh"
-                description="The container or location to add the item to.">
-                <cocoa key="ToLocation"/>
-                <type type="specifier"/>
-                <type type="location specifier"/>
-            </parameter>
-            <result description="the added item">
-                <type type="specifier"/>
-                <type type="specifier" list="yes"/>
-                <type type="any"/>
-                <type type="any" list="yes"/>
-            </result>
-        </command>
-        
-        <command name="remove" code="BDSKRemv"
-			description="Remove items from a collection.">
-            <cocoa class="BDSKRemoveCommand"/>
-            <direct-parameter
-				description="the object(s) to remove.">
-                <type type="specifier"/>
-                <type type="specifier" list="yes"/>
-            </direct-parameter>
-            <parameter name="from" code="from" optional="yes"
-                description="The container to remove the object(s) from.">
-                <cocoa key="FromContainer"/>
-                <type type="specifier"/>
-            </parameter>
-        </command>
-        
-        <command name="show" code="BDSKshow"
-			description="Shows an author or a publication in a separate window for editing.">
-            <cocoa class="BDSKShowCommand"/>
-            <direct-parameter description="The author or publication to show in the new window.">
-                <type type="author"/>
-                <type type="publication"/>
-            </direct-parameter>
-        </command>
-        
-        <command name="search" code="BDSKsrch"
-			description="Returns a list of publications matching the given string. Typical usage: search for string.">
-            <cocoa class="BDSKSearchForCommand"/>
-            <!-- this needs to be optional or the autocomplete script handler won't work -->
-            <direct-parameter type="specifier" optional="yes"
-                description="The object responding to the command. Either the application or a document."/>
-            <!-- type is actually application | document above -->
-            <parameter name="for" code="for " type="text"
-                description="The string to search for.">
-                <cocoa key="for"/>
-            </parameter>
-            <parameter name="for completion" code="cmpl" type="boolean" optional="yes"
-                description="Specifies whether to return a string for completion rather than a publication.">
-                <cocoa key="forCompletion"/>
-            </parameter>                
-            <result description="list of results">
-                <type type="publication" list="yes"/>
-                <type type="text" list="yes"/>
-            </result>
-        </command>
-        
-        <command name="sort" code="BDSKSort"
-			description="Returns a list of publications sorted by a field.">
-            <cocoa class="BDSKSortCommand"/>
-            <direct-parameter
-                description="The publications to sort.">
-                <type type="publication" list="yes"/>
-            </direct-parameter>
-            <parameter name="by" code="by  " type="text"
-                description="The field to sort by.">
-                <cocoa key="by"/>
-            </parameter>
-            <parameter name="subsort by" code="SubS" type="text" optional="yes"
-                description="The secondary field to subsort by.">
-                <cocoa key="subsort"/>
-            </parameter>
-            <parameter name="ascending" code="Ascn" type="boolean" optional="yes"
-                description="Is the sort ascending? Defaults to true.">
-                <cocoa key="ascending"/>
-            </parameter>
-            <parameter name="subsort ascending" code="SAsc" type="boolean" optional="yes"
-                description="Is the subsort ascending? Defaults to the value of ascending.">
-                <cocoa key="subsortAscending"/>
-            </parameter>
-            <result description="sorted list of publications">
-                <type type="publication" list="yes"/>
-            </result>
-        </command>
-
-        <command name="export" code="BDSKexpt"
-			description="Exports publications in the document using a template to file.">
-            <cocoa class="BDSKExportUsingTemplateCommand"/>
-            <direct-parameter type="document"
-                description="The object responding to the command, the document."/>
-            <parameter name="using template" code="uset" optional="yes"
-                description="The name or file of the template to use. Either this, 'using text', or 'using rich text' should be used.">
-                <type type="text"/>
-                <type type="file"/>
-                <cocoa key="using"/>
-            </parameter>
-            <parameter name="using text" code="usTx" type="text" optional="yes"
-                description="The template text to use. Either this, 'using template', or 'using rich text' should be used.">
-                <cocoa key="usingText"/>
-            </parameter>
-            <parameter name="using rich text" code="usRT" type="rich text" optional="yes"
-                description="The template rich text to use. Either this, 'using template', or 'using text' should be used.">
-                <cocoa key="usingRichText"/>
-            </parameter>
-            <parameter name="to" code="to  "
-                description="The file to export to.">
-                <type type="file"/>
-                <type type="specifier" hidden="yes"/>
-                <cocoa key="to"/>
-            </parameter>
-            <parameter name="for" code="for " optional="yes"
-                description="Specifies the publication or list of publications to export.">
-                <type type="publication" list="yes"/>
-                <type type="publication"/>
-                <cocoa key="for"/>
-            </parameter>                
-            <parameter name="in" code="in  " optional="yes"
-                description="Specifies an ordered list of publications used to provide the itemIndex of the exported publications. These must include the parsed publications themselves and defaults to the exported publications.">
-                <type type="publication" list="yes"/>
-                <cocoa key="in"/>
-            </parameter>                
-        </command>
-        
-        <command name="templated text" code="BDSKttxt"
-			description="Returns a string representation of publications in the document using a template.">
-            <cocoa class="BDSKTemplatedTextCommand"/>
-            <direct-parameter type="document"
-                description="The object responding to the command, the document."/>
-            <parameter name="using" code="usng" optional="yes"
-                description="The name or file of the template to use. Either this or 'using text' should be used.">
-                <type type="text"/>
-                <type type="file"/>
-                <cocoa key="using"/>
-            </parameter>
-            <parameter name="using text" code="usTx" type="text" optional="yes"
-                description="The template text to use. Either this or 'using' should be used.">
-                <cocoa key="usingText"/>
-            </parameter>
-            <parameter name="for" code="for " optional="yes"
-                description="Specifies the publication or list of publications to parse.">
-                <type type="publication" list="yes"/>
-                <type type="publication"/>
-                <cocoa key="for"/>
-            </parameter>                
-            <parameter name="in" code="in  " optional="yes"
-                description="Specifies an ordered list of publications used to provide the itemIndex of the parsed publications. These must include the parsed publications themselves and defaults to the parsed publications.">
-                <type type="publication" list="yes"/>
-                <cocoa key="in"/>
-            </parameter>                
-            <result description="the templated text" type="text">
-            </result>
-        </command>
-        
-        <command name="templated rich text" code="BDSKtrtx"
-			description="Returns a styled text representation of publications in the document using a template.">
-            <cocoa class="BDSKTemplatedRichTextCommand"/>
-            <direct-parameter type="document"
-                description="The object responding to the command, the document."/>
-            <parameter name="using" code="usng" optional="yes"
-                description="The name or file of the template to use. Either this or 'using rich text' should be used.">
-                <type type="text"/>
-                <type type="file"/>
-                <cocoa key="using"/>
-            </parameter>
-            <parameter name="using rich text" code="usRT" type="rich text" optional="yes"
-                description="The template rich text to use. Either this, or 'using' should be used.">
-                <cocoa key="usingRichText"/>
-            </parameter>
-            <parameter name="for" code="for " optional="yes"
-                description="Specifies the publication or list of publications to parse.">
-                <type type="publication" list="yes"/>
-                <type type="publication"/>
-                <cocoa key="for"/>
-            </parameter>                
-            <parameter name="in" code="in  " optional="yes"
-                description="Specifies an ordered list of publications used to provide the itemIndex of the parsed publications. These must include the parsed publications themselves and defaults to the parsed publications.">
-                <type type="publication" list="yes"/>
-                <cocoa key="in"/>
-            </parameter>                
-            <result description="the templated rich text" type="specifier">
-            </result>
-        </command>
-
-        <command name="import" code="BDSKImpt"
-			description="Imports publications in the document using a string format.">
-            <cocoa class="BDSKImportCommand"/>
-            <direct-parameter type="document"
-                description="The object responding to the command, the document."/>
-            <parameter name="from" code="from" optional="yes"
-                description="The string or file containing publications in a supported string format. Either this or 'for search term' must be specified.">
-                <type type="text"/>
-                <type type="file"/>
-                <cocoa key="from"/>
-            </parameter>
-            <parameter name="for search term" code="Srch" optional="yes"
-                description="The search term to search the PubMed database. Either this or 'from' must be specified.">
-                <type type="text"/>
-                <cocoa key="searchTerm"/>
-            </parameter>
-            <result description="The publications parsed from the string format and added to the document">
-                <type type="publication" list="yes"/>
-            </result>
-        </command>
-        
-        <command name="parse format" code="BDSKpfmt"
-			description="Parses a format string for a field from a publication. Does not set the field.">
-            <cocoa class="BDSKParseFormatCommand"/>
-            <direct-parameter type="text"
-                description="The format string to parse."/>
-            <parameter name="for" code="for " optional="yes"
-                description="The field or field name for which to parse the format string.">
-                <type type="field"/>
-                <type type="text"/>
-                <cocoa key="for"/>
-            </parameter>
-            <parameter name="for file at index" type="integer" code="Indx" optional="yes"
-                description="The index of the linked file for which to parse the format. Defaults to 1 if there is a is a field set.">
-                <cocoa key="index"/>
-            </parameter>
-            <parameter name="from" type="publication" code="from" optional="yes"
-                description="The publication for which to parse the format string. This is required unless a full field reference was given.">
-                <cocoa key="from"/>
-            </parameter>
-            <parameter name="check" type="boolean" code="Chck" optional="yes"
-                description="Check whether all information to parse the format is available. 'missing value' is returned when this is set and the check fails.">
-                <cocoa key="check"/>
-            </parameter>
-            <result description="the parsed format" type="text">
-            </result>
-        </command>    
-        
-        <command name="auto file" code="BDSKAfil"
-			description="Auto file a linked file.">
-            <cocoa class="BDSKAutoFileCommand"/>
-            <direct-parameter type="publication"
-                description="The pubication for which to auto file a linked file."/>
-            <parameter name="for" type="text" code="for " optional="yes" hidden="yes"
-                description="The local file field name for which to auto file. Deprecated.">
-                <cocoa key="for"/>
-            </parameter>
-            <parameter name="at index" type="integer" code="Indx" optional="yes"
-                description="The index of the linked file to auto file. Defaults to 1 if there is a location set, otherwise all linked files are auto filed.">
-                <cocoa key="index"/>
-            </parameter>
-            <parameter name="to" type="text" code="to  " optional="yes"
-                description="The URL or path to move the linked file to. If not supplied, it is generated using the Local File format.">
-                <cocoa key="to"/>
-            </parameter>
-            <parameter name="check" type="boolean" code="Chck" optional="yes"
-                description="Check whether all information to parse the Local File format is available. Ignored if a location is specified. Defaults to true.">
-                <cocoa key="check"/>
-            </parameter>
-        </command>    
-        
-        <command name="perform BibDesk action with publications" code="BDSKpAct"
-			description="Script handler invoked by script hooks.">
-            <cocoa class="NSScriptCommand"/>
-            <direct-parameter description="A list of publications that is acted upon.">
-                <type type="publication" list="yes"/>
-            </direct-parameter>
-            <parameter name="for script hook" code="fshk" type="script hook"
-                description="The script hook that was invoked.">
-                <cocoa key="forScriptHook"/>
-            </parameter>
-        </command>
         
     </suite>
 	
