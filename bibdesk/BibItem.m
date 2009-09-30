@@ -323,42 +323,12 @@ static CFDictionaryRef selectorTable = NULL;
 
 // Never copy between different documents, as this messes up the macroResolver for complex string values, unfortunately we don't always control that
 - (id)copyWithZone:(NSZone *)zone{
-    BibItem *theCopy = nil;
-    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-    
-    if ([cmd isKindOfClass:[NSCloneCommand class]]) {
-        // if this is called from AppleScript 'duplicate', we need to use the correct macroResolver, as we may be copying from another source
-        BDSKMacroResolver *aMacroResolver = nil;
-        id container = [[cmd arguments] valueForKey:@"ToLocation"];
-        if (container == nil) {
-            container = [cmd evaluatedReceivers];
-        } else {
-            [container insertionContainer];
-            if ([container respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
-                container = [container objectsByEvaluatingSpecifier];
-        }
-        if ([container isKindOfClass:[NSArray class]]) {
-            if ([container count] > 1) {
-                [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
-                return nil;
-            }
-            container = [container lastObject];
-        }
-        // the container of the location should be either a document or a local group
-        if ([container respondsToSelector:@selector(macroResolver)])
-            aMacroResolver = [container macroResolver];
-        [NSString setMacroResolverForUnarchiving:aMacroResolver];
-        theCopy = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:self]] retain];
-        [NSString setMacroResolverForUnarchiving:nil];
-        [theCopy setMacroResolver:aMacroResolver];
-    } else {
-        // We set isNew to YES because this is used for duplicate, either from the menu or AppleScript, and these items are supposed to be newly added to the document so who0uld have their Date-Added field set to now
-        // Note that unless someone uses Date-Added or Date-Modified as a default field, a copy is equal according to isEqualToItem:
-        NSArray *filesCopy = [[NSArray allocWithZone: zone] initWithArray:files copyItems:YES];
-        theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType citeKey:citeKey pubFields:pubFields files:filesCopy isNew:YES];
-        [filesCopy release];
-        [theCopy setDate: pubDate];
-    }
+    // We set isNew to YES because this is used for duplicate, either from the menu or AppleScript, and these items are supposed to be newly added to the document so who0uld have their Date-Added field set to now
+    // Note that unless someone uses Date-Added or Date-Modified as a default field, a copy is equal according to isEqualToItem:
+    NSArray *filesCopy = [[NSArray allocWithZone: zone] initWithArray:files copyItems:YES];
+    BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType citeKey:citeKey pubFields:pubFields files:filesCopy isNew:YES];
+    [filesCopy release];
+    [theCopy setDate: pubDate];
     return theCopy;
 }
 
