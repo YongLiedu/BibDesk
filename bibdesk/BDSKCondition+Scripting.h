@@ -41,11 +41,10 @@
 
 @interface BDSKCondition (Scripting)
 
+- (id)initWithScriptingProperties:(NSDictionary *)properties;
+
 - (NSString *)scriptingKey;
-- (void)setScriptingKey:(NSString *)newKey;
 - (NSInteger)scriptingComparison;
-- (void)setScriptingComparison:(NSInteger)newComparison;
 - (id)scriptingValue;
-- (void)setScriptingValue:(id)newValue;
 
 @end

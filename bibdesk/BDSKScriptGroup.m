@@ -64,27 +64,8 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
 // old designated initializer
 - (id)initWithName:(NSString *)aName count:(NSInteger)aCount;
 {
-    // ignore the name, because if this is called it's a dummy name anyway
-    NSString *path = nil;
-    NSString *arguments = nil;
-    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-    if ([cmd isKindOfClass:[NSCreateCommand class]]) {
-        NSDictionary *properties = [(NSCreateCommand *)cmd resolvedKeyDictionary];
-        if ([properties objectForKey:@"scriptURL"]) {
-            path = [[properties objectForKey:@"scriptURL"] path];
-        } else {
-            [cmd setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
-            [cmd setScriptErrorString:NSLocalizedString(@"New script groups need a script file.", @"Error description")];
-        }
-        if ([properties objectForKey:@"scriptingScriptArguments"])
-            arguments = [properties objectForKey:@"scriptingScriptArguments"];
-    }
-    if (path == nil) {
-        [self release];
-        self = nil;
-    } else {
-        self = [self initWithName:nil scriptPath:path scriptArguments:arguments scriptType:[[NSWorkspace sharedWorkspace] isAppleScriptFileAtPath:path] ? BDSKAppleScriptType : BDSKShellScriptType];
-    }
+    [self release];
+    self = nil;
     return self;
 }
 

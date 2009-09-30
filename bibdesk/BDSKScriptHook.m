@@ -51,12 +51,8 @@ static unsigned long scriptHookID = 0;
 
 // dummy, don't use this
 - (id)init {
-    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-    if ([cmd isKindOfClass:[NSCreateCommand class]]) {
-        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-        [cmd setScriptErrorString:NSLocalizedString(@"Cannot create script hook", @"Error description")];
-    }
-	self = [self initWithName:@"" script:nil];
+	[self release];
+    self = nil;
 	return self;
 }
 

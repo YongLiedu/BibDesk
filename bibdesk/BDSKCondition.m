@@ -89,15 +89,6 @@ static char BDSKConditionObservationContext;
         cachedEndDate = nil;
 		cacheTimer = nil;
         
-        // when called from scripting we need to set the key and comparison first, so scripting setters know what type of field it is
-        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-        if ([cmd isKindOfClass:[NSCreateCommand class]] && [[[(NSCreateCommand *)cmd createClassDescription] className] isEqualToString:@"condition"]) {
-            [self setKey:[[(NSCreateCommand *)cmd resolvedKeyDictionary] objectForKey:@"scriptingKey"]];
-            NSNumber *comparisonNumber = [[(NSCreateCommand *)cmd resolvedKeyDictionary] objectForKey:@"scriptingComparison"];
-            if (comparisonNumber)
-                [self setScriptingComparison:[comparisonNumber intValue]];
-        }
-        
         [self startObserving];
     }
     return self;

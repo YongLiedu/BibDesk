@@ -67,18 +67,7 @@ static NSString *createUniqueID(void)
 
 // super's designated initializer
 - (id)init {
-    if ([self class] == [BDSKGroup class]) {
-        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-        if ([cmd isKindOfClass:[NSCreateCommand class]]) {
-            [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-            [cmd setScriptErrorString:NSLocalizedString(@"Groups must be created with a specific class.", @"Error description")];
-        }
-        [self release];
-        self = nil;
-    } else {
-        self = [self initWithName:NSLocalizedString(@"Group", @"Default group name") count:0];
-    }
-    return self;
+    return [self initWithName:NSLocalizedString(@"Group", @"Default group name") count:0];
 }
 
 - (id)initLibraryGroup {

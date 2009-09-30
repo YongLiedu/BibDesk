@@ -498,52 +498,29 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
  This may be a bit of a hack for a few reasons: (a) there seems to be no good way to initialise a BibItem from a BibString when it already exists and (b) I suspect this isn't the way you're supposed to do AS.
 */
 - (void) setBibTeXString:(NSString*) btString {
-	NSScriptCommand * cmd = [NSScriptCommand currentCommand];
 
 	// we do not allow setting the bibtex string after an edit, only at initialization
     if ([self owner] && [[self owner] isDocument] == NO) {
+        NSScriptCommand *cmd= [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
         [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
+        return;
 	} else if([self hasBeenEdited]){
-		if (cmd) {
-			[cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-			[cmd setScriptErrorString:NSLocalizedString(@"Cannot set BibTeX string after initialization.",@"Error description")];
-		}
+        NSScriptCommand *cmd= [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set BibTeX string after initialization.",@"Error description")];
 		return;
 	}
     
-    id doc = [self owner];
-    if ([cmd isKindOfClass:[NSCreateCommand class]]) {
-        // if this is called from AppleScript 'make', we need to use the correct macroResolver, as we may be copying from another source
-        id container = [[cmd arguments] valueForKey:@"ToLocation"];
-        if (container == nil) {
-            container = [cmd evaluatedReceivers];
-        } else {
-            [container insertionContainer];
-            if ([container respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
-                container = [container objectsByEvaluatingSpecifier];
-        }
-        if ([container isKindOfClass:[NSArray class]]) {
-            if ([container count] > 1) {
-                [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
-                return;
-            }
-            container = [container lastObject];
-        }
-        if ([container isKindOfClass:[BibDocument class]])
-            doc = container;
-    }
-    
     NSError *error = nil;
     BOOL isPartialData;
-    NSArray *newPubs = [BDSKBibTeXParser itemsFromString:btString document:doc isPartialData:&isPartialData error:&error];
+    NSArray *newPubs = [BDSKBibTeXParser itemsFromString:btString document:[self owner] isPartialData:&isPartialData error:&error];
 	
 	// try to do some error handling for AppleScript
-	if(isPartialData) {
-		if (cmd) {
-			[cmd setScriptErrorNumber:NSInternalScriptError];
-			[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"BibDesk failed to process the BibTeX entry %@ with error %@. It may be malformed.",@"Error description"), btString, [error localizedDescription]]];
-		}
+	if (isPartialData) {
+        NSScriptCommand *cmd= [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSInternalScriptError];
+        [cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"BibDesk failed to process the BibTeX entry %@ with error %@. It may be malformed.",@"Error description"), btString, [error localizedDescription]]];
 		return;
 	}
 		

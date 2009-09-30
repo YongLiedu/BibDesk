@@ -64,6 +64,9 @@
 #import "BDSKTypeManager.h"
 #import <Quartz/Quartz.h>
 #import "BDSKCFCallBacks.h"
+#import "NSWorkspace_BDSKExtensions.h"
+#import "BDSKServerInfo.h"
+#import "BDSKBibTeXParser.h"
 
 
 @implementation BibDocument (Scripting)
@@ -163,6 +166,141 @@
     } else {
         return [super handlePrintScriptCommand:command];
     }
+}
+
+- (id)newScriptingObjectOfClass:(Class)class forValueForKey:(NSString *)key withContentsValue:(id)contentsValue properties:(NSDictionary *)properties {
+    if ([class isKindOfClass:[BDSKGroup class]]) {
+        id group = nil;
+        if ([class isKindOfClass:[BDSKScriptGroup class]]) {
+            NSString *path = [[properties objectForKey:@"scriptURL"] path];
+            NSString *arguments = [properties objectForKey:@"scriptingScriptArguments"];
+            if (path == nil) {
+                NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+                [cmd setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
+                [cmd setScriptErrorString:NSLocalizedString(@"New script groups need a script file.", @"Error description")];
+                return nil;
+            }
+            NSMutableDictionary *mutableProperties = [[properties mutableCopy] autorelease];
+            [mutableProperties removeObjectForKey:@"scriptURL"];
+            [mutableProperties removeObjectForKey:@"scriptingScriptArguments"];
+            properties = mutableProperties;
+            group = [[BDSKScriptGroup alloc] initWithName:nil scriptPath:path scriptArguments:arguments scriptType:[[NSWorkspace sharedWorkspace] isAppleScriptFileAtPath:path] ? BDSKAppleScriptType : BDSKShellScriptType];
+        } else if ([class isKindOfClass:[BDSKSearchGroup class]]) {
+            NSString *aType = BDSKSearchGroupEntrez;
+            NSDictionary *info = [properties objectForKey:@"scriptingServerInfo"];
+            if ([properties objectForKey:@"type"]) {
+                switch ([[info objectForKey:@"type"] intValue]) {
+                    case BDSKScriptingSearchGroupEntrez: aType = BDSKSearchGroupEntrez; break;
+                    case BDSKScriptingSearchGroupZoom: aType = BDSKSearchGroupZoom; break;
+                    case BDSKScriptingSearchGroupISI: aType = BDSKSearchGroupISI; break;
+                    case BDSKScriptingSearchGroupDBLP: aType = BDSKSearchGroupDBLP; break;
+                    default: break;
+                }
+            }
+            group = [[BDSKSearchGroup alloc] initWithType:aType serverInfo:[BDSKServerInfo defaultServerInfoWithType:aType] searchTerm:nil];
+        } else if ([class isKindOfClass:[BDSKURLGroup class]]) {
+            NSURL *theURL = [NSURL URLWithString:@"http://"];
+            NSMutableDictionary *mutableProperties = [[properties mutableCopy] autorelease];
+            if ([properties objectForKey:@"fileURL"]) {
+                theURL = [properties objectForKey:@"fileURL"];
+                [mutableProperties removeObjectForKey:@"fileURL"];
+            } else if ([properties objectForKey:@"URLString"]) {
+                theURL = [NSURL URLWithString:[properties objectForKey:@"URLString"]];
+                [mutableProperties removeObjectForKey:@"URLString"];
+            } else {
+                NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+                [cmd setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
+                [cmd setScriptErrorString:NSLocalizedString(@"New external file groups need a file or a URL.", @"Error description")];
+                return nil;
+            }
+            properties = mutableProperties;
+            group = [[BDSKURLGroup alloc] initWithURL:theURL];
+        } else if ([class isKindOfClass:[BDSKStaticGroup class]] || [class isKindOfClass:[BDSKSmartGroup class]]) {
+            group = [[class alloc] init];
+        } else {
+            NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+            [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+            [cmd setScriptErrorString:NSLocalizedString(@"Groups must be created with a specific class.", @"Error description")];
+        }
+        if ([properties count])
+            [group setScriptingProperties:properties];
+        return group;
+    } else if ([class isKindOfClass:[BibItem class]]) {
+        BibItem *item = nil;
+        NSString *bibtexString = [properties objectForKey:@"bibTeXString"];
+        if (bibtexString) {
+            NSError *error = nil;
+            BOOL isPartialData;
+            NSArray *newPubs = [BDSKBibTeXParser itemsFromString:bibtexString document:self isPartialData:&isPartialData error:&error];
+            if (isPartialData) {
+                NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+                [cmd setScriptErrorNumber:NSInternalScriptError];
+                [cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"BibDesk failed to process the BibTeX entry %@ with error %@. It may be malformed.",@"Error description"), bibtexString, [error localizedDescription]]];
+                return nil;
+            }
+            item = [[newPubs objectAtIndex:0] retain];
+            properties = [[properties mutableCopy] autorelease];
+            [(NSMutableDictionary *)properties removeObjectForKey:@"bibTeXString"];
+        } else if (contentsValue) {
+            [NSString setMacroResolverForUnarchiving:[self macroResolver]];
+            item = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:contentsValue]] retain];
+            [NSString setMacroResolverForUnarchiving:nil];
+            [item setMacroResolver:[self macroResolver]];
+        } else {
+            item = [[BibItem alloc] init];
+        }
+        if ([properties count])
+            [item setScriptingProperties:properties];
+        return item;
+    }
+    return [super newScriptingObjectOfClass:class forValueForKey:key withContentsValue:contentsValue properties:properties];
+}
+
+- (id)copyScriptingValue:(id)value forKey:(NSString *)key withProperties:(NSDictionary *)properties {
+    if ([key isEqualToString:@"scriptingPublications"]) {
+        [NSString setMacroResolverForUnarchiving:[self macroResolver]];
+        id copiedValue = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:value]] retain];
+        [NSString setMacroResolverForUnarchiving:nil];
+        [copiedValue makeObjectsPerformSelector:@selector(setMacroResolver:) withObject:[self macroResolver]];
+        if ([properties count])
+            [copiedValue makeObjectsPerformSelector:@selector(setScriptingProperties:) withObject:properties];
+        return copiedValue;
+    } else if ([[NSSet setWithObjects:@"scriptingGroups", @"staticGroups", @"smartGroups", @"externalFileGroups", @"scriptGroups", @"searchGroups", nil] containsObject:key]) {
+        NSMutableArray *copiedValue = [[NSMutableArray alloc] init];
+        for (id group in value) {
+            id copiedGroup = nil;
+            if ([group isStatic]) {
+                copiedGroup = [[BDSKStaticGroup alloc] initWithName:[group name] publications:([group document] == self ? [group publications] : nil)];
+            } else if ([group isSmart]) {
+                copiedGroup = [[BDSKSmartGroup alloc] initWithName:[group name] count:[group count] filter:[group filter]];
+            } else if ([group isURL]) {
+                copiedGroup = [[BDSKURLGroup alloc] initWithName:[group name] URL:[group URL]];
+            } else if ([group isScript]) {
+                copiedGroup = [[BDSKScriptGroup alloc] initWithName:[group name] scriptPath:[group scriptPath] scriptArguments:[group scriptArguments] scriptType:[group scriptType]];
+            } else if ([group isSearch]) {
+                copiedGroup = [[BDSKSearchGroup alloc] initWithType:[group type] serverInfo:[group serverInfo] searchTerm:[group searchTerm]];
+            }
+            if (copiedGroup == nil) {
+                NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+                [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+                [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
+                [copiedValue release];
+                copiedValue = nil;
+            } else {
+                if ([properties count])
+                    [copiedGroup setScriptingProperties:properties];
+                [copiedValue addObject:copiedGroup];
+                [copiedGroup release];
+            }
+            return copiedValue;
+        }
+    } else if ([[NSSet setWithObjects:@"libraryGroups", @"lastImportGroups", @"fieldGroups", @"sharedGroups", @"webGroups", nil] containsObject:key]) {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
+        return nil;
+    }
+    return [super copyScriptingValue:value forKey:key withProperties:properties];
 }
 
 #pragma mark Publications

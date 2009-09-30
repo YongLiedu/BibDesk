@@ -60,20 +60,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 - (id)initWithName:(NSString *)aName count:(NSInteger)aCount;
 {
     // ignore the name, because if this is called it's a dummy name anyway
-    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
     NSString *aType = BDSKSearchGroupEntrez;
-    if ([cmd isKindOfClass:[NSCreateCommand class]]) {
-        NSDictionary *info = [[(NSCreateCommand *)cmd resolvedKeyDictionary] objectForKey:@"scriptingServerInfo"];
-        if ([info objectForKey:@"type"]) {
-            switch ([[info objectForKey:@"type"] intValue]) {
-                case BDSKScriptingSearchGroupEntrez: aType = BDSKSearchGroupEntrez; break;
-                case BDSKScriptingSearchGroupZoom: aType = BDSKSearchGroupZoom; break;
-                case BDSKScriptingSearchGroupISI: aType = BDSKSearchGroupISI; break;
-                case BDSKScriptingSearchGroupDBLP: aType = BDSKSearchGroupDBLP; break;
-                default: break;
-            }
-        }
-    }
     return [self initWithType:aType serverInfo:[BDSKServerInfo defaultServerInfoWithType:aType] searchTerm:nil];
 }
 

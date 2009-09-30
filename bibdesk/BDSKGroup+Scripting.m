@@ -48,12 +48,14 @@
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "BibAuthor+Scripting.h"
+#import "BDSKCondition+Scripting.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKServerInfo.h"
 #import "BDSKWebGroupViewController.h"
 #import "BDSKCondition.h"
 #import "BDSKFilter.h"
 #import "NSWorkspace_BDSKExtensions.h"
+#import "BDSKBibTeXParser.h"
 
 
 @implementation BDSKGroup (Scripting)
@@ -66,6 +68,51 @@
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
     return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"groups" uniqueID:[self scriptingUniqueID]] autorelease];
+}
+
+- (id)newScriptingObjectOfClass:(Class)class forValueForKey:(NSString *)key withContentsValue:(id)contentsValue properties:(NSDictionary *)properties {
+    if ([class isKindOfClass:[BibItem class]]) {
+        BibItem *item = nil;
+        NSString *bibtexString = [properties objectForKey:@"bibTeXString"];
+        if (bibtexString) {
+            NSError *error = nil;
+            BOOL isPartialData;
+            NSArray *newPubs = [BDSKBibTeXParser itemsFromString:bibtexString document:[self document] isPartialData:&isPartialData error:&error];
+            if (isPartialData) {
+                NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+                [cmd setScriptErrorNumber:NSInternalScriptError];
+                [cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"BibDesk failed to process the BibTeX entry %@ with error %@. It may be malformed.",@"Error description"), bibtexString, [error localizedDescription]]];
+                return nil;
+            }
+            item = [[newPubs objectAtIndex:0] retain];
+            properties = [[properties mutableCopy] autorelease];
+            [(NSMutableDictionary *)properties removeObjectForKey:@"bibTeXString"];
+        } else if (contentsValue) {
+            [NSString setMacroResolverForUnarchiving:[self macroResolver]];
+            item = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:contentsValue]] retain];
+            [NSString setMacroResolverForUnarchiving:nil];
+            [item setMacroResolver:[self macroResolver]];
+        } else {
+            item = [[BibItem alloc] init];
+        }
+        if ([properties count])
+            [item setScriptingProperties:properties];
+        return item;
+    }
+    return [super newScriptingObjectOfClass:class forValueForKey:key withContentsValue:contentsValue properties:properties];
+}
+
+- (id)copyScriptingValue:(id)value forKey:(NSString *)key withProperties:(NSDictionary *)properties {
+    if ([key isEqualToString:@"scriptingPublications"]) {
+        [NSString setMacroResolverForUnarchiving:[self macroResolver]];
+        id copiedValue = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:value]] retain];
+        [NSString setMacroResolverForUnarchiving:nil];
+        [copiedValue makeObjectsPerformSelector:@selector(setMacroResolver:) withObject:[self macroResolver]];
+        if ([properties count])
+            [copiedValue setScriptingProperties:properties];
+        return copiedValue;
+    }
+    return [super copyScriptingValue:value forKey:key withProperties:properties];
 }
 
 - (id)valueInScriptingPublicationsWithUniqueID:(NSString *)aUniqueID {
@@ -255,6 +302,13 @@
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
     return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"smartGroups" uniqueID:[self scriptingUniqueID]] autorelease];
+}
+
+- (id)newScriptingObjectOfClass:(Class)class forValueForKey:(NSString *)key withContentsValue:(id)contentsValue properties:(NSDictionary *)properties {
+    if ([class isKindOfClass:[BDSKCondition class]]) {
+        return [[BDSKCondition alloc] initWithScriptingProperties:properties];
+    }
+    return [super newScriptingObjectOfClass:class forValueForKey:key withContentsValue:contentsValue properties:properties];
 }
 
 - (NSArray *)conditions {
