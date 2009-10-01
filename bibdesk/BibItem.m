@@ -3497,4 +3497,12 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     return self;
 }
 
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id *)stackbuf count:(NSUInteger)len
+{
+    NSUInteger i, count = [fieldNames countByEnumeratingWithState:state objects:stackbuf count:len];
+    for (i = 0; i < count; i++)
+        state->itemsPtr[i] = [fieldCollection fieldForName:state->itemsPtr[i]];
+    return count;
+}
+
 @end
