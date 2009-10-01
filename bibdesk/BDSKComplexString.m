@@ -299,23 +299,20 @@ Rather than relying on the same call sequence to be used, I think we should igno
 
 - (NSComparisonResult)compareAsComplexString:(NSString *)other options:(NSUInteger)mask{
 	if ([self isComplex]) {
-		if (![other isComplex])
+		if (NO == [other isComplex])
 			return NSOrderedDescending;
 		
-		NSEnumerator *nodeE = [nodes objectEnumerator];
-		NSEnumerator *otherNodeE = [[other nodes] objectEnumerator];
-		BDSKStringNode *node = nil;
-		BDSKStringNode *otherNode = nil;
-		NSComparisonResult comp;
+		NSArray *otherNodes = [other nodes];
+        NSUInteger i, count = MIN([nodes count], [otherNodes count]);
 		
-		while((node = [nodeE nextObject]) && (otherNode = [otherNodeE nextObject])){
-			comp = [node compareNode:otherNode options:mask];
-			if(comp != NSOrderedSame)
+		for (i = 0; i < count; i++) {
+			NSComparisonResult comp = [[nodes objectAtIndex:i] compareNode:[otherNodes objectAtIndex:i] options:mask];
+			if (comp != NSOrderedSame)
 				return comp;
 		}
-		if(otherNode)
+		if (count > [otherNodes count])
 			return NSOrderedAscending;
-		if(node)
+		if (count > [nodes count])
 			return NSOrderedDescending;
 		return NSOrderedSame;
 	}

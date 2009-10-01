@@ -50,6 +50,7 @@
 #import "BDSKFiler.h"
 #import "BDSKFindFieldEditor.h"
 #import "BDSKLinkedFile.h"
+#import "NSArray_BDSKExtensions.h"
 
 #define MAX_HISTORY_COUNT	10
 
@@ -669,7 +670,7 @@ enum {
         return;
 	}
     
-    BibItem *selItem = [[[theDocument selectedPublications] objectEnumerator] nextObject];
+    BibItem *selItem = [[theDocument selectedPublications] firstObject];
     
     if(selItem == nil){
         NSBeep();
@@ -709,8 +710,7 @@ enum {
         return;
     }
 
-    NSEnumerator *selPubE = [[theDocument selectedPublications] objectEnumerator];
-    BibItem *selItem = [selPubE nextObject];
+    BibItem *selItem = [[theDocument selectedPublications] firstObject];
     NSUInteger indexOfSelectedItem;
     if(selItem == nil){ // no selection, so select the first one
         indexOfSelectedItem = 0;

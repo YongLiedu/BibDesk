@@ -1590,13 +1590,12 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     
     // if dropping on the static group parent, create a new static groups using a common author name or keyword if available
     if ([item isEqual:[groups staticParent]]) {
-        NSEnumerator *pubEnum = [pubs objectEnumerator];
-        BibItem *pub = [pubEnum nextObject];
+        BibItem *pub = [pubs lastObject];
         NSMutableSet *auths = [[NSMutableSet alloc] initForFuzzyAuthors];
         NSMutableSet *keywords = [[NSMutableSet alloc] initWithSet:[pub groupsForField:BDSKKeywordsString]];
         
         [auths setSet:[pub allPeople]];
-        while (pub = [pubEnum nextObject]) {
+        for (pub in pubs) {
             [auths intersectSet:[pub allPeople]];
             [keywords intersectSet:[pub groupsForField:BDSKKeywordsString]];
         }
