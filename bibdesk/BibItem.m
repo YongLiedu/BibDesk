@@ -109,6 +109,7 @@ enum {
 @interface BDSKFieldArray : NSArray {
     NSMutableArray *fieldNames;
     BDSKFieldCollection *fieldCollection;
+    unsigned long mutations;
 }
 
 - (id)initWithFieldCollection:(BDSKFieldCollection *)collection fieldNames:(NSArray *)array;
@@ -3471,6 +3472,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         for (NSString *name in array) 
             if ([fieldCollection isUsedField:name] == NO)
                 [fieldNames addObject:name];
+        mutations = 0;
     }
     return self;
 }
@@ -3494,7 +3496,18 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     while (i--) 
         if ([fieldCollection isEmptyField:[fieldNames objectAtIndex:i]])
             [fieldNames removeObjectAtIndex:i];
+    mutations++;
     return self;
+}
+
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id *)stackbuf count:(NSUInteger)len {
+    NSUInteger i = 0, current = state->state, count = [fieldNames count];
+    for (i = 0, current = state->state; current < count && i < len; i++, current++)
+        stackbuf[i] = [fieldCollection fieldForName:[fieldNames objectAtIndex:current]];
+    state->state = current;
+    state->itemsPtr = stackbuf;
+	state->mutationsPtr = &mutations;
+    return i;
 }
 
 @end
