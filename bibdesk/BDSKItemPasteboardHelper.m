@@ -244,7 +244,7 @@
 }
 
 - (void)clearPromisedTypesForPasteboard:(NSPasteboard *)pboard {
-    for (NSString *type in [self promisedTypesForPasteboard:pboard]) {
+    for (NSString *type in [[[self promisedTypesForPasteboard:pboard] copy] autorelease]) {
         @try {
             // can raise NSPasteboardCommunicationException
             [pboard setData:nil forType:type];
