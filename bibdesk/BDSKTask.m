@@ -58,6 +58,7 @@ struct BDSKTaskInternal {
     int32_t            _terminationStatus;
     int32_t            _running;
     int32_t            _launched;
+    int32_t            _canNotify;
     struct kevent      _event;
     CFRunLoopRef       _rl;
     CFRunLoopSourceRef _rlsource;
@@ -70,10 +71,19 @@ static int _kqueue = -1;
 
 + (void)initialize
 {
-    BDSKINITIALIZE;
+    if ([BDSKTask class] != self) return;
     _kqueue = kqueue();
     // persistent thread to watch all tasks
     [NSThread detachNewThreadSelector:@selector(_watchQueue) toTarget:self withObject:nil];
+}
+
++ (BDSKTask *)launchedTaskWithLaunchPath:(NSString *)path arguments:(NSArray *)arguments;
+{
+    BDSKTask *task = [[self new] autorelease];
+    [task setLaunchPath:path];
+    [task setArguments:arguments];
+    [task launch];
+    return task;
 }
 
 #define ASSERT_LAUNCH do { if (!_internal->_launched) { [NSException raise:@"BDSKTaskException" format:@"Task has not been launched"]; } } while (0)
@@ -86,13 +96,23 @@ static int _kqueue = -1;
         _internal = NSZoneCalloc([self zone], 1, sizeof(struct BDSKTaskInternal));
         memset(&_internal->_event, 0, sizeof(struct kevent));
         pthread_mutex_init(&_internal->_lock, NULL);
+        _internal->_canNotify = 1;
     }
     return self;
 }
 
 - (void)dealloc
 {
+    /*
+     Set _canNotify in case kevent unblocks before we can remove it from the queue,
+     since the event's task pointer is about to become invalid (and it mustn't access
+     the lock after this flag is set).  Lock before entering _disableNotification, so 
+     we can shrink our race window even smaller.
+     */
+    OSAtomicCompareAndSwap32Barrier(1, 0, &_internal->_canNotify);
+    pthread_mutex_lock(&_internal->_lock);
     [self _disableNotification];
+    pthread_mutex_unlock(&_internal->_lock);
     pthread_mutex_destroy(&_internal->_lock);
     [_launchPath release];
     [_arguments release];
@@ -197,10 +217,10 @@ static void __BDSKTaskNotify(void *info)
 {
     ASSERT_NOTLAUNCHED;
     
-    NSInteger argCount = [_arguments count];
+    NSUInteger argCount = [_arguments count];
     const char *workingDir = [_currentDirectoryPath fileSystemRepresentation];
     char **args = NSZoneCalloc([self zone], (argCount + 2), sizeof(char *));
-    NSInteger i, iMax = argCount;
+    NSUInteger i, iMax = argCount;
     args[0] = (char *)[_launchPath fileSystemRepresentation];
     for (i = 0; i < iMax; i++) {
         args[i + 1] = (char *)[[_arguments objectAtIndex:i] fileSystemRepresentation];
@@ -214,8 +234,9 @@ static void __BDSKTaskNotify(void *info)
     if (environment) {
         // fill with pointers to autoreleased C strings
         env = NSZoneCalloc([self zone], [environment count] + 1, sizeof(char *));
+        NSString *key;
         NSUInteger envIndex = 0;
-        for (NSString *key in environment) {
+        for (key in environment) {
             env[envIndex++] = (char *)[[NSString stringWithFormat:@"%@=%@", key, [environment objectForKey:key]] UTF8String];        
         }
         env[envIndex] = NULL;
@@ -269,7 +290,7 @@ static void __BDSKTaskNotify(void *info)
     struct rlimit openFileLimit;
     if (getrlimit(RLIMIT_NOFILE, &openFileLimit) == 0)
         maxOpenFiles = openFileLimit.rlim_cur;
-    
+        
     // !!! No CF or Cocoa after this point in the child process!
     _processIdentifier = fork();
     
@@ -285,7 +306,7 @@ static void __BDSKTaskNotify(void *info)
         if (-1 != fd_err) dup2(fd_err, STDERR_FILENO);  
         
         if (workingDir) chdir(workingDir);
-        
+
         /*         
          Unfortunately, a side effect of blocking on a pipe is that other processes inherit our blockpipe
          descriptors as well.  Consequently, if taskB calls fork() while taskA is still setting up its
@@ -299,7 +320,7 @@ static void __BDSKTaskNotify(void *info)
          be protected by that lock.  Closing all remaining file descriptors doesn't break any documented 
          behavior of NSTask, and it should take care of that problem.  It's not a great solution, since 
          inheriting other descriptors could possibly be useful, but I don't need to share arbitrary file 
-         descriptors, wherease I do need subclassing and threads to work properly.
+         descriptors, whereas I do need subclassing and threads to work properly.
          */
         rlim_t j;
         for (j = (STDERR_FILENO + 1); j < maxOpenFiles; j++) {
@@ -403,6 +424,7 @@ static void __BDSKTaskNotify(void *info)
 
 - (void)waitUntilExit;
 {
+    ASSERT_LAUNCH;
     while ([self isRunning]) {
         NSDate *next = [[NSDate allocWithZone:[self zone]] initWithTimeIntervalSinceNow:0.1];
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:next];
@@ -424,9 +446,10 @@ static void __BDSKTaskNotify(void *info)
         if (kevent(_kqueue, NULL, 0, &evt, 1, NULL)) {
             
             BDSKTask *task = evt.udata;
+            OSMemoryBarrier();
             
             // can only fail if _disableNotification is called immediately after kevent unblocks
-            if (pthread_mutex_trylock(&task->_internal->_lock) == 0) {
+            if (task->_internal->_canNotify && pthread_mutex_trylock(&task->_internal->_lock) == 0) {
                 
                 /* 
                  Retain to make sure we hold a reference to the task long enough to handle these calls,
@@ -467,10 +490,8 @@ static void __BDSKTaskNotify(void *info)
  thread won't do callout during/after dealloc.
  */
 - (void)_disableNotification
-{
-    pthread_mutex_lock(&_internal->_lock);
-        
-    // called unconditionally from -dealloc, so we may have already notified
+{        
+    // called unconditionally from -dealloc, so we may have already notified and freed this source
     if (_internal->_rlsource) {
         
         // after this point, _taskExited and __BDSKTaskNotify will never be called, so account for their teardown
@@ -487,11 +508,9 @@ static void __BDSKTaskNotify(void *info)
             _internal->_rl = NULL;
         } 
     }
-    
-    pthread_mutex_unlock(&_internal->_lock);
 }
 
-// kevent thread has a retain, so no contention with _disableNotification
+// kevent thread has a retain, so no contention with _disableNotification since we can't dealloc
 - (void)_taskExited
 {
     NSParameterAssert(_internal->_launched);
