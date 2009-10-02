@@ -63,7 +63,6 @@
 #import "BibAuthor+Scripting.h"
 #import "BDSKTypeManager.h"
 #import <Quartz/Quartz.h>
-#import "BDSKCFCallBacks.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKServerInfo.h"
 #import "BDSKBibTeXParser.h"
@@ -383,16 +382,11 @@
 }
 
 - (BDSKGroup *)valueInScriptingGroupsWithName:(NSString *)name {
-    NSArray *allGroups = [self scriptingGroups];
-    NSArray *names = [allGroups valueForKey:@"stringValue"];
-    NSUInteger idx = [names indexOfObject:name];
-    if (idx == NSNotFound) {
-        NSMutableArray *fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &kBDSKCaseInsensitiveStringArrayCallBacks);
-        [fuzzyNames addObjectsFromArray:names];
-        idx = [fuzzyNames indexOfObject:name];
-        [fuzzyNames release];
+    for (BDSKGroup *group in [self scriptingGroups]) {
+        if ([[group stringValue] caseInsensitiveCompare:name] == NSOrderedSame)
+            return group;
     }
-    return idx == NSNotFound ? nil : [allGroups objectAtIndex:idx];
+    return nil;
 }
 
 - (void)insertInScriptingGroups:(BDSKGroup *)group {
@@ -536,20 +530,17 @@
 }
 
 - (BDSKCategoryGroup *)valueInFieldGroupsWithName:(NSString *)name {
-    id field = [self currentGroupField];
-    NSArray *names = [[groups categoryGroups] valueForKey:@"name"];
-    id fuzzyName = name;
-    NSMutableArray *fuzzyNames = nil;
-    if ([field isPersonField]) {
-        fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &kBDSKAuthorFuzzyArrayCallBacks);
-        fuzzyName = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name andPub:nil];
+    if ([[self currentGroupField] isPersonField]) {
+        BibAuthor *fuzzyName = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name andPub:nil];
+        for (BDSKCategoryGroup *group in [groups categoryGroups])
+            if ([[group name] fuzzyEqual:fuzzyName] == NSOrderedSame)
+                return group;
     } else {
-        fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &kBDSKCaseInsensitiveStringArrayCallBacks);
+        for (BDSKCategoryGroup *group in [groups categoryGroups])
+            if ([[group name] caseInsensitiveCompare:name] == NSOrderedSame)
+                return group;
     }
-    [fuzzyNames addObjectsFromArray:names];
-    NSUInteger idx = [fuzzyNames indexOfObject:fuzzyName];
-    [fuzzyNames release];
-    return idx == NSNotFound ? nil : [[groups categoryGroups] objectAtIndex:idx];
+    return nil;
 }
 
 #pragma mark -

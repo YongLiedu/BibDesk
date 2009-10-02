@@ -80,14 +80,6 @@ const CFDictionaryKeyCallBacks kBDSKCaseInsensitiveStringDictionaryKeyCallBacks 
     BDSKCaseInsensitiveStringHash
 };
 
-const CFArrayCallBacks kBDSKCaseInsensitiveStringArrayCallBacks = {
-    0,   // version
-    BDSKNSObjectRetain,
-    BDSKNSObjectRelease,
-    BDSKNSObjectCopyDescription,
-    BDSKCaseInsensitiveStringEqual
-};
-
 const CFSetCallBacks kBDSKCaseInsensitiveStringSetCallBacks = {
     0,   // version
     BDSKNSObjectRetain,

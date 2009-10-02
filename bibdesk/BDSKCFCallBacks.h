@@ -53,8 +53,6 @@ extern const CFDictionaryValueCallBacks kBDSKSELDictionaryValueCallBacks;
 
 extern const CFDictionaryKeyCallBacks kBDSKCaseInsensitiveStringDictionaryKeyCallBacks;
 
-extern const CFArrayCallBacks kBDSKCaseInsensitiveStringArrayCallBacks;
-
 extern const CFSetCallBacks kBDSKCaseInsensitiveStringSetCallBacks;
 
 extern const CFBagCallBacks kBDSKCaseInsensitiveStringBagCallBacks;
