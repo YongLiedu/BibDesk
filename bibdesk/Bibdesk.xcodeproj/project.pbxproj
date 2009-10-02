@@ -194,7 +194,6 @@
 		CE8BE5BF0D99AF5000E314A4 /* BDSKSearchBookmark.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8BE5BD0D99AF5000E314A4 /* BDSKSearchBookmark.m */; };
 		CE8C731F0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8C731D0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m */; };
 		CE8F5F840DEEB26800061148 /* ZoomValues.strings in Resources */ = {isa = PBXBuildFile; fileRef = CE8F5F830DEEB26800061148 /* ZoomValues.strings */; };
-		CE90BAFC103978D300992D50 /* BDSKURLSheetController.h in Headers */ = {isa = PBXBuildFile; fileRef = CE90BAFA103978D300992D50 /* BDSKURLSheetController.h */; };
 		CE90BAFD103978D300992D50 /* BDSKURLSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE90BAFB103978D300992D50 /* BDSKURLSheetController.m */; };
 		CE92CE5E0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m in Sources */ = {isa = PBXBuildFile; fileRef = CE92CE5C0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m */; };
 		CE95A57C0A88883300334DFA /* BDSKReadMeController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE95A57A0A88883300334DFA /* BDSKReadMeController.m */; };
@@ -2832,7 +2831,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CE90BAFC103978D300992D50 /* BDSKURLSheetController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
