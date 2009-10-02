@@ -175,24 +175,25 @@ There could be other extensions, like matching for every word with conjunction o
 
 @implementation BibItem (Finding)
 
+
 - (BOOL)matchesString:(NSString *)searchterm {
 
     // search authors and editors
     NSMutableSet *authors = [[NSMutableSet alloc] initWithCapacity:5];
-    for (NSArray *array in [[self people] allValues])
+    for (NSArray *array in [[self people] objectEnumerator])
         [authors addObjectsFromArray:array];
-    
-    [authors release];
     
 	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:20];	
 
-	for (BibAuthor *auth in [self people]) {
+	for (BibAuthor *auth in authors) {
         NSString *name = [auth lastName] ?: [auth name];
         if (nil != name) {
             [string appendString:name];
             [string appendFormat:@"%C", 0x1E];
         }
 	}
+    
+    [authors release];
     
     // these are all guaranteed to be non-nil
     [string appendString:[self citeKey]];

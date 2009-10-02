@@ -714,7 +714,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 - (oneway void)notifyClientsOfChange;
 {
     // here is where we notify other hosts that something changed
-    for (NSString *key in remoteClients) {
+    for (NSString *key in [remoteClients allKeys]) {
         
         id proxyObject = [[remoteClients objectForKey:key] objectForKey:@"object"];
         

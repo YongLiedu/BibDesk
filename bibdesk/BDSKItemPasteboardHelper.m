@@ -342,7 +342,7 @@
     if(delegate == nil)
         return;
     
-	for (NSString *name in promisedPboardTypes) {
+	for (NSString *name in [promisedPboardTypes allKeys]) {
         NSPasteboard *pboard = [NSPasteboard pasteboardWithName:name];
         
         // if we have BDSKBibItemPboardType, call to pasteboard:provideDataForType: will make this array go away

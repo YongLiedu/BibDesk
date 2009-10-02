@@ -2368,7 +2368,7 @@ static void addFilesToArray(const void *value, void *context)
 
 - (NSArray *)usedMacros {
     NSMutableSet *macros = [NSMutableSet set];
-    for (NSString *value in pubFields) {
+    for (NSString *value in [pubFields objectEnumerator]) {
         if ([value isComplex] == NO) continue;
         for (BDSKStringNode *node in [value nodes]) {
             if ([node type] != BDSKStringNodeMacro) continue;
