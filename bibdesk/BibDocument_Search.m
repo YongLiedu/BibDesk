@@ -290,7 +290,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     
     SKIndexRef skIndex = NULL;
     
-    if ([field isEqualToString:BDSKSkimNotesString] && notesSearchIndex) {
+    if ([field isEqualToString:BDSKSkimNotesString]) {
         skIndex = [notesSearchIndex index];
     } else {
         // we need the correct BDSKPublicationsArray for access to the identifierURLs

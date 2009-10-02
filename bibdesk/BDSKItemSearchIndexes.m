@@ -55,7 +55,7 @@ static CFStringRef searchIndexCopyDescription(const void *value)
     // file content is also indexed, but it's handled by a separate object (BDSKFileSearchIndex) and controller, since it's threaded
     static NSSet *indexedFields = nil;
     if (nil == indexedFields)
-        indexedFields = [[NSSet alloc] initWithObjects:BDSKAllFieldsString, BDSKTitleString, BDSKPersonString, BDSKSkimNotesString, nil];
+        indexedFields = [[NSSet alloc] initWithObjects:BDSKAllFieldsString, BDSKTitleString, BDSKPersonString, nil];
     return indexedFields;
 }
 
@@ -118,14 +118,7 @@ static void appendNormalizedNames(const void *value, void *context)
             
             // ARM: I thought Search Kit was supposed to ignore some punctuation, but it matches curly braces (bug #1762014).  Since Title is the field most likely to have specific formatting commands, we'll remove all TeX from it, but the commands shouldn't affect search results anyway unless the commands split words.  For the allFieldsString, we'll just remove curly braces to save time, and pollute the index with a few commands.
             
-            // shouldn't be any TeX junk to remove from these
-            NSString *skimNotes = [pub skimNotesForLocalURL];
-            
             NSString *searchText = [[pub allFieldsString] stringByRemovingCurlyBraces];
-            
-            // add Skim notes to all fields string as well
-            if (skimNotes)
-                searchText = [searchText stringByAppendingFormat:@" %@", skimNotes];
             
             SKIndexRef skIndex = (void *)CFDictionaryGetValue(searchIndexes, BDSKAllFieldsString);
             if (searchText && skIndex)
@@ -143,10 +136,6 @@ static void appendNormalizedNames(const void *value, void *context)
             if (skIndex)
                 SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)names, TRUE);  
             [names release];
-            
-            skIndex = (void *)CFDictionaryGetValue(searchIndexes, (CFStringRef)BDSKSkimNotesString);
-            if (skimNotes && skIndex)
-                SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)skimNotes, TRUE);
             
             CFRelease(doc);
         }

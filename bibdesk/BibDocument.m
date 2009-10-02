@@ -229,7 +229,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [self registerForNotifications];
         
         searchIndexes = [[BDSKItemSearchIndexes alloc] init];   
-        //notesSearchIndex = [[BDSKNotesSearchIndex alloc] init];   
+        notesSearchIndex = [[BDSKNotesSearchIndex alloc] init];   
         documentSearch = [[BDSKDocumentSearch alloc] initWithDocument:(id)self];
         rowToSelectAfterDelete = -1;
     }
