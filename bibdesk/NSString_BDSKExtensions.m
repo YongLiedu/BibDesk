@@ -1863,6 +1863,10 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return [[self url] linkedSmallIcon];
 }
 
+- (NSArray *)SkimNotes {
+    return [[self url] SkimNotes];
+}
+
 - (NSString *)textSkimNotes {
     return [[self url] textSkimNotes];
 }
