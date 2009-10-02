@@ -40,18 +40,29 @@
 #import "BibDocument.h"
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
-#import "NSInvocation_BDSKExtensions.h"
 
 
-@interface BDSKDocumentSearch (BDSKPrivate)
-- (void)runSearchThread;
-
+@interface BDSKDocumentSearchOperation : NSOperation {
+    NSString *searchString;
+    BDSKDocumentSearch *search;
+    SKIndexRef index;
+}
+- (id)initWithDocumentSearch:(BDSKDocumentSearch *)search index:(SKIndexRef)anIndex searchString:(NSString *)searchString;
 @end
+
+#pragma mark -
 
 @implementation BDSKDocumentSearch
 
-#define QUEUE_EMPTY 0
-#define QUEUE_HAS_INVOCATIONS 1
+static NSOperationQueue *searchQueue = nil;
+
++ (void)initialize
+{
+    if (nil == searchQueue) {
+        searchQueue = [NSOperationQueue new];
+        [searchQueue setMaxConcurrentOperationCount:1];
+    }
+}
 
 - (id)initWithDocument:(id)doc;
 {
@@ -65,15 +76,11 @@
         [invocation setSelector:cb];
         [invocation setArgument:&self atIndex:2];
         searchLock = [[NSLock alloc] init];
-        queueLock = [[NSConditionLock alloc] initWithCondition:QUEUE_EMPTY];
-        queue = [[NSMutableArray alloc] init];
         
         callback = [invocation retain];
         originalScores = [NSMutableDictionary new];
         isSearching = 0;
-        shouldKeepRunning = 1;
         
-        [NSThread detachNewThreadSelector:@selector(runSearchThread) toTarget:self withObject:nil];
     }
     return self;
 }
@@ -81,27 +88,12 @@
 // owner should have already sent -terminate; sending it from -dealloc causes resurrection
 - (void)dealloc
 {
-	[queue release];
-	[queueLock release];
     [currentSearchString release];
     [originalScores release];
     [callback release];
     [previouslySelectedPublications release];
     [searchLock release];
     [super dealloc];
-}
-
-- (BOOL)shouldKeepRunning {
-    OSMemoryBarrier();
-    return shouldKeepRunning;
-}
-
-- (void)queueInvocation:(NSInvocation *)invocation {
-    if ([self shouldKeepRunning]) {
-        [queueLock lock];
-        [queue addObject:invocation];
-        [queueLock unlockWithCondition:QUEUE_HAS_INVOCATIONS];
-    }
 }
 
 - (void)_cancelSearch;
@@ -117,17 +109,15 @@
 
 - (void)cancelSearch;
 {
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(_cancelSearch)];
-    [self queueInvocation:invocation];
+    // make sure this is performed on the queue thread
+    NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(_cancelSearch) object:nil];
+    [searchQueue addOperation:op];
+    [op release];
 }
 
 - (void)terminate;
 {
-    OSAtomicCompareAndSwap32Barrier(1, 0, &shouldKeepRunning);
-    [queueLock lock];
-    [queue removeAllObjects];
-    // make sure the worker thread wakes up
-    [queueLock unlockWithCondition:QUEUE_HAS_INVOCATIONS];
+    [self cancelSearch];
     [searchLock lock];
     NSInvocation *cb = callback;
     callback = nil;
@@ -165,7 +155,7 @@
 
 #define SEARCH_BUFFER_MAX 1024
 
-- (void)_searchForString:(NSString *)searchString index:(SKIndexRef)skIndex
+- (void)backgroundSearchForString:(NSString *)searchString index:(SKIndexRef)skIndex
 {
     OSAtomicCompareAndSwap32Barrier(0, 1, &isSearching);
     [self performSelectorOnMainThread:@selector(invokeStartedCallback) withObject:nil waitUntilDone:YES];
@@ -261,48 +251,45 @@
         [self cancelSearch];
     
     // always queue a search, since the index content may be changing (in case of a search group)
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(_searchForString:index:)];
-    [invocation retainArguments];
-    [invocation setArgument:&searchString atIndex:2];
-    [invocation setArgument:&skIndex atIndex:3];
-    [self queueInvocation:invocation];
-}
-
-- (void)runSearchThread
-{
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
-	while ([self shouldKeepRunning]) {
-        NSInvocation *invocation = nil;
-        
-        // get the next invocation from the queue as soon as it's available
-        [queueLock lockWhenCondition:QUEUE_HAS_INVOCATIONS];
-        NSUInteger count = [queue count];
-        if (count) {
-            invocation = [[queue objectAtIndex:0] retain];
-            [queue removeObjectAtIndex:0];
-            count--;
-        }
-        [queueLock unlockWithCondition:count > 0 ? QUEUE_HAS_INVOCATIONS : QUEUE_EMPTY];
-        
-        if (invocation) {
-            @try {
-                [invocation invoke];
-                [invocation release];
-            }
-            @catch(id e) {
-                NSLog(@"Ignored exception %@ when executing a document search", e);
-            }
-		}
-        
-		[pool release];
-		pool = [[NSAutoreleasePool alloc] init];
-    }
-	
-    // make sure the last search was canceled
-    [self _cancelSearch];
-	
-	[pool release];
+    BDSKDocumentSearchOperation *op = [[BDSKDocumentSearchOperation alloc] initWithDocumentSearch:self index:skIndex searchString:searchString];
+    [searchQueue addOperation:op];
+    [op release];
 }
 
 @end
+
+#pragma mark -
+
+@implementation BDSKDocumentSearchOperation
+
+- (id)initWithDocumentSearch:(BDSKDocumentSearch *)aSearch index:(SKIndexRef)anIndex searchString:(NSString *)aSearchString;
+{
+    NSParameterAssert(anIndex); 
+    NSParameterAssert(searchString);
+    
+    self = [super init];
+    if (self) {
+        search = [aSearch retain];
+        index = (SKIndexRef)CFRetain(anIndex);
+        searchString = [aSearchString copy];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    CFRelease(index);
+    [search release];
+    [searchString release];
+    [super dealloc];
+}
+
+- (void)main
+{
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+    [search backgroundSearchForString:searchString index:index];
+    [pool release];
+}
+
+@end
+

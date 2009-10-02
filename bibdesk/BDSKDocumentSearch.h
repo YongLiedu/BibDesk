@@ -46,11 +46,8 @@
     CGFloat maxScore;                         // maximum score encountered
     NSMutableDictionary *originalScores;      // non-normalized scores, identifier URLs as keys
     volatile int32_t isSearching;
-    volatile int32_t shouldKeepRunning;
     NSString *currentSearchString;            // avoids duplicate searches
     NSLock *searchLock;                       // for currentSearchString and invocation
-    NSConditionLock *queueLock;               // for queued invocations
-    NSMutableArray *queue;
     
     // main thread access only
     NSArray *previouslySelectedPublications;  // convenience for the document
