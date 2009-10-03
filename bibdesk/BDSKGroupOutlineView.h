@@ -37,11 +37,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKGradientTableView.h"
+#import "BDSKOutlineView.h"
 
-@class BDSKGroupOutlineView;
-
-@interface BDSKGroupOutlineView : BDSKGradientOutlineView {
+@interface BDSKGroupOutlineView : BDSKOutlineView {
     NSTextFieldCell *parentCell;
 }
 - (NSTextFieldCell *)parentCell;
@@ -51,7 +49,7 @@
 
 #pragma mark -
 
-@interface NSObject (BDSKGroupTableViewDelegate)
+@interface NSObject (BDSKGroupOutlineViewDelegate)
 - (NSIndexSet *)outlineView:(BDSKGroupOutlineView *)anOutlineView indexesOfRowsToHighlightInRange:(NSRange)indexRange;
 - (BOOL)outlineView:(BDSKGroupOutlineView *)anOutlineView isSingleSelectionItem:(id)item;
 - (void)outlineView:(BDSKGroupOutlineView *)anOutlineView doubleClickedOnIconOfItem:(id)item;

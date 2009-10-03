@@ -88,27 +88,3 @@
 }
 
 @end
-
-#pragma mark -
-
-@implementation BDSKGradientOutlineView
-
-- (id)initWithFrame:(NSRect)frameRect {
-    if (self = [super initWithFrame:frameRect]) {
-        [self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
-    }
-    return self;
-}
-
-- (id)initWithCoder:(NSCoder *)coder {
-    if (self = [super initWithCoder:coder]) {
-        [self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
-    }
-    return self;
-}
-
-- (CGFloat)rowHeightForFont:(NSFont *)font {
-    return [NSLayoutManager defaultViewLineHeightForFont:font] + 2.0;
-}
-
-@end

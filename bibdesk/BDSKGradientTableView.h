@@ -70,7 +70,3 @@
 
 @interface BDSKGradientTableView : BDSKTableView
 @end
-
-
-@interface BDSKGradientOutlineView : BDSKOutlineView
-@end
