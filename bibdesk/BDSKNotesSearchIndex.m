@@ -41,6 +41,7 @@
 #import "BDSKStringConstants.h"
 #import "NSURL_BDSKExtensions.h"
 #import <libkern/OSAtomic.h>
+#import <SkimNotes/SkimNotes.h>
 
 
 @interface BDSKNotesSearchIndex (BDSKPrivate)
@@ -170,11 +171,30 @@
         if ([fileURLs count]) {
             searchText = [NSMutableString string];
             for (NSURL *fileURL in fileURLs) {
-                NSString *notes = [fileURL textSkimNotes];
-                if ([notes length]) {
+                NSString *notesString = nil;
+                FSRef fileRef;
+                CFStringRef theUTI = NULL;
+                if (CFURLGetFSRef((CFURLRef)fileURL, &fileRef))
+                    LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
+                if (theUTI && UTTypeConformsTo(theUTI, CFSTR("net.sourceforge.skim-app.pdfd")))
+                    notesString = [fileManager readSkimTextNotesFromPDFBundleAtURL:fileURL error:NULL];
+                else
+                    notesString = [fileManager readSkimTextNotesFromExtendedAttributesAtURL:fileURL error:NULL];
+                if (notesString == nil) {
+                    NSArray *notes = nil;
+                    if (theUTI && UTTypeConformsTo(theUTI, CFSTR("net.sourceforge.skim-app.pdfd")))
+                        notes = [fileManager readSkimNotesFromPDFBundleAtURL:fileURL error:NULL];
+                    else if (theUTI && UTTypeConformsTo(theUTI, CFSTR("net.sourceforge.skim-app.skimnotes")))
+                        notes = [fileManager readSkimNotesFromSkimFileAtURL:fileURL error:NULL];
+                    else
+                        notes = [fileManager readSkimNotesFromExtendedAttributesAtURL:fileURL error:NULL];
+                    if (notes)
+                        notesString = SKNSkimTextNotes(notes);
+                }
+                if ([notesString length]) {
                     if ([searchText length])
                         [searchText appendString:@"\n"];
-                    [searchText appendString:notes];
+                    [searchText appendString:notesString];
                 }
             }
         }
@@ -201,6 +221,8 @@
 - (void)runIndexThread
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+    fileManager = [[NSFileManager alloc] init];
     
     [setupLock lockWhenCondition:INDEX_STARTUP];
     [setupLock unlockWithCondition:INDEX_STARTUP_COMPLETE];
@@ -234,6 +256,7 @@
     }
     @finally {
         // allow the top-level pool to catch this autorelease pool
+        [fileManager release];
         [setupLock unlockWithCondition:INDEX_THREAD_DONE];
         [pool release];
     }

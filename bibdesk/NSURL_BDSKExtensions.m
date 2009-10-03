@@ -259,22 +259,15 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
 
 #pragma mark Skim Notes
 
-static CFStringRef getUTIForURL(CFURLRef theURL) {
-    FSRef fileRef;
-    CFStringRef theUTI = NULL;
-    if (CFURLGetFSRef(theURL, &fileRef))
-        LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
-    return theUTI;
-}
-
 - (NSArray *)SkimNotes {
     NSArray *array = nil;
     if ([self isFileURL]) {
         NSFileManager *fm = [NSFileManager defaultManager];
-        CFStringRef theUTI = getUTIForURL((CFURLRef)self);
-        if (UTTypeConformsTo(theUTI, CFSTR("net.sourceforge.skim-app.pdfd")))
+        NSWorkspace *ws = [NSWorkspace sharedWorkspace];
+        NSString *theUTI = [ws typeOfFile:[self path] error:NULL];
+        if ([ws type:theUTI conformsToType:@"net.sourceforge.skim-app.pdfd"])
             array = [fm readSkimNotesFromPDFBundleAtURL:self error:NULL];
-        else if (UTTypeConformsTo(theUTI, CFSTR("net.sourceforge.skim-app.skimnotes")))
+        else if ([ws type:theUTI conformsToType:@"net.sourceforge.skim-app.skimnotes"])
             array = [fm readSkimNotesFromSkimFileAtURL:self error:NULL];
         else
             array = [fm readSkimNotesFromExtendedAttributesAtURL:self error:NULL];
@@ -286,8 +279,9 @@ static CFStringRef getUTIForURL(CFURLRef theURL) {
     NSString *string = nil;
     if ([self isFileURL]) {
         NSFileManager *fm = [NSFileManager defaultManager];
-        CFStringRef theUTI = getUTIForURL((CFURLRef)self);
-        if (UTTypeConformsTo(theUTI, CFSTR("net.sourceforge.skim-app.pdfd")))
+        NSWorkspace *ws = [NSWorkspace sharedWorkspace];
+        NSString *theUTI = [ws typeOfFile:[self path] error:NULL];
+        if ([ws type:theUTI conformsToType:@"net.sourceforge.skim-app.pdfd"])
             string = [fm readSkimTextNotesFromPDFBundleAtURL:self error:NULL];
         else
             string = [fm readSkimTextNotesFromExtendedAttributesAtURL:self error:NULL];
@@ -304,8 +298,9 @@ static CFStringRef getUTIForURL(CFURLRef theURL) {
     NSData *data = nil;
     if ([self isFileURL]) {
         NSFileManager *fm = [NSFileManager defaultManager];
-        CFStringRef theUTI = getUTIForURL((CFURLRef)self);
-        if (UTTypeConformsTo(theUTI, CFSTR("net.sourceforge.skim-app.pdfd")))
+        NSWorkspace *ws = [NSWorkspace sharedWorkspace];
+        NSString *theUTI = [ws typeOfFile:[self path] error:NULL];
+        if ([ws type:theUTI conformsToType:@"net.sourceforge.skim-app.pdfd"])
             data = [fm readSkimRTFNotesFromPDFBundleAtURL:self error:NULL];
         else
             data = [fm readSkimRTFNotesFromExtendedAttributesAtURL:self error:NULL];

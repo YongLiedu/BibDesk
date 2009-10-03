@@ -46,6 +46,7 @@
     NSConditionLock *queueLock;
     NSMutableArray *queue;
     NSConditionLock *setupLock;
+    NSFileManager *fileManager;
 }
 
 - (void)removePublications:(NSArray *)pubs;
