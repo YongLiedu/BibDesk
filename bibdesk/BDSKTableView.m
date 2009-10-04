@@ -535,7 +535,10 @@ static char BDSKTableViewFontDefaultsObservationContext;
 }
 
 - (CGFloat)rowHeightForFont:(NSFont *)font {
-    return [NSLayoutManager defaultViewLineHeightForFont:font];
+    CGFloat rowHeight = [NSLayoutManager defaultViewLineHeightForFont:font];
+    if ([self selectionHighlightStyle] == NSTableViewSelectionHighlightStyleSourceList)
+        rowHeight += 2.0;
+    return rowHeight;
 }
 
 #pragma mark SKTypeSelectHelper datasource protocol

@@ -91,7 +91,6 @@
 		CE15C0D80AA5B9A3002C555F /* BDSKErrorManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE15C0D60AA5B9A3002C555F /* BDSKErrorManager.m */; };
 		CE15E6230FCC28B1009FCBF1 /* BibDocument_UI.m in Sources */ = {isa = PBXBuildFile; fileRef = CE15E6210FCC28B1009FCBF1 /* BibDocument_UI.m */; };
 		CE1EF2940F8E0D54004E7AE8 /* BDSKParentGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE1EF2920F8E0D54004E7AE8 /* BDSKParentGroup.m */; };
-		CE1EF3890F8E6190004E7AE8 /* BDSKGradientTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE1EF3880F8E6190004E7AE8 /* BDSKGradientTableView.m */; };
 		CE21D10B09208B9D0075E607 /* BDSKGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE21D10909208B9D0075E607 /* BDSKGroup.m */; };
 		CE22E1CE0A8CCF9D002CEFB8 /* BDSKOrphanedFilesFinder.m in Sources */ = {isa = PBXBuildFile; fileRef = CE22E1CC0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.m */; };
 		CE2391620A334890009F3A5B /* BDSKDocumentInfoWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2391600A334890009F3A5B /* BDSKDocumentInfoWindowController.m */; };
@@ -874,7 +873,6 @@
 		CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-App.xcconfig"; sourceTree = "<group>"; };
 		CE1EF2910F8E0D54004E7AE8 /* BDSKParentGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKParentGroup.h; sourceTree = "<group>"; };
 		CE1EF2920F8E0D54004E7AE8 /* BDSKParentGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKParentGroup.m; sourceTree = "<group>"; };
-		CE1EF3880F8E6190004E7AE8 /* BDSKGradientTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGradientTableView.m; sourceTree = "<group>"; };
 		CE21D10809208B9D0075E607 /* BDSKGroup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKGroup.h; sourceTree = "<group>"; };
 		CE21D10909208B9D0075E607 /* BDSKGroup.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKGroup.m; sourceTree = "<group>"; };
 		CE22E1CB0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKOrphanedFilesFinder.h; sourceTree = "<group>"; };
@@ -991,7 +989,6 @@
 		CE62DE4D0F4B790C00BDF01E /* Preferences.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Preferences.plist; sourceTree = "<group>"; };
 		CE62DE4F0F4B797B00BDF01E /* next.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = next.tiff; sourceTree = "<group>"; };
 		CE62DE500F4B797B00BDF01E /* previous.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = previous.tiff; sourceTree = "<group>"; };
-		CE62E0480F4C3D9400BDF01E /* BDSKGradientTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKGradientTableView.h; sourceTree = "<group>"; };
 		CE62E0910F4C46D600BDF01E /* BDSKSplitView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSplitView.h; sourceTree = "<group>"; };
 		CE62E0920F4C46D600BDF01E /* BDSKSplitView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSplitView.m; sourceTree = "<group>"; };
 		CE62E0B70F4C4A2100BDF01E /* BDSKTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTableView.h; sourceTree = "<group>"; };
@@ -1960,7 +1957,6 @@
 				CE92CE5C0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m */,
 				CEF7AC050915929E00BE9E02 /* BDSKGradientSplitView.m */,
 				F9706DE409102DF500526FC8 /* BDSKGradientView.m */,
-				CE1EF3880F8E6190004E7AE8 /* BDSKGradientTableView.m */,
 				CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */,
 				F97BE8F00907321F0063504B /* BDSKGroupOutlineView.m */,
 				CE80A8740FDAB27D0086A46C /* BDSKHighlightingPopUpButton.m */,
@@ -2521,7 +2517,6 @@
 				45BB77510CAC74AE00F6299B /* BDSKGoogleScholarParser.h */,
 				CE92CE5B0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h */,
 				CEF7AC040915929E00BE9E02 /* BDSKGradientSplitView.h */,
-				CE62E0480F4C3D9400BDF01E /* BDSKGradientTableView.h */,
 				F9706DE309102DF500526FC8 /* BDSKGradientView.h */,
 				CE21D10809208B9D0075E607 /* BDSKGroup.h */,
 				CE82B4710D57EECF00A2E8C5 /* BDSKGroup+Scripting.h */,
@@ -3639,7 +3634,6 @@
 				6C567DBA0F8189F500DE285D /* BDSKZentralblattParser.m in Sources */,
 				6C567DBF0F818A1600DE285D /* BDSKMathSciNetParser.m in Sources */,
 				CE1EF2940F8E0D54004E7AE8 /* BDSKParentGroup.m in Sources */,
-				CE1EF3890F8E6190004E7AE8 /* BDSKGradientTableView.m in Sources */,
 				6C5DE3E80F8FC33B00E02D5F /* BDSKMathSiteParser.m in Sources */,
 				6CD26A240F928EEE0089FDFD /* BDSKBibDeskProtocol.m in Sources */,
 				6CAEE4CD0F98EC63009EA5FE /* BDSKCOinSParser.m in Sources */,
