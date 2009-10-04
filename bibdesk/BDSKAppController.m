@@ -1208,7 +1208,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     
     NSArray *publications = [userInfo valueForKey:@"publications"];
     NSError *error = nil;
-    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSFileManager *fileManager = [[NSFileManager alloc] init];
     
     @try{
 
@@ -1292,6 +1292,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     @finally{
         [userInfo release];
         [metadataCacheLock unlock];
+        [fileManager release];
         [pool release];
     }
 }
