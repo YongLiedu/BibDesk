@@ -47,7 +47,7 @@ typedef struct _BDSKISIGroupFlags {
 
 @class BDSKReadWriteLock;
 
-@interface BDSKISIGroupServer : BDSKAsynchronousDOServer 
+@interface BDSKISIGroupServer : BDSKAsynchronousDOServer <BDSKSearchGroupServer>
 {
     BDSKSearchGroup *group;
     BDSKServerInfo *serverInfo;

@@ -60,7 +60,7 @@ typedef struct _BDSKZoomGroupFlags {
 
 @class BDSKServerInfo, BDSKReadWriteLock;
 
-@interface BDSKZoomGroupServer : BDSKAsynchronousDOServer
+@interface BDSKZoomGroupServer : BDSKAsynchronousDOServer <BDSKSearchGroupServer>
 {
     BDSKSearchGroup *group;
     ZOOMConnection *connection;
