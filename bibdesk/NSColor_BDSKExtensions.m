@@ -91,53 +91,36 @@ typedef union _BDSKRGBAInt {
     return ((r > 1.0-margin && g > 1.0-margin && b > 1.0-margin) || (r < margin && g < margin && b < margin) || a < margin);
 }
 
+- (uint32_t)fourByteHSBAValue {
+    CGFloat hue = 0.0, saturation = 0.0, brightness = 0.0, alpha = 0.0;
+    union _ {
+        struct {
+            uint8_t h;
+            uint8_t s;
+            uint8_t b;
+            uint8_t a;
+        } hsba;
+        uint32_t uintValue;
+    } u;
+    [[self colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getHue:&hue saturation:&saturation brightness:&brightness alpha:&alpha];
+    u.hsba.h = (uint8_t)(hue * 255);
+    u.hsba.s = (uint8_t)(saturation * 255);
+    u.hsba.b = (uint8_t)(brightness * 255);
+    u.hsba.a = (uint8_t)(alpha * 255);
+    return CFSwapInt32HostToBig(u.uintValue);
+}
+
 - (NSComparisonResult)colorCompare:(id)other {
     if (NO == [other isKindOfClass:[NSColor class]])
         return NSOrderedAscending;
-    CGFloat hue1 = 0.0, saturation1 = 0.0, brightness1 = 0.0, alpha1 = 0.0, hue2 = 0.0, saturation2 = 0.0, brightness2 = 0.0, alpha2 = 0.0;
-    [[self colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getHue:&hue1 saturation:&saturation1 brightness:&brightness1 alpha:&alpha1];
-    [[other colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getHue:&hue2 saturation:&saturation2 brightness:&brightness2 alpha:&alpha2];
-    uint32_t h1 = (uint32_t)(hue1 * 255);
-    uint32_t s1 = (uint32_t)(saturation1 * 255);
-    uint32_t b1 = (uint32_t)(brightness1 * 255);
-    uint32_t a1 = (uint32_t)(alpha1 * 255);
-    uint32_t h2 = (uint32_t)(hue2 * 255);
-    uint32_t s2 = (uint32_t)(saturation2 * 255);
-    uint32_t b2 = (uint32_t)(brightness2 * 255);
-    uint32_t a2 = (uint32_t)(alpha2 * 255);
-    if (h1 < h2)
+    uint32_t value1 = [self fourByteHSBAValue];
+    uint32_t value2 = [other fourByteHSBAValue];
+    if (value1 < value2)
         return NSOrderedAscending;
-    if (h1 > h2)
+    else if (value1 > value2)
         return NSOrderedDescending;
-    if (s1 < s2)
-        return NSOrderedAscending;
-    if (s1 > s2)
-        return NSOrderedDescending;
-    if (b1 < b2)
-        return NSOrderedAscending;
-    if (b1 > b2)
-        return NSOrderedDescending;
-    if (a1 < a2)
-        return NSOrderedAscending;
-    if (a1 > a2)
-        return NSOrderedDescending;
-    if (hue1 < hue2)
-        return NSOrderedAscending;
-    if (hue1 > hue2)
-        return NSOrderedDescending;
-    if (saturation1 < saturation2)
-        return NSOrderedAscending;
-    if (saturation1 > saturation2)
-        return NSOrderedDescending;
-    if (brightness1 < b2)
-        return NSOrderedAscending;
-    if (brightness1 > brightness2)
-        return NSOrderedDescending;
-    if (alpha1 < alpha2)
-        return NSOrderedAscending;
-    if (alpha1 > alpha2)
-        return NSOrderedDescending;
-    return NSOrderedSame;
+    else
+        return NSOrderedSame;
 }
 
 + (id)scriptingRgbaColorWithDescriptor:(NSAppleEventDescriptor *)descriptor {
