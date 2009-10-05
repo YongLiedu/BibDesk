@@ -41,7 +41,7 @@
 
 @interface BDSKFile : NSObject <NSCopying, NSCoding>
 
-- (id)initWithFSRef:(FSRef *)aRef;
+- (id)initWithFSRef:(const FSRef *)aRef;
 - (id)initWithPath:(NSString *)aPath;
 - (id)initWithURL:(NSURL *)aURL;
 + (id)fileWithURL:(NSURL *)aURL;

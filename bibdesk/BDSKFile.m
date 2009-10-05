@@ -94,7 +94,7 @@ static Class BDSKFileClass = Nil;
 // designated initializer for the class cluster is -init; all subclasses should call it
 
 // returns an FSRef wrapper
-- (id)initWithFSRef:(FSRef *)aRef;
+- (id)initWithFSRef:(const FSRef *)aRef;
 {
     BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
@@ -265,7 +265,10 @@ static Class BDSKFileClass = Nil;
 
 - (id)copyWithZone:(NSZone *)aZone
 {
-    return [self retain];
+    if (NSShouldRetainWithZone(self, aZone))
+        return [self retain];
+    else
+        return [[[self class] allocWithZone:aZone] initWithURL:fileURL];
 }
 
 - (NSUInteger)hash
@@ -307,7 +310,7 @@ static Class BDSKFileClass = Nil;
 @implementation BDSKFSRefFile
 
 // guaranteed to be called with a non-NULL FSRef
-- (id)initWithFSRef:(FSRef *)aRef;
+- (id)initWithFSRef:(const FSRef *)aRef;
 {
     self = [super init];
     fileRef = NULL;
@@ -359,7 +362,10 @@ static Class BDSKFileClass = Nil;
 
 - (id)copyWithZone:(NSZone *)aZone
 {
-    return [self retain];
+    if (NSShouldRetainWithZone(self, aZone))
+        return [self retain];
+    else
+        return [[[self class] allocWithZone:aZone] initWithFSRef:fileRef];
 }
 
 - (NSURL *)fileURL;

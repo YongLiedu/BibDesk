@@ -141,7 +141,10 @@ static CFCharacterSetRef dashSet = NULL;
 
 - (id)copyWithZone:(NSZone *)zone{
     // authors are immutable
-    return [self retain];
+    if (NSShouldRetainWithZone(self, zone))
+        return [self retain];
+    else
+        return [[[self class] allocWithZone:zone] initWithName:originalName andPub:publication forField:field];
 }
 
 - (id)initWithCoder:(NSCoder *)coder{

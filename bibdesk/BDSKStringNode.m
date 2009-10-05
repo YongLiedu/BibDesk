@@ -87,7 +87,10 @@
 }
 
 - (id)copyWithZone:(NSZone *)zone{
-    return [self retain];
+    if (NSShouldRetainWithZone(self, zone))
+        return [self retain];
+    else
+        return [[[self class] allocWithZone:zone] initWithType:type value:value];
 }
 
 - (id)initWithCoder:(NSCoder *)coder{
