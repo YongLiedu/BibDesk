@@ -265,7 +265,7 @@ static NSOperationQueue *searchQueue = nil;
 - (id)initWithDocumentSearch:(BDSKDocumentSearch *)aSearch index:(SKIndexRef)anIndex searchString:(NSString *)aSearchString;
 {
     NSParameterAssert(anIndex); 
-    NSParameterAssert(searchString);
+    NSParameterAssert(aSearchString);
     
     self = [super init];
     if (self) {
