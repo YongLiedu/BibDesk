@@ -211,7 +211,6 @@
 		CEB5D6061072AE360001C135 /* AddFieldSheet.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D58E1072AE350001C135 /* AddFieldSheet.xib */; };
 		CEB5D6071072AE360001C135 /* AutoFile.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D5901072AE350001C135 /* AutoFile.xib */; };
 		CEB5D6081072AE360001C135 /* AutoFileProgress.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D5921072AE350001C135 /* AutoFileProgress.xib */; };
-		CEB5D6091072AE360001C135 /* BDSKAlert.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D5941072AE350001C135 /* BDSKAlert.xib */; };
 		CEB5D60A1072AE360001C135 /* BDSKCharacterConversion.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D5961072AE350001C135 /* BDSKCharacterConversion.xib */; };
 		CEB5D60B1072AE360001C135 /* BDSKCondition.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D5981072AE350001C135 /* BDSKCondition.xib */; };
 		CEB5D60C1072AE360001C135 /* BDSKCustomCiteDrawer.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D59A1072AE350001C135 /* BDSKCustomCiteDrawer.xib */; };
@@ -1089,7 +1088,6 @@
 		CEB5D58F1072AE350001C135 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AddFieldSheet.xib; sourceTree = "<group>"; };
 		CEB5D5911072AE350001C135 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AutoFile.xib; sourceTree = "<group>"; };
 		CEB5D5931072AE350001C135 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AutoFileProgress.xib; sourceTree = "<group>"; };
-		CEB5D5951072AE350001C135 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/BDSKAlert.xib; sourceTree = "<group>"; };
 		CEB5D5971072AE350001C135 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/BDSKCharacterConversion.xib; sourceTree = "<group>"; };
 		CEB5D5991072AE350001C135 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/BDSKCondition.xib; sourceTree = "<group>"; };
 		CEB5D59B1072AE350001C135 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/BDSKCustomCiteDrawer.xib; sourceTree = "<group>"; };
@@ -1146,7 +1144,6 @@
 		CEB5D6501072AE950001C135 /* French */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = French; path = French.lproj/AddFieldSheet.xib; sourceTree = "<group>"; };
 		CEB5D6511072AE950001C135 /* French */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = French; path = French.lproj/AutoFile.xib; sourceTree = "<group>"; };
 		CEB5D6521072AE950001C135 /* French */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = French; path = French.lproj/AutoFileProgress.xib; sourceTree = "<group>"; };
-		CEB5D6531072AE950001C135 /* French */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = French; path = French.lproj/BDSKAlert.xib; sourceTree = "<group>"; };
 		CEB5D6541072AE950001C135 /* French */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = French; path = French.lproj/BDSKCharacterConversion.xib; sourceTree = "<group>"; };
 		CEB5D6551072AE950001C135 /* French */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = French; path = French.lproj/BDSKCondition.xib; sourceTree = "<group>"; };
 		CEB5D6561072AE950001C135 /* French */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = French; path = French.lproj/BDSKCustomCiteDrawer.xib; sourceTree = "<group>"; };
@@ -1780,7 +1777,6 @@
 				CEB5D58E1072AE350001C135 /* AddFieldSheet.xib */,
 				CEB5D5901072AE350001C135 /* AutoFile.xib */,
 				CEB5D5921072AE350001C135 /* AutoFileProgress.xib */,
-				CEB5D5941072AE350001C135 /* BDSKAlert.xib */,
 				CEB5D5961072AE350001C135 /* BDSKCharacterConversion.xib */,
 				CEB5D5981072AE350001C135 /* BDSKCondition.xib */,
 				CEB5D59A1072AE350001C135 /* BDSKCustomCiteDrawer.xib */,
@@ -3152,7 +3148,6 @@
 				CEB5D6061072AE360001C135 /* AddFieldSheet.xib in Resources */,
 				CEB5D6071072AE360001C135 /* AutoFile.xib in Resources */,
 				CEB5D6081072AE360001C135 /* AutoFileProgress.xib in Resources */,
-				CEB5D6091072AE360001C135 /* BDSKAlert.xib in Resources */,
 				CEB5D60A1072AE360001C135 /* BDSKCharacterConversion.xib in Resources */,
 				CEB5D60B1072AE360001C135 /* BDSKCondition.xib in Resources */,
 				CEB5D60C1072AE360001C135 /* BDSKCustomCiteDrawer.xib in Resources */,
@@ -3797,15 +3792,6 @@
 				CEB5D6521072AE950001C135 /* French */,
 			);
 			name = AutoFileProgress.xib;
-			sourceTree = "<group>";
-		};
-		CEB5D5941072AE350001C135 /* BDSKAlert.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				CEB5D5951072AE350001C135 /* English */,
-				CEB5D6531072AE950001C135 /* French */,
-			);
-			name = BDSKAlert.xib;
 			sourceTree = "<group>";
 		};
 		CEB5D5961072AE350001C135 /* BDSKCharacterConversion.xib */ = {
