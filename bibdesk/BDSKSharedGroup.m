@@ -63,16 +63,14 @@ static NSImage *unlockedIcon = nil;
 + (NSImage *)lockedIcon {
     if(lockedIcon == nil){
         NSRect iconRect = NSMakeRect(0.0, 0.0, 32.0, 32.0);
-        NSRect iconSrcRect = {NSZeroPoint, [[self icon] size]};
         NSRect badgeRect = NSMakeRect(20.0, 0.0, 12.0, 16.0);
-        NSRect badgeSrcRect = NSMakeRect(0.0, 0.0, 9.0, 12.0);
         NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
-        NSImage *badge = [NSImage imageNamed:@"locked"];
+        NSImage *badge = [NSImage imageNamed:NSImageNameLockLockedTemplate];
         
         [image lockFocus];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-        [[self icon] drawInRect:iconRect fromRect:iconSrcRect operation:NSCompositeSourceOver fraction:1.0];
-        [badge drawInRect:badgeRect fromRect:badgeSrcRect operation:NSCompositeSourceOver fraction:0.65];
+        [[self icon] drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [badge drawInRect:badgeRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.65];
         [image unlockFocus];
         
         iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
@@ -82,8 +80,8 @@ static NSImage *unlockedIcon = nil;
         
         [tinyImage lockFocus];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-        [[self icon] drawInRect:iconRect fromRect:iconSrcRect operation:NSCompositeSourceOver fraction:1.0];
-        [badge drawInRect:badgeRect fromRect:badgeSrcRect operation:NSCompositeSourceOver fraction:0.65];
+        [[self icon] drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [badge drawInRect:badgeRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.65];
         [tinyImage unlockFocus];
         [image addRepresentation:[[tinyImage representations] lastObject]];
         [tinyImage release];
@@ -96,16 +94,14 @@ static NSImage *unlockedIcon = nil;
 + (NSImage *)unlockedIcon {
     if(unlockedIcon == nil){
         NSRect iconRect = NSMakeRect(0.0, 0.0, 32.0, 32.0);
-        NSRect iconSrcRect = {NSZeroPoint, [[self icon] size]};
         NSRect badgeRect = NSMakeRect(20.0, 0.0, 12.0, 16.0);
-        NSRect badgeSrcRect = NSMakeRect(0.0, 0.0, 9.0, 12.0);
         NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
-        NSImage *badge = [NSImage imageNamed:@"unlocked"];
+        NSImage *badge = [NSImage imageNamed:NSImageNameLockUnlockedTemplate];
         
         [image lockFocus];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-        [[self icon] drawInRect:iconRect fromRect:iconSrcRect operation:NSCompositeSourceOver fraction:1.0];
-        [badge drawInRect:badgeRect fromRect:badgeSrcRect operation:NSCompositeSourceOver fraction:0.65];
+        [[self icon] drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [badge drawInRect:badgeRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.65];
         [image unlockFocus];
         
         iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
@@ -115,8 +111,8 @@ static NSImage *unlockedIcon = nil;
         
         [tinyImage lockFocus];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-        [[self icon] drawInRect:iconRect fromRect:iconSrcRect operation:NSCompositeSourceOver fraction:1.0];
-        [badge drawInRect:badgeRect fromRect:badgeSrcRect operation:NSCompositeSourceOver fraction:0.65];
+        [[self icon] drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [badge drawInRect:badgeRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.65];
         [tinyImage unlockFocus];
         [image addRepresentation:[[tinyImage representations] lastObject]];
         [tinyImage release];

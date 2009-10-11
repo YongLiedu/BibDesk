@@ -235,6 +235,7 @@
     static NSImage *smartGroupImage = nil;
     static NSImage *importGroupImage = nil;
     static NSImage *sharedGroupImage = nil;
+    static NSImage *urlGroupImage = nil;
     
     if (categoryGroupImage)
         return;
@@ -244,7 +245,7 @@
     NSRect smallRect = {NSZeroPoint, smallSize};
     NSRect tinyRect = {NSZeroPoint, tinySize};
     
-    smartGroupImage = [[NSImage imageNamed:@"NSFolderSmart"] copy];
+    smartGroupImage = [[NSImage imageNamed:NSImageNameFolderSmart] copy];
     [smartGroupImage setName:@"smartGroup"];
     
     staticGroupImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] copy];
@@ -259,7 +260,7 @@
     [categoryGroupImage unlockFocus];
     NSImage *tinyImage = [[NSImage alloc] initWithSize:tinySize];
     [tinyImage lockFocus];
-    [[NSImage imageNamed:@"NSFolderSmart"] drawInRect:tinyRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    [[NSImage imageNamed:NSImageNameFolderSmart] drawInRect:tinyRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     [tinyImage unlockFocus];
     ciImage = [CIImage imageWithData:[tinyImage TIFFRepresentation]];
     ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.3 brightnessBias:0.3];
@@ -274,20 +275,23 @@
     
     importGroupImage = [[NSImage alloc] initWithSize:smallSize];
     [importGroupImage lockFocus];
-    [[NSImage imageNamed:@"NSFolderSmart"] drawInRect:smallRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    [[NSImage imageNamed:NSImageNameFolderSmart] drawInRect:smallRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     [[NSImage imageNamed:@"importBadge"] drawInRect:smallRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     [importGroupImage unlockFocus];
     tinyImage = [[NSImage alloc] initWithSize:tinySize];
     [tinyImage lockFocus];
-    [[NSImage imageNamed:@"NSFolderSmart"] drawInRect:tinyRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    [[NSImage imageNamed:NSImageNameFolderSmart] drawInRect:tinyRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     [[NSImage imageNamed:@"importBadge"] drawInRect:tinyRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     [tinyImage unlockFocus];
     [importGroupImage addRepresentation:[[tinyImage representations] lastObject]];
     [tinyImage release];
     [importGroupImage setName:@"importGroup"];
     
-    sharedGroupImage = [[NSImage imageNamed:@"NSBonjour"] copy];
+    sharedGroupImage = [[NSImage imageNamed:NSImageNameBonjour] copy];
     [sharedGroupImage setName:@"sharedGroup"];
+    
+    urlGroupImage = [[NSImage imageNamed:NSImageNameNetwork] copy];
+    [urlGroupImage setName:@"urlGroup"];
 }
 
 + (NSImage *)httpInternetLocationImage {
