@@ -46,26 +46,7 @@
 @implementation BDSKSortCommand
 
 static NSString *normalizedKey(NSString *key) {
-    static NSArray *specialKeys = nil;
-    if (specialKeys == nil) {
-        specialKeys = [[NSMutableArray alloc] initWithObjects:
-            BDSKAuthorEditorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKLastAuthorEditorString, nil];
-    }
-
-    NSString *capKey = [key fieldName];
-    if ([key isEqualToString:capKey] == NO) {
-        BOOL isSpecial = NO;
-        for (NSString *specialKey in specialKeys) {
-            if ([key caseInsensitiveCompare:specialKey]) {
-                key = specialKey;
-                isSpecial = YES;
-                break;
-            }
-        }
-        if (isSpecial == NO)
-            key = capKey;
-    }
-    return key;
+    return [key rangeOfCharacterFromSet:[NSCharacterSet whitespaceCharacterSet]].location == NSNotFound ? [key fieldName] : key;
 }
 
 - (id)performDefaultImplementation {
