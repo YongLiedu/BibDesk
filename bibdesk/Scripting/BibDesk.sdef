@@ -196,6 +196,10 @@
 			<property name="file" code="file" type="file" access="r" description="Its location on disk, if it has one.">
 				<cocoa key="fileURL"/>
 			</property>
+            <property name="path" code="ppth" type="text" access="r" hidden="yes"
+                description="The document's path.">
+                <cocoa key="fileName"/>
+            </property>
 			<responds-to command="close">
 				<cocoa method="handleCloseScriptCommand:"/>
 			</responds-to>
