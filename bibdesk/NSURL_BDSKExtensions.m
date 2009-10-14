@@ -356,8 +356,10 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
 }
 
 - (NSAttributedString *)smallIcon {
-    NSImage *image = [[[NSImage imageForURL:self] copy] autorelease];
-    [image setSize:NSMakeSize(16, 16)];
+    NSImage *image = [[[NSImage alloc] initWithSize:NSMakeSize(16, 16)] autorelease];
+    [image lockFocus];
+    [[NSImage imageForURL:self] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+    [image unlockFocus];
     NSString *name = ([self isFileURL]) ? [self path] : [self relativeString];
     name = [[[name lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"tiff"];
     
@@ -392,8 +394,10 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
 }
 
 - (NSAttributedString *)linkedSmallIcon {
-    NSImage *image = [[[NSImage imageForURL:self] copy] autorelease];
-    [image setSize:NSMakeSize(16, 16)];
+    NSImage *image = [[[NSImage alloc] initWithSize:NSMakeSize(16, 16)] autorelease];
+    [image lockFocus];
+    [[NSImage imageForURL:self] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+    [image unlockFocus];
     NSString *name = ([self isFileURL]) ? [self path] : [self relativeString];
     name = [[[name lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"tiff"];
     

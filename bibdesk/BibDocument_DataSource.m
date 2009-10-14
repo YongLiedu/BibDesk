@@ -175,7 +175,7 @@
             } else if ([[aTableColumn identifier] isEqualToString:BDSKCrossrefString]) {
                 if ([[shownPublications objectAtIndex:row] crossrefParent]) {
                     [aCell setEnabled:YES];
-                    [aCell setImage:[NSImage arrowImage]];
+                    [aCell setImage:[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate]];
                 } else {
                     [aCell setEnabled:YES];
                     [aCell setImage:nil];

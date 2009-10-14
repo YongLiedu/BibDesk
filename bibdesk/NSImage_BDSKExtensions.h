@@ -86,8 +86,6 @@
 + (NSImage *)paperclipImage;
 + (NSImage *)redPaperclipImage;
 
-+ (NSImage *)arrowImage;
-
 - (NSImage *)imageFlippedHorizontally;
 - (NSImage *)highlightedImage;
 - (NSImage *)invertedImage;

@@ -202,7 +202,7 @@
 	
 	if ([self hasButton] || [self URL]) {
         NSRect buttonRect = [self buttonRectForBounds:cellFrame];
-        NSImage *theImage = [self URL] ? [NSImage imageForURL:[self URL]] : [NSImage arrowImage];
+        NSImage *theImage = [self URL] ? [NSImage imageForURL:[self URL]] : [NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate];
         [buttonCell setImage:theImage];
         [buttonCell drawWithFrame:buttonRect inView:controlView];
     }

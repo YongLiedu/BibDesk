@@ -335,8 +335,9 @@ enum {
             [cell setButtonType:NSMomentaryChangeButton];
             [cell setBordered:NO];
             [cell setImagePosition:NSImageOnly];
+            [cell setImageScaling:NSImageScaleProportionallyDown];
             [cell setControlSize:NSSmallControlSize];
-            [cell setImage:[NSImage arrowImage]];
+            [cell setImage:[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate]];
             [cell setAction:@selector(openParentItem:)];
             [cell setTarget:self];
             break;
@@ -525,14 +526,20 @@ enum {
 	
 	if (headerImageCache == nil) {
 		NSDictionary *paths = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKTableHeaderImagesKey];
-        NSImage *paperclip = [[[NSImage paperclipImage] copy] autorelease];
-        [paperclip setScalesWhenResized:YES];
-        [paperclip setSize:NSMakeSize(16, 16)];
+        NSImage *paperclip = [[[NSImage alloc] initWithSize:NSMakeSize(16, 16)] autorelease];
+        [paperclip lockFocus];
+        [[NSImage paperclipImage] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        [paperclip unlockFocus];
         [paperclip setTemplate:NO];
-        NSImage *color = [[[NSImage imageNamed:@"colors"] copy] autorelease];
-        [color setScalesWhenResized:YES];
-        [color setSize:NSMakeSize(16, 16)];
-		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, paperclip, BDSKLocalFileString, [NSImage arrowImage], BDSKCrossrefString, color, BDSKColorString, color, BDSKColorLabelString, nil];
+        NSImage *color = [[[NSImage alloc] initWithSize:NSMakeSize(16, 16)] autorelease];
+        [color lockFocus];
+        [[NSImage imageNamed:@"colors"] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        [color unlockFocus];
+        NSImage *crossref = [[[NSImage alloc] initWithSize:NSMakeSize(16, 16)] autorelease];
+        [crossref lockFocus];
+        [[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        [crossref unlockFocus];
+		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, paperclip, BDSKLocalFileString, crossref, BDSKCrossrefString, color, BDSKColorString, color, BDSKColorLabelString, nil];
 		if (paths) {
 			NSImage *image;
 			
