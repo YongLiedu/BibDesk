@@ -264,7 +264,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     if ([self isFileURL]) {
         NSFileManager *fm = [NSFileManager defaultManager];
         NSWorkspace *ws = [NSWorkspace sharedWorkspace];
-        NSString *theUTI = [ws typeOfFile:[self path] error:NULL];
+        NSString *theUTI = [ws typeOfFile:[[[self path] stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL];
         if ([ws type:theUTI conformsToType:@"net.sourceforge.skim-app.pdfd"])
             array = [fm readSkimNotesFromPDFBundleAtURL:self error:NULL];
         else if ([ws type:theUTI conformsToType:@"net.sourceforge.skim-app.skimnotes"])
@@ -280,7 +280,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     if ([self isFileURL]) {
         NSFileManager *fm = [NSFileManager defaultManager];
         NSWorkspace *ws = [NSWorkspace sharedWorkspace];
-        NSString *theUTI = [ws typeOfFile:[self path] error:NULL];
+        NSString *theUTI = [ws typeOfFile:[[[self path] stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL];
         if ([ws type:theUTI conformsToType:@"net.sourceforge.skim-app.pdfd"])
             string = [fm readSkimTextNotesFromPDFBundleAtURL:self error:NULL];
         else
@@ -299,7 +299,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     if ([self isFileURL]) {
         NSFileManager *fm = [NSFileManager defaultManager];
         NSWorkspace *ws = [NSWorkspace sharedWorkspace];
-        NSString *theUTI = [ws typeOfFile:[self path] error:NULL];
+        NSString *theUTI = [ws typeOfFile:[[[self path] stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL];
         if ([ws type:theUTI conformsToType:@"net.sourceforge.skim-app.pdfd"])
             data = [fm readSkimRTFNotesFromPDFBundleAtURL:self error:NULL];
         else

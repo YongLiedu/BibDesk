@@ -360,7 +360,7 @@
 
 - (id)openDocumentWithContentsOfURL:(NSURL *)absoluteURL display:(BOOL)displayDocument error:(NSError **)outError{
             
-    NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[absoluteURL path] error:NULL];
+    NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[[[absoluteURL path] stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL];
     id document = nil;
     
     if ([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"]) {

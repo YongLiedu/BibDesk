@@ -357,7 +357,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         NSURL *fileURL = (hfsPath == nil ? nil : [(id)CFURLCreateWithFileSystemPath(CFAllocatorGetDefault(), (CFStringRef)hfsPath, kCFURLHFSPathStyle, FALSE) autorelease]);
         
         BDSKPOSTCONDITION(fileURL != nil);
-        if(fileURL == nil || [[[NSWorkspace sharedWorkspace] typeOfFile:[fileURL path] error:NULL] isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"] == NO){
+        if(fileURL == nil || [[[NSWorkspace sharedWorkspace] typeOfFile:[[[fileURL path] stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL] isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"] == NO){
             // strip extra search criteria
             NSRange range = [searchString rangeOfString:@":"];
             if (range.location != NSNotFound) {
@@ -2377,7 +2377,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         
         // we /can/ create a string from these (usually), but there's no point in wasting the memory
         
-        NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:fileName error:NULL];
+        NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[[fileName stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL];
         if([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bdsksearch"]){
             NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfFile:fileName];
             Class aClass = NSClassFromString([dictionary objectForKey:@"class"]);
@@ -2447,11 +2447,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             }
             
 			// GJ try parsing pdf to extract info that is then used to get a PubMed record
-			if(newBI == nil && [[[NSWorkspace sharedWorkspace] typeOfFile:fnStr error:NULL] isEqualToUTI:(NSString *)kUTTypePDF] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTermKey])
+			if(newBI == nil && [[[NSWorkspace sharedWorkspace] typeOfFile:[[fnStr stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL] isEqualToUTI:(NSString *)kUTTypePDF] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTermKey])
 				newBI = [BibItem itemByParsingPDFFile:fnStr];			
 			
             // fall back on the least reliable metadata source (hidden pref)
-            if(newBI == nil && [[[NSWorkspace sharedWorkspace] typeOfFile:fnStr error:NULL] isEqualToUTI:(NSString *)kUTTypePDF] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldUsePDFMetadataKey])
+            if(newBI == nil && [[[NSWorkspace sharedWorkspace] typeOfFile:[[fnStr stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL] isEqualToUTI:(NSString *)kUTTypePDF] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldUsePDFMetadataKey])
                 newBI = [BibItem itemWithPDFMetadata:[PDFMetadata metadataForURL:url error:&xerror]];
 			
             if(newBI == nil)

@@ -62,7 +62,7 @@ static NSArray *sortDescriptors = nil;
 
 static BOOL isSearchFileAtPath(NSString *path)
 {
-    return [[[NSWorkspace sharedWorkspace] typeOfFile:path error:NULL] isEqualToUTI:@"net.sourceforge.bibdesk.bdsksearch"];
+    return [[[NSWorkspace sharedWorkspace] typeOfFile:[[path stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL] isEqualToUTI:@"net.sourceforge.bibdesk.bdsksearch"];
 }
     
 + (void)resetServers;

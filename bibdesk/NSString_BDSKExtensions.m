@@ -1057,7 +1057,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     if (fileURL = CreateFileURLFromPathOrURLString(aPath, basePath)) {
         // UTI will be nil for a file that doesn't exist, yet had an absolute/resolvable path
         if (fileURL) {
-            theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[fileURL path] error:NULL];
+            theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[[[fileURL path] stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL];
             [fileURL release];
         }
         

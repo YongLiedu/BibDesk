@@ -313,19 +313,19 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
 }
 
 - (BOOL)isAppleScriptFileAtPath:(NSString *)path {
-    NSString *theUTI = [self typeOfFile:[path stringByStandardizingPath] error:NULL];
+    NSString *theUTI = [self typeOfFile:[[path stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL];
     return theUTI ? ([self type:theUTI conformsToType:@"com.apple.applescript.script"] ||
                      [self type:theUTI conformsToType:@"com.apple.applescript.text"] ||
                      [self type:theUTI conformsToType:@"com.apple.applescript.script-bundle"] ) : NO;
 }
 
 - (BOOL)isApplicationAtPath:(NSString *)path {
-    NSString *theUTI = [self typeOfFile:[path stringByStandardizingPath] error:NULL];
-    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, kUTTypeApplication)) : NO;
+    NSString *theUTI = [self typeOfFile:[[path stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL];
+    return theUTI ? [self type:theUTI conformsToType:(id)kUTTypeApplication] : NO;
 }
 
 - (BOOL)isFolderAtPath:(NSString *)path {
-    NSString *theUTI = [self typeOfFile:[path stringByStandardizingPath] error:NULL];
+    NSString *theUTI = [self typeOfFile:[[path stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL];
     return theUTI ? [self type:theUTI conformsToType:(id)kUTTypeFolder] : NO;
 }
 
