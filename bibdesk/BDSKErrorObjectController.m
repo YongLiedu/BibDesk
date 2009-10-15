@@ -115,6 +115,8 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 - (void)awakeFromNib;
 {
+    [self setWindowFrameAutosaveName:@"BDSKErrorPanel"];
+    
     [errorTableView setDoubleAction:@selector(gotoError:)];
     
     [errorsController setFilterManager:[BDSKErrorManager allItemsErrorManager]];

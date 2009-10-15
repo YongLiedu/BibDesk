@@ -120,8 +120,9 @@ enum {
 }
 
 - (void)windowDidLoad{
-    if ([[self window] respondsToSelector:@selector(setCollectionBehavior:)])
-        [[self window] setCollectionBehavior:NSWindowCollectionBehaviorMoveToActiveSpace];
+    [self setWindowFrameAutosaveName:@"Find and Replace Window"];
+    
+    [[self window] setCollectionBehavior:NSWindowCollectionBehaviorMoveToActiveSpace];
     
     BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
     NSMutableArray *extraFields = [NSMutableArray arrayWithObjects:BDSKCiteKeyString, BDSKPubTypeString, BDSKRemoteURLString, nil];

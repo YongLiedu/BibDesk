@@ -95,6 +95,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 - (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)awakeFromNib{
+    [self setWindowFrameAutosaveName:@"BDSKOrphanedFilesWindow"];
     [tableView setDoubleAction:@selector(showFile:)];
     [tableView setFontNamePreferenceKey:BDSKOrphanedFilesTableViewFontNameKey];
     [tableView setFontSizePreferenceKey:BDSKOrphanedFilesTableViewFontSizeKey];
