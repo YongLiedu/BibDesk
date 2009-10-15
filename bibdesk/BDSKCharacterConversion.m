@@ -244,58 +244,62 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	[self setListType:[[sender selectedItem] tag]];
 }
 
-- (IBAction)add:(id)sender {
-    [self finalizeChangesIgnoringEdit:NO]; // make sure we are not editing
-	
-	NSString *newRoman = [NSString stringWithFormat:@"%C",0x00E4];
-    NSString *newTex = [NSString stringWithString:@"{\\\"a}"];
-	
-	[currentArray addObject:newRoman];
-	[currentDict setObject:newTex forKey:newRoman];
-	[romanSet addObject:newRoman];
-	if ([self listType] == 2)
-		[texSet addObject:newTex];
-	
-	validRoman = NO;
-	validTex = ([self listType] == 1);
-	
-    [tableView reloadData];
-	
-    NSInteger row = [currentArray indexOfObject:newRoman];
-    [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-    [tableView editColumn:0 row:row withEvent:nil select:YES];
-	
-	[self setDocumentEdited:YES];
-}
-
-- (IBAction)remove:(id)sender {
-    [self finalizeChangesIgnoringEdit:YES]; // make sure we are not editing
-	
-	NSInteger row = [tableView selectedRow];
-	if (row == -1) return;
-	NSString *oldRoman = [currentArray objectAtIndex:row];
-	NSString *oldTex = [currentDict objectForKey:oldRoman];
-	[currentArray removeObject:oldRoman];
-	[currentDict removeObjectForKey:oldRoman];
-	[romanSet removeObject:oldRoman];
-	if ([self listType] == 2)
-		[texSet removeObject:oldTex];
-	
-	validRoman = YES;
-	validTex = YES;
-	
-    [tableView reloadData];
-	
-    [tableView deselectAll:nil];
-	
-	[self setDocumentEdited:YES];
+- (IBAction)addRemove:(id)sender {
+    if ([sender selectedSegment] == 0) { // add
+        
+        [self finalizeChangesIgnoringEdit:NO]; // make sure we are not editing
+        
+        NSString *newRoman = [NSString stringWithFormat:@"%C",0x00E4];
+        NSString *newTex = [NSString stringWithString:@"{\\\"a}"];
+        
+        [currentArray addObject:newRoman];
+        [currentDict setObject:newTex forKey:newRoman];
+        [romanSet addObject:newRoman];
+        if ([self listType] == 2)
+            [texSet addObject:newTex];
+        
+        validRoman = NO;
+        validTex = ([self listType] == 1);
+        
+        [tableView reloadData];
+        
+        NSInteger row = [currentArray indexOfObject:newRoman];
+        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        [tableView editColumn:0 row:row withEvent:nil select:YES];
+        
+        [self setDocumentEdited:YES];
+        
+    } else { // remove
+        
+        [self finalizeChangesIgnoringEdit:YES]; // make sure we are not editing
+        
+        NSInteger row = [tableView selectedRow];
+        if (row == -1) return;
+        NSString *oldRoman = [currentArray objectAtIndex:row];
+        NSString *oldTex = [currentDict objectForKey:oldRoman];
+        [currentArray removeObject:oldRoman];
+        [currentDict removeObjectForKey:oldRoman];
+        [romanSet removeObject:oldRoman];
+        if ([self listType] == 2)
+            [texSet removeObject:oldTex];
+        
+        validRoman = YES;
+        validTex = YES;
+        
+        [tableView reloadData];
+        
+        [tableView deselectAll:nil];
+        
+        [self setDocumentEdited:YES];
+        
+    }
 }
 
 #pragma mark UI methods
 
 - (void)updateButtons {
-	[addButton setEnabled:(validRoman && validTex)];
-	[removeButton setEnabled:[tableView selectedRow] != -1];
+	[addRemoveButton setEnabled:(validRoman && validTex) forSegment:0];
+	[addRemoveButton setEnabled:[tableView selectedRow] != -1 forSegment:1];
 }
 
 - (void)finalizeChangesIgnoringEdit:(BOOL)flag {

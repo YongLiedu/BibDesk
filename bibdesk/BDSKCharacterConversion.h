@@ -42,8 +42,7 @@
 @interface BDSKCharacterConversion : NSWindowController {
 	IBOutlet NSPopUpButton *listButton;
 	IBOutlet NSTableView *tableView;
-	IBOutlet NSButton *addButton;
-	IBOutlet NSButton *removeButton;
+    IBOutlet NSSegmentedControl *addRemoveButton;
     NSSet *defaultOneWayRomanSet;
 	NSMutableDictionary *oneWayDict;
 	NSMutableDictionary *twoWayDict;
@@ -62,8 +61,7 @@
 - (void)updateDicts;
 
 - (IBAction)changeList:(id)sender;
-- (IBAction)add:(id)sender;
-- (IBAction)remove:(id)sender;
+- (IBAction)addRemove:(id)sender;
 
 - (NSInteger)listType;
 - (void)setListType:(NSInteger)newListType;

@@ -44,8 +44,7 @@
     IBOutlet NSArrayController *arrayController;
     IBOutlet NSTableView *tableView;
     IBOutlet NSButton *closeButton;
-    IBOutlet NSButton *addButton;
-    IBOutlet NSButton *removeButton;
+    IBOutlet NSSegmentedControl *addRemoveButton;
     BDSKMacroResolver *macroResolver;
     NSMutableArray *macros;
 	BDSKComplexStringFormatter *tableCellFormatter;
@@ -66,8 +65,7 @@
 - (void)removeObjectFromMacrosAtIndex:(NSUInteger)idx;
 - (void)replaceObjectInMacrosAtIndex:(NSUInteger)idx withObject:(id)obj;
 
-- (IBAction)addMacro:(id)sender;
-- (IBAction)removeSelectedMacros:(id)sender;
+- (IBAction)addRemoveMacro:(id)sender;
 - (BOOL)addMacrosFromBibTeXString:(NSString *)aString;
 
 - (IBAction)closeAction:(id)sender;

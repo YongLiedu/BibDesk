@@ -113,18 +113,21 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
 		[[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromPathsAndDirectories:[panel filenames]]];
 }
 
-- (IBAction)add:(id)sender;
+- (IBAction)addRemove:(id)sender;
 {
-    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-    [openPanel setAllowsMultipleSelection:YES];
-    [openPanel setCanChooseDirectories:YES];
-    [openPanel setPrompt:NSLocalizedString(@"Choose", @"")];
-    [openPanel beginSheetForDirectory:nil file:nil types:nil modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) contextInfo:NULL];
-}
-
-- (IBAction)remove:(id)sender;
-{
-    [fileArrayController remove:self];
+    if ([sender selectedSegment] == 0) { // add
+        
+        NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+        [openPanel setAllowsMultipleSelection:YES];
+        [openPanel setCanChooseDirectories:YES];
+        [openPanel setPrompt:NSLocalizedString(@"Choose", @"")];
+        [openPanel beginSheetForDirectory:nil file:nil types:nil modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+        
+    } else { // remove
+        
+        [fileArrayController remove:self];
+        
+    }
 }
 
 - (IBAction)selectAllDocuments:(id)sender;
@@ -145,10 +148,11 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
     [self setDocuments:array];
 }
 
-- (void)awakeFromNib
+- (void)windowDidLoad
 {
     [self handleDocumentAddRemove:nil];
     [fileTableView registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
+    [addRemoveButton setEnabled:[fileTableView numberOfSelectedRows] > 0 forSegment:1];
 }
 
 // fix a zombie issue
@@ -220,5 +224,9 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView { return 0; }
 - (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tc row:(NSInteger)r { return nil; }
+
+- (void)tableViewSelectionDidChange:(NSNotification *)notification {
+    [addRemoveButton setEnabled:[fileTableView numberOfSelectedRows] > 0 forSegment:1];
+}
 
 @end

@@ -214,102 +214,108 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
     [super dismiss:sender];
 }
 
-- (IBAction)addType:(id)sender {
-	NSString *newType = [NSString stringWithString:@"new-type"];
-	NSInteger i = 0;
-	while ([types containsObject:newType]) {
-		newType = [NSString stringWithFormat:@"new-type-%ld", (long)++i];
-	}
-	[self addType:newType withFields:nil];
-	
-    [typeTableView reloadData];
-	
-    NSInteger row = [types indexOfObject:newType];
-    [typeTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-	[[[typeTableView tableColumnWithIdentifier:@"type"] dataCell] setEnabled:YES];
-    [typeTableView editColumn:0 row:row withEvent:nil select:YES];
-	
-	[self setDocumentEdited:YES];
+- (IBAction)addRemoveType:(id)sender {
+    if ([sender selectedSegment] == 0) { // add
+        
+        NSString *newType = [NSString stringWithString:@"new-type"];
+        NSInteger i = 0;
+        while ([types containsObject:newType]) {
+            newType = [NSString stringWithFormat:@"new-type-%ld", (long)++i];
+        }
+        [self addType:newType withFields:nil];
+        
+        [typeTableView reloadData];
+        
+        NSInteger row = [types indexOfObject:newType];
+        [typeTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        [[[typeTableView tableColumnWithIdentifier:@"type"] dataCell] setEnabled:YES];
+        [typeTableView editColumn:0 row:row withEvent:nil select:YES];
+        
+    } else { // remove
+        
+        NSIndexSet *indexesToRemove = [typeTableView selectedRowIndexes];
+        NSArray *typesToRemove = [types objectsAtIndexes:indexesToRemove];
+        
+        // make sure we stop editing
+        [[self window] makeFirstResponder:typeTableView];
+        
+        [types removeObjectsAtIndexes:indexesToRemove];
+        [fieldsForTypesDict removeObjectsForKeys:typesToRemove];
+        
+        [typeTableView reloadData];
+        [typeTableView deselectAll:nil];
+        
+    }
+    
+    [self setDocumentEdited:YES];
 }
 
-- (IBAction)removeType:(id)sender {
-	NSIndexSet *indexesToRemove = [typeTableView selectedRowIndexes];
-	NSArray *typesToRemove = [types objectsAtIndexes:indexesToRemove];
-	
-	// make sure we stop editing
-	[[self window] makeFirstResponder:typeTableView];
-	
-	[types removeObjectsAtIndexes:indexesToRemove];
-	[fieldsForTypesDict removeObjectsForKeys:typesToRemove];
-	
-    [typeTableView reloadData];
-    [typeTableView deselectAll:nil];
-	
-	[self setDocumentEdited:YES];
+- (IBAction)addRemoveRequired:(id)sender {
+    if ([sender selectedSegment] == 0) { // add
+        
+        NSString *newField = [NSString stringWithString:@"New-Field"];
+        NSInteger i = 0;
+        while ([currentRequiredFields containsObject:newField]) {
+            newField = [NSString stringWithFormat:@"New-Field-%ld", (long)++i];
+        }
+        [currentRequiredFields addObject:newField];
+        
+        [requiredTableView reloadData];
+        
+        NSInteger row = [currentRequiredFields indexOfObject:newField];
+        [requiredTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        [[[requiredTableView tableColumnWithIdentifier:@"required"] dataCell] setEnabled:YES];
+        [requiredTableView editColumn:0 row:row withEvent:nil select:YES];
+        
+    } else { // remove
+        
+        NSIndexSet *indexesToRemove = [requiredTableView selectedRowIndexes];
+        
+        // make sure we stop editing
+        [[self window] makeFirstResponder:requiredTableView];
+        
+        [currentRequiredFields removeObjectsAtIndexes:indexesToRemove];
+        
+        [requiredTableView reloadData];
+        [requiredTableView deselectAll:nil];
+        
+    }
+    
+    [self setDocumentEdited:YES];
 }
 
-- (IBAction)addRequired:(id)sender {
-	NSString *newField = [NSString stringWithString:@"New-Field"];
-	NSInteger i = 0;
-	while ([currentRequiredFields containsObject:newField]) {
-		newField = [NSString stringWithFormat:@"New-Field-%ld", (long)++i];
-	}
-	[currentRequiredFields addObject:newField];
-	
-    [requiredTableView reloadData];
-	
-    NSInteger row = [currentRequiredFields indexOfObject:newField];
-    [requiredTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-	[[[requiredTableView tableColumnWithIdentifier:@"required"] dataCell] setEnabled:YES];
-    [requiredTableView editColumn:0 row:row withEvent:nil select:YES];
-	
-	[self setDocumentEdited:YES];
-}
+- (IBAction)addRemoveOptional:(id)sender {
+    if ([sender selectedSegment] == 0) { // add
+        
+        NSString *newField = [NSString stringWithString:@"New-Field"];
+        NSInteger i = 0;
+        while ([currentOptionalFields containsObject:newField]) {
+            newField = [NSString stringWithFormat:@"New-Field-%ld", (long)++i];
+        }
+        [currentOptionalFields addObject:newField];
+        
+        [optionalTableView reloadData];
+        
+        NSInteger row = [currentOptionalFields indexOfObject:newField];
+        [optionalTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        [[[optionalTableView tableColumnWithIdentifier:@"optional"] dataCell] setEnabled:YES];
+        [optionalTableView editColumn:0 row:row withEvent:nil select:YES];
+        
+    } else { // remove
+        
+        NSIndexSet *indexesToRemove = [optionalTableView selectedRowIndexes];
+        
+        // make sure we stop editing
+        [[self window] makeFirstResponder:optionalTableView];
 
-- (IBAction)removeRequired:(id)sender  {
-	NSIndexSet *indexesToRemove = [requiredTableView selectedRowIndexes];
-	
-	// make sure we stop editing
-	[[self window] makeFirstResponder:requiredTableView];
-	
-	[currentRequiredFields removeObjectsAtIndexes:indexesToRemove];
-	
-    [requiredTableView reloadData];
-    [requiredTableView deselectAll:nil];
-	
-	[self setDocumentEdited:YES];
-}
-
-- (IBAction)addOptional:(id)sender {
-	NSString *newField = [NSString stringWithString:@"New-Field"];
-	NSInteger i = 0;
-	while ([currentOptionalFields containsObject:newField]) {
-		newField = [NSString stringWithFormat:@"New-Field-%ld", (long)++i];
-	}
-	[currentOptionalFields addObject:newField];
-	
-    [optionalTableView reloadData];
-	
-    NSInteger row = [currentOptionalFields indexOfObject:newField];
-    [optionalTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-	[[[optionalTableView tableColumnWithIdentifier:@"optional"] dataCell] setEnabled:YES];
-    [optionalTableView editColumn:0 row:row withEvent:nil select:YES];
-	
-	[self setDocumentEdited:YES];
-}
-
-- (IBAction)removeOptional:(id)sender {
-	NSIndexSet *indexesToRemove = [optionalTableView selectedRowIndexes];
-	
-	// make sure we stop editing
-	[[self window] makeFirstResponder:optionalTableView];
-
-	[currentOptionalFields removeObjectsAtIndexes:indexesToRemove];
-	
-	[optionalTableView reloadData];
-	[optionalTableView deselectAll:nil];
-	
-	[self setDocumentEdited:YES];
+        [currentOptionalFields removeObjectsAtIndexes:indexesToRemove];
+        
+        [optionalTableView reloadData];
+        [optionalTableView deselectAll:nil];
+        
+    }
+    
+    [self setDocumentEdited:YES];
 }
 
 - (IBAction)revertCurrentToDefault:(id)sender {
@@ -408,10 +414,10 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	BOOL canRemove;
 	NSString *value;
 	
-	[addTypeButton setEnabled:YES];
+	[addRemoveTypeButton setEnabled:YES forSegment:0];
 	
 	if ([typeTableView numberOfSelectedRows] == 0) {
-		[removeTypeButton setEnabled:NO];
+		[addRemoveTypeButton setEnabled:NO forSegment:1];
 	} else {
 		rowIndexes = [typeTableView selectedRowIndexes];
 		row = [rowIndexes firstIndex];
@@ -424,13 +430,13 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 			}
 			row = [rowIndexes indexGreaterThanIndex:row];
 		}
-		[removeTypeButton setEnabled:canRemove];
+		[addRemoveTypeButton setEnabled:canRemove forSegment:1];
 	}
 	
-	[addRequiredButton setEnabled:currentType != nil];
+	[addRemoveRequiredButton setEnabled:currentType != nil forSegment:0];
 	
 	if ([requiredTableView numberOfSelectedRows] == 0) {
-		[removeRequiredButton setEnabled:NO];
+		[addRemoveRequiredButton setEnabled:NO forSegment:1];
 	} else {
 		rowIndexes = [requiredTableView selectedRowIndexes];
 		row = [rowIndexes firstIndex];
@@ -443,13 +449,13 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 			}
 			row = [rowIndexes indexGreaterThanIndex:row];
 		}
-		[removeRequiredButton setEnabled:canRemove];
+		[addRemoveRequiredButton setEnabled:canRemove forSegment:1];
 	}
 	
-	[addOptionalButton setEnabled:currentType != nil];
+	[addRemoveOptionalButton setEnabled:currentType != nil forSegment:0];
 	
 	if ([optionalTableView numberOfSelectedRows] == 0) {
-		[removeOptionalButton setEnabled:NO];
+		[addRemoveOptionalButton setEnabled:NO forSegment:1];
 	} else {
 		rowIndexes = [optionalTableView selectedRowIndexes];
 		row = [rowIndexes firstIndex];
@@ -462,7 +468,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 			}
 			row = [rowIndexes indexGreaterThanIndex:row];
 		}
-		[removeOptionalButton setEnabled:canRemove];
+		[addRemoveOptionalButton setEnabled:canRemove forSegment:1];
 	}
 	
 	[revertCurrentToDefaultButton setEnabled:(currentType && [defaultFieldsForTypesDict objectForKey:currentType])];

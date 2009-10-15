@@ -52,8 +52,7 @@ typedef NSUInteger BDSKTemplateListType;
     NSMutableArray *roles;    
     NSArray *fileTypes;    
     BDSKTemplateListType templatePrefList;
-    IBOutlet NSButton *addButton;
-    IBOutlet NSButton *deleteButton;
+    IBOutlet NSSegmentedControl *addRemoveButton;
     IBOutlet NSMatrix *prefListRadio;
     IBOutlet NSWindow *chooseMainPageSheet;
     IBOutlet NSPopUpButton *chooseMainPagePopup;
@@ -63,8 +62,7 @@ typedef NSUInteger BDSKTemplateListType;
 
 - (IBAction)resetDefaultFiles:(id)sender;
 
-- (IBAction)addNode:(id)sender;
-- (IBAction)removeNode:(id)sender;
+- (IBAction)addRemoveNode:(id)sender;
 
 - (IBAction)revealInFinder:(id)sender;
 - (IBAction)chooseFile:(id)sender;

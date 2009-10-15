@@ -42,8 +42,7 @@
 
 @interface BDSKDocumentInfoWindowController : NSWindowController {
     IBOutlet NSTableView *tableView;
-    IBOutlet NSButton *addButton;
-    IBOutlet NSButton *removeButton;
+    IBOutlet NSSegmentedControl *addRemoveButton;
     NSMutableDictionary *info;
     NSMutableArray *keys;
     BibDocument *document;
@@ -51,7 +50,6 @@
 }
 
 - (id)initWithDocument:(BibDocument *)aDocument;
-- (IBAction)addKey:(id)sender;
-- (IBAction)removeSelectedKeys:(id)sender;
+- (IBAction)addRemoveKey:(id)sender;
 
 @end

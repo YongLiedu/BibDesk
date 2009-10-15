@@ -123,8 +123,8 @@
     [prefListRadio selectCellWithTag:templatePrefList];
     [outlineView reloadData];
     [self synchronizePrefs];
-    [deleteButton setEnabled:[self canDeleteSelectedItem]];
-    [addButton setEnabled:[self canAddItem]];
+    [addRemoveButton setEnabled:[self canAddItem] forSegment:0];
+    [addRemoveButton setEnabled:[self canDeleteSelectedItem] forSegment:1];
 }
 
 - (void)setItemNodes:(NSArray *)array;
@@ -166,53 +166,55 @@
 						contextInfo:NULL];
 }
 
-- (IBAction)addNode:(id)sender;
+- (IBAction)addRemoveNode:(id)sender;
 {
-    // may be nil
-    NSInteger row = [outlineView selectedRow];
-    BDSKTreeNode *selectedNode = row == -1 ? nil : [outlineView itemAtRow:row];
-    BDSKTemplate *newNode = [[BDSKTemplate alloc] init];
+    if (sender && [sender selectedSegment] == 0) { // add
+        
+        // may be nil
+        NSInteger row = [outlineView selectedRow];
+        BDSKTreeNode *selectedNode = row == -1 ? nil : [outlineView itemAtRow:row];
+        BDSKTemplate *newNode = [[BDSKTemplate alloc] init];
 
-    if([selectedNode isLeaf]){
-        // add as a sibling of the selected node
-        // we're already expanded, and newNode won't be expandable
-        [[selectedNode parent] addChild:newNode];
-    } else if(nil != selectedNode && [outlineView isItemExpanded:selectedNode]){
-        // add as a child of the selected node
-        // selected node is expanded, so no need to expand
-        [selectedNode addChild:newNode];
-    } else if(BDSKExportTemplateList == templatePrefList){
-        // add as a non-leaf node
-        [itemNodes addObject:newNode];
+        if([selectedNode isLeaf]){
+            // add as a sibling of the selected node
+            // we're already expanded, and newNode won't be expandable
+            [[selectedNode parent] addChild:newNode];
+        } else if(nil != selectedNode && [outlineView isItemExpanded:selectedNode]){
+            // add as a child of the selected node
+            // selected node is expanded, so no need to expand
+            [selectedNode addChild:newNode];
+        } else if(BDSKExportTemplateList == templatePrefList){
+            // add as a non-leaf node
+            [itemNodes addObject:newNode];
+            
+            // each style needs at least a Main Page child, and newNode will be recognized as a non-leaf node
+            BDSKTemplate *child = [[BDSKTemplate alloc] init];
+            [child setValue:BDSKTemplateMainPageString forKey:BDSKTemplateRoleString];
+            [newNode addChild:child];
+            [child release];
+            
+            // reload so we can expand this new parent node
+            [outlineView reloadData];
+            [outlineView expandItem:newNode];
+        }
         
-        // each style needs at least a Main Page child, and newNode will be recognized as a non-leaf node
-        BDSKTemplate *child = [[BDSKTemplate alloc] init];
-        [child setValue:BDSKTemplateMainPageString forKey:BDSKTemplateRoleString];
-        [newNode addChild:child];
-        [child release];
+        [newNode release];
         
-        // reload so we can expand this new parent node
-        [outlineView reloadData];
-        [outlineView expandItem:newNode];
+    } else { // remove
+        
+        NSInteger row = [outlineView selectedRow];
+        BDSKTreeNode *selectedNode = row == -1 ? nil : [outlineView itemAtRow:row];
+        if(nil != selectedNode){
+            if([selectedNode isLeaf])
+                [[selectedNode parent] removeChild:selectedNode];
+            else
+                [itemNodes removeObjectIdenticalTo:selectedNode];
+        } else {
+            NSBeep();
+        }
+        
     }
     
-    [self updateUI];
-    [newNode release];
-}
-
-- (IBAction)removeNode:(id)sender;
-{
-    
-    NSInteger row = [outlineView selectedRow];
-    BDSKTreeNode *selectedNode = row == -1 ? nil : [outlineView itemAtRow:row];
-    if(nil != selectedNode){
-        if([selectedNode isLeaf])
-            [[selectedNode parent] removeChild:selectedNode];
-        else
-            [itemNodes removeObjectIdenticalTo:selectedNode];
-    } else {
-        NSBeep();
-    }
     [self updateUI];
 }
 
@@ -361,8 +363,8 @@
 
 - (void)outlineViewSelectionDidChange:(NSNotification *)notification;
 {
-    [deleteButton setEnabled:[self canDeleteSelectedItem]];
-    [addButton setEnabled:[self canAddItem]];
+    [addRemoveButton setEnabled:[self canAddItem] forSegment:0];
+    [addRemoveButton setEnabled:[self canDeleteSelectedItem] forSegment:1];
 }
 
 - (void)outlineView:(NSOutlineView *)ov deleteItems:(NSArray *)items;
@@ -370,7 +372,7 @@
     // currently we don't allow multiple selection
     BDSKTreeNode *item = [items lastObject];
     if(item && [self canDeleteItem:item]) {
-        [self removeNode:nil];
+        [self addRemoveNode:nil];
         if ([item isLeaf])
             [[item parent] removeChild:item];
         else

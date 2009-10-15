@@ -84,7 +84,7 @@
 }
 
 - (void)updateButtons{
-	[removeButton setEnabled:[tableView numberOfSelectedRows] > 0];
+	[addRemoveButton setEnabled:[tableView numberOfSelectedRows] > 0 forSegment:1];
 }
 
 - (void)awakeFromNib{
@@ -128,30 +128,34 @@
     [super dismiss:sender];
 }
 
-- (IBAction)addKey:(id)sender{
-    // find a unique new key
-    NSInteger i = 0;
-    NSString *newKey = @"key";
-    while([info objectForKey:newKey] != nil)
-        newKey = [NSString stringWithFormat:@"key%ld", (long)++i];
-    
-    [info setObject:@"" forKey:newKey];
-    [self refreshKeys];
-    [tableView reloadData];
-    
-    NSInteger row = [keys indexOfObject:newKey];
-    [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-    [tableView editColumn:0 row:row withEvent:nil select:YES];
-}
+- (IBAction)addRemoveKey:(id)sender{
+    if ([sender selectedSegment] == 0) { // add
+        
+        // find a unique new key
+        NSInteger i = 0;
+        NSString *newKey = @"key";
+        while([info objectForKey:newKey] != nil)
+            newKey = [NSString stringWithFormat:@"key%ld", (long)++i];
+        
+        [info setObject:@"" forKey:newKey];
+        [self refreshKeys];
+        [tableView reloadData];
+        
+        NSInteger row = [keys indexOfObject:newKey];
+        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        [tableView editColumn:0 row:row withEvent:nil select:YES];
+        
+    } else { // remove
+        
+        // in case we're editing the selected field we need to end editing.
+        // we don't give it a chance to modify state.
+        [[self window] endEditingFor:[tableView selectedCell]];
 
-- (IBAction)removeSelectedKeys:(id)sender{
-    // in case we're editing the selected field we need to end editing.
-    // we don't give it a chance to modify state.
-    [[self window] endEditingFor:[tableView selectedCell]];
-
-    [info removeObjectsForKeys:[keys objectsAtIndexes:[tableView selectedRowIndexes]]];
-    [self refreshKeys];
-    [tableView reloadData];
+        [info removeObjectsForKeys:[keys objectsAtIndexes:[tableView selectedRowIndexes]]];
+        [self refreshKeys];
+        [tableView reloadData];
+        
+    }
 }
 
 #pragma mark TableView DataSource methods

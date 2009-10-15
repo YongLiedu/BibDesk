@@ -42,7 +42,7 @@
 @interface BDSKCustomCiteDrawerController : NSWindowController {
     IBOutlet NSTableView *tableView;
     IBOutlet NSDrawer *drawer;
-    IBOutlet NSButton *removeButton;
+    IBOutlet NSSegmentedControl *addRemoveButton;
     BibDocument *document;
     NSMutableArray *customStringArray;
 }
@@ -55,7 +55,6 @@
 
 - (IBAction)toggle:(id)sender;
 
-- (IBAction)addCustomCiteString:(id)sender;
-- (IBAction)removeCustomCiteString:(id)sender;
+- (IBAction)addRemoveCustomCiteString:(id)sender;
 
 @end

@@ -43,12 +43,9 @@
 	IBOutlet NSTableView *typeTableView;
 	IBOutlet NSTableView *requiredTableView;
 	IBOutlet NSTableView *optionalTableView;
-	IBOutlet NSButton *addTypeButton;
-	IBOutlet NSButton *removeTypeButton;
-	IBOutlet NSButton *addRequiredButton;
-	IBOutlet NSButton *removeRequiredButton;
-	IBOutlet NSButton *addOptionalButton;
-	IBOutlet NSButton *removeOptionalButton;
+	IBOutlet NSSegmentedControl *addRemoveTypeButton;
+	IBOutlet NSSegmentedControl *addRemoveRequiredButton;
+	IBOutlet NSSegmentedControl *addRemoveOptionalButton;
 	IBOutlet NSButton *revertCurrentToDefaultButton;
 	IBOutlet NSButton *revertAllToDefaultButton;
 	IBOutlet NSButton *canEditDefaultTypesButton;
@@ -72,12 +69,9 @@
 - (void)insertType:(NSString *)newType withFields:(NSDictionary *)fieldsDict atIndex:(NSUInteger)index;
 - (void)setCurrentType:(NSString *)newCurrentType;
 
-- (IBAction)addType:(id)sender;
-- (IBAction)removeType:(id)sender;
-- (IBAction)addRequired:(id)sender;
-- (IBAction)removeRequired:(id)sender;
-- (IBAction)addOptional:(id)sender;
-- (IBAction)removeOptional:(id)sender;
+- (IBAction)addRemoveType:(id)sender;
+- (IBAction)addRemoveRequired:(id)sender;
+- (IBAction)addRemoveOptional:(id)sender;
 - (IBAction)revertCurrentToDefault:(id)sender;
 - (IBAction)revertAllToDefault:(id)sender;
 - (IBAction)changeCanEditDefaultTypes:(id)sender;

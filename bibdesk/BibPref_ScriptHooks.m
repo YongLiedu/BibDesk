@@ -77,32 +77,36 @@
 	[tableView reloadData];
 }
 
-- (IBAction)addScriptHook:(id)sender{
-	if([tableView selectedRow] == -1) 
-		return;
-	
-	NSString *directory = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
-	NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
-	[openPanel setAllowsMultipleSelection:NO];
-    [openPanel beginSheetForDirectory:directory 
-								 file:nil
-								types:[NSArray arrayWithObjects:@"scpt", @"scptd", @"applescript", nil] 
-					   modalForWindow:[[self view] window] 
-						modalDelegate:self 
-					   didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
-						  contextInfo:NULL];
-}
-
-- (IBAction)removeScriptHook:(id)sender{
-	NSInteger row = [tableView selectedRow];
-	if (row == -1) return;
-	
-	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
-	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[sud dictionaryForKey:BDSKScriptHooksKey]];
-	[dict removeObjectForKey:name];
-	[sud setObject:dict forKey:BDSKScriptHooksKey];
-	[tableView reloadData];
+- (IBAction)addRemoveScriptHook:(id)sender{
+    if (sender == nil || [sender selectedSegment] == 0) { // add
+        
+        if([tableView selectedRow] == -1) 
+            return;
+        
+        NSString *directory = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
+        NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+        [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
+        [openPanel setAllowsMultipleSelection:NO];
+        [openPanel beginSheetForDirectory:directory 
+                                     file:nil
+                                    types:[NSArray arrayWithObjects:@"scpt", @"scptd", @"applescript", nil] 
+                           modalForWindow:[[self view] window] 
+                            modalDelegate:self 
+                           didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
+                              contextInfo:NULL];
+        
+    } else { // remove
+        
+        NSInteger row = [tableView selectedRow];
+        if (row == -1) return;
+        
+        NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
+        NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[sud dictionaryForKey:BDSKScriptHooksKey]];
+        [dict removeObjectForKey:name];
+        [sud setObject:dict forKey:BDSKScriptHooksKey];
+        [tableView reloadData];
+        
+    }
 }
 
 - (void)showOrChooseScriptFile:(id)sender {
@@ -116,7 +120,7 @@
 	
 	if ([NSString isEmptyString:path]) {
 		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-		[self addScriptHook:sender];
+		[self addRemoveScriptHook:nil];
 	} else {
 		NSURL *url = [NSURL fileURLWithPath:path];
 		if (url)
@@ -190,8 +194,8 @@
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
 	NSInteger row = [tableView selectedRow];
-	[addButton setEnabled:(row != -1)];
-	[removeButton setEnabled:(row != -1)];
+	[addRemoveButton setEnabled:(row != -1) forSegment:0];
+	[addRemoveButton setEnabled:(row != -1) forSegment:1];
 }
 
 - (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{

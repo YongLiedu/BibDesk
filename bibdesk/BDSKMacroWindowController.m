@@ -107,8 +107,8 @@
 }
 
 - (void)updateButtons{
-    [addButton setEnabled:isEditable];
-    [removeButton setEnabled:isEditable && [tableView numberOfSelectedRows]];
+    [addRemoveButton setEnabled:isEditable forSegment:0];
+    [addRemoveButton setEnabled:isEditable && [tableView numberOfSelectedRows] forSegment:1];
 }
 
 - (void)windowDidLoad{
@@ -254,29 +254,33 @@
 
 #pragma mark Actions
 
-- (IBAction)addMacro:(id)sender{
-    BDSKASSERT(isEditable);
-    NSDictionary *macroDefinitions = [macroResolver macroDefinitions];
-    // find a unique new macro key
-    NSInteger i = 0;
-    NSString *newKey = [NSString stringWithString:@"macro"];
-    while([macroDefinitions objectForKey:newKey] != nil)
-        newKey = [NSString stringWithFormat:@"macro%ld", (long)++i];
-    
-    [macroResolver addMacroDefinition:@"definition" forMacro:newKey];
-    [[[self window] undoManager] setActionName:NSLocalizedString(@"Add Macro", @"Undo action name")];
-    
-    NSUInteger row = [[[arrayController arrangedObjects] valueForKey:@"name"] indexOfObject:newKey];
-    [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-    [tableView editColumn:0 row:row withEvent:nil select:YES];
-}
-
-- (IBAction)removeSelectedMacros:(id)sender{
-    BDSKASSERT(isEditable);
-    NSArray *macrosToRemove = [[[arrayController arrangedObjects] objectsAtIndexes:[tableView selectedRowIndexes]] valueForKey:@"name"];
-    for (NSString *key in macrosToRemove) {
-        [macroResolver removeMacro:key];
-		[[[self window] undoManager] setActionName:NSLocalizedString(@"Delete Macro", @"Undo action name")];
+- (IBAction)addRemoveMacro:(id)sender{
+    if (sender && [sender selectedSegment] == 0) { // add
+        
+        BDSKASSERT(isEditable);
+        NSDictionary *macroDefinitions = [macroResolver macroDefinitions];
+        // find a unique new macro key
+        NSInteger i = 0;
+        NSString *newKey = [NSString stringWithString:@"macro"];
+        while([macroDefinitions objectForKey:newKey] != nil)
+            newKey = [NSString stringWithFormat:@"macro%ld", (long)++i];
+        
+        [macroResolver addMacroDefinition:@"definition" forMacro:newKey];
+        [[[self window] undoManager] setActionName:NSLocalizedString(@"Add Macro", @"Undo action name")];
+        
+        NSUInteger row = [[[arrayController arrangedObjects] valueForKey:@"name"] indexOfObject:newKey];
+        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        [tableView editColumn:0 row:row withEvent:nil select:YES];
+        
+    } else { // remove
+        
+        BDSKASSERT(isEditable);
+        NSArray *macrosToRemove = [[[arrayController arrangedObjects] objectsAtIndexes:[tableView selectedRowIndexes]] valueForKey:@"name"];
+        for (NSString *key in macrosToRemove) {
+            [macroResolver removeMacro:key];
+            [[[self window] undoManager] setActionName:NSLocalizedString(@"Delete Macro", @"Undo action name")];
+        }
+        
     }
 }
 
@@ -563,7 +567,7 @@
 // called from tableView delete: action defined in NSTableView_OAExtensions
 - (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows{
 	if (isEditable)
-        [self removeSelectedMacros:nil];
+        [self addRemoveMacro:nil];
 }
 
 - (BOOL)tableView:(NSTableView *)tv canDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {

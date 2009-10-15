@@ -175,7 +175,7 @@ static NSSet *alwaysDisabledFields = nil;
     NSInteger row = [defaultFieldsTableView selectedRow];
     if(row >= 0)
         shouldEnable = NO == [alwaysDisabledFields containsObject:[[customFieldsArray objectAtIndex:row] objectForKey:@"field"]];
-    [delSelectedDefaultFieldButton setEnabled:shouldEnable];
+    [addRemoveDefaultFieldButton setEnabled:shouldEnable forSegment:1];
 }
 
 - (void)updateUI {
@@ -461,14 +461,14 @@ static NSSet *alwaysDisabledFields = nil;
     if ([[aNotification object] isEqual:defaultFieldsTableView]) {
         NSInteger row = [defaultFieldsTableView selectedRow];
         if(row == -1){
-            [delSelectedDefaultFieldButton setEnabled:NO];
+            [addRemoveDefaultFieldButton setEnabled:NO forSegment:1];
             return;
         }
         NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
         if([alwaysDisabledFields containsObject:field])
-            [delSelectedDefaultFieldButton setEnabled:NO];
+            [addRemoveDefaultFieldButton setEnabled:NO forSegment:1];
         else
-            [delSelectedDefaultFieldButton setEnabled:YES];
+            [addRemoveDefaultFieldButton setEnabled:YES forSegment:1];
     }
 }
 
@@ -496,28 +496,31 @@ static NSSet *alwaysDisabledFields = nil;
 
 #pragma mark Add and Del fields buttons
 
-- (IBAction)delSelectedDefaultField:(id)sender{
-	NSInteger row = [defaultFieldsTableView selectedRow];
-    if(row != -1){
-		if([defaultFieldsTableView editedRow] != -1)
-			[[defaultFieldsTableView window] makeFirstResponder:nil];
-        [customFieldsSet removeObject:[[customFieldsArray objectAtIndex:row] objectForKey:@"field"]];
-        [customFieldsArray removeObjectAtIndex:row];
-        [self updatePrefs];
+- (IBAction)addRemoveDefaultField:(id)sender {
+    if ([sender selectedSegment] == 0) { // add
+        
+        NSInteger row = [customFieldsArray count];
+        NSMutableDictionary *newDict = [NSMutableDictionary dictionaryWithObjectsAndKeys: @"Field", @"field", [NSNumber numberWithInt:BDSKStringType], @"type", [NSNumber numberWithBool:NO], @"default", nil]; // do not localize
+        [customFieldsArray addObject:newDict];
+        [defaultFieldsTableView reloadData];
+        [defaultFieldsTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        [[[defaultFieldsTableView tableColumnWithIdentifier:@"field"] dataCell] setEnabled:YES]; // hack to make sure we can edit, as the delegate method is called too late
+        [defaultFieldsTableView editColumn:0 row:row withEvent:nil select:YES];
+        // don't update the prefs yet, as the user should first set the field name
+        
+    } else { // remove
+        
+        NSInteger row = [defaultFieldsTableView selectedRow];
+        if(row != -1){
+            if([defaultFieldsTableView editedRow] != -1)
+                [[defaultFieldsTableView window] makeFirstResponder:nil];
+            [customFieldsSet removeObject:[[customFieldsArray objectAtIndex:row] objectForKey:@"field"]];
+            [customFieldsArray removeObjectAtIndex:row];
+            [self updatePrefs];
+        }
+        
     }
 }
-
-- (IBAction)addDefaultField:(id)sender{
-    NSInteger row = [customFieldsArray count];
-	NSMutableDictionary *newDict = [NSMutableDictionary dictionaryWithObjectsAndKeys: @"Field", @"field", [NSNumber numberWithInt:BDSKStringType], @"type", [NSNumber numberWithBool:NO], @"default", nil]; // do not localize
-	[customFieldsArray addObject:newDict];
-    [defaultFieldsTableView reloadData];
-    [defaultFieldsTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-	[[[defaultFieldsTableView tableColumnWithIdentifier:@"field"] dataCell] setEnabled:YES]; // hack to make sure we can edit, as the delegate method is called too late
-    [defaultFieldsTableView editColumn:0 row:row withEvent:nil select:YES];
-	// don't update the prefs yet, as the user should first set the field name
-}
-
 
 - (IBAction)showTypeInfoEditor:(id)sender{
 	[[BDSKTypeInfoEditor sharedTypeInfoEditor] beginSheetModalForWindow:[[self view] window]];

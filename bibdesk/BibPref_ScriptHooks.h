@@ -41,12 +41,10 @@
 
 @interface BibPref_ScriptHooks : BDSKPreferencePane {
 	IBOutlet NSTableView *tableView;
-	IBOutlet NSButton *addButton;
-	IBOutlet NSButton *removeButton;
+	IBOutlet NSSegmentedControl *addRemoveButton;
 }
 
-- (IBAction)addScriptHook:(id)sender;
-- (IBAction)removeScriptHook:(id)sender;
+- (IBAction)addRemoveScriptHook:(id)sender;
 - (void)showOrChooseScriptFile:(id)sender;
 
 @end

@@ -38,6 +38,7 @@
     IBOutlet NSTableView *documentTableView;
     IBOutlet NSTableView *fileTableView;
     IBOutlet NSButton *useOrphansCheckbox;
+    IBOutlet NSSegmentedControl *addRemoveButton;
     
     NSMutableArray *documents;
     NSMutableArray *files;
@@ -47,8 +48,7 @@
     IBOutlet NSArrayController *fileArrayController;
 }
 
-- (IBAction)add:(id)sender;
-- (IBAction)remove:(id)sender;
+- (IBAction)addRemove:(id)sender;
 
 - (IBAction)selectAllDocuments:(id)sender;
 

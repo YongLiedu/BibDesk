@@ -43,8 +43,7 @@
     IBOutlet NSButton* convertURLFieldsButton;
     IBOutlet NSButton* removeLocalFileFieldsButton;
     IBOutlet NSButton* removeRemoteURLFieldsButton;
-    IBOutlet NSButton* delSelectedDefaultFieldButton;
-    IBOutlet NSButton* addDefaultFieldButton;
+    IBOutlet NSSegmentedControl* addRemoveDefaultFieldButton;
     IBOutlet NSWindow* globalMacroFileSheet;
     IBOutlet BDSKTableView* globalMacroFilesTableView;
     IBOutlet NSTableView* defaultFieldsTableView;
@@ -61,8 +60,7 @@
 - (IBAction)changeRemoveLocalFileFields:(id)sender;
 - (IBAction)changeRemoveRemoteURLFields:(id)sender;
 
-- (IBAction)delSelectedDefaultField:(id)sender;
-- (IBAction)addDefaultField:(id)sender;
+- (IBAction)addRemoveDefaultField:(id)sender;
 - (IBAction)showTypeInfoEditor:(id)sender;
 
 - (IBAction)showMacrosWindow:(id)sender;

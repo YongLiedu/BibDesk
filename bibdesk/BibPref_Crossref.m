@@ -102,8 +102,8 @@ static char BDSKBibPrefCrossrefDefaultsObservationContext;
 	BOOL duplicate = [sud boolForKey:BDSKDuplicateBooktitleKey];
     [forceDuplicateBooktitleCheckButton setEnabled:duplicate];
 	[tableView setEnabled:duplicate];
-	[addTypeButton setEnabled:duplicate];
-	[deleteTypeButton setEnabled:duplicate && [tableView numberOfSelectedRows] > 0];
+	[addRemoveTypeButton setEnabled:duplicate forSegment:0];
+	[addRemoveTypeButton setEnabled:duplicate && [tableView numberOfSelectedRows] > 0 forSegment:1];
 }
 
 - (IBAction)changeAutoSort:(id)sender{
@@ -124,23 +124,27 @@ static char BDSKBibPrefCrossrefDefaultsObservationContext;
     [sud setBool:([sender state] == NSOnState) forKey:BDSKForceDuplicateBooktitleKey];
 }
 
-- (IBAction)deleteType:(id)sender{
-    NSInteger row = [tableView selectedRow];
-    if(row != -1){
-        if ([tableView editedRow] != -1)
-            [[[self view] window] makeFirstResponder:tableView];
-        [typesArray removeObjectAtIndex:row];
-        [self updateDuplicateTypes];
+- (IBAction)addRemoveType:(id)sender{
+    if ([sender selectedSegment] == 0) { // add
+        
+        NSString *newType = @"type"; // do not localize
+        [typesArray addObject:newType];
+        NSInteger row = [typesArray count] - 1;
+        [tableView reloadData];
+        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        [tableView editColumn:0 row:row withEvent:nil select:YES];
+        
+    } else { // remove
+        
+        NSInteger row = [tableView selectedRow];
+        if(row != -1){
+            if ([tableView editedRow] != -1)
+                [[[self view] window] makeFirstResponder:tableView];
+            [typesArray removeObjectAtIndex:row];
+            [self updateDuplicateTypes];
+        }
+        
     }
-}
-
-- (IBAction)addType:(id)sender{
-    NSString *newType = @"type"; // do not localize
-    [typesArray addObject:newType];
-    NSInteger row = [typesArray count] - 1;
-    [tableView reloadData];
-    [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-    [tableView editColumn:0 row:row withEvent:nil select:YES];
 }
 
 #pragma mark TableView datasource methods

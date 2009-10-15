@@ -87,23 +87,27 @@
     [drawer toggle:sender];
 }
 
-- (IBAction)addCustomCiteString:(id)sender{
-    NSInteger row = [customStringArray count];
-	[customStringArray addObject:@"citeCommand"];
-    [tableView reloadData];
-	[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-	[tableView editColumn:0 row:row withEvent:nil select:YES];
-    [[NSUserDefaults standardUserDefaults] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
-}
-
-- (IBAction)removeCustomCiteString:(id)sender{
-    if([tableView numberOfSelectedRows] == 0)
-		return;
-	
-	if ([tableView editedRow] != -1)
-		[[drawer parentWindow] makeFirstResponder:tableView];
-	[customStringArray removeObjectAtIndex:[tableView selectedRow]];
-	[tableView reloadData];
+- (IBAction)addRemoveCustomCiteString:(id)sender{
+    if ([sender selectedSegment] == 0) { // add
+        
+        NSInteger row = [customStringArray count];
+        [customStringArray addObject:@"citeCommand"];
+        [tableView reloadData];
+        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        [tableView editColumn:0 row:row withEvent:nil select:YES];
+        
+    } else { // remove
+        
+        if([tableView numberOfSelectedRows] == 0)
+            return;
+        
+        if ([tableView editedRow] != -1)
+            [[drawer parentWindow] makeFirstResponder:tableView];
+        [customStringArray removeObjectAtIndex:[tableView selectedRow]];
+        [tableView reloadData];
+        
+    }
+    
     [[NSUserDefaults standardUserDefaults] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
 }
 
@@ -126,7 +130,7 @@
 #pragma mark TableView delegate
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
-    [removeButton setEnabled:([tableView numberOfSelectedRows] > 0)];
+    [addRemoveButton setEnabled:([tableView numberOfSelectedRows] > 0) forSegment:1];
 }
 
 #pragma mark TableView dragging source

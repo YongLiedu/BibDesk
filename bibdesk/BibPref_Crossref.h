@@ -45,8 +45,7 @@
     IBOutlet NSButton* warnOnEditInheritedCheckButton;
     IBOutlet NSButton* duplicateBooktitleCheckButton;
     IBOutlet NSButton* forceDuplicateBooktitleCheckButton;
-    IBOutlet NSButton* deleteTypeButton;
-    IBOutlet NSButton* addTypeButton;
+    IBOutlet NSSegmentedControl* addRemoveTypeButton;
 	IBOutlet NSTableView *tableView;
 	NSMutableArray *typesArray;
 }
@@ -55,8 +54,7 @@
 - (IBAction)changeWarnOnEditInherited:(id)sender;
 - (IBAction)changeDuplicateBooktitle:(id)sender;
 - (IBAction)changeForceDuplicateBooktitle:(id)sender;
-- (IBAction)deleteType:(id)sender;
-- (IBAction)addType:(id)sender;
+- (IBAction)addRemoveType:(id)sender;
 
 @end
 
