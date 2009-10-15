@@ -321,7 +321,7 @@
 // BDSKGroup overrides
 
 - (NSImage *)icon {
-    return [NSImage imageNamed:@"urlGroup"];
+    return [NSImage imageNamed:NSImageNameNetwork];
 }
 
 - (BOOL)isURL { return YES; }

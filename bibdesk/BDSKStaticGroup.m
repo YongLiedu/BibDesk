@@ -101,7 +101,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
 }
 
 - (NSImage *)icon {
-	return [NSImage imageNamed:@"staticGroup"];
+	return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)];
 }
 
 - (BOOL)isStatic { return YES; }
@@ -177,7 +177,22 @@ static NSString *BDSKLastImportLocalizedString = nil;
 @implementation BDSKLastImportGroup
 
 - (NSImage *)icon {
-	return [NSImage imageNamed:@"importGroup"];
+	static NSImage *importGroupImage = nil;
+    if (importGroupImage == nil) {
+        importGroupImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
+        [importGroupImage lockFocus];
+        [[NSImage imageNamed:NSImageNameFolderSmart] drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [[NSImage imageNamed:@"importBadge"] drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [importGroupImage unlockFocus];
+        NSImage *tinyImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
+        [tinyImage lockFocus];
+        [[NSImage imageNamed:NSImageNameFolderSmart] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [[NSImage imageNamed:@"importBadge"] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [tinyImage unlockFocus];
+        [importGroupImage addRepresentation:[[tinyImage representations] lastObject]];
+        [tinyImage release];
+    }
+    return importGroupImage;
 }
 
 - (void)setName:(NSString *)newName {}

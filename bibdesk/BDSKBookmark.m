@@ -315,7 +315,18 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (NSImage *)icon {
-    return [NSImage imageNamed:@"TinyBookmark"];
+    static NSImage *icon = nil;
+    if (icon == nil) {
+        icon = [[NSImage imageNamed:@"Bookmark"] copy];
+        NSImage *tinyIcon = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
+        [tinyIcon lockFocus];
+        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
+        [icon drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        [tinyIcon unlockFocus];
+        [icon addRepresentation:[[tinyIcon representations] lastObject]];
+        [tinyIcon release];
+    }
+    return icon;
 }
 
 @end
@@ -356,7 +367,7 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (NSImage *)icon {
-    return [NSImage imageNamed:@"TinyFolder"];
+    return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)];
 }
 
 - (NSString *)name {

@@ -57,7 +57,7 @@ static NSImage *lockedIcon = nil;
 static NSImage *unlockedIcon = nil;
 
 + (NSImage *)icon{
-    return [NSImage imageNamed:@"sharedGroup"];
+    return [NSImage imageNamed:NSImageNameBonjour];
 }
 
 + (NSImage *)lockedIcon {

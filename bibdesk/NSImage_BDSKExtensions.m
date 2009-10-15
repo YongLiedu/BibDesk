@@ -128,142 +128,62 @@
     }
 }
 
-+ (void)makeBookmarkImages {
-    static NSImage *newBookmarkImage = nil;
-    static NSImage *newFolderImage = nil;
-    static NSImage *newSeparatorImage = nil;
-    static NSImage *tinyBookmarkImage = nil;
-    static NSImage *tinyFolderImage = nil;
-    static NSImage *tinySearchBookmarkImage = nil;
-    
-    if (newFolderImage)
-        return;
-    
-    newBookmarkImage = [[self imageNamed:@"Bookmark"] copy];
-    [newBookmarkImage lockFocus];
-    [[self class] drawAddBadgeAtPoint:NSMakePoint(18.0, 18.0)];
-    [newBookmarkImage unlockFocus];
-    [newBookmarkImage setName:@"NewBookmark"];
-    
-    newFolderImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
-    [newFolderImage lockFocus];
-    [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)] drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-    [[self class] drawAddBadgeAtPoint:NSMakePoint(18.0, 18.0)];
-    [newFolderImage unlockFocus];
-    [newFolderImage setName:@"NewFolder"];
-    
-    newSeparatorImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
-    [newSeparatorImage lockFocus];
-    [NSGraphicsContext saveGraphicsState];
-    [[NSColor clearColor] setFill];
-    NSRectFill(NSMakeRect(0.0, 0.0, 32.0, 32.0));
-    NSShadow *shadow1 = [[[NSShadow alloc] init] autorelease];
-    [shadow1 setShadowBlurRadius:2.0];
-    [shadow1 setShadowOffset:NSMakeSize(0.0, -1.0)];
-    [shadow1 setShadowColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.5]];
-    [shadow1 set];
-    [[NSColor colorWithCalibratedWhite:0.35 alpha:1.0] setFill];
-    NSBezierPath *path = [NSBezierPath bezierPathWithRect:NSMakeRect(2.0, 14.0, 28.0, 4.0)];
-    [path fill];
-    [NSGraphicsContext restoreGraphicsState];
-    [NSGraphicsContext saveGraphicsState];
-    [[NSColor colorWithCalibratedWhite:0.65 alpha:1.0] setFill];
-    path = [NSBezierPath bezierPathWithRect:NSMakeRect(3.0, 15.0, 26.0, 2.0)];
-    [path fill];
-    [[NSColor colorWithCalibratedWhite:0.8 alpha:1.0] setFill];
-    path = [NSBezierPath bezierPathWithRect:NSMakeRect(4.0, 16.0, 24.0, 1.0)];
-    [path fill];
-    [[NSColor colorWithCalibratedWhite:0.45 alpha:1.0] setFill];
-    path = [NSBezierPath bezierPathWithRect:NSMakeRect(3.0, 17.0, 26.0, 1.0)];
-    [path fill];
-    [[self class] drawAddBadgeAtPoint:NSMakePoint(18.0, 14.0)];
-    [NSGraphicsContext restoreGraphicsState];
-    [newSeparatorImage unlockFocus];
-    [newSeparatorImage setName:@"NewSeparator"];
-    
-    tinyFolderImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
-    [tinyFolderImage lockFocus];
-    [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-    [tinyFolderImage unlockFocus];
-    [tinyFolderImage setName:@"TinyFolder"];
-    
-    tinyBookmarkImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
-    [tinyBookmarkImage lockFocus];
-    [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-    [[self imageNamed:@"Bookmark"] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) operation:NSCompositeCopy fraction:1.0];
-    [tinyBookmarkImage unlockFocus];
-    [tinyBookmarkImage setName:@"TinyBookmark"];
-    
-    tinySearchBookmarkImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
-    [tinySearchBookmarkImage lockFocus];
-    [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-    [[self imageNamed:@"searchGroup"] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) operation:NSCompositeCopy fraction:1.0];
-    [tinySearchBookmarkImage unlockFocus];
-    [tinySearchBookmarkImage setName:@"TinySearchBookmark"];
++ (NSImage *)addBookmarkToolbarImage {
+    static NSImage *image = nil;
+    if (image == nil) {
+        image = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
+        [image lockFocus];
+        [[self imageNamed:@"Bookmark"] drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        [[self class] drawAddBadgeAtPoint:NSMakePoint(18.0, 18.0)];
+        [image unlockFocus];
+    }
+    return image;
 }
-    
-+ (void)makeGroupImages {
-    static NSImage *categoryGroupImage = nil;
-    static NSImage *staticGroupImage = nil;
-    static NSImage *smartGroupImage = nil;
-    static NSImage *importGroupImage = nil;
-    static NSImage *sharedGroupImage = nil;
-    static NSImage *urlGroupImage = nil;
-    
-    if (categoryGroupImage)
-        return;
-    
-    NSSize smallSize = NSMakeSize(32.0, 32.0);
-    NSSize tinySize = NSMakeSize(16.0, 16.0);
-    NSRect smallRect = {NSZeroPoint, smallSize};
-    NSRect tinyRect = {NSZeroPoint, tinySize};
-    
-    smartGroupImage = [[NSImage imageNamed:NSImageNameFolderSmart] copy];
-    [smartGroupImage setName:@"smartGroup"];
-    
-    staticGroupImage = [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)] copy];
-    [staticGroupImage setName:@"staticGroup"];
-    
-    categoryGroupImage = [[NSImage alloc] initWithSize:smallSize];
-    [categoryGroupImage lockFocus];
-    CIImage *ciImage = [CIImage imageWithData:[smartGroupImage TIFFRepresentation]];
-    ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.3 brightnessBias:0.3];
-    [ciImage drawInRect:smallRect fromRect:smallRect operation:NSCompositeSourceOver fraction:1.0];
-    [categoryGroupImage unlockFocus];
-    NSImage *tinyImage = [[NSImage alloc] initWithSize:tinySize];
-    [tinyImage lockFocus];
-    [[NSImage imageNamed:NSImageNameFolderSmart] drawInRect:tinyRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [tinyImage unlockFocus];
-    ciImage = [CIImage imageWithData:[tinyImage TIFFRepresentation]];
-    ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.3 brightnessBias:0.3];
-    [tinyImage release];
-    tinyImage = [[NSImage alloc] initWithSize:tinySize];
-    [tinyImage lockFocus];
-    [ciImage drawInRect:tinyRect fromRect:tinyRect operation:NSCompositeSourceOver fraction:1.0];
-    [tinyImage unlockFocus];
-    [categoryGroupImage addRepresentation:[[tinyImage representations] lastObject]];
-    [tinyImage release];
-    [categoryGroupImage setName:@"categoryGroup"];
-    
-    importGroupImage = [[NSImage alloc] initWithSize:smallSize];
-    [importGroupImage lockFocus];
-    [[NSImage imageNamed:NSImageNameFolderSmart] drawInRect:smallRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [[NSImage imageNamed:@"importBadge"] drawInRect:smallRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [importGroupImage unlockFocus];
-    tinyImage = [[NSImage alloc] initWithSize:tinySize];
-    [tinyImage lockFocus];
-    [[NSImage imageNamed:NSImageNameFolderSmart] drawInRect:tinyRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [[NSImage imageNamed:@"importBadge"] drawInRect:tinyRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [tinyImage unlockFocus];
-    [importGroupImage addRepresentation:[[tinyImage representations] lastObject]];
-    [tinyImage release];
-    [importGroupImage setName:@"importGroup"];
-    
-    sharedGroupImage = [[NSImage imageNamed:NSImageNameBonjour] copy];
-    [sharedGroupImage setName:@"sharedGroup"];
-    
-    urlGroupImage = [[NSImage imageNamed:NSImageNameNetwork] copy];
-    [urlGroupImage setName:@"urlGroup"];
+
++ (NSImage *)addFolderToolbarImage {
+    static NSImage *image = nil;
+    if (image == nil) {
+        image = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
+        [image lockFocus];
+        [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)] drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        [[self class] drawAddBadgeAtPoint:NSMakePoint(18.0, 18.0)];
+        [image unlockFocus];
+    }
+    return image;
+}
+
++ (NSImage *)addSeparatorToolbarImage {
+    static NSImage *image = nil;
+    if (image == nil) {
+        image = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
+        [image lockFocus];
+        [NSGraphicsContext saveGraphicsState];
+        [[NSColor clearColor] setFill];
+        NSRectFill(NSMakeRect(0.0, 0.0, 32.0, 32.0));
+        NSShadow *shadow1 = [[[NSShadow alloc] init] autorelease];
+        [shadow1 setShadowBlurRadius:2.0];
+        [shadow1 setShadowOffset:NSMakeSize(0.0, -1.0)];
+        [shadow1 setShadowColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.5]];
+        [shadow1 set];
+        [[NSColor colorWithCalibratedWhite:0.35 alpha:1.0] setFill];
+        NSBezierPath *path = [NSBezierPath bezierPathWithRect:NSMakeRect(2.0, 14.0, 28.0, 4.0)];
+        [path fill];
+        [NSGraphicsContext restoreGraphicsState];
+        [NSGraphicsContext saveGraphicsState];
+        [[NSColor colorWithCalibratedWhite:0.65 alpha:1.0] setFill];
+        path = [NSBezierPath bezierPathWithRect:NSMakeRect(3.0, 15.0, 26.0, 2.0)];
+        [path fill];
+        [[NSColor colorWithCalibratedWhite:0.8 alpha:1.0] setFill];
+        path = [NSBezierPath bezierPathWithRect:NSMakeRect(4.0, 16.0, 24.0, 1.0)];
+        [path fill];
+        [[NSColor colorWithCalibratedWhite:0.45 alpha:1.0] setFill];
+        path = [NSBezierPath bezierPathWithRect:NSMakeRect(3.0, 17.0, 26.0, 1.0)];
+        [path fill];
+        [[self class] drawAddBadgeAtPoint:NSMakePoint(18.0, 14.0)];
+        [NSGraphicsContext restoreGraphicsState];
+        [image unlockFocus];
+    }
+    return image;
 }
 
 + (NSImage *)tinyCautionImage {

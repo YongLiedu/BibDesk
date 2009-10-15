@@ -42,15 +42,16 @@
 @interface NSImage (BDSKExtensions)
 
 + (void)makePreviewDisplayImages;
-+ (void)makeBookmarkImages;
-+ (void)makeGroupImages;
 
++ (NSImage *)imageForURL:(NSURL *)aURL;
+
++ (NSImage *)missingFileImage;
 + (NSImage *)tinyCautionImage;
 + (NSImage *)paperclipImage;
 + (NSImage *)redPaperclipImage;
-+ (NSImage *)missingFileImage;
-
-+ (NSImage *)imageForURL:(NSURL *)aURL;
++ (NSImage *)addBookmarkToolbarImage;
++ (NSImage *)addFolderToolbarImage;
++ (NSImage *)addSeparatorToolbarImage;
 
 - (NSImage *)dragImageWithCount:(NSInteger)count;
 - (NSImage *)dragImageWithCount:(NSInteger)count inside:(BOOL)inside isIcon:(BOOL)isIcon;

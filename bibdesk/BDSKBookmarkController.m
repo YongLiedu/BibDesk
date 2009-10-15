@@ -43,6 +43,7 @@
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKBookmarkOutlineView.h"
 #import "BDSKTextWithIconCell.h"
+#import "NSImage_BDSKExtensions.h"
 
 #define BDSKBookmarkRowsPboardType @"BDSKBookmarkRowsPboardType"
 
@@ -621,7 +622,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     [item setLabel:NSLocalizedString(@"New Bookmark", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"New Bookmark", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Add a New Bookmark", @"Tool tip message")];
-    [item setImage:[NSImage imageNamed:@"NewBookmark"]];
+    [item setImage:[NSImage addBookmarkToolbarImage]];
     [item setTarget:self];
     [item setAction:@selector(insertBookmark:)];
     [toolbarItems setObject:item forKey:BDSKBookmarksNewBookmarkToolbarItemIdentifier];
@@ -631,7 +632,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     [item setLabel:NSLocalizedString(@"New Folder", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"New Folder", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Add a New Folder", @"Tool tip message")];
-    [item setImage:[NSImage imageNamed:@"NewFolder"]];
+    [item setImage:[NSImage addFolderToolbarImage]];
     [item setTarget:self];
     [item setAction:@selector(insertBookmarkFolder:)];
     [toolbarItems setObject:item forKey:BDSKBookmarksNewFolderToolbarItemIdentifier];
@@ -641,7 +642,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     [item setLabel:NSLocalizedString(@"New Separator", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"New Separator", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Add a New Separator", @"Tool tip message")];
-    [item setImage:[NSImage imageNamed:@"NewSeparator"]];
+    [item setImage:[NSImage addSeparatorToolbarImage]];
     [item setTarget:self];
     [item setAction:@selector(insertBookmarkSeparator:)];
     [toolbarItems setObject:item forKey:BDSKBookmarksNewSeparatorToolbarItemIdentifier];

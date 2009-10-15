@@ -40,6 +40,7 @@
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "BDSKTypeManager.h"
+#import "CIImage_BDSKExtensions.h"
 
 
 // a private subclass for the Empty ... group
@@ -131,7 +132,29 @@
 }
 
 - (NSImage *)icon {
-	return [NSImage imageNamed:@"categoryGroup"];
+    static NSImage *categoryGroupImage = nil;
+    if (categoryGroupImage == nil) {
+        categoryGroupImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
+        [categoryGroupImage lockFocus];
+        CIImage *ciImage = [CIImage imageWithData:[[NSImage imageNamed:NSImageNameFolderSmart] TIFFRepresentation]];
+        ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.3 brightnessBias:0.3];
+        [ciImage drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) operation:NSCompositeSourceOver fraction:1.0];
+        [categoryGroupImage unlockFocus];
+        NSImage *tinyImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
+        [tinyImage lockFocus];
+        [[NSImage imageNamed:NSImageNameFolderSmart] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [tinyImage unlockFocus];
+        ciImage = [CIImage imageWithData:[tinyImage TIFFRepresentation]];
+        ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.3 brightnessBias:0.3];
+        [tinyImage release];
+        tinyImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
+        [tinyImage lockFocus];
+        [ciImage drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) operation:NSCompositeSourceOver fraction:1.0];
+        [tinyImage unlockFocus];
+        [categoryGroupImage addRepresentation:[[tinyImage representations] lastObject]];
+        [tinyImage release];
+    }
+    return categoryGroupImage;
 }
 
 - (void)setName:(id)newName {
@@ -167,7 +190,7 @@
     static NSImage *image = nil;
     if(image == nil){
         image = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
-        NSImage *genericImage = [NSImage imageNamed:@"categoryGroup"];
+        NSImage *genericImage = [super icon];
         NSImage *questionMark = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kQuestionMarkIcon)];
         NSUInteger i;
         [image lockFocus];

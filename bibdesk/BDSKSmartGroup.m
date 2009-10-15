@@ -126,7 +126,7 @@
 - (BOOL)isEditable { return YES; }
 
 - (NSImage *)icon {
-	return [NSImage imageNamed:@"smartGroup"];
+	return [NSImage imageNamed:NSImageNameFolderSmart];
 }
 
 // accessors
