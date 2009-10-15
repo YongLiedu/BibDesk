@@ -96,7 +96,7 @@
     [item setPaletteLabel:NSLocalizedString(@"Delete Publication", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Delete selected publication(s)", @"Tool tip message")];
     [item setTarget:self];
-    [item setImage:[NSImage imageWithSmallIconForToolboxCode:kToolbarDeleteIcon]];
+    [item setImage:[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kToolbarDeleteIcon)]];
     [item setAction:@selector(deleteSelectedPubs:)];
     [toolbarItems setObject:item forKey:BibDocumentToolbarDeleteItemIdentifier];
     [item release];

@@ -35,37 +35,6 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
-/*
- Some methods in this category are copied from OmniAppKit 
- and are subject to the following licence:
- 
- Omni Source License 2007
-
- OPEN PERMISSION TO USE AND REPRODUCE OMNI SOURCE CODE SOFTWARE
-
- Omni Source Code software is available from The Omni Group on their 
- web site at http://www.omnigroup.com/www.omnigroup.com. 
-
- Permission is hereby granted, free of charge, to any person obtaining 
- a copy of this software and associated documentation files (the 
- "Software"), to deal in the Software without restriction, including 
- without limitation the rights to use, copy, modify, merge, publish, 
- distribute, sublicense, and/or sell copies of the Software, and to 
- permit persons to whom the Software is furnished to do so, subject to 
- the following conditions:
-
- Any original copyright notices and this permission notice shall be 
- included in all copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, 
- EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
- MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
- IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
- CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
- TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
- SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 
 #import "NSImage_BDSKExtensions.h"
 #import "NSBezierPath_BDSKExtensions.h"
@@ -176,8 +145,9 @@
     [newBookmarkImage unlockFocus];
     [newBookmarkImage setName:@"NewBookmark"];
     
-    newFolderImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] retain];
+    newFolderImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
     [newFolderImage lockFocus];
+    [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)] drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
     [[self class] drawAddBadgeAtPoint:NSMakePoint(18.0, 18.0)];
     [newFolderImage unlockFocus];
     [newFolderImage setName:@"NewFolder"];
@@ -211,7 +181,10 @@
     [newSeparatorImage unlockFocus];
     [newSeparatorImage setName:@"NewSeparator"];
     
-    tinyFolderImage = [[self iconWithSize:NSMakeSize(16.0, 16.0) forToolboxCode:kGenericFolderIcon] retain];
+    tinyFolderImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
+    [tinyFolderImage lockFocus];
+    [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+    [tinyFolderImage unlockFocus];
     [tinyFolderImage setName:@"TinyFolder"];
     
     tinyBookmarkImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
@@ -248,8 +221,7 @@
     smartGroupImage = [[NSImage imageNamed:NSImageNameFolderSmart] copy];
     [smartGroupImage setName:@"smartGroup"];
     
-    staticGroupImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] copy];
-    [staticGroupImage addRepresentation:[[[self iconWithSize:tinySize forToolboxCode:kGenericFolderIcon] representations] objectAtIndex:0]];
+    staticGroupImage = [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)] copy];
     [staticGroupImage setName:@"staticGroup"];
     
     categoryGroupImage = [[NSImage alloc] initWithSize:smallSize];
@@ -294,36 +266,16 @@
     [urlGroupImage setName:@"urlGroup"];
 }
 
-+ (NSImage *)httpInternetLocationImage {
-    return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationHTTPIcon)];}
-
-+ (NSImage *)ftpInternetLocationImage {
-    return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationFTPIcon)];
-}
-
-+ (NSImage *)mailInternetLocationImage {
-    return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationMailIcon)];
-}
-
-+ (NSImage *)newsInternetLocationImage {
-    return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationNewsIcon)];
-}
-
-+ (NSImage *)genericInternetLocationImage {
-    return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationGenericIcon)];
-}
-
-+ (NSImage *)iconWithSize:(NSSize)iconSize forToolboxCode:(OSType)code {
-    NSImage *image = [[[NSImage alloc] initWithSize:iconSize] autorelease];
-    NSRect rect = {NSZeroPoint, iconSize};
-    [image lockFocus];
-    [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(code)] drawInRect:rect fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-    [image unlockFocus];
-	return image;
-}
-
-+ (NSImage *)imageWithSmallIconForToolboxCode:(OSType)code {
-    return [self iconWithSize:NSMakeSize(32.0, 32.0) forToolboxCode:code];
++ (NSImage *)tinyCautionImage {
+    static NSImage *image = nil;
+    if (image == nil) {
+        image = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
+        [image lockFocus];
+        [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kAlertCautionIcon)] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        [image unlockFocus];
+        [image setName:@"BDSKSmallCautionIcon"];
+	}
+    return image;
 }
 
 + (NSImage *)missingFileImage {
@@ -429,50 +381,6 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
     return image;
 }
 
-- (NSImage *)imageFlippedHorizontally;
-{
-	NSImage *flippedImage;
-	NSAffineTransform *transform = [NSAffineTransform transform];
-	NSSize size = [self size];
-    NSRect rect = {NSZeroPoint, size};
-	NSAffineTransformStruct flip = {-1.0, 0.0, 0.0, 1.0, size.width, 0.0};	
-	flippedImage = [[[NSImage alloc] initWithSize:size] autorelease];
-	[flippedImage lockFocus];
-    [transform setTransformStruct:flip];
-	[transform concat];
-	[self drawAtPoint:NSZeroPoint fromRect:rect operation:NSCompositeCopy fraction:1.0];
-	[flippedImage unlockFocus];
-	return flippedImage;
-}
-
-- (NSImage *)highlightedImage;
-{
-    NSSize iconSize = [self size];
-    NSRect iconRect = {NSZeroPoint, iconSize};
-    NSImage *newImage = [[NSImage alloc] initWithSize:iconSize];
-    
-    [newImage lockFocus];
-    // copy the original image (self)
-    [self drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-    
-    // blend with black to create a highlighted appearance
-    [[[NSColor blackColor] colorWithAlphaComponent:0.3] set];
-    NSRectFillUsingOperation(iconRect, NSCompositeSourceAtop);
-    [newImage unlockFocus];
-    
-    return [newImage autorelease];
-}
-
-- (NSImage *)invertedImage {
-    CIImage *ciImage = [CIImage imageWithData:[self TIFFRepresentation]];
-    NSRect rect = {NSZeroPoint, [self size]};
-    NSImage *image = [[[NSImage alloc] initWithSize:rect.size] autorelease];
-    [image lockFocus];
-    [[ciImage invertedImage] drawInRect:rect fromRect:rect operation:NSCompositeCopy fraction:1.0];
-    [image unlockFocus];
-    return image;
-}
-
 - (NSImage *)dragImageWithCount:(NSInteger)count;
 {
     return [self dragImageWithCount:count inside:NO isIcon:YES];
@@ -574,21 +482,16 @@ static NSComparisonResult compareImageRepWidths(NSBitmapImageRep *r1, NSBitmapIm
     return toReturn;    
 }
 
-// Modified and generalized from OmniAppKit/NSImage-OAExtensions
-- (void)drawFlippedInRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(CGFloat)delta {
-    [NSGraphicsContext saveGraphicsState];
-    NSAffineTransform *transform = [NSAffineTransform transform];
-    [transform translateXBy:0.0 yBy:NSMaxY(dstRect)];
-    [transform scaleXBy:1.0 yBy:-1.0];
-    [transform translateXBy:0.0 yBy:-NSMinY(dstRect)];
-    [transform concat];
-    [self drawInRect:dstRect fromRect:srcRect operation:op fraction:delta];
-    [NSGraphicsContext restoreGraphicsState];
-}
-
 - (void)drawFlipped:(BOOL)isFlipped inRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(CGFloat)delta {
     if (isFlipped) {
-        [self drawFlippedInRect:dstRect fromRect:srcRect operation:op fraction:delta];
+        [NSGraphicsContext saveGraphicsState];
+        NSAffineTransform *transform = [NSAffineTransform transform];
+        [transform translateXBy:0.0 yBy:NSMaxY(dstRect)];
+        [transform scaleXBy:1.0 yBy:-1.0];
+        [transform translateXBy:0.0 yBy:-NSMinY(dstRect)];
+        [transform concat];
+        [self drawInRect:dstRect fromRect:srcRect operation:op fraction:delta];
+        [NSGraphicsContext restoreGraphicsState];
     } else {
         [self drawInRect:dstRect fromRect:srcRect operation:op fraction:delta];
     }

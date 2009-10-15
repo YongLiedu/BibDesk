@@ -327,10 +327,7 @@ static void fixLegacyTableColumnIdentifiers()
     }
     
     // name image to make it available app wide, also in IB
-    static NSImage *nsCautionIcon = nil;
-    nsCautionIcon = [[NSImage iconWithSize:NSMakeSize(16.0, 16.0) forToolboxCode:kAlertCautionIcon] retain];
-    [nsCautionIcon setName:@"BDSKSmallCautionIcon"];
-    
+    [NSImage tinyCautionImage];
     [NSImage makeBookmarkImages];
     [NSImage makeGroupImages];
     

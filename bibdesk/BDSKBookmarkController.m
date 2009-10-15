@@ -651,7 +651,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     [item setLabel:NSLocalizedString(@"Delete", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"Delete", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Delete Selected Items", @"Tool tip message")];
-    [item setImage:[NSImage imageWithSmallIconForToolboxCode:kToolbarDeleteIcon]];
+    [item setImage:[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kToolbarDeleteIcon)]];
     [item setTarget:self];
     [item setAction:@selector(deleteBookmark:)];
     [toolbarItems setObject:item forKey:BDSKBookmarksDeleteToolbarItemIdentifier];

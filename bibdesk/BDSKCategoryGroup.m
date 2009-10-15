@@ -37,7 +37,6 @@
  */
 
 #import "BDSKCategoryGroup.h"
-#import "NSImage_BDSKExtensions.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "BDSKTypeManager.h"
@@ -169,21 +168,20 @@
     if(image == nil){
         image = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
         NSImage *genericImage = [NSImage imageNamed:@"categoryGroup"];
-        NSImage *questionMark = [NSImage iconWithSize:NSMakeSize(20.0, 20.0) forToolboxCode:kQuestionMarkIcon];
+        NSImage *questionMark = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kQuestionMarkIcon)];
         NSUInteger i;
         [image lockFocus];
         [genericImage drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
         // hack to make the question mark dark enough to be visible
         for(i = 0; i < 3; i++)
-            [questionMark compositeToPoint:NSMakePoint(6.0, 4.0) operation:NSCompositeSourceOver];
+            [questionMark drawInRect:NSMakeRect(6.0, 4.0, 20.0, 20.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
         [image unlockFocus];
         NSImage *tinyImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
-        questionMark = [NSImage iconWithSize:NSMakeSize(10.0, 10.0) forToolboxCode:kQuestionMarkIcon];
         [tinyImage lockFocus];
         [genericImage drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
         // hack to make the question mark dark enough to be visible
         for(i = 0; i < 3; i++)
-            [questionMark compositeToPoint:NSMakePoint(3.0, 2.0) operation:NSCompositeSourceOver];
+            [questionMark drawInRect:NSMakeRect(3.0, 1.0, 10.0, 10.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
         [tinyImage unlockFocus];
         [image addRepresentation:[[tinyImage representations] lastObject]];
         [tinyImage release];
