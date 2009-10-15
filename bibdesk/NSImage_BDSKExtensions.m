@@ -313,103 +313,101 @@
     return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationGenericIcon)];
 }
 
-+ (NSImage *)iconWithSize:(NSSize)iconSize forToolboxCode:(OSType) code {
-	NSInteger width = iconSize.width;
-	NSInteger height = iconSize.height;
-	IconRef iconref;
-	OSErr myErr = GetIconRef (kOnSystemDisk, kSystemIconsCreator, code, &iconref);
-	
-	NSImage* image = [[NSImage alloc] initWithSize:NSMakeSize(width,height)]; 
-	[image lockFocus]; 
-	
-	CGRect rect =  CGRectMake(0,0,width,height);
-	
-	PlotIconRefInContext((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort],
-                         &rect,
-						 kAlignAbsoluteCenter, //kAlignNone,
-						 kTransformNone,
-						 NULL /*inLabelColor*/,
-						 kPlotIconRefNormalFlags,
-						 iconref); 
-	[image unlockFocus]; 
-	
-	myErr = ReleaseIconRef(iconref);
-	
-	[image autorelease];	
++ (NSImage *)iconWithSize:(NSSize)iconSize forToolboxCode:(OSType)code {
+    NSImage *image = [[[NSImage alloc] initWithSize:iconSize] autorelease];
+    NSRect rect = {NSZeroPoint, iconSize};
+    [image lockFocus];
+    [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(code)] drawInRect:rect fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+    [image unlockFocus];
 	return image;
 }
 
-+ (NSImage *)imageWithSmallIconForToolboxCode:(OSType) code {
-    /* ssp: 30-07-2004 
-    
-	A category on NSImage that creates an NSImage containing an icon from the system specified by an OSType.
-    LIMITATION: This always creates 32x32 images as are useful for toolbars.
-    
-	Code taken from http://cocoa.mamasam.com/MACOSXDEV/2002/01/2/22427.php
-    */
-    
-    return [self iconWithSize:NSMakeSize(32,32) forToolboxCode:code];
++ (NSImage *)imageWithSmallIconForToolboxCode:(OSType)code {
+    return [self iconWithSize:NSMakeSize(32.0, 32.0) forToolboxCode:code];
 }
 
-+ (NSImage *)smallMissingFileImage {
++ (NSImage *)missingFileImage {
     static NSImage *image = nil;
-    if(image == nil){
-        image = [[NSImage alloc] initWithSize:NSMakeSize(32, 32)];
-        NSImage *genericDocImage = [self iconWithSize:NSMakeSize(32, 32) forToolboxCode:kGenericDocumentIcon];
-        NSImage *questionMark = [self iconWithSize:NSMakeSize(20, 20) forToolboxCode:kQuestionMarkIcon];
+    if (image == nil) {
+        image = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
+        NSImage *genericDocImage = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericDocumentIcon)];
+        NSImage *questionMark = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kQuestionMarkIcon)];
         [image lockFocus];
-        [genericDocImage compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:0.7];
+        [genericDocImage drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:0.7];
         [questionMark compositeToPoint:NSMakePoint(6, 4) operation:NSCompositeSourceOver fraction:0.7];
         [image unlockFocus];
+        NSImage *tinyImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
+        [tinyImage lockFocus];
+        [genericDocImage drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:0.7];
+        [questionMark compositeToPoint:NSMakePoint(3.0, 2.0) operation:NSCompositeSourceOver fraction:0.7];
+        [tinyImage unlockFocus];
+        [image addRepresentation:[[tinyImage representations] lastObject]];
+        [tinyImage release];
     }
     return image;
 }
 
 + (NSImage *)imageForURL:(NSURL *)aURL{
-    
-    if(!aURL) return nil;
-
-    if([aURL isFileURL])
+    if (aURL == nil)
+        return nil;
+    else if ([aURL isFileURL])
         return [[NSWorkspace sharedWorkspace] iconForFile:[aURL path]];
     
     NSString *scheme = [aURL scheme];
+    OSType typeCode = kInternetLocationGenericIcon;
     
-    if([scheme isEqualToString:@"http"])
-        return [self httpInternetLocationImage];
-    else if([scheme isEqualToString:@"ftp"])
-        return [self ftpInternetLocationImage];
-    else if([scheme isEqualToString:@"mailto"])
-        return [self mailInternetLocationImage];
-    else if([scheme isEqualToString:@"news"])
-        return [self newsInternetLocationImage];
-    else return [self genericInternetLocationImage];
+    if([scheme caseInsensitiveCompare:@"http"] == NSOrderedSame || [scheme caseInsensitiveCompare:@"https"] == NSOrderedSame)
+        typeCode = kInternetLocationHTTPIcon;
+    else if([scheme caseInsensitiveCompare:@"ftp"] == NSOrderedSame)
+        typeCode = kInternetLocationFTPIcon;
+    else if([scheme caseInsensitiveCompare:@"mailto"] == NSOrderedSame)
+        typeCode = kInternetLocationMailIcon;
+    else if([scheme caseInsensitiveCompare:@"news"] == NSOrderedSame)
+        typeCode = kInternetLocationNewsIcon;
+    
+    return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(typeCode)];
 }
 
 static NSImage *createPaperclipImageWithColor(NSColor *color) {
-    NSSize size = NSMakeSize(32.0, 32.0);
-    NSImage *image = [[NSImage alloc] initWithSize:size];
+    NSImage *image = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
     [image setBackgroundColor:[NSColor clearColor]];
-    
-    NSBezierPath *path = [NSBezierPath bezierPath];    
-    [image lockFocus];
     
     NSAffineTransform *t = [NSAffineTransform transform];
     [t rotateByDegrees:-45.0];
     [t translateXBy:-4.0 yBy:10.0];
-    [t concat];
     
     // start at the outside (right) and work inward
+    NSBezierPath *path = [NSBezierPath bezierPath];    
     [path moveToPoint:NSMakePoint(10.0, 18.0)];
     [path appendBezierPathWithArcWithCenter:NSMakePoint(5.0, 4.0) radius:5.0 startAngle:0.0 endAngle:180.0 clockwise:YES];
     [path appendBezierPathWithArcWithCenter:NSMakePoint(3.0, 22.0) radius:3.5 startAngle:180.0 endAngle:0.0 clockwise:YES];
     [path appendBezierPathWithArcWithCenter:NSMakePoint(5.0, 8.0) radius:2.0 startAngle:0.0 endAngle:180.0 clockwise:YES];
     [path lineToPoint:NSMakePoint(3.0, 18.0)];
     
+    [image lockFocus];
+    [t concat];
     [color setStroke];
     [path setLineWidth:1.0];
     [path stroke];
-    
     [image unlockFocus];
+    
+    NSImage *tinyImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
+    [tinyImage setBackgroundColor:[NSColor clearColor]];
+    
+    t = [NSAffineTransform transform];
+    [t rotateByDegrees:-45.0];
+    [t scaleBy:0.5];
+    [t translateXBy:-4.0 yBy:10.0];
+    
+    [tinyImage lockFocus];
+    [t concat];
+    [color setStroke];
+    [path stroke];
+    [tinyImage unlockFocus];
+    
+    [image addRepresentation:[[tinyImage representations] lastObject]];
+    [tinyImage release];
+    
     return image;
 }
 

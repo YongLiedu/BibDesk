@@ -50,7 +50,7 @@
     [self setBezeled:YES];
     [self setDrawsBackground:YES];
     [self setHasButton:NO];
-    buttonCell = [[NSButtonCell alloc] initImageCell:[NSImage arrowImage]];
+    buttonCell = [[NSButtonCell alloc] initImageCell:[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate]];
     [buttonCell setButtonType:NSMomentaryChangeButton];
     [buttonCell setBordered:NO];
     [buttonCell setImagePosition:NSImageOnly];

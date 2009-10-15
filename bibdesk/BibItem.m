@@ -1398,7 +1398,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         NSDictionary *cellDictionary = nil;
         if (count > 0) {
             NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%ld items", @""), (long)count];
-            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:[NSImage genericInternetLocationImage], BDSKTextWithIconCellImageKey, label, BDSKTextWithIconCellStringKey, nil];
+            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationGenericIcon)], BDSKTextWithIconCellImageKey, label, BDSKTextWithIconCellStringKey, nil];
         }
         return cellDictionary;
     }else if([field isEqualToString:BDSKColorString] || [field isEqualToString:BDSKColorLabelString]){
@@ -2480,7 +2480,7 @@ static void addFilesToArray(const void *value, void *context)
         return nil;
     
     if([field isLocalFileField] && (url = [url fileURLByResolvingAliases]) == nil)
-        return [NSImage smallMissingFileImage];
+        return [NSImage missingFileImage];
     
     return [NSImage imageForURL:url];
 }

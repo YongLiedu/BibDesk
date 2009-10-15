@@ -1312,7 +1312,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
                                                action:@selector(addRemoteURLFromMenuItem:)
                                         keyEquivalent:@""];
 			[item setRepresentedObject:URLString];
-			[item setImageAndSize:[NSImage genericInternetLocationImage]];
+			[item setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationGenericIcon)]];
 		}
 	}
     

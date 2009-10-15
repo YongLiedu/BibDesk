@@ -178,7 +178,7 @@
     [cell setAction:[oldCell action]];
     [cell setSendsActionOnEndEditing:[oldCell sendsActionOnEndEditing]];
     [cell setPlaceholderString:[oldCell placeholderString]];
-    [cell setIcon:[NSImage smallMissingFileImage]];
+    [cell setIcon:[NSImage missingFileImage]];
     [urlField setCell:cell];
     [cell release];
     
@@ -229,7 +229,7 @@
 
 - (void)loadURL:(NSURL *)theURL {
     if (theURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:theURL] == NO) {
-        [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:[NSImage smallMissingFileImage]];
+        [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:[NSImage missingFileImage]];
         [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:theURL]];
     }
 }
@@ -473,7 +473,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     }
     
     if (frame == [sender mainFrame]) {
-        if ([[(BDSKConcreteIconTextFieldCell *)[urlField cell] icon] isEqual:[NSImage smallMissingFileImage]])
+        if ([[(BDSKConcreteIconTextFieldCell *)[urlField cell] icon] isEqual:[NSImage missingFileImage]])
             [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:[NSImage imageNamed:@"Bookmark"]];
     }
     
