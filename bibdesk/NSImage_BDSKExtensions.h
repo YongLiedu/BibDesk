@@ -46,7 +46,7 @@
 + (NSImage *)imageForURL:(NSURL *)aURL;
 
 + (NSImage *)missingFileImage;
-+ (NSImage *)tinyCautionImage;
++ (NSImage *)cautionImage;
 + (NSImage *)paperclipImage;
 + (NSImage *)redPaperclipImage;
 + (NSImage *)addBookmarkToolbarImage;

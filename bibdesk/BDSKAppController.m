@@ -327,7 +327,7 @@ static void fixLegacyTableColumnIdentifiers()
     }
     
     // name image to make it available app wide, also in IB
-    [NSImage tinyCautionImage];
+    [NSImage cautionImage];
     
     // register NSURL as conversion handler for file types
     [NSAppleEventDescriptor registerConversionHandler:[NSURL class]

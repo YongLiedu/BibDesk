@@ -186,14 +186,11 @@
     return image;
 }
 
-+ (NSImage *)tinyCautionImage {
++ (NSImage *)cautionImage {
     static NSImage *image = nil;
     if (image == nil) {
-        image = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
-        [image lockFocus];
-        [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kAlertCautionIcon)] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-        [image unlockFocus];
-        [image setName:@"BDSKSmallCautionIcon"];
+        image = [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kAlertCautionIcon)] copy];
+        [image setName:@"BDSKCautionIcon"];
 	}
     return image;
 }
