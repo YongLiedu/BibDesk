@@ -51,6 +51,8 @@
 		3DA82939083ECE9300321864 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3DA82938083ECE9300321864 /* Localizable.strings */; };
 		3DAEA2EE07703F6000AF111A /* BDSKUndoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DAEA2EC07703F6000AF111A /* BDSKUndoManager.m */; };
 		3DD300F6075C054D003FD2D7 /* BDSKField.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DD300F5075C054D003FD2D7 /* BDSKField.m */; };
+		454AC23D1086E07B00F2890A /* BDSKIEEEXploreParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 454AC23B1086E07B00F2890A /* BDSKIEEEXploreParser.h */; };
+		454AC23E1086E07B00F2890A /* BDSKIEEEXploreParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 454AC23C1086E07B00F2890A /* BDSKIEEEXploreParser.m */; };
 		4575382F0B70170D00C0E49B /* BDSKHCiteParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 457538290B70170D00C0E49B /* BDSKHCiteParser.m */; };
 		457538310B70170D00C0E49B /* BDSKWebGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 4575382B0B70170D00C0E49B /* BDSKWebGroup.m */; };
 		457538330B70170D00C0E49B /* BDSKWebGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */; };
@@ -795,6 +797,8 @@
 		3DAEA2EC07703F6000AF111A /* BDSKUndoManager.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKUndoManager.m; sourceTree = "<group>"; };
 		3DD300F3075C0532003FD2D7 /* BDSKField.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKField.h; sourceTree = "<group>"; };
 		3DD300F5075C054D003FD2D7 /* BDSKField.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKField.m; sourceTree = "<group>"; };
+		454AC23B1086E07B00F2890A /* BDSKIEEEXploreParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKIEEEXploreParser.h; sourceTree = "<group>"; };
+		454AC23C1086E07B00F2890A /* BDSKIEEEXploreParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKIEEEXploreParser.m; sourceTree = "<group>"; };
 		457538280B70170D00C0E49B /* BDSKHCiteParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKHCiteParser.h; sourceTree = "<group>"; };
 		457538290B70170D00C0E49B /* BDSKHCiteParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKHCiteParser.m; sourceTree = "<group>"; };
 		4575382A0B70170D00C0E49B /* BDSKWebGroup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKWebGroup.h; sourceTree = "<group>"; };
@@ -2171,6 +2175,7 @@
 				45BB77520CAC74AE00F6299B /* BDSKGoogleScholarParser.m */,
 				457538290B70170D00C0E49B /* BDSKHCiteParser.m */,
 				45DB3E8D0CAAFED5001EACDA /* BDSKHubmedParser.m */,
+				454AC23C1086E07B00F2890A /* BDSKIEEEXploreParser.m */,
 				CEAE613D097FF60A000B618C /* BDSKJSTORParser.m */,
 				CE34A5720B249E0B00755730 /* BDSKMARCParser.m */,
 				6C567DBD0F818A1600DE285D /* BDSKMathSciNetParser.m */,
@@ -2481,6 +2486,7 @@
 				CE80A8730FDAB27D0086A46C /* BDSKHighlightingPopUpButton.h */,
 				45DB3E8C0CAAFED5001EACDA /* BDSKHubmedParser.h */,
 				CEC7D0230F680C970051794E /* BDSKIconTextFieldCell.h */,
+				454AC23B1086E07B00F2890A /* BDSKIEEEXploreParser.h */,
 				CE3B682609D1B0190017D339 /* BDSKImagePopUpButton.h */,
 				CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */,
 				CE40EC520EE9AAEF00BCF379 /* BDSKImportCommand.h */,
@@ -2776,6 +2782,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
+				454AC23D1086E07B00F2890A /* BDSKIEEEXploreParser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3581,6 +3588,7 @@
 				CE80A8760FDAB27D0086A46C /* BDSKHighlightingPopUpButton.m in Sources */,
 				CE90BAFD103978D300992D50 /* BDSKURLSheetController.m in Sources */,
 				CEE50487104D662500636237 /* BDSKNotesSearchIndex.m in Sources */,
+				454AC23E1086E07B00F2890A /* BDSKIEEEXploreParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -48,6 +48,7 @@
 #import "BDSKZentralblattParser.h"
 #import "BDSKMathSiteParser.h"
 #import "BDSKCOinSParser.h"
+#import "BDSKIEEEXploreParser.h"
 #import "NSError_BDSKExtensions.h"
 #import "BDSKRuntime.h"
 
@@ -85,6 +86,8 @@ static Class webParserClassForType(NSInteger stringType)
 			return [BDSKCOinSParser class];
 		case BDSKHCiteWebType: 
             return [BDSKHCiteParser class];
+        case BDSKIEEEXploreWebType:
+            return [BDSKIEEEXploreParser class];
         default:
             return Nil;
     }    
@@ -115,6 +118,9 @@ static Class webParserClassForType(NSInteger stringType)
 		return BDSKProjectEuclidWebType;
     if([BDSKNumdamParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
 		return BDSKNumdamWebType;
+    if([BDSKIEEEXploreParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
+		return BDSKIEEEXploreWebType;
+
     if([BDSKCOinSParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
 		return BDSKCOinSWebType;
     if([BDSKHCiteParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])

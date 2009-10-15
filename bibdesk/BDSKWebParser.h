@@ -60,6 +60,7 @@ enum {
 	BDSKZentralblattWebType,
 	BDSKProjectEuclidWebType,
 	BDSKNumdamWebType,
+    BDSKIEEEXploreWebType,
 	// parsers for microformats which are not site-specific should better be at the end 
 	BDSKCOinSWebType,
     BDSKHCiteWebType
