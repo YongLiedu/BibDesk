@@ -45,6 +45,7 @@
 // sometimes the link says AbstractPlus, sometimes it only says Abstract. This should catch both:
 NSString *containsAbstractPlusLinkNode = @"//a[contains(lower-case(text()),'abstract')]";
 NSString *abstractPageURLPath = @"/xpls/abs_all.jsp";
+NSString *searchResultPageURLPath = @"/search/srchabstract.jsp";
 
 @implementation BDSKIEEEXploreParser
 
@@ -54,13 +55,14 @@ NSString *abstractPageURLPath = @"/xpls/abs_all.jsp";
         return NO;
     }
         
-	bool isOnAbstractPage = [[url path] isEqualToString:abstractPageURLPath];
+	bool isOnAbstractPage     = [[url path] isEqualToString:abstractPageURLPath];
+	bool isOnSearchResultPage = [[url path] isEqualToString:searchResultPageURLPath];
     
     NSError *error = nil;    
 
     bool nodecountisok =  [[[xmlDocument rootElement] nodesForXPath:containsAbstractPlusLinkNode error:&error] count] > 0;
 
-    return nodecountisok || isOnAbstractPage;
+    return nodecountisok || isOnAbstractPage || isOnSearchResultPage;
 }
 
 
@@ -96,8 +98,9 @@ NSString *abstractPageURLPath = @"/xpls/abs_all.jsp";
     
     // http://ieeexplore.ieee.org/search/srchabstract.jsp?arnumber=4723961&isnumber=4723954&punumber=4711036&k2dockey=4723961@ieeecnfs&query=%28%28pegasus+on+the+virtual+grid%29%3Cin%3Emetadata%29&pos=0&access=no
     // http://ieeexplore.ieee.org/xpls/abs_all.jsp?isnumber=4723954&arnumber=4723958&count=9&index=3
-    if([[url path] isEqualToString:@"/xpls/abs_all.jsp"] ||
-	   [[url path] isEqualToString:@"/search/srchabstract.jsp"]){        
+	// http://ieeexplore.ieee.org/search/srchabstract.jsp?arnumber=928956&isnumber=20064&punumber=7385&k2dockey=928956@ieeecnfs&query=%28%28planning+deformable+objects%29%3Cin%3Emetadata%29&pos=0&access=no
+    if([[url path] isEqualToString:abstractPageURLPath] ||
+	   [[url path] isEqualToString:searchResultPageURLPath]){        
 		
 		return [NSArray arrayWithObject:[self itemFromURL:url xmlDocument:xmlDocument error:outError]];
 	}else{
@@ -178,7 +181,7 @@ NSString *abstractPageURLPath = @"/xpls/abs_all.jsp";
 	bibTeXString = [bibTeXString stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 
 	bibTeXString = [bibTeXString stringByRemovingString:@"<br>"]; // yes, that's all. whee!
-
+	
 	// TODO: need to unescape XML entities. 
 	// for example: http://ieeexplore.ieee.org/xpls/abs_all.jsp?isnumber=4977283&arnumber=4977305&count=206&index=11
 	// has a (tm) as an entity.
