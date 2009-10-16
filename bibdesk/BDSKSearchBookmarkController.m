@@ -40,8 +40,9 @@
 #import "BDSKSearchBookmark.h"
 #import "BDSKStringConstants.h"
 #import "NSImage_BDSKExtensions.h"
-#import "BDSKBookmarkOutlineView.h"
+#import "BDSKOutlineView.h"
 #import "BDSKTextWithIconCell.h"
+#import "BDSKSeparatorCell.h"
 
 #define BDSKSearchBookmarkRowsPboardType @"BDSKSearchBookmarkRowsPboardType"
 
@@ -412,6 +413,12 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 
 #pragma mark NSOutlineView delegate methods
 
+- (NSCell *)outlineView:(NSOutlineView *)ov dataCellForTableColumn:(NSTableColumn *)tableColumn item:(id)item {
+    if (tableColumn == nil)
+        return [item bookmarkType] == BDSKSearchBookmarkTypeSeparator ? [[[BDSKSeparatorCell alloc] init] autorelease] : nil;
+    return [tableColumn dataCellForRow:[ov rowForItem:item]];
+}
+
 - (void)outlineView:(NSOutlineView *)ov willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item {
     if ([[tableColumn identifier] isEqualToString:@"server"]) {
         if ([item bookmarkType] == BDSKSearchBookmarkTypeFolder)
@@ -434,10 +441,6 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
         if (itemIndex != NSNotFound)
             [parent removeObjectFromChildrenAtIndex:itemIndex];
     }
-}
-
-- (BOOL)outlineView:(NSOutlineView *)ov drawSeparatorRowForItem:(id)item {
-    return [item bookmarkType] == BDSKSearchBookmarkTypeSeparator;
 }
 
 #pragma mark Toolbar

@@ -40,10 +40,10 @@
 #import <WebKit/WebKit.h>
 
 
-@class BDSKBookmark, BDSKBookmarkOutlineView;
+@class BDSKBookmark, BDSKOutlineView;
 
 @interface BDSKBookmarkController : NSWindowController {
-    IBOutlet BDSKBookmarkOutlineView *outlineView;
+    IBOutlet BDSKOutlineView *outlineView;
     IBOutlet NSWindow *addBookmarkSheet;
     IBOutlet NSTextField *bookmarkField;
     IBOutlet NSPopUpButton *folderPopUp;

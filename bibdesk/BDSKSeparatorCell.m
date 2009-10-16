@@ -1,10 +1,10 @@
 //
-//  BDSKBookmarkOutlineView.m
+//  BDSKSeparatorCell.m
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 11/10/07.
+//  Created by Christiaan on 10/16/09.
 /*
- This software is Copyright (c) 2007-2009
+ This software is Copyright (c) 2009
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -36,24 +36,19 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKBookmarkOutlineView.h"
+#import "BDSKSeparatorCell.h"
 
-
-@implementation BDSKBookmarkOutlineView
-
-#define SEPARATOR_LEFT_INDENT 20.0
+#define SEPARATOR_LEFT_INDENT 4.0
 #define SEPARATOR_RIGHT_INDENT 2.0
 
-- (void)drawRow:(NSInteger)rowIndex clipRect:(NSRect)clipRect {
-    if ([[self delegate] respondsToSelector:@selector(outlineView:drawSeparatorRowForItem:)] &&
-        [[self delegate] outlineView:self drawSeparatorRowForItem:[self itemAtRow:rowIndex]]) {
-        CGFloat indent = [self levelForItem:[self itemAtRow:rowIndex]] * [self indentationPerLevel];
-        NSRect rect = [self rectOfRow:rowIndex];
-        [[NSColor gridColor] setStroke];
-        [NSBezierPath strokeLineFromPoint:NSMakePoint(NSMinX(rect) + indent + SEPARATOR_LEFT_INDENT, BDSKFloor(NSMidY(rect)) + 0.5) toPoint:NSMakePoint(NSMaxX(rect) - SEPARATOR_RIGHT_INDENT, BDSKFloor(NSMidY(rect)) + 0.5)];
-    } else {
-        [super drawRow:rowIndex clipRect:clipRect];
-    }
+@implementation BDSKSeparatorCell
+
+- (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+    [NSGraphicsContext saveGraphicsState];
+    [[NSColor gridColor] setStroke];
+    [NSBezierPath setDefaultLineWidth:1.0];
+    [NSBezierPath strokeLineFromPoint:NSMakePoint(NSMinX(cellFrame) + SEPARATOR_LEFT_INDENT, BDSKFloor(NSMidY(cellFrame)) + 0.5) toPoint:NSMakePoint(NSMaxX(cellFrame) - SEPARATOR_RIGHT_INDENT, BDSKFloor(NSMidY(cellFrame)) + 0.5)];
+    [NSGraphicsContext restoreGraphicsState];
 }
 
 @end

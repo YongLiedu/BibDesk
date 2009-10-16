@@ -1,10 +1,10 @@
 //
-//  BDSKBookmarkOutlineView.h
+//  BDSKSeparatorCell.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 11/10/07.
+//  Created by Christiaan on 10/16/09.
 /*
- This software is Copyright (c) 2007-2009
+ This software is Copyright (c) 2009
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,14 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKOutlineView.h"
 
 
-@interface BDSKBookmarkOutlineView : BDSKOutlineView
+@interface BDSKSeparatorCell : NSCell
 @end
-
-
-@interface NSObject (BDSKBookmarkOutlineViewDelegate)
-- (BOOL)outlineView:(NSOutlineView *)anOutlineView drawSeparatorRowForItem:(id)item;
-@end
-
