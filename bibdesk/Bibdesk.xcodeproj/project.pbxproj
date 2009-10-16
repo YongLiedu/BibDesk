@@ -314,7 +314,6 @@
 		CEF5C0450F546ADD00DBC864 /* TestComplexString.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C02D0F5469E300DBC864 /* TestComplexString.m */; };
 		CEF5C0460F546ADE00DBC864 /* TestPubMed.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C02F0F5469E300DBC864 /* TestPubMed.m */; };
 		CEF5C0470F546ADF00DBC864 /* TestUnitTest.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0310F5469E300DBC864 /* TestUnitTest.m */; };
-		CEF63D0910888A5A000A31E2 /* BDSKSeparatorCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CEF63D0710888A5A000A31E2 /* BDSKSeparatorCell.h */; };
 		CEF63D0A10888A5A000A31E2 /* BDSKSeparatorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF63D0810888A5A000A31E2 /* BDSKSeparatorCell.m */; };
 		CEF71ADB0B91BBCB003A2771 /* BDSKNotesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF71AD90B91BBCB003A2771 /* BDSKNotesWindowController.m */; };
 		CEF7295709CC88AB00802D48 /* BDSKFieldSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF7295509CC88AB00802D48 /* BDSKFieldSheetController.m */; };
@@ -2778,7 +2777,6 @@
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
 				454AC23D1086E07B00F2890A /* BDSKIEEEXploreParser.h in Headers */,
-				CEF63D0910888A5A000A31E2 /* BDSKSeparatorCell.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
