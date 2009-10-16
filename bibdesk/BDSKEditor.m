@@ -198,12 +198,12 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [self setWindowFrameAutosaveNameOrCascade:BDSKEditorFrameAutosaveName];
     
     // Setup the splitview autosave frames, should be done after the statusBar and splitViews are setup
-    [mainSplitView setPositionAutosaveName:@"BDSKEditorMainSplitView"];
-    [fileSplitView setPositionAutosaveName:@"BDSKEditorFileSplitView"];
+    [mainSplitView setAutosaveName:@"BDSKEditorMainSplitView"];
+    [fileSplitView setAutosaveName:@"BDSKEditorFileSplitView"];
     if ([self windowFrameAutosaveName] == nil) {
         // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
-        [mainSplitView setPositionAutosaveName:nil];
-        [fileSplitView setPositionAutosaveName:nil];
+        [mainSplitView setAutosaveName:nil];
+        [fileSplitView setAutosaveName:nil];
     }
     
     tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[publication macroResolver]];

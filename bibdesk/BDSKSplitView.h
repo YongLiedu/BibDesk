@@ -66,12 +66,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKSplitView : NSSplitView {
-    NSString *positionAutosaveName;
-}
-
-- (NSString *)positionAutosaveName;
-- (void)setPositionAutosaveName:(NSString *)name;
+@interface BDSKSplitView : NSSplitView
 
 - (CGFloat)fraction;
 - (void)setFraction:(CGFloat)newFraction;

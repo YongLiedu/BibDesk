@@ -83,10 +83,10 @@
 - (void)windowDidLoad {
     [self setWindowFrameAutosaveNameOrCascade:@"NotesWindow"];
     
-    [splitView setPositionAutosaveName:@"BDSKNotesWindow"];
+    [splitView setAutosaveName:@"BDSKNotesWindow"];
     if ([self windowFrameAutosaveName] == nil) {
         // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
-        [splitView setPositionAutosaveName:nil];
+        [splitView setAutosaveName:nil];
     }
     
     [tokenField setTokenizingCharacterSet:[NSCharacterSet whitespaceCharacterSet]];

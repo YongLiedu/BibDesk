@@ -67,76 +67,7 @@
 
 // This class is basically a copy of OASplitView
 
-@interface BDSKSplitView (BDSKPrivate)
-- (void)didResizeSubviews:(NSNotification *)notification;
-@end
-
-
 @implementation BDSKSplitView
-
-#pragma mark AutosaveName
-
-- (id)initWithFrame:(NSRect)frameRect {
-    if (self = [super initWithFrame:frameRect]) {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didResizeSubviews:) name:NSSplitViewDidResizeSubviewsNotification object:self];
-    }
-    return self;
-
-}
-
-- (id)initWithCoder:(NSCoder *)coder {
-    if (self = [super initWithCoder:coder]) {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didResizeSubviews:) name:NSSplitViewDidResizeSubviewsNotification object:self];
-    }
-    return self;
-
-}
-
-- (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [positionAutosaveName release];
-    [super dealloc];
-}
-
-- (NSString *)positionAutosaveName {
-    return positionAutosaveName;
-}
-
-- (NSString *)positionAutosaveKey {
-    return positionAutosaveName ? [@"BDSKSplitView Frame " stringByAppendingString:positionAutosaveName] : nil;
-}
-
-- (void)setPositionAutosaveName:(NSString *)name {
-    if (positionAutosaveName != name) {
-        [positionAutosaveName release];
-        positionAutosaveName = [name retain];
-        
-        if ([NSString isEmptyString:positionAutosaveName] == NO) {
-            NSArray *frameStrings = [[NSUserDefaults standardUserDefaults] arrayForKey:[self positionAutosaveKey]];
-            if (frameStrings) {
-                NSArray *subviews = [self subviews];
-                NSUInteger subviewCount = [subviews count];
-                NSUInteger frameCount = [frameStrings count];
-                NSUInteger i;
-
-                // Walk through our subviews re-applying frames so we don't explode in the event that the archived frame strings become out of sync with our subview count
-                for (i = 0; i < subviewCount && i < frameCount; i++)
-                    [[subviews objectAtIndex:i] setFrame:NSRectFromString([frameStrings objectAtIndex:i])];
-            }
-        }
-    }
-}
-
-- (void)didResizeSubviews:(NSNotification *)notification {
-    if ([NSString isEmptyString:positionAutosaveName] == NO) {
-        NSMutableArray *frameStrings = [NSMutableArray array];
-        NSArray *subviews = [self subviews];
-        NSUInteger i, iMax = [subviews count];
-        for (i = 0; i < iMax; i++)
-            [frameStrings addObject:NSStringFromRect([[subviews objectAtIndex:i] frame])];
-        [[NSUserDefaults standardUserDefaults] setObject:frameStrings forKey:[self positionAutosaveKey]];
-    }
-}
 
 #pragma mark Double-click support
 

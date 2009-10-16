@@ -96,7 +96,7 @@
 	
 	[collapsibleView setMinSize:NSMakeSize(0.0, 38.0)];
 	[imageView setDelegate:self];
-	[splitView setPositionAutosaveName:@"BibPersonView"];
+	[splitView setAutosaveName:@"BibPersonView"];
 
     if (isEditable && nil != owner) {
         [[NSNotificationCenter defaultCenter] addObserver:self

@@ -473,12 +473,12 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [splitView setBlendStyle:BDSKMinBlendStyleMask | BDSKMaxBlendStyleMask];
     
     // set autosave names first
-	[splitView setPositionAutosaveName:@"Main Window"];
-    [groupSplitView setPositionAutosaveName:@"Group Table"];
+	[splitView setAutosaveName:@"Main Window"];
+    [groupSplitView setAutosaveName:@"Group Table"];
     if ([aController windowFrameAutosaveName] == nil) {
         // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
-        [splitView setPositionAutosaveName:nil];
-        [groupSplitView setPositionAutosaveName:nil];
+        [splitView setAutosaveName:nil];
+        [groupSplitView setAutosaveName:nil];
     }
     
     // set previous splitview frames
