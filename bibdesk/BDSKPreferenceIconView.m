@@ -57,7 +57,7 @@
 
 
 @interface BDSKPreferenceIconView (Private)
-- (void)setupView;
+- (void)setupViewWithPreferenceController:(BDSKPreferenceController *)aController;
 @end
 
 
@@ -65,8 +65,6 @@
 
 - (id)initWithPreferenceController:(BDSKPreferenceController *)aController {
     if (self = [super initWithFrame:NSZeroRect]) {
-        preferenceController = aController;
-        
         NSCell *prototype = [[NSCell alloc] init];
         [prototype setEnabled:NO];
         matrix = [[NSMatrix alloc] initWithFrame:NSZeroRect mode:NSHighlightModeMatrix prototype:prototype numberOfRows:0 numberOfColumns:0];
@@ -78,13 +76,16 @@
         captionCell = [[NSTextFieldCell alloc] init];
         [captionCell setFont:[NSFont boldSystemFontOfSize:0.0]];
         
-        [self setupView];
+        captionTitles = [[NSMutableArray alloc] init];
+        
+        [self setupViewWithPreferenceController:aController];
     }
     return self;
 }
 
 - (void)dealloc {
     [captionCell release];
+    [captionTitles release];
     [super dealloc];
 }
 
@@ -120,7 +121,7 @@
     [self sendAction:[self action] to:[self target]];
 }
 
-- (void)setupView {
+- (void)setupViewWithPreferenceController:(BDSKPreferenceController *)preferenceController {
     NSArray *categories = [preferenceController categories];
     NSUInteger numRows = [categories count];
     NSUInteger numColumns = 0;
@@ -131,7 +132,8 @@
     NSSize iconSize = NSZeroSize;
     [matrix renewRows:numRows columns:numColumns];
     for (i = 0; i < iMax; i++) {
-        NSArray *panes = [preferenceController panesForCategory:[categories objectAtIndex:i]];
+        NSString *category = [categories objectAtIndex:i];
+        NSArray *panes = [preferenceController panesForCategory:category];
         NSUInteger j, jMax = [panes count];
         for (j = 0; j < jMax; j++) {
             NSString *identifier = [panes objectAtIndex:j];
@@ -149,6 +151,7 @@
 			iconSize.height = BDSKMax(iconSize.height, cellSize.height);
             [cell release];
         }
+        [captionTitles addObject:[preferenceController localizedTitleForCategory:category] ?: @""];
     }
 	
     CGFloat iconWidth = iconSize.width;
@@ -186,8 +189,7 @@
 #pragma mark Drawing
 
 - (void)drawRect:(NSRect)aRect {
-    NSArray *categories = [preferenceController categories];
-    NSInteger i, iMax = [categories count];
+    NSInteger i, iMax = [matrix numberOfRows];
     NSString *caption;
     NSColor *backgroundColor = [NSColor colorWithCalibratedWhite:0.97 alpha:0.99];
     NSColor *dividerColor = [NSColor colorWithCalibratedWhite:0.84 alpha:1.0];
@@ -207,10 +209,8 @@
             [dividerColor setFill];
             NSRectFill(dividerRect);
         }
-        if (caption = [preferenceController localizedTitleForCategory:[[preferenceController categories] objectAtIndex:i]]) {
-            [captionCell setStringValue:caption];
-            [captionCell drawWithFrame:captionRect inView:self];
-        }
+        [captionCell setStringValue:[captionTitles objectAtIndex:i]];
+        [captionCell drawWithFrame:captionRect inView:self];
     }
 }
 

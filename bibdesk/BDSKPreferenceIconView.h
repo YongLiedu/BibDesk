@@ -41,7 +41,7 @@
 @class BDSKPreferenceController;
 
 @interface BDSKPreferenceIconView : NSControl {
-    BDSKPreferenceController *preferenceController;
+    NSMutableArray *captionTitles;
     NSMatrix *matrix;
     NSTextFieldCell *captionCell;
     id target;
