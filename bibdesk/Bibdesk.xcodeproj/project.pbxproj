@@ -96,7 +96,6 @@
 		CE28346509176CA3006B4C63 /* BDSKGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9706DE409102DF500526FC8 /* BDSKGradientView.m */; };
 		CE2837420917D31D006B4C63 /* BDSKEdgeView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2837400917D31D006B4C63 /* BDSKEdgeView.m */; };
 		CE2941050A7F8F2900A46D05 /* ReadMe.rtf in Resources */ = {isa = PBXBuildFile; fileRef = CE2941040A7F8F2900A46D05 /* ReadMe.rtf */; };
-		CE2A198F0CE499AD00A0499B /* SmallMenu.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2A198D0CE499AD00A0499B /* SmallMenu.tiff */; };
 		CE2AFE5A0911425F00E65C87 /* BDSKGroupCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */; };
 		CE2C16F90A0A149E006F0A73 /* gear2.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C16F80A0A149E006F0A73 /* gear2.tiff */; };
 		CE2E78CD0D40F6BB00340B39 /* BDSKManyToManyDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2E78CB0D40F6BB00340B39 /* BDSKManyToManyDictionary.m */; };
@@ -867,7 +866,6 @@
 		CE27D95A0AF92BFD00419879 /* BDSKZoomableTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKZoomableTextView.m; sourceTree = "<group>"; };
 		CE28373F0917D31D006B4C63 /* BDSKEdgeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKEdgeView.h; sourceTree = "<group>"; };
 		CE2837400917D31D006B4C63 /* BDSKEdgeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKEdgeView.m; sourceTree = "<group>"; };
-		CE2A198D0CE499AD00A0499B /* SmallMenu.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = SmallMenu.tiff; sourceTree = "<group>"; };
 		CE2AFE570911425F00E65C87 /* BDSKGroupCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKGroupCell.h; sourceTree = "<group>"; };
 		CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKGroupCell.m; sourceTree = "<group>"; };
 		CE2BB58F0E0BE0EA0090E848 /* PDFKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PDFKit.framework; path = /System/Library/Frameworks/Quartz.framework/Frameworks/PDFKit.framework; sourceTree = "<absolute>"; };
@@ -2359,7 +2357,6 @@
 				F945240B0B4B15A6000A5E12 /* searchDocIcon.icns */,
 				CE7F5E470B3F5F1800A919D0 /* searchGroup.tiff */,
 				CE0391900F612ED5001808EA /* sharing.tiff */,
-				CE2A198D0CE499AD00A0499B /* SmallMenu.tiff */,
 				F9022DBA0758088000C3F701 /* startup.tiff */,
 				F9022DBB0758088000C3F701 /* TinyFile.tiff */,
 				CE3A24190B750424006B64D3 /* webGroup.tiff */,
@@ -3073,7 +3070,6 @@
 				CE8962C60CBEC0C500EA2D98 /* TemplateOptions.strings in Resources */,
 				CE8962CB0CBEC10700EA2D98 /* TemplateOptions.plist in Resources */,
 				CE023F5D0CC50F87003F52E5 /* Add_Small.tiff in Resources */,
-				CE2A198F0CE499AD00A0499B /* SmallMenu.tiff in Resources */,
 				CEF1817F0CEB702000716E85 /* Bookmarks.plist in Resources */,
 				CE8F5F840DEEB26800061148 /* ZoomValues.strings in Resources */,
 				CE62DE4E0F4B790C00BDF01E /* Preferences.plist in Resources */,

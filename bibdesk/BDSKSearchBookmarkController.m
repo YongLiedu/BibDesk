@@ -87,7 +87,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
                 [bookmarks addObject:bm];
         }
         
-        bookmarkRoot = [[BDSKSearchBookmark alloc] initFolderWithChildren:bookmarks label:nil];
+        bookmarkRoot = [[BDSKSearchBookmark alloc] initRootWithChildren:bookmarks];
         [self startObservingBookmarks:[NSArray arrayWithObject:bookmarkRoot]];
     }
     return sharedBookmarkController;

@@ -57,6 +57,7 @@ enum {
 - (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName;
 - (id)initFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName;
 - (id)initFolderWithName:(NSString *)aName;
+- (id)initRootWithChildren:(NSArray *)aChildren;
 - (id)initSeparator;
 - (id)initWithDictionary:(NSDictionary *)dictionary;
 

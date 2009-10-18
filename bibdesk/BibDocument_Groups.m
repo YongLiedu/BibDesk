@@ -958,11 +958,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	[searchBookmarkField setStringValue:[NSString stringWithFormat:@"%@: %@", [[group serverInfo] name], [group name]]];
     [searchBookmarkPopUp removeAllItems];
     BDSKSearchBookmark *bookmark = [[BDSKSearchBookmarkController sharedBookmarkController] bookmarkRoot];
-    NSArray *bookmarks = [bookmark children];
-    NSMenuItem *item = [[searchBookmarkPopUp menu] addItemWithTitle:NSLocalizedString(@"Bookmarks Menu", @"Menu item title") action:NULL keyEquivalent:@""];
-    [item setImage:[NSImage imageNamed:@"SmallMenu"]];
-    [item setRepresentedObject:bookmark];
-    [self addMenuItemsForBookmarks:bookmarks level:1 toMenu:[searchBookmarkPopUp menu]];
+    [self addMenuItemsForBookmarks:[NSArray arrayWithObjects:bookmark, nil] level:0 toMenu:[searchBookmarkPopUp menu]];
     [searchBookmarkPopUp selectItemAtIndex:0];
     
     [NSApp beginSheet:searchBookmarkSheet

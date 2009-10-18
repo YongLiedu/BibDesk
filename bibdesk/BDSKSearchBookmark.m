@@ -37,6 +37,7 @@
  */
 
 #import "BDSKSearchBookmark.h"
+#import "NSImage_BDSKExtensions.h"
 
 #define BOOKMARK_STRING     @"bookmark"
 #define FOLDER_STRING       @"folder"
@@ -60,6 +61,9 @@
     NSString *label;
     NSMutableArray *children;
 }
+@end
+
+@interface BDSKRootSearchBookmark : BDSKFolderSearchBookmark
 @end
 
 @interface BDSKSeparatorSearchBookmark : BDSKSearchBookmark
@@ -108,6 +112,11 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (id)initFolderWithLabel:(NSString *)aLabel {
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
+
+- (id)initRootWithChildren:(NSArray *)aChildren {
     [self doesNotRecognizeSelector:_cmd];
     return nil;
 }
@@ -190,6 +199,10 @@ static Class BDSKSearchBookmarkClass = Nil;
 
 - (id)initFolderWithLabel:(NSString *)aLabel {
     return [self initFolderWithChildren:[NSArray array] label:aLabel];
+}
+
+- (id)initRootWithChildren:(NSArray *)aChildren {
+    return [[BDSKRootSearchBookmark alloc] initFolderWithChildren:aChildren label:NSLocalizedString(@"Bookmarks Menu", @"Menu item title")];
 }
 
 - (id)initSeparator {
@@ -364,6 +377,16 @@ static Class BDSKSearchBookmarkClass = Nil;
 - (void)removeObjectFromChildrenAtIndex:(NSUInteger)idx {
     [[children objectAtIndex:idx] setParent:nil];
     [children removeObjectAtIndex:idx];
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKRootSearchBookmark
+
+- (NSImage *)icon {
+    return [NSImage menuIcon];
 }
 
 @end

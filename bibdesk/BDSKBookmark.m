@@ -37,6 +37,7 @@
  */
 
 #import "BDSKBookmark.h"
+#import "NSImage_BDSKExtensions.h"
 
 #define CHILDREN_KEY    @"Children"
 #define TITLE_KEY       @"Title"
@@ -61,6 +62,9 @@
     NSString *name;
     NSMutableArray *children;
 }
+@end
+
+@interface BDSKRootBookmark : BDSKFolderBookmark
 @end
 
 @interface BDSKSeparatorBookmark : BDSKBookmark
@@ -114,6 +118,11 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (id)initFolderWithName:(NSString *)aName {
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
+
+- (id)initRootWithChildren:(NSArray *)aChildren {
     [self doesNotRecognizeSelector:_cmd];
     return nil;
 }
@@ -201,6 +210,10 @@ static Class BDSKBookmarkClass = Nil;
 
 - (id)initSeparator {
     return [[BDSKSeparatorBookmark alloc] init];
+}
+
+- (id)initRootWithChildren:(NSArray *)aChildren {
+    return [[BDSKRootBookmark alloc] initFolderWithChildren:aChildren name:NSLocalizedString(@"Bookmarks Menu", @"Menu item title")];
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
@@ -415,6 +428,16 @@ static Class BDSKBookmarkClass = Nil;
 - (void)removeObjectFromChildrenAtIndex:(NSUInteger)idx {
     [[children objectAtIndex:idx] setParent:nil];
     [children removeObjectAtIndex:idx];
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKRootBookmark
+
+- (NSImage *)icon {
+    return [NSImage menuIcon];
 }
 
 @end

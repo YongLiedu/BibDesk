@@ -52,6 +52,7 @@
 + (NSImage *)addBookmarkToolbarImage;
 + (NSImage *)addFolderToolbarImage;
 + (NSImage *)addSeparatorToolbarImage;
++ (NSImage *)menuIcon;
 
 - (NSImage *)dragImageWithCount:(NSInteger)count;
 - (NSImage *)dragImageWithCount:(NSInteger)count inside:(BOOL)inside isIcon:(BOOL)isIcon;

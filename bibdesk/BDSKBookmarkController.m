@@ -98,7 +98,7 @@ static id sharedBookmarkController = nil;
 			}
 		}
         
-        bookmarkRoot = [[BDSKBookmark alloc] initFolderWithChildren:bookmarks name:nil];
+        bookmarkRoot = [[BDSKBookmark alloc] initRootWithChildren:bookmarks];
         [self startObservingBookmarks:[NSArray arrayWithObject:bookmarkRoot]];
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminateNotification:) name:NSApplicationWillTerminateNotification object:nil];
@@ -188,10 +188,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     [self window];
     [bookmarkField setStringValue:name];
     [folderPopUp removeAllItems];
-    NSMenuItem *item = [[folderPopUp menu] addItemWithTitle:NSLocalizedString(@"Bookmarks Menu", @"Menu item title") action:NULL keyEquivalent:@""];
-    [item setImage:[NSImage imageNamed:@"SmallMenu"]];
-    [item setRepresentedObject:bookmarkRoot];
-    [self addMenuItemsForBookmarks:[bookmarkRoot children] level:1 toMenu:[folderPopUp menu]];
+    [self addMenuItemsForBookmarks:[NSArray arrayWithObjects:bookmarkRoot, nil] level:0 toMenu:[folderPopUp menu]];
     [folderPopUp selectItemAtIndex:0];
 	
 	[NSApp beginSheet:addBookmarkSheet
