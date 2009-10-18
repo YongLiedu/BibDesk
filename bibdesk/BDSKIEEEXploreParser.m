@@ -70,7 +70,7 @@ NSString *searchResultPageURLPath = @"/search/srchabstract.jsp";
 	
 	AGRegex * ARNumberRegex = [AGRegex regexWithPattern:@"arnumber=([0-9]+)" options:AGRegexMultiline];
 	AGRegexMatch *match = [ARNumberRegex findInString:urlPath];
-	if([match count] == 0){
+	if([match count] == 0 && outError){
 		*outError = [NSError localErrorWithCode:0 localizedDescription:NSLocalizedString(@"missingARNumberKey", @"Can't get an ARNumber from the URL")];
 
 		return NULL;
@@ -82,7 +82,7 @@ NSString *searchResultPageURLPath = @"/search/srchabstract.jsp";
 	
 	AGRegex * ISNumberRegex = [AGRegex regexWithPattern:@"isnumber=([0-9]+)" options:AGRegexMultiline];
 	AGRegexMatch *match = [ISNumberRegex findInString:urlPath];
-	if([match count] == 0){
+	if([match count] == 0 && outError){
 		*outError = [NSError localErrorWithCode:0 localizedDescription:NSLocalizedString(@"missingISNumberKey", @"Can't get an ISNumber from the URL")];
 		
 		return NULL;
@@ -102,7 +102,8 @@ NSString *searchResultPageURLPath = @"/search/srchabstract.jsp";
     if([[url path] isEqualToString:abstractPageURLPath] ||
 	   [[url path] isEqualToString:searchResultPageURLPath]){        
 		
-		return [NSArray arrayWithObject:[self itemFromURL:url xmlDocument:xmlDocument error:outError]];
+        BibItem *item = [self itemFromURL:url xmlDocument:xmlDocument error:outError];
+		return item ? [NSArray arrayWithObject:item] : nil;
 	}else{
         // The following code parses all the links on a TOC page and is unusably slow.
 		// Included for posterity in case we ever add async parsing.
@@ -172,7 +173,7 @@ NSString *searchResultPageURLPath = @"/search/srchabstract.jsp";
 	NSURLResponse * response;
 	NSData * result = [NSURLConnection sendSynchronousRequest:request returningResponse: &response error: &error];
 	
-	if (error != nil) {
+	if (nil == result) {
 		if (outError != NULL) { *outError = error; } 
 		return nil; 
 	}
@@ -208,6 +209,7 @@ NSString *searchResultPageURLPath = @"/search/srchabstract.jsp";
 		xmlDocument = [[NSXMLDocument alloc] initWithXMLString:abs_allHTMLString
 																 options:NSXMLDocumentTidyHTML 
 																   error:&error];
+        [xmlDocument autorelease];
 
 	}
     NSArray *pdfLinkNodes = [[xmlDocument rootElement] nodesForXPath:@"//a[contains(text(), 'PDF')]"
