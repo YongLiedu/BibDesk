@@ -188,8 +188,7 @@ NSString *searchResultPageURLPath = @"/search/srchabstract.jsp";
 	// has a (tm) as an entity.
 
 	BOOL isPartialData;
-	NSError * ignoreError;
-	NSArray * newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString document:nil isPartialData:&isPartialData error: &ignoreError];
+	NSArray * newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString document:nil isPartialData:&isPartialData error: outError];
 	
 	BibItem *newPub = nil;
 	
@@ -201,12 +200,7 @@ NSString *searchResultPageURLPath = @"/search/srchabstract.jsp";
     // Need to load the page if it isn't passed in:
 	if(xmlDocument == nil){
 		NSString * ARNumberURLString = [NSString stringWithFormat:@"http://ieeexplore.ieee.org/xpls/abs_all.jsp?tp=&arnumber=%@&isnumber=%@", arnumberString, isnumberString];
-		
-		request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:ARNumberURLString]];
-	
-		result = [NSURLConnection sendSynchronousRequest:request returningResponse: &response error: &error];
-		NSString * abs_allHTMLString = [[[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding] autorelease];
-		xmlDocument = [[NSXMLDocument alloc] initWithXMLString:abs_allHTMLString
+		xmlDocument = [[NSXMLDocument alloc] initWithContentsOfURL:[NSURL URLWithString:ARNumberURLString]
 																 options:NSXMLDocumentTidyHTML 
 																   error:&error];
         [xmlDocument autorelease];
