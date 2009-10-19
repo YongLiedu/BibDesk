@@ -178,14 +178,18 @@ NSString *searchResultPageURLPath = @"/search/srchabstract.jsp";
 		return nil; 
 	}
 	
-	NSString * bibTeXString = [[[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding] autorelease];
-	bibTeXString = [bibTeXString stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    /*
+     Use NSAttributedString to unescape XML entities
+	 For example: http://ieeexplore.ieee.org/xpls/abs_all.jsp?isnumber=4977283&arnumber=4977305&count=206&index=11
+	 has a (tm) as an entity.
 
-	bibTeXString = [bibTeXString stringByRemovingString:@"<br>"]; // yes, that's all. whee!
+     http://ieeexplore.ieee.org/search/srchabstract.jsp?arnumber=259629&isnumber=6559&punumber=16&k2dockey=259629@ieeejrns&query=%28%28moll%29%3Cin%3Emetadata%29&pos=1&access=no
+     has smart quotes and a Greek letter (converted) and <sub> and <sup> (which are lost).
+     Using stringByConvertingHTMLToTeX will screw up too much stuff here, so that's not really an option.
+     */
 	
-	// TODO: need to unescape XML entities. 
-	// for example: http://ieeexplore.ieee.org/xpls/abs_all.jsp?isnumber=4977283&arnumber=4977305&count=206&index=11
-	// has a (tm) as an entity.
+    NSAttributedString * attrString = [[[NSAttributedString alloc] initWithHTML:result options:nil documentAttributes:NULL] autorelease];
+	NSString * bibTeXString = [[attrString string] stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 
 	BOOL isPartialData;
 	NSArray * newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString document:nil isPartialData:&isPartialData error: outError];
