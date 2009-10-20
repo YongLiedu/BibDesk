@@ -40,14 +40,54 @@
 #import "BibItem.h"
 #import "BDSKBibTeXParser.h"
 #import "NSError_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 #import <AGRegex/AGRegex.h>
 
 // sometimes the link says AbstractPlus, sometimes it only says Abstract. This should catch both:
-NSString *containsAbstractPlusLinkNode = @"//a[contains(lower-case(text()),'abstract')]";
-NSString *abstractPageURLPath = @"/xpls/abs_all.jsp";
-NSString *searchResultPageURLPath = @"/search/srchabstract.jsp";
+static NSString *containsAbstractPlusLinkNode = @"//a[contains(lower-case(text()),'abstract')]";
+static NSString *abstractPageURLPath = @"/xpls/abs_all.jsp";
+static NSString *searchResultPageURLPath = @"/search/srchabstract.jsp";
+
+@interface _BDSKIEEEDownload : NSObject <NSCopying>
+{
+@private
+    NSURLConnection *_connection;
+    NSURLRequest    *_request;
+    NSURL           *_pdfLinkURL;
+    BOOL             _failed;
+    NSError         *_error;
+    NSMutableData   *_result;
+    id               _delegate;
+}
+
+// private runloop mode to avoid other callouts on the main thread (will also cause beachball if needed)
++ (NSString *)runloopMode;
+- (id)initWithRequest:(NSURLRequest *)request delegate:(id)delegate;
+- (void)start;
+
+@property (nonatomic, copy) NSURL *pdfLinkURL;
+
+// not KVO compliant, but that doesn't matter here
+@property (nonatomic, readonly) BOOL failed;
+@property (nonatomic, readonly) NSURL *URL;
+@property (nonatomic, readonly) NSError *error;
+@property (nonatomic, readonly) NSData *result;
+
+@end
+
+
+static NSMutableArray *_activeDownloads = nil;
+static NSMutableArray *_finishedDownloads = nil;
 
 @implementation BDSKIEEEXploreParser
+
++ (void)initialize
+{
+    if ([BDSKIEEEXploreParser class] == self) {
+        _activeDownloads = [NSMutableArray new];
+        _finishedDownloads = [NSMutableArray new];
+    }
+}
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
@@ -90,26 +130,69 @@ NSString *searchResultPageURLPath = @"/search/srchabstract.jsp";
 	return [match groupAtIndex:1];
 }
 
++ (void)downloadFinishedOrFailed:(_BDSKIEEEDownload *)download;
+{
+    if ([download failed] == NO)
+        [_finishedDownloads addObject:download];
+    [_activeDownloads removeObject:download];
+}
 
++ (void)enqueueAbstractPageDownloadForURL:(NSURL *)url
+{
+    NSError *error;
+
+    NSString *arnumberString = [self ARNumberFromURLSubstring:[url query] error:&error];
+    NSString *isnumberString = [self ISNumberFromURLSubstring:[url query] error:&error];
+    
+    
+    // Query IEEEXplore with a POST request	
+    
+    NSString * serverName = [[url host] lowercaseString];
+    
+    NSString * URLString = [NSString stringWithFormat:@"http://%@/xpls/citationAct", serverName];
+    
+    NSMutableURLRequest * request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:URLString]];
+    [request setHTTPMethod:@"POST"];
+    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-type"];
+    
+    // note, do not actually url-encode this. they are expecting their angle brackets raw.
+    NSString * queryString = [NSString stringWithFormat:@"dlSelect=cite_abs&fileFormate=BibTex&arnumber=<arnumber>%@</arnumber>", arnumberString];
+    
+    [request setHTTPBody:[queryString dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    _BDSKIEEEDownload *download = [[_BDSKIEEEDownload alloc] initWithRequest:request delegate:self];
+    
+    NSString * arnumberURLString = [NSString stringWithFormat:@"http://ieeexplore.ieee.org/xpls/abs_all.jsp?tp=&arnumber=%@&isnumber=%@", arnumberString, isnumberString];
+    
+    // stash this away since we have arnumber and isnumber here, and the download won't have the correct URL
+    [download setPdfLinkURL:[NSURL URLWithString:arnumberURLString]];
+    
+    [_activeDownloads addObject:download];
+    [download release];
+    [download start];
+}
 
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
 	
-    NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
+    /*
     
-    // http://ieeexplore.ieee.org/search/srchabstract.jsp?arnumber=4723961&isnumber=4723954&punumber=4711036&k2dockey=4723961@ieeecnfs&query=%28%28pegasus+on+the+virtual+grid%29%3Cin%3Emetadata%29&pos=0&access=no
-    // http://ieeexplore.ieee.org/xpls/abs_all.jsp?isnumber=4723954&arnumber=4723958&count=9&index=3
-	// http://ieeexplore.ieee.org/search/srchabstract.jsp?arnumber=928956&isnumber=20064&punumber=7385&k2dockey=928956@ieeecnfs&query=%28%28planning+deformable+objects%29%3Cin%3Emetadata%29&pos=0&access=no
-    if([[url path] isEqualToString:abstractPageURLPath] ||
-	   [[url path] isEqualToString:searchResultPageURLPath]){        
+     http://ieeexplore.ieee.org/search/srchabstract.jsp?arnumber=4723961&isnumber=4723954&punumber=4711036&k2dockey=4723961@ieeecnfs&query=%28%28pegasus+on+the+virtual+grid%29%3Cin%3Emetadata%29&pos=0&access=no
 		
-        BibItem *item = [self itemFromURL:url xmlDocument:xmlDocument error:outError];
-		return item ? [NSArray arrayWithObject:item] : nil;
-	}else{
-        // The following code parses all the links on a TOC page and is unusably slow.
-		// Included for posterity in case we ever add async parsing.
-        /*
+     http://ieeexplore.ieee.org/xpls/abs_all.jsp?isnumber=4723954&arnumber=4723958&count=9&index=3
+     
+	 http://ieeexplore.ieee.org/search/srchabstract.jsp?arnumber=928956&isnumber=20064&punumber=7385&k2dockey=928956@ieeecnfs&query=%28%28planning+deformable+objects%29%3Cin%3Emetadata%29&pos=0&access=no
+     
+     http://ieeexplore.ieee.org/search/searchresult.jsp?history=yes&queryText=%28%28sediment+transport%29%3Cin%3Emetadata%29
+     
+     */
+        
 		 NSError *error = nil;    
+    NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
 		
+    if ([[url path] isEqualToString:abstractPageURLPath] == NO && [[url path] isEqualToString:searchResultPageURLPath] == NO) {
+    
+        // parse all links on a TOC page
+
 		 NSArray *AbstractPlusLinkNodes = [[xmlDocument rootElement] nodesForXPath:containsAbstractPlusLinkNode
 																			error:&error];  
 		
@@ -124,58 +207,40 @@ NSString *searchResultPageURLPath = @"/search/srchabstract.jsp";
 		 NSString *hrefValue = [aplinknode stringValueOfAttribute:@"href"];
 			NSURL *abstractPageURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@%@", [url host], hrefValue]];
 			
-		 [items addObject:[self itemFromURL:abstractPageURL error:&error]];
+            [self enqueueAbstractPageDownloadForURL:abstractPageURL];
 		}
-		*/
-		
-		// display a fake item in the table so the user knows one of the items failed to parse, but still gets the rest of the data
-		NSString     *msg        = NSLocalizedString(@"Click the \"AbstractPlus\" link for the item you want to import.",
-														@"IEEE TOC page fake marker item title");
-		NSDictionary *pubFields     = [NSDictionary dictionaryWithObjectsAndKeys:msg, BDSKTitleString, nil];
-		BibItem      *tocMarkerItem = [[BibItem alloc] initWithType:BDSKMiscString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];
-		[items addObject:tocMarkerItem];
-		[tocMarkerItem release];
 		
 	}
+    else {
 
-	return items;
-	
+        // already on the abstract page
+        [self enqueueAbstractPageDownloadForURL:url];
 }
 
+    // wait for all those downloads to finish
+    while ([_activeDownloads count])
+        CFRunLoopRunInMode((CFStringRef)[_BDSKIEEEDownload runloopMode], 0.3, FALSE);
 
-+ (BibItem *)itemFromURL:(NSURL *)url error:(NSError **)outError{
-	return [self itemFromURL:url xmlDocument:nil error:outError];
-}
+    // copy and clear _finishedDownloads, since we'll be enqueuing more right away
+    NSArray *finishedDownloads = [[_finishedDownloads copy] autorelease];
+    [_finishedDownloads removeAllObjects];
 
-+ (BibItem *)itemFromURL:(NSURL *)url xmlDocument:(NSXMLDocument *)xmlDocument error:(NSError **)outError{
+    // need to associate subsequent PDF link downloads with their BibItem
+    NSMutableDictionary *downloadItemTable = [NSMutableDictionary dictionary];
 	
-	NSError *error;
+    for (_BDSKIEEEDownload *download in finishedDownloads) {
 	
-	NSString *arnumberString = [self ARNumberFromURLSubstring:[url query] error:outError];
-	NSString *isnumberString = [self ISNumberFromURLSubstring:[url query] error:outError];
+        // download failure
+        if ([download failed]) {
+            NSString *errMsg = [[download error] localizedDescription];
+            if (nil == errMsg)
+                errMsg = NSLocalizedString(@"Download from IEEEXplore failed.", @"error message");
+            NSDictionary *pubFields = [NSDictionary dictionaryWithObject:errMsg forKey:BDSKTitleString];
+            BibItem *errorItem = [[BibItem alloc] initWithType:BDSKMiscString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];
+            [items addObject:errorItem];
+            [errorItem release];
 
-	
-	// Query IEEEXplore with a POST request	
-	
-	NSString * serverName = [[url host] lowercaseString];
-
-	NSString * URLString = [NSString stringWithFormat:@"http://%@/xpls/citationAct", serverName];
-	
-	NSMutableURLRequest * request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:URLString]];
-	[request setHTTPMethod:@"POST"];
-	[request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-type"];
-	
-	// note, do not actually url-encode this. they are expecting their angle brackets raw.
-	NSString * queryString = [NSString stringWithFormat:@"dlSelect=cite_abs&fileFormate=BibTex&arnumber=<arnumber>%@</arnumber>", arnumberString];
-
-	[request setHTTPBody:[queryString dataUsingEncoding:NSUTF8StringEncoding]];
-
-	NSURLResponse * response;
-	NSData * result = [NSURLConnection sendSynchronousRequest:request returningResponse: &response error: &error];
-	
-	if (nil == result) {
-		if (outError != NULL) { *outError = error; } 
-		return nil; 
+            continue;
 	}
 	
     /*
@@ -188,52 +253,126 @@ NSString *searchResultPageURLPath = @"/search/srchabstract.jsp";
      Using stringByConvertingHTMLToTeX will screw up too much stuff here, so that's not really an option.
      */
 	
-    NSAttributedString * attrString = [[[NSAttributedString alloc] initWithHTML:result options:nil documentAttributes:NULL] autorelease];
-	NSString * bibTeXString = [[attrString string] stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        NSAttributedString * attrString = [[[NSAttributedString alloc] initWithHTML:[download result] options:nil documentAttributes:NULL] autorelease];
+        NSString * bibTeXString = [[attrString string] stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 
 	BOOL isPartialData;
-	NSArray * newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString document:nil isPartialData:&isPartialData error: outError];
+        NSArray * newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString document:nil isPartialData:&isPartialData error: &error];
 	
-	BibItem *newPub = nil;
+        BibItem *newPub = [newPubs firstObject];
 	
-	if (newPubs != nil && [newPubs count] > 0) {
-		newPub = [newPubs objectAtIndex:0];
+        // parse failure
+        if (nil == newPub) {
+            NSDictionary *pubFields = [NSDictionary dictionaryWithObject:[error localizedDescription] forKey:BDSKTitleString];
+            BibItem *errorItem = [[BibItem alloc] initWithType:BDSKMiscString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];
+            [items addObject:errorItem];
+            [errorItem release];
+            
+            continue;
 	}
 	
-	// Get the PDF URL, if possible:
-    // Need to load the page if it isn't passed in:
-	if(xmlDocument == nil){
-		NSString * ARNumberURLString = [NSString stringWithFormat:@"http://ieeexplore.ieee.org/xpls/abs_all.jsp?tp=&arnumber=%@&isnumber=%@", arnumberString, isnumberString];
-		xmlDocument = [[NSXMLDocument alloc] initWithContentsOfURL:[NSURL URLWithString:ARNumberURLString]
-																 options:NSXMLDocumentTidyHTML 
-																   error:&error];
-        [xmlDocument autorelease];
+        // enqueue a download to get the PDF URL, if possible:
+        NSURLRequest *request = [NSURLRequest requestWithURL:[download pdfLinkURL]];
+        _BDSKIEEEDownload *download = [[_BDSKIEEEDownload alloc] initWithRequest:request delegate:self];
+        [_activeDownloads addObject:download];
+        [download release];
+        [download start];
+        [downloadItemTable setObject:newPub forKey:download];
+
+        [items addObject:newPub];
 
 	}
-    NSArray *pdfLinkNodes = [[xmlDocument rootElement] nodesForXPath:@"//a[contains(text(), 'PDF')]"
-                                                               error:&error];
+    
+    // download all the PDF link documents
+    while ([_activeDownloads count])
+        CFRunLoopRunInMode((CFStringRef)[_BDSKIEEEDownload runloopMode], 0.3, FALSE);
+    
+    for (_BDSKIEEEDownload *download in _finishedDownloads) {
+                            
+        if ([download failed])
+            continue;
+        
+        NSXMLDocument *linkDocument = nil;
+        linkDocument = [[NSXMLDocument alloc] initWithData:[download result] options:NSXMLDocumentTidyHTML error:NULL];
+        NSArray *pdfLinkNodes = [[linkDocument rootElement] nodesForXPath:@"//a[contains(text(), 'PDF')]" error:NULL];
     if ([pdfLinkNodes count] > 0){
         NSXMLNode *pdfLinkNode = [pdfLinkNodes objectAtIndex:0];
         NSString *hrefValue = [pdfLinkNode stringValueOfAttribute:@"href"];
         
-        NSString *pdfURLString = [NSString stringWithFormat:@"http://%@%@", serverName, hrefValue];
+            NSString *pdfURLString = [NSString stringWithFormat:@"http://%@%@", [[download URL] host], hrefValue];
         
-        [newPub setField:BDSKUrlString toValue:pdfURLString];
+            [[downloadItemTable objectForKey:download] setField:BDSKUrlString toValue:pdfURLString];
     }
+        [linkDocument release];
+    }
+    [_finishedDownloads removeAllObjects];
 	
-	return newPub;
+	return items;
+	
 }
 
-+ (NSArray *) parserInfos {
-	NSString * parserDescription = NSLocalizedString(@"IEEE Xplore Library Portal. Searching and browsing are free, but subscription is required for citation importing and full text access",
-													 @"Description for IEEE Xplore site.");
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"IEEE Xplore" address:@"http://ieeexplore.ieee.org/" 
-													  description: parserDescription 
-															flags: BDSKParserFeatureSubscriptionMask];
+@end
 	
-	return [NSArray arrayWithObject:parserInfo];
+#pragma mark Download delegate
+
+@implementation _BDSKIEEEDownload
+
+@synthesize pdfLinkURL = _pdfLinkURL;
+@synthesize failed = _failed;
+@synthesize error = _error;
+@synthesize result = _result;
+
++ (NSString *)runloopMode { return @"_BDSKRunLoopModeIEEEDownload"; }
+
+- (id)initWithRequest:(NSURLRequest *)request delegate:(id)delegate
+{
+    self = [super init];
+    if (self) {
+        _request = [request copy];
+        _delegate = delegate;
+}
+    return self;
 }
 
+- (void)dealloc
+{
+    [_connection release];
+    [_request release];
+    [_error release];
+    [_result release];
+    [_pdfLinkURL release];
+    [super dealloc];
+}
+
+- (id)copyWithZone:(NSZone *)aZone { return [self retain]; }
+
+- (NSURL *)URL { return [_request URL]; }
+
+- (void)start
+{
+    NSParameterAssert(nil == _connection);
+    NSParameterAssert(nil == _result);
+    _result = [NSMutableData new];
+    _connection = [[NSURLConnection alloc] initWithRequest:_request delegate:self startImmediately:NO];
+    [_connection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:[[self class] runloopMode]];
+    [_connection start];
+}
+
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
+{
+    _error = [error retain];
+    _failed = YES;
+    [_delegate performSelector:@selector(downloadFinishedOrFailed:) withObject:self];
+}
+
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection;
+{
+    [_delegate performSelector:@selector(downloadFinishedOrFailed:) withObject:self];
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data;
+{
+    [_result appendData:data];
+}
 
 @end 
-

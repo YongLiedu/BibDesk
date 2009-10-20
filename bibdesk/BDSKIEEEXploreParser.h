@@ -42,10 +42,6 @@
 
 
 @interface BDSKIEEEXploreParser : BDSKWebParser
-+ (NSString *)ARNumberFromURLSubstring:(NSString *)urlPath error:(NSError **)outError;
-+ (NSString *)ISNumberFromURLSubstring:(NSString *)urlPath error:(NSError **)outError;
-+ (BibItem *)itemFromURL:(NSURL *)url error:(NSError **)outError;
-+ (BibItem *)itemFromURL:(NSURL *)url xmlDocument:(NSXMLDocument *)xmlDocument error:(NSError **)outError;
 @end
 
 
