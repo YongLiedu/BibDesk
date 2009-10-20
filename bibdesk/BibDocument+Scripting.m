@@ -221,8 +221,18 @@
             [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
             [cmd setScriptErrorString:NSLocalizedString(@"Groups must be created with a specific class.", @"Error description")];
         }
-        if ([properties count])
-            [group setScriptingProperties:properties];
+        if ([properties count]) {
+            NSMutableDictionary *validProps = [NSMutableDictionary dictionary];
+            NSScriptClassDescription *classDesc = [NSScriptClassDescription classDescriptionForClass:class];
+            if ([properties count]) {
+                for (NSString *aKey in properties) {
+                    if ([classDesc hasWritablePropertyForKey:aKey])
+                        [validProps setValue:[group coerceValue:[properties objectForKey:aKey] forKey:aKey] forKey:aKey];
+                }
+                if ([validProps count])
+                    [group setScriptingProperties:validProps];
+            }
+        }
         return group;
     } else if ([class isKindOfClass:[BibItem class]]) {
         BibItem *item = nil;
@@ -248,8 +258,18 @@
         } else {
             item = [[BibItem alloc] init];
         }
-        if ([properties count])
-            [item setScriptingProperties:properties];
+        if ([properties count]) {
+            NSMutableDictionary *validProps = [NSMutableDictionary dictionary];
+            NSScriptClassDescription *classDesc = [NSScriptClassDescription classDescriptionForClass:class];
+            if ([properties count]) {
+                for (NSString *aKey in properties) {
+                    if ([classDesc hasWritablePropertyForKey:aKey])
+                        [validProps setValue:[item coerceValue:[properties objectForKey:aKey] forKey:aKey] forKey:aKey];
+                }
+                if ([validProps count])
+                    [item setScriptingProperties:validProps];
+            }
+        }
         return item;
     }
     return [super newScriptingObjectOfClass:class forValueForKey:key withContentsValue:contentsValue properties:properties];
@@ -261,8 +281,18 @@
         id copiedValue = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:value]] retain];
         [NSString setMacroResolverForUnarchiving:nil];
         [copiedValue makeObjectsPerformSelector:@selector(setMacroResolver:) withObject:[self macroResolver]];
-        if ([properties count])
-            [copiedValue makeObjectsPerformSelector:@selector(setScriptingProperties:) withObject:properties];
+        if ([properties count]) {
+            for (id item in copiedValue) {
+                NSMutableDictionary *validProps = [NSMutableDictionary dictionary];
+                NSScriptClassDescription *classDesc = [NSScriptClassDescription classDescriptionForClass:[item class]];
+                for (NSString *aKey in properties) {
+                    if ([classDesc hasWritablePropertyForKey:aKey])
+                        [validProps setValue:[item coerceValue:[properties objectForKey:aKey] forKey:aKey] forKey:aKey];
+                }
+                if ([validProps count])
+                    [item setScriptingProperties:validProps];
+            }
+        }
         return copiedValue;
     } else if ([[NSSet setWithObjects:@"scriptingGroups", @"staticGroups", @"smartGroups", @"externalFileGroups", @"scriptGroups", @"searchGroups", nil] containsObject:key]) {
         NSMutableArray *copiedValue = [[NSMutableArray alloc] init];
@@ -286,8 +316,16 @@
                 [copiedValue release];
                 copiedValue = nil;
             } else {
-                if ([properties count])
-                    [copiedGroup setScriptingProperties:properties];
+                if ([properties count]) {
+                    NSMutableDictionary *validProps = [NSMutableDictionary dictionary];
+                    NSScriptClassDescription *classDesc = [NSScriptClassDescription classDescriptionForClass:[copiedGroup class]];
+                    for (NSString *aKey in properties) {
+                        if ([classDesc hasWritablePropertyForKey:aKey])
+                            [validProps setValue:[copiedGroup coerceValue:[properties objectForKey:aKey] forKey:aKey] forKey:aKey];
+                    }
+                    if ([validProps count])
+                        [copiedGroup setScriptingProperties:validProps];
+                }
                 [copiedValue addObject:copiedGroup];
                 [copiedGroup release];
             }

@@ -95,8 +95,18 @@
         } else {
             item = [[BibItem alloc] init];
         }
-        if ([properties count])
-            [item setScriptingProperties:properties];
+        if ([properties count]) {
+            NSMutableDictionary *validProps = [NSMutableDictionary dictionary];
+            NSScriptClassDescription *classDesc = [NSScriptClassDescription classDescriptionForClass:class];
+            if ([properties count]) {
+                for (NSString *aKey in properties) {
+                    if ([classDesc hasWritablePropertyForKey:aKey])
+                        [validProps setValue:[item coerceValue:[properties objectForKey:aKey] forKey:aKey] forKey:aKey];
+                }
+                if ([validProps count])
+                    [item setScriptingProperties:validProps];
+            }
+        }
         return item;
     }
     return [super newScriptingObjectOfClass:class forValueForKey:key withContentsValue:contentsValue properties:properties];
@@ -108,8 +118,18 @@
         id copiedValue = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:value]] retain];
         [NSString setMacroResolverForUnarchiving:nil];
         [copiedValue makeObjectsPerformSelector:@selector(setMacroResolver:) withObject:[self macroResolver]];
-        if ([properties count])
-            [copiedValue setScriptingProperties:properties];
+        if ([properties count]) {
+            for (id item in copiedValue) {
+                NSMutableDictionary *validProps = [NSMutableDictionary dictionary];
+                NSScriptClassDescription *classDesc = [NSScriptClassDescription classDescriptionForClass:[item class]];
+                for (NSString *aKey in properties) {
+                    if ([classDesc hasWritablePropertyForKey:aKey])
+                        [validProps setValue:[item coerceValue:[properties objectForKey:aKey] forKey:aKey] forKey:aKey];
+                }
+                if ([validProps count])
+                    [item setScriptingProperties:validProps];
+            }
+        }
         return copiedValue;
     }
     return [super copyScriptingValue:value forKey:key withProperties:properties];
