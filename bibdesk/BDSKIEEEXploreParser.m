@@ -227,8 +227,9 @@ static NSMutableArray *_finishedDownloads = nil;
 
     // need to associate subsequent PDF link downloads with their BibItem
     NSMutableDictionary *downloadItemTable = [NSMutableDictionary dictionary];
-	
-    for (_BDSKIEEEDownload *download in finishedDownloads) {
+	_BDSKIEEEDownload *download;
+    
+    for (download in finishedDownloads) {
 	
         // download failure
         if ([download failed]) {
@@ -273,7 +274,7 @@ static NSMutableArray *_finishedDownloads = nil;
 	
         // enqueue a download to get the PDF URL, if possible:
         NSURLRequest *request = [NSURLRequest requestWithURL:[download pdfLinkURL]];
-        _BDSKIEEEDownload *download = [[_BDSKIEEEDownload alloc] initWithRequest:request delegate:self];
+        download = [[_BDSKIEEEDownload alloc] initWithRequest:request delegate:self];
         [_activeDownloads addObject:download];
         [download release];
         [download start];
