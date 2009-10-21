@@ -83,10 +83,9 @@ static NSMutableArray *_finishedDownloads = nil;
 
 + (void)initialize
 {
-    if ([BDSKIEEEXploreParser class] == self) {
-        _activeDownloads = [NSMutableArray new];
-        _finishedDownloads = [NSMutableArray new];
-    }
+    BDSKINITIALIZE;
+    _activeDownloads = [NSMutableArray new];
+    _finishedDownloads = [NSMutableArray new];
 }
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
@@ -185,15 +184,15 @@ static NSMutableArray *_finishedDownloads = nil;
      http://ieeexplore.ieee.org/search/searchresult.jsp?history=yes&queryText=%28%28sediment+transport%29%3Cin%3Emetadata%29
      
      */
-        
-		 NSError *error = nil;    
-    NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
-		
-    if ([[url path] isEqualToString:abstractPageURLPath] == NO && [[url path] isEqualToString:searchResultPageURLPath] == NO) {
     
+    NSError *error = nil;    
+    NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
+    
+    if ([[url path] isEqualToString:abstractPageURLPath] == NO && [[url path] isEqualToString:searchResultPageURLPath] == NO) {
+        
         // parse all links on a TOC page
-
-		 NSArray *AbstractPlusLinkNodes = [[xmlDocument rootElement] nodesForXPath:containsAbstractPlusLinkNode
+        
+        NSArray *AbstractPlusLinkNodes = [[xmlDocument rootElement] nodesForXPath:containsAbstractPlusLinkNode
 																			error:&error];  
 		
 		if ([AbstractPlusLinkNodes count] < 1) {
@@ -215,22 +214,22 @@ static NSMutableArray *_finishedDownloads = nil;
 
         // already on the abstract page
         [self enqueueAbstractPageDownloadForURL:url];
-}
-
+    }
+    
     // wait for all those downloads to finish
     while ([_activeDownloads count])
         CFRunLoopRunInMode((CFStringRef)[_BDSKIEEEDownload runloopMode], 0.3, FALSE);
-
+    
     // copy and clear _finishedDownloads, since we'll be enqueuing more right away
     NSArray *finishedDownloads = [[_finishedDownloads copy] autorelease];
     [_finishedDownloads removeAllObjects];
-
+    
     // need to associate subsequent PDF link downloads with their BibItem
     NSMutableDictionary *downloadItemTable = [NSMutableDictionary dictionary];
 	_BDSKIEEEDownload *download;
     
     for (download in finishedDownloads) {
-	
+        
         // download failure
         if ([download failed]) {
             NSString *errMsg = [[download error] localizedDescription];
@@ -242,26 +241,26 @@ static NSMutableArray *_finishedDownloads = nil;
             [errorItem release];
 
             continue;
-	}
-	
-    /*
-     Use NSAttributedString to unescape XML entities
-	 For example: http://ieeexplore.ieee.org/xpls/abs_all.jsp?isnumber=4977283&arnumber=4977305&count=206&index=11
-	 has a (tm) as an entity.
+        }
+        
+        /*
+         Use NSAttributedString to unescape XML entities
+         For example: http://ieeexplore.ieee.org/xpls/abs_all.jsp?isnumber=4977283&arnumber=4977305&count=206&index=11
+         has a (tm) as an entity.
 
-     http://ieeexplore.ieee.org/search/srchabstract.jsp?arnumber=259629&isnumber=6559&punumber=16&k2dockey=259629@ieeejrns&query=%28%28moll%29%3Cin%3Emetadata%29&pos=1&access=no
-     has smart quotes and a Greek letter (converted) and <sub> and <sup> (which are lost).
-     Using stringByConvertingHTMLToTeX will screw up too much stuff here, so that's not really an option.
-     */
-	
+         http://ieeexplore.ieee.org/search/srchabstract.jsp?arnumber=259629&isnumber=6559&punumber=16&k2dockey=259629@ieeejrns&query=%28%28moll%29%3Cin%3Emetadata%29&pos=1&access=no
+         has smart quotes and a Greek letter (converted) and <sub> and <sup> (which are lost).
+         Using stringByConvertingHTMLToTeX will screw up too much stuff here, so that's not really an option.
+         */
+        
         NSAttributedString * attrString = [[[NSAttributedString alloc] initWithHTML:[download result] options:nil documentAttributes:NULL] autorelease];
         NSString * bibTeXString = [[attrString string] stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-
-	BOOL isPartialData;
+        
+        BOOL isPartialData;
         NSArray * newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString document:nil isPartialData:&isPartialData error: &error];
-	
+        
         BibItem *newPub = [newPubs firstObject];
-	
+        
         // parse failure
         if (nil == newPub) {
             NSDictionary *pubFields = [NSDictionary dictionaryWithObject:[error localizedDescription] forKey:BDSKTitleString];
@@ -270,8 +269,8 @@ static NSMutableArray *_finishedDownloads = nil;
             [errorItem release];
             
             continue;
-	}
-	
+        }
+        
         // enqueue a download to get the PDF URL, if possible:
         NSURLRequest *request = [NSURLRequest requestWithURL:[download pdfLinkURL]];
         download = [[_BDSKIEEEDownload alloc] initWithRequest:request delegate:self];
@@ -288,7 +287,7 @@ static NSMutableArray *_finishedDownloads = nil;
     while ([_activeDownloads count])
         CFRunLoopRunInMode((CFStringRef)[_BDSKIEEEDownload runloopMode], 0.3, FALSE);
     
-    for (_BDSKIEEEDownload *download in _finishedDownloads) {
+    for (download in _finishedDownloads) {
                             
         if ([download failed])
             continue;
@@ -296,14 +295,14 @@ static NSMutableArray *_finishedDownloads = nil;
         NSXMLDocument *linkDocument = nil;
         linkDocument = [[NSXMLDocument alloc] initWithData:[download result] options:NSXMLDocumentTidyHTML error:NULL];
         NSArray *pdfLinkNodes = [[linkDocument rootElement] nodesForXPath:@"//a[contains(text(), 'PDF')]" error:NULL];
-    if ([pdfLinkNodes count] > 0){
-        NSXMLNode *pdfLinkNode = [pdfLinkNodes objectAtIndex:0];
-        NSString *hrefValue = [pdfLinkNode stringValueOfAttribute:@"href"];
-        
+        if ([pdfLinkNodes count] > 0) {
+            NSXMLNode *pdfLinkNode = [pdfLinkNodes objectAtIndex:0];
+            NSString *hrefValue = [pdfLinkNode stringValueOfAttribute:@"href"];
+            
             NSString *pdfURLString = [NSString stringWithFormat:@"http://%@%@", [[download URL] host], hrefValue];
         
             [[downloadItemTable objectForKey:download] setField:BDSKUrlString toValue:pdfURLString];
-    }
+        }
         [linkDocument release];
     }
     [_finishedDownloads removeAllObjects];
