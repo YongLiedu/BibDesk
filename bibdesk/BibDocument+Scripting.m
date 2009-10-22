@@ -237,14 +237,65 @@
         }
         return group;
     } else if ([class isKindOfClass:[BibItem class]]) {
-        return [BibItem newScriptingItemWithContentsValue:contentsValue properties:properties owner:self];
+        BibItem *item = nil;
+        NSString *bibtexString = [properties objectForKey:@"bibTeXString"];
+        if (bibtexString) {
+            NSError *error = nil;
+            BOOL isPartialData;
+            NSArray *newPubs = [BDSKBibTeXParser itemsFromString:bibtexString document:self isPartialData:&isPartialData error:&error];
+            if (isPartialData) {
+                NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+                [cmd setScriptErrorNumber:NSInternalScriptError];
+                [cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"BibDesk failed to process the BibTeX entry %@ with error %@. It may be malformed.",@"Error description"), bibtexString, [error localizedDescription]]];
+                return nil;
+            }
+            item = [[newPubs objectAtIndex:0] retain];
+            properties = [[properties mutableCopy] autorelease];
+            [(NSMutableDictionary *)properties removeObjectForKey:@"bibTeXString"];
+        } else if (contentsValue) {
+            [NSString setMacroResolverForUnarchiving:[self macroResolver]];
+            item = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:contentsValue]] retain];
+            [NSString setMacroResolverForUnarchiving:nil];
+            [item setMacroResolver:[self macroResolver]];
+        } else {
+            item = [[BibItem alloc] init];
+        }
+        if ([properties count]) {
+            NSMutableDictionary *validProps = [NSMutableDictionary dictionary];
+            NSScriptClassDescription *classDesc = [NSScriptClassDescription classDescriptionForClass:class];
+            if ([properties count]) {
+                for (NSString *aKey in properties) {
+                    if ([classDesc hasWritablePropertyForKey:aKey])
+                        [validProps setValue:[item coerceValue:[properties objectForKey:aKey] forKey:aKey] forKey:aKey];
+                }
+                if ([validProps count])
+                    [item setScriptingProperties:validProps];
+            }
+        }
+        return item;
     }
     return [super newScriptingObjectOfClass:class forValueForKey:key withContentsValue:contentsValue properties:properties];
 }
 
 - (id)copyScriptingValue:(id)value forKey:(NSString *)key withProperties:(NSDictionary *)properties {
     if ([key isEqualToString:@"scriptingPublications"]) {
-        return [BibItem copyScriptingValue:value properties:properties owner:self];
+        [NSString setMacroResolverForUnarchiving:[self macroResolver]];
+        id copiedValue = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:value]] retain];
+        [NSString setMacroResolverForUnarchiving:nil];
+        [copiedValue makeObjectsPerformSelector:@selector(setMacroResolver:) withObject:[self macroResolver]];
+        if ([properties count]) {
+            for (id item in copiedValue) {
+                NSMutableDictionary *validProps = [NSMutableDictionary dictionary];
+                NSScriptClassDescription *classDesc = [NSScriptClassDescription classDescriptionForClass:[item class]];
+                for (NSString *aKey in properties) {
+                    if ([classDesc hasWritablePropertyForKey:aKey])
+                        [validProps setValue:[item coerceValue:[properties objectForKey:aKey] forKey:aKey] forKey:aKey];
+                }
+                if ([validProps count])
+                    [item setScriptingProperties:validProps];
+            }
+        }
+        return copiedValue;
     } else if ([[NSSet setWithObjects:@"scriptingGroups", @"staticGroups", @"smartGroups", @"externalFileGroups", @"scriptGroups", @"searchGroups", nil] containsObject:key]) {
         NSMutableArray *copiedValue = [[NSMutableArray alloc] init];
         for (id group in value) {

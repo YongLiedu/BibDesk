@@ -56,7 +56,6 @@
 #import "BDSKCondition.h"
 #import "BDSKFilter.h"
 #import "NSWorkspace_BDSKExtensions.h"
-#import "BDSKBibTeXParser.h"
 
 
 @implementation BDSKGroup (Scripting)
@@ -74,14 +73,14 @@
 - (id)newScriptingObjectOfClass:(Class)class forValueForKey:(NSString *)key withContentsValue:(id)contentsValue properties:(NSDictionary *)properties {
     if ([class isKindOfClass:[BibItem class]])
         // external groups do not accept new scriptable items, so the owner for the new item should always be the document
-        return [BibItem newScriptingItemWithContentsValue:contentsValue properties:properties owner:[self document]];
+        return [[self document] newScriptingObjectOfClass:class forValueForKey:key withContentsValue:contentsValue properties:properties];
     return [super newScriptingObjectOfClass:class forValueForKey:key withContentsValue:contentsValue properties:properties];
 }
 
 - (id)copyScriptingValue:(id)value forKey:(NSString *)key withProperties:(NSDictionary *)properties {
     if ([key isEqualToString:@"scriptingPublications"])
         // external groups do not accept new scriptable items, so the owner for the copied item should always be the document
-        return [BibItem copyScriptingValue:value properties:properties owner:[self document]];
+        return [[self document] copyScriptingValue:value forKey:key withProperties:properties];
     return [super copyScriptingValue:value forKey:key withProperties:properties];
 }
 
