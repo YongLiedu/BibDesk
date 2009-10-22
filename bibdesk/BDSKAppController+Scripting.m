@@ -43,6 +43,7 @@
 #import "BDSKMacroResolver+Scripting.h"
 #import "BDSKMacro.h"
 #import "BDSKTemplate.h"
+#import "BDSKApplication.h"
 
 
 /* ssp
@@ -75,7 +76,7 @@ Category on BDSKAppController making the papers folder readable for scripting
 }
 
 - (id)clipboard {
-    NSScriptClassDescription *containerClassDescription = (NSScriptClassDescription *)[NSClassDescription classDescriptionForClass:[NSApplication class]];
+    NSScriptClassDescription *containerClassDescription = [NSScriptClassDescription classDescriptionForClass:[BDSKApplication class]];
     return [[[NSPropertySpecifier allocWithZone: [self zone]] 
           initWithContainerClassDescription: containerClassDescription 
                          containerSpecifier: nil // the application is the null container

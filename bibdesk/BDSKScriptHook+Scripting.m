@@ -49,7 +49,7 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
     if (uniqueID) {
         // this is necessary as our container is the application 
-		NSScriptClassDescription *containerClassDescription = (NSScriptClassDescription *)[NSClassDescription classDescriptionForClass:[BDSKApplication class]];
+		NSScriptClassDescription *containerClassDescription = [NSScriptClassDescription classDescriptionForClass:[BDSKApplication class]];
         return [[[NSUniqueIDSpecifier allocWithZone: [self zone]] 
 			  initWithContainerClassDescription: containerClassDescription 
 							 containerSpecifier: nil // the application is the null container

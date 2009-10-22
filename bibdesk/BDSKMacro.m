@@ -71,7 +71,7 @@
             containerRef = [owner objectSpecifier];
             containerClassDescription = [containerRef keyClassDescription];
         } else {
-            containerClassDescription = (NSScriptClassDescription *)[NSClassDescription classDescriptionForClass:[BDSKApplication class]];
+            containerClassDescription = [NSScriptClassDescription classDescriptionForClass:[BDSKApplication class]];
         }
         return [[[NSNameSpecifier allocWithZone: [self zone]] 
 			  initWithContainerClassDescription: containerClassDescription 

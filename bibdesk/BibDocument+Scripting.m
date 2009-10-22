@@ -66,6 +66,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKServerInfo.h"
 #import "BDSKBibTeXParser.h"
+#import "BDSKApplication.h"
 
 
 @implementation BibDocument (Scripting)
@@ -783,7 +784,7 @@
 }
 
 - (id)clipboard {
-    NSScriptClassDescription *containerClassDescription = (NSScriptClassDescription *)[NSClassDescription classDescriptionForClass:[NSApplication class]];
+    NSScriptClassDescription *containerClassDescription = [NSScriptClassDescription classDescriptionForClass:[BDSKApplication class]];
     return [[[NSPropertySpecifier allocWithZone: [self zone]] 
           initWithContainerClassDescription: containerClassDescription 
                          containerSpecifier: nil // the application is the null container

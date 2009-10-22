@@ -38,6 +38,7 @@
 
 #import "BDSKRichTextFormat.h"
 #import "NSData_BDSKExtensions.h"
+#import "BDSKApplication.h"
 
 
 @implementation BDSKRichTextFormat
@@ -75,7 +76,7 @@
 }
 
 - (NSScriptObjectSpecifier *)objectSpecifier {
-    NSScriptClassDescription *containerClassDescription = (NSScriptClassDescription *)[NSClassDescription classDescriptionForClass:[NSApplication class]];
+    NSScriptClassDescription *containerClassDescription = [NSScriptClassDescription classDescriptionForClass:[BDSKApplication class]];
     return [[[NSNameSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:containerClassDescription containerSpecifier:nil key:@"richTextFormat" name:[self name]] autorelease];
 }
 
