@@ -274,9 +274,8 @@
 }
 
 - (id)newScriptingObjectOfClass:(Class)class forValueForKey:(NSString *)key withContentsValue:(id)contentsValue properties:(NSDictionary *)properties {
-    if ([class isKindOfClass:[BDSKCondition class]]) {
-        return [contentsValue copy] ?: [[BDSKCondition alloc] initWithScriptingProperties:properties];
-    }
+    if ([class isKindOfClass:[BDSKCondition class]])
+        return [[BDSKCondition alloc] initWithScriptingProperties:properties];
     return [super newScriptingObjectOfClass:class forValueForKey:key withContentsValue:contentsValue properties:properties];
 }
 

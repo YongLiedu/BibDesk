@@ -172,9 +172,7 @@
 - (id)newScriptingObjectOfClass:(Class)class forValueForKey:(NSString *)key withContentsValue:(id)contentsValue properties:(NSDictionary *)properties {
     if ([class isKindOfClass:[BDSKGroup class]]) {
         id group = nil;
-        if (contentsValue) {
-            group = [[[self copyScriptingValue:[NSArray arrayWithObjects:contentsValue, nil] forKey:key withProperties:nil] lastObject] retain];
-        } else if ([class isKindOfClass:[BDSKScriptGroup class]]) {
+        if ([class isKindOfClass:[BDSKScriptGroup class]]) {
             NSString *path = [[properties objectForKey:@"scriptURL"] path];
             NSString *arguments = [properties objectForKey:@"scriptingScriptArguments"];
             if (path == nil) {
@@ -254,11 +252,6 @@
             item = [[newPubs objectAtIndex:0] retain];
             properties = [[properties mutableCopy] autorelease];
             [(NSMutableDictionary *)properties removeObjectForKey:@"bibTeXString"];
-        } else if (contentsValue) {
-            [NSString setMacroResolverForUnarchiving:[self macroResolver]];
-            item = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:contentsValue]] retain];
-            [NSString setMacroResolverForUnarchiving:nil];
-            [item setMacroResolver:[self macroResolver]];
         } else {
             item = [[BibItem alloc] init];
         }
