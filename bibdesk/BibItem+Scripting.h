@@ -42,6 +42,8 @@
 
 @interface BibItem (Scripting) 
 
++ (id)newScriptingItemWithContentsValue:(id)contentsValue properties:(NSDictionary *)properties owner:(id<BDSKOwner>)anOwner;
+
 - (BDSKField *)valueInBibFieldsWithName:(NSString *)name;
 - (NSArray *)bibFields;
 

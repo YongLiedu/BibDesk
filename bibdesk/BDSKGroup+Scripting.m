@@ -46,6 +46,7 @@
 #import "BDSKMacroResolver.h"
 #import "BDSKMacroResolver+Scripting.h"
 #import "BibItem.h"
+#import "BibItem+Scripting.h"
 #import "BibAuthor.h"
 #import "BibAuthor+Scripting.h"
 #import "BDSKCondition+Scripting.h"
@@ -71,44 +72,9 @@
 }
 
 - (id)newScriptingObjectOfClass:(Class)class forValueForKey:(NSString *)key withContentsValue:(id)contentsValue properties:(NSDictionary *)properties {
-    if ([class isKindOfClass:[BibItem class]]) {
-        BibItem *item = nil;
-        NSString *bibtexString = [properties objectForKey:@"bibTeXString"];
-        if (bibtexString) {
-            NSError *error = nil;
-            BOOL isPartialData;
-            NSArray *newPubs = [BDSKBibTeXParser itemsFromString:bibtexString document:[self document] isPartialData:&isPartialData error:&error];
-            if (isPartialData) {
-                NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-                [cmd setScriptErrorNumber:NSInternalScriptError];
-                [cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"BibDesk failed to process the BibTeX entry %@ with error %@. It may be malformed.",@"Error description"), bibtexString, [error localizedDescription]]];
-                return nil;
-            }
-            item = [[newPubs objectAtIndex:0] retain];
-            properties = [[properties mutableCopy] autorelease];
-            [(NSMutableDictionary *)properties removeObjectForKey:@"bibTeXString"];
-        } else if (contentsValue) {
-            [NSString setMacroResolverForUnarchiving:[self macroResolver]];
-            item = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:contentsValue]] retain];
-            [NSString setMacroResolverForUnarchiving:nil];
-            [item setMacroResolver:[self macroResolver]];
-        } else {
-            item = [[BibItem alloc] init];
-        }
-        if ([properties count]) {
-            NSMutableDictionary *validProps = [NSMutableDictionary dictionary];
-            NSScriptClassDescription *classDesc = [NSScriptClassDescription classDescriptionForClass:class];
-            if ([properties count]) {
-                for (NSString *aKey in properties) {
-                    if ([classDesc hasWritablePropertyForKey:aKey])
-                        [validProps setValue:[item coerceValue:[properties objectForKey:aKey] forKey:aKey] forKey:aKey];
-                }
-                if ([validProps count])
-                    [item setScriptingProperties:validProps];
-            }
-        }
-        return item;
-    }
+    if ([class isKindOfClass:[BibItem class]])
+        // external groups do not accept new scriptable items, so the owner for the new item should always be the document
+        return [BibItem newScriptingItemWithContentsValue:contentsValue properties:properties owner:[self document]];
     return [super newScriptingObjectOfClass:class forValueForKey:key withContentsValue:contentsValue properties:properties];
 }
 
