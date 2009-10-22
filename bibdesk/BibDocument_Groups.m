@@ -934,9 +934,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (void)addMenuItemsForBookmarks:(NSArray *)bookmarksArray level:(NSInteger)level toMenu:(NSMenu *)menu {
-    NSInteger i, iMax = [bookmarksArray count];
-    for (i = 0; i < iMax; i++) {
-        BDSKSearchBookmark *bm = [bookmarksArray objectAtIndex:i];
+    for (BDSKSearchBookmark *bm in bookmarksArray) {
         if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
             NSString *label = [bm label];
             NSMenuItem *item = [menu addItemWithTitle:label ?: @"" action:NULL keyEquivalent:@""];

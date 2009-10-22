@@ -79,12 +79,8 @@ static id sharedManager = nil;
         [autoCompletionDict setObject:nameSet forKey:BDSKAuthorString];
         [nameSet release];
     }
-    NSUInteger i, iMax = [names count];
-    NSString *name;
-    for (i = 0; i < iMax; i++) {
-        name = [names objectAtIndex:i];
+    for (NSString *name in names)
         [nameSet addObject:([name isComplex] ? [NSString stringWithString:name] : name)];
-    }
 }
 
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{

@@ -170,9 +170,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 }
 
 - (void)addMenuItemsForBookmarks:(NSArray *)bookmarksArray level:(NSInteger)level toMenu:(NSMenu *)menu {
-    NSInteger i, iMax = [bookmarksArray count];
-    for (i = 0; i < iMax; i++) {
-        BDSKBookmark *bm = [bookmarksArray objectAtIndex:i];
+    for (BDSKBookmark *bm in bookmarksArray) {
         if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
             NSString *name = [bm name];
             NSMenuItem *item = [menu addItemWithTitle:name ?: @"" action:NULL keyEquivalent:@""];

@@ -1268,14 +1268,11 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 - (void)updateSafariRecentDownloadsMenu:(NSMenu *)menu{
 	NSArray *historyArray = [self safariDownloadHistory];
 		
-	NSUInteger i = 0;
-	NSUInteger numberOfItems = [historyArray count];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     
     [menu removeAllItems];
     
-	for (i = 0; i < numberOfItems; i ++){
-		NSDictionary *itemDict = [historyArray objectAtIndex:i];
+	for (NSDictionary *itemDict in historyArray) {
 		NSString *filePath = [itemDict objectForKey:@"DownloadEntryPath"];
 		filePath = [filePath stringByStandardizingPath];
         
@@ -1291,7 +1288,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 		}
 	}
     
-    if (numberOfItems == 0) {
+    if ([historyArray count] == 0) {
         [menu addItemWithTitle:NSLocalizedString(@"No Recent Downloads", @"Menu item title") action:NULL keyEquivalent:@""];
     }
 }
@@ -1299,13 +1296,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 - (void)updateSafariRecentURLsMenu:(NSMenu *)menu{
 	NSArray *historyArray = [self safariDownloadHistory];
-	NSUInteger numberOfItems = [historyArray count];
-	NSUInteger i = 0;
     
     [menu removeAllItems];
 	
-	for (i = 0; i < numberOfItems; i ++){
-		NSDictionary *itemDict = [historyArray objectAtIndex:i];
+	for (NSDictionary *itemDict in historyArray) {
 		NSString *URLString = [itemDict objectForKey:@"DownloadEntryURL"];
 		if (![NSString isEmptyString:URLString] && [NSURL URLWithString:URLString]) {
 			NSMenuItem *item = [menu addItemWithTitle:URLString
@@ -1316,7 +1310,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 		}
 	}
     
-    if (numberOfItems == 0) {
+    if ([historyArray count] == 0) {
         [menu addItemWithTitle:NSLocalizedString(@"No Recent Downloads", @"Menu item title") action:NULL keyEquivalent:@""];
     }
 }

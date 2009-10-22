@@ -290,12 +290,12 @@
             NSString *record;
             NSInteger stringType;
             BibItem *anItem;
-            for (i = 0; i < iMax; i++) {
-                record = [[records objectAtIndex:i] rawString];
+            for (id result in records) {
+                record = [result rawString];
                 stringType = [self stringTypeForRecordString:record];
                 anItem = [[BDSKStringParser itemsFromString:record ofType:stringType error:NULL] lastObject];
                 if (anItem == nil) {
-                    record = [[records objectAtIndex:i] renderedString];
+                    record = [result renderedString];
                     anItem = [[BibItem alloc] initWithType:BDSKBookString
                                                   fileType:BDSKBibtexString
                                                    citeKey:nil

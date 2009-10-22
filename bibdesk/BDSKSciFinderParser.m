@@ -213,10 +213,7 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
         // split each record up into field/value lines
         NSArray *lines = [str componentsSeparatedByString:@"\nFIELD "];
         
-        NSUInteger i, iMax = [lines count];
-        for (i = 0; i < iMax; i++) {
-            
-            NSString *line = [lines objectAtIndex:i];
+        for (NSString *line in lines) {
             
             NSString *key;
             NSString *value;

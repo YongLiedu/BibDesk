@@ -200,10 +200,8 @@ static NSMutableArray *_finishedDownloads = nil;
 			return nil;
 		}
 		
-		NSUInteger i, count = [AbstractPlusLinkNodes count];
-		 for (i = 0; i < count; i++) {
-		 NSXMLNode *aplinknode = [AbstractPlusLinkNodes objectAtIndex:i];
-		 NSString *hrefValue = [aplinknode stringValueOfAttribute:@"href"];
+        for (NSXMLNode *aplinknode in AbstractPlusLinkNodes) {
+            NSString *hrefValue = [aplinknode stringValueOfAttribute:@"href"];
 			NSURL *abstractPageURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@%@", [url host], hrefValue]];
 			
             [self enqueueAbstractPageDownloadForURL:abstractPageURL];

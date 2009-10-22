@@ -589,9 +589,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 - (BOOL)menuHasKeyEquivalent:(NSMenu *)menu forEvent:(NSEvent *)event target:(id *)target action:(SEL *)action { return NO; }
 
 - (void)addMenuItemsForSearchBookmarks:(NSArray *)bookmarks toMenu:(NSMenu *)menu {
-    NSInteger i, iMax = [bookmarks count];
-    for (i = 0; i < iMax; i++) {
-        BDSKSearchBookmark *bm = [bookmarks objectAtIndex:i];
+    for (BDSKSearchBookmark *bm in bookmarks) {
         if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
             NSString *label = [bm label];
             NSMenu *submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:[bm label]] autorelease];

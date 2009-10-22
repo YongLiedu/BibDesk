@@ -94,13 +94,12 @@ static NSInteger recursionDepth = 0;
 
 static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
 {
-    NSUInteger i, count = [folders count];
     NSDate *date = [NSDate distantPast];
-    for(i = 0; i < count; i++){
-        NSDate *modDate = [[[NSFileManager defaultManager] attributesOfItemAtPath:[folders objectAtIndex:i] error:NULL] objectForKey:NSFileModificationDate];
+    for (NSString *folder in folders) {
+        NSDate *modDate = [[[NSFileManager defaultManager] attributesOfItemAtPath:folder error:NULL] objectForKey:NSFileModificationDate];
         
         // typically these don't even exist for the other domains
-        if(modDate)
+        if (modDate)
             date = [modDate laterDate:date];
     }
     return date;

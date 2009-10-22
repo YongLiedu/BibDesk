@@ -1851,12 +1851,8 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     // NOTE: this isn't always text. what are the special case pubtypes?
     [s appendString:@"<typeOfResource>text</typeOfResource>\n"];
     
-    NSArray *genresForSelf = [genreForTypeDict objectForKey:@"self"];
-    if(genresForSelf){
-        for(i = 0; i < [genresForSelf count]; i++){
-            [s appendStrings:@"<genre>", [genresForSelf objectAtIndex:i], @"</genre>\n", nil];
-        }
-    }
+    for (NSString *genre in [genreForTypeDict objectForKey:@"self"])
+        [s appendStrings:@"<genre>", genre, @"</genre>\n", nil];
 
     // HOST INFO
     NSArray *genresForHost = [genreForTypeDict objectForKey:@"host"];
