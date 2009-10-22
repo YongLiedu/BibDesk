@@ -53,7 +53,7 @@
 	NSDictionary *params = [self evaluatedArguments];
 	if (!params) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
-        return [NSNull null];
+        return nil;
 	}
 	
 	BibDocument *document = nil;
@@ -69,7 +69,7 @@
 		// give up
 		[self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
 		[self setScriptErrorString:NSLocalizedString(@"The templated text command can only be sent to the documents.", @"Error description")];
-        return [NSNull null];
+        return nil;
 	}
 	
 	// the 'using' parameters gives the template name or file to use
@@ -79,7 +79,7 @@
     // make sure we get something
 	if (templateStyle == nil && templateString == nil) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
-        return [NSNull null];
+        return nil;
 	}
 	// make sure we get the right thing
 	if ([templateStyle isKindOfClass:[NSString class]] ) {
@@ -92,7 +92,7 @@
     }
     if (template == nil) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
-        return [NSNull null];
+        return nil;
 	}
 	
 	// the 'for' parameter can select the items to template
@@ -111,7 +111,7 @@
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
 			[self setScriptErrorString:NSLocalizedString(@"The 'for' option needs to be a publication or a list of publications.",@"Error description")];
-            return [NSNull null];
+            return nil;
 		}
 		
 	} else {
@@ -133,7 +133,7 @@
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
 			[self setScriptErrorString:NSLocalizedString(@"The 'in' option needs to be a publication or a list of publications.",@"Error description")];
-            return [NSNull null];
+            return nil;
 		}
 		
 	}
@@ -160,7 +160,7 @@
 	NSDictionary *params = [self evaluatedArguments];
 	if (!params) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
-        return [NSNull null];
+        return nil;
 	}
 	
 	BibDocument *document = nil;
@@ -176,7 +176,7 @@
 		// give up
 		[self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
 		[self setScriptErrorString:NSLocalizedString(@"The templated rich text command can only be sent to the documents.", @"Error description")];
-        return [NSNull null];
+        return nil;
 	}
 	
 	// the 'using' parameters gives the template name to use
@@ -186,7 +186,7 @@
     // make sure we get something
 	if (templateStyle == nil && templateAttrString == nil) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
-        return [NSNull null];
+        return nil;
 	}
 	// make sure we get the right thing
 	if ([templateStyle isKindOfClass:[NSString class]] ) {
@@ -199,7 +199,7 @@
     }
     if (template == nil) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
-        return [NSNull null];
+        return nil;
 	}
 	
 	// the 'for' parameter can select the items to template
@@ -218,7 +218,7 @@
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
 			[self setScriptErrorString:NSLocalizedString(@"The 'for' option needs to be a publication or a list of publications.",@"Error description")];
-            return [NSNull null];
+            return nil;
 		}
 		
 	} else {
@@ -240,7 +240,7 @@
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
 			[self setScriptErrorString:NSLocalizedString(@"The 'in' option needs to be a publication or a list of publications.",@"Error description")];
-            return [NSNull null];
+            return nil;
 		}
 		
 	}

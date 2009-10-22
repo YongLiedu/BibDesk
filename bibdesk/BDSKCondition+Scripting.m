@@ -306,7 +306,7 @@ enum {
             case BDSKInDateRange:
                 return [NSDictionary dictionaryWithObjectsAndKeys:dateValue, @"dateValue", toDateValue, @"dateValue", nil];
             default:
-                return [NSNull null];
+                return nil;
         }
     } else if ([self isAttachmentCondition]) {
         switch ([self attachmentComparison]) {

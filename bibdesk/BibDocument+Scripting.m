@@ -347,7 +347,7 @@
 - (id)valueInScriptingPublicationsWithUniqueID:(NSString *)aUniqueID {
 	NSURL *identifierURL = [NSURL URLWithString:aUniqueID];
     id item = identifierURL ? [[self publications] itemForIdentifierURL:identifierURL] : nil;
-    return item ?: [NSNull null];
+    return item;
 }
 
 - (NSArray *)scriptingPublications {

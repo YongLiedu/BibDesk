@@ -201,7 +201,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (id)group {
-    return [owner isDocument] ? (id)[NSNull null] : (id)owner;
+    return [owner isDocument] ? nil : owner;
 }
 
 - (BOOL)isExternal {
@@ -302,7 +302,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 
 
 - (NSColor *)scriptingColor {
-	return [self color] ?: (id)[NSNull null];
+	return [self color];
 }
 
 - (void)setScriptingColor:(NSColor *)newColor {

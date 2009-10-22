@@ -96,7 +96,7 @@
                 pub = nil;
         }
     }
-    return pub ?: [NSNull null];
+    return pub;
 }
 
 - (NSArray *)scriptingPublications {
@@ -375,7 +375,7 @@
 
 - (NSURL *)scriptingFileURL {
     NSURL *fileURL = [self URL];
-    return [fileURL isFileURL] ? fileURL : (id)[NSNull null];
+    return [fileURL isFileURL] ? fileURL : nil;
 }
 
 - (void)setScriptingFileURL:(NSURL *)newURL {

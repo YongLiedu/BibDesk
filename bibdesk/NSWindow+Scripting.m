@@ -52,7 +52,7 @@
         if ([[pub owner] isDocument])
             return pub;
     }
-    return [NSNull null];
+    return nil;
 }
 
 - (id)author {
@@ -62,7 +62,7 @@
         if ([[[auth publication] owner] isDocument])
             return auth;
     }
-    return [NSNull null];
+    return nil;
 }
 
 @end
