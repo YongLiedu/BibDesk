@@ -79,25 +79,9 @@
 }
 
 - (id)copyScriptingValue:(id)value forKey:(NSString *)key withProperties:(NSDictionary *)properties {
-    if ([key isEqualToString:@"scriptingPublications"]) {
-        [NSString setMacroResolverForUnarchiving:[self macroResolver]];
-        id copiedValue = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:value]] retain];
-        [NSString setMacroResolverForUnarchiving:nil];
-        [copiedValue makeObjectsPerformSelector:@selector(setMacroResolver:) withObject:[self macroResolver]];
-        if ([properties count]) {
-            for (id item in copiedValue) {
-                NSMutableDictionary *validProps = [NSMutableDictionary dictionary];
-                NSScriptClassDescription *classDesc = [NSScriptClassDescription classDescriptionForClass:[item class]];
-                for (NSString *aKey in properties) {
-                    if ([classDesc hasWritablePropertyForKey:aKey])
-                        [validProps setValue:[item coerceValue:[properties objectForKey:aKey] forKey:aKey] forKey:aKey];
-                }
-                if ([validProps count])
-                    [item setScriptingProperties:validProps];
-            }
-        }
-        return copiedValue;
-    }
+    if ([key isEqualToString:@"scriptingPublications"])
+        // external groups do not accept new scriptable items, so the owner for the copied item should always be the document
+        return [BibItem copyScriptingValue:value properties:properties owner:[self document]];
     return [super copyScriptingValue:value forKey:key withProperties:properties];
 }
 

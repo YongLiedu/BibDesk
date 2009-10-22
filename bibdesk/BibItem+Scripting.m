@@ -96,6 +96,26 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     return item;
 }
 
++ (id)copyScriptingValue:(id)value properties:(NSDictionary *)properties owner:(id<BDSKOwner>)anOwner {
+    [NSString setMacroResolverForUnarchiving:[anOwner macroResolver]];
+    id copiedValue = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:value]] retain];
+    [NSString setMacroResolverForUnarchiving:nil];
+    [copiedValue makeObjectsPerformSelector:@selector(setMacroResolver:) withObject:[anOwner macroResolver]];
+    if ([properties count]) {
+        for (id item in copiedValue) {
+            NSMutableDictionary *validProps = [NSMutableDictionary dictionary];
+            NSScriptClassDescription *classDesc = [NSScriptClassDescription classDescriptionForClass:[item class]];
+            for (NSString *aKey in properties) {
+                if ([classDesc hasWritablePropertyForKey:aKey])
+                    [validProps setValue:[item coerceValue:[properties objectForKey:aKey] forKey:aKey] forKey:aKey];
+            }
+            if ([validProps count])
+                [item setScriptingProperties:validProps];
+        }
+    }
+    return copiedValue;
+}
+
 /* 
  ssp 2004-07-10
  Returns a path to the BibItem for Apple Script
