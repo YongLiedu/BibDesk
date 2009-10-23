@@ -43,28 +43,7 @@
 #import <Carbon/Carbon.h>
 
 
-@interface NSWindow (BDSKApplication)
-// these are implemented in AppKit as private methods
-- (void)undo:(id)obj;
-- (void)redo:(id)obj;
-@end
-
-
-@interface NSThread (BDSKExtensions)
-+ (void)assignMainThread;
-@end
-
-
 @implementation BDSKApplication
-
-+ (id)sharedApplication {
-    static id sharedApplication = nil;
-    if (sharedApplication == nil) {
-        sharedApplication = [super sharedApplication];
-        [NSThread assignMainThread];
-    }
-    return sharedApplication;
-}
 
 - (IBAction)terminate:(id)sender {
     NSArray *fileNames = [[[NSDocumentController sharedDocumentController] documents] valueForKeyPath:@"@distinctUnionOfObjects.fileName"];
@@ -252,29 +231,6 @@
             [orderedDocuments removeObjectAtIndex:i];
     
     return orderedDocuments;
-}
-
-@end
-
-
-@implementation NSThread (BDSKExtensions)
-
-static NSThread *mainThread = nil;
-
-+ (void)assignMainThread {
-    BDSKPRECONDITION(mainThread == nil);
-    mainThread = [[NSThread currentThread] retain];
-}
-
-+ (BOOL)Tiger_isMainThread {
-    if (mainThread == nil)
-        [self assignMainThread];
-    return [self currentThread] == mainThread;
-}
-
-+ (void)load {
-    // this does nothing when +isMainThread is already implemented, that is, on Leopard
-    BDSKAddClassMethodImplementationFromSelector(self, @selector(isMainThread), @selector(Tiger_isMainThread));
 }
 
 @end
