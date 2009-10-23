@@ -130,9 +130,6 @@ static void fixLegacyTableColumnIdentifiers()
 - (id)init
 {
     if(self = [super init]){
-        requiredFieldsForCiteKey = nil;
-        requiredFieldsForLocalFile = nil;
-        
         metadataCacheLock = [[NSLock alloc] init];
         canWriteMetadata = 1;
     }
@@ -142,7 +139,6 @@ static void fixLegacyTableColumnIdentifiers()
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-	[requiredFieldsForCiteKey release];
     [metadataCacheLock release];
     [super dealloc];
 }

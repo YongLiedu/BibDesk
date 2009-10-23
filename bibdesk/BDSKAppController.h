@@ -49,11 +49,6 @@
 
 
 @interface BDSKAppController : NSObject {
-	
-	// auto generation format
-	NSArray *requiredFieldsForCiteKey;
-    NSArray *requiredFieldsForLocalFile;
-    
 	IBOutlet NSMenu *columnsMenu;
 	IBOutlet NSMenu *groupSortMenu;
 	IBOutlet NSMenu *groupFieldMenu;
