@@ -499,10 +499,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 #pragma mark Menu stuff
 
-- (NSMenu *)groupSortMenu {
-	return groupSortMenu;
-}
-
 - (NSMenu *)groupFieldMenu {
     [self menuNeedsUpdate:groupFieldMenu];
 	return groupFieldMenu;

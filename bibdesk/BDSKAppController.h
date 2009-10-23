@@ -63,7 +63,6 @@
     NSConnection *completionConnection;
 }
 
-- (NSMenu *)groupSortMenu;
 - (NSMenu *)groupFieldMenu;
 
 - (IBAction)visitWebSite:(id)sender;
