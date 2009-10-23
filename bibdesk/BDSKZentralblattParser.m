@@ -100,7 +100,7 @@
  Turns an array of Zentralblatt Math IDs into an array of BibItems.
 */
 + (NSArray *) bibItemsForZMathIDs:(NSArray *) IDs referrer:(NSURL *) referrer error:(NSError **) outError {
-	NSError * error;
+	NSError * error = nil;
 	
 	/*	Determine the server name to use.
 		If the referring URL's path begins with '/zmath', assume we are using a Zentralblatt mirror server before and continue using that.
