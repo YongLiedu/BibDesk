@@ -441,6 +441,19 @@ static BDSKTypeManager *sharedInstance = nil;
     }
 }
 
+- (void)setRequiredFieldsForCiteKey:(NSArray *)newFields{
+	if (requiredFieldsForCiteKey != newFields) {
+        [requiredFieldsForCiteKey release];
+        requiredFieldsForCiteKey = [newFields retain];
+    }
+}
+
+- (void)setRequiredFieldsForLocalFile:(NSArray *)newFields{
+	if (requiredFieldsForLocalFile != newFields) {
+        [requiredFieldsForLocalFile release];
+        requiredFieldsForLocalFile = [newFields retain];
+    }
+}
 
 #pragma mark Getters
 
@@ -716,6 +729,14 @@ static BDSKTypeManager *sharedInstance = nil;
 
 - (NSCharacterSet *)separatorCharacterSetForField:(NSString *)fieldName{
 	return [fieldName isCitationField] ? [NSCharacterSet commaCharacterSet] : separatorCharSet;
+}
+
+- (NSArray *)requiredFieldsForCiteKey{
+	return requiredFieldsForCiteKey;
+}
+
+- (NSArray *)requiredFieldsForLocalFile{
+	return requiredFieldsForLocalFile;
 }
 
 @end

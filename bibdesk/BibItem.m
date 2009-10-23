@@ -1071,7 +1071,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (BOOL)canGenerateAndSetCiteKey
 {
-    NSArray *requiredFields = [BDSKFormatParser requiredFieldsForCiteKey];
+    NSArray *requiredFields = [[BDSKTypeManager sharedManager] requiredFieldsForCiteKey];
     
     // see if it needs to be set (hasEmptyOrDefaultCiteKey)
 	if (nil == requiredFields || [self hasEmptyOrDefaultCiteKey] == NO)
@@ -2691,7 +2691,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 - (BOOL)canSetURLForLinkedFile:(BDSKLinkedFile *)file
 {
-    NSArray *requiredFields = [BDSKFormatParser requiredFieldsForLocalFile];
+    NSArray *requiredFields = [[BDSKTypeManager sharedManager] requiredFieldsForLocalFile];
 	
 	if (nil == requiredFields || 
         ([NSString isEmptyString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKPapersFolderPathKey]] && 

@@ -43,6 +43,7 @@
 #import "BDSKPreviewItem.h"
 #import "BDSKStringConstants.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "BDSKTypeManager.h"
 
 #define MAX_PREVIEW_WIDTH	501.0
 #define MAX_FORMAT_WIDTH	288.0
@@ -336,7 +337,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 			return;
 		}
 	}
-	[[NSApp delegate] setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+	[[BDSKTypeManager sharedManager] setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
     [self updateFormatPresetUI];
 }
 
@@ -393,7 +394,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	} else if (rv == NSAlertAlternateReturn){
 		formatString = [[sudc initialValues] objectForKey:BDSKLocalFileFormatKey];
 		[sud setObject:formatString forKey:BDSKLocalFileFormatKey];
-		[[NSApp delegate] setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+		[[BDSKTypeManager sharedManager] setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
 	}
 	[self updateFormatPreviewUI];
 	return YES;

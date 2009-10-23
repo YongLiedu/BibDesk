@@ -113,6 +113,9 @@
     NSMutableSet *personFieldsSet;
     NSMutableSet *singleValuedGroupFieldsSet;
     NSMutableSet *invalidGroupFieldsSet;
+    
+    NSArray *requiredFieldsForCiteKey;
+    NSArray *requiredFieldsForLocalFile;
 }
 + (BDSKTypeManager *)sharedManager;
 
@@ -144,7 +147,8 @@
 - (void)setBibtexTypeForReferTypeDict:(NSDictionary *)newNames;
 - (void)setFieldNameForReferTagDict:(NSDictionary *)newNames;
 - (void)setBibtexTypeForHCiteTypeDict:(NSDictionary *)newBibtexTypeForHCiteTypeDict;
-
+- (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;
+- (void)setRequiredFieldsForLocalFile:(NSArray *)newFields;
 
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat;
 - (NSSet *)allFieldNames;
@@ -161,6 +165,8 @@
 - (NSString *)bibtexTypeForRISType:(NSString *)type;
 - (NSString *)bibtexTypeForWebOfScienceType:(NSString *)type;
 - (NSString *)bibtexTypeForReferType:(NSString *)type;
+- (NSArray *)requiredFieldsForCiteKey;
+- (NSArray *)requiredFieldsForLocalFile;
 
 /*!
     @method     bibtexTypeForHCiteType:
