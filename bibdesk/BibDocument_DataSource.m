@@ -78,9 +78,9 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import <FileView/FileView.h>
-#import "BDSKApplication.h"
 #import "BDSKAppController.h"
 #import "BDSKFileContentSearchController.h"
+#import "NSEvent_BDSKExtensions.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
@@ -387,7 +387,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-    NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
+    NSString *dragCopyTypeKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
 	NSInteger dragCopyType = [sud integerForKey:dragCopyTypeKey];
     BOOL success = NO;
 	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
@@ -542,7 +542,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     }
     
     if (dragCopyType == BDSKTemplateDragCopyType) {
-        NSString *dragCopyTemplateKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
+        NSString *dragCopyTemplateKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
         NSString *template = [sud stringForKey:dragCopyTemplateKey];
         NSUInteger templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
         if (templateIdx != NSNotFound)
@@ -688,7 +688,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 	} else {
 		NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
 		NSMutableString *s = [NSMutableString string];
-        NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
+        NSString *dragCopyTypeKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
         
         dragCopyType = [sud integerForKey:dragCopyTypeKey];
         
@@ -1350,7 +1350,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard {
     NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
-    NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
+    NSString *dragCopyTypeKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
 	NSInteger dragCopyType = [sud integerForKey:dragCopyTypeKey];
     BOOL success = NO;
 	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
@@ -1394,7 +1394,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     }
     
     if (dragCopyType == BDSKTemplateDragCopyType) {
-        NSString *dragCopyTemplateKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
+        NSString *dragCopyTemplateKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
         NSString *template = [sud stringForKey:dragCopyTemplateKey];
         NSUInteger templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
         if (templateIdx != NSNotFound)
@@ -1832,7 +1832,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             [oldURL release];
             [publication insertObject:aFile inFilesAtIndex:idx];
             [self userAddedURL:aURL forPublication:publication];
-            if (([NSApp currentModifierFlags] & NSCommandKeyMask) == 0)
+            if (([NSEvent standardModifierFlags] & NSCommandKeyMask) == 0)
                 [publication autoFileLinkedFile:aFile];
         }
         idx = [aSet indexGreaterThanIndex:idx];
@@ -1860,7 +1860,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             (aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication])) {
             [publication insertObject:aFile inFilesAtIndex:idx - offset];
             [self userAddedURL:aURL forPublication:publication];
-            if (([NSApp currentModifierFlags] & NSCommandKeyMask) == 0)
+            if (([NSEvent standardModifierFlags] & NSCommandKeyMask) == 0)
                 [publication autoFileLinkedFile:aFile];
         } else {
             // the indexes in aSet assume that we inserted the file
@@ -1958,7 +1958,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             else
                 [aFileView setDropIndex:anIndex dropOperation:FVDropBefore];
         }
-    } else if (dragOperation == NSDragOperationLink && ([NSApp currentModifierFlags] & NSCommandKeyMask) == 0) {
+    } else if (dragOperation == NSDragOperationLink && ([NSEvent standardModifierFlags] & NSCommandKeyMask) == 0) {
         dragOp = NSDragOperationGeneric;
     }
     return dragOp;

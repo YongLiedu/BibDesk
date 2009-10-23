@@ -43,7 +43,6 @@
 #import "BDSKGroup.h"
 #import "BDSKSearchGroup.h"
 #import "BDSKLinkedFile.h"
-#import "BDSKApplication.h"
 #import "BDSKTypeManager.h"
 #import "BDSKPublicationsArray.h"
 #import <Quartz/Quartz.h>
@@ -67,6 +66,7 @@
 #import "NSViewAnimation_BDSKExtensions.h"
 #import "NSTextView_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
+#import "NSEvent_BDSKExtensions.h"
 
 static char BDSKDocumentFileViewObservationContext;
 static char BDSKDocumentDefaultsObservationContext;
@@ -825,7 +825,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 }
 
 - (void)handleFlagsChangedNotification:(NSNotification *)notification{
-    BOOL isOptionKeyState = ([NSApp currentModifierFlags] & NSAlternateKeyMask) != 0;
+    BOOL isOptionKeyState = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) != 0;
     
     if (docState.inOptionKeyState != isOptionKeyState) {
         docState.inOptionKeyState = isOptionKeyState;

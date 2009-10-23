@@ -82,11 +82,11 @@
 #import "WebURLsWithTitles.h"
 #import "NSColor_BDSKExtensions.h"
 #import "NSView_BDSKExtensions.h"
-#import "BDSKApplication.h"
 #import "BDSKCFCallBacks.h"
 #import "BDSKFileContentSearchController.h"
 #import "BDSKSplitView.h"
 #import "BDSKGradientSplitView.h"
+#import "NSEvent_BDSKExtensions.h"
 
 @implementation BibDocument (Groups)
 
@@ -1013,7 +1013,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)addGroupButtonAction:(id)sender {
-    if ([NSApp currentModifierFlags] & NSAlternateKeyMask)
+    if ([NSEvent standardModifierFlags] & NSAlternateKeyMask)
         [self addSmartGroupAction:sender];
     else
         [self addStaticGroupAction:sender];

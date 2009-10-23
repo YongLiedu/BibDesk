@@ -80,9 +80,10 @@
 #import "BDSKEditorTableView.h"
 #import "BDSKEditorTextFieldCell.h"
 #import "BDSKCompletionManager.h"
-#import "BDSKApplication.h"
+#import "NSEvent_BDSKExtensions.h"
 #import "NSColor_BDSKExtensions.h"
 #import "BDSKURLSheetController.h"
+#import "NSEvent_BDSKExtensions.h"
 
 #define WEAK_NULL NULL
 
@@ -1545,7 +1546,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             [oldURL release];
             [publication insertObject:aFile inFilesAtIndex:idx];
             [[self document] userAddedURL:aURL forPublication:publication];
-            if (([NSApp currentModifierFlags] & NSCommandKeyMask) == 0)
+            if (([NSEvent standardModifierFlags] & NSCommandKeyMask) == 0)
                 [publication autoFileLinkedFile:aFile];
         }
         idx = [aSet indexGreaterThanIndex:idx];
@@ -1565,7 +1566,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             (aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication])) {
             [publication insertObject:aFile inFilesAtIndex:idx - offset];
             [[self document] userAddedURL:aURL forPublication:publication];
-            if (([NSApp currentModifierFlags] & NSCommandKeyMask) == 0)
+            if (([NSEvent standardModifierFlags] & NSCommandKeyMask) == 0)
                 [publication autoFileLinkedFile:aFile];
         } else {
             // the indexes in aSet assume that we inserted the file
@@ -1605,7 +1606,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             else
                 [fileView setDropIndex:anIndex dropOperation:FVDropBefore];
         }
-    } else if (dragOperation == NSDragOperationLink && ([NSApp currentModifierFlags] & NSCommandKeyMask) == 0) {
+    } else if (dragOperation == NSDragOperationLink && ([NSEvent standardModifierFlags] & NSCommandKeyMask) == 0) {
         dragOp = NSDragOperationGeneric;
     }
     return dragOp;
@@ -2535,7 +2536,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
     NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
     // get the correct cursor depending on the modifiers
-	if( ([NSApp currentModifierFlags] & (NSAlternateKeyMask | NSCommandKeyMask)) == (NSAlternateKeyMask | NSCommandKeyMask) ){
+	if( ([NSEvent standardModifierFlags] & (NSAlternateKeyMask | NSCommandKeyMask)) == (NSAlternateKeyMask | NSCommandKeyMask) ){
 		return NSDragOperationLink;
     }else if (sourceDragMask & NSDragOperationCopy){
 		return NSDragOperationCopy;
@@ -2577,7 +2578,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	// create a crossref (cmd-option), or fill empty fields (no modifiers)
     
     // uses the Carbon function since [NSApp modifierFlags] won't work if we're not the front app
-	NSUInteger modifierFlags = [NSApp currentModifierFlags];
+	NSUInteger modifierFlags = [NSEvent standardModifierFlags];
 	
 	// we always have sourceDragMask & NSDragOperationLink here for some reason, so test the mask manually
 	if((modifierFlags & (NSAlternateKeyMask | NSCommandKeyMask)) == (NSAlternateKeyMask | NSCommandKeyMask)){
@@ -3481,8 +3482,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     // workaround for an NSForm bug: when selecting a button in a modal dialog after committing an edit it can try a keyEquivalent with the mouseUp event
     if (type != NSKeyDown && type != NSKeyUp)
         return NO;
-    unichar c = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
-    NSUInteger flags = [theEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+    unichar c = [theEvent firstCharacter];
+    NSUInteger flags = [theEvent deviceIndependentModifierFlags];
     
     if((c == NSRightArrowFunctionKey || c == NSDownArrowFunctionKey) && (flags & NSCommandKeyMask) && (flags & NSAlternateKeyMask)){
         if([self indexOfTabViewItem:[self selectedTabViewItem]] == [self numberOfTabViewItems] - 1)

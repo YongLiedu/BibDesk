@@ -39,6 +39,7 @@
 #import "BDSKTableView.h"
 #import "BDSKTypeSelectHelper.h"
 #import "NSLayoutManager_BDSKExtensions.h"
+#import "NSEvent_BDSKExtensions.h"
 
 
 static char BDSKTableViewFontDefaultsObservationContext;
@@ -204,9 +205,8 @@ static char BDSKTableViewFontDefaultsObservationContext;
 #pragma mark Keyboard shortcuts and actions
 
 - (void)keyDown:(NSEvent *)theEvent {
-    NSString *characters = [theEvent charactersIgnoringModifiers];
-    unichar eventChar = [characters length] > 0 ? [characters characterAtIndex:0] : 0;
-    NSUInteger modifierFlags = [theEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+    unichar eventChar = [theEvent firstCharacter];
+    NSUInteger modifierFlags = [theEvent deviceIndependentModifierFlags];
     
 	if ((eventChar == NSEnterCharacter || eventChar == NSFormFeedCharacter || eventChar == NSNewlineCharacter || eventChar == NSCarriageReturnCharacter) && (modifierFlags & ~NSFunctionKeyMask) == 0) {
         [self insertNewline:self];

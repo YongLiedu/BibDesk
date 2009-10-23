@@ -50,7 +50,6 @@
 #import "BDSKSearchGroup.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKGroupsArray.h"
-#import "BDSKApplication.h"
 
 #import "BDSKUndoManager.h"
 #import "BDSKPrintableView.h"
@@ -125,6 +124,7 @@
 #import "NSColor_BDSKExtensions.h"
 #import "BDSKTask.h"
 #import "NSInvocation_BDSKExtensions.h"
+#import "NSEvent_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";

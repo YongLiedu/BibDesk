@@ -43,7 +43,7 @@
 #import "BDSKImagePopUpButton.h"
 #import "BibDocument_Actions.h"
 #import "BDSKCustomCiteDrawerController.h"
-#import "BDSKApplication.h"
+#import "NSEvent_BDSKExtensions.h"
 
 #define TOOLBAR_SEARCHFIELD_MIN_SIZE NSMakeSize(110.0, 22.0)
 #define TOOLBAR_SEARCHFIELD_MAX_SIZE NSMakeSize(1000.0, 22.0)
@@ -258,7 +258,7 @@
     }else if([[toolbarItem itemIdentifier] isEqualToString: BibDocumentToolbarDeleteItemIdentifier]){
         if([self numberOfSelectedPubs] == 0 || [documentWindow isKeyWindow] == NO) enable = NO;  // disable click-through
     }else if([[toolbarItem itemIdentifier] isEqualToString: BibDocumentToolbarNewItemIdentifier]){
-        if(([NSApp currentModifierFlags] & NSAlternateKeyMask) && [self numberOfSelectedPubs] != 1) enable = NO;
+        if(([NSEvent standardModifierFlags] & NSAlternateKeyMask) && [self numberOfSelectedPubs] != 1) enable = NO;
     }
     return enable;
 }

@@ -63,6 +63,7 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "NSView_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSEvent_BDSKExtensions.h"
 
 #import "BDSKTypeManager.h"
 #import "BDSKScriptHookManager.h"
@@ -88,7 +89,6 @@
 #import <sys/stat.h>
 #import <FileView/FileView.h>
 #import "BDSKMacro.h"
-#import "BDSKApplication.h"
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKURLSheetController.h"
 #import "BDSKLinkedFile.h"
@@ -177,7 +177,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)newPub:(id)sender{
-    if ([NSApp currentModifierFlags] & NSAlternateKeyMask) {
+    if ([NSEvent standardModifierFlags] & NSAlternateKeyMask) {
         [self createNewPubUsingCrossrefAction:sender];
     } else {
         [self createNewPub];

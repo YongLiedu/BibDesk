@@ -293,6 +293,7 @@
 		CEE8DEF00E5C402800EFA97F /* BibImporter.mdimporter in Copy Files: Spotlight */ = {isa = PBXBuildFile; fileRef = F95CC113087F54BF002C5694 /* BibImporter.mdimporter */; };
 		CEE8DEF10E5C402800EFA97F /* BibDesk.qlgenerator in Copy Files: QuickLook */ = {isa = PBXBuildFile; fileRef = F98C6FD00CDD30A2002FCAD8 /* BibDesk.qlgenerator */; };
 		CEEA4C6A0B57B0D400434059 /* BDSKBooleanValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEA4C680B57B0D400434059 /* BDSKBooleanValueTransformer.m */; };
+		CEEC1A331091F31600530207 /* NSEvent_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEC1A311091F31600530207 /* NSEvent_BDSKExtensions.m */; };
 		CEEC6C55093A411E00A64F54 /* BDSKCollapsibleView.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEC6C53093A411E00A64F54 /* BDSKCollapsibleView.m */; };
 		CEEC70E2093B6EC200A64F54 /* BDSKDragImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEC70E0093B6EC200A64F54 /* BDSKDragImageView.m */; };
 		CEEC72F7093BDCA200A64F54 /* BibDesk.sdef in Resources */ = {isa = PBXBuildFile; fileRef = F9022FBF07580B9400C3F701 /* BibDesk.sdef */; };
@@ -1207,6 +1208,8 @@
 		CEEBA6850D746DD7000204B8 /* BibDesk-Common.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-Common.xcconfig"; sourceTree = "<group>"; };
 		CEEBA6860D746DD7000204B8 /* BibDesk-Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-Debug.xcconfig"; sourceTree = "<group>"; };
 		CEEBA6870D746DD7000204B8 /* BibDesk-Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-Release.xcconfig"; sourceTree = "<group>"; };
+		CEEC1A301091F31600530207 /* NSEvent_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSEvent_BDSKExtensions.h; sourceTree = "<group>"; };
+		CEEC1A311091F31600530207 /* NSEvent_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSEvent_BDSKExtensions.m; sourceTree = "<group>"; };
 		CEEC6C52093A411D00A64F54 /* BDSKCollapsibleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCollapsibleView.h; sourceTree = "<group>"; };
 		CEEC6C53093A411E00A64F54 /* BDSKCollapsibleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCollapsibleView.m; sourceTree = "<group>"; };
 		CEEC70DF093B6EC200A64F54 /* BDSKDragImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKDragImageView.h; sourceTree = "<group>"; };
@@ -1959,6 +1962,7 @@
 				CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */,
 				F97BF0B8090AE7520063504B /* NSBezierPath_BDSKExtensions.m */,
 				CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */,
+				CEEC1A311091F31600530207 /* NSEvent_BDSKExtensions.m */,
 				F9022C9D0758038000C3F701 /* NSImage_BDSKExtensions.m */,
 				CE6C047F0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m */,
 				F9FD63DB0A61B87800F9871B /* NSMenu_BDSKExtensions.m */,
@@ -2641,6 +2645,7 @@
 				F9235017089A813E00EFEB06 /* NSDate_BDSKExtensions.h */,
 				CE6775140A8506A7003CFC58 /* NSDictionary_BDSKExtensions.h */,
 				F9F5E20B0AE307C0007EBB31 /* NSError_BDSKExtensions.h */,
+				CEEC1A301091F31600530207 /* NSEvent_BDSKExtensions.h */,
 				F95CC0C0087F5378002C5694 /* NSFileManager_BDSKExtensions.h */,
 				CE3255FD0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.h */,
 				F9022C9C0758038000C3F701 /* NSImage_BDSKExtensions.h */,
@@ -3577,6 +3582,7 @@
 				CEE50487104D662500636237 /* BDSKNotesSearchIndex.m in Sources */,
 				454AC23E1086E07B00F2890A /* BDSKIEEEXploreParser.m in Sources */,
 				CEF63D0A10888A5A000A31E2 /* BDSKSeparatorCell.m in Sources */,
+				CEEC1A331091F31600530207 /* NSEvent_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

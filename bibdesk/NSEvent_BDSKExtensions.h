@@ -1,10 +1,10 @@
 //
-//  BDSKApplication.h
+//  NSEvent_BDSKExtensions.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 10/26/06.
+//  Created by Christiaan on 10/23/09.
 /*
- This software is Copyright (c) 2006-2009
+ This software is Copyright (c) 2009
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,5 +39,9 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKApplication : NSApplication 
+@interface NSEvent (BDSKExtensions)
++ (NSUInteger)standardModifierFlags;
+- (NSUInteger)deviceIndependentModifierFlags;
+- (NSUInteger)standardModifierFlags;
+- (unichar)firstCharacter;
 @end

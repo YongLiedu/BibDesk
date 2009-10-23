@@ -37,6 +37,7 @@
  */
 
 #import "BDSKTypeSelectHelper.h"
+#import "NSEvent_BDSKExtensions.h"
 #import "BDSKRuntime.h"
 
 #define REPEAT_CHARACTER 0x2F
@@ -225,7 +226,7 @@
 {
     if ([keyEvent type] != NSKeyDown)
         return NO;
-    if ([keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask & ~NSShiftKeyMask & ~NSAlternateKeyMask & ~NSAlphaShiftKeyMask)
+    if ([keyEvent deviceIndependentModifierFlags] & ~NSShiftKeyMask & ~NSAlternateKeyMask & ~NSAlphaShiftKeyMask)
         return NO;
     
     static NSCharacterSet *nonAlphanumericCharacterSet = nil;
@@ -241,12 +242,7 @@
 {
     if ([keyEvent type] != NSKeyDown)
         return NO;
-    
-    NSString *characters = [keyEvent charactersIgnoringModifiers];
-    unichar character = [characters length] > 0 ? [characters characterAtIndex:0] : 0;
-	NSUInteger modifierFlags = [keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
-    
-    return modifierFlags == 0 && character == REPEAT_CHARACTER;
+    return [keyEvent deviceIndependentModifierFlags] == 0 && [keyEvent firstCharacter] == REPEAT_CHARACTER;
 }
 
 - (BOOL)isCancelEvent:(NSEvent *)keyEvent;
@@ -255,12 +251,7 @@
         return NO;
     if ([self isProcessing] == NO)
         return NO;
-    
-    NSString *characters = [keyEvent charactersIgnoringModifiers];
-    unichar character = [characters length] > 0 ? [characters characterAtIndex:0] : 0;
-	NSUInteger modifierFlags = [keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
-    
-    return modifierFlags == 0 && character == CANCEL_CHARACTER;
+    return [keyEvent deviceIndependentModifierFlags] == 0 && [keyEvent firstCharacter] == CANCEL_CHARACTER;
 }
 
 @end

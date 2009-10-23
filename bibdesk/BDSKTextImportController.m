@@ -65,9 +65,10 @@
 #import "BDSKBookmarkController.h"
 #import "BDSKLinkedFile.h"
 #import "BDSKCompletionManager.h"
-#import "BDSKApplication.h"
+#import "NSEvent_BDSKExtensions.h"
 #import "NSInvocation_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSEvent_BDSKExtensions.h"
 
 
 @interface BDSKTextImportController (Private)
@@ -242,7 +243,7 @@
 #pragma mark Actions
 
 - (IBAction)addItemAction:(id)sender{
-    NSInteger optKey = [NSApp currentModifierFlags] & NSAlternateKeyMask;
+    NSInteger optKey = [NSEvent standardModifierFlags] & NSAlternateKeyMask;
     BibItem *newItem = (optKey) ? [item copy] : [[BibItem alloc] init];
     
     // make the tableview stop editing:
@@ -600,7 +601,7 @@
 @implementation BDSKTextImportController (Private)
 
 - (void)handleFlagsChangedNotification:(NSNotification *)notification{
-    NSUInteger modifierFlags = [NSApp currentModifierFlags];
+    NSUInteger modifierFlags = [NSEvent standardModifierFlags];
     
     if (modifierFlags & NSAlternateKeyMask) {
         [addButton setTitle:NSLocalizedString(@"Add & Copy", @"Button title")];
@@ -1275,7 +1276,7 @@
 	
     NSString *oldValue = [item valueOfField:selKey];
     
-    if(([NSApp currentModifierFlags] & NSControlKeyMask) != 0 && 
+    if(([NSEvent standardModifierFlags] & NSControlKeyMask) != 0 && 
        [NSString isEmptyString:oldValue] == NO && 
        [selKey isSingleValuedField] == NO){
         
@@ -1495,7 +1496,7 @@
         NSString *key = [fields objectAtIndex:row];
         NSString *oldValue = [item valueOfField:key];
         
-        if(([NSApp currentModifierFlags] & NSControlKeyMask) != 0 && 
+        if(([NSEvent standardModifierFlags] & NSControlKeyMask) != 0 && 
            [NSString isEmptyString:oldValue] == NO && 
            [key isSingleValuedField] == NO){
             
@@ -1521,7 +1522,7 @@
         NSString *string = [pboard stringForType:NSStringPboardType];
         NSString *oldValue = [item valueOfField:selKey];
         
-        if(([NSApp currentModifierFlags] & NSControlKeyMask) != 0 && 
+        if(([NSEvent standardModifierFlags] & NSControlKeyMask) != 0 && 
            [NSString isEmptyString:oldValue] == NO && 
            [selKey isSingleValuedField] == NO){
             
@@ -1842,7 +1843,7 @@
 
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent{
     
-    unichar c = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
+    unichar c = [theEvent firstCharacter];
     NSUInteger flags = [theEvent modifierFlags];
     
     if (flags & NSCommandKeyMask) {
@@ -1882,11 +1883,8 @@
 }
 
 - (void)keyDown:(NSEvent *)event{
-    NSString *chars = [event charactersIgnoringModifiers];
-    if ([chars length] == 0)
-        return;
-    unichar c = [chars characterAtIndex:0];
-    NSUInteger flags = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask & ~NSAlphaShiftKeyMask);
+    unichar c = [event firstCharacter];
+    NSUInteger flags = ([event deviceIndependentModifierFlags] & ~NSAlphaShiftKeyMask);
     
     static NSCharacterSet *fieldNameCharSet = nil;
     if (fieldNameCharSet == nil) 
