@@ -2462,10 +2462,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	NSString *tooltip = nil;
 	
 	if ([identifier isEqualToString:@"NeedsToGenerateCiteKey"]) {
-		requiredFields = [[NSApp delegate] requiredFieldsForCiteKey];
+		requiredFields = [BDSKFormatParser requiredFieldsForCiteKey];
 		tooltip = NSLocalizedString(@"The cite key needs to be generated.", @"Tool tip message");
 	} else if ([identifier isEqualToString:@"NeedsToBeFiled"]) {
-		requiredFields = [[NSApp delegate] requiredFieldsForLocalFile];
+		requiredFields = [BDSKFormatParser requiredFieldsForLocalFile];
 		tooltip = NSLocalizedString(@"The linked file needs to be filed.", @"Tool tip message");
 	} else {
 		return nil;

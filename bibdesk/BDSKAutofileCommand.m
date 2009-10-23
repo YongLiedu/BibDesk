@@ -85,7 +85,7 @@
                 return nil;
             }
             if ([location isAbsolutePath] == NO) {
-                NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub owner]];
+                NSString *papersFolderPath = [BDSKFormatParser folderPathForFilingPapersFromDocumentAtPath:[[[pub owner] fileURL] path]];
                 [papersFolderPath stringByAppendingPathComponent:location]; 
             }
             paperInfos = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:pub, @"publication", [localFiles objectAtIndex:i], @"file", location, @"path", nil]];

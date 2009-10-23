@@ -194,7 +194,7 @@ static void fixLegacyTableColumnIdentifiers()
     
     if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
         [sud setObject:formatString forKey:BDSKCiteKeyFormatKey];
-        [self setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+        [BDSKFormatParser setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
     }else{
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @"Message in alert dialog when detecting invalid cite key format")
                                          defaultButton:NSLocalizedString(@"Go to Preferences", @"Button title")
@@ -206,7 +206,7 @@ static void fixLegacyTableColumnIdentifiers()
         if (button == NSAlertAlternateReturn){
             formatString = [[[NSUserDefaultsController sharedUserDefaultsController] initialValues] objectForKey:BDSKCiteKeyFormatKey];
             [sud setObject:formatString forKey:BDSKCiteKeyFormatKey];
-            [self setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+            [BDSKFormatParser setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
         }else{
             [[BDSKPreferenceController sharedPreferenceController] showWindow:self];
             [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.citekey"];
@@ -243,7 +243,7 @@ static void fixLegacyTableColumnIdentifiers()
     
     if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:&error]) {
         [sud setObject:formatString forKey:BDSKLocalFileFormatKey];
-        [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+        [BDSKFormatParser setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
     } else {
         NSString *fixedFormatString = nil;
         NSString *otherButton = nil;
@@ -258,7 +258,7 @@ static void fixLegacyTableColumnIdentifiers()
         }
         if (fixedFormatString && [BDSKFormatParser validateFormat:&fixedFormatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:NULL]) {
             [sud setObject:fixedFormatString forKey:BDSKLocalFileFormatKey];
-            [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
+            [BDSKFormatParser setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
             otherButton = NSLocalizedString(@"Fix", @"Button title");
         }
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"The autogeneration format for local files is invalid.", @"Message in alert dialog when detecting invalid local file format")
@@ -270,13 +270,13 @@ static void fixLegacyTableColumnIdentifiers()
         button = [alert runModal];
         if (button == NSAlertDefaultReturn) {
             [sud setObject:fixedFormatString forKey:BDSKLocalFileFormatKey];
-            [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
+            [BDSKFormatParser setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
             [[BDSKPreferenceController sharedPreferenceController] showWindow:self];
             [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.autofile"];
         } else if (button == NSAlertAlternateReturn) {
             formatString = [[[NSUserDefaultsController sharedUserDefaultsController] initialValues] objectForKey:BDSKLocalFileFormatKey];			
             [sud setObject:formatString forKey:BDSKLocalFileFormatKey];
-            [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+            [BDSKFormatParser setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
         }
     }
 
@@ -711,43 +711,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     }
 }
 
-- (IBAction)reportBug:(id)sender {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://sourceforge.net/tracker/?group_id=61487&atid=497423"]];
-}
-
-- (IBAction)requestFeature:(id)sender {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://sourceforge.net/tracker/?group_id=61487&atid=497426"]];
-}
-
-#pragma mark Auto generation format stuff
-
-- (NSArray *)requiredFieldsForCiteKey{
-	return requiredFieldsForCiteKey;
-}
-
-- (void)setRequiredFieldsForCiteKey:(NSArray *)newFields{
-	[requiredFieldsForCiteKey autorelease];
-	requiredFieldsForCiteKey = [newFields retain];
-}
-
-- (NSArray *)requiredFieldsForLocalFile{
-	return requiredFieldsForLocalFile;
-}
-
-- (void)setRequiredFieldsForLocalFile:(NSArray *)newFields{
-	[requiredFieldsForLocalFile autorelease];
-	requiredFieldsForLocalFile = [newFields retain];
-}
-
-- (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKOwner>)owner {
-	NSString *papersFolderPath = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKPapersFolderPathKey];
-	if ([NSString isEmptyString:papersFolderPath])
-		papersFolderPath = [[[owner fileURL] path] stringByDeletingLastPathComponent];
-	if ([NSString isEmptyString:papersFolderPath])
-		papersFolderPath = NSHomeDirectory();
-	return [papersFolderPath stringByExpandingTildeInPath];
-}
-
 #pragma mark DO completion
 
 - (NSArray *)completionsForString:(NSString *)searchString;
@@ -774,7 +737,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     return theURLs;
 }
 
-#pragma mark Panels
+#pragma mark Actions
 
 - (IBAction)showReadMeFile:(id)sender{
     [[BDSKReadMeController sharedReadMeController] showWindow:self];
@@ -800,6 +763,14 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         [NSURL URLWithString:WIKI_URL]]){
         NSBeep();
     }
+}
+
+- (IBAction)reportBug:(id)sender {
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://sourceforge.net/tracker/?group_id=61487&atid=497423"]];
+}
+
+- (IBAction)requestFeature:(id)sender {
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://sourceforge.net/tracker/?group_id=61487&atid=497426"]];
 }
 
 - (IBAction)toggleShowingErrorPanel:(id)sender{
@@ -1335,76 +1306,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             else NSLog(@"/usr/bin/mdimport not found!");
         }
     }
-}
-
-#pragma mark Email support
-
-- (BOOL)emailTo:(NSString *)receiver subject:(NSString *)subject body:(NSString *)body attachments:(NSArray *)files {
-    NSMutableString *scriptString = nil;
-    
-    NSString *mailAppName = @"";
-    CFURLRef mailAppURL = NULL;
-    OSStatus status = LSGetApplicationForURL((CFURLRef)[NSURL URLWithString:@"mailto:"], kLSRolesAll, NULL, &mailAppURL);
-    if (status == noErr)
-        mailAppName = [[[(NSURL *)mailAppURL path] lastPathComponent] stringByDeletingPathExtension];
-    
-    if ([mailAppName rangeOfString:@"Entourage" options:NSCaseInsensitiveSearch].length) {
-        scriptString = [NSMutableString stringWithString:@"tell application \"Microsoft Entourage\"\n"];
-        [scriptString appendString:@"activate\n"];
-        [scriptString appendFormat:@"set m to make new draft window with properties {subject: \"%@\"}\n", subject ?: @""];
-        [scriptString appendString:@"tell m\n"];
-        if (receiver)
-            [scriptString appendFormat:@"set recipient to {address:{address: \"%@\", display name: \"%@\"}, recipient type:to recipient}}\n", receiver, receiver];
-        if (body)
-            [scriptString appendFormat:@"set content to \"%@\"\n", body];
-        for (NSString *fileName in files)
-            [scriptString appendFormat:@"make new attachment with properties {file:POSIX file \"%@\"}\n", fileName];
-        [scriptString appendString:@"end tell\n"];
-        [scriptString appendString:@"end tell\n"];
-    } else if ([mailAppName rangeOfString:@"Mailsmith" options:NSCaseInsensitiveSearch].length) {
-        scriptString = [NSMutableString stringWithString:@"tell application \"Mailsmith\"\n"];
-        [scriptString appendString:@"activate\n"];
-        [scriptString appendFormat:@"set m to make new message window with properties {subject: \"%@\"}\n", subject ?: @""];
-        [scriptString appendString:@"tell m\n"];
-        if (receiver)
-            [scriptString appendFormat:@"make new to_recipient at end with properties {address: \"%@\"}\n", receiver];
-        if (body)
-            [scriptString appendFormat:@"set contents to \"%@\"\n", body];
-        for (NSString *fileName in files)
-            [scriptString appendFormat:@"make new enclosure with properties {file:POSIX file \"%@\"}\n", fileName];
-        [scriptString appendString:@"end tell\n"];
-        [scriptString appendString:@"end tell\n"];
-    } else {
-        scriptString = [NSMutableString stringWithString:@"tell application \"Mail\"\n"];
-        [scriptString appendString:@"activate\n"];
-        [scriptString appendFormat:@"set m to make new outgoing message with properties {subject: \"%@\", visible:true}\n", subject ?: @""];
-        [scriptString appendString:@"tell m\n"];
-        if (receiver)
-            [scriptString appendFormat:@"make new to recipient at end of to recipients with properties {address: \"%@\"}\n", receiver];
-        if (body)
-            [scriptString appendFormat:@"set content to \"%@\"\n", body];
-        [scriptString appendString:@"tell its content\n"];
-        for (NSString *fileName in files)
-            [scriptString appendFormat:@"make new attachment at after last character with properties {file name:\"%@\"}\n", fileName];
-        [scriptString appendString:@"end tell\n"];
-        [scriptString appendString:@"end tell\n"];
-        [scriptString appendString:@"end tell\n"];
-    }
-    
-    if (scriptString) {
-        NSAppleScript *script = [[[NSAppleScript alloc] initWithSource:scriptString] autorelease];
-        NSDictionary *errorDict = nil;
-        if ([script compileAndReturnError:&errorDict] == NO) {
-            NSLog(@"Error compiling mail to script: %@", errorDict);
-            return NO;
-        }
-        if ([script executeAndReturnError:&errorDict] == NO) {
-            NSLog(@"Error running mail to script: %@", errorDict);
-            return NO;
-        }
-        return YES;
-    }
-    return NO;
 }
 
 @end

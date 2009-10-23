@@ -329,6 +329,76 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     return theUTI ? [self type:theUTI conformsToType:(id)kUTTypeFolder] : NO;
 }
 
+#pragma mark Email support
+
+- (BOOL)emailTo:(NSString *)receiver subject:(NSString *)subject body:(NSString *)body attachments:(NSArray *)files {
+    NSMutableString *scriptString = nil;
+    
+    NSString *mailAppName = @"";
+    CFURLRef mailAppURL = NULL;
+    OSStatus status = LSGetApplicationForURL((CFURLRef)[NSURL URLWithString:@"mailto:"], kLSRolesAll, NULL, &mailAppURL);
+    if (status == noErr)
+        mailAppName = [[[(NSURL *)mailAppURL path] lastPathComponent] stringByDeletingPathExtension];
+    
+    if ([mailAppName rangeOfString:@"Entourage" options:NSCaseInsensitiveSearch].length) {
+        scriptString = [NSMutableString stringWithString:@"tell application \"Microsoft Entourage\"\n"];
+        [scriptString appendString:@"activate\n"];
+        [scriptString appendFormat:@"set m to make new draft window with properties {subject: \"%@\"}\n", subject ?: @""];
+        [scriptString appendString:@"tell m\n"];
+        if (receiver)
+            [scriptString appendFormat:@"set recipient to {address:{address: \"%@\", display name: \"%@\"}, recipient type:to recipient}}\n", receiver, receiver];
+        if (body)
+            [scriptString appendFormat:@"set content to \"%@\"\n", body];
+        for (NSString *fileName in files)
+            [scriptString appendFormat:@"make new attachment with properties {file:POSIX file \"%@\"}\n", fileName];
+        [scriptString appendString:@"end tell\n"];
+        [scriptString appendString:@"end tell\n"];
+    } else if ([mailAppName rangeOfString:@"Mailsmith" options:NSCaseInsensitiveSearch].length) {
+        scriptString = [NSMutableString stringWithString:@"tell application \"Mailsmith\"\n"];
+        [scriptString appendString:@"activate\n"];
+        [scriptString appendFormat:@"set m to make new message window with properties {subject: \"%@\"}\n", subject ?: @""];
+        [scriptString appendString:@"tell m\n"];
+        if (receiver)
+            [scriptString appendFormat:@"make new to_recipient at end with properties {address: \"%@\"}\n", receiver];
+        if (body)
+            [scriptString appendFormat:@"set contents to \"%@\"\n", body];
+        for (NSString *fileName in files)
+            [scriptString appendFormat:@"make new enclosure with properties {file:POSIX file \"%@\"}\n", fileName];
+        [scriptString appendString:@"end tell\n"];
+        [scriptString appendString:@"end tell\n"];
+    } else {
+        scriptString = [NSMutableString stringWithString:@"tell application \"Mail\"\n"];
+        [scriptString appendString:@"activate\n"];
+        [scriptString appendFormat:@"set m to make new outgoing message with properties {subject: \"%@\", visible:true}\n", subject ?: @""];
+        [scriptString appendString:@"tell m\n"];
+        if (receiver)
+            [scriptString appendFormat:@"make new to recipient at end of to recipients with properties {address: \"%@\"}\n", receiver];
+        if (body)
+            [scriptString appendFormat:@"set content to \"%@\"\n", body];
+        [scriptString appendString:@"tell its content\n"];
+        for (NSString *fileName in files)
+            [scriptString appendFormat:@"make new attachment at after last character with properties {file name:\"%@\"}\n", fileName];
+        [scriptString appendString:@"end tell\n"];
+        [scriptString appendString:@"end tell\n"];
+        [scriptString appendString:@"end tell\n"];
+    }
+    
+    if (scriptString) {
+        NSAppleScript *script = [[[NSAppleScript alloc] initWithSource:scriptString] autorelease];
+        NSDictionary *errorDict = nil;
+        if ([script compileAndReturnError:&errorDict] == NO) {
+            NSLog(@"Error compiling mail to script: %@", errorDict);
+            return NO;
+        }
+        if ([script executeAndReturnError:&errorDict] == NO) {
+            NSLog(@"Error running mail to script: %@", errorDict);
+            return NO;
+        }
+        return YES;
+    }
+    return NO;
+}
+
 @end
 
 @implementation NSString (UTIExtensions)

@@ -102,7 +102,7 @@
     BOOL isFileField = [field isLocalFileField];
     NSString *papersFolderPath = nil;
     if (isFileField || isFile)
-        papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub owner]];
+        papersFolderPath = [BDSKFormatParser folderPathForFilingPapersFromDocumentAtPath:[[[pub owner] fileURL] path]];
 	
     BDSKLinkedFile *file = nil;
     if (isFile)

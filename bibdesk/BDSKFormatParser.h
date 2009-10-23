@@ -167,6 +167,13 @@
  @result Array of required field names
 */
 + (NSArray *)requiredFieldsForFormat:(NSString *)formatString;
+	
++ (NSArray *)requiredFieldsForCiteKey;
++ (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;
++ (NSArray *)requiredFieldsForLocalFile;
++ (void)setRequiredFieldsForLocalFile:(NSArray *)newFields;
+
++ (NSString *)folderPathForFilingPapersFromDocumentAtPath:(NSString *)path;
 
 @end
 

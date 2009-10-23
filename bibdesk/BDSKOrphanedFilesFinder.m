@@ -140,7 +140,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     if ([NSString isEmptyString:papersFolderPath]) {
         NSArray *documents = [[NSDocumentController sharedDocumentController] documents];
         if ([documents count] == 1) {
-            papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[documents objectAtIndex:0]];
+            papersFolderPath = [BDSKFormatParser folderPathForFilingPapersFromDocumentAtPath:[[[documents objectAtIndex:0] fileURL] path]];
         } else {
             return nil;
         }

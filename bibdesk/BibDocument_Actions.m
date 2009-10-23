@@ -88,7 +88,6 @@
 #import <sys/stat.h>
 #import <FileView/FileView.h>
 #import "BDSKMacro.h"
-#import "BDSKAppController.h"
 #import "BDSKApplication.h"
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKURLSheetController.h"
@@ -493,7 +492,7 @@ static BOOL changingColors = NO;
     // escape double quotes
     [body replaceOccurrencesOfString:@"\"" withString:@"\\\"" options:NSLiteralSearch range:NSMakeRange(0, [body length])];
 
-    [[NSApp delegate] emailTo:nil subject:@"BibDesk references" body:body attachments:files];
+    [[NSWorkspace sharedWorkspace] emailTo:nil subject:@"BibDesk references" body:body attachments:files];
 }
 
 - (IBAction)sendToLyX:(id)sender {

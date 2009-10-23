@@ -1071,7 +1071,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (BOOL)canGenerateAndSetCiteKey
 {
-    NSArray *requiredFields = [[NSApp delegate] requiredFieldsForCiteKey];
+    NSArray *requiredFields = [BDSKFormatParser requiredFieldsForCiteKey];
     
     // see if it needs to be set (hasEmptyOrDefaultCiteKey)
 	if (nil == requiredFields || [self hasEmptyOrDefaultCiteKey] == NO)
@@ -2671,7 +2671,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 - (BOOL)isValidLocalFilePath:(NSString *)proposedPath{
     if ([NSString isEmptyString:proposedPath])
         return NO;
-    NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
+    NSString *papersFolderPath = [BDSKFormatParser folderPathForFilingPapersFromDocumentAtPath:[[owner fileURL] path]];
     // NSFileManager need aliases resolved for existence checks
     papersFolderPath = [[NSFileManager defaultManager] resolveAliasesInPath:papersFolderPath];
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKLocalFileLowercaseKey])
@@ -2681,7 +2681,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 - (NSURL *)suggestedURLForLinkedFile:(BDSKLinkedFile *)file
 {
-	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
+    NSString *papersFolderPath = [BDSKFormatParser folderPathForFilingPapersFromDocumentAtPath:[[owner fileURL] path]];
     
 	NSString *relativeFile = [BDSKFormatParser parseFormatForLinkedFile:file ofItem:self];
 	if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKLocalFileLowercaseKey])
@@ -2691,7 +2691,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 - (BOOL)canSetURLForLinkedFile:(BDSKLinkedFile *)file
 {
-    NSArray *requiredFields = [[NSApp delegate] requiredFieldsForLocalFile];
+    NSArray *requiredFields = [BDSKFormatParser requiredFieldsForLocalFile];
 	
 	if (nil == requiredFields || 
         ([NSString isEmptyString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKPapersFolderPathKey]] && 

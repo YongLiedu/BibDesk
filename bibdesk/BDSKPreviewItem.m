@@ -139,7 +139,7 @@
 - (NSString *)suggestedLocalFilePath {
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
 	NSString *localFileFormat = [sud objectForKey:BDSKLocalFileFormatKey];
-	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
+    NSString *papersFolderPath = [BDSKFormatParser folderPathForFilingPapersFromDocumentAtPath:[[owner fileURL] path]];
 	NSString *relativeFile = [BDSKFormatParser parseFormat:localFileFormat forField:BDSKLocalFileString linkedFile:linkedFile ofItem:self suggestion:nil];
 	if ([sud boolForKey:BDSKLocalFileLowercaseKey])
 		relativeFile = [relativeFile lowercaseString];

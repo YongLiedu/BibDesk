@@ -72,13 +72,6 @@
 
 - (NSMenu *)groupSortMenu;
 - (NSMenu *)groupFieldMenu;
-	
-- (NSArray *)requiredFieldsForCiteKey;
-- (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;
-- (NSArray *)requiredFieldsForLocalFile;
-- (void)setRequiredFieldsForLocalFile:(NSArray *)newFields;
-
-- (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKOwner>)owner;
 
 - (IBAction)visitWebSite:(id)sender;
 - (IBAction)visitWiki:(id)sender;
@@ -162,7 +155,5 @@
 - (void)doSpotlightImportIfNeeded;
 
 - (void)handleGetURLEvent:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)replyEvent;
-
-- (BOOL)emailTo:(NSString *)receiver subject:(NSString *)subject body:(NSString *)body attachments:(NSArray *)files;
 
 @end
