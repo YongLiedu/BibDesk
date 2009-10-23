@@ -37,7 +37,6 @@
  */
 
 #import "BDSKScriptHook+Scripting.h"
-#import "BDSKApplication.h";
 
 
 @implementation BDSKScriptHook (Scripting)
@@ -49,7 +48,7 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
     if (uniqueID) {
         // this is necessary as our container is the application 
-		NSScriptClassDescription *containerClassDescription = [NSScriptClassDescription classDescriptionForClass:[BDSKApplication class]];
+		NSScriptClassDescription *containerClassDescription = [NSScriptClassDescription classDescriptionForClass:[NSApp class]];
         return [[[NSUniqueIDSpecifier allocWithZone: [self zone]] 
 			  initWithContainerClassDescription: containerClassDescription 
 							 containerSpecifier: nil // the application is the null container
