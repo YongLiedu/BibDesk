@@ -159,33 +159,6 @@ static void fixLegacyTableColumnIdentifiers()
         [fileMenu removeItemAtIndex:idx];
 }
 
-- (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite{
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *applicationSupport = [fileManager currentApplicationSupportPathForCurrentUser];
-    NSString *templates = @"Templates";
-    NSString *templatesPath = [applicationSupport stringByAppendingPathComponent:templates];
-    BOOL success = NO;
-    
-    if ([fileManager fileExistsAtPath:templatesPath isDirectory:&success] == NO) {
-        success = [fileManager createDirectoryAtPath:templatesPath withIntermediateDirectories:NO attributes:nil error:NULL];
-    }
-    
-    if (success) {
-        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"htmlExportTemplate.html"] overwrite:overwrite];
-        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"htmlItemExportTemplate.html"] overwrite:overwrite];
-        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"htmlExportStyleSheet.css"] overwrite:overwrite];
-        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"rssExportTemplate.rss"] overwrite:overwrite];
-        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfExportTemplate.rtf"] overwrite:overwrite];
-        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfdExportTemplate.rtfd"] overwrite:overwrite];
-        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"docExportTemplate.doc"] overwrite:overwrite];
-        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"citeServiceTemplate.txt"] overwrite:overwrite];
-        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"textServiceTemplate.txt"] overwrite:overwrite];
-        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfServiceTemplate.rtf"] overwrite:overwrite];
-        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfServiceTemplate default item.rtf"] overwrite:overwrite];
-        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfServiceTemplate book.rtf"] overwrite:overwrite];
-    }    
-}
-
 - (void)checkFormatStrings {
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     NSString *formatString = [sud objectForKey:BDSKCiteKeyFormatKey];
@@ -370,7 +343,7 @@ static void fixLegacyTableColumnIdentifiers()
     
     // copy files to application support
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    [self copyAllExportTemplatesToApplicationSupportAndOverwrite:NO];        
+    [fileManager copyAllExportTemplatesToApplicationSupportAndOverwrite:NO];        
     [fileManager copyFileFromSharedSupportToApplicationSupport:@"previewtemplate.tex" overwrite:NO];
     [fileManager copyFileFromSharedSupportToApplicationSupport:@"template.txt" overwrite:NO];   
     [fileManager copyFileFromSharedSupportToApplicationSupport:@"Bookmarks.plist" overwrite:NO];   

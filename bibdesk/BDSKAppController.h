@@ -68,8 +68,6 @@
     NSConnection *completionConnection;
 }
 
-- (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite;
-
 - (NSMenu *)groupSortMenu;
 - (NSMenu *)groupFieldMenu;
 

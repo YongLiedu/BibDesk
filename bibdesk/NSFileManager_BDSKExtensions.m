@@ -303,6 +303,22 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     return [self copyItemAtPath:sourcePath toPath:targetPath error:NULL];
 }
 
+- (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite{
+    NSString *applicationSupport = [self currentApplicationSupportPathForCurrentUser];
+    NSString *templates = @"Templates";
+    NSString *templatesPath = [applicationSupport stringByAppendingPathComponent:templates];
+    BOOL success = NO;
+    
+    if ([self fileExistsAtPath:templatesPath isDirectory:&success] == NO)
+        success = [self createDirectoryAtPath:templatesPath withIntermediateDirectories:NO attributes:nil error:NULL];
+    if (success) {
+        for (NSString *file in [self contentsOfDirectoryAtPath:templatesPath error:NULL]) {
+            if ([file hasPrefix:@"."] == NO)
+                [self copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:file] overwrite:overwrite];
+        }
+    }
+}
+
 #pragma mark Temporary files and directories
 
 // This method is copied and modified from NSFileManager-OFExtensions.m

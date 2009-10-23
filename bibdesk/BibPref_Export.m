@@ -150,7 +150,7 @@
 
 - (void)alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     if (NSAlertDefaultReturn == returnCode)
-        [[NSApp delegate] copyAllExportTemplatesToApplicationSupportAndOverwrite:YES];
+        [[NSFileManager defaultManager] copyAllExportTemplatesToApplicationSupportAndOverwrite:YES];
 }
 
 - (IBAction)resetDefaultFiles:(id)sender;

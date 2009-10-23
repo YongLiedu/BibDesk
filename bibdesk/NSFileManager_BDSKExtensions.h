@@ -78,6 +78,8 @@
 
 - (BOOL)copyFileFromSharedSupportToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite;
 
+- (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite;
+
 /*!
     @method     createWeblocFileAtPath:withURL:
     @abstract   Creates a webloc resource file at the destination path, for a given target URL.  This method is thread safe.
