@@ -49,8 +49,6 @@
 #import "BDSKLinkedFile.h"
 #import "BDSKAppController.h"
 
-static NSArray *requiredFieldsForCiteKey = nil;
-static NSArray *requiredFieldsForLocalFile = nil;
 
 @implementation BDSKFormatParser
 
@@ -73,7 +71,7 @@ static NSArray *requiredFieldsForLocalFile = nil;
 
 + (NSString *)parseFormat:(NSString *)format forLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub
 {
-    NSString *papersFolderPath = [BDSKFormatParser folderPathForFilingPapersFromDocumentAtPath:[[[pub owner] fileURL] path]];
+    NSString *papersFolderPath = [self folderPathForFilingPapersFromDocumentAtPath:[[[pub owner] fileURL] path]];
     
     NSString *oldPath = [[file URL] path];
     if ([oldPath hasPrefix:[papersFolderPath stringByAppendingString:@"/"]]) 
@@ -1218,28 +1216,6 @@ static NSArray *requiredFieldsForLocalFile = nil;
 	if ([NSString isEmptyString:papersFolderPath])
 		papersFolderPath = NSHomeDirectory();
 	return [papersFolderPath stringByExpandingTildeInPath];
-}
-
-+ (NSArray *)requiredFieldsForCiteKey{
-	return requiredFieldsForCiteKey;
-}
-
-+ (void)setRequiredFieldsForCiteKey:(NSArray *)newFields{
-	if (requiredFieldsForCiteKey != newFields) {
-        [requiredFieldsForCiteKey release];
-        requiredFieldsForCiteKey = [newFields retain];
-    }
-}
-
-+ (NSArray *)requiredFieldsForLocalFile{
-	return requiredFieldsForLocalFile;
-}
-
-+ (void)setRequiredFieldsForLocalFile:(NSArray *)newFields{
-	if (requiredFieldsForLocalFile != newFields) {
-        [requiredFieldsForLocalFile release];
-        requiredFieldsForLocalFile = [newFields retain];
-    }
 }
 
 @end
