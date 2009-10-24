@@ -288,13 +288,12 @@ Rather than relying on the same call sequence to be used, I think we should igno
 }
 
 - (BOOL)isEqualAsComplexString:(NSString *)other{
-	if ([self isComplex]) {
-		if (![other isComplex])
-			return NO;
+	if ([self isComplex] != [other isComplex])
+        return NO;
+    else if ([self isComplex])
 		return [[self nodes] isEqualToArray:[other nodes]];
-	} else {
+	else
 		return [self isEqualToString:other];
-	}
 }
 
 - (NSComparisonResult)compareAsComplexString:(NSString *)other options:(NSUInteger)mask{
