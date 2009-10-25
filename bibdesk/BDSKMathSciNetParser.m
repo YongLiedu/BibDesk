@@ -150,7 +150,7 @@
 		*/
 		NSArray * preArray = [resultsPage nodesForXPath:@".//div[@class='doc']/pre" error:&error];
 		
-		if (error != nil ) { 
+		if ( preArray == nil ) { 
 			if (outError != NULL) { *outError = error; }
 			return nil; 
 		}
@@ -164,7 +164,7 @@
 			NSError * parseError;
 			NSArray * newPubs = [BDSKBibTeXParser itemsFromString:cleanedRecord document:nil isPartialData:&isPartialData error: &parseError];
 			
-			if (error == nil) {
+			if (newPubs != nil) {
 				[results addObjectsFromArray:newPubs];
 			}
 		}
