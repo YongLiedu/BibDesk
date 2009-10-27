@@ -309,6 +309,16 @@ static NSMutableArray *_finishedDownloads = nil;
 	
 }
 
++ (NSArray *) parserInfos {
+	NSString * parserDescription = NSLocalizedString(@"IEEE Xplore Library Portal. Searching and browsing are free, but subscription is required for citation importing and full text access",
+													 @"Description for IEEE Xplore site.");
+	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"IEEE Xplore" address:@"http://ieeexplore.ieee.org/" 
+													  description: parserDescription 
+															flags: BDSKParserFeatureSubscriptionMask];
+	
+	return [NSArray arrayWithObject:parserInfo];
+}
+
 @end
 	
 #pragma mark Download delegate
