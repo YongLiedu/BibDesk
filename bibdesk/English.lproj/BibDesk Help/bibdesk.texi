@@ -4645,8 +4645,6 @@ Below are lists of collection keys that could be used in BibDesk export template
 @tab
 @item @@componentsWithEtAlAfterOne
 @tab 
-@item @@componentsJoinedByAndWithEtAlAfterOne
-@tab 
 @item @@componentsJoinedByAndWithEtAlAfterTwo
 @tab 
 @item @@componentsJoinedByCommaAndAndWithEtAlAfterThree
