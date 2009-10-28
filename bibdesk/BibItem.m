@@ -1835,7 +1835,6 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 - (NSString *)MODSString{
     NSDictionary *genreForTypeDict = [[BDSKTypeManager sharedManager] MODSGenresForBibTeXType:[self pubType]];
     NSMutableString *s = [NSMutableString stringWithString:@"<mods>\n"];
-    NSUInteger i = 0;
     NSString *value;
     
     [s appendString:@"<titleInfo>\n"];
