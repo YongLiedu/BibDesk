@@ -39,7 +39,6 @@
 #import "BDSKApplication.h"
 #import "BibDocument.h"
 #import "BDAlias.h"
-#import "BDSKRunTime.h"
 
 
 @implementation BDSKApplication
