@@ -134,6 +134,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSButton *groupAddButton;
     IBOutlet BDSKCollapsibleView *groupCollapsibleView;
     IBOutlet BDSKGradientView *groupGradientView;
+    IBOutlet NSMenu *groupFieldMenu;
 	NSString *currentGroupField;
     NSMapTable *groupSpinners;
     

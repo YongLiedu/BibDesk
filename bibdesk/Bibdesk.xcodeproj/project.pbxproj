@@ -182,6 +182,7 @@
 		CE8BE5480D99A10700E314A4 /* BDSKBookmark.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8BE5460D99A10700E314A4 /* BDSKBookmark.m */; };
 		CE8BE5BF0D99AF5000E314A4 /* BDSKSearchBookmark.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8BE5BD0D99AF5000E314A4 /* BDSKSearchBookmark.m */; };
 		CE8C731F0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8C731D0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m */; };
+		CE8DAD901098976400896F69 /* BDSKMetadataCacheManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8DAD8E1098976400896F69 /* BDSKMetadataCacheManager.m */; };
 		CE8F5F840DEEB26800061148 /* ZoomValues.strings in Resources */ = {isa = PBXBuildFile; fileRef = CE8F5F830DEEB26800061148 /* ZoomValues.strings */; };
 		CE90BAFD103978D300992D50 /* BDSKURLSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE90BAFB103978D300992D50 /* BDSKURLSheetController.m */; };
 		CE92CE5E0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m in Sources */ = {isa = PBXBuildFile; fileRef = CE92CE5C0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m */; };
@@ -1029,6 +1030,8 @@
 		CE8BE5BD0D99AF5000E314A4 /* BDSKSearchBookmark.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchBookmark.m; sourceTree = "<group>"; };
 		CE8C731C0B0CA6C500E31E5A /* NSObject_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSObject_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE8C731D0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSObject_BDSKExtensions.m; sourceTree = "<group>"; };
+		CE8DAD8D1098976400896F69 /* BDSKMetadataCacheManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKMetadataCacheManager.h; sourceTree = "<group>"; };
+		CE8DAD8E1098976400896F69 /* BDSKMetadataCacheManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKMetadataCacheManager.m; sourceTree = "<group>"; };
 		CE8F5F800DEEB24700061148 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/ZoomValues.strings; sourceTree = "<group>"; };
 		CE8F5F850DEEB27600061148 /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/ZoomValues.strings; sourceTree = "<group>"; };
 		CE90BAFA103978D300992D50 /* BDSKURLSheetController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKURLSheetController.h; sourceTree = "<group>"; };
@@ -2143,6 +2146,7 @@
 				CE7A313E0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m */,
 				F9936CC40BC746C300A32DC4 /* BDSKItemSearchIndexes.m */,
 				CE3B5E7B09CEDE470017D339 /* BDSKMacroResolver.m */,
+				CE8DAD8E1098976400896F69 /* BDSKMetadataCacheManager.m */,
 				CEE50486104D662500636237 /* BDSKNotesSearchIndex.m */,
 				F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */,
 				CEC1CEA60F51D2CE00D18921 /* BDSKReadWriteLock.m */,
@@ -2500,6 +2504,7 @@
 				CE34A5710B249E0B00755730 /* BDSKMARCParser.h */,
 				6C567DBE0F818A1600DE285D /* BDSKMathSciNetParser.h */,
 				6C5DE3E50F8FC33B00E02D5F /* BDSKMathSiteParser.h */,
+				CE8DAD8D1098976400896F69 /* BDSKMetadataCacheManager.h */,
 				F9D0E5340BF92768001C6C22 /* BDSKMODSParser.h */,
 				CEED2C120F4DA0E00078E87A /* BDSKMultiValueDictionary.h */,
 				CEE50488104D664200636237 /* BDSKNotesSearchIndex.h */,
@@ -3583,6 +3588,7 @@
 				454AC23E1086E07B00F2890A /* BDSKIEEEXploreParser.m in Sources */,
 				CEF63D0A10888A5A000A31E2 /* BDSKSeparatorCell.m in Sources */,
 				CEEC1A331091F31600530207 /* NSEvent_BDSKExtensions.m in Sources */,
+				CE8DAD901098976400896F69 /* BDSKMetadataCacheManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

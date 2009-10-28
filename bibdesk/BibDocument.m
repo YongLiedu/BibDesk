@@ -125,6 +125,7 @@
 #import "BDSKTask.h"
 #import "NSInvocation_BDSKExtensions.h"
 #import "NSEvent_BDSKExtensions.h"
+#import "BDSKMetadataCacheManager.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -1104,7 +1105,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         
         NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:pubsInfo, @"publications", absoluteURL, @"fileURL", nil];
         [pubsInfo release];
-        [[NSApp delegate] rebuildMetadataCache:infoDict];
+        [[BDSKMetadataCacheManager sharedManager] rebuildMetadataCache:infoDict];
         [infoDict release];
         
         // save window setup to extended attributes, so it is set also if we use saveAs

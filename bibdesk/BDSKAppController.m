@@ -91,6 +91,7 @@
 #import "KFASHandlerAdditions-TypeTranslation.h"
 #import "BDSKTask.h"
 #import <Sparkle/Sparkle.h>
+#import "BDSKMetadataCacheManager.h"
 
 #define WEB_URL @"http://bibdesk.sourceforge.net/"
 #define WIKI_URL @"http://sourceforge.net/apps/mediawiki/bibdesk/"
@@ -104,6 +105,11 @@ enum {
     BDSKStartupOpenDefaultFile,
     BDSKStartupOpenLastOpenFiles
 };
+
+@interface BDSKAppController (Private)
+- (void)doSpotlightImportIfNeeded;
+- (void)handleGetURLEvent:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)replyEvent;
+@end
 
 @implementation BDSKAppController
 
@@ -127,19 +133,9 @@ static void fixLegacyTableColumnIdentifiers()
         [sud setObject:fixedTableColumnIdentifiers forKey:BDSKShownColsNamesKey];
 }
 
-- (id)init
-{
-    if(self = [super init]){
-        metadataCacheLock = [[NSLock alloc] init];
-        canWriteMetadata = 1;
-    }
-    return self;
-}
-
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [metadataCacheLock release];
     [super dealloc];
 }
 
@@ -356,7 +352,7 @@ static void fixLegacyTableColumnIdentifiers()
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification{
-    OSAtomicCompareAndSwap32Barrier(1, 0, &canWriteMetadata);
+    [[BDSKMetadataCacheManager sharedManager] terminate];
     
     [[BDSKSharingServer defaultServer] disableSharing];
     
@@ -498,11 +494,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 }
 
 #pragma mark Menu stuff
-
-- (NSMenu *)groupFieldMenu {
-    [self menuNeedsUpdate:groupFieldMenu];
-	return groupFieldMenu;
-}
 
 - (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
 	SEL act = [menuItem action];
@@ -878,6 +869,42 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     return searchConstraints;
 }
 
+// this only should return items that belong to a document, not items from external groups
+// if this is ever changed, we should also change showPubWithKey:userData:error:
+- (NSSet *)itemsMatchingSearchConstraints:(NSDictionary *)constraints{
+    NSArray *docs = [[NSDocumentController sharedDocumentController] documents];
+    if ([docs count] == 0)
+        return nil;
+
+    NSMutableSet *itemsFound = [NSMutableSet set];
+    NSMutableArray *arrayOfSets = [NSMutableArray array];
+    
+    for (NSString *constraintKey in constraints) {
+        for (BibDocument *aDoc in docs) { 
+	    // this is an array of objects matching this particular set of search constraints; add them to the set
+            [itemsFound addObjectsFromArray:[aDoc publicationsMatchingSubstring:[constraints objectForKey:constraintKey] 
+                                                                        inField:constraintKey]];
+        }
+        // we have one set per search term, so copy it to an array and we'll get the next set of matches
+        [arrayOfSets addObject:[[itemsFound copy] autorelease]];
+        [itemsFound removeAllObjects];
+    }
+    
+    // sort the sets in order of increasing length indexed 0-->[arrayOfSets length]
+    NSSortDescriptor *setLengthSort = [[[NSSortDescriptor alloc] initWithKey:@"self.@count" ascending:YES selector:@selector(compare:)] autorelease];
+    [arrayOfSets sortUsingDescriptors:[NSArray arrayWithObject:setLengthSort]];
+
+    [itemsFound setSet:[arrayOfSets firstObject]]; // smallest set
+    [itemsFound performSelector:@selector(intersectSet:) withObjectsFromArray:arrayOfSets];
+    
+    return itemsFound;
+}
+
+- (NSSet *)itemsMatchingCiteKey:(NSString *)citeKeyString{
+    NSDictionary *constraints = [NSDictionary dictionaryWithObject:citeKeyString forKey:BDSKCiteKeyString];
+    return [self itemsMatchingSearchConstraints:constraints];
+}
+
 - (void)completeCitationFromSelection:(NSPasteboard *)pboard
                              userData:(NSString *)userData
                                 error:(NSString **)error{
@@ -1009,42 +1036,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     return;
 }
 
-// this only should return items that belong to a document, not items from external groups
-// if this is ever changed, we should also change showPubWithKey:userData:error:
-- (NSSet *)itemsMatchingSearchConstraints:(NSDictionary *)constraints{
-    NSArray *docs = [[NSDocumentController sharedDocumentController] documents];
-    if ([docs count] == 0)
-        return nil;
-
-    NSMutableSet *itemsFound = [NSMutableSet set];
-    NSMutableArray *arrayOfSets = [NSMutableArray array];
-    
-    for (NSString *constraintKey in constraints) {
-        for (BibDocument *aDoc in docs) { 
-	    // this is an array of objects matching this particular set of search constraints; add them to the set
-            [itemsFound addObjectsFromArray:[aDoc publicationsMatchingSubstring:[constraints objectForKey:constraintKey] 
-                                                                        inField:constraintKey]];
-        }
-        // we have one set per search term, so copy it to an array and we'll get the next set of matches
-        [arrayOfSets addObject:[[itemsFound copy] autorelease]];
-        [itemsFound removeAllObjects];
-    }
-    
-    // sort the sets in order of increasing length indexed 0-->[arrayOfSets length]
-    NSSortDescriptor *setLengthSort = [[[NSSortDescriptor alloc] initWithKey:@"self.@count" ascending:YES selector:@selector(compare:)] autorelease];
-    [arrayOfSets sortUsingDescriptors:[NSArray arrayWithObject:setLengthSort]];
-
-    [itemsFound setSet:[arrayOfSets firstObject]]; // smallest set
-    [itemsFound performSelector:@selector(intersectSet:) withObjectsFromArray:arrayOfSets];
-    
-    return itemsFound;
-}
-
-- (NSSet *)itemsMatchingCiteKey:(NSString *)citeKeyString{
-    NSDictionary *constraints = [NSDictionary dictionaryWithObject:citeKeyString forKey:BDSKCiteKeyString];
-    return [self itemsMatchingSearchConstraints:constraints];
-}
-
 - (void)completeCiteKeyFromSelection:(NSPasteboard *)pboard
                              userData:(NSString *)userData
                                 error:(NSString **)error{
@@ -1117,118 +1108,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 }
 
 #pragma mark Spotlight support
-
-- (void)privateRebuildMetadataCache:(id)userInfo{
-    
-    BDSKPRECONDITION([NSThread isMainThread] == NO);
-    
-    // we could unlock after checking the flag, but we don't want multiple threads writing to the cache directory at the same time, in case files have identical items
-    [metadataCacheLock lock];
-    OSMemoryBarrier();
-    if(canWriteMetadata == 0){
-        NSLog(@"Application will quit without writing metadata cache.");
-        [metadataCacheLock unlock];
-        return;
-    }
-
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
-    [userInfo retain];
-    
-    NSArray *publications = [userInfo valueForKey:@"publications"];
-    NSError *error = nil;
-    NSFileManager *fileManager = [[NSFileManager alloc] init];
-    
-    @try{
-
-        // hidden option to use XML plists for easier debugging, but the binary plists are more efficient
-        BOOL useXMLFormat = [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKUseXMLSpotlightCache"];
-        NSPropertyListFormat plistFormat = useXMLFormat ? NSPropertyListXMLFormat_v1_0 : NSPropertyListBinaryFormat_v1_0;
-
-        NSString *cachePath = [fileManager spotlightCacheFolderPathByCreating:&error];
-        if(cachePath == nil){
-            error = [NSError localErrorWithCode:kBDSKFileOperationFailed localizedDescription:NSLocalizedString(@"Unable to create the cache folder for Spotlight metadata.", @"Error description") underlyingError:error];
-            @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to build metadata cache at path \"%@\"", cachePath] userInfo:nil];
-        }
-        
-        NSURL *documentURL = [userInfo valueForKey:@"fileURL"];
-        NSString *docPath = [documentURL path];
-        
-        // After this point, there should be no underlying NSError, so we'll create one from scratch
-        
-        if([fileManager objectExistsAtFileURL:documentURL] == NO){
-            error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to find the file associated with this item.", @"Error description"), NSLocalizedDescriptionKey, docPath, NSFilePathErrorKey, nil]];
-            @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to build metadata cache for document at path \"%@\"", docPath] userInfo:nil];
-        }
-        
-        NSString *path;
-        NSString *citeKey;
-        
-        BDAlias *alias = [[BDAlias alloc] initWithURL:documentURL];
-        if(alias == nil){
-            error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to create an alias for this document.", @"Error description"), NSLocalizedDescriptionKey, docPath, NSFilePathErrorKey, nil]];
-            @throw [NSException exceptionWithName:NSObjectNotAvailableException reason:[NSString stringWithFormat:@"Unable to get an alias for file %@", docPath] userInfo:nil];
-        }
-        
-        NSData *aliasData = [alias aliasData];
-        [alias autorelease];
-    
-        NSMutableDictionary *metadata = [NSMutableDictionary dictionaryWithCapacity:10];    
-        
-        for (NSDictionary *anItem in publications) {
-            OSMemoryBarrier();
-            if(canWriteMetadata == 0){
-                NSLog(@"Application will quit without finishing writing metadata cache.");
-                break;
-            }
-            
-            citeKey = [anItem objectForKey:@"net_sourceforge_bibdesk_citekey"];
-            if(citeKey == nil)
-                continue;
-                        
-            // we won't index this, but it's needed to reopen the parent file
-            [metadata setObject:aliasData forKey:@"FileAlias"];
-            // use doc path as a backup in case the alias fails
-            [metadata setObject:docPath forKey:@"net_sourceforge_bibdesk_owningfilepath"];
-            
-            [metadata addEntriesFromDictionary:anItem];
-			
-            path = [fileManager spotlightCacheFilePathWithCiteKey:citeKey];
-
-            // Save the plist; we can get an error if these are not plist objects, or the file couldn't be written.  The first case is a programmer error, and the second should have been caught much earlier in this code.
-            if(path) {
-                
-                NSString *errString = nil;
-                NSData *data = [NSPropertyListSerialization dataFromPropertyList:metadata format:plistFormat errorDescription:&errString];
-                if(nil == data) {
-                    error = [NSError mutableLocalErrorWithCode:kBDSKPropertyListSerializationFailed localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to save metadata cache file for item with cite key \"%@\".  The error was \"%@\"", @"Error description"), citeKey, errString]];
-                    [errString release];
-                    @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to create cache file for %@", [anItem description]] userInfo:nil];
-                } else {
-                    if(NO == [data writeToFile:path options:NSAtomicWrite error:&error])
-                        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to create cache file for %@", [anItem description]] userInfo:nil];
-                }
-            }
-            [metadata removeAllObjects];
-        }
-    }    
-    @catch (id localException){
-        NSLog(@"-[%@ %@] discarding exception %@", [self class], NSStringFromSelector(_cmd), [localException description]);
-        // log the error since presentError: only gives minimum info
-        NSLog(@"%@", [error description]);
-        [NSApp performSelectorOnMainThread:@selector(presentError:) withObject:error waitUntilDone:NO];
-    }
-    @finally{
-        [userInfo release];
-        [metadataCacheLock unlock];
-        [fileManager release];
-        [pool release];
-    }
-}
-
-- (void)rebuildMetadataCache:(id)userInfo{  
-    [NSThread detachNewThreadSelector:@selector(privateRebuildMetadataCache:) toTarget:self withObject:userInfo];
-}
 
 - (void)doSpotlightImportIfNeeded {
     

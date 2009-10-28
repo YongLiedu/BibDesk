@@ -58,12 +58,8 @@
 	IBOutlet NSMenu *searchBookmarksMenu;
 	IBOutlet NSMenu *bookmarksMenu;
 
-    NSLock *metadataCacheLock;
-    int32_t canWriteMetadata;
     NSConnection *completionConnection;
 }
-
-- (NSMenu *)groupFieldMenu;
 
 - (IBAction)visitWebSite:(id)sender;
 - (IBAction)visitWiki:(id)sender;
@@ -82,70 +78,12 @@
 
 - (IBAction)toggleShowingOrphanedFilesPanel:(id)sender;
 
-// ----------------------------------------------------------------------------------------
-// A first attempt at a service.
-// This allows you to type a substring of a title and hit a key to
-//    have it complete into the appropriate citekey(s), with a comment containing the full title(s)
-// Alternately, you can write key = text , and have it search for text in key.
-// ----------------------------------------------------------------------------------------
-
-// helper method
-- (NSDictionary *)constraintsFromString:(NSString *)string;
-
-/*!
-@method completeCitationFromSelection:userData:error
- @abstract The service method
- @discussion  Performs the service. <br>
- Called when user selects Complete Citation.  <br>
- You the programmer should never have to call this explicitly (There is a better way)
-    @param pboard The pasteboard that we read from & write to for the service.
-*/
 - (void)completeCitationFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
-
 - (void)completeTextBibliographyFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
-
 - (void)completeRichBibliographyFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
-
 - (void)completeCiteKeyFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
-
 - (void)showPubWithKey:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
-
 - (void)newDocumentFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
-
 - (void)addPublicationsFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
-
-/*!
-    @method     itemsMatchingSearchConstraints:
-    @abstract   Search across all open documents for items matching the given search constraints.  Returns a set of BibItems.
-    @discussion Searches are performed by intersecting the search constraints, so all object/key pairs will be matched in any single item returned.
-    @param      constraints Dictionary of the form @"objectToSearchFor" forKey:@"BibTeXFieldName".
-    @result     NSSet of BibItems.
-*/
-- (NSSet *)itemsMatchingSearchConstraints:(NSDictionary *)constraints;
-/*!
-    @method     itemsMatchingCiteKey:
-    @abstract   Search across all open documents for items with the given cite key.  Returns a set of BibItems.
-    @discussion (comprehensive description)
-    @param      citeKeyString (description)
-    @result     (description)
-*/
-- (NSSet *)itemsMatchingCiteKey:(NSString *)citeKeyString;
-
-/*!
-    @method     rebuildMetadataCache:
-    @abstract   Rebuilds the metadata cache for a userInfo object which must be key-value coding compliant for the keys fileName and publications (BibDocument).
-    @discussion (comprehensive description)
-    @param      document (description)
-*/
-- (void)rebuildMetadataCache:(id)userInfo;
-
-/*!
-    @method     doSpotlightImportIfNeeded
-    @abstract   Reruns the bundled metadata importer when a new app version or OS version is detected.
-    @discussion (comprehensive description)
-*/
-- (void)doSpotlightImportIfNeeded;
-
-- (void)handleGetURLEvent:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)replyEvent;
 
 @end
