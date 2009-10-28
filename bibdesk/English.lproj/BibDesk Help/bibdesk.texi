@@ -3255,14 +3255,14 @@ Here is an example of an AppleScript to process the titles of all selected refer
 
 @example
 @html
-<span class="aslangkeyword">tell</span> <span class="asappkeyword">application</span> <span class="asvalue">"BibDesk"</span>
-    <span class="aslangkeyword">set</span> <span class="asvariable">theSelection</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">selection</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">document</span> <span class="asvalue">1</span>
+<span class="aslangkeyword">tell</span> <span class="asclass">application</span> <span class="asvalue">"BibDesk"</span>
+    <span class="aslangkeyword">set</span> <span class="asvariable">theSelection</span> <span class="aslangkeyword">to the</span> <span class="asproperty">selection</span> <span class="aslangkeyword">of</span> <span class="asclass">document</span> <span class="asvalue">1</span>
     <span class="aslangkeyword">repeat with</span> <span class="asvariable">thePub</span> <span class="aslangkeyword">in</span> <span class="asvariable">theSelection</span>
         <span class="ascomment">-- accessing field values</span>
-        <span class="aslangkeyword">set</span> <span class="asvariable">theTitle</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">field</span> <span class="asvalue">"Title"</span> <span class="aslangkeyword">of</span> <span class="asvariable">thePub</span>
+        <span class="aslangkeyword">set</span> <span class="asvariable">theTitle</span> <span class="aslangkeyword">to the</span> <span class="asproperty">value</span> <span class="aslangkeyword">of</span> <span class="asclass">field</span> <span class="asvalue">"Title"</span> <span class="aslangkeyword">of</span> <span class="asvariable">thePub</span>
         <span class="ascomment">-- processString is a subroutine defined elsewhere in the script</span>
         <span class="aslangkeyword">set</span> <span class="asvariable">theTitle</span> <span class="aslangkeyword">to my</span> <span class="asvariable">processString</span><span class="asoperator">(</span><span class="asvariable">theTitle</span><span class="asoperator">)</span>
-        <span class="aslangkeyword">set the</span> <span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">field</span> <span class="asvalue">"Title"</span> <span class="aslangkeyword">of</span> <span class="asvariable">thePub</span> <span class="aslangkeyword">to</span> <span class="asvariable">theTitle</span>
+        <span class="aslangkeyword">set the</span> <span class="asproperty">value</span> <span class="aslangkeyword">of</span> <span class="asclass">field</span> <span class="asvalue">"Title"</span> <span class="aslangkeyword">of</span> <span class="asvariable">thePub</span> <span class="aslangkeyword">to</span> <span class="asvariable">theTitle</span>
     <span class="aslangkeyword">end repeat</span>
 <span class="aslangkeyword">end tell</span>
 @end html
@@ -3354,38 +3354,38 @@ of the "Aid" field is set in the editor.
 <span class="aslangkeyword">property</span> <span class="asvariable">theFormatString</span> <span class="asoperator">:</span> <span class="asvalue">"http://dx.doi.org/%f{Aid}"</span>
 <span class="aslangkeyword">property</span> <span class="asvariable">theRequiredFields</span> <span class="asoperator">:</span> <span class="asvalue">{"Aid"}</span>
 
-<span class="aslangkeyword">using terms from</span> <span class="asappkeyword">application</span> <span class="asvalue">"BibDesk"</span>
-    <span class="aslangkeyword">on</span> <span class="asappkeyword">perform BibDesk action with publications</span> <span class="asvariable">thePubs</span> <span class="asappkeyword">for script hook</span> <span class="asvariable">theScriptHook</span>
+<span class="aslangkeyword">using terms from</span> <span class="asclass">application</span> <span class="asvalue">"BibDesk"</span>
+    <span class="aslangkeyword">on</span> <span class="ascommand">perform BibDesk action with publications</span> <span class="asvariable">thePubs</span> <span class="asappkeyword">for script hook</span> <span class="asvariable">theScriptHook</span>
         <span class="ascomment">-- get some properties from the script hook</span>
-        <span class="aslangkeyword">set</span> <span class="asvariable">theName</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">name</span> <span class="aslangkeyword">of</span> <span class="asvariable">theScriptHook</span>
-        <span class="aslangkeyword">set</span> <span class="asvariable">changedField</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">field name</span> <span class="aslangkeyword">of</span> <span class="asvariable">theScriptHook</span>
+        <span class="aslangkeyword">set</span> <span class="asvariable">theName</span> <span class="aslangkeyword">to the</span> <span class="asproperty">name</span> <span class="aslangkeyword">of</span> <span class="asvariable">theScriptHook</span>
+        <span class="aslangkeyword">set</span> <span class="asvariable">changedField</span> <span class="aslangkeyword">to the</span> <span class="asproperty">field name</span> <span class="aslangkeyword">of</span> <span class="asvariable">theScriptHook</span>
         <span class="ascomment">-- check if we get the right script hook event</span>
         <span class="aslangkeyword">if</span> <span class="asvariable">theName</span> <span class="aslangkeyword">is not</span> <span class="asvalue">"Change Field"</span> <span class="aslangkeyword">then return</span>
         <span class="aslangkeyword">if</span> <span class="asvariable">changedField</span> <span class="aslangkeyword">is not in</span> <span class="asvariable">theRequiredFields</span> <span class="aslangkeyword">then return</span>
         <span class="aslangkeyword">repeat with</span> <span class="asvariable">aPub</span> <span class="aslangkeyword">in</span> <span class="asvariable">thePubs</span>
             <span class="aslangkeyword">tell</span> <span class="asvariable">aPub</span>
                 <span class="ascomment">-- check that we can set the field</span>
-                <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">true</span>
-                <span class="aslangkeyword">if</span> <span class="asoperator">(</span><span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">field</span> <span class="asvariable">theFieldToSet</span> <span class="aslangkeyword">is not</span> <span class="asvalue">""</span><span class="asoperator">)</span> <span class="aslangkeyword">then</span>
-                    <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">false</span>
+                <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asenum">true</span>
+                <span class="aslangkeyword">if</span> <span class="asoperator">(</span><span class="asproperty">value</span> <span class="aslangkeyword">of</span> <span class="asclass">field</span> <span class="asvariable">theFieldToSet</span> <span class="aslangkeyword">is not</span> <span class="asvalue">""</span><span class="asoperator">)</span> <span class="aslangkeyword">then</span>
+                    <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asenum">false</span>
                 <span class="aslangkeyword">else</span>
                     <span class="aslangkeyword">repeat with</span> <span class="asvariable">aField</span> <span class="aslangkeyword">in</span> <span class="asvariable">theRequiredFields</span>
-                        <span class="aslangkeyword">if</span> <span class="asoperator">(</span><span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">field</span> <span class="asvariable">aField</span> <span class="aslangkeyword">is</span> <span class="asvalue">""</span><span class="asoperator">)</span> <span class="aslangkeyword">then</span>
-                            <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">false</span>
+                        <span class="aslangkeyword">if</span> <span class="asoperator">(</span><span class="asproperty">value</span> <span class="aslangkeyword">of</span> <span class="asclass">field</span> <span class="asvariable">aField</span> <span class="aslangkeyword">is</span> <span class="asvalue">""</span><span class="asoperator">)</span> <span class="aslangkeyword">then</span>
+                            <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asenum">false</span>
                         <span class="aslangkeyword">end if</span>
                     <span class="aslangkeyword">end repeat</span>
                 <span class="aslangkeyword">end if</span>
                 <span class="aslangkeyword">if</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">then</span>
                     <span class="ascomment">-- generate a new value for the field</span>
-                    <span class="aslangkeyword">set</span> <span class="asvariable">theField</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">field</span> <span class="asvariable">theFieldToSet</span>
-                    <span class="aslangkeyword">set</span> <span class="asvariable">newValue</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">parse format</span> <span class="asvariable">theFormatString</span> <span class="asappkeyword">for</span> <span class="asvariable">theField</span>
+                    <span class="aslangkeyword">set</span> <span class="asvariable">theField</span> <span class="aslangkeyword">to</span> <span class="asclass">field</span> <span class="asvariable">theFieldToSet</span>
+                    <span class="aslangkeyword">set</span> <span class="asvariable">newValue</span> <span class="aslangkeyword">to</span> <span class="ascommand">parse format</span> <span class="asvariable">theFormatString</span> <span class="asappkeyword">for</span> <span class="asvariable">theField</span>
                     <span class="aslangkeyword">if</span> <span class="asvariable">newValue</span> <span class="aslangkeyword">is not</span> <span class="asvalue">""</span> <span class="aslangkeyword">then</span>
-                        <span class="aslangkeyword">set</span> <span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asvariable">theField</span> <span class="aslangkeyword">to</span> <span class="asvariable">newValue</span>
+                        <span class="aslangkeyword">set</span> <span class="asproperty">value</span> <span class="aslangkeyword">of</span> <span class="asvariable">theField</span> <span class="aslangkeyword">to</span> <span class="asvariable">newValue</span>
                     <span class="aslangkeyword">end if</span>
                 <span class="aslangkeyword">end if</span>
             <span class="aslangkeyword">end tell</span>
         <span class="aslangkeyword">end repeat</span>
-    <span class="aslangkeyword">end</span> <span class="asappkeyword">perform BibDesk action with publications</span>
+    <span class="aslangkeyword">end</span> <span class="ascommand">perform BibDesk action with publications</span>
 <span class="aslangkeyword">end using terms from</span>
 @end html
 @ifnothtml
@@ -3394,7 +3394,7 @@ of the "Aid" field is set in the editor.
 @b{property} theRequiredFields : @{"Aid"@}
 
 @b{using terms from} application "BibDesk"
-    @b{on} perform BibDesk action with publications thePubs for script hook theScriptHook
+    @b{on perform BibDesk action with publications} thePubs for script hook theScriptHook
         @i{-- get some properties from the script hook}
         @b{set} theName @b{to the} name @b{of} theScriptHook
         @b{set} changedField @b{to the} field name @b{of} theScriptHook
@@ -3424,7 +3424,7 @@ of the "Aid" field is set in the editor.
                 @b{end if}
             @b{end tell}
         @b{end repeat}
-    @b{end} perform BibDesk action with publications
+    @b{end perform BibDesk action with publications}
 @b{end using terms from}
 @end ifnothtml
 @end example
@@ -3453,33 +3453,33 @@ It exports an RSS representation of the document in the same folder as the BibTe
 <span class="aslangkeyword">property</span> <span class="asvariable">theTemplateName</span> <span class="asoperator">:</span> <span class="asvalue">"Default RSS template"</span>
 <span class="aslangkeyword">property</span> <span class="asvariable">theFileExtension</span> <span class="asoperator">:</span> <span class="asvalue">".rss"</span>
 
-<span class="aslangkeyword">using terms from</span> <span class="asappkeyword">application</span> <span class="asvalue">"BibDesk"</span>
-    <span class="aslangkeyword">on</span> <span class="asappkeyword">perform BibDesk action with publications</span> <span class="asvariable">thePubs</span> <span class="asappkeyword">for script hook</span> <span class="asvariable">theScriptHook</span>
+<span class="aslangkeyword">using terms from</span> <span class="asclass">application</span> <span class="asvalue">"BibDesk"</span>
+    <span class="aslangkeyword">on</span> <span class="ascommand">perform BibDesk action with publications</span> <span class="asvariable">thePubs</span> <span class="asappkeyword">for script hook</span> <span class="asvariable">theScriptHook</span>
         <span class="ascomment">-- get some properties from the script hook</span>
-        <span class="aslangkeyword">set</span> <span class="asvariable">theName</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">name</span> <span class="aslangkeyword">of</span> <span class="asvariable">theScriptHook</span>
-        <span class="aslangkeyword">set</span> <span class="asvariable">theDocument</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">document</span> <span class="aslangkeyword">of</span> <span class="asvariable">theScriptHook</span>
+        <span class="aslangkeyword">set</span> <span class="asvariable">theName</span> <span class="aslangkeyword">to the</span> <span class="asproperty">name</span> <span class="aslangkeyword">of</span> <span class="asvariable">theScriptHook</span>
+        <span class="aslangkeyword">set</span> <span class="asvariable">theDocument</span> <span class="aslangkeyword">to the</span> <span class="asproperty">document</span> <span class="aslangkeyword">of</span> <span class="asvariable">theScriptHook</span>
         <span class="ascomment">-- check if we get the right script hook event</span>
         <span class="aslangkeyword">if</span> <span class="asvariable">theName</span> <span class="aslangkeyword">is not</span> <span class="asvalue">"Save Document"</span> <span class="aslangkeyword">then return</span>
         <span class="ascomment">-- get the document's file</span>
-        <span class="aslangkeyword">set</span> <span class="asvariable">theDocFile</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">file</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocument</span>
-        <span class="aslangkeyword">tell</span> <span class="asappkeyword">application</span> <span class="asvalue">"Finder"</span>
+        <span class="aslangkeyword">set</span> <span class="asvariable">theDocFile</span> <span class="aslangkeyword">to the</span> <span class="asproperty">file</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocument</span>
+        <span class="aslangkeyword">tell</span> <span class="asclass">application</span> <span class="asvalue">"Finder"</span>
             <span class="ascomment">-- extract containing folder and file name</span>
-            <span class="aslangkeyword">set</span> <span class="asvariable">theFolder</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">container</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">text</span>
-            <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">name</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span>
+            <span class="aslangkeyword">set</span> <span class="asvariable">theFolder</span> <span class="aslangkeyword">to the</span> <span class="asproperty">container</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span> <span class="aslangkeyword">as</span> <span class="asclass">text</span>
+            <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to the</span> <span class="asproperty">name</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span>
             <span class="ascomment">-- change extension to "rss"</span>
-            <span class="aslangkeyword">if the</span> <span class="asappkeyword">name extension</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span> <span class="asappkeyword">is not</span> <span class="asvalue">""</span> <span class="aslangkeyword">then</span>
-                <span class="aslangkeyword">set</span> <span class="asappkeyword">AppleScript</span><span class="asvalue">'s</span> <span class="asappkeyword">text item delimiters</span> <span class="aslangkeyword">to</span> <span class="asvalue">"."</span>
-                <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">text items</span> <span class="asvalue">1</span> <span class="aslangkeyword">thru</span> <span class="asvalue">-2</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">text</span>
+            <span class="aslangkeyword">if the</span> <span class="asproperty">name extension</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span> <span class="aslangkeyword">is not</span> <span class="asvalue">""</span> <span class="aslangkeyword">then</span>
+                <span class="aslangkeyword">set</span> <span class="asproperty">AppleScript</span><span class="asvalue">'s</span> <span class="asproperty">text item delimiters</span> <span class="aslangkeyword">to</span> <span class="asvalue">"."</span>
+                <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asclass">text items</span> <span class="asvalue">1</span> <span class="aslangkeyword">thru</span> <span class="asvalue">-2</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">as</span> <span class="asclass">text</span>
             <span class="aslangkeyword">end if</span>
             <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asvariable">theFileName</span> <span class="asoperator">&</span> <span class="asvariable">theFileExtension</span>
             <span class="ascomment">-- create a reference to the file</span>
-            <span class="aslangkeyword">set</span> <span class="asvariable">theFile</span> <span class="aslangkeyword">to</span> <span class="asoperator">(</span><span class="asvariable">theFileName</span> <span class="asoperator">&</span> <span class="asvariable">theFolder</span><span class="asoperator">)</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">file specification</span>
+            <span class="aslangkeyword">set</span> <span class="asvariable">theFile</span> <span class="aslangkeyword">to</span> <span class="asoperator">(</span><span class="asvariable">theFileName</span> <span class="asoperator">&</span> <span class="asvariable">theFolder</span><span class="asoperator">)</span> <span class="aslangkeyword">as</span> <span class="asclass">file specification</span>
         <span class="aslangkeyword">end tell</span>
         <span class="ascomment">-- now export using the template</span>
         <span class="aslangkeyword">tell</span> <span class="asvariable">theDocument</span>
-            <span class="asappkeyword">export using template</span> <span class="asvariable">theTemplateName</span> <span class="asappkeyword">to</span> <span class="asvariable">theFile</span>
+            <span class="ascommand">export</span> <span class="asappkeyword">using template</span> <span class="asvariable">theTemplateName</span> <span class="asappkeyword">to</span> <span class="asvariable">theFile</span>
         <span class="aslangkeyword">end tell</span>
-    <span class="aslangkeyword">end</span> <span class="asappkeyword">perform BibDesk action with publications</span>
+    <span class="aslangkeyword">end</span> <span class="ascommand">perform BibDesk action with publications</span>
 <span class="aslangkeyword">end using terms from</span>
 @end html
 @ifnothtml
@@ -3487,7 +3487,7 @@ It exports an RSS representation of the document in the same folder as the BibTe
 @b{property} theFileExtension : ".rss"
 
 @b{using terms from} application "BibDesk"
-    @b{on} perform BibDesk action with publications thePubs for script hook theScriptHook
+    @b{on perform BibDesk action with publications} thePubs for script hook theScriptHook
         @i{-- get some properties from the script hook}
         @b{set} theName @b{to the} name @b{of} theScriptHook
         @b{set} theDocument @b{to the} document @b{of} theScriptHook
@@ -3510,9 +3510,9 @@ It exports an RSS representation of the document in the same folder as the BibTe
         @b{end tell} 
         @i{-- now export using the template}
         @b{tell} theDocument
-            export using template theFileExtension to theFile
+            @b{export} using template theFileExtension to theFile
         @b{end tell} 
-    @b{end} perform BibDesk action with publications
+    @b{end perform BibDesk action with publications}
 @b{end using terms from}
 @end ifnothtml
 @end example

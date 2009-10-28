@@ -67,13 +67,39 @@ code,tt,pre {
     font-family: Verdana,Regular;
     font-size: 1em;
     font-weight:bold;
-    color: blue
+    color: black
 }
 
 .asappkeyword {
     font-family: Verdana,Regular;
     font-size: 1em;
     color: blue
+}
+
+.asclass {
+    font-family: Verdana,Italic;
+    font-size: 1em;
+    font-style: italic;
+    color: blue
+}
+
+.ascommand {
+    font-family: Verdana,Regular;
+    font-size: 1em;
+    font-weight:bold;
+    color: blue
+}
+
+.asproperty {
+    font-family: Verdana,Regular;
+    font-size: 1em;
+    color: darkorchid
+}
+
+.asenum {
+    font-family: Verdana,Regular;
+    font-size: 1em;
+    color: indigo
 }
 
 .asvariable {
@@ -97,7 +123,6 @@ code,tt,pre {
 .ascomment {
     font-family: Verdana,Italic;
     font-size: 1em;
-    font-style: italic;
-    color: gray
+    color: dimgray
 }
 
