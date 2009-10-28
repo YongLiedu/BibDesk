@@ -2306,7 +2306,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
 {
     // only called if we originated the drag, so the row/column must be valid
     if ((operation & NSDragOperationDelete) != 0 && operation != NSDragOperationEvery && [self isEditable]) {
-        [[self dataSource] fileView:self deleteURLsAtIndexes:_selectionIndexes];
+        [[self dataSource] fileView:self deleteURLsAtIndexes:[[_selectionIndexes retain] autorelease]];
         [self _setSelectionIndexes:[NSIndexSet indexSet]];
         [self reloadIcons];
     }
@@ -2537,7 +2537,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     
     if (isMove) {
         
-        didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:insertIndex forDrop:sender dropOperation:_fvFlags.dropOperation];
+        didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[[_selectionIndexes retain] autorelease] toIndex:insertIndex forDrop:sender dropOperation:_fvFlags.dropOperation];
         
     } else if (FVDropBefore == _fvFlags.dropOperation || FVDropAfter == _fvFlags.dropOperation || NSNotFound == _dropIndex) {
            
@@ -3359,7 +3359,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (IBAction)delete:(id)sender;
 {
-    if (NO == [self isEditable] || NO == [[self dataSource] fileView:self deleteURLsAtIndexes:_selectionIndexes])
+    if (NO == [self isEditable] || NO == [[self dataSource] fileView:self deleteURLsAtIndexes:[[_selectionIndexes retain] autorelease]])
         NSBeep();
     else
         [self reloadIcons];
