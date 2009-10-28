@@ -36,17 +36,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BibDocument;
-@protocol BDSKOwner;
-
-/*!
-    @class BDSKAppController
-    @abstract The application delegate.
-    @discussion This (intended as a singleton) object handles various tasks that require global knowledge, such
- as showing & hiding the finder & preferences window, and the preview. <br>
- This class also performs the complete citation service.
-*/
-
 
 @interface BDSKAppController : NSObject {
 	IBOutlet NSMenu *columnsMenu;
