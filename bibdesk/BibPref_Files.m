@@ -187,6 +187,7 @@
 {
     BOOL shouldSave = ([sender state] == NSOnState);
     [sud setBool:shouldSave forKey:BDSKShouldAutosaveDocumentKey];
+    [[NSDocumentController sharedDocumentController] setAutosavingDelay:shouldSave ? [sud integerForKey:BDSKAutosaveTimeIntervalKey] : 0.0];
     [self updateAutoSaveUI];
 }
 
