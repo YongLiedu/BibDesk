@@ -41,11 +41,6 @@
 
 @implementation NSScriptClassDescription (SKExtensions)
 
-+ (NSScriptClassDescription *)scriptClassDescriptionForClass:(Class)aClass {
-    id classDescription = [self classDescriptionForClass:aClass];
-    return [classDescription isKindOfClass:[NSScriptClassDescription class]] ? classDescription : nil;
-}
-
 + (NSScriptClassDescription *)commonAncestorForClassDescriptions:(NSArray *)classDescriptionArray {
     NSEnumerator *cdEnum = [classDescriptionArray objectEnumerator];
     NSScriptClassDescription *classDescription = [cdEnum nextObject];
