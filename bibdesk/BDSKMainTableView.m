@@ -342,7 +342,9 @@ enum {
             [cell setTarget:self];
             break;
         case BDSKColumnTypeImportOrder:
-            cell = [[[BDSKRoundRectButtonCell alloc] initTextCell:NSLocalizedString(@"Import", @"button title")] autorelease];
+            cell = [[[NSButtonCell alloc] initTextCell:NSLocalizedString(@"Import", @"button title")] autorelease];
+            [cell setButtonType:NSMomentaryPushInButton];
+            [cell setBezelStyle:NSRoundRectBezelStyle];
             [cell setImagePosition:NSNoImage];
             [cell setControlSize:NSSmallControlSize];
             [cell setAction:@selector(importItem:)];
@@ -714,35 +716,6 @@ enum {
 - (NSInteger)columnType { return columnType; }
 
 - (void)setColumnType:(NSInteger)type { columnType = type; }
-
-@end
-
-#pragma mark -
-
-@implementation BDSKRoundRectButtonCell
-
-- (id)initTextCell:(NSString *)aString {
-    if (self = [super initTextCell:aString]) {
-        [self setButtonType:NSMomentaryPushInButton];
-        [self setBezelStyle:NSRoundRectBezelStyle];
-    }
-    return self;
-}
-
-- (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView{
-    CGFloat startWhite = [self isHighlighted] ? 0.9 : 1.0;
-    CGFloat endWhite = [self isHighlighted] ? 0.95 : 0.9;
-    CGFloat alpha = [self isEnabled] ? 1.0 : 0.6;
-    NSRect rect = cellFrame;
-    rect.size.height -= 1.0;
-    rect = NSInsetRect(rect, 0.0, 0.5);
-    NSGradient *gradient = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:startWhite alpha:alpha] endingColor:[NSColor colorWithCalibratedWhite:endWhite alpha:alpha]] autorelease];
-
-    [gradient drawInRect:rect angle:90.0];
-    [[NSColor colorWithCalibratedWhite:0.8 alpha:alpha] set];
-    [NSBezierPath strokeRect:rect];
-    [super drawInteriorWithFrame:cellFrame inView:controlView];
-}
 
 @end
 
