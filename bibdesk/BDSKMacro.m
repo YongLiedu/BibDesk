@@ -39,6 +39,7 @@
 #import "BDSKMacro.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKOwnerProtocol.h"
+#import "NSObject_BDSKExtensions.h"
 
 
 @implementation BDSKMacro
@@ -70,7 +71,7 @@
             containerRef = [owner objectSpecifier];
             containerClassDescription = [containerRef keyClassDescription];
         } else {
-            containerClassDescription = [NSScriptClassDescription classDescriptionForClass:[NSApp class]];
+            containerClassDescription = [NSApp scriptClassDescription];
         }
         return [[[NSNameSpecifier allocWithZone: [self zone]] 
 			  initWithContainerClassDescription: containerClassDescription 

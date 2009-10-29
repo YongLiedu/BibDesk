@@ -43,7 +43,7 @@
 @implementation NSObject (BDSKExtensions)
 
 - (NSScriptClassDescription *)scriptClassDescription {
-    return [NSScriptClassDescription scriptClassDescriptionForClass:[self class]];
+    return [NSScriptClassDescription classDescriptionForClass:[self class]];
 }
 
 - (void)performSelector:(SEL)selector withObjectsFromArray:(NSArray *)objects;

@@ -280,7 +280,7 @@
         if ([properties count]) {
             for (id item in copiedValue) {
                 NSMutableDictionary *validProps = [NSMutableDictionary dictionary];
-                NSScriptClassDescription *classDesc = [NSScriptClassDescription classDescriptionForClass:[item class]];
+                NSScriptClassDescription *classDesc = [item scriptClassDescription];
                 for (NSString *aKey in properties) {
                     if ([classDesc hasWritablePropertyForKey:aKey])
                         [validProps setValue:[item coerceValue:[properties objectForKey:aKey] forKey:aKey] forKey:aKey];
@@ -314,7 +314,7 @@
             } else {
                 if ([properties count]) {
                     NSMutableDictionary *validProps = [NSMutableDictionary dictionary];
-                    NSScriptClassDescription *classDesc = [NSScriptClassDescription classDescriptionForClass:[copiedGroup class]];
+                    NSScriptClassDescription *classDesc = [copiedGroup scriptClassDescription];
                     for (NSString *aKey in properties) {
                         if ([classDesc hasWritablePropertyForKey:aKey])
                             [validProps setValue:[copiedGroup coerceValue:[properties objectForKey:aKey] forKey:aKey] forKey:aKey];
@@ -779,7 +779,7 @@
 }
 
 - (id)clipboard {
-    NSScriptClassDescription *containerClassDescription = [NSScriptClassDescription classDescriptionForClass:[NSApp class]];
+    NSScriptClassDescription *containerClassDescription = [NSApp scriptClassDescription];
     return [[[NSPropertySpecifier allocWithZone: [self zone]] 
           initWithContainerClassDescription: containerClassDescription 
                          containerSpecifier: nil // the application is the null container
