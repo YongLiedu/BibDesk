@@ -235,8 +235,6 @@
 		CEB5D62A1072AE360001C135 /* BibPref_ScriptHooks.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D5D61072AE350001C135 /* BibPref_ScriptHooks.xib */; };
 		CEB5D62B1072AE360001C135 /* BibPref_Sharing.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D5D81072AE350001C135 /* BibPref_Sharing.xib */; };
 		CEB5D62C1072AE360001C135 /* BibPref_TeX.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D5DA1072AE350001C135 /* BibPref_TeX.xib */; };
-		CEB5D62D1072AE360001C135 /* BibTexExporterSettings.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D5DC1072AE350001C135 /* BibTexExporterSettings.xib */; };
-		CEB5D62E1072AE360001C135 /* BibTeXItemDisplay.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D5DE1072AE350001C135 /* BibTeXItemDisplay.xib */; };
 		CEB5D62F1072AE360001C135 /* BookmarksWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D5E01072AE350001C135 /* BookmarksWindow.xib */; };
 		CEB5D6311072AE360001C135 /* ChangeFieldSheet.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D5E41072AE350001C135 /* ChangeFieldSheet.xib */; };
 		CEB5D6321072AE360001C135 /* ComplexStringEditor.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D5E61072AE350001C135 /* ComplexStringEditor.xib */; };
@@ -1099,8 +1097,6 @@
 		CEB5D5D71072AE350001C135 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/BibPref_ScriptHooks.xib; sourceTree = "<group>"; };
 		CEB5D5D91072AE350001C135 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/BibPref_Sharing.xib; sourceTree = "<group>"; };
 		CEB5D5DB1072AE350001C135 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/BibPref_TeX.xib; sourceTree = "<group>"; };
-		CEB5D5DD1072AE350001C135 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/BibTexExporterSettings.xib; sourceTree = "<group>"; };
-		CEB5D5DF1072AE350001C135 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/BibTeXItemDisplay.xib; sourceTree = "<group>"; };
 		CEB5D5E11072AE350001C135 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/BookmarksWindow.xib; sourceTree = "<group>"; };
 		CEB5D5E51072AE350001C135 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/ChangeFieldSheet.xib; sourceTree = "<group>"; };
 		CEB5D5E71072AE350001C135 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/ComplexStringEditor.xib; sourceTree = "<group>"; };
@@ -1786,8 +1782,6 @@
 				CEB5D5D61072AE350001C135 /* BibPref_ScriptHooks.xib */,
 				CEB5D5D81072AE350001C135 /* BibPref_Sharing.xib */,
 				CEB5D5DA1072AE350001C135 /* BibPref_TeX.xib */,
-				CEB5D5DC1072AE350001C135 /* BibTexExporterSettings.xib */,
-				CEB5D5DE1072AE350001C135 /* BibTeXItemDisplay.xib */,
 				CEB5D5E01072AE350001C135 /* BookmarksWindow.xib */,
 				CEB5D5E41072AE350001C135 /* ChangeFieldSheet.xib */,
 				CEB5D5E61072AE350001C135 /* ComplexStringEditor.xib */,
@@ -3130,8 +3124,6 @@
 				CEB5D62A1072AE360001C135 /* BibPref_ScriptHooks.xib in Resources */,
 				CEB5D62B1072AE360001C135 /* BibPref_Sharing.xib in Resources */,
 				CEB5D62C1072AE360001C135 /* BibPref_TeX.xib in Resources */,
-				CEB5D62D1072AE360001C135 /* BibTexExporterSettings.xib in Resources */,
-				CEB5D62E1072AE360001C135 /* BibTeXItemDisplay.xib in Resources */,
 				CEB5D62F1072AE360001C135 /* BookmarksWindow.xib in Resources */,
 				CEB5D6311072AE360001C135 /* ChangeFieldSheet.xib in Resources */,
 				CEB5D6321072AE360001C135 /* ComplexStringEditor.xib in Resources */,
@@ -4041,22 +4033,6 @@
 				CEB5D67A1072AE950001C135 /* French */,
 			);
 			name = BibPref_TeX.xib;
-			sourceTree = "<group>";
-		};
-		CEB5D5DC1072AE350001C135 /* BibTexExporterSettings.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				CEB5D5DD1072AE350001C135 /* English */,
-			);
-			name = BibTexExporterSettings.xib;
-			sourceTree = "<group>";
-		};
-		CEB5D5DE1072AE350001C135 /* BibTeXItemDisplay.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				CEB5D5DF1072AE350001C135 /* English */,
-			);
-			name = BibTeXItemDisplay.xib;
 			sourceTree = "<group>";
 		};
 		CEB5D5E01072AE350001C135 /* BookmarksWindow.xib */ = {
