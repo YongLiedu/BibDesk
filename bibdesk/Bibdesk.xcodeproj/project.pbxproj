@@ -4321,7 +4321,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 1658;
+				CURRENT_PROJECT_VERSION = 1659;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -4330,7 +4330,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 1658;
+				CURRENT_PROJECT_VERSION = 1659;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
