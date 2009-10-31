@@ -78,6 +78,8 @@
 		delegate = nil;
         
         textOffset = 0.0;
+        
+        drawsGradient = YES;
 
     }
     return self;
