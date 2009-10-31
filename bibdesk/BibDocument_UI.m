@@ -839,7 +839,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
                 [alternateNewToolbarImage lockFocus];
                 NSImage *srcImage = [NSImage imageNamed:@"newdoc"];
                 [srcImage drawInRect:NSMakeRect(0, 0, 32, 32) fromRect:NSMakeRect(0, 0, [srcImage size].width, [srcImage size].height) operation:NSCompositeSourceOver fraction:1.0]; 
-                [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kAliasBadgeIcon)] drawInRect:NSMakeRect(8, -10, 32, 32) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+                [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kAliasBadgeIcon)] drawInRect:NSMakeRect(24, 0, 32, 32) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
                 [alternateNewToolbarImage unlockFocus];
             }
             
