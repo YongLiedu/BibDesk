@@ -111,7 +111,8 @@
 	NSRect textRect, ignored;
     CGFloat rightMargin = RIGHT_MARGIN;
 	
-	[super drawRect:rect];
+	if (drawsGradient)
+        [super drawRect:rect];
     
     if (progressIndicator)
         rightMargin += NSWidth([progressIndicator frame]) + MARGIN_BETWEEN_ITEMS;
@@ -143,6 +144,18 @@
 
 - (BOOL)isVisible {
 	return [self superview]  && [self isHidden] == NO;
+}
+
+- (BOOL)isOpaque {
+    return drawsGradient;
+}
+
+- (BOOL)drawsGradient {
+    return drawsGradient;
+}
+
+- (void)setDrawsGradient:(BOOL)newDrawsGradient {
+    drawsGradient = newDrawsGradient;
 }
 
 - (void)toggleBelowView:(NSView *)view offset:(CGFloat)offset {

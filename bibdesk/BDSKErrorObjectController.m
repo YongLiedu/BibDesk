@@ -117,6 +117,14 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 {
     [self setWindowFrameAutosaveName:@"BDSKErrorPanel"];
     
+    [[self window] setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
+    [[self window] setContentBorderThickness:22.0 forEdge:NSMinYEdge];
+    
+    for (id view in [[[self window] contentView] subviews]) {
+        if ([view isKindOfClass:[NSTextField class]] || [view isKindOfClass:[NSButton class]])
+            [[view cell] setBackgroundStyle:NSBackgroundStyleRaised];
+    }
+    
     [errorTableView setDoubleAction:@selector(gotoError:)];
     
     [errorsController setFilterManager:[BDSKErrorManager allItemsErrorManager]];

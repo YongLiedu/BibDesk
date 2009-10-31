@@ -54,6 +54,7 @@ typedef NSInteger BDSKProgressIndicatorStyle;
 	NSMutableArray *icons;
 	id delegate;
     CGFloat textOffset;
+    BOOL drawsGradient;
 }
 
 + (NSColor *)lowerColor;
@@ -84,6 +85,9 @@ typedef NSInteger BDSKProgressIndicatorStyle;
 	@discussion -
 */
 - (BOOL)isVisible;
+
+- (BOOL)drawsGradient;
+- (void)setDrawsGradient:(BOOL)newDrawsGradient;
 
 - (NSString *)stringValue;
 - (void)setStringValue:(NSString *)aString;

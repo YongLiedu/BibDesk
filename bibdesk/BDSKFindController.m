@@ -120,7 +120,7 @@ enum {
 }
 
 - (void)windowDidLoad{
-    [self setWindowFrameAutosaveName:@"Find and Replace Window"];
+    [self setWindowFrameAutosaveName:@"BDSKFindPanel"];
     
     [[self window] setCollectionBehavior:NSWindowCollectionBehaviorMoveToActiveSpace];
     
@@ -136,8 +136,12 @@ enum {
     [formatter setDelegate:self];
     [formatter release];
 	
+    [[self window] setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
+    [[self window] setContentBorderThickness:22.0 forEdge:NSMinYEdge];
+    
 	[statusBar retain]; // we need to retain, as we might remove it from the window
-	if (![[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowFindStatusBarKey]) {
+	[statusBar setDrawsGradient:NO];
+    if (![[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowFindStatusBarKey]) {
 		[self toggleStatusBar:nil];
 	}
 	[statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
@@ -605,7 +609,8 @@ enum {
 }
 
 - (IBAction)toggleStatusBar:(id)sender{
-	[statusBar toggleInWindow:[self window] offset:1.0];
+	[statusBar toggleInWindow:[self window] offset:0.0];
+    [[self window] setContentBorderThickness:[statusBar isVisible] ? 22.0 : 0.0 forEdge:NSMinYEdge];
 	[[NSUserDefaults standardUserDefaults] setBool:[statusBar isVisible] forKey:BDSKShowFindStatusBarKey];
 }
 
