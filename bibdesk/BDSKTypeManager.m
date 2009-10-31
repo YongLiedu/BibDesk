@@ -101,7 +101,7 @@ static BDSKTypeManager *sharedInstance = nil;
         [tmpSet release];
         
         // see the URI specifications for the valid characters
-        NSMutableCharacterSet *validSet = [[NSCharacterSet characterSetWithRange:NSMakeRange( (NSUInteger)'a', 26)] mutableCopy];
+        NSMutableCharacterSet *validSet = [[NSCharacterSet letterCharacterSet] mutableCopy];
         [validSet addCharactersInRange:NSMakeRange( (NSUInteger)'A', 26)];
         [validSet addCharactersInRange:NSMakeRange( (NSUInteger)'0', 10)];
         [validSet addCharactersInString:@"-._~:/?#[]@!$&'()*+,;="];
