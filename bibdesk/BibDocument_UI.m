@@ -833,9 +833,6 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         NSToolbarItem *toolbarItem = [toolbarItems objectForKey:@"BibDocumentToolbarNewItemIdentifier"];
         
         if (isOptionKeyState) {
-            [groupAddButton setImage:[NSImage imageNamed:@"GroupAddSmart"]];
-            [groupAddButton setToolTip:NSLocalizedString(@"Add new smart group.", @"Tool tip message")];
-            
             static NSImage *alternateNewToolbarImage = nil;
             if (alternateNewToolbarImage == nil) {
                 alternateNewToolbarImage = [[NSImage alloc] initWithSize:NSMakeSize(32, 32)];
@@ -851,9 +848,6 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
             [toolbarItem setImage:alternateNewToolbarImage];
             [toolbarItem setAction:@selector(createNewPubUsingCrossrefAction:)];
         } else {
-            [groupAddButton setImage:[NSImage imageNamed:@"GroupAdd"]];
-            [groupAddButton setToolTip:NSLocalizedString(@"Add new group.", @"Tool tip message")];
-            
             [toolbarItem setLabel:NSLocalizedString(@"New", @"Toolbar item label")];
             [toolbarItem setToolTip:NSLocalizedString(@"Create new publication", @"Tool tip message")];
             [toolbarItem setImage:[NSImage imageNamed: @"newdoc"]];

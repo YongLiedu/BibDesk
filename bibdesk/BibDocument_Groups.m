@@ -1012,13 +1012,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	
 }
 
-- (IBAction)addGroupButtonAction:(id)sender {
-    if ([NSEvent standardModifierFlags] & NSAlternateKeyMask)
-        [self addSmartGroupAction:sender];
-    else
-        [self addStaticGroupAction:sender];
-}
-
 - (void)removeGroups:(NSArray *)theGroups {
     BOOL didRemove = NO;
 	

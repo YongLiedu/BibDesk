@@ -569,6 +569,10 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 	[[groupActionButton cell] setAltersStateOfSelectedItem:NO];
 	[[groupActionButton cell] setUsesItemFromMenu:NO];
 	[groupActionButton setMenu:groupMenu];
+	
+	[[groupAddButton cell] setAltersStateOfSelectedItem:NO];
+	[[groupAddButton cell] setUsesItemFromMenu:NO];
+	[groupAddButton setMenu:groupAddMenu];
     
     // array of BDSKSharedGroup objects and zeroconf support, doesn't do anything when already enabled
     // we don't do this in appcontroller as we want our data to be loaded

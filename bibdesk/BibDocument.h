@@ -131,7 +131,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet BDSKGroupOutlineView *groupOutlineView;
     IBOutlet BDSKGradientSplitView *groupSplitView;
     IBOutlet BDSKImagePopUpButton *groupActionButton;
-    IBOutlet NSButton *groupAddButton;
+    IBOutlet BDSKImagePopUpButton *groupAddButton;
     IBOutlet BDSKCollapsibleView *groupCollapsibleView;
     IBOutlet BDSKGradientView *groupGradientView;
     IBOutlet NSMenu *groupFieldMenu;
@@ -188,6 +188,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 #pragma mark Menu variables
 
 	IBOutlet NSMenu * groupMenu;
+	IBOutlet NSMenu * groupAddMenu;
 	IBOutlet NSMenu * actionMenu;
 	IBOutlet NSMenu * copyAsMenu;
 
@@ -526,7 +527,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (IBAction)newSearchGroupFromBookmark:(id)sender;
 - (IBAction)addSearchBookmark:(id)sender;
 - (IBAction)dismissSearchBookmarkSheet:(id)sender;
-- (IBAction)addGroupButtonAction:(id)sender;
 - (IBAction)removeSelectedGroups:(id)sender;
 - (IBAction)editGroupAction:(id)sender;
 - (IBAction)renameGroupAction:(id)sender;

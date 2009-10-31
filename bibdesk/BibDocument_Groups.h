@@ -108,7 +108,6 @@
 - (IBAction)newSearchGroupFromBookmark:(id)sender;
 - (IBAction)addSearchBookmark:(id)sender;
 - (IBAction)dismissSearchBookmarkSheet:(id)sender;
-- (IBAction)addGroupButtonAction:(id)sender;
 - (void)removeGroups:(NSArray *)theGroups;
 - (IBAction)removeSelectedGroups:(id)sender;
 - (void)editGroup:(BDSKGroup *)group;
