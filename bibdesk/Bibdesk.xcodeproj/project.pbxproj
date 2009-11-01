@@ -279,6 +279,7 @@
 		CEE23BF20BFBA827002B746B /* ignore.cfg in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D560758073E00C3F701 /* ignore.cfg */; };
 		CEE23BF30BFBA827002B746B /* style.cfg in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D690758073E00C3F701 /* style.cfg */; };
 		CEE50487104D662500636237 /* BDSKNotesSearchIndex.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE50486104D662500636237 /* BDSKNotesSearchIndex.m */; };
+		CEE7ACE9109E2F360072D63C /* NSSplitView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE7ACE7109E2F360072D63C /* NSSplitView_BDSKExtensions.m */; };
 		CEE8DD470E5C3F5B00EFA97F /* yaz.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5950BEA3C9400D65C7F /* yaz.framework */; };
 		CEE8DD480E5C3F5B00EFA97F /* AGRegex.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
 		CEE8DD490E5C3F5B00EFA97F /* FileView.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
@@ -1202,6 +1203,8 @@
 		CEE23BD50BFBA6D6002B746B /* Scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Scripts; sourceTree = "<group>"; };
 		CEE50486104D662500636237 /* BDSKNotesSearchIndex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKNotesSearchIndex.m; sourceTree = "<group>"; };
 		CEE50488104D664200636237 /* BDSKNotesSearchIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKNotesSearchIndex.h; sourceTree = "<group>"; };
+		CEE7ACE6109E2F360072D63C /* NSSplitView_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSSplitView_BDSKExtensions.h; sourceTree = "<group>"; };
+		CEE7ACE7109E2F360072D63C /* NSSplitView_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSSplitView_BDSKExtensions.m; sourceTree = "<group>"; };
 		CEEA4C680B57B0D400434059 /* BDSKBooleanValueTransformer.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKBooleanValueTransformer.m; sourceTree = "<group>"; };
 		CEEA4C690B57B0D400434059 /* BDSKBooleanValueTransformer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKBooleanValueTransformer.h; sourceTree = "<group>"; };
 		CEEBA6850D746DD7000204B8 /* BibDesk-Common.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-Common.xcconfig"; sourceTree = "<group>"; };
@@ -1965,6 +1968,7 @@
 				F9FD63DB0A61B87800F9871B /* NSMenu_BDSKExtensions.m */,
 				CE6C04430BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m */,
 				CE6C962A0CD9014A0022D69F /* NSScrollView_BDSKExtensions.m */,
+				CEE7ACE7109E2F360072D63C /* NSSplitView_BDSKExtensions.m */,
 				CE969E320931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.m */,
 				CE77A7FC0923BEBA0019D901 /* NSTableView_BDSKExtensions.m */,
 				F9022CA10758038000C3F701 /* NSTextView_BDSKExtensions.m */,
@@ -2659,6 +2663,7 @@
 				CE117D210D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.h */,
 				CE6C96290CD9014A0022D69F /* NSScrollView_BDSKExtensions.h */,
 				F9463F4309436F7500CC4549 /* NSSet_BDSKExtensions.h */,
+				CEE7ACE6109E2F360072D63C /* NSSplitView_BDSKExtensions.h */,
 				F9022C9E0758038000C3F701 /* NSString_BDSKExtensions.h */,
 				CE969E310931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.h */,
 				CE77A7FB0923BEBA0019D901 /* NSTableView_BDSKExtensions.h */,
@@ -3581,6 +3586,7 @@
 				CEF63D0A10888A5A000A31E2 /* BDSKSeparatorCell.m in Sources */,
 				CEEC1A331091F31600530207 /* NSEvent_BDSKExtensions.m in Sources */,
 				CE8DAD901098976400896F69 /* BDSKMetadataCacheManager.m in Sources */,
+				CEE7ACE9109E2F360072D63C /* NSSplitView_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

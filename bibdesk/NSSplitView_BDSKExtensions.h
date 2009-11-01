@@ -1,8 +1,8 @@
 //
-//  BDSKSplitView.m
+//  NSSplitView_BDSKExtensions.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 2/18/09.
+//  Created by Christiaan on 11/1/09.
 /*
  This software is Copyright (c) 2009
  Christiaan Hofman. All rights reserved.
@@ -35,47 +35,40 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/*
+ Omni Source License 2007
 
-#import "BDSKSplitView.h"
+ OPEN PERMISSION TO USE AND REPRODUCE OMNI SOURCE CODE SOFTWARE
+
+ Omni Source Code software is available from The Omni Group on their 
+ web site at http://www.omnigroup.com/www.omnigroup.com. 
+
+ Permission is hereby granted, free of charge, to any person obtaining 
+ a copy of this software and associated documentation files (the 
+ "Software"), to deal in the Software without restriction, including 
+ without limitation the rights to use, copy, modify, merge, publish, 
+ distribute, sublicense, and/or sell copies of the Software, and to 
+ permit persons to whom the Software is furnished to do so, subject to 
+ the following conditions:
+
+ Any original copyright notices and this permission notice shall be 
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, 
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
+ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+#import <Cocoa/Cocoa.h>
 
 
-@implementation BDSKSplitView
+@interface NSSplitView (BDSKExtensions)
 
-
-// arm: mouseDown: swallows mouseDragged: needlessly
-- (void)mouseDown:(NSEvent *)theEvent {
-    BOOL inDivider = NO;
-    NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-    NSArray *subviews = [self subviews];
-    NSInteger i, count = [subviews count];
-    id view;
-    NSRect divRect;
-    
-    for (i = 0; i < count - 1; i++) {
-        view = [subviews objectAtIndex:i];
-        divRect = [view frame];
-        if ([self isVertical]) {
-            divRect.origin.x = NSMaxX(divRect);
-            divRect.size.width = [self dividerThickness];
-        } else {
-            divRect.origin.y = NSMaxY(divRect);
-            divRect.size.height = [self dividerThickness];
-        }
-        
-        if (NSMouseInRect(mouseLoc, divRect, [self isFlipped])) {
-            inDivider = YES;
-            break;
-        }
-    }
-    
-    if (inDivider) {
-        if ([theEvent clickCount] > 1 && [[self delegate] respondsToSelector:@selector(splitView:doubleClickedDividerAt:)])
-            [[self delegate] splitView:self doubleClickedDividerAt:i];
-        else
-            [super mouseDown:theEvent];
-    } else {
-        [[self nextResponder] mouseDown:theEvent];
-    }
-}
+- (CGFloat)fraction;
+- (void)setFraction:(CGFloat)newFraction;
 
 @end

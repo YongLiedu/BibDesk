@@ -87,6 +87,7 @@
 #import "BDSKSplitView.h"
 #import "BDSKGradientSplitView.h"
 #import "NSEvent_BDSKExtensions.h"
+#import "NSSplitView_BDSKExtensions.h"
 
 @implementation BibDocument (Groups)
 
