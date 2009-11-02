@@ -140,7 +140,6 @@ enum {
     [[self window] setContentBorderThickness:22.0 forEdge:NSMinYEdge];
     
 	[statusBar retain]; // we need to retain, as we might remove it from the window
-	[statusBar setDrawsGradient:NO];
     if (![[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowFindStatusBarKey]) {
 		[self toggleStatusBar:nil];
 	}
@@ -609,9 +608,51 @@ enum {
 }
 
 - (IBAction)toggleStatusBar:(id)sender{
-	[statusBar toggleInWindow:[self window] offset:0.0];
+	NSRect winFrame = [[self window] frame];
+	NSSize minSize = [[self window] minSize];
+	NSSize maximumSize = [[self window] maxSize];
+	NSView *contentView = [[self window] contentView];
+	CGFloat statusHeight = NSHeight([statusBar frame]);
+	BOOL autoresizes = [contentView autoresizesSubviews];
+	NSRect viewFrame;
+	
+	if ([statusBar superview])
+		statusHeight = -statusHeight;
+	
+	if ([contentView isFlipped] == NO) {
+		for (NSView *view in [contentView subviews]) {
+			viewFrame = [view frame];
+			viewFrame.origin.y += statusHeight;
+			[view setFrame:viewFrame];
+		}
+	}
+	winFrame.size.height += statusHeight;
+	winFrame.origin.y -= statusHeight;
+	if (minSize.height > 0.0) minSize.height += statusHeight;
+	if (maximumSize.height > 0.0) maximumSize.height += statusHeight;
+	if (winFrame.size.height < 0.0) winFrame.size.height = 0.0;
+	if (minSize.height < 0.0) minSize.height = 0.0;
+	if (maximumSize.height < 0.0) maximumSize.height = 0.0;
+	
+	if ([statusBar superview]) {
+		[statusBar removeFromSuperview];
+	} else {
+		NSRect statusRect = [contentView bounds];
+		statusRect.size.height = statusHeight;
+		if ([contentView isFlipped])
+			statusRect.origin.y = NSMaxY([contentView bounds]) - NSHeight(statusRect);
+		[statusBar setFrame:statusRect];
+		[contentView addSubview:statusBar positioned:NSWindowBelow relativeTo:nil];
+	}
+	
+	[contentView setAutoresizesSubviews:NO];
+	[[self window] setFrame:winFrame display:YES];
+	[contentView setAutoresizesSubviews:autoresizes];
+	[[self window] setMinSize:minSize];
+	[[self window] setMaxSize:maximumSize];
     [[self window] setContentBorderThickness:[statusBar isVisible] ? 22.0 : 0.0 forEdge:NSMinYEdge];
-	[[NSUserDefaults standardUserDefaults] setBool:[statusBar isVisible] forKey:BDSKShowFindStatusBarKey];
+	
+    [[NSUserDefaults standardUserDefaults] setBool:[statusBar isVisible] forKey:BDSKShowFindStatusBarKey];
 }
 
 #pragma mark Find and Replace Action methods

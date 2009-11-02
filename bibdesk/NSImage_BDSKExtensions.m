@@ -83,19 +83,26 @@
     if (previewDisplayTextImage == nil) {
         NSBezierPath *path;
         
-        previewDisplayTextImage = [[NSImage alloc] initWithSize:NSMakeSize(11.0, 10.0)];
+        previewDisplayTextImage = [[NSImage alloc] initWithSize:NSMakeSize(25.0, 10.0)];
         [previewDisplayTextImage lockFocus];
         path = [NSBezierPath bezierPath];
-        [path moveToPoint:NSMakePoint(0.0, 0.5)];
-        [path lineToPoint:NSMakePoint(11.0, 0.5)];
-        [path moveToPoint:NSMakePoint(0.0, 3.5)];
-        [path lineToPoint:NSMakePoint(11.0, 3.5)];
-        [path moveToPoint:NSMakePoint(0.0, 6.5)];
-        [path lineToPoint:NSMakePoint(11.0, 6.5)];
-        [path moveToPoint:NSMakePoint(0.0, 9.5)];
-        [path lineToPoint:NSMakePoint(11.0, 9.5)];
+        [path moveToPoint:NSMakePoint(7.0, 0.5)];
+        [path lineToPoint:NSMakePoint(18.0, 0.5)];
+        [path moveToPoint:NSMakePoint(7.0, 3.5)];
+        [path lineToPoint:NSMakePoint(18.0, 3.5)];
+        [path moveToPoint:NSMakePoint(7.0, 6.5)];
+        [path lineToPoint:NSMakePoint(18.0, 6.5)];
+        [path moveToPoint:NSMakePoint(7.0, 9.5)];
+        [path lineToPoint:NSMakePoint(18.0, 9.5)];
         [path stroke];
+        path = [NSBezierPath bezierPath];
+        [path moveToPoint:NSMakePoint(20.0, 5.0)];
+        [path lineToPoint:NSMakePoint(25.0, 5.0)];
+        [path lineToPoint:NSMakePoint(22.5, 2.0)];
+        [path closePath];
+        [path fill];
         [previewDisplayTextImage unlockFocus];
+        [previewDisplayTextImage setTemplate:YES];
         [previewDisplayTextImage setName:@"BDSKPreviewDisplayText"];
         
         previewDisplayFilesImage = [[NSImage alloc] initWithSize:NSMakeSize(11.0, 10.0)];
@@ -107,6 +114,7 @@
         [path appendBezierPathWithRect:NSMakeRect(7.5, 6.5, 3.0, 3.0)];
         [path stroke];
         [previewDisplayFilesImage unlockFocus];
+        [previewDisplayFilesImage setTemplate:YES];
         [previewDisplayFilesImage setName:@"BDSKPreviewDisplayFiles"];
         
         previewDisplayTeXImage = [[NSImage alloc] initWithSize:NSMakeSize(11.0, 10.0)];
@@ -124,6 +132,7 @@
         [path appendBezierPathWithArcFromPoint:NSMakePoint(8.5, 10.0) toPoint:NSMakePoint(6.5, 8.0) radius:1.0];
         [path stroke];
         [previewDisplayTeXImage unlockFocus];
+        [previewDisplayTeXImage setTemplate:YES];
         [previewDisplayTeXImage setName:@"BDSKPreviewDisplayTeX"];
     }
 }

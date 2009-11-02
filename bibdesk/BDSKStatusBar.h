@@ -37,7 +37,6 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKGradientView.h"
 
 enum {
    BDSKProgressIndicatorNone = -1,
@@ -47,47 +46,16 @@ enum {
 typedef NSInteger BDSKProgressIndicatorStyle;
 
 
-@interface BDSKStatusBar : BDSKGradientView {
+@interface BDSKStatusBar : NSView {
 	id textCell;
 	NSImageCell *iconCell;
 	NSProgressIndicator *progressIndicator;
 	NSMutableArray *icons;
 	id delegate;
     CGFloat textOffset;
-    BOOL drawsGradient;
 }
 
-+ (NSColor *)lowerColor;
-+ (NSColor *)upperColor;
-
-/*!
-	@method toggleBelowView:offset:
-	@abstract Toggles the visibility of the status bar in the window, resizes the view to cover or open up the frame occupied by the receiver.
-	@discussion This only works properly when the receiver and view are the only subviews of a common superview (when the receiver is attached). 
-		This can implicitly release the receiver, therefore the caller is responsible for retaining it when this is used. 
-	@param view The view that should be resized.
-	@param offset The extra amount by which the view should resize over the receivers height.
-*/
-- (void)toggleBelowView:(NSView *)view offset:(CGFloat)offset;
-
-/*!
-	@method toggleInWindow:offset:
-	@abstract Toggles the visibility of the status bar in the window, resizes the window to make add or remove space for the receiver.
-	@discussion This can implicitly release the receiver, therefore the caller is responsible for retaining it when this is used. 
-	@param window The window that should be resized.
-	@param offset The extra amount by which the window should resize over the receivers height.
-*/
-- (void)toggleInWindow:(NSWindow *)window offset:(CGFloat)offset;
-
-/*!
-	@method isVisible
-	@abstract Returns a boolean indicating whether the receiver is shown and attached.
-	@discussion -
-*/
 - (BOOL)isVisible;
-
-- (BOOL)drawsGradient;
-- (void)setDrawsGradient:(BOOL)newDrawsGradient;
 
 - (NSString *)stringValue;
 - (void)setStringValue:(NSString *)aString;

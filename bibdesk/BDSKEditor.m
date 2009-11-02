@@ -73,7 +73,6 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKCitationFormatter.h"
 #import "BDSKNotesWindowController.h"
-#import "BDSKGradientSplitView.h"
 #import <FileView/FileView.h>
 #import "BDSKLinkedFile.h"
 #import "NSObject_BDSKExtensions.h"
@@ -100,7 +99,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 @interface BDSKEditor (Private)
 
-- (void)setupActionButton;
 - (void)setupButtonCells;
 - (void)setupMatrix;
 - (void)matrixFrameDidChange:(NSNotification *)notification;
@@ -160,11 +158,14 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     // we should have a document at this point, as the nib is not loaded before -window is called, which shouldn't happen before the document shows us
     BDSKASSERT([self document]);
     
-    [[self window] setBackgroundColor:[NSColor colorWithCalibratedWhite:0.935 alpha:1.0]];
+    //[[self window] setBackgroundColor:[NSColor colorWithCalibratedWhite:0.935 alpha:1.0]];
+    
+    [[self window] setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
+    [[self window] setContentBorderThickness:NSHeight([statusBar frame]) forEdge:NSMinYEdge];
     
     // Unfortunately Tiger does not support transparent tables
     // We could also use a tabless tabview with a separate tab control
-    [tableView setBackgroundColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
+    //[tableView setBackgroundColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
     
     BDSKEditorTextFieldCell *dataCell = [[tableView tableColumnWithIdentifier:@"value"] dataCell];
     [dataCell setButtonAction:@selector(tableButtonAction:)];
@@ -185,16 +186,13 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [statusBar setTextOffset:NSMaxX([actionButton frame])];
     
     // Insert the tabView in the main window
-    BDSKEdgeView *edgeView = [[mainSplitView subviews] objectAtIndex:0];
-	[edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxXEdgeMask];
-    [[tabView superview] setFrame:[[edgeView contentView] bounds]];
-    [edgeView addSubview:tabView];
+    NSView *view = [[mainSplitView subviews] objectAtIndex:0];
+    [[tabView superview] setFrame:[view bounds]];
+    [mainSplitView replaceSubview:view with:[tabView superview]];
     
-    edgeView = (BDSKEdgeView *)[[[matrix enclosingScrollView] superview] superview];
+    BDSKEdgeView *edgeView = (BDSKEdgeView *)[[[matrix enclosingScrollView] superview] superview];
 	[edgeView setEdges:BDSKMaxYEdgeMask];
 	[edgeView setEdgeColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
-    
-    [fileSplitView setBlendStyle:BDSKMinBlendStyleMask];
     
     [self setWindowFrameAutosaveNameOrCascade:BDSKEditorFrameAutosaveName];
     
@@ -226,9 +224,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     // Setup the type popup
     [self setupTypePopUp];
     
-	// Setup the action button
-    [self setupActionButton];
-
     [authorTableView setDoubleAction:@selector(showPersonDetail:)];
     
     // Setup the textviews
@@ -1113,6 +1108,18 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         [[self document] showPerson:[self personAtIndex:i]];
 }
 
+- (IBAction)toggleSidebar:(id)sender {
+    CGFloat position = [mainSplitView maxPossiblePositionOfDividerAtIndex:0];
+    if ([mainSplitView isSubviewCollapsed:fileSplitView]) {
+        if (lastFileViewWidth <= 0.0)
+            lastFileViewWidth = 150.0; // a reasonable value to start
+        position -= lastFileViewWidth + [mainSplitView dividerThickness];
+    } else {
+        lastFileViewWidth = NSWidth([fileSplitView frame]);
+    }
+    [mainSplitView setPosition:position ofDividerAtIndex:0];
+}
+
 #pragma mark Menus
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
@@ -1500,6 +1507,13 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 		return (row != -1 && [complexStringEditor isEditing] == NO && 
                 [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] == NO && [[fields objectAtIndex:row] isCitationField] == NO);
     }
+	else if (theAction == @selector(toggleSidebar:)) {
+		if ([mainSplitView isSubviewCollapsed:fileSplitView])
+            [menuItem setTitle:NSLocalizedString(@"Show Sidebar", @"Menu item title")];
+        else
+            [menuItem setTitle:NSLocalizedString(@"Hide Sidebar", @"Menu item title")];
+        return YES;
+	}
     else if (theAction == @selector(raiseAddField:) || 
              theAction == @selector(raiseDelField:) || 
              theAction == @selector(raiseChangeFieldName:) || 
@@ -3016,111 +3030,42 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 #pragma mark Splitview delegate methods
 
-- (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(NSInteger)offset {
+- (BOOL)splitView:(NSSplitView *)sender canCollapseSubview:(NSView *)subview {
     if ([sender isEqual:mainSplitView]) {
-        NSView *tabs = [[mainSplitView subviews] objectAtIndex:0]; // tabs
-        NSView *files = [[mainSplitView subviews] objectAtIndex:1]; // files+authors
-        NSRect tabsFrame = [tabs frame];
-        NSRect filesFrame = [files frame];
-        
-        if(NSWidth(filesFrame) > 0.0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
-            lastFileViewWidth = NSWidth(filesFrame); // cache this
-            tabsFrame.size.width += lastFileViewWidth;
-            filesFrame.size.width = 0.0;
-        } else {
-            if(lastFileViewWidth <= 0.0)
-                lastFileViewWidth = 150.0; // a reasonable value to start
-            filesFrame.size.width = lastFileViewWidth;
-            tabsFrame.size.width = NSWidth([mainSplitView frame]) - lastFileViewWidth - [mainSplitView dividerThickness];
-            if (NSWidth(tabsFrame) < 390.0) {
-                tabsFrame.size.width = 390.0;
-                filesFrame.size.width = NSWidth([mainSplitView frame]) - [mainSplitView dividerThickness] - 390.0;
-                lastFileViewWidth = NSWidth(filesFrame);
-            }
-        }
-        [tabs setFrame:tabsFrame];
-        [files setFrame:filesFrame];
-        [mainSplitView adjustSubviews];
-        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
-        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:mainSplitView];
-        [[sender window] invalidateCursorRectsForView:sender];
+        return [subview isEqual:fileSplitView];
     } else if ([sender isEqual:fileSplitView]) {
-        NSView *files = [[fileSplitView subviews] objectAtIndex:0]; // files
-        NSView *authors = [[fileSplitView subviews] objectAtIndex:1]; // authors
-        NSRect filesFrame = [files frame];
-        NSRect authorsFrame = [authors frame];
-        
-        if(NSHeight(authorsFrame) > 0.0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
-            lastAuthorsHeight = NSHeight(authorsFrame); // cache this
-            filesFrame.size.height += lastAuthorsHeight;
-            authorsFrame.size.height = 0.0;
-        } else {
-            if(lastAuthorsHeight <= 0.0)
-                lastAuthorsHeight = 150.0; // a reasonable value to start
-            authorsFrame.size.height = lastAuthorsHeight;
-            filesFrame.size.height = NSHeight([fileSplitView frame]) - lastAuthorsHeight - [fileSplitView dividerThickness];
-            if (NSHeight(filesFrame) < 0.0) {
-                filesFrame.size.height = 0.0;
-                authorsFrame.size.height = NSHeight([fileSplitView frame]) - [fileSplitView dividerThickness];
-                lastAuthorsHeight = NSHeight(authorsFrame);
-            }
-        }
-        [files setFrame:filesFrame];
-        [authors setFrame:authorsFrame];
-        [fileSplitView adjustSubviews];
-        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
-        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fileSplitView];
-        [[sender window] invalidateCursorRectsForView:sender];
+        return [subview isEqual:[authorTableView enclosingScrollView]];
     }
+    return NO;
 }
 
-- (CGFloat)splitView:(NSSplitView *)sender constrainMinCoordinate:(CGFloat)proposedMin ofSubviewAt:(NSInteger)offset{
+- (BOOL)splitView:(NSSplitView *)sender shouldCollapseSubview:(NSView *)subview forDoubleClickOnDividerAtIndex:(NSInteger)dividerIndex {
+    if ([sender isEqual:mainSplitView]) {
+        if ([subview isEqual:fileSplitView])
+            lastFileViewWidth = NSWidth([fileSplitView frame]);
+        return YES;
+    } else if ([sender isEqual:fileSplitView]) {
+        return [subview isEqual:[authorTableView enclosingScrollView]];
+    }
+    return NO;
+}
+
+- (BOOL)splitView:(NSSplitView *)sender shouldHideDividerAtIndex:(NSInteger)dividerIndex {
+    return NO;
+}
+
+- (CGFloat)splitView:(NSSplitView *)sender constrainMaxCoordinate:(CGFloat)proposedMax ofSubviewAt:(NSInteger)dividerIndex {
+    if ([sender isEqual:mainSplitView]) {
+        return proposedMax - [mainSplitView dividerThickness] - 50.0;
+    }
+    return proposedMax;
+}
+
+- (CGFloat)splitView:(NSSplitView *)sender constrainMinCoordinate:(CGFloat)proposedMin ofSubviewAt:(NSInteger)dividerIndex {
     if ([sender isEqual:mainSplitView]) {
         return BDSKMax(proposedMin, 390.0);
     }
     return proposedMin;
-}
-
-- (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize{
-    if ([sender isEqual:mainSplitView]) {
-        NSView *tabs = [[sender subviews] objectAtIndex:0]; // tabview
-        NSView *files = [[sender subviews] objectAtIndex:1]; // files+authors
-        NSRect tabsFrame = [tabs frame];
-        NSRect filesFrame = [files frame];
-        NSSize newSize = [sender frame].size;
-        
-        tabsFrame.size.width += newSize.width - oldSize.width;
-        if (NSWidth(tabsFrame) < 390.0) {
-            tabsFrame.size.width = 390.0;
-            filesFrame.size.width = newSize.width - [mainSplitView dividerThickness] - 390.0;
-            lastFileViewWidth = NSWidth(filesFrame);
-        }
-        [tabs setFrame:tabsFrame];
-        [files setFrame:filesFrame];
-        [mainSplitView adjustSubviews];
-        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
-        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:mainSplitView];
-    } else if ([sender isEqual:fileSplitView]) {
-        NSView *files = [[sender subviews] objectAtIndex:0]; // files
-        NSView *authors = [[sender subviews] objectAtIndex:1]; // authors
-        NSRect filesFrame = [files frame];
-        NSRect authorsFrame = [authors frame];
-        NSSize newSize = [sender frame].size;
-        
-        filesFrame.size.height += newSize.height - oldSize.height;
-        if (NSHeight(filesFrame) < 0.0) {
-            filesFrame.size.height = 0.0;
-            authorsFrame.size.height = newSize.height - [fileSplitView dividerThickness];
-            lastAuthorsHeight = NSHeight(authorsFrame);
-        }
-        [files setFrame:filesFrame];
-        [authors setFrame:authorsFrame];
-        [fileSplitView adjustSubviews];
-        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
-        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fileSplitView];
-    } else {
-        [sender adjustSubviews];
-    }
 }
 
 @end
@@ -3379,12 +3324,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if (numberOfColumns != [matrix numberOfColumns])
         [self setupMatrix];
 }
-
-- (void)setupActionButton {
-	[[actionButton cell] setAltersStateOfSelectedItem:NO];
-	[[actionButton cell] setUsesItemFromMenu:NO];
-    [actionButton setMenu:actionMenu];
-}    
 
 - (void)setupTypePopUp{
     [bibTypeButton removeAllItems];

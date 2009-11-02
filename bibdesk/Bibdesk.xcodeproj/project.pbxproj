@@ -319,7 +319,6 @@
 		CEF7295709CC88AB00802D48 /* BDSKFieldSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF7295509CC88AB00802D48 /* BDSKFieldSheetController.m */; };
 		CEF795E60F55728F003AD9A9 /* colors.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEF795E50F55728F003AD9A9 /* colors.tiff */; };
 		CEF7A6690915115B00BE9E02 /* BDSKScriptMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF7A6670915115B00BE9E02 /* BDSKScriptMenu.m */; };
-		CEF7AC070915929E00BE9E02 /* BDSKGradientSplitView.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF7AC050915929E00BE9E02 /* BDSKGradientSplitView.m */; };
 		CEF83F380C77911F00A3AD51 /* BDSKBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF83F360C77911F00A3AD51 /* BDSKBookmarkController.m */; };
 		CEF8F8DF0F93519700948A88 /* WebGroupStartPage.html in Resources */ = {isa = PBXBuildFile; fileRef = CEF8F8DD0F93519700948A88 /* WebGroupStartPage.html */; };
 		CEF942120926458C00750FFA /* BDSKPathColorTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF942100926458C00750FFA /* BDSKPathColorTransformer.m */; };
@@ -1254,8 +1253,6 @@
 		CEF795E50F55728F003AD9A9 /* colors.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = colors.tiff; sourceTree = "<group>"; };
 		CEF7A6660915115B00BE9E02 /* BDSKScriptMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptMenu.h; sourceTree = "<group>"; };
 		CEF7A6670915115B00BE9E02 /* BDSKScriptMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptMenu.m; sourceTree = "<group>"; };
-		CEF7AC040915929E00BE9E02 /* BDSKGradientSplitView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKGradientSplitView.h; sourceTree = "<group>"; };
-		CEF7AC050915929E00BE9E02 /* BDSKGradientSplitView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGradientSplitView.m; sourceTree = "<group>"; };
 		CEF83F350C77911F00A3AD51 /* BDSKBookmarkController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKBookmarkController.h; sourceTree = "<group>"; };
 		CEF83F360C77911F00A3AD51 /* BDSKBookmarkController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKBookmarkController.m; sourceTree = "<group>"; };
 		CEF8F8DE0F93519700948A88 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = English; path = English.lproj/WebGroupStartPage.html; sourceTree = "<group>"; };
@@ -1924,7 +1921,6 @@
 				CEC7CDDF0F6725890051794E /* BDSKFilePathCell.m */,
 				CE51921F09E5755600E97C3A /* BDSKFindFieldEditor.m */,
 				CE92CE5C0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m */,
-				CEF7AC050915929E00BE9E02 /* BDSKGradientSplitView.m */,
 				F9706DE409102DF500526FC8 /* BDSKGradientView.m */,
 				CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */,
 				F97BE8F00907321F0063504B /* BDSKGroupOutlineView.m */,
@@ -2472,7 +2468,6 @@
 				3D44F5600812A91D003C67F0 /* BDSKFormatParser.h */,
 				45BB77510CAC74AE00F6299B /* BDSKGoogleScholarParser.h */,
 				CE92CE5B0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h */,
-				CEF7AC040915929E00BE9E02 /* BDSKGradientSplitView.h */,
 				F9706DE309102DF500526FC8 /* BDSKGradientView.h */,
 				CE21D10809208B9D0075E607 /* BDSKGroup.h */,
 				CE82B4710D57EECF00A2E8C5 /* BDSKGroup+Scripting.h */,
@@ -3375,7 +3370,6 @@
 				CE2AFE5A0911425F00E65C87 /* BDSKGroupCell.m in Sources */,
 				F97073B00911592000526FC8 /* NSWorkspace_BDSKExtensions.m in Sources */,
 				CEF7A6690915115B00BE9E02 /* BDSKScriptMenu.m in Sources */,
-				CEF7AC070915929E00BE9E02 /* BDSKGradientSplitView.m in Sources */,
 				CE28346509176CA3006B4C63 /* BDSKGradientView.m in Sources */,
 				CE2837420917D31D006B4C63 /* BDSKEdgeView.m in Sources */,
 				CE30FAD80919713100CB1A19 /* BDSKStatusBar.m in Sources */,

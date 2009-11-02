@@ -212,6 +212,9 @@
 */
 - (IBAction)deselectAllPublications:(id)sender;
 
+- (IBAction)toggleGroups:(id)sender;
+- (IBAction)toggleSidebar:(id)sender;
+
 - (IBAction)toggleStatusBar:(id)sender;
 
 - (IBAction)changeMainTableFont:(id)sender;

@@ -1194,57 +1194,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 #pragma mark NSSplitView delegate
 
-- (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize {
-    if (sender == tableViewSplitView) {
-        NSView *view1 = [[sender subviews] objectAtIndex:0];
-        NSView *view2 = [[sender subviews] objectAtIndex:1];
-        NSRect frame1 = [view1 frame];
-        NSRect frame2 = [view2 frame];
-        
-        CGFloat contentWidth = NSWidth([sender frame]) - [sender dividerThickness];
-        
-        if (NSWidth(frame1) <= 1.0)
-            frame1.size.width = 0.0;
-        if (contentWidth < NSWidth(frame1))
-            frame1.size.width = BDSKFloor(NSWidth(frame1) * contentWidth / (oldSize.width - [sender dividerThickness]));
-        
-        frame2.size.width = contentWidth - NSWidth(frame1);
-        frame2.origin.x = NSMaxX(frame1) + [sender dividerThickness];
-        
-        [view1 setFrame:frame1];
-        [view2 setFrame:frame2];
-        [sender adjustSubviews];
-    } else {
-        NSView *views[3];
-        NSRect frames[3];
-        CGFloat factor = (NSWidth([sender frame]) - 2 * [sender dividerThickness]) / (oldSize.width - 2 * [sender dividerThickness]);
-        NSInteger i, gap;
-        
-        [[sender subviews] getObjects:views];
-        for (i = 0; i < 3; i++) {
-            frames[i] = [views[i] frame];
-            frames[i].size.width = BDSKFloor(factor * NSWidth(frames[i]));
-        }
-        
-        // randomly divide the remaining gap over the three views; NSSplitView dumps it all over the last view, which grows that one more than the others
-        gap = NSWidth([sender frame]) - 2 * [sender dividerThickness] - NSWidth(frames[0]) - NSWidth(frames[1]) - NSWidth(frames[2]);
-        while (gap > 0) {
-            i = floor(3.0f * rand() / RAND_MAX);
-            if (NSWidth(frames[i]) > 0.0) {
-                frames[i].size.width += 1.0;
-                gap--;
-            }
-        }
-        
-        for (i = 0; i < 3; i++) {
-            if (i > 0)
-                frames[i].origin.x = NSMaxX(frames[i - 1]) + [sender dividerThickness];
-            [views[i] setFrame:frames[i]];
-        }
-        [sender adjustSubviews];
-    }
-}
-
 - (CGFloat)splitView:(NSSplitView *)sender constrainMaxCoordinate:(CGFloat)proposedMax ofSubviewAt:(NSInteger)offset {
     if (sender == tableViewSplitView) {
         return proposedMax - 600.0;

@@ -143,7 +143,7 @@
     [collapsibleView setMinSize:[collapsibleView frame].size];
     [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     
-    [view setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
+    [view setEdges:BDSKMinYEdgeMask];
     [view setEdgeColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
     
     NSRect frame = [backForwardButton frame];
@@ -185,7 +185,6 @@
     [urlField registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil]];
     
     // webview
-    [webEdgeView setEdges:BDSKEveryEdgeMask];
     [webView setEditingDelegate:self];
     [self loadURL: BDSKBibDeskWebGroupURL];
 	
@@ -202,7 +201,7 @@
 
 - (NSView *)webView {
     [self window];
-    return webEdgeView;
+    return webView;
 }
 
 - (BDSKWebGroup *)group {

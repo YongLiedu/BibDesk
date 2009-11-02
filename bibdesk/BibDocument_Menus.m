@@ -256,14 +256,40 @@
 	return YES;
 }
 
-- (BOOL) validateToggleStatusBarMenuItem:(NSMenuItem*) menuItem {
+- (BOOL) validateToggleGroupsMenuItem:(NSMenuItem*) menuItem {
     NSString *s;
-	if ([statusBar isVisible]){
-		s = NSLocalizedString(@"Hide Status Bar", @"Menu item title");
+	if ([groupSplitView isSubviewCollapsed:[[groupSplitView subviews] objectAtIndex:0]]){
+		s = NSLocalizedString(@"Show Groups", @"Menu item title");
 		[menuItem setTitle:s];
 	}
 	else {
+		s = NSLocalizedString(@"Hide Groups", @"Menu item title");
+		[menuItem setTitle:s];
+	}
+	return YES;
+}
+
+- (BOOL) validateToggleSidebarMenuItem:(NSMenuItem*) menuItem {
+    NSString *s;
+	if ([groupSplitView isSubviewCollapsed:[[groupSplitView subviews] objectAtIndex:2]]){
+		s = NSLocalizedString(@"Show Sidebar", @"Menu item title");
+		[menuItem setTitle:s];
+	}
+	else {
+		s = NSLocalizedString(@"Hide Sidebar", @"Menu item title");
+		[menuItem setTitle:s];
+	}
+	return YES;
+}
+
+- (BOOL) validateToggleStatusBarMenuItem:(NSMenuItem*) menuItem {
+    NSString *s;
+	if ([statusView isHidden]){
 		s = NSLocalizedString(@"Show Status Bar", @"Menu item title");
+		[menuItem setTitle:s];
+	}
+	else {
+		s = NSLocalizedString(@"Hide Status Bar", @"Menu item title");
 		[menuItem setTitle:s];
 	}
 	return YES;
@@ -671,6 +697,12 @@
 	}
 	else if (act == @selector(printDocument:)) {
 		return [self validatePrintDocumentMenuItem:menuItem];
+	}
+	else if (act == @selector(toggleGroups:)) {
+		return [self validateToggleGroupsMenuItem:menuItem];
+	}
+	else if (act == @selector(toggleSidebar:)) {
+		return [self validateToggleSidebarMenuItem:menuItem];
 	}
 	else if (act == @selector(toggleStatusBar:)) {
 		return [self validateToggleStatusBarMenuItem:menuItem];

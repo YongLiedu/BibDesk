@@ -44,7 +44,7 @@
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
 @class AGRegex, BDSKMacroResolver, BDSKItemPasteboardHelper;
 @class BDSKEditor, BDSKMacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController, BDSKSearchGroupViewController;
-@class BDSKStatusBar, BDSKMainTableView, BDSKGroupOutlineView, BDSKGradientView, BDSKGradientSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredView, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FVFileView;
+@class BDSKStatusBar, BDSKMainTableView, BDSKGroupOutlineView, BDSKGradientView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredView, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FVFileView;
 @class BDSKWebGroupViewController, BDSKSearchButtonController;
 @class BDSKItemSearchIndexes, BDSKNotesSearchIndex, BDSKFileMigrationController, BDSKDocumentSearch;
 
@@ -112,10 +112,10 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
     IBOutlet NSWindow *documentWindow;
     IBOutlet BDSKMainTableView *tableView;
-    IBOutlet BDSKGradientSplitView *splitView;
+    IBOutlet NSSplitView *splitView;
     IBOutlet BDSKColoredView *mainBox;
     IBOutlet NSView *mainView;
-    
+    IBOutlet NSView *statusView;
     IBOutlet BDSKStatusBar *statusBar;
     
     BDSKFileContentSearchController *fileSearchController;
@@ -129,9 +129,9 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 #pragma mark Group pane variables
 
     IBOutlet BDSKGroupOutlineView *groupOutlineView;
-    IBOutlet BDSKGradientSplitView *groupSplitView;
-    IBOutlet BDSKImagePopUpButton *groupActionButton;
-    IBOutlet BDSKImagePopUpButton *groupAddButton;
+    IBOutlet NSSplitView *groupSplitView;
+    IBOutlet NSPopUpButton *groupActionButton;
+    IBOutlet NSPopUpButton *groupAddButton;
     IBOutlet BDSKCollapsibleView *groupCollapsibleView;
     IBOutlet BDSKGradientView *groupGradientView;
     IBOutlet NSMenu *groupFieldMenu;
@@ -188,7 +188,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 #pragma mark Menu variables
 
 	IBOutlet NSMenu * groupMenu;
-	IBOutlet NSMenu * groupAddMenu;
 	IBOutlet NSMenu * actionMenu;
 	IBOutlet NSMenu * copyAsMenu;
 
@@ -492,6 +491,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (IBAction)migrateFiles:(id)sender;
 - (IBAction)selectAllPublications:(id)sender;
 - (IBAction)deselectAllPublications:(id)sender;
+- (IBAction)toggleGroups:(id)sender;
+- (IBAction)toggleSidebar:(id)sender;
 - (IBAction)toggleStatusBar:(id)sender;
 - (IBAction)changeMainTableFont:(id)sender;
 - (IBAction)changeGroupTableFont:(id)sender;

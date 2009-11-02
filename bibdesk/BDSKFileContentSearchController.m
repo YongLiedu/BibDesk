@@ -124,7 +124,7 @@
     frame.size.width = 350.0;
     [collapsibleView setMinSize:frame.size];
     [collapsibleView setCollapseEdges:BDSKMinXEdgeMask | BDSKMinYEdgeMask];
-    [controlView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
+    [controlView setEdges:BDSKMinYEdgeMask];
 
     // we might remove this, so keep a retained reference
     [[tableView enclosingScrollView] retain];

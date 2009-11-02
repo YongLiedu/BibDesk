@@ -50,8 +50,6 @@
 #import "BDSKGroupOutlineView.h"
 #import "BDSKMainTableView.h"
 #import "BDSKContainerView.h"
-#import "BDSKSplitView.h"
-#import "BDSKGradientSplitView.h"
 #import "BDSKEdgeView.h"
 #import "BDSKPreviewer.h"
 #import "BDSKOverlayWindow.h"
@@ -179,10 +177,7 @@ enum {
         [previewer setPDFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0]];
         [previewer setRTFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0]];
         [previewer setGeneratedTypes:BDSKGeneratePDF];
-        BDSKEdgeView *previewerBox = [[[BDSKEdgeView alloc] init] autorelease];
-        [previewerBox setEdges:BDSKEveryEdgeMask];
-        [previewerBox setContentView:[previewer pdfView]];
-        [[bottomPreviewTabView tabViewItemAtIndex:BDSKPreviewDisplayTeX] setView:previewerBox];
+        [[bottomPreviewTabView tabViewItemAtIndex:BDSKPreviewDisplayTeX] setView:[previewer pdfView]];
     }
     
     [[previewer progressOverlay] overlayView:bottomPreviewTabView];
@@ -495,127 +490,70 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 
 #pragma mark SplitView delegate
 
-- (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize {
-    NSInteger i = [[sender subviews] count] - 2;
-    BDSKASSERT(i >= 0);
-	NSView *zerothView = i == 0 ? nil : [[sender subviews] objectAtIndex:0];
-	NSView *firstView = [[sender subviews] objectAtIndex:i];
-	NSView *secondView = [[sender subviews] objectAtIndex:++i];
-	NSRect zerothFrame = zerothView ? [zerothView frame] : NSZeroRect;
-	NSRect firstFrame = [firstView frame];
-	NSRect secondFrame = [secondView frame];
-	
-	if (sender == splitView) {
-		// first = table, second = preview, zeroth = web
-        CGFloat contentHeight = NSHeight([sender frame]) - i * [sender dividerThickness];
-        CGFloat factor = contentHeight / (oldSize.height - i * [sender dividerThickness]);
-        secondFrame = NSIntegralRect(secondFrame);
-        zerothFrame.size.height = BDSKFloor(factor * NSHeight(zerothFrame));
-        firstFrame.size.height = BDSKFloor(factor * NSHeight(firstFrame));
-        secondFrame.size.height = BDSKFloor(factor * NSHeight(secondFrame));
-        if (NSHeight(zerothFrame) < 1.0)
-            zerothFrame.size.height = 0.0;
-        if (NSHeight(firstFrame) < 1.0)
-            firstFrame.size.height = 0.0;
-        if (NSHeight(secondFrame) < 1.0)
-            secondFrame.size.height = 0.0;
-        // randomly divide the remaining gap over the two views; NSSplitView dumps it all over the last view, which grows that one more than the others
-        NSInteger gap = (NSInteger)(contentHeight - NSHeight(zerothFrame) - NSHeight(firstFrame) - NSHeight(secondFrame));
-        while (gap > 0) {
-            i = BDSKFloor((3.0f * rand()) / RAND_MAX);
-            if (i == 0 && NSHeight(zerothFrame) > 0.0) {
-                zerothFrame.size.height += 1.0;
-                gap--;
-            } else if (i == 1 && NSHeight(firstFrame) > 0.0) {
-                firstFrame.size.height += 1.0;
-                gap--;
-            } else if (i == 2 && NSHeight(secondFrame) > 0.0) {
-                secondFrame.size.height += 1.0;
-                gap--;
-            }
-        }
-        zerothFrame.size.width = firstFrame.size.width = secondFrame.size.width = NSWidth([sender frame]);
-        if (zerothView)
-            firstFrame.origin.y = NSMaxY(zerothFrame) + [sender dividerThickness];
-        secondFrame.origin.y = NSMaxY(firstFrame) + [sender dividerThickness];
-	} else {
-		// zeroth = group, first = table+preview, second = fileview
-        CGFloat contentWidth = NSWidth([sender frame]) - 2 * [sender dividerThickness];
-        if (NSWidth(zerothFrame) < 1.0)
-            zerothFrame.size.width = 0.0;
-        if (NSWidth(secondFrame) < 1.0)
-            secondFrame.size.width = 0.0;
-        if (contentWidth < NSWidth(zerothFrame) + NSWidth(secondFrame)) {
-            CGFloat factor = contentWidth / (oldSize.width - [sender dividerThickness]);
-            zerothFrame.size.width = BDSKFloor(factor * NSWidth(zerothFrame));
-            secondFrame.size.width = BDSKFloor(factor * NSWidth(secondFrame));
-        }
-        firstFrame.size.width = contentWidth - NSWidth(zerothFrame) - NSWidth(secondFrame);
-        firstFrame.origin.x = NSMaxX(zerothFrame) + [sender dividerThickness];
-        secondFrame.origin.x = NSMaxX(firstFrame) + [sender dividerThickness];
-        zerothFrame.size.height = firstFrame.size.height = secondFrame.size.height = NSHeight([sender frame]);
+- (BOOL)splitView:(NSSplitView *)sender canCollapseSubview:(NSView *)subview {
+    if ([sender isEqual:groupSplitView]) {
+        return [subview isEqual:[[sender subviews] objectAtIndex:1]] == NO;
+    } else if ([sender isEqual:splitView]) {
+        return [subview isEqual:[[sender subviews] lastObject]];
     }
-	
-	[zerothView setFrame:zerothFrame];
-	[firstView setFrame:firstFrame];
-	[secondView setFrame:secondFrame];
-    [sender adjustSubviews];
+    return NO;
 }
 
-- (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(NSInteger)offset {
-    NSInteger i = [[sender subviews] count] - 2;
-    BDSKASSERT(i >= 0);
-	NSView *zerothView = i == 0 ? nil : [[sender subviews] objectAtIndex:0];
-	NSView *firstView = [[sender subviews] objectAtIndex:i];
-	NSView *secondView = [[sender subviews] objectAtIndex:++i];
-	NSRect zerothFrame = zerothView ? [zerothView frame] : NSZeroRect;
-	NSRect firstFrame = [firstView frame];
-	NSRect secondFrame = [secondView frame];
-	
-	if (sender == splitView && offset == i - 1) {
-		// first = table, second = preview, zeroth = web
-		if(NSHeight(secondFrame) > 0){ // can't use isSubviewCollapsed, because implementing splitView:canCollapseSubview: prevents uncollapsing
-			docState.lastPreviewHeight = NSHeight(secondFrame); // cache this
-			firstFrame.size.height += docState.lastPreviewHeight;
-			secondFrame.size.height = 0;
-		} else {
-			if(docState.lastPreviewHeight <= 0)
-				docState.lastPreviewHeight = BDSKFloor(NSHeight([sender frame]) / 3); // a reasonable value for uncollapsing the first time
-			firstFrame.size.height = NSHeight(firstFrame) + NSHeight(secondFrame) - docState.lastPreviewHeight;
-			secondFrame.size.height = docState.lastPreviewHeight;
-		}
-	} else if (sender == groupSplitView) {
-		// zeroth = group, first = table+preview, second = fileview
-        if (offset == 0) {
-            if(NSWidth(zerothFrame) > 0){
-                docState.lastGroupViewWidth = NSWidth(zerothFrame); // cache this
-                firstFrame.size.width += docState.lastGroupViewWidth;
-                zerothFrame.size.width = 0;
-            } else {
-                if(docState.lastGroupViewWidth <= 0)
-                    docState.lastGroupViewWidth = BDSKMin(120, NSWidth(firstFrame)); // a reasonable value for uncollapsing the first time
-                firstFrame.size.width -= docState.lastGroupViewWidth;
-                zerothFrame.size.width = docState.lastGroupViewWidth;
-            }
-        } else {
-            if(NSWidth(secondFrame) > 0){
-                docState.lastFileViewWidth = NSWidth(secondFrame); // cache this
-                firstFrame.size.width += docState.lastFileViewWidth;
-                secondFrame.size.width = 0;
-            } else {
-                if(docState.lastFileViewWidth <= 0)
-                    docState.lastFileViewWidth = BDSKMin(120, NSWidth(firstFrame)); // a reasonable value for uncollapsing the first time
-                firstFrame.size.width -= docState.lastFileViewWidth;
-                secondFrame.size.width = docState.lastFileViewWidth;
-            }
+- (BOOL)splitView:(NSSplitView *)sender shouldCollapseSubview:(NSView *)subview forDoubleClickOnDividerAtIndex:(NSInteger)dividerIndex {
+    if ([sender isEqual:groupSplitView]) {
+        if ([subview isEqual:[[sender subviews] objectAtIndex:1]] == NO) {
+            if (dividerIndex == 0)
+                docState.lastGroupViewWidth = NSWidth([[[sender subviews] objectAtIndex:0] frame]);
+            else
+                docState.lastFileViewWidth = NSWidth([[[sender subviews] objectAtIndex:2] frame]);
+            return YES;
         }
-	} else return;
-	
-	[zerothView setFrame:zerothFrame];
-	[firstView setFrame:firstFrame];
-	[secondView setFrame:secondFrame];
-    [sender adjustSubviews];
-    [[sender window] invalidateCursorRectsForView:sender];
+    } else if ([sender isEqual:splitView]) {
+        if ([subview isEqual:[[sender subviews] lastObject]]) {
+            docState.lastPreviewHeight = NSWidth([[[sender subviews] lastObject] frame]);
+            return YES;
+        }
+    }
+    return NO;
+}
+
+- (BOOL)splitView:(NSSplitView *)sender shouldHideDividerAtIndex:(NSInteger)dividerIndex {
+    return [sender isEqual:groupSplitView];
+}
+
+- (CGFloat)splitView:(NSSplitView *)sender constrainMaxCoordinate:(CGFloat)proposedMax ofSubviewAt:(NSInteger)dividerIndex {
+    if ([sender isEqual:groupSplitView] && dividerIndex == 1)
+        return proposedMax - [groupSplitView dividerThickness] - 100.0;
+    return proposedMax;
+}
+
+- (CGFloat)splitView:(NSSplitView *)sender constrainMinCoordinate:(CGFloat)proposedMin ofSubviewAt:(NSInteger)dividerIndex {
+    if ([sender isEqual:groupSplitView] && dividerIndex == 0)
+        return proposedMin + 100.0;
+    return proposedMin;
+}
+
+- (void)splitViewDidResizeSubviews:(NSNotification *)aNotification {
+    if ([[aNotification object] isEqual:groupSplitView] || aNotification == nil) {
+        NSRect frame = [statusBar frame];
+        NSView *view = [[groupSplitView subviews] objectAtIndex:1];
+        NSRect rect = [view convertRect:[view bounds] toView:[documentWindow contentView]];
+        frame.origin.x = BDSKMax(8.0, NSMinX(rect));
+        frame.size.width = NSWidth(rect);
+        [statusBar setFrame:frame];
+        BOOL isLeftHidden = [groupSplitView isSubviewCollapsed:[[groupSplitView subviews] objectAtIndex:0]];
+        BOOL isRightHidden = [groupSplitView isSubviewCollapsed:[[groupSplitView subviews] objectAtIndex:2]];
+        [groupAddButton setHidden:isLeftHidden];
+        [groupActionButton setHidden:isLeftHidden];
+        [sidePreviewButton setHidden:isRightHidden];
+        if (isRightHidden == NO) {
+            frame = [sidePreviewButton frame];
+            view = [[groupSplitView subviews] objectAtIndex:2];
+            rect = [view convertRect:[view bounds] toView:[documentWindow contentView]];
+            frame.origin.x = NSMinX(rect);
+            [sidePreviewButton setFrame:frame];
+        }
+    }
 }
 
 #pragma mark -

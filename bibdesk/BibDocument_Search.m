@@ -43,7 +43,6 @@
 #import "BibItem.h"
 #import "CFString_BDSKExtensions.h"
 #import "BDSKFieldSheetController.h"
-#import "BDSKGradientSplitView.h"
 #import "BDSKFileContentSearchController.h"
 #import "BDSKGroupOutlineView.h"
 #import "NSTableView_BDSKExtensions.h"

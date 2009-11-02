@@ -76,10 +76,10 @@
 #import <ApplicationServices/ApplicationServices.h>
 #import "BDSKImagePopUpButton.h"
 #import "BDSKRatingButton.h"
-#import "BDSKGradientSplitView.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKZoomablePDFView.h"
 #import "BDSKZoomableTextView.h"
+#import "BDSKGradientView.h"
 
 #import "BDSKMacroResolver.h"
 #import "BDSKErrorObjectController.h"
@@ -392,12 +392,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }
 }
 
-static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInteger i) {
-    NSView *placeholderView = [[splitView subviews] objectAtIndex:i];
-    [view setFrame:[placeholderView frame]];
-    [splitView replaceSubview:placeholderView with:view];
-}
-
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
 {
     [groupOutlineView expandItem:[groupOutlineView itemAtRow:0]];
@@ -419,22 +413,15 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     
     [self setupToolbar];
     
-    replaceSplitViewSubview(bottomPreviewTabView, splitView, 1);
-    replaceSplitViewSubview([[groupOutlineView enclosingScrollView] superview], groupSplitView, 0);
-    replaceSplitViewSubview([mainBox superview], groupSplitView, 1);
-    replaceSplitViewSubview([sidePreviewTabView superview], groupSplitView, 2);
+    [documentWindow setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
+    [documentWindow setContentBorderThickness:NSHeight([statusBar frame]) forEdge:NSMinYEdge];
     
     // First remove the statusbar if we should, as it affects proper resizing of the window and splitViews
 	[statusBar retain]; // we need to retain, as we might remove it from the window
-	if (![sud boolForKey:BDSKShowStatusBarKey]) {
+    [statusBar setTextOffset:NSMaxX([bottomPreviewButton frame])];
+	if ([sud boolForKey:BDSKShowStatusBarKey] == NO)
 		[self toggleStatusBar:nil];
-	} else {
-		// make sure they are ordered correctly, mainly for the focus ring
-		[statusBar removeFromSuperview];
-		[[mainBox superview] addSubview:statusBar positioned:NSWindowBelow relativeTo:nil];
-	}
 	[statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
-    [statusBar setTextOffset:NSMaxX([bottomPreviewButton frame]) - 2.0];
     
     bottomPreviewDisplay = [xattrDefaults intForKey:BDSKBottomPreviewDisplayKey defaultValue:[sud integerForKey:BDSKBottomPreviewDisplayKey]];
     bottomPreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKBottomPreviewDisplayTemplateKey defaultObject:[sud stringForKey:BDSKBottomPreviewDisplayTemplateKey]] retain];
@@ -458,21 +445,11 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [groupGradientView setUpperColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
     [groupGradientView setLowerColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
 
-    // make sure they are ordered correctly, mainly for the focus ring
-	[groupCollapsibleView retain];
-    [groupCollapsibleView removeFromSuperview];
-    [[[groupOutlineView enclosingScrollView] superview] addSubview:groupCollapsibleView positioned:NSWindowBelow relativeTo:nil];
-	[groupCollapsibleView release];
-
     NSRect frameRect = [xattrDefaults rectForKey:BDSKDocumentWindowFrameKey defaultValue:NSZeroRect];
     
     [aController setWindowFrameAutosaveNameOrCascade:@"Main Window Frame Autosave" setFrame:frameRect];
             
     [documentWindow makeFirstResponder:tableView];	
-    
-    // SplitViews setup
-    [groupSplitView setBlendStyle:BDSKStatusBarBlendStyleMask];
-    [splitView setBlendStyle:BDSKMinBlendStyleMask | BDSKMaxBlendStyleMask];
     
     // set autosave names first
 	[splitView setAutosaveName:@"Main Window"];
@@ -492,13 +469,17 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     if (fract >= 0)
         [splitView setFraction:fract];
     
+    [self splitViewDidResizeSubviews:nil];
+    
     docState.lastWebViewFraction = [xattrDefaults floatForKey:BDSKWebViewFractionKey defaultValue:0.0];
     
     [mainBox setBackgroundColor:[NSColor controlBackgroundColor]];
     
     // this might be replaced by the file content tableView
     [[tableView enclosingScrollView] retain];
-    [[tableView enclosingScrollView] setFrame:[mainView bounds]];
+    frameRect = [mainView bounds];
+    frameRect.size.height += 1.0;
+    [[tableView enclosingScrollView] setFrame:frameRect];
     
     // TableView setup
     [tableView removeAllTableColumns];
@@ -566,14 +547,6 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 	[[groupActionMenuButton cell] setAltersStateOfSelectedItem:NO];
 	[[groupActionMenuButton cell] setUsesItemFromMenu:NO];
 	[groupActionMenuButton setMenu:groupMenu];
-	
-	[[groupActionButton cell] setAltersStateOfSelectedItem:NO];
-	[[groupActionButton cell] setUsesItemFromMenu:NO];
-	[groupActionButton setMenu:groupMenu];
-	
-	[[groupAddButton cell] setAltersStateOfSelectedItem:NO];
-	[[groupAddButton cell] setUsesItemFromMenu:NO];
-	[groupAddButton setMenu:groupAddMenu];
     
     // array of BDSKSharedGroup objects and zeroconf support, doesn't do anything when already enabled
     // we don't do this in appcontroller as we want our data to be loaded

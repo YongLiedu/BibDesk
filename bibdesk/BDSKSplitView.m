@@ -38,44 +38,41 @@
 
 #import "BDSKSplitView.h"
 
+#ifndef NSAppKitVersionNumber10_5
+#define NSAppKitVersionNumber10_5 949
+#endif
 
 @implementation BDSKSplitView
 
+- (id)initWithCoder:(NSCoder *)coder{
+    if (self = [super initWithCoder:coder]) {
+        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_5 && [self dividerStyle] == NSSplitViewDividerStyleThick)
+            [self setDividerStyle:3]; // NSSplitViewDividerStylePaneSplitter
+    }
+    return self;
+}
 
-// arm: mouseDown: swallows mouseDragged: needlessly
-- (void)mouseDown:(NSEvent *)theEvent {
-    BOOL inDivider = NO;
-    NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-    NSArray *subviews = [self subviews];
-    NSInteger i, count = [subviews count];
-    id view;
-    NSRect divRect;
-    
-    for (i = 0; i < count - 1; i++) {
-        view = [subviews objectAtIndex:i];
-        divRect = [view frame];
-        if ([self isVertical]) {
-            divRect.origin.x = NSMaxX(divRect);
-            divRect.size.width = [self dividerThickness];
-        } else {
-            divRect.origin.y = NSMaxY(divRect);
-            divRect.size.height = [self dividerThickness];
-        }
+- (void)drawDividerInRect:(NSRect)aRect {
+	if ([self dividerStyle] == NSSplitViewDividerStyleThick) {
+        NSRect topRect, bottomRect, innerRect;
+        NSDivideRect(aRect, &topRect, &innerRect, 1.0, NSMaxYEdge);
+        NSDivideRect(innerRect, &bottomRect, &innerRect, 1.0, NSMinYEdge);
         
-        if (NSMouseInRect(mouseLoc, divRect, [self isFlipped])) {
-            inDivider = YES;
-            break;
-        }
+        [NSGraphicsContext saveGraphicsState];
+        NSGradient *gradient = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithDeviceWhite:0.98 alpha:1.0] endingColor:[NSColor colorWithDeviceWhite:0.91 alpha:1.0]] autorelease];
+        [gradient drawInRect:innerRect angle:90.0];
+        [[NSColor colorWithDeviceWhite:0.69 alpha:1.0] setFill];
+        NSRectFill(topRect);
+        NSRectFill(bottomRect);
+        [NSGraphicsContext restoreGraphicsState];
     }
-    
-    if (inDivider) {
-        if ([theEvent clickCount] > 1 && [[self delegate] respondsToSelector:@selector(splitView:doubleClickedDividerAt:)])
-            [[self delegate] splitView:self doubleClickedDividerAt:i];
-        else
-            [super mouseDown:theEvent];
-    } else {
-        [[self nextResponder] mouseDown:theEvent];
-    }
+    [super drawDividerInRect:aRect];
+}
+
+- (CGFloat)dividerThickness {
+	if ([self dividerStyle] == NSSplitViewDividerStyleThick)
+        return 10.0;
+    return [super dividerThickness];
 }
 
 @end

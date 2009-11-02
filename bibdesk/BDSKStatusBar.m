@@ -48,20 +48,6 @@
 
 @implementation BDSKStatusBar
 
-+ (NSColor *)lowerColor{
-    static NSColor *lowerColor = nil;
-    if (lowerColor == nil)
-        lowerColor = [[NSColor colorWithCalibratedWhite:0.75 alpha:1.0] retain];
-    return lowerColor;
-}
-
-+ (NSColor *)upperColor{
-    static NSColor *upperColor = nil;
-    if (upperColor == nil)
-        upperColor = [[NSColor colorWithCalibratedWhite:0.9 alpha:1.0] retain];
-    return upperColor;
-}
-
 - (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
@@ -78,9 +64,6 @@
 		delegate = nil;
         
         textOffset = 0.0;
-        
-        drawsGradient = YES;
-
     }
     return self;
 }
@@ -90,16 +73,6 @@
 	[iconCell release];
 	[icons release];
 	[super dealloc];
-}
-
-- (NSColor *)upperColor
-{
-    return [[self class] upperColor];
-}
-
-- (NSColor *)lowerColor
-{
-    return [[self class] lowerColor];
 }
 
 - (NSSize)cellSizeForIcon:(NSImage *)icon {
@@ -113,9 +86,6 @@
 	NSRect textRect, ignored;
     CGFloat rightMargin = RIGHT_MARGIN;
 	
-	if (drawsGradient)
-        [super drawRect:rect];
-    
     if (progressIndicator)
         rightMargin += NSWidth([progressIndicator frame]) + MARGIN_BETWEEN_ITEMS;
     NSDivideRect([self bounds], &ignored, &textRect, LEFT_MARGIN + textOffset, NSMinXEdge);
@@ -146,93 +116,6 @@
 
 - (BOOL)isVisible {
 	return [self superview]  && [self isHidden] == NO;
-}
-
-- (BOOL)isOpaque {
-    return drawsGradient;
-}
-
-- (BOOL)drawsGradient {
-    return drawsGradient;
-}
-
-- (void)setDrawsGradient:(BOOL)newDrawsGradient {
-    drawsGradient = newDrawsGradient;
-}
-
-- (void)toggleBelowView:(NSView *)view offset:(CGFloat)offset {
-	NSRect viewFrame = [view frame];
-	NSView *contentView = [view superview];
-	NSRect statusRect = [contentView bounds];
-	CGFloat shiftHeight = NSHeight([self frame]) + offset;
-	statusRect.size.height = NSHeight([self frame]);
-	
-	BDSKASSERT(contentView != nil);
-	
-	if ([self superview]) {
-		BDSKASSERT([[self superview] isEqual:contentView]);
-		viewFrame.size.height += shiftHeight;
-		if ([contentView isFlipped] == NO)
-			viewFrame.origin.y -= shiftHeight;
-		[self removeFromSuperview];
-	} else {
-		viewFrame.size.height -= shiftHeight;
-		if ([contentView isFlipped] == NO)
-			viewFrame.origin.y += shiftHeight;
-		else 
-			statusRect.origin.y = NSMaxY([contentView bounds]) - NSHeight(statusRect);
-		[self setFrame:statusRect];
-		[contentView  addSubview:self positioned:NSWindowBelow relativeTo:nil];
-	}
-	[view setFrame:viewFrame];
-	[contentView setNeedsDisplay:YES];
-}
-
-- (void)toggleInWindow:(NSWindow *)window offset:(CGFloat)offset {
-	NSRect winFrame = [window frame];
-	NSSize minSize = [window minSize];
-	NSSize maximumSize = [window maxSize];
-	NSView *contentView = [window contentView];
-	CGFloat shiftHeight = NSHeight([self frame]) + offset;
-	BOOL autoresizes = [contentView autoresizesSubviews];
-	NSRect viewFrame;
-	
-	BDSKASSERT(contentView != nil);
-	
-	if ([self superview])
-		shiftHeight = -shiftHeight;
-	
-	if ([contentView isFlipped] == NO) {
-		for (NSView *view in [contentView subviews]) {
-			viewFrame = [view frame];
-			viewFrame.origin.y += shiftHeight;
-			[view setFrame:viewFrame];
-		}
-	}
-	winFrame.size.height += shiftHeight;
-	winFrame.origin.y -= shiftHeight;
-	if (minSize.height > 0.0) minSize.height += shiftHeight;
-	if (maximumSize.height > 0.0) maximumSize.height += shiftHeight;
-	if (winFrame.size.height < 0.0) winFrame.size.height = 0.0;
-	if (minSize.height < 0.0) minSize.height = 0.0;
-	if (maximumSize.height < 0.0) maximumSize.height = 0.0;
-	
-	if ([self superview]) {
-		[self removeFromSuperview];
-	} else {
-		NSRect statusRect = [contentView bounds];
-		statusRect.size.height = NSHeight([self frame]);
-		if ([contentView isFlipped])
-			statusRect.origin.y = NSMaxY([contentView bounds]) - NSHeight(statusRect);
-		[self setFrame:statusRect];
-		[contentView addSubview:self positioned:NSWindowBelow relativeTo:nil];
-	}
-	
-	[contentView setAutoresizesSubviews:NO];
-	[window setFrame:winFrame display:YES];
-	[contentView setAutoresizesSubviews:autoresizes];
-	[window setMinSize:minSize];
-	[window setMaxSize:maximumSize];
 }
 
 #pragma mark Text cell accessors

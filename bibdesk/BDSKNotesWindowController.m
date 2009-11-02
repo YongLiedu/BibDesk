@@ -40,7 +40,6 @@
 #import "BDSKAppController.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
-#import "BDSKGradientSplitView.h"
 
 
 @interface BDSKNotesWindowController (Private)
@@ -240,53 +239,12 @@
 
 #pragma mark NSSplitView deldegate methods
 
-- (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(NSInteger)offset {
-    NSView *notesView = [[sender subviews] objectAtIndex:0]; // outlineView
-    NSView *tagsView = [[sender subviews] objectAtIndex:1]; // tokenField
-    NSRect notesFrame = [notesView frame];
-    NSRect tagsFrame = [tagsView frame];
-    
-    if(NSHeight(tagsFrame) > 0.0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
-        lastTagsHeight = NSHeight(tagsFrame); // cache this
-        notesFrame.size.height += lastTagsHeight;
-        tagsFrame.size.height = 0.0;
-    } else {
-        if(lastTagsHeight <= 0.0)
-            lastTagsHeight = 22.0; // a reasonable value to start
-        tagsFrame.size.height = lastTagsHeight;
-        notesFrame.size.height = NSHeight([sender frame]) - lastTagsHeight - [sender dividerThickness];
-        if (NSHeight(notesFrame) < 0.0) {
-            notesFrame.size.height = 0.0;
-            tagsFrame.size.height = NSHeight([sender frame]) - [sender dividerThickness];
-            lastTagsHeight = NSHeight(tagsFrame);
-        }
-    }
-    [notesView setFrame:notesFrame];
-    [tagsView setFrame:tagsFrame];
-    [sender adjustSubviews];
-    // fix for NSSplitView bug, which doesn't send this in adjustSubviews
-    [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:sender];
-    [[sender window] invalidateCursorRectsForView:sender];
+- (BOOL)splitView:(NSSplitView *)sender canCollapseSubview:(NSView *)subview {
+    return [subview isEqual:tokenField];
 }
 
-- (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize{
-    NSView *notesView = [[sender subviews] objectAtIndex:0]; // outlineView
-    NSView *tagsView = [[sender subviews] objectAtIndex:1]; // tokenField
-    NSRect notesFrame = [notesView frame];
-    NSRect tagsFrame = [tagsView frame];
-    NSSize newSize = [sender frame].size;
-    
-    notesFrame.size.height += newSize.height - oldSize.height;
-    if (NSHeight(notesFrame) < 0.0) {
-        notesFrame.size.height = 0.0;
-        tagsFrame.size.height = newSize.height - [sender dividerThickness];
-        lastTagsHeight = NSHeight(tagsFrame);
-    }
-    [notesView setFrame:notesFrame];
-    [tagsView setFrame:tagsFrame];
-    [sender adjustSubviews];
-    // fix for NSSplitView bug, which doesn't send this in adjustSubviews
-    [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:sender];
+- (BOOL)splitView:(NSSplitView *)sender shouldCollapseSubview:(NSView *)subview forDoubleClickOnDividerAtIndex:(NSInteger)dividerIndex {
+    return [subview isEqual:tokenField];
 }
 
 @end

@@ -60,7 +60,7 @@
 - (void)awakeFromNib
 {
     NSParameterAssert(nil != edgeView);
-    [edgeView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
+    [edgeView setEdges:BDSKMinYEdgeMask];
     
     [gradientView setLowerColor:[NSColor colorWithCalibratedRed:0.82 green:0.82 blue:0.82 alpha:1.0]];
     [gradientView setUpperColor:[NSColor colorWithCalibratedRed:0.914 green:0.914 blue:0.914 alpha:1.0]]; 

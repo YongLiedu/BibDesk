@@ -48,7 +48,6 @@
 #import "BDSKPublicationsArray.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
-#import "BDSKSplitView.h"
 #import "BDSKTableView.h"
 #import <AddressBook/AddressBook.h>
 
@@ -503,85 +502,18 @@
 
 #pragma mark Splitview delegate methods
 
-- (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize {
-    if ([sender isEqual:splitView]) {
-        
-        NSView *views[2];
-        NSRect frames[2];
-        CGFloat contentHeight = NSHeight([sender frame]) - [sender dividerThickness];
-        CGFloat factor = contentHeight / (oldSize.height - [sender dividerThickness]);
-        NSInteger i, gap;
-        
-        [[sender subviews] getObjects:views];
-        for (i = 0; i < 2; i++) {
-            frames[i] = [views[i] frame];
-            frames[i].size.height = BDSKFloor(factor * NSHeight(frames[i]));
-        }
-        
-        // randomly divide the remaining gap over the two views; NSSplitView dumps it all over the last view, which grows that one more than the others
-        gap = contentHeight - NSHeight(frames[0]) - NSHeight(frames[1]);
-        while (gap > 0) {
-            i = floor(2.0f * rand() / RAND_MAX);
-            if (NSHeight(frames[i]) > 0.0) {
-                frames[i].size.height += 1.0;
-                gap--;
-            }
-        }
-        frames[0].origin.y = NSMaxY(frames[1]) + [sender dividerThickness];
-        
-        for (i = 0; i < 2; i++)
-            [views[i] setFrame:frames[i]];
-        
-    } else if ([sender isEqual:fieldNameSplitView]) {
-        
-        NSView *leftView = [[sender subviews] objectAtIndex:0];
-        NSView *rightView = [[sender subviews] objectAtIndex:1];
-        NSRect leftFrame = [leftView frame];
-        NSRect rightFrame = [rightView frame];
-        CGFloat contentWidth = NSWidth([sender frame]) - [sender dividerThickness];
-        
-        if (NSWidth(rightFrame) <= 1.0)
-            rightFrame.size.width = 0.0;
-        else if (NSWidth(leftFrame) <= 1.0)
-            rightFrame.size.width = contentWidth;
-        else if (contentWidth < NSWidth(rightFrame))
-            rightFrame.size.width = BDSKFloor(NSWidth(rightFrame) * contentWidth / (oldSize.width - [sender dividerThickness]));
-        
-        leftFrame.size.width = contentWidth - NSWidth(rightFrame);
-        rightFrame.origin.x = NSMaxX(leftFrame) + [sender dividerThickness];
-        rightFrame.size.height = leftFrame.size.height = NSHeight([sender frame]);
-        [leftView setFrame:leftFrame];
-        [rightView setFrame:rightFrame];
-    }
-    
-    [sender adjustSubviews];
+- (BOOL)splitView:(NSSplitView *)sender canCollapseSubview:(NSView *)subview {
+    return [sender isEqual:splitView] && [subview isEqual:collapsibleView];
 }
 
-- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(NSInteger)offset {
-    if ([sender isEqual:splitView]) {
-        
-        NSView *pickerView = [[sender subviews] objectAtIndex:0];
-        NSView *pubsView = [[sender subviews] objectAtIndex:1];
-        NSRect pubsFrame = [pubsView frame];
-        NSRect pickerFrame = [pickerView frame];
-        
-        if (NSHeight(pickerFrame) > 0.0) { // can't use isSubviewCollapsed, because implementing splitView:canCollapseSubview: prevents uncollapsing
-            lastPickerHeight = NSHeight(pickerFrame); // cache this
-            pubsFrame.size.height += lastPickerHeight;
-            pickerFrame.size.height = 0.0;
-        } else {
-            if(lastPickerHeight <= 0.0)
-                lastPickerHeight = 150.0; // a reasonable value to start
-            pickerFrame.size.height = lastPickerHeight;
-            pubsFrame.size.height = NSHeight([sender frame]) - lastPickerHeight - [splitView dividerThickness];
-        }
-        [pubsView setFrame:pubsFrame];
-        [pickerView setFrame:pickerFrame];
-        [sender adjustSubviews];
-        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
-        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:sender];
-        [[sender window] invalidateCursorRectsForView:sender];
-    }
+- (BOOL)splitView:(NSSplitView *)sender shouldCollapseSubview:(NSView *)subview forDoubleClickOnDividerAtIndex:(NSInteger)dividerIndex {
+    return [sender isEqual:splitView] && [subview isEqual:collapsibleView];
+}
+
+- (CGFloat)splitView:(NSSplitView *)sender constrainMinCoordinate:(CGFloat)proposedMin ofSubviewAt:(NSInteger)dividerIndex {
+    if ([sender isEqual:splitView])
+        return proposedMin + 20.0;
+    return proposedMin;
 }
 
 #pragma mark Undo Manager

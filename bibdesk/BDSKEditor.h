@@ -41,7 +41,7 @@
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
 
-@class BDSKRatingButton, BDSKRatingButtonCell, BDSKImagePopUpButton, BDSKStatusBar, BDSKZoomablePDFView, FVFileView, BDSKGradientSplitView, BDSKEditorTableView;
+@class BDSKRatingButton, BDSKRatingButtonCell, BDSKImagePopUpButton, BDSKStatusBar, BDSKZoomablePDFView, FVFileView, BDSKEditorTableView;
 @class BDSKComplexStringFormatter, BDSKCrossrefFormatter, BDSKCitationFormatter, BDSKComplexStringEditor;
 @class BibItem, BibAuthor;
 
@@ -51,8 +51,8 @@
     @discussion Subclass of the NSWindowController class, This handles making, reversing and keeping track of changes to the BibItem, and displaying a nice GUI.
 */
 @interface BDSKEditor : NSWindowController {
-	IBOutlet BDSKGradientSplitView *mainSplitView;
-	IBOutlet BDSKGradientSplitView *fileSplitView;
+	IBOutlet NSSplitView *mainSplitView;
+	IBOutlet NSSplitView *fileSplitView;
     IBOutlet NSPopUpButton *bibTypeButton;
     IBOutlet BDSKEditorTableView *tableView;
     IBOutlet NSMatrix *matrix;
@@ -81,8 +81,7 @@
     
     IBOutlet NSTextField *citeKeyField;
     IBOutlet NSTextField *citeKeyTitle;
-	IBOutlet BDSKImagePopUpButton *actionButton;
-    IBOutlet NSMenu *actionMenu;
+	IBOutlet NSPopUpButton *actionButton;
 	IBOutlet NSButton *addFieldButton;
     
     // ----------------------------------------------------------------------------------------
@@ -313,6 +312,9 @@
     
 - (BOOL)editSelectedCellAsMacro;
 - (void)macrosDidChange:(NSNotification *)aNotification;
+
+
+- (IBAction)toggleSidebar:(id)sender;
 
 @end
 

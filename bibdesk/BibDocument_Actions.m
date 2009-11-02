@@ -76,7 +76,6 @@
 #import "BDSKTemplateObjectProxy.h"
 #import "BDSKMainTableView.h"
 #import "BDSKGroupOutlineView.h"
-#import "BDSKGradientSplitView.h"
 #import "NSTask_BDSKExtensions.h"
 #import "BDSKColoredView.h"
 #import "BDSKStringParser.h"
@@ -1217,9 +1216,41 @@ static BOOL changingColors = NO;
 	[tableView deselectAll:sender];
 }
 
+- (IBAction)toggleGroups:(id)sender {
+    CGFloat position = 0.0;
+    NSView *view = [[groupSplitView subviews] objectAtIndex:0];
+    if ([groupSplitView isSubviewCollapsed:view]) {
+        if(docState.lastGroupViewWidth <= 0.0)
+            docState.lastGroupViewWidth = 120.0; // a reasonable value to start
+        position = docState.lastGroupViewWidth;
+    } else {
+        docState.lastGroupViewWidth = NSWidth([view frame]);
+    }
+    [groupSplitView setPosition:position ofDividerAtIndex:0];
+}
+
+- (IBAction)toggleSidebar:(id)sender {
+    CGFloat position = [groupSplitView maxPossiblePositionOfDividerAtIndex:1];
+    NSView *view = [[groupSplitView subviews] objectAtIndex:2];
+    if ([groupSplitView isSubviewCollapsed:view]) {
+        if(docState.lastFileViewWidth <= 0.0)
+            docState.lastFileViewWidth = 120.0; // a reasonable value to start
+        position -= docState.lastFileViewWidth + [groupSplitView dividerThickness];
+    } else {
+        docState.lastFileViewWidth = NSWidth([view frame]);
+    }
+    [groupSplitView setPosition:position ofDividerAtIndex:1];
+}
+
 - (IBAction)toggleStatusBar:(id)sender{
-	[statusBar toggleBelowView:mainBox offset:1.0];
-	[[NSUserDefaults standardUserDefaults] setBool:[statusBar isVisible] forKey:BDSKShowStatusBarKey];
+    BOOL visible = [statusView isHidden];
+    NSRect ignored, frame = [groupSplitView frame];
+    CGFloat height = NSHeight([statusView frame]);
+    [statusView setHidden:visible == NO];
+    NSDivideRect(frame, &ignored, &frame, visible ? height : -height, NSMinYEdge);
+    [groupSplitView setFrame:frame];
+    [documentWindow setContentBorderThickness:visible ? height : 0.0 forEdge:NSMinYEdge];
+	[[NSUserDefaults standardUserDefaults] setBool:visible forKey:BDSKShowStatusBarKey];
 }
 
 - (IBAction)changeMainTableFont:(id)sender{
