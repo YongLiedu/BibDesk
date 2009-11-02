@@ -41,7 +41,6 @@
 #import "BibItem.h"
 #import "BDSKTypeManager.h"
 #import "BDSKComplexStringEditor.h"
-#import "BDSKImagePopUpButton.h"
 #import "BDSKTypeSelectHelper.h"
 #import <WebKit/WebKit.h>
 #import "BDSKComplexStringFormatter.h"
@@ -177,11 +176,6 @@
     [itemTableView setDoubleAction:@selector(addTextToCurrentFieldAction:)];
     
     [self setWindowFrameAutosaveName:@"BDSKTextImportController Frame Autosave Name"];
-	
-    // Set the properties of actionMenuButton that cannot be set in IB
-	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
-	[[actionMenuButton cell] setUsesItemFromMenu:NO];
-    [actionMenuButton setMenu:actionMenu];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleFlagsChangedNotification:)

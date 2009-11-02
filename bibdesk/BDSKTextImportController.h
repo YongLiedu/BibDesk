@@ -40,7 +40,7 @@
 #import "BDSKOwnerProtocol.h"
 #import "BDSKTableView.h"
 
-@class BibDocument, BibItem, BDSKEdgeView, WebView, WebDownload, BDSKImagePopUpButton, BDSKComplexStringEditor;
+@class BibDocument, BibItem, BDSKEdgeView, WebView, WebDownload, BDSKComplexStringEditor;
 @class BDSKComplexStringFormatter, BDSKCiteKeyFormatter, BDSKCrossrefFormatter, BDSKCitationFormatter;
 
 @interface BDSKTextImportController : NSWindowController <BDSKOwner> {
@@ -53,8 +53,7 @@
     IBOutlet NSButton *closeButton;
     IBOutlet NSButton *clearButton;
     IBOutlet NSPopUpButton* itemTypeButton;
-    IBOutlet BDSKImagePopUpButton *actionMenuButton;
-    IBOutlet NSMenu *actionMenu;
+    IBOutlet NSPopUpButton *actionMenuButton;
     IBOutlet NSSplitView* splitView;
     IBOutlet NSBox* sourceBox;
     IBOutlet WebView* webView;

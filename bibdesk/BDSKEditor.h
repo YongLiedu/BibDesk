@@ -41,7 +41,7 @@
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
 
-@class BDSKRatingButton, BDSKRatingButtonCell, BDSKImagePopUpButton, BDSKStatusBar, BDSKZoomablePDFView, FVFileView, BDSKEditorTableView;
+@class BDSKRatingButton, BDSKRatingButtonCell, BDSKStatusBar, BDSKZoomablePDFView, FVFileView, BDSKEditorTableView;
 @class BDSKComplexStringFormatter, BDSKCrossrefFormatter, BDSKCitationFormatter, BDSKComplexStringEditor;
 @class BibItem, BibAuthor;
 

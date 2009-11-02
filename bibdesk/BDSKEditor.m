@@ -53,7 +53,6 @@
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKCrossrefFormatter.h"
 #import "BDSKAppController.h"
-#import "BDSKImagePopUpButton.h"
 #import "BDSKRatingButton.h"
 #import "BDSKComplexStringEditor.h"
 #import "BDSKStatusBar.h"
