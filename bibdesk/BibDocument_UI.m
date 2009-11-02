@@ -539,7 +539,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         NSView *view = [[groupSplitView subviews] objectAtIndex:1];
         NSRect rect = [view convertRect:[view bounds] toView:[documentWindow contentView]];
         frame.origin.x = BDSKMax(8.0, NSMinX(rect));
-        frame.size.width = NSWidth(rect);
+        frame.size.width = NSMaxX(rect) - NSMinX(frame);
         [statusBar setFrame:frame];
         BOOL isLeftHidden = [groupSplitView isSubviewCollapsed:[[groupSplitView subviews] objectAtIndex:0]];
         BOOL isRightHidden = [groupSplitView isSubviewCollapsed:[[groupSplitView subviews] objectAtIndex:2]];
