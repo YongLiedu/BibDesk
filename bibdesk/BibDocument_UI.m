@@ -522,13 +522,13 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 }
 
 - (CGFloat)splitView:(NSSplitView *)sender constrainMaxCoordinate:(CGFloat)proposedMax ofSubviewAt:(NSInteger)dividerIndex {
-    if ([sender isEqual:groupSplitView] && dividerIndex == 1)
+    if ([sender isEqual:groupSplitView])
         return proposedMax - [groupSplitView dividerThickness] - 100.0;
     return proposedMax;
 }
 
 - (CGFloat)splitView:(NSSplitView *)sender constrainMinCoordinate:(CGFloat)proposedMin ofSubviewAt:(NSInteger)dividerIndex {
-    if ([sender isEqual:groupSplitView] && dividerIndex == 0)
+    if ([sender isEqual:groupSplitView])
         return proposedMin + 100.0;
     return proposedMin;
 }
