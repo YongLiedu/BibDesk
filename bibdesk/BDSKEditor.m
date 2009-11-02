@@ -182,8 +182,11 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [self setupButtonCells];
     
     // Setup the statusbar
+    [statusBar retain];
 	[statusBar setDelegate:self];
     [statusBar setTextOffset:NSMaxX([actionButton frame])];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowEditorStatusBarKey] == NO)
+        [self toggleStatusBar:nil];
     
     // Insert the tabView in the main window
     NSView *view = [[mainSplitView subviews] objectAtIndex:0];
@@ -287,6 +290,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [publication release];
     [fields release];
     [addedFields release];
+    [statusBar release];
     [previousValueForCurrentEditedView release];
     [notesViewUndoManager release];
     [abstractViewUndoManager release];
@@ -1120,6 +1124,22 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [mainSplitView setPosition:position ofDividerAtIndex:0];
 }
 
+- (IBAction)toggleStatusBar:(id)sender {
+    BOOL visible = [statusBar isVisible] == NO;
+    NSRect rect, frame = [mainSplitView frame];
+    CGFloat height = NSHeight([statusBar frame]);
+    NSDivideRect(frame, &rect, &frame, visible ? height : -height, NSMinYEdge);
+    if (visible) {
+        [statusBar setFrame:rect];
+        [[[self window] contentView] addSubview:statusBar];
+    } else {
+        [statusBar removeFromSuperview];
+    }
+    [mainSplitView setFrame:frame];
+    [[self window] setContentBorderThickness:visible ? height : 0.0 forEdge:NSMinYEdge];
+	[[NSUserDefaults standardUserDefaults] setBool:visible forKey:BDSKShowEditorStatusBarKey];
+}
+
 #pragma mark Menus
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
@@ -1512,6 +1532,13 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             [menuItem setTitle:NSLocalizedString(@"Show Sidebar", @"Menu item title")];
         else
             [menuItem setTitle:NSLocalizedString(@"Hide Sidebar", @"Menu item title")];
+        return YES;
+	}
+	else if (theAction == @selector(toggleStatusBar:)) {
+		if ([statusBar isVisible])
+            [menuItem setTitle:NSLocalizedString(@"Hide Status Bar", @"Menu item title")];
+        else
+            [menuItem setTitle:NSLocalizedString(@"Show Status Bar", @"Menu item title")];
         return YES;
 	}
     else if (theAction == @selector(raiseAddField:) || 

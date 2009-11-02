@@ -315,6 +315,7 @@
 
 
 - (IBAction)toggleSidebar:(id)sender;
+- (IBAction)toggleStatusBar:(id)sender;
 
 @end
 

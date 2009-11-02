@@ -104,6 +104,7 @@ NSString *BDSKSortGroupsKey = @"BDSKSortGroupsKey";
 NSString *BDSKSortGroupsDescendingKey = @"BDSKSortGroupsDescendingKey";
 
 NSString *BDSKShowStatusBarKey = @"Show Status Bar";
+NSString *BDSKShowEditorStatusBarKey = @"Show Editor Status Bar";
 NSString *BDSKShowFindStatusBarKey = @"Show Find Status Bar";
 
 NSString *BDSKMainTableViewFontNameKey = @"BDSKMainTableViewFontNameKey";

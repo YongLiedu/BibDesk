@@ -62,6 +62,7 @@ extern NSString *BDSKEditOnPasteKey;
 extern NSString *BDSKSeparateCiteKey;
 extern NSString *BDSKShownColsNamesKey;
 extern NSString *BDSKShowStatusBarKey;
+extern NSString *BDSKShowEditorStatusBarKey;
 extern NSString *BDSKShowFindStatusBarKey;
 extern NSString *BDSKDefaultFieldsKey;
 extern NSString *BDSKLocalFileFieldsKey;
