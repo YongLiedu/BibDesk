@@ -164,9 +164,6 @@
 		CE77A7FE0923BEBA0019D901 /* NSTableView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE77A7FC0923BEBA0019D901 /* NSTableView_BDSKExtensions.m */; };
 		CE7A31400B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7A313E0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m */; };
 		CE7A4A8F0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7A4A8D0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m */; };
-		CE7E1BB50A0B8EE7009D04C3 /* GroupAction.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7E1BB30A0B8EE7009D04C3 /* GroupAction.tiff */; };
-		CE7E1BB60A0B8EE7009D04C3 /* GroupAdd.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7E1BB40A0B8EE7009D04C3 /* GroupAdd.tiff */; };
-		CE7E207F0A0BF833009D04C3 /* GroupAddSmart.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7E207D0A0BF833009D04C3 /* GroupAddSmart.tiff */; };
 		CE7EA95D0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7EA95B0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.m */; };
 		CE7F5E480B3F5F1800A919D0 /* searchGroup.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7F5E470B3F5F1800A919D0 /* searchGroup.tiff */; };
 		CE80A8760FDAB27D0086A46C /* BDSKHighlightingPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE80A8740FDAB27D0086A46C /* BDSKHighlightingPopUpButton.m */; };
@@ -995,9 +992,6 @@
 		CE7A4A8C0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCustomCiteDrawerController.h; sourceTree = "<group>"; };
 		CE7A4A8D0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCustomCiteDrawerController.m; sourceTree = "<group>"; };
 		CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SkimNotes.xcodeproj; path = SkimNotes/SkimNotes.xcodeproj; sourceTree = "<group>"; };
-		CE7E1BB30A0B8EE7009D04C3 /* GroupAction.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = GroupAction.tiff; sourceTree = "<group>"; };
-		CE7E1BB40A0B8EE7009D04C3 /* GroupAdd.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = GroupAdd.tiff; sourceTree = "<group>"; };
-		CE7E207D0A0BF833009D04C3 /* GroupAddSmart.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = GroupAddSmart.tiff; sourceTree = "<group>"; };
 		CE7E29D60A0E84AA009D04C3 /* CIImage_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CIImage_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CIImage_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE7EA95A0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSWindowController_BDSKExtensions.h; sourceTree = "<group>"; };
@@ -2343,9 +2337,6 @@
 				3D4373AC07FB3E960007BA84 /* gear.tiff */,
 				CE2C16F80A0A149E006F0A73 /* gear2.tiff */,
 				F92F4E460788DEDD001B8F82 /* genericBibDocIcon.tiff */,
-				CE7E1BB30A0B8EE7009D04C3 /* GroupAction.tiff */,
-				CE7E1BB40A0B8EE7009D04C3 /* GroupAdd.tiff */,
-				CE7E207D0A0BF833009D04C3 /* GroupAddSmart.tiff */,
 				CE0391F80F6166FA001808EA /* importBadge.tiff */,
 				F9022DB10758088000C3F701 /* key.tiff */,
 				F9022DB20758088000C3F701 /* newdoc.tiff */,
@@ -3063,9 +3054,6 @@
 				F938408A0906DD1F00FC37F2 /* scripthook.tiff in Resources */,
 				CEBB8D8809C8B0D90074C79E /* Font.tiff in Resources */,
 				CE2C16F90A0A149E006F0A73 /* gear2.tiff in Resources */,
-				CE7E1BB50A0B8EE7009D04C3 /* GroupAction.tiff in Resources */,
-				CE7E1BB60A0B8EE7009D04C3 /* GroupAdd.tiff in Resources */,
-				CE7E207F0A0BF833009D04C3 /* GroupAddSmart.tiff in Resources */,
 				F963E4500A1D81B000695DDC /* exportPrefs.tiff in Resources */,
 				CE11B0060AE8FD53008C47AC /* scriptGroup.tiff in Resources */,
 				CE7F5E480B3F5F1800A919D0 /* searchGroup.tiff in Resources */,
