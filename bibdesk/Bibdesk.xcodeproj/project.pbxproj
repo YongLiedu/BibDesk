@@ -366,7 +366,6 @@
 		F9022CEE0758050E00C3F701 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F9022CE50758050E00C3F701 /* Credits.rtf */; };
 		F9022D210758066000C3F701 /* CharacterConversion.plist in Resources */ = {isa = PBXBuildFile; fileRef = F9022D150758066000C3F701 /* CharacterConversion.plist */; };
 		F9022D270758066000C3F701 /* TypeInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = F9022D1B0758066000C3F701 /* TypeInfo.plist */; };
-		F9022DBE0758088000C3F701 /* Action.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA30758088000C3F701 /* Action.tiff */; };
 		F9022DC20758088000C3F701 /* autofile.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA70758088000C3F701 /* autofile.tiff */; };
 		F9022DC30758088000C3F701 /* bibDocIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA80758088000C3F701 /* bibDocIcon.icns */; };
 		F9022DC40758088000C3F701 /* citation.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA90758088000C3F701 /* citation.tiff */; };
@@ -1350,7 +1349,6 @@
 		F9022D510758073E00C3F701 /* fonts.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = fonts.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/fonts.cfg; sourceTree = SOURCE_ROOT; };
 		F9022D560758073E00C3F701 /* ignore.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = ignore.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/ignore.cfg; sourceTree = SOURCE_ROOT; };
 		F9022D690758073E00C3F701 /* style.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = style.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/style.cfg; sourceTree = SOURCE_ROOT; };
-		F9022DA30758088000C3F701 /* Action.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Action.tiff; sourceTree = "<group>"; };
 		F9022DA70758088000C3F701 /* autofile.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = autofile.tiff; sourceTree = "<group>"; };
 		F9022DA80758088000C3F701 /* bibDocIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = bibDocIcon.icns; sourceTree = "<group>"; };
 		F9022DA90758088000C3F701 /* citation.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = citation.tiff; sourceTree = "<group>"; };
@@ -2317,7 +2315,6 @@
 		F9022DDA0758089500C3F701 /* Images */ = {
 			isa = PBXGroup;
 			children = (
-				F9022DA30758088000C3F701 /* Action.tiff */,
 				CE023F5C0CC50F86003F52E5 /* Add_Small.tiff */,
 				F9022DA70758088000C3F701 /* autofile.tiff */,
 				F9022DA80758088000C3F701 /* bibDocIcon.icns */,
@@ -3030,7 +3027,6 @@
 				CE12A1700B44AED200416D19 /* SearchGroupServers.plist in Resources */,
 				F9BF481F0BD69F700071094F /* MODS2MARC21slim.xsl in Resources */,
 				CEEC72F7093BDCA200A64F54 /* BibDesk.sdef in Resources */,
-				F9022DBE0758088000C3F701 /* Action.tiff in Resources */,
 				F9022DC20758088000C3F701 /* autofile.tiff in Resources */,
 				F9022DC30758088000C3F701 /* bibDocIcon.icns in Resources */,
 				F9022DC40758088000C3F701 /* citation.tiff in Resources */,
