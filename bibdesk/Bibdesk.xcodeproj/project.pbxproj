@@ -51,7 +51,6 @@
 		3DA82939083ECE9300321864 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3DA82938083ECE9300321864 /* Localizable.strings */; };
 		3DAEA2EE07703F6000AF111A /* BDSKUndoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DAEA2EC07703F6000AF111A /* BDSKUndoManager.m */; };
 		3DD300F6075C054D003FD2D7 /* BDSKField.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DD300F5075C054D003FD2D7 /* BDSKField.m */; };
-		454AC23D1086E07B00F2890A /* BDSKIEEEXploreParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 454AC23B1086E07B00F2890A /* BDSKIEEEXploreParser.h */; };
 		454AC23E1086E07B00F2890A /* BDSKIEEEXploreParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 454AC23C1086E07B00F2890A /* BDSKIEEEXploreParser.m */; };
 		4575382F0B70170D00C0E49B /* BDSKHCiteParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 457538290B70170D00C0E49B /* BDSKHCiteParser.m */; };
 		457538310B70170D00C0E49B /* BDSKWebGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 4575382B0B70170D00C0E49B /* BDSKWebGroup.m */; };
@@ -2760,7 +2759,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				454AC23D1086E07B00F2890A /* BDSKIEEEXploreParser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
