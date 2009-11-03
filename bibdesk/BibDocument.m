@@ -419,6 +419,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     // First remove the statusbar if we should, as it affects proper resizing of the window and splitViews
 	[statusBar retain]; // we need to retain, as we might remove it from the window
     [statusBar setTextOffset:NSMaxX([bottomPreviewButton frame])];
+    [[statusBar textCell] setAlignment:NSCenterTextAlignment];
 	if ([sud boolForKey:BDSKShowStatusBarKey] == NO)
 		[self toggleStatusBar:nil];
 	[statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
