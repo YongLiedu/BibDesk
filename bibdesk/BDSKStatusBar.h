@@ -52,7 +52,8 @@ typedef NSInteger BDSKProgressIndicatorStyle;
 	NSProgressIndicator *progressIndicator;
 	NSMutableArray *icons;
 	id delegate;
-    CGFloat textOffset;
+    CGFloat leftMargin;
+    CGFloat rightMargin;
 }
 
 - (BOOL)isVisible;
@@ -69,8 +70,11 @@ typedef NSInteger BDSKProgressIndicatorStyle;
 - (id)textCell;
 - (void)setTextCell:(NSCell *)aCell;
 
-- (CGFloat)textOffset;
-- (void)setTextOffset:(CGFloat)offset;
+- (CGFloat)leftMargin;
+- (void)setLeftMargin:(CGFloat)margin;
+
+- (CGFloat)rightMargin;
+- (void)setRightMargin:(CGFloat)margin;
 
 - (NSProgressIndicator *)progressIndicator;
 

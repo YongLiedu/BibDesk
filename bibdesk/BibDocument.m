@@ -418,11 +418,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     // First remove the statusbar if we should, as it affects proper resizing of the window and splitViews
 	[statusBar retain]; // we need to retain, as we might remove it from the window
-    [statusBar setTextOffset:NSMaxX([bottomPreviewButton frame])];
+    [statusBar setLeftMargin:NSMaxX([bottomPreviewButton frame]) + 5.0];
+    [statusBar setRightMargin:4.0];
     [[statusBar textCell] setAlignment:NSCenterTextAlignment];
 	if ([sud boolForKey:BDSKShowStatusBarKey] == NO)
 		[self toggleStatusBar:nil];
-	[statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
     
     bottomPreviewDisplay = [xattrDefaults intForKey:BDSKBottomPreviewDisplayKey defaultValue:[sud integerForKey:BDSKBottomPreviewDisplayKey]];
     bottomPreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKBottomPreviewDisplayTemplateKey defaultObject:[sud stringForKey:BDSKBottomPreviewDisplayTemplateKey]] retain];
@@ -2461,11 +2461,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (void)pasteboardHelperWillBeginGenerating:(BDSKItemPasteboardHelper *)helper{
 	[self setStatus:[NSLocalizedString(@"Generating data. Please wait", @"Status message when generating drag/paste data") stringByAppendingEllipsis]];
+    [statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
 	[statusBar startAnimation:nil];
 }
 
 - (void)pasteboardHelperDidEndGenerating:(BDSKItemPasteboardHelper *)helper{
 	[statusBar stopAnimation:nil];
+    [statusBar setProgressIndicatorStyle:BDSKProgressIndicatorNone];
 	[self updateStatus];
 }
 

@@ -177,7 +177,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     // Setup the statusbar
     [statusBar retain];
 	[statusBar setDelegate:self];
-    [statusBar setTextOffset:NSMaxX([actionButton frame])];
+    [statusBar setLeftMargin:NSMaxX([actionButton frame]) + 5.0];
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowEditorStatusBarKey] == NO)
         [self toggleStatusBar:nil];
     

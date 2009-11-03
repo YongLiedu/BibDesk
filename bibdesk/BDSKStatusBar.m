@@ -63,7 +63,8 @@
 		
 		delegate = nil;
         
-        textOffset = 0.0;
+        leftMargin = LEFT_MARGIN;
+        rightMargin = RIGHT_MARGIN;
     }
     return self;
 }
@@ -84,12 +85,12 @@
 
 - (void)drawRect:(NSRect)rect {
 	NSRect textRect, ignored;
-    CGFloat rightMargin = RIGHT_MARGIN;
+    CGFloat fullRightMargin = rightMargin;
 	
     if (progressIndicator)
-        rightMargin += NSWidth([progressIndicator frame]) + MARGIN_BETWEEN_ITEMS;
-    NSDivideRect([self bounds], &ignored, &textRect, LEFT_MARGIN + textOffset, NSMinXEdge);
-    NSDivideRect(textRect, &ignored, &textRect, rightMargin, NSMaxXEdge);
+        fullRightMargin += NSWidth([progressIndicator frame]) + MARGIN_BETWEEN_ITEMS;
+    NSDivideRect([self bounds], &ignored, &textRect, leftMargin, NSMinXEdge);
+    NSDivideRect(textRect, &ignored, &textRect, fullRightMargin, NSMaxXEdge);
 	
 	NSImage *icon;
 	NSRect iconRect;    
@@ -158,12 +159,21 @@
 	}
 }
 
-- (CGFloat)textOffset {
-    return textOffset;
+- (CGFloat)leftMargin {
+    return leftMargin;
 }
 
-- (void)setTextOffset:(CGFloat)offset {
-    textOffset = offset;
+- (void)setLeftMargin:(CGFloat)margin {
+    leftMargin = margin;
+    [self setNeedsDisplay:YES];
+}
+
+- (CGFloat)rightMargin {
+    return rightMargin;
+}
+
+- (void)setRightMargin:(CGFloat)margin {
+    rightMargin = margin;
     [self setNeedsDisplay:YES];
 }
 
@@ -216,12 +226,12 @@
 
 - (void)rebuildToolTips {
 	NSRect ignored, rect;
-    CGFloat rightMargin = RIGHT_MARGIN;
+    CGFloat fullRightMargin = rightMargin;
 	
 	if (progressIndicator != nil) 
-		rightMargin += NSMinX([progressIndicator frame]) + MARGIN_BETWEEN_ITEMS;
+		fullRightMargin += NSMinX([progressIndicator frame]) + MARGIN_BETWEEN_ITEMS;
 	
-    NSDivideRect([self bounds], &ignored, &rect, rightMargin, NSMaxXEdge);
+    NSDivideRect([self bounds], &ignored, &rect, fullRightMargin, NSMaxXEdge);
     
 	NSRect iconRect;
     NSSize size;
@@ -288,7 +298,7 @@
 		
 		NSRect rect, ignored;
 		NSSize size = [progressIndicator frame].size;
-        NSDivideRect([self bounds], &ignored, &rect, RIGHT_MARGIN, NSMaxXEdge);
+        NSDivideRect([self bounds], &ignored, &rect, rightMargin, NSMaxXEdge);
         NSDivideRect(rect, &rect, &ignored, size.width, NSMaxXEdge);
         rect = BDSKCenterRect(rect, size, [self isFlipped]);
         rect.origin.y += VERTICAL_OFFSET;
@@ -329,8 +339,8 @@
     NSPoint localPoint = [self convertPoint:[[self window] convertScreenToBase:point] fromView:nil];
     NSRect rect, childRect, ignored;
     
-    NSDivideRect([self bounds], &ignored, &rect, LEFT_MARGIN, NSMinXEdge);
-    NSDivideRect(rect, &ignored, &rect, RIGHT_MARGIN, NSMaxXEdge);
+    NSDivideRect([self bounds], &ignored, &rect, leftMargin, NSMinXEdge);
+    NSDivideRect(rect, &ignored, &rect, rightMargin, NSMaxXEdge);
     if (progressIndicator) {
         NSDivideRect(rect, &childRect, &rect, NSWidth([progressIndicator frame]), NSMaxXEdge);
         if (NSMouseInRect(localPoint, childRect, [self isFlipped]))

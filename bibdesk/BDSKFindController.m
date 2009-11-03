@@ -143,7 +143,6 @@ enum {
     if (![[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowFindStatusBarKey]) {
 		[self toggleStatusBar:nil];
 	}
-	[statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
     
 	// IB does not allow us to set the maxSize.height equal to the minSize.height for some reason, but it should be only horizontally resizable
 	NSSize maxWindowSize = [[self window] maxSize];
@@ -815,6 +814,7 @@ enum {
         return;
 	}
 	
+    [statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
 	[statusBar startAnimation:nil];
 
     NSArray *publications;
@@ -831,6 +831,7 @@ enum {
 	[self findAndReplaceInItems:publications ofDocument:theDocument];
 	
 	[statusBar stopAnimation:nil];
+    [statusBar setProgressIndicatorStyle:BDSKProgressIndicatorNone];
 }
 
 - (AGRegex *)currentRegex{

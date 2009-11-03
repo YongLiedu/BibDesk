@@ -522,33 +522,43 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 }
 
 - (CGFloat)splitView:(NSSplitView *)sender constrainMaxCoordinate:(CGFloat)proposedMax ofSubviewAt:(NSInteger)dividerIndex {
-    if ([sender isEqual:groupSplitView])
-        return proposedMax - [groupSplitView dividerThickness] - 100.0;
+    if ([sender isEqual:groupSplitView]) {
+        if (dividerIndex == 0)
+            return proposedMax - [groupSplitView dividerThickness] - 150.0;
+        else
+            return proposedMax - [groupSplitView dividerThickness] - 100.0;
+    }
     return proposedMax;
 }
 
 - (CGFloat)splitView:(NSSplitView *)sender constrainMinCoordinate:(CGFloat)proposedMin ofSubviewAt:(NSInteger)dividerIndex {
-    if ([sender isEqual:groupSplitView])
-        return proposedMin + 100.0;
+    if ([sender isEqual:groupSplitView]) {
+        if (dividerIndex == 0)
+            return proposedMin + 100.0;
+        else
+            return proposedMin + 150.0;
+    }
     return proposedMin;
 }
 
 - (void)splitViewDidResizeSubviews:(NSNotification *)aNotification {
     if ([[aNotification object] isEqual:groupSplitView] || aNotification == nil) {
+        NSArray *subviews = [groupSplitView subviews];
+        BOOL isLeftHidden = [groupSplitView isSubviewCollapsed:[subviews objectAtIndex:0]];
+        BOOL isRightHidden = [groupSplitView isSubviewCollapsed:[subviews objectAtIndex:2]];
         NSRect frame = [statusBar frame];
-        NSView *view = [[groupSplitView subviews] objectAtIndex:1];
+        NSView *view = [subviews objectAtIndex:1];
         NSRect rect = [view convertRect:[view bounds] toView:[documentWindow contentView]];
         frame.origin.x = BDSKMax(8.0, NSMinX(rect));
         frame.size.width = NSMaxX(rect) - NSMinX(frame);
         [statusBar setFrame:frame];
-        BOOL isLeftHidden = [groupSplitView isSubviewCollapsed:[[groupSplitView subviews] objectAtIndex:0]];
-        BOOL isRightHidden = [groupSplitView isSubviewCollapsed:[[groupSplitView subviews] objectAtIndex:2]];
+        [statusBar setRightMargin:isRightHidden ? 17.0 : 4.0];
         [groupAddButton setHidden:isLeftHidden];
         [groupActionButton setHidden:isLeftHidden];
         [sidePreviewButton setHidden:isRightHidden];
         if (isRightHidden == NO) {
             frame = [sidePreviewButton frame];
-            view = [[groupSplitView subviews] objectAtIndex:2];
+            view = [subviews objectAtIndex:2];
             rect = [view convertRect:[view bounds] toView:[documentWindow contentView]];
             frame.origin.x = NSMinX(rect);
             [sidePreviewButton setFrame:frame];
