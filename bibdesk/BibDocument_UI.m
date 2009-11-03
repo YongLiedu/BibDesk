@@ -524,9 +524,9 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 - (CGFloat)splitView:(NSSplitView *)sender constrainMaxCoordinate:(CGFloat)proposedMax ofSubviewAt:(NSInteger)dividerIndex {
     if ([sender isEqual:groupSplitView]) {
         if (dividerIndex == 0)
-            return proposedMax - [groupSplitView dividerThickness] - 150.0;
+            return proposedMax - 150.0;
         else
-            return proposedMax - [groupSplitView dividerThickness] - 100.0;
+            return proposedMax - 100.0;
     }
     return proposedMax;
 }

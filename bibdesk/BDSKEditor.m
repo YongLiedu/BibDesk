@@ -1110,7 +1110,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     if ([mainSplitView isSubviewCollapsed:fileSplitView]) {
         if (lastFileViewWidth <= 0.0)
             lastFileViewWidth = 150.0; // a reasonable value to start
-        position -= lastFileViewWidth + [mainSplitView dividerThickness];
+        position -= lastFileViewWidth;
     } else {
         lastFileViewWidth = NSWidth([fileSplitView frame]);
     }
@@ -3076,7 +3076,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (CGFloat)splitView:(NSSplitView *)sender constrainMaxCoordinate:(CGFloat)proposedMax ofSubviewAt:(NSInteger)dividerIndex {
     if ([sender isEqual:mainSplitView]) {
-        return proposedMax - [mainSplitView dividerThickness] - 50.0;
+        return proposedMax - 50.0;
     }
     return proposedMax;
 }
