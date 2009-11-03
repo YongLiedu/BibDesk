@@ -157,14 +157,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     // we should have a document at this point, as the nib is not loaded before -window is called, which shouldn't happen before the document shows us
     BDSKASSERT([self document]);
     
-    //[[self window] setBackgroundColor:[NSColor colorWithCalibratedWhite:0.935 alpha:1.0]];
-    
     [[self window] setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
     [[self window] setContentBorderThickness:NSHeight([statusBar frame]) forEdge:NSMinYEdge];
-    
-    // Unfortunately Tiger does not support transparent tables
-    // We could also use a tabless tabview with a separate tab control
-    //[tableView setBackgroundColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
     
     BDSKEditorTextFieldCell *dataCell = [[tableView tableColumnWithIdentifier:@"value"] dataCell];
     [dataCell setButtonAction:@selector(tableButtonAction:)];
