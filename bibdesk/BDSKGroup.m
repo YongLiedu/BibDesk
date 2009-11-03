@@ -273,7 +273,7 @@ static NSString *BDSKLibraryLocalizedString = nil;
 }
 
 - (NSImage *)icon {
-	return [NSImage imageNamed:@"NSApplicationIcon"];
+	return [NSImage imageNamed:@"libraryGroup"];
 }
 
 - (BOOL)containsItem:(BibItem *)item {

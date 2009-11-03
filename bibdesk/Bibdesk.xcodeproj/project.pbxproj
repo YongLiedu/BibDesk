@@ -320,6 +320,7 @@
 		CEF94415092668EA00750FFA /* BDSKTableSortDescriptor.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF94413092668EA00750FFA /* BDSKTableSortDescriptor.m */; };
 		CEFA07F50AF0E52100A3B4B1 /* BDSKApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */; };
 		CEFA2F130CC0272C002A8262 /* BDSKTemplateTag.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFA2F110CC0272C002A8262 /* BDSKTemplateTag.m */; };
+		CEFB73F610A07E31001DC4C1 /* libraryGroup.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEFB73F510A07E31001DC4C1 /* libraryGroup.tiff */; };
 		CEFD45890BFFC1F80027B933 /* NSWindow+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFD45870BFFC1F80027B933 /* NSWindow+Scripting.m */; };
 		CEFDBDBE0AEA86BA009EE99D /* BDSKSmartGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDBC0AEA86BA009EE99D /* BDSKSmartGroup.m */; };
 		CEFDBDC60AEA86F0009EE99D /* BDSKStaticGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDC40AEA86F0009EE99D /* BDSKStaticGroup.m */; };
@@ -1256,6 +1257,7 @@
 		CEFA2C150F98D25500531EB6 /* HowtoRelease.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = HowtoRelease.txt; sourceTree = "<group>"; };
 		CEFA2F100CC0272C002A8262 /* BDSKTemplateTag.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTemplateTag.h; sourceTree = "<group>"; };
 		CEFA2F110CC0272C002A8262 /* BDSKTemplateTag.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTemplateTag.m; sourceTree = "<group>"; };
+		CEFB73F510A07E31001DC4C1 /* libraryGroup.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = libraryGroup.tiff; sourceTree = "<group>"; };
 		CEFD45860BFFC1F80027B933 /* NSWindow+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSWindow+Scripting.h"; sourceTree = "<group>"; };
 		CEFD45870BFFC1F80027B933 /* NSWindow+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSWindow+Scripting.m"; sourceTree = "<group>"; };
 		CEFDBDBB0AEA86BA009EE99D /* BDSKSmartGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSmartGroup.h; sourceTree = "<group>"; };
@@ -2330,6 +2332,7 @@
 				CE2C16F80A0A149E006F0A73 /* gear2.tiff */,
 				F92F4E460788DEDD001B8F82 /* genericBibDocIcon.tiff */,
 				CE0391F80F6166FA001808EA /* importBadge.tiff */,
+				CEFB73F510A07E31001DC4C1 /* libraryGroup.tiff */,
 				F9022DB10758088000C3F701 /* key.tiff */,
 				F9022DB20758088000C3F701 /* newdoc.tiff */,
 				CE62DE4F0F4B797B00BDF01E /* next.tiff */,
@@ -3119,6 +3122,7 @@
 				CEB5D63F1072AE360001C135 /* SelectEncodingsPanel.xib in Resources */,
 				CEB5D6401072AE360001C135 /* TemplateDocument.xib in Resources */,
 				CEB5D6411072AE360001C135 /* TextImport.xib in Resources */,
+				CEFB73F610A07E31001DC4C1 /* libraryGroup.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
