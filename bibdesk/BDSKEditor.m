@@ -1128,6 +1128,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     NSRect rect, frame = [mainSplitView frame];
     CGFloat height = NSHeight([statusBar frame]);
     NSDivideRect(frame, &rect, &frame, visible ? height : -height, NSMinYEdge);
+    [[self window] setContentBorderThickness:visible ? height : 0.0 forEdge:NSMinYEdge];
     if (visible) {
         [statusBar setFrame:rect];
         [[[self window] contentView] addSubview:statusBar];
@@ -1135,7 +1136,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         [statusBar removeFromSuperview];
     }
     [mainSplitView setFrame:frame];
-    [[self window] setContentBorderThickness:visible ? height : 0.0 forEdge:NSMinYEdge];
 	[[NSUserDefaults standardUserDefaults] setBool:visible forKey:BDSKShowEditorStatusBarKey];
 }
 

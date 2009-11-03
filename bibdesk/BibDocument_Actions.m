@@ -1246,10 +1246,10 @@ static BOOL changingColors = NO;
     BOOL visible = [statusView isHidden];
     NSRect ignored, frame = [groupSplitView frame];
     CGFloat height = NSHeight([statusView frame]);
-    [statusView setHidden:visible == NO];
     NSDivideRect(frame, &ignored, &frame, visible ? height : -height, NSMinYEdge);
     [groupSplitView setFrame:frame];
     [documentWindow setContentBorderThickness:visible ? height : 0.0 forEdge:NSMinYEdge];
+    [statusView setHidden:visible == NO];
 	[[NSUserDefaults standardUserDefaults] setBool:visible forKey:BDSKShowStatusBarKey];
 }
 

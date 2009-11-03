@@ -645,12 +645,13 @@ enum {
 		[contentView addSubview:statusBar positioned:NSWindowBelow relativeTo:nil];
 	}
 	
+    [[self window] setContentBorderThickness:[statusBar isVisible] ? 22.0 : 0.0 forEdge:NSMinYEdge];
+    
 	[contentView setAutoresizesSubviews:NO];
 	[[self window] setFrame:winFrame display:YES];
 	[contentView setAutoresizesSubviews:autoresizes];
 	[[self window] setMinSize:minSize];
 	[[self window] setMaxSize:maximumSize];
-    [[self window] setContentBorderThickness:[statusBar isVisible] ? 22.0 : 0.0 forEdge:NSMinYEdge];
 	
     [[NSUserDefaults standardUserDefaults] setBool:[statusBar isVisible] forKey:BDSKShowFindStatusBarKey];
 }
