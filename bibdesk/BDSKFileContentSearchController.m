@@ -125,6 +125,7 @@
     [collapsibleView setMinSize:frame.size];
     [collapsibleView setCollapseEdges:BDSKMinXEdgeMask | BDSKMinYEdgeMask];
     [controlView setEdges:BDSKMinYEdgeMask];
+    [controlView setColor:[controlView colorForEdge:NSMaxYEdge] forEdge:NSMinYEdge];
 
     // we might remove this, so keep a retained reference
     [[tableView enclosingScrollView] retain];
