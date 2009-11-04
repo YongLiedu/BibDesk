@@ -56,6 +56,7 @@
     [collapsibleView setMinSize:[collapsibleView frame].size];
     [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     [view setEdges:BDSKMinYEdgeMask];
+    [view setColor:[view colorForEdge:NSMaxYEdge] forEdge:NSMinYEdge];
 }
 
 - (void)updateSearchView {
