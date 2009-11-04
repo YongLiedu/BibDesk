@@ -188,7 +188,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     BDSKEdgeView *edgeView = (BDSKEdgeView *)[[[matrix enclosingScrollView] superview] superview];
 	[edgeView setEdges:BDSKMaxYEdgeMask];
-	[edgeView setEdgeColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
+	[edgeView setColor:[edgeView colorForEdge:NSMinYEdge] forEdge:NSMaxYEdge];
     
     [self setWindowFrameAutosaveNameOrCascade:BDSKEditorFrameAutosaveName];
     
