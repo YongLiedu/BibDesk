@@ -161,7 +161,7 @@
     NSURL *theURL = [self URL];
     if ([theURL isFileURL]) {
         NSString *path = [[theURL fileURLByResolvingAliases] path];
-        BOOL isDir;
+        BOOL isDir = NO;
         if([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] && NO == isDir){
             [self download:nil didCreateDestination:path];
             [self downloadDidFinish:nil];
