@@ -271,7 +271,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
         NSRect countRect = [self countRectForBounds:aRect];
         NSInteger count = [self count];
         if ([self failedDownload]) {
-            [self drawIcon:[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kAlertCautionIcon)] withFrame:countRect inView:controlView];
+            [self drawIcon:[NSImage imageNamed:@"failed"] withFrame:countRect inView:controlView];
         } else if (count > 0) {
             CGFloat countInset = 0.5 * [self countPaddingForSize:countRect.size];
             NSColor *fgColor;
