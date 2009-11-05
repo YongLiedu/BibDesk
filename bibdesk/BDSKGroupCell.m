@@ -65,7 +65,7 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 
 + (void)initialize {
     BDSKINITIALIZE;
-    numberStringDictionary = [[NSMutableDictionary alloc] initWithObjectsAndKeys:@"", [NSNumber numberWithInt:0], nil];
+    numberStringDictionary = [[NSMutableDictionary alloc] init];
     groupCellFormatter = [[BDSKGroupCellFormatter alloc] init];
     
 }
@@ -230,11 +230,14 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
 - (NSSize)cellSize {
     NSSize cellSize = [super cellSize];
     NSSize countSize = NSZeroSize;
-    if ([self isRetrieving] || [self failedDownload]) {
+    if ([self isRetrieving]) {
         countSize = NSMakeSize(16, 16);
-    } else if ([self count] > 0) {
+    } else if ([self count] > 0 || [self failedDownload]) {
         countSize = [countString boundingRectWithSize:cellSize options:0].size;
-        countSize.width += [self countPaddingForSize:countSize]; // add oval pading around count
+        if ([self failedDownload])
+            countSize.width = countSize.height;
+        else
+            countSize.width += [self countPaddingForSize:countSize]; // add oval pading around count
     }
     // cellSize.height approximates the icon size
     cellSize.width += BORDER_BETWEEN_EDGE_AND_IMAGE + cellSize.height + BORDER_BETWEEN_IMAGE_AND_TEXT;
@@ -312,10 +315,10 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
                 path = [NSBezierPath bezierPath];
                 [path moveToPoint:NSMakePoint(top.x - u / 2.0, top.y + 4.0 * u)];
                 [path relativeLineToPoint:NSMakePoint(u, 0)];
-                [path relativeLineToPoint:NSMakePoint(0, 5.0 * u)];
+                [path relativeLineToPoint:NSMakePoint(0, 6.0 * u)];
                 [path relativeLineToPoint:NSMakePoint(-u, 0)];
                 [path closePath];
-                [path relativeMoveToPoint:NSMakePoint(0, 6.0 * u)];
+                [path relativeMoveToPoint:NSMakePoint(0, 7.0 * u)];
                 [path relativeLineToPoint:NSMakePoint(u, 0)];
                 [path relativeLineToPoint:NSMakePoint(0, u)];
                 [path relativeLineToPoint:NSMakePoint(-u, 0)];
