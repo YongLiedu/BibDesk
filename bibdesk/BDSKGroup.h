@@ -215,6 +215,8 @@
 
 - (NSString *)toolTip;
 
+- (NSString *)errorMessage;
+
 - (BDSKParentGroup *)parent;
 - (void)setParent:(BDSKParentGroup *)newParent;
 

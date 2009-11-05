@@ -60,6 +60,7 @@ enum {
     NSString *workingDirPath;
     NSData *stdoutData;
     BDSKItemSearchIndexes *searchIndexes;
+    NSString *errorMessage;
 }
 
 - (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
@@ -77,6 +78,9 @@ enum {
 
 - (NSInteger)scriptType;
 - (void)setScriptType:(NSInteger)newType;
+
+- (NSString *)errorMessage;
+- (void)setErrorMessage:(NSString *)newErrorMessage;
 
 - (void)startRunningScript;
 - (void)scriptDidFinishWithResult:(NSString *)outputString;

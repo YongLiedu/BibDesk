@@ -222,6 +222,10 @@ static NSString *createUniqueID(void)
     return [self stringValue];
 }
 
+- (NSString *)errorMessage {
+    return nil;
+}
+
 - (BDSKParentGroup *)parent {
     return parent;
 }

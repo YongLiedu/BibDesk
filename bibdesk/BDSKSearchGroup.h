@@ -71,6 +71,7 @@ extern NSString *BDSKSearchGroupDBLP;
     NSArray *history;
     id<BDSKSearchGroupServer> server;
     BDSKItemSearchIndexes *searchIndexes;
+    NSString *errorMessage;
 }
 
 - (id)initWithType:(NSString *)aType serverInfo:(BDSKServerInfo *)info searchTerm:(NSString *)string;
@@ -94,6 +95,9 @@ extern NSString *BDSKSearchGroupDBLP;
 
 - (void)setNumberOfAvailableResults:(NSInteger)value;
 - (NSInteger)numberOfAvailableResults;
+
+- (NSString *)errorMessage;
+- (void)setErrorMessage:(NSString *)newErrorMessage;
 
 - (BOOL)hasMoreResults;
 

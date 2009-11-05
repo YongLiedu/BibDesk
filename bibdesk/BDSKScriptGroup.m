@@ -171,6 +171,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     
     isRetrieving = NO;
     failedDownload = NO;
+    [self setErrorMessage:nil];
     
     if([[NSFileManager defaultManager] fileExistsAtPath:standardizedPath isDirectory:&isDir] == NO || isDir){
         NSError *error = [NSError mutableLocalErrorWithCode:kBDSKFileNotFound localizedDescription:nil];
@@ -256,7 +257,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     }
     if (pubs == nil || isPartialData) {
         failedDownload = YES;
-        [NSApp presentError:error];
+        [self setErrorMessage:[error localizedDescription]];
     }
     [self setPublications:pubs];
 }
@@ -266,10 +267,10 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     NSParameterAssert([NSThread isMainThread]);
     isRetrieving = NO;
     failedDownload = YES;
+    [self setErrorMessage:[error localizedDescription]];
     
     // redraw 
     [self setPublications:nil];
-    [NSApp presentError:error];
 }
 
 #pragma mark Accessors
@@ -400,6 +401,17 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
 - (BOOL)isExternal { return YES; }
 
 - (BOOL)isEditable { return YES; }
+
+- (NSString *)errorMessage {
+    return errorMessage;
+}
+
+- (void)setErrorMessage:(NSString *)newErrorMessage {
+    if (errorMessage != newErrorMessage) {
+        [errorMessage release];
+        errorMessage = [newErrorMessage retain];
+    }
+}
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification{
     [self terminate];

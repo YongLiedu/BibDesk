@@ -299,8 +299,12 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
             [statusStr appendFormat:@" %@ (%@ %ld)", groupStr, ofStr, (long)totalItemsCount];
         }
         
+    } else if ([[[self selectedGroups] firstObject] failedDownload]) {
+        
+        [statusStr setString:[[[self selectedGroups] firstObject] errorMessage] ?: @""];
+        
     } else {
-
+        
         NSInteger shownPubsCount = [shownPublications count];
         NSInteger groupPubsCount = [groupedPublications count];
         NSInteger totalPubsCount = [publications count];

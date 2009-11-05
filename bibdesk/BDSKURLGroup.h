@@ -52,6 +52,7 @@
     BOOL failedDownload;
     NSURLDownload *URLDownload;
     BDSKItemSearchIndexes *searchIndexes;
+    NSString *errorMessage;
 }
 
 - (NSImage *)icon;
@@ -65,6 +66,9 @@
 - (BDSKPublicationsArray *)publicationsWithoutUpdating; 
 - (BDSKPublicationsArray *)publications;
 - (void)setPublications:(NSArray *)newPublications;
+
+- (NSString *)errorMessage;
+- (void)setErrorMessage:(NSString *)newErrorMessage;
 
 - (BOOL)isRetrieving;
 

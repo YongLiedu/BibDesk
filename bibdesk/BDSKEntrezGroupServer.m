@@ -139,9 +139,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
             [self fetch];
     } else {
         failedDownload = YES;
-        
-        NSError *presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to connect to server", @"error when pubmed connection fails")];
-        [NSApp presentError:presentableError];
+        [group setErrorMessage:NSLocalizedString(@"Unable to connect to server", @"error when pubmed connection fails")];
     }
 }
 
@@ -311,11 +309,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
                 
                 // no document, or zero length data from the server
                 failedDownload = YES;
-
-                presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to connect to server", @"error when pubmed connection fails")];
-                
-                [presentableError embedError:error];
-                [NSApp presentError:presentableError];
+                [group setErrorMessage:NSLocalizedString(@"Unable to connect to server", @"error when pubmed connection fails")];
             }
             
             break;
@@ -330,7 +324,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
             
             if (nil == pubs) {
                 failedDownload = YES;
-                [NSApp presentError:presentableError];
+                [group setErrorMessage:[presentableError localizedDescription]];
             }
             else {
                 [group addPublications:pubs];
@@ -355,6 +349,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
 {
     downloadState = BDSKIdleState;
     failedDownload = YES;
+    [group setErrorMessage:[error localizedDescription]];
     
     if (URLDownload) {
         [URLDownload release];
@@ -369,7 +364,6 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     
     // redraw 
     [group addPublications:nil];
-    [NSApp presentError:error];
 }
 
 @end

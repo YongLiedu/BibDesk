@@ -196,6 +196,7 @@
 {
     isRetrieving = NO;
     failedDownload = NO;
+    [self setErrorMessage:nil];
     NSError *error = nil;
     
     if (URLDownload) {
@@ -208,6 +209,7 @@
     NSArray *pubs = nil;
     if (nil == contentString) {
         failedDownload = YES;
+        [self setErrorMessage:NSLocalizedString(@"Unable to find content", @"Error description")];
     } else {
         NSInteger type = [contentString contentStringType];
         BOOL isPartialData = NO;
@@ -219,7 +221,7 @@
         }
         if (pubs == nil || isPartialData) {
             failedDownload = YES;
-            [NSApp presentError:error];
+            [self setErrorMessage:[error localizedDescription]];
         }
     }
     [self setPublications:pubs];
@@ -229,6 +231,7 @@
 {
     isRetrieving = NO;
     failedDownload = YES;
+    [self setErrorMessage:[error localizedDescription]];
     
     if (URLDownload) {
         [URLDownload release];
@@ -237,7 +240,6 @@
     
     // redraw 
     [self setPublications:nil];
-    [NSApp presentError:error];
 }
 
 #pragma mark Accessors
@@ -329,6 +331,18 @@
 - (BOOL)isExternal { return YES; }
 
 - (BOOL)isEditable { return YES; }
+
+
+- (NSString *)errorMessage {
+    return errorMessage;
+}
+
+- (void)setErrorMessage:(NSString *)newErrorMessage {
+    if (errorMessage != newErrorMessage) {
+        [errorMessage release];
+        errorMessage = [newErrorMessage retain];
+    }
+}
 
 - (BOOL)containsItem:(BibItem *)item {
     // calling [self publications] will repeatedly reschedule a retrieval, which may be undesirable if it failed
