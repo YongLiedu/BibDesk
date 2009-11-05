@@ -274,7 +274,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
         NSRect countRect = [self countRectForBounds:aRect];
         NSInteger count = [self count];
         if (count > 0 || [self failedDownload]) {
-            CGFloat countInset = 0.5 * [self countPaddingForSize:countRect.size];
+            
             NSColor *fgColor;
             NSColor *bgColor;
             // On Leopard, use the blue or gray color taken from the center of the gradient highlight
@@ -296,17 +296,49 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
             }
             
             [NSGraphicsContext saveGraphicsState];
-            [bgColor setFill];
-            if ([self failedDownload]) {
-                [[NSBezierPath bezierPathWithOvalInRect:countRect] fill];
-                countInset = 0.5 * (NSWidth(countRect) - NSWidth([countString boundingRectWithSize:countRect.size options:0]));
-            } else {
-                [NSBezierPath fillHorizontalOvalInRect:countRect];
-            }
-            [NSGraphicsContext restoreGraphicsState];
             
-            [countString addAttribute:NSForegroundColorAttributeName value:fgColor range:NSMakeRange(0, [countString length])];
-            [countString drawWithRect:NSInsetRect(countRect, countInset, 0.0) options:NSStringDrawingUsesLineFragmentOrigin];
+            if ([self failedDownload]) {
+                
+                [bgColor setFill];
+                [[NSBezierPath bezierPathWithOvalInRect:countRect] fill];
+                [fgColor setFill];
+                CGFloat u = NSWidth(countRect) / 16.0;
+                NSBezierPath *path = [NSBezierPath bezierPath];
+                [path moveToPoint:NSMakePoint(NSMidX(countRect), NSMinY(countRect) + u)];
+                [path relativeLineToPoint:NSMakePoint(-6.0 * u, 12.0 * u)];
+                [path relativeLineToPoint:NSMakePoint(12.0 * u, 0)];
+                [path closePath];
+                [path fill];
+                [bgColor setFill];
+                path = [NSBezierPath bezierPath];
+                [path moveToPoint:NSMakePoint(NSMidX(countRect) - u / 2.0, NSMinY(countRect) + 4.0 * u)];
+                [path relativeLineToPoint:NSMakePoint(u, 0)];
+                [path relativeLineToPoint:NSMakePoint(0, 5.0 * u)];
+                [path relativeLineToPoint:NSMakePoint(-u, 0)];
+                [path closePath];
+                [path relativeMoveToPoint:NSMakePoint(0, 6.0 * u)];
+                [path relativeLineToPoint:NSMakePoint(u, 0)];
+                [path relativeLineToPoint:NSMakePoint(0, u)];
+                [path relativeLineToPoint:NSMakePoint(-u, 0)];
+                [path closePath];
+                [path setWindingRule:NSEvenOddWindingRule];
+                [path fill];
+                [path fill];
+                
+            } else {
+                
+                CGFloat countInset = 0.5 * [self countPaddingForSize:countRect.size];
+                
+                [bgColor setFill];
+                [NSBezierPath fillHorizontalOvalInRect:countRect];
+                [NSGraphicsContext restoreGraphicsState];
+                
+                [countString addAttribute:NSForegroundColorAttributeName value:fgColor range:NSMakeRange(0, [countString length])];
+                [countString drawWithRect:NSInsetRect(countRect, countInset, 0.0) options:NSStringDrawingUsesLineFragmentOrigin];
+                
+            }
+            
+            [NSGraphicsContext restoreGraphicsState];
         }
     }
     
