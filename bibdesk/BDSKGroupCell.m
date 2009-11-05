@@ -199,7 +199,10 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     if ([self isRetrieving]) {
         countSize = NSMakeSize(16.0, 16.0);
     } else if ([self failedDownload]) {
-        countSize = [self iconSizeForBounds:aRect];
+        [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:@"!"];
+        [self updateCountAttributes];
+        countSize = [countString boundingRectWithSize:aRect.size options:0].size;
+        countSize.width = countSize.height;
     } else if ([self count] > 0) {
         countSize = [countString boundingRectWithSize:aRect.size options:0].size;
         countSize.width += [self countPaddingForSize:countSize]; // add oval pading around count
@@ -270,9 +273,7 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
     if ([self isRetrieving] == NO) {
         NSRect countRect = [self countRectForBounds:aRect];
         NSInteger count = [self count];
-        if ([self failedDownload]) {
-            [self drawIcon:[NSImage imageNamed:@"failed"] withFrame:countRect inView:controlView];
-        } else if (count > 0) {
+        if (count > 0 || [self failedDownload]) {
             CGFloat countInset = 0.5 * [self countPaddingForSize:countRect.size];
             NSColor *fgColor;
             NSColor *bgColor;
@@ -296,7 +297,12 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
             
             [NSGraphicsContext saveGraphicsState];
             [bgColor setFill];
-            [NSBezierPath fillHorizontalOvalInRect:countRect];
+            if ([self failedDownload]) {
+                [[NSBezierPath bezierPathWithOvalInRect:countRect] fill];
+                countInset = 0.5 * (NSWidth(countRect) - NSWidth([countString boundingRectWithSize:countRect.size options:0]));
+            } else {
+                [NSBezierPath fillHorizontalOvalInRect:countRect];
+            }
             [NSGraphicsContext restoreGraphicsState];
             
             [countString addAttribute:NSForegroundColorAttributeName value:fgColor range:NSMakeRange(0, [countString length])];
