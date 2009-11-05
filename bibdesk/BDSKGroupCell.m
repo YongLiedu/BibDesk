@@ -124,7 +124,7 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 static NSString *stringWithNumber(NSNumber *number)
 {
     if (number == nil)
-        return @"";
+        return @"0";
     NSString *string = [numberStringDictionary objectForKey:number];
     if (string == nil) {
         string = [number stringValue];
@@ -199,8 +199,6 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     if ([self isRetrieving]) {
         countSize = NSMakeSize(16.0, 16.0);
     } else if ([self failedDownload]) {
-        [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:@"!"];
-        [self updateCountAttributes];
         countSize = [countString boundingRectWithSize:aRect.size options:0].size;
         countSize.width = countSize.height;
     } else if ([self count] > 0) {
@@ -302,16 +300,17 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
                 [bgColor setFill];
                 [[NSBezierPath bezierPathWithOvalInRect:countRect] fill];
                 [fgColor setFill];
-                CGFloat u = NSWidth(countRect) / 16.0;
+                CGFloat u = [controlView isFlipped] ? NSWidth(countRect) / 16.0 : NSWidth(countRect) / -16.0;
+                NSPoint top = NSMakePoint(NSMidX(countRect), [controlView isFlipped] ? NSMinY(countRect) : NSMaxY(countRect));
                 NSBezierPath *path = [NSBezierPath bezierPath];
-                [path moveToPoint:NSMakePoint(NSMidX(countRect), NSMinY(countRect) + u)];
+                [path moveToPoint:NSMakePoint(top.x, top.y + u)];
                 [path relativeLineToPoint:NSMakePoint(-6.0 * u, 12.0 * u)];
                 [path relativeLineToPoint:NSMakePoint(12.0 * u, 0)];
                 [path closePath];
                 [path fill];
                 [bgColor setFill];
                 path = [NSBezierPath bezierPath];
-                [path moveToPoint:NSMakePoint(NSMidX(countRect) - u / 2.0, NSMinY(countRect) + 4.0 * u)];
+                [path moveToPoint:NSMakePoint(top.x - u / 2.0, top.y + 4.0 * u)];
                 [path relativeLineToPoint:NSMakePoint(u, 0)];
                 [path relativeLineToPoint:NSMakePoint(0, 5.0 * u)];
                 [path relativeLineToPoint:NSMakePoint(-u, 0)];
