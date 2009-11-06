@@ -238,6 +238,8 @@ static NSImage *unlockedIcon = nil;
 
 - (void)setNeedsUpdate:(BOOL)flag { needsUpdate = flag; }
 
+- (NSString *)errorMessage { return [client errorMessage]; }
+
 // BDSKGroup overrides
 
 - (NSImage *)icon {

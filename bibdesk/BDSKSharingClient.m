@@ -74,6 +74,7 @@ typedef struct _BDSKSharingClientFlags {
     id protocolChecker;             // proxy wrapping self for security
     BDSKSharingClientFlags flags;   // state variables
     NSString *uniqueIdentifier;     // used by the remote server
+    NSString *errorMessage;
 }
 
 + (NSString *)supportedProtocolVersion;
@@ -84,6 +85,8 @@ typedef struct _BDSKSharingClientFlags {
 - (void)setRetrieving:(BOOL)flag;
 - (BOOL)needsAuthentication;
 - (BOOL)failedDownload;
+- (NSString *)errorMessage;
+- (void)setErrorMessage:(NSString *)newErrorMessage;
 
 // proxy object for messaging the remote server
 - (id <BDSKSharingServer>)remoteServer;
@@ -185,6 +188,10 @@ typedef struct _BDSKSharingClientFlags {
     return name;
 }
 
+- (NSString *)errorMessage {
+    return [server errorMessage];
+}
+
 @end
 
 #pragma mark -
@@ -221,6 +228,8 @@ typedef struct _BDSKSharingClientFlags {
         // test this to see if we've registered with the remote host
         uniqueIdentifier = nil;
         
+        errorMessage = nil;
+        
         [self startDOServerAsync];
     }
     return self;
@@ -232,6 +241,8 @@ typedef struct _BDSKSharingClientFlags {
     [service release];
     service = nil;
     [uniqueIdentifier release];
+    [errorMessage release];
+    errorMessage = nil;
     [super dealloc];
 }
 
@@ -264,6 +275,23 @@ typedef struct _BDSKSharingClientFlags {
 - (BOOL)failedDownload { 
     OSMemoryBarrier();
     return flags.failedDownload == 1; 
+}
+
+- (NSString *)errorMessage {
+    NSString *msg;
+    @synchronized(self) {
+        msg = [[errorMessage copy] autorelease];
+    }
+    return msg;
+}
+
+- (void)setErrorMessage:(NSString *)newErrorMessage {
+    @synchronized(self) {
+        if (errorMessage != newErrorMessage) {
+            [errorMessage release];
+            errorMessage = [newErrorMessage copy];
+        }
+    }
 }
 
 #pragma mark Proxies
@@ -421,6 +449,7 @@ typedef struct _BDSKSharingClientFlags {
     // set so we don't try calling this multiple times
     OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
+    [self setErrorMessage:nil];
     
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     

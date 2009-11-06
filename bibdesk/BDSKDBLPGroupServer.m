@@ -88,6 +88,7 @@
         availableResults = 0;
         fetchedResults = 0;
         infoLock = [[BDSKReadWriteLock alloc] init];
+        errorMessage = nil;
         
         [self startDOServerSync];
     }
@@ -99,6 +100,9 @@
     [serverInfo release];
     serverInfo = nil;
     [scheduledService release];
+    scheduledService = nil;
+    [errorMessage release];
+    errorMessage = nil;
     [super dealloc];
 }
 
@@ -122,6 +126,7 @@
 {
     if ([[self class] canConnect]) {
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
+        [self setErrorMessage:nil];
         
         // stop the current service (if any); -cancel is thread safe, and so is calling it multiple times
         [scheduledService cancel];
@@ -130,8 +135,7 @@
         
     } else {
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
-        NSError *presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to connect to server", @"")];
-        [NSApp presentError:presentableError];
+        [self setErrorMessage:NSLocalizedString(@"Unable to connect to server", @"")];
     }
 }
 
@@ -176,6 +180,20 @@
 - (BOOL)failedDownload { OSMemoryBarrier(); return 1 == flags.failedDownload; }
 
 - (BOOL)isRetrieving { OSMemoryBarrier(); return 1 == flags.isRetrieving; }
+
+// warning: if these ever can be set on the background thread they have to be made thread safe
+- (NSString *)errorMessage {
+    return errorMessage;
+}
+
+- (void)setErrorMessage:(NSString *)newErrorMessage {
+    BDSKASSERT([NSThread isMainThread]);
+    if (errorMessage != newErrorMessage) {
+        [errorMessage release];
+        errorMessage = [newErrorMessage copy];
+    }
+}
+
 - (NSFormatter *)searchStringFormatter { return nil; }
 
 #pragma mark Main thread

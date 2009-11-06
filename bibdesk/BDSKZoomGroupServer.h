@@ -69,8 +69,10 @@ typedef struct _BDSKZoomGroupFlags {
     volatile int32_t fetchedResults;
     BDSKZoomGroupFlags flags;
     BDSKReadWriteLock *infoLock;
+    NSString *errorMessage;
 }
 + (NSArray *)supportedRecordSyntaxes;
 + (ZOOMSyntaxType)zoomRecordSyntaxForRecordSyntaxString:(NSString *)syntax;
 - (void)resetConnection;
+- (void)setErrorMessage:(NSString *)newErrorMessage;
 @end

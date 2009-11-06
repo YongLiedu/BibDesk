@@ -55,8 +55,8 @@ typedef struct _BDSKDBLPGroupFlags {
     volatile int32_t fetchedResults;
     BDSKDBLPGroupFlags flags;
     BDSKReadWriteLock *infoLock;
-    
+    NSString *errorMessage;
     WSGeneratedObj *scheduledService;
 }
-
+- (void)setErrorMessage:(NSString *)newErrorMessage;
 @end

@@ -79,7 +79,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
             publications = nil;
             macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
             searchIndexes = [[BDSKItemSearchIndexes alloc] init];
-            errorMessage = nil;
             [self resetServerWithInfo:info];
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
         }
@@ -213,8 +212,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     searchTerm = nil;
     [searchIndexes release];
     searchIndexes = nil;
-    [errorMessage release];
-    errorMessage = nil;
     [super dealloc];
 }
 
@@ -265,19 +262,10 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 - (BOOL)failedDownload { return [server failedDownload]; }
 
+- (NSString *)errorMessage { return [server errorMessage]; }
+
 - (BOOL)containsItem:(BibItem *)item {
     return [publications containsObject:item];
-}
-
-- (NSString *)errorMessage {
-    return errorMessage;
-}
-
-- (void)setErrorMessage:(NSString *)newErrorMessage {
-    if (errorMessage != newErrorMessage) {
-        [errorMessage release];
-        errorMessage = [newErrorMessage retain];
-    }
 }
 
 #pragma mark BDSKOwner protocol

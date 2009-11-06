@@ -97,6 +97,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
         filePath = nil;
         URLDownload = nil;
         downloadState = BDSKIdleState;
+        errorMessage = nil;
     }
     return self;
 }
@@ -107,6 +108,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     [serverInfo release];
     [webEnv release];
     [queryKey release];
+    [errorMessage release];
     [super dealloc];
 }
 
@@ -139,7 +141,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
             [self fetch];
     } else {
         failedDownload = YES;
-        [group setErrorMessage:NSLocalizedString(@"Unable to connect to server", @"error when pubmed connection fails")];
+        [self setErrorMessage:NSLocalizedString(@"Unable to connect to server", @"error when pubmed connection fails")];
     }
 }
 
@@ -171,6 +173,17 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
 - (BOOL)failedDownload { return failedDownload; }
 
 - (BOOL)isRetrieving { return BDSKIdleState != downloadState; }
+
+// warning: if these ever can be set on the background thread they have to be made thread safe
+- (NSString *)errorMessage { return errorMessage; }
+
+- (void)setErrorMessage:(NSString *)newErrorMessage {
+    BDSKASSERT([NSThread isMainThread]);
+    if (errorMessage != newErrorMessage) {
+        [errorMessage release];
+        errorMessage = [newErrorMessage retain];
+    }
+}
 
 - (NSFormatter *)searchStringFormatter { return nil; }
 
@@ -273,6 +286,8 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     failedDownload = NO;
     NSError *presentableError;
     
+    [self setErrorMessage:nil];
+    
     if (URLDownload) {
         [URLDownload release];
         URLDownload = nil;
@@ -309,7 +324,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
                 
                 // no document, or zero length data from the server
                 failedDownload = YES;
-                [group setErrorMessage:NSLocalizedString(@"Unable to connect to server", @"error when pubmed connection fails")];
+                [self setErrorMessage:NSLocalizedString(@"Unable to connect to server", @"error when pubmed connection fails")];
             }
             
             break;
@@ -324,7 +339,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
             
             if (nil == pubs) {
                 failedDownload = YES;
-                [group setErrorMessage:[presentableError localizedDescription]];
+                [self setErrorMessage:[presentableError localizedDescription]];
             }
             else {
                 [group addPublications:pubs];
@@ -349,7 +364,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
 {
     downloadState = BDSKIdleState;
     failedDownload = YES;
-    [group setErrorMessage:[error localizedDescription]];
+    [self setErrorMessage:[error localizedDescription]];
     
     if (URLDownload) {
         [URLDownload release];

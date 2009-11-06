@@ -56,6 +56,7 @@
     NSInteger availableResults;
     NSInteger fetchedResults;
     NSInteger downloadState;
+    NSString *errorMessage;
 }
 + (NSString *)baseURLString;
 + (BOOL)canConnect;
@@ -70,5 +71,6 @@
 - (void)resetSearch;
 - (void)fetch;
 - (void)startDownloadFromURL:(NSURL *)theURL;
+- (void)setErrorMessage:(NSString *)newErrorMessage;
 
 @end

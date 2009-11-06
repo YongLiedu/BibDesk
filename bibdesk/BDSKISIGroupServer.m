@@ -152,14 +152,14 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 {
     if ([[self class] canConnect]) {
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
-    
+        [self setErrorMessage:nil];
+        
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
         [[self serverOnServerThread] downloadWithSearchTerm:[group searchTerm]];
-
+        
     } else {
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
-        NSError *presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to connect to server", @"")];
-        [NSApp presentError:presentableError];
+        [self setErrorMessage:NSLocalizedString(@"Unable to connect to server", @"")];
     }
 }
 
@@ -204,6 +204,24 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 - (BOOL)failedDownload { OSMemoryBarrier(); return 1 == flags.failedDownload; }
 
 - (BOOL)isRetrieving { OSMemoryBarrier(); return 1 == flags.isRetrieving; }
+
+- (NSString *)errorMessage {
+    NSString *msg;
+    @synchronized(self) {
+        msg = [[errorMessage copy] autorelease];
+    }
+    return msg;
+}
+
+- (void)setErrorMessage:(NSString *)newErrorMessage {
+    @synchronized(self) {
+        if (errorMessage != newErrorMessage) {
+            [errorMessage release];
+            errorMessage = [newErrorMessage copy];
+        }
+    }
+}
+
 - (NSFormatter *)searchStringFormatter { return nil; }
 
 #pragma mark Main thread
@@ -356,8 +374,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
         if (nil == resultString && nil == resultInfo && operation != retrieveRecid) {
             OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
             // we already know that a connection can be made, so we likely don't have permission to read this edition or database
-            NSError *presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.")];
-            [NSApp performSelectorOnMainThread:@selector(presentError:) withObject:presentableError waitUntilDone:NO];
+            [self setErrorMessage:NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.")];
         }
         
         NSInteger numResults = MIN(availableResultsLocal - fetchedResultsLocal, MAX_RESULTS);

@@ -60,6 +60,8 @@
 - (BOOL)failedDownload;
 - (BOOL)needsAuthentication;
 
+- (NSString *)errorMessage;
+
 - (NSString *)name;
 
 - (void)retrievePublications;

@@ -87,6 +87,7 @@
         flags.needsReset = 1;
         availableResults = 0;
         fetchedResults = 0;
+        errorMessage = nil;
         infoLock = [[BDSKReadWriteLock alloc] init];
         [self startDOServerSync];
     }
@@ -99,6 +100,7 @@
     group = nil;
     [connection release], connection = nil;
     [serverInfo release], serverInfo = nil;
+    [errorMessage release], errorMessage = nil;
     [super dealloc];
 }
 
@@ -124,6 +126,7 @@
 - (void)retrievePublications
 {
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
+    [self setErrorMessage:nil];
     
     OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
     [[self serverOnServerThread] downloadWithSearchTerm:[group searchTerm]];
@@ -171,6 +174,23 @@
 - (BOOL)failedDownload { OSMemoryBarrier(); return 1 == flags.failedDownload; }
 
 - (BOOL)isRetrieving { OSMemoryBarrier(); return 1 == flags.isRetrieving; }
+
+- (NSString *)errorMessage {
+    NSString *msg;
+    @synchronized(self) {
+        msg = [[errorMessage copy] autorelease];
+    }
+    return msg;
+}
+
+- (void)setErrorMessage:(NSString *)newErrorMessage {
+    @synchronized(self) {
+        if (errorMessage != newErrorMessage) {
+            [errorMessage release];
+            errorMessage = [newErrorMessage copy];
+        }
+    }
+}
 
 - (NSFormatter *)searchStringFormatter { return [[[ZOOMCCLQueryFormatter alloc] initWithConfigString:[[[self serverInfo] options] objectForKey:@"queryConfig"]] autorelease]; }
 
@@ -272,8 +292,10 @@
         
         ZOOMResultSet *resultSet = query ? [connection resultsForQuery:query] : nil;
         
-        if (nil == resultSet)
+        if (nil == resultSet) {
             OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
+            [self setErrorMessage:NSLocalizedString(@"Could not retrieve results", @"")];
+        }
         
         [self setNumberOfAvailableResults:[resultSet countOfRecords]];
         
