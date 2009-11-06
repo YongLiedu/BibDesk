@@ -449,7 +449,6 @@ typedef struct _BDSKSharingClientFlags {
     // set so we don't try calling this multiple times
     OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
-    [self setErrorMessage:nil];
     
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     

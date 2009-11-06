@@ -196,7 +196,7 @@
 {
     isRetrieving = NO;
     failedDownload = NO;
-    [self setErrorMessage:nil];
+    
     NSError *error = nil;
     
     if (URLDownload) {

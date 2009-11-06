@@ -126,7 +126,6 @@
 {
     if ([[self class] canConnect]) {
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
-        [self setErrorMessage:nil];
         
         // stop the current service (if any); -cancel is thread safe, and so is calling it multiple times
         [scheduledService cancel];

@@ -286,8 +286,6 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     failedDownload = NO;
     NSError *presentableError;
     
-    [self setErrorMessage:nil];
-    
     if (URLDownload) {
         [URLDownload release];
         URLDownload = nil;

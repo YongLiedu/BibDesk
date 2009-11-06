@@ -171,7 +171,6 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     
     isRetrieving = NO;
     failedDownload = NO;
-    [self setErrorMessage:nil];
     
     if([[NSFileManager defaultManager] fileExistsAtPath:standardizedPath isDirectory:&isDir] == NO || isDir){
         NSError *error = [NSError mutableLocalErrorWithCode:kBDSKFileNotFound localizedDescription:nil];
