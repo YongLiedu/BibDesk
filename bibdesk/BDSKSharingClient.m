@@ -475,6 +475,7 @@ typedef struct _BDSKSharingClientFlags {
     @catch(id exception){
         NSLog(@"%@: discarding exception \"%@\" while retrieving publications", [self class], exception);
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
+        [self setErrorMessage:NSLocalizedString(@"Failed to retrieve publications", @"")];
         
         // this posts a notification that the publications of the client changed, forcing a redisplay of the table cell
         [client performSelectorOnMainThread:@selector(setArchivedPublicationsAndMacros:) withObject:nil waitUntilDone:NO];
