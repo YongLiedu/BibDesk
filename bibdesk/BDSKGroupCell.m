@@ -333,7 +333,6 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
                 
                 [bgColor setFill];
                 [NSBezierPath fillHorizontalOvalInRect:countRect];
-                [NSGraphicsContext restoreGraphicsState];
                 
                 [countString addAttribute:NSForegroundColorAttributeName value:fgColor range:NSMakeRange(0, [countString length])];
                 [countString drawWithRect:NSInsetRect(countRect, countInset, 0.0) options:NSStringDrawingUsesLineFragmentOrigin];
