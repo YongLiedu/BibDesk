@@ -1304,15 +1304,40 @@ static BOOL changingColors = NO;
     }
 }
 
+- (void)endStatusBarAnimation:(NSNumber *)visible {
+    if ([visible boolValue] == NO) {
+        [documentWindow setContentBorderThickness:0.0 forEdge:NSMinYEdge];
+        [statusView setHidden:YES];
+    }
+    docState.isAnimating = NO;
+}
+
 - (IBAction)toggleStatusBar:(id)sender{
+    if (docState.isAnimating)
+        return;
+    
     BOOL visible = [statusView isHidden];
-    NSRect ignored, frame = [groupSplitView frame];
-    CGFloat height = NSHeight([statusView frame]);
-    NSDivideRect(frame, &ignored, &frame, visible ? height : -height, NSMinYEdge);
-    [groupSplitView setFrame:frame];
-    [documentWindow setContentBorderThickness:visible ? height : 0.0 forEdge:NSMinYEdge];
-    [statusView setHidden:visible == NO];
+    NSRect ignored, frame = [groupSplitView frame], statusFrame = [statusView frame];
+    CGFloat dy = visible ? NSHeight(statusFrame) : -NSHeight(statusFrame);
+    
+    NSDivideRect(frame, &ignored, &frame, dy, NSMinYEdge);
+    statusFrame.origin.y += dy;
+    if (visible)
+        [documentWindow setContentBorderThickness:dy forEdge:NSMinYEdge];
+    [statusView setHidden:NO];
 	[[NSUserDefaults standardUserDefaults] setBool:visible forKey:BDSKShowStatusBarKey];
+    
+    if (sender == nil) {
+        [groupSplitView setFrame:frame];
+        [statusView setFrame:statusFrame];
+    } else {
+        docState.isAnimating = YES;
+        [NSAnimationContext beginGrouping];
+        [[groupSplitView animator] setFrame:frame];
+        [[statusView animator] setFrame:statusFrame];
+        [NSAnimationContext endGrouping];
+        [self performSelector:@selector(endStatusBarAnimation:) withObject:[NSNumber numberWithBool:visible] afterDelay:[[NSAnimationContext currentContext] duration]];
+    }
 }
 
 - (IBAction)changeMainTableFont:(id)sender{
