@@ -90,6 +90,8 @@
     
     BOOL isEditing;
     
+    BOOL isAnimating;
+    
     NSMutableArray *fields;
     
     NSMutableSet *addedFields;

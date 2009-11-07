@@ -1105,16 +1105,44 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         [[self document] showPerson:[self personAtIndex:i]];
 }
 
+- (void)endSidebarAnimation:(NSNumber *)position {
+    [mainSplitView setPosition:[position doubleValue] ofDividerAtIndex:0];
+    isAnimating = NO;
+}
+
 - (IBAction)toggleSidebar:(id)sender {
+    if (isAnimating)
+        return;
+    
     CGFloat position = [mainSplitView maxPossiblePositionOfDividerAtIndex:0];
+    NSSize viewSize = [fileSplitView frame].size;
+    NSSize tabSize = [[tabView superview] frame].size;
+    
     if ([mainSplitView isSubviewCollapsed:fileSplitView]) {
         if (lastFileViewWidth <= 0.0)
             lastFileViewWidth = 150.0; // a reasonable value to start
         position -= lastFileViewWidth;
+        viewSize.width = 0.0;
+        [fileSplitView setFrameSize:viewSize];
+        [fileSplitView setHidden:NO];
+        viewSize.width = lastFileViewWidth;
+        tabSize.width += lastFileViewWidth;
     } else {
         lastFileViewWidth = NSWidth([fileSplitView frame]);
+        viewSize.width = 0.0;
+        tabSize.width -= lastFileViewWidth;
     }
-    [mainSplitView setPosition:position ofDividerAtIndex:0];
+    
+    if (sender == nil) {
+        [mainSplitView setPosition:position ofDividerAtIndex:0];
+    } else {
+        isAnimating = YES;
+        [NSAnimationContext beginGrouping];
+        [[fileSplitView animator] setFrameSize:viewSize];
+        [[[tabView superview] animator] setFrameSize:tabSize];
+        [NSAnimationContext endGrouping];
+        [self performSelector:@selector(endSidebarAnimation:) withObject:[NSNumber numberWithDouble:position] afterDelay:[[NSAnimationContext currentContext] duration]];
+    }
 }
 
 - (IBAction)toggleStatusBar:(id)sender {
@@ -3062,8 +3090,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (BOOL)splitView:(NSSplitView *)sender shouldCollapseSubview:(NSView *)subview forDoubleClickOnDividerAtIndex:(NSInteger)dividerIndex {
     if ([sender isEqual:mainSplitView]) {
         if ([subview isEqual:fileSplitView])
-            lastFileViewWidth = NSWidth([fileSplitView frame]);
-        return YES;
+            [self toggleSidebar:sender];
+        return NO;
     } else if ([sender isEqual:fileSplitView]) {
         return [subview isEqual:[authorTableView enclosingScrollView]];
     }
