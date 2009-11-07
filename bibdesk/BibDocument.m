@@ -222,6 +222,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         docState.lastGroupViewWidth = 0.0;
         docState.lastFileViewWidth = 0.0;
         docState.lastWebViewFraction = 0.0;
+        docState.isAnimating = NO;
         
         // these are temporary state variables
         promiseDragColumnIdentifier = nil;

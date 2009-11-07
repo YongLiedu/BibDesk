@@ -505,13 +505,11 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 
 - (BOOL)splitView:(NSSplitView *)sender shouldCollapseSubview:(NSView *)subview forDoubleClickOnDividerAtIndex:(NSInteger)dividerIndex {
     if ([sender isEqual:groupSplitView]) {
-        if ([subview isEqual:[[sender subviews] objectAtIndex:1]] == NO) {
-            if (dividerIndex == 0)
-                docState.lastGroupViewWidth = NSWidth([[[sender subviews] objectAtIndex:0] frame]);
-            else
-                docState.lastFileViewWidth = NSWidth([[[sender subviews] objectAtIndex:2] frame]);
-            return YES;
-        }
+        if ([subview isEqual:[[sender subviews] objectAtIndex:0]])
+            [self toggleGroups:sender];
+        else if ([subview isEqual:[[sender subviews] objectAtIndex:2]])
+            [self toggleSidebar:sender];
+        return NO;
     } else if ([sender isEqual:splitView]) {
         if ([subview isEqual:[[sender subviews] lastObject]]) {
             docState.lastPreviewHeight = NSWidth([[[sender subviews] lastObject] frame]);
