@@ -1145,20 +1145,44 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     }
 }
 
-- (IBAction)toggleStatusBar:(id)sender {
-    BOOL visible = [statusBar isVisible] == NO;
-    NSRect rect, frame = [mainSplitView frame];
-    CGFloat height = NSHeight([statusBar frame]);
-    NSDivideRect(frame, &rect, &frame, visible ? height : -height, NSMinYEdge);
-    [[self window] setContentBorderThickness:visible ? height : 0.0 forEdge:NSMinYEdge];
-    if (visible) {
-        [statusBar setFrame:rect];
-        [[[self window] contentView] addSubview:statusBar];
-    } else {
+- (void)endStatusBarAnimation:(NSNumber *)visible {
+    if ([visible boolValue] == NO) {
+        [[self window] setContentBorderThickness:0.0 forEdge:NSMinYEdge];
         [statusBar removeFromSuperview];
     }
-    [mainSplitView setFrame:frame];
+    isAnimating = NO;
+}
+
+- (IBAction)toggleStatusBar:(id)sender {
+    BOOL visible = [statusBar isVisible] == NO;
+    NSView *view = [[mainSplitView superview] superview];
+    NSRect ignored, frame = [view frame];
+    NSRect statusFrame = frame;
+    CGFloat height = NSHeight([statusBar frame]);
+    CGFloat dy = visible ? height : -height;
+    
+    statusFrame.origin.y -= height;
+    statusFrame.size.height = height;
+    NSDivideRect(frame, &ignored, &frame, dy, NSMinYEdge);
+    if (visible) {
+        [[self window] setContentBorderThickness:height forEdge:NSMinYEdge];
+        [statusBar setFrame:statusFrame];
+        [[[self window] contentView] addSubview:statusBar];
+    }
+    statusFrame.origin.y += dy;
 	[[NSUserDefaults standardUserDefaults] setBool:visible forKey:BDSKShowEditorStatusBarKey];
+    
+    if (sender == nil) {
+        [view setFrame:frame];
+        [statusBar setFrame:statusFrame];
+    } else {
+        isAnimating = YES;
+        [NSAnimationContext beginGrouping];
+        [[view animator] setFrame:frame];
+        [[statusBar animator] setFrame:statusFrame];
+        [NSAnimationContext endGrouping];
+        [self performSelector:@selector(endStatusBarAnimation:) withObject:[NSNumber numberWithBool:visible] afterDelay:[[NSAnimationContext currentContext] duration]];
+    }
 }
 
 #pragma mark Menus
