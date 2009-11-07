@@ -64,6 +64,7 @@
 #import "NSView_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSEvent_BDSKExtensions.h"
+#import "NSViewAnimation_BDSKExtensions.h"
 
 #import "BDSKTypeManager.h"
 #import "BDSKScriptHookManager.h"
@@ -1230,6 +1231,7 @@ static BOOL changingColors = NO;
     NSView *centerView = [[groupSplitView subviews] objectAtIndex:1];
     NSSize viewSize = [view frame].size;
     NSSize centerSize = [centerView frame].size;
+    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
     
     if ([groupSplitView isSubviewCollapsed:view]) {
         if(docState.lastGroupViewWidth <= 0.0)
@@ -1248,15 +1250,16 @@ static BOOL changingColors = NO;
         centerSize.width += docState.lastGroupViewWidth;
     }
     
-    if (sender == nil) {
+    if (sender == nil || duration <= 0.0) {
         [groupSplitView setPosition:position ofDividerAtIndex:0];
     } else {
         docState.isAnimating = YES;
         [NSAnimationContext beginGrouping];
+        [[NSAnimationContext currentContext]setDuration:duration];
         [[view animator] setFrameSize:viewSize];
         [[centerView animator] setFrameSize:centerSize];
         [NSAnimationContext endGrouping];
-        [self performSelector:@selector(endGroupsAnimation:) withObject:[NSNumber numberWithDouble:position] afterDelay:[[NSAnimationContext currentContext] duration]];
+        [self performSelector:@selector(endGroupsAnimation:) withObject:[NSNumber numberWithDouble:position] afterDelay:duration];
     }
 }
 
@@ -1274,6 +1277,7 @@ static BOOL changingColors = NO;
     NSView *centerView = [[groupSplitView subviews] objectAtIndex:1];
     NSSize viewSize = [view frame].size;
     NSSize centerSize = [centerView frame].size;
+    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
     
     if ([groupSplitView isSubviewCollapsed:view]) {
         if(docState.lastFileViewWidth <= 0.0)
@@ -1292,15 +1296,16 @@ static BOOL changingColors = NO;
         centerSize.width += docState.lastFileViewWidth;
     }
     
-    if (sender == nil) {
+    if (sender == nil || duration <= 0.0) {
         [groupSplitView setPosition:position ofDividerAtIndex:1];
     } else {
         docState.isAnimating = YES;
         [NSAnimationContext beginGrouping];
+        [[NSAnimationContext currentContext]setDuration:duration];
         [[view animator] setFrameSize:viewSize];
         [[centerView animator] setFrameSize:centerSize];
         [NSAnimationContext endGrouping];
-        [self performSelector:@selector(endSidebarAnimation:) withObject:[NSNumber numberWithDouble:position] afterDelay:[[NSAnimationContext currentContext] duration]];
+        [self performSelector:@selector(endSidebarAnimation:) withObject:[NSNumber numberWithDouble:position] afterDelay:duration];
     }
 }
 
@@ -1319,6 +1324,7 @@ static BOOL changingColors = NO;
     BOOL visible = [statusView isHidden];
     NSRect ignored, frame = [groupSplitView frame], statusFrame = [statusView frame];
     CGFloat dy = visible ? NSHeight(statusFrame) : -NSHeight(statusFrame);
+    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
     
     NSDivideRect(frame, &ignored, &frame, dy, NSMinYEdge);
     statusFrame.origin.y += dy;
@@ -1327,16 +1333,17 @@ static BOOL changingColors = NO;
     [statusView setHidden:NO];
 	[[NSUserDefaults standardUserDefaults] setBool:visible forKey:BDSKShowStatusBarKey];
     
-    if (sender == nil) {
+    if (sender == nil || duration <= 0.0) {
         [groupSplitView setFrame:frame];
         [statusView setFrame:statusFrame];
     } else {
         docState.isAnimating = YES;
         [NSAnimationContext beginGrouping];
+        [[NSAnimationContext currentContext]setDuration:duration];
         [[groupSplitView animator] setFrame:frame];
         [[statusView animator] setFrame:statusFrame];
         [NSAnimationContext endGrouping];
-        [self performSelector:@selector(endStatusBarAnimation:) withObject:[NSNumber numberWithBool:visible] afterDelay:[[NSAnimationContext currentContext] duration]];
+        [self performSelector:@selector(endStatusBarAnimation:) withObject:[NSNumber numberWithBool:visible] afterDelay:duration];
     }
 }
 

@@ -82,6 +82,7 @@
 #import "NSColor_BDSKExtensions.h"
 #import "BDSKURLSheetController.h"
 #import "NSEvent_BDSKExtensions.h"
+#import "NSViewAnimation_BDSKExtensions.h"
 
 #define WEAK_NULL NULL
 
@@ -1117,6 +1118,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     CGFloat position = [mainSplitView maxPossiblePositionOfDividerAtIndex:0];
     NSSize viewSize = [fileSplitView frame].size;
     NSSize tabSize = [[tabView superview] frame].size;
+    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
     
     if ([mainSplitView isSubviewCollapsed:fileSplitView]) {
         if (lastFileViewWidth <= 0.0)
@@ -1133,15 +1135,16 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         tabSize.width -= lastFileViewWidth;
     }
     
-    if (sender == nil) {
+    if (sender == nil || duration <= 0.0) {
         [mainSplitView setPosition:position ofDividerAtIndex:0];
     } else {
         isAnimating = YES;
         [NSAnimationContext beginGrouping];
+        [[NSAnimationContext currentContext]setDuration:duration];
         [[fileSplitView animator] setFrameSize:viewSize];
         [[[tabView superview] animator] setFrameSize:tabSize];
         [NSAnimationContext endGrouping];
-        [self performSelector:@selector(endSidebarAnimation:) withObject:[NSNumber numberWithDouble:position] afterDelay:[[NSAnimationContext currentContext] duration]];
+        [self performSelector:@selector(endSidebarAnimation:) withObject:[NSNumber numberWithDouble:position] afterDelay:duration];
     }
 }
 
@@ -1160,6 +1163,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     NSRect statusFrame = frame;
     CGFloat height = NSHeight([statusBar frame]);
     CGFloat dy = visible ? height : -height;
+    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
     
     statusFrame.origin.y -= height;
     statusFrame.size.height = height;
@@ -1172,16 +1176,17 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     statusFrame.origin.y += dy;
 	[[NSUserDefaults standardUserDefaults] setBool:visible forKey:BDSKShowEditorStatusBarKey];
     
-    if (sender == nil) {
+    if (sender == nil || duration <= 0.0) {
         [view setFrame:frame];
         [statusBar setFrame:statusFrame];
     } else {
         isAnimating = YES;
         [NSAnimationContext beginGrouping];
+        [[NSAnimationContext currentContext]setDuration:duration];
         [[view animator] setFrame:frame];
         [[statusBar animator] setFrame:statusFrame];
         [NSAnimationContext endGrouping];
-        [self performSelector:@selector(endStatusBarAnimation:) withObject:[NSNumber numberWithBool:visible] afterDelay:[[NSAnimationContext currentContext] duration]];
+        [self performSelector:@selector(endStatusBarAnimation:) withObject:[NSNumber numberWithBool:visible] afterDelay:duration];
     }
 }
 
