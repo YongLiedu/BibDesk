@@ -284,12 +284,12 @@
 
 - (BOOL) validateToggleStatusBarMenuItem:(NSMenuItem*) menuItem {
     NSString *s;
-	if ([statusView isHidden]){
-		s = NSLocalizedString(@"Show Status Bar", @"Menu item title");
+	if ([statusBar isVisible]){
+		s = NSLocalizedString(@"Hide Status Bar", @"Menu item title");
 		[menuItem setTitle:s];
 	}
 	else {
-		s = NSLocalizedString(@"Hide Status Bar", @"Menu item title");
+		s = NSLocalizedString(@"Show Status Bar", @"Menu item title");
 		[menuItem setTitle:s];
 	}
 	return YES;

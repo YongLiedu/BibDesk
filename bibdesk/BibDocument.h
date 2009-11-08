@@ -115,7 +115,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSSplitView *splitView;
     IBOutlet BDSKColoredView *mainBox;
     IBOutlet NSView *mainView;
-    IBOutlet NSView *statusView;
     IBOutlet BDSKStatusBar *statusBar;
     
     BDSKFileContentSearchController *fileSearchController;
