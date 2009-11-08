@@ -548,21 +548,23 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         NSArray *subviews = [groupSplitView subviews];
         BOOL isLeftHidden = [groupSplitView isSubviewCollapsed:[subviews objectAtIndex:0]];
         BOOL isRightHidden = [groupSplitView isSubviewCollapsed:[subviews objectAtIndex:2]];
-        NSRect frame = [statusBar frame];
         NSView *view = [subviews objectAtIndex:1];
         NSRect rect = [view convertRect:[view bounds] toView:[documentWindow contentView]];
+        NSRect frame = [statusBar frame];
         frame.origin.x = BDSKMax(8.0, NSMinX(rect));
         frame.size.width = NSMaxX(rect) - NSMinX(frame);
         [statusBar setFrame:frame];
         [statusBar setRightMargin:isRightHidden ? 17.0 : 4.0];
-        [groupAddButton setHidden:isLeftHidden];
-        [groupActionButton setHidden:isLeftHidden];
+        [groupButtonView setHidden:isLeftHidden];
         [sidePreviewButton setHidden:isRightHidden];
+        if (isLeftHidden == NO) {
+            frame = [groupButtonView frame];
+            frame.size.width = NSMinX(rect) - [groupSplitView dividerThickness];
+            [groupButtonView setFrame:frame];
+        }
         if (isRightHidden == NO) {
             frame = [sidePreviewButton frame];
-            view = [subviews objectAtIndex:2];
-            rect = [view convertRect:[view bounds] toView:[documentWindow contentView]];
-            frame.origin.x = NSMinX(rect);
+            frame.origin.x = NSMaxX(rect) + [groupSplitView dividerThickness];
             [sidePreviewButton setFrame:frame];
         }
     }

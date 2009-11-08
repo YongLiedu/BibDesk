@@ -425,6 +425,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	if ([sud boolForKey:BDSKShowStatusBarKey] == NO)
 		[self toggleStatusBar:nil];
     
+    [groupButtonView setMinSize:[groupButtonView frame].size];
+    [groupButtonView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
+    
     bottomPreviewDisplay = [xattrDefaults intForKey:BDSKBottomPreviewDisplayKey defaultValue:[sud integerForKey:BDSKBottomPreviewDisplayKey]];
     bottomPreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKBottomPreviewDisplayTemplateKey defaultObject:[sud stringForKey:BDSKBottomPreviewDisplayTemplateKey]] retain];
     sidePreviewDisplay = [xattrDefaults intForKey:BDSKSidePreviewDisplayKey defaultValue:[sud integerForKey:BDSKSidePreviewDisplayKey]];
