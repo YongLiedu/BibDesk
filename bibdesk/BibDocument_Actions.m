@@ -1318,32 +1318,8 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)toggleStatusBar:(id)sender{
-    if (docState.isAnimating)
-        return;
-    
-    BOOL visible = (NO == [statusBar isVisible]);
-    NSRect ignored, frame = [groupSplitView frame], statusFrame = [statusBar frame];
-    CGFloat dy = visible ? NSHeight(statusFrame) : -NSHeight(statusFrame);
-    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
-    
-    NSDivideRect(frame, &ignored, &frame, dy, NSMinYEdge);
-    statusFrame.origin.y += dy;
-    if (visible)
-        [documentWindow setContentBorderThickness:dy forEdge:NSMinYEdge];
-	[[NSUserDefaults standardUserDefaults] setBool:visible forKey:BDSKShowStatusBarKey];
-    
-    if (sender == nil || duration <= 0.0) {
-        [groupSplitView setFrame:frame];
-        [statusBar setFrame:statusFrame];
-    } else {
-        docState.isAnimating = YES;
-        [NSAnimationContext beginGrouping];
-        [[NSAnimationContext currentContext]setDuration:duration];
-        [[groupSplitView animator] setFrame:frame];
-        [[statusBar animator] setFrame:statusFrame];
-        [NSAnimationContext endGrouping];
-        [self performSelector:@selector(endStatusBarAnimation:) withObject:[NSNumber numberWithBool:visible] afterDelay:duration];
-    }
+	[[NSUserDefaults standardUserDefaults] setBool:[statusBar isVisible] == NO forKey:BDSKShowStatusBarKey];
+    [statusBar toggleBelowView:groupSplitView animate:sender != nil];
 }
 
 - (IBAction)changeMainTableFont:(id)sender{

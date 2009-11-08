@@ -1159,37 +1159,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (IBAction)toggleStatusBar:(id)sender {
-    BOOL visible = [statusBar isVisible] == NO;
-    NSView *view = [mainSplitView superview];
-    NSRect ignored, frame = [view frame];
-    NSRect statusFrame = frame;
-    CGFloat height = NSHeight([statusBar frame]);
-    CGFloat dy = visible ? height : -height;
-    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
-    
-    statusFrame.origin.y -= height;
-    statusFrame.size.height = height;
-    NSDivideRect(frame, &ignored, &frame, dy, NSMinYEdge);
-    if (visible) {
-        [[self window] setContentBorderThickness:height forEdge:NSMinYEdge];
-        [statusBar setFrame:statusFrame];
-        [[[self window] contentView] addSubview:statusBar];
-    }
-    statusFrame.origin.y += dy;
-	[[NSUserDefaults standardUserDefaults] setBool:visible forKey:BDSKShowEditorStatusBarKey];
-    
-    if (sender == nil || duration <= 0.0) {
-        [view setFrame:frame];
-        [statusBar setFrame:statusFrame];
-    } else {
-        isAnimating = YES;
-        [NSAnimationContext beginGrouping];
-        [[NSAnimationContext currentContext]setDuration:duration];
-        [[view animator] setFrame:frame];
-        [[statusBar animator] setFrame:statusFrame];
-        [NSAnimationContext endGrouping];
-        [self performSelector:@selector(endStatusBarAnimation:) withObject:[NSNumber numberWithBool:visible] afterDelay:duration];
-    }
+	[[NSUserDefaults standardUserDefaults] setBool:[statusBar isVisible] == NO forKey:BDSKShowEditorStatusBarKey];
+    [statusBar toggleBelowView:mainSplitView animate:sender != nil];
 }
 
 #pragma mark Menus

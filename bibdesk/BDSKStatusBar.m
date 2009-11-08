@@ -39,6 +39,7 @@
 #import "BDSKStatusBar.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "BDSKCenterScaledImageCell.h"
+#import "NSViewAnimation_BDSKExtensions.h"
 
 #define LEFT_MARGIN				5.0
 #define RIGHT_MARGIN			15.0
@@ -65,6 +66,7 @@
         
         leftMargin = LEFT_MARGIN;
         rightMargin = RIGHT_MARGIN;
+        isAnimating = NO;
     }
     return self;
 }
@@ -74,6 +76,42 @@
 	[iconCell release];
 	[icons release];
 	[super dealloc];
+}
+
+- (void)endAnimation:(NSNumber *)visible {
+    if ([visible boolValue] == NO) {
+        [[self window] setContentBorderThickness:0.0 forEdge:NSMinYEdge];
+        [self removeFromSuperview];
+    }
+    isAnimating = NO;
+}
+
+- (void)toggleBelowView:(NSView *)view animate:(BOOL)animate {
+    if (isAnimating)
+        return;
+    
+    BOOL visible = (NO == [self isVisible]);
+    NSRect ignored, frame = [view frame], statusFrame = [self frame];
+    CGFloat dy = visible ? NSHeight(statusFrame) : -NSHeight(statusFrame);
+    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
+    
+    NSDivideRect(frame, &ignored, &frame, dy, NSMinYEdge);
+    statusFrame.origin.y += dy;
+    if (visible)
+        [[view window] setContentBorderThickness:dy forEdge:NSMinYEdge];
+    
+    if (animate == NO || duration <= 0.0) {
+        [view setFrame:frame];
+        [self setFrame:statusFrame];
+    } else {
+        isAnimating = YES;
+        [NSAnimationContext beginGrouping];
+        [[NSAnimationContext currentContext]setDuration:duration];
+        [[view animator] setFrame:frame];
+        [[self animator] setFrame:statusFrame];
+        [NSAnimationContext endGrouping];
+        [self performSelector:@selector(endAnimation:) withObject:[NSNumber numberWithBool:visible] afterDelay:duration];
+    }
 }
 
 - (NSSize)cellSizeForIcon:(NSImage *)icon {
