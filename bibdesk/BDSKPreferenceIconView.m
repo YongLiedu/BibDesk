@@ -190,7 +190,6 @@
 
 - (void)drawRect:(NSRect)aRect {
     NSInteger i, iMax = [matrix numberOfRows];
-    NSString *caption;
     NSColor *backgroundColor = [NSColor colorWithCalibratedWhite:0.97 alpha:0.99];
     NSColor *dividerColor = [NSColor colorWithCalibratedWhite:0.84 alpha:1.0];
     NSRect rect = NSMakeRect(0.0, TOP_MARGIN, NSWidth([self bounds]), [matrix cellSize].height + [matrix intercellSpacing].height);

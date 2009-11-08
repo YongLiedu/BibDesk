@@ -307,7 +307,6 @@
             [self setNumberOfFetchedResults:[self numberOfFetchedResults] + numResults];
             
             pubs = [NSMutableArray array];
-            NSInteger i, iMax = [records count];
             NSString *record;
             NSInteger stringType;
             BibItem *anItem;

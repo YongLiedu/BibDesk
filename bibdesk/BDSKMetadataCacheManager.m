@@ -40,6 +40,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "BDAlias.h"
+#import <libkern/OSAtomic.h>
 
 @implementation BDSKMetadataCacheManager
 
