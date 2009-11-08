@@ -543,6 +543,49 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     return proposedMin;
 }
 
+- (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize {
+    if ([sender isEqual:groupSplitView]) {
+        NSView *leftView = [[sender subviews] objectAtIndex:0];
+        NSView *centerView = [[sender subviews] objectAtIndex:1];
+        NSView *rightView = [[sender subviews] objectAtIndex:2];
+        BOOL leftCollapsed = [sender isSubviewCollapsed:leftView];
+        BOOL rightCollapsed = [sender isSubviewCollapsed:rightView];
+        NSSize leftSize = [leftView frame].size;
+        NSSize centerSize = [centerView frame].size;
+        NSSize rightSize = [rightView frame].size;
+        CGFloat contentWidth = NSWidth([sender frame]);
+        
+        if (leftCollapsed)
+            leftSize.width = 0.0;
+        else
+            contentWidth -= [sender dividerThickness];
+        if (rightCollapsed)
+            rightSize.width = 0.0;
+        else
+            contentWidth -= [sender dividerThickness];
+        
+        if (contentWidth < leftSize.width + rightSize.width) {
+            CGFloat oldContentWidth = oldSize.width;
+            if (leftCollapsed == NO)
+                oldContentWidth -= [sender dividerThickness];
+            if (rightCollapsed == NO)
+                oldContentWidth -= [sender dividerThickness];
+            CGFloat resizeFactor = contentWidth / oldContentWidth;
+            leftSize.width = BDSKFloor(resizeFactor * leftSize.width);
+            rightSize.width = BDSKFloor(resizeFactor * rightSize.width);
+        }
+        
+        centerSize.width = contentWidth - leftSize.width - rightSize.width;
+        leftSize.height = rightSize.height = centerSize.height = NSHeight([sender frame]);
+        if (leftCollapsed == NO)
+            [leftView setFrameSize:leftSize];
+        if (rightCollapsed == NO)
+            [rightView setFrameSize:rightSize];
+        [centerView setFrameSize:centerSize];
+    }
+    [sender adjustSubviews];
+}
+
 - (void)splitViewDidResizeSubviews:(NSNotification *)aNotification {
     if ([[aNotification object] isEqual:groupSplitView] || aNotification == nil) {
         NSArray *subviews = [groupSplitView subviews];

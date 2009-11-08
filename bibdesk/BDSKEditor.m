@@ -3147,6 +3147,36 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return proposedMin;
 }
 
+- (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize {
+    NSView *mainView = [[sender subviews] objectAtIndex:0];
+    NSView *sideView = [[sender subviews] objectAtIndex:1];
+    BOOL collapsed = [sender isSubviewCollapsed:sideView];
+    NSSize mainSize = [mainView frame].size;
+    NSSize sideSize = [sideView frame].size;
+    
+    if ([sender isEqual:mainSplitView]) {
+        CGFloat contentWidth = NSWidth([sender frame]) - [sender dividerThickness];
+        if (collapsed)
+            sideSize.width = 0.0;
+        else if (contentWidth < sideSize.width)
+            sideSize.width = BDSKFloor(contentWidth * sideSize.width / (oldSize.width - [sender dividerThickness]));
+        mainSize.width = contentWidth - sideSize.width;
+        sideSize.height = mainSize.height = NSHeight([sender frame]);
+    } else if ([sender isEqual:fileSplitView]) {
+        CGFloat contentHeight = NSHeight([sender frame]) - [sender dividerThickness];
+        if (collapsed)
+            sideSize.height = 0.0;
+        else if (contentHeight < sideSize.height)
+            sideSize.height = BDSKFloor(contentHeight * sideSize.height / (oldSize.height - [sender dividerThickness]));
+        mainSize.height = contentHeight - sideSize.height;
+        sideSize.width = mainSize.width = NSHeight([sender frame]);
+    }
+    if (collapsed == NO)
+        [sideView setFrameSize:sideSize];
+    [mainView setFrameSize:mainSize];
+    [sender adjustSubviews];
+}
+
 @end
 
 @implementation BDSKEditor (Private)
