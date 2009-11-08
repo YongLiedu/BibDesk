@@ -83,6 +83,7 @@
 #import "BDSKURLSheetController.h"
 #import "NSEvent_BDSKExtensions.h"
 #import "NSViewAnimation_BDSKExtensions.h"
+#import "BDSKColoredView.h"
 
 #define WEAK_NULL NULL
 
@@ -186,6 +187,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     NSView *view = [[mainSplitView subviews] objectAtIndex:0];
     [[tabView superview] setFrame:[view bounds]];
     [mainSplitView replaceSubview:view with:[tabView superview]];
+    [(BDSKColoredView *)[mainSplitView superview] setBackgroundColor:[NSColor windowBackgroundColor]];
     
     BDSKEdgeView *edgeView = (BDSKEdgeView *)[[[matrix enclosingScrollView] superview] superview];
 	[edgeView setEdges:BDSKMaxYEdgeMask];
@@ -1158,7 +1160,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 - (IBAction)toggleStatusBar:(id)sender {
     BOOL visible = [statusBar isVisible] == NO;
-    NSView *view = [[mainSplitView superview] superview];
+    NSView *view = [mainSplitView superview];
     NSRect ignored, frame = [view frame];
     NSRect statusFrame = frame;
     CGFloat height = NSHeight([statusBar frame]);
