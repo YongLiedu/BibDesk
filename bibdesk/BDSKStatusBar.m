@@ -66,7 +66,8 @@
         
         leftMargin = LEFT_MARGIN;
         rightMargin = RIGHT_MARGIN;
-        isAnimating = NO;
+        
+        animating = NO;
     }
     return self;
 }
@@ -76,42 +77,6 @@
 	[iconCell release];
 	[icons release];
 	[super dealloc];
-}
-
-- (void)endAnimation:(NSNumber *)visible {
-    if ([visible boolValue] == NO) {
-        [[self window] setContentBorderThickness:0.0 forEdge:NSMinYEdge];
-        [self removeFromSuperview];
-    }
-    isAnimating = NO;
-}
-
-- (void)toggleBelowView:(NSView *)view animate:(BOOL)animate {
-    if (isAnimating)
-        return;
-    
-    BOOL visible = (NO == [self isVisible]);
-    NSRect ignored, frame = [view frame], statusFrame = [self frame];
-    CGFloat dy = visible ? NSHeight(statusFrame) : -NSHeight(statusFrame);
-    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
-    
-    NSDivideRect(frame, &ignored, &frame, dy, NSMinYEdge);
-    statusFrame.origin.y += dy;
-    if (visible)
-        [[view window] setContentBorderThickness:dy forEdge:NSMinYEdge];
-    
-    if (animate == NO || duration <= 0.0) {
-        [view setFrame:frame];
-        [self setFrame:statusFrame];
-    } else {
-        isAnimating = YES;
-        [NSAnimationContext beginGrouping];
-        [[NSAnimationContext currentContext]setDuration:duration];
-        [[view animator] setFrame:frame];
-        [[self animator] setFrame:statusFrame];
-        [NSAnimationContext endGrouping];
-        [self performSelector:@selector(endAnimation:) withObject:[NSNumber numberWithBool:visible] afterDelay:duration];
-    }
 }
 
 - (NSSize)cellSizeForIcon:(NSImage *)icon {
@@ -155,6 +120,63 @@
 
 - (BOOL)isVisible {
 	return [self superview]  && [self isHidden] == NO;
+}
+
+- (void)endAnimation:(NSNumber *)visible {
+    if ([visible boolValue] == NO) {
+        [[self window] setContentBorderThickness:0.0 forEdge:NSMinYEdge];
+        [self removeFromSuperview];
+    }
+    animating = NO;
+}
+
+- (void)toggleBelowView:(NSView *)view animate:(BOOL)animate {
+    if (animating)
+        return;
+    
+	NSRect viewFrame = [view frame];
+	NSView *contentView = [view superview];
+	NSRect statusRect = [contentView bounds];
+	CGFloat statusHeight = NSHeight([self frame]);
+    BOOL visible = (nil == [self superview]);
+    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
+	
+    statusRect.size.height = statusHeight;
+	
+	if (visible) {
+        [[view window] setContentBorderThickness:statusHeight forEdge:NSMinYEdge];
+		if ([contentView isFlipped])
+			statusRect.origin.y = NSMaxY([contentView bounds]);
+		else
+            statusRect.origin.y -= statusHeight;
+        [self setFrame:statusRect];
+		[contentView addSubview:self positioned:NSWindowBelow relativeTo:nil];
+        statusHeight = -statusHeight;
+	}
+    viewFrame.size.height += statusHeight;
+    if ([contentView isFlipped]) {
+        statusRect.origin.y += statusHeight;
+    } else {
+        viewFrame.origin.y -= statusHeight;
+        statusRect.origin.y -= statusHeight;
+    }
+    if (animate && duration > 0.0) {
+        animating = YES;
+        [NSAnimationContext beginGrouping];
+        [[NSAnimationContext currentContext] setDuration:duration];
+        [[view animator] setFrame:viewFrame];
+        [[self animator] setFrame:statusRect];
+        [NSAnimationContext endGrouping];
+        [self performSelector:@selector(endAnimation:) withObject:[NSNumber numberWithBool:visible] afterDelay:duration];
+    } else {
+        [view setFrame:viewFrame];
+        if (visible) {
+            [self setFrame:statusRect];
+        } else {
+            [[self window] setContentBorderThickness:0.0 forEdge:NSMinYEdge];
+            [self removeFromSuperview];
+        }
+    }
 }
 
 #pragma mark Text cell accessors

@@ -54,7 +54,7 @@ typedef NSInteger BDSKProgressIndicatorStyle;
 	id delegate;
     CGFloat leftMargin;
     CGFloat rightMargin;
-    BOOL isAnimating;
+    BOOL animating;
 }
 
 - (void)toggleBelowView:(NSView *)view animate:(BOOL)animate;
