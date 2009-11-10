@@ -104,7 +104,7 @@
     BOOL collapsed1 = [self isSubviewCollapsed:view1];
     BOOL collapsed2 = [self isSubviewCollapsed:view2];
     CGFloat min = [self minPossiblePositionOfDividerAtIndex:dividerIndex];
-    CGFloat thickness;
+    CGFloat thickness = [self dividerThickness];
     BOOL canHide = [[self delegate] respondsToSelector:@selector(splitView:shouldHideDividerAtIndex:)] &&
                    [[self delegate] splitView:self shouldHideDividerAtIndex:dividerIndex];
     
