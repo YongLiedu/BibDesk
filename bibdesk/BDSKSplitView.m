@@ -126,8 +126,8 @@
                 }
             }
             [view1 setFrameSize:size1];
-            [view2 setFrameSize:size2];
             [view1 setHidden:NO];
+            [view2 setFrameSize:size2];
         } else if (collapsed2) {
             size2.width = 0.0;
             if (canHide && dividerIndex == (NSInteger)[[self subviews] count] - 2) {
@@ -141,9 +141,9 @@
                     }
                 }
             }
-            [view1 setFrameSize:size1];
             [view2 setFrameSize:size2];
             [view2 setHidden:NO];
+            [view1 setFrameSize:size1];
         }
         size2.width -= position - min - size1.width;
         size1.width = position - min;
@@ -170,8 +170,8 @@
                 }
             }
             [view1 setFrameSize:size1];
-            [view2 setFrameSize:size2];
             [view1 setHidden:NO];
+            [view2 setFrameSize:size2];
         } else if (collapsed2) {
             size2.height = 0.0;
             if (canHide && dividerIndex == (NSInteger)[[self subviews] count] - 2) {
@@ -185,9 +185,9 @@
                     }
                 }
             }
-            [view1 setFrameSize:size1];
             [view2 setFrameSize:size2];
             [view2 setHidden:NO];
+            [view1 setFrameSize:size1];
         }
         size2.height -= position - min - size1.height;
         size1.height = position - min;
