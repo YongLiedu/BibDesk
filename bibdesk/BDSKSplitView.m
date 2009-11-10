@@ -108,6 +108,9 @@
     BOOL canHide = [[self delegate] respondsToSelector:@selector(splitView:shouldHideDividerAtIndex:)] &&
                    [[self delegate] splitView:self shouldHideDividerAtIndex:dividerIndex];
     
+    if (collapsed1 && collapsed2)
+        return;
+    
     if (canHide) {
         // on 10.5 minPossiblePositionOfDividerAtIndex may wrongly return 0 for the first divider when it can hide
         if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_5 && dividerIndex == 0)
@@ -116,10 +119,6 @@
     }
     
     if ([self isVertical]) {
-        if ((collapsed1 || collapsed2) && canHide && size1.width + size2.width < thickness) {
-            [self setPosition:position ofDividerAtIndex:dividerIndex];
-            return;
-        }
         if (collapsed1) {
             size1.width = 0.0;
             if (canHide) {
@@ -127,6 +126,10 @@
                 if (size2.width < 0.0) {
                     size1.width += size2.width;
                     size2.width = 0.0;
+                    if (size1.width < 0.0) {
+                        [self setPosition:position ofDividerAtIndex:dividerIndex];
+                        return;
+                    }
                 }
             }
             [view1 setFrameSize:size1];
@@ -139,6 +142,10 @@
                 if (size1.width < 0.0) {
                     size2.width += size1.width;
                     size1.width = 0.0;
+                    if (size2.width < 0.0) {
+                        [self setPosition:position ofDividerAtIndex:dividerIndex];
+                        return;
+                    }
                 }
             }
             [view1 setFrameSize:size1];
@@ -167,6 +174,10 @@
                 if (size2.height < 0.0) {
                     size1.height += size2.height;
                     size2.height = 0.0;
+                    if (size1.height < 0.0) {
+                        [self setPosition:position ofDividerAtIndex:dividerIndex];
+                        return;
+                    }
                 }
             }
             [view1 setFrameSize:size1];
@@ -179,6 +190,10 @@
                 if (size1.height < 0.0) {
                     size2.height += size1.height;
                     size1.height = 0.0;
+                    if (size2.height < 0.0) {
+                        [self setPosition:position ofDividerAtIndex:dividerIndex];
+                        return;
+                    }
                 }
             }
             [view1 setFrameSize:size1];
