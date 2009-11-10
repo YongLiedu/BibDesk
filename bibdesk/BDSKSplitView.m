@@ -103,7 +103,7 @@
     NSSize size2 = [view2 frame].size;
     BOOL collapsed1 = [self isSubviewCollapsed:view1];
     BOOL collapsed2 = [self isSubviewCollapsed:view2];
-    CGFloat min = [self minPossiblePositionOfDividerAtIndex:dividerIndex];
+    CGFloat min = dividerIndex == 0 ? 0.0 : [self minPossiblePositionOfDividerAtIndex:dividerIndex];
     CGFloat thickness = [self dividerThickness];
     BOOL canHide = [[self delegate] respondsToSelector:@selector(splitView:shouldHideDividerAtIndex:)] &&
                    [[self delegate] splitView:self shouldHideDividerAtIndex:dividerIndex];
@@ -111,17 +111,10 @@
     if (collapsed1 && collapsed2)
         return;
     
-    if (canHide) {
-        // on 10.5 minPossiblePositionOfDividerAtIndex may wrongly return 0 for the first divider when it can hide
-        if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_5 && dividerIndex == 0)
-            min = -[self dividerThickness];
-        min += thickness;
-    }
-    
     if ([self isVertical]) {
         if (collapsed1) {
             size1.width = 0.0;
-            if (canHide) {
+            if (canHide && dividerIndex == 0) {
                 size2.width -= thickness;
                 if (size2.width < 0.0) {
                     size1.width += size2.width;
@@ -137,7 +130,7 @@
             [view1 setHidden:NO];
         } else if (collapsed2) {
             size2.width = 0.0;
-            if (canHide) {
+            if (canHide && dividerIndex == (NSInteger)[[self subviews] count] - 2) {
                 size1.width -= thickness;
                 if (size1.width < 0.0) {
                     size2.width += size1.width;
@@ -163,13 +156,9 @@
             size1.width = 0.0;
         }
     } else {
-        if ((collapsed1 || collapsed2) && canHide && size1.height + size2.height < thickness) {
-            [self setPosition:position ofDividerAtIndex:dividerIndex];
-            return;
-        }
         if (collapsed1) {
             size1.height = 0.0;
-            if (canHide) {
+            if (canHide && dividerIndex == 0) {
                 size2.height -= thickness;
                 if (size2.height < 0.0) {
                     size1.height += size2.height;
@@ -185,7 +174,7 @@
             [view1 setHidden:NO];
         } else if (collapsed2) {
             size2.height = 0.0;
-            if (canHide) {
+            if (canHide && dividerIndex == (NSInteger)[[self subviews] count] - 2) {
                 size1.height -= thickness;
                 if (size1.height < 0.0) {
                     size2.height += size1.height;
