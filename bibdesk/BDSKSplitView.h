@@ -39,5 +39,8 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKSplitView : NSSplitView
+@interface BDSKSplitView : NSSplitView {
+    BOOL animating;
+}
+- (void)setPosition:(CGFloat)position ofDividerAtIndex:(NSInteger)dividerIndex animate:(BOOL)animate;
 @end

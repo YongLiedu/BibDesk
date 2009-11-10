@@ -92,6 +92,7 @@
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKURLSheetController.h"
 #import "BDSKLinkedFile.h"
+#import "BDSKSplitView.h"
 
 @implementation BibDocument (Actions)
 
@@ -1217,104 +1218,34 @@ static BOOL changingColors = NO;
 	[tableView deselectAll:sender];
 }
 
-- (void)endGroupsAnimation:(NSNumber *)position {
-    [groupSplitView setPosition:[position doubleValue] ofDividerAtIndex:0];
-    docState.isAnimating = NO;
-}
-
 - (IBAction)toggleGroups:(id)sender {
-    if (docState.isAnimating)
-        return;
-    
     CGFloat position = [groupSplitView minPossiblePositionOfDividerAtIndex:0];
     NSView *view = [[groupSplitView subviews] objectAtIndex:0];
-    NSView *centerView = [[groupSplitView subviews] objectAtIndex:1];
-    NSSize viewSize = [view frame].size;
-    NSSize centerSize = [centerView frame].size;
-    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
     
     if ([groupSplitView isSubviewCollapsed:view]) {
         if(docState.lastGroupViewWidth <= 0.0)
             docState.lastGroupViewWidth = 120.0; // a reasonable value to start
         position = docState.lastGroupViewWidth;
-        viewSize.width = 0.0;
-        centerSize.width -= [groupSplitView dividerThickness];
-        [view setFrameSize:viewSize];
-        [centerView setFrameSize:centerSize];
-        [view setHidden:NO];
-        viewSize.width = docState.lastGroupViewWidth;
-        centerSize.width -= docState.lastGroupViewWidth;
     } else {
         docState.lastGroupViewWidth = NSWidth([view frame]);
-        viewSize.width = 0.0;
-        centerSize.width += docState.lastGroupViewWidth;
     }
     
-    if (sender == nil || duration <= 0.0) {
-        [groupSplitView setPosition:position ofDividerAtIndex:0];
-    } else {
-        docState.isAnimating = YES;
-        [NSAnimationContext beginGrouping];
-        [[NSAnimationContext currentContext]setDuration:duration];
-        [[view animator] setFrameSize:viewSize];
-        [[centerView animator] setFrameSize:centerSize];
-        [NSAnimationContext endGrouping];
-        [self performSelector:@selector(endGroupsAnimation:) withObject:[NSNumber numberWithDouble:position] afterDelay:duration];
-    }
-}
-
-- (void)endSidebarAnimation:(NSNumber *)position {
-    [groupSplitView setPosition:[position doubleValue] ofDividerAtIndex:1];
-    docState.isAnimating = NO;
+    [(BDSKSplitView *)groupSplitView setPosition:position ofDividerAtIndex:0 animate:sender != nil];
 }
 
 - (IBAction)toggleSidebar:(id)sender {
-    if (docState.isAnimating)
-        return;
-    
     CGFloat position = [groupSplitView maxPossiblePositionOfDividerAtIndex:1];
     NSView *view = [[groupSplitView subviews] objectAtIndex:2];
-    NSView *centerView = [[groupSplitView subviews] objectAtIndex:1];
-    NSSize viewSize = [view frame].size;
-    NSSize centerSize = [centerView frame].size;
-    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
     
     if ([groupSplitView isSubviewCollapsed:view]) {
         if(docState.lastFileViewWidth <= 0.0)
             docState.lastFileViewWidth = 120.0; // a reasonable value to start
         position -= docState.lastFileViewWidth + [groupSplitView dividerThickness];
-        viewSize.width = 0.0;
-        centerSize.width -= [groupSplitView dividerThickness];
-        [view setFrameSize:viewSize];
-        [centerView setFrameSize:centerSize];
-        [view setHidden:NO];
-        viewSize.width = docState.lastFileViewWidth;
-        centerSize.width -= docState.lastFileViewWidth;
     } else {
         docState.lastFileViewWidth = NSWidth([view frame]);
-        viewSize.width = 0.0;
-        centerSize.width += docState.lastFileViewWidth;
     }
     
-    if (sender == nil || duration <= 0.0) {
-        [groupSplitView setPosition:position ofDividerAtIndex:1];
-    } else {
-        docState.isAnimating = YES;
-        [NSAnimationContext beginGrouping];
-        [[NSAnimationContext currentContext]setDuration:duration];
-        [[view animator] setFrameSize:viewSize];
-        [[centerView animator] setFrameSize:centerSize];
-        [NSAnimationContext endGrouping];
-        [self performSelector:@selector(endSidebarAnimation:) withObject:[NSNumber numberWithDouble:position] afterDelay:duration];
-    }
-}
-
-- (void)endStatusBarAnimation:(NSNumber *)visible {
-    if ([visible boolValue] == NO) {
-        [documentWindow setContentBorderThickness:0.0 forEdge:NSMinYEdge];
-        [statusBar removeFromSuperview];
-    }
-    docState.isAnimating = NO;
+    [(BDSKSplitView *)groupSplitView setPosition:position ofDividerAtIndex:1 animate:sender != nil];
 }
 
 - (IBAction)toggleStatusBar:(id)sender{

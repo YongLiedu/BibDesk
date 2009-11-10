@@ -84,6 +84,7 @@
 #import "NSEvent_BDSKExtensions.h"
 #import "NSViewAnimation_BDSKExtensions.h"
 #import "BDSKColoredView.h"
+#import "BDSKSplitView.h"
 
 #define WEAK_NULL NULL
 
@@ -1108,46 +1109,18 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         [[self document] showPerson:[self personAtIndex:i]];
 }
 
-- (void)endSidebarAnimation:(NSNumber *)position {
-    [mainSplitView setPosition:[position doubleValue] ofDividerAtIndex:0];
-    isAnimating = NO;
-}
-
 - (IBAction)toggleSidebar:(id)sender {
-    if (isAnimating)
-        return;
-    
     CGFloat position = [mainSplitView maxPossiblePositionOfDividerAtIndex:0];
-    NSSize viewSize = [fileSplitView frame].size;
-    NSSize tabSize = [[tabView superview] frame].size;
-    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
     
     if ([mainSplitView isSubviewCollapsed:fileSplitView]) {
         if (lastFileViewWidth <= 0.0)
             lastFileViewWidth = 150.0; // a reasonable value to start
         position -= lastFileViewWidth;
-        viewSize.width = 0.0;
-        [fileSplitView setFrameSize:viewSize];
-        [fileSplitView setHidden:NO];
-        viewSize.width = lastFileViewWidth;
-        tabSize.width += lastFileViewWidth;
     } else {
         lastFileViewWidth = NSWidth([fileSplitView frame]);
-        viewSize.width = 0.0;
-        tabSize.width -= lastFileViewWidth;
     }
     
-    if (sender == nil || duration <= 0.0) {
-        [mainSplitView setPosition:position ofDividerAtIndex:0];
-    } else {
-        isAnimating = YES;
-        [NSAnimationContext beginGrouping];
-        [[NSAnimationContext currentContext]setDuration:duration];
-        [[fileSplitView animator] setFrameSize:viewSize];
-        [[[tabView superview] animator] setFrameSize:tabSize];
-        [NSAnimationContext endGrouping];
-        [self performSelector:@selector(endSidebarAnimation:) withObject:[NSNumber numberWithDouble:position] afterDelay:duration];
-    }
+    [(BDSKSplitView *)mainSplitView setPosition:position ofDividerAtIndex:0 animate:sender != nil];
 }
 
 - (void)endStatusBarAnimation:(NSNumber *)visible {

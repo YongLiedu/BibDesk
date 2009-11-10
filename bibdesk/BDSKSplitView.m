@@ -37,6 +37,7 @@
  */
 
 #import "BDSKSplitView.h"
+#import "NSViewAnimation_BDSKExtensions.h"
 
 #ifndef NSAppKitVersionNumber10_5
 #define NSAppKitVersionNumber10_5 949
@@ -79,6 +80,133 @@
     [super adjustSubviews];
     if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_5)
         [self resetCursorRects];
+}
+
+- (void)endAnimation:(NSDictionary *)info {
+    [self setPosition:[[info objectForKey:@"position"] doubleValue] ofDividerAtIndex:[[info objectForKey:@"dividerIndex"] integerValue]];
+    animating = NO;
+}
+
+- (void)setPosition:(CGFloat)position ofDividerAtIndex:(NSInteger)dividerIndex animate:(BOOL)animate {
+    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
+    
+    if (animating) {
+        return;
+    } else if (animate == NO || duration <= 0.0) {
+        [self setPosition:position ofDividerAtIndex:dividerIndex];
+        return;
+    }
+    
+    NSView *view1 = [[self subviews] objectAtIndex:dividerIndex];
+    NSView *view2 = [[self subviews] objectAtIndex:dividerIndex + 1];
+    NSSize size1 = [view1 frame].size;
+    NSSize size2 = [view2 frame].size;
+    BOOL collapsed1 = [self isSubviewCollapsed:view1];
+    BOOL collapsed2 = [self isSubviewCollapsed:view2];
+    CGFloat min = [self minPossiblePositionOfDividerAtIndex:dividerIndex];
+    CGFloat thickness;
+    BOOL canHide = [[self delegate] respondsToSelector:@selector(splitView:shouldHideDividerAtIndex:)] &&
+                   [[self delegate] splitView:self shouldHideDividerAtIndex:dividerIndex];
+    
+    if (canHide) {
+        // on 10.5 minPossiblePositionOfDividerAtIndex may wrongly return 0 for the first divider when it can hide
+        if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_5 && dividerIndex == 0)
+            min = -[self dividerThickness];
+        min += thickness;
+    }
+    
+    if ([self isVertical]) {
+        if ((collapsed1 || collapsed2) && canHide && size1.width + size2.width < thickness) {
+            [self setPosition:position ofDividerAtIndex:dividerIndex];
+            return;
+        }
+        if (collapsed1) {
+            size1.width = 0.0;
+            if (canHide) {
+                size2.width -= thickness;
+                if (size2.width < 0.0) {
+                    size1.width += size2.width;
+                    size2.width = 0.0;
+                }
+            }
+            [view1 setFrameSize:size1];
+            [view2 setFrameSize:size2];
+            [view1 setHidden:NO];
+        } else if (collapsed2) {
+            size2.width = 0.0;
+            if (canHide) {
+                size1.width -= thickness;
+                if (size1.width < 0.0) {
+                    size2.width += size1.width;
+                    size1.width = 0.0;
+                }
+            }
+            [view1 setFrameSize:size1];
+            [view2 setFrameSize:size2];
+            [view2 setHidden:NO];
+        }
+        size2.width -= position - min - size1.width;
+        size1.width = position - min;
+        if (size2.width < 0.0) {
+            size1.width += size2.width;
+            size2.width = 0.0;
+        }
+        if (size1.width < 0.0) {
+            size2.width += size1.width;
+            size1.width = 0.0;
+        }
+    } else {
+        if ((collapsed1 || collapsed2) && canHide && size1.height + size2.height < thickness) {
+            [self setPosition:position ofDividerAtIndex:dividerIndex];
+            return;
+        }
+        if (collapsed1) {
+            size1.height = 0.0;
+            if (canHide) {
+                size2.height -= thickness;
+                if (size2.height < 0.0) {
+                    size1.height += size2.height;
+                    size2.height = 0.0;
+                }
+            }
+            [view1 setFrameSize:size1];
+            [view2 setFrameSize:size2];
+            [view1 setHidden:NO];
+        } else if (collapsed2) {
+            size2.height = 0.0;
+            if (canHide) {
+                size1.height -= thickness;
+                if (size1.height < 0.0) {
+                    size2.height += size1.height;
+                    size1.height = 0.0;
+                }
+            }
+            [view1 setFrameSize:size1];
+            [view2 setFrameSize:size2];
+            [view2 setHidden:NO];
+        }
+        size2.height -= position - min - size1.height;
+        size1.height = position - min;
+        if (size2.height < 0.0) {
+            size1.height += size2.height;
+            size2.height = 0.0;
+        }
+        if (size1.height < 0.0) {
+            size2.height += size1.height;
+            size1.height = 0.0;
+        }
+    }
+    
+    NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithDouble:position], @"position", [NSNumber numberWithInteger:dividerIndex], @"dividerIndex", nil];
+    
+    animating = YES;
+    [NSAnimationContext beginGrouping];
+    [[NSAnimationContext currentContext] setDuration:duration];
+    [[view1 animator] setFrameSize:size1];
+    [[view2 animator] setFrameSize:size2];
+    [NSAnimationContext endGrouping];
+    
+    [self performSelector:@selector(endAnimation:) withObject:info afterDelay:duration]; 
 }
 
 @end
