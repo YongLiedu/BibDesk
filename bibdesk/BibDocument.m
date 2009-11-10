@@ -118,7 +118,7 @@
 #import "BDSKFileMigrationController.h"
 #import "BDSKDocumentSearch.h"
 #import "NSImage_BDSKExtensions.h"
-#import <SkimNotes/SkimNotes.h>
+#import <SkimNotesBase/SkimNotesBase.h>
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSView_BDSKExtensions.h"
 #import "NSColor_BDSKExtensions.h"

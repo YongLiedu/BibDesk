@@ -42,7 +42,7 @@
 #import "NSAppleEventDescriptor_BDSKExtensions.h"
 #import <FileView/FileView.h>
 #import "NSWorkspace_BDSKExtensions.h"
-#import <SkimNotes/SkimNotes.h>
+#import <SkimNotesBase/SkimNotesBase.h>
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
 
@@ -424,19 +424,19 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     for (NSDictionary *note in [self SkimNotes]) {
         note = [note mutableCopy];
         id value;
-        if (value = [note objectForKey:SKNPDFAnnotationBoundsKey]) {
+        if (value = [note objectForKey:@"bounds"]) {
             NSRect nsBounds = NSRectFromString(value);
             Rect qdBounds;
             qdBounds.left = BDSKRound(NSMinX(nsBounds));
             qdBounds.bottom = BDSKRound(NSMinY(nsBounds));
             qdBounds.right = BDSKRound(NSMaxX(nsBounds));
             qdBounds.top = BDSKRound(NSMaxY(nsBounds));
-            [note setValue:[NSData dataWithBytes:&qdBounds length:sizeof(Rect)] forKey:SKNPDFAnnotationBoundsKey];
+            [note setValue:[NSData dataWithBytes:&qdBounds length:sizeof(Rect)] forKey:@"bounds"];
         }
-        if (value = [note objectForKey:SKNPDFAnnotationPageIndexKey]) {
-            [note setValue:[NSNumber numberWithUnsignedInt:[value unsignedIntValue] + 1] forKey:SKNPDFAnnotationPageIndexKey];
+        if (value = [note objectForKey:@"pageIndex"]) {
+            [note setValue:[NSNumber numberWithUnsignedInt:[value unsignedIntValue] + 1] forKey:@"pageIndex"];
         }
-        if (value = [note objectForKey:SKNPDFAnnotationBorderStyleKey]) {
+        if (value = [note objectForKey:@"borderStyle"]) {
             NSString *style = nil;
             switch ([value intValue]) {
                 case kPDFBorderStyleSolid: style = @"solid"; break;
@@ -445,23 +445,23 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
                 case kPDFBorderStyleInset: style = @"inset"; break;
                 case kPDFBorderStyleUnderline: style = @"underline"; break;
             }
-            [note setValue:style forKey:SKNPDFAnnotationBorderStyleKey];
+            [note setValue:style forKey:@"borderStyle"];
         }
-        if (value = [note objectForKey:SKNPDFAnnotationStartPointKey]) {
+        if (value = [note objectForKey:@"startPoint"]) {
             NSPoint nsPoint = NSPointFromString(value);
             Point qdPoint;
             qdPoint.h = BDSKRound(nsPoint.x);
             qdPoint.v = BDSKRound(nsPoint.y);
-            [note setValue:[NSData dataWithBytes:&qdPoint length:sizeof(Point)] forKey:SKNPDFAnnotationStartPointKey];
+            [note setValue:[NSData dataWithBytes:&qdPoint length:sizeof(Point)] forKey:@"startPoint"];
         }
-        if (value = [note objectForKey:SKNPDFAnnotationEndPointKey]) {
+        if (value = [note objectForKey:@"endPoint"]) {
             NSPoint nsPoint = NSPointFromString(value);
             Point qdPoint;
             qdPoint.h = BDSKRound(nsPoint.x);
             qdPoint.v = BDSKRound(nsPoint.y);
-            [note setValue:[NSData dataWithBytes:&qdPoint length:sizeof(Point)] forKey:SKNPDFAnnotationEndPointKey];
+            [note setValue:[NSData dataWithBytes:&qdPoint length:sizeof(Point)] forKey:@"endPoint"];
         }
-        if (value = [note objectForKey:SKNPDFAnnotationStartLineStyleKey]) {
+        if (value = [note objectForKey:@"startLineStyle"]) {
             NSString *style = nil;
             switch ([value intValue]) {
                 case kPDFLineStyleNone: style = @"none"; break;
@@ -471,9 +471,9 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
                 case kPDFLineStyleOpenArrow: style = @"open arrow"; break;
                 case kPDFLineStyleClosedArrow: style = @"closed arrow"; break;
             }
-            [note setValue:style forKey:SKNPDFAnnotationStartLineStyleKey];
+            [note setValue:style forKey:@"startLineStyle"];
         }
-        if (value = [note objectForKey:SKNPDFAnnotationEndLineStyleKey]) {
+        if (value = [note objectForKey:@"endLineStyle"]) {
             NSString *style = nil;
             switch ([value intValue]) {
                 case kPDFLineStyleNone: style = @"none"; break;
@@ -483,9 +483,9 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
                 case kPDFLineStyleOpenArrow: style = @"open arrow"; break;
                 case kPDFLineStyleClosedArrow: style = @"closed arrow"; break;
             }
-            [note setValue:style forKey:SKNPDFAnnotationEndLineStyleKey];
+            [note setValue:style forKey:@"endLineStyle"];
         }
-        if (value = [note objectForKey:SKNPDFAnnotationIconTypeKey]) {
+        if (value = [note objectForKey:@"iconType"]) {
             NSString *style = nil;
             switch ([value intValue]) {
                 case kPDFTextAnnotationIconComment: style = @"comment"; break;
@@ -496,15 +496,15 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
                 case kPDFTextAnnotationIconParagraph: style = @"paragraph"; break;
                 case kPDFTextAnnotationIconInsert: style = @"insert"; break;
             }
-            [note setValue:style forKey:SKNPDFAnnotationIconTypeKey];
+            [note setValue:style forKey:@"iconType"];
         }
-        if (value = [note objectForKey:SKNPDFAnnotationTextKey]) {
-            [note setValue:[[[NSTextStorage alloc] initWithAttributedString:value] autorelease] forKey:SKNPDFAnnotationTextKey];
+        if (value = [note objectForKey:@"text"]) {
+            [note setValue:[[[NSTextStorage alloc] initWithAttributedString:value] autorelease] forKey:@"text"];
         }
-        if (value = [note objectForKey:SKNPDFAnnotationImageKey]) {
-            [note setValue:[NSAppleEventDescriptor descriptorWithDescriptorType:typeTIFF data:[value TIFFRepresentation]] forKey:SKNPDFAnnotationImageKey];
+        if (value = [note objectForKey:@"image"]) {
+            [note setValue:[NSAppleEventDescriptor descriptorWithDescriptorType:typeTIFF data:[value TIFFRepresentation]] forKey:@"image"];
         }
-        if (value = [note objectForKey:SKNPDFAnnotationQuadrilateralPointsKey]) {
+        if (value = [note objectForKey:@"quadrilateralPoints"]) {
             NSMutableArray *pathList = [NSMutableArray array];
             NSMutableArray *points = [NSMutableArray array];
             for (NSString *pointString in value) {
@@ -518,10 +518,10 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
                     points = [NSMutableArray array];
                 }
             }
-            [note setValue:nil forKey:SKNPDFAnnotationQuadrilateralPointsKey];
-            [note setValue:pathList forKey:SKNPDFAnnotationPointListsKey];
+            [note setValue:nil forKey:@"quadrilateralPoints"];
+            [note setValue:pathList forKey:@"pointLists"];
         }
-        if (value = [note objectForKey:SKNPDFAnnotationPointListsKey]) {
+        if (value = [note objectForKey:@"pointLists"]) {
             NSMutableArray *pathList = [NSMutableArray array];
             for (NSArray *path in value) {
                 NSMutableArray *points = [NSMutableArray array];
@@ -534,7 +534,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
                 }
                 [pathList addObject:points];
             }
-            [note setValue:pathList forKey:SKNPDFAnnotationPointListsKey];
+            [note setValue:pathList forKey:@"pointLists"];
         }
         [notes addObject:note];
         [note release];

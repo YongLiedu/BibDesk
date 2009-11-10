@@ -41,7 +41,7 @@
 #import "BDSKStringConstants.h"
 #import "NSURL_BDSKExtensions.h"
 #import <libkern/OSAtomic.h>
-#import <SkimNotes/SkimNotes.h>
+#import <SkimNotesBase/SkimNotesBase.h>
 
 
 @interface BDSKNotesSearchIndex (BDSKPrivate)

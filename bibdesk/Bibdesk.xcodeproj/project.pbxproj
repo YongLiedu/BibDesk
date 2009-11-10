@@ -181,6 +181,8 @@
 		CE8DAD901098976400896F69 /* BDSKMetadataCacheManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8DAD8E1098976400896F69 /* BDSKMetadataCacheManager.m */; };
 		CE8F5F840DEEB26800061148 /* ZoomValues.strings in Resources */ = {isa = PBXBuildFile; fileRef = CE8F5F830DEEB26800061148 /* ZoomValues.strings */; };
 		CE90BAFD103978D300992D50 /* BDSKURLSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE90BAFB103978D300992D50 /* BDSKURLSheetController.m */; };
+		CE94C0D910A8F240002634D2 /* SkimNotesBase.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = CE52E69D0E2D2B87007B6C62 /* SkimNotesBase.framework */; };
+		CE94C0DA10A8F2A2002634D2 /* SkimNotesBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE52E69D0E2D2B87007B6C62 /* SkimNotesBase.framework */; };
 		CE95A57C0A88883300334DFA /* BDSKReadMeController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE95A57A0A88883300334DFA /* BDSKReadMeController.m */; };
 		CE95AF180ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = CE95AF160ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m */; };
 		CE9666460B46B70C003BAB9A /* BDSKServerInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = CE9666440B46B70C003BAB9A /* BDSKServerInfo.m */; };
@@ -279,12 +281,10 @@
 		CEE8DD480E5C3F5B00EFA97F /* AGRegex.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
 		CEE8DD490E5C3F5B00EFA97F /* FileView.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
 		CEE8DD4A0E5C3F5B00EFA97F /* BTParse.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9AF4DF50BEA3E5B009B16D5 /* BTParse.framework */; };
-		CEE8DD4B0E5C3F5B00EFA97F /* SkimNotes.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */; };
 		CEE8DEC90E5C3FB700EFA97F /* yaz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5950BEA3C9400D65C7F /* yaz.framework */; };
 		CEE8DECA0E5C3FB700EFA97F /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
 		CEE8DECB0E5C3FB700EFA97F /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
 		CEE8DECC0E5C3FB700EFA97F /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9AF4DF50BEA3E5B009B16D5 /* BTParse.framework */; };
-		CEE8DECD0E5C3FB700EFA97F /* SkimNotes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */; };
 		CEE8DEF00E5C402800EFA97F /* BibImporter.mdimporter in Copy Files: Spotlight */ = {isa = PBXBuildFile; fileRef = F95CC113087F54BF002C5694 /* BibImporter.mdimporter */; };
 		CEE8DEF10E5C402800EFA97F /* BibDesk.qlgenerator in Copy Files: QuickLook */ = {isa = PBXBuildFile; fileRef = F98C6FD00CDD30A2002FCAD8 /* BibDesk.qlgenerator */; };
 		CEEA4C6A0B57B0D400434059 /* BDSKBooleanValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEA4C680B57B0D400434059 /* BDSKBooleanValueTransformer.m */; };
@@ -513,12 +513,12 @@
 			remoteGlobalIDString = CEBA2B550E0566B00000B2E6;
 			remoteInfo = skimnotes;
 		};
-		CEA451690E47C8C000D161AD /* PBXContainerItemProxy */ = {
+		CE94C0DB10A8F2AC002634D2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
-			remoteInfo = SkimNotes;
+			remoteGlobalIDString = CEA5F53C0E2CED0E00F65088 /* SkimNotesBase */;
+			remoteInfo = SkimNotesBase;
 		};
 		CEB34BA10F5CB2CC0037E086 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -705,7 +705,7 @@
 				CEE8DD480E5C3F5B00EFA97F /* AGRegex.framework in Copy Files: Frameworks */,
 				CEE8DD490E5C3F5B00EFA97F /* FileView.framework in Copy Files: Frameworks */,
 				CEE8DD4A0E5C3F5B00EFA97F /* BTParse.framework in Copy Files: Frameworks */,
-				CEE8DD4B0E5C3F5B00EFA97F /* SkimNotes.framework in Copy Files: Frameworks */,
+				CE94C0D910A8F240002634D2 /* SkimNotesBase.framework in Copy Files: Frameworks */,
 				CEB34C4A0F5D49D40037E086 /* Sparkle.framework in Copy Files: Frameworks */,
 			);
 			name = "Copy Files: Frameworks";
@@ -1597,7 +1597,7 @@
 				CEE8DECA0E5C3FB700EFA97F /* AGRegex.framework in Frameworks */,
 				CEE8DECB0E5C3FB700EFA97F /* FileView.framework in Frameworks */,
 				CEE8DECC0E5C3FB700EFA97F /* BTParse.framework in Frameworks */,
-				CEE8DECD0E5C3FB700EFA97F /* SkimNotes.framework in Frameworks */,
+				CE94C0DA10A8F2A2002634D2 /* SkimNotesBase.framework in Frameworks */,
 				CEB34C490F5D49BD0037E086 /* Sparkle.framework in Frameworks */,
 				CEED306C0F4ED3410078E87A /* libz.dylib in Frameworks */,
 			);
@@ -2793,7 +2793,7 @@
 				F9AF56360BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF56380BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */,
-				CEA4516A0E47C8C000D161AD /* PBXTargetDependency */,
+				CE94C0DC10A8F2AC002634D2 /* PBXTargetDependency */,
 				CEFC1F870F6AD7A800B2AEE6 /* PBXTargetDependency */,
 				CEB34C4C0F5D49F80037E086 /* PBXTargetDependency */,
 				F90B13050C29900200144F1B /* PBXTargetDependency */,
@@ -3585,10 +3585,10 @@
 			target = 8D1107260486CEB800E47090 /* BibDesk */;
 			targetProxy = CE17F5370F1A868F00E741DD /* PBXContainerItemProxy */;
 		};
-		CEA4516A0E47C8C000D161AD /* PBXTargetDependency */ = {
+		CE94C0DC10A8F2AC002634D2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = SkimNotes;
-			targetProxy = CEA451690E47C8C000D161AD /* PBXContainerItemProxy */;
+			name = SkimNotesBase;
+			targetProxy = CE94C0DB10A8F2AC002634D2 /* PBXContainerItemProxy */;
 		};
 		CEB34C4C0F5D49F80037E086 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

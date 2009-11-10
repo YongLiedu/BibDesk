@@ -74,7 +74,7 @@
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKVersionNumber.h"
 #import "NSError_BDSKExtensions.h"
-#import <SkimNotes/SKNExtendedAttributeManager.h>
+#import <SkimNotesBase/SkimNotesBase.h>
 #import <CoreServices/CoreServices.h>
 
 #define OPEN_META_TAGS_KEY @"com.apple.metadata:kOMUserTags"
