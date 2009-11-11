@@ -137,9 +137,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         
         publication = [aBib retain];
         fields = [[NSMutableArray alloc] init];
-        isEditable = [[publication owner] isDocument];
+        editorFlags.isEditable = [[publication owner] isDocument];
                 
-        didSetupFields = NO;
+        editorFlags.didSetupFields = NO;
     }
     return self;
 }
@@ -165,14 +165,14 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     BDSKEditorTextFieldCell *dataCell = [[tableView tableColumnWithIdentifier:@"value"] dataCell];
     [dataCell setButtonAction:@selector(tableButtonAction:)];
     [dataCell setButtonTarget:self];
-    [dataCell setEditable:isEditable];
+    [dataCell setEditable:editorFlags.isEditable];
     [dataCell setSelectable:YES]; // the previous call may reset this
     
-    if (isEditable)
+    if (editorFlags.isEditable)
         [tableView setDoubleAction:@selector(raiseChangeFieldName:)];
     
-    [bibTypeButton setEnabled:isEditable];
-    [addFieldButton setEnabled:isEditable];
+    [bibTypeButton setEnabled:editorFlags.isEditable];
+    [addFieldButton setEnabled:editorFlags.isEditable];
     
     [self setupButtonCells];
     
@@ -210,7 +210,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     [self resetFields];
     [self setupMatrix];
-    if (isEditable)
+    if (editorFlags.isEditable)
         [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
     
     // Setup the citekey textfield
@@ -218,7 +218,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [citeKeyField setFormatter:citeKeyFormatter];
     [citeKeyFormatter release];
 	[citeKeyField setStringValue:[publication citeKey]];
-    [citeKeyField setEditable:isEditable];
+    [citeKeyField setEditable:editorFlags.isEditable];
 	
     // Setup the type popup
     [self setupTypePopUp];
@@ -229,15 +229,15 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     NSString *currentValue = [publication valueOfField:BDSKAnnoteString inherit:NO];
     if (currentValue)
         [notesView setString:currentValue];
-    [notesView setEditable:isEditable];
+    [notesView setEditable:editorFlags.isEditable];
     currentValue = [publication valueOfField:BDSKAbstractString inherit:NO];
     if (currentValue)
         [abstractView setString:currentValue];
-    [abstractView setEditable:isEditable];
+    [abstractView setEditable:editorFlags.isEditable];
     currentValue = [publication valueOfField:BDSKRssDescriptionString inherit:NO];
     if (currentValue)
         [rssDescriptionView setString:currentValue];
-    [rssDescriptionView setEditable:isEditable];
+    [rssDescriptionView setEditable:editorFlags.isEditable];
 	currentEditedView = nil;
     
     // Set up identifiers for the tab view items, since we receive delegate messages from it
@@ -254,7 +254,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [self registerForNotifications];
     
     [[self window] setDelegate:self];
-    if (isEditable)
+    if (editorFlags.isEditable)
         [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];					
 	
     [self updateCiteKeyDuplicateWarning];
@@ -264,8 +264,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [fileView setIconScale:[[NSUserDefaults standardUserDefaults] floatForKey:BDSKEditorFileViewIconScaleKey]];
     [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:&BDSKEditorObservationContext];
     [fileView addObserver:self forKeyPath:@"displayMode" options:0 context:&BDSKEditorObservationContext];
-    [fileView setEditable:isEditable];
-    [fileView setAllowsDownloading:isEditable];
+    [fileView setEditable:editorFlags.isEditable];
+    [fileView setAllowsDownloading:editorFlags.isEditable];
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
@@ -354,9 +354,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         // should never happen
         fprintf(stderr, "%s, unhandled firstResponder = %s\n", __func__, [[[[[self window] firstResponder] class] description] UTF8String]);
     }
-    if (isEditing) {
+    if (editorFlags.isEditing) {
         [[self document] objectDidEndEditing:self];
-        isEditing = NO;
+        editorFlags.isEditing = NO;
     }
 }
 
@@ -395,7 +395,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
                 editedRow = [tableView editedRow];
         }
         
-		didSetupFields = NO; // if we we rebuild the fields, the selection will become meaningless
+		editorFlags.didSetupFields = NO; // if we we rebuild the fields, the selection will become meaningless
         
         // check textviews for balanced braces as needed
         if (currentEditedView && [self validateCurrentEditedView] == NO)
@@ -407,7 +407,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         
         // for inherited fields, we should do something here to make sure the user doesn't have to go through the warning sheet
 		
-		if ([[self window] makeFirstResponder:firstResponder] && didSetupFields == NO) {
+		if ([[self window] makeFirstResponder:firstResponder] && editorFlags.didSetupFields == NO) {
             if (firstResponder == tableView && editedRow != -1)
                 [tableView editColumn:1 row:editedRow withEvent:nil select:NO];
             if ([[textView string] length] >= NSMaxRange(selection)) // check range for safety
@@ -1127,7 +1127,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         [[self window] setContentBorderThickness:0.0 forEdge:NSMinYEdge];
         [statusBar removeFromSuperview];
     }
-    isAnimating = NO;
+    editorFlags.isAnimating = NO;
 }
 
 - (IBAction)toggleStatusBar:(id)sender {
@@ -1179,7 +1179,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
                                      atIndex:++i];
             [item setRepresentedObject:theURL];
             
-            if (isEditable) {
+            if (editorFlags.isEditable) {
                 i = [menu indexOfItemWithTag:FVRemoveMenuItemTag];
                 item = [menu insertItemWithTitle:NSLocalizedString(@"AutoFile Linked File", @"Menu item title")
                                           action:@selector(consolidateLinkedFiles:)
@@ -1194,7 +1194,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
                 [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
 
             }
-        } else if (isEditable) {
+        } else if (editorFlags.isEditable) {
             i = [menu indexOfItemWithTag:FVRemoveMenuItemTag];
             item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace URL", @"Menu item title") stringByAppendingEllipsis]
                                       action:@selector(chooseRemoteURL:)
@@ -1204,7 +1204,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         }
     }
     
-    if (isEditable) {
+    if (editorFlags.isEditable) {
         NSIndexSet *selectedIndexes = [fileView selectionIndexes];
         if ([[[[publication files] objectsAtIndexes:selectedIndexes] valueForKey:@"isFileURL"] containsObject:[NSNumber numberWithInt:1]]) {
             i = [menu indexOfItemWithTag:FVRemoveMenuItemTag];
@@ -1483,19 +1483,19 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     SEL theAction = [menuItem action];
     
 	if (theAction == @selector(generateCiteKey:)) {
-		return isEditable;
+		return editorFlags.isEditable;
 	}
 	else if (theAction == @selector(consolidateLinkedFiles:)) {
-		return (isEditable && [[publication localFiles] count]);
+		return (editorFlags.isEditable && [[publication localFiles] count]);
 	}
 	else if (theAction == @selector(duplicateTitleToBooktitle:)) {
-		return (isEditable && ![NSString isEmptyString:[publication valueOfField:BDSKTitleString]]);
+		return (editorFlags.isEditable && ![NSString isEmptyString:[publication valueOfField:BDSKTitleString]]);
 	}
 	else if (theAction == @selector(selectCrossrefParentAction:)) {
         return ([NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == NO);
 	}
 	else if (theAction == @selector(createNewPubUsingCrossrefAction:)) {
-        return (isEditable && [NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]]);
+        return (editorFlags.isEditable && [NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]]);
 	}
 	else if (theAction == @selector(openLinkedFile:)) {
 		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
@@ -1516,7 +1516,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 		return [[publication files] count];
 	}
     else if (theAction == @selector(editSelectedFieldAsRawBibTeX:)) {
-        if (isEditable == NO)
+        if (editorFlags.isEditable == NO)
             return NO;
         NSInteger row = [tableView editedRow];
 		return (row != -1 && [complexStringEditor isEditing] == NO && 
@@ -1543,7 +1543,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
              theAction == @selector(chooseRemoteURL:) || 
              theAction == @selector(addLinkedFileFromMenuItem:) || 
              theAction == @selector(addRemoteURLFromMenuItem:)) {
-        return isEditable;
+        return editorFlags.isEditable;
     }
 
 	return YES;
@@ -1828,7 +1828,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         return NO;
 	if (complexStringEditor == nil) {
     	complexStringEditor = [[BDSKComplexStringEditor alloc] initWithMacroResolver:[publication macroResolver]];
-        [complexStringEditor setEditable:isEditable];
+        [complexStringEditor setEditable:editorFlags.isEditable];
 	}
     NSString *value = [publication valueOfField:[fields objectAtIndex:row]];
 	NSText *fieldEditor = [tableView currentEditor];
@@ -1847,7 +1847,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 // this is called when the user actually starts editing
 - (BOOL)control:(NSControl *)control textShouldBeginEditing:(NSText *)fieldEditor{
-    BOOL canEdit = isEditable;
+    BOOL canEdit = editorFlags.isEditable;
     
     if (canEdit && control == tableView) {
         // check if we're editing an inherited field
@@ -1880,9 +1880,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (void)controlTextDidBeginEditing:(NSNotification *)note {
-    if (isEditing == NO) {
+    if (editorFlags.isEditing == NO) {
         [[self document] objectDidBeginEditing:self];
-        isEditing = YES;
+        editorFlags.isEditing = YES;
     }
 }
 
@@ -2033,7 +2033,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         NSString *newKey = [control stringValue];
         NSString *oldKey = [[[publication citeKey] retain] autorelease];
         
-        if(isEditable && [newKey isEqualToString:oldKey] == NO){
+        if(editorFlags.isEditable && [newKey isEqualToString:oldKey] == NO){
             [publication setCiteKey:newKey];
             
             [self userChangedField:BDSKCiteKeyString from:oldKey to:newKey];
@@ -2044,9 +2044,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             
         }
     }
-    if (isEditing) {
+    if (editorFlags.isEditing) {
         [[self document] objectDidEndEditing:self];
-        isEditing = NO;
+        editorFlags.isEditing = NO;
     }
 }
 
@@ -2097,7 +2097,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     // are automatically tracked.  We still have to update the UI manually.
     // The contents of the text views are initialized with the current contents of the BibItem in windowDidLoad:
 	currentEditedView = [aNotification object];
-    ignoreFieldChange = YES;
+    editorFlags.ignoreFieldChange = YES;
     // we need to preserve selection manually; otherwise you end up editing at the end of the string after the call to setField: below
     NSRange selRange = [currentEditedView selectedRange];
     if(currentEditedView == notesView){
@@ -2112,13 +2112,13 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     }
     if(selRange.location != NSNotFound && selRange.location < [[currentEditedView string] length])
         [currentEditedView setSelectedRange:selRange];
-    ignoreFieldChange = NO;
+    editorFlags.ignoreFieldChange = NO;
     
     // save off the old value in case abortEditing gets called
     [self setPreviousValueForCurrentEditedNotesView:[currentEditedView string]];
-    if (isEditing == NO) {
+    if (editorFlags.isEditing == NO) {
         [[self document] objectDidBeginEditing:self];
-        isEditing = YES;
+        editorFlags.isEditing = YES;
     }
 }
 
@@ -2167,9 +2167,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         currentEditedView = nil;
         [self setPreviousValueForCurrentEditedNotesView:nil];
     }
-    if (isEditing) {
+    if (editorFlags.isEditing) {
         [[self document] objectDidEndEditing:self];
-        isEditing = NO;
+        editorFlags.isEditing = NO;
     }
 }
 
@@ -2237,7 +2237,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 		[self synchronizeWindowTitleWithDocumentName];
 	}
     else if([changeKey isNoteField]){
-        if(ignoreFieldChange == NO) {
+        if(editorFlags.ignoreFieldChange == NO) {
             if([changeKey isEqualToString:BDSKAnnoteString]){
                // make a copy of the current value, so we don't overwrite it when we set the field value to the text storage
                 NSString *tmpValue = [[publication valueOfField:BDSKAnnoteString inherit:NO] copy];
@@ -2306,7 +2306,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         }
 		[self resetFields];
         [self setupMatrix];
-        if(ignoreFieldChange == NO) {
+        if(editorFlags.ignoreFieldChange == NO) {
            // make a copy of the current value, so we don't overwrite it when we set the field value to the text storage
             NSString *tmpValue = [[publication valueOfField:BDSKAnnoteString inherit:NO] copy];
             [notesView setString:(tmpValue == nil ? @"" : tmpValue)];
@@ -2696,7 +2696,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 		return nil;
 	if (dragFieldEditor == nil) {
 		dragFieldEditor = [[BDSKFieldEditor alloc] init];
-        if (isEditable)
+        if (editorFlags.isEditable)
             [(BDSKFieldEditor *)dragFieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
 	}
 	return dragFieldEditor;
@@ -2723,7 +2723,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         return NO;
     
 	// we shouldn't further check external items, though they could have had a macro editor
-    if (isEditable == NO)
+    if (editorFlags.isEditable == NO)
         return YES;
         
     NSString *errMsg = nil;
@@ -2765,7 +2765,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     [complexStringEditor close];
     
     // make sure we're not registered as editor because we will be invalid, this shouldn't be necessary but there have been reports of crashes
-    if (isEditing && [self commitEditing] == NO)
+    if (editorFlags.isEditing && [self commitEditing] == NO)
         [self discardEditing];
     
 	// this can give errors when the application quits when an editor window is open
@@ -2794,12 +2794,12 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)setDocument:(NSDocument *)document {
     // in case the document is reset before windowWillClose: is called, I think this can happen on Tiger
-    if ([self document] && document == nil && isEditing) {
+    if ([self document] && document == nil && editorFlags.isEditing) {
         if ([self commitEditing] == NO)
             [self discardEditing];
-        if (isEditing) {
+        if (editorFlags.isEditing) {
             [[self document] objectDidEndEditing:self];
-            isEditing = NO;
+            editorFlags.isEditing = NO;
         }
     }
     [super setDocument:document];
@@ -3017,7 +3017,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
 	if ([tv isEqual:tableView] && [[tableColumn identifier] isEqualToString:@"value"]) {
-        // we always want to "edit" even when we are not editable, so we can always select, and the cell will prevent editing when isEditable == NO
+        // we always want to "edit" even when we are not editable, so we can always select, and the cell will prevent editing when editorFlags.isEditable == NO
         return YES;
     }
     return NO;
@@ -3246,7 +3246,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (void)resetFields{
     [self reloadTableWithFields:[self currentFields]];
     
-	didSetupFields = YES;
+	editorFlags.didSetupFields = YES;
 }
 
 - (void)resetFieldsIfNeeded{
@@ -3255,7 +3255,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if ([fields isEqualToArray:currentFields] == NO)
         [self reloadTableWithFields:currentFields];
     
-	didSetupFields = YES;
+	editorFlags.didSetupFields = YES;
 }
 
 - (void)getNumberOfRows:(NSInteger *)rows columns:(NSInteger *)columns forMatrixCellSize:(NSSize)cellSize {
@@ -3364,7 +3364,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	[booleanButtonCell setButtonType:NSSwitchButton];
 	[booleanButtonCell setTarget:self];
 	[booleanButtonCell setAction:@selector(changeFlag:)];
-    [booleanButtonCell setEnabled:isEditable];
+    [booleanButtonCell setEnabled:editorFlags.isEditable];
 	
 	triStateButtonCell = [booleanButtonCell copy];
 	[triStateButtonCell setAllowsMixedState:YES];
@@ -3374,7 +3374,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	[ratingButtonCell setAlignment:NSLeftTextAlignment];
 	[ratingButtonCell setTarget:self];
 	[ratingButtonCell setAction:@selector(changeRating:)];
-    [ratingButtonCell setEnabled:isEditable];
+    [ratingButtonCell setEnabled:editorFlags.isEditable];
 	
 	NSCell *cell = [[NSCell alloc] initTextCell:@""];
 	[matrix setPrototype:cell];
@@ -3421,7 +3421,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
            selector:@selector(bibWillBeRemoved:)
                name:BDSKDocWillRemoveItemNotification
              object:[self document]];
-    if(isEditable == NO)
+    if(editorFlags.isEditable == NO)
         [nc addObserver:self
                    selector:@selector(groupWillBeRemoved:)
                        name:BDSKDidAddRemoveGroupNotification
@@ -3462,7 +3462,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)updateCiteKeyDuplicateWarning{
-    if (isEditable == NO)
+    if (editorFlags.isEditable == NO)
         return;
     NSString *message = nil;
     if ([publication hasEmptyOrDefaultCiteKey])

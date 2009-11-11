@@ -70,7 +70,6 @@
     NSUndoManager *abstractViewUndoManager;
     NSUndoManager *rssDescriptionViewUndoManager;
     
-    BOOL ignoreFieldChange;
     // for the splitview double-click handling
 	CGFloat lastFileViewWidth;
     CGFloat lastAuthorsHeight;
@@ -86,11 +85,6 @@
     
     // ----------------------------------------------------------------------------------------
     BibItem *publication;
-    BOOL isEditable;
-    
-    BOOL isEditing;
-    
-    BOOL isAnimating;
     
     NSMutableArray *fields;
     
@@ -115,14 +109,19 @@
     // Macro editing stuff
     BDSKComplexStringEditor *complexStringEditor;
 
-	// edit field stuff
-    BOOL didSetupFields;
-	
 	NSTextView *dragFieldEditor;
     
     IBOutlet FVFileView *fileView;
     
     NSButton *disableAutoFileButton;
+    
+    struct _editorFlags {
+        unsigned int ignoreFieldChange:1;
+        unsigned int isEditable:1;
+        unsigned int isEditing:1;
+        unsigned int isAnimating:1;
+        unsigned int didSetupFields:1;
+    } editorFlags;
 }
 
 /*!
