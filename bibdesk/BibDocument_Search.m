@@ -191,7 +191,7 @@ Ensure that views are always ordered vertically from top to bottom as
         if ([previousSortKey isEqualToString:BDSKRelevanceString]) {
             [previousSortKey release];
             previousSortKey = [BDSKTitleString retain];
-            docState.previousSortDescending = NO;
+            docFlags.previousSortDescending = NO;
         }
         if ([sortKey isEqualToString:BDSKRelevanceString]) {
             [self sortPubsByKey:[[previousSortKey retain] autorelease]];

@@ -295,7 +295,7 @@ The groupedPublications array is a subset of the publications array, developed b
         if ([previousSortKey isEqualToString:BDSKImportOrderString]) {
             [previousSortKey release];
             previousSortKey = [BDSKTitleString retain];
-            docState.previousSortDescending = NO;
+            docFlags.previousSortDescending = NO;
         }
         if ([sortKey isEqualToString:BDSKImportOrderString]) {
             newSortKey = [[previousSortKey retain] autorelease];
@@ -1521,14 +1521,14 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 		// nil key indicates resort
     } else if ([key isEqualToString:sortGroupsKey]) {
         // clicked the sort arrow in the table header, change sort order
-        docState.sortGroupsDescending = !docState.sortGroupsDescending;
+        docFlags.sortGroupsDescending = !docFlags.sortGroupsDescending;
     } else {
         // change key
         // save new sorting selector, and re-sort the array.
         if ([key isEqualToString:BDSKGroupCellStringKey])
-			docState.sortGroupsDescending = NO;
+			docFlags.sortGroupsDescending = NO;
 		else
-			docState.sortGroupsDescending = YES; // more appropriate for default count sort
+			docFlags.sortGroupsDescending = YES; // more appropriate for default count sort
 		[sortGroupsKey release];
         sortGroupsKey = [key retain];
         if ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKHideGroupCountKey]) {
@@ -1547,13 +1547,13 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSArray *sortDescriptors;
     
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
-        NSSortDescriptor *countSort = [[NSSortDescriptor alloc] initWithKey:@"numberValue" ascending:!docState.sortGroupsDescending  selector:@selector(compare:)];
-        NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"self" ascending:docState.sortGroupsDescending  selector:@selector(nameCompare:)];
+        NSSortDescriptor *countSort = [[NSSortDescriptor alloc] initWithKey:@"numberValue" ascending:!docFlags.sortGroupsDescending  selector:@selector(compare:)];
+        NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"self" ascending:docFlags.sortGroupsDescending  selector:@selector(nameCompare:)];
         sortDescriptors = [NSArray arrayWithObjects:countSort, nameSort, nil];
         [countSort release];
         [nameSort release];
     } else {
-        NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"self" ascending:!docState.sortGroupsDescending  selector:@selector(nameCompare:)];
+        NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"self" ascending:!docFlags.sortGroupsDescending  selector:@selector(nameCompare:)];
         sortDescriptors = [NSArray arrayWithObjects:nameSort, nil];
         [nameSort release];
     }

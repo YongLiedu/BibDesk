@@ -340,7 +340,7 @@
 - (BOOL) validateSortGroupsByGroupMenuItem:(NSMenuItem *)menuItem{
 	if([sortGroupsKey isEqualToString:BDSKGroupCellStringKey]){
 		[menuItem setState:NSOnState];
-        [menuItem setImage:[NSImage imageNamed:docState.sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
+        [menuItem setImage:[NSImage imageNamed:docFlags.sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
 	}else{
 		[menuItem setState:NSOffState];
         [menuItem setImage:nil];
@@ -351,7 +351,7 @@
 - (BOOL) validateSortGroupsByCountMenuItem:(NSMenuItem *)menuItem{
 	if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
 		[menuItem setState:NSOnState];
-        [menuItem setImage:[NSImage imageNamed:docState.sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
+        [menuItem setImage:[NSImage imageNamed:docFlags.sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
 	}else{
 		[menuItem setState:NSOffState];
         [menuItem setImage:nil];

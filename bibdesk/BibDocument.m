@@ -187,7 +187,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         pboardHelper = [[BDSKItemPasteboardHelper alloc] init];
         [pboardHelper setDelegate:self];
         
-        docState.isDocumentClosed = NO;
+        docFlags.isDocumentClosed = NO;
         
         // need to set this for new documents
         [self setDocumentStringEncoding:[BDSKStringEncodingManager defaultEncoding]]; 
@@ -202,13 +202,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         previousSortKey = nil;
         sortGroupsKey = nil;
         currentGroupField = nil;
-        docState.sortDescending = NO;
-        docState.previousSortDescending = NO;
-        docState.sortGroupsDescending = NO;
-        docState.didImport = NO;
-        docState.itemChangeMask = 0;
-        docState.displayMigrationAlert = NO;
-        docState.inOptionKeyState = NO;
+        docFlags.sortDescending = NO;
+        docFlags.previousSortDescending = NO;
+        docFlags.sortGroupsDescending = NO;
+        docFlags.didImport = NO;
+        docFlags.itemChangeMask = 0;
+        docFlags.displayMigrationAlert = NO;
+        docFlags.inOptionKeyState = NO;
         
         // these are created lazily when needed
         fileSearchController = nil;
@@ -221,11 +221,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         docState.lastGroupViewWidth = 0.0;
         docState.lastFileViewWidth = 0.0;
         docState.lastWebViewFraction = 0.0;
-        docState.isAnimating = NO;
+        docFlags.isAnimating = NO;
         
         // these are temporary state variables
         promiseDragColumnIdentifier = nil;
-        docState.dragFromExternalGroups = NO;
+        docFlags.dragFromExternalGroups = NO;
         docState.currentSaveOperationType = 0;
         
         [self registerForNotifications];
@@ -374,8 +374,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     [self updatePreviews];
     
-    if (docState.displayMigrationAlert) {
-        docState.displayMigrationAlert = NO;
+    if (docFlags.displayMigrationAlert) {
+        docFlags.displayMigrationAlert = NO;
         // If a single file was migrated, this alert will be shown even if all other BibItems already use BDSKLinkedFile.  However, I think that's an edge case, since the user had to manually add that pub in a text editor or by setting the local-url field.  Items imported or added in BD will already use BDSKLinkedFile, so this notification won't be posted.
         NSString *verify = NSLocalizedString(@"Verify", @"button title for migration alert");
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Local File and URL fields have been automatically converted", @"warning in document")
@@ -489,13 +489,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [tableView setupTableColumnsWithIdentifiers:[xattrDefaults objectForKey:BDSKShownColsNamesKey defaultObject:[sud objectForKey:BDSKShownColsNamesKey]]];
     sortKey = [[xattrDefaults objectForKey:BDSKDefaultSortedTableColumnKey defaultObject:[sud objectForKey:BDSKDefaultSortedTableColumnKey]] retain];
     previousSortKey = [sortKey retain];
-    docState.sortDescending = [xattrDefaults  boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey defaultValue:[sud boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey]];
-    docState.previousSortDescending = docState.sortDescending;
+    docFlags.sortDescending = [xattrDefaults  boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey defaultValue:[sud boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey]];
+    docFlags.previousSortDescending = docFlags.sortDescending;
     [tableView setHighlightedTableColumn:[tableView tableColumnWithIdentifier:sortKey]];
     
     [sortGroupsKey autorelease];
     sortGroupsKey = [[xattrDefaults objectForKey:BDSKSortGroupsKey defaultObject:[sud objectForKey:BDSKSortGroupsKey]] retain];
-    docState.sortGroupsDescending = [xattrDefaults boolForKey:BDSKSortGroupsDescendingKey defaultValue:[sud boolForKey:BDSKSortGroupsDescendingKey]];
+    docFlags.sortGroupsDescending = [xattrDefaults boolForKey:BDSKSortGroupsDescendingKey defaultValue:[sud boolForKey:BDSKSortGroupsDescendingKey]];
     [self setCurrentGroupField:[xattrDefaults objectForKey:BDSKCurrentGroupFieldKey defaultObject:[sud objectForKey:BDSKCurrentGroupFieldKey]]];
     
     [tableView setDoubleAction:@selector(editPubOrOpenURLAction:)];
@@ -599,7 +599,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (void)windowWillClose:(NSNotification *)notification{
         
-    docState.isDocumentClosed = YES;
+    docFlags.isDocumentClosed = YES;
     
     // remove all queued invocations
     [[self class] cancelPreviousPerformRequestsWithTarget:self];
@@ -672,9 +672,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [dictionary setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
         [dictionary setObject:[self currentTableColumnWidthsAndIdentifiers] forKey:BDSKColumnWidthsKey];
         [dictionary setObject:savedSortKey ?: BDSKTitleString forKey:BDSKDefaultSortedTableColumnKey];
-        [dictionary setBoolValue:docState.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+        [dictionary setBoolValue:docFlags.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
         [dictionary setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
-        [dictionary setBoolValue:docState.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
+        [dictionary setBoolValue:docFlags.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
         [dictionary setRectValue:[documentWindow frame] forKey:BDSKDocumentWindowFrameKey];
         [dictionary setFloatValue:[groupSplitView fraction] forKey:BDSKGroupSplitViewFractionKey];
         // of the 3 splitviews, the fraction of the first divider would be considered, so fallback to the fraction from the nib
@@ -2129,9 +2129,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication", @"Undo action name")];
     
     NSMutableArray *importedItems = [NSMutableArray array];
-    if (shouldSelect == NO && docState.didImport)
+    if (shouldSelect == NO && docFlags.didImport)
         [importedItems addObjectsFromArray:[[groups lastImportGroup] publications]];
-    docState.didImport = (shouldSelect == NO);
+    docFlags.didImport = (shouldSelect == NO);
     [importedItems addObjectsFromArray:newPubs];
     
     // set up the smart group that shows the latest import
@@ -2495,7 +2495,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         // a nil argument means resort the current column in the same order
     } else if ([sortKey isEqualToString:key]) {
         // User clicked same column, change sort order
-        docState.sortDescending = !docState.sortDescending;
+        docFlags.sortDescending = !docFlags.sortDescending;
     } else {
         // User clicked new column, change old/new column headers,
         // save new sorting selector, and re-sort the array.
@@ -2504,16 +2504,16 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if ([sortKey isEqualToString:BDSKImportOrderString] || [sortKey isEqualToString:BDSKRelevanceString]) {
             // this is probably after removing an ImportOrder or Relevance column, try to reinstate the previous sort order
             if ([key isEqualToString:previousSortKey])
-                docState.sortDescending = docState.previousSortDescending;
+                docFlags.sortDescending = docFlags.previousSortDescending;
             else
-                docState.sortDescending = [key isEqualToString:BDSKRelevanceString];
+                docFlags.sortDescending = [key isEqualToString:BDSKRelevanceString];
         } else {
             if ([previousSortKey isEqualToString:sortKey] == NO) {
                 [previousSortKey release];
                 previousSortKey = [sortKey retain];
             }
-            docState.previousSortDescending = docState.sortDescending;
-            docState.sortDescending = [key isEqualToString:BDSKRelevanceString];
+            docFlags.previousSortDescending = docFlags.sortDescending;
+            docFlags.sortDescending = [key isEqualToString:BDSKRelevanceString];
         }
         [sortKey release];
         sortKey = [key retain];
@@ -2522,11 +2522,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     if (previousSortKey == nil) {
         previousSortKey = [sortKey retain];
-        docState.previousSortDescending = docState.sortDescending;
+        docFlags.previousSortDescending = docFlags.sortDescending;
     }
     
     NSString *userInfo = [self fileName];
-    NSArray *sortDescriptors = [NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:sortKey ascending:!docState.sortDescending userInfo:userInfo], [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:previousSortKey ascending:!docState.previousSortDescending userInfo:userInfo], nil];
+    NSArray *sortDescriptors = [NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:sortKey ascending:!docFlags.sortDescending userInfo:userInfo], [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:previousSortKey ascending:!docFlags.previousSortDescending userInfo:userInfo], nil];
     [tableView setSortDescriptors:sortDescriptors]; // just using this to store them; it's really a no-op
     
     // @@ DON'T RETURN WITHOUT RESETTING THIS!
@@ -2542,7 +2542,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [shownPublications mergeSortUsingDescriptors:sortDescriptors];
 
     // Set the graphic for the new column header
-    [tableView setIndicatorImage: [NSImage imageNamed:(docState.sortDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator")]
+    [tableView setIndicatorImage: [NSImage imageNamed:(docFlags.sortDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator")]
                    inTableColumn: tableColumn];
 
     // have to reload so the rows get set up right, but a full updateStatus flashes the preview, which is annoying (and the preview won't change if we're maintaining the selection)
@@ -2568,9 +2568,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     }
     if (savedSortKey)
         [sud setObject:savedSortKey forKey:BDSKDefaultSortedTableColumnKey];
-    [sud setBool:docState.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+    [sud setBool:docFlags.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
     [sud setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
-    [sud setBool:docState.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];    
+    [sud setBool:docFlags.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];    
 }  
 
 #pragma mark -

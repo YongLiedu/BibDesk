@@ -396,13 +396,13 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     
 	BDSKPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
 
-    docState.dragFromExternalGroups = NO;
+    docFlags.dragFromExternalGroups = NO;
 	
     if(tv == tableView){
 		// drag from the main table
 		pubs = [shownPublications objectsAtIndexes:rowIndexes];
         
-        docState.dragFromExternalGroups = [self hasExternalGroupsSelected];
+        docFlags.dragFromExternalGroups = [self hasExternalGroupsSelected];
 
 		if(pboard == [NSPasteboard pasteboardWithName:NSDragPboard]){
 			// see where we clicked in the table
@@ -807,7 +807,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                 [tv setDropRow:row dropOperation:NSTableViewDropOn];
             return NSDragOperationEvery;
         }
-        if (isDragFromGroupTable && docState.dragFromExternalGroups && [self hasLibraryGroupSelected]) {
+        if (isDragFromGroupTable && docFlags.dragFromExternalGroups && [self hasLibraryGroupSelected]) {
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
             return NSDragOperationCopy;
         }
@@ -1272,7 +1272,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 - (void)outlineViewSelectionDidChange:(NSNotification *)notification {
     NSNotification *note = [NSNotification notificationWithName:BDSKGroupTableSelectionChangedNotification object:self];
     [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
-    docState.didImport = NO;
+    docFlags.didImport = NO;
 }
 
 - (NSMenu *)outlineView:(NSOutlineView *)ov menuForTableColumn:(NSTableColumn *)tableColumn item:(id)item {
@@ -1367,7 +1367,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     
 	BDSKPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
     
-    docState.dragFromExternalGroups = NO;
+    docFlags.dragFromExternalGroups = NO;
 	
     if ([items containsObject:[groups libraryGroup]]) {
         pubs = [NSArray arrayWithArray:publications];
@@ -1381,7 +1381,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             pubs = [NSArray arrayWithArray:[(id)group publications]];
             if ([group isSearch])
                 additionalFilenames = [NSArray arrayWithObject:[[[(BDSKSearchGroup *)group serverInfo] name] stringByAppendingPathExtension:@"bdsksearch"]];
-            docState.dragFromExternalGroups = YES;
+            docFlags.dragFromExternalGroups = YES;
         } else {
             NSMutableArray *pubsInGroup = [NSMutableArray arrayWithCapacity:[publications count]];
             for (BibItem *pub in publications) {
@@ -1447,7 +1447,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
     
     // drop of items from external groups is allowed only on the Library
-    if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromExternalGroups) {
+    if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups) {
         if ([item isEqual:[groups libraryGroup]] == NO && [item isEqual:[groups libraryParent]] == NO)
             return NSDragOperationNone;
         [outlineView setDropItem:[groups libraryGroup] dropChildIndex:NSOutlineViewDropOnItemIndex];
@@ -1504,7 +1504,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupOutlineView];
     BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
     
-    if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromExternalGroups) {
+    if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups) {
         
         return [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
         
@@ -1713,11 +1713,11 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 #pragma mark -
 
 - (BOOL)isDragFromExternalGroups {
-    return docState.dragFromExternalGroups;
+    return docFlags.dragFromExternalGroups;
 }
 
 - (void)setDragFromExternalGroups:(BOOL)flag {
-    docState.dragFromExternalGroups = flag;
+    docFlags.dragFromExternalGroups = flag;
 }
 
 #pragma mark -

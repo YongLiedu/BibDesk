@@ -235,17 +235,20 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
         CGFloat             lastWebViewFraction;
         NSStringEncoding    documentStringEncoding;
         NSSaveOperationType currentSaveOperationType; // used to check for autosave during writeToFile:ofType:
-        BOOL                sortDescending;
-        BOOL                previousSortDescending;
-        BOOL                sortGroupsDescending;
-        BOOL                dragFromExternalGroups;
-        BOOL                isDocumentClosed;
-        BOOL                didImport;
-        NSInteger           itemChangeMask;
-        BOOL                displayMigrationAlert;
-        BOOL                inOptionKeyState;
-        BOOL                isAnimating;
     } docState;
+    
+    struct _docFlags {
+        unsigned int        itemChangeMask:4;
+        unsigned int        sortDescending:1;
+        unsigned int        previousSortDescending:1;
+        unsigned int        sortGroupsDescending:1;
+        unsigned int        dragFromExternalGroups:1;
+        unsigned int        isDocumentClosed:1;
+        unsigned int        didImport:1;
+        unsigned int        displayMigrationAlert:1;
+        unsigned int        inOptionKeyState:1;
+        unsigned int        isAnimating:1;
+    } docFlags;
     
     NSDictionary *mainWindowSetupDictionary;
     

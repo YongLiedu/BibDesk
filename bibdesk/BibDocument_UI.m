@@ -96,7 +96,7 @@ enum {
 
 - (void)doUpdatePreviews{
     // we can be called from a queue after the document was closed
-    if (docState.isDocumentClosed)
+    if (docFlags.isDocumentClosed)
         return;
 
     BDSKASSERT([NSThread isMainThread]);
@@ -115,7 +115,7 @@ enum {
     // Coalesce these messages here, since something like select all -> generate cite keys will force a preview update for every
     // changed key, so we have to update all the previews each time.  This should be safer than using cancelPrevious... since those
     // don't get performed on the main thread (apparently), and can lead to problems.
-    if (docState.isDocumentClosed == NO && [documentWindow isVisible]) {
+    if (docFlags.isDocumentClosed == NO && [documentWindow isVisible]) {
         [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(doUpdatePreviews) object:nil];
         [self performSelector:@selector(doUpdatePreviews) withObject:nil afterDelay:0.0];
     }
@@ -683,15 +683,15 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 
 - (void)handlePrivateBibItemChanged{
     // we can be called from a queue after the document was closed
-    if (docState.isDocumentClosed)
+    if (docFlags.isDocumentClosed)
         return;
     
     BOOL displayingLocal = (NO == [self hasExternalGroupsSelected]);
     
-    if (displayingLocal && (docState.itemChangeMask & BDSKItemChangedFilesMask) != 0)
+    if (displayingLocal && (docFlags.itemChangeMask & BDSKItemChangedFilesMask) != 0)
         [self updateFileViews];
 
-    BOOL shouldUpdateGroups = [NSString isEmptyString:[self currentGroupField]] == NO && (docState.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0;
+    BOOL shouldUpdateGroups = [NSString isEmptyString:[self currentGroupField]] == NO && (docFlags.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0;
     
     // allow updating a smart group if it's selected
 	[self updateSmartGroups];
@@ -699,12 +699,12 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     if(shouldUpdateGroups){
         // this handles all UI updates if we call it, so don't bother with any others
         [self updateCategoryGroupsPreservingSelection:YES];
-    } else if (displayingLocal && (docState.itemChangeMask & BDSKItemChangedSearchKeyMask) != 0) {
+    } else if (displayingLocal && (docFlags.itemChangeMask & BDSKItemChangedSearchKeyMask) != 0) {
         // this handles all UI updates if we call it, so don't bother with any others
         [searchField sendAction:[searchField action] to:[searchField target]];
     } else if (displayingLocal) {
         // groups and quicksearch won't update for us
-        if ((docState.itemChangeMask & BDSKItemChangedSortKeyMask) != 0)
+        if ((docFlags.itemChangeMask & BDSKItemChangedSortKeyMask) != 0)
             [self sortPubsByKey:nil];
         else
             [tableView reloadData];
@@ -712,7 +712,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         [self updatePreviews];
     }
     
-    docState.itemChangeMask = 0;
+    docFlags.itemChangeMask = 0;
 }
 
 // this structure is only used in the following CFSetApplierFunction
@@ -802,17 +802,17 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     }
     
     if ([changedKey isEqualToString:[self currentGroupField]] || changedKey == nil)
-        docState.itemChangeMask |= BDSKItemChangedGroupFieldMask;
+        docFlags.itemChangeMask |= BDSKItemChangedGroupFieldMask;
     if ([self sortKeyDependsOnKey:changedKey])
-        docState.itemChangeMask |= BDSKItemChangedSortKeyMask;
+        docFlags.itemChangeMask |= BDSKItemChangedSortKeyMask;
     if ([self searchKeyDependsOnKey:changedKey])
-        docState.itemChangeMask |= BDSKItemChangedSearchKeyMask;
+        docFlags.itemChangeMask |= BDSKItemChangedSearchKeyMask;
     if ([changedKey isEqualToString:BDSKLocalFileString] || [changedKey isEqualToString:BDSKRemoteURLString])
-        docState.itemChangeMask |= BDSKItemChangedFilesMask;
+        docFlags.itemChangeMask |= BDSKItemChangedFilesMask;
     
     
     // queue for UI updating, in case the item is changed as part of a batch process such as Find & Replace or AutoFile
-    if (docState.isDocumentClosed == NO) {
+    if (docFlags.isDocumentClosed == NO) {
         [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(handlePrivateBibItemChanged) object:nil];
         [self performSelector:@selector(handlePrivateBibItemChanged) withObject:nil afterDelay:0.0];
     }
@@ -839,8 +839,8 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 - (void)handleFlagsChangedNotification:(NSNotification *)notification{
     BOOL isOptionKeyState = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) != 0;
     
-    if (docState.inOptionKeyState != isOptionKeyState) {
-        docState.inOptionKeyState = isOptionKeyState;
+    if (docFlags.inOptionKeyState != isOptionKeyState) {
+        docFlags.inOptionKeyState = isOptionKeyState;
         
         NSToolbarItem *toolbarItem = [toolbarItems objectForKey:@"BibDocumentToolbarNewItemIdentifier"];
         
@@ -889,7 +889,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 - (void)handleTemporaryFileMigrationNotification:(NSNotification *)notification{
     // display after the window loads so we can use a sheet, and the migration controller window is in front
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableMigrationWarning"] == NO)
-        docState.displayMigrationAlert = YES;
+        docFlags.displayMigrationAlert = YES;
 }
 
 - (void)handleSkimFileDidSaveNotification:(NSNotification *)notification{
