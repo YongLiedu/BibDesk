@@ -2,10 +2,10 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1050</int>
-		<string key="IBDocument.SystemVersion">10B504</string>
+		<string key="IBDocument.SystemVersion">10C540</string>
 		<string key="IBDocument.InterfaceBuilderVersion">740</string>
-		<string key="IBDocument.AppKitVersion">1038.2</string>
-		<string key="IBDocument.HIToolboxVersion">437.00</string>
+		<string key="IBDocument.AppKitVersion">1038.25</string>
+		<string key="IBDocument.HIToolboxVersion">458.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
 			<string key="NS.object.0">740</string>
@@ -176,6 +176,7 @@
 											</object>
 											<string key="NSFrameSize">{120, 456}</string>
 											<reference key="NSSuperview" ref="734654594"/>
+											<reference key="NSNextKeyView" ref="187525547"/>
 											<reference key="NSDocView" ref="187525547"/>
 											<reference key="NSBGColor" ref="587111683"/>
 											<int key="NScvFlags">4</int>
@@ -202,6 +203,7 @@
 									</object>
 									<string key="NSFrameSize">{120, 456}</string>
 									<reference key="NSSuperview" ref="28018430"/>
+									<reference key="NSNextKeyView" ref="992962446"/>
 									<int key="NSsFlags">528</int>
 									<reference key="NSVScroller" ref="448211062"/>
 									<reference key="NSHScroller" ref="515980046"/>
@@ -275,6 +277,7 @@
 																	</object>
 																	<string key="NSFrame">{{0, 17}, {503, 242}}</string>
 																	<reference key="NSSuperview" ref="926207286"/>
+																	<reference key="NSNextKeyView" ref="87855178"/>
 																	<reference key="NSDocView" ref="87855178"/>
 																	<reference key="NSBGColor" ref="593649249"/>
 																	<int key="NScvFlags">4</int>
@@ -307,6 +310,7 @@
 																	</object>
 																	<string key="NSFrameSize">{503, 17}</string>
 																	<reference key="NSSuperview" ref="926207286"/>
+																	<reference key="NSNextKeyView" ref="859221"/>
 																	<reference key="NSDocView" ref="859221"/>
 																	<reference key="NSBGColor" ref="587111683"/>
 																	<int key="NScvFlags">4</int>
@@ -315,6 +319,7 @@
 															</object>
 															<string key="NSFrameSize">{518, 274}</string>
 															<reference key="NSSuperview" ref="173025236"/>
+															<reference key="NSNextKeyView" ref="677369467"/>
 															<int key="NSsFlags">48</int>
 															<reference key="NSVScroller" ref="1036979450"/>
 															<reference key="NSHScroller" ref="307074470"/>
@@ -459,6 +464,7 @@
 																				</object>
 																				<string key="NSFrameSize">{503, 174}</string>
 																				<reference key="NSSuperview" ref="434174003"/>
+																				<reference key="NSNextKeyView" ref="762552002"/>
 																				<reference key="NSDocView" ref="762552002"/>
 																				<reference key="NSBGColor" ref="360253647"/>
 																				<object class="NSCursor" key="NSCursor" id="306218247">
@@ -490,6 +496,7 @@
 																		</object>
 																		<string key="NSFrameSize">{518, 174}</string>
 																		<reference key="NSSuperview" ref="369586663"/>
+																		<reference key="NSNextKeyView" ref="267949102"/>
 																		<int key="NSsFlags">16</int>
 																		<reference key="NSVScroller" ref="846411749"/>
 																		<reference key="NSHScroller" ref="61529244"/>
@@ -786,6 +793,7 @@
 																</object>
 																<string key="NSFrameSize">{120, 456}</string>
 																<reference key="NSSuperview" ref="878641021"/>
+																<reference key="NSNextKeyView" ref="107211547"/>
 																<reference key="NSDocView" ref="107211547"/>
 																<object class="NSColor" key="NSBGColor">
 																	<int key="NSColorSpace">1</int>
@@ -816,6 +824,7 @@
 														</object>
 														<string key="NSFrameSize">{120, 456}</string>
 														<reference key="NSSuperview" ref="913006268"/>
+														<reference key="NSNextKeyView" ref="390981983"/>
 														<int key="NSsFlags">560</int>
 														<reference key="NSVScroller" ref="96586144"/>
 														<reference key="NSHScroller" ref="79792160"/>
@@ -3106,14 +3115,6 @@
 						<reference key="destination" ref="570686473"/>
 					</object>
 					<int key="connectionID">101725</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">statusView</string>
-						<reference key="source" ref="254371248"/>
-						<reference key="destination" ref="277782155"/>
-					</object>
-					<int key="connectionID">101727</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
