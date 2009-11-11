@@ -3065,9 +3065,20 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if ([sender isEqual:mainSplitView]) {
         if ([subview isEqual:fileSplitView])
             [self toggleSidebar:sender];
-        return NO;
     } else if ([sender isEqual:fileSplitView]) {
-        return [subview isEqual:[authorTableView enclosingScrollView]];
+        if ([subview isEqual:[authorTableView enclosingScrollView]]) {
+            CGFloat position = [fileSplitView maxPossiblePositionOfDividerAtIndex:dividerIndex];
+            if ([fileSplitView isSubviewCollapsed:subview]) {
+                if (lastAuthorsHeight <= 0.0)
+                    lastAuthorsHeight = 150.0;
+                if (lastAuthorsHeight > NSHeight([[fileView enclosingScrollView] frame]))
+                    lastAuthorsHeight = BDSKFloor(0.5 * NSHeight([[fileView enclosingScrollView] frame]));
+                position -= lastAuthorsHeight;
+            } else {
+                lastAuthorsHeight = NSHeight([subview frame]);
+            }
+            [(BDSKSplitView *)fileSplitView setPosition:position ofDividerAtIndex:dividerIndex animate:YES];
+        }
     }
     return NO;
 }

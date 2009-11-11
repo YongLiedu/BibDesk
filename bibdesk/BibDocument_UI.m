@@ -51,6 +51,7 @@
 #import "BDSKMainTableView.h"
 #import "BDSKContainerView.h"
 #import "BDSKEdgeView.h"
+#import "BDSKSplitView.h"
 #import "BDSKPreviewer.h"
 #import "BDSKOverlayWindow.h"
 #import "BDSKTeXTask.h"
@@ -509,11 +510,19 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
             [self toggleGroups:sender];
         else if ([subview isEqual:[[sender subviews] objectAtIndex:2]])
             [self toggleSidebar:sender];
-        return NO;
     } else if ([sender isEqual:splitView]) {
         if ([subview isEqual:[[sender subviews] lastObject]]) {
-            docState.lastPreviewHeight = NSWidth([[[sender subviews] lastObject] frame]);
-            return YES;
+            CGFloat position = [splitView maxPossiblePositionOfDividerAtIndex:dividerIndex];
+            if ([splitView isSubviewCollapsed:subview]) {
+                if (docState.lastPreviewHeight <= 0.0)
+                    docState.lastPreviewHeight = 200.0;
+                if (docState.lastPreviewHeight > NSHeight([[[sender subviews] objectAtIndex:dividerIndex] frame]))
+                    docState.lastPreviewHeight = BDSKFloor(0.5 * NSHeight([[[sender subviews] objectAtIndex:dividerIndex] frame]));
+                position -= docState.lastPreviewHeight;
+            } else {
+                docState.lastPreviewHeight = NSHeight([[[sender subviews] lastObject] frame]);
+            }
+            [(BDSKSplitView *)splitView setPosition:position ofDividerAtIndex:dividerIndex animate:YES];
         }
     }
     return NO;
