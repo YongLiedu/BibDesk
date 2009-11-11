@@ -82,7 +82,6 @@
 #import "BDSKStringParser.h"
 #import "BDSKZoomablePDFView.h"
 #import "BDSKCustomCiteDrawerController.h"
-#import "NSObject_BDSKExtensions.h"
 #import "BDSKOwnerProtocol.h"
 #import "BDSKPreviewer.h"
 #import "BDSKFileMigrationController.h"
@@ -357,7 +356,8 @@ static BOOL changingColors = NO;
 - (void)editPubAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     NSArray *pubs = (NSArray *)contextInfo;
     if (returnCode == NSAlertAlternateReturn) {
-        [self performSelector:@selector(editPub:) withObjectsFromArray:pubs];
+        for (BibItem *pub in pubs)
+            [self editPub:pub];
     }
     [pubs release];
 }

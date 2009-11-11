@@ -71,7 +71,6 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
 #import "NSURL_BDSKExtensions.h"
-#import "NSObject_BDSKExtensions.h"
 #import "BDSKVersionNumber.h"
 #import "NSError_BDSKExtensions.h"
 #import <SkimNotesBase/SkimNotesBase.h>
@@ -1093,7 +1092,8 @@ FSOpenIterator:
     
     result = [NSMutableData dataWithBytes:&header length:sizeof(WLDragMapHeaderStruct)];
     
-    [result performSelector:@selector(appendData:) withObjectsByMakingObjectsFromArray:entries performSelector:@selector(entryData)];
+    for (WLDragMapEntry *entry in entries)
+        [result appendData:[entry entryData]];
     
     return result;
 }

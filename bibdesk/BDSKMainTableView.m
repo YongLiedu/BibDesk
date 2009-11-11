@@ -45,7 +45,6 @@
 #import "BDSKRatingButtonCell.h"
 #import "BDSKImagePopUpButton.h"
 #import "BDSKImagePopUpButtonCell.h"
-#import "NSObject_BDSKExtensions.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import "BDSKCenterScaledImageCell.h"
 #import "BDSKLevelIndicatorCell.h"
@@ -433,7 +432,8 @@ enum {
 	NSIndexSet *selectedRows = [self selectedRowIndexes];
     
     [self removeAllTableColumns];
-    [self performSelector:@selector(addTableColumn:) withObjectsFromArray:columns];
+    for (NSTableColumn *column in columns)
+        [self addTableColumn:column];
     [self selectRowIndexes:selectedRows byExtendingSelection:NO];
     [self setHighlightedTableColumn:highlightedColumn]; 
     [self tableViewFontChanged];

@@ -39,7 +39,6 @@
 #import "BDSKAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringNode.h"
-#import "NSObject_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 
 @interface BDSKConverter (Private)
@@ -118,7 +117,8 @@ static BDSKConverter *sharedConverter = nil;
     workingSet = [[NSCharacterSet characterSetWithRange:NSMakeRange(0x80, 0x1d0)] mutableCopy]; //this should get all the characters in Latin-1 Supplement, Latin Extended-A, and Latin Extended-B
     [workingSet addCharactersInRange:NSMakeRange(0x1e00, 0x100)]; //this should get all the characters in Latin Extended Additional.
     [workingSet formIntersectionWithCharacterSet:[NSCharacterSet decomposableCharacterSet]];
-    [workingSet performSelector:@selector(addCharactersInString:) withObjectsFromArray:[tmpTexifyDict allKeys]];
+    for (NSString *string in [tmpTexifyDict allKeys])
+        [workingSet addCharactersInString:string];
 	
     [self setFinalCharSet:workingSet];
     [workingSet release];

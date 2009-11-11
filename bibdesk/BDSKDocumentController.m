@@ -305,7 +305,8 @@
         [doc setFileURL:nil];
         // set date-added for imports
         NSString *importDate = [[NSCalendarDate date] description];
-        [[doc publications] makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:importDate];
+        for (BibItem *pub in [doc publications])
+            [pub setField:BDSKDateAddedString toValue:importDate];
         [[doc undoManager] removeAllActions];
         [doc makeWindowControllers];
         [doc showWindows];

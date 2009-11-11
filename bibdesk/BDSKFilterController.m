@@ -39,7 +39,6 @@
 #import "BDSKFilterController.h"
 #import "BDSKConditionController.h"
 #import "BDSKConditionsView.h"
-#import "NSArray_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 
 
@@ -123,7 +122,8 @@
         
         NSMutableArray *conditions = [NSMutableArray arrayWithCapacity:[conditionControllers count]];
         
-        [conditions addObjectsByMakingObjectsFromArray:conditionControllers performSelector:@selector(condition)];
+        for (BDSKConditionController *controller in conditionControllers)
+            [conditions addObject:[controller condition]];
         // remove the dummy condition
         [conditions removeObject:[NSNull null]];
         [filter setConditions:conditions];

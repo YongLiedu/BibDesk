@@ -89,8 +89,6 @@
 
 - (NSArray *)arrayByRemovingObject:(id)anObject;
 
-- (void)makeObjectsPerformSelector:(SEL)selector withObject:(id)arg1 withObject:(id)arg2;
-
 - (NSArray *)arrayByPerformingSelector:(SEL)aSelector;
 - (NSArray *)arrayByPerformingSelector:(SEL)aSelector withObject:(id)anObject;
 
@@ -105,7 +103,6 @@
 @interface NSMutableArray (BDSKExtensions)
 
 - (void)addNonDuplicateObjectsFromArray:(NSArray *)otherArray;
-- (void)addObjectsByMakingObjectsFromArray:(NSArray *)otherArray performSelector:(SEL)selector;
 
 - (void)sortUsingSelector:(SEL)comparator ascending:(BOOL)ascend;
 - (void)insertObject:anObject inArraySortedUsingDescriptors:(NSArray *)sortDescriptors;

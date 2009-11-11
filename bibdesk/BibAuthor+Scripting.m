@@ -48,7 +48,8 @@
 
 + (NSArray *)authorsInPublications:(NSArray *)publications {
 	NSMutableSet *auths = [NSMutableSet set];
-    [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubAuthors)];
+    for (BibItem *pub in publications)
+        [auths addObjectsFromArray:[pub pubAuthors]];
 	return [auths allObjects];
 }
 
@@ -67,7 +68,8 @@
 
 + (NSArray *)editorsInPublications:(NSArray *)publications {
 	NSMutableSet *auths = [NSMutableSet set];
-    [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubEditors)];
+    for (BibItem *pub in publications)
+        [auths addObjectsFromArray:[pub pubEditors]];
 	return [auths allObjects];
 }
 

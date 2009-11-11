@@ -361,11 +361,6 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
     return [self arrayByPerformingSelector:aSelector withObject:nil];
 }
 
-- (void)makeObjectsPerformSelector:(SEL)selector withObject:(id)arg1 withObject:(id)arg2 {
-    for (id object in self)
-        [object methodForSelector:selector](object, selector, arg1, arg2);
-}
-
 - (NSArray *)arrayByPerformingSelector:(SEL)aSelector withObject:(id)anObject {
     NSMutableArray *array = [NSMutableArray array];
     for (id object in self) {
@@ -417,12 +412,6 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
         if([self containsObject:object] == NO)
             [self addObject:object];
     }
-}
-
-- (void)addObjectsByMakingObjectsFromArray:(NSArray *)otherArray performSelector:(SEL)selector;
-{
-    for (id object in otherArray)
-        [self addObject:[object performSelector:selector]];
 }
 
 - (void)sortUsingSelector:(SEL)comparator ascending:(BOOL)ascend;

@@ -45,7 +45,6 @@
 #import "BDSKBibTeXParser.h"
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
-#import "NSObject_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 
 static char BDSKMacroResolverDefaultsObservationContext;
@@ -116,10 +115,10 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         return @"";
     
     // bibtex requires that macros whose definitions contain macros are ordered in the document after the macros on which they depend
-    NSArray *macros = [[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)];
-    NSMutableArray *orderedMacros = [NSMutableArray arrayWithCapacity:[macros count]];
+    NSMutableArray *orderedMacros = [NSMutableArray array];
     
-    [self performSelector:@selector(addMacro:toArray:) withObjectsFromArray:macros withObject:orderedMacros];
+    for (NSString *macro in [[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)])
+        [self addMacro:macro toArray:orderedMacros];
     
     BOOL shouldTeXify = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
 	NSMutableString *macroString = [NSMutableString string];

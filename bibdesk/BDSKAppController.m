@@ -69,7 +69,6 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 #import "NSArray_BDSKExtensions.h"
-#import "NSObject_BDSKExtensions.h"
 #import "BDSKSearchForCommand.h"
 #import "BDSKCompletionServerProtocol.h"
 #import "BDSKDocumentController.h"
@@ -894,7 +893,8 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     [arrayOfSets sortUsingDescriptors:[NSArray arrayWithObject:setLengthSort]];
 
     [itemsFound setSet:[arrayOfSets firstObject]]; // smallest set
-    [itemsFound performSelector:@selector(intersectSet:) withObjectsFromArray:arrayOfSets];
+    for (NSSet *set in arrayOfSets)
+        [itemsFound intersectSet:set];
     
     return itemsFound;
 }

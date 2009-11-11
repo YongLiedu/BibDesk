@@ -105,7 +105,6 @@
 #import "NSError_BDSKExtensions.h"
 #import "BDSKColoredView.h"
 #import "BDSKCustomCiteDrawerController.h"
-#import "NSObject_BDSKExtensions.h"
 #import "BDSKDocumentController.h"
 #import "BDSKFiler.h"
 #import "BibItem_PubMedLookup.h"
@@ -1496,7 +1495,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
     [d appendUTF8DataFromString:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xml>\n<records>\n"];
-    [d performSelector:@selector(appendUTF8DataFromString:) withObjectsByMakingObjectsFromArray:items performSelector:@selector(endNoteString)];
+    for (BibItem *pub in items)
+        [d appendUTF8DataFromString:[pub endNoteString]];
     [d appendUTF8DataFromString:@"</records>\n</xml>\n"];
     
     return d;
@@ -1785,8 +1785,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     // make sure we clear all macros and groups that are saved in the file, should only have those for revert
     // better do this here, so we don't remove them when reading the data fails
     [macroResolver removeAllMacros];
-    [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:[groups URLGroups]];
-    [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:[groups scriptGroups]];
+    for (BDSKGroup *group in [groups URLGroups])
+        [self removeSpinnerForGroup:group];
+    for (BDSKGroup *group in [groups scriptGroups])
+        [self removeSpinnerForGroup:group];
     [groups removeAllUndoableGroups]; // this also removes editor windows for external groups
     [frontMatter setString:@""];
     
@@ -2096,8 +2098,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [self selectPublications:newPubs];
 	if (pubsToAutoFile != nil){
         // tried checking [pb isEqual:[NSPasteboard pasteboardWithName:NSDragPboard]] before using delay, but pb is a CFPasteboardUnique
-        for (pub in pubsToAutoFile)
-            [pub performSelector:@selector(autoFileLinkedFile:) withObjectsFromArray:[pub localFiles]];
+        for (pub in pubsToAutoFile) {
+            for (BDSKLinkedFile *file in [pub localFiles])
+                [pub autoFileLinkedFile:file];
+        }
     }
     
     BOOL autoGenerate = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyAutogenerateKey];
@@ -2115,8 +2119,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [self generateCiteKeysForPublications:autogeneratePubs];
     
     // set Date-Added to the current date, since unarchived items will have their own (incorrect) date
-    NSCalendarDate *importDate = [NSCalendarDate date];
-    [newPubs makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
+    NSString *importDate = [[NSCalendarDate date] description];
+    for (pub in newPubs)
+        [pub setField:BDSKDateAddedString toValue:importDate];
 	
 	if(shouldEdit)
 		[self editPublications:newPubs]; // this will ask the user when there are many pubs

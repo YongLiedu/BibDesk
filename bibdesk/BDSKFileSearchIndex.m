@@ -41,7 +41,6 @@
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
 #import "BDSKManyToManyDictionary.h"
-#import "NSObject_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSData_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"

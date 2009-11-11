@@ -74,7 +74,6 @@
 #import "BDSKSearchGroupViewController.h"
 #import "BDSKWebGroupViewController.h"
 #import "BDSKServerInfo.h"
-#import "NSObject_BDSKExtensions.h"
 #import "BDSKSearchBookmarkController.h"
 #import "BDSKSearchBookmark.h"
 #import "BDSKSearchButtonController.h"
@@ -472,7 +471,8 @@ The groupedPublications array is a subset of the publications array, developed b
 - (void)handleWillRemoveGroupsNotification:(NSNotification *)notification{
     if([groupOutlineView editedRow] != -1 && [documentWindow makeFirstResponder:nil] == NO)
         [documentWindow endEditingFor:groupOutlineView];
-    [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:[[notification userInfo] valueForKey:@"groups"]];
+    for (BDSKGroup *group in [[notification userInfo] valueForKey:@"groups"])
+        [self removeSpinnerForGroup:group];
 }
 
 - (void)handleDidAddRemoveGroupNotification:(NSNotification *)notification{

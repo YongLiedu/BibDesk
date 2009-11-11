@@ -74,7 +74,6 @@
 #import "BDSKNotesWindowController.h"
 #import <FileView/FileView.h>
 #import "BDSKLinkedFile.h"
-#import "NSObject_BDSKExtensions.h"
 #import "BDSKEditorTableView.h"
 #import "BDSKEditorTextFieldCell.h"
 #import "BDSKCompletionManager.h"
@@ -1747,10 +1746,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (NSArray *)persons {
-    NSArray *allArrays = [[publication people] allValues];
     NSMutableArray *array = [NSMutableArray array];
     
-    [array performSelector:@selector(addObjectsFromArray:) withObjectsFromArray:allArrays];
+    for (NSArray *arr in [[publication people] allValues])
+        [array addObjectsFromArray:arr];
     [array sortUsingSelector:@selector(sortCompare:)];
     
     return array;

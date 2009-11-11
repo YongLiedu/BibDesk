@@ -39,7 +39,6 @@
 #import "BDSKTeXTask.h"
 #import "BibDocument.h"
 #import "NSArray_BDSKExtensions.h"
-#import "NSObject_BDSKExtensions.h"
 #import "WebURLsWithTitles.h"
 
 
@@ -333,7 +332,8 @@
 	for (NSString *name in [promisedPboardTypes allKeys]) {
         NSPasteboard *pboard = [NSPasteboard pasteboardWithName:name];
         NSArray *types = [[self promisedTypesForPasteboard:pboard] copy]; // we need to copy as types can be removed
-        [self performSelector:@selector(pasteboard:provideDataForType:) withObject:pboard withObjectsFromArray:types];
+        for (NSString *type in types)
+            [self pasteboard:pboard provideDataForType:type];
         [types release];
     }
 }

@@ -46,28 +46,4 @@
     return [NSScriptClassDescription classDescriptionForClass:[self class]];
 }
 
-- (void)performSelector:(SEL)selector withObjectsFromArray:(NSArray *)objects;
-{
-    for (id object in objects)
-        [self performSelector:selector withObject:object];
-}
-
-- (void)performSelector:(SEL)selector withObjectsFromArray:(NSArray *)objects withObject:(id)anObject;
-{
-    for (id object in objects)
-        [self performSelector:selector withObject:object withObject:anObject];
-}
-
-- (void)performSelector:(SEL)selector withObject:(id)anObject withObjectsFromArray:(NSArray *)objects;
-{
-    for (id object in objects)
-        [self performSelector:selector withObject:anObject withObject:object];
-}
-
-- (void)performSelector:(SEL)selector withObjectsByMakingObjectsFromArray:(NSArray *)objects performSelector:(SEL)otherSelector;
-{
-    for (id object in objects)
-        [self performSelector:selector withObject:[object performSelector:otherSelector]];
-}
-
 @end

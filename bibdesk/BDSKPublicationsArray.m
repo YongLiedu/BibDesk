@@ -40,7 +40,6 @@
 #import "BDSKMultiValueDictionary.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
-#import "NSObject_BDSKExtensions.h"
 
 
 @interface BDSKPublicationsArray (Private)
@@ -73,7 +72,8 @@
         publications = [[NSMutableArray allocWithZone:zone] initWithObjects:objects count:count];
         itemsForCiteKeys = [[BDSKMultiValueDictionary allocWithZone:zone] initWithCaseInsensitiveKeys:YES];
         itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] init];
-        [self performSelector:@selector(addToItemsForCiteKeys:) withObjectsFromArray:publications];
+        for (BibItem *pub in publications)
+            [self addToItemsForCiteKeys:pub];
         [self updateFileOrder];
     }
     return self;
@@ -175,18 +175,21 @@
 
 - (void)addObjectsFromArray:(NSArray *)otherArray{
     [publications addObjectsFromArray:otherArray];
-    [self performSelector:@selector(addToItemsForCiteKeys:) withObjectsFromArray:publications];
+    for (BibItem *pub in publications)
+        [self addToItemsForCiteKeys:pub];
     [self updateFileOrder];
 }
 
 - (void)insertObjects:(NSArray *)objects atIndexes:(NSIndexSet *)indexes{
     [publications insertObjects:objects atIndexes:indexes];
-    [self performSelector:@selector(addToItemsForCiteKeys:) withObjectsFromArray:[publications objectsAtIndexes:indexes]];
+    for (BibItem *pub in [publications objectsAtIndexes:indexes])
+        [self addToItemsForCiteKeys:pub];
     [self updateFileOrder];
 }
 
 - (void)removeObjectsAtIndexes:(NSIndexSet *)indexes{
-    [self performSelector:@selector(removeFromItemsForCiteKeys:) withObjectsFromArray:[publications objectsAtIndexes:indexes]];
+    for (BibItem *pub in [publications objectsAtIndexes:indexes])
+        [self removeFromItemsForCiteKeys:pub];
     [publications removeObjectsAtIndexes:indexes];
     [self updateFileOrder];
 }

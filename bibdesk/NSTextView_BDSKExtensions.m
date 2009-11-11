@@ -36,7 +36,6 @@
 
 #import "NSTextView_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
-#import "NSObject_BDSKExtensions.h"
 
 @implementation NSTextView (BDSKExtensions)
 
@@ -115,8 +114,10 @@
     NSArray *allComponents = [mutableString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet] trimWhitespace:YES];
     [mutableString release];
 
-    if ([allComponents count])
-        [self performSelector:@selector(highlightOccurrencesOfString:) withObjectsFromArray:allComponents];
+    if ([allComponents count]) {
+        for (NSString *string in allComponents)
+            [self highlightOccurrencesOfString:string];
+    }
 }
 
 - (void)highlightOccurrencesOfString:(NSString *)substring;

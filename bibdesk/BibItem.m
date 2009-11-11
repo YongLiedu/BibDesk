@@ -56,7 +56,6 @@
 #import "NSSet_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
-#import "NSObject_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKStringNode.h"
@@ -616,11 +615,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 // this returns a set so it's clear that the objects are unordered
 - (NSSet *)allPeople{
-    NSArray *allArrays = [[self people] allValues];
     NSMutableSet *set = [NSMutableSet set];
-    
-    [set performSelector:@selector(addObjectsFromArray:) withObjectsFromArray:allArrays];
-    
+    for (NSArray *array in [[self people] allValues])
+        [set addObjectsFromArray:array];
     return set;
 }
 

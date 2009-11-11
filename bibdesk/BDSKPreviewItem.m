@@ -160,7 +160,8 @@
 - (NSString *)displayText {
     NSMutableArray *authors = [NSMutableArray arrayWithCapacity:[pubAuthors count]];
     NSMutableString *string = [NSMutableString string];
-    [authors addObjectsByMakingObjectsFromArray:pubAuthors performSelector:@selector(abbreviatedName)];
+    for (BibAuthor *auth in pubAuthors)
+        [authors addObject:[auth abbreviatedName]];
     
     [string appendStrings:[authors componentsJoinedByCommaAndAnd], @",\n", 
                           [pubFields objectForKey:BDSKTitleString], @",\n", 

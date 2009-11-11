@@ -49,7 +49,6 @@
 #import "BDSKWebGroup.h"
 #import "BDSKPublicationsArray.h"
 #import "BibAuthor.h"
-#import "NSObject_BDSKExtensions.h"
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKFilter.h"
 #import "NSArray_BDSKExtensions.h"
