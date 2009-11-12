@@ -66,8 +66,7 @@
 - (IBAction)showMacrosWindow:(id)sender;
 - (IBAction)showMacroFileWindow:(id)sender;
 - (IBAction)closeMacroFileWindow:(id)sender;
-- (IBAction)addGlobalMacroFile:(id)sender;
-- (IBAction)delGlobalMacroFiles:(id)sender;
+- (IBAction)addRemoveGlobalMacroFile:(id)sender;
 - (IBAction)changeDefaultPDFViewer:(id)sender;
 
 @end

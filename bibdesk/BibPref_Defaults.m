@@ -621,25 +621,29 @@ static NSSet *alwaysDisabledFields = nil;
     [sud setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
 }
 
-- (IBAction)addGlobalMacroFile:(id)sender{
-    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-    [openPanel setAllowsMultipleSelection:YES];
-    [openPanel setResolvesAliases:NO];
-    [openPanel setCanChooseDirectories:NO];
-    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
+- (IBAction)addRemoveGlobalMacroFile:(id)sender{
+    if ([sender selectedSegment] == 0) { // add
+        
+        NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+        [openPanel setAllowsMultipleSelection:YES];
+        [openPanel setResolvesAliases:NO];
+        [openPanel setCanChooseDirectories:NO];
+        [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
 
-    [openPanel beginSheetForDirectory:@"/usr" 
-                                 file:nil 
-                                types:[NSArray arrayWithObjects:@"bib", @"bst", nil] 
-                       modalForWindow:globalMacroFileSheet
-                        modalDelegate:self 
-                       didEndSelector:@selector(addGlobalMacroFilePanelDidEnd:returnCode:contextInfo:) 
-                          contextInfo:nil];
-}
-
-- (IBAction)delGlobalMacroFiles:(id)sender {
-    if ([globalMacroFilesTableView canDelete])
-        [globalMacroFilesTableView delete:sender];
+        [openPanel beginSheetForDirectory:@"/usr" 
+                                     file:nil 
+                                    types:[NSArray arrayWithObjects:@"bib", @"bst", nil] 
+                           modalForWindow:globalMacroFileSheet
+                            modalDelegate:self 
+                           didEndSelector:@selector(addGlobalMacroFilePanelDidEnd:returnCode:contextInfo:) 
+                              contextInfo:nil];
+        
+    } else { // remove
+        
+        if ([globalMacroFilesTableView canDelete])
+            [globalMacroFilesTableView delete:sender];
+        
+    }
 }
 
 @end
