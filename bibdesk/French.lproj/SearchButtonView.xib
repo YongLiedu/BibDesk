@@ -22,38 +22,38 @@
 				<bool key="EncodedWithXMLCoder">YES</bool>
 			</object>
 		</object>
-		<object class="NSMutableArray" key="IBDocument.RootObjects" id="132277579">
+		<object class="NSMutableArray" key="IBDocument.RootObjects" id="596390607">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<object class="NSCustomObject" id="299414004">
+			<object class="NSCustomObject" id="991895026">
 				<string key="NSClassName">BDSKSearchButtonController</string>
 			</object>
-			<object class="NSCustomObject" id="22758859">
+			<object class="NSCustomObject" id="766426899">
 				<string key="NSClassName">FirstResponder</string>
 			</object>
-			<object class="NSCustomObject" id="369863614">
+			<object class="NSCustomObject" id="746999504">
 				<string key="NSClassName">NSApplication</string>
 			</object>
-			<object class="NSCustomView" id="673998816">
+			<object class="NSCustomView" id="899774820">
 				<nil key="NSNextResponder"/>
 				<int key="NSvFlags">266</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
-					<object class="NSCustomView" id="807183443">
-						<reference key="NSNextResponder" ref="673998816"/>
+					<object class="NSCustomView" id="142800856">
+						<reference key="NSNextResponder" ref="899774820"/>
 						<int key="NSvFlags">258</int>
 						<object class="NSMutableArray" key="NSSubviews">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<object class="NSCustomView" id="13920648">
-								<reference key="NSNextResponder" ref="807183443"/>
+							<object class="NSCustomView" id="463294670">
+								<reference key="NSNextResponder" ref="142800856"/>
 								<int key="NSvFlags">258</int>
 								<string key="NSFrameSize">{400, 28}</string>
-								<reference key="NSSuperview" ref="807183443"/>
+								<reference key="NSSuperview" ref="142800856"/>
 								<string key="NSClassName">AMButtonBar</string>
 								<string key="NSExtension">NSView</string>
 							</object>
 						</object>
 						<string key="NSFrameSize">{400, 28}</string>
-						<reference key="NSSuperview" ref="673998816"/>
+						<reference key="NSSuperview" ref="899774820"/>
 						<string key="NSClassName">BDSKGradientView</string>
 						<string key="NSExtension">NSView</string>
 					</object>
@@ -69,24 +69,24 @@
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
 						<string key="label">edgeView</string>
-						<reference key="source" ref="299414004"/>
-						<reference key="destination" ref="673998816"/>
+						<reference key="source" ref="991895026"/>
+						<reference key="destination" ref="899774820"/>
 					</object>
 					<int key="connectionID">16</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
 						<string key="label">gradientView</string>
-						<reference key="source" ref="299414004"/>
-						<reference key="destination" ref="807183443"/>
+						<reference key="source" ref="991895026"/>
+						<reference key="destination" ref="142800856"/>
 					</object>
 					<int key="connectionID">17</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
 						<string key="label">buttonBar</string>
-						<reference key="source" ref="299414004"/>
-						<reference key="destination" ref="13920648"/>
+						<reference key="source" ref="991895026"/>
+						<reference key="destination" ref="463294670"/>
 					</object>
 					<int key="connectionID">18</int>
 				</object>
@@ -97,50 +97,50 @@
 					<object class="IBObjectRecord">
 						<int key="objectID">0</int>
 						<reference key="object" ref="0"/>
-						<reference key="children" ref="132277579"/>
+						<reference key="children" ref="596390607"/>
 						<nil key="parent"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">-2</int>
-						<reference key="object" ref="299414004"/>
+						<reference key="object" ref="991895026"/>
 						<reference key="parent" ref="0"/>
 						<string type="base64-UTF8" key="objectName">RmlsZSdzIE93bmVyA</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">-1</int>
-						<reference key="object" ref="22758859"/>
+						<reference key="object" ref="766426899"/>
 						<reference key="parent" ref="0"/>
 						<string key="objectName">First Responder</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">-3</int>
-						<reference key="object" ref="369863614"/>
+						<reference key="object" ref="746999504"/>
 						<reference key="parent" ref="0"/>
 						<string key="objectName">Application</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">9</int>
-						<reference key="object" ref="673998816"/>
+						<reference key="object" ref="899774820"/>
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<reference ref="807183443"/>
+							<reference ref="142800856"/>
 						</object>
 						<reference key="parent" ref="0"/>
 						<string key="objectName">edgeView</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">13</int>
-						<reference key="object" ref="807183443"/>
+						<reference key="object" ref="142800856"/>
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<reference ref="13920648"/>
+							<reference ref="463294670"/>
 						</object>
-						<reference key="parent" ref="673998816"/>
+						<reference key="parent" ref="899774820"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">15</int>
-						<reference key="object" ref="13920648"/>
-						<reference key="parent" ref="807183443"/>
+						<reference key="object" ref="463294670"/>
+						<reference key="parent" ref="142800856"/>
 					</object>
 				</object>
 			</object>
