@@ -126,6 +126,10 @@
     if ([visible boolValue] == NO) {
         [[self window] setContentBorderThickness:0.0 forEdge:NSMinYEdge];
         [self removeFromSuperview];
+    } else {
+        // this fixes an AppKit bug, the window does not update its draggable areas
+        [[self window] setMovableByWindowBackground:YES];
+        [[self window] setMovableByWindowBackground:NO];
     }
     animating = NO;
 }

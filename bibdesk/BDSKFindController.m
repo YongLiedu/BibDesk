@@ -652,6 +652,10 @@ enum {
 	[[self window] setMinSize:minSize];
 	[[self window] setMaxSize:maximumSize];
 	
+    // fix an AppKit bug
+    [[self window] setMovableByWindowBackground:YES];
+    [[self window] setMovableByWindowBackground:NO];
+    
     [[NSUserDefaults standardUserDefaults] setBool:[statusBar isVisible] forKey:BDSKShowFindStatusBarKey];
 }
 
