@@ -7,10 +7,11 @@
 		* { margin: 0px; padding: 0px; }
 		body { font-family: "Lucida Grande"; font-size: 13px; padding: 1em; }
 		h1 { font-size: 16px; display:none; }
+		.help {display: block; float:right; margin-left:1em;}
 		p, .columns { max-width:50em; margin:auto;}
-		.columns { margin-top:1em; position: relative;}
-		.column { width:33%; float:left; display:block; }
-		.column.c1>* { margin-right: .66em; }
+		.columns { margin-top:1em; }
+		.column { width:33.3333%; float:left; display:block; }
+		.column.c1>* { margin-right: .66em;}
 		.column.c2>* { margin: 0em 0.33em; }
 		.column.c3>* { margin-left: .66em; }		
 		.column h2 { font-size: 13px; background: #ccc; padding: 0.5em 0.66em;}
@@ -27,29 +28,27 @@
 	</head>
 	<body>
 	
-		<h1>Web Group</h1>	
+		<h1>Groupes Web</h1>	
 		<p>
-			BibDesk reconna&icirc;t automatiquement les informations bibliographiques de certaines pages Web et les interpr&egrave;te directement pour faciliter les recherches et importations en un clic. Les sites et formats support&eacute;s sont&nbsp;:
+			<a class="help" href="help:anchor=Web-Group">[Aide]</a>BibDesk reconna&icirc;t automatiquement les informations bibliographiques de certaines pages Web et les interpr&egrave;te directement pour faciliter les recherches et importations en un clic. Les sites et formats support&eacute;s sont&nbsp;:
+			
 		</p>
 		
 		<div class="columns">
 		<div class="column c1">
 			<h2 title="These sites are fully accessible for anyone.">Sites gratuits</h2>
 			PUBLICLIST
+
 		</div>
 		
 		<div class="column c2">
-			<h2 title="These sites require a subscription by you or your institution to access their full content. A subset of the content may be available to everybody.">Sites d&rsquo;abonnements</h2>
+			<h2 title="These sites require a subscription by you or your institution to access their full content. A subset of the content may be available to everybody.">Sites par abonnement</h2>
 			SUBSCRIPTIONLIST
 		</div>
 		
 		<div class="column c3">
 			<h2 title="Formats which can be embedded in web pages and extracted from there.">Formats g&eacute;n&eacute;raux</h2>
 			GENERALLIST
-
-			<p>
-			Veuillez consulter la <a href="help:anchor=Web-Group">page d'aide sur les groupes Web</a> pour plus d&rsquo;informations sur les formats et sites support&eacute;s.
-			</p>
 		</div>
 		</div>
 	</body>
