@@ -542,6 +542,11 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 #else
             return proposedMax - 100.0 - [groupSplitView dividerThickness];
 #endif
+    } else if ([sender isEqual:splitView]) {
+        if (dividerIndex == (NSInteger)[[splitView subviews] count] - 2)
+            return proposedMax - 50.0;
+        else
+            return proposedMax;
     }
     return proposedMax;
 }

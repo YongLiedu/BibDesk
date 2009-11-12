@@ -3088,10 +3088,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (CGFloat)splitView:(NSSplitView *)sender constrainMaxCoordinate:(CGFloat)proposedMax ofSubviewAt:(NSInteger)dividerIndex {
-    if ([sender isEqual:mainSplitView]) {
-        return proposedMax - 50.0;
-    }
-    return proposedMax;
+    return proposedMax - 50.0;
 }
 
 - (CGFloat)splitView:(NSSplitView *)sender constrainMinCoordinate:(CGFloat)proposedMin ofSubviewAt:(NSInteger)dividerIndex {
