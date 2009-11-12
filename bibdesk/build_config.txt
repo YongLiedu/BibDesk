@@ -1,1 +1,1 @@
-disableLocalizations 1
+disableLocalizations 0
