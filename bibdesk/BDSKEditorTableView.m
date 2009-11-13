@@ -52,12 +52,10 @@
     if (clickedRow != -1 && clickedColumn != -1) {
         NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:clickedColumn];
         NSRect cellFrame = [self frameOfCellAtColumn:clickedColumn row:clickedRow];
-        id cell = [tableColumn dataCellForRow:clickedRow];
+        id cell = [self preparedCellAtColumn:clickedColumn row:clickedRow];
         BOOL isEditable = [tableColumn isEditable] && 
                 ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
                  [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:clickedRow]);
-        if ([[self delegate] respondsToSelector:@selector(tableView:willDisplayCell:forTableColumn:row:)])
-            [[self delegate] tableView:self willDisplayCell:cell forTableColumn:tableColumn row:clickedRow];
         if ([cell respondsToSelector:@selector(buttonRectForBounds:)] &&
             NSMouseInRect(location, [cell buttonRectForBounds:cellFrame], [self isFlipped])) {
             if ([theEvent clickCount] > 1)

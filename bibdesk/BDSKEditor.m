@@ -3197,13 +3197,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             NSTableColumn *tableColumn = [tableView tableColumnWithIdentifier:@"field"];
             id cell;
             NSInteger numberOfRows = [fields count];
-            NSInteger row;
+            NSInteger row, column = [[tableView tableColumns] indexOfObject:tableColumn];
             CGFloat maxWidth = NSWidth([citeKeyTitle frame]) + 4.0;
             
             for (row = 0; row < numberOfRows; row++) {
-                cell = [tableColumn dataCellForRow:row];
-                [self tableView:tableView willDisplayCell:cell forTableColumn:tableColumn row:row];
-                [cell setObjectValue:[fields objectAtIndex:row]];
+                cell = [tableView preparedCellAtColumn:column row:row];
                 maxWidth = BDSKMax(maxWidth, [cell cellSize].width);
             }
             maxWidth = BDSKCeil(maxWidth);
