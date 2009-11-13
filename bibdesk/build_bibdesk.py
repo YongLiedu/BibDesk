@@ -80,6 +80,15 @@ LOG_PATH=os.path.join(TEMP_DIR, "build_bibdesk_py.log")
 EMAIL_ADDRESS="amaxwell@mac.com"
 SMTP_SERVER="smtp.olypen.com"
 
+# create a dictionary of config values
+buildConfigPath = os.path.join(SOURCE_DIR, "build_config.txt")
+buildConfigFile = open(buildConfigPath)
+buildConfig = {}
+for configLine in buildConfigFile:
+    key, value = configLine.split()
+    # always store as string
+    buildConfig[key] = value
+
 def removeTemporaryDirectory():
     shutil.rmtree(TEMP_DIR)
 
@@ -262,8 +271,10 @@ if os.access(BUILT_APP, os.F_OK) == False:
     logFile.close()
     sendEmailAndRemoveTemporaryDirectory()
     exit(1)
-
-disableLocalizations(BUILT_APP)      
+    
+# disable localizations if needed
+if int(buildConfig["disableLocalizations"]) != 0:
+    disableLocalizations(BUILT_APP)      
 
 # create a name for the disk image based on today's date
 imageName = datetime.date.today().strftime("%Y%m%d")
@@ -366,12 +377,13 @@ finally:
 #   <integer>5</integer>
 #   <key>ProgramArguments</key>
 #   <array>
-#       <string>/Volumes/Local/Users/amaxwell/bin/build_bibdesk.py</string>
+#       <string>/usr/bin/python</string>
+#       <string>/Volumes/Local/Users/amaxwell/build/bibdesk-clean/build_bibdesk.py</string>
 #   </array>
 #   <key>StartCalendarInterval</key>
 #   <dict>
 #       <key>Hour</key>
-#       <integer>21</integer>
+#       <integer>22</integer>
 #       <key>Minute</key>
 #       <integer>55</integer>
 #   </dict>
