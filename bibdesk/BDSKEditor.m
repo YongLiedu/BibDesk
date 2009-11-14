@@ -1132,7 +1132,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 - (IBAction)toggleStatusBar:(id)sender {
 	[[NSUserDefaults standardUserDefaults] setBool:[statusBar isVisible] == NO forKey:BDSKShowEditorStatusBarKey];
-    [statusBar toggleBelowView:mainSplitView animate:sender != nil];
+    [statusBar toggleBelowView:[mainSplitView superview] animate:sender != nil];
 }
 
 #pragma mark Menus
