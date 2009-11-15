@@ -47,6 +47,7 @@
 #import "BibAuthor.h"
 #import "BDSKGroupCell.h"
 #import "NSLayoutManager_BDSKExtensions.h"
+#import "NSColor_BDSKExtensions.h"
 
 
 @interface BDSKParentGroupCell : NSTextFieldCell
@@ -130,11 +131,6 @@
     [super mouseDown:theEvent];
 }
 
-static CGFloat mainColorBlue[3]         = {34695.0/65535.0, 39064.0/65535.0, 48316.0/65535.0};
-static CGFloat disabledColorBlue[3]     = {40606.0/65535.0, 40606.0/65535.0, 40606.0/65535.0};
-static CGFloat mainColorGraphite[3]     = {37779.0/65535.0, 41634.0/65535.0, 45489.0/65535.0};
-static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 40606.0/65535.0};
-
 - (void)drawHighlightOnRows:(NSIndexSet *)rows
 {
     NSParameterAssert(rows != nil);
@@ -143,13 +139,10 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
     CGFloat heightOffset = BDSKMax(1.0f, BDSKRound(0.25 * [self intercellSpacing].height) - lineWidth);
     NSColor *highlightColor;
     
-    CGFloat *color;
-    BOOL isGraphite = [NSColor currentControlTint] == NSGraphiteControlTint;
     if ([[self window] isMainWindow] || [[self window] isKeyWindow])
-        color = isGraphite ? mainColorGraphite : mainColorBlue;
+        highlightColor = [NSColor mainSourceListHighlightColor];
     else
-        color = isGraphite ? disabledColorGraphite : disabledColorBlue;
-    highlightColor = [NSColor colorWithDeviceRed:color[0] green:color[1] blue:color[2] alpha:1.0];
+        highlightColor = [NSColor disabledSourceListHighlightColor];
     
     NSUInteger rowIndex = [rows firstIndex];
     NSRect drawRect;

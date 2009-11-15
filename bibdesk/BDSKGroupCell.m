@@ -43,6 +43,7 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
 #import "BDSKCenterScaledImageCell.h"
+#import "NSColor_BDSKExtensions.h"
 
 
 // names of these globals were changed to support key-value coding on BDSKGroup
@@ -279,21 +280,19 @@ static CGFloat disabledColorGraphite[3] = {40606.0/65535.0, 40606.0/65535.0, 406
             NSColor *fgColor;
             NSColor *bgColor;
             // On Leopard, use the blue or gray color taken from the center of the gradient highlight
-            CGFloat *color;
-            BOOL isGraphite = [NSColor currentControlTint] == NSGraphiteControlTint;
             if ([[controlView window] isKeyWindow] && [[controlView window] firstResponder] == controlView)
                 // the key state color does not look nice for the count bubble background
-                color = isHighlighted ? (isGraphite ? keyColorGraphite : keyColorBlue) : (isGraphite ? mainColorGraphite : mainColorBlue);
+                bgColor = isHighlighted ? [NSColor keySourceListHighlightColor] : [NSColor mainSourceListHighlightColor];
             else if ([[controlView window] isMainWindow] || [[controlView window] isKeyWindow])
-                color = isGraphite ? mainColorGraphite : mainColorBlue;
+                bgColor = [NSColor mainSourceListHighlightColor];
             else
-                color = isGraphite ? disabledColorGraphite : disabledColorBlue;
+                bgColor = [NSColor disabledSourceListHighlightColor];
             if (isHighlighted) {
-                fgColor = [NSColor colorWithDeviceRed:color[0] green:color[1] blue:color[2] alpha:1.0];
+                fgColor = bgColor;
                 bgColor = [NSColor colorWithDeviceWhite:1.0 alpha:0.95];
             } else {
                 fgColor = [NSColor colorWithDeviceWhite:1.0 alpha:1.0];
-                bgColor = [NSColor colorWithDeviceRed:color[0] green:color[1] blue:color[2] alpha:0.95];
+                bgColor = [bgColor colorWithAlphaComponent:0.95];
             }
             
             [NSGraphicsContext saveGraphicsState];
