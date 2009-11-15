@@ -458,4 +458,6 @@ static NSInteger BDSKCompletionMinHeight = 20;
 - (BOOL)canBecomeKeyWindow { return NO; }
 - (BOOL)canBecomeMainWindow { return NO; }
 
+- (BOOL)accessibilityIsIgnored { return YES; }
+
 @end
