@@ -244,7 +244,7 @@ static BOOL changingColors = NO;
     
     // This is preserved as an ivar; since removePublications: triggers an async search as a UI update, restoring the selection/scroll position here will no longer work if a search is active.  Storing a row is safe since sort order should be stable.
     rowToSelectAfterDelete = [[tv selectedRowIndexes] lastIndex];
-    scrollLocationAfterDelete = [[tv enclosingScrollView] scrollPositionAsPercentage];
+    scrollLocationAfterDelete = [tv scrollPositionAsPercentage];
 	[self removePublications:pubs];
     
     if([NSString isEmptyString:[self searchString]]) {
@@ -253,7 +253,7 @@ static BOOL changingColors = NO;
         if(rowToSelectAfterDelete != -1)
             [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:rowToSelectAfterDelete] byExtendingSelection:NO];
         rowToSelectAfterDelete = -1;
-        [[tv enclosingScrollView] setScrollPositionAsPercentage:scrollLocationAfterDelete];
+        [tv setScrollPositionAsPercentage:scrollLocationAfterDelete];
         scrollLocationAfterDelete = NSZeroPoint;
     }
     

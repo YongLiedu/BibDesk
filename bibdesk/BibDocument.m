@@ -344,7 +344,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     [self selectItemsForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey defaultObject:[NSArray array]] selectLibrary:NO];
     NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
-    [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
+    [tableView setScrollPositionAsPercentage:scrollPoint];
     
     // Get the search string keyword if available (Spotlight passes this)
     NSAppleEventDescriptor *event = [[NSAppleEventManager sharedAppleEventManager] currentAppleEvent];
@@ -694,7 +694,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         if ([selectedKeys count] == 0 || [self hasExternalGroupsSelected])
             selectedKeys = [NSArray array];
         [dictionary setObject:selectedKeys forKey:BDSKSelectedPublicationsKey];
-        [dictionary setPointValue:[[tableView enclosingScrollView] scrollPositionAsPercentage] forKey:BDSKDocumentScrollPercentageKey];
+        [dictionary setPointValue:[tableView scrollPositionAsPercentage] forKey:BDSKDocumentScrollPercentageKey];
         
         [dictionary setIntValue:bottomPreviewDisplay forKey:BDSKBottomPreviewDisplayKey];
         [dictionary setObject:bottomPreviewDisplayTemplate forKey:BDSKBottomPreviewDisplayTemplateKey];

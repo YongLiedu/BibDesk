@@ -502,7 +502,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
     [groupOutlineView setDelegate:nil];
     
-    NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];    
+    NSPoint scrollPoint = [tableView scrollPositionAsPercentage];    
     
 	NSArray *selectedGroups = [self selectedGroups];
 	
@@ -592,7 +592,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     
     // The search: in displaySelectedGroups will change the main table's scroll location, which isn't necessarily what we want (say when clicking the add button for a search group pub).  If we selected the same groups as previously, we should scroll to the old location instead of centering.
     if (didSelect)
-        [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
+        [tableView setScrollPositionAsPercentage:scrollPoint];
     
 	// reset ourself as delegate
     [groupOutlineView setDelegate:self];
@@ -615,15 +615,15 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         [smartGroups makeObjectsPerformSelector:@selector(filterItems:) withObject:publications];
     
     if (sortByCount) {
-        NSPoint scrollPoint = [[groupOutlineView enclosingScrollView] scrollPositionAsPercentage];
+        NSPoint scrollPoint = [groupOutlineView scrollPositionAsPercentage];
         [self sortGroupsByKey:nil];
-        [[groupOutlineView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
+        [groupOutlineView setScrollPositionAsPercentage:scrollPoint];
     } else if (needsUpdate) {
         [groupOutlineView reloadData];
         // fix for bug #1362191: after changing a checkbox that removed an item from a smart group, the table scrolled to the top
-        NSPoint scrollPoint = [[groupOutlineView enclosingScrollView] scrollPositionAsPercentage];
+        NSPoint scrollPoint = [groupOutlineView scrollPositionAsPercentage];
         [self displaySelectedGroups];
-        [[groupOutlineView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
+        [groupOutlineView setScrollPositionAsPercentage:scrollPoint];
     } else if (hideCount == NO) {
         [groupOutlineView reloadData];
     }

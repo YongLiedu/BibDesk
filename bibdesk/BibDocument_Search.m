@@ -251,7 +251,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
             rowToSelectAfterDelete = [tableView numberOfRows] - 1;
         if(rowToSelectAfterDelete != -1) {
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:rowToSelectAfterDelete] byExtendingSelection:NO];
-            [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollLocationAfterDelete];
+            [tableView setScrollPositionAsPercentage:scrollLocationAfterDelete];
         } else {
             // no prior selection
             [tableView setScrollPositionAsPercentage:[documentSearch previousScrollPositionAsPercentage]];

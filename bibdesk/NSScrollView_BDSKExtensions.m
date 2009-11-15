@@ -127,14 +127,6 @@ static NSMapTable *scrollViewPlacardViews = NULL;
     [self tile];
 }
 
-- (NSPoint)scrollPositionAsPercentage {
-    return [[self documentView] scrollPositionAsPercentage];
-}
-
-- (void)setScrollPositionAsPercentage:(NSPoint)scrollPosition {
-    [[self documentView] setScrollPositionAsPercentage:scrollPosition];
-}
-
 @end
 
 
