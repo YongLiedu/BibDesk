@@ -261,11 +261,11 @@ static id sharedController = nil;
 @implementation BDSKTextViewCompletionController (Private)
 
 // constants for determining the window height, which we adjust based on parent window location and screen size
-static NSInteger BDSKCompletionMaxWidth = 350;
-static NSInteger BDSKCompletionMaxHeight = 200;
-static NSInteger BDSKCompletionRowHeight = 17;
-static NSInteger BDSKCompletionMinWidth = 50;
-static NSInteger BDSKCompletionMinHeight = 20;
+#define BDSKCompletionMaxWidth  350.0
+#define BDSKCompletionMaxHeight 200.0
+#define BDSKCompletionRowHeight 17.0
+#define BDSKCompletionMinWidth  50.0
+#define BDSKCompletionMinHeight 20.0
 
 
 - (void)setupWindow;
