@@ -134,8 +134,8 @@
 					<true/>
 					<key>BDSKWarnOnRenameGroup</key>
 					<true/>
-					<key>BibEditor window autosave name</key>
-					<string></string>
+					<key>BDSKEditorFormShouldAutoCompleteKey</key>
+					<true/>
 					<key>Check spelling continuously while editing</key>
 					<false/>
 					<key>Column Widths by Name</key>
