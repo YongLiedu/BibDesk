@@ -44,11 +44,11 @@
 #pragma mark Templating support
 
 - (NSNumber *)numberByAddingOne {
-    return [NSNumber numberWithInt:[self integerValue] + 1];
+    return [NSNumber numberWithInteger:[self integerValue] + 1];
 }
 
 - (NSNumber *)numberBySubstractingOne {
-    return [NSNumber numberWithInt:[self integerValue] - 1];
+    return [NSNumber numberWithInteger:[self integerValue] - 1];
 }
 
 inline static NSString *romanNumeralForDigit(NSUInteger digit, NSString *i, NSString *v, NSString *x) {

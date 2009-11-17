@@ -548,7 +548,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
     CFMutableDictionaryRef opts = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     
     // we generally shouldn't need to index the (default) first 2000 terms just to get title and author
-    CFDictionaryAddValue(opts, kSKMaximumTerms, (CFNumberRef)[NSNumber numberWithInt:200]);
+    CFDictionaryAddValue(opts, kSKMaximumTerms, (CFNumberRef)[NSNumber numberWithInteger:200]);
     
     // kSKProximityIndexing is unused for now, since it slows things down and caused a crash on one of my files rdar://problem/4988691 (fixed in 10.5)
     CFDictionaryAddValue(opts, kSKProximityIndexing, kCFBooleanTrue);

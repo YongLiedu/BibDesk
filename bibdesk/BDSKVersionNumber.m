@@ -54,7 +54,7 @@
         while ([scanner isAtEnd] == NO && sep != nil) {
             NSInteger component;
             
-            if ([scanner scanInt:&component] && component >= 0) {
+            if ([scanner scanInteger:&component] && component >= 0) {
             
                 [mutableVersionString appendFormat:@"%@%ld", sep, (long)component];
                 

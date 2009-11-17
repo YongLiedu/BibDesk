@@ -104,7 +104,7 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
 
 - (void)setCode:(NSInteger)code;
 {
-    [self setValue:[NSNumber numberWithInt:code] forKey:@"__BDSKErrorCode"];
+    [self setValue:[NSNumber numberWithInteger:code] forKey:@"__BDSKErrorCode"];
 }
 
 - (NSInteger)code;

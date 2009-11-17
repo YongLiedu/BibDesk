@@ -110,7 +110,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     NSString *aName = [[self stringValue] stringByEscapingGroupPlistEntities];
     NSString *aPath = [[self scriptPath] stringByEscapingGroupPlistEntities];
     NSString *anArgs = [[self scriptArguments] stringByEscapingGroupPlistEntities];
-    NSNumber *aType = [NSNumber numberWithInt:[self scriptType]];
+    NSNumber *aType = [NSNumber numberWithInteger:[self scriptType]];
     return [NSDictionary dictionaryWithObjectsAndKeys:aName, @"group name", aPath, @"script path", anArgs, @"script arguments", aType, @"script type", nil];
 }
 

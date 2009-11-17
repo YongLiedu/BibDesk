@@ -195,7 +195,7 @@ static BDSKFiler *sharedFiler = nil;
         if (check && NO == [pub canSetURLForLinkedFile:file]) {
             
             [info setValue:NSLocalizedString(@"Incomplete information to generate file name.",@"") forKey:STATUS_KEY];
-            [info setValue:[NSNumber numberWithInt:BDSKIncompleteFieldsErrorMask] forKey:FLAG_KEY];
+            [info setValue:[NSNumber numberWithInteger:BDSKIncompleteFieldsErrorMask] forKey:FLAG_KEY];
             [info setValue:NSLocalizedString(@"Move anyway.",@"") forKey:FIX_KEY];
             [info setValue:newPath forKey:NEW_PATH_KEY];
             [self insertObject:info inErrorInfoDictsAtIndex:[self countOfErrorInfoDicts]];
@@ -215,7 +215,7 @@ static BDSKFiler *sharedFiler = nil;
                 NSDictionary *errorInfo = [error userInfo];
                 [info setValue:[errorInfo objectForKey:NSLocalizedRecoverySuggestionErrorKey] forKey:FIX_KEY];
                 [info setValue:[errorInfo objectForKey:NSLocalizedDescriptionKey] forKey:STATUS_KEY];
-                [info setValue:[NSNumber numberWithInt:[error code]] forKey:FLAG_KEY];
+                [info setValue:[NSNumber numberWithInteger:[error code]] forKey:FLAG_KEY];
                 [info setValue:newPath forKey:NEW_PATH_KEY];
                 [self insertObject:info inErrorInfoDictsAtIndex:[self countOfErrorInfoDicts]];
                 

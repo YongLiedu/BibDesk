@@ -279,7 +279,7 @@
     if (nil == data) {
         if (outError) {
             *outError = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:NSLocalizedString(@"Incorrect string encoding", @"")];
-            [*outError setValue:[NSNumber numberWithInt:encoding] forKey:NSStringEncodingErrorKey];
+            [*outError setValue:[NSNumber numberWithUnsignedInteger:encoding] forKey:NSStringEncodingErrorKey];
             [*outError setValue:[NSString stringWithFormat:NSLocalizedString(@"The file could not be converted to encoding \"%@\".  Please try a different encoding.", @""), [NSString localizedNameOfStringEncoding:encoding]] forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
         return nil;

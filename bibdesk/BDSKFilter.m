@@ -117,7 +117,7 @@
 
 - (NSDictionary *)dictionaryValue {
 	NSArray *conditionArray = [conditions arrayByPerformingSelector:@selector(dictionaryValue)];
-	NSNumber *conjunctionNumber = [NSNumber numberWithInt:conjunction];
+	NSNumber *conjunctionNumber = [NSNumber numberWithInteger:conjunction];
 	return [NSDictionary dictionaryWithObjectsAndKeys:conjunctionNumber, @"conjunction", conditionArray, @"conditions", nil];
 }
 

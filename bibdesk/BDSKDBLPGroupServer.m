@@ -210,8 +210,8 @@
     BDSKServerInfo *info = [self serverInfo];
     
     // no UI for providing years, so use 1900--present
-    NSNumber *startYear = [NSNumber numberWithInt:1900];
-    NSNumber *endYear = [NSNumber numberWithInt:[[NSCalendarDate date] yearOfCommonEra]];
+    NSNumber *startYear = [NSNumber numberWithInteger:1900];
+    NSNumber *endYear = [NSNumber numberWithInteger:[[NSCalendarDate date] yearOfCommonEra]];
     
     NSArray *searchResults = nil;
     if ([[info database] caseInsensitiveCompare:@"authors"] == NSOrderedSame) {
@@ -227,7 +227,7 @@
     else {
         BDSKDBLPAllPublicationsKeywordsYear *invocation = [[BDSKDBLPAllPublicationsKeywordsYear alloc] init];    
         [invocation setParameters:searchTerm
-                     in_startYear:startYear in_endYear:endYear in_limit:[NSNumber numberWithInt:100]];    
+                     in_startYear:startYear in_endYear:endYear in_limit:[NSNumber numberWithInteger:100]];    
         [scheduledService autorelease];
         scheduledService = invocation;
         searchResults = [[[invocation resultValue] retain] autorelease];

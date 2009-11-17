@@ -121,7 +121,7 @@
 {
     [publications addObject:anObject];
     [self addToItemsForCiteKeys:anObject];
-    [anObject setFileOrder:[NSNumber numberWithInt:[publications count]]];
+    [anObject setFileOrder:[NSNumber numberWithInteger:[publications count]]];
 }
 
 - (void)insertObject:(id)anObject atIndex:(NSUInteger)idx;

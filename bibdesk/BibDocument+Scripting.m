@@ -153,9 +153,9 @@
             if ([settings objectForKey:NSPrintFirstPage] || [settings objectForKey:NSPrintLastPage]) {
                 [settings setObject:[NSNumber numberWithBool:NO] forKey:NSPrintAllPages];
                 if ([settings objectForKey:NSPrintFirstPage] == nil)
-                    [settings setObject:[NSNumber numberWithInt:1] forKey:NSPrintLastPage];
+                    [settings setObject:[NSNumber numberWithInteger:1] forKey:NSPrintLastPage];
                 if ([settings objectForKey:NSPrintLastPage] == nil)
-                    [settings setObject:[NSNumber numberWithInt:[[pdfView document] pageCount]] forKey:NSPrintLastPage];
+                    [settings setObject:[NSNumber numberWithInteger:[[pdfView document] pageCount]] forKey:NSPrintLastPage];
             }
             [[printInfo dictionary] addEntriesFromDictionary:settings];
         }
@@ -876,12 +876,12 @@
 
             for (i = startIndex; i <= endIndex; i++) {
                 if (keyIsGroups) {
-                    [result addObject:[NSNumber numberWithInt:i]];
+                    [result addObject:[NSNumber numberWithInteger:i]];
                 } else {
                     curObj = [allGroups objectAtIndex:i];
                     curKeyIndex = [rangeKeyObjects indexOfObjectIdenticalTo:curObj];
                     if (curKeyIndex != NSNotFound)
-                        [result addObject:[NSNumber numberWithInt:curKeyIndex]];
+                        [result addObject:[NSNumber numberWithInteger:curKeyIndex]];
                 }
             }
             return result;
@@ -949,13 +949,13 @@
             
             while ((baseIndex >= 0) && (baseIndex < groupCount)) {
                 if (keyIsGroups) {
-                    [result addObject:[NSNumber numberWithInt:baseIndex]];
+                    [result addObject:[NSNumber numberWithInteger:baseIndex]];
                     break;
                 } else {
                     curObj = [allGroups objectAtIndex:baseIndex];
                     curKeyIndex = [relKeyObjects indexOfObjectIdenticalTo:curObj];
                     if (curKeyIndex != NSNotFound) {
-                        [result addObject:[NSNumber numberWithInt:curKeyIndex]];
+                        [result addObject:[NSNumber numberWithInteger:curKeyIndex]];
                         break;
                     }
                 }

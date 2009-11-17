@@ -171,7 +171,7 @@ static char BDSKConditionObservationContext;
 }
 
 - (NSDictionary *)dictionaryValue {
-	NSNumber *comparisonNumber = [NSNumber numberWithInt:[self comparison]];
+	NSNumber *comparisonNumber = [NSNumber numberWithInteger:[self comparison]];
 	NSString *escapedValue = [[self value] stringByEscapingGroupPlistEntities];
 	NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:key, @"key", escapedValue, @"value", comparisonNumber, @"comparison", [[self class] dictionaryVersion], @"version", nil];
 	return [dict autorelease];

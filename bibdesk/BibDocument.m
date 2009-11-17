@@ -1632,7 +1632,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSData *data = [RISString dataUsingEncoding:encoding allowLossyConversion:NO];
     if (nil == data && error) {
         *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]]];
-        [*error setValue:[NSNumber numberWithInt:encoding] forKey:NSStringEncodingErrorKey];
+        [*error setValue:[NSNumber numberWithUnsignedInteger:encoding] forKey:NSStringEncodingErrorKey];
     }
 	return data;
 }
@@ -1660,7 +1660,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSData *data = [s dataUsingEncoding:encoding allowLossyConversion:NO];
     if (nil == data && error) {
         *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]]];
-        [*error setValue:[NSNumber numberWithInt:encoding] forKey:NSStringEncodingErrorKey];
+        [*error setValue:[NSNumber numberWithUnsignedInteger:encoding] forKey:NSStringEncodingErrorKey];
     }        
 	return data;
 }
@@ -1801,7 +1801,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:NSLocalizedString(@"Incorrect encoding", @"Message in alert dialog when opening a document with different encoding")];
         [error setValue:[NSString stringWithFormat:NSLocalizedString(@"BibDesk tried to open the document using encoding %@, but it should have been opened with encoding %@.", @"Informative text in alert dialog when opening a document with different encoding"), [NSString localizedNameOfStringEncoding:encoding], [NSString localizedNameOfStringEncoding:encodingFromFile]] forKey:NSLocalizedRecoverySuggestionErrorKey];
         [error setValue:absoluteURL forKey:NSURLErrorKey];
-        [error setValue:[NSNumber numberWithUnsignedInt:encoding] forKey:NSStringEncodingErrorKey];
+        [error setValue:[NSNumber numberWithUnsignedInteger:encoding] forKey:NSStringEncodingErrorKey];
         
         // If we allow the user to reopen here, NSDocumentController puts up an open failure here when we return NO from this instance, and the message appears after the successfully opened file is on-screen...which is confusing, to say the least.
         NSAlert *encodingAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Incorrect encoding", @"error title when opening file")
@@ -1925,7 +1925,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(dataString == nil){
         error = [NSError mutableLocalErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unable to Interpret", @"Error description")];
         [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Unable to interpret data as %@.  Try a different encoding.", @"Error informative text"), [NSString localizedNameOfStringEncoding:encoding]] forKey:NSLocalizedRecoverySuggestionErrorKey];
-        [error setValue:[NSNumber numberWithInt:encoding] forKey:NSStringEncodingErrorKey];
+        [error setValue:[NSNumber numberWithUnsignedInteger:encoding] forKey:NSStringEncodingErrorKey];
         if(outError) *outError = error;
         return NO;
     }

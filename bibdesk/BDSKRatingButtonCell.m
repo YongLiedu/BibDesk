@@ -408,16 +408,16 @@
     } else if ([attribute isEqualToString:NSAccessibilityRoleDescriptionAttribute]) {
         return NSAccessibilityRoleDescriptionForUIElement(self);
     } else if ([attribute isEqualToString:NSAccessibilityValueAttribute]) {
-        return [NSNumber numberWithUnsignedInt:rating];
+        return [NSNumber numberWithUnsignedInteger:rating];
     } else if ([attribute isEqualToString:NSAccessibilityMinValueAttribute]) {
-        return [NSNumber numberWithUnsignedInt:0];
+        return [NSNumber numberWithUnsignedInteger:0];
     } else if ([attribute isEqualToString:NSAccessibilityMaxValueAttribute]) {
-        return [NSNumber numberWithUnsignedInt:maxRating];
+        return [NSNumber numberWithUnsignedInteger:maxRating];
     } else if ([attribute isEqualToString:NSAccessibilityAllowedValuesAttribute]) {
         NSMutableArray *values = [NSMutableArray array];
         NSUInteger i;
         for (i = 0; i <= maxRating; i++)
-            [values addObject:[NSNumber numberWithUnsignedInt:i]];
+            [values addObject:[NSNumber numberWithUnsignedInteger:i]];
         return values;
     } else if ([attribute isEqualToString:NSAccessibilityChildrenAttribute]) {
         return [NSArray array];

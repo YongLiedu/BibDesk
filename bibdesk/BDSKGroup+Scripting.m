@@ -451,7 +451,7 @@
     else
         return nil;
     
-    [info setValue:[NSNumber numberWithInt:serverType] forKey:@"type"];
+    [info setValue:[NSNumber numberWithInteger:serverType] forKey:@"type"];
     [info setValue:[serverInfo name] forKey:@"name"];
     [info setValue:[serverInfo database] forKey:@"database"];
     if ([serverInfo isZoom]) {

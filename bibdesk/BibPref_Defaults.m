@@ -82,7 +82,7 @@ static NSSet *alwaysDisabledFields = nil;
         [customFieldsSet removeAllObjects];
         
 		// Add Local File fields
-		type = [NSNumber numberWithInt:BDSKLocalFileType];
+		type = [NSNumber numberWithInteger:BDSKLocalFileType];
 		for (field in [sud arrayForKey:BDSKLocalFileFieldsKey]) {
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
 			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];
@@ -91,7 +91,7 @@ static NSSet *alwaysDisabledFields = nil;
 		}
 		
 		// Add Remote URL fields
-		type = [NSNumber numberWithInt:BDSKRemoteURLType];
+		type = [NSNumber numberWithInteger:BDSKRemoteURLType];
 		for (field in [sud arrayForKey:BDSKRemoteURLFieldsKey]) {
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
 			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];
@@ -100,7 +100,7 @@ static NSSet *alwaysDisabledFields = nil;
 		}
 		
 		// Add Boolean fields
-		type = [NSNumber numberWithInt:BDSKBooleanType];
+		type = [NSNumber numberWithInteger:BDSKBooleanType];
 		for (field in [sud arrayForKey:BDSKBooleanFieldsKey]) {
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
 			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];
@@ -109,7 +109,7 @@ static NSSet *alwaysDisabledFields = nil;
 		}
         
         // Add Tri-State fields
-		type = [NSNumber numberWithInt:BDSKTriStateType];
+		type = [NSNumber numberWithInteger:BDSKTriStateType];
 		for (field in [sud arrayForKey:BDSKTriStateFieldsKey]) {
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
 			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];
@@ -118,7 +118,7 @@ static NSSet *alwaysDisabledFields = nil;
 		}
         
 		// Add Rating fields
-		type = [NSNumber numberWithInt:BDSKRatingType];
+		type = [NSNumber numberWithInteger:BDSKRatingType];
 		for (field in [sud arrayForKey:BDSKRatingFieldsKey]){
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
 			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];
@@ -127,7 +127,7 @@ static NSSet *alwaysDisabledFields = nil;
 		}
         
 		// Add Citation fields
-		type = [NSNumber numberWithInt:BDSKCitationType];
+		type = [NSNumber numberWithInteger:BDSKCitationType];
 		for (field in [sud arrayForKey:BDSKCitationFieldsKey]) {
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
 			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];
@@ -136,7 +136,7 @@ static NSSet *alwaysDisabledFields = nil;
 		}
         
 		// Add Person fields
-		type = [NSNumber numberWithInt:BDSKPersonType];
+		type = [NSNumber numberWithInteger:BDSKPersonType];
 		for (field in [sud arrayForKey:BDSKPersonFieldsKey]) {
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
 			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];
@@ -145,7 +145,7 @@ static NSSet *alwaysDisabledFields = nil;
 		}        
 		
 		// Add any remaining Textual default fields at the beginning
-		type = [NSNumber numberWithInt:BDSKStringType];
+		type = [NSNumber numberWithInteger:BDSKStringType];
 		isDefault = [NSNumber numberWithBool:YES];
 		for (field in [defaultFields reverseObjectEnumerator]){
 			if([customFieldsSet containsObject:field])
@@ -500,7 +500,7 @@ static NSSet *alwaysDisabledFields = nil;
     if ([sender selectedSegment] == 0) { // add
         
         NSInteger row = [customFieldsArray count];
-        NSMutableDictionary *newDict = [NSMutableDictionary dictionaryWithObjectsAndKeys: @"Field", @"field", [NSNumber numberWithInt:BDSKStringType], @"type", [NSNumber numberWithBool:NO], @"default", nil]; // do not localize
+        NSMutableDictionary *newDict = [NSMutableDictionary dictionaryWithObjectsAndKeys: @"Field", @"field", [NSNumber numberWithInteger:BDSKStringType], @"type", [NSNumber numberWithBool:NO], @"default", nil]; // do not localize
         [customFieldsArray addObject:newDict];
         [defaultFieldsTableView reloadData];
         [defaultFieldsTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];

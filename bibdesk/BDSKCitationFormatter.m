@@ -108,7 +108,7 @@ static NSCharacterSet *keyCharSet = nil;
                 if ([[self delegate] citationFormatter:self isValidKey:keyString]) {
                     // we found a valid key, so now underline it and make it blue
                     [attrString addAttribute:NSForegroundColorAttributeName value:[NSColor blueColor] range:range];
-                    [attrString addAttribute:NSUnderlineStyleAttributeName value:[NSNumber numberWithInt:NSUnderlineStyleSingle] range:range];
+                    [attrString addAttribute:NSUnderlineStyleAttributeName value:[NSNumber numberWithInteger:NSUnderlineStyleSingle] range:range];
                     [attrString addAttribute:NSLinkAttributeName value:keyString range:range]; // this won't work, but who cares
                 }
             }

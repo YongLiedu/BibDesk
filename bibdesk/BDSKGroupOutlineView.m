@@ -231,7 +231,7 @@
         NSNotification *newNotification;
 
         newUserInfo = [NSMutableDictionary dictionaryWithDictionary:[notification userInfo]];
-        [newUserInfo setObject:[NSNumber numberWithInt:NSIllegalTextMovement] forKey:@"NSTextMovement"];
+        [newUserInfo setObject:[NSNumber numberWithInteger:NSIllegalTextMovement] forKey:@"NSTextMovement"];
         newNotification = [NSNotification notificationWithName:[notification name] object:[notification object] userInfo:newUserInfo];
         [super textDidEndEditing:notification];
 

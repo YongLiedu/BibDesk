@@ -245,7 +245,7 @@
         NSInteger value = [item integerValue];
         if (value != end + 1) {
             if (start != NSIntegerMin) {
-                NSArray *range = [[NSArray alloc] initWithObjects:[NSNumber numberWithInt:start], start == end ? nil : [NSNumber numberWithInt:end], nil];
+                NSArray *range = [[NSArray alloc] initWithObjects:[NSNumber numberWithInteger:start], start == end ? nil : [NSNumber numberWithInteger:end], nil];
                 [array addObject:range];
                 [range release];
             }
@@ -254,7 +254,7 @@
         end = value;
     }
     if (start != NSIntegerMin) {
-        NSArray *range = [[NSArray alloc] initWithObjects:[NSNumber numberWithInt:start], start == end ? nil : [NSNumber numberWithInt:end], nil];
+        NSArray *range = [[NSArray alloc] initWithObjects:[NSNumber numberWithInteger:start], start == end ? nil : [NSNumber numberWithInteger:end], nil];
         [array addObject:range];
         [range release];
     }

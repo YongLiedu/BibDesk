@@ -296,9 +296,9 @@ enum {
             case BDSKExactly: 
             case BDSKInLast: 
             case BDSKNotInLast: 
-                return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:numberValue], @"numberValue", [NSNumber numberWithInt:scriptingPeriodValue], @"periodValue", nil];
+                return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:numberValue], @"numberValue", [NSNumber numberWithInteger:scriptingPeriodValue], @"periodValue", nil];
             case BDSKBetween:
-                return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:numberValue], @"numberValue", [NSNumber numberWithInt:andNumberValue], @"andNumberValue", [NSNumber numberWithInt:scriptingPeriodValue], @"periodValue", nil];
+                return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:numberValue], @"numberValue", [NSNumber numberWithInteger:andNumberValue], @"andNumberValue", [NSNumber numberWithInteger:scriptingPeriodValue], @"periodValue", nil];
             case BDSKDate: 
             case BDSKAfterDate: 
             case BDSKBeforeDate: 
@@ -314,7 +314,7 @@ enum {
             case BDSKCountNotEqual:
             case BDSKCountLarger:
             case BDSKCountSmaller:
-                return [NSNumber numberWithInt:countValue];
+                return [NSNumber numberWithInteger:countValue];
             case BDSKAttachmentContain:
             case BDSKAttachmentNotContain:
             case BDSKAttachmentStartWith:

@@ -140,7 +140,7 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
 
 - (IBAction)changeStartupBehavior:(id)sender{
     NSInteger n = [[sender selectedCell] tag];
-    [sud setObject:[NSNumber numberWithInt:n] forKey:BDSKStartupBehaviorKey];
+    [sud setObject:[NSNumber numberWithInteger:n] forKey:BDSKStartupBehaviorKey];
     [self updateStartupBehaviorUI];
     if(n == 3 && [[defaultBibFileTextField stringValue] isEqualToString:@""])
         [self chooseAutoOpenFile:nil];
@@ -167,7 +167,7 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
     BDAlias *alias = [BDAlias aliasWithURL:[sheet URL]];
     
     [sud setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
-    [sud setObject:[NSNumber numberWithInt:3] forKey:BDSKStartupBehaviorKey];
+    [sud setObject:[NSNumber numberWithInteger:3] forKey:BDSKStartupBehaviorKey];
     [self updateDefaultBibFileUI];
     [self updateStartupBehaviorUI];
 }

@@ -135,7 +135,7 @@
 - (void)resetWithPublications:(NSArray *)pubs
 {
     CFMutableDataRef indexData = CFDataCreateMutable(NULL, 0);
-    NSDictionary *options = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:0], (id)kSKMaximumTerms, nil];
+    NSDictionary *options = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInteger:0], (id)kSKMaximumTerms, nil];
     @synchronized(self) {
         if (index) CFRelease(index);
         index = SKIndexCreateWithMutableData(indexData, (CFStringRef)BDSKSkimNotesString, kSKIndexInverted, (CFDictionaryRef)options);

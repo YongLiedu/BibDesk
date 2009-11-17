@@ -434,7 +434,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
             [note setValue:[NSData dataWithBytes:&qdBounds length:sizeof(Rect)] forKey:@"bounds"];
         }
         if (value = [note objectForKey:@"pageIndex"]) {
-            [note setValue:[NSNumber numberWithUnsignedInt:[value unsignedIntegerValue] + 1] forKey:@"pageIndex"];
+            [note setValue:[NSNumber numberWithUnsignedInteger:[value unsignedIntegerValue] + 1] forKey:@"pageIndex"];
         }
         if (value = [note objectForKey:@"borderStyle"]) {
             NSString *style = nil;

@@ -44,7 +44,7 @@
 - (BOOL)scanUnsignedInteger:(NSUInteger *)unsignedValue{
     NSUInteger rewindLocation = [self scanLocation];
     NSInteger intValue = 0;
-    BOOL returnValue = [self scanInt:&intValue];
+    BOOL returnValue = [self scanInteger:&intValue];
     if (returnValue && intValue < 0) {
         [self setScanLocation:rewindLocation];
         returnValue = NO;

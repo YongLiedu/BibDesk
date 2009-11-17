@@ -1185,13 +1185,13 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
                                           action:@selector(consolidateLinkedFiles:)
                                    keyEquivalent:@""
                                          atIndex:++i];
-                [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+                [item setRepresentedObject:[NSNumber numberWithUnsignedInteger:anIndex]];
                 
                 item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace File", @"Menu item title") stringByAppendingEllipsis]
                                           action:@selector(chooseLocalFile:)
                                    keyEquivalent:@""
                                          atIndex:++i];
-                [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+                [item setRepresentedObject:[NSNumber numberWithUnsignedInteger:anIndex]];
 
             }
         } else if (editorFlags.isEditable) {
@@ -1200,13 +1200,13 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
                                       action:@selector(chooseRemoteURL:)
                                keyEquivalent:@""
                                      atIndex:++i];
-            [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+            [item setRepresentedObject:[NSNumber numberWithUnsignedInteger:anIndex]];
         }
     }
     
     if (editorFlags.isEditable) {
         NSIndexSet *selectedIndexes = [fileView selectionIndexes];
-        if ([[[[publication files] objectsAtIndexes:selectedIndexes] valueForKey:@"isFileURL"] containsObject:[NSNumber numberWithInt:1]]) {
+        if ([[[[publication files] objectsAtIndexes:selectedIndexes] valueForKey:@"isFileURL"] containsObject:[NSNumber numberWithInteger:1]]) {
             i = [menu indexOfItemWithTag:FVRemoveMenuItemTag];
             item = [menu insertItemWithTitle:NSLocalizedString(@"Move To Trash", @"Menu item title")
                                       action:@selector(trashLinkedFiles:)

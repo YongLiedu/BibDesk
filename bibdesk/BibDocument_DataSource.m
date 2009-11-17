@@ -1781,13 +1781,13 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                                           action:@selector(chooseLinkedFile:)
                                    keyEquivalent:@""
                                          atIndex:++i];
-                [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+                [item setRepresentedObject:[NSNumber numberWithUnsignedInteger:anIndex]];
             } else {
                 item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace URL", @"Menu item title") stringByAppendingEllipsis]
                                           action:@selector(chooseLinkedURL:)
                                    keyEquivalent:@""
                                          atIndex:++i];
-                [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+                [item setRepresentedObject:[NSNumber numberWithUnsignedInteger:anIndex]];
             }
         }
         

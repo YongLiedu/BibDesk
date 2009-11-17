@@ -511,7 +511,7 @@
                 [chooseMainPagePopup addItemWithTitle:NSLocalizedString(@"Separate templates", @"Popup menu item title")];
                 [chooseMainPagePopup addItemsWithTitles:[fileNames valueForKey:@"lastPathComponent"]];
                 [chooseMainPagePopup selectItemAtIndex:0];
-                NSDictionary *contextInfo = [[NSDictionary alloc] initWithObjectsAndKeys:fileNames, @"fileNames", [NSNumber numberWithInt:idx], @"index", nil];
+                NSDictionary *contextInfo = [[NSDictionary alloc] initWithObjectsAndKeys:fileNames, @"fileNames", [NSNumber numberWithInteger:idx], @"index", nil];
                 [NSApp beginSheet:chooseMainPageSheet modalForWindow:[[self view] window]
                                                        modalDelegate:self
                                                       didEndSelector:@selector(chooseMainPageSheetDidEnd:returnCode:contextInfo:)
@@ -644,7 +644,7 @@
         NSNotification *newNotification;
 
         newUserInfo = [NSMutableDictionary dictionaryWithDictionary:[notification userInfo]];
-        [newUserInfo setObject:[NSNumber numberWithInt:NSIllegalTextMovement] forKey:@"NSTextMovement"];
+        [newUserInfo setObject:[NSNumber numberWithInteger:NSIllegalTextMovement] forKey:@"NSTextMovement"];
         newNotification = [NSNotification notificationWithName:[notification name] object:[notification object] userInfo:newUserInfo];
         [super textDidEndEditing:notification];
 

@@ -206,7 +206,7 @@ static NSInteger encodingCompare(const void *firstPtr, const void *secondPtr) {
             CFStringEncoding cfEncoding = tmp[cnt];
             NSStringEncoding nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
             if (nsEncoding && [NSString localizedNameOfStringEncoding:nsEncoding] && cfEncoding != kCFStringEncodingMacSymbol && cfEncoding != kCFStringEncodingMacDingbats && cfEncoding != kBDStringEncodingMacKeyboardSymbol)
-                [allEncodings addObject:[NSNumber numberWithUnsignedInt:nsEncoding]];
+                [allEncodings addObject:[NSNumber numberWithUnsignedInteger:nsEncoding]];
         }
         free(tmp);
     }
@@ -251,7 +251,7 @@ static NSInteger encodingCompare(const void *firstPtr, const void *secondPtr) {
     [popup removeAllItems];
 
     // Make sure the initial selected encoding appears in the list
-    if (NO == [encs containsObject:[NSNumber numberWithUnsignedInt:selectedEncoding]]) encs = [encs arrayByAddingObject:[NSNumber numberWithUnsignedInt:selectedEncoding]];
+    if (NO == [encs containsObject:[NSNumber numberWithUnsignedInteger:selectedEncoding]]) encs = [encs arrayByAddingObject:[NSNumber numberWithUnsignedInteger:selectedEncoding]];
 
     numEncodings = [encs count];
 
@@ -295,12 +295,12 @@ static NSInteger encodingCompare(const void *firstPtr, const void *secondPtr) {
                 encs = [[NSMutableArray alloc] init];
             while (defaultStringEncodings[cnt] != -1) {
                 if ((encoding = CFStringConvertEncodingToNSStringEncoding(defaultStringEncodings[cnt++])) != kCFStringEncodingInvalidId) {
-                    [encs addObject:[NSNumber numberWithUnsignedInt:encoding]];
+                    [encs addObject:[NSNumber numberWithUnsignedInteger:encoding]];
                     if (encoding == defaultEncoding) hasDefault = YES;
                 }
             }
             if (hasDefault == NO)
-                [encs addObject:[NSNumber numberWithUnsignedInt:defaultEncoding]];
+                [encs addObject:[NSNumber numberWithUnsignedInteger:defaultEncoding]];
         }
         encodings = encs;
     }
@@ -315,7 +315,7 @@ static NSInteger encodingCompare(const void *firstPtr, const void *secondPtr) {
         NSInteger cnt, numEncodings = [encodingMatrix numberOfRows];
         for (cnt = 0; cnt < numEncodings; cnt++) {
             NSCell *cell = [encodingMatrix cellAtRow:cnt column:0];
-            [cell setState:[encodings containsObject:[NSNumber numberWithUnsignedInt:[cell tag]]] ? NSOnState : NSOffState];
+            [cell setState:[encodings containsObject:[NSNumber numberWithUnsignedInteger:[cell tag]]] ? NSOnState : NSOffState];
         }
     }
 
@@ -349,7 +349,7 @@ static NSInteger encodingCompare(const void *firstPtr, const void *secondPtr) {
 
     for (cnt = 0; cnt < numRows; cnt++) {
         NSCell *cell = [encodingMatrix cellAtRow:cnt column:0];
-        if (((NSUInteger)[cell tag] != 0) && ([cell state] == NSOnState)) [encs addObject:[NSNumber numberWithUnsignedInt:[cell tag]]];
+        if (((NSUInteger)[cell tag] != 0) && ([cell state] == NSOnState)) [encs addObject:[NSNumber numberWithUnsignedInteger:[cell tag]]];
     }
 
     [encodings autorelease];

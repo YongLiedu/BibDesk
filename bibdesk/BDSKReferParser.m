@@ -135,7 +135,7 @@ static void fixDateInDictionary(NSMutableDictionary *pubDict)
         NSScanner *scanner = [[NSScanner alloc] initWithString:dateString];
         [scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL];
         NSInteger year;
-        if ([scanner scanInt:&year])
+        if ([scanner scanInteger:&year])
             [pubDict setObject:[NSString stringWithFormat:@"%ld", (long)year] forKey:BDSKYearString];
         [scanner release];
     }

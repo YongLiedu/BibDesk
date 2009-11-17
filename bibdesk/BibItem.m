@@ -1366,11 +1366,11 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     }else if([field isURLField]){
         return [self imageForURLField:field];
     }else if([field isRatingField]){
-        return [NSNumber numberWithInt:[self ratingValueOfField:field]];
+        return [NSNumber numberWithInteger:[self ratingValueOfField:field]];
     }else if([field isBooleanField]){
         return [NSNumber numberWithBool:[self boolValueOfField:field]];
     }else if([field isTriStateField]){
-        return [NSNumber numberWithInt:[self triStateValueOfField:field]];
+        return [NSNumber numberWithInteger:[self triStateValueOfField:field]];
     }else if([field isCitationField]){
         return [self valueOfField:field inherit:NO];
     }else if([field isEqualToString:BDSKPubTypeString]){
@@ -1523,7 +1523,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         [info setObject:array forKey:(NSString *)kMDItemKeywords];
 
     if(rating = [self rating])
-        [info setObject:[NSNumber numberWithInt:rating] forKey:(NSString *)kMDItemStarRating];
+        [info setObject:[NSNumber numberWithInteger:rating] forKey:(NSString *)kMDItemStarRating];
 
     // properly supporting tri-state fields will need a new key of type CFNumber; it will only show up as a number in get info, though, which is not particularly useful
     if([BDSKReadString isBooleanField])
@@ -1561,7 +1561,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     [dict setObject:[self citeKey] forKey:@"citeKey"];
     // displayTitle removes TeX
     [dict setObject:[self displayTitle] forKey:@"title"];
-    [dict setObject:[NSNumber numberWithInt:[self numberOfAuthorsOrEditors]] forKey:@"numberOfNames"];
+    [dict setObject:[NSNumber numberWithInteger:[self numberOfAuthorsOrEditors]] forKey:@"numberOfNames"];
     
     // now some optional keys that may be useful, but aren't guaranteed
     id value = [[[self firstAuthorOrEditor] fullLastName] stringByRemovingTeX];
@@ -1575,7 +1575,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     // passing this as an NSString causes a "more significant bytes than room to hold them" exception in the client
     value = [self valueOfField:BDSKYearString];
     if([NSString isEmptyString:value] == NO &&
-        (value = [NSNumber numberWithInt:[value integerValue]]))
+        (value = [NSNumber numberWithInteger:[value integerValue]]))
     [dict setObject:value forKey:@"year"];
     
     return dict;
@@ -2389,8 +2389,8 @@ static void addFilesToArray(const void *value, void *context)
 }
 
 // for main tableview sort descriptor
-- (NSNumber *)countOfLocalFilesAsNumber { return [NSNumber numberWithInt:[[self localFiles] count]]; }
-- (NSNumber *)countOfRemoteURLsAsNumber { return [NSNumber numberWithInt:[[self remoteURLs] count]]; }
+- (NSNumber *)countOfLocalFilesAsNumber { return [NSNumber numberWithInteger:[[self localFiles] count]]; }
+- (NSNumber *)countOfRemoteURLsAsNumber { return [NSNumber numberWithInteger:[[self remoteURLs] count]]; }
 
 - (NSArray *)files { return files; }
 

@@ -320,7 +320,7 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
         if (convertedLength != length){
             if(error != NULL){
                 *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert string to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]]];
-                [*error setValue:[NSNumber numberWithInt:encoding] forKey:NSStringEncodingErrorKey];
+                [*error setValue:[NSNumber numberWithUnsignedInteger:encoding] forKey:NSStringEncodingErrorKey];
             }
             return NO;
         }
@@ -335,7 +335,7 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
         // raise if the conversion wasn't possible, since we're not using a loss byte
         if(error != NULL){
             *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert string to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]]];
-            [*error setValue:[NSNumber numberWithInt:encoding] forKey:NSStringEncodingErrorKey];
+            [*error setValue:[NSNumber numberWithUnsignedInteger:encoding] forKey:NSStringEncodingErrorKey];
         }
         return NO;
     }
@@ -355,7 +355,7 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
         if(nil == string){
             if(error != NULL){
                 *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert data to string with encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:toEncoding]]];
-                [*error setValue:[NSNumber numberWithInt:toEncoding] forKey:NSStringEncodingErrorKey];
+                [*error setValue:[NSNumber numberWithUnsignedInteger:toEncoding] forKey:NSStringEncodingErrorKey];
             }
             return NO;
         }

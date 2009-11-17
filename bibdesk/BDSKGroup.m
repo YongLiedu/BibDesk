@@ -204,7 +204,7 @@ static NSString *createUniqueID(void)
 }
 
 - (NSNumber *)numberValue {
-	return [NSNumber numberWithInt:[self count]];
+	return [NSNumber numberWithInteger:[self count]];
 }
 
 - (NSString *)editingStringValue {

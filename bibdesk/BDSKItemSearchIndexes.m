@@ -173,7 +173,7 @@ static void removeFromIndex(const void *key, const void *value, void *context)
     SKIndexRef skIndex;
     
     // Search Kit defaults to indexing the first 2000 terms.  This is almost never what we want for BibItem searching, so set it to be unlimited (zero, of course).
-    NSDictionary *options = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:0], (id)kSKMaximumTerms, nil];
+    NSDictionary *options = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInteger:0], (id)kSKMaximumTerms, nil];
     for (NSString *fieldName in [[self class] indexedFields]) {
         indexData = CFDataCreateMutable(NULL, 0);
         skIndex = SKIndexCreateWithMutableData(indexData, (CFStringRef)fieldName, kSKIndexInverted, (CFDictionaryRef)options);

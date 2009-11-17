@@ -111,7 +111,7 @@
     }
     [self clearPromisedTypesForPasteboard:pboard];
     [pboard declareTypes:types owner:self];
-	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:items, @"items", types, @"types", [NSNumber numberWithInt:dragCopyType], @"dragCopyType", nil];
+	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:items, @"items", types, @"types", [NSNumber numberWithInteger:dragCopyType], @"dragCopyType", nil];
 	[promisedPboardTypes setObject:dict forKey:[pboard name]];
 }
 

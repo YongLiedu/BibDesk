@@ -191,7 +191,7 @@ static Class webParserClassForType(NSInteger stringType)
 		[dict setObject:name forKey:NAME_KEY];
 		if (address) { [dict setObject:address forKey:ADDRESS_KEY]; }
 		if (description) { [dict setObject:description forKey:DESCRIPTION_KEY]; }
-		NSNumber * flagsNumber = [NSNumber numberWithInt:flags];
+		NSNumber * flagsNumber = [NSNumber numberWithInteger:flags];
 		[dict setObject:flagsNumber forKey:FLAGS_KEY];
 		result = dict;
 	}
