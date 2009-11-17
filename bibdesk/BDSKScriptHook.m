@@ -62,7 +62,7 @@ static unsigned long scriptHookID = 0;
             [self release];
             self = nil;
         } else {
-            uniqueID = [[NSNumber alloc] initWithInt:++scriptHookID];
+            uniqueID = [[NSNumber alloc] initWithInteger:++scriptHookID];
             name = [aName retain];
             script = [aScript retain];
             field = nil;
