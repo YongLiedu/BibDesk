@@ -49,7 +49,7 @@ static NSStringEncoding fallbackEncoding = kCFStringEncodingInvalidId;
 @interface ZOOMRecord (Private)
 
 // converts the supplied buffer to an NSData instance in UTF-8 encoding; if buf is not MARC-8, you get garbage back
-static NSData *copyMARC8BytesToUTF8(const char *buf, int length);
+static NSData *copyMARC8BytesToUTF8(const char *buf, NSInteger length);
 
 // converts the NSData instance for the specified key to an NSString; guaranteed non-nil
 - (NSString *)copyStringValueForKey:(NSString *)aKey;
@@ -201,7 +201,7 @@ static NSData *copyMARC8BytesToUTF8(const char *buf, int length);
 @implementation ZOOMRecord (Private)
 
 // yaz_iconv() usage example is in record_iconv_return() in zoom-c.c
-static NSData *copyMARC8BytesToUTF8(const char *buf, int length)
+static NSData *copyMARC8BytesToUTF8(const char *buf, NSInteger length)
 {
     yaz_iconv_t cd = 0;
     size_t sz = length;
@@ -285,7 +285,7 @@ static NSData *copyMARC8BytesToUTF8(const char *buf, int length)
 - (NSString *)copyStringValueForKey:(NSString *)aKey;
 {
     NSData *data = [self valueForKey:aKey];
-    unsigned length = [data length];
+    NSUInteger length = [data length];
     
     NSString *nsString = nil;
     
@@ -315,7 +315,7 @@ static NSData *copyMARC8BytesToUTF8(const char *buf, int length)
 
 - (void)cacheRepresentationForKey:(NSString *)aKey;
 {
-    int length;
+    NSInteger length;
     
     // length will be -1 for some types, so we'll use strlen for those
     const void *bytes = ZOOM_record_get(_record, [aKey UTF8String], &length);

@@ -53,7 +53,7 @@ enum {
     UNIMARC =  4,
     XML     =  5
 };
-typedef int ZOOMSyntaxType;
+typedef NSInteger ZOOMSyntaxType;
 
 /*!
     @class       ZOOMRecord 

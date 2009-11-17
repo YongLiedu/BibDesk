@@ -56,7 +56,7 @@
     static const char *config = NULL;
     if (NULL == config) {
         NSString *str = [self defaultConfigString];
-        unsigned len = ([str lengthOfBytesUsingEncoding:NSASCIIStringEncoding] + 1);
+        NSUInteger len = ([str lengthOfBytesUsingEncoding:NSASCIIStringEncoding] + 1);
         char *buf = NSZoneMalloc(NULL, sizeof(char) * len);
         [str getCString:buf maxLength:len encoding:NSASCIIStringEncoding];
         config = buf ? buf : "";
@@ -105,7 +105,7 @@
 
 - (id)copyWithZone:(NSZone *)zone { return [self retain]; }
 
-- (unsigned int)hash { return [_queryString hash]; }
+- (NSUInteger)hash { return [_queryString hash]; }
 
 - (BOOL)isEqualToQuery:(ZOOMQuery *)aQuery;
 {
@@ -137,7 +137,7 @@
     self = [super init];
     if (self) {
         const char *config_cstr = config ? [config UTF8String] : [ZOOMQuery defaultConfigCString];
-        unsigned len = strlen(config_cstr) + 1;
+        size_t len = strlen(config_cstr) + 1;
         char *copy = NSZoneMalloc([self zone], len * sizeof(char));
         
         // copy so that we can free it later

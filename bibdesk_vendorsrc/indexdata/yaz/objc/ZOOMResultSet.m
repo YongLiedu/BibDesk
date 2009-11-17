@@ -54,12 +54,12 @@
     [super dealloc];
 }
 
-- (unsigned int)countOfRecords;
+- (NSUInteger)countOfRecords;
 {
     return ZOOM_resultset_size(_resultSet);
 }
 
-- (ZOOMRecord *)recordAtIndex:(unsigned int)index;
+- (ZOOMRecord *)recordAtIndex:(NSUInteger)index;
 {
     NSParameterAssert(index < [self countOfRecords]);
     return [ZOOMRecord recordWithZoomRecord:ZOOM_resultset_record(_resultSet, index) charSet:_charSetName];
@@ -75,7 +75,7 @@
 
 - (NSArray *)recordsInRange:(NSRange)range;
 {
-    unsigned count = range.length;
+    NSUInteger count = range.length;
 
     if (count)
         NSParameterAssert(NSMaxRange(range) <= [self countOfRecords]);
@@ -86,7 +86,7 @@
     // since we're using a small buffer, we can keep everything on the stack
     ZOOM_record recordBuffer[BATCH_SIZE];
     ZOOMRecord *record;
-    unsigned i;
+    NSUInteger i;
     
     size_t bufferSize = sizeof(ZOOM_record) * BATCH_SIZE;
     

@@ -48,7 +48,7 @@
     @private
     ZOOM_connection       _connection;
     NSString             *_hostName;
-    int                   _portNum;
+    NSInteger                   _portNum;
     NSString             *_dataBase;
     NSString             *_charSetName;    // can force result encoding, since we require a connection per-host
     
@@ -66,7 +66,7 @@
     @param      dbase Database name.
     @result     (description)
 */
-- (id)initWithHost:(NSString *)hostName port:(int)portNum database:(NSString *)dbase;
+- (id)initWithHost:(NSString *)hostName port:(NSInteger)portNum database:(NSString *)dbase;
 
 /*!
     @method     initWithPropertyList:

@@ -47,7 +47,7 @@
     }
 }
 
-- (id)initWithHost:(NSString *)hostName port:(int)portNum database:(NSString *)dbase;
+- (id)initWithHost:(NSString *)hostName port:(NSInteger)portNum database:(NSString *)dbase;
 {
     if (self = [super init]) {
         
@@ -62,13 +62,13 @@
         if (_dataBase) {
             // we have to append port as well, if there's a specific database
             if (_portNum)
-                _connectHost = [[hostName stringByAppendingFormat:@":%d/%@", _portNum, _dataBase] copy];
+                _connectHost = [[hostName stringByAppendingFormat:@":%ld/%@", (long)_portNum, _dataBase] copy];
             else
                 _connectHost = [[hostName stringByAppendingFormat:@"/%@", _dataBase] copy];
             
         } else {
             if (_portNum)
-                _connectHost = [[hostName stringByAppendingFormat:@":%d", _portNum] copy];
+                _connectHost = [[hostName stringByAppendingFormat:@":%ld", (long)_portNum] copy];
             else
                 _connectHost = [hostName copy];
         }
@@ -108,7 +108,7 @@
 {
     NSMutableDictionary *plist = [NSMutableDictionary dictionary];
     [plist setObject:_hostName forKey:@"_hostName"];
-    [plist setObject:[NSNumber numberWithInt:_portNum] forKey:@"_portNum"];
+    [plist setObject:[NSNumber numberWithInteger:_portNum] forKey:@"_portNum"];
     [plist setObject:_charSetName forKey:@"_charSetName"];
     [plist setObject:_options forKey:@"_options"];
     
@@ -123,7 +123,7 @@
 - (id)initWithPropertyList:(id)plist;
 {
     self = [self initWithHost:[plist objectForKey:@"_hostName"] 
-                         port:[[plist objectForKey:@"_portNum"] intValue] 
+                         port:[[plist objectForKey:@"_portNum"] integerValue] 
                      database:[plist objectForKey:@"_dataBase"]];
     
     // set to default in init...

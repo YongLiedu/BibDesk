@@ -61,7 +61,7 @@
     @abstract   Returns the number of records in the result set.
     @result     Returns zero for an empty result set.
 */
-- (unsigned int)countOfRecords;
+- (NSUInteger)countOfRecords;
 
 /*!
     @method     recordAtIndex:
@@ -70,7 +70,7 @@
     @param      index Index of the record to extract.  Must not exceed the number of available records.
     @result     A ZOOMRecord instance.  The caller is responsible for retaining this object.
 */
-- (ZOOMRecord *)recordAtIndex:(unsigned int)index;
+- (ZOOMRecord *)recordAtIndex:(NSUInteger)index;
 
 /*!
     @method     allRecords
