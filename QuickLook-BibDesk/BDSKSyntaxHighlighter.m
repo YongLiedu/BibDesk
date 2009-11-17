@@ -43,7 +43,7 @@
 + (NSData *)HTMLDataWithBibTeXString:(NSString *)aString;
 {
     NSAttributedString *attrString = [self highlightedStringWithBibTeXString:aString];
-    NSDictionary *docAttrs = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:NSUTF8StringEncoding], NSCharacterEncodingDocumentAttribute, NSHTMLTextDocumentType, NSDocumentTypeDocumentAttribute, [NSColor whiteColor], NSBackgroundColorDocumentAttribute, nil];
+    NSDictionary *docAttrs = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInteger:NSUTF8StringEncoding], NSCharacterEncodingDocumentAttribute, NSHTMLTextDocumentType, NSDocumentTypeDocumentAttribute, [NSColor whiteColor], NSBackgroundColorDocumentAttribute, nil];
     return [attrString dataFromRange:NSMakeRange(0, [attrString length]) documentAttributes:docAttrs error:NULL];
 }
 
