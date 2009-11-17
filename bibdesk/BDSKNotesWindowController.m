@@ -106,9 +106,9 @@
     for (NSDictionary *dict in [url SkimNotes]) {
         NSMutableDictionary *note = [dict mutableCopy];
         
-        [note setObject:[NSNumber numberWithFloat:19.0] forKey:@"rowHeight"];
+        [note setObject:[NSNumber numberWithDouble:19.0] forKey:@"rowHeight"];
         if ([[dict valueForKey:@"type"] isEqualToString:@"Note"])
-            [note setObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithFloat:85.0], @"rowHeight", [dict valueForKey:@"text"], @"contents", nil] forKey:@"child"];
+            [note setObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithDouble:85.0], @"rowHeight", [dict valueForKey:@"text"], @"contents", nil] forKey:@"child"];
         
         [notes addObject:note];
         [note release];
@@ -176,18 +176,18 @@
         return [item valueForKey:@"contents"];
     } else if ([tcID isEqualToString:@"page"]) {
         NSNumber *pageNumber = [item valueForKey:@"pageIndex"];
-        return pageNumber ? [NSString stringWithFormat:@"%i", [pageNumber integerValue] + 1] : nil;
+        return pageNumber ? [NSString stringWithFormat:@"%ld", (long)[pageNumber integerValue] + 1] : nil;
     }
     return nil;
 }
 
 - (CGFloat)outlineView:(NSOutlineView *)ov heightOfRowByItem:(id)item {
     NSNumber *heightNumber = [item valueForKey:@"rowHeight"];
-    return heightNumber ? [heightNumber floatValue] : 17.0;
+    return heightNumber ? [heightNumber doubleValue] : 17.0;
 }
 
 - (void)outlineView:(NSOutlineView *)ov setHeightOfRow:(NSInteger)newHeight byItem:(id)item {
-    [item setObject:[NSNumber numberWithFloat:newHeight] forKey:@"rowHeight"];
+    [item setObject:[NSNumber numberWithDouble:newHeight] forKey:@"rowHeight"];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov canResizeRowByItem:(id)item {

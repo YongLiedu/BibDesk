@@ -45,7 +45,7 @@
 #define kBDSKPerformBibdeskAction		'pAct'
 #define kBDSKPrepositionForScriptHook	'fshk'
 
-static unsigned long scriptHookID = 0;
+static NSUInteger scriptHookID = 0;
 
 @implementation BDSKScriptHook
 

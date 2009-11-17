@@ -277,7 +277,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [shownPublications addObjectsFromArray:[pubArray itemsForIdentifierURLs:[foundURLSet allObjects]]];
     
     for (BibItem *aPub in [self shownPublications])
-        [aPub setSearchScore:[[scores objectForKey:[aPub identifierURL]] floatValue]];
+        [aPub setSearchScore:[[scores objectForKey:[aPub identifierURL]] doubleValue]];
     
     [self sortPubsByKey:nil];
     [self selectPublications:[documentSearch previouslySelectedPublications]];    

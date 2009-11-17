@@ -679,7 +679,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 + (NSString *)TeXStringWithHTMLString:(NSString *)htmlString;
 {
     const char *str = [htmlString UTF8String];
-    int ln = strlen(str);
+    NSInteger ln = strlen(str);
     FILE *freport = stdout;
     char *html_fn = NULL;
     BOOL in_math = NO;
@@ -781,12 +781,12 @@ http://home.planet.nl/~faase009/GNU.txt
                     {   if (freport != NULL && option_warn)
                         if (html_ch[0] == '\0')
                             fprintf(freport,
-                                    "%s (%d) : Replace `&' by `&amp;'.\n",
-                                    html_fn, ln);
+                                    "%s (%ld) : Replace `&' by `&amp;'.\n",
+                                    html_fn, (long)ln);
                         else
                             fprintf(freport,
-                                    "%s (%d) : Unknown sequence `&%s;'.\n",
-                                    html_fn, ln, html_ch);
+                                    "%s (%ld) : Unknown sequence `&%s;'.\n",
+                                    html_fn, (long)ln, html_ch);
                         ch = *str;
                     }
             }
@@ -794,17 +794,17 @@ http://home.planet.nl/~faase009/GNU.txt
                     ch = *str;
                 else if (option_warn && freport != NULL)
                     fprintf(freport,
-                            "%s (%d) : Unknown character %d (decimal)\n",
-                            html_fn, ln, (unsigned char)*str);
+                            "%s (%d) : Unknown character %ld (decimal)\n",
+                            html_fn, (long)ln, (unsigned char)*str);
                 if (mString)
                 {   if (in_verb)
                 {   
                     [mString appendFormat:@"%c", ch != '\0' ? ch : ' '];
                     if (   special && freport != NULL && option_warn
                            && v < NR_CH_M)
-                    {   fprintf(freport, "%s (%d) : ", html_fn, ln);
+                    {   fprintf(freport, "%s (%ld) : ", html_fn, (long)ln);
                         if (html_ch[0] == '\0')
-                            fprintf(freport, "character %d (decimal)", 
+                            fprintf(freport, "character %c (decimal)", 
                                     (unsigned char) *str);
                         else
                             fprintf(freport, "sequence `&%s;'", html_ch);
@@ -833,10 +833,10 @@ http://home.planet.nl/~faase009/GNU.txt
                         if (o == NULL)
                         {   if (freport != NULL && option_warn)
                         {   fprintf(freport,
-                                    "%s (%d) : no LaTeX representation for ",
-                                    html_fn, ln);
+                                    "%s (%ld) : no LaTeX representation for ",
+                                    html_fn, (long)ln);
                             if (html_ch[0] == '\0')
-                                fprintf(freport, "character %d (decimal)\n", 
+                                fprintf(freport, "character %c (decimal)\n", 
                                         (unsigned char) *str);
                             else
                                 fprintf(freport, "sequence `&%s;'\n", html_ch);
@@ -1619,7 +1619,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     while (ptr < end) {
         if (*ptr > 127) {
             APPEND_PREVIOUS();
-            [result appendFormat:@"&#%d;", (int)*ptr];
+            [result appendFormat:@"&#%ld;", (long)*ptr];
         } else if (*ptr == '&') {
             APPEND_PREVIOUS();
             [result appendString:@"&amp;"];

@@ -41,7 +41,6 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import <sys/stat.h>
 
-volatile int caughtSignal = 0;
 
 @interface BDSKShellTask : NSObject {
     NSTask *task;
@@ -130,7 +129,7 @@ volatile int caughtSignal = 0;
     NSString *script;
     NSData *scriptData;
     NSMutableDictionary *currentAttributes;
-    unsigned long currentMode;
+    NSUInteger currentMode;
     NSData *output = nil;
 
     // ---------- Check the shell and create the script ----------

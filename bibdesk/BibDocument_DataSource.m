@@ -209,7 +209,7 @@
     NSMutableDictionary *columns = [NSMutableDictionary dictionaryWithCapacity:5];
     
     for (NSTableColumn *tc in [tableView tableColumns]) {
-        [columns setObject:[NSNumber numberWithFloat:[tc width]]
+        [columns setObject:[NSNumber numberWithDouble:[tc width]]
                     forKey:[tc identifier]];
     }
     return columns;
@@ -437,7 +437,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                             NSError *xerror = nil;
                             // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
                             if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:&xerror] == NO)
-                                NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
+                                NSLog(@"%@ line %ld: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, (long)__LINE__, xerror);
                         }
                         row = [rowIndexes indexGreaterThanIndex:row];
                     }
@@ -493,7 +493,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                                 NSError *xerror = nil;
                                 // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
                                 if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:&xerror] == NO)
-                                    NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
+                                    NSLog(@"%@ line %ld: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, (long)__LINE__, xerror);
                             }
                         }
                         row = [rowIndexes indexGreaterThanIndex:row];

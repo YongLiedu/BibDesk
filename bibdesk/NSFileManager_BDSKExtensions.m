@@ -962,7 +962,7 @@ FSOpenIterator:
     NSParameterAssert(0 != nsEncoding);
     CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(nsEncoding);
     CFStringRef name = CFStringConvertEncodingToIANACharSetName(cfEncoding);
-    NSString *encodingString = [NSString stringWithFormat:@"%@;%u", name, cfEncoding];
+    NSString *encodingString = [NSString stringWithFormat:@"%@;%lu", name, (unsigned long)cfEncoding];
     return [[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:@"com.apple.TextEncoding" toValue:[encodingString dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:error];
 }
 

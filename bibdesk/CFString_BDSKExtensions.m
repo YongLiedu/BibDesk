@@ -165,7 +165,7 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingCharactersInSet(CFAllocatorRe
     NSCAssert1(buffer != NULL, @"failed to allocate memory for string of length %ld", (long)length);
     
     BOOL isFirst = NO;
-    int bufCnt = 0;
+    NSInteger bufCnt = 0;
     for(cnt = 0; cnt < length; cnt++){
         ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
         if(!__BDCharacterIsContainedInASCIISet(ch, charSet)){
@@ -305,7 +305,7 @@ uint32_t __BDFastHash(CFStringRef aString)
     // Implementation from Apple's WebCore/khtml/xml/dom_stringimpl.cpp, designed
     // to hash UTF-16 characters.
     
-    unsigned int l = CFStringGetLength(aString);
+    CFIndex l = CFStringGetLength(aString);
     uint32_t fastHash = PHI;
     uint32_t tmp;
     
@@ -326,7 +326,7 @@ uint32_t __BDFastHash(CFStringRef aString)
         s = buf;
     }
     
-    int rem = l & 1;
+    CFIndex rem = l & 1;
     l >>= 1;
     
     // Main loop
@@ -388,7 +388,7 @@ CFStringRef __BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef al
     
     NSCAssert1(buffer != NULL, @"failed to allocate memory for string of length %ld", (long)length);
     
-    int bufCnt = 0;
+    NSInteger bufCnt = 0;
     BOOL ignoreNextNewline = NO;
     
     for(cnt = 0; cnt < length; cnt++){

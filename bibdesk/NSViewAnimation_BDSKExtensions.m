@@ -45,7 +45,7 @@
     static NSTimeInterval defaultAnimationTimeInterval = -1.0;
     if (defaultAnimationTimeInterval < 0.0) {
         NSNumber *n = [[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKDefaultAnimationTimeInterval"];
-        defaultAnimationTimeInterval = n ? [n floatValue] : 0.15;
+        defaultAnimationTimeInterval = n ? [n doubleValue] : 0.15;
     }
     return defaultAnimationTimeInterval;
 }

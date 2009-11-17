@@ -137,8 +137,8 @@ static NSOperationQueue *searchQueue = nil;
     for (id aKey in originalScores) {
         NSNumber *nsScore = [originalScores objectForKey:aKey];
         NSParameterAssert(nil != nsScore);
-        CGFloat score = [nsScore floatValue];
-        [scores setObject:[NSNumber numberWithFloat:(score/maxScore)] forKey:aKey];
+        CGFloat score = [nsScore doubleValue];
+        [scores setObject:[NSNumber numberWithDouble:(score/maxScore)] forKey:aKey];
     }
     return scores;
 }
@@ -190,7 +190,7 @@ static NSOperationQueue *searchQueue = nil;
                 
                 // Array may contain NULL values from initialization; before adding the initialization step, it was possible to pass garbage pointers as documentURL (bug #2124370) and non-finite values for the score (bug #1932040).  This is actually a gap in the returned values, so appears to be a Search Kit bug.
                 if (documentURLs[i] != nil) {
-                    [originalScores setObject:[NSNumber numberWithFloat:scores[i]] forKey:documentURLs[i]];
+                    [originalScores setObject:[NSNumber numberWithDouble:scores[i]] forKey:documentURLs[i]];
                     [foundURLSet addObject:documentURLs[i]];
                     [documentURLs[i] release];
                     maxScore = MAX(maxScore, scores[i]);

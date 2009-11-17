@@ -60,6 +60,8 @@ static NSString *BDSKDefaultScaleMenuLabels[] = {@"Auto", @"10%", @"20%", @"25%"
 static CGFloat BDSKDefaultScaleMenuFactors[] = {0.0, 0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 0.71, 0.85, 1.0, 1.2, 1.41, 1.7, 2.0, 3.0, 4.0, 6.0, 8.0};
 
 #define BDSKMinDefaultScaleMenuFactor (BDSKDefaultScaleMenuFactors[1])
+#warning 64BIT: Inspect use of sizeof
+#warning 64BIT: Inspect use of sizeof
 #define BDSKDefaultScaleMenuFactorsCount (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(CGFloat))
 
 #define BDSKScaleMenuFontSize ((CGFloat)11.0)
@@ -231,7 +233,7 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
             }
             [scalePopUpButton addItemWithTitle:label];
             curItem = [scalePopUpButton itemAtIndex:cnt];
-            [curItem setRepresentedObject:(BDSKDefaultScaleMenuFactors[cnt] > 0.0 ? [NSNumber numberWithFloat:BDSKDefaultScaleMenuFactors[cnt]] : nil)];
+            [curItem setRepresentedObject:(BDSKDefaultScaleMenuFactors[cnt] > 0.0 ? [NSNumber numberWithDouble:BDSKDefaultScaleMenuFactors[cnt]] : nil)];
         }
         // select the appropriate item, adjusting the scaleFactor if necessary
         if([self autoScales])
@@ -260,7 +262,7 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
     if(!selectedFactorObject)
         [super setAutoScales:YES];
     else
-        [self setScaleFactor:[selectedFactorObject floatValue] adjustPopup:NO];
+        [self setScaleFactor:[selectedFactorObject doubleValue] adjustPopup:NO];
 }
 
 - (NSUInteger)lowerIndexForScaleFactor:(CGFloat)scaleFactor {

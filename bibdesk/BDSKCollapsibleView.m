@@ -53,8 +53,8 @@
 - (id)initWithCoder:(NSCoder *)decoder {
 	if (self = [super initWithCoder:decoder]) {
 		collapseEdges = [decoder decodeIntegerForKey:@"collapseEdges"];
-		minSize.width = [decoder decodeFloatForKey:@"minSize.width"];
-		minSize.height = [decoder decodeFloatForKey:@"minSize.height"];
+		minSize.width = [decoder decodeDoubleForKey:@"minSize.width"];
+		minSize.height = [decoder decodeDoubleForKey:@"minSize.height"];
 	}
 	return self;
 }
@@ -62,8 +62,8 @@
 - (void)encodeWithCoder:(NSCoder *)coder {
   [super encodeWithCoder:coder];
   [coder encodeInteger:collapseEdges forKey:@"collapseEdges"];
-  [coder encodeFloat:minSize.width forKey:@"minSize.width"];
-  [coder encodeFloat:minSize.height forKey:@"minSize.height"];
+  [coder encodeDouble:minSize.width forKey:@"minSize.width"];
+  [coder encodeDouble:minSize.height forKey:@"minSize.height"];
   // NSView should handle encoding of contentView as it is a subview
 }
 

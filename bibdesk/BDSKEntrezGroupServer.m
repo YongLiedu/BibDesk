@@ -347,7 +347,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
         case BDSKIdleState:
             break;
         default:
-            [NSException raise:NSInternalInconsistencyException format:@"Unhandled case %d", downloadState];
+            [NSException raise:NSInternalInconsistencyException format:@"Unhandled case %ld", (long)downloadState];
             break;
     }
     

@@ -112,7 +112,7 @@
         scrollPosition.y = BDSKMin(BDSKMax(scrollPosition.y, 0.0f), 1.0f);
         if (![self isFlipped])
             scrollPosition.y = 1.0f - scrollPosition.y;
-        desiredRect.origin.y = rintf(NSMinY(bounds) + scrollPosition.y * (NSHeight(bounds) - NSHeight(desiredRect)));
+        desiredRect.origin.y = BDSKRound(NSMinY(bounds) + scrollPosition.y * (NSHeight(bounds) - NSHeight(desiredRect)));
         if (NSMinY(desiredRect) < NSMinY(bounds))
             desiredRect.origin.y = NSMinY(bounds);
         else if (NSMaxY(desiredRect) > NSMaxY(bounds))
@@ -122,7 +122,7 @@
     // Horizontal position
     if (NSWidth(desiredRect) < NSWidth(bounds)) {
         scrollPosition.x = BDSKMin(BDSKMax(scrollPosition.x, 0.0f), 1.0f);
-        desiredRect.origin.x = rintf(NSMinX(bounds) + scrollPosition.x * (NSWidth(bounds) - NSWidth(desiredRect)));
+        desiredRect.origin.x = BDSKRound(NSMinX(bounds) + scrollPosition.x * (NSWidth(bounds) - NSWidth(desiredRect)));
         if (NSMinX(desiredRect) < NSMinX(bounds))
             desiredRect.origin.x = NSMinX(bounds);
         else if (NSMaxX(desiredRect) > NSMaxX(bounds))

@@ -82,7 +82,7 @@
 
 - (CGFloat)floatForKey:(NSString *)key defaultValue:(CGFloat)defaultValue {
     id value = [self objectForKey:key];
-    return [value respondsToSelector:@selector(floatValue)] ? [value floatValue] : defaultValue;
+    return [value respondsToSelector:@selector(doubleValue)] ? [value doubleValue] : defaultValue;
 }
 
 - (CGFloat)floatForKey:(NSString *)key {
@@ -183,7 +183,7 @@
 // The rest of these methods are copied from NSMutableData-OFExtensions.m
 
 - (void)setFloatValue:(CGFloat)value forKey:(NSString *)key {
-    NSNumber *number = [[NSNumber alloc] initWithFloat:value];
+    NSNumber *number = [[NSNumber alloc] initWithDouble:value];
     [self setObject:number forKey:key];
     [number release];
 }

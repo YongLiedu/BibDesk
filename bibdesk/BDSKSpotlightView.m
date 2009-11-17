@@ -127,7 +127,7 @@
     // apply the blur filter to soften the edges of the circles
     CIFilter *gaussianBlurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];
     // sys prefs uses fuzzier circles for more matches; filter range 0 -- 100, values 0 -- 10 are reasonable?
-    [gaussianBlurFilter setValue:[NSNumber numberWithFloat:MIN([highlightCircleRects count], MAXIMUM_BLUR)] forKey:@"inputRadius"];
+    [gaussianBlurFilter setValue:[NSNumber numberWithDouble:MIN([highlightCircleRects count], MAXIMUM_BLUR)] forKey:@"inputRadius"];
     // see NSCIImageRep.h for this and other useful methods that aren't documented
     [gaussianBlurFilter setValue:[[[CIImage alloc] initWithBitmapImageRep:imageRep] autorelease] forKey:@"inputImage"];
     [imageRep release];

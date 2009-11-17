@@ -436,7 +436,7 @@ static void normalizeScoresForItem(BDSKTreeNode *parent, CGFloat maxScore)
         BDSKTreeNode *child = [parent childAtIndex:i];
         NSNumber *score = [child valueForKey:@"score"];
         if (score) {
-            CGFloat oldValue = [score floatValue];
+            CGFloat oldValue = [score doubleValue];
             double newValue = oldValue/maxScore;
             [child setValue:[NSNumber numberWithDouble:newValue] forKey:@"score"];
         }
@@ -508,7 +508,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
                     [child setValue:searchString forKey:@"searchString"];
                     thisScore = scores[i];
                     maxScore = MAX(maxScore, thisScore);
-                    [child setValue:[NSNumber numberWithFloat:thisScore] forKey:@"score"];
+                    [child setValue:[NSNumber numberWithDouble:thisScore] forKey:@"score"];
                     [node addChild:child];
                     [child release];
                     CFRelease(urls[i]);

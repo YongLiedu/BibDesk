@@ -1378,7 +1378,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     }else if([field isEqualToString:BDSKImportOrderString]){
         return nil;
     }else if([field isEqualToString:BDSKRelevanceString]){
-        return [NSNumber numberWithFloat:[self searchScore]];
+        return [NSNumber numberWithDouble:[self searchScore]];
     }else if([field isEqualToString:BDSKLocalFileString]){
         NSArray *localFiles = [self localFiles];
         NSUInteger count = [localFiles count];

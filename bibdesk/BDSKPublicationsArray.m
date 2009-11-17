@@ -324,7 +324,7 @@
     NSInteger fileOrder = 1;
     CFAllocatorRef alloc = CFAllocatorGetDefault();
     for(i = 0; i < count; i++, fileOrder++) {
-        CFNumberRef n = CFNumberCreate(alloc, kCFNumberIntType, &fileOrder);
+        CFNumberRef n = CFNumberCreate(alloc, kCFNumberNSIntegerType, &fileOrder);
         [[publications objectAtIndex:i] setFileOrder:(NSNumber *)n];
         CFRelease(n);
     }

@@ -1897,7 +1897,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     if (nil == error) {
         // shouldn't get here
-        NSLog(@"%@:%d formatter failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__);
+        NSLog(@"%@:%ld formatter failed for unknown reason", __FILENAMEASNSSTRING__, (long)__LINE__);
     } else if (control == tableView) {
         
         NSString *fieldName = [fields objectAtIndex:[tableView editedRow]];

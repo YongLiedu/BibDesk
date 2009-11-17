@@ -44,7 +44,7 @@
 {
     CIFilter *gaussianBlurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];    
     
-    [gaussianBlurFilter setValue:[NSNumber numberWithFloat:radius] forKey:@"inputRadius"];
+    [gaussianBlurFilter setValue:[NSNumber numberWithDouble:radius] forKey:@"inputRadius"];
     [gaussianBlurFilter setValue:self forKey:@"inputImage"];
     
     return [gaussianBlurFilter valueForKey:@"outputImage"];
@@ -79,12 +79,12 @@
     CIFilter *hueAdjustFilter = [CIFilter filterWithName:@"CIHueAdjust"];
     CIFilter *colorControlsFilter = [CIFilter filterWithName:@"CIColorControls"];
     
-    [hueAdjustFilter setValue:[NSNumber numberWithFloat:hue * M_PI] forKey:@"inputAngle"];
+    [hueAdjustFilter setValue:[NSNumber numberWithDouble:hue * M_PI] forKey:@"inputAngle"];
     [hueAdjustFilter setValue:self forKey:@"inputImage"];
     
     [colorControlsFilter setDefaults];
-    [colorControlsFilter setValue:[NSNumber numberWithFloat:saturation] forKey:@"inputSaturation"];
-    [colorControlsFilter setValue:[NSNumber numberWithFloat:brightness] forKey:@"inputBrightness"];
+    [colorControlsFilter setValue:[NSNumber numberWithDouble:saturation] forKey:@"inputSaturation"];
+    [colorControlsFilter setValue:[NSNumber numberWithDouble:brightness] forKey:@"inputBrightness"];
     [colorControlsFilter setValue:[hueAdjustFilter valueForKey:@"outputImage"] forKey:@"inputImage"];
     
     return [colorControlsFilter valueForKey:@"outputImage"];

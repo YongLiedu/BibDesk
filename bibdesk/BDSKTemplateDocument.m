@@ -501,7 +501,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 }
 
 - (id)objectInSizesAtIndex:(NSUInteger)idx {
-    return [NSNumber numberWithFloat:BDSKDefaultFontSizes[idx]];
+    return [NSNumber numberWithDouble:BDSKDefaultFontSizes[idx]];
 }
 
 - (NSUInteger)countOfTokenSizes {
@@ -509,7 +509,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 }
 
 - (id)objectInTokenSizesAtIndex:(NSUInteger)idx {
-    return [NSNumber numberWithFloat:idx == 0 ? 0.0 : BDSKDefaultFontSizes[idx - 1]];
+    return [NSNumber numberWithDouble:idx == 0 ? 0.0 : BDSKDefaultFontSizes[idx - 1]];
 }
 
 - (NSArray *)specialTokens {

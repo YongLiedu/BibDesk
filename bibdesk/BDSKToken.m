@@ -106,7 +106,7 @@ NSString *BDSKRichTextString = @"Rich Text";
     if (self = [super init]) {
         title = [[decoder decodeObjectForKey:@"title"] retain];
         fontName = [[decoder decodeObjectForKey:@"fontName"] retain];
-        fontSize = [decoder decodeFloatForKey:@"fontSize"];
+        fontSize = [decoder decodeDoubleForKey:@"fontSize"];
         bold = [decoder decodeIntegerForKey:@"bold"];
         italic = [decoder decodeIntegerForKey:@"italic"];
     }
@@ -116,7 +116,7 @@ NSString *BDSKRichTextString = @"Rich Text";
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [encoder encodeObject:title forKey:@"title"];
     [encoder encodeObject:fontName forKey:@"fontName"];
-    [encoder encodeFloat:fontSize forKey:@"fontSize"];
+    [encoder encodeDouble:fontSize forKey:@"fontSize"];
     [encoder encodeInteger:bold forKey:@"bold"];
     [encoder encodeInteger:italic forKey:@"italic"];
 }
