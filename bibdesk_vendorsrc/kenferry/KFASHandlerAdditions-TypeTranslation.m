@@ -117,7 +117,7 @@
         if ([key isKindOfClass:[NSNumber class]])
         {
             [resultDesc setDescriptor:[[self objectForKey:key] aeDescriptorValue]
-                           forKeyword:[(NSNumber *)key intValue]];
+                           forKeyword:[(NSNumber *)key unsignedIntValue]];
         }
         else if ([key isKindOfClass:[NSString class]])
         {
@@ -143,7 +143,8 @@
 {
     NSMutableDictionary *resultDict;
     NSAppleEventDescriptor *recDescriptor, *listDescriptor;
-    NSInteger recordIndex, recordCount, listIndex, listCount, keyword;
+    NSInteger recordIndex, recordCount, listIndex, listCount;
+    AEKeyword keyword;
     id keyObj, valObj;
         
     recDescriptor = [desc coerceToDescriptorType:typeAERecord];
@@ -156,7 +157,7 @@
         
         if( keyword != keyASUserRecordFields)
         {
-            keyObj = [NSNumber numberWithInt:keyword];
+            keyObj = [NSNumber numberWithUnsignedInt:keyword];
             valObj = [[recDescriptor descriptorAtIndex:recordIndex] objCObjectValue];
             
             [resultDict setObject:valObj forKey:keyObj];
@@ -242,7 +243,7 @@
 
 
 
-static inline int areEqualEncodings(const char *enc1, const char *enc2)
+static inline BOOL areEqualEncodings(const char *enc1, const char *enc2)
 {
     return (strcmp(enc1, enc2) == 0);
 }
@@ -491,7 +492,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     }
     else if (bytes == sizeof(int))
     {
-        resultNumber = [NSNumber numberWithInt:*(int *)int_p];
+        resultNumber = [NSNumber numberWithInt:*(NSInteger *)int_p];
     }
     else if (bytes == sizeof(long))
     {
@@ -524,7 +525,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     }
     else if (bytes == sizeof(unsigned int))
     {
-        resultNumber = [NSNumber numberWithUnsignedInt:*(unsigned int *)int_p];
+        resultNumber = [NSNumber numberWithUnsignedInt:*(NSUInteger *)int_p];
     }
     else if (bytes == sizeof(unsigned long))
     {
@@ -553,7 +554,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     }
     else if (bytes == sizeof(double))
     {
-        resultNumber = [NSNumber numberWithFloat:*(double *)float_p];
+        resultNumber = [NSNumber numberWithDouble:*(double *)float_p];
     }
     else 
     {
@@ -579,16 +580,16 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     {
         NSSize size = [self sizeValue];
         resultDesc = [[NSArray arrayWithObjects:
-            [NSNumber numberWithFloat:size.width],
-            [NSNumber numberWithFloat:size.height],
+            [NSNumber numberWithDouble:size.width],
+            [NSNumber numberWithDouble:size.height],
             nil] aeDescriptorValue];
     }
     else if (areEqualEncodings(type, @encode(NSPoint)))
     {
         NSPoint point = [self pointValue];
         resultDesc = [[NSArray arrayWithObjects:
-            [NSNumber numberWithFloat:point.x],
-            [NSNumber numberWithFloat:point.y],
+            [NSNumber numberWithDouble:point.x],
+            [NSNumber numberWithDouble:point.y],
             nil] aeDescriptorValue];
     }    
     else if (areEqualEncodings(type, @encode(NSRange)))
@@ -603,10 +604,10 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     {
         NSRect rect = [self rectValue];
         resultDesc = [[NSArray arrayWithObjects:
-            [NSNumber numberWithFloat:rect.origin.x],
-            [NSNumber numberWithFloat:rect.origin.y],
-            [NSNumber numberWithFloat:rect.origin.x + rect.size.width],
-            [NSNumber numberWithFloat:rect.origin.y + rect.size.height],
+            [NSNumber numberWithDouble:rect.origin.x],
+            [NSNumber numberWithDouble:rect.origin.y],
+            [NSNumber numberWithDouble:rect.origin.x + rect.size.width],
+            [NSNumber numberWithDouble:rect.origin.y + rect.size.height],
             nil] aeDescriptorValue];
     }  
     else

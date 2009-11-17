@@ -9,6 +9,7 @@
 #import "AMButtonBar.h"
 #import "AMButtonBarItem.h"
 #import "AMButtonBarCell.h"
+#include <tgmath.h>
 
 static CGFloat const AM_START_GAP_WIDTH = 8.0;
 static CGFloat const AM_BUTTON_GAP_WIDTH = 2.0;
@@ -198,7 +199,7 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 
 - (void)layoutItems
 {
-	NSPoint origin = NSMakePoint(AM_START_GAP_WIDTH, floorf((NSHeight([self frame]) - AM_BUTTON_HEIGHT) / 2.0));
+	NSPoint origin = NSMakePoint(AM_START_GAP_WIDTH, floor((NSHeight([self frame]) - AM_BUTTON_HEIGHT) / 2.0));
 	NSEnumerator *enumerator = [[self items] objectEnumerator];
 	id item;
 	while (item = [enumerator nextObject]) {
