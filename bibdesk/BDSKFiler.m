@@ -416,7 +416,7 @@ static BDSKFiler *sharedFiler = nil;
     if (row == -1)
         return;
     NSDictionary *dict = [self objectInErrorInfoDictsAtIndex:row];
-    NSInteger statusFlag = [[dict objectForKey:FLAG_KEY] intValue];
+    NSInteger statusFlag = [[dict objectForKey:FLAG_KEY] integerValue];
     NSString *tcid = nil;
     NSString *path = nil;
     BibItem *pub = nil;

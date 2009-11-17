@@ -241,8 +241,8 @@
     NSInteger start = NSIntegerMin, end = NSIntegerMin;
     
     for (id item in [self sortedArrayUsingSelector:@selector(compare:)]) {
-        if ([item respondsToSelector:@selector(intValue)] == NO) continue;
-        NSInteger value = [item intValue];
+        if ([item respondsToSelector:@selector(integerValue)] == NO) continue;
+        NSInteger value = [item integerValue];
         if (value != end + 1) {
             if (start != NSIntegerMin) {
                 NSArray *range = [[NSArray alloc] initWithObjects:[NSNumber numberWithInt:start], start == end ? nil : [NSNumber numberWithInt:end], nil];
@@ -267,8 +267,8 @@
     NSInteger start = NSIntegerMin, end = NSIntegerMin;
     
     for (id item in [self sortedArrayUsingSelector:@selector(compare:)]) {
-        if ([item respondsToSelector:@selector(intValue)] == NO) continue;
-        NSInteger value = [item intValue];
+        if ([item respondsToSelector:@selector(integerValue)] == NO) continue;
+        NSInteger value = [item integerValue];
         if (value != end + 1) {
             if (start != NSIntegerMin) {
                 NSString *string = [[NSString alloc] initWithFormat:(start == end ? @"%ld" : @"%ld-%ld"), (long)start, (long)end];

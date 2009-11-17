@@ -417,7 +417,7 @@ static void removeAliens(NSMutableString *string)
         id count = [[[root nodesForXPath:@"/eSearchResult[1]/Count[1]" error:NULL] lastObject] objectValue];
 
         // ensure that we only have a single result; if it's ambiguous, just return nil
-        if ([count intValue] == 1) {  
+        if ([count integerValue] == 1) {  
             
             // get the first result (zero-based indexing)
             NSString *efetch = [[[self class] baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=abstract&retmode=xml&retstart=0&retmax=1&db=pubmed&query_key=%@&WebEnv=%@&tool=bibdesk", queryKey, webEnv];

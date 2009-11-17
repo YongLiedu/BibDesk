@@ -302,7 +302,7 @@
 }
 
 - (NSInteger)promisedDragCopyTypeForPasteboard:(NSPasteboard *)pboard {
-	return [self pasteboardIsValid:pboard] ? [[[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"dragCopyType"] intValue] : -1;
+	return [self pasteboardIsValid:pboard] ? [[[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"dragCopyType"] integerValue] : -1;
 }
 
 - (NSString *)promisedBibTeXStringForPasteboard:(NSPasteboard *)pboard {

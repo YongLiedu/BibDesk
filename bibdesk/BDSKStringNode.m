@@ -96,7 +96,7 @@
 - (id)initWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
         if (self = [super init]) {
-            type = [coder decodeIntForKey:@"type"];
+            type = [coder decodeIntegerForKey:@"type"];
             value = [[coder decodeObjectForKey:@"value"] retain];
         }
     } else {       
@@ -108,7 +108,7 @@
 
 - (void)encodeWithCoder:(NSCoder *)encoder{
     if([encoder allowsKeyedCoding]){
-        [encoder encodeInt:type forKey:@"type"];
+        [encoder encodeInteger:type forKey:@"type"];
         [encoder encodeObject:value forKey:@"value"];
     } else {
         [encoder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];

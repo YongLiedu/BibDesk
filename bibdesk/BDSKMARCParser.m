@@ -212,11 +212,11 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
         if([record length] < 25)
             continue;
         
-        base = [[record substringWithRange:NSMakeRange(12, 5)] intValue];
+        base = [[record substringWithRange:NSMakeRange(12, 5)] integerValue];
         dir = [record substringWithRange:NSMakeRange(24, base - 25)];
         dirLength = [dir length] / 12;
         
-        fieldsStart = base + [[dir substringWithRange:NSMakeRange(7, 5)] intValue];
+        fieldsStart = base + [[dir substringWithRange:NSMakeRange(7, 5)] integerValue];
         fields = [[record substringFromIndex:fieldsStart] componentsSeparatedByString:fieldTerminator];
         
         [formattedString setString:@""];

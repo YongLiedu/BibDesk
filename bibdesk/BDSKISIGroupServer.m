@@ -294,7 +294,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
                                               in_editions:[info database]
                                               in_firstRec:1
                                                in_numRecs:1];
-            availableResultsLocal = [[resultInfo objectForKey:@"recordsFound"] intValue];
+            availableResultsLocal = [[resultInfo objectForKey:@"recordsFound"] integerValue];
             break;
         
         case retrieve:
@@ -354,7 +354,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
                                                           in_firstRec:1
                                                            in_numRecs:1
                                                             in_fields:@""];
-            availableResultsLocal = [[resultInfo objectForKey:@"recordsFound"] intValue];
+            availableResultsLocal = [[resultInfo objectForKey:@"recordsFound"] integerValue];
             break;
         
         case citingArticlesByRecids:
@@ -366,7 +366,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
                                                                   in_firstRec:1
                                                                    in_numRecs:1
                                                                     in_fields:@""];
-            availableResultsLocal = [[resultInfo objectForKey:@"recordsFound"] intValue];
+            availableResultsLocal = [[resultInfo objectForKey:@"recordsFound"] integerValue];
             break;
         }
         

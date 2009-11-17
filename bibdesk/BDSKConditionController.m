@@ -133,7 +133,7 @@ static char BDSKConditionControllerObservationContext;
     [[triStateButton superview] retain];
     [[ratingButton superview] retain];
     
-    [ratingButton setRating:[[condition stringValue] intValue]];
+    [ratingButton setRating:[[condition stringValue] integerValue]];
     
     NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
     [formatter setDateStyle:NSDateFormatterShortStyle];
@@ -319,23 +319,23 @@ static char BDSKConditionControllerObservationContext;
                 [[undoManager prepareWithInvocationTarget:condition] setKey:oldValue];
             } else if ([keyPath isEqualToString:@"dateComparison"]) {
                 [self layoutValueControls];
-                [[undoManager prepareWithInvocationTarget:condition] setDateComparison:[oldValue intValue]];
+                [[undoManager prepareWithInvocationTarget:condition] setDateComparison:[oldValue integerValue]];
             } else if ([keyPath isEqualToString:@"attachmentComparison"]) {
                 [self layoutValueControls];
-                [[undoManager prepareWithInvocationTarget:condition] setAttachmentComparison:[oldValue intValue]];
+                [[undoManager prepareWithInvocationTarget:condition] setAttachmentComparison:[oldValue integerValue]];
             } else if ([keyPath isEqualToString:@"stringComparison"]) {
-                [[undoManager prepareWithInvocationTarget:condition] setStringComparison:[oldValue intValue]];
+                [[undoManager prepareWithInvocationTarget:condition] setStringComparison:[oldValue integerValue]];
             } else if ([keyPath isEqualToString:@"stringValue"]) {
                 [[undoManager prepareWithInvocationTarget:condition] setStringValue:oldValue];
-                [ratingButton setRating:[[condition stringValue] intValue]];
+                [ratingButton setRating:[[condition stringValue] integerValue]];
             } else if ([keyPath isEqualToString:@"countValue"]) {
-                [[undoManager prepareWithInvocationTarget:condition] setCountValue:[oldValue intValue]];
+                [[undoManager prepareWithInvocationTarget:condition] setCountValue:[oldValue integerValue]];
             } else if ([keyPath isEqualToString:@"numberValue"]) {
-                [[undoManager prepareWithInvocationTarget:condition] setNumberValue:[oldValue intValue]];
+                [[undoManager prepareWithInvocationTarget:condition] setNumberValue:[oldValue integerValue]];
             } else if ([keyPath isEqualToString:@"andNumberValue"]) {
-                [[undoManager prepareWithInvocationTarget:condition] setAndNumberValue:[oldValue intValue]];
+                [[undoManager prepareWithInvocationTarget:condition] setAndNumberValue:[oldValue integerValue]];
             } else if ([keyPath isEqualToString:@"periodValue"]) {
-                [[undoManager prepareWithInvocationTarget:condition] setPeriodValue:[oldValue intValue]];
+                [[undoManager prepareWithInvocationTarget:condition] setPeriodValue:[oldValue integerValue]];
             } else if ([keyPath isEqualToString:@"dateValue"]) {
                 [[undoManager prepareWithInvocationTarget:condition] setDateValue:oldValue];
             } else if ([keyPath isEqualToString:@"toDateValue"]) {

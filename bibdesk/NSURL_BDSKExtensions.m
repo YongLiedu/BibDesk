@@ -434,11 +434,11 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
             [note setValue:[NSData dataWithBytes:&qdBounds length:sizeof(Rect)] forKey:@"bounds"];
         }
         if (value = [note objectForKey:@"pageIndex"]) {
-            [note setValue:[NSNumber numberWithUnsignedInt:[value unsignedIntValue] + 1] forKey:@"pageIndex"];
+            [note setValue:[NSNumber numberWithUnsignedInt:[value unsignedIntegerValue] + 1] forKey:@"pageIndex"];
         }
         if (value = [note objectForKey:@"borderStyle"]) {
             NSString *style = nil;
-            switch ([value intValue]) {
+            switch ([value integerValue]) {
                 case kPDFBorderStyleSolid: style = @"solid"; break;
                 case kPDFBorderStyleDashed: style = @"dashed"; break;
                 case kPDFBorderStyleBeveled: style = @"beveled"; break;
@@ -463,7 +463,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
         }
         if (value = [note objectForKey:@"startLineStyle"]) {
             NSString *style = nil;
-            switch ([value intValue]) {
+            switch ([value integerValue]) {
                 case kPDFLineStyleNone: style = @"none"; break;
                 case kPDFLineStyleSquare: style = @"square"; break;
                 case kPDFLineStyleCircle: style = @"circle"; break;
@@ -475,7 +475,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
         }
         if (value = [note objectForKey:@"endLineStyle"]) {
             NSString *style = nil;
-            switch ([value intValue]) {
+            switch ([value integerValue]) {
                 case kPDFLineStyleNone: style = @"none"; break;
                 case kPDFLineStyleSquare: style = @"square"; break;
                 case kPDFLineStyleCircle: style = @"circle"; break;
@@ -487,7 +487,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
         }
         if (value = [note objectForKey:@"iconType"]) {
             NSString *style = nil;
-            switch ([value intValue]) {
+            switch ([value integerValue]) {
                 case kPDFTextAnnotationIconComment: style = @"comment"; break;
                 case kPDFTextAnnotationIconKey: style = @"key"; break;
                 case kPDFTextAnnotationIconNote: style = @"note"; break;

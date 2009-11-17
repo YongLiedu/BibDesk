@@ -1263,7 +1263,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     }else if([field isTriStateField]){
         [self setField:field toTriStateValue:[value triStateValue]];
 	}else if([field isRatingField]){
-		[self setField:field toRatingValue:[value intValue]];
+		[self setField:field toRatingValue:[value integerValue]];
 	}else if([field isEqualToString:BDSKPubTypeString]){
 		[self setPubType:value];
 	}else if([field isEqualToString:BDSKCiteKeyString]){
@@ -1287,7 +1287,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 - (NSInteger)ratingValueOfField:(NSString *)field{
-    return [[self valueOfField:field inherit:NO] intValue];
+    return [[self valueOfField:field inherit:NO] integerValue];
 }
 
 - (void)setField:(NSString *)field toRatingValue:(NSInteger)rating{
@@ -1437,7 +1437,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         else if([field isTriStateField])
             return [self triStateValueOfField:field] == [substring triStateValue];
         else if([field isRatingField])
-            return [self ratingValueOfField:field] == [substring intValue];
+            return [self ratingValueOfField:field] == [substring integerValue];
     }
 
     // must be a string of some kind...
@@ -1575,7 +1575,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     // passing this as an NSString causes a "more significant bytes than room to hold them" exception in the client
     value = [self valueOfField:BDSKYearString];
     if([NSString isEmptyString:value] == NO &&
-        (value = [NSNumber numberWithInt:[value intValue]]))
+        (value = [NSNumber numberWithInt:[value integerValue]]))
     [dict setObject:value forKey:@"year"];
     
     return dict;
@@ -2901,7 +2901,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 		return BDSKOperationSet;
 	} else if ([[sud stringArrayForKey:BDSKRatingFieldsKey] containsObject:field]) {
 		// this operation doesn't really make sense for ratings, but we need to do something
-		[self setField:field toRatingValue:([groupName intValue] == 0) ? 1 : 0];
+		[self setField:field toRatingValue:([groupName integerValue] == 0) ? 1 : 0];
 		return BDSKOperationSet;
 	} else if ([[sud stringArrayForKey:BDSKTriStateFieldsKey] containsObject:field]) {
 		// this operation also doesn't make much sense for tri-state fields
@@ -3037,7 +3037,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 		return BDSKOperationSet;
 	} else if ([[sud stringArrayForKey:BDSKRatingFieldsKey] containsObject:field]) {
 		// this operation doesn't really make sense for ratings, but we need to do something
-		[self setField:field toRatingValue:[newGroupName intValue]];
+		[self setField:field toRatingValue:[newGroupName integerValue]];
 		return BDSKOperationSet;
 	} else if (operation == BDSKOperationSet) {
 		// we should have a single value to remove, so we can simply clear the field

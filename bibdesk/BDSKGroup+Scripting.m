@@ -470,7 +470,7 @@
 - (void)setScriptingServerInfo:(NSDictionary *)info {
     NSString *serverType = type;
      
-    switch ([[info objectForKey:@"type"] intValue]) {
+    switch ([[info objectForKey:@"type"] unsignedIntValue]) {
         case BDSKScriptingSearchGroupEntrez:
             serverType = BDSKSearchGroupEntrez;
             break;
@@ -538,7 +538,7 @@
     
     if ([NSString isEmptyString:[serverInfo name]] || [NSString isEmptyString:[serverInfo database]])
         isValid = NO;
-    else if ([serverInfo isZoom] && ([NSString isEmptyString:[serverInfo host]] || [[serverInfo port] intValue] == 0))
+    else if ([serverInfo isZoom] && ([NSString isEmptyString:[serverInfo host]] || [[serverInfo port] integerValue] == 0))
         isValid = NO;
     for (NSString *key in info) {
         if (isValid == NO) break;

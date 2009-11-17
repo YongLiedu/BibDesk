@@ -264,7 +264,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
         if ([newValue isEqual:[NSNull null]]) newValue = nil;
         if ([oldValue isEqual:[NSNull null]]) oldValue = nil;
         
-        switch ([[change objectForKey:NSKeyValueChangeKindKey] unsignedIntValue]) {
+        switch ([[change objectForKey:NSKeyValueChangeKindKey] unsignedIntegerValue]) {
             case NSKeyValueChangeSetting:
                 if ([keyPath isEqualToString:CHILDREN_KEY]) {
                     NSMutableArray *old = [NSMutableArray arrayWithArray:oldValue];

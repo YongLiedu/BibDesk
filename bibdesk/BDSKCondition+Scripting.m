@@ -97,7 +97,7 @@ enum {
         NSNumber *comparisonNumber = [properties objectForKey:@"scriptingComparison"];
         if (comparisonNumber == nil) {
         } else if ([self isDateCondition]) {
-            switch ([comparisonNumber intValue]) {
+            switch ([comparisonNumber unsignedIntValue]) {
                 case BDSKASToday:       [self setDateComparison:BDSKToday];         break; 
                 case BDSKASYesterday:   [self setDateComparison:BDSKYesterday];     break; 
                 case BDSKASThisWeek:    [self setDateComparison:BDSKThisWeek];      break; 
@@ -119,7 +119,7 @@ enum {
                 }
             }
         } else if ([self isAttachmentCondition]) {
-            switch ([comparisonNumber intValue]) {
+            switch ([comparisonNumber unsignedIntValue]) {
                 case BDSKASCountEqual:      [self setAttachmentComparison:BDSKCountEqual];           break;
                 case BDSKASCountNotEqual:   [self setAttachmentComparison:BDSKCountNotEqual];        break;
                 case BDSKASCountLarger:     [self setAttachmentComparison:BDSKCountLarger];          break;
@@ -137,7 +137,7 @@ enum {
                 }
             }
         } else {
-            switch ([comparisonNumber intValue]) {
+            switch ([comparisonNumber unsignedIntValue]) {
                 case BDSKASGroupContain:    [self setStringComparison:BDSKGroupContain];    break;
                 case BDSKASGroupNotContain: [self setStringComparison:BDSKGroupNotContain]; break;
                 case BDSKASContain:         [self setStringComparison:BDSKContain];         break;
@@ -164,9 +164,9 @@ enum {
             if ([newValue isKindOfClass:[NSDictionary class]]) {
                 id value;
                 if (value = [newValue objectForKey:@"numberValue"]) {
-                    [self setNumberValue:[value intValue]];
+                    [self setNumberValue:[value integerValue]];
                     if (value = [newValue objectForKey:@"periodValue"]) {
-                        switch ([value intValue]) {
+                        switch ([value unsignedIntValue]) {
                             case BDSKASPeriodDay:   [self setPeriodValue:BDSKPeriodDay];    break;
                             case BDSKASPeriodWeek:  [self setPeriodValue:BDSKPeriodWeek];   break;
                             case BDSKASPeriodMonth: [self setPeriodValue:BDSKPeriodMonth];  break;
@@ -174,7 +174,7 @@ enum {
                         }
                     }
                     if (value = [newValue objectForKey:@"andNumberValue"])
-                        [self setAndNumberValue:[value intValue]];
+                        [self setAndNumberValue:[value integerValue]];
                 } else if (value = [newValue objectForKey:@"dateValue"]) {
                     [self setDateValue:[[[NSCalendarDate alloc] initWithTimeInterval:0.0 sinceDate:value] autorelease]];
                     if (value = [newValue objectForKey:@"toDateValue"])
@@ -194,7 +194,7 @@ enum {
                     case BDSKCountNotEqual:
                     case BDSKCountLarger:
                     case BDSKCountSmaller:
-                        [self setCountValue:[newValue intValue]];
+                        [self setCountValue:[newValue integerValue]];
                         break;
                     case BDSKAttachmentContain:
                     case BDSKAttachmentNotContain:

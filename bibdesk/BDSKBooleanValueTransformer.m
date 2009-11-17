@@ -75,7 +75,7 @@
 }
 
 - (id)reverseTransformedValue:(id)number {
-    return [NSString stringWithTriStateValue:[number intValue]];
+    return [NSString stringWithTriStateValue:[number integerValue]];
 }
 
 @end

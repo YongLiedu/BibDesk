@@ -82,7 +82,7 @@
 	if (maxNumber == 0)
 		[previewMaxNumberComboBox setStringValue:NSLocalizedString(@"All",@"Display all items in preview")];
 	else 
-		[previewMaxNumberComboBox setIntValue:maxNumber];
+		[previewMaxNumberComboBox setIntegerValue:maxNumber];
 }
 
 - (void)updateAuthorNameDisplayUI{
@@ -99,7 +99,7 @@
 }
 
 - (IBAction)changePreviewMaxNumber:(id)sender{
-    NSInteger maxNumber = [[[sender cell] objectValueOfSelectedItem] intValue]; // returns 0 if not a number (as in @"All")
+    NSInteger maxNumber = [[[sender cell] objectValueOfSelectedItem] integerValue]; // returns 0 if not a number (as in @"All")
     if(maxNumber != [sud integerForKey:BDSKPreviewMaxNumberKey]){
 		[sud setInteger:maxNumber forKey:BDSKPreviewMaxNumberKey];
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];

@@ -322,7 +322,7 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 
 - (BOOL)validatePort:(id *)value error:(NSError **)error {
     if (nil != *value)
-    *value = [NSString stringWithFormat:@"%i", [*value intValue]];
+    *value = [NSString stringWithFormat:@"%i", [*value integerValue]];
     return YES;
 }
 

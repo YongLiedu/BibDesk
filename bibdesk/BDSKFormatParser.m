@@ -287,7 +287,7 @@
                     NSString *title = [pub title];
                     if ([scanner scanString:@"[" intoString:NULL]) {
                         if ([scanner scanUpToString:@"]" intoString:&numString])
-                            smallWordLength = (NSUInteger)[numString intValue];
+                            smallWordLength = (NSUInteger)[numString integerValue];
                         else
                             smallWordLength = 0;
                         [scanner scanString:@"]" intoString:NULL];

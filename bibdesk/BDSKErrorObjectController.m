@@ -524,7 +524,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (id)transformedValue:(id)number {
-	return ([number intValue] == -1) ? @"?" : number;
+	return ([number integerValue] == -1) ? @"?" : number;
 }
 
 @end

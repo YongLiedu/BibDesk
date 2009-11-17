@@ -116,7 +116,7 @@
 		if([tcID isRatingField]){
 			BibItem *pub = [shownPublications objectAtIndex:row];
 			NSInteger oldRating = [pub ratingValueOfField:tcID];
-			NSInteger newRating = [object intValue];
+			NSInteger newRating = [object integerValue];
 			if(newRating != oldRating) {
 				[pub setField:tcID toRatingValue:newRating];
                 [self userChangedField:tcID ofPublications:[NSArray arrayWithObject:pub] from:[NSArray arrayWithObject:[NSString stringWithFormat:@"%ld", (long)oldRating]] to:[NSArray arrayWithObject:[NSString stringWithFormat:@"%ld", (long)newRating]]];
@@ -125,7 +125,7 @@
 		}else if([tcID isBooleanField]){
 			BibItem *pub = [shownPublications objectAtIndex:row];
             NSCellStateValue oldStatus = [pub boolValueOfField:tcID];
-			NSCellStateValue newStatus = [object intValue];
+			NSCellStateValue newStatus = [object integerValue];
 			if(newStatus != oldStatus) {
 				[pub setField:tcID toBoolValue:newStatus];
                 [self userChangedField:tcID ofPublications:[NSArray arrayWithObject:pub] from:[NSArray arrayWithObject:[NSString stringWithBool:oldStatus]] to:[NSArray arrayWithObject:[NSString stringWithBool:newStatus]]];
@@ -134,7 +134,7 @@
 		}else if([tcID isTriStateField]){
 			BibItem *pub = [shownPublications objectAtIndex:row];
             NSCellStateValue oldStatus = [pub triStateValueOfField:tcID];
-			NSCellStateValue newStatus = [object intValue];
+			NSCellStateValue newStatus = [object integerValue];
 			if(newStatus != oldStatus) {
 				[pub setField:tcID toTriStateValue:newStatus];
                 [self userChangedField:tcID ofPublications:[NSArray arrayWithObject:pub] from:[NSArray arrayWithObject:[NSString stringWithTriStateValue:oldStatus]] to:[NSArray arrayWithObject:[NSString stringWithTriStateValue:newStatus]]];

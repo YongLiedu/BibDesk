@@ -107,8 +107,8 @@ NSString *BDSKRichTextString = @"Rich Text";
         title = [[decoder decodeObjectForKey:@"title"] retain];
         fontName = [[decoder decodeObjectForKey:@"fontName"] retain];
         fontSize = [decoder decodeFloatForKey:@"fontSize"];
-        bold = [decoder decodeIntForKey:@"bold"];
-        italic = [decoder decodeIntForKey:@"italic"];
+        bold = [decoder decodeIntegerForKey:@"bold"];
+        italic = [decoder decodeIntegerForKey:@"italic"];
     }
     return self;
 }
@@ -117,8 +117,8 @@ NSString *BDSKRichTextString = @"Rich Text";
     [encoder encodeObject:title forKey:@"title"];
     [encoder encodeObject:fontName forKey:@"fontName"];
     [encoder encodeFloat:fontSize forKey:@"fontSize"];
-    [encoder encodeInt:bold forKey:@"bold"];
-    [encoder encodeInt:italic forKey:@"italic"];
+    [encoder encodeInteger:bold forKey:@"bold"];
+    [encoder encodeInteger:italic forKey:@"italic"];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {

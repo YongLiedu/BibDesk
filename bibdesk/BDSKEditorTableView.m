@@ -84,7 +84,7 @@
     // on Leopard, we have to manually handle tab/return movements to avoid losing focus
     // http://www.cocoabuilder.com/archive/message/cocoa/2007/10/31/191866
     
-    NSInteger movement = [[[aNotification userInfo] objectForKey:@"NSTextMovement"] intValue];
+    NSInteger movement = [[[aNotification userInfo] objectForKey:@"NSTextMovement"] integerValue];
     if ((editedRow != -1 && editedColumn != -1) && 
         (NSTabTextMovement == movement || NSBacktabTextMovement == movement || NSReturnTextMovement == movement)) {
         

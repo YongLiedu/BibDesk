@@ -425,9 +425,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [groupButtonView setMinSize:[groupButtonView frame].size];
     [groupButtonView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     
-    bottomPreviewDisplay = [xattrDefaults intForKey:BDSKBottomPreviewDisplayKey defaultValue:[sud integerForKey:BDSKBottomPreviewDisplayKey]];
+    bottomPreviewDisplay = [xattrDefaults integerForKey:BDSKBottomPreviewDisplayKey defaultValue:[sud integerForKey:BDSKBottomPreviewDisplayKey]];
     bottomPreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKBottomPreviewDisplayTemplateKey defaultObject:[sud stringForKey:BDSKBottomPreviewDisplayTemplateKey]] retain];
-    sidePreviewDisplay = [xattrDefaults intForKey:BDSKSidePreviewDisplayKey defaultValue:[sud integerForKey:BDSKSidePreviewDisplayKey]];
+    sidePreviewDisplay = [xattrDefaults integerForKey:BDSKSidePreviewDisplayKey defaultValue:[sud integerForKey:BDSKSidePreviewDisplayKey]];
     sidePreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKSidePreviewDisplayTemplateKey defaultObject:[sud stringForKey:BDSKSidePreviewDisplayTemplateKey]] retain];
         
     bottomTemplatePreviewMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
@@ -518,7 +518,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }
 
     iconScale = [xattrDefaults floatForKey:BDSKBottomFileViewIconScaleKey defaultValue:[sud floatForKey:BDSKBottomFileViewIconScaleKey]];
-    displayMode = [xattrDefaults intForKey:BDSKBottomFileViewDisplayModeKey defaultValue:[sud integerForKey:BDSKBottomFileViewDisplayModeKey]];
+    displayMode = [xattrDefaults integerForKey:BDSKBottomFileViewDisplayModeKey defaultValue:[sud integerForKey:BDSKBottomFileViewDisplayModeKey]];
     [bottomFileView setDisplayMode:displayMode];
     if (displayMode == FVDisplayModeGrid) {
         if (iconScale < 0.00001)
@@ -685,7 +685,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
         // we can't just use -documentStringEncoding, because that may be different for SaveTo
         if (encoding)
-            [dictionary setUnsignedIntValue:encoding forKey:BDSKDocumentStringEncodingKey];
+            [dictionary setUnsignedIntegerValue:encoding forKey:BDSKDocumentStringEncodingKey];
         
         // encode groups so we can select them later with isEqual: (saving row indexes would not be as reliable)
         [dictionary setObject:([self hasExternalGroupsSelected] ? [NSData data] : [NSKeyedArchiver archivedDataWithRootObject:[self selectedGroups]]) forKey:BDSKSelectedGroupsKey];
@@ -696,14 +696,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [dictionary setObject:selectedKeys forKey:BDSKSelectedPublicationsKey];
         [dictionary setPointValue:[tableView scrollPositionAsPercentage] forKey:BDSKDocumentScrollPercentageKey];
         
-        [dictionary setIntValue:bottomPreviewDisplay forKey:BDSKBottomPreviewDisplayKey];
+        [dictionary setIntegerValue:bottomPreviewDisplay forKey:BDSKBottomPreviewDisplayKey];
         [dictionary setObject:bottomPreviewDisplayTemplate forKey:BDSKBottomPreviewDisplayTemplateKey];
-        [dictionary setIntValue:sidePreviewDisplay forKey:BDSKSidePreviewDisplayKey];
+        [dictionary setIntegerValue:sidePreviewDisplay forKey:BDSKSidePreviewDisplayKey];
         [dictionary setObject:sidePreviewDisplayTemplate forKey:BDSKSidePreviewDisplayTemplateKey];
         
-        [dictionary setIntValue:[bottomFileView displayMode] forKey:BDSKBottomFileViewDisplayModeKey];
+        [dictionary setIntegerValue:[bottomFileView displayMode] forKey:BDSKBottomFileViewDisplayModeKey];
         [dictionary setFloatValue:([bottomFileView displayMode] == FVDisplayModeGrid ? [bottomFileView iconScale] : 0.0) forKey:BDSKBottomFileViewIconScaleKey];
-        [dictionary setIntValue:[sideFileView displayMode] forKey:BDSKSideFileViewDisplayModeKey];
+        [dictionary setIntegerValue:[sideFileView displayMode] forKey:BDSKSideFileViewDisplayModeKey];
         [dictionary setFloatValue:([sideFileView displayMode] == FVDisplayModeGrid ? [sideFileView iconScale] : 0.0) forKey:BDSKSideFileViewIconScaleKey];
         
         [dictionary setFloatValue:[(BDSKZoomableTextView *)bottomPreviewTextView scaleFactor] forKey:BDSKBottomPreviewScaleFactorKey];
@@ -1421,7 +1421,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         // NSLocalizedRecoverySuggestion is appropriate for display as error message in alert
         if(kBDSKStringEncodingError == [error code]){
             // encoding conversion failure (string to data)
-            NSStringEncoding usedEncoding = [[error valueForKey:NSStringEncodingErrorKey] intValue];
+            NSStringEncoding usedEncoding = [[error valueForKey:NSStringEncodingErrorKey] integerValue];
             NSMutableString *message = [NSMutableString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.", @"Error informative text"), [NSString localizedNameOfStringEncoding:usedEncoding]];
             
             // this is likely nil, so keep NSMutableString from raising
@@ -1793,7 +1793,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [frontMatter setString:@""];
     
     // This is only a sanity check; an encoding of 0 is not valid, so is a signal we should ignore xattrs; could only check for public.text UTIs, but it will be zero if it was never written (and we don't warn in that case).  The user can do many things to make the attribute incorrect, so this isn't very robust.
-    NSStringEncoding encodingFromFile = [[self mainWindowSetupDictionaryFromExtendedAttributes] unsignedIntForKey:BDSKDocumentStringEncodingKey defaultValue:0];
+    NSStringEncoding encodingFromFile = [[self mainWindowSetupDictionaryFromExtendedAttributes] unsignedIntegerForKey:BDSKDocumentStringEncodingKey defaultValue:0];
     if (encodingFromFile != 0 && encodingFromFile != encoding) {
         
         NSInteger rv;

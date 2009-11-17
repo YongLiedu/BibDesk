@@ -1105,7 +1105,7 @@ static BOOL changingColors = NO;
     NSNumber *indexNumber = [sender representedObject];
     NSString *path = nil;
     if (indexNumber) {
-        anIndex = [indexNumber unsignedIntValue];
+        anIndex = [indexNumber unsignedIntegerValue];
         path = [[[[self shownFiles] objectAtIndex:anIndex] URL] path];
     }
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
@@ -1181,7 +1181,7 @@ static BOOL changingColors = NO;
     NSNumber *indexNumber = [sender representedObject];
     NSString *urlString = @"http://";
     if (indexNumber) {
-        anIndex = [indexNumber unsignedIntValue];
+        anIndex = [indexNumber unsignedIntegerValue];
         urlString = [[[[self shownFiles] objectAtIndex:anIndex] URL] absoluteString];
     }
     

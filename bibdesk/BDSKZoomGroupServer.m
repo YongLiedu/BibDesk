@@ -211,7 +211,7 @@
     
     [connection release];
     if ([info host] != nil) {
-        connection = [[ZOOMConnection alloc] initWithHost:[info host] port:[[info port] intValue] database:[info database]];
+        connection = [[ZOOMConnection alloc] initWithHost:[info host] port:[[info port] integerValue] database:[info database]];
         [connection setPassword:[info password]];
         [connection setUsername:[info username]];
         ZOOMSyntaxType syntax = [[self class] zoomRecordSyntaxForRecordSyntaxString:[info recordSyntax]];

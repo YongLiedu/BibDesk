@@ -176,7 +176,7 @@
         return [item valueForKey:@"contents"];
     } else if ([tcID isEqualToString:@"page"]) {
         NSNumber *pageNumber = [item valueForKey:@"pageIndex"];
-        return pageNumber ? [NSString stringWithFormat:@"%i", [pageNumber intValue] + 1] : nil;
+        return pageNumber ? [NSString stringWithFormat:@"%i", [pageNumber integerValue] + 1] : nil;
     }
     return nil;
 }

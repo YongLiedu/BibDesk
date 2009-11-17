@@ -263,7 +263,7 @@
                 // try old format, yymmnnn
                 match = [eprintRegex2 findInString:string];
                 if (string = [match groupAtIndex:1]) {
-                    [pubFields setValue:[([string intValue] < 90 ? @"20" : @"19") stringByAppendingString:string] forKey:BDSKYearString];
+                    [pubFields setValue:[([string integerValue] < 90 ? @"20" : @"19") stringByAppendingString:string] forKey:BDSKYearString];
                     [pubFields setValue:[match groupAtIndex:2] forKey:BDSKMonthString];
                 }
             }

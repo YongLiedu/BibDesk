@@ -110,14 +110,14 @@ static char BDSKConditionObservationContext;
 		
 		// the order is important
         if (comparisonNumber != nil) 
-			[self setComparison:[comparisonNumber intValue]];
+			[self setComparison:[comparisonNumber integerValue]];
         
 		if (aValue != nil)
 			[self setValue:aValue];
         
         static BOOL didWarn = NO;
 		
-        if (([[dictionary objectForKey:@"version"] intValue] < [[[self class] dictionaryVersion] intValue]) &&
+        if (([[dictionary objectForKey:@"version"] integerValue] < [[[self class] dictionaryVersion] integerValue]) &&
             [self isDateCondition] && didWarn == NO) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Smart Groups Need Updating", @"Message in alert dialog when smart groups with obsolete date format are detected") 
                                              defaultButton:nil
@@ -136,7 +136,7 @@ static char BDSKConditionObservationContext;
 	if (self = [self init]) {
 		// the order is important
 		[self setKey:[decoder decodeObjectForKey:@"key"]];
-		[self setComparison:[decoder decodeIntForKey:@"comparison"]];
+		[self setComparison:[decoder decodeIntegerForKey:@"comparison"]];
 		[self setValue:[decoder decodeObjectForKey:@"value"]];
 		BDSKASSERT(key != nil);
 		BDSKASSERT([self value] != nil);
@@ -146,7 +146,7 @@ static char BDSKConditionObservationContext;
 
 - (void)encodeWithCoder:(NSCoder *)coder {
 	[coder encodeObject:[self key] forKey:@"key"];
-	[coder encodeInt:[self comparison] forKey:@"comparison"];
+	[coder encodeInteger:[self comparison] forKey:@"comparison"];
 	[coder encodeObject:[self value] forKey:@"value"];
 }
 
@@ -406,15 +406,15 @@ static char BDSKConditionObservationContext;
             case BDSKNotInLast: 
                 values = [newValue componentsSeparatedByString:@" "];
                 BDSKASSERT([values count] == 2);
-                [self setNumberValue:[[values objectAtIndex:0] intValue]];
-                [self setPeriodValue:[[values objectAtIndex:1] intValue]];
+                [self setNumberValue:[[values objectAtIndex:0] integerValue]];
+                [self setPeriodValue:[[values objectAtIndex:1] integerValue]];
                 break;
             case BDSKBetween: 
                 values = [newValue componentsSeparatedByString:@" "];
                 BDSKASSERT([values count] == 3);
-                [self setNumberValue:[[values objectAtIndex:0] intValue]];
-                [self setAndNumberValue:[[values objectAtIndex:1] intValue]];
-                [self setPeriodValue:[[values objectAtIndex:2] intValue]];
+                [self setNumberValue:[[values objectAtIndex:0] integerValue]];
+                [self setAndNumberValue:[[values objectAtIndex:1] integerValue]];
+                [self setPeriodValue:[[values objectAtIndex:2] integerValue]];
                 break;
             case BDSKDate: 
             case BDSKAfterDate: 
@@ -436,7 +436,7 @@ static char BDSKConditionObservationContext;
             case BDSKCountNotEqual: 
             case BDSKCountLarger: 
             case BDSKCountSmaller: 
-                [self setCountValue:[newValue intValue]];
+                [self setCountValue:[newValue integerValue]];
                 break;
             case BDSKAttachmentContain: 
             case BDSKAttachmentNotContain: 

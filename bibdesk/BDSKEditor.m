@@ -586,7 +586,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     NSNumber *indexNumber = [sender representedObject];
     NSString *path = nil;
     if (indexNumber) {
-        anIndex = [indexNumber unsignedIntValue];
+        anIndex = [indexNumber unsignedIntegerValue];
         path = [[[publication objectInFilesAtIndex:anIndex] URL] path];
     }
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
@@ -657,7 +657,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     NSNumber *indexNumber = [sender representedObject];
     NSString *urlString = @"http://";
     if (indexNumber) {
-        anIndex = [indexNumber unsignedIntValue];
+        anIndex = [indexNumber unsignedIntegerValue];
         urlString = [[[publication objectInFilesAtIndex:anIndex] URL] absoluteString];
     }
     
@@ -975,7 +975,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	BOOL canSet = YES;
     
     if (indexNumber) {
-        anIndex = [indexNumber unsignedIntValue];
+        anIndex = [indexNumber unsignedIntegerValue];
         canSet = [publication canSetURLForLinkedFile:[publication objectInFilesAtIndex:anIndex]];
     } else {
         for (BDSKLinkedFile *file in [publication localFiles]){
@@ -2266,7 +2266,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	else if([changeKey isIntegerField]){
 		for (NSButtonCell *entry in [matrix cells]){
 			if([[entry representedObject] isEqualToString:changeKey]){
-				[entry setIntValue:[publication intValueOfField:changeKey]];
+				[entry setIntegerValue:[publication intValueOfField:changeKey]];
 				[matrix setNeedsDisplay:YES];
 				break;
 			}
@@ -3276,7 +3276,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSButtonCell *buttonCell = [templateCell copy];
     [buttonCell setTitle:[field localizedFieldName]];
     [buttonCell setRepresentedObject:field];
-    [buttonCell setIntValue:[publication intValueOfField:field]];
+    [buttonCell setIntegerValue:[publication intValueOfField:field]];
     [cells addObject:buttonCell];
     size = [buttonCell cellSize];
     [buttonCell release];

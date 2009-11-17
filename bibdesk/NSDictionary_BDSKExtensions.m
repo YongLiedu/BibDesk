@@ -151,22 +151,22 @@
 }
 
 // Just to make life easier
-- (int)intForKey:(NSString *)key defaultValue:(int)defaultValue {
+- (NSInteger)integerForKey:(NSString *)key defaultValue:(NSInteger)defaultValue {
     id value = [self objectForKey:key];
-    return [value respondsToSelector:@selector(intValue)] ? [value intValue] : defaultValue;
+    return [value respondsToSelector:@selector(integerValue)] ? [value integerValue] : defaultValue;
 }
 
-- (int)intForKey:(NSString *)key {
-    return [self intForKey:key defaultValue:0];
+- (NSInteger)integerForKey:(NSString *)key {
+    return [self integerForKey:key defaultValue:0];
 }
 
-- (unsigned int)unsignedIntForKey:(NSString *)key defaultValue:(unsigned int)defaultValue {
+- (NSUInteger)unsignedIntegerForKey:(NSString *)key defaultValue:(NSUInteger)defaultValue {
     id value = [self objectForKey:key];
-    return [value respondsToSelector:@selector(unsignedIntValue)] ? [value unsignedIntValue] : defaultValue;
+    return [value respondsToSelector:@selector(unsignedIntegerValue)] ? [value unsignedIntegerValue] : defaultValue;
 }
 
-- (unsigned int)unsignedIntForKey:(NSString *)key {
-    return [self unsignedIntForKey:key defaultValue:0u];
+- (NSUInteger)unsignedIntegerForKey:(NSString *)key {
+    return [self unsignedIntegerForKey:key defaultValue:0u];
 }
 
 @end
@@ -194,14 +194,14 @@
     [number release];
 }
 
-- (void)setIntValue:(int)value forKey:(NSString *)key {
-    NSNumber *number = [[NSNumber alloc] initWithInt:value];
+- (void)setIntegerValue:(NSInteger)value forKey:(NSString *)key {
+    NSNumber *number = [[NSNumber alloc] initWithInteger:value];
     [self setObject:number forKey:key];
     [number release];
 }
 
-- (void)setUnsignedIntValue:(unsigned int)value forKey:(NSString *)key {
-    NSNumber *number = [[NSNumber alloc] initWithUnsignedInt:value];
+- (void)setUnsignedIntegerValue:(NSUInteger)value forKey:(NSString *)key {
+    NSNumber *number = [[NSNumber alloc] initWithUnsignedInteger:value];
     [self setObject:number forKey:key];
     [number release];
 }

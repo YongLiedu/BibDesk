@@ -45,7 +45,7 @@
 {
     NSMutableIndexSet *indexSet = [NSMutableIndexSet indexSet];
     for (NSNumber *number in indexArray)
-        [indexSet addIndex:[number intValue]];
+        [indexSet addIndex:[number integerValue]];
     
     return indexSet;
 }

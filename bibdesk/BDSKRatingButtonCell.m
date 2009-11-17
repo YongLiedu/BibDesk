@@ -108,18 +108,26 @@
 }
 
 - (void)setObjectValue:(id)object {
-	[self setRating:[object intValue]];
+	[self setRating:[object unsignedIntegerValue]];
 }
 
 - (id)objectValue {
-	return [NSNumber numberWithInt:rating];
+	return [NSNumber numberWithUnsignedInteger:rating];
 }
 
-- (NSInteger)intValue {
+- (int)intValue {
 	return rating;
 }
 
-- (void)setIntValue:(NSInteger)anInt {
+- (void)setIntValue:(int)anInt {
+	[self setRating:anInt];
+}
+
+- (NSInteger)integerValue {
+	return rating;
+}
+
+- (void)setIntegerValue:(NSInteger)anInt {
 	[self setRating:anInt];
 }
 
@@ -427,7 +435,7 @@
 
 - (void)accessibilitySetValue:(id)value forAttribute:(NSString *)attribute {
     if ([attribute isEqualToString:NSAccessibilityValueAttribute]) {
-        [self setRating:MIN([value unsignedIntValue], maxRating)];
+        [self setRating:MIN([value unsignedIntegerValue], maxRating)];
         [(NSControl *)[self controlView] updateCellInside:self];
         [(NSControl *)[self controlView] sendAction:[self action] to:[self target]];
     } else

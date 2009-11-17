@@ -279,7 +279,7 @@ static char BDSKErrorEditorObservationContext;
 }
 
 - (IBAction)changeLineNumber:(id)sender{
-    NSInteger lineNumber = [sender intValue];
+    NSInteger lineNumber = [sender integerValue];
     if (lineNumber > 0)
         [self gotoLine:lineNumber];
     else
@@ -325,7 +325,7 @@ static char BDSKErrorEditorObservationContext;
         }
     }
     
-    [lineNumberField setIntValue:lineNumber];
+    [lineNumberField setIntegerValue:lineNumber];
     
     if(enableSyntaxHighlighting && invalidSyntaxHighlightMark < NSMaxRange(selectedRange))
         [[textView textStorage] edited:NSTextStorageEditedAttributes range:selectedRange changeInLength:0];

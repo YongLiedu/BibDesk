@@ -458,7 +458,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void)netService:(NSNetService *)sender didNotPublish:(NSDictionary *)errorDict
 {
-    NSInteger err = [[errorDict objectForKey:NSNetServicesErrorCode] intValue];
+    NSInteger err = [[errorDict objectForKey:NSNetServicesErrorCode] integerValue];
     
     [self disableSharing];
     

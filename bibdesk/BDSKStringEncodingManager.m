@@ -229,7 +229,7 @@ static NSInteger encodingCompare(const void *firstPtr, const void *secondPtr) {
     NSInteger cnt, numEncodings = [allEncodings count];
 
     for (cnt = 0; cnt < numEncodings; cnt++) {
-        NSStringEncoding encoding = [[allEncodings objectAtIndex:cnt] unsignedIntValue];
+        NSStringEncoding encoding = [[allEncodings objectAtIndex:cnt] unsignedIntegerValue];
         NSString *encodingName = [NSString localizedNameOfStringEncoding:encoding];
         NSCell *cell;
         if (cnt >= [encodingMatrix numberOfRows]) [encodingMatrix addRow];
@@ -257,7 +257,7 @@ static NSInteger encodingCompare(const void *firstPtr, const void *secondPtr) {
 
     // Fill with encodings
     for (cnt = 0; cnt < numEncodings; cnt++) {
-        NSStringEncoding enc = [[encs objectAtIndex:cnt] unsignedIntValue];
+        NSStringEncoding enc = [[encs objectAtIndex:cnt] unsignedIntegerValue];
         [popup addItemWithTitle:enc ? [NSString localizedNameOfStringEncoding:enc] : @""];
         [[popup lastItem] setTag:enc];
         [[popup lastItem] setEnabled:YES];

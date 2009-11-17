@@ -257,7 +257,7 @@ static NSSet *alwaysDisabledFields = nil;
 	
 	for (NSDictionary *dict in customFieldsArray) {
 		field = [dict objectForKey:@"field"]; 
-		type = [[dict objectForKey:@"type"] intValue];
+		type = [[dict objectForKey:@"type"] integerValue];
 		if([[dict objectForKey:@"default"] boolValue])
 			[defaultFields addObject:field];
         switch(type){

@@ -288,8 +288,8 @@
 
 - (void)tableViewColumnDidMove:(NSNotification *)notification {
 	NSDictionary *userInfo = [notification userInfo];
-	NSInteger oldColumn = [[userInfo objectForKey:@"oldColumn"] intValue];
-	NSInteger newColumn = [[userInfo objectForKey:@"newColumn"] intValue];
+	NSInteger oldColumn = [[userInfo objectForKey:@"oldColumn"] integerValue];
+	NSInteger newColumn = [[userInfo objectForKey:@"newColumn"] integerValue];
 	if (oldColumn == column) {
 		column = newColumn;
 	} else if (oldColumn < column) {

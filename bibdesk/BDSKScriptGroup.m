@@ -101,7 +101,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     NSString *aName = [[groupDict objectForKey:@"group name"] stringByUnescapingGroupPlistEntities];
     NSString *aPath = [[groupDict objectForKey:@"script path"] stringByUnescapingGroupPlistEntities];
     NSString *anArguments = [[groupDict objectForKey:@"script arguments"] stringByUnescapingGroupPlistEntities];
-    NSInteger aType = [[groupDict objectForKey:@"script type"] intValue];
+    NSInteger aType = [[groupDict objectForKey:@"script type"] integerValue];
     self = [self initWithName:aName scriptPath:aPath scriptArguments:anArguments scriptType:aType];
     return self;
 }

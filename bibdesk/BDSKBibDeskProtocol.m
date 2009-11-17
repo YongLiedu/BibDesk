@@ -123,7 +123,7 @@
 	NSMutableArray * generalFeatures = [NSMutableArray array];
 	
 	for (NSDictionary *parserInfo in parserFeatures) {
-		NSUInteger parserFlags = [[parserInfo objectForKey:FLAGS_KEY] unsignedIntValue];
+		NSUInteger parserFlags = [[parserInfo objectForKey:FLAGS_KEY] unsignedIntegerValue];
 		if ( parserFlags & BDSKParserFeatureAllPagesMask ) {
 			// it's a 'general' parser that's not limited to particular sites
 			[generalFeatures addObject: parserInfo];

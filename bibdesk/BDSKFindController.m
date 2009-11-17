@@ -485,7 +485,7 @@ enum {
 }
 
 - (BOOL)validateSearchType:(id *)value error:(NSError **)error {
-    if ([*value intValue] == FCRegexSearch && 
+    if ([*value integerValue] == FCRegexSearch && 
 		[self regexIsValid:[self findString]] == NO) {
         if(error != nil){
             NSString *description = NSLocalizedString(@"Invalid Regular Expression.", @"Error description");

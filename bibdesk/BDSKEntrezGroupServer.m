@@ -313,7 +313,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
                 [self setWebEnv:[[[root nodesForXPath:@"/eSearchResult[1]/WebEnv[1]" error:NULL] lastObject] stringValue]];
                 [self setQueryKey:[[[root nodesForXPath:@"/eSearchResult[1]/QueryKey[1]" error:NULL] lastObject] stringValue]];
                 NSString *countString = [[[root nodesForXPath:@"/eSearchResult[1]/Count[1]" error:NULL] lastObject] stringValue];
-                [self setNumberOfAvailableResults:[countString intValue]];
+                [self setNumberOfAvailableResults:[countString integerValue]];
                 
                 [document release];
                 [self fetch];

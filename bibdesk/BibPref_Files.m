@@ -80,8 +80,8 @@
 - (void)updateAutoSaveUI{
     // prefs time is in seconds, but we display in minutes
     NSTimeInterval saveDelay = [sud integerForKey:BDSKAutosaveTimeIntervalKey] / 60;
-    [autosaveTimeField setIntValue:saveDelay];
-    [autosaveTimeStepper setIntValue:saveDelay];
+    [autosaveTimeField setIntegerValue:saveDelay];
+    [autosaveTimeStepper setIntegerValue:saveDelay];
     
     BOOL shouldAutosave = [sud boolForKey:BDSKShouldAutosaveDocumentKey];
     [autosaveDocumentButton setState:shouldAutosave ? NSOnState : NSOffState];
@@ -177,7 +177,7 @@
 
 - (IBAction)setAutosaveTime:(id)sender;
 {    
-    NSTimeInterval saveDelay = [sender intValue] * 60; // convert to seconds
+    NSTimeInterval saveDelay = [sender integerValue] * 60; // convert to seconds
     [sud setInteger:saveDelay forKey:BDSKAutosaveTimeIntervalKey];
     [[NSDocumentController sharedDocumentController] setAutosavingDelay:saveDelay];
     [self updateAutoSaveUI];

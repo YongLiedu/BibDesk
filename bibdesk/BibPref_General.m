@@ -76,7 +76,7 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
 }
 
 - (void)updateStartupBehaviorUI {
-    NSInteger startupBehavior = [[sud objectForKey:BDSKStartupBehaviorKey] intValue];
+    NSInteger startupBehavior = [[sud objectForKey:BDSKStartupBehaviorKey] integerValue];
     [startupBehaviorRadio selectCellWithTag:startupBehavior];
     [defaultBibFileTextField setEnabled:startupBehavior == 3];
     [defaultBibFileButton setEnabled:startupBehavior == 3];

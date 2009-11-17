@@ -447,7 +447,7 @@
     
     NSDictionary *info = [(NSDictionary *)contextInfo autorelease];
     NSArray *fileNames = [info objectForKey:@"fileNames"];
-    NSInteger idx = [[info objectForKey:@"index"] intValue];
+    NSInteger idx = [[info objectForKey:@"index"] integerValue];
     
     NSInteger mainIndex = [chooseMainPagePopup indexOfSelectedItem] - 1;
     NSInteger i, count = [fileNames count];
@@ -636,7 +636,7 @@
 @implementation BDSKTemplateOutlineView
 
 - (void)textDidEndEditing:(NSNotification *)notification {
-    NSInteger textMovement = [[[notification userInfo] objectForKey:@"NSTextMovement"] intValue];
+    NSInteger textMovement = [[[notification userInfo] objectForKey:@"NSTextMovement"] integerValue];
     if ((textMovement == NSReturnTextMovement || textMovement == NSTabTextMovement) && 
         [[self delegate] respondsToSelector:@selector(outlineViewShouldEditNextItemWhenEditingEnds:)] && [[self delegate] outlineViewShouldEditNextItemWhenEditingEnds:self] == NO) {
         // This is ugly, but just about the only way to do it. NSTableView is determined to select and edit something else, even the text field that it just finished editing, unless we mislead it about what key was pressed to end editing.

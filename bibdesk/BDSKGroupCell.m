@@ -157,7 +157,7 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
 }
 
 - (NSInteger)count {
-    return [nonNullObjectValueForKey([self objectValue], BDSKGroupCellCountKey) intValue];
+    return [nonNullObjectValueForKey([self objectValue], BDSKGroupCellCountKey) integerValue];
 }
 
 - (BOOL)isRetrieving {

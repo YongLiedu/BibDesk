@@ -147,7 +147,7 @@
             settings = [[settings mutableCopy] autorelease];
             id value;
             if (value = [settings objectForKey:NSPrintDetailedErrorReporting])
-                [settings setObject:[NSNumber numberWithBool:[value intValue] == 'lwdt'] forKey:NSPrintDetailedErrorReporting];
+                [settings setObject:[NSNumber numberWithBool:[value unsignedIntValue] == 'lwdt'] forKey:NSPrintDetailedErrorReporting];
             if ((value = [settings objectForKey:NSPrintPrinterName]) && (value = [NSPrinter printerWithName:value]))
                 [settings setObject:value forKey:NSPrintPrinter];
             if ([settings objectForKey:NSPrintFirstPage] || [settings objectForKey:NSPrintLastPage]) {
@@ -189,7 +189,7 @@
             NSString *aType = BDSKSearchGroupEntrez;
             NSDictionary *info = [properties objectForKey:@"scriptingServerInfo"];
             if ([properties objectForKey:@"type"]) {
-                switch ([[info objectForKey:@"type"] intValue]) {
+                switch ([[info objectForKey:@"type"] unsignedIntValue]) {
                     case BDSKScriptingSearchGroupEntrez: aType = BDSKSearchGroupEntrez; break;
                     case BDSKScriptingSearchGroupZoom: aType = BDSKSearchGroupZoom; break;
                     case BDSKScriptingSearchGroupISI: aType = BDSKSearchGroupISI; break;

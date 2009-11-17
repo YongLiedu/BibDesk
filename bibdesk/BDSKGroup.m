@@ -104,7 +104,7 @@ static NSString *createUniqueID(void)
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super init]) {
         name = [[decoder decodeObjectForKey:@"name"] retain];
-        count = [decoder decodeIntForKey:@"count"];
+        count = [decoder decodeIntegerForKey:@"count"];
         uniqueID = createUniqueID();
     }
     return self;
@@ -112,7 +112,7 @@ static NSString *createUniqueID(void)
 
 - (void)encodeWithCoder:(NSCoder *)coder {
     [coder encodeObject:name forKey:@"name"];
-    [coder encodeInt:count forKey:@"count"];
+    [coder encodeInteger:count forKey:@"count"];
 }
 
 // NSCopying protocol, may be used by the duplicate script command

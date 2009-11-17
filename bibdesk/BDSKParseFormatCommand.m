@@ -56,7 +56,7 @@
 	NSNumber *indexNumber = [params objectForKey:@"index"];
 	BibItem *pub = [params objectForKey:@"from"];
 	BOOL check = [[params objectForKey:@"check"] boolValue];
-    NSUInteger i = indexNumber ? [indexNumber unsignedIntValue] - 1 : 0;
+    NSUInteger i = indexNumber ? [indexNumber unsignedIntegerValue] - 1 : 0;
     BOOL isFile = field == nil;
     
 	if (formatString == nil || params == nil) {

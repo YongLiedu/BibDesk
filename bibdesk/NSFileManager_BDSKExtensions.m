@@ -990,7 +990,7 @@ FSOpenIterator:
     
     // currently only two elements, but may become arbitrarily long in future
     if ([array count] >= 2) {
-        CFStringEncoding cfEncoding = [[array objectAtIndex:1] intValue];
+        CFStringEncoding cfEncoding = [[array objectAtIndex:1] integerValue];
         nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
     }
     else if ([array count] > 0) {

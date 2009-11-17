@@ -79,7 +79,7 @@
 	else
 		self = [self init];
 	if (self) {
-		conjunction = [[dictionary objectForKey:@"conjunction"] intValue];
+		conjunction = [[dictionary objectForKey:@"conjunction"] integerValue];
 	}
 	return self;
 }
@@ -87,7 +87,7 @@
 - (id)initWithCoder:(NSCoder *)decoder {
 	if (self = [super init]) {
 		conditions = [[NSMutableArray alloc] initWithArray:[decoder decodeObjectForKey:@"conditions"]];
-		conjunction = [decoder decodeIntForKey:@"conjunction"];
+		conjunction = [decoder decodeIntegerForKey:@"conjunction"];
 		group = nil;
 	}
 	return self;
@@ -95,7 +95,7 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder {
 	[coder encodeObject:conditions forKey:@"conditions"];
-	[coder encodeInt:conjunction forKey:@"conjunction"];
+	[coder encodeInteger:conjunction forKey:@"conjunction"];
 }
 
 - (void)dealloc {
