@@ -108,7 +108,7 @@
 }
 
 - (void)setObjectValue:(id)object {
-	[self setRating:[object unsignedIntegerValue]];
+	[self setRating:[object integerValue]];
 }
 
 - (id)objectValue {
