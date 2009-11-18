@@ -12,7 +12,6 @@
 		F93566620912D56F002B6957 /* internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 24ADE650050886DD00DAF17A /* internal.h */; };
 		F93566630912D56F002B6957 /* pcre.h in Headers */ = {isa = PBXBuildFile; fileRef = 24ADE663050886DD00DAF17A /* pcre.h */; };
 		F93566660912D56F002B6957 /* AGRegex.m in Sources */ = {isa = PBXBuildFile; fileRef = F9302D8B0429B15D01FE1BD3 /* AGRegex.m */; };
-		F93566670912D56F002B6957 /* chartables.c in Sources */ = {isa = PBXBuildFile; fileRef = 24ADE600050886DD00DAF17A /* chartables.c */; };
 		F93566680912D56F002B6957 /* get.c in Sources */ = {isa = PBXBuildFile; fileRef = 24ADE64B050886DD00DAF17A /* get.c */; };
 		F93566690912D56F002B6957 /* maketables.c in Sources */ = {isa = PBXBuildFile; fileRef = 24ADE658050886DD00DAF17A /* maketables.c */; };
 		F935666A0912D56F002B6957 /* pcre.c in Sources */ = {isa = PBXBuildFile; fileRef = 24ADE661050886DD00DAF17A /* pcre.c */; };
@@ -282,7 +281,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				F93566660912D56F002B6957 /* AGRegex.m in Sources */,
-				F93566670912D56F002B6957 /* chartables.c in Sources */,
 				F93566680912D56F002B6957 /* get.c in Sources */,
 				F93566690912D56F002B6957 /* maketables.c in Sources */,
 				F935666A0912D56F002B6957 /* pcre.c in Sources */,
