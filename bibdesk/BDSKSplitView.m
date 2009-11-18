@@ -39,9 +39,6 @@
 #import "BDSKSplitView.h"
 #import "NSViewAnimation_BDSKExtensions.h"
 
-#ifndef NSAppKitVersionNumber10_5
-#define NSAppKitVersionNumber10_5 949
-#endif
 
 @implementation BDSKSplitView
 
