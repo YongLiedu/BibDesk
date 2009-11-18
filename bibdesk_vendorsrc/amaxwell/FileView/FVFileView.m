@@ -1887,13 +1887,9 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     for (i = 0; i < wordCount; i++) {
         word = [words objectAtIndex:i];
         [[message mutableString] setString:word];
-        width = MAX(width, NSWidth([message boundingRectWithSize:NSMakeSize(CGFLOAT_MAX, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin]));
+        width = FVMax(width, NSWidth([message boundingRectWithSize:NSMakeSize(CGFLOAT_MAX, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin]));
     }
-#if __LP64__
-    return ceil(width);
-#else
-    return ceilf(width);
-#endif
+    return FVCeil(width);
 }
 
 - (void)_drawDropMessage;
@@ -2480,7 +2476,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     NSString *newPath = nil;
     
     do {
-        newPath = [[NSString stringWithFormat:@"%@-%i", basePath, ++i] stringByAppendingPathExtension:ext];
+        newPath = [[NSString stringWithFormat:@"%@-%lu", basePath, (unsigned long)++i] stringByAppendingPathExtension:ext];
     } while ([fm fileExistsAtPath:newPath]);
     
     if ([fm copyItemAtPath:path toPath:newPath error:NULL]) {
@@ -2526,7 +2522,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
             if ([aURL isFileURL])
                 aURL = makeCopyOfFileAtURL(aURL);
             else if ([self allowsDownloading])
-                [downloads addObject:[NSDictionary dictionaryWithObjectsAndKeys:aURL, @"URL", [NSNumber numberWithUnsignedInt:i], @"index", nil]];
+                [downloads addObject:[NSDictionary dictionaryWithObjectsAndKeys:aURL, @"URL", [NSNumber numberWithUnsignedInteger:i], @"index", nil]];
             if (aURL) {
                 [copiedURLs addObject:aURL];
                 i++;
@@ -2565,7 +2561,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
         NSEnumerator *dlEnum = [downloads objectEnumerator];
         NSDictionary *dl;
         while (dl = [dlEnum nextObject]) {
-            NSUInteger anIndex = [[dl objectForKey:@"index"] unsignedIntValue];
+            NSUInteger anIndex = [[dl objectForKey:@"index"] unsignedIntegerValue];
             NSURL *aURL = [dl objectForKey:@"URL"];
             if (anIndex < [self numberOfIcons] && [aURL isEqual:[self URLAtIndex:anIndex]])
                 [self _downloadURLAtIndex:anIndex];
@@ -3057,7 +3053,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (void)magnifyWithEvent:(NSEvent *)theEvent;
 {
-    float dz = [theEvent deltaZ];
+    CGFloat dz = [theEvent deltaZ];
     dz = dz > 0 ? FVMin(0.2, dz) : FVMax(-0.2, dz);
     [self _setIconScale:FVMax(0.1, [self iconScale] + 0.5 * dz)];
 }

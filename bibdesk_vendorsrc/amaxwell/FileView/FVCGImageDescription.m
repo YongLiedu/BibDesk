@@ -116,14 +116,14 @@
 - (void)encodeWithCoder:(NSCoder *)aCoder;
 {
     if ([aCoder allowsKeyedCoding]) {
-        [aCoder encodeInt:_width forKey:@"_width"];
-        [aCoder encodeInt:_height forKey:@"_height"];
-        [aCoder encodeInt:_bitsPerComponent forKey:@"_bitsPerComponent"];
-        [aCoder encodeInt:_bitsPerPixel forKey:@"_bitsPerPixel"];
-        [aCoder encodeInt:_bytesPerRow forKey:@"_bytesPerRow"];
-        [aCoder encodeInt:_bitmapInfo forKey:@"_bitmapInfo"];
-        [aCoder encodeInt:_shouldInterpolate forKey:@"_shouldInterpolate"];
-        [aCoder encodeInt:_renderingIntent forKey:@"_renderingIntent"];
+        [aCoder encodeInteger:_width forKey:@"_width"];
+        [aCoder encodeInteger:_height forKey:@"_height"];
+        [aCoder encodeInteger:_bitsPerComponent forKey:@"_bitsPerComponent"];
+        [aCoder encodeInteger:_bitsPerPixel forKey:@"_bitsPerPixel"];
+        [aCoder encodeInteger:_bytesPerRow forKey:@"_bytesPerRow"];
+        [aCoder encodeInteger:_bitmapInfo forKey:@"_bitmapInfo"];
+        [aCoder encodeInteger:_shouldInterpolate forKey:@"_shouldInterpolate"];
+        [aCoder encodeInteger:_renderingIntent forKey:@"_renderingIntent"];
         [aCoder encodeObject:_colorSpaceDescription forKey:@"_colorSpaceDescription"];
         [aCoder encodeObject:(NSData *)_bitmapData forKey:@"_bitmapData"];
         [aCoder encodeBytes:(const uint8_t *)_decode length:[self _decodeLength]  forKey:@"_decode"];
@@ -152,14 +152,14 @@
     self = [super init];
     if (self) {
         if ([aDecoder allowsKeyedCoding]) {
-            _width = [aDecoder decodeIntForKey:@"_width"];
-            _height = [aDecoder decodeIntForKey:@"_height"];
-            _bitsPerComponent = [aDecoder decodeIntForKey:@"_bitsPerComponent"];
-            _bitsPerPixel = [aDecoder decodeIntForKey:@"_bitsPerPixel"];
-            _bytesPerRow = [aDecoder decodeIntForKey:@"_bytesPerRow"];
-            _bitmapInfo = [aDecoder decodeIntForKey:@"_bitmapInfo"];
-            _shouldInterpolate = [aDecoder decodeIntForKey:@"_shouldInterpolate"];
-            _renderingIntent = (CGColorRenderingIntent)[aDecoder decodeIntForKey:@"_renderingIntent"];
+            _width = [aDecoder decodeIntegerForKey:@"_width"];
+            _height = [aDecoder decodeIntegerForKey:@"_height"];
+            _bitsPerComponent = [aDecoder decodeIntegerForKey:@"_bitsPerComponent"];
+            _bitsPerPixel = [aDecoder decodeIntegerForKey:@"_bitsPerPixel"];
+            _bytesPerRow = [aDecoder decodeIntegerForKey:@"_bytesPerRow"];
+            _bitmapInfo = [aDecoder decodeIntegerForKey:@"_bitmapInfo"];
+            _shouldInterpolate = [aDecoder decodeIntegerForKey:@"_shouldInterpolate"];
+            _renderingIntent = (CGColorRenderingIntent)[aDecoder decodeIntegerForKey:@"_renderingIntent"];
             _colorSpaceDescription = [[aDecoder decodeObjectForKey:@"_colorSpaceDescription"] retain];
             _bitmapData = (CFDataRef)[[aDecoder decodeObjectForKey:@"_bitmapData"] retain];
 

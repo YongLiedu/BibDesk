@@ -174,7 +174,7 @@ static CGImageRef FVCreateCGImageWithData(NSData *data)
 #if USE_IMAGEIO
     static NSDictionary *imageProperties = nil;
     if (nil == imageProperties)
-        imageProperties = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:1.0], (id)kCGImageDestinationLossyCompressionQuality, nil];
+        imageProperties = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInteger:1], (id)kCGImageDestinationLossyCompressionQuality, nil];
     
     CGImageSourceRef imsrc = CGImageSourceCreateWithData((CFDataRef)data, (CFDictionaryRef)imageProperties);
     if (imsrc && CGImageSourceGetCount(imsrc))

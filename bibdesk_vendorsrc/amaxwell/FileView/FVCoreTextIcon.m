@@ -72,10 +72,10 @@
         
         CGFloat left, right, top, bottom;
         
-        left = [[documentAttributes objectForKey:NSLeftMarginDocumentAttribute] floatValue];
-        right = [[documentAttributes objectForKey:NSRightMarginDocumentAttribute] floatValue];
-        top = [[documentAttributes objectForKey:NSTopMarginDocumentAttribute] floatValue];
-        bottom = [[documentAttributes objectForKey:NSBottomMarginDocumentAttribute] floatValue];
+        left = [[documentAttributes objectForKey:NSLeftMarginDocumentAttribute] doubleValue];
+        right = [[documentAttributes objectForKey:NSRightMarginDocumentAttribute] doubleValue];
+        top = [[documentAttributes objectForKey:NSTopMarginDocumentAttribute] doubleValue];
+        bottom = [[documentAttributes objectForKey:NSBottomMarginDocumentAttribute] doubleValue];
         NSSize paperSize = [[documentAttributes objectForKey:NSPaperSizeDocumentAttribute] sizeValue];
         textRect.size.width = paperSize.width - left - right;
         textRect.size.height = paperSize.height - top - bottom;

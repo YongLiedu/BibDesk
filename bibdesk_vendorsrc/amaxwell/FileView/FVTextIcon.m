@@ -311,10 +311,10 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
         
         CGFloat left, right, top, bottom;
         
-        left = [[documentAttributes objectForKey:NSLeftMarginDocumentAttribute] floatValue];
-        right = [[documentAttributes objectForKey:NSRightMarginDocumentAttribute] floatValue];
-        top = [[documentAttributes objectForKey:NSTopMarginDocumentAttribute] floatValue];
-        bottom = [[documentAttributes objectForKey:NSBottomMarginDocumentAttribute] floatValue];
+        left = [[documentAttributes objectForKey:NSLeftMarginDocumentAttribute] doubleValue];
+        right = [[documentAttributes objectForKey:NSRightMarginDocumentAttribute] doubleValue];
+        top = [[documentAttributes objectForKey:NSTopMarginDocumentAttribute] doubleValue];
+        bottom = [[documentAttributes objectForKey:NSBottomMarginDocumentAttribute] doubleValue];
         paperSize = [[documentAttributes objectForKey:NSPaperSizeDocumentAttribute] sizeValue];
         
         t1 = CGAffineTransformMakeTranslation(0, paperSize.height);

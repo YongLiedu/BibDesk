@@ -300,7 +300,7 @@ static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
         [self setMode:NSRadioModeMatrix];
         [self renewRows:1 columns:8];
         [self sizeToCells];
-        int column, tags[8] = FINDER_LABELS;
+        NSInteger column, tags[8] = FINDER_LABELS;
         for (column = 0; column < 8; column++)
             [[self cellAtRow:0 column:column] setTag:tags[column]];
         _boxedRow = NO_BOX;

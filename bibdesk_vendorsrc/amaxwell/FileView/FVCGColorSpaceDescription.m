@@ -144,11 +144,11 @@ static inline bool __FVCGCanSaveIndexedSpaces(void)
 - (void)encodeWithCoder:(NSCoder *)aCoder;
 {
     if ([aCoder allowsKeyedCoding]) {
-        [aCoder encodeInt:_colorSpaceModel forKey:@"_colorSpaceModel"];
-        [aCoder encodeInt:_components forKey:@"_components"];
-        [aCoder encodeInt:_baseColorSpaceComponents forKey:@"_baseColorSpaceComponents"];
-        [aCoder encodeInt:_colorTableCount forKey:@"_colorTableCount"];
-        [aCoder encodeInt:_colorTableLength forKey:@"_colorTableLength"];
+        [aCoder encodeInteger:_colorSpaceModel forKey:@"_colorSpaceModel"];
+        [aCoder encodeInteger:_components forKey:@"_components"];
+        [aCoder encodeInteger:_baseColorSpaceComponents forKey:@"_baseColorSpaceComponents"];
+        [aCoder encodeInteger:_colorTableCount forKey:@"_colorTableCount"];
+        [aCoder encodeInteger:_colorTableLength forKey:@"_colorTableLength"];
         [aCoder encodeBytes:_colorTable length:_colorTableLength  forKey:@"_colorTable"];
     }
     else {
@@ -166,11 +166,11 @@ static inline bool __FVCGCanSaveIndexedSpaces(void)
     self = [super init];
     if (self) {
         if ([aDecoder allowsKeyedCoding]) {
-            _colorSpaceModel = (CGColorSpaceModel)[aDecoder decodeIntForKey:@"_colorSpaceModel"];
-            _components = [aDecoder decodeIntForKey:@"_components"];
-            _baseColorSpaceComponents = [aDecoder decodeIntForKey:@"_baseColorSpaceComponents"];
-            _colorTableCount = [aDecoder decodeIntForKey:@"_colorTableCount"];
-            _colorTableLength = [aDecoder decodeIntForKey:@"_colorTableLength"];
+            _colorSpaceModel = (CGColorSpaceModel)[aDecoder decodeIntegerForKey:@"_colorSpaceModel"];
+            _components = [aDecoder decodeIntegerForKey:@"_components"];
+            _baseColorSpaceComponents = [aDecoder decodeIntegerForKey:@"_baseColorSpaceComponents"];
+            _colorTableCount = [aDecoder decodeIntegerForKey:@"_colorTableCount"];
+            _colorTableLength = [aDecoder decodeIntegerForKey:@"_colorTableLength"];
             
             NSUInteger len;
             const void *colorTable = [aDecoder decodeBytesForKey:@"_colorTable" returnedLength:&len];

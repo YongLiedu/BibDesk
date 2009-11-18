@@ -214,7 +214,7 @@ static void __FVLinearColorReleaseFunction(void *info)
 {
     // Apple preference for Finder label names
     NSDictionary *labelPrefs = [[NSUserDefaults standardUserDefaults] persistentDomainForName:@"com.apple.Labels"];
-    id name = [labelPrefs objectForKey:[NSString stringWithFormat:@"Label_Name_%d", label]];
+    id name = [labelPrefs objectForKey:[NSString stringWithFormat:@"Label_Name_%ld", (long)label]];
     // check the class, since this is private
     if ([name isKindOfClass:[NSString class]] == NO)
         name = nil;
