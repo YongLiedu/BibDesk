@@ -794,7 +794,7 @@ http://home.planet.nl/~faase009/GNU.txt
                     ch = *str;
                 else if (option_warn && freport != NULL)
                     fprintf(freport,
-                            "%s (%d) : Unknown character %ld (decimal)\n",
+                            "%s (%ld) : Unknown character %c (decimal)\n",
                             html_fn, (long)ln, (unsigned char)*str);
                 if (mString)
                 {   if (in_verb)

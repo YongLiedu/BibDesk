@@ -58,8 +58,6 @@ static NSString *BDSKDefaultScaleMenuLabels[] = {@"10%", @"20%", @"25%", @"35%",
 static CGFloat BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 0.71, 0.85, 1.0, 1.2, 1.41, 1.7, 2.0, 3.0, 4.0, 6.0, 8.0};
 
 #define BDSKMinDefaultScaleMenuFactor (BDSKDefaultScaleMenuFactors[1])
-#warning 64BIT: Inspect use of sizeof
-#warning 64BIT: Inspect use of sizeof
 #define BDSKDefaultScaleMenuFactorsCount (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(CGFloat))
 
 #define BDSKScaleMenuFontSize ((CGFloat)11.0)
