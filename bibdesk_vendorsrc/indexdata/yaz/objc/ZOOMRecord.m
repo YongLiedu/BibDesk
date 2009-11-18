@@ -315,7 +315,7 @@ static NSData *copyMARC8BytesToUTF8(const char *buf, NSInteger length)
 
 - (void)cacheRepresentationForKey:(NSString *)aKey;
 {
-    NSInteger length;
+    int length;
     
     // length will be -1 for some types, so we'll use strlen for those
     const void *bytes = ZOOM_record_get(_record, [aKey UTF8String], &length);

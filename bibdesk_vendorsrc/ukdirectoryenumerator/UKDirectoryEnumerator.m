@@ -610,7 +610,7 @@ NSDictionary*       UKDictionaryFromFSCatInfo( FSCatalogInfo* currInfo, FSCatalo
 	{
 		FSPermissionInfo*		pInfo;
 #ifdef __LP64__
-		pInfo = (FSPermissionInfo*) &currInfo->permissions);
+		pInfo = (FSPermissionInfo*) &currInfo->permissions;
 #else
 		pInfo = (FSPermissionInfo*) currInfo->permissions;
 #endif
@@ -770,7 +770,7 @@ void    UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* currInfo,
     // Permissions:
     FSPermissionInfo*		pInfo;
 #ifdef __LP64__
-		pInfo = (FSPermissionInfo*) &currInfo->permissions);
+		pInfo = (FSPermissionInfo*) &currInfo->permissions;
 #else
 		pInfo = (FSPermissionInfo*) currInfo->permissions;
 #endif
