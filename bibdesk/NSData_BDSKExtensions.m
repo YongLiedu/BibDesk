@@ -109,13 +109,13 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
     const vm_size_t blockSize = vm_page_size * 1024;
     
     off_t offset = 0;
-    size_t len = MIN(blockSize, sb.st_size - offset);
+    size_t len = MIN((size_t)blockSize, (size_t)(sb.st_size - offset));
     char *buffer;
     while (len > 0 && (buffer = mmap(0, len, PROT_READ, MAP_SHARED | MAP_NOCACHE, fd, offset)) != (void *)-1) {
         status = EVP_DigestUpdate(&mdctx, buffer, len);
         munmap(buffer, len);
         offset += len;
-        len = MIN(blockSize, sb.st_size - offset);
+        len = MIN((size_t)blockSize, (size_t)(sb.st_size - offset));
     }
     close(fd);    
     

@@ -83,7 +83,9 @@
 The WLDragMapHeaderStruct stuff was borrowed from CocoaTech Foundation, http://www.cocoatech.com (BSD licensed).  This is used for creating WebLoc files, which are a resource-only Finder clipping.  Apple provides no API for creating them, so apparently everyone just reverse-engineers the resource file format and creates them.  Since I have no desire to mess with ResEdit anymore, we're borrowing this code directly and using Omni's resource fork methods to create the file.  Note that you can check the contents of a resource fork in Terminal with `cat somefile/rsrc`, not that it's incredibly helpful. 
 */
 
+#if !__LP64__
 #pragma options align=mac68k
+#endif
 
 typedef struct WLDragMapHeaderStruct
 {
@@ -103,7 +105,9 @@ typedef struct WLDragMapEntryStruct
     long unused2;   // always 0
 } WLDragMapEntryStruct;
 
+#if !__LP64__
 #pragma options align=reset
+#endif
 
 @interface WLDragMapEntry : NSObject
 {
@@ -859,7 +863,7 @@ FSOpenIterator:
     
     // open the resource fork
     HFSUniStr255 forkName;
-    SInt16 refNum;
+    ResFileRefNum refNum;
     
     if (success)
         err = FSGetResourceForkName(&forkName);

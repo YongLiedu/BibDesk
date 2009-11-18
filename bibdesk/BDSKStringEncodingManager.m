@@ -176,7 +176,7 @@ extern CFStringEncoding BDStringGetMostCompatibleMacStringEncoding(CFStringEncod
 }
 
 // Sort using the equivalent Mac encoding as the major key. Secondary key is the actual encoding value, which works well enough. We treat Unicode encodings as special case, putting them at top of the list.
-static NSInteger encodingCompare(const void *firstPtr, const void *secondPtr) {
+static int encodingCompare(const void *firstPtr, const void *secondPtr) {
     CFStringEncoding first = *(CFStringEncoding *)firstPtr;
     CFStringEncoding second = *(CFStringEncoding *)secondPtr;
     CFStringEncoding macEncodingForFirst = BDStringGetMostCompatibleMacStringEncoding(first);

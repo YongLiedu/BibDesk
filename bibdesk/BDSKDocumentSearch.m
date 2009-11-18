@@ -165,7 +165,7 @@ static NSOperationQueue *searchQueue = nil;
     search = SKSearchCreate(skIndex, (CFStringRef)searchString, kSKSearchOptionDefault);
     
     SKDocumentID documents[SEARCH_BUFFER_MAX] = { 0 };
-    CGFloat scores[SEARCH_BUFFER_MAX] = { 0.0 };
+    float scores[SEARCH_BUFFER_MAX] = { 0.0 };
     CFIndex i, foundCount;
     
     Boolean more, keepGoing;

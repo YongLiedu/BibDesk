@@ -295,7 +295,7 @@ static void fixLegacyTableColumnIdentifiers()
     // register NSURL as conversion handler for file types
     [NSAppleEventDescriptor registerConversionHandler:[NSURL class]
                                              selector:@selector(fileURLWithAEDesc:)
-                                   forDescriptorTypes:typeFileURL, typeFSS, typeAlias, typeFSRef, nil];
+                                   forDescriptorTypes:typeFileURL, typeAlias, typeFSRef, 'fss ', nil];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification{
@@ -1120,7 +1120,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         BDSKVersionNumber *importerVersionNumber = [[[BDSKVersionNumber alloc] initWithVersionString:importerVersion] autorelease];
         NSDictionary *versionInfo = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKSpotlightVersionInfoKey];
         
-        long sysVersion;
+        SInt32 sysVersion;
         OSStatus err = Gestalt(gestaltSystemVersion, &sysVersion);
         
         BOOL runImporter = NO;
@@ -1142,7 +1142,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
                 [importerTask setArguments:[NSArray arrayWithObjects:@"-r", importerPath, nil]];
                 [importerTask launch];
                 
-                NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithLong:sysVersion], @"lastSysVersion", importerVersion, @"lastImporterVersion", nil];
+                NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:sysVersion], @"lastSysVersion", importerVersion, @"lastImporterVersion", nil];
                 [[NSUserDefaults standardUserDefaults] setObject:info forKey:BDSKSpotlightVersionInfoKey];
                 
             }

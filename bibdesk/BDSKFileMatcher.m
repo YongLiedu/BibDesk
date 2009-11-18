@@ -481,12 +481,12 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
         
         // if we get more than 10 matches back per pub, the results will be pretty useless anyway
         SKDocumentID docID[MAX_SEARCHKIT_RESULTS];
-        CGFloat scores[MAX_SEARCHKIT_RESULTS];
+        float scores[MAX_SEARCHKIT_RESULTS];
         
         CFIndex numFound;
         
         Boolean moreToFind;
-        CGFloat thisScore, maxScore = 0.0f;
+        float thisScore, maxScore = 0.0f;
         
         do {
             

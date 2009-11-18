@@ -60,7 +60,7 @@ static AliasHandle BDSKDataToAliasHandle(CFDataRef inData)
         
         if ((handle != NULL) && (len > 0)) {
             HLock(handle);
-            BlockMoveData(CFDataGetBytePtr(inData), *handle, len);
+            memmove((void *)*handle, (const void *)CFDataGetBytePtr(inData), len);
             HUnlock(handle);
         }
     }

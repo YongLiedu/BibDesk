@@ -2955,7 +2955,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
 	NSScanner *scanner = [[NSScanner alloc] initWithString:oldString];
 	NSString *token;
-	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[oldString length] - [groupName length] - 1];
+	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[oldString length] - [(NSString *)groupName length] - 1];
 	BOOL addedToken = NO;
 	NSString *lastDelimiter = @"";
 	NSInteger startLocation, endLocation;
@@ -3079,7 +3079,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	
 	NSScanner *scanner = [[NSScanner alloc] initWithString:oldString];
 	NSString *token;
-	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[oldString length] - [groupName length] - 1];
+	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[oldString length] - [(NSString *)groupName length] - 1];
 	BOOL addedToken = NO;
 	NSString *lastDelimiter = @"";
 	NSInteger startLocation, endLocation;

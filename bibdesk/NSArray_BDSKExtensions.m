@@ -493,7 +493,7 @@ typedef struct _BDSortCacheValue {
 } BDSortCacheValue;
 
 // this function may be passed to a stdlib mergesort/qsort function
-static inline NSInteger __BDCompareSortCacheValues(const void *a, const void *b)
+static inline int __BDCompareSortCacheValues(const void *a, const void *b)
 {
     return __comparator(__sort, __selector, ((BDSortCacheValue *)a)->sortValue, ((BDSortCacheValue *)b)->sortValue);
 }

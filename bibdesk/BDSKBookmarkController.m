@@ -441,7 +441,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
         if ([newName isEqualToString:[item name]] == NO)
             [(BDSKBookmark *)item setName:newName];
     } else if ([tcID isEqualToString:@"url"]) {
-        if ([object length] == 0 || [NSURL URLWithString:object] == nil) {
+        if ([(NSString *)object length] == 0 || [NSURL URLWithString:object] == nil) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid URL", @"Message in alert dialog when setting an invalid URL") 
                                              defaultButton:NSLocalizedString(@"OK", @"Button title")
                                            alternateButton:nil

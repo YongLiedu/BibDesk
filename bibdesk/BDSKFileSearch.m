@@ -50,7 +50,7 @@
 {
  @private
     SKDocumentID *ids;
-    CGFloat *scores;
+    float *scores;
     size_t indexSize;
     
     SKDocumentRef *docs;
@@ -58,7 +58,7 @@
 }
 
 - (SKDocumentID *)documentIDBuffer;
-- (CGFloat *)scoreBuffer;
+- (float *)scoreBuffer;
 - (SKDocumentRef *)documentRefBuffer;
 - (BOOL)changeIndexSize:(size_t)size;
 - (BOOL)changeResultSize:(size_t)size;
@@ -188,7 +188,7 @@
 
     CFIndex actualCount;
     
-    CGFloat *scores = [data scoreBuffer];
+    float *scores = [data scoreBuffer];
     SKDocumentID *documentIDs = [data documentIDBuffer];
     
     SKSearchFindMatches(search, maxCount, documentIDs, scores, 10, &actualCount);
@@ -293,7 +293,7 @@
 {
     if ((!ids && !scores) || indexSize < size) {
         ids = (SKDocumentID *)NSZoneRealloc([self zone], ids, size * sizeof(SKDocumentID));
-        scores = (CGFloat *)NSZoneRealloc([self zone], scores, size * sizeof(CGFloat));
+        scores = (float *)NSZoneRealloc([self zone], scores, size * sizeof(float));
         indexSize = size;
     } 
     return NULL != scores && NULL != ids;
@@ -309,7 +309,7 @@
 }
 
 - (SKDocumentID *)documentIDBuffer { return ids; }
-- (CGFloat *)scoreBuffer { return scores; }
+- (float *)scoreBuffer { return scores; }
 - (SKDocumentRef *)documentRefBuffer { return docs; }
 
 @end

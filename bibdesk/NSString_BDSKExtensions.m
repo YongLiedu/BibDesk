@@ -456,7 +456,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         }
     }
     
-    return (matchFound) ? cnt : NSNotFound;    
+    return matchFound ? (NSUInteger)cnt : NSNotFound;    
 }
 
 - (BOOL)isStringTeXQuotingBalancedWithBraces:(BOOL)braces connected:(BOOL)connected{
