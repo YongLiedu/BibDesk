@@ -37,8 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-
-@class BDSKTypeSelectHelper;
+#import "BDSKTypeSelectHelper.h"
 
 @protocol BDSKTableViewDelegate <NSTableViewDelegate>
 @optional
@@ -75,7 +74,7 @@
 @end
 
 
-@interface BDSKTableView : NSTableView {
+@interface BDSKTableView : NSTableView <BDSKTypeSelectDataSource> {
     BDSKTypeSelectHelper *typeSelectHelper;
     NSString *fontNamePreferenceKey;
     NSString *fontSizePreferenceKey;

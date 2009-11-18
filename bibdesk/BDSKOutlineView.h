@@ -37,8 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-
-@class BDSKTypeSelectHelper;
+#import "BDSKTypeSelectHelper.h"
 
 @protocol BDSKOutlineViewDelegate <NSOutlineViewDelegate>
 @optional
@@ -73,7 +72,7 @@
 @end
 
 
-@interface BDSKOutlineView : NSOutlineView {
+@interface BDSKOutlineView : NSOutlineView <BDSKTypeSelectDataSource> {
     BDSKTypeSelectHelper *typeSelectHelper;
     NSString *fontNamePreferenceKey;
     NSString *fontSizePreferenceKey;

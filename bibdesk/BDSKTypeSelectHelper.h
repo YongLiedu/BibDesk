@@ -42,9 +42,24 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class BDSKTypeSelectHelper;
+
+@protocol BDSKTypeSelectDataSource <NSObject>
+
+- (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper;
+- (NSUInteger)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper;
+- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(NSUInteger)itemIndex;
+
+@optional
+
+- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString;
+- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString;
+
+@end
+
 
 @interface BDSKTypeSelectHelper : NSObject <NSTextDelegate> {
-    id dataSource;
+    id<BDSKTypeSelectDataSource> dataSource;
     BOOL cycleResults;
     BOOL matchPrefix;
     
@@ -54,8 +69,8 @@
     BOOL processing;
 }
 
-- (id)dataSource;
-- (void)setDataSource:(id)anObject;
+- (id<BDSKTypeSelectDataSource>)dataSource;
+- (void)setDataSource:(id<BDSKTypeSelectDataSource>)anObject;
 
 - (BOOL)cyclesSimilarResults;
 - (void)setCyclesSimilarResults:(BOOL)newValue;
@@ -79,17 +94,5 @@
 - (BOOL)isSearchEvent:(NSEvent *)keyEvent;
 - (BOOL)isRepeatEvent:(NSEvent *)keyEvent;
 - (BOOL)isCancelEvent:(NSEvent *)keyEvent;
-
-@end
-
-
-@interface NSObject (BDSKTypeSelectDataSource)
-
-- (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper; // required
-- (NSUInteger)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper; // required
-- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(NSUInteger)itemIndex; // required
-
-- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString; // optional
-- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString; // optional
 
 @end

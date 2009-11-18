@@ -37,7 +37,6 @@
  */
 
 #import "BDSKTableView.h"
-#import "BDSKTypeSelectHelper.h"
 #import "NSLayoutManager_BDSKExtensions.h"
 #import "NSEvent_BDSKExtensions.h"
 
