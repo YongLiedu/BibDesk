@@ -64,7 +64,7 @@
     }
 }
 
-- (unsigned int)hash {
+- (NSUInteger)hash {
     return _index + [_parent hash];
 }
 

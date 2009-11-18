@@ -50,9 +50,9 @@
 
 
 @interface NSObject (FVAccessibilityIconElementParent)
-- (NSURL *)URLForIconElement:(id)element;
-- (NSRect)screenRectForIconElement:(id)element;
-- (BOOL)isIconElementSelected:(id)element;
-- (void)setSelected:(BOOL)selected forIconElement:(id)element;
-- (void)openIconElement:(id)element;
+- (NSURL *)URLForIconElement:(FVAccessibilityIconElement *)element;
+- (NSRect)screenRectForIconElement:(FVAccessibilityIconElement *)element;
+- (BOOL)isIconElementSelected:(FVAccessibilityIconElement *)element;
+- (void)setSelected:(BOOL)selected forIconElement:(FVAccessibilityIconElement *)element;
+- (void)openIconElement:(FVAccessibilityIconElement *)element;
 @end
