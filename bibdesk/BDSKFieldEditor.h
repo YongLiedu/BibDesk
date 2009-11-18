@@ -41,6 +41,7 @@
 
 @protocol BDSKFieldEditorDelegate <NSTextViewDelegate>
 @optional
+
 - (NSRange)textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange;
 - (BOOL)textViewShouldAutoComplete:(NSTextView *)textView;
 - (BOOL)textViewShouldLinkKeys:(NSTextView *)textView;

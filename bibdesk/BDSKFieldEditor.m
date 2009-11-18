@@ -154,7 +154,7 @@
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender {
 	if ([self delegateHandlesDragOperation:sender]) {
 		if ([[self delegate] respondsToSelector:@selector(draggingEntered:)])
-			return [[self delegate] draggingEntered:sender];
+			return [(id)[self delegate] draggingEntered:sender];
 		return NSDragOperationNone;
 	} else
 		return [super draggingEntered:sender];
@@ -163,7 +163,7 @@
 - (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender {
 	if ([self delegateHandlesDragOperation:sender]) {
 		if ([[self delegate] respondsToSelector:@selector(draggingUpdated:)])
-			return [[self delegate] draggingUpdated:sender];
+			return [(id)[self delegate] draggingUpdated:sender];
 		return [sender draggingSourceOperationMask];
 	} else
 		return [super draggingUpdated:sender];
@@ -172,7 +172,7 @@
 - (void)draggingExited:(id <NSDraggingInfo>)sender {
 	if ([self delegateHandlesDragOperation:sender]) {
 		if ([[self delegate] respondsToSelector:@selector(draggingExited:)])
-			[[self delegate] draggingExited:sender];
+			[(id)[self delegate] draggingExited:sender];
 	} else
 		[super draggingExited:sender];
 }
@@ -184,7 +184,7 @@
 - (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender {
 	if ([self delegateHandlesDragOperation:sender]) {
 		if ([[self delegate] respondsToSelector:@selector(prepareForDragOperation:)])
-			return [[self delegate] prepareForDragOperation:sender];
+			return [(id)[self delegate] prepareForDragOperation:sender];
 		return YES;
 	} else
 		return [super prepareForDragOperation:sender];
@@ -193,7 +193,7 @@
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
 	if ([self delegateHandlesDragOperation:sender]) {
 		if ([[self delegate] respondsToSelector:@selector(performDragOperation:)])
-			return [[self delegate] performDragOperation:sender];
+			return [(id)[self delegate] performDragOperation:sender];
 		return NO;
 	} else
 		return [super performDragOperation:sender];
@@ -202,7 +202,7 @@
 - (void)concludeDragOperation:(id <NSDraggingInfo>)sender {
 	if ([self delegateHandlesDragOperation:sender]) {
 		if ([[self delegate] respondsToSelector:@selector(concludeDragOperation:)])
-			[[self delegate] concludeDragOperation:sender];
+			[(id)[self delegate] concludeDragOperation:sender];
 	} else
 		[super concludeDragOperation:sender];
 }
@@ -375,32 +375,32 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
 
 - (NSRange)textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
 	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textView:rangeForUserCompletion:)]) 
-		return [[self delegate] control:self textView:textView rangeForUserCompletion:charRange];
+		return [(id<BDSKControlFieldEditorDelegate>)[self delegate] control:self textView:textView rangeForUserCompletion:charRange];
 	return charRange;
 }
 
 - (BOOL)textViewShouldAutoComplete:(NSTextView *)textView {
 	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textViewShouldAutoComplete:)]) 
-		return [(id)[self delegate] control:self textViewShouldAutoComplete:textView];
+		return [(id<BDSKControlFieldEditorDelegate>)[self delegate] control:self textViewShouldAutoComplete:textView];
 	return NO;
 }
 
 - (BOOL)textViewShouldLinkKeys:(NSTextView *)textView {
     return textView == [self currentEditor] && 
            [[self delegate] respondsToSelector:@selector(control:textViewShouldLinkKeys:)] &&
-           [[self delegate] control:self textViewShouldLinkKeys:textView];
+           [(id<BDSKControlFieldEditorDelegate>)[self delegate] control:self textViewShouldLinkKeys:textView];
 }
 
 - (BOOL)textView:(NSTextView *)textView isValidKey:(NSString *)key{
     return textView == [self currentEditor] && 
            [[self delegate] respondsToSelector:@selector(control:textView:isValidKey:)] &&
-           [[self delegate] control:self textView:textView isValidKey:key];
+           [(id<BDSKControlFieldEditorDelegate>)[self delegate] control:self textView:textView isValidKey:key];
 }
 
 - (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex{
     return textView == [self currentEditor] && 
            [[self delegate] respondsToSelector:@selector(control:textView:clickedOnLink:atIndex:)] &&
-           [[self delegate] control:self textView:textView clickedOnLink:aLink atIndex:charIndex];
+           [(id<BDSKControlFieldEditorDelegate>)[self delegate] control:self textView:textView clickedOnLink:aLink atIndex:charIndex];
 }
 
 @end
@@ -411,32 +411,32 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
 
 - (NSRange)textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
 	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textView:rangeForUserCompletion:)]) 
-		return [[self delegate] control:self textView:textView rangeForUserCompletion:charRange];
+		return [(id<BDSKControlFieldEditorDelegate>)[self delegate] control:self textView:textView rangeForUserCompletion:charRange];
 	return charRange;
 }
 
 - (BOOL)textViewShouldAutoComplete:(NSTextView *)textView {
 	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textViewShouldAutoComplete:)]) 
-		return [(id)[self delegate] control:self textViewShouldAutoComplete:textView];
+		return [(id<BDSKControlFieldEditorDelegate>)[self delegate] control:self textViewShouldAutoComplete:textView];
 	return NO;
 }
 
 - (BOOL)textViewShouldLinkKeys:(NSTextView *)textView {
     return textView == [self currentEditor] && 
            [[self delegate] respondsToSelector:@selector(control:textViewShouldLinkKeys:)] &&
-           [[self delegate] control:self textViewShouldLinkKeys:textView];
+           [(id<BDSKControlFieldEditorDelegate>)[self delegate] control:self textViewShouldLinkKeys:textView];
 }
 
 - (BOOL)textView:(NSTextView *)textView isValidKey:(NSString *)key{
     return textView == [self currentEditor] && 
            [[self delegate] respondsToSelector:@selector(control:textView:isValidKey:)] &&
-           [[self delegate] control:self textView:textView isValidKey:key];
+           [(id<BDSKControlFieldEditorDelegate>)[self delegate] control:self textView:textView isValidKey:key];
 }
 
 - (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex{
     return textView == [self currentEditor] && 
            [[self delegate] respondsToSelector:@selector(control:textView:clickedOnLink:atIndex:)] &&
-           [[self delegate] control:self textView:textView clickedOnLink:aLink atIndex:charIndex];
+           [(id<BDSKControlFieldEditorDelegate>)[self delegate] control:self textView:textView clickedOnLink:aLink atIndex:charIndex];
 }
 
 @end

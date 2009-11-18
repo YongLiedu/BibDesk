@@ -1467,10 +1467,20 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 - (void)textViewDidChangeSelection:(NSNotification *)notification {
     if ([[BDSKTokenField superclass] instancesRespondToSelector:_cmd])
-        [super textViewDidChangeSelection:notification];
+        [(id<NSTextViewDelegate>)super textViewDidChangeSelection:notification];
     if ([[self delegate] respondsToSelector:@selector(tokenField:textViewDidChangeSelection:)])
         [[self delegate] tokenField:self textViewDidChangeSelection:[notification object]];
 }
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKTokenFieldDelegate>)delegate {
+    return (id <BDSKTokenFieldDelegate>)[super delegate];
+}
+
+- (void)setDelegate:(id <BDSKTokenFieldDelegate>)newDelegate {
+    [super setDelegate:newDelegate];
+}
+#endif
 
 @end
 

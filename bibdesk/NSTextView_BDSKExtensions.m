@@ -193,15 +193,6 @@
 
 - (NSPoint)locationForCompletionWindow;
 {
-    // give our delegate (and possibly its delegate) a chance to override this
-    if([[self delegate] respondsToSelector:@selector(locationForCompletionWindowInTextView:)])
-        return [[self delegate] locationForCompletionWindowInTextView:self];
-    else if([[self delegate] respondsToSelector:@selector(delegate)]){
-        id controlDelegate = [[self delegate] delegate];  // e.g. delegate of NSTextField
-        if([controlDelegate respondsToSelector:@selector(control:locationForCompletionWindowInTextView:)])
-            return [controlDelegate control:[self delegate] locationForCompletionWindowInTextView:self];
-    }
-    
     NSPoint point = NSZeroPoint;
     
     NSRange selRange = [self rangeForUserCompletion];

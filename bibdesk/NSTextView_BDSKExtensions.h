@@ -42,11 +42,4 @@
 - (void)highlightComponentsOfSearchString:(NSString *)searchString;
 - (void)highlightOccurrencesOfString:(NSString *)substring;
 - (NSPoint)locationForCompletionWindow;
-
 @end
-
-@interface NSTextView (CompletionExtensions)
-- (NSPoint)locationForCompletionWindowInTextView:(NSTextView *)tv;
-- (NSPoint)control:(NSControl *)control locationForCompletionWindowInTextView:(NSTextView *)tv;
-@end
-
