@@ -390,7 +390,7 @@ static void yaz_strftime(char *dst, size_t sz,
 #else
         long tid = 0;
 #if YAZ_POSIX_THREADS
-        tid = pthread_self();
+        tid = (long)pthread_self();
 #endif
 #endif
         memcpy(fmt2, fmt, cp-fmt);
