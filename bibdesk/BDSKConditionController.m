@@ -39,7 +39,6 @@
 #import "BDSKConditionController.h"
 #import "BDSKFilterController.h"
 #import "BibItem.h"
-#import "BDSKFieldNameFormatter.h"
 #import "BDSKBooleanValueTransformer.h"
 #import "BDSKRatingButton.h"
 

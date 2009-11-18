@@ -37,10 +37,11 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKOrphanedFileServer.h"
 
-@class BDSKOrphanedFileServer, BDSKOrphanedFilesArrayController, BDSKTableView;
+@class BDSKOrphanedFilesArrayController, BDSKTableView;
 
-@interface BDSKOrphanedFilesFinder : NSWindowController <NSTableViewDelegate, NSTableViewDataSource> {
+@interface BDSKOrphanedFilesFinder : NSWindowController <NSTableViewDelegate, NSTableViewDataSource, BDSKOrphanedFileServerDelegate> {
     IBOutlet BDSKTableView *tableView;
     IBOutlet NSButton *refreshButton;
     IBOutlet BDSKOrphanedFilesArrayController *arrayController;

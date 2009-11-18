@@ -57,11 +57,11 @@
 	return self;
 }
 
-- (id)delegate {
+- (id<BDSKDragImageViewDelegate>)delegate {
     return delegate;
 }
 
-- (void)setDelegate:(id)newDelegate {
+- (void)setDelegate:(id<BDSKDragImageViewDelegate>)newDelegate {
 	delegate = newDelegate;
 }
 

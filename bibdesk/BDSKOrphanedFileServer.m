@@ -88,9 +88,9 @@
 
 #pragma mark API
 
-- (id)delegate { return delegate; }
+- (id<BDSKOrphanedFileServerDelegate>)delegate { return delegate; }
 
-- (void)setDelegate:(id)newDelegate { delegate = newDelegate; }
+- (void)setDelegate:(id<BDSKOrphanedFileServerDelegate>)newDelegate { delegate = newDelegate; }
 
 - (BOOL)allFilesEnumerated { OSMemoryBarrier(); return (BOOL)(1 == allFilesEnumerated); }
 

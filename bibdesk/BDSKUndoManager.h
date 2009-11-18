@@ -39,17 +39,17 @@
 #import <Cocoa/Cocoa.h>
 
 
+@protocol BDSKUndoManagerDelegate <NSObject>
+@optional
+- (BOOL)undoManagerShouldUndoChange:(id)sender;
+@end
+
+
 @interface BDSKUndoManager : NSUndoManager {
 	id delegate;
 }
 
 - (id)delegate;
 - (void)setDelegate:(id)newDelegate;
-
-@end
-
-@interface NSObject (BDSKUndoManagerDelegate)
-
-- (BOOL)undoManagerShouldUndoChange:(id)sender;
 
 @end

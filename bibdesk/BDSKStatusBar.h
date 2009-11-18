@@ -46,12 +46,20 @@ enum {
 typedef NSInteger BDSKProgressIndicatorStyle;
 
 
+@class BDSKStatusBar;
+
+@protocol BDSKStatusBarDelegate <NSObject>
+@optional
+- (NSString *)statusBar:(BDSKStatusBar *)statusBar toolTipForIdentifier:(NSString *)identifier;
+@end
+
+
 @interface BDSKStatusBar : NSView {
 	id textCell;
 	NSImageCell *iconCell;
 	NSProgressIndicator *progressIndicator;
 	NSMutableArray *icons;
-	id delegate;
+	id<BDSKStatusBarDelegate> delegate;
     CGFloat leftMargin;
     CGFloat rightMargin;
     BOOL animating;
@@ -106,12 +114,7 @@ typedef NSInteger BDSKProgressIndicatorStyle;
 - (NSString *)view:(NSView *)view stringForToolTip:(NSToolTipTag)tag point:(NSPoint)point userData:(void *)userData;
 - (void)rebuildToolTips;
 
-- (id)delegate;
-- (void)setDelegate:(id)newDelegate;
+- (id<BDSKStatusBarDelegate>)delegate;
+- (void)setDelegate:(id<BDSKStatusBarDelegate>)newDelegate;
 
-@end
-
-
-@interface NSObject (BDSKStatusBarDelegate)
-- (NSString *)statusBar:(BDSKStatusBar *)statusBar toolTipForIdentifier:(NSString *)identifier;
 @end

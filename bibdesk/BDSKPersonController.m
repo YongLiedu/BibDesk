@@ -44,7 +44,6 @@
 #import "BibItem.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKCollapsibleView.h"
-#import "BDSKDragImageView.h"
 #import "BDSKPublicationsArray.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"

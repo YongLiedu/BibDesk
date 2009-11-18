@@ -46,7 +46,7 @@
     return [self initWithDelegate:nil macroResolver:nil];
 }
 
-- (id)initWithDelegate:(id)anObject macroResolver:(BDSKMacroResolver *)aMacroResolver {
+- (id)initWithDelegate:(id<BDSKComplexStringFormatterDelegate>)anObject macroResolver:(BDSKMacroResolver *)aMacroResolver {
     if (self = [super init]) {
 		editAsComplexString = NO;
 		[self setMacroResolver:aMacroResolver];
@@ -161,12 +161,11 @@
 	}
 }
 
-- (id)delegate {
+- (id<BDSKComplexStringFormatterDelegate>)delegate {
     return delegate;
 }
 
-- (void)setDelegate:(id)newDelegate {
-    BDSKPRECONDITION([newDelegate respondsToSelector:@selector(formatter:shouldEditAsComplexString:)]);
+- (void)setDelegate:(id<BDSKComplexStringFormatterDelegate>)newDelegate {
 	delegate = newDelegate;
 }
 

@@ -38,15 +38,23 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class BDSKLinkedFile;
+
+@protocol BDSKLinkedFileDelegate <NSObject>
+@optional
+- (NSString *)basePathForLinkedFile:(BDSKLinkedFile *)file;
+- (void)linkedFileURLChanged:(BDSKLinkedFile *)file;
+@end
+
 
 @interface BDSKLinkedFile : NSObject <NSCopying, NSCoding>
 
-+ (id)linkedFileWithURL:(NSURL *)aURL delegate:(id)aDelegate;
++ (id)linkedFileWithURL:(NSURL *)aURL delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 + (id)linkedFileWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
 + (id)linkedFileWithURLString:(NSString *)aString;
 
 // creates a linked local file or remote URL object depending on the URL
-- (id)initWithURL:(NSURL *)aURL delegate:(id)aDelegate;
+- (id)initWithURL:(NSURL *)aURL delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 // creates a linked local file
 - (id)initWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
 // creates a linked remote URL
@@ -65,16 +73,10 @@
 
 - (NSString *)relativePath;
 
-- (void)setDelegate:(id)aDelegate;
-- (id)delegate;
+- (void)setDelegate:(id<BDSKLinkedFileDelegate>)aDelegate;
+- (id<BDSKLinkedFileDelegate>)delegate;
 
 - (void)update;
 - (void)updateWithPath:(NSString *)aPath;
 
-@end
-
-
-@interface NSObject (BDSKLinkedFileDelegate)
-- (NSString *)basePathForLinkedFile:(BDSKLinkedFile *)file;
-- (void)linkedFileURLChanged:(BDSKLinkedFile *)file;
 @end

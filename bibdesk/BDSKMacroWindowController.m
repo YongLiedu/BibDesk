@@ -43,7 +43,6 @@
 #import "BDSKComplexStringEditor.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKBibTeXParser.h"
-#import "BDSKComplexStringFormatter.h"
 #import "BDSKGroup.h"
 #import "BibItem.h"
 #import "BDSKMacroResolver.h"

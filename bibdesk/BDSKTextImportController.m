@@ -43,10 +43,8 @@
 #import "BDSKComplexStringEditor.h"
 #import "BDSKTypeSelectHelper.h"
 #import <WebKit/WebKit.h>
-#import "BDSKComplexStringFormatter.h"
 #import "BDSKCrossrefFormatter.h"
 #import "BDSKCiteKeyFormatter.h"
-#import "BDSKCitationFormatter.h"
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKEdgeView.h"
 #import "BibDocument.h"

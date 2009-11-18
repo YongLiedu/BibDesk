@@ -37,10 +37,11 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKSpotlightView.h"
 
 @class BDSKPreferenceIconView, BDSKOverlayWindow;
 
-@interface BDSKPreferenceController : NSWindowController <NSToolbarDelegate, NSWindowDelegate> {
+@interface BDSKPreferenceController : NSWindowController <NSToolbarDelegate, NSWindowDelegate, BDSKSpotlightViewDelegate> {
     IBOutlet NSView *contentView;
     IBOutlet NSView *controlView;
     IBOutlet NSButton *revertButton;

@@ -38,21 +38,24 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class BDSKDragImageView;
 
-@interface BDSKDragImageView : NSImageView {
-	id delegate;
-	BOOL highlight;
-} 
-
-- (id)delegate;
-- (void)setDelegate:(id)newDelegate;
-
-@end
-
-@interface NSObject (BDSKDragImageViewDelegate)
+@protocol BDSKDragImageViewDelegate <NSObject>
+@optional
 - (NSDragOperation)dragImageView:(BDSKDragImageView *)view validateDrop:(id <NSDraggingInfo>)sender;
 - (BOOL)dragImageView:(BDSKDragImageView *)view acceptDrop:(id <NSDraggingInfo>)sender;
 - (BOOL)dragImageView:(BDSKDragImageView *)view writeDataToPasteboard:(NSPasteboard *)pasteboard;
 - (NSArray *)dragImageView:(BDSKDragImageView *)view namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination;
 - (NSImage *)dragImageForDragImageView:(BDSKDragImageView *)view;
+@end
+
+
+@interface BDSKDragImageView : NSImageView {
+	id<BDSKDragImageViewDelegate> delegate;
+	BOOL highlight;
+} 
+
+- (id<BDSKDragImageViewDelegate>)delegate;
+- (void)setDelegate:(id<BDSKDragImageViewDelegate>)newDelegate;
+
 @end

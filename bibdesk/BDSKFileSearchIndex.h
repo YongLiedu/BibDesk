@@ -69,7 +69,7 @@ typedef struct _BDSKSearchIndexFlags
     CFMutableDataRef indexData;
     BDSKManyToManyDictionary *identifierURLs;
     NSMutableDictionary *signatures;
-    id delegate;
+    id<BDSKFileSearchIndexDelegate> delegate;
     
     BDSKReadWriteLock *rwLock;
     
@@ -92,7 +92,7 @@ typedef struct _BDSKSearchIndexFlags
 
 - (NSUInteger)status;
 
-- (id)delegate;
+- (id <BDSKFileSearchIndexDelegate>)delegate;
 - (void)setDelegate:(id <BDSKFileSearchIndexDelegate>)anObject;
 
 - (NSSet *)identifierURLsForURL:(NSURL *)theURL;

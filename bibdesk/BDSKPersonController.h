@@ -38,10 +38,11 @@
 
 #import <AppKit/AppKit.h>
 #import "BDSKOwnerProtocol.h"
+#import "BDSKDragImageView.h"
 
-@class BibDocument, BibAuthor, BDSKDragImageView, BDSKCollapsibleView, BDSKTableView;
+@class BibDocument, BibAuthor, BDSKCollapsibleView, BDSKTableView;
 
-@interface BDSKPersonController : NSWindowController <NSTableViewDelegate, NSSplitViewDelegate> {
+@interface BDSKPersonController : NSWindowController <NSTableViewDelegate, NSSplitViewDelegate, BDSKDragImageViewDelegate> {
     BibAuthor *person;
     id<BDSKOwner> owner;
     NSMutableArray *publicationItems;

@@ -139,11 +139,10 @@
 
 - (void)setDelegate:(id <BDSKSearchDelegate>)aDelegate;
 {
-    NSParameterAssert(nil == aDelegate || [aDelegate conformsToProtocol:@protocol(BDSKSearchDelegate)]);
     delegate = aDelegate;
 }
 
-- (id)delegate { return delegate; }
+- (id <BDSKSearchDelegate>)delegate { return delegate; }
 
 @end
 

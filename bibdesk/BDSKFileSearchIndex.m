@@ -187,9 +187,6 @@
 
 - (void)setDelegate:(id <BDSKFileSearchIndexDelegate>)anObject
 {
-    if(anObject)
-        NSAssert1([(id)anObject conformsToProtocol:@protocol(BDSKFileSearchIndexDelegate)], @"%@ does not conform to BDSKFileSearchIndexDelegate protocol", [anObject class]);
-
     delegate = anObject;
 }
 

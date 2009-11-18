@@ -36,7 +36,6 @@
  */
 
 #import "BDSKItemPasteboardHelper.h"
-#import "BDSKTeXTask.h"
 #import "BibDocument.h"
 #import "NSArray_BDSKExtensions.h"
 #import "WebURLsWithTitles.h"
@@ -85,12 +84,11 @@
 
 #pragma mark Delegate
 
-- (id)delegate{
+- (id<BDSKItemPasteboardHelperDelegate>)delegate{
     return delegate;
 }
 
-- (void)setDelegate:(id)newDelegate{
-    BDSKASSERT(newDelegate == nil || ([newDelegate respondsToSelector:@selector(pasteboardHelper:bibTeXStringForItems:)] && delegate == nil));
+- (void)setDelegate:(id<BDSKItemPasteboardHelperDelegate>)newDelegate{
     if (newDelegate == nil && delegate != nil)
         [self absolveDelegateResponsibility];
     delegate = newDelegate;

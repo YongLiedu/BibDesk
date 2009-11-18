@@ -39,6 +39,8 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKOwnerProtocol.h"
 #import "BDSKTableView.h"
+#import "BDSKComplexStringFormatter.h"
+#import "BDSKCitationFormatter.h"
 
 @protocol BDSKTextImportItemTableViewDelegate <BDSKTableViewDelegate>
 
@@ -58,9 +60,9 @@
 #pragma mark -
 
 @class BibDocument, BibItem, BDSKEdgeView, WebView, WebDownload, BDSKComplexStringEditor;
-@class BDSKComplexStringFormatter, BDSKCiteKeyFormatter, BDSKCrossrefFormatter, BDSKCitationFormatter;
+@class BDSKCiteKeyFormatter, BDSKCrossrefFormatter;
 
-@interface BDSKTextImportController : NSWindowController <BDSKOwner, BDSKTextImportItemTableViewDelegate, NSTableViewDataSource, NSTextViewDelegate, NSSplitViewDelegate> {
+@interface BDSKTextImportController : NSWindowController <BDSKOwner, BDSKTextImportItemTableViewDelegate, NSTableViewDataSource, NSTextViewDelegate, NSSplitViewDelegate, BDSKComplexStringFormatterDelegate, BDSKCitationFormatterDelegate> {
     IBOutlet NSTextView* sourceTextView;
     IBOutlet NSTableView* itemTableView;
     IBOutlet NSTextField* citeKeyField;

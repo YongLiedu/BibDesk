@@ -38,16 +38,18 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class BDSKCitationFormatter;
+
+@protocol BDSKCitationFormatterDelegate <NSObject>
+@optional
+- (BOOL)citationFormatter:(BDSKCitationFormatter *)formatter isValidKey:(NSString *)key;
+@end
+
 
 @interface BDSKCitationFormatter : NSFormatter {
     id delegate;
 }
-- (id)initWithDelegate:(id)aDelegate;
-- (id)delegate;
-- (void)setDelegate:(id)newDelegate;
-@end
-
-
-@interface NSObject (BDSKCitationFormatterDelegate)
-- (BOOL)citationFormatter:(BDSKCitationFormatter *)formatter isValidKey:(NSString *)key;
+- (id)initWithDelegate:(id<BDSKCitationFormatterDelegate>)aDelegate;
+- (id<BDSKCitationFormatterDelegate>)delegate;
+- (void)setDelegate:(id<BDSKCitationFormatterDelegate>)newDelegate;
 @end

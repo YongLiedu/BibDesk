@@ -37,7 +37,6 @@
  */
 
 #import "BDSKFieldSheetController.h"
-#import "BDSKFieldNameFormatter.h"
 #import "NSWindowController_BDSKExtensions.h"
 
 @implementation BDSKFieldSheetController

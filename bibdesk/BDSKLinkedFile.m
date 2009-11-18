@@ -208,12 +208,12 @@ static Class BDSKLinkedFileClass = Nil;
     return BDSKLinkedFileClass == self ? defaultPlaceholderLinkedFile : NSAllocateObject(self, 0, aZone);
 }
 
-+ (id)linkedFileWithURL:(NSURL *)aURL delegate:(id)aDelegate;
++ (id)linkedFileWithURL:(NSURL *)aURL delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
     return [[[self alloc] initWithURL:aURL delegate:aDelegate] autorelease];
 }
 
-+ (id)linkedFileWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
++ (id)linkedFileWithBase64String:(NSString *)base64String delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
     return [[[self alloc] initWithBase64String:base64String delegate:aDelegate] autorelease];
 }
@@ -223,13 +223,13 @@ static Class BDSKLinkedFileClass = Nil;
     return [[[self alloc] initWithURLString:aString] autorelease];
 }
 
-- (id)initWithURL:(NSURL *)aURL delegate:(id)aDelegate;
+- (id)initWithURL:(NSURL *)aURL delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
     BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
-- (id)initWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
+- (id)initWithBase64String:(NSString *)base64String delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
     BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
@@ -291,8 +291,8 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (NSString *)relativePath { return nil; }
 
-- (void)setDelegate:(id)aDelegate {}
-- (id)delegate { return nil; }
+- (void)setDelegate:(id<BDSKLinkedFileDelegate>)aDelegate {}
+- (id<BDSKLinkedFileDelegate>)delegate { return nil; }
 
 // for templating
 - (id)valueForUndefinedKey:(NSString *)key {
@@ -309,7 +309,7 @@ static Class BDSKLinkedFileClass = Nil;
     return nil;
 }
 
-- (id)initWithURL:(NSURL *)aURL delegate:(id)aDelegate;
+- (id)initWithURL:(NSURL *)aURL delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
     if([aURL isFileURL])
         return [[BDSKLinkedAliasFile alloc] initWithURL:aURL delegate:aDelegate];
@@ -319,7 +319,7 @@ static Class BDSKLinkedFileClass = Nil;
         return nil;
 }
 
-- (id)initWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
+- (id)initWithBase64String:(NSString *)base64String delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
     return [[BDSKLinkedAliasFile alloc] initWithBase64String:base64String delegate:aDelegate];
 }
@@ -346,7 +346,7 @@ static Class BDSKLinkedFileClass = Nil;
 @implementation BDSKLinkedAliasFile
 
 // takes possession of anAlias, even if it fails
-- (id)initWithAlias:(AliasHandle)anAlias relativePath:(NSString *)relPath delegate:(id)aDelegate;
+- (id)initWithAlias:(AliasHandle)anAlias relativePath:(NSString *)relPath delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
     BDSKASSERT(nil == aDelegate || [aDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
     self = [super init];
@@ -366,7 +366,7 @@ static Class BDSKLinkedFileClass = Nil;
     return self;    
 }
 
-- (id)initWithAliasData:(NSData *)data relativePath:(NSString *)relPath delegate:(id)aDelegate;
+- (id)initWithAliasData:(NSData *)data relativePath:(NSString *)relPath delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
     BDSKASSERT(nil != data);
     
@@ -374,7 +374,7 @@ static Class BDSKLinkedFileClass = Nil;
     return [self initWithAlias:anAlias relativePath:relPath delegate:aDelegate];
 }
 
-- (id)initWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
+- (id)initWithBase64String:(NSString *)base64String delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
     BDSKASSERT(nil != base64String);
     
@@ -407,7 +407,7 @@ static Class BDSKLinkedFileClass = Nil;
     return [self initWithAliasData:[dictionary objectForKey:@"aliasData"] relativePath:[dictionary objectForKey:@"relativePath"] delegate:aDelegate];
 }
 
-- (id)initWithPath:(NSString *)aPath delegate:(id)aDelegate;
+- (id)initWithPath:(NSString *)aPath delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
     BDSKASSERT(nil != aPath);
     BDSKASSERT(nil == aDelegate || [aDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
@@ -424,7 +424,7 @@ static Class BDSKLinkedFileClass = Nil;
     return self;
 }
 
-- (id)initWithURL:(NSURL *)aURL delegate:(id)aDelegate;
+- (id)initWithURL:(NSURL *)aURL delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
     BDSKASSERT([aURL isFileURL]);
     
@@ -487,11 +487,11 @@ static Class BDSKLinkedFileClass = Nil;
     return YES;
 }
 
-- (id)delegate {
+- (id<BDSKLinkedFileDelegate>)delegate {
     return delegate;
 }
 
-- (void)setDelegate:(id)newDelegate {
+- (void)setDelegate:(id<BDSKLinkedFileDelegate>)newDelegate {
     BDSKASSERT(nil == newDelegate || [newDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
     
     delegate = newDelegate;
@@ -710,7 +710,7 @@ static Class BDSKLinkedFileClass = Nil;
 
 @implementation BDSKLinkedURL
 
-- (id)initWithURL:(NSURL *)aURL delegate:(id)aDelegate;
+- (id)initWithURL:(NSURL *)aURL delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
     if (self = [super init]) {
         if (aURL) {
@@ -729,7 +729,7 @@ static Class BDSKLinkedFileClass = Nil;
     return [self initWithURL:[NSURL URLWithString:aString] delegate:nil];
 }
 
-- (id)initWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
+- (id)initWithBase64String:(NSString *)base64String delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
     BDSKASSERT_NOT_REACHED("Attempt to initialize BDSKLinkedURL with a base 64 string");
     return nil;

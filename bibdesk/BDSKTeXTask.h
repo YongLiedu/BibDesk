@@ -53,6 +53,14 @@ typedef struct _BDSKTeXTaskFlags {
     volatile int32_t hasRTFData;
 } BDSKTeXTaskFlags;
 
+@class BDSKTeXTask;
+
+@protocol BDSKTeXTaskDelegate <NSObject>
+@optional
+- (BOOL)texTaskShouldStartRunning:(BDSKTeXTask *)texTask;
+- (void)texTask:(BDSKTeXTask *)texTask finishedWithResult:(BOOL)success;
+@end
+
 @class BDSKTeXPath, BDSKTask, BDSKReadWriteLock;
 
 @interface BDSKTeXTask : NSObject {	
@@ -60,7 +68,7 @@ typedef struct _BDSKTeXTaskFlags {
     BDSKTeXPath *texPath;
     NSString *binDirPath;
 	
-	id delegate;
+	id<BDSKTeXTaskDelegate> delegate;
     NSInvocation *taskShouldStartInvocation;
     NSInvocation *taskFinishedInvocation;
     BDSKTask *currentTask;
@@ -74,8 +82,8 @@ typedef struct _BDSKTeXTaskFlags {
 - (id)init;
 - (id)initWithFileName:(NSString *)fileName;
 
-- (id)delegate;
-- (void)setDelegate:(id)newDelegate;
+- (id<BDSKTeXTaskDelegate>)delegate;
+- (void)setDelegate:(id<BDSKTeXTaskDelegate>)newDelegate;
 
 // the next few methods are thread-unsafe
 
@@ -107,9 +115,4 @@ typedef struct _BDSKTeXTaskFlags {
 
 - (BOOL)isProcessing;
 
-@end
-
-@interface NSObject (BDSKTeXTaskDelegate)
-- (BOOL)texTaskShouldStartRunning:(BDSKTeXTask *)texTask;
-- (void)texTask:(BDSKTeXTask *)texTask finishedWithResult:(BOOL)success;
 @end

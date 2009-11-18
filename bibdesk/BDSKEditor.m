@@ -50,7 +50,6 @@
 #import "BDSKDragWindow.h"
 #import "BibItem.h"
 #import "BDSKCiteKeyFormatter.h"
-#import "BDSKComplexStringFormatter.h"
 #import "BDSKCrossrefFormatter.h"
 #import "BDSKAppController.h"
 #import "BDSKRatingButton.h"
@@ -70,7 +69,6 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
-#import "BDSKCitationFormatter.h"
 #import "BDSKNotesWindowController.h"
 #import <FileView/FileView.h>
 #import "BDSKLinkedFile.h"

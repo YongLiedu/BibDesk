@@ -37,6 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKFieldNameFormatter.h"
 
 @interface BDSKFieldSheetController : NSWindowController
 {
@@ -61,12 +62,10 @@
 
 @end
 
-@interface BDSKAddFieldSheetController : BDSKFieldSheetController {
-}
+@interface BDSKAddFieldSheetController : BDSKFieldSheetController <BDSKFieldNameFormatterDelegate>
 @end
 
-@interface BDSKRemoveFieldSheetController : BDSKFieldSheetController {
-}
+@interface BDSKRemoveFieldSheetController : BDSKFieldSheetController <BDSKFieldNameFormatterDelegate>
 @end
 
 @interface BDSKChangeFieldSheetController : BDSKRemoveFieldSheetController {

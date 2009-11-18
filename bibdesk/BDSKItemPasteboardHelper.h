@@ -36,17 +36,27 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKTeXTask.h"
+
+@class BDSKItemPasteboardHelper;
+
+@protocol BDSKItemPasteboardHelperDelegate <NSObject>
+- (NSString *)pasteboardHelper:(BDSKItemPasteboardHelper *)pboardHelper bibTeXStringForItems:(NSArray *)items;
+@optional
+- (void)pasteboardHelperWillBeginGenerating:(BDSKItemPasteboardHelper *)pboardHelper;
+- (void)pasteboardHelperDidEndGenerating:(BDSKItemPasteboardHelper *)pboardHelper;
+@end
 
 @class BDSKTeXTask;
 
-@interface BDSKItemPasteboardHelper : NSObject {
+@interface BDSKItemPasteboardHelper : NSObject <BDSKTeXTaskDelegate> {
     NSMutableDictionary *promisedPboardTypes;
     BDSKTeXTask *texTask;
-    id delegate;
+    id<BDSKItemPasteboardHelperDelegate> delegate;
 }
 
-- (id)delegate;
-- (void)setDelegate:(id)newDelegate;
+- (id<BDSKItemPasteboardHelperDelegate>)delegate;
+- (void)setDelegate:(id<BDSKItemPasteboardHelperDelegate>)newDelegate;
 
 - (void)declareType:(NSString *)type dragCopyType:(NSInteger)dragCopyType forItems:(NSArray *)items forPasteboard:(NSPasteboard *)pboard;
 - (void)addTypes:(NSArray *)newTypes forPasteboard:(NSPasteboard *)pboard;
@@ -58,12 +68,4 @@
 - (NSArray *)promisedItemsForPasteboard:(NSPasteboard *)pboard;
 - (void)clearPromisedTypesForPasteboard:(NSPasteboard *)pboard;
 
-@end
-
-
-@interface NSObject (BDSKItemPasteboardHelperDelegate)
-// this one is compulsory
-- (NSString *)pasteboardHelper:(BDSKItemPasteboardHelper *)pboardHelper bibTeXStringForItems:(NSArray *)items;
-- (void)pasteboardHelperWillBeginGenerating:(BDSKItemPasteboardHelper *)pboardHelper;
-- (void)pasteboardHelperDidEndGenerating:(BDSKItemPasteboardHelper *)pboardHelper;
 @end

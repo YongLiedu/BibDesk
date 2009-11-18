@@ -66,7 +66,6 @@
 #import "BDSKPublicationsArray.h"
 #import "NSData_BDSKExtensions.h"
 #import "BDSKCitationFormatter.h"
-#import "BDSKLinkedFile.h"
 #import "BDSKScriptHook.h"
 #import "BDSKScriptHookManager.h"
 #import "NSIndexSet_BDSKExtensions.h"

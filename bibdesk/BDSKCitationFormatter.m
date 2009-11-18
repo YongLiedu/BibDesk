@@ -61,16 +61,16 @@ static NSCharacterSet *keyCharSet = nil;
     [tmpSet release];
 }
 
-- (id)initWithDelegate:(id)aDelegate {
+- (id)initWithDelegate:(id<BDSKCitationFormatterDelegate>)aDelegate {
     if (self = [super init]) {
         delegate = aDelegate;
     }
     return self;
 }
 
-- (id)delegate { return delegate; }
+- (id<BDSKCitationFormatterDelegate>)delegate { return delegate; }
 
-- (void)setDelegate:(id)newDelegate { delegate = newDelegate; }
+- (void)setDelegate:(id<BDSKCitationFormatterDelegate>)newDelegate { delegate = newDelegate; }
 
 - (NSString *)stringForObjectValue:(id)obj{
     return obj;

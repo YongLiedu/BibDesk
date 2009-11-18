@@ -38,19 +38,20 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class BDSKSpotlightView;
+
+@protocol BDSKSpotlightViewDelegate <NSObject>
+// required, return nil for no highlights
+- (NSArray *)spotlightViewCircleRects:(BDSKSpotlightView *)spotlightView;
+@end
+
 
 @interface BDSKSpotlightView : NSView {
-    id delegate;
+    id<BDSKSpotlightViewDelegate> delegate;
     BOOL flipped;
 }
 - (id)initWithFrame:(NSRect)frameRect flipped:(BOOL)isFlipped;
 - (id)initFlipped:(BOOL)isFlipped;
-- (id)delegate;
-- (void)setDelegate:(id)newDelegate;
-@end
-
-
-@interface NSObject (BDSKSpotlightViewDelegate)
-// required, return nil for no highlights
-- (NSArray *)spotlightViewCircleRects:(BDSKSpotlightView *)spotlightView;
+- (id<BDSKSpotlightViewDelegate>)delegate;
+- (void)setDelegate:(id<BDSKSpotlightViewDelegate>)newDelegate;
 @end

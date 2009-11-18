@@ -37,10 +37,11 @@
  */
 #import <Cocoa/Cocoa.h>
 #import "BDSKTableView.h"
+#import "BDSKComplexStringFormatter.h"
 
-@class BDSKMacroResolver, BDSKComplexStringFormatter, BDSKComplexStringEditor;
+@class BDSKMacroResolver, BDSKComplexStringEditor;
 
-@interface BDSKMacroWindowController : NSWindowController <NSTableViewDelegate, NSTableViewDataSource> {
+@interface BDSKMacroWindowController : NSWindowController <NSTableViewDelegate, NSTableViewDataSource, BDSKComplexStringFormatterDelegate> {
     IBOutlet NSArrayController *arrayController;
     IBOutlet NSTableView *tableView;
     IBOutlet NSButton *closeButton;

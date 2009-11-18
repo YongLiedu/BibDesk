@@ -36,15 +36,22 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class BDSKComplexStringFormatter;
+
+@protocol BDSKComplexStringFormatterDelegate <NSObject>
+@optional
+- (BOOL)formatter:(BDSKComplexStringFormatter *)formatter shouldEditAsComplexString:(NSString *)object;
+@end
+
 @class BDSKMacroResolver;
 
 @interface BDSKComplexStringFormatter : NSFormatter {
 	id macroResolver;
 	BOOL editAsComplexString;
-	id delegate;
+	id<BDSKComplexStringFormatterDelegate> delegate;
 }
 
-- (id)initWithDelegate:(id)anObject macroResolver:(BDSKMacroResolver *)aMacroResolver;
+- (id)initWithDelegate:(id<BDSKComplexStringFormatterDelegate>)anObject macroResolver:(BDSKMacroResolver *)aMacroResolver;
 
 - (id)macroResolver;
 - (void)setMacroResolver:(BDSKMacroResolver *)newMacroResolver;
@@ -52,11 +59,7 @@
 - (BOOL)editAsComplexString;
 - (void)setEditAsComplexString:(BOOL)newEditAsComplexString;
 
-- (id)delegate;
-- (void)setDelegate:(id)newDelegate;
+- (id<BDSKComplexStringFormatterDelegate>)delegate;
+- (void)setDelegate:(id<BDSKComplexStringFormatterDelegate>)newDelegate;
 
-@end
-
-@interface NSObject (BDSKComplexStringFormatterDelegate)
-- (BOOL)formatter:(BDSKComplexStringFormatter *)formatter shouldEditAsComplexString:(NSString *)object;
 @end

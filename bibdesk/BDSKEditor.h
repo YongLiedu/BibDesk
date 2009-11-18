@@ -40,9 +40,12 @@
 
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
+#import "BDSKStatusBar.h"
+#import "BDSKComplexStringFormatter.h"
+#import "BDSKCitationFormatter.h"
 
 @class BDSKRatingButton, BDSKRatingButtonCell, BDSKStatusBar, BDSKZoomablePDFView, FVFileView, BDSKEditorTableView;
-@class BDSKComplexStringFormatter, BDSKCrossrefFormatter, BDSKCitationFormatter, BDSKComplexStringEditor;
+@class BDSKCrossrefFormatter, BDSKComplexStringEditor;
 @class BibItem, BibAuthor;
 
 /*!
@@ -50,7 +53,7 @@
     @abstract WindowController for the edit window
     @discussion Subclass of the NSWindowController class, This handles making, reversing and keeping track of changes to the BibItem, and displaying a nice GUI.
 */
-@interface BDSKEditor : NSWindowController <NSWindowDelegate, NSTableViewDelegate, NSTableViewDataSource, NSSplitViewDelegate, NSControlTextEditingDelegate> {
+@interface BDSKEditor : NSWindowController <NSWindowDelegate, NSTableViewDelegate, NSTableViewDataSource, NSSplitViewDelegate, NSControlTextEditingDelegate, BDSKStatusBarDelegate, BDSKComplexStringFormatterDelegate, BDSKCitationFormatterDelegate> {
 	IBOutlet NSSplitView *mainSplitView;
 	IBOutlet NSSplitView *fileSplitView;
     IBOutlet NSPopUpButton *bibTypeButton;

@@ -187,11 +187,11 @@ static double runLoopTimeout = 30;
     return [description autorelease];
 }
 
-- (id)delegate {
+- (id<BDSKTeXTaskDelegate>)delegate {
     return delegate;
 }
 
-- (void)setDelegate:(id)newDelegate {
+- (void)setDelegate:(id<BDSKTeXTaskDelegate>)newDelegate {
 	delegate = newDelegate;
     
     SEL theSelector;

@@ -40,9 +40,11 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKOwnerProtocol.h"
+#import "BDSKUndoManager.h"
+#import "BDSKItemPasteboardHelper.h"
 
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
-@class AGRegex, BDSKMacroResolver, BDSKItemPasteboardHelper;
+@class AGRegex, BDSKMacroResolver;
 @class BDSKEditor, BDSKMacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController, BDSKSearchGroupViewController;
 @class BDSKStatusBar, BDSKMainTableView, BDSKGroupOutlineView, BDSKGradientView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredView, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FVFileView;
 @class BDSKWebGroupViewController, BDSKSearchButtonController;
@@ -106,7 +108,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @discussion This is the document class. It keeps an array of BibItems (called (NSMutableArray *)publications) and handles the quick search box. It delegates PDF generation to a BDSKPreviewer.
 */
 
-@interface BibDocument : NSDocument <BDSKOwner>
+@interface BibDocument : NSDocument <BDSKOwner, BDSKUndoManagerDelegate, BDSKItemPasteboardHelperDelegate>
 {
 #pragma mark Main tableview pane variables
 

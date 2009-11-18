@@ -54,6 +54,17 @@
 @end
 
 
+@class BDSKOrphanedFileServer;
+
+@protocol BDSKOrphanedFileServerDelegate <NSObject>
+@optional
+
+- (void)orphanedFileServer:(BDSKOrphanedFileServer *)server foundFiles:(NSArray *)newFiles;
+- (void)orphanedFileServerDidFinish:(BDSKOrphanedFileServer *)server;
+
+@end
+
+
 @interface BDSKOrphanedFileServer : BDSKAsynchronousDOServer
 {
     NSMutableArray *foundFiles;     // cache of file URLs from UKDirectoryEnumerator minus knownFiles
@@ -61,22 +72,14 @@
     NSURL *baseURL;                 // root URL to start enumerating
     int32_t keepEnumerating;
     int32_t allFilesEnumerated;
-    id delegate;
+    id<BDSKOrphanedFileServerDelegate> delegate;
 }
 
-- (id)delegate;
-- (void)setDelegate:(id)newDelegate;
+- (id<BDSKOrphanedFileServerDelegate>)delegate;
+- (void)setDelegate:(id<BDSKOrphanedFileServerDelegate>)newDelegate;
 
 // OK to access on main thread (uses OSAtomic)
 - (BOOL)allFilesEnumerated;
 - (void)stopEnumerating;
-
-@end
-
-
-@interface NSObject (BDSKOrphanedFileServerDelegate) 
-
-- (void)orphanedFileServer:(BDSKOrphanedFileServer *)server foundFiles:(NSArray *)newFiles;
-- (void)orphanedFileServerDidFinish:(BDSKOrphanedFileServer *)server;
 
 @end

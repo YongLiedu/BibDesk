@@ -44,7 +44,6 @@
 #import "BibDocument+Scripting.h"
 #import "BibDocument_Search.h"
 #import "BibDocument_Groups.h"
-#import "BDSKFieldNameFormatter.h"
 #import <AGRegex/AGRegex.h>
 #import "BibItem.h"
 #import "BDSKFiler.h"

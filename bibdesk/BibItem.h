@@ -40,6 +40,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKFormatParser.h"
+#import "BDSKLinkedFile.h"
 
 enum {
     BDSKNoCrossrefError,
@@ -61,7 +62,7 @@ enum {
     BDSKBibTeXOptionDropInternalMask = 6
 };
 
-@class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate, BDSKPublicationsArray, BDSKMacroResolver, BDSKLinkedFile;
+@class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate, BDSKPublicationsArray, BDSKMacroResolver;
 @protocol BDSKParseableItem, BDSKOwner;
 
 /*!
@@ -70,7 +71,7 @@ enum {
 @discussion This is the data model class that encapsulates each Bibtex entry. BibItems are created for each entry in a file, and a BibDocument keeps collections of BibItems. They are also created in response to drag-in or paste operations containing BibTeX source. Their textvalue method is used to provide the text that is written to a file on saves.
 
 */
-@interface BibItem : NSObject <NSCopying, NSCoding, BDSKParseableItem>{
+@interface BibItem : NSObject <NSCopying, NSCoding, BDSKParseableItem, BDSKLinkedFileDelegate> {
     NSString *fileType;
     NSString *citeKey;
 	NSString *pubType;

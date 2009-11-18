@@ -65,7 +65,7 @@
     SKSearchOptions options;
    
     BDSKSearchPrivateIvars *data;
-    id delegate;
+    id<BDSKSearchDelegate> delegate;
 }
 
 /* 
@@ -117,7 +117,7 @@
 - (void)searchForString:(NSString *)aString withOptions:(SKSearchOptions)opts;
 
 - (void)setDelegate:(id <BDSKSearchDelegate>)aDelegate;
-- (id)delegate;
+- (id <BDSKSearchDelegate>)delegate;
 
 // cancels the current search; shouldn't be any further update messages until another search is performed
 - (void)cancel;

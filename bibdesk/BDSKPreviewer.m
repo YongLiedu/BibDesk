@@ -77,9 +77,14 @@
 - (void)serverFinishedWithResult:(BOOL)success;
 @end
 
+@protocol BDSKPreviewerServerDelegate <NSObject>
+@optional
+- (void)server:(BDSKPreviewerServer *)server finishedWithResult:(BOOL)success;
+@end
+
 @interface BDSKPreviewerServer : BDSKAsynchronousDOServer {
     BDSKTeXTask *texTask;
-    id delegate;
+    id<BDSKPreviewerServerDelegate> delegate;
     NSString *bibString;
     NSRecursiveLock *nextTaskLock;
     BDSKPreviewTask *nextTask;
@@ -87,18 +92,17 @@
     volatile int32_t notifyWhenDone;
 }
 
-- (id)delegate;
-- (void)setDelegate:(id)newDelegate;
+- (id<BDSKPreviewerServerDelegate>)delegate;
+- (void)setDelegate:(id<BDSKPreviewerServerDelegate>)newDelegate;
 - (BDSKTeXTask *)texTask;
 - (void)runTeXTaskInBackgroundWithInfo:(BDSKPreviewTask *)previewTask;
 
 @end
 
-@interface NSObject (BDSKPreviewerServerDelegate)
-- (void)serverFinishedWithResult:(BOOL)success;
-@end
-
 #pragma mark -
+
+@interface BDSKPreviewer (BDSKPreviewerServerDelegate) <BDSKPreviewerServerDelegate>
+@end
 
 @implementation BDSKPreviewer
 
@@ -496,7 +500,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 	}	
 }
 
-- (void)serverFinishedWithResult:(BOOL)success{
+- (void)server:(BDSKPreviewerServer *)server finishedWithResult:(BOOL)success{
     // ignore this task if we finished a task that was running when the previews were reset
 	if(previewState != BDSKEmptyPreviewState) {
         // if we didn't have success, the drawing method will show the log file
@@ -607,9 +611,9 @@ static BDSKPreviewer *sharedPreviewer = nil;
 
 // main thread API
 
-- (id)delegate { return delegate; }
+- (id<BDSKPreviewerServerDelegate>)delegate { return delegate; }
 
-- (void)setDelegate:(id)newDelegate { delegate = newDelegate; }
+- (void)setDelegate:(id<BDSKPreviewerServerDelegate>)newDelegate { delegate = newDelegate; }
 
 - (BDSKTeXTask *)texTask{
     return texTask;
@@ -696,8 +700,8 @@ static BDSKPreviewer *sharedPreviewer = nil;
 
 // If this message is sent oneway, there's no guarantee that any results exist when it's delivered, since some other task could have stomped on the files by that time, and the success variable would be stale.
 - (void)serverFinishedWithResult:(BOOL)success{
-    if([delegate respondsToSelector:@selector(serverFinishedWithResult:)])
-        [delegate serverFinishedWithResult:success];
+    if([delegate respondsToSelector:@selector(server:finishedWithResult:)])
+        [delegate server:self finishedWithResult:success];
 }
 
 @end

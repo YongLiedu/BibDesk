@@ -317,11 +317,11 @@
 	[self rebuildToolTips];
 }
 
-- (id)delegate {
+- (id<BDSKStatusBarDelegate>)delegate {
 	return delegate;
 }
 
-- (void)setDelegate:(id)newDelegate {
+- (void)setDelegate:(id<BDSKStatusBarDelegate>)newDelegate {
 	delegate = newDelegate;
 }
 

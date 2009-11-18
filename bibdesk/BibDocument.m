@@ -67,7 +67,6 @@
 #import "BDSKPreviewer.h"
 #import "BDSKEditor.h"
 
-#import "BDSKItemPasteboardHelper.h"
 #import "BDSKMainTableView.h"
 #import "BDSKConverter.h"
 #import "BDSKBibTeXParser.h"

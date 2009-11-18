@@ -41,7 +41,6 @@
 #import "BDSKPreferencePane.h"
 #import "BDSKPreferenceIconView.h"
 #import "BDSKOverlayWindow.h"
-#import "BDSKSpotlightView.h"
 #import "BDSKVersionNumber.h"
 #import <Sparkle/Sparkle.h>
 
