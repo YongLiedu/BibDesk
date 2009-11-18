@@ -169,7 +169,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
         if (procNotFound == err) {
             LSApplicationParameters appParams;
             memset(&appParams, 0, sizeof(LSApplicationParameters));
-            appParams.flags = kLSLaunchDefaults & ~kLSLaunchAsync;
+            appParams.flags = kLSLaunchDefaults;
             appParams.application = &appRef;
             appParams.initialEvent = (AppleEvent *)[openEvent aeDesc];
             err = LSOpenApplication(&appParams, NULL);
