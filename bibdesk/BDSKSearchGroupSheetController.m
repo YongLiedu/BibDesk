@@ -186,11 +186,6 @@ static BOOL isSearchFileAtPath(NSString *path)
 #pragma mark Initialization
 
 + (void)initialize {
-    NSArray *typeKeys = [NSArray arrayWithObjects:@"type", nil];
-    [self setKeys:[NSArray arrayWithObjects:@"serverInfo", nil] triggerChangeNotificationsForDependentKey:@"type"];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"typeTag"];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"zoom"];
-    
     BDSKINITIALIZE;
     
     NSSortDescriptor *typeSort = [[[NSSortDescriptor alloc] initWithKey:@"serverType" ascending:YES selector:@selector(compare:)] autorelease];
@@ -201,6 +196,18 @@ static BOOL isSearchFileAtPath(NSString *path)
     sortDescriptors = [[NSArray alloc] initWithObjects:typeSort, nameSort, nil];
     [self resetServers];
     [self loadCustomServers];
+}
+
++ (NSSet *)keyPathsForValuesAffectingType {
+    return [NSSet setWithObjects:@"serverInfo", nil];
+}
+
++ (NSSet *)keyPathsForValuesAffectingTypeTag {
+    return [NSSet setWithObjects:@"type", nil];
+}
+
++ (NSSet *)keyPathsForValuesAffectingZoom {
+    return [NSSet setWithObjects:@"type", nil];
 }
 
 - (id)init {

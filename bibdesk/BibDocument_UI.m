@@ -328,7 +328,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
             [statusStr appendFormat:NSLocalizedString(@" in \"%@\" search group", @"Partial status message"), [[group serverInfo] name]];
             NSInteger matchCount = [group numberOfAvailableResults];
             if (matchCount == 1)
-                [statusStr appendFormat:NSLocalizedString(@". There was 1 match.", @"Partial status message")];
+                [statusStr appendString:NSLocalizedString(@". There was 1 match.", @"Partial status message")];
             else if (matchCount > 1)
                 [statusStr appendFormat:NSLocalizedString(@". There were %ld matches.", @"Partial status message"), (long)matchCount];
             if ([group hasMoreResults])

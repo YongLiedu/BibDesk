@@ -46,9 +46,8 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
 
 @implementation BDSKTypeTemplate
 
-+ (void)initialize {
-    [self setKeys:[NSArray arrayWithObjects:@"itemTemplate", @"included", @"default", nil] triggerChangeNotificationsForDependentKey:@"textColor"];
-    BDSKINITIALIZE;
++ (NSSet *)keyPathsForValuesAffectingTextColor {
+    return [NSSet setWithObjects:@"itemTemplate", @"included", @"default", nil];
 }
 
 - (id)initWithPubType:(NSString *)aPubType forDocument:(BDSKTemplateDocument *)aDocument {

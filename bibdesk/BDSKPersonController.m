@@ -53,11 +53,8 @@
 
 @implementation BDSKPersonController
 
-#pragma mark initialization
-
-+ (void)initialize{
-    [self setKeys:[NSArray arrayWithObject:@"document"] triggerChangeNotificationsForDependentKey:@"publications"];
-    BDSKINITIALIZE;
++ (NSSet *)keyPathsForValuesAffectingPublications {
+    return [NSSet setWithObjects:@"document", nil];
 }
 
 - (NSString *)windowNibName{return @"BDSKPersonWindow";}

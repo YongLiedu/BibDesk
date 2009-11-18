@@ -30,7 +30,7 @@
 
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
-    [NSException raise:BDSKUnimplementedException format:[NSString stringWithFormat:@"%@ is not currently implemented by the DBLP service", [self class]]];
+    [NSException raise:BDSKUnimplementedException format:@"%@", [NSString stringWithFormat:@"%@ is not currently implemented by the DBLP service", [self class]]];
     return [self createInvocationRef    
                /*endpoint*/: @"http://dblp.l3s.de/WS/dblp.php"            
                  methodName: @"all_journal_titles_year"            
@@ -140,7 +140,7 @@
 
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
-    [NSException raise:BDSKUnimplementedException format:[NSString stringWithFormat:@"%@ is not currently implemented by the DBLP service", [self class]]];
+    [NSException raise:BDSKUnimplementedException format:@"%@", [NSString stringWithFormat:@"%@ is not currently implemented by the DBLP service", [self class]]];
     return [self createInvocationRef    
                /*endpoint*/: @"http://dblp.l3s.de/WS/dblp.php"            
                  methodName: @"all_journal_titles"            
@@ -238,7 +238,7 @@
 
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
-    [NSException raise:BDSKUnimplementedException format:[NSString stringWithFormat:@"%@ is not currently implemented by the DBLP service", [self class]]];
+    [NSException raise:BDSKUnimplementedException format:@"%@", [NSString stringWithFormat:@"%@ is not currently implemented by the DBLP service", [self class]]];
     return [self createInvocationRef    
                /*endpoint*/: @"http://dblp.l3s.de/WS/dblp.php"            
                  methodName: @"all_proceeding_titles"            

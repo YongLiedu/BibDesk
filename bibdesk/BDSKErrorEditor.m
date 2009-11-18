@@ -50,10 +50,8 @@ static char BDSKErrorEditorObservationContext;
 
 @implementation BDSKErrorEditor
 
-+ (void)initialize;
-{
-    [self setKeys:[NSArray arrayWithObjects:@"manager", nil] triggerChangeNotificationsForDependentKey:@"displayName"];
-    BDSKINITIALIZE;
++ (NSSet *)keyPathsForValuesAffectingDisplayName {
+    return [NSSet setWithObjects:@"manager", nil];
 }
 
 - (id)initWithFileName:(NSString *)aFileName pasteDragData:(NSData *)aData;

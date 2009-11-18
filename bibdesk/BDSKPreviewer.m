@@ -328,7 +328,8 @@ static BDSKPreviewer *sharedPreviewer = nil;
         
         // Construct the print operation and setup Print panel
         NSPrintOperation *op = [NSPrintOperation printOperationWithView:printableView printInfo:printInfo];
-        [op setShowPanels:YES];
+        [op setShowsPrintPanel:YES];
+        [op setShowsProgressPanel:YES];
         [op setCanSpawnSeparateThread:YES];
         
         [printableView release];

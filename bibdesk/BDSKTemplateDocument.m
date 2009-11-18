@@ -91,11 +91,12 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 
 @implementation BDSKTemplateDocument
 
++ (NSSet *)keyPathsForValuesAffectingPreviewAttributedString {
+    return [NSSet setWithObjects:@"attributedString", nil];
+}
+
 + (void)initialize {
-    [self setKeys:[NSArray arrayWithObject:@"attributedString"] triggerChangeNotificationsForDependentKey:@"previewAttributedString"];
-    
     BDSKINITIALIZE;
-    
 	[NSValueTransformer setValueTransformer:[[[BDSKValueOrNoneTransformer alloc] init] autorelease]
 									forName:BDSKValueOrNoneTransformerName];
 }

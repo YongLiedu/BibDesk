@@ -61,10 +61,12 @@ static char BDSKConditionObservationContext;
 
 @implementation BDSKCondition
 
-+ (void)initialize {
-    [self setKeys:[NSArray arrayWithObjects:@"stringComparison", @"attachmentComparison", @"dateComparison", nil] triggerChangeNotificationsForDependentKey:@"comparison"];
-    [self setKeys:[NSArray arrayWithObjects:@"stringValue", @"countValue", @"numberValue", @"andNumberValue", @"periodValue", @"dateValue", @"toDateValue", nil] triggerChangeNotificationsForDependentKey:@"value"];
-    BDSKINITIALIZE;
++ (NSSet *)keyPathsForValuesAffectingComparison {
+    return [NSSet setWithObjects:@"stringComparison", @"attachmentComparison", @"dateComparison", nil];
+}
+
++ (NSSet *)keyPathsForValuesAffectingValue {
+    return [NSSet setWithObjects:@"stringValue", @"countValue", @"numberValue", @"andNumberValue", @"periodValue", @"dateValue", @"toDateValue", nil];
 }
 
 + (NSString *)dictionaryVersion {

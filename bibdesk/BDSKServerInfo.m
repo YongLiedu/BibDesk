@@ -205,19 +205,40 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 
 @implementation BDSKMutableServerInfo
 
-+ (void)initialize{
-    NSArray *typeKeys = [NSArray arrayWithObject:@"type"];
-    NSArray *optionsKeys = [NSArray arrayWithObject:@"options"];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"serverType"];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"host"];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"port"];
-    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"options"];
-    [self setKeys:optionsKeys triggerChangeNotificationsForDependentKey:@"password"];
-    [self setKeys:optionsKeys triggerChangeNotificationsForDependentKey:@"username"];
-    [self setKeys:optionsKeys triggerChangeNotificationsForDependentKey:@"recordSyntax"];
-    [self setKeys:optionsKeys triggerChangeNotificationsForDependentKey:@"resultEncoding"];
-    [self setKeys:optionsKeys triggerChangeNotificationsForDependentKey:@"removeDiacritics"];
-    BDSKINITIALIZE;
++ (NSSet *)keyPathsForValuesAffectingServerType {
+    return [NSSet setWithObjects:@"type", nil];
+}
+
++ (NSSet *)keyPathsForValuesAffectingHost {
+    return [NSSet setWithObjects:@"type", nil];
+}
+
++ (NSSet *)keyPathsForValuesAffectingPort {
+    return [NSSet setWithObjects:@"type", nil];
+}
+
++ (NSSet *)keyPathsForValuesAffectingOptions {
+    return [NSSet setWithObjects:@"type", nil];
+}
+
++ (NSSet *)keyPathsForValuesAffectingPassword {
+    return [NSSet setWithObjects:@"options", nil];
+}
+
++ (NSSet *)keyPathsForValuesAffectingUsername {
+    return [NSSet setWithObjects:@"options", nil];
+}
+
++ (NSSet *)keyPathsForValuesAffectingRecordSyntax {
+    return [NSSet setWithObjects:@"options", nil];
+}
+
++ (NSSet *)keyPathsForValuesAffectingResultEncoding {
+    return [NSSet setWithObjects:@"options", nil];
+}
+
++ (NSSet *)keyPathsForValuesAffectingRemoveDiacritics {
+    return [NSSet setWithObjects:@"options", nil];
 }
 
 // When changing the type, all data must be properly updated to be valid, taking into account the condition implict in the validation methods

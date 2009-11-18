@@ -425,17 +425,18 @@
 #pragma mark Template documents
 
 - (IBAction)newTemplateDocument:(id)sender {
-    [self openUntitledDocumentOfType:BDSKTextTemplateDocumentType display:YES];
-    NSDocument *document = [[[BDSKTemplateDocument alloc] init] autorelease];
+    NSError *error = nil;
+    NSDocument *document = [self makeUntitledDocumentOfType:BDSKTextTemplateDocumentType error:&error];
 
-    if (document == nil)
+    if (document == nil) {
+        if (error)
+            [self presentError:error];
         return;
+    }
 
     [self addDocument:document];
-    if ([self shouldCreateUI]) {
-        [document makeWindowControllers];
-        [document showWindows];
-    }
+    [document makeWindowControllers];
+    [document showWindows];
 }
 
 - (IBAction)openTemplateDocument:(id)sender {

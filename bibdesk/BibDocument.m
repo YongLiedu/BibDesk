@@ -1937,7 +1937,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     // since we can't save other files in their native format (BibTeX is handled separately)
     if (type != BDSKRISStringType)
-        [self setFileName:nil];
+        [self setFileURL:nil];
     
     return newPubs != nil;
 }
@@ -2525,7 +2525,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         docFlags.previousSortDescending = docFlags.sortDescending;
     }
     
-    NSString *userInfo = [self fileName];
+    NSString *userInfo = [[self fileURL] path];
     NSArray *sortDescriptors = [NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:sortKey ascending:!docFlags.sortDescending userInfo:userInfo], [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:previousSortKey ascending:!docFlags.previousSortDescending userInfo:userInfo], nil];
     [tableView setSortDescriptors:sortDescriptors]; // just using this to store them; it's really a no-op
     
