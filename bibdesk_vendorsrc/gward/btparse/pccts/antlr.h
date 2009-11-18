@@ -385,7 +385,7 @@ extern void _inf_zzgettok();
 #define zzaCur			(zzaStack[zzasp])
 #define zzaRet			(*zzaRetPtr)
 #define zzaArg(v,n)		zzaStack[v-n]
-#define zzMakeAttr		{ zzNON_GUESS_MODE {zzOvfChk; --zzasp; zzcr_attr(&(zzaStack[zzasp]),LA(1),LATEXT(1));}}
+#define zzMakeAttr		{ zzNON_GUESS_MODE {zzOvfChk; --zzasp; zzcr_attr(&(zzaStack[zzasp]),LA(1),(char *)LATEXT(1));}}
 #ifdef zzdef0
 #define zzMake0			{ zzOvfChk; --zzasp; zzdef0(&(zzaStack[zzasp]));}
 #else
@@ -541,12 +541,10 @@ extern int _zzsetmatch_wdfltsig();
 #define zzTRACEOUT(r)	fprintf(stderr, "exit rule \"%s\"\n", r);
 #endif
 
-/* CMH: modified from unsigned wchar_t resp. unsigned char because these is always used in functions accepting char */
-
 #ifdef ZZWCHAR_T
-#define zzchar_t wchar_t
+#define zzchar_t unsigned wchar_t
 #else
-#define zzchar_t char
+#define zzchar_t unsigned char
 #endif
 
 				/* E x t e r n  D e f s */

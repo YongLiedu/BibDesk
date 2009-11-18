@@ -136,9 +136,9 @@ va_dcl
 	SetWordType *f[1];
 #endif
 	SetWordType **miss_set;
-	char **miss_text;
+	zzchar_t **miss_text;
 	int *bad_tok;
-	char **bad_text;
+	zzchar_t **bad_text;
 	int *err_k;
 	int i;
 	va_list ap;
@@ -159,13 +159,13 @@ va_dcl
 	for (i=1; i<=k; i++)	/* look for offending token */
 	{
                 if ( i>1 ) strlcat(text, " ", sizeof(text));
-                   strlcat(text, LATEXT(i), sizeof(text));
+                   strlcat(text, (char *)LATEXT(i), sizeof(text));
 		if ( !zzset_el((unsigned)LA(i), f[i-1]) ) break;
 	}
 	miss_set = va_arg(ap, SetWordType **);
-	miss_text = va_arg(ap, char **);
+	miss_text = va_arg(ap, zzchar_t **);
 	bad_tok = va_arg(ap, int *);
-	bad_text = va_arg(ap, char **);
+	bad_text = va_arg(ap, zzchar_t **);
 	err_k = va_arg(ap, int *);
 	if ( i>k )
 	{
@@ -182,7 +182,7 @@ va_dcl
 	}
 /*	fprintf(stderr, "%s not in %dth set\n", zztokens[LA(i)], i);*/
 	*miss_set = f[i-1];
-	*miss_text = text;
+	*miss_text = (zzchar_t *)text;
 	*bad_tok = LA(i);
 	*bad_text = LATEXT(i);
 	if ( i==1 ) *err_k = 1;
@@ -223,7 +223,7 @@ zzantlr_state *buf;
 	buf->labase = zzlabase;
 #else
 	buf->token = zztoken;
-	strcpy(buf->text, zzlextext);
+	strcpy(buf->text, (char *)zzlextext);
 #endif
 }
 
@@ -261,7 +261,7 @@ zzantlr_state *buf;
 	zzlabase = buf->labase;
 #else
 	zztoken = buf->token;
-	strcpy(zzlextext, buf->text);
+	strcpy((char *)zzlextext, buf->text);
 #endif
 }
 
@@ -477,8 +477,8 @@ SetWordType **zzMissSet;
 #endif
 {
 	if ( LA(1)!=_t ) {				
-		*zzBadText = *zzMissText=LATEXT(1);	
-		*zzMissTok= _t; *zzBadTok=LA(1); 
+		*zzBadText = *zzMissText = (char *)LATEXT(1);	
+		*zzMissTok= _t; *zzBadTok = LA(1); 
 		*zzMissSet=NULL;				
 		return 0;
 	}
@@ -651,7 +651,7 @@ SetWordType **zzMissSet;
 #endif
 #endif
 	if ( !zzset_el((unsigned)LA(1), e) ) {
-		*zzBadText = LATEXT(1); *zzMissText=NULL;
+		*zzBadText = (char *)LATEXT(1); *zzMissText=NULL;
 		*zzMissTok= 0; *zzBadTok=LA(1);
 		*zzMissSet=e;
 		return 0;

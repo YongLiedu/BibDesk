@@ -57,7 +57,7 @@ GEN_PRIVATE_ERRFUNC (lexical_error, (char * fmt, ...),
  */
 
 /* First, the lexical buffer.  This is used elsewhere, so can't be static */
-char *         zztoktext = NULL;
+zzchar_t *         zztoktext = NULL;
 
 /* 
  * Now, the lexical state -- first, stuff that arises from scanning 
@@ -212,7 +212,7 @@ void alloc_lex_buffer (int size)
 {
    if (zztoktext == NULL)
    {
-      zztoktext = (char *) malloc (size * sizeof (char));
+      zztoktext = (zzchar_t *) malloc (size * sizeof (char));
       memset (zztoktext, 0, size);
       zzlextext = zztoktext;
       zzbufsize = size;
@@ -240,18 +240,17 @@ void alloc_lex_buffer (int size)
  * globals: zztottext, zzbufsize, zzlextext, zzbegexpr, zzendexpr
  * callers: lexer_overflow()
  */
- /* CMH: modified from unsigned char **, see comment in antlr.h for ZZWCHAR_T type */
 static void
 realloc_lex_buffer (int     size_increment, 
-                    char ** lastpos, 
-                    char ** nextpos)
+                    unsigned char ** lastpos, 
+                    unsigned char ** nextpos)
 {
    int   beg, end, next;
 
    if (zztoktext == NULL)
       internal_error ("attempt to reallocate unallocated lexical buffer");
 
-   zztoktext = (char *) realloc (zztoktext, zzbufsize+size_increment);
+   zztoktext = (zzchar_t *) realloc (zztoktext, zzbufsize+size_increment);
    memset (zztoktext+zzbufsize, 0, size_increment);
    zzbufsize += size_increment;
 
@@ -294,8 +293,7 @@ void free_lex_buffer (void)
  *
  * Also prints a couple of lines of useful debugging stuff if DEBUG is true.
  */ 
- /* CMH: modified from unsigned char **, see comment in antlr.h for ZZWCHAR_T type */
-void lexer_overflow (char **lastpos, char **nextpos)
+void lexer_overflow (unsigned char **lastpos, unsigned char **nextpos)
 {
 #if DEBUG
    char   head[16], tail[16];
@@ -435,7 +433,7 @@ void at_sign (void)
 
 void toplevel_junk (void)
 {
-   JunkCount += strlen (zzlextext);
+   JunkCount += strlen ((char *)zzlextext);
    zzskip ();
 }
 
@@ -453,7 +451,7 @@ void name (void)
       }
       case after_at: 
       {
-         char * etype = zzlextext;
+         char * etype = (char *)zzlextext;
          EntryState = after_type;
 
          if (strcasecmp (etype, "comment") == 0)
@@ -665,7 +663,7 @@ void end_string (char end_char)
 
    if (EntryState == in_comment)
    {
-      int   len = strlen (zzlextext);
+      int   len = strlen ((char *)zzlextext);
 
       /* 
        * ARG! no, this is wrong -- what if unbalanced braces in the string 
@@ -872,7 +870,7 @@ void check_runaway_string (void)
 
    /* standardize whitespace (convert all to space) */
 
-   len = strlen (zzbegexpr);
+   len = strlen ((char *)zzbegexpr);
    for (i = 0; i < len; i++)
    {
       if (isspace (zzbegexpr[i]))
