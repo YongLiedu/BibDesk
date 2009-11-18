@@ -149,7 +149,7 @@ In Perl, this would return "R", undef, "p", "a", "t", undef, "r". Unfortunately,
 @interface AGRegex : NSObject {
 	void *regex;
 	void *extra;
-	NSInteger groupCount;
+	int groupCount;
 }
 
 /*!
