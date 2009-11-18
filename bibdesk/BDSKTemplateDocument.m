@@ -1467,7 +1467,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 - (void)textViewDidChangeSelection:(NSNotification *)notification {
     if ([[BDSKTokenField superclass] instancesRespondToSelector:_cmd])
-        [(id<NSTextViewDelegate>)super textViewDidChangeSelection:notification];
+        [(id)super textViewDidChangeSelection:notification];
     if ([[self delegate] respondsToSelector:@selector(tokenField:textViewDidChangeSelection:)])
         [[self delegate] tokenField:self textViewDidChangeSelection:[notification object]];
 }
