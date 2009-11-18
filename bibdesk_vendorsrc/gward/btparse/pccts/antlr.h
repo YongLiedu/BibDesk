@@ -541,10 +541,12 @@ extern int _zzsetmatch_wdfltsig();
 #define zzTRACEOUT(r)	fprintf(stderr, "exit rule \"%s\"\n", r);
 #endif
 
+/* CMH: modified from unsigned wchar_t resp. unsigned char because these is always used in functions accepting char */
+
 #ifdef ZZWCHAR_T
-#define zzchar_t unsigned wchar_t
+#define zzchar_t wchar_t
 #else
-#define zzchar_t unsigned char
+#define zzchar_t char
 #endif
 
 				/* E x t e r n  D e f s */

@@ -41,7 +41,7 @@ void zzcr_attr (Attrib *a, int tok, char *txt);
 
 void alloc_lex_buffer (int size);
 void free_lex_buffer (void);
-void lexer_overflow (unsigned char **lastpos, unsigned char **nextpos);
+void lexer_overflow (char **lastpos, char **nextpos);
 #if ZZCOPY_FUNCTION
 void zzcopy (char **nextpos, char **lastpos, int *ovf_flag);
 #endif

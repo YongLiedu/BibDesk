@@ -240,10 +240,11 @@ void alloc_lex_buffer (int size)
  * globals: zztottext, zzbufsize, zzlextext, zzbegexpr, zzendexpr
  * callers: lexer_overflow()
  */
+ /* CMH: modified from unsigned char **, see comment in antlr.h for ZZWCHAR_T type */
 static void
 realloc_lex_buffer (int     size_increment, 
-                    unsigned char ** lastpos, 
-                    unsigned char ** nextpos)
+                    char ** lastpos, 
+                    char ** nextpos)
 {
    int   beg, end, next;
 
@@ -293,7 +294,8 @@ void free_lex_buffer (void)
  *
  * Also prints a couple of lines of useful debugging stuff if DEBUG is true.
  */ 
-void lexer_overflow (unsigned char **lastpos, unsigned char **nextpos)
+ /* CMH: modified from unsigned char **, see comment in antlr.h for ZZWCHAR_T type */
+void lexer_overflow (char **lastpos, char **nextpos)
 {
 #if DEBUG
    char   head[16], tail[16];
