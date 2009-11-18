@@ -40,7 +40,7 @@
 
 extern NSString *BDSKNetServiceDomain;
 
-@interface BDSKSharingBrowser : NSObject {
+@interface BDSKSharingBrowser : NSObject <NSNetServiceDelegate, NSNetServiceBrowserDelegate> {
     NSMutableSet *sharingClients;
     NSNetServiceBrowser *browser;
     NSMutableArray *unresolvedNetServices;

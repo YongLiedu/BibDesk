@@ -67,7 +67,7 @@ typedef struct _BDSKSharingClientFlags {
 #pragma mark -
 
 // private class for DO server. We have it as a separate object so we don't get a retain loop, we remove it from the thread runloop in the client's dealloc
-@interface BDSKSharingClientServer : BDSKAsynchronousDOServer {
+@interface BDSKSharingClientServer : BDSKAsynchronousDOServer <NSNetServiceDelegate, NSConnectionDelegate> {
     NSNetService *service;          // service with information about the remote server (BDSKSharingServer)
     BDSKSharingClient *client;      // the owner of the local server (BDSKSharingClient)
     id remoteServer;                // proxy for the remote sharing server to which we connect

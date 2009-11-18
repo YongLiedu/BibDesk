@@ -40,7 +40,7 @@
 
 @class BDSKOrphanedFileServer, BDSKOrphanedFilesArrayController, BDSKTableView;
 
-@interface BDSKOrphanedFilesFinder : NSWindowController  {
+@interface BDSKOrphanedFilesFinder : NSWindowController <NSTableViewDelegate, NSTableViewDataSource> {
     IBOutlet BDSKTableView *tableView;
     IBOutlet NSButton *refreshButton;
     IBOutlet BDSKOrphanedFilesArrayController *arrayController;

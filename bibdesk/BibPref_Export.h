@@ -46,7 +46,23 @@ enum {
 };
 typedef NSUInteger BDSKTemplateListType;
 
-@interface BibPref_Export : BDSKPreferencePane {
+@class BDSKTemplateOutlineView;
+
+@protocol BDSKTemplateOutlineViewDelegate <BDSKOutlineViewDelegate>
+@optional
+- (BOOL)outlineViewShouldEditNextItemWhenEditingEnds:(BDSKTemplateOutlineView *)anOutlineView;
+@end
+
+
+@interface BDSKTemplateOutlineView : BDSKOutlineView
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKTemplateOutlineViewDelegate>)delegate;
+- (void)setDelegate:(id <BDSKTemplateOutlineViewDelegate>)newDelegate;
+#endif
+@end
+
+
+@interface BibPref_Export : BDSKPreferencePane <NSOutlineViewDelegate, NSOutlineViewDataSource> {
     IBOutlet NSOutlineView *outlineView;
     NSMutableArray *itemNodes;
     NSMutableArray *roles;    
@@ -70,13 +86,4 @@ typedef NSUInteger BDSKTemplateListType;
 
 - (IBAction)dismissChooseMainPageSheet:(id)sender;
 
-@end
-
-
-@interface BDSKTemplateOutlineView : BDSKOutlineView
-@end
-
-
-@interface NSObject (BDSKTemplateOutlineViewDelegate)
-- (BOOL)outlineViewShouldEditNextItemWhenEditingEnds:(BDSKTemplateOutlineView *)anOutlineView;
 @end

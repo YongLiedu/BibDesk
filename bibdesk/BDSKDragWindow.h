@@ -34,12 +34,17 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface BDSKDragWindow : NSWindow
-{
-}
-@end
+@class BDSKDragWindow;
 
-@interface NSObject (BDSKDragWindowDelegate)
+@protocol BDSKDragWindowDelegate <NSWindowDelegate>
+@optional
 - (NSDragOperation)dragWindow:(BDSKDragWindow *)window canReceiveDrag:(id <NSDraggingInfo>)sender;
 - (BOOL)dragWindow:(BDSKDragWindow *)window receiveDrag:(id <NSDraggingInfo>)sender;
+@end
+
+@interface BDSKDragWindow : NSWindow
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKDragWindowDelegate>)delegate;
+- (void)setDelegate:(id <BDSKDragWindowDelegate>)newDelegate;
+#endif
 @end

@@ -42,7 +42,7 @@
 
 // we implement some of the NSResponder methods, but not all; this class inherits from NSResponder in order to avoid declaring them
 
-@interface BDSKTextViewCompletionController : NSResponder
+@interface BDSKTextViewCompletionController : NSResponder <NSTableViewDelegate, NSTableViewDataSource>
 {
 	NSWindow *completionWindow;
 	NSArray *completions;

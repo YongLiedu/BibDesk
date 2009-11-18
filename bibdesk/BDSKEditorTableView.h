@@ -39,13 +39,19 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKEditorTableView : NSTableView {
-    BOOL endEditing;
-}
-@end
-
-@interface NSObject (BDSKEditorTableViewDelegate)
+@protocol BDSKEditorTableViewDelegate <NSTableViewDelegate>
+@optional
 - (BOOL)tableView:(NSTableView *)aTableView textViewShouldLinkKeys:(NSTextView *)textView forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row;
 - (BOOL)tableView:(NSTableView *)aTableView textView:(NSTextView *)textView isValidKey:(NSString *)key forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row;
 - (BOOL)tableView:(NSTableView *)aTableView textView:(NSTextView *)textView clickedOnLink:(id)link atIndex:(NSUInteger)charIndex forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row;
+@end
+
+
+@interface BDSKEditorTableView : NSTableView {
+    BOOL endEditing;
+}
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKEditorTableViewDelegate>)delegate;
+- (void)setDelegate:(id <BDSKEditorTableViewDelegate>)newDelegate;
+#endif
 @end

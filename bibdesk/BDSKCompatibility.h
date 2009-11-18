@@ -43,11 +43,13 @@
 @protocol NSApplicationDelegate <NSObject> @end
 @protocol NSControlTextEditingDelegate <NSObject> @end
 @protocol NSTextFieldDelegate <NSControlTextEditingDelegate> @end
+@protocol NSTokenFieldDelegate <NSTextFieldDelegate> @end
 @protocol NSTableViewDelegate <NSControlTextEditingDelegate> @end
 @protocol NSTableViewDataSource <NSObject> @end
 @protocol NSOutlineViewDelegate <NSControlTextEditingDelegate> @end
 @protocol NSOutlineViewDataSource <NSObject> @end
 @protocol NSToolbarDelegate <NSObject> @end
+@protocol NSToolbarItemValidation <NSObject> @end
 @protocol NSMenuDelegate <NSObject> @end
 @protocol NSDrawerDelegate <NSObject> @end
 @protocol NSWindowDelegate <NSObject> @end
@@ -57,6 +59,12 @@
 @protocol NSTextStorageDelegate <NSObject> @end
 @protocol NSTabViewDelegate <NSObject> @end
 @protocol NSSplitViewDelegate <NSObject> @end
+@protocol NSNetServiceDelegate <NSObject> @end
+@protocol NSNetServiceBrowserDelegate <NSObject> @end
+@protocol NSConnectionDelegate <NSObject> @end
+@protocol NSOpenSavePanelDelegate <NSObject> @end
+@protocol NSAlertDelegate <NSObject> @end
+@protocol NSXMLParserDelegate <NSObject> @end
 
 #endif
 

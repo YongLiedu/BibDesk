@@ -40,7 +40,7 @@
 
 @class BDSKErrorManager, BibDocument;
 
-@interface BDSKErrorEditor : NSWindowController {
+@interface BDSKErrorEditor : NSWindowController <NSTextStorageDelegate> {
     IBOutlet NSTextView *textView;
     IBOutlet NSButton *syntaxHighlightCheckbox;
     IBOutlet NSButton *reopenButton;

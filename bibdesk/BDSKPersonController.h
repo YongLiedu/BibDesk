@@ -41,7 +41,7 @@
 
 @class BibDocument, BibAuthor, BDSKDragImageView, BDSKCollapsibleView, BDSKTableView;
 
-@interface BDSKPersonController : NSWindowController {
+@interface BDSKPersonController : NSWindowController <NSTableViewDelegate, NSSplitViewDelegate> {
     BibAuthor *person;
     id<BDSKOwner> owner;
     NSMutableArray *publicationItems;

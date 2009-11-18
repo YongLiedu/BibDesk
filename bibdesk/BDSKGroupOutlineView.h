@@ -39,19 +39,27 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKOutlineView.h"
 
-@interface BDSKGroupOutlineView : BDSKOutlineView {
-    NSTextFieldCell *parentCell;
-}
-- (NSTextFieldCell *)parentCell;
-- (void)handleClipViewFrameChangedNotification:(NSNotification *)note;
-- (void)updateHighlights;
-@end
+@class BDSKGroupOutlineView;
 
-#pragma mark -
-
-@interface NSObject (BDSKGroupOutlineViewDelegate)
+@protocol BDSKGroupOutlineViewDelegate <BDSKOutlineViewDelegate>
 - (NSIndexSet *)outlineView:(BDSKGroupOutlineView *)anOutlineView indexesOfRowsToHighlightInRange:(NSRange)indexRange;
 - (BOOL)outlineView:(BDSKGroupOutlineView *)anOutlineView isSingleSelectionItem:(id)item;
 - (void)outlineView:(BDSKGroupOutlineView *)anOutlineView doubleClickedOnIconOfItem:(id)item;
 - (BOOL)outlineViewShouldEditNextItemWhenEditingEnds:(BDSKGroupOutlineView *)anOutlineView;
+@end
+
+
+@interface BDSKGroupOutlineView : BDSKOutlineView {
+    NSTextFieldCell *parentCell;
+}
+
+- (NSTextFieldCell *)parentCell;
+- (void)handleClipViewFrameChangedNotification:(NSNotification *)note;
+- (void)updateHighlights;
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKGroupOutlineViewDelegate>)delegate;
+- (void)setDelegate:(id <BDSKGroupOutlineViewDelegate>)newDelegate;
+#endif
+
 @end

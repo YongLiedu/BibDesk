@@ -40,7 +40,7 @@
 
 @class BibDocument, BibItem, BDSKErrorObject, BDSKErrorManager, BDSKErrorEditor, BDSKFilteringArrayController, BDSKTableView;
 
-@interface BDSKErrorObjectController : NSWindowController {
+@interface BDSKErrorObjectController : NSWindowController <NSTableViewDelegate, NSTableViewDataSource> {
     NSMutableArray *errors;
     NSMutableArray *managers;
     NSMutableArray *currentErrors;

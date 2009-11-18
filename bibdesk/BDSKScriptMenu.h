@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface BDSKScriptMenu : NSMenu
+@interface BDSKScriptMenu : NSMenu <NSMenuDelegate>
 {
     NSDate *cachedDate;
 }

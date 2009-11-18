@@ -37,7 +37,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKAppController : NSObject {
+@interface BDSKAppController : NSObject <NSApplicationDelegate, NSMenuDelegate> {
 	IBOutlet NSMenu *columnsMenu;
 	IBOutlet NSMenu *groupSortMenu;
 	IBOutlet NSMenu *groupFieldMenu;

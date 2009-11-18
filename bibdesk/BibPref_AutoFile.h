@@ -42,7 +42,7 @@
 
 @class BDSKFormatStringFieldEditor;
 
-@interface BibPref_AutoFile : BDSKPreferencePane {
+@interface BibPref_AutoFile : BDSKPreferencePane <NSControlTextEditingDelegate> {
     IBOutlet NSPanel *formatSheet;
 	IBOutlet NSTextField* papersFolderLocationTextField;
 	IBOutlet NSButton* choosePapersFolderLocationButton;

@@ -45,7 +45,7 @@
 @interface BDSKSelectionPreservingArrayController : NSArrayController
 @end
 
-@interface BDSKFileContentSearchController : NSWindowController <BDSKSearchDelegate>
+@interface BDSKFileContentSearchController : NSWindowController <BDSKSearchDelegate, NSTableViewDelegate, NSTextFieldDelegate>
 {
     NSMutableArray *results;
     NSMutableArray *filteredResults;

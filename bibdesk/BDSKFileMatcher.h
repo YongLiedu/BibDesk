@@ -41,7 +41,7 @@
 
 @class BDSKGroupingOutlineView;
 
-@interface BDSKFileMatcher : NSWindowController
+@interface BDSKFileMatcher : NSWindowController <NSOutlineViewDelegate, NSOutlineViewDataSource>
 {
     IBOutlet BDSKGroupingOutlineView *outlineView;
     IBOutlet NSProgressIndicator *progressIndicator;

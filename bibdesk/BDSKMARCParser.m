@@ -59,7 +59,7 @@ static void addStringToDictionary(NSString *value, NSMutableDictionary *dict, NS
 static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pubDict, NSString *tag, NSString *subTag, BOOL isUNIMARC);
 @end
 
-@interface BDSKMARCXMLParser : NSXMLParser {
+@interface BDSKMARCXMLParser : NSXMLParser <NSXMLParserDelegate> {
     NSMutableArray *returnArray;
     NSMutableDictionary *pubDict;
     NSMutableString *currentValue;

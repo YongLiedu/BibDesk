@@ -655,5 +655,15 @@
     }
 }
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKTemplateOutlineViewDelegate>)delegate {
+    return (id <BDSKTemplateOutlineViewDelegate>)[super delegate];
+}
+
+- (void)setDelegate:(id <BDSKTemplateOutlineViewDelegate>)newDelegate {
+    [super setDelegate:newDelegate];
+}
+#endif
+
 @end
 

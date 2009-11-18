@@ -40,7 +40,7 @@
 
 @class BDSKScriptGroup, BDSKDragTextField, BDSKFieldEditor;
 
-@interface BDSKScriptGroupSheetController : NSWindowController
+@interface BDSKScriptGroupSheetController : NSWindowController <NSOpenSavePanelDelegate>
 {
     IBOutlet BDSKDragTextField *pathField;
     IBOutlet NSObjectController *objectController;

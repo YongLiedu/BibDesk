@@ -36,7 +36,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKPreferencePane.h"
 
-@interface BibPref_Cite : BDSKPreferencePane
+@interface BibPref_Cite : BDSKPreferencePane <NSTextFieldDelegate>
 {
     IBOutlet NSPopUpButton* defaultDragCopyPopup;
     IBOutlet NSPopUpButton* defaultDragCopyTemplatePopup;

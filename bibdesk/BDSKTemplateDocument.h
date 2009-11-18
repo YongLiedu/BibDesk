@@ -42,9 +42,14 @@
 extern NSString *BDSKTextTemplateDocumentType;
 extern NSString *BDSKRichTextTemplateDocumentType;
 
+@protocol BDSKTokenFieldDelegate <NSTokenFieldDelegate>
+@optional
+- (void)tokenField:(NSTokenField *)tokenField textViewDidChangeSelection:(NSTextView *)textView;
+@end
+
 @class BDSKToken, BDSKTypeTemplate;
 
-@interface BDSKTemplateDocument : NSDocument
+@interface BDSKTemplateDocument : NSDocument <NSTableViewDelegate, NSTableViewDataSource, BDSKTokenFieldDelegate>
 {
     IBOutlet NSObjectController *ownerController;
     
@@ -190,8 +195,4 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 #pragma mark -
 
 @interface BDSKTokenField : NSTokenField
-@end
-
-@interface NSObject (BDSKTokenFieldDelegate)
-- (void)tokenField:(NSTokenField *)tokenField textViewDidChangeSelection:(NSTextView *)textView;
 @end

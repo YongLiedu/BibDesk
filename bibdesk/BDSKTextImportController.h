@@ -40,10 +40,27 @@
 #import "BDSKOwnerProtocol.h"
 #import "BDSKTableView.h"
 
+@protocol BDSKTextImportItemTableViewDelegate <BDSKTableViewDelegate>
+
+- (void)tableViewStartTemporaryTypeSelectMode:(NSTableView *)tView;
+- (void)tableView:(NSTableView *)tView endTemporaryTypeSelectModeAndSet:(BOOL)set edit:(BOOL)edit;
+- (BOOL)tableViewIsInTemporaryTypeSelectMode:(NSTableView *)tView;
+- (BOOL)tableView:(NSTableView *)tView addCurrentSelectionToFieldAtIndex:(NSUInteger)idx;
+
+@optional
+
+- (BOOL)tableView:(NSTableView *)tView textViewShouldLinkKeys:(NSTextView *)textView;
+- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)textView isValidKey:(NSString *)key;
+- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(NSUInteger)charIndex;
+
+@end
+
+#pragma mark -
+
 @class BibDocument, BibItem, BDSKEdgeView, WebView, WebDownload, BDSKComplexStringEditor;
 @class BDSKComplexStringFormatter, BDSKCiteKeyFormatter, BDSKCrossrefFormatter, BDSKCitationFormatter;
 
-@interface BDSKTextImportController : NSWindowController <BDSKOwner> {
+@interface BDSKTextImportController : NSWindowController <BDSKOwner, BDSKTextImportItemTableViewDelegate, NSTableViewDataSource, NSTextViewDelegate, NSSplitViewDelegate> {
     IBOutlet NSTextView* sourceTextView;
     IBOutlet NSTableView* itemTableView;
     IBOutlet NSTextField* citeKeyField;
@@ -132,14 +149,10 @@
 #pragma mark -
 
 @interface TextImportItemTableView : BDSKTableView
-@end
-
-#pragma mark -
-
-@interface NSObject (TextImportItemTableViewDelegate)
-- (BOOL)tableView:(NSTableView *)tView textViewShouldLinkKeys:(NSTextView *)textView;
-- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)textView isValidKey:(NSString *)key;
-- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(NSUInteger)charIndex;
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKTextImportItemTableViewDelegate>)delegate;
+- (void)setDelegate:(id <BDSKTextImportItemTableViewDelegate>)newDelegate;
+#endif
 @end
 
 #pragma mark -

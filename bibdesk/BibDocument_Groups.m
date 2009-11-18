@@ -45,6 +45,7 @@
 #import "BDSKGroupOutlineView.h"
 #import "BibDocument_Search.h"
 #import "BibDocument_UI.h"
+#import "BibDocument_DataSource.h"
 #import "BDSKGroup.h"
 #import "BDSKSharedGroup.h"
 #import "BDSKURLGroup.h"
@@ -387,7 +388,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [currentGroups removeObjectsAtIndexes:[currentClients indexesOfObjects:[clientsToRemove allObjects]]];
     
     for (BDSKSharingClient *client in clientsToAdd) {
-        BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithClient:client];
+        BDSKSharedGroup *group = [(BDSKSharedGroup *)[BDSKSharedGroup alloc] initWithClient:client];
         [currentGroups addObject:group];
         [group release];
     }

@@ -50,7 +50,7 @@
     @abstract WindowController for the edit window
     @discussion Subclass of the NSWindowController class, This handles making, reversing and keeping track of changes to the BibItem, and displaying a nice GUI.
 */
-@interface BDSKEditor : NSWindowController {
+@interface BDSKEditor : NSWindowController <NSWindowDelegate, NSTableViewDelegate, NSTableViewDataSource, NSSplitViewDelegate, NSControlTextEditingDelegate> {
 	IBOutlet NSSplitView *mainSplitView;
 	IBOutlet NSSplitView *fileSplitView;
     IBOutlet NSPopUpButton *bibTypeButton;

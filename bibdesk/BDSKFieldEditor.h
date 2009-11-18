@@ -39,27 +39,40 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKFieldEditor : NSTextView {
-	NSMutableArray *delegatedDraggedTypes;
-    BOOL isEditing;
-}
-
-- (void)registerForDelegatedDraggedTypes:(NSArray *)pboardTypes;
-@end
-
-@interface NSObject (BDSKFieldEditorDelegate)
+@protocol BDSKFieldEditorDelegate <NSTextViewDelegate>
+@optional
 - (NSRange)textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange;
 - (BOOL)textViewShouldAutoComplete:(NSTextView *)textView;
 - (BOOL)textViewShouldLinkKeys:(NSTextView *)textView;
 - (BOOL)textView:(NSTextView *)textView isValidKey:(NSString *)key;
 @end
 
+
+@interface BDSKFieldEditor : NSTextView {
+	NSMutableArray *delegatedDraggedTypes;
+    BOOL isEditing;
+}
+- (void)registerForDelegatedDraggedTypes:(NSArray *)pboardTypes;
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKFieldEditorDelegate>)delegate;
+- (void)setDelegate:(id <BDSKFieldEditorDelegate>)newDelegate;
+#endif
+@end
+
 // the above delegate methods could be implemented by calling these delegate methods for NSControl subclasses that actually have a delegate
 // currently implemented for NSTextField and NSTableView
-@interface NSControl (NSControlBDSKFieldEditorDelegate)
+@protocol BDSKControlFieldEditorDelegate <NSControlTextEditingDelegate>
+@optional
 - (NSRange)control:(NSControl *)control textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange;
 - (BOOL)control:(NSControl *)control textViewShouldAutoComplete:(NSTextView *)textView;
 - (BOOL)control:(NSControl *)control textViewShouldLinkKeys:(NSTextView *)textView;
 - (BOOL)control:(NSControl *)control textView:(NSTextView *)textView isValidKey:(NSString *)key;
 - (BOOL)control:(NSControl *)control textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex;
+@end
+
+
+@interface NSTextField (BDSKFieldEditorDelegate) <BDSKFieldEditorDelegate>
+@end
+
+@interface NSTableView (BDSKFieldEditorDelegate) <BDSKFieldEditorDelegate>
 @end

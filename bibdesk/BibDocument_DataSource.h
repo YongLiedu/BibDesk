@@ -35,11 +35,13 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
+#import "BDSKMainTableView.h"
+#import "BDSKGroupOutlineView.h"
 
 /*! @category  BibDocument(DataSource)
 @discussion Additions to BibDocument for handling table views.
 */
-@interface BibDocument (DataSource)
+@interface BibDocument (DataSource) <BDSKMainTableViewDelegate, BDSKMainTableViewDataSource, BDSKGroupOutlineViewDelegate, NSOutlineViewDataSource>
 
 - (BOOL)writePublications:(NSArray*)pubs forDragCopyType:(NSInteger)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard;
 - (void)setPromiseDragColumnIdentifier:(NSString *)identifier;

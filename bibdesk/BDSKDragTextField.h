@@ -38,16 +38,23 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class BDSKDragTextField;
 
-@interface BDSKDragTextField : NSTextField {
-    BOOL highlight;
-}
-@end
-
-
-@interface NSObject (BDSKDragTextFieldDelegate)
+@protocol BDSKDragTextFieldDelegate <NSTextFieldDelegate>
+@optional
 - (NSDragOperation)dragTextField:(BDSKDragTextField *)textField validateDrop:(id <NSDraggingInfo>)sender;
 - (BOOL)dragTextField:(BDSKDragTextField *)textField acceptDrop:(id <NSDraggingInfo>)sender;
 - (BOOL)dragTextField:(BDSKDragTextField *)textField writeDataToPasteboard:(NSPasteboard *)pasteboard;
 - (NSImage *)dragImageForDragTextField:(BDSKDragTextField *)textField;
+@end
+
+
+@interface BDSKDragTextField : NSTextField {
+    BOOL highlight;
+}
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKDragTextFieldDelegate>)delegate;
+- (void)setDelegate:(id <BDSKDragTextFieldDelegate>)newDelegate;
+#endif
+
 @end

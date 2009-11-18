@@ -568,4 +568,24 @@ static char BDSKTableViewFontDefaultsObservationContext;
         [[self delegate] tableView:self typeSelectHelper:aTypeSelectHelper updateSearchString:searchString];
 }
 
+#pragma mark Delegate and DataSource
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKTableViewDelegate>)delegate {
+    return (id <BDSKTableViewDelegate>)[super delegate];
+}
+
+- (void)setDelegate:(id <BDSKTableViewDelegate>)newDelegate {
+    [super setDelegate:newDelegate];
+}
+
+- (id <BDSKTableViewDataSource>)dataSource {
+    return (id <BDSKTableViewDataSource>)[super dataSource];
+}
+
+- (void)setDataSource:(id <BDSKTableViewDataSource>)newDataSource {
+    [super setDataSource:newDataSource];
+}
+#endif
+
 @end

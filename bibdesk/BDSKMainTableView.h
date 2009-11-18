@@ -35,6 +35,24 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKTableView.h"
 
+
+@protocol BDSKMainTableViewDelegate <BDSKTableViewDelegate>
+@optional
+- (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView;
+- (void)tableView:(NSTableView *)aTableView importItemAtRow:(NSInteger)rowIndex;
+- (void)tableView:(NSTableView *)aTableView openParentForItemAtRow:(NSInteger)rowIndex;
+- (NSColor *)tableView:(NSTableView *)aTableView highlightColorForRow:(NSInteger)rowIndex;
+@end
+
+
+@protocol BDSKMainTableViewDataSource <BDSKTableViewDataSource>
+@optional
+- (void)tableView:(NSTableView *)aTableView alternateDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes;
+- (BOOL)tableView:(NSTableView *)aTableView canAlternateDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes;
+- (void)tableView:(NSTableView *)aTableView alternateCutRowsWithIndexes:(NSIndexSet *)rowIndexes;
+@end
+
+
 /*!
     @class BDSKMainTableView
     @abstract Drag n' Droppable Tableview
@@ -63,21 +81,13 @@
 - (BOOL)canAlternateDelete;
 - (BOOL)canAlternateCut;
 
-@end
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKMainTableViewDelegate>)delegate;
+- (void)setDelegate:(id <BDSKMainTableViewDelegate>)newDelegate;
+- (id <BDSKMainTableViewDataSource>)dataSource;
+- (void)setDataSource:(id <BDSKMainTableViewDataSource>)newDataSource;
+#endif
 
-
-@interface NSObject (BDSKMainTableViewDelegate)
-- (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView;
-- (void)tableView:(NSTableView *)aTableView importItemAtRow:(NSInteger)rowIndex;
-- (void)tableView:(NSTableView *)aTableView openParentForItemAtRow:(NSInteger)rowIndex;
-- (NSColor *)tableView:(NSTableView *)aTableView highlightColorForRow:(NSInteger)rowIndex;
-@end
-
-
-@interface NSObject (BDSKMainTableViewDataSource)
-- (void)tableView:(NSTableView *)aTableView alternateDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes;
-- (BOOL)tableView:(NSTableView *)aTableView canAlternateDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes;
-- (void)tableView:(NSTableView *)aTableView alternateCutRowsWithIndexes:(NSIndexSet *)rowIndexes;
 @end
 
 

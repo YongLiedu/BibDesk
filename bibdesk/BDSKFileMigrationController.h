@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface BDSKFileMigrationController : NSWindowController {
+@interface BDSKFileMigrationController : NSWindowController <NSTableViewDelegate, NSTableViewDataSource> {
     IBOutlet NSTableView *tableView;
     IBOutlet NSButton *migrateButton;
     IBOutlet NSProgressIndicator *progressBar;

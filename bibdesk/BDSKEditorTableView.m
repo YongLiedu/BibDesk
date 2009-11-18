@@ -150,4 +150,16 @@
     return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
 }
 
+#pragma mark Delegate
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKEditorTableViewDelegate>)delegate {
+    return (id <BDSKEditorTableViewDelegate>)[super delegate];
+}
+
+- (void)setDelegate:(id <BDSKEditorTableViewDelegate>)newDelegate {
+    [super setDelegate:newDelegate];
+}
+#endif
+
 @end

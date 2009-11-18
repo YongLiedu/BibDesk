@@ -57,7 +57,7 @@ enum {
     BDSKForceAutoFileOptionMask = 4
 };
 
-@interface BDSKFiler : NSObject {
+@interface BDSKFiler : NSObject <NSTableViewDelegate, NSTableViewDataSource> {
 	IBOutlet NSWindow *window;
 	IBOutlet NSTableView *tv;
 	IBOutlet NSTextField *infoTextField;

@@ -340,7 +340,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
          since that returns nil for the tableview's field editor.
          */
         
-        NSControl *control = [(NSText *)[[self window] firstResponder] delegate];
+        NSControl *control = (NSControl *)[(NSText *)[[self window] firstResponder] delegate];
         
         // may be self, if a textview was being edited (but we should have taken the first branch in that case)
         if ([control respondsToSelector:@selector(abortEditing)]) {
@@ -390,7 +390,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 		NSInteger editedRow = -1;
 		NSRange selection = [textView selectedRange];
         if ([textView isFieldEditor]) {
-            firstResponder = [textView delegate];
+            firstResponder = (NSResponder *)[textView delegate];
             if (firstResponder == tableView)
                 editedRow = [tableView editedRow];
         }

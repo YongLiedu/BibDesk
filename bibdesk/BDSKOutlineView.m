@@ -554,4 +554,24 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
         [[self delegate] outlineView:self typeSelectHelper:aTypeSelectHelper updateSearchString:searchString];
 }
 
+#pragma mark Delegate and DataSource
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKOutlineViewDelegate>)delegate {
+    return (id <BDSKOutlineViewDelegate>)[super delegate];
+}
+
+- (void)setDelegate:(id <BDSKOutlineViewDelegate>)newDelegate {
+    [super setDelegate:newDelegate];
+}
+
+- (id <BDSKOutlineViewDataSource>)dataSource {
+    return (id <BDSKOutlineViewDataSource>)[super dataSource];
+}
+
+- (void)setDataSource:(id <BDSKOutlineViewDataSource>)newDataSource {
+    [super setDataSource:newDataSource];
+}
+#endif
+
 @end

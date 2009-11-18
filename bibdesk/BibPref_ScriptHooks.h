@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKPreferencePane.h"
 
-@interface BibPref_ScriptHooks : BDSKPreferencePane {
+@interface BibPref_ScriptHooks : BDSKPreferencePane <NSTableViewDelegate, NSTableViewDataSource> {
 	IBOutlet NSTableView *tableView;
 	IBOutlet NSSegmentedControl *addRemoveButton;
 }

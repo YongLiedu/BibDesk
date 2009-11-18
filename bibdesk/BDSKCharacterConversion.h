@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKCharacterConversion : NSWindowController {
+@interface BDSKCharacterConversion : NSWindowController <NSTableViewDelegate, NSTableViewDataSource> {
 	IBOutlet NSPopUpButton *listButton;
 	IBOutlet NSTableView *tableView;
     IBOutlet NSSegmentedControl *addRemoveButton;

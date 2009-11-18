@@ -40,7 +40,7 @@
 
 @class BDSKMacroResolver, BDSKComplexStringFormatter, BDSKComplexStringEditor;
 
-@interface BDSKMacroWindowController : NSWindowController {
+@interface BDSKMacroWindowController : NSWindowController <NSTableViewDelegate, NSTableViewDataSource> {
     IBOutlet NSArrayController *arrayController;
     IBOutlet NSTableView *tableView;
     IBOutlet NSButton *closeButton;

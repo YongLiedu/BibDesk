@@ -41,7 +41,7 @@
 
 @class BDSKSearchBookmark, BDSKOutlineView;
 
-@interface BDSKSearchBookmarkController : NSWindowController {
+@interface BDSKSearchBookmarkController : NSWindowController <NSOutlineViewDelegate, NSOutlineViewDataSource, NSToolbarDelegate> {
     IBOutlet BDSKOutlineView *outlineView;
     BDSKSearchBookmark *bookmarkRoot;
     NSArray *draggedBookmarks;

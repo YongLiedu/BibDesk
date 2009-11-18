@@ -43,7 +43,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKTypeSelectHelper : NSObject {
+@interface BDSKTypeSelectHelper : NSObject <NSTextDelegate> {
     id dataSource;
     BOOL cycleResults;
     BOOL matchPrefix;

@@ -36,7 +36,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
 
-@interface BibDocument (Toolbar)
+@interface BibDocument (Toolbar) <NSToolbarDelegate>
 
 - (void)setupToolbar;
 @end

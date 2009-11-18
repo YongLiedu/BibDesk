@@ -40,7 +40,7 @@
 #import "BibDocument.h"
 
 
-@interface BibDocument (UI)
+@interface BibDocument (UI) <NSSplitViewDelegate, NSMenuDelegate>
 
 - (void)updatePreviews;
 - (void)updatePreviewer:(BDSKPreviewer *)aPreviewer;

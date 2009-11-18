@@ -40,6 +40,39 @@
 
 @class BDSKTypeSelectHelper;
 
+@protocol BDSKOutlineViewDelegate <NSOutlineViewDelegate>
+@optional
+
+- (void)outlineViewInsertNewline:(NSOutlineView *)anOutlineView;
+
+- (NSMenu *)outlineView:(NSOutlineView *)anOutlineView menuForTableColumn:(NSTableColumn *)tableColumn item:(id)item;
+
+- (NSArray *)outlineView:(NSOutlineView *)anOutlineView typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)aTypeSelectHelper;
+- (void)outlineView:(NSOutlineView *)anOutlineView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString;
+- (void)outlineView:(NSOutlineView *)anOutlineView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper updateSearchString:(NSString *)searchString;
+
+@end
+
+@protocol BDSKOutlineViewDataSource <NSOutlineViewDataSource>
+@optional
+
+- (BOOL)outlineView:(NSOutlineView *)anOutlineView canCopyItems:(NSArray *)items;
+- (void)outlineView:(NSOutlineView *)anOutlineView deleteItems:(NSArray *)items;
+- (BOOL)outlineView:(NSOutlineView *)anOutlineView canDeleteItems:(NSArray *)items;
+- (void)outlineView:(NSOutlineView *)anOutlineView pasteFromPasteboard:(NSPasteboard *)pboard;
+- (BOOL)outlineViewCanPasteFromPasteboard:(NSOutlineView *)anOutlineView;
+- (void)outlineView:(NSOutlineView *)anOutlineView duplicateItems:(NSArray *)items; // defaults to copy+paste
+- (BOOL)outlineView:(NSOutlineView *)anOutlineView canDuplicateItems:(NSArray *)items;
+
+- (NSDragOperation)outlineView:(NSOutlineView *)anOutlineView draggingSourceOperationMaskForLocal:(BOOL)flag;
+
+- (NSImage *)outlineView:(NSOutlineView *)anOutlineView dragImageForItems:(NSArray *)items;
+
+- (void)outlineView:(NSOutlineView *)anOutlineView concludeDragOperation:(NSDragOperation)operation;
+
+@end
+
+
 @interface BDSKOutlineView : NSOutlineView {
     BDSKTypeSelectHelper *typeSelectHelper;
     NSString *fontNamePreferenceKey;
@@ -85,36 +118,11 @@
 - (NSFont *)font;
 - (void)setFont:(NSFont *)font;
 
-@end
-
-
-@interface NSObject (BDSKOutlineViewDelegate)
-
-- (void)outlineViewInsertNewline:(NSOutlineView *)anOutlineView;
-
-- (NSMenu *)outlineView:(NSOutlineView *)anOutlineView menuForTableColumn:(NSTableColumn *)tableColumn item:(id)item;
-
-- (NSArray *)outlineView:(NSOutlineView *)anOutlineView typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)aTypeSelectHelper;
-- (void)outlineView:(NSOutlineView *)anOutlineView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString;
-- (void)outlineView:(NSOutlineView *)anOutlineView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper updateSearchString:(NSString *)searchString;
-
-@end
-
-
-@interface NSObject (BDSKOutlineViewDataSource)
-
-- (BOOL)outlineView:(NSOutlineView *)anOutlineView canCopyItems:(NSArray *)items;
-- (void)outlineView:(NSOutlineView *)anOutlineView deleteItems:(NSArray *)items;
-- (BOOL)outlineView:(NSOutlineView *)anOutlineView canDeleteItems:(NSArray *)items;
-- (void)outlineView:(NSOutlineView *)anOutlineView pasteFromPasteboard:(NSPasteboard *)pboard;
-- (BOOL)outlineViewCanPasteFromPasteboard:(NSOutlineView *)anOutlineView;
-- (void)outlineView:(NSOutlineView *)anOutlineView duplicateItems:(NSArray *)items; // defaults to copy+paste
-- (BOOL)outlineView:(NSOutlineView *)anOutlineView canDuplicateItems:(NSArray *)items;
-
-- (NSDragOperation)outlineView:(NSOutlineView *)anOutlineView draggingSourceOperationMaskForLocal:(BOOL)flag;
-
-- (NSImage *)outlineView:(NSOutlineView *)anOutlineView dragImageForItems:(NSArray *)items;
-
-- (void)outlineView:(NSOutlineView *)anOutlineView concludeDragOperation:(NSDragOperation)operation;
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKOutlineViewDelegate>)delegate;
+- (void)setDelegate:(id <BDSKOutlineViewDelegate>)newDelegate;
+- (id <BDSKOutlineViewDataSource>)dataSource;
+- (void)setDataSource:(id <BDSKOutlineViewDataSource>)newDataSource;
+#endif
 
 @end

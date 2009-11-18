@@ -75,7 +75,7 @@ enum {
 };
 typedef NSInteger BDSKSharingStatus;
 
-@interface BDSKSharingServer : NSObject {    
+@interface BDSKSharingServer : NSObject <NSNetServiceDelegate> {    
     NSNetService *netService;
     id server;
     NSString *sharingName;

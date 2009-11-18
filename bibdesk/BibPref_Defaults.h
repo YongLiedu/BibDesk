@@ -38,7 +38,7 @@
 
 @class BDSKMacroWindowController, BDSKTableView;
 
-@interface BibPref_Defaults : BDSKPreferencePane
+@interface BibPref_Defaults : BDSKPreferencePane <NSTableViewDelegate, NSTableViewDataSource>
 {
     IBOutlet NSButton* convertURLFieldsButton;
     IBOutlet NSButton* removeLocalFileFieldsButton;

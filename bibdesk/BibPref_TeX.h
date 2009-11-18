@@ -39,7 +39,7 @@
 
 @class BDSKEncodingPopUpButton;
 
-@interface BibPref_TeX : BDSKPreferencePane
+@interface BibPref_TeX : BDSKPreferencePane <NSTextFieldDelegate, NSAlertDelegate>
 {
     IBOutlet NSButton *usesTeXButton;
     IBOutlet NSTextField *texBinaryPathField;

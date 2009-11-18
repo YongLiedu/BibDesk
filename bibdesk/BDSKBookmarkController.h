@@ -42,7 +42,7 @@
 
 @class BDSKBookmark, BDSKOutlineView;
 
-@interface BDSKBookmarkController : NSWindowController {
+@interface BDSKBookmarkController : NSWindowController <NSOutlineViewDelegate, NSOutlineViewDataSource, NSToolbarDelegate> {
     IBOutlet BDSKOutlineView *outlineView;
     IBOutlet NSWindow *addBookmarkSheet;
     IBOutlet NSTextField *bookmarkField;

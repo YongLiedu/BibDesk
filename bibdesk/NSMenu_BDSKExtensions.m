@@ -46,7 +46,7 @@
 #define BDSKMenuTargetURL @"BDSKMenuTargetURL"
 #define BDSKMenuApplicationURL @"BDSKMenuApplicationURL"
 
-@interface BDSKOpenWithMenuController : NSObject 
+@interface BDSKOpenWithMenuController : NSObject <NSMenuDelegate>
 + (id)sharedInstance;
 - (void)openURLWithApplication:(id)sender;
 @end

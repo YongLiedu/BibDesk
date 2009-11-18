@@ -40,6 +40,41 @@
 
 @class BDSKTypeSelectHelper;
 
+@protocol BDSKTableViewDelegate <NSTableViewDelegate>
+@optional
+
+- (void)tableViewInsertNewline:(NSTableView *)aTableView;
+- (void)tableViewInsertSpace:(NSTableView *)aTableView;
+- (void)tableViewInsertShiftSpace:(NSTableView *)aTableView;
+
+- (NSMenu *)tableView:(NSTableView *)aTableView menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex;
+
+- (NSArray *)tableView:(NSTableView *)aTableView typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)aTypeSelectHelper;
+- (void)tableView:(NSTableView *)aTableView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString;
+- (void)tableView:(NSTableView *)aTableView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper updateSearchString:(NSString *)searchString;
+
+@end
+
+@protocol BDSKTableViewDataSource <NSTableViewDataSource>
+@optional
+
+- (BOOL)tableView:(NSTableView *)aTableView canCopyRowsWithIndexes:(NSIndexSet *)rowIndexes;
+- (void)tableView:(NSTableView *)aTableView deleteRowsWithIndexes:(NSIndexSet *)rowIndexes;
+- (BOOL)tableView:(NSTableView *)aTableView canDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes;
+- (void)tableView:(NSTableView *)aTableView pasteFromPasteboard:(NSPasteboard *)pboard;
+- (BOOL)tableViewCanPasteFromPasteboard:(NSTableView *)aTableView;
+- (void)tableView:(NSTableView *)aTableView duplicateRowsWithIndexes:(NSIndexSet *)rowIndexes; // defaults to copy+paste
+- (BOOL)tableView:(NSTableView *)aTableView canDuplicateRowsWithIndexes:(NSIndexSet *)rowIndexes;
+
+- (NSDragOperation)tableView:(NSTableView *)aTableView draggingSourceOperationMaskForLocal:(BOOL)flag;
+
+- (NSImage *)tableView:(NSTableView *)aTableView dragImageForRowsWithIndexes:(NSIndexSet *)dragRows;
+
+- (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation;
+
+@end
+
+
 @interface BDSKTableView : NSTableView {
     BDSKTypeSelectHelper *typeSelectHelper;
     NSString *fontNamePreferenceKey;
@@ -87,38 +122,11 @@
 - (NSFont *)font;
 - (void)setFont:(NSFont *)font;
 
-@end
-
-
-@interface NSObject (BDSKTableViewDelegate)
-
-- (void)tableViewInsertNewline:(NSTableView *)aTableView;
-- (void)tableViewInsertSpace:(NSTableView *)aTableView;
-- (void)tableViewInsertShiftSpace:(NSTableView *)aTableView;
-
-- (NSMenu *)tableView:(NSTableView *)aTableView menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex;
-
-- (NSArray *)tableView:(NSTableView *)aTableView typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)aTypeSelectHelper;
-- (void)tableView:(NSTableView *)aTableView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString;
-- (void)tableView:(NSTableView *)aTableView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper updateSearchString:(NSString *)searchString;
-
-@end
-
-
-@interface NSObject (BDSKTableViewDataSource)
-
-- (BOOL)tableView:(NSTableView *)aTableView canCopyRowsWithIndexes:(NSIndexSet *)rowIndexes;
-- (void)tableView:(NSTableView *)aTableView deleteRowsWithIndexes:(NSIndexSet *)rowIndexes;
-- (BOOL)tableView:(NSTableView *)aTableView canDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes;
-- (void)tableView:(NSTableView *)aTableView pasteFromPasteboard:(NSPasteboard *)pboard;
-- (BOOL)tableViewCanPasteFromPasteboard:(NSTableView *)aTableView;
-- (void)tableView:(NSTableView *)aTableView duplicateRowsWithIndexes:(NSIndexSet *)rowIndexes; // defaults to copy+paste
-- (BOOL)tableView:(NSTableView *)aTableView canDuplicateRowsWithIndexes:(NSIndexSet *)rowIndexes;
-
-- (NSDragOperation)tableView:(NSTableView *)aTableView draggingSourceOperationMaskForLocal:(BOOL)flag;
-
-- (NSImage *)tableView:(NSTableView *)aTableView dragImageForRowsWithIndexes:(NSIndexSet *)dragRows;
-
-- (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation;
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKTableViewDelegate>)delegate;
+- (void)setDelegate:(id <BDSKTableViewDelegate>)newDelegate;
+- (id <BDSKTableViewDataSource>)dataSource;
+- (void)setDataSource:(id <BDSKTableViewDataSource>)newDataSource;
+#endif
 
 @end

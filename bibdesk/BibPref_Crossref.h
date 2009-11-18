@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKPreferencePane.h"
 
-@interface BibPref_Crossref : BDSKPreferencePane
+@interface BibPref_Crossref : BDSKPreferencePane <NSTableViewDelegate, NSTableViewDataSource>
 {
     IBOutlet NSButton* autoSortCheckButton;
     IBOutlet NSButton* warnOnEditInheritedCheckButton;

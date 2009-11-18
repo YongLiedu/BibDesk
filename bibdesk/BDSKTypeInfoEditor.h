@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKTypeInfoEditor : NSWindowController {
+@interface BDSKTypeInfoEditor : NSWindowController <NSTableViewDelegate, NSTableViewDataSource, NSSplitViewDelegate> {
 	IBOutlet NSTableView *typeTableView;
 	IBOutlet NSTableView *requiredTableView;
 	IBOutlet NSTableView *optionalTableView;

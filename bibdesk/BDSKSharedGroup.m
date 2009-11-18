@@ -169,7 +169,7 @@ static NSImage *unlockedIcon = nil;
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
-	return [[[self class] allocWithZone:aZone] initWithClient:client];
+	return [(BDSKSharedGroup *)[[self class] allocWithZone:aZone] initWithClient:client];
 }
 
 // Logging

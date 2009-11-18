@@ -63,4 +63,14 @@
     } else return  NO;
 }
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKDragWindowDelegate>)delegate {
+    return (id <BDSKDragWindowDelegate>)[super delegate];
+}
+
+- (void)setDelegate:(id <BDSKDragWindowDelegate>)newDelegate {
+    [super setDelegate:newDelegate];
+}
+#endif
+
 @end

@@ -33,7 +33,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface BDSKFileMatchConfigController : NSWindowController
+@interface BDSKFileMatchConfigController : NSWindowController <NSTableViewDelegate, NSTableViewDataSource>
 {
     IBOutlet NSTableView *documentTableView;
     IBOutlet NSTableView *fileTableView;

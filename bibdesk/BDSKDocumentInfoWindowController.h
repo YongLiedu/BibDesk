@@ -40,7 +40,7 @@
 
 @class BibDocument;
 
-@interface BDSKDocumentInfoWindowController : NSWindowController {
+@interface BDSKDocumentInfoWindowController : NSWindowController <NSTableViewDelegate, NSTableViewDataSource> {
     IBOutlet NSTableView *tableView;
     IBOutlet NSSegmentedControl *addRemoveButton;
     NSMutableDictionary *info;

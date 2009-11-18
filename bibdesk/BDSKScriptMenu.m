@@ -41,7 +41,7 @@
 #import "NSMenu_BDSKExtensions.h"
 #import "BDSKTask.h"
 
-@interface BDSKScriptMenu (Private)
+@interface BDSKScriptMenu (Private) <NSMenuDelegate>
 - (NSArray *)scriptPaths;
 - (NSArray *)directoryContentsAtPath:(NSString *)path lastModified:(NSDate **)lastModifiedDate;
 - (void)updateSubmenu:(NSMenu *)menu withScripts:(NSArray *)scripts;
@@ -64,7 +64,7 @@ static NSInteger recursionDepth = 0;
 {
     // title is currently unused
     NSString *scriptMenuTitle = @"Scripts";
-    NSMenu *newMenu = [[self allocWithZone:[self menuZone]] initWithTitle:scriptMenuTitle];
+    BDSKScriptMenu *newMenu = [[self allocWithZone:[self menuZone]] initWithTitle:scriptMenuTitle];
     NSMenuItem *scriptItem = [[NSMenuItem allocWithZone:[self menuZone]] initWithTitle:scriptMenuTitle action:NULL keyEquivalent:@""];
     [scriptItem setImage:[NSImage imageNamed:@"ScriptMenu"]];
     [scriptItem setSubmenu:newMenu];

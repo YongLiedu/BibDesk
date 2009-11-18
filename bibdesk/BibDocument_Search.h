@@ -42,7 +42,7 @@ extern NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString);
 
 @class BDSKFileContentSearchController;
 
-@interface BibDocument (Search)
+@interface BibDocument (Search) <NSTextFieldDelegate>
 
 - (NSString *)searchString;
 
