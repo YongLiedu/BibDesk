@@ -45,7 +45,7 @@
 @implementation NSWorkspace (BDSKExtensions)
 
 static OSErr
-FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpec )
+FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
 {
     OSErr err;
     ProcessInfoRec info;
@@ -57,7 +57,6 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
         if( !err ) {
             info.processInfoLength = sizeof(info);
             info.processName = NULL;
-            info.processAppSpec = fileSpec;
             err= GetProcessInformation(psn,&info);
         }
     } while( !err && info.processSignature != sig );
@@ -95,7 +94,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     OSType invalidCreator = '???\?';
 	OSType appCreator = invalidCreator;
     CFURLRef appURL = NULL;
-    FSSpec appSpec;
+    FSRef appRef;
 	if(noErr == err){
         NSString *extension = [[[fileURL path] pathExtension] lowercaseString];
         NSDictionary *defaultViewers = [[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey];
@@ -108,10 +107,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     
     if(err == noErr) {
         // convert application location to FSSpec in case we need it
-        FSRef appRef;
-        if (CFURLGetFSRef(appURL, &appRef))
-            FSGetCatalogInfo(&appRef, kFSCatInfoNone, NULL, NULL, &appSpec, NULL);
-        else
+        if (NO == CFURLGetFSRef(appURL, &appRef))
             err = fnfErr;
         
         // Get the type info of the creator application from LS, so we know should receive the event
@@ -153,9 +149,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     if (openEvent) {
         
         ProcessSerialNumber psn;
-        // don't overwrite our appSpec...
-        FSSpec runningAppSpec;
-        err = FindRunningAppBySignature(appCreator, &psn, &runningAppSpec);
+        err = FindRunningAppBySignature(appCreator, &psn);
         
         if (noErr == err) {
             
@@ -170,23 +164,11 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
         
          // If the app wasn't running, we need to use LaunchApplication...which doesn't seem to work if the app (at least Skim) is already running, hence the initial call to AESendMessage.  Possibly this can be done with LaunchServices, but the documentation for this stuff isn't sufficient to say and I'm not in the mood for any more trial-and-error AppleEvent coding.
         if (procNotFound == err) {
-            
-            // This code was distilled from http://static.userland.com/Iowa/sourceListings/macbirdSource/Frontier%20SDK%204.1b1/Toolkits/Applet%20Toolkit/appletprocess.c.html
-            LaunchParamBlockRec pb;
-            memset(&pb, 0, sizeof(LaunchParamBlockRec));
-            pb.launchAppSpec = &appSpec;
-            pb.launchBlockID = extendedBlock;
-            pb.launchEPBLength = extendedBlockLen;
-            pb.launchControlFlags = launchContinue | launchNoFileFlags;
-            
-            typedef AppParameters **AppParametersHandle;
-            
-            AppParametersHandle params = NULL;
-            // the coercion is apparently a key to making this work
-            NSAppleEventDescriptor *launchEvent = [openEvent coerceToDescriptorType:typeAppParameters];
-            params = (AppParametersHandle)([launchEvent aeDesc]->dataHandle);
-            pb.launchAppParameters = *params;
-            err = LaunchApplication (&pb);
+            LSApplicationParameters appParams;
+            memset(&appParams, 0, sizeof(LSApplicationParameters));
+            appParams.flags = kLSLaunchDefaults & ~kLSLaunchAsync;
+            appParams.application = &appRef;
+            err = LSOpenApplication(&appParams, NULL);
         }
     }
     
