@@ -1137,7 +1137,7 @@ static void srw_bend_search(association *assoc, request *req,
             break;
         }
         wrbuf_printf(wr, "SRWSearch ");
-        wrbuf_printf(wr, srw_req->database);
+        wrbuf_printf(wr, "%s", srw_req->database);
         wrbuf_printf(wr, " ");
         if (srw_res->num_diagnostics)
             wrbuf_printf(wr, "ERROR %s", srw_res->diagnostics[0].uri);
@@ -1415,7 +1415,7 @@ static void srw_bend_scan(association *assoc, request *req,
         }
 
         wrbuf_printf(wr, "SRWScan ");
-        wrbuf_printf(wr, srw_req->database);
+        wrbuf_printf(wr, "%s", srw_req->database);
         wrbuf_printf(wr, " ");
 
         if (srw_res->num_diagnostics)
@@ -2850,7 +2850,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
         for (i = 0 ; i < req->num_databaseNames; i++){
             if (i)
                 wrbuf_printf(wr, "+");
-            wrbuf_printf(wr, req->databaseNames[i]);
+            wrbuf_printf(wr, "%s", req->databaseNames[i]);
         }
         wrbuf_printf(wr, " ");
         
@@ -3157,7 +3157,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
         for (i = 0 ; i < req->num_databaseNames; i++){
             if (i)
                 wrbuf_printf(wr, "+");
-            wrbuf_printf(wr, req->databaseNames[i]);
+            wrbuf_printf(wr, "%s", req->databaseNames[i]);
         }
         wrbuf_printf(wr, " ");
         
@@ -3258,7 +3258,7 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
         {
             if (i)
                 wrbuf_printf(wr, "+");
-            wrbuf_printf(wr, req->inputResultSetNames[i]);
+            wrbuf_printf(wr, "%s", req->inputResultSetNames[i]);
         }
         wrbuf_printf(wr, ")->%s ",req->sortedResultSetName);
 
