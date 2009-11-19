@@ -318,33 +318,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (void)showWindows{
     [super showWindows];
     
-    // some xattr setup has to be done after the window is on-screen
-    NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
-    
-    NSArray *groupsToExpand = [xattrDefaults objectForKey:BDSKDocumentGroupsToExpandKey];
-    for (BDSKParentGroup *parent in groups) {
-        if (parent != [groups libraryParent] && (groupsToExpand == nil || [groupsToExpand containsObject:NSStringFromClass([parent class])]))
-            [groupOutlineView expandItem:parent];
-    }
-    // make sure the groups are sorted and have their sort descriptors set
-    [self sortGroupsByKey:nil];
-    
-    NSData *groupData = [xattrDefaults objectForKey:BDSKSelectedGroupsKey];
-    if ([groupData length]) {
-        NSSet *allGroups = [NSSet setWithArray:[groups allChildren]];
-        NSMutableArray *groupsToSelect = [NSMutableArray array];
-        for (BDSKGroup *group in [NSKeyedUnarchiver unarchiveObjectWithData:groupData]) {
-            if (group = [allGroups member:group])
-                [groupsToSelect addObject:group];
-        }
-        if ([groupsToSelect count])
-            [self selectGroups:groupsToSelect];
-    }
-    
-    [self selectItemsForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey defaultObject:[NSArray array]] selectLibrary:NO];
-    NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
-    [tableView setScrollPositionAsPercentage:scrollPoint];
-    
     // Get the search string keyword if available (Spotlight passes this)
     NSAppleEventDescriptor *event = [[NSAppleEventManager sharedAppleEventManager] currentAppleEvent];
     NSString *searchString = [[event descriptorForKeyword:keyAESearchText] stringValue];
@@ -370,8 +343,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             [self setSearchString:searchString];
         }
     }
-    
-    [self updatePreviews];
     
     if (docFlags.displayMigrationAlert) {
         docFlags.displayMigrationAlert = NO;
@@ -561,6 +532,32 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [documentWindow makeFirstResponder:tableView];
     
     [self startObserving];
+    
+    NSArray *groupsToExpand = [xattrDefaults objectForKey:BDSKDocumentGroupsToExpandKey];
+    for (BDSKParentGroup *parent in groups) {
+        if (parent != [groups libraryParent] && (groupsToExpand == nil || [groupsToExpand containsObject:NSStringFromClass([parent class])]))
+            [groupOutlineView expandItem:parent];
+    }
+    // make sure the groups are sorted and have their sort descriptors set
+    [self sortGroupsByKey:nil];
+    
+    NSData *groupData = [xattrDefaults objectForKey:BDSKSelectedGroupsKey];
+    if ([groupData length]) {
+        NSSet *allGroups = [NSSet setWithArray:[groups allChildren]];
+        NSMutableArray *groupsToSelect = [NSMutableArray array];
+        for (BDSKGroup *group in [NSKeyedUnarchiver unarchiveObjectWithData:groupData]) {
+            if (group = [allGroups member:group])
+                [groupsToSelect addObject:group];
+        }
+        if ([groupsToSelect count])
+            [self selectGroups:groupsToSelect];
+    }
+    
+    [self selectItemsForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey defaultObject:[NSArray array]] selectLibrary:NO];
+    NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
+    [tableView setScrollPositionAsPercentage:scrollPoint];
+    
+    [self updatePreviews];
 }
 
 - (BOOL)undoManagerShouldUndoChange:(id)sender{

@@ -268,9 +268,10 @@
                 *outError = error;
             return nil;
         }
+        
+        [doc makeWindowControllers];
     }
     
-    [doc makeWindowControllers];
     [doc showWindows];
     
     return doc;
