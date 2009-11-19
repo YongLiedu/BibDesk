@@ -448,6 +448,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (void)saveSortOrder;
 
+- (BOOL)openURL:(NSURL *)aURL;
+
 /*!
     @method     userChangedField:ofPublications:from:to:
     @abstract   Autofiles and generates citekey if we should and runs a script hook

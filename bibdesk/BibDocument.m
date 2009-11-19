@@ -2671,6 +2671,21 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 #pragma mark -
+#pragma mark Opening URLs
+
+- (BOOL)openURL:(NSURL *)aURL {
+    if ([aURL isFileURL]) {
+        NSString *searchString = @"";
+        // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
+        if ([self isDisplayingFileContentSearch])
+            searchString = [searchField stringValue];
+        return [[NSWorkspace sharedWorkspace] openURL:aURL withSearchString:searchString];
+    } else {
+        return [[NSWorkspace sharedWorkspace] openLinkedURL:aURL];
+    }
+}
+
+#pragma mark -
 #pragma mark Auto handling of changes
 
 - (NSInteger)userChangedField:(NSString *)fieldName ofPublications:(NSArray *)pubs from:(NSArray *)oldValues to:(NSArray *)newValues{

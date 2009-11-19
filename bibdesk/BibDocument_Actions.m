@@ -653,12 +653,7 @@ static BOOL changingColors = NO;
 - (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex
 {
     if ([aLink respondsToSelector:@selector(isFileURL)] && [aLink isFileURL]) {
-        NSString *searchString;
-        if([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKFileContentSearchString])
-            searchString = [searchField stringValue];
-        else
-            searchString = @"";
-        [[NSWorkspace sharedWorkspace] openURL:aLink withSearchString:searchString];
+        [self openURL:aLink];
         return YES;
     } else if ([aLink isKindOfClass:[NSString class]]) {
         BibItem *pub = [[self publications] itemForCiteKey:aLink];
@@ -680,17 +675,10 @@ static BOOL changingColors = NO;
     if (returnCode == NSAlertAlternateReturn) {
         NSURL *fileURL;
         
-        NSString *searchString;
-        // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
-        if([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKFileContentSearchString])
-            searchString = [searchField stringValue];
-        else
-            searchString = @"";
-        
         // the user said to go ahead
         for (BibItem *pub in [self selectedPublications]) {
             if (fileURL = [pub localFileURLForField:field])
-                [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:searchString];
+                [self openURL:fileURL];
         }
     }
     [field release];
@@ -863,16 +851,9 @@ static BOOL changingColors = NO;
     if (returnCode == NSAlertAlternateReturn) {
         NSArray *urls = [(NSArray *)contextInfo autorelease] ?: [self selectedFileURLs];
         
-        NSString *searchString;
-        // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
-        if([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKFileContentSearchString])
-            searchString = [searchField stringValue];
-        else
-            searchString = @"";
-        
         for (NSURL *fileURL in urls) {
             if ([fileURL isEqual:[NSNull null]] == NO) {
-                [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:searchString];
+                [self openURL:fileURL];
             }
         }
     }
