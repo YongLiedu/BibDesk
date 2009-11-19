@@ -162,16 +162,19 @@
 - (void)openDocument:(id)sender{
 
     NSStringEncoding encoding;
+    NSError *error = nil;
     for (NSURL *aURL in [self URLsFromRunningOpenPanelForTypes:[self allReadableTypesForOpenPanel] encoding:&encoding]) {
-        if (nil == [self openDocumentWithContentsOfURL:aURL encoding:encoding])
+        if (nil == [self openDocumentWithContentsOfURL:aURL encoding:encoding error:&error] && [self presentError:error] == NO)
             break;
 	}
 }
 
 - (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender{
     NSStringEncoding encoding;
+    NSError *error = nil;
     for (NSURL *aURL in [self URLsFromRunningOpenPanelForTypes:[NSArray arrayWithObject:@"bib"] encoding:&encoding]) {
-        [self openDocumentWithContentsOfURLUsingPhonyCiteKeys:aURL encoding:encoding];
+        if (nil == [self openDocumentWithContentsOfURLUsingPhonyCiteKeys:aURL encoding:encoding error:&error] && [self presentError:error] == NO)
+            break;
 	}
 }
 
@@ -210,8 +213,11 @@
     if (result == NSOKButton) {
         NSString *shellCommand = [openUsingFilterComboBox stringValue];
         NSStringEncoding encoding = [openTextEncodingPopupButton encoding];
-        for (NSURL *aURL in [oPanel URLs])
-            [self openDocumentWithContentsOfURL:aURL usingFilter:shellCommand encoding:encoding];
+        NSError *error = nil;
+        for (NSURL *aURL in [oPanel URLs]) {
+            if (nil == [self openDocumentWithContentsOfURL:aURL usingFilter:shellCommand encoding:encoding error:&error] && [self presentError:error] == NO)
+                break;
+        }
         
         NSUInteger commandIndex = [commandHistory indexOfObject:shellCommand];
         // already in the array, so move it to the head of the list
@@ -228,7 +234,7 @@
     }
 }
 
-- (id)openDocumentWithContentsOfURL:(NSURL *)fileURL encoding:(NSStringEncoding)encoding{
+- (id)openDocumentWithContentsOfURL:(NSURL *)fileURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
     NSParameterAssert(encoding != 0);
 	// first see if we already have this document open
     id doc = [self documentForURL:fileURL];
@@ -241,14 +247,16 @@
         doc = [self openUntitledDocumentAndDisplay:NO error:&error];
         
         if (nil == doc) {
-            [self presentError:error];
+            if (outError)
+                *outError = error;
             return nil;
         }
         
         NSString *type = [self typeForContentsOfURL:fileURL error:&error];
         
         if (nil == type) {
-            [self presentError:error];
+            if (outError)
+                *outError = error;
             return nil;
         }
 
@@ -256,7 +264,8 @@
         success = [doc readFromURL:fileURL ofType:type encoding:encoding error:&error];
         if (success == NO) {
             [self removeDocument:doc];
-            [self presentError:error];
+            if (outError)
+                *outError = error;
             return nil;
         }
     }
@@ -317,29 +326,28 @@
     return doc;
 }
 
-- (id)openDocumentWithContentsOfURLUsingPhonyCiteKeys:(NSURL *)fileURL encoding:(NSStringEncoding)encoding;
+- (id)openDocumentWithContentsOfURLUsingPhonyCiteKeys:(NSURL *)fileURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 {
     NSString *stringFromFile = [NSString stringWithContentsOfURL:fileURL encoding:encoding error:NULL];
     stringFromFile = [stringFromFile stringWithPhoneyCiteKeys:@"FixMe"];
     
     NSError *error;
-	BibDocument *doc = [self openUntitledBibTeXDocumentWithString:stringFromFile encoding:encoding error:&error];
-    if (nil == doc)
-        [self presentError:error];
+	BibDocument *doc = [self openUntitledBibTeXDocumentWithString:stringFromFile encoding:encoding error:outError];
     
     [doc reportTemporaryCiteKeys:@"FixMe" forNewDocument:YES];
     
     return doc;
 }
 
-- (id)openDocumentWithContentsOfURL:(NSURL *)fileURL usingFilter:(NSString *)shellCommand encoding:(NSStringEncoding)encoding;
+- (id)openDocumentWithContentsOfURL:(NSURL *)fileURL usingFilter:(NSString *)shellCommand encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 {
     NSError *error;
     NSString *fileInputString = [NSString stringWithContentsOfURL:fileURL encoding:encoding error:&error];
     BibDocument *doc = nil;
         
     if (nil == fileInputString){
-        [self presentError:error];
+        if (outError)
+            *outError = error;
     } else {
         NSString *filterOutput = [BDSKTask runShellCommand:shellCommand withInputString:fileInputString];
         
@@ -352,8 +360,8 @@
             [alert runModal];
         } else {
             doc = [self openUntitledBibTeXDocumentWithString:filterOutput encoding:NSUTF8StringEncoding error:&error];
-            if (nil == doc)
-                [self presentError:error];
+            if (nil == doc && outError)
+                *outError = error;
         }
     }    
     return doc;
@@ -446,14 +454,15 @@
 		
     NSInteger result = [self runModalOpenPanel:oPanel forTypes:[NSArray arrayWithObjects:@"txt", @"rtf", nil]];
     if(result == NSOKButton){
+        NSError *error = nil;
         for (NSURL *aURL in [oPanel URLs]) {
-            if (nil == [self openTemplateDocumentWithContentsOfURL:aURL])
+            if (nil == [self openTemplateDocumentWithContentsOfURL:aURL error:&error] && [self presentError:error] == NO)
                 break;
         }
     }
 }
 
-- (id)openTemplateDocumentWithContentsOfURL:(NSURL *)fileURL{
+- (id)openTemplateDocumentWithContentsOfURL:(NSURL *)fileURL error:(NSError **)outError{
 	// first see if we already have this document open
     id doc = [self documentForURL:fileURL];
     
@@ -463,7 +472,8 @@
         doc = [[[BDSKTemplateDocument alloc] initWithContentsOfURL:fileURL ofType:type error:&error] autorelease];
         
         if (nil == doc) {
-            [self presentError:error];
+            if (outError)
+                *outError = error;
             return nil;
         }
         

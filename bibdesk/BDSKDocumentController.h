@@ -64,13 +64,14 @@
 - (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender;
 
 /*!
-    @method     openDocumentWithContentsOfURL:encoding:
+    @method     openDocumentWithContentsOfURL:encoding:error:
     @abstract   Creates a new document with given file and string encoding.
     @discussion (comprehensive description)
     @param      fileURL The file to open
     @param      encoding File's character encoding
+    @param      outError The error when opening fails
 */
-- (id)openDocumentWithContentsOfURL:(NSURL *)fileURL encoding:(NSStringEncoding)encoding;
+- (id)openDocumentWithContentsOfURL:(NSURL *)fileURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 
 /*!
     @method     openDocumentWithContentsOfURLUsingPhonyCiteKeys:encoding:
@@ -79,8 +80,9 @@
                 A new, untitled document is created, and a warning about the invalid temporary keys is shown after opening.
     @param      fileURL The file to open
     @param      encoding File's character encoding
+    @param      outError The error when opening fails
 */
-- (id)openDocumentWithContentsOfURLUsingPhonyCiteKeys:(NSURL *)fileURL encoding:(NSStringEncoding)encoding;
+- (id)openDocumentWithContentsOfURLUsingPhonyCiteKeys:(NSURL *)fileURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 
 /*!
     @method     openDocumentWithContentsOfURL:usingFilter:encoding:
@@ -89,14 +91,15 @@
     @param      fileURL The file to open
     @param      shellCommand The shell command to use to filter the file content
     @param      encoding File's character encoding
+    @param      outError The error when opening fails
 */
-- (id)openDocumentWithContentsOfURL:(NSURL *)fileURL usingFilter:(NSString *)shellCommand encoding:(NSStringEncoding)encoding;
+- (id)openDocumentWithContentsOfURL:(NSURL *)fileURL usingFilter:(NSString *)shellCommand encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 
 - (IBAction)newTemplateDocument:(id)sender;
 
 - (IBAction)openTemplateDocument:(id)sender;
 
-- (id)openTemplateDocumentWithContentsOfURL:(NSURL *)fileURL;
+- (id)openTemplateDocumentWithContentsOfURL:(NSURL *)fileURL error:(NSError **)outError;
 
 - (void)handleWindowDidBecomeMainNotification:(NSNotification *)notification;
 
