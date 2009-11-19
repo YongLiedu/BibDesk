@@ -77,7 +77,6 @@
 #import "BDSKLinkedFile.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
-#import <FileView/FileView.h>
 #import "BDSKAppController.h"
 #import "BDSKFileContentSearchController.h"
 #import "NSEvent_BDSKExtensions.h"

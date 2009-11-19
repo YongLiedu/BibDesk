@@ -70,7 +70,6 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKNotesWindowController.h"
-#import <FileView/FileView.h>
 #import "BDSKLinkedFile.h"
 #import "BDSKEditorTableView.h"
 #import "BDSKEditorTextFieldCell.h"
