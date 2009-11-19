@@ -329,13 +329,16 @@
 
 - (id)openDocumentWithContentsOfURLUsingPhonyCiteKeys:(NSURL *)fileURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 {
-    NSString *stringFromFile = [NSString stringWithContentsOfURL:fileURL encoding:encoding error:NULL];
+    NSError *error;
+    NSString *stringFromFile = [NSString stringWithContentsOfURL:fileURL encoding:encoding error:&error];
     stringFromFile = [stringFromFile stringWithPhoneyCiteKeys:@"FixMe"];
     
-    NSError *error;
-	BibDocument *doc = [self openUntitledBibTeXDocumentWithString:stringFromFile encoding:encoding error:outError];
+	BibDocument *doc = [self openUntitledBibTeXDocumentWithString:stringFromFile encoding:encoding error:&error];
     
-    [doc reportTemporaryCiteKeys:@"FixMe" forNewDocument:YES];
+    if (doc)
+        [doc reportTemporaryCiteKeys:@"FixMe" forNewDocument:YES];
+    else if (outError)
+        *outError = error;
     
     return doc;
 }
@@ -352,17 +355,13 @@
     } else {
         NSString *filterOutput = [BDSKTask runShellCommand:shellCommand withInputString:fileInputString];
         
-        if ([NSString isEmptyString:filterOutput]){
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable To Open With Filter", @"Message in alert dialog when unable to open a document with filter")
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Unable to read the file correctly. Please ensure that the shell command specified for filtering is correct by testing it in Terminal.app.", @"Informative text in alert dialog")];
-            [alert runModal];
-        } else {
+        if ([NSString isEmptyString:filterOutput] == NO) {
             doc = [self openUntitledBibTeXDocumentWithString:filterOutput encoding:NSUTF8StringEncoding error:&error];
             if (nil == doc && outError)
                 *outError = error;
+        } else if (outError) {
+            *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentOpenError localizedDescription:NSLocalizedString(@"Unable To Open With Filter", @"Error description")];
+            [*outError setValue:NSLocalizedString(@"Unable to read the file correctly. Please ensure that the shell command specified for filtering is correct by testing it in Terminal.app.", @"Error description") forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
     }    
     return doc;
