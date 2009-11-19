@@ -592,7 +592,7 @@ static char _FVFileViewContentObservationContext;
     return _fvFlags.displayMode;
 }
 
-- (void)setDataSource:(id)obj;
+- (void)setDataSource:(id<FVFileViewDataSource>)obj;
 {
     // I was asserting these conditions, but that crashes the IB simulator if you set a datasource in IB.  Setting datasource to nil in case of failure avoids other exceptions later (notably in FVViewController).
     BOOL failed = NO;
@@ -623,7 +623,7 @@ static char _FVFileViewContentObservationContext;
     [self reloadIcons];
 }
 
-- (id)dataSource { return _dataSource; }
+- (id<FVFileViewDataSource>)dataSource { return _dataSource; }
 
 - (BOOL)isEditable 
 { 
@@ -655,12 +655,12 @@ static char _FVFileViewContentObservationContext;
     }
 }
 
-- (void)setDelegate:(id)obj;
+- (void)setDelegate:(id<FVFileViewDelegate>)obj;
 {
     _delegate = obj;
 }
 
-- (id)delegate { return _delegate; }
+- (id<FVFileViewDelegate>)delegate { return _delegate; }
 
 - (void)_setSelectionIndexes:(NSIndexSet *)indexSet {
     [self setSelectionIndexes:indexSet];
@@ -1525,7 +1525,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     // datasource URL method
     SEL URLSel = @selector(fileView:URLAtIndex:);
     id (*URLAtIndex)(id, SEL, id, NSUInteger);
-    URLAtIndex = (id (*)(id, SEL, id, NSUInteger))[_dataSource methodForSelector:URLSel];
+    URLAtIndex = (id (*)(id, SEL, id, NSUInteger))[(id)_dataSource methodForSelector:URLSel];
     
     // -[NSCFArray objectAtIndex:] (do /not/ use +[NSMutableArray instanceMethodForSelector:]!)
     SEL objectSel = @selector(objectAtIndex:);
@@ -1545,7 +1545,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     // datasource subtitle method; may result in a NULL IMP (in which case _orderedSubtitles is nil)
     SEL subtitleSel = @selector(fileView:subtitleAtIndex:);
     id (*subtitleAtIndex)(id, SEL, id, NSUInteger);
-    subtitleAtIndex = (id (*)(id, SEL, id, NSUInteger))[_dataSource methodForSelector:subtitleSel];
+    subtitleAtIndex = (id (*)(id, SEL, id, NSUInteger))[(id)_dataSource methodForSelector:subtitleSel];
     
     NSUInteger i, iMax = isBound ? [_orderedURLs count] : [_dataSource numberOfURLsInFileView:self];
     

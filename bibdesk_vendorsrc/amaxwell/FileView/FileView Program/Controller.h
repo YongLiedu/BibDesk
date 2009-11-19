@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 #import <FileView/FileView.h>
 
-@interface Controller : NSObject {
+@interface Controller : NSObject <FVFileViewDelegate, FVFileViewDataSource> {
     IBOutlet NSWindow *_window;
     IBOutlet FVFileView *_fileView;
     NSMutableArray *_filePaths;
