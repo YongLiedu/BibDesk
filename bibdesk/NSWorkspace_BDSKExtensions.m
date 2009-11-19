@@ -57,7 +57,8 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
         if( !err ) {
             info.processInfoLength = sizeof(info);
             info.processName = NULL;
-            err= GetProcessInformation(psn,&info);
+            info.processAppSpec = NULL;
+            err = GetProcessInformation(psn,&info);
         }
     } while( !err && info.processSignature != sig );
     
