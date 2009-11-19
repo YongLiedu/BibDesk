@@ -263,27 +263,27 @@ The groupedPublications array is a subset of the publications array, developed b
             [searchButtonController removeFileContentItem];
         }
         
-        if ([self hasSearchGroupsSelected] == NO)
+        BOOL isSearch = [self hasSearchGroupsSelected];
+        BOOL isWeb = [self hasWebGroupSelected];
+        
+        if (isSearch == NO)
             [self hideSearchGroupView];            
             
-        if ([self hasWebGroupSelected] == NO){
+        if (isWeb == NO)
             [self hideWebGroupView];
-        }else{
-            if ([sortKey isEqualToString:BDSKImportOrderString] == NO) {
-                newSortKey = BDSKImportOrderString;
-            }  
+        else
             [self showWebGroupView];
-        }
         
-        if ([self hasSearchGroupsSelected]) {
-            if ([sortKey isEqualToString:BDSKImportOrderString] == NO) {
-                newSortKey = BDSKImportOrderString;
-            }
+        if (isSearch)
             [self showSearchGroupView];
-        } 
     
         [tableView setAlternatingRowBackgroundColors:[NSColor alternateControlAlternatingRowBackgroundColors]];
-        [tableView insertTableColumnWithIdentifier:BDSKImportOrderString atIndex:0];
+        
+        if ([[tableView tableColumnIdentifiers] containsObject:BDSKImportOrderString] == NO) {
+            [tableView insertTableColumnWithIdentifier:BDSKImportOrderString atIndex:0];
+            if ((isSearch || isWeb) && [sortKey isEqualToString:BDSKImportOrderString] == NO)
+                newSortKey = BDSKImportOrderString;
+        }
 
     } else {
         if ([self isDisplayingSearchButtons]) {
