@@ -489,22 +489,6 @@
 	return fileExtensions;
 }
 
-- (NSString *)typeFromFileExtension:(NSString *)fileExtensionOrHFSFileType
-{
-    NSString *type = nil;
-    
-    // @@ revisit this if we compile against 10.5 SDK
-    type = [super typeFromFileExtension:fileExtensionOrHFSFileType];
-    if(type == nil){
-        type = [[BDSKTemplate defaultStyleNameForFileType:fileExtensionOrHFSFileType] valueForKey:BDSKTemplateNameString];
-    }else if ([type isEqualToString:BDSKMinimalBibTeXDocumentType]){
-        // fix of bug when reading a .bib file
-        // this is interpreted as Minimal BibTeX, even though we don't declare that as a readable type
-        type = BDSKBibTeXDocumentType;
-    }
-	return type;
-}
-
 - (Class)documentClassForType:(NSString *)documentTypeName
 {
 	Class docClass = [super documentClassForType:documentTypeName];
