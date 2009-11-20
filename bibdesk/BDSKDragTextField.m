@@ -145,13 +145,6 @@
     [super mouseDown:theEvent];
 }
 
-- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)flag {
-    if ([[self delegate] respondsToSelector:@selector(dragTextField:writeDataToPasteboard:)])
-        return NSDragOperationEvery;
-    else
-        return NSDragOperationNone;        
-}
-
 // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
 - (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:NSApp];
