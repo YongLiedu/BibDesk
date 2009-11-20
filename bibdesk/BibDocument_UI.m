@@ -175,8 +175,8 @@ enum {
     if(previewer == nil && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey]){
         previewer = [[BDSKPreviewer alloc] init];
         NSDictionary *xatrrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
-        [previewer setPDFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0]];
-        [previewer setRTFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0]];
+        [previewer setPDFScaleFactor:[xatrrDefaults doubleForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0]];
+        [previewer setRTFScaleFactor:[xatrrDefaults doubleForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0]];
         [previewer setGeneratedTypes:BDSKGeneratePDF];
         [[bottomPreviewTabView tabViewItemAtIndex:BDSKPreviewDisplayTeX] setView:[previewer pdfView]];
     }

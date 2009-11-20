@@ -67,33 +67,25 @@
 
 
 @interface NSDictionary (BDSKExtensions)
-- (CGFloat)floatForKey:(NSString *)key defaultValue:(CGFloat)defaultValue;
-- (CGFloat)floatForKey:(NSString *)key;
-- (double)doubleForKey:(NSString *)key defaultValue:(double)defaultValue;
-- (double)doubleForKey:(NSString *)key;
-- (NSPoint)pointForKey:(NSString *)key defaultValue:(NSPoint)defaultValue;
-- (NSPoint)pointForKey:(NSString *)key;
-- (NSSize)sizeForKey:(NSString *)key defaultValue:(NSSize)defaultValue;
-- (NSSize)sizeForKey:(NSString *)key;
-- (NSRect)rectForKey:(NSString *)key defaultValue:(NSRect)defaultValue;
-- (NSRect)rectForKey:(NSString *)key;
 - (BOOL)boolForKey:(NSString *)key defaultValue:(BOOL)defaultValue;
-- (BOOL)boolForKey:(NSString *)key;
 - (NSInteger)integerForKey:(NSString *)key defaultValue:(NSInteger)defaultValue;
-- (NSInteger)integerForKey:(NSString *)key;
 - (NSUInteger)unsignedIntegerForKey:(NSString *)key defaultValue:(NSUInteger)defaultValue;
-- (NSUInteger)unsignedIntegerForKey:(NSString *)key;
+- (float)floatForKey:(NSString *)key defaultValue:(float)defaultValue;
+- (double)doubleForKey:(NSString *)key defaultValue:(double)defaultValue;
+- (NSPoint)pointForKey:(NSString *)key defaultValue:(NSPoint)defaultValue;
+- (NSSize)sizeForKey:(NSString *)key defaultValue:(NSSize)defaultValue;
+- (NSRect)rectForKey:(NSString *)key defaultValue:(NSRect)defaultValue;
 @end
 
 #pragma mark -
 
 @interface NSMutableDictionary (BDSKExtensions)
 - (id)initForCaseInsensitiveKeys;
-- (void)setFloatValue:(CGFloat)value forKey:(NSString *)key;
-- (void)setDoubleValue:(double)value forKey:(NSString *)key;
+- (void)setBoolValue:(BOOL)value forKey:(NSString *)key;
 - (void)setIntegerValue:(NSInteger)value forKey:(NSString *)key;
 - (void)setUnsignedIntegerValue:(NSUInteger)value forKey:(NSString *)key;
-- (void)setBoolValue:(BOOL)value forKey:(NSString *)key;
+- (void)setFloatValue:(float)value forKey:(NSString *)key;
+- (void)setDoubleValue:(double)value forKey:(NSString *)key;
 - (void)setPointValue:(NSPoint)value forKey:(NSString *)key;
 - (void)setSizeValue:(NSSize)value forKey:(NSString *)key;
 - (void)setRectValue:(NSRect)value forKey:(NSString *)key;

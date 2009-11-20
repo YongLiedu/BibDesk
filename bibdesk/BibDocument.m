@@ -428,16 +428,16 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     // set previous splitview frames
     CGFloat fract;
-    fract = [xattrDefaults floatForKey:BDSKGroupSplitViewFractionKey defaultValue:-1.0];
+    fract = [xattrDefaults doubleForKey:BDSKGroupSplitViewFractionKey defaultValue:-1.0];
     if (fract >= 0)
         [groupSplitView setFraction:fract];
-    fract = [xattrDefaults floatForKey:BDSKMainTableSplitViewFractionKey defaultValue:-1.0];
+    fract = [xattrDefaults doubleForKey:BDSKMainTableSplitViewFractionKey defaultValue:-1.0];
     if (fract >= 0)
         [splitView setFraction:fract];
     
     [self splitViewDidResizeSubviews:nil];
     
-    docState.lastWebViewFraction = [xattrDefaults floatForKey:BDSKWebViewFractionKey defaultValue:0.0];
+    docState.lastWebViewFraction = [xattrDefaults doubleForKey:BDSKWebViewFractionKey defaultValue:0.0];
     
     [mainBox setBackgroundColor:[NSColor controlBackgroundColor]];
     
@@ -477,8 +477,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [bottomFileView setBackgroundColor:[[NSColor controlAlternatingRowBackgroundColors] lastObject]];
     [[bottomFileView enclosingScrollView] setBackgroundColor:[bottomFileView backgroundColor]];
     
-    CGFloat iconScale = [xattrDefaults floatForKey:BDSKSideFileViewIconScaleKey defaultValue:[sud floatForKey:BDSKSideFileViewIconScaleKey]];
-    FVDisplayMode displayMode = [xattrDefaults floatForKey:BDSKSideFileViewDisplayModeKey defaultValue:[sud floatForKey:BDSKSideFileViewDisplayModeKey]];
+    CGFloat iconScale = [xattrDefaults doubleForKey:BDSKSideFileViewIconScaleKey defaultValue:[sud floatForKey:BDSKSideFileViewIconScaleKey]];
+    FVDisplayMode displayMode = [xattrDefaults doubleForKey:BDSKSideFileViewDisplayModeKey defaultValue:[sud floatForKey:BDSKSideFileViewDisplayModeKey]];
     [sideFileView setDisplayMode:displayMode];
     if (displayMode == FVDisplayModeGrid) {
         if (iconScale < 0.00001)
@@ -487,7 +487,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             [sideFileView setIconScale:iconScale];
     }
 
-    iconScale = [xattrDefaults floatForKey:BDSKBottomFileViewIconScaleKey defaultValue:[sud floatForKey:BDSKBottomFileViewIconScaleKey]];
+    iconScale = [xattrDefaults doubleForKey:BDSKBottomFileViewIconScaleKey defaultValue:[sud floatForKey:BDSKBottomFileViewIconScaleKey]];
     displayMode = [xattrDefaults integerForKey:BDSKBottomFileViewDisplayModeKey defaultValue:[sud integerForKey:BDSKBottomFileViewDisplayModeKey]];
     [bottomFileView setDisplayMode:displayMode];
     if (displayMode == FVDisplayModeGrid) {
@@ -497,8 +497,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             [bottomFileView setIconScale:iconScale];
     }
     
-    [(BDSKZoomableTextView *)sidePreviewTextView setScaleFactor:[xattrDefaults floatForKey:BDSKSidePreviewScaleFactorKey defaultValue:1.0]];
-    [(BDSKZoomableTextView *)bottomPreviewTextView setScaleFactor:[xattrDefaults floatForKey:BDSKBottomPreviewScaleFactorKey defaultValue:1.0]];
+    [(BDSKZoomableTextView *)sidePreviewTextView setScaleFactor:[xattrDefaults doubleForKey:BDSKSidePreviewScaleFactorKey defaultValue:1.0]];
+    [(BDSKZoomableTextView *)bottomPreviewTextView setScaleFactor:[xattrDefaults doubleForKey:BDSKBottomPreviewScaleFactorKey defaultValue:1.0]];
     
 	// ImagePopUpButtons setup
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
@@ -672,11 +672,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [dictionary setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
         [dictionary setBoolValue:docFlags.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
         [dictionary setRectValue:[documentWindow frame] forKey:BDSKDocumentWindowFrameKey];
-        [dictionary setFloatValue:[groupSplitView fraction] forKey:BDSKGroupSplitViewFractionKey];
+        [dictionary setDoubleValue:[groupSplitView fraction] forKey:BDSKGroupSplitViewFractionKey];
         // of the 3 splitviews, the fraction of the first divider would be considered, so fallback to the fraction from the nib
         if (NO == [self hasWebGroupSelected])
-            [dictionary setFloatValue:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
-        [dictionary setFloatValue:docState.lastWebViewFraction forKey:BDSKWebViewFractionKey];
+            [dictionary setDoubleValue:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
+        [dictionary setDoubleValue:docState.lastWebViewFraction forKey:BDSKWebViewFractionKey];
         [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
         
         // we can't just use -documentStringEncoding, because that may be different for SaveTo
@@ -698,16 +698,16 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [dictionary setObject:sidePreviewDisplayTemplate forKey:BDSKSidePreviewDisplayTemplateKey];
         
         [dictionary setIntegerValue:[bottomFileView displayMode] forKey:BDSKBottomFileViewDisplayModeKey];
-        [dictionary setFloatValue:([bottomFileView displayMode] == FVDisplayModeGrid ? [bottomFileView iconScale] : 0.0) forKey:BDSKBottomFileViewIconScaleKey];
+        [dictionary setDoubleValue:([bottomFileView displayMode] == FVDisplayModeGrid ? [bottomFileView iconScale] : 0.0) forKey:BDSKBottomFileViewIconScaleKey];
         [dictionary setIntegerValue:[sideFileView displayMode] forKey:BDSKSideFileViewDisplayModeKey];
-        [dictionary setFloatValue:([sideFileView displayMode] == FVDisplayModeGrid ? [sideFileView iconScale] : 0.0) forKey:BDSKSideFileViewIconScaleKey];
+        [dictionary setDoubleValue:([sideFileView displayMode] == FVDisplayModeGrid ? [sideFileView iconScale] : 0.0) forKey:BDSKSideFileViewIconScaleKey];
         
-        [dictionary setFloatValue:[(BDSKZoomableTextView *)bottomPreviewTextView scaleFactor] forKey:BDSKBottomPreviewScaleFactorKey];
-        [dictionary setFloatValue:[(BDSKZoomableTextView *)sidePreviewTextView scaleFactor] forKey:BDSKSidePreviewScaleFactorKey];
+        [dictionary setDoubleValue:[(BDSKZoomableTextView *)bottomPreviewTextView scaleFactor] forKey:BDSKBottomPreviewScaleFactorKey];
+        [dictionary setDoubleValue:[(BDSKZoomableTextView *)sidePreviewTextView scaleFactor] forKey:BDSKSidePreviewScaleFactorKey];
         
         if(previewer){
-            [dictionary setFloatValue:[previewer PDFScaleFactor] forKey:BDSKPreviewPDFScaleFactorKey];
-            [dictionary setFloatValue:[previewer RTFScaleFactor] forKey:BDSKPreviewRTFScaleFactorKey];
+            [dictionary setDoubleValue:[previewer PDFScaleFactor] forKey:BDSKPreviewPDFScaleFactorKey];
+            [dictionary setDoubleValue:[previewer RTFScaleFactor] forKey:BDSKPreviewRTFScaleFactorKey];
         }
         
         if(fileSearchController){

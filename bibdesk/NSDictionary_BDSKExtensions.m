@@ -76,74 +76,11 @@
 // The rest of these methods are copied from NSData-OFExtensions.m
 
 // This seems more convenient than having to write your own if statement a zillion times
-- (CGFloat)floatForKey:(NSString *)key defaultValue:(CGFloat)defaultValue {
-    id value = [self objectForKey:key];
-    return [value respondsToSelector:@selector(doubleValue)] ? [value doubleValue] : defaultValue;
-}
-
-- (CGFloat)floatForKey:(NSString *)key {
-    return [self floatForKey:key defaultValue:0.0f];
-}
-
-- (double)doubleForKey:(NSString *)key defaultValue:(double)defaultValue {
-    id value = [self objectForKey:key];
-    return [value respondsToSelector:@selector(doubleValue)] ? [value doubleValue] : defaultValue;
-}
-
-- (double)doubleForKey:(NSString *)key {
-    return [self doubleForKey:key defaultValue:0.0];
-}
-
-- (NSPoint)pointForKey:(NSString *)key defaultValue:(NSPoint)defaultValue {
-    id value = [self objectForKey:key];
-    if ([value isKindOfClass:[NSString class]] && NO == [NSString isEmptyString:value])
-        return NSPointFromString(value);
-    else if ([value isKindOfClass:[NSValue class]])
-        return [value pointValue];
-    else
-        return defaultValue;
-}
-
-- (NSPoint)pointForKey:(NSString *)key {
-    return [self pointForKey:key defaultValue:NSZeroPoint];
-}
-
-- (NSSize)sizeForKey:(NSString *)key defaultValue:(NSSize)defaultValue {
-    id value = [self objectForKey:key];
-    if ([value isKindOfClass:[NSString class]] && NO == [NSString isEmptyString:value])
-        return NSSizeFromString(value);
-    else if ([value isKindOfClass:[NSValue class]])
-        return [value sizeValue];
-    else
-        return defaultValue;
-}
-
-- (NSSize)sizeForKey:(NSString *)key {
-    return [self sizeForKey:key defaultValue:NSZeroSize];
-}
-
-- (NSRect)rectForKey:(NSString *)key defaultValue:(NSRect)defaultValue {
-    id value = [self objectForKey:key];
-    if ([value isKindOfClass:[NSString class]] && NO == [NSString isEmptyString:value])
-        return NSRectFromString(value);
-    else if ([value isKindOfClass:[NSValue class]])
-        return [value rectValue];
-    else
-        return defaultValue;
-}
-
-- (NSRect)rectForKey:(NSString *)key {
-    return [self rectForKey:key defaultValue:NSZeroRect];
-}
 
 // Returns YES iff the value is YES, Y, yes, y, or 1.
 - (BOOL)boolForKey:(NSString *)key defaultValue:(BOOL)defaultValue {
     id value = [self objectForKey:key];
-    return [value isKindOfClass:[NSString class]] || [value isKindOfClass:[NSNumber class]] ? [value boolValue] : defaultValue;
-}
-
-- (BOOL)boolForKey:(NSString *)key {
-    return [self boolForKey:key defaultValue:NO];
+    return [value respondsToSelector:@selector(boolValue)] ? [value boolValue] : defaultValue;
 }
 
 // Just to make life easier
@@ -152,17 +89,49 @@
     return [value respondsToSelector:@selector(integerValue)] ? [value integerValue] : defaultValue;
 }
 
-- (NSInteger)integerForKey:(NSString *)key {
-    return [self integerForKey:key defaultValue:0];
-}
-
 - (NSUInteger)unsignedIntegerForKey:(NSString *)key defaultValue:(NSUInteger)defaultValue {
     id value = [self objectForKey:key];
     return [value respondsToSelector:@selector(unsignedIntegerValue)] ? [value unsignedIntegerValue] : [value respondsToSelector:@selector(integerValue)] ? (NSUInteger)[value integerValue] : defaultValue;
 }
 
-- (NSUInteger)unsignedIntegerForKey:(NSString *)key {
-    return [self unsignedIntegerForKey:key defaultValue:0u];
+- (float)floatForKey:(NSString *)key defaultValue:(float)defaultValue {
+    id value = [self objectForKey:key];
+    return [value respondsToSelector:@selector(floatValue)] ? [value floatValue] : defaultValue;
+}
+
+- (double)doubleForKey:(NSString *)key defaultValue:(double)defaultValue {
+    id value = [self objectForKey:key];
+    return [value respondsToSelector:@selector(doubleValue)] ? [value doubleValue] : defaultValue;
+}
+
+- (NSPoint)pointForKey:(NSString *)key defaultValue:(NSPoint)defaultValue {
+    id value = [self objectForKey:key];
+    if ([value respondsToSelector:@selector(pointValue)])
+        return [value pointValue];
+    else if ([value isKindOfClass:[NSString class]] && NO == [NSString isEmptyString:value])
+        return NSPointFromString(value);
+    else
+        return defaultValue;
+}
+
+- (NSSize)sizeForKey:(NSString *)key defaultValue:(NSSize)defaultValue {
+    id value = [self objectForKey:key];
+    if ([value respondsToSelector:@selector(sizeValue)])
+        return [value sizeValue];
+    else if ([value isKindOfClass:[NSString class]] && NO == [NSString isEmptyString:value])
+        return NSSizeFromString(value);
+    else
+        return defaultValue;
+}
+
+- (NSRect)rectForKey:(NSString *)key defaultValue:(NSRect)defaultValue {
+    id value = [self objectForKey:key];
+    if ([value respondsToSelector:@selector(rectValue)])
+        return [value rectValue];
+    else if ([value isKindOfClass:[NSString class]] && NO == [NSString isEmptyString:value])
+        return NSRectFromString(value);
+    else
+        return defaultValue;
 }
 
 @end
@@ -178,14 +147,8 @@
 
 // The rest of these methods are copied from NSMutableData-OFExtensions.m
 
-- (void)setFloatValue:(CGFloat)value forKey:(NSString *)key {
-    NSNumber *number = [[NSNumber alloc] initWithDouble:value];
-    [self setObject:number forKey:key];
-    [number release];
-}
-
-- (void)setDoubleValue:(double)value forKey:(NSString *)key {
-    NSNumber *number = [[NSNumber alloc] initWithDouble:value];
+- (void)setBoolValue:(BOOL)value forKey:(NSString *)key {
+    NSNumber *number = [[NSNumber alloc] initWithBool:value];
     [self setObject:number forKey:key];
     [number release];
 }
@@ -202,8 +165,14 @@
     [number release];
 }
 
-- (void)setBoolValue:(BOOL)value forKey:(NSString *)key {
-    NSNumber *number = [[NSNumber alloc] initWithBool:value];
+- (void)setFloatValue:(float)value forKey:(NSString *)key {
+    NSNumber *number = [[NSNumber alloc] initWithFloat:value];
+    [self setObject:number forKey:key];
+    [number release];
+}
+
+- (void)setDoubleValue:(double)value forKey:(NSString *)key {
+    NSNumber *number = [[NSNumber alloc] initWithDouble:value];
     [self setObject:number forKey:key];
     [number release];
 }
