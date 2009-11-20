@@ -561,7 +561,21 @@ enum {
         [crossref lockFocus];
         [[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
         [crossref unlockFocus];
-		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, paperclip, BDSKLocalFileString, crossref, BDSKCrossrefString, color, BDSKColorString, color, BDSKColorLabelString, nil];
+        NSImage *import = [[[NSImage alloc] initWithSize:NSMakeSize(16, 16)] autorelease];
+        [import lockFocus];
+        NSBezierPath *p = [NSBezierPath bezierPath];
+        [p moveToPoint:NSMakePoint(5.0, 13.0)];
+        [p lineToPoint:NSMakePoint(11.0, 13.0)];
+        [p lineToPoint:NSMakePoint(11.0, 8.0)];
+        [p lineToPoint:NSMakePoint(14.0, 8.0)];
+        [p lineToPoint:NSMakePoint(8.0, 2.0)];
+        [p lineToPoint:NSMakePoint(2.0, 8.0)];
+        [p lineToPoint:NSMakePoint(5.0, 8.0)];
+        [p closePath];
+        [[NSColor colorWithCalibratedWhite:0.3 alpha:1.0] setFill];
+        [p fill];
+        [import unlockFocus];
+		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, paperclip, BDSKLocalFileString, crossref, BDSKCrossrefString, color, BDSKColorString, color, BDSKColorLabelString, import, BDSKImportOrderString, nil];
 		if (paths) {
 			NSImage *image;
 			
