@@ -76,10 +76,6 @@
 // The rest of these methods are copied from NSData-OFExtensions.m
 
 // This seems more convenient than having to write your own if statement a zillion times
-- (id)objectForKey:(NSString *)key defaultObject:(id)defaultObject {
-    return [self objectForKey:key] ?: defaultObject;
-}
-
 - (CGFloat)floatForKey:(NSString *)key defaultValue:(CGFloat)defaultValue {
     id value = [self objectForKey:key];
     return [value respondsToSelector:@selector(doubleValue)] ? [value doubleValue] : defaultValue;

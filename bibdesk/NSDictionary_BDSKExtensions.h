@@ -67,7 +67,6 @@
 
 
 @interface NSDictionary (BDSKExtensions)
-- (id)objectForKey:(NSString *)key defaultObject:(id)defaultObject;
 - (CGFloat)floatForKey:(NSString *)key defaultValue:(CGFloat)defaultValue;
 - (CGFloat)floatForKey:(NSString *)key;
 - (double)doubleForKey:(NSString *)key defaultValue:(double)defaultValue;

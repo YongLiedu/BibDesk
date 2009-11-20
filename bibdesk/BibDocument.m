@@ -396,9 +396,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [groupButtonView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     
     bottomPreviewDisplay = [xattrDefaults integerForKey:BDSKBottomPreviewDisplayKey defaultValue:[sud integerForKey:BDSKBottomPreviewDisplayKey]];
-    bottomPreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKBottomPreviewDisplayTemplateKey defaultObject:[sud stringForKey:BDSKBottomPreviewDisplayTemplateKey]] retain];
+    bottomPreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKBottomPreviewDisplayTemplateKey] ?: [sud stringForKey:BDSKBottomPreviewDisplayTemplateKey] retain];
     sidePreviewDisplay = [xattrDefaults integerForKey:BDSKSidePreviewDisplayKey defaultValue:[sud integerForKey:BDSKSidePreviewDisplayKey]];
-    sidePreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKSidePreviewDisplayTemplateKey defaultObject:[sud stringForKey:BDSKSidePreviewDisplayTemplateKey]] retain];
+    sidePreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKSidePreviewDisplayTemplateKey] ?: [sud stringForKey:BDSKSidePreviewDisplayTemplateKey] retain];
         
     bottomTemplatePreviewMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
     [bottomTemplatePreviewMenu setDelegate:self];
@@ -456,17 +456,17 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [groupOutlineView setFontSizePreferenceKey:BDSKGroupTableViewFontSizeKey];
     
     tableColumnWidths = [[xattrDefaults objectForKey:BDSKColumnWidthsKey] retain];
-    [tableView setupTableColumnsWithIdentifiers:[xattrDefaults objectForKey:BDSKShownColsNamesKey defaultObject:[sud objectForKey:BDSKShownColsNamesKey]]];
-    sortKey = [[xattrDefaults objectForKey:BDSKDefaultSortedTableColumnKey defaultObject:[sud objectForKey:BDSKDefaultSortedTableColumnKey]] retain];
+    [tableView setupTableColumnsWithIdentifiers:[xattrDefaults objectForKey:BDSKShownColsNamesKey] ?: [sud objectForKey:BDSKShownColsNamesKey]];
+    sortKey = [[xattrDefaults objectForKey:BDSKDefaultSortedTableColumnKey] ?: [sud objectForKey:BDSKDefaultSortedTableColumnKey] retain];
     previousSortKey = [sortKey retain];
     docFlags.sortDescending = [xattrDefaults  boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey defaultValue:[sud boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey]];
     docFlags.previousSortDescending = docFlags.sortDescending;
     [tableView setHighlightedTableColumn:[tableView tableColumnWithIdentifier:sortKey]];
     
     [sortGroupsKey autorelease];
-    sortGroupsKey = [[xattrDefaults objectForKey:BDSKSortGroupsKey defaultObject:[sud objectForKey:BDSKSortGroupsKey]] retain];
+    sortGroupsKey = [[xattrDefaults objectForKey:BDSKSortGroupsKey] ?: [sud objectForKey:BDSKSortGroupsKey] retain];
     docFlags.sortGroupsDescending = [xattrDefaults boolForKey:BDSKSortGroupsDescendingKey defaultValue:[sud boolForKey:BDSKSortGroupsDescendingKey]];
-    [self setCurrentGroupField:[xattrDefaults objectForKey:BDSKCurrentGroupFieldKey defaultObject:[sud objectForKey:BDSKCurrentGroupFieldKey]]];
+    [self setCurrentGroupField:[xattrDefaults objectForKey:BDSKCurrentGroupFieldKey] ?: [sud objectForKey:BDSKCurrentGroupFieldKey]];
     
     [tableView setDoubleAction:@selector(editPubOrOpenURLAction:)];
     NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil];
@@ -553,7 +553,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             [self selectGroups:groupsToSelect];
     }
     
-    [self selectItemsForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey defaultObject:[NSArray array]] selectLibrary:NO];
+    [self selectItemsForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey] ?: [NSArray array] selectLibrary:NO];
     NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
     [tableView setScrollPositionAsPercentage:scrollPoint];
     

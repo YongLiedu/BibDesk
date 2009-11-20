@@ -305,7 +305,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 {
     if(fileSearchController == nil){
         fileSearchController = [[BDSKFileContentSearchController alloc] initForDocument:self];
-        NSData *sortDescriptorData = [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKFileContentSearchSortDescriptorKey defaultObject:[[NSUserDefaults standardUserDefaults] dataForKey:BDSKFileContentSearchSortDescriptorKey]];
+        NSData *sortDescriptorData = [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKFileContentSearchSortDescriptorKey] ?: [[NSUserDefaults standardUserDefaults] dataForKey:BDSKFileContentSearchSortDescriptorKey];
         if(sortDescriptorData)
             [fileSearchController setSortDescriptorData:sortDescriptorData];
     }
