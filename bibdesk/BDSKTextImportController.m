@@ -1355,7 +1355,7 @@
     return [self editSelectedCellAsMacro];
 }
 
-#pragma mark BDSKCitationFormatter and TextImportItemTableView delegate
+#pragma mark BDSKCitationFormatter and BDSKTextImportItemTableView delegate
 
 - (BOOL)citationFormatter:(BDSKCitationFormatter *)formatter isValidKey:(NSString *)key {
     return [[self publications] itemForCiteKey:key] != nil;
@@ -1557,7 +1557,7 @@
 
 - (void)tableView:(NSTableView *)tv typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
     if(!searchString)
-        [statusLine setStringValue:[self tableViewIsInTemporaryTypeSelectMode:tv] ? @"Press Enter to set or Tab to cancel." : @""]; // resets the status line to its default value
+        [statusLine setStringValue:[(BDSKTextImportItemTableView *)tv isInTemporaryTypeSelectMode] ? @"Press Enter to set or Tab to cancel." : @""]; // resets the status line to its default value
     else
         [statusLine setStringValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Finding field:", @"Status message"), [searchString fieldName]]];
 }
@@ -1570,43 +1570,18 @@
     return fields;
 }
 
-- (void)tableViewStartTemporaryTypeSelectMode:(NSTableView *)tv {
-    if (temporaryTypeSelectMode)
-        return;
-    temporaryTypeSelectMode = YES;
-    savedFirstResponder = [[self window] firstResponder];
-    if ([savedFirstResponder isKindOfClass:[NSTextView class]] && [(NSTextView *)savedFirstResponder isFieldEditor]) {
-        savedFirstResponder = (NSResponder *)[(NSTextView *)savedFirstResponder delegate];
-    }
-    [[self window] makeFirstResponder:itemTableView];
-    if ([itemTableView selectedRow] == -1 && [itemTableView numberOfRows] > 0)
-        [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+- (void)tableViewDidBeginTemporaryTypeSelectMode:(NSTableView *)tv {
     [statusLine setStringValue:NSLocalizedString(@"Start typing to select a field. Press Enter to set or Tab to cancel.", @"Status message")];
 }
 
-- (void)tableView:(NSTableView *)tv endTemporaryTypeSelectModeAndSet:(BOOL)set edit:(BOOL)edit{
-    if (temporaryTypeSelectMode == NO)
-        return;
-    temporaryTypeSelectMode = NO;
-    if (edit == NO)
-        [[self window] makeFirstResponder:savedFirstResponder];
-    savedFirstResponder = nil;
-    if (set)
-        [self addTextToCurrentFieldAction:itemTableView];
-    if (edit) {
-        NSInteger row = [itemTableView selectedRow];
-        if (row != -1)
-            [itemTableView editColumn:2 row:row withEvent:nil select:YES];
-    }
+- (void)tableViewDidEndTemporaryTypeSelectMode:(NSTableView *)tv {
     [statusLine setStringValue:@""];
 }
 
-- (BOOL)tableViewIsInTemporaryTypeSelectMode:(NSTableView *)tv {
-    return temporaryTypeSelectMode;
-}
-
-- (BOOL)tableView:(NSTableView *)tView addCurrentSelectionToFieldAtIndex:(NSUInteger)idx {
-    return [self addCurrentSelectionToFieldAtIndex:idx];
+- (BOOL)tableView:(NSTableView *)tView performActionForRow:(NSInteger)row {
+    if (row != -1)
+        return [self addCurrentSelectionToFieldAtIndex:row];
+    return NO;
 }
 
 #pragma mark Splitview delegate methods
@@ -1828,7 +1803,7 @@
 
 #pragma mark -
 
-@implementation TextImportItemTableView
+@implementation BDSKTextImportItemTableView
 
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent{
     
@@ -1840,30 +1815,31 @@
         if (c >= '0' && c <= '9') {
         
             NSUInteger idx = c == '0' ? 9 : (NSUInteger)(c - '1');
-            BOOL rv = YES;
             if (flags & NSAlternateKeyMask)
                 idx += 10;
-            if ([[self delegate] tableView:self addCurrentSelectionToFieldAtIndex:idx] == NO) {
-                NSBeep();
-                rv = NO;
-            }
-            if ([[self delegate] tableViewIsInTemporaryTypeSelectMode:self])
-                [[self delegate] tableView:self endTemporaryTypeSelectModeAndSet:NO edit:NO];
+            BOOL rv = [self performActionForRow:idx];
+            if (temporaryTypeSelectMode)
+                [self endTemporaryTypeSelectMode];
             return rv;
         
-        } else if ([[self delegate] tableViewIsInTemporaryTypeSelectMode:self]) {
+        } else if (temporaryTypeSelectMode) {
         
             if (c == NSTabCharacter || c == 0x001b) {
-                [[self delegate] tableView:self endTemporaryTypeSelectModeAndSet:NO edit:YES];
-                return YES;
+                [self endTemporaryTypeSelectMode];
             } else if (c == NSCarriageReturnCharacter || c == NSEnterCharacter || c == NSNewlineCharacter) {
-                [[self delegate] tableView:self endTemporaryTypeSelectModeAndSet:YES edit:YES];
+                [self endTemporaryTypeSelectMode];
+                [self performActionForRow:[self selectedRow]];
+            }
+            if (temporaryTypeSelectMode == NO) {
+                NSInteger row = [self selectedRow];
+                if (row != -1)
+                    [self editColumn:2 row:row withEvent:nil select:YES];
                 return YES;
             }
         
         } else if (c == '=') {
         
-            [[self delegate] tableViewStartTemporaryTypeSelectMode:self];
+            [self startTemporaryTypeSelectMode];
             return YES;
         }
     }
@@ -1879,12 +1855,13 @@
     if (fieldNameCharSet == nil) 
         fieldNameCharSet = [[[[BDSKTypeManager sharedManager] strictInvalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString] invertedSet] copy];
     
-    if ([[self delegate] tableViewIsInTemporaryTypeSelectMode:self]) {
+    if (temporaryTypeSelectMode) {
         if ((c == NSTabCharacter || c == 0x001b) && flags == 0) {
-            [[self delegate] tableView:self endTemporaryTypeSelectModeAndSet:NO edit:NO];
+            [self endTemporaryTypeSelectMode];
             return;
         } else if ((c == NSCarriageReturnCharacter || c == NSEnterCharacter || c == NSNewlineCharacter) && flags == 0) {
-            [[self delegate] tableView:self endTemporaryTypeSelectModeAndSet:YES edit:NO];
+            [self endTemporaryTypeSelectMode];
+            [self performActionForRow:[self selectedRow]];
             return;
         } else if ([[self typeSelectHelper] isTypeSelectEvent:event] == NO && 
             (c != NSDownArrowFunctionKey && c != NSUpArrowFunctionKey && c != NSHomeFunctionKey && c != NSEndFunctionKey)) {
@@ -1897,8 +1874,43 @@
     [super keyDown:event];
 }
 
+- (BOOL)isInTemporaryTypeSelectMode {
+    return temporaryTypeSelectMode;
+}
+
+- (void)startTemporaryTypeSelectMode {
+    if (temporaryTypeSelectMode)
+        return;
+    temporaryTypeSelectMode = YES;
+    savedFirstResponder = [[self window] firstResponder];
+    if ([savedFirstResponder isKindOfClass:[NSTextView class]] && [(NSTextView *)savedFirstResponder isFieldEditor])
+        savedFirstResponder = (NSResponder *)[(NSTextView *)savedFirstResponder delegate];
+    [[self window] makeFirstResponder:self];
+    if ([self selectedRow] == -1 && [self numberOfRows] > 0)
+        [self selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+    [[self delegate] tableViewDidBeginTemporaryTypeSelectMode:self];
+}
+
+- (void)endTemporaryTypeSelectMode  {
+    if (temporaryTypeSelectMode == NO)
+        return;
+    temporaryTypeSelectMode = NO;
+    [[self window] makeFirstResponder:savedFirstResponder];
+    savedFirstResponder = nil;
+    [[self delegate] tableViewDidEndTemporaryTypeSelectMode:self];
+}
+
+- (BOOL)performActionForRow:(NSInteger)row {
+    if ([[self delegate] tableView:self performActionForRow:row]) {
+        return YES;
+    } else {
+        NSBeep();
+        return NO;
+    }
+}
+
 - (BOOL)resignFirstResponder {
-    [[self delegate] tableView:self endTemporaryTypeSelectModeAndSet:NO edit:NO];
+    [self endTemporaryTypeSelectMode];
     return [super resignFirstResponder];
 }
 

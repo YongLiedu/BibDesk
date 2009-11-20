@@ -44,10 +44,9 @@
 
 @protocol BDSKTextImportItemTableViewDelegate <BDSKTableViewDelegate>
 
-- (void)tableViewStartTemporaryTypeSelectMode:(NSTableView *)tView;
-- (void)tableView:(NSTableView *)tView endTemporaryTypeSelectModeAndSet:(BOOL)set edit:(BOOL)edit;
-- (BOOL)tableViewIsInTemporaryTypeSelectMode:(NSTableView *)tView;
-- (BOOL)tableView:(NSTableView *)tView addCurrentSelectionToFieldAtIndex:(NSUInteger)idx;
+- (void)tableViewDidBeginTemporaryTypeSelectMode:(NSTableView *)tView;
+- (void)tableViewDidEndTemporaryTypeSelectMode:(NSTableView *)tView;
+- (BOOL)tableView:(NSTableView *)tView performActionForRow:(NSInteger)row;
 
 @optional
 
@@ -150,7 +149,14 @@
 
 #pragma mark -
 
-@interface TextImportItemTableView : BDSKTableView
+@interface BDSKTextImportItemTableView : BDSKTableView {
+    BOOL temporaryTypeSelectMode;
+    NSResponder *savedFirstResponder;
+}
+- (BOOL)isInTemporaryTypeSelectMode;
+- (void)startTemporaryTypeSelectMode;
+- (void)endTemporaryTypeSelectMode;
+- (BOOL)performActionForRow:(NSInteger)row;
 #if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
 - (id <BDSKTextImportItemTableViewDelegate>)delegate;
 - (void)setDelegate:(id <BDSKTextImportItemTableViewDelegate>)newDelegate;
