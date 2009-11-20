@@ -158,7 +158,7 @@
 
 - (NSUInteger)unsignedIntegerForKey:(NSString *)key defaultValue:(NSUInteger)defaultValue {
     id value = [self objectForKey:key];
-    return [value respondsToSelector:@selector(unsignedIntegerValue)] ? [value unsignedIntegerValue] : defaultValue;
+    return [value respondsToSelector:@selector(unsignedIntegerValue)] ? [value unsignedIntegerValue] : [value respondsToSelector:@selector(integerValue)] ? (NSUInteger)[value integerValue] : defaultValue;
 }
 
 - (NSUInteger)unsignedIntegerForKey:(NSString *)key {
