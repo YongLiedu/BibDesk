@@ -103,6 +103,11 @@
     [fieldsControl setFrame:fieldsFrame];
 }
 
+- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
+    [self prepare];
+    [super beginSheetModalForWindow:window modalDelegate:delegate didEndSelector:didEndSelector contextInfo:contextInfo];
+}
+
 - (IBAction)dismiss:(id)sender{
     if ([sender tag] == NSCancelButton || [objectController commitEditing]) {
         [objectController setContent:nil];

@@ -105,10 +105,11 @@
 
 #pragma mark Showing the window
 
-- (void)prepare{
+- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
     [self window]; // make sure the nib is loaded
     [self resetInfo];
     [tableView reloadData];
+    [super beginSheetModalForWindow:window modalDelegate:delegate didEndSelector:didEndSelector contextInfo:contextInfo];
 }
 
 #pragma mark Button actions
