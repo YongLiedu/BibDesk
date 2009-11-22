@@ -977,7 +977,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [super changeSaveType:sender];
 }
 
-- (void)document:(NSDocument *)doc didSave:(BOOL)didSave contextInfo:(void *)contextInfo {
+- (void)document:(NSDocument *)doc didSaveFromPanel:(BOOL)didSave contextInfo:(void *)contextInfo {
     // reset the encoding popup so we know when it wasn't shown to the user next time
     [saveTextEncodingPopupButton setEncoding:0];
     [exportSelectionCheckButton setState:NSOffState];
@@ -1001,7 +1001,34 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [invocation setArgument:&contextInfo atIndex:4];
     }
     
-    [super runModalSavePanelForSaveOperation:saveOperation delegate:self didSaveSelector:@selector(document:didSave:contextInfo:) contextInfo:invocation];
+    [super runModalSavePanelForSaveOperation:saveOperation delegate:self didSaveSelector:@selector(document:didSaveFromPanel:contextInfo:) contextInfo:invocation];
+}
+
+- (void)document:(NSDocument *)doc didSave:(BOOL)didSave contextInfo:(void *)contextInfo {
+    if (didSave) {
+        [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
+                                                     forPublications:publications
+                                                            document:self];
+    }
+    if (contextInfo != NULL) {
+        NSInvocation *invocation = [(NSInvocation *)contextInfo autorelease];
+        [invocation setArgument:&doc atIndex:2];
+        [invocation setArgument:&didSave atIndex:3];
+        [invocation invoke];
+    }
+}
+
+- (void)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
+    if (saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation) {
+        NSInvocation *invocation = nil;
+        if (delegate && didSaveSelector) {
+            invocation = [[NSInvocation invocationWithTarget:delegate selector:didSaveSelector] retain];
+            [invocation setArgument:&contextInfo atIndex:4];
+        }
+        [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation delegate:self didSaveSelector:@selector(document:didSave:contextInfo:) contextInfo:invocation];
+    } else {
+        [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
+    }
 }
 
 - (BOOL)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError{
@@ -1049,10 +1076,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forEncoding:encoding];
         
     }else if(saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation){
-        [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
-                                                     forPublications:publications
-                                                            document:self];
-        
         // rebuild metadata cache for this document whenever we save
         NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
         NSDictionary *info;
