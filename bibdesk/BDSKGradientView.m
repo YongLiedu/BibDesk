@@ -38,68 +38,37 @@
 
 #import "BDSKGradientView.h"
 
-@interface BDSKGradientView (Private)
-
-- (void)setDefaultColors;
-
-@end
 
 @implementation BDSKGradientView
 
-- (id)initWithFrame:(NSRect)frame
-{
-    self = [super initWithFrame:frame];
-    [self setDefaultColors];
+- (id)initWithFrame:(NSRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        gradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.65 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.8 alpha:1.0]];
+    }
     return self;
 }
 
-- (void)dealloc
-{
-    [lowerColor release];
-    [upperColor release];
+- (void)dealloc {
+    [gradient release];
     [super dealloc];
 }
 
 // fill entire view, not just the (possibly clipped) aRect
 
-- (void)drawRect:(NSRect)aRect
-{
-    NSGradient *gradient = [[[NSGradient alloc] initWithStartingColor:[self lowerColor] endingColor:[self upperColor]] autorelease];
+- (void)drawRect:(NSRect)aRect {
     [gradient drawInRect:[self bounds] angle:90.0];
 }
 
-- (void)setLowerColor:(NSColor *)color
-{
-    if (lowerColor != color) {
-        [lowerColor release];
-        lowerColor = [color retain];
+- (void)setGradient:(NSGradient *)newGradient {
+    if (gradient != newGradient) {
+        [gradient release];
+        gradient = [newGradient retain];
     }
 }
 
-- (void)setUpperColor:(NSColor *)color
-{
-    if (upperColor != color) {
-        [upperColor release];
-        upperColor = [color retain];
-    }
-}    
-
-- (NSColor *)lowerColor { return lowerColor; }
-- (NSColor *)upperColor { return upperColor; }
+- (NSGradient *)gradient { return gradient; }
 
 // required in order for redisplay to work properly with the controls
 - (BOOL)isOpaque{  return YES; }
-- (BOOL)isFlipped { return NO; }
-
-@end
-
-@implementation BDSKGradientView (Private)
-
-// provides an example implementation
-- (void)setDefaultColors
-{
-    [self setLowerColor:[NSColor colorWithCalibratedWhite:0.65 alpha:1.0]];
-    [self setUpperColor:[NSColor colorWithCalibratedWhite:0.8 alpha:1.0]];
-}
 
 @end
