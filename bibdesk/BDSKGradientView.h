@@ -42,15 +42,10 @@
 @interface BDSKGradientView : NSView
 {
     @private
-    NSColor *lowerColor;
-    NSColor *upperColor;
+    NSGradient *gradient;
 }
 
-- (void)setLowerColor:(NSColor *)color;
-- (void)setUpperColor:(NSColor *)color;
-
-// for subclassers
-- (NSColor *)lowerColor;
-- (NSColor *)upperColor;
+- (void)setGradient:(NSGradient *)newGradient;
+- (NSGradient *)gradient;
 
 @end
