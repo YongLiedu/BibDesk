@@ -1556,10 +1556,12 @@
 #pragma mark || Methods to support the type-select selector.
 
 - (void)tableView:(NSTableView *)tv typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
-    if(!searchString)
-        [statusLine setStringValue:[(BDSKTextImportItemTableView *)tv isInTemporaryTypeSelectMode] ? @"Press Enter to set or Tab to cancel." : @""]; // resets the status line to its default value
-    else
+    if (searchString)
         [statusLine setStringValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Finding field:", @"Status message"), [searchString fieldName]]];
+    else if ([(BDSKTextImportItemTableView *)tv isInTemporaryTypeSelectMode])
+        [statusLine setStringValue:NSLocalizedString(@"Press Enter to set or Tab to cancel.", @"Status message")];
+    else
+        [statusLine setStringValue:@""];
 }
 
 - (void)tableView:(NSTableView *)tv typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString{
@@ -1570,12 +1572,11 @@
     return fields;
 }
 
-- (void)tableViewDidBeginTemporaryTypeSelectMode:(NSTableView *)tv {
-    [statusLine setStringValue:NSLocalizedString(@"Start typing to select a field. Press Enter to set or Tab to cancel.", @"Status message")];
-}
-
-- (void)tableViewDidEndTemporaryTypeSelectMode:(NSTableView *)tv {
-    [statusLine setStringValue:@""];
+- (void)tableViewDidChangeTemporaryTypeSelectMode:(NSTableView *)tv {
+    if ([(BDSKTextImportItemTableView *)tv isInTemporaryTypeSelectMode])
+        [statusLine setStringValue:NSLocalizedString(@"Start typing to select a field. Press Enter to set or Tab to cancel.", @"Status message")];
+    else
+        [statusLine setStringValue:@""];
 }
 
 - (BOOL)tableView:(NSTableView *)tView performActionForRow:(NSInteger)row {
@@ -1888,7 +1889,7 @@
     [[self window] makeFirstResponder:self];
     if ([self selectedRow] == -1 && [self numberOfRows] > 0)
         [self selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
-    [[self delegate] tableViewDidBeginTemporaryTypeSelectMode:self];
+    [[self delegate] tableViewDidChangeTemporaryTypeSelectMode:self];
 }
 
 - (void)endTemporaryTypeSelectMode  {
@@ -1897,7 +1898,7 @@
     temporaryTypeSelectMode = NO;
     [[self window] makeFirstResponder:savedFirstResponder];
     savedFirstResponder = nil;
-    [[self delegate] tableViewDidEndTemporaryTypeSelectMode:self];
+    [[self delegate] tableViewDidChangeTemporaryTypeSelectMode:self];
 }
 
 - (BOOL)performActionForRow:(NSInteger)row {

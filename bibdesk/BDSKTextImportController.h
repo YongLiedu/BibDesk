@@ -43,8 +43,7 @@
 #import "BDSKCitationFormatter.h"
 
 @protocol BDSKTextImportItemTableViewDelegate <BDSKTableViewDelegate>
-- (void)tableViewDidBeginTemporaryTypeSelectMode:(NSTableView *)tView;
-- (void)tableViewDidEndTemporaryTypeSelectMode:(NSTableView *)tView;
+- (void)tableViewDidChangeTemporaryTypeSelectMode:(NSTableView *)tView;
 - (BOOL)tableView:(NSTableView *)tView performActionForRow:(NSInteger)row;
 @end
 
