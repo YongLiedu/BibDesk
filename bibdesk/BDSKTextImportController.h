@@ -43,17 +43,9 @@
 #import "BDSKCitationFormatter.h"
 
 @protocol BDSKTextImportItemTableViewDelegate <BDSKTableViewDelegate>
-
 - (void)tableViewDidBeginTemporaryTypeSelectMode:(NSTableView *)tView;
 - (void)tableViewDidEndTemporaryTypeSelectMode:(NSTableView *)tView;
 - (BOOL)tableView:(NSTableView *)tView performActionForRow:(NSInteger)row;
-
-@optional
-
-- (BOOL)tableView:(NSTableView *)tView textViewShouldLinkKeys:(NSTextView *)textView;
-- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)textView isValidKey:(NSString *)key;
-- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(NSUInteger)charIndex;
-
 @end
 
 #pragma mark -

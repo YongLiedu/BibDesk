@@ -39,14 +39,6 @@
 #import <Cocoa/Cocoa.h>
 
 
-@protocol BDSKEditorTableViewDelegate <NSTableViewDelegate>
-@optional
-- (BOOL)tableView:(NSTableView *)aTableView textViewShouldLinkKeys:(NSTextView *)textView forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row;
-- (BOOL)tableView:(NSTableView *)aTableView textView:(NSTextView *)textView isValidKey:(NSString *)key forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row;
-- (BOOL)tableView:(NSTableView *)aTableView textView:(NSTextView *)textView clickedOnLink:(id)link atIndex:(NSUInteger)charIndex forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row;
-@end
-
-
 @interface BDSKEditorTableView : NSTableView {
     BOOL endEditing;
 }

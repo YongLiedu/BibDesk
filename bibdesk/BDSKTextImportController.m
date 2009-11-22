@@ -1361,16 +1361,16 @@
     return [[self publications] itemForCiteKey:key] != nil;
 }
 
-- (BOOL)tableView:(NSTableView *)tView textViewShouldLinkKeys:(NSTextView *)textView {
-    NSInteger row = [tView editedRow];
-    return row != -1 && [[fields objectAtIndex:row] isCitationField];
+- (BOOL)control:(NSControl *)control textViewShouldLinkKeys:(NSTextView *)textView {
+    NSInteger row = [itemTableView editedRow];
+    return control == itemTableView && row != -1 && [[fields objectAtIndex:row] isCitationField];
 }
 
-- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)textView isValidKey:(NSString *)key {
-    return [[self publications] itemForCiteKey:key] != nil;
+- (BOOL)control:(NSControl *)control textView:(NSTextView *)textView isValidKey:(NSString *)key {
+    return control == itemTableView && [[self publications] itemForCiteKey:key] != nil;
 }
 
-- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex {
+- (BOOL)control:(NSControl *)control textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex {
     // we don't open the linked item from the text import sheet
     return NO;
 }
@@ -1919,18 +1919,6 @@
     [aTypeSelectHelper setCyclesSimilarResults:YES];
     [self setTypeSelectHelper:aTypeSelectHelper];
     [aTypeSelectHelper release];
-}
-
-- (BOOL)textViewShouldLinkKeys:(NSTextView *)textView{
-    return [[self delegate] tableView:self textViewShouldLinkKeys:textView];
-}
-
-- (BOOL)textView:(NSTextView *)textView isValidKey:(NSString *)key{
-    return [[self delegate] tableView:self textView:textView isValidKey:key];
-}
-
-- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex{
-    return [[self delegate] tableView:self textView:aTextView clickedOnLink:aLink atIndex:charIndex];
 }
 
 #pragma mark Delegate and DataSource
