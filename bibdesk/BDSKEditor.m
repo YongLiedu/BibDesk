@@ -2021,7 +2021,12 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification{
-	id control = [aNotification object];
+    if (editorFlags.isEditing) {
+        [[self document] objectDidEndEditing:self];
+        editorFlags.isEditing = NO;
+    }
+	
+    id control = [aNotification object];
 	
     if (control == tableView) {
         
@@ -2042,10 +2047,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             [self updateCiteKeyDuplicateWarning];
             
         }
-    }
-    if (editorFlags.isEditing) {
-        [[self document] objectDidEndEditing:self];
-        editorFlags.isEditing = NO;
     }
 }
 
@@ -2143,6 +2144,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 // sent by the textViews
 - (void)textDidEndEditing:(NSNotification *)aNotification{
+    if (editorFlags.isEditing) {
+        [[self document] objectDidEndEditing:self];
+        editorFlags.isEditing = NO;
+    }
     
     NSString *field = nil;
     if(currentEditedView == notesView)
@@ -2165,10 +2170,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         NSParameterAssert([self validateCurrentEditedView]);
         currentEditedView = nil;
         [self setPreviousValueForCurrentEditedNotesView:nil];
-    }
-    if (editorFlags.isEditing) {
-        [[self document] objectDidEndEditing:self];
-        editorFlags.isEditing = NO;
     }
 }
 

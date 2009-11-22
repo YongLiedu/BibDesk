@@ -427,7 +427,7 @@ static BOOL (*original_makeFirstResponder)(id, SEL, id) = NULL;
 }
 
 + (void)load {
-    original_makeFirstResponder = (typeof(original_makeFirstResponder))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(makeFirstResponder:), @selector(replacement_makeFirstResponder:));
+    //original_makeFirstResponder = (typeof(original_makeFirstResponder))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(makeFirstResponder:), @selector(replacement_makeFirstResponder:));
 }
 
 @end
