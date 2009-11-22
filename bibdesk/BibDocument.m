@@ -1005,13 +1005,53 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 - (void)document:(NSDocument *)doc didSave:(BOOL)didSave contextInfo:(void *)contextInfo {
+    NSDictionary *info = [(id)contextInfo autorelease];
+    NSURL *absoluteURL = [info objectForKey:@"URL"];
+    NSSaveOperationType saveOperation = [[info objectForKey:@"saveOperation"] unsignedIntegerValue];
+    NSString *typeName = [info objectForKey:@"typeName"];
+    NSInvocation *invocation = [info objectForKey:@"callback"];
+    
     if (didSave) {
-        [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
-                                                     forPublications:publications
-                                                            document:self];
+        if(saveOperation == NSSaveToOperation){
+            // write template accessory files if necessary
+            BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:typeName];
+            if(selectedTemplate){
+                NSURL *destDirURL = [absoluteURL URLByDeletingLastPathComponent];
+                for (NSURL *accessoryURL in [selectedTemplate accessoryFileURLs])
+                    [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
+            }
+            
+        } else if (saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation) {
+            [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
+                                                         forPublications:publications
+                                                                document:self];
+            
+            // rebuild metadata cache for this document whenever we save
+            NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
+            NSDictionary *cacheInfo;
+            BOOL update = (saveOperation == NSSaveOperation); // for saveTo we should update all items, as our path changes
+            
+            for (BibItem *anItem in [self publications]) {
+                NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+                @try {
+                    if(cacheInfo = [anItem metadataCacheInfoForUpdate:update])
+                        [pubsInfo addObject:cacheInfo];
+                }
+                @catch (id e) { @throw(e); }
+                @finally { [pool release]; }
+            }
+            
+            NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:pubsInfo, @"publications", absoluteURL, @"fileURL", nil];
+            [pubsInfo release];
+            [[BDSKMetadataCacheManager sharedManager] rebuildMetadataCache:cacheInfo];
+            [infoDict release];
+            
+            // save window setup to extended attributes, so it is set also if we use saveAs
+            [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forEncoding:[self documentStringEncoding]];
+        }
     }
-    if (contextInfo != NULL) {
-        NSInvocation *invocation = [(NSInvocation *)contextInfo autorelease];
+    
+    if (invocation) {
         [invocation setArgument:&doc atIndex:2];
         [invocation setArgument:&didSave atIndex:3];
         [invocation invoke];
@@ -1019,16 +1059,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 - (void)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
-    if (saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation) {
-        NSInvocation *invocation = nil;
-        if (delegate && didSaveSelector) {
-            invocation = [[NSInvocation invocationWithTarget:delegate selector:didSaveSelector] retain];
-            [invocation setArgument:&contextInfo atIndex:4];
-        }
-        [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation delegate:self didSaveSelector:@selector(document:didSave:contextInfo:) contextInfo:invocation];
-    } else {
-        [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
+    NSInvocation *invocation = nil;
+    if (delegate && didSaveSelector) {
+        invocation = [NSInvocation invocationWithTarget:delegate selector:didSaveSelector];
+        [invocation setArgument:&contextInfo atIndex:4];
     }
+    NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:absoluteURL, @"URL", typeName, @"typeName", [NSNumber numberWithUnsignedInteger:saveOperation], @"saveOperation", invocation, @"callback", nil];
+    [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation delegate:self didSaveSelector:@selector(document:didSave:contextInfo:) contextInfo:info];
 }
 
 - (BOOL)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError{
@@ -1063,41 +1100,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         return NO;
     
     if(saveOperation == NSSaveToOperation){
-        // write template accessory files if necessary
-        BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:typeName];
-        if(selectedTemplate){
-            NSURL *destDirURL = [absoluteURL URLByDeletingLastPathComponent];
-            for (NSURL *accessoryURL in [selectedTemplate accessoryFileURLs])
-                [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
-        }
-        
         // save our window setup if we export to BibTeX
         if([[self class] isNativeType:typeName] || [typeName isEqualToString:BDSKMinimalBibTeXDocumentType])
             [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forEncoding:encoding];
-        
-    }else if(saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation){
-        // rebuild metadata cache for this document whenever we save
-        NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
-        NSDictionary *info;
-        BOOL update = (saveOperation == NSSaveOperation); // for saveTo we should update all items, as our path changes
-        
-        for (BibItem *anItem in [self publications]) {
-            NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-            @try {
-                if(info = [anItem metadataCacheInfoForUpdate:update])
-                    [pubsInfo addObject:info];
-            }
-            @catch (id e) { @throw(e); }
-            @finally { [pool release]; }
-        }
-        
-        NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:pubsInfo, @"publications", absoluteURL, @"fileURL", nil];
-        [pubsInfo release];
-        [[BDSKMetadataCacheManager sharedManager] rebuildMetadataCache:infoDict];
-        [infoDict release];
-        
-        // save window setup to extended attributes, so it is set also if we use saveAs
-        [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forEncoding:[self documentStringEncoding]];
     }
     
     return YES;
