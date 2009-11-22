@@ -564,17 +564,18 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
                 return;
             NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
             [publication removeObjectFromFilesAtIndex:anIndex];
+            [publication insertObject:aFile inFilesAtIndex:anIndex];
+            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
             if (oldURL)
                 [[self document] userRemovedURL:oldURL forPublication:publication];
             [oldURL release];
-            [publication insertObject:aFile inFilesAtIndex:anIndex];
             [[self document] userAddedURL:aURL forPublication:publication];
             if (shouldAutoFile)
                 [publication autoFileLinkedFile:aFile];
         } else {
             [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
+            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
         }
-        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     }        
 }
 
@@ -636,16 +637,16 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
                 return;
             NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
             [publication removeObjectFromFilesAtIndex:anIndex];
+            [publication insertObject:aFile inFilesAtIndex:anIndex];
             if (oldURL)
                 [[self document] userRemovedURL:oldURL forPublication:publication];
             [oldURL release];
-            [publication insertObject:aFile inFilesAtIndex:anIndex];
             [[self document] userAddedURL:aURL forPublication:publication];
             [publication autoFileLinkedFile:aFile];
         } else {
             [publication addFileForURL:aURL autoFile:NO runScriptHook:YES];
+            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
         }
-        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     }        
 }
 
@@ -729,8 +730,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         [addedFields removeObject:oldField];
         [tabView selectFirstTabViewItem:nil];
         [publication setField:oldField toValue:nil];
-        [self userChangedField:oldField from:oldValue to:@""];
         [[self undoManager] setActionName:NSLocalizedString(@"Remove Field", @"Undo action name")];
+        [self userChangedField:oldField from:oldValue to:@""];
     }
 }
 
@@ -786,9 +787,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         [tabView selectFirstTabViewItem:nil];
         [publication setField:oldField toValue:nil];
         [publication setField:newField toValue:oldValue];
+        [[self undoManager] setActionName:NSLocalizedString(@"Change Field Name", @"Undo action name")];
         autoGenerateStatus = [self userChangedField:oldField from:oldValue to:@""];
         [self userChangedField:newField from:@"" to:oldValue didAutoGenerate:autoGenerateStatus];
-        [[self undoManager] setActionName:NSLocalizedString(@"Change Field Name", @"Undo action name")];
         [self setKeyField:newField];
     }
 }
@@ -1039,8 +1040,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 		
 	if(newRating != oldRating) {
 		[publication setField:field toRatingValue:newRating];
-        [self userChangedField:field from:[NSString stringWithFormat:@"%ld", (long)oldRating] to:[NSString stringWithFormat:@"%ld", (long)newRating]];
 		[[self undoManager] setActionName:NSLocalizedString(@"Change Rating", @"Undo action name")];
+        [self userChangedField:field from:[NSString stringWithFormat:@"%ld", (long)oldRating] to:[NSString stringWithFormat:@"%ld", (long)newRating]];
 	}
 }
 
@@ -1056,6 +1057,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         if(newState == oldState) return;
         
         [publication setField:field toTriStateValue:newState];
+        [[self undoManager] setActionName:NSLocalizedString(@"Change Flag", @"Undo action name")];
         [self userChangedField:field from:[NSString stringWithTriStateValue:oldState] to:[NSString stringWithTriStateValue:newState]];
     }else{
         BOOL oldBool = [publication boolValueOfField:field];
@@ -1064,9 +1066,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         if(newBool == oldBool) return;    
         
         [publication setField:field toBoolValue:newBool];
+        [[self undoManager] setActionName:NSLocalizedString(@"Change Flag", @"Undo action name")];
         [self userChangedField:field from:[NSString stringWithBool:oldBool] to:[NSString stringWithBool:newBool]];
     }
-    [[self undoManager] setActionName:NSLocalizedString(@"Change Flag", @"Undo action name")];
 	
 }
 
@@ -1574,10 +1576,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             (aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication])) {
             NSURL *oldURL = [[[publication objectInFilesAtIndex:idx] URL] retain];
             [publication removeObjectFromFilesAtIndex:idx];
+            [publication insertObject:aFile inFilesAtIndex:idx];
             if (oldURL)
                 [[self document] userRemovedURL:oldURL forPublication:publication];
             [oldURL release];
-            [publication insertObject:aFile inFilesAtIndex:idx];
             [[self document] userAddedURL:aURL forPublication:publication];
             if (([NSEvent standardModifierFlags] & NSCommandKeyMask) == 0)
                 [publication autoFileLinkedFile:aFile];
@@ -2033,9 +2035,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         if(editorFlags.isEditable && [newKey isEqualToString:oldKey] == NO){
             [publication setCiteKey:newKey];
             
-            [self userChangedField:BDSKCiteKeyString from:oldKey to:newKey];
-            
             [[self undoManager] setActionName:NSLocalizedString(@"Change Cite Key", @"Undo action name")];
+            
+            [self userChangedField:BDSKCiteKeyString from:oldKey to:newKey];
             
             [self updateCiteKeyDuplicateWarning];
             
@@ -2053,10 +2055,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [[fieldName retain] autorelease];
     
     [publication setField:fieldName toValue:value];
-    
-    [self userChangedField:fieldName from:oldValue to:value];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+    
+    [self userChangedField:fieldName from:oldValue to:value];
 }
 
 - (NSInteger)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue didAutoGenerate:(NSInteger)mask{

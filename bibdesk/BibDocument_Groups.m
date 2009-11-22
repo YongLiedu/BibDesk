@@ -1369,9 +1369,9 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     }
 	
 	if(count > 0){
+        [self userChangedField:field ofPublications:changedPubs from:oldValues to:newValues];
         if([changedPubs count])
-            [self userChangedField:field ofPublications:changedPubs from:oldValues to:newValues];
-		[[self undoManager] setActionName:NSLocalizedString(@"Add To Group", @"Undo action name")];
+            [[self undoManager] setActionName:NSLocalizedString(@"Add To Group", @"Undo action name")];
     }
     
     return YES;
@@ -1505,9 +1505,9 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	}
 	
 	if(count > 0){
+        [[self undoManager] setActionName:NSLocalizedString(@"Rename Group", @"Undo action name")];
         if([changedPubs count])
             [self userChangedField:field ofPublications:changedPubs from:oldValues to:newValues];
-        [[self undoManager] setActionName:NSLocalizedString(@"Rename Group", @"Undo action name")];
     }
     
     return YES;

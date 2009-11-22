@@ -118,8 +118,8 @@
 			NSInteger newRating = [object integerValue];
 			if(newRating != oldRating) {
 				[pub setField:tcID toRatingValue:newRating];
-                [self userChangedField:tcID ofPublications:[NSArray arrayWithObject:pub] from:[NSArray arrayWithObject:[NSString stringWithFormat:@"%ld", (long)oldRating]] to:[NSArray arrayWithObject:[NSString stringWithFormat:@"%ld", (long)newRating]]];
 				[[pub undoManager] setActionName:NSLocalizedString(@"Change Rating", @"Undo action name")];
+                [self userChangedField:tcID ofPublications:[NSArray arrayWithObject:pub] from:[NSArray arrayWithObject:[NSString stringWithFormat:@"%ld", (long)oldRating]] to:[NSArray arrayWithObject:[NSString stringWithFormat:@"%ld", (long)newRating]]];
 			}
 		}else if([tcID isBooleanField]){
 			BibItem *pub = [shownPublications objectAtIndex:row];
@@ -127,8 +127,8 @@
 			NSCellStateValue newStatus = [object integerValue];
 			if(newStatus != oldStatus) {
 				[pub setField:tcID toBoolValue:newStatus];
-                [self userChangedField:tcID ofPublications:[NSArray arrayWithObject:pub] from:[NSArray arrayWithObject:[NSString stringWithBool:oldStatus]] to:[NSArray arrayWithObject:[NSString stringWithBool:newStatus]]];
 				[[pub undoManager] setActionName:NSLocalizedString(@"Change Check Box", @"Undo action name")];
+                [self userChangedField:tcID ofPublications:[NSArray arrayWithObject:pub] from:[NSArray arrayWithObject:[NSString stringWithBool:oldStatus]] to:[NSArray arrayWithObject:[NSString stringWithBool:newStatus]]];
 			}
 		}else if([tcID isTriStateField]){
 			BibItem *pub = [shownPublications objectAtIndex:row];
@@ -136,8 +136,8 @@
 			NSCellStateValue newStatus = [object integerValue];
 			if(newStatus != oldStatus) {
 				[pub setField:tcID toTriStateValue:newStatus];
-                [self userChangedField:tcID ofPublications:[NSArray arrayWithObject:pub] from:[NSArray arrayWithObject:[NSString stringWithTriStateValue:oldStatus]] to:[NSArray arrayWithObject:[NSString stringWithTriStateValue:newStatus]]];
 				[[pub undoManager] setActionName:NSLocalizedString(@"Change Check Box", @"Undo action name")];
+                [self userChangedField:tcID ofPublications:[NSArray arrayWithObject:pub] from:[NSArray arrayWithObject:[NSString stringWithTriStateValue:oldStatus]] to:[NSArray arrayWithObject:[NSString stringWithTriStateValue:newStatus]]];
 			}
 		}
 	}
@@ -1826,10 +1826,10 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             (aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication])) {
             NSURL *oldURL = [[[publication objectInFilesAtIndex:idx] URL] retain];
             [publication removeObjectFromFilesAtIndex:idx];
+            [publication insertObject:aFile inFilesAtIndex:idx];
             if (oldURL)
                 [self userRemovedURL:oldURL forPublication:publication];
             [oldURL release];
-            [publication insertObject:aFile inFilesAtIndex:idx];
             [self userAddedURL:aURL forPublication:publication];
             if (([NSEvent standardModifierFlags] & NSCommandKeyMask) == 0)
                 [publication autoFileLinkedFile:aFile];

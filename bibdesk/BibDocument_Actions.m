@@ -1062,17 +1062,18 @@ static BOOL changingColors = NO;
                 return;
             NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
             [publication removeObjectFromFilesAtIndex:anIndex];
+            [publication insertObject:aFile inFilesAtIndex:anIndex];
+            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
             if (oldURL)
                 [self userRemovedURL:oldURL forPublication:publication];
             [oldURL release];
-            [publication insertObject:aFile inFilesAtIndex:anIndex];
             [self userAddedURL:aURL forPublication:publication];
             if (shouldAutoFile)
                 [publication autoFileLinkedFile:aFile];
         } else {
+            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
             [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
         }
-        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     }        
 }
 
@@ -1139,10 +1140,10 @@ static BOOL changingColors = NO;
                 return;
             NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
             [publication removeObjectFromFilesAtIndex:anIndex];
+            [publication insertObject:aFile inFilesAtIndex:anIndex];
             if (oldURL)
                 [self userRemovedURL:oldURL forPublication:publication];
             [oldURL release];
-            [publication insertObject:aFile inFilesAtIndex:anIndex];
             [self userAddedURL:aURL forPublication:publication];
             [publication autoFileLinkedFile:aFile];
         } else {
