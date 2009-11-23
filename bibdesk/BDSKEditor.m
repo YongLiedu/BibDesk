@@ -788,9 +788,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         [publication setField:oldField toValue:nil];
         [publication setField:newField toValue:oldValue];
         [[self undoManager] setActionName:NSLocalizedString(@"Change Field Name", @"Undo action name")];
+        [self setKeyField:newField];
         autoGenerateStatus = [self userChangedField:oldField from:oldValue to:@""];
         [self userChangedField:newField from:@"" to:oldValue didAutoGenerate:autoGenerateStatus];
-        [self setKeyField:newField];
     }
 }
 
@@ -886,6 +886,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     }
 	[publication setCiteKey:newKey];
 	
+	[[self undoManager] setActionName:NSLocalizedString(@"Generate Cite Key", @"Undo action name")];
+	[tabView selectFirstTabViewItem:self];
+	
 	scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidGenerateCiteKeyScriptHookName];
 	if (scriptHook) {
 		[scriptHook setField:BDSKCiteKeyString];
@@ -893,9 +896,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 		[scriptHook setNewValues:[NSArray arrayWithObject:newKey]];
 		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication] document:[self document]];
 	}
-	
-	[[self undoManager] setActionName:NSLocalizedString(@"Generate Cite Key", @"Undo action name")];
-	[tabView selectFirstTabViewItem:self];
 }
 
 - (IBAction)generateCiteKey:(id)sender{
@@ -2042,9 +2042,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             
             [[self undoManager] setActionName:NSLocalizedString(@"Change Cite Key", @"Undo action name")];
             
-            [self userChangedField:BDSKCiteKeyString from:oldKey to:newKey];
-            
             [self updateCiteKeyDuplicateWarning];
+            
+            [self userChangedField:BDSKCiteKeyString from:oldKey to:newKey];
             
         }
     }

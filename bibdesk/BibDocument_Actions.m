@@ -1543,14 +1543,14 @@ static BOOL changingColors = NO;
     // should be safe to release here since arrays were created outside the scope of this local pool
     [pool release];
     
+    [[self undoManager] setActionName:(numberOfPubs > 1 ? NSLocalizedString(@"Generate Cite Keys", @"Undo action name") : NSLocalizedString(@"Generate Cite Key", @"Undo action name"))];
+    
     if (scriptHook) {
         [scriptHook setField:BDSKCiteKeyString];
         [scriptHook setOldValues:arrayOfOldValues];
         [scriptHook setNewValues:arrayOfNewValues];
         [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:arrayOfPubs document:self];
     }
-    
-    [[self undoManager] setActionName:(numberOfPubs > 1 ? NSLocalizedString(@"Generate Cite Keys", @"Undo action name") : NSLocalizedString(@"Generate Cite Key", @"Undo action name"))];
 }    
 
 - (void)generateCiteKeyAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {

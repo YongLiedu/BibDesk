@@ -225,6 +225,10 @@ static BDSKFiler *sharedFiler = nil;
                 // make sure the UI is updated
                 [pub noteFilesChanged:YES];
                 
+                // switch them as this is used in undo
+                [info setValue:oldPath forKey:NEW_PATH_KEY];
+                [fileInfoDicts addObject:info];
+                
                 scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidAutoFileScriptHookName];
                 if (scriptHook) {
                     [scriptHook setField:field];
@@ -232,10 +236,6 @@ static BDSKFiler *sharedFiler = nil;
                     [scriptHook setNewValues:[NSArray arrayWithObject:newPath]];
                     [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:pub] document:doc];
                 }
-                
-                // switch them as this is used in undo
-                [info setValue:oldPath forKey:NEW_PATH_KEY];
-                [fileInfoDicts addObject:info];
                 
             }
             
