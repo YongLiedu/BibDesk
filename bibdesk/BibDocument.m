@@ -1010,7 +1010,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if (UTI && [[NSWorkspace sharedWorkspace] type:UTI conformsToType:(id)kUTTypePlainText])
             [[NSFileManager defaultManager] setAppleStringEncoding:encoding atPath:[absoluteURL path] error:NULL];
         
-        if(saveOperation == NSSaveToOperation){
+        if (saveOperation == NSSaveToOperation) {
             
             // write template accessory files if necessary
             BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:typeName];
@@ -1020,15 +1020,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                     [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
             }
             
-            // save our window setup if we export to BibTeX
-            if([[self class] isNativeType:typeName] || [typeName isEqualToString:BDSKMinimalBibTeXDocumentType])
-                [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forEncoding:encoding];
-            
         } else if (saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation) {
-            
-            [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
-                                                         forPublications:publications
-                                                                document:self];
             
             // rebuild metadata cache for this document whenever we save
             NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
@@ -1050,10 +1042,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             [[BDSKMetadataCacheManager sharedManager] rebuildMetadataCache:cacheInfo];
             [infoDict release];
             
-            // save window setup to extended attributes, so it is set also if we use saveAs
-            [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forEncoding:[self documentStringEncoding]];
-            
         }
+        
+        // save our window setup if we save or export to BibTeX
+        if ([[self class] isNativeType:typeName] || [typeName isEqualToString:BDSKMinimalBibTeXDocumentType])
+            [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forEncoding:encoding];
     }
     
     [saveTargetURL release];
@@ -1070,6 +1063,12 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [invocation setArgument:&doc atIndex:2];
         [invocation setArgument:&didSave atIndex:3];
         [invocation invoke];
+    }
+    
+    if (didSave && (saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation)) {
+        [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
+                                                     forPublications:publications
+                                                            document:self];
     }
 }
 
