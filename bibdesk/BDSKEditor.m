@@ -2767,11 +2767,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     // make sure we're not registered as editor because we will be invalid, this shouldn't be necessary but there have been reports of crashes
     if (editorFlags.isEditing && [self commitEditing] == NO)
         [self discardEditing];
-    
-	// this can give errors when the application quits when an editor window is open
-	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKCloseEditorWindowScriptHookName 
-												 forPublications:[NSArray arrayWithObject:publication]
-                                                        document:[self document]];
 	
     // see method for notes
     [self breakTextStorageConnections];
@@ -2788,7 +2783,13 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     [authorTableView setDataSource:nil];
     [authorTableView setDelegate:nil];
     
+	// this can give errors when the application quits when an editor window is open
+	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKCloseEditorWindowScriptHookName 
+												 forPublications:[NSArray arrayWithObject:publication]
+                                                        document:[self document]];
+    
     // document still has a retain up to this point
+    // @@ CMH: is this really necessary? it seems wrong
     [[self document] removeWindowController:self];
 }
 
