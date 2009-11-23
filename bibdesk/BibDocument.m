@@ -977,25 +977,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [super changeSaveType:sender];
 }
 
-- (void)document:(NSDocument *)doc didSaveFromPanel:(BOOL)didSave contextInfo:(void *)contextInfo {
-    [exportSelectionCheckButton setState:NSOffState];
-    [saveFormatPopupButton removeFromSuperview];
-    saveFormatPopupButton = nil;
-    if (contextInfo != NULL) {
-        NSInvocation *invocation = [(NSInvocation *)contextInfo autorelease];
-        [invocation setArgument:&doc atIndex:2];
-        [invocation setArgument:&didSave atIndex:3];
-        [invocation invoke];
-    }
-}
-
 - (void)runModalSavePanelForSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
-    NSInvocation *invocation = nil;
-    if (delegate && didSaveSelector) {
-        invocation = [[NSInvocation invocationWithTarget:delegate selector:didSaveSelector] retain];
-        [invocation setArgument:&contextInfo atIndex:4];
-    }
-    [super runModalSavePanelForSaveOperation:saveOperation delegate:self didSaveSelector:@selector(document:didSaveFromPanel:contextInfo:) contextInfo:invocation];
+    // save this early, so we can setup the panel correctly, the other setting will come later
+    docState.currentSaveOperationType = saveOperation;
+    [super runModalSavePanelForSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
 }
 
 - (void)document:(NSDocument *)doc didSave:(BOOL)didSave contextInfo:(void *)contextInfo {
@@ -1076,6 +1061,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     // reset the encoding popup so we know when it wasn't shown to the user next time
     [saveTextEncodingPopupButton setEncoding:0];
+    // in case we saved using the panel, we should reset that
+    [exportSelectionCheckButton setState:NSOffState];
+    [saveFormatPopupButton removeFromSuperview];
+    saveFormatPopupButton = nil;
     
     if (invocation) {
         [invocation setArgument:&doc atIndex:2];
@@ -1086,7 +1075,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (void)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
     // Override so we can determine if this is an autosave in writeToURL:ofType:error:.
-    // This is necessary on 10.4 to keep from calling the clearChangeCount hack for an autosave, which incorrectly marks the document as clean.
     docState.currentSaveOperationType = saveOperation;
     saveTargetURL = [absoluteURL copy];
     
