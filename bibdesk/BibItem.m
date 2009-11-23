@@ -429,8 +429,20 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	// compare only the standard fields; are these all we should compare?
 	BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
 	NSMutableSet *keys = [[NSMutableSet alloc] initWithCapacity:20];
-	[keys addObjectsFromArray:[btm requiredFieldsForType:[self pubType]]];
+	
+    [keys addObjectsFromArray:[btm requiredFieldsForType:[self pubType]]];
 	[keys addObjectsFromArray:[btm optionalFieldsForType:[self pubType]]];
+    
+    if ([keys count] == 0) {
+        // this is a type we don't know, just compare all fields
+        NSMutableSet *set = [NSMutableSet set];
+        [set addObjectsFromArray:[self allFieldNames]];
+        [set addObjectsFromArray:[aBI allFieldNames]];
+        [set removeObject:BDSKColorString];
+        [set removeObject:BDSKLocalUrlString];
+        [keys addObjectsFromArray:[set allObjects]];
+    }
+    
 	[keys addObjectsFromArray:[btm userDefaultFieldsForType:[self pubType]]];
     
     // @@ remove TeX?  case-sensitive?
@@ -460,8 +472,19 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	// compare only the standard fields; are these all we should compare?
 	BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
 	NSMutableSet *keys = [[NSMutableSet alloc] initWithCapacity:20];
-	[keys addObjectsFromArray:[btm requiredFieldsForType:[self pubType]]];
+	
+    [keys addObjectsFromArray:[btm requiredFieldsForType:[self pubType]]];
 	[keys addObjectsFromArray:[btm optionalFieldsForType:[self pubType]]];
+    
+    if ([keys count] == 0) {
+        // this is a type we don't know, just compare all fields
+        NSMutableSet *set = [NSMutableSet set];
+        [set addObjectsFromArray:[self allFieldNames]];
+        [set addObjectsFromArray:[aBI allFieldNames]];
+        [set removeObject:BDSKColorString];
+        [keys addObjectsFromArray:[set allObjects]];
+    }
+    
     [keys removeObject:BDSKLocalUrlString];
     
     // @@ remove TeX?  case-sensitive?
