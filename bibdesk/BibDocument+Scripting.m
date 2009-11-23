@@ -114,13 +114,9 @@
                 [command setScriptErrorNumber:NSArgumentsWrongScriptError];
                 [command setScriptErrorString:[NSString stringWithFormat:@"Invalid file extension for this file type."]];
             } else if (fileType) {
-                if ([self saveToURL:fileURL ofType:fileType forSaveOperation:NSSaveToOperation error:NULL] == NO) {
-                    [command setScriptErrorNumber:NSInternalScriptError];
-                    [command setScriptErrorString:@"Unable to export."];
-                }
-            } else if ([self saveToURL:fileURL ofType:[self fileType] forSaveOperation:NSSaveAsOperation error:NULL] == NO) {
-                [command setScriptErrorNumber:NSInternalScriptError];
-                [command setScriptErrorString:@"Unable to save."];
+                [self saveToURL:fileURL ofType:fileType forSaveOperation:NSSaveToOperation delegate:nil didSaveSelector:NULL contextInfo:NULL];
+            } else {
+                [self saveToURL:fileURL ofType:[self fileType] forSaveOperation:NSSaveAsOperation delegate:nil didSaveSelector:NULL contextInfo:NULL];
             }
         }
     } else if (fileType) {

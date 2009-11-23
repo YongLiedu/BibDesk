@@ -978,8 +978,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 - (void)document:(NSDocument *)doc didSaveFromPanel:(BOOL)didSave contextInfo:(void *)contextInfo {
-    // reset the encoding popup so we know when it wasn't shown to the user next time
-    [saveTextEncodingPopupButton setEncoding:0];
     [exportSelectionCheckButton setState:NSOffState];
     [saveFormatPopupButton removeFromSuperview];
     saveFormatPopupButton = nil;
@@ -992,15 +990,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 - (void)runModalSavePanelForSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
-    // Override so we can determine if this is a save, saveAs or export operation, so we can prepare the correct accessory view
-    docState.currentSaveOperationType = saveOperation;
-    
     NSInvocation *invocation = nil;
     if (delegate && didSaveSelector) {
         invocation = [[NSInvocation invocationWithTarget:delegate selector:didSaveSelector] retain];
         [invocation setArgument:&contextInfo atIndex:4];
     }
-    
     [super runModalSavePanelForSaveOperation:saveOperation delegate:self didSaveSelector:@selector(document:didSaveFromPanel:contextInfo:) contextInfo:invocation];
 }
 
@@ -1012,7 +1006,27 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSInvocation *invocation = [info objectForKey:@"callback"];
     
     if (didSave) {
+        // compare -dataOfType:forPublications:error:
+        NSStringEncoding encoding = [self documentStringEncoding];
+        if (NSSaveToOperation == saveOperation) {
+            if (NO == [[NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKMinimalBibTeXDocumentType, BDSKRISDocumentType, BDSKLTBDocumentType, nil] containsObject:typeName])
+                encoding = NSUTF8StringEncoding;
+            else
+                encoding = [saveTextEncodingPopupButton encoding] ?: [BDSKStringEncodingManager defaultEncoding];
+        } else if (NSSaveAsOperation == saveOperation && [saveTextEncodingPopupButton encoding] != 0) {
+            // Set the string encoding according to the popup.  
+            // NB: the popup has the incorrect encoding if it wasn't displayed, for example for the Save action and saving using AppleScript, so don't reset encoding unless we're actually modifying this document through a menu .
+            encoding = [saveTextEncodingPopupButton encoding];
+            [self setDocumentStringEncoding:encoding];
+        }
+        
+        // set com.apple.TextEncoding for other apps
+        NSString *UTI = [[NSWorkspace sharedWorkspace] typeOfFile:[absoluteURL path] error:NULL];
+        if (UTI && [[NSWorkspace sharedWorkspace] type:UTI conformsToType:(id)kUTTypePlainText])
+            [[NSFileManager defaultManager] setAppleStringEncoding:encoding atPath:[absoluteURL path] error:NULL];
+        
         if(saveOperation == NSSaveToOperation){
+            
             // write template accessory files if necessary
             BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:typeName];
             if(selectedTemplate){
@@ -1021,7 +1035,12 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                     [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
             }
             
+            // save our window setup if we export to BibTeX
+            if([[self class] isNativeType:typeName] || [typeName isEqualToString:BDSKMinimalBibTeXDocumentType])
+                [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forEncoding:encoding];
+            
         } else if (saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation) {
+            
             [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
                                                          forPublications:publications
                                                                 document:self];
@@ -1048,8 +1067,15 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             
             // save window setup to extended attributes, so it is set also if we use saveAs
             [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forEncoding:[self documentStringEncoding]];
+            
         }
     }
+    
+    [saveTargetURL release];
+    saveTargetURL = nil;
+    
+    // reset the encoding popup so we know when it wasn't shown to the user next time
+    [saveTextEncodingPopupButton setEncoding:0];
     
     if (invocation) {
         [invocation setArgument:&doc atIndex:2];
@@ -1059,68 +1085,21 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 - (void)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
+    // Override so we can determine if this is an autosave in writeToURL:ofType:error:.
+    // This is necessary on 10.4 to keep from calling the clearChangeCount hack for an autosave, which incorrectly marks the document as clean.
+    docState.currentSaveOperationType = saveOperation;
+    saveTargetURL = [absoluteURL copy];
+    
     NSInvocation *invocation = nil;
     if (delegate && didSaveSelector) {
         invocation = [NSInvocation invocationWithTarget:delegate selector:didSaveSelector];
         [invocation setArgument:&contextInfo atIndex:4];
     }
-    NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:absoluteURL, @"URL", typeName, @"typeName", [NSNumber numberWithUnsignedInteger:saveOperation], @"saveOperation", invocation, @"callback", nil];
+    NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:absoluteURL, @"URL", typeName, @"typeName", [NSNumber numberWithUnsignedInteger:saveOperation], @"saveOperation", invocation, @"callback", nil];
     [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation delegate:self didSaveSelector:@selector(document:didSave:contextInfo:) contextInfo:info];
 }
 
-- (BOOL)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError{
-    
-    // Set the string encoding according to the popup.  
-    // NB: the popup has the incorrect encoding if it wasn't displayed, for example for the Save action and saving using AppleScript, so don't reset encoding unless we're actually modifying this document through a menu .
-    if (NSSaveAsOperation == saveOperation && [saveTextEncodingPopupButton encoding] != 0)
-        [self setDocumentStringEncoding:[saveTextEncodingPopupButton encoding]];
-    
-    saveTargetURL = [absoluteURL copy];
-    
-    BOOL success = [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
-    
-    // compare -dataOfType:forPublications:error:
-    NSStringEncoding encoding = [self documentStringEncoding];
-    if (NSSaveToOperation == saveOperation) {
-        if (NO == [[NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKMinimalBibTeXDocumentType, BDSKRISDocumentType, BDSKLTBDocumentType, nil] containsObject:typeName])
-            encoding = NSUTF8StringEncoding;
-        else
-            encoding = [saveTextEncodingPopupButton encoding] ?: [BDSKStringEncodingManager defaultEncoding];
-    }
-    
-    // set com.apple.TextEncoding for other apps
-    NSString *UTI = [[NSWorkspace sharedWorkspace] typeOfFile:[absoluteURL path] error:NULL];
-    if (success && UTI && [[NSWorkspace sharedWorkspace] type:UTI conformsToType:(id)kUTTypePlainText])
-        [[NSFileManager defaultManager] setAppleStringEncoding:encoding atPath:[absoluteURL path] error:NULL];
-    
-    [saveTargetURL release];
-    saveTargetURL = nil;
-    
-    if(success == NO)
-        return NO;
-    
-    if(saveOperation == NSSaveToOperation){
-        // save our window setup if we export to BibTeX
-        if([[self class] isNativeType:typeName] || [typeName isEqualToString:BDSKMinimalBibTeXDocumentType])
-            [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forEncoding:encoding];
-    }
-    
-    return YES;
-}
-
-- (BOOL)writeToURL:(NSURL *)absoluteURL 
-            ofType:(NSString *)typeName 
-  forSaveOperation:(NSSaveOperationType)saveOperation 
-originalContentsURL:(NSURL *)absoluteOriginalContentsURL 
-             error:(NSError **)outError {
-    // Override so we can determine if this is an autosave in writeToURL:ofType:error:.
-    // This is necessary on 10.4 to keep from calling the clearChangeCount hack for an autosave, which incorrectly marks the document as clean.
-    docState.currentSaveOperationType = saveOperation;
-    return [super writeToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation originalContentsURL:absoluteOriginalContentsURL error:outError];
-}
-
 - (BOOL)writeToURL:(NSURL *)fileURL ofType:(NSString *)docType error:(NSError **)outError{
-
     BOOL success = YES;
     NSError *nsError = nil;
     NSArray *items = publications;
@@ -1404,8 +1383,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     BOOL isBibTeX = [aType isEqualToString:BDSKBibTeXDocumentType];
     
     // export operations need their own encoding
-    if(NSSaveToOperation == docState.currentSaveOperationType)
+    if (NSSaveToOperation == docState.currentSaveOperationType)
         encoding = [saveTextEncodingPopupButton encoding] ?: [BDSKStringEncodingManager defaultEncoding];
+    else if (NSSaveAsOperation == docState.currentSaveOperationType && [saveTextEncodingPopupButton encoding])
+        encoding = [saveTextEncodingPopupButton encoding];
     
     if (isBibTeX){
         if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKAutoSortForCrossrefsKey])

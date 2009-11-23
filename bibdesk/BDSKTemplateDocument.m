@@ -267,11 +267,33 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
     return [NSArray arrayWithObjects:richText ? BDSKRichTextTemplateDocumentType : BDSKTextTemplateDocumentType, nil];
 }
 
-- (BOOL)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError {
-    BOOL success = [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
-    if (success && richText == NO)
-        [[NSFileManager defaultManager] setAppleStringEncoding:NSUTF8StringEncoding atPath:[absoluteURL path] error:NULL];
-    return success;
+- (void)document:(NSDocument *)doc didSave:(BOOL)didSave contextInfo:(void *)contextInfo {
+    NSDictionary *info = [(id)contextInfo autorelease];
+    NSString *path = [info objectForKey:@"path"];
+    NSInvocation *invocation = [info objectForKey:@"callback"];
+    
+    if (didSave)
+        [[NSFileManager defaultManager] setAppleStringEncoding:NSUTF8StringEncoding atPath:path error:NULL];
+    
+    if (invocation) {
+        [invocation setArgument:&doc atIndex:2];
+        [invocation setArgument:&didSave atIndex:3];
+        [invocation invoke];
+    }
+}
+
+- (void)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
+    if (richText) {
+        [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
+    } else {
+        NSInvocation *invocation = nil;
+        if (delegate && didSaveSelector) {
+            invocation = [[NSInvocation invocationWithTarget:delegate selector:didSaveSelector] retain];
+            [invocation setArgument:&contextInfo atIndex:4];
+        }
+        NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:[absoluteURL path], @"path", invocation, @"callback", nil];
+        [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation delegate:self didSaveSelector:@selector(document:didSave:contextInfo:) contextInfo:info];
+    }
 }
 
 - (NSData *)dataOfType:(NSString *)typeName error:(NSError **)outError {
