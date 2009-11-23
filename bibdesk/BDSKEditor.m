@@ -2042,9 +2042,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             
             [[self undoManager] setActionName:NSLocalizedString(@"Change Cite Key", @"Undo action name")];
             
-            [self updateCiteKeyDuplicateWarning];
-            
             [self userChangedField:BDSKCiteKeyString from:oldKey to:newKey];
+            
+            [self updateCiteKeyDuplicateWarning];
             
         }
     }
