@@ -40,40 +40,6 @@
 
 @implementation CIImage (BDSKExtensions)
 
-- (CIImage *)blurredImageWithBlurRadius:(CGFloat)radius;
-{
-    CIFilter *gaussianBlurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];    
-    
-    [gaussianBlurFilter setValue:[NSNumber numberWithDouble:radius] forKey:@"inputRadius"];
-    [gaussianBlurFilter setValue:self forKey:@"inputImage"];
-    
-    return [gaussianBlurFilter valueForKey:@"outputImage"];
-}
-
-- (CIImage *)croppedImageWithRect:(CGRect)aRect;
-{
-    CIFilter *transformFilter = [CIFilter filterWithName:@"CIAffineTransform"];
-    CIFilter *cropFilter = [CIFilter filterWithName:@"CICrop"];
-    CIImage *image = self;
-    
-    if (CGPointEqualToPoint(aRect.origin, CGPointZero) == NO) {
-        // shift the cropped rect to the origin
-        NSAffineTransform *transform = [NSAffineTransform transform];
-        [transform translateXBy:-CGRectGetMinX(aRect) yBy:-CGRectGetMinY(aRect)];
-        [transformFilter setValue:transform forKey:@"inputTransform"];
-        [transformFilter setValue:self forKey:@"inputImage"];
-        
-        image = [transformFilter valueForKey:@"outputImage"];
-    }
-    
-    CIVector *cropVector = [CIVector vectorWithX:0 Y:0 Z:CGRectGetWidth(aRect) W:CGRectGetHeight(aRect)];
-    
-    [cropFilter setValue:cropVector forKey:@"inputRectangle"];
-    [cropFilter setValue:image forKey:@"inputImage"];
-    
-    return [cropFilter valueForKey:@"outputImage"];
-}
-
 - (CIImage *)imageWithAdjustedHueAngle:(CGFloat)hue saturationFactor:(CGFloat)saturation brightnessBias:(CGFloat)brightness;
 {
     CIFilter *hueAdjustFilter = [CIFilter filterWithName:@"CIHueAdjust"];

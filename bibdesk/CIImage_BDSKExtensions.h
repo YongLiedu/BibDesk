@@ -42,10 +42,6 @@
 
 @interface CIImage (BDSKExtensions)
 
-- (CIImage *)blurredImageWithBlurRadius:(CGFloat)radius;
-
-- (CIImage *)croppedImageWithRect:(CGRect)aRect;
-
 - (CIImage *)imageWithAdjustedHueAngle:(CGFloat)hue saturationFactor:(CGFloat)saturation brightnessBias:(CGFloat)brightness;
 
 - (CIImage *)invertedImage;
