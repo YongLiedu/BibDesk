@@ -251,7 +251,7 @@ static BDSKTypeManager *sharedInstance = nil;
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
 	NSMutableSet *invalidFields = [NSMutableSet setWithObjects:
 		BDSKDateModifiedString, BDSKDateAddedString, BDSKDateString, 
-		BDSKTitleString, BDSKBooktitleString, BDSKVolumetitleString, BDSKContainerString, BDSKChapterString, 
+		BDSKTitleString, BDSKContainerString, BDSKChapterString, 
 		BDSKVolumeString, BDSKNumberString, BDSKSeriesString, BDSKPagesString, BDSKItemNumberString, 
 		BDSKAbstractString, BDSKAnnoteString, BDSKRssDescriptionString, nil];
 	[invalidFields addObjectsFromArray:[sud stringArrayForKey:BDSKLocalFileFieldsKey]];
@@ -259,7 +259,7 @@ static BDSKTypeManager *sharedInstance = nil;
     [invalidGroupFieldsSet unionSet:invalidFields];
     
     [singleValuedGroupFieldsSet removeAllObjects];
-    NSMutableSet *singleValuedFields = [NSMutableSet setWithObjects:BDSKPubTypeString, BDSKTypeString, BDSKCrossrefString, BDSKJournalString, BDSKYearString, BDSKMonthString, BDSKPublisherString, BDSKAddressString, nil];
+    NSMutableSet *singleValuedFields = [NSMutableSet setWithObjects:BDSKPubTypeString, BDSKTypeString, BDSKCrossrefString, BDSKJournalString, BDSKBooktitleString, BDSKVolumetitleString, BDSKYearString, BDSKMonthString, BDSKPublisherString, BDSKAddressString, nil];
 	[singleValuedFields addObjectsFromArray:[sud stringArrayForKey:BDSKRatingFieldsKey]];
 	[singleValuedFields addObjectsFromArray:[sud stringArrayForKey:BDSKBooleanFieldsKey]];
 	[singleValuedFields addObjectsFromArray:[sud stringArrayForKey:BDSKTriStateFieldsKey]];  
