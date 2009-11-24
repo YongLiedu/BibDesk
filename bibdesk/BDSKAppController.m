@@ -139,9 +139,8 @@ static void fixLegacyTableColumnIdentifiers()
 
 - (void)awakeFromNib{   
     // Add a Scripts menu; searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/BibDesk/Scripts
-    if([BDSKScriptMenu disabled] == NO){
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKScriptMenuDisabled"] == NO)
         [BDSKScriptMenu addScriptsToMainMenu];
-    }
     
     NSMenu *fileMenu = [[[NSApp mainMenu] itemAtIndex:1] submenu];
     NSUInteger idx = [fileMenu indexOfItemWithTarget:nil andAction:@selector(runPageLayout:)];

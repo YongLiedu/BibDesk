@@ -82,12 +82,6 @@ static NSInteger recursionDepth = 0;
     [super dealloc];
 }
 
-+ (BOOL)disabled;
-{
-    // Omni disables their script menu on 10.4, saying the system one is better...
-    return [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKScriptMenuDisabled"];
-}
-
 @end
 
 @implementation BDSKScriptMenu (Private)

@@ -43,7 +43,6 @@
     NSDate *cachedDate;
 }
 
-+ (BOOL)disabled;
 + (void)addScriptsToMainMenu;
 
 @end
