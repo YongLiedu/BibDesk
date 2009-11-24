@@ -70,7 +70,7 @@ enum {
 	if (self = [super initWithFrame:frameRect]) {
             [self setAutoenablesItems:NO];
             
-            defaultEncoding = 0;
+            defaultEncoding = BDSKNoStringEncoding;
             
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleEncodingsListChanged:) name:BDSKEncodingsListChangedNotification object:nil];
 	}
@@ -205,7 +205,7 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
         for (cnt = 0; cnt < num; cnt++) {
             CFStringEncoding cfEncoding = tmp[cnt];
             NSStringEncoding nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
-            if (nsEncoding && [NSString localizedNameOfStringEncoding:nsEncoding] && cfEncoding != kCFStringEncodingMacSymbol && cfEncoding != kCFStringEncodingMacDingbats && cfEncoding != kBDStringEncodingMacKeyboardSymbol)
+            if (nsEncoding != BDSKNoStringEncoding && [NSString localizedNameOfStringEncoding:nsEncoding] && cfEncoding != kCFStringEncodingMacSymbol && cfEncoding != kCFStringEncodingMacDingbats && cfEncoding != kBDStringEncodingMacKeyboardSymbol)
                 [allEncodings addObject:[NSNumber numberWithUnsignedInteger:nsEncoding]];
         }
         free(tmp);
@@ -242,7 +242,7 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
 }
 
 
-// This method initializes the provided popup with list of encodings; it also sets up the selected encoding as indicated and if includeDefaultItem is YES, includes an initial item for selecting "Automatic" choice.  These non-encoding items all have 0 as their tags. Otherwise the tags are set to the NSStringEncoding value for the encoding.
+// This method initializes the provided popup with list of encodings; it also sets up the selected encoding as indicated and if includeDefaultItem is YES, includes an initial item for selecting "Automatic" choice.  These non-encoding items all have BDSKNoStringEncoding as their tags. Otherwise the tags are set to the NSStringEncoding value for the encoding.
 - (void)setupPopUp:(BDSKEncodingPopUpButton *)popup selectedEncoding:(NSUInteger)selectedEncoding {
     NSArray *encs = [self enabledEncodings];
     NSUInteger cnt, numEncodings, itemToSelect = 0;
@@ -267,12 +267,12 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
     // Add an optional separator and "customize" item at end
     if ([popup numberOfItems] > 0) {
         [[popup menu] addItem:[NSMenuItem separatorItem]];
-        [[popup lastItem] setTag:0];
+        [[popup lastItem] setTag:BDSKNoStringEncoding];
     }
     [popup addItemWithTitle:[NSLocalizedString(@"Customize Encodings List", @"Encoding popup entry for bringing up the Customize Encodings List panel") stringByAppendingEllipsis]];
     [[popup lastItem] setAction:@selector(showPanel:)];
     [[popup lastItem] setTarget:self];
-    [[popup lastItem] setTag:0];
+    [[popup lastItem] setTag:BDSKNoStringEncoding];
 
     [popup selectItemAtIndex:itemToSelect];
 }
@@ -349,7 +349,7 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
 
     for (cnt = 0; cnt < numRows; cnt++) {
         NSCell *cell = [encodingMatrix cellAtRow:cnt column:0];
-        if (((NSUInteger)[cell tag] != 0) && ([cell state] == NSOnState)) [encs addObject:[NSNumber numberWithUnsignedInteger:[cell tag]]];
+        if (((NSUInteger)[cell tag] != BDSKNoStringEncoding) && ([cell state] == NSOnState)) [encs addObject:[NSNumber numberWithUnsignedInteger:[cell tag]]];
     }
 
     [encodings autorelease];

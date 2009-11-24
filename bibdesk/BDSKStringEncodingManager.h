@@ -38,6 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
+#define BDSKNoStringEncoding 0xffffffffU // this is the same as kCFStringEncodingInvalidId
 
 @interface BDSKEncodingPopUpButton : NSPopUpButton {
     NSStringEncoding defaultEncoding;

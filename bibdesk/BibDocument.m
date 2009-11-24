@@ -525,7 +525,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [self updateSmartGroupsCount];
     [self updateCategoryGroupsPreservingSelection:NO];
     
-    [saveTextEncodingPopupButton setEncoding:0];
+    [saveTextEncodingPopupButton setEncoding:BDSKNoStringEncoding];
     
     // this shouldn't be necessary
     [documentWindow recalculateKeyViewLoop];
@@ -997,8 +997,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             if (NO == [[NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKMinimalBibTeXDocumentType, BDSKRISDocumentType, BDSKLTBDocumentType, nil] containsObject:typeName])
                 encoding = NSUTF8StringEncoding;
             else
-                encoding = [saveTextEncodingPopupButton encoding] ?: [BDSKStringEncodingManager defaultEncoding];
-        } else if (NSSaveAsOperation == saveOperation && [saveTextEncodingPopupButton encoding] != 0) {
+                encoding = [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
+        } else if (NSSaveAsOperation == saveOperation && [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding) {
             // Set the string encoding according to the popup.  
             // NB: the popup has the incorrect encoding if it wasn't displayed, for example for the Save action and saving using AppleScript, so don't reset encoding unless we're actually modifying this document through a menu .
             encoding = [saveTextEncodingPopupButton encoding];
@@ -1053,7 +1053,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     saveTargetURL = nil;
     
     // reset the encoding popup so we know when it wasn't shown to the user next time
-    [saveTextEncodingPopupButton setEncoding:0];
+    [saveTextEncodingPopupButton setEncoding:BDSKNoStringEncoding];
     // in case we saved using the panel, we should reset that
     [exportSelectionCheckButton setState:NSOffState];
     [saveFormatPopupButton removeFromSuperview];
@@ -1285,7 +1285,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             }
         }
         
-        NSStringEncoding encoding = [saveTextEncodingPopupButton encoding] ?: [BDSKStringEncodingManager defaultEncoding];
+        NSStringEncoding encoding = [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
         NSData *bibtexData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeToPath:commonParent error:outError];
         NSString *bibtexPath = [[path stringByAppendingPathComponent:[path lastPathComponent]] stringByAppendingPathExtension:@"bib"];
         
@@ -1371,8 +1371,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     // export operations need their own encoding
     if (NSSaveToOperation == docState.currentSaveOperationType)
-        encoding = [saveTextEncodingPopupButton encoding] ?: [BDSKStringEncodingManager defaultEncoding];
-    else if (NSSaveAsOperation == docState.currentSaveOperationType && [saveTextEncodingPopupButton encoding])
+        encoding = [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
+    else if (NSSaveAsOperation == docState.currentSaveOperationType && [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding)
         encoding = [saveTextEncodingPopupButton encoding];
     
     if (isBibTeX){
@@ -1785,7 +1785,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [frontMatter setString:@""];
     
     // This is only a sanity check; an encoding of 0 is not valid, so is a signal we should ignore xattrs; could only check for public.text UTIs, but it will be zero if it was never written (and we don't warn in that case).  The user can do many things to make the attribute incorrect, so this isn't very robust.
-    NSStringEncoding encodingFromFile = [[self mainWindowSetupDictionaryFromExtendedAttributes] unsignedIntegerForKey:BDSKDocumentStringEncodingKey defaultValue:0];
+    NSStringEncoding encodingFromFile = [[self mainWindowSetupDictionaryFromExtendedAttributes] unsignedIntegerForKey:BDSKDocumentStringEncodingKey defaultValue:BDSKNoStringEncoding];
     if (encodingFromFile != 0 && encodingFromFile != encoding) {
         
         NSInteger rv;
