@@ -414,10 +414,8 @@
         } else {
             // try the main document first
             document = [self mainDocument];
-            if (nil == document) {
+            if (nil == document)
                 document = [self openUntitledDocumentAndDisplay:YES error:outError];
-                [document showWindows];
-            }
             
             [[document groups] addSearchGroup:group];
             [group release];
