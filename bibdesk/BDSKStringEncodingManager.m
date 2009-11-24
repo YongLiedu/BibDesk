@@ -258,7 +258,7 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
     // Fill with encodings
     for (cnt = 0; cnt < numEncodings; cnt++) {
         NSStringEncoding enc = [[encs objectAtIndex:cnt] unsignedIntegerValue];
-        [popup addItemWithTitle:enc ? [NSString localizedNameOfStringEncoding:enc] : @""];
+        [popup addItemWithTitle:enc != BDSKNoStringEncoding ? [NSString localizedNameOfStringEncoding:enc] : @""];
         [[popup lastItem] setTag:enc];
         [[popup lastItem] setEnabled:YES];
         if (enc == selectedEncoding) itemToSelect = [popup numberOfItems] - 1;
