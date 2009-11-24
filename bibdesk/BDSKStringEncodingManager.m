@@ -159,20 +159,27 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
 #pragma mark -
 
 // Improve grouping as for some encodings CFStringGetMostCompatibleMacStringEncoding returns kCFStringEncodingInvalidId 
-extern CFStringEncoding BDStringGetMostCompatibleMacStringEncoding(CFStringEncoding encoding) {
-    if(encoding == kCFStringEncodingISOLatin6 || encoding == kCFStringEncodingISOLatin8 || encoding == kCFStringEncodingNonLossyASCII || encoding == kCFStringEncodingEBCDIC_CP037)
-        return kCFStringEncodingMacRoman;
-    else if(encoding == kCFStringEncodingISOLatin10)
-        return kCFStringEncodingMacCentralEurRoman;
-    else if(encoding == kCFStringEncodingShiftJIS_X0213_00)
-        return kCFStringEncodingMacJapanese;
-    else if(encoding == kCFStringEncodingBig5_HKSCS_1999 || encoding == kCFStringEncodingBig5_E)
-        return kCFStringEncodingMacChineseTrad;
-    else if(encoding == kCFStringEncodingGB_18030_2000)
-        return kCFStringEncodingMacChineseSimp;
-    else if(encoding == kCFStringEncodingKOI8_U)
-        return kCFStringEncodingMacCyrillic;
-    return CFStringGetMostCompatibleMacStringEncoding(encoding);
+static CFStringEncoding BDStringGetMostCompatibleMacStringEncoding(CFStringEncoding encoding) {
+    switch (encoding) {
+        case kCFStringEncodingISOLatin6:
+        case kCFStringEncodingISOLatin8:
+        case kCFStringEncodingNonLossyASCII:
+        case kCFStringEncodingEBCDIC_CP037:
+            return kCFStringEncodingMacRoman;
+        case kCFStringEncodingISOLatin10:
+            return kCFStringEncodingMacCentralEurRoman;
+        case kCFStringEncodingShiftJIS_X0213_00:
+            return kCFStringEncodingMacJapanese;
+        case kCFStringEncodingBig5_HKSCS_1999:
+        case kCFStringEncodingBig5_E:
+            return kCFStringEncodingMacChineseTrad;
+        case kCFStringEncodingGB_18030_2000:
+            return kCFStringEncodingMacChineseSimp;
+        case kCFStringEncodingKOI8_U:
+            return kCFStringEncodingMacCyrillic;
+        default:
+            return CFStringGetMostCompatibleMacStringEncoding(encoding);
+    }
 }
 
 // Sort using the equivalent Mac encoding as the major key. Secondary key is the actual encoding value, which works well enough. We treat Unicode encodings as special case, putting them at top of the list.
@@ -181,12 +188,15 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
     CFStringEncoding second = *(CFStringEncoding *)secondPtr;
     CFStringEncoding macEncodingForFirst = BDStringGetMostCompatibleMacStringEncoding(first);
     CFStringEncoding macEncodingForSecond = BDStringGetMostCompatibleMacStringEncoding(second);
-    if (first == second) return 0;	// Should really never happen
+    if (first == second)
+        return 0;	// Should really never happen
     if (macEncodingForFirst == kCFStringEncodingUnicode || macEncodingForSecond == kCFStringEncodingUnicode) {
-        if (macEncodingForSecond == macEncodingForFirst) return (first > second) ? 1 : -1;	// Both Unicode; compare second order
+        if (macEncodingForSecond == macEncodingForFirst)
+            return (first > second) ? 1 : -1;	// Both Unicode; compare second order
         return (macEncodingForFirst == kCFStringEncodingUnicode) ? -1 : 1;	// First is Unicode
     }
-    if ((macEncodingForFirst > macEncodingForSecond) || ((macEncodingForFirst == macEncodingForSecond) && (first > second))) return 1;
+    if ((macEncodingForFirst > macEncodingForSecond) || ((macEncodingForFirst == macEncodingForSecond) && (first > second)))
+        return 1;
     return -1;
 }
 
