@@ -607,7 +607,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     if([drawerController isDrawerOpen])
         [drawerController toggle:nil];
     [self saveSortOrder];
-    [self saveWindowSetupInExtendedAttributesAtURL:[self fileURL] forEncoding:0];
+    [self saveWindowSetupInExtendedAttributesAtURL:[self fileURL] forEncoding:BDSKNoStringEncoding];
     
     // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey] &&
@@ -680,7 +680,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
         
         // we can't just use -documentStringEncoding, because that may be different for SaveTo
-        if (encoding)
+        if (encoding != BDSKNoStringEncoding)
             [dictionary setUnsignedIntegerValue:encoding forKey:BDSKDocumentStringEncodingKey];
         
         // encode groups so we can select them later with isEqual: (saving row indexes would not be as reliable)
@@ -1784,7 +1784,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     // This is only a sanity check; an encoding of 0 is not valid, so is a signal we should ignore xattrs; could only check for public.text UTIs, but it will be zero if it was never written (and we don't warn in that case).  The user can do many things to make the attribute incorrect, so this isn't very robust.
     NSStringEncoding encodingFromFile = [[self mainWindowSetupDictionaryFromExtendedAttributes] unsignedIntegerForKey:BDSKDocumentStringEncodingKey defaultValue:BDSKNoStringEncoding];
-    if (encodingFromFile != 0 && encodingFromFile != encoding) {
+    if (encodingFromFile != BDSKNoStringEncoding && encodingFromFile != encoding) {
         
         NSInteger rv;
         
