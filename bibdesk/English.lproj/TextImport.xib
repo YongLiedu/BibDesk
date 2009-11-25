@@ -260,6 +260,7 @@
 															</object>
 															<string key="NSFrame">{{1, 1}, {245, 265}}</string>
 															<reference key="NSSuperview" ref="956705989"/>
+															<reference key="NSNextKeyView" ref="193405898"/>
 															<reference key="NSDocView" ref="193405898"/>
 															<reference key="NSBGColor" ref="469161047"/>
 															<object class="NSCursor" key="NSCursor">
@@ -291,6 +292,7 @@
 													</object>
 													<string key="NSFrame">{{20, 0}, {262, 267}}</string>
 													<reference key="NSSuperview" ref="882655587"/>
+													<reference key="NSNextKeyView" ref="459579259"/>
 													<int key="NSsFlags">18</int>
 													<reference key="NSVScroller" ref="749061617"/>
 													<reference key="NSHScroller" ref="73481414"/>
@@ -475,6 +477,7 @@
 															</object>
 															<string key="NSFrame">{{1, 1}, {260, 194}}</string>
 															<reference key="NSSuperview" ref="262598871"/>
+															<reference key="NSNextKeyView" ref="1035073078"/>
 															<reference key="NSDocView" ref="1035073078"/>
 															<reference key="NSBGColor" ref="403964731"/>
 															<int key="NScvFlags">4</int>
@@ -501,6 +504,7 @@
 													</object>
 													<string key="NSFrame">{{20, 0}, {262, 196}}</string>
 													<reference key="NSSuperview" ref="657066187"/>
+													<reference key="NSNextKeyView" ref="121900897"/>
 													<int key="NSsFlags">530</int>
 													<reference key="NSVScroller" ref="917297075"/>
 													<reference key="NSHScroller" ref="496898511"/>
@@ -955,7 +959,7 @@
 				<string key="NSMaxSize">{531, 152}</string>
 			</object>
 			<object class="NSCustomView" id="1045535231">
-				<nil key="NSNextResponder"/>
+				<reference key="NSNextResponder"/>
 				<int key="NSvFlags">274</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -964,6 +968,7 @@
 						<int key="NSvFlags">268</int>
 						<string key="NSFrame">{{48, 259}, {26, 26}}</string>
 						<reference key="NSSuperview" ref="1045535231"/>
+						<reference key="NSWindow"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSButtonCell" key="NSCell" id="739362039">
 							<int key="NSCellFlags">67239424</int>
@@ -975,7 +980,7 @@
 							<int key="NSButtonFlags2">268435458</int>
 							<object class="NSCustomResource" key="NSNormalImage">
 								<string key="NSClassName">NSImage</string>
-								<string key="NSResourceName">forward_small</string>
+								<string key="NSResourceName">NSGoRightTemplate</string>
 							</object>
 							<string key="NSAlternateContents"/>
 							<string key="NSKeyEquivalent">]</string>
@@ -988,6 +993,7 @@
 						<int key="NSvFlags">268</int>
 						<string key="NSFrame">{{78, 259}, {26, 26}}</string>
 						<reference key="NSSuperview" ref="1045535231"/>
+						<reference key="NSWindow"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSButtonCell" key="NSCell" id="920237480">
 							<int key="NSCellFlags">67239424</int>
@@ -999,7 +1005,7 @@
 							<int key="NSButtonFlags2">402653186</int>
 							<object class="NSCustomResource" key="NSNormalImage">
 								<string key="NSClassName">NSImage</string>
-								<string key="NSResourceName">reload_small</string>
+								<string key="NSResourceName">NSRefreshTemplate</string>
 							</object>
 							<string key="NSAlternateContents"/>
 							<string key="NSKeyEquivalent">r</string>
@@ -1013,6 +1019,7 @@
 						<object class="NSPSMatrix" key="NSDrawMatrix"/>
 						<string key="NSFrame">{{277, 264}, {16, 18}}</string>
 						<reference key="NSSuperview" ref="1045535231"/>
+						<reference key="NSWindow"/>
 						<int key="NSpiFlags">28938</int>
 						<double key="NSMaxValue">100</double>
 					</object>
@@ -1021,6 +1028,7 @@
 						<int key="NSvFlags">268</int>
 						<string key="NSFrame">{{18, 259}, {26, 26}}</string>
 						<reference key="NSSuperview" ref="1045535231"/>
+						<reference key="NSWindow"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSButtonCell" key="NSCell" id="540072454">
 							<int key="NSCellFlags">67239424</int>
@@ -1032,7 +1040,7 @@
 							<int key="NSButtonFlags2">268435458</int>
 							<object class="NSCustomResource" key="NSNormalImage">
 								<string key="NSClassName">NSImage</string>
-								<string key="NSResourceName">back_small</string>
+								<string key="NSResourceName">NSGoLeftTemplate</string>
 							</object>
 							<string key="NSAlternateContents"/>
 							<string key="NSKeyEquivalent">[</string>
@@ -1071,6 +1079,7 @@
 								</object>
 								<string key="NSFrame">{{20, 20}, {233, 203}}</string>
 								<reference key="NSSuperview" ref="248798499"/>
+								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView"/>
 								<string key="FrameName"/>
 								<string key="GroupName"/>
@@ -1098,11 +1107,14 @@
 						</object>
 						<string key="NSFrame">{{20, 0}, {273, 243}}</string>
 						<reference key="NSSuperview" ref="1045535231"/>
+						<reference key="NSWindow"/>
 						<string key="NSClassName">BDSKEdgeView</string>
 						<string key="NSExtension">NSView</string>
 					</object>
 				</object>
 				<string key="NSFrameSize">{293, 299}</string>
+				<reference key="NSSuperview"/>
+				<reference key="NSWindow"/>
 				<string key="NSClassName">NSView</string>
 				<string key="NSExtension">NSView</string>
 			</object>
@@ -2233,7 +2245,9 @@
 					<string>79.ImportedFromIB2</string>
 					<string>8.IBPluginDependency</string>
 					<string>8.ImportedFromIB2</string>
+					<string>80.IBEditorWindowLastContentRect</string>
 					<string>80.IBPluginDependency</string>
+					<string>80.IBWindowTemplateEditedContentRect</string>
 					<string>80.ImportedFromIB2</string>
 					<string>80.windowTemplate.hasMaxSize</string>
 					<string>80.windowTemplate.hasMinSize</string>
@@ -2415,7 +2429,9 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
+					<string>{{0, 738}, {531, 107}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>{{0, 738}, {531, 107}}</string>
 					<boolean value="YES"/>
 					<boolean value="YES"/>
 					<boolean value="YES"/>

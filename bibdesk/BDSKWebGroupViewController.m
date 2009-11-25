@@ -74,23 +74,6 @@
 + (void)initialize {
     BDSKINITIALIZE;
     
-    static NSImage *backAdornImage = nil;
-    static NSImage *forwardAdornImage = nil;
-    static NSImage *reloadAdornImage = nil;
-    static NSImage *stopAdornImage = nil;
-    
-    backAdornImage = [[NSImage imageNamed:NSImageNameGoLeftTemplate] copy];
-    [backAdornImage setName:@"BackAdorn"];
-    
-    forwardAdornImage = [[NSImage imageNamed:NSImageNameGoRightTemplate] copy];
-    [forwardAdornImage setName:@"ForwardAdorn"];
-    
-    reloadAdornImage = [[NSImage imageNamed:NSImageNameRefreshTemplate] copy];
-    [reloadAdornImage setName:@"ReloadAdorn"];
-    
-    stopAdornImage = [[NSImage imageNamed:NSImageNameStopProgressTemplate] copy];
-    [stopAdornImage setName:@"StopAdorn"];
-	
 	// register for bibdesk: protocol, so we can display a help page on start
 	[NSURLProtocol registerClass:[BDSKBibDeskProtocol class]];
 	[WebView registerURLSchemeAsLocal:BDSKBibDeskProtocolName];	
@@ -128,11 +111,11 @@
     [backForwardButton setEnabled:[webView canGoForward] forSegment:1];
     [stopOrReloadButton setEnabled:YES];
     if (retrieving) {
-        [stopOrReloadButton setImage:[NSImage imageNamed:@"StopAdorn"]];
+        [stopOrReloadButton setImage:[NSImage imageNamed:NSImageNameStopProgressTemplate]];
         [stopOrReloadButton setToolTip:NSLocalizedString(@"Cancel download", @"Tool tip message")];
         [stopOrReloadButton setKeyEquivalent:@"."];
     } else {
-        [stopOrReloadButton setImage:[NSImage imageNamed:@"ReloadAdorn"]];
+        [stopOrReloadButton setImage:[NSImage imageNamed:NSImageNameRefreshTemplate]];
         [stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page", @"Tool tip message")];
         [stopOrReloadButton setKeyEquivalent:@"r"];
     }
@@ -146,19 +129,12 @@
     [view setEdges:BDSKMinYEdgeMask];
     [view setColor:[view colorForEdge:NSMaxYEdge] forEdge:NSMinYEdge];
     
-    NSRect frame = [backForwardButton frame];
-    frame.size.height = 25.0;
-    [backForwardButton setFrame:frame];
-    [backForwardButton setSegmentStyle:NSSegmentStyleTexturedRounded];
     backMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
     [backMenu setDelegate:self];
     [backForwardButton setMenu:backMenu forSegment:0];
     forwardMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
     [forwardMenu setDelegate:self];
     [backForwardButton setMenu:forwardMenu forSegment:1];
-    
-    [stopOrReloadButton setImagePosition:NSImageOnly];
-    [stopOrReloadButton setImage:[NSImage imageNamed:@"ReloadAdorn"]];
     
     // update the buttons, we should not be retrieving at this point
     [self setRetrieving:NO];

@@ -889,14 +889,14 @@
 			NSString *message = [NSLocalizedString(@"Loading page", @"Tool tip message") stringByAppendingEllipsis];
 			[progressIndicator setToolTip:message];
 			[statusLine setStringValue:@""];
-			[stopOrReloadButton setImage:[NSImage imageNamed:@"stop_small"]];
+			[stopOrReloadButton setImage:[NSImage imageNamed:NSImageNameStopProgressTemplate]];
 			[stopOrReloadButton setToolTip:NSLocalizedString(@"Stop loading page", @"Tool tip message")];
 			[stopOrReloadButton setKeyEquivalent:@""];
 			[progressIndicator startAnimation:self];
 			[progressIndicator setToolTip:message];
 			[statusLine setStringValue:message];
 		} else {
-			[stopOrReloadButton setImage:[NSImage imageNamed:@"reload_small"]];
+			[stopOrReloadButton setImage:[NSImage imageNamed:NSImageNameRefreshTemplate]];
 			[stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page", @"Tool tip message")];
 			[stopOrReloadButton setKeyEquivalent:@"r"];
 			[progressIndicator stopAnimation:self];
@@ -927,7 +927,7 @@
 			NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %ld%%", @"Tool tip message"), (long)0] stringByAppendingEllipsis];
 			[progressIndicator setToolTip:message];
 			[statusLine setStringValue:@""];
-			[stopOrReloadButton setImage:[NSImage imageNamed:@"stop_small"]];
+			[stopOrReloadButton setImage:[NSImage imageNamed:NSImageNameStopProgressTemplate]];
 			[stopOrReloadButton setToolTip:NSLocalizedString(@"Cancel download", @"Tool tip message")];
 			[stopOrReloadButton setKeyEquivalent:@""];
             [progressIndicator startAnimation:self];
@@ -936,7 +936,7 @@
             [downloadFileName release];
 			downloadFileName = nil;
         } else {
-			[stopOrReloadButton setImage:[NSImage imageNamed:@"reload_small"]];
+			[stopOrReloadButton setImage:[NSImage imageNamed:NSImageNameRefreshTemplate]];
 			[stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page", @"Tool tip message")];
 			[stopOrReloadButton setKeyEquivalent:@"r"];
             [progressIndicator stopAnimation:self];
