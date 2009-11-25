@@ -208,6 +208,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         docFlags.itemChangeMask = 0;
         docFlags.displayMigrationAlert = NO;
         docFlags.inOptionKeyState = NO;
+        docFlags.reverting = NO;
         
         // these are created lazily when needed
         fileSearchController = nil;
@@ -1745,7 +1746,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     while(--idx)
         [[[self windowControllers] objectAtIndex:idx] close];
     
-    if([super revertToContentsOfURL:absoluteURL ofType:aType error:outError]){
+    docFlags.reverting = YES;
+    BOOL success = [super revertToContentsOfURL:absoluteURL ofType:aType error:outError];
+    docFlags.reverting = NO;
+    
+    if(success){
         [self setSearchString:@""];
         [self updateSmartGroupsCount];
         [self updateCategoryGroupsPreservingSelection:YES];
@@ -1753,14 +1758,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 		[tableView deselectAll:self]; // clear before resorting
 		[self search:searchField]; // redo the search
         [self sortPubsByKey:nil]; // resort
-		return YES;
 	}
-	return NO;
+	return success;
 }
 
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType error:(NSError **)outError
 {
-    NSStringEncoding encoding = [BDSKStringEncodingManager defaultEncoding];
+    NSStringEncoding encoding = docFlags.reverting ? [self documentStringEncoding] : [[NSDocumentController sharedDocumentController] lastSelectedEncoding];
     return [self readFromURL:absoluteURL ofType:aType encoding:encoding error:outError];
 }
 

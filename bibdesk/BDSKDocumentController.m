@@ -59,31 +59,39 @@
 
 #define MAX_FILTER_HISTORY 7
 
+enum {
+    BDSKOpenDefault,
+    BDSKOpenUsingPhonyCiteKeys,
+    BDSKOpenUsingFilter,
+    BDSKOpenTemplate
+};
+
+@interface BDSKDocumentController (BDSKPrivate)
+- (void)handleWindowDidBecomeMainNotification:(NSNotification *)notification;
+@end
+
 @implementation BDSKDocumentController
 
-- (id)init
-{
-    if(self = [super init]){
+- (id)init {
+    if ((self = [super init]) && didInitialize == NO) {
 		[[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleWindowDidBecomeMainNotification:)
                                                      name:NSWindowDidBecomeMainNotification
                                                    object:nil];
+        openType = BDSKOpenDefault;
+        lastSelectedEncoding = BDSKNoStringEncoding;
+        lastSelectedFilterCommand = nil;
+        
+        didInitialize = YES;
     }
     return self;
 }
 
-- (void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeMainNotification object:nil];
-    mainDocument = nil;
-    [super dealloc];
-}
-
-- (void)awakeFromNib{
+- (void)awakeFromNib {
     [openUsingFilterAccessoryView retain];
 }
 
-- (id)mainDocument{
+- (id)mainDocument {
     return mainDocument;
 }
 
@@ -115,6 +123,10 @@
     [aDocument release];
 }
 
+- (NSStringEncoding)lastSelectedEncoding {
+    return lastSelectedEncoding != BDSKNoStringEncoding ? lastSelectedEncoding : [BDSKStringEncodingManager defaultEncoding];
+}
+
 - (void)noteNewRecentDocument:(NSDocument *)aDocument{
     
     // may need to revisit this for new document classes
@@ -131,198 +143,146 @@
     }
 }
 
-- (NSArray *)allReadableTypesForOpenPanel {
-    NSMutableArray *types = [NSMutableArray array];
-    for (NSString *className in [self documentClassNames])
-        [types addObjectsFromArray:[NSClassFromString(className) readableTypes]];
-    
-    NSMutableArray *openPanelTypes = [NSMutableArray array];
-    for (NSString *type in types)
-        [openPanelTypes addObjectsFromArray:[self fileExtensionsFromType:type]];
-    
-    return [openPanelTypes count] ? openPanelTypes : types;
+- (IBAction)openDocument:(id)sender {
+    lastSelectedEncoding = [BDSKStringEncodingManager defaultEncoding];
+    [super openDocument:sender];
+    lastSelectedEncoding = BDSKNoStringEncoding;
 }
 
-- (NSArray *)URLsFromRunningOpenPanelForTypes:(NSArray *)types encoding:(NSStringEncoding *)encoding{
-    
-    NSParameterAssert(encoding);
-    
-    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
-    [oPanel setAllowsMultipleSelection:YES];
-    [oPanel setAccessoryView:openTextEncodingAccessoryView];
-    [openTextEncodingPopupButton setEncoding:[BDSKStringEncodingManager defaultEncoding]];
-    [oPanel setDirectory:[self currentDirectory]];
-		
-    NSInteger result = [self runModalOpenPanel:oPanel forTypes:types];
-    if(result == NSOKButton){
-        *encoding = [openTextEncodingPopupButton encoding];
-        return [oPanel URLs];
-    }else 
-        return nil;
+- (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender {
+    openType = BDSKOpenUsingPhonyCiteKeys;
+    lastSelectedEncoding = [BDSKStringEncodingManager defaultEncoding];
+    [super openDocument:sender];
+    lastSelectedEncoding = BDSKNoStringEncoding;
+    openType = BDSKOpenDefault;
 }
 
-- (void)openDocument:(id)sender{
+- (IBAction)openDocumentUsingFilter:(id)sender {
+    openType = BDSKOpenUsingFilter;
+    lastSelectedEncoding = [BDSKStringEncodingManager defaultEncoding];
+    [lastSelectedFilterCommand release];
+    lastSelectedFilterCommand = nil;
+    [super openDocument:sender];
+    lastSelectedEncoding = BDSKNoStringEncoding;
+    [lastSelectedFilterCommand release];
+    lastSelectedFilterCommand = nil;
+    openType = BDSKOpenDefault;
+}
 
-    NSStringEncoding encoding;
-    NSError *error = nil;
-    for (NSURL *aURL in [self URLsFromRunningOpenPanelForTypes:[self allReadableTypesForOpenPanel] encoding:&encoding]) {
-        if (nil == [self openDocumentWithContentsOfURL:aURL encoding:encoding error:&error] && [self presentError:error] == NO)
+- (IBAction)newTemplateDocument:(id)sender {
+    openType = BDSKOpenTemplate;
+    [super newDocument:sender];
+    openType = BDSKOpenDefault;
+}
+
+- (IBAction)openTemplateDocument:(id)sender {
+    openType = BDSKOpenTemplate;
+    [super openDocument:sender];
+    openType = BDSKOpenDefault;
+}
+
+- (NSInteger)runModalOpenPanel:(NSOpenPanel *)openPanel forTypes:(NSArray *)extensions {
+    NSView *accessoryView = nil;
+    NSMutableArray *commandHistory = nil;
+    
+    switch (openType) {
+        case BDSKOpenUsingPhonyCiteKeys:
+            extensions = [NSArray arrayWithObject:@"bib"];
+        case BDSKOpenDefault:
+            accessoryView = openTextEncodingAccessoryView;
             break;
-	}
-}
+        case BDSKOpenUsingFilter:
+            extensions = nil;
+            
+            [openTextEncodingAccessoryView setFrameOrigin:NSZeroPoint];
+            [openUsingFilterAccessoryView addSubview:openTextEncodingAccessoryView];
+            accessoryView = openUsingFilterAccessoryView;
 
-- (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender{
-    NSStringEncoding encoding;
-    NSError *error = nil;
-    for (NSURL *aURL in [self URLsFromRunningOpenPanelForTypes:[NSArray arrayWithObject:@"bib"] encoding:&encoding]) {
-        if (nil == [self openDocumentWithContentsOfURLUsingPhonyCiteKeys:aURL encoding:encoding error:&error] && [self presentError:error] == NO)
+            commandHistory = [NSMutableArray array];
+            // this is a workaround for older versions which added the same command multiple times
+            [commandHistory addNonDuplicateObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKFilterFieldHistoryKey]];
+            
+            // this is also a workaround for older versions
+            if([commandHistory count] > MAX_FILTER_HISTORY)
+                [commandHistory removeObjectsInRange:NSMakeRange(MAX_FILTER_HISTORY, [commandHistory count] - MAX_FILTER_HISTORY)];
+            [openUsingFilterComboBox removeAllItems];
+            [openUsingFilterComboBox addItemsWithObjectValues:commandHistory];
+            
+            if ([commandHistory count]) {
+                [openUsingFilterComboBox selectItemAtIndex:0];
+                [openUsingFilterComboBox setObjectValue:[openUsingFilterComboBox objectValueOfSelectedItem]];
+            }
             break;
-	}
-}
-
-- (IBAction)openDocumentUsingFilter:(id)sender
-{
-    NSInteger result;
-    
-    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
-    [oPanel setAllowsMultipleSelection:YES];
-    [oPanel setDirectory:[self currentDirectory]];
-
-    [openTextEncodingPopupButton setEncoding:[BDSKStringEncodingManager defaultEncoding]];
-    [openTextEncodingAccessoryView setFrameOrigin:NSZeroPoint];
-    [openUsingFilterAccessoryView addSubview:openTextEncodingAccessoryView];
-    [oPanel setAccessoryView:openUsingFilterAccessoryView];
-
-    NSMutableArray *commandHistory = [NSMutableArray array];
-    NSSet *uniqueCommandHistory = [NSSet setWithArray:commandHistory];
-    
-    // this is a workaround for older versions which added the same command multiple times
-    [commandHistory addNonDuplicateObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKFilterFieldHistoryKey]];
-    
-    // this is also a workaround for older versions
-    if([commandHistory count] > MAX_FILTER_HISTORY)
-        [commandHistory removeObjectsInRange:NSMakeRange(MAX_FILTER_HISTORY, [commandHistory count] - MAX_FILTER_HISTORY)];
-    [openUsingFilterComboBox removeAllItems];
-    [openUsingFilterComboBox addItemsWithObjectValues:commandHistory];
-    
-    if ([commandHistory count]) {
-        [openUsingFilterComboBox selectItemAtIndex:0];
-        [openUsingFilterComboBox setObjectValue:[openUsingFilterComboBox objectValueOfSelectedItem]];
+        case BDSKOpenTemplate:
+            extensions = [NSArray arrayWithObjects:@"txt", @"rtf", nil];
+            break;
+    }
+    if (accessoryView) {
+        [openTextEncodingPopupButton setEncoding:[BDSKStringEncodingManager defaultEncoding]];
+        [openPanel setAccessoryView:accessoryView];
     }
     
-    result = [self runModalOpenPanel:oPanel forTypes:nil];
+    NSInteger result = [super runModalOpenPanel:openPanel forTypes:extensions];
     
     if (result == NSOKButton) {
-        NSString *shellCommand = [openUsingFilterComboBox stringValue];
-        NSStringEncoding encoding = [openTextEncodingPopupButton encoding];
-        NSError *error = nil;
-        for (NSURL *aURL in [oPanel URLs]) {
-            if (nil == [self openDocumentWithContentsOfURL:aURL usingFilter:shellCommand encoding:encoding error:&error] && [self presentError:error] == NO)
-                break;
+        if (accessoryView)
+            lastSelectedEncoding = [openTextEncodingPopupButton encoding];
+        
+        if (openType == BDSKOpenUsingFilter) {
+            [lastSelectedFilterCommand release];
+            lastSelectedFilterCommand = [[openUsingFilterComboBox stringValue] copy];
+            
+            NSUInteger commandIndex = [commandHistory indexOfObject:lastSelectedFilterCommand];
+            if (commandIndex == NSNotFound) {
+                // not in the array, so add it and then remove the tail
+                [commandHistory insertObject:lastSelectedFilterCommand atIndex:0];
+                if([commandHistory count] > MAX_FILTER_HISTORY)
+                    [commandHistory removeLastObject];
+            } else if (commandIndex != 0) {
+                // already in the array, so move it to the head of the list
+                [commandHistory removeObject:lastSelectedFilterCommand];
+                [commandHistory insertObject:lastSelectedFilterCommand atIndex:0];
+            }
+            [[NSUserDefaults standardUserDefaults] setObject:commandHistory forKey:BDSKFilterFieldHistoryKey];
         }
-        
-        NSUInteger commandIndex = [commandHistory indexOfObject:shellCommand];
-        if (commandIndex == NSNotFound) {
-            // not in the array, so add it and then remove the tail
-            [commandHistory insertObject:shellCommand atIndex:0];
-            if([commandHistory count] > MAX_FILTER_HISTORY)
-                [commandHistory removeLastObject];
-        } else if (commandIndex != 0) {
-            // already in the array, so move it to the head of the list
-            [[shellCommand retain] autorelease];
-            [commandHistory removeObject:shellCommand];
-            [commandHistory insertObject:shellCommand atIndex:0];
-        }
-        [[NSUserDefaults standardUserDefaults] setObject:commandHistory forKey:BDSKFilterFieldHistoryKey];
-    }
-}
-
-- (id)openDocumentWithContentsOfURL:(NSURL *)fileURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
-    NSParameterAssert(encoding != 0);
-	// first see if we already have this document open
-    id doc = [self documentForURL:fileURL];
-    
-    if(doc == nil){
-        BOOL success;
-        // make a fresh document, and don't display it until we can set its name.
-        
-        NSError *error;
-        doc = [self openUntitledDocumentAndDisplay:NO error:&error];
-        
-        if (nil == doc) {
-            if (outError)
-                *outError = error;
-            return nil;
-        }
-        
-        NSString *type = [self typeForContentsOfURL:fileURL error:&error];
-        
-        if (nil == type) {
-            if (outError)
-                *outError = error;
-            return nil;
-        }
-
-        [doc setFileURL:fileURL]; // this effectively makes it not an untitled document anymore.
-        success = [doc readFromURL:fileURL ofType:type encoding:encoding error:&error];
-        if (success == NO) {
-            [self removeDocument:doc];
-            if (outError)
-                *outError = error;
-            return nil;
-        }
-        
-        [doc makeWindowControllers];
     }
     
-    [doc showWindows];
-    
-    return doc;
+    return result;
 }
 
-- (id)openUntitledBibTeXDocumentWithString:(NSString *)fileString encoding:(NSStringEncoding)encoding error:(NSError **)outError{
+- (id)makeUntitledBibTeXDocumentWithString:(NSString *)fileString error:(NSError **)outError {
     // @@ we could also use [[NSApp delegate] temporaryFilePath:[filePath lastPathComponent] createDirectory:NO];
     // or [[NSFileManager defaultManager] uniqueFilePath:[filePath lastPathComponent] createDirectory:NO];
     // or move aside the original file
     NSString *tmpFilePath = [[[NSFileManager defaultManager] temporaryFileWithBasename:nil] stringByAppendingPathExtension:@"bib"];
     NSURL *tmpFileURL = [NSURL fileURLWithPath:tmpFilePath];
-    NSData *data = [fileString dataUsingEncoding:encoding];
+    NSData *data = [fileString dataUsingEncoding:lastSelectedEncoding];
     
     // If data is nil, then [data writeToFile:error:] is interpreted as NO since it's a message to nil...but doesn't initialize &error, so we crash!
     if (nil == data) {
         if (outError) {
             *outError = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:NSLocalizedString(@"Incorrect string encoding", @"")];
-            [*outError setValue:[NSNumber numberWithUnsignedInteger:encoding] forKey:NSStringEncodingErrorKey];
-            [*outError setValue:[NSString stringWithFormat:NSLocalizedString(@"The file could not be converted to encoding \"%@\".  Please try a different encoding.", @""), [NSString localizedNameOfStringEncoding:encoding]] forKey:NSLocalizedRecoverySuggestionErrorKey];
+            [*outError setValue:[NSNumber numberWithUnsignedInteger:lastSelectedEncoding] forKey:NSStringEncodingErrorKey];
+            [*outError setValue:[NSString stringWithFormat:NSLocalizedString(@"The file could not be converted to encoding \"%@\".  Please try a different encoding.", @""), [NSString localizedNameOfStringEncoding:lastSelectedEncoding]] forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
         return nil;
     }
     
-    NSError *error;
-    
     // bail out if we can't write the temp file
-    if([data writeToFile:tmpFilePath options:NSAtomicWrite error:&error] == NO) {
-        if (outError) *outError = error;
+    if ([data writeToFile:tmpFilePath options:NSAtomicWrite error:outError] == NO) {
         return nil;
     }
     
     // make a fresh document, and don't display it until we can set its name.
-    BibDocument *doc = [self openUntitledDocumentAndDisplay:NO error:outError];    
-    [doc setFileURL:tmpFileURL]; // required for error handling
-    BOOL success = [doc readFromURL:tmpFileURL ofType:BDSKBibTeXDocumentType encoding:encoding error:outError];
+    BibDocument *doc = [self makeDocumentWithContentsOfURL:tmpFileURL ofType:BDSKBibTeXDocumentType error:outError];    
     
-    if (success == NO) {
-        [self removeDocument:doc];
-        doc = nil;
-    } else {
+    if (doc) {
         [doc setFileURL:nil];
         // set date-added for imports
         NSString *importDate = [[NSCalendarDate date] description];
         for (BibItem *pub in [doc publications])
             [pub setField:BDSKDateAddedString toValue:importDate];
         [[doc undoManager] removeAllActions];
-        [doc makeWindowControllers];
-        [doc showWindows];
         // mark as dirty, since we've changed the content
         [doc updateChangeCount:NSChangeDone];
     }
@@ -330,43 +290,30 @@
     return doc;
 }
 
-- (id)openDocumentWithContentsOfURLUsingPhonyCiteKeys:(NSURL *)fileURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
-{
-    NSError *error;
-    NSString *stringFromFile = [NSString stringWithContentsOfURL:fileURL encoding:encoding error:&error];
-    stringFromFile = [stringFromFile stringWithPhoneyCiteKeys:@"FixMe"];
-    
-	BibDocument *doc = [self openUntitledBibTeXDocumentWithString:stringFromFile encoding:encoding error:&error];
-    
-    if (doc)
-        [doc reportTemporaryCiteKeys:@"FixMe" forNewDocument:YES];
-    else if (outError)
-        *outError = error;
-    
-    return doc;
-}
-
-- (id)openDocumentWithContentsOfURL:(NSURL *)fileURL usingFilter:(NSString *)shellCommand encoding:(NSStringEncoding)encoding error:(NSError **)outError;
-{
-    NSError *error;
-    NSString *fileInputString = [NSString stringWithContentsOfURL:fileURL encoding:encoding error:&error];
-    BibDocument *doc = nil;
+- (id)makeDocumentWithContentsOfURL:(NSURL *)absoluteURL ofType:(NSString *)typeName error:(NSError **)outError {
+    id doc = nil;
+    if (openType == BDSKOpenUsingPhonyCiteKeys) {
+        NSString *stringFromFile = [[NSString stringWithContentsOfURL:absoluteURL encoding:lastSelectedEncoding error:outError] stringWithPhoneyCiteKeys:@"FixMe"];
+        if (stringFromFile)
+            doc = [self makeUntitledBibTeXDocumentWithString:stringFromFile error:outError];
+    } else if (openType == BDSKOpenUsingFilter) {
+        NSString *fileInputString = [NSString stringWithContentsOfURL:absoluteURL encoding:lastSelectedEncoding error:outError];
         
-    if (nil == fileInputString){
-        if (outError)
-            *outError = error;
+        lastSelectedEncoding = NSUTF8StringEncoding;
+        
+        if (fileInputString) {
+            NSString *filterOutput = [BDSKTask runShellCommand:lastSelectedFilterCommand withInputString:fileInputString];
+            
+            if ([NSString isEmptyString:filterOutput] == NO) {
+                doc = [self makeUntitledBibTeXDocumentWithString:fileInputString error:outError];
+            } else if (outError) {
+                *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentOpenError localizedDescription:NSLocalizedString(@"Unable To Open With Filter", @"Error description")];
+                [*outError setValue:NSLocalizedString(@"Unable to read the file correctly. Please ensure that the shell command specified for filtering is correct by testing it in Terminal.app.", @"Error description") forKey:NSLocalizedRecoverySuggestionErrorKey];
+            }
+        }    
     } else {
-        NSString *filterOutput = [BDSKTask runShellCommand:shellCommand withInputString:fileInputString];
-        
-        if ([NSString isEmptyString:filterOutput] == NO) {
-            doc = [self openUntitledBibTeXDocumentWithString:filterOutput encoding:NSUTF8StringEncoding error:&error];
-            if (nil == doc && outError)
-                *outError = error;
-        } else if (outError) {
-            *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentOpenError localizedDescription:NSLocalizedString(@"Unable To Open With Filter", @"Error description")];
-            [*outError setValue:NSLocalizedString(@"Unable to read the file correctly. Please ensure that the shell command specified for filtering is correct by testing it in Terminal.app.", @"Error description") forKey:NSLocalizedRecoverySuggestionErrorKey];
-        }
-    }    
+        doc = [super makeDocumentWithContentsOfURL:absoluteURL ofType:typeName error:outError];
+    }
     return doc;
 }
 
@@ -376,12 +323,13 @@
     id document = nil;
     
     if ([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"]) {
+        
         NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:absoluteURL];
         BDAlias *fileAlias = [BDAlias aliasWithData:[dictionary valueForKey:@"FileAlias"]];
         // if the alias didn't work, let's see if we have a filepath key...
         NSString *fullPath = [fileAlias fullPath] ?: [dictionary valueForKey:@"net_sourceforge_bibdesk_owningfilepath"];
         
-        if(fullPath == nil){
+        if (fullPath == nil) {
             if(outError != nil) 
                 *outError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to find the file associated with this item.", @"Error description"), NSLocalizedDescriptionKey, nil]];
             return nil;
@@ -393,7 +341,7 @@
         NSError *error;
         document = [super openDocumentWithContentsOfURL:fileURL display:YES error:&error];
         
-        if(document == nil) {
+        if (document == nil) {
             NSLog(@"document at URL %@ failed to open for reason: %@", fileURL, [error localizedFailureReason]);
             // assign to the outError or we'll crash...
             if (outError) *outError = error;
@@ -425,69 +373,24 @@
         }
         
     } else {
+        
         document = [super openDocumentWithContentsOfURL:absoluteURL display:displayDocument error:outError];
+        
+        if (openType == BDSKOpenUsingPhonyCiteKeys)
+            [(BibDocument *)document reportTemporaryCiteKeys:@"FixMe" forNewDocument:YES];
+        
     }
     
     return document;
 }
 
-#pragma mark Template documents
-
-- (IBAction)newTemplateDocument:(id)sender {
-    NSError *error = nil;
-    NSDocument *document = [self makeUntitledDocumentOfType:BDSKTextTemplateDocumentType error:&error];
-
-    if (document == nil) {
-        if (error)
-            [self presentError:error];
-        return;
-    }
-
-    [self addDocument:document];
-    [document makeWindowControllers];
-    [document showWindows];
-}
-
-- (IBAction)openTemplateDocument:(id)sender {
-    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
-    [oPanel setAllowsMultipleSelection:YES];
-    [oPanel setDirectory:[self currentDirectory]];
-		
-    NSInteger result = [self runModalOpenPanel:oPanel forTypes:[NSArray arrayWithObjects:@"txt", @"rtf", nil]];
-    if(result == NSOKButton){
-        NSError *error = nil;
-        for (NSURL *aURL in [oPanel URLs]) {
-            if (nil == [self openTemplateDocumentWithContentsOfURL:aURL error:&error] && [self presentError:error] == NO)
-                break;
-        }
-    }
-}
-
-- (id)openTemplateDocumentWithContentsOfURL:(NSURL *)fileURL error:(NSError **)outError{
-	// first see if we already have this document open
-    id doc = [self documentForURL:fileURL];
-    
-    if(doc == nil){
-        NSError *error;
-        NSString *type = [[[fileURL path] pathExtension] caseInsensitiveCompare:@"rtf"] == NSOrderedSame ? BDSKRichTextTemplateDocumentType : BDSKTextTemplateDocumentType;
-        doc = [[[BDSKTemplateDocument alloc] initWithContentsOfURL:fileURL ofType:type error:&error] autorelease];
-        
-        if (nil == doc) {
-            if (outError)
-                *outError = error;
-            return nil;
-        }
-        
-        [self addDocument:doc];
-        
-        [doc makeWindowControllers];
-    }
-    [doc showWindows];
-    
-    return doc;
-}
-
 #pragma mark Document types
+
+- (NSString *)defaultType {
+    if (openType == BDSKOpenTemplate)
+        return BDSKTextTemplateDocumentType;
+    return [super defaultType];
+}
 
 - (NSArray *)fileExtensionsFromType:(NSString *)documentTypeName
 {
@@ -500,12 +403,19 @@
 	return fileExtensions;
 }
 
+- (NSString *)typeForContentsOfURL:(NSURL *)inAbsoluteURL error:(NSError **)outError {
+    if (openType == BDSKOpenTemplate)
+        return [[[inAbsoluteURL path] pathExtension] caseInsensitiveCompare:@"rtf"] == NSOrderedSame ? BDSKRichTextTemplateDocumentType : BDSKTextTemplateDocumentType;
+    return [super typeForContentsOfURL:inAbsoluteURL error:outError];
+}
+
 - (Class)documentClassForType:(NSString *)documentTypeName
 {
-	Class docClass = [super documentClassForType:documentTypeName];
-    if (docClass == Nil && [[BDSKTemplate allStyleNames] containsObject:documentTypeName]) {
+    Class docClass = [super documentClassForType:documentTypeName];
+	if ([documentTypeName isEqualToString:BDSKTextTemplateDocumentType] || [documentTypeName isEqualToString:BDSKRichTextTemplateDocumentType])
+        docClass = [BDSKTemplateDocument class];
+    else if (docClass == Nil && [[BDSKTemplate allStyleNames] containsObject:documentTypeName])
         docClass = [BibDocument class];
-    }
     return docClass;
 }
 

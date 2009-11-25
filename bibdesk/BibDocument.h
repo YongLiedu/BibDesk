@@ -245,6 +245,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
         unsigned int        previousSortDescending:1;
         unsigned int        sortGroupsDescending:1;
         unsigned int        dragFromExternalGroups:1;
+        unsigned int        reverting:1;
         unsigned int        isDocumentClosed:1;
         unsigned int        didImport:1;
         unsigned int        displayMigrationAlert:1;

@@ -46,63 +46,23 @@
 	IBOutlet NSView *openTextEncodingAccessoryView;
 	IBOutlet BDSKEncodingPopUpButton *openTextEncodingPopupButton;
     
+    BOOL didInitialize;
+    
     id mainDocument;
+    
+    NSInteger openType;
+    NSStringEncoding lastSelectedEncoding;
+    NSString *lastSelectedFilterCommand;
 }
 
 - (id)mainDocument;
 
-/*!
-    @method openDocumentUsingFilter:
-    @abstract Lets user specify a command-line to read from stdin and give us stdout.    
-*/
-- (IBAction)openDocumentUsingFilter:(id)sender;
+- (NSStringEncoding)lastSelectedEncoding;
 
-/*!
-    @method openDocumentUsingPhonyCiteKeys:
-    @abstract First sets cite keys when they are missing, so we can open the file.    
-*/
+- (IBAction)openDocumentUsingFilter:(id)sender;
 - (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender;
 
-/*!
-    @method     openDocumentWithContentsOfURL:encoding:error:
-    @abstract   Creates a new document with given file and string encoding.
-    @discussion (comprehensive description)
-    @param      fileURL The file to open
-    @param      encoding File's character encoding
-    @param      outError The error when opening fails
-*/
-- (id)openDocumentWithContentsOfURL:(NSURL *)fileURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
-
-/*!
-    @method     openDocumentWithContentsOfURLUsingPhonyCiteKeys:encoding:
-    @abstract   Generates temporary cite keys in order to keep btparse from choking on files exported from Endnote or BookEnds.
-    @discussion Uses a regular expression to find and replace empty cite keys, according to a fairly limited pattern.
-                A new, untitled document is created, and a warning about the invalid temporary keys is shown after opening.
-    @param      fileURL The file to open
-    @param      encoding File's character encoding
-    @param      outError The error when opening fails
-*/
-- (id)openDocumentWithContentsOfURLUsingPhonyCiteKeys:(NSURL *)fileURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
-
-/*!
-    @method     openDocumentWithContentsOfURL:usingFilter:encoding:
-    @abstract   Applies a filter to the file content before openening a new document.
-    @discussion (comprehensive description)
-    @param      fileURL The file to open
-    @param      shellCommand The shell command to use to filter the file content
-    @param      encoding File's character encoding
-    @param      outError The error when opening fails
-*/
-- (id)openDocumentWithContentsOfURL:(NSURL *)fileURL usingFilter:(NSString *)shellCommand encoding:(NSStringEncoding)encoding error:(NSError **)outError;
-
 - (IBAction)newTemplateDocument:(id)sender;
-
 - (IBAction)openTemplateDocument:(id)sender;
-
-- (id)openTemplateDocumentWithContentsOfURL:(NSURL *)fileURL error:(NSError **)outError;
-
-- (void)handleWindowDidBecomeMainNotification:(NSNotification *)notification;
-
-- (IBAction)newTemplateDocument:(id)sender;
 
 @end
