@@ -208,7 +208,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         docFlags.itemChangeMask = 0;
         docFlags.displayMigrationAlert = NO;
         docFlags.inOptionKeyState = NO;
-        docFlags.reverting = NO;
         
         // these are created lazily when needed
         fileSearchController = nil;
@@ -1746,9 +1745,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     while(--idx)
         [[[self windowControllers] objectAtIndex:idx] close];
     
-    docFlags.reverting = YES;
     BOOL success = [super revertToContentsOfURL:absoluteURL ofType:aType error:outError];
-    docFlags.reverting = NO;
     
     if(success){
         [self setSearchString:@""];
@@ -1764,8 +1761,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType error:(NSError **)outError
 {
-    NSStringEncoding encoding = docFlags.reverting ? [self documentStringEncoding] : [[NSDocumentController sharedDocumentController] lastSelectedEncoding];
-    return [self readFromURL:absoluteURL ofType:aType encoding:encoding error:outError];
+    return [self readFromURL:absoluteURL ofType:aType encoding:[self documentStringEncoding] error:outError];
 }
 
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType encoding:(NSStringEncoding)encoding error:(NSError **)outError
