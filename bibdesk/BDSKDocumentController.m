@@ -57,6 +57,8 @@
 #import "BDSKTemplateDocument.h"
 #import "BDSKTask.h"
 
+#define MAX_FILTER_HISTORY 7
+
 @implementation BDSKDocumentController
 
 - (id)init
@@ -191,23 +193,23 @@
     [openUsingFilterAccessoryView addSubview:openTextEncodingAccessoryView];
     [oPanel setAccessoryView:openUsingFilterAccessoryView];
 
-    NSMutableArray *commandHistory = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKFilterFieldHistoryKey]];
+    NSMutableArray *commandHistory = [NSMutableArray array];
     NSSet *uniqueCommandHistory = [NSSet setWithArray:commandHistory];
     
-    // this is a workaround for older versions which added the same command multiple times; it screws up the order
-    if ([commandHistory count] != [uniqueCommandHistory count])
-        commandHistory = [NSMutableArray arrayWithArray:[uniqueCommandHistory allObjects]];
+    // this is a workaround for older versions which added the same command multiple times
+    [commandHistory addNonDuplicateObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKFilterFieldHistoryKey]];
     
     // this is also a workaround for older versions
-    NSUInteger MAX_HISTORY = 7;
-    if([commandHistory count] > MAX_HISTORY)
-        [commandHistory removeObjectsInRange:NSMakeRange(MAX_HISTORY, [commandHistory count] - MAX_HISTORY)];
+    if([commandHistory count] > MAX_FILTER_HISTORY)
+        [commandHistory removeObjectsInRange:NSMakeRange(MAX_FILTER_HISTORY, [commandHistory count] - MAX_FILTER_HISTORY)];
+    [openUsingFilterComboBox removeAllItems];
     [openUsingFilterComboBox addItemsWithObjectValues:commandHistory];
     
-    if([commandHistory count]){
+    if ([commandHistory count]) {
         [openUsingFilterComboBox selectItemAtIndex:0];
         [openUsingFilterComboBox setObjectValue:[openUsingFilterComboBox objectValueOfSelectedItem]];
     }
+    
     result = [self runModalOpenPanel:oPanel forTypes:nil];
     
     if (result == NSOKButton) {
@@ -220,15 +222,16 @@
         }
         
         NSUInteger commandIndex = [commandHistory indexOfObject:shellCommand];
-        // already in the array, so move it to the head of the list
-        if(commandIndex != NSNotFound && commandIndex != 0) {
+        if (commandIndex == NSNotFound) {
+            // not in the array, so add it and then remove the tail
+            [commandHistory insertObject:shellCommand atIndex:0];
+            if([commandHistory count] > MAX_FILTER_HISTORY)
+                [commandHistory removeLastObject];
+        } else if (commandIndex != 0) {
+            // already in the array, so move it to the head of the list
             [[shellCommand retain] autorelease];
             [commandHistory removeObject:shellCommand];
             [commandHistory insertObject:shellCommand atIndex:0];
-        } else {
-            // not in the array, so add it and then remove the tail
-            [commandHistory insertObject:shellCommand atIndex:0];
-            [commandHistory removeLastObject];
         }
         [[NSUserDefaults standardUserDefaults] setObject:commandHistory forKey:BDSKFilterFieldHistoryKey];
     }
