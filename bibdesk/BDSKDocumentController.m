@@ -245,6 +245,7 @@ enum {
         NSStringEncoding encoding = [self lastSelectedEncoding];
         NSString *stringFromFile = [NSString stringWithContentsOfURL:absoluteURL encoding:encoding error:outError];
         if (stringFromFile) {
+            NSStringEncoding savedEncoding = lastSelectedEncoding;
             NSString *filteredString = nil;
             if (openType == BDSKOpenUsingPhonyCiteKeys) {
                 filteredString = [stringFromFile stringWithPhoneyCiteKeys:@"FixMe"];
@@ -257,7 +258,8 @@ enum {
                         *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentOpenError localizedDescription:NSLocalizedString(@"Unable To Open With Filter", @"Error description")];
                         [*outError setValue:NSLocalizedString(@"Unable to read the file correctly. Please ensure that the shell command specified for filtering is correct by testing it in Terminal.app.", @"Error description") forKey:NSLocalizedRecoverySuggestionErrorKey];
                     }
-                }   
+                }
+                // the shell task returns UTF-8, so we open the document with that encoding
                 encoding =  NSUTF8StringEncoding;
                 if (lastSelectedEncoding != BDSKNoStringEncoding)
                     lastSelectedEncoding = encoding;
@@ -272,6 +274,7 @@ enum {
                     [[NSFileManager defaultManager] removeItemAtPath:[tmpFileURL path] error:NULL];
                 }
             }
+            lastSelectedEncoding = savedEncoding;
         }
     } else {
         doc = [super makeDocumentWithContentsOfURL:absoluteURL ofType:typeName error:outError];
