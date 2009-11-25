@@ -1761,11 +1761,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType error:(NSError **)outError
 {
-    return [self readFromURL:absoluteURL ofType:aType encoding:[self documentStringEncoding] error:outError];
-}
-
-- (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType encoding:(NSStringEncoding)encoding error:(NSError **)outError
-{
     BOOL success;
     NSError *error = nil;
     NSData *data = [NSData dataWithContentsOfURL:absoluteURL options:NSUncachedRead error:&error];
@@ -1773,6 +1768,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if (outError) *outError = error;
         return NO;
     }
+    
+    // when using the Open panel this should be initialized to the selected encoding, otherwise the default encoding from the prefs, or for revert whatever it was
+    NSStringEncoding encoding = [self documentStringEncoding];
     
     // make sure we clear all macros and groups that are saved in the file, should only have those for revert
     // better do this here, so we don't remove them when reading the data fails
