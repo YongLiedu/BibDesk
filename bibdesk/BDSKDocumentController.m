@@ -36,18 +36,12 @@
 
 #import "BDSKDocumentController.h"
 #import "BDSKStringConstants.h"
-#import "BDSKRuntime.h"
-#import <AGRegex/AGRegex.h>
 #import "BDSKStringEncodingManager.h"
-#import "BDSKAppController.h"
 #import "BibDocument.h"
-#import "BibDocument_Groups.h"
-#import "BibDocument_Search.h"
 #import "NSTask_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDAlias.h"
 #import "NSWorkspace_BDSKExtensions.h"
-#import "BibItem.h"
 #import "BDSKTemplate.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
