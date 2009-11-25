@@ -785,6 +785,8 @@
             // succeeded to parse the file, we return immediately
             [self didEndSheet:sheet returnCode:returnCode contextInfo:NULL];
         }else{
+            [sheet orderOut:nil];
+            
             // show the main window
             [super beginSheetModalForWindow:docWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
             [self release];
@@ -826,6 +828,8 @@
     NSWindow *docWindow = [(NSWindow *)contextInfo autorelease];
     
     if (returnCode == NSOKButton) {
+        [sheet orderOut:nil];
+        
         // show the main window
         [super beginSheetModalForWindow:docWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         [self release];
