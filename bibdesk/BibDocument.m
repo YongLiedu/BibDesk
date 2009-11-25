@@ -1944,6 +1944,17 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 #pragma mark -
 
+- (void)markAsImported {
+    [self setFileURL:nil];
+    // set date-added for imports
+    NSString *importDate = [[NSCalendarDate date] description];
+    for (BibItem *pub in publications)
+        [pub setField:BDSKDateAddedString toValue:importDate];
+    [[self undoManager] removeAllActions];
+    // mark as dirty, since we've changed the content
+    [self updateChangeCount:NSChangeDone];
+}
+
 - (void)temporaryCiteKeysAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     NSString *tmpKey = [(NSString *)contextInfo autorelease];
     if(returnCode == NSAlertDefaultReturn){

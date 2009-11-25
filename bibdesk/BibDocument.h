@@ -316,6 +316,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 - (void)reportTemporaryCiteKeys:(NSString *)tmpKey forNewDocument:(BOOL)isNewFile;
 
+- (void)markAsImported;
+
 /*!
 	@method bibTeXStringForPublications
 	@abstract auxiliary method for generating bibtex string for publication items
