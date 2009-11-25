@@ -167,6 +167,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [NSImage makePreviewDisplayImages];
 }
 
++ (NSSet *)keyPathsForValuesAffectingDisplayName {
+    return [NSSet setWithObjects:@"fileURL", nil];
+}
+
 - (id)init{
     if(self = [super init]){
         
@@ -2763,23 +2767,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 	}
 }
 
-#pragma mark DisplayName KVO
-
 - (void)setFileURL:(NSURL *)absoluteURL{ 
-    // make sure that changes in the displayName are observed, as NSDocument doesn't use a KVC compliant method for setting it
-    [self willChangeValueForKey:@"displayName"];
-    [super setFileURL:absoluteURL];
-    [self didChangeValueForKey:@"displayName"];
-    
     if (absoluteURL)
         [[publications valueForKeyPath:@"@unionOfArrays.files"]  makeObjectsPerformSelector:@selector(update)];
     [self updateFileViews];
     [self updatePreviews];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentFileURLDidChangeNotification object:self];
 }
-
-// just create this setter to avoid a run time warning
-- (void)setDisplayName:(NSString *)newName{}
 
 // avoid warning for BDSKOwner protocol conformance
 - (NSURL *)fileURL {
