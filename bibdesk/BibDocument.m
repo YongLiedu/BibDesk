@@ -189,7 +189,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         docFlags.isDocumentClosed = NO;
         
         // need to set this for new documents
-        [self setDocumentStringEncoding:[BDSKStringEncodingManager defaultEncoding]]; 
+        [self setDocumentStringEncoding:[[NSDocumentController sharedDocumentController] lastSelectedEncoding]]; 
         
         // these are set in windowControllerDidLoadNib: from the xattr defaults if available
         bottomPreviewDisplay = BDSKPreviewDisplayText;
