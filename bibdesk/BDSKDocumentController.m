@@ -183,7 +183,10 @@ enum {
         case BDSKOpenUsingFilter:
             extensions = nil;
             
-            [openTextEncodingAccessoryView setFrameOrigin:NSZeroPoint];
+            NSRect frame = [openTextEncodingAccessoryView frame];
+            frame.origin = NSZeroPoint;
+            frame.size.width = NSWidth([openUsingFilterAccessoryView frame]);
+            [openTextEncodingAccessoryView setFrame:frame];
             [openUsingFilterAccessoryView addSubview:openTextEncodingAccessoryView];
             accessoryView = openUsingFilterAccessoryView;
 
