@@ -2768,6 +2768,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 - (void)setFileURL:(NSURL *)absoluteURL{ 
+    [super setFileURL:absoluteURL];
     if (absoluteURL)
         [[publications valueForKeyPath:@"@unionOfArrays.files"]  makeObjectsPerformSelector:@selector(update)];
     [self updateFileViews];
