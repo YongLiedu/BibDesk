@@ -130,21 +130,10 @@ static void fixLegacyTableColumnIdentifiers()
         [sud setObject:fixedTableColumnIdentifiers forKey:BDSKShownColsNamesKey];
 }
 
-- (void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
-}
-
 - (void)awakeFromNib{   
     // Add a Scripts menu; searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/BibDesk/Scripts
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKScriptMenuDisabledKey] == NO)
         [BDSKScriptMenu addScriptsToMainMenu];
-    
-    NSMenu *fileMenu = [[[NSApp mainMenu] itemAtIndex:1] submenu];
-    NSUInteger idx = [fileMenu indexOfItemWithTarget:nil andAction:@selector(runPageLayout:)];
-    if (idx != NSNotFound)
-        [fileMenu removeItemAtIndex:idx];
 }
 
 - (void)checkFormatStrings {
@@ -169,7 +158,7 @@ static void fixLegacyTableColumnIdentifiers()
             [sud setObject:formatString forKey:BDSKCiteKeyFormatKey];
             [[BDSKTypeManager sharedManager] setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
         }else{
-            [[BDSKPreferenceController sharedPreferenceController] showWindow:self];
+            [[BDSKPreferenceController sharedPreferenceController] showWindow:nil];
             [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.citekey"];
         }
     }
@@ -232,7 +221,7 @@ static void fixLegacyTableColumnIdentifiers()
         if (button == NSAlertDefaultReturn) {
             [sud setObject:fixedFormatString forKey:BDSKLocalFileFormatKey];
             [[BDSKTypeManager sharedManager] setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
-            [[BDSKPreferenceController sharedPreferenceController] showWindow:self];
+            [[BDSKPreferenceController sharedPreferenceController] showWindow:nil];
             [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.autofile"];
         } else if (button == NSAlertAlternateReturn) {
             formatString = [[[NSUserDefaultsController sharedUserDefaultsController] initialValues] objectForKey:BDSKLocalFileFormatKey];			
