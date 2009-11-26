@@ -48,9 +48,7 @@
     NSData *stdoutData;
 }
 - (id)initWithTask:(NSTask *)aTask;
-// Note: the returned data is not autoreleased
 - (NSData *)runShellCommand:(NSString *)cmd withInputData:(NSData *)input;
-- (NSData *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputData:(NSData *)input;
 - (void)stdoutNowAvailable:(NSNotification *)notification;
 @end
 
@@ -117,7 +115,10 @@
     NSData *scriptData;
     NSMutableDictionary *currentAttributes;
     NSUInteger currentMode;
-    NSData *output = nil;
+    NSPipe *inputPipe;
+    NSPipe *outputPipe;
+    NSFileHandle *inputFileHandle;
+    NSFileHandle *outputFileHandle;
 
     // ---------- Check the shell and create the script ----------
     if (![fm isExecutableFileAtPath:shellPath]) {
@@ -148,35 +149,9 @@
     }
 
     // ---------- Execute the script ----------
-
+    [task setLaunchPath:shellScriptPath];
     // MF:!!! The current working dir isn't too appropriate
-    output = [self executeBinary:shellScriptPath inDirectory:[shellScriptPath stringByDeletingLastPathComponent] withArguments:nil environment:nil inputData:input];
-
-    // ---------- Remove the script file ----------
-    if (![fm removeItemAtPath:shellScriptPath error:NULL]) {
-        NSLog(@"Filter Pipes: Failed to delete temporary script file. (%@)", shellScriptPath);
-    }
-
-    return output;
-}
-
-// This method and the little notification method following implement synchronously running a task with input piped in from a string and output piped back out and returned as a string.   They require only a stdoutData instance variable to function.
-- (NSData *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputData:(NSData *)input {
-    NSPipe *inputPipe;
-    NSPipe *outputPipe;
-    NSFileHandle *inputFileHandle;
-    NSFileHandle *outputFileHandle;
-
-    [task setLaunchPath:executablePath];
-    if (currentDirPath) {
-        [task setCurrentDirectoryPath:currentDirPath];
-    }
-    if (args) {
-        [task setArguments:args];
-    }
-    if (env) {
-        [task setEnvironment:env];
-    }
+    [task setCurrentDirectoryPath:[shellScriptPath stringByDeletingLastPathComponent]];
 
     [task setStandardError:[NSFileHandle fileHandleWithStandardError]];
     inputPipe = [NSPipe pipe];
@@ -211,19 +186,24 @@
             [nc removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
             
         } else {
-            NSLog(@"Failed to launch task at \"%@\" or it exited without accepting input.  Termination status was %d", executablePath, [task terminationStatus]);
+            NSLog(@"Failed to launch task at \"%@\" or it exited without accepting input.  Termination status was %d", shellScriptPath, [task terminationStatus]);
         }
     }
     @catch(id exception){
         // if the pipe failed, we catch an exception here and ignore it
-        NSLog(@"exception %@ encountered while trying to run task %@", exception, executablePath);
+        NSLog(@"exception %@ encountered while trying to run task %@", exception, shellScriptPath);
         [nc removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
     }
     
     // reset signal handling to default behavior
     signal(SIGPIPE, previousSignalMask);
 
-    return [task terminationStatus] == 0 && [stdoutData length] ? stdoutData : nil;
+    // ---------- Remove the script file ----------
+    if (![fm removeItemAtPath:shellScriptPath error:NULL]) {
+        NSLog(@"Filter Pipes: Failed to delete temporary script file. (%@)", shellScriptPath);
+    }
+
+    return [task terminationStatus] == 0 ? [[stdoutData retain] autorelease] : nil;
 }
 
 - (void)stdoutNowAvailable:(NSNotification *)notification {
@@ -231,6 +211,5 @@
     if ([outputData length])
         stdoutData = [outputData retain];
 }
-
 
 @end
