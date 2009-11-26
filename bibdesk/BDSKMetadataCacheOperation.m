@@ -48,7 +48,7 @@
 - (id)initWithPublicationInfos:(NSArray *)pubInfos forDocumentURL:(NSURL *)aURL {
     if (self = [super init]) {
         publicationInfos = [pubInfos copy];
-        documentURL = [aURL retain];
+        documentURL = [aURL copy];
     }
     return self;
 }
