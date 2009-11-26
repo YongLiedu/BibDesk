@@ -41,5 +41,5 @@
 @interface NSTask (BDSKExtensions)
 + (NSString *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input;
 + (NSData *)runRawShellCommand:(NSString *)cmd withInputString:(NSString *)input;
-+ (NSString *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input;
++ (NSData *)runRawShellCommand:(NSString *)cmd withInputData:(NSData *)input;
 @end

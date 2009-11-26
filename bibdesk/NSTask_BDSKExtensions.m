@@ -49,8 +49,8 @@
 }
 - (id)initWithTask:(NSTask *)aTask;
 // Note: the returned data is not autoreleased
-- (NSData *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input;
-- (NSData *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input;
+- (NSData *)runShellCommand:(NSString *)cmd withInputData:(NSData *)input;
+- (NSData *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputData:(NSData *)input;
 - (void)stdoutNowAvailable:(NSNotification *)notification;
 @end
 
@@ -58,9 +58,8 @@
 @implementation NSTask (BDSKExtensions)
 
 + (NSString *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input{
-    BDSKShellTask *shellTask = [[BDSKShellTask alloc] initWithTask:[[[self alloc] init] autorelease]];
+    NSData *outputData = [self runRawShellCommand:cmd withInputString:input];
     NSString *output = nil;
-    NSData *outputData = [shellTask runShellCommand:cmd withInputString:input];
     if(outputData){
         output = [[NSString alloc] initWithData:outputData encoding:NSUTF8StringEncoding];
         if(!output)
@@ -68,28 +67,16 @@
         if(!output)
             output = [[NSString alloc] initWithData:outputData encoding:[NSString defaultCStringEncoding]];
     }
-    [shellTask release];
     return [output autorelease];
 }
 
 + (NSData *)runRawShellCommand:(NSString *)cmd withInputString:(NSString *)input{
-    BDSKShellTask *shellTask = [[BDSKShellTask alloc] initWithTask:[[[self alloc] init] autorelease]];
-    NSData *output = [[shellTask runShellCommand:cmd withInputString:input] retain];
-    [shellTask release];
-    return [output autorelease];
+    return [self runRawShellCommand:cmd withInputData:[input dataUsingEncoding:NSUTF8StringEncoding]];
 }
 
-+ (NSString *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input{
++ (NSData *)runRawShellCommand:(NSString *)cmd withInputData:(NSData *)input{
     BDSKShellTask *shellTask = [[BDSKShellTask alloc] initWithTask:[[[self alloc] init] autorelease]];
-    NSString *output = nil;
-    NSData *outputData = [shellTask executeBinary:executablePath inDirectory:currentDirPath withArguments:args environment:env inputString:input];
-    if(outputData){
-        output = [[NSString alloc] initWithData:outputData encoding:NSUTF8StringEncoding];
-        if(!output)
-            output = [[NSString alloc] initWithData:outputData encoding:NSASCIIStringEncoding];
-        if(!output)
-            output = [[NSString alloc] initWithData:outputData encoding:[NSString defaultCStringEncoding]];
-    }
+    NSData *output = [[shellTask runShellCommand:cmd withInputData:input] retain];
     [shellTask release];
     return [output autorelease];
 }
@@ -122,7 +109,7 @@
 // - mmcc
 
 // was runWithInputString in TextExtras' TEPipeCommand class.
-- (NSData *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input{
+- (NSData *)runShellCommand:(NSString *)cmd withInputData:(NSData *)input{
     NSFileManager *fm = [NSFileManager defaultManager];
     NSString *shellPath = @"/bin/sh";
     NSString *shellScriptPath = [[NSFileManager defaultManager] temporaryFileWithBasename:@"shellscript"];
@@ -163,7 +150,7 @@
     // ---------- Execute the script ----------
 
     // MF:!!! The current working dir isn't too appropriate
-    output = [self executeBinary:shellScriptPath inDirectory:[shellScriptPath stringByDeletingLastPathComponent] withArguments:nil environment:nil inputString:input];
+    output = [self executeBinary:shellScriptPath inDirectory:[shellScriptPath stringByDeletingLastPathComponent] withArguments:nil environment:nil inputData:input];
 
     // ---------- Remove the script file ----------
     if (![fm removeItemAtPath:shellScriptPath error:NULL]) {
@@ -174,7 +161,7 @@
 }
 
 // This method and the little notification method following implement synchronously running a task with input piped in from a string and output piped back out and returned as a string.   They require only a stdoutData instance variable to function.
-- (NSData *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input {
+- (NSData *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputData:(NSData *)input {
     NSPipe *inputPipe;
     NSPipe *outputPipe;
     NSFileHandle *inputFileHandle;
@@ -213,7 +200,7 @@
         if ([task isRunning]) {
             
             if (input)
-                [inputFileHandle writeData:[input dataUsingEncoding:NSUTF8StringEncoding]];
+                [inputFileHandle writeData:input];
             [inputFileHandle closeFile];
             
             // run the runloop and pick up our notifications

@@ -246,38 +246,30 @@ enum {
     id doc = nil;
     if (openType == BDSKOpenUsingPhonyCiteKeys || openType == BDSKOpenUsingFilter) {
         NSStringEncoding encoding = [self lastSelectedEncoding];
-        NSString *stringFromFile = [NSString stringWithContentsOfURL:absoluteURL encoding:encoding error:outError];
-        if (stringFromFile) {
-            NSStringEncoding savedEncoding = lastSelectedEncoding;
-            NSString *filteredString = nil;
-            if (openType == BDSKOpenUsingPhonyCiteKeys) {
-                filteredString = [stringFromFile stringWithPhoneyCiteKeys:@"FixMe"];
-                if ([NSString isEmptyString:filteredString] && outError)
-                    *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentOpenError localizedDescription:NSLocalizedString(@"Unable To Open With Phony Cite Keys", @"Error description")];
-            } else {
-                if (stringFromFile) {
-                    filteredString = [BDSKTask runShellCommand:lastSelectedFilterCommand withInputString:stringFromFile];
-                    if ([NSString isEmptyString:filteredString] && outError) {
-                        *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentOpenError localizedDescription:NSLocalizedString(@"Unable To Open With Filter", @"Error description")];
-                        [*outError setValue:NSLocalizedString(@"Unable to read the file correctly. Please ensure that the shell command specified for filtering is correct by testing it in Terminal.app.", @"Error description") forKey:NSLocalizedRecoverySuggestionErrorKey];
-                    }
-                }
-                // the shell task returns UTF-8, so we open the document with that encoding
-                encoding =  NSUTF8StringEncoding;
-                if (lastSelectedEncoding != BDSKNoStringEncoding)
-                    lastSelectedEncoding = encoding;
+        NSString *filteredString = nil;
+        
+        if (openType == BDSKOpenUsingPhonyCiteKeys) {
+            NSError *error = nil;
+            filteredString = [[NSString stringWithContentsOfURL:absoluteURL encoding:encoding error:&error] stringWithPhoneyCiteKeys:@"FixMe"];
+            if ([NSString isEmptyString:filteredString] && outError)
+                *outError = error ?: [NSError localErrorWithCode:kBDSKDocumentOpenError localizedDescription:NSLocalizedString(@"Unable To Open With Phony Cite Keys", @"Error description")];
+        } else {
+            NSData *filteredData = [BDSKTask runRawShellCommand:lastSelectedFilterCommand withInputData:[NSData dataWithContentsOfURL:absoluteURL]];
+            filteredString = [[[NSString alloc] initWithData:filteredData encoding:encoding] autorelease];
+            if ([NSString isEmptyString:filteredString] && outError) {
+                *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentOpenError localizedDescription:NSLocalizedString(@"Unable To Open With Filter", @"Error description")];
+                [*outError setValue:NSLocalizedString(@"Unable to read the file correctly. Please ensure that the shell command specified for filtering is correct by testing it in Terminal.app.", @"Error description") forKey:NSLocalizedRecoverySuggestionErrorKey];
             }
-            if ([NSString isEmptyString:filteredString] == NO) {
-                NSString *tmpFileName = [[[[absoluteURL path] lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bib"];
-                NSURL *tmpFileURL = [NSURL fileURLWithPath:[[NSFileManager defaultManager] temporaryFileWithBasename:tmpFileName]];
-                
-                if ([filteredString writeToURL:tmpFileURL atomically:YES encoding:encoding error:outError]) {
-                    if (doc = [super makeDocumentWithContentsOfURL:tmpFileURL ofType:BDSKBibTeXDocumentType error:outError])
-                        [(BibDocument *)doc markAsImported];
-                    [[NSFileManager defaultManager] removeItemAtPath:[tmpFileURL path] error:NULL];
-                }
+        }
+        if ([NSString isEmptyString:filteredString] == NO) {
+            NSString *tmpFileName = [[[[absoluteURL path] lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bib"];
+            NSURL *tmpFileURL = [NSURL fileURLWithPath:[[NSFileManager defaultManager] temporaryFileWithBasename:tmpFileName]];
+            
+            if ([filteredString writeToURL:tmpFileURL atomically:YES encoding:encoding error:outError]) {
+                if (doc = [super makeDocumentWithContentsOfURL:tmpFileURL ofType:BDSKBibTeXDocumentType error:outError])
+                    [(BibDocument *)doc markAsImported];
+                [[NSFileManager defaultManager] removeItemAtPath:[tmpFileURL path] error:NULL];
             }
-            lastSelectedEncoding = savedEncoding;
         }
     } else {
         doc = [super makeDocumentWithContentsOfURL:absoluteURL ofType:typeName error:outError];
