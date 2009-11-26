@@ -55,10 +55,7 @@
 #import "BDAlias.h"
 #import "BDSKErrorObjectController.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "BDSKSharingBrowser.h"
-#import "BDSKSharingServer.h"
 #import "BDSKPreferenceController.h"
-#import "BDSKTemplateParser.h"
 #import "BDSKTemplate.h"
 #import "BDSKTemplateObjectProxy.h"
 #import "NSSet_BDSKExtensions.h"
@@ -89,12 +86,14 @@
 #import "KFASHandlerAdditions-TypeTranslation.h"
 #import "BDSKTask.h"
 #import <Sparkle/Sparkle.h>
-#import "BDSKMetadataCacheOperation.h"
 
 #define WEB_URL @"http://bibdesk.sourceforge.net/"
 #define WIKI_URL @"http://sourceforge.net/apps/mediawiki/bibdesk/"
+#define TRACKER_URL @"http://sourceforge.net/tracker/?group_id=61487&atid=497423"
 
 #define BDSKIsRelaunchKey @"BDSKIsRelaunch"
+#define BDSKScriptMenuDisabledKey @"BDSKScriptMenuDisabled"
+#define BDSKDidMigrateLocalUrlFormatDefaultsKey @"BDSKDidMigrateLocalUrlFormatDefaultsKey"
 
 enum {
     BDSKStartupOpenUntitledFile,
@@ -139,7 +138,7 @@ static void fixLegacyTableColumnIdentifiers()
 
 - (void)awakeFromNib{   
     // Add a Scripts menu; searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/BibDesk/Scripts
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKScriptMenuDisabled"] == NO)
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKScriptMenuDisabledKey] == NO)
         [BDSKScriptMenu addScriptsToMainMenu];
     
     NSMenu *fileMenu = [[[NSApp mainMenu] itemAtIndex:1] submenu];
@@ -178,7 +177,7 @@ static void fixLegacyTableColumnIdentifiers()
     formatString = [sud objectForKey:BDSKLocalFileFormatKey];
     error = nil;
     
-    if ([sud boolForKey:@"BDSKDidMigrateLocalUrlFormatDefaultsKey"] == NO) {
+    if ([sud boolForKey:BDSKDidMigrateLocalUrlFormatDefaultsKey] == NO) {
         id oldFormatString = [sud objectForKey:@"Local-Url Format"];
         if (oldFormatString) {
             NSInteger formatPresetChoice = [sud objectForKey:@"Local-Url Format Preset"] ? [sud integerForKey:@"Local-Url Format Preset"] : 2;
@@ -200,7 +199,7 @@ static void fixLegacyTableColumnIdentifiers()
             if (formatCleanOption)
                 [sud setObject:formatCleanOption forKey:BDSKLocalFileCleanOptionKey];
         }
-        [sud setBool:YES forKey:@"BDSKDidMigrateLocalUrlFormatDefaultsKey"];
+        [sud setBool:YES forKey:BDSKDidMigrateLocalUrlFormatDefaultsKey];
     }
     
     if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:&error]) {
@@ -715,11 +714,11 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 }
 
 - (IBAction)reportBug:(id)sender {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://sourceforge.net/tracker/?group_id=61487&atid=497423"]];
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:TRACKER_URL]];
 }
 
 - (IBAction)requestFeature:(id)sender {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://sourceforge.net/tracker/?group_id=61487&atid=497426"]];
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:TRACKER_URL]];
 }
 
 - (IBAction)toggleShowingErrorPanel:(id)sender{
@@ -1103,6 +1102,9 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 #pragma mark Spotlight support
 
+#define LAST_IMPORTER_VERSION_KEY @"lastImporterVersion"
+#define LAST_SYS_VERSION_KEY @"lastSysVersion"
+
 - (void)doSpotlightImportIfNeeded {
     
     // This code finds the spotlight importer and re-runs it if the importer or app version has changed since the last time we launched.
@@ -1122,10 +1124,10 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         if ([versionInfo count] == 0) {
             runImporter = YES;
         } else {
-            NSString *lastImporterVersion = [versionInfo objectForKey:@"lastImporterVersion"];
+            NSString *lastImporterVersion = [versionInfo objectForKey:LAST_IMPORTER_VERSION_KEY];
             BDSKVersionNumber *lastImporterVersionNumber = [[[BDSKVersionNumber alloc] initWithVersionString:lastImporterVersion] autorelease];
             
-            long lastSysVersion = [[versionInfo objectForKey:@"lastSysVersion"] longValue];
+            long lastSysVersion = [[versionInfo objectForKey:LAST_SYS_VERSION_KEY] longValue];
             
             runImporter = noErr == err ? ([lastImporterVersionNumber compareToVersionNumber:importerVersionNumber] == NSOrderedAscending || sysVersion > lastSysVersion) : YES;
         }
@@ -1137,11 +1139,11 @@ static BOOL fileIsInTrash(NSURL *fileURL)
                 [importerTask setArguments:[NSArray arrayWithObjects:@"-r", importerPath, nil]];
                 [importerTask launch];
                 
-                NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:sysVersion], @"lastSysVersion", importerVersion, @"lastImporterVersion", nil];
+                NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:sysVersion], LAST_SYS_VERSION_KEY, importerVersion, LAST_IMPORTER_VERSION_KEY, nil];
                 [[NSUserDefaults standardUserDefaults] setObject:info forKey:BDSKSpotlightVersionInfoKey];
                 
             }
-            else NSLog(@"/usr/bin/mdimport not found!");
+            else NSLog(@"%@ not found!", mdimportPath);
         }
     }
 }
