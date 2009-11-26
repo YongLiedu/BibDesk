@@ -1043,7 +1043,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             
             NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:pubsInfo, @"publications", absoluteURL, @"fileURL", nil];
             [pubsInfo release];
-            [[BDSKMetadataCacheManager sharedManager] rebuildMetadataCache:cacheInfo];
+            [[BDSKMetadataCacheManager sharedManager] rebuildMetadataCache:infoDict];
             [infoDict release];
             
         }
