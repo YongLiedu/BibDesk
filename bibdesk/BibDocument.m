@@ -163,17 +163,19 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 static NSOperationQueue *metadataCacheQueue = nil;
 
++ (void)handleApplicationWillTerminate:(NSNotification *)note {
+    [metadataCacheQueue cancelAllOperations];
+}
+
 + (void)initialize {
     BDSKINITIALIZE;
     
     metadataCacheQueue = [[NSOperationQueue alloc] init];
     [metadataCacheQueue setMaxConcurrentOperationCount:1];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
+    
     [NSImage makePreviewDisplayImages];
-}
-
-+ (void)cancelMetadataCacheQueue {
-    [metadataCacheQueue cancelAllOperations];
 }
 
 + (NSSet *)keyPathsForValuesAffectingDisplayName {

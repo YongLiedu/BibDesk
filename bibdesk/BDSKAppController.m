@@ -349,10 +349,6 @@ static void fixLegacyTableColumnIdentifiers()
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification{
-    [BibDocument cancelMetadataCacheQueue];
-    
-    [[BDSKSharingServer defaultServer] disableSharing];
-    
     [completionConnection registerName:nil];
     [[completionConnection receivePort] invalidate];
     [[completionConnection sendPort] invalidate];
