@@ -89,7 +89,7 @@
 #import "KFASHandlerAdditions-TypeTranslation.h"
 #import "BDSKTask.h"
 #import <Sparkle/Sparkle.h>
-#import "BDSKMetadataCacheManager.h"
+#import "BDSKMetadataCacheOperation.h"
 
 #define WEB_URL @"http://bibdesk.sourceforge.net/"
 #define WIKI_URL @"http://sourceforge.net/apps/mediawiki/bibdesk/"

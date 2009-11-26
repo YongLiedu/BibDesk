@@ -1,5 +1,5 @@
 //
-//  BDSKMetadataCacheManager.m
+//  BDSKMetadataCacheOperation.m
 //  Bibdesk
 //
 //  Created by Christiaan on 10/28/09.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKMetadataCacheManager.h"
+#import "BDSKMetadataCacheOperation.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "BDAlias.h"

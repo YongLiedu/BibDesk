@@ -1,5 +1,5 @@
 //
-//  BDSKMetadataCacheManager.h
+//  BDSKMetadataCacheOperation.h
 //  Bibdesk
 //
 //  Created by Christiaan on 10/28/09.

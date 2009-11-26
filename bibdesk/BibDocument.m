@@ -123,7 +123,7 @@
 #import "BDSKTask.h"
 #import "NSInvocation_BDSKExtensions.h"
 #import "NSEvent_BDSKExtensions.h"
-#import "BDSKMetadataCacheManager.h"
+#import "BDSKMetadataCacheOperation.h"
 #import "NSSplitView_BDSKExtensions.h"
 
 // these are the same as in Info.plist
