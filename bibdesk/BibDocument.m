@@ -362,7 +362,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [alert setShowsSuppressionButton:YES];
         [alert setShowsHelp:YES];
         [alert setHelpAnchor:@"FileMigration"];
-        [alert beginSheetModalForWindow:[self windowForSheet] modalDelegate:self didEndSelector:@selector(migrationAlertDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+        
+        if ([documentWindow attachedSheet])
+            [self migrationAlertDidEnd:alert returnCode:[alert runModal] contextInfo:NULL];
+        else
+            [alert beginSheetModalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(migrationAlertDidEnd:returnCode:contextInfo:) contextInfo:NULL];
     }
 }
 
@@ -1989,11 +1993,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                                    alternateButton:NSLocalizedString(@"Don't Generate", @"Button title") 
                                        otherButton:nil
                          informativeTextWithFormat:infoFormat, tmpKey];
-
-    [alert beginSheetModalForWindow:documentWindow
-                      modalDelegate:self
-                     didEndSelector:@selector(temporaryCiteKeysAlertDidEnd:returnCode:contextInfo:)
-                        contextInfo:[tmpKey retain]];
+    if ([documentWindow attachedSheet])
+        [self temporaryCiteKeysAlertDidEnd:alert returnCode:[alert runModal] contextInfo:[tmpKey retain]];
+    else
+        [alert beginSheetModalForWindow:documentWindow
+                          modalDelegate:self
+                         didEndSelector:@selector(temporaryCiteKeysAlertDidEnd:returnCode:contextInfo:)
+                            contextInfo:[tmpKey retain]];
 }
 
 #pragma mark -
