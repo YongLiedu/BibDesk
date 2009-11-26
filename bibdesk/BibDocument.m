@@ -161,10 +161,19 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 @implementation BibDocument
 
+static NSOperationQueue *metadataCacheQueue = nil;
+
 + (void)initialize {
     BDSKINITIALIZE;
     
+    metadataCacheQueue = [[NSOperationQueue alloc] init];
+    [metadataCacheQueue setMaxConcurrentOperationCount:1];
+    
     [NSImage makePreviewDisplayImages];
+}
+
++ (void)cancelMetadataCacheQueue {
+    [metadataCacheQueue cancelAllOperations];
 }
 
 + (NSSet *)keyPathsForValuesAffectingDisplayName {
@@ -1045,10 +1054,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                 @finally { [pool release]; }
             }
             
-            NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:pubsInfo, @"publications", absoluteURL, @"fileURL", nil];
+            BDSKMetadataCacheOperation *operation = [[[BDSKMetadataCacheOperation alloc] initWithPublicationInfos:pubsInfo forDocumentURL:absoluteURL] autorelease];
+            [metadataCacheQueue addOperation:operation];
             [pubsInfo release];
-            [[BDSKMetadataCacheManager sharedManager] rebuildMetadataCache:infoDict];
-            [infoDict release];
             
         }
         

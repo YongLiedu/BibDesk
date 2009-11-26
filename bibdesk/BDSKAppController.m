@@ -349,7 +349,7 @@ static void fixLegacyTableColumnIdentifiers()
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification{
-    [[BDSKMetadataCacheManager sharedManager] terminate];
+    [BibDocument cancelMetadataCacheQueue];
     
     [[BDSKSharingServer defaultServer] disableSharing];
     

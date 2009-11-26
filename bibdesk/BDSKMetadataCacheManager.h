@@ -39,15 +39,9 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKMetadataCacheManager : NSObject {
-    NSLock *metadataCacheLock;
-    int32_t canWriteMetadata;
+@interface BDSKMetadataCacheOperation : NSOperation {
+    NSArray *publicationInfos;
+    NSURL *documentURL;
 }
-
-+ (BDSKMetadataCacheManager *)sharedManager;
-
-- (void)terminate;
-
-- (void)rebuildMetadataCache:(id)userInfo;
-
+- (id)initWithPublicationInfos:(NSArray *)pubInfos forDocumentURL:(NSURL *)aURL;
 @end

@@ -42,63 +42,31 @@
 #import "BDAlias.h"
 #import <libkern/OSAtomic.h>
 
-@implementation BDSKMetadataCacheManager
 
-static BDSKMetadataCacheManager *sharedManager = nil;
+@implementation BDSKMetadataCacheOperation
 
-+ (BDSKMetadataCacheManager *)sharedManager {
-    if (sharedManager == nil)
-        [[self alloc] init];
-    return sharedManager;
-}
-
-+ (id)allocWithZone:(NSZone *)zone {
-    return sharedManager ?: [super allocWithZone:zone];
-}
-
-- (id)init {
-    if ((sharedManager == nil) && (sharedManager = self = [super init])) {
-        metadataCacheLock = [[NSLock alloc] init];
-        canWriteMetadata = 1;
+- (id)initWithPublicationInfos:(NSArray *)pubInfos forDocumentURL:(NSURL *)aURL {
+    if (self = [super init]) {
+        publicationInfos = [pubInfos copy];
+        documentURL = [aURL retain];
     }
-    return sharedManager;
+    return self;
 }
 
 - (void)dealloc {
-    [metadataCacheLock release];
+    [publicationInfos release];
+    [documentURL release];
     [super dealloc];
 }
 
-- (id)retain { return self; }
-
-- (id)autorelease { return self; }
-
-- (void)release {}
-
-- (NSUInteger)retainCount { return NSUIntegerMax; }
-
-- (void)terminate {
-    OSAtomicCompareAndSwap32Barrier(1, 0, &canWriteMetadata);
-}
-
-- (void)privateRebuildMetadataCache:(id)userInfo{
-    
-    BDSKPRECONDITION([NSThread isMainThread] == NO);
-    
-    // we could unlock after checking the flag, but we don't want multiple threads writing to the cache directory at the same time, in case files have identical items
-    [metadataCacheLock lock];
-    OSMemoryBarrier();
-    if(canWriteMetadata == 0){
+- (void)main {
+    if ([self isCancelled]) {
         NSLog(@"Application will quit without writing metadata cache.");
-        [metadataCacheLock unlock];
         return;
     }
 
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-    [userInfo retain];
-    
-    NSArray *publications = [userInfo valueForKey:@"publications"];
     NSError *error = nil;
     NSFileManager *fileManager = [[NSFileManager alloc] init];
     
@@ -114,7 +82,6 @@ static BDSKMetadataCacheManager *sharedManager = nil;
             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to build metadata cache at path \"%@\"", cachePath] userInfo:nil];
         }
         
-        NSURL *documentURL = [userInfo valueForKey:@"fileURL"];
         NSString *docPath = [documentURL path];
         
         // After this point, there should be no underlying NSError, so we'll create one from scratch
@@ -138,9 +105,8 @@ static BDSKMetadataCacheManager *sharedManager = nil;
     
         NSMutableDictionary *metadata = [NSMutableDictionary dictionaryWithCapacity:10];    
         
-        for (NSDictionary *anItem in publications) {
-            OSMemoryBarrier();
-            if(canWriteMetadata == 0){
+        for (NSDictionary *anItem in publicationInfos) {
+            if ([self isCancelled]) {
                 NSLog(@"Application will quit without finishing writing metadata cache.");
                 break;
             }
@@ -182,15 +148,9 @@ static BDSKMetadataCacheManager *sharedManager = nil;
         [NSApp performSelectorOnMainThread:@selector(presentError:) withObject:error waitUntilDone:NO];
     }
     @finally{
-        [userInfo release];
-        [metadataCacheLock unlock];
         [fileManager release];
         [pool release];
     }
-}
-
-- (void)rebuildMetadataCache:(id)userInfo{  
-    [NSThread detachNewThreadSelector:@selector(privateRebuildMetadataCache:) toTarget:self withObject:userInfo];
 }
 
 @end

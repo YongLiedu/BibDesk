@@ -268,6 +268,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     NSString *uniqueID;
 }
 
++ (void)cancelMetadataCacheQueue;
 
 /*!
 @method     init
