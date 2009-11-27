@@ -565,7 +565,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
                 group = [[oldGroups objectAtIndex:0] retain];
                 [group setCount:emptyCount];
             } else {
-                group = [[BDSKCategoryGroup alloc] initEmptyGroupWithKey:groupField count:emptyCount];
+                group = [[BDSKCategoryGroup alloc] initWithName:nil key:groupField count:emptyCount];
             }
             [mutableGroups insertObject:group atIndex:0];
             [group release];

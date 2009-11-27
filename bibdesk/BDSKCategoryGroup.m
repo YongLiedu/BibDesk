@@ -51,6 +51,12 @@
 
 // designated initializer
 - (id)initWithName:(id)aName key:(NSString *)aKey count:(NSInteger)aCount {
+    if (aName == nil) {
+        NSZone *zone = [self zone];
+        [self release];
+        self = [BDSKEmptyGroup allocWithZone:zone];
+        aName = [aKey isPersonField] ? [BibAuthor emptyAuthor] : @"";
+    }
     if (self = [super initWithName:aName count:aCount]) {
         key = [aKey copy];
     }
@@ -61,13 +67,6 @@
 - (id)initWithName:(id)aName count:(NSInteger)aCount {
     self = [self initWithName:aName key:nil count:aCount];
     return self;
-}
-
-- (id)initEmptyGroupWithKey:(NSString *)aKey count:(NSInteger)aCount {
-    NSZone *zone = [self zone];
-	[[super init] release];
-    id aName = ([aKey isPersonField]) ? [BibAuthor emptyAuthor] : @"";
-    return [[BDSKEmptyGroup allocWithZone:zone] initWithName:aName key:aKey count:aCount];
 }
 
 - (id)initWithDictionary:(NSDictionary *)groupDict {
