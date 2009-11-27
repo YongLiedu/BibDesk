@@ -212,7 +212,7 @@
 }
 
 - (NSString *)stringValue {
-    return [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Empty", @""), key];
+    return [NSString stringWithFormat:NSLocalizedString(@"Empty %@", @""), key];
 }
 
 - (BOOL)containsItem:(BibItem *)item {
