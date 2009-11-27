@@ -56,7 +56,7 @@
     string = [BDSKTemplateParser stringByParsingTemplateString:string usingObject:objectProxy delegate:objectProxy];
     [objectProxy release];
     if(scriptPath)
-        string = [BDSKTask outputStringFromShellCommand:[NSString stringWithFormat:@"\"%@\"", scriptPath] inputString:string];
+        string = [BDSKTask outputStringFromTaskWithLaunchPath:scriptPath arguments:nil inputString:string];
     return string;
 }
 
@@ -103,7 +103,7 @@
     BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items publicationsContext:itemsContext template:template];
     string = [BDSKTemplateParser stringByParsingTemplateString:string usingObject:objectProxy delegate:objectProxy];
     [objectProxy release];
-    return [BDSKTask outputDataFromShellCommand:[NSString stringWithFormat:@"\"%@\"", scriptPath] inputString:string];
+    return [BDSKTask outputDataFromTaskWithLaunchPath:scriptPath arguments:nil inputString:string];
 }
 
 - (id)initWithObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext template:(BDSKTemplate *)aTemplate {

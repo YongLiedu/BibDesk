@@ -43,21 +43,20 @@
 
 #define BDSKSpecialPipeServiceRunLoopMode @"BDSKSpecialPipeServiceRunLoopMode"
 
-@interface BDSKShellTask : NSObject {
+@interface BDSKTaskRunner : NSObject {
     NSTask *task;
     // data used to store stdOut from the filter
     NSData *stdoutData;
 }
-- (id)initWithTask:(NSTask *)aTask;
-- (NSData *)outputDataFromShellCommand:(NSString *)cmd inputData:(NSData *)input;
+- (NSData *)outputDataFromTask:(NSTask *)aTask inputData:(NSData *)input;
 - (void)stdoutNowAvailable:(NSNotification *)notification;
 @end
 
 
 @implementation NSTask (BDSKExtensions)
 
-+ (NSString *)outputStringFromShellCommand:(NSString *)cmd inputString:(NSString *)input{
-    NSData *outputData = [self outputDataFromShellCommand:cmd inputString:input];
++ (NSString *)outputStringFromTaskWithLaunchPath:(NSString *)cmd arguments:(NSArray *)args inputString:(NSString *)input {
+    NSData *outputData = [self outputDataFromTaskWithLaunchPath:cmd arguments:args inputString:input];
     NSString *output = nil;
     if(outputData){
         output = [[NSString alloc] initWithData:outputData encoding:NSUTF8StringEncoding];
@@ -69,32 +68,33 @@
     return [output autorelease];
 }
 
-+ (NSData *)outputDataFromShellCommand:(NSString *)cmd inputString:(NSString *)input{
-    return [self outputDataFromShellCommand:cmd inputData:[input dataUsingEncoding:NSUTF8StringEncoding]];
++ (NSData *)outputDataFromTaskWithLaunchPath:(NSString *)cmd arguments:(NSArray *)args inputString:(NSString *)input {
+    return [self outputDataFromTaskWithLaunchPath:cmd arguments:args inputData:[input dataUsingEncoding:NSUTF8StringEncoding]];
 }
 
-+ (NSData *)outputDataFromShellCommand:(NSString *)cmd inputData:(NSData *)input{
-    BDSKShellTask *shellTask = [[BDSKShellTask alloc] initWithTask:[[[self alloc] init] autorelease]];
-    NSData *output = [[shellTask outputDataFromShellCommand:cmd inputData:input] retain];
-    [shellTask release];
-    return [output autorelease];
++ (NSData *)outputDataFromTaskWithLaunchPath:(NSString *)cmd arguments:(NSArray *)args inputData:(NSData *)input {
+    // ---------- Check the shell ----------
+    if (NO == [[NSFileManager defaultManager] isExecutableFileAtPath:cmd]) {
+        NSLog(@"Filter Pipes: Shell path for Pipe panel does not exist or is not executable. (%@)", cmd);
+        return nil;
+    }
+    
+    NSTask *task = [[self alloc] init];
+    [task setLaunchPath:cmd];
+    [task setArguments:args];
+    
+    BDSKTaskRunner *taskRunner = [[BDSKTaskRunner alloc] init];
+    NSData *output = [taskRunner outputDataFromTask:task inputData:input];
+    [task release];
+    [taskRunner release];
+    
+    return output;
 }
 
 @end
 
 
-@implementation BDSKShellTask
-
-- (id)init{
-    return [self initWithTask:nil];
-}
-
-- (id)initWithTask:(NSTask *)aTask{
-    if (self = [super init]) {
-        task = [aTask retain] ?: [[NSTask alloc] init];
-    }
-    return self;
-}
+@implementation BDSKTaskRunner
 
 - (void)dealloc{
     [task release];
@@ -108,9 +108,8 @@
 // - mmcc
 
 // was runWithInputString in TextExtras' TEPipeCommand class.
-- (NSData *)outputDataFromShellCommand:(NSString *)cmd inputData:(NSData *)input{
+- (NSData *)outputDataFromTask:(NSTask *)aTask inputData:(NSData *)input {
     NSFileManager *fm = [NSFileManager defaultManager];
-    NSString *shellPath = @"/bin/sh";
     NSString *tmpDir;
     NSString *script;
     NSData *scriptData;
@@ -121,23 +120,13 @@
     NSFileHandle *inputFileHandle;
     NSFileHandle *outputFileHandle;
     
-    // ---------- Check the shell and create the script ----------
-    if (![fm isExecutableFileAtPath:shellPath]) {
-        NSLog(@"Filter Pipes: Shell path for Pipe panel does not exist or is not executable. (%@)", shellPath);
-        return nil;
-    }
-    if (!cmd){
-        return nil;
-    }
+    task = [aTask retain];
     
     // ---------- Execute the script ----------
-    [task setLaunchPath:shellPath];
-    [task setArguments:[NSArray arrayWithObject:cmd]];
-    
     // MF:!!! The current working dir isn't too appropriate
     tmpDir = [[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:nil];
     [task setCurrentDirectoryPath:tmpDir];
-
+    
     [task setStandardError:[NSFileHandle fileHandleWithStandardError]];
     inputPipe = [NSPipe pipe];
     inputFileHandle = [inputPipe fileHandleForWriting];
@@ -171,12 +160,12 @@
             [nc removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
             
         } else {
-            NSLog(@"Failed to launch task for \"%@\" or it exited without accepting input.  Termination status was %d", cmd, [task terminationStatus]);
+            NSLog(@"Failed to launch task for %@ with arguments %@ or it exited without accepting input.  Termination status was %d", [task launchPath], [task arguments], [task terminationStatus]);
         }
     }
     @catch(id exception){
         // if the pipe failed, we catch an exception here and ignore it
-        NSLog(@"exception %@ encountered while trying to run task %@", exception, cmd);
+        NSLog(@"exception %@ encountered while trying to run task %@ with arguments %@", exception, [task launchPath], [task arguments]);
         [nc removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
     }
     
@@ -184,7 +173,7 @@
     signal(SIGPIPE, previousSignalMask);
 
     // ---------- Remove the script file ----------
-    if (![fm removeItemAtPath:tmpDir error:NULL]) {
+    if (NO == [fm removeItemAtPath:tmpDir error:NULL]) {
         NSLog(@"Filter Pipes: Failed to delete temporary directory. (%@)", tmpDir);
     }
 

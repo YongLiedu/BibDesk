@@ -39,7 +39,7 @@
 #import <Foundation/Foundation.h>
 
 @interface NSTask (BDSKExtensions)
-+ (NSString *)outputStringFromShellCommand:(NSString *)cmd inputString:(NSString *)input;
-+ (NSData *)outputDataFromShellCommand:(NSString *)cmd inputString:(NSString *)input;
-+ (NSData *)outputDataFromShellCommand:(NSString *)cmd inputData:(NSData *)input;
++ (NSString *)outputStringFromTaskWithLaunchPath:(NSString *)cmd arguments:(NSArray *)args inputString:(NSString *)input;
++ (NSData *)outputDataFromTaskWithLaunchPath:(NSString *)cmd arguments:(NSArray *)args inputString:(NSString *)input;
++ (NSData *)outputDataFromTaskWithLaunchPath:(NSString *)cmd arguments:(NSArray *)args inputData:(NSData *)input;
 @end
