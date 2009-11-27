@@ -108,7 +108,7 @@ extern NSString *BDSKSaveDocumentScriptHookName;
 
 /*!
 	@method runScriptHookWithName:forPublications:document:
-	@abstract Calls -runScriptHookWithName:forPublication:userInfo: with nil userInfo. 
+	@abstract Calls -runScriptHookWithName:forPublication:field:oldValues:newValues: with nil field, oldValues, and newValues. 
 	@discussion -
 	@param name The name for the script hook.
 	@param items An array of publications passed to the script for the script hook.
