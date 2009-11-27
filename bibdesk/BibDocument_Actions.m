@@ -1485,29 +1485,17 @@ static BOOL changingColors = NO;
         return;
     }
     
-    NSUInteger numberOfPubs = [pubs count];
-    BibItem *aPub;
-    NSMutableArray *arrayOfPubs = [NSMutableArray arrayWithCapacity:numberOfPubs];
-    NSMutableArray *arrayOfOldValues = [NSMutableArray arrayWithCapacity:numberOfPubs];
-    NSMutableArray *arrayOfNewValues = [NSMutableArray arrayWithCapacity:numberOfPubs];
-    
-    // put these pubs into an array, since the indices can change after we set the cite key, due to sorting or searching
-    for (aPub in pubs) {
-        [arrayOfPubs addObject:aPub];
-        [arrayOfOldValues addObject:[aPub citeKey]];
-        [arrayOfNewValues addObject:[aPub suggestedCiteKey]];
-    }
+    NSArray *arrayOfPubs = [pubs copy]; // copy in case we were passed a mutable aray and the order changes
+    NSArray *arrayOfOldValues = [arrayOfPubs valueForKey:@"citeKey"];
+    NSArray *arrayOfNewValues = [arrayOfPubs valueForKey:@"suggestedCiteKey"];
     
     [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKWillGenerateCiteKeyScriptHookName 
         forPublications:arrayOfPubs document:self 
         field:BDSKCiteKeyString oldValues:arrayOfOldValues newValues:arrayOfNewValues];
     
-    [arrayOfOldValues removeAllObjects];
-    [arrayOfNewValues removeAllObjects];
-    
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-    for (aPub in arrayOfPubs){
+    for (BibItem *aPub in arrayOfPubs){
         NSString *newKey = [aPub suggestedCiteKey];
         NSString *crossref = [aPub valueOfField:BDSKCrossrefString inherit:NO];
         if (crossref != nil && [crossref caseInsensitiveCompare:newKey] == NSOrderedSame) {
@@ -1524,9 +1512,6 @@ static BOOL changingColors = NO;
         }
         [aPub setCiteKey:newKey];
         
-        [arrayOfOldValues addObject:[aPub citeKey]];
-        [arrayOfNewValues addObject:newKey];
-        
         [pool release];
         pool = [[NSAutoreleasePool alloc] init];
     }
@@ -1534,11 +1519,15 @@ static BOOL changingColors = NO;
     // should be safe to release here since arrays were created outside the scope of this local pool
     [pool release];
     
-    [[self undoManager] setActionName:(numberOfPubs > 1 ? NSLocalizedString(@"Generate Cite Keys", @"Undo action name") : NSLocalizedString(@"Generate Cite Key", @"Undo action name"))];
+    [[self undoManager] setActionName:([arrayOfPubs count] > 1 ? NSLocalizedString(@"Generate Cite Keys", @"Undo action name") : NSLocalizedString(@"Generate Cite Key", @"Undo action name"))];
+    
+    arrayOfNewValues = [arrayOfPubs valueForKey:@"citeKey"];
     
     [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKDidGenerateCiteKeyScriptHookName 
         forPublications:arrayOfPubs document:self 
         field:BDSKCiteKeyString oldValues:arrayOfOldValues newValues:arrayOfNewValues];
+    
+    [arrayOfPubs release];
 }    
 
 - (void)generateCiteKeyAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
