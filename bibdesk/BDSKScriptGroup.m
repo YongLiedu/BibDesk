@@ -150,7 +150,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
 - (BOOL)isEqual:(id)other { return self == other; }
 
 - (NSUInteger)hash {
-    return (NSUInteger)self;
+    return BDSKHash(self);
 }
 
 - (NSString *)description;

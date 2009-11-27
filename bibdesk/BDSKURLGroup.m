@@ -140,7 +140,7 @@
 - (BOOL)isEqual:(id)other { return self == other; }
 
 - (NSUInteger)hash {
-    return( ((NSUInteger) self >> 4) | (NSUInteger) self << (32 - 4));
+    return BDSKHash(self);
 }
 
 // Logging

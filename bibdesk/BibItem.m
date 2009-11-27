@@ -538,8 +538,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     // Optimized hash from http://www.mulle-kybernetik.com/artikel/Optimization/opti-7.html (for ppc).  Use super's hash implementation on other architectures.
 
     // note that BibItems are used in hashing collections and so -hash must not depend on mutable state
-    return( ((NSUInteger) self >> 4) | 
-            (NSUInteger) self << (32 - 4));
+    return BDSKHash(self);
 }
 #endif
 

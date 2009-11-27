@@ -206,7 +206,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
 - (BOOL)isEqual:(id)other { return other == self; }
 
 - (NSUInteger)hash {
-    return( ((NSUInteger) self >> 4) | (NSUInteger) self << (32 - 4));
+    return BDSKHash(self);
 }
 
 @end

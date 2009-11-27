@@ -62,7 +62,7 @@
     return [self initWithName:aName];
 }
 
-- (NSUInteger)hash { return (NSUInteger)self; }
+- (NSUInteger)hash { return BDSKHash(self); }
 
 - (BOOL)isEqual:(id)other { return self == other; }
 
