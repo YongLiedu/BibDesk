@@ -152,16 +152,17 @@ static NSArray *scriptHookNames = nil;
 }
 
 - (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document {
-	return [self runScriptHookWithName:name forPublications:items document:document userInfo:nil];
+	return [self runScriptHookWithName:name forPublications:items document:document field:nil oldValues:nil newValues:nil];
 }
 
-- (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document userInfo:(NSDictionary *)userInfo {
+- (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document field:(NSString *)field oldValues:(NSArray *)oldValues newValues:(NSArray *)newValues {
 	BDSKScriptHook *scriptHook = [self makeScriptHookWithName:name];
 	if (scriptHook == nil)
 		return NO;
-	// set the user info values
-    if (userInfo)
-        [scriptHook setValuesForKeysWithDictionary:userInfo];
+	// set the values
+    [scriptHook setField:field];
+    [scriptHook setOldValues:oldValues];
+    [scriptHook setNewValues:newValues];
 	// execute the script and remove the script hook
 	return [self runScriptHook:scriptHook forPublications:items document:document];
 }

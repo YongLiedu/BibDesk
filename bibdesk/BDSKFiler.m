@@ -202,13 +202,9 @@ static BDSKFiler *sharedFiler = nil;
             
         } else {
             
-            BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKWillAutoFileScriptHookName];
-            if (scriptHook) {
-                [scriptHook setField:field];
-                [scriptHook setOldValues:[NSArray arrayWithObject:oldPath]];
-                [scriptHook setNewValues:[NSArray arrayWithObject:newPath]];
-                [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:pub] document:doc];
-            }
+            [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKWillAutoFileScriptHookName 
+                forPublications:[NSArray arrayWithObject:pub] document:doc 
+                field:field oldValues:[NSArray arrayWithObject:oldPath] newValues:[NSArray arrayWithObject:newPath]];
             
             if (NO == [fm movePath:oldPath toPath:newPath force:force error:&error]){ 
                 
@@ -229,13 +225,9 @@ static BDSKFiler *sharedFiler = nil;
                 [info setValue:oldPath forKey:NEW_PATH_KEY];
                 [fileInfoDicts addObject:info];
                 
-                scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidAutoFileScriptHookName];
-                if (scriptHook) {
-                    [scriptHook setField:field];
-                    [scriptHook setOldValues:[NSArray arrayWithObject:oldPath]];
-                    [scriptHook setNewValues:[NSArray arrayWithObject:newPath]];
-                    [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:pub] document:doc];
-                }
+                [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKDidAutoFileScriptHookName 
+                    forPublications:[NSArray arrayWithObject:pub] document:doc 
+                    field:field oldValues:[NSArray arrayWithObject:oldPath] newValues:[NSArray arrayWithObject:newPath]];
                 
             }
             

@@ -123,8 +123,10 @@ extern NSString *BDSKSaveDocumentScriptHookName;
 	@param name The name for the script hook.
 	@param items An array of publications passed to the script for the script hook.
 	@param document The document for the script hook.
-	@param userInfo The user info set in the script hook.
+	@param field The field set in the script hook.
+	@param oldValues The oldValues set in the script hook.
+	@param newValues The newValues set in the script hook.
 */
-- (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document userInfo:(NSDictionary *)userInfo;
+- (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document field:(NSString *)field oldValues:(NSArray *)oldValues newValues:(NSArray *)newValues;
 
 @end

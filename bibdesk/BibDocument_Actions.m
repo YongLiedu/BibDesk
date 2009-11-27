@@ -1490,25 +1490,18 @@ static BOOL changingColors = NO;
     NSMutableArray *arrayOfPubs = [NSMutableArray arrayWithCapacity:numberOfPubs];
     NSMutableArray *arrayOfOldValues = [NSMutableArray arrayWithCapacity:numberOfPubs];
     NSMutableArray *arrayOfNewValues = [NSMutableArray arrayWithCapacity:numberOfPubs];
-    BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKWillGenerateCiteKeyScriptHookName];
     
     // put these pubs into an array, since the indices can change after we set the cite key, due to sorting or searching
     for (aPub in pubs) {
         [arrayOfPubs addObject:aPub];
-        if(scriptHook){
-            [arrayOfOldValues addObject:[aPub citeKey]];
-            [arrayOfNewValues addObject:[aPub suggestedCiteKey]];
-        }
+        [arrayOfOldValues addObject:[aPub citeKey]];
+        [arrayOfNewValues addObject:[aPub suggestedCiteKey]];
     }
     
-    if (scriptHook) {
-        [scriptHook setField:BDSKCiteKeyString];
-        [scriptHook setOldValues:arrayOfOldValues];
-        [scriptHook setNewValues:arrayOfNewValues];
-        [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:arrayOfPubs document:self];
-    }
+    [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKWillGenerateCiteKeyScriptHookName 
+        forPublications:arrayOfPubs document:self 
+        field:BDSKCiteKeyString oldValues:arrayOfOldValues newValues:arrayOfNewValues];
     
-    scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidGenerateCiteKeyScriptHookName];
     [arrayOfOldValues removeAllObjects];
     [arrayOfNewValues removeAllObjects];
     
@@ -1531,10 +1524,8 @@ static BOOL changingColors = NO;
         }
         [aPub setCiteKey:newKey];
         
-        if(scriptHook){
-            [arrayOfOldValues addObject:[aPub citeKey]];
-            [arrayOfNewValues addObject:newKey];
-        }
+        [arrayOfOldValues addObject:[aPub citeKey]];
+        [arrayOfNewValues addObject:newKey];
         
         [pool release];
         pool = [[NSAutoreleasePool alloc] init];
@@ -1545,12 +1536,9 @@ static BOOL changingColors = NO;
     
     [[self undoManager] setActionName:(numberOfPubs > 1 ? NSLocalizedString(@"Generate Cite Keys", @"Undo action name") : NSLocalizedString(@"Generate Cite Key", @"Undo action name"))];
     
-    if (scriptHook) {
-        [scriptHook setField:BDSKCiteKeyString];
-        [scriptHook setOldValues:arrayOfOldValues];
-        [scriptHook setNewValues:arrayOfNewValues];
-        [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:arrayOfPubs document:self];
-    }
+    [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKDidGenerateCiteKeyScriptHookName 
+        forPublications:arrayOfPubs document:self 
+        field:BDSKCiteKeyString oldValues:arrayOfOldValues newValues:arrayOfNewValues];
 }    
 
 - (void)generateCiteKeyAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {

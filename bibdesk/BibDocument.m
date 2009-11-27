@@ -2746,13 +2746,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         rv |= 2;
     }
     
-	BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKChangeFieldScriptHookName];
-	if (scriptHook) {
-		[scriptHook setField:fieldName];
-		[scriptHook setOldValues:oldValues];
-		[scriptHook setNewValues:newValues];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:pubs document:self];
-	}
+	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKChangeFieldScriptHookName
+        forPublications:pubs document:self field:fieldName oldValues:oldValues newValues:newValues];
     
     return rv;
 }
@@ -2764,23 +2759,17 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [pub setField:BDSKUrlString toValue:[aURL absoluteString]];
     }
     
-    BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKAddFileScriptHookName];
-	if (scriptHook) {
-		[scriptHook setField:[aURL isFileURL] ? BDSKLocalFileString : BDSKRemoteURLString];
-		[scriptHook setOldValues:[NSArray array]];
-		[scriptHook setNewValues:[NSArray arrayWithObjects:[aURL isFileURL] ? [aURL path] : [aURL absoluteString], nil]];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObjects:pub, nil] document:self];
-	}
+    [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKAddFileScriptHookName
+        forPublications:[NSArray arrayWithObjects:pub, nil] document:self 
+        field:[aURL isFileURL] ? BDSKLocalFileString : BDSKRemoteURLString 
+        oldValues:[NSArray array] newValues:[NSArray arrayWithObjects:[aURL isFileURL] ? [aURL path] : [aURL absoluteString], nil]];
 }
 
 - (void)userRemovedURL:(NSURL *)aURL forPublication:(BibItem *)pub {
-	BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKRemoveFileScriptHookName];
-	if (scriptHook) {
-		[scriptHook setField:([aURL isEqual:[NSNull null]] || [aURL isFileURL]) ? BDSKLocalFileString : BDSKRemoteURLString];
-		[scriptHook setOldValues:[NSArray arrayWithObjects:[aURL isEqual:[NSNull null]] ? (id)aURL : [aURL isFileURL] ? [aURL path] : [aURL absoluteString], nil]];
-		[scriptHook setNewValues:[NSArray array]];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObjects:pub, nil] document:self];
-	}
+	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKRemoveFileScriptHookName
+        forPublications:[NSArray arrayWithObjects:pub, nil] document:self 
+        field:([aURL isEqual:[NSNull null]] || [aURL isFileURL]) ? BDSKLocalFileString : BDSKRemoteURLString 
+        oldValues:[NSArray arrayWithObjects:[aURL isEqual:[NSNull null]] ? (id)aURL : [aURL isFileURL] ? [aURL path] : [aURL absoluteString], nil] newValues:[NSArray array]];
 }
 
 - (void)setFileURL:(NSURL *)absoluteURL{ 

@@ -859,13 +859,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	NSString *oldKey = [publication citeKey];
 	NSString *newKey = [publication suggestedCiteKey];
 	
-	scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKWillGenerateCiteKeyScriptHookName];
-	if (scriptHook) {
-		[scriptHook setField:BDSKCiteKeyString];
-		[scriptHook setOldValues:[NSArray arrayWithObject:oldKey]];
-		[scriptHook setNewValues:[NSArray arrayWithObject:newKey]];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication] document:[self document]];
-	}
+	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKWillGenerateCiteKeyScriptHookName 
+        forPublications:[NSArray arrayWithObject:publication] document:[self document] 
+        field:BDSKCiteKeyString oldValues:[NSArray arrayWithObject:oldKey] newValues:[NSArray arrayWithObject:newKey]];
 	
 	// get them again, as the script hook might have changed some values
 	oldKey = [publication citeKey];
@@ -889,13 +885,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	[[self undoManager] setActionName:NSLocalizedString(@"Generate Cite Key", @"Undo action name")];
 	[tabView selectFirstTabViewItem:self];
 	
-	scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidGenerateCiteKeyScriptHookName];
-	if (scriptHook) {
-		[scriptHook setField:BDSKCiteKeyString];
-		[scriptHook setOldValues:[NSArray arrayWithObject:oldKey]];
-		[scriptHook setNewValues:[NSArray arrayWithObject:newKey]];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication] document:[self document]];
-	}
+	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKDidGenerateCiteKeyScriptHookName 
+        forPublications:[NSArray arrayWithObject:publication] document:[self document] 
+		field:BDSKCiteKeyString oldValues:[NSArray arrayWithObject:oldKey] newValues:[NSArray arrayWithObject:newKey]];
 }
 
 - (IBAction)generateCiteKey:(id)sender{
