@@ -82,18 +82,6 @@
     return [NSDictionary dictionaryWithObjectsAndKeys:aName, @"group name", aKey, @"key", nil];
 }
 
-- (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
-        key = [[decoder decodeObjectForKey:@"key"] retain];
-    }
-    return self;
-}
-
-- (void)encodeWithCoder:(NSCoder *)coder {
-    [super encodeWithCoder:coder];
-    [coder encodeObject:key forKey:@"key"];
-}
-
 - (id)copyWithZone:(NSZone *)aZone {
 	return [[[self class] allocWithZone:aZone] initWithName:name key:key count:count];
 }

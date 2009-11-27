@@ -42,7 +42,7 @@
 
 /* note that NSCoding support is presently limited in some cases */
 
-@interface BDSKGroup : NSObject <NSCopying, NSCoding> {
+@interface BDSKGroup : NSObject <NSCopying> {
 	id name;
 	NSInteger count;
     BDSKParentGroup *parent;

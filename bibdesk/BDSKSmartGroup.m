@@ -86,19 +86,6 @@
     return [groupDict autorelease];
 }
 
-- (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
-        filter = [[decoder decodeObjectForKey:@"filter"] retain];
-        [filter setGroup:self];
-    }
-    return self;
-}
-
-- (void)encodeWithCoder:(NSCoder *)coder {
-    [super encodeWithCoder:coder];
-    [coder encodeObject:filter forKey:@"filter"];
-}
-
 - (id)copyWithZone:(NSZone *)aZone {
 	return [[[self class] allocWithZone:aZone] initWithName:name count:count filter:filter];
 }

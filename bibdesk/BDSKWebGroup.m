@@ -63,15 +63,6 @@
     return self;
 }
 
-- (id)initWithCoder:(NSCoder *)aCoder{
-    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
-    return nil;
-}
-
-- (void)encodeWithCoder:(NSCoder *)aCoder{
-    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
-}
-
 - (id)copyWithZone:(NSZone *)aZone {
 	return [[[self class] allocWithZone:aZone] initWithName:name];
 }
