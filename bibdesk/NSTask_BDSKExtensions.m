@@ -48,15 +48,15 @@
     NSData *stdoutData;
 }
 - (id)initWithTask:(NSTask *)aTask;
-- (NSData *)runShellCommand:(NSString *)cmd withInputData:(NSData *)input;
+- (NSData *)outputDataFromShellCommand:(NSString *)cmd inputData:(NSData *)input;
 - (void)stdoutNowAvailable:(NSNotification *)notification;
 @end
 
 
 @implementation NSTask (BDSKExtensions)
 
-+ (NSString *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input{
-    NSData *outputData = [self runRawShellCommand:cmd withInputString:input];
++ (NSString *)outputStringFromShellCommand:(NSString *)cmd inputString:(NSString *)input{
+    NSData *outputData = [self outputDataFromShellCommand:cmd inputString:input];
     NSString *output = nil;
     if(outputData){
         output = [[NSString alloc] initWithData:outputData encoding:NSUTF8StringEncoding];
@@ -68,13 +68,13 @@
     return [output autorelease];
 }
 
-+ (NSData *)runRawShellCommand:(NSString *)cmd withInputString:(NSString *)input{
-    return [self runRawShellCommand:cmd withInputData:[input dataUsingEncoding:NSUTF8StringEncoding]];
++ (NSData *)outputDataFromShellCommand:(NSString *)cmd inputString:(NSString *)input{
+    return [self outputDataFromShellCommand:cmd inputData:[input dataUsingEncoding:NSUTF8StringEncoding]];
 }
 
-+ (NSData *)runRawShellCommand:(NSString *)cmd withInputData:(NSData *)input{
++ (NSData *)outputDataFromShellCommand:(NSString *)cmd inputData:(NSData *)input{
     BDSKShellTask *shellTask = [[BDSKShellTask alloc] initWithTask:[[[self alloc] init] autorelease]];
-    NSData *output = [[shellTask runShellCommand:cmd withInputData:input] retain];
+    NSData *output = [[shellTask outputDataFromShellCommand:cmd inputData:input] retain];
     [shellTask release];
     return [output autorelease];
 }
@@ -107,7 +107,7 @@
 // - mmcc
 
 // was runWithInputString in TextExtras' TEPipeCommand class.
-- (NSData *)runShellCommand:(NSString *)cmd withInputData:(NSData *)input{
+- (NSData *)outputDataFromShellCommand:(NSString *)cmd inputData:(NSData *)input{
     NSFileManager *fm = [NSFileManager defaultManager];
     NSString *shellPath = @"/bin/sh";
     NSString *shellScriptPath = [[NSFileManager defaultManager] temporaryFileWithBasename:@"shellscript"];
