@@ -99,6 +99,22 @@ static NSString *createUniqueID(void)
     return [NSDictionary dictionaryWithObjectsAndKeys:aName, @"group name", nil];
 }
 
+// NSCoding protocol, should never be used
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super init]) {
+        name = [[decoder decodeObjectForKey:@"name"] retain];
+        count = [decoder decodeIntegerForKey:@"count"];
+        uniqueID = createUniqueID();
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:name forKey:@"name"];
+    [coder encodeInteger:count forKey:@"count"];
+}
+
 // NSCopying protocol, may be used by the duplicate script command
 
 - (id)copyWithZone:(NSZone *)aZone {
