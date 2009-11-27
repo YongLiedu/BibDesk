@@ -103,7 +103,7 @@
     BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items publicationsContext:itemsContext template:template];
     string = [BDSKTemplateParser stringByParsingTemplateString:string usingObject:objectProxy delegate:objectProxy];
     [objectProxy release];
-    return [BDSKTask runRawShellCommand:scriptPath withInputString:string];
+    return [BDSKTask runRawShellCommand:[NSString stringWithFormat:@"\"%@\"", scriptPath] withInputString:string];
 }
 
 - (id)initWithObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext template:(BDSKTemplate *)aTemplate {
