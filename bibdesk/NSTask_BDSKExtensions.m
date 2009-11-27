@@ -41,6 +41,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import <sys/stat.h>
 
+#define BDSKSpecialPipeServiceRunLoopMode @"BDSKSpecialPipeServiceRunLoopMode"
 
 @interface BDSKShellTask : NSObject {
     NSTask *task;
@@ -110,7 +111,7 @@
 - (NSData *)outputDataFromShellCommand:(NSString *)cmd inputData:(NSData *)input{
     NSFileManager *fm = [NSFileManager defaultManager];
     NSString *shellPath = @"/bin/sh";
-    NSString *shellScriptPath = [[NSFileManager defaultManager] temporaryFileWithBasename:@"shellscript"];
+    NSString *tmpDir;
     NSString *script;
     NSData *scriptData;
     NSMutableDictionary *currentAttributes;
@@ -119,7 +120,7 @@
     NSPipe *outputPipe;
     NSFileHandle *inputFileHandle;
     NSFileHandle *outputFileHandle;
-
+    
     // ---------- Check the shell and create the script ----------
     if (![fm isExecutableFileAtPath:shellPath]) {
         NSLog(@"Filter Pipes: Shell path for Pipe panel does not exist or is not executable. (%@)", shellPath);
@@ -128,30 +129,14 @@
     if (!cmd){
         return nil;
     }
-    script = [NSString stringWithFormat:@"#!%@\n\n%@\n", shellPath, cmd];
-    // Use UTF8... and write out the shell script and make it exectuable
-    scriptData = [script dataUsingEncoding:NSUTF8StringEncoding];
-    if (![scriptData writeToFile:shellScriptPath atomically:YES]) {
-        NSLog(@"Filter Pipes: Failed to write temporary script file. (%@)", shellScriptPath);
-        return nil;
-    }
-    currentAttributes = [[[fm attributesOfItemAtPath:shellScriptPath error:NULL] mutableCopyWithZone:[self zone]] autorelease];
-    if (!currentAttributes) {
-        NSLog(@"Filter Pipes: Failed to get attributes of temporary script file. (%@)", shellScriptPath);
-        return nil;
-    }
-    currentMode = [currentAttributes filePosixPermissions];
-    currentMode |= S_IRWXU;
-    [currentAttributes setObject:[NSNumber numberWithUnsignedLong:currentMode] forKey:NSFilePosixPermissions];
-    if (![fm setAttributes:currentAttributes ofItemAtPath:shellScriptPath error:NULL]) {
-        NSLog(@"Filter Pipes: Failed to get attributes of temporary script file. (%@)", shellScriptPath);
-        return nil;
-    }
-
+    
     // ---------- Execute the script ----------
-    [task setLaunchPath:shellScriptPath];
+    [task setLaunchPath:shellPath];
+    [task setArguments:[NSArray arrayWithObject:cmd]];
+    
     // MF:!!! The current working dir isn't too appropriate
-    [task setCurrentDirectoryPath:[shellScriptPath stringByDeletingLastPathComponent]];
+    tmpDir = [[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:nil];
+    [task setCurrentDirectoryPath:tmpDir];
 
     [task setStandardError:[NSFileHandle fileHandleWithStandardError]];
     inputPipe = [NSPipe pipe];
@@ -163,11 +148,11 @@
     
     // ignore SIGPIPE, as it causes a crash (seems to happen if the binaries don't exist and you try writing to the pipe)
     sig_t previousSignalMask = signal(SIGPIPE, SIG_IGN);
-
+    
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(stdoutNowAvailable:) name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
-    [outputFileHandle readToEndOfFileInBackgroundAndNotifyForModes:[NSArray arrayWithObject:@"BDSKSpecialPipeServiceRunLoopMode"]];
-
+    [outputFileHandle readToEndOfFileInBackgroundAndNotifyForModes:[NSArray arrayWithObject:BDSKSpecialPipeServiceRunLoopMode]];
+    
     @try{
 
         [task launch];
@@ -180,18 +165,18 @@
             
             // run the runloop and pick up our notifications
             while (nil == stdoutData && ([task isRunning] || [task terminationStatus] == 0))
-                [[NSRunLoop currentRunLoop] runMode:@"BDSKSpecialPipeServiceRunLoopMode" beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
+                [[NSRunLoop currentRunLoop] runMode:BDSKSpecialPipeServiceRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
             [task waitUntilExit];
             
             [nc removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
             
         } else {
-            NSLog(@"Failed to launch task at \"%@\" or it exited without accepting input.  Termination status was %d", shellScriptPath, [task terminationStatus]);
+            NSLog(@"Failed to launch task for \"%@\" or it exited without accepting input.  Termination status was %d", cmd, [task terminationStatus]);
         }
     }
     @catch(id exception){
         // if the pipe failed, we catch an exception here and ignore it
-        NSLog(@"exception %@ encountered while trying to run task %@", exception, shellScriptPath);
+        NSLog(@"exception %@ encountered while trying to run task %@", exception, cmd);
         [nc removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
     }
     
@@ -199,8 +184,8 @@
     signal(SIGPIPE, previousSignalMask);
 
     // ---------- Remove the script file ----------
-    if (![fm removeItemAtPath:shellScriptPath error:NULL]) {
-        NSLog(@"Filter Pipes: Failed to delete temporary script file. (%@)", shellScriptPath);
+    if (![fm removeItemAtPath:tmpDir error:NULL]) {
+        NSLog(@"Filter Pipes: Failed to delete temporary directory. (%@)", tmpDir);
     }
 
     return [task terminationStatus] == 0 ? [[stdoutData retain] autorelease] : nil;
