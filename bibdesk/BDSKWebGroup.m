@@ -101,13 +101,7 @@
 
 - (NSImage *)icon { return [NSImage imageNamed:@"webGroup"]; }
 
-- (BOOL)isSearch { return NO; }
-
 - (BOOL)isExternal { return YES; }
-
-- (BOOL)isEditable { return NO; } 
-
-- (BOOL)hasEditableName { return NO; }
 
 - (BOOL)isRetrieving { return isRetrieving; }
 
