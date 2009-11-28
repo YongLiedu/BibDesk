@@ -124,16 +124,6 @@
 - (BDSKPublicationsArray *)publicationsWithoutUpdating { return publications; }
  
 - (BDSKPublicationsArray *)publications{
-    
-    if([self isRetrieving] == NO && publications == nil){
-        // get initial batch of publications
-     //   [server retrievePublications];
-        
-        // use this to notify the tableview to start the progress indicators
-   //     NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
-     //   [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupUpdatedNotification object:self userInfo:userInfo];
-    }
-    // this posts a notification that the publications of the group changed, forcing a redisplay of the table cell
     return publications;
 }
 
