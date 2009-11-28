@@ -136,7 +136,6 @@ static NSImage *unlockedIcon = nil;
     NSParameterAssert(aClient != nil);
     if (self = [super initWithName:[aClient name]]) {
 
-        needsUpdate = YES;
         client = [aClient retain];
         
         [self handleClientUpdatedNotification:nil];
@@ -165,7 +164,7 @@ static NSImage *unlockedIcon = nil;
 
 - (NSString *)description;
 {
-    return [NSString stringWithFormat:@"<%@ %p>: {\n\tneeds update: %@\n\tname: %@\n }", [self class], self, (needsUpdate ? @"yes" : @"no"), name];
+    return [NSString stringWithFormat:@"<%@ %p>: {\n\tneeds update: %@\n\tname: %@\n }", [self class], self, ([self needsUpdate] ? @"yes" : @"no"), name];
 }
 
 - (BDSKSharingClient *)client { return client; }
@@ -195,8 +194,6 @@ static NSImage *unlockedIcon = nil;
 - (BOOL)failedDownload { return [client failedDownload]; }
 
 - (BOOL)needsUpdate { return [client needsUpdate]; }
-
-- (void)setNeedsUpdate:(BOOL)flag { needsUpdate = flag; }
 
 - (BOOL)isShared { return YES; }
 

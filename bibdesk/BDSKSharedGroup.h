@@ -44,7 +44,6 @@
 @interface BDSKSharedGroup : BDSKExternalGroup
 {
     BDSKSharingClient *client;
-    BOOL needsUpdate;
 }
 
 + (NSImage *)icon;
@@ -55,7 +54,6 @@
 - (BDSKSharingClient *)client;
 - (BOOL)isRetrieving;
 - (BOOL)needsUpdate;
-- (void)setNeedsUpdate:(BOOL)flag;
 
 - (void)handleClientUpdatedNotification:(NSNotification *)notification;
 
