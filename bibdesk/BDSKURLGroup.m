@@ -127,7 +127,7 @@
 
 #pragma mark Downloading
 
-- (void)startDownload;
+- (void)retrievePublications;
 {
     NSURL *theURL = [self URL];
     if ([theURL isFileURL]) {

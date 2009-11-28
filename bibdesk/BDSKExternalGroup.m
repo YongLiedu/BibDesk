@@ -103,9 +103,22 @@
 
 - (BDSKPublicationsArray *)publicationsWithoutUpdating { return publications; }
  
-- (BDSKPublicationsArray *)publications { return publications; }
+- (BDSKPublicationsArray *)publications {
+    if ([self isRetrieving] == NO && [self shouldRetrievePublications]) {
+        // get the publications asynchronously if remote, synchronously if local
+        [self retrievePublications]; 
+        
+        // use this to notify the tableview to start the progress indicators
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:[[self class] updateNotificationName] object:self userInfo:userInfo];
+    }
+    return publications;
+}
 
 - (void)setPublications:(NSArray *)newPublications {
+    if ([self isRetrieving])
+        [self terminate];
+    
     if (newPublications != publications) {
         [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
         [publications release];
@@ -142,6 +155,14 @@
     }
 }
 
+- (BOOL)shouldRetrievePublications { return publications == nil; }
+
+- (void)retrievePublications {}
+
+- (void)terminate {}
+
+#pragma mark BDSKOwner protocol
+
 - (BDSKMacroResolver *)macroResolver { return macroResolver; }
 
 - (NSUndoManager *)undoManager { return nil; }
@@ -163,26 +184,6 @@
 - (void)dealloc {
     [errorMessage release];
     [super dealloc];
-}
-
-- (BDSKPublicationsArray *)publications;
-{
-    if ([self isRetrieving] == NO && [self publicationsWithoutUpdating] == nil) {
-        // get the publications asynchronously if remote, synchronously if local
-        [self startDownload]; 
-        
-        // use this to notify the tableview to start the progress indicators
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
-        [[NSNotificationCenter defaultCenter] postNotificationName:[[self class] updateNotificationName] object:self userInfo:userInfo];
-    }
-    return [super publications];
-}
-
-- (void)setPublications:(NSArray *)newPublications {
-    if ([self isRetrieving])
-        [self terminate];
-    
-    [super setPublications:newPublications];
 }
 
 - (void)addPublications:(NSArray *)newPublications { [self doesNotRecognizeSelector:_cmd]; }
@@ -214,9 +215,5 @@
 - (BOOL)hasEditableName { return YES; }
 
 - (BOOL)isEditable { return YES; }
-
-- (void)startDownload {}
-
-- (void)terminate {}
 
 @end

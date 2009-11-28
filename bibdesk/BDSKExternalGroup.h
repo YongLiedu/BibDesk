@@ -57,6 +57,11 @@
 - (void)setPublications:(NSArray *)newPublications;
 - (void)addPublications:(NSArray *)newPublications;
 
+- (BOOL)shouldRetrievePublications;
+- (void)retrievePublications;
+
+- (void)terminate;
+
 @end
 
 #pragma mark -
@@ -71,9 +76,5 @@
 - (void)setErrorMessage:(NSString *)newErrorMessage;
 
 - (NSUndoManager *)undoManager;
-
-- (void)startDownload;
-
-- (void)terminate;
 
 @end

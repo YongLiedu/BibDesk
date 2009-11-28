@@ -136,7 +136,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
 
 #pragma mark Running the script
 
-- (void)startDownload;
+- (void)retrievePublications;
 {
     BOOL isDir = NO;
     NSString *standardizedPath = [scriptPath stringByStandardizingPath];

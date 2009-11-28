@@ -48,6 +48,8 @@
 
 + (NSString *)updateNotificationName { return BDSKWebGroupUpdatedNotification; }
 
+- (BOOL)shouldRetrievePublications { return NO; }
+
 #pragma mark BDSKGroup overrides
 
 // note that pointer equality is used for these groups, so names can overlap

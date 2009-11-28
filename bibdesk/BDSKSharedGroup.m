@@ -170,27 +170,18 @@ static NSImage *unlockedIcon = nil;
     return [NSString stringWithFormat:@"<%@ %p>: {\n\tneeds update: %@\n\tname: %@\n }", [self class], self, (needsUpdate ? @"yes" : @"no"), name];
 }
 
-#pragma mark Accessors
-
-- (BDSKSharingClient *)client {
-    return client;
-}
- 
-- (BDSKPublicationsArray *)publications;
-{
-    if([self isRetrieving] == NO && ([self needsUpdate] || [self publicationsWithoutUpdating] == nil)){
-        // let the server get the publications asynchronously
-        [client retrievePublications]; 
-        
-        // use this to notify the tableview to start the progress indicators
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupUpdatedNotification object:self userInfo:userInfo];
-    }
-    // this will likely be nil the first time
-    return [super publications];
-}
+- (BDSKSharingClient *)client { return client; }
 
 - (void)addPublications:(NSArray *)newPublications { [self doesNotRecognizeSelector:_cmd]; }
+
+- (BOOL)shouldRetrievePublications {
+    return [self needsUpdate] || [super shouldRetrievePublications];
+
+}
+
+- (void)retrievePublications {
+    [client retrievePublications];
+}
 
 // BDSKGroup overrides
 
