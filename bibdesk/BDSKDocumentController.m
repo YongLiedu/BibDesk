@@ -254,7 +254,7 @@ enum {
             if ([NSString isEmptyString:filteredString] && outError)
                 *outError = error ?: [NSError localErrorWithCode:kBDSKDocumentOpenError localizedDescription:NSLocalizedString(@"Unable To Open With Phony Cite Keys", @"Error description")];
         } else {
-            NSData *filteredData = [BDSKTask outputDataFromTaskWithLaunchPath:@"/bin/sh" arguments:[NSArray arrayWithObjects:lastSelectedFilterCommand, nil] inputData:[NSData dataWithContentsOfURL:absoluteURL]];
+            NSData *filteredData = [BDSKTask outputDataFromTaskWithLaunchPath:@"/bin/sh" arguments:[NSArray arrayWithObjects:@"-c", lastSelectedFilterCommand, nil] inputData:[NSData dataWithContentsOfURL:absoluteURL]];
             filteredString = [[[NSString alloc] initWithData:filteredData encoding:encoding] autorelease];
             if ([NSString isEmptyString:filteredString] && outError) {
                 *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentOpenError localizedDescription:NSLocalizedString(@"Unable To Open With Filter", @"Error description")];
