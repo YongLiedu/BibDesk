@@ -46,8 +46,6 @@
 
 @implementation BDSKWebGroup
 
-+ (NSString *)updateNotificationName { return BDSKWebGroupUpdatedNotification; }
-
 - (BOOL)shouldRetrievePublications { return NO; }
 
 #pragma mark BDSKGroup overrides

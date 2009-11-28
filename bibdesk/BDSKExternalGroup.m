@@ -46,8 +46,6 @@
 
 @implementation BDSKExternalGroup
 
-+ (NSString *)updateNotificationName { return nil; }
-
 // old designated initializer
 - (id)initWithName:(NSString *)aName count:(NSInteger)aCount {
     return [self initWithName:aName];
@@ -110,7 +108,7 @@
         
         // use this to notify the tableview to start the progress indicators
         NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
-        [[NSNotificationCenter defaultCenter] postNotificationName:[[self class] updateNotificationName] object:self userInfo:userInfo];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKExternalGroupUpdatedNotification object:self userInfo:userInfo];
     }
     return publications;
 }
@@ -131,9 +129,9 @@
     
     [self setCount:[publications count]];
     
-    if ([[self class] updateNotificationName]) {
+    if (BDSKExternalGroupUpdatedNotification) {
         NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
-        [[NSNotificationCenter defaultCenter] postNotificationName:[[self class] updateNotificationName] object:self userInfo:userInfo];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKExternalGroupUpdatedNotification object:self userInfo:userInfo];
     }
 }
 
@@ -149,9 +147,9 @@
     
     [self setCount:[publications count]];
     
-    if ([[self class] updateNotificationName]) {
+    if (BDSKExternalGroupUpdatedNotification) {
         NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
-        [[NSNotificationCenter defaultCenter] postNotificationName:[[self class] updateNotificationName] object:self userInfo:userInfo];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKExternalGroupUpdatedNotification object:self userInfo:userInfo];
     }
 }
 

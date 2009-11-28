@@ -319,23 +319,6 @@ The groupedPublications array is a subset of the publications array, developed b
         [groupOutlineView setNeedsDisplay:YES];
 }
 
-
-- (void)handleWebGroupUpdatedNotification:(NSNotification *)notification{
-    BDSKGroup *group = [notification object];
-    BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
-    
-    if ([[groups webGroup] isEqual:group] == NO)
-        return; // must be from another document
-    
-    [groupOutlineView reloadData];
-    if ([[self selectedGroups] containsObject:group])
-        [self displaySelectedGroups];
-    
-    if (succeeded)
-        [self setImported:YES forPublications:publications inGroup:group];
-}
-
-
 - (void)handleStaticGroupChangedNotification:(NSNotification *)notification{
     BDSKGroup *group = [notification object];
     
@@ -345,26 +328,6 @@ The groupedPublications array is a subset of the publications array, developed b
     [groupOutlineView reloadData];
     if ([[self selectedGroups] containsObject:group])
         [self displaySelectedGroups];
-}
-
-- (void)handleSharedGroupUpdatedNotification:(NSNotification *)notification{
-    BDSKGroup *group = [notification object];
-    
-    if ([[groups sharedGroups] containsObject:group] == NO)
-        return; /// must be from another document
-    
-    BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
-    
-    if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
-        [self sortGroupsByKey:nil];
-    }else{
-        [groupOutlineView reloadData];
-        if ([[self selectedGroups] containsObject:group] && succeeded)
-            [self displaySelectedGroups];
-    }
-    
-    if (succeeded)
-        [self setImported:YES forPublications:publications inGroup:group];
 }
 
 - (void)handleSharedGroupsChangedNotification:(NSNotification *)notification{
@@ -413,7 +376,7 @@ The groupedPublications array is a subset of the publications array, developed b
     // Don't flag as imported here, since that forces a (re)load of the shared groups, and causes the spinners to start when just opening a document.  The handleSharedGroupUpdatedNotification: should be enough.
 }
 
-- (void)handleURLGroupUpdatedNotification:(NSNotification *)notification{
+- (void)handleExternalGroupUpdatedNotification:(NSNotification *)notification{
     BDSKGroup *group = [notification object];
     BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
     
@@ -431,41 +394,6 @@ The groupedPublications array is a subset of the publications array, developed b
     if (succeeded)
         [self setImported:YES forPublications:publications inGroup:group];
 }
-
-- (void)handleScriptGroupUpdatedNotification:(NSNotification *)notification{
-    BDSKGroup *group = [notification object];
-    BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
-    
-    if ([[groups scriptGroups] containsObject:group] == NO)
-        return; /// must be from another document
-    
-    if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
-        [self sortGroupsByKey:nil];
-    }else{
-        [groupOutlineView reloadData];
-        if ([[self selectedGroups] containsObject:group] && succeeded)
-            [self displaySelectedGroups];
-    }
-    
-    if (succeeded)
-        [self setImported:YES forPublications:publications inGroup:group];
-}
-
-- (void)handleSearchGroupUpdatedNotification:(NSNotification *)notification{
-    BDSKGroup *group = [notification object];
-    BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
-    
-    if ([[groups searchGroups] containsObject:group] == NO)
-        return; /// must be from another document
-    
-    [groupOutlineView reloadData];
-    if ([[self selectedGroups] containsObject:group] && succeeded)
-        [self displaySelectedGroups];
-    
-    if (succeeded)
-        [self setImported:YES forPublications:publications inGroup:group];
-}
-
 
 - (void)handleWillRemoveGroupsNotification:(NSNotification *)notification{
     if([groupOutlineView editedRow] != -1 && [documentWindow makeFirstResponder:nil] == NO)

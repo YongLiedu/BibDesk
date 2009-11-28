@@ -120,8 +120,6 @@ static NSImage *unlockedIcon = nil;
     return unlockedIcon;
 }
 
-+ (NSString *)updateNotificationName { return BDSKSharedGroupUpdatedNotification; }
-
 #pragma mark Init and dealloc
 
 // old designated initializer

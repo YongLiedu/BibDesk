@@ -56,8 +56,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 @implementation BDSKSearchGroup
 
-+ (NSString *)updateNotificationName { return BDSKSearchGroupUpdatedNotification; }
-
 // old designated initializer
 - (id)initWithName:(NSString *)aName;
 {
@@ -271,7 +269,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     
     // use this to notify the tableview to start the progress indicators and disable the button
     NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupUpdatedNotification object:self userInfo:userInfo];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKExternalGroupUpdatedNotification object:self userInfo:userInfo];
 }
 
 - (void)reset;

@@ -955,28 +955,12 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
                name:BDSKStaticGroupChangedNotification
              object:nil];
     [nc addObserver:self
-           selector:@selector(handleSharedGroupUpdatedNotification:)
-               name:BDSKSharedGroupUpdatedNotification
-             object:nil];
-    [nc addObserver:self
            selector:@selector(handleSharedGroupsChangedNotification:)
                name:BDSKSharingClientsChangedNotification
              object:nil];
     [nc addObserver:self
-           selector:@selector(handleURLGroupUpdatedNotification:)
-               name:BDSKURLGroupUpdatedNotification
-             object:nil];
-    [nc addObserver:self
-           selector:@selector(handleScriptGroupUpdatedNotification:)
-               name:BDSKScriptGroupUpdatedNotification
-             object:nil];
-    [nc addObserver:self
-           selector:@selector(handleSearchGroupUpdatedNotification:)
-               name:BDSKSearchGroupUpdatedNotification
-             object:nil];
-    [nc addObserver:self
-           selector:@selector(handleWebGroupUpdatedNotification:)
-               name:BDSKWebGroupUpdatedNotification
+           selector:@selector(handleExternalGroupUpdatedNotification:)
+               name:BDSKExternalGroupUpdatedNotification
              object:nil];
     [nc addObserver:self
            selector:@selector(handleWillRemoveGroupsNotification:)

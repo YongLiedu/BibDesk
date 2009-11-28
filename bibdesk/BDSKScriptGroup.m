@@ -58,8 +58,6 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
 
 @implementation BDSKScriptGroup
 
-+ (NSString *)updateNotificationName { return BDSKScriptGroupUpdatedNotification; }
-
 // old designated initializer
 - (id)initWithName:(NSString *)aName;
 {

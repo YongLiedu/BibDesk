@@ -82,14 +82,10 @@
 
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification;
 - (void)handleGroupNameChangedNotification:(NSNotification *)notification;
-- (void)handleWebGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleStaticGroupChangedNotification:(NSNotification *)notification;
-- (void)handleSharedGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleSharedGroupsChangedNotification:(NSNotification *)notification;
 - (void)handleGroupTableSelectionChangedNotification:(NSNotification *)notification;
-- (void)handleURLGroupUpdatedNotification:(NSNotification *)notification;
-- (void)handleScriptGroupUpdatedNotification:(NSNotification *)notification;
-- (void)handleSearchGroupUpdatedNotification:(NSNotification *)notification;
+- (void)handleExternalGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleWillRemoveGroupsNotification:(NSNotification *)notification;
 - (void)handleDidAddRemoveGroupNotification:(NSNotification *)notification;
 

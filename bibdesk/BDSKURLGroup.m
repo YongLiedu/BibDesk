@@ -52,8 +52,6 @@
 
 @implementation BDSKURLGroup
 
-+ (NSString *)updateNotificationName { return BDSKURLGroupUpdatedNotification; }
-
 // old designated initializer
 - (id)initWithName:(NSString *)aName;
 {

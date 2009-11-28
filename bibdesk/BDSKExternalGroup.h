@@ -48,8 +48,6 @@
     BDSKItemSearchIndexes *searchIndexes;
 }
 
-+ (NSString *)updateNotificationName;
-
 - (id)initWithName:(NSString *)aName;
 
 - (BDSKPublicationsArray *)publicationsWithoutUpdating; 

@@ -69,7 +69,7 @@
     [[searchField cell] setPlaceholderString:[NSString stringWithFormat:NSLocalizedString(@"Search %@", @"search group field placeholder"), name ?: @""]];
     [searchField setFormatter:[group searchStringFormatter]];
     [searchField selectText:self];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSearchGroupUpdatedNotification:) name:BDSKSearchGroupUpdatedNotification object:group];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSearchGroupUpdatedNotification:) name:BDSKExternalGroupUpdatedNotification object:group];
 }
 
 - (NSView *)view {
@@ -84,7 +84,7 @@
 - (void)setGroup:(BDSKSearchGroup *)newGroup {
     if (group != newGroup) {
         if (group)
-            [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKSearchGroupUpdatedNotification object:group];
+            [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKExternalGroupUpdatedNotification object:group];
         
         [group release];
         group = [newGroup retain];
