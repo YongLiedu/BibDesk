@@ -37,7 +37,6 @@
  */
 
 #import "BDSKScriptGroup.h"
-#import "BDSKOwnerProtocol.h"
 #import "KFAppleScriptHandlerAdditionsCore.h"
 #import "KFASHandlerAdditions-TypeTranslation.h"
 #import "BDSKBibTeXParser.h"
@@ -50,8 +49,6 @@
 #import "NSScanner_BDSKExtensions.h"
 #import "BibItem.h"
 #import "BDSKPublicationsArray.h"
-#import "BDSKMacroResolver.h"
-#import "BDSKItemSearchIndexes.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKTask.h"
 
@@ -62,7 +59,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
 @implementation BDSKScriptGroup
 
 // old designated initializer
-- (id)initWithName:(NSString *)aName count:(NSInteger)aCount;
+- (id)initWithName:(NSString *)aName;
 {
     [self release];
     self = nil;
@@ -81,9 +78,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     NSParameterAssert(path != nil);
     if (aName == nil)
         aName = [[path lastPathComponent] stringByDeletingPathExtension];
-    if(self = [super initWithName:aName count:0]){
-        publications = nil;
-        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
+    if(self = [super initWithName:aName]){
         scriptPath = [path retain];
         scriptArguments = [arguments retain];
         argsArray = nil;
@@ -91,7 +86,6 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
         failedDownload = NO;
         
         workingDirPath = [[[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:nil] retain];
-        searchIndexes = [BDSKItemSearchIndexes new];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     }
     return self;
@@ -114,17 +108,6 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     return [NSDictionary dictionaryWithObjectsAndKeys:aName, @"group name", aPath, @"script path", anArgs, @"script arguments", aType, @"script type", nil];
 }
 
-- (id)initWithCoder:(NSCoder *)aCoder
-{
-    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
-    return nil;
-}
-
-- (void)encodeWithCoder:(NSCoder *)aCoder
-{
-    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
-}
-
 - (id)copyWithZone:(NSZone *)aZone {
 	return [[[self class] allocWithZone:aZone] initWithName:name scriptPath:scriptPath scriptArguments:scriptArguments scriptType:scriptType];
 }
@@ -135,31 +118,17 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     [[NSFileManager defaultManager] deleteObjectAtFileURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self terminate];
-    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [scriptPath release];
     [scriptArguments release];
     [argsArray release];
-    [publications release];
-    [macroResolver release];
     [workingDirPath release];
     [stdoutData release];
-    [searchIndexes release];
     [super dealloc];
-}
-
-- (BOOL)isEqual:(id)other { return self == other; }
-
-- (NSUInteger)hash {
-    return BDSKHash(self);
 }
 
 - (NSString *)description;
 {
     return [NSString stringWithFormat:@"<%@ %p>: {\n\t\tname: %@\n\tscript path: %@\n }", [self class], self, name, scriptPath];
-}
-
-- (BDSKItemSearchIndexes *)searchIndexes{
-    return searchIndexes;
 }
 
 #pragma mark Running the script
@@ -273,12 +242,10 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
 }
 
 #pragma mark Accessors
-
-- (BDSKPublicationsArray *)publicationsWithoutUpdating { return publications; }
  
 - (BDSKPublicationsArray *)publications;
 {
-    if([self isRetrieving] == NO && publications == nil){
+    if ([self isRetrieving] == NO && [self publicationsWithoutUpdating] == nil) {
         // get the publications asynchronously
         [self startRunningScript]; 
         
@@ -286,8 +253,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
         NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKScriptGroupUpdatedNotification object:self userInfo:userInfo];
     }
-    // this posts a notification that the publications of the group changed, forcing a redisplay of the table cell
-    return publications;
+    return [super publications];
 }
 
 - (void)setPublications:(NSArray *)newPublications;
@@ -295,34 +261,13 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     if ([self isRetrieving])
         [self terminate];
     
-    if(newPublications != publications){
-        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
-        [publications release];
-        publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
-        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
-        [searchIndexes resetWithPublications:publications];
-        if (publications == nil)
-            [macroResolver removeAllMacros];
-    }
+    [super setPublications:newPublications];
     
-    [self setCount:[publications count]];
-    
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(publications != nil)] forKey:@"succeeded"];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKScriptGroupUpdatedNotification object:self userInfo:userInfo];
 }
 
-- (BDSKMacroResolver *)macroResolver;
-{
-    return macroResolver;
-}
-
-- (NSUndoManager *)undoManager { return [super undoManager]; }
-
-- (NSURL *)fileURL { return nil; }
-
-- (NSString *)documentInfoForKey:(NSString *)key { return nil; }
-
-- (BOOL)isDocument { return NO; }
+- (void)addPublications:(NSArray *)newPublications { [self doesNotRecognizeSelector:_cmd]; }
 
 - (NSString *)scriptPath;
 {
@@ -383,21 +328,11 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     return [NSImage imageNamed:@"scriptGroup"];
 }
 
-- (BOOL)containsItem:(BibItem *)item {
-    // calling [self publications] will repeatedly reschedule a retrieval, which is undesirable if the the URL download is busy; containsItem is called very frequently
-    NSArray *pubs = [publications retain];
-    BOOL rv = [pubs containsObject:item];
-    [pubs release];
-    return rv;
-}
-
 - (BOOL)isRetrieving { return isRetrieving; }
 
 - (BOOL)failedDownload { return failedDownload; }
 
 - (BOOL)isScript { return YES; }
-
-- (BOOL)isExternal { return YES; }
 
 - (BOOL)isEditable { return YES; }
 

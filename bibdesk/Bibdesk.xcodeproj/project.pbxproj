@@ -325,6 +325,8 @@
 		CEFDBDBE0AEA86BA009EE99D /* BDSKSmartGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDBC0AEA86BA009EE99D /* BDSKSmartGroup.m */; };
 		CEFDBDC60AEA86F0009EE99D /* BDSKStaticGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDC40AEA86F0009EE99D /* BDSKStaticGroup.m */; };
 		CEFDBDDE0AEA87F8009EE99D /* BDSKCategoryGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDDC0AEA87F8009EE99D /* BDSKCategoryGroup.m */; };
+		CEFF6D4110C14D7D006CFC80 /* BDSKExternalGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFF6D3F10C14D7D006CFC80 /* BDSKExternalGroup.h */; };
+		CEFF6D4210C14D7D006CFC80 /* BDSKExternalGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFF6D4010C14D7D006CFC80 /* BDSKExternalGroup.m */; };
 		EF902DA60F12410300E5DE14 /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE30758095000C3F701 /* AGRegex.framework */; };
 		EF902DA70F12410300E5DE14 /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
 		F900CD0A0A8EA97D005C3A0F /* UKDirectoryEnumerator.m in Sources */ = {isa = PBXBuildFile; fileRef = F900CD080A8EA97D005C3A0F /* UKDirectoryEnumerator.m */; };
@@ -1267,6 +1269,8 @@
 		CEFDBDC40AEA86F0009EE99D /* BDSKStaticGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStaticGroup.m; sourceTree = "<group>"; };
 		CEFDBDDB0AEA87F8009EE99D /* BDSKCategoryGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCategoryGroup.h; sourceTree = "<group>"; };
 		CEFDBDDC0AEA87F8009EE99D /* BDSKCategoryGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCategoryGroup.m; sourceTree = "<group>"; };
+		CEFF6D3F10C14D7D006CFC80 /* BDSKExternalGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKExternalGroup.h; sourceTree = "<group>"; };
+		CEFF6D4010C14D7D006CFC80 /* BDSKExternalGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKExternalGroup.m; sourceTree = "<group>"; };
 		EF168DDD0F11325B002F4D9F /* UnitTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EF168DDE0F11325B002F4D9F /* UnitTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "UnitTests-Info.plist"; sourceTree = "<group>"; };
 		F900CD070A8EA97D005C3A0F /* UKDirectoryEnumerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UKDirectoryEnumerator.h; path = ukdirectoryenumerator/UKDirectoryEnumerator.h; sourceTree = "<group>"; };
@@ -2270,6 +2274,7 @@
 				CEFDBDDC0AEA87F8009EE99D /* BDSKCategoryGroup.m */,
 				F97198C00DADD32F00CA57AA /* BDSKDBLPGroupServer.m */,
 				CE129A160B44088900416D19 /* BDSKEntrezGroupServer.m */,
+				CEFF6D4010C14D7D006CFC80 /* BDSKExternalGroup.m */,
 				CE21D10909208B9D0075E607 /* BDSKGroup.m */,
 				F97C9DB10C4481670002EE01 /* BDSKISIGroupServer.m */,
 				CE1EF2920F8E0D54004E7AE8 /* BDSKParentGroup.m */,
@@ -2443,6 +2448,7 @@
 				CE15C0D50AA5B9A3002C555F /* BDSKErrorManager.h */,
 				F9E43AD508AD8BDB00A0354B /* BDSKErrorObjectController.h */,
 				CEAC51540A97730800B8DF43 /* BDSKExportUsingTemplateCommand.h */,
+				CEFF6D3F10C14D7D006CFC80 /* BDSKExternalGroup.h */,
 				3DD300F3075C0532003FD2D7 /* BDSKField.h */,
 				CE9F853E0956A2C50073FCAD /* BDSKFieldEditor.h */,
 				F9022C440758027800C3F701 /* BDSKFieldNameFormatter.h */,
@@ -2772,6 +2778,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
+				CEFF6D4110C14D7D006CFC80 /* BDSKExternalGroup.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3571,6 +3578,7 @@
 				CEEC1A331091F31600530207 /* NSEvent_BDSKExtensions.m in Sources */,
 				CE8DAD901098976400896F69 /* BDSKMetadataCacheOperation.m in Sources */,
 				CEE7ACE9109E2F360072D63C /* NSSplitView_BDSKExtensions.m in Sources */,
+				CEFF6D4210C14D7D006CFC80 /* BDSKExternalGroup.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -37,15 +37,14 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKGroup.h"
-#import "BDSKOwnerProtocol.h"
+#import "BDSKExternalGroup.h"
 
 extern NSString *BDSKSearchGroupEntrez;
 extern NSString *BDSKSearchGroupZoom;
 extern NSString *BDSKSearchGroupISI;
 extern NSString *BDSKSearchGroupDBLP;
 
-@class BDSKSearchGroup, BDSKServerInfo, BDSKItemSearchIndexes;
+@class BDSKSearchGroup, BDSKServerInfo;
 
 @protocol BDSKSearchGroupServer <NSObject>
 - (id)initWithGroup:(BDSKSearchGroup *)aGroup serverInfo:(BDSKServerInfo *)info;
@@ -64,23 +63,15 @@ extern NSString *BDSKSearchGroupDBLP;
 - (NSFormatter *)searchStringFormatter;
 @end
 
-@interface BDSKSearchGroup : BDSKMutableGroup <BDSKOwner> {
-    BDSKPublicationsArray *publications;
-    BDSKMacroResolver *macroResolver;
+@interface BDSKSearchGroup : BDSKExternalGroup {
     NSString *type;
     NSString *searchTerm; // passed in by caller
     NSArray *history;
     id<BDSKSearchGroupServer> server;
-    BDSKItemSearchIndexes *searchIndexes;
 }
 
 - (id)initWithType:(NSString *)aType serverInfo:(BDSKServerInfo *)info searchTerm:(NSString *)string;
 - (id)initWithURL:(NSURL *)bdsksearchURL;
-
-- (BDSKPublicationsArray *)publicationsWithoutUpdating; 
-- (BDSKPublicationsArray *)publications;
-- (void)setPublications:(NSArray *)newPublications;
-- (void)addPublications:(NSArray *)newPublications;
 
 - (NSString *)type;
 

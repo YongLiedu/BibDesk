@@ -37,35 +37,24 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKGroup.h"
-#import "BDSKOwnerProtocol.h"
+#import "BDSKExternalGroup.h"
 
-@class BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes;
 
-@interface BDSKURLGroup : BDSKMutableGroup <BDSKOwner>
+@interface BDSKURLGroup : BDSKExternalGroup
 {
-    BDSKPublicationsArray *publications;
-    BDSKMacroResolver *macroResolver;
     NSURL *URL;
     NSString *filePath;
     BOOL isRetrieving;
     BOOL failedDownload;
     NSURLDownload *URLDownload;
-    BDSKItemSearchIndexes *searchIndexes;
     NSString *errorMessage;
 }
-
-- (NSImage *)icon;
 
 - (id)initWithName:(NSString *)aName URL:(NSURL *)aURL;
 - (id)initWithURL:(NSURL *)aURL;
 
 - (NSURL *)URL;
 - (void)setURL:(NSURL *)newURL;
-
-- (BDSKPublicationsArray *)publicationsWithoutUpdating; 
-- (BDSKPublicationsArray *)publications;
-- (void)setPublications:(NSArray *)newPublications;
 
 - (NSString *)errorMessage;
 - (void)setErrorMessage:(NSString *)newErrorMessage;

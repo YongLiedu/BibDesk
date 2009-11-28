@@ -37,19 +37,16 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKGroup.h"
-#import "BDSKOwnerProtocol.h"
-
-@class BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes, BDSKTask;
+#import "BDSKExternalGroup.h"
 
 enum {
     BDSKShellScriptType,
     BDSKAppleScriptType
 };
 
-@interface BDSKScriptGroup : BDSKMutableGroup <BDSKOwner> {
-    BDSKPublicationsArray *publications;
-    BDSKMacroResolver *macroResolver;
+@class BDSKTask;
+
+@interface BDSKScriptGroup : BDSKExternalGroup {
     NSString *scriptPath;
     NSString *scriptArguments;
     NSArray *argsArray;
@@ -59,16 +56,11 @@ enum {
     BDSKTask *currentTask;
     NSString *workingDirPath;
     NSData *stdoutData;
-    BDSKItemSearchIndexes *searchIndexes;
     NSString *errorMessage;
 }
 
 - (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
 - (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
-
-- (BDSKPublicationsArray *)publicationsWithoutUpdating;
-- (BDSKPublicationsArray *)publications;
-- (void)setPublications:(NSArray *)newPubs;
 
 - (NSString *)scriptPath;
 - (void)setScriptPath:(NSString *)newPath;

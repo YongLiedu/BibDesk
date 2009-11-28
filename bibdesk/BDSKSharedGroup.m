@@ -38,12 +38,10 @@
 
 #import "BDSKSharedGroup.h"
 #import "BDSKSharingClient.h"
-#import "BDSKOwnerProtocol.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKMacroResolver.h"
-#import "BDSKItemSearchIndexes.h"
 #import "BibItem.h"
 
 
@@ -124,15 +122,21 @@ static NSImage *unlockedIcon = nil;
 
 #pragma mark Init and dealloc
 
+// old designated initializer
+- (id)initWithName:(NSString *)aName;
+{
+    [self release];
+    self = nil;
+    return self;
+}
+
+// designated initializer
 - (id)initWithClient:(BDSKSharingClient *)aClient;
 {
     NSParameterAssert(aClient != nil);
-    if(self = [super initWithName:[aClient name] count:0]){
+    if (self = [super initWithName:[aClient name]]) {
 
-        publications = nil;
-        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         needsUpdate = YES;
-        searchIndexes = [[BDSKItemSearchIndexes alloc] init];
         client = [aClient retain];
         
         [self handleClientUpdatedNotification:nil];
@@ -149,23 +153,8 @@ static NSImage *unlockedIcon = nil;
 - (void)dealloc;
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [client release];
-    [publications release];
-    [macroResolver release];
-    [searchIndexes release];
     [super dealloc];
-}
-
-- (id)initWithCoder:(NSCoder *)aCoder
-{
-    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
-    return nil;
-}
-
-- (void)encodeWithCoder:(NSCoder *)aCoder
-{
-    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -184,12 +173,10 @@ static NSImage *unlockedIcon = nil;
 - (BDSKSharingClient *)client {
     return client;
 }
-
-- (BDSKPublicationsArray *)publicationsWithoutUpdating { return publications; }
  
 - (BDSKPublicationsArray *)publications;
 {
-    if([self isRetrieving] == NO && ([self needsUpdate] || publications == nil)){
+    if([self isRetrieving] == NO && ([self needsUpdate] || [self publicationsWithoutUpdating] == nil)){
         // let the server get the publications asynchronously
         [client retrievePublications]; 
         
@@ -198,37 +185,31 @@ static NSImage *unlockedIcon = nil;
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupUpdatedNotification object:self userInfo:userInfo];
     }
     // this will likely be nil the first time
-    return publications;
+    return [super publications];
 }
 
 - (void)setPublications:(NSArray *)newPublications;
 {
-    if(newPublications != publications){
-        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
-        [publications release];
-        publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
-        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
-        [searchIndexes resetWithPublications:publications];
-        if (publications == nil)
-            [macroResolver removeAllMacros];
-    }
+    [super setPublications:newPublications];
     
-    [self setCount:[publications count]];
-    
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(publications != nil)] forKey:@"succeeded"];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupUpdatedNotification object:self userInfo:userInfo];
 }
 
-
-- (BDSKMacroResolver *)macroResolver { return macroResolver; }
+- (void)addPublications:(NSArray *)newPublications { [self doesNotRecognizeSelector:_cmd]; }
 
 - (NSUndoManager *)undoManager { return nil; }
 
-- (NSURL *)fileURL { return nil; }
+// BDSKGroup overrides
 
-- (NSString *)documentInfoForKey:(NSString *)key { return nil; }
+- (NSImage *)icon {
+    if ([client needsAuthentication])
+        return ([self publicationsWithoutUpdating] == nil) ? [[self class] lockedIcon] : [[self class] unlockedIcon];
+    else
+        return [[self class] icon];
+}
 
-- (BOOL)isDocument { return NO; }
+- (void)setName:(NSString *)aName { [self doesNotRecognizeSelector:_cmd]; }
 
 - (BOOL)isRetrieving { return [client isRetrieving]; }
 
@@ -238,38 +219,11 @@ static NSImage *unlockedIcon = nil;
 
 - (void)setNeedsUpdate:(BOOL)flag { needsUpdate = flag; }
 
-- (NSString *)errorMessage { return [client errorMessage]; }
-
-// BDSKGroup overrides
-
-- (NSImage *)icon {
-    if([client needsAuthentication])
-        return (publications == nil) ? [[self class] lockedIcon] : [[self class] unlockedIcon];
-    else
-        return [[self class] icon];
-}
-
 - (BOOL)isShared { return YES; }
 
-- (BOOL)isExternal { return YES; }
+- (BOOL)hasEditableName { return NO; }
 
-- (BOOL)containsItem:(BibItem *)item {
-    // calling [self publications] will repeatedly reschedule a retrieval, which is undesirable if the user canceled a password; containsItem is called very frequently
-    NSArray *pubs = [publications retain];
-    BOOL rv = [pubs containsObject:item];
-    [pubs release];
-    return rv;
-}
-
-- (BOOL)isEqual:(id)other { return self == other; }
-
-- (NSUInteger)hash {
-    return BDSKHash(self);
-}
-
-- (BDSKItemSearchIndexes *)searchIndexes {
-    return searchIndexes;
-}
+- (NSString *)errorMessage { return [client errorMessage]; }
 
 #pragma mark notification handlers
 

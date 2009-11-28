@@ -46,62 +46,15 @@
 
 @implementation BDSKWebGroup
 
-// old designated initializer
-- (id)initWithName:(NSString *)aName count:(NSInteger)aCount{
-    return [self initWithName:aName];
-}
-
-- (id)initWithName:(NSString *)aName{
-    NSAssert(aName != nil, @"BDSKWebGroup requires a name");
-
-    if (self = [super initWithName:aName count:0]) {
-        publications = nil;
-        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
-        isRetrieving = NO;
-        searchIndexes = [BDSKItemSearchIndexes new];
-    }
-    return self;
-}
-
-- (id)initWithCoder:(NSCoder *)aCoder{
-    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
-    return nil;
-}
-
-- (void)encodeWithCoder:(NSCoder *)aCoder{
-    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
-}
-
-- (id)copyWithZone:(NSZone *)aZone {
-	return [[[self class] allocWithZone:aZone] initWithName:name];
-}
-
-- (void)dealloc{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
-    [publications release];
-    [macroResolver release];
-    [searchIndexes release];
-    [super dealloc];
-}
-
-- (BOOL)isEqual:(id)other { return self == other; }
-
-- (NSUInteger)hash {
-    return BDSKHash(self);
-}
-
-- (BDSKItemSearchIndexes *)searchIndexes{
-    return searchIndexes;
-}
-
 #pragma mark BDSKGroup overrides
 
 // note that pointer equality is used for these groups, so names can overlap
 
 - (NSImage *)icon { return [NSImage imageNamed:@"webGroup"]; }
 
-- (BOOL)isExternal { return YES; }
+- (void)setName:(NSString *)newName { [self doesNotRecognizeSelector:_cmd]; }
+
+- (BOOL)hasEditableName { return NO; }
 
 - (BOOL)isRetrieving { return isRetrieving; }
 
@@ -109,64 +62,22 @@
 
 - (BOOL)failedDownload { return NO;}
 
-- (BOOL)containsItem:(BibItem *)item {
-    return [publications containsObject:item];
-}
-
-#pragma mark BDSKOwner protocol
-
-- (BDSKPublicationsArray *)publicationsWithoutUpdating { return publications; }
- 
-- (BDSKPublicationsArray *)publications{
-    return publications;
-}
+#pragma mark Publications
 
 - (void)setPublications:(NSArray *)newPublications{
-    
-    if(newPublications != publications){
-        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
-        [publications release];
-        publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
-        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
-        [searchIndexes resetWithPublications:publications];
-        if (publications == nil)
-            [macroResolver removeAllMacros];
-    }
-    
-    [self setCount:[publications count]];
-    
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(publications != nil)] forKey:@"succeeded"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWebGroupUpdatedNotification object:self userInfo:userInfo];
-}
-
-- (void)addPublications:(NSArray *)newPublications{    
-    
-    if(newPublications != publications && newPublications != nil){
-        
-        if (publications == nil)
-            publications = [[BDSKPublicationsArray alloc] initWithArray:newPublications];
-        else 
-            [publications addObjectsFromArray:newPublications];
-        [newPublications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
-        [searchIndexes addPublications:newPublications];
-    }
-    
-    [self setCount:[publications count]];
+    [super setPublications:newPublications];
     
     NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWebGroupUpdatedNotification object:self userInfo:userInfo];
 }
 
-- (BDSKMacroResolver *)macroResolver{
-    return macroResolver;
+- (void)addPublications:(NSArray *)newPublications{    
+    [super addPublications:newPublications];
+    
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWebGroupUpdatedNotification object:self userInfo:userInfo];
 }
 
 - (NSUndoManager *)undoManager { return nil; }
-
-- (NSURL *)fileURL { return nil; }
-
-- (NSString *)documentInfoForKey:(NSString *)key { return nil; }
-
-- (BOOL)isDocument { return NO; }
 
 @end

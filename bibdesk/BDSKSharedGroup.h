@@ -37,18 +37,14 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKGroup.h"
-#import "BDSKOwnerProtocol.h"
+#import "BDSKExternalGroup.h"
 
-@class BDSKSharingClient, BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes;
+@class BDSKSharingClient;
 
-@interface BDSKSharedGroup : BDSKGroup <BDSKOwner>
+@interface BDSKSharedGroup : BDSKExternalGroup
 {
-    BDSKPublicationsArray *publications;
-    BDSKMacroResolver *macroResolver;
     BDSKSharingClient *client;
     BOOL needsUpdate;
-    BDSKItemSearchIndexes *searchIndexes;
 }
 
 + (NSImage *)icon;
@@ -57,9 +53,6 @@
 
 - (id)initWithClient:(BDSKSharingClient *)aClient;
 - (BDSKSharingClient *)client;
-- (BDSKPublicationsArray *)publicationsWithoutUpdating; 
-- (BDSKPublicationsArray *)publications;
-- (void)setPublications:(NSArray *)newPublications;
 - (BOOL)isRetrieving;
 - (BOOL)needsUpdate;
 - (void)setNeedsUpdate:(BOOL)flag;

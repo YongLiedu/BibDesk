@@ -57,7 +57,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 @implementation BDSKSearchGroup
 
 // old designated initializer
-- (id)initWithName:(NSString *)aName count:(NSInteger)aCount;
+- (id)initWithName:(NSString *)aName;
 {
     // ignore the name, because if this is called it's a dummy name anyway
     NSString *aType = BDSKSearchGroupEntrez;
@@ -68,7 +68,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 - (id)initWithType:(NSString *)aType serverInfo:(BDSKServerInfo *)info searchTerm:(NSString *)string;
 {
     NSString *aName = (([info name] ?: [info database]) ?: string) ?: NSLocalizedString(@"Empty", @"Name for empty search group");
-    if (self = [super initWithName:aName count:0]) {
+    if (self = [super initWithName:aName]) {
         if (aType == nil || info == nil) {
             [self release];
             self = nil;
@@ -76,9 +76,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
             type = [aType copy];
             searchTerm = [string copy];
             history = nil;
-            publications = nil;
-            macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
-            searchIndexes = [[BDSKItemSearchIndexes alloc] init];
             [self resetServerWithInfo:info];
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
         }
@@ -182,17 +179,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     return [groupDict autorelease];
 }
 
-- (id)initWithCoder:(NSCoder *)aCoder
-{
-    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
-    return nil;
-}
-
-- (void)encodeWithCoder:(NSCoder *)aCoder
-{
-    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
-}
-
 - (id)copyWithZone:(NSZone *)aZone {
 	return [[[self class] allocWithZone:aZone] initWithType:type serverInfo:[self serverInfo] searchTerm:searchTerm];
 }
@@ -202,23 +188,11 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     [server terminate];
     [server release];
     server = nil;
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
-    [publications release];
-    publications = nil;
     [type release];
     type = nil;
     [searchTerm release];
     searchTerm = nil;
-    [searchIndexes release];
-    searchIndexes = nil;
     [super dealloc];
-}
-
-- (BOOL)isEqual:(id)other { return self == other; }
-
-- (NSUInteger)hash {
-    return BDSKHash(self);
 }
 
 // Logging
@@ -252,8 +226,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 - (BOOL)isSearch { return YES; }
 
-- (BOOL)isExternal { return YES; }
-
 - (BOOL)isEditable { return YES; }
 
 - (BOOL)hasEditableName { return NO; }
@@ -264,17 +236,11 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 - (NSString *)errorMessage { return [server errorMessage]; }
 
-- (BOOL)containsItem:(BibItem *)item {
-    return [publications containsObject:item];
-}
-
-#pragma mark BDSKOwner protocol
-
-- (BDSKPublicationsArray *)publicationsWithoutUpdating { return publications; }
+#pragma mark Publications
  
 - (BDSKPublicationsArray *)publications;
 {
-    if([self isRetrieving] == NO && publications == nil && [NSString isEmptyString:[self searchTerm]] == NO){
+    if([self isRetrieving] == NO && [self publicationsWithoutUpdating] == nil && [NSString isEmptyString:[self searchTerm]] == NO){
         // get initial batch of publications
         [server retrievePublications];
         
@@ -283,58 +249,27 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupUpdatedNotification object:self userInfo:userInfo];
     }
     // this posts a notification that the publications of the group changed, forcing a redisplay of the table cell
-    return publications;
+    return [super publications];
 }
 
 - (void)setPublications:(NSArray *)newPublications;
 {
-    if(newPublications != publications){
-        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
-        [publications release];
-        publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
-        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
-        [searchIndexes resetWithPublications:publications];
-        
-        if (publications == nil)
-            [macroResolver removeAllMacros];
-    }
-    
-    [self setCount:[publications count]];
-    
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(publications != nil)] forKey:@"succeeded"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupUpdatedNotification object:self userInfo:userInfo];
-}
-
-- (void)addPublications:(NSArray *)newPublications;
-{    
-    if(newPublications != publications && newPublications != nil){
-        
-        if (publications == nil)
-            publications = [[BDSKPublicationsArray alloc] initWithArray:newPublications];
-        else 
-            [publications addObjectsFromArray:newPublications];
-        [newPublications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
-        [searchIndexes addPublications:newPublications];
-    }
-    
-    [self setCount:[publications count]];
+    [super setPublications:newPublications];
     
     NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupUpdatedNotification object:self userInfo:userInfo];
 }
 
-- (BDSKMacroResolver *)macroResolver { return macroResolver; }
+- (void)addPublications:(NSArray *)newPublications;
+{    
+    [super addPublications:newPublications];
+    
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupUpdatedNotification object:self userInfo:userInfo];
+}
 
 // search groups are not saved, so we don't register undo with the document's undo manager
 - (NSUndoManager *)undoManager { return nil; }
-
-- (NSURL *)fileURL { return nil; }
-
-- (NSString *)documentInfoForKey:(NSString *)key { return nil; }
-
-- (BOOL)isDocument { return NO; }
-
-- (BDSKItemSearchIndexes *)searchIndexes { return searchIndexes; }
 
 #pragma mark Searching
 

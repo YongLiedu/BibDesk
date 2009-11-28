@@ -37,7 +37,6 @@
  */
 
 #import "BDSKURLGroup.h"
-#import "BDSKOwnerProtocol.h"
 #import <WebKit/WebKit.h>
 #import "BDSKBibTeXParser.h"
 #import "BDSKWebOfScienceParser.h"
@@ -48,15 +47,13 @@
 #import "NSError_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
-#import "BDSKMacroResolver.h"
-#import "BDSKItemSearchIndexes.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibItem.h"
 
 @implementation BDSKURLGroup
 
 // old designated initializer
-- (id)initWithName:(NSString *)aName count:(NSInteger)aCount;
+- (id)initWithName:(NSString *)aName;
 {
     [self release];
     self = nil;
@@ -75,15 +72,12 @@
     NSParameterAssert(aURL != nil);
     if (aName == nil)
         aName = [aURL lastPathComponent];
-    if(self = [super initWithName:aName count:0]){
+    if(self = [super initWithName:aName]){
         
-        publications = nil;
-        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         URL = [aURL copy];
         isRetrieving = NO;
         failedDownload = NO;
         URLDownload = nil;
-        searchIndexes = [BDSKItemSearchIndexes new];
     }
     
     return self;
@@ -102,17 +96,6 @@
     return [NSDictionary dictionaryWithObjectsAndKeys:aName, @"group name", anURL, @"URL", nil];
 }
 
-- (id)initWithCoder:(NSCoder *)aCoder
-{
-    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
-    return nil;
-}
-
-- (void)encodeWithCoder:(NSCoder *)aCoder
-{
-    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
-}
-
 - (id)copyWithZone:(NSZone *)aZone {
 	return [[[self class] allocWithZone:aZone] initWithName:name URL:URL];
 }
@@ -120,12 +103,8 @@
 - (void)dealloc;
 {
     [self terminate];
-    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [URL release];
     [filePath release];
-    [publications release];
-    [macroResolver release];
-    [searchIndexes release];
     [super dealloc];
 }
 
@@ -137,21 +116,11 @@
     isRetrieving = NO;
 }
 
-- (BOOL)isEqual:(id)other { return self == other; }
-
-- (NSUInteger)hash {
-    return BDSKHash(self);
-}
-
 // Logging
 
 - (NSString *)description;
 {
     return [NSString stringWithFormat:@"<%@ %p>: {\n\tis downloading: %@\n\tname: %@\n\tURL: %@\n }", [self class], self, (isRetrieving ? @"yes" : @"no"), name, [self URL]];
-}
-
-- (BDSKItemSearchIndexes *)searchIndexes {
-    return searchIndexes;
 }
 
 #pragma mark Downloading
@@ -264,12 +233,10 @@
         [self setPublications:nil];
     }
 }
-
-- (BDSKPublicationsArray *)publicationsWithoutUpdating { return publications; }
  
 - (BDSKPublicationsArray *)publications;
 {
-    if([self isRetrieving] == NO && publications == nil){
+    if([self isRetrieving] == NO && [self publicationsWithoutUpdating] == nil){
         // get the publications asynchronously if remote, synchronously if local
         [self startDownload]; 
         
@@ -278,7 +245,7 @@
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKURLGroupUpdatedNotification object:self userInfo:userInfo];
     }
     // this posts a notification that the publications of the group changed, forcing a redisplay of the table cell
-    return publications;
+    return [super publications];
 }
 
 - (void)setPublications:(NSArray *)newPublications;
@@ -286,39 +253,15 @@
     if ([self isRetrieving])
         [self terminate];
     
-    if(newPublications != publications){
-        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
-        [publications release];
-        publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
-        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
-        [searchIndexes resetWithPublications:publications];
-        
-        if (publications == nil)
-            [macroResolver removeAllMacros];
-    }
+    [super setPublications:newPublications];
     
-    [self setCount:[publications count]];
-    
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(publications != nil)] forKey:@"succeeded"];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKURLGroupUpdatedNotification object:self userInfo:userInfo];
 }
 
-- (BDSKMacroResolver *)macroResolver;
-{
-    return macroResolver;
-}
-
-- (NSUndoManager *)undoManager { return [super undoManager]; }
+- (void)addPublications:(NSArray *)newPublications { [self doesNotRecognizeSelector:_cmd]; }
 
 - (NSURL *)fileURL { return [NSURL fileURLWithPath:filePath]; }
-
-- (NSString *)documentInfoForKey:(NSString *)key { return nil; }
-
-- (BOOL)isDocument { return NO; }
-
-- (BOOL)isRetrieving { return isRetrieving; }
-
-- (BOOL)failedDownload { return failedDownload; }
 
 // BDSKGroup overrides
 
@@ -328,10 +271,11 @@
 
 - (BOOL)isURL { return YES; }
 
-- (BOOL)isExternal { return YES; }
-
 - (BOOL)isEditable { return YES; }
 
+- (BOOL)isRetrieving { return isRetrieving; }
+
+- (BOOL)failedDownload { return failedDownload; }
 
 - (NSString *)errorMessage {
     return errorMessage;
@@ -342,11 +286,6 @@
         [errorMessage release];
         errorMessage = [newErrorMessage retain];
     }
-}
-
-- (BOOL)containsItem:(BibItem *)item {
-    // calling [self publications] will repeatedly reschedule a retrieval, which may be undesirable if it failed
-    return [publications containsObject:item];
 }
 
 @end
