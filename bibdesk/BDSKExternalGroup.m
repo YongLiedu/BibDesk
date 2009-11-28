@@ -105,10 +105,8 @@
     if ([self isRetrieving] == NO && [self shouldRetrievePublications]) {
         // get the publications asynchronously if remote, synchronously if local
         [self retrievePublications]; 
-        
         // use this to notify the tableview to start the progress indicators
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKExternalGroupUpdatedNotification object:self userInfo:userInfo];
+        [self notifyUpdateForSuccess:NO];
     }
     return publications;
 }
@@ -129,10 +127,7 @@
     
     [self setCount:[publications count]];
     
-    if (BDSKExternalGroupUpdatedNotification) {
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKExternalGroupUpdatedNotification object:self userInfo:userInfo];
-    }
+    [self notifyUpdateForSuccess:newPublications != nil];
 }
 
 - (void)addPublications:(NSArray *)newPublications {
@@ -147,10 +142,7 @@
     
     [self setCount:[publications count]];
     
-    if (BDSKExternalGroupUpdatedNotification) {
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKExternalGroupUpdatedNotification object:self userInfo:userInfo];
-    }
+    [self notifyUpdateForSuccess:newPublications != nil];
 }
 
 - (BOOL)shouldRetrievePublications { return publications == nil; }
@@ -158,6 +150,11 @@
 - (void)retrievePublications {}
 
 - (void)terminate {}
+
+- (void)notifyUpdateForSuccess:(BOOL)succeeded {
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKExternalGroupUpdatedNotification object:self
+        userInfo:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:succeeded] forKey:@"succeeded"]];
+}
 
 #pragma mark BDSKOwner protocol
 

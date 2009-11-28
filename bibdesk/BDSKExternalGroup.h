@@ -60,6 +60,8 @@
 
 - (void)terminate;
 
+- (void)notifyUpdateForSuccess:(BOOL)succeeded;
+
 @end
 
 #pragma mark -
