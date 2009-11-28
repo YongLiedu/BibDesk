@@ -48,6 +48,8 @@
     BDSKItemSearchIndexes *searchIndexes;
 }
 
++ (NSString *)updateNotificationName;
+
 - (id)initWithName:(NSString *)aName;
 
 - (BDSKPublicationsArray *)publicationsWithoutUpdating; 
@@ -59,10 +61,19 @@
 
 #pragma mark -
 
-@interface BDSKMutableExternalGroup : BDSKExternalGroup
+@interface BDSKMutableExternalGroup : BDSKExternalGroup {
+    NSString *errorMessage;
+}
 
 - (void)setName:(id)newName;
 
+- (NSString *)errorMessage;
+- (void)setErrorMessage:(NSString *)newErrorMessage;
+
 - (NSUndoManager *)undoManager;
+
+- (void)startDownload;
+
+- (void)terminate;
 
 @end

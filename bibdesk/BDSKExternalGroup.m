@@ -46,6 +46,8 @@
 
 @implementation BDSKExternalGroup
 
++ (NSString *)updateNotificationName { return nil; }
+
 // old designated initializer
 - (id)initWithName:(NSString *)aName count:(NSInteger)aCount {
     return [self initWithName:aName];
@@ -113,7 +115,13 @@
         if (publications == nil)
             [macroResolver removeAllMacros];
     }
+    
     [self setCount:[publications count]];
+    
+    if ([[self class] updateNotificationName]) {
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:[[self class] updateNotificationName] object:self userInfo:userInfo];
+    }
 }
 
 - (void)addPublications:(NSArray *)newPublications {
@@ -125,7 +133,13 @@
         [newPublications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
         [searchIndexes addPublications:newPublications];
     }
+    
     [self setCount:[publications count]];
+    
+    if ([[self class] updateNotificationName]) {
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:[[self class] updateNotificationName] object:self userInfo:userInfo];
+    }
 }
 
 - (BDSKMacroResolver *)macroResolver { return macroResolver; }
@@ -146,6 +160,33 @@
 
 @implementation BDSKMutableExternalGroup
 
+- (void)dealloc {
+    [errorMessage release];
+    [super dealloc];
+}
+
+- (BDSKPublicationsArray *)publications;
+{
+    if ([self isRetrieving] == NO && [self publicationsWithoutUpdating] == nil) {
+        // get the publications asynchronously if remote, synchronously if local
+        [self startDownload]; 
+        
+        // use this to notify the tableview to start the progress indicators
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:[[self class] updateNotificationName] object:self userInfo:userInfo];
+    }
+    return [super publications];
+}
+
+- (void)setPublications:(NSArray *)newPublications {
+    if ([self isRetrieving])
+        [self terminate];
+    
+    [super setPublications:newPublications];
+}
+
+- (void)addPublications:(NSArray *)newPublications { [self doesNotRecognizeSelector:_cmd]; }
+
 - (void)setName:(id)newName {
     if (name != newName) {
 		[(BDSKMutableExternalGroup *)[[self undoManager] prepareWithInvocationTarget:self] setName:name];
@@ -155,10 +196,27 @@
     }
 }
 
+- (NSString *)errorMessage {
+    return errorMessage;
+}
+
+- (void)setErrorMessage:(NSString *)newErrorMessage {
+    if (errorMessage != newErrorMessage) {
+        [errorMessage release];
+        errorMessage = [newErrorMessage retain];
+    }
+}
+
 - (NSUndoManager *)undoManager {
     return [document undoManager];
 }
 
 - (BOOL)hasEditableName { return YES; }
+
+- (BOOL)isEditable { return YES; }
+
+- (void)startDownload {}
+
+- (void)terminate {}
 
 @end

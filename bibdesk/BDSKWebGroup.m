@@ -46,6 +46,8 @@
 
 @implementation BDSKWebGroup
 
++ (NSString *)updateNotificationName { return BDSKWebGroupUpdatedNotification; }
+
 #pragma mark BDSKGroup overrides
 
 // note that pointer equality is used for these groups, so names can overlap
@@ -57,21 +59,5 @@
 - (void)setRetrieving:(BOOL)flag { isRetrieving = flag; }
 
 - (BOOL)failedDownload { return NO;}
-
-#pragma mark Publications
-
-- (void)setPublications:(NSArray *)newPublications{
-    [super setPublications:newPublications];
-    
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWebGroupUpdatedNotification object:self userInfo:userInfo];
-}
-
-- (void)addPublications:(NSArray *)newPublications{    
-    [super addPublications:newPublications];
-    
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWebGroupUpdatedNotification object:self userInfo:userInfo];
-}
 
 @end

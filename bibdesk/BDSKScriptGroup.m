@@ -58,6 +58,8 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
 
 @implementation BDSKScriptGroup
 
++ (NSString *)updateNotificationName { return BDSKScriptGroupUpdatedNotification; }
+
 // old designated initializer
 - (id)initWithName:(NSString *)aName;
 {
@@ -83,6 +85,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
         scriptArguments = [arguments retain];
         argsArray = nil;
         scriptType = type;
+        isRetrieving = NO;
         failedDownload = NO;
         
         workingDirPath = [[[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:nil] retain];
@@ -133,7 +136,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
 
 #pragma mark Running the script
 
-- (void)startRunningScript;
+- (void)startDownload;
 {
     BOOL isDir = NO;
     NSString *standardizedPath = [scriptPath stringByStandardizingPath];
@@ -242,32 +245,10 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
 }
 
 #pragma mark Accessors
- 
-- (BDSKPublicationsArray *)publications;
-{
-    if ([self isRetrieving] == NO && [self publicationsWithoutUpdating] == nil) {
-        // get the publications asynchronously
-        [self startRunningScript]; 
-        
-        // use this to notify the tableview to start the progress indicators
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKScriptGroupUpdatedNotification object:self userInfo:userInfo];
-    }
-    return [super publications];
-}
 
-- (void)setPublications:(NSArray *)newPublications;
-{
-    if ([self isRetrieving])
-        [self terminate];
-    
-    [super setPublications:newPublications];
-    
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKScriptGroupUpdatedNotification object:self userInfo:userInfo];
-}
+- (BOOL)isRetrieving { return isRetrieving; }
 
-- (void)addPublications:(NSArray *)newPublications { [self doesNotRecognizeSelector:_cmd]; }
+- (BOOL)failedDownload { return failedDownload; }
 
 - (NSString *)scriptPath;
 {
@@ -328,24 +309,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     return [NSImage imageNamed:@"scriptGroup"];
 }
 
-- (BOOL)isRetrieving { return isRetrieving; }
-
-- (BOOL)failedDownload { return failedDownload; }
-
 - (BOOL)isScript { return YES; }
-
-- (BOOL)isEditable { return YES; }
-
-- (NSString *)errorMessage {
-    return errorMessage;
-}
-
-- (void)setErrorMessage:(NSString *)newErrorMessage {
-    if (errorMessage != newErrorMessage) {
-        [errorMessage release];
-        errorMessage = [newErrorMessage retain];
-    }
-}
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification{
     [self terminate];

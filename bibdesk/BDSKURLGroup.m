@@ -52,6 +52,8 @@
 
 @implementation BDSKURLGroup
 
++ (NSString *)updateNotificationName { return BDSKURLGroupUpdatedNotification; }
+
 // old designated initializer
 - (id)initWithName:(NSString *)aName;
 {
@@ -213,6 +215,10 @@
 
 #pragma mark Accessors
 
+- (BOOL)isRetrieving { return isRetrieving; }
+
+- (BOOL)failedDownload { return failedDownload; }
+
 - (NSURL *)URL;
 {
     return URL;
@@ -233,33 +239,6 @@
         [self setPublications:nil];
     }
 }
- 
-- (BDSKPublicationsArray *)publications;
-{
-    if([self isRetrieving] == NO && [self publicationsWithoutUpdating] == nil){
-        // get the publications asynchronously if remote, synchronously if local
-        [self startDownload]; 
-        
-        // use this to notify the tableview to start the progress indicators
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKURLGroupUpdatedNotification object:self userInfo:userInfo];
-    }
-    // this posts a notification that the publications of the group changed, forcing a redisplay of the table cell
-    return [super publications];
-}
-
-- (void)setPublications:(NSArray *)newPublications;
-{
-    if ([self isRetrieving])
-        [self terminate];
-    
-    [super setPublications:newPublications];
-    
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKURLGroupUpdatedNotification object:self userInfo:userInfo];
-}
-
-- (void)addPublications:(NSArray *)newPublications { [self doesNotRecognizeSelector:_cmd]; }
 
 - (NSURL *)fileURL { return [NSURL fileURLWithPath:filePath]; }
 
@@ -270,22 +249,5 @@
 }
 
 - (BOOL)isURL { return YES; }
-
-- (BOOL)isEditable { return YES; }
-
-- (BOOL)isRetrieving { return isRetrieving; }
-
-- (BOOL)failedDownload { return failedDownload; }
-
-- (NSString *)errorMessage {
-    return errorMessage;
-}
-
-- (void)setErrorMessage:(NSString *)newErrorMessage {
-    if (errorMessage != newErrorMessage) {
-        [errorMessage release];
-        errorMessage = [newErrorMessage retain];
-    }
-}
 
 @end

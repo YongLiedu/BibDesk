@@ -47,7 +47,6 @@
     BOOL isRetrieving;
     BOOL failedDownload;
     NSURLDownload *URLDownload;
-    NSString *errorMessage;
 }
 
 - (id)initWithName:(NSString *)aName URL:(NSURL *)aURL;
@@ -55,12 +54,5 @@
 
 - (NSURL *)URL;
 - (void)setURL:(NSURL *)newURL;
-
-- (NSString *)errorMessage;
-- (void)setErrorMessage:(NSString *)newErrorMessage;
-
-- (BOOL)isRetrieving;
-
-- (void)terminate;
 
 @end

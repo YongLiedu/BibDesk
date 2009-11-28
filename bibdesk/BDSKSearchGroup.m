@@ -56,6 +56,8 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 @implementation BDSKSearchGroup
 
++ (NSString *)updateNotificationName { return BDSKSearchGroupUpdatedNotification; }
+
 // old designated initializer
 - (id)initWithName:(NSString *)aName;
 {
@@ -246,22 +248,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     }
     // this posts a notification that the publications of the group changed, forcing a redisplay of the table cell
     return [super publications];
-}
-
-- (void)setPublications:(NSArray *)newPublications;
-{
-    [super setPublications:newPublications];
-    
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupUpdatedNotification object:self userInfo:userInfo];
-}
-
-- (void)addPublications:(NSArray *)newPublications;
-{    
-    [super addPublications:newPublications];
-    
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupUpdatedNotification object:self userInfo:userInfo];
 }
 
 #pragma mark Searching

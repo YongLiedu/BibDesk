@@ -56,7 +56,6 @@ enum {
     BDSKTask *currentTask;
     NSString *workingDirPath;
     NSData *stdoutData;
-    NSString *errorMessage;
 }
 
 - (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
@@ -71,15 +70,10 @@ enum {
 - (NSInteger)scriptType;
 - (void)setScriptType:(NSInteger)newType;
 
-- (NSString *)errorMessage;
-- (void)setErrorMessage:(NSString *)newErrorMessage;
-
-- (void)startRunningScript;
 - (void)scriptDidFinishWithResult:(NSString *)outputString;
 - (void)scriptDidFailWithError:(NSError *)error;
 - (void)runShellScript;
 - (void)runAppleScript;
-- (void)terminate;
 - (void)stdoutNowAvailable:(NSNotification *)notification;
 
 @end

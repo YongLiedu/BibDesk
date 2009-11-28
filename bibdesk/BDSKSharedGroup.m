@@ -120,6 +120,8 @@ static NSImage *unlockedIcon = nil;
     return unlockedIcon;
 }
 
++ (NSString *)updateNotificationName { return BDSKSharedGroupUpdatedNotification; }
+
 #pragma mark Init and dealloc
 
 // old designated initializer
@@ -186,14 +188,6 @@ static NSImage *unlockedIcon = nil;
     }
     // this will likely be nil the first time
     return [super publications];
-}
-
-- (void)setPublications:(NSArray *)newPublications;
-{
-    [super setPublications:newPublications];
-    
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupUpdatedNotification object:self userInfo:userInfo];
 }
 
 - (void)addPublications:(NSArray *)newPublications { [self doesNotRecognizeSelector:_cmd]; }
