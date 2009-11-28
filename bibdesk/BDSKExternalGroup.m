@@ -99,7 +99,7 @@
 
 - (BOOL)containsItem:(BibItem *)item { return [publications containsObject:item]; }
 
-#pragma mark BDSKOwner protocol
+#pragma mark Publications
 
 - (BDSKPublicationsArray *)publicationsWithoutUpdating { return publications; }
  
