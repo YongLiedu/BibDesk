@@ -2630,7 +2630,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             [itemsToSelect addObject:anItem];
     }
     [self selectPublications:itemsToSelect];
-    return [itemsToSelect count];
+    return [itemsToSelect count] > 0;
 }
 
 - (BOOL)selectItemForPartialItem:(NSDictionary *)partialItem{
