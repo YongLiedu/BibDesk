@@ -111,10 +111,6 @@
 - (NSData *)outputDataFromTask:(NSTask *)aTask inputData:(NSData *)input {
     NSFileManager *fm = [NSFileManager defaultManager];
     NSString *tmpDir;
-    NSString *script;
-    NSData *scriptData;
-    NSMutableDictionary *currentAttributes;
-    NSUInteger currentMode;
     NSPipe *inputPipe;
     NSPipe *outputPipe;
     NSFileHandle *inputFileHandle;

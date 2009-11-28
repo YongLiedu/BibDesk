@@ -855,7 +855,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     // could use [[alert window] orderOut:nil] here, but we're using the didDismissSelector instead
     BDSKPRECONDITION([self commitEditing]);
 	
-	BDSKScriptHook *scriptHook = nil;
 	NSString *oldKey = [publication citeKey];
 	NSString *newKey = [publication suggestedCiteKey];
 	
