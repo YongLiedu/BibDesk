@@ -59,13 +59,6 @@
 */
 - (id)initWithName:(id)aName count:(NSInteger)aCount;
 
-/*!
-	@method initLibraryGroup
-	@abstract Initializes and returns a new Library group. 
-	@discussion -
-*/
-- (id)initLibraryGroup;
-
 - (id)initWithDictionary:(NSDictionary *)groupDict;
 - (NSDictionary *)dictionaryValue;
 

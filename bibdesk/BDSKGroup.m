@@ -70,13 +70,6 @@ static NSString *createUniqueID(void)
     return [self initWithName:NSLocalizedString(@"Group", @"Default group name") count:0];
 }
 
-- (id)initLibraryGroup {
-	NSZone *zone = [self zone];
-	[[super init] release];
-	self = [[BDSKLibraryGroup allocWithZone:zone] init];
-	return self;
-}
-
 // designated initializer
 - (id)initWithName:(id)aName count:(NSInteger)aCount {
     if (self = [super init]) {

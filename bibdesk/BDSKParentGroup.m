@@ -168,7 +168,7 @@
     // all-encompassing, non-expandable name
     self = [self initWithName:NSLocalizedString(@"GROUPS", @"source list group row title")];
     if (self) {
-        BDSKGroup *libraryGroup = [[BDSKGroup alloc] initLibraryGroup];
+        BDSKGroup *libraryGroup = [[BDSKLibraryGroup alloc] init];
         [self insertChild:libraryGroup atIndex:0];
         [libraryGroup release];
     }
