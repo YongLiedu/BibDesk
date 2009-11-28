@@ -52,10 +52,6 @@
 
 - (NSImage *)icon { return [NSImage imageNamed:@"webGroup"]; }
 
-- (void)setName:(NSString *)newName { [self doesNotRecognizeSelector:_cmd]; }
-
-- (BOOL)hasEditableName { return NO; }
-
 - (BOOL)isRetrieving { return isRetrieving; }
 
 - (void)setRetrieving:(BOOL)flag { isRetrieving = flag; }
@@ -77,7 +73,5 @@
     NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWebGroupUpdatedNotification object:self userInfo:userInfo];
 }
-
-- (NSUndoManager *)undoManager { return nil; }
 
 @end

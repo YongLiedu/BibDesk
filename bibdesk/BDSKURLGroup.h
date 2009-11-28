@@ -40,7 +40,7 @@
 #import "BDSKExternalGroup.h"
 
 
-@interface BDSKURLGroup : BDSKExternalGroup
+@interface BDSKURLGroup : BDSKMutableExternalGroup
 {
     NSURL *URL;
     NSString *filePath;

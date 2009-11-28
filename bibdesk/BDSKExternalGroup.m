@@ -130,7 +130,7 @@
 
 - (BDSKMacroResolver *)macroResolver { return macroResolver; }
 
-- (NSUndoManager *)undoManager { return [super undoManager]; }
+- (NSUndoManager *)undoManager { return nil; }
 
 - (NSURL *)fileURL { return nil; }
 
@@ -139,5 +139,26 @@
 - (BOOL)isDocument { return NO; }
 
 - (BDSKItemSearchIndexes *)searchIndexes{ return searchIndexes; }
+
+@end
+
+#pragma mark -
+
+@implementation BDSKMutableExternalGroup
+
+- (void)setName:(id)newName {
+    if (name != newName) {
+		[(BDSKMutableExternalGroup *)[[self undoManager] prepareWithInvocationTarget:self] setName:name];
+        [name release];
+        name = [newName retain];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupNameChangedNotification object:self];
+    }
+}
+
+- (NSUndoManager *)undoManager {
+    return [document undoManager];
+}
+
+- (BOOL)hasEditableName { return YES; }
 
 @end

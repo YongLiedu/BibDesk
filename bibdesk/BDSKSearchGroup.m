@@ -218,8 +218,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     return [NSString isEmptyString:[self searchTerm]] ? NSLocalizedString(@"Empty", @"Name for empty search group") : [self searchTerm];
 }
 
-- (void)setName:(NSString *)newName {}
-
 - (NSString *)toolTip {
     return [NSString stringWithFormat:@"%@: %@", [[self serverInfo] name] ?: @"", [self name]];
 }
@@ -227,8 +225,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 - (BOOL)isSearch { return YES; }
 
 - (BOOL)isEditable { return YES; }
-
-- (BOOL)hasEditableName { return NO; }
 
 - (BOOL)isRetrieving { return [server isRetrieving]; }
 
@@ -267,9 +263,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(newPublications != nil)] forKey:@"succeeded"];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupUpdatedNotification object:self userInfo:userInfo];
 }
-
-// search groups are not saved, so we don't register undo with the document's undo manager
-- (NSUndoManager *)undoManager { return nil; }
 
 #pragma mark Searching
 

@@ -46,7 +46,7 @@ enum {
 
 @class BDSKTask;
 
-@interface BDSKScriptGroup : BDSKExternalGroup {
+@interface BDSKScriptGroup : BDSKMutableExternalGroup {
     NSString *scriptPath;
     NSString *scriptArguments;
     NSArray *argsArray;

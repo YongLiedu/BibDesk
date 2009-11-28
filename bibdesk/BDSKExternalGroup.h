@@ -56,3 +56,13 @@
 - (void)addPublications:(NSArray *)newPublications;
 
 @end
+
+#pragma mark -
+
+@interface BDSKMutableExternalGroup : BDSKExternalGroup
+
+- (void)setName:(id)newName;
+
+- (NSUndoManager *)undoManager;
+
+@end

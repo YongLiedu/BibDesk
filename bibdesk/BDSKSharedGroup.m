@@ -198,8 +198,6 @@ static NSImage *unlockedIcon = nil;
 
 - (void)addPublications:(NSArray *)newPublications { [self doesNotRecognizeSelector:_cmd]; }
 
-- (NSUndoManager *)undoManager { return nil; }
-
 // BDSKGroup overrides
 
 - (NSImage *)icon {
@@ -208,8 +206,6 @@ static NSImage *unlockedIcon = nil;
     else
         return [[self class] icon];
 }
-
-- (void)setName:(NSString *)aName { [self doesNotRecognizeSelector:_cmd]; }
 
 - (BOOL)isRetrieving { return [client isRetrieving]; }
 
@@ -220,8 +216,6 @@ static NSImage *unlockedIcon = nil;
 - (void)setNeedsUpdate:(BOOL)flag { needsUpdate = flag; }
 
 - (BOOL)isShared { return YES; }
-
-- (BOOL)hasEditableName { return NO; }
 
 - (NSString *)errorMessage { return [client errorMessage]; }
 
