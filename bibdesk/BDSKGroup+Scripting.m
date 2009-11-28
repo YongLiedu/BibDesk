@@ -100,18 +100,14 @@
 }
 
 - (NSArray *)scriptingPublications {
-    if ([self respondsToSelector:@selector(publications)]) {
-        return [(id<BDSKOwner>)self publications];
-    } else {
-        NSMutableArray *scriptingPublications = [NSMutableArray array];
-        
-        for (BibItem *pub in [document publications]) {
-            if ([self containsItem:pub])
-                [scriptingPublications addObject:pub];
-        }
-        
-        return scriptingPublications;
+    NSMutableArray *scriptingPublications = [NSMutableArray array];
+    
+    for (BibItem *pub in [document publications]) {
+        if ([self containsItem:pub])
+            [scriptingPublications addObject:pub];
     }
+    
+    return scriptingPublications;
 }
 
 - (NSArray *)authors {
@@ -201,6 +197,10 @@
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
     return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"staticGroups" uniqueID:[self scriptingUniqueID]] autorelease];
+}
+
+- (NSArray *)scriptingPublications {
+    return [self publications];
 }
 
 - (void)insertInScriptingPublications:(BibItem *)pub {
@@ -349,6 +349,27 @@
 - (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx {
     [[self document] removePublications:[[self scriptingPublications] subarrayWithRange:NSMakeRange(idx, 1)] fromGroups:[NSArray arrayWithObject:self]];
     [[[self document] undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKExternalGroup (Scripting)
+
+- (NSArray *)scriptingPublications {
+    return [self publications];
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKMutableExternalGroup (Scripting)
+
+- (void)setScriptingName:(NSString *)newName {
+    [self setName:newName];
+    [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 @end
