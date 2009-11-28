@@ -42,7 +42,7 @@
 
 @class BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes;
 
-@interface BDSKExternalGroup : BDSKMutableGroup <BDSKOwner> {
+@interface BDSKExternalGroup : BDSKGroup <BDSKOwner> {
     BDSKPublicationsArray *publications;
     BDSKMacroResolver *macroResolver;
     BDSKItemSearchIndexes *searchIndexes;
