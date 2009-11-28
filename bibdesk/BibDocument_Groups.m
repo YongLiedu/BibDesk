@@ -380,7 +380,7 @@ The groupedPublications array is a subset of the publications array, developed b
     BDSKGroup *group = [notification object];
     BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
     
-    if ([[groups URLGroups] containsObject:group] == NO)
+    if ([[group document] isEqual:self] == NO)
         return; /// must be from another document
     
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
