@@ -58,6 +58,4 @@
 
 - (void)setRetrieving:(BOOL)flag { isRetrieving = flag; }
 
-- (BOOL)failedDownload { return NO;}
-
 @end
