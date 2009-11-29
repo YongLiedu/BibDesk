@@ -454,26 +454,9 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     
     if (frame == loadingWebFrame) {
         [self setRetrieving:NO];
-        [group addPublications:newPubs ?: [NSArray array]];
-        loadingWebFrame = nil;
-    } else {
-        [group addPublications:newPubs ?: [NSArray array]];
-    }
-}
-
-- (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
-    if (frame == loadingWebFrame) {
-        [self setRetrieving:NO];
-        [group addPublications:nil];
         loadingWebFrame = nil;
     }
-    
-    // !!! logs are here to help diagnose problems that users are reporting
-    NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
-    
-    NSURL *url = [[[frame provisionalDataSource] request] URL];
-    NSString *errorHTML = [NSString stringWithFormat:@"<html><body><h1>%@</h1></body></html>", [error localizedDescription]];
-    [frame loadAlternateHTMLString:errorHTML baseURL:nil forUnreachableURL:url];
+    [group addPublications:newPubs ?: [NSArray array]];
 }
 
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
@@ -489,6 +472,10 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     NSURL *url = [[[frame provisionalDataSource] request] URL];
     NSString *errorHTML = [NSString stringWithFormat:@"<html><body><h1>%@</h1></body></html>", [error localizedDescription]];
     [frame loadAlternateHTMLString:errorHTML baseURL:nil forUnreachableURL:url];
+}
+
+- (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
+    [self webView:sender didFailLoadWithError:error forFrame:frame];
 }
 
 - (void)webView:(WebView *)sender didReceiveServerRedirectForProvisionalLoadForFrame:(WebFrame *)frame{
