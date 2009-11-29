@@ -73,6 +73,7 @@
 #import "NSURL_BDSKExtensions.h"
 #import "BDSKVersionNumber.h"
 #import "NSError_BDSKExtensions.h"
+#import "CFString_BDSKExtensions.h"
 #import <SkimNotesBase/SkimNotesBase.h>
 #import <CoreServices/CoreServices.h>
 
@@ -402,11 +403,8 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     NSString *finalPath = nil;
     
     @synchronized(self) {
-        if (baseName == nil) {
-            CFUUIDRef uuid = CFUUIDCreate(NULL);
-            baseName = [(NSString *)CFUUIDCreateString(NULL, uuid) autorelease];
-            CFRelease(uuid);
-        }
+        if (baseName == nil)
+            baseName = [(NSString *)BDCreateUniqueString() autorelease];
         
         NSUInteger i = 0;
         NSURL *fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:baseName]];

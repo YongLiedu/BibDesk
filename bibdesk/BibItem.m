@@ -191,10 +191,8 @@ const CFSetCallBacks kBDSKBibItemEquivalenceSetCallBacks = {
 
 static NSURL *createUniqueURL(void)
 {
-    CFUUIDRef uuid = CFUUIDCreate(NULL);
-    NSString *uuidStr = (id)CFUUIDCreateString(NULL, uuid);
+    NSString *uuidStr = (id)BDCreateUniqueString();
     NSURL *identifierURL = [[NSURL alloc] initWithString:[@"bdskidentifier://" stringByAppendingString:uuidStr]];
-    CFRelease(uuid);
     [uuidStr release];
     return identifierURL;
 }    

@@ -58,3 +58,5 @@ static inline Boolean BDIsEmptyString(CFStringRef aString)
 { 
     return (aString == NULL || CFStringCompare(aString, CFSTR(""), 0) == kCFCompareEqualTo); 
 }
+
+CFStringRef BDCreateUniqueString();

@@ -851,3 +851,11 @@ void BDDeleteCharactersInCharacterSet(CFMutableStringRef mutableString, CFCharac
 void BDReplaceCharactersInCharacterSet(CFMutableStringRef mutableString, CFCharacterSetRef charSet, CFStringRef replacement){
     __BDReplaceCharactersInCharacterSet(mutableString, charSet, replacement);
 }
+
+CFStringRef BDCreateUniqueString() {
+    CFUUIDRef uuid = CFUUIDCreate(NULL);
+    CFStringRef uuidStr = CFUUIDCreateString(NULL, uuid);
+    CFRelease(uuid);
+    return uuidStr;
+}
+

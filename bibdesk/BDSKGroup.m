@@ -40,6 +40,7 @@
 #import "BDSKParentGroup.h"
 #import "BibItem.h"
 #import "NSString_BDSKExtensions.h"
+#import "CFString_BDSKExtensions.h"
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import "BDSKMacroResolver.h"
@@ -56,14 +57,6 @@ static NSArray *noCountCellValueKeys = nil;
     cellValueKeys = [[NSArray alloc] initWithObjects:@"stringValue", @"editingStringValue", @"numberValue", @"icon", @"isRetrieving", @"failedDownload", nil];
     noCountCellValueKeys = [[NSArray alloc] initWithObjects:@"stringValue", @"editingStringValue", @"icon", @"isRetrieving", @"failedDownload", nil];
 }
- 
-static NSString *createUniqueID(void)
-{
-    CFUUIDRef uuid = CFUUIDCreate(NULL);
-    NSString *uuidStr = (id)CFUUIDCreateString(NULL, uuid);
-    CFRelease(uuid);
-    return uuidStr;
-}    
 
 // super's designated initializer
 - (id)init {
@@ -76,7 +69,7 @@ static NSString *createUniqueID(void)
         name = [aName copy];
         count = 0;
         document = nil;
-        uniqueID = createUniqueID();
+        uniqueID = (id)BDCreateUniqueString();
     }
     return self;
 }
@@ -98,7 +91,7 @@ static NSString *createUniqueID(void)
     if (self = [super init]) {
         name = [[decoder decodeObjectForKey:@"name"] retain];
         count = [decoder decodeIntegerForKey:@"count"];
-        uniqueID = createUniqueID();
+        uniqueID = (id)BDCreateUniqueString();
     }
     return self;
 }

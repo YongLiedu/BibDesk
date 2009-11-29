@@ -41,6 +41,7 @@
 #import "BDSKSharingServer.h"
 #import "BDSKPasswordController.h"
 #import "NSData_BDSKExtensions.h"
+#import "CFString_BDSKExtensions.h"
 
 typedef struct _BDSKSharingClientFlags {
     volatile int32_t isRetrieving;
@@ -347,9 +348,7 @@ typedef struct _BDSKSharingClientFlags {
         
         if(uniqueIdentifier == nil){
             // use uniqueIdentifier as the notification identifier for this host on the other end
-            CFUUIDRef uuid = CFUUIDCreate(NULL);
-            uniqueIdentifier = (id)CFUUIDCreateString(NULL, uuid);
-            CFRelease(uuid);
+            uniqueIdentifier = (id)BDCreateUniqueString();
             @try {
                 protocolChecker = [[NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKSharingClient)] retain];
                 [proxy registerClient:protocolChecker forIdentifier:uniqueIdentifier version:[BDSKSharingClientServer supportedProtocolVersion]];
