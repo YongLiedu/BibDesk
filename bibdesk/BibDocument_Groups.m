@@ -377,7 +377,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)handleExternalGroupUpdatedNotification:(NSNotification *)notification{
-    BDSKGroup *group = [notification object];
+    BDSKExternalGroup *group = [notification object];
     
     if ([[group document] isEqual:self]) {
         BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
@@ -1501,26 +1501,16 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 #pragma mark Importing
 
-- (void)setImported:(BOOL)flag forPublications:(NSArray *)pubs inGroup:(BDSKGroup *)aGroup{
+- (void)setImported:(BOOL)flag forPublications:(NSArray *)pubs inGroup:(BDSKExternalGroup *)aGroup{
     CFIndex countOfItems = [pubs count];
     BibItem **items = (BibItem **)NSZoneMalloc([self zone], sizeof(BibItem *) * countOfItems);
     [pubs getObjects:items];
     NSSet *pubSet = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)items, countOfItems, &kBDSKBibItemEquivalenceSetCallBacks);
     NSZoneFree([self zone], items);
     
-    NSMutableArray *groupsToTest = [NSMutableArray array];
-        
-    if (aGroup) {
-        [groupsToTest addObject:aGroup];
-    } else {
-        [groupsToTest addObject:[groups webGroup]];
-        [groupsToTest addObjectsFromArray:[groups sharedGroups]];
-        [groupsToTest addObjectsFromArray:[groups URLGroups]];
-        [groupsToTest addObjectsFromArray:[groups scriptGroups]];
-        [groupsToTest addObjectsFromArray:[groups searchGroups]];
-    }
+    NSArray *groupsToTest = aGroup ? [NSArray arrayWithObject:aGroup] : [[groups externalParent] children];
     
-    for (id group in groupsToTest) {
+    for (BDSKExternalGroup *group in groupsToTest) {
         // publicationsWithoutUpdating avoids triggering a load or update of external groups every time you add/remove a pub
         for (BibItem *pub in [group publicationsWithoutUpdating]) {
             if ([pubSet containsObject:pub])
