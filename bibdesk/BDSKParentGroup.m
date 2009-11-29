@@ -58,6 +58,24 @@
     return self;
 }
 
+- (id)initWithCoder:(NSCoder *)decoder {
+    BDSKASSERT_NOT_REACHED("Parent groups should never be decoded");
+    if (self = [super initWithCoder:decoder]) {
+        children = [[NSMutableArray alloc] init];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    BDSKASSERT_NOT_REACHED("Parent groups should never be encoded");
+    [super encodeWithCoder:coder];
+}
+
+- (id)copyWithZone:(NSZone *)aZone {
+    BDSKASSERT_NOT_REACHED("Parent groups should never be copied");
+	return [[[self class] allocWithZone:aZone] initWithName:name];
+}
+
 - (NSUInteger)hash { return BDSKHash(self); }
 
 - (BOOL)isEqual:(id)other { return self == other; }
