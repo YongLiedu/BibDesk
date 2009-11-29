@@ -88,13 +88,9 @@
 	NSURL *identifierURL = [NSURL URLWithString:aUniqueID];
     id pub = nil;
     if (identifierURL) {
-        if ([self respondsToSelector:@selector(publications)]) {
-            pub = [[(id<BDSKOwner>)self publications] itemForIdentifierURL:identifierURL];
-        } else {
-            pub = [[document publications] itemForIdentifierURL:identifierURL];
-            if ([self containsItem:pub] == NO)
-                pub = nil;
-        }
+        pub = [[document publications] itemForIdentifierURL:identifierURL];
+        if ([self containsItem:pub] == NO)
+            pub = nil;
     }
     return pub;
 }
@@ -359,6 +355,11 @@
 
 - (NSArray *)scriptingPublications {
     return [self publications];
+}
+
+- (id)valueInScriptingPublicationsWithUniqueID:(NSString *)aUniqueID {
+	NSURL *identifierURL = [NSURL URLWithString:aUniqueID];
+    return identifierURL ? [[self publications] itemForIdentifierURL:identifierURL] : nil;
 }
 
 @end
