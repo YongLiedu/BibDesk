@@ -54,14 +54,13 @@
 - (id)initWithFilter:(BDSKFilter *)aFilter;
 
 /*!
-	@method initWithName:count:filter:
+	@method initWithName:filter:
 	@abstract Initializes and returns a new group instance with a name, count and filter. 
 	@discussion This is the designated initializer. 
 	@param aName The name for the smart group.
-	@param count The count for the smart group.
 	@param aFilter The filter for the smart group with. 
 */
-- (id)initWithName:(id)aName count:(NSInteger)aCount filter:(BDSKFilter *)aFilter;
+- (id)initWithName:(id)aName filter:(BDSKFilter *)aFilter;
 
 /*!
 	@method filter

@@ -1181,7 +1181,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         NSArray *pubs = [groupedPublications copy];
         // change the name of the group first, so we can preserve the selection; we need to old group info to move though
         id name = [[self currentGroupField] isPersonField] ? (id)[BibAuthor authorWithName:newName andPub:[[group name] publication]] : (id)newName;
-        BDSKCategoryGroup *oldGroup = [[[BDSKCategoryGroup alloc] initWithName:[group name] key:[(BDSKCategoryGroup *)group key] count:[group count]] autorelease];
+        BDSKCategoryGroup *oldGroup = [[[BDSKCategoryGroup alloc] initWithName:[group name] key:[(BDSKCategoryGroup *)group key]] autorelease];
         [(BDSKCategoryGroup *)group setName:name];
         [self movePublications:pubs fromGroup:oldGroup toGroupNamed:newName];
         [pubs release];

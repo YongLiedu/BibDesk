@@ -67,14 +67,14 @@ static NSString *createUniqueID(void)
 
 // super's designated initializer
 - (id)init {
-    return [self initWithName:NSLocalizedString(@"Group", @"Default group name") count:0];
+    return [self initWithName:NSLocalizedString(@"Group", @"Default group name")];
 }
 
 // designated initializer
-- (id)initWithName:(id)aName count:(NSInteger)aCount {
+- (id)initWithName:(id)aName {
     if (self = [super init]) {
         name = [aName copy];
-        count = aCount;
+        count = 0;
         document = nil;
         uniqueID = createUniqueID();
     }
@@ -83,7 +83,7 @@ static NSString *createUniqueID(void)
 
 - (id)initWithDictionary:(NSDictionary *)groupDict {
     NSString *aName = [[groupDict objectForKey:@"group name"] stringByUnescapingGroupPlistEntities];
-    self = [self initWithName:aName count:0];
+    self = [self initWithName:aName];
     return self;
 }
 
@@ -111,7 +111,7 @@ static NSString *createUniqueID(void)
 // NSCopying protocol, may be used by the duplicate script command
 
 - (id)copyWithZone:(NSZone *)aZone {
-	return [[[self class] allocWithZone:aZone] initWithName:name count:count];
+	return [[[self class] allocWithZone:aZone] initWithName:name];
 }
 
 - (void)dealloc {
@@ -265,7 +265,7 @@ static NSString *BDSKLibraryLocalizedString = nil;
 }
 
 - (id)init {
-	self = [super initWithName:BDSKLibraryLocalizedString count:0];
+	self = [super initWithName:BDSKLibraryLocalizedString];
     return self;
 }
 

@@ -45,16 +45,16 @@
 @implementation BDSKSmartGroup
 
 // super's designated initializer
-- (id)initWithName:(id)aName count:(NSInteger)aCount {
+- (id)initWithName:(id)aName {
     BDSKFilter *aFilter = [[BDSKFilter alloc] init];
-	self = [self initWithName:aName count:aCount filter:aFilter];
+	self = [self initWithName:aName filter:aFilter];
 	[aFilter release];
     return self;
 }
 
 // designated initializer
-- (id)initWithName:(id)aName count:(NSInteger)aCount filter:(BDSKFilter *)aFilter {
-    if (self = [super initWithName:aName count:aCount]) {
+- (id)initWithName:(id)aName filter:(BDSKFilter *)aFilter {
+    if (self = [super initWithName:aName]) {
         filter = [aFilter copy];
         [filter setGroup:self];
     }
@@ -67,14 +67,14 @@
 		aName = [[[aFilter conditions] objectAtIndex:0] value];
 	if ([NSString isEmptyString:aName])
 		aName = NSLocalizedString(@"Smart Group", @"Default name for smart group");
-	self = [self initWithName:aName count:0 filter:aFilter];
+	self = [self initWithName:aName filter:aFilter];
 	return self;
 }
 
 - (id)initWithDictionary:(NSDictionary *)groupDict {
     NSString *aName = [[groupDict objectForKey:@"group name"] stringByUnescapingGroupPlistEntities];
     BDSKFilter *aFilter = [[BDSKFilter alloc] initWithDictionary:groupDict];
-    self = [self initWithName:aName count:0 filter:aFilter];
+    self = [self initWithName:aName filter:aFilter];
     [aFilter release];
     return self;
 }
@@ -100,7 +100,7 @@
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
-	return [[[self class] allocWithZone:aZone] initWithName:name count:count filter:filter];
+	return [[[self class] allocWithZone:aZone] initWithName:name filter:filter];
 }
 
 - (void)dealloc {

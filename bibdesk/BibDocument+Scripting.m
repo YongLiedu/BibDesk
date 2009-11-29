@@ -293,7 +293,7 @@
             if ([group isStatic]) {
                 copiedGroup = [[BDSKStaticGroup alloc] initWithName:[group name] publications:([group document] == self ? [group publications] : nil)];
             } else if ([group isSmart]) {
-                copiedGroup = [[BDSKSmartGroup alloc] initWithName:[group name] count:[group count] filter:[group filter]];
+                copiedGroup = [[BDSKSmartGroup alloc] initWithName:[group name] filter:[group filter]];
             } else if ([group isURL]) {
                 copiedGroup = [[BDSKURLGroup alloc] initWithName:[group name] URL:[group URL]];
             } else if ([group isScript]) {

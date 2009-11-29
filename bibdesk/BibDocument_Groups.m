@@ -477,12 +477,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         // use BDSKTextWithIconCell keys
         for (id groupName in (NSSet *)(setAndBag.set)) {
             NSUInteger idx = [oldGroupNames indexOfObject:groupName];
-            if (idx == NSNotFound) {
-                group = [[BDSKCategoryGroup alloc] initWithName:groupName key:groupField count:CFBagGetCountOfValue(setAndBag.bag, groupName)];
-            } else {
+            if (idx == NSNotFound)
+                group = [[BDSKCategoryGroup alloc] initWithName:groupName key:groupField];
+            else
                 group = [[oldGroups objectAtIndex:idx] retain];
-                [group setCount:CFBagGetCountOfValue(setAndBag.bag, groupName)];
-            }
+            [group setCount:CFBagGetCountOfValue(setAndBag.bag, groupName)];
             [mutableGroups addObject:group];
             [group release];
         }
@@ -490,12 +489,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         // add the "empty" group at index 0; this is a group of pubs whose value is empty for this field, so they
         // will not be contained in any of the other groups for the currently selected group field (hence multiple selection is desirable)
         if (emptyCount > 0) {
-            if ([oldGroups count] && [[oldGroups objectAtIndex:0] isEmpty]) {
+            if ([oldGroups count] && [[oldGroups objectAtIndex:0] isEmpty])
                 group = [[oldGroups objectAtIndex:0] retain];
-                [group setCount:emptyCount];
-            } else {
-                group = [[BDSKCategoryGroup alloc] initWithName:nil key:groupField count:emptyCount];
-            }
+            else
+                group = [[BDSKCategoryGroup alloc] initWithName:nil key:groupField];
+            [group setCount:emptyCount];
             [mutableGroups insertObject:group atIndex:0];
             [group release];
         }
@@ -1127,7 +1125,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         name = [NSString stringWithFormat:@"%@%lu", baseName, (unsigned long)i++];
     if (isAuthor)
         name = [BibAuthor authorWithName:name andPub:nil];
-    group = [[[BDSKCategoryGroup alloc] initWithName:name key:currentGroupField count:[pubs count]] autorelease];
+    group = [[[BDSKCategoryGroup alloc] initWithName:name key:currentGroupField] autorelease];
     
     // first merge in shared groups
     if ([self hasExternalGroupsSelected])

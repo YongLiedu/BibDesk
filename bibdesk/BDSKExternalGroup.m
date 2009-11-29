@@ -46,15 +46,11 @@
 
 @implementation BDSKExternalGroup
 
-// old designated initializer
-- (id)initWithName:(NSString *)aName count:(NSInteger)aCount {
-    return [self initWithName:aName];
-}
-
+// designated initializer
 - (id)initWithName:(NSString *)aName {
     NSAssert(aName != nil, @"External group requires a name");
 
-    if (self = [super initWithName:aName count:0]) {
+    if (self = [super initWithName:aName]) {
         publications = nil;
         macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         searchIndexes = [BDSKItemSearchIndexes new];

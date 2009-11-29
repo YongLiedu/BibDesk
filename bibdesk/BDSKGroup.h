@@ -51,13 +51,12 @@
 }
 
 /*!
-	@method initWithName:count:
+	@method initWithName:
 	@abstract Initializes and returns a new group instance with a name and count. 
 	@discussion This is the designated initializer. 
 	@param aName The name for the group.
-	@param count The count for the group.
 */
-- (id)initWithName:(id)aName count:(NSInteger)aCount;
+- (id)initWithName:(id)aName;
 
 - (id)initWithDictionary:(NSDictionary *)groupDict;
 - (NSDictionary *)dictionaryValue;

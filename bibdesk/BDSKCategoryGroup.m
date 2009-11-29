@@ -50,29 +50,29 @@
 @implementation BDSKCategoryGroup
 
 // designated initializer
-- (id)initWithName:(id)aName key:(NSString *)aKey count:(NSInteger)aCount {
+- (id)initWithName:(id)aName key:(NSString *)aKey {
     if (aName == nil) {
         NSZone *zone = [self zone];
         [self release];
         self = [BDSKEmptyGroup allocWithZone:zone];
         aName = [aKey isPersonField] ? [BibAuthor emptyAuthor] : @"";
     }
-    if (self = [super initWithName:aName count:aCount]) {
+    if (self = [super initWithName:aName]) {
         key = [aKey copy];
     }
     return self;
 }
 
 // super's designated initializer
-- (id)initWithName:(id)aName count:(NSInteger)aCount {
-    self = [self initWithName:aName key:nil count:aCount];
+- (id)initWithName:(id)aName {
+    self = [self initWithName:aName key:nil];
     return self;
 }
 
 - (id)initWithDictionary:(NSDictionary *)groupDict {
     NSString *aName = [[groupDict objectForKey:@"group name"] stringByUnescapingGroupPlistEntities];
     NSString *aKey = [[groupDict objectForKey:@"key"] stringByUnescapingGroupPlistEntities];
-    self = [self initWithName:aName key:aKey count:0];
+    self = [self initWithName:aName key:aKey];
     return self;
 }
 
@@ -95,7 +95,7 @@
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
-	return [[[self class] allocWithZone:aZone] initWithName:name key:key count:count];
+	return [[[self class] allocWithZone:aZone] initWithName:name key:key];
 }
 
 - (void)dealloc {

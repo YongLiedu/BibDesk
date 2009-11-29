@@ -47,8 +47,6 @@
     NSArray *sortDescriptors;
 }
 
-- (id)initWithName:(NSString *)aName;
-
 - (NSUInteger)numberOfChildren;
 - (id)childAtIndex:(NSUInteger)anIndex;
 - (NSArray *)children;

@@ -52,14 +52,10 @@
 @implementation BDSKParentGroup
 
 - (id)initWithName:(NSString *)aName {
-    if (self = [super initWithName:aName count:0]) {
+    if (self = [super initWithName:aName]) {
         children = [[NSMutableArray alloc] init];
     }
     return self;
-}
-
-- (id)initWithName:(NSString *)aName count:(NSInteger)count {
-    return [self initWithName:aName];
 }
 
 - (NSUInteger)hash { return BDSKHash(self); }

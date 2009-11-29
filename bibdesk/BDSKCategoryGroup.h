@@ -45,14 +45,13 @@
 }
 
 /*!
-	@method initWithName:key:count:
+	@method initWithName:key:
 	@abstract Initializes and returns a new group instance with a name and count. 
 	@discussion This is the designated initializer. 
 	@param aName The name for the group, use nil for the "empty" group.
 	@param aKey The key for the group.
-	@param count The count for the group.
 */
-- (id)initWithName:(id)aName key:(NSString *)aKey count:(NSInteger)aCount;
+- (id)initWithName:(id)aName key:(NSString *)aKey;
 
 /*!
 	@method key
