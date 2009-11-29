@@ -173,7 +173,7 @@
 @implementation BDSKMutableGroup (Scripting)
 
 - (void)setScriptingName:(NSString *)newName {
-    if ([self hasEditableName]) {
+    if ([self isNameEditable]) {
         [self setName:newName];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else {

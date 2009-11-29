@@ -203,7 +203,7 @@
     return [document undoManager];
 }
 
-- (BOOL)hasEditableName { return YES; }
+- (BOOL)isNameEditable { return YES; }
 
 - (BOOL)isEditable { return YES; }
 

@@ -198,7 +198,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
 
 - (void)setName:(NSString *)newName {}
 
-- (BOOL)hasEditableName { return NO; }
+- (BOOL)isNameEditable { return NO; }
 
 - (BOOL)isEditable { return NO; }
 

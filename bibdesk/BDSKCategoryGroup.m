@@ -169,7 +169,7 @@
 
 - (BOOL)isCategory { return YES; }
 
-- (BOOL)hasEditableName { return YES; }
+- (BOOL)isNameEditable { return YES; }
 
 - (BOOL)isEditable {
     return [key isPersonField];
@@ -221,7 +221,7 @@
 	return [[item groupsForField:key] count] == 0;
 }
 
-- (BOOL)hasEditableName { return NO; }
+- (BOOL)isNameEditable { return NO; }
 
 - (BOOL)isEditable { return NO; }
 

@@ -175,7 +175,7 @@ static NSArray *noCountCellValueKeys = nil;
 
 - (BOOL)isValidDropTarget { return NO; }
 
-- (BOOL)hasEditableName { return NO; }
+- (BOOL)isNameEditable { return NO; }
 
 - (BOOL)isEditable { return NO; }
 
@@ -297,6 +297,6 @@ static NSString *BDSKLibraryLocalizedString = nil;
     return [document undoManager];
 }
 
-- (BOOL)hasEditableName { return YES; }
+- (BOOL)isNameEditable { return YES; }
 
 @end

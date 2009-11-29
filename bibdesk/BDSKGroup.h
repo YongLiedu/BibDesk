@@ -156,10 +156,10 @@
 - (BOOL)isExternal;
 
 /*!
-    @method     hasEditableName
+    @method     isNameEditable
     @abstract   Returns NO by default.  Editable subclasses should override this to allow changing the name of a group.
 */
-- (BOOL)hasEditableName;
+- (BOOL)isNameEditable;
 
 /*!
     @method     isEditable
@@ -248,22 +248,13 @@
 @end
 
 
-@interface BDSKMutableGroup : BDSKGroup {
-}
+@protocol BDSKMutableGroup <NSObject>
 
-/*!
-	@method setName:
-	@abstract Sets the name for the group.
-	@discussion -
-	@param newName The new name to set.
-*/
 - (void)setName:(id)newName;
-
-/*!
-	@method undoManager
-	@abstract Returns the undo manager of the group.
-	@discussion -
-*/
 - (NSUndoManager *)undoManager;
 
+@end
+
+
+@interface BDSKMutableGroup : BDSKGroup <BDSKMutableGroup>
 @end

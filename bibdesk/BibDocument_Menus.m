@@ -379,7 +379,7 @@
 	NSInteger row = [groupOutlineView selectedRow];
 	if ([groupOutlineView numberOfSelectedRows] == 1 &&
 		row > 0 &&
-        [[groupOutlineView itemAtRow:row] hasEditableName]) {
+        [[groupOutlineView itemAtRow:row] isNameEditable]) {
 		// single group selection
 		return YES;
 	} else {

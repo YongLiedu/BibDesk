@@ -66,15 +66,11 @@
 
 #pragma mark -
 
-@interface BDSKMutableExternalGroup : BDSKExternalGroup {
+@interface BDSKMutableExternalGroup : BDSKExternalGroup <BDSKMutableGroup> {
     NSString *errorMessage;
 }
 
-- (void)setName:(id)newName;
-
 - (NSString *)errorMessage;
 - (void)setErrorMessage:(NSString *)newErrorMessage;
-
-- (NSUndoManager *)undoManager;
 
 @end

@@ -1185,8 +1185,8 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         [(BDSKCategoryGroup *)group setName:name];
         [self movePublications:pubs fromGroup:oldGroup toGroupNamed:newName];
         [pubs release];
-    } else if([group hasEditableName]) {
-        [(BDSKMutableGroup *)group setName:newName];
+    } else if([group isNameEditable]) {
+        [(id<BDSKMutableGroup>)group setName:newName];
         [[self undoManager] setActionName:NSLocalizedString(@"Rename Group", @"Undo action name")];
     }
 }
@@ -1218,7 +1218,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldEditTableColumn:(NSTableColumn *)tableColumn item:(id)item {
-    if ([item isParent] || [item hasEditableName] == NO) {
+    if ([item isParent] || [item isNameEditable] == NO) {
         return NO;
     } else if ([item isCategory] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRenameGroupKey]) {
         
