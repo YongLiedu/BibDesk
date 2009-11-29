@@ -1709,6 +1709,41 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     return NO;
 }
 
+- (void)outlineView:(NSOutlineView *)ov duplicateItems:(NSArray *)items {
+	// the items are always the selected groups
+	if (ov == groupOutlineView) {
+        NSArray *newGroups = [[NSArray alloc] initWithArray:[self selectedGroups] copyItems:YES];
+        for (id group in newGroups) {
+            if ([group isStatic])
+                [groups addStaticGroup:group];
+            else if ([group isSmart])
+                [groups addSmartGroup:group];
+            else if ([group isURL])
+                [groups addURLGroup:group];
+            else if ([group isScript])
+                [groups addScriptGroup:group];
+            else if ([group isSearch])
+                [groups addSearchGroup:group];
+        }
+        [newGroups release];
+    } else {
+        NSBeep();
+    }
+}
+
+- (BOOL)outlineView:(NSOutlineView *)ov canDuplicateItems:(NSArray *)items {
+	if (ov == groupOutlineView) {
+		if ([self hasExternalGroupsSelected]) {
+            BDSKGroup *group = [[self selectedGroups] lastObject];
+            return [group isURL] || [group isScript] || [group isSearch];
+        } else if ([self hasCategoryGroupsSelected] == NO) {
+            NSArray *selGroups = [self selectedGroups];
+            return [selGroups containsObject:[groups libraryGroup]] == NO && [selGroups containsObject:[groups lastImportGroup]] == NO;
+        }
+    }
+    return NO;
+}
+
 #pragma mark -
 
 - (BOOL)isDragFromExternalGroups {
