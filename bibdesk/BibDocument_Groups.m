@@ -378,21 +378,22 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)handleExternalGroupUpdatedNotification:(NSNotification *)notification{
     BDSKGroup *group = [notification object];
-    BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
     
-    if ([[group document] isEqual:self] == NO)
-        return; /// must be from another document
-    
-    if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
-        [self sortGroupsByKey:nil];
-    }else{
-        [groupOutlineView reloadData];
-        if ([[self selectedGroups] containsObject:group] && succeeded)
-            [self displaySelectedGroups];
+    if ([[group document] isEqual:self]) {
+        BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
+        BOOL isWeb = [group isEqual:[groups webGroup]];
+        
+        if (isWeb == NO && [sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) {
+            [self sortGroupsByKey:nil];
+        } else {
+            [groupOutlineView reloadData];
+            if ([[self selectedGroups] containsObject:group] && (isWeb || succeeded))
+                [self displaySelectedGroups];
+        }
+        
+        if (succeeded)
+            [self setImported:YES forPublications:publications inGroup:group];
     }
-    
-    if (succeeded)
-        [self setImported:YES forPublications:publications inGroup:group];
 }
 
 - (void)handleWillRemoveGroupsNotification:(NSNotification *)notification{
