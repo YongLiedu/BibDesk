@@ -70,7 +70,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
 }
 
 // super's designated initializer
-- (id)initWithName:(id)aName count:(NSInteger)aCount {
+- (id)initWithName:(id)aName {
     self = [self initWithName:aName publications:nil];
     return self;
 }
