@@ -58,7 +58,7 @@
 - (BOOL)shouldRetrievePublications;
 - (void)retrievePublications;
 
-- (void)terminate;
+- (void)stopRetrieving;
 
 - (void)notifyUpdateForSuccess:(BOOL)succeeded;
 

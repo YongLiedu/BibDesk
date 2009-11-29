@@ -102,13 +102,13 @@
 
 - (void)dealloc;
 {
-    [self terminate];
+    [self stopRetrieving];
     [URL release];
     [filePath release];
     [super dealloc];
 }
 
-- (void)terminate;
+- (void)stopRetrieving;
 {
     [URLDownload cancel];
     [URLDownload release];

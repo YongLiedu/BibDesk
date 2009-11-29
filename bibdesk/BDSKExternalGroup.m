@@ -113,7 +113,7 @@
 
 - (void)setPublications:(NSArray *)newPublications {
     if ([self isRetrieving])
-        [self terminate];
+        [self stopRetrieving];
     
     if (newPublications != publications) {
         [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
@@ -149,7 +149,7 @@
 
 - (void)retrievePublications {}
 
-- (void)terminate {}
+- (void)stopRetrieving {}
 
 - (void)notifyUpdateForSuccess:(BOOL)succeeded {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKExternalGroupUpdatedNotification object:self

@@ -118,7 +118,7 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     // don't release currentTask; it's managed in the thread
     [[NSFileManager defaultManager] deleteObjectAtFileURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [self terminate];
+    [self stopRetrieving];
     [scriptPath release];
     [scriptArguments release];
     [argsArray release];
@@ -310,14 +310,14 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
 - (BOOL)isScript { return YES; }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification{
-    [self terminate];
+    [self stopRetrieving];
     [[NSFileManager defaultManager] deleteObjectAtFileURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
 }
 
 #pragma mark Shell task
 
 // this method is called from the main thread
-- (void)terminate{
+- (void)stopRetrieving{
     if([currentTask isRunning])
         [currentTask terminate];
     [currentTask release];
