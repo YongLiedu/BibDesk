@@ -109,6 +109,29 @@ static NSString * const BDSKScriptGroupRunLoopMode = @"BDSKScriptGroupRunLoopMod
     return [NSDictionary dictionaryWithObjectsAndKeys:aName, @"group name", aPath, @"script path", anArgs, @"script arguments", aType, @"script type", nil];
 }
 
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super initWithCoder:decoder]) {
+        scriptPath = [[decoder decodeObjectForKey:@"scriptPath"] retain];
+        scriptArguments = [[decoder decodeObjectForKey:@"scriptArguments"] retain];
+        scriptType = [decoder decodeIntegerForKey:@"scriptType"];
+        
+        argsArray = nil;
+        isRetrieving = NO;
+        failedDownload = NO;
+        
+        workingDirPath = [[[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:nil] retain];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [super encodeWithCoder:coder];
+    [coder encodeObject:scriptPath forKey:@"scriptPath"];
+    [coder encodeObject:scriptArguments forKey:@"scriptArguments"];
+    [coder encodeInteger:scriptType forKey:@"scriptType"];
+}
+
 - (id)copyWithZone:(NSZone *)aZone {
 	return [[[self class] allocWithZone:aZone] initWithName:name scriptPath:scriptPath scriptArguments:scriptArguments scriptType:scriptType];
 }

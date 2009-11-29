@@ -45,7 +45,7 @@ enum {
     BDSKServerTypeDBLP
 };
 
-@interface BDSKServerInfo : NSObject <NSCopying, NSMutableCopying> {
+@interface BDSKServerInfo : NSObject <NSCopying, NSMutableCopying, NSCoding> {
     NSString *type;
     NSString *name;
     NSString *database;

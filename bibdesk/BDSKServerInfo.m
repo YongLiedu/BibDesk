@@ -99,6 +99,27 @@
     return self;
 }
 
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super init]) {
+        type = [[decoder decodeObjectForKey:@"type"] retain];
+        name = [[decoder decodeObjectForKey:@"name"] retain];
+        database = [[decoder decodeObjectForKey:@"database"] retain];
+        host = [[decoder decodeObjectForKey:@"host"] retain];
+        port = [[decoder decodeObjectForKey:@"port"] retain];
+        options = [[decoder decodeObjectForKey:@"options"] mutableCopy];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:type forKey:@"type"];
+    [coder encodeObject:name forKey:@"name"];
+    [coder encodeObject:database forKey:@"database"];
+    [coder encodeObject:host forKey:@"host"];
+    [coder encodeObject:port forKey:@"port"];
+    [coder encodeObject:options forKey:@"options"];
+}
+
 - (id)copyWithZone:(NSZone *)aZone {
     id copy = [[BDSKServerInfo allocWithZone:aZone] initWithType:[self type] name:[self name] database:[self database] host:[self host] port:[self port] options:[self options]];
     return copy;

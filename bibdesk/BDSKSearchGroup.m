@@ -179,6 +179,27 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     return [groupDict autorelease];
 }
 
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super initWithCoder:decoder]) {
+        type = [[decoder decodeObjectForKey:@"type"] retain];
+        searchTerm = [[decoder decodeObjectForKey:@"searchTerm"] retain];
+        
+        history = nil;
+        
+        [self resetServerWithInfo:[decoder decodeObjectForKey:@"serverInfo"]];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [super encodeWithCoder:coder];
+    [coder encodeObject:type forKey:@"type"];
+    [coder encodeObject:searchTerm forKey:@"searchTerm"];
+    [coder encodeObject:[self serverInfo] forKey:@"serverInfo"];
+}
+
 - (id)copyWithZone:(NSZone *)aZone {
 	return [[[self class] allocWithZone:aZone] initWithType:type serverInfo:[self serverInfo] searchTerm:searchTerm];
 }

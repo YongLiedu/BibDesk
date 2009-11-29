@@ -149,6 +149,12 @@ static NSImage *unlockedIcon = nil;
     return self;
 }
 
+- (id)initWithCoder:(NSCoder *)decoder {
+    [self release];
+    self = nil;
+    return self;
+}
+
 - (void)dealloc;
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];

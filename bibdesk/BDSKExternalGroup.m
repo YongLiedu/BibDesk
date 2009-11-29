@@ -58,13 +58,19 @@
     return self;
 }
 
-- (id)initWithCoder:(NSCoder *)aCoder {
-    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
-    return nil;
+- (id)initWithCoder:(NSCoder *)decoder {
+    BDSKASSERT_NOT_REACHED("External groups should never be decoded");
+    if (self = [super initWithCoder:decoder]) {
+        publications = nil;
+        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
+        searchIndexes = [BDSKItemSearchIndexes new];
+    }
+    return self;
 }
 
-- (void)encodeWithCoder:(NSCoder *)aCoder {
-    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
+- (void)encodeWithCoder:(NSCoder *)coder {
+    BDSKASSERT_NOT_REACHED("External groups should never be encoded");
+    [super encodeWithCoder:coder];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {

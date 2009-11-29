@@ -96,6 +96,22 @@
     return [NSDictionary dictionaryWithObjectsAndKeys:aName, @"group name", anURL, @"URL", nil];
 }
 
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super initWithCoder:decoder]) {
+        URL = [[decoder decodeObjectForKey:@"URL"] retain];
+        
+        isRetrieving = NO;
+        failedDownload = NO;
+        URLDownload = nil;
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [super encodeWithCoder:coder];
+    [coder encodeObject:URL forKey:@"URL"];
+}
+
 - (id)copyWithZone:(NSZone *)aZone {
 	return [[[self class] allocWithZone:aZone] initWithName:name URL:URL];
 }
