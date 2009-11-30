@@ -336,14 +336,13 @@ The groupedPublications array is a subset of the publications array, developed b
     [groupOutlineView setDelegate:nil];
 	NSArray *selectedGroups = [self selectedGroups];
 	
-    NSMutableSet *clients = [[[BDSKSharingBrowser sharedBrowser] sharingClients] mutableCopy];
+    NSMutableSet *clientsToAdd = [[[BDSKSharingBrowser sharedBrowser] sharingClients] mutableCopy];
     NSMutableArray *currentGroups = [[groups sharedGroups] mutableCopy];
     NSArray *currentClients = [currentGroups valueForKey:@"client"];
     NSSet *currentClientsSet = [NSSet setWithArray:currentClients];
     NSMutableSet *clientsToRemove = [currentClientsSet mutableCopy];
-    NSMutableSet *clientsToAdd = [clients mutableCopy];
     
-    [clientsToRemove minusSet:clients];
+    [clientsToRemove minusSet:clientsToAdd];
     [clientsToAdd minusSet:currentClientsSet];
     
     [currentGroups removeObjectsAtIndexes:[currentClients indexesOfObjects:[clientsToRemove allObjects]]];
@@ -356,7 +355,6 @@ The groupedPublications array is a subset of the publications array, developed b
     
     [groups setSharedGroups:currentGroups];
     
-    [clients release];
     [clientsToRemove release];
     [clientsToAdd release];
     [currentGroups release];
