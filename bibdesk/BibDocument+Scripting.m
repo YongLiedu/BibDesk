@@ -290,17 +290,10 @@
         NSMutableArray *copiedValue = [[NSMutableArray alloc] init];
         for (id group in value) {
             id copiedGroup = nil;
-            if ([group isStatic]) {
+            if ([group isStatic] && [group isEqual:[groups lastImportGroup]] == NO)
                 copiedGroup = [[BDSKStaticGroup alloc] initWithName:[group name] publications:([group document] == self ? [group publications] : nil)];
-            } else if ([group isSmart]) {
-                copiedGroup = [[BDSKSmartGroup alloc] initWithName:[group name] filter:[group filter]];
-            } else if ([group isURL]) {
-                copiedGroup = [[BDSKURLGroup alloc] initWithName:[group name] URL:[group URL]];
-            } else if ([group isScript]) {
-                copiedGroup = [[BDSKScriptGroup alloc] initWithName:[group name] scriptPath:[group scriptPath] scriptArguments:[group scriptArguments] scriptType:[group scriptType]];
-            } else if ([group isSearch]) {
-                copiedGroup = [[BDSKSearchGroup alloc] initWithType:[group type] serverInfo:[group serverInfo] searchTerm:[group searchTerm]];
-            }
+            else if ([group isSmart] || [group isURL] || [group isScript] || [group isSearch])
+                copiedGroup = [group copy];
             if (copiedGroup == nil) {
                 NSScriptCommand *cmd = [NSScriptCommand currentCommand];
                 [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
