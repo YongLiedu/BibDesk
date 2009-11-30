@@ -1725,6 +1725,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             else if ([group isSearch])
                 [groups addSearchGroup:group];
         }
+        [self selectGroups:newGroups];
         [newGroups release];
     } else {
         NSBeep();
