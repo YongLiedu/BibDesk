@@ -70,10 +70,4 @@ enum {
 - (NSInteger)scriptType;
 - (void)setScriptType:(NSInteger)newType;
 
-- (void)scriptDidFinishWithResult:(NSString *)outputString;
-- (void)scriptDidFailWithError:(NSError *)error;
-- (void)runShellScript;
-- (void)runAppleScript;
-- (void)stdoutNowAvailable:(NSNotification *)notification;
-
 @end
