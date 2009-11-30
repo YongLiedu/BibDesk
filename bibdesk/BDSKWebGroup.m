@@ -46,6 +46,19 @@
 
 @implementation BDSKWebGroup
 
+static NSString *BDSKWebLocalizedString = nil;
+
++ (void)initialize {
+    BDSKINITIALIZE;
+    BDSKWebLocalizedString = [NSLocalizedString(@"Web", @"Group name for web") copy];
+}
+
+- (id)init {
+	self = [super initWithName:BDSKWebLocalizedString];
+    return self;
+}
+
+// web groups don't initiate loading themselves
 - (BOOL)shouldRetrievePublications { return NO; }
 
 #pragma mark BDSKGroup overrides

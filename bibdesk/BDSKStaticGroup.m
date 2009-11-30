@@ -46,20 +46,6 @@
 
 @implementation BDSKStaticGroup
 
-static NSString *BDSKLastImportLocalizedString = nil;
-
-+ (void)initialize{
-    BDSKINITIALIZE;
-    BDSKLastImportLocalizedString = [NSLocalizedString(@"Last Import", @"Group name for last import") copy];
-}
-
-- (id)initWithLastImport:(NSArray *)array {
-	NSZone *zone = [self zone];
-	[[super init] release];
-	self = [[BDSKLastImportGroup allocWithZone:zone] initWithName:BDSKLastImportLocalizedString publications:array];
-	return self;
-}
-
 // designated initializer
 - (id)initWithName:(id)aName publications:(NSArray *)array {
     if (self = [super initWithName:aName]) {
@@ -176,6 +162,18 @@ static NSString *BDSKLastImportLocalizedString = nil;
 #pragma mark -
 
 @implementation BDSKLastImportGroup
+
+static NSString *BDSKLastImportLocalizedString = nil;
+
++ (void)initialize{
+    BDSKINITIALIZE;
+    BDSKLastImportLocalizedString = [NSLocalizedString(@"Last Import", @"Group name for last import") copy];
+}
+
+- (id)initWithLastImport:(NSArray *)array {
+	self = [self initWithName:BDSKLastImportLocalizedString publications:array];
+	return self;
+}
 
 - (NSImage *)icon {
 	static NSImage *importGroupImage = nil;

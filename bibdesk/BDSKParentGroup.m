@@ -211,7 +211,7 @@
         URLGroupCount = 0;
         scriptGroupCount = 0;
         searchGroupCount = 0;
-        BDSKWebGroup *webGroup = [[BDSKWebGroup alloc] initWithName:NSLocalizedString(@"Web", @"")];
+        BDSKWebGroup *webGroup = [[BDSKWebGroup alloc] init];
         [self insertChild:webGroup atIndex:0];
         [webGroup release];
     }
@@ -399,7 +399,7 @@
     if ([pubs count]) {
         if (hasLastImportGroup == NO) {
             hasLastImportGroup = YES;
-            BDSKStaticGroup *group = [[BDSKStaticGroup alloc] initWithLastImport:pubs];
+            BDSKLastImportGroup *group = [[BDSKLastImportGroup alloc] initWithLastImport:pubs];
             [self insertChild:group atIndex:0];
             [group release];
         } else {

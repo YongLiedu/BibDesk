@@ -56,14 +56,6 @@
 - (id)initWithName:(id)aName publications:(NSArray *)array;
 
 /*!
-	@method initForLastImport:
-	@abstract Initializes and returns a new Last Import group. 
-	@discussion -
-	@param array The publications for the static group.
-*/
-- (id)initWithLastImport:(NSArray *)array;
-
-/*!
 	@method publications
 	@abstract Returns the publications in the group.
 	@discussion -
@@ -116,4 +108,13 @@
 
 
 @interface BDSKLastImportGroup : BDSKStaticGroup
+
+/*!
+	@method initWithLastImport:
+	@abstract Initializes and returns a new Last Import group. 
+	@discussion -
+	@param array The publications for the static group.
+*/
+- (id)initWithLastImport:(NSArray *)array;
+
 @end
