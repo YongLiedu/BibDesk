@@ -40,7 +40,7 @@
 #import "BDSKGroup.h"
 
 
-@class BDSKWebGroup, BDSKSearchGroup, BDSKURLGroup, BDSKScriptGroup, BDSKSmartGroup, BDSKStaticGroup;
+@class BDSKWebGroup, BDSKSearchGroup, BDSKURLGroup, BDSKScriptGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKLastImportGroup;
 
 @interface BDSKParentGroup : BDSKGroup {
     NSMutableArray *children;
@@ -96,7 +96,7 @@
     BOOL hasLastImportGroup;
 }
 
-- (BDSKStaticGroup *)lastImportGroup;
+- (BDSKLastImportGroup *)lastImportGroup;
 - (NSArray *)smartGroups;
 - (void)setLastImportedPublications:(NSArray *)pubs;
 - (void)addSmartGroup:(BDSKSmartGroup *)group;

@@ -244,10 +244,6 @@
 @end
 
 
-@interface BDSKLibraryGroup : BDSKGroup
-@end
-
-
 @protocol BDSKMutableGroup <NSObject>
 
 - (void)setName:(id)newName;

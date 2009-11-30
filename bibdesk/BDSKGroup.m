@@ -248,40 +248,6 @@ static NSArray *noCountCellValueKeys = nil;
 
 #pragma mark -
 
-@implementation BDSKLibraryGroup
-
-static NSString *BDSKLibraryLocalizedString = nil;
-
-+ (void)initialize{
-    BDSKINITIALIZE;
-    BDSKLibraryLocalizedString = [NSLocalizedString(@"Library", @"Group name for library") copy];
-}
-
-- (id)init {
-	self = [super initWithName:BDSKLibraryLocalizedString];
-    return self;
-}
-
-- (NSImage *)icon {
-	return [NSImage imageNamed:@"libraryGroup"];
-}
-
-- (BOOL)containsItem:(BibItem *)item {
-    return [[item owner] isEqual:[self document]];
-}
-
-- (BOOL)isEqual:(id)other { return self == other; }
-
-- (NSUInteger)hash {
-    return BDSKHash(self);
-}
-
-- (BOOL)isValidDropTarget { return YES; }
-
-@end
-
-#pragma mark -
-
 @implementation BDSKMutableGroup
 
 - (void)setName:(id)newName {

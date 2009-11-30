@@ -105,16 +105,3 @@
 - (void)update;
 
 @end
-
-
-@interface BDSKLastImportGroup : BDSKStaticGroup
-
-/*!
-	@method initWithLastImport:
-	@abstract Initializes and returns a new Last Import group. 
-	@discussion -
-	@param array The publications for the static group.
-*/
-- (id)initWithLastImport:(NSArray *)array;
-
-@end

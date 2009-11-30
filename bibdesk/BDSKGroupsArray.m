@@ -46,6 +46,8 @@
 #import "BDSKSmartGroup.h"
 #import "BDSKStaticGroup.h"
 #import "BDSKCategoryGroup.h"
+#import "BDSKLibraryGroup.h"
+#import "BDSKLastImportGroup.h"
 #import "BDSKWebGroup.h"
 #import "BDSKPublicationsArray.h"
 #import "BibAuthor.h"
@@ -135,8 +137,8 @@
 
 - (BDSKCategoryParentGroup *)categoryParent { return [groups objectAtIndex:CATEGORY_PARENT_INDEX]; }
 
-- (BDSKGroup *)libraryGroup{
-    return (BDSKGroup *)[[self libraryParent] childAtIndex:0];
+- (BDSKLibraryGroup *)libraryGroup{
+    return [[self libraryParent] childAtIndex:0];
 }
 
 - (BDSKWebGroup *)webGroup{
@@ -159,7 +161,7 @@
     return [[self externalParent] scriptGroups];
 }
 
-- (BDSKStaticGroup *)lastImportGroup{
+- (BDSKLastImportGroup *)lastImportGroup{
     return [[self smartParent] lastImportGroup];
 }
 

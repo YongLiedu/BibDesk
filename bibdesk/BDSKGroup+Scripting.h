@@ -45,6 +45,8 @@
 #import "BDSKScriptGroup.h"
 #import "BDSKSearchGroup.h"
 #import "BDSKSharedGroup.h"
+#import "BDSKLibraryGroup.h"
+#import "BDSKLastImportGroup.h"
 #import "BDSKWebGroup.h"
 
 enum {

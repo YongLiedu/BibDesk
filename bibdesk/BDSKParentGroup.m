@@ -44,6 +44,8 @@
 #import "BDSKSmartGroup.h"
 #import "BDSKStaticGroup.h"
 #import "BDSKCategoryGroup.h"
+#import "BDSKLibraryGroup.h"
+#import "BDSKLastImportGroup.h"
 #import "BDSKWebGroup.h"
 #import "BibDocument.h"
 #import "BibAuthor.h"
@@ -384,7 +386,7 @@
 }
 
 // return nil if non-existent
-- (BDSKStaticGroup *)lastImportGroup {
+- (BDSKLastImportGroup *)lastImportGroup {
     return hasLastImportGroup ? [self childAtIndex:0] : nil;
 }
 
