@@ -43,6 +43,7 @@
 @interface BibDocument (Groups)
 
 - (BOOL)hasLibraryGroupSelected;
+- (BOOL)hasLastImportGroupSelected;
 - (BOOL)hasWebGroupSelected;
 - (BOOL)hasSharedGroupsSelected;
 - (BOOL)hasURLGroupsSelected;

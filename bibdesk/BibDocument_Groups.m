@@ -95,6 +95,10 @@
     return [[self selectedGroups] lastObject] == [groups libraryGroup];
 }
 
+- (BOOL)hasLastImportGroupSelected{
+    return [[self selectedGroups] containsObject:[groups lastImportGroup]];
+}
+
 - (BOOL)hasWebGroupSelected{
     return [[self selectedGroups] lastObject] == [groups webGroup];
 }
@@ -942,7 +946,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 		if ([group isSmart]) {
 			[groups removeSmartGroup:(BDSKSmartGroup *)group];
 			didRemove = YES;
-		} else if ([group isStatic] && [group isEqual:[groups lastImportGroup]] == NO) {
+		} else if ([group isStatic]) {
 			[groups removeStaticGroup:(BDSKStaticGroup *)group];
 			didRemove = YES;
 		} else if ([group isURL]) {
@@ -1238,7 +1242,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group{
-    BDSKPRECONDITION(([group isStatic] && [group isEqual:[groups lastImportGroup]] == NO) || [group isCategory]);
+    BDSKPRECONDITION([group isStatic] || [group isCategory]);
     
     if ([group isStatic]) {
         [(BDSKStaticGroup *)group addPublicationsFromArray:pubs];
@@ -1308,7 +1312,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	NSString *groupName = nil;
     
     for (BDSKGroup *group in groupArray){
-		if([group isCategory] == NO && ([group isStatic] == NO || group == [groups lastImportGroup]))
+		if([group isCategory] == NO && [group isStatic] == NO)
 			continue;
 		
 		if (groupName == nil)

@@ -290,7 +290,7 @@
         NSMutableArray *copiedValue = [[NSMutableArray alloc] init];
         for (id group in value) {
             id copiedGroup = nil;
-            if ([group isStatic] && [group isEqual:[groups lastImportGroup]] == NO)
+            if ([group isStatic])
                 copiedGroup = [[BDSKStaticGroup alloc] initWithName:[group name] publications:([group document] == self ? [group publications] : nil)];
             else if ([group isSmart] || [group isURL] || [group isScript] || [group isSearch])
                 copiedGroup = [group copy];
@@ -421,7 +421,7 @@
     } else if ([group isSmart]) {
         [groups addSmartGroup:(BDSKSmartGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isStatic] && [group isKindOfClass:[BDSKLastImportGroup class]] == NO) {
+    } else if ([group isStatic]) {
         [groups addStaticGroup:(BDSKStaticGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([group isURL]) {
@@ -449,7 +449,7 @@
     if ([group isSmart]) {
         [groups removeSmartGroup:(BDSKSmartGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isStatic] && [group isEqual:[groups lastImportGroup]] == NO) {
+    } else if ([group isStatic]) {
         [groups removeStaticGroup:(BDSKStaticGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([group isURL]) {

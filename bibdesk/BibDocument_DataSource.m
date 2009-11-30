@@ -1733,15 +1733,8 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov canDuplicateItems:(NSArray *)items {
-	if (ov == groupOutlineView) {
-		if ([self hasExternalGroupsSelected]) {
-            BDSKGroup *group = [[self selectedGroups] lastObject];
-            return [group isURL] || [group isScript] || [group isSearch];
-        } else if ([self hasCategoryGroupsSelected] == NO) {
-            NSArray *selGroups = [self selectedGroups];
-            return [selGroups containsObject:[groups libraryGroup]] == NO && [selGroups containsObject:[groups lastImportGroup]] == NO;
-        }
-    }
+	if (ov == groupOutlineView)
+		return ([self hasLibraryGroupSelected] == NO && [self hasLastImportGroupSelected] == NO && [self hasWebGroupSelected] == NO && [self hasSharedGroupsSelected] == NO && [self hasCategoryGroupsSelected] == NO);
     return NO;
 }
 
