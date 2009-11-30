@@ -572,7 +572,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     // optimize for single selections
     if ([selectedGroups count] == 1 && [self hasLibraryGroupSelected]) {
         array = publications;
-    } else if ([selectedGroups count] == 1 && ([self hasExternalGroupsSelected] || [self hasStaticGroupsSelected])) {
+    } else if ([selectedGroups count] == 1 && ([self hasExternalGroupsSelected] || [self hasStaticGroupsSelected] || [self hasLastImportGroupSelected])) {
         array = [(id)[selectedGroups lastObject] publications];
     } else {
         // multiple selections are never shared groups, so they are contained in the publications
