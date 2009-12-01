@@ -137,7 +137,8 @@
 
 - (void)updateNameUI
 {
-    [sharedNameField setStringValue:[BDSKSharingServer defaultSharingName]];
+    [[sharedNameField cell] setPlaceholderString:[BDSKSharingServer defaultSharingName]];
+    [sharedNameField setStringValue:[sud objectForKey:BDSKSharingNameKey]];
 }
 
 - (void)updateStatusUI

@@ -173,15 +173,20 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     }
 }
 
-// base name for sharing (also used for storing remote host names in keychain)
 + (NSString *)defaultSharingName;
+{
+    return [(id)SCDynamicStoreCopyComputerName(dynamicStore, NULL) autorelease];
+}
+
+// base name for sharing (also used for storing remote host names in keychain)
++ (NSString *)sharingName;
 {
     // docs say to use computer name instead of host name http://developer.apple.com/qa/qa2001/qa1228.html
     NSString *sharingName = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKSharingNameKey];
     BDSKASSERT(dynamicStore);
     // default to the computer name as set in sys prefs (sharing)
     if([NSString isEmptyString:sharingName])
-        sharingName = [(id)SCDynamicStoreCopyComputerName(dynamicStore, NULL) autorelease];
+        sharingName = [self defaultSharingName];
     BDSKPOSTCONDITION(sharingName);
     return sharingName;
 }
@@ -313,7 +318,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         // we're not yet sharing and we've got something to share
         
         tryCount = 0;
-        [self setSharingName:[BDSKSharingServer defaultSharingName]];
+        [self setSharingName:[BDSKSharingServer sharingName]];
         
         [self _enableSharing];
     }
@@ -436,7 +441,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         
         // try again with a different name
         if (tryCount < MAX_TRY_COUNT) {
-            [self setSharingName:[NSString stringWithFormat:@"%@-%ld", [BDSKSharingServer defaultSharingName], (long)++tryCount]];
+            [self setSharingName:[NSString stringWithFormat:@"%@-%ld", [BDSKSharingServer sharingName], (long)++tryCount]];
             [self _enableSharing];
         } else {
             [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingStatusChangedNotification object:nil];
@@ -464,7 +469,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     
     if (err == NSNetServicesCollisionError && tryCount < MAX_TRY_COUNT) {
         
-        [self setSharingName:[NSString stringWithFormat:@"%@-%ld", [BDSKSharingServer defaultSharingName], (long)++tryCount]];
+        [self setSharingName:[NSString stringWithFormat:@"%@-%ld", [BDSKSharingServer sharingName], (long)++tryCount]];
         [self _enableSharing];
         
     } else {

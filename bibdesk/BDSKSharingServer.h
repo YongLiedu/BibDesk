@@ -85,9 +85,13 @@ typedef NSInteger BDSKSharingStatus;
 }
 
 + (id)defaultServer;
+// base name for sharing when no pref is provided, the computer name
 + (NSString *)defaultSharingName;
+// base name for sharing
++ (NSString *)sharingName;
 + (NSString *)supportedProtocolVersion;
 
+// actual name used for sharing, unique name based on +sharingName
 - (NSString *)sharingName;
 - (BDSKSharingStatus)status;
 
