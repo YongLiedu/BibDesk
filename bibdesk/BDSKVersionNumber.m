@@ -59,7 +59,7 @@
                 [mutableVersionString appendFormat:@"%@%ld", sep, (long)component];
                 
                 componentCount++;
-                components = realloc(components, sizeof(*components) * componentCount);
+                components = (NSInteger *)NSZoneRealloc(NSDefaultMallocZone(), components, sizeof(NSInteger) * componentCount);
                 components[componentCount - 1] = component;
             
                 if ([scanner isAtEnd] == NO) {
@@ -88,7 +88,7 @@
                         if (releaseType != BDSKReleaseVersionType) {
                             // we scanned an "a", "b", "d", "f", or "rc"
                             componentCount++;
-                            components = realloc(components, sizeof(*components) * componentCount);
+                            components = (NSInteger *)NSZoneRealloc(NSDefaultMallocZone(), components, sizeof(NSInteger) * componentCount);
                             components[componentCount - 1] = -releaseType;
                             
                             sep = @"";
@@ -124,9 +124,7 @@
 {
     BDSKDESTROY(originalVersionString);
     BDSKDESTROY(cleanVersionString);
-    if (components) {
-        free(components); components = NULL;
-    }
+    BDSKZONEDESTROY(components);
     [super dealloc];
 }
 
