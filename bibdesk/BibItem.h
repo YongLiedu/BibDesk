@@ -533,13 +533,13 @@ enum {
 - (void)setField:(NSString *)field toTriStateValue:(NSCellStateValue)triStateValue;
     
 /*!
-    @method     intValueOfField:
+    @method     integerValueOfField:
     @abstract   Returns the value of a string stored in the item's pubFields dictionary as an NSInteger. Only for boolean, rating or tri-state fields.
     @discussion (comprehensive description)
     @param      field (description)
     @result     (description)
 */
-- (NSInteger)intValueOfField:(NSString *)field;
+- (NSInteger)integerValueOfField:(NSString *)field;
 
 /*!
     @method     stringValueOfField:

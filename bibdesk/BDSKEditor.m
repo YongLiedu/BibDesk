@@ -2257,7 +2257,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	else if([changeKey isIntegerField]){
 		for (NSButtonCell *entry in [matrix cells]){
 			if([[entry representedObject] isEqualToString:changeKey]){
-				[entry setIntegerValue:[publication intValueOfField:changeKey]];
+				[entry setIntegerValue:[publication integerValueOfField:changeKey]];
 				[matrix setNeedsDisplay:YES];
 				break;
 			}
@@ -3268,7 +3268,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSButtonCell *buttonCell = [templateCell copy];
     [buttonCell setTitle:[field localizedFieldName]];
     [buttonCell setRepresentedObject:field];
-    [buttonCell setIntegerValue:[publication intValueOfField:field]];
+    [buttonCell setIntegerValue:[publication integerValueOfField:field]];
     [cells addObject:buttonCell];
     size = [buttonCell cellSize];
     [buttonCell release];

@@ -619,7 +619,7 @@
                             }
                         }
 						if (NO == [scanner scanUnsignedInteger:&numChars]) numChars = 0;
-                        intValue = [pub intValueOfField:key];
+                        intValue = [pub integerValueOfField:key];
                         value = (intValue == 0 ? noValue : (intValue == 1 ? yesValue : mixedValue));
                         if (numChars > 0 && [value length] > numChars) {
                             [parsedStr appendString:[value substringToIndex:numChars]];

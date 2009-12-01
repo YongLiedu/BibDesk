@@ -46,7 +46,7 @@
 - (NSString *)title;
 - (NSString *)container;
 - (NSString *)stringValueOfField:(NSString *)field;
-- (NSInteger)intValueOfField:(NSString *)field;
+- (NSInteger)integerValueOfField:(NSString *)field;
 - (NSArray *)peopleArrayForField:(NSString *)field;
 - (NSURL *)localFileURLForField:(NSString *)field;
 - (BOOL)isValidCiteKey:(NSString *)key;

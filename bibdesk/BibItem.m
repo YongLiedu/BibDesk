@@ -1292,7 +1292,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	}
 }
 
-- (NSInteger)intValueOfField:(NSString *)field {
+- (NSInteger)integerValueOfField:(NSString *)field {
 		
 	if([field isRatingField]){
 		return [self ratingValueOfField:field];
