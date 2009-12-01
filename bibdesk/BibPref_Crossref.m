@@ -89,7 +89,7 @@ static char BDSKBibPrefCrossrefDefaultsObservationContext;
 - (void)dealloc{
     @try { [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnEditInheritedKey]]; }
     @catch (id e) {}
-    [typesArray release];
+    BDSKDESTROY(typesArray);
     [super dealloc];
 }
 

@@ -131,19 +131,19 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     // next line is a workaround for a nasty webview crasher; looks like it messages a garbage pointer to its undo manager
     [webView setEditingDelegate:nil];
-    [item release];
-    [fields release];
-    [itemsAdded release];
-    [tableCellFormatter release];
-    [crossrefFormatter release];
-    [citationFormatter release];
-    [sourceBox release];
-    [webViewView release];
-	[complexStringEditor release];
-	[webSelection release];
-    [tableFieldEditor release];
-    [downloadFileName release];
-    [undoManager release];
+    BDSKDESTROY(item);
+    BDSKDESTROY(fields);
+    BDSKDESTROY(itemsAdded);
+    BDSKDESTROY(tableCellFormatter);
+    BDSKDESTROY(crossrefFormatter);
+    BDSKDESTROY(citationFormatter);
+    BDSKDESTROY(sourceBox);
+    BDSKDESTROY(webViewView);
+	BDSKDESTROY(complexStringEditor);
+	BDSKDESTROY(webSelection);
+    BDSKDESTROY(tableFieldEditor);
+    BDSKDESTROY(downloadFileName);
+    BDSKDESTROY(undoManager);
     [super dealloc];
 }
 

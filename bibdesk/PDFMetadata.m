@@ -154,7 +154,7 @@ static NSDictionary *translator = nil;
 
 - (void)dealloc
 {
-    [dictionary release];
+    BDSKDESTROY(dictionary);
     [super dealloc];
 }
 

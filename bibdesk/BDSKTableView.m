@@ -51,7 +51,7 @@ static char BDSKTableViewFontDefaultsObservationContext;
     [self setFontNamePreferenceKey:nil]; // this will also stop observing
     [self setFontSizePreferenceKey:nil];
     [typeSelectHelper setDataSource:nil];
-    [typeSelectHelper release];
+    BDSKDESTROY(typeSelectHelper);
     [super dealloc];
 }
 

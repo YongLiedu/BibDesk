@@ -54,8 +54,8 @@
 }
 
 - (void)dealloc {
-    [publicationInfos release];
-    [documentURL release];
+    BDSKDESTROY(publicationInfos);
+    BDSKDESTROY(documentURL);
     [super dealloc];
 }
 

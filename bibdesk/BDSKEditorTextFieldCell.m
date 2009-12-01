@@ -81,8 +81,8 @@
 }
 
 - (void)dealloc {
-    [url release];
-    [buttonCell release];
+    BDSKDESTROY(url);
+    BDSKDESTROY(buttonCell);
     [super dealloc];
 }
 

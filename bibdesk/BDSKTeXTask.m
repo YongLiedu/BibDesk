@@ -170,12 +170,12 @@ static double runLoopTimeout = 30;
 }
 
 - (void)dealloc{
-    [texTemplatePath release];
-    [texPath release];
-    [taskShouldStartInvocation release];
-    [taskFinishedInvocation release];
-    [processingLock release];
-    [dataFileLock release];
+    BDSKDESTROY(texTemplatePath);
+    BDSKDESTROY(texPath);
+    BDSKDESTROY(taskShouldStartInvocation);
+    BDSKDESTROY(taskFinishedInvocation);
+    BDSKDESTROY(processingLock);
+    BDSKDESTROY(dataFileLock);
 	[super dealloc];
 }
 
@@ -218,8 +218,7 @@ static double runLoopTimeout = 30;
     // This method is mainly to ensure that we don't leave child processes around when exiting; it bypasses the processingLock, so this object is useless after it gets a -terminate message.  We used to wait here for a few seconds, but the application would quit before time was up, and currentTask could be left running.
     if ([self isProcessing] && currentTask){
         [currentTask terminate];
-        [currentTask release];
-        currentTask = nil;
+        BDSKDESTROY(currentTask);
     }    
 }
 
@@ -644,8 +643,7 @@ static double runLoopTimeout = 30;
     [currentTask waitUntilExit];
     rv = [currentTask terminationStatus];
     
-    [currentTask release];
-    currentTask = nil;
+    BDSKDESTROY(currentTask);
     
     return rv;
 }
@@ -667,7 +665,7 @@ static double runLoopTimeout = 30;
 
 - (void)dealloc
 {
-    [fullPathWithoutExtension release];
+    BDSKDESTROY(fullPathWithoutExtension);
     [super dealloc];
 }
 

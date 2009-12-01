@@ -127,9 +127,8 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 }
 
 - (void)dealloc {
-    [infoLock release];
-    [serverInfo release];
-    serverInfo = nil;
+    BDSKDESTROY(infoLock);
+    BDSKDESTROY(serverInfo);
     [super dealloc];
 }
 

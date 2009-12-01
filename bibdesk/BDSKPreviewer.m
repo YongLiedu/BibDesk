@@ -558,7 +558,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     // make sure we don't process anything else; the TeX task will take care of its own cleanup
     [server stopDOServer];
-    [server release];
+    BDSKDESTROY(server);
     [pdfView release];
     [[rtfPreviewView enclosingScrollView] release];
     [super dealloc];
@@ -588,12 +588,9 @@ static BDSKPreviewer *sharedPreviewer = nil;
 
 - (void)dealloc;
 {
-    [texTask release];
-    texTask = nil;
-    [nextTaskLock release];
-    nextTaskLock = nil;
-    [nextTask release];
-    nextTask = nil;
+    BDSKDESTROY(texTask);
+    BDSKDESTROY(nextTaskLock);
+    BDSKDESTROY(nextTask);
     [super dealloc];
 }
 
@@ -724,8 +721,8 @@ static BDSKPreviewer *sharedPreviewer = nil;
 }
 
 - (void)dealloc {
-    [bibTeXString release];
-    [citeKeys release];
+    BDSKDESTROY(bibTeXString);
+    BDSKDESTROY(citeKeys);
     [super dealloc];
 }
 

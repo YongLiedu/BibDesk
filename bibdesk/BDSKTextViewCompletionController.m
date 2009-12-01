@@ -88,7 +88,7 @@ static id sharedController = nil;
     [self setCompletions:nil];
     [self setOriginalString:nil];
     [self setCurrentTextView:nil];
-    [completionWindow release];
+    BDSKDESTROY(completionWindow);
     [super dealloc];
 }
 

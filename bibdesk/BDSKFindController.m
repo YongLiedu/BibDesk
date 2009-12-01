@@ -110,11 +110,11 @@ enum {
 }
 
 - (void)dealloc {
-	[findFieldEditor release];
-    [findString release];
-    [replaceString release];
-	[statusBar release];
-	[replaceAllTooltip release];
+	BDSKDESTROY(findFieldEditor);
+    BDSKDESTROY(findString);
+    BDSKDESTROY(replaceString);
+	BDSKDESTROY(statusBar);
+	BDSKDESTROY(replaceAllTooltip);
     [super dealloc];
 }
 

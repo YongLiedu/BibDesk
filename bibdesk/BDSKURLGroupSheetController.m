@@ -63,10 +63,10 @@
 }
 
 - (void)dealloc {
-    [urlString release];
-    [group release];
-    [undoManager release];
-    [dragFieldEditor release];
+    BDSKDESTROY(urlString);
+    BDSKDESTROY(group);
+    BDSKDESTROY(undoManager);
+    BDSKDESTROY(dragFieldEditor);
     [super dealloc];
 }
 

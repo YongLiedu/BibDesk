@@ -97,8 +97,8 @@
 @implementation BDSKTaskRunner
 
 - (void)dealloc{
-    [task release];
-    [stdoutData release];
+    BDSKDESTROY(task);
+    BDSKDESTROY(stdoutData);
     [super dealloc];
 }
 

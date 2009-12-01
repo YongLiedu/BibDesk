@@ -67,12 +67,9 @@
 - (void)dealloc
 {
 	//NSLog(@"dealloc filterController");
-    [filter release];
-    filter  = nil;
-    [conditionControllers release];
-    conditionControllers = nil;
-    [undoManager release];
-    undoManager = nil;
+    BDSKDESTROY(filter);
+    BDSKDESTROY(conditionControllers);
+    BDSKDESTROY(undoManager);
     [super dealloc];
 }
 

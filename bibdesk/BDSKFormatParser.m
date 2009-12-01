@@ -1239,8 +1239,8 @@
 
 - (void)dealloc
 {
-    [parseFileType release];
-    [parseField release];
+    BDSKDESTROY(parseFileType);
+    BDSKDESTROY(parseField);
     [super dealloc];
 }
 
@@ -1307,8 +1307,8 @@
 
 - (void)dealloc
 {
-    [parseFileType release];
-    [parseField release];
+    BDSKDESTROY(parseFileType);
+    BDSKDESTROY(parseField);
     [super dealloc];
 }
 

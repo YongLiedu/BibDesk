@@ -117,10 +117,10 @@
 }
 
 - (void)dealloc {
-    [object release];
-    [publications release];
-    [publicationsContext release];
-    [template release];
+    BDSKDESTROY(object);
+    BDSKDESTROY(publications);
+    BDSKDESTROY(publicationsContext);
+    BDSKDESTROY(template);
     [super dealloc];
 }
 

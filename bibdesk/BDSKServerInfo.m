@@ -131,12 +131,12 @@
 }
 
 - (void)dealloc {
-    [type release];
-    [name release];
-    [database release];
-    [host release];
-    [port release];
-    [options release];
+    BDSKDESTROY(type);
+    BDSKDESTROY(name);
+    BDSKDESTROY(database);
+    BDSKDESTROY(host);
+    BDSKDESTROY(port);
+    BDSKDESTROY(options);
     [super dealloc];
 }
 

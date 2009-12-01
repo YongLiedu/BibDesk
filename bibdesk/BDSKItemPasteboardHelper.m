@@ -77,8 +77,8 @@
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [texTask terminate];
-    [texTask release];
-    [promisedPboardTypes release];
+    BDSKDESTROY(texTask);
+    BDSKDESTROY(promisedPboardTypes);
     [super dealloc];
 }
 

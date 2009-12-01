@@ -111,10 +111,8 @@
 }
 
 - (void)dealloc{
-    [buttonCell release];
-    buttonCell = nil;
-    [icon release];
-    icon = nil;
+    BDSKDESTROY(buttonCell);
+    BDSKDESTROY(icon);
     [super dealloc];
 }
 

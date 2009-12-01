@@ -75,9 +75,9 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 {
     [document removeObserver:self forKeyPath:@"displayName"];
     [document removeObserver:self forKeyPath:@"documentStringEncoding"];
-    [document release];
-    [editors release];
-    [documentDisplayName release];
+    BDSKDESTROY(document);
+    BDSKDESTROY(editors);
+    BDSKDESTROY(documentDisplayName);
     [super dealloc];
 }
 

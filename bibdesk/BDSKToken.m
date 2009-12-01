@@ -131,8 +131,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (void)dealloc {
-    [title release];
-    [fontName release];
+    BDSKDESTROY(title);
+    BDSKDESTROY(fontName);
     [super dealloc];
 }
 /*
@@ -288,7 +288,7 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (void)dealloc {
-    [key release];
+    BDSKDESTROY(key);
     [super dealloc];
 }
 /*
@@ -373,9 +373,9 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (void)dealloc {
-    [appendingKey release];
-    [prefix release];
-    [suffix release];
+    BDSKDESTROY(appendingKey);
+    BDSKDESTROY(prefix);
+    BDSKDESTROY(suffix);
     [super dealloc];
 }
 /*
@@ -514,8 +514,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (void)dealloc {
-    [casingKey release];
-    [cleaningKey release];
+    BDSKDESTROY(casingKey);
+    BDSKDESTROY(cleaningKey);
     [super dealloc];
 }
 /*
@@ -635,7 +635,7 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (void)dealloc {
-    [urlFormatKey release];
+    BDSKDESTROY(urlFormatKey);
     [super dealloc];
 }
 /*
@@ -727,8 +727,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (void)dealloc {
-    [nameStyleKey release];
-    [joinStyleKey release];
+    BDSKDESTROY(nameStyleKey);
+    BDSKDESTROY(joinStyleKey);
     [super dealloc];
 }
 /*
@@ -835,8 +835,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (void)dealloc {
-    [linkedFileFormatKey release];
-    [linkedFileJoinStyleKey release];
+    BDSKDESTROY(linkedFileFormatKey);
+    BDSKDESTROY(linkedFileJoinStyleKey);
     [super dealloc];
 }
 /*
@@ -935,7 +935,7 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (void)dealloc {
-    [dateFormatKey release];
+    BDSKDESTROY(dateFormatKey);
     [super dealloc];
 }
 /*
@@ -1027,8 +1027,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (void)dealloc {
-    [counterStyleKey release];
-    [counterCasingKey release];
+    BDSKDESTROY(counterStyleKey);
+    BDSKDESTROY(counterCasingKey);
     [super dealloc];
 }
 /*
@@ -1134,8 +1134,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (void)dealloc {
-    [field release];
-    [altText release];
+    BDSKDESTROY(field);
+    BDSKDESTROY(altText);
     [super dealloc];
 }
 /*

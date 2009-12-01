@@ -114,17 +114,17 @@ static int _kqueue = -1;
     [self _disableNotification];
     pthread_mutex_unlock(&_internal->_lock);
     pthread_mutex_destroy(&_internal->_lock);
-    [_launchPath release];
-    [_arguments release];
-    [_environment release];
-    [_currentDirectoryPath release];
-    [_standardInput release];
-    [_standardOutput release];
-    [_standardError release];
+    BDSKDESTROY(_launchPath);
+    BDSKDESTROY(_arguments);
+    BDSKDESTROY(_environment);
+    BDSKDESTROY(_currentDirectoryPath);
+    BDSKDESTROY(_standardInput);
+    BDSKDESTROY(_standardOutput);
+    BDSKDESTROY(_standardError);
     // runloop and source are freed in __BDSKTaskNotify or _disableNotification
     NSParameterAssert(NULL == _internal->_rl);
     NSParameterAssert(NULL == _internal->_rlsource);
-    NSZoneFree(NSZoneFromPointer(_internal), _internal);
+    BDSKZONEDESTROY(_internal);
     [super dealloc];
 }
 

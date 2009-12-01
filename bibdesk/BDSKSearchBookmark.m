@@ -256,8 +256,8 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (void)dealloc {
-    [info release];
-    [label release];
+    BDSKDESTROY(info);
+    BDSKDESTROY(label);
     [super dealloc];
 }
 
@@ -325,8 +325,8 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (void)dealloc {
-    [label release];
-    [children release];
+    BDSKDESTROY(label);
+    BDSKDESTROY(children);
     [super dealloc];
 }
 

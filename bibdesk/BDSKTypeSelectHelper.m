@@ -86,8 +86,8 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self setDataSource:nil];
     [self stopTimer];
-    [searchString release];
-    [searchCache release];
+    BDSKDESTROY(searchString);
+    BDSKDESTROY(searchCache);
     [super dealloc];
 }
 
@@ -269,8 +269,7 @@
 - (void)stopTimer;
 {
     [timer invalidate];
-    [timer release];
-    timer = nil;
+    BDSKDESTROY(timer);
 }
 
 - (void)startTimer;

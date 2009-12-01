@@ -103,9 +103,9 @@
 
 - (void)dealloc
 {
-    [itemNodes release];
-    [roles release];
-    [fileTypes release];
+    BDSKDESTROY(itemNodes);
+    BDSKDESTROY(roles);
+    BDSKDESTROY(fileTypes);
     [super dealloc];
 }
 

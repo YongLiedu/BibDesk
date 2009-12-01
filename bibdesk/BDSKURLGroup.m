@@ -119,16 +119,15 @@
 - (void)dealloc;
 {
     [self stopRetrieving];
-    [URL release];
-    [filePath release];
+    BDSKDESTROY(URL);
+    BDSKDESTROY(filePath);
     [super dealloc];
 }
 
 - (void)stopRetrieving;
 {
     [URLDownload cancel];
-    [URLDownload release];
-    URLDownload = nil;
+    BDSKDESTROY(URLDownload);
     isRetrieving = NO;
 }
 

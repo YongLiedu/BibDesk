@@ -96,13 +96,10 @@
 }
 
 - (void)dealloc {
-    [infoLock release];
-    [serverInfo release];
-    serverInfo = nil;
-    [scheduledService release];
-    scheduledService = nil;
-    [errorMessage release];
-    errorMessage = nil;
+    BDSKDESTROY(infoLock);
+    BDSKDESTROY(serverInfo);
+    BDSKDESTROY(scheduledService);
+    BDSKDESTROY(errorMessage);
     [super dealloc];
 }
 

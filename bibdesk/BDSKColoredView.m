@@ -49,7 +49,7 @@
 }
 
 - (void)dealloc {
-    [backgroundColor release];
+    BDSKDESTROY(backgroundColor);
     [super dealloc];
 }
 

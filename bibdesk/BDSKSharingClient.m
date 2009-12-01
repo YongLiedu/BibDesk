@@ -116,9 +116,9 @@ typedef struct _BDSKSharingClientFlags {
 
 - (void)dealloc {
     [self terminate];
-    [archivedPublications release];
-    [archivedMacros release];
-    [name release];
+    BDSKDESTROY(archivedPublications);
+    BDSKDESTROY(archivedMacros);
+    BDSKDESTROY(name);
     [super dealloc];
 }
 
@@ -128,8 +128,7 @@ typedef struct _BDSKSharingClientFlags {
 
 - (void)terminate {
     [server stopDOServer];
-    [server release];
-    server = nil;
+    BDSKDESTROY(server);
 }
 
 - (void)retrievePublications {
@@ -239,11 +238,9 @@ typedef struct _BDSKSharingClientFlags {
 - (void)dealloc;
 {
     [service setDelegate:nil];
-    [service release];
-    service = nil;
-    [uniqueIdentifier release];
-    [errorMessage release];
-    errorMessage = nil;
+    BDSKDESTROY(service);
+    BDSKDESTROY(uniqueIdentifier);
+    BDSKDESTROY(errorMessage);
     [super dealloc];
 }
 
@@ -354,8 +351,7 @@ typedef struct _BDSKSharingClientFlags {
                 [proxy registerClient:protocolChecker forIdentifier:uniqueIdentifier version:[BDSKSharingClientServer supportedProtocolVersion]];
             }
             @catch(id exception) {
-                [uniqueIdentifier release];
-                uniqueIdentifier = nil;
+                BDSKDESTROY(uniqueIdentifier);
                 NSLog(@"%@: unable to register with remote server %@", [self class], [service hostName]);
                 // don't throw; this isn't critical
             }
@@ -501,18 +497,15 @@ typedef struct _BDSKSharingClientFlags {
         [conn setRootObject:nil];
         [[conn receivePort] invalidate];
         [conn invalidate];
-        [remoteServer release];
-        remoteServer = nil;
-        [protocolChecker release];
-        protocolChecker = nil;
+        BDSKDESTROY(remoteServer);
+        BDSKDESTROY(protocolChecker);
     }
 }
 
 - (oneway void)invalidate
 {
     // set this to nil so we won't try to get back to the remote server
-    [uniqueIdentifier release];
-    uniqueIdentifier = nil;
+    BDSKDESTROY(uniqueIdentifier);
 }
 
 @end

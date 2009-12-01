@@ -280,24 +280,24 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (void)dealloc{
-    [publication release];
-    [fields release];
-    [addedFields release];
-    [statusBar release];
-    [previousValueForCurrentEditedView release];
-    [notesViewUndoManager release];
-    [abstractViewUndoManager release];
-    [rssDescriptionViewUndoManager release];   
-    [booleanButtonCell release];
-    [triStateButtonCell release];
-    [ratingButtonCell release];
+    BDSKDESTROY(publication);
+    BDSKDESTROY(fields);
+    BDSKDESTROY(addedFields);
+    BDSKDESTROY(statusBar);
+    BDSKDESTROY(previousValueForCurrentEditedView);
+    BDSKDESTROY(notesViewUndoManager);
+    BDSKDESTROY(abstractViewUndoManager);
+    BDSKDESTROY(rssDescriptionViewUndoManager);   
+    BDSKDESTROY(booleanButtonCell);
+    BDSKDESTROY(triStateButtonCell);
+    BDSKDESTROY(ratingButtonCell);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-	[dragFieldEditor release];
-	[complexStringEditor release];
-    [tableCellFormatter release];
-    [crossrefFormatter release];
-    [citationFormatter release];
-    [disableAutoFileButton release];
+	BDSKDESTROY(dragFieldEditor);
+	BDSKDESTROY(complexStringEditor);
+    BDSKDESTROY(tableCellFormatter);
+    BDSKDESTROY(crossrefFormatter);
+    BDSKDESTROY(citationFormatter);
+    BDSKDESTROY(disableAutoFileButton);
     [super dealloc];
 }
 

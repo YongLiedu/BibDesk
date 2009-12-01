@@ -75,13 +75,13 @@ static NSUInteger scriptHookID = 0;
 }
 
 - (void)dealloc {
-	[name release];
-	[uniqueID release];
-	[script release];
-	[field release];
-	[oldValues release];
-	[newValues release];
-	[document release];
+	BDSKDESTROY(name);
+	BDSKDESTROY(uniqueID);
+	BDSKDESTROY(script);
+	BDSKDESTROY(field);
+	BDSKDESTROY(oldValues);
+	BDSKDESTROY(newValues);
+	BDSKDESTROY(document);
 	[super dealloc];
 }
 

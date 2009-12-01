@@ -67,8 +67,8 @@ static NSString *presetFormatStrings[] = {@"%l%n0%e", @"%a1/%Y%u0%e", @"%a1/%T5%
 static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", @"%P0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%L", @"%l", @"%e", @"%b", @"%f{}0", @"%w{}[ ]0", @"%s{}[][][]0", @"%c{}", @"%f{Cite Key}", @"%i{}0", @"%u0", @"%U0", @"%n0", @"%0", @"%%"};
 
 - (void)dealloc{
-    [lastPapersFolderPath release];
-    [coloringEditor release];
+    BDSKDESTROY(lastPapersFolderPath);
+    BDSKDESTROY(coloringEditor);
 	[super dealloc];
 }
 

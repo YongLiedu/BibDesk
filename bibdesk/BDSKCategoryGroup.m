@@ -99,7 +99,7 @@
 }
 
 - (void)dealloc {
-    [key release];
+    BDSKDESTROY(key);
     [super dealloc];
 }
 

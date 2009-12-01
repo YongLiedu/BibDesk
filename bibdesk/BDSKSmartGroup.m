@@ -105,7 +105,7 @@
 
 - (void)dealloc {
     [filter setGroup:nil];
-    [filter release];
+    BDSKDESTROY(filter);
     [super dealloc];
 }
 

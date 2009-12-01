@@ -62,8 +62,8 @@
 
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [info release];
-    [keys release];
+    BDSKDESTROY(info);
+    BDSKDESTROY(keys);
     [super dealloc];
 }
 

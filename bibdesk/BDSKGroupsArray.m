@@ -103,7 +103,7 @@
 }
 
 - (void)dealloc {
-    [groups release];
+    BDSKDESTROY(groups);
     [super dealloc];
 }
 

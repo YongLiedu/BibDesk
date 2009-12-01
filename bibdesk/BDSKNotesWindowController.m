@@ -66,9 +66,9 @@
 }
 
 - (void)dealloc {
-    [url release];
-    [notes release];
-    [tags release];
+    BDSKDESTROY(url);
+    BDSKDESTROY(notes);
+    BDSKDESTROY(tags);
     [super dealloc];
 }
 

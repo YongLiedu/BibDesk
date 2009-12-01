@@ -73,10 +73,9 @@
 
 - (void)dealloc
 {
-    [foundFiles release];
-    foundFiles = nil;
-    [knownFiles release];
-    [baseURL release];
+    BDSKDESTROY(foundFiles);
+    BDSKDESTROY(knownFiles);
+    BDSKDESTROY(baseURL);
     [super dealloc];
 }
 

@@ -71,7 +71,7 @@
 }
 
 - (void)dealloc {
-    [data release];
+    BDSKDESTROY(data);
     [super dealloc];
 }
 

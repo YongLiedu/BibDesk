@@ -151,7 +151,7 @@ enum {
 }
 
 - (void)dealloc{
-    [alternatingRowBackgroundColors release];
+    BDSKDESTROY(alternatingRowBackgroundColors);
     [super dealloc];
 }
 

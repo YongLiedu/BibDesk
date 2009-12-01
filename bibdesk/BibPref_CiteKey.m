@@ -63,7 +63,7 @@ static NSString *presetFormatStrings[] = {@"%a1:%Y%u2", @"%a1:%Y%u0", @"%a33%y%m
 static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", @"%P0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%f{}0", @"%w{}[ ]0", @"%s{}[][][]0", @"%c{}", @"%i{}0", @"%u0", @"%U0", @"%n0", @"%0", @"%%"};
 
 - (void)dealloc{
-    [coloringEditor release];
+    BDSKDESTROY(coloringEditor);
 	[super dealloc];
 }
 

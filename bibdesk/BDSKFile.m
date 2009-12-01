@@ -259,7 +259,7 @@ static Class BDSKFileClass = Nil;
 
 - (void)dealloc
 {
-    [fileURL release];
+    BDSKDESTROY(fileURL);
     [super dealloc];
 }
 
@@ -333,7 +333,7 @@ static Class BDSKFileClass = Nil;
 
 - (void)dealloc
 {
-    NSZoneFree([self zone], (void *)fileRef);
+    BDSKZONEDESTROY(fileRef);
     [super dealloc];
 }
 

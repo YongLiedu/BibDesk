@@ -82,7 +82,7 @@
 }
 
 - (void)dealloc{
-    [value release];
+    BDSKDESTROY(value);
     [super dealloc];
 }
 

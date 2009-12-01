@@ -121,21 +121,21 @@ static CFCharacterSetRef dashSet = NULL;
 }
 
 - (void)dealloc{
-    [originalName release];
-    [name release];
-	[firstName release];
-	[vonPart release];
-	[lastName release];
-	[jrPart release];
-    [fullLastName release];
-	[normalizedName release];
-    [sortableName release];
-    [abbreviatedName release];
-    [abbreviatedNormalizedName release];
-    [unpunctuatedAbbreviatedNormalizedName release];
-    [firstNames release];
-    [fuzzyName release];
-    [field release];
+    BDSKDESTROY(originalName);
+    BDSKDESTROY(name);
+	BDSKDESTROY(firstName);
+	BDSKDESTROY(vonPart);
+	BDSKDESTROY(lastName);
+	BDSKDESTROY(jrPart);
+    BDSKDESTROY(fullLastName);
+	BDSKDESTROY(normalizedName);
+    BDSKDESTROY(sortableName);
+    BDSKDESTROY(abbreviatedName);
+    BDSKDESTROY(abbreviatedNormalizedName);
+    BDSKDESTROY(unpunctuatedAbbreviatedNormalizedName);
+    BDSKDESTROY(firstNames);
+    BDSKDESTROY(fuzzyName);
+    BDSKDESTROY(field);
     [super dealloc];
 }
 

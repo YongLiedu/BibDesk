@@ -93,7 +93,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 }
 
 - (void)dealloc {
-    [macroDefinitions release];
+    BDSKDESTROY(macroDefinitions);
     owner = nil;
     [super dealloc];
 }
@@ -336,8 +336,8 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 
 - (void)dealloc {
     [[NSUserDefaultsController sharedUserDefaultsController] removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKGlobalMacroFilesKey]];
-    [standardMacroDefinitions release];
-    [fileMacroDefinitions release];
+    BDSKDESTROY(standardMacroDefinitions);
+    BDSKDESTROY(fileMacroDefinitions);
     [super dealloc];
 }
 

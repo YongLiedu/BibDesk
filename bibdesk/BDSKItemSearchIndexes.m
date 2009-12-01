@@ -84,8 +84,8 @@ static CFStringRef searchIndexCopyDescription(const void *value)
 
 - (void)dealloc
 {
-    CFRelease(searchIndexes);
-    CFRelease(indexesToFlush);
+    BDSKCFDESTROY(searchIndexes);
+    BDSKCFDESTROY(indexesToFlush);
     [super dealloc];
 }
 

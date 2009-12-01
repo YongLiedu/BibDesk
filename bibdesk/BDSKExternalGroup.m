@@ -76,12 +76,9 @@
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
-    [publications release];
-    publications = nil;
-    [macroResolver release];
-    macroResolver = nil;
-    [searchIndexes release];
-    searchIndexes = nil;
+    BDSKDESTROY(publications);
+    BDSKDESTROY(macroResolver);
+    BDSKDESTROY(searchIndexes);
     [super dealloc];
 }
 
@@ -175,7 +172,7 @@
 @implementation BDSKMutableExternalGroup
 
 - (void)dealloc {
-    [errorMessage release];
+    BDSKDESTROY(errorMessage);
     [super dealloc];
 }
 

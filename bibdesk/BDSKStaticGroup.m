@@ -82,8 +82,8 @@
 
 - (void)dealloc {
 	[[self undoManager] removeAllActionsWithTarget:self];
-    [publications release];
-    [tmpKeys release];
+    BDSKDESTROY(publications);
+    BDSKDESTROY(tmpKeys);
     [super dealloc];
 }
 

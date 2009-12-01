@@ -60,7 +60,7 @@ static void *nullQueryMarker = @"Null MDQuery Marker"; /* any CFTypeRef would wo
 
 - (void)dealloc
 {
-    CFRelease(queries);
+    BDSKCFDESTROY(queries);
     [super dealloc];
 }
 

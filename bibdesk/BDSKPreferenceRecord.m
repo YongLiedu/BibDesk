@@ -74,16 +74,16 @@
 }
 
 - (void)dealloc {
-    [identifier release];
-    [nibName release];
-    [title release];
-    [label release];
-    [icon release];
-    [helpAnchor release];
-    [helpURL release];
-    [initialValues release];
-    [searchTerms release];
-    [dictionary release];
+    BDSKDESTROY(identifier);
+    BDSKDESTROY(nibName);
+    BDSKDESTROY(title);
+    BDSKDESTROY(label);
+    BDSKDESTROY(icon);
+    BDSKDESTROY(helpAnchor);
+    BDSKDESTROY(helpURL);
+    BDSKDESTROY(initialValues);
+    BDSKDESTROY(searchTerms);
+    BDSKDESTROY(dictionary);
     [super dealloc];
 }
 

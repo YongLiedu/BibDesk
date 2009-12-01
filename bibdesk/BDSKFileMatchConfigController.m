@@ -56,8 +56,8 @@
 
 - (void)dealloc
 {
-    [documents release];
-    [files release];
+    BDSKDESTROY(documents);
+    BDSKDESTROY(files);
     [super dealloc];
 }
 

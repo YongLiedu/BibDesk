@@ -64,11 +64,11 @@
 }
 
 - (void)dealloc {
-    [path release];
-    [arguments release];
-    [group release];
-    [undoManager release];
-    [dragFieldEditor release];
+    BDSKDESTROY(path);
+    BDSKDESTROY(arguments);
+    BDSKDESTROY(group);
+    BDSKDESTROY(undoManager);
+    BDSKDESTROY(dragFieldEditor);
     [super dealloc];
 }
 

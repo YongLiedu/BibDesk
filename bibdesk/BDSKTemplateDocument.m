@@ -177,20 +177,20 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [specialTokens release];
-    [defaultTokens release];
-    [fieldTokens release];
-    [typeTemplates release];
-    [prefixTemplate release];
-    [suffixTemplate release];
-    [separatorTemplate release];
-    [fontName release];
-    [selectedToken release];
-    [templateOptions release];
-    [fonts release];
-    [tokenFonts release];
-    [string release];
-    [attributedString release];
+    BDSKDESTROY(specialTokens);
+    BDSKDESTROY(defaultTokens);
+    BDSKDESTROY(fieldTokens);
+    BDSKDESTROY(typeTemplates);
+    BDSKDESTROY(prefixTemplate);
+    BDSKDESTROY(suffixTemplate);
+    BDSKDESTROY(separatorTemplate);
+    BDSKDESTROY(fontName);
+    BDSKDESTROY(selectedToken);
+    BDSKDESTROY(templateOptions);
+    BDSKDESTROY(fonts);
+    BDSKDESTROY(tokenFonts);
+    BDSKDESTROY(string);
+    BDSKDESTROY(attributedString);
     [super dealloc];
 }
 

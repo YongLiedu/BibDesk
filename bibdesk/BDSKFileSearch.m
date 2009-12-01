@@ -95,9 +95,9 @@
 {
     [self setSearch:NULL];
     [searchIndex setDelegate:nil];
-    [searchIndex release];
-    [searchResults release];
-    [data release];
+    BDSKDESTROY(searchIndex);
+    BDSKDESTROY(searchResults);
+    BDSKDESTROY(data);
     [super dealloc];
 }
 
@@ -282,9 +282,9 @@
 
 - (void)dealloc
 {
-    if (ids) NSZoneFree(NSZoneFromPointer(ids), ids);
-    if (docs) NSZoneFree(NSZoneFromPointer(docs), docs);
-    if (scores) NSZoneFree(NSZoneFromPointer(scores), scores);
+    BDSKZONEDESTROY(ids);
+    BDSKZONEDESTROY(docs);
+    BDSKZONEDESTROY(scores);
     [super dealloc];
 }
 

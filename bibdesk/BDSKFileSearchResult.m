@@ -65,10 +65,10 @@
 
 - (void)dealloc
 {
-    [file release];
-    [string release];
-    [identifierURL release];
-    [image release];
+    BDSKDESTROY(file);
+    BDSKDESTROY(string);
+    BDSKDESTROY(identifierURL);
+    BDSKDESTROY(image);
     [super dealloc];
 }
 

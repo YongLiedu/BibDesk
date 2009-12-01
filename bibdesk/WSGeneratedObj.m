@@ -26,10 +26,7 @@
 
 - (void) dealloc
 {
-	if (fRef) {
-		CFRelease(fRef);
-		fRef = NULL;
-	}
+	BDSKCFDESTROY(fRef);
 	[fResult release];
 	fResult = NULL;
 	[super dealloc];

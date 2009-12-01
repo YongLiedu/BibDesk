@@ -49,7 +49,7 @@
 }
 
 - (void)dealloc {
-    [gradient release];
+    BDSKDESTROY(gradient);
     [super dealloc];
 }
 

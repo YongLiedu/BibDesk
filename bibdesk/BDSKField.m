@@ -59,7 +59,7 @@ A wrapper object around the fields to access them in AppleScript.
 }
 
 - (void)dealloc {
-    [name release];
+    BDSKDESTROY(name);
     [super dealloc];
 }
 

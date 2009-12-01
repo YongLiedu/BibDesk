@@ -74,10 +74,10 @@
 }
 
 - (void)dealloc{
-    [person release];
-    [publicationItems release];
-    [names release];
-    [fields release];
+    BDSKDESTROY(person);
+    BDSKDESTROY(publicationItems);
+    BDSKDESTROY(names);
+    BDSKDESTROY(fields);
     [super dealloc];
 }
 

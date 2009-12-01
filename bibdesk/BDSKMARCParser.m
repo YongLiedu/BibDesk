@@ -484,12 +484,12 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 }
 
 - (void)dealloc{
-    [returnArray release];
-    [pubDict release];
-    [tag release];
-    [subTag release];
-    [currentValue release];
-    [formattedString release];
+    BDSKDESTROY(returnArray);
+    BDSKDESTROY(pubDict);
+    BDSKDESTROY(tag);
+    BDSKDESTROY(subTag);
+    BDSKDESTROY(currentValue);
+    BDSKDESTROY(formattedString);
     [super dealloc];
 }
 

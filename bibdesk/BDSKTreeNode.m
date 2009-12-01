@@ -55,7 +55,7 @@
 {
     [self setParent:nil];
     [self setChildren:nil];
-    [columnValues release];
+    BDSKDESTROY(columnValues);
     [super dealloc];
 }
 

@@ -52,9 +52,9 @@
 }
 
 - (void)dealloc {
-    [prompt release];
-    [fieldsArray release];
-    [field release];
+    BDSKDESTROY(prompt);
+    BDSKDESTROY(fieldsArray);
+    BDSKDESTROY(field);
     [super dealloc];
 }
 
@@ -172,9 +172,9 @@
 }
 
 - (void)dealloc {
-    [replacePrompt release];
-    [replaceFieldsArray release];
-    [replaceField release];
+    BDSKDESTROY(replacePrompt);
+    BDSKDESTROY(replaceFieldsArray);
+    BDSKDESTROY(replaceField);
     [super dealloc];
 }
 

@@ -74,7 +74,7 @@
 }
 
 - (void)dealloc {
-    [macroResolver release];
+    BDSKDESTROY(macroResolver);
     [super dealloc];
 }
 

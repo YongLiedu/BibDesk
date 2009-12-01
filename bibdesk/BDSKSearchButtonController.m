@@ -50,8 +50,8 @@
 }
 
 - (void)dealloc {
-    [fileContentItem release];
-    [skimNotesItem release];
+    BDSKDESTROY(fileContentItem);
+    BDSKDESTROY(skimNotesItem);
     [super dealloc];
 }
 

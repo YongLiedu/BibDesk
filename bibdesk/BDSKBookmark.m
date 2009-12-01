@@ -256,8 +256,8 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (void)dealloc {
-    [name release];
-    [urlString release];
+    BDSKDESTROY(name);
+    BDSKDESTROY(urlString);
     [super dealloc];
 }
 
@@ -362,8 +362,8 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (void)dealloc {
-    [name release];
-    [children release];
+    BDSKDESTROY(name);
+    BDSKDESTROY(children);
     [super dealloc];
 }
 

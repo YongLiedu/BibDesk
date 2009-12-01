@@ -158,7 +158,7 @@ static NSImage *unlockedIcon = nil;
 - (void)dealloc;
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [client release];
+    BDSKDESTROY(client);
     [super dealloc];
 }
 

@@ -262,8 +262,8 @@ There are some issues with BibAuthor's sortCompare:, though, which we may revisi
 
 - (void)dealloc
 {
-    CFRelease(keys);
-    [userInfo release];
+    BDSKCFDESTROY(keys);
+    BDSKDESTROY(userInfo);
     [super dealloc];
 }
 

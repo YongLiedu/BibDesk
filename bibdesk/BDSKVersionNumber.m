@@ -122,10 +122,11 @@
 
 - (void)dealloc;
 {
-    [originalVersionString release];
-    [cleanVersionString release];
-    if (components)
-        free(components);
+    BDSKDESTROY(originalVersionString);
+    BDSKDESTROY(cleanVersionString);
+    if (components) {
+        free(components); components = NULL;
+    }
     [super dealloc];
 }
 

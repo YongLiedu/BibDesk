@@ -101,7 +101,7 @@
 - (void)dealloc {
 	[[group undoManager] removeAllActionsWithTarget:self];
     [conditions makeObjectsPerformSelector:@selector(setGroup:) withObject:nil]; // this stops the date cache timer
-	[conditions release];
+	BDSKDESTROY(conditions);
 	[super dealloc];
 }
 

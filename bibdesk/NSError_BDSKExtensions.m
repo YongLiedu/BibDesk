@@ -71,7 +71,7 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
 
 - (void)dealloc
 {
-    [mutableUserInfo release];
+    BDSKDESTROY(mutableUserInfo);
     [super dealloc];
 }
 

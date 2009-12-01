@@ -92,11 +92,11 @@
 - (void)dealloc {
     [downloads makeObjectsPerformSelector:@selector(cancel)];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [group release];
-    [undoManager release];
-    [downloads release];
-    [fieldEditor release];
-    [newWindowHandler release];
+    BDSKDESTROY(group);
+    BDSKDESTROY(undoManager);
+    BDSKDESTROY(downloads);
+    BDSKDESTROY(fieldEditor);
+    BDSKDESTROY(newWindowHandler);
     [super dealloc];
 }
 
@@ -688,7 +688,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 }
 
 - (void)dealloc {
-    [webView release];
+    BDSKDESTROY(webView);
     [super dealloc];
 }
 

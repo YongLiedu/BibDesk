@@ -312,11 +312,11 @@ static NSSet *alwaysDisabledFields = nil;
 }
 
 - (void)dealloc{
-    [globalMacroFiles release];
-    [customFieldsArray release];
-    [customFieldsSet release];
-    [macroWC release];
-	[fieldTypeMenu release];
+    BDSKDESTROY(globalMacroFiles);
+    BDSKDESTROY(customFieldsArray);
+    BDSKDESTROY(customFieldsSet);
+    BDSKDESTROY(macroWC);
+	BDSKDESTROY(fieldTypeMenu);
     [super dealloc];
 }
 

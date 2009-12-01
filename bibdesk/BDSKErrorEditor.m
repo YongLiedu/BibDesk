@@ -86,9 +86,9 @@ static char BDSKErrorEditorObservationContext;
 - (void)dealloc;
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [fileName release];
-    [displayName release];
-    [data release];
+    BDSKDESTROY(fileName);
+    BDSKDESTROY(displayName);
+    BDSKDESTROY(data);
     [super dealloc];
 }
 

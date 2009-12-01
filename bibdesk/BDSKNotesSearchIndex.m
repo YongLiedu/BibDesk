@@ -80,10 +80,10 @@
 
 - (void)dealloc
 {
-    if (index) CFRelease(index);
-    [queue release];
-	[queueLock release];
-    [setupLock release];
+    BDSKCFDESTROY(index);
+    BDSKDESTROY(queue);
+	BDSKDESTROY(queueLock);
+    BDSKDESTROY(setupLock);
     [super dealloc];
 }
 

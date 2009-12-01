@@ -108,8 +108,8 @@ static NSArray *noCountCellValueKeys = nil;
 }
 
 - (void)dealloc {
-    [name release];
-    [uniqueID release];
+    BDSKDESTROY(name);
+    BDSKDESTROY(uniqueID);
     [super dealloc];
 }
 

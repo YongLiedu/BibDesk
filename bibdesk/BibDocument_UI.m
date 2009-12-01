@@ -1111,8 +1111,8 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 }
 
 - (void)dealloc {
-    [URL release];
-    [string release];
+    BDSKDESTROY(URL);
+    BDSKDESTROY(string);
     [super dealloc];
 }
 

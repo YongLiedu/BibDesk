@@ -59,7 +59,7 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [parentCell release];
+    BDSKDESTROY(parentCell);
     [super dealloc];
 }
 

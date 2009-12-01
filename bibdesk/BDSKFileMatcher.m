@@ -107,10 +107,9 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
 
 - (void)dealloc
 {
-    [matches release];
-    [indexingLock release];
-    if (searchIndex)
-        CFRelease(searchIndex);
+    BDSKDESTROY(matches);
+    BDSKDESTROY(indexingLock);
+    BDSKCFDESTROY(searchIndex);
     [super dealloc];
 }
 
@@ -700,8 +699,8 @@ static NSColor *fillColor = nil;
 
 - (void)dealloc
 {
-    [topColor release];
-    [bottomColor release];
+    BDSKDESTROY(topColor);
+    BDSKDESTROY(bottomColor);
     [super dealloc];
 }
 

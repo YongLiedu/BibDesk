@@ -85,8 +85,8 @@
 - (void)dealloc {
     [children makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
     [children makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
-    [children release];
-    [sortDescriptors release];
+    BDSKDESTROY(children);
+    BDSKDESTROY(sortDescriptors);
     [super dealloc];
 }
 

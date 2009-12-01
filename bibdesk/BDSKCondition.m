@@ -155,11 +155,12 @@ static char BDSKConditionObservationContext;
 - (void)dealloc {
 	//NSLog(@"dealloc condition");
     [self endObserving];
-    [key release], key  = nil;
-    [stringValue release], stringValue  = nil;
-    [cachedStartDate release], cachedStartDate  = nil;
-    [cachedEndDate release], cachedEndDate  = nil;
-    [cacheTimer invalidate], cacheTimer  = nil;
+    BDSKDESTROY(key);
+    BDSKDESTROY(stringValue);
+    BDSKDESTROY(cachedStartDate);
+    BDSKDESTROY(cachedEndDate);
+    [cacheTimer invalidate];
+    cacheTimer  = nil;
     [super dealloc];
 }
 

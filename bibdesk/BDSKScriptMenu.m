@@ -78,7 +78,7 @@ static NSInteger recursionDepth = 0;
 
 - (void)dealloc
 {
-    [cachedDate release];
+    BDSKDESTROY(cachedDate);
     [super dealloc];
 }
 

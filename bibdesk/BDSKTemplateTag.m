@@ -55,7 +55,7 @@
 }
 
 - (void)dealloc {
-    [keyPath release];
+    BDSKDESTROY(keyPath);
     [super dealloc];
 }
 
@@ -79,7 +79,7 @@
 }
 
 - (void)dealloc {
-    [attributes release];
+    BDSKDESTROY(attributes);
     [super dealloc];
 }
 
@@ -104,10 +104,10 @@
 }
 
 - (void)dealloc {
-    [itemTemplateString release];
-    [separatorTemplateString release];
-    [itemTemplate release];
-    [separatorTemplate release];
+    BDSKDESTROY(itemTemplateString);
+    BDSKDESTROY(separatorTemplateString);
+    BDSKDESTROY(itemTemplate);
+    BDSKDESTROY(separatorTemplate);
     [super dealloc];
 }
 
@@ -142,10 +142,10 @@
 }
 
 - (void)dealloc {
-    [itemTemplateAttributedString release];
-    [separatorTemplateAttributedString release];
-    [itemTemplate release];
-    [separatorTemplate release];
+    BDSKDESTROY(itemTemplateAttributedString);
+    BDSKDESTROY(separatorTemplateAttributedString);
+    BDSKDESTROY(itemTemplate);
+    BDSKDESTROY(separatorTemplate);
     [super dealloc];
 }
 
@@ -179,8 +179,8 @@
 }
 
 - (void)dealloc {
-    [subtemplates release];
-    [matchStrings release];
+    BDSKDESTROY(subtemplates);
+    BDSKDESTROY(matchStrings);
     [super dealloc];
 }
 
@@ -236,7 +236,7 @@
 }
 
 - (void)dealloc {
-    [text release];
+    BDSKDESTROY(text);
     [super dealloc];
 }
 
@@ -271,7 +271,7 @@
 }
 
 - (void)dealloc {
-    [attributedText release];
+    BDSKDESTROY(attributedText);
     [super dealloc];
 }
 

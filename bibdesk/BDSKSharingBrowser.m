@@ -212,20 +212,16 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 {
     if([self isBrowsing]){
         [sharingClients makeObjectsPerformSelector:@selector(terminate)];
-        [sharingClients release];
-        sharingClients = nil;
+        BDSKDESTROY(sharingClients);
         
-        [browser release];
-        browser = nil;
+        BDSKDESTROY(browser);
         
         [unresolvedNetServices makeObjectsPerformSelector:@selector(setDelegate:) withObject:nil];
-        [unresolvedNetServices release];
-        unresolvedNetServices = nil;
+        BDSKDESTROY(unresolvedNetServices);
         
         if ([undecidedNetServices count])
             [[self class] cancelPreviousPerformRequestsWithTarget:self];
-        [undecidedNetServices release];
-        undecidedNetServices = nil;
+        BDSKDESTROY(undecidedNetServices);
         
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
         [nc postNotificationName:BDSKSharingClientsChangedNotification object:self];

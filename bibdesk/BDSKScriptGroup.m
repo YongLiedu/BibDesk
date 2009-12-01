@@ -156,11 +156,11 @@
     [[NSFileManager defaultManager] deleteObjectAtFileURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self stopRetrieving];
-    [scriptPath release];
-    [scriptArguments release];
-    [argsArray release];
-    [workingDirPath release];
-    [stdoutData release];
+    BDSKDESTROY(scriptPath);
+    BDSKDESTROY(scriptArguments);
+    BDSKDESTROY(argsArray);
+    BDSKDESTROY(workingDirPath);
+    BDSKDESTROY(stdoutData);
     [super dealloc];
 }
 
@@ -313,8 +313,7 @@
 - (void)stopRetrieving{
     if([currentTask isRunning])
         [currentTask terminate];
-    [currentTask release];
-    currentTask = nil;
+    BDSKDESTROY(currentTask);
 }
 
 - (void)taskFinished:(NSNotification *)aNote

@@ -207,12 +207,9 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 - (void)dealloc
 {
     [server terminate];
-    [server release];
-    server = nil;
-    [type release];
-    type = nil;
-    [searchTerm release];
-    searchTerm = nil;
+    BDSKDESTROY(server);
+    BDSKDESTROY(type);
+    BDSKDESTROY(searchTerm);
     [super dealloc];
 }
 

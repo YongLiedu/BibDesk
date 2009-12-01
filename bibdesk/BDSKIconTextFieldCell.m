@@ -155,7 +155,7 @@
 }
 
 - (void)dealloc {
-    [icon release];
+    BDSKDESTROY(icon);
     [super dealloc];
 }
 

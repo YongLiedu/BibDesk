@@ -464,10 +464,10 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (void)dealloc
 {
-    NSZoneFree([self zone], (void *)fileRef);
-    BDSKDisposeAliasHandle(alias);
-    [relativePath release];
-    [lastURL release];
+    BDSKZONEDESTROY(fileRef);
+    BDSKDisposeAliasHandle(alias); alias = NULL;
+    BDSKDESTROY(relativePath);
+    BDSKDESTROY(lastURL);
     [super dealloc];
 }
 
@@ -763,7 +763,7 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (void)dealloc
 {
-    [URL release];
+    BDSKDESTROY(URL);
     [super dealloc];
 }
 

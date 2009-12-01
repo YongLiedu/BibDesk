@@ -89,10 +89,10 @@
 }
 
 - (void)dealloc {
-    [pubFields release];
-    [pubAuthors release];
-    [owner release];
-    [linkedFile release];
+    BDSKDESTROY(pubFields);
+    BDSKDESTROY(pubAuthors);
+    BDSKDESTROY(owner);
+    BDSKDESTROY(linkedFile);
     [super dealloc];
 }
 

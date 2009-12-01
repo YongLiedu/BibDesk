@@ -70,6 +70,10 @@
 
 #endif
 
+#define BDSKDESTROY(variable) ({ [variable release]; variable = nil; })
+#define BDSKCFDESTROY(variable) ({ if (variable) CFRelease(variable); variable = NULL; })
+#define BDSKZONEDESTROY(variable) ({ if (variable) NSZoneFree(NSZoneFromPointer((void *)variable), (void *)variable); variable = NULL; })
+
 // see e.g. http://www.mulle-kybernetik.com/artikel/Optimization/opti-7.html, perhaps this could be improved on 64-bits
 #define BDSKHash(self) (((NSUInteger) self >> 4) | ((NSUInteger) self << (32 - 4)))
 

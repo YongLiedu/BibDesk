@@ -104,11 +104,11 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
 
 - (void)dealloc
 {
-    [filePath release];
-    [serverInfo release];
-    [webEnv release];
-    [queryKey release];
-    [errorMessage release];
+    BDSKDESTROY(filePath);
+    BDSKDESTROY(serverInfo);
+    BDSKDESTROY(webEnv);
+    BDSKDESTROY(queryKey);
+    BDSKDESTROY(errorMessage);
     [super dealloc];
 }
 
@@ -122,13 +122,11 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
 - (void)stop;
 {
     [URLDownload cancel];
-    [URLDownload release];
-    URLDownload = nil;
+    BDSKDESTROY(URLDownload);
     downloadState = BDSKIdleState;
     if (filePath) {
         [[NSFileManager defaultManager] removeItemAtPath:filePath error:NULL];
-        [filePath release];
-        filePath = nil;
+        BDSKDESTROY(filePath);
     }
 }
 
@@ -287,13 +285,11 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     NSError *presentableError;
     
     if (URLDownload) {
-        [URLDownload release];
-        URLDownload = nil;
+        BDSKDESTROY(URLDownload);
     }
     
     NSURL *downloadURL = filePath ? [NSURL fileURLWithPath:filePath] : nil;
-    [filePath release];
-    filePath = nil;
+    BDSKDESTROY(filePath);
     
     switch (downloadState) {
         case BDSKEsearchState:
@@ -365,14 +361,12 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     [self setErrorMessage:[error localizedDescription]];
     
     if (URLDownload) {
-        [URLDownload release];
-        URLDownload = nil;
+        BDSKDESTROY(URLDownload);
     }
     
     if (filePath) {
         [[NSFileManager defaultManager] removeItemAtPath:filePath error:NULL];
-        [filePath release];
-        filePath = nil;
+        BDSKDESTROY(filePath);
     }
     
     // redraw 

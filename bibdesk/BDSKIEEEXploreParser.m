@@ -344,11 +344,11 @@ static NSMutableArray *_finishedDownloads = nil;
 
 - (void)dealloc
 {
-    [_connection release];
-    [_request release];
-    [_error release];
-    [_result release];
-    [_pdfLinkURL release];
+    BDSKDESTROY(_connection);
+    BDSKDESTROY(_request);
+    BDSKDESTROY(_error);
+    BDSKDESTROY(_result);
+    BDSKDESTROY(_pdfLinkURL);
     [super dealloc];
 }
 

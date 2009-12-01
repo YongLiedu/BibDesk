@@ -73,9 +73,9 @@
 }
 
 - (void)dealloc {
-	[textCell release];
-	[iconCell release];
-	[icons release];
+	BDSKDESTROY(textCell);
+	BDSKDESTROY(iconCell);
+	BDSKDESTROY(icons);
 	[super dealloc];
 }
 

@@ -54,7 +54,7 @@
 }
 
 - (void)dealloc{
-    [customStringArray release];
+    BDSKDESTROY(customStringArray);
     [super dealloc];
 }
 

@@ -68,7 +68,7 @@
 }
 
 - (void)dealloc {
-	[edgeColors release];
+	BDSKDESTROY(edgeColors);
 	[super dealloc];
 }
 

@@ -102,7 +102,7 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 }
 
 - (void)dealloc {
-    [countString release];
+    BDSKDESTROY(countString);
 	[super dealloc];
 }
 

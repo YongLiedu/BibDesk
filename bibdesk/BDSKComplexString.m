@@ -173,8 +173,8 @@ NSString *__BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolv
 }
 
 - (void)dealloc{
-	[nodes release];
-	[expandedString release];
+	BDSKDESTROY(nodes);
+	BDSKDESTROY(expandedString);
     [super dealloc];
 }
 

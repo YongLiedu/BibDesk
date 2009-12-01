@@ -50,8 +50,8 @@
 }
 
 - (void)dealloc {
-    CFRelease(dictionary);
-    CFRelease(inverseDictionary);
+    BDSKCFDESTROY(dictionary);
+    BDSKCFDESTROY(inverseDictionary);
     [super dealloc];
 }
 

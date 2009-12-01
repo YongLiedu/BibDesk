@@ -70,7 +70,7 @@
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-	[delegatedDraggedTypes release];
+	BDSKDESTROY(delegatedDraggedTypes);
 	[super dealloc];
 }
 

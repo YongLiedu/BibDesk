@@ -54,8 +54,8 @@
 }
 
 - (void)dealloc {
-    [view release];
-    [record release];
+    BDSKDESTROY(view);
+    BDSKDESTROY(record);
     [super dealloc];
 }
 

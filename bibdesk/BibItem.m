@@ -387,21 +387,21 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 - (void)dealloc{
-    [pubFields release];
-    [people release];
-	[groups release];
+    BDSKDESTROY(pubFields);
+    BDSKDESTROY(people);
+	BDSKDESTROY(groups);
 
-    [pubType release];
-    [fileType release];
-    [citeKey release];
-    [pubDate release];
-    [dateAdded release];
-    [dateModified release];
-    [fileOrder release];
-    [identifierURL release];
-    [macroResolver release];
-    [files release];
-    [filesToBeFiled release];
+    BDSKDESTROY(pubType);
+    BDSKDESTROY(fileType);
+    BDSKDESTROY(citeKey);
+    BDSKDESTROY(pubDate);
+    BDSKDESTROY(dateAdded);
+    BDSKDESTROY(dateModified);
+    BDSKDESTROY(fileOrder);
+    BDSKDESTROY(identifierURL);
+    BDSKDESTROY(macroResolver);
+    BDSKDESTROY(files);
+    BDSKDESTROY(filesToBeFiled);
     [super dealloc];
 }
 
@@ -3423,7 +3423,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 - (void)dealloc{
-    [usedFields release];
+    BDSKDESTROY(usedFields);
     [super dealloc];
 }
 
@@ -3489,8 +3489,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 - (void)dealloc{
-    [fieldNames release];
-    [fieldCollection release];
+    BDSKDESTROY(fieldNames);
+    BDSKDESTROY(fieldCollection);
     [super dealloc];
 }
 

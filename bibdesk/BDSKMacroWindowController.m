@@ -98,10 +98,10 @@
 
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [macros release];
-    [tableCellFormatter release];
-	[complexStringEditor release];
-	[macroResolver release];
+    BDSKDESTROY(macros);
+    BDSKDESTROY(tableCellFormatter);
+	BDSKDESTROY(complexStringEditor);
+	BDSKDESTROY(macroResolver);
     [super dealloc];
 }
 
@@ -730,7 +730,7 @@
 }
 
 - (void)dealloc{
-    [typeSelectHelper release];
+    BDSKDESTROY(typeSelectHelper);
     [super dealloc];
 }
 

@@ -91,9 +91,9 @@
 }
 
 - (void)dealloc{
-    [publications release];
-    [itemsForCiteKeys release];
-    [itemsForIdentifierURLs release];
+    BDSKDESTROY(publications);
+    BDSKDESTROY(itemsForCiteKeys);
+    BDSKDESTROY(itemsForIdentifierURLs);
     [super dealloc];
 }
 

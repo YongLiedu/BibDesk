@@ -96,7 +96,7 @@ struct BDSKDOServerFlags {
 
 - (void)dealloc
 {
-    NSZoneFree(NSDefaultMallocZone(), serverFlags);
+    BDSKZONEDESTROY(serverFlags);
     [super dealloc];
 }
 
@@ -234,11 +234,8 @@ struct BDSKDOServerFlags {
         [[localThreadConnection receivePort] invalidate];
         [[localThreadConnection sendPort] invalidate];
         [localThreadConnection invalidate];
-        [localThreadConnection release];
-        localThreadConnection = nil;
-        
-        [serverOnMainThread release];
-        serverOnMainThread = nil;  
+        BDSKDESTROY(localThreadConnection);
+        BDSKDESTROY(serverOnMainThread);  
         serverThread = nil;
         
         [pool release];
@@ -279,11 +276,8 @@ struct BDSKDOServerFlags {
     // clean up the connection in the main thread; don't invalidate the ports, since they're still in use
     [mainThreadConnection setRootObject:nil];
     [mainThreadConnection invalidate];
-    [mainThreadConnection release];
-    mainThreadConnection = nil;
-    
-    [serverOnServerThread release];
-    serverOnServerThread = nil;    
+    BDSKDESTROY(mainThreadConnection);
+    BDSKDESTROY(serverOnServerThread);    
 }
 
 #pragma mark Thread Safe

@@ -231,10 +231,10 @@ static BOOL isSearchFileAtPath(NSString *path)
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [group release];
-    [undoManager release];
-    [serverInfo release];
-    [serverView release];
+    BDSKDESTROY(group);
+    BDSKDESTROY(undoManager);
+    BDSKDESTROY(serverInfo);
+    BDSKDESTROY(serverView);
     [super dealloc];
 }
 

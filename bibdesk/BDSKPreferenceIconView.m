@@ -84,8 +84,8 @@
 }
 
 - (void)dealloc {
-    [captionCell release];
-    [captionTitles release];
+    BDSKDESTROY(captionCell);
+    BDSKDESTROY(captionTitles);
     [super dealloc];
 }
 

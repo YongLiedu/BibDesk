@@ -89,12 +89,12 @@
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     // should already have been taken care of in -stopSearching
-    [search release];
-    [searchIndex release];
+    BDSKDESTROY(search);
+    BDSKDESTROY(searchIndex);
     [[tableView enclosingScrollView] release];
-    [results release];
-    [filteredResults release];
-    [filterURLs release];
+    BDSKDESTROY(results);
+    BDSKDESTROY(filteredResults);
+    BDSKDESTROY(filterURLs);
     [super dealloc];
 }
 
@@ -439,8 +439,7 @@
     
     // stops the search index runloop, let the index know the document's location so it can cache the index to disk
     [searchIndex cancelForDocumentURL:[[self document] fileURL]];
-    [searchIndex release];
-    searchIndex = nil;
+    BDSKDESTROY(searchIndex);
 }
 
 - (void)saveSortDescriptors

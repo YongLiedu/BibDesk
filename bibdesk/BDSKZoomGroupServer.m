@@ -96,11 +96,11 @@
 
 - (void)dealloc
 {
-    [infoLock release];
+    BDSKDESTROY(infoLock);
     group = nil;
-    [connection release], connection = nil;
-    [serverInfo release], serverInfo = nil;
-    [errorMessage release], errorMessage = nil;
+    BDSKDESTROY(connection);
+    BDSKDESTROY(serverInfo);
+    BDSKDESTROY(errorMessage);
     [super dealloc];
 }
 
@@ -209,7 +209,7 @@
     
     BDSKASSERT([info host] != nil);
     
-    [connection release];
+    BDSKDESTROY(connection);
     if ([info host] != nil) {
         connection = [[ZOOMConnection alloc] initWithHost:[info host] port:[[info port] integerValue] database:[info database]];
         [connection setPassword:[info password]];
@@ -228,8 +228,6 @@
         }
         
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.needsReset);
-    }else {
-        connection = nil;
     }
     
     [self setNumberOfAvailableResults:0];
@@ -238,8 +236,7 @@
 
 - (oneway void)terminateConnection;
 {
-    [connection release];
-    connection = nil;
+    BDSKDESTROY(connection);
     OSAtomicCompareAndSwap32Barrier(0, 1, &flags.needsReset);
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
 } 

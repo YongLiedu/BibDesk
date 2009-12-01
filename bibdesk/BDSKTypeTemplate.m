@@ -72,10 +72,10 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
 }
 
 - (void)dealloc {
-    [pubType release];
-    [requiredTokens release];
-    [optionalTokens release];
-    [itemTemplate release];
+    BDSKDESTROY(pubType);
+    BDSKDESTROY(requiredTokens);
+    BDSKDESTROY(optionalTokens);
+    BDSKDESTROY(itemTemplate);
     [super dealloc];
 }
 

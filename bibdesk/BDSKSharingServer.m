@@ -329,15 +329,13 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     if(status != BDSKSharingStatusOff){
         [netService setDelegate:nil];
         [netService stop];
-        [netService release];
-        netService = nil;
+        BDSKDESTROY(netService);
         
         close(socketDescriptor);
         socketDescriptor = -1;
         
         [server stopDOServer];
-        [server release];
-        server = nil;
+        BDSKDESTROY(server);
         
         // unregister for notifications
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
@@ -432,8 +430,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
             [aServer stopDOServer];
         
         [server stopDOServer];
-        [server release];
-        server = nil;
+        BDSKDESTROY(server);
         
         [self setSharingName:nil];
         
@@ -548,11 +545,9 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 - (void)dealloc
 {
     sharingServer = nil;
-    [sharingName release];
-    [remoteClients release];
-    remoteClients = nil;
-    [rwLock release];
-    rwLock = nil;
+    BDSKDESTROY(sharingName);
+    BDSKDESTROY(remoteClients);
+    BDSKDESTROY(rwLock);
     [super dealloc];
 }
 
@@ -654,8 +649,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [connection setDelegate:nil];
     [connection setRootObject:nil];
     [connection invalidate];
-    [connection release];
-    connection = nil;
+    BDSKDESTROY(connection);
 }
 
 #pragma mark | NSConnection delegate

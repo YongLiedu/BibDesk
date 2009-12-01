@@ -88,11 +88,11 @@ static NSOperationQueue *searchQueue = nil;
 // owner should have already sent -terminate; sending it from -dealloc causes resurrection
 - (void)dealloc
 {
-    [currentSearchString release];
-    [originalScores release];
-    [callback release];
-    [previouslySelectedPublications release];
-    [searchLock release];
+    BDSKDESTROY(currentSearchString);
+    BDSKDESTROY(originalScores);
+    BDSKDESTROY(callback);
+    BDSKDESTROY(previouslySelectedPublications);
+    BDSKDESTROY(searchLock);
     [super dealloc];
 }
 
@@ -119,9 +119,7 @@ static NSOperationQueue *searchQueue = nil;
 {
     [self cancelSearch];
     [searchLock lock];
-    NSInvocation *cb = callback;
-    callback = nil;
-    [cb release];
+    BDSKDESTROY(callback);
     [searchLock unlock];
 }
 
@@ -278,9 +276,9 @@ static NSOperationQueue *searchQueue = nil;
 
 - (void)dealloc
 {
-    CFRelease(index);
-    [search release];
-    [searchString release];
+    BDSKCFDESTROY(index);
+    BDSKDESTROY(search);
+    BDSKDESTROY(searchString);
     [super dealloc];
 }
 

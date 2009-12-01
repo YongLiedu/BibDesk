@@ -58,7 +58,7 @@
 }
 
 - (void)dealloc {
-    [name release];
+    BDSKDESTROY(name);
     [super dealloc];
 }
 

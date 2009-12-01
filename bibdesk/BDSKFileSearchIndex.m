@@ -132,16 +132,15 @@
 - (void)dealloc
 {
     [rwLock lockForWriting];
-	[identifierURLs release];
-    identifierURLs = nil;
+	BDSKDESTROY(identifierURLs);
     [rwLock unlock];
-    [rwLock release];
-    [notificationQueue release];
-    [noteLock release];
-    [signatures release];
-    if(index) CFRelease(index);
-    if(indexData) CFRelease(indexData);
-    [setupLock release];
+    BDSKDESTROY(rwLock);
+    BDSKDESTROY(notificationQueue);
+    BDSKDESTROY(noteLock);
+    BDSKDESTROY(signatures);
+    BDSKCFDESTROY(index);
+    BDSKCFDESTROY(indexData);
+    BDSKDESTROY(setupLock);
     [super dealloc];
 }
 
@@ -720,17 +719,14 @@ static void addItemFunction(const void *value, void *context) {
         NSLog(@"Exception %@ raised in search index; exiting thread run loop.", e);
         
         // clean these up to make sure we have no chance of saving it to disk
-        if (index) CFRelease(index);
-        index = NULL;
-        if (indexData) CFRelease(indexData);
-        indexData = NULL;
+        BDSKCFDESTROY(index);
+        BDSKCFDESTROY(indexData);
         @throw;
     }
     @finally{
         // allow the top-level pool to catch this autorelease pool
         
-        [notificationThread release];
-        notificationThread = nil;
+        BDSKDESTROY(notificationThread);
         [setupLock unlockWithCondition:INDEX_THREAD_DONE];
         
         [pool release];
