@@ -84,6 +84,15 @@
     [enableBrowsingButton setState:[sud boolForKey:BDSKShouldLookForSharedFilesKey] ? NSOnState : NSOffState];
     [usePasswordButton setState:[sud boolForKey:BDSKSharingRequiresPasswordKey] ? NSOnState : NSOffState];
     
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_5) {
+        NSRect imageRect, textRect = [statusField frame];
+        NSDivideRect([statusField frame], &imageRect, &textRect, 16.0, NSMinXEdge);
+        [statusField setFrame:textRect];
+        imageRect.size.height = 16.0;
+        statusImageView = [[[NSImageView alloc] initWithFrame:imageRect] autorelease];
+        [[statusField superview] addSubview:statusImageView];
+    }
+    
     [self updateSettingsUI];
     [self updateNameUI];
     [self updateUI];
@@ -146,20 +155,27 @@
     BDSKSharingServer *server = [BDSKSharingServer defaultServer];
     NSString *statusMessage = nil;
     NSString *sharingName = nil;
-    if([sud boolForKey:BDSKShouldShareFilesKey]){
+    NSString *imageName = nil;
+    if ([sud boolForKey:BDSKShouldShareFilesKey]) {
         NSUInteger number = [server numberOfConnections];
-        if(number == 1)
-            statusMessage = NSLocalizedString(@"On, 1 user connected", @"Bonjour sharing is on status message, single connection");
-        else if([server status] >= BDSKSharingStatusPublishing)
-            statusMessage = [NSString stringWithFormat:NSLocalizedString(@"On, %lu users connected", @"Bonjour sharing is on status message, zero or multiple connections"), (unsigned long)number];
-        else
+        if ([server status] < BDSKSharingStatusPublishing) {
             statusMessage = [NSString stringWithFormat:NSLocalizedString(@"Standby", @"Bonjour sharing is standby status message"), number];
+            imageName = @"NSStatusPartiallyAvailable";
+        } else {
+            if (number == 1)
+                statusMessage = NSLocalizedString(@"On, 1 user connected", @"Bonjour sharing is on status message, single connection");
+            else
+                statusMessage = [NSString stringWithFormat:NSLocalizedString(@"On, %lu users connected", @"Bonjour sharing is on status message, zero or multiple connections"), (unsigned long)number];
+            imageName = @"NSStatusAvailable";
+        }
         if ([server status] >= BDSKSharingStatusPublishing)
             sharingName = [server sharingName];
-    }else{
+    } else {
         statusMessage = NSLocalizedString(@"Off", @"Bonjour sharing is off status message");
+        imageName = @"NSStatusUnavailable";
     }
     [statusField setStringValue:statusMessage];
+    [statusImageView setImage:[NSImage imageNamed:imageName]];
     [usedNameField setStringValue:sharingName ?: @""];
 }
 
