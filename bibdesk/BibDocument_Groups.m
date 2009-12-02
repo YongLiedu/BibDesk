@@ -1187,7 +1187,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     // switch to the web group
     if ([self hasWebGroupSelected] == NO) {
         // make sure the controller and its nib are loaded
-        [[self webGroupViewController] window];
+        [[self webGroupViewController] view];
         if ([self selectGroup:[groups webGroup]] == NO) {
             NSBeep();
             return;

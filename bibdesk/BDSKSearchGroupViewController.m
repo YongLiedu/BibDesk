@@ -44,7 +44,9 @@
 
 @implementation BDSKSearchGroupViewController
 
-- (NSString *)windowNibName { return @"BDSKSearchGroupView"; }
+- (id)init {
+    return [super initWithNibName:@"BDSKSearchGroupView" bundle:nil];
+}
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -55,13 +57,14 @@
 - (void)awakeFromNib {
     [collapsibleView setMinSize:[collapsibleView frame].size];
     [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
-    [view setEdges:BDSKMinYEdgeMask];
-    [view setColor:[view colorForEdge:NSMaxYEdge] forEdge:NSMinYEdge];
+    BDSKEdgeView *edgeView = (BDSKEdgeView *)[self view];
+    [edgeView setEdges:BDSKMinYEdgeMask];
+    [edgeView setColor:[edgeView colorForEdge:NSMaxYEdge] forEdge:NSMinYEdge];
 }
 
 - (void)updateSearchView {
     BDSKASSERT(group);
-    [self window];
+    [self view];
     NSString *name = [[group serverInfo] name];
     [searchField setStringValue:[group searchTerm] ?: @""];
     [searchField setRecentSearches:[group history]];
@@ -70,11 +73,6 @@
     [searchField setFormatter:[group searchStringFormatter]];
     [searchField selectText:self];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSearchGroupUpdatedNotification:) name:BDSKExternalGroupUpdatedNotification object:group];
-}
-
-- (NSView *)view {
-    [self window];
-    return view;
 }
 
 - (BDSKSearchGroup *)group {
@@ -111,7 +109,7 @@
 
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)aString errorDescription:(NSString *)error {
     NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid search string syntax", @"") defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:error];
-    [alert beginSheetModalForWindow:[view window] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
+    [alert beginSheetModalForWindow:[[self view] window] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
     return YES;
 }
 

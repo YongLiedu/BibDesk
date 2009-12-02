@@ -112,7 +112,7 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingPasswordChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingNameChangedNotification object:self];
     // reset UI, but only if we loaded the nib
-    if ([self isWindowLoaded]) {
+    if ([self isViewLoaded]) {
         [passwordField setStringValue:@""];
         [self updateUI];
     }

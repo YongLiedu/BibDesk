@@ -1519,7 +1519,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             // switch to the web group
             if ([self hasWebGroupSelected] == NO) {
                 // make sure the controller and its nib are loaded
-                [[self webGroupViewController] window];
+                [[self webGroupViewController] view];
                 [self selectGroup:[groups webGroup]];
             }
             [[self webGroupViewController] setURLString:[url absoluteString]];

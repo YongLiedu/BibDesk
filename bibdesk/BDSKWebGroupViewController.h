@@ -41,8 +41,7 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 
 @class BDSKCollapsibleView, BDSKEdgeView, BDSKWebGroup, WebView, WebFrame, BibDocument, BDSKDragTextField, BDSKFieldEditor, BDSKNewWebWindowHandler;
 
-@interface BDSKWebGroupViewController : NSWindowController <NSMenuDelegate> {
-    IBOutlet BDSKEdgeView *view;
+@interface BDSKWebGroupViewController : NSViewController <NSMenuDelegate> {
     IBOutlet BDSKCollapsibleView *collapsibleView;
     IBOutlet BDSKDragTextField *urlField;
     IBOutlet WebView *webView;
@@ -62,7 +61,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 
 - (id)initWithGroup:(BDSKWebGroup *)aGroup document:(BibDocument *)aDocument;
 
-- (NSView *)view;
 - (NSView *)webView;
 
 - (BDSKWebGroup *)group;

@@ -69,7 +69,7 @@
 
 - (void)defaultsDidRevert {
     // reset UI, but only if we loaded the nib
-    if ([self isWindowLoaded]) {
+    if ([self isViewLoaded]) {
         [displayGroupCountButton setState:[sud boolForKey:BDSKHideGroupCountKey] ? NSOffState : NSOnState];
         [self updatePreviewDisplayUI];
         [self updateAuthorNameDisplayUI];

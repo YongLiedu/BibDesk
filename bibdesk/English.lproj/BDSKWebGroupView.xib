@@ -48,7 +48,7 @@
 				<string key="NSClassName">NSApplication</string>
 			</object>
 			<object class="NSCustomView" id="13637997">
-				<reference key="NSNextResponder"/>
+				<nil key="NSNextResponder"/>
 				<int key="NSvFlags">266</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -67,7 +67,6 @@
 										<int key="NSvFlags">268</int>
 										<string key="NSFrame">{{75, 9}, {26, 25}}</string>
 										<reference key="NSSuperview" ref="735606656"/>
-										<reference key="NSWindow"/>
 										<bool key="NSEnabled">YES</bool>
 										<object class="NSButtonCell" key="NSCell" id="450647266">
 											<int key="NSCellFlags">604110336</int>
@@ -96,7 +95,6 @@
 										<int key="NSvFlags">266</int>
 										<string key="NSFrame">{{109, 11}, {55, 22}}</string>
 										<reference key="NSSuperview" ref="735606656"/>
-										<reference key="NSWindow"/>
 										<bool key="NSEnabled">YES</bool>
 										<object class="NSTextFieldCell" key="NSCell" id="100059808">
 											<int key="NSCellFlags">-1804468671</int>
@@ -135,7 +133,6 @@
 										<int key="NSvFlags">268</int>
 										<string key="NSFrame">{{10, 9}, {57, 25}}</string>
 										<reference key="NSSuperview" ref="735606656"/>
-										<reference key="NSWindow"/>
 										<bool key="NSEnabled">YES</bool>
 										<object class="NSSegmentedCell" key="NSCell" id="238264941">
 											<int key="NSCellFlags">67239424</int>
@@ -176,21 +173,17 @@
 								</object>
 								<string key="NSFrameSize">{174, 44}</string>
 								<reference key="NSSuperview" ref="590748185"/>
-								<reference key="NSWindow"/>
 								<string key="NSClassName">BDSKGradientView</string>
 								<string key="NSExtension">NSView</string>
 							</object>
 						</object>
 						<string key="NSFrameSize">{174, 44}</string>
 						<reference key="NSSuperview" ref="13637997"/>
-						<reference key="NSWindow"/>
 						<string key="NSClassName">BDSKCollapsibleView</string>
 						<string key="NSExtension">NSView</string>
 					</object>
 				</object>
 				<string key="NSFrameSize">{174, 44}</string>
-				<reference key="NSSuperview"/>
-				<reference key="NSWindow"/>
 				<string key="NSClassName">BDSKEdgeView</string>
 				<string key="NSExtension">NSView</string>
 			</object>
@@ -627,7 +620,7 @@
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">BDSKWebGroupViewController</string>
-					<string key="superclassName">NSWindowController</string>
+					<string key="superclassName">NSViewController</string>
 					<object class="NSMutableDictionary" key="actions">
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
@@ -657,7 +650,6 @@
 							<string>collapsibleView</string>
 							<string>stopOrReloadButton</string>
 							<string>urlField</string>
-							<string>view</string>
 							<string>webView</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
@@ -666,7 +658,6 @@
 							<string>BDSKCollapsibleView</string>
 							<string>NSButton</string>
 							<string>BDSKDragTextField</string>
-							<string>BDSKEdgeView</string>
 							<string>WebView</string>
 						</object>
 					</object>
@@ -677,7 +668,7 @@
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">BDSKWebGroupViewController</string>
-					<string key="superclassName">NSWindowController</string>
+					<string key="superclassName">NSViewController</string>
 					<object class="NSMutableDictionary" key="outlets">
 						<string key="NS.key.0">webEdgeView</string>
 						<string key="NS.object.0">BDSKEdgeView</string>
@@ -825,51 +816,6 @@
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSView</string>
-					<string key="superclassName">NSResponder</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBUserSource</string>
-						<string key="minorKey"/>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSWindow</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">NSWindow+Scripting.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSWindow</string>
-					<string key="superclassName">NSResponder</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBUserSource</string>
-						<string key="minorKey"/>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSWindowController</string>
-					<object class="NSMutableDictionary" key="actions">
-						<bool key="EncodedWithXMLCoder">YES</bool>
-						<object class="NSArray" key="dict.sortedKeys">
-							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>dismiss:</string>
-							<string>hideWindow:</string>
-							<string>toggleShowingWindow:</string>
-						</object>
-						<object class="NSMutableArray" key="dict.values">
-							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-						</object>
-					</object>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">NSWindowController_BDSKExtensions.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSWindowController</string>
 					<string key="superclassName">NSResponder</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBUserSource</string>
@@ -1504,37 +1450,15 @@
 					<reference key="sourceIdentifier" ref="930642718"/>
 				</object>
 				<object class="IBPartialClassDescription">
-					<string key="className">NSWindow</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBFrameworkSource</string>
-						<string key="minorKey">AppKit.framework/Headers/NSDrawer.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSWindow</string>
+					<string key="className">NSViewController</string>
 					<string key="superclassName">NSResponder</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBFrameworkSource</string>
-						<string key="minorKey">AppKit.framework/Headers/NSWindow.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSWindow</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBFrameworkSource</string>
-						<string key="minorKey">AppKit.framework/Headers/NSWindowScripting.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSWindowController</string>
-					<string key="superclassName">NSResponder</string>
-					<object class="NSMutableDictionary" key="actions">
-						<string key="NS.key.0">showWindow:</string>
-						<string key="NS.object.0">id</string>
+					<object class="NSMutableDictionary" key="outlets">
+						<string key="NS.key.0">view</string>
+						<string key="NS.object.0">NSView</string>
 					</object>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBFrameworkSource</string>
-						<string key="minorKey">AppKit.framework/Headers/NSWindowController.h</string>
+						<string key="minorKey">AppKit.framework/Headers/NSViewController.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">

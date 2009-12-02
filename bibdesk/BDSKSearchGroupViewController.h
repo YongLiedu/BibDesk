@@ -38,18 +38,15 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKCollapsibleView, BDSKEdgeView, BDSKSearchGroup;
+@class BDSKCollapsibleView, BDSKSearchGroup;
 
-@interface BDSKSearchGroupViewController : NSWindowController {
-    IBOutlet BDSKEdgeView *view;
+@interface BDSKSearchGroupViewController : NSViewController {
     IBOutlet BDSKCollapsibleView *collapsibleView;
     IBOutlet NSSearchField *searchField;
     IBOutlet NSButton *searchButton;
     
     BDSKSearchGroup *group;
 }
-
-- (NSView *)view;
 
 - (BDSKSearchGroup *)group;
 - (void)setGroup:(BDSKSearchGroup *)newGroup;

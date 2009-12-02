@@ -67,7 +67,7 @@ static char BDSKBibPrefCiteDefaultsObservationContext;
 
 - (void)defaultsDidRevert {
     // reset UI, but only if we loaded the nib
-    if ([self isWindowLoaded]) {
+    if ([self isViewLoaded]) {
         //[self updateTemplates]; this should be done by KVO
         [self updateDragCopyUI];
         [self updateCiteCommandUI];

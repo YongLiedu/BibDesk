@@ -80,14 +80,12 @@
 }
 
 - (id)initWithGroup:(BDSKWebGroup *)aGroup document:(BibDocument *)aDocument {
-    if (self = [super init]) {
+    if (self = [super initWithNibName:@"BDSKWebGroupView" bundle:nil]) {
         [self setGroup:aGroup];
         document = aDocument;
     }
     return self;
 }
-
-- (NSString *)windowNibName { return @"BDSKWebGroupView"; }
 
 - (void)dealloc {
     [downloads makeObjectsPerformSelector:@selector(cancel)];
@@ -126,8 +124,9 @@
     [collapsibleView setMinSize:[collapsibleView frame].size];
     [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     
-    [view setEdges:BDSKMinYEdgeMask];
-    [view setColor:[view colorForEdge:NSMaxYEdge] forEdge:NSMinYEdge];
+    BDSKEdgeView *edgeView = (BDSKEdgeView *)[self view];
+    [edgeView setEdges:BDSKMinYEdgeMask];
+    [edgeView setColor:[edgeView colorForEdge:NSMaxYEdge] forEdge:NSMinYEdge];
     
     backMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
     [backMenu setDelegate:self];
@@ -170,13 +169,8 @@
                                                object:NSApp];
 }
 
-- (NSView *)view {
-    [self window];
-    return view;
-}
-
 - (NSView *)webView {
-    [self window];
+    [self view];
     return webView;
 }
 
@@ -192,12 +186,12 @@
 }
 
 - (NSString *)URLString {
-    [self window];
+    [self view];
     return [urlField stringValue];
 }
 
 - (void)setURLString:(NSString *)newURLString {
-    [self window];
+    [self view];
     [urlField setStringValue:newURLString];
     [self changeURL:urlField];
 }

@@ -232,7 +232,7 @@ static NSSet *alwaysDisabledFields = nil;
     [globalMacroFiles setArray:[sud stringArrayForKey:BDSKGlobalMacroFilesKey]];
     [self resetDefaultFields];
     // reset UI, but only if we loaded the nib
-    if ([self isWindowLoaded]) {
+    if ([self isViewLoaded]) {
         [self updateUI];
         // we should use the default viewer by default
         [pdfViewerPopup selectItemAtIndex:0];

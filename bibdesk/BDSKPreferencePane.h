@@ -47,10 +47,9 @@ typedef NSInteger BDSKPreferencePaneUnselectReply;
 
 @class BDSKPreferenceController, BDSKPreferenceRecord;
 
-@interface BDSKPreferencePane : NSWindowController {
-    IBOutlet NSView *view;
-    BDSKPreferenceRecord *record;
+@interface BDSKPreferencePane : NSViewController {
     BDSKPreferenceController *preferenceController;
+    BOOL isViewLoaded;
     NSUserDefaults *sud;
     NSUserDefaultsController *sudc;
 }
@@ -58,8 +57,6 @@ typedef NSInteger BDSKPreferencePaneUnselectReply;
 - (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController;
 
 - (BDSKPreferenceController *)preferenceController;
-
-- (NSView *)view;
 
 - (BDSKPreferenceRecord *)record;
 
@@ -71,6 +68,8 @@ typedef NSInteger BDSKPreferencePaneUnselectReply;
 - (NSString *)helpAnchor;
 - (NSURL *)helpURL;
 - (NSDictionary *)initialValues;
+
+- (BOOL)isViewLoaded;
 
 // these are sent to the relevant pane(s), usually the selected pane, and by default do nothing
 

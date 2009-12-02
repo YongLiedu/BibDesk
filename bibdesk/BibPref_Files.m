@@ -66,7 +66,7 @@
 
 - (void)defaultsDidRevert {
     // reset UI, but only if we loaded the nib
-    if ([self isWindowLoaded]) {
+    if ([self isViewLoaded]) {
         [self updateAutoSaveUI];
         [encodingPopUp setEncoding:[sud integerForKey:BDSKDefaultStringEncodingKey]];
         [showErrorsCheckButton setState:[sud boolForKey:BDSKShowWarningsKey] ? NSOnState : NSOffState  ];	

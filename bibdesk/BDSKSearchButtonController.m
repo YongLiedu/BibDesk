@@ -44,9 +44,10 @@
 @implementation BDSKSearchButtonController
 
 - (id)init { 
-    id obj = [self initWithWindowNibName:[self windowNibName]];
-    [obj window];
-    return obj;
+    if (self = [super initWithNibName:@"SearchButtonView" bundle:nil]) {
+        [self view];
+    }
+    return self;
 }
 
 - (void)dealloc {
@@ -55,12 +56,9 @@
     [super dealloc];
 }
 
-- (NSString *)windowNibName { return @"SearchButtonView"; }
-
 - (void)awakeFromNib
 {
-    NSParameterAssert(nil != edgeView);
-    [edgeView setEdges:BDSKMinYEdgeMask];
+    [(BDSKEdgeView *)[self view] setEdges:BDSKMinYEdgeMask];
     
     [gradientView setGradient:[[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.82 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.914 alpha:1.0]] autorelease]];
     [buttonBar setAllowsMultipleSelection:NO];
@@ -90,8 +88,6 @@
 - (NSString *)selectedItemIdentifier { return [buttonBar selectedItemIdentifier]; }
 
 - (void)selectItemWithIdentifier:(NSString *)ident { [buttonBar selectItemWithIdentifier:ident]; }
-
-- (id)view { return edgeView; }
 
 - (void)setDelegate:(id)delegate { [buttonBar setDelegate:delegate]; }
 

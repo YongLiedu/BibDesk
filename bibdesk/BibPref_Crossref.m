@@ -72,7 +72,7 @@ static char BDSKBibPrefCrossrefDefaultsObservationContext;
 
 - (void)defaultsDidRevert {
     // reset UI, but only if we loaded the nib
-    if ([self isWindowLoaded]) {
+    if ([self isViewLoaded]) {
         [typesArray setArray:[sud arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
         
         //[warnOnEditInheritedCheckButton setState:[sud boolForKey:BDSKWarnOnEditInheritedKey] ? NSOnState : NSOffState]; this should be done by KVO

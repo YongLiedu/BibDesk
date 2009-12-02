@@ -41,17 +41,15 @@
 
 @class BDSKEdgeView, BDSKGradientView;
 
-@interface BDSKSearchButtonController : NSWindowController {
+@interface BDSKSearchButtonController : NSViewController {
     IBOutlet AMButtonBar *buttonBar;
     IBOutlet BDSKGradientView *gradientView;
-    IBOutlet BDSKEdgeView *edgeView;
     AMButtonBarItem *fileContentItem;
     AMButtonBarItem *skimNotesItem;
     BOOL hasFileContentItem;
     BOOL hasSkimNotesItem;
 }
 
-- (id)view;
 - (void)setDelegate:(id)obj;
 - (id)delegate;
 - (void)selectItemWithIdentifier:(NSString *)ident;

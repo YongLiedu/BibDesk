@@ -44,70 +44,63 @@
 @implementation BDSKPreferencePane
 
 - (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController {
-    if (self = [super initWithWindowNibName:[aRecord nibName] ?: [self windowNibName]]) {
-        record = [aRecord retain];
+    if (self = [super initWithNibName:[aRecord nibName] ?: [self nibName] bundle:nil]) {
+        [self setRepresentedObject:aRecord];
         preferenceController = aController;
+        isViewLoaded = NO;
         sud = [NSUserDefaults standardUserDefaults];
         sudc = [NSUserDefaultsController sharedUserDefaultsController];
     }
     return self;
 }
 
-- (void)dealloc {
-    BDSKDESTROY(view);
-    BDSKDESTROY(record);
-    [super dealloc];
+- (void)loadView {
+    [super loadView];
+    isViewLoaded = YES;
 }
 
-- (void)loadWindow {
-    [super loadWindow];
-    [view retain];
+- (BOOL)isViewLoaded {
+    return isViewLoaded;
 }
 
 - (BDSKPreferenceController *)preferenceController {
     return preferenceController;
 }
 
-- (NSView *)view {
-    if (view == nil)
-        [self window];
-    return view;
-}
-
 - (BDSKPreferenceRecord *)record {
-    return record;
+    return [self representedObject];
 }
 
 - (NSString *)identifier {
-    return [record identifier];
+    return [[self representedObject] identifier];
 }
 
 - (NSString *)title {
-    return ([record title] ?: [record label]) ?: [record identifier];
+    return ([[self representedObject] title] ?: [[self representedObject] label]) ?: [[self representedObject] identifier];
 }
 
 - (NSString *)label {
-    return ([record label] ?: [record title]) ?: [record identifier];
+    return ([[self representedObject] label] ?: [[self representedObject] title]) ?: [[self representedObject] identifier];
 }
 
 - (NSString *)toolTip {
-    return ([record toolTip] ?: [record title]) ?: [record label];
+    return ([[self representedObject] toolTip] ?: [[self representedObject] title]) ?: [[self representedObject] label];
 }
 
 - (NSImage *)icon {
-    return [record icon];
+    return [[self representedObject] icon];
 }
 
 - (NSString *)helpAnchor {
-    return [record helpAnchor];
+    return [[self representedObject] helpAnchor];
 }
 
 - (NSURL *)helpURL {
-    return [record helpURL];
+    return [[self representedObject] helpURL];
 }
 
 - (NSDictionary *)initialValues {
-    return [record initialValues];
+    return [[self representedObject] initialValues];
 }
 
 - (void)defaultsDidRevert {}

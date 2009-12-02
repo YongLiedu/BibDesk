@@ -100,7 +100,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 
 - (void)defaultsDidRevert {
     // reset UI, but only if we loaded the nib
-    if ([self isWindowLoaded]) {
+    if ([self isViewLoaded]) {
         [self updateUI];
     }
 }
