@@ -64,7 +64,7 @@
     NSSize newSize = [self minimumSize];
     CGFloat oldHeight = NSHeight([self frame]);
     CGFloat newHeight = newSize.height;
-    CGFloat dh = BDSKMin(newHeight, MAX_HEIGHT) - BDSKMin(oldHeight, MAX_HEIGHT);
+    CGFloat dh = fmin(newHeight, MAX_HEIGHT) - fmin(oldHeight, MAX_HEIGHT);
     
     if (newHeight < oldHeight)
         [self setFrameSize:newSize];

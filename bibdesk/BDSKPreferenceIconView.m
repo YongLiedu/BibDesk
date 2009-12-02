@@ -152,8 +152,8 @@
             [matrix putCell:cell atRow:i column:j];
             [matrix setToolTip:[preferenceController localizedToolTipForIdentifier:identifier] forCell:cell];
 			NSSize cellSize = [cell cellSize];
-			iconSize.width = BDSKMax(iconSize.width, cellSize.width);
-			iconSize.height = BDSKMax(iconSize.height, cellSize.height);
+			iconSize.width = fmax(iconSize.width, cellSize.width);
+			iconSize.height = fmax(iconSize.height, cellSize.height);
             [cell release];
         }
         [captionTitles addObject:[preferenceController localizedTitleForCategory:category] ?: @""];
@@ -165,9 +165,9 @@
     CGFloat iconSpacing = ICON_SPACING;
     if (iconWidth < MINIMUM_ICON_WIDTH) {
         if (COLLAPSE_SIDE_ICON_MARGIN)
-            iconMargin = BDSKMax(0.0, iconMargin - BDSKFloor((MINIMUM_ICON_WIDTH - iconWidth) / 2.0));
+            iconMargin = fmax(0.0, iconMargin - floor((MINIMUM_ICON_WIDTH - iconWidth) / 2.0));
         if (COLLAPSE_ICON_SPACING)
-            iconSpacing = BDSKMax(0.0, iconSpacing - MINIMUM_ICON_WIDTH + iconWidth);
+            iconSpacing = fmax(0.0, iconSpacing - MINIMUM_ICON_WIDTH + iconWidth);
         iconWidth = MINIMUM_ICON_WIDTH;
     } else if (iconWidth > MAXIMUM_ICON_WIDTH) {
         iconWidth = MAXIMUM_ICON_WIDTH;
@@ -185,7 +185,7 @@
     
     [matrix setCellSize:iconSize];
     [matrix setIntercellSpacing:NSMakeSize(iconSpacing + iconWidth - iconSize.width, categoryHeight - iconSize.height)];
-    [matrix setFrameOrigin:NSMakePoint(iconMargin + BDSKFloor((iconWidth - iconSize.width) / 2.0), TOP_MARGIN + TOP_CAPTION_MARGIN + [captionCell cellSize].height + TOP_ICON_MARGIN)];
+    [matrix setFrameOrigin:NSMakePoint(iconMargin + floor((iconWidth - iconSize.width) / 2.0), TOP_MARGIN + TOP_CAPTION_MARGIN + [captionCell cellSize].height + TOP_ICON_MARGIN)];
     [matrix sizeToCells];
     [matrix setTarget:self];
     [matrix setAction:@selector(selectIcon:)];

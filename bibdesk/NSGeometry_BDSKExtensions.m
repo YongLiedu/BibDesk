@@ -42,7 +42,7 @@ NSRect BDSKCenterRect(NSRect rect, NSSize size, BOOL flipped)
 {
     rect.origin.x += 0.5f * (NSWidth(rect) - size.width);
     rect.origin.y += 0.5f * (NSHeight(rect) - size.height);
-    rect.origin.y = flipped ? BDSKCeil(rect.origin.y)  : BDSKFloor(rect.origin.y);
+    rect.origin.y = flipped ? ceil(rect.origin.y)  : floor(rect.origin.y);
     rect.size = size;
     return rect;
 }
@@ -50,14 +50,14 @@ NSRect BDSKCenterRect(NSRect rect, NSSize size, BOOL flipped)
 NSRect BDSKCenterRectVertically(NSRect rect, CGFloat height, BOOL flipped)
 {
     rect.origin.y += 0.5f * (NSHeight(rect) - height);
-    rect.origin.y = flipped ? BDSKCeil(rect.origin.y)  : BDSKFloor(rect.origin.y);
+    rect.origin.y = flipped ? ceil(rect.origin.y)  : floor(rect.origin.y);
     rect.size.height = height;
     return rect;
 }
 
 NSRect BDSKCenterRectHorizontally(NSRect rect, CGFloat width)
 {
-    rect.origin.x += BDSKFloor(0.5f * (NSWidth(rect) - width));
+    rect.origin.x += floor(0.5f * (NSWidth(rect) - width));
     rect.size.width = width;
     return rect;
 }

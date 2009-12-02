@@ -247,7 +247,7 @@
 	textRect = NSInsetRect([self textRectForBounds:cellFrame], 1.0, 0.0);
 	
 	scrollStep = 0;
-	maxScrollStep = BDSKCeil(2 * stringWidth / NSWidth(textRect)) - 2;
+	maxScrollStep = ceil(2 * stringWidth / NSWidth(textRect)) - 2;
 	if (maxScrollStep < 0 ) 
 		maxScrollStep = 0;
 }

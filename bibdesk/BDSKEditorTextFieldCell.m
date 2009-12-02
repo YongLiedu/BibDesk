@@ -182,7 +182,7 @@
 	if ([self hasButton] || [self URL]) {
         NSSize size = BUTTON_SIZE;
         buttonRect.origin.x = NSMaxX(theRect) - size.width - BUTTON_MARGIN;
-        buttonRect.origin.y = BDSKCeil(NSMidY(theRect) - 0.5 * size.height);
+        buttonRect.origin.y = ceil(NSMidY(theRect) - 0.5 * size.height);
         buttonRect.size = size;
 	}
     return buttonRect;

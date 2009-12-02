@@ -94,7 +94,7 @@
     
     for (NSValue *rectValue in highlightCircleRects) {
         NSRect rect = [rectValue rectValue];
-        CGFloat diameter = CIRCLE_FACTOR * BDSKMax(NSHeight(rect), NSWidth(rect));
+        CGFloat diameter = CIRCLE_FACTOR * fmax(NSHeight(rect), NSWidth(rect));
         [path appendBezierPathWithOvalInRect:NSInsetRect(rect, (NSWidth(rect) - diameter) / 2.0, (NSHeight(rect) - diameter) / 2.0)];
     }
     

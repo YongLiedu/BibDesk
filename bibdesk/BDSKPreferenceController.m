@@ -581,7 +581,7 @@ static id sharedController = nil;
 
 - (void)changeContentView:(NSView *)view display:(BOOL)display {
 	NSRect viewFrame = [view frame];
-    NSSize winSize = NSMakeSize(BDSKMax(NSWidth(viewFrame), 200.0), BDSKMax(NSHeight(viewFrame), 100.0));
+    NSSize winSize = NSMakeSize(fmax(NSWidth(viewFrame), 200.0), fmax(NSHeight(viewFrame), 100.0));
     NSRect contentRect = [[[self window] contentView] bounds];
     
     if ([view isEqual:[self iconView]]) {

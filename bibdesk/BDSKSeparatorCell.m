@@ -47,7 +47,7 @@
     [NSGraphicsContext saveGraphicsState];
     [[NSColor gridColor] setStroke];
     [NSBezierPath setDefaultLineWidth:1.0];
-    [NSBezierPath strokeLineFromPoint:NSMakePoint(NSMinX(cellFrame) + SEPARATOR_LEFT_INDENT, BDSKFloor(NSMidY(cellFrame)) + 0.5) toPoint:NSMakePoint(NSMaxX(cellFrame) - SEPARATOR_RIGHT_INDENT, BDSKFloor(NSMidY(cellFrame)) + 0.5)];
+    [NSBezierPath strokeLineFromPoint:NSMakePoint(NSMinX(cellFrame) + SEPARATOR_LEFT_INDENT, floor(NSMidY(cellFrame)) + 0.5) toPoint:NSMakePoint(NSMaxX(cellFrame) - SEPARATOR_RIGHT_INDENT, floor(NSMidY(cellFrame)) + 0.5)];
     [NSGraphicsContext restoreGraphicsState];
 }
 

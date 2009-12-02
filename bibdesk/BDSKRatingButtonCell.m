@@ -185,7 +185,7 @@
 		return NO;
 	
 	offset = mouseLoc.x - buttonRect.origin.x - margin;
-	newRating = (offset < 2) ? 0 : BDSKCeil(offset / OUTER_SIZE);
+	newRating = (offset < 2) ? 0 : ceil(offset / OUTER_SIZE);
 	if (newRating > maxRating)
 		newRating = maxRating;
 	if (rating != newRating) {
@@ -205,7 +205,7 @@
                 keepOn = NO;
                 mouseWentUp = YES;
             case NSLeftMouseDragged:
-                newRating = (offset < 2) ? 0 : BDSKCeil(offset / OUTER_SIZE);
+                newRating = (offset < 2) ? 0 : ceil(offset / OUTER_SIZE);
                 if (newRating > maxRating)
                     newRating = maxRating;
                 if (rating != newRating) {
@@ -240,7 +240,7 @@
 		case NSImageLeft:
 		case NSImageRight:
 			size.width = buttonSize.width + titleSize.width + BUTTON_TEXT_X_SEP;
-			size.height = BDSKMax(buttonSize.height, titleSize.height);
+			size.height = fmax(buttonSize.height, titleSize.height);
 			if ([self isBordered])
 				size.width -= EXTRA_BORDER_MARGIN;
 			break;

@@ -87,7 +87,7 @@
         scrollPosition.y = (NSMinY(documentVisibleRect) - NSMinY(bounds)) / (NSHeight(bounds) - NSHeight(documentVisibleRect));
         if (![self isFlipped])
             scrollPosition.y = 1.0f - scrollPosition.y;
-        scrollPosition.y = BDSKMin(BDSKMax(scrollPosition.y, 0.0f), 1.0f);
+        scrollPosition.y = fmin(fmax(scrollPosition.y, 0.0f), 1.0f);
     }
 
     // Horizontal position
@@ -95,7 +95,7 @@
         scrollPosition.x = 0.0f; // We're completely visible
     } else {
         scrollPosition.x = (NSMinX(documentVisibleRect) - NSMinX(bounds)) / (NSWidth(bounds) - NSWidth(documentVisibleRect));
-        scrollPosition.x = BDSKMin(BDSKMax(scrollPosition.x, 0.0f), 1.0f);
+        scrollPosition.x = fmin(fmax(scrollPosition.x, 0.0f), 1.0f);
     }
 
     return scrollPosition;
@@ -109,10 +109,10 @@
 
     // Vertical position
     if (NSHeight(desiredRect) < NSHeight(bounds)) {
-        scrollPosition.y = BDSKMin(BDSKMax(scrollPosition.y, 0.0f), 1.0f);
+        scrollPosition.y = fmin(fmax(scrollPosition.y, 0.0f), 1.0f);
         if (![self isFlipped])
             scrollPosition.y = 1.0f - scrollPosition.y;
-        desiredRect.origin.y = BDSKRound(NSMinY(bounds) + scrollPosition.y * (NSHeight(bounds) - NSHeight(desiredRect)));
+        desiredRect.origin.y = round(NSMinY(bounds) + scrollPosition.y * (NSHeight(bounds) - NSHeight(desiredRect)));
         if (NSMinY(desiredRect) < NSMinY(bounds))
             desiredRect.origin.y = NSMinY(bounds);
         else if (NSMaxY(desiredRect) > NSMaxY(bounds))
@@ -121,8 +121,8 @@
 
     // Horizontal position
     if (NSWidth(desiredRect) < NSWidth(bounds)) {
-        scrollPosition.x = BDSKMin(BDSKMax(scrollPosition.x, 0.0f), 1.0f);
-        desiredRect.origin.x = BDSKRound(NSMinX(bounds) + scrollPosition.x * (NSWidth(bounds) - NSWidth(desiredRect)));
+        scrollPosition.x = fmin(fmax(scrollPosition.x, 0.0f), 1.0f);
+        desiredRect.origin.x = round(NSMinX(bounds) + scrollPosition.x * (NSWidth(bounds) - NSWidth(desiredRect)));
         if (NSMinX(desiredRect) < NSMinX(bounds))
             desiredRect.origin.x = NSMinX(bounds);
         else if (NSMaxX(desiredRect) > NSMaxX(bounds))

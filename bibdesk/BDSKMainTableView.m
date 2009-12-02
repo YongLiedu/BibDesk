@@ -401,7 +401,7 @@ enum {
         [headerCell setStringValue:[[NSBundle mainBundle] localizedStringForKey:colName value:@"" table:@"BibTeXKeys"]];
     
     if (columnType != BDSKColumnTypeText && columnType != BDSKColumnTypeLinkedFile && columnType != BDSKColumnTypeRelevance)
-        [tc setWidth:BDSKMax([dataCell cellSize].width, [headerCell cellSize].width)];
+        [tc setWidth:fmax([dataCell cellSize].width, [headerCell cellSize].width)];
     
     return tc;
 }
@@ -724,9 +724,9 @@ enum {
     
     for (row = 0; row < numRows; row++) {
         cell = [self preparedCellAtColumn:column row:row];
-        width = BDSKMax(width, [cell cellSize].width);
+        width = fmax(width, [cell cellSize].width);
     }
-    width = BDSKMin([tableColumn maxWidth], BDSKMax([tableColumn minWidth], width));
+    width = fmin([tableColumn maxWidth], fmax([tableColumn minWidth], width));
     [tableColumn setWidth:width];
 }
 

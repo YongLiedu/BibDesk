@@ -204,7 +204,7 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
             newScaleFactor = BDSKDefaultScaleMenuFactors[i];
     }
 	
-	if (BDSKAbs(scaleFactor - newScaleFactor) > 0.01) {
+	if (fabs(scaleFactor - newScaleFactor) > 0.01) {
         NSPoint scrollPoint = [self scrollPositionAsPercentage];
 		
 		scaleFactor = newScaleFactor;
@@ -235,7 +235,7 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
 }
 
 - (BOOL)canZoomToActualSize{
-    return BDSKAbs(scaleFactor - 1.0) > 0.01;
+    return fabs(scaleFactor - 1.0) > 0.01;
 }
 
 - (BOOL)canZoomIn{
@@ -280,7 +280,7 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
 
 - (void)endGestureWithEvent:(NSEvent *)theEvent {
     if (pinchZoomFactor > 1.1 || pinchZoomFactor < 0.9)
-        [self setScaleFactor:BDSKMax(pinchZoomFactor * [self scaleFactor], BDSKMinDefaultScaleMenuFactor)];
+        [self setScaleFactor:fmax(pinchZoomFactor * [self scaleFactor], BDSKMinDefaultScaleMenuFactor)];
     pinchZoomFactor = 1.0;
     if ([[BDSKZoomableTextView superclass] instancesRespondToSelector:_cmd])
         [super endGestureWithEvent:theEvent];
@@ -288,9 +288,9 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
 
 - (void)magnifyWithEvent:(NSEvent *)theEvent {
     if ([theEvent respondsToSelector:@selector(magnification)]) {
-        pinchZoomFactor *= 1.0 + BDSKMax(-0.5, BDSKMin(1.0 , [theEvent magnification]));
+        pinchZoomFactor *= 1.0 + fmax(-0.5, fmin(1.0 , [theEvent magnification]));
         CGFloat scale = pinchZoomFactor * [self scaleFactor];
-        NSUInteger i = [self indexForScaleFactor:BDSKMax(scale, BDSKMinDefaultScaleMenuFactor)];
+        NSUInteger i = [self indexForScaleFactor:fmax(scale, BDSKMinDefaultScaleMenuFactor)];
         if (i != [self indexForScaleFactor:[self scaleFactor]]) {
             [self setScaleFactor:BDSKDefaultScaleMenuFactors[i]];
             pinchZoomFactor = scale / [self scaleFactor];

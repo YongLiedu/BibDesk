@@ -614,7 +614,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 }
 
 - (void)setFontSize:(CGFloat)newFontSize {
-    if (BDSKAbs(fontSize - newFontSize) > 0.0) {
+    if (fabs(fontSize - newFontSize) > 0.0) {
         [[[self undoManager] prepareWithInvocationTarget:self] setFontSize:fontSize];
         fontSize = newFontSize;
         [self updateStrings];
@@ -915,7 +915,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     for (NSTokenField *tokenField in [NSArray arrayWithObjects:specialTokenField, requiredTokenField, optionalTokenField, defaultTokenField, nil]) {
         [tokenField sizeToFit];
         frame = [tokenField frame];
-        width = BDSKMax(width, NSWidth(frame));
+        width = fmax(width, NSWidth(frame));
         // NSTokenField bug: add 10px to the width, because otherwise the tracking rect for the last token is broken
         frame.size.width += 10.0;
         [tokenField setFrame:frame];
@@ -1472,7 +1472,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         
         if ([[font familyName] isEqualToString:[defaultFont familyName]] == NO)
             [token setFontName:[font familyName]];
-        if (BDSKAbs([font pointSize] - [defaultFont pointSize]) > 0.0)
+        if (fabs([font pointSize] - [defaultFont pointSize]) > 0.0)
             [token setFontSize:[font pointSize]];
         if (isBold != defaultBold)
             [token setBold:isBold];

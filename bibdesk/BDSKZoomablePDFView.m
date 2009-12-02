@@ -388,8 +388,8 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
 }
 
 - (void)endGestureWithEvent:(NSEvent *)theEvent {
-    if (BDSKAbs(pinchZoomFactor - 1.0) > 0.1)
-        [self setScaleFactor:BDSKMax(pinchZoomFactor * [self scaleFactor], BDSKMinDefaultScaleMenuFactor)];
+    if (fabs(pinchZoomFactor - 1.0) > 0.1)
+        [self setScaleFactor:fmax(pinchZoomFactor * [self scaleFactor], BDSKMinDefaultScaleMenuFactor)];
     pinchZoomFactor = 1.0;
     if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd])
         [super endGestureWithEvent:theEvent];
@@ -397,9 +397,9 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
 
 - (void)magnifyWithEvent:(NSEvent *)theEvent {
     if ([theEvent respondsToSelector:@selector(magnification)]) {
-        pinchZoomFactor *= 1.0 + BDSKMax(-0.5, BDSKMin(1.0 , [theEvent magnification]));
+        pinchZoomFactor *= 1.0 + fmax(-0.5, fmin(1.0 , [theEvent magnification]));
         CGFloat scaleFactor = pinchZoomFactor * [self scaleFactor];
-        NSUInteger i = [self indexForScaleFactor:BDSKMax(scaleFactor, BDSKMinDefaultScaleMenuFactor)];
+        NSUInteger i = [self indexForScaleFactor:fmax(scaleFactor, BDSKMinDefaultScaleMenuFactor)];
         if (i != [self indexForScaleFactor:[self scaleFactor]]) {
             [self setScaleFactor:BDSKDefaultScaleMenuFactors[i]];
             pinchZoomFactor = scaleFactor / [self scaleFactor];

@@ -136,7 +136,7 @@
     NSParameterAssert(rows != nil);
     
     CGFloat lineWidth = 1.0;
-    CGFloat heightOffset = BDSKMax(1.0f, BDSKRound(0.25 * [self intercellSpacing].height) - lineWidth);
+    CGFloat heightOffset = fmax(1.0f, round(0.25 * [self intercellSpacing].height) - lineWidth);
     NSColor *highlightColor;
     
     if ([[self window] isMainWindow] || [[self window] isKeyWindow])

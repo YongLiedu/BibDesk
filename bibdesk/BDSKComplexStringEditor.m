@@ -236,7 +236,7 @@
 	lowerEdgeRect = [tableView convertRect:lowerEdgeRect toView:nil]; // takes into account isFlipped
     winFrame.origin = [[tableView window] convertBaseToScreen:lowerEdgeRect.origin];
 	winFrame.origin.y -= NSHeight(winFrame);
-	winFrame.size.width = BDSKMax(NSWidth(lowerEdgeRect), minWidth);
+	winFrame.size.width = fmax(NSWidth(lowerEdgeRect), minWidth);
 	winFrame = NSInsetRect(winFrame, -margin, 0.0);
 	[[self window] setFrame:winFrame display:YES];
 	

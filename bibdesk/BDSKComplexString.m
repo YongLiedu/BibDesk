@@ -60,8 +60,8 @@ static BDSKMacroResolver *macroResolverForUnarchiving = nil;
 
   BDSKMacroResolver *macroResolver;
   
-  BOOL complex;
-  BOOL inherited;
+  BOOL isComplex;
+  BOOL isInherited;
   
   NSString *expandedString;
   unsigned long long modification;
@@ -154,8 +154,8 @@ NSString *__BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolv
         nodes = [nodesArray copyWithZone:[self zone]];
         // we don't retain, as the macroResolver might retain us as a macro value
         macroResolver = (aMacroResolver == [BDSKMacroResolver defaultMacroResolver]) ? nil : aMacroResolver;
-        complex = YES;
-		inherited = NO;
+        isComplex = YES;
+		isInherited = NO;
         expandedString = nil;
         modification = 0;
         defaultModification = 0;
@@ -166,8 +166,8 @@ NSString *__BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolv
 - (id)initWithInheritedValue:(NSString *)aValue {
     BDSKASSERT(aValue != nil);
     if (self = [self initWithNodes:[aValue nodes] macroResolver:[aValue macroResolver]]) {
-        complex = [aValue isComplex];
-		inherited = YES;
+        isComplex = [aValue isComplex];
+		isInherited = YES;
 	}
 	return self;
 }
@@ -181,7 +181,7 @@ NSString *__BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolv
 - (id)copyWithZone:(NSZone *)zone{
     if (NSShouldRetainWithZone(self, zone))
         return [self retain];
-    else if (inherited)
+    else if (isInherited)
         return [[BDSKComplexString allocWithZone:zone] initWithInheritedValue:self];
     else
         return [[BDSKComplexString allocWithZone:zone] initWithNodes:nodes macroResolver:macroResolver];
@@ -209,8 +209,8 @@ Rather than relying on the same call sequence to be used, I think we should igno
         if (self = [super init]) {
             BDSKASSERT([coder isKindOfClass:[NSKeyedUnarchiver class]]);
             nodes = [[coder decodeObjectForKey:@"nodes"] retain];
-            complex = [coder decodeBoolForKey:@"complex"];
-            inherited = [coder decodeBoolForKey:@"inherited"];
+            isComplex = [coder decodeBoolForKey:@"complex"];
+            isInherited = [coder decodeBoolForKey:@"inherited"];
             macroResolver = [[self class] macroResolverForUnarchiving];
             expandedString = nil;
             modification = 0;
@@ -227,8 +227,8 @@ Rather than relying on the same call sequence to be used, I think we should igno
     if([coder allowsKeyedCoding]){
         BDSKASSERT([coder isKindOfClass:[NSKeyedArchiver class]]);
         [coder encodeObject:nodes forKey:@"nodes"];
-        [coder encodeBool:complex forKey:@"complex"];
-        [coder encodeBool:inherited forKey:@"inherited"];
+        [coder encodeBool:isComplex forKey:@"complex"];
+        [coder encodeBool:isInherited forKey:@"inherited"];
     } else {
         [coder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];
     }
@@ -269,18 +269,18 @@ Rather than relying on the same call sequence to be used, I think we should igno
 
 - (id)copyUninheritedWithZone:(NSZone *)zone{
 	
-	if (inherited == NO) 
+	if (isInherited == NO) 
         return [self copyWithZone:zone];
 	else 
         return [[NSString allocWithZone:zone] initWithNodes:nodes macroResolver:macroResolver];
 }
 
 - (BOOL)isComplex {
-    return complex;
+    return isComplex;
 }
 
 - (BOOL)isInherited {
-    return inherited;
+    return isInherited;
 }
 
 - (NSArray *)nodes{
@@ -321,7 +321,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 - (NSString *)expandedString {
     if (expandedString == nil ||
         (macroResolver != nil && modification != [macroResolver modification]) ||
-        (complex && defaultModification != [[BDSKMacroResolver defaultMacroResolver] modification])) {
+        (isComplex && defaultModification != [[BDSKMacroResolver defaultMacroResolver] modification])) {
         [expandedString release];
         expandedString = __BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
         if (macroResolver)
@@ -458,7 +458,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 }
 
 - (BDSKMacroResolver *)macroResolver{
-    return (macroResolver == nil && complex) ? [BDSKMacroResolver defaultMacroResolver] : macroResolver;
+    return (macroResolver == nil && isComplex) ? [BDSKMacroResolver defaultMacroResolver] : macroResolver;
 }
 
 @end

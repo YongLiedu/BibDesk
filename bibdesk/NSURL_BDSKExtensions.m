@@ -427,10 +427,10 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
         if (value = [note objectForKey:@"bounds"]) {
             NSRect nsBounds = NSRectFromString(value);
             Rect qdBounds;
-            qdBounds.left = BDSKRound(NSMinX(nsBounds));
-            qdBounds.bottom = BDSKRound(NSMinY(nsBounds));
-            qdBounds.right = BDSKRound(NSMaxX(nsBounds));
-            qdBounds.top = BDSKRound(NSMaxY(nsBounds));
+            qdBounds.left = round(NSMinX(nsBounds));
+            qdBounds.bottom = round(NSMinY(nsBounds));
+            qdBounds.right = round(NSMaxX(nsBounds));
+            qdBounds.top = round(NSMaxY(nsBounds));
             [note setValue:[NSData dataWithBytes:&qdBounds length:sizeof(Rect)] forKey:@"bounds"];
         }
         if (value = [note objectForKey:@"pageIndex"]) {
@@ -450,15 +450,15 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
         if (value = [note objectForKey:@"startPoint"]) {
             NSPoint nsPoint = NSPointFromString(value);
             Point qdPoint;
-            qdPoint.h = BDSKRound(nsPoint.x);
-            qdPoint.v = BDSKRound(nsPoint.y);
+            qdPoint.h = round(nsPoint.x);
+            qdPoint.v = round(nsPoint.y);
             [note setValue:[NSData dataWithBytes:&qdPoint length:sizeof(Point)] forKey:@"startPoint"];
         }
         if (value = [note objectForKey:@"endPoint"]) {
             NSPoint nsPoint = NSPointFromString(value);
             Point qdPoint;
-            qdPoint.h = BDSKRound(nsPoint.x);
-            qdPoint.v = BDSKRound(nsPoint.y);
+            qdPoint.h = round(nsPoint.x);
+            qdPoint.v = round(nsPoint.y);
             [note setValue:[NSData dataWithBytes:&qdPoint length:sizeof(Point)] forKey:@"endPoint"];
         }
         if (value = [note objectForKey:@"startLineStyle"]) {
@@ -510,8 +510,8 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
             for (NSString *pointString in value) {
                 NSPoint nsPoint = NSPointFromString(pointString);
                 Point qdPoint;
-                qdPoint.h = BDSKRound(nsPoint.x);
-                qdPoint.v = BDSKRound(nsPoint.y);
+                qdPoint.h = round(nsPoint.x);
+                qdPoint.v = round(nsPoint.y);
                 [points addObject:[NSData dataWithBytes:&qdPoint length:sizeof(Point)]];
                 if ([points count] == 4) {
                     [pathList addObject:points];
@@ -528,8 +528,8 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
                 for (NSString *pointString in path) {
                     NSPoint nsPoint = NSPointFromString(pointString);
                     Point qdPoint;
-                    qdPoint.h = BDSKRound(nsPoint.x);
-                    qdPoint.v = BDSKRound(nsPoint.y);
+                    qdPoint.h = round(nsPoint.x);
+                    qdPoint.v = round(nsPoint.y);
                     [points addObject:[NSData dataWithBytes:&qdPoint length:sizeof(Point)]];
                 }
                 [pathList addObject:points];

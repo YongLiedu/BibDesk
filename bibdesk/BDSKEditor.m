@@ -2869,7 +2869,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         if (row == -1)
             row = [tableView numberOfRows] - 1;
         else if (op ==  NSTableViewDropAbove)
-            row = BDSKMin(row, [tableView numberOfRows] - 1);
+            row = fmin(row, [tableView numberOfRows] - 1);
         [tableView setDropRow:row dropOperation:NSTableViewDropOn];
         
         NSPasteboard *pboard = [info draggingPasteboard];
@@ -3064,7 +3064,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 if (lastAuthorsHeight <= 0.0)
                     lastAuthorsHeight = 150.0;
                 if (lastAuthorsHeight > NSHeight([[fileView enclosingScrollView] frame]))
-                    lastAuthorsHeight = BDSKFloor(0.5 * NSHeight([[fileView enclosingScrollView] frame]));
+                    lastAuthorsHeight = floor(0.5 * NSHeight([[fileView enclosingScrollView] frame]));
                 position -= lastAuthorsHeight;
             } else {
                 lastAuthorsHeight = NSHeight([subview frame]);
@@ -3085,7 +3085,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (CGFloat)splitView:(NSSplitView *)sender constrainMinCoordinate:(CGFloat)proposedMin ofSubviewAt:(NSInteger)dividerIndex {
     if ([sender isEqual:mainSplitView]) {
-        return BDSKMax(proposedMin, 390.0);
+        return fmax(proposedMin, 390.0);
     }
     return proposedMin;
 }
@@ -3102,7 +3102,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         if (collapsed)
             sideSize.width = 0.0;
         else if (contentWidth < sideSize.width)
-            sideSize.width = BDSKFloor(contentWidth * sideSize.width / (oldSize.width - [sender dividerThickness]));
+            sideSize.width = floor(contentWidth * sideSize.width / (oldSize.width - [sender dividerThickness]));
         mainSize.width = contentWidth - sideSize.width;
         sideSize.height = mainSize.height = NSHeight([sender frame]);
     } else if ([sender isEqual:fileSplitView]) {
@@ -3110,7 +3110,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         if (collapsed)
             sideSize.height = 0.0;
         else if (contentHeight < sideSize.height)
-            sideSize.height = BDSKFloor(contentHeight * sideSize.height / (oldSize.height - [sender dividerThickness]));
+            sideSize.height = floor(contentHeight * sideSize.height / (oldSize.height - [sender dividerThickness]));
         mainSize.height = contentHeight - sideSize.height;
         sideSize.width = mainSize.width = NSHeight([sender frame]);
     }
@@ -3194,15 +3194,15 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             
             for (row = 0; row < numberOfRows; row++) {
                 cell = [tableView preparedCellAtColumn:column row:row];
-                maxWidth = BDSKMax(maxWidth, [cell cellSize].width);
+                maxWidth = fmax(maxWidth, [cell cellSize].width);
             }
-            maxWidth = BDSKCeil(maxWidth);
+            maxWidth = ceil(maxWidth);
             [tableColumn setMinWidth:maxWidth];
             [tableColumn setMaxWidth:maxWidth];
             [tableView sizeToFit];
             NSRect frame = [citeKeyField frame];
             NSRect oldFrame = frame;
-            CGFloat offset = BDSKMin(NSMaxX(frame) - 20.0, maxWidth + NSMinX([citeKeyTitle frame]) + 4.0);
+            CGFloat offset = fmin(NSMaxX(frame) - 20.0, maxWidth + NSMinX([citeKeyTitle frame]) + 4.0);
             frame.size.width = NSMaxX(frame) - offset;
             frame.origin.x = offset;
             [citeKeyField setFrame:frame];
@@ -3250,12 +3250,12 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSInteger numEntries = [[typeMan booleanFieldsSet] count] + [[typeMan triStateFieldsSet] count] + [[typeMan ratingFieldsSet] count];
     NSSize size = [[matrix enclosingScrollView] frame].size;
     NSSize spacing = [matrix intercellSpacing];
-    NSInteger numRows, numCols = MIN(BDSKFloor((size.width + spacing.width) / (cellSize.width + spacing.width)), numEntries);
+    NSInteger numRows, numCols = MIN(floor((size.width + spacing.width) / (cellSize.width + spacing.width)), numEntries);
     numCols = MAX(numCols, 1);
-    numRows = BDSKCeil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
+    numRows = ceil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
     if (numRows * (cellSize.height + spacing.height) > 190.0 + spacing.height) {
-        numCols = MIN(BDSKFloor((size.width - [NSScroller scrollerWidth] + spacing.width) / (cellSize.width + spacing.width)), numEntries);
-        numRows = BDSKCeil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
+        numCols = MIN(floor((size.width - [NSScroller scrollerWidth] + spacing.width) / (cellSize.width + spacing.width)), numEntries);
+        numRows = ceil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
     }
     if (columns)
         *columns = numCols;
@@ -3289,17 +3289,17 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	
     for (field in ratingFields) {
 		size = [self addMatrixButtonCell:ratingButtonCell toArray:cells forField:field];
-        cellSize = NSMakeSize(BDSKMax(size.width, cellSize.width), BDSKMax(size.height, cellSize.height));
+        cellSize = NSMakeSize(fmax(size.width, cellSize.width), fmax(size.height, cellSize.height));
     }
 	
     for (field in booleanFields) {
 		size = [self addMatrixButtonCell:booleanButtonCell toArray:cells forField:field];
-        cellSize = NSMakeSize(BDSKMax(size.width, cellSize.width), BDSKMax(size.height, cellSize.height));
+        cellSize = NSMakeSize(fmax(size.width, cellSize.width), fmax(size.height, cellSize.height));
     }
 	
     for (field in triStateFields) {
 		size = [self addMatrixButtonCell:triStateButtonCell toArray:cells forField:field];
-        cellSize = NSMakeSize(BDSKMax(size.width, cellSize.width), BDSKMax(size.height, cellSize.height));
+        cellSize = NSMakeSize(fmax(size.width, cellSize.width), fmax(size.height, cellSize.height));
     }
     
     if ([[self window] firstResponder] == matrix)
@@ -3321,10 +3321,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSView *tableScrollView = [tableView enclosingScrollView];
     NSRect tableFrame = [tableScrollView frame];
     NSRect matrixFrame = [matrixEdgeView frame];
-    CGFloat dh = BDSKMin(NSHeight([matrix frame]), 190.0) + 1.0 - NSHeight(matrixFrame);
+    CGFloat dh = fmin(NSHeight([matrix frame]), 190.0) + 1.0 - NSHeight(matrixFrame);
     if ([cells count] == 0)
         dh -= 1.0;
-    if (BDSKAbs(dh) > 0.1) {
+    if (fabs(dh) > 0.1) {
         tableFrame.size.height -= dh;
         tableFrame.origin.y += dh;
         matrixFrame.size.height += dh;

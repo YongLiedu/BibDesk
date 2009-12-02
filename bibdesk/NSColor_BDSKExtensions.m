@@ -194,10 +194,10 @@ typedef union _BDSKRGBAInt {
     [[self colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getRed:&red green:&green blue:&blue alpha:&alpha];
     
     NSAppleEventDescriptor *descriptor = [NSAppleEventDescriptor listDescriptor];
-    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:BDSKRound(65535 * red)] atIndex:1];
-    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:BDSKRound(65535 * green)] atIndex:2];
-    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:BDSKRound(65535 * blue)] atIndex:3];
-    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:BDSKRound(65535 * alpha)] atIndex:4];
+    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:round(65535 * red)] atIndex:1];
+    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:round(65535 * green)] atIndex:2];
+    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:round(65535 * blue)] atIndex:3];
+    [descriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:round(65535 * alpha)] atIndex:4];
     
     return descriptor;
 }

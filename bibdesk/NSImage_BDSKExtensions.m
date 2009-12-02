@@ -375,7 +375,7 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
         NSRect countRect = {NSZeroPoint, [countString size]};
         CGFloat countOffset;
         
-        countOffset = BDSKFloor(0.5f * NSHeight(countRect)); // make sure the cap radius is integral
+        countOffset = floor(0.5f * NSHeight(countRect)); // make sure the cap radius is integral
         countRect.size.height = 2.0 * countOffset;
         
         if (inside) {

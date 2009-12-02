@@ -19,14 +19,15 @@
 
 #endif
 
-#define BDSK_BUNDLE_IDENTIFIER @"edu.ucsd.cs.mmccrack.bibdesk"
-
 #ifdef __OBJC__
     #import <Cocoa/Cocoa.h>
     #import "BDSKCompatibility.h"
     #import "NSString_BDSKExtensions.h"
     #import "BDSKComplexString.h"
     #import "BDSKStringConstants.h"
+    #import <tgmath.h>
+
+#define BDSK_BUNDLE_IDENTIFIER @"edu.ucsd.cs.mmccrack.bibdesk"
 
 #define __FILENAMEASNSSTRING__ \
 [[NSString stringWithFileSystemRepresentation:__FILE__] lastPathComponent]
@@ -50,8 +51,8 @@
 
 #else
 
-#define log_method();
-#define log_function();
+#define log_method()
+#define log_function()
 
 #define BDSKPRECONDITION(expression)
 #define BDSKPOSTCONDITION(expression)
@@ -68,8 +69,6 @@
         hasBeenInitialized = YES;\
     } while (0);
 
-#endif
-
 #define BDSKDESTROY(variable) do { [variable release]; variable = nil; } while (0)
 #define BDSKCFDESTROY(variable) do { if (variable) CFRelease(variable); variable = NULL; } while (0)
 #define BDSKZONEDESTROY(variable) do { if (variable) NSZoneFree(NSZoneFromPointer((void *)variable), (void *)variable); variable = NULL; } while (0)
@@ -77,21 +76,4 @@
 // see e.g. http://www.mulle-kybernetik.com/artikel/Optimization/opti-7.html, perhaps this could be improved on 64-bits
 #define BDSKHash(self) (((NSUInteger) self >> 4) | ((NSUInteger) self << (32 - 4)))
 
-#if __LP64__
-#define BDSKRound(f)    round(f)
-#define BDSKFloor(f)    floor(f)
-#define BDSKCeil(f)     ceil(f)
-#define BDSKTrunc(f)    trunc(f)
-#define BDSKAbs(f)      fabs(f)
-#define BDSKMin(f1, f2) fmin(f1, f2)
-#define BDSKMax(f1, f2) fmax(f1, f2)
-#else
-#define BDSKRound(f)    roundf(f)
-#define BDSKFloor(f)    floorf(f)
-#define BDSKCeil(f)     ceilf(f)
-#define BDSKTrunc(f)    truncf(f)
-#define BDSKAbs(f)      fabsf(f)
-#define BDSKMin(f1, f2) fminf(f1, f2)
-#define BDSKMax(f1, f2) fmaxf(f1, f2)
 #endif
-

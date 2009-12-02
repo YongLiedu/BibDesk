@@ -206,8 +206,8 @@ The groupedPublications array is a subset of the publications array, developed b
         if (docState.lastWebViewFraction <= 0.0)
             docState.lastWebViewFraction = 0.4;
         
-        webFrame.size.height = BDSKRound(height * docState.lastWebViewFraction);
-        previewFrame.size.height = BDSKRound((height - NSHeight(webFrame)) * oldFraction);
+        webFrame.size.height = round(height * docState.lastWebViewFraction);
+        previewFrame.size.height = round((height - NSHeight(webFrame)) * oldFraction);
         tableFrame.size.height = height - NSHeight(webFrame) - NSHeight(previewFrame);
         tableFrame.origin.y = NSMaxY(previewFrame) + [splitView dividerThickness];
         webFrame.origin.y = NSMaxY(tableFrame) + [splitView dividerThickness];
@@ -229,7 +229,7 @@ The groupedPublications array is a subset of the publications array, developed b
         id firstResponder = [documentWindow firstResponder];
         if ([firstResponder respondsToSelector:@selector(isDescendantOf:)] && [firstResponder isDescendantOf:webGroupView])
             [documentWindow makeFirstResponder:tableView];
-        docState.lastWebViewFraction = NSHeight([webView frame]) / BDSKMax(1.0, NSHeight([splitView frame]) - 2 * [splitView dividerThickness]);
+        docState.lastWebViewFraction = NSHeight([webView frame]) / fmax(1.0, NSHeight([splitView frame]) - 2 * [splitView dividerThickness]);
         [self removeControlView:webGroupView];
         [webView removeFromSuperview];
         [splitView adjustSubviews];

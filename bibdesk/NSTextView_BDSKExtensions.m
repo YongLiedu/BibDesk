@@ -227,8 +227,8 @@
     point.y += tcOrigin.y;
     
     // make sure we have integral coordinates
-    point.x = BDSKCeil(point.x);
-    point.y = BDSKCeil(point.y);
+    point.x = ceil(point.x);
+    point.y = ceil(point.y);
     
     // make sure we don't put the window before the textfield when the text is scrolled
     if (point.x < [self visibleRect].origin.x) 

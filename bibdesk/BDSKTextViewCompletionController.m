@@ -355,11 +355,11 @@ static id sharedController = nil;
     // get the remaining space on the screen
     CGFloat hSize = NSMaxX(screenFrame) - BDSKCompletionMaxWidth - topLeftPoint.x;
     hSize = hSize <= 0.0f ? BDSKCompletionMaxWidth + hSize : BDSKCompletionMaxWidth;
-    hSize = BDSKFloor(BDSKMax(hSize, BDSKCompletionMinWidth));
+    hSize = floor(fmax(hSize, BDSKCompletionMinWidth));
     
     CGFloat vSize = topLeftPoint.y - BDSKCompletionMaxHeight;
     vSize = vSize <= 0.0f ? BDSKCompletionMaxHeight + vSize : BDSKCompletionMaxHeight;
-    vSize = BDSKFloor(BDSKMax(vSize, BDSKCompletionMinHeight));
+    vSize = floor(fmax(vSize, BDSKCompletionMinHeight));
     
     NSSize adjustedSize = [self windowContentSize];
     if(adjustedSize.width > hSize)
@@ -377,13 +377,13 @@ static id sharedController = nil;
 	NSCell *cell = [[[tableView tableColumns] objectAtIndex:0] dataCell];
 	while(count--){
 		[cell setStringValue:[completions objectAtIndex:count]];
-		hSize = BDSKMax(hSize, [cell cellSize].width);
+		hSize = fmax(hSize, [cell cellSize].width);
 	}
 	hSize += [NSScroller scrollerWidth] + [tableView intercellSpacing].width;
     
 	CGFloat vSize = NSHeight(NSUnionRect([tableView rectOfRow:0], [tableView rectOfRow:[tableView numberOfRows] - 1]));
 	
-	return NSMakeSize(BDSKCeil(hSize), BDSKCeil(vSize));
+	return NSMakeSize(ceil(hSize), ceil(vSize));
 }
 
 

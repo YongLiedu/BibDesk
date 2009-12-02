@@ -517,7 +517,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
                 if (docState.lastPreviewHeight <= 0.0)
                     docState.lastPreviewHeight = 200.0;
                 if (docState.lastPreviewHeight > NSHeight([[[sender subviews] objectAtIndex:dividerIndex] frame]))
-                    docState.lastPreviewHeight = BDSKFloor(0.5 * NSHeight([[[sender subviews] objectAtIndex:dividerIndex] frame]));
+                    docState.lastPreviewHeight = floor(0.5 * NSHeight([[[sender subviews] objectAtIndex:dividerIndex] frame]));
                 position -= docState.lastPreviewHeight;
             } else {
                 docState.lastPreviewHeight = NSHeight([[[sender subviews] lastObject] frame]);
@@ -593,8 +593,8 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
             if (rightCollapsed == NO)
                 oldContentWidth -= [sender dividerThickness];
             CGFloat resizeFactor = contentWidth / oldContentWidth;
-            leftSize.width = BDSKFloor(resizeFactor * leftSize.width);
-            rightSize.width = BDSKFloor(resizeFactor * rightSize.width);
+            leftSize.width = floor(resizeFactor * leftSize.width);
+            rightSize.width = floor(resizeFactor * rightSize.width);
         }
         
         centerSize.width = contentWidth - leftSize.width - rightSize.width;
@@ -616,10 +616,10 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         NSView *view = [subviews objectAtIndex:1];
         NSRect rect = [view convertRect:[view bounds] toView:[documentWindow contentView]];
         NSRect frame = [bottomPreviewButton frame];
-        frame.origin.x = BDSKMax(8.0, NSMinX(rect));
+        frame.origin.x = fmax(8.0, NSMinX(rect));
         [bottomPreviewButton setFrame:frame];
         [statusBar setLeftMargin:NSMaxX(frame) + 8.0];
-        [statusBar setRightMargin:BDSKMax(15.0, NSWidth([statusBar frame]) - NSMaxX(rect) + 8.0)];
+        [statusBar setRightMargin:fmax(15.0, NSWidth([statusBar frame]) - NSMaxX(rect) + 8.0)];
         [groupButtonView setHidden:isLeftHidden];
         [sidePreviewButton setHidden:isRightHidden];
         if (isLeftHidden == NO) {

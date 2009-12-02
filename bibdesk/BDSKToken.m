@@ -171,7 +171,7 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (void)setFontSize:(CGFloat)newFontSize {
-    if (BDSKAbs(fontSize - newFontSize) > 0.0) {
+    if (fabs(fontSize - newFontSize) > 0.0) {
         [[[self undoManager] prepareWithInvocationTarget:self] setFontSize:fontSize];
         fontSize = newFontSize;
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
