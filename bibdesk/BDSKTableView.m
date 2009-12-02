@@ -299,14 +299,14 @@ static char BDSKTableViewFontDefaultsObservationContext;
     if ([[self delegate] respondsToSelector:@selector(tableViewInsertSpace:)])
         [[self delegate] tableViewInsertSpace:self];
     else
-        NSBeep();
+        [[self enclosingScrollView] pageDown:sender];
 }
 
 - (void)insertShiftSpace:(id)sender {
     if ([[self delegate] respondsToSelector:@selector(tableViewInsertShiftSpace:)])
         [[self delegate] tableViewInsertShiftSpace:self];
     else
-        NSBeep();
+        [[self enclosingScrollView] pageUp:sender];
 }
 
 - (BOOL)canDelete {
