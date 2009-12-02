@@ -69,10 +69,10 @@ static char BDSKConditionControllerObservationContext;
 
 - (id)initWithFilterController:(BDSKFilterController *)aFilterController condition:(BDSKCondition *)aCondition
 {
-    self = [super init];
+    self = [super initWithNibName:@"BDSKCondition" bundle:nil];
     if (self) {
         filterController = aFilterController;
-        condition = [aCondition retain];
+        [self setRepresentedObject:aCondition];
 		canRemove = [filterController canRemoveCondition];
 		
         BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
@@ -87,9 +87,7 @@ static char BDSKConditionControllerObservationContext;
 	//NSLog(@"dealloc conditionController");
     [self stopObserving];
     filterController = nil;
-	BDSKDESTROY(condition);
     BDSKDESTROY(keys);
-    BDSKDESTROY(view);
     [[dateComparisonPopUp superview] release];
     [[attachmentComparisonPopUp superview] release];
     [[comparisonPopUp superview] release];
@@ -107,13 +105,7 @@ static char BDSKConditionControllerObservationContext;
     [super dealloc];
 }
 
-- (NSString *)windowNibName {
-    return @"BDSKCondition";
-}
-
 - (void)awakeFromNib {
-    // we add/remove these controls, so we need to retain them
-    [view retain];
     [[dateComparisonPopUp superview] retain];
     [[attachmentComparisonPopUp superview] retain];
     [[comparisonPopUp superview] retain];
@@ -129,7 +121,7 @@ static char BDSKConditionControllerObservationContext;
     [[triStateButton superview] retain];
     [[ratingButton superview] retain];
     
-    [ratingButton setRating:[[condition stringValue] integerValue]];
+    [ratingButton setRating:[[[self condition] stringValue] integerValue]];
     
     NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
     [formatter setDateStyle:NSDateFormatterShortStyle];
@@ -144,7 +136,7 @@ static char BDSKConditionControllerObservationContext;
     [self layoutComparisonControls];
     [self layoutValueControls];
     
-    if (condition == nil) {
+    if ([self condition] == nil) {
         // hide everything except for the Add button when this is a dummy condition controller
         [keyComboBox setHidden:YES];
         [comparisonBox setHidden:YES];
@@ -160,11 +152,6 @@ static char BDSKConditionControllerObservationContext;
         return keys;
     else
         return nil;
-}
-
-- (NSView *)view {
-    [self window]; // this makes sure the nib is loaded
-	return view;
 }
 
 - (IBAction)addNewCondition:(id)sender {
@@ -184,11 +171,11 @@ static char BDSKConditionControllerObservationContext;
 
 // we could implement binding in BDSKRatingButton, but that's a lot of hassle and exposes us to the binding-to-owner bug
 - (IBAction)changeRating:(id)sender {
-    [condition setStringValue:[NSString stringWithFormat:@"%ld", (long)[sender rating]]];
+    [[self condition] setStringValue:[NSString stringWithFormat:@"%ld", (long)[sender rating]]];
 }
 
 - (BDSKCondition *)condition {
-    return [[condition retain] autorelease];
+    return [self representedObject];
 }
 
 - (BOOL)canRemove {
@@ -212,9 +199,9 @@ static char BDSKConditionControllerObservationContext;
 
 - (void)layoutValueControls {
     NSArray *controls = nil;
-    switch ([[condition key] fieldType]) {
+    switch ([[[self condition] key] fieldType]) {
         case BDSKDateField:
-            switch ([condition dateComparison]) {
+            switch ([[self condition] dateComparison]) {
                 case BDSKExactly: 
                     controls = [NSArray arrayWithObjects:numberTextField, periodPopUp, agoText, nil];
                     break;
@@ -238,7 +225,7 @@ static char BDSKConditionControllerObservationContext;
             }
         break;
         case BDSKLinkedField:
-            switch ([condition attachmentComparison]) {
+            switch ([[self condition] attachmentComparison]) {
                 case BDSKCountEqual: 
                 case BDSKCountNotEqual: 
                 case BDSKCountLarger: 
@@ -284,10 +271,10 @@ static char BDSKConditionControllerObservationContext;
 
 - (void)layoutComparisonControls {
     [[[[comparisonBox contentView] subviews] lastObject] removeFromSuperview];
-    if ([condition isDateCondition]) {
+    if ([[self condition] isDateCondition]) {
         [[dateComparisonPopUp superview] setFrameOrigin:NSZeroPoint];
         [comparisonBox addSubview:[dateComparisonPopUp superview]];
-    } else if ([condition isAttachmentCondition]) {
+    } else if ([[self condition] isAttachmentCondition]) {
         [[attachmentComparisonPopUp superview] setFrameOrigin:NSZeroPoint];
         [comparisonBox addSubview:[attachmentComparisonPopUp superview]];
     } else {
@@ -298,9 +285,10 @@ static char BDSKConditionControllerObservationContext;
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if (context == &BDSKConditionControllerObservationContext) {
-        BDSKASSERT(object == condition);
-        if(object == condition) {
+        BDSKASSERT(object == [self condition]);
+        if(object == [self condition]) {
             NSUndoManager *undoManager = [filterController undoManager];
+            BDSKCondition *condition = [self condition];
             id oldValue = [change objectForKey:NSKeyValueChangeOldKey];
             if (oldValue == [NSNull null])
                 oldValue = nil;
@@ -344,6 +332,7 @@ static char BDSKConditionControllerObservationContext;
 }
 
 - (void)startObserving {
+    BDSKCondition *condition = [self condition];
     [condition addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:&BDSKConditionControllerObservationContext];
     [condition addObserver:self forKeyPath:@"dateComparison" options: NSKeyValueObservingOptionOld  context:&BDSKConditionControllerObservationContext];
     [condition addObserver:self forKeyPath:@"attachmentComparison" options:NSKeyValueObservingOptionOld  context:&BDSKConditionControllerObservationContext];
@@ -360,6 +349,7 @@ static char BDSKConditionControllerObservationContext;
 
 - (void)stopObserving {
     if (isObserving) {
+        BDSKCondition *condition = [self condition];
         [condition removeObserver:self forKeyPath:@"key"];
         [condition removeObserver:self forKeyPath:@"dateComparison"];
         [condition removeObserver:self forKeyPath:@"attachmentComparison"];

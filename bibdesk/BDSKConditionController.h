@@ -43,7 +43,7 @@
 @class BDSKFilterController, BDSKRatingButton;
 
 
-@interface BDSKConditionController : NSWindowController <BDSKFieldNameFormatterDelegate> {
+@interface BDSKConditionController : NSViewController <BDSKFieldNameFormatterDelegate> {
     IBOutlet NSObjectController *objectController;
 	IBOutlet NSComboBox *keyComboBox;
 	IBOutlet NSPopUpButton *comparisonPopUp;
@@ -62,11 +62,9 @@
     IBOutlet BDSKRatingButton *ratingButton;
     IBOutlet NSBox *comparisonBox;
     IBOutlet NSBox *valueBox;
-	IBOutlet NSView *view;
 	IBOutlet NSButton *addButton;
 	IBOutlet NSButton *removeButton;
 	BDSKFilterController *filterController;
-	BDSKCondition *condition;
 	NSMutableArray *keys;
 	BOOL canRemove;
     BOOL isObserving;
@@ -74,8 +72,6 @@
 
 - (id)initWithFilterController:(BDSKFilterController *)aFilterController;
 - (id)initWithFilterController:(BDSKFilterController *)aFilterController condition:(BDSKCondition *)aCondition;
-
-- (NSView *)view;
 
 - (IBAction)addNewCondition:(id)sender;
 - (IBAction)removeThisCondition:(id)sender;
