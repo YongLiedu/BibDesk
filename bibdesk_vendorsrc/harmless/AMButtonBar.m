@@ -7,8 +7,6 @@
 //
 
 #import "AMButtonBar.h"
-#import "AMButtonBarItem.h"
-#import "AMButtonBarCell.h"
 #include <tgmath.h>
 
 static CGFloat const AM_START_GAP_WIDTH = 8.0;
@@ -105,10 +103,10 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 {
 	NSString *result = nil;
 	NSEnumerator *enumerator = [[self items] objectEnumerator];
-	AMButtonBarItem *item;
+	NSButton *item;
 	while (item = [enumerator nextObject]) {
 		if ([item state] == NSOnState) {
-			result = [item itemIdentifier];
+			result = [[item cell] representedObject];
 			break;
 		}
 	}
@@ -119,10 +117,10 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 {
 	NSMutableArray *result = [NSMutableArray array];
 	NSEnumerator *enumerator = [[self items] objectEnumerator];
-	AMButtonBarItem *item;
+	NSButton *item;
 	while (item = [enumerator nextObject]) {
 		if ([item state] == NSOnState) {
-			[result addObject:[item itemIdentifier]];
+			[result addObject:[[item cell] representedObject]];
 		}
 	}
 	return result;
@@ -132,12 +130,12 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 #pragma mark 		public methods
 //====================================================================
 
-- (AMButtonBarItem *)itemAtIndex:(NSInteger)idx
+- (NSButton *)itemAtIndex:(NSInteger)idx
 {
 	return [items objectAtIndex:idx];
 }
 
-- (void)insertItem:(AMButtonBarItem *)item atIndex:(NSInteger)idx
+- (void)insertItem:(NSButton *)item atIndex:(NSInteger)idx
 {
 	[items insertObject:item atIndex:idx];
     [item setTarget:self];
@@ -146,7 +144,7 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
     [self setNeedsDisplay:YES];
 }
 
-- (void)removeItem:(AMButtonBarItem *)item
+- (void)removeItem:(NSButton *)item
 {
     [item setTarget:nil];
 	[items removeObject:item];
@@ -170,9 +168,9 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 - (void)selectItemWithIdentifier:(NSString *)identifier
 {
 	NSEnumerator *enumerator = [[self items] objectEnumerator];
-	AMButtonBarItem *item;
+	NSButton *item;
 	while (item = [enumerator nextObject]) {
-		if ([[item itemIdentifier] isEqualToString:identifier]) {
+		if ([[[item cell] representedObject] isEqualToString:identifier]) {
 			[self didClickItem:item];
 			break;
 		}
@@ -183,9 +181,9 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 {
 	if ([self allowsMultipleSelection] || ([identifierList count] < 2)) {
 		NSEnumerator *enumerator = [[self items] objectEnumerator];
-		AMButtonBarItem *item;
+		NSButton *item;
 		while (item = [enumerator nextObject]) {
-			if ([identifierList containsObject:[item itemIdentifier]]) {
+			if ([identifierList containsObject:[[item cell] representedObject]]) {
 				[self didClickItem:item];
 			}
 		}
@@ -209,12 +207,12 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 	}
 }
 
-- (void)didClickItem:(AMButtonBarItem *)theItem
+- (void)didClickItem:(NSButton *)theItem
 {
 	BOOL didChangeSelection = NO;
 	if (![self allowsMultipleSelection]) {
         NSEnumerator *enumerator = [[self items] objectEnumerator];
-        AMButtonBarItem *item;
+        NSButton *item;
         while (item = [enumerator nextObject]) {
             if (item == theItem) {
                 // the button click already swaps the state

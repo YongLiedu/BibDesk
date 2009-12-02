@@ -8,9 +8,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class AMButtonBarItem;
-@class AMButtonBarCell;
-
 
 extern NSString *const AMButtonBarSelectionDidChangeNotification;
 
@@ -36,12 +33,12 @@ extern NSString *const AMButtonBarSelectionDidChangeNotification;
 - (NSString *)selectedItemIdentifier;
 - (NSArray *)selectedItemIdentifiers;
 
-- (AMButtonBarItem *)itemAtIndex:(NSInteger)index;
-- (void)didClickItem:(AMButtonBarItem *)item;
+- (NSButton *)itemAtIndex:(NSInteger)index;
+- (void)didClickItem:(NSButton *)item;
 
-- (void)insertItem:(AMButtonBarItem *)item atIndex:(NSInteger)index;
+- (void)insertItem:(NSButton *)item atIndex:(NSInteger)index;
 
-- (void)removeItem:(AMButtonBarItem *)item;
+- (void)removeItem:(NSButton *)item;
 - (void)removeItemAtIndex:(NSInteger)index;
 - (void)removeAllItems;
 
