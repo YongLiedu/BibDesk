@@ -90,7 +90,6 @@
 - (void)dealloc {
     [downloads makeObjectsPerformSelector:@selector(cancel)];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    BDSKDESTROY(group);
     BDSKDESTROY(undoManager);
     BDSKDESTROY(downloads);
     BDSKDESTROY(fieldEditor);
@@ -104,7 +103,7 @@
 }
 
 - (void)setRetrieving:(BOOL)retrieving {
-    [group setRetrieving:retrieving];
+    [[self group] setRetrieving:retrieving];
     [backForwardButton setEnabled:[webView canGoBack] forSegment:0];
     [backForwardButton setEnabled:[webView canGoForward] forSegment:1];
     [stopOrReloadButton setEnabled:YES];
@@ -175,14 +174,11 @@
 }
 
 - (BDSKWebGroup *)group {
-    return group;
+    return [self representedObject];
 }
 
 - (void)setGroup:(BDSKWebGroup *)newGroup {
-    if (group != newGroup) {
-        [group release];
-        group = [newGroup retain];
-    }
+    [self setRepresentedObject:newGroup];
 }
 
 - (NSString *)URLString {
@@ -225,7 +221,7 @@
 }
 
 - (IBAction)stopOrReloadAction:(id)sender {
-	if ([group isRetrieving]) {
+	if ([[self group] isRetrieving]) {
 		[webView stopLoading:sender];
 	} else {
 		[webView reload:sender];
@@ -389,7 +385,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
         BDSKASSERT(loadingWebFrame == nil);
         
         [self setRetrieving:YES];
-        [group setPublications:nil];
+        [[self group] setPublications:nil];
         loadingWebFrame = frame;
         
         WebDataSource *dataSource = [frame provisionalDataSource];
@@ -450,13 +446,13 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
         [self setRetrieving:NO];
         loadingWebFrame = nil;
     }
-    [group addPublications:newPubs ?: [NSArray array]];
+    [[self group] addPublications:newPubs ?: [NSArray array]];
 }
 
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
     if (frame == loadingWebFrame) {
         [self setRetrieving:NO];
-        [group addPublications:nil];
+        [[self group] addPublications:nil];
         loadingWebFrame = nil;
     }
     

@@ -63,24 +63,22 @@
 
 - (id)initForDocument:(BibDocument *)aDocument
 {    
-    self = [super init];
-    if(!self) return nil;
-    
-    results = nil;
-    filteredResults = nil;
-    filterURLs = nil;
-    
-    canceledSearch = NO;
+    if (self = [super initWithNibName:@"BDSKFileContentSearch" bundle:nil]) {
+        results = nil;
+        filteredResults = nil;
+        filterURLs = nil;
         
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
-    
-    NSParameterAssert([aDocument respondsToSelector:@selector(removeFileContentSearch:)]);
-    [self setDocument:aDocument];
-    
-    searchIndex = [[BDSKFileSearchIndex alloc] initForOwner:aDocument];
-    search = [[BDSKFileSearch alloc] initWithIndex:searchIndex delegate:self];
-    searchFieldDidEndEditing = NO;
-    
+        canceledSearch = NO;
+            
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
+        
+        NSParameterAssert([aDocument respondsToSelector:@selector(removeFileContentSearch:)]);
+        [self setRepresentedObject:aDocument];
+        
+        searchIndex = [[BDSKFileSearchIndex alloc] initForOwner:aDocument];
+        search = [[BDSKFileSearch alloc] initWithIndex:searchIndex delegate:self];
+        searchFieldDidEndEditing = NO;
+    }
     return self;
 }
     
@@ -140,15 +138,14 @@
     [indexProgressBar setDoubleValue:[searchIndex progressValue]];
 }    
 
-- (NSString *)windowNibName
-{
-    return @"BDSKFileContentSearch";
+- (id)document {
+    return [self representedObject];
 }
 
 - (NSView *)controlView
 {
     if(controlView == nil)
-        [self window]; // this forces a load of the nib
+        [self view]; // this forces a load of the nib
     return controlView;
 }
 
@@ -160,7 +157,7 @@
 - (NSTableView *)tableView
 {
     if(tableView == nil)
-        [self window]; // this forces a load of the nib
+        [self view]; // this forces a load of the nib
     return tableView;
 }
 
@@ -324,13 +321,13 @@
 
 - (NSData *)sortDescriptorData
 {
-    [self window];
+    [self view];
     return [NSArchiver archivedDataWithRootObject:[resultsArrayController sortDescriptors]];
 }
 
 - (void)setSortDescriptorData:(NSData *)data
 {
-    [self window];
+    [self view];
     NSMutableArray *sortDescriptors = [NSMutableArray array];
     [sortDescriptors addObjectsFromArray:[NSUnarchiver unarchiveObjectWithData:data]];
     NSUInteger i = [sortDescriptors count];
@@ -428,6 +425,8 @@
 
 - (void)terminate
 {
+    [self saveSortDescriptors];
+    
     // cancel the search
     [self cancelCurrentSearch:nil];
     
@@ -445,11 +444,6 @@
 - (void)saveSortDescriptors
 {
     [[NSUserDefaults standardUserDefaults] setObject:[self sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
-}
-
-- (void)windowWillClose:(NSNotification *)notification
-{
-    [self saveSortDescriptors];
 }
 
 - (void)handleApplicationWillTerminate:(NSNotification *)notification

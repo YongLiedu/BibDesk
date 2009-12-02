@@ -48,7 +48,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
     IBOutlet NSSegmentedControl *backForwardButton;
     IBOutlet NSButton *stopOrReloadButton;
     
-    BDSKWebGroup *group;
     BibDocument *document;
     WebFrame *loadingWebFrame;
     NSUndoManager *undoManager;

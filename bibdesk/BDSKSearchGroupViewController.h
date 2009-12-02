@@ -44,8 +44,6 @@
     IBOutlet BDSKCollapsibleView *collapsibleView;
     IBOutlet NSSearchField *searchField;
     IBOutlet NSButton *searchButton;
-    
-    BDSKSearchGroup *group;
 }
 
 - (BDSKSearchGroup *)group;

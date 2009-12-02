@@ -45,7 +45,7 @@
 @interface BDSKSelectionPreservingArrayController : NSArrayController
 @end
 
-@interface BDSKFileContentSearchController : NSWindowController <BDSKSearchDelegate, NSTableViewDelegate, NSTextFieldDelegate>
+@interface BDSKFileContentSearchController : NSViewController <BDSKSearchDelegate, NSTableViewDelegate, NSTextFieldDelegate>
 {
     NSMutableArray *results;
     NSMutableArray *filteredResults;
@@ -68,6 +68,7 @@
 
 // Use this method to instantiate a search controller for use within a document window
 - (id)initForDocument:(BibDocument *)aDocument;
+
 - (NSView *)controlView;
 - (NSTableView *)tableView;
 // Use this to connect a search field and initiate a search

@@ -50,7 +50,6 @@
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    BDSKDESTROY(group);
     [super dealloc];
 }
 
@@ -63,8 +62,9 @@
 }
 
 - (void)updateSearchView {
-    BDSKASSERT(group);
+    BDSKASSERT([self group]);
     [self view];
+    BDSKSearchGroup *group = [self group];
     NSString *name = [[group serverInfo] name];
     [searchField setStringValue:[group searchTerm] ?: @""];
     [searchField setRecentSearches:[group history]];
@@ -76,30 +76,27 @@
 }
 
 - (BDSKSearchGroup *)group {
-    return group;
+    return [self representedObject];
 }
 
 - (void)setGroup:(BDSKSearchGroup *)newGroup {
-    if (group != newGroup) {
-        if (group)
-            [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKExternalGroupUpdatedNotification object:group];
-        
-        [group release];
-        group = [newGroup retain];
-        
-        if (group)
+    if ([self representedObject] != newGroup) {
+        if ([self representedObject])
+            [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKExternalGroupUpdatedNotification object:[self representedObject]];
+        [self setRepresentedObject:newGroup];
+        if ([self representedObject])
             [self updateSearchView];
     }
 }
 
 - (IBAction)changeSearchTerm:(id)sender {
-    [group setSearchTerm:[sender stringValue]];
-    [group setHistory:[sender recentSearches]];
+    [[self group] setSearchTerm:[sender stringValue]];
+    [[self group] setHistory:[sender recentSearches]];
 }
 
 - (IBAction)nextSearch:(id)sender {
     [self changeSearchTerm:searchField];
-    [group search];
+    [[self group] search];
 }
 
 - (IBAction)searchHelp:(id)sender{
@@ -114,7 +111,7 @@
 }
 
 - (void)handleSearchGroupUpdatedNotification:(NSNotification *)notification{
-    [searchButton setEnabled:[group isRetrieving] == NO];
+    [searchButton setEnabled:[[self group] isRetrieving] == NO];
 }
 
 @end
