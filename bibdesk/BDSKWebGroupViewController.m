@@ -119,7 +119,7 @@
     }
 }
 
-- (void)windowDidLoad {
+- (void)awakeFromNib {
     // navigation views
     [collapsibleView setMinSize:[collapsibleView frame].size];
     [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
