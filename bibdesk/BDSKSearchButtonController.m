@@ -62,6 +62,7 @@
     [item setShowsBorderOnlyWhileMouseInside:YES];
     [item setButtonType:NSPushOnPushOffButton];
     [[item cell] setControlSize:NSSmallControlSize];
+    [item setFont:[NSFont boldSystemFontOfSize:12.0]];
     [item setTitle:title];
     [[item cell] setRepresentedObject:identifier];
     return item;
