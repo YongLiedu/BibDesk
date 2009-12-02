@@ -444,8 +444,6 @@
 		F97C9DB20C4481670002EE01 /* BDSKISIGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DB10C4481670002EE01 /* BDSKISIGroupServer.m */; };
 		F97C9DBE0C44866F0002EE01 /* WSGeneratedObj.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */; };
 		F97C9DBF0C4486700002EE01 /* BDSKISIWebServices.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DBD0C44866F0002EE01 /* BDSKISIWebServices.m */; };
-		F98AACDE0D43DB5A00D3CD64 /* libssl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F98AACDD0D43DB5A00D3CD64 /* libssl.dylib */; };
-		F98AACF50D43E13C00D3CD64 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F98AACF40D43E13C00D3CD64 /* libcrypto.dylib */; };
 		F98DB3180A23C7730040D347 /* BDSKTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = F98DB3160A23C7730040D347 /* BDSKTemplate.m */; };
 		F990C58C0D42D58D00B5425E /* BDSKDocumentSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = F990C58A0D42D58D00B5425E /* BDSKDocumentSearch.m */; };
 		F9936CC60BC746C300A32DC4 /* BDSKItemSearchIndexes.m in Sources */ = {isa = PBXBuildFile; fileRef = F9936CC40BC746C300A32DC4 /* BDSKItemSearchIndexes.m */; };
@@ -1601,8 +1599,6 @@
 				F9DF3BC209B7605E00342ADE /* SystemConfiguration.framework in Frameworks */,
 				F92ECBA009DEF86600A244D0 /* Security.framework in Frameworks */,
 				F95ED6950B07BA4E00000BBF /* ExceptionHandling.framework in Frameworks */,
-				F98AACDE0D43DB5A00D3CD64 /* libssl.dylib in Frameworks */,
-				F98AACF50D43E13C00D3CD64 /* libcrypto.dylib in Frameworks */,
 				CEE8DEC90E5C3FB700EFA97F /* yaz.framework in Frameworks */,
 				CEE8DECA0E5C3FB700EFA97F /* AGRegex.framework in Frameworks */,
 				CEE8DECB0E5C3FB700EFA97F /* FileView.framework in Frameworks */,
