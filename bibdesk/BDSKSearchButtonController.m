@@ -39,7 +39,7 @@
 #import "BDSKSearchButtonController.h"
 #import "BDSKEdgeView.h"
 #import "BDSKGradientView.h"
-#import "AMButtonBarItem.h"
+#import "AMButtonBar.h"
 
 @implementation BDSKSearchButtonController
 
@@ -56,6 +56,17 @@
     [super dealloc];
 }
 
+- (NSButton *)newButtonWithItemIdentifier:(NSString *)identifier title:(NSString *)title {
+    NSButton *item = [[NSButton alloc] init];
+    [item setBezelStyle:NSRecessedBezelStyle];
+    [item setShowsBorderOnlyWhileMouseInside:YES];
+    [item setButtonType:NSPushOnPushOffButton];
+    [[item cell] setControlSize:NSSmallControlSize];
+    [item setTitle:title];
+    [[item cell] setRepresentedObject:identifier];
+    return item;
+}
+
 - (void)awakeFromNib
 {
     [(BDSKEdgeView *)[self view] setEdges:BDSKMinYEdgeMask];
@@ -63,26 +74,20 @@
     [gradientView setGradient:[[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.82 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.914 alpha:1.0]] autorelease]];
     [buttonBar setAllowsMultipleSelection:NO];
     
-    AMButtonBarItem *item = [[AMButtonBarItem alloc] initWithIdentifier:BDSKPersonString];
-    [item setTitle:NSLocalizedString(@"Person", @"Search button")];
+    NSButton *item = [self newButtonWithItemIdentifier:BDSKPersonString title:NSLocalizedString(@"Person", @"Search button")];
     [buttonBar insertItem:item atIndex:0];
     [item release];
     
-    item = [[AMButtonBarItem alloc] initWithIdentifier:BDSKTitleString];
-    [item setTitle:NSLocalizedString(@"Title", @"Search button")];
+    item = [self newButtonWithItemIdentifier:BDSKTitleString title:NSLocalizedString(@"Title", @"Search button")];
     [buttonBar insertItem:item atIndex:0];
     [item release];
     
-    item = [[AMButtonBarItem alloc] initWithIdentifier:BDSKAllFieldsString];
-    [item setTitle:NSLocalizedString(@"Any Field", @"Search button")];
+    item = [self newButtonWithItemIdentifier:BDSKAllFieldsString title:NSLocalizedString(@"Any Field", @"Search button")];
     [buttonBar insertItem:item atIndex:0];
     [item release];
     
-    skimNotesItem = [[AMButtonBarItem alloc] initWithIdentifier:BDSKSkimNotesString];
-    [skimNotesItem setTitle:NSLocalizedString(@"Skim Notes", @"Search button")];
-    
-    fileContentItem = [[AMButtonBarItem alloc] initWithIdentifier:BDSKFileContentSearchString];
-    [fileContentItem setTitle:NSLocalizedString(@"File Content", @"Search button")];
+    skimNotesItem = [self newButtonWithItemIdentifier:BDSKSkimNotesString title:NSLocalizedString(@"Skim Notes", @"Search button")];
+    fileContentItem = [self newButtonWithItemIdentifier:BDSKFileContentSearchString title:NSLocalizedString(@"File Content", @"Search button")];
 }
 
 - (NSString *)selectedItemIdentifier { return [buttonBar selectedItemIdentifier]; }

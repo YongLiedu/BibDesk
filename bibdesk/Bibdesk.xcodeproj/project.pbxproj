@@ -403,8 +403,6 @@
 		F923501A089A813E00EFEB06 /* NSDate_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9235018089A813E00EFEB06 /* NSDate_BDSKExtensions.m */; };
 		F92405030BC5856900672839 /* BDSKLevelIndicatorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F92405010BC5856900672839 /* BDSKLevelIndicatorCell.m */; };
 		F924FC020BC3FFFC00672839 /* AMButtonBar.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FBF00BC3FFFC00672839 /* AMButtonBar.m */; };
-		F924FC040BC3FFFC00672839 /* AMButtonBarCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FBF20BC3FFFC00672839 /* AMButtonBarCell.m */; };
-		F924FC060BC3FFFC00672839 /* AMButtonBarItem.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FBF40BC3FFFC00672839 /* AMButtonBarItem.m */; };
 		F924FC310BC4322500672839 /* BDSKSearchButtonController.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FC2F0BC4322500672839 /* BDSKSearchButtonController.m */; };
 		F9252E2308F60D170045D563 /* BDSKFileContentSearchController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9252E2108F60D170045D563 /* BDSKFileContentSearchController.m */; };
 		F925332408FC9FB80045D563 /* BDSKFileSearchIndex.m in Sources */ = {isa = PBXBuildFile; fileRef = F925332208FC9FB80045D563 /* BDSKFileSearchIndex.m */; };
@@ -1414,10 +1412,6 @@
 		F92405010BC5856900672839 /* BDSKLevelIndicatorCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKLevelIndicatorCell.m; sourceTree = "<group>"; };
 		F924FBEF0BC3FFFC00672839 /* AMButtonBar.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; path = AMButtonBar.h; sourceTree = "<group>"; };
 		F924FBF00BC3FFFC00672839 /* AMButtonBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AMButtonBar.m; sourceTree = "<group>"; };
-		F924FBF10BC3FFFC00672839 /* AMButtonBarCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AMButtonBarCell.h; sourceTree = "<group>"; };
-		F924FBF20BC3FFFC00672839 /* AMButtonBarCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AMButtonBarCell.m; sourceTree = "<group>"; };
-		F924FBF30BC3FFFC00672839 /* AMButtonBarItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AMButtonBarItem.h; sourceTree = "<group>"; };
-		F924FBF40BC3FFFC00672839 /* AMButtonBarItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AMButtonBarItem.m; sourceTree = "<group>"; };
 		F924FC2E0BC4322500672839 /* BDSKSearchButtonController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchButtonController.h; sourceTree = "<group>"; };
 		F924FC2F0BC4322500672839 /* BDSKSearchButtonController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchButtonController.m; sourceTree = "<group>"; };
 		F9252E2008F60D170045D563 /* BDSKFileContentSearchController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFileContentSearchController.h; sourceTree = "<group>"; };
@@ -2690,10 +2684,6 @@
 			children = (
 				F924FBEF0BC3FFFC00672839 /* AMButtonBar.h */,
 				F924FBF00BC3FFFC00672839 /* AMButtonBar.m */,
-				F924FBF10BC3FFFC00672839 /* AMButtonBarCell.h */,
-				F924FBF20BC3FFFC00672839 /* AMButtonBarCell.m */,
-				F924FBF30BC3FFFC00672839 /* AMButtonBarItem.h */,
-				F924FBF40BC3FFFC00672839 /* AMButtonBarItem.m */,
 			);
 			path = harmless;
 			sourceTree = "<group>";
@@ -3493,8 +3483,6 @@
 				CE4385E90BB81D0500A56987 /* BDSKSearchBookmarkController.m in Sources */,
 				F9B3405E0BBC16720072C2B0 /* BibItem_PubMedLookup.m in Sources */,
 				F924FC020BC3FFFC00672839 /* AMButtonBar.m in Sources */,
-				F924FC040BC3FFFC00672839 /* AMButtonBarCell.m in Sources */,
-				F924FC060BC3FFFC00672839 /* AMButtonBarItem.m in Sources */,
 				F924FC310BC4322500672839 /* BDSKSearchButtonController.m in Sources */,
 				F92405030BC5856900672839 /* BDSKLevelIndicatorCell.m in Sources */,
 				F9936CC60BC746C300A32DC4 /* BDSKItemSearchIndexes.m in Sources */,

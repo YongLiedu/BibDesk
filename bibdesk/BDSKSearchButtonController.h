@@ -37,15 +37,14 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "AMButtonBar.h"
 
-@class BDSKEdgeView, BDSKGradientView;
+@class BDSKEdgeView, BDSKGradientView, AMButtonBar;
 
 @interface BDSKSearchButtonController : NSViewController {
     IBOutlet AMButtonBar *buttonBar;
     IBOutlet BDSKGradientView *gradientView;
-    AMButtonBarItem *fileContentItem;
-    AMButtonBarItem *skimNotesItem;
+    NSButton *fileContentItem;
+    NSButton *skimNotesItem;
     BOOL hasFileContentItem;
     BOOL hasSkimNotesItem;
 }
