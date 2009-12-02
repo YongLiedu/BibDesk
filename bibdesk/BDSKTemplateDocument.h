@@ -47,7 +47,7 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 - (void)tokenField:(NSTokenField *)tokenField textViewDidChangeSelection:(NSTextView *)textView;
 @end
 
-@class BDSKToken, BDSKTypeTemplate;
+@class BDSKToken, BDSKTypeTemplate, BDSKTableView;
 
 @interface BDSKTemplateDocument : NSDocument <NSTableViewDelegate, NSTableViewDataSource, BDSKTokenFieldDelegate>
 {
@@ -68,7 +68,7 @@ extern NSString *BDSKRichTextTemplateDocumentType;
     IBOutlet NSTextView *separatorTemplateTextView;
     IBOutlet NSTextView *suffixTemplateTextView;
     
-    IBOutlet NSTableView *tableView;
+    IBOutlet BDSKTableView *tableView;
     IBOutlet NSArrayController *templateArrayController;
     IBOutlet NSObjectController *tokenObjectController;
     IBOutlet NSTokenField *specialTokenField;

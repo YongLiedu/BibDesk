@@ -52,6 +52,7 @@
 #import "NSInvocation_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKPrintableView.h"
+#import "BDSKTableView.h"
 
 static CGFloat BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
 
@@ -238,6 +239,8 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
     [self updateTextViews];
     
     [self setupOptionsMenus];
+    
+    [tableView setTypeSelectHelper:[[[BDSKTypeSelectHelper alloc] init] autorelease]];
     
     [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKTypeTemplateRowsPboardType, nil]];
     
@@ -1213,6 +1216,15 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         return YES;
     }
     return NO;
+}
+
+- (NSArray *)tableView:(NSTableView *)tv typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)aTypeSelectHelper {
+    return [[self typeTemplates] valueForKey:@"pubType"];
+}
+
+- (void)tableViewInsertNewline:(NSTableView *)tv {
+    BDSKTypeTemplate *selTemplate = [self objectInTypeTemplatesAtIndex:[tableView selectedRow]];
+    [selTemplate setIncluded:[selTemplate isIncluded] == NO];
 }
 
 #pragma mark NSSplitView delegate
