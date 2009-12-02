@@ -90,9 +90,7 @@
 		CE21D10B09208B9D0075E607 /* BDSKGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE21D10909208B9D0075E607 /* BDSKGroup.m */; };
 		CE22E1CE0A8CCF9D002CEFB8 /* BDSKOrphanedFilesFinder.m in Sources */ = {isa = PBXBuildFile; fileRef = CE22E1CC0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.m */; };
 		CE2391620A334890009F3A5B /* BDSKDocumentInfoWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2391600A334890009F3A5B /* BDSKDocumentInfoWindowController.m */; };
-		CE24B33410C3E13900818EDF /* BDSKLibraryGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = CE24B33210C3E13900818EDF /* BDSKLibraryGroup.h */; };
 		CE24B33510C3E13900818EDF /* BDSKLibraryGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE24B33310C3E13900818EDF /* BDSKLibraryGroup.m */; };
-		CE24B35410C3E9E100818EDF /* BDSKLastImportGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = CE24B35210C3E9E100818EDF /* BDSKLastImportGroup.h */; };
 		CE24B35510C3E9E100818EDF /* BDSKLastImportGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE24B35310C3E9E100818EDF /* BDSKLastImportGroup.m */; };
 		CE26481D0B5AB4B800D4B5B8 /* BDSKDragTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = CE26481B0B5AB4B700D4B5B8 /* BDSKDragTextField.m */; };
 		CE27D95C0AF92BFD00419879 /* BDSKZoomableTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE27D95A0AF92BFD00419879 /* BDSKZoomableTextView.m */; };
@@ -329,7 +327,6 @@
 		CEFDBDBE0AEA86BA009EE99D /* BDSKSmartGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDBC0AEA86BA009EE99D /* BDSKSmartGroup.m */; };
 		CEFDBDC60AEA86F0009EE99D /* BDSKStaticGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDC40AEA86F0009EE99D /* BDSKStaticGroup.m */; };
 		CEFDBDDE0AEA87F8009EE99D /* BDSKCategoryGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDDC0AEA87F8009EE99D /* BDSKCategoryGroup.m */; };
-		CEFF6D4110C14D7D006CFC80 /* BDSKExternalGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFF6D3F10C14D7D006CFC80 /* BDSKExternalGroup.h */; };
 		CEFF6D4210C14D7D006CFC80 /* BDSKExternalGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFF6D4010C14D7D006CFC80 /* BDSKExternalGroup.m */; };
 		EF902DA60F12410300E5DE14 /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE30758095000C3F701 /* AGRegex.framework */; };
 		EF902DA70F12410300E5DE14 /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
@@ -2790,9 +2787,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CEFF6D4110C14D7D006CFC80 /* BDSKExternalGroup.h in Headers */,
-				CE24B33410C3E13900818EDF /* BDSKLibraryGroup.h in Headers */,
-				CE24B35410C3E9E100818EDF /* BDSKLastImportGroup.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
