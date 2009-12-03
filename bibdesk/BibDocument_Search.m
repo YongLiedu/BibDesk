@@ -163,21 +163,16 @@ Ensure that views are always ordered vertically from top to bottom as
         if ([tableView tableColumnWithIdentifier:BDSKRelevanceString] == nil)
             [tableView insertTableColumnWithIdentifier:BDSKRelevanceString atIndex:0];
         
-        // note: if selectedIdentifier was previously selected, AMButtonBar won't post the selection change notification, but we need to avoid posting it twice
-        if ([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKAllFieldsString]) {
+        // note: if selectedIdentifier was previously selected, searchButtonController won't post the selection change notification, but we need to avoid posting it twice
+        if ([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKAllFieldsString])
             [self searchButtonControllerSelectionDidChange:nil];
-        } else if (nil == [searchButtonController selectedItemIdentifier]) {
+        else
             [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
-            [self searchButtonControllerSelectionDidChange:nil];
-        } else {
-            // should never reach this
-            [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
-    }
         
     } else {
         // update existing search
         [self searchButtonControllerSelectionDidChange:nil];
-}
+    }
 }
 
 - (void)hideSearchButtonView
@@ -185,8 +180,8 @@ Ensure that views are always ordered vertically from top to bottom as
     if ([self isDisplayingSearchButtons]) {
         [tableView removeTableColumnWithIdentifier:BDSKRelevanceString];
         [self removeControlView:[searchButtonController view]];
-        [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
         [searchButtonController setDelegate:nil];
+        [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
         
         if ([previousSortKey isEqualToString:BDSKRelevanceString]) {
             [previousSortKey release];
@@ -197,10 +192,9 @@ Ensure that views are always ordered vertically from top to bottom as
             [self sortPubsByKey:[[previousSortKey retain] autorelease]];
         }
         
-    } else {
-        // handle UI updates when search: action is called without the search view in place
-        [self searchButtonControllerSelectionDidChange:nil];
     }
+    // handle UI updates when search: action is called without the search view in place
+    [self searchButtonControllerSelectionDidChange:nil];
 }
 
 - (IBAction)search:(id)sender{

@@ -126,6 +126,7 @@
 - (void)selectButtonWithRepresentedObject:(id)representedObject {
 	for (NSButton *button in buttons) {
         if ([[[button cell] representedObject] isEqual:representedObject]) {
+            [button setState:[button state] == NSOnState ? NSOffState : NSOnState];
             [self clickButton:button];
             break;
         }
