@@ -179,25 +179,25 @@
     [self selectButtonWithRepresentedObject:[sender representedObject]];
 }
 
-- (void)addOverflowItemForButton:(NSButton *)button {
-    if ([overflowButton superview] == nil) {
-        if (overflowButton == nil) {
-            overflowButton = [[BDSKImagePopUpButton alloc] initWithFrame:NSZeroRect pullsDown:YES];
-            [[overflowButton cell] setArrowPosition:NSPopUpNoArrow];
-            [[overflowButton cell] setUsesItemFromMenu:NO];
-            [[overflowButton cell] setAltersStateOfSelectedItem:NO];
-            [overflowButton addItemWithTitle:@""];
-            [overflowButton setIcon:[NSImage imageNamed:@"Overflow"]];
-            [overflowButton setIconSize:[[overflowButton icon] size]];
-            [overflowButton sizeToFit];
-        } else {
-            while ([overflowButton numberOfItems] > 1)
-                [overflowButton removeItemAtIndex:1];
-        }
-        [overflowButton setFrameOrigin:NSMakePoint(NSMaxX([self bounds]) - NSWidth([overflowButton frame]), floor(0.5 * (NSHeight([self frame]) - NSHeight([overflowButton frame]))))];
-        [self addSubview:overflowButton];
+- (void)addOverflowButton {
+    if (overflowButton == nil) {
+        overflowButton = [[BDSKImagePopUpButton alloc] initWithFrame:NSZeroRect pullsDown:YES];
+        [[overflowButton cell] setArrowPosition:NSPopUpNoArrow];
+        [[overflowButton cell] setUsesItemFromMenu:NO];
+        [[overflowButton cell] setAltersStateOfSelectedItem:NO];
+        [overflowButton addItemWithTitle:@""];
+        [overflowButton setIcon:[NSImage imageNamed:@"Overflow"]];
+        [overflowButton setIconSize:[[overflowButton icon] size]];
+        [overflowButton sizeToFit];
+    } else {
+        while ([overflowButton numberOfItems] > 1)
+            [overflowButton removeItemAtIndex:1];
     }
-    
+    [overflowButton setFrameOrigin:NSMakePoint(NSMaxX([self bounds]) - NSWidth([overflowButton frame]), floor(0.5 * (NSHeight([self frame]) - NSHeight([overflowButton frame]))))];
+    [self addSubview:overflowButton];
+}
+
+- (void)addOverflowItemForButton:(NSButton *)button {
     NSMenuItem *item = [[NSMenuItem alloc] initWithTitle:[button title] action:@selector(selectOverflowItem:) keyEquivalent:@""];
     [item setTarget:self];
     [item setRepresentedObject:[[button cell] representedObject]];
@@ -209,17 +209,26 @@
 - (void)tile {
 	NSPoint origin = NSMakePoint(BUTTON_MARGIN, 0.0);
     NSRect bounds = [self bounds];
+    NSButton *previousButton = nil;
     [overflowButton removeFromSuperview];
 	for (NSButton *button in buttons) {
         origin.y = floor(0.5 * (NSHeight(bounds) - NSHeight([button frame])));
 		[button setFrameOrigin:origin];
-        if (NSMaxX([button frame]) > NSMaxX(bounds) - OVERFLOW_WIDTH) {
+        if (NSMaxX([button frame]) > NSMaxX(bounds) - BUTTON_MARGIN) {
+            if ([overflowButton superview] == nil) {
+                [self addOverflowButton];
+                if (previousButton && NSMaxX([previousButton frame]) > NSMaxX(bounds) - NSWidth([overflowButton frame])) {
+                    [previousButton removeFromSuperview];
+                    [self addOverflowItemForButton:previousButton];
+                }
+            }
             [button removeFromSuperview];
             [self addOverflowItemForButton:button];
         } else {
             [self addSubview:button];
         }
 		origin.x += NSWidth([button frame]) + BUTTON_SEPARATION;
+        previousButton = button;
 	}
 }
 
