@@ -38,7 +38,6 @@
 
 #import "BDSKButtonBar.h"
 
-#define BUTTON_HEIGHT 17.0
 #define BUTTON_MARGIN 8.0
 #define BUTTON_SEPARATION 2.0
 
@@ -154,9 +153,10 @@
 }
 
 - (void)tile {
-	NSPoint origin = NSMakePoint(BUTTON_MARGIN, floor(0.5 * (NSHeight([self frame]) - BUTTON_HEIGHT)));
+	NSPoint origin = NSMakePoint(BUTTON_MARGIN, 0.0);
 	for (NSButton *button in buttons) {
         [button sizeToFit];
+        origin.y = floor(0.5 * (NSHeight([self frame]) - NSHeight([button frame])));
 		[button setFrameOrigin:origin];
 		origin.x += NSWidth([button frame]) + BUTTON_SEPARATION;
 	}
