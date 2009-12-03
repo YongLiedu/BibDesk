@@ -323,6 +323,7 @@
 		CEF94415092668EA00750FFA /* BDSKTableSortDescriptor.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF94413092668EA00750FFA /* BDSKTableSortDescriptor.m */; };
 		CEFA07F50AF0E52100A3B4B1 /* BDSKApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */; };
 		CEFA2F130CC0272C002A8262 /* BDSKTemplateTag.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFA2F110CC0272C002A8262 /* BDSKTemplateTag.m */; };
+		CEFA8E0310C7E9250034C14B /* Overflow.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEFA8E0210C7E9250034C14B /* Overflow.tiff */; };
 		CEFB73F610A07E31001DC4C1 /* libraryGroup.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEFB73F510A07E31001DC4C1 /* libraryGroup.tiff */; };
 		CEFD45890BFFC1F80027B933 /* NSWindow+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFD45870BFFC1F80027B933 /* NSWindow+Scripting.m */; };
 		CEFDBDBE0AEA86BA009EE99D /* BDSKSmartGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDBC0AEA86BA009EE99D /* BDSKSmartGroup.m */; };
@@ -1263,6 +1264,7 @@
 		CEFA2C150F98D25500531EB6 /* HowtoRelease.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = HowtoRelease.txt; sourceTree = "<group>"; };
 		CEFA2F100CC0272C002A8262 /* BDSKTemplateTag.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTemplateTag.h; sourceTree = "<group>"; };
 		CEFA2F110CC0272C002A8262 /* BDSKTemplateTag.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTemplateTag.m; sourceTree = "<group>"; };
+		CEFA8E0210C7E9250034C14B /* Overflow.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Overflow.tiff; sourceTree = "<group>"; };
 		CEFB73F510A07E31001DC4C1 /* libraryGroup.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = libraryGroup.tiff; sourceTree = "<group>"; };
 		CEFD45860BFFC1F80027B933 /* NSWindow+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSWindow+Scripting.h"; sourceTree = "<group>"; };
 		CEFD45870BFFC1F80027B933 /* NSWindow+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSWindow+Scripting.m"; sourceTree = "<group>"; };
@@ -2348,6 +2350,7 @@
 				F9022DB10758088000C3F701 /* key.tiff */,
 				F9022DB20758088000C3F701 /* newdoc.tiff */,
 				CE62DE4F0F4B797B00BDF01E /* next.tiff */,
+				CEFA8E0210C7E9250034C14B /* Overflow.tiff */,
 				F9022DB30758088000C3F701 /* preview.tiff */,
 				CE62DE500F4B797B00BDF01E /* previous.tiff */,
 				F9022DB80758088000C3F701 /* risDocIcon.icns */,
@@ -3126,6 +3129,7 @@
 				CEB5D6401072AE360001C135 /* TemplateDocument.xib in Resources */,
 				CEB5D6411072AE360001C135 /* TextImport.xib in Resources */,
 				CEFB73F610A07E31001DC4C1 /* libraryGroup.tiff in Resources */,
+				CEFA8E0310C7E9250034C14B /* Overflow.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

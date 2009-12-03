@@ -40,8 +40,11 @@
 #import "BDSKGradientView.h"
 
 
+@class BDSKImagePopUpButton;
+
 @interface BDSKButtonBar : BDSKGradientView {
 	NSMutableArray *buttons;
+    BDSKImagePopUpButton *overflowButton;
     id target;
     SEL action;
 }
