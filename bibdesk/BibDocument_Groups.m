@@ -264,8 +264,7 @@ The groupedPublications array is a subset of the publications array, developed b
                 [BDSKSkimNotesString isEqualToString:[searchButtonController selectedItemIdentifier]])
                 [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
             
-            [searchButtonController removeSkimNotesItem];
-            [searchButtonController removeFileContentItem];
+            [searchButtonController removeFileItems];
         }
         
         BOOL wasSearch = [self isDisplayingSearchGroupView];
@@ -290,8 +289,7 @@ The groupedPublications array is a subset of the publications array, developed b
         
     } else {
         if ([self isDisplayingSearchButtons]) {
-            [searchButtonController addSkimNotesItem];
-            [searchButtonController addFileContentItem];
+            [searchButtonController addFileItems];
         }
         
         [tableView setAlternatingRowBackgroundColors:[NSColor controlAlternatingRowBackgroundColors]];

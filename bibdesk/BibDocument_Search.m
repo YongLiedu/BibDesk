@@ -149,11 +149,9 @@ Ensure that views are always ordered vertically from top to bottom as
     [searchButtonController setDelegate:self];
     
     if ([self hasExternalGroupsSelected]) {
-        [searchButtonController removeSkimNotesItem];
-        [searchButtonController removeFileContentItem];
+        [searchButtonController removeFileItems];
     } else {
-        [searchButtonController addSkimNotesItem];
-        [searchButtonController addFileContentItem];
+        [searchButtonController addFileItems];
     }
     
     NSView *searchButtonView = [searchButtonController view];

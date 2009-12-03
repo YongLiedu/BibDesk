@@ -52,8 +52,6 @@
     IBOutlet BDSKButtonBar *buttonBar;
     NSButton *fileContentItem;
     NSButton *skimNotesItem;
-    BOOL hasFileContentItem;
-    BOOL hasSkimNotesItem;
     id <BDSKSearchButtonControllerDelegate> delegate;
 }
 
@@ -63,9 +61,7 @@
 - (void)selectItemWithIdentifier:(NSString *)ident;
 - (NSString *)selectedItemIdentifier;
 
-- (void)addFileContentItem;
-- (void)removeFileContentItem;
-- (void)addSkimNotesItem;
-- (void)removeSkimNotesItem;
+- (void)addFileItems;
+- (void)removeFileItems;
 
 @end

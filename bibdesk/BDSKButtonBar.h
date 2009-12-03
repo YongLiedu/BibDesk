@@ -55,17 +55,19 @@
 - (SEL)action;
 - (void)setAction:(SEL)newAction;
 
-
 - (void)clickButton:(NSButton *)button;
 
 - (NSArray *)buttons;
-- (NSButton *)buttonAtIndex:(NSInteger)index;
-- (void)insertButton:(NSButton *)button atIndex:(NSInteger)index;
+
+- (void)addButton:(NSButton *)button;
 - (void)removeButton:(NSButton *)button;
-- (void)removeButtonAtIndex:(NSInteger)index;
+
+- (NSButton *)newButtonWithTitle:(NSString *)title representedObject:(NSString *)object;
+- (NSButton *)addButtonWithTitle:(NSString *)title representedObject:(NSString *)object;
 
 - (NSButton *)selectedButton;
 - (id)representedObjectOfSelectedButton;
+- (void)selectButton:(NSButton *)button;
 - (void)selectButtonWithRepresentedObject:(id)representedObject;
 
 - (void)tile;

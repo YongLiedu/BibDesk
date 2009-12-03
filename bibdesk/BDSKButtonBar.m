@@ -88,15 +88,11 @@
     return buttons;
 }
 
-- (NSButton *)buttonAtIndex:(NSInteger)anIndex {
-	return [buttons objectAtIndex:anIndex];
-}
-
-- (void)insertButton:(NSButton *)button atIndex:(NSInteger)anIndex {
-	[buttons insertObject:button atIndex:anIndex];
+- (void)addButton:(NSButton *)button {
     [button setTarget:self];
     [button setAction:@selector(clickButton:)];
     [button setState:NSOffState];
+	[buttons addObject:button];
     [self tile];
     [self setNeedsDisplay:YES];
 }
@@ -109,8 +105,24 @@
 	[self setNeedsDisplay:YES];
 }
 
-- (void)removeButtonAtIndex:(NSInteger)anIndex {
-	[self removeButton:[buttons objectAtIndex:anIndex]];
+- (NSButton *)newButtonWithTitle:(NSString *)title representedObject:(NSString *)object {
+    NSButton *button = [[NSButton alloc] init];
+    [button setBezelStyle:NSRecessedBezelStyle];
+    [button setShowsBorderOnlyWhileMouseInside:YES];
+    [button setButtonType:NSPushOnPushOffButton];
+    [[button cell] setControlSize:NSSmallControlSize];
+    [button setFont:[NSFont boldSystemFontOfSize:12.0]];
+    [button setTitle:title];
+    [[button cell] setRepresentedObject:object];
+    [button sizeToFit];
+    return button;
+}
+
+- (NSButton *)addButtonWithTitle:(NSString *)title representedObject:(id)object {
+    NSButton *button = [self newButtonWithTitle:title representedObject:object];
+    [self addButton:button];
+    [button release];
+    return button;
 }
 
 - (NSButton *)selectedButton {
@@ -125,11 +137,15 @@
 	return [[[self selectedButton] cell] representedObject];
 }
 
+- (void)selectButton:(NSButton *)button {
+    [button setState:[button state] == NSOnState ? NSOffState : NSOnState];
+    [self clickButton:button];
+}
+
 - (void)selectButtonWithRepresentedObject:(id)representedObject {
 	for (NSButton *button in buttons) {
         if ([[[button cell] representedObject] isEqual:representedObject]) {
-            [button setState:[button state] == NSOnState ? NSOffState : NSOnState];
-            [self clickButton:button];
+            [self selectButton:button];
             break;
         }
     }
@@ -195,7 +211,6 @@
     NSRect bounds = [self bounds];
     [overflowButton removeFromSuperview];
 	for (NSButton *button in buttons) {
-        [button sizeToFit];
         origin.y = floor(0.5 * (NSHeight(bounds) - NSHeight([button frame])));
 		[button setFrameOrigin:origin];
         if (NSMaxX([button frame]) > NSMaxX(bounds) - OVERFLOW_WIDTH) {

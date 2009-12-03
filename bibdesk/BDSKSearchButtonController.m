@@ -56,18 +56,6 @@
     [super dealloc];
 }
 
-- (NSButton *)newButtonWithItemIdentifier:(NSString *)identifier title:(NSString *)title {
-    NSButton *item = [[NSButton alloc] init];
-    [item setBezelStyle:NSRecessedBezelStyle];
-    [item setShowsBorderOnlyWhileMouseInside:YES];
-    [item setButtonType:NSPushOnPushOffButton];
-    [[item cell] setControlSize:NSSmallControlSize];
-    [item setFont:[NSFont boldSystemFontOfSize:12.0]];
-    [item setTitle:title];
-    [[item cell] setRepresentedObject:identifier];
-    return item;
-}
-
 - (void)changeSelectedSearchButton:(id)sender {
     [[self delegate] searchButtonControllerSelectionDidChange:self];
 }
@@ -79,20 +67,12 @@
     [buttonBar setTarget:self];
     [buttonBar setAction:@selector(changeSelectedSearchButton:)];
     
-    NSButton *item = [self newButtonWithItemIdentifier:BDSKPersonString title:NSLocalizedString(@"Person", @"Search button")];
-    [buttonBar insertButton:item atIndex:0];
-    [item release];
+    [buttonBar addButtonWithTitle:NSLocalizedString(@"Any Field", @"Search button") representedObject:BDSKAllFieldsString];
+    [buttonBar addButtonWithTitle:NSLocalizedString(@"Title", @"Search button") representedObject:BDSKTitleString];
+    [buttonBar addButtonWithTitle:NSLocalizedString(@"Person", @"Search button") representedObject:BDSKPersonString];
     
-    item = [self newButtonWithItemIdentifier:BDSKTitleString title:NSLocalizedString(@"Title", @"Search button")];
-    [buttonBar insertButton:item atIndex:0];
-    [item release];
-    
-    item = [self newButtonWithItemIdentifier:BDSKAllFieldsString title:NSLocalizedString(@"Any Field", @"Search button")];
-    [buttonBar insertButton:item atIndex:0];
-    [item release];
-    
-    skimNotesItem = [self newButtonWithItemIdentifier:BDSKSkimNotesString title:NSLocalizedString(@"Skim Notes", @"Search button")];
-    fileContentItem = [self newButtonWithItemIdentifier:BDSKFileContentSearchString title:NSLocalizedString(@"File Content", @"Search button")];
+    skimNotesItem = [buttonBar newButtonWithTitle:NSLocalizedString(@"Skim Notes", @"Search button") representedObject:BDSKSkimNotesString];
+    fileContentItem = [buttonBar newButtonWithTitle:NSLocalizedString(@"Skim Notes", @"Search button") representedObject:BDSKFileContentSearchString ];
 }
 
 - (NSString *)selectedItemIdentifier {
@@ -111,34 +91,18 @@
     return delegate;
 }
 
-- (void)addFileContentItem {
-    if (hasFileContentItem == NO) {
-        [buttonBar insertButton:fileContentItem atIndex:[[buttonBar buttons] count]];
-        hasFileContentItem = YES;
-        [buttonBar setNeedsDisplay:YES];
-    }
+- (void)addFileItems {
+    if ([[buttonBar buttons] containsObject:fileContentItem] == NO)
+        [buttonBar addButton:fileContentItem];
+    if ([[buttonBar buttons] containsObject:skimNotesItem] == NO)
+        [buttonBar addButton:skimNotesItem];
 }
 
-- (void)removeFileContentItem {
-    if (hasFileContentItem) {
+- (void)removeFileItems {
+    if ([[buttonBar buttons] containsObject:fileContentItem])
         [buttonBar removeButton:fileContentItem];
-        hasFileContentItem = NO;
-        [buttonBar setNeedsDisplay:YES];
-    }
-}
-
-- (void)addSkimNotesItem {
-    if (hasSkimNotesItem == NO) {
-        [buttonBar insertButton:skimNotesItem atIndex:[[buttonBar buttons] count]];
-        hasSkimNotesItem = YES;
-    }
-}
-
-- (void)removeSkimNotesItem {
-    if (hasSkimNotesItem) {
+    if ([[buttonBar buttons] containsObject:skimNotesItem])
         [buttonBar removeButton:skimNotesItem];
-        hasSkimNotesItem = NO;
-    }
 }
 
 @end
