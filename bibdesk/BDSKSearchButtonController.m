@@ -92,10 +92,10 @@
 }
 
 - (void)addFileItems {
-    if ([[buttonBar buttons] containsObject:fileContentItem] == NO)
-        [buttonBar addButton:fileContentItem];
     if ([[buttonBar buttons] containsObject:skimNotesItem] == NO)
         [buttonBar addButton:skimNotesItem];
+    if ([[buttonBar buttons] containsObject:fileContentItem] == NO)
+        [buttonBar addButton:fileContentItem];
 }
 
 - (void)removeFileItems {
