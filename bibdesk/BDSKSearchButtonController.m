@@ -39,7 +39,7 @@
 #import "BDSKSearchButtonController.h"
 #import "BDSKEdgeView.h"
 #import "BDSKGradientView.h"
-#import "AMButtonBar.h"
+#import "BDSKButtonBar.h"
 
 @implementation BDSKSearchButtonController
 
@@ -68,40 +68,53 @@
     return item;
 }
 
+- (void)changeSelectedSearchButton:(id)sender {
+    [[self delegate] searchButtonControllerSelectionDidChange:self];
+}
+
 - (void)awakeFromNib
 {
     [(BDSKEdgeView *)[self view] setEdges:BDSKMinYEdgeMask];
     
     [gradientView setGradient:[[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.82 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.914 alpha:1.0]] autorelease]];
-    [buttonBar setAllowsMultipleSelection:NO];
+    [buttonBar setTarget:self];
+    [buttonBar setAction:@selector(changeSelectedSearchButton:)];
     
     NSButton *item = [self newButtonWithItemIdentifier:BDSKPersonString title:NSLocalizedString(@"Person", @"Search button")];
-    [buttonBar insertItem:item atIndex:0];
+    [buttonBar insertButton:item atIndex:0];
     [item release];
     
     item = [self newButtonWithItemIdentifier:BDSKTitleString title:NSLocalizedString(@"Title", @"Search button")];
-    [buttonBar insertItem:item atIndex:0];
+    [buttonBar insertButton:item atIndex:0];
     [item release];
     
     item = [self newButtonWithItemIdentifier:BDSKAllFieldsString title:NSLocalizedString(@"Any Field", @"Search button")];
-    [buttonBar insertItem:item atIndex:0];
+    [buttonBar insertButton:item atIndex:0];
     [item release];
     
     skimNotesItem = [self newButtonWithItemIdentifier:BDSKSkimNotesString title:NSLocalizedString(@"Skim Notes", @"Search button")];
     fileContentItem = [self newButtonWithItemIdentifier:BDSKFileContentSearchString title:NSLocalizedString(@"File Content", @"Search button")];
 }
 
-- (NSString *)selectedItemIdentifier { return [buttonBar selectedItemIdentifier]; }
+- (NSString *)selectedItemIdentifier {
+    return [buttonBar representedObjectOfSelectedButton];
+}
 
-- (void)selectItemWithIdentifier:(NSString *)ident { [buttonBar selectItemWithIdentifier:ident]; }
+- (void)selectItemWithIdentifier:(NSString *)ident {
+    [buttonBar selectButtonWithRepresentedObject:ident];
+}
 
-- (void)setDelegate:(id)delegate { [buttonBar setDelegate:delegate]; }
+- (void)setDelegate:(id<BDSKSearchButtonControllerDelegate>)newDelegate {
+    delegate = newDelegate;
+}
 
-- (id)delegate { return [buttonBar delegate]; }
+- (id<BDSKSearchButtonControllerDelegate>)delegate {
+    return delegate;
+}
 
 - (void)addFileContentItem {
     if (hasFileContentItem == NO) {
-        [buttonBar insertItem:fileContentItem atIndex:[[buttonBar items] count]];
+        [buttonBar insertButton:fileContentItem atIndex:[[buttonBar buttons] count]];
         hasFileContentItem = YES;
         [buttonBar setNeedsDisplay:YES];
     }
@@ -109,7 +122,7 @@
 
 - (void)removeFileContentItem {
     if (hasFileContentItem) {
-        [buttonBar removeItem:fileContentItem];
+        [buttonBar removeButton:fileContentItem];
         hasFileContentItem = NO;
         [buttonBar setNeedsDisplay:YES];
     }
@@ -117,17 +130,15 @@
 
 - (void)addSkimNotesItem {
     if (hasSkimNotesItem == NO) {
-        [buttonBar insertItem:skimNotesItem atIndex:[[buttonBar items] count]];
+        [buttonBar insertButton:skimNotesItem atIndex:[[buttonBar buttons] count]];
         hasSkimNotesItem = YES;
-        [buttonBar setNeedsDisplay:YES];
     }
 }
 
 - (void)removeSkimNotesItem {
     if (hasSkimNotesItem) {
-        [buttonBar removeItem:skimNotesItem];
+        [buttonBar removeButton:skimNotesItem];
         hasSkimNotesItem = NO;
-        [buttonBar setNeedsDisplay:YES];
     }
 }
 

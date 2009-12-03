@@ -37,12 +37,13 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
+#import "BDSKSearchButtonController.h"
 
 extern NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString);
 
 @class BDSKFileContentSearchController;
 
-@interface BibDocument (Search) <NSTextFieldDelegate>
+@interface BibDocument (Search) <NSTextFieldDelegate, BDSKSearchButtonControllerDelegate>
 
 - (NSString *)searchString;
 

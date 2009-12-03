@@ -38,19 +38,29 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKEdgeView, BDSKGradientView, AMButtonBar;
+
+@class BDSKSearchButtonController;
+
+@protocol BDSKSearchButtonControllerDelegate <NSObject>
+- (void)searchButtonControllerSelectionDidChange:(BDSKSearchButtonController *)controller;
+@end
+
+
+@class BDSKEdgeView, BDSKGradientView, BDSKButtonBar;
 
 @interface BDSKSearchButtonController : NSViewController {
-    IBOutlet AMButtonBar *buttonBar;
+    IBOutlet BDSKButtonBar *buttonBar;
     IBOutlet BDSKGradientView *gradientView;
     NSButton *fileContentItem;
     NSButton *skimNotesItem;
     BOOL hasFileContentItem;
     BOOL hasSkimNotesItem;
+    id <BDSKSearchButtonControllerDelegate> delegate;
 }
 
-- (void)setDelegate:(id)obj;
-- (id)delegate;
+- (void)setDelegate:(id<BDSKSearchButtonControllerDelegate>)newDelegate;
+- (id<BDSKSearchButtonControllerDelegate>)delegate;
+
 - (void)selectItemWithIdentifier:(NSString *)ident;
 - (NSString *)selectedItemIdentifier;
 

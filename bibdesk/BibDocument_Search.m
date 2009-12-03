@@ -95,7 +95,7 @@
     }
 }
 
-- (void)buttonBarSelectionDidChange:(NSNotification *)aNotification;
+- (void)searchButtonControllerSelectionDidChange:(BDSKSearchButtonController *)controller;
 {
     NSString *field = [searchButtonController selectedItemIdentifier];
     if (searchButtonController && nil == field) {
@@ -165,10 +165,10 @@ Ensure that views are always ordered vertically from top to bottom as
         
         // note: if selectedIdentifier was previously selected, AMButtonBar won't post the selection change notification, but we need to avoid posting it twice
         if ([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKAllFieldsString]) {
-            [self buttonBarSelectionDidChange:nil];
+            [self searchButtonControllerSelectionDidChange:nil];
         } else if (nil == [searchButtonController selectedItemIdentifier]) {
             [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
-            [self buttonBarSelectionDidChange:nil];
+            [self searchButtonControllerSelectionDidChange:nil];
         } else {
             // should never reach this
             [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
@@ -176,7 +176,7 @@ Ensure that views are always ordered vertically from top to bottom as
         
     } else {
         // update existing search
-        [self buttonBarSelectionDidChange:nil];
+        [self searchButtonControllerSelectionDidChange:nil];
 }
 }
 
@@ -199,7 +199,7 @@ Ensure that views are always ordered vertically from top to bottom as
         
     } else {
         // handle UI updates when search: action is called without the search view in place
-        [self buttonBarSelectionDidChange:nil];
+        [self searchButtonControllerSelectionDidChange:nil];
     }
 }
 
