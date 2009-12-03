@@ -94,6 +94,7 @@
 	[buttons insertObject:button atIndex:anIndex];
     [button setTarget:self];
     [button setAction:@selector(clickButton:)];
+    [button setState:NSOffState];
     [self addSubview:button];
     [self tile];
     [self setNeedsDisplay:YES];
