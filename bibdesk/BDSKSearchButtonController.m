@@ -76,7 +76,6 @@
 {
     [(BDSKEdgeView *)[self view] setEdges:BDSKMinYEdgeMask];
     
-    [gradientView setGradient:[[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.82 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.914 alpha:1.0]] autorelease]];
     [buttonBar setTarget:self];
     [buttonBar setAction:@selector(changeSelectedSearchButton:)];
     

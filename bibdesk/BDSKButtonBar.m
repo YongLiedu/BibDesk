@@ -51,24 +51,9 @@
         buttons = [[NSMutableArray alloc] init];
         target = nil;
         action = NULL;
+        [self setGradient:[[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.82 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.914 alpha:1.0]] autorelease]];
     }
     return self;
-}
-
-- (id)initWithCoder:(NSCoder *)decoder {
-	if (self = [super initWithCoder:decoder]) {
-        buttons = [[NSMutableArray alloc] initWithArray:[decoder decodeObjectForKey:@"buttons"]];
-        target = [decoder decodeObjectForKey:@"target"];
-        action = NSSelectorFromString([decoder decodeObjectForKey:@"action"]);
-	}
-    return self;
-}
-
-- (void)encodeWithCoder:(NSCoder *)coder {
-    [super encodeWithCoder:coder];
-	[coder encodeObject:buttons forKey:@"buttons"];
-	[coder encodeConditionalObject:target forKey:@"target"];
-	[coder encodeObject:NSStringFromSelector(action) forKey:@"action"];
 }
 
 - (void)dealloc {

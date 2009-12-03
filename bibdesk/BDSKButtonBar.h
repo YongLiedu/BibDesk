@@ -37,9 +37,10 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKGradientView.h"
 
 
-@interface BDSKButtonBar : NSView {
+@interface BDSKButtonBar : BDSKGradientView {
 	NSMutableArray *buttons;
     id target;
     SEL action;

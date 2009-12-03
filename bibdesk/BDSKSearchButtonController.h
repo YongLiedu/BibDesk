@@ -50,7 +50,6 @@
 
 @interface BDSKSearchButtonController : NSViewController {
     IBOutlet BDSKButtonBar *buttonBar;
-    IBOutlet BDSKGradientView *gradientView;
     NSButton *fileContentItem;
     NSButton *skimNotesItem;
     BOOL hasFileContentItem;
