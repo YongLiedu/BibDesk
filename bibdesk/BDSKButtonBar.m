@@ -41,7 +41,6 @@
 
 #define BUTTON_MARGIN 8.0
 #define BUTTON_SEPARATION 2.0
-#define OVERFLOW_WIDTH 17.0
 
 
 @implementation BDSKButtonBar
