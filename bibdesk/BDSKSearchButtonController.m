@@ -72,7 +72,7 @@
     [buttonBar addButtonWithTitle:NSLocalizedString(@"Person", @"Search button") representedObject:BDSKPersonString];
     
     skimNotesItem = [buttonBar newButtonWithTitle:NSLocalizedString(@"Skim Notes", @"Search button") representedObject:BDSKSkimNotesString];
-    fileContentItem = [buttonBar newButtonWithTitle:NSLocalizedString(@"Skim Notes", @"Search button") representedObject:BDSKFileContentSearchString ];
+    fileContentItem = [buttonBar newButtonWithTitle:NSLocalizedString(@"File Content", @"Search button") representedObject:BDSKFileContentSearchString ];
 }
 
 - (NSString *)selectedItemIdentifier {
