@@ -37,13 +37,10 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
-#import "BDSKSearchButtonController.h"
 
 extern NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString);
 
-@class BDSKFileContentSearchController;
-
-@interface BibDocument (Search) <NSTextFieldDelegate, BDSKSearchButtonControllerDelegate>
+@interface BibDocument (Search) <NSTextFieldDelegate>
 
 - (NSString *)searchString;
 
@@ -59,6 +56,11 @@ extern NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString);
 
 - (NSArray *)publicationsMatchingSubstring:(NSString *)searchString inField:(NSString *)field;
 - (void)displayPublicationsMatchingSearchString:(NSString *)searchString indexName:(NSString *)field;
+
+- (void)changeSelectedSearchButton:(id)sender;
+
+- (void)addFileSearchItems;
+- (void)removeFileSearchItems;
 
 #pragma mark Content search
 

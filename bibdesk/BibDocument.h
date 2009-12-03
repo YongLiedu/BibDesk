@@ -46,8 +46,8 @@
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
 @class AGRegex, BDSKMacroResolver;
 @class BDSKEditor, BDSKMacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController, BDSKSearchGroupViewController;
-@class BDSKStatusBar, BDSKMainTableView, BDSKGroupOutlineView, BDSKGradientView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredView, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FVFileView;
-@class BDSKWebGroupViewController, BDSKSearchButtonController;
+@class BDSKStatusBar, BDSKButtonBar, BDSKMainTableView, BDSKGroupOutlineView, BDSKGradientView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredView, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FVFileView;
+@class BDSKWebGroupViewController;
 @class BDSKItemSearchIndexes, BDSKNotesSearchIndex, BDSKFileMigrationController, BDSKDocumentSearch;
 
 enum {
@@ -223,6 +223,18 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     
 	NSMutableString *frontMatter;    // for preambles, and stuff
 	
+#pragma mark Search variables
+    
+    BDSKItemSearchIndexes *searchIndexes;
+    BDSKNotesSearchIndex *notesSearchIndex;
+    BDSKEdgeView *searchButtonEdgeView;
+    BDSKButtonBar *searchButtonBar;
+    NSButton *fileContentItem;
+    NSButton *skimNotesItem;
+    BDSKDocumentSearch *documentSearch;
+    NSInteger rowToSelectAfterDelete;
+    NSPoint scrollLocationAfterDelete;
+    
 #pragma mark Copy & Drag related variables
 
     NSString *promiseDragColumnIdentifier;
@@ -255,13 +267,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     NSDictionary *mainWindowSetupDictionary;
     
     NSURL *saveTargetURL;
-    
-    BDSKItemSearchIndexes *searchIndexes;
-    BDSKNotesSearchIndex *notesSearchIndex;
-    BDSKSearchButtonController *searchButtonController;
-    BDSKDocumentSearch *documentSearch;
-    NSInteger rowToSelectAfterDelete;
-    NSPoint scrollLocationAfterDelete;
     
     BDSKFileMigrationController *migrationController;
     

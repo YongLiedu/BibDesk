@@ -66,6 +66,7 @@
 #import "NSTextView_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSEvent_BDSKExtensions.h"
+#import "BDSKButtonBar.h"
 
 static char BDSKDocumentFileViewObservationContext;
 static char BDSKDocumentDefaultsObservationContext;
@@ -350,7 +351,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 
 #pragma mark Control view animation
 
-- (BOOL)isDisplayingSearchButtons { return [documentWindow isEqual:[[searchButtonController view] window]]; }
+- (BOOL)isDisplayingSearchButtons { return [documentWindow isEqual:[searchButtonEdgeView window]]; }
 - (BOOL)isDisplayingFileContentSearch { return [documentWindow isEqual:[[fileSearchController tableView] window]]; }
 - (BOOL)isDisplayingSearchGroupView { return [documentWindow isEqual:[[searchGroupViewController view] window]]; }
 - (BOOL)isDisplayingWebGroupView { return [documentWindow isEqual:[[webGroupViewController view] window]]; }
@@ -673,7 +674,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 }
 
 - (BOOL)searchKeyDependsOnKey:(NSString *)key{
-    NSString *searchKey = [[searchField stringValue] isEqualToString:@""] ? nil : [searchButtonController selectedItemIdentifier];
+    NSString *searchKey = [[searchField stringValue] isEqualToString:@""] ? nil : [searchButtonBar representedObjectOfSelectedButton];
     if ([searchKey isEqualToString:BDSKSkimNotesString] || [searchKey isEqualToString:BDSKFileContentSearchString])
         return [key isEqualToString:BDSKLocalFileString];
     else if (key == nil)

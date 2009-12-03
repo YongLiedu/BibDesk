@@ -53,7 +53,6 @@
 #import "BibDocument_Groups.h"
 #import "BDSKMainTableView.h"
 #import "BDSKFindController.h"
-#import "BDSKSearchButtonController.h"
 #import "BDSKItemSearchIndexes.h"
 #import "BDSKNotesSearchIndex.h"
 #import "NSArray_BDSKExtensions.h"
@@ -64,6 +63,9 @@
 #import "BDSKDocumentSearch.h"
 #import "NSView_BDSKExtensions.h"
 #import "NSDictionary_BDSKExtensions.h"
+#import "BDSKEdgeView.h"
+#import "BDSKButtonBar.h"
+
 
 @implementation BibDocument (Search)
 
@@ -95,12 +97,11 @@
     }
 }
 
-- (void)searchButtonControllerSelectionDidChange:(BDSKSearchButtonController *)controller;
-{
-    NSString *field = [searchButtonController selectedItemIdentifier];
-    if (searchButtonController && nil == field) {
+- (void)changeSelectedSearchButton:(id)sender {
+    NSString *field = [searchButtonBar representedObjectOfSelectedButton];
+    if (searchButtonBar && nil == field) {
         BDSKASSERT_NOT_REACHED("the search button controller should always have a selected field");
-        [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
+        [searchButtonBar selectButtonWithRepresentedObject:BDSKAllFieldsString];
         field = BDSKAllFieldsString;
     }
     
@@ -131,6 +132,39 @@
     }
 }
 
+- (void)makeSearchButtonView {
+    searchButtonEdgeView = [[BDSKEdgeView alloc] initWithFrame:NSMakeRect(0.0, 0.0, 0.0, 29.0)];
+    [searchButtonEdgeView setEdges:BDSKMinYEdgeMask];
+    [searchButtonEdgeView setAutoresizingMask:NSViewWidthSizable | NSViewMinYMargin];
+    
+    searchButtonBar = [[BDSKButtonBar alloc] initWithFrame:[searchButtonEdgeView contentRect]];
+    [searchButtonEdgeView setContentView:searchButtonBar];
+    [searchButtonBar release];
+    
+    [searchButtonBar setTarget:self];
+    
+    [searchButtonBar addButtonWithTitle:NSLocalizedString(@"Any Field", @"Search button") representedObject:BDSKAllFieldsString];
+    [searchButtonBar addButtonWithTitle:NSLocalizedString(@"Title", @"Search button") representedObject:BDSKTitleString];
+    [searchButtonBar addButtonWithTitle:NSLocalizedString(@"Person", @"Search button") representedObject:BDSKPersonString];
+    
+    skimNotesItem = [searchButtonBar newButtonWithTitle:NSLocalizedString(@"Skim Notes", @"Search button") representedObject:BDSKSkimNotesString];
+    fileContentItem = [searchButtonBar newButtonWithTitle:NSLocalizedString(@"File Content", @"Search button") representedObject:BDSKFileContentSearchString ];
+}
+
+- (void)addFileSearchItems {
+    if ([[searchButtonBar buttons] containsObject:skimNotesItem] == NO)
+        [searchButtonBar addButton:skimNotesItem];
+    if ([[searchButtonBar buttons] containsObject:fileContentItem] == NO)
+        [searchButtonBar addButton:fileContentItem];
+}
+
+- (void)removeFileSearchItems {
+    if ([[searchButtonBar buttons] containsObject:fileContentItem])
+        [searchButtonBar removeButton:fileContentItem];
+    if ([[searchButtonBar buttons] containsObject:skimNotesItem])
+        [searchButtonBar removeButton:skimNotesItem];
+}
+
 /* 
 
 Ensure that views are always ordered vertically from top to bottom as
@@ -143,33 +177,31 @@ Ensure that views are always ordered vertically from top to bottom as
 
 - (void)showSearchButtonView;
 {
-    if (nil == searchButtonController)
-        searchButtonController = [[BDSKSearchButtonController alloc] init];
+    if (nil == searchButtonBar)
+        [self makeSearchButtonView];
     
-    [searchButtonController setDelegate:self];
+    [searchButtonBar setAction:@selector(changeSelectedSearchButton:)];
     
     if ([self hasExternalGroupsSelected]) {
-        [searchButtonController removeFileItems];
+        [self removeFileSearchItems];
     } else {
-        [searchButtonController addFileItems];
+        [self addFileSearchItems];
     }
     
-    NSView *searchButtonView = [searchButtonController view];
-    
     if ([self isDisplayingSearchButtons] == NO) {
-        [self insertControlView:searchButtonView atTop:YES];
+        [self insertControlView:searchButtonEdgeView atTop:YES];
         if ([tableView tableColumnWithIdentifier:BDSKRelevanceString] == nil)
             [tableView insertTableColumnWithIdentifier:BDSKRelevanceString atIndex:0];
         
-        // note: if selectedIdentifier was previously selected, searchButtonController won't post the selection change notification, but we need to avoid posting it twice
-        if ([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKAllFieldsString])
-            [self searchButtonControllerSelectionDidChange:nil];
+        // note: if selectedIdentifier was previously selected, searchButtonBar won't post the selection change notification, but we need to avoid posting it twice
+        if ([[searchButtonBar representedObjectOfSelectedButton] isEqualToString:BDSKAllFieldsString])
+            [self changeSelectedSearchButton:nil];
         else
-            [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
+            [searchButtonBar selectButtonWithRepresentedObject:BDSKAllFieldsString];
         
     } else {
         // update existing search
-        [self searchButtonControllerSelectionDidChange:nil];
+        [self changeSelectedSearchButton:nil];
     }
 }
 
@@ -177,9 +209,9 @@ Ensure that views are always ordered vertically from top to bottom as
 {
     if ([self isDisplayingSearchButtons]) {
         [tableView removeTableColumnWithIdentifier:BDSKRelevanceString];
-        [self removeControlView:[searchButtonController view]];
-        [searchButtonController setDelegate:nil];
-        [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
+        [self removeControlView:searchButtonEdgeView];
+        [searchButtonBar setAction:NULL];
+        [searchButtonBar selectButtonWithRepresentedObject:BDSKAllFieldsString];
         
         if ([previousSortKey isEqualToString:BDSKRelevanceString]) {
             [previousSortKey release];
@@ -192,7 +224,7 @@ Ensure that views are always ordered vertically from top to bottom as
         
     }
     // handle UI updates when search: action is called without the search view in place
-    [self searchButtonControllerSelectionDidChange:nil];
+    [self changeSelectedSearchButton:nil];
 }
 
 - (IBAction)search:(id)sender{

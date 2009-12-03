@@ -77,7 +77,6 @@
 #import "BDSKServerInfo.h"
 #import "BDSKSearchBookmarkController.h"
 #import "BDSKSearchBookmark.h"
-#import "BDSKSearchButtonController.h"
 #import "BDSKSharingClient.h"
 #import "WebURLsWithTitles.h"
 #import "NSColor_BDSKExtensions.h"
@@ -86,6 +85,7 @@
 #import "BDSKFileContentSearchController.h"
 #import "NSEvent_BDSKExtensions.h"
 #import "NSSplitView_BDSKExtensions.h"
+#import "BDSKButtonBar.h"
 
 @implementation BibDocument (Groups)
 
@@ -260,11 +260,11 @@ The groupedPublications array is a subset of the publications array, developed b
         if ([self isDisplayingSearchButtons]) {
             
             // file content and skim notes search are not compatible with external groups
-            if ([BDSKFileContentSearchString isEqualToString:[searchButtonController selectedItemIdentifier]] || 
-                [BDSKSkimNotesString isEqualToString:[searchButtonController selectedItemIdentifier]])
-                [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
+            if ([BDSKFileContentSearchString isEqualToString:[searchButtonBar representedObjectOfSelectedButton]] || 
+                [BDSKSkimNotesString isEqualToString:[searchButtonBar representedObjectOfSelectedButton]])
+                [searchButtonBar selectButtonWithRepresentedObject:BDSKAllFieldsString];
             
-            [searchButtonController removeFileItems];
+            [self removeFileSearchItems];
         }
         
         BOOL wasSearch = [self isDisplayingSearchGroupView];
@@ -289,7 +289,7 @@ The groupedPublications array is a subset of the publications array, developed b
         
     } else {
         if ([self isDisplayingSearchButtons]) {
-            [searchButtonController addFileItems];
+            [self addFileSearchItems];
         }
         
         [tableView setAlternatingRowBackgroundColors:[NSColor controlAlternatingRowBackgroundColors]];
