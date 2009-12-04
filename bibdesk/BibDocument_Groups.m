@@ -158,10 +158,6 @@ The groupedPublications array is a subset of the publications array, developed b
 #pragma mark Search group view
 
 - (void)showSearchGroupView {
-    
-    if ([self isDisplayingFileContentSearch])
-        [fileSearchController restoreDocumentState];
-
     if (nil == searchGroupViewController)
         searchGroupViewController = [[BDSKSearchGroupViewController alloc] init];
     [self insertControlView:[searchGroupViewController view] atTop:NO];
