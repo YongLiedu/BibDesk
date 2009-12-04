@@ -71,7 +71,7 @@
 
 - (IBAction)changeSearchType:(id)sender{
     [[NSUserDefaults standardUserDefaults] setInteger:[sender tag] forKey:BDSKSearchMenuTagKey];
-    [self search:searchField];
+    [searchField sendAction:[searchField action] to:[searchField target]];
 }
 
 - (IBAction)makeSearchFieldKey:(id)sender{
