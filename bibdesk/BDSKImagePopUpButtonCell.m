@@ -161,6 +161,12 @@
 	[buttonCell setImage:nil]; // invalidate the image
 }
 
+- (void)setBackgroundStyle:(NSBackgroundStyle)style {
+    [super setBackgroundStyle:style];
+    [buttonCell setBackgroundStyle:style];
+    [buttonCell setImage:nil]; // invalidate the image
+}
+
 #pragma mark Drawing and highlighting
 
 - (NSSize)iconDrawSize {
@@ -183,32 +189,36 @@
 - (void)drawWithFrame:(NSRect)cellFrame  inView:(NSView *)controlView{
 	if ([buttonCell image] == nil || [self usesItemFromMenu]) {
 		// we need to redraw the image
-
+        
 		NSImage *img = [self usesItemFromMenu] ? [[self selectedItem] image] : [self icon];
-				
-		NSSize drawSize = [self iconDrawSize];
-		NSRect iconRect = NSZeroRect;
-		NSRect iconDrawRect = NSZeroRect;
-		NSRect arrowRect = NSZeroRect;
-		NSRect arrowDrawRect = NSZeroRect;
- 		
-		iconRect.size = [img size];
-		iconDrawRect.size = drawSize;
-		if ([self arrowPosition] != NSPopUpNoArrow) {
-			arrowRect.size = arrowDrawRect.size = [[[self class] arrowImage] size];
-			arrowDrawRect.origin = NSMakePoint(NSWidth(iconDrawRect), 1.0);
-			drawSize.width += NSWidth(arrowRect);
-		}
-		
-		NSImage *popUpImage = [[NSImage alloc] initWithSize: drawSize];
-		
-		[popUpImage lockFocus];
-		if (img)
-			[img drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
-		if ([self arrowPosition] != NSPopUpNoArrow)
-			[[[self class] arrowImage] drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
-		[popUpImage unlockFocus];
-
+        NSImage *popUpImage = nil;
+        NSSize drawSize = [self iconDrawSize];
+        
+        if ([self arrowPosition] == NSPopUpNoArrow && NSEqualSizes([img size], drawSize)) {
+            popUpImage = [img retain];
+        } else {
+            NSRect iconRect = NSZeroRect;
+            NSRect iconDrawRect = NSZeroRect;
+            NSRect arrowRect = NSZeroRect;
+            NSRect arrowDrawRect = NSZeroRect;
+            
+            iconRect.size = [img size];
+            iconDrawRect.size = drawSize;
+            if ([self arrowPosition] != NSPopUpNoArrow) {
+                arrowRect.size = arrowDrawRect.size = [[[self class] arrowImage] size];
+                arrowDrawRect.origin = NSMakePoint(NSWidth(iconDrawRect), 1.0);
+                drawSize.width += NSWidth(arrowRect);
+            }
+            
+            popUpImage = [[NSImage alloc] initWithSize: drawSize];
+            [popUpImage lockFocus];
+            if (img)
+                [img drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
+            if ([self arrowPosition] != NSPopUpNoArrow)
+                [[[self class] arrowImage] drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
+            [popUpImage unlockFocus];
+        }
+        
 		[buttonCell setImage: popUpImage];
 		[popUpImage release];
     }

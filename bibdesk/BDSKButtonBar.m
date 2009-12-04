@@ -184,6 +184,7 @@
         [[overflowButton cell] setArrowPosition:NSPopUpNoArrow];
         [[overflowButton cell] setUsesItemFromMenu:NO];
         [[overflowButton cell] setAltersStateOfSelectedItem:NO];
+        [[overflowButton cell] setBackgroundStyle:NSBackgroundStyleRaised];
         [overflowButton addItemWithTitle:@""];
         [overflowButton setIcon:[NSImage imageNamed:@"Overflow"]];
         [overflowButton setIconSize:[[overflowButton icon] size]];
