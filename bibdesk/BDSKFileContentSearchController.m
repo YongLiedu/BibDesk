@@ -51,8 +51,7 @@
 #import "BDSKFileSearch.h"
 #import "BDSKFileSearchResult.h"
 #import "BDSKLevelIndicatorCell.h"
-#import "BibDocument.h"
-#import "BibDocument_UI.h"
+#import "BDSKOwnerProtocol.h"
 #import "BibDocument_Search.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
@@ -61,19 +60,14 @@
 
 @implementation BDSKFileContentSearchController
 
-- (id)initForDocument:(BibDocument *)aDocument
+- (id)initForOwner:(id<BDSKOwner>)owner
 {    
     if (self = [super initWithNibName:@"BDSKFileContentSearch" bundle:nil]) {
         results = nil;
         filteredResults = nil;
         filterURLs = nil;
-        
         canceledSearch = NO;
-            
-        NSParameterAssert([aDocument respondsToSelector:@selector(removeFileContentSearch:)]);
-        [self setRepresentedObject:aDocument];
-        
-        searchIndex = [[BDSKFileSearchIndex alloc] initForOwner:aDocument];
+        searchIndex = [[BDSKFileSearchIndex alloc] initForOwner:owner];
         search = [[BDSKFileSearch alloc] initWithIndex:searchIndex delegate:self];
         searchFieldDidEndEditing = NO;
     }
@@ -136,8 +130,12 @@
     [indexProgressBar setDoubleValue:[searchIndex progressValue]];
 }    
 
-- (id)document {
-    return [self representedObject];
+- (id<BDSKFileContentSearchControllerDelegate>)delegate {
+    return delegate;
+}
+
+- (void)setDelegate:(id<BDSKFileContentSearchControllerDelegate>)newDelegate {
+    delegate = newDelegate;
 }
 
 - (NSView *)controlView
@@ -233,7 +231,7 @@
         if (searchFieldDidEndEditing)
             [[tableView window] makeFirstResponder:nil];
 
-        [self restoreDocumentState];
+        [self remove];
     } else {
         
         searchFieldDidEndEditing = NO;
@@ -266,7 +264,7 @@
                 [newFilteredResults addObject:result];
         [self setFilteredResults:newFilteredResults];
     }
-    [[self document] updateStatus];
+    [[self delegate] fileContentSearchDidUpdate:self];
 }
 
 - (void)setResults:(NSArray *)newResults
@@ -383,7 +381,7 @@
                 // hides progress bar and text
                 [indexProgressBar setHidden:YES];
                 [statusField setStringValue:@""];
-                [[self document] removeControlView:[self controlView]];
+                [[self delegate] fileContentSearchDidFinishInitialIndexing:self];
                 break;
             default:
                 break;
@@ -393,7 +391,7 @@
 
 - (NSString *)search:(BDSKFileSearch *)aSearch titleForIdentifierURL:(NSURL *)identifierURL;
 {
-    return [[[[self document] publications] itemForIdentifierURL:identifierURL] displayTitle];
+    return [[self delegate] fileContentSearch:self titleForIdentifierURL:identifierURL];
 }
 
 #pragma mark -
@@ -404,7 +402,7 @@
     [[NSUserDefaults standardUserDefaults] setObject:[self sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
 }
 
-- (void)restoreDocumentState
+- (void)remove
 {
     [self saveSortDescriptors];
     
@@ -419,7 +417,7 @@
     // hide this so it doesn't flash during the transition
     [indexProgressBar setHidden:YES];
     
-    [[self document] removeFileContentSearch:self];
+    [[self delegate] removeFileContentSearch:self];
 }
 
 - (void)terminate
@@ -438,7 +436,7 @@
     [searchIndex setDelegate:nil];
     
     // stops the search index runloop, let the index know the document's location so it can cache the index to disk
-    [searchIndex cancelForDocumentURL:[[self document] fileURL]];
+    [searchIndex cancelForDocumentURL:[[self delegate] fileURLForFileContentSearch:self]];
     BDSKDESTROY(searchIndex);
 }
 

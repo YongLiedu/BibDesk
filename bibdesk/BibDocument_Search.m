@@ -43,7 +43,6 @@
 #import "BibItem.h"
 #import "CFString_BDSKExtensions.h"
 #import "BDSKFieldSheetController.h"
-#import "BDSKFileContentSearchController.h"
 #import "BDSKGroupOutlineView.h"
 #import "NSTableView_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
@@ -119,7 +118,7 @@
     } else {
         
         if ([self isDisplayingFileContentSearch])
-            [fileSearchController restoreDocumentState];
+            [fileSearchController remove];
         
         if ([NSString isEmptyString:searchString]) {
             
@@ -328,7 +327,8 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 - (void)showFileContentSearch
 {
     if(fileSearchController == nil){
-        fileSearchController = [[BDSKFileContentSearchController alloc] initForDocument:self];
+        fileSearchController = [[BDSKFileContentSearchController alloc] initForOwner:self];
+        [fileSearchController setDelegate:self];
         NSData *sortDescriptorData = [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKFileContentSearchSortDescriptorKey] ?: [[NSUserDefaults standardUserDefaults] dataForKey:BDSKFileContentSearchSortDescriptorKey];
         if(sortDescriptorData)
             [fileSearchController setSortDescriptorData:sortDescriptorData];
@@ -390,6 +390,22 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
         // make sure the previews and fileview are updated
         [self handleTableSelectionChangedNotification:nil];
     }
+}
+
+- (NSString *)fileContentSearch:(BDSKFileContentSearchController *)fileContentSearch titleForIdentifierURL:(NSURL *)identifierURL {
+    return [[[self publications] itemForIdentifierURL:identifierURL] displayTitle];
+}
+
+- (NSURL *)fileURLForFileContentSearch:(BDSKFileContentSearchController *)fileContentSearch {
+    return [self fileURL];
+}
+
+- (void)fileContentSearchDidUpdate:(BDSKFileContentSearchController *)fileContentSearch {
+    [self updateStatus];
+}
+
+- (void)fileContentSearchDidFinishInitialIndexing:(BDSKFileContentSearchController *)fileContentSearch {
+    [self removeControlView:[fileContentSearch controlView]];
 }
 
 #pragma mark Find panel

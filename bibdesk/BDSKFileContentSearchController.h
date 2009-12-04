@@ -40,7 +40,21 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKFileSearch.h"
 
+@class BDSKFileContentSearchController;
+
+@protocol BDSKFileContentSearchControllerDelegate
+
+- (void)removeFileContentSearch:(BDSKFileContentSearchController *)fileContentSearch;
+- (NSString *)fileContentSearch:(BDSKFileContentSearchController *)fileContentSearch titleForIdentifierURL:(NSURL *)identifierURL;
+- (NSURL *)fileURLForFileContentSearch:(BDSKFileContentSearchController *)fileContentSearch;
+- (void)fileContentSearchDidUpdate:(BDSKFileContentSearchController *)fileContentSearch;
+- (void)fileContentSearchDidFinishInitialIndexing:(BDSKFileContentSearchController *)fileContentSearch;
+
+@end
+
 @class BDSKFileSearchIndex, BDSKTableView, BDSKCollapsibleView, BDSKEdgeView, BibDicument;
+
+@protocol BDSKOwner;
 
 @interface BDSKSelectionPreservingArrayController : NSArrayController
 @end
@@ -52,6 +66,8 @@
     NSMutableSet *filterURLs;
     BDSKFileSearch *search;
     BDSKFileSearchIndex *searchIndex;
+    
+    id <BDSKFileContentSearchControllerDelegate> delegate;
     
     IBOutlet BDSKSelectionPreservingArrayController *resultsArrayController;
     IBOutlet BDSKTableView *tableView;
@@ -67,7 +83,10 @@
 }
 
 // Use this method to instantiate a search controller for use within a document window
-- (id)initForDocument:(BibDocument *)aDocument;
+- (id)initForOwner:(id<BDSKOwner>)owner;
+
+- (id<BDSKFileContentSearchControllerDelegate>)delegate;
+- (void)setDelegate:(id<BDSKFileContentSearchControllerDelegate>)newDelegate;
 
 - (NSView *)controlView;
 - (NSTableView *)tableView;
@@ -93,7 +112,7 @@
 - (NSData *)sortDescriptorData;
 - (void)setSortDescriptorData:(NSData *)data;
 
-- (void)restoreDocumentState;
+- (void)remove;
 - (void)terminate;
 
 - (IBAction)search:(id)sender;
@@ -101,9 +120,4 @@
 
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note;
 
-@end
-
-
-@interface NSObject (BDSKSearchControllerDocument)
-- (void)removeFileContentSearch:(BDSKFileContentSearchController *)fileContentSearchController;
 @end
