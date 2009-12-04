@@ -99,7 +99,6 @@
 - (IBAction)search:(id)sender;
 - (IBAction)tableAction:(id)sender;
 
-- (void)handleApplicationWillTerminate:(NSNotification *)notification;
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note;
 
 @end

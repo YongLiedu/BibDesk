@@ -70,8 +70,6 @@
         
         canceledSearch = NO;
             
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
-        
         NSParameterAssert([aDocument respondsToSelector:@selector(removeFileContentSearch:)]);
         [self setRepresentedObject:aDocument];
         
@@ -442,12 +440,6 @@
     // stops the search index runloop, let the index know the document's location so it can cache the index to disk
     [searchIndex cancelForDocumentURL:[[self document] fileURL]];
     BDSKDESTROY(searchIndex);
-}
-
-- (void)handleApplicationWillTerminate:(NSNotification *)notification
-{
-    [self saveSortDescriptors];
-    [searchIndex cancelForDocumentURL:[[self document] fileURL]];
 }
 
 @end
