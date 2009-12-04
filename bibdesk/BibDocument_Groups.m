@@ -252,7 +252,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)handleGroupTableSelectionChangedNotification:(NSNotification *)notification{
-    // called with notification == nil from searchByContent action, shouldn't redisplay group content in that case to avoid a loop
+    // called with notification == nil from showFileContentSearch, shouldn't redisplay group content in that case to avoid a loop
     
     NSString *newSortKey = nil;
     

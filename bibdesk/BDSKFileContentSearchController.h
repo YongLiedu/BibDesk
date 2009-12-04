@@ -93,12 +93,10 @@
 - (NSData *)sortDescriptorData;
 - (void)setSortDescriptorData:(NSData *)data;
 
-- (void)saveSortDescriptors;
 - (void)restoreDocumentState;
 - (void)terminate;
 
 - (IBAction)search:(id)sender;
-- (IBAction)cancelCurrentSearch:(id)sender;
 - (IBAction)tableAction:(id)sender;
 
 - (void)handleApplicationWillTerminate:(NSNotification *)notification;

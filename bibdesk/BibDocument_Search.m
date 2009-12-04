@@ -106,7 +106,7 @@
     }
     
     if ([field isEqualToString:BDSKFileContentSearchString]) {
-        [self searchByContent:nil];
+        [self showFileContentSearch];
     } else {
         
         if ([self isDisplayingFileContentSearch])
@@ -177,17 +177,16 @@
         [searchButtonBar removeButton:skimNotesItem];
 }
 
-- (void)showSearchButtonView;
-{
-    if (nil == searchButtonBar)
-        [self makeSearchButtonView];
-    
-    if ([self hasExternalGroupsSelected])
-        [self removeFileSearchItems];
-    else
-        [self addFileSearchItems];
-    
+- (void)showSearchButtonView {
     if ([self isDisplayingSearchButtons] == NO) {
+        if (nil == searchButtonBar)
+            [self makeSearchButtonView];
+        
+        if ([self hasExternalGroupsSelected])
+            [self removeFileSearchItems];
+        else
+            [self addFileSearchItems];
+        
         [self insertControlView:searchButtonEdgeView atTop:YES];
         
         if ([tableView tableColumnWithIdentifier:BDSKRelevanceString] == nil)
@@ -200,8 +199,7 @@
     }
 }
 
-- (void)hideSearchButtonView
-{
+- (void)hideSearchButtonView {
     if ([self isDisplayingSearchButtons]) {
         [tableView removeTableColumnWithIdentifier:BDSKRelevanceString];
         
@@ -220,7 +218,7 @@
     }
 }
 
-- (IBAction)search:(id)sender{
+- (IBAction)search:(id)sender {
     if ([[sender stringValue] isEqualToString:@""])
         [self hideSearchButtonView];
     else 
@@ -305,7 +303,17 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 
 #pragma mark File Content Search
 
-- (IBAction)searchByContent:(id)sender
+- (void)animateTableView:(NSTableView *)oldTable toTableView:(NSTableView *)newTable {
+    NSView *oldView = [oldTable enclosingScrollView];
+    NSView *newView = [newTable enclosingScrollView];
+    
+    [newView setFrame:[oldView frame]];
+    [[oldView superview] addSubview:newView];
+    [NSViewAnimation animateFadeOutView:oldView fadeInView:newView];
+    [oldView removeFromSuperview];
+}
+
+- (void)showFileContentSearch
 {
     if(fileSearchController == nil){
         fileSearchController = [[BDSKFileContentSearchController alloc] initForDocument:self];
@@ -316,14 +324,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     
     [fileSearchController filterUsingURLs:[groupedPublications valueForKey:@"identifierURL"]];
     
-    NSView *oldView = [tableView enclosingScrollView];
-    NSView *newView = [[fileSearchController tableView] enclosingScrollView];
-    
-    [newView setFrame:[oldView frame]];
-    [mainView addSubview:newView];
-    [NSViewAnimation animateFadeOutView:oldView fadeInView:newView];
-    [oldView removeFromSuperview];
-    
+    [self animateTableView:tableView toTableView:[fileSearchController tableView]];
     if ([fileSearchController shouldShowControlView])
         [self insertControlView:[fileSearchController controlView] atTop:NO];
     
@@ -337,14 +338,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 // Method required by the BDSKFileContentSearchController; the implementor is responsible for restoring its state by removing the view passed as an argument and resetting search field target/action.
 - (void)removeFileContentSearch:(BDSKFileContentSearchController *)controller
 {
-    NSView *oldView = [[fileSearchController tableView] enclosingScrollView];
-    NSView *newView = [tableView enclosingScrollView];
-    
-    [newView setFrame:[oldView frame]];
-    [mainView addSubview:newView];
-    [NSViewAnimation animateFadeOutView:oldView fadeInView:newView];
-    [oldView removeFromSuperview];
-    
+    [self animateTableView:[fileSearchController tableView] toTableView:tableView];
     [self removeControlView:[fileSearchController controlView]];
     
     // reconnect the searchfield

@@ -254,20 +254,6 @@
     }
 }
 
-- (void)restoreDocumentState
-{
-    [self saveSortDescriptors];
-    [self cancelCurrentSearch:nil];
-    
-    // disconnect the searchfield
-    [self setSearchField:nil];
-    
-    // hide this so it doesn't flash during the transition
-    [indexProgressBar setHidden:YES];
-    
-    [[self document] removeFileContentSearch:self];
-}
-
 #pragma mark -
 #pragma mark Accessors
 
@@ -412,23 +398,40 @@
     return [[[[self document] publications] itemForIdentifierURL:identifierURL] displayTitle];
 }
 
-- (IBAction)cancelCurrentSearch:(id)sender
-{
-    [search cancel];
-    
-    // this will cancel updates to the tableview
-    canceledSearch = YES;
-}    
-
 #pragma mark -
 #pragma mark Document interaction
+
+- (void)saveSortDescriptors
+{
+    [[NSUserDefaults standardUserDefaults] setObject:[self sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
+}
+
+- (void)restoreDocumentState
+{
+    [self saveSortDescriptors];
+    
+    // cancel the search
+    [search cancel];
+    // this will cancel updates to the tableview
+    canceledSearch = YES;
+    
+    // disconnect the searchfield
+    [self setSearchField:nil];
+    
+    // hide this so it doesn't flash during the transition
+    [indexProgressBar setHidden:YES];
+    
+    [[self document] removeFileContentSearch:self];
+}
 
 - (void)terminate
 {
     [self saveSortDescriptors];
     
     // cancel the search
-    [self cancelCurrentSearch:nil];
+    [search cancel];
+    // this will cancel updates to the tableview
+    canceledSearch = YES;
     
     // the index may continue sending the search object update messages, so make sure it doesn't try to pass them on
     [search setDelegate:nil];
@@ -439,11 +442,6 @@
     // stops the search index runloop, let the index know the document's location so it can cache the index to disk
     [searchIndex cancelForDocumentURL:[[self document] fileURL]];
     BDSKDESTROY(searchIndex);
-}
-
-- (void)saveSortDescriptors
-{
-    [[NSUserDefaults standardUserDefaults] setObject:[self sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
 }
 
 - (void)handleApplicationWillTerminate:(NSNotification *)notification

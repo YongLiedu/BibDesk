@@ -57,7 +57,7 @@ extern NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString);
 
 #pragma mark Content search
 
-- (IBAction)searchByContent:(id)sender;
+- (void)showFileContentSearch;
 
 #pragma mark Find panel
 
