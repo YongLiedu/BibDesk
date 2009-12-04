@@ -97,7 +97,7 @@
     }
 }
 
-- (void)changeSelectedSearchButton:(id)sender {
+- (void)updateSearch:(id)sender {
     NSString *field = [searchButtonBar representedObjectOfSelectedButton];
     if (searchButtonBar && nil == field) {
         BDSKASSERT_NOT_REACHED("the search button controller should always have a selected field");
@@ -105,28 +105,40 @@
         field = BDSKAllFieldsString;
     }
     
-    if([field isEqualToString:BDSKFileContentSearchString]) {
+    if ([field isEqualToString:BDSKFileContentSearchString]) {
         [self searchByContent:nil];
     } else {
+        
         if ([self isDisplayingFileContentSearch])
             [fileSearchController restoreDocumentState];
         
-        NSArray *pubsToSelect = [self selectedPublications];
         NSString *searchString = [searchField stringValue];
         
-        if([NSString isEmptyString:searchString]){
-            [shownPublications setArray:groupedPublications];
+        if ([NSString isEmptyString:searchString]) {
             
+            NSArray *pubsToSelect = [self selectedPublications];
+            
+            [shownPublications setArray:groupedPublications];
             [tableView deselectAll:nil];
             [self sortPubsByKey:nil];
             [self updateStatus];
-            if([pubsToSelect count])
+            
+            if ([pubsToSelect count])
                 [self selectPublications:pubsToSelect];
             
         } else {
             
-            [self displayPublicationsMatchingSearchString:searchString indexName:field];
-
+            SKIndexRef skIndex = NULL;
+            
+            if ([field isEqualToString:BDSKSkimNotesString]) {
+                skIndex = [notesSearchIndex index];
+            } else {
+                // we need the correct BDSKPublicationsArray for access to the identifierURLs
+                id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;
+                skIndex = [[owner searchIndexes] indexForField:field];
+            }
+            [documentSearch searchForString:BDSKSearchKitExpressionWithString(searchString) index:skIndex selectedPublications:[self selectedPublications] scrollPositionAsPercentage:[tableView scrollPositionAsPercentage]];
+            
         }
          
     }
@@ -165,43 +177,26 @@
         [searchButtonBar removeButton:skimNotesItem];
 }
 
-/* 
-
-Ensure that views are always ordered vertically from top to bottom as
-
----- toolbar
----- search button view
----- search group view OR file content
-
-*/
-
 - (void)showSearchButtonView;
 {
     if (nil == searchButtonBar)
         [self makeSearchButtonView];
     
-    [searchButtonBar setAction:@selector(changeSelectedSearchButton:)];
-    
-    if ([self hasExternalGroupsSelected]) {
+    if ([self hasExternalGroupsSelected])
         [self removeFileSearchItems];
-    } else {
+    else
         [self addFileSearchItems];
-    }
     
     if ([self isDisplayingSearchButtons] == NO) {
         [self insertControlView:searchButtonEdgeView atTop:YES];
+        
         if ([tableView tableColumnWithIdentifier:BDSKRelevanceString] == nil)
             [tableView insertTableColumnWithIdentifier:BDSKRelevanceString atIndex:0];
         
-        // note: if selectedIdentifier was previously selected, searchButtonBar won't post the selection change notification, but we need to avoid posting it twice
-        if ([[searchButtonBar representedObjectOfSelectedButton] isEqualToString:BDSKAllFieldsString])
-            [self changeSelectedSearchButton:nil];
-        else
+        if ([[searchButtonBar representedObjectOfSelectedButton] isEqualToString:BDSKAllFieldsString] == NO)
             [searchButtonBar selectButtonWithRepresentedObject:BDSKAllFieldsString];
         
-    } else {
-        // update existing search
-        [self changeSelectedSearchButton:nil];
+        [searchButtonBar setAction:@selector(updateSearch:)];
     }
 }
 
@@ -209,7 +204,9 @@ Ensure that views are always ordered vertically from top to bottom as
 {
     if ([self isDisplayingSearchButtons]) {
         [tableView removeTableColumnWithIdentifier:BDSKRelevanceString];
+        
         [self removeControlView:searchButtonEdgeView];
+        
         [searchButtonBar setAction:NULL];
         [searchButtonBar selectButtonWithRepresentedObject:BDSKAllFieldsString];
         
@@ -218,13 +215,9 @@ Ensure that views are always ordered vertically from top to bottom as
             previousSortKey = [BDSKTitleString retain];
             docFlags.previousSortDescending = NO;
         }
-        if ([sortKey isEqualToString:BDSKRelevanceString]) {
+        if ([sortKey isEqualToString:BDSKRelevanceString])
             [self sortPubsByKey:[[previousSortKey retain] autorelease]];
-        }
-        
     }
-    // handle UI updates when search: action is called without the search view in place
-    [self changeSelectedSearchButton:nil];
 }
 
 - (IBAction)search:(id)sender{
@@ -232,6 +225,8 @@ Ensure that views are always ordered vertically from top to bottom as
         [self hideSearchButtonView];
     else 
         [self showSearchButtonView];    
+    // update existing search
+    [self updateSearch:nil];
 }
 
 #pragma mark -
@@ -307,21 +302,6 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [self selectPublications:[documentSearch previouslySelectedPublications]];    
     [self updateStatus];
 }
-        
-- (void)displayPublicationsMatchingSearchString:(NSString *)searchString indexName:(NSString *)field {
-    searchString = BDSKSearchKitExpressionWithString(searchString);
-    
-    SKIndexRef skIndex = NULL;
-    
-    if ([field isEqualToString:BDSKSkimNotesString]) {
-        skIndex = [notesSearchIndex index];
-    } else {
-        // we need the correct BDSKPublicationsArray for access to the identifierURLs
-        id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;
-        skIndex = [[owner searchIndexes] indexForField:field];
-    }
-    [documentSearch searchForString:searchString index:skIndex selectedPublications:[self selectedPublications] scrollPositionAsPercentage:[tableView scrollPositionAsPercentage]];
-}
 
 #pragma mark File Content Search
 
@@ -374,6 +354,8 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     // removeFileContentSearch may be called after the user clicks a different search type, without changing the searchfield; in that case, we want to leave the search button view in place, and refilter the list.  Otherwise, select the pubs corresponding to the file content selection.
     if ([[searchField stringValue] isEqualToString:@""]) {
         [self hideSearchButtonView];
+        // update search
+        [self updateSearch:nil];
         
         // have to hide the search view before trying to select anything
         NSArray *itemsToSelect = [fileSearchController selectedIdentifierURLs];

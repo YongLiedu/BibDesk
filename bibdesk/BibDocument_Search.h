@@ -46,18 +46,11 @@ extern NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString);
 
 - (void)setSearchString:(NSString *)filterterm;
 
-    /*!
-    @method     makeSearchFieldKey:
-     @abstract   action to highlight the search field
-     */
 - (IBAction)makeSearchFieldKey:(id)sender;
 - (IBAction)changeSearchType:(id)sender;
 - (IBAction)search:(id)sender;
 
 - (NSArray *)publicationsMatchingSubstring:(NSString *)searchString inField:(NSString *)field;
-- (void)displayPublicationsMatchingSearchString:(NSString *)searchString indexName:(NSString *)field;
-
-- (void)changeSelectedSearchButton:(id)sender;
 
 - (void)addFileSearchItems;
 - (void)removeFileSearchItems;
