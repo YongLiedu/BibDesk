@@ -463,9 +463,9 @@
     return [(id)displayName autorelease];
 }
 
-- (void)tableView:(NSTableView *)tv insertNewline:(id)sender{
+- (void)tableViewInsertNewline:(NSTableView *)tv {
     if ([[self document] respondsToSelector:_cmd])
-        [[self document] tableView:tv insertNewline:sender];
+        [[self document] tableViewInsertNewline:tv];
 }
 
 - (void)tableView:(NSTableView *)tv deleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
