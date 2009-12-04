@@ -228,7 +228,7 @@
 
 
 - (void)tableViewColumnDidMove:(NSNotification *)notification{
-	if ([notification object] != tableView) {
+	if ([notification object] == tableView) {
         [[NSUserDefaults standardUserDefaults] setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
                                                           forKey:BDSKShownColsNamesKey];
     }
