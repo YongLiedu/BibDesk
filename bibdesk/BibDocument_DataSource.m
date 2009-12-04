@@ -379,12 +379,18 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 }
 
 - (NSColor *)tableView:(NSTableView *)tv highlightColorForRow:(NSInteger)row {
-    return [[[self shownPublications] objectAtIndex:row] color];
+    if (tv == tableView) {
+        return [[[self shownPublications] objectAtIndex:row] color];
+    }
+    return nil;
 }
 
 #pragma mark TableView dragging source
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
+    if (tv != tableView) 
+        return NO;
+    
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     NSString *dragCopyTypeKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
 	NSInteger dragCopyType = [sud integerForKey:dragCopyTypeKey];
@@ -397,147 +403,143 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 
     docFlags.dragFromExternalGroups = NO;
 	
-    if(tv == tableView){
-		// drag from the main table
-		pubs = [shownPublications objectsAtIndexes:rowIndexes];
+    // drag from the main table
+    pubs = [shownPublications objectsAtIndexes:rowIndexes];
+    
+    docFlags.dragFromExternalGroups = [self hasExternalGroupsSelected];
+
+    if(pboard == [NSPasteboard pasteboardWithName:NSDragPboard]){
+        // see where we clicked in the table
+        // if we clicked on a local file column that has a file, we'll copy that file
+        // if we clicked on a remote URL column that has a URL, we'll copy that URL
+        // but only if we were passed a single row for now
         
-        docFlags.dragFromExternalGroups = [self hasExternalGroupsSelected];
+        // we want the drag to occur for the row that is dragged, not the row that is selected
+        if([rowIndexes count]){
+            NSPoint eventPt = [[tv window] mouseLocationOutsideOfEventStream];
+            NSPoint dragPosition = [tv convertPoint:eventPt fromView:nil];
+            NSInteger dragColumn = [tv columnAtPoint:dragPosition];
+            NSString *dragColumnId = nil;
+                    
+            if(dragColumn == -1)
+                return NO;
+            
+            dragColumnId = [[[tv tableColumns] objectAtIndex:dragColumn] identifier];
+            
+            if([dragColumnId isLocalFileField]){
 
-		if(pboard == [NSPasteboard pasteboardWithName:NSDragPboard]){
-			// see where we clicked in the table
-			// if we clicked on a local file column that has a file, we'll copy that file
-			// if we clicked on a remote URL column that has a URL, we'll copy that URL
-			// but only if we were passed a single row for now
-			
-			// we want the drag to occur for the row that is dragged, not the row that is selected
-			if([rowIndexes count]){
-				NSPoint eventPt = [[tv window] mouseLocationOutsideOfEventStream];
-				NSPoint dragPosition = [tv convertPoint:eventPt fromView:nil];
-				NSInteger dragColumn = [tv columnAtPoint:dragPosition];
-				NSString *dragColumnId = nil;
-						
-				if(dragColumn == -1)
-					return NO;
-				
-				dragColumnId = [[[tv tableColumns] objectAtIndex:dragColumn] identifier];
-				
-				if([dragColumnId isLocalFileField]){
+                // if we have more than one row, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
+                NSUInteger row = [rowIndexes firstIndex];
+                BibItem *pub = nil;
+                NSString *path;
+                NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
 
-                    // if we have more than one row, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
-                    NSUInteger row = [rowIndexes firstIndex];
-                    BibItem *pub = nil;
-                    NSString *path;
-                    NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
+                while(row != NSNotFound){
+                    pub = [shownPublications objectAtIndex:row];
+                    if (path = [[pub localFileURLForField:dragColumnId] path]){
+                        [filePaths addObject:path];
+                        NSError *xerror = nil;
+                        // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
+                        if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:&xerror] == NO)
+                            NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
+                    }
+                    row = [rowIndexes indexGreaterThanIndex:row];
+                }
+                
+                if([filePaths count]){
+                    [pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil] owner:nil];
+                    return [pboard setPropertyList:filePaths forType:NSFilenamesPboardType];
+                }
+                
+            }else if([dragColumnId isRemoteURLField]){
+                
+                // cache this so we know which column (field) was dragged
+                [self setPromiseDragColumnIdentifier:dragColumnId];
 
-                    while(row != NSNotFound){
-                        pub = [shownPublications objectAtIndex:row];
-                        if (path = [[pub localFileURLForField:dragColumnId] path]){
+                // if we have more than one row, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
+                NSUInteger row = [rowIndexes firstIndex];
+                BibItem *pub = nil;
+                NSURL *url, *theURL = nil;
+                NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
+
+                while(row != NSNotFound){
+                    pub = [shownPublications objectAtIndex:row];
+                    url = [pub remoteURLForField:dragColumnId];
+                    if(url != nil){
+                        if (theURL == nil)
+                            theURL = url;
+                        [filePaths addObject:[[pub displayTitle] stringByAppendingPathExtension:@"webloc"]];
+                    }
+                    row = [rowIndexes indexGreaterThanIndex:row];
+                }
+                
+                if([filePaths count]){
+                    [pboard declareTypes:[NSArray arrayWithObjects:NSFilesPromisePboardType, NSURLPboardType, nil] owner:self];
+                    success = [pboard setPropertyList:filePaths forType:NSFilesPromisePboardType];
+                    [theURL writeToPasteboard:pboard];
+                    return success;
+                }
+            
+            }else if([dragColumnId isEqualToString:BDSKLocalFileString]){
+
+                // if we have more than one files, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
+                NSUInteger row = [rowIndexes firstIndex];
+                BibItem *pub = nil;
+                NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
+                NSString *path;
+                
+                while(row != NSNotFound){
+                    pub = [shownPublications objectAtIndex:row];
+                    
+                    for (BDSKLinkedFile *file in [pub localFiles]) {
+                        if (path = [file path]) {
                             [filePaths addObject:path];
                             NSError *xerror = nil;
                             // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
                             if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:&xerror] == NO)
                                 NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
                         }
-                        row = [rowIndexes indexGreaterThanIndex:row];
                     }
+                    row = [rowIndexes indexGreaterThanIndex:row];
+                }
+                
+                if([filePaths count]){
+                    [pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil] owner:nil];
+                    return [pboard setPropertyList:filePaths forType:NSFilenamesPboardType];
+                }
+                
+            }else if([dragColumnId isEqualToString:BDSKRemoteURLString]){
+                // cache this so we know which column (field) was dragged
+                [self setPromiseDragColumnIdentifier:dragColumnId];
+                
+                NSUInteger row = [rowIndexes firstIndex];
+                BibItem *pub = nil;
+                NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
+                NSString *fileName;
+                NSURL *url, *theURL = nil;
+                
+                while(row != NSNotFound){
+                    pub = [shownPublications objectAtIndex:row];
+                    fileName = [[pub displayTitle] stringByAppendingPathExtension:@"webloc"];
                     
-                    if([filePaths count]){
-                        [pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil] owner:nil];
-                        return [pboard setPropertyList:filePaths forType:NSFilenamesPboardType];
-                    }
-                    
-				}else if([dragColumnId isRemoteURLField]){
-					
-                    // cache this so we know which column (field) was dragged
-					[self setPromiseDragColumnIdentifier:dragColumnId];
-
-                    // if we have more than one row, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
-                    NSUInteger row = [rowIndexes firstIndex];
-                    BibItem *pub = nil;
-                    NSURL *url, *theURL = nil;
-                    NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
-
-                    while(row != NSNotFound){
-                        pub = [shownPublications objectAtIndex:row];
-                        url = [pub remoteURLForField:dragColumnId];
-                        if(url != nil){
+                    for (BDSKLinkedFile *file in [pub remoteURLs]) {
+                        if (url = [file URL]) {
                             if (theURL == nil)
                                 theURL = url;
-                            [filePaths addObject:[[pub displayTitle] stringByAppendingPathExtension:@"webloc"]];
+                            [filePaths addObject:fileName];
                         }
-                        row = [rowIndexes indexGreaterThanIndex:row];
-					}
-                    
-                    if([filePaths count]){
-                        [pboard declareTypes:[NSArray arrayWithObjects:NSFilesPromisePboardType, NSURLPboardType, nil] owner:self];
-                        success = [pboard setPropertyList:filePaths forType:NSFilesPromisePboardType];
-                        [theURL writeToPasteboard:pboard];
-						return success;
                     }
-				
-                }else if([dragColumnId isEqualToString:BDSKLocalFileString]){
-
-                    // if we have more than one files, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
-                    NSUInteger row = [rowIndexes firstIndex];
-                    BibItem *pub = nil;
-                    NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
-                    NSString *path;
-                    
-                    while(row != NSNotFound){
-                        pub = [shownPublications objectAtIndex:row];
-                        
-                        for (BDSKLinkedFile *file in [pub localFiles]) {
-                            if (path = [file path]) {
-                                [filePaths addObject:path];
-                                NSError *xerror = nil;
-                                // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
-                                if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:&xerror] == NO)
-                                    NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
-                            }
-                        }
-                        row = [rowIndexes indexGreaterThanIndex:row];
-                    }
-                    
-                    if([filePaths count]){
-                        [pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil] owner:nil];
-                        return [pboard setPropertyList:filePaths forType:NSFilenamesPboardType];
-                    }
-                    
-				}else if([dragColumnId isEqualToString:BDSKRemoteURLString]){
-					// cache this so we know which column (field) was dragged
-					[self setPromiseDragColumnIdentifier:dragColumnId];
-                    
-                    NSUInteger row = [rowIndexes firstIndex];
-                    BibItem *pub = nil;
-                    NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
-                    NSString *fileName;
-                    NSURL *url, *theURL = nil;
-                    
-                    while(row != NSNotFound){
-                        pub = [shownPublications objectAtIndex:row];
-                        fileName = [[pub displayTitle] stringByAppendingPathExtension:@"webloc"];
-                        
-                        for (BDSKLinkedFile *file in [pub remoteURLs]) {
-                            if (url = [file URL]) {
-                                if (theURL == nil)
-                                    theURL = url;
-                                [filePaths addObject:fileName];
-                            }
-                        }
-                        row = [rowIndexes indexGreaterThanIndex:row];
-                    }
-                    
-                    if([filePaths count]){
-                        [pboard declareTypes:[NSArray arrayWithObjects:NSFilesPromisePboardType, NSURLPboardType, nil] owner:self];
-                        success = [pboard setPropertyList:filePaths forType:NSFilesPromisePboardType];
-                        [theURL writeToPasteboard:pboard];
-                        return success;
-                    }
-				}
-			}
-		}
-    } else {
-        return NO;
+                    row = [rowIndexes indexGreaterThanIndex:row];
+                }
+                
+                if([filePaths count]){
+                    [pboard declareTypes:[NSArray arrayWithObjects:NSFilesPromisePboardType, NSURLPboardType, nil] owner:self];
+                    success = [pboard setPropertyList:filePaths forType:NSFilesPromisePboardType];
+                    [theURL writeToPasteboard:pboard];
+                    return success;
+                }
+            }
+        }
     }
     
     if (dragCopyType == BDSKTemplateDragCopyType) {
@@ -634,8 +636,10 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     return YES;
 }
 
-- (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation{
-    [self clearPromisedDraggedItems];
+- (void)tableView:(NSTableView *)tv concludeDragOperation:(NSDragOperation)operation{
+    if (tv == tableView) {
+        [self clearPromisedDraggedItems];
+    }
 }
 
 - (void)clearPromisedDraggedItems{
@@ -643,11 +647,17 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 }
 
 - (NSDragOperation)tableView:(NSTableView *)tv draggingSourceOperationMaskForLocal:(BOOL)isLocal{
-    return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
+    if (tv == tableView) {
+        return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
+    }
+    return NSDragOperationNone;
 }
 
 - (NSImage *)tableView:(NSTableView *)tv dragImageForRowsWithIndexes:(NSIndexSet *)dragRows{
-    return [self dragImageForPromisedItemsUsingCiteString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey]];
+    if (tv == tableView) {
+        return [self dragImageForPromisedItemsUsingCiteString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey]];
+    }
+    return nil;
 }
 
 - (NSImage *)dragImageForPromisedItemsUsingCiteString:(NSString *)citeString{
@@ -788,47 +798,46 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 #pragma mark TableView dragging destination
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op{
+    if (tv != tableView)
+        return NSDragOperationNone;
     
     NSPasteboard *pboard = [info draggingPasteboard];
     BOOL isDragFromMainTable = [[info draggingSource] isEqual:tableView];
     BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupOutlineView];
     BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
     
-    if(tv == tableView){
-        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil]];
-        
-        if([self hasExternalGroupsSelected] || type == nil) 
-			return NSDragOperationNone;
-		if ([type isEqualToString:NSColorPboardType]) {
-            if (row == -1 || row == [tableView numberOfRows])
-                return NSDragOperationNone;
-            else if (op == NSTableViewDropAbove)
-                [tv setDropRow:row dropOperation:NSTableViewDropOn];
-            return NSDragOperationEvery;
-        }
-        if (isDragFromGroupTable && docFlags.dragFromExternalGroups && [self hasLibraryGroupSelected]) {
-            [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
-            return NSDragOperationCopy;
-        }
-        if(isDragFromMainTable || isDragFromGroupTable || isDragFromDrawer) {
-			// can't copy onto same table
-			return NSDragOperationNone;
-		}
-        // set drop row to -1 and NSTableViewDropOperation to NSTableViewDropOn, when we don't target specific rows http://www.corbinstreehouse.com/blog/?p=123
-        if(row == -1 || op == NSTableViewDropAbove){
-            [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
-		}
-        // We were checking -containsUnparseableFile here as well, but I think it makes sense to allow the user to target a specific row with any file type (including BibTeX).  Further, checking -containsUnparseableFile can be unacceptably slow (see bug #1799630), which ruins the dragging experience.
-        else if(([type isEqualToString:NSFilenamesPboardType] == NO) &&
-                 [type isEqualToString:BDSKWeblocFilePboardType] == NO && [type isEqualToString:NSURLPboardType] == NO){
-            [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
-        }
-        if ([type isEqualToString:BDSKBibItemPboardType])   
-            return NSDragOperationCopy;
-        else
-            return NSDragOperationEvery;
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil]];
+    
+    if([self hasExternalGroupsSelected] || type == nil) 
+        return NSDragOperationNone;
+    if ([type isEqualToString:NSColorPboardType]) {
+        if (row == -1 || row == [tableView numberOfRows])
+            return NSDragOperationNone;
+        else if (op == NSTableViewDropAbove)
+            [tv setDropRow:row dropOperation:NSTableViewDropOn];
+        return NSDragOperationEvery;
     }
-    return NSDragOperationNone;
+    if (isDragFromGroupTable && docFlags.dragFromExternalGroups && [self hasLibraryGroupSelected]) {
+        [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+        return NSDragOperationCopy;
+    }
+    if(isDragFromMainTable || isDragFromGroupTable || isDragFromDrawer) {
+        // can't copy onto same table
+        return NSDragOperationNone;
+    }
+    // set drop row to -1 and NSTableViewDropOperation to NSTableViewDropOn, when we don't target specific rows http://www.corbinstreehouse.com/blog/?p=123
+    if(row == -1 || op == NSTableViewDropAbove){
+        [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+    }
+    // We were checking -containsUnparseableFile here as well, but I think it makes sense to allow the user to target a specific row with any file type (including BibTeX).  Further, checking -containsUnparseableFile can be unacceptably slow (see bug #1799630), which ruins the dragging experience.
+    else if(([type isEqualToString:NSFilenamesPboardType] == NO) &&
+             [type isEqualToString:BDSKWeblocFilePboardType] == NO && [type isEqualToString:NSURLPboardType] == NO){
+        [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+    }
+    if ([type isEqualToString:BDSKBibItemPboardType])   
+        return NSDragOperationCopy;
+    else
+        return NSDragOperationEvery;
 }
 
 - (BOOL)selectItemsInAuxFileAtPath:(NSString *)auxPath {
@@ -868,10 +877,8 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 }
 
 - (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
-	
-    NSPasteboard *pboard = [info draggingPasteboard];
-    
     if (tv == tableView) {
+        NSPasteboard *pboard = [info draggingPasteboard];
         NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil]];
         
         if ([self hasExternalGroupsSelected])
@@ -1142,9 +1149,11 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 }
 
 - (void)tableView:(NSTableView *)tv openParentForItemAtRow:(NSInteger)row{
-    BibItem *parent = [[shownPublications objectAtIndex:row] crossrefParent];
-    if (parent)
-        [self editPub:parent];
+    if (tv == tableView) {
+        BibItem *parent = [[shownPublications objectAtIndex:row] crossrefParent];
+        if (parent)
+            [self editPub:parent];
+    }
 }
 
 #pragma mark-
