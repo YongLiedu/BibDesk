@@ -340,6 +340,8 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     if ([fileSearchController shouldShowControlView])
         [self insertControlView:[fileSearchController controlView] atTop:NO];
     
+    [[fileSearchController tableView] setDelegate:self];
+    
     // connect the searchfield to the controller and start the search
     [fileSearchController setSearchField:searchField];
     
@@ -350,6 +352,8 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 // Method required by the BDSKFileContentSearchController; the implementor is responsible for restoring its state by removing the view passed as an argument and resetting search field target/action.
 - (void)removeFileContentSearch:(BDSKFileContentSearchController *)controller
 {
+    [[fileSearchController tableView] setDelegate:nil];
+    
     [self animateTableView:[fileSearchController tableView] toTableView:tableView];
     [self removeControlView:[fileSearchController controlView]];
     

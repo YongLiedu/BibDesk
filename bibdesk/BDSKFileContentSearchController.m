@@ -450,35 +450,6 @@
     [searchIndex cancelForDocumentURL:[[self document] fileURL]];
 }
 
-#pragma mark TableView delegate
-
-- (void)tableViewSelectionDidChange:(NSNotification *)notification {
-    if ([[self document] respondsToSelector:_cmd])
-        [[self document] tableViewSelectionDidChange:notification];
-}
-
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation {
-    CFStringRef displayName = NULL;
-    LSCopyDisplayNameForURL((CFURLRef)[[[resultsArrayController arrangedObjects] objectAtIndex:row] URL], &displayName);
-    return [(id)displayName autorelease];
-}
-
-- (void)tableViewInsertNewline:(NSTableView *)tv {
-    if ([[self document] respondsToSelector:_cmd])
-        [[self document] tableViewInsertNewline:tv];
-}
-
-- (void)tableView:(NSTableView *)tv deleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
-    if ([[self document] respondsToSelector:_cmd])
-        [[self document] tableView:tv deleteRowsWithIndexes:rowIndexes];
-}
-
-- (BOOL)tableView:(NSTableView *)tv canDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
-    if ([[self document] respondsToSelector:_cmd])
-        return [[self document] tableView:tv canDeleteRowsWithIndexes:rowIndexes];
-    return NO;
-}
-
 @end
 
 // The array controller is set to preserve selection, but it seems to work based on pointer equality or else isn't implemented for setContent:.  Consequently, each time setContent: is called (via setResults:), the selection changes randomly.  Here we explicitly preserve selection based on isEqual:, which is implemented correctly for the BDSKSearchResults.  This is generally pretty fast, since the number of selected objects is typically small.
