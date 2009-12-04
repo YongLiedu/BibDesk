@@ -599,7 +599,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     if ([self isDisplayingFileContentSearch])
         [fileSearchController filterUsingURLs:[groupedPublications valueForKey:@"identifierURL"]];
     
-    [searchField sendAction:[searchField action] to:[searchField target]]; // redo the search to update the table
+    [self redoSearch];
 }
 
 - (BOOL)selectGroups:(NSArray *)theGroups{

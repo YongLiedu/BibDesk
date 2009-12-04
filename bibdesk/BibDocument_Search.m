@@ -71,7 +71,7 @@
 
 - (IBAction)changeSearchType:(id)sender{
     [[NSUserDefaults standardUserDefaults] setInteger:[sender tag] forKey:BDSKSearchMenuTagKey];
-    [searchField sendAction:[searchField action] to:[searchField target]];
+    [self redoSearch];
 }
 
 - (IBAction)makeSearchFieldKey:(id)sender{
@@ -93,7 +93,7 @@
     NSParameterAssert(filterterm != nil);
     if([[searchField stringValue] isEqualToString:filterterm] == NO){
         [searchField setStringValue:filterterm];
-        [searchField sendAction:[searchField action] to:[searchField target]];
+        [self redoSearch];
     }
 }
 
@@ -105,14 +105,21 @@
         field = BDSKAllFieldsString;
     }
     
+    NSString *searchString = [searchField stringValue];
+    
     if ([field isEqualToString:BDSKFileContentSearchString]) {
+        
+        // if searchString is empty, there is no buttonBar, and File Content shouldn't be selected
+        BDSKASSERT([NSString isEmptyString:searchString] == NO);
+        // if the file content search is already shown, we should not get this message, as the search: action is send to the fileSearchController
+        BDSKASSERT([self isDisplayingFileContentSearch] == NO);
+        
         [self showFileContentSearch];
+        
     } else {
         
         if ([self isDisplayingFileContentSearch])
             [fileSearchController restoreDocumentState];
-        
-        NSString *searchString = [searchField stringValue];
         
         if ([NSString isEmptyString:searchString]) {
             
@@ -225,6 +232,11 @@
         [self showSearchButtonView];    
     // update existing search
     [self updateSearch:nil];
+}
+
+- (void)redoSearch {
+    // do the correct search: action depending on whether we have the file content shown or not
+    [searchField sendAction:[searchField action] to:[searchField target]];
 }
 
 #pragma mark -
@@ -347,9 +359,8 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     
     // removeFileContentSearch may be called after the user clicks a different search type, without changing the searchfield; in that case, we want to leave the search button view in place, and refilter the list.  Otherwise, select the pubs corresponding to the file content selection.
     if ([[searchField stringValue] isEqualToString:@""]) {
-        [self hideSearchButtonView];
-        // update search
-        [self updateSearch:nil];
+        // hide the search buttons and update search
+        [self redoSearch];
         
         // have to hide the search view before trying to select anything
         NSArray *itemsToSelect = [fileSearchController selectedIdentifierURLs];

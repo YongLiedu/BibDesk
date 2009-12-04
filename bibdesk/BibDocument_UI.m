@@ -707,7 +707,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         [self updateCategoryGroupsPreservingSelection:YES];
     } else if (displayingLocal && (docFlags.itemChangeMask & BDSKItemChangedSearchKeyMask) != 0) {
         // this handles all UI updates if we call it, so don't bother with any others
-        [searchField sendAction:[searchField action] to:[searchField target]];
+        [self redoSearch];
     } else if (displayingLocal) {
         // groups and quicksearch won't update for us
         if ((docFlags.itemChangeMask & BDSKItemChangedSortKeyMask) != 0)

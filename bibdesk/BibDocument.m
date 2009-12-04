@@ -1773,7 +1773,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [self updateCategoryGroupsPreservingSelection:YES];
         [self sortGroupsByKey:nil]; // resort
 		[tableView deselectAll:self]; // clear before resorting
-		[searchField sendAction:[searchField action] to:[searchField target]]; // redo the search
+		[self redoSearch]; // redo the search
         [self sortPubsByKey:nil]; // resort
 	}
 	return success;
