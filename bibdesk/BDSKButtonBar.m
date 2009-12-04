@@ -170,7 +170,7 @@
             [item setState:[[item representedObject] isEqual:[[sender cell] representedObject]] ? NSOnState : NSOffState];
     }
     [self setNeedsDisplayInRect:[sender frame]];
-	if (didChangeSelection)
+	if (didChangeSelection && [self target] && [self action])
         [NSApp sendAction:[self action] to:[self target] from:self];
 }
 
