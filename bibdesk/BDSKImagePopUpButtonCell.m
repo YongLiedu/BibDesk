@@ -161,6 +161,11 @@
 	[buttonCell setImage:nil]; // invalidate the image
 }
 
+- (void)setControlSize:(NSControlSize)size {
+    [super setControlSize:size];
+    [buttonCell setImage:nil]; // invalidate the image
+}
+
 - (void)setBackgroundStyle:(NSBackgroundStyle)style {
     [super setBackgroundStyle:style];
     [buttonCell setBackgroundStyle:style];
