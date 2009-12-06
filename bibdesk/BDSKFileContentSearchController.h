@@ -46,7 +46,6 @@
 
 - (void)removeFileContentSearch:(BDSKFileContentSearchController *)fileContentSearch;
 - (NSString *)fileContentSearch:(BDSKFileContentSearchController *)fileContentSearch titleForIdentifierURL:(NSURL *)identifierURL;
-- (NSURL *)fileURLForFileContentSearch:(BDSKFileContentSearchController *)fileContentSearch;
 - (void)fileContentSearchDidUpdate:(BDSKFileContentSearchController *)fileContentSearch;
 - (void)fileContentSearchDidFinishInitialIndexing:(BDSKFileContentSearchController *)fileContentSearch;
 
@@ -113,7 +112,7 @@
 - (void)setSortDescriptorData:(NSData *)data;
 
 - (void)remove;
-- (void)terminate;
+- (void)terminateForDocumentURL:(NSURL *)fileURL;
 
 - (IBAction)search:(id)sender;
 - (IBAction)tableAction:(id)sender;

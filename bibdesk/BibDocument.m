@@ -622,7 +622,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [[self class] cancelPreviousPerformRequestsWithTarget:self];
     
     [documentSearch terminate];
-    [fileSearchController terminate];
+    [fileSearchController terminateForDocumentURL:[self fileURL]];
     [notesSearchIndex terminate];
     
     if([drawerController isDrawerOpen])

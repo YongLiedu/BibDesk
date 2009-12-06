@@ -396,10 +396,6 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     return [[[self publications] itemForIdentifierURL:identifierURL] displayTitle];
 }
 
-- (NSURL *)fileURLForFileContentSearch:(BDSKFileContentSearchController *)fileContentSearch {
-    return [self fileURL];
-}
-
 - (void)fileContentSearchDidUpdate:(BDSKFileContentSearchController *)fileContentSearch {
     [self updateStatus];
 }

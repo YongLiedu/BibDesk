@@ -420,7 +420,7 @@
     [[self delegate] removeFileContentSearch:self];
 }
 
-- (void)terminate
+- (void)terminateForDocumentURL:(NSURL *)fileURL
 {
     [self saveSortDescriptors];
     
@@ -436,7 +436,7 @@
     [searchIndex setDelegate:nil];
     
     // stops the search index runloop, let the index know the document's location so it can cache the index to disk
-    [searchIndex cancelForDocumentURL:[[self delegate] fileURLForFileContentSearch:self]];
+    [searchIndex cancelForDocumentURL:fileURL];
     BDSKDESTROY(searchIndex);
 }
 
