@@ -127,7 +127,7 @@
     
     if (NSIsEmptyRect(arrowRect) == NO) {
         NSBezierPath *path = [NSBezierPath bezierPath];
-        NSPoint offset = NSMakePoint(NSMinX(arrowRect), NSMinY(arrowRect));
+        NSPoint offset = arrowRect.origin;
         char s = 1;
         if ([controlView isFlipped]) {
             offset.y += NSHeight(arrowRect);
