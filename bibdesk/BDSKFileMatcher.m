@@ -751,13 +751,8 @@ static NSColor *fillColor = nil;
 - (void)drawRow:(NSInteger)rowIndex clipRect:(NSRect)clipRect
 {
     if ([self isExpandable:[self itemAtRow:rowIndex]]) {
-
-        NSGradient *gradient;
-        if ([self isFlipped])
-            gradient = [[[NSGradient alloc] initWithStartingColor:topColor endingColor:bottomColor] autorelease];
-        else
-            gradient = [[[NSGradient alloc] initWithStartingColor:bottomColor endingColor:topColor] autorelease];
-        [gradient drawInRect:[self rectOfRow:rowIndex] angle:90.0];
+        NSGradient *gradient = [[[NSGradient alloc] initWithStartingColor:bottomColor endingColor:topColor] autorelease];
+        [gradient drawInRect:[self rectOfRow:rowIndex] angle:[self isFlipped] ? -90.0 : 90.0];
     }
     [super drawRow:rowIndex clipRect:clipRect];
 }
