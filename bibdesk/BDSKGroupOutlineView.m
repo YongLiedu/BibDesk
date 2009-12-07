@@ -58,7 +58,6 @@
 
 - (void)dealloc
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
     BDSKDESTROY(parentCell);
     [super dealloc];
 }
@@ -66,11 +65,6 @@
 - (void)awakeFromNib
 {
     BDSKPRECONDITION([[self enclosingScrollView] contentView]);
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(handleClipViewFrameChangedNotification:)
-                                                 name:NSViewFrameDidChangeNotification
-                                               object:[[self enclosingScrollView] contentView]];
-    
     BDSKTypeSelectHelper *aTypeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
     [aTypeSelectHelper setCyclesSimilarResults:NO];
     [aTypeSelectHelper setMatchesPrefix:NO];
@@ -102,12 +96,6 @@
 - (CGFloat)rowHeightForFont:(NSFont *)font {
     // use a larger row height to give space for the highlights, also reproduces the row height in Mail
     return [NSLayoutManager defaultViewLineHeightForFont:font] + 4.0;
-}
-
-- (void)handleClipViewFrameChangedNotification:(NSNotification *)note
-{
-    // work around for bug where corner view doesn't get redrawn after scrollers hide
-    [[self cornerView] setNeedsDisplay:YES];
 }
 
 - (void)mouseDown:(NSEvent *)theEvent{
