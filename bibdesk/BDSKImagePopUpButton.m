@@ -52,7 +52,7 @@
 	if (self = [super initWithCoder:coder]) {
 		if ([[self cell] isKindOfClass:[[self class] cellClass]] == NO) {
 			id oldCell = [self cell];
-			id cell = [[[[[self class] cellClass] alloc] initTextCell:@"" pullsDown:NO] autorelease];
+			id cell = [[[[[self class] cellClass] alloc] initTextCell:@"" pullsDown:YES] autorelease];
             
 			[cell setEnabled:[oldCell isEnabled]];
 			[cell setShowsFirstResponder:[oldCell showsFirstResponder]];
