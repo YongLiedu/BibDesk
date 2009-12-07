@@ -48,7 +48,6 @@
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKEdgeView.h"
 #import "BibDocument.h"
-#import "BDSKImagePopUpButtonCell.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKAppController.h"
 #import "BDSKFieldEditor.h"
