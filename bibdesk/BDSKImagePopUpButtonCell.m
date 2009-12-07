@@ -150,10 +150,10 @@
             }
         }
         [path closePath];
-        [[NSColor colorWithCalibratedWhite:0.0 alpha:0.75] setFill];
         [NSGraphicsContext saveGraphicsState];
         if ([self showsFirstResponder])
             NSSetFocusRingStyle(NSFocusRingBelow);
+        [[NSColor colorWithCalibratedWhite:0.0 alpha:[(NSControl *)controlView isEnabled] ? 0.75 : 0.375] setFill];
         [path fill];
         [NSGraphicsContext restoreGraphicsState];
     }
