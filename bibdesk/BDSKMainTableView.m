@@ -135,11 +135,8 @@ enum {
     NSRect cornerViewFrame = [[self cornerView] frame];
     BDSKImagePopUpButton *cornerViewButton = [[BDSKImagePopUpButton alloc] initWithFrame:cornerViewFrame];
     [cornerViewButton setPullsDown:YES];
-    [cornerViewButton setIconSize:cornerViewFrame.size];
-    [cornerViewButton setIcon:[[self class] cornerColumnsImage]];
     [[cornerViewButton cell] setArrowPosition:NSPopUpNoArrow];
     [[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
-    [[cornerViewButton cell] setUsesItemFromMenu:NO];
     [self setCornerView:cornerViewButton];
     [cornerViewButton release];
     
@@ -676,10 +673,11 @@ enum {
 		[item setState:NSOnState];
 	}
     
-	if ([[self cornerView] isKindOfClass:[BDSKImagePopUpButton class]] && menu != nil) {
+	if ([[self cornerView] isKindOfClass:[NSPopUpButton class]] && menu != nil) {
         menu = [self columnsMenu]; // this is already a copy
-        [menu insertItemWithTitle:@"" action:NULL keyEquivalent:@"" atIndex:0];
-        [(BDSKImagePopUpButton *)[self cornerView] setMenu:menu];
+        item = [menu insertItemWithTitle:@"" action:NULL keyEquivalent:@"" atIndex:0];
+        [item setImage:[[self class] cornerColumnsImage]];
+        [(NSPopUpButton *)[self cornerView] setMenu:menu];
     }
 }
 

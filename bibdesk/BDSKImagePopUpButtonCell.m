@@ -43,43 +43,21 @@
 
 @implementation BDSKImagePopUpButtonCell
 
-+ (NSImage *)arrowImage {
-    static NSImage *arrowImage = nil;
-    if (arrowImage == nil) {
-        arrowImage = [[NSImage alloc] initWithSize:NSMakeSize(7.0, 5.0)];
-        [arrowImage lockFocus];
-        NSBezierPath *path = [NSBezierPath bezierPath];
-        [path moveToPoint:NSMakePoint(0.5, 5.0)];
-        [path lineToPoint:NSMakePoint(6.5, 5.0)];
-        [path lineToPoint:NSMakePoint(3.5, 0.0)];
-        [path closePath];
-        [[NSColor colorWithCalibratedWhite:0.0 alpha:0.75] setFill];
-        [path fill];
-        [arrowImage unlockFocus];
-    }
-    return arrowImage;
-}
-
 - (void)makeButtonCell {
     buttonCell = [[NSButtonCell allocWithZone:[self zone]] initTextCell: @""];
     [buttonCell setBordered: NO];
     [buttonCell setHighlightsBy: NSContentsCellMask];
     [buttonCell setImagePosition: NSImageLeft];
+    [buttonCell setImageScaling:NSImageScaleProportionallyDown];
     [buttonCell setEnabled:[self isEnabled]];
     [buttonCell setShowsFirstResponder:[self showsFirstResponder]];
 }
 
-// this used to be the designated intializer
+// we should always be unbordered and pulldown
 - (id)initTextCell:(NSString *)stringValue pullsDown:(BOOL)pullsDown{
-    return [self initImageCell:nil];
-}
-
-// this is now the designated intializer
-- (id)initImageCell:(NSImage *)anImage{
-    if (self = [super initTextCell:@"" pullsDown:YES]) {
+    if (self = [super initTextCell:stringValue pullsDown:YES]) {
 		[self makeButtonCell];
-        icon = [anImage retain];
-        iconSize = icon ? [icon size] : NSMakeSize(32.0, 32.0);
+        [self setBordered:NO];
     }
     
     return self;
@@ -88,63 +66,25 @@
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
 		[self makeButtonCell];
-		icon = [[coder decodeObjectForKey:@"icon"] retain];
-		iconSize = [coder decodeSizeForKey:@"iconSize"];
+        [self setBordered:NO];
 		// hack to always get regular controls in a toolbar customization palette, there should be a better way
 		[self setControlSize:NSRegularControlSize];
 	}
 	return self;
 }
 
-- (void)encodeWithCoder:(NSCoder *)encoder{
-	[super encodeWithCoder:encoder];
-	[encoder encodeObject:icon forKey:@"icon"];
-	[encoder encodeSize:iconSize forKey:@"iconSize"];
-}
-
 - (id)copyWithZone:(NSZone *)aZone {
     BDSKImagePopUpButtonCell *copy = [super copyWithZone:aZone];
     [copy makeButtonCell];
-    copy->icon = [icon copyWithZone:aZone];
-    copy->iconSize = iconSize;
     return copy;
 }
 
 - (void)dealloc{
     BDSKDESTROY(buttonCell);
-    BDSKDESTROY(icon);
     [super dealloc];
 }
 
 #pragma mark Accessors
-
-- (NSSize)iconSize {
-    return iconSize;
-}
-
-- (void)setIconSize:(NSSize)newIconSize {
-    if (NSEqualSizes(iconSize, newIconSize) == NO) {
-        iconSize = newIconSize;
-        [buttonCell setImage:nil];
-    }
-}
-
-- (NSImage *)icon {
-    return icon;
-}
-
-- (void)setIcon:(NSImage *)anImage{
-    if (icon != anImage) {
-        [icon release];
-        icon = [anImage retain];
-        [buttonCell setImage:nil]; // invalidate the image
-    }
-}
-
-- (void)setArrowPosition:(NSPopUpArrowPosition)position {
-    [super setArrowPosition:position];
-    [buttonCell setImage:nil]; // invalidate the image
-}
 
 - (void)setEnabled:(BOOL)flag {
 	[super setEnabled:flag];
@@ -156,80 +96,67 @@
 	[buttonCell setShowsFirstResponder:flag];
 }
 
-- (void)setUsesItemFromMenu:(BOOL)flag{
-	[super setUsesItemFromMenu:flag];
-	[buttonCell setImage:nil]; // invalidate the image
-}
-
-- (void)setControlSize:(NSControlSize)size {
-    [super setControlSize:size];
-    [buttonCell setImage:nil]; // invalidate the image
-}
-
 - (void)setBackgroundStyle:(NSBackgroundStyle)style {
     [super setBackgroundStyle:style];
     [buttonCell setBackgroundStyle:style];
-    [buttonCell setImage:nil]; // invalidate the image
 }
 
 #pragma mark Drawing and highlighting
 
-- (NSSize)iconDrawSize {
-	NSSize size = iconSize;
-	if ([self controlSize] != NSRegularControlSize) {
-		// for small and mini controls we just scale the icon by 75% 
-		size = NSMakeSize(size.width * 0.75, size.height * 0.75);
-	}
-	return size;
-}
-
 - (NSSize)cellSize {
-	NSSize size = [self iconDrawSize];
-	if ([self arrowPosition] != NSPopUpNoArrow) {
-		size.width += [[[self class] arrowImage] size].width;
-	}
-	return size;
+    [buttonCell setImage:[self numberOfItems] ? [[self itemAtIndex:0] image] : nil];
+	NSSize size = [buttonCell cellSize];
+	if ([self controlSize] != NSRegularControlSize) {
+        size = NSMakeSize(round(0.75 * size.width), round(0.75 * size.height));
+        if ([self arrowPosition] != NSPopUpNoArrow)
+            size.width += 5.0;
+	} else if ([self arrowPosition] != NSPopUpNoArrow) {
+        size.width += 7.0;
+    }
+    return size;
 }
 
-- (void)drawWithFrame:(NSRect)cellFrame  inView:(NSView *)controlView{
-	if ([buttonCell image] == nil || [self usesItemFromMenu]) {
-		// we need to redraw the image
-        
-		NSImage *img = [self usesItemFromMenu] ? [[self selectedItem] image] : [self icon];
-        NSImage *popUpImage = nil;
-        NSSize drawSize = [self iconDrawSize];
-        
-        if ([self arrowPosition] == NSPopUpNoArrow && NSEqualSizes([img size], drawSize)) {
-            popUpImage = [img retain];
-        } else {
-            NSRect iconRect = NSZeroRect;
-            NSRect iconDrawRect = NSZeroRect;
-            NSRect arrowRect = NSZeroRect;
-            NSRect arrowDrawRect = NSZeroRect;
-            
-            iconRect.size = [img size];
-            iconDrawRect.size = drawSize;
-            if ([self arrowPosition] != NSPopUpNoArrow) {
-                arrowRect.size = arrowDrawRect.size = [[[self class] arrowImage] size];
-                arrowDrawRect.origin = NSMakePoint(NSWidth(iconDrawRect), 1.0);
-                drawSize.width += NSWidth(arrowRect);
+- (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView{
+    NSRect arrowRect = NSZeroRect, rect = cellFrame;
+    CGFloat arrowWidth = [self controlSize] == NSRegularControlSize ? 7.0 : 5.0;
+    
+   if ([self arrowPosition] != NSPopUpNoArrow)
+        NSDivideRect(rect, &arrowRect, &rect, arrowWidth, NSMaxXEdge);
+    
+    [buttonCell setImage:[self numberOfItems] ? [[self itemAtIndex:0] image] : nil];
+    [buttonCell drawWithFrame:rect inView:controlView];
+    
+    if (NSIsEmptyRect(arrowRect) == NO) {
+        NSBezierPath *path = [NSBezierPath bezierPath];
+        if ([self controlSize] == NSRegularControlSize) {
+            if ([controlView isFlipped]) {
+                [path moveToPoint:NSMakePoint(NSMinX(arrowRect) + 0.5, NSMaxY(arrowRect) - 6.0)];
+                [path relativeLineToPoint:NSMakePoint(6.0, 0.0)];
+                [path relativeLineToPoint:NSMakePoint(-3.0, 5.0)];
+            } else {
+                [path moveToPoint:NSMakePoint(NSMinX(arrowRect) + 0.5, NSMinY(arrowRect) + 6.0)];
+                [path relativeLineToPoint:NSMakePoint(6.0, 0.0)];
+                [path relativeLineToPoint:NSMakePoint(-3.0, -5.0)];
             }
-            
-            popUpImage = [[NSImage alloc] initWithSize: drawSize];
-            [popUpImage lockFocus];
-            if (img)
-                [img drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
-            if ([self arrowPosition] != NSPopUpNoArrow)
-                [[[self class] arrowImage] drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
-            [popUpImage unlockFocus];
+        } else {
+            if ([controlView isFlipped]) {
+                [path moveToPoint:NSMakePoint(NSMinX(arrowRect) + 0.5, NSMaxY(arrowRect) - 4.0)];
+                [path relativeLineToPoint:NSMakePoint(4.0, 0.0)];
+                [path relativeLineToPoint:NSMakePoint(-2.0, 3.0)];
+            } else {
+                [path moveToPoint:NSMakePoint(NSMinX(arrowRect) + 0.5, NSMinY(arrowRect) + 4.0)];
+                [path relativeLineToPoint:NSMakePoint(4.0, 0.0)];
+                [path relativeLineToPoint:NSMakePoint(-2.0, -3.0)];
+            }
         }
-        
-		[buttonCell setImage: popUpImage];
-		[popUpImage release];
+        [path closePath];
+        [[NSColor colorWithCalibratedWhite:0.0 alpha:0.75] setFill];
+        [NSGraphicsContext saveGraphicsState];
+        if ([self showsFirstResponder])
+            NSSetFocusRingStyle(NSFocusRingBelow);
+        [path fill];
+        [NSGraphicsContext restoreGraphicsState];
     }
-	//   NSLog(@"cellFrame: %@  selectedItem: %@", NSStringFromRect(cellFrame), [[self selectedItem] title]);
-	
-    [buttonCell drawWithFrame: cellFrame  inView: controlView];
 }
 
 - (void)highlight:(BOOL)flag  withFrame:(NSRect)cellFrame  inView:(NSView *)controlView{

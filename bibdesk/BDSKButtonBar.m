@@ -182,12 +182,10 @@
     if (overflowButton == nil) {
         overflowButton = [[BDSKImagePopUpButton alloc] initWithFrame:NSZeroRect pullsDown:YES];
         [[overflowButton cell] setArrowPosition:NSPopUpNoArrow];
-        [[overflowButton cell] setUsesItemFromMenu:NO];
         [[overflowButton cell] setAltersStateOfSelectedItem:NO];
         [[overflowButton cell] setBackgroundStyle:NSBackgroundStyleRaised];
         [overflowButton addItemWithTitle:@""];
-        [overflowButton setIcon:[NSImage imageNamed:@"Overflow"]];
-        [overflowButton setIconSize:[[overflowButton icon] size]];
+        [[overflowButton itemAtIndex:0] setImage:[NSImage imageNamed:@"Overflow"]];
         [overflowButton sizeToFit];
     } else {
         while ([overflowButton numberOfItems] > 1)

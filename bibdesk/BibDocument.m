@@ -523,11 +523,9 @@ static NSOperationQueue *metadataCacheQueue = nil;
     
 	// ImagePopUpButtons setup
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
-	[[actionMenuButton cell] setUsesItemFromMenu:NO];
 	[actionMenuButton setMenu:actionMenu];
 	
 	[[groupActionMenuButton cell] setAltersStateOfSelectedItem:NO];
-	[[groupActionMenuButton cell] setUsesItemFromMenu:NO];
 	[groupActionMenuButton setMenu:groupMenu];
     
     // array of BDSKSharedGroup objects and zeroconf support, doesn't do anything when already enabled

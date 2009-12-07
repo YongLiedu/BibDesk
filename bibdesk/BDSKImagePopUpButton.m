@@ -52,11 +52,10 @@
 	if (self = [super initWithCoder:coder]) {
 		if ([[self cell] isKindOfClass:[[self class] cellClass]] == NO) {
 			id oldCell = [self cell];
-			id cell = [[[[[self class] cellClass] alloc] initImageCell:[oldCell image]] autorelease];
+			id cell = [[[[[self class] cellClass] alloc] initTextCell:@"" pullsDown:NO] autorelease];
             
 			[cell setEnabled:[oldCell isEnabled]];
 			[cell setShowsFirstResponder:[oldCell showsFirstResponder]];
-			[cell setUsesItemFromMenu:[oldCell usesItemFromMenu]];
             [cell setArrowPosition:[oldCell arrowPosition]];
 			[cell setMenu:[oldCell menu]];
             
@@ -64,22 +63,6 @@
 		}
 	}
 	return self;
-}
-
-- (NSImage *)icon {
-    return [[self cell] icon];
-}
-
-- (void)setIcon:(NSImage *)anImage {
-    [[self cell] setIcon:anImage];
-}
-
-- (NSSize)iconSize {
-    return [[self cell] iconSize];
-}
-
-- (void)setIconSize:(NSSize)newIconSize {
-    [[self cell] setIconSize:newIconSize];
 }
 
 @end
