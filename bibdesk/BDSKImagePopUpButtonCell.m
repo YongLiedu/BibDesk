@@ -66,8 +66,6 @@
 	if (self = [super initWithCoder:coder]) {
 		[self makeButtonCell];
         [self setBordered:NO];
-		// hack to always get regular controls in a toolbar customization palette, there should be a better way
-		[self setControlSize:NSRegularControlSize];
 	}
 	return self;
 }

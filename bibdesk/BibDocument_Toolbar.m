@@ -191,8 +191,15 @@
 
 - (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdent willBeInsertedIntoToolbar:(BOOL)willBeInserted {
     BDSKToolbarItem *item = [toolbarItems objectForKey:itemIdent];
-    if (willBeInserted == NO)
+    if (willBeInserted == NO) {
         item = [[item copy] autorelease];
+        if ([[item view] isKindOfClass:[NSControl class]]) {
+            [[(NSControl *)[item view] cell] setControlSize:NSRegularControlSize];
+            [(NSControl *)[item view] sizeToFit];
+            [item setMaxSize:[[item view] frame].size];
+            [item setMinSize:[[item view] frame].size];
+        }
+    }
     return item;
 }
 
