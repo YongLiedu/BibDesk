@@ -44,10 +44,10 @@
 @implementation BDSKImagePopUpButtonCell
 
 - (void)makeButtonCell {
-    buttonCell = [[NSButtonCell allocWithZone:[self zone]] initTextCell: @""];
+    buttonCell = [[NSButtonCell allocWithZone:[self zone]] initTextCell:@""];
     [buttonCell setBordered: NO];
-    [buttonCell setHighlightsBy: NSContentsCellMask];
-    [buttonCell setImagePosition: NSImageLeft];
+    [buttonCell setHighlightsBy:NSContentsCellMask];
+    [buttonCell setImagePosition:NSImageOnly];
     [buttonCell setImageScaling:NSImageScaleProportionallyDown];
     [buttonCell setEnabled:[self isEnabled]];
     [buttonCell setShowsFirstResponder:[self showsFirstResponder]];
@@ -59,7 +59,6 @@
 		[self makeButtonCell];
         [self setBordered:NO];
     }
-    
     return self;
 }
 
@@ -141,15 +140,15 @@
         [NSGraphicsContext saveGraphicsState];
         if ([self showsFirstResponder])
             NSSetFocusRingStyle(NSFocusRingBelow);
-        [[NSColor colorWithCalibratedWhite:0.0 alpha:[(NSControl *)controlView isEnabled] ? 0.75 : 0.375] setFill];
+        [[NSColor colorWithCalibratedWhite:0.0 alpha:[self isEnabled] ? 0.75 : 0.375] setFill];
         [path fill];
         [NSGraphicsContext restoreGraphicsState];
     }
 }
 
-- (void)highlight:(BOOL)flag  withFrame:(NSRect)cellFrame  inView:(NSView *)controlView{
-	[buttonCell highlight: flag  withFrame: cellFrame  inView: controlView];
-	[super highlight: flag  withFrame: cellFrame  inView: controlView];
+- (void)highlight:(BOOL)flag withFrame:(NSRect)cellFrame inView:(NSView *)controlView{
+	[buttonCell highlight:flag withFrame:cellFrame inView:controlView];
+	[super highlight:flag withFrame:cellFrame inView:controlView];
 }
 
 @end
