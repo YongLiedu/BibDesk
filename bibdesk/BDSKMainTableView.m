@@ -90,6 +90,7 @@ enum {
 - (void)columnsMenuAddTableColumn:(id)sender;
 - (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)updateColumnsMenu;
+- (void)updateColumnsButton;
 - (IBAction)importItem:(id)sender;
 - (IBAction)openParentItem:(id)sender;
 - (void)autosizeColumn:(id)sender;
@@ -435,6 +436,7 @@ enum {
     [self setHighlightedTableColumn:highlightedColumn]; 
     [self tableViewFontChanged];
     [self updateColumnsMenu];
+    [self updateColumnsButton];
 }
 
 - (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(NSUInteger)idx {
@@ -672,10 +674,12 @@ enum {
 		[item setTarget:self];
 		[item setState:NSOnState];
 	}
-    
-	if ([[self cornerView] isKindOfClass:[NSPopUpButton class]] && menu != nil) {
-        menu = [self columnsMenu]; // this is already a copy
-        item = [menu insertItemWithTitle:@"" action:NULL keyEquivalent:@"" atIndex:0];
+}
+
+- (void)updateColumnsButton {
+	if ([[self cornerView] isKindOfClass:[NSPopUpButton class]]) {
+        NSMenu *menu = [self columnsMenu]; // this is already a copy
+        NSMenuItem *item = [menu insertItemWithTitle:@"" action:NULL keyEquivalent:@"" atIndex:0];
         [item setImage:[[self class] cornerColumnsImage]];
         [(NSPopUpButton *)[self cornerView] setMenu:menu];
     }
