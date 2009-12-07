@@ -42,6 +42,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKVersionNumber.h"
+#import "BDSKRuntime.h"
 
 #define BDSKMenuTargetURL @"BDSKMenuTargetURL"
 #define BDSKMenuApplicationURL @"BDSKMenuApplicationURL"
@@ -57,10 +58,14 @@
 
 @implementation NSMenu (BDSKExtensions)
 
-- (void)removeAllItems {
+- (void)Leopard_removeAllItems {
     NSUInteger numItems = 0;
     while (numItems = [self numberOfItems])
         [self removeItemAtIndex:numItems - 1];
+}
+
++ (void)load {
+    BDSKAddInstanceMethodImplementationFromSelector(self, @selector(removeAllItems), @selector(Leopard_removeAllItems));
 }
 
 - (NSMenuItem *)itemWithAction:(SEL)action {

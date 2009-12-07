@@ -40,8 +40,6 @@
 
 @interface NSMenu (BDSKExtensions)
 
-- (void)removeAllItems;
-
 - (NSMenuItem *)itemWithAction:(SEL)action;
 
 - (void)addItemsFromMenu:(NSMenu *)other;
@@ -54,6 +52,12 @@
 - (NSMenuItem *)addItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL;
 
 @end
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5
+@interface NSMenu (BDSKSnowLeopardExtensions)
+- (void)removeAllItems;
+@end
+#endif
 
 @interface NSMenuItem (BDSKImageExtensions)
 - (void)setImageAndSize:(NSImage *)image;
