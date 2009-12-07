@@ -118,37 +118,25 @@
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView{
     NSRect arrowRect = NSZeroRect, rect = cellFrame;
-    CGFloat arrowWidth = [self controlSize] == NSRegularControlSize ? 7.0 : 5.0;
+    CGFloat arrowWidth = [self controlSize] == NSRegularControlSize ? 6.0 : 4.0;
     
    if ([self arrowPosition] != NSPopUpNoArrow)
-        NSDivideRect(rect, &arrowRect, &rect, arrowWidth, NSMaxXEdge);
+        NSDivideRect(rect, &arrowRect, &rect, arrowWidth + 1.0, NSMaxXEdge);
     
     [buttonCell setImage:[self numberOfItems] ? [[self itemAtIndex:0] image] : nil];
     [buttonCell drawWithFrame:rect inView:controlView];
     
     if (NSIsEmptyRect(arrowRect) == NO) {
         NSBezierPath *path = [NSBezierPath bezierPath];
-        if ([self controlSize] == NSRegularControlSize) {
-            if ([controlView isFlipped]) {
-                [path moveToPoint:NSMakePoint(NSMinX(arrowRect) + 0.5, NSMaxY(arrowRect) - 6.0)];
-                [path relativeLineToPoint:NSMakePoint(6.0, 0.0)];
-                [path relativeLineToPoint:NSMakePoint(-3.0, 5.0)];
-            } else {
-                [path moveToPoint:NSMakePoint(NSMinX(arrowRect) + 0.5, NSMinY(arrowRect) + 6.0)];
-                [path relativeLineToPoint:NSMakePoint(6.0, 0.0)];
-                [path relativeLineToPoint:NSMakePoint(-3.0, -5.0)];
-            }
-        } else {
-            if ([controlView isFlipped]) {
-                [path moveToPoint:NSMakePoint(NSMinX(arrowRect) + 0.5, NSMaxY(arrowRect) - 4.0)];
-                [path relativeLineToPoint:NSMakePoint(4.0, 0.0)];
-                [path relativeLineToPoint:NSMakePoint(-2.0, 3.0)];
-            } else {
-                [path moveToPoint:NSMakePoint(NSMinX(arrowRect) + 0.5, NSMinY(arrowRect) + 4.0)];
-                [path relativeLineToPoint:NSMakePoint(4.0, 0.0)];
-                [path relativeLineToPoint:NSMakePoint(-2.0, -3.0)];
-            }
+        NSPoint offset = NSMakePoint(NSMinX(arrowRect), NSMinY(arrowRect));
+        char s = 1;
+        if ([controlView isFlipped]) {
+            offset.y += NSHeight(arrowRect);
+            s = -1;
         }
+        [path moveToPoint:NSMakePoint(offset.x + 0.5, offset.y + s * arrowWidth)];
+        [path relativeLineToPoint:NSMakePoint(arrowWidth, 0.0)];
+        [path relativeLineToPoint:NSMakePoint(-0.5 * arrowWidth, -s * (arrowWidth - 1.0))];
         [path closePath];
         [NSGraphicsContext saveGraphicsState];
         if ([self showsFirstResponder])
