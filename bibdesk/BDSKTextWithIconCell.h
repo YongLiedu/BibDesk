@@ -43,14 +43,7 @@ extern NSString *BDSKTextWithIconCellStringKey;
 extern NSString *BDSKTextWithIconCellImageKey;
 
 
-@interface BDSKTextWithIconCell : BDSKIconTextFieldCell {
-    BOOL hasDarkHighlight;
-    BOOL settingUpFieldEditor;
-}
-
-- (BOOL)hasDarkHighlight;
-- (void)setHasDarkHighlight:(BOOL)flag;
-
+@interface BDSKTextWithIconCell : BDSKIconTextFieldCell
 @end
 
 #pragma mark -

@@ -59,7 +59,7 @@
 static CGFloat LEAF_ROW_HEIGHT = 20.0;
 static CGFloat GROUP_ROW_HEIGHT = 24.0;
 
-@interface BDSKCountOvalCell : NSTextFieldCell
+@interface BDSKCenteredTextFieldCell : NSTextFieldCell
 @end
 @interface BDSKBoldShadowFormatter : BDSKTextWithIconFormatter
 @end
@@ -119,7 +119,6 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
     [outlineView setAutoresizesOutlineColumn:NO];
 
     BDSKTextWithIconCell *titleCell = [[BDSKTextWithIconCell alloc] initTextCell:@""];
-    [titleCell setHasDarkHighlight:YES];
     [[outlineView tableColumnWithIdentifier:@"title"] setDataCell:titleCell];
     [titleCell release];
     
@@ -309,7 +308,7 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
     if ([[tableColumn identifier] isEqualToString:@"score"]) {
         static id prototype = nil;
         if (nil == prototype) {
-            prototype = [[BDSKCountOvalCell alloc] initTextCell:@""];
+            prototype = [[BDSKCenteredTextFieldCell alloc] initTextCell:@""];
             [prototype setFont:[outlineView font]];
             [prototype setBordered:NO];
             [prototype setControlSize:[cell controlSize]];
@@ -650,22 +649,13 @@ static NSDictionary *attributes = nil;
 /* This cell draws a centered (horizontally and vertically) string, and surrounds the string with a filled oval. 
 */
 
-@implementation BDSKCountOvalCell
-
-static NSColor *fillColor = nil;
-
-+ (void)initialize
-{
-    BDSKINITIALIZE;
-    fillColor = [[[NSColor keyboardFocusIndicatorColor] colorWithAlphaComponent:0.8] copy];
-}
+@implementation BDSKCenteredTextFieldCell
 
 - (id)initTextCell:(NSString *)string;
 {
     self = [super initTextCell:string];
     if (self) {
         [self setAlignment:NSCenterTextAlignment];
-        [self setTextColor:[NSColor whiteColor]];
     }
     return self;
 }

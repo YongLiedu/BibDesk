@@ -100,9 +100,6 @@
     [cell setEnabled:NO]; // this is required to make it non-editable
     [cell setMaxHeight:17.0 * 0.7];
     
-    // set up the image/text cell combination
-    [(BDSKTextWithIconCell *)[[tableView tableColumnWithIdentifier:@"title"] dataCell] setHasDarkHighlight:YES];
-    
     BDSKPRECONDITION([[tableView enclosingScrollView] contentView]);
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleClipViewFrameChangedNotification:)

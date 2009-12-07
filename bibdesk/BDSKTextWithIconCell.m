@@ -60,7 +60,6 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
 - (id)init {
     if (self = [super initTextCell:@""]) {
         [self setEditable:YES];
-        [self setHasDarkHighlight:NO];
         [self setScrollable:YES];
         [self setLineBreakMode:NSLineBreakByTruncatingTail];
         [self setFormatter:textWithIconFormatter];
@@ -70,7 +69,6 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
 
 - (id)initWithCoder:(NSCoder *)coder {
     if (self = [super initWithCoder:coder]) {
-        [self setHasDarkHighlight:NO];
         if ([self formatter] == nil)
             [self setFormatter:textWithIconFormatter];
     }
@@ -79,33 +77,12 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
 
 // NSCopying protocol
 
-- (id)copyWithZone:(NSZone *)zone {
-    BDSKTextWithIconCell *copy = [super copyWithZone:zone];
-    copy->hasDarkHighlight = hasDarkHighlight;
-    return copy;
-}
-
 - (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     return nil;
 }
 
 - (NSColor *)textColor {
-    // this allows the expansion tooltips on 10.5 to draw with the correct color
-    if (settingUpFieldEditor == NO && hasDarkHighlight && [self isHighlighted])
-        return [NSColor textBackgroundColor];
     return [super textColor];
-}
-
-- (void)editWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject event:(NSEvent *)theEvent {
-    settingUpFieldEditor = YES;
-    [super editWithFrame:aRect inView:controlView editor:textObj delegate:anObject event:theEvent];
-    settingUpFieldEditor = NO;
-}
-
-- (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(NSInteger)selStart length:(NSInteger)selLength {
-    settingUpFieldEditor = YES;
-    [super selectWithFrame:aRect inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
-    settingUpFieldEditor = NO;
 }
 
 - (void)setObjectValue:(id <NSCopying>)obj {
@@ -121,14 +98,6 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
 
 - (NSImage *)icon {
     return nonNullObjectValueForKey([self objectValue], BDSKTextWithIconCellImageKey);
-}
-
-- (BOOL)hasDarkHighlight {
-    return hasDarkHighlight;
-}
-
-- (void)setHasDarkHighlight:(BOOL)flag {
-    hasDarkHighlight = flag;
 }
 
 @end
