@@ -313,7 +313,7 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
             [prototype setBordered:NO];
             [prototype setControlSize:[cell controlSize]];
         }
-        if ([item isLeaf])
+        if ([item isLeaf] == NO)
             cell = prototype;
     }
     return cell;
@@ -656,6 +656,7 @@ static NSDictionary *attributes = nil;
     self = [super initTextCell:string];
     if (self) {
         [self setAlignment:NSCenterTextAlignment];
+        [self setTextColor:[NSColor whiteColor]];
     }
     return self;
 }
