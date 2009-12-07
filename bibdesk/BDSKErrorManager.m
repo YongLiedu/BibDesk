@@ -73,7 +73,7 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 
 - (void)dealloc;
 {
-    [document removeObserver:self forKeyPath:@"displayName"];
+    [document removeObserver:self forKeyPath:@"fileURL"];
     [document removeObserver:self forKeyPath:@"documentStringEncoding"];
     BDSKDESTROY(document);
     BDSKDESTROY(editors);
@@ -105,14 +105,14 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 {
     if (document != newDocument) {
         if(document){
-            [document removeObserver:self forKeyPath:@"displayName"];
+            [document removeObserver:self forKeyPath:@"fileURL"];
             [document removeObserver:self forKeyPath:@"documentStringEncoding"];
         }
         [document release];
         document = [newDocument retain];
         [self updateDisplayName];
         if(document){
-            [document addObserver:self forKeyPath:@"displayName" options:0 context:&BDSKErrorManagerObservationContext];
+            [document addObserver:self forKeyPath:@"fileURL" options:0 context:&BDSKErrorManagerObservationContext];
             [document addObserver:self forKeyPath:@"documentStringEncoding" options:0 context:&BDSKErrorManagerObservationContext];
         }
     }
@@ -170,7 +170,7 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
     if (context == &BDSKErrorManagerObservationContext) {
-        if(object == document && [keyPath isEqualToString:@"displayName"])
+        if(object == document && [keyPath isEqualToString:@"fileURL"])
             [self updateDisplayName];
         else if(object == document && document && [keyPath isEqualToString:@"documentStringEncoding"])
             documentStringEncoding = [document documentStringEncoding];
