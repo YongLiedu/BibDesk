@@ -195,6 +195,7 @@
         item = [[item copy] autorelease];
         if ([[item view] isKindOfClass:[NSControl class]]) {
             [[(NSControl *)[item view] cell] setControlSize:NSRegularControlSize];
+            [[(NSControl *)[item view] cell] setFont:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSRegularControlSize]]];
             [(NSControl *)[item view] sizeToFit];
             [item setMaxSize:[[item view] frame].size];
             [item setMinSize:[[item view] frame].size];
