@@ -572,12 +572,16 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     if ([menu isEqual:columnsMenu]) {
                 
         // remove all items; then fill it with the items from the current document
-        while([menu numberOfItems])
-            [menu removeItemAtIndex:0];
+        [menu removeAllItems];
         
         BibDocument *document = (BibDocument *)[[NSDocumentController sharedDocumentController] currentDocument];
-        if ([document respondsToSelector:@selector(columnsMenu)])
+        if ([document respondsToSelector:@selector(columnsMenu)]) {
             [menu addItemsFromMenu:[document columnsMenu]];
+        } else {
+            [menu addItemWithTitle:[NSLocalizedString(@"Add Other", @"Menu title") stringByAppendingEllipsis] action:NULL keyEquivalent:@""];
+            [menu addItem:[NSMenuItem separatorItem]];
+            [menu addItemWithTitle:NSLocalizedString(@"Autosize All Columns", @"Menu title") action:NULL keyEquivalent:@""];
+        }
         
     } else if ([menu isEqual:groupFieldMenu]) {
         
