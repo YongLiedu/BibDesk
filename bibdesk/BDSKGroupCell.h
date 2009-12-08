@@ -49,7 +49,6 @@ extern NSString *BDSKGroupCellFailedDownloadKey;
 
 @interface BDSKGroupCell : NSTextFieldCell {
     NSMutableAttributedString *countString;
-    BOOL settingUpFieldEditor;
 }
 
 - (NSRect)textRectForBounds:(NSRect)theRect;
