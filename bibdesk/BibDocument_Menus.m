@@ -245,71 +245,45 @@
 }
 
 - (BOOL) validateToggleToggleCustomCiteDrawerMenuItem:(NSMenuItem*) menuItem {
-    NSString *s;
-	if([drawerController isDrawerOpen]){
-		s = NSLocalizedString(@"Hide Custom \\cite Commands", @"Menu item title");
-		[menuItem setTitle:s];
-	}else{
-		s = NSLocalizedString(@"Show Custom \\cite Commands", @"Menu item title");
-		[menuItem setTitle:s];
-	}
+    [menuItem setTitle:[drawerController isDrawerOpen] ? NSLocalizedString(@"Hide Custom \\cite Commands", @"Menu item title") : NSLocalizedString(@"Show Custom \\cite Commands", @"Menu item title")];
 	return YES;
 }
 
 - (BOOL) validateToggleGroupsMenuItem:(NSMenuItem*) menuItem {
     NSString *s;
-	if ([groupSplitView isSubviewCollapsed:[[groupSplitView subviews] objectAtIndex:0]]){
-		s = NSLocalizedString(@"Show Groups", @"Menu item title");
-		[menuItem setTitle:s];
-	}
-	else {
-		s = NSLocalizedString(@"Hide Groups", @"Menu item title");
-		[menuItem setTitle:s];
-	}
+	if ([groupSplitView isSubviewCollapsed:[[groupSplitView subviews] objectAtIndex:0]])
+		[menuItem setTitle:NSLocalizedString(@"Show Groups", @"Menu item title")];
+	else
+		[menuItem setTitle:NSLocalizedString(@"Hide Groups", @"Menu item title")];
 	return YES;
 }
 
 - (BOOL) validateToggleSidebarMenuItem:(NSMenuItem*) menuItem {
     NSString *s;
-	if ([groupSplitView isSubviewCollapsed:[[groupSplitView subviews] objectAtIndex:2]]){
-		s = NSLocalizedString(@"Show Sidebar", @"Menu item title");
-		[menuItem setTitle:s];
-	}
-	else {
-		s = NSLocalizedString(@"Hide Sidebar", @"Menu item title");
-		[menuItem setTitle:s];
-	}
+	if ([groupSplitView isSubviewCollapsed:[[groupSplitView subviews] objectAtIndex:2]])
+		[menuItem setTitle:NSLocalizedString(@"Show Sidebar", @"Menu item title")];
+	else
+		[menuItem setTitle:NSLocalizedString(@"Hide Sidebar", @"Menu item title")];
 	return YES;
 }
 
 - (BOOL) validateToggleStatusBarMenuItem:(NSMenuItem*) menuItem {
-    NSString *s;
-	if ([statusBar isVisible]){
-		s = NSLocalizedString(@"Hide Status Bar", @"Menu item title");
-		[menuItem setTitle:s];
-	}
-	else {
-		s = NSLocalizedString(@"Show Status Bar", @"Menu item title");
-		[menuItem setTitle:s];
-	}
+    [menuItem setTitle:[statusBar isVisible] ? NSLocalizedString(@"Hide Status Bar", @"Menu item title") : NSLocalizedString(@"Show Status Bar", @"Menu item title")];
 	return YES;
 }
 
 - (BOOL) validateNewPubFromPasteboardMenuItem:(NSMenuItem*) menuItem {
-    NSString *s = [NSLocalizedString(@"New Publications from Clipboard", @"Menu item title") stringByAppendingEllipsis];
-	[menuItem setTitle:s];
+    [menuItem setTitle:[NSLocalizedString(@"New Publications from Clipboard", @"Menu item title") stringByAppendingEllipsis]];
 	return YES;
 }
 
 - (BOOL) validateNewPubFromFileMenuItem:(NSMenuItem*) menuItem {
-    NSString *s = [NSLocalizedString(@"New Publications from File", @"Menu item title") stringByAppendingEllipsis];
-	[menuItem setTitle:s];
+	[menuItem setTitle:[NSLocalizedString(@"New Publications from File", @"Menu item title") stringByAppendingEllipsis]];
 	return YES;
 }
 
 - (BOOL) validateNewPubFromWebMenuItem:(NSMenuItem*) menuItem {
-    NSString *s = [NSLocalizedString(@"New Publications from Web", @"Menu item title") stringByAppendingEllipsis];
-	[menuItem setTitle:s];
+	[menuItem setTitle:[NSLocalizedString(@"New Publications from Web", @"Menu item title") stringByAppendingEllipsis]];
 	return YES;
 }
 
@@ -463,22 +437,12 @@
 }
 
 - (BOOL)validateEditNewStaticGroupWithSelectionMenuItem:(NSMenuItem *)menuItem {
-    NSString *s;
-    if ([self hasExternalGroupsSelected])
-        s = NSLocalizedString(@"New Static Group With Merged Selection", @"Menu item title");
-    else
-        s = NSLocalizedString(@"New Static Group With Selection", @"Menu item title");
-    [menuItem setTitle:s];
+    [menuItem setTitle:[self hasExternalGroupsSelected] ? NSLocalizedString(@"New Static Group With Merged Selection", @"Menu item title") : NSLocalizedString(@"New Static Group With Selection", @"Menu item title")];
     return ([self numberOfSelectedPubs] > 0);
 }
 
 - (BOOL)validateEditNewCategoryGroupWithSelectionMenuItem:(NSMenuItem *)menuItem {
-    NSString *s;
-    if ([self hasExternalGroupsSelected])
-        s = NSLocalizedString(@"New Field Group With Merged Selection", @"Menu item title");
-    else
-        s = NSLocalizedString(@"New Field Group With Selection", @"Menu item title");
-    [menuItem setTitle:s];
+    [menuItem setTitle:[self hasExternalGroupsSelected] ? NSLocalizedString(@"New Field Group With Merged Selection", @"Menu item title") : NSLocalizedString(@"New Field Group With Selection", @"Menu item title")];
     return ([self numberOfSelectedPubs] > 0 && [currentGroupField isEqualToString:@""] == NO);
 }
 
@@ -554,13 +518,11 @@
 }
 
 - (BOOL)validateRefreshSharingMenuItem:(NSMenuItem *)menuItem {
-    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-    return ([sud boolForKey:BDSKShouldShareFilesKey]);
+    return [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldShareFilesKey];
 }
 
 - (BOOL)validateRefreshSharedBrowsingMenuItem:(NSMenuItem *)menuItem {
-    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-    return ([sud boolForKey:BDSKShouldLookForSharedFilesKey]);
+    return [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldLookForSharedFilesKey];
 }
 
 - (BOOL)validateRefreshURLGroupsMenuItem:(NSMenuItem *)menuItem {
@@ -619,222 +581,149 @@
 - (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
 	SEL act = [menuItem action];
 
-	if (act == @selector(cut:)) {
+	if (act == @selector(cut:))
 		return [self validateCutMenuItem:menuItem];
-	}
-	else if (act == @selector(copy:)) {
+	else if (act == @selector(copy:))
 		return [self validateCopyMenuItem:menuItem];
-	}
-	else if (act == @selector(copyAsAction:)) {
+	else if (act == @selector(copyAsAction:))
 		return [self validateCopyAsMenuItem:menuItem];
-	}
-    else if (act == @selector(paste:)) {
-		// called through NSTableView_BDSKExtensions
+    else if (act == @selector(paste:))
         return [self validatePasteMenuItem:menuItem];
-	}
-    else if (act == @selector(duplicate:)) {
+    else if (act == @selector(duplicate:))
         return [self validateDuplicateMenuItem:menuItem];
-	}
-	else if (act == @selector(editPubCmd:)) {
+	else if (act == @selector(editPubCmd:))
 		return [self validateEditSelectionMenuItem:menuItem];
-	}
-	else if (act == @selector(duplicateTitleToBooktitle:)) {
+	else if (act == @selector(duplicateTitleToBooktitle:))
 		return [self validateDuplicateTitleToBooktitleMenuItem:menuItem];
-	}
-	else if (act == @selector(generateCiteKey:)) {
+	else if (act == @selector(generateCiteKey:))
 		return [self validateGenerateCiteKeyMenuItem:menuItem];
-	}
-	else if (act == @selector(consolidateLinkedFiles:)) {
+	else if (act == @selector(consolidateLinkedFiles:))
 		return [self validateConsolidateLinkedFilesMenuItem:menuItem];
-	}
-	else if (act == @selector(removeSelectedPubs:)) {
+	else if (act == @selector(removeSelectedPubs:))
 		return [self validateRemoveSelectionMenuItem:menuItem];
-	}
-	else if (act == @selector(deleteSelectedPubs:)) {
+	else if (act == @selector(deleteSelectedPubs:))
 		return [self validateDeleteSelectionMenuItem:menuItem];
-	}
-	else if(act == @selector(emailPubCmd:)) {
+	else if(act == @selector(emailPubCmd:))
 		return ([self numberOfSelectedPubs] != 0);
-	}
-	else if(act == @selector(sendToLyX:)) {
+	else if(act == @selector(sendToLyX:))
 		return [self validateSendToLyXMenuItem:menuItem];
-	}
-	else if(act == @selector(openLocalURL:)) {
+	else if(act == @selector(openLocalURL:))
 		return [self validateOpenLocalURLMenuItem:menuItem];
-	}
-	else if(act == @selector(revealLocalURL:)) {
+	else if(act == @selector(revealLocalURL:))
 		return [self validateRevealLocalURLMenuItem:menuItem];
-	}
-	else if(act == @selector(openRemoteURL:)) {
+	else if(act == @selector(openRemoteURL:))
 		return [self validateOpenRemoteURLMenuItem:menuItem];
-	}
-	else if(act == @selector(showNotesForLocalURL:)) {
+	else if(act == @selector(showNotesForLocalURL:))
 		return [self validateShowNotesForLocalURLMenuItem:menuItem];
-	}
-	else if(act == @selector(copyNotesForLocalURL:)) {
+	else if(act == @selector(copyNotesForLocalURL:))
 		return [self validateCopyNotesForLocalURLMenuItem:menuItem];
-	}
-	else if(act == @selector(openLinkedFile:)) {
+	else if(act == @selector(openLinkedFile:))
 		return [self validateOpenLinkedFileMenuItem:menuItem];
-	}
-	else if(act == @selector(revealLinkedFile:)) {
+	else if(act == @selector(revealLinkedFile:))
 		return [self validateRevealLinkedFileMenuItem:menuItem];
-	}
-	else if(act == @selector(openLinkedURL:)) {
+	else if(act == @selector(openLinkedURL:))
 		return [self validateOpenLinkedURLMenuItem:menuItem];
-	}
-	else if(act == @selector(showNotesForLinkedFile:)) {
+	else if(act == @selector(showNotesForLinkedFile:))
 		return [self validateShowNotesForLinkedFileMenuItem:menuItem];
-	}
-	else if(act == @selector(copyNotesForLinkedFile:)) {
+	else if(act == @selector(copyNotesForLinkedFile:))
 		return [self validateCopyNotesForLinkedFileMenuItem:menuItem];
-	}
-	else if(act == @selector(previewAction:)) {
+	else if(act == @selector(previewAction:))
 		return [self validatePreviewMenuItem:menuItem];
-	}
-	else if(act == @selector(toggleShowingCustomCiteDrawer:)) {
+	else if(act == @selector(toggleShowingCustomCiteDrawer:))
 		return [self validateToggleToggleCustomCiteDrawerMenuItem:menuItem];
-	}
-	else if (act == @selector(printDocument:)) {
+	else if (act == @selector(printDocument:))
 		return [self validatePrintDocumentMenuItem:menuItem];
-	}
-	else if (act == @selector(toggleGroups:)) {
+	else if (act == @selector(toggleGroups:))
 		return [self validateToggleGroupsMenuItem:menuItem];
-	}
-	else if (act == @selector(toggleSidebar:)) {
+	else if (act == @selector(toggleSidebar:))
 		return [self validateToggleSidebarMenuItem:menuItem];
-	}
-	else if (act == @selector(toggleStatusBar:)) {
+	else if (act == @selector(toggleStatusBar:))
 		return [self validateToggleStatusBarMenuItem:menuItem];
-	}
-	else if (act == @selector(importFromPasteboardAction:)) {
+	else if (act == @selector(importFromPasteboardAction:))
 		return [self validateNewPubFromPasteboardMenuItem:menuItem];
-	}
-	else if (act == @selector(importFromFileAction:)) {
+	else if (act == @selector(importFromFileAction:))
 		return [self validateNewPubFromFileMenuItem:menuItem];
-	}
-	else if (act == @selector(importFromWebAction:)) {
+	else if (act == @selector(importFromWebAction:))
 		return [self validateNewPubFromWebMenuItem:menuItem];
-	}
-	else if (act == @selector(sortForCrossrefs:)) {
+	else if (act == @selector(sortForCrossrefs:))
         return [self validateSortForCrossrefsMenuItem:menuItem];
-	}
-	else if (act == @selector(selectCrossrefParentAction:)) {
+	else if (act == @selector(selectCrossrefParentAction:))
         return [self validateSelectCrossrefParentMenuItem:menuItem];
-	}
-	else if (act == @selector(createNewPubUsingCrossrefAction:)) {
+	else if (act == @selector(createNewPubUsingCrossrefAction:))
         return [self validateCreateNewPubUsingCrossrefMenuItem:menuItem];
-	}
-	else if (act == @selector(sortGroupsByGroup:)) {
+	else if (act == @selector(sortGroupsByGroup:))
         return [self validateSortGroupsByGroupMenuItem:menuItem];
-	}
-	else if (act == @selector(sortGroupsByCount:)) {
+	else if (act == @selector(sortGroupsByCount:))
         return [self validateSortGroupsByCountMenuItem:menuItem];
-	}
-	else if (act == @selector(changeGroupFieldAction:)) {
+	else if (act == @selector(changeGroupFieldAction:))
         return [self validateChangeGroupFieldMenuItem:menuItem];
-	}
-	else if (act == @selector(removeSelectedGroups:)) {
+	else if (act == @selector(removeSelectedGroups:))
         return [self validateRemoveSelectedGroupsMenuItem:menuItem];
-	}
-	else if (act == @selector(editGroupAction:)) {
+	else if (act == @selector(editGroupAction:))
         return [self validateEditGroupMenuItem:menuItem];
-	}
-	else if (act == @selector(renameGroupAction:)) {
+	else if (act == @selector(renameGroupAction:))
         return [self validateRenameGroupMenuItem:menuItem];
-	}
-	else if (act == @selector(copyGroupURLAction:)) {
+	else if (act == @selector(copyGroupURLAction:))
         return [self validateCopyGroupURLMenuItem:menuItem];
-	}
-	else if (act == @selector(removeGroupFieldAction:)) {
+	else if (act == @selector(removeGroupFieldAction:))
 		// don't allow the removal of the last item
         return ([[menuItem menu] numberOfItems] > 4);
-	}
-	else if (act == @selector(editAction:)) {
+	else if (act == @selector(editAction:))
         return [self validateEditActionMenuItem:menuItem];
-	}
-	else if (act == @selector(delete:)) {
-		// called through NSTableView_BDSKExtensions
+	else if (act == @selector(delete:))
 		return [self validateDeleteMenuItem:menuItem];
-    }
-	else if (act == @selector(selectAllPublications:)){
+    else if (act == @selector(selectAllPublications:))
         return [self validateSelectAllPublicationsMenuItem:menuItem];
-    }
-	else if (act == @selector(deselectAllPublications:)){
+    else if (act == @selector(deselectAllPublications:))
         return [self validateDeselectAllPublicationsMenuItem:menuItem];
-    }
-	else if (act == @selector(selectLibraryGroup:)){
+    else if (act == @selector(selectLibraryGroup:))
         return [self validateSelectLibraryGroupMenuItem:menuItem];
-    }
-	else if (act == @selector(selectDuplicates:)){
+    else if (act == @selector(selectDuplicates:))
         return [self validateSelectDuplicatesMenuItem:menuItem];
-    }
-	else if (act == @selector(selectPossibleDuplicates:)){
+    else if (act == @selector(selectPossibleDuplicates:))
         return [self validateSelectPossibleDuplicatesMenuItem:menuItem];
-    }
-	else if (act == @selector(selectIncompletePublications:)){
+    else if (act == @selector(selectIncompletePublications:))
         return [self validateSelectIncompletePublicationsMenuItem:menuItem];
-    }
-    else if (act == @selector(editNewCategoryGroupWithSelection:)){
+    else if (act == @selector(editNewCategoryGroupWithSelection:))
         return [self validateEditNewCategoryGroupWithSelectionMenuItem:menuItem];
-    }
-    else if (act == @selector(editNewStaticGroupWithSelection:)){
+    else if (act == @selector(editNewStaticGroupWithSelection:))
         return [self validateEditNewStaticGroupWithSelectionMenuItem:menuItem];
-    }
-    else if (act == @selector(addSearchBookmark:)){
+    else if (act == @selector(addSearchBookmark:))
         return [self validateAddSearchBookmarkMenuItem:menuItem];
-    }
-    else if (act == @selector(revertDocumentToSaved:)){
+    else if (act == @selector(revertDocumentToSaved:))
         return [self validateRevertDocumentToSavedMenuItem:menuItem];
-    }
-    else if (act == @selector(changePreviewDisplay:)){
+    else if (act == @selector(changePreviewDisplay:))
         return [self validateChangePreviewDisplayMenuItem:menuItem];
-    }
-    else if (act == @selector(changeSidePreviewDisplay:)){
+    else if (act == @selector(changeSidePreviewDisplay:))
         return [self validateChangeSidePreviewDisplayMenuItem:menuItem];
-    }
-    else if (act == @selector(changeIntersectGroupsAction:)){
+    else if (act == @selector(changeIntersectGroupsAction:))
         return [self validateChangeIntersectGroupsMenuItem:menuItem];
-    }
-    else if (act == @selector(mergeInExternalGroup:)){
+    else if (act == @selector(mergeInExternalGroup:))
         return [self validateMergeInExternalGroupMenuItem:menuItem];
-    }
-    else if (act == @selector(mergeInExternalPublications:)){
+    else if (act == @selector(mergeInExternalPublications:))
         return [self validateMergeInExternalPublicationsMenuItem:menuItem];
-    }
-    else if (act == @selector(refreshSharing:)){
+    else if (act == @selector(refreshSharing:))
         return [self validateRefreshSharingMenuItem:menuItem];
-    }
-    else if (act == @selector(refreshSharedBrowsing:)){
+    else if (act == @selector(refreshSharedBrowsing:))
         return [self validateRefreshSharedBrowsingMenuItem:menuItem];
-    }
-    else if (act == @selector(refreshURLGroups:)){
+    else if (act == @selector(refreshURLGroups:))
         return [self validateRefreshURLGroupsMenuItem:menuItem];
-    }
-    else if (act == @selector(refreshScriptGroups:)){
+    else if (act == @selector(refreshScriptGroups:))
         return [self validateRefreshScriptGroupsMenuItem:menuItem];
-    }
-    else if (act == @selector(refreshSearchGroups:)){
+    else if (act == @selector(refreshSearchGroups:))
         return [self validateRefreshSearchGroupsMenuItem:menuItem];
-    }
-    else if (act == @selector(refreshAllExternalGroups:)){
+    else if (act == @selector(refreshAllExternalGroups:))
         return [self validateRefreshAllExternalGroupsMenuItem:menuItem];
-    }
-    else if (act == @selector(refreshSelectedGroups:)){
+    else if (act == @selector(refreshSelectedGroups:))
         return [self validateRefreshSelectedGroupsMenuItem:menuItem];
-    }
-    else if (act == @selector(changeSearchType:)){
+    else if (act == @selector(changeSearchType:))
         return [self validateChangeSearchTypeMenuItem:menuItem];
-    }
-    else if (act == @selector(openBookmark:)){
+    else if (act == @selector(openBookmark:))
         return [self validateOpenBookmarkMenuItem:menuItem];
-    }
-    else if (act == @selector(addBookmark:)){
+    else if (act == @selector(addBookmark:))
         return [self validateAddBookmarkMenuItem:menuItem];
-    }
-    else {
+    else
 		return [super validateMenuItem:menuItem];
-    }
 }
 
 @end
