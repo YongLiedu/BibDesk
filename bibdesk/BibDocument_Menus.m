@@ -587,7 +587,7 @@
     return ([self numberOfSelectedPubs] != 0);
 }
 
-inline SEL validateMenuItemSelector(SEL sel) {
+static inline SEL validateMenuItemSelector(SEL sel) {
     static NSMapTable *table = NULL;
     // selectors are unique global "constants" so don't need to be retained and can be compared using pointer equivalence
     if (table == NULL)
