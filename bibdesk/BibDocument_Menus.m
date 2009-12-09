@@ -589,6 +589,7 @@
 
 inline SEL validateMenuItemSelector(SEL sel) {
     static NSMapTable *table = NULL;
+    // selectors are unique global "constants" so don't need to be retained and can be compared using pointer equivalence
     if (table == NULL)
         table = NSCreateMapTable(NSNonOwnedPointerMapKeyCallBacks, NSNonOwnedPointerMapValueCallBacks, 0);
     SEL validateSel = NSMapGet(table, sel);
@@ -606,6 +607,8 @@ inline SEL validateMenuItemSelector(SEL sel) {
     }
     return validateSel;
 }
+
+// This methods looks for a method named -validate<Action>MenuItem: formed from the capitalized menuItem action
 
 - (BOOL)validateMenuItem:(NSMenuItem*)menuItem {
     SEL validateSelector = validateMenuItemSelector([menuItem action]);
