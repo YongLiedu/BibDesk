@@ -587,8 +587,28 @@
     return ([self numberOfSelectedPubs] != 0);
 }
 
+inline SEL validateMenuItemSelector(SEL sel) {
+    static NSMapTable *table = NULL;
+    if (table == NULL)
+        table = NSCreateMapTable(NSNonOwnedPointerMapKeyCallBacks, NSNonOwnedPointerMapValueCallBacks, 0);
+    SEL validateSel = NSMapGet(table, sel);
+    if (validateSel == NULL) {
+        const char *name = sel_getName(sel);
+        int length = strlen(name);
+        char buffer[17 + length];
+        strcpy(buffer, "validate");
+        buffer[8] = toupper(name[0]);
+        strcpy(buffer + 9, name + 1);
+        strcpy(buffer + 7 + length, "MenuItem:");
+        buffer[length + 16] = '\0';
+        validateSel = sel_getUid(buffer);
+        NSMapInsert(table, sel, validateSel);
+    }
+    return validateSel;
+}
+
 - (BOOL)validateMenuItem:(NSMenuItem*)menuItem {
-    SEL validateSelector = NSSelectorFromString([NSString stringWithFormat:@"validate%@MenuItem:", [NSStringFromSelector([menuItem action]) uppercaseFirst]]);
+    SEL validateSelector = validateMenuItemSelector([menuItem action]);
     if ([self respondsToSelector:validateSelector])
         return ((BOOL(*)(id, SEL, id))[self methodForSelector:validateSelector])(self, validateSelector, menuItem);
     else
