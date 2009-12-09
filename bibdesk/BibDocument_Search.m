@@ -113,7 +113,8 @@
         // if the file content search is already shown, we should not get this message, as the search: action is send to the fileSearchController
         BDSKASSERT([self isDisplayingFileContentSearch] == NO);
         
-        [self showFileContentSearch];
+        if ([self isDisplayingFileContentSearch] == NO)
+            [self showFileContentSearch];
         
     } else {
         
