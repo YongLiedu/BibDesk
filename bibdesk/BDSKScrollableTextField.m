@@ -49,21 +49,23 @@
 - (id)initWithCoder:(NSCoder*)coder {
 	if (self = [super initWithCoder:coder]) {
 		NSTextFieldCell *oldCell = [self cell];
-		BDSKScrollableTextFieldCell *myCell = [[BDSKScrollableTextFieldCell alloc] initTextCell:[oldCell stringValue]];
-		
-		[myCell setFont:[oldCell font]];
-		[myCell setControlSize:[oldCell controlSize]];
-		[myCell setControlTint:[oldCell controlTint]];
-		[myCell setEnabled:[oldCell isEnabled]];
-		[myCell setAlignment:NSLeftTextAlignment];
-		[myCell setWraps:NO];
-		[myCell setScrollable:NO];
-		[myCell setBordered:NO];
-		[myCell setSelectable:NO];
-		[myCell setEditable:NO];
-		
-		[self setCell:myCell];
-        [myCell release];
+        if ([oldCell isKindOfClass:[[self class] cellClass]] == NO) {
+            BDSKScrollableTextFieldCell *myCell = [[[[self class] cellClass] alloc] initTextCell:[oldCell stringValue]];
+            
+            [myCell setFont:[oldCell font]];
+            [myCell setControlSize:[oldCell controlSize]];
+            [myCell setControlTint:[oldCell controlTint]];
+            [myCell setEnabled:[oldCell isEnabled]];
+            [myCell setAlignment:NSLeftTextAlignment];
+            [myCell setWraps:NO];
+            [myCell setScrollable:NO];
+            [myCell setBordered:NO];
+            [myCell setSelectable:NO];
+            [myCell setEditable:NO];
+            
+            [self setCell:myCell];
+            [myCell release];
+        }
 	}
 	return self;
 }

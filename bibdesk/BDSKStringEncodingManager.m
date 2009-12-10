@@ -79,8 +79,8 @@ enum {
 
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
-		if ([[self cell] isKindOfClass:[BDSKEncodingPopUpButtonCell class]] == NO) {
-            BDSKEncodingPopUpButtonCell *newCell = [[BDSKEncodingPopUpButtonCell alloc] init];
+		if ([[self cell] isKindOfClass:[[self class] cellClass]] == NO) {
+            BDSKEncodingPopUpButtonCell *newCell = [[[[self class] cellClass] alloc] init];
             [newCell setAction:[[self cell] action]];
             [newCell setTarget:[[self cell] target]];
             [newCell setControlSize:[[self cell] controlSize]];

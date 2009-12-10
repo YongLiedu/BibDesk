@@ -57,8 +57,8 @@
 - (id)initWithCoder:(NSCoder *)coder {
 	if (self = [super initWithCoder:coder]) {
 		NSButtonCell *oldCell = [self cell];
-		if (![oldCell isKindOfClass:[BDSKRatingButtonCell class]]) {
-			BDSKRatingButtonCell *newCell = [[BDSKRatingButtonCell alloc] init];
+		if ([oldCell isKindOfClass:[[self class] cellClass]] == NO) {
+			BDSKRatingButtonCell *newCell = [[[[self class] cellClass] alloc] init];
 			[newCell setBordered:[oldCell isBordered]];
 			[newCell setAlignment:[oldCell alignment]];
 			[newCell setEditable:[oldCell isEditable]];
