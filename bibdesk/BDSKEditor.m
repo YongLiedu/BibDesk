@@ -2752,13 +2752,13 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
-    // close so it's not hanging around by itself; this works if the doc window closes, also
-    [complexStringEditor close];
-    
     // make sure we're not registered as editor because we will be invalid, this shouldn't be necessary but there have been reports of crashes
     if (editorFlags.isEditing && [self commitEditing] == NO)
         [self discardEditing];
 	
+    // close so it's not hanging around by itself; this works if the doc window closes, also
+    [complexStringEditor close];
+    
     // see method for notes
     [self breakTextStorageConnections];
     

@@ -259,7 +259,7 @@
 - (void)windowWillClose:(NSNotification *)notification {
 	// this gets called whenever an editor window closes
 	if ([self isEditing]){
-        BDSKASSERT_NOT_REACHED("macro textfield window closed while editing");
+        //BDSKASSERT_NOT_REACHED("macro textfield window closed while editing");
 		[self endEditingAndOrderOut];
     }
 }
