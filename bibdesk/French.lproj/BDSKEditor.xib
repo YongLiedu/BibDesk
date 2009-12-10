@@ -333,6 +333,7 @@
 															</object>
 															<string key="NSFrameSize">{178, 285}</string>
 															<reference key="NSSuperview" ref="360647390"/>
+															<reference key="NSNextKeyView" ref="1067124639"/>
 															<reference key="NSDocView" ref="1067124639"/>
 															<object class="NSColor" key="NSBGColor">
 																<int key="NSColorSpace">1</int>
@@ -364,6 +365,7 @@
 													</object>
 													<string key="NSFrameSize">{178, 285}</string>
 													<reference key="NSSuperview" ref="986628165"/>
+													<reference key="NSNextKeyView" ref="858041993"/>
 													<int key="NSsFlags">560</int>
 													<reference key="NSVScroller" ref="1014403589"/>
 													<reference key="NSHScroller" ref="545251860"/>
@@ -462,6 +464,7 @@
 															</object>
 															<string key="NSFrameSize">{178, 82}</string>
 															<reference key="NSSuperview" ref="387260512"/>
+															<reference key="NSNextKeyView" ref="46304801"/>
 															<reference key="NSDocView" ref="46304801"/>
 															<object class="NSColor" key="NSBGColor" id="393756620">
 																<int key="NSColorSpace">6</int>
@@ -497,6 +500,7 @@
 													</object>
 													<string key="NSFrame">{{0, 294}, {178, 82}}</string>
 													<reference key="NSSuperview" ref="986628165"/>
+													<reference key="NSNextKeyView" ref="1051857197"/>
 													<int key="NSsFlags">528</int>
 													<reference key="NSVScroller" ref="147418008"/>
 													<reference key="NSHScroller" ref="1041346641"/>
@@ -772,7 +776,7 @@
 																		<reference key="NSSupport" ref="187092848"/>
 																		<reference key="NSControlView" ref="1002900646"/>
 																		<bool key="NSDrawsBackground">YES</bool>
-																		<reference key="NSBackgroundColor" ref="922246584"/>
+																		<reference key="NSBackgroundColor" ref="393756620"/>
 																		<reference key="NSTextColor" ref="937364678"/>
 																	</object>
 																	<int key="NSResizingMask">1</int>
@@ -1020,7 +1024,7 @@
 														<object class="NSTextView" id="60210821">
 															<reference key="NSNextResponder" ref="399212806"/>
 															<int key="NSvFlags">2322</int>
-															<string key="NSFrameSize">{486, 15}</string>
+															<string key="NSFrameSize">{486, 14}</string>
 															<reference key="NSSuperview" ref="399212806"/>
 															<object class="NSTextContainer" key="NSTextContainer" id="725185204">
 																<object class="NSLayoutManager" key="NSLayoutManager">
@@ -1113,7 +1117,7 @@
 												<object class="NSScroller" id="1003983322">
 													<reference key="NSNextResponder" ref="638203386"/>
 													<int key="NSvFlags">256</int>
-													<string key="NSFrame">{{486, 1}, {15, 325}}</string>
+													<string key="NSFrame">{{486, 1}, {15, 340}}</string>
 													<reference key="NSSuperview" ref="638203386"/>
 													<reference key="NSTarget" ref="638203386"/>
 													<string key="NSAction">_doScroller:</string>
@@ -1167,7 +1171,7 @@
 														<object class="NSTextView" id="436114610">
 															<reference key="NSNextResponder" ref="521783221"/>
 															<int key="NSvFlags">2322</int>
-															<string key="NSFrameSize">{485, 15}</string>
+															<string key="NSFrameSize">{485, 14}</string>
 															<reference key="NSSuperview" ref="521783221"/>
 															<object class="NSTextContainer" key="NSTextContainer" id="1036033853">
 																<object class="NSLayoutManager" key="NSLayoutManager">
@@ -1241,7 +1245,7 @@
 												<object class="NSScroller" id="235088022">
 													<reference key="NSNextResponder" ref="867604177"/>
 													<int key="NSvFlags">256</int>
-													<string key="NSFrame">{{486, 1}, {15, 325}}</string>
+													<string key="NSFrame">{{486, 1}, {15, 340}}</string>
 													<reference key="NSSuperview" ref="867604177"/>
 													<reference key="NSTarget" ref="867604177"/>
 													<string key="NSAction">_doScroller:</string>
@@ -1294,7 +1298,7 @@
 														<object class="NSTextView" id="497468439">
 															<reference key="NSNextResponder" ref="194562792"/>
 															<int key="NSvFlags">2322</int>
-															<string key="NSFrameSize">{485, 15}</string>
+															<string key="NSFrameSize">{485, 14}</string>
 															<reference key="NSSuperview" ref="194562792"/>
 															<object class="NSTextContainer" key="NSTextContainer" id="889509108">
 																<object class="NSLayoutManager" key="NSLayoutManager">
@@ -1368,7 +1372,7 @@
 												<object class="NSScroller" id="782037224">
 													<reference key="NSNextResponder" ref="83017985"/>
 													<int key="NSvFlags">256</int>
-													<string key="NSFrame">{{486, 1}, {15, 325}}</string>
+													<string key="NSFrame">{{486, 1}, {15, 340}}</string>
 													<reference key="NSSuperview" ref="83017985"/>
 													<reference key="NSTarget" ref="83017985"/>
 													<string key="NSAction">_doScroller:</string>
@@ -2891,7 +2895,7 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">BDSKDragWindow</string>
 					<string key="superclassName">NSWindow</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="875820547">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">BDSKDragWindow.h</string>
 					</object>
@@ -3077,7 +3081,7 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">BDSKEditorTableView</string>
 					<string key="superclassName">NSTableView</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="289515526">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">BDSKEditorTableView.h</string>
 					</object>
@@ -3184,7 +3188,7 @@
 							<string>id</string>
 						</object>
 					</object>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="20324788">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">BDSKStatusBar.h</string>
 					</object>
@@ -3273,13 +3277,6 @@
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSControl</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="367575949">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKFieldEditor.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSControl</string>
 					<string key="superclassName">NSView</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBUserSource</string>
@@ -3317,142 +3314,7 @@
 					<string key="className">NSObject</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKCitationFormatter.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKComplexStringFormatter.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">BDSKDocumentSearch.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKDragImageView.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKDragTextField.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<reference key="sourceIdentifier" ref="875820547"/>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<reference key="sourceIdentifier" ref="289515526"/>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<reference key="sourceIdentifier" ref="367575949"/>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKFieldNameFormatter.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKFileContentSearchController.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKGroupOutlineView.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKItemPasteboardHelper.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKLinkedFile.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKMainTableView.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKNotesWindowController.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKOrphanedFileServer.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKOutlineView.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKSpotlightView.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<reference key="sourceIdentifier" ref="20324788"/>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKTableView.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKTeXTask.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKTemplateDocument.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
@@ -3466,42 +3328,7 @@
 					<string key="className">NSObject</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKTextImportController.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKTypeSelectHelper.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKUndoManager.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BibPref_Export.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">NSObject_BDSKExtensions.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">vendorsrc/harmless/AMButtonBar.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
@@ -3542,6 +3369,13 @@
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSTableView</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="367575949">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKFieldEditor.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSTableView</string>
 					<object class="NSMutableDictionary" key="actions">
 						<string key="NS.key.0">invertSelection:</string>
 						<string key="NS.object.0">id</string>
@@ -3562,6 +3396,10 @@
 						<string key="majorKey">IBUserSource</string>
 						<string key="minorKey"/>
 					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSTextField</string>
+					<reference key="sourceIdentifier" ref="367575949"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSTextView</string>
@@ -3665,7 +3503,7 @@
 							<string>id</string>
 						</object>
 					</object>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="879932440">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">FileView.framework/Headers/FVFileView.h</string>
 					</object>
@@ -3917,10 +3755,6 @@
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">ExceptionHandling.framework/Headers/NSExceptionHandler.h</string>
 					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<reference key="sourceIdentifier" ref="879932440"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
