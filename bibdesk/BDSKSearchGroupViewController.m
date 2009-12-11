@@ -106,6 +106,8 @@
 
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)aString errorDescription:(NSString *)error {
     NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid search string syntax", @"") defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:error];
+    [alert setShowsHelp:YES];
+    [alert setHelpAnchor:@"SearchingExternalDatabases"];
     [alert beginSheetModalForWindow:[[self view] window] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
     return YES;
 }
