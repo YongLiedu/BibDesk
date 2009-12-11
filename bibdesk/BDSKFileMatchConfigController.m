@@ -44,7 +44,7 @@
 {
     self = [super init];
     if (self) {
-        documents = [NSMutableArray new];
+        documents = [NSArray new];
         files = [NSMutableArray new];
         useOrphanedFiles = NO;
         
@@ -130,8 +130,7 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
 
 - (IBAction)selectAllDocuments:(id)sender;
 {
-    BOOL flag = (BOOL)[sender tag];
-    [documents setValue:[NSNumber numberWithBool:flag] forKeyPath:@"useDocument"];
+    [documents setValue:[NSNumber numberWithBool:(BOOL)[sender tag]] forKey:@"useDocument"];
 }
 
 - (void)handleDocumentAddRemove:(NSNotification *)note
@@ -165,19 +164,31 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
 
 - (void)setDocuments:(NSArray *)docs;
 {
-    [documents autorelease];
-    documents = [docs mutableCopy];
+    if (documents != docs) {
+        [documents release];
+        documents = [docs copy];
+    }
 }
 
 - (NSArray *)documents { return documents; }
 
-- (void)setFiles:(NSArray *)newFiles;
-{
-    [files autorelease];
-    files = [newFiles mutableCopy];
+- (NSArray *)files { return files; }
+
+- (NSUInteger)countOfFiles {
+    return [files count];
 }
 
-- (NSArray *)files { return files; }
+- (id)objectInFilesAtIndex:(NSUInteger)anIndex {
+    return [files objectAtIndex:anIndex];
+}
+
+- (void)insertObject:(id)obj inFilesAtIndex:(NSUInteger)anIndex {
+    [files insertObject:obj atIndex:anIndex];
+}
+
+- (void)removeObjectFromFilesAtIndex:(NSUInteger)anIndex {
+    [files removeObjectAtIndex:anIndex];
+}
 
 - (NSArray *)publications;
 {

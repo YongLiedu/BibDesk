@@ -40,7 +40,7 @@
     IBOutlet NSButton *useOrphansCheckbox;
     IBOutlet NSSegmentedControl *addRemoveButton;
     
-    NSMutableArray *documents;
+    NSArray *documents;
     NSMutableArray *files;
     BOOL useOrphanedFiles;
     
@@ -53,10 +53,16 @@
 - (IBAction)selectAllDocuments:(id)sender;
 
 - (NSArray *)publications;
+
 - (void)handleDocumentAddRemove:(NSNotification *)note;
-- (void)setDocuments:(NSArray *)docs;
+
 - (NSArray *)documents;
+- (void)setDocuments:(NSArray *)docs;
+
 - (NSArray *)files;
-- (NSArray *)publications;
+- (NSUInteger)countOfFiles;
+- (id)objectInFilesAtIndex:(NSUInteger)anIndex;
+- (void)insertObject:(id)obj inFilesAtIndex:(NSUInteger)anIndex;
+- (void)removeObjectFromFilesAtIndex:(NSUInteger)anIndex;
 
 @end
