@@ -410,30 +410,29 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 - (void)openRecentItemFromDock:(id)sender{
     BDSKASSERT([sender isKindOfClass:[NSMenuItem class]]);
     NSURL *url = [sender representedObject];
-    if(url == nil) 
-        return NSBeep();
+    if (url == nil) {
+        NSBeep();
+        return;
+    }
     
     // open... methods automatically call addDocument, so we don't have to
-    NSError *error;
-    [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:url display:YES error:&error];
+    NSError *error = nil;
+    if (nil == [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:url display:YES error:&error] && error)
+        [NSApp presentError:error];
 }    
 
 - (NSMenu *)applicationDockMenu:(NSApplication *)sender{
     NSMenu *menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@""] autorelease];
-    NSMenu *submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@""] autorelease];
+    NSMenu *submenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@""];
 
-    NSMenuItem *anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open Recent",  @"Recent Documents dock menu title") action:nil keyEquivalent:@""];
-    [anItem setSubmenu:submenu];
-	[menu addItem:anItem];
-    [anItem release];
-    
     for (NSURL *url in [[NSDocumentController sharedDocumentController] recentDocumentURLs]) {
-        anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[url lastPathComponent] action:@selector(openRecentItemFromDock:) keyEquivalent:@""];
+        NSMenuItem *anItem = [submenu addItemWithTitle:[url lastPathComponent] action:@selector(openRecentItemFromDock:) keyEquivalent:@""];
         [anItem setTarget:self];
         [anItem setRepresentedObject:url];
-        [submenu addItem:anItem];
-        [anItem release];
     }
+    
+	[menu addItemWithTitle:NSLocalizedString(@"Open Recent",  @"Recent Documents dock menu title") submenu:submenu];
+    [submenu release];
     
     return menu;
 }
