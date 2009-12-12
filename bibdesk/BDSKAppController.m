@@ -431,24 +431,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[url lastPathComponent] action:@selector(openRecentItemFromDock:) keyEquivalent:@""];
         [anItem setTarget:self];
         [anItem setRepresentedObject:url];
-        
-        // Supposed to be able to set the image this way according to a post from jcr on cocoadev, but all I get is a weird [obj] image on 10.4.  Apparently this is possible with Carbon <http://developer.apple.com/documentation/Carbon/Conceptual/customizing_docktile/index.html> but it involves event handlers and other nasty things, even more painful than adding an image to an attributed string.
-#if 0
-        NSMutableAttributedString *attrTitle = [[NSMutableAttributedString alloc] init];
-        NSTextAttachmentCell *attachmentCell = [[NSTextAttachmentCell alloc] init];
-        [attachmentCell setImage:[NSImage imageForURL:url]];
-        
-        NSTextAttachment *attachment = [[NSTextAttachment alloc] init];
-        [attachment setAttachmentCell:attachmentCell];
-        [attachmentCell release];
-        [attrTitle appendAttributedString:[NSAttributedString attributedStringWithAttachment:attachment]];
-        [attachment release];
-        
-        [attrTitle appendString:@" " attributes:nil];
-        [attrTitle appendString:[anItem title]];
-        [anItem setAttributedTitle:attrTitle];
-        [attrTitle release];
-#endif        
         [submenu addItem:anItem];
         [anItem release];
     }
