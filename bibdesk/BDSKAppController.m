@@ -286,6 +286,8 @@ static void fixLegacyTableColumnIdentifiers()
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification{
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:BDSKIsRelaunchKey];
+    
     // validate the Cite Key and LocalUrl format strings
     [self checkFormatStrings];
     
@@ -397,7 +399,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         default:
             return NO;
     }
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:BDSKIsRelaunchKey];
 }
 
 // we don't want to reopen last open files or show an Open dialog when re-activating the app
