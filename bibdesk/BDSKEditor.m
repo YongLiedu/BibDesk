@@ -624,6 +624,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 - (void)chooseRemoteURLSheetDidEnd:(BDSKURLSheetController *)urlController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
 
     if (returnCode == NSOKButton) {
+        // remove the sheet in case we get an alert
+        [[urlController window] orderOut:nil];
+        
         NSString *aURLString = [urlController urlString];
         if ([NSString isEmptyString:aURLString])
             return;
@@ -685,6 +688,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     if(returnCode == NSCancelButton || newField == nil)
         return;
     
+    // remove the sheet in case we get an alert
+    [[addFieldController window] orderOut:nil];
+    
     newField = [newField fieldName];
     if([currentFields containsObject:newField] == NO){
         if (addedFields == nil)
@@ -727,6 +733,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     NSArray *removableFields = [removeFieldController fieldsArray];
     
     if (returnCode == NSOKButton && oldField != nil && [removableFields count]) {
+        // remove the sheet in case we get an alert
+        [[removeFieldController window] orderOut:nil];
+        
         [addedFields removeObject:oldField];
         [tabView selectFirstTabViewItem:nil];
         [publication setField:oldField toValue:nil];
@@ -781,6 +790,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     if (returnCode == NSOKButton && [NSString isEmptyString:newField] == NO  && 
         [newField isEqualToString:oldField] == NO && [fields containsObject:newField] == NO) {
+        // remove the sheet in case we get an alert
+        [[changeFieldController window] orderOut:nil];
         
         [addedFields removeObject:oldField];
         [addedFields addObject:newField];
@@ -851,6 +862,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     if(returnCode == NSAlertAlternateReturn)
         return;
+    
+    // remove the sheet in case we get an alert
+    [[alert window] orderOut:nil];
     
     // could use [[alert window] orderOut:nil] here, but we're using the didDismissSelector instead
     BDSKPRECONDITION([self commitEditing]);
@@ -929,9 +943,13 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     else
         files = [NSArray arrayWithObject:[publication objectInFilesAtIndex:anIndex]];
     
-    if (returnCode == NSAlertAlternateReturn){
+    if (returnCode == NSAlertAlternateReturn)
         return;
-    }else if(returnCode == NSAlertOtherReturn){
+    
+    // remove the sheet in case we get an alert
+    [[alert window] orderOut:nil];
+    
+    if (returnCode == NSAlertOtherReturn) {
         NSMutableArray *tmpFiles = [NSMutableArray array];
         
         for (BDSKLinkedFile *file in files) {
@@ -3176,8 +3194,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	if(fieldEditor){
 		selection = [fieldEditor selectedRange];
 		editedTitle = [[fields objectAtIndex:[tableView editedRow]] retain];
-		if ([[self window] makeFirstResponder:[self window]] == NO)
-            [NSException raise:NSInternalInconsistencyException format:@"Failed to commit edits in %s, trouble ahead", __func__];
 	}
 	
     if (newFields && [fields isEqualToArray:newFields] == NO) {
@@ -3215,7 +3231,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	// restore the edited cell and its selection
 	if(editedTitle){
         NSUInteger editedRow = [fields indexOfObject:editedTitle];
-        if (editedRow != NSNotFound) {
+        if (editedRow != NSNotFound && [tableView editedRow] != (NSInteger)editedRow) {
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:editedRow] byExtendingSelection:NO];
             [tableView editColumn:1 row:editedRow withEvent:nil select:NO];
             fieldEditor = [tableView currentEditor];
