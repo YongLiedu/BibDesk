@@ -410,14 +410,10 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 - (void)openRecentItemFromDock:(id)sender{
     BDSKASSERT([sender isKindOfClass:[NSMenuItem class]]);
     NSURL *url = [sender representedObject];
-    if (url == nil) {
-        NSBeep();
-        return;
-    }
-    
-    // open... methods automatically call addDocument, so we don't have to
     NSError *error = nil;
-    if (nil == [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:url display:YES error:&error] && error)
+    if (url == nil)
+        NSBeep();
+    else if (nil == [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:url display:YES error:&error] && error)
         [NSApp presentError:error];
 }    
 
