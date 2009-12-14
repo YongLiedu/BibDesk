@@ -68,7 +68,6 @@
 #import "BDSKCitationFormatter.h"
 #import "BDSKScriptHook.h"
 #import "BDSKScriptHookManager.h"
-#import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKCompletionManager.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKMacro.h"
@@ -2448,7 +2447,7 @@ static void addFilesToArray(const void *value, void *context)
     NSArray *toMove = [[files objectsAtIndexes:aSet] copy];
     NSMutableArray *observedFiles = [self mutableArrayValueForKey:@"files"];
     // reduce idx by the number of smaller indexes in aSet
-    idx -= [aSet numberOfIndexesInRange:NSMakeRange(0, idx)];
+    idx -= [aSet countOfIndexesInRange:NSMakeRange(0, idx)];
     [observedFiles removeObjectsAtIndexes:aSet];
     [observedFiles insertObjects:toMove atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(idx, [toMove count])]];
     [toMove release];
