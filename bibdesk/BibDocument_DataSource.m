@@ -366,7 +366,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 	
 	while (--i >= 0) {
 		item = (NSMenuItem*)[menu itemAtIndex:i];
-		if ([self validateMenuItem:item] == NO || ((wasSeparator || i == 0) && [item isSeparatorItem]) || ([item submenu] && menuHasNoValidItems(self, [item submenu])))
+		if (([item isSeparatorItem] == NO && [self validateMenuItem:item] == NO) || ((wasSeparator || i == 0) && [item isSeparatorItem]) || ([item submenu] && menuHasNoValidItems(self, [item submenu])))
 			[menu removeItem:item];
         else
             wasSeparator = [item isSeparatorItem];
