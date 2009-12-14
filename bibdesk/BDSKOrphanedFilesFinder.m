@@ -49,7 +49,6 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "BDSKFile.h"
 #import "NSWindowController_BDSKExtensions.h"
-#import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKFileMatcher.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKLinkedFile.h"

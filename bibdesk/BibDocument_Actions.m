@@ -88,7 +88,6 @@
 #import <sys/stat.h>
 #import <FileView/FileView.h>
 #import "BDSKMacro.h"
-#import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKURLSheetController.h"
 #import "BDSKLinkedFile.h"
 #import "BDSKSplitView.h"

@@ -70,7 +70,6 @@
 #import "BDSKGroupsArray.h"
 #import "BDSKItemPasteboardHelper.h"
 #import "NSMenu_BDSKExtensions.h"
-#import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKCategoryGroup.h"
 #import "BDSKSearchGroup.h"
 #import "BDSKURLGroup.h"
