@@ -187,16 +187,6 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     return [(id)newURL autorelease];
 }
 
-- (NSURL *)URLByDeletingLastPathComponent;
-{
-    return [(id)CFURLCreateCopyDeletingLastPathComponent(CFGetAllocator((CFURLRef)self), (CFURLRef)self) autorelease];
-}
-
-- (NSURL *)URLByDeletingPathExtension;
-{
-    return [(id)CFURLCreateCopyDeletingPathExtension(CFGetAllocator((CFURLRef)self), (CFURLRef)self) autorelease];
-}
-
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string;
 {
     return [self URLWithStringByNormalizingPercentEscapes:string baseURL:nil];
@@ -540,6 +530,23 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
         [note release];
     }
     return notes;
+}
+
+#pragma mark Leopard definitions
+
+- (NSURL *)Leopard_URLByDeletingLastPathComponent;
+{
+    return [(id)CFURLCreateCopyDeletingLastPathComponent(CFGetAllocator((CFURLRef)self), (CFURLRef)self) autorelease];
+}
+
+- (NSURL *)Leopard_URLByDeletingPathExtension;
+{
+    return [(id)CFURLCreateCopyDeletingPathExtension(CFGetAllocator((CFURLRef)self), (CFURLRef)self) autorelease];
+}
+
++ (void)load {
+    BDSKAddInstanceMethodImplementationFromSelector(self, @selector(URLByDeletingLastPathComponent), @selector(Leopard_URLByDeletingLastPathComponent));
+    BDSKAddInstanceMethodImplementationFromSelector(self, @selector(URLByDeletingPathExtension), @selector(Leopard_URLByDeletingPathExtension));
 }
 
 @end

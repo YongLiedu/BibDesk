@@ -45,8 +45,6 @@
 
 - (NSURL *)fileURLByResolvingAliases;
 - (NSURL *)fileURLByResolvingAliasesBeforeLastPathComponent;
-- (NSURL *)URLByDeletingLastPathComponent;
-- (NSURL *)URLByDeletingPathExtension;
 
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string;
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string baseURL:(NSURL *)baseURL;
@@ -72,5 +70,12 @@
 - (NSAttributedString *)linkedSmallIcon;
 
 @end
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5
+@interface NSURL (BDSKSnowLeopardExtensions)
+- (NSURL *)URLByDeletingLastPathComponent;
+- (NSURL *)URLByDeletingPathExtension;
+@end
+#endif
 
 CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL);
