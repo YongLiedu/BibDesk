@@ -2738,26 +2738,28 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSString *errMsg = nil;
     NSString *discardMsg = nil;
     
-    // case 1: the item has not been edited
-    if(![publication hasBeenEdited]){
-        errMsg = NSLocalizedString(@"The item has not been edited.  Would you like to keep it?", @"Informative text in alert dialog");
+    if (NO == [publication hasBeenEdited]) {
+        // case 1: the item has not been edited
+        errMsg = NSLocalizedString(@"The item has not been edited.  Would you like to close the window and keep it, discard it, or continue editing?", @"Informative text in alert dialog");
         discardMsg = NSLocalizedString(@"Discard", @"Button title");
-    // case 2: cite key hasn't been set, and paper needs to be filed
-    }else if([publication hasEmptyOrDefaultCiteKey] && [[publication filesToBeFiled] count] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]){
-        errMsg = NSLocalizedString(@"The cite key for this entry has not been set, and AutoFile did not have enough information to file the paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
-    // case 3: only the paper needs to be filed
-    }else if([[publication filesToBeFiled] count] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]){
-        errMsg = NSLocalizedString(@"AutoFile did not have enough information to file this paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
-    // case 4: only the cite key needs to be set
-    }else if([publication hasEmptyOrDefaultCiteKey]){
+    } else if ([[publication filesToBeFiled] count] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]) {
+        if ([publication hasEmptyOrDefaultCiteKey]) {
+            // case 2: cite key hasn't been set, and paper needs to be filed
+            errMsg = NSLocalizedString(@"The cite key for this entry has not been set, and AutoFile did not have enough information to file the paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
+        } else {
+            // case 3: only the paper needs to be filed
+            errMsg = NSLocalizedString(@"AutoFile did not have enough information to file this paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
+        }
+    } else if ([publication hasEmptyOrDefaultCiteKey]) {
+        // case 4: only the cite key needs to be set
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set.  Would you like to cancel and edit the cite key, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
     }
 	
     if (errMsg) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning!", @"Message in alert dialog")
-                                         defaultButton:NSLocalizedString(@"Keep", @"Button title")
+                                         defaultButton:NSLocalizedString(@"Close", @"Button title")
                                        alternateButton:discardMsg
-                                           otherButton:NSLocalizedString(@"Cancel", @"Button title")
+                                           otherButton:NSLocalizedString(@"Edit", @"Button title")
                               informativeTextWithFormat:errMsg];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self 
