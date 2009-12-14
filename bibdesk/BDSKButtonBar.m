@@ -168,7 +168,7 @@
     }
     if ([overflowButton superview]) {
         for (NSMenuItem *item in [overflowButton itemArray])
-            [item setState:[[item representedObject] isEqual:[[sender cell] representedObject]] ? NSOnState : NSOffState];
+            [item setState:[[item representedObject] isEqual:sender] ? NSOnState : NSOffState];
     }
     [self setNeedsDisplayInRect:[sender frame]];
 	if (didChangeSelection && [self target] && [self action])
@@ -176,7 +176,7 @@
 }
 
 - (void)selectOverflowItem:(id)sender {
-    [self selectButtonWithRepresentedObject:[sender representedObject]];
+    [self selectButton:[sender representedObject]];
 }
 
 - (void)addOverflowButton {
@@ -188,18 +188,23 @@
         [overflowButton addItemWithTitle:@""];
         [[overflowButton itemAtIndex:0] setImage:[NSImage imageNamed:@"Overflow"]];
         [overflowButton sizeToFit];
-    } else {
-        while ([overflowButton numberOfItems] > 1)
-            [overflowButton removeItemAtIndex:1];
     }
     [overflowButton setFrameOrigin:NSMakePoint(NSMaxX([self bounds]) - NSWidth([overflowButton frame]), floor(0.5 * (NSHeight([self frame]) - NSHeight([overflowButton frame]))))];
     [self addSubview:overflowButton];
 }
 
+- (void)removeOverflowButton {
+    if ([overflowButton superview]) {
+        while ([overflowButton numberOfItems] > 1)
+            [overflowButton removeItemAtIndex:1];
+        [overflowButton removeFromSuperview];
+    }
+}
+
 - (void)addOverflowItemForButton:(NSButton *)button {
     NSMenuItem *item = [[NSMenuItem alloc] initWithTitle:[button title] action:@selector(selectOverflowItem:) keyEquivalent:@""];
     [item setTarget:self];
-    [item setRepresentedObject:[[button cell] representedObject]];
+    [item setRepresentedObject:button];
     [item setState:[button state]];
     [[overflowButton menu] addItem:item];
     [item release];
@@ -209,7 +214,7 @@
 	NSPoint origin = NSMakePoint(BUTTON_MARGIN, 0.0);
     NSRect bounds = [self bounds];
     NSButton *previousButton = nil;
-    [overflowButton removeFromSuperview];
+    [self removeOverflowButton];
 	for (NSButton *button in buttons) {
         origin.y = floor(0.5 * (NSHeight(bounds) - NSHeight([button frame])));
 		[button setFrameOrigin:origin];
