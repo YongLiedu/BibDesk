@@ -74,6 +74,7 @@
 #import "BDSKVersionNumber.h"
 #import "NSError_BDSKExtensions.h"
 #import "CFString_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 #import <SkimNotesBase/SkimNotesBase.h>
 #import <CoreServices/CoreServices.h>
 
@@ -174,32 +175,12 @@ static void destroyTemporaryDirectory()
     [pool release];
 }
 
-static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boolean createFolder) {
-    FSRef foundRef;
-    OSStatus err = noErr;
-    CFURLRef url = NULL;
-    NSString *path = nil;
-    
-    err = FSFindFolder(domain, folderType, createFolder, &foundRef);
-    if (err != noErr)
-        NSLog(@"Error %d:  the system was unable to find your folder of type %i in domain %i.", err, folderType, domain);
-    else
-        url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
-    
-    if(url != NULL){
-        path = [(NSURL *)url path];
-        CFRelease(url);
-    }
-    
-    return path;
-}
-
 - (NSString *)currentApplicationSupportPathForCurrentUser{
     
     static NSString *path = nil;
     
     if(path == nil){
-        path = findSpecialFolder(kUserDomain, kApplicationSupportFolderType, kCreateFolder);
+        path = [NSSearchPathForDirectoriesInDomains(NSApplicationDirectory, NSUserDomainMask, YES) firstObject];
         
         NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleNameKey];
         if(appName == nil)
@@ -207,7 +188,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
         
         path = [[path stringByAppendingPathComponent:appName] copy];
         
-        // the call to FSFindFolder creates the parent hierarchy, but not the directory we're looking for
+        // the call to NSSearchPathForDirectoriesInDomains does not create the directory we're looking for
         static BOOL dirExists = NO;
         if(dirExists == NO){
             BOOL pathIsDir;
@@ -223,17 +204,13 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
     return path;
 }
 
-- (NSString *)applicationSupportDirectory:(SInt16)domain{
-    return findSpecialFolder(domain, kApplicationSupportFolderType, kCreateFolder);
-}
-
 - (NSString *)applicationsDirectory{
-    NSString *path = findSpecialFolder(kLocalDomain, kApplicationsFolderType, kDontCreateFolder);
+    NSString *path = [NSSearchPathForDirectoriesInDomains(NSApplicationDirectory, NSUserDomainMask, YES) firstObject];
     
-    if(path == nil){
+    if (path == nil) {
         path = @"/Applications";
         BOOL isDir;
-        if([self fileExistsAtPath:path isDirectory:&isDir] == NO || isDir == NO){
+        if ([self fileExistsAtPath:path isDirectory:&isDir] == NO || isDir == NO) {
             NSLog(@"The system was unable to find your Applications folder.", @"");
             return nil;
         }
@@ -243,23 +220,17 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
 }
 
 - (NSString *)desktopDirectory {
-    return findSpecialFolder(kUserDomain, kDesktopFolderType, kCreateFolder);
+    return [NSSearchPathForDirectoriesInDomains(NSDesktopDirectory, NSUserDomainMask, YES) firstObject];
 }
 
-// note: IC is not thread safe
 - (NSURL *)downloadFolderURL;
 {
-    FSRef pathRef;
-    CFURLRef downloadsURL = NULL;
-    
-    if (noErr == FSFindFolder(kUserDomain, kDownloadsFolderType, TRUE, &pathRef))
-        downloadsURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &pathRef);
-    
-    return [(NSURL *)downloadsURL autorelease];
+    NSString *downloadsPath = [NSSearchPathForDirectoriesInDomains(NSDownloadsDirectory, NSUserDomainMask, YES) lastObject];
+    return downloadsPath ? [NSURL fileURLWithPath:downloadsPath] : nil;
 }
 
 - (NSString *)newestLyXPipePath {
-    NSString *appSupportPath = [self applicationSupportDirectory:kUserDomain];
+    NSString *appSupportPath = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) firstObject];
     NSDirectoryEnumerator *dirEnum = [self enumeratorAtPath:appSupportPath];
     NSString *file;
     NSString *lyxPipePath = nil;
@@ -355,7 +326,15 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
         return nil;
     }
     
-    NSString *tempItemsPath = findSpecialFolder(catalogInfo.volume, kTemporaryFolderType, kCreateFolder);
+    NSString *tempItemsPath = nil;
+    FSRef tempItemsRef;
+    CFURLRef tempItemsURL = NULL;
+    if (noErr == FSFindFolder(catalogInfo.volume, kTemporaryFolderType, kCreateFolder, &tempItemsRef)) {
+        NSLog(@"Error %d:  the system was unable to find your temporary items folder on volume %i.", err, kTemporaryFolderType, catalogInfo.volume);
+    } else if (tempItemsURL = CFURLCreateFromFSRef(kCFAllocatorDefault, &tempItemsRef)) {
+        tempItemsPath = [(NSURL *)tempItemsURL path];
+        CFRelease(tempItemsURL);
+    }
     if (tempItemsPath == nil) {
         NSError *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:nil]; // underlying error
         if (outError)

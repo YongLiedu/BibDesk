@@ -70,7 +70,6 @@
 @interface NSFileManager (BDSKExtensions)
 
 - (NSString *)currentApplicationSupportPathForCurrentUser;
-- (NSString *)applicationSupportDirectory:(SInt16)domain;
 - (NSString *)applicationsDirectory;
 - (NSString *)desktopDirectory;
 - (NSURL *)downloadFolderURL;
