@@ -589,6 +589,8 @@
 
 static inline SEL validateMenuItemSelector(SEL sel) {
     static NSMapTable *table = NULL;
+    if (sel == NULL)
+        return NULL;
     // selectors are unique global "constants" so don't need to be retained and can be compared using pointer equivalence
     if (table == NULL)
         table = NSCreateMapTable(NSNonOwnedPointerMapKeyCallBacks, NSNonOwnedPointerMapValueCallBacks, 0);
