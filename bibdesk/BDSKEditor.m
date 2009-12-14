@@ -2757,7 +2757,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	
     if (errMsg) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning!", @"Message in alert dialog")
-                                         defaultButton:NSLocalizedString(@"Close", @"Button title")
+                                         defaultButton:NSLocalizedString(@"Keep", @"Button title")
                                        alternateButton:discardMsg
                                            otherButton:NSLocalizedString(@"Edit", @"Button title")
                               informativeTextWithFormat:errMsg];
