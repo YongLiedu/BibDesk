@@ -137,7 +137,8 @@
 }
 
 - (void)selectButton:(NSButton *)button {
-    [button setState:[button state] == NSOnState ? NSOffState : NSOnState];
+    // simulates a button click like -performClick: but without the highlighting
+    [button setNextState];
     [self clickButton:button];
 }
 
