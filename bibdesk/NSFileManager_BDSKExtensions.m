@@ -180,7 +180,7 @@ static void destroyTemporaryDirectory()
     static NSString *path = nil;
     
     if(path == nil){
-        path = [NSSearchPathForDirectoriesInDomains(NSApplicationDirectory, NSUserDomainMask, YES) firstObject];
+        path = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) firstObject];
         
         NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleNameKey];
         if(appName == nil)
@@ -194,7 +194,7 @@ static void destroyTemporaryDirectory()
             BOOL pathIsDir;
             dirExists = [self fileExistsAtPath:path isDirectory:&pathIsDir];
             if(dirExists == NO || pathIsDir == NO)
-                [self createDirectoryAtPath:path withIntermediateDirectories:NO attributes:nil error:NULL];
+                [self createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:NULL];
             // make sure it was created
             dirExists = [self fileExistsAtPath:path isDirectory:&pathIsDir];
             NSAssert1(dirExists && pathIsDir, @"Unable to create folder %@", path);
@@ -205,7 +205,7 @@ static void destroyTemporaryDirectory()
 }
 
 - (NSString *)applicationsDirectory{
-    NSString *path = [NSSearchPathForDirectoriesInDomains(NSApplicationDirectory, NSUserDomainMask, YES) firstObject];
+    NSString *path = [NSSearchPathForDirectoriesInDomains(NSApplicationDirectory, NSLocalDomainMask, YES) firstObject];
     
     if (path == nil) {
         path = @"/Applications";
@@ -229,7 +229,7 @@ static void destroyTemporaryDirectory()
     return downloadsPath ? [NSURL fileURLWithPath:downloadsPath] : nil;
 }
 
-- (NSString *)newestLyXPipePath {
+- (NSString *)latestLyXPipePath {
     NSString *appSupportPath = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) firstObject];
     NSDirectoryEnumerator *dirEnum = [self enumeratorAtPath:appSupportPath];
     NSString *file;
