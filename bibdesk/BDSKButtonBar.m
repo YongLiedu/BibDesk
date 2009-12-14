@@ -159,7 +159,7 @@
                 didChangeSelection = YES;
             else
                 [button setState:NSOnState];
-        } else if ([button state] == NSOnState && [button isEqual:sender] == NO) {
+        } else if ([button state] == NSOnState) {
             [button setState:NSOffState];
             [self setNeedsDisplayInRect:[button frame]];
             didChangeSelection = YES;
