@@ -228,7 +228,7 @@ static NSString *findSpecialFolder(FSVolumeRefNum domain, OSType folderType, Boo
 }
 
 - (NSString *)applicationsDirectory{
-    NSString *path = findSpecialFolder(kLocalDomain, kApplicationSupportFolderType, kDontCreateFolder);
+    NSString *path = findSpecialFolder(kLocalDomain, kApplicationsFolderType, kDontCreateFolder);
     
     if(path == nil){
         path = @"/Applications";
