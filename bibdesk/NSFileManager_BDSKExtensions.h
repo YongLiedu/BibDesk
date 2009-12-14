@@ -73,7 +73,7 @@
 - (NSString *)applicationsDirectory;
 - (NSString *)desktopDirectory;
 - (NSURL *)downloadFolderURL;
-- (NSString *)newestLyXPipePath;
+- (NSString *)latestLyXPipePath;
 
 - (BOOL)copyFileFromSharedSupportToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite;
 

@@ -135,7 +135,7 @@
     if ([self numberOfSelectedPubs] == 0)
         return NO;
     
-    if ([[NSFileManager defaultManager] newestLyXPipePath])
+    if ([[NSFileManager defaultManager] latestLyXPipePath])
         return YES;
         
     return NO;
