@@ -436,8 +436,8 @@
 	</suite>
     
     
-    <suite name="Bibdesk Suite" code="BDSK"
-			description="Bibdesk specific commands and classes for dealing with bibliographies and publications.">
+    <suite name="BibDesk Suite" code="BDSK"
+			description="BibDesk specific commands and classes for dealing with bibliographies and publications.">
         <cocoa name="BibDeskSuite"/>
         
         <command name="add" code="BDSKAdd "
@@ -774,7 +774,7 @@
 				<cocoa key="macros"/>
 			</element>
 			<element type="script hook" access="r"
-				description="The script hook rules known by Bibdesk.">
+				description="The script hook rules known by BibDesk.">
 				<cocoa key="scriptHooks"/>
 			</element>
             <element type="rich text format" access="r" hidden="yes"
@@ -787,7 +787,7 @@
 		</class-extension>
 
 		<class-extension extends="document"
-			description="A Bibdesk bibliography document.">
+			description="A BibDesk bibliography document.">
 			<cocoa class="BibDocument"/>
 			<property name="filter field" code="filt" type="text"
 				description="Only publications matching this property will be displayed">
@@ -887,6 +887,18 @@
 			<responds-to name="search">
 				<cocoa method=""/>
 			</responds-to>
+		</class-extension>
+
+		<class-extension extends="window"
+			description="A BibDesk window.">
+			<property name="publication" code="bibi" type="publication" access="r"
+				description="The publication associated with the window.">
+				<cocoa key="publication"/>
+			</property>
+			<property name="author" code="auth" type="author" access="r"
+				description="The author associated with the window.">
+				<cocoa key="author"/>
+			</property>
 		</class-extension>
 
 		<class name="publication" plural="publications" code="bibi"
