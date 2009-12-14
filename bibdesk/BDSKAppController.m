@@ -291,6 +291,11 @@ static void fixLegacyTableColumnIdentifiers()
     // validate the Cite Key and LocalUrl format strings
     [self checkFormatStrings];
     
+    // register our help book, so it's available for methods that don't register this, e.g. the web group
+    FSRef appRef;
+    if (noErr == FSPathMakeRef((const UInt8 *)[[[NSBundle mainBundle] bundlePath] fileSystemRepresentation], &appRef, NULL))
+        AHRegisterHelpBook(&appRef);
+    
     // register URL handler
     [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self andSelector:@selector(handleGetURLEvent:withReplyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
     
