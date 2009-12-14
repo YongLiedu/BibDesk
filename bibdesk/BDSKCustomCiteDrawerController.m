@@ -39,7 +39,6 @@
 #import "BibDocument.h"
 #import "BibDocument_DataSource.h"
 #import "BibDocument_Groups.h"
-#import "NSIndexSet_BDSKExtensions.h"
 
 
 @implementation BDSKCustomCiteDrawerController

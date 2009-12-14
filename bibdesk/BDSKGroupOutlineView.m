@@ -41,7 +41,6 @@
 #import "NSBezierPath_BDSKExtensions.h"
 #import "BibDocument_Groups.h"
 #import "NSTableView_BDSKExtensions.h"
-#import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKTypeSelectHelper.h"
 #import "BDSKGroup.h"
 #import "BibAuthor.h"
