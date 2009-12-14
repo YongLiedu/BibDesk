@@ -263,8 +263,10 @@ static unsigned char base64DecodeTable[256] =
 
 - (BOOL)mightBeCompressed
 {
-    const unsigned char *bytes = [self bytes];
-    return ([self length] >= 10 && bytes[0] == 0x1F && bytes[1] == 0x8B);
+    if ([self length] < 10) return NO;
+    unsigned char bytes[2] = {0, 0};
+    [self getBytes:bytes length:2];
+    return (bytes[0] == 0x1F && bytes[1] == 0x8B);
 }
 
 - (NSData *)decompressedData
