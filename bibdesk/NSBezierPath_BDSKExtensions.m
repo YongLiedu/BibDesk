@@ -84,11 +84,7 @@
 }
 
 + (void)fillStarInRect:(NSRect)rect flipped:(BOOL)flipped {
-    [[self bezierPathWithStarInRect:rect invert:flipped] fill];
-}
-
-+ (void)fillInvertedStarInRect:(NSRect)rect{
-    [[self bezierPathWithInvertedStarInRect:rect] fill];
+    [[self bezierPathWithStarInRect:rect flipped:flipped] fill];
 }
 
 + (NSBezierPath *)bezierPathWithStarInRect:(NSRect)rect flipped:(BOOL)flipped {
