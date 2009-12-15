@@ -56,7 +56,7 @@
 
 - (NSImage *)dragImageWithCount:(NSInteger)count;
 - (NSImage *)dragImageWithCount:(NSInteger)count inside:(BOOL)inside isIcon:(BOOL)isIcon;
-- (NSBitmapImageRep *)bestImageRepForSize:(NSSize)preferredSize device:(NSDictionary *)deviceDescription;
+- (NSImageRep *)bestImageRepForSize:(NSSize)preferredSize device:(NSDictionary *)deviceDescription;
 
 - (void)drawFlipped:(BOOL)isFlipped inRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(CGFloat)delta;
 
