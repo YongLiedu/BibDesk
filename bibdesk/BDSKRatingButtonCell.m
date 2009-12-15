@@ -347,10 +347,7 @@
 	[color set];
 	
 	while (i++ < rating) {
-		if([controlView isFlipped])
-            [NSBezierPath fillInvertedStarInRect:rect];
-        else
-            [NSBezierPath fillStarInRect:rect];
+		[NSBezierPath fillStarInRect:rect flipped:[controlView isFlipped]];
 		rect.origin.x += OUTER_SIZE;
 	}
 	

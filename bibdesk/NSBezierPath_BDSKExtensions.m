@@ -83,15 +83,15 @@
     return path;
 }
 
-+ (void)fillStarInRect:(NSRect)rect{
-    [[self bezierPathWithStarInRect:rect] fill];
++ (void)fillStarInRect:(NSRect)rect flipped:(BOOL)flipped {
+    [[self bezierPathWithStarInRect:rect invert:flipped] fill];
 }
 
 + (void)fillInvertedStarInRect:(NSRect)rect{
     [[self bezierPathWithInvertedStarInRect:rect] fill];
 }
 
-+ (NSBezierPath *)bezierPathWithStarInRect:(NSRect)rect invert:(BOOL)invert {
++ (NSBezierPath *)bezierPathWithStarInRect:(NSRect)rect flipped:(BOOL)flipped {
     CGFloat centerX = NSMidX(rect);
     CGFloat centerY = NSMidY(rect);
     CGFloat radiusX = 0.5 * NSWidth(rect);
@@ -99,7 +99,7 @@
     NSInteger i = 0;
     NSBezierPath *path = [self bezierPath];
     
-    if (invert)
+    if (flipped)
         radiusY *= -1.0;
     [path moveToPoint: NSMakePoint(centerX, centerY + radiusY)];
     for (i = 1; i < 5; i++)
@@ -107,14 +107,6 @@
     [path closePath];
     
     return path;
-}
-
-+ (NSBezierPath *)bezierPathWithStarInRect:(NSRect)rect{
-    return [self bezierPathWithStarInRect:rect invert:NO];
-}
-
-+ (NSBezierPath *)bezierPathWithInvertedStarInRect:(NSRect)rect{
-    return [self bezierPathWithStarInRect:rect invert:YES];
 }
 
 @end

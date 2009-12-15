@@ -46,9 +46,7 @@
 + (void)strokeHorizontalOvalInRect:(NSRect)rect;
 + (NSBezierPath*)bezierPathWithHorizontalOvalInRect:(NSRect)rect;
 
-+ (void)fillStarInRect:(NSRect)rect;
-+ (void)fillInvertedStarInRect:(NSRect)rect;
-+ (NSBezierPath *)bezierPathWithStarInRect:(NSRect)rect;
-+ (NSBezierPath *)bezierPathWithInvertedStarInRect:(NSRect)rect;
++ (void)fillStarInRect:(NSRect)rect flipped:(BOOL)flipped;
++ (NSBezierPath *)bezierPathWithStarInRect:(NSRect)rect flipped:(BOOL)flipped;
 
 @end
