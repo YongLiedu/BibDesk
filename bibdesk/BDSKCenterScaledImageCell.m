@@ -100,7 +100,7 @@
             [bitmapRep release];          
         }
         CIFilter *filter = [CIFilter filterWithName:@"CIColorInvert"];
-        [filter setValue:self forKey:@"inputImage"];
+        [filter setValue:ciImage forKey:@"inputImage"];
         rep = [NSCIImageRep imageRepWithCIImage:[filter valueForKey:@"outputImage"]];
         [ciImage release];
     }
