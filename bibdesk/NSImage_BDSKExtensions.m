@@ -440,16 +440,15 @@ static NSComparisonResult compareImageRepWidths(NSBitmapImageRep *r1, NSBitmapIm
     NSUInteger i, iMax = [reps count];
     NSBitmapImageRep *toReturn = nil;
     
-    for (i = 0; i < iMax && nil == toReturn; i++) {
+    for (i = 0; i < iMax; i++) {
         NSBitmapImageRep *rep = [reps objectAtIndex:i];
         BOOL hasPreferredColorSpace = [[rep colorSpaceName] isEqualToString:preferredColorSpaceName];
         NSSize size = [rep size];
         
         if (hasPreferredColorSpace) {
-            if (NSEqualSizes(size, preferredSize))
-                toReturn = rep;
-            else if (size.width > preferredSize.width)
-                toReturn = rep;
+            toReturn = rep;
+            if (NSEqualSizes(size, preferredSize) || size.width > preferredSize.width)
+                break;
         }
     }
     [reps release];
