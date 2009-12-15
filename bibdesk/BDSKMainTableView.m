@@ -302,6 +302,7 @@ enum {
     switch(columnType) {
         case BDSKColumnTypeURL:
             cell = [[[NSImageCell alloc] init] autorelease];
+            [cell setImageScaling:NSImageScaleProportionallyUpOrDown];
             break;
         case BDSKColumnTypeLinkedFile:
             cell = [[[BDSKTextWithIconCell alloc] init] autorelease];
