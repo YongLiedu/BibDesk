@@ -64,7 +64,7 @@
         if ([rep isKindOfClass:[NSBitmapImageRep class]]) {
             ciImage = [[CIImage alloc] initWithBitmapImageRep:(NSBitmapImageRep *)rep];
         }
-        else {
+        else if (rep) {
             // draw as a bitmap at the source image resolution
             NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL
                                                                                   pixelsWide:[rep pixelsWide]
