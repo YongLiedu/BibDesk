@@ -1,5 +1,5 @@
 //
-//  BDSKCenterScaledImageCell.h
+//  NSCell_BDSKExtensions.h
 //  Bibdesk
 //
 //  Created by Adam Maxwell on 02/21/07.
@@ -39,11 +39,6 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKCenterScaledImageCell : NSImageCell
-@end
-
-#pragma mark -
-
-@interface NSCell (BDSKCenterScaling)
+@interface NSCell (BDSKExtensions)
 - (void)drawIcon:(NSImage *)img withFrame:(NSRect)iconRect inView:(NSView *)controlView;
 @end

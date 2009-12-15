@@ -38,7 +38,6 @@
 
 #import "BDSKStatusBar.h"
 #import "NSGeometry_BDSKExtensions.h"
-#import "BDSKCenterScaledImageCell.h"
 #import "NSViewAnimation_BDSKExtensions.h"
 
 #define LEFT_MARGIN				5.0
@@ -56,7 +55,7 @@
 		[textCell setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
         [textCell setBackgroundStyle:NSBackgroundStyleRaised];
 		
-        iconCell = [[BDSKCenterScaledImageCell alloc] init];
+        iconCell = [[NSImageCell alloc] init];
 		
 		progressIndicator = nil;
 		

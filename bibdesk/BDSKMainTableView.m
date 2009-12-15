@@ -46,7 +46,6 @@
 #import "BDSKImagePopUpButton.h"
 #import "BDSKImagePopUpButtonCell.h"
 #import "NSBezierPath_BDSKExtensions.h"
-#import "BDSKCenterScaledImageCell.h"
 #import "BDSKLevelIndicatorCell.h"
 #import <QuartzCore/QuartzCore.h>
 #import "BDSKTextWithIconCell.h"
@@ -302,7 +301,7 @@ enum {
     
     switch(columnType) {
         case BDSKColumnTypeURL:
-            cell = [[[BDSKCenterScaledImageCell alloc] init] autorelease];
+            cell = [[[NSImageCell alloc] init] autorelease];
             break;
         case BDSKColumnTypeLinkedFile:
             cell = [[[BDSKTextWithIconCell alloc] init] autorelease];

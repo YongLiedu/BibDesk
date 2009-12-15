@@ -1,5 +1,5 @@
 //
-//  BDSKCenterScaledImageCell.m
+//  NSCell_BDSKExtensions.m
 //  Bibdesk
 //
 //  Created by Adam Maxwell on 02/21/07.
@@ -36,25 +36,12 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKCenterScaledImageCell.h"
+#import "NSCell_BDSKExtensions.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import <QuartzCore/QuartzCore.h>
 
-@implementation BDSKCenterScaledImageCell
-
-// limitation: this assumes you always want a proportionally scaled, centered image (hence the class name)
-- (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
-{
-    if ([self image]) 
-        [self drawIcon:[self image] withFrame:cellFrame inView:controlView];
-}
-
-@end
-
-#pragma mark -
-
-@implementation NSCell (BDSKCenterScaling)
+@implementation NSCell (BDSKExtensions)
 
 - (void)drawIcon:(NSImage *)img withFrame:(NSRect)iconRect inView:(NSView *)controlView
 {    

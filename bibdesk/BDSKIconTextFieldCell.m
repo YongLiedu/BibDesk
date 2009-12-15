@@ -39,7 +39,7 @@
 #import "BDSKIconTextFieldCell.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
-#import "BDSKCenterScaledImageCell.h"
+#import "NSCell_BDSKExtensions.h"
 
 
 @implementation BDSKIconTextFieldCell

@@ -42,7 +42,7 @@
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
-#import "BDSKCenterScaledImageCell.h"
+#import "NSCell_BDSKExtensions.h"
 #import "NSColor_BDSKExtensions.h"
 
 
