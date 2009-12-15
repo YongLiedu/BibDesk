@@ -53,15 +53,13 @@
 
 + (void)fillHorizontalOvalInRect:(NSRect)rect
 {
-    NSBezierPath *p = [self bezierPathWithHorizontalOvalInRect:rect];
-    [p fill];
+    [[self bezierPathWithHorizontalOvalInRect:rect] fill];
 }
 
 
 + (void)strokeHorizontalOvalInRect:(NSRect)rect
 {
-    NSBezierPath *p = [self bezierPathWithHorizontalOvalInRect:rect];
-    [p stroke];
+    [[self bezierPathWithHorizontalOvalInRect:rect] stroke];
 }
 
 + (NSBezierPath*)bezierPathWithHorizontalOvalInRect:(NSRect)rect
@@ -71,8 +69,6 @@
     
     CGFloat radius = 0.5f * NSHeight(rect);
     NSBezierPath *path = [self bezierPath];
-    
-    [path removeAllPoints];
     
     // Now draw our rectangle:
     [path moveToPoint: NSMakePoint(NSMinX(rect) + radius, NSMaxY(rect))];
@@ -95,7 +91,7 @@
     [[self bezierPathWithInvertedStarInRect:rect] fill];
 }
 
-+ (NSBezierPath *)bezierPathWithStarInRect:(NSRect)rect{
++ (NSBezierPath *)bezierPathWithStarInRect:(NSRect)rect invert:(BOOL)invert {
     CGFloat centerX = NSMidX(rect);
     CGFloat centerY = NSMidY(rect);
     CGFloat radiusX = 0.5 * NSWidth(rect);
@@ -103,32 +99,22 @@
     NSInteger i = 0;
     NSBezierPath *path = [self bezierPath];
     
-    [path removeAllPoints];
-    
-    [path moveToPoint: NSMakePoint(NSMidX(rect), NSMaxY(rect))];
-    while(++i < 5)
+    if (invert)
+        radiusY *= -1.0;
+    [path moveToPoint: NSMakePoint(centerX, centerY + radiusY)];
+    for (i = 1; i < 5; i++)
         [path lineToPoint:NSMakePoint(centerX + sin(0.8 * M_PI * i) * radiusX, centerY + cos(0.8 * M_PI * i) * radiusY)];
     [path closePath];
     
     return path;
 }
 
++ (NSBezierPath *)bezierPathWithStarInRect:(NSRect)rect{
+    return [self bezierPathWithStarInRect:rect invert:NO];
+}
+
 + (NSBezierPath *)bezierPathWithInvertedStarInRect:(NSRect)rect{
-    CGFloat centerX = NSMidX(rect);
-    CGFloat centerY = NSMidY(rect);
-    CGFloat radiusX = 0.5 * NSWidth(rect);
-    CGFloat radiusY = 0.5 * NSHeight(rect);
-    NSInteger i;
-    NSBezierPath *path = [self bezierPath];
-    
-    [path removeAllPoints];
-    
-    [path moveToPoint:NSMakePoint(NSMidX(rect), NSMinY(rect))];
-    for(i = 1; i < 5; i++)
-        [path lineToPoint:NSMakePoint(centerX + sinf(0.8 * M_PI * i) * radiusX, centerY - cosf(0.8 * M_PI * i) * radiusY)];
-    [path closePath];
-    
-    return path;
+    return [self bezierPathWithStarInRect:rect invert:YES];
 }
 
 @end
