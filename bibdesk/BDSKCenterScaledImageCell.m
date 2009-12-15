@@ -39,7 +39,7 @@
 #import "BDSKCenterScaledImageCell.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
-#import "CIImage_BDSKExtensions.h"
+#import <QuartzCore/QuartzCore.h>
 
 @implementation BDSKCenterScaledImageCell
 
@@ -99,7 +99,9 @@
             ciImage = [[CIImage alloc] initWithBitmapImageRep:bitmapRep];
             [bitmapRep release];          
         }
-        rep = [NSCIImageRep imageRepWithCIImage:[ciImage invertedImage]];
+        CIFilter *filter = [CIFilter filterWithName:@"CIColorInvert"];
+        [filter setValue:self forKey:@"inputImage"];
+        rep = [NSCIImageRep imageRepWithCIImage:[filter valueForKey:@"outputImage"]];
         [ciImage release];
     }
     

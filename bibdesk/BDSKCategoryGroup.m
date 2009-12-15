@@ -40,7 +40,7 @@
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "BDSKTypeManager.h"
-#import "CIImage_BDSKExtensions.h"
+#import <QuartzCore/QuartzCore.h>
 
 
 // a private subclass for the Empty ... group
@@ -136,7 +136,15 @@
         categoryGroupImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
         [categoryGroupImage lockFocus];
         CIImage *ciImage = [CIImage imageWithData:[[NSImage imageNamed:NSImageNameFolderSmart] TIFFRepresentation]];
-        ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.3 brightnessBias:0.3];
+        CIFilter *hueAdjustFilter = [CIFilter filterWithName:@"CIHueAdjust"];
+        CIFilter *colorControlsFilter = [CIFilter filterWithName:@"CIColorControls"];
+        [hueAdjustFilter setValue:[NSNumber numberWithDouble:3.0 * M_PI] forKey:@"inputAngle"];
+        [colorControlsFilter setDefaults];
+        [colorControlsFilter setValue:[NSNumber numberWithDouble:1.3] forKey:@"inputSaturation"];
+        [colorControlsFilter setValue:[NSNumber numberWithDouble:0.3] forKey:@"inputBrightness"];
+        [hueAdjustFilter setValue:ciImage forKey:@"inputImage"];
+        [colorControlsFilter setValue:[hueAdjustFilter valueForKey:@"outputImage"] forKey:@"inputImage"];
+        ciImage = [colorControlsFilter valueForKey:@"outputImage"];
         [ciImage drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) operation:NSCompositeSourceOver fraction:1.0];
         [categoryGroupImage unlockFocus];
         NSImage *tinyImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
@@ -144,7 +152,9 @@
         [[NSImage imageNamed:NSImageNameFolderSmart] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
         [tinyImage unlockFocus];
         ciImage = [CIImage imageWithData:[tinyImage TIFFRepresentation]];
-        ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.3 brightnessBias:0.3];
+        [hueAdjustFilter setValue:ciImage forKey:@"inputImage"];
+        [colorControlsFilter setValue:[hueAdjustFilter valueForKey:@"outputImage"] forKey:@"inputImage"];
+        ciImage = [colorControlsFilter valueForKey:@"outputImage"];
         [tinyImage release];
         tinyImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
         [tinyImage lockFocus];

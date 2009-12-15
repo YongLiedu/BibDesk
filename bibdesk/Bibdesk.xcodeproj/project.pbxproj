@@ -446,7 +446,6 @@
 		F9937E230AD8268E001D1DFB /* BDSKZoomablePDFView.m in Sources */ = {isa = PBXBuildFile; fileRef = F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */; };
 		F9937E250AD82690001D1DFB /* PDFDocument_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F947A01B09AA80E4004C27FF /* PDFDocument_BDSKExtensions.m */; };
 		F9937E290AD826AA001D1DFB /* BDSKSpotlightView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A411F00A0B1FEF008493C0 /* BDSKSpotlightView.m */; };
-		F9937E2A0AD826AB001D1DFB /* CIImage_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */; };
 		F9937E4E0AD826EB001D1DFB /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9B9E17E089479FC00C21B17 /* Quartz.framework */; };
 		F9937E6C0AD82700001D1DFB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9706DB909102DA800526FC8 /* QuartzCore.framework */; };
 		F99BC25F095A5C7000E018C3 /* NSArray_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F99BC25D095A5C7000E018C3 /* NSArray_BDSKExtensions.m */; };
@@ -990,8 +989,6 @@
 		CE7A4A8C0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCustomCiteDrawerController.h; sourceTree = "<group>"; };
 		CE7A4A8D0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCustomCiteDrawerController.m; sourceTree = "<group>"; };
 		CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SkimNotes.xcodeproj; path = SkimNotes/SkimNotes.xcodeproj; sourceTree = "<group>"; };
-		CE7E29D60A0E84AA009D04C3 /* CIImage_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CIImage_BDSKExtensions.h; sourceTree = "<group>"; };
-		CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CIImage_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE7EA95A0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSWindowController_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE7EA95B0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSWindowController_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE7F5E470B3F5F1800A919D0 /* searchGroup.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = searchGroup.tiff; sourceTree = "<group>"; };
@@ -1938,7 +1935,6 @@
 		CE38FA7D091D210C00BCB69D /* AppKit Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */,
 				F97BF0B8090AE7520063504B /* NSBezierPath_BDSKExtensions.m */,
 				CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */,
 				CEEC1A311091F31600530207 /* NSEvent_BDSKExtensions.m */,
@@ -2622,7 +2618,6 @@
 				F95D3FAC09DDF6A900D793A6 /* BibPref_Sharing.h */,
 				F9022CB8075803AC00C3F701 /* BibPref_TeX.h */,
 				F9025F2E0969D66F008A551C /* CFString_BDSKExtensions.h */,
-				CE7E29D60A0E84AA009D04C3 /* CIImage_BDSKExtensions.h */,
 				F9022C9B0758038000C3F701 /* html2tex.h */,
 				CE3011B70D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.h */,
 				F99BC25C095A5C7000E018C3 /* NSArray_BDSKExtensions.h */,
@@ -3413,7 +3408,6 @@
 				F9937E230AD8268E001D1DFB /* BDSKZoomablePDFView.m in Sources */,
 				F9937E250AD82690001D1DFB /* PDFDocument_BDSKExtensions.m in Sources */,
 				F9937E290AD826AA001D1DFB /* BDSKSpotlightView.m in Sources */,
-				F9937E2A0AD826AB001D1DFB /* CIImage_BDSKExtensions.m in Sources */,
 				CE95AF180ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m in Sources */,
 				CE7596000ADDB0E1009C1329 /* BDSKContainerView.m in Sources */,
 				F9A2245D0AE02C8E0046CA3D /* BDSKFileSearch.m in Sources */,

@@ -39,7 +39,6 @@
 #import "NSImage_BDSKExtensions.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
-#import "CIImage_BDSKExtensions.h"
 
 @implementation NSImage (BDSKExtensions)
 
