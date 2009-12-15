@@ -98,7 +98,7 @@
     drawFrame.size.width = ratio * srcRect.size.width;
     drawFrame.size.height = ratio * srcRect.size.height;
     
-    drawFrame = BDSKCenterRect(drawFrame, drawFrame.size, [controlView isFlipped]);
+    drawFrame = BDSKCenterRect(iconRect, drawFrame.size, [controlView isFlipped]);
     
     // draw the image rep directly to avoid creating a new NSImage and adding the rep to it
     if (rep) {
