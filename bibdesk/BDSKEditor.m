@@ -2745,14 +2745,14 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     } else if ([[publication filesToBeFiled] count] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]) {
         if ([publication hasEmptyOrDefaultCiteKey]) {
             // case 2: cite key hasn't been set, and paper needs to be filed
-            errMsg = NSLocalizedString(@"The cite key for this entry has not been set, and AutoFile did not have enough information to file the paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
+            errMsg = NSLocalizedString(@"The cite key for this entry has not been set, and AutoFile did not have enough information to file the paper.  Would you like to continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
         } else {
             // case 3: only the paper needs to be filed
-            errMsg = NSLocalizedString(@"AutoFile did not have enough information to file this paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
+            errMsg = NSLocalizedString(@"AutoFile did not have enough information to file this paper.  Would you like to continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
         }
     } else if ([publication hasEmptyOrDefaultCiteKey]) {
         // case 4: only the cite key needs to be set
-        errMsg = NSLocalizedString(@"The cite key for this entry has not been set.  Would you like to cancel and edit the cite key, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
+        errMsg = NSLocalizedString(@"The cite key for this entry has not been set.  Would you like to edit the cite key, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
     }
 	
     if (errMsg) {
