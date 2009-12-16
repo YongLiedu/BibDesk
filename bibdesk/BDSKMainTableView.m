@@ -782,10 +782,6 @@ enum {
     }
 }
 
-- (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-    return nil;
-}
-
 @end
 
 #pragma mark -
