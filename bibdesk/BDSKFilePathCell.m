@@ -51,8 +51,8 @@ static BDSKFilePathFormatter *filePathFormatter = nil;
     filePathFormatter = [[BDSKFilePathFormatter alloc] init];
 }
 
-- (id)init {
-    if (self = [super initTextCell:@""]) {
+- (id)initTextCell:(NSString *)aString {
+    if (self = [super initTextCell:aString]) {
         [self setEditable:YES];
         [self setScrollable:YES];
         [self setLineBreakMode:NSLineBreakByTruncatingMiddle];

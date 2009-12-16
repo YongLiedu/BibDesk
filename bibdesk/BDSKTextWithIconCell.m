@@ -55,10 +55,8 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
     textWithIconFormatter = [[BDSKTextWithIconFormatter alloc] init];
 }
 
-// Init and dealloc
-
-- (id)init {
-    if (self = [super initTextCell:@""]) {
+- (id)initTextCell:(NSString *)aString {
+    if (self = [super initTextCell:aString]) {
         [self setEditable:YES];
         [self setScrollable:YES];
         [self setLineBreakMode:NSLineBreakByTruncatingTail];
@@ -75,14 +73,8 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
     return self;
 }
 
-// NSCopying protocol
-
 - (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     return nil;
-}
-
-- (NSColor *)textColor {
-    return [super textColor];
 }
 
 - (void)setObjectValue:(id <NSCopying>)obj {
