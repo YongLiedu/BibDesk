@@ -88,8 +88,8 @@ enum {
 - (void)columnsMenuSelectTableColumn:(id)sender;
 - (void)columnsMenuAddTableColumn:(id)sender;
 - (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-- (void)updateColumnsMenu;
-- (void)updateColumnsButton;
+- (void)updateColumnsMenuUpdatingButton:(BOOL)updateButton;
+- (void)tableColumnDidMove:(NSNotification *)note;
 - (IBAction)importItem:(id)sender;
 - (IBAction)openParentItem:(id)sender;
 - (void)autosizeColumn:(id)sender;
@@ -145,9 +145,12 @@ enum {
     [aTypeSelectHelper setMatchesPrefix:NO];
     [self setTypeSelectHelper:aTypeSelectHelper];
     [aTypeSelectHelper release];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableColumnDidMove:) name:NSTableViewColumnDidMoveNotification object:self];
 }
 
 - (void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     BDSKDESTROY(alternatingRowBackgroundColors);
     [super dealloc];
 }
@@ -435,8 +438,7 @@ enum {
     [self selectRowIndexes:selectedRows byExtendingSelection:NO];
     [self setHighlightedTableColumn:highlightedColumn]; 
     [self tableViewFontChanged];
-    [self updateColumnsMenu];
-    [self updateColumnsButton];
+    [self updateColumnsMenuUpdatingButton:YES];
 }
 
 - (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(NSUInteger)idx {
@@ -473,7 +475,7 @@ enum {
 - (NSMenu *)columnsMenu{
     NSMenu *menu = [[[self headerView] menu] copy];
     if(menu == nil){
-        [self updateColumnsMenu];
+        [self updateColumnsMenuUpdatingButton:NO];
         menu = [[[self headerView] menu] copy];
     }
     [menu removeItem:[menu itemWithAction:@selector(autosizeColumn:)]];
@@ -636,7 +638,7 @@ enum {
     [addFieldController release];
 }
 
-- (void)updateColumnsMenu{
+- (void)updateColumnsMenuUpdatingButton:(BOOL)updateButton {
     NSArray *shownColumns = [self tableColumnIdentifiers];
 	NSMenuItem *item = nil;
     NSMenu *menu = [[self headerView] menu];
@@ -674,15 +676,17 @@ enum {
 		[item setTarget:self];
 		[item setState:NSOnState];
 	}
-}
-
-- (void)updateColumnsButton {
-	if ([[self cornerView] isKindOfClass:[NSPopUpButton class]]) {
-        NSMenu *menu = [self columnsMenu]; // this is already a copy
-        NSMenuItem *item = [menu insertItemWithTitle:@"" action:NULL keyEquivalent:@"" atIndex:0];
+    
+	if (updateButton && [[self cornerView] isKindOfClass:[NSPopUpButton class]]) {
+        menu = [self columnsMenu]; // this is already a copy
+        item = [menu insertItemWithTitle:@"" action:NULL keyEquivalent:@"" atIndex:0];
         [item setImage:[[self class] cornerColumnsImage]];
         [(NSPopUpButton *)[self cornerView] setMenu:menu];
     }
+}
+
+- (void)tableColumnDidMove:(NSNotification *)note {
+    [self updateColumnsMenuUpdatingButton:YES];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
