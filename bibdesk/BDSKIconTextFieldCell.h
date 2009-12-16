@@ -49,6 +49,4 @@
 - (NSRect)textRectForBounds:(NSRect)aRect;
 - (NSRect)iconRectForBounds:(NSRect)aRect;
 
-- (void)drawIconWithFrame:(NSRect)iconRect inView:(NSView *)controlView;
-
 @end

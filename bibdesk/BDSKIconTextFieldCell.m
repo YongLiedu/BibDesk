@@ -102,10 +102,6 @@
     return cellSize;
 }
 
-- (void)drawIconWithFrame:(NSRect)iconRect inView:(NSView *)controlView {
-    [imageCell drawInteriorWithFrame:iconRect inView:controlView];
-}
-
 - (NSRect)textRectForBounds:(NSRect)aRect {
     NSRect ignored, textRect = aRect;
     CGFloat border;
@@ -156,7 +152,7 @@
     imageRect = BDSKCenterRectVertically(imageRect, NSWidth(imageRect), [controlView isFlipped]);
     if ([self isBordered] == NO && [self isBezeled] == NO)
         imageRect.origin.y += [controlView isFlipped] ? -IMAGE_OFFSET : IMAGE_OFFSET;
-    [self drawIconWithFrame:imageRect inView:controlView];
+    [imageCell drawInteriorWithFrame:imageRect inView:controlView];
 }
 
 - (NSImage *)icon {
