@@ -87,11 +87,7 @@
 }
 
 - (void)drawIconWithFrame:(NSRect)iconRect inView:(NSView *)controlView {
-    NSImage *img = [self icon];
-    if (nil != img) {
-        [imageCell setImage:img];
-        [imageCell drawInteriorWithFrame:iconRect inView:controlView];
-    }
+    [imageCell drawInteriorWithFrame:iconRect inView:controlView];
 }
 
 - (NSRect)textRectForBounds:(NSRect)aRect {
@@ -147,9 +143,15 @@
     [self drawIconWithFrame:imageRect inView:controlView];
 }
 
-// this is supposed to be implemented by subclasses
 - (NSImage *)icon {
-    return nil;
+    return [imageCell image];
+}
+
+- (void)setIcon:(NSImage *)newIcon {
+    if ([imageCell image] != newIcon) {
+        [imageCell setImage:newIcon];
+        [(NSControl *)[self controlView] updateCellInside:self];
+    }
 }
 
 - (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(NSInteger)selStart length:(NSInteger)selLength {
@@ -165,23 +167,6 @@
     else if (NSMouseInRect(mouseLoc, [self iconRectForBounds:cellFrame], [controlView isFlipped]))
         hit = NSCellHitContentArea;
     return hit;
-}
-
-@end
-
-#pragma mark -
-
-@implementation BDSKConcreteIconTextFieldCell
-
-- (NSImage *)icon {
-    return [imageCell image];
-}
-
-- (void)setIcon:(NSImage *)newIcon {
-    if ([imageCell image] != newIcon) {
-        [imageCell setImage:newIcon];
-        [(NSControl *)[self controlView] updateCellInside:self];
-    }
 }
 
 @end

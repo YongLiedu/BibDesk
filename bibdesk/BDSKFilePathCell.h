@@ -40,7 +40,7 @@
 #import "BDSKIconTextFieldCell.h"
 
 
-@interface BDSKFilePathCell : BDSKConcreteIconTextFieldCell
+@interface BDSKFilePathCell : BDSKIconTextFieldCell
 @end
 
 

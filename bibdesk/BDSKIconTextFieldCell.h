@@ -44,16 +44,11 @@
 }
 
 - (NSImage *)icon;
+- (void)setIcon:(NSImage *)newIcon;
 
 - (NSRect)textRectForBounds:(NSRect)aRect;
 - (NSRect)iconRectForBounds:(NSRect)aRect;
 
 - (void)drawIconWithFrame:(NSRect)iconRect inView:(NSView *)controlView;
 
-@end
-
-#pragma mark -
-
-@interface BDSKConcreteIconTextFieldCell : BDSKIconTextFieldCell
-- (void)setIcon:(NSImage *)newIcon;
 @end

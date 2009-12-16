@@ -94,10 +94,8 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
     
     // we should not set a derived value such as the string here, otherwise NSTableView will call tableView:setObjectValue:forTableColumn:row: whenever a cell is selected
     [super setObjectValue:obj];
-}
-
-- (NSImage *)icon {
-    return nonNullObjectValueForKey([self objectValue], BDSKTextWithIconCellImageKey);
+    
+    [self setIcon:nonNullObjectValueForKey(obj, BDSKTextWithIconCellImageKey)];
 }
 
 @end

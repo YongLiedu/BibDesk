@@ -138,7 +138,7 @@
     [self setRetrieving:NO];
     
     id oldCell = [urlField cell];
-    BDSKConcreteIconTextFieldCell *cell = [[BDSKConcreteIconTextFieldCell alloc] initTextCell:[oldCell stringValue]];
+    BDSKIconTextFieldCell *cell = [[BDSKIconTextFieldCell alloc] initTextCell:[oldCell stringValue]];
     [cell setEditable:[oldCell isEditable]];
     [cell setSelectable:[oldCell isSelectable]];
     [cell setEnabled:[oldCell isEnabled]];
@@ -194,7 +194,7 @@
 
 - (void)loadURL:(NSURL *)theURL {
     if (theURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:theURL] == NO) {
-        [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:[NSImage missingFileImage]];
+        [(BDSKIconTextFieldCell *)[urlField cell] setIcon:[NSImage missingFileImage]];
         [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:theURL]];
     }
 }
@@ -438,8 +438,8 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     }
     
     if (frame == [sender mainFrame]) {
-        if ([[(BDSKConcreteIconTextFieldCell *)[urlField cell] icon] isEqual:[NSImage missingFileImage]])
-            [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:[NSImage imageNamed:@"Bookmark"]];
+        if ([[(BDSKIconTextFieldCell *)[urlField cell] icon] isEqual:[NSImage missingFileImage]])
+            [(BDSKIconTextFieldCell *)[urlField cell] setIcon:[NSImage imageNamed:@"Bookmark"]];
     }
     
     if (frame == loadingWebFrame) {
@@ -477,7 +477,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 
 - (void)webView:(WebView *)sender didReceiveIcon:(NSImage *)image forFrame:(WebFrame *)frame{
     if (frame == [sender mainFrame]) { 
-        [(BDSKConcreteIconTextFieldCell *)[urlField cell] setIcon:image];
+        [(BDSKIconTextFieldCell *)[urlField cell] setIcon:image];
     }
 }
 
