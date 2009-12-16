@@ -45,26 +45,36 @@ static char BDSKEditorTextViewDefaultsObservationContext;
 @interface BDSKEditorTextView (Private)
 
 - (void)updateFontFromPreferences;
-- (NSString *)URLStringFromRange:(NSRange *)startRange inString:(NSString *)string;
-- (void)fixAttributesForURLs;
-- (void)updateFontFromPreferences;
-- (void)doCommonSetup;
 
 @end
 
 @implementation BDSKEditorTextView
 
+- (void)doCommonSetup;
+{
+    BDSKPRECONDITION([self textStorage]);
+    // use Apple's link detection on 10.5 and later
+    [self setAutomaticLinkDetectionEnabled:YES];
+    [self updateFontFromPreferences];
+    [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self
+        forKeyPath:[@"values." stringByAppendingString:BDSKEditorFontNameKey]
+           options:0
+           context:&BDSKEditorTextViewDefaultsObservationContext];
+}    
+
 - (id)initWithCoder:(NSCoder *)coder
 {
-    self = [super initWithCoder:coder];
-    [self doCommonSetup];
+    if (self = [super initWithCoder:coder]) {
+        [self doCommonSetup];
+    }
     return self;
 }
 
 - (id)initWithFrame:(NSRect)frameRect textContainer:(NSTextContainer *)container;
 {
-    self = [super initWithFrame:frameRect textContainer:container];
-    [self doCommonSetup];
+    if (self = [super initWithFrame:frameRect textContainer:container]) {
+        [self doCommonSetup];
+    }
     return self;    
 }
 
@@ -87,31 +97,6 @@ static char BDSKEditorTextViewDefaultsObservationContext;
     [[NSUserDefaults standardUserDefaults] setObject:[font fontName] forKey:BDSKEditorFontNameKey];
 }
 
-- (void)textStorageDidProcessEditing:(NSNotification *)notification
-{    
-    NSTextStorage *textStorage = [notification object];    
-    NSString *string = [textStorage string];
-    
-    NSRange editedRange = [textStorage editedRange];
-    
-    // if this is > 1, it's likely a paste or initial insertion, so fix the whole thing
-    if(editedRange.length > 1){
-        [self fixAttributesForURLs];
-    } else if(editedRange.location != NSNotFound){
-        NSString *editedWord = [self URLStringFromRange:&editedRange inString:string];
-        if(editedWord && [editedWord rangeOfString:@"://"].length == 0)
-            editedWord = nil;
-        NSURL *url = editedWord ? [[NSURL alloc] initWithString:editedWord] : nil;
-        if(url != nil)
-            [textStorage addAttribute:NSLinkAttributeName value:url range:editedRange];
-        else
-            [textStorage removeAttribute:NSLinkAttributeName range:editedRange];
-        [url release];
-    } else {
-        NSLog(@"I am confused: edited range is %@", NSStringFromRange(editedRange));
-    }
-}
-
 // make sure the font and other attributes get fixed when pasting text
 - (void)paste:(id)sender {  [self pasteAsPlainText:sender]; }
 
@@ -128,111 +113,7 @@ static char BDSKEditorTextViewDefaultsObservationContext;
     }
 }
 
-@end
-
-@implementation BDSKEditorTextView (Private)
-
-// Determine if a % character is followed by two digits (valid in a URL)
-static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, NSUInteger startIndex)
-{
-    static NSCharacterSet *hexadecimalCharacterSet = nil;
-    if (hexadecimalCharacterSet == nil) {
-        NSMutableCharacterSet *tmpSet = [[NSCharacterSet decimalDigitCharacterSet] mutableCopy];
-        [tmpSet addCharactersInRange:NSMakeRange('a', 6)];
-        [tmpSet addCharactersInRange:NSMakeRange('A', 6)];
-        hexadecimalCharacterSet = [tmpSet copy];
-        [tmpSet release];
-    }
-    
-    NSCParameterAssert(startIndex == 0 || [string length] > startIndex);
-    // require % and at least two additional chars
-    if([string isEqualToString:@""] || [string characterAtIndex:startIndex] != '%' || [string length] <= (startIndex + 2))
-        return NO;
-    
-    // both characters following the % should be digits 0-9
-    unichar ch1 = [string characterAtIndex:(startIndex + 1)];
-    unichar ch2 = [string characterAtIndex:(startIndex + 2)];
-    return ([hexadecimalCharacterSet characterIsMember:ch1] && [hexadecimalCharacterSet characterIsMember:ch2]) ? YES : NO;
-}
-
-/* Starts in the middle of a "word" (some range of interest) and searches forward and backward to find boundaries marked by characters that would be illegal for a URL.  Note that this may not be a valid URL in itself; it is just bounded by URL-like markers.
-*/
-- (NSString *)URLStringFromRange:(NSRange *)startRange inString:(NSString *)string
-{
-    NSUInteger startIdx = NSNotFound, endIdx = NSNotFound;
-    NSRange range = NSMakeRange(0, startRange->location);
-    
-    do {
-        range = [string rangeOfCharacterFromSet:[NSURL illegalURLCharacterSet] options:NSBackwardsSearch range:range];
-        
-        if(range.location != NSNotFound){
-            // advance past the illegal character
-            startIdx = range.location + 1;
-        } else {
-            // this has a URL as the first word in the string
-            startIdx = 0;
-            break;
-        }
-        
-        // move the search range interval towards the beginning of the string
-        range = NSMakeRange(0, range.location);
-           
-    } while (startIdx != NSNotFound && hasValidPercentEscapeFromIndex(string, startIdx - 1));
-
-    NSString *lastWord = nil;
-    if(startIdx != NSNotFound){
-
-        range = NSMakeRange(startRange->location, [string length] - startRange->location);
-        
-        do {
-            range = [string rangeOfCharacterFromSet:[NSURL illegalURLCharacterSet] options:0 range:range];
-
-            // if the entire string is valid...
-            if(range.location == NSNotFound){
-                endIdx = [string length];
-                break;
-            } else {
-                endIdx = range.location;
-            }
-            
-            // move the search range interval towards the end of the string
-            range = NSMakeRange(range.location + 1, [string length] - range.location - 1);
-            
-        } while (endIdx != NSNotFound && hasValidPercentEscapeFromIndex(string, endIdx));
-        
-        if(endIdx != NSNotFound && startIdx != NSNotFound && endIdx > startIdx){
-            range = NSMakeRange(startIdx, endIdx - startIdx);
-            lastWord = [string substringWithRange:range]; 
-            *startRange = range;
-        }
-    }
-    return lastWord;
-}
-
-// fixes the attributes for the entire text storage; inefficient for large strings
-- (void)fixAttributesForURLs;
-{
-    NSTextStorage *textStorage = [self textStorage];
-    NSString *string = [textStorage string];
-    
-    NSInteger start, length = [string length];
-    NSRange range = NSMakeRange(0, 0);
-    NSString *urlString;
-    NSURL *url;
-    
-    do {
-        start = NSMaxRange(range);
-        range = [string rangeOfString:@"://" options:0 range:NSMakeRange(start, length - start)];
-        
-        if(range.length){
-            urlString = [self URLStringFromRange:&range inString:string];
-            url = urlString ? [[NSURL alloc] initWithString:urlString] : nil;
-            if([url scheme]) [textStorage addAttribute:NSLinkAttributeName value:url range:range];
-            [url release];
-        }
-        
-    } while (range.length);
-}
+#pragma mark Private
 
 // used only for reading the default font from prefs and then changing the font of the text storage
 - (void)updateFontFromPreferences;
@@ -251,17 +132,5 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, NSUInteger s
     // this changes the font of the entire text storage without undo
     [self setFont:font];
 }
-
-- (void)doCommonSetup;
-{
-    BDSKPRECONDITION([self textStorage]);
-    // use Apple's link detection on 10.5 and later
-    [self setAutomaticLinkDetectionEnabled:YES];
-    [self updateFontFromPreferences];
-    [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self
-        forKeyPath:[@"values." stringByAppendingString:BDSKEditorFontNameKey]
-           options:0
-           context:&BDSKEditorTextViewDefaultsObservationContext];
-}    
 
 @end
