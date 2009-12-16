@@ -59,6 +59,22 @@
     return self;
 }
 
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super initWithCoder:decoder]) {
+        imageCell = [[decoder decodeObjectForKey:@"imageCell"] retain];
+        if (imageCell == nil) {
+            imageCell = [[NSImageCell alloc] init];
+            [imageCell setImageScaling:NSImageScaleProportionallyUpOrDown];
+        }
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+    [super encodeWithCoder:encoder];
+    [encoder encodeObject:imageCell forKey:@"imageCell"];
+}
+
 - (id)copyWithZone:(NSZone *)zone {
     BDSKIconTextFieldCell *copy = [super copyWithZone:zone];
     copy->imageCell = [imageCell copyWithZone:zone];
