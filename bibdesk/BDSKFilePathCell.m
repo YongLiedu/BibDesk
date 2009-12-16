@@ -53,9 +53,6 @@ static BDSKFilePathFormatter *filePathFormatter = nil;
 
 - (id)initTextCell:(NSString *)aString {
     if (self = [super initTextCell:aString]) {
-        [self setEditable:YES];
-        [self setScrollable:YES];
-        [self setLineBreakMode:NSLineBreakByTruncatingMiddle];
         [self setFormatter:filePathFormatter];
     }
     return self;

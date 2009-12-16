@@ -57,9 +57,6 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
 
 - (id)initTextCell:(NSString *)aString {
     if (self = [super initTextCell:aString]) {
-        [self setEditable:YES];
-        [self setScrollable:YES];
-        [self setLineBreakMode:NSLineBreakByTruncatingTail];
         [self setFormatter:textWithIconFormatter];
     }
     return self;
