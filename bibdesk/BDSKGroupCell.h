@@ -48,6 +48,7 @@ extern NSString *BDSKGroupCellFailedDownloadKey;
 @class BDSKGroup;
 
 @interface BDSKGroupCell : NSTextFieldCell {
+    NSImageCell *imageCell;
     NSMutableAttributedString *countString;
 }
 

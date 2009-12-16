@@ -39,7 +39,6 @@
 #import "BDSKIconTextFieldCell.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
-#import "NSCell_BDSKExtensions.h"
 
 
 @implementation BDSKIconTextFieldCell
@@ -51,6 +50,30 @@
 #define BORDER_BETWEEN_EDGE_AND_IMAGE_BEZELED (3.0)
 #define BORDER_BETWEEN_IMAGE_AND_TEXT_BEZELED (-2.0)
 #define IMAGE_OFFSET (1.0)
+
+- (id)initTextCell:(NSString *)aString {
+    if (self = [super initTextCell:aString]) {
+        imageCell = [[NSImageCell alloc] init];
+        [imageCell setImageScaling:NSImageScaleProportionallyUpOrDown];
+    }
+    return self;
+}
+
+- (id)copyWithZone:(NSZone *)zone {
+    BDSKIconTextFieldCell *copy = [super copyWithZone:zone];
+    copy->imageCell = [imageCell copyWithZone:zone];
+    return copy;
+}
+
+- (void)dealloc {
+    BDSKDESTROY(imageCell);
+    [super dealloc];
+}
+
+- (void)setBackgroundStyle:(NSBackgroundStyle)style {
+    [super setBackgroundStyle:style];
+    [imageCell setBackgroundStyle:style];
+}
 
 - (NSSize)cellSize {
     NSSize cellSize = [super cellSize];
@@ -65,8 +88,10 @@
 
 - (void)drawIconWithFrame:(NSRect)iconRect inView:(NSView *)controlView {
     NSImage *img = [self icon];
-    if (nil != img)
-        [self drawIcon:img withFrame:iconRect inView:controlView];
+    if (nil != img) {
+        [imageCell setImage:img];
+        [imageCell drawInteriorWithFrame:iconRect inView:controlView];
+    }
 }
 
 - (NSRect)textRectForBounds:(NSRect)aRect {
@@ -148,25 +173,13 @@
 
 @implementation BDSKConcreteIconTextFieldCell
 
-- (id)copyWithZone:(NSZone *)zone {
-    BDSKConcreteIconTextFieldCell *copy = [super copyWithZone:zone];
-    copy->icon = [icon retain];
-    return copy;
-}
-
-- (void)dealloc {
-    BDSKDESTROY(icon);
-    [super dealloc];
-}
-
 - (NSImage *)icon {
-    return icon;
+    return [imageCell image];
 }
 
 - (void)setIcon:(NSImage *)newIcon {
-    if (icon != newIcon) {
-        [icon release];
-        icon = [newIcon retain];
+    if ([imageCell image] != newIcon) {
+        [imageCell setImage:newIcon];
         [(NSControl *)[self controlView] updateCellInside:self];
     }
 }

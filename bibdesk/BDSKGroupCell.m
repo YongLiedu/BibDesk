@@ -38,11 +38,9 @@
 
 #import "BDSKGroupCell.h"
 #import "NSBezierPath_BDSKExtensions.h"
-#import "NSImage_BDSKExtensions.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
-#import "NSCell_BDSKExtensions.h"
 #import "NSColor_BDSKExtensions.h"
 
 
@@ -71,11 +69,13 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
     
 }
 
-- (id)init {
-    if (self = [super initTextCell:@""]) {
+- (id)initTextCell:(NSString *)aString {
+    if (self = [super initTextCell:aString]) {
         [self setEditable:YES];
         [self setScrollable:YES];
         [self setWraps:NO];
+        imageCell = [[NSImageCell alloc] init];
+        [imageCell setImageScaling:NSImageScaleProportionallyUpOrDown];
         countString = [[NSMutableAttributedString alloc] init];
         [self setFormatter:groupCellFormatter];
     }
@@ -86,6 +86,8 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 
 - (id)initWithCoder:(NSCoder *)coder {
 	if (self = [super initWithCoder:coder]) {
+        imageCell = [[NSImageCell alloc] init];
+        [imageCell setImageScaling:NSImageScaleProportionallyUpOrDown];
         countString = [[NSMutableAttributedString alloc] init];
         if ([self formatter] == nil)
             [self setFormatter:groupCellFormatter];
@@ -97,11 +99,13 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 
 - (id)copyWithZone:(NSZone *)zone {
     BDSKGroupCell *copy = [super copyWithZone:zone];
+    copy->imageCell = [imageCell copyWithZone:zone];
     copy->countString = [countString mutableCopyWithZone:zone];
     return copy;
 }
 
 - (void)dealloc {
+    BDSKDESTROY(imageCell);
     BDSKDESTROY(countString);
 	[super dealloc];
 }
@@ -119,6 +123,11 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 - (void)setFont:(NSFont *)font {
     [super setFont:font];
     [self updateCountAttributes];
+}
+
+- (void)setBackgroundStyle:(NSBackgroundStyle)style {
+    [super setBackgroundStyle:style];
+    [imageCell setBackgroundStyle:style];
 }
 
 // all the -[NSNumber stringValue] does is create a string with a localized format description, so we'll cache more strings than Foundation does, since this shows up in Shark as a bottleneck
@@ -147,6 +156,8 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
         obj = [NSDictionary dictionaryWithObjectsAndKeys:obj, BDSKGroupCellStringKey, nil];
     
     [super setObjectValue:obj];
+    
+    [imageCell setImage:nonNullObjectValueForKey(obj, BDSKGroupCellImageKey)];
     
     [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithNumber(nonNullObjectValueForKey(obj, BDSKGroupCellCountKey))];
     [self updateCountAttributes];
@@ -337,8 +348,7 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     
     // Draw the image
     NSRect imageRect = BDSKCenterRect([self iconRectForBounds:aRect], [self iconSizeForBounds:aRect], [controlView isFlipped]);
-    if ([self icon])
-        [self drawIcon:[self icon] withFrame:imageRect inView:controlView];
+    [imageCell drawInteriorWithFrame:imageRect inView:controlView];
 }
 
 - (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(NSInteger)selStart length:(NSInteger)selLength {

@@ -451,7 +451,6 @@
 		F99BC25F095A5C7000E018C3 /* NSArray_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F99BC25D095A5C7000E018C3 /* NSArray_BDSKExtensions.m */; };
 		F9A2245D0AE02C8E0046CA3D /* BDSKFileSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A2245B0AE02C8E0046CA3D /* BDSKFileSearch.m */; };
 		F9A411FC0A0B2066008493C0 /* BDSKPreferenceController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9DAC7A10A0A95BC0099117E /* BDSKPreferenceController.m */; };
-		F9A5B10C0B8CEA9600C52257 /* NSCell_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A5B10A0B8CEA9600C52257 /* NSCell_BDSKExtensions.m */; };
 		F9B3405E0BBC16720072C2B0 /* BibItem_PubMedLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */; };
 		F9B800950B41DFAF00A5A615 /* BDSKSearchGroupSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B800930B41DFAF00A5A615 /* BDSKSearchGroupSheetController.m */; };
 		F9B8019F0B41E91F00A5A615 /* BDSKZoomGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B8019D0B41E91F00A5A615 /* BDSKZoomGroupServer.m */; };
@@ -1500,8 +1499,6 @@
 		F9A2245B0AE02C8E0046CA3D /* BDSKFileSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFileSearch.m; sourceTree = "<group>"; };
 		F9A411EF0A0B1FEF008493C0 /* BDSKSpotlightView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSpotlightView.h; sourceTree = "<group>"; };
 		F9A411F00A0B1FEF008493C0 /* BDSKSpotlightView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSpotlightView.m; sourceTree = "<group>"; };
-		F9A5B1090B8CEA9600C52257 /* NSCell_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSCell_BDSKExtensions.h; sourceTree = "<group>"; };
-		F9A5B10A0B8CEA9600C52257 /* NSCell_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSCell_BDSKExtensions.m; sourceTree = "<group>"; };
 		F9ABEC9E086E11B500741FC5 /* BTParse.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BTParse.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BTParse.xcodeproj; path = vendorsrc/gward/btparse/objc/BTParse.xcodeproj; sourceTree = "<group>"; };
 		F9B3405B0BBC16720072C2B0 /* BibItem_PubMedLookup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibItem_PubMedLookup.h; sourceTree = "<group>"; };
@@ -1935,7 +1932,6 @@
 			isa = PBXGroup;
 			children = (
 				F97BF0B8090AE7520063504B /* NSBezierPath_BDSKExtensions.m */,
-				F9A5B10A0B8CEA9600C52257 /* NSCell_BDSKExtensions.m */,
 				CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */,
 				CEEC1A311091F31600530207 /* NSEvent_BDSKExtensions.m */,
 				F9022C9D0758038000C3F701 /* NSImage_BDSKExtensions.m */,
@@ -2622,7 +2618,6 @@
 				F99BC25C095A5C7000E018C3 /* NSArray_BDSKExtensions.h */,
 				CEB772E80A34529D00B8A299 /* NSAttributedString_BDSKExtensions.h */,
 				F97BF0B7090AE7520063504B /* NSBezierPath_BDSKExtensions.h */,
-				F9A5B1090B8CEA9600C52257 /* NSCell_BDSKExtensions.h */,
 				F9025DC70969AD2C008A551C /* NSCharacterSet_BDSKExtensions.h */,
 				CEF2EEE40F3462A900A7989E /* NSColor_BDSKExtensions.h */,
 				F96F11940AAF4FD100815D06 /* NSData_BDSKExtensions.h */,
@@ -3452,7 +3447,6 @@
 				CE3A25500B75FF09006B64D3 /* BDSKWebParser.m in Sources */,
 				F9B88D990B7D14B700D5D42C /* BDSKFileMatcher.m in Sources */,
 				F9BE68380B80F94000B2597C /* BDSKFileMatchConfigController.m in Sources */,
-				F9A5B10C0B8CEA9600C52257 /* NSCell_BDSKExtensions.m in Sources */,
 				CEF71ADB0B91BBCB003A2771 /* BDSKNotesWindowController.m in Sources */,
 				CE4385E90BB81D0500A56987 /* BDSKSearchBookmarkController.m in Sources */,
 				F9B3405E0BBC16720072C2B0 /* BibItem_PubMedLookup.m in Sources */,

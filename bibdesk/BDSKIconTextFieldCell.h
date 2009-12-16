@@ -39,7 +39,9 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKIconTextFieldCell : NSTextFieldCell
+@interface BDSKIconTextFieldCell : NSTextFieldCell {
+    NSImageCell *imageCell;
+}
 
 - (NSImage *)icon;
 
@@ -52,8 +54,6 @@
 
 #pragma mark -
 
-@interface BDSKConcreteIconTextFieldCell : BDSKIconTextFieldCell {
-    NSImage *icon;
-}
+@interface BDSKConcreteIconTextFieldCell : BDSKIconTextFieldCell
 - (void)setIcon:(NSImage *)newIcon;
 @end
