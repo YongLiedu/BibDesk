@@ -148,11 +148,6 @@
         [_slider setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
         [[self contentView] addSubview:_slider];
         [_slider release];
-        
-        id animation = [NSClassFromString(@"CABasicAnimation") animation];
-        if (animation && [self respondsToSelector:@selector(setAnimations:)]) {
-            [self setAnimations:[NSDictionary dictionaryWithObject:animation forKey:@"alphaValue"]];
-        }
 
     }
     return self;
@@ -172,8 +167,8 @@
 
 - (void)fadeOut:(id)sender {
     if ([self isVisible] && [self respondsToSelector:@selector(animator)]) {
-        [[self animationForKey:@"alphaValue"] setDelegate:self];
         [[self animator] setAlphaValue:0.0];
+        [self performSelector:@selector(orderOut:) withObject:nil afterDelay:[[NSAnimationContext currentContext] duration]];
     } else {
         [self orderOut:sender];
     }
@@ -182,11 +177,6 @@
 - (void)orderOut:(id)sender {
     [[self parentWindow] removeChildWindow:self];
     [super orderOut:self];
-}
-
-- (void)animationDidStop:(id)animation finished:(BOOL)flag  {
-    [self orderOut:self];
-    [[self animationForKey:@"alphaValue"] setDelegate:nil];
 }
 
 @end
