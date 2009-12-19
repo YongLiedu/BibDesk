@@ -186,7 +186,7 @@
 
 - (void)animationDidStop:(id)animation finished:(BOOL)flag  {
     [self orderOut:self];
-    [animation setDelegate:nil];
+    [[self animationForKey:@"alphaValue"] setDelegate:nil];
 }
 
 @end
