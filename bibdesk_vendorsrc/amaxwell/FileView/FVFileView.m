@@ -104,6 +104,11 @@ static char _FVFileViewContentObservationContext;
 
 #pragma mark -
 
+@interface FVAnimation : NSAnimation
+@end
+
+#pragma mark -
+
 @interface FVFileView (Private)
 // wrapper that calls bound array or datasource transparently; for internal use
 // clients should access the datasource or bound array directly
@@ -264,7 +269,7 @@ static char _FVFileViewContentObservationContext;
     _leftArrowFrame = NSZeroRect;
     _rightArrowFrame = NSZeroRect;
     _arrowAlpha = 0.0;
-    _fvFlags.isAnimatingArrowAlpha = NO;
+    _arrowAnimation = nil;
     _fvFlags.hasArrows = NO;
     
     _minScale = 0.5;
@@ -309,6 +314,7 @@ static char _FVFileViewContentObservationContext;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_titleCell release];
     [_subtitleCell release];
+    [_arrowAnimation stopAnimation];
     [_leftArrow release];
     [_rightArrow release];
     [_iconURLs release];
@@ -2262,7 +2268,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     
     if (isDrawingToScreen) {
         
-        if (_fvFlags.hasArrows || _fvFlags.isAnimatingArrowAlpha) {
+        if (_fvFlags.hasArrows || _arrowAnimation) {
             if (NSIntersectsRect(rect, _leftArrowFrame))
                 [(FVArrowButtonCell *)_leftArrow drawWithFrame:_leftArrowFrame inView:self alpha:_arrowAlpha];
             if (NSIntersectsRect(rect, _rightArrowFrame))
@@ -2628,41 +2634,35 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     [self _redisplayIconAfterPageChanged:anIcon];
 }
 
-// note that hasArrows has to have the desired state before this fires
-- (void)_updateArrowAlpha:(NSTimer *)timer
+- (void)animationDidStop:(NSAnimation *)animation
 {
-    NSAnimation *animation = [timer userInfo];
-    CGFloat value = [animation currentValue];
-    if (value > 0.99) {
-        [animation stopAnimation];
-        [timer invalidate];
-        _fvFlags.isAnimatingArrowAlpha = NO;
-        _arrowAlpha = _fvFlags.hasArrows ? 1.0 : 0.0;
-    }
-    else {
-        _arrowAlpha = _fvFlags.hasArrows ? value : (1 - value);
-    }
+    [_arrowAnimation release];
+    _arrowAnimation = nil;
+    _arrowAlpha = _fvFlags.hasArrows ? 1.0 : 0.0;
+    [self setNeedsDisplayInRect:NSUnionRect(_leftArrowFrame, _rightArrowFrame)];
+}
+
+- (void)animationDidEnd:(NSAnimation *)animation
+{
+    [_arrowAnimation release];
+    _arrowAnimation = nil;
+    _arrowAlpha = _fvFlags.hasArrows ? 1.0 : 0.0;
+    [self setNeedsDisplayInRect:NSUnionRect(_leftArrowFrame, _rightArrowFrame)];
+}
+
+- (void)animation:(NSAnimation *)animation didReachProgress:(NSAnimationProgress)progress
+{
+    _arrowAlpha = _fvFlags.hasArrows ? progress : (1 - progress);
     [self setNeedsDisplayInRect:NSUnionRect(_leftArrowFrame, _rightArrowFrame)];
 }
 
 - (void)_startArrowAlphaTimer
 {
-    _fvFlags.isAnimatingArrowAlpha = YES;
     // animate ~30 fps for 0.3 seconds, using NSAnimation to get the alpha curve
-    NSAnimation *animation = [[NSAnimation alloc] initWithDuration:0.3 animationCurve:NSAnimationEaseInOut]; 
-    // runloop mode is irrelevant for non-blocking threaded
-    [animation setAnimationBlockingMode:NSAnimationNonblockingThreaded];
-    // explicitly alloc/init so it can be added to all the common modes instead of the default mode
-    NSTimer *timer = [[NSTimer alloc] initWithFireDate:[NSDate date]
-                                              interval:0.03
-                                                target:self 
-                                              selector:@selector(_updateArrowAlpha:)
-                                              userInfo:animation
-                                               repeats:YES];
-    [[NSRunLoop currentRunLoop] addTimer:timer forMode:(NSString *)kCFRunLoopCommonModes];
-    [timer release];
-    [animation startAnimation];
-    [animation release];  
+    _arrowAnimation = [[FVAnimation alloc] initWithDuration:0.3 animationCurve:NSAnimationEaseInOut]; 
+    [_arrowAnimation setAnimationBlockingMode:NSAnimationNonblocking];
+    [_arrowAnimation setDelegate:self];
+    [_arrowAnimation startAnimation];
 }
 
 - (void)_showArrowsForIconAtIndex:(NSUInteger)anIndex
@@ -2677,6 +2677,11 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
         FVIcon *anIcon = [self iconAtIndex:anIndex];
         
         if ([anIcon pageCount] > 1) {
+            
+            if (_arrowAnimation) {
+                // make sure we redraw whatever area previously had the arrows
+                [self setNeedsDisplayInRect:NSUnionRect(_leftArrowFrame, _rightArrowFrame)];
+            }
         
             NSRect iconRect = [self _rectOfIconInRow:r column:c];
             
@@ -2696,13 +2701,8 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
             // set enabled states
             [self _updateButtonsForIcon:anIcon];  
                         
-            if (_fvFlags.isAnimatingArrowAlpha) {
-                // make sure we redraw whatever area previously had the arrows
-                [self setNeedsDisplay:YES];
-            }
-            else {
+            if (nil == _arrowAnimation)
                 [self _startArrowAlphaTimer];
-            }
         }
     }
 }
@@ -2713,7 +2713,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
         _fvFlags.hasArrows = NO;
         [_leftArrow setRepresentedObject:nil];
         [_rightArrow setRepresentedObject:nil];
-        if (NO == _fvFlags.isAnimatingArrowAlpha)
+        if (nil == _arrowAnimation)
             [self _startArrowAlphaTimer];
     }
 }
@@ -3894,5 +3894,15 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 - (NSString *)name { return _name; }
 
 - (NSUInteger)label { return _label; }
+
+@end
+
+
+@implementation FVAnimation
+
+- (void)setCurrentProgress:(NSAnimationProgress)progress {
+    [super setCurrentProgress:progress];
+    [[self delegate] animation:self didReachProgress:progress];
+}
 
 @end
