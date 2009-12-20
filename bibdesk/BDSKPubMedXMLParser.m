@@ -300,6 +300,9 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
         addStringValueOfNodeForField([citation firstNodeForXPath:@"./Article/Pagination/MedlinePgn"], BDSKPagesString, pubFields);
         addStringValueOfNodeForField([citation firstNodeForXPath:@"./PMID"], @"Pmid", pubFields);
         
+        // not a BibTeX field: http://www.mail-archive.com/bibdesk-users@lists.sourceforge.net/msg04650.html
+        addStringValueOfNodeForField([article firstNodeForXPath:@"./PubmedData/PublicationStatus"], @"Pst", pubFields);
+        
         // use MedlineTA if available, since the full title evidently has too much information in some cases
         NSString *ta = [[citation firstNodeForXPath:@"./MedlineJournalInfo/MedlineTA"] stringValue];        
         if (ta) {
