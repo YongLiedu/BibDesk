@@ -94,11 +94,8 @@
     NSColor *bgColor = nil;
     NSColor *arrowColor = nil;
     NSColor *strokeColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.9];
-    NSRect diskFrame = NSInsetRect(frame, 2.5, 2.5);
-    NSRect circleFrame = NSInsetRect(frame, 2.0, 2.0);
-    NSShadow *buttonShadow = [[[NSShadow alloc] init] autorelease];
-    [buttonShadow setShadowBlurRadius:1.5];
-    [buttonShadow setShadowColor:[NSColor blackColor]];
+    NSRect diskFrame = NSInsetRect(frame, 1.0, 1.0);
+    NSRect circleFrame = NSInsetRect(frame, 0.5, 0.5);
     
     if ([self isEnabled] == NO) {
         bgColor = [NSColor colorWithCalibratedWhite:0.3 alpha:0.5];
