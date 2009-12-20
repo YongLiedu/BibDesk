@@ -86,7 +86,7 @@
     
     if (err == noErr) {
         // password was on keychain, so flush the buffer and then modify the keychain if necessary
-        if (strcmp(passwordData, oldPasswordData) != 0) {
+        if (passwordLength != strlen(passwordData) || strncmp(passwordData, oldPasswordData, passwordLength) != 0) {
             SecKeychainAttribute attrs[] = {
             { kSecAccountItemAttr, strlen(userNameCString), (char *)userNameCString },
             { kSecServiceItemAttr, strlen(nameCString), (char *)nameCString } };
