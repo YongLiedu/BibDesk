@@ -2679,6 +2679,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
         if ([anIcon pageCount] > 1) {
             
             if (_arrowAnimation) {
+                [_arrowAnimation stopAnimation];
                 // make sure we redraw whatever area previously had the arrows
                 [self setNeedsDisplayInRect:NSUnionRect(_leftArrowFrame, _rightArrowFrame)];
             }
