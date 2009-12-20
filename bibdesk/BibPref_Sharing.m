@@ -195,8 +195,12 @@
 // setting to the empty string will restore the default
 - (IBAction)changeSharedName:(id)sender
 {
-    [sud setObject:[sender stringValue] forKey:BDSKSharingNameKey];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingNameChangedNotification object:self];
+    NSString *oldName = [sud objectForKey:BDSKSharingNameKey] ?: @"";
+    NSString *newName = [sender stringValue] ?: @"";
+    if ([oldName isEqualToString:newName] == NO) {
+        [sud setObject:newName forKey:BDSKSharingNameKey];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingNameChangedNotification object:self];
+    }
 }
 
 - (IBAction)toggleBrowsing:(id)sender
