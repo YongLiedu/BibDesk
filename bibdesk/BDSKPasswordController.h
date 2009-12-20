@@ -49,7 +49,7 @@
 + (NSData *)passwordForKeychainServiceName:(NSString *)name;
 + (NSData *)passwordHashedForKeychainServiceName:(NSString *)name;
 
-+ (void)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName;
++ (BOOL)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName;
 
 + (NSData *)runModalPanelForKeychainServiceName:(NSString *)aName message:(NSString *)status;
 

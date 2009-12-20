@@ -188,8 +188,8 @@
 
 - (IBAction)changePassword:(id)sender
 {
-    [BDSKPasswordController addOrModifyPassword:[sender stringValue] name:BDSKServiceNameForKeychain userName:nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingPasswordChangedNotification object:nil];
+    if ([BDSKPasswordController addOrModifyPassword:[sender stringValue] name:BDSKServiceNameForKeychain userName:nil])
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingPasswordChangedNotification object:nil];
 }
 
 // setting to the empty string will restore the default

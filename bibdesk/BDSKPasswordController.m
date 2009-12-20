@@ -67,7 +67,7 @@
     return [[self passwordForKeychainServiceName:name] sha1Signature];
 }
 
-+ (void)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName {
++ (BOOL)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName {
     // default is to use current user's username
     const char *userNameCString = userName == nil ? [NSUserName() UTF8String] : [userName UTF8String];
     
@@ -76,30 +76,34 @@
     
     OSStatus err;
     SecKeychainItemRef itemRef = NULL;    
-    const void *passwordData = NULL;
+    const void *passwordData = [password UTF8String];
+    const void *oldPasswordData = NULL;
     UInt32 passwordLength = 0;
+    BOOL result = NO;
     
     // first see if the password exists in the keychain
-    err = SecKeychainFindGenericPassword(NULL, strlen(nameCString), nameCString, strlen(userNameCString), userNameCString, &passwordLength, (void **)&passwordData, &itemRef);
+    err = SecKeychainFindGenericPassword(NULL, strlen(nameCString), nameCString, strlen(userNameCString), userNameCString, &passwordLength, (void **)&oldPasswordData, &itemRef);
     
-    if(err == noErr){
-        // password was on keychain, so flush the buffer and then modify the keychain
-        SecKeychainItemFreeContent(NULL, (void *)passwordData);
-        passwordData = NULL;
-        
-        passwordData = [password UTF8String];
-        SecKeychainAttribute attrs[] = {
-        { kSecAccountItemAttr, strlen(userNameCString), (char *)userNameCString },
-        { kSecServiceItemAttr, strlen(nameCString), (char *)nameCString } };
-        const SecKeychainAttributeList attributes = { sizeof(attrs) / sizeof(attrs[0]), attrs };
-        
-        err = SecKeychainItemModifyAttributesAndData(itemRef, &attributes, strlen(passwordData), passwordData);
-    } else if(err == errSecItemNotFound){
+    if (err == noErr) {
+        // password was on keychain, so flush the buffer and then modify the keychain if necessary
+        if (strcmp(passwordData, oldPasswordData) != 0) {
+            SecKeychainAttribute attrs[] = {
+            { kSecAccountItemAttr, strlen(userNameCString), (char *)userNameCString },
+            { kSecServiceItemAttr, strlen(nameCString), (char *)nameCString } };
+            const SecKeychainAttributeList attributes = { sizeof(attrs) / sizeof(attrs[0]), attrs };
+            
+            err = SecKeychainItemModifyAttributesAndData(itemRef, &attributes, strlen(passwordData), passwordData);
+            result = (err == noErr);
+        }
+        SecKeychainItemFreeContent(NULL, (void *)oldPasswordData);
+    } else if (err == errSecItemNotFound) {
         // password not on keychain, so add it
-        passwordData = [password UTF8String];
         err = SecKeychainAddGenericPassword(NULL, strlen(nameCString), nameCString, strlen(userNameCString), userNameCString, strlen(passwordData), passwordData, &itemRef);    
-    } else 
+        result = (err == noErr);
+    } else {
         NSLog(@"Error %d occurred setting password", err);
+    }
+    return result;
 }
 
 - (NSData *)runModalForKeychainServiceName:(NSString *)name message:(NSString *)status {
