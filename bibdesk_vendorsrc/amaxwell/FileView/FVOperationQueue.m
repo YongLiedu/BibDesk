@@ -84,7 +84,7 @@ static Class FVOperationQueueClass = Nil;
 
 - (void)subclassResponsibility:(SEL)selector
 {
-    [NSException raise:@"FVAbstractClassException" format:@"Abstract class %@ does not implement %@", [self class], NSStringFromSelector(selector)];
+    [NSException raise:@"fabstractClassException" format:@"Abstract class %@ does not implement %@", [self class], NSStringFromSelector(selector)];
 }
 
 - (void)cancel;

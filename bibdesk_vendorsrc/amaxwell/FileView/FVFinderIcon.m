@@ -199,7 +199,7 @@
     [super dealloc];
 }
 
-- (NSSize)size { return NSMakeSize(FVMaxThumbnailDimension, FVMaxThumbnailDimension); }
+- (NSSize)size { return NSMakeSize(fmaxThumbnailDimension, fmaxThumbnailDimension); }
 
 - (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
 {    
@@ -239,12 +239,12 @@ static CGImageRef __FVCreateImageWithIcon(IconRef icon, size_t width, size_t hei
 
 static CGImageRef __FVCreateThumbnailWithIcon(IconRef icon)
 {
-    return __FVCreateImageWithIcon(icon, FVMaxThumbnailDimension, FVMaxThumbnailDimension);
+    return __FVCreateImageWithIcon(icon, fmaxThumbnailDimension, fmaxThumbnailDimension);
 }
 
 static CGImageRef __FVCreateFullImageWithIcon(IconRef icon)
 {
-    return __FVCreateImageWithIcon(icon, FVMaxImageDimension, FVMaxImageDimension);
+    return __FVCreateImageWithIcon(icon, fmaxImageDimension, fmaxImageDimension);
 }
 
 @implementation FVSingletonFinderIcon
@@ -301,10 +301,10 @@ static CGImageRef __FVCreateFullImageWithIcon(IconRef icon)
         err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericDocumentIcon, &docIcon);
         if (err) docIcon = NULL;
 
-        FVBitmapContextRef context = FVIconBitmapContextCreateWithSize(FVMaxThumbnailDimension, FVMaxThumbnailDimension);
+        FVBitmapContextRef context = FVIconBitmapContextCreateWithSize(fmaxThumbnailDimension, fmaxThumbnailDimension);
         CGRect rect = CGRectZero;
         
-        rect.size = CGSizeMake(FVMaxThumbnailDimension, FVMaxThumbnailDimension);
+        rect.size = CGSizeMake(fmaxThumbnailDimension, fmaxThumbnailDimension);
         CGContextClearRect(context, rect);
         if (docIcon) PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, docIcon);
 
@@ -314,10 +314,10 @@ static CGImageRef __FVCreateFullImageWithIcon(IconRef icon)
         _thumbnail = CGBitmapContextCreateImage(context);        
         FVIconBitmapContextRelease(context);
         
-        context = FVIconBitmapContextCreateWithSize(FVMaxImageDimension, FVMaxImageDimension);
+        context = FVIconBitmapContextCreateWithSize(fmaxImageDimension, fmaxImageDimension);
         rect = CGRectZero;
         
-        rect.size = CGSizeMake(FVMaxImageDimension, FVMaxImageDimension);
+        rect.size = CGSizeMake(fmaxImageDimension, fmaxImageDimension);
         CGContextClearRect(context, rect);
         if (docIcon) PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, docIcon);
         

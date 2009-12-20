@@ -449,7 +449,7 @@ static char _FVFileViewContentObservationContext;
     if (NSHeight(desiredRect) < NSHeight(bounds)) {
         scrollPosition.y = MAX(scrollPosition.y, 0.0);
         scrollPosition.y = MIN(scrollPosition.y, 1.0);
-        desiredRect.origin.y = FVRound(NSMinY(bounds) + scrollPosition.y * (NSHeight(bounds) - NSHeight(desiredRect)));
+        desiredRect.origin.y = round(NSMinY(bounds) + scrollPosition.y * (NSHeight(bounds) - NSHeight(desiredRect)));
         if (NSMinY(desiredRect) < NSMinY(bounds))
             desiredRect.origin.y = NSMinY(bounds);
         else if (NSMaxY(desiredRect) > NSMaxY(bounds))
@@ -460,7 +460,7 @@ static char _FVFileViewContentObservationContext;
     if (NSWidth(desiredRect) < NSWidth(bounds)) {
         scrollPosition.x = MAX(scrollPosition.x, 0.0);
         scrollPosition.x = MIN(scrollPosition.x, 1.0);
-        desiredRect.origin.x = FVRound(NSMinX(bounds) + scrollPosition.x * (NSWidth(bounds) - NSWidth(desiredRect)));
+        desiredRect.origin.x = round(NSMinX(bounds) + scrollPosition.x * (NSWidth(bounds) - NSWidth(desiredRect)));
         if (NSMinX(desiredRect) < NSMinX(bounds))
             desiredRect.origin.x = NSMinX(bounds);
         else if (NSMaxX(desiredRect) > NSMaxX(bounds))
@@ -1008,7 +1008,7 @@ static char _FVFileViewContentObservationContext;
 {
     NSSize size = DEFAULT_PADDING;
     // ??? magic number here... using a fixed padding looked funny at some sizes, so this is now adjustable
-    CGFloat extraPadding = FVRound(PADDING_STRETCH * scale);
+    CGFloat extraPadding = round(PADDING_STRETCH * scale);
     size.width += extraPadding;
     size.height += extraPadding + [self _textHeight];
     return size;
@@ -1038,41 +1038,41 @@ static char _FVFileViewContentObservationContext;
     NSRect dirtyRect = [self _rectOfIconInRow:row column:column];
     // extend the icon rect to account for shadow in case text is narrower than the icon
     // extend downward to account for the text area
-    dirtyRect = NSUnionRect(NSInsetRect(dirtyRect, -FVCeil(2.0 * [self iconScale]), -FVCeil([self iconScale])), [self _rectOfTextForIconRect:dirtyRect]);
+    dirtyRect = NSUnionRect(NSInsetRect(dirtyRect, -ceil(2.0 * [self iconScale]), -ceil([self iconScale])), [self _rectOfTextForIconRect:dirtyRect]);
     [self setNeedsDisplayInRect:dirtyRect];
 }
 
 #pragma mark Drawing layout
 
 - (CGFloat)_frameWidth {
-    return FVCeil( [self _columnWidth] * _numberOfColumns - _padding.width + [self _leftMargin] + [self _rightMargin] );
+    return ceil( [self _columnWidth] * _numberOfColumns - _padding.width + [self _leftMargin] + [self _rightMargin] );
 }
 
 - (CGFloat)_frameHeight {
-    return FVCeil( [self _rowHeight] * _numberOfRows + [self _topMargin] + [self _bottomMargin] );
+    return ceil( [self _rowHeight] * _numberOfRows + [self _topMargin] + [self _bottomMargin] );
 }
 
 - (void)_setPaddingAndIconSizeFromContentWidth:(CGFloat)width {
     // guess the iconScale, ignoring the variable padding because that depends on the iconScale
-    CGFloat iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( width - 2 * DEFAULT_MARGIN.width ) / _numberOfColumns - [self _paddingForScale:0.0].width ) / ( DEFAULT_ICON_SIZE.width + PADDING_STRETCH ));
+    CGFloat iconScale = fmax( MIN_AUTO_ICON_SCALE, ( ( width - 2 * DEFAULT_MARGIN.width ) / _numberOfColumns - [self _paddingForScale:0.0].width ) / ( DEFAULT_ICON_SIZE.width + PADDING_STRETCH ));
     _padding = [self _paddingForScale:iconScale];
     // recalculate exactly based on this padding, inverting the calculation in _frameWidth
-    iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( width - [self _leftMargin] - [self _rightMargin] + _padding.width ) / _numberOfColumns - _padding.width ) / DEFAULT_ICON_SIZE.width );
+    iconScale = fmax( MIN_AUTO_ICON_SCALE, ( ( width - [self _leftMargin] - [self _rightMargin] + _padding.width ) / _numberOfColumns - _padding.width ) / DEFAULT_ICON_SIZE.width );
     _iconSize = NSMakeSize(iconScale * DEFAULT_ICON_SIZE.width, iconScale * DEFAULT_ICON_SIZE.height);
 }
 
 - (void)_setPaddingAndIconSizeFromContentHeight:(CGFloat)height {
     // guess the iconScale, ignoring the variable padding because that depends on the iconScale
-    CGFloat iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( height - DEFAULT_MARGIN.height ) / _numberOfRows - [self _paddingForScale:0.0].height ) / ( DEFAULT_ICON_SIZE.height + PADDING_STRETCH ) );
+    CGFloat iconScale = fmax( MIN_AUTO_ICON_SCALE, ( ( height - DEFAULT_MARGIN.height ) / _numberOfRows - [self _paddingForScale:0.0].height ) / ( DEFAULT_ICON_SIZE.height + PADDING_STRETCH ) );
     _padding = [self _paddingForScale:iconScale];
     // recalculate exactly based on this padding, inverting the calculation in _frameHeight
-    iconScale = FVMax( MIN_AUTO_ICON_SCALE, ( ( height - [self _topMargin] - [self _bottomMargin] ) / _numberOfRows - _padding.height ) / DEFAULT_ICON_SIZE.height );
+    iconScale = fmax( MIN_AUTO_ICON_SCALE, ( ( height - [self _topMargin] - [self _bottomMargin] ) / _numberOfRows - _padding.height ) / DEFAULT_ICON_SIZE.height );
     _iconSize = NSMakeSize(iconScale * DEFAULT_ICON_SIZE.width, iconScale * DEFAULT_ICON_SIZE.height);
 }
 
 
 - (void)_setColumnsAndRowsFromContentWidth:(CGFloat)width {
-    _numberOfColumns = MAX( 1,  (NSInteger)FVFloor( ( width - [self _leftMargin] - [self _rightMargin] + _padding.width ) / [self _columnWidth] ) );
+    _numberOfColumns = MAX( 1,  (NSInteger)floor( ( width - [self _leftMargin] - [self _rightMargin] + _padding.width ) / [self _columnWidth] ) );
     _numberOfRows = ( [self numberOfIcons]  + _numberOfColumns - 1 ) / _numberOfColumns;
 }
 
@@ -1114,7 +1114,7 @@ static CGFloat _scrollerWidthForScroller(NSScroller *scroller) {
         
         // if we have an auto-hiding vertical scroller, we may or may not have scroll bars, which affects the effective width
         if ([scrollView autohidesScrollers] && [scrollView hasVerticalScroller]) {
-            CGFloat minWidth = FVCeil( DEFAULT_PADDING.width + MIN_AUTO_ICON_SCALE * DEFAULT_ICON_SIZE.width + 2 * DEFAULT_MARGIN.width );
+            CGFloat minWidth = ceil( DEFAULT_PADDING.width + MIN_AUTO_ICON_SCALE * DEFAULT_ICON_SIZE.width + 2 * DEFAULT_MARGIN.width );
             
             // first assume we need a vertical scroller...
             contentSize = [self _contentSizeForScrollView:scrollView minWidth:minWidth hasVerticalScroller:YES];
@@ -1148,7 +1148,7 @@ static CGFloat _scrollerWidthForScroller(NSScroller *scroller) {
         
         // if we have an auto-hiding horizontal scroller, we may or may not have scroll bars, which affects the effective height
         if ([scrollView autohidesScrollers] && [scrollView hasHorizontalScroller]) {
-            CGFloat minHeight = FVCeil( DEFAULT_PADDING.height + MIN_AUTO_ICON_SCALE * DEFAULT_ICON_SIZE.height + DEFAULT_MARGIN.height );
+            CGFloat minHeight = ceil( DEFAULT_PADDING.height + MIN_AUTO_ICON_SCALE * DEFAULT_ICON_SIZE.height + DEFAULT_MARGIN.height );
             
             // first assume we need a horizontal scroller...
             contentSize = [self _contentSizeForScrollView:scrollView minHeight:minHeight hasHorizontalScroller:YES];
@@ -1203,7 +1203,7 @@ static CGFloat _scrollerWidthForScroller(NSScroller *scroller) {
     }
     
     if (scrollView) {
-        NSRect frame = NSMakeRect(0.0, 0.0, FVMax([self _frameWidth], contentSize.width), FVMax([self _frameHeight], contentSize.height));
+        NSRect frame = NSMakeRect(0.0, 0.0, fmax([self _frameWidth], contentSize.width), fmax([self _frameHeight], contentSize.height));
         if (NSEqualRects([self frame], frame) == NO) {
             [super setFrame:frame];
             [scrollView reflectScrolledClipView:[scrollView contentView]];
@@ -1378,7 +1378,7 @@ static CGFloat _scrollerWidthForScroller(NSScroller *scroller) {
 - (NSRect)_topSliderRect
 {
     NSRect r = [self visibleRect];
-    CGFloat l = FVFloor( NSMidX(r) - FVMax( MIN_SLIDER_WIDTH / 2, FVMin( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
+    CGFloat l = floor( NSMidX(r) - fmax( MIN_SLIDER_WIDTH / 2, fmin( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
     r.origin.x += l;
     r.origin.y += TOP_SLIDER_OFFSET;
     r.size.width -= 2 * l;
@@ -1389,7 +1389,7 @@ static CGFloat _scrollerWidthForScroller(NSScroller *scroller) {
 - (NSRect)_bottomSliderRect
 {
     NSRect r = [self visibleRect];
-    CGFloat l = FVFloor( NSMidX(r) - FVMax( MIN_SLIDER_WIDTH / 2, FVMin( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
+    CGFloat l = floor( NSMidX(r) - fmax( MIN_SLIDER_WIDTH / 2, fmin( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
     r.origin.x += l;
     r.origin.y += NSHeight(r) - BOTTOM_SLIDER_OFFSET;
     r.size.width -= 2 * l;
@@ -1893,9 +1893,9 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     for (i = 0; i < wordCount; i++) {
         word = [words objectAtIndex:i];
         [[message mutableString] setString:word];
-        width = FVMax(width, NSWidth([message boundingRectWithSize:NSMakeSize(CGFLOAT_MAX, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin]));
+        width = fmax(width, NSWidth([message boundingRectWithSize:NSMakeSize(CGFLOAT_MAX, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin]));
     }
-    return FVCeil(width);
+    return ceil(width);
 }
 
 - (void)_drawDropMessage;
@@ -2687,7 +2687,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
             
             // determine a min/max size for the arrow buttons
             CGFloat side;
-            side = FVRound(NSHeight(iconRect) / 5);
+            side = round(NSHeight(iconRect) / 5);
             side = MIN(side, 32);
             side = MAX(side, 10);
             // 2 pixels between arrows horizontally, and 4 pixels between bottom of arrow and bottom of iconRect
@@ -2933,8 +2933,8 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     NSRect rect;
     rect.origin.x = MIN(aPoint.x, bPoint.x);
     rect.origin.y = MIN(aPoint.y, bPoint.y);
-    rect.size.width = FVMax(3.0, FVMax(aPoint.x, bPoint.x) - NSMinX(rect));
-    rect.size.height = FVMax(3.0, FVMax(aPoint.y, bPoint.y) - NSMinY(rect));
+    rect.size.width = fmax(3.0, fmax(aPoint.x, bPoint.x) - NSMinX(rect));
+    rect.size.height = fmax(3.0, fmax(aPoint.y, bPoint.y) - NSMinY(rect));
     return rect;
 }
 
@@ -3054,8 +3054,8 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 - (void)magnifyWithEvent:(NSEvent *)theEvent;
 {
     CGFloat dz = [theEvent deltaZ];
-    dz = dz > 0 ? FVMin(0.2, dz) : FVMax(-0.2, dz);
-    [self _setIconScale:FVMax(0.1, [self iconScale] + 0.5 * dz)];
+    dz = dz > 0 ? fmin(0.2, dz) : fmax(-0.2, dz);
+    [self _setIconScale:fmax(0.1, [self iconScale] + 0.5 * dz)];
 }
 
 #pragma mark User interaction
@@ -3308,12 +3308,12 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (IBAction)zoomIn:(id)sender;
 {
-    [self _setIconScale:FVMin([self maxIconScale], [self iconScale] * sqrt(2.0))];
+    [self _setIconScale:fmin([self maxIconScale], [self iconScale] * sqrt(2.0))];
 }
 
 - (IBAction)zoomOut:(id)sender;
 {
-    [self _setIconScale:FVMax([self minIconScale], [self iconScale] * sqrt(0.5))];
+    [self _setIconScale:fmax([self minIconScale], [self iconScale] * sqrt(0.5))];
 }
 
 - (IBAction)displayGrid:(id)sender;

@@ -117,24 +117,6 @@ FV_PRIVATE_EXTERN NSGraphicsContext *FVWindowGraphicsContextWithSize(NSSize size
  @return true if it's safe to mmap(2) the file. */
 FV_PRIVATE_EXTERN bool FVCanMapFileAtURL(NSURL *fileURL);
 
-#if __LP64__
-#define FVRound(f)      round(f)
-#define FVFloor(f)      floor(f)
-#define FVCeil(f)       ceil(f)
-#define FVTrunc(f)      trunc(f)
-#define FVAbs(f)        fabs(f)
-#define FVMin(f1, f2)   fmin(f1, f2)
-#define FVMax(f1, f2)   fmax(f1, f2)
-#else
-#define FVRound(f)      roundf(f)
-#define FVFloor(f)      floorf(f)
-#define FVCeil(f)       ceilf(f)
-#define FVTrunc(f)      truncf(f)
-#define FVAbs(f)        fabsf(f)
-#define FVMin(f1, f2)   fminf(f1, f2)
-#define FVMax(f1, f2)   fmaxf(f1, f2)
-#endif
-
 /** @internal
  @brief NSBezierPath extensions for drawing round rects. */
 @interface NSBezierPath (RoundRect)

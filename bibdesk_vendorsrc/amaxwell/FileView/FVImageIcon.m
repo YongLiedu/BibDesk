@@ -115,7 +115,7 @@ static CFDictionaryRef _imsrcOptions = NULL;
 }
 
 // only guaranteed to have _thumbnailSize; returning NSZeroSize causes _drawingRectWithRect: to return garbage
-- (NSSize)size { return NSEqualSizes(_thumbnailSize, NSZeroSize) ? (NSSize) { FVMaxThumbnailDimension, FVMaxThumbnailDimension } : _thumbnailSize; }
+- (NSSize)size { return NSEqualSizes(_thumbnailSize, NSZeroSize) ? (NSSize) { fmaxThumbnailDimension, fmaxThumbnailDimension } : _thumbnailSize; }
 
 - (BOOL)needsRenderForSize:(NSSize)size
 {

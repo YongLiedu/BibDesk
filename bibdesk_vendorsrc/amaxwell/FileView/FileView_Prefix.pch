@@ -4,6 +4,7 @@
 
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
+#import <tgmath.h>
 
 // docs say not to send [super initialize], but that's a bug
 #if !defined(FVINITIALIZE)

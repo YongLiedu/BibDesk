@@ -212,16 +212,16 @@ static CGLayerRef   _pageLayer = NULL;
 }
 
 // roughly 50% of a typical page minimum dimension
-#define FVMaxPDFThumbnailDimension 310
+#define fmaxPDFThumbnailDimension 310
 
 // used to constrain thumbnail size for huge pages
 static bool __FVPDFIconLimitThumbnailSize(NSSize *size)
 {
     CGFloat dimension = MAX(size->width, size->height);
-    if (dimension <= FVMaxPDFThumbnailDimension)
+    if (dimension <= fmaxPDFThumbnailDimension)
         return false;
     
-    while (dimension > FVMaxPDFThumbnailDimension) {
+    while (dimension > fmaxPDFThumbnailDimension) {
         size->width *= 0.9;
         size->height *= 0.9;
         dimension = MAX(size->width, size->height);

@@ -88,7 +88,7 @@ static NSMutableDictionary *_iconTable = nil;
 
 - (void)renderOffscreen { /* no-op */ }
 
-- (NSSize)size { return (NSSize){ FVMaxThumbnailDimension, FVMaxThumbnailDimension }; }   
+- (NSSize)size { return (NSSize){ fmaxThumbnailDimension, fmaxThumbnailDimension }; }   
 
 - (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
 {
