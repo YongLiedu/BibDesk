@@ -418,8 +418,8 @@ static char _FVFileViewContentObservationContext;
         scrollPosition.y = 0.0; // We're completely visible
     } else {
         scrollPosition.y = (NSMinY(documentVisibleRect) - NSMinY(bounds)) / (NSHeight(bounds) - NSHeight(documentVisibleRect));
-        scrollPosition.y = MAX(scrollPosition.y, 0.0);
-        scrollPosition.y = MIN(scrollPosition.y, 1.0);
+        scrollPosition.y = fmax(scrollPosition.y, 0.0);
+        scrollPosition.y = fmin(scrollPosition.y, 1.0);
     }
     
     // Horizontal position
@@ -427,8 +427,8 @@ static char _FVFileViewContentObservationContext;
         scrollPosition.x = 0.0; // We're completely visible
     } else {
         scrollPosition.x = (NSMinX(documentVisibleRect) - NSMinX(bounds)) / (NSWidth(bounds) - NSWidth(documentVisibleRect));
-        scrollPosition.x = MAX(scrollPosition.x, 0.0);
-        scrollPosition.x = MIN(scrollPosition.x, 1.0);
+        scrollPosition.x = fmax(scrollPosition.x, 0.0);
+        scrollPosition.x = fmin(scrollPosition.x, 1.0);
     }
     
     return scrollPosition;
@@ -447,8 +447,8 @@ static char _FVFileViewContentObservationContext;
     
     // Vertical position
     if (NSHeight(desiredRect) < NSHeight(bounds)) {
-        scrollPosition.y = MAX(scrollPosition.y, 0.0);
-        scrollPosition.y = MIN(scrollPosition.y, 1.0);
+        scrollPosition.y = fmax(scrollPosition.y, 0.0);
+        scrollPosition.y = fmin(scrollPosition.y, 1.0);
         desiredRect.origin.y = round(NSMinY(bounds) + scrollPosition.y * (NSHeight(bounds) - NSHeight(desiredRect)));
         if (NSMinY(desiredRect) < NSMinY(bounds))
             desiredRect.origin.y = NSMinY(bounds);
@@ -458,8 +458,8 @@ static char _FVFileViewContentObservationContext;
     
     // Horizontal position
     if (NSWidth(desiredRect) < NSWidth(bounds)) {
-        scrollPosition.x = MAX(scrollPosition.x, 0.0);
-        scrollPosition.x = MIN(scrollPosition.x, 1.0);
+        scrollPosition.x = fmax(scrollPosition.x, 0.0);
+        scrollPosition.x = fmin(scrollPosition.x, 1.0);
         desiredRect.origin.x = round(NSMinX(bounds) + scrollPosition.x * (NSWidth(bounds) - NSWidth(desiredRect)));
         if (NSMinX(desiredRect) < NSMinX(bounds))
             desiredRect.origin.x = NSMinX(bounds);
@@ -1903,7 +1903,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     CGFloat minWidth = [self _widthOfLongestWordInDropMessage];    
     NSRect visibleRect = [self visibleRect];
     CGFloat containerInset = (NSWidth(visibleRect) - minWidth) / 2.0;
-    containerInset = MIN(containerInset, DROP_MESSAGE_MAX_INSET);
+    containerInset = fmin(containerInset, DROP_MESSAGE_MAX_INSET);
     NSRect containerRect = containerInset > 0 ? [self centerScanRect:NSInsetRect(visibleRect, containerInset, containerInset)] : visibleRect;
     
     // avoid drawing text right up to the path at small widths (inset < 20)
@@ -2688,8 +2688,8 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
             // determine a min/max size for the arrow buttons
             CGFloat side;
             side = round(NSHeight(iconRect) / 5);
-            side = MIN(side, 32);
-            side = MAX(side, 10);
+            side = fmin(side, 32);
+            side = fmax(side, 10);
             // 2 pixels between arrows horizontally, and 4 pixels between bottom of arrow and bottom of iconRect
             _leftArrowFrame = _rightArrowFrame = NSMakeRect(NSMidX(iconRect) + 2, NSMaxY(iconRect) - side - 4, side, side);
             _leftArrowFrame.origin.x -= side + 4;
@@ -2931,8 +2931,8 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     NSRect rect;
-    rect.origin.x = MIN(aPoint.x, bPoint.x);
-    rect.origin.y = MIN(aPoint.y, bPoint.y);
+    rect.origin.x = fmin(aPoint.x, bPoint.x);
+    rect.origin.y = fmin(aPoint.y, bPoint.y);
     rect.size.width = fmax(3.0, fmax(aPoint.x, bPoint.x) - NSMinX(rect));
     rect.size.height = fmax(3.0, fmax(aPoint.y, bPoint.y) - NSMinY(rect));
     return rect;
