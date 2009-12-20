@@ -2686,13 +2686,13 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
             NSRect iconRect = [self _rectOfIconInRow:r column:c];
             
             // determine a min/max size for the arrow buttons
-            CGFloat side;
-            side = round(NSHeight(iconRect) / 5);
-            side = fmin(side, 32);
-            side = fmax(side, 10);
+            CGFloat side, sep;
+            side = round(0.2 * NSHeight(iconRect));
+            side = fmax(fmin(side, 32.0), 10.0);
+            sep = side < 16.0 ? 1.0 : 2.0;
             // 2 pixels between arrows horizontally, and 4 pixels between bottom of arrow and bottom of iconRect
-            _leftArrowFrame = _rightArrowFrame = NSMakeRect(NSMidX(iconRect) + 2, NSMaxY(iconRect) - side - 4, side, side);
-            _leftArrowFrame.origin.x -= side + 4;
+            _leftArrowFrame = _rightArrowFrame = NSMakeRect(NSMidX(iconRect) + sep, NSMaxY(iconRect) - side - 2.0 * sep, side, side);
+            _leftArrowFrame.origin.x -= side + 2.0 * sep;
             
             [_leftArrow setRepresentedObject:anIcon];
             [_rightArrow setRepresentedObject:anIcon];
