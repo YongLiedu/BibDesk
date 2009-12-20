@@ -95,35 +95,24 @@
                
                     NSImage *dragImage = nil;
                     NSSize imageSize = NSZeroSize;
-                    NSPoint dragPoint = NSZeroPoint;
-                    if ([[self delegate] respondsToSelector:@selector(dragImageForDragTextField:)]) {
-                        dragImage = [[self delegate] dragImageForDragTextField:self];
-                        imageSize = [dragImage size];
-                    }
-                    if (dragImage == nil) {
-                        NSImage *image = nil;
-                        NSRect drawRect = [self bounds];
-                        NSRect rect = drawRect;
-                        if ([[self cell] respondsToSelector:@selector(iconRectForBounds:)]) {
-                            rect = [[self cell] iconRectForBounds:drawRect];
-                            drawRect.origin.x -= NSMinX(rect);
-                            drawRect.origin.y -= NSMinY(rect);
-                        } else {
-                            drawRect.origin = NSZeroPoint;
-                        }
-                        dragPoint = rect.origin;
-                        if ([self isFlipped])
-                            dragPoint.y += NSHeight(rect);
-                        image = [[[NSImage alloc] initWithSize:rect.size] autorelease];
-                        [image lockFocus];
-                        [[self cell] drawInteriorWithFrame:drawRect inView:nil];
-                        [image unlockFocus];
-                        imageSize = [image size];
-                        dragImage = [[[NSImage alloc] initWithSize:imageSize] autorelease];
-                        [dragImage lockFocus];
-                        [image compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:0.7];
-                        [dragImage unlockFocus];
-                    }
+                    NSImage *image = nil;
+                    NSRect drawRect = [self bounds];
+                    NSRect rect = [[self cell] iconRectForBounds:drawRect];
+                    NSPoint dragPoint = rect.origin;
+                    if ([self isFlipped])
+                        dragPoint.y += NSHeight(rect);
+                    drawRect.origin.x -= NSMinX(rect);
+                    drawRect.origin.y -= NSMinY(rect);
+                    image = [[NSImage alloc] initWithSize:rect.size];
+                    [image lockFocus];
+                    [[self cell] drawInteriorWithFrame:drawRect inView:nil];
+                    [image unlockFocus];
+                    imageSize = [image size];
+                    dragImage = [[[NSImage alloc] initWithSize:imageSize] autorelease];
+                    [dragImage lockFocus];
+                    [image drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:0.7];
+                    [dragImage unlockFocus];
+                    [image release];
                     [self dragImage:dragImage at:dragPoint offset:NSZeroSize event:theEvent pasteboard:pboard source:self slideBack:YES]; 
                 }
             }
