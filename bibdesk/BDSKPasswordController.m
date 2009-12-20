@@ -120,8 +120,7 @@
     
     if (password == nil)
         return nil;
-    const void *passwordBytes = [password UTF8String];
-    return [[NSData dataWithBytes:passwordBytes length:strlen(passwordBytes)] sha1Signature];
+    return [[password dataUsingEncoding:NSUTF8StringEncoding] sha1Signature];
 }
 
 + (NSData *)runModalPanelForKeychainServiceName:(NSString *)name message:(NSString *)status {
