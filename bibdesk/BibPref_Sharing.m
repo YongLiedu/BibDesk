@@ -40,7 +40,6 @@
 #import "BibPref_Sharing.h"
 #import "BDSKStringConstants.h"
 #import "BDSKSharingBrowser.h"
-#import <Security/Security.h>
 #import "BDSKSharingServer.h"
 #import "BDSKPasswordController.h"
 
