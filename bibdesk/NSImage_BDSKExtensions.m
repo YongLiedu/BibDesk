@@ -357,15 +357,17 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
 
 - (NSImage *)dragImageWithCount:(NSInteger)count;
 {
-    return [self dragImageWithCount:count inside:NO isIcon:YES];
+    return [self dragImageWithCount:count inside:NO size:NSMakeSize(32.0, 32.0)];
 }
 
-- (NSImage *)dragImageWithCount:(NSInteger)count inside:(BOOL)inside isIcon:(BOOL)isIcon;
+- (NSImage *)dragImageWithCount:(NSInteger)count inside:(BOOL)inside size:(NSSize)size;
 {
     NSImage *labeledImage;
     NSRect sourceRect = {NSZeroPoint, [self size]};
-    NSSize size = isIcon ? NSMakeSize(32.0, 32.0) : [self size];
     NSRect targetRect = {NSZeroPoint, size};
+    
+    if (NSEqualSizes(size, NSZeroSize))
+        size = [self size];
     
     if (count > 1) {
         
@@ -418,41 +420,6 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
 	[dragImage unlockFocus];
 	
 	return [dragImage autorelease];
-}
-
-static NSComparisonResult compareImageRepWidths(NSBitmapImageRep *r1, NSBitmapImageRep *r2, void *ctxt)
-{
-    NSSize s1 = [r1 size];
-    NSSize s2 = [r2 size];
-    if (NSEqualSizes(s1, s2))
-        return NSOrderedSame;
-    return s1.width > s2.width ? NSOrderedDescending : NSOrderedAscending;
-}
-
-- (NSImageRep *)bestImageRepForSize:(NSSize)preferredSize device:(NSDictionary *)deviceDescription
-{
-    // We need to get the correct color space, or we can end up with a mask image in some cases
-    NSString *preferredColorSpaceName = [[self bestRepresentationForDevice:deviceDescription] colorSpaceName];
-
-    // sort the image reps by increasing width, so we can easily pick the next largest one
-    NSMutableArray *reps = [[self representations] mutableCopy];
-    [reps sortUsingFunction:compareImageRepWidths context:NULL];
-    NSUInteger i, iMax = [reps count];
-    NSImageRep *toReturn = nil;
-    
-    for (i = 0; i < iMax; i++) {
-        NSImageRep *rep = [reps objectAtIndex:i];
-        BOOL hasPreferredColorSpace = [[rep colorSpaceName] isEqualToString:preferredColorSpaceName];
-        NSSize size = [rep size];
-        
-        if (hasPreferredColorSpace) {
-            toReturn = rep;
-            if (NSEqualSizes(size, preferredSize) || size.width > preferredSize.width)
-                break;
-        }
-    }
-    [reps release];
-    return toReturn ?: [self bestRepresentationForDevice:deviceDescription];    
 }
 
 - (void)drawFlipped:(BOOL)isFlipped inRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(CGFloat)delta {

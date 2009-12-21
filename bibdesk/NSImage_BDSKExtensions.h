@@ -55,8 +55,7 @@
 + (NSImage *)menuIcon;
 
 - (NSImage *)dragImageWithCount:(NSInteger)count;
-- (NSImage *)dragImageWithCount:(NSInteger)count inside:(BOOL)inside isIcon:(BOOL)isIcon;
-- (NSImageRep *)bestImageRepForSize:(NSSize)preferredSize device:(NSDictionary *)deviceDescription;
+- (NSImage *)dragImageWithCount:(NSInteger)count inside:(BOOL)inside size:(NSSize)size;
 
 - (void)drawFlipped:(BOOL)isFlipped inRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(CGFloat)delta;
 

@@ -791,7 +791,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         [image unlockFocus];
 	}
 	
-    return [image dragImageWithCount:count inside:inside isIcon:isIcon];
+    return [image dragImageWithCount:count inside:inside size:(isIcon ? NSMakeSize(32.0, 32.0) : NSZeroSize)];
 }
 
 #pragma mark TableView dragging destination
