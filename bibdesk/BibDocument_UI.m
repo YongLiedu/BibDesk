@@ -836,7 +836,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 - (void)handleTableSelectionChangedNotification:(NSNotification *)notification{
     [self updateFileViews];
     [self updatePreviews];
-    [groupOutlineView updateHighlights];
+    [groupOutlineView setNeedsDisplay:YES];
     BOOL fileViewEditable = [self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO && [[self selectedPublications] count] == 1;
     [sideFileView setEditable:fileViewEditable];
     [bottomFileView setEditable:fileViewEditable]; 

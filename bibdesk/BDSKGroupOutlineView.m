@@ -141,12 +141,6 @@
     }
 }
 
-// public method for updating the highlights (as when another table's selection changes)
-- (void)updateHighlights
-{
-    [self setNeedsDisplay:YES];
-}
-
 - (void)reloadData
 {
     const NSInteger nrows = [self numberOfRows];
