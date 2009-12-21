@@ -63,7 +63,6 @@
 
 - (void)awakeFromNib
 {
-    BDSKPRECONDITION([[self enclosingScrollView] contentView]);
     BDSKTypeSelectHelper *aTypeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
     [aTypeSelectHelper setCyclesSimilarResults:NO];
     [aTypeSelectHelper setMatchesPrefix:NO];
@@ -122,8 +121,7 @@
 {
     NSParameterAssert(rows != nil);
     
-    CGFloat lineWidth = 1.0;
-    CGFloat heightOffset = fmax(1.0f, round(0.25 * [self intercellSpacing].height) - lineWidth);
+    CGFloat heightOffset = fmax(1.0, round(0.25 * [self intercellSpacing].height) - 1.0);
     NSColor *highlightColor;
     
     if ([[self window] isMainWindow] || [[self window] isKeyWindow])
@@ -136,7 +134,7 @@
     
     while (rowIndex != NSNotFound) {
         drawRect = NSInsetRect([self rectOfRow:rowIndex], 1.0, heightOffset);
-        [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:lineWidth color:highlightColor];
+        [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:1.0 color:highlightColor];
         rowIndex = [rows indexGreaterThanIndex:rowIndex];
     }
 }
