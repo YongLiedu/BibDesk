@@ -317,23 +317,6 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
     [path stroke];
     [image unlockFocus];
     
-    NSImage *tinyImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
-    [tinyImage setBackgroundColor:[NSColor clearColor]];
-    
-    t = [NSAffineTransform transform];
-    [t rotateByDegrees:-45.0];
-    [t scaleBy:0.5];
-    [t translateXBy:-4.0 yBy:10.0];
-    
-    [tinyImage lockFocus];
-    [t concat];
-    [color setStroke];
-    [path stroke];
-    [tinyImage unlockFocus];
-    
-    [image addRepresentation:[[tinyImage representations] lastObject]];
-    [tinyImage release];
-    
     return image;
 }
 
