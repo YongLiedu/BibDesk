@@ -549,34 +549,38 @@ enum {
 	
 	if (headerImageCache == nil) {
 		NSDictionary *paths = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKTableHeaderImagesKey];
-        NSImage *paperclip = [[[NSImage alloc] initWithSize:NSMakeSize(16, 16)] autorelease];
+        NSImage *paperclip = [[[NSImage alloc] initWithSize:NSMakeSize(13.0, 13.0)] autorelease];
         [paperclip lockFocus];
-        [[NSImage paperclipImage] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        [[NSImage paperclipImage] drawInRect:NSMakeRect(0.0, 0.0, 13.0, 13.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
         [paperclip unlockFocus];
         [paperclip setTemplate:NO];
-        NSImage *color = [[[NSImage alloc] initWithSize:NSMakeSize(16, 16)] autorelease];
+        NSImage *url = [[[NSImage alloc] initWithSize:NSMakeSize(13.0, 13.0)] autorelease];
+        [url lockFocus];
+        [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericURLIcon)] drawInRect:NSMakeRect(0.0, 0.0, 13.0, 13.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        [url unlockFocus];
+        NSImage *color = [[[NSImage alloc] initWithSize:NSMakeSize(13.0, 13.0)] autorelease];
         [color lockFocus];
-        [[NSImage imageNamed:@"colors"] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        [[NSImage imageNamed:@"colors"] drawInRect:NSMakeRect(0.0, 0.0, 13.0, 13.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
         [color unlockFocus];
-        NSImage *crossref = [[[NSImage alloc] initWithSize:NSMakeSize(16, 16)] autorelease];
+        NSImage *crossref = [[[NSImage alloc] initWithSize:NSMakeSize(13.0, 13.0)] autorelease];
         [crossref lockFocus];
-        [[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        [[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate] drawInRect:NSMakeRect(0.0, 0.0, 13.0, 13.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
         [crossref unlockFocus];
-        NSImage *import = [[[NSImage alloc] initWithSize:NSMakeSize(16, 16)] autorelease];
+        NSImage *import = [[[NSImage alloc] initWithSize:NSMakeSize(13.0, 13.0)] autorelease];
         [import lockFocus];
         NSBezierPath *p = [NSBezierPath bezierPath];
-        [p moveToPoint:NSMakePoint(5.0, 13.0)];
-        [p lineToPoint:NSMakePoint(11.0, 13.0)];
-        [p lineToPoint:NSMakePoint(11.0, 8.0)];
-        [p lineToPoint:NSMakePoint(14.0, 8.0)];
-        [p lineToPoint:NSMakePoint(8.0, 2.0)];
-        [p lineToPoint:NSMakePoint(2.0, 8.0)];
-        [p lineToPoint:NSMakePoint(5.0, 8.0)];
+        [p moveToPoint:NSMakePoint(3.0, 13.0)];
+        [p lineToPoint:NSMakePoint(10.0, 13.0)];
+        [p lineToPoint:NSMakePoint(10.0, 7.0)];
+        [p lineToPoint:NSMakePoint(13.0, 7.0)];
+        [p lineToPoint:NSMakePoint(6.5, 0.5)];
+        [p lineToPoint:NSMakePoint(0.0, 7.0)];
+        [p lineToPoint:NSMakePoint(3.0, 7.0)];
         [p closePath];
         [[NSColor colorWithCalibratedWhite:0.3 alpha:1.0] setFill];
         [p fill];
         [import unlockFocus];
-		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, paperclip, BDSKLocalFileString, crossref, BDSKCrossrefString, color, BDSKColorString, color, BDSKColorLabelString, import, BDSKImportOrderString, nil];
+		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, paperclip, BDSKLocalFileString, url, BDSKRemoteURLString, crossref, BDSKCrossrefString, color, BDSKColorString, color, BDSKColorLabelString, import, BDSKImportOrderString, nil];
 		if (paths) {
 			NSImage *image;
 			
@@ -600,7 +604,7 @@ enum {
 	static NSDictionary *headerTitleCache = nil;
 	
 	if (headerTitleCache == nil) {
-        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:@"@", BDSKUrlString, @"@", BDSKRemoteURLString, @"#", BDSKItemNumberString, @"#", BDSKImportOrderString, nil];
+        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:@"@", BDSKUrlString, @"#", BDSKItemNumberString, @"#", BDSKImportOrderString, nil];
 		[tmpDict addEntriesFromDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKTableHeaderTitlesKey]];
         headerTitleCache = [tmpDict copy];
         [tmpDict release];

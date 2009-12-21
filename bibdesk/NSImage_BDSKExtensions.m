@@ -300,22 +300,35 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
     
     NSAffineTransform *t = [NSAffineTransform transform];
     [t rotateByDegrees:-45.0];
-    [t translateXBy:-4.0 yBy:10.0];
     
     // start at the outside (right) and work inward
     NSBezierPath *path = [NSBezierPath bezierPath];    
-    [path moveToPoint:NSMakePoint(10.0, 18.0)];
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(5.0, 4.0) radius:5.0 startAngle:0.0 endAngle:180.0 clockwise:YES];
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(3.0, 22.0) radius:3.5 startAngle:180.0 endAngle:0.0 clockwise:YES];
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(5.0, 8.0) radius:2.0 startAngle:0.0 endAngle:180.0 clockwise:YES];
-    [path lineToPoint:NSMakePoint(3.0, 18.0)];
+    [path moveToPoint:NSMakePoint(6.0, 30.0)];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(0.0, 12.0) radius:6.0 startAngle:0.0 endAngle:180.0 clockwise:YES];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(-2.0, 34.0) radius:4.0 startAngle:180.0 endAngle:0.0 clockwise:YES];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(0.0, 16.0) radius:2.0 startAngle:0.0 endAngle:180.0 clockwise:YES];
+    [path lineToPoint:NSMakePoint(-2.0, 30.0)];
+    [path transformUsingAffineTransform:t];
     
     [image lockFocus];
-    [t concat];
+    [color setStroke];
+    [path setLineWidth:2.0];
+    [path stroke];
+    [image unlockFocus];
+    
+    t = [NSAffineTransform transform];
+    [t scaleBy:0.5];
+    [path transformUsingAffineTransform:t];
+    
+    NSImage *tinyImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
+    [tinyImage lockFocus];
     [color setStroke];
     [path setLineWidth:1.0];
     [path stroke];
-    [image unlockFocus];
+    [tinyImage unlockFocus];
+    
+    [image addRepresentation:[[tinyImage representations] lastObject]];
+    [tinyImage release];
     
     return image;
 }
@@ -324,7 +337,7 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
 {
     static NSImage *image = nil;
     if(image == nil) {
-        image = createPaperclipImageWithColor([NSColor blackColor]);
+        image = createPaperclipImageWithColor([NSColor colorWithCalibratedWhite:0.0 alpha:0.8]);
         [image setTemplate:YES];
     }
     return image;
