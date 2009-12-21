@@ -586,7 +586,9 @@ enum {
 			
 			for (NSString *key in paths) {
 				NSString *path = [paths objectForKey:key];
-				if ([[NSFileManager defaultManager] fileExistsAtPath:path] &&
+                if ([path isEqualToString:@""]) {
+                    [tmpDict removeObjectForKey:key];
+				} else if ([[NSFileManager defaultManager] fileExistsAtPath:path] &&
 					(image = [[NSImage alloc] initWithContentsOfFile:path])) {
 					[tmpDict setObject:image forKey:key];
 					[image release];
@@ -604,7 +606,7 @@ enum {
 	static NSDictionary *headerTitleCache = nil;
 	
 	if (headerTitleCache == nil) {
-        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:@"@", BDSKUrlString, @"#", BDSKItemNumberString, @"#", BDSKImportOrderString, nil];
+        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:@"@", BDSKUrlString, @"#", BDSKItemNumberString, nil];
 		[tmpDict addEntriesFromDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKTableHeaderTitlesKey]];
         headerTitleCache = [tmpDict copy];
         [tmpDict release];
