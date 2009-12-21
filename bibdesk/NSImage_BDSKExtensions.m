@@ -362,12 +362,11 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
 
 - (NSImage *)dragImageWithCount:(NSInteger)count inside:(BOOL)inside size:(NSSize)size;
 {
-    NSImage *labeledImage;
-    NSRect sourceRect = {NSZeroPoint, [self size]};
-    NSRect targetRect = {NSZeroPoint, size};
-    
     if (NSEqualSizes(size, NSZeroSize))
         size = [self size];
+    
+    NSImage *labeledImage;
+    NSRect targetRect = {NSZeroPoint, size};
     
     if (count > 1) {
         
@@ -394,7 +393,7 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
         
         [labeledImage lockFocus];
         
-        [self drawInRect:targetRect fromRect:sourceRect operation:NSCompositeCopy fraction:1.0];
+        [self drawInRect:targetRect fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
         
         // draw a count of the rows being dragged, similar to Mail.app
         [[NSColor redColor] setFill];
@@ -403,7 +402,6 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
         
         [labeledImage unlockFocus];
         
-        sourceRect.size = size;
         targetRect.size = size;
         targetRect.origin = NSZeroPoint;
         
@@ -416,7 +414,7 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
     NSImage *dragImage = [[NSImage alloc] initWithSize:size];
 	
 	[dragImage lockFocus];
-	[labeledImage drawInRect:targetRect fromRect:sourceRect operation:NSCompositeCopy fraction:0.7];
+	[labeledImage drawInRect:targetRect fromRect:NSZeroRect operation:NSCompositeCopy fraction:0.7];
 	[dragImage unlockFocus];
 	
 	return [dragImage autorelease];
