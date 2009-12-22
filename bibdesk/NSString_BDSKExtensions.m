@@ -204,7 +204,7 @@ static NSInteger MAX_RATING = 5;
 }
 
 + (NSString *)stringWithBool:(BOOL)boolValue {
-	return boolValue ? [self yesString] : [self noString];
+	return boolValue ? @"1" : @"0";
 }
 
 + (NSString *)stringWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
@@ -221,15 +221,12 @@ static NSInteger MAX_RATING = 5;
 + (NSString *)stringWithTriStateValue:(NSCellStateValue)triStateValue {
     switch (triStateValue) {
         case NSOffState:
-            return [self noString];
-            break;
+            return @"0";
         case NSOnState:
-            return [self yesString];
-            break;
+            return @"1";
         case NSMixedState:
         default:
-            return [self mixedString];
-            break;
+            return @"-1";
     }
 }
 
