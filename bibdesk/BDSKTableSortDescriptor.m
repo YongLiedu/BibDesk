@@ -244,7 +244,7 @@ There are some issues with BibAuthor's sortCompare:, though, which we may revisi
         [self cacheKeys];
         selector = [self selector];
         ascending = [self ascending];
-        userInfo = [aCoder allowsKeyedCoding] ? [aCoder decodeObjectForKey:@"userInfo"] : [aCoder decodeObject];
+        userInfo = [([aCoder allowsKeyedCoding] ? [aCoder decodeObjectForKey:@"userInfo"] : [aCoder decodeObject]) retain];
     }
     return self;
 }
