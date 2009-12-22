@@ -1090,7 +1090,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     NSBundle *importerBundle = [NSBundle bundleWithPath:importerPath];
     NSString *importerVersion = [importerBundle objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey];
     if (importerVersion) {
-        BDSKVersionNumber *importerVersionNumber = [[[BDSKVersionNumber alloc] initWithVersionString:importerVersion] autorelease];
         NSDictionary *versionInfo = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKSpotlightVersionInfoKey];
         
         SInt32 sysVersion;
@@ -1101,11 +1100,10 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             runImporter = YES;
         } else {
             NSString *lastImporterVersion = [versionInfo objectForKey:LAST_IMPORTER_VERSION_KEY];
-            BDSKVersionNumber *lastImporterVersionNumber = [[[BDSKVersionNumber alloc] initWithVersionString:lastImporterVersion] autorelease];
             
             long lastSysVersion = [[versionInfo objectForKey:LAST_SYS_VERSION_KEY] longValue];
             
-            runImporter = noErr == err ? ([lastImporterVersionNumber compareToVersionNumber:importerVersionNumber] == NSOrderedAscending || sysVersion > lastSysVersion) : YES;
+            runImporter = noErr == err ? ([BDSKVersionNumber compareVersionString:lastImporterVersion toVersionString:importerVersion] == NSOrderedAscending || sysVersion > lastSysVersion) : YES;
         }
         if (runImporter) {
             NSString *mdimportPath = @"/usr/bin/mdimport";

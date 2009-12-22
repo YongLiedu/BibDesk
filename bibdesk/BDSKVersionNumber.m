@@ -22,6 +22,16 @@
 
 // This allows version numbers like "1.3", "v1.3", "1.0b2", "1.0rc1", "198v3", "1.0-alpha-5", and ignores spaces
 
++ (NSComparisonResult)compareVersionString:(NSString *)versionString toVersionString:(NSString *)otherVersionString;
+{
+    BDSKVersionNumber *versionNumber = [[self alloc] initWithVersionString:versionString];
+    BDSKVersionNumber *otherVersionNumber = [[self alloc] initWithVersionString:otherVersionString];
+    NSComparisonResult result = [versionNumber compareToVersionNumber:otherVersionNumber];
+    [versionNumber release];
+    [otherVersionNumber release];
+    return result;
+}
+
 + (id)versionNumberWithVersionString:(NSString *)versionString;
 {
     return [versionString isKindOfClass:[NSString class]] ? [[[self alloc] initWithVersionString:versionString] autorelease] : nil;
