@@ -210,19 +210,31 @@
 - (NSComparisonResult)compareToVersionNumber:(BDSKVersionNumber *)otherVersion;
 {
     if (otherVersion == nil)
-        return NSOrderedDescending;
-
-    NSUInteger i, count = MAX(componentCount, [otherVersion componentCount]);
-    for (i = 0; i < count; i++) {
-        NSInteger component = [self componentAtIndex:i];
-        NSInteger otherComponent = [otherVersion componentAtIndex:i];
-
+        return NSOrderedAscending;
+    
+    NSUInteger idx = 0, otherIdx = 0, otherCount = [otherVersion componentCount];
+    while (idx < componentCount || otherIdx < otherCount) {
+        NSInteger component = [self componentAtIndex:idx];
+        NSInteger otherComponent = [otherVersion componentAtIndex:otherIdx];
+        
+        // insert zeros before matching possible a/d/b/rc components, e.g. to get 1b1 > 1.0a1
+        if (component < 0 && otherComponent >= 0 && otherIdx < otherCount) {
+            component = 0;
+            otherIdx++;
+        } else if (component >= 0 && otherComponent < 0 && idx < componentCount) {
+            otherComponent = 0;
+            idx++;
+        } else {
+            idx++;
+            otherIdx++;
+        }
+        
         if (component < otherComponent)
             return NSOrderedAscending;
         else if (component > otherComponent)
             return NSOrderedDescending;
     }
-
+    
     return NSOrderedSame;
 }
 
