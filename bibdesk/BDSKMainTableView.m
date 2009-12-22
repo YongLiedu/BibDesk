@@ -75,10 +75,7 @@ enum {
 - (void)setColumnType:(NSInteger)type;
 @end
 
-@interface BDSKMainTableHeaderView : NSTableHeaderView {
-    NSInteger columnForMenu;
-}
-- (NSInteger)columnForMenu;
+@interface BDSKMainTableHeaderView : NSTableHeaderView
 @end
 
 @interface BDSKMainTableView (Private)
@@ -739,8 +736,8 @@ enum {
 }
 
 - (void)autosizeColumn:(id)sender {
-    NSInteger clickedColumn = [(BDSKMainTableHeaderView *)[self headerView] columnForMenu];
-    if (clickedColumn >= 0)
+    NSInteger clickedColumn = [[sender representedObject] integerValue];
+    if ([sender representedObject] && clickedColumn >= 0)
         [self doAutosizeColumn:clickedColumn];
 }
 
@@ -794,22 +791,11 @@ enum {
 
 @implementation BDSKMainTableHeaderView 
 
-- (id)initWithFrame:(NSRect)frameRect {
-    if (self = [super initWithFrame:frameRect]) {
-        columnForMenu = -1;
-    }
-    return self;
-}
-
 - (NSMenu *)menuForEvent:(NSEvent *)theEvent {
     NSMenu *menu = [super menuForEvent:theEvent];
-    NSPoint clickPoint = [self convertPoint:[[NSApp currentEvent] locationInWindow] fromView:nil];
-    columnForMenu = [self columnAtPoint:clickPoint];
+    NSPoint clickPoint = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    [[menu itemWithAction:@selector(autosizeColumn:)] setRepresentedObject:[NSNumber numberWithInteger:[self columnAtPoint:clickPoint]]];
     return menu;
-}
-
-- (NSInteger)columnForMenu {
-    return columnForMenu;
 }
 
 @end
