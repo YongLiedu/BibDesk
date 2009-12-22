@@ -549,23 +549,16 @@ enum {
 	
 	if (headerImageCache == nil) {
 		NSDictionary *paths = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKTableHeaderImagesKey];
-        NSImage *paperclip = [[[NSImage alloc] initWithSize:NSMakeSize(13.0, 13.0)] autorelease];
-        [paperclip lockFocus];
-        [[NSImage paperclipImage] drawInRect:NSMakeRect(0.0, 0.0, 13.0, 13.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-        [paperclip unlockFocus];
+        NSSize size = NSMakeSize(13.0, 13.0);
+        NSImage *paperclip = [[[NSImage paperclipImage] copy] autorelease];
+        [paperclip setSize:size];
         [paperclip setTemplate:NO];
-        NSImage *url = [[[NSImage alloc] initWithSize:NSMakeSize(13.0, 13.0)] autorelease];
-        [url lockFocus];
-        [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericURLIcon)] drawInRect:NSMakeRect(0.0, 0.0, 13.0, 13.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-        [url unlockFocus];
-        NSImage *color = [[[NSImage alloc] initWithSize:NSMakeSize(13.0, 13.0)] autorelease];
-        [color lockFocus];
-        [[NSImage imageNamed:@"colors"] drawInRect:NSMakeRect(0.0, 0.0, 13.0, 13.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-        [color unlockFocus];
-        NSImage *crossref = [[[NSImage alloc] initWithSize:NSMakeSize(13.0, 13.0)] autorelease];
-        [crossref lockFocus];
-        [[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate] drawInRect:NSMakeRect(0.0, 0.0, 13.0, 13.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-        [crossref unlockFocus];
+        NSImage *url = [[[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericURLIcon)] copy] autorelease];
+        [url setSize:size];
+        NSImage *color = [[[NSImage imageNamed:@"colors"] copy] autorelease];
+        [color setSize:size];
+        NSImage *crossref = [[[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate] copy] autorelease];
+        [crossref setSize:size];
         NSImage *import = [[[NSImage alloc] initWithSize:NSMakeSize(13.0, 13.0)] autorelease];
         [import lockFocus];
         NSBezierPath *p = [NSBezierPath bezierPath];
