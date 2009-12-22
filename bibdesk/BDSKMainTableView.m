@@ -299,39 +299,39 @@ enum {
     return type;
 }
 
-- (id)dataCellForColumnType:(NSInteger)columnType {
+- (id)newDataCellForColumnType:(NSInteger)columnType {
     id cell = nil;
     
     switch(columnType) {
         case BDSKColumnTypeURL:
-            cell = [[[NSImageCell alloc] init] autorelease];
+            cell = [[NSImageCell alloc] init];
             [cell setImageScaling:NSImageScaleProportionallyUpOrDown];
             break;
         case BDSKColumnTypeLinkedFile:
-            cell = [[[BDSKTextWithIconCell alloc] init] autorelease];
+            cell = [[BDSKTextWithIconCell alloc] init];
             [cell setLineBreakMode:NSLineBreakByClipping];
             break;
         case BDSKColumnTypeRating:
-            cell = [[[BDSKRatingButtonCell alloc] initWithMaxRating:5] autorelease];
+            cell = [[BDSKRatingButtonCell alloc] initWithMaxRating:5];
             [cell setBordered:NO];
             [cell setAlignment:NSCenterTextAlignment];
             break;
         case BDSKColumnTypeBoolean:
-            cell = [[[NSButtonCell alloc] initTextCell:@""] autorelease];
+            cell = [[NSButtonCell alloc] initTextCell:@""];
             [cell setButtonType:NSSwitchButton];
             [cell setImagePosition:NSImageOnly];
             [cell setControlSize:NSSmallControlSize];
             [cell setAllowsMixedState:NO];
             break;
         case BDSKColumnTypeTriState:
-            cell = [[[NSButtonCell alloc] initTextCell:@""] autorelease];
+            cell = [[NSButtonCell alloc] initTextCell:@""];
             [cell setButtonType:NSSwitchButton];
             [cell setImagePosition:NSImageOnly];
             [cell setControlSize:NSSmallControlSize];
             [cell setAllowsMixedState:YES];
             break;
         case BDSKColumnTypeCrossref: 
-            cell = [[[NSButtonCell alloc] initTextCell:@""] autorelease];
+            cell = [[NSButtonCell alloc] initTextCell:@""];
             [cell setButtonType:NSMomentaryChangeButton];
             [cell setBordered:NO];
             [cell setImagePosition:NSImageOnly];
@@ -342,7 +342,7 @@ enum {
             [cell setTarget:self];
             break;
         case BDSKColumnTypeImportOrder:
-            cell = [[[NSButtonCell alloc] initTextCell:NSLocalizedString(@"Import", @"button title")] autorelease];
+            cell = [[NSButtonCell alloc] initTextCell:NSLocalizedString(@"Import", @"button title")];
             [cell setButtonType:NSMomentaryPushInButton];
             [cell setBezelStyle:NSRoundRectBezelStyle];
             [cell setImagePosition:NSNoImage];
@@ -351,17 +351,17 @@ enum {
             [cell setTarget:self];
             break;
         case BDSKColumnTypeRelevance: 
-            cell = [[[BDSKLevelIndicatorCell alloc] initWithLevelIndicatorStyle:NSRelevancyLevelIndicatorStyle] autorelease];
+            cell = [[BDSKLevelIndicatorCell alloc] initWithLevelIndicatorStyle:NSRelevancyLevelIndicatorStyle];
             [cell setMaxValue:(double)1.0];
             [cell setEnabled:NO];
             [(BDSKLevelIndicatorCell *)cell setMaxHeight:(17.0 * 0.7)];
             break;
         case BDSKColumnTypeColor: 
-            cell = [[[BDSKColorCell alloc] initImageCell:nil] autorelease];
+            cell = [[BDSKColorCell alloc] initImageCell:nil];
             break;
         case BDSKColumnTypeText:
         default:
-            cell = [[[BDSKTextFieldCell alloc] initTextCell:@""] autorelease];
+            cell = [[BDSKTextFieldCell alloc] initTextCell:@""];
             [cell setBordered:NO];
             [cell setLineBreakMode:NSLineBreakByTruncatingTail];
             break;
@@ -370,14 +370,14 @@ enum {
     return cell;
 }
 
-- (NSTableColumn *)configuredTableColumnForField:(NSString *)colName {
-    BDSKTableColumn *tc = (BDSKTableColumn *)[self tableColumnWithIdentifier:colName];
+- (NSTableColumn *)newConfiguredTableColumnForField:(NSString *)colName {
+    BDSKTableColumn *tc = [[self tableColumnWithIdentifier:colName] retain];
     id dataCell = [tc dataCell];
     NSInteger columnType = [self columnTypeForField:colName];
     
     if(tc == nil){
         // it is a new column, so create it
-        tc = [[[BDSKTableColumn alloc] initWithIdentifier:colName] autorelease];
+        tc = [[BDSKTableColumn alloc] initWithIdentifier:colName];
         [tc setResizingMask:(NSTableColumnAutoresizingMask | NSTableColumnUserResizingMask)];
         [tc setEditable:NO];
         [tc setMinWidth:16.0];
@@ -386,8 +386,9 @@ enum {
     
     // this may be called in response to a field type change, so the cell may also need to change, even if the column is already in the tableview
     if (dataCell == nil || [tc columnType] != columnType) {
-        dataCell = [self dataCellForColumnType:columnType];
+        dataCell = [self newDataCellForColumnType:columnType];
         [tc setDataCell:dataCell];
+        [dataCell release];
         [tc setColumnType:columnType];
     }
 
@@ -416,15 +417,16 @@ enum {
     if ([[self delegate] respondsToSelector:@selector(defaultColumnWidthsForTableView:)])
         defaultTableColumnWidths = [[self delegate] defaultColumnWidthsForTableView:self];
     
-    NSMutableArray *columns = [NSMutableArray arrayWithCapacity:[identifiers count]];
+    NSMutableArray *columns = [[NSMutableArray alloc] initWithCapacity:[identifiers count]];
 	
 	for (NSString *colName in identifiers) {
-		tc = [self configuredTableColumnForField:colName];
+		tc = [self newConfiguredTableColumnForField:colName];
         
-        if([colName isEqualToString:BDSKImportOrderString] == NO && (tcWidth = [defaultTableColumnWidths objectForKey:colName]))
-            [tc setWidth:[tcWidth floatValue]];
+        if ([colName isEqualToString:BDSKImportOrderString] == NO && (tcWidth = [defaultTableColumnWidths objectForKey:colName]))
+            [tc setWidth:[tcWidth doubleValue]];
 		
 		[columns addObject:tc];
+        [tc release];
 	}
     
     NSTableColumn *highlightedColumn = [self highlightedTableColumn];
@@ -435,6 +437,7 @@ enum {
     [self removeAllTableColumns];
     for (NSTableColumn *column in columns)
         [self addTableColumn:column];
+    [columns release];
     [self selectRowIndexes:selectedRows byExtendingSelection:NO];
     [self setHighlightedTableColumn:highlightedColumn]; 
     [self tableViewFontChanged];
