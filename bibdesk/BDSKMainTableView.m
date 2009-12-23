@@ -731,7 +731,7 @@ enum {
         cell = [self preparedCellAtColumn:column row:row];
         width = fmax(width, [cell cellSize].width);
     }
-    width = fmin([tableColumn maxWidth], fmax([tableColumn minWidth], width));
+    width = fmin([tableColumn maxWidth], fmax([tableColumn minWidth], ceil(width)));
     [tableColumn setWidth:width];
 }
 
