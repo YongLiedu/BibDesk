@@ -85,27 +85,6 @@
 
 @implementation NSString (BDSKExtensions)
 
-+ (NSString *)yesString {
-    static NSString *yesString = nil;
-    if (yesString == nil)
-        yesString = [NSLocalizedString(@"Yes", @"") copy];
-    return yesString;
-}
-
-+ (NSString *)noString {
-    static NSString *noString = nil;
-    if (noString == nil)
-        noString = [NSLocalizedString(@"No", @"") copy];
-    return noString;
-}
-
-+ (NSString *)mixedString {
-    static NSString *mixedString = nil;
-    if (mixedString == nil)
-        mixedString = [NSLocalizedString(@"-", @"indeterminate or mixed value indicator") copy];
-    return mixedString;
-}
-
 // This method is copied from NSString-OFStringExtensions.m
 + (BOOL)isEmptyString:(NSString *)string {
     return string == nil || [string isEqualToString:@""];
@@ -1085,24 +1064,25 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 #pragma mark -
 
 - (BOOL)booleanValue{
-    // Omni's boolValue method uses YES, Y, yes, y and 1 with isEqualToString
-    if([self compare:[NSString stringWithBool:YES] options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+    // check for "oui" for backard compatibility with French localization
+    if([self isEqualToString:@"1"] ||
        [self compare:@"y" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
        [self compare:@"yes" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
-       [self isEqualToString:@"1"])
+       [self compare:@"oui" options:NSCaseInsensitiveSearch] == NSOrderedSame)
         return YES;
     else
         return NO;
 }
 
 - (NSCellStateValue)triStateValue{
+    // check for "non" for backard compatibility with French localization
     if([self booleanValue]){
         return NSOnState;
     }else if([self isEqualToString:@""] ||
-             [self compare:[NSString stringWithBool:NO] options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+             [self isEqualToString:@"0"] ||
              [self compare:@"n" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
              [self compare:@"no" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
-             [self isEqualToString:@"0"]){
+             [self compare:@"non" options:NSCaseInsensitiveSearch] == NSOrderedSame){
         return NSOffState;
     }else{
         return NSMixedState;
