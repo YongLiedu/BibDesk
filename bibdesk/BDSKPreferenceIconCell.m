@@ -43,7 +43,7 @@
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     NSSize cellSize = [self cellSizeForBounds:cellFrame];
-    if (cellSize.width < NSWidth(cellFrame)) {
+    if (cellSize.height < NSHeight(cellFrame)) {
         NSRect ignored;
         NSDivideRect(cellFrame, &cellFrame, &ignored, cellSize.height, [controlView isFlipped] ? NSMinYEdge : NSMaxYEdge);
     }
