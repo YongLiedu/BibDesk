@@ -205,7 +205,7 @@ static NSInteger MAX_RATING = 5;
             return @"1";
         case NSMixedState:
         default:
-            return @"-1";
+            return @"-";
     }
 }
 
