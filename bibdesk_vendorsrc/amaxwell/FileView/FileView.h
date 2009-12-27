@@ -36,30 +36,6 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// From NSObjCRuntime.h
-#ifndef NSINTEGER_DEFINED
-typedef int NSInteger;
-typedef unsigned int NSUInteger;
-#define NSIntegerMax    LONG_MAX
-#define NSIntegerMin    LONG_MIN
-#define NSUIntegerMax   ULONG_MAX
-#define NSINTEGER_DEFINED 1
-#endif /* NSINTEGER_DEFINED */
-
-// From CGBase.h
-#ifndef	CGFLOAT_DEFINED
-typedef float CGFloat;
-#define CGFLOAT_MIN FLT_MIN
-#define CGFLOAT_MAX FLT_MAX
-#define CGFLOAT_IS_DOUBLE 0
-#define CGFLOAT_DEFINED 1
-#endif /* CGFLOAT_DEFINED */
-
-// from 10.5 header
-#ifndef NSAppKitVersionNumber10_4
-#define NSAppKitVersionNumber10_4 824
-#endif
-
 #import <FileView/FVFileView.h>
 #import <FileView/FVPreviewer.h>
 #import <FileView/FVFinderLabel.h>
