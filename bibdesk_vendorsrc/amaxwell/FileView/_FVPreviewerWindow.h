@@ -1,10 +1,10 @@
 //
-//  _FVDocumentDescription.m
+//  _FVPreviewerWindow.h
 //  FileView
 //
-//  Created by Adam Maxwell on 07/15/08.
+//  Created by Adam R. Maxwell on 12/15/09.
 /*
- This software is Copyright (c) 2008-2009
+ This software is Copyright (c) 2009
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -36,47 +36,32 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "_FVDocumentDescription.h"
-#import <libkern/OSAtomic.h>
+#import <Cocoa/Cocoa.h>
 
-@implementation _FVDocumentDescription
-
-static NSMutableDictionary *_descriptionTable = nil;
-static OSSpinLock _descriptionLock = OS_SPINLOCK_INIT;
-
-+ (void)initialize
+/** @internal @brief Window subclass for the previewer.
+ 
+ The Quick Look panel allows the controlling responder/view to remain key, practically.  The best
+ way to handle this in the custom preview is to return NO from NSWindow::canBecomeKeyWindow, but
+ that breaks text selection in views.  Since text selection is the only reason for using this as
+ a substitute for the real thing on 10.5 and later, we need to allow text selection.
+ 
+ This class installs a CGEventTap listening for mouse down events in its process, and returns YES
+ for NSWindow::canBecomeKeyWindow after a mouse down.  The controller needs to reset this periodically,
+ as a change in content without dismissing the window should also reset the canBecomeKeyWindow flag.
+ 
+ I originally tried saving and restoring NSApp::keyWindow when showing the panel, but that required
+ a delay to work around the animation, which makes the fullscreen button first responder after the
+ animation completes (regardless of NSButton::refusesFirstResponder returning NO).
+ */
+@interface _FVPreviewerWindow : NSPanel
 {
-    FVINITIALIZE(_FVDocumentDescription);
-    _descriptionTable = [NSMutableDictionary new];
+@private
+    BOOL               _didClickWindow;
+    CFRunLoopSourceRef _mouseDownSource;
+    CFMachPortRef      _mouseDownTap;
 }
 
-+ (_FVDocumentDescription *)descriptionForKey:(id)aKey;
-{
-    NSParameterAssert(nil != aKey);
-    _FVDocumentDescription *desc;
-    OSSpinLockLock(&_descriptionLock);
-    desc = [_descriptionTable objectForKey:aKey];
-    OSSpinLockUnlock(&_descriptionLock);
-    return desc;
-}
-
-+ (void)setDescription:(_FVDocumentDescription *)description forKey:(id <NSObject, NSCopying>)aKey;
-{
-    NSParameterAssert(nil != description);
-    NSParameterAssert(nil != aKey);
-    OSSpinLockLock(&_descriptionLock);
-    [_descriptionTable setObject:description forKey:aKey];
-    OSSpinLockUnlock(&_descriptionLock);
-}    
-
-- (id)init
-{
-    self = [super init];
-    if (self) {
-        _fullSize = NSZeroSize;
-        _pageCount = 0;
-    }
-    return self;
-}
+/** @internal Call as needed to return NO for NSWindow::canBecomeKeyWindow. */
+- (void)resetKeyStatus;
 
 @end

@@ -171,7 +171,7 @@ static inline bool __FVQLShouldDrawFullImageWithSize(NSSize desiredSize, NSSize 
 
     if (NO == _quickLookFailed) {
         
-        CGSize requestedSize = (CGSize) { fmaxThumbnailDimension, fmaxThumbnailDimension };
+        CGSize requestedSize = (CGSize) { FVMaxThumbnailDimension, FVMaxThumbnailDimension };
         
         // !!! QLThumbnailImageCreate is not currently a good candidate for FVAllocator, since image sizes are unpredictable.  I'm not sure how that should be handled, but at present FVQuickLookIcon is not enough of a problem to worry about.
         if (NULL == _thumbnail)

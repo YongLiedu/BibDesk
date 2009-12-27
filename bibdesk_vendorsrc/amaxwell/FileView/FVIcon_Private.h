@@ -43,7 +43,7 @@
 
 // subclasses use various functions from these headers
 #import "FVBitmapContext.h"
-#import "FVIconCache.h"
+#import "FVCGImageCache.h"
 #import <pthread.h>
 #import <libkern/OSAtomic.h>
 #import "FVCGImageUtilities.h"
@@ -97,16 +97,16 @@
  @return true if the full (largest) image representation should be drawn. */
 FV_EXTERN bool FVShouldDrawFullImageWithThumbnailSize(const NSSize desiredSize, const NSSize thumbnailSize);
 
-// best not to use these at all, but fmaxThumbnailDimension is exported for the QL icon bundle
+// best not to use these at all, but FVMaxThumbnailDimension is exported for the QL icon bundle
 
-/** @internal @var fmaxThumbnailDimension
+/** @internal @var FVMaxThumbnailDimension
  Maximum dimension of a thumbnail image. 
  @warning Exported only for FVQuickLookIcon bundle linkage. */
-extern const size_t fmaxThumbnailDimension;
+extern const size_t FVMaxThumbnailDimension;
 
-/** @internal @var fmaxImageDimension
+/** @internal @var FVMaxImageDimension
  Maximum dimension of a full image. */
-FV_PRIVATE_EXTERN const size_t fmaxImageDimension;
+FV_PRIVATE_EXTERN const size_t FVMaxImageDimension;
 
 /** @internal @var FVDefaultPaperSize
  Nominal paper size to avoid using NSPrintInfo. */
@@ -133,13 +133,13 @@ FV_PRIVATE_EXTERN bool FVIconLimitFullImageSize(NSSize *size);
 FV_PRIVATE_EXTERN bool FVIconLimitThumbnailSize(NSSize *size);
 
 /** @internal
- Create a thumbnail image with maximum dimension of FVIcon_Private.h::fmaxThumbnailDimension.
+ Create a thumbnail image with maximum dimension of FVIcon_Private.h::FVMaxThumbnailDimension.
  @param image The image to scale.
  @return Will simply retain the argument and return it if possible. */
 FV_PRIVATE_EXTERN CGImageRef FVCreateResampledThumbnail(CGImageRef image);
 
 /** @internal
- Create a full size image with maximum dimension of FVIcon_Private.h::fmaxImageDimension.  
+ Create a full size image with maximum dimension of FVIcon_Private.h::FVMaxImageDimension.  
  @param image The image to scale.
  @return Will simply retain the argument and return it if possible. */
 FV_PRIVATE_EXTERN CGImageRef FVCreateResampledFullImage(CGImageRef image);

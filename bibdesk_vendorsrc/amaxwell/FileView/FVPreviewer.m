@@ -41,6 +41,7 @@
 #import <QTKit/QTKit.h>
 #import <WebKit/WebKit.h>
 #import <pthread.h>
+#import "_FVPreviewerWindow.h"
 
 #define USE_LAYER_BACKING 0
 
@@ -495,9 +496,9 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
 }
 
 - (void)_previewURL:(NSURL *)absoluteURL
-{
+{    
     [self _killTask];
-        
+
     BOOL shouldUseQuickLook;
     NSView *newView = [self contentViewForURL:absoluteURL shouldUseQuickLook:&shouldUseQuickLook];
     
@@ -528,7 +529,7 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
     }
     else {
         NSWindow *theWindow = [self window];
-        
+
         [[contentView tabViewItemAtIndex:0] setView:newView];
         
         if ([absoluteURL isFileURL]) {
@@ -577,30 +578,22 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
                 // saved frame was set to zero rect (not previously in defaults database) and user will adjust
                 [[self windowAnimator] setAlphaValue:1.0];
             }
-            
-            /*
-             This is the only way I've found on 10.5 and later to get the fullscreen button to resign first responder.
-             Evidently the animator resets first responder and ignores -refusesFirstResponder from the button.
-             Disabling the keyview loop calculation doesn't help, nor does changing the panel to non-activating.
-             */
-            NSTimeInterval delay = [[NSAnimationContext currentContext] duration] + 0.05;
-            [[self window] performSelector:@selector(makeFirstResponder:) withObject:nil afterDelay:delay];
-
         }
         else {
             [contentView selectFirstTabViewItem:nil];
             if (NO == NSEqualRects(newWindowFrame, NSZeroRect))
-            [[self window] setFrame:newWindowFrame display:YES animate:YES];
+                [[self window] setFrame:newWindowFrame display:YES animate:YES];
             [self showWindow:self];
-            [[self window] makeFirstResponder:nil];
-        }
+        }    
+        
+        [(_FVPreviewerWindow *)[self window] resetKeyStatus];
     }
 }
 
 - (void)previewURL:(NSURL *)absoluteURL forIconInRect:(NSRect)screenRect
 {
     FVAPIParameterAssert(nil != absoluteURL);
-    
+
     // set up a rect in the middle of the main screen for a default value from which to animate
     if (NSEqualRects(screenRect, NSZeroRect)) {
         previousIconFrame = NSZeroRect;
@@ -618,7 +611,7 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
     
     // if currently on screen, this will screw up the saved frame
     if ([[self window] isVisible] == NO)
-    [[self window] setFrame:screenRect display:NO];
+        [[self window] setFrame:screenRect display:NO];
     [self _previewURL:absoluteURL];
 }
 
@@ -659,7 +652,17 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
 // end up getting this via the responder chain for most views
 - (void)cancel:(id)sender
 {
-    [self stopPreviewing];
+    // !!! since this is now part of the API, make sure it's save to call
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+        return;
+    
+    if ([[[self window] contentView] isInFullScreenMode]) {
+        [[[self window] contentView] exitFullScreenModeWithOptions:nil];
+        [[fullScreenButton cell] setBackgroundStyle:NSBackgroundStyleDark];
+    }
+    else {
+        [self stopPreviewing];
+    }
 }    
 
 

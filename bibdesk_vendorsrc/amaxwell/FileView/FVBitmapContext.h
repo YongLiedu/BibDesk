@@ -40,14 +40,56 @@
 #define _FVBITMAPCONTEXT_H_
 
 #import <Cocoa/Cocoa.h>
+#import <FVObject.h>
 
 __BEGIN_DECLS
 
-/** @file FVBitmapContext.h  Bitmap context creation and disposal. */
+/** @internal @brief Wrapper around a CGBitmapContext.
+ 
+ FVBitmapContext is a simple wrapper around a bitmap-based graphics context, and provides Core Graphics and Cocoa graphics contexts.  Memory for the bitmap data may not be allocated in the default zone or the object's zone, and is considered to be owned by the FVBitmapContext.  Consequently, do not attempt to access the CGContext's bitmap data after the FVBitmapContext is deallocated.  Likewise, retaining any of the graphics contexts returned from an instance and using them after it has been deallocated is a programmer error.
+ 
+ The underlying CGContext is guaranteed to be compatible with caching and scaling methods used elsewhere in the framework (correct colorspace, pixel format, and size).
+ 
+ @warning FVBitmapContext instances should not be shared between threads unless protected by a mutex.
+ 
+ */
 
-/** @typedef CGContextRef FVBitmapContextRef
- This typedef mainly exists to silence clang's retain/release heuristic warnings, which unfortunately look for CF/CG as the release function prefix.  Should file a bug with llvm, but this is easier than dealing with bugzilla. */
-typedef CGContextRef FVBitmapContextRef;
+@interface FVBitmapContext : FVObject
+{
+@private
+    CGContextRef       _port;
+    NSGraphicsContext *_flipped;
+    NSGraphicsContext *_context;
+}
+
+/** @internal @brief Convenience initializer.
+ 
+ This is the only public API for creating an FVBitmapContext.
+ 
+ @param pixelSize Height and width in pixels.  Floating point values will be truncated.
+ @return An autoreleased instance of a new FVBitmapContext. */
++ (FVBitmapContext *)bitmapContextWithSize:(NSSize)pixelSize;
+
+/** @internal @brief Core Graphics context.
+ 
+ @return CGContext owned by FVBitmapContext. */
+- (CGContextRef)graphicsPort;
+
+/** @internal @brief Unflipped Cocoa graphics context.
+ 
+ Lazily instantiates a new NSGraphicsContext from FVBitmapContext::graphicsPort. 
+ @return Unflipped NSGraphicsContext owned by FVBitmapContext. */
+- (NSGraphicsContext *)graphicsContext;
+
+/** @internal @brief Flipped Cocoa graphics context.
+ 
+ Lazily instantiates a new NSGraphicsContext from FVBitmapContext::graphicsPort. 
+ @return Flipped NSGraphicsContext owned by FVBitmapContext. */
+- (NSGraphicsContext *)flippedGraphicsContext;
+
+@end
+
+/** @file FVBitmapContext.h  Bitmap context creation and disposal. */
 
 /** @internal @brief Row bytes for pixel width.
  
@@ -57,23 +99,9 @@ typedef CGContextRef FVBitmapContextRef;
  @return Number of bytes to allocate per row. */
 FV_PRIVATE_EXTERN size_t FVPaddedRowBytesForWidth(const size_t bytesPerSample, const size_t pixelsWide);
 
-/** @internal @brief Bitmap context creation.
- 
- Create a new ARGB (ppc) or BGRA (x86) bitmap context of the given size, with rows padded appropriately and Device RGB colorspace.  The context should be released using FVIconBitmapContextRelease.  The context may contain garbage, so clear it first if you're drawing transparent content.
- @param width Width in pixels.
- @param height Height in pixels. 
- @return A new CGBitmapContext or NULL if it could not be created. */
-FV_PRIVATE_EXTERN FVBitmapContextRef FVIconBitmapContextCreateWithSize(size_t width, size_t height);
-
-/** @internal @brief Bitmap context disposal.
- 
- Destroys a CGBitmapContext created using FVIconBitmapContextCreateWithSize.  @warning This deallocates the bitmap data associated with the context, rather than decrementing a reference count.
- @arg ctxt The context to release. */
-FV_PRIVATE_EXTERN void FVIconBitmapContextRelease(FVBitmapContextRef ctxt);
-
 /** @internal @brief See if an image is compatible with caching assumptions.
  
- If this returns false, the image should be redrawn into a bitmap context created with FVIconBitmapContextCreateWithSize, and CGBitmapContextCreateImage() should be used to create a new CGImage that can be cached.
+ If this returns false, the image should be redrawn into a bitmap context created with FVBitmapContext::bitmapContextWithSize:, and CGBitmapContextCreateImage() should be used to create a new CGImage that can be cached.
  @return true if the image does not need to be redrawn. 
  @todo Move this elsewhere. */
 FV_PRIVATE_EXTERN bool FVImageIsIncompatible(CGImageRef image);

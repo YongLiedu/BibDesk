@@ -141,12 +141,44 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
 
 // allows a crude sniffing, so initWithTextAtURL: doesn't have to immediately instantiate an attributed string ivar and return nil if that fails
 
++ (NSArray *)_supportedUTIs
+{
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
+    return [NSAttributedString textUnfilteredTypes];
+#else
+    // new in 10.5
+    if ([NSAttributedString respondsToSelector:@selector(textUnfilteredTypes)])
+        return [NSAttributedString performSelector:@selector(textUnfilteredTypes)];
+    
+    NSMutableSet *UTIs = [NSMutableSet set];
+    NSEnumerator *typeEnum = [[NSAttributedString textUnfilteredFileTypes] objectEnumerator];
+    NSString *aType;
+    CFStringRef aUTI;
+    
+    // checking OSType and extension gives lots of duplicates, but the set filters them out
+    while ((aType = [typeEnum nextObject])) {
+        OSType osType = NSHFSTypeCodeFromFileType(aType);
+        if (0 != osType) {
+            aUTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassOSType, (CFStringRef)aType, NULL);
+        }
+        else {
+            aUTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)aType, NULL);
+        }
+        if (NULL != aUTI) {
+            [UTIs addObject:(id)aUTI];
+            CFRelease(aUTI);
+        }
+    }
+    return [UTIs allObjects];
+#endif
+}
+
 // This should be very reliable, but in practice it's only as reliable as the UTI declaration.  For instance, OmniGraffle declares .graffle files as public.composite-content and public.xml in its Info.plist.  Since we see that it's public.xml (which is in this list), we open it as text, and it will actually open with NSAttributedString...and display as binary garbage.
 + (BOOL)canInitWithUTI:(NSString *)aUTI
 {
     static NSArray *types = nil;
     if (nil == types) {
-        NSMutableArray *a = [NSMutableArray arrayWithArray:[NSAttributedString textUnfilteredTypes]];
+        NSMutableArray *a = [NSMutableArray arrayWithArray:[self _supportedUTIs]];
         // avoid threading issues on 10.4; this class should never be asked to render HTML anyway, since that's now handled by FVWebViewIcon
         if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
             [a removeObject:(id)kUTTypeHTML];
@@ -283,14 +315,14 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
 
 - (void)recache;
 {
-    [FVIconCache invalidateCachesForKey:_cacheKey];
+    [FVCGImageCache invalidateCachesForKey:_cacheKey];
     [self releaseResources];
 }
 
 - (CGImageRef)_newImageWithAttributedString:(NSMutableAttributedString *)attrString documentAttributes:(NSDictionary *)documentAttributes
 {
     NSParameterAssert(attrString);
-    FVBitmapContextRef ctxt = FVIconBitmapContextCreateWithSize(FVDefaultPaperSize.width, FVDefaultPaperSize.height);    
+    CGContextRef ctxt = [[FVBitmapContext bitmapContextWithSize:FVDefaultPaperSize] graphicsPort];
 
     // set up default page layout parameters
     CGAffineTransform t1 = CGAffineTransformMakeTranslation(FVSideMargin, FVDefaultPaperSize.height - FVTopMargin);
@@ -376,7 +408,6 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
     CGContextRestoreGState(ctxt);
     
     CGImageRef image = CGBitmapContextCreateImage(ctxt);
-    FVIconBitmapContextRelease(ctxt);
     
     return image;
     
@@ -403,12 +434,12 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
     else {
         
         if (NULL == _thumbnail) {
-            _thumbnail = [FVIconCache newThumbnailForKey:_cacheKey];
+            _thumbnail = [FVCGImageCache newThumbnailForKey:_cacheKey];
             _thumbnailSize = FVCGImageSize(_thumbnail);
         }
         
         if (_thumbnail && FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize)) {
-            _fullImage = [FVIconCache newImageForKey:_cacheKey];
+            _fullImage = [FVCGImageCache newImageForKey:_cacheKey];
             if (NULL != _fullImage) {
                 [self unlock];
                 [[self class] _stopRenderingForKey:_cacheKey];
@@ -512,9 +543,9 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
     [self unlock];    
     
     // cache and release
-    if (fullImage) [FVIconCache cacheImage:fullImage forKey:_cacheKey];
+    if (fullImage) [FVCGImageCache cacheImage:fullImage forKey:_cacheKey];
     CGImageRelease(fullImage);
-    if (thumbnail) [FVIconCache cacheThumbnail:thumbnail forKey:_cacheKey];
+    if (thumbnail) [FVCGImageCache cacheThumbnail:thumbnail forKey:_cacheKey];
     CGImageRelease(thumbnail);
 
     [[self class] _stopRenderingForKey:_cacheKey];

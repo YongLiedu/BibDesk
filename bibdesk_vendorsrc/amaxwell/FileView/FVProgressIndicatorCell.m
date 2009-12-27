@@ -92,7 +92,8 @@
 - (void)drawWithFrame:(NSRect)aRect inView:(NSView *)aView
 {
     CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
-    CGRect progressRect = NSRectToCGRect(aRect); 
+    CGContextSaveGState(context);
+    CGRect progressRect = NSRectToCGRect(aRect);    
     CGPoint ctr = CGPointMake(CGRectGetMidX(progressRect), CGRectGetMidY(progressRect));
     
     // indeterminate download length
@@ -119,6 +120,7 @@
         CGContextClosePath(context);
         CGContextDrawPath(context, kCGPathFillStroke);
     }
+    CGContextRestoreGState(context);
 }
 
 @end

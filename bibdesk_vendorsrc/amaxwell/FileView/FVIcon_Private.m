@@ -230,8 +230,8 @@ bool FVShouldDrawFullImageWithThumbnailSize(const NSSize desiredSize, const NSSi
 }
 
 // these are compromises based on memory constraints and readability at high magnification
-const size_t fmaxThumbnailDimension = 200;
-const size_t fmaxImageDimension     = 512;
+const size_t FVMaxThumbnailDimension = 200;
+const size_t FVMaxImageDimension     = 512;
 
 /*
  Global variables are evil, but NSPrintInfo and CUPS are more evil.  Since NSPrintInfo must be used from the main thread and it can block for a long time in +initialize if CUPS is jacked up, we'll just assume some values since the main need is to have page-like proportions.  The default for CGPDFContextCreate is 612x792 pts, and NSPrintInfo on my system has 1" left and 1.25" top margins.
@@ -244,10 +244,10 @@ const CGFloat FVTopMargin       = 90.0;
 bool FVIconLimitThumbnailSize(NSSize *size)
 {
     CGFloat dimension = MAX(size->width, size->height);
-    if (dimension <= fmaxThumbnailDimension)
+    if (dimension <= FVMaxThumbnailDimension)
         return false;
     
-    while (dimension > fmaxThumbnailDimension) {
+    while (dimension > FVMaxThumbnailDimension) {
         size->width *= 0.9;
         size->height *= 0.9;
         dimension = MAX(size->width, size->height);
@@ -258,10 +258,10 @@ bool FVIconLimitThumbnailSize(NSSize *size)
 bool FVIconLimitFullImageSize(NSSize *size)
 {
     CGFloat dimension = MAX(size->width, size->height);
-    if (dimension <= fmaxImageDimension)
+    if (dimension <= FVMaxImageDimension)
         return false;
     
-    while (dimension > fmaxImageDimension) {
+    while (dimension > FVMaxImageDimension) {
         size->width *= 0.9;
         size->height *= 0.9;
         dimension = MAX(size->width, size->height);

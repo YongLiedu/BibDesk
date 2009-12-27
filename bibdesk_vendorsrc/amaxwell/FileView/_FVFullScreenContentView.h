@@ -1,10 +1,10 @@
 //
-//  FVIconCache.h
+//  _FVFullScreenContentView.h
 //  FileView
 //
-//  Created by Adam Maxwell on 10/21/07.
+//  Created by Adam R. Maxwell on 12/14/09.
 /*
- This software is Copyright (c) 2007-2009
+ This software is Copyright (c) 2009
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,28 +38,16 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class FVCacheFile;
+@class FVPreviewer;
 
-@interface FVIconCache : NSObject
+/** @internal @brief Full screen window content view.
+ 
+ Forwards an esc key event to the window's delegate by invoking -(void)cancel:(id)sender when in
+ fullscreen mode, since the normal responder chain won't work.  For consistency, also does this when
+ not in fullscreen mode. */
+@interface _FVFullScreenContentView : NSView
 {
-@private;
-    FVCacheFile *_cacheFile;
+    FVPreviewer *_windowDelegate;
 }
-
-// use this to get a key for caching images to disk
-+ (id)newKeyForURL:(NSURL *)aURL;
-
-// cache small images to disk
-+ (CGImageRef)newThumbnailForKey:(id)aKey;
-+ (void)cacheThumbnail:(CGImageRef)image forKey:(id)aKey;
-
-// cache large images to disk
-+ (CGImageRef)newImageForKey:(id)aKey;
-+ (void)cacheImage:(CGImageRef)image forKey:(id)aKey;
-
-+ (void)invalidateCachesForKey:(id)aKey;
-
-// sets name for recording/logging statistics
-- (void)setName:(NSString *)name;
 
 @end

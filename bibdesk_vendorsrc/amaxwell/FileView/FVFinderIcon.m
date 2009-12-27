@@ -69,13 +69,13 @@
     FVINITIALIZE(FVFinderIcon);
     
     // create all singletons now to avoid locking
-    [[FVMissingFinderIcon self] sharedIcon];
-    [[FVHTTPURLIcon self] sharedIcon];
-    [[FVGenericURLIcon self] sharedIcon];
-    [[FVFTPURLIcon self] sharedIcon];
-    [[FVMailURLIcon self] sharedIcon];
-    [[FVGenericFolderIcon self] sharedIcon];
-    [[FVSavedSearchIcon self] sharedIcon];
+    [FVMissingFinderIcon sharedIcon];
+    [FVHTTPURLIcon sharedIcon];
+    [FVGenericURLIcon sharedIcon];
+    [FVFTPURLIcon sharedIcon];
+    [FVMailURLIcon sharedIcon];
+    [FVGenericFolderIcon sharedIcon];
+    [FVSavedSearchIcon sharedIcon];
 }
 
 + (BOOL)_isSavedSearchURL:(NSURL *)aURL
@@ -176,7 +176,8 @@
             
             // header doesn't specify that this increments the refcount, but the doc page does
 
-            err = GetIconRefFromFileInfo(&fileRef, name.length, name.unicode, kIconServicesCatalogInfoMask, &catInfo, kIconServicesNoBadgeFlag, &_icon, NULL);
+            if (noErr == err)
+                err = GetIconRefFromFileInfo(&fileRef, name.length, name.unicode, kIconServicesCatalogInfoMask, &catInfo, kIconServicesNoBadgeFlag, &_icon, NULL);
             
             // file likely doesn't exist; can't just return FVMissingFinderIcon since we may need a link badge
             if (noErr != err)
@@ -199,7 +200,7 @@
     [super dealloc];
 }
 
-- (NSSize)size { return NSMakeSize(fmaxThumbnailDimension, fmaxThumbnailDimension); }
+- (NSSize)size { return NSMakeSize(FVMaxThumbnailDimension, FVMaxThumbnailDimension); }
 
 - (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
 {    
@@ -226,25 +227,24 @@
 
 static CGImageRef __FVCreateImageWithIcon(IconRef icon, size_t width, size_t height)
 {
-    FVBitmapContextRef ctxt = FVIconBitmapContextCreateWithSize(width, height);
+    CGContextRef ctxt = [[FVBitmapContext bitmapContextWithSize:NSMakeSize(width, height)] graphicsPort];
     CGRect rect = CGRectZero;
     rect.size = CGSizeMake(width, height);
     CGContextClearRect(ctxt, rect);
     CGImageRef image = NULL;
     if (noErr == PlotIconRefInContext(ctxt, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, icon))
         image = CGBitmapContextCreateImage(ctxt);
-    FVIconBitmapContextRelease(ctxt);
     return image;
 }
 
 static CGImageRef __FVCreateThumbnailWithIcon(IconRef icon)
 {
-    return __FVCreateImageWithIcon(icon, fmaxThumbnailDimension, fmaxThumbnailDimension);
+    return __FVCreateImageWithIcon(icon, FVMaxThumbnailDimension, FVMaxThumbnailDimension);
 }
 
 static CGImageRef __FVCreateFullImageWithIcon(IconRef icon)
 {
-    return __FVCreateImageWithIcon(icon, fmaxImageDimension, fmaxImageDimension);
+    return __FVCreateImageWithIcon(icon, FVMaxImageDimension, FVMaxImageDimension);
 }
 
 @implementation FVSingletonFinderIcon
@@ -301,10 +301,10 @@ static CGImageRef __FVCreateFullImageWithIcon(IconRef icon)
         err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericDocumentIcon, &docIcon);
         if (err) docIcon = NULL;
 
-        FVBitmapContextRef context = FVIconBitmapContextCreateWithSize(fmaxThumbnailDimension, fmaxThumbnailDimension);
+        CGContextRef context = [[FVBitmapContext bitmapContextWithSize:NSMakeSize(FVMaxThumbnailDimension, FVMaxThumbnailDimension)] graphicsPort];
         CGRect rect = CGRectZero;
         
-        rect.size = CGSizeMake(fmaxThumbnailDimension, fmaxThumbnailDimension);
+        rect.size = CGSizeMake(FVMaxThumbnailDimension, FVMaxThumbnailDimension);
         CGContextClearRect(context, rect);
         if (docIcon) PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, docIcon);
 
@@ -312,12 +312,11 @@ static CGImageRef __FVCreateFullImageWithIcon(IconRef icon)
         if (questionIcon) PlotIconRefInContext(context, &rect, kAlignCenterBottom, kTransformNone, NULL, kIconServicesNoBadgeFlag, questionIcon);          
         
         _thumbnail = CGBitmapContextCreateImage(context);        
-        FVIconBitmapContextRelease(context);
         
-        context = FVIconBitmapContextCreateWithSize(fmaxImageDimension, fmaxImageDimension);
+        context = [[FVBitmapContext bitmapContextWithSize:NSMakeSize(FVMaxImageDimension, FVMaxImageDimension)] graphicsPort];
         rect = CGRectZero;
         
-        rect.size = CGSizeMake(fmaxImageDimension, fmaxImageDimension);
+        rect.size = CGSizeMake(FVMaxImageDimension, FVMaxImageDimension);
         CGContextClearRect(context, rect);
         if (docIcon) PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, docIcon);
         
@@ -325,7 +324,6 @@ static CGImageRef __FVCreateFullImageWithIcon(IconRef icon)
         if (questionIcon) PlotIconRefInContext(context, &rect, kAlignCenterBottom, kTransformNone, NULL, kIconServicesNoBadgeFlag, questionIcon);          
         
         _fullImage = CGBitmapContextCreateImage(context);        
-        FVIconBitmapContextRelease(context);
         
         if (questionIcon) ReleaseIconRef(questionIcon);
         if (docIcon) ReleaseIconRef(docIcon);

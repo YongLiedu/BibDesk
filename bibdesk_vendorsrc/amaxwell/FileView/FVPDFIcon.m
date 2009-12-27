@@ -180,7 +180,7 @@ static CGLayerRef   _pageLayer = NULL;
 
 - (void)recache;
 {
-    [FVIconCache invalidateCachesForKey:_cacheKey];
+    [FVCGImageCache invalidateCachesForKey:_cacheKey];
     [self lock];
     CGImageRelease(_thumbnail);
     _thumbnail = NULL;
@@ -212,16 +212,16 @@ static CGLayerRef   _pageLayer = NULL;
 }
 
 // roughly 50% of a typical page minimum dimension
-#define fmaxPDFThumbnailDimension 310
+#define FVMaxPDFThumbnailDimension 310
 
 // used to constrain thumbnail size for huge pages
 static bool __FVPDFIconLimitThumbnailSize(NSSize *size)
 {
     CGFloat dimension = MAX(size->width, size->height);
-    if (dimension <= fmaxPDFThumbnailDimension)
+    if (dimension <= FVMaxPDFThumbnailDimension)
         return false;
     
-    while (dimension > fmaxPDFThumbnailDimension) {
+    while (dimension > FVMaxPDFThumbnailDimension) {
         size->width *= 0.9;
         size->height *= 0.9;
         dimension = MAX(size->width, size->height);
@@ -297,7 +297,7 @@ static bool __FVPDFIconLimitThumbnailSize(NSSize *size)
     
     if (NULL == _thumbnail && 1 == _currentPage) {
         
-        _thumbnail = [FVIconCache newThumbnailForKey:_cacheKey];
+        _thumbnail = [FVCGImageCache newThumbnailForKey:_cacheKey];
         BOOL exitEarly = NO;
         
         // This is an optimization to avoid loading the PDF document unless absolutely necessary.  If the icon was cached by a different FVPDFIcon instance, _pageCount won't be correct and we have to continue on and load the PDF document.  In that case, our sizes will be overwritten, but the thumbnail won't be recreated.  If we need to render something that's larger than the thumbnail by 20%, we have to continue on and make sure the PDF doc is loaded as well.
@@ -369,8 +369,8 @@ static bool __FVPDFIconLimitThumbnailSize(NSSize *size)
     
     if (NULL == _thumbnail) {
         
-        FVBitmapContextRef ctxt = FVIconBitmapContextCreateWithSize(_thumbnailSize.width, _thumbnailSize.height);
-        
+        CGContextRef ctxt = [[FVBitmapContext bitmapContextWithSize:_thumbnailSize] graphicsPort];
+
         // set a white page background
         CGRect pageRect = CGRectMake(0, 0, _thumbnailSize.width, _thumbnailSize.height);
         CGContextDrawLayerInRect(ctxt, pageRect, _pageLayer);
@@ -398,12 +398,11 @@ static bool __FVPDFIconLimitThumbnailSize(NSSize *size)
         if (1 == _currentPage && NULL != _thumbnail)
             thumbnail = CGImageRetain(_thumbnail);
         
-        FVIconBitmapContextRelease(ctxt);
     }
     [self unlock];
     
     // okay to draw, but now cache to disk before allowing others to read from disk
-    if (thumbnail) [FVIconCache cacheThumbnail:thumbnail forKey:_cacheKey];
+    if (thumbnail) [FVCGImageCache cacheThumbnail:thumbnail forKey:_cacheKey];
     CGImageRelease(thumbnail);
 
     [[self class] _stopRenderingForKey:_cacheKey];
@@ -636,7 +635,7 @@ static NSLock              *_convertedKeysLock = nil;
         [_convertedKeysLock lock];
         
         // key is based on /original/ file URL
-        id key = [[FVIconCache newKeyForURL:[self _fileURL]] autorelease];
+        id key = [[FVCGImageCache newKeyForURL:[self _fileURL]] autorelease];
         NSURL *newURL = [_convertedKeys objectForKey:key];
 
         if (nil != newURL) {

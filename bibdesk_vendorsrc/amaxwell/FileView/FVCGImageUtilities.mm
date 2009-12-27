@@ -141,7 +141,7 @@ static CGImageRef __FVCopyImageUsingCacheColorspace(CGImageRef image, NSSize siz
     __FVCGImageRequestAllocationSize(allocSize);
 #endif
     
-    FVBitmapContextRef ctxt = FVIconBitmapContextCreateWithSize(size.width, size.height);
+    CGContextRef ctxt = [[FVBitmapContext bitmapContextWithSize:size] graphicsPort];
     CGContextClearRect(ctxt, CGRectMake(0, 0, size.width, size.height));
 
     CGContextSaveGState(ctxt);
@@ -150,7 +150,6 @@ static CGImageRef __FVCopyImageUsingCacheColorspace(CGImageRef image, NSSize siz
     CGContextRestoreGState(ctxt);
     
     CGImageRef toReturn = CGBitmapContextCreateImage(ctxt);
-    FVIconBitmapContextRelease(ctxt);
     
 #if FV_LIMIT_TILEMEMORY_USAGE
     __FVCGImageDiscardAllocationSize(allocSize);
@@ -482,12 +481,12 @@ static inline size_t __FVGetNumberOfColumnsInRegionVector(std::vector <FVRegion>
     return columnIndex;
 }
 
-static inline size_t __fmaximumTileWidthForImage(CGImageRef image)
+static inline size_t __FVMaximumTileWidthForImage(CGImageRef image)
 {
     return std::min((size_t)MAX_TILE_WIDTH,  CGImageGetWidth(image));
 }
 
-static inline size_t __fmaximumTileHeightForImage(CGImageRef image)
+static inline size_t __FVMaximumTileHeightForImage(CGImageRef image)
 {
     return std::min((size_t)MAX_TILE_HEIGHT,  CGImageGetHeight(image));
 }
@@ -546,11 +545,11 @@ static std::vector <FVRegion> __FVTileRegionsForImage(CGImageRef image, double s
     const size_t originalHeight = CGImageGetHeight(image);
     const size_t minimumTileHeight = std::min((size_t)MIN_TILE_HEIGHT, originalHeight);
     // height of 16 is fast, so start searching there
-    const size_t tileHeight = __FVOptimumTileDimension(minimumTileHeight, __fmaximumTileHeightForImage(image), DEFAULT_TILE_HEIGHT, scale);
+    const size_t tileHeight = __FVOptimumTileDimension(minimumTileHeight, __FVMaximumTileHeightForImage(image), DEFAULT_TILE_HEIGHT, scale);
     
     const size_t originalWidth = CGImageGetWidth(image);
     const size_t minimumTileWidth = std::min((size_t)MIN_TILE_WIDTH, originalWidth);
-    const size_t tileWidth = __FVOptimumTileDimension(minimumTileWidth, __fmaximumTileWidthForImage(image), DEFAULT_TILE_WIDTH, scale);
+    const size_t tileWidth = __FVOptimumTileDimension(minimumTileWidth, __FVMaximumTileWidthForImage(image), DEFAULT_TILE_WIDTH, scale);
     
     size_t columns = originalWidth / tileWidth;
     if (columns * tileWidth < originalWidth)

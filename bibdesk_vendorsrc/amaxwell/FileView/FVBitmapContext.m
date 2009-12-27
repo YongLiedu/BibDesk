@@ -40,6 +40,70 @@
 #import "FVCGImageUtilities.h"
 #import "FVAllocator.h"
 
+/** @internal @brief Bitmap context creation.
+ 
+ Create a new ARGB (ppc) or BGRA (x86) bitmap context of the given size, with rows padded appropriately and Device RGB colorspace.  The context should be released using CFRelease, and its bitmap data should be deallocated with CFAllocatorDeallocate/FVAllocatorGetDefault.  The context may contain garbage, so clear it first if you're drawing transparent content.
+ @param width Width in pixels.
+ @param height Height in pixels. 
+ @return A new CGBitmapContext or NULL if it could not be created. */
+static CGContextRef __FVIconBitmapContextCreateWithSize(size_t width, size_t height);
+
+@implementation FVBitmapContext
+
+- (id)init
+{
+    [NSException raise:NSInternalInconsistencyException format:@"Invalid initializer %s", __func__];
+    return nil;
+}
+
+- (id)initPixelsWide:(size_t)pixelsWide pixelsHigh:(size_t)pixelsHigh;
+{
+    self = [super init];
+    if (self) {
+        _port = __FVIconBitmapContextCreateWithSize(pixelsWide, pixelsHigh);
+    }
+    return self;
+}
+
++ (FVBitmapContext *)bitmapContextWithSize:(NSSize)pixelSize;
+{
+    return [[[self allocWithZone:[self zone]] initPixelsWide:pixelSize.width pixelsHigh:pixelSize.height] autorelease];
+}
+
+- (void)dealloc
+{
+    [_flipped release];
+    [_context release];
+    void *bitmapData = CGBitmapContextGetData(_port);
+    if (bitmapData) CFAllocatorDeallocate(FVAllocatorGetDefault(), bitmapData);
+    CGContextRelease(_port);
+    [super dealloc];
+}
+
+- (CGContextRef)graphicsPort;
+{
+    FVAPIParameterAssert(NULL != _port);
+    return _port;
+}
+
+- (NSGraphicsContext *)graphicsContext;
+{
+    if (nil == _context)
+        _context = [[NSGraphicsContext graphicsContextWithGraphicsPort:[self graphicsPort] flipped:NO] retain];    
+    FVAPIParameterAssert(nil != _context);
+    return _context;
+}
+
+- (NSGraphicsContext *)flippedGraphicsContext;
+{
+    if (nil == _flipped)
+        _flipped = [[NSGraphicsContext graphicsContextWithGraphicsPort:[self graphicsPort] flipped:YES] retain];
+    FVAPIParameterAssert(nil != _flipped);
+    return _flipped;
+}
+
+@end
+
 // discard indexed color images (e.g. GIF) and convert to RGBA for FVCGImageDescription compatibility
 static inline bool __FVColorSpaceIsIncompatible(CGImageRef image)
 {
@@ -66,7 +130,7 @@ size_t FVPaddedRowBytesForWidth(const size_t bytesPerSample, const size_t pixels
     return destRowBytes;
 }
 
-FVBitmapContextRef FVIconBitmapContextCreateWithSize(size_t width, size_t height)
+static CGContextRef __FVIconBitmapContextCreateWithSize(size_t width, size_t height)
 {
     size_t bitsPerComponent = 8;
     size_t nComponents = 4;
@@ -99,12 +163,5 @@ FVBitmapContextRef FVIconBitmapContextCreateWithSize(size_t width, size_t height
     // note that bitmapData and the context itself are allocated and not freed here
     
     return ctxt;
-}
-
-void FVIconBitmapContextRelease(FVBitmapContextRef ctxt)
-{
-    void *bitmapData = CGBitmapContextGetData(ctxt);
-    if (bitmapData) CFAllocatorDeallocate(FVAllocatorGetDefault(), bitmapData);
-    CGContextRelease(ctxt);
 }
 

@@ -1,10 +1,10 @@
 //
-//  _FVDocumentDescription.m
+//  _FVFullScreenContentView.m
 //  FileView
 //
-//  Created by Adam Maxwell on 07/15/08.
+//  Created by Adam R. Maxwell on 12/14/09.
 /*
- This software is Copyright (c) 2008-2009
+ This software is Copyright (c) 2009
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -36,47 +36,41 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "_FVDocumentDescription.h"
-#import <libkern/OSAtomic.h>
+#import "_FVFullScreenContentView.h"
+#import "FVPreviewer.h"
 
-@implementation _FVDocumentDescription
+@implementation _FVFullScreenContentView
 
-static NSMutableDictionary *_descriptionTable = nil;
-static OSSpinLock _descriptionLock = OS_SPINLOCK_INIT;
-
-+ (void)initialize
+- (BOOL)enterFullScreenMode:(NSScreen *)screen withOptions:(NSDictionary *)options;
 {
-    FVINITIALIZE(_FVDocumentDescription);
-    _descriptionTable = [NSMutableDictionary new];
+    _windowDelegate = (FVPreviewer *)[[self window] delegate];
+    return [super enterFullScreenMode:screen withOptions:options];
 }
 
-+ (_FVDocumentDescription *)descriptionForKey:(id)aKey;
+- (void)exitFullScreenModeWithOptions:(NSDictionary *)options;
 {
-    NSParameterAssert(nil != aKey);
-    _FVDocumentDescription *desc;
-    OSSpinLockLock(&_descriptionLock);
-    desc = [_descriptionTable objectForKey:aKey];
-    OSSpinLockUnlock(&_descriptionLock);
-    return desc;
+    _windowDelegate = nil;
+    [super exitFullScreenModeWithOptions:options];
 }
 
-+ (void)setDescription:(_FVDocumentDescription *)description forKey:(id <NSObject, NSCopying>)aKey;
+- (void)keyDown:(NSEvent *)event
 {
-    NSParameterAssert(nil != description);
-    NSParameterAssert(nil != aKey);
-    OSSpinLockLock(&_descriptionLock);
-    [_descriptionTable setObject:description forKey:aKey];
-    OSSpinLockUnlock(&_descriptionLock);
-}    
+    /*
+     Handle escape; this is essentially overriding any key bindings, but interpretKeyEvents:
+     sends complete: on my system when I get an esc.  Even if that binding is not standard, it's
+     fairly common.
+     */
+    if ([[event characters] length] && [[event characters] characterAtIndex:0] == 0x001b) {
 
-- (id)init
-{
-    self = [super init];
-    if (self) {
-        _fullSize = NSZeroSize;
-        _pageCount = 0;
+        if ([[self window] delegate]) 
+            [(FVPreviewer *)[[self window] delegate] cancel:self];
+        else
+            [_windowDelegate cancel:self];
+        
     }
-    return self;
+    else {
+        [super keyDown:event];
+    }
 }
 
 @end
