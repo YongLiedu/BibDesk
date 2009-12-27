@@ -2690,10 +2690,10 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
             CGFloat side, sep;
             side = round(0.2 * NSHeight(iconRect));
             side = fmax(fmin(side, 32.0), 10.0);
-            sep = side < 16.0 ? 1.0 : 2.0;
+            sep = fmin(0.5 * side - 4.0, 4.0);
             // 2 pixels between arrows horizontally, and 4 pixels between bottom of arrow and bottom of iconRect
-            _leftArrowFrame = _rightArrowFrame = NSMakeRect(NSMidX(iconRect) + sep, NSMaxY(iconRect) - side - 2.0 * sep, side, side);
-            _leftArrowFrame.origin.x -= side + 2.0 * sep;
+            _leftArrowFrame = _rightArrowFrame = NSMakeRect(ceil(NSMidX(iconRect) + 0.5 * sep), NSMaxY(iconRect) - side - sep, side, side);
+            _leftArrowFrame.origin.x -= side + sep;
             
             [_leftArrow setRepresentedObject:anIcon];
             [_rightArrow setRepresentedObject:anIcon];
