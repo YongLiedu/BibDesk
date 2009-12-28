@@ -315,16 +315,6 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 
 #pragma mark File Content Search
 
-- (void)animateTableView:(NSTableView *)oldTable toTableView:(NSTableView *)newTable {
-    NSView *oldView = [oldTable enclosingScrollView];
-    NSView *newView = [newTable enclosingScrollView];
-    
-    [newView setFrame:[oldView frame]];
-    [[oldView superview] addSubview:newView];
-    [NSViewAnimation animateFadeOutView:oldView fadeInView:newView];
-    [oldView removeFromSuperview];
-}
-
 - (void)showFileContentSearch
 {
     if(fileSearchController == nil){
@@ -337,7 +327,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     
     [fileSearchController filterUsingURLs:[groupedPublications valueForKey:@"identifierURL"]];
     
-    [self animateTableView:tableView toTableView:[fileSearchController tableView]];
+    [NSViewAnimation animateReplaceView:[tableView enclosingScrollView] withView:[[fileSearchController tableView] enclosingScrollView]];
     if ([fileSearchController shouldShowControlView])
         [self insertControlView:[fileSearchController controlView] atTop:NO];
     
@@ -355,7 +345,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 {
     [[fileSearchController tableView] setDelegate:nil];
     
-    [self animateTableView:[fileSearchController tableView] toTableView:tableView];
+    [NSViewAnimation animateReplaceView:[[fileSearchController tableView] enclosingScrollView] withView:[tableView enclosingScrollView]];
     [self removeControlView:[fileSearchController controlView]];
     
     // reconnect the searchfield

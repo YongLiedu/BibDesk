@@ -43,5 +43,5 @@
 + (NSTimeInterval)defaultAnimationTimeInterval;
 + (void)animateWithViewAnimations:(NSArray *)viewAnimations;
 + (void)animateResizeView:(NSView *)aView toRect:(NSRect)aRect;
-+ (void)animateFadeOutView:(NSView *)fadeOutView fadeInView:(NSView *)fadeInView;
++ (void)animateReplaceView:(NSView *)fadeOutView withView:(NSView *)fadeInView;
 @end

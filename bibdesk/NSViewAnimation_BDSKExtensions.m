@@ -69,13 +69,19 @@
     }
 }
 
-+ (void)animateFadeOutView:(NSView *)fadeOutView fadeInView:(NSView *)fadeInView {
++ (void)animateReplaceView:(NSView *)fadeOutView withView:(NSView *)fadeInView {
+    [fadeInView setFrame:[fadeOutView frame]];
     if ([self defaultAnimationTimeInterval] > 0.0) {
         NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:fadeOutView, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
         NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:fadeInView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
+        [fadeInView setHidden:YES];
+        [[fadeOutView superview] addSubview:fadeInView positioned:NSWindowBelow relativeTo:fadeOutView];
         [self animateWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]];
+        [fadeOutView removeFromSuperview];
         [fadeOutDict release];
         [fadeInDict release];
+    } else {
+        [[fadeOutView superview] replaceSubview:fadeOutView with:fadeInView];
     }
 }
 
