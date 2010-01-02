@@ -27,53 +27,53 @@
     #import "BDSKStringConstants.h"
     #import <tgmath.h>
 
-#define BDSK_BUNDLE_IDENTIFIER @"edu.ucsd.cs.mmccrack.bibdesk"
+    #define BDSK_BUNDLE_IDENTIFIER @"edu.ucsd.cs.mmccrack.bibdesk"
 
-#define __FILENAMEASNSSTRING__ \
-[[NSString stringWithFileSystemRepresentation:__FILE__] lastPathComponent]
+    #define __FILENAMEASNSSTRING__ \
+    [[NSString stringWithFileSystemRepresentation:__FILE__] lastPathComponent]
 
-#if defined (DEBUG)
+    #if defined (DEBUG)
 
-#define log_method() \
-    NSLog(@"%@[%@ %@] (%@ line %d)", (id)[self class] == (id)self ? @"+" : @"-", [self class], NSStringFromSelector(_cmd), __FILENAMEASNSSTRING__, __LINE__)
+    #define log_method() \
+        NSLog(@"%@[%@ %@] (%@ line %d)", (id)[self class] == (id)self ? @"+" : @"-", [self class], NSStringFromSelector(_cmd), __FILENAMEASNSSTRING__, __LINE__)
 
-#define log_function() \
-    NSLog(@"%s (%@ line %d)", __PRETTY_FUNCTION__, __FILENAMEASNSSTRING__, __LINE__)
+    #define log_function() \
+        NSLog(@"%s (%@ line %d)", __PRETTY_FUNCTION__, __FILENAMEASNSSTRING__, __LINE__)
 
-#define BDSKPRECONDITION(expression) \
-    do { if (!(expression)) fprintf(stderr, "PRECONDITION failed: requires '%s', file %s, line %d\n", #expression, __FILE__, __LINE__); } while (NO)
-#define BDSKPOSTCONDITION(expression) \
-    do { if (!(expression)) fprintf(stderr, "POSTCONDITION failed: requires '%s', file %s, line %d\n", #expression, __FILE__, __LINE__); } while (NO)
-#define BDSKASSERT(expression) \
-    do { if (!(expression)) fprintf(stderr, "ASSERT failed: requires '%s', file %s, line %d\n", #expression, __FILE__, __LINE__); } while (NO)
-#define BDSKASSERT_NOT_REACHED(reason) \
-    do { fprintf(stderr, "NOTREACHED failed: requires '%s', file %s, line %d\n", reason, __FILE__, __LINE__); } while (NO)
+    #define BDSKPRECONDITION(expression) \
+        do { if (!(expression)) fprintf(stderr, "PRECONDITION failed: requires '%s', file %s, line %d\n", #expression, __FILE__, __LINE__); } while (NO)
+    #define BDSKPOSTCONDITION(expression) \
+        do { if (!(expression)) fprintf(stderr, "POSTCONDITION failed: requires '%s', file %s, line %d\n", #expression, __FILE__, __LINE__); } while (NO)
+    #define BDSKASSERT(expression) \
+        do { if (!(expression)) fprintf(stderr, "ASSERT failed: requires '%s', file %s, line %d\n", #expression, __FILE__, __LINE__); } while (NO)
+    #define BDSKASSERT_NOT_REACHED(reason) \
+        do { fprintf(stderr, "NOTREACHED failed: requires '%s', file %s, line %d\n", reason, __FILE__, __LINE__); } while (NO)
+
+    #define BDSKINITIALIZE \
+        do { \
+            static BOOL hasBeenInitialized = NO; \
+            [super initialize]; \
+            if (hasBeenInitialized) return; \
+            hasBeenInitialized = YES;\
+        } while (0);
+
+    #define BDSKDESTROY(variable) do { [variable release]; variable = nil; } while (0)
+    #define BDSKCFDESTROY(variable) do { if (variable) CFRelease(variable); variable = NULL; } while (0)
+    #define BDSKZONEDESTROY(variable) do { if (variable) NSZoneFree(NSZoneFromPointer((void *)variable), (void *)variable); variable = NULL; } while (0)
+
+    // see e.g. http://www.mulle-kybernetik.com/artikel/Optimization/opti-7.html, perhaps this could be improved on 64-bits
+    #define BDSKHash(self) (((NSUInteger) self >> 4) | ((NSUInteger) self << (32 - 4)))
 
 #else
 
-#define log_method()
-#define log_function()
+    #define log_method()
+    #define log_function()
 
-#define BDSKPRECONDITION(expression)
-#define BDSKPOSTCONDITION(expression)
-#define BDSKASSERT(expression)
-#define BDSKASSERT_NOT_REACHED(reason)
+    #define BDSKPRECONDITION(expression)
+    #define BDSKPOSTCONDITION(expression)
+    #define BDSKASSERT(expression)
+    #define BDSKASSERT_NOT_REACHED(reason)
 
 #endif
-
-#define BDSKINITIALIZE \
-    do { \
-        static BOOL hasBeenInitialized = NO; \
-        [super initialize]; \
-        if (hasBeenInitialized) return; \
-        hasBeenInitialized = YES;\
-    } while (0);
-
-#define BDSKDESTROY(variable) do { [variable release]; variable = nil; } while (0)
-#define BDSKCFDESTROY(variable) do { if (variable) CFRelease(variable); variable = NULL; } while (0)
-#define BDSKZONEDESTROY(variable) do { if (variable) NSZoneFree(NSZoneFromPointer((void *)variable), (void *)variable); variable = NULL; } while (0)
-
-// see e.g. http://www.mulle-kybernetik.com/artikel/Optimization/opti-7.html, perhaps this could be improved on 64-bits
-#define BDSKHash(self) (((NSUInteger) self >> 4) | ((NSUInteger) self << (32 - 4)))
 
 #endif
