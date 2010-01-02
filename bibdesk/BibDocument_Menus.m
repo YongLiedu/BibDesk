@@ -250,7 +250,6 @@
 }
 
 - (BOOL) validateToggleGroupsMenuItem:(NSMenuItem*) menuItem {
-    NSString *s;
 	if ([groupSplitView isSubviewCollapsed:[[groupSplitView subviews] objectAtIndex:0]])
 		[menuItem setTitle:NSLocalizedString(@"Show Groups", @"Menu item title")];
 	else
@@ -259,7 +258,6 @@
 }
 
 - (BOOL) validateToggleSidebarMenuItem:(NSMenuItem*) menuItem {
-    NSString *s;
 	if ([groupSplitView isSubviewCollapsed:[[groupSplitView subviews] objectAtIndex:2]])
 		[menuItem setTitle:NSLocalizedString(@"Show Sidebar", @"Menu item title")];
 	else
@@ -587,7 +585,7 @@
     return ([self numberOfSelectedPubs] != 0);
 }
 
-static inline SEL validateMenuItemSelector(SEL sel) {
+static SEL validateMenuItemSelector(SEL sel) {
     static NSMapTable *table = NULL;
     if (sel == NULL)
         return NULL;
