@@ -146,6 +146,8 @@ static id sharedController = nil;
 - (BOOL)windowShouldClose:(id)window {
     if ([[[self window] firstResponder] isKindOfClass:[NSText class]])
         [[self window] makeFirstResponder:nil];
+    if ([[self window] attachedSheet])
+        return NO;
     BDSKPreferencePane *pane = [self selectedPane];
     return pane == nil || [pane shouldCloseWindow];
 }
@@ -322,7 +324,7 @@ static id sharedController = nil;
         if ((pane || [identifier isEqualToString:@""]) && view) {
             if ([[[self window] firstResponder] isKindOfClass:[NSText class]] && [(NSView *)[[self window] firstResponder] isDescendantOf:[oldPane view]])
                 [[self window] makeFirstResponder:nil];
-            BDSKPreferencePaneUnselectReply shouldUnselect = (force == NO && oldPane) ? [oldPane shouldUnselect]  : BDSKPreferencePaneUnselectNow;
+            BDSKPreferencePaneUnselectReply shouldUnselect = [[self window] attachedSheet] ? BDSKPreferencePaneUnselectCancel : (force == NO && oldPane) ? [oldPane shouldUnselect]  : BDSKPreferencePaneUnselectNow;
             [self setDelayedPaneIdentifier:nil];
             if (shouldUnselect == BDSKPreferencePaneUnselectNow) {
                 [oldPane willUnselect];

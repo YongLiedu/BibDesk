@@ -77,17 +77,6 @@
     }
 }
 
-- (BDSKPreferencePaneUnselectReply)shouldUnselect {
-    if ([[[self view] window] attachedSheet])
-        return BDSKPreferencePaneUnselectCancel;
-    else
-        return BDSKPreferencePaneUnselectNow;
-}
-
-- (BOOL)shouldCloseWindow {
-    return [[[self view] window] attachedSheet] == nil;
-}
-
 - (void)updateAutoSaveUI{
     // prefs time is in seconds, but we display in minutes
     NSTimeInterval saveDelay = [sud integerForKey:BDSKAutosaveTimeIntervalKey] / 60;

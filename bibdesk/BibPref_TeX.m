@@ -102,17 +102,6 @@ static NSSet *standardStyles = nil;
     }
 }
 
-- (BDSKPreferencePaneUnselectReply)shouldUnselect {
-    if ([[[self view] window] attachedSheet])
-        return BDSKPreferencePaneUnselectCancel;
-    else
-        return BDSKPreferencePaneUnselectNow;
-}
-
-- (BOOL)shouldCloseWindow {
-    return [[[self view] window] attachedSheet] == nil;
-}
-
 - (void)updateBibTeXPathUI{
     NSString *bibTeXPath = [sud objectForKey:BDSKBibTeXBinPathKey];
     [bibtexBinaryPathField setStringValue:bibTeXPath];

@@ -105,17 +105,6 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
     }
 }
 
-- (BDSKPreferencePaneUnselectReply)shouldUnselect {
-    if ([[[self view] window] attachedSheet])
-        return BDSKPreferencePaneUnselectCancel;
-    else
-        return BDSKPreferencePaneUnselectNow;
-}
-
-- (BOOL)shouldCloseWindow {
-    return [[[self view] window] attachedSheet] == nil;
-}
-
 // sheet's delegate must be connected to file's owner in IB
 - (id)windowWillReturnFieldEditor:(NSWindow *)sender toObject:(id)anObject{
     return (anObject == formatSheetField ? coloringEditor : nil);
