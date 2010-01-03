@@ -144,13 +144,13 @@ static id sharedController = nil;
 }
 
 - (BOOL)windowShouldClose:(id)window {
+    if ([[[self window] firstResponder] isKindOfClass:[NSText class]])
+        [[self window] makeFirstResponder:nil];
     BDSKPreferencePane *pane = [self selectedPane];
     return pane == nil || [pane shouldCloseWindow];
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
-    if ([[[self window] firstResponder] isKindOfClass:[NSText class]])
-        [[self window] makeFirstResponder:nil];
     [[self selectedPane] willCloseWindow];
 }
 
@@ -320,13 +320,13 @@ static id sharedController = nil;
         BDSKPreferencePane *oldPane = [self selectedPane];
         NSView *view = pane ? [pane view] : [self iconView];
         if ((pane || [identifier isEqualToString:@""]) && view) {
-            BDSKPreferencePaneUnselectReply shouldUnselect = (force == NO && pane) ? [pane shouldUnselect]  : BDSKPreferencePaneUnselectNow;
+            if ([[[self window] firstResponder] isKindOfClass:[NSText class]] && [(NSView *)[[self window] firstResponder] isDescendantOf:[oldPane view]])
+                [[self window] makeFirstResponder:nil];
+            BDSKPreferencePaneUnselectReply shouldUnselect = (force == NO && oldPane) ? [oldPane shouldUnselect]  : BDSKPreferencePaneUnselectNow;
             [self setDelayedPaneIdentifier:nil];
             if (shouldUnselect == BDSKPreferencePaneUnselectNow) {
                 [oldPane willUnselect];
                 [pane willSelect];
-                if ([[[self window] firstResponder] isKindOfClass:[NSText class]] && [(NSView *)[[self window] firstResponder] isDescendantOf:[oldPane view]])
-                    [[self window] makeFirstResponder:nil];
                 [[self window] setTitle:pane ? [self localizedTitleForIdentifier:identifier] : [self defaultWindowTitle]];
                 [self changeContentView:view display:[[self window] isVisible]];
                 [oldPane didUnselect];
