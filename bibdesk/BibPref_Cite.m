@@ -74,6 +74,17 @@ static char BDSKBibPrefCiteDefaultsObservationContext;
     }
 }
 
+- (BDSKPreferencePaneUnselectReply)shouldUnselect {
+    if ([[[self view] window] attachedSheet])
+        return BDSKPreferencePaneUnselectCancel;
+    else
+        return BDSKPreferencePaneUnselectNow;
+}
+
+- (BOOL)shouldCloseWindow {
+    return [[[self view] window] attachedSheet] == nil;
+}
+
 - (void)dealloc{
     @try { [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree]]; }
     @catch (id e) {}

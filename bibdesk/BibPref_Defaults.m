@@ -227,6 +227,17 @@ static NSSet *alwaysDisabledFields = nil;
     [defaultFieldsTableView reloadData];
 }
 
+- (BDSKPreferencePaneUnselectReply)shouldUnselect {
+    if ([[[self view] window] attachedSheet])
+        return BDSKPreferencePaneUnselectCancel;
+    else
+        return BDSKPreferencePaneUnselectNow;
+}
+
+- (BOOL)shouldCloseWindow {
+    return [[[self view] window] attachedSheet] == nil;
+}
+
 - (void)defaultsDidRevert {
     // these should always be reset, becaus eth prefs may have changed
     [globalMacroFiles setArray:[sud stringArrayForKey:BDSKGlobalMacroFilesKey]];
