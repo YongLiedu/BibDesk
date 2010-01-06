@@ -38,11 +38,10 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKFile;
 
 @interface BDSKFileSearchResult : NSObject <NSCopying>
 {
-    BDSKFile *file;
+    NSURL *url;
     // title of the search result (shown in table)
     NSString *string;
     NSImage *image;

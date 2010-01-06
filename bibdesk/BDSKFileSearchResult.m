@@ -50,7 +50,7 @@
         
     if ((self = [super init])) {
         
-        file = [[BDSKFile alloc] initWithURL:aURL];
+        url = [aURL copy];
 
         image = [[NSImage imageForURL:aURL] retain];
         
@@ -65,7 +65,7 @@
 
 - (void)dealloc
 {
-    BDSKDESTROY(file);
+    BDSKDESTROY(url);
     BDSKDESTROY(string);
     BDSKDESTROY(identifierURL);
     BDSKDESTROY(image);
@@ -75,7 +75,7 @@
 - (id)copyWithZone:(NSZone *)zone
 {
     BDSKFileSearchResult *copy = [[[self class] allocWithZone:zone] init];
-    copy->file = [file copy];
+    copy->url = [url copy];
     copy->string = [string copy];
     copy->identifierURL = [identifierURL copy];
     copy->image = [image retain];
@@ -85,24 +85,24 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"File: %@ \n\t string = \"%@\"", file, string];
+    return [NSString stringWithFormat:@"File: %@ \n\t string = \"%@\"", url, string];
 }
 
 - (NSUInteger)hash
 {
-    return [file hash];
+    return [url hash];
 }
 
 - (BOOL)isEqual:(id)anObject
 {
     // base equality on identifierURL, since items are now displayed per-pub and the same file may appear multiple times
-    return ([anObject isKindOfClass:[self class]] && [((BDSKFileSearchResult *)anObject)->file isEqual:file] && [((BDSKFileSearchResult *)anObject)->identifierURL isEqual:identifierURL]);
+    return ([anObject isKindOfClass:[self class]] && [((BDSKFileSearchResult *)anObject)->url isEqual:url] && [((BDSKFileSearchResult *)anObject)->identifierURL isEqual:identifierURL]);
 }
 
 - (NSImage *)image { return image; }
 - (NSString *)string { return string; }
 - (NSURL *)identifierURL { return identifierURL; }
-- (NSURL *)URL { return [file fileURL]; }
+- (NSURL *)URL { return url; }
 - (void)setScore:(double)newScore { score = newScore; }
 - (double)score { return score; }
 
