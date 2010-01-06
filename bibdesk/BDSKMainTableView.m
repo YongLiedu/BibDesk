@@ -613,13 +613,16 @@ enum {
         [self removeTableColumnWithIdentifier:[sender representedObject]];
     else
         [self insertTableColumnWithIdentifier:[sender representedObject] atIndex:[self numberOfColumns]];
+    [[NSUserDefaults standardUserDefaults] setObject:[[[self tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
 }
 
 - (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     NSString *newColumnName = [addFieldController field];
     
-    if(newColumnName && returnCode == NSOKButton)
+    if (newColumnName && returnCode == NSOKButton) {
         [self insertTableColumnWithIdentifier:newColumnName atIndex:[self numberOfColumns]];
+        [[NSUserDefaults standardUserDefaults] setObject:[[[self tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
+    }
 }
 
 - (void)columnsMenuAddTableColumn:(id)sender{
