@@ -69,7 +69,7 @@
 #define QUEUE_HAS_NOTIFICATIONS 1
 
 // increment if incompatible changes are introduced
-#define CACHE_VERSION @"1"
+#define CACHE_VERSION @"2"
 
 #pragma mark API
 
@@ -604,7 +604,8 @@ static void addItemFunction(const void *value, void *context) {
     
     if (tmpIndex == NULL) {
         indexData = CFDataCreateMutable(CFAllocatorGetDefault(), 0);
-        tmpIndex = SKIndexCreateWithMutableData(indexData, NULL, kSKIndexInverted, NULL);
+        NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], (id)kSKMaximumTerms, [NSNumber numberWithInt:3], (id)kSKMinTermLength, nil];
+        tmpIndex = SKIndexCreateWithMutableData(indexData, NULL, kSKIndexInverted, (CFDictionaryRef)options);
     }
     
     index = tmpIndex;
