@@ -38,7 +38,6 @@
 
 #import "BDSKFileSearchResult.h"
 #import "NSImage_BDSKExtensions.h"
-#import "BDSKFile.h"
 
 @implementation BDSKFileSearchResult
 
