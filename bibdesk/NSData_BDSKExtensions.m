@@ -125,7 +125,7 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
     
     (void)CC_SHA1_Final(signature, &sha1context);
 
-    return [NSData dataWithBytes:signature length:signatureLength];
+    return offset > 0 ? [NSData dataWithBytes:signature length:signatureLength] : nil;
 }
 
 // The following code is taken and modified from Matt Gallagher's code at http://cocoawithlove.com/2009/06/base64-encoding-options-on-mac-and.html
