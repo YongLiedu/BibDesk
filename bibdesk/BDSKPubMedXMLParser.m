@@ -314,14 +314,17 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
             [pubFields setObject:ta forKey:BDSKJournalString];
         }
         
-        // grab the DOI if available
+        // grab the DOI and PMC if available
         NSArray *articleIDs = [article nodesForXPath:@"./PubmedData/ArticleIdList/ArticleId" error:NULL];
-        
         for (NSXMLElement *articleID in articleIDs) {
-            if ([articleID kind] == NSXMLElementKind && [[[articleID attributeForName:@"IdType"] stringValue] isEqualToString:@"doi"])
-                addStringValueOfNodeForField(articleID, BDSKDoiString, pubFields);
+            if ([articleID kind] == NSXMLElementKind) {
+                NSString *idType = [[articleID attributeForName:@"IdType"] stringValue];
+                if ([idType isEqualToString:@"doi"])
+                    addStringValueOfNodeForField(articleID, BDSKDoiString, pubFields);
+                else if ([idType isEqualToString:@"pmc"]) /* e.g. PMID 19930638 */
+                    addStringValueOfNodeForField(articleID, @"Pmc", pubFields);
+            }
         }
-        
         
         // for debugging
         if (_addXMLStringToAnnote) addStringToDictionaryIfNotNil([article XMLStringWithOptions:NSXMLNodePrettyPrint], BDSKAnnoteString, pubFields);
