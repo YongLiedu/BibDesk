@@ -102,8 +102,8 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     }
     
     // we now have a valid FSRef, since the last call to CFURLGetFSRef succeeded (assuming that / will always work)
-    // use kARMNoUI to avoid blocking while the Finder tries to mount idisk or other remote volues; this could be an option
-    err = FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kARMNoUI);
+    // use kResolveAliasFileNoUI to avoid blocking while the Finder tries to mount idisk or other remote volues; this could be an option
+    err = FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kResolveAliasFileNoUI);
     
     // remainder of this code assumes that fileURL is non-NULL, which should always be true
     NSCParameterAssert(fileURL != NULL);
@@ -137,7 +137,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
                 break;
             }
             
-            err = FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kARMNoUI);
+            err = FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kResolveAliasFileNoUI);
             if (err != noErr) {
                 CFRelease(fileURL);
                 fileURL = NULL;
