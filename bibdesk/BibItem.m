@@ -1476,12 +1476,18 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (NSDictionary *)searchIndexInfo{
     NSURL *aURL;
+    FSRef fileRef;
+    Boolean isFolder, wasAliased;
     
     // create an array of all local-URLs this object could have
     NSMutableArray *urls = [[NSMutableArray alloc] initWithCapacity:5];
     for (BDSKLinkedFile *file in [self localFiles]) {
-        if (aURL = [file URL])
+        if (aURL = [file URL]) {
+            // SearchKit cannot handle alias files, so we resolve those
+            if (CFURLGetFSRef((CFURLRef)aURL, &fileRef) && noErr == FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kResolveAliasFileNoUI) && wasAliased)
+                aURL = [(id)CFURLCreateFromFSRef(CFGetAllocator((CFURLRef)aURL), &fileRef) autorelease];
             [urls addObject:aURL];
+        }
     }
     
     NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[self identifierURL], @"identifierURL", urls, @"urls", nil];
