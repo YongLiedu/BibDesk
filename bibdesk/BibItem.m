@@ -2397,6 +2397,20 @@ static void addFilesToArray(const void *value, void *context)
     return [macros allObjects];
 }
 
+- (NSArray *)usedLocalMacros {
+    NSMutableSet *macros = [NSMutableSet set];
+    for (NSString *value in [pubFields objectEnumerator]) {
+        if ([value isComplex] == NO) continue;
+        for (BDSKStringNode *node in [value nodes]) {
+            if ([node type] != BDSKStringNodeMacro || [node value] == nil) continue;
+            BDSKMacro *macro = [[BDSKMacro alloc] initWithName:[node value] macroResolver:[self macroResolver]];
+            [macros addObject:macro];
+            [macro release];
+        }
+    }
+    return [macros allObjects];
+}
+
 #pragma mark -
 #pragma mark URL handling
 

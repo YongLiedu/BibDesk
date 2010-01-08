@@ -116,6 +116,7 @@ enum {
 - (NSArray *)remoteURLs;
 
 - (NSArray *)usedMacros;
+- (NSArray *)usedLocalMacros;
 
 - (NSURL *)suggestedURLForLinkedFile:(BDSKLinkedFile *)file;
 - (BOOL)canSetURLForLinkedFile:(BDSKLinkedFile *)file;

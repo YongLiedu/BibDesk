@@ -4364,6 +4364,8 @@ Below are lists of collection keys that could be used in BibDesk export template
 @tab 
 @item usedMacros
 @tab 
+@item usedLocalMacros
+@tab 
 @end multitable
 
 @subheading URLs and paths
