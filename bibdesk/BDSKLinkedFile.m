@@ -294,6 +294,14 @@ static Class BDSKLinkedFileClass = Nil;
 - (void)setDelegate:(id<BDSKLinkedFileDelegate>)aDelegate {}
 - (id<BDSKLinkedFileDelegate>)delegate { return nil; }
 
+- (NSString *)stringValue {
+    return [[self URL] absoluteString];
+}
+
+- (NSString *)bibTeXString {
+    return [[self stringRelativeToPath:nil] stringAsBibTeXString];
+}
+
 // for templating
 - (id)valueForUndefinedKey:(NSString *)key {
     return [[self URL] valueForKey:key];
@@ -765,10 +773,6 @@ static Class BDSKLinkedFileClass = Nil;
 {
     BDSKDESTROY(URL);
     [super dealloc];
-}
-
-- (NSString *)stringValue {
-    return [[self URL] absoluteString];
 }
 
 - (NSURL *)URL

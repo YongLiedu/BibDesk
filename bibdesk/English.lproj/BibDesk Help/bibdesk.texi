@@ -4321,6 +4321,8 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @item path
 @tab 
+@item bibTeXString
+@tab 
 @end multitable
 
 

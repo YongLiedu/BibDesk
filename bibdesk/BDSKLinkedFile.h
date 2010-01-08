@@ -69,6 +69,9 @@
 // string value to be saved as a field value, base64 encoded data for a local file or an absolute URL string for a remote URL
 - (NSString *)stringRelativeToPath:(NSString *)newBasePath;
 
+- (NSString *)stringValue;
+- (NSString *)bibTeXString;
+
 // the rest is only relevant for local files, but it's safe to call for any linked file object
 
 - (NSString *)relativePath;
