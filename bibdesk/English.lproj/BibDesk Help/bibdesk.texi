@@ -4275,6 +4275,8 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @item bibTeXString
 @tab 
+@item inherited
+@tab 
 @end multitable
 
 @subheading Author
