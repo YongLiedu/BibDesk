@@ -38,8 +38,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-extern CFStringRef BDSKSELCopyDescription(const void *value);
-
 extern const void *BDSKNSObjectRetain(CFAllocatorRef allocator, const void *value);
 extern void BDSKNSObjectRelease(CFAllocatorRef allocator, const void *value);
 extern CFStringRef BDSKNSObjectCopyDescription(const void *value);
