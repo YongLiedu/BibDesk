@@ -792,7 +792,7 @@ static BOOL addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
             if (error)
                 *error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Circular macro ignored.", @"Error description")];
         }else if(nil != macroString){
-            [macroResolver addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
+            [macroResolver setMacroWithoutUndo:macroKey toValue:macroString];
         }else {
             // set this to NO, but don't subsequently set it to YES; signals partial data
             success = NO;

@@ -170,20 +170,20 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     return macroDefinitions;
 }
 
-- (void)addMacroDefinitionWithoutUndo:(NSString *)macroString forMacro:(NSString *)macroKey{
+- (void)setMacroWithoutUndo:(NSString *)macroKey toValue:(NSString *)macroString {
     if (macroDefinitions == nil)
         [self loadMacroDefinitions];
     [macroDefinitions setObject:macroString forKey:macroKey];
 }
 
-- (void)changeMacroKey:(NSString *)oldKey to:(NSString *)newKey{
+- (void)changeMacro:(NSString *)oldKey to:(NSString *)newKey{
     if (macroDefinitions == nil)
         [self loadMacroDefinitions];
     if([macroDefinitions objectForKey:oldKey] == nil)
         [NSException raise:NSInvalidArgumentException
                     format:@"tried to change the value of a macro key that doesn't exist"];
     [[[self undoManager] prepareWithInvocationTarget:self]
-        changeMacroKey:newKey to:oldKey];
+        changeMacro:newKey to:oldKey];
     NSString *val = [macroDefinitions valueForKey:oldKey];
     
     // retain in case these go away with removeObjectForKey:
@@ -201,63 +201,28 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
                                                       userInfo:userInfo];    
 }
 
-- (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey{
-    if (macroDefinitions == nil)
-        [self loadMacroDefinitions];
-    // we're adding a new one, so to undo, we remove.
-    [[[self undoManager] prepareWithInvocationTarget:self]
-            removeMacro:macroKey];
-
-    [macroDefinitions setObject:macroString forKey:macroKey];
-	
-    modification++;
-    [self synchronize];
-	
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add macro", @"type", macroKey, @"macroKey", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
-                                                        object:self
-                                                      userInfo:userInfo];    
-}
-
-- (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey{
+- (void)setMacro:(NSString *)macroKey toValue:(NSString *)newDefinition {
     if (macroDefinitions == nil)
         [self loadMacroDefinitions];
     NSString *oldDef = [macroDefinitions objectForKey:macroKey];
-    if(oldDef == nil){
-        [self addMacroDefinition:newDefinition forMacro:macroKey];
-        return;
-    }
-    // we're just changing an existing one, so to undo, we change back.
     [[[self undoManager] prepareWithInvocationTarget:self]
-            setMacroDefinition:oldDef forMacro:macroKey];
-    [macroDefinitions setObject:newDefinition forKey:macroKey];
-	
-    modification++;
-    [self synchronize];
-
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Change macro", @"type", macroKey, @"macroKey", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
-                                                        object:self
-                                                      userInfo:userInfo];    
-}
-
-- (void)removeMacro:(NSString *)macroKey{
-    if (macroDefinitions == nil)
-        [self loadMacroDefinitions];
-    NSString *currentValue = [macroDefinitions objectForKey:macroKey];
-    if(!currentValue){
-        return;
-    }else{
-        [[[self undoManager] prepareWithInvocationTarget:self]
-              addMacroDefinition:currentValue
-                        forMacro:macroKey];
+            setMacro:macroKey toValue:oldDef];
+    NSString *type;
+    if (newDefinition == nil) {
+        if (oldDef == nil)
+            return;
+        type = @"Remove macro";
+    } else if (oldDef == nil) {
+        type = @"Add macro";
+    } else {
+        type = @"Change macro";
     }
-    [macroDefinitions removeObjectForKey:macroKey];
+    [macroDefinitions setValue:newDefinition forKey:macroKey];
 	
     modification++;
     [self synchronize];
-	
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Remove macro", @"type", macroKey, @"macroKey", nil];
+
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:type, @"type", macroKey, @"macroKey", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
                                                         object:self
                                                       userInfo:userInfo];    

@@ -102,7 +102,7 @@
     if ([macroResolver owner] && [[macroResolver owner] isDocument]) {
         if (name != newName) {
             if ([macroResolver valueOfMacro:name] != nil)
-                [macroResolver changeMacroKey:name to:newName];
+                [macroResolver changeMacro:name to:newName];
             [[macroResolver undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
             [name release];
             name = [newName copy];
@@ -120,7 +120,7 @@
 
 - (void)setValue:(NSString *)newValue {
     if ([macroResolver owner] && [[macroResolver owner] isDocument]) {
-        [macroResolver setMacroDefinition:newValue forMacro:name];
+        [macroResolver setMacro:name toValue:newValue];
         [[macroResolver undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
@@ -137,7 +137,7 @@
     if ([macroResolver owner] && [[macroResolver owner] isDocument]) {
         NSString *value = [NSString stringWithBibTeXString:newValue macroResolver:macroResolver error:NULL];
         if (value) {
-            [macroResolver setMacroDefinition:value forMacro:name];
+            [macroResolver setMacro:name toValue:value];
             [[macroResolver undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
         } else {
             NSBeep();

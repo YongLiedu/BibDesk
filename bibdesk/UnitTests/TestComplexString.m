@@ -76,10 +76,8 @@
 	static BDSKMacroResolver *macroResolver = nil;
 	if (macroResolver == nil) {
 		macroResolver = [[BDSKMacroResolver alloc] initWithOwner:nil];
-		[macroResolver addMacroDefinition:@"expansion1"  
-								 forMacro:@"macro1"];
-		[macroResolver addMacroDefinition:@"expansion2"  
-								 forMacro:@"macro2"];
+		[macroResolver setMacro:@"macro1" toValue:@"expansion1"];
+		[macroResolver setMacro:@"macro2" toValue:@"expansion2"];
 	}
 	return macroResolver;
 }

@@ -264,7 +264,7 @@
         while([macroDefinitions objectForKey:newKey] != nil)
             newKey = [NSString stringWithFormat:@"macro%ld", (long)++i];
         
-        [macroResolver addMacroDefinition:@"definition" forMacro:newKey];
+        [macroResolver setMacro:newKey toValue:@"definition"];
         [[[self window] undoManager] setActionName:NSLocalizedString(@"Add Macro", @"Undo action name")];
         
         NSUInteger row = [[[arrayController arrangedObjects] valueForKey:@"name"] indexOfObject:newKey];
@@ -276,7 +276,7 @@
         BDSKASSERT(isEditable);
         NSArray *macrosToRemove = [[[arrayController arrangedObjects] objectsAtIndexes:[tableView selectedRowIndexes]] valueForKey:@"name"];
         for (NSString *key in macrosToRemove) {
-            [macroResolver removeMacro:key];
+            [macroResolver setMacro:key toValue:nil];
             [[[self window] undoManager] setActionName:NSLocalizedString(@"Delete Macro", @"Undo action name")];
         }
         
@@ -446,7 +446,7 @@
 			return;
 		}
 		
-        [macroResolver changeMacroKey:key to:object];
+        [macroResolver changeMacro:key to:object];
 
         // Rearranging objects will likely move the row we just edited (bug #1859542), so find this macro and edit its value instead of some random macro's value.  Using [[arrayController arrangedObjects] indexOfObject:macro] won't work because the notification handler just replaced it with another object (so that's probably a garbage pointer now, as well).
         NSUInteger newRow = [[[arrayController arrangedObjects] valueForKeyPath:@"name.lowercaseString"] indexOfObject:[object lowercaseString]];
@@ -475,7 +475,7 @@
 			return;
 		}
         
-		[macroResolver setMacroDefinition:object forMacro:key];
+		[macroResolver setMacro:key toValue:object];
 		
 		[undoMan setActionName:NSLocalizedString(@"Change Macro Definition", @"Undo action name")];
     }
@@ -632,7 +632,7 @@
     for (NSString *macroKey in defs) {
         macroString = [defs objectForKey:macroKey];
 		if([macroResolver macroDefinition:macroString dependsOnMacro:macroKey] == NO)
-            [(BDSKMacroResolver *)macroResolver setMacroDefinition:macroString forMacro:macroKey];
+            [(BDSKMacroResolver *)macroResolver setMacro:macroKey toValue:macroString];
 		else
             hadCircular = YES;
         [[[self window] undoManager] setActionName:NSLocalizedString(@"Change Macro Definition", @"Undo action name")];
