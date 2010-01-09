@@ -49,8 +49,6 @@ extern CFHashCode BDSKCaseInsensitiveStringHash(const void *value);
 
 #pragma mark CallBacks
 
-extern const CFDictionaryValueCallBacks kBDSKSELDictionaryValueCallBacks;
-
 extern const CFDictionaryKeyCallBacks kBDSKCaseInsensitiveStringDictionaryKeyCallBacks;
 
 extern const CFSetCallBacks kBDSKCaseInsensitiveStringSetCallBacks;

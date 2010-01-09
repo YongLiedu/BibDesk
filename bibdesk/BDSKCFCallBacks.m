@@ -39,10 +39,6 @@
 #import "BDSKCFCallBacks.h"
 #import "CFString_BDSKExtensions.h"
 
-CFStringRef BDSKSELCopyDescription(const void *value) {
-    return (CFStringRef)[NSStringFromSelector((SEL)value) retain];
-}
-
 const void *BDSKNSObjectRetain(CFAllocatorRef allocator, const void *value) {
     return [(id)value retain];
 }
@@ -56,20 +52,12 @@ CFStringRef BDSKNSObjectCopyDescription(const void *value) {
 }
 
 Boolean BDSKCaseInsensitiveStringEqual(const void *value1, const void *value2) {
-    return (CFStringCompareWithOptions(value1, value2, CFRangeMake(0, CFStringGetLength(value1)), kCFCompareCaseInsensitive) == kCFCompareEqualTo);
+    return (CFStringGetLength(value1) == CFStringGetLength(value2) && CFStringCompareWithOptions(value1, value2, CFRangeMake(0, CFStringGetLength(value1)), kCFCompareCaseInsensitive) == kCFCompareEqualTo);
 }
 
 CFHashCode BDSKCaseInsensitiveStringHash(const void *value) {
     return BDCaseInsensitiveStringHash(value);
 }
-
-const CFDictionaryValueCallBacks kBDSKSELDictionaryValueCallBacks = {
-    0,    // version
-    NULL, // retain
-    NULL, // release
-    BDSKSELCopyDescription,
-    NULL  // equal
-};
 
 const CFDictionaryKeyCallBacks kBDSKCaseInsensitiveStringDictionaryKeyCallBacks = {
     0,   // version

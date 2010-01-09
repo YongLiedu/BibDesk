@@ -200,7 +200,7 @@ static NSURL *createUniqueURL(void)
 static NSParagraphStyle* keyParagraphStyle = nil;
 static NSParagraphStyle* bodyParagraphStyle = nil;
 
-static CFDictionaryRef selectorTable = NULL;
+static NSMapTable *selectorTable = NULL;
 
 #pragma mark -
 
@@ -220,21 +220,22 @@ static CFDictionaryRef selectorTable = NULL;
     [defaultStyle release];
     
     // Create a table of field/SEL pairs used for searching
-    CFMutableDictionaryRef table = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFCopyStringDictionaryKeyCallBacks, &kBDSKSELDictionaryValueCallBacks);
+    NSMapTable *mapTable = NSCreateMapTable(NSObjectMapKeyCallBacks, NSNonOwnedPointerMapValueCallBacks, 0);
     
-    CFDictionaryAddValue(table, (CFStringRef)BDSKTitleString, NSSelectorFromString(@"title"));
-    CFDictionaryAddValue(table, (CFStringRef)BDSKAuthorString, NSSelectorFromString(@"bibTeXAuthorString"));
-    CFDictionaryAddValue(table, (CFStringRef)BDSKAllFieldsString, NSSelectorFromString(@"allFieldsString"));
-    CFDictionaryAddValue(table, (CFStringRef)BDSKPubTypeString, NSSelectorFromString(@"pubType"));
-    CFDictionaryAddValue(table, (CFStringRef)BDSKCiteKeyString, NSSelectorFromString(@"citeKey"));
+    NSMapInsert(mapTable, BDSKTitleString, NSSelectorFromString(@"title"));
+    NSMapInsert(mapTable, BDSKAuthorString, NSSelectorFromString(@"bibTeXAuthorString"));
+    NSMapInsert(mapTable, BDSKAllFieldsString, NSSelectorFromString(@"allFieldsString"));
+    NSMapInsert(mapTable, BDSKPubTypeString, NSSelectorFromString(@"pubType"));
+    NSMapInsert(mapTable, BDSKCiteKeyString, NSSelectorFromString(@"citeKey"));
     
     // legacy field name support
-    CFDictionaryAddValue(table, CFSTR("Modified"), NSSelectorFromString(@"calendarDateModifiedDescription"));
-    CFDictionaryAddValue(table, CFSTR("Added"), NSSelectorFromString(@"calendarDateAddedDescription"));
-    CFDictionaryAddValue(table, CFSTR("Created"), NSSelectorFromString(@"calendarDateAddedDescription"));
-    CFDictionaryAddValue(table, CFSTR("Pub Type"), NSSelectorFromString(@"pubType"));
-    selectorTable = CFDictionaryCreateCopy(CFAllocatorGetDefault(), table);
-    CFRelease(table);
+    NSMapInsert(mapTable, @"Modified", NSSelectorFromString(@"calendarDateModifiedDescription"));
+    NSMapInsert(mapTable, @"Added", NSSelectorFromString(@"calendarDateAddedDescription"));
+    NSMapInsert(mapTable, @"Created", NSSelectorFromString(@"calendarDateAddedDescription"));
+    NSMapInsert(mapTable, @"Pub Type", NSSelectorFromString(@"pubType"));
+    
+    selectorTable = NSCopyMapTableWithZone(mapTable, NULL);
+    NSFreeMapTable(mapTable);
     
     // hidden pref as support for RFE #1690155 https://sourceforge.net/tracker/index.php?func=detail&aid=1690155&group_id=61487&atid=497426
     // partially implemented; view will represent this as inherited unless it goes through -[BibItem valueOfField:inherit:], which fields like "Key" certainly will
@@ -1448,7 +1449,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (BOOL)matchesSubstring:(NSString *)substring inField:(NSString *)field;
 {
-    SEL selector = (void *)CFDictionaryGetValue(selectorTable, (CFStringRef)field);
+    SEL selector = (SEL)NSMapGet(selectorTable, field);
     if (NULL == selector) {
         if ([field isBooleanField])
             return [self boolValueOfField:field] == [substring booleanValue];
