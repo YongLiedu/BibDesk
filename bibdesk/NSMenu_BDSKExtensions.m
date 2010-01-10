@@ -306,30 +306,21 @@ static id sharedOpenWithController = nil;
 + (id)sharedInstance
 {
     if (sharedOpenWithController == nil)
-        [[self alloc] init];
+        sharedOpenWithController = [[self alloc] init];
     return sharedOpenWithController;
 }
 
-+ (id)allocWithZone:(NSZone *)zone
-{
-    if (sharedOpenWithController == nil)
-        sharedOpenWithController = [[super allocWithZone:zone] init];
-    return sharedOpenWithController;
+- (id)copyWithZone:(NSZone *)zone{ return [self retain]; }
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    [self release];
+    return [sharedOpenWithController retain];
 }
 
-- (id)copyWithZone:(NSZone *)zone{ return self; }
-
-- (void)encodeWithCoder:(NSCoder *)coder{}
-
-- (id)initWithCoder:(NSCoder *)decoder { return self; }
-
-- (id)retain { return self; }
-
-- (id)autorelease { return self; }
-
-- (void)release {}
-
-- (NSUInteger)retainCount { return NSUIntegerMax; }
+- (id)init {
+    BDSKPRECONDITION(sharedOpenWithController == nil);
+    return [super init];
+}
 
 - (void)chooseApplicationToOpenURL:(NSURL *)aURL;
 {

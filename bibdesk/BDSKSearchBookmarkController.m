@@ -70,16 +70,13 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 
 + (id)sharedBookmarkController {
     if (sharedBookmarkController == nil)
-        [[self alloc] init];
+        sharedBookmarkController = [[self alloc] init];
     return sharedBookmarkController;
 }
 
-+ (id)allocWithZone:(NSZone *)zone {
-    return sharedBookmarkController ?: [super allocWithZone:zone];
-}
-
 - (id)init {
-    if ((sharedBookmarkController == nil) && (sharedBookmarkController = self = [super initWithWindowNibName:@"SearchBookmarksWindow"])) {
+    BDSKPRECONDITION(sharedBookmarkController == nil);
+    if (self = [super initWithWindowNibName:@"SearchBookmarksWindow"]) {
         NSMutableArray *bookmarks = [NSMutableArray array];
         for (NSDictionary *dict in [[NSUserDefaults standardUserDefaults] arrayForKey:BDSKSearchGroupBookmarksKey]) {
             BDSKSearchBookmark *bm = [BDSKSearchBookmark searchBookmarkWithDictionary:dict];
@@ -90,16 +87,8 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
         bookmarkRoot = [[BDSKSearchBookmark alloc] initRootWithChildren:bookmarks];
         [self startObservingBookmarks:[NSArray arrayWithObject:bookmarkRoot]];
     }
-    return sharedBookmarkController;
+    return self;
 }
-
-- (id)retain { return self; }
-
-- (id)autorelease { return self; }
-
-- (void)release {}
-
-- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)windowDidLoad {
     [self setupToolbar];

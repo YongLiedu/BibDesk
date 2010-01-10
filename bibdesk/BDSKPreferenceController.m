@@ -81,39 +81,40 @@
 
 @implementation BDSKPreferenceController
 
+// we want to be able to get the shared instance in MainMenu.nib, which passes through alloc/init, so we need to be a bit more careful
+
 static id sharedController = nil;
 
 + (id)sharedPreferenceController {
     if (nil == sharedController)
-        [[self alloc] init];
+        [[[self alloc] init] release];
     return sharedController;
 }
 
 + (id)allocWithZone:(NSZone *)zone {
-    return sharedController ?: [super allocWithZone:zone];
+    return [sharedController retain] ?: [super allocWithZone:zone];
 }
 
 - (id)init {
-    if ((sharedController == nil) && (sharedController = self = [super initWithWindowNibName:@"Preferences"])) {
-        categories = [[NSMutableArray alloc] init];
-        categoryDicts = [[NSMutableDictionary alloc] init];
-        records = [[NSMutableDictionary alloc] init];
-        panes = [[NSMutableDictionary alloc] init];
-        identifierSearchTerms = [[NSMutableDictionary alloc] init];
-        selectedPaneIdentifier = [@"" retain];
-        helpBookName = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleHelpBookName"] retain];
-        [self loadPreferences];
+    if (sharedController == nil) {
+        if (self = [super initWithWindowNibName:@"Preferences"]) {
+            categories = [[NSMutableArray alloc] init];
+            categoryDicts = [[NSMutableDictionary alloc] init];
+            records = [[NSMutableDictionary alloc] init];
+            panes = [[NSMutableDictionary alloc] init];
+            identifierSearchTerms = [[NSMutableDictionary alloc] init];
+            selectedPaneIdentifier = [@"" retain];
+            helpBookName = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleHelpBookName"] retain];
+            [self loadPreferences];
+        }
+        sharedController = [self retain];
+    } else if (self != sharedController) {
+        BDSKASSERT_NOT_REACHED("shouldn't be able to create multiple instances");
+        [self release];
+        self = [sharedController retain];
     }
     return sharedController;
 }
-
-- (id)retain { return self; }
-
-- (id)autorelease { return self; }
-
-- (void)release {}
-
-- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 // windiwDidLoad comes after the window is already moved onscreen, I think that's wrong
 - (void)windowDidLoad {

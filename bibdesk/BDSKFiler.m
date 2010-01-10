@@ -74,28 +74,17 @@ static BDSKFiler *sharedFiler = nil;
 
 + (BDSKFiler *)sharedFiler{
 	if (sharedFiler == nil)
-		[[BDSKFiler alloc] init];
+		sharedFiler = [[BDSKFiler alloc] init];
 	return sharedFiler;
-}
-
-+ (id)allocWithZone:(NSZone *)zone {
-    return sharedFiler ?: [super allocWithZone:zone];
 }
 
 - (id)init{
-	if((sharedFiler == nil) && (sharedFiler = self = [super init])){
+    BDSKPRECONDITION(sharedFiler == nil);
+	if (self = [super init]) {
 		errorInfoDicts = [[NSMutableArray alloc] initWithCapacity:10];
 	}
-	return sharedFiler;
+	return self;
 }
-
-- (id)retain { return self; }
-
-- (id)autorelease { return self; }
-
-- (void)release {}
-
-- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 #pragma mark Auto file methods
 

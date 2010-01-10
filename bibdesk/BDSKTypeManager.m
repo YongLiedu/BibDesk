@@ -55,16 +55,13 @@ static BDSKTypeManager *sharedInstance = nil;
 
 + (BDSKTypeManager *)sharedManager{
     if (sharedInstance == nil)
-        [[self alloc] init];
+        sharedInstance = [[self alloc] init];
     return sharedInstance;
 }
 
-+ (id)allocWithZone:(NSZone *)zone {
-    return sharedInstance ?: [super allocWithZone:zone];
-}
-
 - (id)init{
-    if ((sharedInstance == nil) && (sharedInstance = self = [super init])) {
+    BDSKPRECONDITION(sharedInstance == nil);
+    if (self = [super init]) {
         
         [self reloadTypeInfo];
         
@@ -142,16 +139,8 @@ static BDSKTypeManager *sharedInstance = nil;
                    options:0
                    context:&BDSKTypeManagerDefaultsObservationContext];
     }
-	return sharedInstance;
+	return self;
 }
-
-- (id)retain { return self; }
-
-- (id)autorelease { return self; }
-
-- (void)release {}
-
-- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)reloadTypeInfo{
     // Load the TypeInfo plists

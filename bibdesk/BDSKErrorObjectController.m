@@ -69,18 +69,15 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 + (BDSKErrorObjectController *)sharedErrorObjectController;
 {
-    if(sharedErrorObjectController == nil)
-        [[BDSKErrorObjectController alloc] init];
+    if (sharedErrorObjectController == nil)
+        sharedErrorObjectController = [[BDSKErrorObjectController alloc] init];
     return sharedErrorObjectController;
-}
-
-+ (id)allocWithZone:(NSZone *)zone {
-    return sharedErrorObjectController ?: [super allocWithZone:zone];
 }
 
 - (id)init;
 {
-    if((sharedErrorObjectController == nil) && (sharedErrorObjectController = self = [super initWithWindowNibName:@"BDSKErrorPanel"])){
+    BDSKPRECONDITION(sharedErrorObjectController == nil);
+    if (self = [super initWithWindowNibName:@"BDSKErrorPanel"]) {
         errors = [[NSMutableArray alloc] initWithCapacity:10];
         managers = [[NSMutableArray alloc] initWithCapacity:4];
         lastIndex = 0;
@@ -102,16 +99,8 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
                                                    object:nil];
     }
     
-    return sharedErrorObjectController;
+    return self;
 }
-
-- (id)retain { return self; }
-
-- (id)autorelease { return self; }
-
-- (void)release {}
-
-- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)awakeFromNib;
 {

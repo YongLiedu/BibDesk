@@ -60,12 +60,8 @@ static NSArray *scriptHookNames = nil;
 
 + (BDSKScriptHookManager *)sharedManager {
 	if (sharedManager == nil)
-		[[self alloc] init];
+		sharedManager = [[self alloc] init];
 	return sharedManager;
-}
-
-+ (id)allocWithZone:(NSZone *)zone {
-    return sharedManager ?: [super allocWithZone:zone];
 }
 
 + (NSArray *)scriptHookNames {
@@ -85,19 +81,12 @@ static NSArray *scriptHookNames = nil;
 }
 
 - (id)init {
-    if ((sharedManager == nil) && (sharedManager = self = [super init])) {
+    BDSKPRECONDITION(sharedManager == nil);
+    if (self = [super init]) {
 		scriptHooks = [[NSMutableDictionary alloc] initWithCapacity:3];
 	}
-	return sharedManager;
+	return self;
 }
-
-- (id)retain { return self; }
-
-- (id)autorelease { return self; }
-
-- (void)release {}
-
-- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (BDSKScriptHook *)scriptHookWithUniqueID:(NSNumber *)uniqueID {
 	return [scriptHooks objectForKey:uniqueID];

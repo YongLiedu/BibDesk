@@ -49,28 +49,17 @@ static id sharedManager = nil;
 
 + (id)sharedManager {
     if (sharedManager == nil)
-        [[self alloc] init];
+        sharedManager = [[self alloc] init];
     return sharedManager;
-}
-
-+ (id)allocWithZone:(NSZone *)zone {
-    return sharedManager ?: [super allocWithZone:zone];
 }
 
 - (id)init {
-    if((sharedManager == nil) && (sharedManager = self = [super init])) {
+    BDSKPRECONDITION(sharedManager == nil);
+    if(self = [super init]) {
         autoCompletionDict = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
     }
-    return sharedManager;
+    return self;
 }
-
-- (id)retain { return self; }
-
-- (id)autorelease { return self; }
-
-- (void)release {}
-
-- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)addNamesForCompletion:(NSArray *)names {
     NSMutableSet *nameSet = [autoCompletionDict objectForKey:BDSKAuthorString];

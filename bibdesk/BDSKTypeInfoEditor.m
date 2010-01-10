@@ -53,17 +53,14 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 + (BDSKTypeInfoEditor *)sharedTypeInfoEditor{
     if (sharedTypeInfoEditor == nil) 
-        [[BDSKTypeInfoEditor alloc] init];
+        sharedTypeInfoEditor = [[BDSKTypeInfoEditor alloc] init];
     return sharedTypeInfoEditor;
-}
-
-+ (id)allocWithZone:(NSZone *)zone {
-    return sharedTypeInfoEditor ?: [super allocWithZone:zone];
 }
 
 - (id)init
 {
-    if ((sharedTypeInfoEditor == nil) && (sharedTypeInfoEditor = self = [super initWithWindowNibName:@"BDSKTypeInfoEditor"])) {
+    BDSKPRECONDITION(sharedTypeInfoEditor == nil);
+    if (self = [super initWithWindowNibName:@"BDSKTypeInfoEditor"]) {
 		// we keep a copy to the bundles TypeInfo list to see which items we shouldn't edit
 		NSDictionary *tmpDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"TypeInfo.plist"]];
 		// we are only interested in this dictionary
@@ -76,16 +73,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 		types = [[NSMutableArray alloc] initWithCapacity:[defaultFieldsForTypesDict count]];
 		[self revertTypes]; // this loads the current typeInfo from BDSKTypeManager
     }
-    return sharedTypeInfoEditor;
+    return self;
 }
-
-- (id)retain { return self; }
-
-- (id)autorelease { return self; }
-
-- (void)release {}
-
-- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)awakeFromNib
 {

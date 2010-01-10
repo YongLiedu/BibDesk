@@ -75,16 +75,13 @@ static id sharedBookmarkController = nil;
 
 + (id)sharedBookmarkController {
     if (sharedBookmarkController == nil)
-        [[self alloc] init];
+        sharedBookmarkController = [[self alloc] init];
     return sharedBookmarkController;
 }
 
-+ (id)allocWithZone:(NSZone *)zone {
-    return sharedBookmarkController ?: [super allocWithZone:zone];
-}
-
 - (id)init {
-    if (sharedBookmarkController == nil && (sharedBookmarkController = self = [super initWithWindowNibName:@"BookmarksWindow"])) {
+    BDSKPRECONDITION(sharedBookmarkController == nil);
+    if (self = [super initWithWindowNibName:@"BookmarksWindow"]) {
 		undoManager = nil;
         
         NSMutableArray *bookmarks = [NSMutableArray array];
@@ -103,16 +100,8 @@ static id sharedBookmarkController = nil;
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminateNotification:) name:NSApplicationWillTerminateNotification object:nil];
     }
-    return sharedBookmarkController;
+    return self;
 }
-
-- (id)retain { return self; }
-
-- (id)autorelease { return self; }
-
-- (void)release {}
-
-- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)windowDidLoad {
     [self setupToolbar];

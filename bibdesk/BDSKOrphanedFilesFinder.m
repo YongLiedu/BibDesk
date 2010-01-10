@@ -68,29 +68,18 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 + (id)sharedFinder {
     if (sharedFinder == nil)
-        [[[self class] alloc] init];
+        sharedFinder = [[self alloc] init];
     return sharedFinder;
-}
-
-+ (id)allocWithZone:(NSZone *)zone {
-    return sharedFinder ?: [super allocWithZone:zone];
 }
 
 - (id)init {
-    if ((sharedFinder == nil) && (sharedFinder = self = [super init])) {
+    BDSKPRECONDITION(sharedFinder == nil);
+    if (self = [super init]) {
         orphanedFiles = [[NSMutableArray alloc] init];
         wasLaunched = NO;
     }
-    return sharedFinder;
+    return self;
 }
-
-- (id)retain { return self; }
-
-- (id)autorelease { return self; }
-
-- (void)release {}
-
-- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)awakeFromNib{
     [self setWindowFrameAutosaveName:@"BDSKOrphanedFilesWindow"];

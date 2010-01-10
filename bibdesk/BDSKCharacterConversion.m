@@ -48,17 +48,14 @@ static BDSKCharacterConversion *sharedConversionEditor;
 
 + (BDSKCharacterConversion *)sharedConversionEditor{
     if (sharedConversionEditor == nil)
-        [[BDSKCharacterConversion alloc] init];
+        sharedConversionEditor = [[BDSKCharacterConversion alloc] init];
     return sharedConversionEditor;
-}
-
-+ (id)allocWithZone:(NSZone *)zone {
-    return sharedConversionEditor ?: [super allocWithZone:zone];
 }
 
 - (id)init
 {
-    if ((sharedConversionEditor == nil) && (sharedConversionEditor = self = [super initWithWindowNibName:@"BDSKCharacterConversion"])) {  
+    BDSKPRECONDITION(sharedConversionEditor == nil);
+    if (self = [super initWithWindowNibName:@"BDSKCharacterConversion"]) {  
 		
 		oneWayDict = [[NSMutableDictionary alloc] initWithCapacity:1];
 		twoWayDict = [[NSMutableDictionary alloc] initWithCapacity:1];
@@ -72,16 +69,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
 		[self updateDicts];
 		
 	}
-    return sharedConversionEditor;
+    return self;
 }
-
-- (id)retain { return self; }
-
-- (id)autorelease { return self; }
-
-- (void)release {}
-
-- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)awakeFromNib {
 	texFormatter = [[BDSKTeXFormatter alloc] init];

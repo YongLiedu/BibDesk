@@ -59,28 +59,17 @@ static BDSKConverter *sharedConverter = nil;
 
 + (BDSKConverter *)sharedConverter{
     if (sharedConverter == nil)
-        [[self alloc] init];
+        sharedConverter = [[self alloc] init];
     return sharedConverter;
-}
-
-+ (id)allocWithZone:(NSZone *)zone {
-    return sharedConverter ?: [super allocWithZone:zone];
 }
 
 - (id)init{
-    if ((sharedConverter == nil) && (sharedConverter = self = [super init])) {
+    BDSKPRECONDITION(sharedConverter == nil);
+    if (self = [super init]) {
         [self loadDict];
     }
-    return sharedConverter;
+    return self;
 }
-
-- (id)retain { return self; }
-
-- (id)autorelease { return self; }
-
-- (void)release {}
-
-- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 - (void)loadDict{
     

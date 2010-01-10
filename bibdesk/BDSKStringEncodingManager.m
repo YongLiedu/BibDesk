@@ -129,7 +129,7 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
 
 + (BDSKStringEncodingManager *)sharedEncodingManager{
     if (sharedEncodingManager == nil)
-        [[self alloc] init];
+        sharedEncodingManager = [[self alloc] init];
     return sharedEncodingManager;
 }
 
@@ -138,23 +138,11 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
     return [[NSUserDefaults standardUserDefaults] integerForKey:BDSKDefaultStringEncodingKey];
 }
 
-+ (id)allocWithZone:(NSZone *)zone {
-    return sharedEncodingManager ?: [super allocWithZone:zone];
-}
-
 - (id)init{
-    if (sharedEncodingManager == nil)
-        sharedEncodingManager = [super init];
-    return sharedEncodingManager;
+    BDSKPRECONDITION(sharedEncodingManager == nil);
+    self = [super init];
+    return self;
 }
-
-- (id)retain { return self; }
-
-- (id)autorelease { return self; }
-
-- (void)release {}
-
-- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 #pragma mark -
 
