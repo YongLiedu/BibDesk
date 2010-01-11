@@ -347,10 +347,8 @@ static BDSKFiler *sharedFiler = nil;
     if ([[notification object] isEqual:window]) {
         [[self mutableArrayValueForKey:@"errorInfoDicts"] removeAllObjects];
         [tv reloadData]; // this is necessary to avoid an exception
-        [document release];
-        document = nil;
-        [fieldName release];
-        fieldName = nil;
+        BDSKDESTROY(document);
+        BDSKDESTROY(fieldName);
         options = 0;
         [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:window];
     }
