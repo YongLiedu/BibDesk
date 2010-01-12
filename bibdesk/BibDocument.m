@@ -1356,7 +1356,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         fileWrapper = [self fileWrapperForPublications:items usingTemplate:selectedTemplate];
         if(fileWrapper == nil){
             if (outError) 
-                *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"Error description")];
+                *outError = [NSError localErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"Error description")];
         }
     }else if ([aType isEqualToString:BDSKArchiveDocumentType]){
         BDSKASSERT_NOT_REACHED("Should not save a fileWrapper for archive");

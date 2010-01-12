@@ -746,7 +746,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         if (path && (fileURL = [NSURL fileURLWithPath:path])) {
             document = [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:fileURL display:YES error:&error];
         } else {
-            error = [NSError mutableLocalErrorWithCode:kBDSKURLOperationFailed localizedDescription:NSLocalizedString(@"Unable to get item from bdsk:// URL.", @"error when opening bdskURL")];
+            error = [NSError localErrorWithCode:kBDSKURLOperationFailed localizedDescription:NSLocalizedString(@"Unable to get item from bdsk:// URL.", @"error when opening bdskURL")];
         }
         
     } else if ([[theURL scheme] isEqualToString:@"x-bdsk-search"]) {
@@ -764,7 +764,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             [[document groups] addSearchGroup:group];
             [group release];
         } else {
-            error = [NSError mutableLocalErrorWithCode:kBDSKURLOperationFailed localizedDescription:NSLocalizedString(@"Unable to get search group from bdsksearch:// URL.", @"error when opening bdsksearch URL")];
+            error = [NSError localErrorWithCode:kBDSKURLOperationFailed localizedDescription:NSLocalizedString(@"Unable to get search group from bdsksearch:// URL.", @"error when opening bdsksearch URL")];
         }
         
     } else if (([[theURL scheme] isEqualToString:@"http"] || [[theURL scheme] isEqualToString:@"https"]) &&

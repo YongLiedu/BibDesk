@@ -980,7 +980,7 @@ FSOpenIterator:
         nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
     }
     else if (NULL != error && nil != encodingString /* we read something from EA, but couldn't understand it */) {
-        *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:NSLocalizedString(@"Unable to interpret com.apple.TextEncoding", @"")];
+        *error = [NSError localErrorWithCode:kBDSKStringEncodingError localizedDescription:NSLocalizedString(@"Unable to interpret com.apple.TextEncoding", @"")];
     }
     
     return nsEncoding;

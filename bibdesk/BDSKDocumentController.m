@@ -317,7 +317,7 @@ enum {
         BDSKSearchGroup *group = [[aClass alloc] initWithDictionary:dictionary];
         
         if (nil == group) {
-            if (outError) *outError = [NSError mutableLocalErrorWithCode:kBDSKPropertyListDeserializationFailed localizedDescription:NSLocalizedString(@"Unable to read this file as a search group property list", @"error when opening search group file")];
+            if (outError) *outError = [NSError localErrorWithCode:kBDSKPropertyListDeserializationFailed localizedDescription:NSLocalizedString(@"Unable to read this file as a search group property list", @"error when opening search group file")];
             NSLog(@"Unable to instantiate BDSKSearchGroup of class %@", [dictionary objectForKey:@"class"]);
             // make sure we return nil
             document = nil;

@@ -545,7 +545,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
                 [sc setScanLocation:[sc scanLocation] + 1];
             }
             if (nesting > 0) {
-                error = [NSError mutableLocalErrorWithCode:kBDSKComplexStringError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unbalanced string: [%@]", @"error description"), nodeStr]];
+                error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unbalanced string: [%@]", @"error description"), nodeStr]];
             } else {
                 node = [[BDSKStringNode alloc] initWithQuotedString:nodeStr];
                 [returnNodes addObject:node];
@@ -572,7 +572,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
             // we don't accept unbalanced braces, as we always quote with braces
             // do we want to be more permissive and try to use "-quoted fields?
             if (nesting > 0 || ![nodeStr isStringTeXQuotingBalancedWithBraces:YES connected:NO]) {
-                error = [NSError mutableLocalErrorWithCode:kBDSKComplexStringError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unbalanced string: [%@]", @"error description"), nodeStr]];
+                error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unbalanced string: [%@]", @"error description"), nodeStr]];
             } else {
                 node = [[BDSKStringNode alloc] initWithQuotedString:nodeStr];
                 [returnNodes addObject:node];
@@ -597,10 +597,10 @@ Rather than relying on the same call sequence to be used, I think we should igno
         }
         else if (ch == '#') {
             // we found 2 # or a # at the beginning
-            error = [NSError mutableLocalErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Invalid first character in component", @"error description")];
+            error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Invalid first character in component", @"error description")];
         }
         else {
-            error = [NSError mutableLocalErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Invalid first character in component", @"error description")];
+            error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Invalid first character in component", @"error description")];
         }
         
         if (error == nil) {
@@ -608,12 +608,12 @@ Rather than relying on the same call sequence to be used, I think we should igno
             [sc scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
             if (![sc isAtEnd]) {
                 if (![sc scanString:@"#" intoString:NULL]) {
-                    error = [NSError mutableLocalErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Missing # character", @"error description")];
+                    error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Missing # character", @"error description")];
                 } else {
                     [sc scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
                     if ([sc isAtEnd]) {
                         // we found a # at the end
-                        error = [NSError mutableLocalErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Empty component", @"error description")];
+                        error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Empty component", @"error description")];
                     }
                 }
             }

@@ -287,7 +287,7 @@
     } else if (type != BDSKUnknownStringType){
         pubs = [BDSKStringParser itemsFromString:outputString ofType:type error:&error];
     } else {
-        error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script did not return BibTeX", @"Error description")];
+        error = [NSError localErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script did not return BibTeX", @"Error description")];
     }
     if (pubs == nil || isPartialData) {
         failedDownload = YES;
@@ -358,7 +358,7 @@
     currentTask = nil;
 
     if (terminationStatus != EXIT_SUCCESS || nil == outputString) {
-        NSError *error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"The script did not return any output", @"Error description")];
+        NSError *error = [NSError localErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"The script did not return any output", @"Error description")];
         [self scriptDidFailWithError:error];
     } else {
         [self scriptDidFinishWithResult:outputString];
@@ -416,7 +416,7 @@
     isRetrieving = [currentTask isRunning];
     
     if (NO == isRetrieving) {
-        NSError *error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Failed to launch shell script", @"Error description")];
+        NSError *error = [NSError localErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Failed to launch shell script", @"Error description")];
         [self scriptDidFailWithError:error];
     }
     
@@ -461,7 +461,7 @@
     }
     if (error || nil == outputString || NO == [outputString isKindOfClass:[NSString class]]) {
         if (error == nil)
-            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"The script did not return any output", @"Error description")];
+            error = [NSError localErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"The script did not return any output", @"Error description")];
         [self scriptDidFailWithError:error];
     } else {
         [self scriptDidFinishWithResult:outputString];
