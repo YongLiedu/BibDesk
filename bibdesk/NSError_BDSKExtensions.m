@@ -77,7 +77,7 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
 
 - (id)copyWithZone:(NSZone *)aZone
 {
-    return [[NSError alloc] initWithDomain:[self domain] code:[self code] userInfo:[self userInfo]];
+    return [[NSError allocWithZone:aZone] initWithDomain:[self domain] code:[self code] userInfo:[self userInfo]];
 }
 
 - (NSDictionary *)userInfo
