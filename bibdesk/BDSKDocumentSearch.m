@@ -45,7 +45,7 @@
 @interface BDSKDocumentSearchOperation : NSOperation {
     NSString *searchString;
     BDSKDocumentSearch *search;
-    SKIndexRef index;
+    SKIndexRef skIndex;
 }
 - (id)initWithDocumentSearch:(BDSKDocumentSearch *)search index:(SKIndexRef)anIndex searchString:(NSString *)searchString;
 @end
@@ -268,7 +268,7 @@ static NSOperationQueue *searchQueue = nil;
     self = [super init];
     if (self) {
         search = [aSearch retain];
-        index = (SKIndexRef)CFRetain(anIndex);
+        skIndex = (SKIndexRef)CFRetain(anIndex);
         searchString = [aSearchString copy];
     }
     return self;
@@ -276,7 +276,7 @@ static NSOperationQueue *searchQueue = nil;
 
 - (void)dealloc
 {
-    BDSKCFDESTROY(index);
+    BDSKCFDESTROY(skIndex);
     BDSKDESTROY(search);
     BDSKDESTROY(searchString);
     [super dealloc];
@@ -285,7 +285,7 @@ static NSOperationQueue *searchQueue = nil;
 - (void)main
 {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    [search backgroundSearchForString:searchString index:index];
+    [search backgroundSearchForString:searchString index:skIndex];
     [pool release];
 }
 

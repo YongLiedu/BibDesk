@@ -83,7 +83,7 @@
         // maintain dictionaries mapping URL -> signature, so we can check if a URL is outdated
         signatures = [[NSMutableDictionary alloc] initWithCapacity:128];
         
-        index = NULL;
+        skIndex = NULL;
         
         // new document won't have a URL, so we'll have to wait for the controller to set it
         NSURL *documentURL = [owner fileURL];
@@ -138,7 +138,7 @@
     BDSKDESTROY(notificationQueue);
     BDSKDESTROY(noteLock);
     BDSKDESTROY(signatures);
-    BDSKCFDESTROY(index);
+    BDSKCFDESTROY(skIndex);
     BDSKCFDESTROY(indexData);
     BDSKDESTROY(setupLock);
     [super dealloc];
@@ -170,7 +170,7 @@
 
 - (SKIndexRef)index
 {
-    return index;
+    return skIndex;
 }
 
 - (NSUInteger)status
@@ -291,11 +291,11 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableFileSearchIndexCacheKey"])
         return;
     
-    if (index && documentURL) {
+    if (skIndex && documentURL) {
         // flush all pending updates and compact the index as needed before writing
-        SKIndexCompact(index);
-        CFRelease(index);
-        index = NULL;
+        SKIndexCompact(skIndex);
+        CFRelease(skIndex);
+        skIndex = NULL;
         
         NSString *indexCachePath = [[self class] indexCachePathForDocumentURL:documentURL];
         if (nil == indexCachePath) {
@@ -371,7 +371,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
             BDSKASSERT(signature);
             [signatures setObject:signature forKey:aURL];
             
-            SKIndexAddDocument(index, skDocument, NULL, TRUE);
+            SKIndexAddDocument(skIndex, skDocument, NULL, TRUE);
             CFRelease(skDocument);
         }
     }
@@ -385,7 +385,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     if (skDocument != NULL) {
         [signatures removeObjectForKey:aURL];
         
-        SKIndexRemoveDocument(index, skDocument);
+        SKIndexRemoveDocument(skIndex, skDocument);
         CFRelease(skDocument);
     }
 }
@@ -608,7 +608,7 @@ static void addItemFunction(const void *value, void *context) {
         tmpIndex = SKIndexCreateWithMutableData(indexData, NULL, kSKIndexInverted, (CFDictionaryRef)options);
     }
     
-    index = tmpIndex;
+    skIndex = tmpIndex;
     
     if ([signatures count]) {
         // cached index, update identifierURLs and remove unlinked or invalid indexed URLs
@@ -720,7 +720,7 @@ static void addItemFunction(const void *value, void *context) {
         NSLog(@"Exception %@ raised in search index; exiting thread run loop.", e);
         
         // clean these up to make sure we have no chance of saving it to disk
-        BDSKCFDESTROY(index);
+        BDSKCFDESTROY(skIndex);
         BDSKCFDESTROY(indexData);
         @throw;
     }

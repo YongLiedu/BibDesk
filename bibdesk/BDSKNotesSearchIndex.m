@@ -80,7 +80,7 @@
 
 - (void)dealloc
 {
-    BDSKCFDESTROY(index);
+    BDSKCFDESTROY(skIndex);
     BDSKDESTROY(queue);
 	BDSKDESTROY(queueLock);
     BDSKDESTROY(setupLock);
@@ -137,8 +137,8 @@
     CFMutableDataRef indexData = CFDataCreateMutable(NULL, 0);
     NSDictionary *options = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInteger:0], (id)kSKMaximumTerms, nil];
     @synchronized(self) {
-        if (index) CFRelease(index);
-        index = SKIndexCreateWithMutableData(indexData, (CFStringRef)BDSKSkimNotesString, kSKIndexInverted, (CFDictionaryRef)options);
+        BDSKCFDESTROY(skIndex);
+        skIndex = SKIndexCreateWithMutableData(indexData, (CFStringRef)BDSKSkimNotesString, kSKIndexInverted, (CFDictionaryRef)options);
     }
     CFRelease(indexData);
     [options release];
@@ -150,16 +150,16 @@
 
 - (SKIndexRef)index
 {
-    SKIndexRef skIndex = NULL;
+    SKIndexRef theIndex = NULL;
     @synchronized(self) {
-        if (index) skIndex = (SKIndexRef)CFRetain(index);
+        if (skIndex) theIndex = (SKIndexRef)CFRetain(skIndex);
     }
     OSMemoryBarrier();
     if (needsFlushing) {
-        SKIndexFlush(skIndex);
+        SKIndexFlush(theIndex);
         OSAtomicCompareAndSwap32Barrier(1, 0, &needsFlushing);
     }
-    return (SKIndexRef)[(id)skIndex autorelease];
+    return (SKIndexRef)[(id)theIndex autorelease];
 }
 
 - (void)indexItem:(NSDictionary *)info
@@ -199,16 +199,16 @@
             }
         }
         if (doc) {
-            SKIndexRef skIndex = NULL;
+            SKIndexRef theIndex = NULL;
             @synchronized(self) {
-                if (index) skIndex = (SKIndexRef)CFRetain(index);
+                if (skIndex) theIndex = (SKIndexRef)CFRetain(skIndex);
             }
-            if (skIndex) {
+            if (theIndex) {
                 if ([searchText length])
-                    SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)searchText, TRUE);
+                    SKIndexAddDocumentWithText(theIndex, doc, (CFStringRef)searchText, TRUE);
                 else
-                    SKIndexRemoveDocument(skIndex, doc);
-                CFRelease(skIndex);
+                    SKIndexRemoveDocument(theIndex, doc);
+                CFRelease(theIndex);
                 OSAtomicCompareAndSwap32Barrier(0, 1, &needsFlushing);
             }
         }

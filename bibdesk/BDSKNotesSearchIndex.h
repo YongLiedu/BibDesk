@@ -40,7 +40,7 @@
 
 
 @interface BDSKNotesSearchIndex : NSObject {
-    SKIndexRef index;
+    SKIndexRef skIndex;
     volatile int32_t shouldKeepRunning;
     volatile int32_t needsFlushing;
     NSConditionLock *queueLock;

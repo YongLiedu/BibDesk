@@ -65,7 +65,7 @@ typedef struct _BDSKSearchIndexFlags
 } BDSKSearchIndexFlags;
 
 @interface BDSKFileSearchIndex : NSObject {
-    SKIndexRef index;
+    SKIndexRef skIndex;
     CFMutableDataRef indexData;
     BDSKManyToManyDictionary *identifierURLs;
     NSMutableDictionary *signatures;
