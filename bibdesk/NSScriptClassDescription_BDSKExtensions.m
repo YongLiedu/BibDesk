@@ -39,7 +39,7 @@
 #import "NSScriptClassDescription_BDSKExtensions.h"
 
 
-@implementation NSScriptClassDescription (SKExtensions)
+@implementation NSScriptClassDescription (BDSKExtensions)
 
 + (NSScriptClassDescription *)commonAncestorForClassDescriptions:(NSArray *)classDescriptionArray {
     NSEnumerator *cdEnum = [classDescriptionArray objectEnumerator];
