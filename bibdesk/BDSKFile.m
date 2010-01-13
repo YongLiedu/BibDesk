@@ -51,7 +51,7 @@
 @interface BDSKFSRefFile : BDSKFile <NSCopying>
 {
     const FSRef *fileRef;
-    UInt32 hash;
+    NSUInteger hash;
 }
 @end
 
