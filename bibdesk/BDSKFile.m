@@ -211,13 +211,12 @@ static Class BDSKFileClass = Nil;
     FSRef aRef;
     
     // return a concrete subclass or nil
-    if(aURL && CFURLGetFSRef((CFURLRef)aURL, &aRef))
-        return [[BDSKFSRefFile alloc] initWithFSRef:&aRef];
-    else if(aURL)
-        return [[BDSKURLFile alloc] initWithURL:aURL];
-    else
-        // nil URL
+    if (aURL == nil)
         return nil;
+    else if (CFURLGetFSRef((CFURLRef)aURL, &aRef))
+        return [[BDSKFSRefFile alloc] initWithFSRef:&aRef];
+    else
+        return [[BDSKURLFile alloc] initWithURL:aURL];
 }
 
 - (id)initWithPath:(NSString *)aPath;
