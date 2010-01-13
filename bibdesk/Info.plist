@@ -246,8 +246,6 @@
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>BibDesk</string>
-	<key>CFBundleGetInfoString</key>
-	<string>BibDesk 1.4b1 (v${CURRENT_PROJECT_VERSION}), Copyright 2001-2009 Michael O. McCracken.</string>
 	<key>CFBundleHelpBookFolder</key>
 	<string>BibDesk Help</string>
 	<key>CFBundleHelpBookName</key>
