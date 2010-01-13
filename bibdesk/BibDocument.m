@@ -185,9 +185,9 @@ static NSOperationQueue *metadataCacheQueue = nil;
 - (id)init{
     if(self = [super init]){
         
-        publications = [[BDSKPublicationsArray alloc] initWithCapacity:1];
-        shownPublications = [[NSMutableArray alloc] initWithCapacity:1];
-        groupedPublications = [[NSMutableArray alloc] initWithCapacity:1];
+        publications = [[BDSKPublicationsArray alloc] init];
+        shownPublications = [[NSMutableArray alloc] init];
+        groupedPublications = [[NSMutableArray alloc] init];
         groups = [(BDSKGroupsArray *)[BDSKGroupsArray alloc] initWithDocument:self];
         
         frontMatter = [[NSMutableString alloc] initWithString:@""];

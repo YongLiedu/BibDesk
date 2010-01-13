@@ -64,28 +64,17 @@
     return self;
 }
 
-// this is called from initWithArray:
-- (id)initWithObjects:(id *)objects count:(NSUInteger)count;
+// custom initializers should be explicitly defined in concrete subclasses to be supported, we should not rely on inheritance
+- (id)initWithArray:(NSArray *)anArray;
 {
     if (self = [super init]) {
         NSZone *zone = [self zone];
-        publications = [[NSMutableArray allocWithZone:zone] initWithObjects:objects count:count];
+        publications = [[NSMutableArray allocWithZone:zone] initWithArray:anArray];
         itemsForCiteKeys = [[BDSKMultiValueDictionary allocWithZone:zone] initWithCaseInsensitiveKeys:YES];
         itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] init];
         for (BibItem *pub in publications)
             [self addToItemsForCiteKeys:pub];
         [self updateFileOrder];
-    }
-    return self;
-}
-
-- (id)initWithCapacity:(NSUInteger)numItems;
-{
-    if (self = [super init]) {
-        NSZone *zone = [self zone];
-        publications = [[NSMutableArray allocWithZone:zone] initWithCapacity:numItems];
-        itemsForCiteKeys = [[BDSKMultiValueDictionary allocWithZone:zone] initWithCaseInsensitiveKeys:YES];
-        itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] initWithCapacity:numItems];
     }
     return self;
 }
