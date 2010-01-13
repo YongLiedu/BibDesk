@@ -52,7 +52,7 @@ CFStringRef BDSKNSObjectCopyDescription(const void *value) {
 }
 
 Boolean BDSKCaseInsensitiveStringEqual(const void *value1, const void *value2) {
-    return (CFStringGetLength(value1) == CFStringGetLength(value2) && CFStringCompareWithOptions(value1, value2, CFRangeMake(0, CFStringGetLength(value1)), kCFCompareCaseInsensitive) == kCFCompareEqualTo);
+    return CFStringCompare(value1, value2, kCFCompareCaseInsensitive) == kCFCompareEqualTo;
 }
 
 CFHashCode BDSKCaseInsensitiveStringHash(const void *value) {

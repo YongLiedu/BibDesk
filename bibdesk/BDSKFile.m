@@ -401,7 +401,7 @@ static Class BDSKFileClass = Nil;
         
         // handle case-insensitivity and precomposition
         if(path1 && path2)
-            isEqual = CFStringCompareWithOptions(path1, path2, CFRangeMake(0, CFStringGetLength(path1)), kCFCompareCaseInsensitive | kCFCompareNonliteral) == kCFCompareEqualTo;
+            isEqual = CFStringCompare(path1, path2, kCFCompareCaseInsensitive | kCFCompareNonliteral) == kCFCompareEqualTo;
         
         [(id)path1 release];
         [(id)path2 release];
