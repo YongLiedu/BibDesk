@@ -41,8 +41,20 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 
+#define TYPE_KEY             @"type"
+#define NAME_KEY             @"name" 
+#define DATABASE_KEY         @"database"
+#define HOST_KEY             @"host"
+#define PORT_KEY             @"port"
+#define OPTIONS_KEY          @"options"
+#define PASSWORD_KEY         @"password"
+#define USERNAME_KEY         @"username"
+#define RECORDSYNTAX_KEY     @"recordSyntax"
+#define RESULTENCODING_KEY   @"resultEncoding"
+#define REMOVEDIACRITICS_KEY @"removeDiacritics"
+
 #define DEFAULT_NAME     NSLocalizedString(@"New Server", @"")
-#define DEFAULT_DATABASE @"database" 
+#define DEFAULT_DATABASE DATABASE_KEY 
 #define DEFAULT_HOST     @"host.domain.com"
 #define DEFAULT_PORT     @"0"
 
@@ -79,7 +91,7 @@
         } else if ([self isZoom]) {
             host = [aHost copy];
             port = [aPort copy];
-            options = [opts mutableCopy];
+            options = [[NSMutableDictionary alloc] initWithDictionary:opts];
         } else {
             [self release];
             self = nil;
@@ -90,34 +102,34 @@
 
 - (id)initWithType:(NSString *)aType dictionary:(NSDictionary *)info;
 {    
-    self = [self initWithType:aType ?: [info objectForKey:@"type"]
-                         name:[info objectForKey:@"name"]
-                     database:[info objectForKey:@"database"]
-                         host:[info objectForKey:@"host"]
-                         port:[info objectForKey:@"port"]
-                      options:[info objectForKey:@"options"]];
+    self = [self initWithType:aType ?: [info objectForKey:TYPE_KEY]
+                         name:[info objectForKey:NAME_KEY]
+                     database:[info objectForKey:DATABASE_KEY]
+                         host:[info objectForKey:HOST_KEY]
+                         port:[info objectForKey:PORT_KEY]
+                      options:[info objectForKey:OPTIONS_KEY]];
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super init]) {
-        type = [[decoder decodeObjectForKey:@"type"] retain];
-        name = [[decoder decodeObjectForKey:@"name"] retain];
-        database = [[decoder decodeObjectForKey:@"database"] retain];
-        host = [[decoder decodeObjectForKey:@"host"] retain];
-        port = [[decoder decodeObjectForKey:@"port"] retain];
-        options = [[decoder decodeObjectForKey:@"options"] mutableCopy];
+        type = [[decoder decodeObjectForKey:TYPE_KEY] retain];
+        name = [[decoder decodeObjectForKey:NAME_KEY] retain];
+        database = [[decoder decodeObjectForKey:DATABASE_KEY] retain];
+        host = [[decoder decodeObjectForKey:HOST_KEY] retain];
+        port = [[decoder decodeObjectForKey:PORT_KEY] retain];
+        options = [[NSMutableDictionary alloc] initWithDictionary:[decoder decodeObjectForKey:OPTIONS_KEY]];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-    [coder encodeObject:type forKey:@"type"];
-    [coder encodeObject:name forKey:@"name"];
-    [coder encodeObject:database forKey:@"database"];
-    [coder encodeObject:host forKey:@"host"];
-    [coder encodeObject:port forKey:@"port"];
-    [coder encodeObject:options forKey:@"options"];
+    [coder encodeObject:type forKey:TYPE_KEY];
+    [coder encodeObject:name forKey:NAME_KEY];
+    [coder encodeObject:database forKey:DATABASE_KEY];
+    [coder encodeObject:host forKey:HOST_KEY];
+    [coder encodeObject:port forKey:PORT_KEY];
+    [coder encodeObject:options forKey:OPTIONS_KEY];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -170,13 +182,13 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 
 - (NSDictionary *)dictionaryValue {
     NSMutableDictionary *info = [NSMutableDictionary dictionaryWithCapacity:7];
-    [info setValue:[self type] forKey:@"type"];
-    [info setValue:[self name] forKey:@"name"];
-    [info setValue:[self database] forKey:@"database"];
+    [info setValue:[self type] forKey:TYPE_KEY];
+    [info setValue:[self name] forKey:NAME_KEY];
+    [info setValue:[self database] forKey:DATABASE_KEY];
     if ([self isZoom]) {
-        [info setValue:[self host] forKey:@"host"];
-        [info setValue:[self port] forKey:@"port"];
-        [info setValue:[self options] forKey:@"options"];
+        [info setValue:[self host] forKey:HOST_KEY];
+        [info setValue:[self port] forKey:PORT_KEY];
+        [info setValue:[self options] forKey:OPTIONS_KEY];
     }
     return info;
 }
@@ -191,17 +203,17 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 
 - (NSString *)port { return [self isZoom] ? port : nil; }
 
-- (NSString *)password { return [[self options] objectForKey:@"password"]; }
+- (NSString *)password { return [[self options] objectForKey:PASSWORD_KEY]; }
 
-- (NSString *)username { return [[self options] objectForKey:@"username"]; }
+- (NSString *)username { return [[self options] objectForKey:USERNAME_KEY]; }
 
-- (NSString *)recordSyntax { return [[self options] objectForKey:@"recordSyntax"]; }
+- (NSString *)recordSyntax { return [[self options] objectForKey:RECORDSYNTAX_KEY]; }
 
-- (NSString *)resultEncoding { return [[self options] objectForKey:@"resultEncoding"]; }
+- (NSString *)resultEncoding { return [[self options] objectForKey:RESULTENCODING_KEY]; }
 
-- (BOOL)removeDiacritics { return [[[self options] objectForKey:@"removeDiacritics"] boolValue]; }
+- (BOOL)removeDiacritics { return [[[self options] objectForKey:REMOVEDIACRITICS_KEY] boolValue]; }
 
-- (NSDictionary *)options { return [self isZoom] ? options : nil; }
+- (NSDictionary *)options { return [self isZoom] ? [[options copy] autorelease] : nil; }
 
 - (BOOL)isEntrez { return [[self type] isEqualToString:BDSKSearchGroupEntrez]; }
 - (BOOL)isZoom { return [[self type] isEqualToString:BDSKSearchGroupZoom]; }
@@ -227,39 +239,39 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 @implementation BDSKMutableServerInfo
 
 + (NSSet *)keyPathsForValuesAffectingServerType {
-    return [NSSet setWithObjects:@"type", nil];
+    return [NSSet setWithObjects:TYPE_KEY, nil];
 }
 
 + (NSSet *)keyPathsForValuesAffectingHost {
-    return [NSSet setWithObjects:@"type", nil];
+    return [NSSet setWithObjects:TYPE_KEY, nil];
 }
 
 + (NSSet *)keyPathsForValuesAffectingPort {
-    return [NSSet setWithObjects:@"type", nil];
+    return [NSSet setWithObjects:TYPE_KEY, nil];
 }
 
 + (NSSet *)keyPathsForValuesAffectingOptions {
-    return [NSSet setWithObjects:@"type", nil];
+    return [NSSet setWithObjects:TYPE_KEY, nil];
 }
 
 + (NSSet *)keyPathsForValuesAffectingPassword {
-    return [NSSet setWithObjects:@"options", nil];
+    return [NSSet setWithObjects:OPTIONS_KEY, nil];
 }
 
 + (NSSet *)keyPathsForValuesAffectingUsername {
-    return [NSSet setWithObjects:@"options", nil];
+    return [NSSet setWithObjects:OPTIONS_KEY, nil];
 }
 
 + (NSSet *)keyPathsForValuesAffectingRecordSyntax {
-    return [NSSet setWithObjects:@"options", nil];
+    return [NSSet setWithObjects:OPTIONS_KEY, nil];
 }
 
 + (NSSet *)keyPathsForValuesAffectingResultEncoding {
-    return [NSSet setWithObjects:@"options", nil];
+    return [NSSet setWithObjects:OPTIONS_KEY, nil];
 }
 
 + (NSSet *)keyPathsForValuesAffectingRemoveDiacritics {
-    return [NSSet setWithObjects:@"options", nil];
+    return [NSSet setWithObjects:OPTIONS_KEY, nil];
 }
 
 // When changing the type, all data must be properly updated to be valid, taking into account the condition implict in the validation methods
@@ -309,27 +321,27 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 
 - (void)setPassword:(NSString *)newPassword;
 {
-    [self setOptionValue:newPassword forKey:@"password"];
+    [self setOptionValue:newPassword forKey:PASSWORD_KEY];
 }
 
 - (void)setUsername:(NSString *)newUser;
 {
-    [self setOptionValue:newUser forKey:@"username"];
+    [self setOptionValue:newUser forKey:USERNAME_KEY];
 }
 
 - (void)setRecordSyntax:(NSString *)newSyntax;
 {
-    [self setOptionValue:newSyntax forKey:@"recordSyntax"];
+    [self setOptionValue:newSyntax forKey:RECORDSYNTAX_KEY];
 }
 
 - (void)setResultEncoding:(NSString *)newEncoding;
 {
-    [self setOptionValue:newEncoding forKey:@"resultEncoding"];
+    [self setOptionValue:newEncoding forKey:RESULTENCODING_KEY];
 }
 
 - (void)setRemoveDiacritics:(BOOL)flag;
 {
-    [self setOptionValue:(flag ? @"YES" : nil) forKey:@"removeDiacritics"];
+    [self setOptionValue:(flag ? @"YES" : nil) forKey:REMOVEDIACRITICS_KEY];
 }
 
 - (void)setOptions:(NSDictionary *)newOptions;
