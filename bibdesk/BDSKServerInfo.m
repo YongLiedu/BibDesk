@@ -91,7 +91,7 @@
         } else if ([self isZoom]) {
             host = [aHost copy];
             port = [aPort copy];
-            options = [[NSMutableDictionary alloc] initWithDictionary:opts];
+            options = [opts mutableCopy];
         } else {
             [self release];
             self = nil;
@@ -118,7 +118,7 @@
         database = [[decoder decodeObjectForKey:DATABASE_KEY] retain];
         host = [[decoder decodeObjectForKey:HOST_KEY] retain];
         port = [[decoder decodeObjectForKey:PORT_KEY] retain];
-        options = [[NSMutableDictionary alloc] initWithDictionary:[decoder decodeObjectForKey:OPTIONS_KEY]];
+        options = [[decoder decodeObjectForKey:OPTIONS_KEY] mutableCopy];
     }
     return self;
 }
