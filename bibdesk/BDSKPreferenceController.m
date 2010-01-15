@@ -515,10 +515,10 @@ static id sharedController = nil;
     NSString *plistPath = [[NSBundle mainBundle] pathForResource:DEFAULTS_TABLE ofType:@"plist"];
     NSMutableDictionary *initialValues = [NSMutableDictionary dictionary];
 	
-    SInt32 major = 0, minor = 0, bugfix = 0;
+    SInt32 majorVersion = 0, minorVersion = 0, bugfixVersion = 0;
 	BDSKVersionNumber *systemVersion = nil;
-    if (noErr == Gestalt(gestaltSystemVersionMajor, &major) && noErr == Gestalt(gestaltSystemVersionMinor, &minor) && noErr == Gestalt(gestaltSystemVersionBugFix, &bugfix))
-        systemVersion = [BDSKVersionNumber versionNumberWithVersionString:[NSString stringWithFormat:@"%i.%i.%i", major, minor, bugfix]];
+    if (noErr == Gestalt(gestaltSystemVersionMajor, &majorVersion) && noErr == Gestalt(gestaltSystemVersionMinor, &minorVersion) && noErr == Gestalt(gestaltSystemVersionBugFix, &bugfixVersion))
+        systemVersion = [BDSKVersionNumber versionNumberWithVersionString:[NSString stringWithFormat:@"%i.%i.%i", majorVersion, minorVersion, bugfixVersion]];
     
     for (NSDictionary *dict in [NSArray arrayWithContentsOfFile:plistPath]) {
         NSMutableArray *paneArray = [[NSMutableArray alloc] init];
