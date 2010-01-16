@@ -54,6 +54,7 @@
         [self setImagePosition:NSImageOnly];
         [self setBezelStyle:NSRegularSquareBezelStyle];
         [self setBordered:NO];
+        [self setContinuous:YES];
         _arrowDirection = anArrowDirection;
     }
     return self;
