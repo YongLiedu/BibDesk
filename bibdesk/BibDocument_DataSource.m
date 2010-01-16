@@ -1551,28 +1551,35 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         }
         
         BDSKGroup *group = nil;
+        BDSKGroup *lastGroup = nil;
+        BOOL undoable = NO;
         
         for (NSURL *url in urls) {
             if ([url isFileURL] && [[[url path] pathExtension] isEqualToString:@"bdsksearch"]) {
                 NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:url];
                 Class groupClass = NSClassFromString([dictionary objectForKey:@"class"]);
-                group = [[[(groupClass ?: [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease];
-                if(group)
+                if (group = [[[(groupClass ?: [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease]) {
                     [groups addSearchGroup:(BDSKSearchGroup *)group];
+                    lastGroup = group;
+                }
             } else if ([[url scheme] isEqualToString:@"x-bdsk-search"]) {
-                group = [[[BDSKSearchGroup alloc] initWithURL:url] autorelease];
-                if(group)
+                if (group = [[[BDSKSearchGroup alloc] initWithURL:url] autorelease]) {
                     [groups addSearchGroup:(BDSKSearchGroup *)group];
+                    lastGroup = group;
+                    undoable == YES;
+                }
             } else {
-                group = [[[BDSKURLGroup alloc] initWithURL:url] autorelease];
-                [groups addURLGroup:(BDSKURLGroup *)group];
+                if (group = [[[BDSKURLGroup alloc] initWithURL:url] autorelease]) {
+                    [groups addURLGroup:(BDSKURLGroup *)group];
+                    lastGroup = group;
+                    undoable == YES;
+                }
             }
         }
-        if (group)
-            [self selectGroup:group];
-        
-        if ([urls count]) {
-            [[self undoManager] setActionName:NSLocalizedString(@"Add Group", @"Undo action name")];
+        if (lastGroup) {
+            [self selectGroup:lastGroup];
+            if (undoable)
+                [[self undoManager] setActionName:NSLocalizedString(@"Add Group", @"Undo action name")];
             return YES;
         } else {
             return NO;
