@@ -113,13 +113,13 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     
     [options setValue:[bdsksearchURL password] forKey:@"password"];
     [options setValue:[bdsksearchURL user] forKey:@"username"];
-   
+    
     if (aPort == nil) {
-        if ([aHost caseInsensitiveCompare:BDSKSearchGroupEntrez])
+        if ([aHost caseInsensitiveCompare:BDSKSearchGroupEntrez] == NSOrderedSame)
             aType = BDSKSearchGroupEntrez;
-        else if ([aHost caseInsensitiveCompare:BDSKSearchGroupISI])
+        else if ([aHost caseInsensitiveCompare:BDSKSearchGroupISI] == NSOrderedSame)
             aType = BDSKSearchGroupISI;
-        else if ([aHost caseInsensitiveCompare:BDSKSearchGroupDBLP])
+        else if ([aHost caseInsensitiveCompare:BDSKSearchGroupDBLP] == NSOrderedSame)
             aType = BDSKSearchGroupDBLP;
     }
     
