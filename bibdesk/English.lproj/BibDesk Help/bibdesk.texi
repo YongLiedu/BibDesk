@@ -4281,7 +4281,7 @@ Here are lists of value keys that could be used in BibDesk export templates.
 
 @subheading Author
 
-@multitable {abbreviatedNormalizedName} {}
+@multitable {unpunctuatedAbbreviatedNormalizedName} {}
 @headitem Key @tab Description
 @item name
 @tab 
@@ -4290,6 +4290,8 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @item abbreviatedName
 @tab 
 @item abbreviatedNormalizedName
+@tab 
+@item unpunctuatedAbbreviatedNormalizedName
 @tab 
 @item lastName
 @tab 
