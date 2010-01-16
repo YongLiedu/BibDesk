@@ -965,7 +965,7 @@
 		return newString;
 	}
 	else {
-		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
+		newString = [string stringByReplacingCharactersInSet:invalidCharSet withString:@""];
 		return newString;
 	}
 }
