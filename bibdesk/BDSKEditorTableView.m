@@ -146,6 +146,24 @@
     }
 }
 
+- (NSMenu *)menuForEvent:(NSEvent *)theEvent {
+    NSMenu *menu = nil;
+    
+    if ([[self delegate] respondsToSelector:@selector(tableView:menuForTableColumn:row:)]) {
+        NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+        NSInteger row = [self rowAtPoint:mouseLoc];
+        NSInteger column = [self columnAtPoint:mouseLoc];
+        if (row != -1 && column != -1) {
+            NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
+            menu = [[self delegate] tableView:self menuForTableColumn:tableColumn row:row];
+        }
+    } else {
+        menu = [super menuForEvent:theEvent];
+    }
+    
+	return menu;
+}
+
 - (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
     return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
 }

@@ -86,6 +86,7 @@
     IBOutlet NSTextField *citeKeyTitle;
 	IBOutlet NSPopUpButton *actionButton;
 	IBOutlet NSButton *addFieldButton;
+    IBOutlet NSMenu *contextMenu;
     
     // ----------------------------------------------------------------------------------------
     BibItem *publication;

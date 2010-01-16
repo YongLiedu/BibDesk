@@ -3062,6 +3062,27 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return nil;
 }
 
+- (NSMenu *)tableView:(NSTableView *)aTableView menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex {
+    NSMenu *menu = nil;
+    if ([[tableColumn identifier] isEqual:@"field"] && editorFlags.isEditable) {
+        menu = [[contextMenu copy] autorelease];
+        // kick out every item we won't need:
+        NSInteger i = [menu numberOfItems];
+        BOOL wasSeparator = YES;
+        
+        while (--i >= 0) {
+            NSMenuItem *item = [menu itemAtIndex:i];
+            if (([item isSeparatorItem] == NO && [self validateMenuItem:item] == NO) || ((wasSeparator || i == 0) && [item isSeparatorItem]))
+                [menu removeItem:item];
+            else
+                wasSeparator = [item isSeparatorItem];
+        }
+        while ([menu numberOfItems] > 0 && [(NSMenuItem*)[menu itemAtIndex:0] isSeparatorItem])	
+            [menu removeItemAtIndex:0];
+    }
+    return menu;
+}
+
 #pragma mark Splitview delegate methods
 
 - (BOOL)splitView:(NSSplitView *)sender canCollapseSubview:(NSView *)subview {
