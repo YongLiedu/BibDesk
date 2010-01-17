@@ -3,7 +3,7 @@
 //
 //  Created by Sven-S. Porst on Fri Jul 30 2004.
 /*
- This software is Copyright (c) 2004-2009
+ This software is Copyright (c) 2004-2010
  Sven-S. Porst. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without

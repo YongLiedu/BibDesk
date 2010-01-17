@@ -1,7 +1,7 @@
 //  BDSKConverter.m
 //  Created by Michael McCracken on Thu Mar 07 2002.
 /*
- This software is Copyright (c) 2001-2009
+ This software is Copyright (c) 2001-2010
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without

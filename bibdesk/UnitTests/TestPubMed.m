@@ -3,7 +3,7 @@
 //  Bibdesk
 //
 //  Created by Gregory Jefferis on 2009-01-05.
-/* This software is Copyright (c) 2009
+/* This software is Copyright (c) 2009-2010
  Gregory Jefferis. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
