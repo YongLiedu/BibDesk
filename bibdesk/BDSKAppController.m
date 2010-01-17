@@ -138,13 +138,14 @@ static void fixLegacyTableColumnIdentifiers()
 
 - (void)checkFormatStrings {
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
+    BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
     NSString *formatString = [sud objectForKey:BDSKCiteKeyFormatKey];
     NSString *error = nil;
     NSInteger button = 0;
     
     if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
         [sud setObject:formatString forKey:BDSKCiteKeyFormatKey];
-        [[BDSKTypeManager sharedManager] setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+        [btm setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
     }else{
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @"Message in alert dialog when detecting invalid cite key format")
                                          defaultButton:NSLocalizedString(@"Go to Preferences", @"Button title")
@@ -156,7 +157,7 @@ static void fixLegacyTableColumnIdentifiers()
         if (button == NSAlertAlternateReturn){
             formatString = [[[NSUserDefaultsController sharedUserDefaultsController] initialValues] objectForKey:BDSKCiteKeyFormatKey];
             [sud setObject:formatString forKey:BDSKCiteKeyFormatKey];
-            [[BDSKTypeManager sharedManager] setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+            [btm setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
         }else{
             [[BDSKPreferenceController sharedPreferenceController] showWindow:nil];
             [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.citekey"];
@@ -193,7 +194,7 @@ static void fixLegacyTableColumnIdentifiers()
     
     if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:&error]) {
         [sud setObject:formatString forKey:BDSKLocalFileFormatKey];
-        [[BDSKTypeManager sharedManager] setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+        [btm setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
     } else {
         NSString *fixedFormatString = nil;
         NSString *otherButton = nil;
@@ -208,7 +209,7 @@ static void fixLegacyTableColumnIdentifiers()
         }
         if (fixedFormatString && [BDSKFormatParser validateFormat:&fixedFormatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:NULL]) {
             [sud setObject:fixedFormatString forKey:BDSKLocalFileFormatKey];
-            [[BDSKTypeManager sharedManager] setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
+            [btm setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
             otherButton = NSLocalizedString(@"Fix", @"Button title");
         }
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"The autogeneration format for local files is invalid.", @"Message in alert dialog when detecting invalid local file format")
@@ -220,13 +221,13 @@ static void fixLegacyTableColumnIdentifiers()
         button = [alert runModal];
         if (button == NSAlertDefaultReturn) {
             [sud setObject:fixedFormatString forKey:BDSKLocalFileFormatKey];
-            [[BDSKTypeManager sharedManager] setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
+            [btm setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
             [[BDSKPreferenceController sharedPreferenceController] showWindow:nil];
             [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.autofile"];
         } else if (button == NSAlertAlternateReturn) {
             formatString = [[[NSUserDefaultsController sharedUserDefaultsController] initialValues] objectForKey:BDSKLocalFileFormatKey];			
             [sud setObject:formatString forKey:BDSKLocalFileFormatKey];
-            [[BDSKTypeManager sharedManager] setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+            [btm setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
         }
     }
 
@@ -348,7 +349,7 @@ static void fixLegacyTableColumnIdentifiers()
     [[completionConnection receivePort] invalidate];
     [[completionConnection sendPort] invalidate];
     [completionConnection invalidate];
-    [completionConnection release];
+    BDSKDESTROY(completionConnection);
     
 }
 
