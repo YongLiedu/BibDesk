@@ -740,7 +740,7 @@
 #pragma mark Properties
 
 - (NSArray *)selection { 
-    return [self selectedPublications];
+    return [self selectedPublications] ?: [NSArray array];
 }
 
 - (void)setSelection:(NSArray *)newSelection {
