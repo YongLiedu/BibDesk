@@ -68,7 +68,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
         unresolvedNetServices = nil;
         undecidedNetServices = nil;
     }
-    return sharedBrowser;
+    return self;
 }
 
 - (NSSet *)sharingClients{
