@@ -432,7 +432,7 @@
 			return;
 		}
 		
-		if([macroResolver macroDefinition:[macroDefinitions objectForKey:key] dependsOnMacro:object]){
+		if([macroResolver string:[macroDefinitions objectForKey:key] dependsOnMacro:object]){
 			[tableView reloadData];
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:0 row:row withEvent:nil select:YES];
@@ -461,7 +461,7 @@
         // do nothing if there was no change.
         if([[macroDefinitions objectForKey:key] isEqualAsComplexString:object]) return;
 		
-		if([macroResolver macroDefinition:object dependsOnMacro:key]){
+		if([macroResolver string:object dependsOnMacro:key]){
 			[tableView reloadData];
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:0 row:row withEvent:nil select:YES];
@@ -631,7 +631,7 @@
     
     for (NSString *macroKey in defs) {
         macroString = [defs objectForKey:macroKey];
-		if([macroResolver macroDefinition:macroString dependsOnMacro:macroKey] == NO)
+		if([macroResolver string:macroString dependsOnMacro:macroKey] == NO)
             [(BDSKMacroResolver *)macroResolver setMacro:macroKey toValue:macroString];
 		else
             hadCircular = YES;

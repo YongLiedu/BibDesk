@@ -786,7 +786,7 @@ static BOOL addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
         NSString *macroKey = copyCheckedString(field->text, field->line, filePath, encoding);
         NSCAssert(macroKey != nil, @"Macro keys must be ASCII");
         NSString *macroString = copyStringFromBTField(field, filePath, macroResolver, encoding); // handles TeXification
-        if([macroResolver macroDefinition:macroString dependsOnMacro:macroKey]){
+        if([macroResolver string:macroString dependsOnMacro:macroKey]){
             NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"Error description");            
             [BDSKErrorObject reportError:message forFile:filePath line:field->line];
             if (error)

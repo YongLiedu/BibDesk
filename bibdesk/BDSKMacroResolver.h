@@ -52,19 +52,22 @@
 - (id)initWithOwner:(id<BDSKOwner>)anOwner;
 
 - (id<BDSKOwner>)owner;
-- (NSUndoManager *)undoManager;
-- (NSString *)bibTeXString;
-- (BOOL)macroDefinition:(NSString *)macroDef dependsOnMacro:(NSString *)macroKey;
 
+- (NSUndoManager *)undoManager;
+
+- (NSString *)bibTeXString;
+
+- (NSDictionary *)macroDefinitions;
 // returns global definitions + local overrides
 - (NSDictionary *)allMacroDefinitions;
 
-- (NSDictionary *)macroDefinitions;
 - (NSString *)valueOfMacro:(NSString *)macro;
+- (void)setMacro:(NSString *)macro toValue:(NSString *)value;
+- (void)setMacroWithoutUndo:(NSString *)macroKey toValue:(NSString *)value;
+- (void)changeMacro:(NSString *)oldMacro to:(NSString *)newMacro;
 - (void)removeAllMacros;
-- (void)changeMacro:(NSString *)oldKey to:(NSString *)newKey;
-- (void)setMacro:(NSString *)macroKey toValue:(NSString *)newDefinition;
-- (void)setMacroWithoutUndo:(NSString *)macroKey toValue:(NSString *)macroString;
+
+- (BOOL)string:(NSString *)string dependsOnMacro:(NSString *)macro;
 
 - (unsigned long long)modification;
 

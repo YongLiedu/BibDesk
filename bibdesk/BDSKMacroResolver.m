@@ -64,7 +64,7 @@ static char BDSKMacroResolverDefaultsObservationContext;
 @interface BDSKMacroResolver (Private)
 - (void)loadMacroDefinitions;
 - (void)synchronize;
-- (void)addMacro:(NSString *)macroKey toArray:(NSMutableArray *)array;
+- (void)addMacro:(NSString *)macro toArray:(NSMutableArray *)array;
 @end
 
 
@@ -133,23 +133,22 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 	return macroString;
 }
 
-- (BOOL)macroDefinition:(NSString *)macroDef dependsOnMacro:(NSString *)macroKey{
-    if ([macroDef isComplex] == NO) 
+- (BOOL)string:(NSString *)string dependsOnMacro:(NSString *)macro{
+    if ([string isComplex] == NO) 
         return NO;
     
-    BDSKASSERT([[macroDef macroResolver] isEqual:self]);
+    BDSKASSERT([[string macroResolver] isEqual:self]);
     
-    for (BDSKStringNode *node in [macroDef nodes]) {
+    for (BDSKStringNode *node in [string nodes]) {
         if([node type] != BDSKStringNodeMacro)
             continue;
         
-        NSString *key = [node value];
+        NSString *aMacro = [node value];
         
-        if ([key caseInsensitiveCompare:macroKey] == NSOrderedSame)
+        if ([aMacro caseInsensitiveCompare:macro] == NSOrderedSame)
             return YES;
         
-        NSString *value = [self valueOfMacro:key];
-        if ([self macroDefinition:value dependsOnMacro:macroKey])
+        if ([self string:[self valueOfMacro:aMacro] dependsOnMacro:macro])
             return YES;
     }
     return NO;
@@ -170,45 +169,45 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     return macroDefinitions;
 }
 
-- (void)setMacroWithoutUndo:(NSString *)macroKey toValue:(NSString *)macroString {
+- (void)setMacroWithoutUndo:(NSString *)macro toValue:(NSString *)value {
     if (macroDefinitions == nil)
         [self loadMacroDefinitions];
-    [macroDefinitions setObject:macroString forKey:macroKey];
+    [macroDefinitions setObject:value forKey:macro];
 }
 
-- (void)changeMacro:(NSString *)oldKey to:(NSString *)newKey{
+- (void)changeMacro:(NSString *)oldMacro to:(NSString *)newMacro{
     if (macroDefinitions == nil)
         [self loadMacroDefinitions];
-    if([macroDefinitions objectForKey:oldKey] == nil)
+    if([macroDefinitions objectForKey:oldMacro] == nil)
         [NSException raise:NSInvalidArgumentException
                     format:@"tried to change the value of a macro key that doesn't exist"];
     [[[self undoManager] prepareWithInvocationTarget:self]
-        changeMacro:newKey to:oldKey];
-    NSString *val = [macroDefinitions valueForKey:oldKey];
+        changeMacro:newMacro to:oldMacro];
+    NSString *val = [macroDefinitions valueForKey:oldMacro];
     
     // retain in case these go away with removeObjectForKey:
     [[val retain] autorelease]; 
-    [[oldKey retain] autorelease];
-    [macroDefinitions removeObjectForKey:oldKey];
-    [macroDefinitions setObject:val forKey:newKey];
+    [[oldMacro retain] autorelease];
+    [macroDefinitions removeObjectForKey:oldMacro];
+    [macroDefinitions setObject:val forKey:newMacro];
 	
     modification++;
     [self synchronize];
     
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Change key", @"type", oldKey, @"oldKey", newKey, @"newKey", nil];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Change key", @"type", oldMacro, @"oldMacro", newMacro, @"newMacro", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
                                                         object:self
                                                       userInfo:userInfo];    
 }
 
-- (void)setMacro:(NSString *)macroKey toValue:(NSString *)newDefinition {
+- (void)setMacro:(NSString *)macro toValue:(NSString *)value {
     if (macroDefinitions == nil)
         [self loadMacroDefinitions];
-    NSString *oldDef = [macroDefinitions objectForKey:macroKey];
+    NSString *oldDef = [macroDefinitions objectForKey:macro];
     [[[self undoManager] prepareWithInvocationTarget:self]
-            setMacro:macroKey toValue:oldDef];
+            setMacro:macro toValue:oldDef];
     NSString *type;
-    if (newDefinition == nil) {
+    if (value == nil) {
         if (oldDef == nil)
             return;
         type = @"Remove macro";
@@ -217,12 +216,12 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     } else {
         type = @"Change macro";
     }
-    [macroDefinitions setValue:newDefinition forKey:macroKey];
+    [macroDefinitions setValue:value forKey:macro];
 	
     modification++;
     [self synchronize];
 
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:type, @"type", macroKey, @"macroKey", nil];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:type, @"type", macro, @"macro", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
                                                         object:self
                                                       userInfo:userInfo];    
@@ -238,8 +237,8 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
                                                       userInfo:userInfo];    
 }
 
-- (NSString *)valueOfMacro:(NSString *)macroString{
-    return [[self macroDefinitions] objectForKey:macroString];
+- (NSString *)valueOfMacro:(NSString *)macro{
+    return [[self macroDefinitions] objectForKey:macro];
 }
 
 @end
@@ -259,10 +258,10 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 
 - (void)synchronize{}
 
-- (void)addMacro:(NSString *)macroKey toArray:(NSMutableArray *)array{
-    if([array containsObject:macroKey])
+- (void)addMacro:(NSString *)macro toArray:(NSMutableArray *)array{
+    if([array containsObject:macro])
         return;
-    NSString *value = [macroDefinitions objectForKey:macroKey];
+    NSString *value = [macroDefinitions objectForKey:macro];
     
     // if the definition is complex, we first have to add the macros that appear there
     if ([value isComplex]) {
@@ -271,7 +270,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
                 [self addMacro:[node value] toArray:array];
         }
     }
-    [array addObject:macroKey];
+    [array addObject:macro];
 }
 
 @end
@@ -350,14 +349,14 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
             macroDefs = [BDSKBibTeXParser macrosFromBibTeXStyle:fileContent document:nil];
         else continue;
         if (macroDefs != nil) {
-            NSString *macroString;
+            NSString *value;
             
-            for (NSString *macroKey in macroDefs) {
-                macroString = [macroDefs objectForKey:macroKey];
-                if([self macroDefinition:macroString dependsOnMacro:macroKey])
-                    NSLog(@"Macro from file %@ leads to circular definition, ignored: %@ = %@", file, macroKey, [macroString stringAsBibTeXString]);
+            for (NSString *macro in macroDefs) {
+                value = [macroDefs objectForKey:macro];
+                if([self string:value dependsOnMacro:macro])
+                    NSLog(@"Macro from file %@ leads to circular definition, ignored: %@ = %@", file, macro, [value stringAsBibTeXString]);
                 else
-                    [fileMacroDefinitions setObject:macroString forKey:macroKey];
+                    [fileMacroDefinitions setObject:value forKey:macro];
             }
         }
     }
@@ -366,8 +365,8 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 
 - (void)synchronize{
     NSMutableDictionary *macros = [[NSMutableDictionary alloc] initWithCapacity:[[self macroDefinitions] count]];
-    for (NSString *key in [self macroDefinitions])
-        [macros setObject:[[[self macroDefinitions] objectForKey:key] stringAsBibTeXString] forKey:key];
+    for (NSString *macro in [self macroDefinitions])
+        [macros setObject:[[[self macroDefinitions] objectForKey:macro] stringAsBibTeXString] forKey:macro];
     [[NSUserDefaults standardUserDefaults] setObject:macros forKey:BDSKGlobalMacroDefinitionsKey];
     [macros release];
 }
@@ -385,10 +384,10 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     return fileMacroDefinitions;
 }
 
-- (NSString *)valueOfMacro:(NSString *)macroString{
-    return ([[self macroDefinitions] objectForKey:macroString] ?:
-            [[self fileMacroDefinitions] objectForKey:macroString]) ?:
-            [standardMacroDefinitions objectForKey:macroString];
+- (NSString *)valueOfMacro:(NSString *)macro{
+    return ([[self macroDefinitions] objectForKey:macro] ?:
+            [[self fileMacroDefinitions] objectForKey:macro]) ?:
+            [standardMacroDefinitions objectForKey:macro];
 }
 #pragma mark KVO
 
