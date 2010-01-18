@@ -52,6 +52,48 @@
 
 @implementation BDSKFormatParser
 
+static NSCharacterSet *nonLowercaseLetterCharSet = nil;
+static NSCharacterSet *nonUppercaseLetterCharSet = nil;
+static NSCharacterSet *nonDecimalDigitCharSet = nil;
+
+static NSCharacterSet *validSpecifierChars = nil;
+static NSCharacterSet *validParamSpecifierChars = nil;
+static NSCharacterSet *validUniqueSpecifierChars = nil;
+static NSCharacterSet *validLocalFileSpecifierChars = nil;
+static NSCharacterSet *validEscapeSpecifierChars = nil;
+static NSCharacterSet *validArgSpecifierChars = nil;
+static NSCharacterSet *validOptArgSpecifierChars = nil;
+static NSCharacterSet *validAuthorSpecifierChars = nil;
+static NSDictionary *specAttr = nil;
+static NSDictionary *paramAttr = nil;
+static NSDictionary *argAttr = nil;
+static NSDictionary *textAttr = nil;
+static NSDictionary *errorAttr = nil;
+
++ (void)initialize {
+    BDSKINITIALIZE;
+    nonLowercaseLetterCharSet = [[[NSCharacterSet characterSetWithRange:NSMakeRange('a',26)] invertedSet] copy];
+    nonUppercaseLetterCharSet = [[[NSCharacterSet characterSetWithRange:NSMakeRange('A',26)] invertedSet] copy];
+    nonDecimalDigitCharSet = [[[NSCharacterSet characterSetWithRange:NSMakeRange('0',10)] invertedSet] copy];
+    
+    validSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTmyYlLebkfwcsirRduUn0123456789%[]"] retain];
+    validParamSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTkfwciuUn"] retain];
+    validUniqueSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"uUn"] retain];
+    validLocalFileSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"lLe"] retain];
+    validEscapeSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"0123456789%[]"] retain];
+    validArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"fwcsi"] retain];
+    validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPTkfwsuUn"] retain];
+    validAuthorSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApP"] retain];
+    
+    NSFont *font = [NSFont systemFontOfSize:0];
+    NSFont *boldFont = [NSFont boldSystemFontOfSize:0];
+    specAttr = [[NSDictionary alloc] initWithObjectsAndKeys:boldFont, NSFontAttributeName, [NSColor blueColor], NSForegroundColorAttributeName, nil];
+    paramAttr = [[NSDictionary alloc] initWithObjectsAndKeys:boldFont, NSFontAttributeName, [NSColor colorWithCalibratedRed:0.0 green:0.5 blue:0.0 alpha:1.0], NSForegroundColorAttributeName, nil];
+    argAttr = [[NSDictionary alloc] initWithObjectsAndKeys:font, NSFontAttributeName, [NSColor controlTextColor], NSForegroundColorAttributeName, nil];
+    textAttr = [[NSDictionary alloc] initWithObjectsAndKeys:boldFont, NSFontAttributeName, [NSColor controlTextColor], NSForegroundColorAttributeName, nil];
+    errorAttr = [[NSDictionary alloc] initWithObjectsAndKeys:font, NSFontAttributeName, [NSColor redColor], NSForegroundColorAttributeName, nil];
+}
+
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub
 {
     return [self parseFormat:format forField:fieldName ofItem:pub suggestion:nil];
@@ -84,16 +126,6 @@
 
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName linkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion
 {
-	static NSCharacterSet *nonLowercaseLetterCharSet = nil;
-	static NSCharacterSet *nonUppercaseLetterCharSet = nil;
-	static NSCharacterSet *nonDecimalDigitCharSet = nil;
-	
-    if (nonLowercaseLetterCharSet == nil) {
-        nonLowercaseLetterCharSet = [[[NSCharacterSet characterSetWithRange:NSMakeRange('a',26)] invertedSet] copy];
-        nonUppercaseLetterCharSet = [[[NSCharacterSet characterSetWithRange:NSMakeRange('A',26)] invertedSet] copy];
-        nonDecimalDigitCharSet = [[[NSCharacterSet characterSetWithRange:NSMakeRange('0',10)] invertedSet] copy];
-    }
-    
     NSMutableString *parsedStr = [NSMutableString string];
 	NSString *prefixStr = nil;
 	NSScanner *scanner = [NSScanner scannerWithString:format];
@@ -970,39 +1002,6 @@
 
 + (BOOL)validateFormat:(NSString **)formatString attributedFormat:(NSAttributedString **)attrFormatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error
 {
-	static NSCharacterSet *validSpecifierChars = nil;
-	static NSCharacterSet *validParamSpecifierChars = nil;
-	static NSCharacterSet *validUniqueSpecifierChars = nil;
-	static NSCharacterSet *validLocalFileSpecifierChars = nil;
-	static NSCharacterSet *validEscapeSpecifierChars = nil;
-	static NSCharacterSet *validArgSpecifierChars = nil;
-	static NSCharacterSet *validOptArgSpecifierChars = nil;
-	static NSCharacterSet *validAuthorSpecifierChars = nil;
-	static NSDictionary *specAttr = nil;
-	static NSDictionary *paramAttr = nil;
-	static NSDictionary *argAttr = nil;
-	static NSDictionary *textAttr = nil;
-	static NSDictionary *errorAttr = nil;
-	
-	if (validSpecifierChars == nil) {
-		validSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTmyYlLebkfwcsirRduUn0123456789%[]"] retain];
-		validParamSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTkfwciuUn"] retain];
-		validUniqueSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"uUn"] retain];
-		validLocalFileSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"lLe"] retain];
-		validEscapeSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"0123456789%[]"] retain];
-		validArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"fwcsi"] retain];
-		validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPTkfwsuUn"] retain];
-		validAuthorSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApP"] retain];
-        
-		NSFont *font = [NSFont systemFontOfSize:0];
-		NSFont *boldFont = [NSFont boldSystemFontOfSize:0];
-		specAttr = [[NSDictionary alloc] initWithObjectsAndKeys:boldFont, NSFontAttributeName, [NSColor blueColor], NSForegroundColorAttributeName, nil];
-		paramAttr = [[NSDictionary alloc] initWithObjectsAndKeys:boldFont, NSFontAttributeName, [NSColor colorWithCalibratedRed:0.0 green:0.5 blue:0.0 alpha:1.0], NSForegroundColorAttributeName, nil];
-		argAttr = [[NSDictionary alloc] initWithObjectsAndKeys:font, NSFontAttributeName, [NSColor controlTextColor], NSForegroundColorAttributeName, nil];
-		textAttr = [[NSDictionary alloc] initWithObjectsAndKeys:boldFont, NSFontAttributeName, [NSColor controlTextColor], NSForegroundColorAttributeName, nil];
-		errorAttr = [[NSDictionary alloc] initWithObjectsAndKeys:font, NSFontAttributeName, [NSColor redColor], NSForegroundColorAttributeName, nil];
-	}
-	
 	NSCharacterSet *invalidCharSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:fieldName inFileType:type];
 	NSCharacterSet *digitCharSet = [NSCharacterSet decimalDigitCharacterSet];
 	NSScanner *scanner = [NSScanner scannerWithString:*formatString];
