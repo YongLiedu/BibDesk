@@ -39,6 +39,12 @@
 #import "BDSKScriptHookManager.h"
 #import "BibDocument.h"
 #import "BDSKStringConstants.h"
+#import "KFAppleScriptHandlerAdditionsCore.h"
+
+// these correspond to the script codes in the .sdef file
+#define kBDSKBibdeskSuite				'BDSK'
+#define kBDSKPerformBibdeskAction		'pAct'
+#define kBDSKPrepositionForScriptHook	'fshk'
 
 #define MAX_RUNNING_SCRIPT_HOOKS	100
 
@@ -131,12 +137,27 @@ static NSArray *scriptHookNames = nil;
 }
 
 - (BOOL)runScriptHook:(BDSKScriptHook *)scriptHook forPublications:(NSArray *)items document:(BibDocument *)document {
-	if (scriptHook == nil)
-		return NO;
-	// execute the script
-	BOOL rv = [scriptHook executeForPublications:items document:document];
-	// cleanup
-	[self removeScriptHook:scriptHook];
+	BOOL rv = NO;
+    
+    if (scriptHook) {
+        BDSKPRECONDITION([scriptHook script] != nil);
+        
+        [scriptHook setDocument:document];
+        
+        // execute the script
+        @try {
+            [[scriptHook script] executeHandler:kBDSKPerformBibdeskAction 
+                                      fromSuite:kBDSKBibdeskSuite 
+                        withLabelsAndParameters:keyDirectObject, items, kBDSKPrepositionForScriptHook, scriptHook, nil];
+            rv = YES;
+        }
+        @catch(id exception) {
+            NSLog(@"Error executing %@: %@", scriptHook, [exception respondsToSelector:@selector(reason)] ? [exception reason] : exception);
+            rv = NO;
+        }
+        // cleanup
+        [self removeScriptHook:scriptHook];
+    }
 	return rv;
 }
 

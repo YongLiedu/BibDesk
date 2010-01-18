@@ -140,13 +140,4 @@
 */
 - (NSAppleScript *)script;
 
-/*!
-	@method executeForPublications:
-	@abstract Execute the script file for the script hook passing the publication.
-	@discussion -
-	@param items An array of publications passed to the script for the script hook.
-	@result Boolean indicating whether the script was executed sucessfully. 
-*/
-- (BOOL)executeForPublications:(NSArray *)item document:(BibDocument *)aDocument;
-
 @end

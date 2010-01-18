@@ -38,31 +38,24 @@
 
 #import "BDSKScriptHook.h"
 #import "BibDocument.h"
-#import "KFAppleScriptHandlerAdditionsCore.h"
-
-// these correspond to the script codes in the .sdef file
-#define kBDSKBibdeskSuite				'BDSK'
-#define kBDSKPerformBibdeskAction		'pAct'
-#define kBDSKPrepositionForScriptHook	'fshk'
 
 static NSUInteger scriptHookID = 0;
 
 @implementation BDSKScriptHook
 
-// dummy, don't use this
+// old designated initializer, shouldn't be used
 - (id)init {
-	[self release];
-    self = nil;
-	return self;
+	return [self initWithName:nil script:nil];
 }
 
+// designated initializer
 - (id)initWithName:(NSString *)aName script:(NSAppleScript *)aScript {
 	if (self = [super init]) {
         if (aScript == nil || aName == nil) {
             [self release];
             self = nil;
         } else {
-            uniqueID = [[NSNumber alloc] initWithInteger:++scriptHookID];
+            uniqueID = [[NSNumber alloc] initWithUnsignedInteger:++scriptHookID];
             name = [aName retain];
             script = [aScript retain];
             field = nil;
@@ -83,6 +76,10 @@ static NSUInteger scriptHookID = 0;
 	BDSKDESTROY(newValues);
 	BDSKDESTROY(document);
 	[super dealloc];
+}
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<%@: name=%@, uniqueID=%@>", [self class], self, name, uniqueID];
 }
 
 - (NSString *)name {
@@ -139,28 +136,6 @@ static NSUInteger scriptHookID = 0;
         [document release];
         document = [newDocument retain];
     }
-}
-
-- (BOOL)executeForPublications:(NSArray *)items document:(BibDocument *)aDocument{
-	if (script == nil) {
-		NSLog(@"No script found for script hook \"%@\"", name);
-		return NO;
-	}
-	BOOL rv = YES;
-    
-    [self setDocument:aDocument];
-	
-	@try {
-		[script executeHandler:kBDSKPerformBibdeskAction 
-					 fromSuite:kBDSKBibdeskSuite 
-	   withLabelsAndParameters:keyDirectObject, items, kBDSKPrepositionForScriptHook, self, nil];
-	}
-    @catch(id exception) {
-		NSLog(@"Error executing script hook \"%@\": %@", name, [exception respondsToSelector:@selector(reason)] ? [exception reason] : exception);
-		rv = NO;
-	}
-	
-	return rv;
 }
 
 @end
