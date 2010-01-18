@@ -57,76 +57,13 @@ extern NSString *BDSKSaveDocumentScriptHookName;
 	NSMutableDictionary *scriptHooks;
 }
 
-
-/*!
-	@method sharedManager
-	@abstract Returns the shared instance of the class.
-	@discussion -
-*/
 + (BDSKScriptHookManager *)sharedManager;
 
-/*!
-	@method scriptHookNames
-	@abstract Returns the known scripthook names
-	@discussion -
-*/
 + (NSArray *)scriptHookNames;
 
-/*!
-	@method scriptHookWithUniqueID:
-	@abstract Returns the script hook with the given unique ID. 
-	@discussion This is used for the AppleScript accessor.
-	@param uniqueID The unique ID number.
-*/
 - (BDSKScriptHook *)scriptHookWithUniqueID:(NSNumber *)uniqueID;
 
-/*!
-	@method removeScriptHook:
-	@abstract Removes the given script hook.
-	@discussion -
-	@param scriptHook The script hook object to remove.
-*/
-- (void)removeScriptHook:(BDSKScriptHook *)scriptHook;
-
-/*!
-	@method makeScriptHookWithName:
-	@abstract Returns a newly created script hook with the given name, or nil if the script cannot be found.
-	@discussion Remove the script hook after being done, or use one of the -runScriptHook... methods. 
-	@param name The name for the script hook.
-*/
-- (BDSKScriptHook *)makeScriptHookWithName:(NSString *)name;
-
-/*!
-	@method runScriptHook:forPublications:document:
-	@abstract Convenience method to execute the script and remove the script hook object. 
-	@discussion -
-	@param scriptHook The script hook to run.
-	@param items An array of publications passed to the script for the script hook.
-	@param document The document for the script hook.
-*/
-- (BOOL)runScriptHook:(BDSKScriptHook *)scriptHook forPublications:(NSArray *)items document:(BibDocument *)document;
-
-/*!
-	@method runScriptHookWithName:forPublications:document:
-	@abstract Calls -runScriptHookWithName:forPublication:field:oldValues:newValues: with nil field, oldValues, and newValues. 
-	@discussion -
-	@param name The name for the script hook.
-	@param items An array of publications passed to the script for the script hook.
-	@param document The document for the script hook.
-*/
 - (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document;
-
-/*!
-	@method runScriptHookWithName:forPublications:document:userInfo:
-	@abstract Convenience method to create a script hook with the given name, set values from the userInfo, run the script, and remove the script hook object. 
-	@discussion -
-	@param name The name for the script hook.
-	@param items An array of publications passed to the script for the script hook.
-	@param document The document for the script hook.
-	@param field The field set in the script hook.
-	@param oldValues The oldValues set in the script hook.
-	@param newValues The newValues set in the script hook.
-*/
 - (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document field:(NSString *)field oldValues:(NSArray *)oldValues newValues:(NSArray *)newValues;
 
 @end

@@ -98,11 +98,7 @@ static NSArray *scriptHookNames = nil;
 	return [scriptHooks objectForKey:uniqueID];
 }
 
-- (void)removeScriptHook:(BDSKScriptHook *)scriptHook {
-	[scriptHooks removeObjectForKey:[scriptHook uniqueID]];
-}
-
-- (BDSKScriptHook *)makeScriptHookWithName:(NSString *)name {
+- (BDSKScriptHook *)newScriptHookWithName:(NSString *)name {
 	if (name == nil)
 		return nil;
 	// Safety call in case a script generates a loop
@@ -128,20 +124,28 @@ static NSArray *scriptHookNames = nil;
 		}
 	}
 	
-	BDSKScriptHook *scriptHook = [[[BDSKScriptHook alloc] initWithName:name script:script] autorelease];
+	BDSKScriptHook *scriptHook = [[BDSKScriptHook alloc] initWithName:name script:script];
 	[scriptHooks setObject:scriptHook forKey:[scriptHook uniqueID]];
 	[script release];
 	
 	return scriptHook;
 }
 
-- (BOOL)runScriptHook:(BDSKScriptHook *)scriptHook forPublications:(NSArray *)items document:(BibDocument *)document {
+- (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document {
+	return [self runScriptHookWithName:name forPublications:items document:document field:nil oldValues:nil newValues:nil];
+}
+
+- (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document field:(NSString *)field oldValues:(NSArray *)oldValues newValues:(NSArray *)newValues {
+	BDSKScriptHook *scriptHook = [self newScriptHookWithName:name];
 	BOOL rv = NO;
-    
+	
     if (scriptHook) {
-        BDSKPRECONDITION([scriptHooks objectForKey:[scriptHook uniqueID]] == scriptHook);
         BDSKPRECONDITION([scriptHook script] != nil);
         
+        // set the values
+        [scriptHook setField:field];
+        [scriptHook setOldValues:oldValues];
+        [scriptHook setNewValues:newValues];
         [scriptHook setDocument:document];
         
         // execute the script
@@ -155,26 +159,12 @@ static NSArray *scriptHookNames = nil;
             NSLog(@"Error executing %@: %@", scriptHook, [exception respondsToSelector:@selector(reason)] ? [exception reason] : exception);
             rv = NO;
         }
+        
         // cleanup
-        [self removeScriptHook:scriptHook];
+        [scriptHooks removeObjectForKey:[scriptHook uniqueID]];
+        [scriptHook release];
     }
 	return rv;
-}
-
-- (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document {
-	return [self runScriptHookWithName:name forPublications:items document:document field:nil oldValues:nil newValues:nil];
-}
-
-- (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document field:(NSString *)field oldValues:(NSArray *)oldValues newValues:(NSArray *)newValues {
-	BDSKScriptHook *scriptHook = [self makeScriptHookWithName:name];
-	if (scriptHook == nil)
-		return NO;
-	// set the values
-    [scriptHook setField:field];
-    [scriptHook setOldValues:oldValues];
-    [scriptHook setNewValues:newValues];
-	// execute the script and remove the script hook
-	return [self runScriptHook:scriptHook forPublications:items document:document];
 }
 
 @end
