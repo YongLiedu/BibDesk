@@ -660,8 +660,11 @@ static NSOperationQueue *metadataCacheQueue = nil;
 // returns empty dictionary if no attributes set
 - (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes {
     if (mainWindowSetupDictionary == nil) {
-        if ([self fileURL])
+        if ([self fileURL]) {
             mainWindowSetupDictionary = [[[SKNExtendedAttributeManager sharedNoSplitManager] propertyListFromExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey atPath:[[self fileURL] path] traverseLink:YES error:NULL] retain];
+            if ([mainWindowSetupDictionary isKindOfClass:[NSDictionary class]] == NO)
+                BDSKDESTROY(mainWindowSetupDictionary);
+        }
         if (nil == mainWindowSetupDictionary)
             mainWindowSetupDictionary = [[NSDictionary alloc] init];
     }
