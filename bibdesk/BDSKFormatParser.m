@@ -909,6 +909,9 @@
 
 + (NSString *)stringByStrictlySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type
 {
+    if ([NSString isEmptyString:string])
+        return @"";
+    
 	NSCharacterSet *invalidCharSet = [[BDSKTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
     NSString *newString = nil;
 	NSInteger cleanOption = 0;
@@ -916,9 +919,6 @@
 	if ([fieldName isEqualToString:BDSKCiteKeyString]) {
 		cleanOption = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKCiteKeyCleanOptionKey];
 		
-		if ([NSString isEmptyString:string]) {
-			return @"";
-		}
 		newString = [string stringByDeTeXifyingString];
 		if (cleanOption == 1) {
 			newString = [newString stringByRemovingCurlyBraces];
@@ -929,8 +929,6 @@
 													 withString:@"-"];
 		newString = [newString lossyASCIIString];
 		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
-		
-		return newString;
 	}
 	else if ([fieldName isEqualToString:BDSKLocalFileString] || [fieldName isLocalFileField]) {
 		cleanOption = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKLocalFileCleanOptionKey];
@@ -938,36 +936,26 @@
 		if (cleanOption >= 3)
 			invalidCharSet = [[BDSKTypeManager sharedManager] veryStrictInvalidCharactersForField:fieldName inFileType:type];
 		
-		if ([NSString isEmptyString:string]) {
-			return @"";
-		}
-		newString = [string stringByDeTeXifyingString];
-		if (cleanOption == 1) {
-			newString = [newString stringByRemovingCurlyBraces];
-		} else if (cleanOption >= 2) {
-			newString = [newString stringByRemovingTeX];
+        newString = [string stringByDeTeXifyingString];
+        if (cleanOption == 1) {
+            newString = [newString stringByRemovingCurlyBraces];
+        } else if (cleanOption >= 2) {
+            newString = [newString stringByRemovingTeX];
             if (cleanOption == 4)
                 newString = [newString lossyASCIIString];
-		}
-		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
-		
-		return newString;
+        }
+        newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
 	}
 	else if ([fieldName isEqualToString:BDSKRemoteURLString] || [fieldName isRemoteURLField]) {
-		if ([NSString isEmptyString:string]) {
-			return @"";
-		}
-		newString = [string stringByDeTeXifyingString];
-		newString = [newString lossyASCIIString];
-		newString = [newString stringByRemovingTeX];
-		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
-		
-		return newString;
+        newString = [string stringByDeTeXifyingString];
+        newString = [newString lossyASCIIString];
+        newString = [newString stringByRemovingTeX];
+        newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
 	}
 	else {
 		newString = [string stringByReplacingCharactersInSet:invalidCharSet withString:@""];
-		return newString;
 	}
+    return newString;
 }
 
 + (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error
