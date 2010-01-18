@@ -120,11 +120,6 @@ static id sharedManager = nil;
     NSCharacterSet *wsCharSet = [NSCharacterSet whitespaceCharacterSet];
     NSCharacterSet *acSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:entry];
 
-	if ([entry isEqualToString:BDSKEditorString])	
-		entry = BDSKAuthorString;
-	else if ([entry isEqualToString:BDSKBooktitleString])	
-		entry = BDSKTitleString;
-	
 	// find a string to match, be consistent with addString:forCompletionEntry:
 	NSRange searchRange = NSMakeRange(0, charRange.location);
 	// find the first separator preceding the current word being entered
