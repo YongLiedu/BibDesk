@@ -400,7 +400,7 @@
 
 - (BDSKGroup *)valueInScriptingGroupsWithUniqueID:(NSString *)aUniqueID {
     NSArray *allGroups = [self scriptingGroups];
-    NSUInteger idx = [[allGroups valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    NSUInteger idx = [[allGroups valueForKey:@"uniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [allGroups objectAtIndex:idx];
 }
 
@@ -476,7 +476,7 @@
 }
 
 - (BDSKStaticGroup *)valueInStaticGroupsWithUniqueID:(NSString *)aUniqueID {
-    NSUInteger idx = [[[groups staticGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    NSUInteger idx = [[[groups staticGroups] valueForKey:@"uniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [[groups staticGroups] objectAtIndex:idx];
 }
 
@@ -512,7 +512,7 @@
 }
 
 - (BDSKSmartGroup *)valueInSmartGroupsWithUniqueID:(NSString *)aUniqueID {
-    NSUInteger idx = [[[groups smartGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    NSUInteger idx = [[[groups smartGroups] valueForKey:@"uniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [[groups smartGroups] objectAtIndex:idx];
 }
 
@@ -548,7 +548,7 @@
 }
 
 - (BDSKCategoryGroup *)valueInFieldGroupsWithUniqueID:(NSString *)aUniqueID {
-    NSUInteger idx = [[[groups categoryGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    NSUInteger idx = [[[groups categoryGroups] valueForKey:@"uniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [[groups categoryGroups] objectAtIndex:idx];
 }
 
@@ -573,7 +573,7 @@
 }
 
 - (BDSKURLGroup *)valueInExternalFileGroupsWithUniqueID:(NSString *)aUniqueID {
-    NSUInteger idx = [[[groups URLGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    NSUInteger idx = [[[groups URLGroups] valueForKey:@"uniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [[groups URLGroups] objectAtIndex:idx];
 }
 
@@ -609,7 +609,7 @@
 }
 
 - (BDSKScriptGroup *)valueInScriptGroupsWithUniqueID:(NSString *)aUniqueID {
-    NSUInteger idx = [[[groups scriptGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    NSUInteger idx = [[[groups scriptGroups] valueForKey:@"uniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [[groups scriptGroups] objectAtIndex:idx];
 }
 
@@ -645,7 +645,7 @@
 }
 
 - (BDSKSearchGroup *)valueInSearchGroupsWithUniqueID:(NSString *)aUniqueID {
-    NSUInteger idx = [[[groups searchGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    NSUInteger idx = [[[groups searchGroups] valueForKey:@"uniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [[groups searchGroups] objectAtIndex:idx];
 }
 
@@ -679,7 +679,7 @@
 }
 
 - (BDSKSharedGroup *)valueInSharedGroupsWithUniqueID:(NSString *)aUniqueID {
-    NSUInteger idx = [[[groups sharedGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    NSUInteger idx = [[[groups sharedGroups] valueForKey:@"uniqueID"] indexOfObject:aUniqueID];
     return idx == NSNotFound ? nil : [[groups sharedGroups] objectAtIndex:idx];
 }
 
@@ -696,7 +696,7 @@
 
 - (BDSKGroup *)valueInLibraryGroupsWithUniqueID:(NSString *)aUniqueID {
     BDSKGroup *group = [[self groups] libraryGroup];
-    return [[group scriptingUniqueID] isEqualToString:aUniqueID] == NSOrderedSame ? group : nil;
+    return [[group uniqueID] isEqualToString:aUniqueID] == NSOrderedSame ? group : nil;
 }
 
 - (BDSKGroup *)valueInLibraryGroupsWithName:(NSString *)name {
@@ -713,7 +713,7 @@
 
 - (BDSKGroup *)valueInLastImportGroupsWithUniqueID:(NSString *)aUniqueID {
     BDSKGroup *group = [groups lastImportGroup];
-    return [[group scriptingUniqueID] isEqualToString:aUniqueID] == NSOrderedSame ? group : nil;
+    return [[group uniqueID] isEqualToString:aUniqueID] == NSOrderedSame ? group : nil;
 }
 
 - (BDSKGroup *)valueInLastImportGroupsWithName:(NSString *)name {
@@ -729,7 +729,7 @@
 
 - (BDSKWebGroup *)valueInWebGroupsWithUniqueID:(NSString *)aUniqueID {
     BDSKWebGroup *group = [groups webGroup];
-    return [[group scriptingUniqueID] isEqualToString:aUniqueID] == NSOrderedSame ? group : nil;
+    return [[group uniqueID] isEqualToString:aUniqueID] == NSOrderedSame ? group : nil;
 }
 
 - (BDSKWebGroup *)valueInWebGroupsWithName:(NSString *)name {

@@ -130,10 +130,6 @@
     return [[self macroResolver] valueInMacrosWithName:aName];
 }
 
-- (NSString *)scriptingUniqueID {
-    return [self uniqueID];
-}
-
 - (NSString *)scriptingName {
     return [self stringValue];
 }

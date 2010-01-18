@@ -1197,7 +1197,7 @@
             <cocoa class="BDSKGroup"/>
             <property name="id" code="ID  " type="text" access="r"
                 description="Unique ID of the group.">
-                <cocoa key="scriptingUniqueID"/>
+                <cocoa key="uniqueID"/>
             </property>  
             <property name="name" code="pnam" type="text"
                 description="The group's name.">
