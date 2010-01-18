@@ -128,10 +128,9 @@ static NSArray *scriptHookNames = nil;
 		}
 	}
 	
-	BDSKScriptHook *scriptHook = [[BDSKScriptHook alloc] initWithName:name script:script];
+	BDSKScriptHook *scriptHook = [[[BDSKScriptHook alloc] initWithName:name script:script] autorelease];
 	[scriptHooks setObject:scriptHook forKey:[scriptHook uniqueID]];
 	[script release];
-	[scriptHook release];
 	
 	return scriptHook;
 }
@@ -140,6 +139,7 @@ static NSArray *scriptHookNames = nil;
 	BOOL rv = NO;
     
     if (scriptHook) {
+        BDSKPRECONDITION([scriptHooks objectForKey:[scriptHook uniqueID]] == scriptHook);
         BDSKPRECONDITION([scriptHook script] != nil);
         
         [scriptHook setDocument:document];
