@@ -61,7 +61,7 @@ extern NSString *BDSKSaveDocumentScriptHookName;
 
 + (NSArray *)scriptHookNames;
 
-- (BDSKScriptHook *)scriptHookWithUniqueID:(NSNumber *)uniqueID;
+- (BDSKScriptHook *)scriptHookWithUniqueID:(NSString *)uniqueID;
 
 - (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document;
 - (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document field:(NSString *)field oldValues:(NSArray *)oldValues newValues:(NSArray *)newValues;

@@ -42,7 +42,7 @@
 
 @interface BDSKScriptHook : NSObject {
 	NSString *name;
-	NSNumber *uniqueID;
+	NSString *uniqueID;
 	NSAppleScript *script;
 	NSString *field;
 	NSArray *oldValues;
@@ -71,7 +71,7 @@
 	@abstract Returns the unique ID of the script hook.
 	@discussion -
 */
-- (NSNumber *)uniqueID;
+- (NSString *)uniqueID;
 
 /*!
 	@method field

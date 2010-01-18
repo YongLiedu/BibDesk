@@ -1336,11 +1336,11 @@
             <cocoa class="BDSKScriptHook"/>
             <property name="name" code="pnam" type="text" access="r"
                 description="Name of the script hook.">
-                <cocoa key="scriptingName"/>
+                <cocoa key="name"/>
             </property>  
-            <property name="id" code="ID  " type="integer" access="r"
+            <property name="id" code="ID  " type="text" access="r"
                 description="Unique ID of the script hook.">
-                <cocoa key="scriptingUniqueID"/>
+                <cocoa key="uniqueID"/>
             </property>  
             <property name="document" code="docu" type="document" access="r"
                 description="Document for the script hook.">

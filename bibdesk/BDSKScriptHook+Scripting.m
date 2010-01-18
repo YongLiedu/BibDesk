@@ -60,16 +60,7 @@
     }
 }
 
-// Use separate accessors for AppleScript, to ensure the read-only properties. 
-// Also make sure we don't return nil and break a script.
-
-- (NSString *)scriptingName {
-    return name;
-}
-
-- (NSNumber *)scriptingUniqueID {
-    return uniqueID;
-}
+// Use separate accessors to sure we don't return nil and break a script.
 
 - (NSString *)scriptingField {
     return field ?: @"";

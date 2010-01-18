@@ -94,7 +94,7 @@ static NSArray *scriptHookNames = nil;
 	return self;
 }
 
-- (BDSKScriptHook *)scriptHookWithUniqueID:(NSNumber *)uniqueID {
+- (BDSKScriptHook *)scriptHookWithUniqueID:(NSString *)uniqueID {
 	return [scriptHooks objectForKey:uniqueID];
 }
 

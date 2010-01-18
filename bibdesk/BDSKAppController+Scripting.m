@@ -83,7 +83,7 @@ Category on BDSKAppController making the papers folder readable for scripting
                                         key: @"clipboard"] autorelease];
 }
 
-- (BDSKScriptHook *)valueInScriptHooksWithUniqueID:(NSNumber *)uniqueID {
+- (BDSKScriptHook *)valueInScriptHooksWithUniqueID:(NSString *)uniqueID {
 	return [[BDSKScriptHookManager sharedManager] scriptHookWithUniqueID:uniqueID];
 }
 

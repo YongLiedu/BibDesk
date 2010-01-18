@@ -38,8 +38,8 @@
 
 #import "BDSKScriptHook.h"
 #import "BibDocument.h"
+#import "CFString_BDSKExtensions.h"
 
-static NSUInteger scriptHookID = 0;
 
 @implementation BDSKScriptHook
 
@@ -55,7 +55,7 @@ static NSUInteger scriptHookID = 0;
             [self release];
             self = nil;
         } else {
-            uniqueID = [[NSNumber alloc] initWithUnsignedInteger:++scriptHookID];
+            uniqueID = (id)BDCreateUniqueString();
             name = [aName retain];
             script = [aScript retain];
             field = nil;
@@ -86,7 +86,7 @@ static NSUInteger scriptHookID = 0;
     return name;
 }
 
-- (NSNumber *)uniqueID {
+- (NSString *)uniqueID {
     return uniqueID;
 }
 

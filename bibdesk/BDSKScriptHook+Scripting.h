@@ -42,20 +42,6 @@
 @interface BDSKScriptHook (Scripting)
 
 /*!
-	@method asName
-	@abstract Returns the name of the script hook for AppleScript.
-	@discussion -
-*/
-- (NSString *)scriptingName;
-
-/*!
-	@method asUniqueID
-	@abstract Returns the unique ID of the script hook for AppleScript.
-	@discussion -
-*/
-- (NSNumber *)scriptingUniqueID;
-
-/*!
 	@method asField
 	@abstract Returns the field name for the script hook event for AppleScript.
 	@discussion -

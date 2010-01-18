@@ -54,7 +54,7 @@
 
 - (id)clipboard;
 
-- (BDSKScriptHook *)valueInScriptHooksWithUniqueID:(NSNumber *)uniqueID;
+- (BDSKScriptHook *)valueInScriptHooksWithUniqueID:(NSString *)uniqueID;
 
 - (BDSKMacro *)valueInMacrosWithName:(NSString *)name;
 - (NSArray *)macros;
