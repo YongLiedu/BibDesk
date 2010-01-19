@@ -45,7 +45,6 @@ static char BDSKTypeManagerDefaultsObservationContext;
 
 @interface BDSKTypeManager (BDSKPrivate)
 
-- (void)reloadAllFieldNames;
 - (void)reloadFieldSets;
 
 - (void)setAllFieldNames:(NSSet *)newNames;
@@ -175,6 +174,26 @@ static BDSKTypeManager *sharedManager = nil;
 	return self;
 }
 
+- (void)reloadAllFieldNames {
+    NSMutableSet *allFields = [NSMutableSet setWithCapacity:30];
+    
+    for (NSString *type in [self bibTypes]) {
+        [allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY]];
+        [allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY]];
+    }
+    
+    [allFields addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKDefaultFieldsKey]];
+    [allFields unionSet:allURLFieldsSet];
+    [allFields unionSet:booleanFieldsSet];
+    [allFields unionSet:ratingFieldsSet];
+    [allFields unionSet:triStateFieldsSet];
+    [allFields unionSet:citationFieldsSet];
+    [allFields unionSet:personFieldsSet];
+    
+    [self setAllFieldNames:allFields];
+
+}
+
 - (void)reloadTypesAndFields{
     // Load the TypeInfo plist, prefer the user one, otherwise use the default one
     NSString *userTypeInfoPath = [[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:TYPE_INFO_FILENAME];
@@ -190,27 +209,6 @@ static BDSKTypeManager *sharedManager = nil;
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibTypeInfoChangedNotification
 														object:self
 													  userInfo:[NSDictionary dictionary]];
-}
-
-- (void)reloadAllFieldNames {
-    NSMutableSet *allFields = [NSMutableSet setWithCapacity:30];
-    
-    for (NSString *type in [self bibTypes]) {
-        [allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY]];
-        [allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY]];
-    }
-    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-    [allFields addObjectsFromArray:[sud stringArrayForKey:BDSKDefaultFieldsKey]];
-    [allFields addObjectsFromArray:[sud stringArrayForKey:BDSKLocalFileFieldsKey]];
-    [allFields addObjectsFromArray:[sud stringArrayForKey:BDSKRemoteURLFieldsKey]];
-    [allFields addObjectsFromArray:[sud stringArrayForKey:BDSKBooleanFieldsKey]];
-    [allFields addObjectsFromArray:[sud stringArrayForKey:BDSKRatingFieldsKey]];
-    [allFields addObjectsFromArray:[sud stringArrayForKey:BDSKTriStateFieldsKey]];
-    [allFields addObjectsFromArray:[sud stringArrayForKey:BDSKCitationFieldsKey]];
-    [allFields addObjectsFromArray:[sud stringArrayForKey:BDSKPersonFieldsKey]];
-    
-    [self setAllFieldNames:allFields];
-
 }
 
 - (void)reloadFieldSets {
@@ -252,6 +250,8 @@ static BDSKTypeManager *sharedManager = nil;
 	[singleValuedFields unionSet:booleanFieldsSet];
 	[singleValuedFields unionSet:triStateFieldsSet];  
     [singleValuedGroupFieldsSet unionSet:singleValuedFields];
+    
+    [self reloadAllFieldNames];
 }
 
 
@@ -259,7 +259,6 @@ static BDSKTypeManager *sharedManager = nil;
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if (context == &BDSKTypeManagerDefaultsObservationContext) {
-        [self reloadAllFieldNames];
         [self reloadFieldSets];
         
         // coalesce notifications; this is received once each preference value that's set in BibPref_Defaults, but observers of BDSKCustomFieldsChangedNotification should only receive it once
@@ -296,14 +295,14 @@ static BDSKTypeManager *sharedManager = nil;
 - (void)setRequiredFieldsForCiteKey:(NSArray *)newFields{
 	if (requiredFieldsForCiteKey != newFields) {
         [requiredFieldsForCiteKey release];
-        requiredFieldsForCiteKey = [newFields retain];
+        requiredFieldsForCiteKey = [newFields copy];
     }
 }
 
 - (void)setRequiredFieldsForLocalFile:(NSArray *)newFields{
 	if (requiredFieldsForLocalFile != newFields) {
         [requiredFieldsForLocalFile release];
-        requiredFieldsForLocalFile = [newFields retain];
+        requiredFieldsForLocalFile = [newFields copy];
     }
 }
 
