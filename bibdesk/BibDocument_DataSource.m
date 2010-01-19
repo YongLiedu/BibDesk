@@ -1453,14 +1453,6 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupOutlineView];
     BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
     
-    // drop of items from external groups is allowed only on the Library
-    if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups) {
-        if ([item isEqual:[groups libraryGroup]] == NO && [item isEqual:[groups libraryParent]] == NO)
-            return NSDragOperationNone;
-        [outlineView setDropItem:[groups libraryGroup] dropChildIndex:NSOutlineViewDropOnItemIndex];
-        return NSDragOperationCopy;
-    }
-    
     // we don't allow local drags unless they're targeted on a specific group
     if (isDragFromDrawer || isDragFromGroupTable)
         return NSDragOperationNone;
@@ -1490,7 +1482,11 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     if (item && [item isValidDropTarget] == NO)
         return NSDragOperationNone;
     
-    if (isDragFromMainTable) {
+    if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups) {
+        if ([type isEqualToString:BDSKBibItemPboardType] == NO || item == nil)
+            return NSDragOperationNone;
+        return NSDragOperationCopy;
+    } else if (isDragFromMainTable) {
         if ([type isEqualToString:BDSKBibItemPboardType] == NO || item == nil || [item isEqual:[groups libraryGroup]])
             return NSDragOperationNone;
         return NSDragOperationLink;
@@ -1511,11 +1507,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupOutlineView];
     BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
     
-    if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups) {
-        
-        return nil != [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
-        
-    } else if (idx == NSOutlineViewDropOnItemIndex && [item isEqual:[groups webGroup]] && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil] containsObject:type]) {
+    if (idx == NSOutlineViewDropOnItemIndex && [item isEqual:[groups webGroup]] && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil] containsObject:type]) {
         
         NSURL *url = nil;
         
@@ -1587,27 +1579,24 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         
     }
     
-    if (idx != NSOutlineViewDropOnItemIndex) {
-        // we shouldn't get here at this point
-        if (item && [(BDSKParentGroup *)item numberOfChildren])
-            item = [(BDSKParentGroup *)item childAtIndex:MIN((NSInteger)[(BDSKParentGroup *)item numberOfChildren] - 1, idx)];
-        idx = NSOutlineViewDropOnItemIndex;
-    }
-    
-    if (isDragFromGroupTable || isDragFromDrawer || (item && [item isValidDropTarget] == NO)) {
+    if (idx != NSOutlineViewDropOnItemIndex || (item && [item isValidDropTarget] == NO)) {
         // shouldn't get here at this point
         return NO;
+    }
+    
+    if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups) {
+        pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
     } else if (isDragFromMainTable) {
         // we already have these publications, so we just want to add them to the group, not the document
         pubs = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
-    } else {
+    } else if (isDragFromGroupTable == NO && isDragFromDrawer == NO) {
         pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL];
     }
     
     if ([pubs count] == 0)
         return NO;
     
-    BOOL shouldSelect = (item == nil || [item isParent] || [[self selectedGroups] containsObject:item]);
+    BOOL shouldSelect = (item == nil || [item isParent] || [[self selectedGroups] containsObject:item]) && docFlags.dragFromExternalGroups == NO;
     
     // if dropping on the static group parent, create a new static groups using a common author name or keyword if available
     if ([item isEqual:[groups staticParent]]) {
