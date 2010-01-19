@@ -58,7 +58,7 @@
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
-    NSRange r = [string rangeOfCharacterFromSet:[[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString]];
+    NSRange r = [string rangeOfCharacterFromSet:[[BDSKTypeManager sharedManager] invalidFieldNameCharacterSet]];
     if ( r.location != NSNotFound) {
         if (error) *error = NSLocalizedString(@"The type name contains an invalid character", @"field name warning");
         return NO;
@@ -72,7 +72,7 @@
 
 - (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error {
     NSString *partialString = *partialStringPtr;
-    NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString];
+    NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidFieldNameCharacterSet];
     NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
     if ( r.location != NSNotFound) {
         NSMutableString *new = [[partialString mutableCopy] autorelease];

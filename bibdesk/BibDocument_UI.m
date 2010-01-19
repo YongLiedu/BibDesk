@@ -779,7 +779,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     
     // access type manager outside the enumerator, since it's @synchronized...
     BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
-    NSCharacterSet *invalidSet = [typeManager invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString];
+    NSCharacterSet *invalidSet = [typeManager invalidCharactersForField:BDSKCiteKeyString];
     NSSet *citeFields = [typeManager citationFieldsSet];
     
     _BibItemCiteKeyChangeInfo changeInfo;

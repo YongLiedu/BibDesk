@@ -134,7 +134,6 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
                 [pubDict setObject:itemString forKey:BDSKAnnoteString];
                 
                 newBI = [[BibItem alloc] initWithType:BDSKBookString
-                                             fileType:BDSKBibtexString
                                               citeKey:nil
                                             pubFields:pubDict
                                                 isNew:YES];
@@ -170,7 +169,6 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 	if([pubDict count] > 0){
 		
 		newBI = [[BibItem alloc] initWithType:BDSKBookString
-									 fileType:BDSKBibtexString
 									  citeKey:nil
 									pubFields:pubDict
                                         isNew:YES];
@@ -249,7 +247,6 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
             [value release];
             
             newBI = [[BibItem alloc] initWithType:BDSKBookString
-                                         fileType:BDSKBibtexString
                                           citeKey:nil
                                         pubFields:pubDict
                                             isNew:YES];
@@ -527,7 +524,6 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
             [value release];
             
             BibItem *newBI = [[BibItem alloc] initWithType:BDSKBookString
-                                                  fileType:BDSKBibtexString
                                                    citeKey:nil
                                                  pubFields:pubDict
                                                      isNew:YES];

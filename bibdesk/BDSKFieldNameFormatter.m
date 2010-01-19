@@ -72,7 +72,7 @@
         *obj = string;
         return YES;
     }
-    NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString];
+    NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidFieldNameCharacterSet];
     NSRange r = [string rangeOfCharacterFromSet:invalidSet];
     if (r.location != NSNotFound) {
         if (error) *error = NSLocalizedString(@"The field name contains an invalid character", @"field name warning");
@@ -102,7 +102,7 @@
     if ([[delegate fieldNameFormatterKnownFieldNames:self] containsObject:partialString]) {
         return YES;
     }
-    NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString];
+    NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidFieldNameCharacterSet];
     NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
     if (r.location != NSNotFound) {
         if (error) *error = NSLocalizedString(@"The field name contains an invalid character", @"field name warning");

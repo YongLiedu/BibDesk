@@ -732,7 +732,7 @@
 
     // setup the type popup:
     [itemTypeButton removeAllItems];
-    [itemTypeButton addItemsWithTitles:[[BDSKTypeManager sharedManager] bibTypesForFileType:[item fileType]]];
+    [itemTypeButton addItemsWithTitles:[[BDSKTypeManager sharedManager] bibTypes]];
     
     NSString *type = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKPubTypeStringKey];
     
@@ -1857,7 +1857,7 @@
     
     static NSCharacterSet *fieldNameCharSet = nil;
     if (fieldNameCharSet == nil) 
-        fieldNameCharSet = [[[[BDSKTypeManager sharedManager] strictInvalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString] invertedSet] copy];
+        fieldNameCharSet = [[[[BDSKTypeManager sharedManager] strictInvalidCharactersForField:BDSKCiteKeyString] invertedSet] copy];
     
     if (temporaryTypeSelectMode) {
         if ((c == NSTabCharacter || c == 0x001b) && flags == 0) {

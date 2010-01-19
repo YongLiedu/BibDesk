@@ -40,7 +40,6 @@
 #import "BDSKOwnerProtocol.h"
 
 @protocol BDSKParseableItem <NSObject>
-- (NSString *)fileType;
 - (NSString *)pubType;
 - (NSString *)citeKey;
 - (NSString *)title;
@@ -113,51 +112,47 @@
 + (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub;
 
 /*!
- @method stringBySanitizingString:forField:inFieldType:
+ @method stringBySanitizingString:forField:
  @abstract Sanitize a string to use in a generated value for a field and type
- @discussion Creates a string containing only a strictly valid set of characters, by converting some characters and removing others. This uses invalidCharactersForField:inFileType:. It is used for the validation of the format string.  
+ @discussion Creates a string containing only a strictly valid set of characters, by converting some characters and removing others. This uses invalidCharactersForField:. It is used for the validation of the format string.  
  @param string The unsanitized string
  @param fieldName The name of the field (e.g. "Author")
- @param type The reference type (e.g. BibTeX, RIS)
  @result The sanitized string
 */
-+ (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type;
++ (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName;
 
 /*!
- @method stringByStrictlySanitizingString:forField:inFieldType:
+ @method stringByStrictlySanitizingString:forField:
  @abstract Sanitize a string to use in a generated value for a field and type
- @discussion Creates a string containing only a valid set of characters, by converting some characters and removing others. This uses strictInvalidCharactersForField:inFileType:. It is used for the parsing of the format string. 
+ @discussion Creates a string containing only a valid set of characters, by converting some characters and removing others. This uses strictInvalidCharactersForField:. It is used for the parsing of the format string. 
  @param string The unsanitized string
  @param fieldName The name of the field (e.g. "Author")
- @param type The reference type (e.g. BibTeX, RIS)
  @result The sanitized string
 */
-+ (NSString *)stringByStrictlySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type;
++ (NSString *)stringByStrictlySanitizingString:(NSString *)string forField:(NSString *)fieldName;
 
 /*!
- @method stringBySanitizedCiteKeyString
+ @method validateFormat:forField:error:
  @abstract Validate a format string to use for a field in a type
  @discussion Checks for valid specifiers and calls stringBySanitizingString:forField:inFieldType: on other parts of the string. Might change the format string.
  @param formatString The format string to check
  @param fieldName The name of the field (e.g. "Author")
- @param type The reference type (e.g. BibTeX, RIS)
  @param error An error string returned when the format is not valid
  @result The sanitized string
 */
-+ (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error;
++ (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName error:(NSString **)error;
 
 /*!
- @method stringBySanitizedCiteKeyString
+ @method validateFormat:attributedFormat:forField:error:
  @abstract Validate a format string to use for a field in a type
  @discussion Checks for valid specifiers and calls stringBySanitizingString:forField:inFieldType: on other parts of the string. Might change the format string.
  @param formatString The format string to check
  @param attrFormatString Is set to a sanitized attributedString version of the format string.
  @param fieldName The name of the field (e.g. "Author")
- @param type The reference type (e.g. BibTeX, RIS)
  @param error An error string returned when the format is not valid
  @result The sanitized string
 */
-+ (BOOL)validateFormat:(NSString **)formatString attributedFormat:(NSAttributedString **)attrFormatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error;
++ (BOOL)validateFormat:(NSString **)formatString attributedFormat:(NSAttributedString **)attrFormatString forField:(NSString *)fieldName error:(NSString **)error;
 
 /*!
  @method requiredFieldsForFormat

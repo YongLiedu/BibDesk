@@ -107,7 +107,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	
 	[types removeAllObjects];
 	[fieldsForTypesDict removeAllObjects];
-	for (NSString *type in [btm bibTypesForFileType:BDSKBibtexString]) {
+	for (NSString *type in [btm bibTypes]) {
 		[fieldsDict setObject:[btm requiredFieldsForType:type] forKey:REQUIRED_KEY];
 		[fieldsDict setObject:[btm optionalFieldsForType:type] forKey:OPTIONAL_KEY];
 		[self addType:type withFields:fieldsDict];

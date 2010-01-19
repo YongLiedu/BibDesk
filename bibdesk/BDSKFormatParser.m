@@ -202,7 +202,7 @@ static NSDictionary *errorAttr = nil;
 						if (i > 0) {
 							[parsedStr appendString:authSep];
 						}
-						NSString *authName = [self stringByStrictlySanitizingString:[[authArray objectAtIndex:isLast ? [authArray count] - numAuth + i : i] lastName] forField:fieldName inFileType:[pub fileType]];
+						NSString *authName = [self stringByStrictlySanitizingString:[[authArray objectAtIndex:isLast ? [authArray count] - numAuth + i : i] lastName] forField:fieldName];
 						if (isLocalFile) {
 							authName = [authName stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
 						}
@@ -274,8 +274,8 @@ static NSDictionary *errorAttr = nil;
 						}
 						BibAuthor *auth = [authArray objectAtIndex:isLast ? [authArray count] - numAuth + i : i];
 						NSString *authName;
-                        NSString *firstName = [self stringByStrictlySanitizingString:[auth firstName] forField:fieldName inFileType:[pub fileType]];
-						NSString *lastName = [self stringByStrictlySanitizingString:[auth lastName] forField:fieldName inFileType:[pub fileType]];
+                        NSString *firstName = [self stringByStrictlySanitizingString:[auth firstName] forField:fieldName];
+						NSString *lastName = [self stringByStrictlySanitizingString:[auth lastName] forField:fieldName];
 						if ([firstName length] > 0) {
 							authName = [NSString stringWithFormat:@"%@%@%C", lastName, nameSep, [firstName characterAtIndex:0]];
 						} else {
@@ -296,7 +296,7 @@ static NSDictionary *errorAttr = nil;
                 	// title, optional #chars
                     NSUInteger numChars = 0;
                     NSString *title = [pub title];
-					title = [self stringByStrictlySanitizingString:title forField:fieldName inFileType:[pub fileType]];
+					title = [self stringByStrictlySanitizingString:title forField:fieldName];
 					if ([NSString isEmptyString:title] == NO) {
                         if (isLocalFile) {
                             title = [title stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
@@ -345,13 +345,13 @@ static NSDictionary *errorAttr = nil;
 						if (numWords == 0) numWords = [words count];
                         BOOL isFirst = YES;
 						for (i = 0; i < [words count] && numWords > 0; i++) { 
-                            word = [self stringByStrictlySanitizingString:[words objectAtIndex:i] forField:fieldName inFileType:[pub fileType]]; 
+                            word = [self stringByStrictlySanitizingString:[words objectAtIndex:i] forField:fieldName]; 
 							if (isLocalFile) {
 								word = [word stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
 							}
                             if (numString == nil || [word length] > smallWordLength) {
                                 if (isFirst) isFirst = NO;
-                                else [parsedStr appendString:[self stringByStrictlySanitizingString:@" " forField:fieldName inFileType:[pub fileType]]]; 
+                                else [parsedStr appendString:[self stringByStrictlySanitizingString:@" " forField:fieldName]]; 
                                 [parsedStr appendString:word]; 
                                 if ([word length] > smallWordLength) --numWords;
                             }
@@ -436,7 +436,7 @@ static NSDictionary *errorAttr = nil;
 						}
 						for (i = 0; i < [keywords count] && (numWords == 0 || i < numWords); i++) { 
                             keyword = [[keywords objectAtIndex:i] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]; 
-                            keyword = [self stringByStrictlySanitizingString:keyword forField:fieldName inFileType:[pub fileType]]; 
+                            keyword = [self stringByStrictlySanitizingString:keyword forField:fieldName]; 
 							if (NO == [slash isEqualToString:@"/"])
 								keyword = [keyword stringByReplacingCharactersInSet:slashCharSet withString:slash];
 							[parsedStr appendString:keyword]; 
@@ -456,7 +456,7 @@ static NSDictionary *errorAttr = nil;
 						filename = [[pub localFileURLForField:BDSKLocalUrlString] path];
 					if (filename != nil) {
 						filename = [[filename lastPathComponent] stringByDeletingPathExtension];
-						filename = [self stringBySanitizingString:filename forField:fieldName inFileType:[pub fileType]]; 
+						filename = [self stringBySanitizingString:filename forField:fieldName]; 
 						[parsedStr appendString:filename];
 					}
 					break;
@@ -473,7 +473,7 @@ static NSDictionary *errorAttr = nil;
 						filename = [[pub localFileURLForField:BDSKLocalUrlString] path];
 					if (filename != nil) {
 						filename = [filename lastPathComponent];
-						filename = [self stringBySanitizingString:filename forField:fieldName inFileType:[pub fileType]]; 
+						filename = [self stringBySanitizingString:filename forField:fieldName]; 
 						[parsedStr appendString:filename];
 					}
 					break;
@@ -491,7 +491,7 @@ static NSDictionary *errorAttr = nil;
 					if (filename != nil) {
 						filename = [filename pathExtension];
 						if (NO == [filename isEqualToString:@""]) {
-							filename = [self stringBySanitizingString:filename forField:fieldName inFileType:[pub fileType]]; 
+							filename = [self stringBySanitizingString:filename forField:fieldName]; 
 							[parsedStr appendFormat:@".%@", filename];
 						}
 					}
@@ -502,7 +502,7 @@ static NSDictionary *errorAttr = nil;
                 	// document filename
 					NSString *filename = [[[[[pub owner] fileURL] path] lastPathComponent] stringByDeletingPathExtension];
 					if (filename != nil) {
-						filename = [self stringBySanitizingString:filename forField:fieldName inFileType:[pub fileType]]; 
+						filename = [self stringBySanitizingString:filename forField:fieldName]; 
 						[parsedStr appendString:filename];
 					}
 					break;
@@ -533,7 +533,7 @@ static NSDictionary *errorAttr = nil;
 							value = [pub stringValueOfField:key];
 						}
 						if ([NSString isEmptyString:value] == NO) {
-							value = [self stringByStrictlySanitizingString:value forField:fieldName inFileType:[pub fileType]];
+							value = [self stringByStrictlySanitizingString:value forField:fieldName];
 							if (NO == [slash isEqualToString:@"/"])
 								value = [value stringByReplacingCharactersInSet:slashCharSet withString:slash];
 							if (numChars > 0 && [value length] > numChars) {
@@ -590,7 +590,7 @@ static NSDictionary *errorAttr = nil;
                             }
                             for (i = 0; i < [words count] && (numWords == 0 || i < numWords); i++) { 
                                 word = [[words objectAtIndex:i] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]; 
-                                word = [self stringByStrictlySanitizingString:word forField:fieldName inFileType:[pub fileType]]; 
+                                word = [self stringByStrictlySanitizingString:word forField:fieldName]; 
                                 if (NO == [slash isEqualToString:@"/"])
                                     word = [word stringByReplacingCharactersInSet:slashCharSet withString:slash];
                                 [parsedStr appendString:word]; 
@@ -614,7 +614,7 @@ static NSDictionary *errorAttr = nil;
 						if (NO == [scanner scanUnsignedInteger:&smallWordLength]) smallWordLength = 3;
 				
 						value = [[pub stringValueOfField:key] acronymValueIgnoringWordLength:smallWordLength];
-						value = [self stringByStrictlySanitizingString:value forField:fieldName inFileType:[pub fileType]];
+						value = [self stringByStrictlySanitizingString:value forField:fieldName];
 						[parsedStr appendString:value];
 					}
 					else {
@@ -677,7 +677,7 @@ static NSDictionary *errorAttr = nil;
 						if (NO == [scanner scanUnsignedInteger:&numChars]) numChars = 0;
                         value = [[pub owner] documentInfoForKey:key];
 						if ([NSString isEmptyString:value] == NO) {
-							value = [self stringByStrictlySanitizingString:value forField:fieldName inFileType:[pub fileType]];
+							value = [self stringByStrictlySanitizingString:value forField:fieldName];
 							if (numChars > 0 && [value length] > numChars) {
 								[parsedStr appendString:[value substringToIndex:numChars]];
 							} else {
@@ -881,9 +881,9 @@ static NSDictionary *errorAttr = nil;
 	}
 }
 
-+ (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type
++ (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName
 {
-	NSCharacterSet *invalidCharSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:fieldName inFileType:type];
+	NSCharacterSet *invalidCharSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:fieldName];
     NSString *newString = nil;
 
 	if ([fieldName isEqualToString:BDSKCiteKeyString]) {
@@ -924,12 +924,12 @@ static NSDictionary *errorAttr = nil;
 	}
 }
 
-+ (NSString *)stringByStrictlySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type
++ (NSString *)stringByStrictlySanitizingString:(NSString *)string forField:(NSString *)fieldName
 {
     if ([NSString isEmptyString:string])
         return @"";
     
-	NSCharacterSet *invalidCharSet = [[BDSKTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
+	NSCharacterSet *invalidCharSet = [[BDSKTypeManager sharedManager] strictInvalidCharactersForField:fieldName];
     NSString *newString = nil;
 	NSInteger cleanOption = 0;
 
@@ -951,7 +951,7 @@ static NSDictionary *errorAttr = nil;
 		cleanOption = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKLocalFileCleanOptionKey];
 		
 		if (cleanOption >= 3)
-			invalidCharSet = [[BDSKTypeManager sharedManager] veryStrictInvalidCharactersForField:fieldName inFileType:type];
+			invalidCharSet = [[BDSKTypeManager sharedManager] veryStrictInvalidCharactersForField:fieldName];
 		
         newString = [string stringByDeTeXifyingString];
         if (cleanOption == 1) {
@@ -975,9 +975,9 @@ static NSDictionary *errorAttr = nil;
     return newString;
 }
 
-+ (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error
++ (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName error:(NSString **)error
 {
-	return [self validateFormat:formatString attributedFormat:NULL forField:fieldName inFileType:type error:error];
+	return [self validateFormat:formatString attributedFormat:NULL forField:fieldName error:error];
 }
 
 #define AppendStringToFormatStrings(s, attr) \
@@ -985,9 +985,9 @@ static NSDictionary *errorAttr = nil;
 	[attrString appendString:s attributes:attr]; \
 	location = [scanner scanLocation];
 
-+ (BOOL)validateFormat:(NSString **)formatString attributedFormat:(NSAttributedString **)attrFormatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error
++ (BOOL)validateFormat:(NSString **)formatString attributedFormat:(NSAttributedString **)attrFormatString forField:(NSString *)fieldName error:(NSString **)error
 {
-	NSCharacterSet *invalidCharSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:fieldName inFileType:type];
+	NSCharacterSet *invalidCharSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:fieldName];
 	NSCharacterSet *digitCharSet = [NSCharacterSet decimalDigitCharacterSet];
 	NSScanner *scanner = [NSScanner scannerWithString:*formatString];
 	NSMutableString *sanitizedFormatString = [[NSMutableString alloc] init];
@@ -1007,7 +1007,7 @@ static NSDictionary *errorAttr = nil;
 		
 		// scan non-specifier parts
 		if ([scanner scanUpToString:@"%" intoString:&string]) {
-			string = [self stringBySanitizingString:string forField:fieldName inFileType:type];
+			string = [self stringBySanitizingString:string forField:fieldName];
 			AppendStringToFormatStrings(string, textAttr);
 		}
 		if (NO == [scanner scanString:@"%" intoString: NULL]) { // we're at the end, so done
@@ -1057,7 +1057,7 @@ static NSDictionary *errorAttr = nil;
 			else if ([string caseInsensitiveCompare:BDSKPubTypeString] == NSOrderedSame)
 				string = BDSKPubTypeString;
             else
-                string = [[self stringBySanitizingString:string forField:BDSKCiteKeyString inFileType:type] fieldName]; // cite-key sanitization is strict, so we use that for fieldnames
+                string = [[self stringBySanitizingString:string forField:BDSKCiteKeyString] fieldName]; // cite-key sanitization is strict, so we use that for fieldnames
 			AppendStringToFormatStrings(@"{", specAttr);
 			AppendStringToFormatStrings(string, argAttr);
 			AppendStringToFormatStrings(@"}", specAttr);
@@ -1075,7 +1075,7 @@ static NSDictionary *errorAttr = nil;
 						break;
 					}
                     if (specifier != 'w' || i > 0)
-                        string = [self stringBySanitizingString:string forField:fieldName inFileType:type];
+                        string = [self stringBySanitizingString:string forField:fieldName];
 					AppendStringToFormatStrings(@"[", paramAttr);
 					AppendStringToFormatStrings(string, paramAttr);
 					AppendStringToFormatStrings(@"]", paramAttr);

@@ -219,7 +219,7 @@
             // display a fake item in the table so the user knows one of the items failed to parse, but still gets the rest of the data
             NSString *errMsg = NSLocalizedString(@"Unable to parse as BibTeX", @"google scholar error");
             NSDictionary *pubFields = [NSDictionary dictionaryWithObjectsAndKeys:errMsg, BDSKTitleString, [btURL absoluteString], BDSKUrlString, nil];
-            BibItem *errorItem = [[BibItem alloc] initWithType:BDSKMiscString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];
+            BibItem *errorItem = [[BibItem alloc] initWithType:BDSKMiscString citeKey:nil pubFields:pubFields isNew:YES];
             [items addObject:errorItem];
             [errorItem release];
         }

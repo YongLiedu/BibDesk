@@ -143,7 +143,7 @@ static void fixLegacyTableColumnIdentifiers()
     NSString *error = nil;
     NSInteger button = 0;
     
-    if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
+    if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString error:&error]) {
         [sud setObject:formatString forKey:BDSKCiteKeyFormatKey];
         [btm setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
     }else{
@@ -192,7 +192,7 @@ static void fixLegacyTableColumnIdentifiers()
         [sud setBool:YES forKey:BDSKDidMigrateLocalUrlFormatDefaultsKey];
     }
     
-    if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:&error]) {
+    if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalFileString error:&error]) {
         [sud setObject:formatString forKey:BDSKLocalFileFormatKey];
         [btm setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
     } else {
@@ -207,7 +207,7 @@ static void fixLegacyTableColumnIdentifiers()
         } else if ([formatString rangeOfString:@"."].length) {
             fixedFormatString = [[[formatString stringByDeletingPathExtension] stringByAppendingString:@"%n0"] stringByAppendingPathExtension:[formatString pathExtension]];
         }
-        if (fixedFormatString && [BDSKFormatParser validateFormat:&fixedFormatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:NULL]) {
+        if (fixedFormatString && [BDSKFormatParser validateFormat:&fixedFormatString forField:BDSKLocalFileString error:NULL]) {
             [sud setObject:fixedFormatString forKey:BDSKLocalFileFormatKey];
             [btm setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
             otherButton = NSLocalizedString(@"Fix", @"Button title");

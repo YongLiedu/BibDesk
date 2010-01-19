@@ -150,7 +150,6 @@ static NSArray *dcProperties(NSXMLNode *node, NSString *key)
 
         // @article is most common for ADS
         BibItem *pub = [[BibItem alloc] initWithType:BDSKArticleString
-                                            fileType:BDSKBibtexString 
                                              citeKey:nil 
                                            pubFields:pubDict 
                                                isNew:YES];

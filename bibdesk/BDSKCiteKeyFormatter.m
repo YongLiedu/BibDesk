@@ -51,7 +51,7 @@
         if(error) *error = NSLocalizedString(@"Empty cite keys are not allowed.", @"Error description");
         return NO;
     }
-    NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString];
+    NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString];
     NSRange r = [string rangeOfCharacterFromSet:invalidSet];
     if (r.length) {
         if(error) *error = [NSString stringWithFormat:NSLocalizedString(@"The character \"%@\" is not allowed in a BibTeX cite key.", @"Error description"), [string substringWithRange:r]];
@@ -63,7 +63,7 @@
 
 - (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error {
     NSString *partialString = *partialStringPtr;
-	NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString];
+	NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString];
     NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
     if ( r.location != NSNotFound) {
         NSMutableString *new = [[partialString mutableCopy] autorelease];

@@ -165,7 +165,6 @@ static void splitDateString(NSMutableDictionary *pubDict)
 			splitDateString(pubDict);
 			
 			newBI = [[BibItem alloc] initWithType:BDSKArticleString
-										 fileType:BDSKBibtexString
 										  citeKey:nil
 										pubFields:pubDict
                                             isNew:YES];
@@ -185,7 +184,6 @@ static void splitDateString(NSMutableDictionary *pubDict)
 					splitDateString(pubDict);
 					
 					newBI = [[BibItem alloc] initWithType:BDSKArticleString
-												 fileType:BDSKBibtexString
 												  citeKey:nil
 												pubFields:pubDict
                                                     isNew:YES];
@@ -236,7 +234,6 @@ static void splitDateString(NSMutableDictionary *pubDict)
 		splitDateString(pubDict);
 		
 		newBI = [[BibItem alloc] initWithType:BDSKArticleString
-									 fileType:BDSKBibtexString
 									  citeKey:nil
 									pubFields:pubDict
                                         isNew:YES];

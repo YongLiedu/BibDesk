@@ -274,7 +274,7 @@
             [pubFields setValue:[NSString stringWithFormat:@"http://%@/pdf/%@", [url host], string] forKey:BDSKUrlString];
         }
         
-        BibItem *item = [[BibItem alloc] initWithType:BDSKArticleString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];
+        BibItem *item = [[BibItem alloc] initWithType:BDSKArticleString citeKey:nil pubFields:pubFields isNew:YES];
         [items addObject:item];
         [item release];
         

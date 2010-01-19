@@ -98,8 +98,6 @@
 
 #pragma mark BibItem simulation
 
-- (NSString *)fileType { return BDSKBibtexString; }
-
 - (NSString *)pubType { return BDSKArticleString; }
 
 - (NSString *)citeKey { return @"citeKey"; }

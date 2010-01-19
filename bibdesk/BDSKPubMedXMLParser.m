@@ -330,7 +330,6 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
         if (_addXMLStringToAnnote) addStringToDictionaryIfNotNil([article XMLStringWithOptions:NSXMLNodePrettyPrint], BDSKAnnoteString, pubFields);
         
         BibItem *pub = [[BibItem allocWithZone:[self zone]] initWithType:BDSKArticleString
-                                                                fileType:BDSKBibtexString
                                                                  citeKey:nil
                                                                pubFields:pubFields
                                                                    isNew:YES];

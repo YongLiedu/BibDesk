@@ -250,7 +250,7 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
                 type = BDSKArticleString;
             }
             
-            BibItem *pub = [[BibItem alloc] initWithType:type fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];
+            BibItem *pub = [[BibItem alloc] initWithType:type citeKey:nil pubFields:pubFields isNew:YES];
             [toReturn addObject:pub];
             [pub release];
             [pubFields removeAllObjects];

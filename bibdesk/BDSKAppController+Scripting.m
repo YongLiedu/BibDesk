@@ -68,7 +68,7 @@ Category on BDSKAppController making the papers folder readable for scripting
 }
 
 - (NSArray *)allTypes {
-	return [[BDSKTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString];
+	return [[BDSKTypeManager sharedManager] bibTypes];
 }
 
 - (NSArray *)allFieldNames {

@@ -234,7 +234,7 @@ static NSMutableArray *_finishedDownloads = nil;
             if (nil == errMsg)
                 errMsg = NSLocalizedString(@"Download from IEEEXplore failed.", @"error message");
             NSDictionary *pubFields = [NSDictionary dictionaryWithObject:errMsg forKey:BDSKTitleString];
-            BibItem *errorItem = [[BibItem alloc] initWithType:BDSKMiscString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];
+            BibItem *errorItem = [[BibItem alloc] initWithType:BDSKMiscString citeKey:nil pubFields:pubFields isNew:YES];
             [items addObject:errorItem];
             [errorItem release];
 
@@ -262,7 +262,7 @@ static NSMutableArray *_finishedDownloads = nil;
         // parse failure
         if (nil == newPub) {
             NSDictionary *pubFields = [NSDictionary dictionaryWithObject:[error localizedDescription] forKey:BDSKTitleString];
-            BibItem *errorItem = [[BibItem alloc] initWithType:BDSKMiscString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];
+            BibItem *errorItem = [[BibItem alloc] initWithType:BDSKMiscString citeKey:nil pubFields:pubFields isNew:YES];
             [items addObject:errorItem];
             [errorItem release];
             

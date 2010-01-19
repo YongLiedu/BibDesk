@@ -314,7 +314,6 @@
                 if (anItem == nil) {
                     record = [result renderedString];
                     anItem = [[BibItem alloc] initWithType:BDSKBookString
-                                                  fileType:BDSKBibtexString
                                                    citeKey:nil
                                                  pubFields:[NSDictionary dictionaryWithObjectsAndKeys:record, BDSKAnnoteString, nil]
                                                      isNew:YES];

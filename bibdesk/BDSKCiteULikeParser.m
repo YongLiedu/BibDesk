@@ -84,7 +84,7 @@
         // display a fake item in the table rather than the annoying modal failure alert
         NSString *errMsg = NSLocalizedString(@"Unable to parse as BibTeX", @"google scholar error");
         NSDictionary *pubFields = [NSDictionary dictionaryWithObjectsAndKeys:errMsg, BDSKTitleString, nil];
-        BibItem *errorItem = [[BibItem alloc] initWithType:BDSKMiscString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];
+        BibItem *errorItem = [[BibItem alloc] initWithType:BDSKMiscString citeKey:nil pubFields:pubFields isNew:YES];
         [items addObject:errorItem];
         [errorItem release];
     }

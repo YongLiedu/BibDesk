@@ -95,7 +95,6 @@
         rd = [self dictionaryFromCitationNode:obj];
         
         BibItem *item = [[[BibItem alloc] initWithType:[rd valueForKey:@"Type"]
-                                              fileType:BDSKBibtexString
                                                citeKey:nil
                                              pubFields:rd
                                                  isNew:YES] autorelease];

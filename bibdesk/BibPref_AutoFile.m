@@ -86,11 +86,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (void)awakeFromNib{
-	BDSKFormatStringFormatter *formatter = [[BDSKFormatStringFormatter alloc] initWithField:BDSKLocalFileString fileType:BDSKBibtexString];
+	BDSKFormatStringFormatter *formatter = [[BDSKFormatStringFormatter alloc] initWithField:BDSKLocalFileString];
     [formatSheetField setFormatter:formatter];
 	[formatter release];
     
-    coloringEditor = [[BDSKFormatStringFieldEditor alloc] initWithFrame:[formatSheetField frame] parseField:BDSKLocalFileString fileType:BDSKBibtexString];
+    coloringEditor = [[BDSKFormatStringFieldEditor alloc] initWithFrame:[formatSheetField frame] parseField:BDSKLocalFileString];
     
     [papersFolderLocationTextField setFormatter:[[[BDSKFolderPathFormatter alloc] init] autorelease]];
     
@@ -149,7 +149,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
     NSString * error;
 	NSRect frame;
 	
-	if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:BDSKLocalFileString inFileType:BDSKBibtexString error:&error]) {
+	if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:BDSKLocalFileString error:&error]) {
 		[self setLocalUrlFormatInvalidWarning:NO message:nil];
 		
         [previewTextField setStringValue:[[BDSKPreviewItem sharedItem] suggestedLocalFilePath]];
@@ -330,7 +330,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		NSAttributedString *attrFormat = nil;
 		formatString = [formatSheetField stringValue];
 		//if ([formatString isEqualToString:[sud stringForKey:BDSKLocalFileFormatKey]]) return; // nothing changed
-		if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:BDSKLocalFileString inFileType:BDSKBibtexString error:&error]) {
+		if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:BDSKLocalFileString error:&error]) {
 			[sud setObject:formatString forKey:BDSKLocalFileFormatKey];
 		}
 		else {
@@ -374,11 +374,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	if ([formatSheet makeFirstResponder:nil])
 		[formatSheet endEditingFor:nil];
 	
-	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:&error]) 
+	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalFileString error:&error]) 
 		return YES;
 	
 	formatString = [sud stringForKey:BDSKLocalFileFormatKey];
-	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:NULL]) {
+	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalFileString error:NULL]) {
 		// The currently set local-url format is valid, so we can keep it 
 		otherButton = NSLocalizedString(@"Revert to Last", @"Button title");
 	}

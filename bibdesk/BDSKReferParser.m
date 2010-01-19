@@ -243,7 +243,7 @@ static inline BOOL isTagLine(NSString *sourceLine)
                 
                 fixDateInDictionary(pubDict);
                 
-                newBI = [[BibItem alloc] initWithType:type fileType:BDSKBibtexString citeKey:nil pubFields:pubDict isNew:YES];
+                newBI = [[BibItem alloc] initWithType:type citeKey:nil pubFields:pubDict isNew:YES];
                 [returnArray addObject:newBI];
                 [newBI release];
             }

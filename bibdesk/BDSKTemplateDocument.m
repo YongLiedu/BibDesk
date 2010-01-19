@@ -146,7 +146,7 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
         templateOptions = [tmpDict copy];
         [tmpDict release];
         
-        for (NSString *type in [[BDSKTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString])
+        for (NSString *type in [[BDSKTypeManager sharedManager] bibTypes])
             [typeTemplates addObject:[[[BDSKTypeTemplate alloc] initWithPubType:type forDocument:self] autorelease]];
         
         defaultTypeIndex = [[typeTemplates valueForKey:@"pubType"] indexOfObject:BDSKArticleString];

@@ -278,7 +278,6 @@ error:(NSError **)outError{
                         [[BDSKCompletionManager sharedManager] addString:citeKey forCompletionEntry:BDSKCrossrefString];
                         
                         newBI = [[BibItem alloc] initWithType:entryType
-                                                     fileType:BDSKBibtexString
                                                       citeKey:citeKey
                                                     pubFields:dictionary
                                                         isNew:isPasteOrDrag];

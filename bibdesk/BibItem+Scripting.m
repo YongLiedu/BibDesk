@@ -535,7 +535,6 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	// ... and replace the current record with it.
 	// hopefully, I don't understand the whole filetypes/pubtypes stuff	
 	[self setPubType:[newPub pubType]];
-	[self setFileType:[newPub fileType]];
 	[self setCiteKey:[newPub citeKey]];
 	[self setFields:[newPub pubFields]];
 	

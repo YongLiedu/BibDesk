@@ -629,7 +629,6 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
         addStringToDictionaryIfNotNil([record XMLString], BDSKAnnoteString, pubFields);
     
     BibItem *pub = [[BibItem alloc] initWithType:pubType
-                                        fileType:BDSKBibtexString
                                          citeKey:nil
                                        pubFields:pubFields
                                            isNew:YES];
@@ -721,7 +720,6 @@ static BibItem *createBibItemWithRefRecord(NSXMLNode *record)
         addStringToDictionaryIfNotNil([record XMLString], BDSKAnnoteString, pubFields);
     
     BibItem *pub = [[BibItem alloc] initWithType:pubType
-                                        fileType:BDSKBibtexString
                                          citeKey:nil
                                        pubFields:pubFields
                                            isNew:YES];

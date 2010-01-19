@@ -41,7 +41,6 @@
 
 @interface BDSKFormatStringFieldEditor : NSTextView {
     NSString *parseField;
-    NSString *parseFileType;
 } 
-- (id)initWithFrame:(NSRect)frameRect parseField:(NSString *)field fileType:(NSString *)fileType;
+- (id)initWithFrame:(NSRect)frameRect parseField:(NSString *)field;
 @end

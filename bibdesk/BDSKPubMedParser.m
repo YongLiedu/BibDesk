@@ -111,7 +111,6 @@
 				if([pubDict count] > 0){
                     [self fixPublicationDictionary:pubDict];
                     newBI = [[BibItem alloc] initWithType:[self pubTypeFromDictionary:pubDict]
-                                                 fileType:BDSKBibtexString
                                                   citeKey:nil
                                                 pubFields:pubDict
                                                     isNew:YES];
@@ -145,7 +144,6 @@
     if([pubDict count] > 0){
         [self fixPublicationDictionary:pubDict];
         newBI = [[BibItem alloc] initWithType:[self pubTypeFromDictionary:pubDict]
-                                     fileType:BDSKBibtexString
                                       citeKey:nil
                                     pubFields:pubDict
                                         isNew:YES];

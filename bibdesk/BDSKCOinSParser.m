@@ -303,7 +303,6 @@
 	}
 	
     return [[[BibItem alloc] initWithType:publicationType
-                                 fileType:BDSKBibtexString
                                   citeKey:nil
                                 pubFields:fieldsDict
                                     files:files

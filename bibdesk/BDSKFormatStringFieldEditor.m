@@ -43,22 +43,18 @@
 
 @implementation BDSKFormatStringFieldEditor
 
-- (id)initWithFrame:(NSRect)frameRect parseField:(NSString *)field fileType:(NSString *)fileType;
+- (id)initWithFrame:(NSRect)frameRect parseField:(NSString *)field;
 {
     // initWithFrame sets up the entire text system for us
     if(self = [super initWithFrame:frameRect]){
         BDSKASSERT(field != nil);
         parseField = [field copy];
-        
-        BDSKASSERT(fileType != nil);
-        parseFileType = [fileType copy];
     }
     return self;
 }
 
 - (void)dealloc
 {
-    BDSKDESTROY(parseFileType);
     BDSKDESTROY(parseField);
     [super dealloc];
 }
@@ -79,7 +75,7 @@
     // get the attributed string from the format parser
     NSAttributedString *attrString = nil;
     NSString *format = [[[self string] copy] autorelease]; // pass a copy so we don't change the backing store of our text storage
-    [BDSKFormatParser validateFormat:&format attributedFormat:&attrString forField:parseField inFileType:parseFileType error:NULL];   
+    [BDSKFormatParser validateFormat:&format attributedFormat:&attrString forField:parseField error:NULL];   
     
 	if ([[self string] isEqualToString:[attrString string]] == NO) 
 		return;

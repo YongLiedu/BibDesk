@@ -93,7 +93,7 @@
 	
 	NSString *error = nil;
     
-	if (NO == [BDSKFormatParser validateFormat:&formatString forField:field inFileType:BDSKBibtexString error:&error]) {
+	if (NO == [BDSKFormatParser validateFormat:&formatString forField:field error:&error]) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
 		[self setScriptErrorString:[NSString stringWithFormat:@"Invalid format string: %@", error]]; 
 		return nil;

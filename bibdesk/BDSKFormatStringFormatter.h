@@ -41,7 +41,6 @@
 
 @interface BDSKFormatStringFormatter : NSFormatter {
     NSString *parseField;
-    NSString *parseFileType;
 }
-- (id)initWithField:(NSString *)field fileType:(NSString *)fileType;
+- (id)initWithField:(NSString *)field;
 @end

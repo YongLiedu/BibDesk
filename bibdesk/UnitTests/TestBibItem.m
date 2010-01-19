@@ -64,7 +64,7 @@
 	// This was Mike's original test, but I'm not sure what Less, von More is supposed to mean anyway
 	NSDictionary *pubFields = [NSDictionary dictionaryWithObjectsAndKeys:@"Hello", BDSKTitleString,
 							   @"Less, von More, Jr.", BDSKAuthorString, nil];
-	BibItem *b = [[[BibItem alloc] initWithType:BDSKArticleString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES] autorelease];
+	BibItem *b = [[[BibItem alloc] initWithType:BDSKArticleString citeKey:nil pubFields:pubFields isNew:YES] autorelease];
 	
     STAssertEquals(1, [b numberOfAuthors],@"Check that Less, von More, Jr. parses to single author");
 }
@@ -76,8 +76,8 @@
 								@"First von Last", BDSKAuthorString, nil];
 	NSDictionary *pubFields2 = [NSDictionary dictionaryWithObjectsAndKeys:@"Hello", BDSKTitleString,
 								@"von Last, First", BDSKAuthorString, nil];
-	BibItem *b1 = [[[BibItem alloc] initWithType:BDSKArticleString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields1 isNew:YES] autorelease];
-	BibItem *b2 = [[[BibItem alloc] initWithType:BDSKArticleString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields2 isNew:YES] autorelease];
+	BibItem *b1 = [[[BibItem alloc] initWithType:BDSKArticleString citeKey:nil pubFields:pubFields1 isNew:YES] autorelease];
+	BibItem *b2 = [[[BibItem alloc] initWithType:BDSKArticleString citeKey:nil pubFields:pubFields2 isNew:YES] autorelease];
 
 	STAssertEqualObjects([[b1 firstAuthor] firstName], @"First", @"first name of First von Last");
 	STAssertEqualObjects([[b1 firstAuthor] lastName], @"Last", @"last name of First von Last");
@@ -97,8 +97,8 @@
 								@"First von Last, Jr.", BDSKAuthorString, nil];
 	NSDictionary *pubFields2 = [NSDictionary dictionaryWithObjectsAndKeys:@"Hello", BDSKTitleString,
 								@"von Last, Jr., First", BDSKAuthorString, nil];
-	BibItem *b1 = [[[BibItem alloc] initWithType:BDSKArticleString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields1 isNew:YES] autorelease];
-	BibItem *b2 = [[[BibItem alloc] initWithType:BDSKArticleString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields2 isNew:YES] autorelease];
+	BibItem *b1 = [[[BibItem alloc] initWithType:BDSKArticleString citeKey:nil pubFields:pubFields1 isNew:YES] autorelease];
+	BibItem *b2 = [[[BibItem alloc] initWithType:BDSKArticleString citeKey:nil pubFields:pubFields2 isNew:YES] autorelease];
 	
 	// GJ: my understanding was that "First von Last, Jr." was an acceptable BibTex form,
 	// but a note before BibAuthor's setupNames method suggests otherwise
@@ -167,7 +167,7 @@
     NSString *firstType = [item1 pubType];
     NSString *beforeString = [item1 bibTeXString];
 	 
-    for (NSString *aType in [[BDSKTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString])
+    for (NSString *aType in [[BDSKTypeManager sharedManager] bibTypes])
         [item1 setPubType:aType];
     [item1 setPubType:firstType];
     STAssertEqualObjects(beforeString, [item1 bibTeXString],nil);

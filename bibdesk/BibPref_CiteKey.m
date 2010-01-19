@@ -79,11 +79,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (void)awakeFromNib{
-	BDSKFormatStringFormatter *formatter = [[BDSKFormatStringFormatter alloc] initWithField:BDSKCiteKeyString fileType:BDSKBibtexString];
+	BDSKFormatStringFormatter *formatter = [[BDSKFormatStringFormatter alloc] initWithField:BDSKCiteKeyString];
     [formatSheetField setFormatter:formatter];
 	[formatter release];
     
-	coloringEditor = [[BDSKFormatStringFieldEditor alloc] initWithFrame:[formatSheetField frame] parseField:BDSKCiteKeyString fileType:BDSKBibtexString];
+	coloringEditor = [[BDSKFormatStringFieldEditor alloc] initWithFrame:[formatSheetField frame] parseField:BDSKCiteKeyString];
     
     [previewDisplay setStringValue:[[BDSKPreviewItem sharedItem] displayText]];
     [previewDisplay sizeToFit];
@@ -124,7 +124,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	
 	// update the UI elements
 	
-	if ([BDSKFormatParser validateFormat:&citeKeyFormat attributedFormat:&attrFormat forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
+	if ([BDSKFormatParser validateFormat:&citeKeyFormat attributedFormat:&attrFormat forField:BDSKCiteKeyString error:&error]) {
 		[self setCiteKeyFormatInvalidWarning:NO message:nil];
 		
 		[citeKeyLine setStringValue:[[BDSKPreviewItem sharedItem] suggestedCiteKey]];
@@ -235,7 +235,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		NSAttributedString *attrFormat = nil;
 		formatString = [formatSheetField stringValue];
 		//if ([formatString isEqualToString:[sud stringForKey:BDSKCiteKeyFormatKey]]) return; // nothing changed
-		if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
+		if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:BDSKCiteKeyString error:&error]) {
 			[sud setObject:formatString forKey:BDSKCiteKeyFormatKey];
 		}
 		else {
@@ -279,11 +279,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	if ([formatSheet makeFirstResponder:nil])
 		[formatSheet endEditingFor:nil];
 	
-	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) 
+	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString error:&error]) 
 		return YES;
 	
 	formatString = [sud stringForKey:BDSKCiteKeyFormatKey];
-	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:NULL]) {
+	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString error:NULL]) {
 		// The currently set cite-key format is valid, so we can keep it 
 		otherButton = NSLocalizedString(@"Revert to Last", @"Button title");
 	}

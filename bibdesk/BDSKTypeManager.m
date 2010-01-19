@@ -191,7 +191,7 @@ static BDSKTypeManager *sharedInstance = nil;
 - (void)reloadAllFieldNames {
     NSMutableSet *allFields = [NSMutableSet setWithCapacity:30];
     
-    for (NSString *type in [self bibTypesForFileType:BDSKBibtexString]) {
+    for (NSString *type in [self bibTypes]) {
         [allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY]];
         [allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY]];
     }
@@ -494,8 +494,8 @@ static BDSKTypeManager *sharedInstance = nil;
 	return singleValuedGroupFieldsSet;
 }
 
-- (NSArray *)bibTypesForFileType:(NSString *)fileType{
-    return [typesForFileTypeDict objectForKey:fileType];
+- (NSArray *)bibTypes{
+    return [typesForFileTypeDict objectForKey:BDSKBibtexString];
 }
 
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag{
@@ -616,7 +616,7 @@ static BDSKTypeManager *sharedInstance = nil;
 - (NSString *)bibtexTypeForHCiteType:(NSString *)type {
     // first try to find 'type' in the list of regular types:
     
-    if([[self bibTypesForFileType:BDSKBibtexString] containsObject:type])
+    if([[self bibTypes] containsObject:type])
         return type;
     
     // then try to find 'type' in the custom dict:, and if it's not there, give up and return "misc".
@@ -670,7 +670,7 @@ static BDSKTypeManager *sharedInstance = nil;
     return numericFields;
 }
 
-- (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
+- (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName {
 	if( [fieldName isEqualToString:BDSKCiteKeyString]){
 		return invalidCiteKeyCharSet;
 	}
@@ -683,7 +683,7 @@ static BDSKTypeManager *sharedInstance = nil;
 	return invalidGeneralCharSet;
 }
 
-- (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
+- (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName{
 	if( [fieldName isEqualToString:BDSKCiteKeyString]){
 		return strictInvalidCiteKeyCharSet;
 	}
@@ -696,20 +696,15 @@ static BDSKTypeManager *sharedInstance = nil;
 	return strictInvalidGeneralCharSet;
 }
 
-- (NSCharacterSet *)veryStrictInvalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
+- (NSCharacterSet *)veryStrictInvalidCharactersForField:(NSString *)fieldName{
 	if([localFileFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKLocalFileString]){
 		return veryStrictInvalidLocalUrlCharSet;
 	}
-	return [self strictInvalidCharactersForField:fieldName inFileType:type];
+	return [self strictInvalidCharactersForField:fieldName];
 }
 
-- (NSCharacterSet *)invalidFieldNameCharacterSetForFileType:(NSString *)type{
-    if([type isEqualToString:BDSKBibtexString])
-        return invalidCiteKeyCharSet;
-    else
-        [NSException raise:BDSKUnimplementedException format:@"invalidFieldNameCharacterSetForFileType is only implemented for BibTeX"];
-    // not reached
-    return nil;
+- (NSCharacterSet *)invalidFieldNameCharacterSet{
+    return invalidCiteKeyCharSet;
 }
 
 - (NSCharacterSet *)fragileCiteKeyCharacterSet{

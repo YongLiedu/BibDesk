@@ -55,7 +55,7 @@ static NSCharacterSet *keyCharSet = nil;
     
     keyCharSet = [[keySepCharSet invertedSet] retain];
     
-    NSMutableCharacterSet *tmpSet = [[[BDSKTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString] mutableCopy];
+    NSMutableCharacterSet *tmpSet = [[[BDSKTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString] mutableCopy];
     [tmpSet formIntersectionWithCharacterSet:keyCharSet];
     invalidSet = [tmpSet copy];
     [tmpSet release];

@@ -158,7 +158,7 @@
 - (NSArray *)userDefaultFieldsForType:(NSString *)type;
 - (NSSet *)invalidGroupFieldsSet;
 - (NSSet *)singleValuedGroupFieldsSet;
-- (NSArray *)bibTypesForFileType:(NSString *)fileType;
+- (NSArray *)bibTypes;
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag;
 - (NSString *)bibtexTypeForPubMedType:(NSString *)type;
 - (NSString *)fieldNameForRISTag:(NSString *)tag;
@@ -250,44 +250,40 @@
 - (NSDictionary *)MODSGenresForBibTeXType:(NSString *)type;
 
 /*!
-    @method     invalidCharactersForField:inFieldType:
+    @method     invalidCharactersForField:
     @abstract   Characters that must not be used in a given key and reference type, currently only for Cite Key in BibTeX.  This is a fairly liberal definition, since it allows
                 non-ascii and some math characters.  Used by the formatter subclass for field entry in BDSKEditor.
     @discussion (comprehensive description)
     @param      fieldName The name of the field (e.g. "Author")
-    @param      type The reference type (e.g. BibTeX, RIS)
     @result     A character set of invalid entries.
 */
-- (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type;
+- (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName;
 
 /*!
-    @method     strictInvalidCharactersForField:inFieldType:
+    @method     strictInvalidCharactersForField:
     @abstract   Characters that will not be used in a generated key and reference type, currently only for BibTeX. 
     @discussion (comprehensive description)
     @param      fieldName The name of the field (e.g. "Author")
-    @param      type The reference type (e.g. BibTeX, RIS)
     @result     A character set of invalid entries.
 */
-- (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type;
+- (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName;
 
 /*!
-    @method     veryStrictInvalidCharactersForField:inFieldType:
+    @method     veryStrictInvalidCharactersForField:
     @abstract   Characters that will not be used in a generated key and reference type, currently only for BibTeX. 
     @discussion mainly for use of windoze compatible file names
     @param      fieldName The name of the field (e.g. "Author")
-    @param      type The reference type (e.g. BibTeX, RIS)
     @result     A character set of invalid entries.
 */
-- (NSCharacterSet *)veryStrictInvalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type;
+- (NSCharacterSet *)veryStrictInvalidCharactersForField:(NSString *)fieldName;
 
 /*!
-    @method     invalidFieldNameCharacterSetForFileType:
-    @abstract   Returns invalid characters for field names; currently only for BibTeX.  Same character set as for citekeys.
+    @method     invalidFieldNameCharacterSet
+    @abstract   Returns invalid characters for field names.  Same character set as for citekeys.
     @discussion (comprehensive description)
-    @param      type (description)
     @result     (description)
 */
-- (NSCharacterSet *)invalidFieldNameCharacterSetForFileType:(NSString *)type;
+- (NSCharacterSet *)invalidFieldNameCharacterSet;
 
 /*!
     @method     fragileCiteKeyCharacterSet

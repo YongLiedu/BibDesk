@@ -48,7 +48,7 @@
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
-	NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString];
+	NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString];
     NSRange r = [string rangeOfCharacterFromSet:invalidSet];
     if ( r.location != NSNotFound) {
         if(error) *error = [NSString stringWithFormat:NSLocalizedString(@"The character \"%@\" is not allowed in a BibTeX cite key.", @"Error description"), [string substringWithRange:r]];
@@ -61,7 +61,7 @@
 - (BOOL)isPartialStringValid:(NSString *)partialString
             newEditingString:(NSString **)newString
             errorDescription:(NSString **)error{
-	NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString];
+	NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString];
     NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
     if ( r.location != NSNotFound) {
         // formatter will remove the last character typed

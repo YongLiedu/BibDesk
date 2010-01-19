@@ -42,21 +42,17 @@
 
 @implementation BDSKFormatStringFormatter
 
-- (id)initWithField:(NSString *)field fileType:(NSString *)fileType; {
+- (id)initWithField:(NSString *)field {
     // initWithFrame sets up the entire text system for us
     if(self = [super init]){
         BDSKASSERT(field != nil);
-        parseField = [field copy];
-        
-        BDSKASSERT(fileType != nil);
-        parseFileType = [fileType copy];
+        parseField = [field retain];
     }
     return self;
 }
 
 - (void)dealloc
 {
-    BDSKDESTROY(parseFileType);
     BDSKDESTROY(parseField);
     [super dealloc];
 }
@@ -69,7 +65,7 @@
     NSAttributedString *attrString = nil;
     NSString *format = [[obj copy] autorelease];
     
-	[BDSKFormatParser validateFormat:&format attributedFormat:&attrString forField:parseField inFileType:parseFileType error:NULL];
+	[BDSKFormatParser validateFormat:&format attributedFormat:&attrString forField:parseField error:NULL];
     
     return attrString;
 }
@@ -83,7 +79,7 @@
     NSAttributedString *attrString = nil;
     NSString *format = [[*partialStringPtr copy] autorelease];
     
-	[BDSKFormatParser validateFormat:&format attributedFormat:&attrString forField:parseField inFileType:parseFileType error:NULL];
+	[BDSKFormatParser validateFormat:&format attributedFormat:&attrString forField:parseField error:NULL];
     format = [attrString string];
 	
 	if (NO == [format isEqualToString:*partialStringPtr]) {

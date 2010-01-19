@@ -248,7 +248,6 @@ static NSMapTable *selectorTable = NULL;
 - (id)init
 {
 	self = [self initWithType:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKPubTypeStringKey] 
-                     fileType:BDSKBibtexString 
                       citeKey:DEFAULT_CITEKEY 
                     pubFields:nil 
                         files:nil 
@@ -261,11 +260,11 @@ static NSMapTable *selectorTable = NULL;
 }
 
 // this is the designated initializer.
-- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType citeKey:(NSString *)key pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew{ 
-    return [self initWithType:type fileType:inFileType citeKey:key pubFields:fieldsDict files:nil isNew:isNew];
+- (id)initWithType:(NSString *)type citeKey:(NSString *)key pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew{ 
+    return [self initWithType:type citeKey:key pubFields:fieldsDict files:nil isNew:isNew];
 }
 
-- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType citeKey:(NSString *)key pubFields:(NSDictionary *)fieldsDict files:(NSArray *)filesArray isNew:(BOOL)isNew{ 
+- (id)initWithType:(NSString *)type citeKey:(NSString *)key pubFields:(NSDictionary *)fieldsDict files:(NSArray *)filesArray isNew:(BOOL)isNew{ 
     if (self = [super init]){
 		if(fieldsDict){
 			pubFields = [fieldsDict mutableCopy];
@@ -292,7 +291,6 @@ static NSMapTable *selectorTable = NULL;
         fileOrder = nil;
         identifierURL = createUniqueURL();
         
-        [self setFileType:inFileType ?: BDSKBibtexString];
         [self setPubTypeWithoutUndo:type];
         [self setDate: nil];
         [self setDateAdded: nil];
@@ -323,7 +321,7 @@ static NSMapTable *selectorTable = NULL;
     // We set isNew to YES because this is used for duplicate, either from the menu or AppleScript, and these items are supposed to be newly added to the document so who0uld have their Date-Added field set to now
     // Note that unless someone uses Date-Added or Date-Modified as a default field, a copy is equal according to isEqualToItem:
     NSArray *filesCopy = [[NSArray allocWithZone: zone] initWithArray:files copyItems:YES];
-    BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType citeKey:citeKey pubFields:pubFields files:filesCopy isNew:YES];
+    BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType citeKey:citeKey pubFields:pubFields files:filesCopy isNew:YES];
     [filesCopy release];
     [theCopy setDate: pubDate];
     return theCopy;
@@ -340,7 +338,6 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     if([coder allowsKeyedCoding]){
         if(self = [super init]){
             pubFields = [[NSMutableDictionary alloc] initWithDictionary:[coder decodeObjectForKey:@"pubFields"]];
-            [self setFileType:[coder decodeObjectForKey:@"fileType"] ?: BDSKBibtexString];
             [self setCiteKeyString:[coder decodeObjectForKey:@"citeKey"]];
             [self setDate:ensureCalendarDate([coder decodeObjectForKey:@"pubDate"])];
             [self setDateAdded:ensureCalendarDate([coder decodeObjectForKey:@"dateAdded"])];
@@ -358,7 +355,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
             spotlightMetadataChanged = YES;
             identifierURL = createUniqueURL();
         }
-    } else {       
+    } else {
         [[super init] release];
         self = [[NSKeyedUnarchiver unarchiveObjectWithData:[coder decodeDataObject]] retain];
     }
@@ -367,7 +364,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (void)encodeWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
-        [coder encodeObject:fileType forKey:@"fileType"];
+        [coder encodeObject:BDSKBibtexString forKey:@"fileType"]; // legacy
         [coder encodeObject:citeKey forKey:@"citeKey"];
         [coder encodeObject:pubDate forKey:@"pubDate"];
         [coder encodeObject:dateAdded forKey:@"dateAdded"];
@@ -392,7 +389,6 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	BDSKDESTROY(groups);
 
     BDSKDESTROY(pubType);
-    BDSKDESTROY(fileType);
     BDSKDESTROY(citeKey);
     BDSKDESTROY(pubDate);
     BDSKDESTROY(dateAdded);
@@ -592,17 +588,6 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     if(fileOrder != newOrder){
         [fileOrder release];
         fileOrder = [newOrder retain];
-    }
-}
-
-- (NSString *)fileType { 
-    return fileType;
-}
-
-- (void)setFileType:(NSString *)someFileType {
-    if(someFileType != fileType){
-        [fileType release];
-        fileType = [someFileType retain];
     }
 }
 
