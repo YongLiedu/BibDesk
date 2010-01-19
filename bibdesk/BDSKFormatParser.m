@@ -780,53 +780,38 @@ static NSDictionary *errorAttr = nil;
                     suggestedUnique = nil;
             }
         }
+        NSCharacterSet *nonUniqueChars = nil;
+        unichar fromChar = 0, toChar = 0;
 		switch (uniqueSpecifier) {
 			case 'u':
-				// unique lowercase letters
-                if (suggestedUnique && [suggestedUnique rangeOfCharacterFromSet:nonLowercaseLetterCharSet].location == NSNotFound) {
-                    [parsedStr setString:suggestion];
-                } else {
-                    [parsedStr setString:[self uniqueString:prefixStr 
-                                                     suffix:parsedStr
-                                                  separator:uniqueSeparator
-                                                   forField:fieldName
-                                                     ofItem:pub
-                                              numberOfChars:uniqueNumber 
-                                                       from:'a' to:'z' 
-                                                      force:(uniqueNumber == 0)]];
-                }
+                nonUniqueChars = nonLowercaseLetterCharSet;
+                fromChar = 'a';
+                toChar = 'z';
 				break;
 			case 'U':
-				// unique uppercase letters
-                if (suggestedUnique && [suggestedUnique rangeOfCharacterFromSet:nonUppercaseLetterCharSet].location == NSNotFound) {
-                    [parsedStr setString:suggestion];
-                } else {
-                    [parsedStr setString:[self uniqueString:prefixStr 
-                                                     suffix:parsedStr
-                                                  separator:uniqueSeparator
-                                                   forField:fieldName
-                                                     ofItem:pub
-                                              numberOfChars:uniqueNumber 
-                                                       from:'A' to:'Z' 
-                                                      force:(uniqueNumber == 0)]];
-				}
-                break;
+                nonUniqueChars = nonUppercaseLetterCharSet;
+                fromChar = 'A';
+                toChar = 'Z';
+				break;
 			case 'n':
-				// unique number
-                if (suggestedUnique && [suggestedUnique rangeOfCharacterFromSet:nonDecimalDigitCharSet].location == NSNotFound) {
-                    [parsedStr setString:suggestion];
-                } else {
-                    [parsedStr setString:[self uniqueString:prefixStr 
-                                                     suffix:parsedStr
-                                                  separator:uniqueSeparator
-                                                   forField:fieldName
-                                                     ofItem:pub
-                                              numberOfChars:uniqueNumber 
-                                                       from:'0' to:'9' 
-                                                      force:(uniqueNumber == 0)]];
-				}
-                break;
+                nonUniqueChars = nonDecimalDigitCharSet;
+                fromChar = '0';
+                toChar = '9';
+				break;
 		}
+        if (suggestedUnique && [suggestedUnique rangeOfCharacterFromSet:nonUniqueChars].location == NSNotFound) {
+            [parsedStr setString:suggestion];
+        } else {
+            [parsedStr setString:[self uniqueString:prefixStr 
+                                             suffix:parsedStr
+                                          separator:uniqueSeparator
+                                           forField:fieldName
+                                             ofItem:pub
+                                      numberOfChars:uniqueNumber 
+                                               from:fromChar
+                                                 to:toChar 
+                                              force:(uniqueNumber == 0)]];
+        }
 	}
 	
 	if([NSString isEmptyString:parsedStr]) {
