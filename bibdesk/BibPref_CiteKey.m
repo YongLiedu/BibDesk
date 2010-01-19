@@ -41,6 +41,8 @@
 #import "BibItem.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKFormatParser.h"
+#import "BDSKFormatStringFormatter.h"
+#import "BDSKFormatStringFieldEditor.h"
 #import "BDSKAppController.h"
 #import "BDSKPreviewItem.h"
 #import "BDSKTypeManager.h"

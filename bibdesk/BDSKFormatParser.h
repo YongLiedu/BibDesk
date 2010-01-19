@@ -171,17 +171,3 @@
 + (NSString *)folderPathForFilingPapersFromDocumentAtPath:(NSString *)path;
 
 @end
-
-@interface BDSKFormatStringFieldEditor : NSTextView {
-    NSString *parseField;
-    NSString *parseFileType;
-} 
-- (id)initWithFrame:(NSRect)frameRect parseField:(NSString *)field fileType:(NSString *)fileType;
-@end
-
-@interface BDSKFormatStringFormatter : NSFormatter {
-    NSString *parseField;
-    NSString *parseFileType;
-}
-- (id)initWithField:(NSString *)field fileType:(NSString *)fileType;
-@end
