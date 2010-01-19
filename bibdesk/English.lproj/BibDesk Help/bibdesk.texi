@@ -607,15 +607,13 @@ for Apple's Search Kit technology are available as well.
 @cindex boolean search
 @cindex diacritic accents in search
 
-For normal (non-similarity-based) queries, Search Kit discerns the type of query---Boolean, prefix, phrase, and so on---from the syntax of the query itself. Moreover, Search Kit supports multiple query types within a single search. For example, the following query includes Boolean, prefix, and suffix searching:
+Apple's Search Kit supports multiple query types within a single search. For example, the following query includes Boolean, prefix, and suffix searching:
 
 @samp{appl* OR *ing}
 
-This query will return documents containing words that begin with ``appl'' as well as documents that contain words that end with ``ing''.
+This query will return documents containing words that begin with ``appl'' as well as documents that contain words that end with ``ing''.  Note that BibDesk does not support phrase searching, since index creation is slower with that option.
 
-For similarity searches, specified with the kSKSearchOptionFindSimilar flag in the inSearchOptions parameter, SKSearchCreate ignores all query operators.
-
-The query operators that SKSearchCreate recognizes for non-similarity searching are:
+The recognized query operators are:
 
 @multitable {searchKitOperators} {}
 @headitem Operator @tab Meaning
@@ -641,11 +639,7 @@ The query operators that SKSearchCreate recognizes for non-similarity searching 
 @tab End logical grouping
 @end multitable
 
-The operators AND, OR, and NOT are case sensitive.
-
-Search Kit performs Unicode normalization on query strings and on the text placed into indexes. It uses Unicode Normalization Form KC (NFKC, compatibility decomposition followed by canonical composition) as documented in Unicode Standard Annex #15. For example, the a-grave character, `√†', can be written as the two Unicode characters (0x0061, 0x0300) or as the single Unicode character 0x00E0. Search Kit will normalize (0x0061, 0x0300) to 0x00E0. For more information on Unicode normalization, see @url{http://unicode.org/reports/tr15}.
-
-Search Kit further normalizes query strings and indexes by stripping diacritical marks and by forcing characters to lowercase. For example, Search Kit normalizes each of the following characters to `a': `a', `√†', `A', and `√Ä'.
+The operators AND, OR, and NOT are case sensitive, but Search Kit normalizes query strings and indexes by stripping diacritical marks and by forcing characters to lowercase. For example, Search Kit normalizes each of the following characters to `a': `a', `à', `A', and `À'. For more information, see @url{http://developer.apple.com/mac/library/documentation/UserExperience/Reference/SearchKit/Reference/reference.html, SKSearchCreate developer documentation}.
 
 @node Find and Replace
 @c DO NOT LOCALIZE THE NEXT LINE
