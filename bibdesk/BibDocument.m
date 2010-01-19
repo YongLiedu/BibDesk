@@ -662,8 +662,10 @@ static NSOperationQueue *metadataCacheQueue = nil;
     if (mainWindowSetupDictionary == nil) {
         if ([self fileURL]) {
             mainWindowSetupDictionary = [[[SKNExtendedAttributeManager sharedNoSplitManager] propertyListFromExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey atPath:[[self fileURL] path] traverseLink:YES error:NULL] retain];
-            if ([mainWindowSetupDictionary isKindOfClass:[NSDictionary class]] == NO)
+            if ([mainWindowSetupDictionary isKindOfClass:[NSDictionary class]] == NO) {
+                NSLog(@"Window setup EAs had wrong class %@", [mainWindowSetupDictionary class]);
                 BDSKDESTROY(mainWindowSetupDictionary);
+            }
         }
         if (nil == mainWindowSetupDictionary)
             mainWindowSetupDictionary = [[NSDictionary alloc] init];
