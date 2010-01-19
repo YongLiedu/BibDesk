@@ -2735,7 +2735,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 			if ([NSString isEmptyString:[self valueOfField:BDSKAuthorString]] && 
 				[NSString isEmptyString:[self valueOfField:BDSKEditorString]])
 				return NO;
-		} else if ([fieldName isEqualToString:BDSKBibtexString] == NO) {
+		} else if ([fieldName isEqualToString:BDSKPubTypeString] == NO) {
 			if ([NSString isEmptyString:[self valueOfField:fieldName]]) 
 				return NO;
 		}
