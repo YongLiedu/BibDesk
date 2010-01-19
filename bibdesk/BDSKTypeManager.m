@@ -215,6 +215,8 @@ static BDSKTypeManager *sharedManager = nil;
 }
 
 - (void)reloadFieldSets {
+    NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
+    
     [localFileFieldsSet removeAllObjects];
     [remoteURLFieldsSet removeAllObjects];
     [allURLFieldsSet removeAllObjects];
@@ -224,34 +226,32 @@ static BDSKTypeManager *sharedManager = nil;
     [citationFieldsSet removeAllObjects];
     [personFieldsSet removeAllObjects];
     [invalidGroupFieldsSet removeAllObjects];
+    [singleValuedGroupFieldsSet removeAllObjects];
     
-    [localFileFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKLocalFileFieldsKey]];
-    [remoteURLFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRemoteURLFieldsKey]];
+    [localFileFieldsSet addObjectsFromArray:[sud stringArrayForKey:BDSKLocalFileFieldsKey]];
+    [remoteURLFieldsSet addObjectsFromArray:[sud stringArrayForKey:BDSKRemoteURLFieldsKey]];
     [allURLFieldsSet unionSet:remoteURLFieldsSet];
     [allURLFieldsSet unionSet:localFileFieldsSet];
     
+    [ratingFieldsSet addObjectsFromArray:[sud stringArrayForKey:BDSKRatingFieldsKey]];
+    [triStateFieldsSet addObjectsFromArray:[sud stringArrayForKey:BDSKTriStateFieldsKey]];
+    [booleanFieldsSet addObjectsFromArray:[sud stringArrayForKey:BDSKBooleanFieldsKey]];    
+    [citationFieldsSet addObjectsFromArray:[sud stringArrayForKey:BDSKCitationFieldsKey]];   
+    [personFieldsSet addObjectsFromArray:[sud stringArrayForKey:BDSKPersonFieldsKey]];
     
-    [ratingFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRatingFieldsKey]];
-    [triStateFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKTriStateFieldsKey]];
-    [booleanFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKBooleanFieldsKey]];    
-    [citationFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKCitationFieldsKey]];   
-    [personFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKPersonFieldsKey]];
-    
-    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
 	NSMutableSet *invalidFields = [NSMutableSet setWithObjects:
 		BDSKDateModifiedString, BDSKDateAddedString, BDSKDateString, 
 		BDSKTitleString, BDSKContainerString, BDSKChapterString, 
 		BDSKVolumeString, BDSKNumberString, BDSKSeriesString, BDSKPagesString, BDSKItemNumberString, 
 		BDSKAbstractString, BDSKAnnoteString, BDSKRssDescriptionString, nil];
-	[invalidFields addObjectsFromArray:[sud stringArrayForKey:BDSKLocalFileFieldsKey]];
-	[invalidFields addObjectsFromArray:[sud stringArrayForKey:BDSKRemoteURLFieldsKey]];
+	[invalidFields unionSet:localFileFieldsSet];
+	[invalidFields unionSet:remoteURLFieldsSet];
     [invalidGroupFieldsSet unionSet:invalidFields];
     
-    [singleValuedGroupFieldsSet removeAllObjects];
     NSMutableSet *singleValuedFields = [NSMutableSet setWithObjects:BDSKPubTypeString, BDSKTypeString, BDSKCrossrefString, BDSKJournalString, BDSKBooktitleString, BDSKVolumetitleString, BDSKYearString, BDSKMonthString, BDSKPublisherString, BDSKAddressString, nil];
-	[singleValuedFields addObjectsFromArray:[sud stringArrayForKey:BDSKRatingFieldsKey]];
-	[singleValuedFields addObjectsFromArray:[sud stringArrayForKey:BDSKBooleanFieldsKey]];
-	[singleValuedFields addObjectsFromArray:[sud stringArrayForKey:BDSKTriStateFieldsKey]];  
+	[singleValuedFields unionSet:ratingFieldsSet];
+	[singleValuedFields unionSet:booleanFieldsSet];
+	[singleValuedFields unionSet:triStateFieldsSet];  
     [singleValuedGroupFieldsSet unionSet:singleValuedFields];
 }
 
