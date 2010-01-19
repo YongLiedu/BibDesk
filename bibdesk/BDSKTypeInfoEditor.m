@@ -61,16 +61,10 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 {
     BDSKPRECONDITION(sharedTypeInfoEditor == nil);
     if (self = [super initWithWindowNibName:@"BDSKTypeInfoEditor"]) {
-		// we keep a copy to the bundles TypeInfo list to see which items we shouldn't edit
-		NSDictionary *tmpDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"TypeInfo.plist"]];
-		// we are only interested in this dictionary
-		defaultFieldsForTypesDict = [[tmpDict objectForKey:FIELDS_FOR_TYPES_KEY] retain];
-		defaultTypes = [[[tmpDict objectForKey:REQUIRED_TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString] retain];
-		
         canEditDefaultTypes = NO;
         
-		fieldsForTypesDict = [[NSMutableDictionary alloc] initWithCapacity:[defaultFieldsForTypesDict count]];
-		types = [[NSMutableArray alloc] initWithCapacity:[defaultFieldsForTypesDict count]];
+		fieldsForTypesDict = [[NSMutableDictionary alloc] init];
+		types = [[NSMutableArray alloc] init];
 		[self revertTypes]; // this loads the current typeInfo from BDSKTypeManager
     }
     return self;
@@ -150,10 +144,11 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
         currentType = [newCurrentType copy];
 		
 		if (currentType) {
+            NSDictionary *defaultFieldsDict = [[[BDSKTypeManager sharedManager] defaultFieldsForTypes] objectForKey:currentType];
 			currentRequiredFields = [[fieldsForTypesDict objectForKey:currentType] objectForKey:REQUIRED_KEY];
 			currentOptionalFields = [[fieldsForTypesDict objectForKey:currentType] objectForKey:OPTIONAL_KEY]; 
-			currentDefaultRequiredFields = [[defaultFieldsForTypesDict objectForKey:currentType] objectForKey:REQUIRED_KEY];
-			currentDefaultOptionalFields = [[defaultFieldsForTypesDict objectForKey:currentType] objectForKey:OPTIONAL_KEY];
+			currentDefaultRequiredFields = [defaultFieldsDict objectForKey:REQUIRED_KEY];
+			currentDefaultOptionalFields = [defaultFieldsDict objectForKey:OPTIONAL_KEY];
 		} else {
 			currentRequiredFields = nil;
 			currentOptionalFields = nil;
@@ -192,7 +187,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
             [data writeToFile:typeInfoPath atomically:YES];
         }
         
-        [[BDSKTypeManager sharedManager] reloadTypeInfo];
+        [[BDSKTypeManager sharedManager] reloadTypesAndFields];
         
         [self setDocumentEdited:NO];
     } else {
@@ -330,6 +325,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	
 	[fieldsForTypesDict removeAllObjects];
 	[types removeAllObjects];
+    NSDictionary *defaultFieldsForTypesDict = [[BDSKTypeManager sharedManager] defaultFieldsForTypes];
 	for (NSString *type in defaultFieldsForTypesDict)
 		[self addType:type withFields:[defaultFieldsForTypesDict objectForKey:type]];
 	[types sortUsingSelector:@selector(compare:)];
@@ -368,7 +364,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 #pragma mark validation methods
 
 - (BOOL)canEditType:(NSString *)type {
-	return (canEditDefaultTypes || NO == [defaultTypes containsObject:type]);
+	return (canEditDefaultTypes || NO == [[[BDSKTypeManager sharedManager] defaultTypes] containsObject:type]);
 }
 
 - (BOOL)canEditField:(NSString *)field{
@@ -376,7 +372,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
         return YES;
 	if (currentType == nil) // there is nothing to edit
 		return NO;
-	if (![defaultTypes containsObject:currentType]) // we allow any edits for non-default types
+	if (![[[BDSKTypeManager sharedManager] defaultTypes] containsObject:currentType]) // we allow any edits for non-default types
 		return YES;
 	if ([currentDefaultRequiredFields containsObject:field] ||
 		[currentDefaultOptionalFields containsObject:field]) // we don't allow edits of default fields for default types
@@ -459,7 +455,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 		[addRemoveOptionalButton setEnabled:canRemove forSegment:1];
 	}
 	
-	[revertCurrentToDefaultButton setEnabled:(currentType && [defaultFieldsForTypesDict objectForKey:currentType])];
+	[revertCurrentToDefaultButton setEnabled:(currentType && [[[BDSKTypeManager sharedManager] defaultFieldsForTypes] objectForKey:currentType])];
 }
 
 #pragma mark NSTableview datasource

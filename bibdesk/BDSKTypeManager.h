@@ -90,6 +90,8 @@
     NSDictionary *bibtexTypeForReferTypeDict;
     NSDictionary *bibtexTypeForHCiteTypeDict;
 	NSDictionary *MODSGenresForBibTeXTypeDict;
+	NSDictionary *defaultFieldsForTypesDict;
+	NSArray *defaultTypes;
 	NSSet *allFieldNames;
 	NSCharacterSet *invalidCiteKeyCharSet;
 	NSCharacterSet *fragileCiteKeyCharSet;
@@ -119,34 +121,15 @@
 }
 + (BDSKTypeManager *)sharedManager;
 
-- (void)reloadTypeInfo;
+- (void)reloadTypesAndFields;
 - (void)reloadAllFieldNames;
 - (void)reloadURLFields;
 - (void)reloadSpecialFields;
 - (void)reloadGroupFields;
 
 - (void)setAllFieldNames:(NSSet *)newNames;
-- (void)setMODSGenresForBibTeXTypeDict:(NSDictionary *)newNames;
-- (void)setBibtexTypeForPubMedTypeDict:(NSDictionary *)newNames;
-- (void)setFieldNameForPubMedTagDict:(NSDictionary *)newNames;
-- (void)setBibtexTypeForRISTypeDict:(NSDictionary *)newNames;
-- (void)setFieldNameForRISTagDict:(NSDictionary *)newNames;
-- (void)setRISTagForFieldNameDict:(NSDictionary *)newNames;
-- (void)setFieldNamesForMARCTagDict:(NSDictionary *)newNames;
-- (void)setFieldNamesForUNIMARCTagDict:(NSDictionary *)newNames;
-- (void)setFileTypesDict:(NSDictionary *)newTypes;
 - (void)setFieldsForTypesDict:(NSDictionary *)newFields;
 - (void)setTypesForFileTypeDict:(NSDictionary *)newTypes;
-- (void)setFieldNameForJSTORTagDict:(NSDictionary *)dict;
-- (void)setFieldDescriptionForJSTORTagDict:(NSDictionary *)dict;
-- (void)setFieldNameForWebOfScienceTagDict:(NSDictionary *)dict;
-- (void)setFieldDescriptionForWebOfScienceTagDict:(NSDictionary *)dict;
-- (void)setBibtexTypeForWebOfScienceTypeDict:(NSDictionary *)dict;
-- (void)setBibtexTypeForDublinCoreTypeDict:(NSDictionary *)dict;
-- (void)setFieldNameForDublinCoreTermDict:(NSDictionary *)dict;
-- (void)setBibtexTypeForReferTypeDict:(NSDictionary *)newNames;
-- (void)setFieldNameForReferTagDict:(NSDictionary *)newNames;
-- (void)setBibtexTypeForHCiteTypeDict:(NSDictionary *)newBibtexTypeForHCiteTypeDict;
 - (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;
 - (void)setRequiredFieldsForLocalFile:(NSArray *)newFields;
 
@@ -167,6 +150,8 @@
 - (NSString *)bibtexTypeForReferType:(NSString *)type;
 - (NSArray *)requiredFieldsForCiteKey;
 - (NSArray *)requiredFieldsForLocalFile;
+- (NSDictionary *)defaultFieldsForTypes;
+- (NSArray *)defaultTypes;
 
 /*!
     @method     bibtexTypeForHCiteType:

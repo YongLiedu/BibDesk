@@ -51,8 +51,6 @@
 	IBOutlet NSButton *canEditDefaultTypesButton;
 	NSMutableDictionary *fieldsForTypesDict;
 	NSMutableArray *types;
-	NSDictionary *defaultFieldsForTypesDict;
-	NSArray *defaultTypes;
 	NSMutableArray *currentRequiredFields;
 	NSMutableArray *currentOptionalFields;
 	NSArray *currentDefaultRequiredFields;

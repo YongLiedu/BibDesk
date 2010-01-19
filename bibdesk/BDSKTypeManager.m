@@ -63,7 +63,48 @@ static BDSKTypeManager *sharedInstance = nil;
     BDSKPRECONDITION(sharedInstance == nil);
     if (self = [super init]) {
         
-        [self reloadTypeInfo];
+        NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
+        fieldsForTypesDict = [[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] copy];
+        typesForFileTypeDict = [[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] copy];
+        defaultFieldsForTypesDict = [[typeInfoDict objectForKey:REQUIRED_TYPES_FOR_FILE_TYPE_KEY] copy];
+        defaultTypes = [[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] copy];
+        fileTypesDict = [[typeInfoDict objectForKey:FILE_TYPES_KEY] copy];
+        fieldNameForPubMedTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY] copy];
+        bibtexTypeForPubMedTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY] copy];
+        fieldNameForRISTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_RIS_TAGS_KEY] copy];
+        RISTagForFieldNameDict = [[typeInfoDict objectForKey:RIS_TAGS_FOR_BIBTEX_FIELDS_KEY] copy];
+        bibtexTypeForRISTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_RIS_TYPES_KEY] copy];
+        fieldNamesForMARCTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_MARC_TAGS_KEY] copy];
+        fieldNamesForUNIMARCTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_UNIMARC_TAGS_KEY] copy];
+        MODSGenresForBibTeXTypeDict = [[typeInfoDict objectForKey:MODS_GENRES_FOR_BIBTEX_TYPES_KEY] copy];
+        fieldNameForJSTORTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_JSTOR_TAGS_KEY] copy];
+        fieldDescriptionForJSTORTagDict = [[typeInfoDict objectForKey:FIELD_DESCRIPTIONS_FOR_JSTOR_TAGS_KEY] copy];
+        fieldNameForWebOfScienceTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_WOS_TAGS_KEY] copy];
+        fieldDescriptionForWebOfScienceTagDict = [[typeInfoDict objectForKey:FIELD_DESCRIPTIONS_FOR_WOS_TAGS_KEY] copy];
+        bibtexTypeForWebOfScienceTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_WOS_TYPES_KEY] copy];
+        bibtexTypeForDublinCoreTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_DC_TYPES_KEY] copy];        
+        fieldNameForDublinCoreTermDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_DC_TERMS_KEY] copy];
+        fieldNameForReferTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_REFER_TAGS_KEY] copy];
+        bibtexTypeForReferTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_REFER_TYPES_KEY] copy];
+        bibtexTypeForHCiteTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_HCITE_TYPES_KEY] copy];
+        
+        [self reloadTypesAndFields];
+        
+        localFileFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
+        remoteURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
+        allURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
+        [self reloadURLFields];
+        
+        ratingFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
+        triStateFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
+        booleanFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
+        citationFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
+        personFieldsSet = [[NSMutableSet alloc] initWithCapacity:2];
+        [self reloadSpecialFields];
+        
+        singleValuedGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
+        invalidGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
+        [self reloadGroupFields];
         
         NSMutableCharacterSet *tmpSet;
         // this set is used for warning the user on manual entry of a citekey; allows ASCII characters and some math symbols
@@ -116,22 +157,6 @@ static BDSKTypeManager *sharedInstance = nil;
         
         separatorCharSet = [[NSCharacterSet characterSetWithCharactersInString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKGroupFieldSeparatorCharactersKey]] copy];
         
-        localFileFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-        remoteURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-        allURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
-        [self reloadURLFields];
-        
-        ratingFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-        triStateFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-        booleanFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-        citationFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-        personFieldsSet = [[NSMutableSet alloc] initWithCapacity:2];
-        [self reloadSpecialFields];
-        
-        singleValuedGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
-        invalidGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
-        [self reloadGroupFields];
-        
         // observe the pref changes for custom fields
         for (NSString *prefKey in [NSSet setWithObjects:BDSKDefaultFieldsKey, BDSKLocalFileFieldsKey, BDSKRemoteURLFieldsKey, BDSKRatingFieldsKey, BDSKBooleanFieldsKey, BDSKTriStateFieldsKey, BDSKCitationFieldsKey, BDSKPersonFieldsKey, nil])
             [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self
@@ -142,45 +167,16 @@ static BDSKTypeManager *sharedInstance = nil;
 	return self;
 }
 
-- (void)reloadTypeInfo{
-    // Load the TypeInfo plists
-    NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
-
-    NSFileManager *fm = [NSFileManager defaultManager];
-    NSString *userTypeInfoPath = [[fm currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:TYPE_INFO_FILENAME];
-    NSDictionary *userTypeInfoDict;
+- (void)reloadTypesAndFields{
+    // Load the TypeInfo plist, prefer the user one, otherwise use the default one
+    NSString *userTypeInfoPath = [[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:TYPE_INFO_FILENAME];
+    NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:userTypeInfoPath];
     
-    if ([fm fileExistsAtPath:userTypeInfoPath]) {
-        userTypeInfoDict = [NSDictionary dictionaryWithContentsOfFile:userTypeInfoPath];
-        // set all the lists we support in the user file
-        [self setFieldsForTypesDict:[userTypeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY]];
-        [self setTypesForFileTypeDict:[NSDictionary dictionaryWithObjectsAndKeys: 
-            [[userTypeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString], BDSKBibtexString, nil]];
-    } else {
-        [self setFieldsForTypesDict:[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY]];
-        [self setTypesForFileTypeDict:[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY]];
-    }
-
-    [self setFileTypesDict:[typeInfoDict objectForKey:FILE_TYPES_KEY]];
-    [self setFieldNameForPubMedTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY]];
-    [self setBibtexTypeForPubMedTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY]];
-    [self setFieldNameForRISTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_RIS_TAGS_KEY]];
-    [self setRISTagForFieldNameDict:[typeInfoDict objectForKey:RIS_TAGS_FOR_BIBTEX_FIELDS_KEY]];
-    [self setBibtexTypeForRISTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_RIS_TYPES_KEY]];
-    [self setFieldNamesForMARCTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_MARC_TAGS_KEY]];
-    [self setFieldNamesForUNIMARCTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_UNIMARC_TAGS_KEY]];
-    [self setMODSGenresForBibTeXTypeDict:[typeInfoDict objectForKey:MODS_GENRES_FOR_BIBTEX_TYPES_KEY]];
-    [self setFieldNameForJSTORTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_JSTOR_TAGS_KEY]];
-    [self setFieldDescriptionForJSTORTagDict:[typeInfoDict objectForKey:FIELD_DESCRIPTIONS_FOR_JSTOR_TAGS_KEY]];
-    [self setFieldNameForWebOfScienceTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_WOS_TAGS_KEY]];
-    [self setFieldDescriptionForWebOfScienceTagDict:[typeInfoDict objectForKey:FIELD_DESCRIPTIONS_FOR_WOS_TAGS_KEY]];
-    [self setBibtexTypeForWebOfScienceTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_WOS_TYPES_KEY]];
-    [self setBibtexTypeForDublinCoreTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_DC_TYPES_KEY]];        
-    [self setFieldNameForDublinCoreTermDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_DC_TERMS_KEY]];
-    [self setFieldNameForReferTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_REFER_TAGS_KEY]];
-    [self setBibtexTypeForReferTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_REFER_TYPES_KEY]];
-    [self setBibtexTypeForHCiteTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_HCITE_TYPES_KEY]];
+    if (typeInfoDict == nil)
+        typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
 	
+    [self setFieldsForTypesDict:[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY]];
+    [self setTypesForFileTypeDict:[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY]];
 	[self reloadAllFieldNames];
 	
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibTypeInfoChangedNotification
@@ -274,6 +270,20 @@ static BDSKTypeManager *sharedInstance = nil;
 }
 
 #pragma mark Setters
+
+- (void)setDefaultFieldsForTypesDict:(NSDictionary *)dict{
+    if(defaultFieldsForTypesDict != dict){
+        [defaultFieldsForTypesDict release];
+        defaultFieldsForTypesDict = [dict copy];
+    }
+}
+
+- (void)setDefaultTypes:(NSArray *)array{
+    if(defaultTypes != array){
+        [defaultTypes release];
+        defaultTypes = [array copy];
+    }
+}
 
 - (void)setAllFieldNames:(NSSet *)newNames{
     if(allFieldNames != newNames){
@@ -448,6 +458,14 @@ static BDSKTypeManager *sharedInstance = nil;
 
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat{
      return [[fileTypesDict objectForKey:fileFormat] objectForKey:@"DefaultType"];
+}
+
+- (NSDictionary *)defaultFieldsForTypes{
+    return defaultFieldsForTypesDict;
+}
+
+- (NSArray *)defaultTypes{
+    return defaultTypes;
 }
 
 - (NSSet *)allFieldNames{
