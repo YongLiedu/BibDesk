@@ -79,8 +79,6 @@ static BDSKTypeManager *sharedManager = nil;
         NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
         fieldsForTypesDict = [[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] copy];
         typesForFileTypeDict = [[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] copy];
-        defaultFieldsForTypesDict = [[typeInfoDict objectForKey:REQUIRED_TYPES_FOR_FILE_TYPE_KEY] copy];
-        defaultTypes = [[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] copy];
         fieldNameForPubMedTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY] copy];
         bibtexTypeForPubMedTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY] copy];
         fieldNameForRISTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_RIS_TAGS_KEY] copy];
@@ -99,6 +97,8 @@ static BDSKTypeManager *sharedManager = nil;
         fieldNameForReferTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_REFER_TAGS_KEY] copy];
         bibtexTypeForReferTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_REFER_TYPES_KEY] copy];
         bibtexTypeForHCiteTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_HCITE_TYPES_KEY] copy];
+        defaultFieldsForTypesDict = [[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] copy];
+        defaultTypes = [[NSSet alloc] initWithArray:[[typeInfoDict objectForKey:DEFAULT_TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString]];
         
         localFileFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
         remoteURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
@@ -313,8 +313,8 @@ static BDSKTypeManager *sharedManager = nil;
     return defaultFieldsForTypesDict;
 }
 
-- (NSArray *)defaultTypes{
-    return defaultTypes;
+- (BOOL)isDefaultType:(NSString *)type{
+    return [defaultTypes containsObject:type];
 }
 
 - (NSSet *)allFieldNames{

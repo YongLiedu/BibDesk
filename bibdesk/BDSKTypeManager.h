@@ -45,7 +45,7 @@
 #define REQUIRED_KEY                          @"required"
 #define OPTIONAL_KEY                          @"optional"
 #define TYPES_FOR_FILE_TYPE_KEY               @"TypesForFileType"
-#define REQUIRED_TYPES_FOR_FILE_TYPE_KEY      @"RequiredTypesForFileType"
+#define DEFAULT_TYPES_FOR_FILE_TYPE_KEY       @"DefaultTypesForFileType"
 #define BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY     @"BibTeXFieldNamesForPubMedTags"
 #define BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY     @"BibTeXTypesForPubMedTypes"
 #define BIBTEX_FIELDS_FOR_RIS_TAGS_KEY        @"BibTeXFieldNamesForRISTags"
@@ -89,7 +89,7 @@
     NSDictionary *bibtexTypeForHCiteTypeDict;
 	NSDictionary *MODSGenresForBibTeXTypeDict;
 	NSDictionary *defaultFieldsForTypesDict;
-	NSArray *defaultTypes;
+	NSSet *defaultTypes;
 	NSSet *allFieldNames;
 	NSCharacterSet *invalidCiteKeyCharSet;
 	NSCharacterSet *fragileCiteKeyCharSet;
@@ -131,7 +131,7 @@
 - (NSSet *)allFieldNames;
 - (NSArray *)allFieldNamesIncluding:(NSArray *)include excluding:(NSArray *)exclude;
 - (NSDictionary *)defaultFieldsForTypes;
-- (NSArray *)defaultTypes;
+- (BOOL)isDefaultType:(NSString *)type;
 
 // PubMed
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag;

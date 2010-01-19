@@ -364,15 +364,13 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 #pragma mark validation methods
 
 - (BOOL)canEditType:(NSString *)type {
-	return (canEditDefaultTypes || NO == [[[BDSKTypeManager sharedManager] defaultTypes] containsObject:type]);
+	return (canEditDefaultTypes || NO == [[BDSKTypeManager sharedManager] isDefaultType:type]);
 }
 
 - (BOOL)canEditField:(NSString *)field{
-    if (canEditDefaultTypes)
-        return YES;
 	if (currentType == nil) // there is nothing to edit
 		return NO;
-	if (![[[BDSKTypeManager sharedManager] defaultTypes] containsObject:currentType]) // we allow any edits for non-default types
+	if ([self canEditType:currentType]) // we allow any edits for non-default types
 		return YES;
 	if ([currentDefaultRequiredFields containsObject:field] ||
 		[currentDefaultOptionalFields containsObject:field]) // we don't allow edits of default fields for default types
