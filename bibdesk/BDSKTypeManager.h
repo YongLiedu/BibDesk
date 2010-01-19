@@ -68,7 +68,7 @@
 
 @interface BDSKTypeManager : NSObject {
 	NSDictionary *fieldsForTypesDict;
-	NSDictionary *typesForFileTypeDict;
+	NSArray *types;
 	NSDictionary *fieldNameForPubMedTagDict;
 	NSDictionary *pubMedTagForFieldNameDict;
 	NSDictionary *bibtexTypeForPubMedTypeDict;

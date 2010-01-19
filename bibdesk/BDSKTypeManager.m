@@ -49,7 +49,7 @@ static char BDSKTypeManagerDefaultsObservationContext;
 
 - (void)setAllFieldNames:(NSSet *)newNames;
 - (void)setFieldsForTypesDict:(NSDictionary *)newFields;
-- (void)setTypesForFileTypeDict:(NSDictionary *)newTypes;
+- (void)setTypes:(NSArray *)newTypes;
 
 @end
 
@@ -77,7 +77,7 @@ static BDSKTypeManager *sharedManager = nil;
         
         NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
         fieldsForTypesDict = [[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] copy];
-        typesForFileTypeDict = [[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] copy];
+        types = [[[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString] copy];
         fieldNameForPubMedTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY] copy];
         bibtexTypeForPubMedTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY] copy];
         fieldNameForRISTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_RIS_TAGS_KEY] copy];
@@ -203,7 +203,7 @@ static BDSKTypeManager *sharedManager = nil;
         typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
 	
     [self setFieldsForTypesDict:[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY]];
-    [self setTypesForFileTypeDict:[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY]];
+    [self setTypes:[[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString]];
 	[self reloadAllFieldNames];
 	
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibTypeInfoChangedNotification
@@ -285,10 +285,10 @@ static BDSKTypeManager *sharedManager = nil;
     }
 }
 
-- (void)setTypesForFileTypeDict:(NSDictionary *)newTypes{
-    if(typesForFileTypeDict != newTypes){
-        [typesForFileTypeDict release];
-        typesForFileTypeDict = [newTypes copy];
+- (void)setTypes:(NSArray *)newTypes{
+    if(types != newTypes){
+        [types release];
+        types = [newTypes copy];
     }
 }
 
@@ -361,7 +361,7 @@ static BDSKTypeManager *sharedManager = nil;
 }
 
 - (NSArray *)bibTypes{
-    return [typesForFileTypeDict objectForKey:BDSKBibtexString];
+    return types;
 }
 
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag{
@@ -409,11 +409,11 @@ static BDSKTypeManager *sharedManager = nil;
 
 - (NSString *)RISTypeForBibTeXType:(NSString *)type{
     
-    NSArray *types = [bibtexTypeForRISTypeDict allKeysForObject:type];
+    NSArray *theTypes = [bibtexTypeForRISTypeDict allKeysForObject:type];
     NSString *newType = nil;
         
-    if([types count]) {
-        newType = [types objectAtIndex:0];
+    if([theTypes count]) {
+        newType = [theTypes objectAtIndex:0];
     } else {
         newType = [[type stringByPaddingToLength:4 withString:@"?" startingAtIndex:0] uppercaseString]; // manufacture a guess
     }
