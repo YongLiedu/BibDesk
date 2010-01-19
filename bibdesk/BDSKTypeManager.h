@@ -119,69 +119,61 @@
     NSArray *requiredFieldsForCiteKey;
     NSArray *requiredFieldsForLocalFile;
 }
+
 + (BDSKTypeManager *)sharedManager;
 
+// Updating
 - (void)reloadTypesAndFields;
-- (void)reloadAllFieldNames;
-- (void)reloadURLFields;
-- (void)reloadSpecialFields;
-- (void)reloadGroupFields;
 
-- (void)setAllFieldNames:(NSSet *)newNames;
-- (void)setFieldsForTypesDict:(NSDictionary *)newFields;
-- (void)setTypesForFileTypeDict:(NSDictionary *)newTypes;
-- (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;
-- (void)setRequiredFieldsForLocalFile:(NSArray *)newFields;
-
+// BibTeX
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat;
-- (NSSet *)allFieldNames;
-- (NSArray *)allFieldNamesIncluding:(NSArray *)include excluding:(NSArray *)exclude;
 - (NSArray *)requiredFieldsForType:(NSString *)type;
 - (NSArray *)optionalFieldsForType:(NSString *)type;
 - (NSArray *)userDefaultFieldsForType:(NSString *)type;
-- (NSSet *)invalidGroupFieldsSet;
-- (NSSet *)singleValuedGroupFieldsSet;
 - (NSArray *)bibTypes;
-- (NSString *)fieldNameForPubMedTag:(NSString *)tag;
-- (NSString *)bibtexTypeForPubMedType:(NSString *)type;
-- (NSString *)fieldNameForRISTag:(NSString *)tag;
-- (NSString *)bibtexTypeForRISType:(NSString *)type;
-- (NSString *)bibtexTypeForWebOfScienceType:(NSString *)type;
-- (NSString *)bibtexTypeForReferType:(NSString *)type;
-- (NSArray *)requiredFieldsForCiteKey;
-- (NSArray *)requiredFieldsForLocalFile;
+- (NSSet *)allFieldNames;
+- (NSArray *)allFieldNamesIncluding:(NSArray *)include excluding:(NSArray *)exclude;
 - (NSDictionary *)defaultFieldsForTypes;
 - (NSArray *)defaultTypes;
 
-/*!
-    @method     bibtexTypeForHCiteType:
-    @abstract   translates between common types used in hCite and bibtex types
-    @discussion 
-    @param      type -- a string representing a type
-    @result     a bibtex type
-*/
-- (NSString *)bibtexTypeForHCiteType:(NSString *)type;
+// PubMed
+- (NSString *)fieldNameForPubMedTag:(NSString *)tag;
+- (NSString *)bibtexTypeForPubMedType:(NSString *)type;
 
+// RIS
+- (NSString *)fieldNameForRISTag:(NSString *)tag;
+- (NSString *)bibtexTypeForRISType:(NSString *)type;
+- (NSString *)RISTagForBibTeXFieldName:(NSString *)name;
+- (NSString *)RISTypeForBibTeXType:(NSString *)type;
 
-/*!
-    @method     fieldNameForDublinCoreTerm:
-    @abstract   translates between Dublin Core Terms and bibtex fields.
-    @discussion Is probably incomplete, but doesn't ignore qualifiers - DC.Title.Alternate will become Title-Alternate.
-    @param      term - a Dublin Core term like "DC.title"
-    @result     a string that can be used as a key to a BibItem field like "Title" (note capitalization!)
-*/
+// Refer
+- (NSString *)fieldNameForReferTag:(NSString *)tag;
+- (NSString *)bibtexTypeForReferType:(NSString *)type;
+
+// MARC
+- (NSDictionary *)fieldNamesForMARCTag:(NSString *)name;
+- (NSDictionary *)fieldNamesForUNIMARCTag:(NSString *)name;
+
+// JSTOR
+- (NSString *)fieldNameForJSTORTag:(NSString *)tag;
+- (NSString *)fieldNameForJSTORDescription:(NSString *)name;
+
+// Web of Science
+- (NSString *)bibtexTypeForWebOfScienceType:(NSString *)type;
+- (NSString *)fieldNameForWebOfScienceTag:(NSString *)tag;
+- (NSString *)fieldNameForWebOfScienceDescription:(NSString *)name;
+
+// Dublin Core
 - (NSString *)fieldNameForDublinCoreTerm:(NSString *)term;
-
-/*!
-    @method     bibtexTypeForDublinCoreType:
-    @abstract   translates between Dublin Core types and bibtex terms
-    @discussion This is likely to be messy since I couldn't find a good reference for DC types.
-    @param      type - A DC.Type value
-    @result     a bibtex type
-*/
 - (NSString *)bibtexTypeForDublinCoreType:(NSString *)type;
 
+// HCite
+- (NSString *)bibtexTypeForHCiteType:(NSString *)type;
 
+// MODS
+- (NSDictionary *)MODSGenresForBibTeXType:(NSString *)type;
+
+// Field types sets
 - (NSSet *)localFileFieldsSet;
 - (NSSet *)remoteURLFieldsSet;
 - (NSSet *)allURLFieldsSet;
@@ -192,98 +184,28 @@
 - (NSSet *)ratingFieldsSet;
 - (NSSet *)citationFieldsSet;
 - (NSSet *)numericFieldsSet;
+- (NSSet *)invalidGroupFieldsSet;
+- (NSSet *)singleValuedGroupFieldsSet;
 
-/*!
-    @method     RISTagForBibTeXFieldName:
-    @abstract   Returns an RIS tag for a BibTeX field name.  May not be a recognized tag according to the http://www.refman.com/support/risformat_intro.asp, but
-                it should always be a valid RIS tag.
-    @discussion (comprehensive description)
-    @param      name (description)
-    @result     (description)
-*/
-- (NSString *)RISTagForBibTeXFieldName:(NSString *)name;
-
-/*!
-    @method     RISTypeForBibTeXType:
-    @abstract   Returns the closest matching RIS type for a given BibTeX type.  If the type does not exist, it is manufactured by uppercasing the first
-                four characters of the given type, and padding with ? as necessary.
-    @discussion (comprehensive description)
-    @param      type (description)
-    @result     (description)
-*/
-- (NSString *)RISTypeForBibTeXType:(NSString *)type;
-
-- (NSDictionary *)fieldNamesForMARCTag:(NSString *)name;
-- (NSDictionary *)fieldNamesForUNIMARCTag:(NSString *)name;
-
-- (NSString *)fieldNameForJSTORTag:(NSString *)tag;
-
-- (NSString *)fieldNameForJSTORDescription:(NSString *)name;
-
-- (NSString *)fieldNameForWebOfScienceTag:(NSString *)tag;
-
-- (NSString *)fieldNameForWebOfScienceDescription:(NSString *)name;
-- (NSString *)fieldNameForReferTag:(NSString *)tag;
-
-    /*!
-              @method     MODSGenresForBibTeXType:
-     @abstract   returns the appropriate MODS genre and level (like "Conference Publication") for known bibtex types (like "inproceedings")
-     @discussion 
-     @param      type The bibtex type.
-     @result     A dictionary that includes genre tags organized by whether they belong in the item or its host. The dictionary has two keys: 'self' and 'host', and when not nil, the values of those keys are arrays. See TypeInfo.plist for the whole story.
-     */
-- (NSDictionary *)MODSGenresForBibTeXType:(NSString *)type;
-
-/*!
-    @method     invalidCharactersForField:
-    @abstract   Characters that must not be used in a given key and reference type, currently only for Cite Key in BibTeX.  This is a fairly liberal definition, since it allows
-                non-ascii and some math characters.  Used by the formatter subclass for field entry in BDSKEditor.
-    @discussion (comprehensive description)
-    @param      fieldName The name of the field (e.g. "Author")
-    @result     A character set of invalid entries.
-*/
+// Character sets for format parsing and group splitting
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName;
-
-/*!
-    @method     strictInvalidCharactersForField:
-    @abstract   Characters that will not be used in a generated key and reference type, currently only for BibTeX. 
-    @discussion (comprehensive description)
-    @param      fieldName The name of the field (e.g. "Author")
-    @result     A character set of invalid entries.
-*/
 - (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName;
-
-/*!
-    @method     veryStrictInvalidCharactersForField:
-    @abstract   Characters that will not be used in a generated key and reference type, currently only for BibTeX. 
-    @discussion mainly for use of windoze compatible file names
-    @param      fieldName The name of the field (e.g. "Author")
-    @result     A character set of invalid entries.
-*/
 - (NSCharacterSet *)veryStrictInvalidCharactersForField:(NSString *)fieldName;
-
-/*!
-    @method     invalidFieldNameCharacterSet
-    @abstract   Returns invalid characters for field names.  Same character set as for citekeys.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
 - (NSCharacterSet *)invalidFieldNameCharacterSet;
-
-/*!
-    @method     fragileCiteKeyCharacterSet
-    @abstract   Returns characters that could give problems in LaTeX for use in cite keys.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
 - (NSCharacterSet *)fragileCiteKeyCharacterSet;
-
 - (NSCharacterSet *)separatorCharacterSetForField:(NSString *)fieldName;
+
+// Fields for autogeneration formats
+- (NSArray *)requiredFieldsForCiteKey;
+- (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;
+- (NSArray *)requiredFieldsForLocalFile;
+- (void)setRequiredFieldsForLocalFile:(NSArray *)newFields;
 
 @end
 
-@interface NSString (BDSKTypeExtensions)
+#pragma mark -
 
+@interface NSString (BDSKTypeExtensions)
 - (BOOL)isBooleanField;
 - (BOOL)isTriStateField;
 - (BOOL)isRatingField;

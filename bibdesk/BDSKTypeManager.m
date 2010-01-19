@@ -43,9 +43,22 @@
 
 static char BDSKTypeManagerDefaultsObservationContext;
 
-static BDSKTypeManager *sharedInstance = nil;
+@interface BDSKTypeManager (BDSKPrivate)
+
+- (void)reloadAllFieldNames;
+- (void)reloadFieldSets;
+
+- (void)setAllFieldNames:(NSSet *)newNames;
+- (void)setFieldsForTypesDict:(NSDictionary *)newFields;
+- (void)setTypesForFileTypeDict:(NSDictionary *)newTypes;
+
+@end
+
+#pragma mark -
 
 @implementation BDSKTypeManager
+
+static BDSKTypeManager *sharedManager = nil;
 
 + (void)initialize
 {
@@ -54,13 +67,13 @@ static BDSKTypeManager *sharedInstance = nil;
 }
 
 + (BDSKTypeManager *)sharedManager{
-    if (sharedInstance == nil)
-        sharedInstance = [[self alloc] init];
-    return sharedInstance;
+    if (sharedManager == nil)
+        sharedManager = [[self alloc] init];
+    return sharedManager;
 }
 
 - (id)init{
-    BDSKPRECONDITION(sharedInstance == nil);
+    BDSKPRECONDITION(sharedManager == nil);
     if (self = [super init]) {
         
         NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
@@ -88,23 +101,19 @@ static BDSKTypeManager *sharedInstance = nil;
         bibtexTypeForReferTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_REFER_TYPES_KEY] copy];
         bibtexTypeForHCiteTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_HCITE_TYPES_KEY] copy];
         
-        [self reloadTypesAndFields];
-        
         localFileFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
         remoteURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
         allURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
-        [self reloadURLFields];
-        
         ratingFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
         triStateFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
         booleanFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
         citationFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
         personFieldsSet = [[NSMutableSet alloc] initWithCapacity:2];
-        [self reloadSpecialFields];
-        
         singleValuedGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
         invalidGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
-        [self reloadGroupFields];
+        
+        [self reloadTypesAndFields];
+        [self reloadFieldSets];
         
         NSMutableCharacterSet *tmpSet;
         // this set is used for warning the user on manual entry of a citekey; allows ASCII characters and some math symbols
@@ -205,33 +214,28 @@ static BDSKTypeManager *sharedInstance = nil;
 
 }
 
-- (void)reloadURLFields {
+- (void)reloadFieldSets {
     [localFileFieldsSet removeAllObjects];
     [remoteURLFieldsSet removeAllObjects];
     [allURLFieldsSet removeAllObjects];
-    
-    [localFileFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKLocalFileFieldsKey]];
-    [remoteURLFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRemoteURLFieldsKey]];
-    [allURLFieldsSet unionSet:remoteURLFieldsSet];
-    [allURLFieldsSet unionSet:localFileFieldsSet];
-}
-
-- (void)reloadSpecialFields{
     [ratingFieldsSet removeAllObjects];
     [triStateFieldsSet removeAllObjects];
     [booleanFieldsSet removeAllObjects];
     [citationFieldsSet removeAllObjects];
     [personFieldsSet removeAllObjects];
+    [invalidGroupFieldsSet removeAllObjects];
+    
+    [localFileFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKLocalFileFieldsKey]];
+    [remoteURLFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRemoteURLFieldsKey]];
+    [allURLFieldsSet unionSet:remoteURLFieldsSet];
+    [allURLFieldsSet unionSet:localFileFieldsSet];
+    
     
     [ratingFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRatingFieldsKey]];
     [triStateFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKTriStateFieldsKey]];
     [booleanFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKBooleanFieldsKey]];    
     [citationFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKCitationFieldsKey]];   
     [personFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKPersonFieldsKey]];
-}
-
-- (void)reloadGroupFields{
-    [invalidGroupFieldsSet removeAllObjects];
     
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
 	NSMutableSet *invalidFields = [NSMutableSet setWithObjects:
@@ -257,9 +261,7 @@ static BDSKTypeManager *sharedInstance = nil;
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if (context == &BDSKTypeManagerDefaultsObservationContext) {
         [self reloadAllFieldNames];
-        [self reloadURLFields];
-        [self reloadSpecialFields];
-        [self reloadGroupFields];
+        [self reloadFieldSets];
         
         // coalesce notifications; this is received once each preference value that's set in BibPref_Defaults, but observers of BDSKCustomFieldsChangedNotification should only receive it once
         NSNotification *note = [NSNotification notificationWithName:BDSKCustomFieldsChangedNotification object:self];
@@ -271,132 +273,12 @@ static BDSKTypeManager *sharedInstance = nil;
 
 #pragma mark Setters
 
-- (void)setDefaultFieldsForTypesDict:(NSDictionary *)dict{
-    if(defaultFieldsForTypesDict != dict){
-        [defaultFieldsForTypesDict release];
-        defaultFieldsForTypesDict = [dict copy];
-    }
-}
-
-- (void)setDefaultTypes:(NSArray *)array{
-    if(defaultTypes != array){
-        [defaultTypes release];
-        defaultTypes = [array copy];
-    }
-}
-
 - (void)setAllFieldNames:(NSSet *)newNames{
     if(allFieldNames != newNames){
         [allFieldNames release];
         allFieldNames = [newNames copy];
     }
 }
-
-- (void)setMODSGenresForBibTeXTypeDict:(NSDictionary *)newNames{
-    if(MODSGenresForBibTeXTypeDict != newNames){
-        [MODSGenresForBibTeXTypeDict release];
-        MODSGenresForBibTeXTypeDict = [newNames copy];
-    }
-}
-
-- (void)setBibtexTypeForPubMedTypeDict:(NSDictionary *)newNames{
-    if(bibtexTypeForPubMedTypeDict != newNames){
-        [bibtexTypeForPubMedTypeDict release];
-        bibtexTypeForPubMedTypeDict = [newNames copy];
-    }
-}
-
-- (void)setFieldNameForPubMedTagDict:(NSDictionary *)newNames{
-    if(fieldNameForPubMedTagDict != newNames){
-        [fieldNameForPubMedTagDict release];
-        fieldNameForPubMedTagDict = [newNames copy];
-    }
-}
-
-- (void)setBibtexTypeForRISTypeDict:(NSDictionary *)newNames{
-    if(bibtexTypeForRISTypeDict != newNames){
-        [bibtexTypeForRISTypeDict release];
-        bibtexTypeForRISTypeDict = [newNames copy];
-    }
-}
-
-- (void)setFieldNameForRISTagDict:(NSDictionary *)newNames{
-    if(fieldNameForRISTagDict != newNames){
-        [fieldNameForRISTagDict release];
-        fieldNameForRISTagDict = [newNames copy];
-    }
-}
-
-- (void)setRISTagForFieldNameDict:(NSDictionary *)newNames{
-    if(RISTagForFieldNameDict != newNames){
-        [RISTagForFieldNameDict release];
-        RISTagForFieldNameDict = [newNames copy];
-    }
-}
-
-- (void)setFieldNamesForMARCTagDict:(NSDictionary *)newNames{
-    if(fieldNamesForMARCTagDict != newNames){
-        [fieldNamesForMARCTagDict release];
-        fieldNamesForMARCTagDict = [newNames copy];
-    }
-}
-
-- (void)setFieldNamesForUNIMARCTagDict:(NSDictionary *)newNames{
-    if(fieldNamesForUNIMARCTagDict != newNames){
-        [fieldNamesForUNIMARCTagDict release];
-        fieldNamesForUNIMARCTagDict = [newNames copy];
-    }
-}
-
-- (void)setFieldDescriptionForJSTORTagDict:(NSDictionary *)dict{
-    if(fieldDescriptionForJSTORTagDict != dict){
-        [fieldDescriptionForJSTORTagDict release];
-        fieldDescriptionForJSTORTagDict = [dict copy];
-    }
-}
-
-- (void)setFieldNameForJSTORTagDict:(NSDictionary *)dict{
-    if(fieldNameForJSTORTagDict != dict){
-        [fieldNameForJSTORTagDict release];
-        fieldNameForJSTORTagDict = [dict copy];
-    }
-}
-
-- (void)setBibtexTypeForWebOfScienceTypeDict:(NSDictionary *)dict{
-    if(bibtexTypeForWebOfScienceTypeDict != dict){
-        [bibtexTypeForWebOfScienceTypeDict release];
-        bibtexTypeForWebOfScienceTypeDict = [dict copy];
-    }
-}
-
-- (void)setFieldNameForWebOfScienceTagDict:(NSDictionary *)dict{
-    if(fieldNameForWebOfScienceTagDict != dict){
-        [fieldNameForWebOfScienceTagDict release];
-        fieldNameForWebOfScienceTagDict = [dict copy];
-    }
-}
-
-- (void)setFieldDescriptionForWebOfScienceTagDict:(NSDictionary *)dict{
-    if(fieldDescriptionForWebOfScienceTagDict != dict){
-        [fieldDescriptionForWebOfScienceTagDict release];
-        fieldDescriptionForWebOfScienceTagDict = [dict copy];
-    }
-}
-
-- (void)setBibtexTypeForDublinCoreTypeDict:(NSDictionary *)dict{
-    if(bibtexTypeForDublinCoreTypeDict != dict){
-        [bibtexTypeForDublinCoreTypeDict release];
-        bibtexTypeForDublinCoreTypeDict = [dict copy];
-    }
-}
-
-- (void)setFieldNameForDublinCoreTermDict:(NSDictionary *)dict{
-    if(fieldNameForDublinCoreTermDict != dict){
-        [fieldNameForDublinCoreTermDict release];
-        fieldNameForDublinCoreTermDict = [dict copy];
-    }
-}
-
 
 - (void)setFileTypesDict:(NSDictionary *)newTypes{
     if(fileTypesDict != newTypes){
@@ -416,27 +298,6 @@ static BDSKTypeManager *sharedInstance = nil;
     if(typesForFileTypeDict != newTypes){
         [typesForFileTypeDict release];
         typesForFileTypeDict = [newTypes copy];
-    }
-}
-
-- (void)setFieldNameForReferTagDict:(NSDictionary *)newNames {
-    if(fieldNameForReferTagDict != newNames) {
-        [fieldNameForReferTagDict release];
-        fieldNameForReferTagDict = [newNames copy];
-    }
-}
-
-- (void)setBibtexTypeForReferTypeDict:(NSDictionary *)newNames {
-    if(bibtexTypeForReferTypeDict != newNames) {
-        [bibtexTypeForReferTypeDict release];
-        bibtexTypeForReferTypeDict = [newNames copy];
-    }
-}
-
-- (void)setBibtexTypeForHCiteTypeDict:(NSDictionary *)newBibtexTypeForHCiteTypeDict {
-    if (bibtexTypeForHCiteTypeDict != newBibtexTypeForHCiteTypeDict) {
-        [bibtexTypeForHCiteTypeDict release];
-        bibtexTypeForHCiteTypeDict = [newBibtexTypeForHCiteTypeDict copy];
     }
 }
 
