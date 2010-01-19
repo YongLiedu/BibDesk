@@ -67,7 +67,7 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"groups" uniqueID:[self scriptingUniqueID]] autorelease];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"groups" uniqueID:[self uniqueID]] autorelease];
 }
 
 - (id)newScriptingObjectOfClass:(Class)class forValueForKey:(NSString *)key withContentsValue:(id)contentsValue properties:(NSDictionary *)properties {
@@ -143,7 +143,7 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"libraryGroups" uniqueID:[self scriptingUniqueID]] autorelease];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"libraryGroups" uniqueID:[self uniqueID]] autorelease];
 }
 
 - (NSArray *)scriptingPublications {
@@ -188,7 +188,7 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"staticGroups" uniqueID:[self scriptingUniqueID]] autorelease];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"staticGroups" uniqueID:[self uniqueID]] autorelease];
 }
 
 - (NSArray *)scriptingPublications {
@@ -226,7 +226,7 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"lastImportGroups" uniqueID:[self scriptingUniqueID]] autorelease];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"lastImportGroups" uniqueID:[self uniqueID]] autorelease];
 }
 
 - (void)setAsName:(NSString *)newName {
@@ -262,7 +262,7 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"smartGroups" uniqueID:[self scriptingUniqueID]] autorelease];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"smartGroups" uniqueID:[self uniqueID]] autorelease];
 }
 
 - (id)newScriptingObjectOfClass:(Class)class forValueForKey:(NSString *)key withContentsValue:(id)contentsValue properties:(NSDictionary *)properties {
@@ -318,7 +318,7 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"fieldGroups" uniqueID:[self scriptingUniqueID]] autorelease];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"fieldGroups" uniqueID:[self uniqueID]] autorelease];
 }
 
 - (void)insertInScriptingPublications:(BibItem *)pub {
@@ -378,7 +378,7 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"externalFileGroups" uniqueID:[self scriptingUniqueID]] autorelease];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"externalFileGroups" uniqueID:[self uniqueID]] autorelease];
 }
 
 - (NSString *)URLString {
@@ -409,7 +409,7 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"scriptGroups" uniqueID:[self scriptingUniqueID]] autorelease];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"scriptGroups" uniqueID:[self uniqueID]] autorelease];
 }
 
 - (NSURL *)scriptURL {
@@ -441,7 +441,7 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"searchGroups" uniqueID:[self scriptingUniqueID]] autorelease];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"searchGroups" uniqueID:[self uniqueID]] autorelease];
 }
 
 - (NSString *)scriptingSearchTerm {
@@ -603,7 +603,7 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"sharedGroups" uniqueID:[self scriptingUniqueID]] autorelease];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"sharedGroups" uniqueID:[self uniqueID]] autorelease];
 }
 
 @end
@@ -615,7 +615,7 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"webGroups" uniqueID:[self scriptingUniqueID]] autorelease];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"webGroups" uniqueID:[self uniqueID]] autorelease];
 }
 
 - (NSString *)URLString {
