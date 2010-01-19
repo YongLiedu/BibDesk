@@ -399,8 +399,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 /* Paste related methods */
 - (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect edit:(BOOL)shouldEdit;
-- (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)select verbose:(BOOL)verbose error:(NSError **)error;
-- (BOOL)addPublicationsFromFile:(NSString *)fileName verbose:(BOOL)verbose error:(NSError **)outError;
+- (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)select verbose:(BOOL)verbose error:(NSError **)error;
+- (NSArray *)addPublicationsFromFile:(NSString *)fileName verbose:(BOOL)verbose error:(NSError **)outError;
 - (NSArray *)publicationsFromArchivedData:(NSData *)data;
 - (NSArray *)publicationsForString:(NSString *)string type:(NSInteger)type verbose:(BOOL)verbose error:(NSError **)error;
 - (NSArray *)publicationsForFiles:(NSArray *)filenames error:(NSError **)error;

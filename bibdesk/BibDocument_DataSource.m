@@ -925,7 +925,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                 }
             }
             
-            return [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL];
+            return nil != [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL];
         }
     }
       
@@ -1109,7 +1109,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 - (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
 	if (tv == tableView) {
         NSError *error = nil;
-        if ([self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:&error] == NO)
+        if ([self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:&error] == nil)
             [tv presentError:error];
     } else {
 		NSBeep();
@@ -1513,7 +1513,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     
     if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups) {
         
-        return [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
+        return nil != [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
         
     } else if (idx == NSOutlineViewDropOnItemIndex && [item isEqual:[groups webGroup]] && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil] containsObject:type]) {
         
@@ -1601,8 +1601,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         // we already have these publications, so we just want to add them to the group, not the document
         pubs = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
     } else {
-        if ([self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL])
-            pubs = [self selectedPublications];     
+        pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL];
     }
     
     if ([pubs count] == 0)

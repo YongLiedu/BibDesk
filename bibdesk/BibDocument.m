@@ -2179,7 +2179,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
 }
 
-- (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)shouldSelect verbose:(BOOL)verbose error:(NSError **)outError{
+- (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)shouldSelect verbose:(BOOL)verbose error:(NSError **)outError{
 	// these are the types we support, the order here is important!
     NSString *type = [pb availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
     NSArray *newPubs = nil;
@@ -2232,32 +2232,30 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"Error description")];
 	}
     
-    if (newPubs == nil){
-        if(outError) *outError = error;
-		return NO;
-    }else if ([newPubs count] > 0) 
+    if ([newPubs count] > 0) 
 		[self addPublications:newPubs publicationsToAutoFile:newFilePubs temporaryCiteKey:temporaryCiteKey selectLibrary:shouldSelect edit:shouldEdit];
+    else if (newPubs == nil && outError)
+        *outError = error;
     
-    return YES;
+    return newPubs;
 }
 
-- (BOOL)addPublicationsFromFile:(NSString *)fileName verbose:(BOOL)verbose error:(NSError **)outError{
+- (NSArray *)addPublicationsFromFile:(NSString *)fileName verbose:(BOOL)verbose error:(NSError **)outError{
     NSError *error = nil;
     NSString *temporaryCiteKey = nil;
     NSArray *newPubs = [self extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:nil verbose:verbose error:&error];
     BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
     
-    if(temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"])
+    if (temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"])
         error = nil; // accept temporary cite keys, but show a warning later
     
-    if([newPubs count] == 0){
-        if(outError) *outError = error;
-        return NO;
+    if ([newPubs count] == 0) {
+        if (outError) *outError = error;
+        return nil;
+    } else {
+        [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:temporaryCiteKey selectLibrary:YES edit:shouldEdit];
+        return newPubs;
     }
-    
-    [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:temporaryCiteKey selectLibrary:YES edit:shouldEdit];
-    
-    return YES;
 }
 
 - (NSArray *)publicationsFromArchivedData:(NSData *)data{

@@ -1422,7 +1422,7 @@ static BOOL changingColors = NO;
 			isKnownFormat = ([pboardString contentStringType] != BDSKUnknownStringType);
 		}
 		
-        if(isKnownFormat && [self addPublicationsFromPasteboard:pasteboard selectLibrary:YES verbose:NO error:&error])
+        if(isKnownFormat && nil != [self addPublicationsFromPasteboard:pasteboard selectLibrary:YES verbose:NO error:&error])
             return; // it worked, so we're done here
     }
     
