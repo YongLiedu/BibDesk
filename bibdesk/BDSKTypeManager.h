@@ -46,7 +46,6 @@
 #define OPTIONAL_KEY                          @"optional"
 #define TYPES_FOR_FILE_TYPE_KEY               @"TypesForFileType"
 #define REQUIRED_TYPES_FOR_FILE_TYPE_KEY      @"RequiredTypesForFileType"
-#define FILE_TYPES_KEY                        @"FileTypes"
 #define BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY     @"BibTeXFieldNamesForPubMedTags"
 #define BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY     @"BibTeXTypesForPubMedTypes"
 #define BIBTEX_FIELDS_FOR_RIS_TAGS_KEY        @"BibTeXFieldNamesForRISTags"
@@ -68,7 +67,6 @@
 
 
 @interface BDSKTypeManager : NSObject {
-	NSDictionary *fileTypesDict;
 	NSDictionary *fieldsForTypesDict;
 	NSDictionary *typesForFileTypeDict;
 	NSDictionary *fieldNameForPubMedTagDict;
@@ -126,7 +124,6 @@
 - (void)reloadTypesAndFields;
 
 // BibTeX
-- (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat;
 - (NSArray *)requiredFieldsForType:(NSString *)type;
 - (NSArray *)optionalFieldsForType:(NSString *)type;
 - (NSArray *)userDefaultFieldsForType:(NSString *)type;

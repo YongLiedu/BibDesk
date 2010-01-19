@@ -425,12 +425,6 @@
         url = {optional = (Urldate, Author, Title, Lastchecked); required = (); }; 
         webpage = {optional = (Lastchecked, Year, Month); required = (Url); }; 
     }; 
-    FileTypes = {
-        BibTeX = {DefaultType = Inproceedings; FileExtension = ".bib"; }; 
-        "MARC XML" = {DefaultType = Article; FileExtension = ".marc"; }; 
-        "MODS XML" = {DefaultType = Article; FileExtension = ".mods"; }; 
-        RIS = {DefaultType = Article; FileExtension = ".ris"; }; 
-    }; 
     MODSGenresForBibTeXType = {
         article = {host = (periodical, "academic journal"); }; 
         book = {self = (book); }; 

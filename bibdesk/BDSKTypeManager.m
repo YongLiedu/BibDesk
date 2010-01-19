@@ -81,7 +81,6 @@ static BDSKTypeManager *sharedManager = nil;
         typesForFileTypeDict = [[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] copy];
         defaultFieldsForTypesDict = [[typeInfoDict objectForKey:REQUIRED_TYPES_FOR_FILE_TYPE_KEY] copy];
         defaultTypes = [[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] copy];
-        fileTypesDict = [[typeInfoDict objectForKey:FILE_TYPES_KEY] copy];
         fieldNameForPubMedTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY] copy];
         bibtexTypeForPubMedTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY] copy];
         fieldNameForRISTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_RIS_TAGS_KEY] copy];
@@ -280,13 +279,6 @@ static BDSKTypeManager *sharedManager = nil;
     }
 }
 
-- (void)setFileTypesDict:(NSDictionary *)newTypes{
-    if(fileTypesDict != newTypes){
-        [fileTypesDict release];
-        fileTypesDict = [newTypes copy];
-    }
-}
-
 - (void)setFieldsForTypesDict:(NSDictionary *)newFields{
     if(fieldsForTypesDict != newFields){
         [fieldsForTypesDict release];
@@ -316,10 +308,6 @@ static BDSKTypeManager *sharedManager = nil;
 }
 
 #pragma mark Getters
-
-- (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat{
-     return [[fileTypesDict objectForKey:fileFormat] objectForKey:@"DefaultType"];
-}
 
 - (NSDictionary *)defaultFieldsForTypes{
     return defaultFieldsForTypesDict;
