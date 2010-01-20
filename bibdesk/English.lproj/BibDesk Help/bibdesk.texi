@@ -2531,8 +2531,11 @@ This preference pane lets you control the overall appearance of the main window.
 @prefitem{Name Display} You can change the way names are displayed in the 'Author' column and in
 the lower preview pane of the main browser window (in Details view).
 
-@prefitem{Words to ignore for sorting} In the table, you can add a custom set of words, such as 'the' and 'a', 
+@prefitem{Publication List} In the table, you can add a custom set of words, such as 'the' and 'a', 
 that will be ignored when sorting the table.
+
+@prefitem{Group List} Choose whether you want to display the count bubble in the group list. 
+When you have many smart groups, hiding the count bubbles can improve performance.
 
 @prefitem{Fonts} Choose the interface element for which you want to change the font. 
 Pressing the font button to the right will call the system's font panel, from which you can 
@@ -2577,12 +2580,12 @@ The alternate default format is used when the Option key is held down during the
 @node TeX Preview Preferences
 @c DO NOT LOCALIZE THE NEXT LINE
 @anchor{PreviewPreferences}
-@section Preview
-@abstract{Configuring the Preview Settings}
+@section TeX Preview
+@abstract{Configuring the TeX Preview Settings}
 
 @cindex preview settings
 
-The Preview pane allows you to change the default settings for using 
+The TeX Preview pane allows you to change the default settings for using 
 LaTeX to generate the contents of the typeset preview window, as described in 
 @ref{Previewing Typeset Output}.
 
