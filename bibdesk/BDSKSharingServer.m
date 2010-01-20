@@ -67,7 +67,6 @@ NSString *BDSKSharedArchivedDataKey = @"publications_v1";
 NSString *BDSKSharedArchivedMacroDataKey = @"macros_v1";
 
 NSString *BDSKComputerNameChangedNotification = nil;
-NSString *BDSKHostNameChangedNotification = nil;
 
 NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 
@@ -85,10 +84,6 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         key = (id)CFArrayGetValueAtIndex(changedKeys, cnt);
         [[NSNotificationCenter defaultCenter] postNotificationName:key object:nil];
     }
-    
-    // update the text field in prefs if necessary (or that could listen for computer name changes...)
-    if([NSString isEmptyString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKSharingNameKey]])
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingNameChangedNotification object:nil];
     [pool release];
 }
 
@@ -160,12 +155,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         CFArrayAppendValue(keys, key);
         BDSKComputerNameChangedNotification = (NSString *)key;
         
-        key = SCDynamicStoreKeyCreateHostNames(alloc);
-        CFArrayAppendValue(keys, key);
-        BDSKHostNameChangedNotification = (NSString *)key;
-        
         BDSKASSERT(BDSKComputerNameChangedNotification);
-        BDSKASSERT(BDSKHostNameChangedNotification);
             
         if(SCDynamicStoreSetNotificationKeys(dynamicStore, keys, NULL) == FALSE)
             fprintf(stderr, "unable to register for dynamic store notifications.\n");
@@ -341,6 +331,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
         
         [nc removeObserver:self name:BDSKComputerNameChangedNotification object:nil];
+        [nc removeObserver:self name:BDSKSharingNameChangedNotification object:nil];
         [nc removeObserver:self name:BDSKSharingPasswordChangedNotification object:nil];
         [nc removeObserver:self name:BDSKDocumentControllerAddDocumentNotification object:nil];
         [nc removeObserver:self name:BDSKDocumentControllerRemoveDocumentNotification object:nil];                                                       
@@ -387,6 +378,11 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
             [nc addObserver:self
                    selector:@selector(handleComputerNameChangedNotification:)
                        name:BDSKComputerNameChangedNotification
+                     object:nil];
+            
+            [nc addObserver:self
+                   selector:@selector(handleSharingNameChangedNotification:)
+                       name:BDSKSharingNameChangedNotification
                      object:nil];
             
             [nc addObserver:self

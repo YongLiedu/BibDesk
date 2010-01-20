@@ -45,7 +45,6 @@ extern NSString *BDSKSharedArchivedDataKey;
 extern NSString *BDSKSharedArchivedMacroDataKey;
 
 extern NSString *BDSKComputerNameChangedNotification;
-extern NSString *BDSKHostNameChangedNotification;
 
 extern NSString *BDSKServiceNameForKeychain;
 
@@ -99,6 +98,7 @@ typedef NSInteger BDSKSharingStatus;
 
 - (void)queueDataChangedNotification:(NSNotification *)note;
 - (void)handleComputerNameChangedNotification:(NSNotification *)note;
+- (void)handleSharingNameChangedNotification:(NSNotification *)note;
 - (void)handlePasswordChangedNotification:(NSNotification *)note;
 - (void)handleApplicationWillTerminate:(NSNotification *)note;
 
