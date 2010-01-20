@@ -1558,13 +1558,13 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                 if (group = [[[BDSKSearchGroup alloc] initWithURL:url] autorelease]) {
                     [groups addSearchGroup:(BDSKSearchGroup *)group];
                     lastGroup = group;
-                    undoable == YES;
+                    undoable = YES;
                 }
             } else {
                 if (group = [[[BDSKURLGroup alloc] initWithURL:url] autorelease]) {
                     [groups addURLGroup:(BDSKURLGroup *)group];
                     lastGroup = group;
-                    undoable == YES;
+                    undoable = YES;
                 }
             }
         }
