@@ -316,6 +316,9 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void)disableSharing
 {
+    // cancel possible delayed restart
+    [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(enableSharing) object:nil];
+    
     if(status != BDSKSharingStatusOff){
         [netService setDelegate:nil];
         [netService stop];
