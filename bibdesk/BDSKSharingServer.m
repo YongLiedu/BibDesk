@@ -303,6 +303,9 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void)enableSharing
 {
+    // cancel possible delayed restart
+    [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(enableSharing) object:nil];
+    
     // only restart when there's something to share, the next document that's opened will otherwise call again if necessary
     if(status == BDSKSharingStatusOff && [[NSApp orderedDocuments] count] > 0){
         // we're not yet sharing and we've got something to share
