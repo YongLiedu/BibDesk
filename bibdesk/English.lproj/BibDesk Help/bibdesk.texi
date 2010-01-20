@@ -2468,7 +2468,6 @@ from the @menutitle{BibDesk} menu, or press the key shortcut @cmd{,} (Command
 * Citation Preferences::       Set what you get when copying or dragging citations to other apps.               
 * TeX Preview Preferences::    Change the default settings for using LaTeX in the typeset preview window.       
 * Sharing Preferences::        Set your sharing preferences. 
-* Completion Preferences::     Install and configure the autocompletion system.           
 * Files Preferences::          Set preferences for opening and saving files.             
 * Template Preferences::       Customize templates for Export and Services.             
 * Default Fields Preferences:: Add fields that BibDesk will add to every entry.         
@@ -2643,48 +2642,6 @@ Bibdesk applications on your network.
 
 @prefitem{Require password} Selecting this will require others to authenticate themselves with this 
 sharing password.  The password is stored in your keychain, and is never transmitted in clear text.
-
-@c --------------------------------------------------------------------------------------
-
-@node Completion Preferences
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{CompletionPreferences}
-@section Completion
-@abstract{Autocompletion of citation commands in other applications.}
-
-@cindex autocompletion, preferences
-@cindex completion
-@cindex external autocompletion
-@cindex autocompletion, external
-
-@subheading Warning!
-
-@b{The input manager autocompletion plugin is not installed on Mac OS X 10.5 and greater.  Please
-encourage TeX front end developers to include this functionality.  Details and code are available by
-contacting the @uref{mailto:bibdesk-develop@@lists.sourceforge.net, BibDesk developers}.}
-
-In the Completion pane you can configure the autocompletion system by installing
-citation autocompletion for external applications. 
-
-@image{gfx/autocompletePrefs-External}
-
-@prefindex Completion
-
-External autocompletion allows you to install a plugin which enables
-bibliography-item autocompletion in Mac OS X 10.3 and greater using
-the @buttontitle{Install} button.  
-
-When the plugin has been installed, the button title changes to
-@buttontitle{Reinstall} automatically. Autocompletion will only work in Cocoa
-applications, such as the ones in the picture, and they must be added
-to the list manually using the @buttontitle{Add} button below the list.  
-
-If an application you have added to the list behaves strangely after
-you add it, this is a clue that autocompletion is not compatible;
-Apple's Stickies application is a good example of this.
-
-See section @xref{Autocompletion} for details about how to use this
-feature once it is set up.
 
 @c --------------------------------------------------------------------------------------
 
