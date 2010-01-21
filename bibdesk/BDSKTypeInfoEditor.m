@@ -308,7 +308,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	[fieldsForTypesDict removeAllObjects];
 	[types removeAllObjects];
     NSDictionary *defaultFieldsForTypesDict = [[BDSKTypeManager sharedManager] defaultFieldsForTypes];
-	for (NSString *type in defaultFieldsForTypesDict)
+    NSDictionary *defaultTypes = [[BDSKTypeManager sharedManager] defaultTypes];
+	for (NSString *type in defaultTypes)
 		[self addType:type withFields:[defaultFieldsForTypesDict objectForKey:type]];
 	[types sortUsingSelector:@selector(compare:)];
 	[typeTableView reloadData];
@@ -346,7 +347,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 #pragma mark validation methods
 
 - (BOOL)canEditType:(NSString *)type {
-	return (canEditDefaultTypes || NO == [[BDSKTypeManager sharedManager] isDefaultType:type]);
+	return (canEditDefaultTypes || NO == [[BDSKTypeManager sharedManager] isStandardType:type]);
 }
 
 - (BOOL)canEditField:(NSString *)field{

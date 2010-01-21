@@ -47,7 +47,7 @@
 #define REQUIRED_KEY                          @"required"
 #define OPTIONAL_KEY                          @"optional"
 #define TYPES_FOR_FILE_TYPE_KEY               @"TypesForFileType"
-#define DEFAULT_TYPES_FOR_FILE_TYPE_KEY       @"DefaultTypesForFileType"
+#define STANDARD_TYPES_FOR_FILE_TYPE_KEY      @"StandardTypesForFileType"
 #define BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY     @"BibTeXFieldNamesForPubMedTags"
 #define BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY     @"BibTeXTypesForPubMedTypes"
 #define BIBTEX_FIELDS_FOR_RIS_TAGS_KEY        @"BibTeXFieldNamesForRISTags"
@@ -117,7 +117,8 @@ static BDSKTypeManager *sharedManager = nil;
         fieldsForTypesDict = [[userTypeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] copy];
         types = [[[userTypeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString] copy];
         defaultFieldsForTypesDict = [[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] copy];
-        defaultTypes = [[NSSet alloc] initWithArray:[[typeInfoDict objectForKey:DEFAULT_TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString]];
+        defaultTypes = [[[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString] copy];
+        standardTypes = [[NSSet alloc] initWithArray:[[typeInfoDict objectForKey:STANDARD_TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString]];
         fieldNameForPubMedTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY] copy];
         bibtexTypeForPubMedTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY] copy];
         fieldNameForRISTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_RIS_TAGS_KEY] copy];
@@ -423,8 +424,12 @@ static BDSKTypeManager *sharedManager = nil;
     return defaultFieldsForTypesDict;
 }
 
-- (BOOL)isDefaultType:(NSString *)type{
-    return [defaultTypes containsObject:type];
+- (NSArray *)defaultTypes{
+    return defaultTypes;
+}
+
+- (BOOL)isStandardType:(NSString *)type{
+    return [standardTypes containsObject:type];
 }
 
 - (NSSet *)allFieldNames{

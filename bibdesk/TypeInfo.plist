@@ -468,7 +468,7 @@
         Volume = VL; 
         Year = PY; 
     }; 
-    DefaultTypesForFileType = {
+    StandardTypesForFileType = {
         BibTeX = (
             article, 
             book, 

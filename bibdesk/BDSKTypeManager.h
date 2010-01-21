@@ -62,7 +62,8 @@
     NSDictionary *bibtexTypeForHCiteTypeDict;
 	NSDictionary *MODSGenresForBibTeXTypeDict;
 	NSDictionary *defaultFieldsForTypesDict;
-	NSSet *defaultTypes;
+	NSArray *defaultTypes;
+	NSSet *standardTypes;
 	NSSet *allFieldNames;
 	NSCharacterSet *invalidCiteKeyCharSet;
 	NSCharacterSet *fragileCiteKeyCharSet;
@@ -106,7 +107,8 @@
 - (NSSet *)allFieldNames;
 - (NSArray *)allFieldNamesIncluding:(NSArray *)include excluding:(NSArray *)exclude;
 - (NSDictionary *)defaultFieldsForTypes;
-- (BOOL)isDefaultType:(NSString *)type;
+- (NSArray *)defaultTypes;
+- (BOOL)isStandardType:(NSString *)type;
 
 // PubMed
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag;
