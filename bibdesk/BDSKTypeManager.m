@@ -781,36 +781,44 @@ static BDSKTypeManager *sharedManager = nil;
 
 
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName {
-	if( [fieldName isEqualToString:BDSKCiteKeyString]){
-		return invalidCiteKeyCharSet;
-	}
-	if([localFileFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKLocalFileString]){
-		return invalidLocalUrlCharSet;
-	}
-	if([remoteURLFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKRemoteURLString]){
-		return invalidRemoteUrlCharSet;
-	}
-	return invalidGeneralCharSet;
+    NSCharacterSet *characterSet = nil;
+    [lock lockForReading];
+	if ([fieldName isEqualToString:BDSKCiteKeyString])
+		characterSet = invalidCiteKeyCharSet;
+	else if ([localFileFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKLocalFileString])
+		characterSet = invalidLocalUrlCharSet;
+	else if ([remoteURLFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKRemoteURLString])
+		characterSet = invalidRemoteUrlCharSet;
+	else
+        characterSet = invalidGeneralCharSet;
+    [lock unlock];
+	return characterSet;
 }
 
 - (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName{
-	if( [fieldName isEqualToString:BDSKCiteKeyString]){
-		return strictInvalidCiteKeyCharSet;
-	}
-	if([localFileFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKLocalFileString]){
-		return strictInvalidLocalUrlCharSet;
-	}
-	if([remoteURLFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKRemoteURLString]){
-		return strictInvalidRemoteUrlCharSet;
-	}
-	return strictInvalidGeneralCharSet;
+    NSCharacterSet *characterSet = nil;
+    [lock lockForReading];
+	if ([fieldName isEqualToString:BDSKCiteKeyString])
+		characterSet = strictInvalidCiteKeyCharSet;
+	else if ([localFileFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKLocalFileString])
+		characterSet = strictInvalidLocalUrlCharSet;
+	else if ([remoteURLFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKRemoteURLString])
+		characterSet = strictInvalidRemoteUrlCharSet;
+	else
+        characterSet = strictInvalidGeneralCharSet;
+    [lock unlock];
+	return characterSet;
 }
 
 - (NSCharacterSet *)veryStrictInvalidCharactersForField:(NSString *)fieldName{
-	if([localFileFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKLocalFileString]){
-		return veryStrictInvalidLocalUrlCharSet;
-	}
-	return [self strictInvalidCharactersForField:fieldName];
+    NSCharacterSet *characterSet = nil;
+    [lock lockForReading];
+	if ([localFileFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKLocalFileString])
+		characterSet = veryStrictInvalidLocalUrlCharSet;
+	else
+        characterSet = [self strictInvalidCharactersForField:fieldName];
+    [lock unlock];
+	return characterSet;
 }
 
 - (NSCharacterSet *)invalidFieldNameCharacterSet{
