@@ -42,8 +42,11 @@
 #import "BDSKTypeManager.h"
 #import "NSWindowController_BDSKExtensions.h"
 
-#define BDSKTypeInfoRowsPboardType	@"BDSKTypeInfoRowsPboardType"
-#define BDSKTypeInfoPboardType @"BDSKTypeInfoPboardType"
+#define REQUIRED_KEY @"required"
+#define OPTIONAL_KEY @"optional"
+
+#define BDSKTypeInfoRowsPboardType @"BDSKTypeInfoRowsPboardType"
+#define BDSKTypeInfoPboardType     @"BDSKTypeInfoPboardType"
 
 static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 

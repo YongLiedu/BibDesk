@@ -40,6 +40,33 @@
 #import "BDSKAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSCharacterSet_BDSKExtensions.h"
+#import "BDSKStringConstants.h"
+
+// The filename and keys used in the plist
+#define TYPE_INFO_FILENAME                    @"TypeInfo.plist"
+#define FIELDS_FOR_TYPES_KEY                  @"FieldsForTypes"
+#define REQUIRED_KEY                          @"required"
+#define OPTIONAL_KEY                          @"optional"
+#define TYPES_FOR_FILE_TYPE_KEY               @"TypesForFileType"
+#define DEFAULT_TYPES_FOR_FILE_TYPE_KEY       @"DefaultTypesForFileType"
+#define BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY     @"BibTeXFieldNamesForPubMedTags"
+#define BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY     @"BibTeXTypesForPubMedTypes"
+#define BIBTEX_FIELDS_FOR_RIS_TAGS_KEY        @"BibTeXFieldNamesForRISTags"
+#define RIS_TAGS_FOR_BIBTEX_FIELDS_KEY        @"RISTagsForBibTeXFieldNames"
+#define BIBTEX_TYPES_FOR_RIS_TYPES_KEY        @"BibTeXTypesForRISTypes"
+#define BIBTEX_FIELDS_FOR_MARC_TAGS_KEY       @"BibTeXFieldNamesForMARCTags"
+#define BIBTEX_FIELDS_FOR_UNIMARC_TAGS_KEY    @"BibTeXFieldNamesForUNIMARCTags"
+#define BIBTEX_FIELDS_FOR_JSTOR_TAGS_KEY      @"BibTeXFieldNamesForJSTORTags"
+#define FIELD_DESCRIPTIONS_FOR_JSTOR_TAGS_KEY @"FieldDescriptionsForJSTORTags"
+#define BIBTEX_FIELDS_FOR_WOS_TAGS_KEY        @"BibTeXFieldNamesForWebOfScienceTags"
+#define FIELD_DESCRIPTIONS_FOR_WOS_TAGS_KEY   @"FieldDescriptionsForWebOfScienceTags"
+#define BIBTEX_TYPES_FOR_WOS_TYPES_KEY        @"BibTeXTypesForWebOfScienceTypes"
+#define MODS_GENRES_FOR_BIBTEX_TYPES_KEY      @"MODSGenresForBibTeXType"
+#define BIBTEX_TYPES_FOR_DC_TYPES_KEY         @"BibTeXTypesForDublinCoreTypes"
+#define BIBTEX_FIELDS_FOR_DC_TERMS_KEY        @"BibTeXFieldNamesForDublinCoreTerms"
+#define BIBTEX_FIELDS_FOR_REFER_TAGS_KEY      @"BibTeXFieldNamesForReferTags"
+#define BIBTEX_TYPES_FOR_REFER_TYPES_KEY      @"BibTeXTypesForReferTypes"
+#define BIBTEX_TYPES_FOR_HCITE_TYPES_KEY      @"BibTeXTypesForHCiteTypes"
 
 static char BDSKTypeManagerDefaultsObservationContext;
 
