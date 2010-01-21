@@ -87,9 +87,13 @@ static char BDSKTypeManagerDefaultsObservationContext;
 
 static BDSKTypeManager *sharedManager = nil;
 
++ (void)initialize
+{
+    BDSKINITIALIZE;
+    sharedManager = [[self alloc] init];
+}
+
 + (BDSKTypeManager *)sharedManager{
-    if (sharedManager == nil)
-        sharedManager = [[self alloc] init];
     return sharedManager;
 }
 
