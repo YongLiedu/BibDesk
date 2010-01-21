@@ -40,6 +40,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSCharacterSet_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
+#import "BDSKReadWriteLock.h"
 
 // The filename and keys used in the plist
 #define TYPE_INFO_FILENAME                    @"TypeInfo.plist"
@@ -71,12 +72,23 @@ static char BDSKTypeManagerDefaultsObservationContext;
 
 @interface BDSKTypeManager (BDSKPrivate)
 
-- (void)reloadTypesAndFields;
 - (void)reloadFieldSets;
 
-- (void)setAllFieldNames:(NSSet *)newNames;
 - (void)setFieldsForTypesDict:(NSDictionary *)newFields;
 - (void)setTypes:(NSArray *)newTypes;
+
+- (void)setLocalFileFields:(NSSet *)set;
+- (void)setRemoteURLFields:(NSSet *)set;
+- (void)setAllURLFields:(NSSet *)set;
+- (void)setRatingFields:(NSSet *)set;
+- (void)setTriStateFields:(NSSet *)set;
+- (void)setBooleanFields:(NSSet *)set;
+- (void)setCitationFields:(NSSet *)set;
+- (void)setPersonFields:(NSSet *)set;
+- (void)setSingleValuedGroupFields:(NSSet *)set;
+- (void)setInvalidGroupFields:(NSSet *)set;
+
+- (void)setAllFieldNames:(NSSet *)newNames;
 
 @end
 
@@ -101,8 +113,14 @@ static BDSKTypeManager *sharedManager = nil;
     if (self = [super init]) {
         
         NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
-        fieldsForTypesDict = [[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] copy];
-        types = [[[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString] copy];
+        
+        NSString *userTypeInfoPath = [[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:TYPE_INFO_FILENAME];
+        NSDictionary *userTypeInfoDict = [NSDictionary dictionaryWithContentsOfFile:userTypeInfoPath] ?: typeInfoDict;
+        
+        fieldsForTypesDict = [[userTypeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] copy];
+        types = [[[userTypeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString] copy];
+        defaultFieldsForTypesDict = [[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] copy];
+        defaultTypes = [[NSSet alloc] initWithArray:[[typeInfoDict objectForKey:DEFAULT_TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString]];
         fieldNameForPubMedTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY] copy];
         bibtexTypeForPubMedTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY] copy];
         fieldNameForRISTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_RIS_TAGS_KEY] copy];
@@ -121,21 +139,10 @@ static BDSKTypeManager *sharedManager = nil;
         fieldNameForReferTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_REFER_TAGS_KEY] copy];
         bibtexTypeForReferTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_REFER_TYPES_KEY] copy];
         bibtexTypeForHCiteTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_HCITE_TYPES_KEY] copy];
-        defaultFieldsForTypesDict = [[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] copy];
-        defaultTypes = [[NSSet alloc] initWithArray:[[typeInfoDict objectForKey:DEFAULT_TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString]];
         
-        localFileFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-        remoteURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-        allURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
-        ratingFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-        triStateFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-        booleanFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-        citationFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-        personFieldsSet = [[NSMutableSet alloc] initWithCapacity:2];
-        singleValuedGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
-        invalidGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
+        noteFieldsSet = [[NSSet alloc] initWithObjects:BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil];
+		numericFieldsSet = [[NSSet alloc] initWithObjects:BDSKYearString, BDSKVolumeString, BDSKNumberString, BDSKPagesString, nil];
         
-        [self reloadTypesAndFields];
         [self reloadFieldSets];
         
         NSMutableCharacterSet *tmpSet;
@@ -189,6 +196,8 @@ static BDSKTypeManager *sharedManager = nil;
         
         separatorCharSet = [[NSCharacterSet characterSetWithCharactersInString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKGroupFieldSeparatorCharactersKey]] copy];
         
+        lock = [[BDSKReadWriteLock alloc] init];
+        
         // observe the pref changes for custom fields
         for (NSString *prefKey in [NSSet setWithObjects:BDSKDefaultFieldsKey, BDSKLocalFileFieldsKey, BDSKRemoteURLFieldsKey, BDSKRatingFieldsKey, BDSKBooleanFieldsKey, BDSKTriStateFieldsKey, BDSKCitationFieldsKey, BDSKPersonFieldsKey, nil])
             [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self
@@ -222,56 +231,47 @@ static BDSKTypeManager *sharedManager = nil;
 - (void)reloadFieldSets {
     NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
     
-    [localFileFieldsSet removeAllObjects];
-    [remoteURLFieldsSet removeAllObjects];
-    [allURLFieldsSet removeAllObjects];
-    [ratingFieldsSet removeAllObjects];
-    [triStateFieldsSet removeAllObjects];
-    [booleanFieldsSet removeAllObjects];
-    [citationFieldsSet removeAllObjects];
-    [personFieldsSet removeAllObjects];
-    [invalidGroupFieldsSet removeAllObjects];
-    [singleValuedGroupFieldsSet removeAllObjects];
+    NSSet *localFileFields = [NSSet setWithArray:[sud stringArrayForKey:BDSKLocalFileFieldsKey]];
+    NSSet *remoteURLFields = [NSSet setWithArray:[sud stringArrayForKey:BDSKRemoteURLFieldsKey]];
+    NSSet *ratingFields = [NSSet setWithArray:[sud stringArrayForKey:BDSKRatingFieldsKey]];
+    NSSet *triStateFields = [NSSet setWithArray:[sud stringArrayForKey:BDSKTriStateFieldsKey]];
+    NSSet *booleanFields = [NSSet setWithArray:[sud stringArrayForKey:BDSKBooleanFieldsKey]];
+    NSSet *citationFields = [NSSet setWithArray:[sud stringArrayForKey:BDSKCitationFieldsKey]];
+    NSSet *personFields = [NSSet setWithArray:[sud stringArrayForKey:BDSKPersonFieldsKey]];
     
-    [localFileFieldsSet addObjectsFromArray:[sud stringArrayForKey:BDSKLocalFileFieldsKey]];
-    [remoteURLFieldsSet addObjectsFromArray:[sud stringArrayForKey:BDSKRemoteURLFieldsKey]];
-    [allURLFieldsSet unionSet:remoteURLFieldsSet];
-    [allURLFieldsSet unionSet:localFileFieldsSet];
-    
-    [ratingFieldsSet addObjectsFromArray:[sud stringArrayForKey:BDSKRatingFieldsKey]];
-    [triStateFieldsSet addObjectsFromArray:[sud stringArrayForKey:BDSKTriStateFieldsKey]];
-    [booleanFieldsSet addObjectsFromArray:[sud stringArrayForKey:BDSKBooleanFieldsKey]];    
-    [citationFieldsSet addObjectsFromArray:[sud stringArrayForKey:BDSKCitationFieldsKey]];   
-    [personFieldsSet addObjectsFromArray:[sud stringArrayForKey:BDSKPersonFieldsKey]];
+    NSMutableSet *allURLFields = [NSMutableSet setWithSet:localFileFields];
+    [allURLFields unionSet:remoteURLFields];
     
 	NSMutableSet *invalidFields = [NSMutableSet setWithObjects:
 		BDSKDateModifiedString, BDSKDateAddedString, BDSKDateString, 
 		BDSKTitleString, BDSKContainerString, BDSKChapterString, 
 		BDSKVolumeString, BDSKNumberString, BDSKSeriesString, BDSKPagesString, BDSKItemNumberString, 
 		BDSKAbstractString, BDSKAnnoteString, BDSKRssDescriptionString, nil];
-	[invalidFields unionSet:localFileFieldsSet];
-	[invalidFields unionSet:remoteURLFieldsSet];
-    [invalidGroupFieldsSet unionSet:invalidFields];
+	[invalidFields unionSet:allURLFields];
     
     NSMutableSet *singleValuedFields = [NSMutableSet setWithObjects:BDSKPubTypeString, BDSKTypeString, BDSKCrossrefString, BDSKJournalString, BDSKBooktitleString, BDSKVolumetitleString, BDSKYearString, BDSKMonthString, BDSKPublisherString, BDSKAddressString, nil];
-	[singleValuedFields unionSet:ratingFieldsSet];
-	[singleValuedFields unionSet:booleanFieldsSet];
-	[singleValuedFields unionSet:triStateFieldsSet];  
-    [singleValuedGroupFieldsSet unionSet:singleValuedFields];
+	[singleValuedFields unionSet:ratingFields];
+	[singleValuedFields unionSet:booleanFields];
+	[singleValuedFields unionSet:triStateFields];  
+    
+    [lock lockForWriting];
+    
+    [self setLocalFileFields:localFileFields];
+    [self setRemoteURLFields:remoteURLFields];
+    [self setAllURLFields:allURLFields];
+    
+    [self setRatingFields:ratingFields];
+    [self setTriStateFields:triStateFields];
+    [self setBooleanFields:booleanFields];    
+    [self setCitationFields:citationFields];   
+    [self setPersonFields:personFields];
+    
+    [self setInvalidGroupFields:invalidFields];
+    [self setSingleValuedGroupFields:singleValuedFields];
     
     [self reloadAllFieldNames];
-}
-
-- (void)reloadTypesAndFields{
-    // Load the TypeInfo plist, prefer the user one, otherwise use the default one
-    NSString *userTypeInfoPath = [[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:TYPE_INFO_FILENAME];
-    NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:userTypeInfoPath];
     
-    if (typeInfoDict == nil)
-        typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
-	
-    [self setFieldsForTypesDict:[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY]];
-    [self setTypes:[[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString]];
+    [lock unlock];
 }
 
 - (void)updateUserTypes:(NSArray *)newTypes andFields:(NSDictionary *)newFieldsForTypes {
@@ -294,14 +294,19 @@ static BDSKTypeManager *sharedManager = nil;
         NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
         NSString *typeInfoPath = [applicationSupportPath stringByAppendingPathComponent:TYPE_INFO_FILENAME];
         [data writeToFile:typeInfoPath atomically:YES];
+        
+        [lock lockForWriting];
+        
+        [self setFieldsForTypesDict:newFieldsForTypes];
+        [self setTypes:newTypes];
+        [self reloadAllFieldNames];
+        
+        [lock unlock];
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibTypeInfoChangedNotification
+                                                            object:self
+                                                          userInfo:[NSDictionary dictionary]];
     }
-    
-    [self reloadTypesAndFields];
-	[self reloadAllFieldNames];
-	
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibTypeInfoChangedNotification
-														object:self
-													  userInfo:[NSDictionary dictionary]];
 }
 
 #pragma mark KVO
@@ -320,22 +325,92 @@ static BDSKTypeManager *sharedManager = nil;
 
 #pragma mark Setters
 
+- (void)setLocalFileFields:(NSSet *)set {
+    if (localFileFieldsSet != set) {
+        [localFileFieldsSet release];
+        localFileFieldsSet = [set copy];
+    }
+}
+
+- (void)setRemoteURLFields:(NSSet *)set {
+    if (remoteURLFieldsSet != set) {
+        [remoteURLFieldsSet release];
+        remoteURLFieldsSet = [set copy];
+    }
+}
+
+- (void)setAllURLFields:(NSSet *)set {
+    if (allURLFieldsSet != set) {
+        [allURLFieldsSet release];
+        allURLFieldsSet = [set copy];
+    }
+}
+
+- (void)setRatingFields:(NSSet *)set {
+    if (ratingFieldsSet != set) {
+        [ratingFieldsSet release];
+        ratingFieldsSet = [set copy];
+    }
+}
+
+- (void)setTriStateFields:(NSSet *)set {
+    if (triStateFieldsSet != set) {
+        [triStateFieldsSet release];
+        triStateFieldsSet = [set copy];
+    }
+}
+
+- (void)setBooleanFields:(NSSet *)set {
+    if (booleanFieldsSet != set) {
+        [booleanFieldsSet release];
+        booleanFieldsSet = [set copy];
+    }
+}
+
+- (void)setCitationFields:(NSSet *)set {
+    if (citationFieldsSet != set) {
+        [citationFieldsSet release];
+        citationFieldsSet = [set copy];
+    }
+}
+
+- (void)setPersonFields:(NSSet *)set {
+    if (personFieldsSet != set) {
+        [personFieldsSet release];
+        personFieldsSet = [set copy];
+    }
+}
+
+- (void)setSingleValuedGroupFields:(NSSet *)set {
+    if (singleValuedGroupFieldsSet != set) {
+        [singleValuedGroupFieldsSet release];
+        singleValuedGroupFieldsSet = [set copy];
+    }
+}
+
+- (void)setInvalidGroupFields:(NSSet *)set {
+    if (invalidGroupFieldsSet != set) {
+        [invalidGroupFieldsSet release];
+        invalidGroupFieldsSet = [set copy];
+    }
+}
+
 - (void)setAllFieldNames:(NSSet *)newNames{
-    if(allFieldNames != newNames){
+    if (allFieldNames != newNames) {
         [allFieldNames release];
         allFieldNames = [newNames copy];
     }
 }
 
 - (void)setFieldsForTypesDict:(NSDictionary *)newFields{
-    if(fieldsForTypesDict != newFields){
+    if (fieldsForTypesDict != newFields) {
         [fieldsForTypesDict release];
         fieldsForTypesDict = [newFields copy];
     }
 }
 
 - (void)setTypes:(NSArray *)newTypes{
-    if(types != newTypes){
+    if (types != newTypes) {
         [types release];
         types = [newTypes copy];
     }
@@ -366,11 +441,14 @@ static BDSKTypeManager *sharedManager = nil;
 }
 
 - (NSSet *)allFieldNames{
-    return allFieldNames;
+    [lock lockForReading];
+    NSSet *set = [[allFieldNames retain] autorelease];
+    [lock unlock];
+    return set;
 }
 
 - (NSArray *)allFieldNamesIncluding:(NSArray *)include excluding:(NSArray *)exclude{
-    NSMutableArray *fieldNames = [[allFieldNames allObjects] mutableCopy];
+    NSMutableArray *fieldNames = [[[self allFieldNames] allObjects] mutableCopy];
     if ([include count])
         [fieldNames addObjectsFromArray:include];
     if([exclude count])
@@ -380,21 +458,17 @@ static BDSKTypeManager *sharedManager = nil;
 }
 
 - (NSArray *)requiredFieldsForType:(NSString *)type{
-    NSDictionary *fieldsForType = [fieldsForTypesDict objectForKey:type];
-	if(fieldsForType){
-        return [fieldsForType objectForKey:REQUIRED_KEY];
-    }else{
-        return [NSArray array];
-    }
+    [lock lockForReading];
+    NSDictionary *fieldsForType = [[[fieldsForTypesDict objectForKey:type] retain] autorelease];
+    [lock unlock];
+	return [fieldsForType objectForKey:REQUIRED_KEY] ?: [NSArray array];
 }
 
 - (NSArray *)optionalFieldsForType:(NSString *)type{
-    NSDictionary *fieldsForType = [fieldsForTypesDict objectForKey:type];
-	if(fieldsForType){
-        return [fieldsForType objectForKey:OPTIONAL_KEY];
-    }else{
-        return [NSArray array];
-    }
+    [lock lockForReading];
+    NSDictionary *fieldsForType = [[[fieldsForTypesDict objectForKey:type] retain] autorelease];
+    [lock unlock];
+	return [fieldsForType objectForKey:OPTIONAL_KEY] ?: [NSArray array];
 }
 
 - (NSArray *)userDefaultFieldsForType:(NSString *)type{
@@ -402,15 +476,24 @@ static BDSKTypeManager *sharedManager = nil;
 }
 
 - (NSSet *)invalidGroupFieldsSet{
-	return invalidGroupFieldsSet;
+    [lock lockForReading];
+    NSSet *set = [[invalidGroupFieldsSet retain] autorelease];
+    [lock unlock];
+    return set;
 }
 
 - (NSSet *)singleValuedGroupFieldsSet{ 
-	return singleValuedGroupFieldsSet;
+    [lock lockForReading];
+    NSSet *set = [[singleValuedGroupFieldsSet retain] autorelease];
+    [lock unlock];
+    return set;
 }
 
 - (NSArray *)bibTypes{
-    return types;
+    [lock lockForReading];
+    NSArray *array = [[types retain] autorelease];
+    [lock unlock];
+    return array;
 }
 
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag{
@@ -540,49 +623,73 @@ static BDSKTypeManager *sharedManager = nil;
 
 
 - (NSSet *)booleanFieldsSet{
-    return booleanFieldsSet;
+    [lock lockForReading];
+    NSSet *set = [[booleanFieldsSet retain] autorelease];
+    [lock unlock];
+    return set;
 }
 
 - (NSSet *)triStateFieldsSet{
-    return triStateFieldsSet;
+    [lock lockForReading];
+    NSSet *set = [[triStateFieldsSet retain] autorelease];
+    [lock unlock];
+    return set;
 }
 
 - (NSSet *)ratingFieldsSet{
-    return ratingFieldsSet;
+    [lock lockForReading];
+    NSSet *set = [[ratingFieldsSet retain] autorelease];
+    [lock unlock];
+    return set;
 }
 
 - (NSSet *)allURLFieldsSet{
-    return allURLFieldsSet;
+    [lock lockForReading];
+    NSSet *set = [[allURLFieldsSet retain] autorelease];
+    [lock unlock];
+    return set;
 }
 
 - (NSSet *)localFileFieldsSet{
-    return localFileFieldsSet;
+    [lock lockForReading];
+    NSSet *set = [[localFileFieldsSet retain] autorelease];
+    [lock unlock];
+    return set;
 }
 
 - (NSSet *)remoteURLFieldsSet{
-    return remoteURLFieldsSet;
+    [lock lockForReading];
+    NSSet *set = [[remoteURLFieldsSet retain] autorelease];
+    [lock unlock];
+    return set;
 }
 
 - (NSSet *)citationFieldsSet{
-    return citationFieldsSet;
+    [lock lockForReading];
+    NSSet *set = [[citationFieldsSet retain] autorelease];
+    [lock unlock];
+    return set;
 }
 
 - (NSSet *)noteFieldsSet{
-    static NSSet *noteFieldsSet = nil;
-    if(nil == noteFieldsSet)
-        noteFieldsSet = [[NSSet alloc] initWithObjects:BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil];
-    return noteFieldsSet;
+    [lock lockForReading];
+    NSSet *set = [[noteFieldsSet retain] autorelease];
+    [lock unlock];
+    return set;
 }
 
 - (NSSet *)personFieldsSet{
-    return personFieldsSet;
+    [lock lockForReading];
+    NSSet *set = [[personFieldsSet retain] autorelease];
+    [lock unlock];
+    return set;
 }
 
 - (NSSet *)numericFieldsSet{
-    static NSSet *numericFields = nil;
-	if (numericFields == nil)
-		numericFields = [[NSSet alloc] initWithObjects:BDSKYearString, BDSKVolumeString, BDSKNumberString, BDSKPagesString, nil];
-    return numericFields;
+    [lock lockForReading];
+    NSSet *set = [[numericFieldsSet retain] autorelease];
+    [lock unlock];
+    return set;
 }
 
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName {

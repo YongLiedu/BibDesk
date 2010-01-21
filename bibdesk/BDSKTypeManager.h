@@ -38,6 +38,7 @@
 
 #import <Foundation/Foundation.h>
 
+@class BDSKReadWriteLock;
 
 @interface BDSKTypeManager : NSObject {
 	NSDictionary *fieldsForTypesDict;
@@ -76,19 +77,23 @@
 	NSCharacterSet *strictInvalidGeneralCharSet;
 	NSCharacterSet *separatorCharSet;
     
-    NSMutableSet *localFileFieldsSet;
-    NSMutableSet *remoteURLFieldsSet;
-    NSMutableSet *allURLFieldsSet;
-    NSMutableSet *ratingFieldsSet;
-    NSMutableSet *triStateFieldsSet;
-    NSMutableSet *booleanFieldsSet;
-    NSMutableSet *citationFieldsSet;
-    NSMutableSet *personFieldsSet;
-    NSMutableSet *singleValuedGroupFieldsSet;
-    NSMutableSet *invalidGroupFieldsSet;
+    NSSet *localFileFieldsSet;
+    NSSet *remoteURLFieldsSet;
+    NSSet *allURLFieldsSet;
+    NSSet *ratingFieldsSet;
+    NSSet *triStateFieldsSet;
+    NSSet *booleanFieldsSet;
+    NSSet *citationFieldsSet;
+    NSSet *personFieldsSet;
+    NSSet *noteFieldsSet;
+    NSSet *numericFieldsSet;
+    NSSet *singleValuedGroupFieldsSet;
+    NSSet *invalidGroupFieldsSet;
     
     NSArray *requiredFieldsForCiteKey;
     NSArray *requiredFieldsForLocalFile;
+    
+    BDSKReadWriteLock *lock;
 }
 
 + (BDSKTypeManager *)sharedManager;
