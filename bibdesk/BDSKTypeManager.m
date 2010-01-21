@@ -40,7 +40,6 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSCharacterSet_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
-#import "BDSKReadWriteLock.h"
 
 // The filename and keys used in the plist
 #define TYPE_INFO_FILENAME                    @"TypeInfo.plist"
@@ -98,13 +97,11 @@ static char BDSKTypeManagerDefaultsObservationContext;
 
 static BDSKTypeManager *sharedManager = nil;
 
-+ (void)initialize
-{
-    BDSKINITIALIZE;
-    sharedManager = [[self alloc] init];
-}
-
 + (BDSKTypeManager *)sharedManager{
+    // this class is not thread safe
+    BDSKASSERT([NSThread isMainThread]);
+    if (sharedManager == nil)
+        sharedManager = [[self alloc] init];
     return sharedManager;
 }
 
@@ -196,8 +193,6 @@ static BDSKTypeManager *sharedManager = nil;
         
         separatorCharSet = [[NSCharacterSet characterSetWithCharactersInString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKGroupFieldSeparatorCharactersKey]] copy];
         
-        lock = [[BDSKReadWriteLock alloc] init];
-        
         // observe the pref changes for custom fields
         for (NSString *prefKey in [NSSet setWithObjects:BDSKDefaultFieldsKey, BDSKLocalFileFieldsKey, BDSKRemoteURLFieldsKey, BDSKRatingFieldsKey, BDSKBooleanFieldsKey, BDSKTriStateFieldsKey, BDSKCitationFieldsKey, BDSKPersonFieldsKey, nil])
             [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self
@@ -254,8 +249,6 @@ static BDSKTypeManager *sharedManager = nil;
 	[singleValuedFields unionSet:booleanFields];
 	[singleValuedFields unionSet:triStateFields];  
     
-    [lock lockForWriting];
-    
     [self setLocalFileFields:localFileFields];
     [self setRemoteURLFields:remoteURLFields];
     [self setAllURLFields:allURLFields];
@@ -270,8 +263,6 @@ static BDSKTypeManager *sharedManager = nil;
     [self setSingleValuedGroupFields:singleValuedFields];
     
     [self reloadAllFieldNames];
-    
-    [lock unlock];
 }
 
 - (void)updateUserTypes:(NSArray *)newTypes andFields:(NSDictionary *)newFieldsForTypes {
@@ -295,13 +286,9 @@ static BDSKTypeManager *sharedManager = nil;
         NSString *typeInfoPath = [applicationSupportPath stringByAppendingPathComponent:TYPE_INFO_FILENAME];
         [data writeToFile:typeInfoPath atomically:YES];
         
-        [lock lockForWriting];
-        
         [self setFieldsForTypesDict:newFieldsForTypes];
         [self setTypes:newTypes];
         [self reloadAllFieldNames];
-        
-        [lock unlock];
         
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibTypeInfoChangedNotification
                                                             object:self
@@ -441,10 +428,7 @@ static BDSKTypeManager *sharedManager = nil;
 }
 
 - (NSSet *)allFieldNames{
-    [lock lockForReading];
-    NSSet *set = [[allFieldNames retain] autorelease];
-    [lock unlock];
-    return set;
+    return allFieldNames;
 }
 
 - (NSArray *)allFieldNamesIncluding:(NSArray *)include excluding:(NSArray *)exclude{
@@ -458,17 +442,11 @@ static BDSKTypeManager *sharedManager = nil;
 }
 
 - (NSArray *)requiredFieldsForType:(NSString *)type{
-    [lock lockForReading];
-    NSDictionary *fieldsForType = [[[fieldsForTypesDict objectForKey:type] retain] autorelease];
-    [lock unlock];
-	return [fieldsForType objectForKey:REQUIRED_KEY] ?: [NSArray array];
+	return [[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY] ?: [NSArray array];
 }
 
 - (NSArray *)optionalFieldsForType:(NSString *)type{
-    [lock lockForReading];
-    NSDictionary *fieldsForType = [[[fieldsForTypesDict objectForKey:type] retain] autorelease];
-    [lock unlock];
-	return [fieldsForType objectForKey:OPTIONAL_KEY] ?: [NSArray array];
+	return [[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY] ?: [NSArray array];
 }
 
 - (NSArray *)userDefaultFieldsForType:(NSString *)type{
@@ -476,24 +454,15 @@ static BDSKTypeManager *sharedManager = nil;
 }
 
 - (NSSet *)invalidGroupFieldsSet{
-    [lock lockForReading];
-    NSSet *set = [[invalidGroupFieldsSet retain] autorelease];
-    [lock unlock];
-    return set;
+    return invalidGroupFieldsSet;
 }
 
 - (NSSet *)singleValuedGroupFieldsSet{ 
-    [lock lockForReading];
-    NSSet *set = [[singleValuedGroupFieldsSet retain] autorelease];
-    [lock unlock];
-    return set;
+    return singleValuedGroupFieldsSet;
 }
 
 - (NSArray *)bibTypes{
-    [lock lockForReading];
-    NSArray *array = [[types retain] autorelease];
-    [lock unlock];
-    return array;
+    return types;
 }
 
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag{
@@ -623,59 +592,35 @@ static BDSKTypeManager *sharedManager = nil;
 
 
 - (NSSet *)booleanFieldsSet{
-    [lock lockForReading];
-    NSSet *set = [[booleanFieldsSet retain] autorelease];
-    [lock unlock];
-    return set;
+    return booleanFieldsSet;
 }
 
 - (NSSet *)triStateFieldsSet{
-    [lock lockForReading];
-    NSSet *set = [[triStateFieldsSet retain] autorelease];
-    [lock unlock];
-    return set;
+    return triStateFieldsSet;
 }
 
 - (NSSet *)ratingFieldsSet{
-    [lock lockForReading];
-    NSSet *set = [[ratingFieldsSet retain] autorelease];
-    [lock unlock];
-    return set;
+    return ratingFieldsSet;
 }
 
 - (NSSet *)allURLFieldsSet{
-    [lock lockForReading];
-    NSSet *set = [[allURLFieldsSet retain] autorelease];
-    [lock unlock];
-    return set;
+    return allURLFieldsSet;
 }
 
 - (NSSet *)localFileFieldsSet{
-    [lock lockForReading];
-    NSSet *set = [[localFileFieldsSet retain] autorelease];
-    [lock unlock];
-    return set;
+    return localFileFieldsSet;
 }
 
 - (NSSet *)remoteURLFieldsSet{
-    [lock lockForReading];
-    NSSet *set = [[remoteURLFieldsSet retain] autorelease];
-    [lock unlock];
-    return set;
+    return remoteURLFieldsSet;
 }
 
 - (NSSet *)citationFieldsSet{
-    [lock lockForReading];
-    NSSet *set = [[citationFieldsSet retain] autorelease];
-    [lock unlock];
-    return set;
+    return citationFieldsSet;
 }
 
 - (NSSet *)personFieldsSet{
-    [lock lockForReading];
-    NSSet *set = [[personFieldsSet retain] autorelease];
-    [lock unlock];
-    return set;
+    return personFieldsSet;
 }
 
 - (NSSet *)noteFieldsSet{
@@ -686,103 +631,8 @@ static BDSKTypeManager *sharedManager = nil;
     return numericFieldsSet;
 }
 
-
-- (BOOL)isBooleanField:(NSString *)field {
-    [lock lockForReading];
-    BOOL rv = [booleanFieldsSet containsObject:field];
-    [lock unlock];
-    return rv;
-}
-
-- (BOOL)isTriStateField:(NSString *)field {
-    [lock lockForReading];
-    BOOL rv = [triStateFieldsSet containsObject:field];
-    [lock unlock];
-    return rv;
-}
-
-- (BOOL)isRatingField:(NSString *)field {
-    [lock lockForReading];
-    BOOL rv = [ratingFieldsSet containsObject:field];
-    [lock unlock];
-    return rv;
-}
-
-- (BOOL)isIntegerField:(NSString *)field {
-    [lock lockForReading];
-    BOOL rv = [booleanFieldsSet containsObject:field] || [triStateFieldsSet containsObject:field] || [ratingFieldsSet containsObject:field];
-    [lock unlock];
-    return rv;
-}
-
-- (BOOL)isLocalFileField:(NSString *)field {
-    [lock lockForReading];
-    BOOL rv = [localFileFieldsSet containsObject:field];
-    [lock unlock];
-    return rv;
-}
-
-- (BOOL)isRemoteURLField:(NSString *)field {
-    [lock lockForReading];
-    BOOL rv = [remoteURLFieldsSet containsObject:field];
-    [lock unlock];
-    return rv;
-}
-
-- (BOOL)isCitationField:(NSString *)field {
-    [lock lockForReading];
-    BOOL rv = [citationFieldsSet containsObject:field];
-    [lock unlock];
-    return rv;
-}
-
-- (BOOL)isPersonField:(NSString *)field {
-    [lock lockForReading];
-    BOOL rv = [personFieldsSet containsObject:field];
-    [lock unlock];
-    return rv;
-}
-
-- (BOOL)isURLField:(NSString *)field {
-    [lock lockForReading];
-    BOOL rv = [allURLFieldsSet containsObject:field];
-    [lock unlock];
-    return rv;
-}
-
-- (BOOL)isNoteField:(NSString *)field {
-    return [noteFieldsSet containsObject:field];
-}
-
-- (BOOL)isNumericField:(NSString *)field {
-    return [numericFieldsSet containsObject:field];
-}
-
-- (BOOL)isSingleValuedGroupField:(NSString *)field {
-    [lock lockForReading];
-    BOOL rv = [singleValuedGroupFieldsSet containsObject:field];
-    [lock unlock];
-    return rv;
-}
-
-- (BOOL)isSingleValuedField:(NSString *)field {
-    [lock lockForReading];
-    BOOL rv = [singleValuedGroupFieldsSet containsObject:field] || [invalidGroupFieldsSet containsObject:field];
-    [lock unlock];
-    return rv;
-}
-
-- (BOOL)isInvalidGroupField:(NSString *)field {
-    [lock lockForReading];
-    BOOL rv = [invalidGroupFieldsSet containsObject:field];
-    [lock unlock];
-    return rv;
-}
-
-
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName {
     NSCharacterSet *characterSet = nil;
-    [lock lockForReading];
 	if ([fieldName isEqualToString:BDSKCiteKeyString])
 		characterSet = invalidCiteKeyCharSet;
 	else if ([localFileFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKLocalFileString])
@@ -791,13 +641,11 @@ static BDSKTypeManager *sharedManager = nil;
 		characterSet = invalidRemoteUrlCharSet;
 	else
         characterSet = invalidGeneralCharSet;
-    [lock unlock];
 	return characterSet;
 }
 
 - (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName{
     NSCharacterSet *characterSet = nil;
-    [lock lockForReading];
 	if ([fieldName isEqualToString:BDSKCiteKeyString])
 		characterSet = strictInvalidCiteKeyCharSet;
 	else if ([localFileFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKLocalFileString])
@@ -806,18 +654,15 @@ static BDSKTypeManager *sharedManager = nil;
 		characterSet = strictInvalidRemoteUrlCharSet;
 	else
         characterSet = strictInvalidGeneralCharSet;
-    [lock unlock];
 	return characterSet;
 }
 
 - (NSCharacterSet *)veryStrictInvalidCharactersForField:(NSString *)fieldName{
     NSCharacterSet *characterSet = nil;
-    [lock lockForReading];
 	if ([localFileFieldsSet containsObject:fieldName] || [fieldName isEqualToString:BDSKLocalFileString])
 		characterSet = veryStrictInvalidLocalUrlCharSet;
 	else
         characterSet = [self strictInvalidCharactersForField:fieldName];
-    [lock unlock];
 	return characterSet;
 }
 
@@ -847,19 +692,19 @@ static BDSKTypeManager *sharedManager = nil;
 
 @implementation NSString (BDSKTypeExtensions)
 
-- (BOOL)isBooleanField { return [[BDSKTypeManager sharedManager] isBooleanField:self]; }
-- (BOOL)isTriStateField { return [[BDSKTypeManager sharedManager] isTriStateField:self]; }
-- (BOOL)isRatingField { return [[BDSKTypeManager sharedManager] isRatingField:self]; }
-- (BOOL)isIntegerField { return [[BDSKTypeManager sharedManager] isIntegerField:self]; }
-- (BOOL)isLocalFileField { return [[BDSKTypeManager sharedManager] isLocalFileField:self]; }
-- (BOOL)isRemoteURLField { return [[BDSKTypeManager sharedManager] isRemoteURLField:self]; }
-- (BOOL)isCitationField { return [[BDSKTypeManager sharedManager] isCitationField:self]; }
-- (BOOL)isPersonField { return [[BDSKTypeManager sharedManager] isPersonField:self]; }
-- (BOOL)isURLField { return [[BDSKTypeManager sharedManager] isURLField:self]; }
-- (BOOL)isNoteField { return [[BDSKTypeManager sharedManager] isNoteField:self]; }
-- (BOOL)isNumericField { return [[BDSKTypeManager sharedManager] isNumericField:self]; }
-- (BOOL)isSingleValuedGroupField { return [[BDSKTypeManager sharedManager] isSingleValuedGroupField:self]; }
-- (BOOL)isSingleValuedField { return [[BDSKTypeManager sharedManager] isSingleValuedField:self]; }
-- (BOOL)isInvalidGroupField { return [[BDSKTypeManager sharedManager] isInvalidGroupField:self]; }
+- (BOOL)isBooleanField { return [[[BDSKTypeManager sharedManager] booleanFieldsSet] containsObject:self]; }
+- (BOOL)isTriStateField { return [[[BDSKTypeManager sharedManager] triStateFieldsSet] containsObject:self]; }
+- (BOOL)isRatingField { return [[[BDSKTypeManager sharedManager] ratingFieldsSet] containsObject:self]; }
+- (BOOL)isIntegerField { return [self isBooleanField] || [self isTriStateField] || [self isRatingField]; }
+- (BOOL)isLocalFileField { return [[[BDSKTypeManager sharedManager] localFileFieldsSet] containsObject:self]; }
+- (BOOL)isRemoteURLField { return [[[BDSKTypeManager sharedManager] remoteURLFieldsSet] containsObject:self]; }
+- (BOOL)isCitationField { return [[[BDSKTypeManager sharedManager] citationFieldsSet] containsObject:self]; }
+- (BOOL)isPersonField { return [[[BDSKTypeManager sharedManager] personFieldsSet] containsObject:self]; }
+- (BOOL)isURLField { return [[[BDSKTypeManager sharedManager] allURLFieldsSet] containsObject:self]; }
+- (BOOL)isNoteField { return [[[BDSKTypeManager sharedManager] noteFieldsSet] containsObject:self]; }
+- (BOOL)isNumericField { return [[[BDSKTypeManager sharedManager] numericFieldsSet] containsObject:self]; }
+- (BOOL)isSingleValuedGroupField { return [[[BDSKTypeManager sharedManager] singleValuedGroupFieldsSet] containsObject:self]; }
+- (BOOL)isSingleValuedField { return [self isSingleValuedGroupField] || [self isInvalidGroupField]; }
+- (BOOL)isInvalidGroupField { return [[[BDSKTypeManager sharedManager] invalidGroupFieldsSet] containsObject:self]; }
 
 @end
