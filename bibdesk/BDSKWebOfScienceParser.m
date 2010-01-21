@@ -216,7 +216,7 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
                         type = BDSKArticleString;
                     } else {
                         type = [pubDict objectForKey:@"Document-Type"];
-                        if (type) type = [typeManager bibtexTypeForWebOfScienceType:type];
+                        if (type) type = [typeManager bibTeXTypeForWebOfScienceType:type];
                         // typeManager may return nil
                         if (nil == type) type = BDSKMiscString;
                     }

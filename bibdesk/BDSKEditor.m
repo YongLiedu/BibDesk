@@ -3416,7 +3416,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)setupTypePopUp{
     [bibTypeButton removeAllItems];
-    [bibTypeButton addItemsWithTitles:[[BDSKTypeManager sharedManager] bibTypes]];
+    [bibTypeButton addItemsWithTitles:[[BDSKTypeManager sharedManager] types]];
     if ([bibTypeButton itemWithTitle:[publication pubType]] == nil)
         [bibTypeButton addItemWithTitle:[publication pubType]];
     [bibTypeButton selectItemWithTitle:[publication pubType]];

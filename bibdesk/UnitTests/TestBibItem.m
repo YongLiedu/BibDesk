@@ -167,7 +167,7 @@
     NSString *firstType = [item1 pubType];
     NSString *beforeString = [item1 bibTeXString];
 	 
-    for (NSString *aType in [[BDSKTypeManager sharedManager] bibTypes])
+    for (NSString *aType in [[BDSKTypeManager sharedManager] types])
         [item1 setPubType:aType];
     [item1 setPubType:firstType];
     STAssertEqualObjects(beforeString, [item1 bibTeXString],nil);

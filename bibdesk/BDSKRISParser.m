@@ -214,8 +214,8 @@
 {
     BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
     NSString *type = BDSKArticleString;
-    if([typeManager bibtexTypeForRISType:[pubDict objectForKey:@"Ty"]] != nil)
-        type = [typeManager bibtexTypeForRISType:[pubDict objectForKey:@"Ty"]];
+    if([typeManager bibTeXTypeForRISType:[pubDict objectForKey:@"Ty"]] != nil)
+        type = [typeManager bibTeXTypeForRISType:[pubDict objectForKey:@"Ty"]];
     return type;
 }
 

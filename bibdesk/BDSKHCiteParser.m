@@ -129,7 +129,7 @@
     }
     
     if(typeString != nil){
-        [rd setObject:[typeMan bibtexTypeForHCiteType:typeString]
+        [rd setObject:[typeMan bibTeXTypeForHCiteType:typeString]
                forKey:@"Type"];
     }else{
         [rd setObject:@"misc" forKey:@"Type"];

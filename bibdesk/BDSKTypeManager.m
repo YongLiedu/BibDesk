@@ -120,10 +120,10 @@ static BDSKTypeManager *sharedManager = nil;
         defaultTypes = [[[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString] copy];
         standardTypes = [[NSSet alloc] initWithArray:[[typeInfoDict objectForKey:STANDARD_TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString]];
         fieldNameForPubMedTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY] copy];
-        bibtexTypeForPubMedTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY] copy];
+        bibTeXTypeForPubMedTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY] copy];
         fieldNameForRISTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_RIS_TAGS_KEY] copy];
         RISTagForFieldNameDict = [[typeInfoDict objectForKey:RIS_TAGS_FOR_BIBTEX_FIELDS_KEY] copy];
-        bibtexTypeForRISTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_RIS_TYPES_KEY] copy];
+        bibTeXTypeForRISTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_RIS_TYPES_KEY] copy];
         fieldNamesForMARCTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_MARC_TAGS_KEY] copy];
         fieldNamesForUNIMARCTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_UNIMARC_TAGS_KEY] copy];
         MODSGenresForBibTeXTypeDict = [[typeInfoDict objectForKey:MODS_GENRES_FOR_BIBTEX_TYPES_KEY] copy];
@@ -131,12 +131,12 @@ static BDSKTypeManager *sharedManager = nil;
         fieldDescriptionForJSTORTagDict = [[typeInfoDict objectForKey:FIELD_DESCRIPTIONS_FOR_JSTOR_TAGS_KEY] copy];
         fieldNameForWebOfScienceTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_WOS_TAGS_KEY] copy];
         fieldDescriptionForWebOfScienceTagDict = [[typeInfoDict objectForKey:FIELD_DESCRIPTIONS_FOR_WOS_TAGS_KEY] copy];
-        bibtexTypeForWebOfScienceTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_WOS_TYPES_KEY] copy];
-        bibtexTypeForDublinCoreTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_DC_TYPES_KEY] copy];        
+        bibTeXTypeForWebOfScienceTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_WOS_TYPES_KEY] copy];
+        bibTeXTypeForDublinCoreTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_DC_TYPES_KEY] copy];        
         fieldNameForDublinCoreTermDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_DC_TERMS_KEY] copy];
         fieldNameForReferTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_REFER_TAGS_KEY] copy];
-        bibtexTypeForReferTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_REFER_TYPES_KEY] copy];
-        bibtexTypeForHCiteTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_HCITE_TYPES_KEY] copy];
+        bibTeXTypeForReferTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_REFER_TYPES_KEY] copy];
+        bibTeXTypeForHCiteTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_HCITE_TYPES_KEY] copy];
         
         noteFieldsSet = [[NSSet alloc] initWithObjects:BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil];
 		numericFieldsSet = [[NSSet alloc] initWithObjects:BDSKYearString, BDSKVolumeString, BDSKNumberString, BDSKPagesString, nil];
@@ -207,7 +207,7 @@ static BDSKTypeManager *sharedManager = nil;
 - (void)reloadAllFieldNames {
     NSMutableSet *allFields = [NSMutableSet setWithCapacity:30];
     
-    for (NSString *type in [self bibTypes]) {
+    for (NSString *type in [self types]) {
         [allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY]];
         [allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY]];
     }
@@ -384,9 +384,9 @@ static BDSKTypeManager *sharedManager = nil;
 }
 
 - (void)setAllFieldNames:(NSSet *)newNames{
-    if (allFieldNames != newNames) {
-        [allFieldNames release];
-        allFieldNames = [newNames copy];
+    if (allFieldsSet != newNames) {
+        [allFieldsSet release];
+        allFieldsSet = [newNames copy];
     }
 }
 
@@ -432,12 +432,12 @@ static BDSKTypeManager *sharedManager = nil;
     return [standardTypes containsObject:type];
 }
 
-- (NSSet *)allFieldNames{
-    return allFieldNames;
+- (NSSet *)allFieldsSet{
+    return allFieldsSet;
 }
 
 - (NSArray *)allFieldNamesIncluding:(NSArray *)include excluding:(NSArray *)exclude{
-    NSMutableArray *fieldNames = [[[self allFieldNames] allObjects] mutableCopy];
+    NSMutableArray *fieldNames = [[[self allFieldsSet] allObjects] mutableCopy];
     if ([include count])
         [fieldNames addObjectsFromArray:include];
     if([exclude count])
@@ -466,7 +466,7 @@ static BDSKTypeManager *sharedManager = nil;
     return singleValuedGroupFieldsSet;
 }
 
-- (NSArray *)bibTypes{
+- (NSArray *)types{
     return types;
 }
 
@@ -474,16 +474,16 @@ static BDSKTypeManager *sharedManager = nil;
     return [fieldNameForPubMedTagDict objectForKey:tag];
 }
 
-- (NSString *)bibtexTypeForPubMedType:(NSString *)type{
-    return [bibtexTypeForPubMedTypeDict objectForKey:type];
+- (NSString *)bibTeXTypeForPubMedType:(NSString *)type{
+    return [bibTeXTypeForPubMedTypeDict objectForKey:type];
 }
 
 - (NSString *)fieldNameForRISTag:(NSString *)tag{
     return [fieldNameForRISTagDict objectForKey:tag];
 }
 
-- (NSString *)bibtexTypeForRISType:(NSString *)type{
-    return [bibtexTypeForRISTypeDict objectForKey:type];
+- (NSString *)bibTeXTypeForRISType:(NSString *)type{
+    return [bibTeXTypeForRISTypeDict objectForKey:type];
 }
 
 - (NSDictionary *)fieldNamesForMARCTag:(NSString *)tag{
@@ -498,8 +498,8 @@ static BDSKTypeManager *sharedManager = nil;
     return [fieldNameForDublinCoreTermDict objectForKey:term];
 }
 
-- (NSString *)bibtexTypeForDublinCoreType:(NSString *)type{
-    return [bibtexTypeForDublinCoreTypeDict objectForKey:type];
+- (NSString *)bibTeXTypeForDublinCoreType:(NSString *)type{
+    return [bibTeXTypeForDublinCoreTypeDict objectForKey:type];
 }
 
 - (NSDictionary *)MODSGenresForBibTeXType:(NSString *)type{
@@ -515,7 +515,7 @@ static BDSKTypeManager *sharedManager = nil;
 
 - (NSString *)RISTypeForBibTeXType:(NSString *)type{
     
-    NSArray *theTypes = [bibtexTypeForRISTypeDict allKeysForObject:type];
+    NSArray *theTypes = [bibTeXTypeForRISTypeDict allKeysForObject:type];
     NSString *newType = nil;
         
     if([theTypes count]) {
@@ -545,8 +545,8 @@ static BDSKTypeManager *sharedManager = nil;
 	return [[name fieldName] stringByReplacingOccurrencesOfString:@" " withString:@"-"];
 }
 
-- (NSString *)bibtexTypeForWebOfScienceType:(NSString *)type{
-    return [bibtexTypeForWebOfScienceTypeDict objectForKey:type];
+- (NSString *)bibTeXTypeForWebOfScienceType:(NSString *)type{
+    return [bibTeXTypeForWebOfScienceTypeDict objectForKey:type];
 }
 
 - (NSString *)fieldNameForWebOfScienceTag:(NSString *)tag{
@@ -581,18 +581,18 @@ static BDSKTypeManager *sharedManager = nil;
     return name;
 }
 
-- (NSString *)bibtexTypeForReferType:(NSString *)type {
-    return [bibtexTypeForReferTypeDict objectForKey:type] ?: BDSKMiscString;
+- (NSString *)bibTeXTypeForReferType:(NSString *)type {
+    return [bibTeXTypeForReferTypeDict objectForKey:type] ?: BDSKMiscString;
 }
 
-- (NSString *)bibtexTypeForHCiteType:(NSString *)type {
+- (NSString *)bibTeXTypeForHCiteType:(NSString *)type {
     // first try to find 'type' in the list of regular types:
     
-    if([[self bibTypes] containsObject:type])
+    if([[self types] containsObject:type])
         return type;
     
     // then try to find 'type' in the custom dict:, and if it's not there, give up and return "misc".
-    return [bibtexTypeForHCiteTypeDict objectForKey:type] ?: BDSKMiscString;
+    return [bibTeXTypeForHCiteTypeDict objectForKey:type] ?: BDSKMiscString;
 }
 
 

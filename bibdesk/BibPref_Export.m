@@ -71,7 +71,7 @@
         fileTypes = [[NSArray alloc] initWithObjects:@"html", @"rss", @"csv", @"txt", @"rtf", @"rtfd", @"doc", @"docx", @"odt", nil];
         
         roles = [[NSMutableArray alloc] initWithObjects:[BDSKTemplate localizedMainPageString], [BDSKTemplate localizedDefaultItemString], [BDSKTemplate localizedAccessoryString], [BDSKTemplate localizedScriptString], nil];
-        [roles addObjectsFromArray:[[BDSKTypeManager sharedManager] bibTypes]];
+        [roles addObjectsFromArray:[[BDSKTypeManager sharedManager] types]];
         
         templatePrefList = BDSKExportTemplateList;
 	}

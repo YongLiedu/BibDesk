@@ -44,27 +44,27 @@
 	NSArray *types;
 	NSDictionary *fieldNameForPubMedTagDict;
 	NSDictionary *pubMedTagForFieldNameDict;
-	NSDictionary *bibtexTypeForPubMedTypeDict;
+	NSDictionary *bibTeXTypeForPubMedTypeDict;
 	NSDictionary *fieldNameForRISTagDict;
 	NSDictionary *RISTagForFieldNameDict;
-	NSDictionary *bibtexTypeForRISTypeDict;
+	NSDictionary *bibTeXTypeForRISTypeDict;
 	NSDictionary *fieldNamesForMARCTagDict;
 	NSDictionary *fieldNamesForUNIMARCTagDict;
 	NSDictionary *fieldNameForJSTORTagDict;
 	NSDictionary *fieldDescriptionForJSTORTagDict;
     NSDictionary *fieldNameForWebOfScienceTagDict;
     NSDictionary *fieldDescriptionForWebOfScienceTagDict;
-    NSDictionary *bibtexTypeForWebOfScienceTypeDict;
-    NSDictionary *bibtexTypeForDublinCoreTypeDict;
+    NSDictionary *bibTeXTypeForWebOfScienceTypeDict;
+    NSDictionary *bibTeXTypeForDublinCoreTypeDict;
     NSDictionary *fieldNameForDublinCoreTermDict;
     NSDictionary *fieldNameForReferTagDict;
-    NSDictionary *bibtexTypeForReferTypeDict;
-    NSDictionary *bibtexTypeForHCiteTypeDict;
+    NSDictionary *bibTeXTypeForReferTypeDict;
+    NSDictionary *bibTeXTypeForHCiteTypeDict;
 	NSDictionary *MODSGenresForBibTeXTypeDict;
 	NSDictionary *defaultFieldsForTypesDict;
 	NSArray *defaultTypes;
 	NSSet *standardTypes;
-	NSSet *allFieldNames;
+	NSSet *allFieldsSet;
 	NSCharacterSet *invalidCiteKeyCharSet;
 	NSCharacterSet *fragileCiteKeyCharSet;
 	NSCharacterSet *strictInvalidCiteKeyCharSet;
@@ -103,49 +103,11 @@
 - (NSArray *)requiredFieldsForType:(NSString *)type;
 - (NSArray *)optionalFieldsForType:(NSString *)type;
 - (NSArray *)userDefaultFieldsForType:(NSString *)type;
-- (NSArray *)bibTypes;
-- (NSSet *)allFieldNames;
+- (NSArray *)types;
 - (NSArray *)allFieldNamesIncluding:(NSArray *)include excluding:(NSArray *)exclude;
 - (NSDictionary *)defaultFieldsForTypes;
 - (NSArray *)defaultTypes;
 - (BOOL)isStandardType:(NSString *)type;
-
-// PubMed
-- (NSString *)fieldNameForPubMedTag:(NSString *)tag;
-- (NSString *)bibtexTypeForPubMedType:(NSString *)type;
-
-// RIS
-- (NSString *)fieldNameForRISTag:(NSString *)tag;
-- (NSString *)bibtexTypeForRISType:(NSString *)type;
-- (NSString *)RISTagForBibTeXFieldName:(NSString *)name;
-- (NSString *)RISTypeForBibTeXType:(NSString *)type;
-
-// Refer
-- (NSString *)fieldNameForReferTag:(NSString *)tag;
-- (NSString *)bibtexTypeForReferType:(NSString *)type;
-
-// MARC
-- (NSDictionary *)fieldNamesForMARCTag:(NSString *)name;
-- (NSDictionary *)fieldNamesForUNIMARCTag:(NSString *)name;
-
-// JSTOR
-- (NSString *)fieldNameForJSTORTag:(NSString *)tag;
-- (NSString *)fieldNameForJSTORDescription:(NSString *)name;
-
-// Web of Science
-- (NSString *)bibtexTypeForWebOfScienceType:(NSString *)type;
-- (NSString *)fieldNameForWebOfScienceTag:(NSString *)tag;
-- (NSString *)fieldNameForWebOfScienceDescription:(NSString *)name;
-
-// Dublin Core
-- (NSString *)fieldNameForDublinCoreTerm:(NSString *)term;
-- (NSString *)bibtexTypeForDublinCoreType:(NSString *)type;
-
-// HCite
-- (NSString *)bibtexTypeForHCiteType:(NSString *)type;
-
-// MODS
-- (NSDictionary *)MODSGenresForBibTeXType:(NSString *)type;
 
 // Field types sets
 - (NSSet *)localFileFieldsSet;
@@ -160,6 +122,44 @@
 - (NSSet *)numericFieldsSet;
 - (NSSet *)invalidGroupFieldsSet;
 - (NSSet *)singleValuedGroupFieldsSet;
+- (NSSet *)allFieldsSet;
+
+// PubMed
+- (NSString *)fieldNameForPubMedTag:(NSString *)tag;
+- (NSString *)bibTeXTypeForPubMedType:(NSString *)type;
+
+// RIS
+- (NSString *)fieldNameForRISTag:(NSString *)tag;
+- (NSString *)bibTeXTypeForRISType:(NSString *)type;
+- (NSString *)RISTagForBibTeXFieldName:(NSString *)name;
+- (NSString *)RISTypeForBibTeXType:(NSString *)type;
+
+// Refer
+- (NSString *)fieldNameForReferTag:(NSString *)tag;
+- (NSString *)bibTeXTypeForReferType:(NSString *)type;
+
+// MARC
+- (NSDictionary *)fieldNamesForMARCTag:(NSString *)name;
+- (NSDictionary *)fieldNamesForUNIMARCTag:(NSString *)name;
+
+// JSTOR
+- (NSString *)fieldNameForJSTORTag:(NSString *)tag;
+- (NSString *)fieldNameForJSTORDescription:(NSString *)name;
+
+// Web of Science
+- (NSString *)bibTeXTypeForWebOfScienceType:(NSString *)type;
+- (NSString *)fieldNameForWebOfScienceTag:(NSString *)tag;
+- (NSString *)fieldNameForWebOfScienceDescription:(NSString *)name;
+
+// Dublin Core
+- (NSString *)fieldNameForDublinCoreTerm:(NSString *)term;
+- (NSString *)bibTeXTypeForDublinCoreType:(NSString *)type;
+
+// HCite
+- (NSString *)bibTeXTypeForHCiteType:(NSString *)type;
+
+// MODS
+- (NSDictionary *)MODSGenresForBibTeXType:(NSString *)type;
 
 // Character sets for format parsing and group splitting
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName;

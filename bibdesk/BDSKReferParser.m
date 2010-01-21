@@ -235,7 +235,7 @@ static inline BOOL isTagLine(NSString *sourceLine)
                 // !!! maybe we should move type conversion dictionaries into parsers?
                 type = [pubDict objectForKey:@"Refer0"];
                 if (nil != type) {
-                    type = [typeManager bibtexTypeForReferType:type];
+                    type = [typeManager bibTeXTypeForReferType:type];
                     [pubDict removeObjectForKey:@"Refer0"];
                 } else {
                     type = BDSKMiscString;

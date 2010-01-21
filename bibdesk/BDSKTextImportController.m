@@ -732,7 +732,7 @@
 
     // setup the type popup:
     [itemTypeButton removeAllItems];
-    [itemTypeButton addItemsWithTitles:[[BDSKTypeManager sharedManager] bibTypes]];
+    [itemTypeButton addItemsWithTitles:[[BDSKTypeManager sharedManager] types]];
     
     NSString *type = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKPubTypeStringKey];
     
@@ -1755,7 +1755,7 @@
 
     }
 
-    NSString *bibtexType = [typeMan bibtexTypeForDublinCoreType:[metaTagDict objectForKey:@"DC.type"]];
+    NSString *bibtexType = [typeMan bibTeXTypeForDublinCoreType:[metaTagDict objectForKey:@"DC.type"]];
     [self setType:(bibtexType ?: @"misc")];
 
     [itemTableView reloadData];

@@ -229,8 +229,8 @@
 {
     BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
     NSString *type = BDSKArticleString;
-    if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Pt"]] != nil)
-        type = [typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Pt"]];
+    if([typeManager bibTeXTypeForPubMedType:[pubDict objectForKey:@"Pt"]] != nil)
+        type = [typeManager bibTeXTypeForPubMedType:[pubDict objectForKey:@"Pt"]];
     return type;
 }
 

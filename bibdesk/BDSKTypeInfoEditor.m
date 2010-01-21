@@ -102,7 +102,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	
 	[types removeAllObjects];
 	[fieldsForTypesDict removeAllObjects];
-	for (NSString *type in [btm bibTypes]) {
+	for (NSString *type in [btm types]) {
 		[fieldsDict setObject:[btm requiredFieldsForType:type] forKey:REQUIRED_KEY];
 		[fieldsDict setObject:[btm optionalFieldsForType:type] forKey:OPTIONAL_KEY];
 		[self addType:type withFields:fieldsDict];
@@ -308,7 +308,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	[fieldsForTypesDict removeAllObjects];
 	[types removeAllObjects];
     NSDictionary *defaultFieldsForTypesDict = [[BDSKTypeManager sharedManager] defaultFieldsForTypes];
-    NSDictionary *defaultTypes = [[BDSKTypeManager sharedManager] defaultTypes];
+    NSArray *defaultTypes = [[BDSKTypeManager sharedManager] defaultTypes];
 	for (NSString *type in defaultTypes)
 		[self addType:type withFields:[defaultFieldsForTypesDict objectForKey:type]];
 	[types sortUsingSelector:@selector(compare:)];
