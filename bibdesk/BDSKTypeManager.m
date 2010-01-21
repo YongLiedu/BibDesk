@@ -671,13 +671,6 @@ static BDSKTypeManager *sharedManager = nil;
     return set;
 }
 
-- (NSSet *)noteFieldsSet{
-    [lock lockForReading];
-    NSSet *set = [[noteFieldsSet retain] autorelease];
-    [lock unlock];
-    return set;
-}
-
 - (NSSet *)personFieldsSet{
     [lock lockForReading];
     NSSet *set = [[personFieldsSet retain] autorelease];
@@ -685,11 +678,12 @@ static BDSKTypeManager *sharedManager = nil;
     return set;
 }
 
+- (NSSet *)noteFieldsSet{
+    return noteFieldsSet;
+}
+
 - (NSSet *)numericFieldsSet{
-    [lock lockForReading];
-    NSSet *set = [[numericFieldsSet retain] autorelease];
-    [lock unlock];
-    return set;
+    return numericFieldsSet;
 }
 
 
@@ -723,51 +717,45 @@ static BDSKTypeManager *sharedManager = nil;
 
 - (BOOL)isLocalFileField:(NSString *)field {
     [lock lockForReading];
-    BOOL rv =[localFileFieldsSet containsObject:field];
+    BOOL rv = [localFileFieldsSet containsObject:field];
     [lock unlock];
     return rv;
 }
 
 - (BOOL)isRemoteURLField:(NSString *)field {
     [lock lockForReading];
-    BOOL rv =[remoteURLFieldsSet containsObject:field];
+    BOOL rv = [remoteURLFieldsSet containsObject:field];
     [lock unlock];
     return rv;
 }
 
 - (BOOL)isCitationField:(NSString *)field {
     [lock lockForReading];
-    BOOL rv =[citationFieldsSet containsObject:field];
+    BOOL rv = [citationFieldsSet containsObject:field];
     [lock unlock];
     return rv;
 }
 
 - (BOOL)isPersonField:(NSString *)field {
     [lock lockForReading];
-    BOOL rv =[personFieldsSet containsObject:field];
+    BOOL rv = [personFieldsSet containsObject:field];
     [lock unlock];
     return rv;
 }
 
 - (BOOL)isURLField:(NSString *)field {
     [lock lockForReading];
-    BOOL rv =[allURLFieldsSet containsObject:field];
+    BOOL rv = [allURLFieldsSet containsObject:field];
     [lock unlock];
     return rv;
 }
 
 - (BOOL)isNoteField:(NSString *)field {
-    [lock lockForReading];
-    BOOL rv =[noteFieldsSet containsObject:field];
-    [lock unlock];
-    return rv;
+    return [noteFieldsSet containsObject:field];
 }
 
 - (BOOL)isNumericField:(NSString *)field {
-    [lock lockForReading];
-    BOOL rv =[numericFieldsSet containsObject:field];
-    [lock unlock];
-    return rv;
+    return [numericFieldsSet containsObject:field];
 }
 
 - (BOOL)isSingleValuedGroupField:(NSString *)field {
@@ -786,7 +774,7 @@ static BDSKTypeManager *sharedManager = nil;
 
 - (BOOL)isInvalidGroupField:(NSString *)field {
     [lock lockForReading];
-    BOOL rv =[invalidGroupFieldsSet containsObject:field];
+    BOOL rv = [invalidGroupFieldsSet containsObject:field];
     [lock unlock];
     return rv;
 }
