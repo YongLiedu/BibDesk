@@ -128,6 +128,9 @@ enum {
 }
 
 - (void)awakeFromNib{
+    lastMouseDownRow = -1;
+    lastMouseDownColumn = -1;
+    
 	[self setHeaderView:[[[BDSKMainTableHeaderView alloc] initWithFrame:[[self headerView] frame]] autorelease]];	
     NSRect cornerViewFrame = [[self cornerView] frame];
     BDSKImagePopUpButton *cornerViewButton = [[BDSKImagePopUpButton alloc] initWithFrame:cornerViewFrame];
@@ -150,6 +153,21 @@ enum {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     BDSKDESTROY(alternatingRowBackgroundColors);
     [super dealloc];
+}
+
+- (void)mouseDown:(NSEvent *)theEvent {
+    NSPoint point = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    lastMouseDownRow = [self rowAtPoint:point];
+    lastMouseDownColumn = [self columnAtPoint:point];
+    [super mouseDown:theEvent];
+}
+
+- (NSInteger)lastMouseDownRow {
+    return lastMouseDownRow;
+}
+
+- (NSInteger)lastMouseDownColumn {
+    return lastMouseDownColumn;
 }
 
 - (BOOL)canAlternateDelete {

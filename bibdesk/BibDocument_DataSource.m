@@ -415,9 +415,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         
         // we want the drag to occur for the row that is dragged, not the row that is selected
         if([rowIndexes count]){
-            NSPoint eventPt = [[tv window] mouseLocationOutsideOfEventStream];
-            NSPoint dragPosition = [tv convertPoint:eventPt fromView:nil];
-            NSInteger dragColumn = [tv columnAtPoint:dragPosition];
+            NSInteger dragColumn = [tableView lastMouseDownColumn];
             NSString *dragColumnId = nil;
                     
             if(dragColumn == -1)

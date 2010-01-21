@@ -61,7 +61,12 @@
 @interface BDSKMainTableView : BDSKTableView
 {
     NSArray *alternatingRowBackgroundColors;
+    NSInteger lastMouseDownRow;
+    NSInteger lastMouseDownColumn;
 }
+
+- (NSInteger)lastMouseDownRow;
+- (NSInteger)lastMouseDownColumn;
 
 - (void)setAlternatingRowBackgroundColors:(NSArray *)colorArray;
 - (NSArray *)alternatingRowBackgroundColors;
