@@ -37,7 +37,6 @@
  */
 
 #import "BDSKTypeManager.h"
-#import "BDSKAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSCharacterSet_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
@@ -222,6 +221,7 @@ static BDSKTypeManager *sharedManager = nil;
 
 - (void)reloadFieldSets {
     NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
+    NSMutableSet *tmpSet = [NSMutableSet set];
     
     [localFileFieldsSet removeAllObjects];
     [remoteURLFieldsSet removeAllObjects];
