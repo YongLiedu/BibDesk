@@ -692,6 +692,106 @@ static BDSKTypeManager *sharedManager = nil;
     return set;
 }
 
+
+- (BOOL)isBooleanField:(NSString *)field {
+    [lock lockForReading];
+    BOOL rv = [booleanFieldsSet containsObject:field];
+    [lock unlock];
+    return rv;
+}
+
+- (BOOL)isTriStateField:(NSString *)field {
+    [lock lockForReading];
+    BOOL rv = [triStateFieldsSet containsObject:field];
+    [lock unlock];
+    return rv;
+}
+
+- (BOOL)isRatingField:(NSString *)field {
+    [lock lockForReading];
+    BOOL rv = [ratingFieldsSet containsObject:field];
+    [lock unlock];
+    return rv;
+}
+
+- (BOOL)isIntegerField:(NSString *)field {
+    [lock lockForReading];
+    BOOL rv = [booleanFieldsSet containsObject:field] || [triStateFieldsSet containsObject:field] || [ratingFieldsSet containsObject:field];
+    [lock unlock];
+    return rv;
+}
+
+- (BOOL)isLocalFileField:(NSString *)field {
+    [lock lockForReading];
+    BOOL rv =[localFileFieldsSet containsObject:field];
+    [lock unlock];
+    return rv;
+}
+
+- (BOOL)isRemoteURLField:(NSString *)field {
+    [lock lockForReading];
+    BOOL rv =[remoteURLFieldsSet containsObject:field];
+    [lock unlock];
+    return rv;
+}
+
+- (BOOL)isCitationField:(NSString *)field {
+    [lock lockForReading];
+    BOOL rv =[citationFieldsSet containsObject:field];
+    [lock unlock];
+    return rv;
+}
+
+- (BOOL)isPersonField:(NSString *)field {
+    [lock lockForReading];
+    BOOL rv =[personFieldsSet containsObject:field];
+    [lock unlock];
+    return rv;
+}
+
+- (BOOL)isURLField:(NSString *)field {
+    [lock lockForReading];
+    BOOL rv =[allURLFieldsSet containsObject:field];
+    [lock unlock];
+    return rv;
+}
+
+- (BOOL)isNoteField:(NSString *)field {
+    [lock lockForReading];
+    BOOL rv =[noteFieldsSet containsObject:field];
+    [lock unlock];
+    return rv;
+}
+
+- (BOOL)isNumericField:(NSString *)field {
+    [lock lockForReading];
+    BOOL rv =[numericFieldsSet containsObject:field];
+    [lock unlock];
+    return rv;
+}
+
+- (BOOL)isSingleValuedGroupField:(NSString *)field {
+    [lock lockForReading];
+    BOOL rv =[singleValuedGroupFieldsSet containsObject:field];
+    [lock unlock];
+    return rv;
+}
+
+- (BOOL)isSingleValuedField:(NSString *)field {
+    [lock lockForReading];
+    BOOL rv = [singleValuedGroupFieldsSet containsObject:field] || [singleValuedGroupFieldsSet containsObject:field];
+    [lock unlock];
+    return rv;
+}
+
+- (BOOL)isInvalidGroupField:(NSString *)field {
+    [lock lockForReading];
+    BOOL rv =[invalidGroupFieldsSet containsObject:field];
+    [lock unlock];
+    return rv;
+}
+
+
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName {
 	if( [fieldName isEqualToString:BDSKCiteKeyString]){
 		return invalidCiteKeyCharSet;
@@ -751,19 +851,19 @@ static BDSKTypeManager *sharedManager = nil;
 
 @implementation NSString (BDSKTypeExtensions)
 
-- (BOOL)isBooleanField { return [[[BDSKTypeManager sharedManager] booleanFieldsSet] containsObject:self]; }
-- (BOOL)isTriStateField { return [[[BDSKTypeManager sharedManager] triStateFieldsSet] containsObject:self]; }
-- (BOOL)isRatingField { return [[[BDSKTypeManager sharedManager] ratingFieldsSet] containsObject:self]; }
-- (BOOL)isIntegerField { return [self isBooleanField] || [self isTriStateField] || [self isRatingField]; }
-- (BOOL)isLocalFileField { return [[[BDSKTypeManager sharedManager] localFileFieldsSet] containsObject:self]; }
-- (BOOL)isRemoteURLField { return [[[BDSKTypeManager sharedManager] remoteURLFieldsSet] containsObject:self]; }
-- (BOOL)isCitationField { return [[[BDSKTypeManager sharedManager] citationFieldsSet] containsObject:self]; }
-- (BOOL)isPersonField { return [[[BDSKTypeManager sharedManager] personFieldsSet] containsObject:self]; }
-- (BOOL)isURLField { return [[[BDSKTypeManager sharedManager] allURLFieldsSet] containsObject:self]; }
-- (BOOL)isNoteField { return [[[BDSKTypeManager sharedManager] noteFieldsSet] containsObject:self]; }
-- (BOOL)isNumericField { return [[[BDSKTypeManager sharedManager] numericFieldsSet] containsObject:self]; }
-- (BOOL)isSingleValuedGroupField { return [[[BDSKTypeManager sharedManager] singleValuedGroupFieldsSet] containsObject:self]; }
-- (BOOL)isSingleValuedField { return [[[BDSKTypeManager sharedManager] singleValuedGroupFieldsSet] containsObject:self] || [self isInvalidGroupField]; }
-- (BOOL)isInvalidGroupField { return [[[BDSKTypeManager sharedManager] invalidGroupFieldsSet] containsObject:self]; }
+- (BOOL)isBooleanField { return [[BDSKTypeManager sharedManager] isBooleanField:self]; }
+- (BOOL)isTriStateField { return [[BDSKTypeManager sharedManager] isTriStateField:self]; }
+- (BOOL)isRatingField { return [[BDSKTypeManager sharedManager] isRatingField:self]; }
+- (BOOL)isIntegerField { return [[BDSKTypeManager sharedManager] isIntegerField:self]; }
+- (BOOL)isLocalFileField { return [[BDSKTypeManager sharedManager] isLocalFileField:self]; }
+- (BOOL)isRemoteURLField { return [[BDSKTypeManager sharedManager] isRemoteURLField:self]; }
+- (BOOL)isCitationField { return [[BDSKTypeManager sharedManager] isCitationField:self]; }
+- (BOOL)isPersonField { return [[BDSKTypeManager sharedManager] isPersonField:self]; }
+- (BOOL)isURLField { return [[BDSKTypeManager sharedManager] isURLField:self]; }
+- (BOOL)isNoteField { return [[BDSKTypeManager sharedManager] isNoteField:self]; }
+- (BOOL)isNumericField { return [[BDSKTypeManager sharedManager] isNumericField:self]; }
+- (BOOL)isSingleValuedGroupField { return [[BDSKTypeManager sharedManager] isSingleValuedGroupField:self]; }
+- (BOOL)isSingleValuedField { return [[BDSKTypeManager sharedManager] isSingleValuedField:self]; }
+- (BOOL)isInvalidGroupField { return [[BDSKTypeManager sharedManager] isInvalidGroupField:self]; }
 
 @end

@@ -162,6 +162,21 @@
 - (NSSet *)invalidGroupFieldsSet;
 - (NSSet *)singleValuedGroupFieldsSet;
 
+- (BOOL)isBooleanField:(NSString *)field;
+- (BOOL)isTriStateField:(NSString *)field;
+- (BOOL)isRatingField:(NSString *)field;
+- (BOOL)isIntegerField:(NSString *)field;
+- (BOOL)isLocalFileField:(NSString *)field;
+- (BOOL)isRemoteURLField:(NSString *)field;
+- (BOOL)isCitationField:(NSString *)field;
+- (BOOL)isPersonField:(NSString *)field;
+- (BOOL)isURLField:(NSString *)field;
+- (BOOL)isNoteField:(NSString *)field;
+- (BOOL)isNumericField:(NSString *)field;
+- (BOOL)isSingleValuedGroupField:(NSString *)field;
+- (BOOL)isSingleValuedField:(NSString *)field;
+- (BOOL)isInvalidGroupField:(NSString *)field;
+
 // Character sets for format parsing and group splitting
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName;
 - (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName;
