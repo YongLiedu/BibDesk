@@ -39,9 +39,7 @@
 #import "BDSKTypeInfoEditor.h"
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKTypeNameFormatter.h"
-#import "BDSKAppController.h"
 #import "BDSKTypeManager.h"
-#import "NSFileManager_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 
 #define BDSKTypeInfoRowsPboardType	@"BDSKTypeInfoRowsPboardType"
@@ -169,26 +167,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
     [[self window] makeFirstResponder:nil]; // commit edit before saving
 	
     if ([sender tag] == NSOKButton) {
-        NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys: 
-                    fieldsForTypesDict, FIELDS_FOR_TYPES_KEY, 
-                    [NSDictionary dictionaryWithObject:types forKey:BDSKBibtexString], TYPES_FOR_FILE_TYPE_KEY, nil];
-        
-        NSString *error = nil;
-        NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-        NSData *data = [NSPropertyListSerialization dataFromPropertyList:dict
-                                                                  format:format 
-                                                        errorDescription:&error];
-        if (error) {
-            NSLog(@"Error writing: %@", error);
-            [error release];
-        } else {
-            NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
-            NSString *typeInfoPath = [applicationSupportPath stringByAppendingPathComponent:TYPE_INFO_FILENAME];
-            [data writeToFile:typeInfoPath atomically:YES];
-        }
-        
-        [[BDSKTypeManager sharedManager] reloadTypesAndFields];
-        
+        [[BDSKTypeManager sharedManager] updateUserTypes:types andFields:fieldsForTypesDict];
         [self setDocumentEdited:NO];
     } else {
         [self revertTypes];

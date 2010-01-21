@@ -121,7 +121,7 @@
 + (BDSKTypeManager *)sharedManager;
 
 // Updating
-- (void)reloadTypesAndFields;
+- (void)updateUserTypes:(NSArray *)newTypes andFields:(NSDictionary *)newFieldsForTypes;
 
 // BibTeX
 - (NSArray *)requiredFieldsForType:(NSString *)type;

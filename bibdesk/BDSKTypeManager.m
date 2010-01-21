@@ -45,6 +45,7 @@ static char BDSKTypeManagerDefaultsObservationContext;
 
 @interface BDSKTypeManager (BDSKPrivate)
 
+- (void)reloadTypesAndFields;
 - (void)reloadFieldSets;
 
 - (void)setAllFieldNames:(NSSet *)newNames;
@@ -194,23 +195,6 @@ static BDSKTypeManager *sharedManager = nil;
 
 }
 
-- (void)reloadTypesAndFields{
-    // Load the TypeInfo plist, prefer the user one, otherwise use the default one
-    NSString *userTypeInfoPath = [[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:TYPE_INFO_FILENAME];
-    NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:userTypeInfoPath];
-    
-    if (typeInfoDict == nil)
-        typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
-	
-    [self setFieldsForTypesDict:[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY]];
-    [self setTypes:[[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString]];
-	[self reloadAllFieldNames];
-	
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibTypeInfoChangedNotification
-														object:self
-													  userInfo:[NSDictionary dictionary]];
-}
-
 - (void)reloadFieldSets {
     NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
     
@@ -254,6 +238,47 @@ static BDSKTypeManager *sharedManager = nil;
     [self reloadAllFieldNames];
 }
 
+- (void)reloadTypesAndFields{
+    // Load the TypeInfo plist, prefer the user one, otherwise use the default one
+    NSString *userTypeInfoPath = [[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:TYPE_INFO_FILENAME];
+    NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:userTypeInfoPath];
+    
+    if (typeInfoDict == nil)
+        typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
+	
+    [self setFieldsForTypesDict:[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY]];
+    [self setTypes:[[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString]];
+}
+
+- (void)updateUserTypes:(NSArray *)newTypes andFields:(NSDictionary *)newFieldsForTypes {
+    BDSKPRECONDITION(newFieldsForTypes != nil);
+    BDSKPRECONDITION(newTypes = nil);
+    
+    NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys: 
+                newFieldsForTypes, FIELDS_FOR_TYPES_KEY, 
+                [NSDictionary dictionaryWithObject:newTypes forKey:BDSKBibtexString], TYPES_FOR_FILE_TYPE_KEY, nil];
+    
+    NSString *error = nil;
+    NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
+    NSData *data = [NSPropertyListSerialization dataFromPropertyList:dict
+                                                              format:format 
+                                                    errorDescription:&error];
+    if (error) {
+        NSLog(@"Error writing: %@", error);
+        [error release];
+    } else {
+        NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
+        NSString *typeInfoPath = [applicationSupportPath stringByAppendingPathComponent:TYPE_INFO_FILENAME];
+        [data writeToFile:typeInfoPath atomically:YES];
+    }
+    
+    [self reloadTypesAndFields];
+	[self reloadAllFieldNames];
+	
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibTypeInfoChangedNotification
+														object:self
+													  userInfo:[NSDictionary dictionary]];
+}
 
 #pragma mark KVO
 
