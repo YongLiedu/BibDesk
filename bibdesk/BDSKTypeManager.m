@@ -760,14 +760,14 @@ static BDSKTypeManager *sharedManager = nil;
 
 - (BOOL)isSingleValuedGroupField:(NSString *)field {
     [lock lockForReading];
-    BOOL rv =[singleValuedGroupFieldsSet containsObject:field];
+    BOOL rv = [singleValuedGroupFieldsSet containsObject:field];
     [lock unlock];
     return rv;
 }
 
 - (BOOL)isSingleValuedField:(NSString *)field {
     [lock lockForReading];
-    BOOL rv = [singleValuedGroupFieldsSet containsObject:field] || [singleValuedGroupFieldsSet containsObject:field];
+    BOOL rv = [singleValuedGroupFieldsSet containsObject:field] || [invalidGroupFieldsSet containsObject:field];
     [lock unlock];
     return rv;
 }
