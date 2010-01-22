@@ -84,7 +84,8 @@
 
 @interface NSPasteboard (BDSKExtensions)
 - (BOOL)containsUnparseableFile;
-- (BOOL)writeURLs:(NSArray *)URLs names:(NSArray *)names;;
+- (BOOL)writeURLs:(NSArray *)URLs names:(NSArray *)names;
+- (NSUInteger)numberOfURLsOnPasteboard;
 @end
 
 #pragma mark -
@@ -673,6 +674,8 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             count = MAX(1, (NSInteger)[[pb propertyListForType:NSFilesPromisePboardType] count]);
         else if ([pb availableTypeFromArray:[NSArray arrayWithObject:@"WebURLsWithTitlesPboardType"]])
             count = MAX(1, (NSInteger)[[pboardHelper promisedItemsForPasteboard:pb] count]);
+        else
+            count = MAX(1, (NSInteger)[pb numberOfURLsOnPasteboard]);
     
 	} else if ([dragType isEqualToString:NSFilesPromisePboardType]) {
 		NSArray *fileNames = [pb propertyListForType:NSFilesPromisePboardType];
@@ -1988,6 +1991,53 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         CFRelease(carbonPboard);
     
     return noErr == err;
+}
+
+- (NSUInteger)numberOfURLsOnPasteboard
+{
+    OSStatus err;
+    
+    PasteboardRef carbonPboard;
+    err = PasteboardCreate((CFStringRef)[self name], &carbonPboard);
+    
+    if (noErr == err)
+        (void)PasteboardSynchronize(carbonPboard);
+    
+    ItemCount itemCount, itemIndex;
+    if (noErr == err)
+        err = PasteboardGetItemCount(carbonPboard, &itemCount);
+    
+    if (noErr != err)
+        itemCount = 0;
+    
+    NSUInteger count = 0;
+    
+    // Pasteboard has 1-based indexing!
+    
+    for (itemIndex = 1; itemIndex <= itemCount; itemIndex++) {
+        
+        PasteboardItemID itemID;
+        CFArrayRef flavors = NULL;
+        CFIndex flavorIndex, flavorCount = 0;
+        
+        err = PasteboardGetItemIdentifier(carbonPboard, itemIndex, &itemID);
+        if (noErr == err)
+            err = PasteboardCopyItemFlavors(carbonPboard, itemID, &flavors);
+        
+        if (noErr == err)
+            flavorCount = CFArrayGetCount(flavors);
+        
+        // flavorCount will be zero in case of an error...
+        for (flavorIndex = 0; flavorIndex < flavorCount; flavorIndex++) {
+            if (UTTypeConformsTo(CFArrayGetValueAtIndex(flavors, flavorIndex), kUTTypeURL))
+                count++;
+        }
+        
+        if (NULL != flavors)
+            CFRelease(flavors);
+    }
+    
+    return count;
 }
 
 @end
