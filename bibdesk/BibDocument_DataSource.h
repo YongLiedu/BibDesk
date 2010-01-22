@@ -45,10 +45,8 @@
 @interface BibDocument (DataSource) <BDSKMainTableViewDelegate, BDSKMainTableViewDataSource, BDSKGroupOutlineViewDelegate, NSOutlineViewDataSource, FVFileViewDelegate, FVFileViewDataSource>
 
 - (BOOL)writePublications:(NSArray*)pubs forDragCopyType:(NSInteger)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard;
-- (void)setPromiseDragColumnIdentifier:(NSString *)identifier;
 - (NSImage *)dragImageForPromisedItemsUsingCiteString:(NSString *)citeString;
 - (void)clearPromisedDraggedItems;
-- (NSString *)promiseDragColumnIdentifier;
 - (NSDictionary *)currentTableColumnWidthsAndIdentifiers;
 - (BOOL)isDragFromExternalGroups;
 - (void)setDragFromExternalGroups:(BOOL)flag;

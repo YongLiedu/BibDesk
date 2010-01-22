@@ -238,7 +238,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
         docFlags.isAnimating = NO;
         
         // these are temporary state variables
-        promiseDragColumnIdentifier = nil;
         docFlags.dragFromExternalGroups = NO;
         docState.currentSaveOperationType = 0;
         
@@ -299,7 +298,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
     BDSKDESTROY(sidePreviewDisplayTemplate);
     BDSKDESTROY(macroWC);
     BDSKDESTROY(infoWC);
-    BDSKDESTROY(promiseDragColumnIdentifier);
     BDSKDESTROY(tableColumnWidths);
     BDSKDESTROY(sortKey);
     BDSKDESTROY(previousSortKey);

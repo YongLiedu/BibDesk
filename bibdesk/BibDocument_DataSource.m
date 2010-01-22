@@ -84,6 +84,7 @@
 
 @interface NSPasteboard (BDSKExtensions)
 - (BOOL)containsUnparseableFile;
+- (BOOL)writeURLs:(NSArray *)URLs names:(NSArray *)names;;
 @end
 
 #pragma mark -
@@ -450,32 +451,25 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                 
             }else if([dragColumnId isRemoteURLField]){
                 
-                // cache this so we know which column (field) was dragged
-                [self setPromiseDragColumnIdentifier:dragColumnId];
-
                 // if we have more than one row, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
                 NSUInteger row = [rowIndexes firstIndex];
                 BibItem *pub = nil;
-                NSURL *url, *theURL = nil;
-                NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
+                NSURL *theURL = nil;
+                NSMutableArray *theURLs = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
+                NSMutableArray *theNames = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
 
                 while(row != NSNotFound){
                     pub = [shownPublications objectAtIndex:row];
-                    url = [pub remoteURLForField:dragColumnId];
-                    if(url != nil){
-                        if (theURL == nil)
-                            theURL = url;
-                        [filePaths addObject:[[pub displayTitle] stringByAppendingPathExtension:@"webloc"]];
+                    theURL = [pub remoteURLForField:dragColumnId];
+                    if (theURL != nil && [theURLs containsObject:theURL] == NO) {
+                        [theURLs addObject:theURL];
+                        [theNames addObject:[pub displayTitle]];
                     }
                     row = [rowIndexes indexGreaterThanIndex:row];
                 }
                 
-                if([filePaths count]){
-                    [pboard declareTypes:[NSArray arrayWithObjects:NSFilesPromisePboardType, NSURLPboardType, nil] owner:self];
-                    success = [pboard setPropertyList:filePaths forType:NSFilesPromisePboardType];
-                    [theURL writeToPasteboard:pboard];
-                    return success;
-                }
+                if ([theURLs count])
+                    return [pboard writeURLs:theURLs names:theNames];
             
             }else if([dragColumnId isEqualToString:BDSKLocalFileString]){
 
@@ -506,35 +500,32 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                 }
                 
             }else if([dragColumnId isEqualToString:BDSKRemoteURLString]){
-                // cache this so we know which column (field) was dragged
-                [self setPromiseDragColumnIdentifier:dragColumnId];
                 
                 NSUInteger row = [rowIndexes firstIndex];
                 BibItem *pub = nil;
-                NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
-                NSString *fileName;
-                NSURL *url, *theURL = nil;
+                NSMutableArray *theNames = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
+                NSMutableArray *theURLs = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
+                NSString *theName;
+                NSURL *theURL = nil;
+                NSInteger i;
                 
                 while(row != NSNotFound){
                     pub = [shownPublications objectAtIndex:row];
-                    fileName = [[pub displayTitle] stringByAppendingPathExtension:@"webloc"];
+                    theName = [pub displayTitle];
+                    i = 0;
                     
                     for (BDSKLinkedFile *file in [pub remoteURLs]) {
-                        if (url = [file URL]) {
-                            if (theURL == nil)
-                                theURL = url;
-                            [filePaths addObject:fileName];
+                        if ((theURL = [file URL]) && [theURLs containsObject:theURL] == NO) {
+                            [theNames addObject:theName];
+                            [theURLs addObject:theURL];
+                            i++;
                         }
                     }
                     row = [rowIndexes indexGreaterThanIndex:row];
                 }
                 
-                if([filePaths count]){
-                    [pboard declareTypes:[NSArray arrayWithObjects:NSFilesPromisePboardType, NSURLPboardType, nil] owner:self];
-                    success = [pboard setPropertyList:filePaths forType:NSFilesPromisePboardType];
-                    [theURL writeToPasteboard:pboard];
-                    return success;
-                }
+                if ([theURLs count])
+                    return [pboard writeURLs:theURLs names:theNames];
             }
         }
     }
@@ -928,76 +919,6 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     }
       
     return NO;
-}
-
-#pragma mark HFS Promise drags
-
-// promise drags (currently used for webloc files)
-- (NSArray *)tableView:(NSTableView *)tv namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forDraggedRowsWithIndexes:(NSIndexSet *)indexSet {
-
-    if ([tv isEqual:tableView]) {
-        NSUInteger rowIdx = [indexSet firstIndex];
-        NSMutableDictionary *fullPathDict = [NSMutableDictionary dictionaryWithCapacity:[indexSet count]];
-        
-        // We're supposed to return this to our caller (usually the Finder); just an array of file names, not full paths
-        NSMutableArray *fileNames = [NSMutableArray arrayWithCapacity:[indexSet count]];
-        
-        NSURL *url = nil;
-        NSString *fullPath = nil;
-        BibItem *theBib = nil;
-        
-        // this ivar stores the field name (e.g. Url, L2)
-        NSString *fieldName = [self promiseDragColumnIdentifier];
-        BOOL isRemoteURLField = [fieldName isRemoteURLField];
-        NSString *fileName;
-        NSString *basePath = [dropDestination path];
-        NSInteger i = 0;
-        
-        BDSKASSERT(isRemoteURLField || [fieldName isEqualToString:BDSKRemoteURLString]);
-        
-        while(rowIdx != NSNotFound){
-            theBib = [shownPublications objectAtIndex:rowIdx];
-            if(isRemoteURLField){
-                fileName = [theBib displayTitle];
-                fullPath = [[basePath stringByAppendingPathComponent:fileName] stringByAppendingPathExtension:@"webloc"];
-                url = [theBib remoteURLForField:fieldName];
-                [fullPathDict setValue:url forKey:fullPath];
-                [fileNames addObject:fileName];
-            } else{
-                i = 0;
-                for (BDSKLinkedFile *file in [theBib remoteURLs]) {
-                    if (url = [file URL]) {
-                        fileName = [theBib displayTitle];
-                        if (i > 0)
-                            fileName = [fileName stringByAppendingFormat:@"-%ld", (long)i];
-                        i++;
-                        fullPath = [[basePath stringByAppendingPathComponent:fileName] stringByAppendingPathExtension:@"webloc"];
-                        [fullPathDict setValue:url forKey:fullPath];
-                        [fileNames addObject:fileName];
-                    }
-                }
-            }
-            rowIdx = [indexSet indexGreaterThanIndex:rowIdx];
-        }
-        [self setPromiseDragColumnIdentifier:nil];
-        
-        [[NSFileManager defaultManager] createWeblocFilesInBackgroundThread:fullPathDict];
-
-        return fileNames;
-    }
-    NSAssert(0, @"code path should be unreached");
-    return nil;
-}
-
-- (void)setPromiseDragColumnIdentifier:(NSString *)identifier {
-    if(promiseDragColumnIdentifier != identifier){
-        [promiseDragColumnIdentifier release];
-        promiseDragColumnIdentifier = [identifier copy];
-    }
-}
-
-- (NSString *)promiseDragColumnIdentifier {
-    return promiseDragColumnIdentifier;
 }
 
 #pragma mark TypeSelectHelper delegate
@@ -2029,6 +1950,44 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     }
     [contentString release];
     return NO;
+}
+
+- (BOOL)writeURLs:(NSArray *)URLs names:(NSArray *)names
+{
+    OSStatus err;
+    
+    PasteboardRef carbonPboard;
+    err = PasteboardCreate((CFStringRef)[self name], &carbonPboard);
+    
+    if (noErr == err)
+        err = PasteboardClear(carbonPboard);
+    
+    if (noErr == err)
+        (void)PasteboardSynchronize(carbonPboard);
+    
+    NSUInteger i, urlCount = [URLs count], namesCount = [names count];
+    
+    for (i = 0; i < urlCount && noErr == err; i++) {
+        
+        NSURL *theURL = [URLs objectAtIndex:i];
+        CFDataRef utf8Data = (CFDataRef)[[theURL absoluteString] dataUsingEncoding:NSUTF8StringEncoding];
+        NSString *name = i < namesCount ? [names objectAtIndex:i] : nil;
+        
+        // any pointer type; private to the creating application
+        PasteboardItemID itemID = (void *)theURL;
+        
+        // Finder adds a file URL and destination URL for weblocs, but only a file URL for regular files
+        // could also put a string representation of the URL, but Finder doesn't do that
+        
+        err = PasteboardPutItemFlavor(carbonPboard, itemID, kUTTypeURL, utf8Data, kPasteboardFlavorNoFlags);
+        if (err == noErr && name)
+            err = PasteboardPutItemFlavor(carbonPboard, itemID, CFSTR("public.url-name"), (CFDataRef)[name dataUsingEncoding:NSUTF8StringEncoding], kPasteboardFlavorNoFlags);
+    }
+    
+    if (carbonPboard) 
+        CFRelease(carbonPboard);
+    
+    return noErr == err;
 }
 
 @end

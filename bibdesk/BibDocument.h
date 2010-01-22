@@ -237,7 +237,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     
 #pragma mark Copy & Drag related variables
 
-    NSString *promiseDragColumnIdentifier;
     BDSKItemPasteboardHelper *pboardHelper;
     
 #pragma mark Scalar state variables

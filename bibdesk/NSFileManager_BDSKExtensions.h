@@ -79,25 +79,6 @@
 
 - (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite;
 
-/*!
-    @method     createWeblocFileAtPath:withURL:
-    @abstract   Creates a webloc resource file at the destination path, for a given target URL.  This method is thread safe.
-    @discussion (comprehensive description)
-    @param      fullPath (description)
-    @param      destURL (description)
-    @result     (description)
-*/
-- (BOOL)createWeblocFileAtPath:(NSString *)fullPath withURL:(NSURL *)destURL;
-
-/*!
-    @method     createWeblocFilesInBackgroundThread:
-    @abstract   Creates a batch of webloc files from a dictionary in a background thread; keys are destination path names, and values are NSURL objects.  This method is creates its own autorelease pool.
-    @discussion (comprehensive description)
-    @param      fullPathDict (description)
-*/
-- (void)createWeblocFilesInBackgroundThread:(NSDictionary *)fullPathDict;
-- (void)copyFilesInBackgroundThread:(NSDictionary *)fullPathDict;
-
 - (NSString *)temporaryPathForWritingToPath:(NSString *)path error:(NSError **)outError;
 
 // creates a temporary directory with default attributes in a system temp location; this is thread safe
