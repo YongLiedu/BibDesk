@@ -420,6 +420,24 @@ static BDSKTypeManager *sharedManager = nil;
 
 #pragma mark Getters
 
+// BibTeX
+
+- (NSArray *)requiredFieldsForType:(NSString *)type{
+	return [[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY] ?: [NSArray array];
+}
+
+- (NSArray *)optionalFieldsForType:(NSString *)type{
+	return [[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY] ?: [NSArray array];
+}
+
+- (NSArray *)userDefaultFieldsForType:(NSString *)type{
+    return [[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKDefaultFieldsKey];
+}
+
+- (NSArray *)types{
+    return types;
+}
+
 - (NSDictionary *)defaultFieldsForTypes{
     return defaultFieldsForTypesDict;
 }
@@ -430,6 +448,56 @@ static BDSKTypeManager *sharedManager = nil;
 
 - (BOOL)isStandardType:(NSString *)type{
     return [standardTypes containsObject:type];
+}
+
+// Field types and sets
+
+- (NSSet *)localFileFieldsSet{
+    return localFileFieldsSet;
+}
+
+- (NSSet *)remoteURLFieldsSet{
+    return remoteURLFieldsSet;
+}
+
+- (NSSet *)allURLFieldsSet{
+    return allURLFieldsSet;
+}
+
+- (NSSet *)booleanFieldsSet{
+    return booleanFieldsSet;
+}
+
+- (NSSet *)triStateFieldsSet{
+    return triStateFieldsSet;
+}
+
+- (NSSet *)ratingFieldsSet{
+    return ratingFieldsSet;
+}
+
+- (NSSet *)citationFieldsSet{
+    return citationFieldsSet;
+}
+
+- (NSSet *)personFieldsSet{
+    return personFieldsSet;
+}
+
+- (NSSet *)noteFieldsSet{
+    return noteFieldsSet;
+}
+
+- (NSSet *)numericFieldsSet{
+    return numericFieldsSet;
+}
+
+- (NSSet *)invalidGroupFieldsSet{
+    return invalidGroupFieldsSet;
+}
+
+- (NSSet *)singleValuedGroupFieldsSet{ 
+    return singleValuedGroupFieldsSet;
 }
 
 - (NSSet *)allFieldsSet{
@@ -446,29 +514,7 @@ static BDSKTypeManager *sharedManager = nil;
     return [fieldNames autorelease];
 }
 
-- (NSArray *)requiredFieldsForType:(NSString *)type{
-	return [[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY] ?: [NSArray array];
-}
-
-- (NSArray *)optionalFieldsForType:(NSString *)type{
-	return [[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY] ?: [NSArray array];
-}
-
-- (NSArray *)userDefaultFieldsForType:(NSString *)type{
-    return [[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKDefaultFieldsKey];
-}
-
-- (NSSet *)invalidGroupFieldsSet{
-    return invalidGroupFieldsSet;
-}
-
-- (NSSet *)singleValuedGroupFieldsSet{ 
-    return singleValuedGroupFieldsSet;
-}
-
-- (NSArray *)types{
-    return types;
-}
+// PubMed
 
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag{
     return [fieldNameForPubMedTagDict objectForKey:tag];
@@ -478,32 +524,14 @@ static BDSKTypeManager *sharedManager = nil;
     return [bibTeXTypeForPubMedTypeDict objectForKey:type];
 }
 
+// RIS
+
 - (NSString *)fieldNameForRISTag:(NSString *)tag{
     return [fieldNameForRISTagDict objectForKey:tag];
 }
 
 - (NSString *)bibTeXTypeForRISType:(NSString *)type{
     return [bibTeXTypeForRISTypeDict objectForKey:type];
-}
-
-- (NSDictionary *)fieldNamesForMARCTag:(NSString *)tag{
-    return [fieldNamesForMARCTagDict objectForKey:tag];
-}
-
-- (NSDictionary *)fieldNamesForUNIMARCTag:(NSString *)tag{
-    return [fieldNamesForUNIMARCTagDict objectForKey:tag];
-}
-
-- (NSString *)fieldNameForDublinCoreTerm:(NSString *)term{
-    return [fieldNameForDublinCoreTermDict objectForKey:term];
-}
-
-- (NSString *)bibTeXTypeForDublinCoreType:(NSString *)type{
-    return [bibTeXTypeForDublinCoreTypeDict objectForKey:type];
-}
-
-- (NSDictionary *)MODSGenresForBibTeXType:(NSString *)type{
-    return [MODSGenresForBibTeXTypeDict objectForKey:type];
 }
 
 - (NSString *)RISTagForBibTeXFieldName:(NSString *)name{
@@ -529,6 +557,37 @@ static BDSKTypeManager *sharedManager = nil;
     return newType;
 }
 
+// Refer
+
+- (NSString *)fieldNameForReferTag:(NSString *)tag {
+    NSString *name = [fieldNameForReferTagDict objectForKey:tag];
+    if (nil == name) {
+        NSLog(@"Unknown Refer tag %@.  Please report this.", tag);
+        // numeric tags don't work with BibTeX; we could have fieldName check this, but it's specific to Refer at this point
+        if ([tag length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[tag characterAtIndex:0]])
+            name = [@"Refer" stringByAppendingString:tag];
+        else
+            name = [tag fieldName];
+    }
+    return name;
+}
+
+- (NSString *)bibTeXTypeForReferType:(NSString *)type {
+    return [bibTeXTypeForReferTypeDict objectForKey:type] ?: BDSKMiscString;
+}
+
+// MARC
+
+- (NSDictionary *)fieldNamesForMARCTag:(NSString *)tag{
+    return [fieldNamesForMARCTagDict objectForKey:tag];
+}
+
+- (NSDictionary *)fieldNamesForUNIMARCTag:(NSString *)tag{
+    return [fieldNamesForUNIMARCTagDict objectForKey:tag];
+}
+
+// JSTOR
+
 - (NSString *)fieldNameForJSTORTag:(NSString *)tag{
     NSString *name = [fieldNameForJSTORTagDict objectForKey:tag];
 	if(name == nil){
@@ -544,6 +603,8 @@ static BDSKTypeManager *sharedManager = nil;
 		return [fieldNameForJSTORTagDict objectForKey:[tags objectAtIndex:0]];
 	return [[name fieldName] stringByReplacingOccurrencesOfString:@" " withString:@"-"];
 }
+
+// Web of Science
 
 - (NSString *)bibTeXTypeForWebOfScienceType:(NSString *)type{
     return [bibTeXTypeForWebOfScienceTypeDict objectForKey:type];
@@ -568,22 +629,17 @@ static BDSKTypeManager *sharedManager = nil;
     return [[name fieldName] stringByReplacingOccurrencesOfString:@" " withString:@"-"];
 }    
 
-- (NSString *)fieldNameForReferTag:(NSString *)tag {
-    NSString *name = [fieldNameForReferTagDict objectForKey:tag];
-    if (nil == name) {
-        NSLog(@"Unknown Refer tag %@.  Please report this.", tag);
-        // numeric tags don't work with BibTeX; we could have fieldName check this, but it's specific to Refer at this point
-        if ([tag length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[tag characterAtIndex:0]])
-            name = [@"Refer" stringByAppendingString:tag];
-        else
-            name = [tag fieldName];
-    }
-    return name;
+// Dublin Core
+
+- (NSString *)fieldNameForDublinCoreTerm:(NSString *)term{
+    return [fieldNameForDublinCoreTermDict objectForKey:term];
 }
 
-- (NSString *)bibTeXTypeForReferType:(NSString *)type {
-    return [bibTeXTypeForReferTypeDict objectForKey:type] ?: BDSKMiscString;
+- (NSString *)bibTeXTypeForDublinCoreType:(NSString *)type{
+    return [bibTeXTypeForDublinCoreTypeDict objectForKey:type];
 }
+
+// HCite
 
 - (NSString *)bibTeXTypeForHCiteType:(NSString *)type {
     // first try to find 'type' in the list of regular types:
@@ -595,46 +651,13 @@ static BDSKTypeManager *sharedManager = nil;
     return [bibTeXTypeForHCiteTypeDict objectForKey:type] ?: BDSKMiscString;
 }
 
+// MODS
 
-- (NSSet *)booleanFieldsSet{
-    return booleanFieldsSet;
+- (NSDictionary *)MODSGenresForBibTeXType:(NSString *)type{
+    return [MODSGenresForBibTeXTypeDict objectForKey:type];
 }
 
-- (NSSet *)triStateFieldsSet{
-    return triStateFieldsSet;
-}
-
-- (NSSet *)ratingFieldsSet{
-    return ratingFieldsSet;
-}
-
-- (NSSet *)allURLFieldsSet{
-    return allURLFieldsSet;
-}
-
-- (NSSet *)localFileFieldsSet{
-    return localFileFieldsSet;
-}
-
-- (NSSet *)remoteURLFieldsSet{
-    return remoteURLFieldsSet;
-}
-
-- (NSSet *)citationFieldsSet{
-    return citationFieldsSet;
-}
-
-- (NSSet *)personFieldsSet{
-    return personFieldsSet;
-}
-
-- (NSSet *)noteFieldsSet{
-    return noteFieldsSet;
-}
-
-- (NSSet *)numericFieldsSet{
-    return numericFieldsSet;
-}
+// Character sets for format parsing and group splitting
 
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName {
     NSCharacterSet *characterSet = nil;

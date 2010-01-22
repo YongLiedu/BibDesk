@@ -104,7 +104,6 @@
 - (NSArray *)optionalFieldsForType:(NSString *)type;
 - (NSArray *)userDefaultFieldsForType:(NSString *)type;
 - (NSArray *)types;
-- (NSArray *)allFieldNamesIncluding:(NSArray *)include excluding:(NSArray *)exclude;
 - (NSDictionary *)defaultFieldsForTypes;
 - (NSArray *)defaultTypes;
 - (BOOL)isStandardType:(NSString *)type;
@@ -123,6 +122,8 @@
 - (NSSet *)invalidGroupFieldsSet;
 - (NSSet *)singleValuedGroupFieldsSet;
 - (NSSet *)allFieldsSet;
+
+- (NSArray *)allFieldNamesIncluding:(NSArray *)include excluding:(NSArray *)exclude;
 
 // PubMed
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag;
