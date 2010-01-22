@@ -727,8 +727,8 @@ static BDSKTypeManager *sharedManager = nil;
 - (BOOL)isLocalFileField { return [[[BDSKTypeManager sharedManager] localFileFieldsSet] containsObject:self]; }
 - (BOOL)isRemoteURLField { return [[[BDSKTypeManager sharedManager] remoteURLFieldsSet] containsObject:self]; }
 - (BOOL)isURLField { return [[[BDSKTypeManager sharedManager] allURLFieldsSet] containsObject:self]; }
-- (BOOL)isGeneralLocalFileField { return [self isGeneralLocalFileField]; }
-- (BOOL)isGeneralRemoteURLField { return [self isGeneralRemoteURLField]; }
+- (BOOL)isGeneralLocalFileField { return [self isLocalFileField] || [self isEqualToString:BDSKLocalFileString]; }
+- (BOOL)isGeneralRemoteURLField { return [self isRemoteURLField] || [self isEqualToString:BDSKRemoteURLString]; }
 - (BOOL)isGeneralURLField { return [self isURLField] || [self isEqualToString:BDSKLocalFileString] || [self isEqualToString:BDSKRemoteURLString]; }
 - (BOOL)isCitationField { return [[[BDSKTypeManager sharedManager] citationFieldsSet] containsObject:self]; }
 - (BOOL)isPersonField { return [[[BDSKTypeManager sharedManager] personFieldsSet] containsObject:self]; }
