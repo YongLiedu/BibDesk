@@ -79,7 +79,7 @@
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"<%@: name=%@, uniqueID=%@>", [self class], self, name, uniqueID];
+    return [NSString stringWithFormat:@"<%@: name=%@, uniqueID=%@>", [self class], name, uniqueID];
 }
 
 - (NSString *)name {
