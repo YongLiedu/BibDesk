@@ -955,7 +955,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         NSMutableArray *a = [NSMutableArray arrayWithCapacity:count];
 
         // table datasource returns an NSImage for URL fields, so we'll ignore those columns
-        if([sortKey isURLField] == NO && nil != sortKey){
+        if(nil != sortKey && [sortKey isURLField] == NO && [sortKey isEqualToString:BDSKLocalFileString] == NO && [sortKey isEqualToString:BDSKRemoteURLString] == NO){
             BibItem *pub;
             id value;
             
