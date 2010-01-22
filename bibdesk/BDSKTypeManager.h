@@ -186,8 +186,12 @@
 - (BOOL)isIntegerField;
 - (BOOL)isLocalFileField;
 - (BOOL)isRemoteURLField;
-- (BOOL)isPersonField;
 - (BOOL)isURLField;
+// the next 3 also match BDSKLinkedFileString and/or BDSKRemoteURLString
+- (BOOL)isGeneralLocalFileField;
+- (BOOL)isGeneralRemoteURLField;
+- (BOOL)isGeneralURLField;
+- (BOOL)isPersonField;
 - (BOOL)isCitationField;
 - (BOOL)isNoteField;
 - (BOOL)isNumericField;

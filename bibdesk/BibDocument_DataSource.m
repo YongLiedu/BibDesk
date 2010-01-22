@@ -275,7 +275,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     NSArray *linkedURLs;
     NSURL *theURL;
     
-    if([tcId isURLField] || [tcId isEqualToString:BDSKLocalFileString] || [tcId isEqualToString:BDSKRemoteURLString]){
+    if([tcId isGeneralURLField]){
         menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
         if([tcId isURLField]){
             if([tcId isLocalFileField]){
@@ -955,7 +955,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         NSMutableArray *a = [NSMutableArray arrayWithCapacity:count];
 
         // table datasource returns an NSImage for URL fields, so we'll ignore those columns
-        if(nil != sortKey && [sortKey isURLField] == NO && [sortKey isEqualToString:BDSKLocalFileString] == NO && [sortKey isEqualToString:BDSKRemoteURLString] == NO){
+        if(nil != sortKey && [sortKey isGeneralURLField] == NO){
             BibItem *pub;
             id value;
             

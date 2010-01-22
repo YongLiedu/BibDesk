@@ -1664,7 +1664,7 @@ static BOOL changingColors = NO;
     
     NSMutableIndexSet *rowsToSelect = [NSMutableIndexSet indexSet];
     CFIndex countOfItems = 0;
-    BOOL isURL = [sortKey isURLField];
+    BOOL isURL = [sortKey isGeneralURLField];
     
     // Compare objects in the currently sorted table column using the isEqual: method to test adjacent cells in order to check for duplicates based on a specific sort key.  BibTool does this, but its effectiveness is obviously limited by the key used <http://lml.ls.fi.upm.es/manuales/bibtool/m_2_11_1.html>.
     while(idx--){

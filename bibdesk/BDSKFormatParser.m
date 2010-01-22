@@ -963,7 +963,7 @@ static NSDictionary *errorAttr = nil;
         }
         newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
 	}
-	else if ([fieldName isEqualToString:BDSKRemoteURLString] || [fieldName isRemoteURLField]) {
+	else if ([fieldName isGeneralRemoteURLField]) {
         newString = [string stringByDeTeXifyingString];
         newString = [newString lossyASCIIString];
         newString = [newString stringByRemovingTeX];
