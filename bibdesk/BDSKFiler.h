@@ -57,22 +57,8 @@ enum {
     BDSKForceAutoFileOptionMask = 4
 };
 
-@interface BDSKFiler : NSObject <NSTableViewDelegate, NSTableViewDataSource> {
-	IBOutlet NSWindow *window;
-	IBOutlet NSTableView *tv;
-	IBOutlet NSTextField *infoTextField;
-	IBOutlet NSImageView *iconView;
-	IBOutlet NSButton *forceCheckButton;
-	IBOutlet NSMenu *contextMenu;
-	
-	IBOutlet NSPanel *progressWindow;
+@interface BDSKFiler : NSWindowController {
 	IBOutlet NSProgressIndicator *progressIndicator;
-	
-    BibDocument *document;
-    NSString *fieldName;
-    NSInteger options;
-    
-	NSMutableArray *errorInfoDicts;
 }
 
 + (BDSKFiler *)sharedFiler;
@@ -104,47 +90,6 @@ BDSKCheckCompleteAutoFileOptionMask indicates that for initial moves a check wil
 BDSKForceAutoFileOptionMask forces AutoFiling, even if there may be problems moving the file. 
 */
 - (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(NSInteger)masks;
-
-/*!
-	@method		showProblems
-	@abstract	Shows a dialog with information on files that had problems moving. 
-	@discussion -
-*/
-- (void)showProblems;
-
-/*!
-	@method		done:
-	@abstract	Action for the problems view button, cleans up. 
-	@discussion -
-*/
-- (IBAction)done:(id)sender;
-
-/*!
-	@method		tryAgain:
-	@abstract	Action for the problems view button, cleans up, and tries to move again.
-	@discussion If the sender's tag is 1, it files with the BDSKForceAutoFileOptionMask set. 
-*/
-- (IBAction)tryAgain:(id)sender;
-
-/*!
-	@method		dump:
-	@abstract	Action for the problems view button, dumps the errors on the desktop. 
-	@discussion -
-*/
-- (IBAction)dump:(id)sender;
-
-/*!
-	@method		showFile:
-	@abstract	Double click action of the problems view tableview, shows the linked file or the status message.
-	@discussion -
-*/
-- (IBAction)showFile:(id)sender;
-
-- (NSArray *)errorInfoDicts;
-- (NSUInteger)countOfErrorInfoDicts;
-- (id)objectInErrorInfoDictsAtIndex:(NSUInteger)index;
-- (void)insertObject:(id)obj inErrorInfoDictsAtIndex:(NSUInteger)index;
-- (void)removeObjectFromErrorInfoDictsAtIndex:(NSUInteger)index;
 
 @end
 

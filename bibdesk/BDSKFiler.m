@@ -41,15 +41,15 @@
 #import "BibItem.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKScriptHookManager.h"
-#import "BDSKPathColorTransformer.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
 #import "BDSKAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKLinkedFile.h"
 #import "BDSKPreferenceController.h"
+#import "BDSKFilerErrorController.h"
 
-// these keys should correspond to the table column identifiers
+// these keys should correspond to the keys in BDSKFilerErrorController
 #define FILE_KEY           @"file"
 #define PUBLICATION_KEY    @"publication"
 #define OLD_PATH_KEY       @"oldPath"
@@ -61,15 +61,6 @@
 
 @implementation BDSKFiler
 
-+ (void)initialize {
-    BDSKINITIALIZE;
-	// register transformer class
-	[NSValueTransformer setValueTransformer:[[[BDSKOldPathColorTransformer alloc] init] autorelease]
-									forName:@"BDSKOldPathColorTransformer"];
-	[NSValueTransformer setValueTransformer:[[[BDSKNewPathColorTransformer alloc] init] autorelease]
-									forName:@"BDSKNewPathColorTransformer"];
-}
-
 static BDSKFiler *sharedFiler = nil;
 
 + (BDSKFiler *)sharedFiler{
@@ -80,9 +71,7 @@ static BDSKFiler *sharedFiler = nil;
 
 - (id)init{
     BDSKPRECONDITION(sharedFiler == nil);
-	if (self = [super init]) {
-		errorInfoDicts = [[NSMutableArray alloc] initWithCapacity:10];
-	}
+	self = [super initWithWindowNibName:@"AutoFileProgress"];
 	return self;
 }
 
@@ -128,6 +117,7 @@ static BDSKFiler *sharedFiler = nil;
 	NSString *oldPath = nil;
 	NSString *newPath = nil;
 	NSMutableArray *fileInfoDicts = [NSMutableArray arrayWithCapacity:numberOfPapers];
+	NSMutableArray *errorInfoDicts = [NSMutableArray arrayWithCapacity:5];
 	NSMutableDictionary *info = nil;
 	NSError *error = nil;
     
@@ -142,11 +132,10 @@ static BDSKFiler *sharedFiler = nil;
         [NSException raise:BDSKUnimplementedException format:@"%@ is only implemented for local files for initial moves.",NSStringFromSelector(_cmd)];
 	
 	if (numberOfPapers > 1) {
-        if (progressWindow == nil)
-            [NSBundle loadNibNamed:@"AutoFileProgress" owner:self];
+        [self window];
 		[progressIndicator setMaxValue:numberOfPapers];
 		[progressIndicator setDoubleValue:0.0];
-        [progressWindow orderFront:nil];
+        [[self window] orderFront:nil];
 	}
 	
 	for (id paperInfo in paperInfos) {
@@ -187,7 +176,7 @@ static BDSKFiler *sharedFiler = nil;
             [info setValue:[NSNumber numberWithInteger:BDSKIncompleteFieldsErrorMask] forKey:FLAG_KEY];
             [info setValue:NSLocalizedString(@"Move anyway.",@"") forKey:FIX_KEY];
             [info setValue:newPath forKey:NEW_PATH_KEY];
-            [self insertObject:info inErrorInfoDictsAtIndex:[self countOfErrorInfoDicts]];
+            [errorInfoDicts addObject:info];
             
         } else {
             
@@ -202,7 +191,7 @@ static BDSKFiler *sharedFiler = nil;
                 [info setValue:[errorInfo objectForKey:NSLocalizedDescriptionKey] forKey:STATUS_KEY];
                 [info setValue:[NSNumber numberWithInteger:[error code]] forKey:FLAG_KEY];
                 [info setValue:newPath forKey:NEW_PATH_KEY];
-                [self insertObject:info inErrorInfoDictsAtIndex:[self countOfErrorInfoDicts]];
+                [errorInfoDicts addObject:info];
                 
             } else {
                 
@@ -227,219 +216,16 @@ static BDSKFiler *sharedFiler = nil;
 	}
 	
 	if (numberOfPapers > 1)
-		[progressWindow orderOut:nil];
+		[[self window] orderOut:nil];
 	
 	NSUndoManager *undoManager = [doc undoManager];
 	[[undoManager prepareWithInvocationTarget:self] 
 		movePapers:fileInfoDicts forField:field fromDocument:doc options:0];
 	
-	if ([self countOfErrorInfoDicts] > 0) {
-        document = [doc retain];
-        fieldName = [field retain];
-        options = mask;
-		[self showProblems];
+	if ([errorInfoDicts count] > 0) {
+		BDSKFilerErrorController *errorController = [[[BDSKFilerErrorController alloc] initWithErrors:errorInfoDicts forField:field fromDocument:doc options:mask] autorelease];
+        [[errorController window] makeKeyAndOrderFront:nil];
     }
-}
-
-#pragma mark Error reporting
-
-- (void)showProblems{
-    if (window == nil) {
-        if([NSBundle loadNibNamed:@"AutoFile" owner:self] == NO){
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error loading AutoFile window module.", @"Message in alert dialog when unable to load window")
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"There was an error loading the AutoFile window module. BibDesk will still run, and automatically filing papers that are dragged in should still work fine. Please report this error to the developers. Sorry!", @"Informative text in alert dialog")];
-            [alert setAlertStyle:NSCriticalAlertStyle];
-            [alert runModal];
-            return;
-        }
-	}
-    [tv reloadData];
-    if (options & BDSKInitialAutoFileOptionMask)
-        [infoTextField setStringValue:NSLocalizedString(@"There were problems moving the following files to the location generated using the format string. You can retry to move items selected in the first column.",@"description string")];
-    else
-        [infoTextField setStringValue:NSLocalizedString(@"There were problems moving the following files to the target location. You can retry to move items selected in the first column.",@"description string")];
-	[iconView setImage:[NSImage imageNamed:@"NSApplicationIcon"]];
-	[tv setDoubleAction:@selector(showFile:)];
-	[tv setTarget:self];
-    [forceCheckButton setState:NSOffState];
-	[window makeKeyAndOrderFront:self];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(windowWillClose:)
-                                                 name:NSWindowWillCloseNotification
-                                               object:window];
-}
-
-- (IBAction)done:(id)sender{
-    [window close];
-}
-
-- (IBAction)tryAgain:(id)sender{
-	NSDictionary *info = nil;
-    NSInteger i, count = [self countOfErrorInfoDicts];
-	NSMutableArray *fileInfoDicts = [NSMutableArray arrayWithCapacity:count];
-    
-    for (i = 0; i < count; i++) {
-        info = [self objectInErrorInfoDictsAtIndex:i];
-        if ([[info objectForKey:SELECT_KEY] boolValue]) {
-            if (options & BDSKInitialAutoFileOptionMask) {
-                [fileInfoDicts addObject:[info objectForKey:PUBLICATION_KEY]];
-            } else {
-                [fileInfoDicts addObject:info];
-            }
-        }
-    }
-    
-    if ([fileInfoDicts count] == 0) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Nothing Selected", @"Message in alert dialog when retrying to autofile without selection")
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"Please select the items you want to auto file again or press Done.", @"Informative text in alert dialog")];
-        [alert beginSheetModalForWindow:window
-                          modalDelegate:nil
-                         didEndSelector:NULL 
-                            contextInfo:NULL];
-        return;
-    }
-    
-    BibDocument *doc = [[document retain] autorelease];
-    NSString *field = [[fieldName retain] autorelease];
-    NSInteger mask = (options & BDSKInitialAutoFileOptionMask);
-    mask |= ([forceCheckButton state]) ? BDSKForceAutoFileOptionMask : (options & BDSKCheckCompleteAutoFileOptionMask);
-    
-    [window close];
-    
-    [self movePapers:fileInfoDicts forField:field fromDocument:doc options:mask];
-}
-
-- (IBAction)dump:(id)sender{
-    NSMutableString *string = [NSMutableString string];
-	NSDictionary *info = nil;
-    NSInteger i, count = [self countOfErrorInfoDicts];
-    
-    for (i = 0; i < count; i++) {
-        info = [self objectInErrorInfoDictsAtIndex:i];
-        [string appendStrings:NSLocalizedString(@"Publication key: ", @"Label for autofile dump"),
-                              [[info objectForKey:PUBLICATION_KEY] citeKey], @"\n", 
-                              NSLocalizedString(@"Original path: ", @"Label for autofile dump"),
-                              [[[info objectForKey:FILE_KEY] URL] path], @"\n", 
-                              NSLocalizedString(@"New path: ", @"Label for autofile dump"),
-                              [info objectForKey:NEW_PATH_KEY], @"\n", 
-                              NSLocalizedString(@"Status: ",@"Label for autofile dump"),
-                              [info objectForKey:STATUS_KEY], @"\n", 
-                              NSLocalizedString(@"Fix: ", @"Label for autofile dump"),
-                              (([info objectForKey:FIX_KEY] == nil) ? NSLocalizedString(@"Cannot fix.", @"Cannot fix AutoFile error") : [info objectForKey:FIX_KEY]),
-                              @"\n\n", nil];
-    }
-    
-    NSString *fileName = NSLocalizedString(@"BibDesk AutoFile Errors", @"Filename for dumped autofile errors.");
-    NSString *path = [[NSFileManager defaultManager] desktopDirectory];
-    if (path)
-        path = [[NSFileManager defaultManager] uniqueFilePathWithName:[fileName stringByAppendingPathExtension:@"txt"] atPath:path];
-    
-    [string writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:NULL];
-}
-
-- (void)windowWillClose:(NSNotification *)notification{
-    if ([[notification object] isEqual:window]) {
-        [[self mutableArrayValueForKey:@"errorInfoDicts"] removeAllObjects];
-        [tv reloadData]; // this is necessary to avoid an exception
-        BDSKDESTROY(document);
-        BDSKDESTROY(fieldName);
-        options = 0;
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:window];
-    }
-}
-
-#pragma mark Accessors
-
-- (NSArray *)errorInfoDicts {
-    return errorInfoDicts;
-}
-
-- (NSUInteger)countOfErrorInfoDicts {
-    return [errorInfoDicts count];
-}
-
-- (id)objectInErrorInfoDictsAtIndex:(NSUInteger)idx {
-    return [errorInfoDicts objectAtIndex:idx];
-}
-
-- (void)insertObject:(id)obj inErrorInfoDictsAtIndex:(NSUInteger)idx {
-    [errorInfoDicts insertObject:obj atIndex:idx];
-}
-
-- (void)removeObjectFromErrorInfoDictsAtIndex:(NSUInteger)idx {
-    [errorInfoDicts removeObjectAtIndex:idx];
-}
-
-#pragma mark table view stuff
-
-// dummy dataSource implementation
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)tView{ return 0; }
-- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{ return nil; }
-
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation{
-	NSString *tcid = [tableColumn identifier];
-    if ([tcid isEqualToString:SELECT_KEY]) {
-        return NSLocalizedString(@"Select items to Try Again or to Force.", @"Tool tip message");
-    }
-    return [[self objectInErrorInfoDictsAtIndex:row] objectForKey:tcid];
-}
-
-- (IBAction)showFile:(id)sender{
-    NSInteger row = [tv selectedRow];
-    if (row == -1)
-        return;
-    NSDictionary *dict = [self objectInErrorInfoDictsAtIndex:row];
-    NSInteger statusFlag = [[dict objectForKey:FLAG_KEY] integerValue];
-    NSString *tcid = nil;
-    NSString *path = nil;
-    BibItem *pub = nil;
-    NSInteger type = -1;
-
-    if(sender == tv){
-        NSInteger column = [tv clickedColumn];
-        if(column == -1)
-            return;
-        tcid = [[[tv tableColumns] objectAtIndex:column] identifier];
-        if([tcid isEqualToString:OLD_PATH_KEY] || [tcid isEqualToString:@"icon"]){
-            type = 0;
-        }else if([tcid isEqualToString:@"newPath"]){
-            type = 1;
-        }else if([tcid isEqualToString:STATUS_KEY] || [tcid isEqualToString:FIX_KEY]){
-            type = 2;
-        }
-    }else if([sender isKindOfClass:[NSMenuItem class]]){
-        type = [sender tag];
-    }
-    
-    switch(type){
-        case 0:
-            if(statusFlag & BDSKSourceFileDoesNotExistErrorMask)
-                return;
-            path = [[[dict objectForKey:FILE_KEY] URL] path];
-            [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
-            break;
-        case 1:
-            if(!(statusFlag & BDSKTargetFileExistsErrorMask))
-                return;
-            path = [dict objectForKey:NEW_PATH_KEY];
-            [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
-            break;
-        case 2:
-            pub = [dict objectForKey:PUBLICATION_KEY];
-            // at this moment we have the document set
-            [document editPub:pub];
-            break;
-	}
-}
-
-- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex {
-    return contextMenu;
 }
 
 @end
