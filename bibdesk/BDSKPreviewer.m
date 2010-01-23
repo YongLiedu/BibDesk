@@ -144,10 +144,11 @@ static BDSKPreviewer *sharedPreviewer = nil;
     BDSKCollapsibleView *collapsibleView = (BDSKCollapsibleView *)[[[progressOverlay contentView] subviews] firstObject];
     NSSize minSize = [progressIndicator frame].size;
     NSRect rect = [warningImageView bounds];
+    NSRect targetRect = {NSZeroPoint, rect.size};
     NSImage *image = [[NSImage alloc] initWithSize:rect.size];
     
     [image lockFocus];
-    [[warningImageView image] drawAtPoint:NSZeroPoint fromRect:rect operation:NSCompositeSourceOver fraction:0.7];
+    [[warningImageView image] drawInRect:targetRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.7];
     [image unlockFocus];
     [warningImageView setImage:image];
     [image release];

@@ -247,7 +247,6 @@
     static NSImage *image = nil;
     if (image == nil) {
         image = [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kAlertCautionIcon)] copy];
-        [image setSize:NSMakeSize(16.0, 16.0)];
         [image setName:@"BDSKCautionIcon"];
 	}
     return image;
