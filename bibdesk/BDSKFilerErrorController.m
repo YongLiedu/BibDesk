@@ -111,7 +111,7 @@
         info = [self objectInErrorInfoDictsAtIndex:i];
         if ([[info objectForKey:SELECT_KEY] boolValue]) {
             if (options & BDSKInitialAutoFileOptionMask) {
-                [fileInfoDicts addObject:[info objectForKey:PUBLICATION_KEY]];
+                [fileInfoDicts addObject:[info objectForKey:FILE_KEY]];
             } else {
                 [fileInfoDicts addObject:info];
             }
