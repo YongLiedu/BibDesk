@@ -592,7 +592,7 @@ static BDSKTypeManager *sharedManager = nil;
     NSString *name = [fieldNameForJSTORTagDict objectForKey:tag];
 	if(name == nil){
 		name = [fieldDescriptionForJSTORTagDict objectForKey:tag];
-		name = [[name fieldName] stringByReplacingOccurrencesOfString:@" " withString:@"-"];
+		name = [[name stringByReplacingOccurrencesOfString:@" " withString:@"-"] fieldName];
 	}
 	return name;
 }
@@ -601,7 +601,7 @@ static BDSKTypeManager *sharedManager = nil;
     NSArray *tags = [fieldDescriptionForJSTORTagDict allKeysForObject:name];
     if([tags count])
 		return [fieldNameForJSTORTagDict objectForKey:[tags objectAtIndex:0]];
-	return [[name fieldName] stringByReplacingOccurrencesOfString:@" " withString:@"-"];
+	return [[name stringByReplacingOccurrencesOfString:@" " withString:@"-"] fieldName];
 }
 
 // Web of Science
@@ -614,7 +614,7 @@ static BDSKTypeManager *sharedManager = nil;
     NSString *name = [fieldNameForWebOfScienceTagDict objectForKey:tag];
 	if(name == nil){
 		name = [fieldDescriptionForWebOfScienceTagDict objectForKey:tag];
-		name = [[name fieldName] stringByReplacingOccurrencesOfString:@" " withString:@"-"];
+		name = [[name stringByReplacingOccurrencesOfString:@" " withString:@"-"] fieldName];
         if(name == nil)
             name = tag; // guard against a nil return; it turns out that not all WOS tags are documented
 	}
@@ -626,7 +626,7 @@ static BDSKTypeManager *sharedManager = nil;
     NSArray *tags = [fieldDescriptionForWebOfScienceTagDict allKeysForObject:name];
     if([tags count])
         return [fieldNameForWebOfScienceTagDict objectForKey:[tags objectAtIndex:0]];
-    return [[name fieldName] stringByReplacingOccurrencesOfString:@" " withString:@"-"];
+    return [[name stringByReplacingOccurrencesOfString:@" " withString:@"-"] fieldName];
 }    
 
 // Dublin Core
