@@ -41,6 +41,12 @@
 #import "WebURLsWithTitles.h"
 
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5
+@interface NSPasteboard (BDSKSnowLeopardDeclarations)
+- (BOOL)writeObjects:(NSArray *)objects;
+@end
+#endif
+
 @interface BDSKItemPasteboardHelper (Private)
 
 - (NSMutableArray *)promisedTypesForPasteboard:(NSPasteboard *)pboard;
@@ -103,9 +109,11 @@
         Class WebURLsWithTitlesClass = NSClassFromString(@"WebURLsWithTitles");
         if (WebURLsWithTitlesClass && [WebURLsWithTitlesClass respondsToSelector:@selector(writeURLs:andTitles:toPasteboard:)])
             [types addObject:@"WebURLsWithTitlesPboardType"];
-        [types addObject:(NSString *)kUTTypeURL];
-        [types addObject:@"public.url-name"];
-        [types addObject:NSStringPboardType];
+        if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_5) {
+            [types addObject:(NSString *)kUTTypeURL];
+            [types addObject:@"public.url-name"];
+            [types addObject:NSStringPboardType];
+        }
     }
     [self clearPromisedTypesForPasteboard:pboard];
     [pboard declareTypes:types owner:self];
@@ -151,15 +159,19 @@
     }
     
     [self removePromisedType:NSURLPboardType forPasteboard:pboard];
-    [self removePromisedType:NSStringPboardType forPasteboard:pboard];
-    [firstURL writeToPasteboard:pboard];
-    [pboard setString:[firstURL absoluteString] forType:NSStringPboardType];
-    
-    NSData *data = [(NSData *)CFURLCreateData(nil, (CFURLRef)firstURL, kCFStringEncodingUTF8, true) autorelease];
-    [self removePromisedType:(NSString *)kUTTypeURL forPasteboard:pboard];
-    [self removePromisedType:@"public.url-name" forPasteboard:pboard];
-    [pboard setData:data forType:(NSString *)kUTTypeURL];
-    [pboard setString:firstTitle forType:@"public.url-name"];
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_5) {
+        [self removePromisedType:NSStringPboardType forPasteboard:pboard];
+        [firstURL writeToPasteboard:pboard];
+        [pboard setString:[firstURL absoluteString] forType:NSStringPboardType];
+        
+        NSData *data = [(NSData *)CFURLCreateData(nil, (CFURLRef)firstURL, kCFStringEncodingUTF8, true) autorelease];
+        [self removePromisedType:(NSString *)kUTTypeURL forPasteboard:pboard];
+        [self removePromisedType:@"public.url-name" forPasteboard:pboard];
+        [pboard setData:data forType:(NSString *)kUTTypeURL];
+        [pboard setString:firstTitle forType:@"public.url-name"];
+    } else {
+        [pboard writeObjects:URLs];
+    }
     
     return YES;
 }

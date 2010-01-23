@@ -668,7 +668,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         
     } else if ([dragType isEqualToString:NSURLPboardType]) {
         count = 1;
-        image = [NSImage imageForURL:[NSURL URLFromPasteboard:pb]];
+        image = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationGenericIcon)];
         isIcon = YES;
         if ([pb availableTypeFromArray:[NSArray arrayWithObject:NSFilesPromisePboardType]])
             count = MAX(1, (NSInteger)[[pb propertyListForType:NSFilesPromisePboardType] count]);
