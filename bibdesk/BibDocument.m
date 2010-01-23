@@ -137,7 +137,7 @@ NSString *BDSKAtomDocumentType = @"Atom XML";
 NSString *BDSKArchiveDocumentType = @"BibTeX and Papers Archive";
 
 NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x57454253";
-NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard type";
+NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk.BibItemPasteboardType";
 NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 // private keys used for storing window information in xattrs
