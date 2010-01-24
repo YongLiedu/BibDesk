@@ -964,7 +964,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     if ([files count] == 0)
         return;
     
-	[[BDSKFiler sharedFiler] filePapers:files fromDocument:[self document] check:NO];
+	[[BDSKFiler sharedFiler] autoFileLinkedFiles:files fromDocument:[self document] check:NO];
     
 	[tabView selectFirstTabViewItem:self];
 	

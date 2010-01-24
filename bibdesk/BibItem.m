@@ -2770,7 +2770,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	if ([self canSetURLForLinkedFile:file]) {
         BDSKASSERT([owner isDocument]);
         if ([owner isDocument]) {
-            [[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:file]
+            [[BDSKFiler sharedFiler] autoFileLinkedFiles:[NSArray arrayWithObject:file]
                                   fromDocument:(BibDocument *)owner
                                          check:NO]; 
             return YES;

@@ -45,16 +45,7 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKPathColorTransformer.h"
 
-// these keys should correspond to the keys in BDSKFiler, the table column names, and the table column bindings
-#define FILE_KEY           @"file"
-#define PUBLICATION_KEY    @"publication"
-#define OLD_PATH_KEY       @"oldPath"
-#define NEW_PATH_KEY       @"path"
-#define STATUS_KEY         @"status"
-#define FLAG_KEY           @"flag"
-#define FIX_KEY            @"fix"
-#define SELECT_KEY         @"select"
-
+#define BDSKFilerSelectKey @"select"
 
 @implementation BDSKFilerErrorController
 
@@ -109,9 +100,9 @@
     
     for (i = 0; i < count; i++) {
         info = [self objectInErrorInfoDictsAtIndex:i];
-        if ([[info objectForKey:SELECT_KEY] boolValue]) {
+        if ([[info objectForKey:BDSKFilerSelectKey] boolValue]) {
             if (options & BDSKInitialAutoFileOptionMask) {
-                [fileInfoDicts addObject:[info objectForKey:FILE_KEY]];
+                [fileInfoDicts addObject:[info objectForKey:BDSKFilerFileKey]];
             } else {
                 [fileInfoDicts addObject:info];
             }
@@ -149,15 +140,15 @@
     for (i = 0; i < count; i++) {
         info = [self objectInErrorInfoDictsAtIndex:i];
         [string appendStrings:NSLocalizedString(@"Publication key: ", @"Label for autofile dump"),
-                              [[info objectForKey:PUBLICATION_KEY] citeKey], @"\n", 
+                              [[info objectForKey:BDSKFilerPublicationKey] citeKey], @"\n", 
                               NSLocalizedString(@"Original path: ", @"Label for autofile dump"),
-                              [[[info objectForKey:FILE_KEY] URL] path], @"\n", 
+                              [[[info objectForKey:BDSKFilerFileKey] URL] path], @"\n", 
                               NSLocalizedString(@"New path: ", @"Label for autofile dump"),
-                              [info objectForKey:NEW_PATH_KEY], @"\n", 
+                              [info objectForKey:BDSKFilerNewPathKey], @"\n", 
                               NSLocalizedString(@"Status: ",@"Label for autofile dump"),
-                              [info objectForKey:STATUS_KEY], @"\n", 
+                              [info objectForKey:BDSKFilerStatusKey], @"\n", 
                               NSLocalizedString(@"Fix: ", @"Label for autofile dump"),
-                              (([info objectForKey:FIX_KEY] == nil) ? NSLocalizedString(@"Cannot fix.", @"Cannot fix AutoFile error") : [info objectForKey:FIX_KEY]),
+                              (([info objectForKey:BDSKFilerFixKey] == nil) ? NSLocalizedString(@"Cannot fix.", @"Cannot fix AutoFile error") : [info objectForKey:BDSKFilerFixKey]),
                               @"\n\n", nil];
     }
     
@@ -174,7 +165,7 @@
     if (row == -1)
         return;
     NSDictionary *dict = [self objectInErrorInfoDictsAtIndex:row];
-    NSInteger statusFlag = [[dict objectForKey:FLAG_KEY] integerValue];
+    NSInteger statusFlag = [[dict objectForKey:BDSKFilerFlagKey] integerValue];
     NSString *tcid = nil;
     NSString *path = nil;
     BibItem *pub = nil;
@@ -185,11 +176,11 @@
         if(column == -1)
             return;
         tcid = [[[tv tableColumns] objectAtIndex:column] identifier];
-        if([tcid isEqualToString:OLD_PATH_KEY] || [tcid isEqualToString:@"icon"]){
+        if([tcid isEqualToString:BDSKFilerOldPathKey] || [tcid isEqualToString:@"icon"]){
             type = 0;
         }else if([tcid isEqualToString:@"newPath"]){
             type = 1;
-        }else if([tcid isEqualToString:STATUS_KEY] || [tcid isEqualToString:FIX_KEY]){
+        }else if([tcid isEqualToString:BDSKFilerStatusKey] || [tcid isEqualToString:BDSKFilerFixKey]){
             type = 2;
         }
     }else if([sender isKindOfClass:[NSMenuItem class]]){
@@ -200,17 +191,17 @@
         case 0:
             if(statusFlag & BDSKSourceFileDoesNotExistErrorMask)
                 return;
-            path = [[[dict objectForKey:FILE_KEY] URL] path];
+            path = [[[dict objectForKey:BDSKFilerFileKey] URL] path];
             [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
             break;
         case 1:
             if(!(statusFlag & BDSKTargetFileExistsErrorMask))
                 return;
-            path = [dict objectForKey:NEW_PATH_KEY];
+            path = [dict objectForKey:BDSKFilerNewPathKey];
             [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
             break;
         case 2:
-            pub = [dict objectForKey:PUBLICATION_KEY];
+            pub = [dict objectForKey:BDSKFilerPublicationKey];
             // at this moment we have the document set
             [document editPub:pub];
             break;
@@ -239,7 +230,7 @@
 
 - (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation{
 	NSString *tcid = [tableColumn identifier];
-    if ([tcid isEqualToString:SELECT_KEY]) {
+    if ([tcid isEqualToString:BDSKFilerSelectKey]) {
         return NSLocalizedString(@"Select items to Try Again or to Force.", @"Tool tip message");
     }
     return [[self objectInErrorInfoDictsAtIndex:row] objectForKey:tcid];

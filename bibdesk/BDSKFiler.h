@@ -38,6 +38,14 @@
 
 #import <Cocoa/Cocoa.h>
 
+extern NSString *BDSKFilerFileKey;
+extern NSString *BDSKFilerPublicationKey;
+extern NSString *BDSKFilerOldPathKey;
+extern NSString *BDSKFilerNewPathKey;
+extern NSString *BDSKFilerStatusKey;
+extern NSString *BDSKFilerFlagKey;
+extern NSString *BDSKFilerFixKey;
+
 @class BibDocument;
 
 enum {
@@ -64,20 +72,20 @@ enum {
 + (BDSKFiler *)sharedFiler;
 
 /*!
-	@method		filePapers:fromDocument:doc:check:
+	@method		autoFileLinkedFiles:fromDocument:doc:check:
 	@abstract	Main auto-file routine to file papers in the Papers folder according to a generated location.
-	@param		papers The BibItemsfor which linked files should be moved.
+	@param		papers An array of linked files to be auto-filed.
 	@param		doc The parent document of the papers. 
 	@param		check Boolean determines whether to move only entries with all necessary fields set. 
 	@discussion	This is the main method that should be used to autofile papers.
 It calls the necessary methods to do the move and generates the new locations for the papers. 
 */
-- (void)filePapers:(NSArray *)papers fromDocument:(BibDocument *)doc check:(BOOL)check;
+- (void)autoFileLinkedFiles:(NSArray *)papers fromDocument:(BibDocument *)doc check:(BOOL)check;
 
 /*!
 	@method		movePapers:forField:fromDocument:options:
 	@abstract	Tries to move list of papers from a document.
-	@param		paperInfos A list of BibItems or a info dictionaries containing a BibItem and file paths to move between.
+	@param		paperInfos A list of info dictionaries containing a BibItem, a BDSKLinkedFile and for non-initial autofiles a target path.
 	@param		field The field for which to move the linked files.
 	@param		doc The parent document of the papers. 
 	@param		mask Integer, see the AutoFileOptionMask enum for options. 

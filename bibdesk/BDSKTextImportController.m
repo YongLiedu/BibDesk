@@ -252,7 +252,7 @@
             [files addObject:file];
         }
         if ([files count])
-            [[BDSKFiler sharedFiler] filePapers:files fromDocument:document check:NO];
+            [[BDSKFiler sharedFiler] autoFileLinkedFiles:files fromDocument:document check:NO];
     }
     
     [item release];
@@ -444,7 +444,7 @@
     if ([files count] == 0)
         return;
     
-    [[BDSKFiler sharedFiler] filePapers:files fromDocument:document check:NO];
+    [[BDSKFiler sharedFiler] autoFileLinkedFiles:files fromDocument:document check:NO];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Move File", @"Undo action name")];
 }
@@ -1414,7 +1414,7 @@
 		return NO;
 	
 	if ([item canSetURLForLinkedFile:file]) {
-        [[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:file] fromDocument:document check:NO]; 
+        [[BDSKFiler sharedFiler] autoFileLinkedFiles:[NSArray arrayWithObject:file] fromDocument:document check:NO]; 
         return YES;
 	} else {
 		[item addFileToBeFiled:file];

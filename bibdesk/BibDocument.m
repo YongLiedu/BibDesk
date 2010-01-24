@@ -2743,7 +2743,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         rv |= 1;
     }
     if([autofileFiles count]){
-        [[BDSKFiler sharedFiler] filePapers:autofileFiles fromDocument:self check:NO];
+        [[BDSKFiler sharedFiler] autoFileLinkedFiles:autofileFiles fromDocument:self check:NO];
         rv |= 2;
     }
     

@@ -50,6 +50,7 @@
 
 - (id)performDefaultImplementation {
     BibItem *pub = [self evaluatedReceivers];
+    BibDocument *doc = (BibDocument *)[pub owner];
 	NSDictionary *params = [self evaluatedArguments];
 	NSNumber *indexNumber = [params objectForKey:@"index"];
     NSString *location = [params objectForKey:@"to"];
@@ -65,7 +66,7 @@
 	if ([pub isKindOfClass:[BibItem class]] == NO) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
 		return nil;
-	} else if ([[pub owner] isDocument] == NO) {
+	} else if ([doc isDocument] == NO) {
         [self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
     }
     
@@ -74,34 +75,25 @@
     if (i >= [localFiles count]) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
 		return nil;
-	}
-    
-    NSArray *paperInfos = nil;
-    
-    if ([localFiles count]) {
-        if (location) {
-            if ([location isKindOfClass:[NSString class]] == NO) {
-                [self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
-                return nil;
-            }
-            if ([location isAbsolutePath] == NO) {
-                NSString *papersFolderPath = [BDSKFormatParser folderPathForFilingPapersFromDocumentAtPath:[[[pub owner] fileURL] path]];
-                [papersFolderPath stringByAppendingPathComponent:location]; 
-            }
-            paperInfos = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:pub, @"publication", [localFiles objectAtIndex:i], @"file", location, @"path", nil]];
-        } else {
-            mask |= BDSKInitialAutoFileOptionMask;
-            if (check)
-                mask |= BDSKCheckCompleteAutoFileOptionMask;
-            if (indexNumber)
-                paperInfos = [NSArray arrayWithObject:[localFiles objectAtIndex:i]];
-            else
-                paperInfos = [pub localFiles];
-        }
+	} else if ([localFiles count] == 0) {
+        return nil;
     }
     
-    if (paperInfos) {
-        [[BDSKFiler sharedFiler] movePapers:paperInfos forField:BDSKLocalFileString fromDocument:(BibDocument *)[pub owner] options:mask];
+    if (location) {
+        if ([location isKindOfClass:[NSString class]] == NO) {
+            [self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
+            return nil;
+        }
+        if ([location isAbsolutePath] == NO) {
+            NSString *papersFolderPath = [BDSKFormatParser folderPathForFilingPapersFromDocumentAtPath:[[doc fileURL] path]];
+            [papersFolderPath stringByAppendingPathComponent:location]; 
+        }
+        NSArray *paperInfos = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:[localFiles objectAtIndex:i], BDSKFilerFileKey, pub, BDSKFilerPublicationKey, location, BDSKFilerNewPathKey, nil]];
+        [[BDSKFiler sharedFiler] movePapers:paperInfos forField:BDSKLocalFileString fromDocument:doc options:mask];
+        [[pub undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSArray *files = indexNumber ? [NSArray arrayWithObject:[localFiles objectAtIndex:i]] : [pub localFiles];
+        [[BDSKFiler sharedFiler] autoFileLinkedFiles:files fromDocument:doc check:check];
         [[pub undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     }
     

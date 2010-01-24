@@ -46,15 +46,13 @@
 #import "BDSKPreferenceController.h"
 #import "BDSKFilerErrorController.h"
 
-// these keys should correspond to the keys in BDSKFilerErrorController
-#define FILE_KEY           @"file"
-#define PUBLICATION_KEY    @"publication"
-#define OLD_PATH_KEY       @"oldPath"
-#define NEW_PATH_KEY       @"path"
-#define STATUS_KEY         @"status"
-#define FLAG_KEY           @"flag"
-#define FIX_KEY            @"fix"
-#define SELECT_KEY         @"select"
+NSString *BDSKFilerFileKey = @"file";
+NSString *BDSKFilerPublicationKey = @"publication";
+NSString *BDSKFilerOldPathKey = @"oldPath";
+NSString *BDSKFilerNewPathKey = @"path";
+NSString *BDSKFilerStatusKey = @"status";
+NSString *BDSKFilerFlagKey = @"flag";
+NSString *BDSKFilerFixKey = @"fix";
 
 @implementation BDSKFiler
 
@@ -74,7 +72,7 @@ static BDSKFiler *sharedFiler = nil;
 
 #pragma mark Auto file methods
 
-- (void)filePapers:(NSArray *)papers fromDocument:(BibDocument *)doc check:(BOOL)check{
+- (void)autoFileLinkedFiles:(NSArray *)papers fromDocument:(BibDocument *)doc check:(BOOL)check{
 	NSString *papersFolderPath = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKPapersFolderPathKey];
 
 	if (NO == [NSString isEmptyString:papersFolderPath]) {
@@ -103,7 +101,12 @@ static BDSKFiler *sharedFiler = nil;
 	
     NSInteger mask = BDSKInitialAutoFileOptionMask;
     if (check) mask |= BDSKCheckCompleteAutoFileOptionMask;
-	[self movePapers:papers forField:BDSKLocalFileString fromDocument:doc options:mask];
+    
+    NSMutableArray *paperInfos = [NSMutableArray arrayWithCapacity:[papers count]];
+    for (BDSKLinkedFile *file in papers)
+        [paperInfos addObject:[NSDictionary dictionaryWithObjectsAndKeys:file, BDSKFilerFileKey, [file delegate], BDSKFilerPublicationKey, nil]];
+    
+	[self movePapers:paperInfos forField:BDSKLocalFileString fromDocument:doc options:mask];
 }
 
 - (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(NSInteger)mask{
@@ -137,19 +140,13 @@ static BDSKFiler *sharedFiler = nil;
 	
 	for (id paperInfo in paperInfos) {
 		
-		if (initial) {
-			// autofile action: an array of BDSKLinkedFiles
-			file = (BDSKLinkedFile *)paperInfo;
-			pub = (BibItem *)[file delegate];
-			oldPath = [[file URL] path];
+        file = [paperInfo valueForKey:BDSKFilerFileKey];
+        pub = [paperInfo valueForKey:BDSKFilerPublicationKey];
+        oldPath = [[file URL] path];
+		if (initial) // autofile action: an array of BDSKLinkedFiles
 			newPath = [[pub suggestedURLForLinkedFile:file] path];
-		} else {
-			// an explicit move, possibly from undo: a list of info dictionaries
-			file = [paperInfo valueForKey:FILE_KEY];
-			pub = [paperInfo valueForKey:PUBLICATION_KEY];
-			oldPath = [[file URL] path];
-			newPath = [paperInfo valueForKey:NEW_PATH_KEY];
-		}
+		else // an explicit move, possibly from undo: a list of info dictionaries
+			newPath = [paperInfo valueForKey:BDSKFilerNewPathKey];
 		
 		if (numberOfPapers > 1) {
 			[progressIndicator incrementBy:1.0];
@@ -162,17 +159,17 @@ static BDSKFiler *sharedFiler = nil;
         }
         
 		info = [NSMutableDictionary dictionaryWithCapacity:6];
-		[info setValue:file forKey:FILE_KEY];
-		[info setValue:oldPath forKey:OLD_PATH_KEY];
-		[info setValue:pub forKey:PUBLICATION_KEY];
+		[info setValue:file forKey:BDSKFilerFileKey];
+		[info setValue:oldPath forKey:BDSKFilerOldPathKey];
+		[info setValue:pub forKey:BDSKFilerPublicationKey];
         error = nil;
         
         if (check && NO == [pub canSetURLForLinkedFile:file]) {
             
-            [info setValue:NSLocalizedString(@"Incomplete information to generate file name.",@"") forKey:STATUS_KEY];
-            [info setValue:[NSNumber numberWithInteger:BDSKIncompleteFieldsErrorMask] forKey:FLAG_KEY];
-            [info setValue:NSLocalizedString(@"Move anyway.",@"") forKey:FIX_KEY];
-            [info setValue:newPath forKey:NEW_PATH_KEY];
+            [info setValue:NSLocalizedString(@"Incomplete information to generate file name.",@"") forKey:BDSKFilerStatusKey];
+            [info setValue:[NSNumber numberWithInteger:BDSKIncompleteFieldsErrorMask] forKey:BDSKFilerFlagKey];
+            [info setValue:NSLocalizedString(@"Move anyway.",@"") forKey:BDSKFilerFixKey];
+            [info setValue:newPath forKey:BDSKFilerNewPathKey];
             [errorInfoDicts addObject:info];
             
         } else {
@@ -184,10 +181,10 @@ static BDSKFiler *sharedFiler = nil;
             if (NO == [fm movePath:oldPath toPath:newPath force:force error:&error]){ 
                 
                 NSDictionary *errorInfo = [error userInfo];
-                [info setValue:[errorInfo objectForKey:NSLocalizedRecoverySuggestionErrorKey] forKey:FIX_KEY];
-                [info setValue:[errorInfo objectForKey:NSLocalizedDescriptionKey] forKey:STATUS_KEY];
-                [info setValue:[NSNumber numberWithInteger:[error code]] forKey:FLAG_KEY];
-                [info setValue:newPath forKey:NEW_PATH_KEY];
+                [info setValue:[errorInfo objectForKey:NSLocalizedRecoverySuggestionErrorKey] forKey:BDSKFilerFixKey];
+                [info setValue:[errorInfo objectForKey:NSLocalizedDescriptionKey] forKey:BDSKFilerStatusKey];
+                [info setValue:[NSNumber numberWithInteger:[error code]] forKey:BDSKFilerFlagKey];
+                [info setValue:newPath forKey:BDSKFilerNewPathKey];
                 [errorInfoDicts addObject:info];
                 
             } else {
@@ -197,7 +194,7 @@ static BDSKFiler *sharedFiler = nil;
                 [pub noteFilesChanged:YES];
                 
                 // switch them as this is used in undo
-                [info setValue:oldPath forKey:NEW_PATH_KEY];
+                [info setValue:oldPath forKey:BDSKFilerNewPathKey];
                 [fileInfoDicts addObject:info];
                 
                 [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKDidAutoFileScriptHookName 
