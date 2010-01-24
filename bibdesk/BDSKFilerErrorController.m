@@ -60,10 +60,15 @@
 
 - (id)initWithErrors:(NSArray *)infoDicts forField:(NSString *)field fromDocument:(BibDocument *)doc options:(NSInteger)mask {
     if (self = [super initWithWindowNibName:@"AutoFile"]) {
-        errorInfoDicts = [[NSArray alloc] initWithArray:infoDicts];
         document = [doc retain];
         fieldName = [field retain];
         options = mask;
+        
+        NSMutableArray *tmpArray = [[NSMutableArray alloc] initWithCapacity:[infoDicts count]];
+        for (NSDictionary *infoDict in infoDicts)
+            [tmpArray addObject:[[infoDict mutableCopy] autorelease]];
+        errorInfoDicts = [tmpArray copy];
+        [tmpArray release];
     }
     return self;
 }
@@ -94,20 +99,7 @@
 }
 
 - (IBAction)tryAgain:(id)sender{
-	NSDictionary *info = nil;
-    NSInteger i, count = [self countOfErrorInfoDicts];
-	NSMutableArray *fileInfoDicts = [NSMutableArray arrayWithCapacity:count];
-    
-    for (i = 0; i < count; i++) {
-        info = [self objectInErrorInfoDictsAtIndex:i];
-        if ([[info objectForKey:BDSKFilerSelectKey] boolValue]) {
-            if (options & BDSKInitialAutoFileOptionMask) {
-                [fileInfoDicts addObject:[info objectForKey:BDSKFilerFileKey]];
-            } else {
-                [fileInfoDicts addObject:info];
-            }
-        }
-    }
+    NSArray *fileInfoDicts = [[self errorInfoDicts] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"select == YES"]];
     
     if ([fileInfoDicts count] == 0) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Nothing Selected", @"Message in alert dialog when retrying to autofile without selection")
