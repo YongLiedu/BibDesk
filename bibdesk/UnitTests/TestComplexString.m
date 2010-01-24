@@ -46,7 +46,7 @@
 - (void)testNumberFromBibTeXString{
     BDSKStringNode *sn = [BDSKStringNode nodeWithNumberString:@"14"];
     STAssertNotNil(sn,nil);
-    STAssertEquals((BDSKStringNodeType)BDSKStringNodeNumber, [sn type],nil);
+    STAssertTrue(BDSKStringNodeNumber==[sn type],nil);
     STAssertEqualObjects(@"14", [sn value],nil);
 }
 
@@ -54,7 +54,7 @@
     BDSKStringNode *sn = [BDSKStringNode nodeWithQuotedString:@"string"];
     
     STAssertNotNil(sn,nil);
-    STAssertEquals((BDSKStringNodeType)BDSKStringNodeString, [sn type],nil);
+    STAssertTrue(BDSKStringNodeString==[sn type],nil);
     STAssertEqualObjects(@"string", [sn value],nil);
 }
 
@@ -62,7 +62,7 @@
     BDSKStringNode *sn = [BDSKStringNode nodeWithMacroString:@"macro"];
     
     STAssertNotNil(sn,nil);
-    STAssertEquals((BDSKStringNodeType)BDSKStringNodeMacro, [sn type],nil);
+    STAssertTrue(BDSKStringNodeMacro==[sn type],nil);
     STAssertEqualObjects(@"macro", [sn value],nil);
 }
 
@@ -141,7 +141,7 @@
     STAssertTrue([cs isComplex],nil);
     STAssertEqualObjects( (NSString *)cs,@"A quoted {nested} stringdood",nil);
     STAssertNotNil([cs nodes],nil);
-    STAssertEquals( [[cs nodes] count], (NSUInteger) 3,nil);
+    STAssertTrue([[cs nodes] count]==3,nil);
 }
 
 - (void)testDisplayTwoNumbers{

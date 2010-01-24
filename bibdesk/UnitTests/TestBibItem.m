@@ -66,7 +66,7 @@
 							   @"Less, von More, Jr.", BDSKAuthorString, nil];
 	BibItem *b = [[[BibItem alloc] initWithType:BDSKArticleString citeKey:nil pubFields:pubFields isNew:YES] autorelease];
 	
-    STAssertEquals(1, [b numberOfAuthors],@"Check that Less, von More, Jr. parses to single author");
+    STAssertTrue(1==[b numberOfAuthors],@"Check that Less, von More, Jr. parses to single author");
 }
 
 - (void)testComplexAuthorNameNormalisation{
@@ -149,10 +149,10 @@
     BibItem *item2 = [testArray objectAtIndex:1];
 
 	STAssertNotNil(testArray,@"Failed to parse two BibTex records");
-    STAssertEquals([testArray count],(NSUInteger) 2, @"Parsed 2 Bibtex records as %ld BibTex records",[testArray count]);
+    STAssertTrue([testArray count]==2, @"Parsed 2 Bibtex records as %ld BibTex records",[testArray count]);
 
 	// File order seems to be nil when reading those 2 strings
-//	STAssertEquals([item2 fileOrder] - [item1 fileOrder], 1,
+//	STAssertTrue([item2 fileOrder] - [item1 fileOrder] == 1,
 //				   @"File orders of two records should differ by 1");
 }
 

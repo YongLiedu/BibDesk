@@ -49,19 +49,19 @@
 @implementation TestBDSKRISParser
 - (void)testCanParseString{
 	
-    STAssertEquals([BDSKStringParser canParseString:goodRIS ofType:BDSKRISStringType ],
-				   YES, @"Check that we can parse a basic RIS record");
-    STAssertEquals([BDSKStringParser canParseString:goodRISNoFinalReturnOrSpace ofType:BDSKRISStringType ],
-				   YES, @"Check that we can parse a basic RIS record even with missing final return");
-    STAssertEquals([BDSKStringParser canParseString:goodRIS ofType:BDSKUnknownStringType ],
-				   YES, @"Check that we can parse a basic RIS record without type information");
-    STAssertEquals([BDSKStringParser canParseString:badRISSingleSpace ofType:BDSKRISStringType ],
-				   NO, @"Check that we reject a RIS record with a missing space in front of dash");
+    STAssertTrue([BDSKStringParser canParseString:goodRIS ofType:BDSKRISStringType ],
+				   @"Check that we can parse a basic RIS record");
+    STAssertTrue([BDSKStringParser canParseString:goodRISNoFinalReturnOrSpace ofType:BDSKRISStringType ],
+				   @"Check that we can parse a basic RIS record even with missing final return");
+    STAssertTrue([BDSKStringParser canParseString:goodRIS ofType:BDSKUnknownStringType ],
+				   @"Check that we can parse a basic RIS record without type information");
+    STAssertTrue([BDSKStringParser canParseString:badRISSingleSpace ofType:BDSKRISStringType ]==NO,
+				   @"Check that we reject a RIS record with a missing space in front of dash");
 }
 
 - (void)testContentStringType{
-	STAssertEquals(BDSKRISStringType, [goodRIS contentStringType],@"Check that this string is recognised as RIS content");
-	STAssertEquals(BDSKUnknownStringType, [badRISSingleSpace contentStringType],@"Check that this string is not recognised as RIS content");
+	STAssertTrue(BDSKRISStringType==[goodRIS contentStringType],@"Check that this string is recognised as RIS content");
+	STAssertTrue(BDSKUnknownStringType==[badRISSingleSpace contentStringType],@"Check that this string is not recognised as RIS content");
 }
 
 - (void)testRISToMinimalBibTex{

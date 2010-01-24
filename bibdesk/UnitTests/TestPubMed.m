@@ -73,14 +73,14 @@
 
 - (void)testCanParseString{
 	
-    STAssertEquals([BDSKStringParser canParseString:watsonCrick ofType:BDSKPubMedStringType],
-				   YES, @"Check that we can parse a basic PubMed record");
-	STAssertEquals([BDSKStringParser canParseString:watsonCrick ofType:BDSKUnknownStringType],
-				   YES, @"Check that we can parse a basic PubMed record without type information");
+    STAssertTrue([BDSKStringParser canParseString:watsonCrick ofType:BDSKPubMedStringType],
+                    @"Check that we can parse a basic PubMed record");
+	STAssertTrue([BDSKStringParser canParseString:watsonCrick ofType:BDSKUnknownStringType],
+                    @"Check that we can parse a basic PubMed record without type information");
 }
 
 - (void)testContentStringType{
-	STAssertEquals(BDSKPubMedStringType, [watsonCrick contentStringType],@"Check that this string is recognised as PubMed content");
+	STAssertTrue(BDSKPubMedStringType==[watsonCrick contentStringType],@"Check that this string is recognised as PubMed content");
 }
 
 - (void)testOldMedlineArticleParsing{
@@ -91,7 +91,7 @@
 	// Article Type
 	STAssertEqualObjects(@"article", [b pubType],@"");
 	// Authors
-	STAssertEquals( (NSUInteger) 2, [[b pubAuthors] count],@"There are 2 authors");
+	STAssertTrue(2==[[b pubAuthors] count],@"There are 2 authors");
 	STAssertEqualObjects([[b firstAuthor] valueForKey:@"name"],
 						 @"J D WATSON", @"Watson's full name");
 	STAssertEqualObjects([[b firstAuthor] valueForKey:@"lastName"],
@@ -110,7 +110,7 @@
 	// Article Type
 	STAssertEqualObjects([b pubType], @"article", @"");
 	// Authors
-	STAssertEquals( (NSUInteger) 7, [[b pubAuthors] count],@"There are 7 authors");
+	STAssertTrue(7==[[b pubAuthors] count],@"There are 7 authors");
 	STAssertEqualObjects([[b firstAuthor] valueForKey:@"name"],
 						 @"Gregory S X E Jefferis", @"Greg Jefferis's full name");
 	STAssertEqualObjects([[b firstAuthor] valueForKey:@"lastName"],
