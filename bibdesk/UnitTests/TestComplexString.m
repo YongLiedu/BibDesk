@@ -46,7 +46,7 @@
 - (void)testNumberFromBibTeXString{
     BDSKStringNode *sn = [BDSKStringNode nodeWithNumberString:@"14"];
     STAssertNotNil(sn,nil);
-    STAssertEquals(BDSKStringNodeNumber, [sn type],nil);
+    STAssertEquals((BDSKStringNodeType)BDSKStringNodeNumber, [sn type],nil);
     STAssertEqualObjects(@"14", [sn value],nil);
 }
 
@@ -54,7 +54,7 @@
     BDSKStringNode *sn = [BDSKStringNode nodeWithQuotedString:@"string"];
     
     STAssertNotNil(sn,nil);
-    STAssertEquals(BDSKStringNodeString, [sn type],nil);
+    STAssertEquals((BDSKStringNodeType)BDSKStringNodeString, [sn type],nil);
     STAssertEqualObjects(@"string", [sn value],nil);
 }
 
@@ -62,7 +62,7 @@
     BDSKStringNode *sn = [BDSKStringNode nodeWithMacroString:@"macro"];
     
     STAssertNotNil(sn,nil);
-    STAssertEquals(BDSKStringNodeMacro, [sn type],nil);
+    STAssertEquals((BDSKStringNodeType)BDSKStringNodeMacro, [sn type],nil);
     STAssertEqualObjects(@"macro", [sn value],nil);
 }
 
