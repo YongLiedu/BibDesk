@@ -588,7 +588,7 @@ enum {
         [p lineToPoint:NSMakePoint(0.0, 7.0)];
         [p lineToPoint:NSMakePoint(3.0, 7.0)];
         [p closePath];
-        [[NSColor colorWithCalibratedWhite:0.3 alpha:1.0] setFill];
+        [[NSColor colorWithCalibratedWhite:0.4 alpha:1.0] setFill];
         [p fill];
         [import unlockFocus];
 		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, paperclip, BDSKLocalFileString, url, BDSKRemoteURLString, crossref, BDSKCrossrefString, color, BDSKColorString, color, BDSKColorLabelString, import, BDSKImportOrderString, nil];
