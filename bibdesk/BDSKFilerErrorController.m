@@ -168,13 +168,12 @@
         if(column == -1)
             return;
         tcid = [[[tv tableColumns] objectAtIndex:column] identifier];
-        if([tcid isEqualToString:BDSKFilerOldPathKey] || [tcid isEqualToString:@"icon"]){
+        if([tcid isEqualToString:BDSKFilerOldPathKey])
             type = 0;
-        }else if([tcid isEqualToString:@"newPath"]){
+        else if([tcid isEqualToString:BDSKFilerNewPathKey])
             type = 1;
-        }else if([tcid isEqualToString:BDSKFilerStatusKey] || [tcid isEqualToString:BDSKFilerFixKey]){
+        else if([tcid isEqualToString:BDSKFilerStatusKey] || [tcid isEqualToString:BDSKFilerFixKey])
             type = 2;
-        }
     }else if([sender isKindOfClass:[NSMenuItem class]]){
         type = [sender tag];
     }
@@ -222,10 +221,10 @@
 
 - (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation{
 	NSString *tcid = [tableColumn identifier];
-    if ([tcid isEqualToString:BDSKFilerSelectKey]) {
+    if ([tcid isEqualToString:BDSKFilerSelectKey])
         return NSLocalizedString(@"Select items to Try Again or to Force.", @"Tool tip message");
-    }
-    return [[self objectInErrorInfoDictsAtIndex:row] objectForKey:tcid];
+    else
+        return [[self objectInErrorInfoDictsAtIndex:row] objectForKey:tcid];
 }
 
 - (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex {
