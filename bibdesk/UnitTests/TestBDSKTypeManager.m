@@ -41,7 +41,7 @@
 
 @implementation TestBDSKTypeManager
 - (void)testReadTypeInfoPlist{
-	NSDictionary *tid = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"TypeInfo.plist"]];
+	NSDictionary *tid = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"TypeInfo" ofType:@"plist"]];
 
 	// This will fail if TypeInfo.plist has any syntax errors which prevent it from loading
 	STAssertTrue([tid count]>0 ,@"Check that we are able to load (and parse) TypeInfo.plist");

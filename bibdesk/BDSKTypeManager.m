@@ -42,7 +42,7 @@
 #import "BDSKStringConstants.h"
 
 // The filename and keys used in the plist
-#define TYPE_INFO_FILENAME                    @"TypeInfo.plist"
+#define TYPE_INFO_FILENAME                    @"TypeInfo"
 #define FIELDS_FOR_TYPES_KEY                  @"FieldsForTypes"
 #define REQUIRED_KEY                          @"required"
 #define OPTIONAL_KEY                          @"optional"
@@ -105,14 +105,16 @@ static BDSKTypeManager *sharedManager = nil;
     return sharedManager;
 }
 
+static NSString *BDSKUserTypeInfoPath() {
+    return [[[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:TYPE_INFO_FILENAME] stringByAppendingPathExtension:@"plist"];
+}
+
 - (id)init{
     BDSKPRECONDITION(sharedManager == nil);
     if (self = [super init]) {
         
-        NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
-        
-        NSString *userTypeInfoPath = [[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:TYPE_INFO_FILENAME];
-        NSDictionary *userTypeInfoDict = [NSDictionary dictionaryWithContentsOfFile:userTypeInfoPath] ?: typeInfoDict;
+        NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:TYPE_INFO_FILENAME ofType:@"plist"]];
+        NSDictionary *userTypeInfoDict = [NSDictionary dictionaryWithContentsOfFile:BDSKUserTypeInfoPath()] ?: typeInfoDict;
         
         fieldsForTypesDict = [[userTypeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] copy];
         types = [[[userTypeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString] copy];
@@ -283,9 +285,7 @@ static BDSKTypeManager *sharedManager = nil;
         NSLog(@"Error writing: %@", error);
         [error release];
     } else {
-        NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
-        NSString *typeInfoPath = [applicationSupportPath stringByAppendingPathComponent:TYPE_INFO_FILENAME];
-        [data writeToFile:typeInfoPath atomically:YES];
+        [data writeToFile:BDSKUserTypeInfoPath() atomically:YES];
         
         [self setFieldsForTypesDict:newFieldsForTypes];
         [self setTypes:newTypes];
