@@ -149,6 +149,10 @@
     [string writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
+- (IBAction)selectAll:(id)sender{
+    [errorInfoDicts setValue:[NSNumber numberWithBool:(BOOL)[sender tag]] forKey:BDSKFilerSelectKey];
+}
+
 - (IBAction)showFile:(id)sender{
     NSInteger row = [tv selectedRow];
     if (row == -1)

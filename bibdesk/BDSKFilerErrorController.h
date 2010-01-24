@@ -59,6 +59,7 @@
 - (IBAction)done:(id)sender;
 - (IBAction)tryAgain:(id)sender;
 - (IBAction)dump:(id)sender;
+- (IBAction)selectAll:(id)sender;
 - (IBAction)showFile:(id)sender;
 
 - (NSArray *)errorInfoDicts;
