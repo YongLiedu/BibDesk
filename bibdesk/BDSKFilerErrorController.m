@@ -126,11 +126,8 @@
 
 - (IBAction)dump:(id)sender{
     NSMutableString *string = [NSMutableString string];
-	NSDictionary *info = nil;
-    NSInteger i, count = [self countOfErrorInfoDicts];
     
-    for (i = 0; i < count; i++) {
-        info = [self objectInErrorInfoDictsAtIndex:i];
+    for (NSDictionary *info in errorInfoDicts) {
         [string appendStrings:NSLocalizedString(@"Publication key: ", @"Label for autofile dump"),
                               [[info objectForKey:BDSKFilerPublicationKey] citeKey], @"\n", 
                               NSLocalizedString(@"Original path: ", @"Label for autofile dump"),
