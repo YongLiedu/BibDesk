@@ -183,7 +183,7 @@ about the BibTeX file format.
 
 Portions of BibDesk:
 
-Copyright @copyright{} 2001 - 2009 Michael O. McCracken@*
+Copyright @copyright{} 2001 - 2010 Michael O. McCracken@*
 Copyright @copyright{} many others@*
 
 @c ======================================================================================
