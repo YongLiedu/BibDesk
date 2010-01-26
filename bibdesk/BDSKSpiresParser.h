@@ -40,5 +40,5 @@
 #import "BDSKWebParser.h"
 
 
-@interface BDSKSpiresParser : BDSKWebParser
+@interface BDSKSpiresParser: NSObject <BDSKWebParser>
 @end

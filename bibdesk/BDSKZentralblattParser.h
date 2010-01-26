@@ -40,7 +40,7 @@
 #import "BDSKWebParser.h"
 
 
-@interface BDSKZentralblattParser : BDSKWebParser
+@interface BDSKZentralblattParser: NSObject <BDSKWebParser>
 + (NSArray *) bibItemsForZMathIDs:(NSArray *) IDs;
 + (NSArray *) bibItemsForZMathIDs:(NSArray *) IDs referrer:(NSURL *) referrer error:(NSError **) outError;
 + (NSURL *) reviewLinkForID: (NSString *) ZblID;

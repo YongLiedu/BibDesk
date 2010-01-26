@@ -110,7 +110,7 @@ static NSArray *webParserClasses() {
             break;
     }
     
-    BDSKASSERT(parserClass != [BDSKWebParser class]);
+    BDSKASSERT(parserClass == Nil || [parserClass conformsToProtocol:@protocol(BDSKWebParser)]);
     
     // this may lead to some false negatives if the heuristics for canParseDocument::: change.
     if (Nil == parserClass) {
@@ -122,16 +122,6 @@ static NSArray *webParserClasses() {
     }
     
     return [parserClass itemsFromDocument:domDocument xmlDocument:xmlDoc fromURL:url error:outError];
-}
-
-+ (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
-    BDSKRequestConcreteImplementation(self, _cmd);
-    return NO;
-}
-
-+ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
-    BDSKRequestConcreteImplementation(self, _cmd);
-    return nil;
 }
 
 + (NSDictionary *) parserInfoWithName: (NSString *) name address: (NSString *) address description: (NSString *) description flags: (NSUInteger) flags {
@@ -151,9 +141,7 @@ static NSArray *webParserClasses() {
 }
 
 + (NSArray *)parserInfos {
-    if (self == [BDSKWebParser class])
-        return [webParserClasses() valueForKeyPath:@"@unionOfArrays.parserInfos"];
-	return nil;
+    return [webParserClasses() valueForKeyPath:@"@unionOfArrays.parserInfos"];
 }
 
 @end

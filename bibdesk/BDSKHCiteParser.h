@@ -40,7 +40,7 @@
 #import "NSXMLNode_BDSKExtensions.h"
 
 
-@interface BDSKHCiteParser : BDSKWebParser
+@interface BDSKHCiteParser: NSObject <BDSKWebParser>
 @end
 
 

@@ -53,12 +53,12 @@ enum {
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument fromURL:(NSURL *)url error:(NSError **)outError;
 // Helper method for creating a correctly formatted parser feature information dictionary. 
 + (NSDictionary *) parserInfoWithName: (NSString *) name address: (NSString *) address description: (NSString *) description flags:(NSUInteger) flags;
+// Returns the union of parserInfos of all available web parsers.
++ (NSArray *)parserInfos;
 @end
 
-@interface BDSKWebParser (SubclassResponsibility)
-// these methods must be implemented by the concrete subclasses, and are invalid for the BDSKWebParser class
+@protocol BDSKWebParser <NSObject>
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url;
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError;
-// This method is valid for the BDSKWebParser class, and returns the union for all its subclasses. Subclasses return an array of parser feature information dictionaries which are used to create the Web Group start page.
-+ (NSArray *) parserInfos;
++ (NSArray *)parserInfos;
 @end

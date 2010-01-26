@@ -39,7 +39,7 @@
 #import "BDSKWebParser.h"
 #import "BDSKBibTeXParser.h"
 
-@interface BDSKCiteULikeParser : BDSKWebParser
+@interface BDSKCiteULikeParser: NSObject <BDSKWebParser>
 @end
 
 

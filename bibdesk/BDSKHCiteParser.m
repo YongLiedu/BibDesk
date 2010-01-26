@@ -105,11 +105,6 @@
     
 }
 
-@end 
-
-
-@implementation BDSKHCiteParser (Private)
-
 + (NSMutableDictionary *)dictionaryFromCitationNode:(NSXMLNode *)citationNode{
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     NSMutableDictionary *rd = [NSMutableDictionary dictionaryWithCapacity:0];

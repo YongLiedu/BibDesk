@@ -46,7 +46,7 @@
 	Has a helper class method for fetching the relevant info from the respective servers.
 	Needs subclasses to implement the important BDSKWebParser methods.
 */
-@interface BDSKMathSiteParser : BDSKWebParser
+@interface BDSKMathSiteParser: NSObject
 + (NSArray *) bibItemsForMRIDs:(NSArray *) MRIDs andZMathIDs:(NSArray *) ZMathIDs error:(NSError **) outError;
 @end
 
@@ -55,7 +55,7 @@
 /*
 	BDSKMathSiteParser subclass for pages of projecteuclid.org
 */ 
-@interface BDSKProjectEuclidParser : BDSKMathSiteParser
+@interface BDSKProjectEuclidParser : BDSKMathSiteParser <BDSKWebParser>
 
 @end
 
@@ -64,6 +64,6 @@
 /*
 	BDSKMathSiteParser subclass for pages of numdam.org
 */ 
-@interface BDSKNumdamParser : BDSKMathSiteParser
+@interface BDSKNumdamParser : BDSKMathSiteParser <BDSKWebParser>
 
 @end

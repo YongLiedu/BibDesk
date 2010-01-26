@@ -43,7 +43,7 @@
 /*
 	BDSKWebParser subclass for the AMS's MathSciNet pages.
 */ 
-@interface BDSKMathSciNetParser : BDSKWebParser
+@interface BDSKMathSciNetParser: NSObject <BDSKWebParser>
 + (NSArray *) bibItemsForMRIDs:(NSArray *) IDs;
 + (NSArray *) bibItemsForMRIDs:(NSArray *) IDs referrer:(NSURL *) URL error:(NSError **) outError;
 + (NSURL *) reviewLinkForID:(NSString *) MRID;

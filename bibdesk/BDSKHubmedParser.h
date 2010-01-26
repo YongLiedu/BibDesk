@@ -41,7 +41,7 @@
 #import "NSXMLNode_BDSKExtensions.h"
 
 
-@interface BDSKHubmedParser : BDSKWebParser
+@interface BDSKHubmedParser: NSObject <BDSKWebParser>
 @end
 
 

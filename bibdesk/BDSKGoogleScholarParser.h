@@ -39,7 +39,7 @@
 #import "BDSKWebParser.h"
 
 
-@interface BDSKGoogleScholarParser : BDSKWebParser
+@interface BDSKGoogleScholarParser: NSObject <BDSKWebParser>
 @end
 
 

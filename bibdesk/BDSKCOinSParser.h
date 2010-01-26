@@ -41,6 +41,6 @@
 #import "BibItem.h"
 #import "BDSKWebParser.h"
 
-@interface BDSKCOinSParser : BDSKWebParser {
+@interface BDSKCOinSParser: NSObject <BDSKWebParser> {
 }
 @end
