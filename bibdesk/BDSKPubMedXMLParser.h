@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKStringParser.h"
 
-@interface BDSKPubMedXMLParser : BDSKStringParser {
+@interface BDSKPubMedXMLParser: NSObject <BDSKStringParser> {
 
 }
 

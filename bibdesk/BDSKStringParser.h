@@ -55,16 +55,14 @@ enum {
     BDSKPubMedXMLStringType
 };
 
-// these methods are valid for the abstract class, and should not be used or defined for a concrete subclass
-// for BDSKUnknownStringType, type will be determined using [string contentStringType]
 @interface BDSKStringParser : NSObject
+// passing BDSKUnknownStringType will ise the appropriate -contentStringType
 + (BOOL)canParseString:(NSString *)string ofType:(NSInteger)stringType;
 + (NSArray *)itemsFromString:(NSString *)string ofType:(NSInteger)stringType error:(NSError **)outError;
 @end
 
-// these methods must be implemented by the concrete subclasses
-// for the abstract class, these will call the corresponding method above using BDSKUnknownStringType
-@interface BDSKStringParser (SubclassResponsibility)
+
+@protocol BDSKStringParser <NSObject>
 + (BOOL)canParseString:(NSString *)string;
 + (NSArray *)itemsFromString:(NSString *)string error:(NSError **)outError;
 @end

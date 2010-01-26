@@ -39,6 +39,6 @@
 #import <Foundation/Foundation.h>
 #import "BDSKStringParser.h"
 
-@interface BDSKPubMedParser : BDSKStringParser {
+@interface BDSKPubMedParser: NSObject <BDSKStringParser> {
 }
 @end

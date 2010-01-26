@@ -93,50 +93,30 @@ static Class classForType(NSInteger stringType)
             break;
         default:
             parserClass = Nil;
-    }    
+    }
     return parserClass;
 }
 
 + (BOOL)canParseString:(NSString *)string ofType:(NSInteger)stringType{
-    BDSKASSERT(self == [BDSKStringParser class]);
     if (stringType == BDSKUnknownStringType)
         stringType = [string contentStringType];
     Class parserClass = classForType(stringType);
-    BDSKASSERT(parserClass != [BDSKStringParser class]);
+    BDSKASSERT(parserClass == Nil || [parserClass conformsToProtocol:@protocol(BDSKStringParser)]);
     return [parserClass canParseString:string];
 }
 
 + (NSArray *)itemsFromString:(NSString *)string ofType:(NSInteger)stringType error:(NSError **)outError{
-    BDSKASSERT(self == [BDSKStringParser class]);
     if (stringType == BDSKUnknownStringType)
         stringType = [string contentStringType];
     BDSKASSERT(stringType != BDSKBibTeXStringType);
     BDSKASSERT(stringType != BDSKNoKeyBibTeXStringType);
     Class parserClass = classForType(stringType);
-    BDSKASSERT(parserClass != [BDSKStringParser class]);
+    BDSKASSERT(parserClass == Nil || [parserClass conformsToProtocol:@protocol(BDSKStringParser)]);
     if (Nil == parserClass && outError){
         *outError = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Unsupported or invalid format", @"error when parsing text fails")];
         [*outError setValue:NSLocalizedString(@"BibDesk was not able to determine the syntax of this data.  It may be incorrect or an unsupported type of text.", @"error description when parsing text fails") forKey:NSLocalizedRecoverySuggestionErrorKey];
     }
     return [parserClass itemsFromString:string error:outError];
-}
-
-+ (BOOL)canParseString:(NSString *)string{
-    if([self class] == [BDSKStringParser class]){
-        return [self canParseString:string ofType:BDSKUnknownStringType];
-    }else{
-        BDSKRequestConcreteImplementation(self, _cmd);
-        return NO;
-    }
-}
-
-+ (NSArray *)itemsFromString:(NSString *)string error:(NSError **)outError{
-    if([self class] == [BDSKStringParser class]){
-        return [self itemsFromString:string ofType:BDSKUnknownStringType error:outError];
-    }else{
-        BDSKRequestConcreteImplementation(self, _cmd);
-        return nil;
-    }
 }
 
 @end

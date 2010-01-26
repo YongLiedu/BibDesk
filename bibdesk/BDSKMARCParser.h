@@ -40,6 +40,6 @@
 #import "BDSKStringParser.h"
 
 
-@interface BDSKMARCParser : BDSKStringParser
+@interface BDSKMARCParser: NSObject <BDSKStringParser>
 + (NSArray *)itemsFromMARCXMLString:(NSString *)itemString error:(NSError **)outError;
 @end

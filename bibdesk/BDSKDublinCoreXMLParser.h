@@ -40,5 +40,5 @@
 #import "BDSKStringParser.h"
 
 
-@interface BDSKDublinCoreXMLParser : BDSKStringParser
+@interface BDSKDublinCoreXMLParser: NSObject <BDSKStringParser>
 @end

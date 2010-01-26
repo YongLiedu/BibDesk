@@ -39,6 +39,6 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKStringParser.h"
 
-@interface BDSKMODSParser : BDSKStringParser
+@interface BDSKMODSParser: NSObject <BDSKStringParser>
 
 @end

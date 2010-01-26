@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKStringParser.h"
 
-@interface BDSKReferParser : BDSKStringParser {
+@interface BDSKReferParser: NSObject <BDSKStringParser> {
 
 }
 
