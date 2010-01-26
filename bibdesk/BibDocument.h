@@ -520,6 +520,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (IBAction)selectPossibleDuplicates:(id)sender;
 - (IBAction)selectDuplicates:(id)sender;
 - (IBAction)selectIncompletePublications:(id)sender;
+- (IBAction)selectPublicationsFromAuxFile:(id)sender;
 
 - (IBAction)changeGroupFieldAction:(id)sender;
 - (IBAction)addGroupFieldAction:(id)sender;

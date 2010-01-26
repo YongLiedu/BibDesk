@@ -287,5 +287,6 @@
 - (IBAction)selectPossibleDuplicates:(id)sender;
 - (IBAction)selectDuplicates:(id)sender;
 - (IBAction)selectIncompletePublications:(id)sender;
+- (IBAction)selectPublicationsFromAuxFile:(id)sender;
 
 @end

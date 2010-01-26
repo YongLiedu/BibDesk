@@ -1809,4 +1809,26 @@ static BOOL changingColors = NO;
     [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%ld incomplete %@ found.", @"Status message: [number] incomplete publication(s) found"), (long)countOfItems, pubSingularPlural]];
 }
 
+- (void)chooseAuxPanelDidEnd:(NSOpenPanel *)openPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSCancelButton)
+        return;
+    
+	NSString *path = [[openPanel filenames] objectAtIndex:0];
+	if (path == nil)
+		return;
+    
+    [self selectItemsInAuxFileAtPath:path];
+}
+
+- (IBAction)selectPublicationsFromAuxFile:(id)sender{
+    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+    [openPanel setPrompt:NSLocalizedString(@"Choose", @"")];
+    [openPanel beginSheetForDirectory:nil 
+                                 file:nil 
+                                types:[NSArray arrayWithObject:@"aux"]  
+                       modalForWindow:documentWindow 
+                        modalDelegate:self 
+                       didEndSelector:@selector(chooseAuxPanelDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+}
+
 @end

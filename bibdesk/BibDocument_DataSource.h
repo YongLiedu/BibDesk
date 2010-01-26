@@ -50,5 +50,6 @@
 - (NSDictionary *)currentTableColumnWidthsAndIdentifiers;
 - (BOOL)isDragFromExternalGroups;
 - (void)setDragFromExternalGroups:(BOOL)flag;
+- (BOOL)selectItemsInAuxFileAtPath:(NSString *)auxPath;
 
 @end
