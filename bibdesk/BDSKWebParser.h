@@ -59,6 +59,6 @@ enum {
 // these methods must be implemented by the concrete subclasses, and are invalid for the BDSKWebParser class
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url;
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError;
-// Subclasses return an array of parser feature information dictionaries which are used to create the Web Group start page.
+// This method is valid for the BDSKWebParser class, and returns the union for all its subclasses. Subclasses return an array of parser feature information dictionaries which are used to create the Web Group start page.
 + (NSArray *) parserInfos;
 @end
