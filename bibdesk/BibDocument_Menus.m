@@ -86,7 +86,9 @@
 	}
 }	
 
-- (BOOL) validateCopyAsMenuItem:(NSMenuItem*) menuItem {
+- (BOOL) validateCopyAsActionMenuItem:(NSMenuItem*) menuItem {
+    if ([documentWindow isKeyWindow] == NO)
+        return NO;
     BOOL usesTeX = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey];
 	NSInteger copyType = [menuItem tag];
     
