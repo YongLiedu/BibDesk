@@ -59,32 +59,24 @@
 
 @implementation BDSKWebParser
 
-+ (NSArray *)webParserClasses {
-    static NSArray *webParserClasses = nil;
-    if (webParserClasses == nil) {
-        webParserClasses = [[NSArray alloc] initWithObjects:
-                                [BDSKGoogleScholarParser class], 
-                                [BDSKACMDLParser class], 
-                                [BDSKCiteULikeParser class], 
-                                [BDSKHubmedParser class], 
-                                [BDSKSpiresParser class], 
-                                [BDSKArxivParser class], 
-                                [BDSKMathSciNetParser class], 
-                                [BDSKZentralblattParser class], 
-                                [BDSKProjectEuclidParser class], 
-                                [BDSKCOinSParser class], 
-                                [BDSKHCiteParser class], 
-                                [BDSKIEEEXploreParser class], nil];
+static NSArray *webParserClasses() {
+    static NSArray *webParsers = nil;
+    if (webParsers == nil) {
+        webParsers = [[NSArray alloc] initWithObjects:
+                        [BDSKGoogleScholarParser class], 
+                        [BDSKACMDLParser class], 
+                        [BDSKCiteULikeParser class], 
+                        [BDSKHubmedParser class], 
+                        [BDSKSpiresParser class], 
+                        [BDSKArxivParser class], 
+                        [BDSKMathSciNetParser class], 
+                        [BDSKZentralblattParser class], 
+                        [BDSKProjectEuclidParser class], 
+                        [BDSKCOinSParser class], 
+                        [BDSKHCiteParser class], 
+                        [BDSKIEEEXploreParser class], nil];
     }
-    return webParserClasses;
-}
-
-+ (Class)webParserClassForDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
-	for (Class webParserClass in [self webParserClasses]) {
-        if ([webParserClass canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
-            return webParserClass;
-    }
-    return Nil;
+    return webParsers;
 }
 
 // entry point from view controller
@@ -112,7 +104,11 @@
         return nil;
     }
     
-    Class parserClass = [self webParserClassForDocument:domDocument xmlDocument:xmlDoc fromURL:url];
+    Class parserClass = Nil;
+	for (parserClass in webParserClasses()) {
+        if ([parserClass canParseDocument:domDocument xmlDocument:xmlDoc fromURL:url])
+            break;
+    }
     
     BDSKASSERT(parserClass != [BDSKWebParser class]);
     
@@ -154,10 +150,10 @@
 	return result;
 }
 
-
-+ (NSArray *) parserInfos {
++ (NSArray *)parserInfos {
+    if (self == [BDSKWebParser class])
+        return [webParserClasses() valueForKeyPath:@"@unionOfArrays.parserInfos"];
 	return nil;
 }
-
 
 @end

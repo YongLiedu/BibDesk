@@ -106,13 +106,8 @@
 	NSMutableString * baseString = [NSMutableString stringWithContentsOfFile:baseStringPath encoding:NSUTF8StringEncoding error:&error];
 	if (!baseString) return nil;
 	
-	NSMutableArray * parserFeatures = [NSMutableArray array];
-		
-	for (Class webParserClass in [BDSKWebParser webParserClasses] )
-		[parserFeatures addObjectsFromArray: [webParserClass parserInfos]];
-	
 	NSSortDescriptor * sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:NAME_KEY ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
-	[parserFeatures sortUsingDescriptors:[NSArray arrayWithObject: sortDescriptor]];
+	NSArray * parserFeatures = [[BDSKWebParser parserInfos] sortedArrayUsingDescriptors:[NSArray arrayWithObject: sortDescriptor]];
 
 	NSMutableArray * publicFeatures = [NSMutableArray array];
 	NSMutableArray * subscriptionFeatures = [NSMutableArray array];

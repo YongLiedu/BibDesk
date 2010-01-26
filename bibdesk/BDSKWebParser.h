@@ -49,7 +49,6 @@ enum {
 };
 
 @interface BDSKWebParser : NSObject
-+ (NSArray *)webParserClasses;
 // this method is the main entry point for the BDSKWebParser class it should not be overridden by the concrete subclasses
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument fromURL:(NSURL *)url error:(NSError **)outError;
 // Helper method for creating a correctly formatted parser feature information dictionary. 
