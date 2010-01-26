@@ -59,73 +59,32 @@
 
 @implementation BDSKWebParser
 
-static Class webParserClassForType(NSInteger stringType)
-{
-    switch(stringType){
-        case BDSKGoogleScholarWebType:
-            return [BDSKGoogleScholarParser class];
-        case BDSKACMDLWebType:
-            return [BDSKACMDLParser class];
-        case BDSKCiteULikeWebType:
-            return [BDSKCiteULikeParser class];
-        case BDSKHubmedWebType:
-            return [BDSKHubmedParser class];
-		case BDSKSpiresWebType: 
-            return [BDSKSpiresParser class];
-		case BDSKArxivWebType: 
-            return [BDSKArxivParser class];
-        case BDSKMathSciNetWebType: 
-            return [BDSKMathSciNetParser class];
-		case BDSKZentralblattWebType: 
-            return [BDSKZentralblattParser class];
-		case BDSKProjectEuclidWebType:
-			return [BDSKProjectEuclidParser class];
-		case BDSKNumdamWebType:
-			return [BDSKNumdamParser class];
-		case BDSKCOinSWebType:
-			return [BDSKCOinSParser class];
-		case BDSKHCiteWebType: 
-            return [BDSKHCiteParser class];
-        case BDSKIEEEXploreWebType:
-            return [BDSKIEEEXploreParser class];
-        default:
-            return Nil;
-    }    
++ (NSArray *)webParserClasses {
+    static NSArray *webParserClasses = nil;
+    if (webParserClasses == nil) {
+        webParserClasses = [[NSArray alloc] initWithObjects:
+                                [BDSKGoogleScholarParser class], 
+                                [BDSKACMDLParser class], 
+                                [BDSKCiteULikeParser class], 
+                                [BDSKHubmedParser class], 
+                                [BDSKSpiresParser class], 
+                                [BDSKArxivParser class], 
+                                [BDSKMathSciNetParser class], 
+                                [BDSKZentralblattParser class], 
+                                [BDSKProjectEuclidParser class], 
+                                [BDSKCOinSParser class], 
+                                [BDSKHCiteParser class], 
+                                [BDSKIEEEXploreParser class], nil];
+    }
+    return webParserClasses;
 }
 
-+ (Class) webParserClassForType: (NSInteger) stringType {
-	return webParserClassForType(stringType);
-}
-
-+ (NSInteger)webTypeOfDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
-    if([BDSKGoogleScholarParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
-        return BDSKGoogleScholarWebType;
-    if([BDSKHubmedParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
-        return BDSKHubmedWebType;
-    if([BDSKCiteULikeParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
-        return BDSKCiteULikeWebType;
-    if([BDSKACMDLParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
-        return BDSKACMDLWebType;
-    if([BDSKSpiresParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
-		return BDSKSpiresWebType;
-    if([BDSKArxivParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
-		return BDSKArxivWebType;
-    if([BDSKMathSciNetParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
-		return BDSKMathSciNetWebType;
-    if([BDSKZentralblattParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
-		return BDSKZentralblattWebType;
-    if([BDSKProjectEuclidParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
-		return BDSKProjectEuclidWebType;
-    if([BDSKNumdamParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
-		return BDSKNumdamWebType;
-    if([BDSKIEEEXploreParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
-		return BDSKIEEEXploreWebType;
-
-    if([BDSKCOinSParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
-		return BDSKCOinSWebType;
-    if([BDSKHCiteParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
-		return BDSKHCiteWebType;
-    return BDSKUnknownWebType;
++ (Class)webParserClassForDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
+	for (Class webParserClass in [self webParserClasses]) {
+        if ([webParserClass canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
+            return webParserClass;
+    }
+    return Nil;
 }
 
 // entry point from view controller
@@ -153,9 +112,7 @@ static Class webParserClassForType(NSInteger stringType)
         return nil;
     }
     
-    NSInteger webType = [self webTypeOfDocument:domDocument xmlDocument:xmlDoc fromURL:url];
-    
-    Class parserClass = webParserClassForType(webType);
+    Class parserClass = [self webParserClassForDocument:domDocument xmlDocument:xmlDoc fromURL:url];
     
     BDSKASSERT(parserClass != [BDSKWebParser class]);
     
@@ -180,8 +137,6 @@ static Class webParserClassForType(NSInteger stringType)
     BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
-
-
 
 + (NSDictionary *) parserInfoWithName: (NSString *) name address: (NSString *) address description: (NSString *) description flags: (NSUInteger) flags {
 	NSDictionary * result = nil;

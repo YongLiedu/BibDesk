@@ -48,26 +48,8 @@ enum {
     BDSKParserFeatureAllPagesMask = 1 << 1
 };
 
-enum {
-	BDSKUnknownWebType = -1, 
-    BDSKCiteULikeWebType,
-    BDSKACMDLWebType,
-    BDSKHubmedWebType,
-    BDSKGoogleScholarWebType,
-    BDSKSpiresWebType,
-    BDSKArxivWebType,
-	BDSKMathSciNetWebType,
-	BDSKZentralblattWebType,
-	BDSKProjectEuclidWebType,
-	BDSKNumdamWebType,
-    BDSKIEEEXploreWebType,
-	// parsers for microformats which are not site-specific should better be at the end 
-	BDSKCOinSWebType,
-    BDSKHCiteWebType
-};
-
 @interface BDSKWebParser : NSObject
-+ (Class) webParserClassForType: (NSInteger) stringType;
++ (NSArray *)webParserClasses;
 // this method is the main entry point for the BDSKWebParser class it should not be overridden by the concrete subclasses
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument fromURL:(NSURL *)url error:(NSError **)outError;
 // Helper method for creating a correctly formatted parser feature information dictionary. 

@@ -108,12 +108,8 @@
 	
 	NSMutableArray * parserFeatures = [NSMutableArray array];
 		
-	NSInteger webParserID = 0;
-	Class webParserClass;
-	while ( webParserClass = [BDSKWebParser webParserClassForType:webParserID] ) {
+	for (Class webParserClass in [BDSKWebParser webParserClasses] )
 		[parserFeatures addObjectsFromArray: [webParserClass parserInfos]];
-		webParserID++;
-	}
 	
 	NSSortDescriptor * sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:NAME_KEY ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
 	[parserFeatures sortUsingDescriptors:[NSArray arrayWithObject: sortDescriptor]];
