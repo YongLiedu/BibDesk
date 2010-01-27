@@ -1913,10 +1913,8 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
             refTypeID = 20; // map
             authorField = @"Cartographer";
         }
-    }else if([entryType isEqualToString:BDSKInbookString]){
+    }else if([entryType isEqualToString:BDSKInbookString] || [entryType isEqualToString:BDSKIncollectionString]){
         refTypeID = 5; // book section
-    }else if([entryType isEqualToString:BDSKIncollectionString]){
-        refTypeID = 40; // unused 1
     }else if([entryType isEqualToString:BDSKInproceedingsString]){
         refTypeID = 47; // conference paper
     }else if([entryType isEqualToString:BDSKProceedingsString] || [entryType isEqualToString:BDSKConferenceString]){
