@@ -41,15 +41,6 @@
 #import "BDSKSearchGroup.h"
 #import "BDSKAsynchronousDOServer.h"
 
-// private protocols for inter-thread messaging
-@protocol BDSKZoomGroupServerMainThread <BDSKAsyncDOServerMainThread>
-- (void)addPublicationsFromResults:(bycopy NSArray *)results;
-@end
-
-@protocol BDSKZoomGroupServerLocalThread <BDSKAsyncDOServerThread>
-- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm;
-- (oneway void)terminateConnection;
-@end
 
 typedef struct _BDSKZoomGroupFlags {
     volatile int32_t isRetrieving;

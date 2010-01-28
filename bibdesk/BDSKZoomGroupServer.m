@@ -53,6 +53,16 @@
 #define DCXML_STRING    @"DC XML"
 #define MODS_STRING     @"MODS"
 
+// private protocols for inter-thread messaging
+@protocol BDSKZoomGroupServerMainThread <BDSKAsyncDOServerMainThread>
+- (void)addPublicationsFromResults:(bycopy NSArray *)results;
+@end
+
+@protocol BDSKZoomGroupServerLocalThread <BDSKAsyncDOServerThread>
+- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm;
+- (oneway void)terminateConnection;
+@end
+
 @implementation BDSKZoomGroupServer
 
 + (void)initialize
