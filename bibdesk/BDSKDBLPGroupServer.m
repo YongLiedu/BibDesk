@@ -47,7 +47,7 @@
 
 // private protocols for inter-thread messaging
 @protocol BDSKDBLPGroupServerMainThread <BDSKAsyncDOServerMainThread>
-- (void)addPublicationsToGroup:(bycopy NSArray *)pubs;
+- (void)addPublicationsFromBibTeXString:(bycopy NSString *)btString abstracts:(bycopy NSDictionary *)abstracts;
 @end
 
 @protocol BDSKDBLPGroupServerLocalThread <BDSKAsyncDOServerThread>
@@ -194,9 +194,53 @@
 
 #pragma mark Main thread
 
-- (void)addPublicationsToGroup:(bycopy NSArray *)pubs;
+static void fixEEURL(BibItem *pub)
+{
+    NSMutableString *URLString = [NSMutableString stringWithString:[pub valueOfField:[@"ee" fieldName] inherit:NO]];
+    // some URLs have been converted for compatibility with TeX
+    [URLString replaceOccurrencesOfString:@"{\\&}" withString:@"&" options:0 range:NSMakeRange(0, [URLString length])];
+    NSURL *aURL;
+    if ([NSString isEmptyString:URLString] == NO && (aURL = [NSURL URLWithString:URLString]) != nil) {
+        
+        // some refs have a partial URL in the ee field that uses this as a base
+        if (nil == [aURL scheme]) {
+            [URLString insertString:@"http://dblp.uni-trier.de/" atIndex:0];
+            aURL = [NSURL URLWithString:URLString];
+        }
+        
+        if ([pub addFileForURL:aURL autoFile:NO runScriptHook:NO])
+            [pub setField:[@"ee" fieldName] toValue:nil];
+    }
+}
+
+- (void)addPublicationsFromBibTeXString:(bycopy NSString *)btString abstracts:(bycopy NSDictionary *)abstracts;
 {
     BDSKASSERT([NSThread isMainThread]);
+    NSArray *pubs = nil;
+    
+    if ([btString isEqualToString:@""]) {
+        // cancelled case
+        pubs = [NSArray array];
+    } else if (btString) {
+        pubs = [BDSKBibTeXParser itemsFromString:btString document:group isPartialData:NULL error:NULL];
+        for (BibItem *pub in pubs) {
+            NSString *aKey = [[pub citeKey] stringByRemovingPrefix:@"DBLP:"];
+            id value = [abstracts objectForKey:aKey];
+            if (value && [value isEqual:[NSNull null]] == NO)
+                [pub setValue:value forKey:BDSKAbstractString];
+            fixEEURL(pub);
+        }
+    }
+    
+    if (pubs) {
+        [self setNumberOfAvailableResults:[pubs count]];
+        [self setNumberOfFetchedResults:[pubs count]];
+    }
+    
+    // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+    
+    // this will create the array if it doesn't exist
     [group addPublications:pubs];
 }
 
@@ -232,29 +276,11 @@
     return searchResults;
 }
 
-static void fixEEURL(BibItem *pub)
-{
-    NSMutableString *URLString = [NSMutableString stringWithString:[pub valueOfField:[@"ee" fieldName] inherit:NO]];
-    // some URLs have been converted for compatibility with TeX
-    [URLString replaceOccurrencesOfString:@"{\\&}" withString:@"&" options:0 range:NSMakeRange(0, [URLString length])];
-    NSURL *aURL;
-    if ([NSString isEmptyString:URLString] == NO && (aURL = [NSURL URLWithString:URLString]) != nil) {
-        
-        // some refs have a partial URL in the ee field that uses this as a base
-        if (nil == [aURL scheme]) {
-            [URLString insertString:@"http://dblp.uni-trier.de/" atIndex:0];
-            aURL = [NSURL URLWithString:URLString];
-        }
-        
-        if ([pub addFileForURL:aURL autoFile:NO runScriptHook:NO])
-            [pub setField:[@"ee" fieldName] toValue:nil];
-    }
-}
-
 // Note:  WSGeneratedObj doesn't supply a way to cancel a request, so calling downloadWithSearchTerm: again with a non-empty string before the first request completes will cause a beachball.  This is mainly a problem on slow network connections.
 - (oneway void)downloadWithSearchTerm:(NSString *)searchTerm;
 {    
-    NSArray *pubs = nil;
+    NSString *btString = nil;
+    NSMutableDictionary *abstracts = nil;
     
     if (NO == [NSString isEmptyString:searchTerm]){
         
@@ -262,7 +288,7 @@ static void fixEEURL(BibItem *pub)
         [self setNumberOfAvailableResults:[dblpKeys count]];
 
         NSMutableSet *btEntries = [NSMutableSet set];
-        NSMutableDictionary *abstracts = [NSMutableDictionary dictionary];
+        abstracts = [NSMutableDictionary dictionary];
         for (NSString *aKey in dblpKeys) {
             if (flags.isRetrieving == 0) break;
             
@@ -281,34 +307,11 @@ static void fixEEURL(BibItem *pub)
             OSMemoryBarrier();
         }
         
-        NSString *btString = [[btEntries allObjects] componentsJoinedByString:@"\n"];
-        pubs = [BDSKBibTeXParser itemsFromString:btString document:group isPartialData:NULL error:NULL];
-        for (BibItem *pub in pubs) {
-            if (flags.isRetrieving == 0) break;
-            
-            NSString *aKey = [[pub citeKey] stringByRemovingPrefix:@"DBLP:"];
-            id value = [abstracts objectForKey:aKey];
-            if (value && [value isEqual:[NSNull null]] == NO)
-                [pub setValue:value forKey:BDSKAbstractString];
-            
-            fixEEURL(pub);
-            OSMemoryBarrier();
-        }
-        
-        // cancelled case
-        if (flags.isRetrieving == 0)
-            pubs = [NSArray array];
-        
-        [self setNumberOfAvailableResults:[pubs count]];
-        [self setNumberOfFetchedResults:[pubs count]];
-        
+        btString = (flags.isRetrieving == 0) ? @"" : [[btEntries allObjects] componentsJoinedByString:@"\n"];
     }
     
-    // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
-    
     // this will create the array if it doesn't exist
-    [[self serverOnMainThread] addPublicationsToGroup:pubs];
+    [[self serverOnMainThread] addPublicationsFromBibTeXString:btString abstracts:abstracts];
 }
 
 @end

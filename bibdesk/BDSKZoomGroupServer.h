@@ -43,7 +43,7 @@
 
 // private protocols for inter-thread messaging
 @protocol BDSKZoomGroupServerMainThread <BDSKAsyncDOServerMainThread>
-- (void)addPublicationsToGroup:(bycopy NSArray *)pubs;
+- (void)addPublicationsFromResults:(bycopy NSArray *)results;
 @end
 
 @protocol BDSKZoomGroupServerLocalThread <BDSKAsyncDOServerThread>

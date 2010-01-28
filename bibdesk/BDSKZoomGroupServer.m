@@ -195,9 +195,55 @@
 
 #pragma mark Main thread 
 
-- (void)addPublicationsToGroup:(bycopy NSArray *)pubs;
+- (NSInteger)stringTypeForRecordString:(NSString *)string
+{
+    NSString *recordSyntax = [serverInfo recordSyntax];
+    NSInteger stringType = BDSKUnknownStringType;
+    if([recordSyntax isEqualToString:USMARC_STRING] || [recordSyntax isEqualToString:UNIMARC_STRING]) {
+        stringType = BDSKMARCStringType;
+    } else if([recordSyntax isEqualToString:MARCXML_STRING]) {
+        stringType = BDSKMARCStringType;
+        if ([BDSKStringParser canParseString:string ofType:stringType] == NO)
+            stringType = BDSKDublinCoreStringType;
+    } else if([recordSyntax isEqualToString:DCXML_STRING]) {
+        stringType = BDSKDublinCoreStringType;
+        if ([BDSKStringParser canParseString:string ofType:stringType] == NO)
+            stringType = BDSKMARCStringType;
+    } else if([recordSyntax isEqualToString:MODS_STRING]) {
+        stringType = BDSKMODSStringType;
+    }
+    if (NO == [BDSKStringParser canParseString:string ofType:stringType])
+        stringType = [string contentStringType];
+    return stringType;
+}
+
+- (void)addPublicationsFromResults:(bycopy NSArray *)results;
 {
     BDSKASSERT([NSThread isMainThread]);
+    
+    NSMutableArray *pubs = nil;
+    if (results) {
+        pubs = [NSMutableArray array];
+        for (NSDictionary *result in results) {
+            NSString *record = [result objectForKey:@"rawString"];
+            NSInteger stringType = [self stringTypeForRecordString:record];
+            BibItem *anItem = [[BDSKStringParser itemsFromString:record ofType:stringType error:NULL] lastObject];
+            if (anItem == nil) {
+                record = [result objectForKey:@"renderedString"];
+                anItem = [[BibItem alloc] initWithType:BDSKBookString
+                                               citeKey:nil
+                                             pubFields:[NSDictionary dictionaryWithObjectsAndKeys:record, BDSKAnnoteString, nil]
+                                                 isNew:YES];
+                [anItem autorelease];
+            }
+            [pubs addObject:anItem];
+        }
+    }
+    
+    // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+
+    // this will create the array if it doesn't exist
     [group addPublications:pubs];
 }
 
@@ -241,28 +287,6 @@
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
 } 
 
-- (NSInteger)stringTypeForRecordString:(NSString *)string
-{
-    NSString *recordSyntax = [serverInfo recordSyntax];
-    NSInteger stringType = BDSKUnknownStringType;
-    if([recordSyntax isEqualToString:USMARC_STRING] || [recordSyntax isEqualToString:UNIMARC_STRING]) {
-        stringType = BDSKMARCStringType;
-    } else if([recordSyntax isEqualToString:MARCXML_STRING]) {
-        stringType = BDSKMARCStringType;
-        if ([BDSKStringParser canParseString:string ofType:stringType] == NO)
-            stringType = BDSKDublinCoreStringType;
-    } else if([recordSyntax isEqualToString:DCXML_STRING]) {
-        stringType = BDSKDublinCoreStringType;
-        if ([BDSKStringParser canParseString:string ofType:stringType] == NO)
-            stringType = BDSKMARCStringType;
-    } else if([recordSyntax isEqualToString:MODS_STRING]) {
-        stringType = BDSKMODSStringType;
-    }
-    if (NO == [BDSKStringParser canParseString:string ofType:stringType])
-        stringType = [string contentStringType];
-    return stringType;
-}
-
 - (oneway void)downloadWithSearchTerm:(NSString *)searchTerm;
 {
     // only reset the connection when we're actually going to use it, since a mixed host/database/port won't work
@@ -270,7 +294,7 @@
     if (flags.needsReset)
         [self resetConnection];
     
-    NSMutableArray *pubs = nil;
+    NSMutableArray *results = nil;
     
     if (NO == [NSString isEmptyString:searchTerm]){
         
@@ -303,32 +327,18 @@
             
             [self setNumberOfFetchedResults:[self numberOfFetchedResults] + numResults];
             
-            pubs = [NSMutableArray array];
-            NSString *record;
-            NSInteger stringType;
-            BibItem *anItem;
+            results = [NSMutableArray array];
+            NSDictionary *dict;
             for (id result in records) {
-                record = [result rawString];
-                stringType = [self stringTypeForRecordString:record];
-                anItem = [[BDSKStringParser itemsFromString:record ofType:stringType error:NULL] lastObject];
-                if (anItem == nil) {
-                    record = [result renderedString];
-                    anItem = [[BibItem alloc] initWithType:BDSKBookString
-                                                   citeKey:nil
-                                                 pubFields:[NSDictionary dictionaryWithObjectsAndKeys:record, BDSKAnnoteString, nil]
-                                                     isNew:YES];
-                    [anItem autorelease];
-                }
-                [pubs addObject:anItem];
+                dict = [[NSDictionary alloc] initWithObjectsAndKeys:[result rawString], @"rawString", [result renderedString], @"renderedString", nil];
+                [results addObject:dict];
+                [dict release];
             }
         }
         
     }
-    // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
-
-    // this will create the array if it doesn't exist
-    [[self serverOnMainThread] addPublicationsToGroup:pubs];
+    
+    [[self serverOnMainThread] addPublicationsFromResults:results];
 }
 
 - (void)serverDidFinish{
