@@ -285,88 +285,88 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
         // @@ Currently limited to WOS database; extension to other WOS databases might require different WebService stubs?  Note that the value we're passing as [info database] is referred to as  "edition" in the WoS docs.
         NSScanner *scanner;
         switch (operation) {
-        
-        case search:
-        resultInfo = [BDSKISISearchRetrieveService search:@"WOS"
-                                                 in_query:searchTerm
-                                                 in_depth:@""
-                                              in_editions:[info database]
-                                              in_firstRec:1
-                                               in_numRecs:1];
-            availableResultsLocal = [[resultInfo objectForKey:@"recordsFound"] integerValue];
-            break;
-        
-        case retrieve:
-            resultString = [BDSKISISearchRetrieveService retrieve:@"WOS"
-                                                   in_primaryKeys:searchTerm
-                                                          in_sort:@""
-                                                        in_fields:fields];
-            pubs = publicationsWithISIXMLString(resultString);
-            availableResultsLocal = [pubs count];
-            fetchedResultsLocal = [pubs count];
-            break;
-        
-        case retrieveRecid:
-            scanner = [[[NSScanner alloc] initWithString:searchTerm] autorelease];
-            identifiers = [[[NSMutableArray alloc] init] autorelease];
-            while ([scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL]) {
-                NSString *token;
-                if ([scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:&token])
-                    [identifiers addObject:token];
-            }
-            availableResultsLocal = [identifiers count];
-            break;
-        
-        case citedReferences:
-            resultString = [BDSKISISearchRetrieveService citedReferences:@"WOS"
-                                                           in_primaryKey:searchTerm];
-            if (resultString) {
-                NSMutableArray *hotRecids = [[[NSMutableArray alloc] init] autorelease];
-                pubs = publicationsWithISIRefXMLString(resultString, hotRecids);
-                NSRange retrieveRange = {0, 0};
-                while ([hotRecids count] > retrieveRange.location) {
-                    retrieveRange.length = MIN((NSUInteger)MAX_RESULTS, [hotRecids count] - retrieveRange.location);
-                    NSArray *subHotRecids = [hotRecids subarrayWithRange:retrieveRange];
-                    NSString *fullString;
-                    fullString = [BDSKISISearchRetrieveService retrieveRecid:@"WOS"
-                                                                    in_recid:[subHotRecids componentsJoinedByString:@" "]
-                                                                     in_sort:@""
-                                                                   in_fields:fields];
-                    if (fullString) {
-                        NSArray *fullPubs = publicationsWithISIXMLString(fullString);
-                        if (fullPubs)
-                            pubs = replacePubsByField(pubs, fullPubs, @"Isi-Recid");
-                    }
-                    retrieveRange.location += MAX_RESULTS;
-                }
-            }
-            availableResultsLocal = [pubs count];
-            fetchedResultsLocal = [pubs count];
-            break;
-        
-        case citingArticles:
-            resultInfo = [BDSKISISearchRetrieveService citingArticles:@"WOS"
-                                                        in_primaryKey:searchTerm
-                                                             in_depth:@""
-                                                          in_editions:[info database]
+            
+            case search:
+                resultInfo = [BDSKISISearchRetrieveService search:@"WOS"
+                                                         in_query:searchTerm
+                                                         in_depth:@""
+                                                      in_editions:[info database]
+                                                      in_firstRec:1
+                                                       in_numRecs:1];
+                availableResultsLocal = [[resultInfo objectForKey:@"recordsFound"] integerValue];
+                break;
+            
+            case retrieve:
+                resultString = [BDSKISISearchRetrieveService retrieve:@"WOS"
+                                                       in_primaryKeys:searchTerm
                                                               in_sort:@""
-                                                          in_firstRec:1
-                                                           in_numRecs:1
-                                                            in_fields:@""];
-            availableResultsLocal = [[resultInfo objectForKey:@"recordsFound"] integerValue];
-            break;
-        
-        case citingArticlesByRecids:
-            resultInfo = [BDSKISISearchRetrieveService citingArticlesByRecids:@"WOS"
-                                                                    in_recids:searchTerm
-                                                                     in_depth:@""
-                                                                  in_editions:[info database]
-                                                                      in_sort:@""
-                                                                  in_firstRec:1
-                                                                   in_numRecs:1
-                                                                    in_fields:@""];
-            availableResultsLocal = [[resultInfo objectForKey:@"recordsFound"] integerValue];
-            break;
+                                                            in_fields:fields];
+                pubs = publicationsWithISIXMLString(resultString);
+                availableResultsLocal = [pubs count];
+                fetchedResultsLocal = [pubs count];
+                break;
+            
+            case retrieveRecid:
+                scanner = [[[NSScanner alloc] initWithString:searchTerm] autorelease];
+                identifiers = [[[NSMutableArray alloc] init] autorelease];
+                while ([scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL]) {
+                    NSString *token;
+                    if ([scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:&token])
+                        [identifiers addObject:token];
+                }
+                availableResultsLocal = [identifiers count];
+                break;
+            
+            case citedReferences:
+                resultString = [BDSKISISearchRetrieveService citedReferences:@"WOS"
+                                                               in_primaryKey:searchTerm];
+                if (resultString) {
+                    NSMutableArray *hotRecids = [[[NSMutableArray alloc] init] autorelease];
+                    pubs = publicationsWithISIRefXMLString(resultString, hotRecids);
+                    NSRange retrieveRange = {0, 0};
+                    while ([hotRecids count] > retrieveRange.location) {
+                        retrieveRange.length = MIN((NSUInteger)MAX_RESULTS, [hotRecids count] - retrieveRange.location);
+                        NSArray *subHotRecids = [hotRecids subarrayWithRange:retrieveRange];
+                        NSString *fullString;
+                        fullString = [BDSKISISearchRetrieveService retrieveRecid:@"WOS"
+                                                                        in_recid:[subHotRecids componentsJoinedByString:@" "]
+                                                                         in_sort:@""
+                                                                       in_fields:fields];
+                        if (fullString) {
+                            NSArray *fullPubs = publicationsWithISIXMLString(fullString);
+                            if (fullPubs)
+                                pubs = replacePubsByField(pubs, fullPubs, @"Isi-Recid");
+                        }
+                        retrieveRange.location += MAX_RESULTS;
+                    }
+                }
+                availableResultsLocal = [pubs count];
+                fetchedResultsLocal = [pubs count];
+                break;
+            
+            case citingArticles:
+                resultInfo = [BDSKISISearchRetrieveService citingArticles:@"WOS"
+                                                            in_primaryKey:searchTerm
+                                                                 in_depth:@""
+                                                              in_editions:[info database]
+                                                                  in_sort:@""
+                                                              in_firstRec:1
+                                                               in_numRecs:1
+                                                                in_fields:@""];
+                availableResultsLocal = [[resultInfo objectForKey:@"recordsFound"] integerValue];
+                break;
+            
+            case citingArticlesByRecids:
+                resultInfo = [BDSKISISearchRetrieveService citingArticlesByRecids:@"WOS"
+                                                                        in_recids:searchTerm
+                                                                         in_depth:@""
+                                                                      in_editions:[info database]
+                                                                          in_sort:@""
+                                                                      in_firstRec:1
+                                                                       in_numRecs:1
+                                                                        in_fields:@""];
+                availableResultsLocal = [[resultInfo objectForKey:@"recordsFound"] integerValue];
+                break;
         }
         
         if (nil == resultString && nil == resultInfo && operation != retrieveRecid) {
@@ -381,62 +381,62 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
         if(numResults > 0) {
             // retrieve the actual XML results up to the maximum number per fetch
             switch (operation) {
-            
-            case search:
-            resultInfo = [BDSKISISearchRetrieveService searchRetrieve:@"WOS"
-                                                             in_query:searchTerm
-                                                             in_depth:@""
-                                                          in_editions:[info database]
-                                                              in_sort:@""
-                                                              in_firstRec:fetchedResultsLocal
-                                                           in_numRecs:numResults
-                                                                in_fields:fields];
-                resultString = [resultInfo objectForKey:@"records"];
-                break;
-            
-            case retrieveRecid:
-                searchTerm = [[identifiers subarrayWithRange:NSMakeRange(fetchedResultsLocal, numResults)] componentsJoinedByString:@" "];
-                resultString = [BDSKISISearchRetrieveService retrieveRecid:@"WOS"
-                                                                  in_recid:searchTerm
-                                                                   in_sort:@""
-                                                                 in_fields:fields];
-                break;
-
-            case citingArticles:
-                resultInfo = [BDSKISISearchRetrieveService citingArticles:@"WOS"
-                                                            in_primaryKey:searchTerm
-                                                                 in_depth:@""
-                                                              in_editions:[info database]
-                                                                  in_sort:@""
-                                                              in_firstRec:fetchedResultsLocal
-                                                               in_numRecs:numResults
-                                                                in_fields:fields];
-                resultString = [resultInfo objectForKey:@"records"];
-                break;
-            
-            case citingArticlesByRecids:
-                resultInfo = [BDSKISISearchRetrieveService citingArticlesByRecids:@"WOS"
-                                                                        in_recids:searchTerm
-                                                                         in_depth:@""
-                                                                      in_editions:[info database]
-                                                                          in_sort:@""
+                
+                case search:
+                    resultInfo = [BDSKISISearchRetrieveService searchRetrieve:@"WOS"
+                                                                     in_query:searchTerm
+                                                                     in_depth:@""
+                                                                  in_editions:[info database]
+                                                                      in_sort:@""
                                                                       in_firstRec:fetchedResultsLocal
-                                                                       in_numRecs:numResults
+                                                                   in_numRecs:numResults
                                                                         in_fields:fields];
-                resultString = [resultInfo objectForKey:@"records"];
-                break;
-            
-            // get rid of warnings
-            case retrieve:
-            case citedReferences:
-                break;
-        }
+                    resultString = [resultInfo objectForKey:@"records"];
+                    break;
+                
+                case retrieveRecid:
+                    searchTerm = [[identifiers subarrayWithRange:NSMakeRange(fetchedResultsLocal, numResults)] componentsJoinedByString:@" "];
+                    resultString = [BDSKISISearchRetrieveService retrieveRecid:@"WOS"
+                                                                      in_recid:searchTerm
+                                                                       in_sort:@""
+                                                                     in_fields:fields];
+                    break;
+
+                case citingArticles:
+                    resultInfo = [BDSKISISearchRetrieveService citingArticles:@"WOS"
+                                                                in_primaryKey:searchTerm
+                                                                     in_depth:@""
+                                                                  in_editions:[info database]
+                                                                      in_sort:@""
+                                                                  in_firstRec:fetchedResultsLocal
+                                                                   in_numRecs:numResults
+                                                                    in_fields:fields];
+                    resultString = [resultInfo objectForKey:@"records"];
+                    break;
+                
+                case citingArticlesByRecids:
+                    resultInfo = [BDSKISISearchRetrieveService citingArticlesByRecids:@"WOS"
+                                                                            in_recids:searchTerm
+                                                                             in_depth:@""
+                                                                          in_editions:[info database]
+                                                                              in_sort:@""
+                                                                          in_firstRec:fetchedResultsLocal
+                                                                           in_numRecs:numResults
+                                                                            in_fields:fields];
+                    resultString = [resultInfo objectForKey:@"records"];
+                    break;
+                
+                // get rid of warnings
+                case retrieve:
+                case citedReferences:
+                    break;
+            }
         
             pubs = publicationsWithISIXMLString(resultString);
             
             // now increment this so we don't get the same set next time; BDSKSearchGroup resets it when the searcn term changes
             fetchedResultsLocal += [pubs count];
-    }
+        }
     }
     
     [self setNumberOfAvailableResults:availableResultsLocal];
@@ -449,8 +449,8 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
     if (availableResultsLocal == (NSInteger)[pubs count]) {
         [[self serverOnMainThread] setPublicationsOfGroup:pubs];
     } else {
-    [[self serverOnMainThread] addPublicationsToGroup:pubs];
-}
+        [[self serverOnMainThread] addPublicationsToGroup:pubs];
+    }
 }
 
 #pragma mark XML Parsing
