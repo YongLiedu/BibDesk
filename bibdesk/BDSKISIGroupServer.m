@@ -57,9 +57,10 @@ static BOOL useTitlecase = YES;
 static NSArray *sourceXMLTagPriority = nil;
 static NSString *ISIURLFieldName = nil;
 
-static NSArray *publicationsWithISIXMLString(NSString *xmlString);
-static NSArray *publicationsWithISIRefXMLString(NSString *xmlString, NSMutableArray *hotRecids);
-static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName);
+static NSArray *publicationInfosWithISIXMLString(NSString *xmlString);
+static NSArray *publicationInfosWithISIRefXMLString(NSString *xmlString, NSMutableArray *hotRecids);
+static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName);
+static NSArray *publicationsFromDictionaries(NSArray *pubInfos);
 
 // private protocols for inter-thread messaging
 @protocol BDSKISIGroupServerMainThread <BDSKAsyncDOServerMainThread>
@@ -224,16 +225,16 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 
 #pragma mark Main thread
 
-- (void)addPublicationsToGroup:(bycopy NSArray *)pubs;
+- (void)addPublicationsToGroup:(bycopy NSArray *)pubInfos;
 {
     BDSKASSERT([NSThread isMainThread]);
-    [group addPublications:pubs];
+    [group addPublications:publicationsFromDictionaries(pubInfos)];
 }
 
-- (void)setPublicationsOfGroup:(bycopy NSArray *)pubs;
+- (void)setPublicationsOfGroup:(bycopy NSArray *)pubInfos;
 {
     BDSKASSERT([NSThread isMainThread]);
-    [group setPublications:pubs];
+    [group setPublications:publicationsFromDictionaries(pubInfos)];
 }
 
 #pragma mark Server thread
@@ -302,7 +303,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
                                                        in_primaryKeys:searchTerm
                                                               in_sort:@""
                                                             in_fields:fields];
-                pubs = publicationsWithISIXMLString(resultString);
+                pubs = publicationInfosWithISIXMLString(resultString);
                 availableResultsLocal = [pubs count];
                 fetchedResultsLocal = [pubs count];
                 break;
@@ -323,7 +324,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
                                                                in_primaryKey:searchTerm];
                 if (resultString) {
                     NSMutableArray *hotRecids = [[[NSMutableArray alloc] init] autorelease];
-                    pubs = publicationsWithISIRefXMLString(resultString, hotRecids);
+                    pubs = publicationInfosWithISIRefXMLString(resultString, hotRecids);
                     NSRange retrieveRange = {0, 0};
                     while ([hotRecids count] > retrieveRange.location) {
                         retrieveRange.length = MIN((NSUInteger)MAX_RESULTS, [hotRecids count] - retrieveRange.location);
@@ -334,9 +335,9 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
                                                                          in_sort:@""
                                                                        in_fields:fields];
                         if (fullString) {
-                            NSArray *fullPubs = publicationsWithISIXMLString(fullString);
+                            NSArray *fullPubs = publicationInfosWithISIXMLString(fullString);
                             if (fullPubs)
-                                pubs = replacePubsByField(pubs, fullPubs, @"Isi-Recid");
+                                pubs = replacePubInfosByField(pubs, fullPubs, @"Isi-Recid");
                         }
                         retrieveRange.location += MAX_RESULTS;
                     }
@@ -433,7 +434,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
                     break;
             }
         
-            pubs = publicationsWithISIXMLString(resultString);
+            pubs = publicationInfosWithISIXMLString(resultString);
             
             // now increment this so we don't get the same set next time; BDSKSearchGroup resets it when the searcn term changes
             fetchedResultsLocal += [pubs count];
@@ -494,7 +495,7 @@ static void addAuthorsFromXMLNode(NSXMLNode *child, NSMutableDictionary *pubFiel
     }
 }
 
-static BibItem *createBibItemWithRecord(NSXMLNode *record)
+static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
 {
     // this is now a field/value set for a particular publication record
     NSXMLNode *child = [record childCount] ? [record childAtIndex:0] : nil;
@@ -629,23 +630,18 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
     if (addXMLStringToAnnote)
         addStringToDictionaryIfNotNil([record XMLString], BDSKAnnoteString, pubFields);
     
-    BibItem *pub = [[BibItem alloc] initWithType:pubType
-                                         citeKey:nil
-                                       pubFields:pubFields
-                                           isNew:YES];
-    
     // insert the ISI URL into the normal file array if hasn't been put elsewhere
-    if (isiURL && ISIURLFieldName == nil) {
-        NSURL *newURL = [NSURL URLWithStringByNormalizingPercentEscapes:isiURL];
-        BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURL:newURL delegate:pub];
-        [pub insertObject:file inFilesAtIndex:0];
-    }
+    NSURL *newURL = nil;
+    if (isiURL && ISIURLFieldName == nil)
+        newURL = [NSURL URLWithStringByNormalizingPercentEscapes:isiURL];
+    
+    NSDictionary *pub = [[NSDictionary alloc] initWithObjectsAndKeys:pubType, @"pubType", pubFields, @"pubFields", newURL, @"URL", nil];
     
     [pubFields release];
     return pub;
 }
 
-static NSArray *publicationsWithISIXMLString(NSString *xmlString)
+static NSArray *publicationInfosWithISIXMLString(NSString *xmlString)
 {
     NSCParameterAssert(nil != xmlString);
     NSError *error;
@@ -664,7 +660,7 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString)
     
     while (nil != record) {
         
-        BibItem *pub = createBibItemWithRecord(record);
+        NSDictionary *pub = createPublicationInfoWithRecord(record);
         [pubs addObject:pub];
         [pub release];
         
@@ -673,7 +669,7 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString)
     return pubs;
 }
 
-static BibItem *createBibItemWithRefRecord(NSXMLNode *record)
+static NSDictionary *createBibItemWithRefRecord(NSXMLNode *record)
 {
     // this is now a field/value set for a particular publication record
     NSXMLNode *child = [record childCount] ? [record childAtIndex:0] : nil;
@@ -720,15 +716,13 @@ static BibItem *createBibItemWithRefRecord(NSXMLNode *record)
     if (addXMLStringToAnnote)
         addStringToDictionaryIfNotNil([record XMLString], BDSKAnnoteString, pubFields);
     
-    BibItem *pub = [[BibItem alloc] initWithType:pubType
-                                         citeKey:nil
-                                       pubFields:pubFields
-                                           isNew:YES];
+    NSDictionary *pub = [[NSDictionary alloc] initWithObjectsAndKeys:pubType, @"pubType", pubFields, @"pubFields", nil];
+    
     [pubFields release];
     return pub;
 }
 
-static NSArray *publicationsWithISIRefXMLString(NSString *xmlString, NSMutableArray *hotRecids)
+static NSArray *publicationInfosWithISIRefXMLString(NSString *xmlString, NSMutableArray *hotRecids)
 {
     NSCParameterAssert(nil != xmlString);
     NSError *error;
@@ -747,7 +741,7 @@ static NSArray *publicationsWithISIRefXMLString(NSString *xmlString, NSMutableAr
     
     while (nil != record) {
         
-        BibItem *pub = createBibItemWithRefRecord(record);
+        NSDictionary *pub = createBibItemWithRefRecord(record);
         [pubs addObject:pub];
         [pub release];
         
@@ -761,7 +755,7 @@ static NSArray *publicationsWithISIRefXMLString(NSString *xmlString, NSMutableAr
     return pubs;
 }
 
-static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName)
+static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName)
 {
     NSMutableArray *replacedPubs = [targetPubs mutableCopy];
     
@@ -770,20 +764,21 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
     NSUInteger i;
     for (i = 0; i < [sourcePubs count]; i++) {
         
-        BibItem *pub = [sourcePubs objectAtIndex:i];
+        NSDictionary *pub = [sourcePubs objectAtIndex:i];
+        NSString *value = [[pub objectForKey:@"pubFields"] objectForKey:fieldName];
         
-        if ([[pub pubFields] objectForKey:fieldName]) {
-            [sourcePubIndex setValue:pub forKey:[pub valueOfField:fieldName]];
+        if (value) {
+            [sourcePubIndex setValue:pub forKey:value];
         }
     }
     
     for (i = 0; i < [replacedPubs count]; i++) {
     
-        BibItem *pub = [replacedPubs objectAtIndex:i];
+        NSDictionary *pub = [replacedPubs objectAtIndex:i];
+        NSString *value = [[pub objectForKey:@"pubFields"] objectForKey:fieldName];
         
-        if ([[pub pubFields] objectForKey:fieldName]) {
-        
-            BibItem *replacedPub = [sourcePubIndex objectForKey:[pub valueOfField:fieldName]];
+        if (value) {
+            NSDictionary *replacedPub = [sourcePubIndex objectForKey:value];
             if (replacedPub)
                 [replacedPubs replaceObjectAtIndex:i withObject:replacedPub];
         }
@@ -792,5 +787,24 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
     return replacedPubs;
 }
 
+static NSArray *publicationsFromDictionaries(NSArray *pubInfos) {
+    NSMutableArray *pubs = [NSMutableArray arrayWithCapacity:[pubInfos count]];
+    for (NSDictionary *pubInfo in pubInfos) {
+        BibItem *pub = [[BibItem alloc] initWithType:[pubInfo objectForKey:@"pubType"]
+                                             citeKey:nil
+                                           pubFields:[pubInfo objectForKey:@"pubFields"]
+                                               isNew:YES];
+        
+        NSURL *newURL = [pubInfo objectForKey:@"URL"];
+        if (newURL) {
+            BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURL:newURL delegate:pub];
+            [pub insertObject:file inFilesAtIndex:0];
+        }
+        
+        [pubs addObject:pub];
+        [pub release];
+    }
+    return pubs;
+}
 
 @end
