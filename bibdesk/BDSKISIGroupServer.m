@@ -238,6 +238,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 
 #pragma mark Server thread
 
+// @@ Thread safety: it is not thread safe to get the publications on a secondary thread
 - (oneway void)downloadWithSearchTerm:(NSString *)searchTerm;
 {    
     NSArray *pubs = nil;
