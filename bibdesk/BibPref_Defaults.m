@@ -305,10 +305,11 @@ static NSSet *alwaysDisabledFields = nil;
     [citationFields release];
     [personFields release];
     
+    [[BDSKTypeManager sharedManager] updateCustomFields];
+    //notification of these changes is posted by the type manager, which observes the pref keys; this ensures that the type manager gets notified first, so notification observers don't get stale data; as a consequence, if you add another custom field type, the type manager needs to observe it in -init
+    
 	[defaultFieldsTableView reloadData];
 	[self updateDeleteButton];
-	
-    // !!! notification of these changes is posted by the type manager, which observes the pref keys; this ensures that the type manager gets notified first, so notification observers don't get stale data; as a consequence, if you add another custom field type, the type manager needs to observe it in -init
 }
 
 - (void)dealloc{

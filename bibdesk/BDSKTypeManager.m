@@ -195,13 +195,6 @@ static NSString *BDSKUserTypeInfoPath() {
         strictInvalidGeneralCharSet = [[NSCharacterSet alloc] init];
         
         separatorCharSet = [[NSCharacterSet characterSetWithCharactersInString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKGroupFieldSeparatorCharactersKey]] copy];
-        
-        // observe the pref changes for custom fields
-        for (NSString *prefKey in [NSSet setWithObjects:BDSKDefaultFieldsKey, BDSKLocalFileFieldsKey, BDSKRemoteURLFieldsKey, BDSKRatingFieldsKey, BDSKBooleanFieldsKey, BDSKTriStateFieldsKey, BDSKCitationFieldsKey, BDSKPersonFieldsKey, nil])
-            [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self
-                forKeyPath:[@"values." stringByAppendingString:prefKey]
-                   options:0
-                   context:&BDSKTypeManagerDefaultsObservationContext];
     }
 	return self;
 }
@@ -297,18 +290,9 @@ static NSString *BDSKUserTypeInfoPath() {
     }
 }
 
-#pragma mark KVO
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == &BDSKTypeManagerDefaultsObservationContext) {
-        [self reloadFieldSets];
-        
-        // coalesce notifications; this is received once each preference value that's set in BibPref_Defaults, but observers of BDSKCustomFieldsChangedNotification should only receive it once
-        NSNotification *note = [NSNotification notificationWithName:BDSKCustomFieldsChangedNotification object:self];
-        [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostASAP coalesceMask:NSNotificationCoalescingOnName forModes:[NSArray arrayWithObject:NSDefaultRunLoopMode]];
-    } else {
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-    }
+- (void)updateCustomFields {
+    [self reloadFieldSets];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKCustomFieldsChangedNotification object:self];
 }
 
 #pragma mark Setters

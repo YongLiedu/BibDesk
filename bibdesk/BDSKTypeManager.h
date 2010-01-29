@@ -98,6 +98,7 @@
 
 // Updating
 - (void)updateUserTypes:(NSArray *)newTypes andFields:(NSDictionary *)newFieldsForTypes;
+- (void)updateCustomFields;
 
 // BibTeX
 - (NSArray *)requiredFieldsForType:(NSString *)type;

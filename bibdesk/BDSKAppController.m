@@ -275,6 +275,7 @@ static void fixLegacyTableColumnIdentifiers()
             [(NSMutableArray *)personFields insertObject:BDSKEditorString atIndex:idx];
         [sud setObject:personFields forKey:BDSKPersonFieldsKey];
         [personFields release];
+        [[BDSKTypeManager sharedManager] updateCustomFields];
     }
     
     // name image to make it available app wide, also in IB
