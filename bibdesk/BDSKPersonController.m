@@ -74,6 +74,15 @@
 }
 
 - (void)dealloc{
+    [publicationTableView setDelegate:nil];
+    [publicationTableView setDataSource:nil];
+    [nameTableView setDelegate:nil];
+    [nameTableView setDataSource:nil];
+    [fieldTableView setDelegate:nil];
+    [fieldTableView setDataSource:nil];
+    [splitView setDelegate:nil];
+    [fieldNameSplitView setDelegate:nil];
+    [imageView setDelegate:nil];
     BDSKDESTROY(person);
     BDSKDESTROY(publicationItems);
     BDSKDESTROY(names);

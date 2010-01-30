@@ -90,6 +90,10 @@
 - (void)dealloc {
     [downloads makeObjectsPerformSelector:@selector(cancel)];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [webView setFrameLoadDelegate:nil];
+    [webView setUIDelegate:nil];
+    [webView setPolicyDelegate:nil];
+    [urlField setDelegate:nil];
     BDSKDESTROY(undoManager);
     BDSKDESTROY(downloads);
     BDSKDESTROY(fieldEditor);

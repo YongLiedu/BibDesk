@@ -178,6 +178,18 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [tableView setDelegate:nil];
+    [tableView setDataSource:nil];
+    [textViewSplitView setDelegate:nil];
+    [tableViewSplitView setDelegate:nil];
+    [specialTokenField setDelegate:nil];
+    [requiredTokenField setDelegate:nil];
+    [optionalTokenField setDelegate:nil];
+    [defaultTokenField setDelegate:nil];
+    [itemTemplateTokenField setDelegate:nil];
+    [prefixTemplateTextView setDelegate:nil];
+    [separatorTemplateTextView setDelegate:nil];
+    [suffixTemplateTextView setDelegate:nil];
     BDSKDESTROY(specialTokens);
     BDSKDESTROY(defaultTokens);
     BDSKDESTROY(fieldTokens);

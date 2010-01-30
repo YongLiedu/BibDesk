@@ -63,6 +63,7 @@
 }
 
 - (void)dealloc {
+    [urlField setDelegate:nil];
     BDSKDESTROY(urlString);
     BDSKDESTROY(group);
     BDSKDESTROY(undoManager);

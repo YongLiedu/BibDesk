@@ -64,6 +64,7 @@
 }
 
 - (void)dealloc {
+    [pathField setDelegate:nil];
     BDSKDESTROY(path);
     BDSKDESTROY(arguments);
     BDSKDESTROY(group);

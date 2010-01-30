@@ -98,6 +98,8 @@
 
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [tableView setDelegate:nil];
+    [tableView setDataSource:nil];
     BDSKDESTROY(macros);
     BDSKDESTROY(tableCellFormatter);
 	BDSKDESTROY(complexStringEditor);

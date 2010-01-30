@@ -74,6 +74,8 @@
 }
 
 - (void)dealloc {
+    [tv setDelegate:nil];
+    [tv setDataSource:nil];
     BDSKDESTROY(errorInfoDicts);
     BDSKDESTROY(document);
     BDSKDESTROY(fieldName);

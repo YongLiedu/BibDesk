@@ -82,6 +82,8 @@
 
 - (void)dealloc
 {
+    [tableView setDelegate:nil];
+    [tableView setDataSource:nil];
     BDSKDESTROY(results);
     [super dealloc];
 }

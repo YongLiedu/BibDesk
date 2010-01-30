@@ -78,6 +78,8 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [tableView setDelegate:nil];
+    [tableView setDataSource:nil];
     // should already have been taken care of in -stopSearching
     BDSKDESTROY(search);
     BDSKDESTROY(searchIndex);

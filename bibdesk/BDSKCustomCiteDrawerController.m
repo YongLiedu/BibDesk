@@ -53,6 +53,9 @@
 }
 
 - (void)dealloc{
+    [tableView setDelegate:nil];
+    [tableView setDataSource:nil];
+    document = nil;
     BDSKDESTROY(customStringArray);
     [super dealloc];
 }

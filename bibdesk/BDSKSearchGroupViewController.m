@@ -50,6 +50,7 @@
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [searchField setDelegate:nil];
     [super dealloc];
 }
 

@@ -66,6 +66,9 @@
 }
 
 - (void)dealloc {
+    [outlineView setDelegate:nil];
+    [outlineView setDataSource:nil];
+    [tokenField setDelegate:nil];
     BDSKDESTROY(url);
     BDSKDESTROY(notes);
     BDSKDESTROY(tags);
