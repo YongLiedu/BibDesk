@@ -285,6 +285,9 @@ static void fixLegacyTableColumnIdentifiers()
     [NSAppleEventDescriptor registerConversionHandler:[NSURL class]
                                              selector:@selector(fileURLWithAEDesc:)
                                    forDescriptorTypes:typeFileURL, typeAlias, typeFSRef, 'fss ', nil];
+    
+    // register URL handler
+    [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self andSelector:@selector(handleGetURLEvent:withReplyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification{
@@ -297,9 +300,6 @@ static void fixLegacyTableColumnIdentifiers()
     
     // validate the Cite Key and LocalUrl format strings
     [self checkFormatStrings];
-    
-    // register URL handler
-    [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self andSelector:@selector(handleGetURLEvent:withReplyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
     
     // register services
     [NSApp setServicesProvider:self];
