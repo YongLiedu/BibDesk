@@ -320,13 +320,6 @@ static void fixLegacyTableColumnIdentifiers()
         [self showReadMeFile:nil];
     [[NSUserDefaults standardUserDefaults] setObject:versionString forKey:BDSKLastVersionLaunchedKey];
     
-    // Ensure the previewer and TeX task get created now in order to avoid a spurious "unable to copy helper file" warning when quit->document window closes->first call to [BDSKPreviewer sharedPreviewer]
-    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey])
-        [BDSKPreviewer sharedPreviewer];
-	
-	if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowingPreviewKey])
-		[[BDSKPreviewer sharedPreviewer] showWindow:self];
-    
     // copy files to application support
     NSFileManager *fileManager = [NSFileManager defaultManager];
     [fileManager copyAllExportTemplatesToApplicationSupportAndOverwrite:NO];        
@@ -337,6 +330,13 @@ static void fixLegacyTableColumnIdentifiers()
     NSString *scriptsPath = [[fileManager currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"Scripts"];
     if ([fileManager fileExistsAtPath:scriptsPath] == NO)
         [fileManager createDirectoryAtPath:scriptsPath withIntermediateDirectories:NO attributes:nil error:NULL];
+    
+    // Ensure the previewer and TeX task get created now in order to avoid a spurious "unable to copy helper file" warning when quit->document window closes->first call to [BDSKPreviewer sharedPreviewer]
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey])
+        [BDSKPreviewer sharedPreviewer];
+	
+	if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowingPreviewKey])
+		[[BDSKPreviewer sharedPreviewer] showWindow:self];
     
     [self doSpotlightImportIfNeeded];
     
