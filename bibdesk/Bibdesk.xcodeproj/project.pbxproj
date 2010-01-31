@@ -131,6 +131,7 @@
 		CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3A0BD50B1634D500233208 /* BDSKCompletionServerProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CE4376F70D24341E00C993CF /* NSViewAnimation_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4376F50D24341E00C993CF /* NSViewAnimation_BDSKExtensions.m */; };
 		CE4385E90BB81D0500A56987 /* BDSKSearchBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */; };
+		CE4A0E141115ABEF000A95C5 /* BDSKServiceProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4A0E121115ABEF000A95C5 /* BDSKServiceProvider.m */; };
 		CE4D85290C3A8C8F002C20CB /* BDSKAutofileCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4D85270C3A8C8E002C20CB /* BDSKAutofileCommand.m */; };
 		CE51922109E5755600E97C3A /* BDSKFindFieldEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = CE51921F09E5755600E97C3A /* BDSKFindFieldEditor.m */; };
 		CE564D260AECBA5B002F0A24 /* NSScanner_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE564D240AECBA5B002F0A24 /* NSScanner_BDSKExtensions.m */; };
@@ -928,6 +929,8 @@
 		CE4385E60BB81D0500A56987 /* BDSKSearchBookmarkController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchBookmarkController.h; sourceTree = "<group>"; };
 		CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchBookmarkController.m; sourceTree = "<group>"; };
 		CE452AC00F1EBBD500DA1A5A /* TestBDSKRISParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestBDSKRISParser.h; sourceTree = "<group>"; };
+		CE4A0E111115ABEF000A95C5 /* BDSKServiceProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKServiceProvider.h; sourceTree = "<group>"; };
+		CE4A0E121115ABEF000A95C5 /* BDSKServiceProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKServiceProvider.m; sourceTree = "<group>"; };
 		CE4D85260C3A8C8E002C20CB /* BDSKAutofileCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKAutofileCommand.h; sourceTree = "<group>"; };
 		CE4D85270C3A8C8E002C20CB /* BDSKAutofileCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKAutofileCommand.m; sourceTree = "<group>"; };
 		CE51921E09E5755600E97C3A /* BDSKFindFieldEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFindFieldEditor.h; sourceTree = "<group>"; };
@@ -2029,6 +2032,7 @@
 				CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */,
 				CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */,
 				F9B800930B41DFAF00A5A615 /* BDSKSearchGroupSheetController.m */,
+				CE4A0E121115ABEF000A95C5 /* BDSKServiceProvider.m */,
 				CE8961BB0CBEB5AC00EA2D98 /* BDSKTemplateDocument.m */,
 				27AFAF9B080D1E1B0096F5D2 /* BDSKTextImportController.m */,
 				F98AA6800971E3F400184BD8 /* BDSKTextViewCompletionController.m */,
@@ -2547,6 +2551,7 @@
 				F920DAFC075C2B69000C5FCA /* BDSKSearchForCommand.h */,
 				CEBC676C0B4A845F00CE0B2D /* BDSKSearchGroupViewController.h */,
 				CE9666430B46B70C003BAB9A /* BDSKServerInfo.h */,
+				CE4A0E111115ABEF000A95C5 /* BDSKServiceProvider.h */,
 				F92EF32009E6242100A244D0 /* BDSKSharedGroup.h */,
 				CE6FB32009DFFCB5005E3E14 /* BDSKSharingBrowser.h */,
 				CE82B2CF0D57AE0B00A2E8C5 /* BDSKSharingClient.h */,
@@ -3558,6 +3563,7 @@
 				CE6DA03211052C81001CD28E /* BDSKFormatStringFormatter.m in Sources */,
 				CE6DA03F11052CF4001CD28E /* BDSKFormatStringFieldEditor.m in Sources */,
 				CEFF3180110B27ED0098DD17 /* BDSKFilerErrorController.m in Sources */,
+				CE4A0E141115ABEF000A95C5 /* BDSKServiceProvider.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

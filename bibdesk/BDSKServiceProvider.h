@@ -1,9 +1,11 @@
-//  BDSKAppController.h
-
-//  Created by Michael McCracken on Sat Jan 19 2002.
+//
+//  BDSKServiceProvider.h
+//  Bibdesk
+//
+//  Created by Christiaan on 1/31/10.
 /*
- This software is Copyright (c) 2002-2010
- Michael O. McCracken. All rights reserved.
+ This software is Copyright (c) 2010
+ Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -17,7 +19,7 @@
     the documentation and/or other materials provided with the
     distribution.
 
- - Neither the name of Michael O. McCracken nor the names of any
+ - Neither the name of Christiaan Hofman nor the names of any
     contributors may be used to endorse or promote products derived
     from this software without specific prior written permission.
 
@@ -37,34 +39,16 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKAppController : NSObject <NSApplicationDelegate, NSMenuDelegate> {
-	IBOutlet NSMenu *columnsMenu;
-	IBOutlet NSMenu *groupSortMenu;
-	IBOutlet NSMenu *groupFieldMenu;
-	IBOutlet NSMenu *copyAsTemplateMenu;
-	IBOutlet NSMenu *previewDisplayMenu;
-	IBOutlet NSMenu *sidePreviewDisplayMenu;
-	IBOutlet NSMenu *searchBookmarksMenu;
-	IBOutlet NSMenu *bookmarksMenu;
+@interface BDSKServiceProvider : NSObject
 
-    NSConnection *completionConnection;
-}
++ (id)sharedServiceProvider;
 
-- (IBAction)visitWebSite:(id)sender;
-- (IBAction)visitWiki:(id)sender;
-- (IBAction)reportBug:(id)sender;
-- (IBAction)requestFeature:(id)sender;
-
-- (IBAction)toggleShowingErrorPanel:(id)sender;
-- (IBAction)toggleShowingPreviewPanel:(id)sender;
-
-- (IBAction)showReadMeFile:(id)sender;
-- (IBAction)showRelNotes:(id)sender;
-
-- (IBAction)editSearchBookmarks:(id)sender;
-
-- (IBAction)showBookmarks:(id)sender;
-
-- (IBAction)toggleShowingOrphanedFilesPanel:(id)sender;
+- (void)completeCitationFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
+- (void)completeTextBibliographyFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
+- (void)completeRichBibliographyFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
+- (void)completeCiteKeyFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
+- (void)showPubWithKey:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
+- (void)openDocumentFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
+- (void)addPublicationsFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
 
 @end
