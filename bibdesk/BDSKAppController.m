@@ -1050,7 +1050,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 }
 
-- (void)newDocumentFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error{	
+- (void)openDocumentFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error{	
 
     id doc = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:NULL];
     NSError *nsError = nil;
@@ -1070,7 +1070,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 	BibDocument * doc = [[NSDocumentController sharedDocumentController] mainDocument];
     if (nil == doc) {
         // create a new document if we don't have one, or else this method appears to fail mysteriosly (since the error isn't displayed)
-        [self newDocumentFromSelection:pboard userData:userData error:error];
+        [self openDocumentFromSelection:pboard userData:userData error:error];
 	} else {
         NSError *addError = nil;
         if([doc addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:NO error:&addError] == nil || addError != nil)

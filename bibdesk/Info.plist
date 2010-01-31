@@ -336,7 +336,7 @@
 				<string>BibDesk/New Document With Selection</string>
 			</dict>
 			<key>NSMessage</key>
-			<string>newDocumentFromSelection</string>
+			<string>openDocumentFromSelection</string>
 			<key>NSPortName</key>
 			<string>BibDesk</string>
 			<key>NSSendTypes</key>

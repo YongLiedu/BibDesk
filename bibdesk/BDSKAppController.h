@@ -72,7 +72,7 @@
 - (void)completeRichBibliographyFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
 - (void)completeCiteKeyFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
 - (void)showPubWithKey:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
-- (void)newDocumentFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
+- (void)openDocumentFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
 - (void)addPublicationsFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
 
 @end
