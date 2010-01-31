@@ -297,7 +297,6 @@ static void fixLegacyTableColumnIdentifiers()
     
     // register services
     [NSApp setServicesProvider:[BDSKServiceProvider sharedServiceProvider]];
-    [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObject:NSStringPboardType] returnTypes:[NSArray arrayWithObject:NSStringPboardType]];
     
     // register server for cite key completion
     completionConnection = [[NSConnection alloc] initWithReceivePort:[NSPort port] sendPort:nil];
