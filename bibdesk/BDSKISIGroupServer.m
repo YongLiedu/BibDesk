@@ -597,8 +597,10 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
         else if ([name isEqualToString:@"ut"]) {
             addStringValueOfNodeForField(child, @"Isi", pubFields);
             isiURL = [@"http://gateway.isiknowledge.com/gateway/Gateway.cgi?GWVersion=2&SrcAuth=Alerting&SrcApp=Alerting&DestApp=WOS&DestLinkType=FullRecord;KeyUT=" stringByAppendingString:[pubFields objectForKey:@"Isi"]];
-            if (ISIURLFieldName)
+            if (ISIURLFieldName) {
                 [pubFields setObject:isiURL forKey:ISIURLFieldName];
+                isiURL = nil;
+            }
         } else if ([name isEqualToString:@"refs"])
             addStringToDictionaryIfNotNil( nodeStringsForXPathJoinedByString(child, @".//ref", @" "), @"Isi-Ref-Recids", pubFields);
         
@@ -630,12 +632,7 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
     if (addXMLStringToAnnote)
         addStringToDictionaryIfNotNil([record XMLString], BDSKAnnoteString, pubFields);
     
-    // insert the ISI URL into the normal file array if hasn't been put elsewhere
-    NSURL *newURL = nil;
-    if (isiURL && ISIURLFieldName == nil)
-        newURL = [NSURL URLWithStringByNormalizingPercentEscapes:isiURL];
-    
-    NSDictionary *pub = [[NSDictionary alloc] initWithObjectsAndKeys:pubType, @"pubType", pubFields, @"pubFields", newURL, @"URL", nil];
+    NSDictionary *pub = [[NSDictionary alloc] initWithObjectsAndKeys:pubType, @"pubType", pubFields, @"pubFields", isiURL, @"isiURL", nil];
     
     [pubFields release];
     return pub;
@@ -795,8 +792,10 @@ static NSArray *publicationsFromDictionaries(NSArray *pubInfos) {
                                            pubFields:[pubInfo objectForKey:@"pubFields"]
                                                isNew:YES];
         
-        NSURL *newURL = [pubInfo objectForKey:@"URL"];
-        if (newURL) {
+        // insert the ISI URL into the normal file array if hasn't been put elsewhere
+        NSString *isiURL = [pubInfo objectForKey:@"isiURL"];
+        if (isiURL) {
+            NSURL *newURL = [NSURL URLWithStringByNormalizingPercentEscapes:isiURL];
             BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURL:newURL delegate:pub];
             [pub insertObject:file inFilesAtIndex:0];
         }
