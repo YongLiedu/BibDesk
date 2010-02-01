@@ -60,12 +60,12 @@ static NSString *ISIURLFieldName = nil;
 static NSArray *publicationInfosWithISIXMLString(NSString *xmlString);
 static NSArray *publicationInfosWithISIRefXMLString(NSString *xmlString, NSMutableArray *hotRecids);
 static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName);
-static NSArray *publicationsFromDictionaries(NSArray *pubInfos);
+static NSArray *publicationsFromData(NSData *data);
 
 // private protocols for inter-thread messaging
 @protocol BDSKISIGroupServerMainThread <BDSKAsyncDOServerMainThread>
-- (void)addPublicationsToGroup:(bycopy NSArray *)pubs;
-- (void)setPublicationsOfGroup:(bycopy NSArray *)pubs;
+- (void)addPublicationsToGroup:(bycopy NSData *)data;
+- (void)setPublicationsOfGroup:(bycopy NSData *)data;
 @end
 
 @protocol BDSKISIGroupServerLocalThread <BDSKAsyncDOServerThread>
@@ -225,16 +225,16 @@ static NSArray *publicationsFromDictionaries(NSArray *pubInfos);
 
 #pragma mark Main thread
 
-- (void)addPublicationsToGroup:(bycopy NSArray *)pubInfos;
+- (void)addPublicationsToGroup:(bycopy NSData *)data;
 {
     BDSKASSERT([NSThread isMainThread]);
-    [group addPublications:publicationsFromDictionaries(pubInfos)];
+    [group addPublications:publicationsFromData(data)];
 }
 
-- (void)setPublicationsOfGroup:(bycopy NSArray *)pubInfos;
+- (void)setPublicationsOfGroup:(bycopy NSData *)data;
 {
     BDSKASSERT([NSThread isMainThread]);
-    [group setPublications:publicationsFromDictionaries(pubInfos)];
+    [group setPublications:publicationsFromData(data)];
 }
 
 #pragma mark Server thread
@@ -447,11 +447,13 @@ static NSArray *publicationsFromDictionaries(NSArray *pubInfos);
     // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
     
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:pubs];
+    
     // this will create the array if it doesn't exist
     if (availableResultsLocal == (NSInteger)[pubs count]) {
-        [[self serverOnMainThread] setPublicationsOfGroup:pubs];
+        [[self serverOnMainThread] setPublicationsOfGroup:data];
     } else {
-        [[self serverOnMainThread] addPublicationsToGroup:pubs];
+        [[self serverOnMainThread] addPublicationsToGroup:data];
     }
 }
 
@@ -784,7 +786,8 @@ static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs,
     return replacedPubs;
 }
 
-static NSArray *publicationsFromDictionaries(NSArray *pubInfos) {
+static NSArray *publicationsFromData(NSData *data) {
+    NSArray *pubInfos = [NSKeyedUnarchiver unarchiveObjectWithData:data];
     NSMutableArray *pubs = [NSMutableArray arrayWithCapacity:[pubInfos count]];
     for (NSDictionary *pubInfo in pubInfos) {
         BibItem *pub = [[BibItem alloc] initWithType:[pubInfo objectForKey:@"pubType"]
