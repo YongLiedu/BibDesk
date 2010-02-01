@@ -338,11 +338,12 @@
             [self setNumberOfFetchedResults:[self numberOfFetchedResults] + numResults];
             
             results = [NSMutableArray array];
-            NSDictionary *dict;
             for (id result in records) {
-                dict = [[NSDictionary alloc] initWithObjectsAndKeys:[result rawString], @"rawString", [result renderedString], @"renderedString", nil];
-                [results addObject:dict];
-                [dict release];
+                NSString *rawString = [result rawString];
+                NSString *renderedString = [result renderedString];
+                NSDictionary *resultDict = [[NSDictionary alloc] initWithObjectsAndKeys:rawString, @"rawString", renderedString, @"renderedString", nil];
+                [results addObject:resultDict];
+                [resultDict release];
             }
         }
         
