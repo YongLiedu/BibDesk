@@ -46,6 +46,18 @@
 #import "NSURL_BDSKExtensions.h"
 #import "BDSKReadWriteLock.h"
 
+#define SERVER_URL @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"
+
+#define WOS_DB_ID @"WOS"
+
+#define RECORDSFOUND_KEY @"recordsFound"
+#define RECORDS_KEY @"records"
+
+#define BDSKAddISIXMLStringToAnnoteKey @"BDSKAddISIXMLStringToAnnote"
+#define BDSKDisableISITitleCasingKey @"BDSKDisableISITitleCasing"
+#define BDSKISISourceXMLTagPriorityKey @"BDSKISISourceXMLTagPriority"
+#define BDSKISIURLFieldNameKey @"BDSKISIURLFieldName"
+
 #define DefaultISIURLFieldName @"ISI URL"
 
 #define MAX_RESULTS 100
@@ -78,7 +90,7 @@ static NSArray *publicationsFromData(NSData *data);
 
 + (BOOL)canConnect;
 {
-    CFURLRef theURL = (CFURLRef)[NSURL URLWithString:@"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"];
+    CFURLRef theURL = (CFURLRef)[NSURL URLWithString:SERVER_URL];
     CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(CFGetAllocator(theURL), theURL);
     
     NSString *details;
@@ -97,16 +109,16 @@ static NSArray *publicationsFromData(NSData *data);
 {
     BDSKINITIALIZE;
     // this is messy, but may be useful for debugging
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKAddISIXMLStringToAnnote"])
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKAddISIXMLStringToAnnoteKey])
         addXMLStringToAnnote = YES;
     // try to allow for common titlecasing in Web of Science (which gives us uppercase titles)
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableISITitleCasing"])
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKDisableISITitleCasingKey])
         useTitlecase = NO;
     // prioritized list of XML tag names for getting the source field value
-    sourceXMLTagPriority = [[[NSUserDefaults standardUserDefaults] arrayForKey:@"BDSKISISourceXMLTagPriority"] retain];
+    sourceXMLTagPriority = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKISISourceXMLTagPriorityKey] retain];
 
     // set the ISI URL in a specified field name
-    ISIURLFieldName = [([[NSUserDefaults standardUserDefaults] stringForKey:@"BDSKISIURLFieldName"] ?: DefaultISIURLFieldName) retain];
+    ISIURLFieldName = [([[NSUserDefaults standardUserDefaults] stringForKey:BDSKISIURLFieldNameKey] ?: DefaultISIURLFieldName) retain];
 }
 
 - (Protocol *)protocolForMainThread { return @protocol(BDSKISIGroupServerMainThread); }
@@ -291,17 +303,17 @@ static NSArray *publicationsFromData(NSData *data);
         switch (operation) {
             
             case search:
-                resultInfo = [BDSKISISearchRetrieveService search:@"WOS"
+                resultInfo = [BDSKISISearchRetrieveService search:WOS_DB_ID
                                                          in_query:searchTerm
                                                          in_depth:@""
                                                       in_editions:[info database]
                                                       in_firstRec:1
                                                        in_numRecs:1];
-                availableResultsLocal = [[resultInfo objectForKey:@"recordsFound"] integerValue];
+                availableResultsLocal = [[resultInfo objectForKey:RECORDSFOUND_KEY] integerValue];
                 break;
             
             case retrieve:
-                resultString = [BDSKISISearchRetrieveService retrieve:@"WOS"
+                resultString = [BDSKISISearchRetrieveService retrieve:WOS_DB_ID
                                                        in_primaryKeys:searchTerm
                                                               in_sort:@""
                                                             in_fields:fields];
@@ -322,7 +334,7 @@ static NSArray *publicationsFromData(NSData *data);
                 break;
             
             case citedReferences:
-                resultString = [BDSKISISearchRetrieveService citedReferences:@"WOS"
+                resultString = [BDSKISISearchRetrieveService citedReferences:WOS_DB_ID
                                                                in_primaryKey:searchTerm];
                 if (resultString) {
                     NSMutableArray *hotRecids = [[[NSMutableArray alloc] init] autorelease];
@@ -332,7 +344,7 @@ static NSArray *publicationsFromData(NSData *data);
                         retrieveRange.length = MIN((NSUInteger)MAX_RESULTS, [hotRecids count] - retrieveRange.location);
                         NSArray *subHotRecids = [hotRecids subarrayWithRange:retrieveRange];
                         NSString *fullString;
-                        fullString = [BDSKISISearchRetrieveService retrieveRecid:@"WOS"
+                        fullString = [BDSKISISearchRetrieveService retrieveRecid:WOS_DB_ID
                                                                         in_recid:[subHotRecids componentsJoinedByString:@" "]
                                                                          in_sort:@""
                                                                        in_fields:fields];
@@ -349,7 +361,7 @@ static NSArray *publicationsFromData(NSData *data);
                 break;
             
             case citingArticles:
-                resultInfo = [BDSKISISearchRetrieveService citingArticles:@"WOS"
+                resultInfo = [BDSKISISearchRetrieveService citingArticles:WOS_DB_ID
                                                             in_primaryKey:searchTerm
                                                                  in_depth:@""
                                                               in_editions:[info database]
@@ -357,11 +369,11 @@ static NSArray *publicationsFromData(NSData *data);
                                                               in_firstRec:1
                                                                in_numRecs:1
                                                                 in_fields:@""];
-                availableResultsLocal = [[resultInfo objectForKey:@"recordsFound"] integerValue];
+                availableResultsLocal = [[resultInfo objectForKey:RECORDSFOUND_KEY] integerValue];
                 break;
             
             case citingArticlesByRecids:
-                resultInfo = [BDSKISISearchRetrieveService citingArticlesByRecids:@"WOS"
+                resultInfo = [BDSKISISearchRetrieveService citingArticlesByRecids:WOS_DB_ID
                                                                         in_recids:searchTerm
                                                                          in_depth:@""
                                                                       in_editions:[info database]
@@ -369,7 +381,7 @@ static NSArray *publicationsFromData(NSData *data);
                                                                       in_firstRec:1
                                                                        in_numRecs:1
                                                                         in_fields:@""];
-                availableResultsLocal = [[resultInfo objectForKey:@"recordsFound"] integerValue];
+                availableResultsLocal = [[resultInfo objectForKey:RECORDSFOUND_KEY] integerValue];
                 break;
         }
         
@@ -387,7 +399,7 @@ static NSArray *publicationsFromData(NSData *data);
             switch (operation) {
                 
                 case search:
-                    resultInfo = [BDSKISISearchRetrieveService searchRetrieve:@"WOS"
+                    resultInfo = [BDSKISISearchRetrieveService searchRetrieve:WOS_DB_ID
                                                                      in_query:searchTerm
                                                                      in_depth:@""
                                                                   in_editions:[info database]
@@ -395,19 +407,19 @@ static NSArray *publicationsFromData(NSData *data);
                                                                       in_firstRec:fetchedResultsLocal
                                                                    in_numRecs:numResults
                                                                         in_fields:fields];
-                    resultString = [resultInfo objectForKey:@"records"];
+                    resultString = [resultInfo objectForKey:RECORDS_KEY];
                     break;
                 
                 case retrieveRecid:
                     searchTerm = [[identifiers subarrayWithRange:NSMakeRange(fetchedResultsLocal, numResults)] componentsJoinedByString:@" "];
-                    resultString = [BDSKISISearchRetrieveService retrieveRecid:@"WOS"
+                    resultString = [BDSKISISearchRetrieveService retrieveRecid:WOS_DB_ID
                                                                       in_recid:searchTerm
                                                                        in_sort:@""
                                                                      in_fields:fields];
                     break;
 
                 case citingArticles:
-                    resultInfo = [BDSKISISearchRetrieveService citingArticles:@"WOS"
+                    resultInfo = [BDSKISISearchRetrieveService citingArticles:WOS_DB_ID
                                                                 in_primaryKey:searchTerm
                                                                      in_depth:@""
                                                                   in_editions:[info database]
@@ -415,11 +427,11 @@ static NSArray *publicationsFromData(NSData *data);
                                                                   in_firstRec:fetchedResultsLocal
                                                                    in_numRecs:numResults
                                                                     in_fields:fields];
-                    resultString = [resultInfo objectForKey:@"records"];
+                    resultString = [resultInfo objectForKey:RECORDS_KEY];
                     break;
                 
                 case citingArticlesByRecids:
-                    resultInfo = [BDSKISISearchRetrieveService citingArticlesByRecids:@"WOS"
+                    resultInfo = [BDSKISISearchRetrieveService citingArticlesByRecids:WOS_DB_ID
                                                                             in_recids:searchTerm
                                                                              in_depth:@""
                                                                           in_editions:[info database]
@@ -427,7 +439,7 @@ static NSArray *publicationsFromData(NSData *data);
                                                                           in_firstRec:fetchedResultsLocal
                                                                            in_numRecs:numResults
                                                                             in_fields:fields];
-                    resultString = [resultInfo objectForKey:@"records"];
+                    resultString = [resultInfo objectForKey:RECORDS_KEY];
                     break;
                 
                 // get rid of warnings
@@ -759,12 +771,12 @@ static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs,
     NSDictionary *replacedPub;
     
     for (pub in sourcePubs) {
-        if (value = [[pub objectForKey:@"pubFields"] objectForKey:fieldName])
+        if (value = [pub objectForKey:fieldName])
             [sourcePubIndex setValue:pub forKey:value];
     }
     
     for (pub in targetPubs) {
-        if ((value = [[pub objectForKey:@"pubFields"] objectForKey:fieldName]) &&
+        if ((value = [pub objectForKey:fieldName]) &&
             (replacedPub = [sourcePubIndex objectForKey:value]))
             pub = replacedPub;
         [outPubs addObject:pub]; 
@@ -780,7 +792,7 @@ static NSArray *publicationsFromData(NSData *data) {
         NSMutableDictionary *pubFields = [pubInfo mutableCopy];
         NSArray *files = nil;
         
-        NSString *pubType = [pubFields objectForKey:@"pubType"];
+        NSString *pubType = [pubFields objectForKey:BDSKPubTypeString];
         [pubFields removeObjectForKey:BDSKPubTypeString];
         
         // insert the ISI URL into the normal file array if hasn't been put elsewhere
