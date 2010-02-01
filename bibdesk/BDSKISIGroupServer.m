@@ -669,7 +669,7 @@ static NSArray *publicationInfosWithISIXMLString(NSString *xmlString)
     return pubs;
 }
 
-static NSDictionary *createBibItemWithRefRecord(NSXMLNode *record)
+static NSDictionary *createPublicationInfoWithRefRecord(NSXMLNode *record)
 {
     // this is now a field/value set for a particular publication record
     NSXMLNode *child = [record childCount] ? [record childAtIndex:0] : nil;
@@ -741,7 +741,7 @@ static NSArray *publicationInfosWithISIRefXMLString(NSString *xmlString, NSMutab
     
     while (nil != record) {
         
-        NSDictionary *pub = createBibItemWithRefRecord(record);
+        NSDictionary *pub = createPublicationInfoWithRefRecord(record);
         [pubs addObject:pub];
         [pub release];
         
