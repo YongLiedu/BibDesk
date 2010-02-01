@@ -67,7 +67,6 @@
 #define BIBTEX_TYPES_FOR_REFER_TYPES_KEY      @"BibTeXTypesForReferTypes"
 #define BIBTEX_TYPES_FOR_HCITE_TYPES_KEY      @"BibTeXTypesForHCiteTypes"
 
-static char BDSKTypeManagerDefaultsObservationContext;
 
 @interface BDSKTypeManager (BDSKPrivate)
 
