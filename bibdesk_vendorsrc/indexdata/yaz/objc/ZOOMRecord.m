@@ -179,7 +179,7 @@ static NSData *copyMARC8BytesToUTF8(const char *buf, NSInteger length);
     NSString *string = [_representations objectForKey:rawKey];
     if (nil == string) {
         string = [self copyStringValueForKey:@"raw"];
-        [_representations setObject:string forKey:renderKey];
+        [_representations setObject:string forKey:rawKey];
         [string release];
     }
     return string;
