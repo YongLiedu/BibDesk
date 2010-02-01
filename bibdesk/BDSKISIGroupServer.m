@@ -46,6 +46,8 @@
 #import "NSURL_BDSKExtensions.h"
 #import "BDSKReadWriteLock.h"
 
+#define DefaultISIURLFieldName @"ISI URL"
+
 #define MAX_RESULTS 100
 #ifdef DEBUG
 static BOOL addXMLStringToAnnote = YES;
@@ -101,10 +103,10 @@ static NSArray *publicationsFromData(NSData *data);
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableISITitleCasing"])
         useTitlecase = NO;
     // prioritized list of XML tag names for getting the source field value
-    sourceXMLTagPriority = [[NSUserDefaults standardUserDefaults] arrayForKey:@"BDSKISISourceXMLTagPriority"];
+    sourceXMLTagPriority = [[[NSUserDefaults standardUserDefaults] arrayForKey:@"BDSKISISourceXMLTagPriority"] retain];
 
     // set the ISI URL in a specified field name
-    ISIURLFieldName = [[NSUserDefaults standardUserDefaults] stringForKey:@"BDSKISIURLFieldName"];
+    ISIURLFieldName = [([[NSUserDefaults standardUserDefaults] stringForKey:@"BDSKISIURLFieldName"] ?: DefaultISIURLFieldName) retain];
 }
 
 - (Protocol *)protocolForMainThread { return @protocol(BDSKISIGroupServerMainThread); }
@@ -525,6 +527,8 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
         addStringToDictionaryIfNotNil(docType, BDSKTypeString, pubFields);
     }
     
+    [pubFields setObject:pubType forKey:BDSKPubTypeString];
+    
     addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"timescited"] stringValue], @"Times-Cited", pubFields);
     addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"recid"] stringValue], @"Isi-Recid", pubFields);
         
@@ -599,10 +603,7 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
         else if ([name isEqualToString:@"ut"]) {
             addStringValueOfNodeForField(child, @"Isi", pubFields);
             isiURL = [@"http://gateway.isiknowledge.com/gateway/Gateway.cgi?GWVersion=2&SrcAuth=Alerting&SrcApp=Alerting&DestApp=WOS&DestLinkType=FullRecord;KeyUT=" stringByAppendingString:[pubFields objectForKey:@"Isi"]];
-            if (ISIURLFieldName) {
-                [pubFields setObject:isiURL forKey:ISIURLFieldName];
-                isiURL = nil;
-            }
+            [pubFields setObject:isiURL forKey:ISIURLFieldName];
         } else if ([name isEqualToString:@"refs"])
             addStringToDictionaryIfNotNil( nodeStringsForXPathJoinedByString(child, @".//ref", @" "), @"Isi-Ref-Recids", pubFields);
         
@@ -634,10 +635,7 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
     if (addXMLStringToAnnote)
         addStringToDictionaryIfNotNil([record XMLString], BDSKAnnoteString, pubFields);
     
-    NSDictionary *pub = [[NSDictionary alloc] initWithObjectsAndKeys:pubType, @"pubType", pubFields, @"pubFields", isiURL, @"isiURL", nil];
-    
-    [pubFields release];
-    return pub;
+    return pubFields;
 }
 
 static NSArray *publicationInfosWithISIXMLString(NSString *xmlString)
@@ -675,8 +673,9 @@ static NSDictionary *createPublicationInfoWithRefRecord(NSXMLNode *record)
     NSMutableDictionary *pubFields = [NSMutableDictionary new];
 
     // fallback values
-    NSString *pubType = BDSKArticleString;
     NSString *sourceField = BDSKJournalString;
+    
+    [pubFields setObject:BDSKArticleString forKey:BDSKPubTypeString];
     
     addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"timescited"] stringValue], @"Timescited", pubFields);
     addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"recid"] stringValue], @"Isi-Recid", pubFields);
@@ -715,10 +714,7 @@ static NSDictionary *createPublicationInfoWithRefRecord(NSXMLNode *record)
     if (addXMLStringToAnnote)
         addStringToDictionaryIfNotNil([record XMLString], BDSKAnnoteString, pubFields);
     
-    NSDictionary *pub = [[NSDictionary alloc] initWithObjectsAndKeys:pubType, @"pubType", pubFields, @"pubFields", nil];
-    
-    [pubFields release];
-    return pub;
+    return pubFields;
 }
 
 static NSArray *publicationInfosWithISIRefXMLString(NSString *xmlString, NSMutableArray *hotRecids)
@@ -756,55 +752,50 @@ static NSArray *publicationInfosWithISIRefXMLString(NSString *xmlString, NSMutab
 
 static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName)
 {
-    NSMutableArray *replacedPubs = [[targetPubs mutableCopy] autorelease];
-    
+    NSMutableArray *outPubs = [NSMutableArray arrayWithCapacity:[targetPubs count]];
     NSMutableDictionary *sourcePubIndex = [NSMutableDictionary dictionaryWithCapacity:[sourcePubs count]];
+    NSDictionary *pub;
+    NSString *value;
+    NSDictionary *replacedPub;
     
-    NSUInteger i;
-    for (i = 0; i < [sourcePubs count]; i++) {
-        
-        NSDictionary *pub = [sourcePubs objectAtIndex:i];
-        NSString *value = [[pub objectForKey:@"pubFields"] objectForKey:fieldName];
-        
-        if (value) {
+    for (pub in sourcePubs) {
+        if (value = [[pub objectForKey:@"pubFields"] objectForKey:fieldName])
             [sourcePubIndex setValue:pub forKey:value];
-        }
     }
     
-    for (i = 0; i < [replacedPubs count]; i++) {
-    
-        NSDictionary *pub = [replacedPubs objectAtIndex:i];
-        NSString *value = [[pub objectForKey:@"pubFields"] objectForKey:fieldName];
-        
-        if (value) {
-            NSDictionary *replacedPub = [sourcePubIndex objectForKey:value];
-            if (replacedPub)
-                [replacedPubs replaceObjectAtIndex:i withObject:replacedPub];
-        }
+    for (pub in targetPubs) {
+        if ((value = [[pub objectForKey:@"pubFields"] objectForKey:fieldName]) &&
+            (replacedPub = [sourcePubIndex objectForKey:value]))
+            pub = replacedPub;
+        [outPubs addObject:pub]; 
     }
     
-    return replacedPubs;
+    return outPubs;
 }
 
 static NSArray *publicationsFromData(NSData *data) {
     NSArray *pubInfos = [NSKeyedUnarchiver unarchiveObjectWithData:data];
     NSMutableArray *pubs = [NSMutableArray arrayWithCapacity:[pubInfos count]];
     for (NSDictionary *pubInfo in pubInfos) {
-        BibItem *pub = [[BibItem alloc] initWithType:[pubInfo objectForKey:@"pubType"]
-                                             citeKey:nil
-                                           pubFields:[pubInfo objectForKey:@"pubFields"]
-                                               isNew:YES];
+        NSMutableDictionary *pubFields = [pubInfo mutableCopy];
+        NSArray *files = nil;
+        
+        NSString *pubType = [pubFields objectForKey:@"pubType"];
+        [pubFields removeObjectForKey:BDSKPubTypeString];
         
         // insert the ISI URL into the normal file array if hasn't been put elsewhere
-        NSString *isiURL = [pubInfo objectForKey:@"isiURL"];
+        NSString *isiURL = [pubFields objectForKey:DefaultISIURLFieldName];
         if (isiURL) {
-            NSURL *newURL = [NSURL URLWithStringByNormalizingPercentEscapes:isiURL];
-            BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURL:newURL delegate:pub];
-            [pub insertObject:file inFilesAtIndex:0];
+            files = [[NSMutableArray alloc] initWithObjects:[BDSKLinkedFile linkedFileWithURL:[NSURL URLWithStringByNormalizingPercentEscapes:isiURL] delegate:nil], nil];
+            [pubFields removeObjectForKey:DefaultISIURLFieldName];
         }
+        
+        BibItem *pub = [[BibItem alloc] initWithType:pubType citeKey:nil pubFields:pubFields files:files isNew:YES];
         
         [pubs addObject:pub];
         [pub release];
+        [pubFields release];
+        [files release];
     }
     return pubs;
 }
