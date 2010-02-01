@@ -754,7 +754,7 @@ static NSArray *publicationInfosWithISIRefXMLString(NSString *xmlString, NSMutab
 
 static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName)
 {
-    NSMutableArray *replacedPubs = [targetPubs mutableCopy];
+    NSMutableArray *replacedPubs = [[targetPubs mutableCopy] autorelease];
     
     NSMutableDictionary *sourcePubIndex = [NSMutableDictionary dictionaryWithCapacity:[sourcePubs count]];
     
