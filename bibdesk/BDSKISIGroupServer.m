@@ -379,9 +379,9 @@ static NSArray *publicationsFromData(NSData *data);
                                                                      in_depth:@""
                                                                   in_editions:database
                                                                       in_sort:@""
-                                                                      in_firstRec:fetchedResultsLocal
+                                                                  in_firstRec:fetchedResultsLocal
                                                                    in_numRecs:numResults
-                                                                        in_fields:fields];
+                                                                    in_fields:fields];
                     resultString = [resultInfo objectForKey:RECORDS_KEY];
                     break;
                 
