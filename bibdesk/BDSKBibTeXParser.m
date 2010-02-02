@@ -344,7 +344,7 @@ error:(NSError **)outError{
     return returnArray;
 }
 
-+ (NSDictionary *)macrosFromBibTeXString:(NSString *)stringContents document:(BibDocument *)aDocument{
++ (NSDictionary *)macrosFromBibTeXString:(NSString *)stringContents macroResolver:(BDSKMacroResolver *)macroResolver{
     NSScanner *scanner = [[NSScanner alloc] initWithString:stringContents];
     [scanner setCharactersToBeSkipped:nil];
     
@@ -423,7 +423,7 @@ error:(NSError **)outError{
             CFStringTrimWhitespace((CFMutableStringRef)value);
             
             key = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            if (value = [NSString stringWithBibTeXString:value macroResolver:[aDocument macroResolver] error:&error])
+            if (value = [NSString stringWithBibTeXString:value macroResolver:macroResolver error:&error])
                 [macros setObject:value forKey:key];
             else
                 NSLog(@"Ignoring invalid complex macro: %@", [error localizedDescription]);
@@ -437,7 +437,7 @@ error:(NSError **)outError{
     return ([macros count] ? macros : nil);
 }
 
-+ (NSDictionary *)macrosFromBibTeXStyle:(NSString *)styleContents document:(BibDocument *)aDocument{
++ (NSDictionary *)macrosFromBibTeXStyle:(NSString *)styleContents macroResolver:(BDSKMacroResolver *)macroResolver{
     NSScanner *scanner = [[NSScanner alloc] initWithString:styleContents];
     [scanner setCharactersToBeSkipped:nil];
     
@@ -509,7 +509,7 @@ error:(NSError **)outError{
         CFStringTrimWhitespace((CFMutableStringRef)value);
         
         key = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        if (value = [NSString stringWithBibTeXString:value macroResolver:[aDocument macroResolver] error:&error])
+        if (value = [NSString stringWithBibTeXString:value macroResolver:macroResolver error:&error])
             [macros setObject:value forKey:key];
         else
             NSLog(@"Ignoring invalid complex macro: %@", [error localizedDescription]);

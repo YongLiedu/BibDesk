@@ -344,9 +344,9 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         NSDictionary *macroDefs = nil;
         if (fileContent == nil) continue;
         if ([[file pathExtension] caseInsensitiveCompare:@"bib"] == NSOrderedSame)
-            macroDefs = [BDSKBibTeXParser macrosFromBibTeXString:fileContent document:nil];
+            macroDefs = [BDSKBibTeXParser macrosFromBibTeXString:fileContent macroResolver:nil];
         else if ([[file pathExtension] caseInsensitiveCompare:@"bst"] == NSOrderedSame)
-            macroDefs = [BDSKBibTeXParser macrosFromBibTeXStyle:fileContent document:nil];
+            macroDefs = [BDSKBibTeXParser macrosFromBibTeXStyle:fileContent macroResolver:nil];
         else continue;
         if (macroDefs != nil) {
             NSString *value;

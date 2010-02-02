@@ -614,17 +614,14 @@
 #pragma mark Support
 
 - (BOOL)addMacrosFromBibTeXString:(NSString *)aString{
-    // if this is called, we shouldn't belong to a group
-	BibDocument *document = (BibDocument *)[macroResolver owner];
-	
     BOOL hadCircular = NO;
     NSMutableDictionary *defs = [NSMutableDictionary dictionary];
     
     if([aString rangeOfString:@"@string" options:NSCaseInsensitiveSearch].location != NSNotFound)
-        [defs addEntriesFromDictionary:[BDSKBibTeXParser macrosFromBibTeXString:aString document:document]];
+        [defs addEntriesFromDictionary:[BDSKBibTeXParser macrosFromBibTeXString:aString macroResolver:macroResolver]];
             
     if([aString rangeOfString:@"MACRO" options:NSCaseInsensitiveSearch].location != NSNotFound)
-        [defs addEntriesFromDictionary:[BDSKBibTeXParser macrosFromBibTeXStyle:aString document:document]]; // in case these are style defs
+        [defs addEntriesFromDictionary:[BDSKBibTeXParser macrosFromBibTeXStyle:aString macroResolver:macroResolver]]; // in case these are style defs
 
     if ([defs count] == 0)
         return NO;

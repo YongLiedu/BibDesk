@@ -37,7 +37,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-@class BibDocument, BibItem;
+
+@class BDSKMacroResolver, BibItem;
+
 @protocol BDSKOwner;
 
 @interface BDSKBibTeXParser : NSObject {
@@ -55,8 +57,7 @@
     @param      outError (description)
     @result     (description)
 */
-+ (NSArray *)itemsFromString:(NSString *)aString owner:(id<BDSKOwner>)anOwner isPartialData:(BOOL *)isPartialData
-error:(NSError **)outError;
++ (NSArray *)itemsFromString:(NSString *)aString owner:(id<BDSKOwner>)anOwner isPartialData:(BOOL *)isPartialData error:(NSError **)outError;
 
 /*!
     @method     itemsFromData:error:frontMatter:filePath:owner:encoding:error:
@@ -72,12 +73,12 @@ error:(NSError **)outError;
     @result     (description)
 */
 + (NSArray *)itemsFromData:(NSData *)inData
-                      frontMatter:(NSMutableString *)frontMatter
-                         filePath:(NSString *)filePath
-						    owner:(id<BDSKOwner>)anOwner
-                         encoding:(NSStringEncoding)parserEncoding
-                    isPartialData:(BOOL *)isPartialData
-                            error:(NSError **)outError;
+               frontMatter:(NSMutableString *)frontMatter
+                  filePath:(NSString *)filePath
+                     owner:(id<BDSKOwner>)anOwner
+                  encoding:(NSStringEncoding)parserEncoding
+             isPartialData:(BOOL *)isPartialData
+                     error:(NSError **)outError;
 
 /*!
     @method     macrosFromBibTeXString:document:
@@ -85,10 +86,10 @@ error:(NSError **)outError;
     @discussion The definitions take the form <tt>@STRING {ibmjrd = "IBM Journal of Research and Development"}</tt>
                 The returned macros can contain circular macro definitions.
     @param      styleContents The contents of the bib file as a string
-    @param      aDocument (description)
+    @param      macroResolver (description)
     @result     Returns nil if nothing was found or an error occurred.
 */
-+ (NSDictionary *)macrosFromBibTeXString:(NSString *)stringContents document:(BibDocument *)aDocument;
++ (NSDictionary *)macrosFromBibTeXString:(NSString *)stringContents macroResolver:(BDSKMacroResolver *)macroResolver;
 
 /*!
     @method     macrosFromBibTeXStyle:document:
@@ -96,10 +97,10 @@ error:(NSError **)outError;
     @discussion The definitions take the form <tt>MACRO {ibmjrd} {"IBM Journal of Research and Development"}</tt>
                 The returned macros can contain circular macro definitions.
     @param      styleContents The contents of the bst file as a string
-    @param      aDocument (description)
+    @param      macroResolver (description)
     @result     Returns nil if nothing was found or an error occurred.
 */
-+ (NSDictionary *)macrosFromBibTeXStyle:(NSString *)styleContents document:(BibDocument *)aDocument;
++ (NSDictionary *)macrosFromBibTeXStyle:(NSString *)styleContents macroResolver:(BDSKMacroResolver *)macroResolver;
     
 /*!
     @method     authorsFromBibtexString:withPublication:forField
