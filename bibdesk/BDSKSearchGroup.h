@@ -57,7 +57,6 @@ extern NSString *BDSKSearchGroupDBLP;
 - (BOOL)isRetrieving;
 - (void)retrievePublications;
 - (void)reset;
-- (void)stop;
 - (void)terminate;
 - (NSFormatter *)searchStringFormatter;
 @end

@@ -116,16 +116,13 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
 
 - (void)reset
 {
+    if ([self isRetrieving])
+        [self terminate];
     availableResults = 0;
     fetchedResults = 0;
 }
 
 - (void)terminate;
-{
-    [self stop];
-}
-
-- (void)stop;
 {
     [URLDownload cancel];
     BDSKDESTROY(URLDownload);

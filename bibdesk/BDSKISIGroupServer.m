@@ -150,6 +150,7 @@ static NSArray *publicationsFromData(NSData *data);
 
 - (void)reset
 {
+    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
     OSAtomicCompareAndSwap32Barrier(availableResults, 0, &availableResults);
     OSAtomicCompareAndSwap32Barrier(fetchedResults, 0, &fetchedResults);
 }
@@ -157,11 +158,6 @@ static NSArray *publicationsFromData(NSData *data);
 - (void)terminate
 {
     [self stopDOServer];
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
-}
-
-- (void)stop
-{
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
 }
 

@@ -289,9 +289,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 - (void)reset;
 {
-    if ([self isRetrieving])
-        [server stop];
-    
     [server reset];
     [self setPublications:[NSArray array]];
 }
