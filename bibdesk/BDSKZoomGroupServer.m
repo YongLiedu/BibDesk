@@ -123,6 +123,10 @@
 
 - (void)reset
 {
+    if ([self isRetrieving]) {
+        [[self serverOnServerThread] terminateConnection];
+        OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+    }
     OSAtomicCompareAndSwap32Barrier(availableResults, 0, &availableResults);
     OSAtomicCompareAndSwap32Barrier(fetchedResults, 0, &fetchedResults);
 }
@@ -130,12 +134,6 @@
 - (void)terminate
 {
     [self stopDOServer];
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
-}
-
-- (void)stop
-{
-    [[self serverOnServerThread] terminateConnection];
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
 }
 
