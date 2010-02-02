@@ -148,6 +148,12 @@ static NSArray *publicationsFromData(NSData *data);
 
 // these are called on the main thread
 
+- (void)reset
+{
+    OSAtomicCompareAndSwap32Barrier(availableResults, 0, &availableResults);
+    OSAtomicCompareAndSwap32Barrier(fetchedResults, 0, &fetchedResults);
+}
+
 - (void)terminate
 {
     [self stopDOServer];
@@ -186,19 +192,9 @@ static NSArray *publicationsFromData(NSData *data);
     return serverInfo;
 }
 
-- (void)setNumberOfAvailableResults:(NSInteger)value;
-{
-    OSAtomicCompareAndSwap32Barrier(availableResults, value, &availableResults);
-}
-
 - (NSInteger)numberOfAvailableResults;
 {
     return availableResults;
-}
-
-- (void)setNumberOfFetchedResults:(NSInteger)value;
-{
-    OSAtomicCompareAndSwap32Barrier(fetchedResults, value, &fetchedResults);
 }
 
 - (NSInteger)numberOfFetchedResults;
@@ -444,8 +440,8 @@ static NSArray *publicationsFromData(NSData *data);
         }
     }
     
-    [self setNumberOfAvailableResults:availableResultsLocal];
-    [self setNumberOfFetchedResults:fetchedResultsLocal];
+    OSAtomicCompareAndSwap32Barrier(availableResults, availableResultsLocal, &availableResults);
+    OSAtomicCompareAndSwap32Barrier(fetchedResults, fetchedResultsLocal, &fetchedResults);
     
     // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);

@@ -114,6 +114,12 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
 
 #pragma mark BDSKSearchGroupServer protocol
 
+- (void)reset
+{
+    availableResults = 0;
+    fetchedResults = 0;
+}
+
 - (void)terminate;
 {
     [self stop];
@@ -154,17 +160,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     }
 }
 
-- (void)setNumberOfAvailableResults:(NSInteger)value;
-{
-    availableResults = value;
-}
-
 - (NSInteger)numberOfFetchedResults { return fetchedResults; }
-
-- (void)setNumberOfFetchedResults:(NSInteger)value;
-{
-    fetchedResults = value;
-}
 
 - (NSInteger)numberOfAvailableResults { return availableResults; }
 
@@ -224,8 +220,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     [self setSearchTerm:[group searchTerm]];
     [self setWebEnv:nil];
     [self setQueryKey:nil];
-    [self setNumberOfAvailableResults:0];
-    [self setNumberOfFetchedResults:0];
+    [self reset];
     
     if(NO == [NSString isEmptyString:[self searchTerm]]){
         // get the initial XML document with our search parameters in it
@@ -254,7 +249,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     NSURL *theURL = [NSURL URLWithString:efetch];
     BDSKPOSTCONDITION(theURL);
     
-    [self setNumberOfFetchedResults:[self numberOfFetchedResults] + numResults];
+    fetchedResults += numResults;
     
     downloadState = BDSKEfetchState;
     [self startDownloadFromURL:theURL];
@@ -309,7 +304,8 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
                 [self setWebEnv:[[[root nodesForXPath:@"/eSearchResult[1]/WebEnv[1]" error:NULL] lastObject] stringValue]];
                 [self setQueryKey:[[[root nodesForXPath:@"/eSearchResult[1]/QueryKey[1]" error:NULL] lastObject] stringValue]];
                 NSString *countString = [[[root nodesForXPath:@"/eSearchResult[1]/Count[1]" error:NULL] lastObject] stringValue];
-                [self setNumberOfAvailableResults:[countString integerValue]];
+                
+                availableResults = [countString integerValue];
                 
                 [document release];
                 [self fetch];

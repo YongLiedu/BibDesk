@@ -292,8 +292,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     if ([self isRetrieving])
         [server stop];
     
-    [server setNumberOfAvailableResults:0];
-    [server setNumberOfFetchedResults:0];
+    [server reset];
     [self setPublications:[NSArray array]];
 }
 
@@ -342,11 +341,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 }
 
 - (NSArray *)history {return history; }
-
-- (void)setNumberOfAvailableResults:(NSInteger)value;
-{
-    [server setNumberOfAvailableResults:value];
-}
 
 - (NSInteger)numberOfAvailableResults { return [server numberOfAvailableResults]; }
 

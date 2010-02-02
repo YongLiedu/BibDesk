@@ -121,6 +121,12 @@
 
 // these are called on the main thread
 
+- (void)reset
+{
+    OSAtomicCompareAndSwap32Barrier(availableResults, 0, &availableResults);
+    OSAtomicCompareAndSwap32Barrier(fetchedResults, 0, &fetchedResults);
+}
+
 - (void)terminate
 {
     [self stopDOServer];
@@ -160,19 +166,9 @@
     return info;
 }
 
-- (void)setNumberOfAvailableResults:(NSInteger)value;
-{
-    OSAtomicCompareAndSwap32Barrier(availableResults, value, &availableResults);
-}
-
 - (NSInteger)numberOfAvailableResults;
 {
     return availableResults;
-}
-
-- (void)setNumberOfFetchedResults:(NSInteger)value;
-{
-    OSAtomicCompareAndSwap32Barrier(fetchedResults, value, &fetchedResults);
 }
 
 - (NSInteger)numberOfFetchedResults;
@@ -286,8 +282,7 @@
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.needsReset);
     }
     
-    [self setNumberOfAvailableResults:0];
-    [self setNumberOfFetchedResults:0];
+    [self reset];
 } 
 
 - (oneway void)terminateConnection;
@@ -327,15 +322,17 @@
             [self setErrorMessage:NSLocalizedString(@"Could not retrieve results", @"")];
         }
         
-        [self setNumberOfAvailableResults:[resultSet countOfRecords]];
+        int32_t newAvailableResults = [resultSet countOfRecords];
+        OSAtomicCompareAndSwap32Barrier(availableResults, newAvailableResults, &availableResults);
         
         NSInteger numResults = MIN([self numberOfAvailableResults] - [self numberOfFetchedResults], MAX_RESULTS);
         //NSAssert(numResults >= 0, @"number of results to get must be non-negative");
         
         if(numResults > 0){
             NSArray *records = [resultSet recordsInRange:NSMakeRange([self numberOfFetchedResults], numResults)];
+            int32_t newNumberOfFetchedResults = [self numberOfFetchedResults] + numResults;
             
-            [self setNumberOfFetchedResults:[self numberOfFetchedResults] + numResults];
+            OSAtomicCompareAndSwap32Barrier(fetchedResults, newNumberOfFetchedResults, &fetchedResults);
             
             results = [NSMutableArray array];
             for (id result in records) {

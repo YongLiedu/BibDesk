@@ -104,6 +104,12 @@
 
 // these are called on the main thread
 
+- (void)reset
+{
+    OSAtomicCompareAndSwap32Barrier(availableResults, 0, &availableResults);
+    OSAtomicCompareAndSwap32Barrier(fetchedResults, 0, &fetchedResults);
+}
+
 - (void)terminate
 {
     [self stopDOServer];
@@ -145,19 +151,9 @@
     return serverInfo;
 }
 
-- (void)setNumberOfAvailableResults:(NSInteger)value;
-{
-    OSAtomicCompareAndSwap32Barrier(availableResults, value, &availableResults);
-}
-
 - (NSInteger)numberOfAvailableResults;
 {
     return availableResults;
-}
-
-- (void)setNumberOfFetchedResults:(NSInteger)value;
-{
-    OSAtomicCompareAndSwap32Barrier(fetchedResults, value, &fetchedResults);
 }
 
 - (NSInteger)numberOfFetchedResults;
@@ -225,8 +221,9 @@ static void fixEEURL(BibItem *pub)
     }
     
     if (pubs) {
-        [self setNumberOfAvailableResults:[pubs count]];
-        [self setNumberOfFetchedResults:[pubs count]];
+        int32_t count = [pubs count];
+        OSAtomicCompareAndSwap32Barrier(availableResults, count, &availableResults);
+        OSAtomicCompareAndSwap32Barrier(fetchedResults, count, &fetchedResults);
     }
     
     // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
@@ -275,8 +272,10 @@ static void fixEEURL(BibItem *pub)
     if (NO == [NSString isEmptyString:searchTerm]){
         
         NSArray *dblpKeys = [[self resultsWithSearchTerm:searchTerm database:database] valueForKeyPath:@"dblp_key"];
-        [self setNumberOfAvailableResults:[dblpKeys count]];
-
+        int32_t dblpKeysCount = [dblpKeys count];
+        
+        OSAtomicCompareAndSwap32Barrier(availableResults, dblpKeysCount, &availableResults);
+        
         NSMutableSet *btEntries = [NSMutableSet set];
         abstracts = [NSMutableDictionary dictionary];
         for (NSString *aKey in dblpKeys) {
