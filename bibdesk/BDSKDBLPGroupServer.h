@@ -45,7 +45,7 @@ typedef struct _BDSKDBLPGroupFlags {
     volatile int32_t failedDownload;
 } BDSKDBLPGroupFlags;
 
-@class WSGeneratedObj, BDSKReadWriteLock;
+@class WSGeneratedObj;
 
 @interface BDSKDBLPGroupServer :  BDSKAsynchronousDOServer <BDSKSearchGroupServer> 
 {
@@ -54,7 +54,6 @@ typedef struct _BDSKDBLPGroupFlags {
     volatile int32_t availableResults;
     volatile int32_t fetchedResults;
     BDSKDBLPGroupFlags flags;
-    BDSKReadWriteLock *infoLock;
     NSString *errorMessage;
     WSGeneratedObj *scheduledService;
 }

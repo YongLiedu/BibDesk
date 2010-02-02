@@ -43,7 +43,6 @@
 #import "BDSKBibTeXParser.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
-#import "BDSKReadWriteLock.h"
 
 // private protocols for inter-thread messaging
 @protocol BDSKDBLPGroupServerMainThread <BDSKAsyncDOServerMainThread>
@@ -51,7 +50,7 @@
 @end
 
 @protocol BDSKDBLPGroupServerLocalThread <BDSKAsyncDOServerThread>
-- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm;
+- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm database:(NSString *)database;
 @end
 
 
@@ -87,7 +86,6 @@
         flags.isRetrieving = 0;
         availableResults = 0;
         fetchedResults = 0;
-        infoLock = [[BDSKReadWriteLock alloc] init];
         errorMessage = nil;
         
         [self startDOServerSync];
@@ -96,7 +94,6 @@
 }
 
 - (void)dealloc {
-    BDSKDESTROY(infoLock);
     BDSKDESTROY(serverInfo);
     BDSKDESTROY(scheduledService);
     BDSKDESTROY(errorMessage);
@@ -127,7 +124,7 @@
         // stop the current service (if any); -cancel is thread safe, and so is calling it multiple times
         [scheduledService cancel];
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
-        [[self serverOnServerThread] downloadWithSearchTerm:[group searchTerm]];
+        [[self serverOnServerThread] downloadWithSearchTerm:[group searchTerm] database:[[self serverInfo] database]];
         
     } else {
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
@@ -137,20 +134,15 @@
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
 {
-    [infoLock lockForWriting];
     if (serverInfo != info) {
         [serverInfo release];
         serverInfo = [info copy];
     }
-    [infoLock unlock];
 }
 
 - (BDSKServerInfo *)serverInfo;
 {
-    [infoLock lockForReading];
-    BDSKServerInfo *info = [[serverInfo copy] autorelease];
-    [infoLock unlock];
-    return info;
+    return serverInfo;
 }
 
 - (void)setNumberOfAvailableResults:(NSInteger)value;
@@ -246,16 +238,14 @@ static void fixEEURL(BibItem *pub)
 
 #pragma mark Server thread
 
-- (NSArray *)resultsWithSearchTerm:(NSString *)searchTerm
+- (NSArray *)resultsWithSearchTerm:(NSString *)searchTerm database:(NSString *)database
 {
-    BDSKServerInfo *info = [self serverInfo];
-    
     // no UI for providing years, so use 1900--present
     NSNumber *startYear = [NSNumber numberWithInteger:1900];
     NSNumber *endYear = [NSNumber numberWithInteger:[[NSCalendarDate date] yearOfCommonEra]];
     
     NSArray *searchResults = nil;
-    if ([[info database] caseInsensitiveCompare:@"authors"] == NSOrderedSame) {
+    if ([database caseInsensitiveCompare:@"authors"] == NSOrderedSame) {
         BibAuthor *author = [BibAuthor authorWithName:searchTerm andPub:nil];
         BDSKDBLPAllPublicationsAuthorYear *invocation = [[BDSKDBLPAllPublicationsAuthorYear alloc] init];    
         [invocation setParameters:([author firstName] ?: @"")
@@ -277,14 +267,14 @@ static void fixEEURL(BibItem *pub)
 }
 
 // Note:  WSGeneratedObj doesn't supply a way to cancel a request, so calling downloadWithSearchTerm: again with a non-empty string before the first request completes will cause a beachball.  This is mainly a problem on slow network connections.
-- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm;
+- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm database:(NSString *)database;
 {    
     NSString *btString = nil;
     NSMutableDictionary *abstracts = nil;
     
     if (NO == [NSString isEmptyString:searchTerm]){
         
-        NSArray *dblpKeys = [[self resultsWithSearchTerm:searchTerm] valueForKeyPath:@"dblp_key"];
+        NSArray *dblpKeys = [[self resultsWithSearchTerm:searchTerm database:database] valueForKeyPath:@"dblp_key"];
         [self setNumberOfAvailableResults:[dblpKeys count]];
 
         NSMutableSet *btEntries = [NSMutableSet set];
