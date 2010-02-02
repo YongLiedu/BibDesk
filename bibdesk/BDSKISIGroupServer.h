@@ -45,7 +45,6 @@ typedef struct _BDSKISIGroupFlags {
     volatile int32_t failedDownload;
 } BDSKISIGroupFlags;
 
-@class BDSKReadWriteLock;
 
 @interface BDSKISIGroupServer : BDSKAsynchronousDOServer <BDSKSearchGroupServer>
 {
@@ -54,7 +53,6 @@ typedef struct _BDSKISIGroupFlags {
     volatile int32_t availableResults;
     volatile int32_t fetchedResults;
     BDSKISIGroupFlags flags;
-    BDSKReadWriteLock *infoLock;
     NSString *errorMessage;
 }
 - (void)setErrorMessage:(NSString *)newErrorMessage;
