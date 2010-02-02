@@ -44,7 +44,6 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
-#import "BDSKReadWriteLock.h"
 
 #define SERVER_URL @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"
 
@@ -83,7 +82,7 @@ static NSArray *publicationsFromData(NSData *data);
 @end
 
 @protocol BDSKISIGroupServerLocalThread <BDSKAsyncDOServerThread>
-- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm;
+- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm database:(NSString *)database;
 @end
 
 @implementation BDSKISIGroupServer
@@ -134,7 +133,6 @@ static NSArray *publicationsFromData(NSData *data);
         flags.isRetrieving = 0;
         availableResults = 0;
         fetchedResults = 0;
-        infoLock = [[BDSKReadWriteLock alloc] init];
     
         [self startDOServerSync];
     }
@@ -142,7 +140,6 @@ static NSArray *publicationsFromData(NSData *data);
 }
 
 - (void)dealloc {
-    BDSKDESTROY(infoLock);
     BDSKDESTROY(serverInfo);
     [super dealloc];
 }
@@ -168,7 +165,7 @@ static NSArray *publicationsFromData(NSData *data);
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
         
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
-        [[self serverOnServerThread] downloadWithSearchTerm:[group searchTerm]];
+        [[self serverOnServerThread] downloadWithSearchTerm:[group searchTerm] database:[[self serverInfo] database]];
         
     } else {
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
@@ -178,20 +175,15 @@ static NSArray *publicationsFromData(NSData *data);
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
 {
-    [infoLock lockForWriting];
     if (serverInfo != info) {
         [serverInfo release];
         serverInfo = [info copy];
     }
-    [infoLock unlock];
 }
 
 - (BDSKServerInfo *)serverInfo;
 {
-    [infoLock lockForReading];
-    BDSKServerInfo *info = [[serverInfo copy] autorelease];
-    [infoLock unlock];
-    return info;
+    return serverInfo;
 }
 
 - (void)setNumberOfAvailableResults:(NSInteger)value;
@@ -253,8 +245,8 @@ static NSArray *publicationsFromData(NSData *data);
 
 #pragma mark Server thread
 
-// @@ Thread safety: it is not thread safe to get the publications on a secondary thread
-- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm;
+// @@ currently limited to topic search; need to figure out UI for other search types (mixing search types will require either NSTokenField or raw text string entry)
+- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm database:(NSString *)database;
 {    
     NSArray *pubs = nil;
     NSMutableArray *identifiers = nil;
@@ -263,9 +255,6 @@ static NSArray *publicationsFromData(NSData *data);
     NSInteger fetchedResultsLocal = [self numberOfFetchedResults];
     
     if (NO == [NSString isEmptyString:searchTerm]){
-        
-        // @@ currently limited to topic search; need to figure out UI for other search types (mixing search types will require either NSTokenField or raw text string entry)
-        BDSKServerInfo *info = [self serverInfo];
         
         /*
          TODO: document this syntax and the results thereof in the code, and in the help book.
@@ -298,7 +287,7 @@ static NSArray *publicationsFromData(NSData *data);
         if (sourceXMLTagPriority)
             fields = [fields stringByAppendingString:[sourceXMLTagPriority componentsJoinedByString:@" "]];
         
-        // @@ Currently limited to WOS database; extension to other WOS databases might require different WebService stubs?  Note that the value we're passing as [info database] is referred to as  "edition" in the WoS docs.
+        // @@ Currently limited to WOS database; extension to other WOS databases might require different WebService stubs?  Note that the value we're passing as database is referred to as  "edition" in the WoS docs.
         NSScanner *scanner;
         switch (operation) {
             
@@ -306,7 +295,7 @@ static NSArray *publicationsFromData(NSData *data);
                 resultInfo = [BDSKISISearchRetrieveService search:WOS_DB_ID
                                                          in_query:searchTerm
                                                          in_depth:@""
-                                                      in_editions:[info database]
+                                                      in_editions:database
                                                       in_firstRec:1
                                                        in_numRecs:1];
                 availableResultsLocal = [[resultInfo objectForKey:RECORDSFOUND_KEY] integerValue];
@@ -364,7 +353,7 @@ static NSArray *publicationsFromData(NSData *data);
                 resultInfo = [BDSKISISearchRetrieveService citingArticles:WOS_DB_ID
                                                             in_primaryKey:searchTerm
                                                                  in_depth:@""
-                                                              in_editions:[info database]
+                                                              in_editions:database
                                                                   in_sort:@""
                                                               in_firstRec:1
                                                                in_numRecs:1
@@ -376,7 +365,7 @@ static NSArray *publicationsFromData(NSData *data);
                 resultInfo = [BDSKISISearchRetrieveService citingArticlesByRecids:WOS_DB_ID
                                                                         in_recids:searchTerm
                                                                          in_depth:@""
-                                                                      in_editions:[info database]
+                                                                      in_editions:database
                                                                           in_sort:@""
                                                                       in_firstRec:1
                                                                        in_numRecs:1
@@ -402,7 +391,7 @@ static NSArray *publicationsFromData(NSData *data);
                     resultInfo = [BDSKISISearchRetrieveService searchRetrieve:WOS_DB_ID
                                                                      in_query:searchTerm
                                                                      in_depth:@""
-                                                                  in_editions:[info database]
+                                                                  in_editions:database
                                                                       in_sort:@""
                                                                       in_firstRec:fetchedResultsLocal
                                                                    in_numRecs:numResults
@@ -422,7 +411,7 @@ static NSArray *publicationsFromData(NSData *data);
                     resultInfo = [BDSKISISearchRetrieveService citingArticles:WOS_DB_ID
                                                                 in_primaryKey:searchTerm
                                                                      in_depth:@""
-                                                                  in_editions:[info database]
+                                                                  in_editions:database
                                                                       in_sort:@""
                                                                   in_firstRec:fetchedResultsLocal
                                                                    in_numRecs:numResults
@@ -434,7 +423,7 @@ static NSArray *publicationsFromData(NSData *data);
                     resultInfo = [BDSKISISearchRetrieveService citingArticlesByRecids:WOS_DB_ID
                                                                             in_recids:searchTerm
                                                                              in_depth:@""
-                                                                          in_editions:[info database]
+                                                                          in_editions:database
                                                                               in_sort:@""
                                                                           in_firstRec:fetchedResultsLocal
                                                                            in_numRecs:numResults
