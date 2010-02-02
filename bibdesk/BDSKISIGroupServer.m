@@ -272,16 +272,16 @@ static NSArray *publicationsFromData(NSData *data);
          */
         
         NSRange prefixRange;
-        if ((prefixRange = [searchTerm rangeOfString:@"RetrieveRecid:"]).location == 0) {
+        if ((prefixRange = [searchTerm rangeOfString:@"RetrieveRecid:" options:NSAnchoredSearch]).location == 0) {
             searchTerm = [searchTerm substringFromIndex:NSMaxRange(prefixRange)];
             operation = retrieveRecid;
-        } else if ((prefixRange = [searchTerm rangeOfString:@"CitedReferences:"]).location == 0) {
+        } else if ((prefixRange = [searchTerm rangeOfString:@"CitedReferences:" options:NSAnchoredSearch]).location == 0) {
             searchTerm = [searchTerm substringFromIndex:NSMaxRange(prefixRange)];
             operation = citedReferences;
-        } else if ((prefixRange = [searchTerm rangeOfString:@"CitingArticles:"]).location == 0) {
+        } else if ((prefixRange = [searchTerm rangeOfString:@"CitingArticles:" options:NSAnchoredSearch]).location == 0) {
             searchTerm = [searchTerm substringFromIndex:NSMaxRange(prefixRange)];
             operation = citingArticles;
-        } else if ((prefixRange = [searchTerm rangeOfString:@"CitingArticlesRecid:"]).location == 0) {
+        } else if ((prefixRange = [searchTerm rangeOfString:@"CitingArticlesRecid:" options:NSAnchoredSearch]).location == 0) {
             searchTerm = [searchTerm substringFromIndex:NSMaxRange(prefixRange)];
             operation = citingArticlesByRecids;
         } else if ([searchTerm rangeOfString:@"="].location == NSNotFound)
