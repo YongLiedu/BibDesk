@@ -78,7 +78,6 @@ static NSArray *publicationsFromData(NSData *data);
 // private protocols for inter-thread messaging
 @protocol BDSKISIGroupServerMainThread <BDSKAsyncDOServerMainThread>
 - (void)addPublicationsToGroup:(bycopy NSData *)data;
-- (void)setPublicationsOfGroup:(bycopy NSData *)data;
 @end
 
 @protocol BDSKISIGroupServerLocalThread <BDSKAsyncDOServerThread>
@@ -227,12 +226,6 @@ static NSArray *publicationsFromData(NSData *data);
 {
     BDSKASSERT([NSThread isMainThread]);
     [group addPublications:publicationsFromData(data)];
-}
-
-- (void)setPublicationsOfGroup:(bycopy NSData *)data;
-{
-    BDSKASSERT([NSThread isMainThread]);
-    [group setPublications:publicationsFromData(data)];
 }
 
 #pragma mark Server thread
@@ -445,11 +438,7 @@ static NSArray *publicationsFromData(NSData *data);
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:pubs];
     
     // this will create the array if it doesn't exist
-    if (availableResultsLocal == (NSInteger)[pubs count]) {
-        [[self serverOnMainThread] setPublicationsOfGroup:data];
-    } else {
-        [[self serverOnMainThread] addPublicationsToGroup:data];
-    }
+    [[self serverOnMainThread] addPublicationsToGroup:data];
 }
 
 #pragma mark XML Parsing
