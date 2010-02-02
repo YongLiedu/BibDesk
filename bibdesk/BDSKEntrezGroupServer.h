@@ -43,7 +43,7 @@
 
 @interface BDSKEntrezGroupServer : NSObject <BDSKSearchGroupServer>
 {
-    BDSKSearchGroup *group;
+    id<BDSKSearchGroup> group;
     BDSKServerInfo *serverInfo;
     NSString *searchTerm;
     NSString *webEnv;     // cookie-like data returned by PubMed

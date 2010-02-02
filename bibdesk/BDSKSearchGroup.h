@@ -44,10 +44,14 @@ extern NSString *BDSKSearchGroupZoom;
 extern NSString *BDSKSearchGroupISI;
 extern NSString *BDSKSearchGroupDBLP;
 
-@class BDSKSearchGroup, BDSKServerInfo;
+@class BDSKServerInfo;
+
+@protocol BDSKSearchGroup <BDSKOwner>
+- (void)addPublications:(NSArray *)pubs;
+@end
 
 @protocol BDSKSearchGroupServer <NSObject>
-- (id)initWithGroup:(BDSKSearchGroup *)aGroup serverInfo:(BDSKServerInfo *)info;
+- (id)initWithGroup:(id<BDSKSearchGroup>)aGroup serverInfo:(BDSKServerInfo *)info;
 - (BDSKServerInfo *)serverInfo;
 - (void)setServerInfo:(BDSKServerInfo *)info;
 - (NSInteger)numberOfAvailableResults;
@@ -55,13 +59,13 @@ extern NSString *BDSKSearchGroupDBLP;
 - (BOOL)failedDownload;
 - (NSString *)errorMessage;
 - (BOOL)isRetrieving;
-- (void)retrievePublications;
+- (void)retrieveWithSearchTerm:(NSString *)aSearchTerm;
 - (void)reset;
 - (void)terminate;
 - (NSFormatter *)searchStringFormatter;
 @end
 
-@interface BDSKSearchGroup : BDSKExternalGroup {
+@interface BDSKSearchGroup : BDSKExternalGroup <BDSKSearchGroup> {
     NSString *type;
     NSString *searchTerm; // passed in by caller
     NSArray *history;

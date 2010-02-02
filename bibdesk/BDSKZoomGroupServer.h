@@ -53,7 +53,7 @@ typedef struct _BDSKZoomGroupFlags {
 
 @interface BDSKZoomGroupServer : BDSKAsynchronousDOServer <BDSKSearchGroupServer>
 {
-    BDSKSearchGroup *group;
+    id<BDSKSearchGroup> group;
     ZOOMConnection *connection;
     BDSKServerInfo *serverInfo;
     volatile int32_t availableResults;

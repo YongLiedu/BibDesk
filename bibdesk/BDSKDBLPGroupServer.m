@@ -76,7 +76,7 @@
 - (Protocol *)protocolForMainThread { return @protocol(BDSKDBLPGroupServerMainThread); }
 - (Protocol *)protocolForServerThread { return @protocol(BDSKDBLPGroupServerLocalThread); }
 
-- (id)initWithGroup:(BDSKSearchGroup *)aGroup serverInfo:(BDSKServerInfo *)info;
+- (id)initWithGroup:(id<BDSKSearchGroup>)aGroup serverInfo:(BDSKServerInfo *)info;
 {
     self = [super init];
     if (self) {
@@ -94,6 +94,7 @@
 }
 
 - (void)dealloc {
+    group = nil;
     BDSKDESTROY(serverInfo);
     BDSKDESTROY(scheduledService);
     BDSKDESTROY(errorMessage);
@@ -120,7 +121,7 @@
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
 }
 
-- (void)retrievePublications
+- (void)retrieveWithSearchTerm:(NSString *)aSearchTerm
 {
     if ([[self class] canConnect]) {
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
@@ -128,7 +129,7 @@
         // stop the current service (if any); -cancel is thread safe, and so is calling it multiple times
         [scheduledService cancel];
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
-        [[self serverOnServerThread] downloadWithSearchTerm:[group searchTerm] database:[[self serverInfo] database]];
+        [[self serverOnServerThread] downloadWithSearchTerm:aSearchTerm database:[[self serverInfo] database]];
         
     } else {
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);

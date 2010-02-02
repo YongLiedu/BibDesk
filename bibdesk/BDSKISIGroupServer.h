@@ -48,7 +48,7 @@ typedef struct _BDSKISIGroupFlags {
 
 @interface BDSKISIGroupServer : BDSKAsynchronousDOServer <BDSKSearchGroupServer>
 {
-    BDSKSearchGroup *group;
+    id<BDSKSearchGroup> group;
     BDSKServerInfo *serverInfo;
     volatile int32_t availableResults;
     volatile int32_t fetchedResults;

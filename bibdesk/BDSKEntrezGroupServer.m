@@ -84,7 +84,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     return canConnect;
 }
 
-- (id)initWithGroup:(BDSKSearchGroup *)aGroup serverInfo:(BDSKServerInfo *)info;
+- (id)initWithGroup:(id<BDSKSearchGroup>)aGroup serverInfo:(BDSKServerInfo *)info;
 {
     self = [super init];
     if (self) {
@@ -104,6 +104,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
 
 - (void)dealloc
 {
+    group = nil;
     BDSKDESTROY(filePath);
     BDSKDESTROY(serverInfo);
     BDSKDESTROY(webEnv);
@@ -133,13 +134,15 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     }
 }
 
-- (void)retrievePublications {
+- (void)retrieveWithSearchTerm:(NSString *)aSearchTerm {
     if ([[self class] canConnect]) {
         isRetrieving = YES;
-        if ([[self searchTerm] isEqualToString:[group searchTerm]] == NO || needsReset)
+        if ([[self searchTerm] isEqualToString:aSearchTerm] == NO || needsReset) {
+            [self setSearchTerm:aSearchTerm];
             [self resetSearch];
-        else if ([self isRetrieving] == NO)
+        } else if ([self isRetrieving] == NO) {
             [self fetch];
+        }
     } else {
         failedDownload = YES;
         [self setErrorMessage:NSLocalizedString(@"Unable to connect to server", @"error when pubmed connection fails")];
@@ -214,7 +217,6 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
 
 - (void)resetSearch;
 {
-    [self setSearchTerm:[group searchTerm]];
     [self setWebEnv:nil];
     [self setQueryKey:nil];
     [self reset];

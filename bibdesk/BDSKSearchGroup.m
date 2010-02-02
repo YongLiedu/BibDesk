@@ -257,7 +257,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 }
 
 - (void)retrievePublications {
-    [server retrievePublications];
+    [server retrieveWithSearchTerm:[self searchTerm]];
 }
 
 - (void)resetServerWithInfo:(BDSKServerInfo *)info {
@@ -281,7 +281,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 {
     if ([self isRetrieving] == NO) {
         // call this also for empty searchTerm, so the server can reset itself
-        [server retrievePublications];
+        [self retrievePublications];
         // use this to notify the tableview to start the progress indicators and disable the button
         [self notifyUpdateForSuccess:NO];
     }

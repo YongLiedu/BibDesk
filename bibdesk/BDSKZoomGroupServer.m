@@ -86,7 +86,7 @@
         return UNKNOWN;
 }
 
-- (id)initWithGroup:(BDSKSearchGroup *)aGroup serverInfo:(BDSKServerInfo *)info;
+- (id)initWithGroup:(id<BDSKSearchGroup>)aGroup serverInfo:(BDSKServerInfo *)info;
 {    
     self = [super init];
     if (self) {
@@ -139,12 +139,12 @@
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
 }
 
-- (void)retrievePublications
+- (void)retrieveWithSearchTerm:(NSString *)aSearchTerm
 {
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
     
     OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
-    [[self serverOnServerThread] downloadWithSearchTerm:[group searchTerm]];
+    [[self serverOnServerThread] downloadWithSearchTerm:aSearchTerm];
 }
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
