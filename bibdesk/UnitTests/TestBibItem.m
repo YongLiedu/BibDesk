@@ -122,7 +122,7 @@
 	BOOL isPartialData = NO;
 	NSError *parseError = nil;
 	
-	NSArray *testArray = [BDSKBibTeXParser itemsFromString:oneItem document:nil isPartialData:&isPartialData error:&parseError];
+	NSArray *testArray = [BDSKBibTeXParser itemsFromString:oneItem owner:nil isPartialData:&isPartialData error:&parseError];
 	
 	BibItem *item1 = [testArray objectAtIndex:0];
 
@@ -143,7 +143,7 @@
     BOOL isPartialData = NO;
 	NSError *parseError = nil;
 
-	NSArray *testArray = [BDSKBibTeXParser itemsFromString:twoItems document:nil isPartialData:&isPartialData error:&parseError];
+	NSArray *testArray = [BDSKBibTeXParser itemsFromString:twoItems owner:nil isPartialData:&isPartialData error:&parseError];
 
     BibItem *item1 = [testArray objectAtIndex:0];
     BibItem *item2 = [testArray objectAtIndex:1];
@@ -160,7 +160,7 @@
     BOOL isPartialData = NO;
 	NSError *parseError = nil;
 	
-	NSArray *testArray = [BDSKBibTeXParser itemsFromString:oneItem document:nil isPartialData:&isPartialData error:&parseError];
+	NSArray *testArray = [BDSKBibTeXParser itemsFromString:oneItem owner:nil isPartialData:&isPartialData error:&parseError];
 
 	BibItem *item1 = [testArray objectAtIndex:0];
 

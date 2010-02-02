@@ -79,7 +79,7 @@
     
     BOOL isPartialData = NO;
     
-    NSArray* bibtexItems = [BDSKBibTeXParser itemsFromString:preString document:nil isPartialData:&isPartialData error:&error];
+    NSArray* bibtexItems = [BDSKBibTeXParser itemsFromString:preString owner:nil isPartialData:&isPartialData error:&error];
     if ([bibtexItems count] == 0){
         // display a fake item in the table rather than the annoying modal failure alert
         NSString *errMsg = NSLocalizedString(@"Unable to parse as BibTeX", @"google scholar error");

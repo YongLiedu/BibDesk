@@ -47,7 +47,7 @@
 + (BOOL)canParseStringAfterFixingKeys:(NSString *)string;
 
 /*!
-    @method     itemsFromString:error:document:encoding:error:
+    @method     itemsFromString:error:owner:encoding:error:
     @abstract   Convenience method that returns an array of BibItems from the input string; used by the pasteboard.  Uses libbtparse to parse the data.
     @discussion (comprehensive description)
     @param      aString (description)
@@ -55,11 +55,11 @@
     @param      outError (description)
     @result     (description)
 */
-+ (NSArray *)itemsFromString:(NSString *)aString document:(id<BDSKOwner>)anOwner isPartialData:(BOOL *)isPartialData
++ (NSArray *)itemsFromString:(NSString *)aString owner:(id<BDSKOwner>)anOwner isPartialData:(BOOL *)isPartialData
 error:(NSError **)outError;
 
 /*!
-    @method     itemsFromData:error:frontMatter:filePath:document:encoding:error:
+    @method     itemsFromData:error:frontMatter:filePath:owner:encoding:error:
     @abstract   Parsing method that returns an array of BibItems from data, using libbtparse; needs a document to act as macro resolver.
     @discussion (comprehensive description)
     @param      inData (description)
@@ -74,7 +74,7 @@ error:(NSError **)outError;
 + (NSArray *)itemsFromData:(NSData *)inData
                       frontMatter:(NSMutableString *)frontMatter
                          filePath:(NSString *)filePath
-						 document:(id<BDSKOwner>)anOwner
+						    owner:(id<BDSKOwner>)anOwner
                          encoding:(NSStringEncoding)parserEncoding
                     isPartialData:(BOOL *)isPartialData
                             error:(NSError **)outError;

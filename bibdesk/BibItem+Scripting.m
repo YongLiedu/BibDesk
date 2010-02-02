@@ -514,7 +514,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     
     NSError *error = nil;
     BOOL isPartialData;
-    NSArray *newPubs = [BDSKBibTeXParser itemsFromString:btString document:[self owner] isPartialData:&isPartialData error:&error];
+    NSArray *newPubs = [BDSKBibTeXParser itemsFromString:btString owner:[self owner] isPartialData:&isPartialData error:&error];
 	
 	// try to do some error handling for AppleScript
 	if (isPartialData) {

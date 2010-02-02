@@ -162,7 +162,7 @@
 			
 			BOOL isPartialData;
 			NSError * parseError;
-			NSArray * newPubs = [BDSKBibTeXParser itemsFromString:cleanedRecord document:nil isPartialData:&isPartialData error: &parseError];
+			NSArray * newPubs = [BDSKBibTeXParser itemsFromString:cleanedRecord owner:nil isPartialData:&isPartialData error: &parseError];
 			
 			if (newPubs != nil) {
 				[results addObjectsFromArray:newPubs];

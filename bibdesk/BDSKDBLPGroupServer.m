@@ -209,7 +209,7 @@ static void fixEEURL(BibItem *pub)
         // cancelled case
         pubs = [NSArray array];
     } else if (btString) {
-        pubs = [BDSKBibTeXParser itemsFromString:btString document:group isPartialData:NULL error:NULL];
+        pubs = [BDSKBibTeXParser itemsFromString:btString owner:group isPartialData:NULL error:NULL];
         for (BibItem *pub in pubs) {
             NSString *aKey = [[pub citeKey] stringByRemovingPrefix:@"DBLP:"];
             id value = [abstracts objectForKey:aKey];

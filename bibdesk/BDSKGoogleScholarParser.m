@@ -184,7 +184,7 @@
         NSArray* bibtexItems = nil;
         
         if (nil != bibTeXString)
-            bibtexItems = [BDSKBibTeXParser itemsFromString:bibTeXString document:nil isPartialData:&isPartialData error:&error];
+            bibtexItems = [BDSKBibTeXParser itemsFromString:bibTeXString owner:nil isPartialData:&isPartialData error:&error];
         
         if ([bibtexItems count] && NO == isPartialData) {
             BibItem *bibtexItem = [bibtexItems objectAtIndex:0]; 

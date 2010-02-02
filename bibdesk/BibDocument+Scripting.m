@@ -237,7 +237,7 @@
         if (bibtexString) {
             NSError *error = nil;
             BOOL isPartialData;
-            NSArray *newPubs = [BDSKBibTeXParser itemsFromString:bibtexString document:self isPartialData:&isPartialData error:&error];
+            NSArray *newPubs = [BDSKBibTeXParser itemsFromString:bibtexString owner:self isPartialData:&isPartialData error:&error];
             if (isPartialData) {
                 NSScriptCommand *cmd = [NSScriptCommand currentCommand];
                 [cmd setScriptErrorNumber:NSInternalScriptError];

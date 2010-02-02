@@ -255,7 +255,7 @@ static NSMutableArray *_finishedDownloads = nil;
         NSString * bibTeXString = [[attrString string] stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         
         BOOL isPartialData;
-        NSArray * newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString document:nil isPartialData:&isPartialData error: &error];
+        NSArray * newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString owner:nil isPartialData:&isPartialData error: &error];
         
         BibItem *newPub = [newPubs firstObject];
         

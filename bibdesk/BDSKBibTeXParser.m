@@ -130,13 +130,13 @@ static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dict
 }
 
 /// libbtparse methods
-+ (NSArray *)itemsFromString:(NSString *)aString document:(id<BDSKOwner>)anOwner isPartialData:(BOOL *)isPartialData
++ (NSArray *)itemsFromString:(NSString *)aString owner:(id<BDSKOwner>)anOwner isPartialData:(BOOL *)isPartialData
 error:(NSError **)outError{
     NSData *inData = [aString dataUsingEncoding:NSUTF8StringEncoding];
-    return [self itemsFromData:inData frontMatter:nil filePath:BDSKParserPasteDragString document:anOwner encoding:NSUTF8StringEncoding isPartialData:isPartialData error:outError];
+    return [self itemsFromData:inData frontMatter:nil filePath:BDSKParserPasteDragString owner:anOwner encoding:NSUTF8StringEncoding isPartialData:isPartialData error:outError];
 }
 
-+ (NSArray *)itemsFromData:(NSData *)inData frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(id<BDSKOwner>)anOwner encoding:(NSStringEncoding)parserEncoding isPartialData:(BOOL *)isPartialData error:(NSError **)outError{
++ (NSArray *)itemsFromData:(NSData *)inData frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath owner:(id<BDSKOwner>)anOwner encoding:(NSStringEncoding)parserEncoding isPartialData:(BOOL *)isPartialData error:(NSError **)outError{
     
     NSUInteger inputDataLength = [inData length];
     

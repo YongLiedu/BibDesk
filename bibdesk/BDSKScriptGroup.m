@@ -283,7 +283,7 @@
 
     if (type == BDSKBibTeXStringType) {
         NSMutableString *frontMatter = [NSMutableString string];
-        pubs = [BDSKBibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:@"" document:self encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
+        pubs = [BDSKBibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:@"" owner:self encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
     } else if (type != BDSKUnknownStringType){
         pubs = [BDSKStringParser itemsFromString:outputString ofType:type error:&error];
     } else {
