@@ -231,6 +231,8 @@ static NSSet *alwaysDisabledFields = nil;
     // these should always be reset, becaus eth prefs may have changed
     [globalMacroFiles setArray:[sud stringArrayForKey:BDSKGlobalMacroFilesKey]];
     [self resetDefaultFields];
+    // the field types may have changed, so notify the type manager
+    [[BDSKTypeManager sharedManager] updateCustomFields];
     // reset UI, but only if we loaded the nib
     if ([self isViewLoaded]) {
         [self updateUI];
