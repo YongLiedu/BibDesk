@@ -43,13 +43,16 @@
 #import "BDSKBibTeXParser.h"
 #import "NSXMLNode_BDSKExtensions.h"
 
+#define BDSKDisableGoogleScholarListParsingKey @"BDSKDisableGoogleScholarListParsing"
+
 @implementation BDSKGoogleScholarParser
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
     // !!! other countries end up with e.g. scholar.google.be; checking for scholar.google.com may fail in those cases
     // also some sites access google scholar via an ezproxy, so the suffix could be quite complex
-    if (! [[[url host] lowercaseString] hasPrefix:@"scholar.google."]){
+    if (NO == [[[url host] lowercaseString] hasPrefix:@"scholar.google."] || 
+        [[NSUserDefaults standardUserDefaults] boolForKey:BDSKDisableGoogleScholarListParsingKey]){
         return NO;
     }
     
