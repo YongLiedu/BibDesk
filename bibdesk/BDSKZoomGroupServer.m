@@ -280,7 +280,8 @@
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.needsReset);
     }
     
-    [self reset];
+    OSAtomicCompareAndSwap32Barrier(availableResults, 0, &availableResults);
+    OSAtomicCompareAndSwap32Barrier(fetchedResults, 0, &fetchedResults);
 } 
 
 - (oneway void)terminateConnection;
