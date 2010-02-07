@@ -513,14 +513,17 @@ static id sharedController = nil;
 
 - (void)loadPreferences {
     NSString *plistPath = [[NSBundle mainBundle] pathForResource:DEFAULTS_TABLE ofType:@"plist"];
+    NSArray *categoryArray = [NSArray arrayWithContentsOfFile:plistPath];
     NSMutableDictionary *initialValues = [NSMutableDictionary dictionary];
 	
+    NSAssert(categoryArray != nil, @"Could not find preferences in main bundle");
+    
     SInt32 majorVersion = 0, minorVersion = 0, bugfixVersion = 0;
 	BDSKVersionNumber *systemVersion = nil;
     if (noErr == Gestalt(gestaltSystemVersionMajor, &majorVersion) && noErr == Gestalt(gestaltSystemVersionMinor, &minorVersion) && noErr == Gestalt(gestaltSystemVersionBugFix, &bugfixVersion))
         systemVersion = [BDSKVersionNumber versionNumberWithVersionString:[NSString stringWithFormat:@"%i.%i.%i", majorVersion, minorVersion, bugfixVersion]];
     
-    for (NSDictionary *dict in [NSArray arrayWithContentsOfFile:plistPath]) {
+    for (NSDictionary *dict in categoryArray) {
         NSMutableArray *paneArray = [[NSMutableArray alloc] init];
         
         for (NSDictionary *paneDict in [dict valueForKey:PANES_KEY]) {
