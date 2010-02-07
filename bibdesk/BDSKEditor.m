@@ -39,6 +39,7 @@
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
+#import "BibDocument_DataSource.h"
 #import "BDAlias.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKComplexString.h"
@@ -81,6 +82,7 @@
 #import "NSViewAnimation_BDSKExtensions.h"
 #import "BDSKColoredView.h"
 #import "BDSKSplitView.h"
+#import "BDSKTemplate.h"
 
 #define WEAK_NULL NULL
 
@@ -418,6 +420,33 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 #pragma mark Actions
+
+- (IBAction)copy:(id)sender {
+    NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
+    NSString *copyTypeKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
+	NSInteger copyType = [sud integerForKey:copyTypeKey];
+	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
+    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+    NSArray *pubs = [NSArray arrayWithObject:publication];
+    
+    if (copyType == BDSKTemplateDragCopyType) {
+        NSString *dragCopyTemplateKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
+        NSString *template = [sud stringForKey:dragCopyTemplateKey];
+        NSUInteger templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
+        if (templateIdx != NSNotFound)
+            copyType += templateIdx;
+    }
+    
+    [[self document] writePublications:pubs forDragCopyType:copyType citeString:citeString toPasteboard:pboard];
+}
+
+- (IBAction)copyAsAction:(id)sender {
+	NSInteger copyType = [sender tag];
+    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+	NSString *citeString = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey];
+    NSArray *pubs = [NSArray arrayWithObject:publication];
+	[[self document] writePublications:pubs forDragCopyType:copyType citeString:citeString toPasteboard:pboard];
+}
 
 - (IBAction)openLinkedFile:(id)sender{
     NSArray *urls;
@@ -1490,7 +1519,16 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     SEL theAction = [menuItem action];
     
-	if (theAction == @selector(generateCiteKey:)) {
+	if (theAction == @selector(copy:)) {
+		return (editorFlags.isEditable && [[publication localFiles] count]);
+	}
+	else if (theAction == @selector(copyAsAction:)) {
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey])
+            return YES;
+        NSInteger copyType = [menuItem tag];
+        return (copyType != BDSKPDFDragCopyType && copyType != BDSKRTFDragCopyType && copyType != BDSKLaTeXDragCopyType && copyType != BDSKLTBDragCopyType);
+	}
+    else if (theAction == @selector(generateCiteKey:)) {
 		return editorFlags.isEditable;
 	}
 	else if (theAction == @selector(consolidateLinkedFiles:)) {
