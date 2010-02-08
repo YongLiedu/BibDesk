@@ -49,6 +49,7 @@
 
 #define USMARC_STRING   @"US MARC"
 #define UNIMARC_STRING  @"UNIMARC"
+#define OPAC_STRING     @"OPAC"
 #define MARCXML_STRING  @"MARC XML"
 #define DCXML_STRING    @"DC XML"
 #define MODS_STRING     @"MODS"
@@ -72,7 +73,7 @@
 }
 
 + (NSArray *)supportedRecordSyntaxes {
-    return [NSArray arrayWithObjects:USMARC_STRING, UNIMARC_STRING, MARCXML_STRING, DCXML_STRING, MODS_STRING, nil];
+    return [NSArray arrayWithObjects:USMARC_STRING, UNIMARC_STRING, OPAC_STRING, MARCXML_STRING, DCXML_STRING, MODS_STRING, nil];
 }
 
 + (ZOOMSyntaxType)zoomRecordSyntaxForRecordSyntaxString:(NSString *)syntax{
@@ -80,6 +81,8 @@
         return USMARC;
     else if ([syntax isEqualToString:UNIMARC_STRING]) 
         return UNIMARC;
+    else if ([syntax isEqualToString:OPAC_STRING]) 
+        return OPAC;
     else if ([syntax isEqualToString:MARCXML_STRING] || [syntax isEqualToString:DCXML_STRING] || [syntax isEqualToString:MODS_STRING]) 
         return XML;
     else
@@ -203,7 +206,7 @@
 {
     NSString *recordSyntax = [serverInfo recordSyntax];
     NSInteger stringType = BDSKUnknownStringType;
-    if([recordSyntax isEqualToString:USMARC_STRING] || [recordSyntax isEqualToString:UNIMARC_STRING]) {
+    if([recordSyntax isEqualToString:USMARC_STRING] || [recordSyntax isEqualToString:UNIMARC_STRING] || [recordSyntax isEqualToString:OPAC_STRING]) {
         stringType = BDSKMARCStringType;
     } else if([recordSyntax isEqualToString:MARCXML_STRING]) {
         stringType = BDSKMARCStringType;
@@ -310,7 +313,9 @@
             BDDeleteCharactersInCharacterSet(mutableCopy, CFCharacterSetGetPredefined(kCFCharacterSetNonBase));
             searchTerm = (NSString *)mutableCopy;
         }
-                
+        
+        BOOL isOPAC = [[info recordSyntax] isEqualToString:OPAC_STRING];
+        
         // the resultSet is cached for each searchTerm, so we have no overhead calling it for retrieving more results
         ZOOMQuery *query = [ZOOMQuery queryWithCCLString:searchTerm config:[[info options] objectForKey:@"queryConfig"]];
         
@@ -335,7 +340,7 @@
             
             results = [NSMutableArray array];
             for (id result in records) {
-                NSString *rawString = [result rawString];
+                NSString *rawString = isOPAC ? [result opacString] : [result rawString];
                 NSString *renderedString = [result renderedString];
                 NSDictionary *resultDict = [[NSDictionary alloc] initWithObjectsAndKeys:rawString, @"rawString", renderedString, @"renderedString", nil];
                 [results addObject:resultDict];

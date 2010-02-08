@@ -414,7 +414,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 
 - (BOOL)isMARCXMLString{
     AGRegex *regex = [AGRegex regexWithPattern:@"<record( xmlns=\"[^<>\"]*\")?>\n *<leader>[ 0-9]{5}[a-z]{3}[ a]{2}22[ 0-9]{5}[ 1-8uz][ a-z][ r]45[ 0A-Z]0</leader>\n *<controlfield tag=\"00[0-9]\">"];
-    NSUInteger maxLen = MIN([self length], (NSUInteger)100);
+    NSUInteger maxLen = MIN([self length], (NSUInteger)150);
     return nil != [regex findInString:[[self substringToIndex:maxLen] stringByNormalizingSpacesAndLineBreaks]];
 }
 
