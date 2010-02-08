@@ -69,12 +69,12 @@
     [_searchField setFormatter:[[[ZOOMCCLQueryFormatter alloc] init] autorelease]];
     
     [_syntaxPopup removeAllItems];
-    [_syntaxPopup addItemsWithTitles:[NSArray arrayWithObjects:@"USMARC", @"GRS-1", @"SUTRS", @"XML", @"UKMARC", @"UNIMARC", nil]];
+    [_syntaxPopup addItemsWithTitles:[NSArray arrayWithObjects:@"USMARC", @"GRS-1", @"SUTRS", @"XML", @"UKMARC", @"UNIMARC", @"OPAC", nil]];
     [_syntaxPopup selectItemAtIndex:0];
     
     _connectionNeedsReset = YES;
     
-    NSArray *charsets = [NSArray arrayWithObjects:@"MARC-8", @"UTF-8", @"ISO-8859-1", nil];
+    NSArray *charsets = [NSArray arrayWithObjects:@"MARC-8", @"UTF-8", @"ISO-8859-1", @"ANSEL", nil];
     [_charSetPopup removeAllItems];
     [_charSetPopup addItemsWithTitles:charsets];
     [_charSetPopup selectItemAtIndex:0];

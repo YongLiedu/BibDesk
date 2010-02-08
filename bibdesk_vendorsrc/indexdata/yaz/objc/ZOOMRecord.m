@@ -44,6 +44,7 @@
 // could specify explicit character set conversions in the keys, but that's not very flexible
 static NSString *renderKey = @"__renderedString";
 static NSString *rawKey = @"__rawString";
+static NSString *opacKey = @"__opacString";
 static NSStringEncoding fallbackEncoding = kCFStringEncodingInvalidId;
 
 @interface ZOOMRecord (Private)
@@ -89,6 +90,8 @@ static NSData *copyMARC8BytesToUTF8(const char *buf, NSInteger length);
         return @"ukmarc";
     case UNIMARC:
         return @"unimarc";
+    case OPAC:
+        return @"opac";
     default:
         return @"unknown";
     }
@@ -113,6 +116,8 @@ static NSData *copyMARC8BytesToUTF8(const char *buf, NSInteger length);
         return UKMARC;
     else if (!yaz_matchstr(syn, "Unimarc"))
         return UNIMARC;
+    else if (!yaz_matchstr(syn, "OPAC"))
+        return OPAC;
     else if (!yaz_matchstr(syn, "XML") ||
              !yaz_matchstr(syn, "text-XML") ||
              !yaz_matchstr(syn, "application-XML"))
@@ -180,6 +185,17 @@ static NSData *copyMARC8BytesToUTF8(const char *buf, NSInteger length);
     if (nil == string) {
         string = [self copyStringValueForKey:@"raw"];
         [_representations setObject:string forKey:rawKey];
+        [string release];
+    }
+    return string;
+}
+
+- (NSString *)opacString;
+{
+    NSString *string = [_representations objectForKey:opacKey];
+    if (nil == string) {
+        string = [self copyStringValueForKey:@"opac"];
+        [_representations setObject:string forKey:opacKey];
         [string release];
     }
     return string;

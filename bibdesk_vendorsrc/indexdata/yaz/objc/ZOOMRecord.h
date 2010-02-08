@@ -42,6 +42,7 @@
  @constant   SUTRS 
  @constant   USMARC 
  @constant   UKMARC 
+ @constant   OPAC 
  @constant   XML 
  */
 enum {
@@ -51,7 +52,8 @@ enum {
     USMARC  =  2,
     UKMARC  =  3,
     UNIMARC =  4,
-    XML     =  5
+    OPAC    =  5,
+    XML     =  6
 };
 typedef NSInteger ZOOMSyntaxType;
 
@@ -126,6 +128,13 @@ typedef NSInteger ZOOMSyntaxType;
     @result     NSString instance.
 */
 - (NSString *)renderedString;
+
+/*!
+    @method     opacString
+    @abstract   Converts the underlying data in its "opac" syntax to an NSString, using the character set supplied at initialization time.
+    @result     NSString instance.
+*/
+- (NSString *)opacString;
 
 /*!
     @method     stringValueForKey:
