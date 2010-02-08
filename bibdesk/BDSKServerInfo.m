@@ -238,40 +238,26 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 
 @implementation BDSKMutableServerInfo
 
-+ (NSSet *)keyPathsForValuesAffectingServerType {
-    return [NSSet setWithObjects:TYPE_KEY, nil];
+static NSSet *keysAffectedByType = nil;
+static NSSet *keysAffectedByOptions = nil;
+static NSSet *typeSet = nil;
+static NSSet *optionsSet = nil;
+
++ (void)initialize {
+    BDSKINITIALIZE;
+    keysAffectedByType = [[NSSet alloc] initWithObjects:@"serverType", HOST_KEY, PORT_KEY, OPTIONS_KEY, nil];
+    keysAffectedByOptions = [[NSSet alloc] initWithObjects:PASSWORD_KEY, USERNAME_KEY, RECORDSYNTAX_KEY, RESULTENCODING_KEY, REMOVEDIACRITICS_KEY, nil];
+    typeSet = [[NSSet alloc] initWithObjects:TYPE_KEY, nil];
+    optionsSet = [[NSSet alloc] initWithObjects:OPTIONS_KEY, nil];
 }
 
-+ (NSSet *)keyPathsForValuesAffectingHost {
-    return [NSSet setWithObjects:TYPE_KEY, nil];
-}
-
-+ (NSSet *)keyPathsForValuesAffectingPort {
-    return [NSSet setWithObjects:TYPE_KEY, nil];
-}
-
-+ (NSSet *)keyPathsForValuesAffectingOptions {
-    return [NSSet setWithObjects:TYPE_KEY, nil];
-}
-
-+ (NSSet *)keyPathsForValuesAffectingPassword {
-    return [NSSet setWithObjects:OPTIONS_KEY, nil];
-}
-
-+ (NSSet *)keyPathsForValuesAffectingUsername {
-    return [NSSet setWithObjects:OPTIONS_KEY, nil];
-}
-
-+ (NSSet *)keyPathsForValuesAffectingRecordSyntax {
-    return [NSSet setWithObjects:OPTIONS_KEY, nil];
-}
-
-+ (NSSet *)keyPathsForValuesAffectingResultEncoding {
-    return [NSSet setWithObjects:OPTIONS_KEY, nil];
-}
-
-+ (NSSet *)keyPathsForValuesAffectingRemoveDiacritics {
-    return [NSSet setWithObjects:OPTIONS_KEY, nil];
++ (NSSet *)keyPathsForValuesAffectingValueForKey:(NSString *)key {
+    NSSet *set = [super keyPathsForValuesAffectingValueForKey:key];
+    if ([keysAffectedByType containsObject:key])
+        return [set count] > 0 ? [set setByAddingObjectsFromSet:typeSet] : typeSet;
+    if ([keysAffectedByOptions containsObject:key])
+        return [set count] > 0 ? [set setByAddingObjectsFromSet:optionsSet] : optionsSet;
+    return set;
 }
 
 // When changing the type, all data must be properly updated to be valid, taking into account the condition implict in the validation methods
