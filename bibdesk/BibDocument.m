@@ -2678,10 +2678,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
 	NSIndexSet *indexes = [shownPublications indexesOfObjectsIdenticalTo:bibArray];
     
-    if([indexes count]){
-        [tableView selectRowIndexes:indexes byExtendingSelection:NO];
+    [tableView selectRowIndexes:indexes byExtendingSelection:NO];
+    if([indexes count])
         [tableView scrollRowToCenter:[indexes firstIndex]];
-    }
 }
 
 - (NSArray *)selectedFileURLs {
