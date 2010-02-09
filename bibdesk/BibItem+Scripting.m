@@ -39,6 +39,7 @@
 #import "BibAuthor.h"
 #import "BDSKStringConstants.h"
 #import "BibDocument.h"
+#import "BDSKGroupsArray.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKLinkedFile.h"
@@ -201,7 +202,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (id)group {
-    return [owner isDocument] ? nil : owner;
+    return [owner isDocument] ? (BDSKGroup *)[[(BibDocument *)owner groups] libraryGroup] : (BDSKGroup *)owner;
 }
 
 - (BOOL)isExternal {
