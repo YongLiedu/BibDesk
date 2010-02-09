@@ -994,7 +994,7 @@
                 <cocoa key="scriptingDocument"/>
             </property>  
             <property name="group" code="Grup" type="group" access="r"
-                description="The external group containing this publication record, if any.">
+                description="The external group or the library group containing this publication record.">
                 <cocoa key="group"/>
             </property>  
             <property name="external" code="Extl" type="boolean" access="r"
