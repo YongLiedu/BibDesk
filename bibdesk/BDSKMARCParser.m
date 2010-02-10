@@ -386,9 +386,9 @@ static BibItem *createPublicationWithRecord(NSXMLNode *record) {
     NSXMLNode *node, *subnode;
     NSString *value, *tag, *subTag, *ind1, *ind2;
     
-    nodes = [record nodesForXPath:@"//marc:leader" error:NULL];
+    nodes = [record nodesForXPath:@"./marc:leader" error:NULL];
     if ([nodes count] == 0)
-        nodes = [record nodesForXPath:@"//leader" error:NULL];
+        nodes = [record nodesForXPath:@"./leader" error:NULL];
     if ([nodes count]) {
         node = [nodes lastObject];
         value = [node stringValue];
@@ -396,27 +396,27 @@ static BibItem *createPublicationWithRecord(NSXMLNode *record) {
         [formattedString appendStrings:@"LDR    ", value, @"\n", nil];
     }
     
-    nodes = [record nodesForXPath:@"//marc:controlfield" error:NULL];
+    nodes = [record nodesForXPath:@"./marc:controlfield" error:NULL];
     if ([nodes count] == 0)
-        nodes = [record nodesForXPath:@"//controlfield" error:NULL];
+        nodes = [record nodesForXPath:@"./controlfield" error:NULL];
     for (node in nodes) {
         value = [node stringValue];
         tag = [node stringValueOfAttribute:@"tag"];
         [formattedString appendStrings:tag, @"    ", value, @"\n", nil];
     }
     
-    nodes = [record nodesForXPath:@"//marc:datafield" error:NULL];
+    nodes = [record nodesForXPath:@"./marc:datafield" error:NULL];
     if ([nodes count] == 0)
-        nodes = [record nodesForXPath:@"//datafield" error:NULL];
+        nodes = [record nodesForXPath:@"./datafield" error:NULL];
     for (node in nodes) {
         tag = [node stringValueOfAttribute:@"tag"];
         ind1 = [node stringValueOfAttribute:@"ind1"] ?: @" ";
         ind2 = [node stringValueOfAttribute:@"ind2"] ?: @" ";
         [formattedString appendStrings:tag, @" ", ind1, ind2, nil];
         
-        subnodes = [node nodesForXPath:@".//marc:subfield" error:NULL];
+        subnodes = [node nodesForXPath:@"./marc:subfield" error:NULL];
         if ([subnodes count] == 0)
-            subnodes = [node nodesForXPath:@".//subfield" error:NULL];
+            subnodes = [node nodesForXPath:@"./subfield" error:NULL];
         for (subnode in subnodes) {
             value = [subnode stringValue];
             subTag = [subnode stringValueOfAttribute:@"code"];
