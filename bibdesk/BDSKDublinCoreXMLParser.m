@@ -82,6 +82,12 @@ static NSArray *dcProperties(NSXMLNode *node, NSString *key)
         return nil;
     
     NSXMLElement *root = [doc rootElement];
+    NSXMLNode *rdfns = [NSXMLNode namespaceWithName:@"rdf" stringValue:@"http://www.w3.org/1999/02/22-rdf-syntax-ns#"];
+    NSXMLNode *dcns = [NSXMLNode namespaceWithName:@"dc" stringValue:@"http://purl.org/dc/elements/1.1/"];
+    
+    // Cocoa's xpath gets its namespaces from the context node, it does not provide a way to pass namespaces to the xpath engine separately, which is seriously against the idea of namespaces
+    [root addNamespace:rdfns];
+    [root addNamespace:dcns];
     
     BOOL isOAI = [xmlString isOAIDublinCoreXMLString];
     NSMutableArray *arrayOfPubs = [NSMutableArray array];
