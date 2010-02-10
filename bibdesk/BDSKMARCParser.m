@@ -44,6 +44,7 @@
 #import "NSScanner_BDSKExtensions.h"
 #import <AGRegex/AGRegex.h>
 #import "NSError_BDSKExtensions.h"
+#import "NSXMLNode_BDSKExtensions.h"
 
 @interface NSString (BDSKMARCParserExtensions)
 - (BOOL)isMARCString;
@@ -53,22 +54,9 @@
 - (NSString *)stringByRemovingPunctuationCharactersAndBracketedText;
 @end
 
-
-@interface BDSKMARCParser (Private)
 static void addStringToDictionary(NSString *value, NSMutableDictionary *dict, NSString *tag, NSString *subFieldIndicator, BOOL isUNIMARC);
 static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pubDict, NSString *tag, NSString *subTag, BOOL isUNIMARC);
-@end
-
-@interface BDSKMARCXMLParser : NSXMLParser <NSXMLParserDelegate> {
-    NSMutableArray *returnArray;
-    NSMutableDictionary *pubDict;
-    NSMutableString *currentValue;
-    NSString *tag;
-    NSString *subTag;
-    NSMutableString *formattedString;
-}
-- (NSArray *)parsedItems;
-@end
+static BibItem *createPublicationWithRecord(NSXMLNode *record);
 
 @implementation BDSKMARCParser
 
@@ -261,20 +249,25 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 }
 
 + (NSArray *)itemsFromMARCXMLString:(NSString *)itemString error:(NSError **)outError{
-    BDSKMARCXMLParser *xmlParser = [[BDSKMARCXMLParser alloc] initWithXMLString:itemString];
-    BOOL success = [xmlParser parse];
-    NSArray *returnArray = nil;
+    NSMutableArray *pubs = [NSMutableArray array];
+    NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:itemString options:0 error:NULL] autorelease];
+    NSXMLElement *root = [doc rootElement];
+    NSXMLNode *marcns = [NSXMLNode namespaceWithName:@"marc" stringValue:@"http://www.loc.gov/MARC21/slim"];
     
-    if(success){
-        returnArray = [xmlParser parsedItems];
-    }else{
-        returnArray = [NSArray array];
-        if(outError) *outError = [xmlParser parserError];
+    // if the XML uses the MARC namespace, we need to add it to the root element, otherwise xpath queries won't know about it
+    [root addNamespace:marcns];
+    
+    NSArray *nodes = [root nodesForXPath:@"//marc:record" error:NULL];
+    if ([nodes count] == 0)
+        nodes = [root nodesForXPath:@"//record" error:NULL];
+    
+    for (NSXMLNode *node in nodes) {
+        BibItem *pub = createPublicationWithRecord(node);
+        [pubs addObject:pub];
+        [pub release];
     }
     
-    [xmlParser release];
-    
-    return returnArray;
+    return pubs;
 }
 
 + (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
@@ -293,8 +286,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 
 @end
 
-
-@implementation BDSKMARCParser (Private)
+#pragma mark -
 
 static void addStringToDictionary(NSString *value, NSMutableDictionary *pubDict, NSString *tag, NSString *subFieldIndicator, BOOL isUNIMARC){
 	unichar subTag = 0;
@@ -386,8 +378,68 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     [subValue release];
 }
 
-@end
 
+static BibItem *createPublicationWithRecord(NSXMLNode *record) {
+    NSMutableDictionary *pubDict = [[NSMutableDictionary alloc] init];
+    NSMutableString *formattedString = [[NSMutableString alloc] init];
+    NSArray *nodes, *subnodes;
+    NSXMLNode *node, *subnode;
+    NSString *value, *tag, *subTag, *ind1, *ind2;
+    
+    nodes = [record nodesForXPath:@"//marc:leader" error:NULL];
+    if ([nodes count] == 0)
+        nodes = [record nodesForXPath:@"//leader" error:NULL];
+    if ([nodes count]) {
+        node = [nodes lastObject];
+        value = [node stringValue];
+        tag = [node stringValueOfAttribute:@"tag"];
+        [formattedString appendStrings:@"LDR    ", value, @"\n", nil];
+    }
+    
+    nodes = [record nodesForXPath:@"//marc:controlfield" error:NULL];
+    if ([nodes count] == 0)
+        nodes = [record nodesForXPath:@"//controlfield" error:NULL];
+    for (node in nodes) {
+        value = [node stringValue];
+        tag = [node stringValueOfAttribute:@"tag"];
+        [formattedString appendStrings:tag, @"    ", value, @"\n", nil];
+    }
+    
+    nodes = [record nodesForXPath:@"//marc:datafield" error:NULL];
+    if ([nodes count] == 0)
+        nodes = [record nodesForXPath:@"//datafield" error:NULL];
+    for (node in nodes) {
+        tag = [node stringValueOfAttribute:@"tag"];
+        ind1 = [node stringValueOfAttribute:@"ind1"] ?: @" ";
+        ind2 = [node stringValueOfAttribute:@"ind2"] ?: @" ";
+        [formattedString appendStrings:tag, @" ", ind1, ind2, nil];
+        
+        subnodes = [node nodesForXPath:@".//marc:subfield" error:NULL];
+        if ([subnodes count] == 0)
+            subnodes = [node nodesForXPath:@".//subfield" error:NULL];
+        for (subnode in subnodes) {
+            value = [subnode stringValue];
+            subTag = [subnode stringValueOfAttribute:@"code"];
+            [formattedString appendStrings:@" ", @"$", subTag, @" " , value, nil];
+            if (tag && subTag && [value length])
+                addSubstringToDictionary(value, pubDict, tag, subTag, NO);
+        }
+        [formattedString appendString:@"\n"];
+    }
+    
+    [pubDict setObject:formattedString forKey:BDSKAnnoteString];
+    [formattedString release];
+    
+    BibItem *newBI = [[BibItem alloc] initWithType:BDSKBookString
+                                           citeKey:nil
+                                         pubFields:pubDict
+                                             isNew:YES];
+    [pubDict release];
+    
+    return newBI;
+}
+
+#pragma mark -
 
 @implementation NSString (BDSKMARCParserExtensions)
 
@@ -457,94 +509,3 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 }
 
 @end
-
-
-@implementation BDSKMARCXMLParser  
-
-- (id)initWithXMLString:(NSString *)aString{
-    NSData *data = [aString dataUsingEncoding:NSUTF8StringEncoding];
-    if(data == nil){
-        [[super init] release];
-        self = nil;
-    }else if(self = [super initWithData:data]){
-        returnArray = [[NSMutableArray alloc] initWithCapacity:10];
-        pubDict = [[NSMutableDictionary alloc] init];
-        currentValue = [[NSMutableString alloc] initWithCapacity:50];
-        tag = nil;
-        subTag = nil;
-        formattedString = [[NSMutableString alloc] initWithCapacity:1000];
-        
-        [self setDelegate:self];
-        
-    }
-    return self;
-}
-
-- (void)dealloc{
-    BDSKDESTROY(returnArray);
-    BDSKDESTROY(pubDict);
-    BDSKDESTROY(tag);
-    BDSKDESTROY(subTag);
-    BDSKDESTROY(currentValue);
-    BDSKDESTROY(formattedString);
-    [super dealloc];
-}
-
-- (NSArray *)parsedItems{
-    return [[returnArray copy] autorelease];
-}
-
-- (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qualifiedName attributes:(NSDictionary *)attributeDict{
-    if([elementName isEqualToString:@"record"] || [elementName isEqualToString:@"marc:record"]){
-        [pubDict removeAllObjects];
-        [formattedString setString:@""];
-    }else if([elementName isEqualToString:@"leader"] || [elementName isEqualToString:@"marc:leader"]){
-        [formattedString appendString:@"LDR    "];
-    }else if([elementName isEqualToString:@"controlfield"] || [elementName isEqualToString:@"marc:controlfield"]){
-        [tag release];
-        tag = [[attributeDict objectForKey:@"tag"] retain];
-        [formattedString appendStrings:tag, @"    ", nil];
-    }else if([elementName isEqualToString:@"datafield"] || [elementName isEqualToString:@"marc:datafield"]){
-        [tag release];
-        tag = [[attributeDict objectForKey:@"tag"] retain];
-        [formattedString appendStrings:tag, @" ", [attributeDict objectForKey:@"ind1"], [attributeDict objectForKey:@"ind2"], @" ", nil];
-    }else if([elementName isEqualToString:@"subfield"] || [elementName isEqualToString:@"marc:subfield"]){
-        [subTag release];
-        subTag = [[attributeDict objectForKey:@"code"] retain];
-        [formattedString appendStrings:tag, @"$", subTag, nil];
-    }
-    [currentValue setString:@""];
-}
-
-- (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName{
-    if([elementName isEqualToString:@"record"] || [elementName isEqualToString:@"marc:record"]){
-        if([pubDict count] > 0){
-            NSString *value = [formattedString copy];
-            [pubDict setObject:value forKey:BDSKAnnoteString];
-            [value release];
-            
-            BibItem *newBI = [[BibItem alloc] initWithType:BDSKBookString
-                                                   citeKey:nil
-                                                 pubFields:pubDict
-                                                     isNew:YES];
-            [returnArray addObject:newBI];
-            [newBI release];
-        }
-    }else if([elementName isEqualToString:@"leader"] || [elementName isEqualToString:@"marc:leader"] ||
-             [elementName isEqualToString:@"controlfield"] || [elementName isEqualToString:@"marc:controlfield"]){
-        [formattedString appendStrings:currentValue, @"\n", nil];
-    }else if([elementName isEqualToString:@"datafield"] || [elementName isEqualToString:@"marc:datafield"]){
-        [formattedString appendString:@"\n"];
-    }else if([elementName isEqualToString:@"subfield"] || [elementName isEqualToString:@"marc:subfield"]){
-        if(tag && subTag && [currentValue length])
-            addSubstringToDictionary(currentValue, pubDict, tag, subTag, NO);
-        [formattedString appendString:currentValue];
-    }
-}
-
-- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string{
-    [currentValue appendString:string];
-}
-
-@end
-
