@@ -2,10 +2,10 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1050</int>
-		<string key="IBDocument.SystemVersion">10C540</string>
+		<string key="IBDocument.SystemVersion">10D552</string>
 		<string key="IBDocument.InterfaceBuilderVersion">740</string>
-		<string key="IBDocument.AppKitVersion">1038.25</string>
-		<string key="IBDocument.HIToolboxVersion">458.00</string>
+		<string key="IBDocument.AppKitVersion">1038.29</string>
+		<string key="IBDocument.HIToolboxVersion">460.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
 			<string key="NS.object.0">740</string>
@@ -55,7 +55,7 @@
 						<object class="NSButton" id="769816582">
 							<reference key="NSNextResponder" ref="1051294543"/>
 							<int key="NSvFlags">289</int>
-							<string key="NSFrame">{{475, 12}, {90, 32}}</string>
+							<string key="NSFrame">{{478, 12}, {82, 32}}</string>
 							<reference key="NSSuperview" ref="1051294543"/>
 							<reference key="NSWindow"/>
 							<int key="NSTag">1</int>
@@ -83,7 +83,7 @@
 						<object class="NSButton" id="137347081">
 							<reference key="NSNextResponder" ref="1051294543"/>
 							<int key="NSvFlags">289</int>
-							<string key="NSFrame">{{387, 12}, {90, 32}}</string>
+							<string key="NSFrame">{{396, 12}, {82, 32}}</string>
 							<reference key="NSSuperview" ref="1051294543"/>
 							<reference key="NSWindow"/>
 							<bool key="NSEnabled">YES</bool>
@@ -1066,12 +1066,12 @@
 						<reference key="object" ref="1051294543"/>
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="769816582"/>
+							<reference ref="137347081"/>
 							<reference ref="82600986"/>
 							<reference ref="691132835"/>
 							<reference ref="1068006976"/>
 							<reference ref="428549065"/>
-							<reference ref="769816582"/>
-							<reference ref="137347081"/>
 						</object>
 						<reference key="parent" ref="69230916"/>
 					</object>
@@ -1557,9 +1557,9 @@
 					</object>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{228, 117}, {574, 384}}</string>
+					<string>{{353, 497}, {574, 384}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{228, 117}, {574, 384}}</string>
+					<string>{{353, 497}, {574, 384}}</string>
 					<boolean value="YES"/>
 					<boolean value="YES"/>
 					<string>{1.79769e+308, 1.79769e+308}</string>
