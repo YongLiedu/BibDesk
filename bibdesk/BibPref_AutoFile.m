@@ -66,7 +66,7 @@
 
 // these should correspond to the items in the popups set in IB
 static NSString *presetFormatStrings[] = {@"%l%n0%e", @"%a1/%Y%u0%e", @"%a1/%T5%n0%e"};
-static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", @"%P0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%L", @"%l", @"%e", @"%b", @"%f{}0", @"%w{}[ ]0", @"%s{}[][][]0", @"%c{}", @"%f{Cite Key}", @"%i{}0", @"%u0", @"%U0", @"%n0", @"%0", @"%%"};
+static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", @"%P0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%L", @"%l", @"%e", @"%b", @"%f{}0", @"%w{}[ ]0", @"%s{}[][][]0", @"%c{}", @"%f{Cite Key}", @"%f{BibTeX Type}", @"%i{}0", @"%u0", @"%U0", @"%n0", @"%0", @"%%"};
 
 - (void)dealloc{
     BDSKDESTROY(lastPapersFolderPath);
@@ -298,6 +298,10 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	}
 	else if ([newSpecifier isEqualToString:@"%f{Cite Key}"]) {
 		selRange.location += 10;
+		selRange.length = 0;
+	}
+	else if ([newSpecifier isEqualToString:@"%f{BibTeX Type}"]) {
+		selRange.location += 13;
 		selRange.length = 0;
 	}
 	[formatSheetField selectText:self];

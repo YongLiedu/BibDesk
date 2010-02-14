@@ -12,6 +12,7 @@
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
+			<integer value="138"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -704,7 +705,7 @@ AAA</bytes>
 				<string key="NSWindowContentMaxSize">{1.79769e+308, 1.79769e+308}</string>
 				<string key="NSWindowContentMinSize">{213, 107}</string>
 				<object class="NSView" key="NSWindowView" id="703500811">
-					<nil key="NSNextResponder"/>
+					<reference key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<object class="NSMutableArray" key="NSSubviews">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1423,6 +1424,18 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<int key="NSTag">19</int>
 											<reference key="NSTarget" ref="1049143227"/>
 										</object>
+										<object class="NSMenuItem" id="622274633">
+											<reference key="NSMenu" ref="337715496"/>
+											<string key="NSTitle">BibTeX Type</string>
+											<string key="NSKeyEquiv"/>
+											<int key="NSKeyEquivModMask">1048576</int>
+											<int key="NSMnemonicLoc">2147483647</int>
+											<reference key="NSOnImage" ref="403184879"/>
+											<reference key="NSMixedImage" ref="667185006"/>
+											<string key="NSAction">_popUpItemAction:</string>
+											<int key="NSTag">20</int>
+											<reference key="NSTarget" ref="1049143227"/>
+										</object>
 										<object class="NSMenuItem" id="10174702">
 											<reference key="NSMenu" ref="337715496"/>
 											<string key="NSTitle">Arbitrary document info [length]</string>
@@ -1432,7 +1445,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<reference key="NSOnImage" ref="403184879"/>
 											<reference key="NSMixedImage" ref="667185006"/>
 											<string key="NSAction">_popUpItemAction:</string>
-											<int key="NSTag">20</int>
+											<int key="NSTag">21</int>
 											<reference key="NSTarget" ref="1049143227"/>
 										</object>
 										<object class="NSMenuItem" id="845896289">
@@ -1444,7 +1457,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<reference key="NSOnImage" ref="403184879"/>
 											<reference key="NSMixedImage" ref="667185006"/>
 											<string key="NSAction">_popUpItemAction:</string>
-											<int key="NSTag">21</int>
+											<int key="NSTag">22</int>
 											<reference key="NSTarget" ref="1049143227"/>
 										</object>
 										<object class="NSMenuItem" id="947955662">
@@ -1456,7 +1469,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<reference key="NSOnImage" ref="403184879"/>
 											<reference key="NSMixedImage" ref="667185006"/>
 											<string key="NSAction">_popUpItemAction:</string>
-											<int key="NSTag">22</int>
+											<int key="NSTag">23</int>
 											<reference key="NSTarget" ref="1049143227"/>
 										</object>
 										<object class="NSMenuItem" id="419497234">
@@ -1468,7 +1481,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<reference key="NSOnImage" ref="403184879"/>
 											<reference key="NSMixedImage" ref="667185006"/>
 											<string key="NSAction">_popUpItemAction:</string>
-											<int key="NSTag">23</int>
+											<int key="NSTag">24</int>
 											<reference key="NSTarget" ref="1049143227"/>
 										</object>
 										<object class="NSMenuItem" id="579676673">
@@ -1480,7 +1493,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<reference key="NSOnImage" ref="403184879"/>
 											<reference key="NSMixedImage" ref="667185006"/>
 											<string key="NSAction">_popUpItemAction:</string>
-											<int key="NSTag">24</int>
+											<int key="NSTag">25</int>
 											<reference key="NSTarget" ref="1049143227"/>
 										</object>
 										<object class="NSMenuItem" id="1015728094">
@@ -1492,7 +1505,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<reference key="NSOnImage" ref="403184879"/>
 											<reference key="NSMixedImage" ref="667185006"/>
 											<string key="NSAction">_popUpItemAction:</string>
-											<int key="NSTag">25</int>
+											<int key="NSTag">26</int>
 											<reference key="NSTarget" ref="1049143227"/>
 										</object>
 									</object>
@@ -1576,6 +1589,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 						</object>
 					</object>
 					<string key="NSFrameSize">{561, 284}</string>
+					<reference key="NSSuperview"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMinSize">{213, 129}</string>
@@ -2735,6 +2749,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 							<reference ref="947955662"/>
 							<reference ref="419497234"/>
 							<reference ref="755780432"/>
+							<reference ref="622274633"/>
 						</object>
 						<reference key="parent" ref="1049143227"/>
 					</object>
@@ -2882,6 +2897,11 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 						<reference key="object" ref="888696891"/>
 						<reference key="parent" ref="261484923"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">389</int>
+						<reference key="object" ref="622274633"/>
+						<reference key="parent" ref="337715496"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -2920,6 +2940,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 					<string>145.ImportedFromIB2</string>
 					<string>146.IBPluginDependency</string>
 					<string>146.ImportedFromIB2</string>
+					<string>148.IBEditorWindowLastContentRect</string>
 					<string>148.IBPluginDependency</string>
 					<string>148.ImportedFromIB2</string>
 					<string>149.IBPluginDependency</string>
@@ -3067,6 +3088,8 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 					<string>386.IBPluginDependency</string>
 					<string>387.IBPluginDependency</string>
 					<string>388.IBPluginDependency</string>
+					<string>389.IBPluginDependency</string>
+					<string>389.ImportedFromIB2</string>
 					<string>5.IBPluginDependency</string>
 					<string>5.ImportedFromIB2</string>
 					<string>75.IBAttributePlaceholdersKey</string>
@@ -3144,6 +3167,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
+					<string>{{221, 67}, {435, 543}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3363,6 +3387,8 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
 					<object class="NSMutableDictionary">
 						<string key="NS.key.0">ToolTip</string>
 						<object class="IBToolTipAttribute" key="NS.object.0">
@@ -3421,7 +3447,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">388</int>
+			<int key="maxID">389</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -3565,13 +3591,6 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSCell</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKCenterScaledImageCell.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSCell</string>
 					<string key="superclassName">NSObject</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBUserSource</string>
@@ -3624,13 +3643,6 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 					<string key="className">NSObject</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKFileContentSearchController.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">BDSKTemplateParser.h</string>
 					</object>
 				</object>
@@ -3639,13 +3651,6 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">NSObject_BDSKExtensions.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">vendorsrc/harmless/AMButtonBar.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
