@@ -43,6 +43,7 @@ enum {
     BDSKBookmarkTypeFolder,
     BDSKBookmarkTypeSeparator
 };
+typedef NSInteger BDSKBookmarkType;
 
 @interface BDSKBookmark : NSObject <NSCopying> {
     BDSKBookmark *parent;
@@ -63,7 +64,7 @@ enum {
 
 - (NSDictionary *)dictionaryValue;
 
-- (NSInteger)bookmarkType;
+- (BDSKBookmarkType)bookmarkType;
 
 - (NSURL *)URL;
 
