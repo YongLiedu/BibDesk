@@ -220,7 +220,7 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 - (BOOL)isISI { return [[self type] isEqualToString:BDSKSearchGroupISI]; }
 - (BOOL)isDBLP { return [[self type] isEqualToString:BDSKSearchGroupDBLP]; }
 
-- (NSInteger)serverType {
+- (BDSKServerType)serverType {
     if ([self isEntrez])
         return BDSKServerTypeEntrez;
     if ([self isZoom])

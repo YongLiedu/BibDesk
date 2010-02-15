@@ -456,7 +456,7 @@
 - (NSDictionary *)scriptingServerInfo {
     BDSKServerInfo *serverInfo = [self serverInfo];
     NSMutableDictionary *info = [NSMutableDictionary dictionary];
-    NSInteger serverType = 0;
+    BDSKServerType serverType = 0;
     
     if ([serverInfo isEntrez])
         serverType = BDSKScriptingSearchGroupEntrez;

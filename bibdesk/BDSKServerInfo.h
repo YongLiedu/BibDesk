@@ -44,6 +44,7 @@ enum {
     BDSKServerTypeISI,
     BDSKServerTypeDBLP
 };
+typedef NSInteger BDSKServerType;
 
 @interface BDSKServerInfo : NSObject <NSCopying, NSMutableCopying, NSCoding> {
     NSString *type;
@@ -79,7 +80,7 @@ enum {
 - (BOOL)isISI;
 - (BOOL)isDBLP;
 
-- (NSInteger)serverType;
+- (BDSKServerType)serverType;
 
 @end
 
