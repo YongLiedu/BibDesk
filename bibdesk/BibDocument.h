@@ -73,16 +73,6 @@ enum {
 };
 
 enum {
-    BDSKDetailsPreviewDisplay = 0,
-    BDSKNotesPreviewDisplay = 1,
-    BDSKAbstractPreviewDisplay = 2,
-    BDSKTemplatePreviewDisplay = 3,
-    BDSKPDFPreviewDisplay = 4,
-    BDSKRTFPreviewDisplay = 5,
-    BDSKLinkedFilePreviewDisplay = 6
-};
-
-enum {
     BDSKPreviewDisplayText = 0,
     BDSKPreviewDisplayFiles = 1,
     BDSKPreviewDisplayTeX = 2
