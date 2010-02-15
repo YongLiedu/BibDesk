@@ -54,11 +54,12 @@ enum {
     BDSKSciFinderStringType,
     BDSKPubMedXMLStringType
 };
+typedef NSInteger BDSKStringType;
 
 @interface BDSKStringParser : NSObject
 // passing BDSKUnknownStringType will ise the appropriate -contentStringType
-+ (BOOL)canParseString:(NSString *)string ofType:(NSInteger)stringType;
-+ (NSArray *)itemsFromString:(NSString *)string ofType:(NSInteger)stringType error:(NSError **)outError;
++ (BOOL)canParseString:(NSString *)string ofType:(BDSKStringType)stringType;
++ (NSArray *)itemsFromString:(NSString *)string ofType:(BDSKStringType)stringType error:(NSError **)outError;
 @end
 
 
@@ -69,5 +70,5 @@ enum {
 
 
 @interface NSString (BDSKStringParserExtensions)
-- (NSInteger)contentStringType;
+- (BDSKStringType)contentStringType;
 @end

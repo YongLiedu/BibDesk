@@ -195,7 +195,7 @@
         failedDownload = YES;
         [self setErrorMessage:NSLocalizedString(@"Unable to find content", @"Error description")];
     } else {
-        NSInteger type = [contentString contentStringType];
+        BDSKStringType type = [contentString contentStringType];
         BOOL isPartialData = NO;
         if (type == BDSKBibTeXStringType) {
             NSMutableString *frontMatter = [NSMutableString string];

@@ -1768,7 +1768,7 @@
 }
 
 - (void)autoDiscoverDataFromString:(NSString *)string{
-    NSInteger type = [string contentStringType];
+    BDSKStringType type = [string contentStringType];
     
     if(type == BDSKUnknownStringType)
         return;

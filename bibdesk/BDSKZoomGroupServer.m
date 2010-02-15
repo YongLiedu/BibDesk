@@ -202,10 +202,10 @@
 
 #pragma mark Main thread 
 
-- (NSInteger)stringTypeForRecordString:(NSString *)string
+- (BDSKStringType)stringTypeForRecordString:(NSString *)string
 {
     NSString *recordSyntax = [serverInfo recordSyntax];
-    NSInteger stringType = BDSKUnknownStringType;
+    BDSKStringType stringType = BDSKUnknownStringType;
     if([recordSyntax isEqualToString:USMARC_STRING] || [recordSyntax isEqualToString:UNIMARC_STRING] || [recordSyntax isEqualToString:OPAC_STRING]) {
         stringType = BDSKMARCStringType;
     } else if([recordSyntax isEqualToString:MARCXML_STRING]) {
@@ -233,7 +233,7 @@
         pubs = [NSMutableArray array];
         for (NSDictionary *result in results) {
             NSString *record = [result objectForKey:@"rawString"];
-            NSInteger stringType = [self stringTypeForRecordString:record];
+            BDSKStringType stringType = [self stringTypeForRecordString:record];
             BibItem *anItem = [[BDSKStringParser itemsFromString:record ofType:stringType error:NULL] lastObject];
             if (anItem == nil) {
                 record = [result objectForKey:@"renderedString"];

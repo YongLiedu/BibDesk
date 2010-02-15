@@ -124,7 +124,7 @@ static NSArray *webParserClasses() {
     return [parserClass itemsFromDocument:domDocument xmlDocument:xmlDoc fromURL:url error:outError];
 }
 
-+ (NSDictionary *) parserInfoWithName: (NSString *) name address: (NSString *) address description: (NSString *) description flags: (NSUInteger) flags {
++ (NSDictionary *) parserInfoWithName: (NSString *) name address: (NSString *) address description: (NSString *) description flags: (BDSKParserFeature) flags {
 	NSDictionary * result = nil;
 	NSMutableDictionary * dict = [NSMutableDictionary dictionaryWithCapacity:4];
 
@@ -132,7 +132,7 @@ static NSArray *webParserClasses() {
 		[dict setObject:name forKey:NAME_KEY];
 		if (address) { [dict setObject:address forKey:ADDRESS_KEY]; }
 		if (description) { [dict setObject:description forKey:DESCRIPTION_KEY]; }
-		NSNumber * flagsNumber = [NSNumber numberWithInteger:flags];
+		NSNumber * flagsNumber = [NSNumber numberWithUnsignedInteger:flags];
 		[dict setObject:flagsNumber forKey:FLAGS_KEY];
 		result = dict;
 	}

@@ -274,7 +274,7 @@
     NSError *error = nil;
 
     NSArray *pubs = nil;
-    NSInteger type = [outputString contentStringType];
+    BDSKStringType type = [outputString contentStringType];
     if (type == BDSKNoKeyBibTeXStringType) {
         outputString = [outputString stringWithPhoneyCiteKeys:@"FixMe"];
         type = BDSKBibTeXStringType;

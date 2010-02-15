@@ -1871,7 +1871,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             // bypass the partial data warning, since we have no data
 			return NO;
         }
-        NSInteger type = [string contentStringType];
+        BDSKStringType type = [string contentStringType];
         if(type == BDSKBibTeXStringType){
             success = [self readFromBibTeXData:data fromURL:absoluteURL encoding:encoding error:&error];
 		}else if (type == BDSKNoKeyBibTeXStringType){
@@ -1951,7 +1951,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     return isPartialData == NO;
 }
 
-- (BOOL)readFromData:(NSData *)data ofStringType:(NSInteger)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
+- (BOOL)readFromData:(NSData *)data ofStringType:(BDSKStringType)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
     
     NSError *error = nil;    
     NSString *dataString = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
@@ -2298,7 +2298,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 // pass BDSKUnkownStringType to allow BDSKStringParser to sniff the text and determine the format
-- (NSArray *)publicationsForString:(NSString *)string type:(NSInteger)type verbose:(BOOL)verbose error:(NSError **)outError {
+- (NSArray *)publicationsForString:(NSString *)string type:(BDSKStringType)type verbose:(BOOL)verbose error:(NSError **)outError {
     NSArray *newPubs = nil;
     NSError *parseError = nil;
     BOOL isPartialData = NO;
@@ -2389,7 +2389,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 - (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSMutableArray *)unparseableFiles verbose:(BOOL)verbose error:(NSError **)outError {
     NSString *contentString;
     NSMutableArray *array = [NSMutableArray array];
-    NSInteger type = BDSKUnknownStringType;
+    BDSKStringType type = BDSKUnknownStringType;
     
     // some common types that people might use as attachments; we don't need to sniff these
     NSSet *unreadableTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];

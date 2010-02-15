@@ -428,7 +428,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
                     nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
                 string = [[[NSString alloc] initWithData:[dataSource data] encoding:nsEncoding] autorelease];
             }
-            NSInteger type = [string contentStringType];
+            BDSKStringType type = [string contentStringType];
             if(type != BDSKUnknownStringType)
                 newPubs = [document publicationsForString:string type:type verbose:NO error:&error];
         }

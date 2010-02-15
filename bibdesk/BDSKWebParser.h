@@ -47,12 +47,13 @@ enum {
 // flag indicating that the parser's feature looks for specific data on all pages:
     BDSKParserFeatureAllPagesMask = 1 << 1
 };
+typedef NSUInteger BDSKParserFeature;
 
 @interface BDSKWebParser : NSObject
 // this method is the main entry point for the BDSKWebParser class it should not be overridden by the concrete subclasses
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument fromURL:(NSURL *)url error:(NSError **)outError;
 // Helper method for creating a correctly formatted parser feature information dictionary. 
-+ (NSDictionary *) parserInfoWithName: (NSString *) name address: (NSString *) address description: (NSString *) description flags:(NSUInteger) flags;
++ (NSDictionary *) parserInfoWithName: (NSString *) name address: (NSString *) address description: (NSString *) description flags:(BDSKParserFeature) flags;
 // Returns the union of parserInfos of all available web parsers.
 + (NSArray *)parserInfos;
 @end
