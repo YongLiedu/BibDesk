@@ -202,7 +202,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (id)initRootWithChildren:(NSArray *)aChildren {
-    return [[BDSKRootSearchBookmark alloc] initFolderWithChildren:aChildren label:NSLocalizedString(@"Bookmarks Menu", @"Menu item title")];
+    return [[BDSKRootSearchBookmark alloc] initFolderWithChildren:aChildren label:NSLocalizedString(@"Searches Menu", @"Menu item title")];
 }
 
 - (id)initSeparator {
