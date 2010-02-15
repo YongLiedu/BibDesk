@@ -330,6 +330,7 @@
 		CEFDBDBE0AEA86BA009EE99D /* BDSKSmartGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDBC0AEA86BA009EE99D /* BDSKSmartGroup.m */; };
 		CEFDBDC60AEA86F0009EE99D /* BDSKStaticGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDC40AEA86F0009EE99D /* BDSKStaticGroup.m */; };
 		CEFDBDDE0AEA87F8009EE99D /* BDSKCategoryGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDDC0AEA87F8009EE99D /* BDSKCategoryGroup.m */; };
+		CEFE71771129A91E0018CD74 /* ServicesMenu.strings in Resources */ = {isa = PBXBuildFile; fileRef = CEFE71761129A91E0018CD74 /* ServicesMenu.strings */; };
 		CEFF3180110B27ED0098DD17 /* BDSKFilerErrorController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFF317E110B27ED0098DD17 /* BDSKFilerErrorController.m */; };
 		CEFF6D4210C14D7D006CFC80 /* BDSKExternalGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFF6D4010C14D7D006CFC80 /* BDSKExternalGroup.m */; };
 		EF902DA60F12410300E5DE14 /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE30758095000C3F701 /* AGRegex.framework */; };
@@ -1273,6 +1274,8 @@
 		CEFDBDC40AEA86F0009EE99D /* BDSKStaticGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStaticGroup.m; sourceTree = "<group>"; };
 		CEFDBDDB0AEA87F8009EE99D /* BDSKCategoryGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCategoryGroup.h; sourceTree = "<group>"; };
 		CEFDBDDC0AEA87F8009EE99D /* BDSKCategoryGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCategoryGroup.m; sourceTree = "<group>"; };
+		CEFE71691129A8120018CD74 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/ServicesMenu.strings; sourceTree = "<group>"; };
+		CEFE71781129A9260018CD74 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/ServicesMenu.strings; sourceTree = "<group>"; };
 		CEFF317D110B27ED0098DD17 /* BDSKFilerErrorController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFilerErrorController.h; sourceTree = "<group>"; };
 		CEFF317E110B27ED0098DD17 /* BDSKFilerErrorController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFilerErrorController.m; sourceTree = "<group>"; };
 		CEFF6D3F10C14D7D006CFC80 /* BDSKExternalGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKExternalGroup.h; sourceTree = "<group>"; };
@@ -1793,6 +1796,7 @@
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				3DA82938083ECE9300321864 /* Localizable.strings */,
+				CEFE71761129A91E0018CD74 /* ServicesMenu.strings */,
 				F9022CE30758050E00C3F701 /* BibTeXKeys.strings */,
 				F94AA3690BE8FD87007BCE2B /* Preferences.strings */,
 				CE8962C40CBEC0C500EA2D98 /* TemplateOptions.strings */,
@@ -3125,6 +3129,7 @@
 				CEB5D6411072AE360001C135 /* TextImport.xib in Resources */,
 				CEFB73F610A07E31001DC4C1 /* libraryGroup.tiff in Resources */,
 				CEFA8E0310C7E9250034C14B /* Overflow.tiff in Resources */,
+				CEFE71771129A91E0018CD74 /* ServicesMenu.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4178,6 +4183,15 @@
 				CEF8F8E00F9351A600948A88 /* French */,
 			);
 			name = WebGroupStartPage.html;
+			sourceTree = "<group>";
+		};
+		CEFE71761129A91E0018CD74 /* ServicesMenu.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEFE71691129A8120018CD74 /* English */,
+				CEFE71781129A9260018CD74 /* French */,
+			);
+			name = ServicesMenu.strings;
 			sourceTree = "<group>";
 		};
 		F9022CE30758050E00C3F701 /* BibTeXKeys.strings */ = {
