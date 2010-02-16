@@ -242,6 +242,7 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
 - (NSSize)cellSize {
     NSSize cellSize = [super cellSize];
     NSSize countSize = NSZeroSize;
+    cellSize.height += 2.0 * TEXT_INSET - 1.0;
     if ([self isRetrieving]) {
         countSize = NSMakeSize(16, 16);
     } else if ([self count] > 0 || [self failedDownload]) {
