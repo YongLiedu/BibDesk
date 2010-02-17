@@ -37,7 +37,7 @@
  */
 
 #import "BDSKOutlineView.h"
-#import "NSLayoutManager_BDSKExtensions.h"
+#import "NSFont_BDSKExtensions.h"
 #import "NSEvent_BDSKExtensions.h"
 
 
@@ -523,7 +523,7 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
 }
 
 - (CGFloat)rowHeightForFont:(NSFont *)font {
-    return [NSLayoutManager defaultViewLineHeightForFont:font];
+    return [font defaultViewLineHeight];
 }
 
 #pragma mark SKTypeSelectHelper datasource protocol

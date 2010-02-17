@@ -45,7 +45,7 @@
 #import "BDSKGroup.h"
 #import "BibAuthor.h"
 #import "BDSKGroupCell.h"
-#import "NSLayoutManager_BDSKExtensions.h"
+#import "NSFont_BDSKExtensions.h"
 #import "NSColor_BDSKExtensions.h"
 
 
@@ -93,7 +93,7 @@
 
 - (CGFloat)rowHeightForFont:(NSFont *)font {
     // use a larger row height to give space for the highlights, also reproduces the row height in Mail
-    return [NSLayoutManager defaultViewLineHeightForFont:font] + 4.0;
+    return [font defaultViewLineHeight] + 4.0;
 }
 
 - (void)mouseDown:(NSEvent *)theEvent{

@@ -1,10 +1,10 @@
 //
-//  NSLayoutManager_BDSKExtensions.m
+//  NSFont_BDSKExtensions.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 5/6/07.
+//  Created by Christiaan on 2/17/10.
 /*
- This software is Copyright (c) 2007-2010
+ This software is Copyright (c) 2010
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -36,18 +36,9 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "NSLayoutManager_BDSKExtensions.h"
+#import <Cocoa/Cocoa.h>
 
 
-@implementation NSLayoutManager (BDSKExtensions)
-
-+ (CGFloat)defaultViewLineHeightForFont:(NSFont *)theFont {
-    static NSLayoutManager *layoutManager = nil;
-    if (layoutManager == nil) {
-        layoutManager = [[NSLayoutManager alloc] init];
-        [layoutManager setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
-    }
-    return [layoutManager defaultLineHeightForFont:theFont];
-}
-
+@interface NSFont (BDSKExtensions)
+- (CGFloat)defaultViewLineHeight;
 @end

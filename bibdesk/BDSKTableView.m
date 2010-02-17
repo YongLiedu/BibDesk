@@ -37,7 +37,7 @@
  */
 
 #import "BDSKTableView.h"
-#import "NSLayoutManager_BDSKExtensions.h"
+#import "NSFont_BDSKExtensions.h"
 #import "NSEvent_BDSKExtensions.h"
 
 
@@ -534,7 +534,7 @@ static char BDSKTableViewFontDefaultsObservationContext;
 }
 
 - (CGFloat)rowHeightForFont:(NSFont *)font {
-    CGFloat rowHeight = [NSLayoutManager defaultViewLineHeightForFont:font];
+    CGFloat rowHeight = [font defaultViewLineHeight];
     if ([self selectionHighlightStyle] == NSTableViewSelectionHighlightStyleSourceList)
         rowHeight += 2.0;
     return rowHeight;
