@@ -197,27 +197,6 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
     return self;
 }
 
-- (NSRect)boundingRectForDrawingInViewWithSize:(NSSize)size{
-    NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:self];
-    NSTextContainer *textContainer = [[NSTextContainer alloc] initWithContainerSize:size];
-    NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
-    
-    [layoutManager addTextContainer:textContainer];
-    [textStorage addLayoutManager:layoutManager];
-    [textContainer release];
-    [layoutManager release];
-    
-    // drawing in views uses a different typesetting behavior from the current one which leads to a mismatch in line height
-    // see http://www.cocoabuilder.com/archive/message/cocoa/2006/1/3/153669
-    [layoutManager setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
-    [layoutManager glyphRangeForTextContainer:textContainer];
-    
-    NSRect rect = [layoutManager usedRectForTextContainer:textContainer];
-    [textStorage release];
-    
-    return rect;
-}
-
 - (NSComparisonResult)localizedCaseInsensitiveNonTeXNonArticleCompare:(NSAttributedString *)other;
 {
     return [[self string] localizedCaseInsensitiveNonTeXNonArticleCompare:[other string]];

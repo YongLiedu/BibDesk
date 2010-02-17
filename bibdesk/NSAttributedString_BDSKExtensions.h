@@ -45,8 +45,6 @@
 
 - (id)initWithTeXString:(NSString *)string attributes:(NSDictionary *)attributes collapseWhitespace:(BOOL)collapse;
 
-- (NSRect)boundingRectForDrawingInViewWithSize:(NSSize)size;
-
 - (NSComparisonResult)localizedCaseInsensitiveNonTeXNonArticleCompare:(NSAttributedString *)other;
 
 + (id)scriptingRtfWithDescriptor:(NSAppleEventDescriptor *)descriptor;
