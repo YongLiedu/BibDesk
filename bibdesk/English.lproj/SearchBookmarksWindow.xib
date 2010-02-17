@@ -119,9 +119,9 @@
 													<object class="NSTextFieldCell" key="NSDataCell" id="499628072">
 														<int key="NSCellFlags">337772096</int>
 														<int key="NSCellFlags2">2048</int>
-														<object class="NSFont" key="NSSupport" id="306849052">
+														<object class="NSFont" key="NSSupport" id="949389097">
 															<string key="NSName">LucidaGrande</string>
-															<double key="NSSize">12</double>
+															<double key="NSSize">13</double>
 															<int key="NSfFlags">16</int>
 														</object>
 														<reference key="NSControlView" ref="684906957"/>
@@ -162,7 +162,7 @@
 													<object class="NSTextFieldCell" key="NSDataCell" id="219559595">
 														<int key="NSCellFlags">337772096</int>
 														<int key="NSCellFlags2">2048</int>
-														<reference key="NSSupport" ref="306849052"/>
+														<reference key="NSSupport" ref="949389097"/>
 														<reference key="NSControlView" ref="684906957"/>
 														<object class="NSColor" key="NSBackgroundColor" id="876824435">
 															<int key="NSColorSpace">6</int>
@@ -201,7 +201,7 @@
 													<object class="NSTextFieldCell" key="NSDataCell" id="675470394">
 														<int key="NSCellFlags">337772096</int>
 														<int key="NSCellFlags2">2048</int>
-														<reference key="NSSupport" ref="306849052"/>
+														<reference key="NSSupport" ref="949389097"/>
 														<reference key="NSControlView" ref="684906957"/>
 														<reference key="NSBackgroundColor" ref="876824435"/>
 														<reference key="NSTextColor" ref="875870142"/>
@@ -251,7 +251,7 @@
 									<reference key="NSWindow"/>
 									<reference key="NSTarget" ref="658459585"/>
 									<string key="NSAction">_doScroller:</string>
-									<double key="NSPercent">0.99667779999999995</double>
+									<double key="NSPercent">0.99649122807017543</double>
 								</object>
 								<object class="NSScroller" id="571244051">
 									<reference key="NSNextResponder" ref="658459585"/>

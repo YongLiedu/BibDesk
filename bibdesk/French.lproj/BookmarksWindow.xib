@@ -121,9 +121,9 @@
 													<object class="NSTextFieldCell" key="NSDataCell" id="257274886">
 														<int key="NSCellFlags">337772096</int>
 														<int key="NSCellFlags2">2048</int>
-														<object class="NSFont" key="NSSupport" id="474904794">
+														<object class="NSFont" key="NSSupport" id="313553803">
 															<string key="NSName">LucidaGrande</string>
-															<double key="NSSize">12</double>
+															<double key="NSSize">13</double>
 															<int key="NSfFlags">16</int>
 														</object>
 														<reference key="NSControlView" ref="116035622"/>
@@ -164,7 +164,7 @@
 													<object class="NSTextFieldCell" key="NSDataCell" id="453102920">
 														<int key="NSCellFlags">337772096</int>
 														<int key="NSCellFlags2">2048</int>
-														<reference key="NSSupport" ref="474904794"/>
+														<reference key="NSSupport" ref="313553803"/>
 														<reference key="NSControlView" ref="116035622"/>
 														<object class="NSColor" key="NSBackgroundColor" id="976057997">
 															<int key="NSColorSpace">6</int>
@@ -396,11 +396,7 @@
 								<reference key="NSControlView" ref="849055189"/>
 								<int key="NSButtonFlags">109199615</int>
 								<int key="NSButtonFlags2">1</int>
-								<object class="NSFont" key="NSAlternateImage">
-									<string key="NSName">LucidaGrande</string>
-									<double key="NSSize">13</double>
-									<int key="NSfFlags">16</int>
-								</object>
+								<reference key="NSAlternateImage" ref="313553803"/>
 								<string key="NSAlternateContents"/>
 								<object class="NSMutableString" key="NSKeyEquivalent">
 									<characters key="NS.bytes"/>
