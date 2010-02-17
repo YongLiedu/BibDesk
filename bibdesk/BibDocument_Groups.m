@@ -276,8 +276,9 @@ The groupedPublications array is a subset of the publications array, developed b
             newSortKey = BDSKImportOrderString;
             [self showWebGroupView];
         }
-        if (isSearch && wasSearch == NO) {
-            newSortKey = BDSKImportOrderString;
+        if (isSearch) {
+            if (wasSearch == NO)
+                newSortKey = BDSKImportOrderString;
             [self showSearchGroupView];
         }
         [tableView setAlternatingRowBackgroundColors:[NSColor alternateControlAlternatingRowBackgroundColors]];
