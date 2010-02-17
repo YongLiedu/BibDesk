@@ -194,7 +194,8 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
 }
 
 - (NSSize)iconSizeForBounds:(NSRect)aRect {
-    return NSMakeSize(NSHeight(aRect) - IMAGE_SIZE_OFFSET, NSHeight(aRect) - IMAGE_SIZE_OFFSET);
+    CGFloat height = NSHeight(aRect) - IMAGE_SIZE_OFFSET;
+    return NSMakeSize(height, height);
 }
 
 - (NSRect)iconRectForBounds:(NSRect)aRect {
