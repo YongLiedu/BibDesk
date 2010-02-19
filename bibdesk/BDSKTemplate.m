@@ -217,19 +217,23 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 }
 
 + (NSArray *)exportTemplates{
+    NSArray *templates = nil;
     NSData *prefData = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKExportTemplateTree];
     if ([prefData length])
-        return [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
-    else 
-        return [BDSKTemplate defaultExportTemplates];
+        templates = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+    if ([templates count] == 0)
+        templates = [BDSKTemplate defaultExportTemplates];
+    return templates;
 }
 
 + (NSArray *)serviceTemplates{
+    NSArray *templates = nil;
     NSData *prefData = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKServiceTemplateTree];
     if ([prefData length])
-        return [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
-    else 
-        return [BDSKTemplate defaultServiceTemplates];
+        templates = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+    if ([templates count] == 0)
+        templates = [BDSKTemplate defaultServiceTemplates];
+    return templates;
 }
 
 + (NSArray *)allStyleNames;
