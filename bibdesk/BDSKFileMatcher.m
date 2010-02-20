@@ -441,11 +441,6 @@ static void normalizeScoresForItem(BDSKTreeNode *parent, CGFloat maxScore)
     }
 }
 
-static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
-{
-    return [[obj2 valueForKey:@"score"] compare:[obj1 valueForKey:@"score"]];
-}
-
 // this method iterates available publications, trying to match them up with a file
 - (void)doSearch;
 {
@@ -521,7 +516,11 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
         
         normalizeScoresForItem(node, maxScore);
         [node setValue:[NSString stringWithFormat:@"%ld", (long)[node countOfChildren]] forKey:@"score"];
-        [node sortChildrenUsingFunction:scoreComparator context:NULL];
+        NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"score" ascending:YES];
+        NSArray *sortDescriptors = [[NSArray alloc] initWithObjects:sort, nil];
+        [[node mutableArrayValueForKey:@"children"] sortUsingDescriptors:sortDescriptors];
+        [sort release];
+        [sortDescriptors release];
         
         val++;
         [outlineView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
