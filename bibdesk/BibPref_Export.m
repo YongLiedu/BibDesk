@@ -62,11 +62,7 @@
 - (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController {
 	if(self = [super initWithRecord:aRecord forPreferenceController:aController]){
         
-        NSData *data = [sud objectForKey:BDSKExportTemplateTree];
-        if([data length])
-            [self setItemNodes:[NSKeyedUnarchiver unarchiveObjectWithData:data]];
-        else 
-            [self setItemNodes:[BDSKTemplate defaultExportTemplates]];
+        [self setItemNodes:[BDSKTemplate exportTemplates]];
         
         fileTypes = [[NSArray alloc] initWithObjects:@"html", @"rss", @"csv", @"txt", @"rtf", @"rtfd", @"doc", @"docx", @"odt", nil];
         
@@ -137,14 +133,7 @@
 
 - (IBAction)changePrefList:(id)sender{
     templatePrefList = [[sender selectedCell] tag];
-    NSData *data = [sud objectForKey:(templatePrefList == BDSKExportTemplateList) ? BDSKExportTemplateTree : BDSKServiceTemplateTree];
-    if([data length])
-        [self setItemNodes:[NSKeyedUnarchiver unarchiveObjectWithData:data]];
-    else if (templatePrefList == BDSKExportTemplateList)
-        [self setItemNodes:[BDSKTemplate defaultExportTemplates]];
-    else if (BDSKServiceTemplateList == templatePrefList)
-        [self setItemNodes:[BDSKTemplate defaultServiceTemplates]];
-    else [NSException raise:NSInternalInconsistencyException format:@"Unrecognized templatePrefList parameter"];
+    [self setItemNodes:templatePrefList == BDSKExportTemplateList ? [BDSKTemplate exportTemplates] : [BDSKTemplate serviceTemplates]];
     [self updateUI];
 }
 
