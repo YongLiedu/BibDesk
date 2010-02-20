@@ -119,55 +119,50 @@
     [columnValues setValue:value forKey:key];
 }
 
-- (void)addChild:(BDSKTreeNode *)anObject;
+- (void)sortChildrenUsingFunction:(NSInteger (*)(id, id, void *))compare context:(void *)context;
 {
-    [children addObject:anObject];
-    
-    // make sure this child knows its parent
-    [anObject setParent:self];
+    [children sortUsingFunction:compare context:context];
 }
 
-- (void)insertChild:(BDSKTreeNode *)anObject atIndex:(NSUInteger)idx;
-{
-    [children insertObject:anObject atIndex:idx];
-    
-    // make sure this child knows its parent
-    [anObject setParent:self];
+- (NSArray *)children {
+    return [[children copy] autorelease];
 }
 
-- (id)childAtIndex:(NSUInteger)idx;
-{
-    return [children objectAtIndex:idx];
-}
-
-- (void)removeChild:(BDSKTreeNode *)anObject;
-{
-    [anObject setParent:nil];
-    
-    // make sure to orphan this child
-    [children removeObject:anObject];
-}
-
-- (void)setChildren:(NSArray *)theChildren;
-{
-    if(theChildren != children){
+- (void)setChildren:(NSArray *)newChildren {
+    if (children != newChildren) {
+        // make sure to orphan these children
+        [children makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
+        
         [children release];
-        children = [theChildren mutableCopy];
+        children = [newChildren mutableCopy];
         
         // make sure these children know their parent
         [children makeObjectsPerformSelector:@selector(setParent:) withObject:self];
     }
 }
 
-- (void)sortChildrenUsingFunction:(NSInteger (*)(id, id, void *))compare context:(void *)context;
-{
-    [children sortUsingFunction:compare context:context];
+- (NSUInteger)countOfChildren {
+    return [children count];
 }
 
-- (NSArray *)children { return children; }
+- (id)objectInChildrenAtIndex:(NSUInteger)anIndex {
+    return [children objectAtIndex:anIndex];
+}
 
-- (NSUInteger)numberOfChildren { return [children count]; }
+- (void)insertObject:(id)obj inChildrenAtIndex:(NSUInteger)anIndex {
+    [children insertObject:obj atIndex:anIndex];
+    
+    // make sure this child knows its parent
+    [obj setParent:self];
+}
 
-- (BOOL)isLeaf { return [self numberOfChildren] > 0 ? NO : YES; }
+- (void)removeObjectFromChildrenAtIndex:(NSUInteger)anIndex {
+    // make sure to orphan this child
+    [[children objectAtIndex:anIndex] setParent:nil];
+    
+    [children removeObjectAtIndex:anIndex];
+}
+
+- (BOOL)isLeaf { return [self countOfChildren] == 0; }
 
 @end

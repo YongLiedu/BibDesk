@@ -167,11 +167,11 @@
         if([selectedNode isLeaf]){
             // add as a sibling of the selected node
             // we're already expanded, and newNode won't be expandable
-            [[selectedNode parent] addChild:newNode];
+            [[[selectedNode parent] mutableArrayValueForKey:@"children"] addObject:newNode];
         } else if(nil != selectedNode && [outlineView isItemExpanded:selectedNode]){
             // add as a child of the selected node
             // selected node is expanded, so no need to expand
-            [selectedNode addChild:newNode];
+            [[selectedNode mutableArrayValueForKey:@"children"] addObject:newNode];
         } else if(BDSKExportTemplateList == templatePrefList){
             // add as a non-leaf node
             [itemNodes addObject:newNode];
@@ -179,7 +179,7 @@
             // each style needs at least a Main Page child, and newNode will be recognized as a non-leaf node
             BDSKTemplate *child = [[BDSKTemplate alloc] init];
             [child setValue:BDSKTemplateMainPageString forKey:BDSKTemplateRoleString];
-            [newNode addChild:child];
+            [[newNode mutableArrayValueForKey:@"children"] addObject:child];
             [child release];
             
             // reload so we can expand this new parent node
@@ -195,7 +195,7 @@
         BDSKTreeNode *selectedNode = row == -1 ? nil : [outlineView itemAtRow:row];
         if(nil != selectedNode){
             if([selectedNode isLeaf])
-                [[selectedNode parent] removeChild:selectedNode];
+                [[[selectedNode parent] mutableArrayValueForKey:@"children"] removeObject:selectedNode];
             else
                 [itemNodes removeObjectIdenticalTo:selectedNode];
         } else {
@@ -216,7 +216,7 @@
 
 - (NSInteger)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item
 { 
-    return item ? [item numberOfChildren] : [itemNodes count];
+    return item ? [item countOfChildren] : [itemNodes count];
 }
 
 - (id)outlineView:(NSOutlineView *)ov objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
@@ -241,7 +241,7 @@
 
 - (id)outlineView:(NSOutlineView *)ov child:(NSInteger)idx ofItem:(id)item
 {
-    return nil == item ? [itemNodes objectAtIndex:idx] : [[item children] objectAtIndex:idx];
+    return nil == item ? [itemNodes objectAtIndex:idx] : [item objectInChildrenAtIndex:idx];
 }
 
 - (id)outlineView:(NSOutlineView *)ov itemForPersistentObject:(id)object
@@ -363,7 +363,7 @@
     if(item && [self canDeleteItem:item]) {
         [self addRemoveNode:nil];
         if ([item isLeaf])
-            [[item parent] removeChild:item];
+            [[[item parent] mutableArrayValueForKey:@"children"] removeObject:item];
         else
             [itemNodes removeObjectIdenticalTo:item];
         [self updateUI];
@@ -454,9 +454,9 @@
         childNode = [[BDSKTemplate alloc] init];
         if (mainIndex == -1 || i == mainIndex) {
             [childNode setValue:BDSKTemplateMainPageString forKey:BDSKTemplateRoleString];
-            [newNode insertChild:childNode atIndex:0];
+            [newNode insertObject:childNode inChildrenAtIndex:0];
         } else {
-            [newNode addChild:childNode];
+            [[newNode mutableArrayValueForKey:@"children"] addObject:childNode];
         }
         [childNode release];
         [childNode setValue:[NSURL fileURLWithPath:[fileNames objectAtIndex:i]] forKey:BDSKTemplateFileURLString];
@@ -489,7 +489,7 @@
                 newNode = [[BDSKTemplate alloc] init];
                 childNode = [[BDSKTemplate alloc] init];
                 [itemNodes insertObject:newNode atIndex:idx++];
-                [newNode addChild:childNode];
+                [[newNode mutableArrayValueForKey:@"children"] addObject:childNode];
                 [newNode release];
                 [childNode release];
                 [childNode setValue:BDSKTemplateMainPageString forKey:BDSKTemplateRoleString];
@@ -510,7 +510,7 @@
         } else if ([item isLeaf] == NO && idx != NSOutlineViewDropOnItemIndex && idx > 0) {
             for (fileName in fileNames) {
                 newNode = [[[BDSKTemplate alloc] init] autorelease];
-                [item insertChild:newNode atIndex:idx++];
+                [item insertObject:newNode inChildrenAtIndex:idx++];
                 [newNode setValue:[NSURL fileURLWithPath:fileName] forKey:BDSKTemplateFileURLString];
             }
         } else return NO;
@@ -527,8 +527,9 @@
                 return NO;
             if (sourceIndex < idx)
                 --idx;
-            [(BDSKTreeNode *)item removeChild:dropItem];
-            [item insertChild:dropItem atIndex:idx];
+            NSMutableArray *children = [(BDSKTreeNode *)item mutableArrayValueForKey:@"children"];
+            [children removeObject:dropItem];
+            [children insertObject:dropItem atIndex:idx];
         } else {
             NSInteger sourceIndex = [itemNodes indexOfObject:dropItem];
             if (sourceIndex == NSNotFound)

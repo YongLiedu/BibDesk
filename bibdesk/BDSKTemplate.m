@@ -508,7 +508,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     
     [newChild setValue:fileURL forKey:BDSKTemplateFileURLString];
     [newChild setValue:role forKey:BDSKTemplateRoleString];
-    [self addChild:newChild];
+    [self insertObject:newChild inChildrenAtIndex:[self countOfChildren]];
     [newChild release];
     if([newChild representedFileURL] == nil)
         retVal = NO;

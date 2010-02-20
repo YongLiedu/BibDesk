@@ -48,13 +48,12 @@
 
 - (id)init;
 // uses isEqual:
-- (void)removeChild:(BDSKTreeNode *)anObject;
-- (void)insertChild:(BDSKTreeNode *)anObject atIndex:(NSUInteger)index;
-- (id)childAtIndex:(NSUInteger)index;
-- (void)addChild:(BDSKTreeNode *)anObject;
-- (void)setChildren:(NSArray *)theChildren;
 - (NSArray *)children;
-- (NSUInteger)numberOfChildren;
+- (void)setChildren:(NSArray *)newChildren;
+- (NSUInteger)countOfChildren;
+- (id)objectInChildrenAtIndex:(NSUInteger)anIndex;
+- (void)insertObject:(id)obj inChildrenAtIndex:(NSUInteger)anIndex;
+- (void)removeObjectFromChildrenAtIndex:(NSUInteger)anIndex;
 - (BDSKTreeNode *)parent;
 - (void)setParent:(BDSKTreeNode *)aParent;
 - (BOOL)isLeaf;

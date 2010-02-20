@@ -343,7 +343,7 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
 
 - (id)outlineView:(NSOutlineView *)ov child:(NSInteger)idx ofItem:(id)item;
 {
-    return nil == item ? [matches objectAtIndex:idx] : [item childAtIndex:idx];
+    return nil == item ? [matches objectAtIndex:idx] : [item objectInChildrenAtIndex:idx];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov isItemExpandable:(id)item;
@@ -353,7 +353,7 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
 
 - (NSInteger)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item;
 {
-    return item ? [item numberOfChildren] : [matches count];
+    return item ? [item countOfChildren] : [matches count];
 }
 
 - (id)outlineView:(NSOutlineView *)ov objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item;
@@ -429,9 +429,9 @@ static NSString *titleStringWithPub(BibItem *pub)
 static void normalizeScoresForItem(BDSKTreeNode *parent, CGFloat maxScore)
 {
     // nodes are shallow, so we only traverse 1 deep
-    NSUInteger i, iMax = [parent numberOfChildren];
+    NSUInteger i, iMax = [parent countOfChildren];
     for (i = 0; i < iMax; i++) {
-        BDSKTreeNode *child = [parent childAtIndex:i];
+        BDSKTreeNode *child = [parent objectInChildrenAtIndex:i];
         NSNumber *score = [child valueForKey:@"score"];
         if (score) {
             CGFloat oldValue = [score doubleValue];
@@ -507,7 +507,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
                     thisScore = scores[i];
                     maxScore = MAX(maxScore, thisScore);
                     [child setValue:[NSNumber numberWithDouble:thisScore] forKey:@"score"];
-                    [node addChild:child];
+                    [[node mutableArrayValueForKey:@"children"] addObject:child];
                     [child release];
                     CFRelease(urls[i]);
                 }
@@ -520,7 +520,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
         CFRelease(search);
         
         normalizeScoresForItem(node, maxScore);
-        [node setValue:[NSString stringWithFormat:@"%ld", (long)[node numberOfChildren]] forKey:@"score"];
+        [node setValue:[NSString stringWithFormat:@"%ld", (long)[node countOfChildren]] forKey:@"score"];
         [node sortChildrenUsingFunction:scoreComparator context:NULL];
         
         val++;
