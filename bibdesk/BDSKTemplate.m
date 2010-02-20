@@ -46,6 +46,7 @@
 NSString *BDSKTemplateRoleString = @"role";
 NSString *BDSKTemplateNameString = @"name";
 NSString *BDSKTemplateFileURLString = @"representedFileURL";
+NSString *BDSKTemplateFilePathString = @"filePath";
 NSString *BDSKTemplateStringString = @"string";
 NSString *BDSKTemplateAttributedStringString = @"attributedString";
 NSString *BDSKExportTemplateTree = @"BDSKExportTemplateTree";
@@ -536,6 +537,8 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     if(alias){
         [self setValue:[alias aliasData] forKey:@"_BDAlias"];
         
+        [self setValue:[[aURL path] stringByAbbreviatingWithTildeInPath] forKey:@"filePath"];
+        
         [self setValue:[aURL lastPathComponent] forKey:BDSKTemplateNameString];
         
         NSString *extension = [[aURL path] pathExtension];
@@ -551,6 +554,11 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     BDAlias *alias = [[BDAlias alloc] initWithData:[self valueForKey:@"_BDAlias"]];
     NSURL *theURL = [alias fileURLNoUI];
     [alias release];
+    if (theURL == nil) {
+        NSString *path = [[self valueForKey:@"filePath"] stringByExpandingTildeInPath];
+        if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
+            theURL = [NSURL fileURLWithPath:path];
+    }
     return theURL;
 }
 
