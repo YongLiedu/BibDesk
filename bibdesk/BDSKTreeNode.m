@@ -46,7 +46,7 @@
     if(self = [super init]){
         parent = nil;
         children = [[NSMutableArray alloc] initWithArray:newChildren];
-        columnValues = [[NSDictionary alloc] initWithDictionary:newColumnValues];
+        columnValues = [[NSMutableDictionary alloc] initWithDictionary:newColumnValues];
     }
     return self;
 }
