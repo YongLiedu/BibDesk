@@ -1364,7 +1364,7 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 															<object class="NSTextFieldCell" key="NSDataCell" id="513466492">
 																<int key="NSCellFlags">337772096</int>
 																<int key="NSCellFlags2">2048</int>
-																<reference key="NSSupport" ref="729414828"/>
+																<reference key="NSSupport" ref="584251408"/>
 																<reference key="NSControlView" ref="1018935168"/>
 																<reference key="NSBackgroundColor" ref="457713514"/>
 																<reference key="NSTextColor" ref="985444501"/>
@@ -1378,7 +1378,7 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 													<double key="NSIntercellSpacingHeight">2</double>
 													<reference key="NSBackgroundColor" ref="60900986"/>
 													<reference key="NSGridColor" ref="90803538"/>
-													<double key="NSRowHeight">17</double>
+													<double key="NSRowHeight">16</double>
 													<int key="NSTvFlags">46137344</int>
 													<reference key="NSDelegate"/>
 													<reference key="NSDataSource"/>
@@ -1445,7 +1445,7 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 									<reference key="NSContentView" ref="819752060"/>
 									<reference key="NSHeaderClipView" ref="236991436"/>
 									<reference key="NSCornerView" ref="692290230"/>
-									<bytes key="NSScrollAmts">QSAAAEEgAABBmAAAQZgAAA</bytes>
+									<bytes key="NSScrollAmts">QSAAAEEgAABBkAAAQZAAAA</bytes>
 								</object>
 								<object class="NSCustomView" id="327940259">
 									<reference key="NSNextResponder" ref="923131441"/>
@@ -9160,7 +9160,7 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 							<string>NSTokenField</string>
 							<string>NSTextField</string>
 							<string>NSTextView</string>
-							<string>NSTableView</string>
+							<string>BDSKTableView</string>
 							<string>NSSplitView</string>
 							<string>NSArrayController</string>
 							<string>NSTextField</string>
@@ -9253,13 +9253,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSCell</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKCenterScaledImageCell.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSCell</string>
 					<string key="superclassName">NSObject</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBUserSource</string>
@@ -9312,13 +9305,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 					<string key="className">NSObject</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKFileContentSearchController.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">BDSKTemplateParser.h</string>
 					</object>
 				</object>
@@ -9327,13 +9313,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">NSObject_BDSKExtensions.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">vendorsrc/harmless/AMButtonBar.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">

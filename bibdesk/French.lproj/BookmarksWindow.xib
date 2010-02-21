@@ -121,9 +121,9 @@
 													<object class="NSTextFieldCell" key="NSDataCell" id="257274886">
 														<int key="NSCellFlags">337772096</int>
 														<int key="NSCellFlags2">2048</int>
-														<object class="NSFont" key="NSSupport" id="313553803">
+														<object class="NSFont" key="NSSupport" id="574072994">
 															<string key="NSName">LucidaGrande</string>
-															<double key="NSSize">13</double>
+															<double key="NSSize">12</double>
 															<int key="NSfFlags">16</int>
 														</object>
 														<reference key="NSControlView" ref="116035622"/>
@@ -164,7 +164,7 @@
 													<object class="NSTextFieldCell" key="NSDataCell" id="453102920">
 														<int key="NSCellFlags">337772096</int>
 														<int key="NSCellFlags2">2048</int>
-														<reference key="NSSupport" ref="313553803"/>
+														<reference key="NSSupport" ref="574072994"/>
 														<reference key="NSControlView" ref="116035622"/>
 														<object class="NSColor" key="NSBackgroundColor" id="976057997">
 															<int key="NSColorSpace">6</int>
@@ -195,7 +195,7 @@
 													<bytes key="NSWhite">MC41AA</bytes>
 												</object>
 											</object>
-											<double key="NSRowHeight">17</double>
+											<double key="NSRowHeight">16</double>
 											<int key="NSTvFlags">1388314624</int>
 											<reference key="NSDelegate"/>
 											<reference key="NSDataSource"/>
@@ -262,7 +262,7 @@
 							<reference key="NSContentView" ref="521129956"/>
 							<reference key="NSHeaderClipView" ref="475628093"/>
 							<reference key="NSCornerView" ref="1056018912"/>
-							<bytes key="NSScrollAmts">QSAAAEEgAABBmAAAQZgAAA</bytes>
+							<bytes key="NSScrollAmts">QSAAAEEgAABBkAAAQZAAAA</bytes>
 						</object>
 					</object>
 					<string key="NSFrameSize">{400, 250}</string>
@@ -396,7 +396,11 @@
 								<reference key="NSControlView" ref="849055189"/>
 								<int key="NSButtonFlags">109199615</int>
 								<int key="NSButtonFlags2">1</int>
-								<reference key="NSAlternateImage" ref="313553803"/>
+								<object class="NSFont" key="NSAlternateImage">
+									<string key="NSName">LucidaGrande</string>
+									<double key="NSSize">13</double>
+									<int key="NSfFlags">16</int>
+								</object>
 								<string key="NSAlternateContents"/>
 								<object class="NSMutableString" key="NSKeyEquivalent">
 									<characters key="NS.bytes"/>

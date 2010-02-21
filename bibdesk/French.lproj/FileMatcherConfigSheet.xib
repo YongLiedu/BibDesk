@@ -2,10 +2,10 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1050</int>
-		<string key="IBDocument.SystemVersion">10D552</string>
+		<string key="IBDocument.SystemVersion">10C540</string>
 		<string key="IBDocument.InterfaceBuilderVersion">740</string>
-		<string key="IBDocument.AppKitVersion">1038.29</string>
-		<string key="IBDocument.HIToolboxVersion">460.00</string>
+		<string key="IBDocument.AppKitVersion">1038.25</string>
+		<string key="IBDocument.HIToolboxVersion">458.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
 			<string key="NS.object.0">740</string>
@@ -303,7 +303,7 @@
 															<bytes key="NSWhite">MC41AA</bytes>
 														</object>
 													</object>
-													<double key="NSRowHeight">17</double>
+													<double key="NSRowHeight">16</double>
 													<int key="NSTvFlags">-700448768</int>
 													<reference key="NSDelegate"/>
 													<reference key="NSDataSource"/>
@@ -378,7 +378,7 @@
 									<reference key="NSContentView" ref="350481130"/>
 									<reference key="NSHeaderClipView" ref="507523910"/>
 									<reference key="NSCornerView" ref="891186406"/>
-									<bytes key="NSScrollAmts">QSAAAEEgAABBmAAAQZgAAA</bytes>
+									<bytes key="NSScrollAmts">QSAAAEEgAABBkAAAQZAAAA</bytes>
 								</object>
 								<object class="NSScrollView" id="867881054">
 									<reference key="NSNextResponder" ref="265341259"/>
@@ -446,7 +446,7 @@
 													<double key="NSIntercellSpacingHeight">2</double>
 													<reference key="NSBackgroundColor" ref="344350845"/>
 													<reference key="NSGridColor" ref="965300181"/>
-													<double key="NSRowHeight">17</double>
+													<double key="NSRowHeight">16</double>
 													<int key="NSTvFlags">-566231040</int>
 													<reference key="NSDelegate"/>
 													<reference key="NSDataSource"/>
@@ -513,7 +513,7 @@
 									<reference key="NSContentView" ref="13290387"/>
 									<reference key="NSHeaderClipView" ref="609092082"/>
 									<reference key="NSCornerView" ref="837405490"/>
-									<bytes key="NSScrollAmts">QSAAAEEgAABBmAAAQZgAAA</bytes>
+									<bytes key="NSScrollAmts">QSAAAEEgAABBkAAAQZAAAA</bytes>
 								</object>
 							</object>
 							<string key="NSFrame">{{20, 88}, {449, 287}}</string>

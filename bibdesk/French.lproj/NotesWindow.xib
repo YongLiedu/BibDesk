@@ -178,9 +178,9 @@
 															<object class="NSTextFieldCell" key="NSDataCell" id="489986673">
 																<int key="NSCellFlags">337772032</int>
 																<int key="NSCellFlags2">0</int>
-																<object class="NSFont" key="NSSupport">
+																<object class="NSFont" key="NSSupport" id="59341309">
 																	<string key="NSName">LucidaGrande</string>
-																	<double key="NSSize">13</double>
+																	<double key="NSSize">12</double>
 																	<int key="NSfFlags">16</int>
 																</object>
 																<reference key="NSControlView" ref="435059109"/>
@@ -220,7 +220,7 @@
 															<object class="NSTextFieldCell" key="NSDataCell" id="964125787">
 																<int key="NSCellFlags">337772096</int>
 																<int key="NSCellFlags2">2048</int>
-																<reference key="NSSupport" ref="584698721"/>
+																<reference key="NSSupport" ref="59341309"/>
 																<reference key="NSControlView" ref="435059109"/>
 																<object class="NSColor" key="NSBackgroundColor" id="577849739">
 																	<int key="NSColorSpace">6</int>
@@ -250,7 +250,7 @@
 															<bytes key="NSWhite">MC41AA</bytes>
 														</object>
 													</object>
-													<double key="NSRowHeight">17</double>
+													<double key="NSRowHeight">16</double>
 													<int key="NSTvFlags">-759169024</int>
 													<reference key="NSDelegate"/>
 													<reference key="NSDataSource"/>
@@ -317,7 +317,7 @@
 									<reference key="NSContentView" ref="886045298"/>
 									<reference key="NSHeaderClipView" ref="78302964"/>
 									<reference key="NSCornerView" ref="166869623"/>
-									<bytes key="NSScrollAmts">QSAAAEEgAABBmAAAQZgAAA</bytes>
+									<bytes key="NSScrollAmts">QSAAAEEgAABBkAAAQZAAAA</bytes>
 								</object>
 								<object class="NSTokenField" id="941149962">
 									<reference key="NSNextResponder" ref="768688746"/>

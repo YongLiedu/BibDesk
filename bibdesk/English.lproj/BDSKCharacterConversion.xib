@@ -117,10 +117,10 @@
 													<object class="NSTextFieldCell" key="NSDataCell" id="1030085368">
 														<int key="NSCellFlags">338820672</int>
 														<int key="NSCellFlags2">1024</int>
-														<object class="NSFont" key="NSSupport" id="664767020">
+														<object class="NSFont" key="NSSupport" id="1049628526">
 															<string key="NSName">LucidaGrande</string>
-															<double key="NSSize">13</double>
-															<int key="NSfFlags">1044</int>
+															<double key="NSSize">12</double>
+															<int key="NSfFlags">16</int>
 														</object>
 														<reference key="NSControlView" ref="513650934"/>
 														<object class="NSColor" key="NSBackgroundColor" id="280442206">
@@ -155,7 +155,7 @@
 													<object class="NSTextFieldCell" key="NSDataCell" id="547355364">
 														<int key="NSCellFlags">338820672</int>
 														<int key="NSCellFlags2">1024</int>
-														<reference key="NSSupport" ref="664767020"/>
+														<reference key="NSSupport" ref="1049628526"/>
 														<reference key="NSControlView" ref="513650934"/>
 														<reference key="NSBackgroundColor" ref="280442206"/>
 														<reference key="NSTextColor" ref="562849887"/>
@@ -178,7 +178,7 @@
 													<bytes key="NSWhite">MC41AA</bytes>
 												</object>
 											</object>
-											<double key="NSRowHeight">17</double>
+											<double key="NSRowHeight">16</double>
 											<int key="NSTvFlags">-692027392</int>
 											<reference key="NSDelegate"/>
 											<reference key="NSDataSource"/>
@@ -254,7 +254,7 @@
 							<reference key="NSContentView" ref="28508489"/>
 							<reference key="NSHeaderClipView" ref="637860137"/>
 							<reference key="NSCornerView" ref="728399698"/>
-							<bytes key="NSScrollAmts">QSAAAEEgAABBmAAAQZgAAA</bytes>
+							<bytes key="NSScrollAmts">QSAAAEEgAABBkAAAQZAAAA</bytes>
 						</object>
 						<object class="NSButton" id="981831477">
 							<reference key="NSNextResponder" ref="864775331"/>
@@ -267,7 +267,11 @@
 								<int key="NSCellFlags">67239424</int>
 								<int key="NSCellFlags2">134217728</int>
 								<string key="NSContents">Cancel</string>
-								<reference key="NSSupport" ref="664767020"/>
+								<object class="NSFont" key="NSSupport" id="664767020">
+									<string key="NSName">LucidaGrande</string>
+									<double key="NSSize">13</double>
+									<int key="NSfFlags">1044</int>
+								</object>
 								<reference key="NSControlView" ref="981831477"/>
 								<int key="NSButtonFlags">-2038284033</int>
 								<int key="NSButtonFlags2">1</int>

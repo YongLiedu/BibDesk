@@ -50,7 +50,7 @@
 				<string key="NSWindowContentMaxSize">{1.79769e+308, 1.79769e+308}</string>
 				<string key="NSWindowContentMinSize">{151.907, 100}</string>
 				<object class="NSView" key="NSWindowView" id="157994773">
-					<reference key="NSNextResponder"/>
+					<nil key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<object class="NSMutableArray" key="NSSubviews">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -69,14 +69,12 @@
 											<int key="NSvFlags">256</int>
 											<string key="NSFrameSize">{500, 284}</string>
 											<reference key="NSSuperview" ref="544934740"/>
-											<reference key="NSWindow"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTableHeaderView" key="NSHeaderView" id="316563076">
 												<reference key="NSNextResponder" ref="952168024"/>
 												<int key="NSvFlags">256</int>
 												<string key="NSFrameSize">{500, 17}</string>
 												<reference key="NSSuperview" ref="952168024"/>
-												<reference key="NSWindow"/>
 												<reference key="NSTableView" ref="684906957"/>
 											</object>
 											<object class="_NSCornerView" key="NSCornerView" id="784871229">
@@ -84,7 +82,6 @@
 												<int key="NSvFlags">-2147483392</int>
 												<string key="NSFrame">{{-26, 0}, {16, 17}}</string>
 												<reference key="NSSuperview" ref="658459585"/>
-												<reference key="NSWindow"/>
 											</object>
 											<object class="NSMutableArray" key="NSTableColumns">
 												<bool key="EncodedWithXMLCoder">YES</bool>
@@ -119,9 +116,9 @@
 													<object class="NSTextFieldCell" key="NSDataCell" id="499628072">
 														<int key="NSCellFlags">337772096</int>
 														<int key="NSCellFlags2">2048</int>
-														<object class="NSFont" key="NSSupport" id="408945249">
+														<object class="NSFont" key="NSSupport" id="127510684">
 															<string key="NSName">LucidaGrande</string>
-															<double key="NSSize">13</double>
+															<double key="NSSize">12</double>
 															<int key="NSfFlags">16</int>
 														</object>
 														<reference key="NSControlView" ref="684906957"/>
@@ -162,7 +159,7 @@
 													<object class="NSTextFieldCell" key="NSDataCell" id="219559595">
 														<int key="NSCellFlags">337772096</int>
 														<int key="NSCellFlags2">2048</int>
-														<reference key="NSSupport" ref="408945249"/>
+														<reference key="NSSupport" ref="127510684"/>
 														<reference key="NSControlView" ref="684906957"/>
 														<object class="NSColor" key="NSBackgroundColor" id="876824435">
 															<int key="NSColorSpace">6</int>
@@ -201,7 +198,7 @@
 													<object class="NSTextFieldCell" key="NSDataCell" id="675470394">
 														<int key="NSCellFlags">337772096</int>
 														<int key="NSCellFlags2">2048</int>
-														<reference key="NSSupport" ref="408945249"/>
+														<reference key="NSSupport" ref="127510684"/>
 														<reference key="NSControlView" ref="684906957"/>
 														<reference key="NSBackgroundColor" ref="876824435"/>
 														<reference key="NSTextColor" ref="875870142"/>
@@ -224,7 +221,7 @@
 													<bytes key="NSWhite">MC41AA</bytes>
 												</object>
 											</object>
-											<double key="NSRowHeight">17</double>
+											<double key="NSRowHeight">16</double>
 											<int key="NSTvFlags">1388314624</int>
 											<reference key="NSDelegate"/>
 											<reference key="NSDataSource"/>
@@ -237,8 +234,6 @@
 									</object>
 									<string key="NSFrame">{{0, 17}, {500, 284}}</string>
 									<reference key="NSSuperview" ref="658459585"/>
-									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="684906957"/>
 									<reference key="NSDocView" ref="684906957"/>
 									<reference key="NSBGColor" ref="876824435"/>
 									<int key="NScvFlags">4</int>
@@ -248,7 +243,6 @@
 									<int key="NSvFlags">-2147483392</int>
 									<string key="NSFrame">{{-30, 17}, {15, 285}}</string>
 									<reference key="NSSuperview" ref="658459585"/>
-									<reference key="NSWindow"/>
 									<reference key="NSTarget" ref="658459585"/>
 									<string key="NSAction">_doScroller:</string>
 									<double key="NSPercent">0.99667779999999995</double>
@@ -258,7 +252,6 @@
 									<int key="NSvFlags">-2147483392</int>
 									<string key="NSFrame">{{0, -30}, {487, 15}}</string>
 									<reference key="NSSuperview" ref="658459585"/>
-									<reference key="NSWindow"/>
 									<int key="NSsFlags">1</int>
 									<reference key="NSTarget" ref="658459585"/>
 									<string key="NSAction">_doScroller:</string>
@@ -273,8 +266,6 @@
 									</object>
 									<string key="NSFrameSize">{500, 17}</string>
 									<reference key="NSSuperview" ref="658459585"/>
-									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="316563076"/>
 									<reference key="NSDocView" ref="316563076"/>
 									<reference key="NSBGColor" ref="876824435"/>
 									<int key="NScvFlags">4</int>
@@ -283,20 +274,16 @@
 							</object>
 							<string key="NSFrameSize">{500, 301}</string>
 							<reference key="NSSuperview" ref="157994773"/>
-							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView" ref="544934740"/>
 							<int key="NSsFlags">560</int>
 							<reference key="NSVScroller" ref="872608429"/>
 							<reference key="NSHScroller" ref="571244051"/>
 							<reference key="NSContentView" ref="544934740"/>
 							<reference key="NSHeaderClipView" ref="952168024"/>
 							<reference key="NSCornerView" ref="784871229"/>
-							<bytes key="NSScrollAmts">QSAAAEEgAABBmAAAQZgAAA</bytes>
+							<bytes key="NSScrollAmts">QSAAAEEgAABBkAAAQZAAAA</bytes>
 						</object>
 					</object>
 					<string key="NSFrameSize">{500, 300}</string>
-					<reference key="NSSuperview"/>
-					<reference key="NSWindow"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMinSize">{151.907, 122}</string>

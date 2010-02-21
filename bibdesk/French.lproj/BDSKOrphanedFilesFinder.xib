@@ -117,7 +117,7 @@
 													</object>
 													<object class="NSTextFieldCell" key="NSDataCell" id="912621444">
 														<int key="NSCellFlags">70385217</int>
-														<int key="NSCellFlags2">1024</int>
+														<int key="NSCellFlags2">132096</int>
 														<reference key="NSSupport" ref="26"/>
 														<reference key="NSControlView" ref="1012433272"/>
 														<object class="NSColor" key="NSBackgroundColor" id="692240906">
@@ -153,7 +153,7 @@
 													<bytes key="NSWhite">MC41AA</bytes>
 												</object>
 											</object>
-											<double key="NSRowHeight">17</double>
+											<double key="NSRowHeight">14</double>
 											<int key="NSTvFlags">440401920</int>
 											<reference key="NSDelegate"/>
 											<reference key="NSDataSource"/>
@@ -228,7 +228,7 @@
 							<reference key="NSContentView" ref="613725844"/>
 							<reference key="NSHeaderClipView" ref="28326139"/>
 							<reference key="NSCornerView" ref="1070272599"/>
-							<bytes key="NSScrollAmts">QSAAAEEgAABBmAAAQZgAAA</bytes>
+							<bytes key="NSScrollAmts">QSAAAEEgAABBgAAAQYAAAA</bytes>
 						</object>
 						<object class="NSButton" id="879196924">
 							<reference key="NSNextResponder" ref="815331917"/>

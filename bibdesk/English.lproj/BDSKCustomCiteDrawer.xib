@@ -153,8 +153,8 @@
 													<int key="NSCellFlags2">1024</int>
 													<object class="NSFont" key="NSSupport">
 														<string key="NSName">LucidaGrande</string>
-														<double key="NSSize">13</double>
-														<int key="NSfFlags">1044</int>
+														<double key="NSSize">12</double>
+														<int key="NSfFlags">16</int>
 													</object>
 													<reference key="NSControlView" ref="912711782"/>
 													<object class="NSColor" key="NSBackgroundColor" id="157774651">
@@ -184,7 +184,7 @@
 												<bytes key="NSWhite">MC41AA</bytes>
 											</object>
 										</object>
-										<double key="NSRowHeight">17</double>
+										<double key="NSRowHeight">16</double>
 										<int key="NSTvFlags">-767557632</int>
 										<reference key="NSDelegate"/>
 										<reference key="NSDataSource"/>
@@ -220,7 +220,7 @@
 								<int key="NSsFlags">256</int>
 								<reference key="NSTarget" ref="357941803"/>
 								<string key="NSAction">_doScroller:</string>
-								<double key="NSPercent">0.98421060000000005</double>
+								<double key="NSPercent">0.9747474747474747</double>
 							</object>
 							<object class="NSScroller" id="568343027">
 								<reference key="NSNextResponder" ref="357941803"/>
@@ -242,7 +242,7 @@
 						<reference key="NSVScroller" ref="794701556"/>
 						<reference key="NSHScroller" ref="568343027"/>
 						<reference key="NSContentView" ref="457447600"/>
-						<bytes key="NSScrollAmts">QSAAAEEgAABBmAAAQZgAAA</bytes>
+						<bytes key="NSScrollAmts">QSAAAEEgAABBkAAAQZAAAA</bytes>
 					</object>
 					<object class="NSTextField" id="95904413">
 						<reference key="NSNextResponder" ref="1067513711"/>
