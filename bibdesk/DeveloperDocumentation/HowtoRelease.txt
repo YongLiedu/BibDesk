@@ -1,12 +1,14 @@
 How To Release BibDesk
 
+- make sure your working copy is up-to-date (run "svn up")
+
 - clean the project in Release configuration, make sure you also clean the dependencies and precompiled header
 
 - change version numbers
   *  Info.plist
   *  version.texi
-  *  Info.plist and InfoPlist.strings in the BibImporter project
-  *  Info.plist and InfoPlist.strings in the QuickLook-BibDesk project
+  *  Info.plist and *.lproj/InfoPlist.strings in the BibImporter project
+  *  Info.plist and *.lproj/InfoPlist.strings in the QuickLook-BibDesk project
 
 - run "agvtool bump"
 
@@ -21,15 +23,16 @@ How To Release BibDesk
 - build the "DiskImage" target, which should drop a disk image and an (partial) appcast XML on your desktop
 
 - follow the sf.net release instructions
+  *  log into sf.net
   *  in the BibDesk project, follow the "File Manager" item in the "Project Admin" menu
   *  click the BibDesk folder
   *  right-click the BibDesk folder and choose "New folder", name it the same as the disk image (without the dmg part)
   *  right-click the new folder and choose "Uploads here"
   *  click the "Upload File" link, and select the disk image
   *  click the uploaded disk image file, and check the "Mac (OSX)" button, hit Save
-  *  file release docs:  http://apps.sourceforge.net/trac/sourceforge/wiki/Release%20files%20for%20download
+  *  for more info see:  http://apps.sourceforge.net/trac/sourceforge/wiki/Release%20files%20for%20download
 
-- edit the release notes at relnotes.html
+- edit the release notes at relnotes.html on the web server
 
 - update the release notes lines in the generated appcast XML using <li> elements
 
