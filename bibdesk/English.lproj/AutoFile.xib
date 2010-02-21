@@ -310,11 +310,7 @@ aXRlbXMgc2VsZWN0ZWQgaW4gdGhlIGZpcnN0IGNvbHVtbi4KA</string>
 													<object class="NSTextFieldCell" key="NSDataCell" id="66961967">
 														<int key="NSCellFlags">338820672</int>
 														<int key="NSCellFlags2">1024</int>
-														<object class="NSFont" key="NSSupport" id="563210639">
-															<string key="NSName">LucidaGrande</string>
-															<double key="NSSize">13</double>
-															<int key="NSfFlags">1044</int>
-														</object>
+														<reference key="NSSupport" ref="223749437"/>
 														<reference key="NSControlView" ref="106490577"/>
 														<reference key="NSBackgroundColor" ref="875025071"/>
 														<reference key="NSTextColor" ref="675854359"/>
@@ -339,7 +335,7 @@ aXRlbXMgc2VsZWN0ZWQgaW4gdGhlIGZpcnN0IGNvbHVtbi4KA</string>
 													<object class="NSTextFieldCell" key="NSDataCell" id="42149526">
 														<int key="NSCellFlags">337772096</int>
 														<int key="NSCellFlags2">2048</int>
-														<reference key="NSSupport" ref="563210639"/>
+														<reference key="NSSupport" ref="223749437"/>
 														<reference key="NSControlView" ref="106490577"/>
 														<reference key="NSBackgroundColor" ref="875025071"/>
 														<reference key="NSTextColor" ref="675854359"/>
@@ -362,7 +358,7 @@ aXRlbXMgc2VsZWN0ZWQgaW4gdGhlIGZpcnN0IGNvbHVtbi4KA</string>
 													<bytes key="NSWhite">MC41AA</bytes>
 												</object>
 											</object>
-											<double key="NSRowHeight">17</double>
+											<double key="NSRowHeight">16</double>
 											<int key="NSTvFlags">-692060160</int>
 											<reference key="NSDelegate"/>
 											<reference key="NSDataSource"/>
@@ -430,7 +426,7 @@ aXRlbXMgc2VsZWN0ZWQgaW4gdGhlIGZpcnN0IGNvbHVtbi4KA</string>
 							<reference key="NSContentView" ref="458706998"/>
 							<reference key="NSHeaderClipView" ref="829289657"/>
 							<reference key="NSCornerView" ref="314270876"/>
-							<bytes key="NSScrollAmts">QSAAAEEgAABBmAAAQZgAAA</bytes>
+							<bytes key="NSScrollAmts">QSAAAEEgAABBkAAAQZAAAA</bytes>
 						</object>
 						<object class="NSImageView" id="892077678">
 							<reference key="NSNextResponder" ref="928054691"/>
@@ -520,7 +516,11 @@ aXRlbXMgc2VsZWN0ZWQgaW4gdGhlIGZpcnN0IGNvbHVtbi4KA</string>
 								<int key="NSCellFlags">67239424</int>
 								<int key="NSCellFlags2">0</int>
 								<string key="NSContents">Retry forces moves according to Fix</string>
-								<reference key="NSSupport" ref="563210639"/>
+								<object class="NSFont" key="NSSupport">
+									<string key="NSName">LucidaGrande</string>
+									<double key="NSSize">13</double>
+									<int key="NSfFlags">1044</int>
+								</object>
 								<reference key="NSControlView" ref="189276793"/>
 								<int key="NSButtonFlags">1211912703</int>
 								<int key="NSButtonFlags2">2</int>
