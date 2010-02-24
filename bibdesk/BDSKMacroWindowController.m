@@ -225,12 +225,12 @@
     } else if (sender == macroResolver) {
         NSString *type = [info objectForKey:@"type"];
         if ([type isEqualToString:@"Add macro"]) {
-            NSString *key = [info objectForKey:@"macroKey"];
+            NSString *key = [info objectForKey:@"macro"];
             BDSKMacro *macro = [[BDSKMacro alloc] initWithName:key macroResolver:macroResolver];
             [self insertObject:macro inMacrosAtIndex:[self countOfMacros]];
             [macro release];
         } else if ([type isEqualToString:@"Remove macro"]) {
-            NSString *key = [info objectForKey:@"macroKey"];
+            NSString *key = [info objectForKey:@"macro"];
             if (key) {
                 NSUInteger idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[key lowercaseString]];
                 BDSKASSERT(idx != NSNotFound);
@@ -240,8 +240,8 @@
                 return;
             }
         } else if ([type isEqualToString:@"Change key"]) {
-            NSString *newKey = [info objectForKey:@"newKey"];
-            NSString *oldKey = [info objectForKey:@"oldKey"];
+            NSString *newKey = [info objectForKey:@"newMacro"];
+            NSString *oldKey = [info objectForKey:@"oldMacro"];
             NSUInteger idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[oldKey lowercaseString]];
             BDSKMacro *macro = [[BDSKMacro alloc] initWithName:newKey macroResolver:macroResolver];
             BDSKASSERT(idx != NSNotFound);
