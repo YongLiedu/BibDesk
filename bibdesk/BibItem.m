@@ -65,7 +65,6 @@
 #import "BDSKTemplateParser.h"
 #import "BDSKPublicationsArray.h"
 #import "NSData_BDSKExtensions.h"
-#import "BDSKCitationFormatter.h"
 #import "BDSKScriptHook.h"
 #import "BDSKScriptHookManager.h"
 #import "BDSKCompletionManager.h"
@@ -1765,10 +1764,6 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 #pragma mark Other text representations
-
-- (BOOL)citationFormatter:(BDSKCitationFormatter *)formatter isValidKey:(NSString *)key {
-    return [[[self owner] publications] itemForCiteKey:key] != nil;
-}
 
 - (NSString *)RISStringValue{
     NSString *v;
