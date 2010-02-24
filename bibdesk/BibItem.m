@@ -1316,6 +1316,43 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	[self setField:field toValue:[NSString stringWithTriStateValue:triStateValue]];
 }
 
+- (NSArray *)citationValueOfField:(NSString *)field{
+    static NSCharacterSet *keySepCharSet = nil;
+    static NSCharacterSet *keyCharSet = nil;
+    
+    if (keySepCharSet == nil) {
+        keySepCharSet = [[NSCharacterSet characterSetWithCharactersInString:@", "] retain];
+        keyCharSet = [[keySepCharSet invertedSet] retain];
+    }
+    
+    NSString *string = [self valueOfField:field];
+    NSUInteger start, length = [string length];
+    NSRange range = NSMakeRange(0, 0);
+    NSString *keyString;
+    BibItem *pub;
+    NSMutableArray *pubs = [NSMutableArray array];
+    
+    do {
+        start = NSMaxRange(range);
+        range = [string rangeOfCharacterFromSet:keyCharSet options:0 range:NSMakeRange(start, length - start)];
+        
+        if (range.length) {
+            start = range.location;
+            range = [string rangeOfCharacterFromSet:keySepCharSet options:0 range:NSMakeRange(start, length - start)];
+            if (range.length == 0)
+                range.location = length;
+            if (range.location > start) {
+                range = NSMakeRange(start, range.location - start);
+                keyString = [string substringWithRange:range];
+                if (pub = [[[self owner] publications] itemForCiteKey:keyString])
+                    [pubs addObject:pub];
+            }
+        }
+    } while (range.length);
+    
+    return pubs;
+}
+
 - (id)displayValueOfField:(NSString *)field{
     static NSDateFormatter *shortDateFormatter = nil;
     if(shortDateFormatter == nil) {

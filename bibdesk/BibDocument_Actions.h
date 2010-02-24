@@ -104,6 +104,8 @@
 */
 - (void)editAction:(id)sender;
 
+- (void)editRepresentedPub:(id)sender;
+
 /*!
     @method editPubOrOpenURLAction:
     @abstract 

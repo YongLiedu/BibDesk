@@ -392,6 +392,11 @@ static BOOL changingColors = NO;
 		[self editGroupAction:sender];
 }
 
+- (void)editRepresentedPub:(id)sender {
+    BibItem *pub = [sender representedObject];
+    [self editPublications:[NSArray arrayWithObjects:pub, nil]];
+}
+
 - (IBAction)editPubOrOpenURLAction:(id)sender{
     NSInteger column = [tableView clickedColumn];
     NSString *colID = column != -1 ? [[[tableView tableColumns] objectAtIndex:column] identifier] : nil;
@@ -419,6 +424,13 @@ static BOOL changingColors = NO;
             changingColors = NO;
         }
         [[NSColorPanel sharedColorPanel] makeKeyAndOrderFront:nil];
+    } else if([colID isCitationField]) {
+        BibItem *pub = [[self selectedPublications] lastObject];
+        NSArray *linkedPubs = [pub citationValueOfField:colID];
+        if ([linkedPubs count])
+            [self editPublications:linkedPubs];
+        else
+            [self editPubCmd:sender];
     } else {
         [self editPubCmd:sender];
     }

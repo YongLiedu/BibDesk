@@ -564,6 +564,8 @@ enum {
 */
 - (void)setField:(NSString *)field toStringValue:(NSString *)value;
 
+- (NSArray *)citationValueOfField:(NSString *)field;
+
 - (id)displayValueOfField:(NSString *)field;
 
 /*!

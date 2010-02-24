@@ -356,6 +356,23 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         [item setTarget:self];
         [item setKeyEquivalentModifierMask:NSAlternateKeyMask];
         [item setAlternate:YES];
+    }else if([tcId isCitationField]){
+        NSMutableArray *linkedPubs = [NSMutableArray array];
+        BibItem *pub;
+        for (pub in [self selectedPublications])
+            [linkedPubs addObjectsFromArray:[pub citationValueOfField:tcId]];
+        if ([linkedPubs count]) {
+            menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
+            for (pub in linkedPubs) {
+                item = [menu addItemWithTitle:[pub citeKey] action:@selector(editRepresentedPub:) keyEquivalent:@""];
+                [item setTarget:self];
+                [item setRepresentedObject:pub];
+            }
+        } else {
+            [self menuNeedsUpdate:copyAsMenu];
+            menu = [[actionMenu copyWithZone:[NSMenu menuZone]] autorelease];
+            [menu removeItemAtIndex:0];
+        }
     }else{
         [self menuNeedsUpdate:copyAsMenu];
         menu = [[actionMenu copyWithZone:[NSMenu menuZone]] autorelease];
