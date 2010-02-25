@@ -3255,6 +3255,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	if(fieldEditor){
 		selection = [fieldEditor selectedRange];
 		editedTitle = [[fields objectAtIndex:[tableView editedRow]] retain];
+        if ([[self window] makeFirstResponder:[self window]] == NO) 	 
+             [NSException raise:NSInternalInconsistencyException format:@"Failed to commit edits in %s, trouble ahead", __func__];
 	}
 	
     if (newFields && [fields isEqualToArray:newFields] == NO) {
