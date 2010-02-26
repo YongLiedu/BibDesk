@@ -69,11 +69,6 @@ enum {
 - (NSInteger)componentAtIndex:(NSUInteger)componentIndex;
 
 - (NSInteger)releaseType;
-- (BOOL)isRelease;
-- (BOOL)isReleaseCandidate;
-- (BOOL)isDevelopment;
-- (BOOL)isBeta;
-- (BOOL)isAlpha;
 
 - (NSComparisonResult)compareToVersionNumber:(BDSKVersionNumber *)otherVersion;
 
