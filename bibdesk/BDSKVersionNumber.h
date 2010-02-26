@@ -39,11 +39,11 @@
 #import <Cocoa/Cocoa.h>
 
 enum {
-    BDSKReleaseVersionType,
-    BDSKReleaseCandidateVersionType,
-    BDSKDevelopmentVersionType,
-    BDSKBetaVersionType,
-    BDSKAlphaVersionType,
+    BDSKReleaseVersionType = 0,
+    BDSKReleaseCandidateVersionType = -1,
+    BDSKDevelopmentVersionType = -2,
+    BDSKBetaVersionType = -3,
+    BDSKAlphaVersionType = -4
 };
 
 @interface BDSKVersionNumber : NSObject <NSCopying>
