@@ -362,7 +362,7 @@ error:(NSError **)outError{
     
     static NSCharacterSet *bracesQuotesAndCommaCharSet = nil;
     if (bracesQuotesAndCommaCharSet == nil) {
-        bracesQuotesAndCommaCharSet = [[NSCharacterSet characterSetWithCharactersInString:@"{}\","] retain];
+        bracesQuotesAndCommaCharSet = [[NSCharacterSet characterSetWithCharactersInString:@"{})\","] retain];
     }
     
     // NSScanner is case-insensitive by default
@@ -377,7 +377,7 @@ error:(NSError **)outError{
         
 		[scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
 		
-        if(![scanner scanString:@"{" intoString:nil])
+        if(![scanner scanString:@"{" intoString:nil] && ![scanner scanString:@"(" intoString:nil])
             continue;
 
         // scan macro=value items up to the closing brace 
@@ -413,6 +413,11 @@ error:(NSError **)outError{
                 }else if(ch == ','){
                     if(nesting == 1)
                         endOfValue = YES;
+                }else if(ch == ')'){
+                    if(nesting == 1){
+                        endOfValue = YES;
+                        --nesting;
+                    }
                 }
                 if (endOfValue == NO) // we don't include the outer braces or the separating commas
                     [value appendFormat:@"%C", ch];
