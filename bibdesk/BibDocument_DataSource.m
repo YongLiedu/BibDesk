@@ -361,18 +361,21 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         BibItem *pub;
         for (pub in [self selectedPublications])
             [linkedPubs addObjectsFromArray:[pub citationValueOfField:tcId]];
-        if ([linkedPubs count]) {
-            menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
-            for (pub in linkedPubs) {
-                item = [menu addItemWithTitle:[pub citeKey] action:@selector(editRepresentedPub:) keyEquivalent:@""];
-                [item setTarget:self];
-                [item setRepresentedObject:pub];
-            }
-        } else {
-            [self menuNeedsUpdate:copyAsMenu];
-            menu = [[actionMenu copyWithZone:[NSMenu menuZone]] autorelease];
-            [menu removeItemAtIndex:0];
+        menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
+        for (pub in linkedPubs) {
+            item = [menu addItemWithTitle:[pub citeKey] action:@selector(editRepresentedPub:) keyEquivalent:@""];
+            [item setTarget:self];
+            [item setRepresentedObject:pub];
         }
+        [menu addItem:[NSMenuItem separatorItem]];
+        item = [menu addItemWithTitle:NSLocalizedString(@"Get Info", @"Menu item title") action:@selector(editPubCmd:) keyEquivalent:@""];
+        [item setTarget:self];
+        item = [menu addItemWithTitle:NSLocalizedString(@"Remove", @"Menu item title") action:@selector(removeSelectedPubs:) keyEquivalent:@""];
+        [item setTarget:self];
+        item = [menu addItemWithTitle:NSLocalizedString(@"Delete", @"Menu item title") action:@selector(deleteSelectedPubs:) keyEquivalent:@""];
+        [item setTarget:self];
+        [item setKeyEquivalentModifierMask:NSAlternateKeyMask];
+        [item setAlternate:YES];
     }else{
         [self menuNeedsUpdate:copyAsMenu];
         menu = [[actionMenu copyWithZone:[NSMenu menuZone]] autorelease];
