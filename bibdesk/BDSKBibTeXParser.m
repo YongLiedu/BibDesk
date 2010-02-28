@@ -353,7 +353,8 @@ error:(NSError **)outError{
     NSMutableString *value = nil;
     BOOL endOfValue = NO;
     BOOL quoted = NO;
-
+    BOOL parenthesis = NO;
+    
 	NSString *s;
 	NSInteger nesting;
 	unichar ch;
@@ -377,9 +378,14 @@ error:(NSError **)outError{
         
 		[scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
 		
-        if(![scanner scanString:@"{" intoString:nil] && ![scanner scanString:@"(" intoString:nil])
-            continue;
-
+        parenthesis = NO;
+        
+        if(NO == [scanner scanString:@"{" intoString:nil]){
+            if(NO == [scanner scanString:@"(" intoString:nil])
+                continue;
+            parenthesis = YES;
+        }
+        
         // scan macro=value items up to the closing brace 
         nesting = 1;
         while(nesting > 0 && ![scanner isAtEnd]){
@@ -413,11 +419,9 @@ error:(NSError **)outError{
                 }else if(ch == ','){
                     if(nesting == 1)
                         endOfValue = YES;
-                }else if(ch == ')'){
-                    if(nesting == 1){
-                        endOfValue = YES;
-                        --nesting;
-                    }
+                }else if(ch == ')' && parenthesis && nesting == 1){
+                    endOfValue = YES;
+                    --nesting;
                 }
                 if (endOfValue == NO) // we don't include the outer braces or the separating commas
                     [value appendFormat:@"%C", ch];
