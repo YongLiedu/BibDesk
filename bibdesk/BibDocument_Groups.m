@@ -86,6 +86,7 @@
 #import "NSEvent_BDSKExtensions.h"
 #import "NSSplitView_BDSKExtensions.h"
 #import "BDSKButtonBar.h"
+#import "NSMenu_BDSKExtensions.h"
 
 @implementation BibDocument (Groups)
 
@@ -861,7 +862,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
             NSString *label = [bm label];
             NSMenuItem *item = [menu addItemWithTitle:label ?: @"" action:NULL keyEquivalent:@""];
-            [item setImage:[bm icon]];
+            [item setImageAndSize:[bm icon]];
             [item setIndentationLevel:level];
             [item setRepresentedObject:bm];
             [self addMenuItemsForBookmarks:[bm children] level:level+1 toMenu:menu];

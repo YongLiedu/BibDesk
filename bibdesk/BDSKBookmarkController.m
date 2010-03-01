@@ -45,6 +45,7 @@
 #import "BDSKTextWithIconCell.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKSeparatorCell.h"
+#import "NSMenu_BDSKExtensions.h"
 
 #define BDSKBookmarkRowsPboardType @"BDSKBookmarkRowsPboardType"
 
@@ -163,7 +164,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
         if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
             NSString *name = [bm name];
             NSMenuItem *item = [menu addItemWithTitle:name ?: @"" action:NULL keyEquivalent:@""];
-            [item setImage:[bm icon]];
+            [item setImageAndSize:[bm icon]];
             [item setIndentationLevel:level];
             [item setRepresentedObject:bm];
             [self addMenuItemsForBookmarks:[bm children] level:level+1 toMenu:menu];
