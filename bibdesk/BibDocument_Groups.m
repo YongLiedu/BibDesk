@@ -721,9 +721,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     
     [self setCurrentGroupField:newGroupField];
 	
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
-														object:self
-													  userInfo:[NSDictionary dictionary]];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification object:self];
     [array release];
 }    
 
@@ -756,9 +754,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         [self setCurrentGroupField:@""];
 		[[groups categoryParent] setName:NSLocalizedString(@"FIELD", @"")];
         
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
-                                                            object:self
-                                                          userInfo:[NSDictionary dictionary]];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification object:self];
     }
 }
 

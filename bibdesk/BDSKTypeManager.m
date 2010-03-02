@@ -283,9 +283,7 @@ static NSString *BDSKUserTypeInfoPath() {
         [self setTypes:newTypes];
         [self reloadAllFieldNames];
         
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibTypeInfoChangedNotification
-                                                            object:self
-                                                          userInfo:[NSDictionary dictionary]];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibTypeInfoChangedNotification object:self];
     }
 }
 
