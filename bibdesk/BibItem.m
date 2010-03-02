@@ -77,6 +77,10 @@
 #import "NSCharacterSet_BDSKExtensions.h"
 #import <Quartz/Quartz.h>
 
+NSString *BDSKBibItemKeyKey = @"key";
+NSString *BDSKBibItemOldValueKey = @"oldValue";
+NSString *BDSKBibItemNewValueKey = @"newValue";
+
 #define DEFAULT_CITEKEY @"cite-key"
 static NSSet *fieldsToWriteIfEmpty = nil;
 
@@ -962,7 +966,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	}
 	[self updateMetadataForKey:BDSKPubTypeString];
 		
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKPubTypeString, @"key", newType, @"newValue", oldType, @"oldValue", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKPubTypeString, BDSKBibItemKeyKey, newType, BDSKBibItemNewValueKey, oldType, BDSKBibItemOldValueKey, nil];
     [oldType release];
     
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
@@ -1026,7 +1030,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	}
 	[self updateMetadataForKey:BDSKCiteKeyString];
 		
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKCiteKeyString, @"key", newCiteKey, @"newValue", oldCiteKey, @"oldValue", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKCiteKeyString, BDSKBibItemKeyKey, newCiteKey, BDSKBibItemNewValueKey, oldCiteKey, BDSKBibItemOldValueKey, nil];
 
     [[NSFileManager defaultManager] removeSpotlightCacheFileForCiteKey:oldCiteKey];
     [oldCiteKey release];
@@ -1183,9 +1187,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     [pubFields setValue:[date description] forKey:BDSKDateModifiedString];
 	[self updateMetadataForKey:key];
 	
-	NSMutableDictionary *notifInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:key, @"key", nil];
-    [notifInfo setValue:value forKey:@"newValue"];
-    [notifInfo setValue:oldValue forKey:@"oldValue"];
+	NSMutableDictionary *notifInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:key, BDSKBibItemKeyKey, nil];
+    [notifInfo setValue:value forKey:BDSKBibItemNewValueKey];
+    [notifInfo setValue:oldValue forKey:BDSKBibItemOldValueKey];
     [oldValue release];
     
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
@@ -2513,7 +2517,7 @@ static void addFilesToArray(const void *value, void *context)
     // this updates the search index
     [self updateMetadataForKey:key];
     // make sure the UI is notified that the linked file has changed, as this is often called after setField:toValue:
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:key, @"key", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:key, BDSKBibItemKeyKey, nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
                                                         object:self
                                                       userInfo:notifInfo];
@@ -3352,7 +3356,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     // Updates the document's file content search index
     if([owner isDocument] && [key isEqualToString:BDSKLocalFileString]){
-        NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObject:self], @"pubs", nil];
+        NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObject:self], BDSKDocumentPublicationsKey, nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFileSearchIndexInfoChangedNotification
                                                             object:(BibDocument *)owner
                                                           userInfo:notifInfo];

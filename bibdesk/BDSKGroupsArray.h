@@ -38,6 +38,8 @@
 
 #import <Cocoa/Cocoa.h>
 
+extern NSString *BDSKGroupsArrayGroupsKey;
+
 enum {
     BDSKSharedGroupType,
 	BDSKURLGroupType,

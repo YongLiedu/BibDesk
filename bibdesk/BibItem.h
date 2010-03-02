@@ -42,6 +42,10 @@
 #import "BDSKFormatParser.h"
 #import "BDSKLinkedFile.h"
 
+extern NSString *BDSKBibItemKeyKey;
+extern NSString *BDSKBibItemOldValueKey;
+extern NSString *BDSKBibItemNewValueKey;
+
 enum {
     BDSKNoCrossrefError,
     BDSKSelfCrossrefError,

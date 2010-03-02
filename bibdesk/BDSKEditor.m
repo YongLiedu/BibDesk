@@ -83,6 +83,7 @@
 #import "BDSKColoredView.h"
 #import "BDSKSplitView.h"
 #import "BDSKTemplate.h"
+#import "BDSKGroupsArray.h"
 
 #define WEAK_NULL NULL
 
@@ -2206,7 +2207,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     if (field) {
         // this is needed to update the search index and tex preview
         NSString *value = [publication valueOfField:field];
-        NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:field, @"key", value, @"newValue", value, @"oldValue", nil];
+        NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:field, BDSKBibItemKeyKey, value, BDSKBibItemNewValueKey, value, BDSKBibItemOldValueKey, nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
                                                             object:publication
                                                           userInfo:notifInfo];
@@ -2234,13 +2235,13 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 - (void)bibDidChange:(NSNotification *)notification{
 	NSDictionary *userInfo = [notification userInfo];
-	NSString *changeKey = [userInfo objectForKey:@"key"];
-	NSString *newValue = [userInfo objectForKey:@"newValue"];
+	NSString *changeKey = [userInfo objectForKey:BDSKBibItemKeyKey];
+	NSString *newValue = [userInfo objectForKey:BDSKBibItemNewValueKey];
 	BibItem *sender = (BibItem *)[notification object];
 	NSString *crossref = [publication valueOfField:BDSKCrossrefString inherit:NO];
 	BOOL parentDidChange = (crossref != nil && 
 							([crossref caseInsensitiveCompare:[sender citeKey]] == NSOrderedSame || 
-							 [crossref caseInsensitiveCompare:[userInfo objectForKey:@"oldValue"]] == NSOrderedSame));
+							 [crossref caseInsensitiveCompare:[userInfo objectForKey:BDSKBibItemOldValueKey]] == NSOrderedSame));
 	
     // If it is not our item or his crossref parent, we don't care, but our parent may have changed his cite key
 	if (sender != publication && NO == parentDidChange) {
@@ -2378,7 +2379,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	NSString *crossref = [publication valueOfField:BDSKCrossrefString inherit:NO];
 	
 	if ([NSString isEmptyString:crossref] == NO) {
-        for (id pub in [[notification userInfo] objectForKey:@"pubs"]) {
+        for (id pub in [[notification userInfo] objectForKey:BDSKDocumentPublicationsKey]) {
             if ([crossref caseInsensitiveCompare:[pub valueForKey:@"citeKey"]] == NSOrderedSame) {
                 // changes in the parent cannot change the field names, as custom fields are never inherited
                 [self reloadTable];
@@ -2429,14 +2430,14 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 #pragma mark document interaction
 	
 - (void)bibWillBeRemoved:(NSNotification *)notification{
-	NSArray *pubs = [[notification userInfo] objectForKey:@"pubs"];
+	NSArray *pubs = [[notification userInfo] objectForKey:BDSKDocumentPublicationsKey];
 	
 	if ([pubs containsObject:publication])
 		[self close];
 }
 	
 - (void)groupWillBeRemoved:(NSNotification *)notification{
-	NSArray *groups = [[notification userInfo] objectForKey:@"groups"];
+	NSArray *groups = [[notification userInfo] objectForKey:BDSKGroupsArrayGroupsKey];
 	
 	if ([groups containsObject:[publication owner]])
 		[self close];

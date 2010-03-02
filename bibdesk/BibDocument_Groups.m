@@ -398,7 +398,7 @@ The groupedPublications array is a subset of the publications array, developed b
 - (void)handleWillRemoveGroupsNotification:(NSNotification *)notification{
     if([groupOutlineView editedRow] != -1 && [documentWindow makeFirstResponder:nil] == NO)
         [documentWindow endEditingFor:groupOutlineView];
-    for (BDSKGroup *group in [[notification userInfo] valueForKey:@"groups"])
+    for (BDSKGroup *group in [[notification userInfo] valueForKey:BDSKGroupsArrayGroupsKey])
         [self removeSpinnerForGroup:group];
 }
 

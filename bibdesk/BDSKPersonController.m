@@ -49,6 +49,7 @@
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKTableView.h"
 #import <AddressBook/AddressBook.h>
+#import "BDSKGroupsArray.h"
 
 @implementation BDSKPersonController
 
@@ -340,7 +341,7 @@
 }
 
 - (void)handleBibItemChanged:(NSNotification *)note{
-    NSString *key = [[note userInfo] valueForKey:@"key"];
+    NSString *key = [[note userInfo] valueForKey:BDSKBibItemKeyKey];
     if (([key isPersonField] || key == nil) && owner) {
         [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(setPublicationItems:) object:nil];
         [self performSelector:@selector(setPublicationItems:) withObject:nil afterDelay:0.0];
@@ -356,7 +357,7 @@
 }
 
 - (void)handleGroupWillBeRemoved:(NSNotification *)note{
-	NSArray *groups = [[note userInfo] objectForKey:@"groups"];
+	NSArray *groups = [[note userInfo] objectForKey:BDSKGroupsArrayGroupsKey];
 	
 	if ([groups containsObject:owner])
 		[self close];

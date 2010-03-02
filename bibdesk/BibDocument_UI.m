@@ -650,7 +650,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     // this handles the remaining UI updates necessary (tableView and previews)
 	[self updateCategoryGroupsPreservingSelection:YES];
     
-    NSArray *pubs = [[notification userInfo] objectForKey:@"pubs"];
+    NSArray *pubs = [[notification userInfo] objectForKey:BDSKDocumentPublicationsKey];
     [self setImported:isDelete == NO forPublications:pubs inGroup:nil];
 }
 
@@ -758,13 +758,13 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 	if([pub owner] != self)
         return;
 
-	NSString *changedKey = [userInfo objectForKey:@"key"];
+	NSString *changedKey = [userInfo objectForKey:BDSKBibItemKeyKey];
     NSString *key = [pub citeKey];
     NSString *oldKey = nil;
     
     // need to handle cite keys and crossrefs if a cite key changed
     if([changedKey isEqualToString:BDSKCiteKeyString]){
-        oldKey = [userInfo objectForKey:@"oldValue"];
+        oldKey = [userInfo objectForKey:BDSKBibItemOldValueKey];
         [publications changeCiteKey:oldKey toCiteKey:key forItem:pub];
         if([NSString isEmptyString:oldKey])
             oldKey = nil;
@@ -900,7 +900,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 
 - (void)handleSkimFileDidSaveNotification:(NSNotification *)notification{
     NSString *path = [notification object];
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, BDSKBibItemKeyKey, nil];
     
     for (BibItem *pub in publications) {
         if ([[[pub existingLocalFiles] valueForKey:@"path"] containsObject:path])

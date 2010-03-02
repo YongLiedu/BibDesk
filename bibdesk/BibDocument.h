@@ -93,6 +93,8 @@ extern NSString* BDSKReferenceMinerStringPboardType; // pasteboard type from Ref
 extern NSString *BDSKBibItemPboardType;
 extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc files
 
+extern NSString *BDSKDocumentPublicationsKey;
+
 /*!
     @class BibDocument
     @abstract Controller class for .bib files

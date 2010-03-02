@@ -140,6 +140,8 @@ NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x5745
 NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk.BibItemPasteboardType";
 NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
+NSString *BDSKDocumentPublicationsKey = @"publications";
+
 // private keys used for storing window information in xattrs
 #define BDSKMainWindowExtendedAttributeKey @"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes"
 #define BDSKGroupSplitViewFractionKey @"BDSKGroupSplitViewFractionKey"
@@ -812,7 +814,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         
         [self setPublicationsWithoutUndo:newPubs];
         
-        NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newPubs, @"pubs", nil];
+        NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newPubs, BDSKDocumentPublicationsKey, nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocSetPublicationsNotification
                                                             object:self
                                                           userInfo:notifInfo];
@@ -839,7 +841,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [searchIndexes addPublications:pubs];
     [notesSearchIndex addPublications:pubs];
 
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, BDSKDocumentPublicationsKey, nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocAddItemNotification
 														object:self
 													  userInfo:notifInfo];
@@ -861,7 +863,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
     NSArray *pubs = [publications objectsAtIndexes:indexes];
 	[[[self undoManager] prepareWithInvocationTarget:self] insertPublications:pubs atIndexes:indexes];
 	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, BDSKDocumentPublicationsKey, nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocWillRemoveItemNotification
 														object:self
 													  userInfo:notifInfo];	
@@ -876,7 +878,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
 	[pubs makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [[NSFileManager defaultManager] removeSpotlightCacheFilesForCiteKeys:[pubs arrayByPerformingSelector:@selector(citeKey)]];
 	
-	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", nil];
+	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, BDSKDocumentPublicationsKey, nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocDelItemNotification
 														object:self
 													  userInfo:notifInfo];

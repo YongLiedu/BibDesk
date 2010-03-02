@@ -604,7 +604,7 @@
     if ([notification object] != item)
         return;
 	
-	NSString *changeKey = [[notification userInfo] objectForKey:@"key"];
+	NSString *changeKey = [[notification userInfo] objectForKey:BDSKBibItemKeyKey];
     
 	if([changeKey isEqualToString:BDSKCiteKeyString]) {
 		[citeKeyField setStringValue:[item citeKey]];

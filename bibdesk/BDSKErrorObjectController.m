@@ -297,7 +297,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 // remove a publication
 - (void)handleRemovePublicationNotification:(NSNotification *)notification{
-    NSArray *pubs = [[notification userInfo] objectForKey:@"pubs"];
+    NSArray *pubs = [[notification userInfo] objectForKey:BDSKDocumentPublicationsKey];
     [self removeErrorsForPublications:pubs];
 }
 

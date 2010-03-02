@@ -54,6 +54,8 @@
 #import "BDSKFilter.h"
 #import "NSArray_BDSKExtensions.h"
 
+NSString *BDSKGroupsArrayGroupsKey = @"groups";
+
 #define LIBRARY_PARENT_INDEX  0
 #define EXTERNAL_PARENT_INDEX 1 /* webGroup, searchGroups, sharedGroups, URLGroups, scriptGroups */
 #define SMART_PARENT_INDEX    2 /* lastImportGroup, smartGroups */
@@ -205,7 +207,7 @@
     [removedGroups removeObjectsInArray:array];
     if ([removedGroups count])
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
-            object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:removedGroups, @"groups", nil]];
+            object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:removedGroups, BDSKGroupsArrayGroupsKey, nil]];
     [removedGroups release];
     [[self externalParent] setSharedGroups:array];
 }
@@ -218,7 +220,7 @@
 
 - (void)removeURLGroup:(BDSKURLGroup *)group {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
-        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], @"groups", nil]];
+        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], BDSKGroupsArrayGroupsKey, nil]];
 	[[[self undoManager] prepareWithInvocationTarget:self] addURLGroup:group];
 	[[self externalParent] removeURLGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
@@ -232,7 +234,7 @@
 
 - (void)removeScriptGroup:(BDSKScriptGroup *)group {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
-        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], @"groups", nil]];
+        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], BDSKGroupsArrayGroupsKey, nil]];
 	[[[self undoManager] prepareWithInvocationTarget:self] addScriptGroup:group];
 	[[self externalParent] removeScriptGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
@@ -245,7 +247,7 @@
 
 - (void)removeSearchGroup:(BDSKSearchGroup *)group {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
-        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], @"groups", nil]];
+        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], BDSKGroupsArrayGroupsKey, nil]];
 	[[self externalParent] removeSearchGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
@@ -260,7 +262,7 @@
 
 - (void)removeSmartGroup:(BDSKSmartGroup *)group {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
-        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], @"groups", nil]];
+        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], BDSKGroupsArrayGroupsKey, nil]];
 	[[[self undoManager] prepareWithInvocationTarget:self] addSmartGroup:group];
 	[[self smartParent] removeSmartGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
@@ -274,7 +276,7 @@
 
 - (void)removeStaticGroup:(BDSKStaticGroup *)group {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
-        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], @"groups", nil]];
+        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], BDSKGroupsArrayGroupsKey, nil]];
 	[[[self undoManager] prepareWithInvocationTarget:self] addStaticGroup:group];
 	[[self staticParent] removeStaticGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
@@ -282,7 +284,7 @@
  
 - (void)setCategoryGroups:(NSArray *)array{
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
-        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[self categoryGroups], @"groups", nil]];
+        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[self categoryGroups], BDSKGroupsArrayGroupsKey, nil]];
     [[self categoryParent] setCategoryGroups:array];
 }
 

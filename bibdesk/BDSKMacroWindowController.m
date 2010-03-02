@@ -50,6 +50,7 @@
 #import "BDSKTypeSelectHelper.h"
 #import "BibDocument.h"
 #import "BDSKMacro.h"
+#import "BDSKGroupsArray.h"
 
 #define MACRO_COLUMNID      @"macro"
 #define DEFINITION_COLUMNID @"definition"
@@ -212,7 +213,7 @@
 #pragma mark Notification handlers
 
 - (void)handleGroupWillBeRemovedNotification:(NSNotification *)notif{
-	NSArray *groups = [[notif userInfo] objectForKey:@"groups"];
+	NSArray *groups = [[notif userInfo] objectForKey:BDSKGroupsArrayGroupsKey];
 	
 	if ([groups containsObject:[macroResolver owner]])
 		[self close];
