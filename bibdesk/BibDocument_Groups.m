@@ -379,7 +379,7 @@ The groupedPublications array is a subset of the publications array, developed b
     BDSKExternalGroup *group = [notification object];
     
     if ([[group document] isEqual:self]) {
-        BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
+        BOOL succeeded = [[[notification userInfo] objectForKey:BDSKExternalGroupSucceededKey] boolValue];
         BOOL isWeb = [group isEqual:[groups webGroup]];
         
         if (isWeb == NO && [sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) {

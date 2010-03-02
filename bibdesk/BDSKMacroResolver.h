@@ -43,10 +43,10 @@ extern NSString *BDSKMacroResolverMacroKey;
 extern NSString *BDSKMacroResolverOldMacroKey;
 extern NSString *BDSKMacroResolverNewMacroKey;
 
-extern NSString *BDSKMacroResolverAddMacroKey;
-extern NSString *BDSKMacroResolverRemoveMacroKey;
-extern NSString *BDSKMacroResolverChangeMacroKey;
-extern NSString *BDSKMacroResolverChangeKeyKey;
+extern NSString *BDSKMacroResolverAddType;
+extern NSString *BDSKMacroResolverRemoveType;
+extern NSString *BDSKMacroResolverChangeType;
+extern NSString *BDSKMacroResolverRenameType;
 
 @class BibDocument;
 @protocol BDSKOwner;

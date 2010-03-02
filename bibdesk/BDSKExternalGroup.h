@@ -40,6 +40,8 @@
 #import "BDSKGroup.h"
 #import "BDSKOwnerProtocol.h"
 
+extern NSString *BDSKExternalGroupSucceededKey;
+
 @class BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes;
 
 @interface BDSKExternalGroup : BDSKGroup <BDSKOwner> {

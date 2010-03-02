@@ -43,6 +43,7 @@
 #import "BDSKMacroResolver.h"
 #import "BDSKItemSearchIndexes.h"
 
+NSString *BDSKExternalGroupSucceededKey = @"succeeded";
 
 @implementation BDSKExternalGroup
 
@@ -148,7 +149,7 @@
 
 - (void)notifyUpdateForSuccess:(BOOL)succeeded {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKExternalGroupUpdatedNotification object:self
-        userInfo:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:succeeded] forKey:@"succeeded"]];
+        userInfo:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:succeeded] forKey:BDSKExternalGroupSucceededKey]];
 }
 
 #pragma mark BDSKOwner protocol
