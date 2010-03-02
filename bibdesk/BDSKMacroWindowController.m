@@ -51,6 +51,9 @@
 #import "BibDocument.h"
 #import "BDSKMacro.h"
 
+#define MACRO_COLUMNID      @"macro"
+#define DEFINITION_COLUMNID @"definition"
+
 @implementation BDSKMacroWindowController
 
 - (id)init {
@@ -119,11 +122,11 @@
     NSSortDescriptor *sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
     [arrayController setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     
-    NSTableColumn *tc = [tableView tableColumnWithIdentifier:@"macro"];
+    NSTableColumn *tc = [tableView tableColumnWithIdentifier:MACRO_COLUMNID];
     [[tc dataCell] setFormatter:[[[MacroKeyFormatter alloc] init] autorelease]];
     if(isEditable)
         [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, nil]];
-    tc = [tableView tableColumnWithIdentifier:@"definition"];
+    tc = [tableView tableColumnWithIdentifier:DEFINITION_COLUMNID];
     [[tc dataCell] setFormatter:tableCellFormatter];
     [tableView reloadData];
     
@@ -223,14 +226,14 @@
         if (sender == macroResolver || sender == [BDSKMacroResolver defaultMacroResolver])
             [self reloadMacros];
     } else if (sender == macroResolver) {
-        NSString *type = [info objectForKey:@"type"];
-        if ([type isEqualToString:@"Add macro"]) {
-            NSString *key = [info objectForKey:@"macro"];
+        NSString *type = [info objectForKey:BDSKMacroResolverTypeKey];
+        if ([type isEqualToString:BDSKMacroResolverAddMacroKey]) {
+            NSString *key = [info objectForKey:BDSKMacroResolverMacroKey];
             BDSKMacro *macro = [[BDSKMacro alloc] initWithName:key macroResolver:macroResolver];
             [self insertObject:macro inMacrosAtIndex:[self countOfMacros]];
             [macro release];
-        } else if ([type isEqualToString:@"Remove macro"]) {
-            NSString *key = [info objectForKey:@"macro"];
+        } else if ([type isEqualToString:BDSKMacroResolverRemoveMacroKey]) {
+            NSString *key = [info objectForKey:BDSKMacroResolverMacroKey];
             if (key) {
                 NSUInteger idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[key lowercaseString]];
                 BDSKASSERT(idx != NSNotFound);
@@ -239,9 +242,9 @@
                 [self setMacros:[NSArray array]];
                 return;
             }
-        } else if ([type isEqualToString:@"Change key"]) {
-            NSString *newKey = [info objectForKey:@"newMacro"];
-            NSString *oldKey = [info objectForKey:@"oldMacro"];
+        } else if ([type isEqualToString:BDSKMacroResolverChangeKeyKey]) {
+            NSString *newKey = [info objectForKey:BDSKMacroResolverNewMacroKey];
+            NSString *oldKey = [info objectForKey:BDSKMacroResolverOldMacroKey];
             NSUInteger idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[oldKey lowercaseString]];
             BDSKMacro *macro = [[BDSKMacro alloc] initWithName:newKey macroResolver:macroResolver];
             BDSKASSERT(idx != NSNotFound);
@@ -385,7 +388,7 @@
 - (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     BDSKMacro *macro = [[arrayController arrangedObjects] objectAtIndex:row];
     
-    if([[tableColumn identifier] isEqualToString:@"macro"]){
+    if([[tableColumn identifier] isEqualToString:MACRO_COLUMNID]){
          return [macro name];
     }else{
          return [macro value];
@@ -402,7 +405,7 @@
     BDSKMacro *macro = [arrangedMacros objectAtIndex:row];
     NSString *key = [macro name];
     
-    if([[tableColumn identifier] isEqualToString:@"macro"]){
+    if([[tableColumn identifier] isEqualToString:MACRO_COLUMNID]){
         // do nothing if there was no change.
         if([key isEqualToString:object]) return;
                 
@@ -589,7 +592,7 @@
     NSSortDescriptor *sortDescriptor = [[arrayController sortDescriptors] lastObject];
     
     NSString *oldKey = [sortDescriptor key];
-    NSString *newKey = [[tableColumn identifier] isEqualToString:@"macro"] ? @"name" : @"value";
+    NSString *newKey = [[tableColumn identifier] isEqualToString:MACRO_COLUMNID] ? @"name" : @"value";
     
     if ([newKey isEqualToString:oldKey])
         sortDescriptor = [sortDescriptor reversedSortDescriptor];

@@ -47,6 +47,16 @@
 #import "BibDocument.h"
 #import "NSError_BDSKExtensions.h"
 
+NSString *BDSKMacroResolverTypeKey = @"type";
+NSString *BDSKMacroResolverMacroKey = @"macro";
+NSString *BDSKMacroResolverOldMacroKey = @"oldMacro";
+NSString *BDSKMacroResolverNewMacroKey = @"newMacro";
+
+NSString *BDSKMacroResolverAddMacroKey = @"Add macro";
+NSString *BDSKMacroResolverRemoveMacroKey = @"Remove macro";
+NSString *BDSKMacroResolverChangeMacroKey = @"Change macro";
+NSString *BDSKMacroResolverChangeKeyKey = @"Change key";
+
 static char BDSKMacroResolverDefaultsObservationContext;
 
 @interface BDSKGlobalMacroResolver : BDSKMacroResolver {
@@ -194,7 +204,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     modification++;
     [self synchronize];
     
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Change key", @"type", oldMacro, @"oldMacro", newMacro, @"newMacro", nil];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKMacroResolverChangeKeyKey, BDSKMacroResolverTypeKey, oldMacro, BDSKMacroResolverOldMacroKey, newMacro,BDSKMacroResolverNewMacroKey, nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
                                                         object:self
                                                       userInfo:userInfo];    
@@ -210,18 +220,18 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     if (value == nil) {
         if (oldDef == nil)
             return;
-        type = @"Remove macro";
+        type = BDSKMacroResolverRemoveMacroKey;
     } else if (oldDef == nil) {
-        type = @"Add macro";
+        type = BDSKMacroResolverAddMacroKey;
     } else {
-        type = @"Change macro";
+        type = BDSKMacroResolverChangeMacroKey;
     }
     [macroDefinitions setValue:value forKey:macro];
 	
     modification++;
     [self synchronize];
 
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:type, @"type", macro, @"macro", nil];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:type, BDSKMacroResolverTypeKey, macro, BDSKMacroResolverMacroKey, nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
                                                         object:self
                                                       userInfo:userInfo];    
@@ -231,7 +241,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     [macroDefinitions release];
     macroDefinitions = nil;
     
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Remove macro", @"type", nil];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKMacroResolverRemoveMacroKey, BDSKMacroResolverTypeKey, nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
                                                         object:self
                                                       userInfo:userInfo];    

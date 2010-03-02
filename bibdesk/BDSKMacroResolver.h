@@ -38,6 +38,16 @@
 
 #import <Cocoa/Cocoa.h>
 
+extern NSString *BDSKMacroResolverTypeKey;
+extern NSString *BDSKMacroResolverMacroKey;
+extern NSString *BDSKMacroResolverOldMacroKey;
+extern NSString *BDSKMacroResolverNewMacroKey;
+
+extern NSString *BDSKMacroResolverAddMacroKey;
+extern NSString *BDSKMacroResolverRemoveMacroKey;
+extern NSString *BDSKMacroResolverChangeMacroKey;
+extern NSString *BDSKMacroResolverChangeKeyKey;
+
 @class BibDocument;
 @protocol BDSKOwner;
 
