@@ -70,6 +70,8 @@
 */
 - (id)name;
 
+- (NSString *)label;
+
 /*!
 	@method count
 	@abstract Returns the count of the group.

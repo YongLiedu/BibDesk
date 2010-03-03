@@ -285,6 +285,10 @@
 - (void)resort {
     if (sortDescriptors) {
         NSRange range;
+        if (searchGroupCount > 1) {
+            range = NSMakeRange(webGroupCount, searchGroupCount);
+            [children replaceObjectsInRange:range withObjectsFromArray:[[children subarrayWithRange:range] sortedArrayUsingDescriptors:sortDescriptors]];
+        }
         if (sharedGroupCount > 1) {
             range = NSMakeRange(webGroupCount + searchGroupCount, sharedGroupCount);
             [children replaceObjectsInRange:range withObjectsFromArray:[[children subarrayWithRange:range] sortedArrayUsingDescriptors:sortDescriptors]];

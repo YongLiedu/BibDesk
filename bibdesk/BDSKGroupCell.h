@@ -40,6 +40,7 @@
 
 extern NSString *BDSKGroupCellStringKey;
 extern NSString *BDSKGroupCellEditingStringKey;
+extern NSString *BDSKGroupCellLabelKey;
 extern NSString *BDSKGroupCellImageKey;
 extern NSString *BDSKGroupCellCountKey;
 extern NSString *BDSKGroupCellIsRetrievingKey;
@@ -49,10 +50,12 @@ extern NSString *BDSKGroupCellFailedDownloadKey;
 
 @interface BDSKGroupCell : NSTextFieldCell {
     NSImageCell *imageCell;
+    NSTextFieldCell *labelCell;
     NSMutableAttributedString *countString;
 }
 
 - (NSRect)textRectForBounds:(NSRect)theRect;
 - (NSRect)iconRectForBounds:(NSRect)theRect;
+- (CGFloat)labelHeight;
 
 @end

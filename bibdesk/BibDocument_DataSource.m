@@ -1224,6 +1224,13 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     docFlags.didImport = NO;
 }
 
+- (CGFloat)outlineView:(NSOutlineView *)ov heightOfRowByItem:(id)item {
+    CGFloat rowHeight = [ov rowHeight];
+    if (ov == groupOutlineView && [item label])
+        rowHeight += [[[[ov tableColumns] lastObject] dataCell] labelHeight];
+    return rowHeight;
+}
+
 - (NSMenu *)outlineView:(NSOutlineView *)ov menuForTableColumn:(NSTableColumn *)tableColumn item:(id)item {
 	if (ov != groupOutlineView || tableColumn == nil || item == nil) 
 		return nil;

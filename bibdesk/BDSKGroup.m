@@ -54,8 +54,8 @@ static NSArray *noCountCellValueKeys = nil;
 
 + (void)initialize {
     BDSKINITIALIZE;
-    cellValueKeys = [[NSArray alloc] initWithObjects:@"stringValue", @"editingStringValue", @"numberValue", @"icon", @"isRetrieving", @"failedDownload", nil];
-    noCountCellValueKeys = [[NSArray alloc] initWithObjects:@"stringValue", @"editingStringValue", @"icon", @"isRetrieving", @"failedDownload", nil];
+    cellValueKeys = [[NSArray alloc] initWithObjects:@"stringValue", @"editingStringValue", @"numberValue", @"label", @"icon", @"isRetrieving", @"failedDownload", nil];
+    noCountCellValueKeys = [[NSArray alloc] initWithObjects:@"stringValue", @"editingStringValue", @"label", @"icon", @"isRetrieving", @"failedDownload", nil];
 }
 
 // super's designated initializer
@@ -138,6 +138,10 @@ static NSArray *noCountCellValueKeys = nil;
 
 - (id)name {
     return name;
+}
+
+- (NSString *)label {
+    return nil;
 }
 
 - (NSInteger)count {

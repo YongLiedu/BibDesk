@@ -233,11 +233,15 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 - (NSImage *)icon { return [NSImage imageNamed:@"searchGroup"]; }
 
 - (NSString *)name {
-    return [NSString isEmptyString:[self searchTerm]] ? NSLocalizedString(@"Empty", @"Name for empty search group") : [self searchTerm];
+    return [[self serverInfo] name] ?: @"";
+}
+
+- (NSString *)label {
+    return [self searchTerm] ?: NSLocalizedString(@"(Empty)", @"Empty search term");
 }
 
 - (NSString *)toolTip {
-    return [NSString stringWithFormat:@"%@: %@", [[self serverInfo] name] ?: @"", [self name]];
+    return [NSString stringWithFormat:@"%@: %@", [self name], [self label]];
 }
 
 - (BOOL)isSearch { return YES; }
@@ -311,6 +315,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
         [self resetServerWithInfo:info];
     } else
         [server setServerInfo:info];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupNameChangedNotification object:self];
     [self reset];
 }
 

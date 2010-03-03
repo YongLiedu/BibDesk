@@ -42,15 +42,19 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
 #import "NSColor_BDSKExtensions.h"
+#import "NSFont_BDSKExtensions.h"
 
 
 // names of these globals were changed to support key-value coding on BDSKGroup
 NSString *BDSKGroupCellStringKey = @"stringValue";
 NSString *BDSKGroupCellEditingStringKey = @"editingStringValue";
+NSString *BDSKGroupCellLabelKey = @"label";
 NSString *BDSKGroupCellImageKey = @"icon";
 NSString *BDSKGroupCellCountKey = @"numberValue";
 NSString *BDSKGroupCellIsRetrievingKey = @"isRetrieving";
 NSString *BDSKGroupCellFailedDownloadKey = @"failedDownload";
+
+#define LABEL_FONTSIZE_OFFSET 2.0
 
 @interface BDSKGroupCellFormatter : NSFormatter
 @end
@@ -69,15 +73,22 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
     
 }
 
+- (void)commonInit {
+    imageCell = [[NSImageCell alloc] init];
+    [imageCell setImageScaling:NSImageScaleProportionallyUpOrDown];
+    labelCell = [[NSTextFieldCell alloc] initTextCell:@""];
+    [labelCell setFont:[[NSFontManager sharedFontManager] convertFont:[self font] toSize:[[self font] pointSize] - LABEL_FONTSIZE_OFFSET]];
+    countString = [[NSMutableAttributedString alloc] init];
+    if ([self formatter] == nil)
+        [self setFormatter:groupCellFormatter];
+}
+
 - (id)initTextCell:(NSString *)aString {
     if (self = [super initTextCell:aString]) {
         [self setEditable:YES];
         [self setScrollable:YES];
         [self setWraps:NO];
-        imageCell = [[NSImageCell alloc] init];
-        [imageCell setImageScaling:NSImageScaleProportionallyUpOrDown];
-        countString = [[NSMutableAttributedString alloc] init];
-        [self setFormatter:groupCellFormatter];
+        [self commonInit];
     }
     return self;
 }
@@ -86,11 +97,7 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 
 - (id)initWithCoder:(NSCoder *)coder {
 	if (self = [super initWithCoder:coder]) {
-        imageCell = [[NSImageCell alloc] init];
-        [imageCell setImageScaling:NSImageScaleProportionallyUpOrDown];
-        countString = [[NSMutableAttributedString alloc] init];
-        if ([self formatter] == nil)
-            [self setFormatter:groupCellFormatter];
+        [self commonInit];
 	}
 	return self;
 }
@@ -100,12 +107,14 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 - (id)copyWithZone:(NSZone *)zone {
     BDSKGroupCell *copy = [super copyWithZone:zone];
     copy->imageCell = [imageCell copyWithZone:zone];
+    copy->labelCell = [labelCell copyWithZone:zone];
     copy->countString = [countString mutableCopyWithZone:zone];
     return copy;
 }
 
 - (void)dealloc {
     BDSKDESTROY(imageCell);
+    BDSKDESTROY(labelCell);
     BDSKDESTROY(countString);
 	[super dealloc];
 }
@@ -122,12 +131,14 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 
 - (void)setFont:(NSFont *)font {
     [super setFont:font];
+    [labelCell setFont:[[NSFontManager sharedFontManager] convertFont:font toSize:[font pointSize] - LABEL_FONTSIZE_OFFSET]];
     [self updateCountAttributes];
 }
 
 - (void)setBackgroundStyle:(NSBackgroundStyle)style {
     [super setBackgroundStyle:style];
     [imageCell setBackgroundStyle:style];
+    [labelCell setBackgroundStyle:style];
 }
 
 // all the -[NSNumber stringValue] does is create a string with a localized format description, so we'll cache more strings than Foundation does, since this shows up in Shark as a bottleneck
@@ -157,10 +168,16 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     
     [super setObjectValue:obj];
     
+    [labelCell setObjectValue:nonNullObjectValueForKey(obj, BDSKGroupCellLabelKey)];
+    
     [imageCell setImage:nonNullObjectValueForKey(obj, BDSKGroupCellImageKey)];
     
     [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithNumber(nonNullObjectValueForKey(obj, BDSKGroupCellCountKey))];
     [self updateCountAttributes];
+}
+
+- (NSString *)label {
+    return nonNullObjectValueForKey([self objectValue], BDSKGroupCellLabelKey);
 }
 
 - (NSImage *)icon {
@@ -194,7 +211,7 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
 }
 
 - (NSSize)iconSizeForBounds:(NSRect)aRect {
-    CGFloat height = NSHeight(aRect) - IMAGE_SIZE_OFFSET;
+    CGFloat height = [super cellSize].height + IMAGE_SIZE_OFFSET;
     return NSMakeSize(height, height);
 }
 
@@ -240,9 +257,18 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     return NSInsetRect(textRect, 0.0, TEXT_INSET);
 }
 
+- (CGFloat)labelHeight {
+    return [[labelCell font] defaultViewLineHeight];
+}
+
 - (NSSize)cellSize {
     NSSize cellSize = [super cellSize];
     NSSize countSize = NSZeroSize;
+    CGFloat iconHeight = cellSize.height + IMAGE_SIZE_OFFSET;
+    if ([self label]) {
+        cellSize.width = fmax(cellSize.width, [labelCell cellSize].width);
+        cellSize.height += [self labelHeight];
+    }
     cellSize.height += 2.0 * TEXT_INSET - 1.0;
     if ([self isRetrieving]) {
         countSize = NSMakeSize(16, 16);
@@ -254,7 +280,7 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
             countSize.width += [self countPaddingForSize:countSize]; // add oval pading around count
     }
     // cellSize.height approximates the icon size
-    cellSize.width += BORDER_BETWEEN_EDGE_AND_IMAGE + cellSize.height + BORDER_BETWEEN_IMAGE_AND_TEXT;
+    cellSize.width += BORDER_BETWEEN_EDGE_AND_IMAGE + iconHeight + BORDER_BETWEEN_IMAGE_AND_TEXT;
     if (countSize.width > 0.0)
         cellSize.width += BORDER_BETWEEN_COUNT_AND_TEXT + countSize.width + BORDER_BETWEEN_EDGE_AND_COUNT;
     return cellSize;
@@ -346,6 +372,12 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
             
             [NSGraphicsContext restoreGraphicsState];
         }
+    }
+    
+    if ([self label]) {
+        NSRect ignored;
+        NSDivideRect(textRect, &textRect, &ignored, [self labelHeight], [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
+        [labelCell drawInteriorWithFrame:textRect inView:controlView];
     }
     
     // Draw the image
