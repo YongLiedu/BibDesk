@@ -1338,7 +1338,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             if ([group isSearch])
                 additionalFilenames = [NSArray arrayWithObject:[[[(BDSKSearchGroup *)group serverInfo] name] stringByAppendingPathExtension:@"bdsksearch"]];
             docFlags.dragFromExternalGroups = YES;
-        } else {
+        } else if ([group isParent] == NO) {
             NSMutableArray *pubsInGroup = [NSMutableArray arrayWithCapacity:[publications count]];
             for (BibItem *pub in publications) {
                 if ([group containsItem:pub]) 
@@ -1347,29 +1347,21 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             pubs = pubsInGroup;
         }
     }
-    if ([pubs count] == 0 && [self hasSearchGroupsSelected] == NO) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty Groups", @"Message in alert dialog when dragging from empty groups")
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The groups you want to drag do not contain any items.", @"Informative text in alert dialog")];
-        [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-        return NO;
-    }
-    
-    if (dragCopyType == BDSKTemplateDragCopyType) {
-        NSString *dragCopyTemplateKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
-        NSString *template = [sud stringForKey:dragCopyTemplateKey];
-        NSUInteger templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
-        if (templateIdx != NSNotFound)
-            dragCopyType += templateIdx;
-    }
-	
-	success = [self writePublications:pubs forDragCopyType:dragCopyType citeString:citeString toPasteboard:pboard];
-	
-    if(success && additionalFilenames){
-        [pboardHelper addTypes:[NSArray arrayWithObject:NSFilesPromisePboardType] forPasteboard:pboard];
-        [pboardHelper setPropertyList:additionalFilenames forType:NSFilesPromisePboardType forPasteboard:pboard];
+    if ([pubs count] > 0 || [self hasSearchGroupsSelected]) {
+        if (dragCopyType == BDSKTemplateDragCopyType) {
+            NSString *dragCopyTemplateKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
+            NSString *template = [sud stringForKey:dragCopyTemplateKey];
+            NSUInteger templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
+            if (templateIdx != NSNotFound)
+                dragCopyType += templateIdx;
+        }
+        
+        success = [self writePublications:pubs forDragCopyType:dragCopyType citeString:citeString toPasteboard:pboard];
+        
+        if(success && additionalFilenames){
+            [pboardHelper addTypes:[NSArray arrayWithObject:NSFilesPromisePboardType] forPasteboard:pboard];
+            [pboardHelper setPropertyList:additionalFilenames forType:NSFilesPromisePboardType forPasteboard:pboard];
+        }
     }
     
     return success;
