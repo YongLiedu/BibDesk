@@ -45,5 +45,7 @@
 - (BOOL)hasParentWithClassName:(NSString *)class;
 - (NSArray *)classNames;
 - (NSString *)fullStringValueIfABBR;
+- (NSString *)searchXPath:(NSString *)searchPath addTo:(NSMutableDictionary *)dict forKey:(NSString *)key;
+- (NSString *)searchXPath:(NSString *)searchPath addTo:(NSMutableDictionary *)dict forKey:(NSString *)key last:(BOOL)last;
 
 @end

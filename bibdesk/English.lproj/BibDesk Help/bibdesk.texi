@@ -1595,6 +1595,8 @@ The Web Group supports a number of web sites as well as a few bibliographic form
 
 @uref{http://www.hubmed.org/,HubMed}: Alternative interface for queries to the PubMed database of medical literature.
 
+@uref{http://eprint.iacr.org/,IACR}: ePrint archive of the International Association for Cryptologic Research (IACR).
+
 @uref{http://ams.org/mathscinet/,MathSciNet}: Database of Mathematical Reviews by the American Mathematical Society. Requires a subscription to be accessed. 
 
 @uref{http://www.numdam.org/?lang=en,NUMDAM} (Num@'erisation de documents anciens math@'ematiques): Digital versions of old mathematical papers. The site itself is public but BibDesk's support for it requires access to the Zentralblatt Math service.
@@ -1602,6 +1604,8 @@ The Web Group supports a number of web sites as well as a few bibliographic form
 @uref{http://projecteuclid.org/,Project Euclid}: A publishing platform for 'independent and society journals' in mathematics and statistics. BibDesk can provide bibliographic information for those articles and references mentioed on the site if MathSciNet or Zentralblatt Math IDs are listed for them and you   have access to those sites.
 
 @uref{http://www.slac.stanford.edu/spires/,SPIRES}: Database of literature on particle physics.
+
+@uref{http://www.springerlink.com/,SpringerLink}: Database of papers published by Springer.  Fulltext access requires a subscription.
 
 @uref{http://www.zentralblatt-math.org/zmath/en/,Zentralblatt Math}: Database of Zentralblatt Mathematik with reviews of mathematical papers. Only the first three search results are displayed without a subscription.
 

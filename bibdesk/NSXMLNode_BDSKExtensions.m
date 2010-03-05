@@ -115,4 +115,31 @@
     return [self stringValue];
 }
 
+- (NSString *)searchXPath:(NSString *)searchPath addTo:(NSMutableDictionary *)dict forKey:(NSString *)key {
+	return [self searchXPath:searchPath
+					   addTo:dict
+					  forKey:key
+						last:NO];
+}
+
+- (NSString *)searchXPath:(NSString *)searchPath addTo:(NSMutableDictionary *)dict forKey:(NSString *)key last:(BOOL)last {
+	NSError *error = nil;
+	NSArray *nodes = [self nodesForXPath:searchPath error:&error];
+	NSString *string = nil;
+	if (nil != nodes && 0 < [nodes count]) {
+		if (last) {
+			string = [[nodes objectAtIndex:([nodes count] - 1)] stringValue];
+		} else {
+			string = [[nodes objectAtIndex:0] stringValue];
+		}
+		if (string) {
+			string = [string stringByRemovingSurroundingWhitespaceAndNewlines];
+			if (dict != nil) {
+				[dict setValue:string forKey:key];
+			}
+		}
+	}
+	return string;
+}
+
 @end
