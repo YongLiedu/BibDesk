@@ -72,6 +72,8 @@
 		CD6295341140DE03002E4751 /* BDSKIACRParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD6295331140DE03002E4751 /* BDSKIACRParser.h */; };
 		CD6295361140DE16002E4751 /* BDSKIACRParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD6295351140DE16002E4751 /* BDSKIACRParser.m */; };
 		CD6295381140DE1C002E4751 /* BDSKSpringerParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD6295371140DE1C002E4751 /* BDSKSpringerParser.m */; };
+		CD86BA2D1141C018005EEFDA /* BDSKBibTeXWebParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD86BA2C1141C018005EEFDA /* BDSKBibTeXWebParser.h */; };
+		CD86BA3A1141C023005EEFDA /* BDSKBibTeXWebParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD86BA391141C023005EEFDA /* BDSKBibTeXWebParser.m */; };
 		CE023F5D0CC50F87003F52E5 /* Add_Small.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE023F5C0CC50F86003F52E5 /* Add_Small.tiff */; };
 		CE038E6A0F5F00E8001808EA /* Bookmark.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE038E690F5F00E8001808EA /* Bookmark.tiff */; };
 		CE0391910F612ED5001808EA /* sharing.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE0391900F612ED5001808EA /* sharing.tiff */; };
@@ -827,6 +829,8 @@
 		CD6295331140DE03002E4751 /* BDSKIACRParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKIACRParser.h; sourceTree = "<group>"; };
 		CD6295351140DE16002E4751 /* BDSKIACRParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKIACRParser.m; sourceTree = "<group>"; };
 		CD6295371140DE1C002E4751 /* BDSKSpringerParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSpringerParser.m; sourceTree = "<group>"; };
+		CD86BA2C1141C018005EEFDA /* BDSKBibTeXWebParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKBibTeXWebParser.h; sourceTree = "<group>"; };
+		CD86BA391141C023005EEFDA /* BDSKBibTeXWebParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKBibTeXWebParser.m; sourceTree = "<group>"; };
 		CE023F5C0CC50F86003F52E5 /* Add_Small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Add_Small.tiff; sourceTree = "<group>"; };
 		CE038E690F5F00E8001808EA /* Bookmark.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Bookmark.tiff; sourceTree = "<group>"; };
 		CE0391900F612ED5001808EA /* sharing.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = sharing.tiff; sourceTree = "<group>"; };
@@ -2150,6 +2154,7 @@
 				CE071ECF0F213EB300244F5C /* BDSKArxivParser.m */,
 				6CD26A220F928EEE0089FDFD /* BDSKBibDeskProtocol.m */,
 				F9022C960758038000C3F701 /* BDSKBibTeXParser.m */,
+				CD86BA391141C023005EEFDA /* BDSKBibTeXWebParser.m */,
 				45DB3E4A0CAADFC3001EACDA /* BDSKCiteULikeParser.m */,
 				6CAEE4CB0F98EC63009EA5FE /* BDSKCOinSParser.m */,
 				F9022C3B0758027800C3F701 /* BDSKConverter.m */,
@@ -2410,6 +2415,7 @@
 				3D824AA607D099C300FB2F67 /* BDSKBackgroundView.h */,
 				6CD26A210F928EEE0089FDFD /* BDSKBibDeskProtocol.h */,
 				F9022C950758038000C3F701 /* BDSKBibTeXParser.h */,
+				CD86BA2C1141C018005EEFDA /* BDSKBibTeXWebParser.h */,
 				CE8BE5450D99A10700E314A4 /* BDSKBookmark.h */,
 				CEF63D0710888A5A000A31E2 /* BDSKSeparatorCell.h */,
 				CEF83F350C77911F00A3AD51 /* BDSKBookmarkController.h */,
@@ -2782,6 +2788,7 @@
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
 				CD6295301140DDDA002E4751 /* BDSKSpringerParser.h in Headers */,
 				CD6295341140DE03002E4751 /* BDSKIACRParser.h in Headers */,
+				CD86BA2D1141C018005EEFDA /* BDSKBibTeXWebParser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3585,6 +3592,7 @@
 				CE248773112C974D006B4FA5 /* NSFont_BDSKExtensions.m in Sources */,
 				CD6295361140DE16002E4751 /* BDSKIACRParser.m in Sources */,
 				CD6295381140DE1C002E4751 /* BDSKSpringerParser.m in Sources */,
+				CD86BA3A1141C023005EEFDA /* BDSKBibTeXWebParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

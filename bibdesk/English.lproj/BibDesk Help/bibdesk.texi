@@ -1610,6 +1610,8 @@ The Web Group supports a number of web sites as well as a few bibliographic form
 @uref{http://www.zentralblatt-math.org/zmath/en/,Zentralblatt Math}: Database of Zentralblatt Mathematik with reviews of mathematical papers. Only the first three search results are displayed without a subscription.
 
 @subheading Supported General Formats
+@uref{http://en.wikipedia.org/wiki/BibTeX,BibTeX}: BibTeX is often used in conjunction with LaTeX for storing bibliographic data and is the native format of BibDesk.
+
 @uref{http://ocoins.info/,COinS}: A microformat which adds bibliographic information to a web page by placing it into the title attribute of a span element with class 'Z3988'. A number of web sites ranging from blogs to library catalogues insert these elements into their web pages. Examples: @uref{http://citeseerx.ist.psu.edu/,CiteSeerX}, @uref{http://suche3.suub.uni-bremen.de/index.html,Uni Bremen Library}, @uref{https://kataloge.uni-hamburg.de/,Some OPACs}.
 
 @uref{http://microformats.org/wiki/citation,HCite}: Another microformat for adding bibliographic information to web pages. Hardly used.
