@@ -79,8 +79,8 @@ static NSArray *webParserClasses() {
                         [BDSKProjectEuclidParser class], 
                         [BDSKCOinSParser class], 
                         [BDSKHCiteParser class], 
-					    [BDSKBibTeXWebParser class], 
-                        [BDSKIEEEXploreParser class], nil];
+                        [BDSKIEEEXploreParser class], 
+					    [BDSKBibTeXWebParser class], nil];
     }
     return webParsers;
 }

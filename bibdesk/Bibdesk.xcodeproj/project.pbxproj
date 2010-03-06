@@ -68,11 +68,8 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		CD6295301140DDDA002E4751 /* BDSKSpringerParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD62952F1140DDDA002E4751 /* BDSKSpringerParser.h */; };
-		CD6295341140DE03002E4751 /* BDSKIACRParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD6295331140DE03002E4751 /* BDSKIACRParser.h */; };
 		CD6295361140DE16002E4751 /* BDSKIACRParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD6295351140DE16002E4751 /* BDSKIACRParser.m */; };
 		CD6295381140DE1C002E4751 /* BDSKSpringerParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD6295371140DE1C002E4751 /* BDSKSpringerParser.m */; };
-		CD86BA2D1141C018005EEFDA /* BDSKBibTeXWebParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD86BA2C1141C018005EEFDA /* BDSKBibTeXWebParser.h */; };
 		CD86BA3A1141C023005EEFDA /* BDSKBibTeXWebParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD86BA391141C023005EEFDA /* BDSKBibTeXWebParser.m */; };
 		CE023F5D0CC50F87003F52E5 /* Add_Small.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE023F5C0CC50F86003F52E5 /* Add_Small.tiff */; };
 		CE038E6A0F5F00E8001808EA /* Bookmark.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE038E690F5F00E8001808EA /* Bookmark.tiff */; };
@@ -2786,9 +2783,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CD6295301140DDDA002E4751 /* BDSKSpringerParser.h in Headers */,
-				CD6295341140DE03002E4751 /* BDSKIACRParser.h in Headers */,
-				CD86BA2D1141C018005EEFDA /* BDSKBibTeXWebParser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
