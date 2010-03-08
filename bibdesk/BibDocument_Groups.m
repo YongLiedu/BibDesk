@@ -136,6 +136,50 @@
     return [[[self selectedGroups] lastObject] isExternal];
 }
 
+- (BOOL)hasLibraryGroupClickedOrSelected{
+    return [[self clickedOrSelectedGroups] lastObject] == [groups libraryGroup];
+}
+
+- (BOOL)hasLastImportGroupClickedOrSelected{
+    return [[self clickedOrSelectedGroups] containsObject:[groups lastImportGroup]];
+}
+
+- (BOOL)hasWebGroupClickedOrSelected{
+    return [[self clickedOrSelectedGroups] lastObject] == [groups webGroup];
+}
+
+- (BOOL)hasSharedGroupsClickedOrSelected{
+    return [[[self clickedOrSelectedGroups] lastObject] isShared];
+}
+
+- (BOOL)hasURLGroupsClickedOrSelected{
+    return [[[self clickedOrSelectedGroups] lastObject] isURL];
+}
+
+- (BOOL)hasScriptGroupsClickedOrSelected{
+    return [[[self clickedOrSelectedGroups] lastObject] isScript];
+}
+
+- (BOOL)hasSearchGroupsClickedOrSelected{
+    return [[[self clickedOrSelectedGroups] lastObject] isSearch];
+}
+
+- (BOOL)hasSmartGroupsClickedOrSelected{
+    return [[[self clickedOrSelectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isSmart == YES"]] count] > 0;
+}
+
+- (BOOL)hasStaticGroupsClickedOrSelected{
+    return [[[self clickedOrSelectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isStatic == YES"]] count] > 0;
+}
+
+- (BOOL)hasCategoryGroupsClickedOrSelected{
+    return [[[self clickedOrSelectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isCategory == YES"]] count] > 0;
+}
+
+- (BOOL)hasExternalGroupsClickedOrSelected{
+    return [[[self clickedOrSelectedGroups] lastObject] isExternal];
+}
+
 /* 
 The groupedPublications array is a subset of the publications array, developed by searching the publications array; shownPublications is now a subset of the groupedPublications array, and searches in the searchfield will search only within groupedPublications (which may include all publications).
 */
@@ -154,6 +198,14 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (NSArray *)selectedGroups {
     return [groupOutlineView selectedItems];
+}
+
+- (NSArray *)clickedOrSelectedGroups {
+    NSInteger row = [groupOutlineView clickedRow];
+    NSIndexSet *rowIndexes = [groupOutlineView selectedRowIndexes];
+    if (row != -1 && [rowIndexes containsIndex:row] == NO)
+        rowIndexes = [NSIndexSet indexSetWithIndex:row];
+    return [groupOutlineView itemsAtRowIndexes:rowIndexes];
 }
 
 #pragma mark Search group view
@@ -959,7 +1011,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)removeSelectedGroups:(id)sender {
-    [self removeGroups:[self selectedGroups]];
+    [self removeGroups:[self clickedOrSelectedGroups]];
 }
 
 - (void)editGroup:(BDSKGroup *)group {
@@ -994,7 +1046,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)editGroupAction:(id)sender {
-    NSArray *selectedGroups = [self selectedGroups];
+    NSArray *selectedGroups = [self clickedOrSelectedGroups];
 	if ([selectedGroups count] != 1) {
 		NSBeep();
 		return;
@@ -1003,31 +1055,40 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)renameGroupAction:(id)sender {
-	if ([groupOutlineView numberOfSelectedRows] != 1) {
+	NSInteger row = [groupOutlineView clickedRow];
+    if (row == -1 && [groupOutlineView numberOfSelectedRows] == 1)
+        row = [groupOutlineView selectedRow];
+	if (row != -1) {
 		NSBeep();
 		return;
 	} 
-	
-	NSInteger row = [groupOutlineView selectedRow];
-	BDSKASSERT(row != -1);
-	if (row <= 0) return;
     
-    if([self outlineView:groupOutlineView shouldEditTableColumn:[[groupOutlineView tableColumns] objectAtIndex:0] item:[groupOutlineView itemAtRow:row]])
+    NSTableColumn *tableColumn = [[groupOutlineView tableColumns] objectAtIndex:0];
+    id item = [groupOutlineView itemAtRow:row];
+    
+    if ([groupOutlineView isRowSelected:row] == NO) {
+        if ([self outlineView:groupOutlineView shouldSelectItem:item] == NO) {
+            NSBeep();
+            return;
+        }
+        [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+    }
+    if ([self outlineView:groupOutlineView shouldEditTableColumn:tableColumn item:item])
 		[groupOutlineView editColumn:0 row:row withEvent:nil select:YES];
 	
 }
 
 - (IBAction)copyGroupURLAction:(id)sender {
-	if ([self hasExternalGroupsSelected] == NO) {
-		NSBeep();
-		return;
-	} 
-	id group = [[self selectedGroups] lastObject];
+	id group = [[self clickedOrSelectedGroups] lastObject];
     NSURL *url = nil;
     NSString *title = nil;
     NSString *theUTI = nil;
     NSData *data = nil;
     
+	if ([group isExternal] == NO) {
+		NSBeep();
+		return;
+	} 
     if ([group isSearch]) {
         url = [(BDSKSearchGroup *)group bdsksearchURL];
         title = [[(BDSKSearchGroup *)group serverInfo] name];
@@ -1134,13 +1195,13 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)mergeInExternalGroup:(id)sender{
-    if ([self hasExternalGroupsSelected] == NO) {
+    // we should have a single external group selected
+    id group = [[self clickedOrSelectedGroups] lastObject];
+    if ([group isExternal] == NO) {
         NSBeep();
         return;
     }
-    // we should have a single external group selected
-    NSArray *pubs = [[[self selectedGroups] lastObject] publications];
-    [self mergeInPublications:pubs];
+    [self mergeInPublications:[group publications]];
 }
 
 - (IBAction)mergeInExternalPublications:(id)sender{
@@ -1171,8 +1232,9 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)refreshSelectedGroups:(id)sender{
-    if([self hasExternalGroupsSelected])
-        [[[self selectedGroups] firstObject] setPublications:nil];
+    id group = [[self clickedOrSelectedGroups] lastObject];
+    if ([group isExternal])
+        [group setPublications:nil];
     else NSBeep();
 }
 

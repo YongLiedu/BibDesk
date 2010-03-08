@@ -54,10 +54,23 @@
 - (BOOL)hasCategoryGroupsSelected;
 - (BOOL)hasExternalGroupsSelected;
 
+- (BOOL)hasLibraryGroupClickedOrSelected;
+- (BOOL)hasLastImportGroupClickedOrSelected;
+- (BOOL)hasWebGroupClickedOrSelected;
+- (BOOL)hasSharedGroupsClickedOrSelected;
+- (BOOL)hasURLGroupsClickedOrSelected;
+- (BOOL)hasScriptGroupsClickedOrSelected;
+- (BOOL)hasSearchGroupsClickedOrSelected;
+- (BOOL)hasSmartGroupsClickedOrSelected;
+- (BOOL)hasStaticGroupsClickedOrSelected;
+- (BOOL)hasCategoryGroupsClickedOrSelected;
+- (BOOL)hasExternalGroupsClickedOrSelected;
+
 - (void)setCurrentGroupField:(NSString *)field;
 - (NSString *)currentGroupField;
 
 - (NSArray *)selectedGroups;
+- (NSArray *)clickedOrSelectedGroups;
 - (void)updateCategoryGroupsPreservingSelection:(BOOL)preserve;
 - (void)updateSmartGroupsCount;
 - (void)updateSmartGroups;

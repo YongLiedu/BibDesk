@@ -1231,41 +1231,6 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     return rowHeight;
 }
 
-- (NSMenu *)outlineView:(NSOutlineView *)ov menuForTableColumn:(NSTableColumn *)tableColumn item:(id)item {
-	if (ov != groupOutlineView || tableColumn == nil || item == nil) 
-		return nil;
-    
-    if (item == [groups categoryParent]) {
-        while ([[groupFieldMenu itemAtIndex:1] isSeparatorItem] == NO)
-            [groupFieldMenu removeItemAtIndex:1];
-        for (NSString *field in [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] reverseObjectEnumerator]) {
-            NSMenuItem *menuItem = [groupFieldMenu insertItemWithTitle:field action:@selector(changeGroupFieldAction:) keyEquivalent:@"" atIndex:1];
-            [menuItem setTarget:self];
-            [menuItem setRepresentedObject:field];
-        }
-        return groupFieldMenu;
-    }
-    
-    NSMenu *menu = [[groupMenu copyWithZone:[NSMenu menuZone]] autorelease];
-    [menu removeItemAtIndex:0];
-    
-	// kick out every item we won't need:
-	NSInteger i = [menu numberOfItems];
-    BOOL wasSeparator = YES;
-	
-	while (--i >= 0) {
-		NSMenuItem *menuItem = [menu itemAtIndex:i];
-		if ([self validateMenuItem:menuItem] == NO || ((wasSeparator || i == 0) && [menuItem isSeparatorItem]))
-			[menu removeItem:menuItem];
-        else
-            wasSeparator = [menuItem isSeparatorItem];
-	}
-	while ([menu numberOfItems] > 0 && [(NSMenuItem*)[menu itemAtIndex:0] isSeparatorItem])	
-		[menu removeItemAtIndex:0];
-	
-	return [menu numberOfItems] ? menu : nil;
-}
-
 - (NSIndexSet *)outlineView:(BDSKGroupOutlineView *)outlineView indexesOfRowsToHighlightInRange:(NSRange)indexRange {
     if([self numberOfSelectedPubs] == 0 || [self hasExternalGroupsSelected])
         return [NSIndexSet indexSet];

@@ -44,8 +44,6 @@
 
 - (void)outlineViewInsertNewline:(NSOutlineView *)anOutlineView;
 
-- (NSMenu *)outlineView:(NSOutlineView *)anOutlineView menuForTableColumn:(NSTableColumn *)tableColumn item:(id)item;
-
 - (NSArray *)outlineView:(NSOutlineView *)anOutlineView typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)aTypeSelectHelper;
 - (void)outlineView:(NSOutlineView *)anOutlineView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString;
 - (void)outlineView:(NSOutlineView *)anOutlineView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper updateSearchString:(NSString *)searchString;

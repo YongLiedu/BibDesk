@@ -342,20 +342,20 @@
 } 
 
 - (BOOL) validateRemoveSelectedGroupsMenuItem:(NSMenuItem *)menuItem{
-    return [self hasSmartGroupsSelected] ||
-           [self hasStaticGroupsSelected] ||
-           [self hasURLGroupsSelected] ||
-           [self hasScriptGroupsSelected] ||
-           [self hasSearchGroupsSelected];
+    return [self hasSmartGroupsClickedOrSelected] ||
+           [self hasStaticGroupsClickedOrSelected] ||
+           [self hasURLGroupsClickedOrSelected] ||
+           [self hasScriptGroupsClickedOrSelected] ||
+           [self hasSearchGroupsClickedOrSelected];
 } 
 
 - (BOOL) validateRenameGroupActionMenuItem:(NSMenuItem *)menuItem{
-	NSInteger row = [groupOutlineView selectedRow];
-	if ([groupOutlineView numberOfSelectedRows] == 1 &&
-		row > 0 &&
-        [[groupOutlineView itemAtRow:row] isNameEditable]) {
+	NSInteger row = [groupOutlineView clickedRow];
+    if (row == -1 && [groupOutlineView numberOfSelectedRows] == 1)
+        row = [groupOutlineView selectedRow];
+	if (row > 0) {
 		// single group selection
-		return YES;
+		return [[groupOutlineView itemAtRow:row] isNameEditable];
 	} else {
 		// multiple selection or no group selected
 		return NO;
@@ -363,7 +363,7 @@
 } 
 
 - (BOOL) validateCopyGroupURLActionMenuItem:(NSMenuItem *)menuItem{
-	if ([self hasSearchGroupsSelected] || [self hasURLGroupsSelected] || [self hasScriptGroupsSelected]) {
+	if ([self hasSearchGroupsClickedOrSelected] || [self hasURLGroupsClickedOrSelected] || [self hasScriptGroupsClickedOrSelected]) {
 		return YES;
 	} else {
 		return NO;
@@ -378,8 +378,10 @@
 - (BOOL) validateEditGroupActionMenuItem:(NSMenuItem *)menuItem{
     if ([documentWindow isKeyWindow] == NO)
         return NO;
-	NSInteger row = [groupOutlineView selectedRow];
-	if ([groupOutlineView numberOfSelectedRows] == 1 && row > 0) {
+	NSInteger row = [groupOutlineView clickedRow];
+    if (row == -1 && [groupOutlineView numberOfSelectedRows] == 1)
+        row = [groupOutlineView selectedRow];
+	if (row > 0) {
 		// single group selection
         return [[groupOutlineView itemAtRow:row] isEditable];
 	} else {
@@ -491,16 +493,16 @@
 }
 
 - (BOOL)validateMergeInExternalGroupMenuItem:(NSMenuItem *)menuItem {
-    if ([self hasSharedGroupsSelected]) {
+    if ([self hasSharedGroupsClickedOrSelected]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In Shared Group", @"Menu item title")];
         return YES;
-    } else if ([self hasURLGroupsSelected]) {
+    } else if ([self hasURLGroupsClickedOrSelected]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In External File Group", @"Menu item title")];
         return YES;
-    } else if ([self hasScriptGroupsSelected]) {
+    } else if ([self hasScriptGroupsClickedOrSelected]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In Script Group", @"Menu item title")];
         return YES;
-    } else if ([self hasSearchGroupsSelected]) {
+    } else if ([self hasSearchGroupsClickedOrSelected]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In Search Group", @"Menu item title")];
         return YES;
     } else {
@@ -543,16 +545,16 @@
 }
 
 - (BOOL)validateRefreshSelectedGroupsMenuItem:(NSMenuItem *)menuItem {
-    if([self hasSharedGroupsSelected]){
+    if([self hasSharedGroupsClickedOrSelected]){
         [menuItem setTitle:NSLocalizedString(@"Refresh Shared Group", @"Menu item title")];
         return YES;
-    }else if([self hasURLGroupsSelected]){
+    }else if([self hasURLGroupsClickedOrSelected]){
         [menuItem setTitle:NSLocalizedString(@"Refresh External File Group", @"Menu item title")];
         return YES;
-    }else if([self hasScriptGroupsSelected]){
+    }else if([self hasScriptGroupsClickedOrSelected]){
         [menuItem setTitle:NSLocalizedString(@"Refresh Script Group", @"Menu item title")];
         return YES;
-    }else if([self hasSearchGroupsSelected]){
+    }else if([self hasSearchGroupsClickedOrSelected]){
         [menuItem setTitle:NSLocalizedString(@"Refresh Search Group", @"Menu item title")];
         return YES;
     } else {

@@ -67,6 +67,8 @@
 #import "NSImage_BDSKExtensions.h"
 #import "NSEvent_BDSKExtensions.h"
 #import "BDSKButtonBar.h"
+#import "NSMenu_BDSKExtensions.h"
+#import "BDSKGroupsArray.h"
 
 static char BDSKDocumentFileViewObservationContext;
 static char BDSKDocumentDefaultsObservationContext;
@@ -490,6 +492,41 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
             NSMenuItem *item = [menu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
             [item setTarget:self];
             [item setTag:BDSKTemplateDragCopyType + i];
+        }
+    } else if (menu == [groupOutlineView menu]) {
+        NSInteger row = [groupOutlineView clickedRow];
+        
+        [menu removeAllItems];
+        if (row != -1) {
+            id item = [groupOutlineView itemAtRow:row];
+            
+            if (item == [groups categoryParent]) {
+                [menu addItemsFromMenu:groupFieldMenu];
+                while ([[menu itemAtIndex:1] isSeparatorItem] == NO)
+                    [menu removeItemAtIndex:1];
+                for (NSString *field in [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] reverseObjectEnumerator]) {
+                    NSMenuItem *menuItem = [menu insertItemWithTitle:field action:@selector(changeGroupFieldAction:) keyEquivalent:@"" atIndex:1];
+                    [menuItem setTarget:self];
+                    [menuItem setRepresentedObject:field];
+                }
+            } else {
+                [menu addItemsFromMenu:groupMenu];
+                [menu removeItemAtIndex:0];
+                
+                // kick out every item we won't need:
+                NSInteger i = [menu numberOfItems];
+                BOOL wasSeparator = YES;
+                
+                while (--i >= 0) {
+                    NSMenuItem *menuItem = [menu itemAtIndex:i];
+                    if ([self validateMenuItem:menuItem] == NO || ((wasSeparator || i == 0) && [menuItem isSeparatorItem]))
+                        [menu removeItem:menuItem];
+                    else
+                        wasSeparator = [menuItem isSeparatorItem];
+                }
+                while ([menu numberOfItems] > 0 && [(NSMenuItem*)[menu itemAtIndex:0] isSeparatorItem])	
+                    [menu removeItemAtIndex:0];
+            }
         }
     }
 }
