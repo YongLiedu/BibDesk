@@ -508,6 +508,8 @@ static char BDSKTableViewFontDefaultsObservationContext;
             NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
             menu = [[self delegate] tableView:self menuForTableColumn:tableColumn row:row];
         }
+    } else {
+        menu = [super menuForEvent:theEvent];
     }
     
 	return menu;

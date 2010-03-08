@@ -226,6 +226,8 @@
 */
 - (NSMenu *)recentDownloadsMenu;
 
+- (void)updateContextMenu:(NSMenu *)menu;
+
 /*!
     @method     addLinkedFileFromMenuItem
     @abstract   Action to select a local file path from a menu item.

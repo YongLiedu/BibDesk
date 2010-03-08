@@ -1177,13 +1177,14 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
     NSString *menuTitle = [menu title];
-    if([menuTitle isEqualToString:@"previewRecentDocumentsMenu"]){
+    if([menuTitle isEqualToString:@"previewRecentDocumentsMenu"])
         [self updatePreviewRecentDocumentsMenu:menu];
-    } else if([menuTitle isEqualToString:@"safariRecentDownloadsMenu"]){
+    else if([menuTitle isEqualToString:@"safariRecentDownloadsMenu"])
         [self updateSafariRecentDownloadsMenu:menu];
-    } else if([menuTitle isEqualToString:@"safariRecentURLsMenu"]){
+    else if([menuTitle isEqualToString:@"safariRecentURLsMenu"])
         [self updateSafariRecentURLsMenu:menu];
-    }
+    else if (menu == [tableView menu])
+        [self updateContextMenu:menu];
 }
 
 // prevents the menus from being updated just to look for key equivalents
@@ -1514,6 +1515,29 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     }
     
     return [menu autorelease];
+}
+
+- (void)updateContextMenu:(NSMenu *)menu {
+    NSInteger row = [tableView clickedRow];
+    NSInteger column = [tableView clickedColumn];
+    if (row != -1 && column == 0 && editorFlags.isEditable) {
+        [menu removeAllItems];
+        [menu addItemsFromMenu:contextMenu];
+        
+        // kick out every item we won't need:
+        NSInteger i = [menu numberOfItems];
+        BOOL wasSeparator = YES;
+        
+        while (--i >= 0) {
+            NSMenuItem *item = [menu itemAtIndex:i];
+            if (([item isSeparatorItem] == NO && [self validateMenuItem:item] == NO) || ((wasSeparator || i == 0) && [item isSeparatorItem]))
+                [menu removeItem:item];
+            else
+                wasSeparator = [item isSeparatorItem];
+        }
+        while ([menu numberOfItems] > 0 && [(NSMenuItem*)[menu itemAtIndex:0] isSeparatorItem])	
+            [menu removeItemAtIndex:0];
+    }
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
@@ -3099,27 +3123,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         return [NSString stringWithFormat:@"%@ (%@)", [person displayName], [[person field] localizedFieldName]];
     }
     return nil;
-}
-
-- (NSMenu *)tableView:(NSTableView *)aTableView menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex {
-    NSMenu *menu = nil;
-    if ([[tableColumn identifier] isEqual:@"field"] && editorFlags.isEditable) {
-        menu = [[contextMenu copy] autorelease];
-        // kick out every item we won't need:
-        NSInteger i = [menu numberOfItems];
-        BOOL wasSeparator = YES;
-        
-        while (--i >= 0) {
-            NSMenuItem *item = [menu itemAtIndex:i];
-            if (([item isSeparatorItem] == NO && [self validateMenuItem:item] == NO) || ((wasSeparator || i == 0) && [item isSeparatorItem]))
-                [menu removeItem:item];
-            else
-                wasSeparator = [item isSeparatorItem];
-        }
-        while ([menu numberOfItems] > 0 && [(NSMenuItem*)[menu itemAtIndex:0] isSeparatorItem])	
-            [menu removeItemAtIndex:0];
-    }
-    return menu;
 }
 
 #pragma mark Splitview delegate methods

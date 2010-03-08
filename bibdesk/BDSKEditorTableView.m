@@ -111,6 +111,7 @@
 }
 
 - (void)highlightSelectionInClipRect:(NSRect)clipRect {}
+- (void)_drawContextMenuHighlightForIndexes:(NSIndexSet *)rowIndexes clipRect:(NSRect)clipRect {}
 
 - (BOOL)becomeFirstResponder {
     if ([super becomeFirstResponder]) {
@@ -146,24 +147,6 @@
     }
 }
 
-- (NSMenu *)menuForEvent:(NSEvent *)theEvent {
-    NSMenu *menu = nil;
-    
-    if ([[self delegate] respondsToSelector:@selector(tableView:menuForTableColumn:row:)]) {
-        NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-        NSInteger row = [self rowAtPoint:mouseLoc];
-        NSInteger column = [self columnAtPoint:mouseLoc];
-        if (row != -1 && column != -1) {
-            NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
-            menu = [[self delegate] tableView:self menuForTableColumn:tableColumn row:row];
-        }
-    } else {
-        menu = [super menuForEvent:theEvent];
-    }
-    
-	return menu;
-}
-
 - (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
     return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
 }
@@ -172,17 +155,5 @@
 - (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:NSApp];
 }
-
-#pragma mark Delegate
-
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-- (id <BDSKEditorTableViewDelegate>)delegate {
-    return (id <BDSKEditorTableViewDelegate>)[super delegate];
-}
-
-- (void)setDelegate:(id <BDSKEditorTableViewDelegate>)newDelegate {
-    [super setDelegate:newDelegate];
-}
-#endif
 
 @end

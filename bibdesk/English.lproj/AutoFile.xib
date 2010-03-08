@@ -12,6 +12,7 @@
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
+			<integer value="47"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -50,7 +51,7 @@
 				<string key="NSWindowContentMaxSize">{1.79769e+308, 1.79769e+308}</string>
 				<string key="NSWindowContentMinSize">{500, 230}</string>
 				<object class="NSView" key="NSWindowView" id="928054691">
-					<nil key="NSNextResponder"/>
+					<reference key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<object class="NSMutableArray" key="NSSubviews">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -563,6 +564,7 @@ aXRlbXMgc2VsZWN0ZWQgaW4gdGhlIGZpcnN0IGNvbHVtbi4KA</string>
 						</object>
 					</object>
 					<string key="NSFrameSize">{558, 327}</string>
+					<reference key="NSSuperview"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 938}}</string>
 				<string key="NSMinSize">{500, 252}</string>
@@ -958,6 +960,14 @@ aXRlbXMgc2VsZWN0ZWQgaW4gdGhlIGZpcnN0IGNvbHVtbi4KA</string>
 						<reference key="destination" ref="429949973"/>
 					</object>
 					<int key="connectionID">240</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">menu</string>
+						<reference key="source" ref="106490577"/>
+						<reference key="destination" ref="932264327"/>
+					</object>
+					<int key="connectionID">241</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -1505,7 +1515,7 @@ aXRlbXMgc2VsZWN0ZWQgaW4gdGhlIGZpcnN0IGNvbHVtbi4KA</string>
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">240</int>
+			<int key="maxID">241</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">

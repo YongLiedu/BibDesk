@@ -46,6 +46,7 @@
 #import "BDSKLinkedFile.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKTextWithIconCell.h"
+#import "NSMenu_BDSKExtensions.h"
 
 #define BDSKFileMigrationFrameAutosaveName @"BDSKFileMigrationWindow"
 
@@ -238,21 +239,21 @@
     return tooltip;
 }
 
-- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row;
-{
-    NSZone *zone = [NSMenu menuZone];
-    NSMenu *menu = [[[NSMenu allocWithZone:zone] initWithTitle:@""] autorelease];
-    if (row >= 0 && tableColumn) {
-        NSMenuItem *anItem = [[NSMenuItem allocWithZone:zone] initWithTitle:NSLocalizedString(@"Open Parent Directory in Finder", @"") action:@selector(openParentDirectory:) keyEquivalent:@""];
-        [anItem setRepresentedObject:[[self mutableArrayValueForKey:@"results"] objectAtIndex:row]];
-        [menu addItem:anItem];
-        [anItem release];
-        anItem = [[NSMenuItem allocWithZone:zone] initWithTitle:NSLocalizedString(@"Edit Publication", @"") action:@selector(editPublication:) keyEquivalent:@""];
-        [anItem setRepresentedObject:[[self mutableArrayValueForKey:@"results"] objectAtIndex:row]];
-        [menu addItem:anItem];
-        [anItem release];
+#pragma mark Contextual menu
+
+- (void)menuNeedsUpdate:(NSMenu *)menu {
+    if (menu == [tableView menu]) {
+        NSInteger row = [tableView clickedRow];
+        [menu removeAllItems];
+        if (row >= 0) {
+            NSMenuItem *anItem = [menu addItemWithTitle:NSLocalizedString(@"Open Parent Directory in Finder", @"") action:@selector(openParentDirectory:) keyEquivalent:@""];
+            [anItem setRepresentedObject:[[self mutableArrayValueForKey:@"results"] objectAtIndex:row]];
+            [menu addItem:anItem];
+            anItem = [menu addItemWithTitle:NSLocalizedString(@"Edit Publication", @"") action:@selector(editPublication:) keyEquivalent:@""];
+            [anItem setRepresentedObject:[[self mutableArrayValueForKey:@"results"] objectAtIndex:row]];
+            [menu addItem:anItem];
+        }
     }
-    return [menu numberOfItems] > 0 ? menu : nil;
 }
 
 @end

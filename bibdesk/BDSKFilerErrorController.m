@@ -156,7 +156,7 @@
 }
 
 - (IBAction)showFile:(id)sender{
-    NSInteger row = [tv selectedRow];
+    NSInteger row = [tv clickedRow];
     if (row == -1)
         return;
     NSDictionary *dict = [self objectInErrorInfoDictsAtIndex:row];
@@ -228,10 +228,6 @@
         return NSLocalizedString(@"Select items to Try Again or to Force.", @"Tool tip message");
     else
         return [[self objectInErrorInfoDictsAtIndex:row] objectForKey:tcid];
-}
-
-- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex {
-    return contextMenu;
 }
 
 @end

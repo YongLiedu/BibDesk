@@ -39,17 +39,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@protocol BDSKEditorTableViewDelegate <NSTableViewDelegate>
-@optional
-- (NSMenu *)tableView:(NSTableView *)aTableView menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex;
-@end
-
-
 @interface BDSKEditorTableView : NSTableView {
     BOOL endEditing;
 }
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-- (id <BDSKEditorTableViewDelegate>)delegate;
-- (void)setDelegate:(id <BDSKEditorTableViewDelegate>)newDelegate;
-#endif
 @end

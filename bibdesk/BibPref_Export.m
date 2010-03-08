@@ -277,7 +277,7 @@
         NSString *columnID = [[[outlineView tableColumns] objectAtIndex:column] identifier];
         BDSKTemplate *node = [outlineView itemAtRow:row];
         if ([node isLeaf] && [columnID isEqualToString:BDSKTemplateNameString])
-            [self chooseFile:sender];
+            [self chooseFile:nil];
     }
 }
 
@@ -557,53 +557,62 @@
     return tooltip;
 }
 
-- (NSMenu *)outlineView:(NSOutlineView *)ov menuForTableColumn:(NSTableColumn *)tableColumn item:(id)item;
-{
-    NSMenu *menu = nil;
-    
-    if([[tableColumn identifier] isEqualToString:BDSKTemplateNameString] && [item isLeaf]){
-        menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
-        
-        NSURL *theURL = [item representedFileURL];
-        NSMenuItem *menuItem = nil;
-    
-        if(nil != theURL){
-            menuItem = [menu addItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") andSubmenuOfApplicationsForURL:theURL];
+- (void)menuNeedsUpdate:(NSMenu *)menu {
+    if (menu == [outlineView menu]) {
+        NSInteger row = [outlineView clickedRow];
+        [menu removeAllItems];
+        if (row != -1) {
+            BDSKTemplate *item = [outlineView itemAtRow:row];
+            if ([outlineView clickedColumn] == 0 && [item isLeaf]) {
+                NSURL *theURL = [item representedFileURL];
+                NSMenuItem *menuItem = nil;
             
-            menuItem = [menu addItemWithTitle:NSLocalizedString(@"Reveal in Finder", @"Menu item title") action:@selector(revealInFinder:) keyEquivalent:@""];
-            [menuItem setTarget:self];
+                if(nil != theURL){
+                    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") andSubmenuOfApplicationsForURL:theURL];
+                    
+                    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Reveal in Finder", @"Menu item title") action:@selector(revealInFinder:) keyEquivalent:@""];
+                    [menuItem setTarget:self];
+                    [menuItem setRepresentedObject:theURL];
+                }
+                
+                menuItem = [menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis] action:@selector(chooseFile:) keyEquivalent:@""];
+                [menuItem setTarget:self];
+                [menuItem setRepresentedObject:[NSNumber numberWithInteger:row]];
+            }
         }
-        
-        menuItem = [menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis] action:@selector(chooseFile:) keyEquivalent:@""];
-        [menuItem setTarget:self];
     }
-    
-    return menu;
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem;
 {
     SEL action = [menuItem action];
-    BOOL validate = NO;
+    BOOL validate = YES;
     if (@selector(revealInFinder:) == action || @selector(chooseFile:) == action) {
-        NSInteger row = [outlineView selectedRow];
-        if(row >= 0)
-            validate = [[outlineView itemAtRow:row] isLeaf];
+        if ([menuItem representedObject] == nil) {
+            NSInteger row = [outlineView selectedRow];
+            validate = row != -1 && [[outlineView itemAtRow:row] isLeaf];
+        }
     }
     return validate;
 }
 
 - (IBAction)revealInFinder:(id)sender;
 {
-    NSInteger row = [outlineView selectedRow];
-    if(row >= 0)
-        [[NSWorkspace sharedWorkspace] selectFile:[[[outlineView itemAtRow:row] representedFileURL] path] inFileViewerRootedAtPath:@""];
+    NSURL *theURL = [sender representedObject];
+    if (theURL == nil) {
+        NSInteger row = [outlineView selectedRow];
+        if (row >= 0)
+            theURL = [[outlineView itemAtRow:row] representedFileURL];
+    }
+    if (theURL)
+        [[NSWorkspace sharedWorkspace] selectFile:[theURL path] inFileViewerRootedAtPath:@""];
 }
 
 - (IBAction)chooseFile:(id)sender;
 {
-    NSInteger row = [outlineView selectedRow];
-    id item = [outlineView itemAtRow:row];
+    NSNumber *rowNumber = [sender representedObject];
+    NSInteger row = rowNumber ? [rowNumber integerValue] : [outlineView selectedRow];
+    id item = row == -1 ? nil : [outlineView itemAtRow:row];
     
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
     [openPanel setCanChooseDirectories:YES];

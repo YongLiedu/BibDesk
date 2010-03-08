@@ -53,6 +53,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKLinkedFile.h"
 #import "BDSKTableView.h"
+#import "NSMenu_BDSKExtensions.h"
 
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)refreshOrphanedFiles;
@@ -220,24 +221,17 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return [[[arrayController arrangedObjects] objectAtIndex:row] path];
 }
 
-- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex {
-    return [[arrayController selectedObjects] count] ? contextMenu : nil;
-}
-
 - (IBAction)showFile:(id)sender{
-    NSArray *paths = [[arrayController selectedObjects] valueForKey:@"path"];
-    if ([paths count] == 0)
+    NSInteger row = [tableView clickedRow];
+    if (row == -1)
         return;
     
-    NSInteger type = -1;
+    NSIndexSet *rowIndexes = [tableView selectedRowIndexes];
+    if ([rowIndexes containsIndex:row] == NO)
+        rowIndexes = [NSIndexSet indexSetWithIndex:row];
     
-    if(sender == tableView){
-        if([tableView clickedColumn] == -1)
-            return;
-        type = 0;
-    }else if([sender isKindOfClass:[NSMenuItem class]]){
-        type = [sender tag];
-    }
+    NSArray *paths = [[[arrayController arrangedObjects] objectsAtIndexes:rowIndexes] valueForKey:@"path"];
+    NSInteger type = ([sender isKindOfClass:[NSMenuItem class]]) ? [sender tag] : 0;
     
     for (NSString *path in paths) {
         if(type == 1)
@@ -261,7 +255,15 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (IBAction)moveToTrash:(id)sender{
-    NSArray *files = [arrayController selectedObjects];
+    NSInteger row = [tableView clickedRow];
+    if (row == -1)
+        return;
+    
+    NSIndexSet *rowIndexes = [tableView selectedRowIndexes];
+    if ([rowIndexes containsIndex:row] == NO)
+        rowIndexes = [NSIndexSet indexSetWithIndex:row];
+    
+    NSArray *files = [[arrayController arrangedObjects] objectsAtIndexes:rowIndexes];
     NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
                                      defaultButton:NSLocalizedString(@"Yes", @"Button title")
                                    alternateButton:NSLocalizedString(@"No", @"Button title")
@@ -316,6 +318,14 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     }
     
     return image ? [image dragImageWithCount:count] : nil;
+}
+
+#pragma mark Contextual menu
+
+- (void)menuNeedsUpdate:(NSMenu *)menu {
+    [menu removeAllItems];
+    if (menu == [tableView menu] && [tableView clickedRow] != -1)
+        [menu addItemsFromMenu:contextMenu];
 }
 
 @end

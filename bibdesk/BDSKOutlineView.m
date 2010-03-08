@@ -497,6 +497,8 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
             NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
             menu = [[self delegate] outlineView:self menuForTableColumn:tableColumn item:[self itemAtRow:row]];
         }
+    } else {
+        menu = [super menuForEvent:theEvent];
     }
     
 	return menu;
