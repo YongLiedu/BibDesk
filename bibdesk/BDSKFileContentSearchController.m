@@ -336,6 +336,23 @@
     return [resultsArrayController selectedObjects];
 }
 
+- (NSArray *)clickedOrSelectedIdentifierURLs
+{
+    return [[self clickedOrSelectedResults] valueForKey:@"identifierURL"];
+}
+
+- (NSArray *)clickedOrSelectedURLs {
+    return [[self clickedOrSelectedResults] valueForKey:@"URL"];
+}
+
+- (NSArray *)clickedOrSelectedResults {
+    NSIndexSet *indexes = [tableView selectedRowIndexes];
+    NSInteger row = [tableView clickedRow];
+    if (row != -1 && [indexes containsIndex:row] == NO)
+        indexes = [NSIndexSet indexSetWithIndex:row];
+    return [[resultsArrayController arrangedObjects] objectsAtIndexes:indexes];
+}
+
 - (NSArray *)identifierURLsAtIndexes:(NSIndexSet *)indexes
 {
     return [[[resultsArrayController arrangedObjects] objectsAtIndexes:indexes] valueForKeyPath:@"@distinctUnionOfObjects.identifierURL"];

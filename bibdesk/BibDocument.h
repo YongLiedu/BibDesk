@@ -416,6 +416,7 @@ extern NSString *BDSKDocumentPublicationsKey;
     @result     the number of currently selected pubs in the doc
 */
 - (NSInteger)numberOfSelectedPubs;
+- (NSInteger)numberOfClickedOrSelectedPubs;
 
 /*!
     @method     selectedPublications
@@ -424,6 +425,7 @@ extern NSString *BDSKDocumentPublicationsKey;
     @result     an array of the currently selected pubs in the doc
 */
 - (NSArray *)selectedPublications;
+- (NSArray *)clickedOrSelectedPublications;
 
 - (BOOL)selectItemsForCiteKeys:(NSArray *)citeKeys selectLibrary:(BOOL)flag;
 - (BOOL)selectItemForPartialItem:(NSDictionary *)partialItem;
@@ -433,6 +435,7 @@ extern NSString *BDSKDocumentPublicationsKey;
 - (void)selectPublications:(NSArray *)bibArray;
 
 - (NSArray *)selectedFileURLs;
+- (NSArray *)clickedOrSelectedFileURLs;
 
 - (NSStringEncoding)documentStringEncoding;
 - (void)setDocumentStringEncoding:(NSStringEncoding)encoding;

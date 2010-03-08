@@ -97,6 +97,10 @@
 - (NSArray *)selectedURLs;
 - (NSArray *)selectedResults;
 
+- (NSArray *)clickedOrSelectedIdentifierURLs;
+- (NSArray *)clickedOrSelectedURLs;
+- (NSArray *)clickedOrSelectedResults;
+
 - (NSArray *)identifierURLsAtIndexes:(NSIndexSet *)indexes;
 - (NSArray *)URLsAtIndexes:(NSIndexSet *)indexes;
 - (NSArray *)resultsAtIndexes:(NSIndexSet *)indexes;

@@ -2642,6 +2642,33 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     return selPubs;
 }
 
+- (NSInteger)numberOfClickedOrSelectedPubs{
+    if ([self isDisplayingFileContentSearch])
+        return [[fileSearchController clickedOrSelectedIdentifierURLs] count];
+    else {
+        NSIndexSet *indexes = [tableView selectedRowIndexes];
+        NSInteger row = [tableView clickedRow];
+        if (row != -1 && [indexes containsIndex:row] == NO)
+            return 1;
+        return [indexes count];
+    }
+}
+
+- (NSArray *)clickedOrSelectedPublications{
+    NSArray *selPubs = nil;
+    if ([self isDisplayingFileContentSearch]) {
+        if ([[fileSearchController tableView] numberOfSelectedRows])
+            selPubs =  [publications itemsForIdentifierURLs:[fileSearchController clickedOrSelectedIdentifierURLs]];
+    } else if ([tableView numberOfSelectedRows]) {
+        NSIndexSet *indexes = [tableView selectedRowIndexes];
+        NSInteger row = [tableView clickedRow];
+        if (row != -1 && [indexes containsIndex:row] == NO)
+            indexes = [NSIndexSet indexSetWithIndex:row];
+        selPubs = [shownPublications objectsAtIndexes:indexes];
+    }
+    return selPubs;
+}
+
 - (BOOL)selectItemsForCiteKeys:(NSArray *)citeKeys selectLibrary:(BOOL)flag {
 
     // make sure we can see the publication, if it's still in the document
@@ -2690,6 +2717,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         return [fileSearchController selectedURLs];
     else
         return [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles.URL"];
+}
+
+- (NSArray *)clickedOrSelectedFileURLs {
+    if ([self isDisplayingFileContentSearch])
+        return [fileSearchController clickedOrSelectedURLs];
+    else
+        return [[self clickedOrSelectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles.URL"];
 }
 
 #pragma mark -
