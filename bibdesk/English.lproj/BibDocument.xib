@@ -12,7 +12,6 @@
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="819"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -2005,6 +2004,12 @@
 					<bool key="EncodedWithXMLCoder">YES</bool>
 				</object>
 			</object>
+			<object class="NSMenu" id="769609135">
+				<string key="NSTitle"/>
+				<object class="NSMutableArray" key="NSMenuItems">
+					<bool key="EncodedWithXMLCoder">YES</bool>
+				</object>
+			</object>
 			<object class="NSCustomView" id="999660847">
 				<nil key="NSNextResponder"/>
 				<int key="NSvFlags">266</int>
@@ -3195,6 +3200,22 @@
 						<reference key="destination" ref="957789242"/>
 					</object>
 					<int key="connectionID">101749</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">delegate</string>
+						<reference key="source" ref="769609135"/>
+						<reference key="destination" ref="254371248"/>
+					</object>
+					<int key="connectionID">101751</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">menu</string>
+						<reference key="source" ref="87855178"/>
+						<reference key="destination" ref="769609135"/>
+					</object>
+					<int key="connectionID">101752</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -4460,6 +4481,11 @@
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">101750</int>
+						<reference key="object" ref="769609135"/>
+						<reference key="parent" ref="0"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -4699,6 +4725,7 @@
 					<string>101726.IBPluginDependency</string>
 					<string>101741.IBPluginDependency</string>
 					<string>101744.IBPluginDependency</string>
+					<string>101750.IBPluginDependency</string>
 					<string>1039.IBPluginDependency</string>
 					<string>1039.ImportedFromIB2</string>
 					<string>1040.IBPluginDependency</string>
@@ -5078,6 +5105,7 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
@@ -5118,9 +5146,9 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{60, 198}, {760, 480}}</string>
+					<string>{{140, 280}, {760, 480}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{60, 198}, {760, 480}}</string>
+					<string>{{140, 280}, {760, 480}}</string>
 					<boolean value="YES"/>
 					<boolean value="YES"/>
 					<string>{400, 300}</string>
@@ -5152,7 +5180,7 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{84, 353}, {311, 367}}</string>
+					<string>{{84, 353}, {311, 463}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -5223,7 +5251,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">101749</int>
+			<int key="maxID">101752</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">

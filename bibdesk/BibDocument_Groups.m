@@ -1205,11 +1205,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)mergeInExternalPublications:(id)sender{
-    if ([self hasExternalGroupsSelected] == NO || [self numberOfSelectedPubs] == 0) {
+    if ([self hasExternalGroupsSelected] == NO || [self numberOfClickedOrSelectedPubs] == 0) {
         NSBeep();
         return;
     }
-    [self mergeInPublications:[self selectedPublications]];
+    [self mergeInPublications:[self clickedOrSelectedPublications]];
 }
 
 - (IBAction)refreshURLGroups:(id)sender{

@@ -495,26 +495,6 @@ static char BDSKTableViewFontDefaultsObservationContext;
         return YES;
 }
 
-- (NSMenu *)menuForEvent:(NSEvent *)theEvent {
-    NSMenu *menu = nil;
-    
-    if ([[self delegate] respondsToSelector:@selector(tableView:menuForTableColumn:row:)]) {
-        NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-        NSInteger row = [self rowAtPoint:mouseLoc];
-        NSInteger column = [self columnAtPoint:mouseLoc];
-        if (row != -1 && column != -1) {
-            if ([self isRowSelected:row] == NO && ([[self delegate] respondsToSelector:@selector(tableView:shouldSelectRow:)] == NO || [[self delegate] tableView:self shouldSelectRow:row]))
-                [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-            NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
-            menu = [[self delegate] tableView:self menuForTableColumn:tableColumn row:row];
-        }
-    } else {
-        menu = [super menuForEvent:theEvent];
-    }
-    
-	return menu;
-}
-
 - (NSFont *)font {
     for (NSTableColumn *tc in [self tableColumns]) {
         NSCell *cell = [tc dataCell];

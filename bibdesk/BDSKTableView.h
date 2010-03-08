@@ -46,8 +46,6 @@
 - (void)tableViewInsertSpace:(NSTableView *)aTableView;
 - (void)tableViewInsertShiftSpace:(NSTableView *)aTableView;
 
-- (NSMenu *)tableView:(NSTableView *)aTableView menuForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex;
-
 - (NSArray *)tableView:(NSTableView *)aTableView typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)aTypeSelectHelper;
 - (void)tableView:(NSTableView *)aTableView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString;
 - (void)tableView:(NSTableView *)aTableView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper updateSearchString:(NSString *)searchString;

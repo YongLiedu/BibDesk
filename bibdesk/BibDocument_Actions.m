@@ -171,7 +171,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)createNewPubUsingCrossrefAction:(id)sender{
-    BibItem *selectedBI = [[self selectedPublications] lastObject];
+    BibItem *selectedBI = [[self clickedOrSelectedPublications] lastObject];
     [self createNewPubUsingCrossrefForItem:selectedBI];
 }
 
@@ -227,7 +227,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)removeSelectedPubs:(id)sender{
-	[self removePublicationsFromSelectedGroups:[self selectedPublications]];
+	[self removePublicationsFromSelectedGroups:[self clickedOrSelectedPublications]];
 }
 
 - (void)deletePubsAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
@@ -295,7 +295,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)deleteSelectedPubs:(id)sender{
-    [self deletePublications:[self selectedPublications]];
+    [self deletePublications:[self clickedOrSelectedPublications]];
 }
 
 // -delete:,  -alternateDelete:, -copy:, -cut:, -alternateCut:, -paste:, and -duplicate are defined in BDSKTableView and BDSKMainTableView using dataSource methods
@@ -304,7 +304,7 @@ static BOOL changingColors = NO;
 	NSInteger copyType = [sender tag];
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
 	NSString *citeString = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey];
-	[self writePublications:[self selectedPublications] forDragCopyType:copyType citeString:citeString toPasteboard:pboard];
+	[self writePublications:[self clickedOrSelectedPublications] forDragCopyType:copyType citeString:citeString toPasteboard:pboard];
 }
 
 - (BDSKEditor *)editorForPublication:(BibItem *)pub create:(BOOL)createNew{
@@ -380,7 +380,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)editPubCmd:(id)sender{
-    NSArray *pubs = [self selectedPublications];
+    NSArray *pubs = [self clickedOrSelectedPublications];
     [self editPublications:pubs];
 }
 
@@ -456,7 +456,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)emailPubCmd:(id)sender{
-    NSArray *pubs = [self selectedPublications];
+    NSArray *pubs = [self clickedOrSelectedPublications];
     NSMutableArray *items = [pubs mutableCopy];
     
     NSString *path = nil;
@@ -508,7 +508,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)sendToLyX:(id)sender {
-    if ([self numberOfSelectedPubs] == 0)
+    if ([self numberOfClickedOrSelectedPubs] == 0)
         return;
     
     NSString *lyxPipePath = [[NSUserDefaults standardUserDefaults] stringForKey:@"BDSKLyXPipePath"];
@@ -543,7 +543,7 @@ static BOOL changingColors = NO;
             [alert beginSheetModalForWindow:[self windowForSheet] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         }
         else {
-            NSArray *citeKeys = [[self selectedPublications] valueForKey:@"citeKey"];
+            NSArray *citeKeys = [[self clickedOrSelectedPublications] valueForKey:@"citeKey"];
             NSMutableString *cites = [NSMutableString stringWithString:@"LYXCMD:BibDesk:citation-insert:"];
             [cites appendString:[citeKeys componentsJoinedByString:@","]];
             // pipe uses line buffering, so append a newline
@@ -1622,7 +1622,7 @@ static BOOL changingColors = NO;
 
 - (IBAction)selectCrossrefParentAction:(id)sender{
     BDSKASSERT([self isDisplayingFileContentSearch] == NO);
-    BibItem *selectedBI = [[self selectedPublications] lastObject];
+    BibItem *selectedBI = [[self clickedOrSelectedPublications] lastObject];
     [self selectCrossrefParentForItem:selectedBI];
 }
 

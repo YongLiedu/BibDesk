@@ -95,7 +95,7 @@
     if (usesTeX == NO && (copyType == BDSKPDFDragCopyType || copyType == BDSKRTFDragCopyType || copyType == BDSKLaTeXDragCopyType || copyType == BDSKLTBDragCopyType))
         return NO;
     else
-        return [self numberOfSelectedPubs] > 0;
+        return [self numberOfClickedOrSelectedPubs] > 0;
 }
 
 - (BOOL)validatePasteMenuItem:(NSMenuItem *)menuItem{
@@ -113,15 +113,15 @@
 }
 
 - (BOOL) validateEditPubCmdMenuItem:(NSMenuItem*) menuItem {
-    return [self numberOfSelectedPubs] > 0;
+    return [self numberOfClickedOrSelectedPubs] > 0;
 }
 
 - (BOOL) validateDeleteSelectedPubsMenuItem:(NSMenuItem*) menuItem {
-    return ([self numberOfSelectedPubs] > 0 && [self hasExternalGroupsSelected] == NO);
+    return ([self numberOfClickedOrSelectedPubs] > 0 && [self hasExternalGroupsSelected] == NO);
 }	
 		
 - (BOOL) validateRemoveSelectedPubsMenuItem:(NSMenuItem*) menuItem {
-    if ([self numberOfSelectedPubs] == 0 && [self hasExternalGroupsSelected])
+    if ([self numberOfClickedOrSelectedPubs] == 0 && [self hasExternalGroupsSelected])
         return NO;
     if([self hasLibraryGroupSelected])
         return [self validateDeleteSelectedPubsMenuItem:menuItem];
@@ -134,7 +134,7 @@
 }	
 
 - (BOOL)validateSendToLyXMenuItem:(NSMenuItem*) menuItem {
-    if ([self numberOfSelectedPubs] == 0)
+    if ([self numberOfClickedOrSelectedPubs] == 0)
         return NO;
     
     if ([[NSFileManager defaultManager] latestLyXPipePath])
@@ -292,8 +292,8 @@
 }
 
 - (BOOL)validateSelectCrossrefParentActionMenuItem:(NSMenuItem *)menuItem{
-    if([self isDisplayingFileContentSearch] == NO && [self numberOfSelectedPubs] == 1){
-        BibItem *selectedBI = [[self selectedPublications] objectAtIndex:0];
+    if([self isDisplayingFileContentSearch] == NO && [self numberOfClickedOrSelectedPubs] == 1){
+        BibItem *selectedBI = [[self clickedOrSelectedPublications] objectAtIndex:0];
         if(![NSString isEmptyString:[selectedBI valueOfField:BDSKCrossrefString inherit:NO]])
             return YES;
     }
@@ -301,8 +301,8 @@
 }
 
 - (BOOL)validateCreateNewPubUsingCrossrefMenuItem:(NSMenuItem *)menuItem{
-    if([self numberOfSelectedPubs] == 1 && [self hasExternalGroupsSelected] == NO){
-        BibItem *selectedBI = [[self selectedPublications] objectAtIndex:0];
+    if([self numberOfClickedOrSelectedPubs] == 1 && [self hasExternalGroupsSelected] == NO){
+        BibItem *selectedBI = [[self clickedOrSelectedPublications] objectAtIndex:0];
         
         // only valid if the selected pub (parent-to-be) doesn't have a crossref field
         if([NSString isEmptyString:[selectedBI valueOfField:BDSKCrossrefString inherit:NO]])
@@ -514,10 +514,10 @@
 - (BOOL)validateMergeInExternalPublicationsMenuItem:(NSMenuItem *)menuItem {
     if ([self hasSharedGroupsSelected]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In Shared Publications", @"Menu item title")];
-        return [self numberOfSelectedPubs] > 0;
+        return [self numberOfClickedOrSelectedPubs] > 0;
     } else if ([self hasURLGroupsSelected] || [self hasScriptGroupsSelected] || [self hasSearchGroupsSelected]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In External Publications", @"Menu item title")];
-        return [self numberOfSelectedPubs] > 0;
+        return [self numberOfClickedOrSelectedPubs] > 0;
     } else {
         [menuItem setTitle:NSLocalizedString(@"Merge In External Publications", @"Menu item title")];
         return NO;
@@ -586,7 +586,7 @@
 }
 
 - (BOOL)validateEmailPubCmdMenuItem:(NSMenuItem *)menuItem {
-    return ([self numberOfSelectedPubs] != 0);
+    return ([self numberOfClickedOrSelectedPubs] != 0);
 }
 
 static SEL validateMenuItemSelector(SEL sel) {
