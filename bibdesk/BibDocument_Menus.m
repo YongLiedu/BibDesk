@@ -145,7 +145,7 @@
 
 - (BOOL) validateOpenLocalURLMenuItem:(NSMenuItem*) menuItem {
 	NSString *field = [menuItem representedObject] ?: BDSKLocalUrlString;
-    for (BibItem *pub in [self selectedPublications]) {
+    for (BibItem *pub in [self clickedOrSelectedPublications]) {
         NSString *path = [[pub localFileURLForField:field] path];
         if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
             return YES;
@@ -155,7 +155,7 @@
 
 - (BOOL) validateRevealLocalURLMenuItem:(NSMenuItem*) menuItem {
 	NSString *field = [menuItem representedObject] ?: BDSKLocalUrlString;
-    for (BibItem *pub in [self selectedPublications]) {
+    for (BibItem *pub in [self clickedOrSelectedPublications]) {
         NSString *path = [[pub localFileURLForField:field] path];
         if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
             return YES;
@@ -165,7 +165,7 @@
 
 - (BOOL) validateOpenRemoteURLMenuItem:(NSMenuItem*) menuItem {
 	NSString *field = [menuItem representedObject] ?: BDSKUrlString;
-    for (BibItem *pub in [self selectedPublications]) {
+    for (BibItem *pub in [self clickedOrSelectedPublications]) {
         NSURL *url = [pub remoteURLForField:field];
         if (url)
             return YES;
@@ -175,7 +175,7 @@
 
 - (BOOL) validateShowNotesForLocalURLMenuItem:(NSMenuItem*) menuItem {
 	NSString *field = [menuItem representedObject] ?: BDSKLocalUrlString;
-    for (BibItem *pub in [self selectedPublications]) {
+    for (BibItem *pub in [self clickedOrSelectedPublications]) {
         NSString *path = [[pub localFileURLForField:field] path];
         if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
             return YES;
@@ -185,7 +185,7 @@
 
 - (BOOL) validateCopyNotesForLocalURLMenuItem:(NSMenuItem*) menuItem {
 	NSString *field = [menuItem representedObject] ?: BDSKLocalUrlString;
-    for (BibItem *pub in [self selectedPublications]) {
+    for (BibItem *pub in [self clickedOrSelectedPublications]) {
         NSString *path = [[pub localFileURLForField:field] path];
         if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
             return YES;
@@ -194,29 +194,29 @@
 }	
 
 - (BOOL) validateOpenLinkedFileMenuItem:(NSMenuItem*) menuItem {
-    return ([menuItem representedObject] != nil || [[self selectedFileURLs] count] > 0);
+    return ([menuItem representedObject] != nil || [[self clickedOrSelectedFileURLs] count] > 0);
 }	
 
 - (BOOL) validateRevealLinkedFileMenuItem:(NSMenuItem*) menuItem {
-    return ([menuItem representedObject] != nil || [[self selectedFileURLs] count] > 0);
+    return ([menuItem representedObject] != nil || [[self clickedOrSelectedFileURLs] count] > 0);
 }	
 
 - (BOOL) validateOpenLinkedURLMenuItem:(NSMenuItem*) menuItem {
-    return [menuItem representedObject] != nil || [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count] > 0;
+    return [menuItem representedObject] != nil || [[[self clickedOrSelectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count] > 0;
 }	
 
 - (BOOL) validateShowNotesForLinkedFileMenuItem:(NSMenuItem*) menuItem {
-    return ([menuItem representedObject] != nil || [[self selectedFileURLs] count] > 0);
+    return ([menuItem representedObject] != nil || [[self clickedOrSelectedFileURLs] count] > 0);
 }	
 
 - (BOOL) validateCopyNotesForLinkedFileMenuItem:(NSMenuItem*) menuItem {
-    return ([menuItem representedObject] != nil || [[self selectedFileURLs] count] > 0);
+    return ([menuItem representedObject] != nil || [[self clickedOrSelectedFileURLs] count] > 0);
 }	
 
 - (BOOL) validatePreviewActionMenuItem:(NSMenuItem*) menuItem {
     return ([[menuItem representedObject] count] ||
-            [[self selectedFileURLs] count] ||
-            [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count]);
+            [[self clickedOrSelectedFileURLs] count] ||
+            [[[self clickedOrSelectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count]);
 }	
 
 - (BOOL) validateDuplicateTitleToBooktitleMenuItem:(NSMenuItem*) menuItem {

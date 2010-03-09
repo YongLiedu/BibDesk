@@ -687,7 +687,7 @@ static BOOL changingColors = NO;
         NSURL *fileURL;
         
         // the user said to go ahead
-        for (BibItem *pub in [self selectedPublications]) {
+        for (BibItem *pub in [self clickedOrSelectedPublications]) {
             if (fileURL = [pub localFileURLForField:field])
                 [self openURL:fileURL];
         }
@@ -696,7 +696,7 @@ static BOOL changingColors = NO;
 }
 
 - (void)openLocalURLForField:(NSString *)field{
-	NSInteger n = [self numberOfSelectedPubs];
+	NSInteger n = [self numberOfClickedOrSelectedPubs];
     
     if (n > 6) {
 		// Do we really want a gazillion of files open?
@@ -724,7 +724,7 @@ static BOOL changingColors = NO;
     if (returnCode == NSAlertAlternateReturn) {
         NSURL *fileURL;
         
-        for (BibItem *pub in [self selectedPublications]) {
+        for (BibItem *pub in [self clickedOrSelectedPublications]) {
             if (fileURL = [pub localFileURLForField:field])
                 [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:nil];
         }
@@ -733,7 +733,7 @@ static BOOL changingColors = NO;
 }
 
 - (void)revealLocalURLForField:(NSString *)field{
-	NSInteger n = [self numberOfSelectedPubs];
+	NSInteger n = [self numberOfClickedOrSelectedPubs];
     
     if (n > 6) {
 		// Do we really want a gazillion of Finder windows?
@@ -759,7 +759,7 @@ static BOOL changingColors = NO;
 - (void)openRemoteURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
 	NSString *field = (NSString *)contextInfo;
     if(returnCode == NSAlertAlternateReturn){
-        for (BibItem *pub in [self selectedPublications]) {
+        for (BibItem *pub in [self clickedOrSelectedPublications]) {
 			[[NSWorkspace sharedWorkspace] openLinkedURL:[pub remoteURLForField:field]];
 		}
 	}
@@ -767,7 +767,7 @@ static BOOL changingColors = NO;
 }
 
 - (void)openRemoteURLForField:(NSString *)field{
-	NSInteger n = [self numberOfSelectedPubs];
+	NSInteger n = [self numberOfClickedOrSelectedPubs];
     
     if (n > 6) {
 		// Do we really want a gazillion of browser windows?
@@ -797,7 +797,7 @@ static BOOL changingColors = NO;
         BDSKNotesWindowController *notesController;
         
         // the user said to go ahead
-        for (BibItem *pub in [self selectedPublications]) {
+        for (BibItem *pub in [self clickedOrSelectedPublications]) {
             fileURL = [pub URLForField:field];
             if(fileURL == nil) continue;
             notesController = [[[BDSKNotesWindowController alloc] initWithURL:fileURL] autorelease];
@@ -809,7 +809,7 @@ static BOOL changingColors = NO;
 }
 
 - (void)showNotesForLocalURLForField:(NSString *)field{
-	NSInteger n = [self numberOfSelectedPubs];
+	NSInteger n = [self numberOfClickedOrSelectedPubs];
     
     if (n > 6) {
 		// Do we really want a gazillion of files open?
@@ -837,7 +837,7 @@ static BOOL changingColors = NO;
     NSString *string;
     NSMutableString *notes = [NSMutableString string];
     
-    for (BibItem *pub in [self selectedPublications]) {
+    for (BibItem *pub in [self clickedOrSelectedPublications]) {
         fileURL = [pub URLForField:field];
         if(fileURL == nil) continue;
         string = [fileURL textSkimNotes];
@@ -860,7 +860,7 @@ static BOOL changingColors = NO;
 
 - (void)openLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
-        NSArray *urls = [(NSArray *)contextInfo autorelease] ?: [self selectedFileURLs];
+        NSArray *urls = [(NSArray *)contextInfo autorelease] ?: [self clickedOrSelectedFileURLs];
         
         for (NSURL *fileURL in urls) {
             if ([fileURL isEqual:[NSNull null]] == NO) {
@@ -875,7 +875,7 @@ static BOOL changingColors = NO;
     if (fileURL) {
         [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[[NSArray alloc] initWithObjects:fileURL, nil]];
     } else {
-        NSInteger n = [[self selectedFileURLs] count];
+        NSInteger n = [[self clickedOrSelectedFileURLs] count];
         
         if (n > 6) {
             // Do we really want a gazillion of files open?
@@ -896,7 +896,7 @@ static BOOL changingColors = NO;
 
 - (void)revealLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
-        NSArray *urls = [(NSArray *)contextInfo autorelease] ?: [self selectedFileURLs];
+        NSArray *urls = [(NSArray *)contextInfo autorelease] ?: [self clickedOrSelectedFileURLs];
         for (NSURL *fileURL in urls) {
             if ([fileURL isEqual:[NSNull null]] == NO) {
                 [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:nil];
@@ -910,7 +910,7 @@ static BOOL changingColors = NO;
     if (fileURL) {
         [self revealLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[[NSArray alloc] initWithObjects:fileURL, nil]];
     } else {
-        NSInteger n = [[self selectedFileURLs] count];
+        NSInteger n = [[self clickedOrSelectedFileURLs] count];
         
         if (n > 6) {
             // Do we really want a gazillion of Finder windows?
@@ -931,7 +931,7 @@ static BOOL changingColors = NO;
 
 - (void)openLinkedURLAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if(returnCode == NSAlertAlternateReturn){
-        NSArray *urls = [(NSArray *)contextInfo autorelease] ?: [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
+        NSArray *urls = [(NSArray *)contextInfo autorelease] ?: [[self clickedOrSelectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
         for (NSURL *remoteURL in urls) {
             if ([remoteURL isEqual:[NSNull null]] == NO) {
                 [[NSWorkspace sharedWorkspace] openLinkedURL:remoteURL];
@@ -945,7 +945,7 @@ static BOOL changingColors = NO;
     if (remoteURL) {
         [self openLinkedURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[[NSArray alloc] initWithObjects:remoteURL, nil]];
     } else {
-        NSInteger n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count];
+        NSInteger n = [[[self clickedOrSelectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count];
         
         if (n > 6) {
             // Do we really want a gazillion of browser windows?
@@ -983,7 +983,7 @@ static BOOL changingColors = NO;
     if (fileURL) {
         [self showNotesForLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[[NSArray alloc] initWithObjects:fileURL, nil]];
     } else {
-        NSInteger n = [[self selectedFileURLs] count];
+        NSInteger n = [[self clickedOrSelectedFileURLs] count];
         
         if (n > 6) {
             // Do we really want a gazillion of files open?
@@ -1011,7 +1011,7 @@ static BOOL changingColors = NO;
     if (fileURL)
         urls = [NSArray arrayWithObject:fileURL];
     else
-        urls = [self selectedFileURLs];
+        urls = [self clickedOrSelectedFileURLs];
     
     for (fileURL in urls) {
         if ([fileURL isEqual:[NSNull null]] == NO) {
@@ -1036,9 +1036,9 @@ static BOOL changingColors = NO;
 - (IBAction)previewAction:(id)sender {
     NSArray *theURLs = [sender representedObject];
     if (theURLs == nil) {
-        theURLs = [self selectedFileURLs];
+        theURLs = [self clickedOrSelectedFileURLs];
         if ([theURLs count] == 0)
-            theURLs = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
+            theURLs = [[self clickedOrSelectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
     }
     FVPreviewer *qlPreviewer = [FVPreviewer sharedPreviewer];
     if ([theURLs count] == 1) {
