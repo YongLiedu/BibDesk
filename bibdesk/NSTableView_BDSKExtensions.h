@@ -40,5 +40,11 @@
 
 
 @interface NSTableView (BDSKExtensions)
+
 - (IBAction)invertSelection:(id)sender;
+
+- (NSInteger)numberOfClickedOrSelectedRows;
+- (NSInteger)clickedOrSelectedRow;
+- (NSIndexSet *)clickedOrSelectedRowIndexes;
+
 @end

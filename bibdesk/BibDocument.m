@@ -2645,13 +2645,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 - (NSInteger)numberOfClickedOrSelectedPubs{
     if ([self isDisplayingFileContentSearch])
         return [[fileSearchController clickedOrSelectedIdentifierURLs] count];
-    else {
-        NSIndexSet *indexes = [tableView selectedRowIndexes];
-        NSInteger row = [tableView clickedRow];
-        if (row != -1 && [indexes containsIndex:row] == NO)
-            return 1;
-        return [indexes count];
-    }
+    else
+        return [tableView numberOfClickedOrSelectedRows];
 }
 
 - (NSArray *)clickedOrSelectedPublications{
@@ -2660,11 +2655,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if ([[fileSearchController tableView] numberOfSelectedRows])
             selPubs =  [publications itemsForIdentifierURLs:[fileSearchController clickedOrSelectedIdentifierURLs]];
     } else if ([tableView numberOfSelectedRows]) {
-        NSIndexSet *indexes = [tableView selectedRowIndexes];
-        NSInteger row = [tableView clickedRow];
-        if (row != -1 && [indexes containsIndex:row] == NO)
-            indexes = [NSIndexSet indexSetWithIndex:row];
-        selPubs = [shownPublications objectsAtIndexes:indexes];
+        selPubs = [shownPublications objectsAtIndexes:[tableView clickedOrSelectedRowIndexes]];
     }
     return selPubs;
 }

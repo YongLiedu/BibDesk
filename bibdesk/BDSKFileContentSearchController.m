@@ -56,6 +56,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKTableView.h"
+#import "NSTableView_BDSKExtensions.h"
 
 
 @implementation BDSKFileContentSearchController
@@ -346,11 +347,7 @@
 }
 
 - (NSArray *)clickedOrSelectedResults {
-    NSIndexSet *indexes = [tableView selectedRowIndexes];
-    NSInteger row = [tableView clickedRow];
-    if (row != -1 && [indexes containsIndex:row] == NO)
-        indexes = [NSIndexSet indexSetWithIndex:row];
-    return [[resultsArrayController arrangedObjects] objectsAtIndexes:indexes];
+    return [[resultsArrayController arrangedObjects] objectsAtIndexes:[tableView clickedOrSelectedRowIndexes]];
 }
 
 - (NSArray *)identifierURLsAtIndexes:(NSIndexSet *)indexes

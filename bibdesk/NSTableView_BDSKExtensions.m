@@ -67,6 +67,34 @@ static BOOL (*original_validateUserInterfaceItem)(id, SEL, id) = NULL;
     }
 }
 
+- (NSInteger)numberOfClickedOrSelectedRows {
+    NSInteger number = 1;
+    NSInteger clickedRow = [self clickedRow];
+    if (clickedRow == -1) {
+        number = [self numberOfSelectedRows];
+    } else {
+        NSIndexSet *selectedIndexes = [self selectedRowIndexes];
+        if ([selectedIndexes containsIndex:clickedRow])
+            number = [selectedIndexes count];
+    }
+    return number;
+}
+
+- (NSInteger)clickedOrSelectedRow {
+    NSInteger row = [self clickedRow];
+    if (row == -1)
+        row = [self selectedRow];
+    return row;
+}
+
+- (NSIndexSet *)clickedOrSelectedRowIndexes {
+    NSIndexSet *selectedIndexes = [self selectedRowIndexes];
+    NSInteger clickedRow = [self clickedRow];
+    if (clickedRow != -1 && [selectedIndexes containsIndex:clickedRow] == NO)
+        selectedIndexes = [NSIndexSet indexSetWithIndex:clickedRow];
+    return selectedIndexes;
+}
+
 #pragma mark Drop highlight
 
 + (void)load {

@@ -84,6 +84,7 @@
 #import "BDSKSplitView.h"
 #import "BDSKTemplate.h"
 #import "BDSKGroupsArray.h"
+#import "NSTableView_BDSKExtensions.h"
 
 #define WEAK_NULL NULL
 
@@ -792,9 +793,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt
                                                                                                        fieldsArray:removableFields];
-    NSInteger selectedRow = [tableView clickedRow];
-    if (selectedRow == -1)
-        selectedRow = [tableView selectedRow];
+    NSInteger selectedRow = [tableView clickedOrSelectedRow];
     NSString *selectedField = selectedRow == -1 ? nil : [fields objectAtIndex:selectedRow];
     BOOL didValidate = YES;
     if([removableFields containsObject:selectedField]){
