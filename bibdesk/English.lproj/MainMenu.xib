@@ -12,6 +12,7 @@
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
+			<integer value="29"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1521,6 +1522,15 @@
 								<object class="NSMenuItem" id="283645142">
 									<reference key="NSMenu" ref="588461980"/>
 									<string key="NSTitle">Select Publications From .aux File</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSKeyEquivModMask">1572864</int>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="570548833"/>
+									<reference key="NSMixedImage" ref="523458683"/>
+								</object>
+								<object class="NSMenuItem" id="946574587">
+									<reference key="NSMenu" ref="588461980"/>
+									<string key="NSTitle">Select Crossrefs</string>
 									<string key="NSKeyEquiv"/>
 									<int key="NSKeyEquivModMask">1572864</int>
 									<int key="NSMnemonicLoc">2147483647</int>
@@ -3573,6 +3583,14 @@
 					</object>
 					<int key="connectionID">1312</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">selectCrossrefs:</string>
+						<reference key="source" ref="485804586"/>
+						<reference key="destination" ref="946574587"/>
+					</object>
+					<int key="connectionID">1315</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -4845,6 +4863,7 @@
 							<reference ref="661890103"/>
 							<reference ref="689361011"/>
 							<reference ref="283645142"/>
+							<reference ref="946574587"/>
 						</object>
 						<reference key="parent" ref="220708354"/>
 					</object>
@@ -5158,6 +5177,11 @@
 						<reference key="object" ref="283645142"/>
 						<reference key="parent" ref="588461980"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">1313</int>
+						<reference key="object" ref="946574587"/>
+						<reference key="parent" ref="588461980"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -5340,6 +5364,8 @@
 					<string>131.ImportedFromIB2</string>
 					<string>1310.IBPluginDependency</string>
 					<string>1310.ImportedFromIB2</string>
+					<string>1313.IBPluginDependency</string>
+					<string>1313.ImportedFromIB2</string>
 					<string>134.IBPluginDependency</string>
 					<string>134.ImportedFromIB2</string>
 					<string>136.IBPluginDependency</string>
@@ -5659,7 +5685,7 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{225, 411}, {319, 403}}</string>
+					<string>{{271, 391}, {319, 423}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -5841,6 +5867,8 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
 					<string>{{131, 321}, {275, 493}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
@@ -5876,7 +5904,7 @@
 					<string>{{571, 651}, {208, 163}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{0, 814}, {703, 20}}</string>
+					<string>{{46, 814}, {703, 20}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<boolean value="YES"/>
@@ -6129,7 +6157,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">1312</int>
+			<int key="maxID">1315</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -6377,6 +6405,8 @@
 							<string>chooseLocalFile:</string>
 							<string>chooseRemoteURL:</string>
 							<string>consolidateLinkedFiles:</string>
+							<string>copy:</string>
+							<string>copyAsAction:</string>
 							<string>copyNotesForLinkedFile:</string>
 							<string>createNewPubUsingCrossrefAction:</string>
 							<string>duplicateTitleToBooktitle:</string>
@@ -6402,6 +6432,8 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>NSMenuItem</string>
 							<string>NSMenuItem</string>
+							<string>id</string>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -7482,6 +7514,7 @@
 							<string>search:</string>
 							<string>selectAllPublications:</string>
 							<string>selectCrossrefParentAction:</string>
+							<string>selectCrossrefs:</string>
 							<string>selectDuplicates:</string>
 							<string>selectIncompletePublications:</string>
 							<string>selectLibraryGroup:</string>
@@ -7502,6 +7535,7 @@
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -7690,6 +7724,7 @@
 							<string>editAction:</string>
 							<string>editPubCmd:</string>
 							<string>editPubOrOpenURLAction:</string>
+							<string>editRepresentedPub:</string>
 							<string>emailPubCmd:</string>
 							<string>generateCiteKey:</string>
 							<string>importFromFileAction:</string>
@@ -7712,6 +7747,7 @@
 							<string>revealLocalURL:</string>
 							<string>selectAllPublications:</string>
 							<string>selectCrossrefParentAction:</string>
+							<string>selectCrossrefs:</string>
 							<string>selectDuplicates:</string>
 							<string>selectIncompletePublications:</string>
 							<string>selectPossibleDuplicates:</string>
@@ -7729,6 +7765,8 @@
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>

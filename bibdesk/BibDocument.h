@@ -512,6 +512,7 @@ extern NSString *BDSKDocumentPublicationsKey;
 - (IBAction)generateCiteKey:(id)sender;
 - (IBAction)sortForCrossrefs:(id)sender;
 - (IBAction)selectCrossrefParentAction:(id)sender;
+- (IBAction)selectCrossrefs:(id)sender;
 - (IBAction)duplicateTitleToBooktitle:(id)sender;
 - (IBAction)selectPossibleDuplicates:(id)sender;
 - (IBAction)selectDuplicates:(id)sender;

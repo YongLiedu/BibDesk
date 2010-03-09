@@ -300,6 +300,12 @@
 	return NO;
 }
 
+- (BOOL)validateSelectCrossrefsMenuItem:(NSMenuItem *)menuItem{
+    if([self isDisplayingFileContentSearch] == NO && [self numberOfClickedOrSelectedPubs] > 0)
+        return YES;
+	return NO;
+}
+
 - (BOOL)validateCreateNewPubUsingCrossrefMenuItem:(NSMenuItem *)menuItem{
     if([self numberOfClickedOrSelectedPubs] == 1 && [self hasExternalGroupsSelected] == NO){
         BibItem *selectedBI = [[self clickedOrSelectedPublications] objectAtIndex:0];

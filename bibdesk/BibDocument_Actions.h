@@ -282,6 +282,8 @@
 - (void)selectCrossrefParentForItem:(BibItem *)item;
 - (IBAction)selectCrossrefParentAction:(id)sender;
 
+- (IBAction)selectCrossrefs:(id)sender;
+
 - (IBAction)duplicateTitleToBooktitle:(id)sender;
 
 #pragma mark Duplicate and Incomplete searching

@@ -1626,6 +1626,21 @@ static BOOL changingColors = NO;
     [self selectCrossrefParentForItem:selectedBI];
 }
 
+- (IBAction)selectCrossrefs:(id)sender{
+    NSArray *selPubs = [self selectedPublications];
+    if ([selPubs count]) {
+        NSMutableArray *allSelPubs = [selPubs mutableCopy];
+        for (BibItem *pub in selPubs) {
+            BibItem *parent = [pub crossrefParent];
+            if (parent && [allSelPubs containsObject:parent] == NO)
+                [allSelPubs addObject:parent];
+        }
+        if ([allSelPubs count] > [selPubs count])
+            [self selectPublications:allSelPubs];
+        [allSelPubs release];
+    }
+}
+
 - (void)dublicateTitleToBooktitleAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     
     // !!! early return
