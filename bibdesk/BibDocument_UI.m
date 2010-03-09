@@ -474,6 +474,22 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
     return YES;
 }
 
+static void removeInvalidItemsFromMenu(id validator, NSMenu *menu) {
+    // kick out every item we won't need:
+    NSInteger i = [menu numberOfItems];
+    BOOL wasSeparator = YES;
+    
+    while (--i >= 0) {
+        NSMenuItem *item = [menu itemAtIndex:i];
+        if (([item isSeparatorItem] == NO && [validator validateMenuItem:item] == NO) || ((wasSeparator || i == 0) && [item isSeparatorItem]) || ([item submenu] && menuHasNoValidItems(validator, [item submenu])))
+            [menu removeItem:item];
+        else
+            wasSeparator = [item isSeparatorItem];
+    }
+    while ([menu numberOfItems] > 0 && [(NSMenuItem*)[menu itemAtIndex:0] isSeparatorItem])	
+        [menu removeItemAtIndex:0];
+}
+
 static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     NSMenu *submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
     for (NSURL *url in urls) {
@@ -632,19 +648,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             [menu removeItemAtIndex:0];
         }
         
-        // kick out every item we won't need:
-        NSInteger i = [menu numberOfItems];
-        BOOL wasSeparator = YES;
-        
-        while (--i >= 0) {
-            item = (NSMenuItem*)[menu itemAtIndex:i];
-            if (([item isSeparatorItem] == NO && [self validateMenuItem:item] == NO) || ((wasSeparator || i == 0) && [item isSeparatorItem]) || ([item submenu] && menuHasNoValidItems(self, [item submenu])))
-                [menu removeItem:item];
-            else
-                wasSeparator = [item isSeparatorItem];
-        }
-        while ([menu numberOfItems] > 0 && [(NSMenuItem*)[menu itemAtIndex:0] isSeparatorItem])	
-            [menu removeItemAtIndex:0];
+        removeInvalidItemsFromMenu(self, menu);
     }
 }
 
@@ -668,19 +672,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
             [menu addItemsFromMenu:groupMenu];
             [menu removeItemAtIndex:0];
             
-            // kick out every item we won't need:
-            NSInteger i = [menu numberOfItems];
-            BOOL wasSeparator = YES;
-            
-            while (--i >= 0) {
-                NSMenuItem *menuItem = [menu itemAtIndex:i];
-                if ([self validateMenuItem:menuItem] == NO || ((wasSeparator || i == 0) && [menuItem isSeparatorItem]))
-                    [menu removeItem:menuItem];
-                else
-                    wasSeparator = [menuItem isSeparatorItem];
-            }
-            while ([menu numberOfItems] > 0 && [(NSMenuItem*)[menu itemAtIndex:0] isSeparatorItem])	
-                [menu removeItemAtIndex:0];
+            removeInvalidItemsFromMenu(self, menu);
         }
     }
 }
