@@ -792,7 +792,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt
                                                                                                        fieldsArray:removableFields];
-    NSInteger selectedRow = [tableView selectedRow];
+    NSInteger selectedRow = [tableView clickedRow];
+    if (selectedRow == -1)
+        selectedRow = [tableView selectedRow];
     NSString *selectedField = selectedRow == -1 ? nil : [fields objectAtIndex:selectedRow];
     BOOL didValidate = YES;
     if([removableFields containsObject:selectedField]){
@@ -877,12 +879,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 - (IBAction)raiseChangeFieldName:(id)sender{
     NSString *field = nil;
-    if (sender == tableView) {
-        NSInteger clickedRow = [tableView clickedRow];
-        if (clickedRow == -1)
-            return;
+    NSInteger clickedRow = [tableView clickedRow];
+    if (clickedRow != -1)
         field = [fields objectAtIndex:clickedRow];
-    }
     [self raiseChangeFieldSheetForField:field];
 }
 
