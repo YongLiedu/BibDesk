@@ -102,7 +102,8 @@
                 anItem = [windowsMenu itemAtIndex:idx];
                 if (anItem != item && [anItem action] == @selector(makeKeyAndOrderFront:)) {
                     id target = [anItem target];
-                    NSWindowController *aMainWindowController = [[[[target windowController] document] windowControllers] objectAtIndex:0];
+                    NSWindowController *aWindowController = [target windowController];
+                    NSWindowController *aMainWindowController = [[[aWindowController document] windowControllers] objectAtIndex:0];
                     if ([aMainWindowController isEqual:mainWindowController]) {
                         [subitems insertObject:anItem atIndex:0];
                         [windowsMenu removeItemAtIndex:idx];
@@ -188,18 +189,17 @@
 - (void)removeWindowsItem:(NSWindow *)aWindow {
     [super removeWindowsItem:aWindow];
     
-    NSInteger idx = [[self windowsMenu] numberOfItems];
+    NSMenu *windowsMenu = [self windowsMenu];
+    NSInteger idx = [windowsMenu numberOfItems];
     BOOL wasSeparator = YES;
     
     while (idx--) {
-        if ([[[self windowsMenu] itemAtIndex:idx] isSeparatorItem]) {
-            if (wasSeparator)
-                [[self windowsMenu] removeItemAtIndex:idx];
-            else
-                wasSeparator = YES;
-        } else {
+        if ([[windowsMenu itemAtIndex:idx] isSeparatorItem] == NO)
             wasSeparator = NO;
-        }
+        else if (wasSeparator)
+            [windowsMenu removeItemAtIndex:idx];
+        else
+            wasSeparator = YES;
     }
 }
 
