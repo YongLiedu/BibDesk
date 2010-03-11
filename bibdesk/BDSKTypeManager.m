@@ -543,7 +543,8 @@ static NSString *BDSKUserTypeInfoPath() {
 - (NSString *)fieldNameForReferTag:(NSString *)tag {
     NSString *name = [fieldNameForReferTagDict objectForKey:tag];
     if (nil == name) {
-        NSLog(@"Unknown Refer tag %@.  Please report this.", tag);
+        if ([tag isEqualToString:@"0"] == NO)
+            NSLog(@"Unknown Refer tag %@.  Please report this.", tag);
         // numeric tags don't work with BibTeX; we could have fieldName check this, but it's specific to Refer at this point
         if ([tag length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[tag characterAtIndex:0]])
             name = [@"Refer" stringByAppendingString:tag];
