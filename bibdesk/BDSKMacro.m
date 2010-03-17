@@ -115,7 +115,7 @@
 }
 
 - (id)value {
-	return (id)[macroResolver valueOfMacro:name] ?: (id)[NSNull null];
+	return [macroResolver valueOfMacro:name];
 }
 
 - (void)setValue:(NSString *)newValue {
@@ -130,7 +130,7 @@
 }
 
 - (id)bibTeXString {
-	return (id)[[macroResolver valueOfMacro:name] stringAsBibTeXString] ?: (id)[NSNull null];
+	return [[self value] stringAsBibTeXString];
 }
 
 - (void)setBibTeXString:(NSString *)newValue {

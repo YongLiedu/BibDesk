@@ -104,7 +104,7 @@ A wrapper object around the fields to access them in AppleScript.
 }
 
 - (NSString *)bibTeXString {
-    return [([bibItem valueOfField:name inherit:[name isIntegerField] == NO && [name isNoteField] == NO] ?: @"") stringAsBibTeXString];
+    return [[self value] stringAsBibTeXString];
 }
 
 - (void)setBibTeXString:(NSString *)newValue {
