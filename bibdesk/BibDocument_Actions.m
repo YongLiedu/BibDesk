@@ -483,7 +483,7 @@ static BOOL changingColors = NO;
         NSArray *usedMacros = [pubs valueForKeyPath:@"@distinctUnionOfArrays.usedMacros"];
         if ([usedMacros count]) {
             for (BDSKMacro *macro in usedMacros) {
-                if ([macro value] && [[macro value] isEqual:[NSNull null]] == NO)
+                if ([macro value])
                     [body appendFormat:@"@string{%@ = %@}\n", [macro name], [macro bibTeXString]];
             }
             [body appendString:@"\n\n"];
