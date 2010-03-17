@@ -40,11 +40,17 @@
 #import "BDSKPreferencePane.h"
 #import "BDSKPreferenceController.h"
 
+@class BDSKFontWell;
+
 @interface BibPref_Display : BDSKPreferencePane {
     IBOutlet NSComboBox *previewMaxNumberComboBox;
     
     IBOutlet NSPopUpButton *fontElementPopup;
     IBOutlet NSButton *fontButton;
+    IBOutlet BDSKFontWell *publicationsFontWell;
+    IBOutlet BDSKFontWell *groupsFontWell;
+    IBOutlet BDSKFontWell *personsFontWell;
+    IBOutlet BDSKFontWell *abstractFontWell;
     
     IBOutlet NSTextField *ignoredSortTermsField;
 
@@ -63,14 +69,9 @@
 
 - (IBAction)changeIgnoredSortTerms:(id)sender;
 
-- (IBAction)changeFont:(id)sender;
-- (IBAction)changeFontElement:(id)sender;
-
-@end
-
-
-@interface BDSKPreferenceController (BDSKFontExtension)
-
-- (void)localChangeFont:(id)sender;
+- (IBAction)changePublicationsFont:(id)sender;
+- (IBAction)changeGroupsFont:(id)sender;
+- (IBAction)changePersonsFont:(id)sender;
+- (IBAction)changeAbstractFont:(id)sender;
 
 @end

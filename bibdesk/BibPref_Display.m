@@ -42,16 +42,14 @@
 #import "BDSKStringConstants.h"
 #import "BDSKPreferenceController.h"
 #import "BDSKStringArrayFormatter.h"
+#import "BDSKFontWell.h"
 
 
 @interface BibPref_Display (Private)
+- (void)updateFontDisplayUI;
 - (void)updatePreviewDisplayUI;
 - (void)updateAuthorNameDisplayUI;
 - (void)updateSortWordsDisplayUI;
-- (NSFont *)currentFont;
-- (void)setCurrentFont:(NSFont *)font;
-- (void)updateFontPanel:(NSNotification *)notification;
-- (void)resetFontPanel:(NSNotification *)notification;
 @end
 
 
@@ -62,6 +60,7 @@
     [ignoredSortTermsField setFormatter:[[[BDSKStringArrayFormatter alloc] init] autorelease]];
     
     [displayGroupCountButton setState:[sud boolForKey:BDSKHideGroupCountKey] ? NSOffState : NSOnState];
+    [self updateFontDisplayUI];
     [self updatePreviewDisplayUI];
     [self updateAuthorNameDisplayUI];
     [self updateSortWordsDisplayUI];
@@ -71,10 +70,22 @@
     // reset UI, but only if we loaded the nib
     if ([self isViewLoaded]) {
         [displayGroupCountButton setState:[sud boolForKey:BDSKHideGroupCountKey] ? NSOffState : NSOnState];
+        [self updateFontDisplayUI];
         [self updatePreviewDisplayUI];
         [self updateAuthorNameDisplayUI];
         [self updateSortWordsDisplayUI];
     }
+}
+
+- (void)updateFontDisplayUI{
+    [publicationsFontWell setFontSize:[sud floatForKey:BDSKMainTableViewFontSizeKey]];
+    [publicationsFontWell setFontName:[sud stringForKey:BDSKMainTableViewFontNameKey]];
+    [groupsFontWell setFontSize:[sud floatForKey:BDSKGroupTableViewFontSizeKey]];
+    [groupsFontWell setFontName:[sud stringForKey:BDSKGroupTableViewFontNameKey]];
+    [personsFontWell setFontSize:[sud floatForKey:BDSKPersonTableViewFontSizeKey]];
+    [personsFontWell setFontName:[sud stringForKey:BDSKPersonTableViewFontNameKey]];
+    [abstractFontWell setFontSize:[sud floatForKey:BDSKEditorFontSizeKey]];
+    [abstractFontWell setFontName:[sud stringForKey:BDSKEditorFontNameKey]];
 }
 
 - (void)updatePreviewDisplayUI{
@@ -127,102 +138,57 @@
     [self updateAuthorNameDisplayUI];
 }
 
-- (NSFont *)currentFont{
-    NSString *fontNameKey = nil;
-    NSString *fontSizeKey = nil;
-    switch ([fontElementPopup indexOfSelectedItem]) {
-        case 0:
-            fontNameKey = BDSKMainTableViewFontNameKey;
-            fontSizeKey = BDSKMainTableViewFontSizeKey;
-            break;
-        case 1:
-            fontNameKey = BDSKGroupTableViewFontNameKey;
-            fontSizeKey = BDSKGroupTableViewFontSizeKey;
-            break;
-        case 2:
-            fontNameKey = BDSKPersonTableViewFontNameKey;
-            fontSizeKey = BDSKPersonTableViewFontSizeKey;
-            break;
-        case 3:
-            fontNameKey = BDSKEditorFontNameKey;
-            fontSizeKey = BDSKEditorFontSizeKey;
-            break;
-        default:
-            return nil;
+- (IBAction)changePublicationsFont:(id)sender {
+    [sud setFloat:[sender fontSize] forKey:BDSKMainTableViewFontSizeKey];
+    [sud setObject:[sender fontName] forKey:BDSKMainTableViewFontNameKey];
+}
+
+- (IBAction)changeGroupsFont:(id)sender {
+    [sud setFloat:[sender fontSize] forKey:BDSKGroupTableViewFontSizeKey];
+    [sud setObject:[sender fontName] forKey:BDSKGroupTableViewFontNameKey];
+}
+
+- (IBAction)changePersonsFont:(id)sender {
+    [sud setFloat:[sender fontSize] forKey:BDSKPersonTableViewFontSizeKey];
+    [sud setObject:[sender fontName] forKey:BDSKPersonTableViewFontNameKey];
+}
+
+- (IBAction)changeAbstractFont:(id)sender {
+    [sud setFloat:[sender fontSize] forKey:BDSKEditorFontNameKey];
+    [sud setObject:[sender fontName] forKey:BDSKEditorFontNameKey];
+}
+
+- (BDSKFontWell *)activeFontWell{
+    for (BDSKFontWell *fontWell in [NSArray arrayWithObjects:publicationsFontWell, groupsFontWell, personsFontWell, abstractFontWell, nil]) {
+        if ([fontWell isActive])
+            return fontWell;
     }
-    return [NSFont fontWithName:[sud objectForKey:fontNameKey] size:[sud floatForKey:fontSizeKey]];
+    return nil;
 }
 
-- (void)setCurrentFont:(NSFont *)font{
-    NSString *fontNameKey = nil;
-    NSString *fontSizeKey = nil;
-    switch ([fontElementPopup indexOfSelectedItem]) {
-        case 0:
-            fontNameKey = BDSKMainTableViewFontNameKey;
-            fontSizeKey = BDSKMainTableViewFontSizeKey;
-            break;
-        case 1:
-            fontNameKey = BDSKGroupTableViewFontNameKey;
-            fontSizeKey = BDSKGroupTableViewFontSizeKey;
-            break;
-        case 2:
-            fontNameKey = BDSKPersonTableViewFontNameKey;
-            fontSizeKey = BDSKPersonTableViewFontSizeKey;
-            break;
-        case 3:
-            fontNameKey = BDSKEditorFontNameKey;
-            fontSizeKey = BDSKEditorFontSizeKey;
-            break;
-        default:
-            return;
-    }
-    // set the name last, as that is observed for changes
-    [sud setFloat:[font pointSize] forKey:fontSizeKey];
-    [sud setObject:[font fontName] forKey:fontNameKey];
+- (void)changeFont:(id)sender{
+    [[self activeFontWell] changeFontFromFontManager:sender];
 }
 
-- (IBAction)changeFont:(id)sender{
-	NSFontManager *fontManager = [NSFontManager sharedFontManager];
-	NSFont *font = [self currentFont] ?: [NSFont systemFontOfSize:[NSFont systemFontSize]];
-    font = [fontManager convertFont:font];
-    
-    [self setCurrentFont:font];
+- (void)deactivateFontWells {
+    [[self activeFontWell] deactivate];
 }
 
-- (IBAction)changeFontElement:(id)sender{
-    [self updateFontPanel:nil];
-    [[NSFontManager sharedFontManager] orderFrontFontPanel:sender];
-}
-
-- (void)updateFontPanel:(NSNotification *)notification{
-	NSFont *font = [self currentFont] ?: [NSFont systemFontOfSize:[NSFont systemFontSize]];
-	[[NSFontManager sharedFontManager] setSelectedFont:font isMultiple:NO];
-	[[NSFontManager sharedFontManager] setAction:@selector(localChangeFont:)];
-}
-
-- (void)resetFontPanel:(NSNotification *)notification{
-	[[NSFontManager sharedFontManager] setAction:@selector(changeFont:)];
+- (void)handleWindowDidResignMain:(NSNotification *)notification{
+    [self deactivateFontWells];
 }
 
 - (void)didSelect{
     [super didSelect];
-    [self updateFontPanel:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(updateFontPanel:)
-                                                 name:NSWindowDidBecomeMainNotification
-                                               object:[[self view] window]];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(resetFontPanel:)
+                                             selector:@selector(handleWindowDidResignMain:)
                                                  name:NSWindowDidResignMainNotification
                                                object:[[self view] window]];
 }
 
 - (void)willUnselect{
     [super willUnselect];
-    [self resetFontPanel:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                    name:NSWindowDidBecomeMainNotification
-                                                  object:[[self view] window]];
+    [self deactivateFontWells];
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:NSWindowDidResignMainNotification
                                                   object:[[self view] window]];
@@ -244,7 +210,7 @@
 
 @implementation BDSKPreferenceController (BDSKFontExtension)
 
-- (void)localChangeFont:(id)sender{
+- (void)changeFont:(id)sender{
     if ([[self selectedPane] respondsToSelector:@selector(changeFont:)])
         [(id)[self selectedPane] performSelector:@selector(changeFont:) withObject:sender];
 }

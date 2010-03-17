@@ -328,6 +328,7 @@
 		CEFA07F50AF0E52100A3B4B1 /* BDSKApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */; };
 		CEFA2F130CC0272C002A8262 /* BDSKTemplateTag.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFA2F110CC0272C002A8262 /* BDSKTemplateTag.m */; };
 		CEFA8E0310C7E9250034C14B /* Overflow.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEFA8E0210C7E9250034C14B /* Overflow.tiff */; };
+		CEFAD8BF1150F7A800A3D969 /* BDSKFontWell.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFAD8BD1150F7A800A3D969 /* BDSKFontWell.m */; };
 		CEFB73F610A07E31001DC4C1 /* libraryGroup.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEFB73F510A07E31001DC4C1 /* libraryGroup.tiff */; };
 		CEFD45890BFFC1F80027B933 /* NSWindow+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFD45870BFFC1F80027B933 /* NSWindow+Scripting.m */; };
 		CEFDBDBE0AEA86BA009EE99D /* BDSKSmartGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDBC0AEA86BA009EE99D /* BDSKSmartGroup.m */; };
@@ -1274,6 +1275,8 @@
 		CEFA2F100CC0272C002A8262 /* BDSKTemplateTag.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTemplateTag.h; sourceTree = "<group>"; };
 		CEFA2F110CC0272C002A8262 /* BDSKTemplateTag.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTemplateTag.m; sourceTree = "<group>"; };
 		CEFA8E0210C7E9250034C14B /* Overflow.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Overflow.tiff; sourceTree = "<group>"; };
+		CEFAD8BC1150F7A800A3D969 /* BDSKFontWell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFontWell.h; sourceTree = "<group>"; };
+		CEFAD8BD1150F7A800A3D969 /* BDSKFontWell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFontWell.m; sourceTree = "<group>"; };
 		CEFB73F510A07E31001DC4C1 /* libraryGroup.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = libraryGroup.tiff; sourceTree = "<group>"; };
 		CEFD45860BFFC1F80027B933 /* NSWindow+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSWindow+Scripting.h"; sourceTree = "<group>"; };
 		CEFD45870BFFC1F80027B933 /* NSWindow+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSWindow+Scripting.m"; sourceTree = "<group>"; };
@@ -1921,6 +1924,7 @@
 				CE9F853F0956A2C50073FCAD /* BDSKFieldEditor.m */,
 				CEC7CDDF0F6725890051794E /* BDSKFilePathCell.m */,
 				CE51921F09E5755600E97C3A /* BDSKFindFieldEditor.m */,
+				CEFAD8BD1150F7A800A3D969 /* BDSKFontWell.m */,
 				CE6DA03D11052CF4001CD28E /* BDSKFormatStringFieldEditor.m */,
 				F9706DE409102DF500526FC8 /* BDSKGradientView.m */,
 				CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */,
@@ -2480,6 +2484,7 @@
 				CE38FB8C091D94A100BCB69D /* BDSKFilterController.h */,
 				F97965EF086909EA00050427 /* BDSKFindController.h */,
 				CE51921E09E5755600E97C3A /* BDSKFindFieldEditor.h */,
+				CEFAD8BC1150F7A800A3D969 /* BDSKFontWell.h */,
 				3D44F5600812A91D003C67F0 /* BDSKFormatParser.h */,
 				CE6DA03C11052CF4001CD28E /* BDSKFormatStringFieldEditor.h */,
 				CE6DA02F11052C81001CD28E /* BDSKFormatStringFormatter.h */,
@@ -3587,6 +3592,7 @@
 				CD6295361140DE16002E4751 /* BDSKIACRParser.m in Sources */,
 				CD6295381140DE1C002E4751 /* BDSKSpringerParser.m in Sources */,
 				CD86BA3A1141C023005EEFDA /* BDSKBibTeXWebParser.m in Sources */,
+				CEFAD8BF1150F7A800A3D969 /* BDSKFontWell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
