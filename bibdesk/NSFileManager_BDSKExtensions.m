@@ -282,12 +282,13 @@ static void destroyTemporaryDirectory()
     NSString *applicationSupport = [self currentApplicationSupportPathForCurrentUser];
     NSString *templates = @"Templates";
     NSString *templatesPath = [applicationSupport stringByAppendingPathComponent:templates];
-    BOOL success = NO;
+    BOOL success = YES;
     
     if ([self fileExistsAtPath:templatesPath isDirectory:&success] == NO)
         success = [self createDirectoryAtPath:templatesPath withIntermediateDirectories:NO attributes:nil error:NULL];
     if (success) {
-        for (NSString *file in [self contentsOfDirectoryAtPath:templatesPath error:NULL]) {
+        NSString *sourcePath = [[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:templates];
+        for (NSString *file in [self contentsOfDirectoryAtPath:sourcePath error:NULL]) {
             if ([file hasPrefix:@"."] == NO)
                 [self copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:file] overwrite:overwrite];
         }
