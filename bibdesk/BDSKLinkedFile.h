@@ -49,25 +49,20 @@
 
 @interface BDSKLinkedFile : NSObject <NSCopying, NSCoding>
 
-+ (id)linkedFileWithURL:(NSURL *)aURL delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
-+ (id)linkedFileWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
-+ (id)linkedFileWithURLString:(NSString *)aString;
-
-// creates a linked local file or remote URL object depending on the URL
-- (id)initWithURL:(NSURL *)aURL delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
-// creates a linked local file
-- (id)initWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
-// creates a linked remote URL
-- (id)initWithURLString:(NSString *)aString;
-
-- (BOOL)isFile;
-
 - (NSURL *)URL;
-- (NSURL *)displayURL;
-- (NSString *)path;
 
 // string value to be saved as a field value, base64 encoded data for a local file or an absolute URL string for a remote URL
 - (NSString *)stringRelativeToPath:(NSString *)newBasePath;
+
+@end
+
+
+@interface BDSKLinkedFile (BDSKExtendedLinkedFile)
+
+- (BOOL)isFile;
+
+- (NSURL *)displayURL;
+- (NSString *)path;
 
 - (NSString *)stringValue;
 - (NSString *)bibTeXString;
@@ -81,5 +76,21 @@
 
 - (void)update;
 - (void)updateWithPath:(NSString *)aPath;
+
+@end
+
+
+@interface BDSKLinkedFile (BDSKLinkedFileCreation)
+
++ (id)linkedFileWithURL:(NSURL *)aURL delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
++ (id)linkedFileWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
++ (id)linkedFileWithURLString:(NSString *)aString;
+
+// creates a linked local file or remote URL object depending on the URL
+- (id)initWithURL:(NSURL *)aURL delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
+// creates a linked local file
+- (id)initWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
+// creates a linked remote URL
+- (id)initWithURLString:(NSString *)aString;
 
 @end

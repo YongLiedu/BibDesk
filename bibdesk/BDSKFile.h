@@ -41,16 +41,26 @@
 
 @interface BDSKFile : NSObject <NSCopying, NSCoding>
 
+- (NSURL *)fileURL;
+- (const FSRef *)fsRef;
+
+@end
+
+
+@interface BDSKFile (BDSKExtendedFile)
+
+- (NSString *)fileName;
+- (NSString *)path;
+- (NSString *)tildePath;
+
+@end
+
+
+@interface BDSKFile (BDSKFileCreation)
+
 - (id)initWithFSRef:(const FSRef *)aRef;
 - (id)initWithPath:(NSString *)aPath;
 - (id)initWithURL:(NSURL *)aURL;
 + (id)fileWithURL:(NSURL *)aURL;
-
-- (NSURL *)fileURL;
-- (const FSRef *)fsRef;
-- (NSString *)fileName;
-
-- (NSString *)path;
-- (NSString *)tildePath;
 
 @end
