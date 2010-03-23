@@ -939,11 +939,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
                                           contextInfo:NULL];
 }
 
-- (IBAction)dismissSearchBookmarkSheet:(id)sender {
-    [NSApp endSheet:searchBookmarkSheet returnCode:[sender tag]];
-    [searchBookmarkSheet orderOut:self];
-}
-
 - (IBAction)addURLGroupAction:(id)sender {
     BDSKURLGroupSheetController *sheetController = [[BDSKURLGroupSheetController alloc] init];
     [sheetController beginSheetModalForWindow:documentWindow
