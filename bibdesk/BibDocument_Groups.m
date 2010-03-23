@@ -87,6 +87,7 @@
 #import "NSSplitView_BDSKExtensions.h"
 #import "BDSKButtonBar.h"
 #import "NSMenu_BDSKExtensions.h"
+#import "BDSKBookmarkSheetController.h"
 
 @implementation BibDocument (Groups)
 
@@ -897,11 +898,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         NSBeep();
 }
 
-- (void)searchBookmarkSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+- (void)searchBookmarkSheetDidEnd:(BDSKBookmarkSheetController *)sheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSOKButton) {
         BDSKGroup *group = [[self selectedGroups] lastObject];
-        BDSKSearchBookmark *folder = [[searchBookmarkPopUp selectedItem] representedObject];
-        [[BDSKSearchBookmarkController sharedBookmarkController] addBookmarkWithInfo:[group dictionaryValue] label:[searchBookmarkField stringValue] toFolder:folder];
+        [[BDSKSearchBookmarkController sharedBookmarkController] addBookmarkWithInfo:[group dictionaryValue] label:[sheetController stringValue] toFolder:[sheetController selectedFolder]];
     }
 }
 
@@ -925,17 +925,18 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     }
     
     BDSKSearchGroup *group = (BDSKSearchGroup *)[[self selectedGroups] lastObject];
-	[searchBookmarkField setStringValue:[NSString stringWithFormat:@"%@: %@", [[group serverInfo] name], [group name]]];
-    [searchBookmarkPopUp removeAllItems];
+    BDSKBookmarkSheetController *bookmarkSheetController = [[[BDSKBookmarkSheetController alloc] init] autorelease];
+	NSPopUpButton *folderPopUp = [bookmarkSheetController folderPopUpButton];
+    [bookmarkSheetController setStringValue:[NSString stringWithFormat:@"%@: %@", [[group serverInfo] name], [group name]]];
+    [folderPopUp removeAllItems];
     BDSKSearchBookmark *bookmark = [[BDSKSearchBookmarkController sharedBookmarkController] bookmarkRoot];
-    [self addMenuItemsForBookmarks:[NSArray arrayWithObjects:bookmark, nil] level:0 toMenu:[searchBookmarkPopUp menu]];
-    [searchBookmarkPopUp selectItemAtIndex:0];
+    [self addMenuItemsForBookmarks:[NSArray arrayWithObjects:bookmark, nil] level:0 toMenu:[folderPopUp menu]];
+    [folderPopUp selectItemAtIndex:0];
     
-    [NSApp beginSheet:searchBookmarkSheet
-       modalForWindow:[self windowForSheet]
-        modalDelegate:self 
-       didEndSelector:@selector(searchBookmarkSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:NULL];
+    [bookmarkSheetController beginSheetModalForWindow:[self windowForSheet]
+                                        modalDelegate:self 
+                                       didEndSelector:@selector(searchBookmarkSheetDidEnd:returnCode:contextInfo:)
+                                          contextInfo:NULL];
 }
 
 - (IBAction)dismissSearchBookmarkSheet:(id)sender {

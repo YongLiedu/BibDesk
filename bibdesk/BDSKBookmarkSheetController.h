@@ -1,10 +1,10 @@
 //
-//  BDSKBookmarkController.h
+//  BDSKBookmarkSheetController.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 8/18/07.
+//  Created by Christiaan on 3/23/10.
 /*
- This software is Copyright (c) 2007-2010
+ This software is Copyright (c) 2010
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,38 +37,20 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <WebKit/WebKit.h>
 
 
-@class BDSKBookmark, BDSKOutlineView;
-
-@interface BDSKBookmarkController : NSWindowController <NSOutlineViewDelegate, NSOutlineViewDataSource, NSToolbarDelegate> {
-    IBOutlet BDSKOutlineView *outlineView;
-    BDSKBookmark *bookmarkRoot;
-    NSUndoManager *undoManager;
-    NSArray *draggedBookmarks;
-    NSMutableDictionary *toolbarItems;
+@interface BDSKBookmarkSheetController : NSWindowController {
+    IBOutlet NSTextField *textField;
+    IBOutlet NSPopUpButton *folderPopUp;
 }
 
-+ (id)sharedBookmarkController;
+- (NSTextField *)textField;
 
-- (BDSKBookmark *)bookmarkRoot;
+- (NSString *)stringValue;
+- (void)setStringValue:(NSString *)string;
 
-- (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name;
-- (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name toFolder:(BDSKBookmark *)folder;
-- (void)addBookmarkWithUrlString:(NSString *)urlString proposedName:(NSString *)name modalForWindow:(NSWindow *)window;
+- (NSPopUpButton *)folderPopUpButton;
 
-- (IBAction)insertBookmark:(id)sender;
-- (IBAction)insertBookmarkFolder:(id)sender;
-- (IBAction)insertBookmarkSeparator:(id)sender;
-- (IBAction)deleteBookmark:(id)sender;
+- (id)selectedFolder;
 
-- (NSUndoManager *)undoManager;
-
-@end
-
-#pragma mark -
-
-@interface WebView (BDSKExtensions)
-- (IBAction)addBookmark:(id)sender;
 @end

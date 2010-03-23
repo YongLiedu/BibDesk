@@ -89,6 +89,8 @@
 		CE12A1700B44AED200416D19 /* SearchGroupServers.plist in Resources */ = {isa = PBXBuildFile; fileRef = CE12A16F0B44AED100416D19 /* SearchGroupServers.plist */; };
 		CE15C0D80AA5B9A3002C555F /* BDSKErrorManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE15C0D60AA5B9A3002C555F /* BDSKErrorManager.m */; };
 		CE15E6230FCC28B1009FCBF1 /* BibDocument_UI.m in Sources */ = {isa = PBXBuildFile; fileRef = CE15E6210FCC28B1009FCBF1 /* BibDocument_UI.m */; };
+		CE1782FC1158EFCB00B2EBDF /* BookmarkSheet.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE1782FB1158EFCB00B2EBDF /* BookmarkSheet.xib */; };
+		CE17832E1158F0A000B2EBDF /* BDSKBookmarkSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE17832C1158F0A000B2EBDF /* BDSKBookmarkSheetController.m */; };
 		CE1EF2940F8E0D54004E7AE8 /* BDSKParentGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE1EF2920F8E0D54004E7AE8 /* BDSKParentGroup.m */; };
 		CE21D10B09208B9D0075E607 /* BDSKGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE21D10909208B9D0075E607 /* BDSKGroup.m */; };
 		CE22E1CE0A8CCF9D002CEFB8 /* BDSKOrphanedFilesFinder.m in Sources */ = {isa = PBXBuildFile; fileRef = CE22E1CC0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.m */; };
@@ -857,6 +859,10 @@
 		CE15E6200FCC28B1009FCBF1 /* BibDocument_UI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibDocument_UI.h; sourceTree = "<group>"; };
 		CE15E6210FCC28B1009FCBF1 /* BibDocument_UI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibDocument_UI.m; sourceTree = "<group>"; };
 		CE166D3B10B46F9300648D2E /* BDSKCompatibility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCompatibility.h; sourceTree = "<group>"; };
+		CE1782F81158EFA000B2EBDF /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/BookmarkSheet.xib; sourceTree = "<group>"; };
+		CE17832B1158F0A000B2EBDF /* BDSKBookmarkSheetController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKBookmarkSheetController.h; sourceTree = "<group>"; };
+		CE17832C1158F0A000B2EBDF /* BDSKBookmarkSheetController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKBookmarkSheetController.m; sourceTree = "<group>"; };
+		CE1783631158F57600B2EBDF /* French */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = French; path = French.lproj/BookmarkSheet.xib; sourceTree = "<group>"; };
 		CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-App.xcconfig"; sourceTree = "<group>"; };
 		CE1EF2910F8E0D54004E7AE8 /* BDSKParentGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKParentGroup.h; sourceTree = "<group>"; };
 		CE1EF2920F8E0D54004E7AE8 /* BDSKParentGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKParentGroup.m; sourceTree = "<group>"; };
@@ -1788,6 +1794,7 @@
 				CEB5D5D61072AE350001C135 /* BibPref_ScriptHooks.xib */,
 				CEB5D5D81072AE350001C135 /* BibPref_Sharing.xib */,
 				CEB5D5DA1072AE350001C135 /* BibPref_TeX.xib */,
+				CE1782FB1158EFCB00B2EBDF /* BookmarkSheet.xib */,
 				CEB5D5E01072AE350001C135 /* BookmarksWindow.xib */,
 				CEB5D5E41072AE350001C135 /* ChangeFieldSheet.xib */,
 				CEB5D5E61072AE350001C135 /* ComplexStringEditor.xib */,
@@ -2017,6 +2024,7 @@
 				F9022C5E075802E300C3F701 /* BDSKAppController.m */,
 				CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */,
 				CEF83F360C77911F00A3AD51 /* BDSKBookmarkController.m */,
+				CE17832C1158F0A000B2EBDF /* BDSKBookmarkSheetController.m */,
 				3D866C2708031CEC00FF1724 /* BDSKCharacterConversion.m */,
 				2730077A07CF20B500F2E485 /* BDSKComplexStringEditor.m */,
 				CE38FB85091D946A00BCB69D /* BDSKConditionController.m */,
@@ -2420,6 +2428,7 @@
 				CE8BE5450D99A10700E314A4 /* BDSKBookmark.h */,
 				CEF63D0710888A5A000A31E2 /* BDSKSeparatorCell.h */,
 				CEF83F350C77911F00A3AD51 /* BDSKBookmarkController.h */,
+				CE17832B1158F0A000B2EBDF /* BDSKBookmarkSheetController.h */,
 				CEEA4C690B57B0D400434059 /* BDSKBooleanValueTransformer.h */,
 				2730077607CF20B500F2E485 /* BDSKBorderlessKeyWindow.h */,
 				CEFDBDDB0AEA87F8009EE99D /* BDSKCategoryGroup.h */,
@@ -3150,6 +3159,7 @@
 				CEFB73F610A07E31001DC4C1 /* libraryGroup.tiff in Resources */,
 				CEFA8E0310C7E9250034C14B /* Overflow.tiff in Resources */,
 				CEFE71771129A91E0018CD74 /* ServicesMenu.strings in Resources */,
+				CE1782FC1158EFCB00B2EBDF /* BookmarkSheet.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3593,6 +3603,7 @@
 				CD6295381140DE1C002E4751 /* BDSKSpringerParser.m in Sources */,
 				CD86BA3A1141C023005EEFDA /* BDSKBibTeXWebParser.m in Sources */,
 				CEFAD8BF1150F7A800A3D969 /* BDSKFontWell.m in Sources */,
+				CE17832E1158F0A000B2EBDF /* BDSKBookmarkSheetController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3694,6 +3705,15 @@
 				F9C7D3FF0BE9280F00D65C7F /* French */,
 			);
 			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		CE1782FB1158EFCB00B2EBDF /* BookmarkSheet.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CE1782F81158EFA000B2EBDF /* English */,
+				CE1783631158F57600B2EBDF /* French */,
+			);
+			name = BookmarkSheet.xib;
 			sourceTree = "<group>";
 		};
 		CE2941040A7F8F2900A46D05 /* ReadMe.rtf */ = {

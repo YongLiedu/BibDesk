@@ -1,10 +1,10 @@
 //
-//  BDSKBookmarkController.h
+//  BDSKBookmarkSheetController.m
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 8/18/07.
+//  Created by Christiaan on 3/23/10.
 /*
- This software is Copyright (c) 2007-2010
+ This software is Copyright (c) 2010
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -36,39 +36,33 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
-#import <WebKit/WebKit.h>
+#import "BDSKBookmarkSheetController.h"
 
 
-@class BDSKBookmark, BDSKOutlineView;
+@implementation BDSKBookmarkSheetController
 
-@interface BDSKBookmarkController : NSWindowController <NSOutlineViewDelegate, NSOutlineViewDataSource, NSToolbarDelegate> {
-    IBOutlet BDSKOutlineView *outlineView;
-    BDSKBookmark *bookmarkRoot;
-    NSUndoManager *undoManager;
-    NSArray *draggedBookmarks;
-    NSMutableDictionary *toolbarItems;
+- (NSString *)windowNibName { return @"BookmarkSheet"; }
+
+- (NSTextField *)textField {
+    [self window];
+    return textField;
 }
 
-+ (id)sharedBookmarkController;
+- (NSString *)stringValue {
+    return [[self textField] stringValue];
+}
 
-- (BDSKBookmark *)bookmarkRoot;
+- (void)setStringValue:(NSString *)string {
+    [[self textField] setStringValue:string];
+}
 
-- (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name;
-- (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name toFolder:(BDSKBookmark *)folder;
-- (void)addBookmarkWithUrlString:(NSString *)urlString proposedName:(NSString *)name modalForWindow:(NSWindow *)window;
+- (NSPopUpButton *)folderPopUpButton {
+    [self window];
+    return folderPopUp;
+}
 
-- (IBAction)insertBookmark:(id)sender;
-- (IBAction)insertBookmarkFolder:(id)sender;
-- (IBAction)insertBookmarkSeparator:(id)sender;
-- (IBAction)deleteBookmark:(id)sender;
+- (id)selectedFolder {
+    return [[[self folderPopUpButton] selectedItem] representedObject];
+}
 
-- (NSUndoManager *)undoManager;
-
-@end
-
-#pragma mark -
-
-@interface WebView (BDSKExtensions)
-- (IBAction)addBookmark:(id)sender;
 @end

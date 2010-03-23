@@ -46,6 +46,8 @@
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKSeparatorCell.h"
 #import "NSMenu_BDSKExtensions.h"
+#import "BDSKBookmarkSheetController.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 #define BDSKBookmarkRowsPboardType @"BDSKBookmarkRowsPboardType"
 
@@ -151,10 +153,10 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     }
 }
 
-- (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+- (void)addBookmarkSheetDidEnd:(BDSKBookmarkSheetController *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     NSString *urlString = (NSString *)contextInfo;
 	if (returnCode == NSOKButton) {
-        [self addBookmarkWithUrlString:urlString name:[bookmarkField stringValue] toFolder:[[folderPopUp selectedItem] representedObject]];
+        [self addBookmarkWithUrlString:urlString name:[sheet stringValue] toFolder:[sheet selectedFolder]];
 	}
     [urlString release]; //the contextInfo was retained
 }
@@ -173,22 +175,18 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 }
 
 - (void)addBookmarkWithUrlString:(NSString *)urlString proposedName:(NSString *)name modalForWindow:(NSWindow *)window {
-    [self window];
-    [bookmarkField setStringValue:name];
+    BDSKBookmarkSheetController *bookmarkSheetController = [[[BDSKBookmarkSheetController alloc] init] autorelease];
+    NSPopUpButton *folderPopUp = [bookmarkSheetController folderPopUpButton];
+    
+    [bookmarkSheetController setStringValue:name];
     [folderPopUp removeAllItems];
     [self addMenuItemsForBookmarks:[NSArray arrayWithObjects:bookmarkRoot, nil] level:0 toMenu:[folderPopUp menu]];
     [folderPopUp selectItemAtIndex:0];
 	
-	[NSApp beginSheet:addBookmarkSheet
-       modalForWindow:window
-        modalDelegate:self
-       didEndSelector:@selector(addBookmarkSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:[urlString retain]];
-}
-
-- (IBAction)dismissAddBookmarkSheet:(id)sender {
-    [NSApp endSheet:addBookmarkSheet returnCode:[sender tag]];
-    [addBookmarkSheet orderOut:self];
+    [bookmarkSheetController beginSheetModalForWindow:window 
+                                        modalDelegate:self
+                                       didEndSelector:@selector(addBookmarkSheetDidEnd:returnCode:contextInfo:)
+                                          contextInfo:[urlString retain]];
 }
 
 #pragma mark Actions
