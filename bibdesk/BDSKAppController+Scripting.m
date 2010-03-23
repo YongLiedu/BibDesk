@@ -109,7 +109,7 @@ Category on BDSKAppController making the papers folder readable for scripting
 
 - (BOOL)application:(NSApplication *)sender delegateHandlesKey:(NSString *)key {
 	if ([key isEqualToString:@"papersFolder"] ||
-        [key isEqualToString:@"localUrlFormat"] ||
+        [key isEqualToString:@"localFileFormat"] ||
         [key isEqualToString:@"citeKeyFormat"] ||
 		[key isEqualToString:@"allTypes"] ||
 		[key isEqualToString:@"allFieldNames"] ||
