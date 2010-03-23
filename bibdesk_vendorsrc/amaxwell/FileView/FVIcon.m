@@ -111,6 +111,50 @@ static inline id _placeholderForZone(NSZone *aZone)
     return [self allocWithZone:NULL];
 }
 
+// we only want to encode the public superclass
+- (Class)classForCoder { return FVIconClass; }
+
+// we don't implement NSCoding, so always return a distant object (unused)
+- (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
+{
+    return [NSDistantObject proxyWithLocal:self connection:[encoder connection]];
+}
+
+// these methods are all required
+- (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context { [self doesNotRecognizeSelector:_cmd]; }
+- (void)renderOffscreen { [self doesNotRecognizeSelector:_cmd]; }
+
+@end
+
+
+@implementation FVIcon (Extended)
+
+// not all subclasses can release resources, and others may not be fully initialized
+- (BOOL)canReleaseResources { return NO; }
+
+// implement trivially so these are safe to call on the abstract class
+- (void)releaseResources { /* do nothing */ }
+- (BOOL)needsRenderForSize:(NSSize)size { return NO; }
+- (void)recache { /* do nothing */ }
+
+// this method is optional; some subclasses may not have a fast path
+- (void)fastDrawInRect:(NSRect)dstRect ofContext:(CGContextRef)context { [self drawInRect:dstRect ofContext:context]; }
+
+@end
+
+
+@implementation FVIcon (Pages)
+
+- (NSUInteger)pageCount { return 1; }
+- (NSUInteger)currentPageIndex { return 1; }
+- (void)showNextPage { /* do nothing */ }
+- (void)showPreviousPage { /* do nothing */ }
+
+@end
+
+
+@implementation FVIcon (Creation)
+
 + (NSURL *)missingFileURL;
 {
     return _missingFileURL;
@@ -127,30 +171,6 @@ static inline id _placeholderForZone(NSZone *aZone)
     [self doesNotRecognizeSelector:_cmd];
     return nil;
 }
-
-// we only want to encode the public superclass
-- (Class)classForCoder { return FVIconClass; }
-
-// we don't implement NSCoding, so always return a distant object (unused)
-- (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
-{
-    return [NSDistantObject proxyWithLocal:self connection:[encoder connection]];
-}
-
-// these methods are all required
-- (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context { [self doesNotRecognizeSelector:_cmd]; }
-- (void)renderOffscreen { [self doesNotRecognizeSelector:_cmd]; }
-
-// not all subclasses can release resources, and others may not be fully initialized
-- (BOOL)canReleaseResources { return NO; }
-
-// implement trivially so these are safe to call on the abstract class
-- (void)releaseResources { /* do nothing */ }
-- (BOOL)needsRenderForSize:(NSSize)size { return NO; }
-- (void)recache { /* do nothing */ }
-
-// this method is optional; some subclasses may not have a fast path
-- (void)fastDrawInRect:(NSRect)dstRect ofContext:(CGContextRef)context { [self drawInRect:dstRect ofContext:context]; }
 
 @end
 
@@ -315,15 +335,5 @@ static inline id _placeholderForZone(NSZone *aZone)
     
     return anIcon;    
 }
-
-@end
-
-
-@implementation FVIcon (Pages)
-
-- (NSUInteger)pageCount { return 1; }
-- (NSUInteger)currentPageIndex { return 1; }
-- (void)showNextPage { /* do nothing */ }
-- (void)showPreviousPage { /* do nothing */ }
 
 @end

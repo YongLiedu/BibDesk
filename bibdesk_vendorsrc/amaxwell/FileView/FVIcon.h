@@ -48,41 +48,6 @@
  This class is thread safe, but it is not reentrant.  You can abuse it to create deadlocks.  Don't do that. */
 @interface FVIcon : FVObject
 
-/** Shared instance representing a missing file.
- 
- @return A URL that is appropriate for a missing file to be passed to iconWithURL:.  Don't rely on the scheme or path for anything. */
-+ (NSURL *)missingFileURL;
-
-/** Only public factory method.
- 
- Decides which concrete subclass to return based on the scheme and/or UTI of the URL or its target.
- @param representedURL Any URL type
- @return A file thumbnail, file icon, or appropriate icon for the given URL scheme. */
-+ (id)iconWithURL:(NSURL *)representedURL;
-
-/** Initializer.
- In subclasses, do not call -[super initWithURL:] ([super init] is superclass initializer).
- @param aURL Any NSURL instance. */
-- (id)initWithURL:(NSURL *)aURL;
-
-/** Releases cached resources.
- 
- Send this to icons that won't be displayed "soon."  The only way to guarantee a decrease in memory usage is to release all references to the object, though, as this call may be a noop for some subclasses. */
-- (void)releaseResources;
-
-/** Determine if releaseResources is possible.
- 
- @return NO if releaseResources will be a no-op or otherwise is not possible. */
-- (BOOL)canReleaseResources;
-
-/** Determine if renderOffscreen is required.
- 
- Clients (i.e. FileView) calls this in order to see if renderOffscreen should be called.  If it returns YES, this method sets the desired size in the case of Finder icons, and the caller should then send renderOffscreen.  By the same token, if this returns NO, don't waste time on renderOffscreen.
- 
- @param size The desired icon size in points.  Subclasses are free to ignore this.
- @return NO if the icon already has a cached version for this size. */
-- (BOOL)needsRenderForSize:(NSSize)size;
-
 /** Primitive method.
  
  Draws the icon into an offscreen bitmap context.  Subclasses must override this.
@@ -105,6 +70,28 @@
  @param dstRect Destination rect for drawing in the passed-in context's coordinate space.
  @param context CGContext for drawing content. */
 - (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
+
+@end
+
+@interface FVIcon (Extended)
+
+/** Releases cached resources.
+ 
+ Send this to icons that won't be displayed "soon."  The only way to guarantee a decrease in memory usage is to release all references to the object, though, as this call may be a noop for some subclasses. */
+- (void)releaseResources;
+
+/** Determine if releaseResources is possible.
+ 
+ @return NO if releaseResources will be a no-op or otherwise is not possible. */
+- (BOOL)canReleaseResources;
+
+/** Determine if renderOffscreen is required.
+ 
+ Clients (i.e. FileView) calls this in order to see if renderOffscreen should be called.  If it returns YES, this method sets the desired size in the case of Finder icons, and the caller should then send renderOffscreen.  By the same token, if this returns NO, don't waste time on renderOffscreen.
+ 
+ @param size The desired icon size in points.  Subclasses are free to ignore this.
+ @return NO if the icon already has a cached version for this size. */
+- (BOOL)needsRenderForSize:(NSSize)size;
 
 /** Optional drawing method.
  
@@ -141,5 +128,26 @@
  
  This does not redisplay the icon; needsRenderForSize: and renderOffscreen must be called to redraw. */
 - (void)showPreviousPage;
+
+@end
+
+@interface FVIcon (Creation)
+
+/** Shared instance representing a missing file.
+ 
+ @return A URL that is appropriate for a missing file to be passed to iconWithURL:.  Don't rely on the scheme or path for anything. */
++ (NSURL *)missingFileURL;
+
+/** Only public factory method.
+ 
+ Decides which concrete subclass to return based on the scheme and/or UTI of the URL or its target.
+ @param representedURL Any URL type
+ @return A file thumbnail, file icon, or appropriate icon for the given URL scheme. */
++ (id)iconWithURL:(NSURL *)representedURL;
+
+/** Initializer.
+ In subclasses, do not call -[super initWithURL:] ([super init] is superclass initializer).
+ @param aURL Any NSURL instance. */
+- (id)initWithURL:(NSURL *)aURL;
 
 @end

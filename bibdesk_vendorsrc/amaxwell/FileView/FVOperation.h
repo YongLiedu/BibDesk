@@ -80,29 +80,6 @@ typedef int32_t FVOperationQueuePriority;
  @return YES if instances are equal as determined by the implementor. */
 - (BOOL)isEqual:(id)object;
 
-/** Compares priority.
- 
- If receiver's priority is higher than other, returns NSOrderedDescending.  If receiver's priority is lower than other, returns NSOrderedAscending.  If same priority, returns NSOrderedSame.
- @param other The FVOperation to compare against.
- @return The result of the comparison test. */
-- (NSComparisonResult)compare:(FVOperation *)other;
-
-/** Starts the operation.
- 
- If FVOperation::isConcurrent returns YES, detaches a thread to call FVOperation::main.  If not concurrent, calls FVOperation::main from whatever thread called FVOperation::start.  Raises if the operation was previously cancelled or executed. */
-- (void)start;
-
-/** Check to see if the operation is concurrent.
- 
- This method returns NO by default for consistency with NSOperation.  Subclasses may override this.
- @return YES if it detaches a new thread in FVOperation::start, NO otherwise. */
-- (BOOL)isConcurrent;
-
-/** Notification that an operation is finished.
- 
- A subclass must call this when FVOperation::main completes in order to avoid leaking FVOperation instances in the queue. */
-- (void)finished;
-
 //
 // subclasses must implement all of the following; do not call super
 //
@@ -170,6 +147,33 @@ typedef int32_t FVOperationQueuePriority;
  This is not part of the NSOperation API, but it's useful.  Raises an exception if the operation was previously cancelled or executed.
  @param flag YES if the operation should detach its own thread to call FVOperation::main. */
 - (void)setConcurrent:(BOOL)flag;
+
+@end
+
+@interface FVOperation (Extended)
+
+/** Compares priority.
+ 
+ If receiver's priority is higher than other, returns NSOrderedDescending.  If receiver's priority is lower than other, returns NSOrderedAscending.  If same priority, returns NSOrderedSame.
+ @param other The FVOperation to compare against.
+ @return The result of the comparison test. */
+- (NSComparisonResult)compare:(FVOperation *)other;
+
+/** Starts the operation.
+ 
+ If FVOperation::isConcurrent returns YES, detaches a thread to call FVOperation::main.  If not concurrent, calls FVOperation::main from whatever thread called FVOperation::start.  Raises if the operation was previously cancelled or executed. */
+- (void)start;
+
+/** Check to see if the operation is concurrent.
+ 
+ This method returns NO by default for consistency with NSOperation.  Subclasses may override this.
+ @return YES if it detaches a new thread in FVOperation::start, NO otherwise. */
+- (BOOL)isConcurrent;
+
+/** Notification that an operation is finished.
+ 
+ A subclass must call this when FVOperation::main completes in order to avoid leaking FVOperation instances in the queue. */
+- (void)finished;
 
 @end
 

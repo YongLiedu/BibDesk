@@ -51,16 +51,6 @@ FV_PRIVATE_EXTERN NSString * const FVMainQueueRunLoopMode;
  This class declares the interface for an operation queue with similar semantics to NSOperationQueue.  Initializers return an instance of a concrete subclass, never of an FVOperationQueue itself.  FVOperationQueue is thread safe, and instances may be shared between threads with no additional locking, although the client is responsible for keeping a valid reference. */
 @interface FVOperationQueue : NSObject
 
-/** Main thread queue.
- 
- A shared instance of FVOperationQueue that executes FVOperation::start on the main thread.  Adding operations to this queue is roughly equivalent to using +[NSObject cancelPreviousPerformRequestsWithTarget:selector:object:]/-[NSObject performSelector:withObject:afterDelay:inModes:] with a zero delay and kCFRunLoopCommonModes, but you can add operations from any thread. */
-+ (FVOperationQueue *)mainQueue;
-
-/** Designated initializer.  
- 
- Returns a queue set up with default parameters.  Call FVOperationQueue::terminate before releasing the last reference to the queue or else it will leak. */
-- (id)init;
-
 /** Add operations to the queue.
  
  Operations are coalesced using FVOperation::isEqual.  If you want different behavior, override FVOperation::hash and FVOperation::isEqual: in a subclass.
@@ -89,5 +79,20 @@ FV_PRIVATE_EXTERN NSString * const FVMainQueueRunLoopMode;
  Calls +[NSThread setThreadPriority:].  Mainly useful for a queue that will be running non-concurrent operations.
  @param p Value between 0.0 and 1.0, where 1.0 is highest priority. */
 - (void)setThreadPriority:(double)p;
+
+@end
+
+
+@interface FVOperationQueue (Creation)
+
+/** Main thread queue.
+ 
+ A shared instance of FVOperationQueue that executes FVOperation::start on the main thread.  Adding operations to this queue is roughly equivalent to using +[NSObject cancelPreviousPerformRequestsWithTarget:selector:object:]/-[NSObject performSelector:withObject:afterDelay:inModes:] with a zero delay and kCFRunLoopCommonModes, but you can add operations from any thread. */
++ (FVOperationQueue *)mainQueue;
+
+/** Designated initializer.  
+ 
+ Returns a queue set up with default parameters.  Call FVOperationQueue::terminate before releasing the last reference to the queue or else it will leak. */
+- (id)init;
 
 @end

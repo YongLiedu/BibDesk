@@ -52,11 +52,6 @@ static id _mainThreadQueue = nil;
 static FVOperationQueue *defaultPlaceholderQueue = nil;
 static Class FVOperationQueueClass = Nil;
 
-+ (FVOperationQueue *)mainQueue
-{
-    return _mainThreadQueue;
-}
-
 + (void)initialize
 {
     FVINITIALIZE(FVOperationQueue);  
@@ -74,12 +69,6 @@ static Class FVOperationQueueClass = Nil;
 + (id)alloc
 {
     return [self allocWithZone:NULL];
-}
-
-- (id)init
-{
-    self = [super init];
-    return self;
 }
 
 - (void)subclassResponsibility:(SEL)selector
@@ -115,6 +104,22 @@ static Class FVOperationQueueClass = Nil;
 - (void)terminate
 {
     [self subclassResponsibility:_cmd];
+}
+
+@end
+
+
+@implementation FVOperationQueue (Creation)
+
++ (FVOperationQueue *)mainQueue
+{
+    return _mainThreadQueue;
+}
+
+- (id)init
+{
+    self = [super init];
+    return self;
 }
 
 @end

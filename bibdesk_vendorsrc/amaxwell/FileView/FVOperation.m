@@ -92,6 +92,24 @@ static Class FVOperationClass = Nil;
     return [NSString stringWithFormat:@"%@ = {\n\t cancelled = %d,\n\t priority = %d,\n}\n", [super description], [self isCancelled], [self queuePriority]];
 }
 
+// Subclass responsibility
+
+- (FVOperationQueuePriority)queuePriority { [self doesNotRecognizeSelector:_cmd]; return 0; };
+- (void)setQueuePriority:(FVOperationQueuePriority)queuePriority { [self doesNotRecognizeSelector:_cmd]; };
+- (void)cancel { [self doesNotRecognizeSelector:_cmd]; };
+- (BOOL)isCancelled { [self doesNotRecognizeSelector:_cmd]; return YES; };
+- (BOOL)isExecuting { [self doesNotRecognizeSelector:_cmd]; return YES; };
+- (BOOL)isFinished { [self doesNotRecognizeSelector:_cmd]; return YES; };
+- (void)main { [self doesNotRecognizeSelector:_cmd]; }
+- (void)setQueue:(id)queue { [self doesNotRecognizeSelector:_cmd]; }
+- (id)queue { [self doesNotRecognizeSelector:_cmd]; return nil; };
+- (void)setConcurrent:(BOOL)flag { [self doesNotRecognizeSelector:_cmd]; }
+
+@end
+
+
+@implementation FVOperation (Extended)
+
 // semantics here as the same as for NSDate, if we consider the dates as absolute time values
 - (NSComparisonResult)compare:(FVOperation *)other;
 {
@@ -122,19 +140,6 @@ static Class FVOperationClass = Nil;
 }
 
 - (BOOL)isConcurrent { return NO; }
-
-// Subclass responsibility
-
-- (FVOperationQueuePriority)queuePriority { [self doesNotRecognizeSelector:_cmd]; return 0; };
-- (void)setQueuePriority:(FVOperationQueuePriority)queuePriority { [self doesNotRecognizeSelector:_cmd]; };
-- (void)cancel { [self doesNotRecognizeSelector:_cmd]; };
-- (BOOL)isCancelled { [self doesNotRecognizeSelector:_cmd]; return YES; };
-- (BOOL)isExecuting { [self doesNotRecognizeSelector:_cmd]; return YES; };
-- (BOOL)isFinished { [self doesNotRecognizeSelector:_cmd]; return YES; };
-- (void)main { [self doesNotRecognizeSelector:_cmd]; }
-- (void)setQueue:(id)queue { [self doesNotRecognizeSelector:_cmd]; }
-- (id)queue { [self doesNotRecognizeSelector:_cmd]; return nil; };
-- (void)setConcurrent:(BOOL)flag { [self doesNotRecognizeSelector:_cmd]; }
 
 @end
 
