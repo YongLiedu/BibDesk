@@ -442,6 +442,7 @@ static id sharedController = nil;
                 [item setAction:@selector(showPane:)];
                 [item setImage:[pane icon]];
                 [item setLabel:[self localizedLabelForIdentifier:itemIdentifier]];
+                [item setVisibilityPriority:NSToolbarItemVisibilityPriorityLow];
             }
         }
         if (item) {
