@@ -129,6 +129,7 @@ struct BDSKDOServerFlags {
 - (void)setLocalServer:(byref id)anObject;
 {
     BDSKASSERT([NSThread isMainThread]);
+    BDSKASSERT(protocol_conformsToProtocol([self protocolForServerThread], @protocol(BDSKAsyncDOServerThread)));
     [anObject setProtocolForProxy:[self protocolForServerThread]];
     serverOnServerThread = [anObject retain];
 }
@@ -196,6 +197,7 @@ struct BDSKDOServerFlags {
         [localThreadConnection enableMultipleThreads];
         
         serverOnMainThread = [[localThreadConnection rootProxy] retain];
+        BDSKASSERT(protocol_conformsToProtocol([self protocolForMainThread], @protocol(BDSKAsyncDOServerMainThread)));
         [serverOnMainThread setProtocolForProxy:[self protocolForMainThread]];
         // handshake, this sets the proxy at the other side
         [serverOnMainThread setLocalServer:self];
