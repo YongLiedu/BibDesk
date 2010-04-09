@@ -556,7 +556,7 @@
     if ([[self currentGroupField] isPersonField]) {
         BibAuthor *fuzzyName = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name andPub:nil];
         for (BDSKCategoryGroup *group in [groups categoryGroups])
-            if ([[group name] fuzzyEqual:fuzzyName] == NSOrderedSame)
+            if ([[group name] fuzzyEqual:fuzzyName])
                 return group;
     } else {
         for (BDSKCategoryGroup *group in [groups categoryGroups])
@@ -696,7 +696,7 @@
 
 - (BDSKGroup *)valueInLibraryGroupsWithUniqueID:(NSString *)aUniqueID {
     BDSKGroup *group = [[self groups] libraryGroup];
-    return [[group uniqueID] isEqualToString:aUniqueID] == NSOrderedSame ? group : nil;
+    return [[group uniqueID] isEqualToString:aUniqueID] ? group : nil;
 }
 
 - (BDSKGroup *)valueInLibraryGroupsWithName:(NSString *)name {
@@ -713,7 +713,7 @@
 
 - (BDSKGroup *)valueInLastImportGroupsWithUniqueID:(NSString *)aUniqueID {
     BDSKGroup *group = [groups lastImportGroup];
-    return [[group uniqueID] isEqualToString:aUniqueID] == NSOrderedSame ? group : nil;
+    return [[group uniqueID] isEqualToString:aUniqueID] ? group : nil;
 }
 
 - (BDSKGroup *)valueInLastImportGroupsWithName:(NSString *)name {
@@ -729,7 +729,7 @@
 
 - (BDSKWebGroup *)valueInWebGroupsWithUniqueID:(NSString *)aUniqueID {
     BDSKWebGroup *group = [groups webGroup];
-    return [[group uniqueID] isEqualToString:aUniqueID] == NSOrderedSame ? group : nil;
+    return [[group uniqueID] isEqualToString:aUniqueID] ? group : nil;
 }
 
 - (BDSKWebGroup *)valueInWebGroupsWithName:(NSString *)name {
