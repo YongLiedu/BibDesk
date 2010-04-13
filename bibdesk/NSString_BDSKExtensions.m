@@ -568,23 +568,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         return self;
     
     NSMutableString *toReturn = [self mutableCopy];
-    while (r.length) {
-        NSUInteger start;
-        if (r.location == 0 || [toReturn characterAtIndex:(r.location - 1)] != '\\') {
-            // insert the backslash, then advance the search range by two characters
-            [toReturn replaceCharactersInRange:NSMakeRange(r.location, 0) withString:@"\\"];
-            start = r.location + 2;
-            r = [toReturn rangeOfCharacterFromSet:charSet options:NSLiteralSearch range:NSMakeRange(start, [toReturn length] - start)];
-        } else {
-            // this one was already escaped, so advance a character and repeat the search, unless that puts us over the end
-            if (r.location < [toReturn length]) {
-                start = r.location + 1;
-                r = [toReturn rangeOfCharacterFromSet:charSet options:NSLiteralSearch range:NSMakeRange(start, [toReturn length] - start)];
-            } else {
-                r = NSMakeRange(NSNotFound, 0);
-            }
-        }
-    }
+    [toReturn backslashEscapeCharactersInSet:charSet];
     return [toReturn autorelease];
 }
 
@@ -1968,6 +1952,27 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     while ((next = va_arg(argList, NSString *)))
         [self appendString:next];
     va_end(argList);
+}
+
+- (void)backslashEscapeCharactersInSet:(NSCharacterSet *)charSet {
+    NSRange r = [self rangeOfCharacterFromSet:charSet options:NSLiteralSearch];
+    while (r.length) {
+        NSUInteger start;
+        if (r.location == 0 || [self characterAtIndex:(r.location - 1)] != '\\') {
+            // insert the backslash, then advance the search range by two characters
+            [self replaceCharactersInRange:NSMakeRange(r.location, 0) withString:@"\\"];
+            start = r.location + 2;
+            r = [self rangeOfCharacterFromSet:charSet options:NSLiteralSearch range:NSMakeRange(start, [self length] - start)];
+        } else {
+            // this one was already escaped, so advance a character and repeat the search, unless that puts us over the end
+            if (r.location < [self length]) {
+                start = r.location + 1;
+                r = [self rangeOfCharacterFromSet:charSet options:NSLiteralSearch range:NSMakeRange(start, [self length] - start)];
+            } else {
+                r = NSMakeRange(NSNotFound, 0);
+            }
+        }
+    }
 }
 
 @end

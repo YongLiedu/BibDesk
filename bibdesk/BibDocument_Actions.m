@@ -497,12 +497,8 @@ static BOOL changingColors = NO;
     }
     [items release];
     
-    // ampersands are common in publication names
-    [body replaceOccurrencesOfString:@"&" withString:@"\\&" options:NSLiteralSearch range:NSMakeRange(0, [body length])];
-    // escape backslashes
-    [body replaceOccurrencesOfString:@"\\" withString:@"\\\\" options:NSLiteralSearch range:NSMakeRange(0, [body length])];
-    // escape double quotes
-    [body replaceOccurrencesOfString:@"\"" withString:@"\\\"" options:NSLiteralSearch range:NSMakeRange(0, [body length])];
+    // escapes ampersands, backslashes, and double quotes
+    [body backslashEscapeCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"&\\\""]];
 
     [[NSWorkspace sharedWorkspace] emailTo:nil subject:@"BibDesk references" body:body attachments:files];
 }
