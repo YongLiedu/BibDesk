@@ -499,7 +499,7 @@ static BOOL changingColors = NO;
     
     // escapes ampersands, backslashes, and double quotes
     [body backslashEscapeCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"&\""]];
-    [body replaceOccurrencesOfString:@"\\" withString:@"\\\\" options:NSLiteralSearch range:NSMakeRange(0, [body length])];
+    [body backslashEscapeCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\\"]];
 
     [[NSWorkspace sharedWorkspace] emailTo:nil subject:@"BibDesk references" body:body attachments:files];
 }
