@@ -54,10 +54,7 @@
     BOOL isEditing;
 }
 - (void)registerForDelegatedDraggedTypes:(NSArray *)pboardTypes;
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-- (id <BDSKFieldEditorDelegate>)delegate;
-- (void)setDelegate:(id <BDSKFieldEditorDelegate>)newDelegate;
-#endif
+SUBCLASS_DELEGATE_DECLARATION(BDSKFieldEditorDelegate)
 @end
 
 // the above delegate methods could be implemented by calling these delegate methods for NSControl subclasses that actually have a delegate

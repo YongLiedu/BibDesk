@@ -234,15 +234,7 @@
 
 #pragma mark Delegate and DataSource
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-- (id <BDSKGroupOutlineViewDelegate>)delegate {
-    return (id <BDSKGroupOutlineViewDelegate>)[super delegate];
-}
-
-- (void)setDelegate:(id <BDSKGroupOutlineViewDelegate>)newDelegate {
-    [super setDelegate:newDelegate];
-}
-#endif
+SUBCLASS_DELEGATE_DEFINITION(BDSKGroupOutlineViewDelegate)
 
 @end
 

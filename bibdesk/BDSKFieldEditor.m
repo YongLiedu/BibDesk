@@ -333,15 +333,7 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
     return [super resignFirstResponder];
 }
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-- (id <BDSKFieldEditorDelegate>)delegate {
-    return (id <BDSKFieldEditorDelegate>)[super delegate];
-}
-
-- (void)setDelegate:(id <BDSKFieldEditorDelegate>)newDelegate {
-    [super setDelegate:newDelegate];
-}
-#endif
+SUBCLASS_DELEGATE_DEFINITION(BDSKFieldEditorDelegate)
 
 @end
 

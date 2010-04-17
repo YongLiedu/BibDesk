@@ -48,10 +48,7 @@
 
 
 @interface BDSKNotesOutlineView : BDSKOutlineView
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-- (id <BDSKNotesOutlineViewDelegate>)delegate;
-- (void)setDelegate:(id <BDSKNotesOutlineViewDelegate>)newDelegate;
-#endif
+SUBCLASS_DELEGATE_DECLARATION(BDSKNotesOutlineViewDelegate)
 @end
 
 

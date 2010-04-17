@@ -380,14 +380,6 @@
     return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
 }
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-- (id <BDSKNotesOutlineViewDelegate>)delegate {
-    return (id <BDSKNotesOutlineViewDelegate>)[super delegate];
-}
-
-- (void)setDelegate:(id <BDSKNotesOutlineViewDelegate>)newDelegate {
-    [super setDelegate:newDelegate];
-}
-#endif
+SUBCLASS_DELEGATE_DEFINITION(BDSKNotesOutlineViewDelegate)
 
 @end

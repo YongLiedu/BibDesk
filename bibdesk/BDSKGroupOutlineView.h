@@ -55,9 +55,6 @@
 
 - (NSTextFieldCell *)parentCell;
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-- (id <BDSKGroupOutlineViewDelegate>)delegate;
-- (void)setDelegate:(id <BDSKGroupOutlineViewDelegate>)newDelegate;
-#endif
+SUBCLASS_DELEGATE_DECLARATION(BDSKGroupOutlineViewDelegate)
 
 @end

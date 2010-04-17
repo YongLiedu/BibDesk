@@ -55,10 +55,7 @@ typedef NSUInteger BDSKTemplateListType;
 
 
 @interface BDSKTemplateOutlineView : BDSKOutlineView
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-- (id <BDSKTemplateOutlineViewDelegate>)delegate;
-- (void)setDelegate:(id <BDSKTemplateOutlineViewDelegate>)newDelegate;
-#endif
+SUBCLASS_DELEGATE_DECLARATION(BDSKTemplateOutlineViewDelegate)
 @end
 
 

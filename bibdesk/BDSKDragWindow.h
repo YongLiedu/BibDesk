@@ -43,8 +43,5 @@
 @end
 
 @interface BDSKDragWindow : NSWindow
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-- (id <BDSKDragWindowDelegate>)delegate;
-- (void)setDelegate:(id <BDSKDragWindowDelegate>)newDelegate;
-#endif
+SUBCLASS_DELEGATE_DECLARATION(BDSKDragWindowDelegate)
 @end

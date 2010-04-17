@@ -115,11 +115,7 @@
 - (NSFont *)font;
 - (void)setFont:(NSFont *)font;
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-- (id <BDSKOutlineViewDelegate>)delegate;
-- (void)setDelegate:(id <BDSKOutlineViewDelegate>)newDelegate;
-- (id <BDSKOutlineViewDataSource>)dataSource;
-- (void)setDataSource:(id <BDSKOutlineViewDataSource>)newDataSource;
-#endif
+SUBCLASS_DELEGATE_DECLARATION(BDSKOutlineViewDelegate)
+SUBCLASS_DATASOURCE_DECLARATION(BDSKOutlineViewDataSource)
 
 @end
