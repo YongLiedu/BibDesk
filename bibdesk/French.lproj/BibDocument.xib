@@ -2,10 +2,10 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1050</int>
-		<string key="IBDocument.SystemVersion">10C540</string>
+		<string key="IBDocument.SystemVersion">10D573</string>
 		<string key="IBDocument.InterfaceBuilderVersion">740</string>
-		<string key="IBDocument.AppKitVersion">1038.25</string>
-		<string key="IBDocument.HIToolboxVersion">458.00</string>
+		<string key="IBDocument.AppKitVersion">1038.29</string>
+		<string key="IBDocument.HIToolboxVersion">460.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
 			<string key="NS.object.0">740</string>
@@ -1918,7 +1918,7 @@
 					</object>
 					<object class="NSMenuItem" id="321838436">
 						<reference key="NSMenu" ref="1048436194"/>
-						<string key="NSTitle">Ajouter un champ…</string>
+						<string key="NSTitle">Ajouter un champ de groupe…</string>
 						<string key="NSKeyEquiv"/>
 						<int key="NSMnemonicLoc">2147483647</int>
 						<reference key="NSOnImage" ref="530244347"/>
@@ -1926,7 +1926,7 @@
 					</object>
 					<object class="NSMenuItem" id="486527779">
 						<reference key="NSMenu" ref="1048436194"/>
-						<string key="NSTitle">Supprimer le champ…</string>
+						<string key="NSTitle">Supprimer le champ de groupe…</string>
 						<string key="NSKeyEquiv"/>
 						<int key="NSMnemonicLoc">2147483647</int>
 						<reference key="NSOnImage" ref="530244347"/>
@@ -2032,7 +2032,7 @@
 				<string key="NSExtension">NSResponder</string>
 			</object>
 			<object class="NSCustomView" id="84178352">
-				<reference key="NSNextResponder"/>
+				<nil key="NSNextResponder"/>
 				<int key="NSvFlags">256</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -2041,7 +2041,6 @@
 						<int key="NSvFlags">256</int>
 						<string key="NSFrame">{{65, 9}, {282, 18}}</string>
 						<reference key="NSSuperview" ref="84178352"/>
-						<reference key="NSWindow"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSButtonCell" key="NSCell" id="611970210">
 							<int key="NSCellFlags">67239424</int>
@@ -2069,7 +2068,6 @@
 						<int key="NSvFlags">256</int>
 						<string key="NSFrame">{{23, 72}, {120, 17}}</string>
 						<reference key="NSSuperview" ref="84178352"/>
-						<reference key="NSWindow"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSTextFieldCell" key="NSCell" id="648632296">
 							<int key="NSCellFlags">67239424</int>
@@ -2083,8 +2081,6 @@
 					</object>
 				</object>
 				<string key="NSFrameSize">{356, 100}</string>
-				<reference key="NSSuperview"/>
-				<reference key="NSWindow"/>
 				<string key="NSClassName">NSView</string>
 				<string key="NSExtension">NSResponder</string>
 			</object>
@@ -4908,7 +4904,7 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{63, 703}, {156, 73}}</string>
+					<string>{{63, 703}, {277, 73}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -5583,10 +5579,12 @@
 							<string>search:</string>
 							<string>selectAllPublications:</string>
 							<string>selectCrossrefParentAction:</string>
+							<string>selectCrossrefs:</string>
 							<string>selectDuplicates:</string>
 							<string>selectIncompletePublications:</string>
 							<string>selectLibraryGroup:</string>
 							<string>selectPossibleDuplicates:</string>
+							<string>selectPublicationsFromAuxFile:</string>
 							<string>sendToLyX:</string>
 							<string>showDocumentInfoWindow:</string>
 							<string>showMacrosWindow:</string>
@@ -5602,6 +5600,8 @@
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -5712,9 +5712,6 @@
 							<string>mainView</string>
 							<string>saveAccessoryView</string>
 							<string>saveTextEncodingPopupButton</string>
-							<string>searchBookmarkField</string>
-							<string>searchBookmarkPopUp</string>
-							<string>searchBookmarkSheet</string>
 							<string>searchField</string>
 							<string>sideFileView</string>
 							<string>sidePreviewButton</string>
@@ -5748,9 +5745,6 @@
 							<string>NSView</string>
 							<string>NSView</string>
 							<string>BDSKEncodingPopUpButton</string>
-							<string>NSTextField</string>
-							<string>NSPopUpButton</string>
-							<string>NSWindow</string>
 							<string>NSSearchField</string>
 							<string>FVFileView</string>
 							<string>NSSegmentedControl</string>
@@ -5789,6 +5783,7 @@
 							<string>editAction:</string>
 							<string>editPubCmd:</string>
 							<string>editPubOrOpenURLAction:</string>
+							<string>editRepresentedPub:</string>
 							<string>emailPubCmd:</string>
 							<string>generateCiteKey:</string>
 							<string>importFromFileAction:</string>
@@ -5811,9 +5806,11 @@
 							<string>revealLocalURL:</string>
 							<string>selectAllPublications:</string>
 							<string>selectCrossrefParentAction:</string>
+							<string>selectCrossrefs:</string>
 							<string>selectDuplicates:</string>
 							<string>selectIncompletePublications:</string>
 							<string>selectPossibleDuplicates:</string>
+							<string>selectPublicationsFromAuxFile:</string>
 							<string>sendToLyX:</string>
 							<string>showDocumentInfoWindow:</string>
 							<string>showMacrosWindow:</string>
@@ -5827,6 +5824,9 @@
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -5910,7 +5910,6 @@
 							<string>changeGroupFieldAction:</string>
 							<string>changeIntersectGroupsAction:</string>
 							<string>copyGroupURLAction:</string>
-							<string>dismissSearchBookmarkSheet:</string>
 							<string>editGroupAction:</string>
 							<string>editNewCategoryGroupWithSelection:</string>
 							<string>editNewStaticGroupWithSelection:</string>
@@ -5932,7 +5931,6 @@
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -6102,13 +6100,6 @@
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBUserSource</string>
 						<string key="minorKey"/>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSCell</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKCenterScaledImageCell.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
