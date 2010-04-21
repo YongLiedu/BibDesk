@@ -46,7 +46,6 @@
 		3D824AA907D099C300FB2F67 /* BDSKBackgroundView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D824AA707D099C300FB2F67 /* BDSKBackgroundView.m */; };
 		3D8663400802C25800FF1724 /* BDSKTypeInfoEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D86633E0802C25800FF1724 /* BDSKTypeInfoEditor.m */; };
 		3D866C2908031CEC00FF1724 /* BDSKCharacterConversion.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D866C2708031CEC00FF1724 /* BDSKCharacterConversion.m */; };
-		3D8A5520082D1F86008E818C /* BibDesk Help in Resources */ = {isa = PBXBuildFile; fileRef = 3D8A54F6082D1F86008E818C /* BibDesk Help */; };
 		3D9EC25307C66B1E00DE459D /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D9EC25207C66B1E00DE459D /* WebKit.framework */; };
 		3DA82939083ECE9300321864 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3DA82938083ECE9300321864 /* Localizable.strings */; };
 		3DAEA2EE07703F6000AF111A /* BDSKUndoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DAEA2EC07703F6000AF111A /* BDSKUndoManager.m */; };
@@ -310,6 +309,11 @@
 		CEEFE6C20B0403E700668BB0 /* BDSKGroupsArray.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFE6C00B0403E700668BB0 /* BDSKGroupsArray.m */; };
 		CEF1817F0CEB702000716E85 /* Bookmarks.plist in Resources */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
 		CEF181BD0CEB711700716E85 /* Bookmarks.plist in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
+		CEF1D6B2117F015A0069E249 /* BibDeskHelp in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D682117F015A0069E249 /* BibDeskHelp */; };
+		CEF1D6B5117F018C0069E249 /* bibdesk.texi in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6B3117F018C0069E249 /* bibdesk.texi */; };
+		CEF1D6B6117F018C0069E249 /* version.texi in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6B4117F018C0069E249 /* version.texi */; };
+		CEF1D6BC117F01C60069E249 /* applehelp.init in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6BA117F01C60069E249 /* applehelp.init */; };
+		CEF1D6BD117F01C60069E249 /* postprocess-nontitle.py in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6BB117F01C60069E249 /* postprocess-nontitle.py */; };
 		CEF2EEE70F3462A900A7989E /* NSColor_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */; };
 		CEF546100F56BDDB008A630F /* BDSKStringArrayFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5460E0F56BDDB008A630F /* BDSKStringArrayFormatter.m */; };
 		CEF5C0420F546ADB00DBC864 /* TestBDSKRISParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0270F5469E300DBC864 /* TestBDSKRISParser.m */; };
@@ -768,9 +772,6 @@
 		27D4FB5407DE7A83001CAB00 /* HelpNotes.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = HelpNotes.txt; sourceTree = "<group>"; };
 		27D4FB5707DE7A97001CAB00 /* build_instructions.tex */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = build_instructions.tex; sourceTree = "<group>"; };
 		27D4FB5807DE7A97001CAB00 /* HackingBibDesk.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = HackingBibDesk.rtf; sourceTree = "<group>"; };
-		27E89E220805E9F500E4DA08 /* applehelp.init */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = applehelp.init; path = "BibDesk Help/applehelp.init"; sourceTree = "<group>"; };
-		27E89E230805E9F500E4DA08 /* version.texi */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = version.texi; path = "English.lproj/BibDesk Help/version.texi"; sourceTree = "<group>"; };
-		27E89E240805E9F500E4DA08 /* bibdesk.texi */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = bibdesk.texi; path = "English.lproj/BibDesk Help/bibdesk.texi"; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -789,7 +790,6 @@
 		3D86633E0802C25800FF1724 /* BDSKTypeInfoEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTypeInfoEditor.m; sourceTree = "<group>"; };
 		3D866C2608031CEC00FF1724 /* BDSKCharacterConversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCharacterConversion.h; sourceTree = "<group>"; };
 		3D866C2708031CEC00FF1724 /* BDSKCharacterConversion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCharacterConversion.m; sourceTree = "<group>"; };
-		3D8A54F7082D1F86008E818C /* English */ = {isa = PBXFileReference; lastKnownFileType = folder; name = English; path = "English.lproj/BibDesk Help"; sourceTree = "<group>"; };
 		3D9EC25207C66B1E00DE459D /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = /System/Library/Frameworks/WebKit.framework; sourceTree = "<absolute>"; };
 		3DAEA2EB07703F6000AF111A /* BDSKUndoManager.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKUndoManager.h; sourceTree = "<group>"; };
 		3DAEA2EC07703F6000AF111A /* BDSKUndoManager.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKUndoManager.m; sourceTree = "<group>"; };
@@ -1242,6 +1242,11 @@
 		CEEFE6C00B0403E700668BB0 /* BDSKGroupsArray.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKGroupsArray.m; sourceTree = "<group>"; };
 		CEEFE6C10B0403E700668BB0 /* BDSKGroupsArray.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKGroupsArray.h; sourceTree = "<group>"; };
 		CEF1817E0CEB701F00716E85 /* Bookmarks.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Bookmarks.plist; sourceTree = "<group>"; };
+		CEF1D683117F015A0069E249 /* English */ = {isa = PBXFileReference; lastKnownFileType = folder; name = English; path = English.lproj/BibDeskHelp; sourceTree = "<group>"; };
+		CEF1D6B3117F018C0069E249 /* bibdesk.texi */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = bibdesk.texi; path = English.lproj/BibDeskHelp/bibdesk.texi; sourceTree = "<group>"; };
+		CEF1D6B4117F018C0069E249 /* version.texi */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = version.texi; path = English.lproj/BibDeskHelp/version.texi; sourceTree = "<group>"; };
+		CEF1D6BA117F01C60069E249 /* applehelp.init */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = applehelp.init; path = BibDeskHelp/applehelp.init; sourceTree = "<group>"; };
+		CEF1D6BB117F01C60069E249 /* postprocess-nontitle.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = "postprocess-nontitle.py"; path = "BibDeskHelp/postprocess-nontitle.py"; sourceTree = "<group>"; };
 		CEF2EEE40F3462A900A7989E /* NSColor_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSColor_BDSKExtensions.h; sourceTree = "<group>"; };
 		CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSColor_BDSKExtensions.m; sourceTree = "<group>"; };
 		CEF5460D0F56BDDB008A630F /* BDSKStringArrayFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStringArrayFormatter.h; sourceTree = "<group>"; };
@@ -1587,7 +1592,6 @@
 		F9EF21B508B1572500AAC9A9 /* BDSKScrollableTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScrollableTextFieldCell.m; sourceTree = "<group>"; };
 		F9EF94E30D15FE7400314058 /* BDSKFileMigrationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFileMigrationController.h; sourceTree = "<group>"; };
 		F9EF94E40D15FE7400314058 /* BDSKFileMigrationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFileMigrationController.m; sourceTree = "<group>"; };
-		F9F0856808247BC800812F2A /* postprocess-nontitle.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = "postprocess-nontitle.py"; path = "BibDesk Help/postprocess-nontitle.py"; sourceTree = "<group>"; };
 		F9F5E20B0AE307C0007EBB31 /* NSError_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSError_BDSKExtensions.h; sourceTree = "<group>"; };
 		F9F5E20C0AE307C0007EBB31 /* NSError_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSError_BDSKExtensions.m; sourceTree = "<group>"; };
 		F9F5ECCF0AE5E7C8007EBB31 /* BDSKURLGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKURLGroup.h; sourceTree = "<group>"; };
@@ -1703,10 +1707,10 @@
 		27AF74ED08021E47006A6ADE /* Help Sources */ = {
 			isa = PBXGroup;
 			children = (
-				F9F0856808247BC800812F2A /* postprocess-nontitle.py */,
-				27E89E220805E9F500E4DA08 /* applehelp.init */,
-				27E89E230805E9F500E4DA08 /* version.texi */,
-				27E89E240805E9F500E4DA08 /* bibdesk.texi */,
+				CEF1D6BA117F01C60069E249 /* applehelp.init */,
+				CEF1D6BB117F01C60069E249 /* postprocess-nontitle.py */,
+				CEF1D6B3117F018C0069E249 /* bibdesk.texi */,
+				CEF1D6B4117F018C0069E249 /* version.texi */,
 			);
 			name = "Help Sources";
 			sourceTree = "<group>";
@@ -1757,7 +1761,7 @@
 			children = (
 				F9BF481E0BD69F6F0071094F /* MODS2MARC21slim.xsl */,
 				F9022DDA0758089500C3F701 /* Images */,
-				3D8A54F6082D1F86008E818C /* BibDesk Help */,
+				CEF1D682117F015A0069E249 /* BibDeskHelp */,
 				CEB5D58E1072AE350001C135 /* AddFieldSheet.xib */,
 				CEB5D5901072AE350001C135 /* AutoFile.xib */,
 				CEB5D5921072AE350001C135 /* AutoFileProgress.xib */,
@@ -3046,7 +3050,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				F9704FF10E6118080050F475 /* latex2rtf in Resources */,
-				3D8A5520082D1F86008E818C /* BibDesk Help in Resources */,
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				F9022CEE0758050E00C3F701 /* Credits.rtf in Resources */,
 				CE2941050A7F8F2900A46D05 /* ReadMe.rtf in Resources */,
@@ -3160,6 +3163,11 @@
 				CEFA8E0310C7E9250034C14B /* Overflow.tiff in Resources */,
 				CEFE71771129A91E0018CD74 /* ServicesMenu.strings in Resources */,
 				CE1782FC1158EFCB00B2EBDF /* BookmarkSheet.xib in Resources */,
+				CEF1D6B2117F015A0069E249 /* BibDeskHelp in Resources */,
+				CEF1D6B5117F018C0069E249 /* bibdesk.texi in Resources */,
+				CEF1D6B6117F018C0069E249 /* version.texi in Resources */,
+				CEF1D6BC117F01C60069E249 /* applehelp.init in Resources */,
+				CEF1D6BD117F01C60069E249 /* postprocess-nontitle.py in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3189,19 +3197,19 @@
 			files = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/BibDesk Help/applehelp.init",
-				"$(SRCROOT)/BibDesk Help/postprocess-nontitle.py",
-				"$(SRCROOT)/English.lproj/BibDesk Help/bibdesk.texi",
-				"$(SRCROOT)/English.lproj/BibDesk Help/version.texi",
+				"$(SRCROOT)/BibDeskHelp/applehelp.init",
+				"$(SRCROOT)/BibDeskHelp/postprocess-nontitle.py",
+				"$(SRCROOT)/English.lproj/BibDeskHelp/bibdesk.texi",
+				"$(SRCROOT)/English.lproj/BibDeskHelp/version.texi",
 			);
 			name = "Run Script: Build Help";
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/BibDesk Help/English.lproj/BibDesk Help/BibDesk Help.html",
-				"$(DERIVED_FILE_DIR)/BibDesk Help/English.lproj/BibDesk Help/BibDesk Help.helpindex",
+				"$(DERIVED_FILE_DIR)/BibDeskHelp/English.lproj/BibDeskHelp/BibDeskHelp.html",
+				"$(DERIVED_FILE_DIR)/BibDeskHelp/English.lproj/BibDeskHelp/BibDeskHelp.helpindex",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "HELP_NAME=\"BibDesk Help\"\n\nLOC_LANGS=(English)\n\nINPUT=\"${HELP_NAME}/bibdesk.texi\"\nTOOLS=\"${HELP_NAME}\"\nDEST=\"${HELP_NAME}\"\nPREFIX=\"${HELP_NAME}\"\n\nHELP_INDEXER=\"${SYSTEM_DEVELOPER_UTILITIES_DIR}/Help Indexer.app/Contents/MacOS/Help Indexer\"\n\nTARGET=\"${DERIVED_FILE_DIR}/${HELP_NAME}\"\n\ncd \"${SOURCE_ROOT}\"\n\n[ -d \"${TARGET}\" ] || /bin/mkdir -p \"${TARGET}\";\n\nfor LANG in ${LOC_LANGS[*]}; do\n\tLOC_TARGET=\"${TARGET}/${LANG}.lproj/${DEST}\";\n\t[ -d \"${LOC_TARGET}\" ] && /bin/rm -rf \"${LOC_TARGET}\"/* || /bin/mkdir -p \"${LOC_TARGET}\";\n\t\n\techo \"*** Creating help files in ${LOC_TARGET} ***\";\n\t\"${TOOLS}/texi2html\" \"${LANG}.lproj/${INPUT}\" --init-file=\"${TOOLS}/applehelp.init\" --prefix=\"${PREFIX}\" --output=\"${LOC_TARGET}\" --split=node --nonumber && \\\n\tpython \"${TOOLS}/postprocess-nontitle.py\" \"${LOC_TARGET}/${PREFIX}_\"*.html;\n\t\n\techo \"*** Indexing help in ${LOC_TARGET} ***\";\n\tif [ \"${LANG}\" = \"French\" ]; then STOPWORDS=\"fr\";\n\telif [ \"${LANG}\" = \"German\" ]; then STOPWORDS=\"de\";\n\telif [ \"${LANG}\" = \"Hungarian\" ]; then STOPWORDS=\"hu\";\n\telif [ \"${LANG}\" = \"Italian\" ]; then STOPWORDS=\"it\";\n\telif [ \"${LANG}\" = \"Spanish\" ]; then STOPWORDS=\"es\";\n\telif [ \"${LANG}\" = \"Swedish\" ]; then STOPWORDS=\"sv\";\n\telse LANG=\"en\";\n\tfi;\n\tif [ -x /usr/bin/hiutil ]; then\n\t\t/usr/bin/hiutil -Cagf \"${LOC_TARGET}/${HELP_NAME}.helpindex\" -s \"${STOPWORDS}\" -m \"${MINTERMLENGTH}\" \"${LOC_TARGET}\";\n\telif [ -x \"${HELP_INDEXER}\" ]; then\n\t\t\"${HELP_INDEXER}\" \"${LOC_TARGET}\" -ShowProgress NO -LogStyle 2 -IndexAnchors YES -TigerIndexing YES -GenerateSummaries YES -Stopwords \"${STOPWORDS}\" -MinTermLength \"${MINTERMLENGTH}\";\n\tfi;\ndone;\n";
+			shellScript = "HELP_NAME=\"BibDeskHelp\"\n\nLOC_LANGS=(English)\n\nINPUT=\"${HELP_NAME}/bibdesk.texi\"\nTOOLS=\"${HELP_NAME}\"\nDEST=\"${HELP_NAME}\"\nPREFIX=\"${HELP_NAME}\"\n\nHELP_INDEXER=\"${SYSTEM_DEVELOPER_UTILITIES_DIR}/Help Indexer.app/Contents/MacOS/Help Indexer\"\n\nTARGET=\"${DERIVED_FILE_DIR}/${HELP_NAME}\"\n\ncd \"${SOURCE_ROOT}\"\n\n[ -d \"${TARGET}\" ] || /bin/mkdir -p \"${TARGET}\";\n\nfor LANG in ${LOC_LANGS[*]}; do\n\tLOC_TARGET=\"${TARGET}/${LANG}.lproj/${DEST}\";\n\t[ -d \"${LOC_TARGET}\" ] && /bin/rm -rf \"${LOC_TARGET}\"/* || /bin/mkdir -p \"${LOC_TARGET}\";\n\t\n\techo \"*** Creating help files in ${LOC_TARGET} ***\";\n\t\"${TOOLS}/texi2html\" \"${LANG}.lproj/${INPUT}\" --init-file=\"${TOOLS}/applehelp.init\" --prefix=\"${PREFIX}\" --output=\"${LOC_TARGET}\" --split=node --nonumber && \\\n\tpython \"${TOOLS}/postprocess-nontitle.py\" \"${LOC_TARGET}/${PREFIX}_\"*.html;\n\t\n\techo \"*** Indexing help in ${LOC_TARGET} ***\";\n\tif [ \"${LANG}\" = \"French\" ]; then STOPWORDS=\"fr\";\n\telif [ \"${LANG}\" = \"German\" ]; then STOPWORDS=\"de\";\n\telif [ \"${LANG}\" = \"Hungarian\" ]; then STOPWORDS=\"hu\";\n\telif [ \"${LANG}\" = \"Italian\" ]; then STOPWORDS=\"it\";\n\telif [ \"${LANG}\" = \"Spanish\" ]; then STOPWORDS=\"es\";\n\telif [ \"${LANG}\" = \"Swedish\" ]; then STOPWORDS=\"sv\";\n\telse LANG=\"en\";\n\tfi;\n\tif [ -x /usr/bin/hiutil ]; then\n\t\t/usr/bin/hiutil -Cagf \"${LOC_TARGET}/${HELP_NAME}.helpindex\" -s \"${STOPWORDS}\" -m \"${MINTERMLENGTH}\" \"${LOC_TARGET}\";\n\telif [ -x \"${HELP_INDEXER}\" ]; then\n\t\t\"${HELP_INDEXER}\" \"${LOC_TARGET}\" -ShowProgress NO -LogStyle 2 -IndexAnchors YES -TigerIndexing YES -GenerateSummaries YES -Stopwords \"${STOPWORDS}\" -MinTermLength \"${MINTERMLENGTH}\";\n\tfi;\ndone;\n";
 		};
 		CEF834480C7750F000A3AD51 /* Run Script: Copy Help */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3209,16 +3217,16 @@
 			files = (
 			);
 			inputPaths = (
-				"$(DERIVED_FILE_DIR)/BibDesk Help/English.lproj/BibDesk Help/BibDesk Help.html",
+				"$(DERIVED_FILE_DIR)/BibDeskHelp/English.lproj/BibDeskHelp/BibDeskHelp.html",
 			);
 			name = "Run Script: Copy Help";
 			outputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/English.lproj/BibDesk Help/BibDesk Help.html",
-				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/French.lproj/BibDesk Help",
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/English.lproj/BibDeskHelp/BibDeskHelp.html",
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/French.lproj/BibDeskHelp",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "HELP_NAME=\"BibDesk Help\"\n\nSOURCE=\"${DERIVED_FILE_DIR}/${HELP_NAME}\";\nTARGET=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\";\nDEST=\"${HELP_NAME}\"\n\ncd \"${TARGET}\"\n\nfor LOC_DIR in *.lproj; do\n\tLOC_SOURCE=\"${SOURCE}/${LOC_DIR}/${DEST}\";\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}/${DEST}\";\n\tif [ -d \"${LOC_SOURCE}\" ]; then\n\t\techo \"*** Copying help files from ${LOC_SOURCE} to ${LOC_TARGET} ***\";\n\t\t/bin/rm -rf \"${LOC_TARGET}/\"*.html;\n\t\t/bin/cp -Rf \"${LOC_SOURCE}/\"*.html \"${LOC_TARGET}\";\n\t\t[ -f \"${LOC_SOURCE}/${HELP_NAME}.helpindex\" ] && \\\n\t\t\t/bin/cp -f \"${LOC_SOURCE}/${HELP_NAME}.helpindex\" \"${LOC_TARGET}\";\n\telse\n\t\techo \"*** Linking help files from ${LOC_TARGET} to ${TARGET}/English.lproj/${DEST} ***\";\n\t\t( cd \"${LOC_DIR}\"; /bin/rm -rf \"${DEST}\"; /bin/ln -fFs ../English.lproj/\"${DEST}\"; )\n\tfi;\ndone;\n";
+			shellScript = "HELP_NAME=\"BibDeskHelp\"\n\nSOURCE=\"${DERIVED_FILE_DIR}/${HELP_NAME}\";\nTARGET=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\";\nDEST=\"${HELP_NAME}\"\n\ncd \"${TARGET}\"\n\nfor LOC_DIR in *.lproj; do\n\tLOC_SOURCE=\"${SOURCE}/${LOC_DIR}/${DEST}\";\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}/${DEST}\";\n\tif [ -d \"${LOC_SOURCE}\" ]; then\n\t\techo \"*** Copying help files from ${LOC_SOURCE} to ${LOC_TARGET} ***\";\n\t\t/bin/rm -rf \"${LOC_TARGET}/\"*.html;\n\t\t/bin/cp -Rf \"${LOC_SOURCE}/\"*.html \"${LOC_TARGET}\";\n\t\t[ -f \"${LOC_SOURCE}/${HELP_NAME}.helpindex\" ] && \\\n\t\t\t/bin/cp -f \"${LOC_SOURCE}/${HELP_NAME}.helpindex\" \"${LOC_TARGET}\";\n\telse\n\t\techo \"*** Linking help files from ${LOC_TARGET} to ${TARGET}/English.lproj/${DEST} ***\";\n\t\t( cd \"${LOC_DIR}\"; /bin/rm -rf \"${DEST}\"; /bin/ln -fFs ../English.lproj/\"${DEST}\"; )\n\tfi;\ndone;\n";
 		};
 		EF168DDB0F11325B002F4D9F /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3688,14 +3696,6 @@
 				F9C7D3FE0BE9280F00D65C7F /* French */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		3D8A54F6082D1F86008E818C /* BibDesk Help */ = {
-			isa = PBXVariantGroup;
-			children = (
-				3D8A54F7082D1F86008E818C /* English */,
-			);
-			name = "BibDesk Help";
 			sourceTree = "<group>";
 		};
 		3DA82938083ECE9300321864 /* Localizable.strings */ = {
@@ -4218,6 +4218,14 @@
 				CEB5D6971072AE950001C135 /* French */,
 			);
 			name = TextImport.xib;
+			sourceTree = "<group>";
+		};
+		CEF1D682117F015A0069E249 /* BibDeskHelp */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEF1D683117F015A0069E249 /* English */,
+			);
+			name = BibDeskHelp;
 			sourceTree = "<group>";
 		};
 		CEF8F8DD0F93519700948A88 /* WebGroupStartPage.html */ = {
