@@ -172,7 +172,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
             NSDictionary *dict;
             
             if ([file hasPrefix:@"."]) {
-            } else if ([wm isAppleScriptFileAtPath:filePath] || [wm isApplicationAtPath:filePath] || ([fm isExecutableFileAtPath:filePath] && isDir == NO)) {
+            } else if ([wm isAppleScriptFileAtPath:filePath] || [wm isApplicationAtPath:filePath] || [wm isAutomatorWorkflowAtPath:filePath] || ([fm isExecutableFileAtPath:filePath] && isDir == NO)) {
                 dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, @"filename", nil];
                 [fileArray addObject:dict];
                 [dict release];
