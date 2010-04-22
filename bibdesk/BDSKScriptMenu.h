@@ -38,9 +38,8 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface BDSKScriptMenu : NSMenu <NSMenuDelegate>
-{
-    NSDate *cachedDate;
+@interface BDSKScriptMenu : NSMenu <NSMenuDelegate> {
+    FSEventStreamRef streamRef;
 }
 
 + (void)addScriptsToMainMenu;
