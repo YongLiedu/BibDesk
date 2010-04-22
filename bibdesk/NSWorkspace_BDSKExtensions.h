@@ -61,6 +61,7 @@
 
 - (BOOL)isAppleScriptFileAtPath:(NSString *)path;
 - (BOOL)isApplicationAtPath:(NSString *)path;
+- (BOOL)isAutomatorWorkflowAtPath:(NSString *)path;
 - (BOOL)isFolderAtPath:(NSString *)path;
 
 - (BOOL)emailTo:(NSString *)receiver subject:(NSString *)subject body:(NSString *)body attachments:(NSArray *)files;

@@ -311,6 +311,11 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
     return theUTI ? [self type:theUTI conformsToType:(id)kUTTypeApplication] : NO;
 }
 
+- (BOOL)isAutomatorWorkflowAtPath:(NSString *)path {
+    NSString *theUTI = [self typeOfFile:[[path stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL];
+    return theUTI ? [self type:theUTI conformsToType:@"com.apple.automator-workflow"] : NO;
+}
+
 - (BOOL)isFolderAtPath:(NSString *)path {
     NSString *theUTI = [self typeOfFile:[[path stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL];
     return theUTI ? [self type:theUTI conformsToType:(id)kUTTypeFolder] : NO;

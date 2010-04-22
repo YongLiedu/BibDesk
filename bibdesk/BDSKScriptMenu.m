@@ -195,7 +195,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
 {        
     static NSSet *scriptExtensions = nil;
     if (scriptExtensions == nil)
-        scriptExtensions = [[NSSet alloc] initWithObjects:@"scpt", @"scptd", @"applescript", @"sh", @"csh", @"command", @"py", @"rb", @"pl", @"pm", @"app", nil];
+        scriptExtensions = [[NSSet alloc] initWithObjects:@"scpt", @"scptd", @"applescript", @"sh", @"csh", @"command", @"py", @"rb", @"pl", @"pm", @"app", @"workflow", nil];
     
     // we call this method recursively; if the menu is nil, the stuff we add won't be retained
     NSParameterAssert(menu != nil);
@@ -317,6 +317,8 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
                 [wm selectFile:scriptFilename inFileViewerRootedAtPath:@""];
             }
         }
+    } else if ([wm isAutomatorWorkflowAtPath:scriptFilename]) {
+        [BDSKTask launchedTaskWithLaunchPath:@"/usr/bin/automator" arguments:[NSArray arrayWithObjects:scriptFilename, nil]];
     } else if ([fm isExecutableFileAtPath:scriptFilename]) {
         [BDSKTask launchedTaskWithLaunchPath:scriptFilename arguments:[NSArray array]];
     }
