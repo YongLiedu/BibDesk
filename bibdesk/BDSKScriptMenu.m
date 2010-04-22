@@ -191,12 +191,30 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
     return fileArray;
 }
 
-- (void)updateSubmenu:(NSMenu *)menu withScripts:(NSArray *)scripts;
-{        
+static NSString *menuItemTitle(NSString *path) {
     static NSSet *scriptExtensions = nil;
     if (scriptExtensions == nil)
         scriptExtensions = [[NSSet alloc] initWithObjects:@"scpt", @"scptd", @"applescript", @"sh", @"csh", @"command", @"py", @"rb", @"pl", @"pm", @"app", @"workflow", nil];
     
+    NSString *name = [path lastPathComponent];
+    
+    // why not use displayNameAtPath: or stringByDeletingPathExtension?
+    // we want to remove the standard script filetype extension even if they're displayed in Finder
+    // but we don't want to truncate a non-extension from a script without a filetype extension.
+    // e.g. "Foo.scpt" -> "Foo" but not "Foo 2.5" -> "Foo 2"
+    if ([scriptExtensions containsObject:[[name pathExtension] lowercaseString]])
+        name = [name stringByDeletingPathExtension];
+    
+    NSScanner *scanner = [NSScanner scannerWithString:name];
+    [scanner setCharactersToBeSkipped:nil];
+    if ([scanner scanCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL] && [scanner scanString:@"-" intoString:NULL])
+        name = [name substringFromIndex:[scanner scanLocation]];
+    
+    return name;
+}
+
+- (void)updateSubmenu:(NSMenu *)menu withScripts:(NSArray *)scripts;
+{        
     // we call this method recursively; if the menu is nil, the stuff we add won't be retained
     NSParameterAssert(menu != nil);
     
@@ -206,7 +224,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
     for (NSDictionary *scriptInfo in scripts) {
         NSString *scriptFilename = [scriptInfo objectForKey:@"filename"];
 		NSArray *folderContent = [scriptInfo objectForKey:@"content"];
-        NSString *scriptName = [scriptFilename lastPathComponent];
+        NSString *scriptName = menuItemTitle(scriptFilename);
 		NSMenuItem *item;
 		
 		if (scriptName == nil) {
@@ -222,12 +240,6 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
 			
 			[self updateSubmenu:submenu withScripts:folderContent];
 		} else {
-			// why not use displayNameAtPath: or stringByDeletingPathExtension?
-			// we want to remove the standard script filetype extension even if they're displayed in Finder
-			// but we don't want to truncate a non-extension from a script without a filetype extension.
-			// e.g. "Foo.scpt" -> "Foo" but not "Foo 2.5" -> "Foo 2"
-            if ([scriptExtensions containsObject:[[scriptName pathExtension] lowercaseString]])
-                scriptName = [scriptName stringByDeletingPathExtension];
 			NSString *showScriptName = [NSString stringWithFormat:NSLocalizedString(@"Show %@", @"menu item title"), scriptName];
             
 			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:scriptName action:@selector(executeScript:) keyEquivalent:@""];
