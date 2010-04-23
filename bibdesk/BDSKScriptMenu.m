@@ -181,39 +181,6 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
     }
 }
 
-- (NSArray *)directoryContentsAtPath:(NSString *)path recursionDepth:(NSInteger)recursionDepth
-{
-	NSMutableArray *fileArray = [NSMutableArray array];
-    NSFileManager *fm = [NSFileManager defaultManager];
-    NSWorkspace *wm = [NSWorkspace sharedWorkspace];
-    
-    for (NSString *file in [fm contentsOfDirectoryAtPath:path error:NULL]) {
-        NSString *filePath = [path stringByAppendingPathComponent:file];
-        NSDictionary *fileAttributes = [fm attributesOfItemAtPath:filePath error:NULL];
-        NSString *fileType = [fileAttributes valueForKey:NSFileType];
-        BOOL isDir = [fileType isEqualToString:NSFileTypeDirectory];
-        NSDictionary *dict;
-        
-        if ([file hasPrefix:@"."]) {
-        } else if ([wm isAppleScriptFileAtPath:filePath] || [wm isApplicationAtPath:filePath] || [wm isAutomatorWorkflowAtPath:filePath] || ([fm isExecutableFileAtPath:filePath] && isDir == NO)) {
-            dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, FILENAME_KEY, nil];
-            [fileArray addObject:dict];
-            [dict release];
-        } else if (isDir && [wm isFolderAtPath:filePath] && recursionDepth < 3) {
-            // avoid recursing too many times (and creating an excessive number of submenus)
-            NSArray *content = [self directoryContentsAtPath:filePath recursionDepth:recursionDepth + 1];
-            if ([content count] > 0) {
-                dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, FILENAME_KEY, content, CONTENT_KEY, nil];
-                [fileArray addObject:dict];
-                [dict release];
-            }
-        }
-    }
-    [fileArray sortUsingDescriptors:sortDescriptors];
-	
-    return fileArray;
-}
-
 static NSString *menuItemTitle(NSString *path) {
     static NSSet *scriptExtensions = nil;
     if (scriptExtensions == nil)
@@ -236,6 +203,43 @@ static NSString *menuItemTitle(NSString *path) {
     return name;
 }
 
+- (NSArray *)directoryContentsAtPath:(NSString *)path recursionDepth:(NSInteger)recursionDepth
+{
+	NSMutableArray *fileArray = [NSMutableArray array];
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSWorkspace *wm = [NSWorkspace sharedWorkspace];
+    
+    for (NSString *file in [fm contentsOfDirectoryAtPath:path error:NULL]) {
+        NSString *filePath = [path stringByAppendingPathComponent:file];
+        NSDictionary *fileAttributes = [fm attributesOfItemAtPath:filePath error:NULL];
+        NSString *fileType = [fileAttributes valueForKey:NSFileType];
+        BOOL isDir = [fileType isEqualToString:NSFileTypeDirectory];
+        NSDictionary *dict;
+        
+        if ([file hasPrefix:@"."]) {
+        } else if ([menuItemTitle(file) isEqualToString:@"-"]) {
+            dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, FILENAME_KEY, nil];
+            [fileArray addObject:dict];
+            [dict release];
+        } else if ([wm isAppleScriptFileAtPath:filePath] || [wm isApplicationAtPath:filePath] || [wm isAutomatorWorkflowAtPath:filePath] || ([fm isExecutableFileAtPath:filePath] && isDir == NO)) {
+            dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, FILENAME_KEY, nil];
+            [fileArray addObject:dict];
+            [dict release];
+        } else if (isDir && [wm isFolderAtPath:filePath] && recursionDepth < 3) {
+            // avoid recursing too many times (and creating an excessive number of submenus)
+            NSArray *content = [self directoryContentsAtPath:filePath recursionDepth:recursionDepth + 1];
+            if ([content count] > 0) {
+                dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, FILENAME_KEY, content, CONTENT_KEY, nil];
+                [fileArray addObject:dict];
+                [dict release];
+            }
+        }
+    }
+    [fileArray sortUsingDescriptors:sortDescriptors];
+	
+    return fileArray;
+}
+
 - (void)updateSubmenu:(NSMenu *)menu withScripts:(NSArray *)scripts;
 {        
     // we call this method recursively; if the menu is nil, the stuff we add won't be retained
@@ -250,7 +254,7 @@ static NSString *menuItemTitle(NSString *path) {
         NSString *scriptName = menuItemTitle(scriptFilename);
 		NSMenuItem *item;
 		
-		if (scriptName == nil) {
+		if (scriptName == nil || [scriptName isEqualToString:@"-"]) {
 			[menu addItem:[NSMenuItem separatorItem]];
 		} else if (folderContent) {
 			NSMenu *submenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:scriptName];
