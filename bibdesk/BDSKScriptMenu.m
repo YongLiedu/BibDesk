@@ -186,6 +186,9 @@ static NSString *menuItemTitle(NSString *path) {
     if (scriptExtensions == nil)
         scriptExtensions = [[NSSet alloc] initWithObjects:@"scpt", @"scptd", @"applescript", @"sh", @"csh", @"command", @"py", @"rb", @"pl", @"pm", @"app", @"workflow", nil];
     
+    if (path == nil)
+        return nil;
+    
     NSString *name = [path lastPathComponent];
     
     // why not use displayNameAtPath: or stringByDeletingPathExtension?
