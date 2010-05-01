@@ -108,7 +108,7 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
 
 - (id)init {
     if (self = [super init]) {
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKScriptMenuDisabledKey]) {
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKScriptMenuDisabledKey] == NO) {
             NSFileManager *fm = [NSFileManager defaultManager];
             NSMutableArray *scriptFolders = [NSMutableArray array];
             BOOL isDir;
