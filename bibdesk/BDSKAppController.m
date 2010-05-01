@@ -86,7 +86,6 @@
 #define TRACKER_URL @"http://sourceforge.net/tracker/?group_id=61487&atid=497423"
 
 #define BDSKIsRelaunchKey @"BDSKIsRelaunch"
-#define BDSKScriptMenuDisabledKey @"BDSKScriptMenuDisabled"
 #define BDSKDidMigrateLocalUrlFormatDefaultsKey @"BDSKDidMigrateLocalUrlFormatDefaultsKey"
 
 enum {
@@ -126,8 +125,7 @@ static void fixLegacyTableColumnIdentifiers()
 
 - (void)awakeFromNib{   
     // Add a Scripts menu; searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/BibDesk/Scripts
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKScriptMenuDisabledKey] == NO)
-        [BDSKScriptMenu addScriptsToMainMenu];
+    [NSApp scriptMenu];
 }
 
 - (void)checkFormatStrings {

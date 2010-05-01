@@ -47,82 +47,53 @@
 #define FILENAME_KEY        @"filename"
 #define CONTENT_KEY         @"content"
 
-@interface BDSKScriptMenu (Private) <NSMenuDelegate>
-- (id)initWithPaths:(NSArray *)scriptFolders;
-- (void)handleApplicationWillTerminateNotification:(NSNotification *)notification;
-+ (NSArray *)scriptPaths;
-- (NSArray *)directoryContentsAtPath:(NSString *)path recursionDepth:(NSInteger)recursionDepth;
-- (void)updateSubmenu:(NSMenu *)menu withScripts:(NSArray *)scripts;
-- (void)executeScript:(id)sender;
-- (void)openScript:(id)sender;
-@end
+#define BDSKScriptMenuDisabledKey @"BDSKScriptMenuDisabled"
 
-@implementation BDSKScriptMenu
-
-static BDSKScriptMenu *sharedMenu = nil;
-static BOOL menuNeedsUpdate = NO;
-static NSArray *sortDescriptors = nil;
-
-+ (void)initialize
-{
-    BDSKINITIALIZE;
-    sortDescriptors = [[NSArray alloc] initWithObjects:[[[NSSortDescriptor alloc] initWithKey:FILENAME_KEY ascending:YES selector:@selector(localizedCaseInsensitiveNumericCompare:)] autorelease], nil];
+@interface BDSKScriptMenuController : NSObject <NSMenuDelegate> {
+    NSMenu *scriptMenu;
+    FSEventStreamRef streamRef;
+    NSArray *sortDescriptors;
 }
 
-+ (void)addScriptsToMainMenu;
-{
-    if (sharedMenu)
-        return;
++ (id)sharedController;
+
+- (NSMenu *)scriptMenu;
+
+- (void)executeScript:(id)sender;
+- (void)openScript:(id)sender;
+
+@end
+
+
+@implementation BDSKScriptMenuController
+
+static BOOL menuNeedsUpdate = NO;
+
++ (id)sharedController {
+    static BDSKScriptMenuController *sharedController = nil;
+    if (sharedController == nil)
+        sharedController = [[self alloc] init];
+    return sharedController;
+}
+
+static NSArray *scriptFolderPaths() {
+    NSString *appSupportDirectory = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleNameKey];
     
-    NSFileManager *fm = [NSFileManager defaultManager];
-    NSMutableArray *scriptFolders = [NSMutableArray array];
-    BOOL isDir;
-    
-    for (NSString *folder in [self scriptPaths]) {
-        if ([fm fileExistsAtPath:folder isDirectory:&isDir] && isDir)
-            [scriptFolders addObject:folder];
+    NSArray *libraries = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSAllDomainsMask, YES);
+    NSUInteger libraryIndex, libraryCount;
+    libraryCount = [libraries count];
+    NSMutableArray *paths = [NSMutableArray arrayWithCapacity:libraryCount + 1];
+    for (libraryIndex = 0; libraryIndex < libraryCount; libraryIndex++) {
+        NSString *library = [libraries objectAtIndex:libraryIndex];        
+        
+        [paths addObject:[[library stringByAppendingPathComponent:appSupportDirectory] stringByAppendingPathComponent:SCRIPTS_FOLDER_NAME]];
     }
     
-    sharedMenu = [[self allocWithZone:[NSMenu menuZone]] initWithPaths:scriptFolders];
-    NSMenuItem *scriptItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:SCRIPTS_MENU_TITLE action:NULL keyEquivalent:@""];
-    [scriptItem setImage:[NSImage imageNamed:@"ScriptMenu"]];
-    [scriptItem setSubmenu:sharedMenu];
-    NSInteger itemIndex = [[NSApp mainMenu] numberOfItems] - 1;
-    if (itemIndex > 0)
-        [[NSApp mainMenu] insertItem:scriptItem atIndex:itemIndex];
-    [scriptItem release];
-}    
+    return paths;
+}
 
 static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackInfo, int numEvents, const char *const eventPaths[], const FSEventStreamEventFlags *eventMasks, const uint64_t *eventIDs) {
     menuNeedsUpdate = YES;
-}
-
-- (id)initWithPaths:(NSArray *)scriptFolders {
-    if (self = [super initWithTitle:SCRIPTS_MENU_TITLE]) {
-        if ([scriptFolders count]) {
-            streamRef = FSEventStreamCreate(kCFAllocatorDefault,
-                                            (FSEventStreamCallback)&fsevents_callback, // callback
-                                            NULL, // context
-                                            (CFArrayRef)scriptFolders, // pathsToWatch
-                                            kFSEventStreamEventIdSinceNow, // sinceWhen
-                                            1.0, // latency
-                                            kFSEventStreamCreateFlagWatchRoot); // flags
-            if (streamRef) {
-                FSEventStreamScheduleWithRunLoop(streamRef, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
-                FSEventStreamStart(streamRef);
-                
-                [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminateNotification:) name:NSApplicationWillTerminateNotification object:NSApp];
-            }
-        }
-        menuNeedsUpdate = YES;
-        [self setDelegate:self];
-    }
-    return self;
-}
-
-- (id)initWithTitle:(NSString *)aTitle {
-    [self release];
-    return nil;
 }
 
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification {
@@ -132,8 +103,57 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
         FSEventStreamRelease(streamRef);
         streamRef = NULL;
     }
-    [self setDelegate:nil];
+    [scriptMenu setDelegate:nil];
 }
+
+- (id)init {
+    if (self = [super init]) {
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKScriptMenuDisabledKey]) {
+            NSFileManager *fm = [NSFileManager defaultManager];
+            NSMutableArray *scriptFolders = [NSMutableArray array];
+            BOOL isDir;
+            
+            for (NSString *folder in scriptFolderPaths()) {
+                if ([fm fileExistsAtPath:folder isDirectory:&isDir] && isDir)
+                    [scriptFolders addObject:folder];
+            }
+            
+            scriptMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:SCRIPTS_MENU_TITLE];
+            NSMenuItem *scriptItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:SCRIPTS_MENU_TITLE action:NULL keyEquivalent:@""];
+            [scriptItem setImage:[NSImage imageNamed:@"ScriptMenu"]];
+            [scriptItem setSubmenu:scriptMenu];
+            NSInteger itemIndex = [[NSApp mainMenu] numberOfItems] - 1;
+            if (itemIndex > 0)
+                [[NSApp mainMenu] insertItem:scriptItem atIndex:itemIndex];
+            [scriptItem release];
+            
+            sortDescriptors = [[NSArray alloc] initWithObjects:[[[NSSortDescriptor alloc] initWithKey:FILENAME_KEY ascending:YES selector:@selector(localizedCaseInsensitiveNumericCompare:)] autorelease], nil];
+            
+            if ([scriptFolders count]) {
+                streamRef = FSEventStreamCreate(kCFAllocatorDefault,
+                                                (FSEventStreamCallback)&fsevents_callback, // callback
+                                                NULL, // context
+                                                (CFArrayRef)scriptFolders, // pathsToWatch
+                                                kFSEventStreamEventIdSinceNow, // sinceWhen
+                                                1.0, // latency
+                                                kFSEventStreamCreateFlagWatchRoot); // flags
+                if (streamRef) {
+                    FSEventStreamScheduleWithRunLoop(streamRef, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+                    FSEventStreamStart(streamRef);
+                    
+                    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminateNotification:) name:NSApplicationWillTerminateNotification object:NSApp];
+                }
+            }
+            
+            menuNeedsUpdate = YES;
+            
+            [scriptMenu setDelegate:self];
+        }
+    }
+    return self;
+}    
+
+- (NSMenu *)scriptMenu { return scriptMenu; }
 
 static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
 {
@@ -146,39 +166,6 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
             date = [modDate laterDate:date];
     }
     return date;
-}
-        
-
-- (void)menuNeedsUpdate:(BDSKScriptMenu *)menu
-{
-    // don't recreate the menu unless the content on disk has actually changed
-    if (menuNeedsUpdate) {
-        NSMutableArray *scripts = [[NSMutableArray alloc] init];
-        
-        if (streamRef) {
-            // walk the subdirectories for each domain
-            NSArray *scriptFolders = (NSArray *)FSEventStreamCopyPathsBeingWatched(streamRef);
-            for (NSString *folder in scriptFolders)
-                [scripts addObjectsFromArray:[self directoryContentsAtPath:folder recursionDepth:0]];
-            [scriptFolders release];
-            [scripts sortUsingDescriptors:sortDescriptors];
-        }
-        
-        NSMutableArray *defaultScripts = [[self directoryContentsAtPath:[[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"Scripts"] recursionDepth:0] mutableCopy];
-        
-        if ([defaultScripts count]) {
-            [defaultScripts sortUsingDescriptors:sortDescriptors];
-            if ([scripts count])
-                [scripts insertObject:[NSDictionary dictionary] atIndex:0];
-            [scripts insertObjects:defaultScripts atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [defaultScripts count])]];
-        }
-        [defaultScripts release];
-        
-        [self updateSubmenu:menu withScripts:scripts];        
-        [scripts release];
-        
-        menuNeedsUpdate = NO;
-    }
 }
 
 static NSString *menuItemTitle(NSString *path) {
@@ -289,29 +276,37 @@ static NSString *menuItemTitle(NSString *path) {
 		}
     }
 }
-
-+ (NSArray *)scriptPaths;
-{
-    static NSArray *scriptPaths = nil;
-    
-    if(nil == scriptPaths){
-        NSString *appSupportDirectory = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleNameKey];
         
-        NSArray *libraries = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSAllDomainsMask, YES);
-        NSUInteger libraryIndex, libraryCount;
-        libraryCount = [libraries count];
-        NSMutableArray *result = [[NSMutableArray alloc] initWithCapacity:libraryCount + 1];
-        for (libraryIndex = 0; libraryIndex < libraryCount; libraryIndex++) {
-            NSString *library = [libraries objectAtIndex:libraryIndex];        
-            
-            [result addObject:[[library stringByAppendingPathComponent:appSupportDirectory] stringByAppendingPathComponent:SCRIPTS_FOLDER_NAME]];
+- (void)menuNeedsUpdate:(NSMenu *)menu
+{
+    // don't recreate the menu unless the content on disk has actually changed
+    if (menuNeedsUpdate) {
+        NSMutableArray *scripts = [[NSMutableArray alloc] init];
+        
+        if (streamRef) {
+            // walk the subdirectories for each domain
+            NSArray *scriptFolders = (NSArray *)FSEventStreamCopyPathsBeingWatched(streamRef);
+            for (NSString *folder in scriptFolders)
+                [scripts addObjectsFromArray:[self directoryContentsAtPath:folder recursionDepth:0]];
+            [scriptFolders release];
+            [scripts sortUsingDescriptors:sortDescriptors];
         }
         
-        scriptPaths = [result copy];
-        [result release];
+        NSMutableArray *defaultScripts = [[self directoryContentsAtPath:[[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"Scripts"] recursionDepth:0] mutableCopy];
+        
+        if ([defaultScripts count]) {
+            [defaultScripts sortUsingDescriptors:sortDescriptors];
+            if ([scripts count])
+                [scripts insertObject:[NSDictionary dictionary] atIndex:0];
+            [scripts insertObjects:defaultScripts atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [defaultScripts count])]];
+        }
+        [defaultScripts release];
+        
+        [self updateSubmenu:menu withScripts:scripts];        
+        [scripts release];
+        
+        menuNeedsUpdate = NO;
     }
-    
-    return scriptPaths;
 }
 
 - (void)executeScript:(id)sender;
@@ -375,6 +370,15 @@ static NSString *menuItemTitle(NSString *path) {
         [wm selectFile:scriptFilename inFileViewerRootedAtPath:@""];
     else
         [wm openFile:scriptFilename];
+}
+
+@end
+
+
+@implementation NSApplication (BDSKScriptMenu)
+
+- (NSMenu *)scriptMenu {
+    return [[BDSKScriptMenuController sharedController] scriptMenu];
 }
 
 @end

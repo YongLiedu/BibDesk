@@ -38,10 +38,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface BDSKScriptMenu : NSMenu <NSMenuDelegate> {
-    FSEventStreamRef streamRef;
-}
-
-+ (void)addScriptsToMainMenu;
-
+@interface NSApplication (BDSKScriptMenu)
+- (NSMenu *)scriptMenu;
 @end
