@@ -110,7 +110,7 @@
 	*/
 	NSString * serverName = [[URL host] lowercaseString];
 	if (!serverName || [serverName rangeOfString:@"ams"].location == NSNotFound) {
-		serverName = @"ams.org";
+		serverName = @"www.ams.org";
 	}
 	
 	
@@ -190,7 +190,7 @@
  It always points to the default server.
 */
 + (NSURL *) reviewLinkForID: (NSString *) MRID {
-	NSString * MRItemURLString = [NSString stringWithFormat:@"http://ams.org/mathscinet-getitem?mr=%@", MRID];
+	NSString * MRItemURLString = [NSString stringWithFormat:@"http://www.ams.org/mathscinet-getitem?mr=%@", MRID];
 	NSURL * MRItemURL = [NSURL URLWithString:MRItemURLString];
 	return MRItemURL;
 }
@@ -202,7 +202,7 @@
 */
 + (NSArray *) parserInfos {
 	NSString * parserDescription = NSLocalizedString(@"Database of Mathematical Reviews by the American Mathematical Society.", @"Description for MathSciNet site");
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"MathSciNet" address:@"http://ams.org/mathscinet/" description: parserDescription flags: BDSKParserFeatureSubscriptionMask];
+	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"MathSciNet" address:@"http://www.ams.org/mathscinet/" description: parserDescription flags: BDSKParserFeatureSubscriptionMask];
 	
 	return [NSArray arrayWithObject:parserInfo];
 }
