@@ -49,11 +49,6 @@
 
 @interface BDSKOpenWithMenuController : NSObject <NSMenuDelegate>
 + (id)sharedInstance;
-- (void)openURLWithApplication:(id)sender;
-@end
-
-@interface NSMenu (BDSKPrivate)
-- (void)replaceAllItemsWithApplicationsForURL:(NSURL *)aURL;
 @end
 
 @implementation NSMenu (BDSKExtensions)
@@ -123,27 +118,19 @@
 
 - (NSMenuItem *)insertItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL atIndex:(NSUInteger)idx;
 {
+    NSMenuItem *openWithItem = nil;
     if (theURL == nil) {
         // just return an empty item
-        return [self insertItemWithTitle:itemTitle action:NULL keyEquivalent:@"" atIndex:idx];
+        openWithItem = [self insertItemWithTitle:itemTitle action:NULL keyEquivalent:@"" atIndex:idx];
+    } else {
+        openWithItem = [self insertItemWithTitle:itemTitle submenuTitle:@"" submenuDelegate:[BDSKOpenWithMenuController sharedInstance] atIndex:idx];
+        // add a dumm choose... item with the URL, the real items will be generated
+        NSDictionary *representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:theURL, BDSKMenuTargetURL, nil];
+        NSMenuItem *item = [[openWithItem submenu] addItemWithTitle:@"" action:NULL keyEquivalent:@""];
+        [item setRepresentedObject:representedObject];
+        [representedObject release];
     }
-    
-    NSMenu *submenu;
-    NSMenuItem *item;
-    NSDictionary *representedObject;
-    BDSKOpenWithMenuController *controller = [BDSKOpenWithMenuController sharedInstance];
-    
-    submenu = [[[NSMenu allocWithZone:[self zone]] initWithTitle:@""] autorelease];
-    [submenu setDelegate:controller];
-    
-    // add the choose... item, the other items are inserted lazily by BDSKOpenWithMenuController
-    item = [submenu addItemWithTitle:[NSLocalizedString(@"Choose", @"Menu item title") stringByAppendingEllipsis] action:@selector(openURLWithApplication:) keyEquivalent:@""];
-    [item setTarget:controller];
-    representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:theURL, BDSKMenuTargetURL, nil];
-    [item setRepresentedObject:representedObject];
-    [representedObject release];
-    
-    return [self insertItemWithTitle:itemTitle submenu:submenu atIndex:idx];
+    return openWithItem;
 }
 
 - (NSMenuItem *)addItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL;
@@ -153,8 +140,59 @@
 
 @end
 
+#pragma mark -
 
-@implementation NSMenu (BDSKPrivate)
+/* Private singleton to act as target for the "Open With..." menu item, or run a modal panel to choose a different application.
+*/
+
+@implementation BDSKOpenWithMenuController
+
+static id sharedOpenWithController = nil;
+
++ (id)sharedInstance
+{
+    if (sharedOpenWithController == nil)
+        sharedOpenWithController = [[self alloc] init];
+    return sharedOpenWithController;
+}
+
+- (id)copyWithZone:(NSZone *)zone{ return [self retain]; }
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    [self release];
+    return [sharedOpenWithController retain];
+}
+
+- (id)init {
+    BDSKPRECONDITION(sharedOpenWithController == nil);
+    return [super init];
+}
+
+- (void)chooseApplicationToOpenURL:(NSURL *)aURL;
+{
+    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+    [openPanel setCanChooseDirectories:NO];
+    [openPanel setAllowsMultipleSelection:NO];
+    [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"Prompt for Choose panel")];
+    
+    NSInteger rv = [openPanel runModalForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
+                                        file:nil 
+                                       types:[NSArray arrayWithObjects:@"app", nil]];
+    if(NSFileHandlingPanelOKButton == rv)
+        [[NSWorkspace sharedWorkspace] openURL:aURL withApplicationURL:[[openPanel URLs] firstObject]];
+}
+
+// action for opening a file with a specific application
+- (void)openURLWithApplication:(id)sender;
+{
+    NSURL *applicationURL = [[sender representedObject] valueForKey:BDSKMenuApplicationURL];
+    NSURL *targetURL = [[sender representedObject] valueForKey:BDSKMenuTargetURL];
+    
+    if(nil == applicationURL)
+        [self chooseApplicationToOpenURL:targetURL];
+    else if([[NSWorkspace sharedWorkspace] openURL:targetURL withApplicationURL:applicationURL] == NO)
+        NSBeep();
+}
 
 static BOOL fileIsInApplicationsOrSystem(NSURL *fileURL)
 {
@@ -229,13 +267,8 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
     return uniqueNamesAndURLs;
 }
 
-- (void)replaceAllItemsWithApplicationsForURL:(NSURL *)aURL;
+- (void)replaceAllItemsInMenu:menu withApplicationsForURL:(NSURL *)aURL;
 {    
-    // assumption: last item is "Choose..." item; note that this item may be the only thing retaining aURL
-    BDSKASSERT([self numberOfItems] > 0);
-    while([self numberOfItems] > 1)
-        [self removeItemAtIndex:0];
-    
     NSZone *menuZone = [NSMenu menuZone];
     NSMenuItem *item;
     
@@ -249,6 +282,8 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
     NSString *version;
     NSDictionary *dict;
     NSUInteger i, j, subCount, count = [appURLs count];
+    
+    [menu removeAllItems];
     
     for (i = 0; i < count; i++) {
         appURL = [appURLs objectAtIndex:i];
@@ -269,7 +304,7 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
             if (subCount > 1 && (version = [dict objectForKey:@"shortVersionString"]))
                 menuTitle = [menuTitle stringByAppendingFormat:@" (%@)", version];
             item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(openURLWithApplication:) keyEquivalent:@""];        
-            [item setTarget:[BDSKOpenWithMenuController sharedInstance]];
+            [item setTarget:self];
             
             dict = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, appURL, BDSKMenuApplicationURL, nil];
             [item setRepresentedObject:dict];
@@ -278,82 +313,37 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
             // use NSWorkspace to get an image; using [NSImage imageForURL:] doesn't work for some reason
             [item setImageAndSize:[workspace iconForFile:[appURL path]]];
             if ([appURL isEqual:defaultAppURL]) {
-                [self insertItem:[NSMenuItem separatorItem] atIndex:0];
-                [self insertItem:item atIndex:0];
+                [menu insertItem:[NSMenuItem separatorItem] atIndex:0];
+                [menu insertItem:item atIndex:0];
             } else {
-                [self insertItem:item atIndex:[self numberOfItems] - 1];
+                [menu addItem:item];
             }
             [item release];
         }
         [namesAndURLs release];
     }
     
-    if ([self numberOfItems] > 1 && [[self itemAtIndex:[self numberOfItems] - 2] isSeparatorItem] == NO)
-        [self insertItem:[NSMenuItem separatorItem] atIndex:[self numberOfItems] - 1];
-}
-
-@end
-
-#pragma mark -
-
-/* Private singleton to act as target for the "Open With..." menu item, or run a modal panel to choose a different application.
-*/
-
-@implementation BDSKOpenWithMenuController
-
-static id sharedOpenWithController = nil;
-
-+ (id)sharedInstance
-{
-    if (sharedOpenWithController == nil)
-        sharedOpenWithController = [[self alloc] init];
-    return sharedOpenWithController;
-}
-
-- (id)copyWithZone:(NSZone *)zone{ return [self retain]; }
-
-- (id)initWithCoder:(NSCoder *)decoder {
-    [self release];
-    return [sharedOpenWithController retain];
-}
-
-- (id)init {
-    BDSKPRECONDITION(sharedOpenWithController == nil);
-    return [super init];
-}
-
-- (void)chooseApplicationToOpenURL:(NSURL *)aURL;
-{
-    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-    [openPanel setCanChooseDirectories:NO];
-    [openPanel setAllowsMultipleSelection:NO];
-    [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"Prompt for Choose panel")];
+    count = [menu numberOfItems];
+    if (count > 0 && [[menu itemAtIndex:count - 1] isSeparatorItem] == NO)
+        [menu addItem:[NSMenuItem separatorItem]];
     
-    NSInteger rv = [openPanel runModalForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
-                                        file:nil 
-                                       types:[NSArray arrayWithObjects:@"app", nil]];
-    if(NSFileHandlingPanelOKButton == rv)
-        [[NSWorkspace sharedWorkspace] openURL:aURL withApplicationURL:[[openPanel URLs] firstObject]];
-}
-
-// action for opening a file with a specific application
-- (void)openURLWithApplication:(id)sender;
-{
-    NSURL *applicationURL = [[sender representedObject] valueForKey:BDSKMenuApplicationURL];
-    NSURL *targetURL = [[sender representedObject] valueForKey:BDSKMenuTargetURL];
+    item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:[NSLocalizedString(@"Choose", @"Menu item title") stringByAppendingEllipsis] action:@selector(openURLWithApplication:) keyEquivalent:@""];        
+    [item setTarget:self];
     
-    if(nil == applicationURL)
-        [self chooseApplicationToOpenURL:targetURL];
-    else if([[NSWorkspace sharedWorkspace] openURL:targetURL withApplicationURL:applicationURL] == NO)
-        NSBeep();
+    dict = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, nil];
+    [item setRepresentedObject:dict];
+    [dict release];
+    
+    [menu addItem:item];
+    [item release];
 }
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
     BDSKASSERT([menu numberOfItems] > 0);
-    NSURL *theURL = [[[[menu itemArray] lastObject] representedObject] valueForKey:BDSKMenuTargetURL];
+    NSURL *theURL = [[[[[[menu itemArray] lastObject] representedObject] valueForKey:BDSKMenuTargetURL] retain] autorelease];
     BDSKASSERT(theURL != nil);
     if(theURL != nil)
-        [menu replaceAllItemsWithApplicationsForURL:theURL];
+        [self replaceAllItemsInMenu:menu withApplicationsForURL:theURL];
 }
 
 // this is needed to prevent the menu from being updated just to look for key equivalents, 
