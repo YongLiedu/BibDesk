@@ -435,6 +435,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
         }
         else if (nil == newPubs) {
             // !!! logs are here to help diagnose problems that users are reporting
+            // but unsupported web pages are far too common, we don't want to flood the console
             if ([[error domain] isEqualToString:[NSError localErrorDomain]] == NO || [error code] != kBDSKWebParserUnsupported)
                 NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
             //NSLog(@"loaded MIME type %@", [[dataSource mainResource] MIMEType]);
