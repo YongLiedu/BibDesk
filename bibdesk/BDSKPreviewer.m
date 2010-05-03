@@ -348,24 +348,24 @@ static BDSKPreviewer *sharedPreviewer = nil;
 #pragma mark Drawing methods
 
 - (NSData *)PDFDataWithString:(NSString *)string color:(NSColor *)color{
-    NSPrintInfo *printInfo = [[NSPrintInfo sharedPrintInfo] copy];
-    [printInfo setHorizontalPagination:NSFitPagination];
-    [printInfo setHorizontallyCentered:NO];
-    [printInfo setVerticallyCentered:NO];
-    [printInfo setLeftMargin:20.0];
-    [printInfo setRightMargin:20.0];
-    [printInfo setTopMargin:20.0];
-    [printInfo setBottomMargin:20.0];
+    NSRect rect = NSMakeRect(0.0, 0.0, 612.0, 792.0);
+    NSTextView *textView = [[NSTextView alloc] initWithFrame:rect];
+    [textView setVerticallyResizable:YES];
+    [textView setHorizontallyResizable:NO];
+    [textView setTextContainerInset:NSMakeSize(20.0, 20.0)];
     
-    BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initWithString:string color:color printInfo:printInfo];
-    [printableView setTextContainerInset:NSMakeSize(20.0, 20.0)];
+    NSTextStorage *textStorage = [textView textStorage];
+    [textStorage beginEditing];
+    if (string)
+        [[textStorage mutableString] setString:string];
+    [textStorage addAttribute:NSFontAttributeName value:[NSFont userFontOfSize:0.0] range:NSMakeRange(0, [textStorage length])];
+    if (color)
+        [textStorage addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(0, [textStorage length])];
+    [textStorage endEditing];
 	
-    NSMutableData *data = [NSMutableData data];
-    NSPrintOperation *printOperation = [NSPrintOperation PDFOperationWithView:printableView insideRect:[printableView bounds] toData:data printInfo:printInfo];
-    [printOperation runOperation];
+    NSData *data = [textView dataWithPDFInsideRect:rect];
     
-    [printableView release];
-    [printInfo release];
+    [textView release];
     
     return data;
 }
