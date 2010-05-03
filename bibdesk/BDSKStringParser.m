@@ -113,7 +113,7 @@ static Class classForType(BDSKStringType stringType)
     Class parserClass = classForType(stringType);
     BDSKASSERT(parserClass == Nil || [parserClass conformsToProtocol:@protocol(BDSKStringParser)]);
     if (Nil == parserClass && outError){
-        *outError = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Unsupported or invalid format", @"error when parsing text fails")];
+        *outError = [NSError mutableLocalErrorWithCode:kBDSKParserUnsupported localizedDescription:NSLocalizedString(@"Unsupported or invalid format", @"error when parsing text fails")];
         [*outError setValue:NSLocalizedString(@"BibDesk was not able to determine the syntax of this data.  It may be incorrect or an unsupported type of text.", @"error description when parsing text fails") forKey:NSLocalizedRecoverySuggestionErrorKey];
     }
     return [parserClass itemsFromString:string error:outError];

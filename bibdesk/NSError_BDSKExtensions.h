@@ -54,6 +54,7 @@ enum {
     kBDSKAppleScriptError,                       /* AppleScript failed                      */
     kBDSKParserIgnoredFrontMatter,               /* BDSKBibTeXParser ignored front matter   */
     kBDSKParserFailed,                           /* Some parser failed for some reason      */
+    kBDSKParserUnsupported,                      /* No valid parser for string              */
     kBDSKWebParserFailed,                        /* Some web parser failed for some reason  */
     kBDSKWebParserUnsupported,                   /* No valid web parser for URL             */
     kBDSKFileOperationFailed,                    /* Generic file operation failure          */
