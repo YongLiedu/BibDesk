@@ -110,7 +110,7 @@ static NSMutableArray *_finishedDownloads = nil;
 	AGRegex * ARNumberRegex = [AGRegex regexWithPattern:@"arnumber=([0-9]+)" options:AGRegexMultiline];
 	AGRegexMatch *match = [ARNumberRegex findInString:urlPath];
 	if([match count] == 0 && outError){
-		*outError = [NSError localErrorWithCode:0 localizedDescription:NSLocalizedString(@"missingARNumberKey", @"Can't get an ARNumber from the URL")];
+		*outError = [NSError localErrorWithCode:kBDSKWebParserFailed localizedDescription:NSLocalizedString(@"missingARNumberKey", @"Can't get an ARNumber from the URL")];
 
 		return NULL;
 	}
@@ -122,7 +122,7 @@ static NSMutableArray *_finishedDownloads = nil;
 	AGRegex * ISNumberRegex = [AGRegex regexWithPattern:@"isnumber=([0-9]+)" options:AGRegexMultiline];
 	AGRegexMatch *match = [ISNumberRegex findInString:urlPath];
 	if([match count] == 0 && outError){
-		*outError = [NSError localErrorWithCode:0 localizedDescription:NSLocalizedString(@"missingISNumberKey", @"Can't get an ISNumber from the URL")];
+		*outError = [NSError localErrorWithCode:kBDSKWebParserFailed localizedDescription:NSLocalizedString(@"missingISNumberKey", @"Can't get an ISNumber from the URL")];
 		
 		return NULL;
 	}

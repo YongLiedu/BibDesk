@@ -192,7 +192,7 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
     }
     if (nStart != nStop) {
         if (outError) {
-            *outError = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Unable to parse SciFinder data", @"error message for SciFinder")];
+            *outError = [NSError mutableLocalErrorWithCode:kBDSKWebParserFailed localizedDescription:NSLocalizedString(@"Unable to parse SciFinder data", @"error message for SciFinder")];
             [*outError setValue:NSLocalizedString(@"Unbalanced START_RECORD and END_RECORD tags", @"error message for SciFinder; do not translate START_RECORD or END_RECORD") forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
         return nil;

@@ -98,7 +98,7 @@
     
     // check the number of nodes first
     if (0 == iMax) {
-        error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"No search results found", @"Google scholar error")];
+        error = [NSError mutableLocalErrorWithCode:kBDSKWebParserFailed localizedDescription:NSLocalizedString(@"No search results found", @"Google scholar error")];
         [error setValue:NSLocalizedString(@"Unable to parse this page.  Please report this to BibDesk's developers and provide the URL.", @"Google scholar error") forKey:NSLocalizedRecoverySuggestionErrorKey];
         if (outError) *outError = error;
         return nil;

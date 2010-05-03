@@ -89,7 +89,7 @@ log_method();
     // check length in case this changes at some point in future, though!
     if ([onClickValue length] < 16) {
         if (outError) {
-            *outError = [NSError localErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Window URL path string shorter than expected", @"ACM parser error")];
+            *outError = [NSError localErrorWithCode:kBDSKWebParserFailed localizedDescription:NSLocalizedString(@"Window URL path string shorter than expected", @"ACM parser error")];
             return nil;
         }
     }

@@ -94,7 +94,7 @@ static NSArray *webParserClasses() {
     NSString *htmlString = [(id)[domDocument documentElement] outerHTML];
     if (nil == htmlString) {
         if (outError) {
-            *outError = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Failed to read HTML string from document", @"web view error; should never occur")];
+            *outError = [NSError mutableLocalErrorWithCode:kBDSKWebParserFailed localizedDescription:NSLocalizedString(@"Failed to read HTML string from document", @"web view error; should never occur")];
             [*outError setValue:NSLocalizedString(@"Please inform the developer of this error and provide the URL.", @"web view error") 
                          forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
@@ -121,7 +121,7 @@ static NSArray *webParserClasses() {
     // this may lead to some false negatives if the heuristics for canParseDocument::: change.
     if (Nil == parserClass) {
         if (outError) {
-            *outError = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Unsupported URL", @"error when parsing text fails")];
+            *outError = [NSError mutableLocalErrorWithCode:kBDSKWebParserUnsupported localizedDescription:NSLocalizedString(@"Unsupported URL", @"error when parsing text fails")];
             [*outError setValue:NSLocalizedString(@"BibDesk was not able to find a parser for this web page.", @"error description") forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
         return nil;
