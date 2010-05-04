@@ -1,5 +1,5 @@
 //
-//  BDSKPrintableView.h
+//  NSPrintOperation_BDSKExtensions.h
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 10/14/08.
@@ -39,13 +39,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKPrintableView : NSTextView
-- (id)initWithAttributedString:(NSAttributedString *)attributedString printInfo:(NSPrintInfo *)printInfo;
-- (id)initWithString:(NSString *)string printInfo:(NSPrintInfo *)printInfo;
-@end
-
-
-@interface NSPrintOperation (BDSKPrintableView)
+@interface NSPrintOperation (BDSKExtensions)
 + (NSPrintOperation *)printOperationWithAttributedString:(NSAttributedString *)attributedString printInfo:(NSPrintInfo *)printInfo settings:(NSDictionary *)printSettings;
 + (NSPrintOperation *)printOperationWithString:(NSString *)string printInfo:(NSPrintInfo *)printInfo settings:(NSDictionary *)printSettings;
 @end

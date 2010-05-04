@@ -1,5 +1,5 @@
 //
-//  BDSKPrintableView.m
+//  NSPrintOperation_BDSKExtensions.m
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 10/14/08.
@@ -36,35 +36,19 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKPrintableView.h"
+#import "NSPrintOperation_BDSKExtensions.h"
+
+
+@interface BDSKPrintableView : NSTextView
+@end
 
 
 @implementation BDSKPrintableView
 
-- (id)initWithAttributedString:(NSAttributedString *)attributedString printInfo:(NSPrintInfo *)printInfo {
-    if (self = [self initWithFrame:[(printInfo ?: [NSPrintInfo sharedPrintInfo]) imageablePageBounds]]) {
+- (id)initWithFrame:(NSRect)frameRect {
+    if (self = [super initWithFrame:frameRect]) {
         [self setVerticallyResizable:YES];
         [self setHorizontallyResizable:NO];
-        if (attributedString) {
-            [[self textStorage] beginEditing];
-            [[self textStorage] setAttributedString:attributedString];
-            [[self textStorage] endEditing];
-        }
-    }
-    return self;
-}
-
-- (id)initWithString:(NSString *)string printInfo:(NSPrintInfo *)printInfo {
-    if (self = [self initWithFrame:[(printInfo ?: [NSPrintInfo sharedPrintInfo]) imageablePageBounds]]) {
-        [self setVerticallyResizable:YES];
-        [self setHorizontallyResizable:NO];
-        if (string) {
-            [[self textStorage] beginEditing];
-            [[[self textStorage] mutableString] setString:string];
-            if (string)
-                [[self textStorage] addAttribute:NSFontAttributeName value:[NSFont userFontOfSize:0.0] range:NSMakeRange(0, [[self textStorage] length])];
-            [[self textStorage] endEditing];
-        }
     }
     return self;
 }
@@ -81,7 +65,7 @@
 @end
 
 
-@implementation NSPrintOperation (BDSKPrintableView)
+@implementation NSPrintOperation (BDSKExtensions)
 
 + (NSPrintOperation *)printOperationWithAttributedString:(NSAttributedString *)attributedString printInfo:(NSPrintInfo *)printInfo settings:(NSDictionary *)printSettings {
     NSPrintInfo *info = [(printInfo ?: [NSPrintInfo sharedPrintInfo]) copy];
@@ -90,7 +74,14 @@
     [info setHorizontallyCentered:NO];
     [info setVerticallyCentered:NO];
     
-    NSTextView *printableView = [[BDSKPrintableView alloc] initWithAttributedString:attributedString printInfo:info];
+    NSTextView *printableView = [[BDSKPrintableView alloc] initWithFrame:[info imageablePageBounds]];
+    if (attributedString) {
+        NSTextStorage *textStorage = [printableView textStorage];
+        [textStorage beginEditing];
+        [textStorage setAttributedString:attributedString];
+        [textStorage endEditing];
+    }
+    
     NSPrintOperation *printOperation = [NSPrintOperation printOperationWithView:printableView printInfo:info];
     [printableView release];
     [info release];
@@ -102,20 +93,11 @@
 }
 
 + (NSPrintOperation *)printOperationWithString:(NSString *)string printInfo:(NSPrintInfo *)printInfo settings:(NSDictionary *)printSettings {
-    NSPrintInfo *info = [(printInfo ?: [NSPrintInfo sharedPrintInfo]) copy];
-    [[info dictionary] addEntriesFromDictionary:printSettings];
-    [info setHorizontalPagination:NSFitPagination];
-    [info setHorizontallyCentered:NO];
-    [info setVerticallyCentered:NO];
-    
-    NSTextView *printableView = [[BDSKPrintableView alloc] initWithString:string printInfo:info];
-    NSPrintOperation *printOperation = [NSPrintOperation printOperationWithView:printableView printInfo:info];
-    [printableView release];
-    [info release];
-    
-    NSPrintPanel *printPanel = [printOperation printPanel];
-    [printPanel setOptions:NSPrintPanelShowsCopies | NSPrintPanelShowsPageRange | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling | NSPrintPanelShowsPreview];
-    
+    NSDictionary *attrs = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont userFontOfSize:0.0], NSFontAttributeName, nil];
+    NSAttributedString *attrString = [[NSAttributedString alloc] initWithString:string attributes:attrs];
+    NSPrintOperation *printOperation = [self printOperationWithAttributedString:attrString printInfo:printInfo settings:printSettings];
+    [attrString release];
+    [attrs release];
     return printOperation;
 }
 

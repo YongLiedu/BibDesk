@@ -50,7 +50,7 @@
 #import "BDSKAsynchronousDOServer.h"
 #import "BDSKDocumentController.h"
 #import "NSImage_BDSKExtensions.h"
-#import "BDSKPrintableView.h"
+#import "NSPrintOperation_BDSKExtensions.h"
 #import "BDSKPreferenceController.h"
 
 #define BDSKPreviewPanelFrameAutosaveName @"BDSKPreviewPanel"

@@ -167,7 +167,7 @@
 		CE6FB32309DFFCB5005E3E14 /* BDSKSharingBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6FB32109DFFCB5005E3E14 /* BDSKSharingBrowser.m */; };
 		CE73BAD10FB1CE9600A43716 /* BDSKPubMedXMLParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE73BACF0FB1CE9600A43716 /* BDSKPubMedXMLParser.m */; };
 		CE7596000ADDB0E1009C1329 /* BDSKContainerView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7595FE0ADDB0E0009C1329 /* BDSKContainerView.m */; };
-		CE7611530EA49B6E00301E45 /* BDSKPrintableView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7611510EA49B6E00301E45 /* BDSKPrintableView.m */; };
+		CE7611530EA49B6E00301E45 /* NSPrintOperation_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7611510EA49B6E00301E45 /* NSPrintOperation_BDSKExtensions.m */; };
 		CE77A7FE0923BEBA0019D901 /* NSTableView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE77A7FC0923BEBA0019D901 /* NSTableView_BDSKExtensions.m */; };
 		CE7A31400B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7A313E0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m */; };
 		CE7A4A8F0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7A4A8D0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m */; };
@@ -1006,8 +1006,8 @@
 		CE73BACF0FB1CE9600A43716 /* BDSKPubMedXMLParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPubMedXMLParser.m; sourceTree = "<group>"; };
 		CE7595FD0ADDB0E0009C1329 /* BDSKContainerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKContainerView.h; sourceTree = "<group>"; };
 		CE7595FE0ADDB0E0009C1329 /* BDSKContainerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKContainerView.m; sourceTree = "<group>"; };
-		CE7611500EA49B6E00301E45 /* BDSKPrintableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPrintableView.h; sourceTree = "<group>"; };
-		CE7611510EA49B6E00301E45 /* BDSKPrintableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPrintableView.m; sourceTree = "<group>"; };
+		CE7611500EA49B6E00301E45 /* NSPrintOperation_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSPrintOperation_BDSKExtensions.h; sourceTree = "<group>"; };
+		CE7611510EA49B6E00301E45 /* NSPrintOperation_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSPrintOperation_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE77A7FB0923BEBA0019D901 /* NSTableView_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSTableView_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE77A7FC0923BEBA0019D901 /* NSTableView_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSTableView_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE7A313E0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKItemPasteboardHelper.m; sourceTree = "<group>"; };
@@ -1950,7 +1950,6 @@
 				CE62DE490F4B788800BDF01E /* BDSKPreferenceIconCell.m */,
 				CE62DE410F4B77D600BDF01E /* BDSKPreferenceIconView.m */,
 				CE62DE3A0F4B777800BDF01E /* BDSKPreferenceWindow.m */,
-				CE7611510EA49B6E00301E45 /* BDSKPrintableView.m */,
 				CE392F5C08D04083001CEAC8 /* BDSKRatingButton.m */,
 				CE392ED308D034E4001CEAC8 /* BDSKRatingButtonCell.m */,
 				CEF7A6670915115B00BE9E02 /* BDSKScriptMenu.m */,
@@ -1979,6 +1978,7 @@
 				F9022C9D0758038000C3F701 /* NSImage_BDSKExtensions.m */,
 				F9FD63DB0A61B87800F9871B /* NSMenu_BDSKExtensions.m */,
 				CE6C04430BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m */,
+				CE7611510EA49B6E00301E45 /* NSPrintOperation_BDSKExtensions.m */,
 				CE6C962A0CD9014A0022D69F /* NSScrollView_BDSKExtensions.m */,
 				CEE7ACE7109E2F360072D63C /* NSSplitView_BDSKExtensions.m */,
 				CE969E320931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.m */,
@@ -2557,7 +2557,6 @@
 				CE62DE390F4B777800BDF01E /* BDSKPreferenceWindow.h */,
 				F9022C57075802E300C3F701 /* BDSKPreviewer.h */,
 				CE3448010A11302F0026A92A /* BDSKPreviewItem.h */,
-				CE7611500EA49B6E00301E45 /* BDSKPrintableView.h */,
 				CE565BBD0AEF848B002F0A24 /* BDSKPublicationsArray.h */,
 				F9022CA60758038000C3F701 /* BDSKPubMedParser.h */,
 				CE73BACE0FB1CE9600A43716 /* BDSKPubMedXMLParser.h */,
@@ -2691,6 +2690,7 @@
 				CE3402720E014B3800A7FFE6 /* NSNumber_BDSKExtensions.h */,
 				CE8C731C0B0CA6C500E31E5A /* NSObject_BDSKExtensions.h */,
 				CE6C04420BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.h */,
+				CE7611500EA49B6E00301E45 /* NSPrintOperation_BDSKExtensions.h */,
 				CE564D230AECBA5B002F0A24 /* NSScanner_BDSKExtensions.h */,
 				CE117D210D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.h */,
 				CE6C96290CD9014A0022D69F /* NSScrollView_BDSKExtensions.h */,
@@ -3560,7 +3560,7 @@
 				CE0ECDAB0DE78619006EEDDB /* BDSKSpiresParser.m in Sources */,
 				CE3402750E014B3800A7FFE6 /* NSNumber_BDSKExtensions.m in Sources */,
 				F9C50D8B0EA3A2D6009FE098 /* BDSKTask.m in Sources */,
-				CE7611530EA49B6E00301E45 /* BDSKPrintableView.m in Sources */,
+				CE7611530EA49B6E00301E45 /* NSPrintOperation_BDSKExtensions.m in Sources */,
 				CE3C02A10EA54C650002AD5B /* KFAppleScriptHandlerAdditionsCore.m in Sources */,
 				CE40EC550EE9AAF000BCF379 /* BDSKImportCommand.m in Sources */,
 				CE071ED10F213EB300244F5C /* BDSKArxivParser.m in Sources */,
