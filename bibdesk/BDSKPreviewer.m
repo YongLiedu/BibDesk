@@ -55,6 +55,13 @@
 
 #define BDSKPreviewPanelFrameAutosaveName @"BDSKPreviewPanel"
 
+enum {
+    BDSKPreviewerTabIndexPDF,
+    BDSKPreviewerTabIndexRTF,
+    BDSKPreviewerTabIndexLog,
+};
+
+
 @interface BDSKPreviewTask : NSObject {
     NSString *bibTeXString;
     NSArray *citeKeys;
@@ -217,9 +224,9 @@ static BDSKPreviewer *sharedPreviewer = nil;
     NSString *path = nil;
 	if(previewState == BDSKShowingPreviewState){
         NSInteger tabIndex = [tabView indexOfTabViewItem:[tabView selectedTabViewItem]];
-        if(tabIndex == 0)
+        if(tabIndex == BDSKPreviewerTabIndexPDF)
             path = [[server texTask] PDFFilePath];
-        else if(tabIndex == 1)
+        else if(tabIndex == BDSKPreviewerTabIndexRTF)
             path = [[server texTask] RTFFilePath];
         else
             path = [[server texTask] logFilePath];
@@ -321,27 +328,16 @@ static BDSKPreviewer *sharedPreviewer = nil;
 
 // first responder gets this
 - (void)printDocument:(id)sender{
-    if([tabView indexOfTabViewItem:[tabView selectedTabViewItem]] == 0){
+    NSInteger tabIndex = [tabView indexOfTabViewItem:[tabView selectedTabViewItem]];
+    if (tabIndex == BDSKPreviewerTabIndexPDF) {
         [pdfView printWithInfo:[NSPrintInfo sharedPrintInfo] autoRotate:NO];
-    }else{
-        NSPrintInfo *printInfo = [[NSPrintInfo sharedPrintInfo] copy];
-        [printInfo setHorizontalPagination:NSFitPagination];
-        [printInfo setHorizontallyCentered:NO];
-        [printInfo setVerticallyCentered:NO];
-        
-        NSView *printableView = [[BDSKPrintableView alloc] initWithAttributedString:[rtfPreviewView textStorage] printInfo:printInfo];
-        
-        // Construct the print operation and setup Print panel
-        NSPrintOperation *op = [NSPrintOperation printOperationWithView:printableView printInfo:printInfo];
-        [op setShowsPrintPanel:YES];
-        [op setShowsProgressPanel:YES];
-        [op setCanSpawnSeparateThread:YES];
-        
-        [printableView release];
-        [printInfo release];
-        
-        // Run operation, which shows the Print panel if showPanels was YES
-        [op runOperationModalForWindow:[self window] delegate:nil didRunSelector:NULL contextInfo:NULL];
+    } else {
+        NSTextView *textView = tabIndex == BDSKPreviewerTabIndexRTF ? rtfPreviewView : logView;
+        NSPrintOperation *printOp = [NSPrintOperation printOperationWithAttributedString:[textView textStorage] printInfo:nil settings:nil];
+        [printOp setShowsPrintPanel:YES];
+        [printOp setShowsProgressPanel:YES];
+        [printOp setCanSpawnSeparateThread:YES];
+        [printOp runOperationModalForWindow:[self window] delegate:nil didRunSelector:NULL contextInfo:NULL];
     }
 }
 
