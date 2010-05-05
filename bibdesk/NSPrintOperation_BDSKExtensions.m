@@ -45,14 +45,6 @@
 
 @implementation BDSKPrintableView
 
-- (id)initWithFrame:(NSRect)frameRect {
-    if (self = [super initWithFrame:frameRect]) {
-        [self setVerticallyResizable:YES];
-        [self setHorizontallyResizable:NO];
-    }
-    return self;
-}
-
 - (BOOL)knowsPageRange:(NSRangePointer)range {
     NSPrintInfo *info = [[NSPrintOperation currentOperation] printInfo];
     if (info) {
@@ -75,6 +67,9 @@
     [info setVerticallyCentered:NO];
     
     NSTextView *printableView = [[BDSKPrintableView alloc] initWithFrame:[info imageablePageBounds]];
+    [printableView setVerticallyResizable:YES];
+    [printableView setHorizontallyResizable:NO];
+    
     if (attributedString) {
         NSTextStorage *textStorage = [printableView textStorage];
         [textStorage beginEditing];
@@ -89,15 +84,6 @@
     NSPrintPanel *printPanel = [printOperation printPanel];
     [printPanel setOptions:NSPrintPanelShowsCopies | NSPrintPanelShowsPageRange | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling | NSPrintPanelShowsPreview];
     
-    return printOperation;
-}
-
-+ (NSPrintOperation *)printOperationWithString:(NSString *)string printInfo:(NSPrintInfo *)printInfo settings:(NSDictionary *)printSettings {
-    NSDictionary *attrs = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont userFontOfSize:0.0], NSFontAttributeName, nil];
-    NSAttributedString *attrString = [[NSAttributedString alloc] initWithString:string attributes:attrs];
-    NSPrintOperation *printOperation = [self printOperationWithAttributedString:attrString printInfo:printInfo settings:printSettings];
-    [attrString release];
-    [attrs release];
     return printOperation;
 }
 

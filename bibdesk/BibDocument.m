@@ -125,6 +125,7 @@
 #import "NSEvent_BDSKExtensions.h"
 #import "BDSKMetadataCacheOperation.h"
 #import "NSSplitView_BDSKExtensions.h"
+#import "NSAttributedString_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -2737,13 +2738,12 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     else
         // this occurs only when both FileViews are displayed, probably never happens
         string = [self bibTeXStringForPublications:[self selectedPublications]];
-    if (attrString) {
-        return [NSPrintOperation printOperationWithAttributedString:attrString printInfo:[self printInfo] settings:printSettings];
-    } else {
+    if (attrString == nil) {
         if (string == nil)
             string = NSLocalizedString(@"Error: nothing to print from document preview", @"printing error");
-        return [NSPrintOperation printOperationWithString:string printInfo:[self printInfo] settings:printSettings];
+        attrString = [[[NSAttributedString alloc] initWithString:string attributeName:NSFontAttributeName attributeValue:[NSFont userFontOfSize:0.0]] autorelease];
     }
+    return [NSPrintOperation printOperationWithAttributedString:attrString printInfo:[self printInfo] settings:printSettings];
 }
 
 #pragma mark -
