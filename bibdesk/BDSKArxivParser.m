@@ -48,7 +48,7 @@
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
     // !!! other countries end up with e.g. fr.arxiv.org; checking for scholar.arxiv.com may fail in those cases
-    if (NO == [[[url host] lowercaseString] hasSuffix:@"arxiv.org"]){
+    if (nil == [url host] ||  NO == [[[url host] lowercaseString] hasSuffix:@"arxiv.org"]){
         return NO;
     }
     

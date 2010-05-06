@@ -44,7 +44,7 @@
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if ([[url host] caseInsensitiveCompare:@"www.citeulike.org"] != NSOrderedSame){
+    if ([url host] == nil || [[url host] caseInsensitiveCompare:@"www.citeulike.org"] != NSOrderedSame){
         return NO;
     }
     

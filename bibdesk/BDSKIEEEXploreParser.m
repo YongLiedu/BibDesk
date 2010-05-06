@@ -90,7 +90,7 @@ static NSMutableArray *_finishedDownloads = nil;
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if (! [[url host] isEqualToString:@"ieeexplore.ieee.org"]){
+    if (nil == [url host] || NSOrderedSame != [[url host] isEqualToString:@"ieeexplore.ieee.org"]){
         return NO;
     }
         

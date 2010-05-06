@@ -47,7 +47,8 @@
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if ((NO == [[[url host] lowercaseString] hasSuffix:@"www.springerlink.com"]) || 
+    if ((nil == [url host]) || 
+        (NO == [[[url host] lowercaseString] hasSuffix:@"www.springerlink.com"]) || 
 		(NO == [[[url path] lowercaseString] hasPrefix:@"/content/"])
 	) {
         return NO;

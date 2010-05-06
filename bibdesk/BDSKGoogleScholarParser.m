@@ -51,7 +51,7 @@
     
     // !!! other countries end up with e.g. scholar.google.be; checking for scholar.google.com may fail in those cases
     // also some sites access google scholar via an ezproxy, so the suffix could be quite complex
-    if (NO == [[[url host] lowercaseString] hasPrefix:@"scholar.google."] || 
+    if (nil == [url host] || NO == [[[url host] lowercaseString] hasPrefix:@"scholar.google."] || 
         [[NSUserDefaults standardUserDefaults] boolForKey:BDSKDisableGoogleScholarListParsingKey]){
         return NO;
     }

@@ -46,7 +46,7 @@
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if ([[url host] caseInsensitiveCompare:@"portal.acm.org"] != NSOrderedSame){
+    if ([url host] == nil || [[url host] caseInsensitiveCompare:@"portal.acm.org"] != NSOrderedSame){
         return NO;
     }
     
@@ -65,7 +65,6 @@
 // and follow links two levels deep to get bibitems from each citation in the list.
 
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
-log_method();
     NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
     
     

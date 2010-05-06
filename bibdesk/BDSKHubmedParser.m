@@ -45,11 +45,8 @@
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if ([[url host] caseInsensitiveCompare:@"www.hubmed.org"] != NSOrderedSame){
-        return NO;
-    }
-    
-    if ([[url path] caseInsensitiveCompare:@"/display.cgi"] != NSOrderedSame){
+    if ([url host] == nil || [[url host] caseInsensitiveCompare:@"www.hubmed.org"] != NSOrderedSame || 
+        [[url path] caseInsensitiveCompare:@"/display.cgi"] != NSOrderedSame){
         return NO;
     }
     

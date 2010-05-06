@@ -47,7 +47,7 @@
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if (NO == [[[url host] lowercaseString] hasSuffix:@"eprint.iacr.org"]){
+    if (nil == [url host] || NO == [[[url host] lowercaseString] hasSuffix:@"eprint.iacr.org"]){
         return NO;
     }
     
