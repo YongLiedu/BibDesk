@@ -2653,9 +2653,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 - (NSArray *)clickedOrSelectedPublications{
     NSArray *selPubs = nil;
     if ([self isDisplayingFileContentSearch]) {
-        if ([[fileSearchController tableView] numberOfSelectedRows])
+        if ([[fileSearchController tableView] numberOfClickedOrSelectedRows])
             selPubs =  [publications itemsForIdentifierURLs:[fileSearchController clickedOrSelectedIdentifierURLs]];
-    } else if ([tableView numberOfSelectedRows]) {
+    } else if ([tableView numberOfClickedOrSelectedRows]) {
         selPubs = [shownPublications objectsAtIndexes:[tableView clickedOrSelectedRowIndexes]];
     }
     return selPubs;

@@ -70,6 +70,7 @@
 #import "BDSKButtonBar.h"
 #import "NSMenu_BDSKExtensions.h"
 #import "BDSKGroupsArray.h"
+#import "NSTableView_BDSKExtensions.h"
 
 static char BDSKDocumentFileViewObservationContext;
 static char BDSKDocumentDefaultsObservationContext;
@@ -565,13 +566,13 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                     [item setTarget:self];
                     [item setRepresentedObject:tcId];
                 }
-                if([tableView numberOfSelectedRows] == 1 &&
+                if([tableView numberOfClickedOrSelectedRows] == 1 &&
                    (theURL = [[shownPublications objectAtIndex:row] URLForField:tcId])){
                     item = [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") 
                                         andSubmenuOfApplicationsForURL:theURL atIndex:1];
                 }
             }else if([tcId isEqualToString:BDSKLocalFileString]){
-                linkedURLs = [self selectedFileURLs];
+                linkedURLs = [self clickedOrSelectedFileURLs];
                 
                 if([linkedURLs count]){
                     item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
@@ -599,7 +600,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                     }
                 }
             }else if([tcId isEqualToString:BDSKRemoteURLString]){
-                linkedURLs = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
+                linkedURLs = [[self clickedOrSelectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
                 
                 if([linkedURLs count]){
                     item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
@@ -627,7 +628,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         }else if([tcId isCitationField]){
             NSMutableArray *linkedPubs = [NSMutableArray array];
             BibItem *pub;
-            for (pub in [self selectedPublications])
+            for (pub in [self clickedOrSelectedPublications])
                 [linkedPubs addObjectsFromArray:[pub citationValueOfField:tcId]];
             for (pub in linkedPubs) {
                 item = [menu addItemWithTitle:[pub citeKey] action:@selector(editRepresentedPub:) keyEquivalent:@""];
