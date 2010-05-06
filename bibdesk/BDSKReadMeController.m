@@ -58,6 +58,7 @@ static BDSKRelNotesController *sharedRelNotesController = nil;
 }
 
 - (void)windowDidLoad {
+    [self setWindowFrameAutosaveName:@"BDSKReadMeWindow"];
     [[self window] setTitle:NSLocalizedString(@"ReadMe", "Window title")];
     [textView setString:@""];
     [textView replaceCharactersInRange:[textView selectedRange]

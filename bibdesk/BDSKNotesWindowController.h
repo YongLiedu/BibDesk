@@ -40,18 +40,6 @@
 #import "BDSKOutlineView.h"
 
 
-@protocol BDSKNotesOutlineViewDelegate <BDSKOutlineViewDelegate>
-@optional
-- (BOOL)outlineView:(NSOutlineView *)ov canResizeRowByItem:(id)item;
-- (void)outlineView:(NSOutlineView *)ov setHeightOfRow:(NSInteger)newHeight byItem:(id)item;
-@end
-
-
-@interface BDSKNotesOutlineView : BDSKOutlineView
-SUBCLASS_DELEGATE_DECLARATION(BDSKNotesOutlineViewDelegate)
-@end
-
-
 @interface BDSKNotesWindowController : NSWindowController <BDSKNotesOutlineViewDelegate, NSOutlineViewDataSource, NSSplitViewDelegate> {
     NSURL *url;
     NSMutableArray *notes;
@@ -74,4 +62,16 @@ SUBCLASS_DELEGATE_DECLARATION(BDSKNotesOutlineViewDelegate)
 - (IBAction)refresh:(id)sender;
 - (IBAction)openInSkim:(id)sender;
 
+@end
+
+
+@protocol BDSKNotesOutlineViewDelegate <BDSKOutlineViewDelegate>
+@optional
+- (BOOL)outlineView:(NSOutlineView *)ov canResizeRowByItem:(id)item;
+- (void)outlineView:(NSOutlineView *)ov setHeightOfRow:(NSInteger)newHeight byItem:(id)item;
+@end
+
+
+@interface BDSKNotesOutlineView : BDSKOutlineView
+SUBCLASS_DELEGATE_DECLARATION(BDSKNotesOutlineViewDelegate)
 @end

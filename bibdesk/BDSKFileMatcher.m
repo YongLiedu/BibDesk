@@ -115,6 +115,8 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
 
 - (void)awakeFromNib
 {
+    [self setWindowFrameAutosaveName:@"Orphaned File Matcher Panel"];
+    
     [outlineView setAutosaveExpandedItems:YES];
     [outlineView setAutoresizesOutlineColumn:NO];
 
