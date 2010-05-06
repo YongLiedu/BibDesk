@@ -315,6 +315,8 @@
 		CEF1D6BC117F01C60069E249 /* applehelp.init in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6BA117F01C60069E249 /* applehelp.init */; };
 		CEF1D6BD117F01C60069E249 /* postprocess-nontitle.py in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6BB117F01C60069E249 /* postprocess-nontitle.py */; };
 		CEF2EEE70F3462A900A7989E /* NSColor_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */; };
+		CEF5366A1192EFE400027C3C /* BDSKNotesOutlineView.h in Headers */ = {isa = PBXBuildFile; fileRef = CEF536681192EFE400027C3C /* BDSKNotesOutlineView.h */; };
+		CEF5366B1192EFE400027C3C /* BDSKNotesOutlineView.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF536691192EFE400027C3C /* BDSKNotesOutlineView.m */; };
 		CEF546100F56BDDB008A630F /* BDSKStringArrayFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5460E0F56BDDB008A630F /* BDSKStringArrayFormatter.m */; };
 		CEF5C0420F546ADB00DBC864 /* TestBDSKRISParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0270F5469E300DBC864 /* TestBDSKRISParser.m */; };
 		CEF5C0430F546ADC00DBC864 /* TestBDSKTypeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0290F5469E300DBC864 /* TestBDSKTypeManager.m */; };
@@ -1249,6 +1251,8 @@
 		CEF1D6BB117F01C60069E249 /* postprocess-nontitle.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = "postprocess-nontitle.py"; path = "BibDeskHelp/postprocess-nontitle.py"; sourceTree = "<group>"; };
 		CEF2EEE40F3462A900A7989E /* NSColor_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSColor_BDSKExtensions.h; sourceTree = "<group>"; };
 		CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSColor_BDSKExtensions.m; sourceTree = "<group>"; };
+		CEF536681192EFE400027C3C /* BDSKNotesOutlineView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKNotesOutlineView.h; sourceTree = "<group>"; };
+		CEF536691192EFE400027C3C /* BDSKNotesOutlineView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKNotesOutlineView.m; sourceTree = "<group>"; };
 		CEF5460D0F56BDDB008A630F /* BDSKStringArrayFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStringArrayFormatter.h; sourceTree = "<group>"; };
 		CEF5460E0F56BDDB008A630F /* BDSKStringArrayFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStringArrayFormatter.m; sourceTree = "<group>"; };
 		CEF5C0270F5469E300DBC864 /* TestBDSKRISParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestBDSKRISParser.m; sourceTree = "<group>"; };
@@ -1945,6 +1949,7 @@
 				CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */,
 				CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */,
 				F92405010BC5856900672839 /* BDSKLevelIndicatorCell.m */,
+				CEF536691192EFE400027C3C /* BDSKNotesOutlineView.m */,
 				CE62E0BE0F4C4A5500BDF01E /* BDSKOutlineView.m */,
 				F941B7E908AA574200F04ECD /* BDSKOverlayWindow.m */,
 				CE62DE490F4B788800BDF01E /* BDSKPreferenceIconCell.m */,
@@ -2537,6 +2542,7 @@
 				CE8DAD8D1098976400896F69 /* BDSKMetadataCacheOperation.h */,
 				F9D0E5340BF92768001C6C22 /* BDSKMODSParser.h */,
 				CEED2C120F4DA0E00078E87A /* BDSKMultiValueDictionary.h */,
+				CEF536681192EFE400027C3C /* BDSKNotesOutlineView.h */,
 				CEE50488104D664200636237 /* BDSKNotesSearchIndex.h */,
 				CEF71AD80B91BBCB003A2771 /* BDSKNotesWindowController.h */,
 				CE22E1CB0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.h */,
@@ -2801,6 +2807,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
+				CEF5366A1192EFE400027C3C /* BDSKNotesOutlineView.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3612,6 +3619,7 @@
 				CD86BA3A1141C023005EEFDA /* BDSKBibTeXWebParser.m in Sources */,
 				CEFAD8BF1150F7A800A3D969 /* BDSKFontWell.m in Sources */,
 				CE17832E1158F0A000B2EBDF /* BDSKBookmarkSheetController.m in Sources */,
+				CEF5366B1192EFE400027C3C /* BDSKNotesOutlineView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

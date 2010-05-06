@@ -1,10 +1,10 @@
 //
-//  BDSKNotesWindowController.h
+//  BDSKNotesOutlineView.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 2/25/07.
+//  Created by Christiaan on 5/6/10.
 /*
- This software is Copyright (c) 2007-2010
+ This software is Copyright (c) 2010
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,29 +37,16 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKNotesOutlineView.h"
+#import "BDSKOutlineView.h"
 
 
-@interface BDSKNotesWindowController : NSWindowController <BDSKNotesOutlineViewDelegate, NSOutlineViewDataSource, NSSplitViewDelegate> {
-    NSURL *url;
-    NSMutableArray *notes;
-    NSArray *tags;
-    double rating;
-    CGFloat lastTagsHeight;
-    IBOutlet NSOutlineView *outlineView;
-    IBOutlet NSTokenField *tokenField;
-    IBOutlet NSSplitView *splitView;
-    IBOutlet NSObjectController *ownerController;
-}
+@protocol BDSKNotesOutlineViewDelegate <BDSKOutlineViewDelegate>
+@optional
+- (BOOL)outlineView:(NSOutlineView *)ov canResizeRowByItem:(id)item;
+- (void)outlineView:(NSOutlineView *)ov setHeightOfRow:(NSInteger)newHeight byItem:(id)item;
+@end
 
-- (id)initWithURL:(NSURL *)aURL;
 
-- (NSArray *)tags;
-- (void)setTags:(NSArray *)newTags;
-- (double)rating;
-- (void)setRating:(double)newRating;
-
-- (IBAction)refresh:(id)sender;
-- (IBAction)openInSkim:(id)sender;
-
+@interface BDSKNotesOutlineView : BDSKOutlineView
+SUBCLASS_DELEGATE_DECLARATION(BDSKNotesOutlineViewDelegate)
 @end
