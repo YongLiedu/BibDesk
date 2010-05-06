@@ -267,7 +267,7 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
     return uniqueNamesAndURLs;
 }
 
-- (void)replaceAllItemsInMenu:menu withApplicationsForURL:(NSURL *)aURL;
+- (void)replaceAllItemsInMenu:(NSMenu *)menu withApplicationsForURL:(NSURL *)aURL;
 {    
     NSZone *menuZone = [NSMenu menuZone];
     NSMenuItem *item;
