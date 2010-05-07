@@ -56,45 +56,20 @@
 
 static Class classForType(BDSKStringType stringType)
 {
-    Class parserClass = Nil;
     switch(stringType){
-		case BDSKPubMedStringType: 
-            parserClass = [BDSKPubMedParser class];
-            break;
-		case BDSKRISStringType:
-            parserClass = [BDSKRISParser class];
-            break;
-		case BDSKMARCStringType:
-            parserClass = [BDSKMARCParser class];
-            break;
-		case BDSKReferenceMinerStringType:
-            parserClass = [BDSKReferenceMinerParser class];
-            break;
-		case BDSKJSTORStringType:
-            parserClass = [BDSKJSTORParser class];
-            break;
-        case BDSKWOSStringType:
-            parserClass = [BDSKWebOfScienceParser class];
-            break;
-        case BDSKDublinCoreStringType:
-            parserClass = [BDSKDublinCoreXMLParser class];
-            break;
-        case BDSKReferStringType:
-            parserClass = [BDSKReferParser class];
-            break;
-        case BDSKMODSStringType:
-            parserClass = [BDSKMODSParser class];
-            break;
-        case BDSKSciFinderStringType:
-            parserClass = [BDSKSciFinderParser class];
-            break;
-        case BDSKPubMedXMLStringType:
-            parserClass = [BDSKPubMedXMLParser class];
-            break;
-        default:
-            parserClass = Nil;
+		case BDSKPubMedStringType:          return [BDSKPubMedParser class];
+		case BDSKRISStringType:             return [BDSKRISParser class];
+		case BDSKMARCStringType:            return [BDSKMARCParser class];
+		case BDSKReferenceMinerStringType:  return [BDSKReferenceMinerParser class];
+		case BDSKJSTORStringType:           return [BDSKJSTORParser class];
+        case BDSKWOSStringType:             return [BDSKWebOfScienceParser class];
+        case BDSKDublinCoreStringType:      return [BDSKDublinCoreXMLParser class];
+        case BDSKReferStringType:           return [BDSKReferParser class];
+        case BDSKMODSStringType:            return [BDSKMODSParser class];
+        case BDSKSciFinderStringType:       return [BDSKSciFinderParser class];
+        case BDSKPubMedXMLStringType:       return [BDSKPubMedXMLParser class];
+        default:                            return Nil;
     }
-    return parserClass;
 }
 
 + (BOOL)canParseString:(NSString *)string ofType:(BDSKStringType)stringType{
