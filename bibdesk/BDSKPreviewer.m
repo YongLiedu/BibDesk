@@ -403,7 +403,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 		if(rtfData != nil)
 			attrString = [[NSAttributedString alloc] initWithRTF:rtfData documentAttributes:NULL];
 		else
-			message = NSLocalizedString(@"***** ERROR:  unable to create preview *****", @"Preview message");
+			message = NSLocalizedString(@"***** ERROR:  unable to create preview *****\n\nsee the logs in the TeX Preview window", @"Preview message");
 		
         logString = [[server texTask] logFileString] ?: NSLocalizedString(@"Unable to read log file from TeX run.", @"Preview message");
         
@@ -424,7 +424,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
             logString = [errorString autorelease];
             
             if(pdfData == nil)
-                pdfData = [self PDFDataWithString:NSLocalizedString(@"***** ERROR:  unable to create preview *****", @"Preview message") color:[NSColor redColor]];
+                pdfData = [self PDFDataWithString:NSLocalizedString(@"***** ERROR:  unable to create preview *****\n\nsee the logs in the TeX Preview window", @"Preview message") color:[NSColor redColor]];
 		}
         
 	}else if(state == BDSKEmptyPreviewState){
