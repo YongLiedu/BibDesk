@@ -465,7 +465,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 	} else if (message){
         NSTextStorage *ts = [rtfPreviewView textStorage];
         [[ts mutableString] setString:message];
-        [ts addAttribute:NSForegroundColorAttributeName value:[NSColor grayColor] range:NSMakeRange(0, [ts length])];
+        [ts addAttribute:NSForegroundColorAttributeName value:(state == BDSKShowingPreviewState ? [NSColor redColor] : [NSColor grayColor]) range:NSMakeRange(0, [ts length])];
 	}
     
 	[logView setString:@""];
