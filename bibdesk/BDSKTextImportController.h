@@ -41,7 +41,6 @@
 #import "BDSKTableView.h"
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKCitationFormatter.h"
-#import "BDSKURLSheetController.h"
 
 @protocol BDSKTextImportItemTableViewDelegate <BDSKTableViewDelegate>
 - (void)tableViewDidChangeTemporaryTypeSelectMode:(NSTableView *)tView;
@@ -153,10 +152,4 @@ SUBCLASS_DELEGATE_DECLARATION(BDSKTextImportItemTableViewDelegate)
 
 @interface BDSKImportTextView : NSTextView {}
 - (IBAction)makePlainText:(id)sender;
-@end
-
-#pragma mark -
-
-@interface BDSKImportURLSheetController : BDSKURLSheetController
-- (IBAction)openBookmark:(id)sender;
 @end

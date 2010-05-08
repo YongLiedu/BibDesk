@@ -65,6 +65,7 @@
 #import "NSInvocation_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSEvent_BDSKExtensions.h"
+#import "BDSKURLSheetController.h"
 
 
 @interface BDSKTextImportController (Private)
@@ -205,7 +206,7 @@
 	
 	[self retain]; // make sure we stay around till we are done
 	
-    BDSKURLSheetController *urlSheetController = [[[BDSKImportURLSheetController alloc] init] autorelease];
+    BDSKURLSheetController *urlSheetController = [[[BDSKURLSheetController alloc] init] autorelease];
     
 	// now show the URL sheet. We will show the main sheet when that is done.
 	[urlSheetController beginSheetModalForWindow:docWindow
@@ -331,7 +332,7 @@
 }
 
 - (IBAction)importFromWebAction:(id)sender{
-	BDSKURLSheetController *urlSheetController = [[[BDSKImportURLSheetController alloc] init] autorelease];
+	BDSKURLSheetController *urlSheetController = [[[BDSKURLSheetController alloc] init] autorelease];
     [urlSheetController beginSheetModalForWindow:[self window]
                                    modalDelegate:self
                                   didEndSelector:@selector(urlSheetDidEnd:returnCode:contextInfo:)
@@ -1957,16 +1958,6 @@ SUBCLASS_DELEGATE_DEFINITION(BDSKTextImportItemTableViewDelegate)
     [menu addItemWithTitle:NSLocalizedString(@"Make Plain Text", @"Menu item title") action:@selector(makePlainText:) keyEquivalent:@""];
     
     return menu;
-}
-
-@end
-
-#pragma mark -
-
-@implementation BDSKImportURLSheetController
-
-- (IBAction)openBookmark:(id)sender {
-    [self setUrlString:[[sender representedObject] absoluteString]];
 }
 
 @end
