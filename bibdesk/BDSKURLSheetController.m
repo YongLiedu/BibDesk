@@ -58,7 +58,7 @@
     [urlField setStringValue:newUrlString ?: @""];
 }
 
-- (void)addBookmark:(id)sender {
+- (void)openBookmark:(id)sender {
     [self setUrlString:[sender representedObject]];
 }
 
