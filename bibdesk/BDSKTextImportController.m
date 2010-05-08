@@ -82,8 +82,8 @@
 
 - (void)initialOpenPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-- (void)initialUrlSheetDidEnd:(NSPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-- (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+- (void)initialUrlSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+- (void)urlSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)autoDiscoverFromFrameAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)autoDiscoverFromStringAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
@@ -205,12 +205,13 @@
 	
 	[self retain]; // make sure we stay around till we are done
 	
+    BDSKURLSheetController *urlSheetController = [[[BDSKImportURLSheetController alloc] init] autorelease];
+    
 	// now show the URL sheet. We will show the main sheet when that is done.
-	[NSApp beginSheet:urlSheet
-	   modalForWindow:docWindow
-		modalDelegate:self
-	   didEndSelector:@selector(initialUrlSheetDidEnd:returnCode:contextInfo:)
-		  contextInfo:[docWindow retain]];
+	[urlSheetController beginSheetModalForWindow:docWindow
+                                   modalDelegate:self
+                                  didEndSelector:@selector(initialUrlSheetDidEnd:returnCode:contextInfo:)
+                                     contextInfo:[docWindow retain]];
 }
 		
 - (void)beginSheetForFileModalForWindow:(NSWindow *)docWindow {
@@ -330,16 +331,11 @@
 }
 
 - (IBAction)importFromWebAction:(id)sender{
-	[NSApp beginSheet:urlSheet
-       modalForWindow:[self window]
-        modalDelegate:self
-       didEndSelector:@selector(urlSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:NULL];
-}
-
-- (IBAction)dismissUrlSheet:(id)sender{
-    [urlSheet orderOut:sender];
-    [NSApp endSheet:urlSheet returnCode:[sender tag]];
+	BDSKURLSheetController *urlSheetController = [[[BDSKImportURLSheetController alloc] init] autorelease];
+    [urlSheetController beginSheetModalForWindow:[self window]
+                                   modalDelegate:self
+                                  didEndSelector:@selector(urlSheetDidEnd:returnCode:contextInfo:)
+                                     contextInfo:NULL];
 }
 
 - (IBAction)importFromFileAction:(id)sender{
@@ -828,38 +824,38 @@
     }        
 }
 
-- (void)initialUrlSheetDidEnd:(NSPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+- (void)initialUrlSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     // this is the initial web load, the main window is not yet there
     NSWindow *docWindow = [(NSWindow *)contextInfo autorelease];
     
     if (returnCode == NSOKButton) {
-        [sheet orderOut:nil];
+        [[urlSheetController window] orderOut:nil];
         
         // show the main window
         [super beginSheetModalForWindow:docWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         [self release];
         
         // then load the data from the file
-        [self urlSheetDidEnd:sheet returnCode:returnCode contextInfo:NULL];
+        [self urlSheetDidEnd:urlSheetController returnCode:returnCode contextInfo:NULL];
         
     } else {
         // the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
-        [self didEndSheet:sheet returnCode:returnCode contextInfo:NULL];
+        [self didEndSheet:nil returnCode:returnCode contextInfo:NULL];
     }
 }
 
-- (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+- (void)urlSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     if(returnCode == NSOKButton){
 		// setup webview and load page
         
 		[self setShowingWebView:YES];
         
-        NSString *urlString = [urlTextField stringValue];
+        NSString *urlString = [urlSheetController urlString];
         
         NSURL *url = [NSURL URLWithString:urlString];
         
         if(url == nil){
-            [sheet orderOut:nil];
+            [[urlSheetController window] orderOut:nil];
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error", @"Message in alert dialog when error occurs")
                                              defaultButton:nil
                                            alternateButton:nil
@@ -1967,12 +1963,10 @@ SUBCLASS_DELEGATE_DEFINITION(BDSKTextImportItemTableViewDelegate)
 
 #pragma mark -
 
-@implementation BDSKURLWindow
+@implementation BDSKImportURLSheetController
 
 - (IBAction)openBookmark:(id)sender {
-    NSString *urlString = [[sender representedObject] absoluteString];
-    [URLField setStringValue:urlString];
-    [OKButton performClick:OKButton];
+    [self setUrlString:[[sender representedObject] absoluteString]];
 }
 
 @end

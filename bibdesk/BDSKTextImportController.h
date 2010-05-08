@@ -41,6 +41,7 @@
 #import "BDSKTableView.h"
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKCitationFormatter.h"
+#import "BDSKURLSheetController.h"
 
 @protocol BDSKTextImportItemTableViewDelegate <BDSKTableViewDelegate>
 - (void)tableViewDidChangeTemporaryTypeSelectMode:(NSTableView *)tView;
@@ -68,8 +69,6 @@
     IBOutlet WebView* webView;
     IBOutlet BDSKEdgeView *webViewBox;
     IBOutlet NSView* webViewView;
-    IBOutlet NSPanel* urlSheet;
-    IBOutlet NSTextField* urlTextField;
     IBOutlet NSProgressIndicator *progressIndicator;
     IBOutlet NSButton *backButton;
     IBOutlet NSButton *forwardButton;
@@ -122,7 +121,6 @@
 - (IBAction)importFromFileAction:(id)sender;
 - (IBAction)importFromWebAction:(id)sender;
 - (IBAction)openBookmark:(id)sender;
-- (IBAction)dismissUrlSheet:(id)sender;
 - (IBAction)stopOrReloadAction:(id)sender;
 - (IBAction)addField:(id)sender;
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender;
@@ -159,10 +157,6 @@ SUBCLASS_DELEGATE_DECLARATION(BDSKTextImportItemTableViewDelegate)
 
 #pragma mark -
 
-@interface BDSKURLWindow : NSPanel {
-    IBOutlet NSTextField *URLField;
-    IBOutlet NSButton *OKButton;
-    IBOutlet NSButton *CancelButton;
-}
+@interface BDSKImportURLSheetController : BDSKURLSheetController
 - (IBAction)openBookmark:(id)sender;
 @end
