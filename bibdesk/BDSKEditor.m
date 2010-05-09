@@ -1199,7 +1199,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     if (theURL && [[aFileView selectionIndexes] count] <= 1) {
         i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
-        [menu insertItemWithTitle:[NSLocalizedString(@"Open With", @"Menu item title") stringByAppendingEllipsis]
+        [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title")
                 andSubmenuOfApplicationsForURL:theURL atIndex:++i];
         
         if ([theURL isFileURL]) {
