@@ -252,10 +252,10 @@ static BibItem *createPublicationWithRecord(NSXMLNode *record);
     NSMutableArray *pubs = [NSMutableArray array];
     NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:itemString options:0 error:NULL] autorelease];
     NSXMLElement *root = [doc rootElement];
-    NSXMLNode *marcns = [NSXMLNode namespaceWithName:@"marc" stringValue:@"http://www.loc.gov/MARC21/slim"];
     
     // if the XML uses the MARC namespace, we need to add it to the root element, otherwise xpath queries won't know about it
-    [root addNamespace:marcns];
+    if ([root namespaceForPrefix:@"marc"])
+        [root addNamespace:[NSXMLNode namespaceWithName:@"marc" stringValue:@"http://www.loc.gov/MARC21/slim"]];
     
     NSArray *nodes = [root nodesForXPath:@"//marc:record" error:NULL];
     if ([nodes count] == 0)
