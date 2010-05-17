@@ -155,19 +155,6 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
 
 - (NSMenu *)scriptMenu { return scriptMenu; }
 
-static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
-{
-    NSDate *date = [NSDate distantPast];
-    for (NSString *folder in folders) {
-        NSDate *modDate = [[[NSFileManager defaultManager] attributesOfItemAtPath:folder error:NULL] objectForKey:NSFileModificationDate];
-        
-        // typically these don't even exist for the other domains
-        if (modDate)
-            date = [modDate laterDate:date];
-    }
-    return date;
-}
-
 static NSString *menuItemTitle(NSString *path) {
     static NSSet *scriptExtensions = nil;
     if (scriptExtensions == nil)
