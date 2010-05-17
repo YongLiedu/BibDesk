@@ -7,8 +7,6 @@ How To Release BibDesk
 - change version numbers
   *  Info.plist
   *  version.texi
-  *  Info.plist and *.lproj/InfoPlist.strings in the BibImporter project
-  *  Info.plist and *.lproj/InfoPlist.strings in the QuickLook-BibDesk project
 
 - run "agvtool bump"
 
