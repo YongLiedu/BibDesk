@@ -59,6 +59,12 @@ using namespace std;
 #import <sys/mman.h>
 #endif
 
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_5
+#ifndef mach_vm_round_page
+#define mach_vm_round_page(x) (((mach_vm_offset_t)(x) + PAGE_MASK) & ~((signed)PAGE_MASK))
+#endif
+#endif
+
 #if DEBUG
 #define ENABLE_STATS 0
 #define fv_zone_assert(condition) do { if(false == (condition)) { HALT; } } while(0)
@@ -210,21 +216,21 @@ static inline size_t __fv_zone_round_size(const size_t requestedSize, bool *useV
     if (*useVM) {
         
         if (actualSize < 102400) 
-            actualSize = round_page(actualSize);
+            actualSize = mach_vm_round_page(actualSize);
         else if (actualSize < 143360)
-            actualSize = round_page(143360);
+            actualSize = mach_vm_round_page(143360);
         else if (actualSize < 204800)
-            actualSize = round_page(204800);
+            actualSize = mach_vm_round_page(204800);
         else if (actualSize < 262144)
-            actualSize = round_page(262144);
+            actualSize = mach_vm_round_page(262144);
         else if (actualSize < 307200)
-            actualSize = round_page(307200);
+            actualSize = mach_vm_round_page(307200);
         else if (actualSize < 512000)
-            actualSize = round_page(512000);
+            actualSize = mach_vm_round_page(512000);
         else if (actualSize < 614400)
-            actualSize = round_page(614400);
+            actualSize = mach_vm_round_page(614400);
         else 
-            actualSize = round_page(actualSize);
+            actualSize = mach_vm_round_page(actualSize);
         
     }
     else if (actualSize < 128) {
@@ -270,7 +276,7 @@ static fv_allocation_t *__fv_zone_vm_allocation(const size_t requestedSize, fv_z
     
     // use this space for the header
     size_t actualSize = requestedSize + PAGE_SIZE;
-    fv_zone_assert(round_page(actualSize) == actualSize);
+    fv_zone_assert(mach_vm_round_page(actualSize) == actualSize);
     
     // allocations going through this allocator will always be larger than 4K
 #if FV_USE_MMAP
@@ -285,7 +291,7 @@ static fv_allocation_t *__fv_zone_vm_allocation(const size_t requestedSize, fv_z
     // set up the data structure
     if (__builtin_expect(0 != memory, 1)) {
         // align ptr to a page boundary
-        void *ptr = (void *)round_page((uintptr_t)(memory + sizeof(fv_allocation_t)));
+        void *ptr = (void *)mach_vm_round_page((uintptr_t)(memory + sizeof(fv_allocation_t)));
         // alloc struct immediately precedes ptr so we can find it again
         alloc = (fv_allocation_t *)((uintptr_t)ptr - sizeof(fv_allocation_t));
         alloc->ptr = ptr;
@@ -413,7 +419,7 @@ static void *fv_zone_valloc(malloc_zone_t *zone, size_t size)
     void *memory = fv_zone_malloc(zone, size);
     memset(memory, 0, size);
     // this should have no effect if we used vm to allocate
-    void *ret = (void *)round_page((uintptr_t)memory);
+    void *ret = (void *)mach_vm_round_page((uintptr_t)memory);
     if (useVM) { fv_zone_assert(memory == ret); }
     return ret;
 }
@@ -441,14 +447,7 @@ static void __fv_zone_free_allocation_locked(fv_zone_t *zone, fv_allocation_t *a
     if (zone->_freeSize > FV_COLLECT_THRESHOLD)
         pthread_cond_signal(&_collectorCond);    
 }
-/*
-static void __fv_zone_free_allocation(fv_zone_t *zone, fv_allocation_t *alloc)
-{
-    LOCK(zone);
-    __fv_zone_free_allocation_locked(zone, alloc);
-    UNLOCK(zone);      
-}
-*/
+
 static void fv_zone_free(malloc_zone_t *fvzone, void *ptr)
 {
     fv_zone_t *zone = reinterpret_cast<fv_zone_t *>(fvzone);
@@ -468,14 +467,18 @@ static void fv_zone_free(malloc_zone_t *fvzone, void *ptr)
         UNLOCK(zone);
     }
 }
-/*
+
+#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
 static void fv_zone_free_definite(malloc_zone_t *fvzone, void *ptr, size_t size)
 {
     fv_zone_t *zone = reinterpret_cast<fv_zone_t *>(fvzone);
     fv_allocation_t *alloc = FV_ALLOC_FROM_POINTER(ptr);
-    __fv_zone_free_allocation(zone, alloc);
+    LOCK(zone);
+    __fv_zone_free_allocation_locked(zone, alloc);
+    UNLOCK(zone);      
 }
-*/
+#endif
+
 static void *fv_zone_realloc(malloc_zone_t *fvzone, void *ptr, size_t size)
 {
     fv_zone_t *zone = reinterpret_cast<fv_zone_t *>(fvzone);
@@ -518,14 +521,14 @@ static void *fv_zone_realloc(malloc_zone_t *fvzone, void *ptr, size_t size)
         // pointer to the current end of this region
         mach_vm_address_t addr = (mach_vm_address_t)alloc->base + alloc->allocSize;
         // attempt to allocate at a specific address and extend the existing region
-        ret = mach_vm_allocate(mach_task_self(), &addr, round_page(size) - alloc->allocSize, VM_FLAGS_FIXED | VM_MAKE_TAG(FV_VM_MEMORY_REALLOC));
+        ret = mach_vm_allocate(mach_task_self(), &addr, mach_vm_round_page(size) - alloc->allocSize, VM_FLAGS_FIXED | VM_MAKE_TAG(FV_VM_MEMORY_REALLOC));
         // if this succeeds, increase sizes and assign newPtr to the original parameter
         if (KERN_SUCCESS == ret) {
-            alloc->allocSize += round_page(size);
-            alloc->ptrSize += round_page(size);
+            alloc->allocSize += mach_vm_round_page(size);
+            alloc->ptrSize += mach_vm_round_page(size);
             // adjust allocation size in the zone
             LOCK(zone);
-            zone->_allocatedSize += round_page(size);
+            zone->_allocatedSize += mach_vm_round_page(size);
             UNLOCK(zone);
             newPtr = ptr;
         }
@@ -831,8 +834,11 @@ malloc_zone_t *fv_create_zone_named(const char *name)
     zone->_basic_zone.batch_free = NULL;
     zone->_basic_zone.introspect = (struct malloc_introspection_t *)&__fv_zone_introspect;
     zone->_basic_zone.version = 0;  /* from scalable_malloc.c in Libc-498.1.1 */
-    //zone->_basic_zone.memalign = NULL;
-    //zone->_basic_zone.free_definite_size = fv_zone_free_definite;
+    
+#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+    zone->_basic_zone.memalign = NULL;
+    zone->_basic_zone.free_definite_size = fv_zone_free_definite;
+#endif
     
     // explicitly initialize padding to NULL
     zone->_reserved[0] = NULL;
