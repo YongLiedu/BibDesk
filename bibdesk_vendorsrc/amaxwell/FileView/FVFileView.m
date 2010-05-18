@@ -107,6 +107,11 @@ static char _FVFileViewContentObservationContext;
 @interface FVAnimation : NSAnimation
 @end
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+@interface FVFileView (SKNSAnimationDelegate) <NSAnimationDelegate>
+@end
+#endif
+
 #pragma mark -
 
 @interface FVFileView (Private)
