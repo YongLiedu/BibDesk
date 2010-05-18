@@ -1599,6 +1599,8 @@ The Web Group supports a number of web sites as well as a few bibliographic form
 
 @uref{http://ams.org/mathscinet/,MathSciNet}: Database of Mathematical Reviews by the American Mathematical Society. Requires a subscription to be accessed. 
 
+@uref{http://www.jstor.org/,JSTOR}: Database of papers from many journals. 
+
 @uref{http://www.numdam.org/?lang=en,NUMDAM} (Num@'erisation de documents anciens math@'ematiques): Digital versions of old mathematical papers. The site itself is public but BibDesk's support for it requires access to the Zentralblatt Math service.
 
 @uref{http://projecteuclid.org/,Project Euclid}: A publishing platform for 'independent and society journals' in mathematics and statistics. BibDesk can provide bibliographic information for those articles and references mentioed on the site if MathSciNet or Zentralblatt Math IDs are listed for them and you   have access to those sites.

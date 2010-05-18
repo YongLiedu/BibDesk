@@ -67,6 +67,8 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		CD50E5FA11A2190E00848756 /* BDSKJSTORWebParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD50E5F811A2190E00848756 /* BDSKJSTORWebParser.h */; };
+		CD50E5FB11A2190E00848756 /* BDSKJSTORWebParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD50E5F911A2190E00848756 /* BDSKJSTORWebParser.m */; };
 		CD6295361140DE16002E4751 /* BDSKIACRParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD6295351140DE16002E4751 /* BDSKIACRParser.m */; };
 		CD6295381140DE1C002E4751 /* BDSKSpringerParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD6295371140DE1C002E4751 /* BDSKSpringerParser.m */; };
 		CD86BA3A1141C023005EEFDA /* BDSKBibTeXWebParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD86BA391141C023005EEFDA /* BDSKBibTeXWebParser.m */; };
@@ -827,6 +829,8 @@
 		6CD26A220F928EEE0089FDFD /* BDSKBibDeskProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKBibDeskProtocol.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CD50E5F811A2190E00848756 /* BDSKJSTORWebParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKJSTORWebParser.h; sourceTree = "<group>"; };
+		CD50E5F911A2190E00848756 /* BDSKJSTORWebParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKJSTORWebParser.m; sourceTree = "<group>"; };
 		CD62952F1140DDDA002E4751 /* BDSKSpringerParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSpringerParser.h; sourceTree = "<group>"; };
 		CD6295331140DE03002E4751 /* BDSKIACRParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKIACRParser.h; sourceTree = "<group>"; };
 		CD6295351140DE16002E4751 /* BDSKIACRParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKIACRParser.m; sourceTree = "<group>"; };
@@ -2184,6 +2188,7 @@
 				CD6295351140DE16002E4751 /* BDSKIACRParser.m */,
 				454AC23C1086E07B00F2890A /* BDSKIEEEXploreParser.m */,
 				CEAE613D097FF60A000B618C /* BDSKJSTORParser.m */,
+				CD50E5F911A2190E00848756 /* BDSKJSTORWebParser.m */,
 				CE34A5720B249E0B00755730 /* BDSKMARCParser.m */,
 				6C567DBD0F818A1600DE285D /* BDSKMathSciNetParser.m */,
 				6C5DE3E60F8FC33B00E02D5F /* BDSKMathSiteParser.m */,
@@ -2527,6 +2532,7 @@
 				CE7A313F0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.h */,
 				F9936CC30BC746C300A32DC4 /* BDSKItemSearchIndexes.h */,
 				CEAE613C097FF60A000B618C /* BDSKJSTORParser.h */,
+				CD50E5F811A2190E00848756 /* BDSKJSTORWebParser.h */,
 				CE24B35210C3E9E100818EDF /* BDSKLastImportGroup.h */,
 				F92405000BC5856900672839 /* BDSKLevelIndicatorCell.h */,
 				CE24B33210C3E13900818EDF /* BDSKLibraryGroup.h */,
@@ -2808,6 +2814,7 @@
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
 				CEF5366A1192EFE400027C3C /* BDSKNotesOutlineView.h in Headers */,
+				CD50E5FA11A2190E00848756 /* BDSKJSTORWebParser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3620,6 +3627,7 @@
 				CEFAD8BF1150F7A800A3D969 /* BDSKFontWell.m in Sources */,
 				CE17832E1158F0A000B2EBDF /* BDSKBookmarkSheetController.m in Sources */,
 				CEF5366B1192EFE400027C3C /* BDSKNotesOutlineView.m in Sources */,
+				CD50E5FB11A2190E00848756 /* BDSKJSTORWebParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

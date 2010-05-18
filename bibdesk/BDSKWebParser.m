@@ -46,6 +46,7 @@
 #import "BDSKSpiresParser.h"
 #import "BDSKArxivParser.h"
 #import "BDSKIACRParser.h"
+#import "BDSKJSTORWebParser.h"
 #import "BDSKSpringerParser.h"
 #import "BDSKMathSciNetParser.h"
 #import "BDSKZentralblattParser.h"
@@ -73,6 +74,7 @@ static NSArray *webParserClasses() {
                         [BDSKSpiresParser class], 
                         [BDSKArxivParser class], 
 					    [BDSKIACRParser class], 
+					    [BDSKJSTORWebParser class], 
 					    [BDSKSpringerParser class], 
                         [BDSKMathSciNetParser class], 
                         [BDSKZentralblattParser class], 
