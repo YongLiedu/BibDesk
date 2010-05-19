@@ -465,7 +465,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     BDSKASSERT([NSThread isMainThread]);
     // get the search index info, don't use the note because we don't want to retain the pubs
     NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[note name], @"name", 
-                                [[note userInfo] valueForKeyPath:@"pubs.searchIndexInfo"], @"searchIndexInfo", nil];
+                                [[note userInfo] valueForKeyPath:@"publications.searchIndexInfo"], @"searchIndexInfo", nil];
     [noteLock lock];
     [notificationQueue addObject:info];
     [noteLock unlockWithCondition:QUEUE_HAS_NOTIFICATIONS];
