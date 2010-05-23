@@ -141,6 +141,11 @@ static Class BDSKSearchBookmarkClass = Nil;
     return nil;
 }
 
+- (void)dealloc {
+    parent = nil;
+    [super dealloc];
+}
+
 - (NSDictionary *)dictionaryValue { return nil; }
 
 - (BDSKSearchBookmarkType)bookmarkType { return 0; }
