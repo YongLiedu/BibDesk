@@ -73,13 +73,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    BDSKFileSearchResult *copy = [[[self class] allocWithZone:zone] init];
-    copy->url = [url copy];
-    copy->string = [string copy];
-    copy->identifierURL = [identifierURL copy];
-    copy->image = [image retain];
-    copy->score = score;
-    return copy;
+    return [[[self class] allocWithZone:zone] initWithURL:url identifierURL:identifierURL title:string score:score];
 }
 
 - (NSString *)description
