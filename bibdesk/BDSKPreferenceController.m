@@ -456,29 +456,28 @@ static id sharedController = nil;
 }
 
 - (NSArray *)toolbarDefaultItemIdentifiers:(NSToolbar *)toolbar {
-	NSMutableArray *identifiers = [NSMutableArray array];
-    [identifiers addObject:BDSKPreferencesToolbarShowAllItemIdentifier];
-    [identifiers addObject:BDSKPreferencesToolbarPreviousItemIdentifier];
-    [identifiers addObject:BDSKPreferencesToolbarNextItemIdentifier];
-    [identifiers addObject:NSToolbarSeparatorItemIdentifier];
-    [identifiers addObject:BDSKPreferencesToolbarSearchItemIdentifier];
+	NSArray *identifiers = [NSArray arrayWithObjects:
+        BDSKPreferencesToolbarShowAllItemIdentifier, 
+        BDSKPreferencesToolbarPreviousItemIdentifier, 
+        BDSKPreferencesToolbarNextItemIdentifier, 
+        NSToolbarSeparatorItemIdentifier, 
+        BDSKPreferencesToolbarSearchItemIdentifier, nil];
 	return identifiers;
 }
 
 - (NSArray *)toolbarAllowedItemIdentifiers:(NSToolbar *)toolbar {
-	NSMutableArray *identifiers = [NSMutableArray array];
-    [identifiers addObject:BDSKPreferencesToolbarShowAllItemIdentifier];
-    [identifiers addObject:BDSKPreferencesToolbarPreviousItemIdentifier];
-    [identifiers addObject:BDSKPreferencesToolbarNextItemIdentifier];
-    [identifiers addObject:NSToolbarSeparatorItemIdentifier];
-    [identifiers addObject:BDSKPreferencesToolbarSearchItemIdentifier];
+	NSMutableArray *identifiers = [NSMutableArray arrayWithObjects:
+        BDSKPreferencesToolbarShowAllItemIdentifier, 
+        BDSKPreferencesToolbarPreviousItemIdentifier, 
+        BDSKPreferencesToolbarNextItemIdentifier, 
+        NSToolbarSeparatorItemIdentifier, 
+        BDSKPreferencesToolbarSearchItemIdentifier, nil];
     [identifiers addObjectsFromArray:[self allPaneIdentifiers]];
 	return identifiers;
 }
 
 - (NSArray *)toolbarSelectableItemIdentifiers:(NSToolbar *)toolbar {
-	NSMutableArray *identifiers = [NSMutableArray array];
-    [identifiers addObject:BDSKPreferencesToolbarShowAllItemIdentifier];
+	NSMutableArray *identifiers = [NSMutableArray arrayWithObjects:BDSKPreferencesToolbarShowAllItemIdentifier, nil];
     [identifiers addObjectsFromArray:[self allPaneIdentifiers]];
 	return identifiers;
 }
