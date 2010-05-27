@@ -116,15 +116,15 @@ static id sharedController = nil;
     return sharedController;
 }
 
-// windiwDidLoad comes after the window is already moved onscreen, I think that's wrong
+// windowDidLoad comes after the window is already moved onscreen, I think that's wrong
 - (void)windowDidLoad {
+    [self loadPanes];
+    
     [self setupToolbar];
     [[self window] setShowsToolbarButton:NO];
     [self setWindowFrameAutosaveName:@"BDSKPreferencesWindow"];
     
     [[self window] setTitle:[self defaultWindowTitle]];
-    
-    [self loadPanes];
     
     iconView = [[BDSKPreferenceIconView alloc] initWithPreferenceController:self];
     [iconView setAction:@selector(iconViewShowPane:)];
