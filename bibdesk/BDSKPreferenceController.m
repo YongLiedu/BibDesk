@@ -391,7 +391,7 @@ static id sharedController = nil;
     [toolbar setDelegate:self];
     [toolbar setVisible:YES];
     [toolbar setAllowsUserCustomization:YES];
-    //[toolbar setAutosavesConfiguration:YES];
+    [toolbar setAutosavesConfiguration:YES];
     if ([toolbar respondsToSelector:@selector(_setCustomizesAlwaysOnClickAndDrag:)])
         [toolbar _setCustomizesAlwaysOnClickAndDrag:YES];
     if ([toolbar respondsToSelector:@selector(_setWantsToolbarContextMenu:)])
