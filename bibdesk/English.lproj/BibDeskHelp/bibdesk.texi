@@ -161,7 +161,7 @@ about the BibTeX file format.
 @item @uref{http://bibdesk.sourceforge.net, BibDesk Website}
 @item @uref{http://sourceforge.net/apps/mediawiki/bibdesk/index.php?title=Main_Page, BibDesk Wiki}
 @item @uref{http://sourceforge.net/apps/mediawiki/bibdesk/index.php?title=FAQ, BibDesk FAQ}
-@item @uref{http://bibdesk.sourceforge.net/scripts.html, BibDesk AppleScript Repository}
+@item @uref{http://sourceforge.net/apps/mediawiki/bibdesk/index.php?title=BibDesk_Applescripts, BibDesk AppleScript Repository}
 @item @uref{http://bibdesk.sourceforge.net/manual/, Online Copy of This Manual}
 @end itemize
 
