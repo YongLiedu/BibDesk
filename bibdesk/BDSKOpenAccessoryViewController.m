@@ -39,25 +39,26 @@
 #import "BDSKOpenAccessoryViewController.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKStringEncodingManager.h"
+#import "NSString_BDSKExtensions.h"
+#import "BDSKStringConstants.h"
 
 #define MAX_FILTER_HISTORY 7
 
 @implementation BDSKOpenAccessoryViewController
 
-- (NSString *)nibName {
-    return @"BDSKOpenAccessoryView";
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    if (self = [super initWithNibName:@"BDSKOpenAccessoryView" bundle:nil]) {
+        // make sure the nib is loaded
+        [self view];
+    }
+    return self;
 }
 
 - (NSView *)openTextEncodingAccessoryView {
-    [self view];
     return openTextEncodingAccessoryView;
 }
 
-- (BDSKEncodingPopUpButton *)openTextEncodingPopupButton {
-    return openTextEncodingPopupButton;
-}
-
-- (NSArray *)commandHistoryFromDefaults {
+- (NSMutableArray *)commandHistoryFromDefaults {
     NSMutableArray *commandHistory = [NSMutableArray array];
     // this is a workaround for older versions which added the same command multiple times
     [commandHistory addNonDuplicateObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKFilterFieldHistoryKey]];
@@ -68,7 +69,6 @@
 }
 
 - (NSView *)openUsingFilterAccessoryView {
-    [self view];
     if ([openTextEncodingPopupButton isDescendantOf:openUsingFilterAccessoryView] == NO) {
         NSRect frame = [openTextEncodingAccessoryView frame];
         frame.origin = NSZeroPoint;
@@ -98,7 +98,7 @@
 - (NSString *)filterCommand {
     NSString *command = [openUsingFilterComboBox stringValue];
     if ([NSString isEmptyString:command] == NO) {
-        NSMutableArray *commandHistory = [[self commandHistoryFromDefaults] mutableCopy];
+        NSMutableArray *commandHistory = [self commandHistoryFromDefaults];
         NSUInteger commandIndex = [commandHistory indexOfObject:command];
         if (commandIndex == NSNotFound) {
             // not in the array, so add it and then remove the tail
@@ -111,7 +111,6 @@
             [commandHistory insertObject:command atIndex:0];
         }
         [[NSUserDefaults standardUserDefaults] setObject:commandHistory forKey:BDSKFilterFieldHistoryKey];
-        [commandHistory release];
     }
     return command;
 }
