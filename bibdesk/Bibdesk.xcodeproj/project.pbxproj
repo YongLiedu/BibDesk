@@ -107,6 +107,9 @@
 		CE2AFE5A0911425F00E65C87 /* BDSKGroupCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */; };
 		CE2C16F90A0A149E006F0A73 /* gear2.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C16F80A0A149E006F0A73 /* gear2.tiff */; };
 		CE2E78CD0D40F6BB00340B39 /* BDSKManyToManyDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2E78CB0D40F6BB00340B39 /* BDSKManyToManyDictionary.m */; };
+		CE2F056811B517E9001B0AE0 /* BDSKOpenAccessoryViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = CE2F056611B517E9001B0AE0 /* BDSKOpenAccessoryViewController.h */; };
+		CE2F056911B517E9001B0AE0 /* BDSKOpenAccessoryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2F056711B517E9001B0AE0 /* BDSKOpenAccessoryViewController.m */; };
+		CE2F057211B51FA7001B0AE0 /* BDSKOpenAccessoryView.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE2F057111B51FA7001B0AE0 /* BDSKOpenAccessoryView.xib */; };
 		CE3011A30D5CC41D00C0B7FA /* BDSKAddCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3011A10D5CC41D00C0B7FA /* BDSKAddCommand.m */; };
 		CE3011AD0D5CC46F00C0B7FA /* BDSKRemoveCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3011AB0D5CC46F00C0B7FA /* BDSKRemoveCommand.m */; };
 		CE3011BA0D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3011B80D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.m */; };
@@ -897,6 +900,10 @@
 		CE2C16F80A0A149E006F0A73 /* gear2.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = gear2.tiff; sourceTree = "<group>"; };
 		CE2E78CA0D40F6BB00340B39 /* BDSKManyToManyDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKManyToManyDictionary.h; sourceTree = "<group>"; };
 		CE2E78CB0D40F6BB00340B39 /* BDSKManyToManyDictionary.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKManyToManyDictionary.m; sourceTree = "<group>"; };
+		CE2F056611B517E9001B0AE0 /* BDSKOpenAccessoryViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKOpenAccessoryViewController.h; sourceTree = "<group>"; };
+		CE2F056711B517E9001B0AE0 /* BDSKOpenAccessoryViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKOpenAccessoryViewController.m; sourceTree = "<group>"; };
+		CE2F056E11B51F90001B0AE0 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/BDSKOpenAccessoryView.xib; sourceTree = "<group>"; };
+		CE2F059411B5261A001B0AE0 /* French */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = French; path = French.lproj/BDSKOpenAccessoryView.xib; sourceTree = "<group>"; };
 		CE3011A00D5CC41C00C0B7FA /* BDSKAddCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKAddCommand.h; sourceTree = "<group>"; };
 		CE3011A10D5CC41D00C0B7FA /* BDSKAddCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKAddCommand.m; sourceTree = "<group>"; };
 		CE3011AA0D5CC46F00C0B7FA /* BDSKRemoveCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKRemoveCommand.h; sourceTree = "<group>"; };
@@ -1783,6 +1790,7 @@
 				CEB5D5A41072AE350001C135 /* BDSKFileMigration.xib */,
 				CEB5D5A81072AE350001C135 /* BDSKFilter.xib */,
 				CEB5D5AA1072AE350001C135 /* BDSKFindPanel.xib */,
+				CE2F057111B51FA7001B0AE0 /* BDSKOpenAccessoryView.xib */,
 				CEB5D5AC1072AE350001C135 /* BDSKOrphanedFilesFinder.xib */,
 				CEB5D5AE1072AE350001C135 /* BDSKPasswordController.xib */,
 				CEB5D5B01072AE350001C135 /* BDSKPersonWindow.xib */,
@@ -2059,6 +2067,7 @@
 				F97965F0086909EA00050427 /* BDSKFindController.m */,
 				2730077C07CF20B500F2E485 /* BDSKMacroWindowController.m */,
 				CEF71AD90B91BBCB003A2771 /* BDSKNotesWindowController.m */,
+				CE2F056711B517E9001B0AE0 /* BDSKOpenAccessoryViewController.m */,
 				CE22E1CC0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.m */,
 				F92ECBF309DF09DA00A244D0 /* BDSKPasswordController.m */,
 				F9022C72075802E300C3F701 /* BDSKPersonController.m */,
@@ -2551,6 +2560,7 @@
 				CEF536681192EFE400027C3C /* BDSKNotesOutlineView.h */,
 				CEE50488104D664200636237 /* BDSKNotesSearchIndex.h */,
 				CEF71AD80B91BBCB003A2771 /* BDSKNotesWindowController.h */,
+				CE2F056611B517E9001B0AE0 /* BDSKOpenAccessoryViewController.h */,
 				CE22E1CB0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.h */,
 				F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */,
 				CE62E0BD0F4C4A5500BDF01E /* BDSKOutlineView.h */,
@@ -2815,6 +2825,7 @@
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
 				CEF5366A1192EFE400027C3C /* BDSKNotesOutlineView.h in Headers */,
 				CD50E5FA11A2190E00848756 /* BDSKJSTORWebParser.h in Headers */,
+				CE2F056811B517E9001B0AE0 /* BDSKOpenAccessoryViewController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3182,6 +3193,7 @@
 				CEF1D6B6117F018C0069E249 /* version.texi in Resources */,
 				CEF1D6BC117F01C60069E249 /* applehelp.init in Resources */,
 				CEF1D6BD117F01C60069E249 /* postprocess-nontitle.py in Resources */,
+				CE2F057211B51FA7001B0AE0 /* BDSKOpenAccessoryView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3628,6 +3640,7 @@
 				CE17832E1158F0A000B2EBDF /* BDSKBookmarkSheetController.m in Sources */,
 				CEF5366B1192EFE400027C3C /* BDSKNotesOutlineView.m in Sources */,
 				CD50E5FB11A2190E00848756 /* BDSKJSTORWebParser.m in Sources */,
+				CE2F056911B517E9001B0AE0 /* BDSKOpenAccessoryViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3739,6 +3752,15 @@
 				F9C7D40A0BE9285500D65C7F /* French */,
 			);
 			name = ReadMe.rtf;
+			sourceTree = "<group>";
+		};
+		CE2F057111B51FA7001B0AE0 /* BDSKOpenAccessoryView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CE2F056E11B51F90001B0AE0 /* English */,
+				CE2F059411B5261A001B0AE0 /* French */,
+			);
+			name = BDSKOpenAccessoryView.xib;
 			sourceTree = "<group>";
 		};
 		CE8962C40CBEC0C500EA2D98 /* TemplateOptions.strings */ = {

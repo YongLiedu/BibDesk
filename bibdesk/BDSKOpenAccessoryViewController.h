@@ -1,8 +1,10 @@
-//  BDSKDocumentController.h
-
-//  Created by Christiaan Hofman on 5/31/06.
+//
+//  BDSKOpenAccessoryViewController.h
+//  Bibdesk
+//
+//  Created by Christiaan on 6/1/10.
 /*
- This software is Copyright (c) 2006-2010
+ This software is Copyright (c) 2010
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -34,27 +36,26 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#import <Cocoa/Cocoa.h>
 
 @class BDSKEncodingPopUpButton;
 
-@interface BDSKDocumentController : NSDocumentController {
-    BOOL didInitialize;
-    
-    id mainDocument;
-    
-    NSInteger openType;
-    NSStringEncoding lastSelectedEncoding;
-    NSString *lastSelectedFilterCommand;
+@interface BDSKOpenAccessoryViewController : NSViewController {
+	// stuff for the accessory view for open text encoding 
+	IBOutlet NSView *openTextEncodingAccessoryView;
+	IBOutlet BDSKEncodingPopUpButton *openTextEncodingPopupButton;
+    // stuff for the accessory view for openUsingFilter
+    IBOutlet NSView *openUsingFilterAccessoryView;
+    IBOutlet NSComboBox *openUsingFilterComboBox;
 }
 
-- (id)mainDocument;
+- (NSView *)openTextEncodingAccessoryView;
+- (NSView *)openUsingFilterAccessoryView;
 
-- (NSStringEncoding)lastSelectedEncoding;
+- (NSStringEncoding)encoding;
+- (void)setEncoding:(NSStringEncoding)encoding;
 
-- (IBAction)openDocumentUsingFilter:(id)sender;
-- (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender;
-
-- (IBAction)newTemplateDocument:(id)sender;
-- (IBAction)openTemplateDocument:(id)sender;
+- (NSString *)filterCommand;
+- (void)setFilterCommand:(NSString *)command;
 
 @end

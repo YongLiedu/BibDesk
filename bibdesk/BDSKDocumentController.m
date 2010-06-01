@@ -50,8 +50,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKTemplateDocument.h"
 #import "BDSKTask.h"
-
-#define MAX_FILTER_HISTORY 7
+#import "BDSKOpenAccessoryViewController.h"
 
 enum {
     BDSKOpenDefault,
@@ -79,10 +78,6 @@ enum {
         didInitialize = YES;
     }
     return self;
-}
-
-- (void)awakeFromNib {
-    [openUsingFilterAccessoryView retain];
 }
 
 - (id)mainDocument {
@@ -172,71 +167,41 @@ enum {
 
 - (NSInteger)runModalOpenPanel:(NSOpenPanel *)openPanel forTypes:(NSArray *)extensions {
     NSView *accessoryView = nil;
-    NSMutableArray *commandHistory = nil;
+    BDSKOpenAccessoryViewController *accessoryController = nil;
     
     switch (openType) {
         case BDSKOpenUsingPhonyCiteKeys:
             extensions = [NSArray arrayWithObject:@"bib"];
         case BDSKOpenDefault:
-            accessoryView = openTextEncodingAccessoryView;
+            accessoryController = [[BDSKOpenAccessoryViewController alloc] init];
+            accessoryView = [accessoryController openTextEncodingAccessoryView];
             break;
         case BDSKOpenUsingFilter:
             extensions = nil;
-            
-            NSRect frame = [openTextEncodingAccessoryView frame];
-            frame.origin = NSZeroPoint;
-            frame.size.width = NSWidth([openUsingFilterAccessoryView frame]);
-            [openTextEncodingAccessoryView setFrame:frame];
-            [openUsingFilterAccessoryView addSubview:openTextEncodingAccessoryView];
-            accessoryView = openUsingFilterAccessoryView;
-
-            commandHistory = [NSMutableArray array];
-            // this is a workaround for older versions which added the same command multiple times
-            [commandHistory addNonDuplicateObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKFilterFieldHistoryKey]];
-            
-            // this is also a workaround for older versions
-            if([commandHistory count] > MAX_FILTER_HISTORY)
-                [commandHistory removeObjectsInRange:NSMakeRange(MAX_FILTER_HISTORY, [commandHistory count] - MAX_FILTER_HISTORY)];
-            [openUsingFilterComboBox removeAllItems];
-            [openUsingFilterComboBox addItemsWithObjectValues:commandHistory];
-            
-            if ([commandHistory count]) {
-                [openUsingFilterComboBox selectItemAtIndex:0];
-                [openUsingFilterComboBox setObjectValue:[openUsingFilterComboBox objectValueOfSelectedItem]];
-            }
+            accessoryController = [[BDSKOpenAccessoryViewController alloc] init];
+            accessoryView = [accessoryController openUsingFilterAccessoryView];
             break;
         case BDSKOpenTemplate:
             extensions = [NSArray arrayWithObjects:@"txt", @"rtf", nil];
             break;
     }
-    if (accessoryView) {
-        [openTextEncodingPopupButton setEncoding:[BDSKStringEncodingManager defaultEncoding]];
+    if (accessoryController) {
+        [accessoryController setEncoding:[BDSKStringEncodingManager defaultEncoding]];
         [openPanel setAccessoryView:accessoryView];
     }
     
     NSInteger result = [super runModalOpenPanel:openPanel forTypes:extensions];
     
-    if (result == NSOKButton) {
-        if (accessoryView)
-            lastSelectedEncoding = [openTextEncodingPopupButton encoding];
-        
-        if (openType == BDSKOpenUsingFilter) {
-            [lastSelectedFilterCommand release];
-            lastSelectedFilterCommand = [[openUsingFilterComboBox stringValue] copy];
+    if (accessoryController) {
+        if (result == NSOKButton) {
+            lastSelectedEncoding = [accessoryController encoding];
             
-            NSUInteger commandIndex = [commandHistory indexOfObject:lastSelectedFilterCommand];
-            if (commandIndex == NSNotFound) {
-                // not in the array, so add it and then remove the tail
-                [commandHistory insertObject:lastSelectedFilterCommand atIndex:0];
-                if([commandHistory count] > MAX_FILTER_HISTORY)
-                    [commandHistory removeLastObject];
-            } else if (commandIndex != 0) {
-                // already in the array, so move it to the head of the list
-                [commandHistory removeObject:lastSelectedFilterCommand];
-                [commandHistory insertObject:lastSelectedFilterCommand atIndex:0];
+            if (openType == BDSKOpenUsingFilter) {
+                [lastSelectedFilterCommand release];
+                lastSelectedFilterCommand = [[accessoryController filterCommand] copy];
             }
-            [[NSUserDefaults standardUserDefaults] setObject:commandHistory forKey:BDSKFilterFieldHistoryKey];
         }
+        [accessoryController release];
     }
     
     return result;
