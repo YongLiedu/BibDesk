@@ -3403,11 +3403,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (IBAction)reloadSelectedIcons:(id)sender;
 {
-    NSEnumerator *iconEnum = [[self iconsAtIndexes:[self selectionIndexes]] objectEnumerator];
-    FVIcon *anIcon;
-    while ((anIcon = [iconEnum nextObject]) != nil)
-        [anIcon recache];
-
+    [[self iconsAtIndexes:[self selectionIndexes]] makeObjectsPerformSelector:@selector(recache)];
     // ensure consistency between URL and icon, since this will require re-reading the URL from disk/net
     [self reloadIcons];
 }
