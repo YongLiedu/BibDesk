@@ -46,8 +46,6 @@
 	IBOutlet NSMenu *sidePreviewDisplayMenu;
 	IBOutlet NSMenu *searchBookmarksMenu;
 	IBOutlet NSMenu *bookmarksMenu;
-
-    NSConnection *completionConnection;
 }
 
 - (IBAction)visitWebSite:(id)sender;
