@@ -51,6 +51,7 @@
 #import "BDAlias.h"
 #import "BDSKErrorObjectController.h"
 #import "BDSKServiceProvider.h"
+#import "BDSKCompletionServer.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKPreferenceController.h"
 #import "BDSKTemplate.h"
@@ -59,9 +60,6 @@
 #import "BDSKReadMeController.h"
 #import "BDSKOrphanedFilesFinder.h"
 #import "NSWindowController_BDSKExtensions.h"
-#import "BDSKPublicationsArray.h"
-#import "BDSKSearchForCommand.h"
-#import "BDSKCompletionServerProtocol.h"
 #import "BDSKDocumentController.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
@@ -297,12 +295,7 @@ static void fixLegacyTableColumnIdentifiers()
     [NSApp setServicesProvider:[BDSKServiceProvider sharedServiceProvider]];
     
     // register server for cite key completion
-    completionConnection = [[NSConnection alloc] initWithReceivePort:[NSPort port] sendPort:nil];
-    NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKCompletionServer)];
-    [completionConnection setRootObject:checker];
-    
-    if ([completionConnection registerName:BIBDESK_SERVER_NAME] == NO)
-        NSLog(@"failed to register completion connection; another BibDesk process must be running");  
+    [BDSKCompletionServer sharedCompletionServer];
     
     NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     if(![versionString isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKLastVersionLaunchedKey]])
@@ -337,12 +330,7 @@ static void fixLegacyTableColumnIdentifiers()
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification{
-    [completionConnection registerName:nil];
-    [[completionConnection receivePort] invalidate];
-    [[completionConnection sendPort] invalidate];
-    [completionConnection invalidate];
-    BDSKDESTROY(completionConnection);
-    
+    [[BDSKCompletionServer sharedCompletionServer] terminate];
 }
 
 static BOOL fileIsInTrash(NSURL *fileURL)
@@ -626,32 +614,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         [self addMenuItemsForBookmarks:bookmarks toMenu:menu];
         
     }
-}
-
-#pragma mark DO completion
-
-- (NSArray *)completionsForString:(NSString *)searchString;
-{
-	NSMutableArray *results = [NSMutableArray array];
-
-    // for empty search string, return all items
-
-    for (BibDocument *document in [NSApp orderedDocuments]) {
-        
-        NSArray *pubs = [NSString isEmptyString:searchString] ? [document publications] : [document findMatchesFor:searchString];
-        [results addObjectsFromArray:[pubs valueForKey:@"completionObject"]];
-    }
-	return results;
-}
-
-- (NSArray *)orderedDocumentURLs;
-{
-    NSMutableArray *theURLs = [NSMutableArray array];
-    for (id aDoc in [NSApp orderedDocuments]) {
-        if ([aDoc fileURL])
-            [theURLs addObject:[aDoc fileURL]];
-    }
-    return theURLs;
 }
 
 #pragma mark Actions
