@@ -54,6 +54,14 @@ static id sharedCompletionServer = nil;
     return sharedCompletionServer;
 }
 
+- (void)handleApplicationWillTerminate:(NSNotification *)note {
+    [connection registerName:nil];
+    [[connection receivePort] invalidate];
+    [[connection sendPort] invalidate];
+    [connection invalidate];
+    BDSKDESTROY(connection);
+}
+
 - (id)init {
     BDSKPRECONDITION(sharedCompletionServer == nil);
     if (self = [super init]) {
@@ -61,18 +69,15 @@ static id sharedCompletionServer = nil;
         NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKCompletionServer)];
         [connection setRootObject:checker];
         
-        if ([connection registerName:BIBDESK_SERVER_NAME] == NO)
-            NSLog(@"failed to register completion connection; another BibDesk process must be running");  
+        if ([connection registerName:BIBDESK_SERVER_NAME] == NO) {
+            NSLog(@"failed to register completion connection; another BibDesk process must be running");
+            [self handleApplicationWillTerminate:nil];
+        } else {
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
+        }
+            
     }
     return self;
-}
-
-- (void)terminate {
-    [connection registerName:nil];
-    [[connection receivePort] invalidate];
-    [[connection sendPort] invalidate];
-    [connection invalidate];
-    BDSKDESTROY(connection);
 }
 
 #pragma mark BDSKCompletionServer protocol

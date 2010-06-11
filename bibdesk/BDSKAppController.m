@@ -329,10 +329,6 @@ static void fixLegacyTableColumnIdentifiers()
     [[NSColorPanel sharedColorPanel] setShowsAlpha:YES];
 }
 
-- (void)applicationWillTerminate:(NSNotification *)aNotification{
-    [[BDSKCompletionServer sharedCompletionServer] terminate];
-}
-
 static BOOL fileIsInTrash(NSURL *fileURL)
 {
     NSCParameterAssert([fileURL isFileURL]);    

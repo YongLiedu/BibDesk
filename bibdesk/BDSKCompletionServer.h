@@ -42,9 +42,5 @@
 @interface BDSKCompletionServer : NSObject {
     NSConnection *connection;
 }
-
 + (id)sharedCompletionServer;
-
-- (void)terminate;
-
 @end
