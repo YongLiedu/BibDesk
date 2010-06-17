@@ -131,8 +131,11 @@ There are some issues with BibAuthor's sortCompare:, though, which we may revisi
 		
         sortDescriptor = [[self alloc] initWithKey:@"lastAuthor" ascending:ascend selector:@selector(sortCompare:)];
         
-	}else if([tcID isEqualToString:BDSKFirstAuthorEditorString] ||
-             [tcID isEqualToString:BDSKAuthorEditorString]){
+	}else if([tcID isEqualToString:BDSKAuthorEditorString]){
+        
+        sortDescriptor = [[self alloc] initWithKey:@"pubAuthorsOrEditors" ascending:ascend selector:@selector(sortCompareToAuthorArray:)];
+        
+	}else if([tcID isEqualToString:BDSKFirstAuthorEditorString]){
         
         sortDescriptor = [[self alloc] initWithKey:@"firstAuthorOrEditor" ascending:ascend selector:@selector(sortCompare:)];
         
