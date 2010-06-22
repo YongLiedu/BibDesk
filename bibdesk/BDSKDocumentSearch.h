@@ -41,21 +41,20 @@
 
 @interface BDSKDocumentSearch : NSObject {
     @private;
-    SKSearchRef search;                       // active search
-    NSInvocation *callback;                   // encapsulates document target for callback messages
-    CGFloat maxScore;                         // maximum score encountered
-    NSMutableDictionary *originalScores;      // non-normalized scores, identifier URLs as keys
+    SKSearchRef search;
+    id delegate;
     volatile int32_t isSearching;
-    NSString *currentSearchString;            // avoids duplicate searches
-    NSLock *searchLock;                       // for currentSearchString and invocation
+    BOOL shouldStop;
+    NSString *currentSearchString; 
+    NSLock *searchLock;
     
     // main thread access only
-    NSArray *previouslySelectedPublications;  // convenience for the document
+    NSArray *previouslySelectedPublications;
     NSPoint previousScrollPositionAsPercentage;
 }
 
-// following are all thread safe; document is only used as target for the callback
-- (id)initWithDelegate:(id)delegate;
+// following are all thread safe, aDelegate must implement all delegate methods
+- (id)initWithDelegate:(id)aDelegate;
 - (void)searchForString:(NSString *)searchString index:(SKIndexRef)index selectedPublications:(NSArray *)selPubs scrollPositionAsPercentage:(NSPoint)scrollPoint;
 - (NSArray *)previouslySelectedPublications;
 - (NSPoint)previousScrollPositionAsPercentage;

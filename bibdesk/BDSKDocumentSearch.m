@@ -41,6 +41,8 @@
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
 
+#define IDENTIFIERS_KEY @"identifiers"
+#define SCORES_KEY @"scores"
 
 @interface BDSKDocumentSearchOperation : NSOperation {
     NSString *searchString;
@@ -64,22 +66,15 @@ static NSOperationQueue *searchQueue = nil;
     }
 }
 
-- (id)initWithDelegate:(id)delegate;
+- (id)initWithDelegate:(id)aDelegate;
 {
     self = [super init];
     if (self) {
-        SEL cb = @selector(search:foundIdentifiers:normalizedScores:);
-        NSMethodSignature *sig = [delegate methodSignatureForSelector:cb];
-        NSParameterAssert(nil != sig);
-        NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
-        [invocation setTarget:delegate];
-        [invocation setSelector:cb];
-        [invocation setArgument:&self atIndex:2];
+        delegate = aDelegate;
         searchLock = [[NSLock alloc] init];
         
-        callback = [invocation retain];
-        originalScores = [NSMutableDictionary new];
         isSearching = 0;
+        shouldStop = NO;
         
     }
     return self;
@@ -88,9 +83,8 @@ static NSOperationQueue *searchQueue = nil;
 // owner should have already sent -terminate; sending it from -dealloc causes resurrection
 - (void)dealloc
 {
+    delegate = nil;
     BDSKDESTROY(currentSearchString);
-    BDSKDESTROY(originalScores);
-    BDSKDESTROY(callback);
     BDSKDESTROY(previouslySelectedPublications);
     BDSKDESTROY(searchLock);
     [super dealloc];
@@ -119,8 +113,9 @@ static NSOperationQueue *searchQueue = nil;
 {
     [self cancelSearch];
     [searchLock lock];
-    BDSKDESTROY(callback);
+    shouldStop = NO;
     [searchLock unlock];
+    delegate = nil;
 }
 
 - (BOOL)isSearching;
@@ -129,29 +124,33 @@ static NSOperationQueue *searchQueue = nil;
     return 1 == isSearching;
 }
 
-- (NSDictionary *)normalizedScores
+- (void)invokeFoundCallback:(NSDictionary *)info
+{
+    [delegate search:self foundIdentifiers:[info objectForKey:IDENTIFIERS_KEY] normalizedScores:[info objectForKey:SCORES_KEY]];
+}
+
+- (void)invokeFinishedCallback
+{
+    [delegate searchDidStop:self];
+} 
+
+- (void)invokeStartedCallback
+{
+    [delegate searchDidStart:self];
+} 
+
+#define SEARCH_BUFFER_MAX 1024
+
+static inline NSDictionary *normalizedScores(NSDictionary *originalScores, CGFloat maxScore)
 {
     NSMutableDictionary *scores = [NSMutableDictionary dictionary];
     for (id aKey in originalScores) {
         NSNumber *nsScore = [originalScores objectForKey:aKey];
-        NSParameterAssert(nil != nsScore);
         CGFloat score = [nsScore doubleValue];
         [scores setObject:[NSNumber numberWithDouble:(score/maxScore)] forKey:aKey];
     }
     return scores;
 }
-
-- (void)invokeFinishedCallback
-{
-    [[callback target] searchDidStop:self];
-}
-
-- (void)invokeStartedCallback
-{
-    [[callback target] searchDidStart:self];
-} 
-
-#define SEARCH_BUFFER_MAX 1024
 
 - (void)backgroundSearchForString:(NSString *)searchString index:(SKIndexRef)skIndex
 {
@@ -167,9 +166,8 @@ static NSOperationQueue *searchQueue = nil;
     CFIndex i, foundCount;
     
     Boolean more, keepGoing;
-    maxScore = 0.0f;
-    
-    [originalScores removeAllObjects];
+    CGFloat maxScore = 0.0f;
+    NSMutableDictionary *originalScores  = [NSMutableDictionary dictionary];
     
     do {
         
@@ -197,24 +195,23 @@ static NSOperationQueue *searchQueue = nil;
         }
         
         // check currentSearchString to see if a new search is queued; if so, exit this loop
-        // check callback in case the doc is closing while a search is in progress
+        // check shouldStop in case the doc is closing while a search is in progress
 
         [searchLock lock];
-        keepGoing = (nil != callback && [searchString isEqualToString:currentSearchString]);
+        keepGoing = (shouldStop != NO && [searchString isEqualToString:currentSearchString]);
         [searchLock unlock];
 
         if (keepGoing) {
-            NSDictionary *normalizedScores = [self normalizedScores];
-            [callback setArgument:&foundURLSet atIndex:3];
-            [callback setArgument:&normalizedScores atIndex:4];
-            [callback performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
+            NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:foundURLSet, IDENTIFIERS_KEY, normalizedScores(originalScores, maxScore), SCORES_KEY, nil];
+            [self performSelectorOnMainThread:@selector(invokeFoundCallback:) withObject:info waitUntilDone:YES];
         }
                 
         [searchLock lock];
-        keepGoing = (nil != callback && [searchString isEqualToString:currentSearchString]);
+        keepGoing = (shouldStop != NO && [searchString isEqualToString:currentSearchString]);
         [searchLock unlock];
         
     } while (keepGoing && NULL != search && more);
+    
     [self performSelectorOnMainThread:@selector(invokeFinishedCallback) withObject:nil waitUntilDone:YES];
     [self _cancelSearch];  
 }
