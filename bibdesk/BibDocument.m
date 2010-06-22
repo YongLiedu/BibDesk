@@ -248,7 +248,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         
         searchIndexes = [[BDSKItemSearchIndexes alloc] init];   
         notesSearchIndex = [[BDSKNotesSearchIndex alloc] init];   
-        documentSearch = [[BDSKDocumentSearch alloc] initWithDocument:(id)self];
+        documentSearch = [[BDSKDocumentSearch alloc] initWithDelegate:(id)self];
         rowToSelectAfterDelete = -1;
     }
     return self;

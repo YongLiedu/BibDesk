@@ -64,15 +64,15 @@ static NSOperationQueue *searchQueue = nil;
     }
 }
 
-- (id)initWithDocument:(id)doc;
+- (id)initWithDelegate:(id)delegate;
 {
     self = [super init];
     if (self) {
         SEL cb = @selector(search:foundIdentifiers:normalizedScores:);
-        NSMethodSignature *sig = [doc methodSignatureForSelector:cb];
+        NSMethodSignature *sig = [delegate methodSignatureForSelector:cb];
         NSParameterAssert(nil != sig);
         NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
-        [invocation setTarget:doc];
+        [invocation setTarget:delegate];
         [invocation setSelector:cb];
         [invocation setArgument:&self atIndex:2];
         searchLock = [[NSLock alloc] init];

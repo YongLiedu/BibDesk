@@ -55,7 +55,7 @@
 }
 
 // following are all thread safe; document is only used as target for the callback
-- (id)initWithDocument:(id)doc;
+- (id)initWithDelegate:(id)delegate;
 - (void)searchForString:(NSString *)searchString index:(SKIndexRef)index selectedPublications:(NSArray *)selPubs scrollPositionAsPercentage:(NSPoint)scrollPoint;
 - (NSArray *)previouslySelectedPublications;
 - (NSPoint)previousScrollPositionAsPercentage;
