@@ -213,24 +213,13 @@ static inline NSDictionary *normalizedScores(NSDictionary *originalScores, CGFlo
 
 - (NSArray *)previouslySelectedPublications { return previouslySelectedPublications; }
 
-- (void)setPreviouslySelectedPublications:(NSArray *)selPubs
-{
-    [previouslySelectedPublications autorelease];
-    previouslySelectedPublications = [[NSArray alloc] initWithArray:selPubs copyItems:NO];
-}
-
-- (NSPoint)previousScrollPositionAsPercentage {
-    return previousScrollPositionAsPercentage;
-}
-
-- (void)setPreviousScrollPositionAsPercentage:(NSPoint)scrollPoint {
-    previousScrollPositionAsPercentage = scrollPoint;
-}
+- (NSPoint)previousScrollPositionAsPercentage { return previousScrollPositionAsPercentage; }
 
 - (void)searchForString:(NSString *)searchString index:(SKIndexRef)skIndex selectedPublications:(NSArray *)selPubs scrollPositionAsPercentage:(NSPoint)scrollPoint;
 {
-    [self setPreviouslySelectedPublications:selPubs];
-    [self setPreviousScrollPositionAsPercentage:scrollPoint];
+    [previouslySelectedPublications autorelease];
+    previouslySelectedPublications = [[NSArray alloc] initWithArray:selPubs copyItems:NO];
+    previousScrollPositionAsPercentage = scrollPoint;
     
     [searchLock lock];
     [currentSearchString autorelease];
