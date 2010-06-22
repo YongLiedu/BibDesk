@@ -39,20 +39,11 @@
 #import "BDSKDocumentSearch.h"
 #import "BibDocument.h"
 #import "BibItem.h"
+#import "NSInvocation_BDSKExtensions.h"
 #import <libkern/OSAtomic.h>
 
 #define IDENTIFIERS_KEY @"identifiers"
 #define SCORES_KEY @"scores"
-
-@interface BDSKDocumentSearchOperation : NSOperation {
-    NSString *searchString;
-    BDSKDocumentSearch *search;
-    SKIndexRef skIndex;
-}
-- (id)initWithDocumentSearch:(BDSKDocumentSearch *)search index:(SKIndexRef)anIndex searchString:(NSString *)searchString;
-@end
-
-#pragma mark -
 
 @implementation BDSKDocumentSearch
 
@@ -154,6 +145,8 @@ static inline NSDictionary *normalizedScores(NSDictionary *originalScores, CGFlo
 
 - (void)backgroundSearchForString:(NSString *)searchString index:(SKIndexRef)skIndex
 {
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+    
     OSAtomicCompareAndSwap32Barrier(0, 1, &isSearching);
     [self performSelectorOnMainThread:@selector(invokeStartedCallback) withObject:nil waitUntilDone:YES];
 
@@ -213,7 +206,9 @@ static inline NSDictionary *normalizedScores(NSDictionary *originalScores, CGFlo
     } while (keepGoing && NULL != search && more);
     
     [self performSelectorOnMainThread:@selector(invokeFinishedCallback) withObject:nil waitUntilDone:YES];
-    [self _cancelSearch];  
+    [self _cancelSearch];
+    
+    [pool release];
 }
 
 - (NSArray *)previouslySelectedPublications { return previouslySelectedPublications; }
@@ -246,45 +241,12 @@ static inline NSDictionary *normalizedScores(NSDictionary *originalScores, CGFlo
         [self cancelSearch];
     
     // always queue a search, since the index content may be changing (in case of a search group)
-    BDSKDocumentSearchOperation *op = [[BDSKDocumentSearchOperation alloc] initWithDocumentSearch:self index:skIndex searchString:searchString];
+    NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(backgroundSearchForString:index:)];
+    [invocation setArgument:&searchString atIndex:3];
+    [invocation setArgument:&skIndex atIndex:4];
+    NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
     [searchQueue addOperation:op];
     [op release];
 }
 
 @end
-
-#pragma mark -
-
-@implementation BDSKDocumentSearchOperation
-
-- (id)initWithDocumentSearch:(BDSKDocumentSearch *)aSearch index:(SKIndexRef)anIndex searchString:(NSString *)aSearchString;
-{
-    NSParameterAssert(anIndex); 
-    NSParameterAssert(aSearchString);
-    
-    self = [super init];
-    if (self) {
-        search = [aSearch retain];
-        skIndex = (SKIndexRef)CFRetain(anIndex);
-        searchString = [aSearchString copy];
-    }
-    return self;
-}
-
-- (void)dealloc
-{
-    BDSKCFDESTROY(skIndex);
-    BDSKDESTROY(search);
-    BDSKDESTROY(searchString);
-    [super dealloc];
-}
-
-- (void)main
-{
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    [search backgroundSearchForString:searchString index:skIndex];
-    [pool release];
-}
-
-@end
-
