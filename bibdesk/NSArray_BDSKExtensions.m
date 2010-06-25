@@ -213,7 +213,7 @@
 
 - (NSString *)componentsJoinedByAndWithEtAlAfterTwo
 {
-    return [self count] > 2 ? [[[self firstTwoObjects] componentsJoinedByComma] stringByAppendingString:@", et al."] : [self componentsJoinedByAnd];
+    return [self count] > 2 ? [[[self firstTwoObjects] componentsJoinedByAnd] stringByAppendingString:@" et al."] : [self componentsJoinedByAnd];
 }
 
 - (NSString *)componentsJoinedByCommaAndAndWithEtAlAfterThree
