@@ -236,6 +236,11 @@
     return [self count] > 6 ? [[[self firstSixObjects] componentsJoinedByComma] stringByAppendingString:@", et al."] : [self componentsJoinedByCommaAndAmpersand];
 }
 
+- (NSString *)componentsJoinedByCommaWithEtAlAfterSix
+{
+    return [self count] > 6 ? [[[self firstSixObjects] componentsJoinedByComma] stringByAppendingString:@", et al."] : [self componentsJoinedByComma];
+}
+
 - (NSArray *)indexRanges {
     NSMutableArray *array = [NSMutableArray array];
     NSInteger start = NSIntegerMin, end = NSIntegerMin;

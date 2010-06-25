@@ -83,6 +83,7 @@
 - (NSString *)componentsJoinedByAmpersandWithSingleEtAlAfterTwo;
 - (NSString *)componentsJoinedByCommaAndAmpersandWithSingleEtAlAfterFive;
 - (NSString *)componentsJoinedByCommaAndAmpersandWithEtAlAfterSix;
+- (NSString *)componentsJoinedByCommaWithEtAlAfterSix;
 
 - (NSArray *)indexRanges;
 - (NSArray *)indexRangeStrings;

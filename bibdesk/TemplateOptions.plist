@@ -267,6 +267,10 @@
             key = "@componentsJoinedByCommaAndAmpersandWithEtAlAfterSix";
         },
         {
+            displayName = "A, …, E, F; A, …, F, et al.";
+            key = "@componentsJoinedByCommaWithEtAlAfterSix";
+        },
+        {
             displayName = "First name only";
             key = "@firstObject";
         }
