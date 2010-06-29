@@ -82,12 +82,6 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 - (void)handleTokenDidChangeNotification:(NSNotification *)notification;
 - (void)handleTemplateDidChangeNotification:(NSNotification *)notification;
 - (NSDictionary *)convertPubTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont;
-- (NSArray *)convertItemTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont;
-- (NSArray *)tokensForTextTag:(BDSKTemplateTag *)tag allowText:(BOOL)allowText defaultFont:(NSFont *)defaultFont;
-- (id)tokenForConditionTag:(BDSKConditionTemplateTag *)tag defaultFont:(NSFont *)defaultFont;
-- (id)tokenForValueTag:(BDSKValueTemplateTag *)tag defaultFont:(NSFont *)defaultFont;
-- (NSString *)propertyForKey:(NSString *)key tokenType:(NSInteger)type;
-- (void)setFont:(NSFont *)font ofToken:(BDSKToken *)token defaultFont:(NSFont *)defaultFont;
 @end
 
 @implementation BDSKTemplateDocument
@@ -859,13 +853,22 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 #pragma mark Setup and Update
 
-- (void)setupOptionsMenu:(NSMenu *)parentMenu forKeys:(NSString *)firstKey, ... {
-    va_list keyList;
-    NSString *key = firstKey;
+- (NSArray *)propertiesForTokenType:(NSInteger)type {
+    switch (type) {
+        case BDSKFieldTokenType:        return [NSArray arrayWithObjects:@"casing", @"cleaning", @"appending", nil];
+        case BDSKURLTokenType:          return [NSArray arrayWithObjects:@"urlFormat", @"casing", @"cleaning", @"appending", nil];
+        case BDSKPersonTokenType:       return [NSArray arrayWithObjects:@"nameStyle", @"joinStyle", @"casing", @"cleaning", @"appending", nil];
+        case BDSKLinkedFileTokenType:   return [NSArray arrayWithObjects:@"linkedFileFormat", @"linkedFileJoinStyle", @"appending", nil];
+        case BDSKDateTokenType:         return [NSArray arrayWithObjects:@"dateFormat", @"casing", @"cleaning", @"appending", nil];
+        case BDSKNumberTokenType:       return [NSArray arrayWithObjects:@"counterStyle", @"counterCasing", nil];
+        default:                        return nil;
+    }
+}
+
+- (void)setupOptionsMenu:(NSMenu *)parentMenu forTokenType:(NSInteger)type {
     NSUInteger i = 0;
-    va_start(keyList, firstKey);
-    while (key) {
-        NSMenu *menu = [[parentMenu itemAtIndex:i] submenu];
+    for (NSString *key in [self propertiesForTokenType:type]) {
+        NSMenu *menu = [[parentMenu itemAtIndex:i++] submenu];
         [menu setTitle:[key stringByAppendingString:@"Key"]];
         for (NSDictionary *dict in [templateOptions valueForKey:key]) {
             NSMenuItem *item = [menu addItemWithTitle:[[NSBundle mainBundle] localizedStringForKey:[dict objectForKey:@"displayName"] value:@"" table:@"TemplateOptions"]
@@ -873,19 +876,16 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
             [item setTarget:self];
             [item setRepresentedObject:[dict objectForKey:@"key"]];
         }
-        key = va_arg(keyList, NSString *);
-        i++;
     }
-    va_end(keyList);
 }
 
 - (void)setupOptionsMenus {
-    [self setupOptionsMenu:fieldOptionsMenu forKeys:@"casing", @"cleaning", @"appending", nil];
-    [self setupOptionsMenu:urlOptionsMenu forKeys:@"urlFormat", @"casing", @"cleaning", @"appending", nil];
-    [self setupOptionsMenu:personOptionsMenu forKeys:@"nameStyle", @"joinStyle", @"casing", @"cleaning", @"appending", nil];
-    [self setupOptionsMenu:linkedFileOptionsMenu forKeys:@"linkedFileFormat", @"linkedFileJoinStyle", @"appending", nil];
-    [self setupOptionsMenu:dateOptionsMenu forKeys:@"dateFormat", @"casing", @"cleaning", @"appending", nil];
-    [self setupOptionsMenu:numberOptionsMenu forKeys:@"counterStyle", @"counterCasing", nil];
+    [self setupOptionsMenu:fieldOptionsMenu forTokenType:BDSKFieldTokenType];
+    [self setupOptionsMenu:urlOptionsMenu forTokenType:BDSKURLTokenType];
+    [self setupOptionsMenu:personOptionsMenu forTokenType:BDSKPersonTokenType];
+    [self setupOptionsMenu:linkedFileOptionsMenu forTokenType:BDSKLinkedFileTokenType];
+    [self setupOptionsMenu:dateOptionsMenu forTokenType:BDSKDateTokenType];
+    [self setupOptionsMenu:numberOptionsMenu forTokenType:BDSKNumberTokenType];
 }
 
 - (void)updateTextViews {
@@ -1239,59 +1239,32 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 #pragma mark Reading
 
-- (NSDictionary *)convertPubTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont {
-    NSMutableDictionary *result = [NSMutableDictionary dictionary];
-    NSArray *itemTemplate;
-    BDSKTemplateTag *tag = [templateArray count] ? [templateArray objectAtIndex:0] : nil;
-    
-    if ([tag type] == BDSKConditionTemplateTagType && [[(BDSKConditionTemplateTag *)tag keyPath] isEqualToString:@"pubType"]) {
-        if ([(BDSKConditionTemplateTag *)tag matchType] != BDSKTemplateTagMatchEqual)
-            return nil;
-        
-        NSArray *matchStrings = [(BDSKConditionTemplateTag *)tag matchStrings];
-        NSUInteger i = 0, keyCount = [matchStrings count], count = [[(BDSKConditionTemplateTag *)tag subtemplates] count];
-        
-        for (i = 0; i < count; i++) {
-            if (itemTemplate = [self convertItemTemplate:[(BDSKConditionTemplateTag *)tag subtemplateAtIndex:i] defaultFont:defaultFont])
-                [result setObject:itemTemplate forKey:i < keyCount ? [matchStrings objectAtIndex:i] : @""];
-            else return nil;
-        }
-    } else {
-        if (itemTemplate = [self convertItemTemplate:templateArray defaultFont:defaultFont])
-            [result setObject:itemTemplate forKey:@""];
-        else return nil;
+- (NSString *)propertyForKey:(NSString *)key tokenType:(NSInteger)type {
+    for (NSString *prop in [self propertiesForTokenType:type]) {
+        if ([[templateOptions valueForKeyPath:[prop stringByAppendingString:@".key"]] containsObject:key])
+            return [prop stringByAppendingString:@"Key"];
     }
-    
-    return result;
+    return nil;
 }
 
-- (NSArray *)convertItemTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont {
-    NSMutableArray *result = [NSMutableArray array];
-    id token;
-    
-    for (BDSKTemplateTag *tag in templateArray) {
-        switch ([(BDSKTemplateTag *)tag type]) {
-            case BDSKTextTemplateTagType:
-                if (token = [self tokensForTextTag:tag allowText:YES defaultFont:defaultFont])
-                    [result addObjectsFromArray:token];
-                else return nil;
-                break;
-            case BDSKValueTemplateTagType:
-                if (token = [self tokenForValueTag:(BDSKValueTemplateTag *)tag defaultFont:defaultFont])
-                    [result addObject:token];
-                else return nil;
-                break;
-            case BDSKConditionTemplateTagType:
-                if (token = [self tokenForConditionTag:(BDSKConditionTemplateTag *)tag defaultFont:defaultFont])
-                    [result addObject:token];
-                else return nil;
-                break;
-            default:
-                return nil;
-        }
+- (void)setFont:(NSFont *)font ofToken:(BDSKToken *)token defaultFont:(NSFont *)defaultFont{
+    if ([font isEqual:defaultFont] == NO) {
+        NSInteger defaultTraits = [[NSFontManager sharedFontManager] traitsOfFont:defaultFont];
+        NSInteger traits = [[NSFontManager sharedFontManager] traitsOfFont:font];
+        BOOL defaultBold = (defaultTraits & NSBoldFontMask) != 0;
+        BOOL defaultItalic = (defaultTraits & NSItalicFontMask) != 0;
+        BOOL isBold = (traits & NSBoldFontMask) != 0;
+        BOOL isItalic = (traits & NSItalicFontMask) != 0;
+        
+        if ([[font familyName] isEqualToString:[defaultFont familyName]] == NO)
+            [token setFontName:[font familyName]];
+        if (fabs([font pointSize] - [defaultFont pointSize]) > 0.0)
+            [token setFontSize:[font pointSize]];
+        if (isBold != defaultBold)
+            [token setBold:isBold];
+        if (isItalic != defaultItalic)
+            [token setItalic:isItalic];
     }
-    
-    return result;
 }
 
 - (NSArray *)tokensForTextTag:(BDSKTemplateTag *)tag allowText:(BOOL)allowText defaultFont:(NSFont *)defaultFont {
@@ -1318,6 +1291,58 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         [tokens addObject:[[[BDSKTextToken alloc] initWithTitle:[(BDSKTextTemplateTag *)tag text]] autorelease]];
     }
     return tokens;
+}
+
+- (id)tokenForValueTag:(BDSKValueTemplateTag *)tag defaultFont:(NSFont *)defaultFont {
+    NSArray *keys = [[tag keyPath] componentsSeparatedByString:@"."];
+    NSString *key = [keys count] ? [keys objectAtIndex:0] : nil;
+    BDSKToken *token = nil;
+    NSInteger type;
+    NSString *field = nil;
+    NSInteger i = 0, j;
+    
+    if ([key isEqualToString:@"fields"] || [key isEqualToString:@"urls"] || [key isEqualToString:@"persons"])
+        field = [keys objectAtIndex:++i];
+    else if ([key isEqualToString:@"citeKey"])
+        field = BDSKCiteKeyString;
+    else if ([key isEqualToString:@"pubType"])
+        field = BDSKPubTypeString;
+    else if ([key isEqualToString:@"itemIndex"])
+        field = BDSKItemNumberString;
+    else if ([key isEqualToString:@"authors"])
+        field = BDSKAuthorString;
+    else if ([key isEqualToString:@"editors"])
+        field = BDSKEditorString;
+    else
+        return nil;
+    
+    token = [BDSKToken tokenWithField:field];
+    type = [(BDSKToken *)token type];
+    keys = [keys subarrayWithRange:NSMakeRange(i + 1, [keys count] - i - 1)];
+    NSInteger count = [keys count];
+    NSString *property;
+    
+    if (type == BDSKPersonTokenType && [keys firstObjectCommonWithArray:[templateOptions valueForKeyPath:@"joinStyle.key"]] == nil)
+        return nil;
+    
+    for (i = 0; i < count; i++) {
+        for (j = count; j > i; j--) {
+            key = [[keys subarrayWithRange:makeRange(i, j)] componentsJoinedByString:@"."];
+            if (property = [self propertyForKey:key tokenType:type])
+                break;
+        }
+        if (j > i)
+            [token setValue:key forKey:property];
+        else return nil;
+        i = j - 1;
+    }
+    
+    if (defaultFont) {
+        NSFont *font = [[(BDSKRichValueTemplateTag *)tag attributes] objectForKey:NSFontAttributeName];
+        [self setFont:font ofToken:token defaultFont:defaultFont];
+    }
+    
+    return token;
 }
 
 - (id)tokenForConditionTag:(BDSKConditionTemplateTag *)tag defaultFont:(NSFont *)defaultFont {
@@ -1374,123 +1399,59 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     return token;
 }
 
-- (id)tokenForValueTag:(BDSKValueTemplateTag *)tag defaultFont:(NSFont *)defaultFont {
-    NSArray *keys = [[tag keyPath] componentsSeparatedByString:@"."];
-    NSString *key = [keys count] ? [keys objectAtIndex:0] : nil;
-    BDSKToken *token = nil;
-    NSInteger type;
-    NSString *field = nil;
-    NSInteger i = 0, j;
+- (NSArray *)convertItemTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont {
+    NSMutableArray *result = [NSMutableArray array];
+    id token;
     
-    if ([key isEqualToString:@"fields"] || [key isEqualToString:@"urls"] || [key isEqualToString:@"persons"])
-        field = [keys objectAtIndex:++i];
-    else if ([key isEqualToString:@"citeKey"])
-        field = BDSKCiteKeyString;
-    else if ([key isEqualToString:@"pubType"])
-        field = BDSKPubTypeString;
-    else if ([key isEqualToString:@"itemIndex"])
-        field = BDSKItemNumberString;
-    else if ([key isEqualToString:@"authors"])
-        field = BDSKAuthorString;
-    else if ([key isEqualToString:@"editors"])
-        field = BDSKEditorString;
-    else
-        return nil;
-    
-    token = [BDSKToken tokenWithField:field];
-    type = [(BDSKToken *)token type];
-    keys = [keys subarrayWithRange:NSMakeRange(i + 1, [keys count] - i - 1)];
-    NSInteger count = [keys count];
-    NSString *property;
-    
-    if (type == BDSKPersonTokenType && [keys firstObjectCommonWithArray:[templateOptions valueForKeyPath:@"joinStyle.key"]] == nil)
-        return nil;
-    
-    for (i = 0; i < count; i++) {
-        for (j = count; j > i; j--) {
-            key = [[keys subarrayWithRange:makeRange(i, j)] componentsJoinedByString:@"."];
-            if (property = [self propertyForKey:key tokenType:type])
+    for (BDSKTemplateTag *tag in templateArray) {
+        switch ([(BDSKTemplateTag *)tag type]) {
+            case BDSKTextTemplateTagType:
+                if (token = [self tokensForTextTag:tag allowText:YES defaultFont:defaultFont])
+                    [result addObjectsFromArray:token];
+                else return nil;
                 break;
+            case BDSKValueTemplateTagType:
+                if (token = [self tokenForValueTag:(BDSKValueTemplateTag *)tag defaultFont:defaultFont])
+                    [result addObject:token];
+                else return nil;
+                break;
+            case BDSKConditionTemplateTagType:
+                if (token = [self tokenForConditionTag:(BDSKConditionTemplateTag *)tag defaultFont:defaultFont])
+                    [result addObject:token];
+                else return nil;
+                break;
+            default:
+                return nil;
         }
-        if (j > i)
-            [token setValue:key forKey:property];
-        else return nil;
-        i = j - 1;
     }
     
-    if (defaultFont) {
-        NSFont *font = [[(BDSKRichValueTemplateTag *)tag attributes] objectForKey:NSFontAttributeName];
-        [self setFont:font ofToken:token defaultFont:defaultFont];
-    }
+    return result;
+}
+
+- (NSDictionary *)convertPubTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont {
+    NSMutableDictionary *result = [NSMutableDictionary dictionary];
+    NSArray *itemTemplate;
+    BDSKTemplateTag *tag = [templateArray count] ? [templateArray objectAtIndex:0] : nil;
     
-    return token;
-}
-
-- (NSString *)propertyForKey:(NSString *)key tokenType:(NSInteger)type {
-    switch (type) {
-        case BDSKFieldTokenType:
-            if ([[templateOptions valueForKeyPath:@"casing.key"] containsObject:key])
-                return @"casingKey";
-            if ([[templateOptions valueForKeyPath:@"cleaning.key"] containsObject:key])
-                return @"cleaningKey";
-            if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
-                return @"appendingKey";
+    if ([tag type] == BDSKConditionTemplateTagType && [[(BDSKConditionTemplateTag *)tag keyPath] isEqualToString:@"pubType"]) {
+        if ([(BDSKConditionTemplateTag *)tag matchType] != BDSKTemplateTagMatchEqual)
             return nil;
-        case BDSKURLTokenType:
-            if ([[templateOptions valueForKeyPath:@"urlFormat.key"] containsObject:key])
-                return @"urlFormatKey";
-            if ([[templateOptions valueForKeyPath:@"casing.key"] containsObject:key])
-                return @"casingKey";
-            if ([[templateOptions valueForKeyPath:@"cleaning.key"] containsObject:key])
-                return @"cleaningKey";
-            if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
-                return @"appendingKey";
-            return nil;
-        case BDSKPersonTokenType:
-            if ([[templateOptions valueForKeyPath:@"nameStyle.key"] containsObject:key])
-                return @"nameStyleKey";
-            if ([[templateOptions valueForKeyPath:@"joinStyle.key"] containsObject:key])
-                return @"joinStyleKey";
-            if ([[templateOptions valueForKeyPath:@"casing.key"] containsObject:key])
-                return @"casingKey";
-            if ([[templateOptions valueForKeyPath:@"cleaning.key"] containsObject:key])
-                return @"cleaningKey";
-            if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
-                return @"appendingKey";
-            return nil;
-        case BDSKDateTokenType:
-            if ([[templateOptions valueForKeyPath:@"dateFormat.key"] containsObject:key])
-                return @"dateFormatKey";
-            return nil;
-        case BDSKNumberTokenType:
-            if ([[templateOptions valueForKeyPath:@"counterStyle.key"] containsObject:key])
-                return @"counterStyleKey";
-            if ([[templateOptions valueForKeyPath:@"counterCasing.key"] containsObject:key])
-                return @"counterCasingKey";
-            return nil;
-        default:
-            return nil;
-    }
-}
-
-- (void)setFont:(NSFont *)font ofToken:(BDSKToken *)token defaultFont:(NSFont *)defaultFont{
-    if ([font isEqual:defaultFont] == NO) {
-        NSInteger defaultTraits = [[NSFontManager sharedFontManager] traitsOfFont:defaultFont];
-        NSInteger traits = [[NSFontManager sharedFontManager] traitsOfFont:font];
-        BOOL defaultBold = (defaultTraits & NSBoldFontMask) != 0;
-        BOOL defaultItalic = (defaultTraits & NSItalicFontMask) != 0;
-        BOOL isBold = (traits & NSBoldFontMask) != 0;
-        BOOL isItalic = (traits & NSItalicFontMask) != 0;
         
-        if ([[font familyName] isEqualToString:[defaultFont familyName]] == NO)
-            [token setFontName:[font familyName]];
-        if (fabs([font pointSize] - [defaultFont pointSize]) > 0.0)
-            [token setFontSize:[font pointSize]];
-        if (isBold != defaultBold)
-            [token setBold:isBold];
-        if (isItalic != defaultItalic)
-            [token setItalic:isItalic];
+        NSArray *matchStrings = [(BDSKConditionTemplateTag *)tag matchStrings];
+        NSUInteger i = 0, keyCount = [matchStrings count], count = [[(BDSKConditionTemplateTag *)tag subtemplates] count];
+        
+        for (i = 0; i < count; i++) {
+            if (itemTemplate = [self convertItemTemplate:[(BDSKConditionTemplateTag *)tag subtemplateAtIndex:i] defaultFont:defaultFont])
+                [result setObject:itemTemplate forKey:i < keyCount ? [matchStrings objectAtIndex:i] : @""];
+            else return nil;
+        }
+    } else {
+        if (itemTemplate = [self convertItemTemplate:templateArray defaultFont:defaultFont])
+            [result setObject:itemTemplate forKey:@""];
+        else return nil;
     }
+    
+    return result;
 }
 
 @end
