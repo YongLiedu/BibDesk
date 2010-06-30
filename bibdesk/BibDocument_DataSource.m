@@ -260,7 +260,6 @@
     NSString *dragCopyTypeKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
 	NSInteger dragCopyType = [sud integerForKey:dragCopyTypeKey];
     BOOL success = NO;
-	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
     NSArray *pubs = nil;
     NSArray *additionalFilenames = nil;
     
@@ -403,17 +402,24 @@
             dragCopyType += templateIdx;
     }
 	
-	success = [self writePublications:pubs forDragCopyType:dragCopyType citeString:citeString toPasteboard:pboard];
-	
-    if(success && additionalFilenames){
-        [pboardHelper addTypes:[NSArray arrayWithObject:NSFilesPromisePboardType] forPasteboard:pboard];
-        [pboardHelper setPropertyList:additionalFilenames forType:NSFilesPromisePboardType forPasteboard:pboard];
-    }
+	success = [self writePublications:pubs fileNames:additionalFilenames forDragCopyType:dragCopyType toPasteboard:pboard];
     
     return success;
 }
 	
+- (BOOL)writePublications:(NSArray *)pubs forDragCopyType:(NSInteger)dragCopyType toPasteboard:(NSPasteboard*)pboard{
+    return [self writePublications:pubs fileNames:nil forDragCopyType:dragCopyType toPasteboard:pboard];
+}
+
+- (BOOL)writePublications:(NSArray *)pubs fileNames:(NSArray *)fileNames forDragCopyType:(NSInteger)dragCopyType toPasteboard:(NSPasteboard*)pboard{
+    return [self writePublications:pubs fileNames:fileNames forDragCopyType:dragCopyType citeString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey] toPasteboard:pboard];
+}
+
 - (BOOL)writePublications:(NSArray *)pubs forDragCopyType:(NSInteger)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard{
+    return [self writePublications:pubs fileNames:nil forDragCopyType:dragCopyType citeString:citeString toPasteboard:pboard];
+}
+
+- (BOOL)writePublications:(NSArray *)pubs fileNames:(NSArray *)fileNames forDragCopyType:(NSInteger)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard{
 	NSString *mainType = nil;
 	NSString *string = nil;
 	NSData *data = nil;
@@ -477,7 +483,7 @@
     
 	[pboardHelper declareType:mainType dragCopyType:dragCopyType forItems:pubs forPasteboard:pboard];
     
-    if(string != nil) {
+    if (string != nil) {
         [pboardHelper setString:string forType:mainType forPasteboard:pboard];
 	} else if(data != nil) {
         [pboardHelper setData:data forType:mainType forPasteboard:pboard];
@@ -486,6 +492,12 @@
     } else if(dragCopyType >= BDSKTemplateDragCopyType) {
         [pboardHelper setData:nil forType:mainType forPasteboard:pboard];
     }
+    
+    if ([fileNames count]) {
+        [pboardHelper addTypes:[NSArray arrayWithObject:NSFilesPromisePboardType] forPasteboard:pboard];
+        [pboardHelper setPropertyList:fileNames forType:NSFilesPromisePboardType forPasteboard:pboard];
+    }
+    
     return YES;
 }
 
@@ -1126,7 +1138,6 @@
     NSString *dragCopyTypeKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
 	NSInteger dragCopyType = [sud integerForKey:dragCopyTypeKey];
     BOOL success = NO;
-	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
     NSArray *pubs = nil;
     NSArray *additionalFilenames = nil;
     
@@ -1165,12 +1176,7 @@
                 dragCopyType += templateIdx;
         }
         
-        success = [self writePublications:pubs forDragCopyType:dragCopyType citeString:citeString toPasteboard:pboard];
-        
-        if(success && additionalFilenames){
-            [pboardHelper addTypes:[NSArray arrayWithObject:NSFilesPromisePboardType] forPasteboard:pboard];
-            [pboardHelper setPropertyList:additionalFilenames forType:NSFilesPromisePboardType forPasteboard:pboard];
-        }
+        success = [self writePublications:pubs fileNames:additionalFilenames forDragCopyType:dragCopyType toPasteboard:pboard];
     }
     
     return success;

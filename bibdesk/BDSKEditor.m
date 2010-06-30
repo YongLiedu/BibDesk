@@ -427,7 +427,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
     NSString *copyTypeKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
 	NSInteger copyType = [sud integerForKey:copyTypeKey];
-	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
     NSArray *pubs = [NSArray arrayWithObject:publication];
     
@@ -439,15 +438,14 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             copyType += templateIdx;
     }
     
-    [[self document] writePublications:pubs forDragCopyType:copyType citeString:citeString toPasteboard:pboard];
+    [[self document] writePublications:pubs forDragCopyType:copyType toPasteboard:pboard];
 }
 
 - (IBAction)copyAsAction:(id)sender {
 	NSInteger copyType = [sender tag];
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-	NSString *citeString = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey];
     NSArray *pubs = [NSArray arrayWithObject:publication];
-	[[self document] writePublications:pubs forDragCopyType:copyType citeString:citeString toPasteboard:pboard];
+	[[self document] writePublications:pubs forDragCopyType:copyType toPasteboard:pboard];
 }
 
 - (IBAction)openLinkedFile:(id)sender{

@@ -303,8 +303,7 @@ static BOOL changingColors = NO;
 - (IBAction)copyAsAction:(id)sender{
 	NSInteger copyType = [sender tag];
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-	NSString *citeString = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey];
-	[self writePublications:[self clickedOrSelectedPublications] forDragCopyType:copyType citeString:citeString toPasteboard:pboard];
+	[self writePublications:[self clickedOrSelectedPublications] forDragCopyType:copyType toPasteboard:pboard];
 }
 
 - (BDSKEditor *)editorForPublication:(BibItem *)pub create:(BOOL)createNew{
