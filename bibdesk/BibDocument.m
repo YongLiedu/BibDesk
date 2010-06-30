@@ -2116,6 +2116,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
+    if (citeString == nil)
+        citeString = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey];
+    
     return [NSString stringWithFormat:@"%@%@%@", startCite, [[items valueForKey:@"citeKey"] componentsJoinedByString:separator], endCite];
 }
 

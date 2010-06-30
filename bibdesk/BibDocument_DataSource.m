@@ -408,11 +408,11 @@
 }
 	
 - (BOOL)writePublications:(NSArray *)pubs forDragCopyType:(NSInteger)dragCopyType toPasteboard:(NSPasteboard*)pboard{
-    return [self writePublications:pubs fileNames:nil forDragCopyType:dragCopyType toPasteboard:pboard];
+    return [self writePublications:pubs fileNames:nil forDragCopyType:dragCopyType citeString:nil toPasteboard:pboard];
 }
 
 - (BOOL)writePublications:(NSArray *)pubs fileNames:(NSArray *)fileNames forDragCopyType:(NSInteger)dragCopyType toPasteboard:(NSPasteboard*)pboard{
-    return [self writePublications:pubs fileNames:fileNames forDragCopyType:dragCopyType citeString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey] toPasteboard:pboard];
+    return [self writePublications:pubs fileNames:fileNames forDragCopyType:dragCopyType citeString:nil toPasteboard:pboard];
 }
 
 - (BOOL)writePublications:(NSArray *)pubs forDragCopyType:(NSInteger)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard{
