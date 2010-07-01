@@ -129,6 +129,9 @@
 
 #pragma mark Delegate
 
-SUBCLASS_DELEGATE_DEFINITION(BDSKDragTextFieldDelegate)
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKDragTextFieldDelegate>)delegate { return (id <BDSKDragTextFieldDelegate>)[super delegate]; }
+- (void)setDelegate:(id <BDSKDragTextFieldDelegate>)newDelegate { [super setDelegate:newDelegate]; }
+#endif
 
 @end

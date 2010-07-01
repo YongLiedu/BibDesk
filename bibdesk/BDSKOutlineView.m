@@ -537,7 +537,11 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
 
 #pragma mark Delegate and DataSource
 
-SUBCLASS_DELEGATE_DEFINITION(BDSKOutlineViewDelegate)
-SUBCLASS_DATASOURCE_DEFINITION(BDSKOutlineViewDataSource)
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKOutlineViewDelegate>)delegate { return (id <BDSKOutlineViewDelegate>)[super delegate]; }
+- (void)setDelegate:(id <BDSKOutlineViewDelegate>)newDelegate { [super setDelegate:newDelegate]; }
+- (id <BDSKOutlineViewDataSource>)dataSource { return (id <BDSKOutlineViewDataSource>)[super dataSource]; }
+- (void)setDataSource:(id <BDSKOutlineViewDataSource>)newDataSource { [super setDataSource:newDataSource]; }
+#endif
 
 @end

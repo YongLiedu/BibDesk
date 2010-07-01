@@ -86,8 +86,12 @@
 - (BOOL)canAlternateDelete;
 - (BOOL)canAlternateCut;
 
-SUBCLASS_DELEGATE_DECLARATION(BDSKMainTableViewDelegate)
-SUBCLASS_DATASOURCE_DECLARATION(BDSKMainTableViewDataSource)
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKMainTableViewDelegate>)delegate;
+- (void)setDelegate:(id <BDSKMainTableViewDelegate>)newDelegate;
+- (id <BDSKMainTableViewDataSource>)dataSource;
+- (void)setDataSource:(id <BDSKMainTableViewDataSource>)newDataSource;
+#endif
 
 @end
 
