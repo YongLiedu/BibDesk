@@ -47,5 +47,6 @@
 + (id)nonWhitespaceCharacterSet;
 + (id)nonLetterCharacterSet;
 + (id)nonDecimalDigitCharacterSet;
++ (id)endPunctuationCharacterSet;
 
 @end

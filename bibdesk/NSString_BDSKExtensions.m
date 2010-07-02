@@ -1220,7 +1220,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 - (NSString *)stringByAppendingFullStopIfNotEmpty
 {
-    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@"."];
+    return ([self isEqualToString:@""] || [[NSCharacterSet endPunctuationCharacterSet] characterIsMember:[self lastCharacter]]) ? self : [self stringByAppendingString:@"."];
 }
 
 - (NSString *)stringByAppendingCommaAndSpaceIfNotEmpty
@@ -1230,7 +1230,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 - (NSString *)stringByAppendingFullStopAndSpaceIfNotEmpty
 {
-    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@". "];
+    return ([self isEqualToString:@""] || [[NSCharacterSet endPunctuationCharacterSet] characterIsMember:[self lastCharacter]]) ? self : [self stringByAppendingString:@". "];
 }
 
 - (NSString *)stringByPrependingCommaAndSpaceIfNotEmpty

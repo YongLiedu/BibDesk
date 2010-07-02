@@ -99,4 +99,12 @@
     return nonDecimalDigitCharacterSet;
 }
 
++ (id)endPunctuationCharacterSet;
+{
+    static NSCharacterSet *endPunctuationCharacterSet = nil;
+    if (endPunctuationCharacterSet == nil)
+        endPunctuationCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@".?!"] copy];
+    return endPunctuationCharacterSet;
+}
+
 @end
