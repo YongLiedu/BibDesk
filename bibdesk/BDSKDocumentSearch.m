@@ -104,7 +104,7 @@ static NSOperationQueue *searchQueue = nil;
 {
     [self cancelSearch];
     [searchLock lock];
-    shouldStop = NO;
+    shouldStop = YES;
     [searchLock unlock];
     delegate = nil;
 }
@@ -191,7 +191,7 @@ static inline NSDictionary *normalizedScores(NSDictionary *originalScores, CGFlo
         // check shouldStop in case the doc is closing while a search is in progress
 
         [searchLock lock];
-        keepGoing = (shouldStop != NO && [searchString isEqualToString:currentSearchString]);
+        keepGoing = (shouldStop == NO && [searchString isEqualToString:currentSearchString]);
         [searchLock unlock];
 
         if (keepGoing) {
@@ -200,7 +200,7 @@ static inline NSDictionary *normalizedScores(NSDictionary *originalScores, CGFlo
         }
                 
         [searchLock lock];
-        keepGoing = (shouldStop != NO && [searchString isEqualToString:currentSearchString]);
+        keepGoing = (shouldStop == NO && [searchString isEqualToString:currentSearchString]);
         [searchLock unlock];
         
     } while (keepGoing && NULL != search && more);
@@ -231,8 +231,8 @@ static inline NSDictionary *normalizedScores(NSDictionary *originalScores, CGFlo
     
     // always queue a search, since the index content may be changing (in case of a search group)
     NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(backgroundSearchForString:index:)];
-    [invocation setArgument:&searchString atIndex:3];
-    [invocation setArgument:&skIndex atIndex:4];
+    [invocation setArgument:&searchString atIndex:2];
+    [invocation setArgument:&skIndex atIndex:3];
     NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
     [searchQueue addOperation:op];
     [op release];
