@@ -46,7 +46,6 @@
     volatile int32_t isSearching;
     BOOL shouldStop;
     NSString *currentSearchString; 
-    NSLock *searchLock;
     
     // main thread access only
     NSArray *previouslySelectedPublications;
@@ -65,7 +64,7 @@
 @end
 
 // This will be sent on the main thread.  Each set only contains newly returned items (since the last time it was sent), but scores include properly normalized values for all previously returned items as well.
-@interface NSObject (BDSKDocumentSearchCallback)
+@interface NSObject (BDSKDocumentSearchDelegate)
 - (void)searchDidStart:(BDSKDocumentSearch *)aSearch;
 - (void)searchDidStop:(BDSKDocumentSearch *)aSearch;
 - (void)search:(BDSKDocumentSearch *)aSearch foundIdentifiers:(NSSet *)identifierURLs normalizedScores:(NSDictionary *)scores;

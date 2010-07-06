@@ -57,18 +57,22 @@ static NSOperationQueue *searchQueue = nil;
     }
 }
 
-- (id)initWithDelegate:(id)aDelegate;
-{
-    self = [super init];
-    if (self) {
+- (id)initWithDelegate:(id)aDelegate {
+    if (self = [super init]) {
         delegate = aDelegate;
-        searchLock = [[NSLock alloc] init];
-        
+        search = NULL;
         isSearching = 0;
         shouldStop = NO;
+        currentSearchString = nil;
+        previouslySelectedPublications = nil;
+        previousScrollPositionAsPercentage = NSZeroPoint;
         
     }
     return self;
+}
+
+- (id)init {
+    return [self initWithDelegate:nil];
 }
 
 // owner should have already sent -terminate; sending it from -dealloc causes resurrection
@@ -77,7 +81,6 @@ static NSOperationQueue *searchQueue = nil;
     delegate = nil;
     BDSKDESTROY(currentSearchString);
     BDSKDESTROY(previouslySelectedPublications);
-    BDSKDESTROY(searchLock);
     [super dealloc];
 }
 
@@ -103,9 +106,9 @@ static NSOperationQueue *searchQueue = nil;
 - (void)terminate;
 {
     [self cancelSearch];
-    [searchLock lock];
-    shouldStop = YES;
-    [searchLock unlock];
+    @synchronized(self) {
+        shouldStop = YES;
+    }
     delegate = nil;
 }
 
@@ -190,18 +193,18 @@ static inline NSDictionary *normalizedScores(NSDictionary *originalScores, CGFlo
         // check currentSearchString to see if a new search is queued; if so, exit this loop
         // check shouldStop in case the doc is closing while a search is in progress
 
-        [searchLock lock];
-        keepGoing = (shouldStop == NO && [searchString isEqualToString:currentSearchString]);
-        [searchLock unlock];
+        @synchronized(self) {
+            keepGoing = (shouldStop == NO && [searchString isEqualToString:currentSearchString]);
+        }
 
         if (keepGoing) {
             NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:foundURLSet, IDENTIFIERS_KEY, normalizedScores(originalScores, maxScore), SCORES_KEY, nil];
             [self performSelectorOnMainThread:@selector(invokeFoundCallback:) withObject:info waitUntilDone:YES];
         }
                 
-        [searchLock lock];
-        keepGoing = (shouldStop == NO && [searchString isEqualToString:currentSearchString]);
-        [searchLock unlock];
+        @synchronized(self) {
+            keepGoing = (shouldStop == NO && [searchString isEqualToString:currentSearchString]);
+        }
         
     } while (keepGoing && NULL != search && more);
     
@@ -221,10 +224,10 @@ static inline NSDictionary *normalizedScores(NSDictionary *originalScores, CGFlo
     previouslySelectedPublications = [[NSArray alloc] initWithArray:selPubs copyItems:NO];
     previousScrollPositionAsPercentage = scrollPoint;
     
-    [searchLock lock];
-    [currentSearchString autorelease];
-    currentSearchString = [searchString copy];
-    [searchLock unlock];
+    @synchronized(self) {
+        [currentSearchString autorelease];
+        currentSearchString = [searchString copy];
+    }
 
     if ([self isSearching])
         [self cancelSearch];
