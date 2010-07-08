@@ -1230,7 +1230,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 - (NSString *)stringByAppendingFullStopAndSpaceIfNotEmpty
 {
-    return ([self isEqualToString:@""] || [[NSCharacterSet endPunctuationCharacterSet] characterIsMember:[self lastCharacter]]) ? self : [self stringByAppendingString:@". "];
+    return [self isEqualToString:@""] ? self : [self stringByAppendingString:([[NSCharacterSet endPunctuationCharacterSet] characterIsMember:[self lastCharacter]] ? @" " : @". ")];
 }
 
 - (NSString *)stringByPrependingCommaAndSpaceIfNotEmpty
