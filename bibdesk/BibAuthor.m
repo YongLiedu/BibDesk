@@ -212,7 +212,6 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
     CFIndex i, cnt = MIN(CFArrayGetCount(myFirstNames), CFArrayGetCount(otherFirstNames));
     CFStringRef myName;
     CFStringRef otherName;
-    CFRange range = CFRangeMake(0, 0);
     
     NSComparisonResult result;
     CFAllocatorRef allocator = CFAllocatorGetDefault();
@@ -221,12 +220,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
         myName = CFArrayGetValueAtIndex(myFirstNames, i);
         otherName = CFArrayGetValueAtIndex(otherFirstNames, i);
         
-        range.length = MIN(CFStringGetLength(myName), CFStringGetLength(otherName));
-        
-        // CFStringCompareWithOptions only applies the range argument to the first string, so make sure they're the same length
-        otherName = CFStringCreateWithSubstring(allocator, otherName, range);
-        
-        result = CFStringCompareWithOptions(myName, otherName, range, kCFCompareCaseInsensitive|kCFCompareLocalized);
+        result = CFStringCompare(myName, otherName, kCFCompareCaseInsensitive|kCFCompareLocalized);
         CFRelease(otherName);
         
         // all it takes is one false match
