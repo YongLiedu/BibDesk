@@ -1075,7 +1075,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
             [super canCloseDocumentWithDelegate:delegate shouldCloseSelector:shouldCloseSelector contextInfo:contextInfo];
         }
     } else if (delegate && shouldCloseSelector) {
-        NSInvocation *invocation = [NSInvocation invocationWithTarget:delegate selector:shouldCloseSelector argument:self];
+        NSInvocation *invocation = [NSInvocation invocationWithTarget:delegate selector:shouldCloseSelector argument:&self];
         BOOL no = NO;
         [invocation setArgument:&no atIndex:3];
         [invocation setArgument:&contextInfo atIndex:4];
