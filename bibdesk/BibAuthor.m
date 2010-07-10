@@ -221,7 +221,6 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
         otherName = CFArrayGetValueAtIndex(otherFirstNames, i);
         
         result = CFStringCompare(myName, otherName, kCFCompareCaseInsensitive|kCFCompareLocalized);
-        CFRelease(otherName);
         
         // all it takes is one false match
         if(result != kCFCompareEqualTo)
