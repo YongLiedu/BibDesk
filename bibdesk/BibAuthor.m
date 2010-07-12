@@ -214,7 +214,6 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
     CFStringRef otherName;
     
     NSComparisonResult result;
-    CFAllocatorRef allocator = CFAllocatorGetDefault();
     
     for(i = 0; i < cnt; i++){
         myName = CFArrayGetValueAtIndex(myFirstNames, i);
