@@ -182,8 +182,24 @@
 	[xmlNode searchXPath:@".//td[.='Publisher']/following-sibling::td" addTo:pubFields forKey:BDSKPublisherString];
 	// set DOI and store for later use
 	NSString *doi = [xmlNode searchXPath:@".//td[.='DOI']/following-sibling::td" addTo:pubFields forKey:BDSKDoiString last:YES];
-	// set pages
-	[xmlNode searchXPath:@".//td[.='Pages']/following-sibling::td" addTo:pubFields forKey:BDSKPagesString];
+	
+    // set pages
+	NSString *pages = [xmlNode searchXPath:@".//td[.='Pages']/following-sibling::td" addTo:pubFields forKey:BDSKPagesString];
+    if (pages != nil) {
+        AGRegex *pagesRegex = [AGRegex regexWithPattern:@"^([0-9]*)-([0-9]*)?"];
+        AGRegexMatch *match = [pagesRegex findInString:pages];
+        if ([match count] == 3) {
+            NSMutableString *page = [[match groupAtIndex:1] mutableCopy];
+            NSString *endPage = [match groupAtIndex:2];
+            [page appendString:@"--"];
+            if([page length] - 2 > [endPage length])
+                [page appendString:[page substringToIndex:[page length] - [endPage length] - 2]];
+            [page appendString:endPage];
+            [pubFields setObject:page forKey:BDSKPagesString];
+            [page release];
+        }
+    }
+    
 	// set authors
 	[pubFields setValue:[BDSKSpringerParser authorStringFromXMLNode:xmlNode] forKey:BDSKAuthorString];
 	// set year
@@ -225,8 +241,24 @@
 	[xmlNode searchXPath:@".//td[.='Journal']/following-sibling::td/a" addTo:pubFields forKey:BDSKJournalString];
 	// set DOI and store for later use
 	NSString *doi = [xmlNode searchXPath:@".//td[.='DOI']/following-sibling::td" addTo:pubFields forKey:BDSKDoiString];
-	// set pages
-	[xmlNode searchXPath:@".//td[.='Pages']/following-sibling::td" addTo:pubFields forKey:BDSKPagesString];
+	
+    // set pages
+	NSString *pages = [xmlNode searchXPath:@".//td[.='Pages']/following-sibling::td" addTo:pubFields forKey:BDSKPagesString];
+    if (pages != nil) {
+        AGRegex *pagesRegex = [AGRegex regexWithPattern:@"^([0-9]*)-([0-9]*)?"];
+        AGRegexMatch *match = [pagesRegex findInString:pages];
+        if ([match count] == 3) {
+            NSMutableString *page = [[match groupAtIndex:1] mutableCopy];
+            NSString *endPage = [match groupAtIndex:2];
+            [page appendString:@"--"];
+            if([page length] - 2 > [endPage length])
+                [page appendString:[page substringToIndex:[page length] - [endPage length] - 2]];
+            [page appendString:endPage];
+            [pubFields setObject:page forKey:BDSKPagesString];
+            [page release];
+        }
+    }
+    
 	// set authors
 	[pubFields setValue:[BDSKSpringerParser authorStringFromXMLNode:xmlNode] forKey:BDSKAuthorString];
 	
