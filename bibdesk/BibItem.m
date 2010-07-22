@@ -1808,14 +1808,17 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (NSString *)RISStringValue{
     NSString *v;
+    BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
+    NSString *type = [self pubType];
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
-    NSMutableArray *keys = [[self allFieldNames] mutableCopy];
-    [keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
+    NSMutableArray *keys = [[NSMutableArray alloc] init];
+    [keys addObjectsFromArray:[btm requiredFieldsForType:type]];
+    [keys addObjectsFromArray:[btm optionalFieldsForType:type]];
+    [keys addNonDuplicateObjectsFromArray:[self allFieldNames]];
     [keys removeObject:BDSKDateAddedString];
     [keys removeObject:BDSKDateModifiedString];
     [keys removeObject:BDSKLocalUrlString];
-
-    BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
+    [keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
     
     // get the type, which may exist in pubFields if this was originally an RIS import; we must have only _one_ TY field,
     // since they mark the beginning of each entry
@@ -1823,7 +1826,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     if ([NSString isEmptyString:risType] == NO)
         [keys removeObject:@"TY"];
     else
-        risType = [btm RISTypeForBibTeXType:[self pubType]];
+        risType = [btm RISTypeForBibTeXType:type];
     
     // enumerate the remaining keys
 	NSString *tag;
@@ -1835,7 +1838,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         // ignore fields that have no RIS tag, we should not contruct invalid or wrong RIS
         if (tag == nil) continue;
         
-        v = [self valueOfField:k inherit:NO];
+        v = [self valueOfField:k];
+        
+        if ([NSString isEmptyString:v]) continue;
         
         if ([k isEqualToString:BDSKAuthorString] || [k isEqualToString:BDSKEditorString]) {
             v = [[[self peopleArrayForField:k] valueForKey:@"normalizedName"] componentsJoinedByString:[NSString stringWithFormat:@"\n%@  - ", tag]];
