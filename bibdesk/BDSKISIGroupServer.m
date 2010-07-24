@@ -534,9 +534,9 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
             NSString *begin = [[(NSXMLElement *)child attributeForName:@"begin"] stringValue];
             NSString *end = [[(NSXMLElement *)child attributeForName:@"end"] stringValue];
             if (NO == [NSString isEmptyString:begin] && NO == [NSString isEmptyString:end])
-                addStringToDictionaryIfNotNil([NSString stringWithFormat:@"%@--%@", begin, end], BDSKYearString, pubFields);
+                addStringToDictionaryIfNotNil([NSString stringWithFormat:@"%@--%@", begin, end], BDSKPagesString, pubFields);
             else if (NO == [NSString isEmptyString:begin])
-                addStringToDictionaryIfNotNil(begin, BDSKYearString, pubFields);
+                addStringToDictionaryIfNotNil(begin, BDSKPagesString, pubFields);
             else if (NO == [[child stringValue] isEqualToString:@"-"])
                 addStringValueOfNodeForField(child, BDSKPagesString, pubFields);
         }
