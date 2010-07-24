@@ -530,8 +530,16 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
             addStringToDictionaryIfNotNil( nodeStringsForXPathJoinedByString(child, @"p", @"\n\n"), BDSKAbstractString, pubFields);
         else if ([name isEqualToString:@"keywords"])
             addStringToDictionaryIfNotNil( nodeStringsForXPathJoinedByString(child, @".//keyword", keywordSeparator), BDSKKeywordsString, pubFields);
-        else if ([name isEqualToString:@"bib_pages"] && NO == [[child stringValue] isEqualToString:@"-"])
-            addStringValueOfNodeForField(child, BDSKPagesString, pubFields);
+        else if ([name isEqualToString:@"bib_pages"]) {
+            NSString *begin = [[(NSXMLElement *)child attributeForName:@"begin"] stringValue];
+            NSString *end = [[(NSXMLElement *)child attributeForName:@"end"] stringValue];
+            if (NO == [NSString isEmptyString:begin] && NO == [NSString isEmptyString:end])
+                addStringToDictionaryIfNotNil([NSString stringWithFormat:@"%@--%@", begin, end], BDSKYearString, pubFields);
+            else if (NO == [NSString isEmptyString:begin])
+                addStringToDictionaryIfNotNil(begin, BDSKYearString, pubFields);
+            else if (NO == [[child stringValue] isEqualToString:@"-"])
+                addStringValueOfNodeForField(child, BDSKPagesString, pubFields);
+        }
         else if ([name isEqualToString:@"bib_issue"] && [child kind] == NSXMLElementKind) {
             addStringValueOfNodeForField([(NSXMLElement *)child attributeForName:@"year"], BDSKYearString, pubFields);
             addStringValueOfNodeForField([(NSXMLElement *)child attributeForName:@"vol"], BDSKVolumeString, pubFields);
