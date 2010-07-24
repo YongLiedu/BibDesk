@@ -540,6 +540,8 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
             else if (NO == [[child stringValue] isEqualToString:@"-"])
                 addStringValueOfNodeForField(child, BDSKPagesString, pubFields);
         }
+        else if ([name isEqualToString:@"article_number"] && nil == [pubFields objectForKey:BDSKPagesString])
+                addStringValueOfNodeForField(child, BDSKPagesString, pubFields);
         else if ([name isEqualToString:@"bib_issue"] && [child kind] == NSXMLElementKind) {
             addStringValueOfNodeForField([(NSXMLElement *)child attributeForName:@"year"], BDSKYearString, pubFields);
             addStringValueOfNodeForField([(NSXMLElement *)child attributeForName:@"vol"], BDSKVolumeString, pubFields);
@@ -696,6 +698,8 @@ static NSDictionary *createPublicationInfoWithRefRecord(NSXMLNode *record)
         else if ([name isEqualToString:@"VL"])
             addStringValueOfNodeForField(child, BDSKVolumeString, pubFields);
         else if ([name isEqualToString:@"BP"])
+            addStringValueOfNodeForField(child, BDSKPagesString, pubFields);
+        else if ([name isEqualToString:@"AR"])
             addStringValueOfNodeForField(child, BDSKPagesString, pubFields);
 
         child = [child nextSibling];
