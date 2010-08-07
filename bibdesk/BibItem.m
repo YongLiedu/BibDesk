@@ -2436,6 +2436,10 @@ static void addFilesToArray(const void *value, void *context)
     return [macros allObjects];
 }
 
+- (NSAttributedString *)linkedText {
+    return [[[NSAttributedString alloc] initWithString:[self citeKey] attributeName:NSLinkAttributeName attributeValue:[self bdskURL]] autorelease];
+}
+
 #pragma mark -
 #pragma mark URL handling
 

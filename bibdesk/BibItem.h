@@ -742,6 +742,7 @@ enum {
 - (NSCalendarDate *)currentDate;
 - (NSString *)textSkimNotes;
 - (NSAttributedString *)richTextSkimNotes;
+- (NSAttributedString *)linkedText;
 
 /*!
     @method     URLForField:

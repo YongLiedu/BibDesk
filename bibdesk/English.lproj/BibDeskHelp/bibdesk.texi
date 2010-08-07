@@ -4211,6 +4211,8 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @item MODSString
 @tab 
+@item linkedText
+@tab 
 @item localUrlPath
 @tab deprecated, use the localFiles collection key
 @item localURL
