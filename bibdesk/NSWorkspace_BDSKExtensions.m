@@ -331,7 +331,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
     OSStatus status = LSGetApplicationForURL((CFURLRef)[NSURL URLWithString:@"mailto:"], kLSRolesAll, NULL, &mailAppURL);
     if (status == noErr)
         mailAppName = [[[(NSURL *)mailAppURL path] lastPathComponent] stringByDeletingPathExtension];
-    
+    mailAppName = @"Mailplane";
     if ([mailAppName rangeOfString:@"Entourage" options:NSCaseInsensitiveSearch].length) {
         scriptString = [NSMutableString stringWithString:@"tell application \"Microsoft Entourage\"\n"];
         [scriptString appendString:@"activate\n"];
@@ -361,7 +361,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
     } else if ([mailAppName rangeOfString:@"Mailplane" options:NSCaseInsensitiveSearch].length) {
         scriptString = [NSMutableString stringWithString:@"tell application \"Mailplane\"\n"];
         [scriptString appendString:@"activate\n"];
-        [scriptString appendFormat:@"set m to make new outgoing message with properties {subject: \"%@\"}\n", subject ?: @""];
+        [scriptString appendFormat:@"set m to make new outgoing message with properties {subject: \"%@\", visible:true}\n", subject ?: @""];
         [scriptString appendString:@"tell m\n"];
         if (receiver)
             [scriptString appendFormat:@"make new to recipient at end with properties {address: \"%@\"}\n", receiver];
