@@ -335,33 +335,33 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
     if ([mailAppName rangeOfString:@"Entourage" options:NSCaseInsensitiveSearch].length) {
         scriptString = [NSMutableString stringWithString:@"tell application \"Microsoft Entourage\"\n"];
         [scriptString appendString:@"activate\n"];
-        [scriptString appendFormat:@"set m to make new draft window with properties {subject: \"%@\"}\n", subject ?: @""];
+        [scriptString appendFormat:@"set m to make new draft window with properties {subject: \"%@\", visible: true}\n", subject ?: @""];
         [scriptString appendString:@"tell m\n"];
         if (receiver)
-            [scriptString appendFormat:@"set recipient to {address:{address: \"%@\", display name: \"%@\"}, recipient type:to recipient}}\n", receiver, receiver];
+            [scriptString appendFormat:@"set recipient to {address: {address: \"%@\", display name: \"%@\"}, recipient type: to recipient}}\n", receiver, receiver];
         if (body)
             [scriptString appendFormat:@"set content to \"%@\"\n", body];
         for (NSString *fileName in files)
-            [scriptString appendFormat:@"make new attachment with properties {file:POSIX file \"%@\"}\n", fileName];
+            [scriptString appendFormat:@"make new attachment with properties {file: POSIX file \"%@\"}\n", fileName];
         [scriptString appendString:@"end tell\n"];
         [scriptString appendString:@"end tell\n"];
     } else if ([mailAppName rangeOfString:@"Mailsmith" options:NSCaseInsensitiveSearch].length) {
         scriptString = [NSMutableString stringWithString:@"tell application \"Mailsmith\"\n"];
         [scriptString appendString:@"activate\n"];
-        [scriptString appendFormat:@"set m to make new message window with properties {subject: \"%@\"}\n", subject ?: @""];
+        [scriptString appendFormat:@"set m to make new message window with properties {subject: \"%@\", visible: true}\n", subject ?: @""];
         [scriptString appendString:@"tell m\n"];
         if (receiver)
             [scriptString appendFormat:@"make new to_recipient at end with properties {address: \"%@\"}\n", receiver];
         if (body)
             [scriptString appendFormat:@"set contents to \"%@\"\n", body];
         for (NSString *fileName in files)
-            [scriptString appendFormat:@"make new enclosure with properties {file:POSIX file \"%@\"}\n", fileName];
+            [scriptString appendFormat:@"make new enclosure with properties {file: POSIX file \"%@\"}\n", fileName];
         [scriptString appendString:@"end tell\n"];
         [scriptString appendString:@"end tell\n"];
     } else if ([mailAppName rangeOfString:@"Mailplane" options:NSCaseInsensitiveSearch].length) {
         scriptString = [NSMutableString stringWithString:@"tell application \"Mailplane\"\n"];
         [scriptString appendString:@"activate\n"];
-        [scriptString appendFormat:@"set m to make new outgoing message with properties {subject: \"%@\", visible:true}\n", subject ?: @""];
+        [scriptString appendFormat:@"set m to make new outgoing message with properties {subject: \"%@\", visible: true}\n", subject ?: @""];
         [scriptString appendString:@"tell m\n"];
         if (receiver)
             [scriptString appendFormat:@"make new to recipient at end with properties {address: \"%@\"}\n", receiver];
@@ -374,7 +374,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
     } else {
         scriptString = [NSMutableString stringWithString:@"tell application \"Mail\"\n"];
         [scriptString appendString:@"activate\n"];
-        [scriptString appendFormat:@"set m to make new outgoing message with properties {subject: \"%@\", visible:true}\n", subject ?: @""];
+        [scriptString appendFormat:@"set m to make new outgoing message with properties {subject: \"%@\", visible: true}\n", subject ?: @""];
         [scriptString appendString:@"tell m\n"];
         if (receiver)
             [scriptString appendFormat:@"make new to recipient at end of to recipients with properties {address: \"%@\"}\n", receiver];
@@ -382,7 +382,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
             [scriptString appendFormat:@"set content to \"%@\"\n", body];
         [scriptString appendString:@"tell its content\n"];
         for (NSString *fileName in files)
-            [scriptString appendFormat:@"make new attachment at after last character with properties {file name:\"%@\"}\n", fileName];
+            [scriptString appendFormat:@"make new attachment at after last character with properties {file name: \"%@\"}\n", fileName];
         [scriptString appendString:@"end tell\n"];
         [scriptString appendString:@"end tell\n"];
         [scriptString appendString:@"end tell\n"];
