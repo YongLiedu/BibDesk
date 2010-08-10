@@ -358,6 +358,19 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
             [scriptString appendFormat:@"make new enclosure with properties {file:POSIX file \"%@\"}\n", fileName];
         [scriptString appendString:@"end tell\n"];
         [scriptString appendString:@"end tell\n"];
+    } else if ([mailAppName rangeOfString:@"Mailplane" options:NSCaseInsensitiveSearch].length) {
+        scriptString = [NSMutableString stringWithString:@"tell application \"Mailplane\"\n"];
+        [scriptString appendString:@"activate\n"];
+        [scriptString appendFormat:@"set m to make new outgoing message with properties {subject: \"%@\"}\n", subject ?: @""];
+        [scriptString appendString:@"tell m\n"];
+        if (receiver)
+            [scriptString appendFormat:@"make new to recipient at end with properties {address: \"%@\"}\n", receiver];
+        if (body)
+            [scriptString appendFormat:@"set content to \"%@\"\n", body];
+        for (NSString *fileName in files)
+            [scriptString appendFormat:@"make new mail attachment with properties {path: \"%@\"}\n", fileName];
+        [scriptString appendString:@"end tell\n"];
+        [scriptString appendString:@"end tell\n"];
     } else {
         scriptString = [NSMutableString stringWithString:@"tell application \"Mail\"\n"];
         [scriptString appendString:@"activate\n"];
