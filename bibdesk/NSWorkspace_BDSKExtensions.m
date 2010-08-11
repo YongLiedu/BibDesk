@@ -371,6 +371,30 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
             [scriptString appendFormat:@"make new mail attachment with properties {path: \"%@\"}\n", fileName];
         [scriptString appendString:@"end tell\n"];
         [scriptString appendString:@"end tell\n"];
+    } else if ([mailAppName rangeOfString:@"PostboxExpress" options:NSCaseInsensitiveSearch].length) {
+        scriptString = [NSMutableString stringWithString:@"tell application \"PostboxExpress\"\n"];
+        [scriptString appendString:@"activate\n"];
+        [scriptString appendFormat:@"send message subject \"%@\"", subject ?: @""];
+        if (receiver)
+            [scriptString appendFormat:@" recipient \"%@\"", receiver];
+        if (body)
+            [scriptString appendFormat:@" body \"%@\"", body];
+        if ([files count])
+            [scriptString appendFormat:@" attachment \"%@\"", [files objectAtIndex:0]];
+        [scriptString appendString:@"\n"];
+        [scriptString appendString:@"end tell\n"];
+    } else if ([mailAppName rangeOfString:@"Postbox" options:NSCaseInsensitiveSearch].length) {
+        scriptString = [NSMutableString stringWithString:@"tell application \"Postbox\"\n"];
+        [scriptString appendString:@"activate\n"];
+        [scriptString appendFormat:@"send message subject \"%@\"", subject ?: @""];
+        if (receiver)
+            [scriptString appendFormat:@" recipient \"%@\"", receiver];
+        if (body)
+            [scriptString appendFormat:@" body \"%@\"", body];
+        if ([files count])
+            [scriptString appendFormat:@" attachment \"%@\"", [files objectAtIndex:0]];
+        [scriptString appendString:@"\n"];
+        [scriptString appendString:@"end tell\n"];
     } else {
         scriptString = [NSMutableString stringWithString:@"tell application \"Mail\"\n"];
         [scriptString appendString:@"activate\n"];
