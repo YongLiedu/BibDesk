@@ -376,7 +376,7 @@ The groupedPublications array is a subset of the publications array, developed b
 - (void)handleStaticGroupChangedNotification:(NSNotification *)notification{
     BDSKGroup *group = [notification object];
     
-    if ([[groups staticGroups] containsObject:group] == NO)
+    if ([[groups staticGroups] containsObject:group] == NO && [group isEqual:[groups lastImportGroup]] == NO)
         return; /// must be from another document
     
     [groupOutlineView reloadData];
