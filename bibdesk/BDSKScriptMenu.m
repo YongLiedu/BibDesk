@@ -52,6 +52,7 @@
 @interface BDSKScriptMenuController : NSObject <NSMenuDelegate> {
     NSMenu *scriptMenu;
     FSEventStreamRef streamRef;
+    NSArray *scriptFolders;
     NSArray *sortDescriptors;
 }
 
@@ -110,12 +111,12 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
     if (self = [super init]) {
         if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKScriptMenuDisabledKey] == NO) {
             NSFileManager *fm = [NSFileManager defaultManager];
-            NSMutableArray *scriptFolders = [NSMutableArray array];
+            NSMutableArray *folders = [NSMutableArray array];
             BOOL isDir;
             
             for (NSString *folder in scriptFolderPaths()) {
                 if ([fm fileExistsAtPath:folder isDirectory:&isDir] && isDir)
-                    [scriptFolders addObject:folder];
+                    [folders addObject:folder];
             }
             
             scriptMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:SCRIPTS_MENU_TITLE];
@@ -127,6 +128,7 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
                 [[NSApp mainMenu] insertItem:scriptItem atIndex:itemIndex];
             [scriptItem release];
             
+            scriptFolders = [folders copy];
             sortDescriptors = [[NSArray alloc] initWithObjects:[[[NSSortDescriptor alloc] initWithKey:FILENAME_KEY ascending:YES selector:@selector(localizedCaseInsensitiveNumericCompare:)] autorelease], nil];
             
             if ([scriptFolders count]) {
@@ -272,10 +274,8 @@ static NSString *menuItemTitle(NSString *path) {
         
         if (streamRef) {
             // walk the subdirectories for each domain
-            NSArray *scriptFolders = (NSArray *)FSEventStreamCopyPathsBeingWatched(streamRef);
             for (NSString *folder in scriptFolders)
                 [scripts addObjectsFromArray:[self directoryContentsAtPath:folder recursionDepth:0]];
-            [scriptFolders release];
             [scripts sortUsingDescriptors:sortDescriptors];
         }
         
