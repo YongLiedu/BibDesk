@@ -158,31 +158,6 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
 
 - (NSMenu *)scriptMenu { return scriptMenu; }
 
-static NSString *menuItemTitle(NSString *path) {
-    static NSSet *scriptExtensions = nil;
-    if (scriptExtensions == nil)
-        scriptExtensions = [[NSSet alloc] initWithObjects:@"scpt", @"scptd", @"applescript", @"sh", @"csh", @"command", @"py", @"rb", @"pl", @"pm", @"app", @"workflow", nil];
-    
-    if (path == nil)
-        return nil;
-    
-    NSString *name = [path lastPathComponent];
-    
-    // why not use displayNameAtPath: or stringByDeletingPathExtension?
-    // we want to remove the standard script filetype extension even if they're displayed in Finder
-    // but we don't want to truncate a non-extension from a script without a filetype extension.
-    // e.g. "Foo.scpt" -> "Foo" but not "Foo 2.5" -> "Foo 2"
-    if ([scriptExtensions containsObject:[[name pathExtension] lowercaseString]])
-        name = [name stringByDeletingPathExtension];
-    
-    NSScanner *scanner = [NSScanner scannerWithString:name];
-    [scanner setCharactersToBeSkipped:nil];
-    if ([scanner scanCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL] && [scanner scanString:@"-" intoString:NULL])
-        name = [name substringFromIndex:[scanner scanLocation]];
-    
-    return name;
-}
-
 - (NSArray *)directoryContentsAtPath:(NSString *)path recursionDepth:(NSInteger)recursionDepth
 {
 	NSMutableArray *fileArray = [NSMutableArray array];
@@ -194,26 +169,37 @@ static NSString *menuItemTitle(NSString *path) {
         NSDictionary *fileAttributes = [fm attributesOfItemAtPath:filePath error:NULL];
         NSString *fileType = [fileAttributes valueForKey:NSFileType];
         BOOL isDir = [fileType isEqualToString:NSFileTypeDirectory];
-        NSDictionary *dict;
-        NSString *title = menuItemTitle(file);
+        NSString *title = [path lastPathComponent];
+        NSDictionary *dict = nil;
+        
+        NSScanner *scanner = [NSScanner scannerWithString:title];
+        [scanner setCharactersToBeSkipped:nil];
+        if ([scanner scanCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL] && [scanner scanString:@"-" intoString:NULL])
+            title = [title substringFromIndex:[scanner scanLocation]];
         
         if ([file hasPrefix:@"."]) {
-        } else if ([title isEqualToString:@"-"]) {
+        } else if ([title length] == 0 || [title isEqualToString:@"-"]) {
             dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, FILENAME_KEY, nil];
-            [fileArray addObject:dict];
-            [dict release];
         } else if ([wm isAppleScriptFileAtPath:filePath] || [wm isApplicationAtPath:filePath] || [wm isAutomatorWorkflowAtPath:filePath] || ([fm isExecutableFileAtPath:filePath] && isDir == NO)) {
+            static NSSet *scriptExtensions = nil;
+            if (scriptExtensions == nil)
+                scriptExtensions = [[NSSet alloc] initWithObjects:@"scpt", @"scptd", @"applescript", @"sh", @"csh", @"command", @"py", @"rb", @"pl", @"pm", @"app", @"workflow", nil];
+            // why not use displayNameAtPath: or stringByDeletingPathExtension?
+            // we want to remove the standard script filetype extension even if they're displayed in Finder
+            // but we don't want to truncate a non-extension from a script without a filetype extension.
+            // e.g. "Foo.scpt" -> "Foo" but not "Foo 2.5" -> "Foo 2"
+            if ([scriptExtensions containsObject:[[title pathExtension] lowercaseString]])
+                title = [title stringByDeletingPathExtension];
             dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, FILENAME_KEY, title, TITLE_KEY, nil];
-            [fileArray addObject:dict];
-            [dict release];
         } else if (isDir && [wm isFolderAtPath:filePath] && recursionDepth < 3) {
             // avoid recursing too many times (and creating an excessive number of submenus)
             NSArray *content = [self directoryContentsAtPath:filePath recursionDepth:recursionDepth + 1];
-            if ([content count] > 0) {
+            if ([content count] > 0)
                 dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, FILENAME_KEY, title, TITLE_KEY, content, CONTENT_KEY, nil];
-                [fileArray addObject:dict];
-                [dict release];
-            }
+        }
+        if (dict) {
+            [fileArray addObject:dict];
+            [dict release];
         }
     }
     [fileArray sortUsingDescriptors:sortDescriptors];
