@@ -272,12 +272,10 @@ static NSString *menuItemTitle(NSString *path) {
     if (menuNeedsUpdate) {
         NSMutableArray *scripts = [[NSMutableArray alloc] init];
         
-        if (streamRef) {
-            // walk the subdirectories for each domain
-            for (NSString *folder in scriptFolders)
-                [scripts addObjectsFromArray:[self directoryContentsAtPath:folder recursionDepth:0]];
-            [scripts sortUsingDescriptors:sortDescriptors];
-        }
+        // walk the subdirectories for each domain
+        for (NSString *folder in scriptFolders)
+            [scripts addObjectsFromArray:[self directoryContentsAtPath:folder recursionDepth:0]];
+        [scripts sortUsingDescriptors:sortDescriptors];
         
         NSMutableArray *defaultScripts = [[self directoryContentsAtPath:[[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"Scripts"] recursionDepth:0] mutableCopy];
         
