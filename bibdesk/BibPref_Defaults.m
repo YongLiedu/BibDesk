@@ -206,10 +206,9 @@ static NSSet *alwaysDisabledFields = nil;
     for(i = 0; i < iMax; i++){
         NSDictionary *dict = [pdfViewers objectAtIndex:i];
         NSString *bundleID = [dict objectForKey:@"bundleID"];
-        NSString *appPath = [sws absolutePathForAppBundleWithIdentifier:bundleID];
         [pdfViewerPopup insertItemWithTitle:[dict objectForKey:@"name"] atIndex:i + 2];
         [[pdfViewerPopup itemAtIndex:i + 2] setRepresentedObject:bundleID];
-        [(NSMenuItem *)[pdfViewerPopup itemAtIndex:i + 2] setImageAndSize:[sws iconForFile:appPath]];
+        [(NSMenuItem *)[pdfViewerPopup itemAtIndex:i + 2] setImageAndSize:[dict objectForKey:@"icon"]];
         if([pdfViewerID isEqualToString:bundleID])
             idx = i + 2;
     }

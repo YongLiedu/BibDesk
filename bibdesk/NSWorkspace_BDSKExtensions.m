@@ -278,18 +278,19 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
     
     for (NSString *bundleID in bundleIDs) {
         if ([set containsObject:bundleID]) continue;
-        NSString *name = [[fm displayNameAtPath:[self absolutePathForAppBundleWithIdentifier:bundleID]] stringByDeletingPathExtension];
+        NSString *appPath = [self absolutePathForAppBundleWithIdentifier:bundleID];
+        if (appPath == nil) continue;
+        NSString *name = [[fm displayNameAtPath:appPath] stringByDeletingPathExtension];
         if (name == nil) continue;
-        NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:bundleID, @"bundleID", name, @"name", nil];
+        NSImage *icon = [self iconForFile:appPath];
+        NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:bundleID, @"bundleID", name, @"name", icon, @"icon", nil];
         [applications addObject:dict];
         [dict release];
         [set addObject:bundleID];
     }
     [set release];
-    if(bundleIDs)
-        CFRelease(bundleIDs);
-    if(theUTI)
-        CFRelease(theUTI);
+    BDSKCFDESTROY(bundleIDs);
+    BDSKCFDESTROY(theUTI);
     
     // sort by application name
     NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)];
