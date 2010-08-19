@@ -169,7 +169,7 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
         NSDictionary *fileAttributes = [fm attributesOfItemAtPath:filePath error:NULL];
         NSString *fileType = [fileAttributes valueForKey:NSFileType];
         BOOL isDir = [fileType isEqualToString:NSFileTypeDirectory];
-        NSString *title = [path lastPathComponent];
+        NSString *title = [file lastPathComponent];
         NSDictionary *dict = nil;
         
         NSScanner *scanner = [NSScanner scannerWithString:title];
