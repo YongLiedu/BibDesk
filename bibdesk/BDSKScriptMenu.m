@@ -45,6 +45,7 @@
 #define SCRIPTS_MENU_TITLE  @"Scripts"
 #define SCRIPTS_FOLDER_NAME @"Scripts"
 #define FILENAME_KEY        @"filename"
+#define TITLE_KEY           @"title"
 #define CONTENT_KEY         @"content"
 
 #define BDSKScriptMenuDisabledKey @"BDSKScriptMenuDisabled"
@@ -194,21 +195,22 @@ static NSString *menuItemTitle(NSString *path) {
         NSString *fileType = [fileAttributes valueForKey:NSFileType];
         BOOL isDir = [fileType isEqualToString:NSFileTypeDirectory];
         NSDictionary *dict;
+        NSString *title = menuItemTitle(file);
         
         if ([file hasPrefix:@"."]) {
-        } else if ([menuItemTitle(file) isEqualToString:@"-"]) {
+        } else if ([title isEqualToString:@"-"]) {
             dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, FILENAME_KEY, nil];
             [fileArray addObject:dict];
             [dict release];
         } else if ([wm isAppleScriptFileAtPath:filePath] || [wm isApplicationAtPath:filePath] || [wm isAutomatorWorkflowAtPath:filePath] || ([fm isExecutableFileAtPath:filePath] && isDir == NO)) {
-            dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, FILENAME_KEY, nil];
+            dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, FILENAME_KEY, title, TITLE_KEY, nil];
             [fileArray addObject:dict];
             [dict release];
         } else if (isDir && [wm isFolderAtPath:filePath] && recursionDepth < 3) {
             // avoid recursing too many times (and creating an excessive number of submenus)
             NSArray *content = [self directoryContentsAtPath:filePath recursionDepth:recursionDepth + 1];
             if ([content count] > 0) {
-                dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, FILENAME_KEY, content, CONTENT_KEY, nil];
+                dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, FILENAME_KEY, title, TITLE_KEY, content, CONTENT_KEY, nil];
                 [fileArray addObject:dict];
                 [dict release];
             }
@@ -230,10 +232,10 @@ static NSString *menuItemTitle(NSString *path) {
     for (NSDictionary *scriptInfo in scripts) {
         NSString *scriptFilename = [scriptInfo objectForKey:FILENAME_KEY];
 		NSArray *folderContent = [scriptInfo objectForKey:CONTENT_KEY];
-        NSString *scriptName = menuItemTitle(scriptFilename);
+        NSString *scriptName = [scriptInfo objectForKey:TITLE_KEY];
 		NSMenuItem *item;
 		
-		if (scriptName == nil || [scriptName isEqualToString:@"-"]) {
+		if (scriptName == nil) {
 			[menu addItem:[NSMenuItem separatorItem]];
 		} else if (folderContent) {
 			NSMenu *submenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:scriptName];
