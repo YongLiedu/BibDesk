@@ -191,7 +191,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
     NSString *appPath = appID ? [self absolutePathForAppBundleWithIdentifier:appID] : nil;
     BOOL rv = NO;
     
-    if (appPath)
+    if (appPath && [[NSFileManager defaultManager] fileExistsAtPath:appPath])
         rv = [self openFile:fullPath withApplication:appPath];
     if (rv == NO)
         rv = [self openFile:fullPath];
@@ -279,7 +279,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
     for (NSString *bundleID in bundleIDs) {
         if ([set containsObject:bundleID]) continue;
         NSString *appPath = [self absolutePathForAppBundleWithIdentifier:bundleID];
-        if (appPath == nil) continue;
+        if (appPath == nil || [fm fileExistsAtPath:appPath] == NO) continue;
         NSString *name = [[fm displayNameAtPath:appPath] stringByDeletingPathExtension];
         if (name == nil) continue;
         NSImage *icon = [self iconForFile:appPath];
