@@ -249,6 +249,26 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
     return i > 1;
 }
 
+- (void)changeFont:(id)sender {
+    switch ([sender currentFontAction]) {
+        case NSSizeUpFontAction:
+            if ([self canZoomIn])
+                [self zoomIn:sender];
+            else
+                NSBeep();
+            break;
+        case NSSizeDownFontAction:
+            if ([self canZoomOut])
+                [self zoomOut:sender];
+            else
+                NSBeep();
+            break;
+        default:
+            [super changeFont:sender];
+            break;
+    }
+}
+
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
     if([menuItem action] == @selector(zoomIn:))
         return [self canZoomIn];
