@@ -503,6 +503,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		CE02444F122BAD6100F8DBD7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CE14113F1229B64D00C9EBA0 /* skimconvert */;
+			remoteInfo = "SkimConvert Tool";
+		};
 		CE17F5370F1A868F00E741DD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -2276,6 +2283,7 @@
 				CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */,
 				CE52E69D0E2D2B87007B6C62 /* SkimNotesBase.framework */,
 				CE7DC8DC0E0952BB00D6D76D /* skimnotes */,
+				CE024450122BAD6100F8DBD7 /* skimconvert */,
 				CEDB9BC80E2F405F0057FD09 /* SkimNotesTest.app */,
 			);
 			name = Products;
@@ -2953,6 +2961,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		CE024450122BAD6100F8DBD7 /* skimconvert */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = skimconvert;
+			remoteRef = CE02444F122BAD6100F8DBD7 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		CE52E69D0E2D2B87007B6C62 /* SkimNotesBase.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
