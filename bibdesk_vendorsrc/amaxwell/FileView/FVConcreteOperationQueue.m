@@ -109,7 +109,7 @@ static volatile int32_t _activeCPUs = 0;
         [nc addObserver:self selector:@selector(handleAppTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
         
         // this lock protects all of the collection ivars
-        _queueLock = OS_SPINLOCK_INIT;
+        (void) pthread_mutex_init(&_queueLock, NULL);
         
         // pending operations
         _pendingOperations = [FVPriorityQueue new];
@@ -151,7 +151,7 @@ static volatile int32_t _activeCPUs = 0;
 
 - (void)cancel;
 {
-    OSSpinLockLock(&_queueLock);
+    pthread_mutex_lock(&_queueLock);
     
     // objects in _pendingOperations queue are waiting to be executed, so just removing is likely sufficient; cancel anyways, just to be safe
     [_pendingOperations makeObjectsPerformSelector:@selector(cancel)];
@@ -161,7 +161,7 @@ static volatile int32_t _activeCPUs = 0;
     [_activeOperations makeObjectsPerformSelector:@selector(cancel)];
     [_activeOperations removeAllObjects];
     
-    OSSpinLockUnlock(&_queueLock);
+    pthread_mutex_unlock(&_queueLock);
 }
 
 - (void)_setThreadPriority:(NSNumber *)p
@@ -206,44 +206,44 @@ static uint32_t __FVSendTrivialMachMessage(mach_port_t port, uint32_t msg_id, CF
 - (void)addOperation:(FVOperation *)operation;
 {
     [operation setQueue:self];
-    OSSpinLockLock(&_queueLock);
+    pthread_mutex_lock(&_queueLock);
     [_pendingOperations push:operation];
-    OSSpinLockUnlock(&_queueLock);
+    pthread_mutex_unlock(&_queueLock);
     [self _wakeThread];
 }
 
 - (void)addOperations:(NSArray *)operations;
 {
     [operations makeObjectsPerformSelector:@selector(setQueue:) withObject:self];
-    OSSpinLockLock(&_queueLock);
+    pthread_mutex_lock(&_queueLock);
     [_pendingOperations pushMultiple:operations];
-    OSSpinLockUnlock(&_queueLock);
+    pthread_mutex_unlock(&_queueLock);
     [self _wakeThread];
 }
 
 - (void)_startQueuedOperations
 {
-    OSSpinLockLock(&_queueLock);
+    pthread_mutex_lock(&_queueLock);
     while ([_pendingOperations count] && ([_activeOperations count] < [[self class] _availableOperationCount])) {
         FVOperation *op = [_pendingOperations pop];
         // Coalescing based on _activeOperations here is questionable, since it's possible that the active operation is stale.
         if (NO == [op isCancelled] && NO == [_activeOperations containsObject:op]) {            
             [_activeOperations addObject:op];
             // avoid a deadlock for a non-threaded operation; -start can trigger -finishedOperation immediately on this thread
-            OSSpinLockUnlock(&_queueLock);
+            pthread_mutex_unlock(&_queueLock);
             [op start];
-            OSSpinLockLock(&_queueLock);
+            pthread_mutex_lock(&_queueLock);
         }        
     }
-    OSSpinLockUnlock(&_queueLock);
+    pthread_mutex_unlock(&_queueLock);
 }
 
 // finishedOperation: callback received on an arbitrary thread
 - (void)finishedOperation:(FVOperation *)anOperation;
 {
-    OSSpinLockLock(&_queueLock);
+    pthread_mutex_lock(&_queueLock);
     [_activeOperations removeObject:anOperation];
-    OSSpinLockUnlock(&_queueLock);
+    pthread_mutex_unlock(&_queueLock);
     
     // If the queue didn't flush because too many operations were active, we need to tickle the thread again.
     // ??? will this cause reentrancy of _startQueuedOperations?
