@@ -2283,7 +2283,7 @@
 				CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */,
 				CE52E69D0E2D2B87007B6C62 /* SkimNotesBase.framework */,
 				CE7DC8DC0E0952BB00D6D76D /* skimnotes */,
-				CE024450122BAD6100F8DBD7 /* skimconvert */,
+				CE024450122BAD6100F8DBD7 /* skimpdf */,
 				CEDB9BC80E2F405F0057FD09 /* SkimNotesTest.app */,
 			);
 			name = Products;
@@ -2961,10 +2961,10 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		CE024450122BAD6100F8DBD7 /* skimconvert */ = {
+		CE024450122BAD6100F8DBD7 /* skimpdf */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
-			path = skimconvert;
+			path = skimpdf;
 			remoteRef = CE02444F122BAD6100F8DBD7 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
