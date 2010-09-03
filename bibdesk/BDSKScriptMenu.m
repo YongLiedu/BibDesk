@@ -305,7 +305,7 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
             [alert runModal];
         } else {
             result = [script executeAndReturnError:&errorDictionary];
-            if (result == nil) {
+            if (result == nil && [[errorDictionary objectForKey:NSAppleScriptErrorMessage] integerValue] != -128) {
                 NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:NSLocalizedString(@"The script '%@' could not complete.", @"Message in alert dialog when failing to execute script"), scriptName]
                                                  defaultButton:NSLocalizedString(@"OK", @"Button title")
                                                alternateButton:NSLocalizedString(@"Edit Script", @"Button title")
