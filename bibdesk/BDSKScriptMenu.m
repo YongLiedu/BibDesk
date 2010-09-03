@@ -303,16 +303,17 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
                                                otherButton:nil
                                  informativeTextWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"Informative text in alert dialog"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
             [alert runModal];
-        }
-        result = [script executeAndReturnError:&errorDictionary];
-        if (result == nil) {
-            NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:NSLocalizedString(@"The script '%@' could not complete.", @"Message in alert dialog when failing to execute script"), scriptName]
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                           alternateButton:NSLocalizedString(@"Edit Script", @"Button title")
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"Informative text in alert dialog"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
-            if ([alert runModal] == NSAlertAlternateReturn) {
-                [wm openFile:scriptFilename];
+        } else {
+            result = [script executeAndReturnError:&errorDictionary];
+            if (result == nil) {
+                NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:NSLocalizedString(@"The script '%@' could not complete.", @"Message in alert dialog when failing to execute script"), scriptName]
+                                                 defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                               alternateButton:NSLocalizedString(@"Edit Script", @"Button title")
+                                                   otherButton:nil
+                                     informativeTextWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"Informative text in alert dialog"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
+                if ([alert runModal] == NSAlertAlternateReturn) {
+                    [wm openFile:scriptFilename];
+                }
             }
         }
     } else if ([wm isApplicationAtPath:scriptFilename]) {
