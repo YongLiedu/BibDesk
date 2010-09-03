@@ -397,10 +397,8 @@
 } 
 
 - (BOOL) validateEditActionMenuItem:(NSMenuItem *)menuItem{
-    if ([documentWindow isKeyWindow] == NO) {
-        [menuItem setTitle:NSLocalizedString(@"Get Info", @"Menu item title")];
+    if ([documentWindow isKeyWindow] == NO)
         return NO;
-	}
     id firstResponder = [documentWindow firstResponder];
 	if (firstResponder == tableView || firstResponder == [fileSearchController tableView]) {
 		return [self validateEditPubCmdMenuItem:menuItem];
