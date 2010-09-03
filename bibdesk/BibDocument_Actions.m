@@ -384,11 +384,10 @@ static BOOL changingColors = NO;
 }
 
 - (void)editAction:(id)sender {
-	id firstResponder = [documentWindow firstResponder];
-    if (firstResponder == tableView || firstResponder == [fileSearchController tableView])
-		[self editPubCmd:sender];
-	else if (firstResponder == groupOutlineView)
+	if ([documentWindow firstResponder] == groupOutlineView)
 		[self editGroupAction:sender];
+    else
+		[self editPubCmd:sender];
 }
 
 - (void)editRepresentedPub:(id)sender {

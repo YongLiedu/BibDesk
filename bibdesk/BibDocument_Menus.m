@@ -397,15 +397,12 @@
 } 
 
 - (BOOL) validateEditActionMenuItem:(NSMenuItem *)menuItem{
-    if ([documentWindow isKeyWindow] == NO)
+    if ([documentWindow isKeyWindow] == NO) {
         return NO;
-    id firstResponder = [documentWindow firstResponder];
-	if (firstResponder == tableView || firstResponder == [fileSearchController tableView]) {
-		return [self validateEditPubCmdMenuItem:menuItem];
-	} else if (firstResponder == groupOutlineView) {
+	} else if ([documentWindow firstResponder] == groupOutlineView) {
 		return [self validateEditGroupActionMenuItem:menuItem];
-	} else {
-		return NO;
+    } else {
+		return [self validateEditPubCmdMenuItem:menuItem];
 	}
 } 
 
