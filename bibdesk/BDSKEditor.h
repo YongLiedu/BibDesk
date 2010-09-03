@@ -197,6 +197,8 @@
 - (IBAction)copy:(id)sender;
 - (IBAction)copyAsAction:(id)sender;
 
+- (IBAction)editAction:(id)sender;
+
 /*!
     @method     updateSafariRecentDownloadsMenu:
     @abstract   Updates the menu of items for local paths of recent downloads from Safari.

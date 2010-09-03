@@ -1169,6 +1169,16 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [statusBar toggleBelowView:[mainSplitView superview] animate:sender != nil];
 }
 
+- (IBAction)editAction:(id)sender {
+    NSIndexSet *rowIndexes = [authorTableView selectedRowIndexes];
+    NSUInteger i = [rowIndexes firstIndex];
+    
+    while (i != NSNotFound) {
+        [[self document] showPerson:[self personAtIndex:i]];
+        i = [rowIndexes indexGreaterThanIndex:i];
+    }
+}
+
 #pragma mark Menus
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
@@ -1603,6 +1613,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             [menuItem setTitle:NSLocalizedString(@"Show Status Bar", @"Menu item title")];
         return YES;
 	}
+	else if (theAction == @selector(editAction:)) {
+        return [[self window] firstResponder] == authorTableView && [authorTableView numberOfSelectedRows] > 0;
+    }
     else if (theAction == @selector(raiseAddField:) || 
              theAction == @selector(raiseDelField:) || 
              theAction == @selector(raiseChangeFieldName:) || 
