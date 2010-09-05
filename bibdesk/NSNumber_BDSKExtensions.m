@@ -101,6 +101,8 @@ inline static NSString *romanNumeralForDigit(NSUInteger digit, NSString *i, NSSt
     
     while (number > 0) {
         letter = (number - 1) % 24;
+        if (letter > 16)
+            letter++;
         number = (number - 1) / 24;
         [string insertString:[NSString stringWithFormat:@"%C", 0x03b1 + letter] atIndex:0];
     }
