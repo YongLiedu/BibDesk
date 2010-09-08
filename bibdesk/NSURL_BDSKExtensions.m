@@ -206,7 +206,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     // CFURLCreateStringByAddingPercentEscapes incorrectly escapes fragment separators, so we'll ignore those
     // we should also not escape %-characters from existing escapes
     urlString = CFURLCreateStringByAddingPercentEscapes(allocator, urlString, CFSTR("#%"), NULL, kCFStringEncodingUTF8);
-    NSLog(@"%@",urlString);
+    
     CFURLRef theURL = CFURLCreateWithString(allocator, urlString, (CFURLRef)baseURL);
     CFRelease(urlString);
     
