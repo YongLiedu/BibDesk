@@ -201,15 +201,12 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
        return nil;
 
     CFAllocatorRef allocator = baseURL ? CFGetAllocator((CFURLRef)baseURL) : CFAllocatorGetDefault();
-    // normalize the URL string; CFURLCreateStringByAddingPercentEscapes appears to have a bug where it replaces some existing percent escapes with a %25, which is the percent character escape, rather than ignoring them as it should
-    CFStringRef unescapedString = CFURLCreateStringByReplacingPercentEscapes(allocator, urlString, CFSTR(""));
-    if(unescapedString == NULL) return nil;
     
     // we need to validate URL strings, as some DOI URL's contain characters that need to be escaped
     // CFURLCreateStringByAddingPercentEscapes incorrectly escapes fragment separators, so we'll ignore those
-    urlString = CFURLCreateStringByAddingPercentEscapes(allocator, unescapedString, CFSTR("#"), NULL, kCFStringEncodingUTF8);
-    CFRelease(unescapedString);
-    
+    // we should also not escape %-characters from existing escapes
+    urlString = CFURLCreateStringByAddingPercentEscapes(allocator, urlString, CFSTR("#%"), NULL, kCFStringEncodingUTF8);
+    NSLog(@"%@",urlString);
     CFURLRef theURL = CFURLCreateWithString(allocator, urlString, (CFURLRef)baseURL);
     CFRelease(urlString);
     
