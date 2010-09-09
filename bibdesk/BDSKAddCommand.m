@@ -83,6 +83,7 @@
         NSScriptClassDescription *insertionClassDescription = [classDescriptions containsObject:[NSNull null]] ? nil : [NSScriptClassDescription commonAncestorForClassDescriptions:classDescriptions];
         
         if ([locationSpecifier isKindOfClass:[NSPositionalSpecifier class]]) {
+            [locationSpecifier setInsertionClassDescription:insertionClassDescription];
             insertionContainer = [locationSpecifier insertionContainer];
             insertionKey = [locationSpecifier insertionKey];
             insertionIndex = [locationSpecifier insertionIndex];
