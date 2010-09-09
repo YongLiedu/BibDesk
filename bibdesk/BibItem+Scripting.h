@@ -52,12 +52,10 @@
 - (BibAuthor *)valueInScriptingEditorsWithName:(NSString *)name;
 
 - (NSArray *)linkedFiles;
-- (void)insertInLinkedFiles:(NSURL *)newURL;
 - (void)insertObject:(NSURL *)newURL inLinkedFilesAtIndex:(NSUInteger)idx;
 - (void)removeObjectFromLinkedFilesAtIndex:(NSUInteger)idx;
 
 - (NSArray *)linkedURLs;
-- (void)insertInLinkedURLs:(NSString *)newURLString;
 - (void)insertObject:(NSString *)newURLString inLinkedURLsAtIndex:(NSUInteger)idx;
 - (void)removeObjectFromLinkedURLsAtIndex:(NSUInteger)idx;
 

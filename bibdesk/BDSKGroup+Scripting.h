@@ -80,7 +80,6 @@ enum {
 
 @interface BDSKLibraryGroup (Scripting)
 
-- (void)insertInScriptingPublications:(BibItem *)pub;
 - (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx;
 - (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx;
 
@@ -98,7 +97,6 @@ enum {
 
 @interface BDSKStaticGroup (Scripting)
 
-- (void)insertInScriptingPublications:(BibItem *)pub;
 - (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx;
 - (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx;
 
@@ -114,7 +112,6 @@ enum {
 @interface BDSKSmartGroup (Scripting)
 
 - (NSArray *)conditions;
-- (void)insertInConditions:(BDSKCondition *)condition;
 - (void)insertObject:(BDSKCondition *)condition inConditionsAtIndex:(NSUInteger)idx;
 - (void)removeObjectFromConditionsAtIndex:(NSUInteger)idx;
 
@@ -127,7 +124,6 @@ enum {
 
 @interface BDSKCategoryGroup (Scripting)
 
-- (void)insertInScriptingPublications:(BibItem *)pub;
 - (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx;
 - (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx;
 

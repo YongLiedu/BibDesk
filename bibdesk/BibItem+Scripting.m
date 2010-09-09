@@ -130,10 +130,6 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     return [[self localFiles] valueForKey:@"URL"];
 }
 
-- (void)insertInLinkedFiles:(NSURL *)newURL {
-    [self insertObject:newURL inLinkedFilesAtIndex:[[self localFiles] count]];
-}
-
 - (void)insertObject:(NSURL *)newURL inLinkedFilesAtIndex:(NSUInteger)idx {
     if ([[self owner] isDocument]) {
         BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURL:newURL delegate:self];
@@ -161,10 +157,6 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 
 - (NSArray *)linkedURLs {
     return [[self remoteURLs] valueForKeyPath:@"URL.absoluteString"];
-}
-
-- (void)insertInLinkedURLs:(NSString *)newURLString {
-    [self insertObject:newURLString inLinkedURLsAtIndex:[[self remoteURLs] count]];
 }
 
 - (void)insertObject:(NSString *)newURLString inLinkedURLsAtIndex:(NSUInteger)idx {

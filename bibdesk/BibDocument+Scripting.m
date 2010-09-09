@@ -337,17 +337,6 @@
     return [self publications];
 }
 
-- (void)insertInScriptingPublications:(BibItem *)pub {
-	if ([pub macroResolver] == nil || [pub macroResolver] == macroResolver) {
-        [self addPublication:pub];
-        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([[pub owner] isEqual:self] == NO) {
-        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-        [cmd setScriptErrorString:NSLocalizedString(@"Cannot add publication from another document or external group.",@"Error description")];
-    } 
-}
-
 - (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
 	if ([pub macroResolver] == nil || [pub macroResolver] == macroResolver) {
         [self insertPublication:pub atIndex:idx];
@@ -412,7 +401,7 @@
     return nil;
 }
 
-- (void)insertInScriptingGroups:(BDSKGroup *)group {
+- (void)insertObject:(BDSKGroup *)group inScriptingGroupsAtIndex:(NSUInteger)idx {
     if ([group document]) {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
@@ -438,10 +427,6 @@
         [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
         return;
     }
-}
-
-- (void)insertObject:(BDSKGroup *)group inScriptingGroupsAtIndex:(NSUInteger)idx {
-    [self insertInScriptingGroups:group];
 }
 
 - (void)removeObjectFromScriptingGroupsAtIndex:(NSUInteger)idx {
@@ -485,7 +470,7 @@
     return idx == NSNotFound ? nil : [[groups staticGroups] objectAtIndex:idx];
 }
 
-- (void)insertInStaticGroups:(BDSKStaticGroup *)group {
+- (void)insertObject:(BDSKStaticGroup *)group inStaticGroupsAtIndex:(NSUInteger)idx {
     if ([group document]) {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
@@ -494,10 +479,6 @@
         [groups addStaticGroup:group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     }
-}
-
-- (void)insertObject:(BDSKStaticGroup *)group inStaticGroupsAtIndex:(NSUInteger)idx {
-    [self insertInStaticGroups:group];
 }
 
 - (void)removeObjectFromStaticGroupsAtIndex:(NSUInteger)idx {
@@ -521,7 +502,7 @@
     return idx == NSNotFound ? nil : [[groups smartGroups] objectAtIndex:idx];
 }
 
-- (void)insertInSmartGroups:(BDSKSmartGroup *)group {
+- (void)insertObject:(BDSKSmartGroup *)group inSmartGroupsAtIndex:(NSUInteger)idx {
     if ([group document]) {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
@@ -530,10 +511,6 @@
         [groups addSmartGroup:group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     }
-}
-
-- (void)insertObject:(BDSKSmartGroup *)group inSmartGroupsAtIndex:(NSUInteger)idx {
-    [self insertInSmartGroups:group];
 }
 
 - (void)removeObjectFromSmartGroupsAtIndex:(NSUInteger)idx {
@@ -582,7 +559,7 @@
     return idx == NSNotFound ? nil : [[groups URLGroups] objectAtIndex:idx];
 }
 
-- (void)insertInExternalFileGroups:(BDSKURLGroup *)group {
+- (void)insertObject:(BDSKURLGroup *)group inExternalFileGroupsAtIndex:(NSUInteger)idx {
     if ([group document]) {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
@@ -591,10 +568,6 @@
         [groups addURLGroup:group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     }
-}
-
-- (void)insertObject:(BDSKURLGroup *)group inExternalFileGroupsAtIndex:(NSUInteger)idx {
-    [self insertInExternalFileGroups:group];
 }
 
 - (void)removeObjectFromExternalFileGroupsAtIndex:(NSUInteger)idx {
@@ -618,7 +591,7 @@
     return idx == NSNotFound ? nil : [[groups scriptGroups] objectAtIndex:idx];
 }
 
-- (void)insertInScriptGroups:(BDSKScriptGroup *)group {
+- (void)insertObject:(BDSKScriptGroup *)group inScriptGroupsAtIndex:(NSUInteger)idx {
     if ([group document]) {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
@@ -627,10 +600,6 @@
         [groups addScriptGroup:group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     }
-}
-
-- (void)insertObject:(BDSKScriptGroup *)group inScriptGroupsAtIndex:(NSUInteger)idx {
-    [self insertInScriptGroups:group];
 }
 
 - (void)removeObjectFromScriptGroupsAtIndex:(NSUInteger)idx {
@@ -654,7 +623,7 @@
     return idx == NSNotFound ? nil : [[groups searchGroups] objectAtIndex:idx];
 }
 
-- (void)insertInSearchGroups:(BDSKSearchGroup *)group {
+- (void)insertObject:(BDSKSearchGroup *)group inSearchGroupsAtIndex:(NSUInteger)idx {
     if ([group document]) {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
@@ -662,10 +631,6 @@
     } else {
         [groups addSearchGroup:group];
     }
-}
-
-- (void)insertObject:(BDSKSearchGroup *)group inSearchGroupsAtIndex:(NSUInteger)idx {
-    [self insertInSearchGroups:group];
 }
 
 - (void)removeObjectFromSearchGroupsAtIndex:(NSUInteger)idx {

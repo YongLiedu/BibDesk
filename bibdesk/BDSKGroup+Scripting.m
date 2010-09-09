@@ -150,10 +150,6 @@
     return [[self document] scriptingPublications];
 }
 
-- (void)insertInScriptingPublications:(BibItem *)pub {
-    [[self document] insertInScriptingPublications:pub];
-}
-
 - (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
     [[self document] insertObject:pub inScriptingPublicationsAtIndex:idx];
 }
@@ -195,7 +191,7 @@
     return [self publications];
 }
 
-- (void)insertInScriptingPublications:(BibItem *)pub {
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
     if ([pub owner] == nil)
         [[self document] addPublication:pub];
 	if ([[pub owner] isEqual:[self document]] == NO) {
@@ -206,10 +202,6 @@
         [self addPublication:pub];
         [[[self document] undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     }
-}
-
-- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
-    [self insertInScriptingPublications:pub];
 }
 
 - (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx {
@@ -233,12 +225,6 @@
     NSScriptCommand *cmd = [NSScriptCommand currentCommand];
     [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
     [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of last import group.",@"Error description")];
-}
-
-- (void)insertInScriptingPublications:(BibItem *)pub {
-    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-    [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-    [cmd setScriptErrorString:NSLocalizedString(@"Cannot modify publications of last import group.",@"Error description")];
 }
 
 - (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
@@ -273,10 +259,6 @@
 
 - (NSArray *)conditions {
     return [[self filter] conditions];
-}
-
-- (void)insertInConditions:(BDSKCondition *)condition {
-    [self insertObject:condition inConditionsAtIndex:[[[self filter] conditions] count]];
 }
 
 - (void)insertObject:(BDSKCondition *)condition inConditionsAtIndex:(NSUInteger)idx {
@@ -321,7 +303,7 @@
     return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"fieldGroups" uniqueID:[self uniqueID]] autorelease];
 }
 
-- (void)insertInScriptingPublications:(BibItem *)pub {
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
     if ([pub owner] == nil)
         [[self document] addPublication:pub];
 	if ([[pub owner] isEqual:[self document]] == NO) {
@@ -332,10 +314,6 @@
         [[self document] addPublications:[NSArray arrayWithObject:pub] toGroup:self];
         [[[self document] undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     }
-}
-
-- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
-    [self insertInScriptingPublications:pub];
 }
 
 - (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx {

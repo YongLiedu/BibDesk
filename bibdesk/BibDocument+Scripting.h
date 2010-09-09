@@ -44,7 +44,6 @@
 
 - (id)valueInScriptingPublicationsWithUniqueID:(NSString *)uniqueID;
 - (NSArray *)scriptingPublications;
-- (void)insertInScriptingPublications:(BibItem *)pub;
 - (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx;
 - (void)removeObjectFromScriptingPublicationsAtIndex:(NSUInteger)idx;
 
@@ -60,21 +59,18 @@
 - (NSArray *)scriptingGroups;
 - (BDSKGroup *)valueInScriptingGroupsWithUniqueID:(NSString *)aUniqueID;
 - (BDSKGroup *)valueInScriptingGroupsWithName:(NSString *)name;
-- (void)insertInScriptingGroups:(BDSKGroup *)group;
 - (void)insertObject:(BDSKGroup *)group inScriptingGroupsAtIndex:(NSUInteger)idx;
 - (void)removeObjectFromScriptingGroupsAtIndex:(NSUInteger)idx;
 
 - (NSArray *)staticGroups;
 - (BDSKStaticGroup *)valueInStaticGroupsWithUniqueID:(NSString *)aUniqueID;
 - (BDSKStaticGroup *)valueInStaticGroupsWithName:(NSString *)name;
-- (void)insertInStaticGroups:(BDSKStaticGroup *)group;
 - (void)insertObject:(BDSKStaticGroup *)group inStaticGroupsAtIndex:(NSUInteger)idx;
 - (void)removeObjectFromStaticGroupsAtIndex:(NSUInteger)idx;
 
 - (NSArray *)smartGroups;
 - (BDSKSmartGroup *)valueInSmartGroupsWithUniqueID:(NSString *)aUniqueID;
 - (BDSKSmartGroup *)valueInSmartGroupsWithName:(NSString *)name;
-- (void)insertInSmartGroups:(BDSKSmartGroup *)group;
 - (void)insertObject:(BDSKSmartGroup *)group inSmartGroupsAtIndex:(NSUInteger)idx;
 - (void)removeObjectFromSmartGroupsAtIndex:(NSUInteger)idx;
 
@@ -85,20 +81,17 @@
 - (NSArray *)externalFileGroups;
 - (BDSKURLGroup *)valueInExternalFileGroupsWithUniqueID:(NSString *)aUniqueID;
 - (BDSKURLGroup *)valueInExternalFileGroupsWithName:(NSString *)name;
-- (void)insertInExternalFileGroups:(BDSKURLGroup *)group;
 - (void)insertObject:(BDSKURLGroup *)group inExternalFileGroupsAtIndex:(NSUInteger)idx;
 - (void)removeObjectFromExternalFileGroupsAtIndex:(NSUInteger)idx;
 
 - (NSArray *)scriptGroups;
 - (BDSKScriptGroup *)valueInScriptGroupsWithUniqueID:(NSString *)aUniqueID;
 - (BDSKScriptGroup *)valueInScriptGroupsWithName:(NSString *)name;
-- (void)insertInScriptGroups:(BDSKScriptGroup *)group;
 - (void)removeObjectFromScriptGroupsAtIndex:(NSUInteger)idx;
 
 - (NSArray *)searchGroups;
 - (BDSKSearchGroup *)valueInSearchGroupsWithUniqueID:(NSString *)aUniqueID;
 - (BDSKSearchGroup *)valueInSearchGroupsWithName:(NSString *)name;
-- (void)insertInSearchGroups:(BDSKSearchGroup *)group;
 - (void)insertObject:(BDSKSearchGroup *)group inSearchGroupsAtIndex:(NSUInteger)idx;
 - (void)removeObjectFromSearchGroupsAtIndex:(NSUInteger)idx;
 
