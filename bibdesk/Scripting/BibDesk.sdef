@@ -771,7 +771,7 @@
 			</property>
 			<element type="macro" access="r"
 				description="The global macros.">
-				<cocoa key="macros"/>
+				<cocoa key="macros" insert-at-beginning="no"/>
 			</element>
 			<element type="script hook" access="r"
 				description="The script hook rules known by BibDesk.">
@@ -814,7 +814,7 @@
 			</property>
 			<element type="publication"
 				description="Publications in the bibliography">
-				<cocoa key="scriptingPublications"/>
+				<cocoa key="scriptingPublications" insert-at-beginning="yes"/>
 			</element>
 			<element type="author" access="r"
 				description="Authors of publications in the bibliography">
@@ -830,45 +830,45 @@
 			</element>
 			<element type="group"
 				description="Groups in the document">
-				<cocoa key="scriptingGroups"/>
+				<cocoa key="scriptingGroups" insert-at-beginning="no"/>
 			</element>
-			<element type="library group"
+			<element type="library group" access="r"
 				description="The library group in the document">
 				<cocoa key="libraryGroups"/>
 			</element>
-			<element type="last import group"
+			<element type="last import group" access="r"
 				description="The last import group in the document">
 				<cocoa key="lastImportGroups"/>
 			</element>
 			<element type="static group"
 				description="The static groups in the document">
-				<cocoa key="staticGroups"/>
+				<cocoa key="staticGroups" insert-at-beginning="no"/>
 			</element>
 			<element type="smart group"
 				description="The smart groups in the document">
-				<cocoa key="smartGroups"/>
+				<cocoa key="smartGroups" insert-at-beginning="no"/>
 			</element>
 			<element type="field group"
 				description="The field groups in the document">
-				<cocoa key="fieldGroups"/>
+				<cocoa key="fieldGroups" insert-at-beginning="no"/>
 			</element>
 			<element type="external file group"
 				description="The external file groups in the document">
-				<cocoa key="externalFileGroups"/>
+				<cocoa key="externalFileGroups" insert-at-beginning="no"/>
 			</element>
 			<element type="script group"
 				description="Groups in the document">
-				<cocoa key="scriptGroups"/>
+				<cocoa key="scriptGroups" insert-at-beginning="no"/>
 			</element>
 			<element type="search group"
 				description="The search groups in the document">
-				<cocoa key="searchGroups"/>
+				<cocoa key="searchGroups" insert-at-beginning="no"/>
 			</element>
-			<element type="shared group"
+			<element type="shared group" access="r"
 				description="The shared groups in the document">
 				<cocoa key="sharedGroups"/>
 			</element>
-			<element type="web group"
+			<element type="web group" access="r"
 				description="The web group in the document">
 				<cocoa key="webGroups"/>
 			</element>
@@ -1015,15 +1015,15 @@
             </element>
             <element type="field"
                 description="The fields of the publication. These should be accessed by name.">
-                <cocoa key="bibFields"/>
+                <cocoa key="bibFields" insert-at-beginning="no"/>
             </element>
             <element type="linked file"
                 description="The local files linked to the publication.">
-                <cocoa key="linkedFiles"/>
+                <cocoa key="linkedFiles" insert-at-beginning="no"/>
             </element>
             <element type="linked URL"
                 description="The remote URLs linked to the publication.">
-                <cocoa key="linkedURLs"/>
+                <cocoa key="linkedURLs" insert-at-beginning="no"/>
             </element>
             <responds-to name="add">
                 <cocoa method=""/>
@@ -1217,7 +1217,7 @@
             </property>  
             <element type="publication"
                 description="Publications in the group.">
-                <cocoa key="scriptingPublications"/>
+                <cocoa key="scriptingPublications" insert-at-beginning="no"/>
             </element>
 			<element type="author" access="r"
 				description="Authors of publications in the group">
@@ -1257,7 +1257,7 @@
             </property>  
             <element type="condition"
                 description="Conditions of the smart group.">
-                <cocoa key="conditions"/>
+                <cocoa key="conditions" insert-at-beginning="no"/>
             </element>
         </class>
         
