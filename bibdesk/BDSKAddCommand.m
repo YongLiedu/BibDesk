@@ -138,7 +138,7 @@
                 // insert using scripting KVC
                 if (insertionIndex >= 0) {
                     for (obj in insertionObjects)
-                        [insertionContainer insertValue:obj atIndex:insertionIndex inPropertyWithKey:insertionKey];
+                        [insertionContainer insertValue:obj atIndex:insertionIndex++ inPropertyWithKey:insertionKey];
                 } else {
                     for (obj in insertionObjects)
                         [insertionContainer insertValue:obj inPropertyWithKey:insertionKey];
