@@ -53,7 +53,17 @@
     NSArray *insertionObjects = nil;
     NSMutableArray *returnValue = nil;
     id obj;
-    BOOL isArray = [directParameter isKindOfClass:[NSArray class]] || [receiver isKindOfClass:[NSArray class]];
+    BOOL isArray;
+    
+    if ([directParameter isKindOfClass:[NSAppleEventDescriptor class]] && [directParameter descriptorType] == typeAEList) {
+        NSMutableArray *array = [NSMutableArray array];
+        NSUInteger i, iMax = [directParameter numberOfItems];
+        for (i = 1; i <= iMax; i++)
+            [array addObject:[directParameter descriptorAtIndex:i]];
+        directParameter = array;
+    }
+    
+    isArray = [directParameter isKindOfClass:[NSArray class]] || [receiver isKindOfClass:[NSArray class]];
     
     if (directParameter && [directParameter isKindOfClass:[NSArray class]] == NO)
         directParameter = [NSArray arrayWithObjects:directParameter, nil];
