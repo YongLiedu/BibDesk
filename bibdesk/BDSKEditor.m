@@ -938,6 +938,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
      */
     if ([citeKeyField currentEditor]) {
         [self discardEditing];
+        [citeKeyField selectText:nil];
     } else if ([self commitEditing] == NO) {
         NSBeep();
         return;
