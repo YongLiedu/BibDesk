@@ -936,7 +936,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
      currently in the field.  If any other field is being edited, validate pending changes to 
      other controls before trying to generate a key.
      */
-    if (([citeKeyField currentEditor] && [citeKeyField abortEditing] == NO) || [self commitEditing] == NO) {
+    if ([citeKeyField currentEditor]) {
+        [self discardEditing];
+    } else if ([self commitEditing] == NO) {
         NSBeep();
         return;
     }
