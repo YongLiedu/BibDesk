@@ -56,15 +56,9 @@
 @implementation BDSKRISParser
 
 + (BOOL)canParseString:(NSString *)string{
-    NSScanner *scanner = [[NSScanner alloc] initWithString:string];
-    [scanner setCharactersToBeSkipped:nil];
-    BOOL isRIS = NO;
-    
-    // skip leading whitespace
-    [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
-    isRIS = [scanner scanString:@"TY  - " intoString:nil];
-    [scanner release];
-    return isRIS;
+    string = [[string substringToIndex:MIN([string length], (NSUInteger)100)] stringByNormalizingSpacesAndLineBreaks];
+    AGRegex *risRegex = [AGRegex regexWithPattern:@"^TY  - [A-Z]+\n[A-Z0-9]{2}  - " options:AGRegexMultiline];
+    return nil != [risRegex findInString:string];
 }
 
 // The RIS specs can be found at http://www.refman.com/support/risformat_intro.asp
@@ -270,6 +264,12 @@
 
 + (NSString *)stringByFixingInputString:(NSString *)inputString;
 {
+    // Some sources add extra lines with some context info before the entries
+    AGRegex *risRegex = [AGRegex regexWithPattern:@"^TY  - [A-Z]+\n[A-Z0-9]{2}  - " options:AGRegexMultiline];
+    AGRegexMatch *match = [risRegex findInString:inputString];
+    if (match)
+        inputString = [inputString substringFromIndex:[match range].location];
+    
     // Scopus doesn't put the end tag ER on a separate line.
     AGRegex *endTag = [AGRegex regexWithPattern:@"([^\r\n])ER  - $" options:AGRegexMultiline];
     return [endTag replaceWithString:@"$1\r\nER  - " inString:inputString];
