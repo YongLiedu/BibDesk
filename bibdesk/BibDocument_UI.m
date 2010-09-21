@@ -504,10 +504,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 }
 
 - (void)updateTemplatePreviewMenu:(NSMenu *)menu {
-    NSMutableArray *styles = [NSMutableArray arrayWithArray:[BDSKTemplate allStyleNamesForFileType:@"rtf"]];
-    [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"rtfd"]];
-    [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"doc"]];
-    [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"html"]];
+    NSArray *styles = [BDSKTemplate allStyleNamesForFileTypes:[NSSet setWithObjects:@"rtf", @"rtfd", @"doc", @"html", nil]];
     
     while ([menu numberOfItems])
         [menu removeItemAtIndex:0];

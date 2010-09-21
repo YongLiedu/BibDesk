@@ -88,7 +88,7 @@ extern NSString *BDSKTemplateScriptString;
 // known export style names
 + (NSArray *)allStyleNames;
 + (NSArray *)allFileTypes;
-+ (NSArray *)allStyleNamesForFileType:(NSString *)fileType;
++ (NSArray *)allStyleNamesForFileTypes:(NSSet *)fileTypes;
 + (NSArray *)allStyleNamesForFormat:(BDSKTemplateFormat)format;
 + (NSString *)defaultStyleNameForFileType:(NSString *)fileType;
 

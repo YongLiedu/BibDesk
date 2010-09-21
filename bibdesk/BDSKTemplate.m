@@ -266,7 +266,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     return fileTypes;
 }
 
-+ (NSArray *)allStyleNamesForFileType:(NSString *)fileType;
++ (NSArray *)allStyleNamesForFileTypes:(NSSet *)fileTypes;
 {
     NSMutableArray *names = [NSMutableArray array];
     NSString *aFileType;
@@ -274,8 +274,8 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     for (id aNode in [self exportTemplates]) {
         if ([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil) {
             name = [aNode valueForKey:BDSKTemplateNameString];
-            aFileType = [aNode valueForKey:BDSKTemplateRoleString];
-            if ([aFileType caseInsensitiveCompare:fileType] == NSOrderedSame && name != nil)
+            aFileType = [[aNode valueForKey:BDSKTemplateRoleString] lowercaseString];
+            if ([fileTypes containsObject:aFileType] && name != nil)
                 [names addObject:name];
         }
     }
@@ -298,7 +298,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 + (NSString *)defaultStyleNameForFileType:(NSString *)fileType;
 {
-    NSArray *names = [self  allStyleNamesForFileType:fileType];
+    NSArray *names = [self  allStyleNamesForFileTypes:[NSSet setWithObject:fileType]];
     if ([names count] > 0)
         return [names objectAtIndex:0];
     else
