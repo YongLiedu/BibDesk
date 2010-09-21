@@ -573,7 +573,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         
     } else if ([menu isEqual:previewDisplayMenu] || [menu isEqual:sidePreviewDisplayMenu]) {
     
-        NSArray *styles = [BDSKTemplate allStyleNamesForFileTypes:[NSSet setWithObjects:@"rtf", @"rtfd", @"doc", @"html", nil]];
+        NSArray *styles = [BDSKTemplate allStyleNamesForFormat:(BDSKRichTextTemplateFormat | BDSKPlainHTMLTemplateFormat)];
         
         NSInteger i = [menu numberOfItems];
         while (i-- && [[menu itemAtIndex:i] isSeparatorItem] == NO)

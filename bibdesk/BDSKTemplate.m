@@ -252,36 +252,6 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     return names;
 }
 
-+ (NSArray *)allFileTypes;
-{
-    NSMutableArray *fileTypes = [NSMutableArray array];
-    NSString *fileType;
-    for (id aNode in [self exportTemplates]) {
-        if ([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil) {
-            fileType = [aNode valueForKey:BDSKTemplateRoleString];
-            if (fileType != nil)
-                [fileTypes addObject:fileType];
-        }
-    }
-    return fileTypes;
-}
-
-+ (NSArray *)allStyleNamesForFileTypes:(NSSet *)fileTypes;
-{
-    NSMutableArray *names = [NSMutableArray array];
-    NSString *aFileType;
-    NSString *name;
-    for (id aNode in [self exportTemplates]) {
-        if ([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil) {
-            name = [aNode valueForKey:BDSKTemplateNameString];
-            aFileType = [[aNode valueForKey:BDSKTemplateRoleString] lowercaseString];
-            if ([fileTypes containsObject:aFileType] && name != nil)
-                [names addObject:name];
-        }
-    }
-    return names;
-}
-
 + (NSArray *)allStyleNamesForFormat:(BDSKTemplateFormat)format;
 {
     NSMutableArray *names = [NSMutableArray array];
@@ -298,11 +268,15 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 + (NSString *)defaultStyleNameForFileType:(NSString *)fileType;
 {
-    NSArray *names = [self  allStyleNamesForFileTypes:[NSSet setWithObject:fileType]];
-    if ([names count] > 0)
-        return [names objectAtIndex:0];
-    else
-        return nil;
+    NSString *name;
+    for (id aNode in [self exportTemplates]) {
+        if ([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil) {
+            name = [aNode valueForKey:BDSKTemplateNameString];
+            if (name != nil && [fileType caseInsensitiveCompare:[aNode valueForKey:BDSKTemplateRoleString]] == NSOrderedSame)
+                return name;
+        }
+    }
+    return nil;
 }
 
 // accesses the node array in prefs
