@@ -153,7 +153,14 @@
 			isa = PBXProject;
 			buildConfigurationList = F95CC105087F54B2002C5694 /* Build configuration list for PBXProject "BibImporter" */;
 			compatibilityVersion = "Xcode 3.0";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 089C166AFE841209C02AAC07 /* BibImporter */;
 			projectDirPath = "";
 			projectRoot = "";
