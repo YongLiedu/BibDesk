@@ -2909,7 +2909,14 @@
 			isa = PBXProject;
 			buildConfigurationList = F993F20208553A61007A7657 /* Build configuration list for PBXProject "Bibdesk" */;
 			compatibilityVersion = "Xcode 3.0";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* BibDesk */;
 			projectDirPath = "";
 			projectReferences = (
