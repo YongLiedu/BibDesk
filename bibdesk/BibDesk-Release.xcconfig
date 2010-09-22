@@ -1,6 +1,5 @@
 #include "BibDesk-Common.xcconfig"
 
-ARCHS = ppc i386
 COPY_PHASE_STRIP = YES
 STRIP_INSTALLED_PRODUCT = YES
 STRIP_STYLE = all

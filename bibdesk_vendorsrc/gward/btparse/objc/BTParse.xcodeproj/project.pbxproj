@@ -421,9 +421,10 @@
 		F9ABEBF1086E102800741FC5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH)";
+				ARCHS = "$(ONLY_ACTIVE_ARCH_PRE_XCODE_3_1)";
 				GCC_ENABLE_SYMBOL_SEPARATION = NO;
 				HEADER_SEARCH_PATHS = "";
+				ONLY_ACTIVE_ARCH_PRE_XCODE_3_1 = "$(NATIVE_ARCH)";
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
@@ -432,10 +433,8 @@
 		F9ABEBF2086E102800741FC5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				COPY_PHASE_STRIP = NO;
 				GCC_ENABLE_SYMBOL_SEPARATION = NO;
 				HEADER_SEARCH_PATHS = "";
