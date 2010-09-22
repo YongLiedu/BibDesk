@@ -258,6 +258,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CEB10D610D7446E50053B916 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
 			};
 			name = Debug;
 		};
