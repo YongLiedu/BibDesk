@@ -71,6 +71,7 @@
 #import "NSMenu_BDSKExtensions.h"
 #import "BDSKGroupsArray.h"
 #import "NSTableView_BDSKExtensions.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 static char BDSKDocumentFileViewObservationContext;
 static char BDSKDocumentDefaultsObservationContext;
@@ -152,8 +153,19 @@ enum {
     } else if([template templateFormat] & BDSKPlainTextTemplateFormat){
         // parse as plain text, so the HTML is interpreted properly by NSAttributedString
         NSString *str = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items];
+        NSArray *accessoryURLs = [template accessoryFileURLs];
         // we generally assume UTF-8 encoding for all template-related files
-        if ([template templateFormat] == BDSKPlainHTMLTemplateFormat)
+        if ([accessoryURLs count] > 0) {
+            NSFileManager *fm = [NSFileManager defaultManager];
+            NSString *tmpDir = [fm makeTemporaryDirectoryWithBasename:@"templatepreview"];
+            NSURL *tmpDirURL = [NSURL fileURLWithPath:tmpDir];
+            for (NSURL *accessoryURL in accessoryURLs)
+                [fm copyObjectAtURL:accessoryURL toDirectoryAtURL:tmpDirURL error:NULL];
+            NSString *tmpFile = [fm uniqueFilePathWithName:[@"templatepreview" stringByAppendingPathExtension:[template fileExtension]] atPath:tmpDir];
+            [str writeToFile:tmpFile atomically:NO encoding:NSUTF8StringEncoding error:NULL];
+            templateString = [[[NSAttributedString alloc] initWithURL:[NSURL fileURLWithPath:tmpFile] documentAttributes:nil] autorelease];
+            [fm removeItemAtPath:tmpDir error:NULL];
+        } else if ([template templateFormat] == BDSKPlainHTMLTemplateFormat)
             templateString = [[[NSAttributedString alloc] initWithHTML:[str dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL] autorelease];
         else
             templateString = [[[NSAttributedString alloc] initWithString:str attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSFont userFontOfSize:0.0], NSFontAttributeName, nil]] autorelease];
