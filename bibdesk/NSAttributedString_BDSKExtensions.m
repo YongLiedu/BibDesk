@@ -202,6 +202,28 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
     return [[self string] localizedCaseInsensitiveNonTeXNonArticleCompare:[other string]];
 }
 
+#pragma mark Template support
+
+- (NSAttributedString *)lastPathComponent {
+    if ([self length] == 0)
+        return self;
+    NSString *string = [[self string] lastPathComponent];
+    NSRange range = [[self string] rangeOfString:string options:NSBackwardsSearch];
+    if (range.location != NSNotFound)
+        return [self attributedSubstringFromRange:range];
+    return [[[NSAttributedString alloc] initWithString:string attributes:[self attributesAtIndex:0 effectiveRange:NULL]] autorelease];
+}
+
+- (NSAttributedString *)stringByDeletingPathExtension {
+    if ([self length] == 0)
+        return self;
+    NSString *string = [[self string] stringByDeletingPathExtension];
+    NSRange range = [[self string] rangeOfString:string];
+    if (range.location != NSNotFound)
+        return [self attributedSubstringFromRange:range];
+    return [[[NSAttributedString alloc] initWithString:string attributes:[self attributesAtIndex:0 effectiveRange:NULL]] autorelease];
+}
+
 #pragma mark Scripting support
 
 + (id)scriptingRtfWithDescriptor:(NSAppleEventDescriptor *)descriptor {
