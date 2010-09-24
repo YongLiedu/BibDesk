@@ -146,10 +146,13 @@ enum {
     
     BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle] ?: [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
     NSAttributedString *templateString = nil;
+    NSColor *backgroundColor = nil;
     
     // make sure this is really one of the attributed string types...
     if([template templateFormat] & BDSKRichTextTemplateFormat){
-        templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:NULL];
+        NSDictionary *docAttributes = nil;
+        templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:&docAttributes];
+        backgroundColor = [docAttributes objectForKey:NSBackgroundColorDocumentAttribute];
     } else if([template templateFormat] & BDSKPlainTextTemplateFormat){
         // parse as plain text, so the HTML is interpreted properly by NSAttributedString
         NSString *str = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items];
@@ -183,6 +186,8 @@ enum {
     else
         [[textStorage mutableString] setString:@""];
     [textStorage endEditing];
+    
+    [textView setBackgroundColor:backgroundColor ?: [NSColor whiteColor]];
     
     if([NSString isEmptyString:[searchField stringValue]] == NO)
         [textView highlightComponentsOfSearchString:[searchField stringValue]];    
