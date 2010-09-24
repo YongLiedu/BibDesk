@@ -2321,7 +2321,7 @@
 				CEEBA6870D746DD7000204B8 /* BibDesk-Release.xcconfig */,
 				CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */,
 			);
-			name = Configurations;
+			path = Configurations;
 			sourceTree = "<group>";
 		};
 		CEFF6CCF10C14774006CFC80 /* Groups */ = {
