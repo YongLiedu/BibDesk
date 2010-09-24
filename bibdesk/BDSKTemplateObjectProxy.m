@@ -84,9 +84,11 @@
         else if(templateFormat == BDSKDocTemplateFormat)
             docType = NSDocFormatTextDocumentType;
         else if(templateFormat == BDSKDocxTemplateFormat)
-            docType = @"NSOfficeOpenXML";
+            docType = NSOfficeOpenXMLTextDocumentType;
         else if(templateFormat == BDSKOdtTemplateFormat)
-            docType = @"NSOpenDocument";
+            docType = NSOpenDocumentTextDocumentType;
+        else if(templateFormat == BDSKWebArchiveTemplateFormat)
+            docType = NSWebArchiveTextDocumentType;
         NSData *data = [self dataByParsingTemplate:template withObject:anObject publications:items];
         attrString = [[[NSAttributedString alloc] initWithData:data options:[NSDictionary dictionaryWithObjectsAndKeys:docType, NSDocumentTypeDocumentOption, nil] documentAttributes:NULL error:NULL] autorelease];
     }

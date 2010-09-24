@@ -50,7 +50,8 @@ enum {
     BDSKDocTemplateFormat = 32,
     BDSKDocxTemplateFormat = 64,
     BDSKOdtTemplateFormat = 128,
-    BDSKRichTextTemplateFormat = 188 // Rich HTML, RTF, RTFD, Doc, Docx, or ODT
+    BDSKWebArchiveTemplateFormat = 256,
+    BDSKRichTextTemplateFormat = 444 // Rich HTML, RTF, RTFD, Doc, Docx, ODT, or WebArchive
 };
 typedef NSUInteger BDSKTemplateFormat;
 
