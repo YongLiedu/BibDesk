@@ -163,7 +163,7 @@ enum {
                 [fm copyObjectAtURL:accessoryURL toDirectoryAtURL:tmpDirURL error:NULL];
             NSString *tmpFile = [fm uniqueFilePathWithName:[@"templatepreview" stringByAppendingPathExtension:[template fileExtension]] atPath:tmpDir];
             [str writeToFile:tmpFile atomically:NO encoding:NSUTF8StringEncoding error:NULL];
-            templateString = [[[NSAttributedString alloc] initWithURL:[NSURL fileURLWithPath:tmpFile] documentAttributes:nil] autorelease];
+            templateString = [[[NSAttributedString alloc] initWithPath:tmpFile documentAttributes:nil] autorelease];
             [fm removeItemAtPath:tmpDir error:NULL];
         } else if ([template templateFormat] == BDSKPlainHTMLTemplateFormat)
             templateString = [[[NSAttributedString alloc] initWithHTML:[str dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL] autorelease];
