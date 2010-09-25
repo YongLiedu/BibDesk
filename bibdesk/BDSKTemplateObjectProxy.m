@@ -216,12 +216,12 @@
 - (NSCalendarDate *)currentDate{ return [NSCalendarDate date]; }
 
 // BDSKTemplateParserDelegate protocol
-- (void)templateParserWillParseTemplate:(id)template usingObject:(id)anObject isAttributed:(BOOL)flag {
+- (void)templateParserWillParseTemplate:(id)template usingObject:(id)anObject {
     if ([anObject respondsToSelector:@selector(prepareForTemplateParsing)])
         [(BibItem *)anObject prepareForTemplateParsing];
 }
 
-- (void)templateParserDidParseTemplate:(id)template usingObject:(id)anObject isAttributed:(BOOL)flag {
+- (void)templateParserDidParseTemplate:(id)template usingObject:(id)anObject {
     if ([anObject respondsToSelector:@selector(cleanupAfterTemplateParsing)])
         [(BibItem *)anObject cleanupAfterTemplateParsing];
 }

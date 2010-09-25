@@ -451,9 +451,9 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                         if (prevItem) {
                             if (itemTemplate == nil)
                                 itemTemplate = [[tag itemTemplate] arrayByAddingObjectsFromArray:[tag separatorTemplate]];
-                            [delegate templateParserWillParseTemplate:itemTemplate usingObject:prevItem isAttributed:NO];
+                            [delegate templateParserWillParseTemplate:itemTemplate usingObject:prevItem];
                             keyValue = [self stringFromTemplateArray:itemTemplate usingObject:prevItem atIndex:++idx delegate:delegate];
-                            [delegate templateParserDidParseTemplate:itemTemplate usingObject:prevItem isAttributed:NO];
+                            [delegate templateParserDidParseTemplate:itemTemplate usingObject:prevItem];
                             if (keyValue != nil)
                                 [result appendString:keyValue];
                         }
@@ -461,9 +461,9 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                     }
                     if (prevItem) {
                         itemTemplate = [tag itemTemplate];
-                        [delegate templateParserWillParseTemplate:itemTemplate usingObject:prevItem isAttributed:NO];
+                        [delegate templateParserWillParseTemplate:itemTemplate usingObject:prevItem];
                         keyValue = [self stringFromTemplateArray:itemTemplate usingObject:prevItem atIndex:++idx delegate:delegate];
-                        [delegate templateParserDidParseTemplate:itemTemplate usingObject:prevItem isAttributed:NO];
+                        [delegate templateParserDidParseTemplate:itemTemplate usingObject:prevItem];
                         if (keyValue != nil)
                             [result appendString:keyValue];
                     }
@@ -721,9 +721,9 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                         if (prevItem) {
                             if (itemTemplate == nil)
                                 itemTemplate = [[tag itemTemplate] arrayByAddingObjectsFromArray:[tag separatorTemplate]];
-                            [delegate templateParserWillParseTemplate:itemTemplate usingObject:prevItem isAttributed:YES];
+                            [delegate templateParserWillParseTemplate:itemTemplate usingObject:prevItem];
                             tmpAttrStr = [self attributedStringFromTemplateArray:itemTemplate usingObject:prevItem atIndex:++idx delegate:delegate];
-                            [delegate templateParserDidParseTemplate:itemTemplate usingObject:prevItem isAttributed:YES];
+                            [delegate templateParserDidParseTemplate:itemTemplate usingObject:prevItem];
                             if (tmpAttrStr != nil)
                                 [result appendAttributedString:tmpAttrStr];
                         }
@@ -731,9 +731,9 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                     }
                     if (prevItem) {
                         itemTemplate = [tag itemTemplate];
-                        [delegate templateParserWillParseTemplate:itemTemplate usingObject:prevItem isAttributed:YES];
+                        [delegate templateParserWillParseTemplate:itemTemplate usingObject:prevItem];
                         tmpAttrStr = [self attributedStringFromTemplateArray:itemTemplate usingObject:prevItem atIndex:++idx delegate:delegate];
-                        [delegate templateParserDidParseTemplate:itemTemplate usingObject:prevItem isAttributed:YES];
+                        [delegate templateParserDidParseTemplate:itemTemplate usingObject:prevItem];
                         if (tmpAttrStr != nil)
                             [result appendAttributedString:tmpAttrStr];
                     }

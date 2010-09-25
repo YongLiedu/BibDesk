@@ -41,8 +41,8 @@
 
 @protocol BDSKTemplateParserDelegate
 
-- (void)templateParserWillParseTemplate:(id)template usingObject:(id)object isAttributed:(BOOL)flag;
-- (void)templateParserDidParseTemplate:(id)template usingObject:(id)object isAttributed:(BOOL)flag;
+- (void)templateParserWillParseTemplate:(id)template usingObject:(id)object;
+- (void)templateParserDidParseTemplate:(id)template usingObject:(id)object;
 
 @end
 
