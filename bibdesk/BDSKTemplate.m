@@ -518,9 +518,17 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
         
         [self setValue:[aURL lastPathComponent] forKey:BDSKTemplateNameString];
         
-        NSString *extension = [[aURL path] pathExtension];
-        if ([NSString isEmptyString:extension] == NO && [[self parent] valueForKey:BDSKTemplateRoleString] == nil) 
-            [[self parent] setValue:extension forKey:BDSKTemplateRoleString];
+        if ([[self parent] valueForKey:BDSKTemplateRoleString] == nil) {
+            NSString *extension = [[aURL path] pathExtension];
+            if ([NSString isEmptyString:extension] == NO) 
+                [[self parent] setValue:extension forKey:BDSKTemplateRoleString];
+        }
+        
+        if ([[self valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] && [[self parent] valueForKey:BDSKTemplateNameString] == nil) {
+            NSString *name = [[[aURL path] lastPathComponent] stringByDeletingPathExtension];
+            if ([NSString isEmptyString:name] == NO) 
+                [[self parent] setValue:name forKey:BDSKTemplateNameString];
+        }
     }
     [alias release];
 }
