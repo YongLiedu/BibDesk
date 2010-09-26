@@ -131,7 +131,6 @@ extern NSString *BDSKTemplateScriptString;
 // other methods
 - (BOOL)addChildWithURL:(NSURL *)fileURL role:(NSString *)role;
 - (id)childForRole:(NSString *)role;
-- (NSColor *)representedColorForKey:(NSString *)key;
 
 @end
 

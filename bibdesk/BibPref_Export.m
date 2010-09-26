@@ -318,7 +318,7 @@
 - (void)outlineView:(NSOutlineView *)ov willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item{
     NSString *columnID = [tableColumn identifier];
     if ([cell respondsToSelector:@selector(setTextColor:)])
-        [cell setTextColor:[item representedColorForKey:columnID]];
+        [cell setTextColor:([item valueForKey:columnID] ? [NSColor blackColor] : [NSColor redColor])];
     if([columnID isEqualToString:BDSKTemplateRoleString]) {
         [cell removeAllItems];
         [cell addItemsWithObjectValues:([item isLeaf]) ? roles : fileTypes];

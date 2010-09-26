@@ -550,16 +550,4 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     return theURL;
 }
 
-- (NSColor *)representedColorForKey:(NSString *)key;
-{
-    NSColor *color = [NSColor controlTextColor];
-    if([key isEqualToString:BDSKTemplateNameString] && [self isLeaf]){
-        if(nil == [self representedFileURL])
-            color = [NSColor redColor];
-    }else if(nil == [self valueForKey:key]){
-        color = [NSColor redColor];
-    }
-    return color;
-}
-
 @end
