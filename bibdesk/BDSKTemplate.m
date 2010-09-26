@@ -511,23 +511,26 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     BDAlias *alias = nil;
     alias = [[BDAlias alloc] initWithURL:aURL];
     
-    if(alias){
+    if (alias) {
+        NSString *name = [aURL lastPathComponent];
+        
         [self setValue:[alias aliasData] forKey:BDSKTemplateAliasString];
         
         [self setValue:[[aURL path] stringByAbbreviatingWithTildeInPath] forKey:BDSKTemplateFilePathString];
         
-        [self setValue:[aURL lastPathComponent] forKey:BDSKTemplateNameString];
+        [self setValue:name forKey:BDSKTemplateNameString];
         
-        if ([[self parent] valueForKey:BDSKTemplateRoleString] == nil) {
-            NSString *extension = [[aURL path] pathExtension];
-            if ([NSString isEmptyString:extension] == NO) 
-                [[self parent] setValue:extension forKey:BDSKTemplateRoleString];
-        }
-        
-        if ([[self valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] && [[self parent] valueForKey:BDSKTemplateNameString] == nil) {
-            NSString *name = [[[aURL path] lastPathComponent] stringByDeletingPathExtension];
-            if ([NSString isEmptyString:name] == NO) 
-                [[self parent] setValue:name forKey:BDSKTemplateNameString];
+        if ([[self valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString]) {
+            if ([[self parent] valueForKey:BDSKTemplateRoleString] == nil) {
+                NSString *extension = [aURL pathExtension];
+                if ([NSString isEmptyString:extension] == NO) 
+                    [[self parent] setValue:extension forKey:BDSKTemplateRoleString];
+            }
+            if ([[self parent] valueForKey:BDSKTemplateNameString] == nil) {
+                name = [name stringByDeletingPathExtension];
+                if ([NSString isEmptyString:name] == NO) 
+                    [[self parent] setValue:name forKey:BDSKTemplateNameString];
+            }
         }
     }
     [alias release];
