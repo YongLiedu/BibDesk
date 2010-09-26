@@ -40,6 +40,7 @@
 #import "BDSKTemplateTag.h"
 #import "NSCharacterSet_BDSKExtensions.h"
 #import "BibAuthor.h"
+#import "NSURL_BDSKExtensions.h"
 
 #define START_TAG_OPEN_DELIM            @"<$"
 #define END_TAG_OPEN_DELIM              @"</$"
@@ -695,11 +696,30 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
     
     for (id tag in template) {
         BDSKTemplateTagType type = [(BDSKTemplateTag *)tag type];
-        NSAttributedString *tmpAttrStr = nil;
         
         if (type == BDSKTextTemplateTagType) {
             
-            [result appendAttributedString:[(BDSKRichTextTemplateTag *)tag attributedText]];
+            NSAttributedString *tmpAttrStr = [(BDSKRichTextTemplateTag *)tag attributedText];
+            NSArray *linkTemplates = [(BDSKRichTextTemplateTag *)tag linkTemplates];
+            
+            if (linkTemplates) {
+                NSMutableAttributedString *tmpMutAttrStr = [tmpAttrStr mutableCopy];
+                for (BDSKAttributeTemplateTag *linkTag in linkTemplates) {
+                    NSRange range = [linkTag range];
+                    NSArray *linkTemplate = [linkTag template];
+                    id aLink;
+                    [delegate templateParserWillParseTemplate:linkTemplate usingObject:object];
+                    aLink = [self stringFromTemplateArray:linkTemplate usingObject:object atIndex:anIndex];
+                    [delegate templateParserDidParseTemplate:linkTemplate usingObject:object];
+                    if ([[tmpAttrStr attribute:NSLinkAttributeName atIndex:range.location effectiveRange:NULL] isKindOfClass:[NSURL class]])
+                        aLink = [NSURL URLWithStringByNormalizingPercentEscapes:aLink];
+                    [tmpMutAttrStr addAttribute:NSLinkAttributeName value:aLink range:range];
+                }
+                [result appendAttributedString:tmpMutAttrStr];
+                [tmpMutAttrStr release];
+            } else {
+                [result appendAttributedString:tmpAttrStr];
+            }
             
         } else {
             
@@ -708,12 +728,32 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
             
             if (type == BDSKValueTemplateTagType) {
                 
-                if (keyValue)
-                    [result appendAttributedString:[keyValue templateAttributedStringValueWithAttributes:[(BDSKRichValueTemplateTag *)tag attributes]]];
+                if (keyValue) {
+                    NSAttributedString *tmpAttrStr;
+                    NSDictionary *attrs = [(BDSKRichValueTemplateTag *)tag attributes];
+                    NSArray *linkTemplate = [(BDSKRichValueTemplateTag *)tag linkTemplate];
+                    if (linkTemplate) {
+                        NSMutableDictionary *tmpAttrs = [attrs mutableCopy];
+                        id aLink;
+                        [delegate templateParserWillParseTemplate:linkTemplate usingObject:object];
+                        aLink = [self stringFromTemplateArray:linkTemplate usingObject:object atIndex:anIndex];
+                        [delegate templateParserDidParseTemplate:linkTemplate usingObject:object];
+                        if ([[attrs objectForKey:NSLinkAttributeName] isKindOfClass:[NSURL class]])
+                            aLink = [NSURL URLWithStringByNormalizingPercentEscapes:aLink];
+                        [tmpAttrs setObject:aLink forKey:NSLinkAttributeName];
+                        tmpAttrStr = [keyValue templateAttributedStringValueWithAttributes:tmpAttrs];
+                        [tmpAttrs release];
+                    } else {
+                        tmpAttrStr = [keyValue templateAttributedStringValueWithAttributes:attrs];
+                    }
+                    if (tmpAttrStr != nil)
+                        [result appendAttributedString:tmpAttrStr];
+                }
                 
             } else if (type == BDSKCollectionTemplateTagType) {
                 
                 if ([keyValue conformsToProtocol:@protocol(NSFastEnumeration)]) {
+                    NSAttributedString *tmpAttrStr = nil;
                     NSArray *itemTemplate = nil;
                     NSInteger idx = 0;
                     id prevItem = nil;
@@ -761,7 +801,8 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                     subtemplate = [tag subtemplateAtIndex:count];
                 }
                 if (subtemplate != nil) {
-                    if (tmpAttrStr = [self attributedStringFromTemplateArray:subtemplate usingObject:object atIndex:anIndex delegate:delegate])
+                    NSAttributedString *tmpAttrStr = [self attributedStringFromTemplateArray:subtemplate usingObject:object atIndex:anIndex delegate:delegate];
+                    if (tmpAttrStr != nil)
                         [result appendAttributedString:tmpAttrStr];
                 }
                 

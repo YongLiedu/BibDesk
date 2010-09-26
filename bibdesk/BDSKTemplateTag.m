@@ -40,6 +40,39 @@
 #import "BDSKTemplateParser.h"
 
 
+static inline NSArray *templateForLink(id aLink) {
+    NSArray *template = nil;
+    if ([aLink isKindOfClass:[NSURL class]])
+        aLink = [[aLink absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    if ([aLink isKindOfClass:[NSString class]]) {
+        template = [BDSKTemplateParser arrayByParsingTemplateString:aLink];
+        if ([template count] == 0 || ([template count] == 1 && [(BDSKTemplateTag *)[template lastObject] type] == BDSKTextTemplateTagType))
+            template = nil;
+    }
+    return template;
+}
+
+static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedString *attrString) {
+    NSRange range = NSMakeRange(0, 0);
+    NSUInteger len = [attrString length];
+    NSMutableArray *templates = [[NSMutableArray alloc] init];
+    NSArray *template;
+    BDSKAttributeTemplateTag *tag;
+    
+    while (NSMaxRange(range) < len) {
+        template = templateForLink([attrString attribute:NSLinkAttributeName atIndex:NSMaxRange(range) longestEffectiveRange:&range inRange:NSMakeRange(NSMaxRange(range), len - NSMaxRange(range))]);
+        if (template) {
+            tag = [[BDSKAttributeTemplateTag alloc] initWithTemplate:template range:range];
+            [templates addObject:tag];
+            [tag release];
+        }
+    }
+    if ([templates count] == 0)
+        BDSKDESTROY(templates);
+    return templates;
+}
+
+
 @implementation BDSKTemplateTag
 - (BDSKTemplateTagType)type { return -1; }
 @end
@@ -80,11 +113,18 @@
 
 - (void)dealloc {
     BDSKDESTROY(attributes);
+    BDSKDESTROY(linkTemplate);
     [super dealloc];
 }
 
 - (NSDictionary *)attributes {
     return attributes;
+}
+
+- (NSArray *)linkTemplate {
+    if (linkTemplate == nil)
+        linkTemplate = [templateForLink([attributes objectForKey:NSLinkAttributeName]) retain] ?: [[NSArray alloc] init];
+    return [linkTemplate count] ? linkTemplate : nil;
 }
 
 @end
@@ -272,6 +312,7 @@
 
 - (void)dealloc {
     BDSKDESTROY(attributedText);
+    BDSKDESTROY(linkTemplates);
     [super dealloc];
 }
 
@@ -294,6 +335,40 @@
     [newAttrText fixAttributesInRange:NSMakeRange(0, [newAttrText length])];
     [self setAttributedText:newAttrText];
     [newAttrText release];
+}
+
+- (NSArray *)linkTemplates; {
+    if (linkTemplates == nil)
+        linkTemplates = copyTemplatesForLinksFromAttributedString(attributedText) ?: [[NSArray alloc] init];
+    return [linkTemplates count] ? linkTemplates : nil;
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKAttributeTemplateTag
+
+
+- (id)initWithTemplate:(NSArray *)aTemplate range:(NSRange)aRange {
+    if (self = [super init]) {
+        template = [aTemplate copy];
+        range = aRange;
+    }
+    return self;
+}
+
+- (void)dealloc {
+    BDSKDESTROY(template);
+    [super dealloc];
+}
+
+- (NSRange)range {
+    return range;
+}
+
+- (NSArray *)template {
+    return template;
 }
 
 @end

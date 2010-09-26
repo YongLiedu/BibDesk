@@ -77,11 +77,14 @@ typedef NSInteger BDSKTemplateTagMatchType;
 
 @interface BDSKRichValueTemplateTag : BDSKValueTemplateTag {
     NSDictionary *attributes;
+    NSArray *linkTemplate;
 }
 
 - (id)initWithKeyPath:(NSString *)aKeyPath attributes:(NSDictionary *)anAttributes;
 
 - (NSDictionary *)attributes;
+
+- (NSArray *)linkTemplate;
 
 @end
 
@@ -158,6 +161,7 @@ typedef NSInteger BDSKTemplateTagMatchType;
 
 @interface BDSKRichTextTemplateTag : BDSKTemplateTag {
     NSAttributedString *attributedText;
+    NSArray *linkTemplates;
 }
 
 - (id)initWithAttributedText:(NSAttributedString *)anAttributedText;
@@ -165,6 +169,23 @@ typedef NSInteger BDSKTemplateTagMatchType;
 - (NSAttributedString *)attributedText;
 - (void)setAttributedText:(NSAttributedString *)newAttributedText;
 
+- (NSArray *)linkTemplates;
+
 - (void)appendAttributedText:(NSAttributedString *)newAttributedText;
+
+@end
+
+#pragma mark -
+
+@interface BDSKAttributeTemplateTag : BDSKTemplateTag {
+    NSRange range;
+    NSArray *template;
+}
+
+- (id)initWithTemplate:(NSArray *)aTemplate range:(NSRange)aRange;
+
+- (NSRange)range;
+
+- (NSArray *)template;
 
 @end
