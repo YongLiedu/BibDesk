@@ -55,10 +55,12 @@ enum {
 };
 typedef NSInteger BDSKTemplateTagMatchType;
 
+@class BDSKAttributeTemplate;
 
-@interface BDSKTemplateTag : NSObject {
-}
+@interface BDSKTemplateTag : NSObject
+
 - (BDSKTemplateTagType)type;
+
 @end
 
 #pragma mark -
@@ -77,14 +79,14 @@ typedef NSInteger BDSKTemplateTagMatchType;
 
 @interface BDSKRichValueTemplateTag : BDSKValueTemplateTag {
     NSDictionary *attributes;
-    NSArray *linkTemplate;
+    BDSKAttributeTemplate *linkTemplate;
 }
 
 - (id)initWithKeyPath:(NSString *)aKeyPath attributes:(NSDictionary *)anAttributes;
 
 - (NSDictionary *)attributes;
 
-- (NSArray *)linkTemplate;
+- (BDSKAttributeTemplate *)linkTemplate;
 
 @end
 
@@ -178,14 +180,17 @@ typedef NSInteger BDSKTemplateTagMatchType;
 #pragma mark -
 
 @interface BDSKAttributeTemplate : NSObject {
-    NSRange range;
     NSArray *template;
+    NSRange range;
+    Class attributeClass;
 }
 
-- (id)initWithTemplate:(NSArray *)aTemplate range:(NSRange)aRange;
+- (id)initWithTemplate:(NSArray *)aTemplate range:(NSRange)aRange attributeClass:(Class)aClass;
+
+- (NSArray *)template;
 
 - (NSRange)range;
 
-- (NSArray *)template;
+- (Class)attributeClass;
 
 @end

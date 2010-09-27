@@ -707,7 +707,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 for (BDSKAttributeTemplate *linkTemplate in linkTemplates) {
                     NSRange range = [linkTemplate range];
                     id aLink = [self stringFromTemplateArray:[linkTemplate template] usingObject:object atIndex:anIndex];
-                    if ([[tmpAttrStr attribute:NSLinkAttributeName atIndex:range.location effectiveRange:NULL] isKindOfClass:[NSURL class]])
+                    if ([[linkTemplate attributeClass] isSubclassOfClass:[NSURL class]])
                         aLink = [NSURL URLWithStringByNormalizingPercentEscapes:aLink];
                     [tmpMutAttrStr addAttribute:NSLinkAttributeName value:aLink range:range];
                 }
@@ -727,11 +727,11 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 if (keyValue) {
                     NSAttributedString *tmpAttrStr;
                     NSDictionary *attrs = [(BDSKRichValueTemplateTag *)tag attributes];
-                    NSArray *linkTemplate = [(BDSKRichValueTemplateTag *)tag linkTemplate];
+                    BDSKAttributeTemplate *linkTemplate = [(BDSKRichValueTemplateTag *)tag linkTemplate];
                     if (linkTemplate) {
                         NSMutableDictionary *tmpAttrs = [attrs mutableCopy];
-                        id aLink = [self stringFromTemplateArray:linkTemplate usingObject:object atIndex:anIndex];
-                        if ([[attrs objectForKey:NSLinkAttributeName] isKindOfClass:[NSURL class]])
+                        id aLink = [self stringFromTemplateArray:[linkTemplate template] usingObject:object atIndex:anIndex];
+                        if ([[linkTemplate attributeClass] isSubclassOfClass:[NSURL class]])
                             aLink = [NSURL URLWithStringByNormalizingPercentEscapes:aLink];
                         [tmpAttrs setObject:aLink forKey:NSLinkAttributeName];
                         tmpAttrStr = [keyValue templateAttributedStringValueWithAttributes:tmpAttrs];

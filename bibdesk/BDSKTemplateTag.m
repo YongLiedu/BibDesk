@@ -40,29 +40,27 @@
 #import "BDSKTemplateParser.h"
 
 
-static inline NSArray *templateForLink(id aLink) {
-    NSArray *template = nil;
+static inline BDSKAttributeTemplate *copyTemplateForLink(id aLink, NSRange range) {
+    BDSKAttributeTemplate *linkTemplate = nil;
     if ([aLink isKindOfClass:[NSURL class]])
         aLink = [[aLink absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     if ([aLink isKindOfClass:[NSString class]]) {
-        template = [BDSKTemplateParser arrayByParsingTemplateString:aLink];
-        if ([template count] == 0 || ([template count] == 1 && [(BDSKTemplateTag *)[template lastObject] type] == BDSKTextTemplateTagType))
-            template = nil;
+        NSArray *template = [BDSKTemplateParser arrayByParsingTemplateString:aLink];
+        if ([template count] > 1 || ([template count] == 1 && [(BDSKTemplateTag *)[template lastObject] type] != BDSKTextTemplateTagType))
+            linkTemplate = [[BDSKAttributeTemplate alloc] initWithTemplate:template range:range attributeClass:[aLink class]];
     }
-    return template;
+    return linkTemplate;
 }
 
 static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedString *attrString) {
     NSRange range = NSMakeRange(0, 0);
     NSUInteger len = [attrString length];
     NSMutableArray *templates = [[NSMutableArray alloc] init];
-    NSArray *template;
     BDSKAttributeTemplate *linkTemplate;
     
     while (NSMaxRange(range) < len) {
-        template = templateForLink([attrString attribute:NSLinkAttributeName atIndex:NSMaxRange(range) longestEffectiveRange:&range inRange:NSMakeRange(NSMaxRange(range), len - NSMaxRange(range))]);
-        if (template) {
-            linkTemplate = [[BDSKAttributeTemplate alloc] initWithTemplate:template range:range];
+        id aLink = [attrString attribute:NSLinkAttributeName atIndex:NSMaxRange(range) longestEffectiveRange:&range inRange:NSMakeRange(NSMaxRange(range), len - NSMaxRange(range))];
+        if (linkTemplate = copyTemplateForLink(aLink, range)) {
             [templates addObject:linkTemplate];
             [linkTemplate release];
         }
@@ -121,10 +119,10 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
     return attributes;
 }
 
-- (NSArray *)linkTemplate {
+- (BDSKAttributeTemplate *)linkTemplate {
     if (linkTemplate == nil)
-        linkTemplate = [templateForLink([attributes objectForKey:NSLinkAttributeName]) retain] ?: [[NSArray alloc] init];
-    return [linkTemplate count] ? linkTemplate : nil;
+        linkTemplate = copyTemplateForLink([attributes objectForKey:NSLinkAttributeName], NSMakeRange(0, 0)) ?: [[BDSKAttributeTemplate alloc] init];
+    return [linkTemplate template] ? linkTemplate : nil;
 }
 
 @end
@@ -349,13 +347,17 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
 
 @implementation BDSKAttributeTemplate
 
-
-- (id)initWithTemplate:(NSArray *)aTemplate range:(NSRange)aRange {
+- (id)initWithTemplate:(NSArray *)aTemplate range:(NSRange)aRange attributeClass:(Class)aClass {
     if (self = [super init]) {
         template = [aTemplate copy];
         range = aRange;
+        attributeClass = aClass;
     }
     return self;
+}
+
+- (id)init {
+    return [self initWithTemplate:nil range:NSMakeRange(0, 0) attributeClass:NULL];
 }
 
 - (void)dealloc {
@@ -369,6 +371,10 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
 
 - (NSArray *)template {
     return template;
+}
+
+- (Class)attributeClass {
+    return attributeClass;
 }
 
 @end
