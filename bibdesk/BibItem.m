@@ -2263,14 +2263,10 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 #pragma mark Templating
 
-- (void)prepareForTemplateParsing{
-    [templateFields release];
-    templateFields = [[BDSKFieldCollection alloc] initWithItem:self];
-}
+- (void)prepareForTemplateParsing{}
 
 - (void)cleanupAfterTemplateParsing{
-    [templateFields release];
-    templateFields = nil;
+    BDSKDESTROY(templateFields);
 }
 
 - (id)requiredFields{
@@ -2297,21 +2293,21 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (BDSKFieldCollection *)fields{
     if (templateFields == nil)
-        [self prepareForTemplateParsing];
+        templateFields = [[BDSKFieldCollection alloc] initWithItem:self];
     [templateFields setType:BDSKStringFieldCollection];
     return templateFields;
 }
 
 - (BDSKFieldCollection *)urls{
     if (templateFields == nil)
-        [self prepareForTemplateParsing];
+        templateFields = [[BDSKFieldCollection alloc] initWithItem:self];
     [templateFields setType:BDSKURLFieldCollection];
     return templateFields;
 }
 
 - (BDSKFieldCollection *)persons{
     if (templateFields == nil)
-        [self prepareForTemplateParsing];
+        templateFields = [[BDSKFieldCollection alloc] initWithItem:self];
     [templateFields setType:BDSKPersonFieldCollection];
     return templateFields;
 }
