@@ -57,14 +57,14 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
     NSUInteger len = [attrString length];
     NSMutableArray *templates = [[NSMutableArray alloc] init];
     NSArray *template;
-    BDSKAttributeTemplateTag *tag;
+    BDSKAttributeTemplate *linkTemplate;
     
     while (NSMaxRange(range) < len) {
         template = templateForLink([attrString attribute:NSLinkAttributeName atIndex:NSMaxRange(range) longestEffectiveRange:&range inRange:NSMakeRange(NSMaxRange(range), len - NSMaxRange(range))]);
         if (template) {
-            tag = [[BDSKAttributeTemplateTag alloc] initWithTemplate:template range:range];
-            [templates addObject:tag];
-            [tag release];
+            linkTemplate = [[BDSKAttributeTemplate alloc] initWithTemplate:template range:range];
+            [templates addObject:linkTemplate];
+            [linkTemplate release];
         }
     }
     if ([templates count] == 0)
@@ -347,7 +347,7 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
 
 #pragma mark -
 
-@implementation BDSKAttributeTemplateTag
+@implementation BDSKAttributeTemplate
 
 
 - (id)initWithTemplate:(NSArray *)aTemplate range:(NSRange)aRange {

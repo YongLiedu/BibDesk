@@ -704,9 +704,9 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
             
             if (linkTemplates) {
                 NSMutableAttributedString *tmpMutAttrStr = [tmpAttrStr mutableCopy];
-                for (BDSKAttributeTemplateTag *linkTag in linkTemplates) {
-                    NSRange range = [linkTag range];
-                    id aLink = [self stringFromTemplateArray:[linkTag template] usingObject:object atIndex:anIndex];
+                for (BDSKAttributeTemplate *linkTemplate in linkTemplates) {
+                    NSRange range = [linkTemplate range];
+                    id aLink = [self stringFromTemplateArray:[linkTemplate template] usingObject:object atIndex:anIndex];
                     if ([[tmpAttrStr attribute:NSLinkAttributeName atIndex:range.location effectiveRange:NULL] isKindOfClass:[NSURL class]])
                         aLink = [NSURL URLWithStringByNormalizingPercentEscapes:aLink];
                     [tmpMutAttrStr addAttribute:NSLinkAttributeName value:aLink range:range];

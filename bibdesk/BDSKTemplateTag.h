@@ -177,7 +177,7 @@ typedef NSInteger BDSKTemplateTagMatchType;
 
 #pragma mark -
 
-@interface BDSKAttributeTemplateTag : BDSKTemplateTag {
+@interface BDSKAttributeTemplate : NSObject {
     NSRange range;
     NSArray *template;
 }
