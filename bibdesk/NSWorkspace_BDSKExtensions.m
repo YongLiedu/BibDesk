@@ -44,29 +44,6 @@
 
 @implementation NSWorkspace (BDSKExtensions)
 
-static OSErr
-FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
-{
-    OSErr err;
-    ProcessInfoRec info;
-    
-    psn->highLongOfPSN = 0;
-    psn->lowLongOfPSN  = kNoProcess;
-    do{
-        err= GetNextProcess(psn);
-        if( !err ) {
-            info.processInfoLength = sizeof(info);
-            info.processName = NULL;
-            info.processAppSpec = NULL;
-            err = GetProcessInformation(psn,&info);
-        }
-    } while( !err && info.processSignature != sig );
-    
-    if( !err )
-        *psn = info.processNumber;
-    return err;
-}
-
 - (BOOL)openURL:(NSURL *)fileURL withSearchString:(NSString *)searchString
 {
     
@@ -89,58 +66,33 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
     // FSRefs are now valid across processes, so we can pass them directly
     fileURL = [fileURL fileURLByResolvingAliases]; 
     BDSKASSERT(fileURL != nil);
-    if(fileURL == nil)
+    if (fileURL == nil)
         err = fnfErr;
-    else if(CFURLGetFSRef((CFURLRef)fileURL, &fileRef) == NO)
+    else if (CFURLGetFSRef((CFURLRef)fileURL, &fileRef) == NO)
         err = coreFoundationUnknownErr;
     
     // Find the application that should open this file.  NB: we need to release this URL when we're done with it.
-    OSType invalidCreator = '???\?';
-	OSType appCreator = invalidCreator;
     CFURLRef appURL = NULL;
-    FSRef appRef;
-	if(noErr == err){
+    NSString *bundleID = nil;
+	if (noErr == err) {
         NSString *extension = [[[fileURL path] pathExtension] lowercaseString];
         NSDictionary *defaultViewers = [[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey];
-        NSString *bundleID = [defaultViewers objectForKey:extension];
-		if (bundleID)
-            err = LSFindApplicationForInfo(kLSUnknownCreator, (CFStringRef)bundleID, NULL, NULL, &appURL);
-        if(appURL == NULL)
+        bundleID = [defaultViewers objectForKey:extension];
+		if (bundleID == nil || noErr != LSFindApplicationForInfo(kLSUnknownCreator, (CFStringRef)bundleID, NULL, NULL, &appURL)) {
             err = LSGetApplicationForURL((CFURLRef)fileURL, kLSRolesAll, NULL, &appURL);
+            if (noErr == err)
+                bundleID = [[NSBundle bundleWithPath:[(NSURL *)appURL path]] bundleIdentifier];
+        }
     }
-    
-    if(err == noErr) {
-        // convert application location to FSSpec in case we need it
-        if (NO == CFURLGetFSRef(appURL, &appRef))
-            err = fnfErr;
-        
-        // Get the type info of the creator application from LS, so we know should receive the event
-        LSItemInfoRecord lsRecord;
-        memset(&lsRecord, 0, sizeof(LSItemInfoRecord));
-        
-        if(err == noErr)
-            err = LSCopyItemInfoForURL(appURL, kLSRequestTypeCreator, &lsRecord);
-        
-        if (err == noErr){
-            appCreator = lsRecord.creator;
-            BDSKASSERT(appCreator != 0); 
-            BDSKASSERT(appCreator != invalidCreator); 
-            // if the app has an invalid creator, our AppleEvent stuff won't work
-            if (appCreator == 0 || appCreator == invalidCreator)
-                err = fnfErr;
-        } 
-    }
-    
-    if(appURL) CFRelease(appURL);
     
     NSAppleEventDescriptor *openEvent = nil;
     
-    if (err == noErr) {
+    if (bundleID) {
         NSAppleEventDescriptor *appDesc = nil;
         NSAppleEventDescriptor *fileListDesc = nil;
         NSAppleEventDescriptor *fileDesc = nil;
         
-        appDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeApplSignature bytes:&appCreator length:sizeof(OSType)];
+        appDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeApplicationBundleID data:[bundleID dataUsingEncoding:NSUTF8StringEncoding]];
         openEvent = [NSAppleEventDescriptor appleEventWithEventClass:kCoreEventClass eventID:kAEOpenDocuments targetDescriptor:appDesc returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
         fileDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeFSRef bytes:&fileRef length:sizeof(FSRef)];
         fileListDesc = [NSAppleEventDescriptor listDescriptor];
@@ -152,32 +104,47 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn)
     
     if (openEvent) {
         
+        // Find the running process with te bundle ID
         ProcessSerialNumber psn;
-        err = FindRunningAppBySignature(appCreator, &psn);
+        psn.highLongOfPSN = 0;
+        psn.lowLongOfPSN  = kNoProcess;
+        err = GetNextProcess(&psn);
+        while (noErr == err) {
+            NSDictionary *info = (NSDictionary *)ProcessInformationCopyDictionary(&psn, kProcessDictionaryIncludeAllInformationMask);
+            BOOL foundProcess = [bundleID isEqualToString:[info objectForKey:(NSString *)kCFBundleIdentifierKey]];
+            [info release];
+            if (foundProcess)
+                break;
+            err = GetNextProcess(&psn);
+        }
         
         if (noErr == err) {
-            
             // using this call, we end up with the newly opened doc in front; with 'misc'/'actv', window layering is messed up
             err = SetFrontProcessWithOptions(&psn, 0);
-
             // try to send the odoc event
             if (noErr == err)
                 err = AESendMessage([openEvent aeDesc], NULL, kAENoReply, kAEDefaultTimeout);
-            
         }
         
          // If the app wasn't running, we need to use LaunchApplication...which doesn't seem to work if the app (at least Skim) is already running, hence the initial call to AESendMessage.  Possibly this can be done with LaunchServices, but the documentation for this stuff isn't sufficient to say and I'm not in the mood for any more trial-and-error AppleEvent coding.
-        if (procNotFound == err) {
-            LSApplicationParameters appParams;
-            memset(&appParams, 0, sizeof(LSApplicationParameters));
-            appParams.flags = kLSLaunchDefaults;
-            appParams.application = &appRef;
-            appParams.initialEvent = (AppleEvent *)[openEvent aeDesc];
-            err = LSOpenApplication(&appParams, NULL);
+        if (procNotFound == err && appURL) {
+            FSRef appRef;
+            if (CFURLGetFSRef(appURL, &appRef)) {
+                LSApplicationParameters appParams;
+                memset(&appParams, 0, sizeof(LSApplicationParameters));
+                appParams.flags = kLSLaunchDefaults;
+                appParams.application = &appRef;
+                appParams.initialEvent = (AppleEvent *)[openEvent aeDesc];
+                err = LSOpenApplication(&appParams, NULL);
+            } else {
+                err = fnfErr;
+            }
         }
     }
     
-    // handle the case of '????' creator and probably others
+    BDSKCFDESTROY(appURL);
+    
+    // handle the case where somehow we are still not able to open
     if (noErr != err || openEvent == nil)
         err = (OSStatus)([self openURL:fileURL] == NO);
     
