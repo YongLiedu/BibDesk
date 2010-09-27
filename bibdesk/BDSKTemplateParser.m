@@ -708,9 +708,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                     NSRange range = [linkTag range];
                     NSArray *linkTemplate = [linkTag template];
                     id aLink;
-                    [delegate templateParserWillParseTemplate:linkTemplate usingObject:object];
                     aLink = [self stringFromTemplateArray:linkTemplate usingObject:object atIndex:anIndex];
-                    [delegate templateParserDidParseTemplate:linkTemplate usingObject:object];
                     if ([[tmpAttrStr attribute:NSLinkAttributeName atIndex:range.location effectiveRange:NULL] isKindOfClass:[NSURL class]])
                         aLink = [NSURL URLWithStringByNormalizingPercentEscapes:aLink];
                     [tmpMutAttrStr addAttribute:NSLinkAttributeName value:aLink range:range];
@@ -735,9 +733,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                     if (linkTemplate) {
                         NSMutableDictionary *tmpAttrs = [attrs mutableCopy];
                         id aLink;
-                        [delegate templateParserWillParseTemplate:linkTemplate usingObject:object];
                         aLink = [self stringFromTemplateArray:linkTemplate usingObject:object atIndex:anIndex];
-                        [delegate templateParserDidParseTemplate:linkTemplate usingObject:object];
                         if ([[attrs objectForKey:NSLinkAttributeName] isKindOfClass:[NSURL class]])
                             aLink = [NSURL URLWithStringByNormalizingPercentEscapes:aLink];
                         [tmpAttrs setObject:aLink forKey:NSLinkAttributeName];
