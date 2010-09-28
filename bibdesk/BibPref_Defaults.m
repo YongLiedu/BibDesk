@@ -195,7 +195,7 @@ static NSSet *alwaysDisabledFields = nil;
     [globalMacroFilesTableView registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
     
     NSWorkspace *sws = [NSWorkspace sharedWorkspace];
-    NSArray *pdfViewers = [[NSWorkspace sharedWorkspace] editorAndViewerNamesAndBundleIDsForPathExtension:@"pdf"];
+    NSArray *pdfViewers = [sws editorAndViewerNamesAndBundleIDsForPathExtension:@"pdf"];
     NSString *pdfViewerID = [[sud dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
     NSInteger i, iMax = [pdfViewers count];
     NSInteger idx = 0;
@@ -213,7 +213,7 @@ static NSSet *alwaysDisabledFields = nil;
             idx = i + 2;
     }
     if(idx == 0 && [pdfViewerID length]){
-        NSString *name = [[[[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:pdfViewerID] lastPathComponent] stringByDeletingPathExtension];
+        NSString *name = [[[sws absolutePathForAppBundleWithIdentifier:pdfViewerID] lastPathComponent] stringByDeletingPathExtension];
         [pdfViewerPopup insertItemWithTitle:name atIndex:2];
         [[pdfViewerPopup itemAtIndex:2] setRepresentedObject:pdfViewerID];
         idx = 2;
