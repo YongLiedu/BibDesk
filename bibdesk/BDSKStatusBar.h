@@ -72,9 +72,6 @@ typedef NSInteger BDSKProgressIndicatorStyle;
 - (NSString *)stringValue;
 - (void)setStringValue:(NSString *)aString;
 
-- (NSAttributedString *)attributedStringValue;
-- (void)setAttributedStringValue:(NSAttributedString *)object;
-
 - (NSFont *)font;
 - (void)setFont:(NSFont *)fontObject;
 

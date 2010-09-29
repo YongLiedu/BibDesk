@@ -193,15 +193,6 @@
 	[self setNeedsDisplay:YES];
 }
 
-- (NSAttributedString *)attributedStringValue {
-	return [textCell attributedStringValue];
-}
-
-- (void)setAttributedStringValue:(NSAttributedString *)object {
-	[textCell setAttributedStringValue:object];
-	[self setNeedsDisplay:YES];
-}
-
 - (NSFont *)font {
 	return [textCell font];
 }
