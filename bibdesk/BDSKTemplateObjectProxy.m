@@ -141,6 +141,9 @@
         }
         [pub setItemIndex:idx];
     }
+    
+    [publications makeObjectsPerformSelector:@selector(prepareForTemplateParsing)];
+    
     return publications;
 }
 

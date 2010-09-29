@@ -2263,7 +2263,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 #pragma mark Templating
 
-- (void)prepareForTemplateParsing{}
+- (void)prepareForTemplateParsing{
+    BDSKDESTROY(templateFields);
+}
 
 - (void)cleanupAfterTemplateParsing{
     BDSKDESTROY(templateFields);
