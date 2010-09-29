@@ -296,7 +296,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
     BDSKDESTROY(documentInfo);
     BDSKDESTROY(drawerController);
     BDSKDESTROY(toolbarItems);
-	[statusBar release];
+	BDSKDESTROY(statusBar);
     [[tableView enclosingScrollView] release];
     BDSKDESTROY(previewer);
     BDSKDESTROY(bottomPreviewDisplayTemplate);
