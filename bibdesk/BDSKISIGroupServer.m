@@ -540,15 +540,18 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
             else if (NO == [[child stringValue] isEqualToString:@"-"])
                 addStringValueOfNodeForField(child, BDSKPagesString, pubFields);
         }
-        else if ([name isEqualToString:@"article_number"] && nil == [pubFields objectForKey:BDSKPagesString])
-                addStringValueOfNodeForField(child, BDSKPagesString, pubFields);
         else if ([name isEqualToString:@"bib_issue"] && [child kind] == NSXMLElementKind) {
             addStringValueOfNodeForField([(NSXMLElement *)child attributeForName:@"year"], BDSKYearString, pubFields);
             addStringValueOfNodeForField([(NSXMLElement *)child attributeForName:@"vol"], BDSKVolumeString, pubFields);
         }
-        else if ([name isEqualToString:@"article_nos"])
+        else if ([name isEqualToString:@"article_nos"]) {
             // for current journals, these are DOI strings, which doesn't follow from the name or the description
             addStringValueOfNodeForField([[child nodesForXPath:@"./article_no[starts-with(., 'DOI')]" error:NULL] lastObject], BDSKDoiString, pubFields);
+            if ([pubFields objectForKey:BDSKPagesString] == nil) {
+                NSString *artnum = [[[child nodesForXPath:@"./article_no[starts-with(., 'ARTN ')]" error:NULL] lastObject] stringValue];
+                addStringToDictionaryIfNotNil([artnum stringByRemovingPrefix:@"ARTN "], BDSKPagesString, pubFields);
+            }
+        }
         else if ([name isEqualToString:@"source_series"])
             addStringValueOfNodeForField(child, BDSKSeriesString, pubFields);
         else if ([name isEqualToString:@"bib_date"] && [child kind] == NSXMLElementKind) {
