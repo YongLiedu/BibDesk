@@ -202,15 +202,12 @@
 	[self setNeedsDisplay:YES];
 }
 
-- (id)textCell {
-	return textCell;
+- (NSTextAlignment)alignment {
+    return [textCell alignment];
 }
 
-- (void)setTextCell:(NSCell *)aCell {
-	if (aCell != textCell) {
-		[textCell release];
-		textCell = [aCell retain];
-	}
+- (void)setAlignment:(NSTextAlignment)newAlignment {
+    [textCell setAlignment:newAlignment];
 }
 
 - (CGFloat)leftMargin {

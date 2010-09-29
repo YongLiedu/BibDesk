@@ -75,8 +75,8 @@ typedef NSInteger BDSKProgressIndicatorStyle;
 - (NSFont *)font;
 - (void)setFont:(NSFont *)fontObject;
 
-- (id)textCell;
-- (void)setTextCell:(NSCell *)aCell;
+- (NSTextAlignment)alignment;
+- (void)setAlignment:(NSTextAlignment)newAlignment;
 
 - (CGFloat)leftMargin;
 - (void)setLeftMargin:(CGFloat)margin;

@@ -417,7 +417,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
     
     // First remove the statusbar if we should, as it affects proper resizing of the window and splitViews
 	[statusBar retain]; // we need to retain, as we might remove it from the window
-    [[statusBar textCell] setAlignment:NSCenterTextAlignment];
+    [statusBar setAlignment:NSCenterTextAlignment];
 	if ([sud boolForKey:BDSKShowStatusBarKey] == NO)
 		[self toggleStatusBar:nil];
     
