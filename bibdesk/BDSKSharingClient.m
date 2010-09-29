@@ -62,6 +62,7 @@ typedef struct _BDSKSharingClientFlags {
 
 - (void)setArchivedPublicationsAndMacros:(bycopy NSDictionary *)dictionary;
 - (NSInteger)runAuthenticationFailedAlert;
+- (NSData *)runPasswordPrompt;
 
 @end
 
@@ -398,7 +399,7 @@ typedef struct _BDSKSharingClientFlags {
     if(password == nil && [self shouldKeepRunning]){   
         
         // run the prompt on the main thread
-        password = [[self serverOnMainThread] runPasswordPrompt];
+        password = [([NSThread isMainThread] ? self : [self serverOnMainThread]) runPasswordPrompt];
         
         // retry from the keychain
         if (password){
