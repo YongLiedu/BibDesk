@@ -150,6 +150,11 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.0, 0.1, 0.2, 0.25, 0.35, 0.5, 
     [[NSSavePanel savePanel] beginSheetForDirectory:nil file:(name ?: NSLocalizedString(@"Untitled.pdf", @"Default file name for saved PDF")) modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(saveDocumentSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 }
 
+- (void)doActualSize:(id)sender;
+{
+    [self setScaleFactor:1.0];
+}
+
 - (NSMenu *)menuForEvent:(NSEvent *)theEvent;
 {
     NSMenu *menu = [super menuForEvent:theEvent];
@@ -173,8 +178,21 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.0, 0.1, 0.2, 0.25, 0.35, 0.5, 
     item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save PDF As", @"Menu item title") stringByAppendingEllipsis] action:@selector(saveDocumentAs:) keyEquivalent:@""];
     [menu addItem:item];
     [item release];
+    
+    NSInteger i = [menu indexOfItemWithTarget:self andAction:NSSelectorFromString(@"_setActualSize:")];
+    if (i != -1)
+        [[menu itemAtIndex:i] setAction:@selector(doActualSize:)];
 
     return menu;
+}
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+    if ([menuItem action] == @selector(doActualSize:)) {
+        [menuItem setState:fabs([self scaleFactor] - 1.0) < 0.1 ? NSOnState : NSOffState];
+        return YES;
+    } else if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd]) {
+        return [super validateMenuItem:menuItem];
+    }
+    return YES;
 }
 
 // Fix a bug in Tiger's PDFKit, tooltips lead to a crash when you reload a PDFDocument in a PDFView
