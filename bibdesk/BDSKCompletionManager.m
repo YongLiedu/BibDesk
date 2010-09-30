@@ -61,59 +61,49 @@ static id sharedManager = nil;
     return self;
 }
 
-- (void)addNamesForCompletion:(NSArray *)names {
-    NSMutableSet *nameSet = [autoCompletionDict objectForKey:BDSKAuthorString];
-    if (nil == nameSet) {
-        nameSet = [[NSMutableSet alloc] initWithCapacity:500];
-        [autoCompletionDict setObject:nameSet forKey:BDSKAuthorString];
-        [nameSet release];
+- (NSMutableSet *)setForCompletionEntry:(NSString *)entry {
+	NSMutableSet *set = [autoCompletionDict objectForKey:entry];
+    if (set == nil) {
+        set = [[NSMutableSet alloc] initWithCapacity:500];
+        [autoCompletionDict setObject:set forKey:entry];
+        [set release];
     }
+    return set;
+}
+
+- (void)addNamesForCompletion:(NSArray *)names {
+    NSMutableSet *nameSet = [self setForCompletionEntry:BDSKAuthorString];
     for (NSString *name in names)
         [nameSet addObject:([name isComplex] ? [NSString stringWithString:name] : name)];
 }
 
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
     
-	if(BDIsEmptyString((CFStringRef)entry) || [entry isNumericField] || [entry isURLField] || [entry isPersonField] || [entry isCitationField] || [entry hasPrefix:@"Bdsk-"])	
+	if (BDIsEmptyString((CFStringRef)entry) || [entry isNumericField] || [entry isURLField] || [entry isPersonField] || [entry isCitationField] || [entry hasPrefix:@"Bdsk-"])	
 		return;
 
-    if([entry isEqualToString:BDSKBooktitleString])	
+    if ([entry isEqualToString:BDSKBooktitleString])	
 		entry = BDSKTitleString;
 	
-	NSMutableSet *completionSet = [autoCompletionDict objectForKey:entry];
-	
-    if (completionSet == nil) {
-        completionSet = [[NSMutableSet alloc] initWithCapacity:500];
-        [autoCompletionDict setObject:completionSet forKey:entry];
-        [completionSet release];
-    }
+	NSMutableSet *completionSet = [self setForCompletionEntry:entry];
     
     // more efficient for the splitting and checking functions
     // also adding complex strings can lead to a crash after the containing document closes
-    if([string isComplex]) string = [NSString stringWithString:string];
+    if ([string isComplex])
+        string = [NSString stringWithString:string];
 
-    if([entry isSingleValuedField]){ // add the whole string 
+    if ([entry isSingleValuedField]) { // add the whole string 
         [completionSet addObject:[string stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
-        return;
-    }
-    
-    NSCharacterSet *acSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:entry];
-    if([string rangeOfCharacterFromSet:acSet].location != NSNotFound){
-        [completionSet addObjectsFromArray:[string componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES]];
-    } else if([entry isEqualToString:BDSKKeywordsString]){
-        // if it wasn't punctuated, try this; Elsevier uses "and" as a separator, and it's annoying to have the whole string autocomplete on you
-        [completionSet addObjectsFromArray:[[string componentsSeparatedByString:@" and "] arrayByPerformingSelector:@selector(stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace)]];
     } else {
-        [completionSet addObject:[string stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+        NSCharacterSet *acSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:entry];
+        if ([string rangeOfCharacterFromSet:acSet].location != NSNotFound)
+            [completionSet addObjectsFromArray:[string componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES]];
+        else if ([entry isEqualToString:BDSKKeywordsString])
+            // if it wasn't punctuated, try this; Elsevier uses "and" as a separator, and it's annoying to have the whole string autocomplete on you
+            [completionSet addObjectsFromArray:[[string componentsSeparatedByString:@" and "] arrayByPerformingSelector:@selector(stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace)]];
+        else
+            [completionSet addObject:[string stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
     }
-}
-
-- (NSSet *)stringsForCompletionEntry:(NSString *)entry{
-    NSSet* autoCompleteStrings = [autoCompletionDict objectForKey:entry];
-	if (autoCompleteStrings)
-		return autoCompleteStrings;
-	else 
-		return [NSSet set];
 }
 
 - (NSRange)entry:(NSString *)entry rangeForUserCompletion:(NSRange)charRange ofString:(NSString *)fullString {
@@ -165,7 +155,7 @@ static id sharedManager = nil;
     if([matchString isEqualToString:@""])
         return [NSArray array];
     
-    NSSet *strings = [self stringsForCompletionEntry:entry];
+    NSSet *strings = [autoCompletionDict objectForKey:entry];
     NSString *string = nil;
     NSMutableArray *completions = [NSMutableArray arrayWithCapacity:[strings count]];
 

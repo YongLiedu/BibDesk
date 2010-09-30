@@ -45,10 +45,8 @@
 
 + (id)sharedManager;
 
-- (void)addNamesForCompletion:(NSArray *)name;
+- (void)addNamesForCompletion:(NSArray *)names;
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry;
-
-- (NSSet *)stringsForCompletionEntry:(NSString *)entry;
 
 - (NSRange)entry:(NSString *)entry rangeForUserCompletion:(NSRange)charRange ofString:(NSString *)fullString;
 - (NSArray *)entry:(NSString *)entry completions:(NSArray *)words forPartialWordRange:(NSRange)charRange ofString:(NSString *)fullString indexOfSelectedItem:(NSInteger *)index;
