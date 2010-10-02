@@ -170,6 +170,7 @@ static double runLoopTimeout = 30;
 }
 
 - (void)dealloc{
+    [[NSFileManager defaultManager] removeItemAtPath:[texPath workingDirectory] error:NULL];
     BDSKDESTROY(texTemplatePath);
     BDSKDESTROY(texPath);
     BDSKDESTROY(taskShouldStartInvocation);
