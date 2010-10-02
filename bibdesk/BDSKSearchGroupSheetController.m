@@ -72,15 +72,12 @@ static BOOL isSearchFileAtPath(NSString *path)
     
     NSString *path = [[NSBundle mainBundle] pathForResource:SERVERS_FILENAME ofType:@"plist"];
     
-    NSDictionary *serverDicts = [NSDictionary dictionaryWithContentsOfFile:path];
-    for (NSString *type in [NSArray arrayWithObjects:BDSKSearchGroupEntrez, BDSKSearchGroupZoom, BDSKSearchGroupISI, BDSKSearchGroupDBLP, nil]) {
-        NSArray *dicts = [serverDicts objectForKey:type];
-        for (NSDictionary *dict in dicts) {
-            BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithType:type dictionary:dict];
-            if (info) {
-                [searchGroupServers addObject:info];
-                [info release];
-            }
+    NSArray *serverDicts = [NSArray arrayWithContentsOfFile:path];
+    for (NSDictionary *dict in serverDicts) {
+        BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithDictionary:dict];
+        if (info) {
+            [searchGroupServers addObject:info];
+            [info release];
         }
     }
     
@@ -101,7 +98,7 @@ static BOOL isSearchFileAtPath(NSString *path)
             } else if (isSearchFileAtPath([serversPath stringByAppendingPathComponent:file])) {
                 NSString *path = [serversPath stringByAppendingPathComponent:file];
                 NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:path];
-                BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithType:nil dictionary:dict];
+                BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithDictionary:dict];
                 if (info) {
                     NSUInteger idx = [[searchGroupServers valueForKey:@"name"] indexOfObject:[info name]];
                     if (idx != NSNotFound)
@@ -327,7 +324,7 @@ static BOOL isSearchFileAtPath(NSString *path)
                 
         // we don't have a group, so create  a new one
         if(group == nil){
-            group = [[BDSKSearchGroup alloc] initWithType:[self type] serverInfo:serverInfo searchTerm:nil];
+            group = [[BDSKSearchGroup alloc] initWithServerInfo:serverInfo searchTerm:nil];
         }else{
             [group setServerInfo:serverInfo];
             [[group undoManager] setActionName:NSLocalizedString(@"Edit Search Group", @"Undo action name")];

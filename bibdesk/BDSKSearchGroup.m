@@ -60,20 +60,19 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 - (id)initWithName:(NSString *)aName;
 {
     // ignore the name, because if this is called it's a dummy name anyway
-    NSString *aType = BDSKSearchGroupEntrez;
-    return [self initWithType:aType serverInfo:[BDSKServerInfo defaultServerInfoWithType:aType] searchTerm:nil];
+    return [self initWithServerInfo:[BDSKServerInfo defaultServerInfoWithType:BDSKSearchGroupEntrez] searchTerm:nil];
 }
 
 // designated initializer
-- (id)initWithType:(NSString *)aType serverInfo:(BDSKServerInfo *)info searchTerm:(NSString *)string;
+- (id)initWithServerInfo:(BDSKServerInfo *)info searchTerm:(NSString *)string;
 {
     NSString *aName = (([info name] ?: [info database]) ?: string) ?: NSLocalizedString(@"Empty", @"Name for empty search group");
     if (self = [super initWithName:aName]) {
-        if (aType == nil || info == nil) {
+        if ([info type] == nil) {
             [self release];
             self = nil;
         } else {
-            type = [aType copy];
+            type = [[info type] copy];
             searchTerm = [string copy];
             history = nil;
             [self resetServerWithInfo:info];
@@ -84,12 +83,11 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 }
 
 - (id)initWithDictionary:(NSDictionary *)groupDict {
-    NSString *aType = [groupDict objectForKey:@"type"];
     NSString *aSearchTerm = [groupDict objectForKey:@"search term"];
     NSArray *aHistory = [groupDict objectForKey:@"history"];
-    BDSKServerInfo *serverInfo = [[BDSKServerInfo alloc] initWithType:aType dictionary:groupDict];
+    BDSKServerInfo *serverInfo = [[BDSKServerInfo alloc] initWithDictionary:groupDict];
     
-    if (self = [self initWithType:aType serverInfo:serverInfo searchTerm:aSearchTerm]) {
+    if (self = [self initWithServerInfo:serverInfo searchTerm:aSearchTerm]) {
         [self setHistory:aHistory];
     }
     [serverInfo release];
@@ -201,7 +199,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
-	return [[[self class] allocWithZone:aZone] initWithType:type serverInfo:[self serverInfo] searchTerm:searchTerm];
+	return [[[self class] allocWithZone:aZone] initWithServerInfo:[self serverInfo] searchTerm:searchTerm];
 }
 
 - (void)dealloc

@@ -72,7 +72,7 @@ extern NSString *BDSKSearchGroupDBLP;
     id<BDSKSearchGroupServer> server;
 }
 
-- (id)initWithType:(NSString *)aType serverInfo:(BDSKServerInfo *)info searchTerm:(NSString *)string;
+- (id)initWithServerInfo:(BDSKServerInfo *)info searchTerm:(NSString *)string;
 - (id)initWithURL:(NSURL *)bdsksearchURL;
 
 - (NSString *)type;

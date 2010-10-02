@@ -193,7 +193,7 @@
                     default: break;
                 }
             }
-            group = [[BDSKSearchGroup alloc] initWithType:aType serverInfo:[BDSKServerInfo defaultServerInfoWithType:aType] searchTerm:nil];
+            group = [[BDSKSearchGroup alloc] initWithServerInfo:[BDSKServerInfo defaultServerInfoWithType:aType] searchTerm:nil];
         } else if ([class isKindOfClass:[BDSKURLGroup class]]) {
             NSURL *theURL = [NSURL URLWithString:@"http://"];
             NSMutableDictionary *mutableProperties = [[properties mutableCopy] autorelease];

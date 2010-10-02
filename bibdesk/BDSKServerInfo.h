@@ -59,7 +59,7 @@ typedef NSInteger BDSKServerType;
 
 - (id)initWithType:(NSString *)aType name:(NSString *)aName database:(NSString *)aDbase host:(NSString *)aHost port:(NSString *)aPort options:(NSDictionary *)options;
 
-- (id)initWithType:(NSString *)aType dictionary:(NSDictionary *)info;
+- (id)initWithDictionary:(NSDictionary *)info;
 
 - (NSDictionary *)dictionaryValue;
 

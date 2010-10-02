@@ -100,9 +100,9 @@
     return self;
 }
 
-- (id)initWithType:(NSString *)aType dictionary:(NSDictionary *)info;
+- (id)initWithDictionary:(NSDictionary *)info;
 {    
-    self = [self initWithType:aType ?: [info objectForKey:TYPE_KEY]
+    self = [self initWithType:[info objectForKey:TYPE_KEY]
                          name:[info objectForKey:NAME_KEY]
                      database:[info objectForKey:DATABASE_KEY]
                          host:[info objectForKey:HOST_KEY]
