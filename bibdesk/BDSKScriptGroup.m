@@ -86,6 +86,15 @@
     return self;
 }
 
+- (void)commonInit {
+    argsArray = nil;
+    isRetrieving = NO;
+    failedDownload = NO;
+    
+    workingDirPath = [[[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:nil] retain];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
+}
+
 // designated initialzer
 - (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
 {
@@ -95,13 +104,8 @@
     if(self = [super initWithName:aName]){
         scriptPath = [path retain];
         scriptArguments = [arguments retain];
-        argsArray = nil;
         scriptType = type;
-        isRetrieving = NO;
-        failedDownload = NO;
-        
-        workingDirPath = [[[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:nil] retain];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
+        [self commonInit];
     }
     return self;
 }
@@ -128,13 +132,7 @@
         scriptPath = [[decoder decodeObjectForKey:@"scriptPath"] retain];
         scriptArguments = [[decoder decodeObjectForKey:@"scriptArguments"] retain];
         scriptType = [decoder decodeIntegerForKey:@"scriptType"];
-        
-        argsArray = nil;
-        isRetrieving = NO;
-        failedDownload = NO;
-        
-        workingDirPath = [[[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:nil] retain];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
+        [self commonInit];
     }
     return self;
 }
