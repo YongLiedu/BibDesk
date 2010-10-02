@@ -375,7 +375,7 @@ static void destroyTemporaryDirectory()
 }
 
 - (NSString *)temporaryFileWithBasename:(NSString *)fileName {
-	return [self uniqueFilePathWithName:fileName atPath:temporaryBaseDirectory ?: [[NSProcessInfo processInfo] globallyUniqueString]];
+	return [self uniqueFilePathWithName:fileName atPath:temporaryBaseDirectory];
 }
 
 // This method is subject to a race condition in our temporary directory if we pass the same baseName to this method and temporaryFileWithBasename: simultaneously; hence the lock in uniqueFilePathWithName:atPath:, even though it and temporaryFileWithBasename: are not thread safe or secure.
