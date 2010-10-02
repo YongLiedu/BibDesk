@@ -160,7 +160,7 @@ enum {
         // we generally assume UTF-8 encoding for all template-related files
         if ([accessoryURLs count] > 0) {
             NSFileManager *fm = [NSFileManager defaultManager];
-            NSString *tmpDir = [fm makeTemporaryDirectoryWithBasename:@"templatepreview"];
+            NSString *tmpDir = [fm makeTemporaryDirectoryWithBasename:[[NSProcessInfo processInfo] globallyUniqueString]];
             NSURL *tmpDirURL = [NSURL fileURLWithPath:tmpDir];
             for (NSURL *accessoryURL in accessoryURLs)
                 [fm copyObjectAtURL:accessoryURL toDirectoryAtURL:tmpDirURL error:NULL];
