@@ -124,6 +124,8 @@
 
 // these are called on the main thread
 
+- (NSString *)type { return BDSKSearchGroupZoom; }
+
 - (void)reset
 {
     if ([self isRetrieving]) {

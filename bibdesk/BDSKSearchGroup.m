@@ -72,7 +72,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
             [self release];
             self = nil;
         } else {
-            type = [[info type] copy];
             searchTerm = [string copy];
             history = nil;
             [self resetServerWithInfo:info];
@@ -179,7 +178,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        type = [[decoder decodeObjectForKey:@"type"] retain];
         searchTerm = [[decoder decodeObjectForKey:@"searchTerm"] retain];
         
         history = nil;
@@ -193,7 +191,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 - (void)encodeWithCoder:(NSCoder *)coder {
     [super encodeWithCoder:coder];
-    [coder encodeObject:type forKey:@"type"];
     [coder encodeObject:searchTerm forKey:@"searchTerm"];
     [coder encodeObject:[self serverInfo] forKey:@"serverInfo"];
 }
@@ -206,7 +203,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 {
     [server terminate];
     BDSKDESTROY(server);
-    BDSKDESTROY(type);
     BDSKDESTROY(searchTerm);
     [super dealloc];
 }
@@ -266,14 +262,15 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 - (void)resetServerWithInfo:(BDSKServerInfo *)info {
     [server terminate];
     [server release];
+    NSString *aType = [info type];
     Class serverClass = Nil;
-    if ([type isEqualToString:BDSKSearchGroupEntrez])
+    if ([aType isEqualToString:BDSKSearchGroupEntrez])
         serverClass = [BDSKEntrezGroupServer class];
-    else if ([type isEqualToString:BDSKSearchGroupZoom])
+    else if ([aType isEqualToString:BDSKSearchGroupZoom])
         serverClass = [BDSKZoomGroupServer class];
-    else if ([type isEqualToString:BDSKSearchGroupISI])
+    else if ([aType isEqualToString:BDSKSearchGroupISI])
         serverClass = [BDSKISIGroupServer class];
-    else if ([type isEqualToString:BDSKSearchGroupDBLP])
+    else if ([aType isEqualToString:BDSKSearchGroupDBLP])
         serverClass = [BDSKDBLPGroupServer class];
     else
         BDSKASSERT_NOT_REACHED("unknown search group type");
@@ -300,19 +297,16 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 #pragma mark Accessors
 
-- (NSString *)type { return type; }
+- (NSString *)type { return [server type]; }
 
 - (BDSKServerInfo *)serverInfo { return [server serverInfo]; }
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
 {
     [(BDSKSearchGroup *)[[self undoManager] prepareWithInvocationTarget:self] setServerInfo:[self serverInfo]];
-    NSString *newType = [info type];
-    if([newType isEqualToString:type] == NO){
-        [type release];
-        type = [newType copy];
+    if ([[info type] isEqualToString:[server type]] == NO)
         [self resetServerWithInfo:info];
-    } else
+    else
         [server setServerInfo:info];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupNameChangedNotification object:self];
     [self reset];
@@ -364,7 +358,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
         }
         [string appendFormat:@"%@:%@", [[serverInfo host] stringByAddingPercentEscapesIncludingReserved], [serverInfo port]];
     } else {
-        [string appendString:type];
+        [string appendString:[serverInfo type]];
     }
     [string appendFormat:@"/%@", [[serverInfo database] stringByAddingPercentEscapesIncludingReserved]];
     [string appendFormat:@";%@", [[serverInfo name] stringByAddingPercentEscapesIncludingReserved]];

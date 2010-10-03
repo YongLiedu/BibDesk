@@ -52,6 +52,7 @@ extern NSString *BDSKSearchGroupDBLP;
 
 @protocol BDSKSearchGroupServer <NSObject>
 - (id)initWithGroup:(id<BDSKSearchGroup>)aGroup serverInfo:(BDSKServerInfo *)info;
+- (NSString *)type;
 - (BDSKServerInfo *)serverInfo;
 - (void)setServerInfo:(BDSKServerInfo *)info;
 - (NSInteger)numberOfAvailableResults;
@@ -66,7 +67,6 @@ extern NSString *BDSKSearchGroupDBLP;
 @end
 
 @interface BDSKSearchGroup : BDSKExternalGroup <BDSKSearchGroup> {
-    NSString *type;
     NSString *searchTerm; // passed in by caller
     NSArray *history;
     id<BDSKSearchGroupServer> server;

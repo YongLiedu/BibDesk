@@ -105,6 +105,8 @@
 
 // these are called on the main thread
 
+- (NSString *)type { return BDSKSearchGroupDBLP; }
+
 - (void)reset
 {
     if ([self isRetrieving]) {

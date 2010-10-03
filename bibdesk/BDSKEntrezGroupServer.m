@@ -115,6 +115,8 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
 
 #pragma mark BDSKSearchGroupServer protocol
 
+- (NSString *)type { return BDSKSearchGroupEntrez; }
+
 - (void)reset
 {
     if ([self isRetrieving])

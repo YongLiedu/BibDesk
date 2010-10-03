@@ -464,7 +464,7 @@
 }
 
 - (void)setScriptingServerInfo:(NSDictionary *)info {
-    NSString *serverType = type;
+    NSString *serverType = [self type];
      
     switch ([[info objectForKey:@"type"] unsignedIntValue]) {
         case BDSKScriptingSearchGroupEntrez:
@@ -489,7 +489,7 @@
     NSString *host = [info valueForKey:@"host"];
     NSString *port = [info valueForKey:@"port"];
     
-    if ([serverType isEqualToString:type]) {
+    if ([serverType isEqualToString:[self type]]) {
         serverInfo = [[self serverInfo] mutableCopy];
         
         NSString *value;
@@ -556,6 +556,7 @@
 }
 
 - (NSInteger)scriptingServerType {
+    NSString *type = [self type];
     if ([type isEqualToString:BDSKSearchGroupEntrez])
         return BDSKScriptingSearchGroupEntrez;
     else if ([type isEqualToString:BDSKSearchGroupZoom])

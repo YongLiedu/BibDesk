@@ -148,6 +148,8 @@ static NSArray *publicationsFromData(NSData *data);
 
 // these are called on the main thread
 
+- (NSString *)type { return BDSKSearchGroupISI; }
+
 - (void)reset
 {
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
