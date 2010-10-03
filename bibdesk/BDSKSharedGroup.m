@@ -225,6 +225,7 @@ static NSImage *unlockedIcon = nil;
     
     [self setPublications:pubs];
     
+    [[self macroResolver] removeAllMacros];
     for (NSString *macro in macros)
         [[self macroResolver] setMacro:macro toValue:[macros objectForKey:macro]];
 }
