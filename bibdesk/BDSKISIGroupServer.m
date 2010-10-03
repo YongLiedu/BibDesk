@@ -192,11 +192,13 @@ static NSArray *publicationsFromData(NSData *data);
 
 - (NSInteger)numberOfAvailableResults;
 {
+    OSMemoryBarrier();
     return availableResults;
 }
 
 - (NSInteger)numberOfFetchedResults;
 {
+    OSMemoryBarrier();
     return fetchedResults;
 }
 

@@ -154,11 +154,13 @@
 
 - (NSInteger)numberOfAvailableResults;
 {
+    OSMemoryBarrier();
     return availableResults;
 }
 
 - (NSInteger)numberOfFetchedResults;
 {
+    OSMemoryBarrier();
     return fetchedResults;
 }
 
