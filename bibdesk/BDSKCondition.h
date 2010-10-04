@@ -92,7 +92,8 @@ enum {
     BDSKRatingField
 };
 
-@class BibItem, BDSKSmartGroup;
+@protocol BDSKSmartGroup;
+@class BibItem;
 
 @interface BDSKCondition : NSObject <NSCopying, NSCoding> {
 	NSString *key;
@@ -106,7 +107,7 @@ enum {
     NSInteger periodValue;
     NSDate *dateValue;
     NSDate *toDateValue;
-    BDSKSmartGroup *group;
+    id<BDSKSmartGroup> group;
 	NSDate *cachedStartDate;
 	NSDate *cachedEndDate;
 	NSTimer *cacheTimer;
@@ -160,8 +161,8 @@ enum {
 - (BOOL)isDateCondition;
 - (BOOL)isAttachmentCondition;
 
-- (BDSKSmartGroup *)group;
-- (void)setGroup:(BDSKSmartGroup *)newGroup;
+- (id<BDSKSmartGroup>)group;
+- (void)setGroup:(id<BDSKSmartGroup>)newGroup;
 
 @end
 

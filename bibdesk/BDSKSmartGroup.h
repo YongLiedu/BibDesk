@@ -41,7 +41,11 @@
 
 @class BDSKFilter;
 
-@interface BDSKSmartGroup : BDSKMutableGroup {
+@protocol BDSKSmartGroup <BDSKMutableGroup>
+- (BDSKFilter *)filter;
+@end
+
+@interface BDSKSmartGroup : BDSKMutableGroup <BDSKSmartGroup> {
 	BDSKFilter *filter;
 }
 

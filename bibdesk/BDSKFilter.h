@@ -44,12 +44,13 @@ enum {
 };
 typedef NSUInteger BDSKConjunction;
 
-@class BDSKCondition, BibItem, BDSKSmartGroup;
+@protocol BDSKSmartGroup;
+@class BDSKCondition, BibItem;
 
 @interface BDSKFilter : NSObject <NSCopying, NSCoding> {
 	NSMutableArray *conditions;
 	BDSKConjunction conjunction;
-    BDSKSmartGroup *group;
+    id<BDSKSmartGroup> group;
 	NSUndoManager *undoManager;
 }
 
@@ -66,8 +67,8 @@ typedef NSUInteger BDSKConjunction;
 - (BDSKConjunction)conjunction;
 - (void)setConjunction:(BDSKConjunction)newConjunction;
 
-- (BDSKSmartGroup *)group;
-- (void)setGroup:(BDSKSmartGroup *)newGroup;
+- (id<BDSKSmartGroup>)group;
+- (void)setGroup:(id<BDSKSmartGroup>)newGroup;
 
 - (NSUndoManager *)undoManager;
 

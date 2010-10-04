@@ -99,7 +99,7 @@
 }
 
 - (void)dealloc {
-	[[group undoManager] removeAllActionsWithTarget:self];
+	[[self undoManager] removeAllActionsWithTarget:self];
     [conditions makeObjectsPerformSelector:@selector(setGroup:) withObject:nil]; // this stops the date cache timer
 	BDSKDESTROY(conditions);
 	[super dealloc];
@@ -186,11 +186,11 @@
     }
 }
 
-- (BDSKSmartGroup *)group {
+- (id<BDSKSmartGroup>)group {
     return group;
 }
 
-- (void)setGroup:(BDSKSmartGroup *)newGroup {
+- (void)setGroup:(id<BDSKSmartGroup>)newGroup {
     group = newGroup;
     [conditions makeObjectsPerformSelector:@selector(setGroup:) withObject:group];
 }

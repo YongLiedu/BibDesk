@@ -611,11 +611,11 @@ static char BDSKConditionObservationContext;
     }
 }
 
-- (BDSKSmartGroup *)group {
+- (id<BDSKSmartGroup>)group {
     return group;
 }
 
-- (void)setGroup:(BDSKSmartGroup *)newGroup {
+- (void)setGroup:(id<BDSKSmartGroup>)newGroup {
     if (group != newGroup) {
         group = newGroup;
         if ([self isDateCondition])
