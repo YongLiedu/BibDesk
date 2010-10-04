@@ -2,7 +2,7 @@
 //  BDSKServiceProvider.m
 //  Bibdesk
 //
-//  Created by Christiaan on 1/31/10.
+//  Created by Christiaan Hofman on 1/31/10.
 /*
  This software is Copyright (c) 2010
  Christiaan Hofman. All rights reserved.

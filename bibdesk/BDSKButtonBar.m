@@ -2,7 +2,7 @@
 //  BDSKButtonBar.m
 //  Bibdesk
 //
-//  Created by Christiaan on 12/2/09.
+//  Created by Christiaan Hofman on 12/2/09.
 /*
  This software is Copyright (c) 2009-2010
  Christiaan Hofman. All rights reserved.

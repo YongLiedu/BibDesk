@@ -2,7 +2,7 @@
 //  BDSKNotesOutlineView.h
 //  Bibdesk
 //
-//  Created by Christiaan on 5/6/10.
+//  Created by Christiaan Hofman on 5/6/10.
 /*
  This software is Copyright (c) 2010
  Christiaan Hofman. All rights reserved.

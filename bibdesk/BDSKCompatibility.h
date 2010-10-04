@@ -2,7 +2,7 @@
 //  BDSKCompatibility.h
 //  Bibdesk
 //
-//  Created by Christiaan on 11/18/09.
+//  Created by Christiaan Hofman on 11/18/09.
 /*
  This software is Copyright (c) 2007-2010
  Christiaan Hofman. All rights reserved.

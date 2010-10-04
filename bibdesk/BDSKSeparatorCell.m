@@ -2,7 +2,7 @@
 //  BDSKSeparatorCell.m
 //  Bibdesk
 //
-//  Created by Christiaan on 10/16/09.
+//  Created by Christiaan Hofman on 10/16/09.
 /*
  This software is Copyright (c) 2009-2010
  Christiaan Hofman. All rights reserved.

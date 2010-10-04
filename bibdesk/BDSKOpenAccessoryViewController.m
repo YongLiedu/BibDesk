@@ -2,7 +2,7 @@
 //  BDSKOpenAccessoryViewController.m
 //  Bibdesk
 //
-//  Created by Christiaan on 6/1/10.
+//  Created by Christiaan Hofman on 6/1/10.
 /*
  This software is Copyright (c) 2010
  Christiaan Hofman. All rights reserved.
