@@ -165,9 +165,9 @@
 }
 
 - (id)newScriptingObjectOfClass:(Class)class forValueForKey:(NSString *)key withContentsValue:(id)contentsValue properties:(NSDictionary *)properties {
-    if ([class isKindOfClass:[BDSKGroup class]]) {
+    if ([class isSubclassOfClass:[BDSKGroup class]]) {
         id group = nil;
-        if ([class isKindOfClass:[BDSKScriptGroup class]]) {
+        if ([class isSubclassOfClass:[BDSKScriptGroup class]]) {
             NSString *path = [[properties objectForKey:@"scriptURL"] path];
             NSString *arguments = [properties objectForKey:@"scriptingScriptArguments"];
             if (path == nil) {
@@ -181,7 +181,7 @@
             [mutableProperties removeObjectForKey:@"scriptingScriptArguments"];
             properties = mutableProperties;
             group = [[BDSKScriptGroup alloc] initWithName:nil scriptPath:path scriptArguments:arguments scriptType:[[NSWorkspace sharedWorkspace] isAppleScriptFileAtPath:path] ? BDSKAppleScriptType : BDSKShellScriptType];
-        } else if ([class isKindOfClass:[BDSKSearchGroup class]]) {
+        } else if ([class isSubclassOfClass:[BDSKSearchGroup class]]) {
             NSString *aType = BDSKSearchGroupEntrez;
             NSDictionary *info = [properties objectForKey:@"scriptingServerInfo"];
             if ([properties objectForKey:@"type"]) {
@@ -194,7 +194,7 @@
                 }
             }
             group = [[BDSKSearchGroup alloc] initWithServerInfo:[BDSKServerInfo defaultServerInfoWithType:aType] searchTerm:nil];
-        } else if ([class isKindOfClass:[BDSKURLGroup class]]) {
+        } else if ([class isSubclassOfClass:[BDSKURLGroup class]]) {
             NSURL *theURL = [NSURL URLWithString:@"http://"];
             NSMutableDictionary *mutableProperties = [[properties mutableCopy] autorelease];
             if ([properties objectForKey:@"fileURL"]) {
@@ -211,7 +211,7 @@
             }
             properties = mutableProperties;
             group = [[BDSKURLGroup alloc] initWithURL:theURL];
-        } else if ([class isKindOfClass:[BDSKStaticGroup class]] || [class isKindOfClass:[BDSKSmartGroup class]]) {
+        } else if ([class isSubclassOfClass:[BDSKStaticGroup class]] || [class isSubclassOfClass:[BDSKSmartGroup class]]) {
             group = [[class alloc] init];
         } else {
             NSScriptCommand *cmd = [NSScriptCommand currentCommand];
@@ -231,7 +231,7 @@
             }
         }
         return group;
-    } else if ([class isKindOfClass:[BibItem class]]) {
+    } else if ([class isSubclassOfClass:[BibItem class]]) {
         BibItem *item = nil;
         NSString *bibtexString = [properties objectForKey:@"bibTeXString"];
         if (bibtexString) {

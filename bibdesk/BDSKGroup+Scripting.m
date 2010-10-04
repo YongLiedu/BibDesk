@@ -71,7 +71,7 @@
 }
 
 - (id)newScriptingObjectOfClass:(Class)class forValueForKey:(NSString *)key withContentsValue:(id)contentsValue properties:(NSDictionary *)properties {
-    if ([class isKindOfClass:[BibItem class]])
+    if ([class isSubclassOfClass:[BibItem class]])
         // external groups do not accept new scriptable items, so the owner for the new item should always be the document
         return [[self document] newScriptingObjectOfClass:class forValueForKey:key withContentsValue:contentsValue properties:properties];
     return [super newScriptingObjectOfClass:class forValueForKey:key withContentsValue:contentsValue properties:properties];
@@ -252,7 +252,7 @@
 }
 
 - (id)newScriptingObjectOfClass:(Class)class forValueForKey:(NSString *)key withContentsValue:(id)contentsValue properties:(NSDictionary *)properties {
-    if ([class isKindOfClass:[BDSKCondition class]])
+    if ([class isSubclassOfClass:[BDSKCondition class]])
         return [[BDSKCondition alloc] initWithScriptingProperties:properties];
     return [super newScriptingObjectOfClass:class forValueForKey:key withContentsValue:contentsValue properties:properties];
 }
