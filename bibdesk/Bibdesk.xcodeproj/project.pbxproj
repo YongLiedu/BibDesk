@@ -347,6 +347,8 @@
 		CEFDBDBE0AEA86BA009EE99D /* BDSKSmartGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDBC0AEA86BA009EE99D /* BDSKSmartGroup.m */; };
 		CEFDBDC60AEA86F0009EE99D /* BDSKStaticGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDC40AEA86F0009EE99D /* BDSKStaticGroup.m */; };
 		CEFDBDDE0AEA87F8009EE99D /* BDSKCategoryGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDDC0AEA87F8009EE99D /* BDSKCategoryGroup.m */; };
+		CEFE21311259E6CB00DAD553 /* BDSKSearchGroupServerManager.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFE212F1259E6CB00DAD553 /* BDSKSearchGroupServerManager.h */; };
+		CEFE21321259E6CB00DAD553 /* BDSKSearchGroupServerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFE21301259E6CB00DAD553 /* BDSKSearchGroupServerManager.m */; };
 		CEFE71771129A91E0018CD74 /* ServicesMenu.strings in Resources */ = {isa = PBXBuildFile; fileRef = CEFE71761129A91E0018CD74 /* ServicesMenu.strings */; };
 		CEFEF0ED11C23F1F0050350D /* BDSKCompletionServer.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFEF0EB11C23F1F0050350D /* BDSKCompletionServer.m */; };
 		CEFF3180110B27ED0098DD17 /* BDSKFilerErrorController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFF317E110B27ED0098DD17 /* BDSKFilerErrorController.m */; };
@@ -1320,6 +1322,8 @@
 		CEFDBDC40AEA86F0009EE99D /* BDSKStaticGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStaticGroup.m; sourceTree = "<group>"; };
 		CEFDBDDB0AEA87F8009EE99D /* BDSKCategoryGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCategoryGroup.h; sourceTree = "<group>"; };
 		CEFDBDDC0AEA87F8009EE99D /* BDSKCategoryGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCategoryGroup.m; sourceTree = "<group>"; };
+		CEFE212F1259E6CB00DAD553 /* BDSKSearchGroupServerManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchGroupServerManager.h; sourceTree = "<group>"; };
+		CEFE21301259E6CB00DAD553 /* BDSKSearchGroupServerManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchGroupServerManager.m; sourceTree = "<group>"; };
 		CEFE71691129A8120018CD74 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/ServicesMenu.strings; sourceTree = "<group>"; };
 		CEFE71781129A9260018CD74 /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/ServicesMenu.strings; sourceTree = "<group>"; };
 		CEFEF0EA11C23F1F0050350D /* BDSKCompletionServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCompletionServer.h; sourceTree = "<group>"; };
@@ -2178,6 +2182,7 @@
 				F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */,
 				CEC1CEA60F51D2CE00D18921 /* BDSKReadWriteLock.m */,
 				CED65AB50906BCC6003EED90 /* BDSKScriptHookManager.m */,
+				CEFE21301259E6CB00DAD553 /* BDSKSearchGroupServerManager.m */,
 				CE6FB32109DFFCB5005E3E14 /* BDSKSharingBrowser.m */,
 				CE82B2D00D57AE0B00A2E8C5 /* BDSKSharingClient.m */,
 				F92ED7CB09E0A93400A244D0 /* BDSKSharingServer.m */,
@@ -2619,6 +2624,7 @@
 				CE8BE5BC0D99AF5000E314A4 /* BDSKSearchBookmark.h */,
 				CE4385E60BB81D0500A56987 /* BDSKSearchBookmarkController.h */,
 				F920DAFC075C2B69000C5FCA /* BDSKSearchForCommand.h */,
+				CEFE212F1259E6CB00DAD553 /* BDSKSearchGroupServerManager.h */,
 				CEBC676C0B4A845F00CE0B2D /* BDSKSearchGroupViewController.h */,
 				CE9666430B46B70C003BAB9A /* BDSKServerInfo.h */,
 				CE4A0E111115ABEF000A95C5 /* BDSKServiceProvider.h */,
@@ -2839,6 +2845,7 @@
 				CEF5366A1192EFE400027C3C /* BDSKNotesOutlineView.h in Headers */,
 				CD50E5FA11A2190E00848756 /* BDSKJSTORWebParser.h in Headers */,
 				CE2F056811B517E9001B0AE0 /* BDSKOpenAccessoryViewController.h in Headers */,
+				CEFE21311259E6CB00DAD553 /* BDSKSearchGroupServerManager.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3669,6 +3676,7 @@
 				CD50E5FB11A2190E00848756 /* BDSKJSTORWebParser.m in Sources */,
 				CE2F056911B517E9001B0AE0 /* BDSKOpenAccessoryViewController.m in Sources */,
 				CEFEF0ED11C23F1F0050350D /* BDSKCompletionServer.m in Sources */,
+				CEFE21321259E6CB00DAD553 /* BDSKSearchGroupServerManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

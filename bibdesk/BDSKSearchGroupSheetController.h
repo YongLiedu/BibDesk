@@ -70,15 +70,6 @@
     IBOutlet NSObjectController *objectController;
 }
 
-+ (void)resetServers;
-+ (void)loadCustomServers;
-+ (void)saveServerFile:(BDSKServerInfo *)serverInfo;
-+ (void)deleteServerFile:(BDSKServerInfo *)serverInfo;
-+ (NSArray *)servers;
-+ (void)addServer:(BDSKServerInfo *)info;
-+ (void)setServer:(BDSKServerInfo *)info atIndex:(NSUInteger)index;
-+ (void)removeServerAtIndex:(NSUInteger)index;
-
 - (id)initWithGroup:(BDSKSearchGroup *)aGroup;
 
 - (IBAction)selectPredefinedServer:(id)sender;
