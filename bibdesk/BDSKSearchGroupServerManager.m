@@ -54,41 +54,8 @@ static BDSKSearchGroupServerManager *sharedManager = nil;
     return sharedManager;
 }
 
-- (id)init {
-    BDSKPRECONDITION(sharedManager == nil);
-    if (self = [super init]) {
-        NSSortDescriptor *typeSort = [[[NSSortDescriptor alloc] initWithKey:@"serverType" ascending:YES selector:@selector(compare:)] autorelease];
-        NSSortDescriptor *nameSort = [[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
-        
-        searchGroupServers = [[NSMutableArray alloc] init];
-        searchGroupServerFiles = [[NSMutableDictionary alloc] init];
-        sortDescriptors = [[NSArray alloc] initWithObjects:typeSort, nameSort, nil];
-        [self resetServers];
-        [self loadCustomServers];
-    }
-    return self;
-}
-
 static BOOL isSearchFileAtPath(NSString *path) {
     return [[[NSWorkspace sharedWorkspace] typeOfFile:[[path stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL] isEqualToUTI:@"net.sourceforge.bibdesk.bdsksearch"];
-}
-    
-- (void)resetServers {
-    [searchGroupServers removeAllObjects];
-    [searchGroupServerFiles removeAllObjects];
-    
-    NSString *path = [[NSBundle mainBundle] pathForResource:SERVERS_FILENAME ofType:@"plist"];
-    
-    NSArray *serverDicts = [NSArray arrayWithContentsOfFile:path];
-    for (NSDictionary *dict in serverDicts) {
-        BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithDictionary:dict];
-        if (info) {
-            [searchGroupServers addObject:info];
-            [info release];
-        }
-    }
-    
-    [searchGroupServers sortUsingDescriptors:sortDescriptors];
 }
 
 - (void)loadCustomServers {
@@ -117,6 +84,39 @@ static BOOL isSearchFileAtPath(NSString *path) {
             }
         }
     }
+    [searchGroupServers sortUsingDescriptors:sortDescriptors];
+}
+
+- (id)init {
+    BDSKPRECONDITION(sharedManager == nil);
+    if (self = [super init]) {
+        NSSortDescriptor *typeSort = [[[NSSortDescriptor alloc] initWithKey:@"serverType" ascending:YES selector:@selector(compare:)] autorelease];
+        NSSortDescriptor *nameSort = [[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
+        
+        searchGroupServers = [[NSMutableArray alloc] init];
+        searchGroupServerFiles = [[NSMutableDictionary alloc] init];
+        sortDescriptors = [[NSArray alloc] initWithObjects:typeSort, nameSort, nil];
+        [self resetServers];
+        [self loadCustomServers];
+    }
+    return self;
+}
+    
+- (void)resetServers {
+    [searchGroupServers removeAllObjects];
+    [searchGroupServerFiles removeAllObjects];
+    
+    NSString *path = [[NSBundle mainBundle] pathForResource:SERVERS_FILENAME ofType:@"plist"];
+    
+    NSArray *serverDicts = [NSArray arrayWithContentsOfFile:path];
+    for (NSDictionary *dict in serverDicts) {
+        BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithDictionary:dict];
+        if (info) {
+            [searchGroupServers addObject:info];
+            [info release];
+        }
+    }
+    
     [searchGroupServers sortUsingDescriptors:sortDescriptors];
 }
 

@@ -49,7 +49,6 @@
 + (id)sharedManager;
 
 - (void)resetServers;
-- (void)loadCustomServers;
 
 - (void)saveServerFile:(BDSKServerInfo *)serverInfo;
 - (void)deleteServerFile:(BDSKServerInfo *)serverInfo;
