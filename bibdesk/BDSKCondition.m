@@ -677,17 +677,26 @@ static char BDSKConditionObservationContext;
     [self setCachedEndDate:endDate];
 }
 
+static BOOL differentDates(NSDate *date1, NSDate *date2) {
+    if (date1 == nil)
+        return date2 != nil;
+    else if (date2 == nil)
+        return date1 != nil;
+    else
+        return [date1 compare:date2] != NSOrderedSame;
+}
+
 - (void)refreshCachedDate:(NSTimer *)timer {
     NSDate *startDate = nil;
     NSDate *endDate = nil;
     BOOL changed = NO;
     
 	[self getStartDate:&startDate endDate:&endDate];
-    if (startDate != nil && [cachedStartDate compare:startDate] != NSOrderedSame) {
+    if (differentDates(cachedStartDate, startDate)) {
         [self setCachedStartDate:startDate];
         changed = YES;
     }
-    if (endDate != nil && [cachedEndDate compare:endDate] != NSOrderedSame) {
+    if (differentDates(cachedEndDate, endDate)) {
         [self setCachedEndDate:endDate];
         changed = YES;
     }
