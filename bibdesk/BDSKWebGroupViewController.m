@@ -498,6 +498,8 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 #pragma mark WebUIDelegate protocol
 
 - (void)setStatus:(NSString *)text {
+    if ([webView window] == nil)
+        return;
     if ([NSString isEmptyString:text])
         [document updateStatus];
     else 
