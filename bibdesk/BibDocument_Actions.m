@@ -1568,8 +1568,15 @@ static BOOL changingColors = NO;
     }
 }
 
+- (void)reorderPublications:(NSArray *)newPubs{
+    NSUndoManager *undoManager = [self undoManager];
+    [[undoManager prepareWithInvocationTarget:self] reorderPublications:[[publications copy] autorelease]];
+    [publications setArray:newPubs];
+    [self sortPubsByKey:nil];
+}
+
 - (void)performSortForCrossrefs{
-    NSArray *copyOfPubs = [[NSArray alloc] initWithArray:publications];
+    NSMutableArray *copyOfPubs = [publications mutableCopy];
 	BibItem *parent;
 	NSString *key;
 	NSMutableSet *prevKeys = [NSMutableSet set];
@@ -1577,32 +1584,28 @@ static BOOL changingColors = NO;
 	NSArray *selectedPubs = [self selectedPublications];
 	
 	// We only move parents that come before a child.
-	for (BibItem *pub in copyOfPubs){
+	for (BibItem *pub in publications){
 		key = [[pub valueOfField:BDSKCrossrefString inherit:NO] lowercaseString];
 		if (![NSString isEmptyString:key] && [prevKeys containsObject:key]) {
             [prevKeys removeObject:key];
 			parent = [publications itemForCiteKey:key];
-			[publications removeObjectIdenticalTo:parent];
-			[publications addObject:parent];
+			[copyOfPubs removeObjectIdenticalTo:parent];
+			[copyOfPubs addObject:parent];
 			moved = YES;
 		}
 		[prevKeys addObject:[[pub citeKey] lowercaseString]];
 	}
-    [copyOfPubs release];
 	
 	if (moved) {
-		[self sortPubsByKey:nil];
-		[self selectPublications:selectedPubs];
+		[self reorderPublications:copyOfPubs];
 		[self setStatus:NSLocalizedString(@"Publications sorted for cross references.", @"Status message")];
 	}
+    [copyOfPubs release];
 }
 
 - (IBAction)sortForCrossrefs:(id)sender{
-	NSUndoManager *undoManager = [self undoManager];
-	[[undoManager prepareWithInvocationTarget:self] setPublications:[[publications copy] autorelease]];
-	[undoManager setActionName:NSLocalizedString(@"Sort Publications", @"Undo action name")];
-	
 	[self performSortForCrossrefs];
+	[[self undoManager] setActionName:NSLocalizedString(@"Sort Publications", @"Undo action name")];
 }
 
 - (void)selectCrossrefParentForItem:(BibItem *)item{

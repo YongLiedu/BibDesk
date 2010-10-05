@@ -345,14 +345,6 @@ extern NSString *BDSKDocumentPublicationsKey;
 - (NSString *)citeStringForPublications:(NSArray *)items citeString:(NSString *)citeString;
 
 /*!
-    @method setPublications
-    @abstract Sets the publications array
-    @discussion Simply replaces the publications array
-    @param newPubs The new array.
-*/
-- (void)setPublications:(NSArray *)newPubs;
-
-/*!
     @method publications
  @abstract Returns the publications array.
     @discussion Returns the publications array.

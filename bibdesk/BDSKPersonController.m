@@ -112,10 +112,6 @@
                                                  selector:@selector(handleBibItemAddDel:)
                                                      name:BDSKDocDelItemNotification
                                                    object:owner];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleBibItemAddDel:)
-                                                     name:BDSKDocSetPublicationsNotification
-                                                   object:owner];
     } else {
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleGroupWillBeRemoved:)

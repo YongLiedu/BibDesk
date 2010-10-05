@@ -850,7 +850,6 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 #pragma mark Notification handlers
 
 - (void)handleBibItemAddDelNotification:(NSNotification *)notification{
-    // NB: this method gets called for setPublications: also, so checking for AddItemNotification might not do what you expect
 	BOOL isDelete = [[notification name] isEqualToString:BDSKDocDelItemNotification];
     if(isDelete == NO && [self hasLibraryGroupSelected])
 		[self setSearchString:@""]; // clear the search when adding
@@ -1137,10 +1136,6 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
            selector:@selector(handleBibItemChangedNotification:)
                name:BDSKBibItemChangedNotification
              object:nil];
-    [nc addObserver:self
-           selector:@selector(handleBibItemAddDelNotification:)
-               name:BDSKDocSetPublicationsNotification
-             object:self];
     [nc addObserver:self
            selector:@selector(handleBibItemAddDelNotification:)
                name:BDSKDocAddItemNotification

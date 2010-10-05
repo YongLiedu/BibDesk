@@ -782,7 +782,8 @@ static NSOperationQueue *metadataCacheQueue = nil;
 #pragma mark -
 #pragma mark Publications acessors
 
-- (void)setPublicationsWithoutUndo:(NSArray *)newPubs{
+// This is not undoable!
+- (void)setPublications:(NSArray *)newPubs{
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [publications setArray:newPubs];
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
@@ -790,20 +791,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [searchIndexes resetWithPublications:newPubs];
     [notesSearchIndex resetWithPublications:newPubs];
 }    
-
-- (void)setPublications:(NSArray *)newPubs{
-    if(newPubs != publications){
-        NSUndoManager *undoManager = [self undoManager];
-        [[undoManager prepareWithInvocationTarget:self] setPublications:[[publications copy] autorelease]];
-        
-        [self setPublicationsWithoutUndo:newPubs];
-        
-        NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newPubs, BDSKDocumentPublicationsKey, nil];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocSetPublicationsNotification
-                                                            object:self
-                                                          userInfo:notifInfo];
-    }
-}
 
 - (BDSKPublicationsArray *) publications{
     return publications;
@@ -1929,7 +1916,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     BOOL isPartialData;
 	NSArray *newPubs = [BDSKBibTeXParser itemsFromData:data frontMatter:frontMatter filePath:filePath owner:self encoding:parserEncoding isPartialData:&isPartialData error:&error];
 	if(isPartialData && outError) *outError = error;	
-    [self setPublicationsWithoutUndo:newPubs];
+    [self setPublications:newPubs];
     
     // update the publications of all static groups from the archived keys
     [[groups staticGroups] makeObjectsPerformSelector:@selector(update)];
@@ -1954,7 +1941,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 	newPubs = [BDSKStringParser itemsFromString:dataString ofType:type error:&error];
         
     if(outError) *outError = error;
-    [self setPublicationsWithoutUndo:newPubs];
+    [self setPublications:newPubs];
     
     // since we can't save other files in their native format (BibTeX is handled separately)
     if (type != BDSKRISStringType)

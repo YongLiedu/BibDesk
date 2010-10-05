@@ -292,7 +292,6 @@ extern NSString *BDSKGroupTableSelectionChangedNotification;
 extern NSString *BDSKGroupFieldChangedNotification;
 extern NSString *BDSKBibItemChangedNotification;
 extern NSString *BDSKNeedsToBeFiledChangedNotification;
-extern NSString *BDSKDocSetPublicationsNotification;
 extern NSString *BDSKDocAddItemNotification;
 extern NSString *BDSKDocWillRemoveItemNotification;
 extern NSString *BDSKDocDelItemNotification;

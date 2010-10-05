@@ -303,7 +303,6 @@ NSString *BDSKGroupTableSelectionChangedNotification = @"GroupTableSelectionChan
 NSString *BDSKGroupFieldChangedNotification = @"GroupFieldChangedNotification";
 NSString *BDSKBibItemChangedNotification = @"BibItem Changed notification";
 NSString *BDSKNeedsToBeFiledChangedNotification = @"BibItem NeedsToBeFiled Flag Changed notification";
-NSString *BDSKDocSetPublicationsNotification = @"Set the publications of a document";
 NSString *BDSKDocAddItemNotification = @"Added a bibitem to a document";
 NSString *BDSKDocWillRemoveItemNotification = @"Will remove a bibitem from a document";
 NSString *BDSKDocDelItemNotification = @"Removed a bibitem from a document";
