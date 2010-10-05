@@ -40,7 +40,8 @@
 
 @class BibItem, BibDocument, BDSKMacroResolver, BDSKParentGroup;
 
-/* note that NSCoding support is presently limited in some cases */
+// NSCoding is used only to save the group selection of non-external groups
+// NSCoding support is presently limited, in particular it is not supported for external groups
 
 @interface BDSKGroup : NSObject <NSCopying, NSCoding> {
 	id name;
