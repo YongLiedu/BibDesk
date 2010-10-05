@@ -794,7 +794,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
 - (void)setPublications:(NSArray *)newPubs{
     if(newPubs != publications){
         NSUndoManager *undoManager = [self undoManager];
-        [[undoManager prepareWithInvocationTarget:self] setPublications:publications];
+        [[undoManager prepareWithInvocationTarget:self] setPublications:[[publications copy] autorelease]];
         
         [self setPublicationsWithoutUndo:newPubs];
         

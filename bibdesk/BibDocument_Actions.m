@@ -1599,7 +1599,7 @@ static BOOL changingColors = NO;
 
 - (IBAction)sortForCrossrefs:(id)sender{
 	NSUndoManager *undoManager = [self undoManager];
-	[[undoManager prepareWithInvocationTarget:self] setPublications:publications];
+	[[undoManager prepareWithInvocationTarget:self] setPublications:[[publications copy] autorelease]];
 	[undoManager setActionName:NSLocalizedString(@"Sort Publications", @"Undo action name")];
 	
 	[self performSortForCrossrefs];
