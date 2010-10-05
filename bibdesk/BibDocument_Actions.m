@@ -1581,7 +1581,6 @@ static BOOL changingColors = NO;
 	NSString *key;
 	NSMutableSet *prevKeys = [NSMutableSet set];
 	BOOL moved = NO;
-	NSArray *selectedPubs = [self selectedPublications];
 	
 	// We only move parents that come before a child.
 	for (BibItem *pub in publications){
