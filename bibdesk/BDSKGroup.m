@@ -85,7 +85,7 @@ static NSArray *noCountCellValueKeys = nil;
     return [NSDictionary dictionaryWithObjectsAndKeys:aName, @"group name", nil];
 }
 
-// NSCoding protocol, should never be used
+// NSCoding protocol, used to remember group selection, but only for non-external groups
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super init]) {
@@ -101,7 +101,7 @@ static NSArray *noCountCellValueKeys = nil;
     [coder encodeInteger:count forKey:@"count"];
 }
 
-// NSCopying protocol, may be used by the duplicate script command
+// NSCopying protocol, used by the duplicate action
 
 - (id)copyWithZone:(NSZone *)aZone {
 	return [[[self class] allocWithZone:aZone] initWithName:name];
