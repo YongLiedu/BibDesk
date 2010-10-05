@@ -286,7 +286,7 @@ error:(NSError **)outError{
                 
                 if ([entryType isEqualToString:@"bibdesk_info"]) {
                     if(nil != frontMatter)
-                        [document setDocumentInfoWithoutUndo:dictionary];
+                        [document setDocumentInfo:dictionary];
                 } else if (entryType) {
                     
                     NSString *citeKey = copyCheckedString(bt_entry_key(entry), entry->line, filePath, parserEncoding);

@@ -365,7 +365,6 @@ extern NSString *BDSKDocumentPublicationsKey;
 - (void)removePublication:(BibItem *)pub;
 
 - (NSDictionary *)documentInfo;
-- (void)setDocumentInfoWithoutUndo:(NSDictionary *)dict;
 - (void)setDocumentInfo:(NSDictionary *)dict;
 - (NSString *)documentInfoForKey:(NSString *)key;
 - (id)valueForUndefinedKey:(NSString *)key;

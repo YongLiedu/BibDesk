@@ -882,10 +882,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
     return documentInfo;
 }
 
-- (void)setDocumentInfoWithoutUndo:(NSDictionary *)dict{
-    [documentInfo setDictionary:dict];
-}
-
 - (void)setDocumentInfo:(NSDictionary *)dict{
     [[[self undoManager] prepareWithInvocationTarget:self] setDocumentInfo:[[documentInfo copy] autorelease]];
     [documentInfo setDictionary:dict];
@@ -1914,9 +1910,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     NSError *error = nil;
     BOOL isPartialData;
-	NSArray *newPubs = [BDSKBibTeXParser itemsFromData:data frontMatter:frontMatter filePath:filePath owner:self encoding:parserEncoding isPartialData:&isPartialData error:&error];
+	NSArray *newPubs;
+    
+    [[self undoManager] disableUndoRegistration];
+    newPubs = [BDSKBibTeXParser itemsFromData:data frontMatter:frontMatter filePath:filePath owner:self encoding:parserEncoding isPartialData:&isPartialData error:&error];
 	if(isPartialData && outError) *outError = error;	
     [self setPublications:newPubs];
+    [[self undoManager] enableUndoRegistration];
     
     // update the publications of all static groups from the archived keys
     [[groups staticGroups] makeObjectsPerformSelector:@selector(update)];
