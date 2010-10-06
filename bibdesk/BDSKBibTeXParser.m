@@ -65,6 +65,9 @@ static NSLock *parserLock = nil;
 
 @interface BDSKBibTeXParser (Private)
 
+// private function to normalize line endings in data
+static inline NSData *normalizeLineEndingsInData(NSData *data, BOOL *didReplaceNewlines);
+
 // private function to check the string for encoding.
 static inline BOOL checkStringForEncoding(NSString *s, NSInteger line, NSString *filePath, NSStringEncoding parserEncoding);
 // private function to do create a string from a c-string with encoding checking.
@@ -154,50 +157,18 @@ error:(NSError **)outError{
 }
 
 + (NSArray *)itemsFromData:(NSData *)inData frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath owner:(id<BDSKOwner>)anOwner encoding:(NSStringEncoding)parserEncoding isPartialData:(BOOL *)isPartialData error:(NSError **)outError{
-    
-    NSUInteger inputDataLength = [inData length];
-    
     // btparse will crash if we pass it a zero-length data, so we'll return here for empty files
     if (isPartialData)
         *isPartialData = NO;
     
-    if (inputDataLength == 0)
+    if ([inData length] == 0)
         return [NSArray array];
     
     [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
     
     // btparse chokes on classic Macintosh line endings, so we'll replace all returns with a newline; this takes < 0.01 seconds on a 1000+ item file with Unix line endings, so performance is not affected.  Windows line endings will be replaced by a single newline.
-    NSMutableData *fixedData = [[inData mutableCopy] autorelease];
-    NSUInteger currIndex, nextIndex;
-    NSRange replaceRange;
-    const char lf[1] = {'\n'};
-    unsigned char *bytePtr = [fixedData mutableBytes];
-    unsigned char ch;
     BOOL didReplaceNewlines = NO;
-    
-    for (currIndex = 0; currIndex < inputDataLength; currIndex++) {
-        
-        ch = bytePtr[currIndex];
-        
-        if (ch == '\r') {
-            
-            replaceRange.location = currIndex;
-            // check the next char to see if we have a Windows line ending
-            nextIndex = currIndex + 1;
-            if (inputDataLength > nextIndex && bytePtr[nextIndex] == '\n') 
-                replaceRange.length = 2;
-            else
-                replaceRange.length = 1;
-        
-            [fixedData replaceBytesInRange:replaceRange withBytes:lf length:1];
-            inputDataLength -= replaceRange.length - 1;
-            didReplaceNewlines = YES;
-        }
-    }
-    // If we replace any characters, swap data, or else the parser will still choke on it (in the case of Mac line ends).
-    // Error reporting should not be affected, because old and new line endings correspond exactly.
-    if (didReplaceNewlines)
-        inData = fixedData;
+    inData = normalizeLineEndingsInData(inData, &didReplaceNewlines);
 	
     BibItem *newBI = nil;
     BibDocument *document = [anOwner isDocument] ? (BibDocument *)anOwner : nil;
@@ -206,7 +177,7 @@ error:(NSError **)outError{
     AST *entry = NULL;
     NSString *entryType = nil;
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:100];
-    
+    NSUInteger inputDataLength = [inData length];
     const char *buf = NULL;
 
     //dictionary is the bibtex entry
@@ -648,6 +619,42 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
 @end
 
 /// private functions used with libbtparse code
+
+static inline NSData *normalizeLineEndingsInData(NSData *data, BOOL *didReplaceNewlines)
+{
+    NSMutableData *fixedData = [[data mutableCopy] autorelease];
+    NSUInteger dataLength = [data length];
+    NSUInteger currIndex, nextIndex;
+    NSRange replaceRange;
+    const char lf[1] = {'\n'};
+    unsigned char *bytePtr = [fixedData mutableBytes];
+    unsigned char ch;
+    
+    *didReplaceNewlines = NO;
+    
+    for (currIndex = 0; currIndex < dataLength; currIndex++) {
+        
+        ch = bytePtr[currIndex];
+        
+        if (ch == '\r') {
+            
+            replaceRange.location = currIndex;
+            // check the next char to see if we have a Windows line ending
+            nextIndex = currIndex + 1;
+            if (dataLength > nextIndex && bytePtr[nextIndex] == '\n') 
+                replaceRange.length = 2;
+            else
+                replaceRange.length = 1;
+        
+            [fixedData replaceBytesInRange:replaceRange withBytes:lf length:1];
+            dataLength -= replaceRange.length - 1;
+            *didReplaceNewlines = YES;
+        }
+    }
+    // If we replace any characters, swap data, or else the parser will still choke on it (in the case of Mac line ends).
+    // Error reporting should not be affected, because old and new line endings correspond exactly.
+    return *didReplaceNewlines ? fixedData : data;
+}
 
 static inline NSInteger numberOfValuesInField(AST *field)
 {
