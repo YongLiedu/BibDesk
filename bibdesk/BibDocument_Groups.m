@@ -237,10 +237,9 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)showWebGroupView {
-    NSView *webGroupView = [[self webGroupViewController] view];
-    NSView *webView = [[self webGroupViewController] webView];
-    
     if ([self isDisplayingWebGroupView] == NO) {
+        NSView *webGroupView = [[self webGroupViewController] view];
+        NSView *webView = [[self webGroupViewController] webView];
         
         [self insertControlView:webGroupView atTop:NO];
         
