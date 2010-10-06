@@ -1759,10 +1759,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     while(--idx)
         [[[self windowControllers] objectAtIndex:idx] close];
     
-    if ([self isDisplayingFileContentSearch]) {
-        [searchField setStringValue:@""];
-        [self redoSearch];
-    }
+    if ([self isDisplayingFileContentSearch])
+        [self setSearchString:@""];
     [fileSearchController terminateForDocumentURL:[self fileURL]];
     BDSKDESTROY(fileSearchController);
     
