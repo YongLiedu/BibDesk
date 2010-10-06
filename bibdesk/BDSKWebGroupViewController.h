@@ -74,9 +74,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 - (IBAction)goBackForward:(id)sender;
 - (IBAction)stopOrReloadAction:(id)sender;
 
-- (IBAction)addBookmark:(id)sender;
-- (IBAction)bookmarkLink:(id)sender;
-
-- (IBAction)downloadLink:(id)sender;
+- (void)addBookmark:(id)sender;
 
 @end

@@ -233,11 +233,11 @@
 	}
 }
 
-- (IBAction)addBookmark:(id)sender {
+- (void)addBookmark:(id)sender {
     [webView addBookmark:sender];
 }
 
-- (IBAction)bookmarkLink:(id)sender {
+- (void)bookmarkLink:(id)sender {
 	NSDictionary *element = (NSDictionary *)[sender representedObject];
 	NSString *URLString = [(NSURL *)[element objectForKey:WebElementLinkURLKey] absoluteString];
 	NSString *title = [element objectForKey:WebElementLinkLabelKey] ?: [URLString lastPathComponent];
@@ -245,7 +245,7 @@
     [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:title modalForWindow:[webView window]];
 }
 
-- (IBAction)downloadLink:(id)sender {
+- (void)downloadLink:(id)sender {
 	NSDictionary *element = (NSDictionary *)[sender representedObject];
 	NSURL *linkURL = (NSURL *)[element objectForKey:WebElementLinkURLKey];
 	NSURLDownload *download = linkURL ? [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:linkURL] delegate:self] : nil;
@@ -259,7 +259,7 @@
         NSBeep();
 }
 
-- (IBAction)openInDefaultBrowser:(id)sender {
+- (void)openInDefaultBrowser:(id)sender {
     NSDictionary *element = (NSDictionary *)[sender representedObject];
 	NSURL *theURL = [element objectForKey:WebElementLinkURLKey];
     if (theURL)
