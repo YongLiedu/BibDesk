@@ -60,6 +60,8 @@
 		32DBCF5E0370ADEE00C91783 /* BTParse_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BTParse_Prefix.pch; sourceTree = "<group>"; };
 		8DC2EF5A0486A6940098B216 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8DC2EF5B0486A6940098B216 /* BTParse.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BTParse.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE3D8F21125E8AE400AE0232 /* German */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CE3D8F23125E8AF200AE0232 /* German */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/BTParse.strings; sourceTree = "<group>"; };
 		CE5895340AA046CE000733B6 /* BDSKErrorObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKErrorObject.h; sourceTree = "<group>"; };
 		CE5895350AA046CE000733B6 /* BDSKErrorObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKErrorObject.m; sourceTree = "<group>"; };
 		CEC151590CDD3AC30014896A /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/BTParse.strings; sourceTree = "<group>"; };
@@ -351,6 +353,7 @@
 			children = (
 				089C1667FE841158C02AAC07 /* English */,
 				F9C7D3BB0BE9275D00D65C7F /* French */,
+				CE3D8F21125E8AE400AE0232 /* German */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -360,6 +363,7 @@
 			children = (
 				CEC151590CDD3AC30014896A /* English */,
 				CEC1516B0CDD3AFE0014896A /* French */,
+				CE3D8F23125E8AF200AE0232 /* German */,
 			);
 			name = BTParse.strings;
 			sourceTree = "<group>";
