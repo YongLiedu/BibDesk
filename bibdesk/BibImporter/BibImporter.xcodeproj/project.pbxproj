@@ -28,6 +28,8 @@
 		C86B05260671AA6E00DD9006 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		C88FB7D7067446EC006EBB30 /* schema.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = schema.xml; sourceTree = "<group>"; };
 		C88FB7DB0674470F006EBB30 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/schema.strings; sourceTree = "<group>"; };
+		CE3D8F06125E8A2100AE0232 /* German */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CE3D8F08125E8A3400AE0232 /* German */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/schema.strings; sourceTree = "<group>"; };
 		CEB10D600D7446E50053B916 /* BibDesk-Common.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-Common.xcconfig"; sourceTree = "<group>"; };
 		CEB10D610D7446E50053B916 /* BibDesk-Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-Debug.xcconfig"; sourceTree = "<group>"; };
 		CEB10D620D7446E50053B916 /* BibDesk-Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-Release.xcconfig"; sourceTree = "<group>"; };
@@ -212,6 +214,7 @@
 			children = (
 				089C167EFE841241C02AAC07 /* English */,
 				F9C7DDAB0BE9570700D65C7F /* French */,
+				CE3D8F06125E8A2100AE0232 /* German */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -221,6 +224,7 @@
 			children = (
 				C88FB7DB0674470F006EBB30 /* English */,
 				F9C7DDAC0BE9570700D65C7F /* French */,
+				CE3D8F08125E8A3400AE0232 /* German */,
 			);
 			name = schema.strings;
 			sourceTree = "<group>";
