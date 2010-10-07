@@ -402,6 +402,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     } else if (loadingWebFrame == nil) {
         
         [self setRetrieving:YES];
+        [[self group] addPublications:nil];
         loadingWebFrame = frame;
         
     }
