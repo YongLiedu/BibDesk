@@ -42,6 +42,7 @@
 #import "BibDocument.h"
 #import "BDSKOwnerProtocol.h"
 #import "BDSKPublicationsArray.h"
+#import "NSSet_BDSKExtensions.h"
 
 
 @implementation BDSKStaticGroup
@@ -149,8 +150,13 @@
 
 - (void)update {
     if (tmpKeys) {
-        for (NSString *key in tmpKeys) 
-            [publications addObjectsFromArray:[[document publications] allItemsForCiteKey:key]];
+        NSMutableSet *usedKeys = [NSMutableSet setForCaseInsensitiveStrings];
+        for (NSString *key in tmpKeys) {
+            if ([usedKeys containsObject:key] == NO) {
+                [publications addObjectsFromArray:[[document publications] allItemsForCiteKey:key]];
+                [usedKeys addObject:key];
+            }
+        }
         [self setCount:[publications count]];
         [tmpKeys release];
         tmpKeys = nil;
