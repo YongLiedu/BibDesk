@@ -197,9 +197,9 @@
         } else if ([class isSubclassOfClass:[BDSKURLGroup class]]) {
             NSURL *theURL = [NSURL URLWithString:@"http://"];
             NSMutableDictionary *mutableProperties = [[properties mutableCopy] autorelease];
-            if ([properties objectForKey:@"fileURL"]) {
-                theURL = [properties objectForKey:@"fileURL"];
-                [mutableProperties removeObjectForKey:@"fileURL"];
+            if ([properties objectForKey:@"scriptingFileURL"]) {
+                theURL = [properties objectForKey:@"scriptingFileURL"];
+                [mutableProperties removeObjectForKey:@"scriptingFileURL"];
             } else if ([properties objectForKey:@"URLString"]) {
                 theURL = [NSURL URLWithString:[properties objectForKey:@"URLString"]];
                 [mutableProperties removeObjectForKey:@"URLString"];
