@@ -35,6 +35,7 @@
 		8D576316048677EA00EA77CD /* BibDesk.qlgenerator */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BibDesk.qlgenerator; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D576317048677EA00EA77CD /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C86B05260671AA6E00DD9006 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
+		CE3D8EF2125E890300AE0232 /* German */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		CE62BC3E1072B13600AAA035 /* SpotlightFileIconController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SpotlightFileIconController.xib; sourceTree = "<group>"; };
 		F28CFBFC0A3EC0AF000ABFF5 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		F28CFC020A3EC0C6000ABFF5 /* QuickLook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLook.framework; path = /System/Library/Frameworks/QuickLook.framework; sourceTree = "<absolute>"; };
@@ -228,6 +229,7 @@
 			children = (
 				089C167EFE841241C02AAC07 /* English */,
 				F93C35550D35D89A006EB558 /* French */,
+				CE3D8EF2125E890300AE0232 /* German */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
