@@ -159,7 +159,7 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 - (BOOL)isEqual:(id)other {
     BOOL isEqual = YES;
     // we don't compare the name, as that is just a label
-    if ([self isKindOfClass:[BDSKServerInfo self]] == NO ||
+    if ([other isKindOfClass:[BDSKServerInfo self]] == NO ||
         [[self type] isEqualToString:[(BDSKServerInfo *)other type]] == NO ||
         isEqualOrBothNil([self database], [other database]) == NO)
         isEqual = NO;
