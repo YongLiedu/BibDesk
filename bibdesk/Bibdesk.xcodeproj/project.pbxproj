@@ -960,6 +960,71 @@
 		CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKImagePopUpButton.m; sourceTree = "<group>"; };
 		CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKImagePopUpButtonCell.h; sourceTree = "<group>"; };
 		CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKImagePopUpButtonCell.m; sourceTree = "<group>"; };
+		CE3D8D7B125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/AddFieldSheet.xib; sourceTree = "<group>"; };
+		CE3D8D7C125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/AutoFile.xib; sourceTree = "<group>"; };
+		CE3D8D7D125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/AutoFileProgress.xib; sourceTree = "<group>"; };
+		CE3D8D7E125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKCharacterConversion.xib; sourceTree = "<group>"; };
+		CE3D8D7F125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKCondition.xib; sourceTree = "<group>"; };
+		CE3D8D80125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKCustomCiteDrawer.xib; sourceTree = "<group>"; };
+		CE3D8D81125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKEditor.xib; sourceTree = "<group>"; };
+		CE3D8D82125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKErrorEditWindow.xib; sourceTree = "<group>"; };
+		CE3D8D83125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKErrorPanel.xib; sourceTree = "<group>"; };
+		CE3D8D84125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKFileContentSearch.xib; sourceTree = "<group>"; };
+		CE3D8D85125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKFileMigration.xib; sourceTree = "<group>"; };
+		CE3D8D86125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKFilter.xib; sourceTree = "<group>"; };
+		CE3D8D87125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKFindPanel.xib; sourceTree = "<group>"; };
+		CE3D8D88125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKOpenAccessoryView.xib; sourceTree = "<group>"; };
+		CE3D8D89125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKOrphanedFilesFinder.xib; sourceTree = "<group>"; };
+		CE3D8D8A125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKPasswordController.xib; sourceTree = "<group>"; };
+		CE3D8D8B125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKPersonWindow.xib; sourceTree = "<group>"; };
+		CE3D8D8C125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKScriptGroupSheet.xib; sourceTree = "<group>"; };
+		CE3D8D8D125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKSearchGroupSheet.xib; sourceTree = "<group>"; };
+		CE3D8D8E125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKSearchGroupView.xib; sourceTree = "<group>"; };
+		CE3D8D8F125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKTypeInfoEditor.xib; sourceTree = "<group>"; };
+		CE3D8D90125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKURLGroupSheet.xib; sourceTree = "<group>"; };
+		CE3D8D91125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKURLSheet.xib; sourceTree = "<group>"; };
+		CE3D8D92125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BDSKWebGroupView.xib; sourceTree = "<group>"; };
+		CE3D8D93125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BibDocument.xib; sourceTree = "<group>"; };
+		CE3D8D94125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BibPref_AutoFile.xib; sourceTree = "<group>"; };
+		CE3D8D95125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BibPref_Cite.xib; sourceTree = "<group>"; };
+		CE3D8D96125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BibPref_CiteKey.xib; sourceTree = "<group>"; };
+		CE3D8D97125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BibPref_Crossref.xib; sourceTree = "<group>"; };
+		CE3D8D98125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BibPref_Defaults.xib; sourceTree = "<group>"; };
+		CE3D8D99125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BibPref_Display.xib; sourceTree = "<group>"; };
+		CE3D8D9A125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BibPref_Export.xib; sourceTree = "<group>"; };
+		CE3D8D9B125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BibPref_Files.xib; sourceTree = "<group>"; };
+		CE3D8D9C125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BibPref_General.xib; sourceTree = "<group>"; };
+		CE3D8D9D125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BibPref_ScriptHooks.xib; sourceTree = "<group>"; };
+		CE3D8D9E125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BibPref_Sharing.xib; sourceTree = "<group>"; };
+		CE3D8D9F125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BibPref_TeX.xib; sourceTree = "<group>"; };
+		CE3D8DA0125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/BibTeXKeys.strings; sourceTree = "<group>"; };
+		CE3D8DA1125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BookmarkSheet.xib; sourceTree = "<group>"; };
+		CE3D8DA2125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/BookmarksWindow.xib; sourceTree = "<group>"; };
+		CE3D8DA3125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/ChangeFieldSheet.xib; sourceTree = "<group>"; };
+		CE3D8DA4125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/ComplexStringEditor.xib; sourceTree = "<group>"; };
+		CE3D8DA5125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = German; path = German.lproj/Credits.rtf; sourceTree = "<group>"; };
+		CE3D8DA6125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/DocumentInfoWindow.xib; sourceTree = "<group>"; };
+		CE3D8DA7125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/FileMatcher.xib; sourceTree = "<group>"; };
+		CE3D8DA8125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/FileMatcherConfigSheet.xib; sourceTree = "<group>"; };
+		CE3D8DA9125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CE3D8DAA125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CE3D8DAD125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/MacroWindow.xib; sourceTree = "<group>"; };
+		CE3D8DAE125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		CE3D8DAF125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/NotesWindow.xib; sourceTree = "<group>"; };
+		CE3D8DB0125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/Preferences.strings; sourceTree = "<group>"; };
+		CE3D8DB1125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/Preferences.xib; sourceTree = "<group>"; };
+		CE3D8DB2125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/Previewer.xib; sourceTree = "<group>"; };
+		CE3D8DB3125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = German; path = German.lproj/ReadMe.rtf; sourceTree = "<group>"; };
+		CE3D8DB4125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/ReadMe.xib; sourceTree = "<group>"; };
+		CE3D8DB5125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/RemoveFieldSheet.xib; sourceTree = "<group>"; };
+		CE3D8DB6125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/SearchBookmarksWindow.xib; sourceTree = "<group>"; };
+		CE3D8DB7125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/SelectEncodingsPanel.xib; sourceTree = "<group>"; };
+		CE3D8DB8125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/ServicesMenu.strings; sourceTree = "<group>"; };
+		CE3D8DB9125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/TemplateDocument.xib; sourceTree = "<group>"; };
+		CE3D8DBA125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/TemplateOptions.strings; sourceTree = "<group>"; };
+		CE3D8DBB125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/TextImport.xib; sourceTree = "<group>"; };
+		CE3D8DBC125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = German; path = German.lproj/WebGroupStartPage.html; sourceTree = "<group>"; };
+		CE3D8DBD125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/ZoomValues.strings; sourceTree = "<group>"; };
 		CE40EC520EE9AAEF00BCF379 /* BDSKImportCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKImportCommand.h; sourceTree = "<group>"; };
 		CE40EC530EE9AAEF00BCF379 /* BDSKImportCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKImportCommand.m; sourceTree = "<group>"; };
 		CE4241330D0EAE0B00F824E7 /* BDSKEditorTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKEditorTableView.h; sourceTree = "<group>"; };
@@ -3759,6 +3824,7 @@
 			children = (
 				089C165DFE840E0CC02AAC07 /* English */,
 				F9C7D3FE0BE9280F00D65C7F /* French */,
+				CE3D8DA9125E69BB00AE0232 /* German */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -3768,6 +3834,7 @@
 			children = (
 				F9E0B08D083E49D2000109C6 /* English */,
 				F9C7D3FF0BE9280F00D65C7F /* French */,
+				CE3D8DAA125E69BB00AE0232 /* German */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -3777,6 +3844,7 @@
 			children = (
 				CE1782F81158EFA000B2EBDF /* English */,
 				CE1783631158F57600B2EBDF /* French */,
+				CE3D8DA1125E69BB00AE0232 /* German */,
 			);
 			name = BookmarkSheet.xib;
 			sourceTree = "<group>";
@@ -3786,6 +3854,7 @@
 			children = (
 				F9022D180758066000C3F701 /* English */,
 				F9C7D40A0BE9285500D65C7F /* French */,
+				CE3D8DB3125E69BB00AE0232 /* German */,
 			);
 			name = ReadMe.rtf;
 			sourceTree = "<group>";
@@ -3795,6 +3864,7 @@
 			children = (
 				CE2F056E11B51F90001B0AE0 /* English */,
 				CE2F059411B5261A001B0AE0 /* French */,
+				CE3D8D88125E69BB00AE0232 /* German */,
 			);
 			name = BDSKOpenAccessoryView.xib;
 			sourceTree = "<group>";
@@ -3804,6 +3874,7 @@
 			children = (
 				CE8962C50CBEC0C500EA2D98 /* English */,
 				CE8962C90CBEC0D600EA2D98 /* French */,
+				CE3D8DBA125E69BB00AE0232 /* German */,
 			);
 			name = TemplateOptions.strings;
 			sourceTree = "<group>";
@@ -3813,6 +3884,7 @@
 			children = (
 				CE8F5F800DEEB24700061148 /* English */,
 				CE8F5F850DEEB27600061148 /* French */,
+				CE3D8DBD125E69BB00AE0232 /* German */,
 			);
 			name = ZoomValues.strings;
 			sourceTree = "<group>";
@@ -3822,6 +3894,7 @@
 			children = (
 				CEB5D58F1072AE350001C135 /* English */,
 				CEB5D6501072AE950001C135 /* French */,
+				CE3D8D7B125E69BB00AE0232 /* German */,
 			);
 			name = AddFieldSheet.xib;
 			sourceTree = "<group>";
@@ -3831,6 +3904,7 @@
 			children = (
 				CEB5D5911072AE350001C135 /* English */,
 				CEB5D6511072AE950001C135 /* French */,
+				CE3D8D7C125E69BB00AE0232 /* German */,
 			);
 			name = AutoFile.xib;
 			sourceTree = "<group>";
@@ -3840,6 +3914,7 @@
 			children = (
 				CEB5D5931072AE350001C135 /* English */,
 				CEB5D6521072AE950001C135 /* French */,
+				CE3D8D7D125E69BB00AE0232 /* German */,
 			);
 			name = AutoFileProgress.xib;
 			sourceTree = "<group>";
@@ -3849,6 +3924,7 @@
 			children = (
 				CEB5D5971072AE350001C135 /* English */,
 				CEB5D6541072AE950001C135 /* French */,
+				CE3D8D7E125E69BB00AE0232 /* German */,
 			);
 			name = BDSKCharacterConversion.xib;
 			sourceTree = "<group>";
@@ -3858,6 +3934,7 @@
 			children = (
 				CEB5D5991072AE350001C135 /* English */,
 				CEB5D6551072AE950001C135 /* French */,
+				CE3D8D7F125E69BB00AE0232 /* German */,
 			);
 			name = BDSKCondition.xib;
 			sourceTree = "<group>";
@@ -3867,6 +3944,7 @@
 			children = (
 				CEB5D59B1072AE350001C135 /* English */,
 				CEB5D6561072AE950001C135 /* French */,
+				CE3D8D80125E69BB00AE0232 /* German */,
 			);
 			name = BDSKCustomCiteDrawer.xib;
 			sourceTree = "<group>";
@@ -3876,6 +3954,7 @@
 			children = (
 				CEB5D59D1072AE350001C135 /* English */,
 				CEB5D6571072AE950001C135 /* French */,
+				CE3D8D81125E69BB00AE0232 /* German */,
 			);
 			name = BDSKEditor.xib;
 			sourceTree = "<group>";
@@ -3885,6 +3964,7 @@
 			children = (
 				CEB5D59F1072AE350001C135 /* English */,
 				CEB5D6581072AE950001C135 /* French */,
+				CE3D8D82125E69BB00AE0232 /* German */,
 			);
 			name = BDSKErrorEditWindow.xib;
 			sourceTree = "<group>";
@@ -3894,6 +3974,7 @@
 			children = (
 				CEB5D5A11072AE350001C135 /* English */,
 				CEB5D6591072AE950001C135 /* French */,
+				CE3D8D83125E69BB00AE0232 /* German */,
 			);
 			name = BDSKErrorPanel.xib;
 			sourceTree = "<group>";
@@ -3903,6 +3984,7 @@
 			children = (
 				CEB5D5A31072AE350001C135 /* English */,
 				CEB5D65A1072AE950001C135 /* French */,
+				CE3D8D84125E69BB00AE0232 /* German */,
 			);
 			name = BDSKFileContentSearch.xib;
 			sourceTree = "<group>";
@@ -3912,6 +3994,7 @@
 			children = (
 				CEB5D5A51072AE350001C135 /* English */,
 				CEB5D65D1072AE950001C135 /* French */,
+				CE3D8D85125E69BB00AE0232 /* German */,
 			);
 			name = BDSKFileMigration.xib;
 			sourceTree = "<group>";
@@ -3921,6 +4004,7 @@
 			children = (
 				CEB5D5A91072AE350001C135 /* English */,
 				CEB5D65F1072AE950001C135 /* French */,
+				CE3D8D86125E69BB00AE0232 /* German */,
 			);
 			name = BDSKFilter.xib;
 			sourceTree = "<group>";
@@ -3930,6 +4014,7 @@
 			children = (
 				CEB5D5AB1072AE350001C135 /* English */,
 				CEB5D6601072AE950001C135 /* French */,
+				CE3D8D87125E69BB00AE0232 /* German */,
 			);
 			name = BDSKFindPanel.xib;
 			sourceTree = "<group>";
@@ -3939,6 +4024,7 @@
 			children = (
 				CEB5D5AD1072AE350001C135 /* English */,
 				CEB5D6611072AE950001C135 /* French */,
+				CE3D8D89125E69BB00AE0232 /* German */,
 			);
 			name = BDSKOrphanedFilesFinder.xib;
 			sourceTree = "<group>";
@@ -3948,6 +4034,7 @@
 			children = (
 				CEB5D5AF1072AE350001C135 /* English */,
 				CEB5D6641072AE950001C135 /* French */,
+				CE3D8D8A125E69BB00AE0232 /* German */,
 			);
 			name = BDSKPasswordController.xib;
 			sourceTree = "<group>";
@@ -3957,6 +4044,7 @@
 			children = (
 				CEB5D5B11072AE350001C135 /* English */,
 				CEB5D6651072AE950001C135 /* French */,
+				CE3D8D8B125E69BB00AE0232 /* German */,
 			);
 			name = BDSKPersonWindow.xib;
 			sourceTree = "<group>";
@@ -3966,6 +4054,7 @@
 			children = (
 				CEB5D5B31072AE350001C135 /* English */,
 				CEB5D6661072AE950001C135 /* French */,
+				CE3D8D8C125E69BB00AE0232 /* German */,
 			);
 			name = BDSKScriptGroupSheet.xib;
 			sourceTree = "<group>";
@@ -3975,6 +4064,7 @@
 			children = (
 				CEB5D5B51072AE350001C135 /* English */,
 				CEB5D6671072AE950001C135 /* French */,
+				CE3D8D8D125E69BB00AE0232 /* German */,
 			);
 			name = BDSKSearchGroupSheet.xib;
 			sourceTree = "<group>";
@@ -3984,6 +4074,7 @@
 			children = (
 				CEB5D5B71072AE350001C135 /* English */,
 				CEB5D6681072AE950001C135 /* French */,
+				CE3D8D8E125E69BB00AE0232 /* German */,
 			);
 			name = BDSKSearchGroupView.xib;
 			sourceTree = "<group>";
@@ -3993,6 +4084,7 @@
 			children = (
 				CEB5D5B91072AE350001C135 /* English */,
 				CEB5D6691072AE950001C135 /* French */,
+				CE3D8D8F125E69BB00AE0232 /* German */,
 			);
 			name = BDSKTypeInfoEditor.xib;
 			sourceTree = "<group>";
@@ -4002,6 +4094,7 @@
 			children = (
 				CEB5D5BB1072AE350001C135 /* English */,
 				CEB5D66A1072AE950001C135 /* French */,
+				CE3D8D90125E69BB00AE0232 /* German */,
 			);
 			name = BDSKURLGroupSheet.xib;
 			sourceTree = "<group>";
@@ -4011,6 +4104,7 @@
 			children = (
 				CEB5D5BD1072AE350001C135 /* English */,
 				CEB5D66B1072AE950001C135 /* French */,
+				CE3D8D91125E69BB00AE0232 /* German */,
 			);
 			name = BDSKURLSheet.xib;
 			sourceTree = "<group>";
@@ -4020,6 +4114,7 @@
 			children = (
 				CEB5D5BF1072AE350001C135 /* English */,
 				CEB5D66C1072AE950001C135 /* French */,
+				CE3D8D92125E69BB00AE0232 /* German */,
 			);
 			name = BDSKWebGroupView.xib;
 			sourceTree = "<group>";
@@ -4029,6 +4124,7 @@
 			children = (
 				CEB5D5C11072AE350001C135 /* English */,
 				CEB5D66D1072AE950001C135 /* French */,
+				CE3D8D93125E69BB00AE0232 /* German */,
 			);
 			name = BibDocument.xib;
 			sourceTree = "<group>";
@@ -4038,6 +4134,7 @@
 			children = (
 				CEB5D5C31072AE350001C135 /* English */,
 				CEB5D66E1072AE950001C135 /* French */,
+				CE3D8D94125E69BB00AE0232 /* German */,
 			);
 			name = BibPref_AutoFile.xib;
 			sourceTree = "<group>";
@@ -4047,6 +4144,7 @@
 			children = (
 				CEB5D5C51072AE350001C135 /* English */,
 				CEB5D66F1072AE950001C135 /* French */,
+				CE3D8D95125E69BB00AE0232 /* German */,
 			);
 			name = BibPref_Cite.xib;
 			sourceTree = "<group>";
@@ -4056,6 +4154,7 @@
 			children = (
 				CEB5D5C71072AE350001C135 /* English */,
 				CEB5D6701072AE950001C135 /* French */,
+				CE3D8D96125E69BB00AE0232 /* German */,
 			);
 			name = BibPref_CiteKey.xib;
 			sourceTree = "<group>";
@@ -4065,6 +4164,7 @@
 			children = (
 				CEB5D5C91072AE350001C135 /* English */,
 				CEB5D6711072AE950001C135 /* French */,
+				CE3D8D97125E69BB00AE0232 /* German */,
 			);
 			name = BibPref_Crossref.xib;
 			sourceTree = "<group>";
@@ -4074,6 +4174,7 @@
 			children = (
 				CEB5D5CB1072AE350001C135 /* English */,
 				CEB5D6721072AE950001C135 /* French */,
+				CE3D8D98125E69BB00AE0232 /* German */,
 			);
 			name = BibPref_Defaults.xib;
 			sourceTree = "<group>";
@@ -4083,6 +4184,7 @@
 			children = (
 				CEB5D5CD1072AE350001C135 /* English */,
 				CEB5D6731072AE950001C135 /* French */,
+				CE3D8D99125E69BB00AE0232 /* German */,
 			);
 			name = BibPref_Display.xib;
 			sourceTree = "<group>";
@@ -4092,6 +4194,7 @@
 			children = (
 				CEB5D5CF1072AE350001C135 /* English */,
 				CEB5D6741072AE950001C135 /* French */,
+				CE3D8D9A125E69BB00AE0232 /* German */,
 			);
 			name = BibPref_Export.xib;
 			sourceTree = "<group>";
@@ -4101,6 +4204,7 @@
 			children = (
 				CEB5D5D11072AE350001C135 /* English */,
 				CEB5D6751072AE950001C135 /* French */,
+				CE3D8D9B125E69BB00AE0232 /* German */,
 			);
 			name = BibPref_Files.xib;
 			sourceTree = "<group>";
@@ -4110,6 +4214,7 @@
 			children = (
 				CEB5D5D31072AE350001C135 /* English */,
 				CEB5D6761072AE950001C135 /* French */,
+				CE3D8D9C125E69BB00AE0232 /* German */,
 			);
 			name = BibPref_General.xib;
 			sourceTree = "<group>";
@@ -4119,6 +4224,7 @@
 			children = (
 				CEB5D5D71072AE350001C135 /* English */,
 				CEB5D6781072AE950001C135 /* French */,
+				CE3D8D9D125E69BB00AE0232 /* German */,
 			);
 			name = BibPref_ScriptHooks.xib;
 			sourceTree = "<group>";
@@ -4128,6 +4234,7 @@
 			children = (
 				CEB5D5D91072AE350001C135 /* English */,
 				CEB5D6791072AE950001C135 /* French */,
+				CE3D8D9E125E69BB00AE0232 /* German */,
 			);
 			name = BibPref_Sharing.xib;
 			sourceTree = "<group>";
@@ -4137,6 +4244,7 @@
 			children = (
 				CEB5D5DB1072AE350001C135 /* English */,
 				CEB5D67A1072AE950001C135 /* French */,
+				CE3D8D9F125E69BB00AE0232 /* German */,
 			);
 			name = BibPref_TeX.xib;
 			sourceTree = "<group>";
@@ -4146,6 +4254,7 @@
 			children = (
 				CEB5D5E11072AE350001C135 /* English */,
 				CEB5D67B1072AE950001C135 /* French */,
+				CE3D8DA2125E69BB00AE0232 /* German */,
 			);
 			name = BookmarksWindow.xib;
 			sourceTree = "<group>";
@@ -4155,6 +4264,7 @@
 			children = (
 				CEB5D5E51072AE350001C135 /* English */,
 				CEB5D67D1072AE950001C135 /* French */,
+				CE3D8DA3125E69BB00AE0232 /* German */,
 			);
 			name = ChangeFieldSheet.xib;
 			sourceTree = "<group>";
@@ -4164,6 +4274,7 @@
 			children = (
 				CEB5D5E71072AE350001C135 /* English */,
 				CEB5D67E1072AE950001C135 /* French */,
+				CE3D8DA4125E69BB00AE0232 /* German */,
 			);
 			name = ComplexStringEditor.xib;
 			sourceTree = "<group>";
@@ -4173,6 +4284,7 @@
 			children = (
 				CEB5D5E91072AE350001C135 /* English */,
 				CEB5D67F1072AE950001C135 /* French */,
+				CE3D8DA6125E69BB00AE0232 /* German */,
 			);
 			name = DocumentInfoWindow.xib;
 			sourceTree = "<group>";
@@ -4182,6 +4294,7 @@
 			children = (
 				CEB5D5EB1072AE350001C135 /* English */,
 				CEB5D6801072AE950001C135 /* French */,
+				CE3D8DA7125E69BB00AE0232 /* German */,
 			);
 			name = FileMatcher.xib;
 			sourceTree = "<group>";
@@ -4191,6 +4304,7 @@
 			children = (
 				CEB5D5ED1072AE350001C135 /* English */,
 				CEB5D6831072AE950001C135 /* French */,
+				CE3D8DA8125E69BB00AE0232 /* German */,
 			);
 			name = FileMatcherConfigSheet.xib;
 			sourceTree = "<group>";
@@ -4200,6 +4314,7 @@
 			children = (
 				CEB5D5EF1072AE350001C135 /* English */,
 				CEB5D6861072AE950001C135 /* French */,
+				CE3D8DAD125E69BB00AE0232 /* German */,
 			);
 			name = MacroWindow.xib;
 			sourceTree = "<group>";
@@ -4209,6 +4324,7 @@
 			children = (
 				CEB5D5F11072AE360001C135 /* English */,
 				CEB5D6871072AE950001C135 /* French */,
+				CE3D8DAE125E69BB00AE0232 /* German */,
 			);
 			name = MainMenu.xib;
 			sourceTree = "<group>";
@@ -4218,6 +4334,7 @@
 			children = (
 				CEB5D5F31072AE360001C135 /* English */,
 				CEB5D6881072AE950001C135 /* French */,
+				CE3D8DAF125E69BB00AE0232 /* German */,
 			);
 			name = NotesWindow.xib;
 			sourceTree = "<group>";
@@ -4227,6 +4344,7 @@
 			children = (
 				CEB5D5F51072AE360001C135 /* English */,
 				CEB5D68B1072AE950001C135 /* French */,
+				CE3D8DB1125E69BB00AE0232 /* German */,
 			);
 			name = Preferences.xib;
 			sourceTree = "<group>";
@@ -4236,6 +4354,7 @@
 			children = (
 				CEB5D5F71072AE360001C135 /* English */,
 				CEB5D68C1072AE950001C135 /* French */,
+				CE3D8DB2125E69BB00AE0232 /* German */,
 			);
 			name = Previewer.xib;
 			sourceTree = "<group>";
@@ -4245,6 +4364,7 @@
 			children = (
 				CEB5D5F91072AE360001C135 /* English */,
 				CEB5D68D1072AE950001C135 /* French */,
+				CE3D8DB4125E69BB00AE0232 /* German */,
 			);
 			name = ReadMe.xib;
 			sourceTree = "<group>";
@@ -4254,6 +4374,7 @@
 			children = (
 				CEB5D5FB1072AE360001C135 /* English */,
 				CEB5D68E1072AE950001C135 /* French */,
+				CE3D8DB5125E69BB00AE0232 /* German */,
 			);
 			name = RemoveFieldSheet.xib;
 			sourceTree = "<group>";
@@ -4263,6 +4384,7 @@
 			children = (
 				CEB5D5FD1072AE360001C135 /* English */,
 				CEB5D68F1072AE950001C135 /* French */,
+				CE3D8DB6125E69BB00AE0232 /* German */,
 			);
 			name = SearchBookmarksWindow.xib;
 			sourceTree = "<group>";
@@ -4272,6 +4394,7 @@
 			children = (
 				CEB5D6011072AE360001C135 /* English */,
 				CEB5D6931072AE950001C135 /* French */,
+				CE3D8DB7125E69BB00AE0232 /* German */,
 			);
 			name = SelectEncodingsPanel.xib;
 			sourceTree = "<group>";
@@ -4281,6 +4404,7 @@
 			children = (
 				CEB5D6031072AE360001C135 /* English */,
 				CEB5D6961072AE950001C135 /* French */,
+				CE3D8DB9125E69BB00AE0232 /* German */,
 			);
 			name = TemplateDocument.xib;
 			sourceTree = "<group>";
@@ -4290,6 +4414,7 @@
 			children = (
 				CEB5D6051072AE360001C135 /* English */,
 				CEB5D6971072AE950001C135 /* French */,
+				CE3D8DBB125E69BB00AE0232 /* German */,
 			);
 			name = TextImport.xib;
 			sourceTree = "<group>";
@@ -4307,6 +4432,7 @@
 			children = (
 				CEF8F8DE0F93519700948A88 /* English */,
 				CEF8F8E00F9351A600948A88 /* French */,
+				CE3D8DBC125E69BB00AE0232 /* German */,
 			);
 			name = WebGroupStartPage.html;
 			sourceTree = "<group>";
@@ -4316,6 +4442,7 @@
 			children = (
 				CEFE71691129A8120018CD74 /* English */,
 				CEFE71781129A9260018CD74 /* French */,
+				CE3D8DB8125E69BB00AE0232 /* German */,
 			);
 			name = ServicesMenu.strings;
 			sourceTree = "<group>";
@@ -4325,6 +4452,7 @@
 			children = (
 				F9022CE40758050E00C3F701 /* English */,
 				F9C7D3FD0BE9280F00D65C7F /* French */,
+				CE3D8DA0125E69BB00AE0232 /* German */,
 			);
 			name = BibTeXKeys.strings;
 			sourceTree = "<group>";
@@ -4334,6 +4462,7 @@
 			children = (
 				F9022CE60758050E00C3F701 /* English */,
 				F9C7D4090BE9285500D65C7F /* French */,
+				CE3D8DA5125E69BB00AE0232 /* German */,
 			);
 			name = Credits.rtf;
 			sourceTree = "<group>";
@@ -4343,6 +4472,7 @@
 			children = (
 				F94AA36A0BE8FD87007BCE2B /* English */,
 				F9C7D4000BE9280F00D65C7F /* French */,
+				CE3D8DB0125E69BB00AE0232 /* German */,
 			);
 			name = Preferences.strings;
 			sourceTree = "<group>";
