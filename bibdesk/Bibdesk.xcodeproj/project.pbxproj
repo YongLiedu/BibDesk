@@ -1023,7 +1023,7 @@
 		CE3D8DB9125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/TemplateDocument.xib; sourceTree = "<group>"; };
 		CE3D8DBA125E69BB00AE0232 /* German */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/TemplateOptions.strings; sourceTree = "<group>"; };
 		CE3D8DBB125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = German; path = German.lproj/TextImport.xib; sourceTree = "<group>"; };
-		CE3D8DBC125E69BB00AE0232 /* German */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = German; path = German.lproj/WebGroupStartPage.html; sourceTree = "<group>"; };
+		CE3D8DBC125E69BB00AE0232 /* German */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = German; path = German.lproj/WebGroupStartPage.html; sourceTree = "<group>"; };
 		CE3D8DBD125E69BB00AE0232 /* German */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/ZoomValues.strings; sourceTree = "<group>"; };
 		CE40EC520EE9AAEF00BCF379 /* BDSKImportCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKImportCommand.h; sourceTree = "<group>"; };
 		CE40EC530EE9AAEF00BCF379 /* BDSKImportCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKImportCommand.m; sourceTree = "<group>"; };
