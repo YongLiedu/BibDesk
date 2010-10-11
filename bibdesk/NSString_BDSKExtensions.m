@@ -877,6 +877,7 @@ http://home.planet.nl/~faase009/GNU.txt
 	[escapedValue replaceOccurrencesOfString:@"}" withString:@"%7D" options:0 range:NSMakeRange(0, [escapedValue length])];
 	[escapedValue replaceOccurrencesOfString:@"<" withString:@"%3C" options:0 range:NSMakeRange(0, [escapedValue length])];
 	[escapedValue replaceOccurrencesOfString:@">" withString:@"%3E" options:0 range:NSMakeRange(0, [escapedValue length])];
+	[escapedValue replaceOccurrencesOfString:@"@" withString:@"%40" options:0 range:NSMakeRange(0, [escapedValue length])];
 	return [escapedValue autorelease];
 }
 
@@ -888,6 +889,7 @@ http://home.planet.nl/~faase009/GNU.txt
 	[escapedValue replaceOccurrencesOfString:@"%3C" withString:@"<" options:0 range:NSMakeRange(0, [escapedValue length])];
 	[escapedValue replaceOccurrencesOfString:@"%3E" withString:@">" options:0 range:NSMakeRange(0, [escapedValue length])];
 	[escapedValue replaceOccurrencesOfString:@"%25" withString:@"%" options:0 range:NSMakeRange(0, [escapedValue length])]; // this should come last
+	[escapedValue replaceOccurrencesOfString:@"%40" withString:@"@" options:0 range:NSMakeRange(0, [escapedValue length])]; // this should come last
 	return [escapedValue autorelease];
 }
 
