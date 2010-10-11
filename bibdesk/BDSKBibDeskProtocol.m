@@ -117,7 +117,7 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
             NSData *data = [NSData dataWithContentsOfFile:path];
             NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:path error:NULL];
             NSString *MIMEType = (NSString *)UTTypeCopyPreferredTagWithClass((CFStringRef)theUTI, kUTTagClassMIMEType);
-            NSString *encoding = [MIMEType isEqualToString:@"text/html"] ? @"utf-8" : nil;
+            NSString *encoding = [[NSWorkspace sharedWorkspace] type:theUTI conformsToType:(NSString *)kUTTypeText] ? @"utf-8" : nil;
             NSURLResponse *response = [[NSURLResponse alloc] initWithURL:theURL MIMEType:MIMEType expectedContentLength:[data length] textEncodingName:encoding];
             [client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
             [client URLProtocol:self didLoadData:data];
