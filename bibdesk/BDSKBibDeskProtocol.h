@@ -39,10 +39,8 @@
 
 #import <Cocoa/Cocoa.h>
 
-#define BDSKBibDeskProtocolName @"bibdesk"
-#define BDSKBibDeskWebGroupURLString [BDSKBibDeskProtocolName stringByAppendingString:@":webgroup"]
-#define BDSKBibDeskWebGroupURL [NSURL URLWithString:BDSKBibDeskWebGroupURLString]
-
+extern NSString *BDSKBibDeskProtocolName;
+extern NSURL *BDSKBibDeskWebGroupURL;
 
 @interface BDSKBibDeskProtocol : NSURLProtocol {
 

@@ -42,21 +42,35 @@
 
 #import "BDSKBibDeskProtocol.h"
 #import "BDSKWebParser.h"
+#import "NSString_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
 #import <WebKit/WebView.h>
+
+#define WEBGROUP_SPECIFIER  @"webgroup"
+#define HELP_SPECIFIER      @"help"
+#define HELP_DIRECTORY      @"BibDeskHelp"
+#define HELP_START_FILE     @"BibDeskHelp.html"
 
 #define NAME_KEY        @"name"
 #define ADDRESS_KEY     @"address"
 #define DESCRIPTION_KEY @"description"
 #define FLAGS_KEY       @"flags"
 
+NSString *BDSKBibDeskProtocolName = @"bibdesk";
+NSURL *BDSKBibDeskWebGroupURL = nil;
+
 @implementation BDSKBibDeskProtocol
+
++ (void)initialize {
+    BDSKINITIALIZE;
+    BDSKBibDeskWebGroupURL = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"%@:%@", BDSKBibDeskProtocolName, WEBGROUP_SPECIFIER]];
+}
 
 /*
  Only accept the bibdesk:webgroup URL.
 */
 + (BOOL)canInitWithRequest:(NSURLRequest *)theRequest {
-	BOOL result = ([[[theRequest URL] absoluteString] caseInsensitiveCompare:BDSKBibDeskWebGroupURLString] == NSOrderedSame);
-	return result;
+	return [[[theRequest URL] scheme] caseInsensitiveCompare:BDSKBibDeskProtocolName] == NSOrderedSame;
 }
 
 
@@ -73,25 +87,54 @@
 - (void)startLoading {
     id<NSURLProtocolClient> client = [self client];
     NSURLRequest *request = [self request];
-    NSData * data = [self welcomeHTMLData];
+    NSURL *theURL = [request URL];
 	
-    if (data) {
+    if ([WEBGROUP_SPECIFIER caseInsensitiveCompare:[theURL resourceSpecifier]] == NSOrderedSame) {
+        NSData *data = [self welcomeHTMLData];
         NSURLResponse *response = [[NSURLResponse alloc] initWithURL:[request URL] MIMEType:@"text/html" expectedContentLength:[data length] textEncodingName:@"utf-8"];
         [client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
         [client URLProtocol:self didLoadData:data];
         [client URLProtocolDidFinishLoading:self];
         [response release];
+    } else if ([[theURL resourceSpecifier] hasCaseInsensitivePrefix:HELP_SPECIFIER]) {
+        NSMutableString *URLString = [[theURL absoluteString] mutableCopy];
+        [URLString insertString:@"//" atIndex:[BDSKBibDeskProtocolName length] + 1];
+        NSURLResponse *response = [[NSURLResponse alloc] initWithURL:theURL MIMEType:@"text/html" expectedContentLength:-1 textEncodingName:nil];
+        NSURLRequest *redirectRequest = [[NSURLRequest alloc] initWithURL:[NSURL URLWithStringByNormalizingPercentEscapes:[URLString stringByReplacingPercentEscapes]]];
+        [client URLProtocol:self wasRedirectedToRequest:redirectRequest redirectResponse:response];
+        [client URLProtocolDidFinishLoading:self];
+        [response release];
+        [redirectRequest release];
+        [URLString release];
+    } else if ([HELP_SPECIFIER caseInsensitiveCompare:[theURL host]] == NSOrderedSame) {
+        NSString *path = [theURL path];
+        if ([path hasPrefix:@"/"])
+            path = [path substringFromIndex:1];
+        if ([path length] == 0)
+            path = HELP_START_FILE;
+        path = [[NSBundle mainBundle] pathForResource:[[path lastPathComponent] stringByDeletingPathExtension] ofType:[path pathExtension] inDirectory:[HELP_DIRECTORY stringByAppendingPathComponent:[path stringByDeletingLastPathComponent]]];
+        if (path) {
+            NSData *data = [NSData dataWithContentsOfFile:path];
+            NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:path error:NULL];
+            NSString *MIMEType = (NSString *)UTTypeCopyPreferredTagWithClass((CFStringRef)theUTI, kUTTagClassMIMEType);
+            NSString *encoding = [MIMEType isEqualToString:@"text/html"] ? @"utf-8" : nil;
+            NSURLResponse *response = [[NSURLResponse alloc] initWithURL:theURL MIMEType:MIMEType expectedContentLength:[data length] textEncodingName:encoding];
+            [client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
+            [client URLProtocol:self didLoadData:data];
+            [client URLProtocolDidFinishLoading:self];
+            [response release];
+            [MIMEType release];
+        } else {
+            [client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorFileDoesNotExist userInfo:nil]];
+        }
     } else {
-        NSInteger resultCode = NSURLErrorResourceUnavailable;		
-        [client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain code:resultCode userInfo:nil]];
+        [client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorResourceUnavailable userInfo:nil]];
     }
 }
 
 
 
-- (void)stopLoading
-{
-}
+- (void)stopLoading {}
 
 
 
