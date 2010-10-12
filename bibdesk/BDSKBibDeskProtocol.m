@@ -143,28 +143,32 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
     if (data == nil) {
         NSString *templateStringPath = [[NSBundle mainBundle] pathForResource:@"WebGroupStartPage" ofType:@"html"];
         NSString *templateString = [NSString stringWithContentsOfFile:templateStringPath encoding:NSUTF8StringEncoding error:NULL];
-        NSString *string = [BDSKTemplateParser stringByParsingTemplateString:templateString usingObject:self];
+        NSMutableArray *publicParsers = [NSMutableArray array];
+        NSMutableArray *subscriptionParsers = [NSMutableArray array];
+        NSMutableArray *genericParsers = [NSMutableArray array];
+        
+        for (NSDictionary *info in [BDSKWebParser parserInfos]) {
+            switch ([[info objectForKey:@"feature"] unsignedIntegerValue]) {
+                case BDSKParserFeaturePublic:
+                    [publicParsers addObject:info];
+                    break;
+                case BDSKParserFeatureSubscription:
+                    [subscriptionParsers addObject:info];
+                    break;
+                case BDSKParserFeatureGeneric:
+                    [genericParsers addObject:info];
+                    break;
+                default:
+                    break;
+            }
+        }
+        
+        NSDictionary *parsers = [NSDictionary dictionaryWithObjectsAndKeys:publicParsers, @"publicParsers", subscriptionParsers, @"subscriptionParsers", genericParsers, @"genericParsers", nil];
+        NSString *string = [BDSKTemplateParser stringByParsingTemplateString:templateString usingObject:parsers];
+        
         data = [[string dataUsingEncoding:NSUTF8StringEncoding] copy];
     }
     return data;
-}
-
-- (NSArray *)parsersForFeature:(BDSKParserFeature)feature {
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"feature == %@", [NSNumber numberWithUnsignedInteger:feature]];
-	NSSortDescriptor * sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
-    return [[[BDSKWebParser parserInfos] filteredArrayUsingPredicate:predicate] sortedArrayUsingDescriptors:[NSArray arrayWithObject: sortDescriptor]];
-}
-
-- (NSArray *)publicParsers {
-    return [self parsersForFeature:BDSKParserFeaturePublic];
-}
-
-- (NSArray *)subscriptionParsers {
-    return [self parsersForFeature:BDSKParserFeatureSubscription];
-}
-
-- (NSArray *)genericParsers {
-    return [self parsersForFeature:BDSKParserFeatureGeneric];
 }
 
 @end
