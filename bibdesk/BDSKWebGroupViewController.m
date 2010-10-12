@@ -447,8 +447,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     }
     
     if (frame == [sender mainFrame]) {
-        if ([[(BDSKIconTextFieldCell *)[urlField cell] icon] isEqual:[NSImage missingFileImage]])
-            [(BDSKIconTextFieldCell *)[urlField cell] setIcon:[NSImage imageNamed:@"Bookmark"]];
+        [(BDSKIconTextFieldCell *)[urlField cell] setIcon:[sender mainFrameIcon] ?: [NSImage imageNamed:@"Bookmark"]];
     }
     
     if (frame == loadingWebFrame) {
