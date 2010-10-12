@@ -88,24 +88,24 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
     id<NSURLProtocolClient> client = [self client];
     NSURLRequest *request = [self request];
     NSURL *theURL = [request URL];
+    NSString *resourceSpecifier = [theURL resourceSpecifier];
 	
-    if ([WEBGROUP_SPECIFIER caseInsensitiveCompare:[theURL resourceSpecifier]] == NSOrderedSame) {
+    if ([WEBGROUP_SPECIFIER caseInsensitiveCompare:resourceSpecifier] == NSOrderedSame) {
         NSData *data = [self welcomeHTMLData];
         NSURLResponse *response = [[NSURLResponse alloc] initWithURL:[request URL] MIMEType:@"text/html" expectedContentLength:[data length] textEncodingName:@"utf-8"];
         [client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
         [client URLProtocol:self didLoadData:data];
         [client URLProtocolDidFinishLoading:self];
         [response release];
-    } else if ([[theURL resourceSpecifier] hasCaseInsensitivePrefix:HELP_SPECIFIER]) {
-        NSMutableString *URLString = [[theURL absoluteString] mutableCopy];
-        [URLString insertString:@"//" atIndex:[BDSKBibDeskProtocolName length] + 1];
+    } else if ([resourceSpecifier hasCaseInsensitivePrefix:HELP_SPECIFIER]) {
+        // when there's no "//" the URL we get has percent escapes including in particular the # character, which would we don't want
+        NSString *URLString = [NSString stringWithFormat:@"%@://%@", BDSKBibDeskProtocolName, [resourceSpecifier stringByReplacingPercentEscapes]];
         NSURLResponse *response = [[NSURLResponse alloc] initWithURL:theURL MIMEType:@"text/html" expectedContentLength:-1 textEncodingName:nil];
-        NSURLRequest *redirectRequest = [[NSURLRequest alloc] initWithURL:[NSURL URLWithStringByNormalizingPercentEscapes:[URLString stringByReplacingPercentEscapes]]];
+        NSURLRequest *redirectRequest = [[NSURLRequest alloc] initWithURL:[NSURL URLWithStringByNormalizingPercentEscapes:URLString]];
         [client URLProtocol:self wasRedirectedToRequest:redirectRequest redirectResponse:response];
         [client URLProtocolDidFinishLoading:self];
         [response release];
         [redirectRequest release];
-        [URLString release];
     } else if ([HELP_SPECIFIER caseInsensitiveCompare:[theURL host]] == NSOrderedSame) {
         NSString *path = [theURL path];
         if ([path hasPrefix:@"/"])
