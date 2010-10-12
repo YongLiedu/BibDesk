@@ -59,7 +59,7 @@
 #define NAME_KEY        @"name"
 #define ADDRESS_KEY     @"address"
 #define DESCRIPTION_KEY @"description"
-#define FLAGS_KEY       @"flags"
+#define FEATURE_KEY     @"feature"
 
 @implementation BDSKWebParser
 
@@ -132,7 +132,7 @@ static NSArray *webParserClasses() {
     return [parserClass itemsFromDocument:domDocument xmlDocument:xmlDoc fromURL:url error:outError];
 }
 
-+ (NSDictionary *) parserInfoWithName: (NSString *) name address: (NSString *) address description: (NSString *) description flags: (BDSKParserFeature) flags {
++ (NSDictionary *) parserInfoWithName: (NSString *) name address: (NSString *) address description: (NSString *) description feature:(BDSKParserFeature) feature {
 	NSDictionary * result = nil;
 	NSMutableDictionary * dict = [NSMutableDictionary dictionaryWithCapacity:4];
 
@@ -140,8 +140,8 @@ static NSArray *webParserClasses() {
 		[dict setObject:name forKey:NAME_KEY];
 		if (address) { [dict setObject:address forKey:ADDRESS_KEY]; }
 		if (description) { [dict setObject:description forKey:DESCRIPTION_KEY]; }
-		NSNumber * flagsNumber = [NSNumber numberWithUnsignedInteger:flags];
-		[dict setObject:flagsNumber forKey:FLAGS_KEY];
+		NSNumber * flagsNumber = [NSNumber numberWithUnsignedInteger:feature];
+		[dict setObject:flagsNumber forKey:FEATURE_KEY];
 		result = dict;
 	}
 
@@ -149,7 +149,7 @@ static NSArray *webParserClasses() {
 }
 
 + (NSArray *)parserInfos {
-    return [webParserClasses() valueForKeyPath:@"@unionOfArrays.parserInfos"];
+    return [webParserClasses() valueForKey:@"parserInfo"];
 }
 
 @end

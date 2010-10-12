@@ -45,16 +45,12 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import <WebKit/WebView.h>
+#import "BDSKTemplateParser.h"
 
 #define WEBGROUP_SPECIFIER  @"webgroup"
 #define HELP_SPECIFIER      @"help"
 #define HELP_DIRECTORY      @"BibDeskHelp"
 #define HELP_START_FILE     @"BibDeskHelp.html"
-
-#define NAME_KEY        @"name"
-#define ADDRESS_KEY     @"address"
-#define DESCRIPTION_KEY @"description"
-#define FLAGS_KEY       @"flags"
 
 NSString *BDSKBibDeskProtocolName = @"bibdesk";
 NSURL *BDSKBibDeskWebGroupURL = nil;
@@ -143,75 +139,32 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
  Loads web page template from resource file, inserts links to the web sites known by the available parser classes and returns the resulting HTML code as UTF-8 encoded data.
 */
 - (NSData *) welcomeHTMLData {
-	NSError * error;
-	NSString * baseStringPath = [[NSBundle mainBundle] pathForResource:@"WebGroupStartPage" ofType:@"html"];
-	NSMutableString * baseString = [NSMutableString stringWithContentsOfFile:baseStringPath encoding:NSUTF8StringEncoding error:&error];
-	if (!baseString) return nil;
-	
-	NSSortDescriptor * sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:NAME_KEY ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
-	NSArray * parserFeatures = [[BDSKWebParser parserInfos] sortedArrayUsingDescriptors:[NSArray arrayWithObject: sortDescriptor]];
-
-	NSMutableArray * publicFeatures = [NSMutableArray array];
-	NSMutableArray * subscriptionFeatures = [NSMutableArray array];
-	NSMutableArray * generalFeatures = [NSMutableArray array];
-	
-	for (NSDictionary *parserInfo in parserFeatures) {
-		NSUInteger parserFlags = [[parserInfo objectForKey:FLAGS_KEY] unsignedIntegerValue];
-		if ( parserFlags & BDSKParserFeatureAllPagesMask ) {
-			// it's a 'general' parser that's not limited to particular sites
-			[generalFeatures addObject: parserInfo];
-		}
-		else {
-			if ( parserFlags & BDSKParserFeatureSubscriptionMask ) {
-				[subscriptionFeatures addObject: parserInfo];
-			}
-			else {
-				[publicFeatures addObject: parserInfo];
-			}
-		}
-	}
-	
-	NSString * publicFeatureMarkup = [self markupForSiteArray:publicFeatures];
-	[baseString replaceOccurrencesOfString:@"PUBLICLIST" withString:publicFeatureMarkup options:NSLiteralSearch range:NSMakeRange(0, [baseString length])];
-	NSString * subscriptionFeatureMarkup = [self markupForSiteArray:subscriptionFeatures];
-	[baseString replaceOccurrencesOfString:@"SUBSCRIPTIONLIST" withString:subscriptionFeatureMarkup options:NSLiteralSearch range:NSMakeRange(0, [baseString length])];
-	NSString * generalFeatureMarkup = [self markupForSiteArray:generalFeatures];
-	[baseString replaceOccurrencesOfString:@"GENERALLIST" withString:generalFeatureMarkup options:NSLiteralSearch range:NSMakeRange(0, [baseString length])];
-	
-	NSData * data = [baseString dataUsingEncoding:NSUTF8StringEncoding];
-	return data;
+	static NSData *data = nil;
+    if (data == nil) {
+        NSString *templateStringPath = [[NSBundle mainBundle] pathForResource:@"WebGroupStartPage" ofType:@"html"];
+        NSString *templateString = [NSString stringWithContentsOfFile:templateStringPath encoding:NSUTF8StringEncoding error:NULL];
+        NSString *string = [BDSKTemplateParser stringByParsingTemplateString:templateString usingObject:self];
+        data = [[string dataUsingEncoding:NSUTF8StringEncoding] copy];
+    }
+    return data;
 }
 
-
-
-/*
- Input: Array of Site Dictionaries
- Output: HTML markup for a list of links to the sites described in the dictionaries with list items separated by commas and ending with a full stop. If available, a description of the site is inserted in the anchor tag's title attribute.
-*/
-- (NSString *) markupForSiteArray: (NSArray *) siteArray {
-	NSXMLElement * ulElement = [NSXMLElement elementWithName:@"ul"];
-	
-	for (NSDictionary *siteInfo in siteArray) {
-		NSXMLElement * aElement = [NSXMLElement elementWithName:@"a" stringValue:[siteInfo objectForKey:NAME_KEY]];
-		NSString * addressString = [siteInfo objectForKey:ADDRESS_KEY];
-		if (addressString) {
-			NSXMLNode * hrefNode = [NSXMLNode attributeWithName:@"href" stringValue: addressString];
-			[aElement addAttribute:hrefNode];
-		}
-		NSString * titleString = [siteInfo objectForKey:DESCRIPTION_KEY];
-		if (titleString) {
-			NSXMLNode * titleNode = [NSXMLNode attributeWithName:@"title" stringValue:titleString];
-			[aElement addAttribute:titleNode];
-		}
-
-		NSXMLElement * liElement = [NSXMLElement elementWithName:@"li"];
-		[liElement addChild:aElement];
-		[ulElement addChild:liElement];
-	}
-	
-	NSString * result = [ulElement XMLString];
-	return result;
+- (NSArray *)parsersForFeature:(BDSKParserFeature)feature {
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"feature == %@", [NSNumber numberWithUnsignedInteger:feature]];
+	NSSortDescriptor * sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
+    return [[[BDSKWebParser parserInfos] filteredArrayUsingPredicate:predicate] sortedArrayUsingDescriptors:[NSArray arrayWithObject: sortDescriptor]];
 }
 
+- (NSArray *)publicParsers {
+    return [self parsersForFeature:BDSKParserFeaturePublic];
+}
+
+- (NSArray *)subscriptionParsers {
+    return [self parsersForFeature:BDSKParserFeatureSubscription];
+}
+
+- (NSArray *)genericParsers {
+    return [self parsersForFeature:BDSKParserFeatureGeneric];
+}
 
 @end

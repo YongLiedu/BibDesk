@@ -296,13 +296,12 @@
 	
 }
 
-+ (NSArray *) parserInfos {
++ (NSDictionary *)parserInfo {
 	NSString *parserDescription = NSLocalizedString(@"SpringerLink portal.  Browsing and abstracts are free but full text requires a subscription.", @"Description for Springer site");
-	NSDictionary *parserInfo = [BDSKWebParser parserInfoWithName:@"SpringerLink" 
-														  address:@"http://www.springerlink.com/" 
-													  description:parserDescription 
-															flags:BDSKParserFeatureSubscriptionMask];
-	return [NSArray arrayWithObject: parserInfo];
+	return [BDSKWebParser parserInfoWithName:@"SpringerLink" 
+                                     address:@"http://www.springerlink.com/" 
+                                 description:parserDescription 
+                                       feature:BDSKParserFeatureSubscription];
 }
 
 @end

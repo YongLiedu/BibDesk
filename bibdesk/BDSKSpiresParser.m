@@ -147,11 +147,9 @@
 
 
 
-+ (NSArray *) parserInfos {
++ (NSDictionary *)parserInfo {
 	NSString * parserDescription = NSLocalizedString(@"SPIRES database of literature on particle physics.", @"Description for SPIRES site");
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"SPIRES" address:@"http://www.slac.stanford.edu/spires/"  description:parserDescription flags:BDSKParserFeatureNone];
-	
-	return [NSArray arrayWithObject:parserInfo];
+	return [BDSKWebParser parserInfoWithName:@"SPIRES" address:@"http://www.slac.stanford.edu/spires/"  description:parserDescription feature:BDSKParserFeaturePublic];
 }
 
 

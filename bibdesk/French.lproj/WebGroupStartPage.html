@@ -38,18 +38,29 @@
 		<div class="columns">
 		<div class="column c1">
 			<h2 title="These sites are fully accessible for anyone.">Sites gratuits</h2>
-			PUBLICLIST
-
+			<ul>
+			<$publicParsers>
+			<li><a href="<$address/>" title="<$description/>"><$name/></a></li>
+			</$publicParsers>
+			</ul>
 		</div>
 		
 		<div class="column c2">
 			<h2 title="These sites require a subscription by you or your institution to access their full content. A subset of the content may be available to everybody.">Sites par abonnement</h2>
-			SUBSCRIPTIONLIST
+			<ul>
+			<$subscriptionParsers>
+			<li><a href="<$address/>" title="<$description/>"><$name/></a></li>
+			</$subscriptionParsers>
+			</ul>
 		</div>
 		
 		<div class="column c3">
 			<h2 title="Formats which can be embedded in web pages and extracted from there.">Formats g&eacute;n&eacute;raux</h2>
-			GENERALLIST
+			<ul>
+			<$genericParsers>
+			<li><a href="<$address/>" title="<$description/>"><$name/></a></li>
+			</$genericParsers>
+			</ul>
 		</div>
 		</div>
 	</body>

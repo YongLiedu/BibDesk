@@ -42,12 +42,6 @@
 extern NSString *BDSKBibDeskProtocolName;
 extern NSURL *BDSKBibDeskWebGroupURL;
 
-@interface BDSKBibDeskProtocol : NSURLProtocol {
-
-}
-
-- (NSString *) markupForSiteArray: (NSArray *) siteArray;
+@interface BDSKBibDeskProtocol : NSURLProtocol
 - (NSData *) welcomeHTMLData;
-
-
 @end

@@ -131,11 +131,9 @@
 	return items;  
 }
 	
-+ (NSArray *) parserInfos {
-	NSString * parserDescription = NSLocalizedString(@"ePrint archive of the International Association for Cryptologic Research (IACR).", @"Description for IACR site");
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"IACR (Cryptology)" address:@"http://eprint.iacr.org/" description:parserDescription flags:BDSKParserFeatureNone];
-	
-	return [NSArray arrayWithObject: parserInfo];
++ (NSDictionary *)parserInfo {
+	NSString *parserDescription = NSLocalizedString(@"ePrint archive of the International Association for Cryptologic Research (IACR).", @"Description for IACR site");
+	return [BDSKWebParser parserInfoWithName:@"IACR (Cryptology)" address:@"http://eprint.iacr.org/" description:parserDescription feature:BDSKParserFeaturePublic];
 }
 
 @end

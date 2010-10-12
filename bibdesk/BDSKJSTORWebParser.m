@@ -99,11 +99,9 @@
 	return items;  
 }
 
-+ (NSArray *) parserInfos {
++ (NSDictionary *)parserInfo {
 	NSString * parserDescription = NSLocalizedString(@"JSTOR archives.", @"Description for JSTOR site");
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"JSTOR" address:@"http://www.jstor.org/" description:parserDescription flags:BDSKParserFeatureSubscriptionMask];
-	
-	return [NSArray arrayWithObject: parserInfo];
+	return [BDSKWebParser parserInfoWithName:@"JSTOR" address:@"http://www.jstor.org/" description:parserDescription feature:BDSKParserFeatureSubscription];
 }
 
 @end

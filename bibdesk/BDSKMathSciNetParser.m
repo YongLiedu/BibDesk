@@ -200,11 +200,9 @@
 /*
  Array with site description dictionary for ams.org/mathscinet.
 */
-+ (NSArray *) parserInfos {
-	NSString * parserDescription = NSLocalizedString(@"Database of Mathematical Reviews by the American Mathematical Society.", @"Description for MathSciNet site");
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"MathSciNet" address:@"http://www.ams.org/mathscinet/" description: parserDescription flags: BDSKParserFeatureSubscriptionMask];
-	
-	return [NSArray arrayWithObject:parserInfo];
++ (NSDictionary *)parserInfo {
+	NSString *parserDescription = NSLocalizedString(@"Database of Mathematical Reviews by the American Mathematical Society.", @"Description for MathSciNet site");
+	return [BDSKWebParser parserInfoWithName:@"MathSciNet" address:@"http://www.ams.org/mathscinet/" description: parserDescription feature:BDSKParserFeatureSubscription];
 }
 
 

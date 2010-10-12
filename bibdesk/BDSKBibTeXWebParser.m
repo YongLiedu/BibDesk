@@ -100,13 +100,12 @@
 	
 }
 
-+ (NSArray *) parserInfos {
++ (NSDictionary *)parserInfo {
 	NSString *parserDescription = NSLocalizedString(@"BibTeX is often used in conjunction with LaTeX for storing bibliographic data and is the native format of BibDesk.", @"Description for BibTeX web parser");
-	NSDictionary *parserInfo = [BDSKWebParser parserInfoWithName:@"BibTeX" 
-														  address:@"http://en.wikipedia.org/wiki/BibTeX" 
-													  description:parserDescription 
-															flags:BDSKParserFeatureAllPagesMask];
-	return [NSArray arrayWithObject: parserInfo];
+	return [BDSKWebParser parserInfoWithName:@"BibTeX" 
+                                     address:@"http://en.wikipedia.org/wiki/BibTeX" 
+                                 description:parserDescription 
+                                       feature:BDSKParserFeatureGeneric];
 }
 
 @end

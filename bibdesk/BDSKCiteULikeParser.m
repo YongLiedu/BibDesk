@@ -98,9 +98,8 @@
 
 
 
-+ (NSArray *) parserInfos {
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"CiteULike" address:@"http://www.citeulike.org/" description:nil flags: BDSKParserFeatureNone];
-	return [NSArray arrayWithObject:parserInfo];
++ (NSDictionary *)parserInfo {
+	return [BDSKWebParser parserInfoWithName:@"CiteULike" address:@"http://www.citeulike.org/" description:nil feature:BDSKParserFeaturePublic];
 }
 
 

@@ -41,11 +41,11 @@
 
 
 enum {
-    BDSKParserFeatureNone = 0,
+    BDSKParserFeaturePublic = 0,
 // flag indicating that full usage of the parser's feature requires some sort of subscription
-    BDSKParserFeatureSubscriptionMask = 1 << 0,
+    BDSKParserFeatureSubscription = 1,
 // flag indicating that the parser's feature looks for specific data on all pages:
-    BDSKParserFeatureAllPagesMask = 1 << 1
+    BDSKParserFeatureGeneric = 2
 };
 typedef NSUInteger BDSKParserFeature;
 
@@ -53,7 +53,7 @@ typedef NSUInteger BDSKParserFeature;
 // this method is the main entry point for the BDSKWebParser class it should not be overridden by the concrete subclasses
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument fromURL:(NSURL *)url error:(NSError **)outError;
 // Helper method for creating a correctly formatted parser feature information dictionary. 
-+ (NSDictionary *) parserInfoWithName: (NSString *) name address: (NSString *) address description: (NSString *) description flags:(BDSKParserFeature) flags;
++ (NSDictionary *) parserInfoWithName: (NSString *) name address: (NSString *) address description: (NSString *) description feature:(BDSKParserFeature) feature;
 // Returns the union of parserInfos of all available web parsers.
 + (NSArray *)parserInfos;
 @end
@@ -61,5 +61,5 @@ typedef NSUInteger BDSKParserFeature;
 @protocol BDSKWebParser <NSObject>
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url;
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError;
-+ (NSArray *)parserInfos;
++ (NSDictionary *)parserInfo;
 @end

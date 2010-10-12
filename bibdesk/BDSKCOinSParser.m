@@ -328,11 +328,9 @@
 }
 
 // Array with feature description dictionary for the COinS microformat.
-+ (NSArray *) parserInfos {
++ (NSDictionary *) parserInfo {
 	NSString * parserDescription = NSLocalizedString(@"The COinS microformat can be used to embed bibliographic information in web pages.", @"Description for COinS mircoformat");
-	NSDictionary * parserInfo = [BDSKWebParser parserInfoWithName:@"COinS" address:@"http://ocoins.info/" description: parserDescription flags: BDSKParserFeatureAllPagesMask];
-	
-	return [NSArray arrayWithObject:parserInfo];
+	return [BDSKWebParser parserInfoWithName:@"COinS" address:@"http://ocoins.info/" description: parserDescription feature:BDSKParserFeatureGeneric];
 }
 
 @end

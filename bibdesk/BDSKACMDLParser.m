@@ -156,9 +156,8 @@
 }
 
 
-+ (NSArray *) parserInfos {
-	NSDictionary * parserInfos = [BDSKWebParser parserInfoWithName:@"ACM" address:@"http://portal.acm.org/" description:nil flags:BDSKParserFeatureNone];
-	return [NSArray arrayWithObject:parserInfos];
++ (NSDictionary *)parserInfo {
+    return [BDSKWebParser parserInfoWithName:@"ACM" address:@"http://portal.acm.org/" description:nil feature:BDSKParserFeaturePublic];
 }
 
 @end 
