@@ -332,8 +332,9 @@
     if ([NSString isEmptyString:urlString] == NO) {
         NSURL *url = [NSURL URLWithString:urlString];
         if (url) {
-            [pboard declareTypes:[NSArray arrayWithObjects:NSURLPboardType, nil] owner:nil];
+            [pboard declareTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil] owner:nil];
             [url writeToPasteboard:pboard];
+            [pboard setString:[url absoluteString] forType:BDSKWeblocFilePboardType];
             return YES;
         }
     }
