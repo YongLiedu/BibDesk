@@ -40,6 +40,7 @@
 #import "BDSKWebGroupViewController.h"
 #import <WebKit/WebKit.h>
 #import "BDSKWebParser.h"
+#import "BDSKBibTeXParser.h"
 #import "BDSKStringParser.h"
 #import "BDSKWebGroup.h"
 #import "BDSKBibDeskProtocol.h"
@@ -435,8 +436,13 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
                 string = [[[NSString alloc] initWithData:[dataSource data] encoding:nsEncoding] autorelease];
             }
             BDSKStringType type = [string contentStringType];
-            if(type != BDSKUnknownStringType)
-                newPubs = [document publicationsForString:string type:type verbose:NO error:&error];
+            BOOL isPartialData = NO;
+            if (type == BDSKBibTeXStringType)
+                newPubs = [BDSKBibTeXParser itemsFromString:string owner:nil isPartialData:&isPartialData error:&error];
+            else if (type == BDSKNoKeyBibTeXStringType)
+                newPubs = [BDSKBibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:@"cite-key"] owner:nil isPartialData:&isPartialData error:&error];
+            else if (type != BDSKUnknownStringType)
+                newPubs = [BDSKStringParser itemsFromString:string ofType:type error:&error];
         }
         else if (nil == newPubs) {
             // !!! logs are here to help diagnose problems that users are reporting
