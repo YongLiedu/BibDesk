@@ -241,7 +241,7 @@
 }
 
 - (void)addSearchGroup:(BDSKSearchGroup *)group {
-    NSUInteger idx = webGroupCount;
+    NSUInteger idx = webGroupCount + searchGroupCount;
     searchGroupCount += 1;    
     [self insertChild:group atIndex:idx];
 }
@@ -259,7 +259,7 @@
 }
 
 - (void)addURLGroup:(BDSKURLGroup *)group {
-    NSUInteger idx = webGroupCount + searchGroupCount + sharedGroupCount;
+    NSUInteger idx = webGroupCount + searchGroupCount + sharedGroupCount + URLGroupCount;
     URLGroupCount += 1;
     [self insertChild:group atIndex:idx];
 }
@@ -271,7 +271,7 @@
 }
 
 - (void)addScriptGroup:(BDSKScriptGroup *)group {
-    NSUInteger idx = webGroupCount + searchGroupCount + sharedGroupCount + URLGroupCount;
+    NSUInteger idx = webGroupCount + searchGroupCount + sharedGroupCount + URLGroupCount + scriptGroupCount;
     scriptGroupCount += 1;
     [self insertChild:group atIndex:idx];
 }
