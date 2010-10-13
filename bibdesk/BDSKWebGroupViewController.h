@@ -39,7 +39,9 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKCollapsibleView, BDSKEdgeView, BDSKWebGroup, WebView, WebFrame, BibDocument, BDSKDragTextField, BDSKFieldEditor, BDSKNewWebWindowHandler;
+@class BDSKCollapsibleView, BDSKEdgeView, BDSKWebGroup, WebView, WebFrame, BDSKDragTextField, BDSKFieldEditor, BDSKNewWebWindowHandler;
+
+@protocol BDSKWebGroupViewControllerDelegate;
 
 @interface BDSKWebGroupViewController : NSViewController <NSMenuDelegate> {
     IBOutlet BDSKCollapsibleView *collapsibleView;
@@ -48,7 +50,7 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
     IBOutlet NSSegmentedControl *backForwardButton;
     IBOutlet NSButton *stopOrReloadButton;
     
-    BibDocument *document;
+    id <BDSKWebGroupViewControllerDelegate> delegate;
     WebFrame *loadingWebFrame;
     NSUndoManager *undoManager;
     NSMutableArray *downloads;
@@ -58,7 +60,7 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
     BDSKNewWebWindowHandler *newWindowHandler;
 }
 
-- (id)initWithGroup:(BDSKWebGroup *)aGroup document:(BibDocument *)aDocument;
+- (id)initWithGroup:(BDSKWebGroup *)aGroup delegate:(id<BDSKWebGroupViewControllerDelegate>)aDelegate;
 
 - (NSView *)webView;
 
@@ -76,4 +78,9 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 
 - (void)addBookmark:(id)sender;
 
+@end
+
+
+@protocol BDSKWebGroupViewControllerDelegate <NSObject>
+- (void)webGroupViewController:(BDSKWebGroupViewController *)controller setStatusText:(NSString *)text;
 @end

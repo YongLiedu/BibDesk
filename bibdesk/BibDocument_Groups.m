@@ -73,7 +73,6 @@
 #import "BDSKMainTableView.h"
 #import "BDSKSearchGroupSheetController.h"
 #import "BDSKSearchGroupViewController.h"
-#import "BDSKWebGroupViewController.h"
 #import "BDSKServerInfo.h"
 #import "BDSKSearchBookmarkController.h"
 #import "BDSKSearchBookmark.h"
@@ -232,7 +231,7 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (BDSKWebGroupViewController *)webGroupViewController {
     if (webGroupViewController == nil)
-        webGroupViewController = [[BDSKWebGroupViewController alloc] initWithGroup:[groups webGroup] document:self];
+        webGroupViewController = [[BDSKWebGroupViewController alloc] initWithGroup:[groups webGroup] delegate:self];
     return webGroupViewController;
 }
 
@@ -286,6 +285,12 @@ The groupedPublications array is a subset of the publications array, developed b
     }
 }
 
+- (void)webGroupViewController:(BDSKWebGroupViewController *)controller setStatusText:(NSString *)text {
+    if ([NSString isEmptyString:text])
+        [self updateStatus];
+    else
+        [self setStatus:text];
+}
 
 #pragma mark Notification handlers
 

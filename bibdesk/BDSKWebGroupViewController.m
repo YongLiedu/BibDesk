@@ -52,7 +52,6 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BibDocument.h"
-#import "BibDocument_UI.h"
 #import "BDSKBookmarkController.h"
 #import "BDSKBookmark.h"
 #import "NSMenu_BDSKExtensions.h"
@@ -81,10 +80,10 @@
 	[WebView registerURLSchemeAsLocal:BDSKBibDeskScheme];	
 }
 
-- (id)initWithGroup:(BDSKWebGroup *)aGroup document:(BibDocument *)aDocument {
+- (id)initWithGroup:(BDSKWebGroup *)aGroup delegate:(id<BDSKWebGroupViewControllerDelegate>)aDelegate {
     if (self = [super initWithNibName:@"BDSKWebGroupView" bundle:nil]) {
         [self setRepresentedObject:aGroup];
-        document = aDocument;
+        delegate = aDelegate;
     }
     return self;
 }
@@ -96,6 +95,7 @@
     [webView setUIDelegate:nil];
     [webView setPolicyDelegate:nil];
     [urlField setDelegate:nil];
+    delegate = nil;
     BDSKDESTROY(undoManager);
     BDSKDESTROY(downloads);
     BDSKDESTROY(fieldEditor);
@@ -506,22 +506,15 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 
 #pragma mark WebUIDelegate protocol
 
-- (void)setStatus:(NSString *)text {
-    if ([webView window] == nil)
-        return;
-    if ([NSString isEmptyString:text])
-        [document updateStatus];
-    else 
-        [document setStatus:text];
-}
-
 - (void)webView:(WebView *)sender setStatusText:(NSString *)text {
-    [self setStatus:text];
+    if ([webView window])
+        [delegate webGroupViewController:self setStatusText:text];
 }
 
 - (void)webView:(WebView *)sender mouseDidMoveOverElement:(NSDictionary *)elementInformation modifierFlags:(NSUInteger)modifierFlags {
     NSURL *aLink = [elementInformation objectForKey:WebElementLinkURLKey];
-    [self setStatus:[[aLink absoluteString] stringByReplacingPercentEscapes]];
+    if ([webView window])
+        [delegate webGroupViewController:self setStatusText:[[aLink absoluteString] stringByReplacingPercentEscapes]];
 }
 
 - (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems;
@@ -628,7 +621,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 #pragma mark NSURLDownloadDelegate protocol
 
 - (NSWindow *)downloadWindowForAuthenticationSheet:(WebDownload *)download {
-    return [document windowForSheet];
+    return [webView window];
 }
 
 - (void)download:(NSURLDownload *)download decideDestinationWithSuggestedFilename:(NSString *)filename {
@@ -666,10 +659,11 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
                                    alternateButton:nil
                                        otherButton:nil
                          informativeTextWithFormat:errorDescription];
-    [alert beginSheetModalForWindow:[document windowForSheet]
-                      modalDelegate:nil
-                     didEndSelector:NULL
-                        contextInfo:NULL];
+    NSWindow *window = [webView window];
+    if (window)
+        [alert beginSheetModalForWindow:window modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+    else
+        [alert runModal];
 }
 
 @end
