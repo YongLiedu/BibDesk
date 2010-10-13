@@ -108,12 +108,11 @@
     [downloads removeAllObjects];
 }
 
-- (void)setRetrieving:(BOOL)retrieving {
-    [[self group] setRetrieving:retrieving];
+- (void)handleGroupUpdatedNotification:(NSNotification *)note {
     [backForwardButton setEnabled:[webView canGoBack] forSegment:0];
     [backForwardButton setEnabled:[webView canGoForward] forSegment:1];
     [stopOrReloadButton setEnabled:YES];
-    if (retrieving) {
+    if ([[self group] isRetrieving]) {
         [stopOrReloadButton setImage:[NSImage imageNamed:NSImageNameStopProgressTemplate]];
         [stopOrReloadButton setToolTip:NSLocalizedString(@"Cancel download", @"Tool tip message")];
         [stopOrReloadButton setKeyEquivalent:@"."];
@@ -141,7 +140,7 @@
     [backForwardButton setMenu:forwardMenu forSegment:1];
     
     // update the buttons, we should not be retrieving at this point
-    [self setRetrieving:NO];
+    [self handleGroupUpdatedNotification:nil];
     
     id oldCell = [urlField cell];
     BDSKIconTextFieldCell *cell = [[BDSKIconTextFieldCell alloc] initTextCell:[oldCell stringValue]];
@@ -172,6 +171,10 @@
                                              selector:@selector(handleApplicationWillTerminateNotification:)
                                                  name:NSApplicationWillTerminateNotification
                                                object:NSApp];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleGroupUpdatedNotification:)
+                                                 name:BDSKExternalGroupUpdatedNotification
+                                               object:[self group]];
 }
 
 #pragma mark Accessors
@@ -397,7 +400,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
         
         BDSKASSERT(loadingWebFrame == nil);
         
-        [self setRetrieving:YES];
+        [[self group] setRetrieving:YES];
         [[self group] setPublications:nil];
         loadingWebFrame = frame;
         
@@ -406,7 +409,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
         
     } else if (loadingWebFrame == nil) {
         
-        [self setRetrieving:YES];
+        [[self group] setRetrieving:YES];
         [[self group] addPublications:nil];
         loadingWebFrame = frame;
         
@@ -460,7 +463,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     }
     
     if (frame == loadingWebFrame) {
-        [self setRetrieving:NO];
+        [[self group] setRetrieving:NO];
         loadingWebFrame = nil;
     }
     [[self group] addPublications:newPubs ?: [NSArray array]];
@@ -468,7 +471,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
     if (frame == loadingWebFrame) {
-        [self setRetrieving:NO];
+        [[self group] setRetrieving:NO];
         [[self group] addPublications:nil];
         loadingWebFrame = nil;
     }
