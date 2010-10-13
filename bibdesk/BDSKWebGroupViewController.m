@@ -165,13 +165,15 @@
     
     // webview
     [webView setEditingDelegate:self];
-    [self loadURL: BDSKBibDeskWebGroupURL];
+    [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:BDSKBibDeskWebGroupURL]];
 	
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleApplicationWillTerminateNotification:)
                                                  name:NSApplicationWillTerminateNotification
                                                object:NSApp];
 }
+
+#pragma mark Accessors
 
 - (NSView *)webView {
     [self view];
@@ -197,25 +199,33 @@
     [self changeURL:urlField];
 }
 
-- (void)loadURL:(NSURL *)theURL {
-    if (theURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:theURL] == NO) {
-        [(BDSKIconTextFieldCell *)[urlField cell] setIcon:[NSImage missingFileImage]];
-        [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:theURL]];
-    }
+- (NSImage *)icon {
+    return [(BDSKIconTextFieldCell *)[urlField cell] icon];
 }
+
+- (void)setIcon:(NSImage *)icon {
+    [(BDSKIconTextFieldCell *)[urlField cell] setIcon:icon ?: [NSImage imageNamed:@"Bookmark"]];
+}
+
+- (void)synchronizeURLString {
+    [urlField setStringValue:[[[[[webView mainFrame] provisionalDataSource] request] URL] absoluteString]];
+}
+
+#pragma mark Actions
 
 - (IBAction)changeURL:(id)sender {
     NSString *newURLString = [sender stringValue];
     
-    if ([NSString isEmptyString:newURLString]) return;
-    
-    NSURL *theURL = [NSURL URLWithString:newURLString];
-    if ([theURL scheme] == nil)
-        theURL = [NSURL URLWithString:[@"http://" stringByAppendingString:newURLString]];
-    
-    if (theURL == nil) return;
-    
-    [self loadURL:theURL];
+    if ([NSString isEmptyString:newURLString] == NO) {
+        NSURL *theURL = [NSURL URLWithString:newURLString];
+        if ([theURL scheme] == nil)
+            theURL = [NSURL URLWithString:[@"http://" stringByAppendingString:newURLString]];
+        
+        if (theURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:theURL] == NO) {
+            [self setIcon:[NSImage missingFileImage]];
+            [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:theURL]];
+        }
+    }
 }
 
 - (IBAction)goBackForward:(id)sender {
@@ -394,11 +404,8 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
         [[self group] setPublications:nil];
         loadingWebFrame = frame;
         
-        WebDataSource *dataSource = [frame provisionalDataSource];
-        if ([dataSource unreachableURL] == nil) {
-            NSString *url = [[[dataSource request] URL] absoluteString];
-            [urlField setStringValue:url];
-        }
+        if ([[frame provisionalDataSource] unreachableURL] == nil)
+            [self synchronizeURLString];
         
     } else if (loadingWebFrame == nil) {
         
@@ -447,7 +454,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     }
     
     if (frame == [sender mainFrame]) {
-        [(BDSKIconTextFieldCell *)[urlField cell] setIcon:[sender mainFrameIcon] ?: [NSImage imageNamed:@"Bookmark"]];
+        [self setIcon:[sender mainFrameIcon]];
     }
     
     if (frame == loadingWebFrame) {
@@ -478,14 +485,13 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 
 - (void)webView:(WebView *)sender didReceiveServerRedirectForProvisionalLoadForFrame:(WebFrame *)frame{
     if (frame == [sender mainFrame]) { 
-        NSString *url = [[[[frame provisionalDataSource] request] URL] absoluteString];
-        [urlField setStringValue:url];
+        [self synchronizeURLString];
     }
 }
 
 - (void)webView:(WebView *)sender didReceiveIcon:(NSImage *)image forFrame:(WebFrame *)frame{
     if (frame == [sender mainFrame]) { 
-        [(BDSKIconTextFieldCell *)[urlField cell] setIcon:image];
+        [self setIcon:image];
     }
 }
 

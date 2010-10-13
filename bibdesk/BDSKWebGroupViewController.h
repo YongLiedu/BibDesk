@@ -68,7 +68,8 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 - (NSString *)URLString;
 - (void)setURLString:(NSString *)newURLString;
 
-- (void)loadURL:(NSURL *)theURL;
+- (NSImage *)icon;
+- (void)setIcon:(NSImage *)icon;
 
 - (IBAction)changeURL:(id)sender;
 - (IBAction)goBackForward:(id)sender;
