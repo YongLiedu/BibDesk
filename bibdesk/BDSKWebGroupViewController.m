@@ -82,7 +82,7 @@
 
 - (id)initWithGroup:(BDSKWebGroup *)aGroup document:(BibDocument *)aDocument {
     if (self = [super initWithNibName:@"BDSKWebGroupView" bundle:nil]) {
-        [self setGroup:aGroup];
+        [self setRepresentedObject:aGroup];
         document = aDocument;
     }
     return self;
@@ -182,10 +182,6 @@
 
 - (BDSKWebGroup *)group {
     return [self representedObject];
-}
-
-- (void)setGroup:(BDSKWebGroup *)newGroup {
-    [self setRepresentedObject:newGroup];
 }
 
 - (NSString *)URLString {
