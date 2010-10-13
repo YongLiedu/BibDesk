@@ -52,21 +52,21 @@
 #define HELP_DIRECTORY      @"BibDeskHelp"
 #define HELP_START_FILE     @"BibDeskHelp.html"
 
-NSString *BDSKBibDeskProtocolName = @"bibdesk";
+NSString *BDSKBibDeskScheme = @"bibdesk";
 NSURL *BDSKBibDeskWebGroupURL = nil;
 
 @implementation BDSKBibDeskProtocol
 
 + (void)initialize {
     BDSKINITIALIZE;
-    BDSKBibDeskWebGroupURL = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"%@:%@", BDSKBibDeskProtocolName, WEBGROUP_SPECIFIER]];
+    BDSKBibDeskWebGroupURL = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"%@:%@", BDSKBibDeskScheme, WEBGROUP_SPECIFIER]];
 }
 
 /*
  Only accept the bibdesk:webgroup URL.
 */
 + (BOOL)canInitWithRequest:(NSURLRequest *)theRequest {
-	return [[[theRequest URL] scheme] caseInsensitiveCompare:BDSKBibDeskProtocolName] == NSOrderedSame;
+	return [[[theRequest URL] scheme] caseInsensitiveCompare:BDSKBibDeskScheme] == NSOrderedSame;
 }
 
 
@@ -95,7 +95,7 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
         [response release];
     } else if ([resourceSpecifier hasCaseInsensitivePrefix:HELP_SPECIFIER]) {
         // when there's no "//" the URL we get has percent escapes including in particular the # character, which would we don't want
-        NSString *URLString = [NSString stringWithFormat:@"%@://%@", BDSKBibDeskProtocolName, [resourceSpecifier stringByReplacingPercentEscapes]];
+        NSString *URLString = [NSString stringWithFormat:@"%@://%@", BDSKBibDeskScheme, [resourceSpecifier stringByReplacingPercentEscapes]];
         NSURLResponse *response = [[NSURLResponse alloc] initWithURL:theURL MIMEType:@"text/html" expectedContentLength:-1 textEncodingName:nil];
         NSURLRequest *redirectRequest = [[NSURLRequest alloc] initWithURL:[NSURL URLWithStringByNormalizingPercentEscapes:URLString]];
         [client URLProtocol:self wasRedirectedToRequest:redirectRequest redirectResponse:response];

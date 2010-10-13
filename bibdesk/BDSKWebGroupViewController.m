@@ -77,7 +77,7 @@
     
 	// register for bibdesk: protocol, so we can display a help page on start
 	[NSURLProtocol registerClass:[BDSKBibDeskProtocol class]];
-	[WebView registerURLSchemeAsLocal:BDSKBibDeskProtocolName];	
+	[WebView registerURLSchemeAsLocal:BDSKBibDeskScheme];	
 }
 
 - (id)initWithGroup:(BDSKWebGroup *)aGroup document:(BibDocument *)aDocument {
