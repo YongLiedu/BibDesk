@@ -611,7 +611,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 
 // this is needed because WebView uses the document's undo manager by default, rather than the one from the window.
 // I consider this a bug
-- (NSUndoManager *)undoManagerForWebView:(WebView *)webView {
+- (NSUndoManager *)undoManagerForWebView:(WebView *)sender {
     if (undoManager == nil)
         undoManager = [[NSUndoManager alloc] init];
     return undoManager;
