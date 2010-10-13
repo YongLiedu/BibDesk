@@ -109,8 +109,8 @@
 }
 
 - (void)handleGroupUpdatedNotification:(NSNotification *)note {
-    [backForwardButton setEnabled:[webView canGoBack] forSegment:0];
-    [backForwardButton setEnabled:[webView canGoForward] forSegment:1];
+    [backForwardButton setEnabled:[[self webView] canGoBack] forSegment:0];
+    [backForwardButton setEnabled:[[self webView] canGoForward] forSegment:1];
     [stopOrReloadButton setEnabled:YES];
     if ([[self group] isRetrieving]) {
         [stopOrReloadButton setImage:[NSImage imageNamed:NSImageNameStopProgressTemplate]];
@@ -179,7 +179,7 @@
 
 #pragma mark Accessors
 
-- (NSView *)webView {
+- (WebView *)webView {
     [self view];
     return webView;
 }
@@ -208,7 +208,7 @@
 }
 
 - (void)synchronizeURLString {
-    [urlField setStringValue:[[[[[webView mainFrame] provisionalDataSource] request] URL] absoluteString]];
+    [urlField setStringValue:[[[[[[self webView] mainFrame] provisionalDataSource] request] URL] absoluteString]];
 }
 
 #pragma mark Actions
@@ -221,7 +221,7 @@
         if ([theURL scheme] == nil)
             theURL = [NSURL URLWithString:[@"http://" stringByAppendingString:newURLString]];
         
-        if (theURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:theURL] == NO) {
+        if (theURL && [[[[[[self webView] mainFrame] dataSource] request] URL] isEqual:theURL] == NO) {
             [self setIcon:[NSImage missingFileImage]];
             [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:theURL]];
         }
@@ -230,21 +230,21 @@
 
 - (IBAction)goBackForward:(id)sender {
     if([sender selectedSegment] == 0)
-        [webView goBack:sender];
+        [[self webView] goBack:sender];
     else
-        [webView goForward:sender];
+        [[self webView] goForward:sender];
 }
 
 - (IBAction)stopOrReloadAction:(id)sender {
 	if ([[self group] isRetrieving]) {
-		[webView stopLoading:sender];
+		[[self webView] stopLoading:sender];
 	} else {
-		[webView reload:sender];
+		[[self webView] reload:sender];
 	}
 }
 
 - (void)addBookmark:(id)sender {
-    [webView addBookmark:sender];
+    [[self webView] addBookmark:sender];
 }
 
 - (void)bookmarkLink:(id)sender {
@@ -279,13 +279,13 @@
 - (void)goBackForwardInHistory:(id)sender {
     WebHistoryItem *item = [sender representedObject];
     if (item)
-        [webView goToBackForwardItem:item];
+        [[self webView] goToBackForwardItem:item];
 }
 
 #pragma mark NSMenu delegate protocol
 
 - (void)menuNeedsUpdate:(NSMenu *)menu {
-    WebBackForwardList *backForwardList = [webView backForwardList];
+    WebBackForwardList *backForwardList = [[self webView] backForwardList];
     id items = nil;
     if (menu == backMenu)
         items = [[backForwardList backListWithLimit:MAX_HISTORY] reverseObjectEnumerator];
@@ -510,13 +510,13 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 #pragma mark WebUIDelegate protocol
 
 - (void)webView:(WebView *)sender setStatusText:(NSString *)text {
-    if ([webView window])
+    if ([sender window])
         [delegate webGroupViewController:self setStatusText:text];
 }
 
 - (void)webView:(WebView *)sender mouseDidMoveOverElement:(NSDictionary *)elementInformation modifierFlags:(NSUInteger)modifierFlags {
     NSURL *aLink = [elementInformation objectForKey:WebElementLinkURLKey];
-    if ([webView window])
+    if ([sender window])
         [delegate webGroupViewController:self setStatusText:[[aLink absoluteString] stringByReplacingPercentEscapes]];
 }
 
@@ -597,7 +597,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
 	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark This Page", @"Menu item title") stringByAppendingEllipsis]
                                                                 action:@selector(addBookmark:)
                                                          keyEquivalent:@""];
-    [item setTarget:webView];
+    [item setTarget:sender];
     [item setRepresentedObject:element];
     [menuItems addObject:[item autorelease]];
     

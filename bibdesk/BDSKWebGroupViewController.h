@@ -62,7 +62,7 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 
 - (id)initWithGroup:(BDSKWebGroup *)aGroup delegate:(id<BDSKWebGroupViewControllerDelegate>)aDelegate;
 
-- (NSView *)webView;
+- (WebView *)webView;
 
 - (BDSKWebGroup *)group;
 
