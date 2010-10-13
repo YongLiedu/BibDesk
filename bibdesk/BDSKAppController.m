@@ -725,8 +725,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             document = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:&error];
             [document showWindows];
         }
-        [document selectGroup:[[document groups] webGroup]];
-        [[document webGroupViewController] setURLString:[theURL absoluteString]];
+        [document openURL:theURL];
         
         if (document == nil && error)
             [NSApp presentError:error];

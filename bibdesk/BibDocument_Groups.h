@@ -148,4 +148,6 @@
 
 - (void)setImported:(BOOL)flag forPublications:(NSArray *)pubs inGroup:(BDSKExternalGroup *)aGroup;
 
+- (BOOL)openURL:(NSURL *)url;
+
 @end

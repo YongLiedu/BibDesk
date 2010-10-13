@@ -1271,18 +1271,10 @@
             url = [NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]]; 	
         else if ([type isEqualToString:NSURLPboardType])
             url = [NSURL URLFromPasteboard:pboard];
-        if (url) {
-            // switch to the web group
-            if ([self hasWebGroupSelected] == NO) {
-                // make sure the controller and its nib are loaded
-                [[self webGroupViewController] view];
-                [self selectGroup:[groups webGroup]];
-            }
-            [[self webGroupViewController] setURLString:[url absoluteString]];
-            return YES;
-        } else {
+        if (url)
+            return [self openURL:url];
+        else
             return NO;
-        }
         
     } else if (([item isExternal] || [item isEqual:[groups externalParent]]) && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil] containsObject:type]){
         

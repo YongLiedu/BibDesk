@@ -1239,16 +1239,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)openBookmark:(id)sender{
-    // switch to the web group
-    if ([self hasWebGroupSelected] == NO) {
-        // make sure the controller and its nib are loaded
-        [[self webGroupViewController] view];
-        if ([self selectGroup:[groups webGroup]] == NO) {
-            NSBeep();
-            return;
-        }
-    }
-    [[self webGroupViewController] setURLString:[[sender representedObject] absoluteString]];
+    if ([self openURL:[sender representedObject]] == NO)
+        NSBeep();
 }
 
 - (IBAction)addBookmark:(id)sender {
@@ -1599,6 +1591,19 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:NO edit:NO];
     
 	[[self undoManager] setActionName:NSLocalizedString(@"Import Publication", @"Undo action name")];
+}
+
+#pragma mark Opening a URL
+
+- (BOOL)openURL:(NSURL *)url {
+    if ([self hasWebGroupSelected] == NO) {
+        // make sure the controller and its nib are loaded
+        [[self webGroupViewController] view];
+        if ([self selectGroup:[groups webGroup]] == NO)
+            return NO;
+    }
+    [[self webGroupViewController] setURLString:[url absoluteString]];
+    return YES;
 }
 
 @end
