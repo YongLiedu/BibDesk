@@ -94,6 +94,7 @@
     [webView setFrameLoadDelegate:nil];
     [webView setUIDelegate:nil];
     [webView setPolicyDelegate:nil];
+    [webView setEditingDelegate:nil];
     [urlField setDelegate:nil];
     delegate = nil;
     BDSKDESTROY(undoManager);
