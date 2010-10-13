@@ -58,9 +58,6 @@ static NSString *BDSKWebLocalizedString = nil;
     return self;
 }
 
-// web groups don't initiate loading themselves
-- (BOOL)shouldRetrievePublications { return NO; }
-
 #pragma mark BDSKGroup overrides
 
 // note that pointer equality is used for these groups, so names can overlap
@@ -70,5 +67,10 @@ static NSString *BDSKWebLocalizedString = nil;
 - (BOOL)isRetrieving { return isRetrieving; }
 
 - (void)setRetrieving:(BOOL)flag { isRetrieving = flag; }
+
+#pragma mark BDSKExternalGroup overrides
+
+// web groups don't initiate loading themselves
+- (BOOL)shouldRetrievePublications { return NO; }
 
 @end
