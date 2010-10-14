@@ -150,7 +150,6 @@
 
 - (void)update {
     if (tmpKeys) {
-        NSMutableSet *usedKeys = [NSMutableSet setForCaseInsensitiveStrings];
         for (NSString *key in tmpKeys)
             [publications addObjectsFromArray:[[document publications] allItemsForCiteKey:key]];
         [self setCount:[publications count]];
