@@ -1043,7 +1043,7 @@
 														</object>
 														<object class="NSMenuItem" id="392102072">
 															<reference key="NSMenu" ref="286464861"/>
-															<string key="NSTitle">Add Web Group…</string>
+															<string key="NSTitle">Add Web Group</string>
 															<string key="NSKeyEquiv"/>
 															<int key="NSKeyEquivModMask">1048576</int>
 															<int key="NSMnemonicLoc">2147483647</int>
@@ -1054,7 +1054,7 @@
 														</object>
 													</object>
 												</object>
-												<int key="NSSelectedIndex">6</int>
+												<int key="NSSelectedIndex">3</int>
 												<bool key="NSPullDown">YES</bool>
 												<int key="NSPreferredEdge">3</int>
 												<bool key="NSUsesItemFromMenu">YES</bool>
@@ -1802,7 +1802,7 @@
 					</object>
 					<object class="NSMenuItem" id="198289746">
 						<reference key="NSMenu" ref="289384325"/>
-						<string key="NSTitle">Add Web Group…</string>
+						<string key="NSTitle">Add Web Group</string>
 						<string key="NSKeyEquiv"/>
 						<int key="NSKeyEquivModMask">1048576</int>
 						<int key="NSMnemonicLoc">2147483647</int>
