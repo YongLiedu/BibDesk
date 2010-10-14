@@ -53,7 +53,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
     id <BDSKWebGroupViewControllerDelegate> delegate;
     WebFrame *loadingWebFrame;
     NSUndoManager *undoManager;
-    NSMutableArray *downloads;
     NSMenu *backMenu;
     NSMenu *forwardMenu;
     BDSKFieldEditor *fieldEditor;

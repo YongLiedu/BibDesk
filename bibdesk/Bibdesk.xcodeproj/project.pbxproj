@@ -76,6 +76,8 @@
 		CE038E6A0F5F00E8001808EA /* Bookmark.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE038E690F5F00E8001808EA /* Bookmark.tiff */; };
 		CE0391910F612ED5001808EA /* sharing.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE0391900F612ED5001808EA /* sharing.tiff */; };
 		CE0391F90F6166FB001808EA /* importBadge.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE0391F80F6166FA001808EA /* importBadge.tiff */; };
+		CE044A4412667EB500CE55C4 /* BDSKDownloadManager.h in Headers */ = {isa = PBXBuildFile; fileRef = CE044A4212667EB500CE55C4 /* BDSKDownloadManager.h */; };
+		CE044A4512667EB500CE55C4 /* BDSKDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE044A4312667EB500CE55C4 /* BDSKDownloadManager.m */; };
 		CE04583D0FB6FBBF003CAF5D /* Scroller_Divider.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE04583B0FB6FBBF003CAF5D /* Scroller_Divider.tiff */; };
 		CE04583E0FB6FBBF003CAF5D /* Scroller_Background.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE04583C0FB6FBBF003CAF5D /* Scroller_Background.tiff */; };
 		CE071ED10F213EB300244F5C /* BDSKArxivParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE071ECF0F213EB300244F5C /* BDSKArxivParser.m */; };
@@ -854,6 +856,8 @@
 		CE038E690F5F00E8001808EA /* Bookmark.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Bookmark.tiff; sourceTree = "<group>"; };
 		CE0391900F612ED5001808EA /* sharing.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = sharing.tiff; sourceTree = "<group>"; };
 		CE0391F80F6166FA001808EA /* importBadge.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = importBadge.tiff; sourceTree = "<group>"; };
+		CE044A4212667EB500CE55C4 /* BDSKDownloadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKDownloadManager.h; sourceTree = "<group>"; };
+		CE044A4312667EB500CE55C4 /* BDSKDownloadManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKDownloadManager.m; sourceTree = "<group>"; };
 		CE04583B0FB6FBBF003CAF5D /* Scroller_Divider.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Scroller_Divider.tiff; sourceTree = "<group>"; };
 		CE04583C0FB6FBBF003CAF5D /* Scroller_Background.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Scroller_Background.tiff; sourceTree = "<group>"; };
 		CE05CF5C0D7743940034C2A8 /* WebURLsWithTitles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebURLsWithTitles.h; sourceTree = "<group>"; };
@@ -2237,6 +2241,7 @@
 				F946DCE709FDC4B600D471DF /* BDSKAsynchronousDOServer.m */,
 				CE09CEA50DDEF65E00F3F2FE /* BDSKCompletionManager.m */,
 				F990C58A0D42D58D00B5425E /* BDSKDocumentSearch.m */,
+				CE044A4312667EB500CE55C4 /* BDSKDownloadManager.m */,
 				F9A2245B0AE02C8E0046CA3D /* BDSKFileSearch.m */,
 				F925332208FC9FB80045D563 /* BDSKFileSearchIndex.m */,
 				CE7A313E0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m */,
@@ -2563,6 +2568,7 @@
 				F97198C10DADD32F00CA57AA /* BDSKDBLPWebServices.h */,
 				CE56D67B0A2DAB66003CE000 /* BDSKDocumentController.h */,
 				CE23915F0A334890009F3A5B /* BDSKDocumentInfoWindowController.h */,
+				CE044A4212667EB500CE55C4 /* BDSKDownloadManager.h */,
 				CE966C6E0B47CF25003BAB9A /* BDSKDublinCoreXMLParser.h */,
 				CEFA0F4C0AF1400900A3B4B1 /* BDSKOwnerProtocol.h */,
 				CEEC70DF093B6EC200A64F54 /* BDSKDragImageView.h */,
@@ -2911,6 +2917,7 @@
 				CD50E5FA11A2190E00848756 /* BDSKJSTORWebParser.h in Headers */,
 				CE2F056811B517E9001B0AE0 /* BDSKOpenAccessoryViewController.h in Headers */,
 				CEFE21311259E6CB00DAD553 /* BDSKSearchGroupServerManager.h in Headers */,
+				CE044A4412667EB500CE55C4 /* BDSKDownloadManager.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3743,6 +3750,7 @@
 				CE2F056911B517E9001B0AE0 /* BDSKOpenAccessoryViewController.m in Sources */,
 				CEFEF0ED11C23F1F0050350D /* BDSKCompletionServer.m in Sources */,
 				CEFE21321259E6CB00DAD553 /* BDSKSearchGroupServerManager.m in Sources */,
+				CE044A4512667EB500CE55C4 /* BDSKDownloadManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

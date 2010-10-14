@@ -54,6 +54,7 @@
 #import "BibDocument.h"
 #import "BDSKBookmarkController.h"
 #import "BDSKBookmark.h"
+#import "BDSKDownloadManager.h"
 #import "NSMenu_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
@@ -89,7 +90,6 @@
 }
 
 - (void)dealloc {
-    [downloads makeObjectsPerformSelector:@selector(cancel)];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [webView setFrameLoadDelegate:nil];
     [webView setUIDelegate:nil];
@@ -98,15 +98,9 @@
     [urlField setDelegate:nil];
     delegate = nil;
     BDSKDESTROY(undoManager);
-    BDSKDESTROY(downloads);
     BDSKDESTROY(fieldEditor);
     BDSKDESTROY(newWindowHandler);
     [super dealloc];
-}
-
-- (void)handleApplicationWillTerminateNotification:(NSNotification *)note {
-    [downloads makeObjectsPerformSelector:@selector(cancel)];
-    [downloads removeAllObjects];
 }
 
 - (void)handleGroupUpdatedNotification:(NSNotification *)note {
@@ -168,10 +162,6 @@
     [webView setEditingDelegate:self];
     [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:BDSKBibDeskWebGroupURL]];
 	
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(handleApplicationWillTerminateNotification:)
-                                                 name:NSApplicationWillTerminateNotification
-                                               object:NSApp];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleGroupUpdatedNotification:)
                                                  name:BDSKExternalGroupUpdatedNotification
@@ -257,16 +247,10 @@
 }
 
 - (void)downloadLink:(id)sender {
-	NSDictionary *element = (NSDictionary *)[sender representedObject];
-	NSURL *linkURL = (NSURL *)[element objectForKey:WebElementLinkURLKey];
-	NSURLDownload *download = linkURL ? [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:linkURL] delegate:self] : nil;
-    
-    if (download) {
-        if (downloads == nil)
-            downloads = [[NSMutableArray alloc] init];
-        [downloads addObject:download];
-        [download release];
-    } else
+	NSURL *linkURL = (NSURL *)[[sender representedObject] objectForKey:WebElementLinkURLKey];
+    if (linkURL)
+        [[BDSKDownloadManager sharedManager] addDownloadForURL:linkURL];
+    else
         NSBeep();
 }
 
@@ -620,54 +604,6 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     if (undoManager == nil)
         undoManager = [[NSUndoManager alloc] init];
     return undoManager;
-}
-
-#pragma mark NSURLDownloadDelegate protocol
-
-- (NSWindow *)downloadWindowForAuthenticationSheet:(WebDownload *)download {
-    return [webView window];
-}
-
-- (void)download:(NSURLDownload *)download decideDestinationWithSuggestedFilename:(NSString *)filename {
-	NSString *extension = [filename pathExtension];
-   
-	NSSavePanel *sPanel = [NSSavePanel savePanel];
-    if (NO == [extension isEqualToString:@""]) 
-		[sPanel setRequiredFileType:extension];
-    [sPanel setAllowsOtherFileTypes:YES];
-    [sPanel setCanSelectHiddenExtension:YES];
-	
-    // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
-    NSInteger returnCode = [sPanel runModalForDirectory:nil file:filename];
-    if (returnCode == NSOKButton) {
-        [download setDestination:[sPanel filename] allowOverwrite:YES];
-    } else {
-        [download cancel];
-    }
-}
-
-- (BOOL)download:(NSURLDownload *)download shouldDecodeSourceDataOfMIMEType:(NSString *)encodingType {
-    return YES;
-}
-
-- (void)downloadDidFinish:(NSURLDownload *)download {
-    [downloads removeObject:download];
-}
-
-- (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error {
-    [downloads removeObject:download];
-        
-    NSString *errorDescription = [error localizedDescription] ?: NSLocalizedString(@"An error occured during download.", @"Informative text in alert dialog");
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Download Failed", @"Message in alert dialog when download failed")
-                                     defaultButton:nil
-                                   alternateButton:nil
-                                       otherButton:nil
-                         informativeTextWithFormat:errorDescription];
-    NSWindow *window = [webView window];
-    if (window)
-        [alert beginSheetModalForWindow:window modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-    else
-        [alert runModal];
 }
 
 @end
