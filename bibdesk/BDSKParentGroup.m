@@ -50,6 +50,7 @@
 #import "BibDocument.h"
 #import "BibAuthor.h"
 
+#define BDSKNoInitialWebGroupKey @"BDSKNoInitialWebGroup"
 
 @implementation BDSKParentGroup
 
@@ -208,14 +209,17 @@
 - (id)init {
     self = [self initWithName:NSLocalizedString(@"EXTERNAL", @"source list group row title")];
     if (self) {
-        webGroupCount = 1;
+        webGroupCount = 0;
         sharedGroupCount = 0;
         URLGroupCount = 0;
         scriptGroupCount = 0;
         searchGroupCount = 0;
-        BDSKWebGroup *webGroup = [[BDSKWebGroup alloc] init];
-        [self insertChild:webGroup atIndex:0];
-        [webGroup release];
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKNoInitialWebGroupKey] == NO) {
+            webGroupCount = 1;
+            BDSKWebGroup *webGroup = [[BDSKWebGroup alloc] init];
+            [self insertChild:webGroup atIndex:0];
+            [webGroup release];
+        }
     }
     return self;
 }
