@@ -118,12 +118,6 @@
     BDSKWebGroup *oldGroup = [self representedObject];
     if (oldGroup != newGroup) {
         if (oldGroup) {
-            WebView *oldWebView = [oldGroup webView];
-            WebView *newWebView = [newGroup webView];
-            if ([oldWebView window] && newWebView) {
-                [newWebView setFrame:[oldWebView frame]];
-                [[oldWebView superview] replaceSubview:oldWebView with:newWebView];
-            }
             [oldGroup setDelegate:nil];
             [[NSNotificationCenter defaultCenter] removeObserver:self
                                                             name:BDSKExternalGroupUpdatedNotification

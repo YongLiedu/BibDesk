@@ -246,37 +246,44 @@ The groupedPublications array is a subset of the publications array, developed b
         webGroupViewController = [[BDSKWebGroupViewController alloc] init];
     [self insertControlView:[webGroupViewController view] atTop:NO];
     
+    WebView *oldWebView = [webGroupViewController webView];
+    
     BDSKWebGroup *group = [[self selectedGroups] firstObject];
     BDSKASSERT([group isWeb]);
     [webGroupViewController setGroup:group];
     
     NSView *webView = [webGroupViewController webView];
     if ([webView window] == nil) {
-        NSView *view1 = [[splitView subviews] objectAtIndex:0];
-        NSView *view2 = [[splitView subviews] objectAtIndex:1];
-        NSRect svFrame = [splitView bounds];
-        NSRect webFrame = svFrame;
-        NSRect tableFrame = svFrame;
-        NSRect previewFrame = svFrame;
-        CGFloat height = NSHeight(svFrame) - 2 * [splitView dividerThickness];
-        CGFloat oldFraction = [splitView fraction];
-        
-        if (docState.lastWebViewFraction <= 0.0)
-            docState.lastWebViewFraction = 0.4;
-        
-        webFrame.size.height = round(height * docState.lastWebViewFraction);
-        previewFrame.size.height = round((height - NSHeight(webFrame)) * oldFraction);
-        tableFrame.size.height = height - NSHeight(webFrame) - NSHeight(previewFrame);
-        tableFrame.origin.y = NSMaxY(previewFrame) + [splitView dividerThickness];
-        webFrame.origin.y = NSMaxY(tableFrame) + [splitView dividerThickness];
-        
-        [webView setFrame:webFrame];
-        [splitView addSubview:webView positioned:NSWindowBelow relativeTo:mainView];
-        [webView setFrame:webFrame];
-        [view1 setFrame:tableFrame];
-        [view2 setFrame:previewFrame];
-        [splitView adjustSubviews];
-        [splitView setNeedsDisplay:YES];
+        if ([oldWebView window]) {
+            [webView setFrame:[oldWebView frame]];
+            [splitView replaceSubview:oldWebView with:webView];
+        } else {
+            NSView *view1 = [[splitView subviews] objectAtIndex:0];
+            NSView *view2 = [[splitView subviews] objectAtIndex:1];
+            NSRect svFrame = [splitView bounds];
+            NSRect webFrame = svFrame;
+            NSRect tableFrame = svFrame;
+            NSRect previewFrame = svFrame;
+            CGFloat height = NSHeight(svFrame) - 2 * [splitView dividerThickness];
+            CGFloat oldFraction = [splitView fraction];
+            
+            if (docState.lastWebViewFraction <= 0.0)
+                docState.lastWebViewFraction = 0.4;
+            
+            webFrame.size.height = round(height * docState.lastWebViewFraction);
+            previewFrame.size.height = round((height - NSHeight(webFrame)) * oldFraction);
+            tableFrame.size.height = height - NSHeight(webFrame) - NSHeight(previewFrame);
+            tableFrame.origin.y = NSMaxY(previewFrame) + [splitView dividerThickness];
+            webFrame.origin.y = NSMaxY(tableFrame) + [splitView dividerThickness];
+            
+            [webView setFrame:webFrame];
+            [splitView addSubview:webView positioned:NSWindowBelow relativeTo:mainView];
+            [webView setFrame:webFrame];
+            [view1 setFrame:tableFrame];
+            [view2 setFrame:previewFrame];
+            [splitView adjustSubviews];
+            [splitView setNeedsDisplay:YES];
+        }
     }
 }
 
