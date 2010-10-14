@@ -211,7 +211,9 @@ static NSArray *noCountCellValueKeys = nil;
 }
 
 - (NSString *)toolTip {
-    return [self stringValue];
+    NSString *aLabel = [self label];
+    NSString *aName = [self stringValue];
+    return [NSString isEmptyString:aLabel] ? aName : [NSString stringWithFormat:@"%@: %@", aName, aLabel];
 }
 
 - (NSString *)errorMessage {

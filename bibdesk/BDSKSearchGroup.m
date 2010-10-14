@@ -235,10 +235,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     return [label length] > 0 ? label : NSLocalizedString(@"(Empty)", @"Empty search term");
 }
 
-- (NSString *)toolTip {
-    return [NSString stringWithFormat:@"%@: %@", [self name], [self label]];
-}
-
 - (BOOL)isSearch { return YES; }
 
 - (BOOL)isEditable { return YES; }

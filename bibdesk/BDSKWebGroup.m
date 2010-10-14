@@ -127,10 +127,6 @@ static NSString *BDSKWebLocalizedString = nil;
     }
 }
 
-- (NSString *)toolTip {
-    return [NSString stringWithFormat:@"%@: %@", [self name], [self label]];
-}
-
 #pragma mark BDSKExternalGroup overrides
 
 // web groups don't initiate loading themselves
