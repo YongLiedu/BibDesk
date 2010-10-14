@@ -117,7 +117,7 @@ static NSString *BDSKWebLocalizedString = nil;
 - (BOOL)isRetrieving { return isRetrieving; }
 
 - (NSString *)label {
-    return [label length] > 0 ? label : NSLocalizedString(@"(Empty)", @"Empty web group title");
+    return [label length] > 0 ? label : NSLocalizedString(@"(Empty)", @"Empty web group label");
 }
 
 - (void)setLabel:(NSString *)newLabel {
@@ -164,7 +164,7 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (void)setURL:(NSURL *)newURL {
     if (newURL && [[[[[[self webView] mainFrame] dataSource] request] URL] isEqual:newURL] == NO) {
-        [self setLabel:nil];
+        [self setLabel:[NSLocalizedString(@"Loading", @"Placeholder web group label") stringByAppendingEllipsis]];
         [delegate webGroup:self setIcon:nil];
         [delegate webGroup:self setURL:newURL];
         [[[self webView] mainFrame] loadRequest:[NSURLRequest requestWithURL:newURL]];
@@ -203,6 +203,9 @@ static NSString *BDSKWebLocalizedString = nil;
     if (frame == [sender mainFrame]) {
         
         BDSKASSERT(loadingWebFrame == nil);
+        
+        [delegate webGroup:self setIcon:nil];
+        [self setLabel:[NSLocalizedString(@"Loading", @"Placeholder web group label") stringByAppendingEllipsis]];
         
         isRetrieving = YES;
         [self setPublications:nil];
@@ -263,8 +266,9 @@ static NSString *BDSKWebLocalizedString = nil;
     }
     
     if (frame == [sender mainFrame]) {
+        NSString *title = [sender mainFrameTitle];
         [delegate webGroup:self setIcon:[sender mainFrameIcon]];
-        [self setLabel:[sender mainFrameTitle]];
+        [self setLabel:[NSString isEmptyString:title] ?  [[self URL] absoluteString] : title];
     }
     
     if (frame == loadingWebFrame) {
@@ -285,7 +289,7 @@ static NSString *BDSKWebLocalizedString = nil;
     NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
     
     NSURL *url = [[[frame provisionalDataSource] request] URL];
-    NSString *errorHTML = [NSString stringWithFormat:@"<html><body><h1>%@</h1></body></html>", [error localizedDescription]];
+    NSString *errorHTML = [NSString stringWithFormat:@"<html><title>%@</title><body><h1>%@</h1></body></html>", NSLocalizedString(@"Error", @"Placeholder web group label"), [error localizedDescription]];
     [frame loadAlternateHTMLString:errorHTML baseURL:nil forUnreachableURL:url];
 }
 
