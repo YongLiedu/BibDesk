@@ -38,44 +38,31 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKWebGroup.h"
 
-@class BDSKCollapsibleView, BDSKEdgeView, BDSKWebGroup, WebView, WebFrame, BDSKDragTextField, BDSKFieldEditor, BDSKNewWebWindowHandler;
+@class BDSKCollapsibleView, BDSKEdgeView, WebView, BDSKDragTextField, BDSKFieldEditor;
 
 @protocol BDSKWebGroupViewControllerDelegate;
 
-@interface BDSKWebGroupViewController : NSViewController <NSMenuDelegate> {
+@interface BDSKWebGroupViewController : NSViewController <NSMenuDelegate, BDSKWebGroupDelegate> {
     IBOutlet BDSKCollapsibleView *collapsibleView;
     IBOutlet BDSKDragTextField *urlField;
-    IBOutlet WebView *webView;
     IBOutlet NSSegmentedControl *backForwardButton;
     IBOutlet NSButton *stopOrReloadButton;
     
-    id <BDSKWebGroupViewControllerDelegate> delegate;
-    WebFrame *loadingWebFrame;
-    NSUndoManager *undoManager;
     NSMenu *backMenu;
     NSMenu *forwardMenu;
     BDSKFieldEditor *fieldEditor;
-    BDSKNewWebWindowHandler *newWindowHandler;
 }
 
-- (id)initWithGroup:(BDSKWebGroup *)aGroup delegate:(id<BDSKWebGroupViewControllerDelegate>)aDelegate;
+- (BDSKWebGroup *)group;
+- (void)setGroup:(BDSKWebGroup *)newGroup;
 
 - (WebView *)webView;
-
-- (BDSKWebGroup *)group;
-
-- (NSString *)URLString;
-- (void)setURLString:(NSString *)newURLString;
-
-- (NSImage *)icon;
-- (void)setIcon:(NSImage *)icon;
 
 - (IBAction)changeURL:(id)sender;
 - (IBAction)goBackForward:(id)sender;
 - (IBAction)stopOrReloadAction:(id)sender;
-
-- (void)addBookmark:(id)sender;
 
 @end
 

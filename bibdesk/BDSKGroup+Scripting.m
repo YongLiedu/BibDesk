@@ -52,7 +52,6 @@
 #import "BDSKCondition+Scripting.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKServerInfo.h"
-#import "BDSKWebGroupViewController.h"
 #import "BDSKCondition.h"
 #import "BDSKFilter.h"
 #import "NSWorkspace_BDSKExtensions.h"
@@ -598,12 +597,12 @@
 }
 
 - (NSString *)URLString {
-    NSString *URLString = [[[self document] webGroupViewController] URLString];
-    return URLString ?: @"";
+    return [[self URL] absoluteString] ?: @"";
 }
 
 - (void)setURLString:(NSString *)newURLString {
-    [[[self document] webGroupViewController] setURLString:newURLString];
+    if (newURLString)
+        [self setURL:[NSURL URLWithString:newURLString]];
 }
 
 @end

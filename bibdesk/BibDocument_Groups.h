@@ -37,11 +37,10 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
-#import "BDSKWebGroupViewController.h"
 
 @class BDSKGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKExternalGroup, BDSKURLGroup, BDSKScriptGroup, BDSKWebGroup, BDSKFilterController, BDSKURLGroupSheetController, BDSKScriptGroupSheetController, BDSKWebGroupViewController;
 
-@interface BibDocument (Groups) <BDSKWebGroupViewControllerDelegate>
+@interface BibDocument (Groups)
 
 - (BOOL)hasLibraryGroupSelected;
 - (BOOL)hasLastImportGroupSelected;

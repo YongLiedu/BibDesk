@@ -71,6 +71,7 @@
 #import "BDSKCollapsibleView.h"
 #import "BDSKSearchGroup.h"
 #import "BDSKMainTableView.h"
+#import "BDSKWebGroupViewController.h"
 #import "BDSKSearchGroupSheetController.h"
 #import "BDSKSearchGroupViewController.h"
 #import "BDSKServerInfo.h"
@@ -87,6 +88,7 @@
 #import "BDSKButtonBar.h"
 #import "NSMenu_BDSKExtensions.h"
 #import "BDSKBookmarkSheetController.h"
+#import "BDSKBookmarkController.h"
 
 @implementation BibDocument (Groups)
 
@@ -230,8 +232,10 @@ The groupedPublications array is a subset of the publications array, developed b
 #pragma mark Web Group 
 
 - (BDSKWebGroupViewController *)webGroupViewController {
-    if (webGroupViewController == nil)
-        webGroupViewController = [[BDSKWebGroupViewController alloc] initWithGroup:[groups webGroup] delegate:self];
+    if (webGroupViewController == nil) {
+        webGroupViewController = [[BDSKWebGroupViewController alloc] init];
+        [webGroupViewController setGroup:[groups webGroup]];
+    }
     return webGroupViewController;
 }
 
@@ -283,13 +287,6 @@ The groupedPublications array is a subset of the publications array, developed b
         [splitView adjustSubviews];
         [splitView setNeedsDisplay:YES];
     }
-}
-
-- (void)webGroupViewController:(BDSKWebGroupViewController *)controller setStatusText:(NSString *)text {
-    if ([NSString isEmptyString:text])
-        [self updateStatus];
-    else
-        [self setStatus:text];
 }
 
 #pragma mark Notification handlers
@@ -1245,7 +1242,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (IBAction)addBookmark:(id)sender {
     if ([self hasWebGroupSelected]) {
-        [[self webGroupViewController] addBookmark:sender];
+        [[[self webGroupViewController] webView] addBookmark:sender];
     } else
         NSBeep();
 }
@@ -1598,11 +1595,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 - (BOOL)openURL:(NSURL *)url {
     if ([self hasWebGroupSelected] == NO) {
         // make sure the controller and its nib are loaded
-        [[self webGroupViewController] view];
         if ([self selectGroup:[groups webGroup]] == NO)
             return NO;
     }
-    [[self webGroupViewController] setURLString:[url absoluteString]];
+    [[groups webGroup] setURL:url];
     return YES;
 }
 

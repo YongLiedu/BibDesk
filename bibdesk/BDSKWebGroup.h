@@ -39,11 +39,30 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKExternalGroup.h"
 
+@protocol BDSKWebGroupDelegate;
+@class WebView, WebFrame, BDSKNewWebWindowHandler;
 
 @interface BDSKWebGroup : BDSKExternalGroup {
     BOOL isRetrieving;
+    id <BDSKWebGroupDelegate> delegate;
+    WebView *webView;
+    WebFrame *loadingWebFrame;
+    NSUndoManager *undoManager;
+    BDSKNewWebWindowHandler *newWindowHandler;
 }
 
-- (void)setRetrieving:(BOOL)flag;
+- (id<BDSKWebGroupDelegate>)delegate;
+- (void)setDelegate:(id<BDSKWebGroupDelegate>)newDelegate;
 
+- (NSURL *)URL;
+- (void)setURL:(NSURL *)newURL;
+
+- (WebView *)webView;
+
+@end
+
+
+@protocol BDSKWebGroupDelegate <NSObject>
+- (void)webGroup:(BDSKWebGroup *)group setURL:(NSURL *)aURL;
+- (void)webGroup:(BDSKWebGroup *)group setIcon:(NSImage *)icon;
 @end
