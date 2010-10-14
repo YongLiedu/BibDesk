@@ -1214,7 +1214,7 @@
         return NSDragOperationNone;
     
     // drop a file or URL on external groups
-    if ([item isEqual:[groups webGroup]] && idx == NSOutlineViewDropOnItemIndex && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil] containsObject:type]) {
+    if ([item isWeb] && idx == NSOutlineViewDropOnItemIndex && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil] containsObject:type]) {
         return NSDragOperationEvery;
     } else if (([item isExternal] || [item isEqual:[groups externalParent]]) && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil] containsObject:type]) {
         [outlineView setDropItem:[groups externalParent] dropChildIndex:NSOutlineViewDropOnItemIndex];
@@ -1263,7 +1263,7 @@
     BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupOutlineView];
     BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
     
-    if (idx == NSOutlineViewDropOnItemIndex && [item isEqual:[groups webGroup]] && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil] containsObject:type]) {
+    if (idx == NSOutlineViewDropOnItemIndex && [item isWeb] && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil] containsObject:type]) {
         
         NSURL *url = nil;
         

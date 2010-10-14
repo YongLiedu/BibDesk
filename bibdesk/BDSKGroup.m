@@ -175,6 +175,8 @@ static NSArray *noCountCellValueKeys = nil;
 
 - (BOOL)isSearch { return NO; }
 
+- (BOOL)isWeb { return NO; }
+
 - (BOOL)isExternal { return NO; }
 
 - (BOOL)isValidDropTarget { return NO; }

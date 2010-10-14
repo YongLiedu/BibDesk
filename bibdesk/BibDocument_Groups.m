@@ -103,7 +103,7 @@
 }
 
 - (BOOL)hasWebGroupSelected{
-    return [[self selectedGroups] lastObject] == [groups webGroup];
+    return [[[self selectedGroups] lastObject] isWeb];
 }
 
 - (BOOL)hasSharedGroupsSelected{
@@ -147,7 +147,7 @@
 }
 
 - (BOOL)hasWebGroupClickedOrSelected{
-    return [[self clickedOrSelectedGroups] lastObject] == [groups webGroup];
+    return [[[self clickedOrSelectedGroups] lastObject] isWeb];
 }
 
 - (BOOL)hasSharedGroupsClickedOrSelected{
@@ -434,7 +434,7 @@ The groupedPublications array is a subset of the publications array, developed b
     
     if ([[group document] isEqual:self]) {
         BOOL succeeded = [[[notification userInfo] objectForKey:BDSKExternalGroupSucceededKey] boolValue];
-        BOOL isWeb = [group isEqual:[groups webGroup]];
+        BOOL isWeb = [group isWeb];
         
         if (isWeb == NO && [sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) {
             [self sortGroupsByKey:nil];

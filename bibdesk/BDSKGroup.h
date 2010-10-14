@@ -152,6 +152,13 @@
 - (BOOL)isSearch;
 
 /*!
+	@method isWeb
+	@abstract Boolean, returns whether the receiver is a web group. 
+	@discussion -
+*/
+- (BOOL)isWeb;
+
+/*!
 	@method isExternal
 	@abstract Boolean, returns whether the receiver is an external source group (shared, URL or script). 
 	@discussion -

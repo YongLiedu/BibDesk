@@ -103,6 +103,8 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (NSImage *)icon { return [NSImage imageNamed:@"webGroup"]; }
 
+- (BOOL)isWeb { return YES; }
+
 - (BOOL)isRetrieving { return isRetrieving; }
 
 #pragma mark BDSKExternalGroup overrides
