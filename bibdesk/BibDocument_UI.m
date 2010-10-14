@@ -337,7 +337,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         }
         [statusStr appendFormat:@"%ld %@", (long)groupPubsCount, (groupPubsCount == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message")];
         // we can have only a single external group selected at a time
-        if ([self hasWebGroupSelected]) {
+        if ([self hasWebGroupsSelected]) {
             [statusStr appendFormat:@" %@", NSLocalizedString(@"in web group", @"Partial status message")];
         } else if ([self hasSharedGroupsSelected]) {
             [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in shared group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];

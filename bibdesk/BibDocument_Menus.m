@@ -352,7 +352,8 @@
            [self hasStaticGroupsClickedOrSelected] ||
            [self hasURLGroupsClickedOrSelected] ||
            [self hasScriptGroupsClickedOrSelected] ||
-           [self hasSearchGroupsClickedOrSelected];
+           [self hasSearchGroupsClickedOrSelected] ||
+           [self hasWebGroupsClickedOrSelected];
 } 
 
 - (BOOL) validateRenameGroupActionMenuItem:(NSMenuItem *)menuItem{
@@ -506,6 +507,9 @@
     } else if ([self hasSearchGroupsClickedOrSelected]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In Search Group", @"Menu item title")];
         return YES;
+    } else if ([self hasWebGroupsClickedOrSelected]) {
+        [menuItem setTitle:NSLocalizedString(@"Merge In Web Group", @"Menu item title")];
+        return YES;
     } else {
         [menuItem setTitle:NSLocalizedString(@"Merge In Shared Group", @"Menu item title")];
         return NO;
@@ -516,7 +520,7 @@
     if ([self hasSharedGroupsSelected]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In Shared Publications", @"Menu item title")];
         return [self numberOfClickedOrSelectedPubs] > 0;
-    } else if ([self hasURLGroupsSelected] || [self hasScriptGroupsSelected] || [self hasSearchGroupsSelected]) {
+    } else if ([self hasURLGroupsSelected] || [self hasScriptGroupsSelected] || [self hasSearchGroupsSelected] || [self hasWebGroupsSelected]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In External Publications", @"Menu item title")];
         return [self numberOfClickedOrSelectedPubs] > 0;
     } else {
@@ -583,7 +587,7 @@
 }
 
 - (BOOL)validateAddBookmarkMenuItem:(NSMenuItem *)menuItem {
-    return [self hasWebGroupSelected];
+    return [self hasWebGroupsSelected];
 }
 
 - (BOOL)validateEmailPubCmdMenuItem:(NSMenuItem *)menuItem {

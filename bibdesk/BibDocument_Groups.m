@@ -102,7 +102,7 @@
     return [[self selectedGroups] containsObject:[groups lastImportGroup]];
 }
 
-- (BOOL)hasWebGroupSelected{
+- (BOOL)hasWebGroupsSelected{
     return [[[self selectedGroups] lastObject] isWeb];
 }
 
@@ -146,7 +146,7 @@
     return [[self clickedOrSelectedGroups] containsObject:[groups lastImportGroup]];
 }
 
-- (BOOL)hasWebGroupClickedOrSelected{
+- (BOOL)hasWebGroupsClickedOrSelected{
     return [[[self clickedOrSelectedGroups] lastObject] isWeb];
 }
 
@@ -240,12 +240,16 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)showWebGroupView {
-    if ([self isDisplayingWebGroupView] == NO) {
-        NSView *webGroupView = [[self webGroupViewController] view];
-        NSView *webView = [[self webGroupViewController] webView];
-        
-        [self insertControlView:webGroupView atTop:NO];
-        
+    if (webGroupViewController == nil)
+        webGroupViewController = [[BDSKWebGroupViewController alloc] init];
+    [self insertControlView:[webGroupViewController view] atTop:NO];
+    
+    BDSKWebGroup *group = [[self selectedGroups] firstObject];
+    BDSKASSERT([group isWeb]);
+    [webGroupViewController setGroup:group];
+    
+    NSView *webView = [webGroupViewController webView];
+    if ([webView window] == nil) {
         NSView *view1 = [[splitView subviews] objectAtIndex:0];
         NSView *view2 = [[splitView subviews] objectAtIndex:1];
         NSRect svFrame = [splitView bounds];
@@ -275,18 +279,20 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)hideWebGroupView{
-    if ([self isDisplayingWebGroupView]) {
-        NSView *webGroupView = [[self webGroupViewController] view];
-        NSView *webView = [[self webGroupViewController] webView];
+    NSView *webView = [webGroupViewController webView];
+    if ([webView window]) {
+        NSView *webGroupView = [webGroupViewController view];
         id firstResponder = [documentWindow firstResponder];
         if ([firstResponder respondsToSelector:@selector(isDescendantOf:)] && [firstResponder isDescendantOf:webGroupView])
             [documentWindow makeFirstResponder:tableView];
         docState.lastWebViewFraction = NSHeight([webView frame]) / fmax(1.0, NSHeight([splitView frame]) - 2 * [splitView dividerThickness]);
-        [self removeControlView:webGroupView];
         [webView removeFromSuperview];
         [splitView adjustSubviews];
         [splitView setNeedsDisplay:YES];
     }
+    
+    [self removeControlView:[webGroupViewController view]];
+    [webGroupViewController setGroup:nil];
 }
 
 #pragma mark Notification handlers
@@ -321,14 +327,15 @@ The groupedPublications array is a subset of the publications array, developed b
         BOOL wasSearch = [self isDisplayingSearchGroupView];
         BOOL wasWeb = [self isDisplayingWebGroupView];
         BOOL isSearch = [self hasSearchGroupsSelected];
-        BOOL isWeb = [self hasWebGroupSelected];
+        BOOL isWeb = [self hasWebGroupsSelected];
         
         if (isSearch == NO && wasSearch)
             [self hideSearchGroupView];            
         if (isWeb == NO && wasWeb)
             [self hideWebGroupView];
-        if (isWeb && wasWeb == NO) {
-            newSortKey = BDSKImportOrderString;
+        if (isWeb) {
+            if (wasWeb == NO)
+                newSortKey = BDSKImportOrderString;
             [self showWebGroupView];
         }
         if (isSearch) {
@@ -866,6 +873,16 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     // updating of the tables is done when finishing the edit of the name
 }
 
+- (IBAction)addWebGroupAction:(id)sender {
+    BDSKWebGroup *group = [[BDSKWebGroup alloc] init];
+    [groups addWebGroup:group];
+    [groupOutlineView expandItem:[group parent]];
+    NSInteger row = [groupOutlineView rowForItem:group];
+    if (row != -1)
+        [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+    [group release];
+}
+
 - (void)searchGroupSheetDidEnd:(BDSKSearchGroupSheetController *)sheetController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
         BDSKGroup *group = [sheetController group];
@@ -999,6 +1016,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 			didRemove = YES;
 		} else if ([group isSearch]) {
 			[groups removeSearchGroup:(BDSKSearchGroup *)group];
+		} else if ([group isWeb]) {
+			[groups removeWebGroup:(BDSKWebGroup *)group];
         }
 	}
 	if (didRemove) {
@@ -1241,9 +1260,9 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)addBookmark:(id)sender {
-    if ([self hasWebGroupSelected]) {
-        [[[self webGroupViewController] webView] addBookmark:sender];
-    } else
+    if ([self hasWebGroupsSelected])
+        [[[[self selectedGroups] lastObject] webView] addBookmark:sender];
+    else
         NSBeep();
 }
 
@@ -1594,8 +1613,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (BOOL)openURL:(NSURL *)url {
     BDSKWebGroup *group = nil;
-    if ([self hasWebGroupSelected] == NO) {
-        group = [[self webGroupViewController] group];
+    if ([self hasWebGroupsSelected] == NO) {
+        group = [[self selectedGroups] lastObject];
     } else {
         if ([[groups webGroups] count] == 0) {
             group = [[[BDSKWebGroup alloc] init] autorelease];

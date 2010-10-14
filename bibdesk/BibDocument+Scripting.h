@@ -92,8 +92,8 @@
 - (NSArray *)webGroups;
 - (BDSKWebGroup *)valueInWebGroupsWithUniqueID:(NSString *)aUniqueID;
 - (BDSKWebGroup *)valueInWebGroupsWithName:(NSString *)name;
-//- (void)insertObject:(BDSKWebGroup *)group inWebGroupsAtIndex:(NSUInteger)idx;
-//- (void)removeObjectFromWebGroupsAtIndex:(NSUInteger)idx;
+- (void)insertObject:(BDSKWebGroup *)group inWebGroupsAtIndex:(NSUInteger)idx;
+- (void)removeObjectFromWebGroupsAtIndex:(NSUInteger)idx;
 
 - (NSArray *)searchGroups;
 - (BDSKSearchGroup *)valueInSearchGroupsWithUniqueID:(NSString *)aUniqueID;

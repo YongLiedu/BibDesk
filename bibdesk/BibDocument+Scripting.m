@@ -194,6 +194,8 @@
                 }
             }
             group = [[BDSKSearchGroup alloc] initWithServerInfo:[BDSKServerInfo defaultServerInfoWithType:aType] searchTerm:nil];
+        } else if ([class isSubclassOfClass:[BDSKWebGroup class]]) {
+            group = [[BDSKWebGroup alloc] init];
         } else if ([class isSubclassOfClass:[BDSKURLGroup class]]) {
             NSURL *theURL = [NSURL URLWithString:@"http://"];
             NSMutableDictionary *mutableProperties = [[properties mutableCopy] autorelease];
@@ -286,13 +288,13 @@
             }
         }
         return copiedValue;
-    } else if ([[NSSet setWithObjects:@"scriptingGroups", @"staticGroups", @"smartGroups", @"externalFileGroups", @"scriptGroups", @"searchGroups", nil] containsObject:key]) {
+    } else if ([[NSSet setWithObjects:@"scriptingGroups", @"staticGroups", @"smartGroups", @"externalFileGroups", @"scriptGroups", @"searchGroups", @"webGroups", nil] containsObject:key]) {
         NSMutableArray *copiedValue = [[NSMutableArray alloc] init];
         for (id group in value) {
             id copiedGroup = nil;
             if ([group isStatic])
                 copiedGroup = [[BDSKStaticGroup alloc] initWithName:[group name] publications:([group document] == self ? [group publications] : nil)];
-            else if ([group isSmart] || [group isURL] || [group isScript] || [group isSearch])
+            else if ([group isSmart] || [group isURL] || [group isScript] || [group isSearch] || [group isWeb])
                 copiedGroup = [group copy];
             if (copiedGroup == nil) {
                 NSScriptCommand *cmd = [NSScriptCommand currentCommand];
@@ -316,7 +318,7 @@
             }
             return copiedValue;
         }
-    } else if ([[NSSet setWithObjects:@"libraryGroups", @"lastImportGroups", @"fieldGroups", @"sharedGroups", @"webGroups", nil] containsObject:key]) {
+    } else if ([[NSSet setWithObjects:@"libraryGroups", @"lastImportGroups", @"fieldGroups", @"sharedGroups", nil] containsObject:key]) {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
         [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
@@ -421,6 +423,8 @@
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([group isSearch]) {
         [groups addSearchGroup:(BDSKSearchGroup *)group];
+    } else if ([group isWeb]) {
+        [groups addWebGroup:(BDSKWebGroup *)group];
     } else {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
@@ -445,6 +449,8 @@
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([group isSearch]) {
         [groups removeSearchGroup:(BDSKSearchGroup *)group];
+    } else if ([group isWeb]) {
+        [groups removeWebGroup:(BDSKWebGroup *)group];
     } else {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
@@ -622,7 +628,7 @@
     NSUInteger idx = [[[groups webGroups] valueForKey:@"name"] indexOfObject:name];
     return idx == NSNotFound ? nil : [[groups webGroups] objectAtIndex:idx];
 }
-/*
+
 - (void)insertObject:(BDSKWebGroup *)group inWebGroupsAtIndex:(NSUInteger)idx {
     if ([group document]) {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
@@ -633,10 +639,10 @@
     }
 }
 
-- (void)removeObjectFromSearchGroupsAtIndex:(NSUInteger)idx {
+- (void)removeObjectFromWebGroupsAtIndex:(NSUInteger)idx {
 	[groups removeWebGroup:[[groups webGroups] objectAtIndex:idx]];
 }
-*/
+
 #pragma mark -
 
 - (NSArray *)searchGroups {

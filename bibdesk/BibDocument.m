@@ -660,8 +660,8 @@ static NSOperationQueue *metadataCacheQueue = nil;
 }
 
 - (id)windowWillReturnFieldEditor:(NSWindow *)sender toObject:(id)anObject {
-    if ([self isDisplayingWebGroupView] && [[self webGroupViewController] respondsToSelector:_cmd])
-        return [[self webGroupViewController] windowWillReturnFieldEditor:sender toObject:anObject];
+    if ([self isDisplayingWebGroupView] && [webGroupViewController respondsToSelector:_cmd])
+        return [webGroupViewController windowWillReturnFieldEditor:sender toObject:anObject];
     return nil;
 }
 
@@ -706,7 +706,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         [dictionary setRectValue:[documentWindow frame] forKey:BDSKDocumentWindowFrameKey];
         [dictionary setDoubleValue:[groupSplitView fraction] forKey:BDSKGroupSplitViewFractionKey];
         // of the 3 splitviews, the fraction of the first divider would be considered, so fallback to the fraction from the nib
-        if (NO == [self hasWebGroupSelected])
+        if (NO == [self hasWebGroupsSelected])
             [dictionary setDoubleValue:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
         [dictionary setDoubleValue:docState.lastWebViewFraction forKey:BDSKWebViewFractionKey];
         [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];

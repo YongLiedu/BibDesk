@@ -252,6 +252,18 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
+- (void)addWebGroup:(BDSKWebGroup *)group {
+	[[self externalParent] addWebGroup:group];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
+}
+
+- (void)removeWebGroup:(BDSKWebGroup *)group {
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
+        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObjects:group, nil], BDSKGroupsArrayGroupsKey, nil]];
+	[[self externalParent] removeWebGroup:group];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
+}
+
 - (void)addSmartGroup:(BDSKSmartGroup *)group {
 	[[[self undoManager] prepareWithInvocationTarget:self] removeSmartGroup:group];
     // update the count

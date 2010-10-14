@@ -97,6 +97,14 @@ static NSString *BDSKWebLocalizedString = nil;
     [super dealloc];
 }
 
+- (id)copyWithZone:(NSZone *)aZone {
+	BDSKWebGroup *copy = [[[self class] allocWithZone:aZone] init];
+    NSURL *url = [self URL];
+    if (url)
+        [copy setURL:url];
+    return copy;
+}
+
 #pragma mark BDSKGroup overrides
 
 // note that pointer equality is used for these groups, so names can overlap
@@ -135,14 +143,14 @@ static NSString *BDSKWebLocalizedString = nil;
 }
 
 - (NSURL *)URL {
-    return [[[[[self webView] mainFrame] provisionalDataSource] request] URL];
+    return [[[[webView mainFrame] provisionalDataSource] request] URL] ?: [[[[webView mainFrame] dataSource] request] URL];
 }
 
 - (void)setURL:(NSURL *)newURL {
     if (newURL && [[[[[[self webView] mainFrame] dataSource] request] URL] isEqual:newURL] == NO) {
         [delegate webGroup:self setIcon:nil];
         [delegate webGroup:self setURL:newURL];
-        [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:newURL]];
+        [[[self webView] mainFrame] loadRequest:[NSURLRequest requestWithURL:newURL]];
     }
 }
 

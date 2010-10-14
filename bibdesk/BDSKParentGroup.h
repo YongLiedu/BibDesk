@@ -80,8 +80,10 @@
 - (NSArray *)sharedGroups;
 - (NSArray *)URLGroups;
 - (NSArray *)scriptGroups;
-- (void)addSearchGroup:(BDSKSearchGroup *)group;
 - (void)setSharedGroups:(NSArray *)array;
+- (void)addWebGroup:(BDSKWebGroup *)group;
+- (void)removeWebGroup:(BDSKWebGroup *)group;
+- (void)addSearchGroup:(BDSKSearchGroup *)group;
 - (void)removeSearchGroup:(BDSKSearchGroup *)group;
 - (void)addURLGroup:(BDSKURLGroup *)group;
 - (void)removeURLGroup:(BDSKURLGroup *)group;

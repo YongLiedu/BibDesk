@@ -1475,6 +1475,8 @@
                 [groups addScriptGroup:group];
             else if ([group isSearch])
                 [groups addSearchGroup:group];
+            else if ([group isWeb])
+                [groups addWebGroup:group];
         }
         [self selectGroups:newGroups];
         [newGroups release];
@@ -1485,7 +1487,7 @@
 
 - (BOOL)outlineView:(NSOutlineView *)ov canDuplicateItems:(NSArray *)items {
 	if (ov == groupOutlineView)
-		return ([self hasLibraryGroupSelected] == NO && [self hasLastImportGroupSelected] == NO && [self hasWebGroupSelected] == NO && [self hasSharedGroupsSelected] == NO && [self hasCategoryGroupsSelected] == NO);
+		return ([self hasLibraryGroupSelected] == NO && [self hasLastImportGroupSelected] == NO && [self hasSharedGroupsSelected] == NO && [self hasCategoryGroupsSelected] == NO);
     return NO;
 }
 

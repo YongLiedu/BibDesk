@@ -38,13 +38,13 @@
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
 
-@class BDSKGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKExternalGroup, BDSKURLGroup, BDSKScriptGroup, BDSKWebGroup, BDSKFilterController, BDSKURLGroupSheetController, BDSKScriptGroupSheetController, BDSKWebGroupViewController;
+@class BDSKGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKExternalGroup, BDSKURLGroup, BDSKScriptGroup, BDSKWebGroup, BDSKFilterController, BDSKURLGroupSheetController, BDSKScriptGroupSheetController;
 
 @interface BibDocument (Groups)
 
 - (BOOL)hasLibraryGroupSelected;
 - (BOOL)hasLastImportGroupSelected;
-- (BOOL)hasWebGroupSelected;
+- (BOOL)hasWebGroupsSelected;
 - (BOOL)hasSharedGroupsSelected;
 - (BOOL)hasURLGroupsSelected;
 - (BOOL)hasScriptGroupsSelected;
@@ -56,7 +56,7 @@
 
 - (BOOL)hasLibraryGroupClickedOrSelected;
 - (BOOL)hasLastImportGroupClickedOrSelected;
-- (BOOL)hasWebGroupClickedOrSelected;
+- (BOOL)hasWebGroupsClickedOrSelected;
 - (BOOL)hasSharedGroupsClickedOrSelected;
 - (BOOL)hasURLGroupsClickedOrSelected;
 - (BOOL)hasScriptGroupsClickedOrSelected;
@@ -86,8 +86,6 @@
 - (IBAction)addGroupFieldAction:(id)sender;
 - (IBAction)removeGroupFieldAction:(id)sender;
 
-- (BDSKWebGroupViewController *)webGroupViewController;
-
 - (void)showWebGroupView;
 - (void)hideWebGroupView;
 
@@ -114,6 +112,7 @@
 - (IBAction)addStaticGroupAction:(id)sender;
 - (IBAction)addURLGroupAction:(id)sender;
 - (IBAction)addScriptGroupAction:(id)sender;
+- (IBAction)addWebGroupAction:(id)sender;
 - (IBAction)addSearchGroupAction:(id)sender;
 - (IBAction)newSearchGroupFromBookmark:(id)sender;
 - (IBAction)addSearchBookmark:(id)sender;
