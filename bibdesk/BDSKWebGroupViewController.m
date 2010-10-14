@@ -101,25 +101,6 @@
     // update the buttons, we should not be retrieving at this point
     [self handleGroupUpdatedNotification:nil];
     
-    id oldCell = [urlField cell];
-    BDSKIconTextFieldCell *cell = [[BDSKIconTextFieldCell alloc] initTextCell:[oldCell stringValue]];
-    [cell setEditable:[oldCell isEditable]];
-    [cell setSelectable:[oldCell isSelectable]];
-    [cell setEnabled:[oldCell isEnabled]];
-    [cell setScrollable:[oldCell isScrollable]];
-    [cell setWraps:[oldCell wraps]];
-    [cell setAlignment:[oldCell alignment]];
-    [cell setLineBreakMode:[oldCell lineBreakMode]];
-    [cell setBezeled:[oldCell isBezeled]];
-    [cell setBezelStyle:[oldCell bezelStyle]];
-    [cell setTarget:[oldCell target]];
-    [cell setAction:[oldCell action]];
-    [cell setSendsActionOnEndEditing:[oldCell sendsActionOnEndEditing]];
-    [cell setPlaceholderString:[oldCell placeholderString]];
-    [cell setIcon:[NSImage missingFileImage]];
-    [urlField setCell:cell];
-    [cell release];
-    
     [urlField registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil]];
 }
 
