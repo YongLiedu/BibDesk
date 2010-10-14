@@ -142,27 +142,7 @@
 			}
 		}
 	}
-}
-
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation{
-    if (tv == tableView) {
-        NSString *tcID = [tableColumn identifier];
-        if ([tcID isEqualToString:BDSKImportOrderString]) {
-            if ([[shownPublications objectAtIndex:row] isImported] == NO)
-                return NSLocalizedString(@"Click to import this item", @"Tool tip message");
-        } else if ([tcID isURLField]) {
-            NSURL *url = [[shownPublications objectAtIndex:row] URLForField:tcID];
-            if (url)
-                return [url isFileURL] ? [[url path] stringByAbbreviatingWithTildeInPath] : [url absoluteString];
-        } else if ([tcID isEqualToString:BDSKLocalFileString]) {
-            return [[[shownPublications objectAtIndex:row] existingLocalFiles] valueForKeyPath:@"path.stringByAbbreviatingWithTildeInPath.@componentsJoinedByComma"];
-        } else if ([tcID isEqualToString:BDSKRemoteURLString]) {
-            return [[[shownPublications objectAtIndex:row] remoteURLs] valueForKeyPath:@"URL.absoluteString.@componentsJoinedByComma"];
-        }
-    }
-    return nil;
-}
-    
+}    
 
 #pragma mark TableView delegate
 
@@ -197,6 +177,25 @@
         NSNotification *note = [NSNotification notificationWithName:BDSKTableSelectionChangedNotification object:self];
         [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
     }
+}
+
+- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation{
+    if (tv == tableView) {
+        NSString *tcID = [tableColumn identifier];
+        if ([tcID isEqualToString:BDSKImportOrderString]) {
+            if ([[shownPublications objectAtIndex:row] isImported] == NO)
+                return NSLocalizedString(@"Click to import this item", @"Tool tip message");
+        } else if ([tcID isURLField]) {
+            NSURL *url = [[shownPublications objectAtIndex:row] URLForField:tcID];
+            if (url)
+                return [url isFileURL] ? [[url path] stringByAbbreviatingWithTildeInPath] : [url absoluteString];
+        } else if ([tcID isEqualToString:BDSKLocalFileString]) {
+            return [[[shownPublications objectAtIndex:row] existingLocalFiles] valueForKeyPath:@"path.stringByAbbreviatingWithTildeInPath.@componentsJoinedByComma"];
+        } else if ([tcID isEqualToString:BDSKRemoteURLString]) {
+            return [[[shownPublications objectAtIndex:row] remoteURLs] valueForKeyPath:@"URL.absoluteString.@componentsJoinedByComma"];
+        }
+    }
+    return nil;
 }
 
 - (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView{
@@ -1085,6 +1084,10 @@
     if (ov == groupOutlineView && [item label])
         rowHeight += [[[[ov tableColumns] lastObject] dataCell] labelHeight];
     return rowHeight;
+}
+
+- (NSString *)outlineView:(NSOutlineView *)ov toolTipForCell:(NSCell *)cell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tc item:(id)item mouseLocation:(NSPoint)mouseLocation {
+    return [item toolTip];
 }
 
 - (NSIndexSet *)outlineView:(BDSKGroupOutlineView *)outlineView indexesOfRowsToHighlightInRange:(NSRange)indexRange {
