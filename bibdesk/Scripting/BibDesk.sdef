@@ -869,7 +869,7 @@
 				<cocoa key="sharedGroups"/>
 			</element>
 			<element type="web group" access="r"
-				description="The web group in the document">
+				description="The web groups in the document">
 				<cocoa key="webGroups"/>
 			</element>
 			<responds-to name="templated text">
@@ -1323,7 +1323,7 @@
         </class>
         
         <class name="web group" plural="web groups" code="WbGp" inherits="group"
-			description="The web group of the document.">
+			description="A group containing publications generated from browsed internet content.">
             <cocoa class="BDSKWebGroup"/>
             <property name="URL" code="rURL" type="text"
                 description="The URL for the web group">
