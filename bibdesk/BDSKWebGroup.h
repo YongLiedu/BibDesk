@@ -44,12 +44,16 @@
 
 @interface BDSKWebGroup : BDSKExternalGroup {
     BOOL isRetrieving;
+    NSString *label;
     id <BDSKWebGroupDelegate> delegate;
     WebView *webView;
     WebFrame *loadingWebFrame;
     NSUndoManager *undoManager;
     BDSKNewWebWindowHandler *newWindowHandler;
 }
+
+- (NSString *)label;
+- (void)setLabel:(NSString *)newLabel;
 
 - (id<BDSKWebGroupDelegate>)delegate;
 - (void)setDelegate:(id<BDSKWebGroupDelegate>)newDelegate;

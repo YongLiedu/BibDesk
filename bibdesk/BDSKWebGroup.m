@@ -91,6 +91,7 @@ static NSString *BDSKWebLocalizedString = nil;
     [webView setPolicyDelegate:nil];
     [webView setEditingDelegate:nil];
     delegate = nil;
+    BDSKDESTROY(label);
     BDSKDESTROY(webView);
     BDSKDESTROY(undoManager);
     BDSKDESTROY(newWindowHandler);
@@ -114,6 +115,21 @@ static NSString *BDSKWebLocalizedString = nil;
 - (BOOL)isWeb { return YES; }
 
 - (BOOL)isRetrieving { return isRetrieving; }
+
+- (NSString *)label {
+    return [label length] > 0 ? label : NSLocalizedString(@"(Empty)", @"Empty web group title");
+}
+
+- (void)setLabel:(NSString *)newLabel {
+    if (label != newLabel) {
+        [label release];
+        label = [newLabel retain];
+    }
+}
+
+- (NSString *)toolTip {
+    return [NSString stringWithFormat:@"%@: %@", [self name], [self label]];
+}
 
 #pragma mark BDSKExternalGroup overrides
 
@@ -148,6 +164,7 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (void)setURL:(NSURL *)newURL {
     if (newURL && [[[[[[self webView] mainFrame] dataSource] request] URL] isEqual:newURL] == NO) {
+        [self setLabel:nil];
         [delegate webGroup:self setIcon:nil];
         [delegate webGroup:self setURL:newURL];
         [[[self webView] mainFrame] loadRequest:[NSURLRequest requestWithURL:newURL]];
@@ -245,8 +262,9 @@ static NSString *BDSKWebLocalizedString = nil;
         }
     }
     
-    if (frame == [sender mainFrame] && delegate) {
+    if (frame == [sender mainFrame]) {
         [delegate webGroup:self setIcon:[sender mainFrameIcon]];
+        [self setLabel:[sender mainFrameTitle]];
     }
     
     if (frame == loadingWebFrame) {
@@ -284,6 +302,12 @@ static NSString *BDSKWebLocalizedString = nil;
 - (void)webView:(WebView *)sender didReceiveIcon:(NSImage *)image forFrame:(WebFrame *)frame{
     if (frame == [sender mainFrame] && delegate) { 
         [delegate webGroup:self setIcon:image];
+    }
+}
+
+- (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame {
+    if (frame == [sender mainFrame] && delegate) { 
+        [self setLabel:title];
     }
 }
 
