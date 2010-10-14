@@ -234,7 +234,7 @@ The groupedPublications array is a subset of the publications array, developed b
 - (BDSKWebGroupViewController *)webGroupViewController {
     if (webGroupViewController == nil) {
         webGroupViewController = [[BDSKWebGroupViewController alloc] init];
-        [webGroupViewController setGroup:[groups webGroup]];
+        [webGroupViewController setGroup:[[groups webGroups] firstObject]];
     }
     return webGroupViewController;
 }
@@ -1593,13 +1593,20 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 #pragma mark Opening a URL
 
 - (BOOL)openURL:(NSURL *)url {
+    BDSKWebGroup *group = nil;
     if ([self hasWebGroupSelected] == NO) {
-        // make sure the controller and its nib are loaded
-        if ([self selectGroup:[groups webGroup]] == NO)
-            return NO;
+        group = [[self webGroupViewController] group];
+    } else {
+        if ([[groups webGroups] count] == 0) {
+            group = [[[BDSKWebGroup alloc] init] autorelease];
+            [groups addWebGroup:group];
+        } else {
+            group = [[groups webGroups] firstObject];
+        }
+        [self selectGroup:group];
     }
-    [[groups webGroup] setURL:url];
-    return YES;
+    [group setURL:url];
+    return group != nil;
 }
 
 @end

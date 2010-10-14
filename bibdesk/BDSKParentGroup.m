@@ -220,8 +220,8 @@
     return self;
 }
 
-- (BDSKWebGroup *)webGroup {
-    return [self childAtIndex:0];
+- (NSArray *)webGroups {
+    return [self childrenInRange:NSMakeRange(0, webGroupCount)];
 }
 
 - (NSArray *)searchGroups {
@@ -238,6 +238,18 @@
 
 - (NSArray *)scriptGroups {
     return [self childrenInRange:NSMakeRange((webGroupCount + searchGroupCount + sharedGroupCount + URLGroupCount), scriptGroupCount)];
+}
+
+- (void)addWebGroup:(BDSKWebGroup *)group {
+    NSUInteger idx = webGroupCount;
+    webGroupCount += 1;    
+    [self insertChild:group atIndex:idx];
+}
+
+- (void)removeWebGroup:(BDSKWebGroup *)group {
+    NSParameterAssert(webGroupCount);
+    webGroupCount -= 1;    
+    [self removeChild:group];
 }
 
 - (void)addSearchGroup:(BDSKSearchGroup *)group {
@@ -285,6 +297,10 @@
 - (void)resort {
     if (sortDescriptors) {
         NSRange range;
+        if (webGroupCount > 1) {
+            range = NSMakeRange(0, webGroupCount);
+            [children replaceObjectsInRange:range withObjectsFromArray:[[children subarrayWithRange:range] sortedArrayUsingDescriptors:sortDescriptors]];
+        }
         if (searchGroupCount > 1) {
             range = NSMakeRange(webGroupCount, searchGroupCount);
             [children replaceObjectsInRange:range withObjectsFromArray:[[children subarrayWithRange:range] sortedArrayUsingDescriptors:sortDescriptors]];

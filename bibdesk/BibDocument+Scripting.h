@@ -89,6 +89,12 @@
 - (BDSKScriptGroup *)valueInScriptGroupsWithName:(NSString *)name;
 - (void)removeObjectFromScriptGroupsAtIndex:(NSUInteger)idx;
 
+- (NSArray *)webGroups;
+- (BDSKWebGroup *)valueInWebGroupsWithUniqueID:(NSString *)aUniqueID;
+- (BDSKWebGroup *)valueInWebGroupsWithName:(NSString *)name;
+//- (void)insertObject:(BDSKWebGroup *)group inWebGroupsAtIndex:(NSUInteger)idx;
+//- (void)removeObjectFromWebGroupsAtIndex:(NSUInteger)idx;
+
 - (NSArray *)searchGroups;
 - (BDSKSearchGroup *)valueInSearchGroupsWithUniqueID:(NSString *)aUniqueID;
 - (BDSKSearchGroup *)valueInSearchGroupsWithName:(NSString *)name;
@@ -106,10 +112,6 @@
 - (NSArray *)lastImportGroups;
 - (BDSKGroup *)valueInLastImportGroupsWithUniqueID:(NSString *)aUniqueID;
 - (BDSKGroup *)valueInLastImportGroupsWithName:(NSString *)name;
-
-- (NSArray *)webGroups;
-- (BDSKWebGroup *)valueInWebGroupsWithUniqueID:(NSString *)aUniqueID;
-- (BDSKWebGroup *)valueInWebGroupsWithName:(NSString *)name;
 
 
 - (NSArray*) selection;

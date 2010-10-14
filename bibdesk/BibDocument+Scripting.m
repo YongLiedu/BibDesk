@@ -609,6 +609,36 @@
 
 #pragma mark -
 
+- (NSArray *)webGroups {
+    return [groups webGroups];
+}
+
+- (BDSKWebGroup *)valueInWebGroupsWithUniqueID:(NSString *)aUniqueID {
+    NSUInteger idx = [[[groups webGroups] valueForKey:@"uniqueID"] indexOfObject:aUniqueID];
+    return idx == NSNotFound ? nil : [[groups webGroups] objectAtIndex:idx];
+}
+
+- (BDSKWebGroup *)valueInWebGroupsWithName:(NSString *)name {
+    NSUInteger idx = [[[groups webGroups] valueForKey:@"name"] indexOfObject:name];
+    return idx == NSNotFound ? nil : [[groups webGroups] objectAtIndex:idx];
+}
+/*
+- (void)insertObject:(BDSKWebGroup *)group inWebGroupsAtIndex:(NSUInteger)idx {
+    if ([group document]) {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
+    } else {
+        [groups addWebGroup:group];
+    }
+}
+
+- (void)removeObjectFromSearchGroupsAtIndex:(NSUInteger)idx {
+	[groups removeWebGroup:[[groups webGroups] objectAtIndex:idx]];
+}
+*/
+#pragma mark -
+
 - (NSArray *)searchGroups {
     return [groups searchGroups];
 }
@@ -684,22 +714,6 @@
 - (BDSKGroup *)valueInLastImportGroupsWithName:(NSString *)name {
     BDSKGroup *group = [groups lastImportGroup];
     return [[group name] caseInsensitiveCompare:name] == NSOrderedSame && [group count] ? group : nil;
-}
-
-#pragma mark -
-
-- (NSArray *)webGroups {
-    return [NSArray arrayWithObjects:[groups webGroup], nil];
-}
-
-- (BDSKWebGroup *)valueInWebGroupsWithUniqueID:(NSString *)aUniqueID {
-    BDSKWebGroup *group = [groups webGroup];
-    return [[group uniqueID] isEqualToString:aUniqueID] ? group : nil;
-}
-
-- (BDSKWebGroup *)valueInWebGroupsWithName:(NSString *)name {
-    BDSKWebGroup *group = [groups webGroup];
-    return [[group name] caseInsensitiveCompare:name] == NSOrderedSame ? group : nil;
 }
 
 #pragma mark Properties

@@ -75,7 +75,7 @@
     NSUInteger scriptGroupCount;
 }
 
-- (BDSKWebGroup *)webGroup;
+- (NSArray *)webGroups;
 - (NSArray *)searchGroups;
 - (NSArray *)sharedGroups;
 - (NSArray *)URLGroups;

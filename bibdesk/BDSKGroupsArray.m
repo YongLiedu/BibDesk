@@ -142,8 +142,8 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
     return [[self libraryParent] childAtIndex:0];
 }
 
-- (BDSKWebGroup *)webGroup{
-    return [[self externalParent] webGroup];
+- (NSArray *)webGroups{
+    return [[self externalParent] webGroups];
 }
 
 - (NSArray *)searchGroups{

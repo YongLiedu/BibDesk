@@ -66,12 +66,12 @@ enum {
 - (BDSKCategoryParentGroup *)categoryParent;
 
 - (BDSKLibraryGroup *)libraryGroup;
-- (BDSKWebGroup *)webGroup;
 - (BDSKLastImportGroup *)lastImportGroup;
 - (NSArray *)sharedGroups;
 - (NSArray *)URLGroups;
 - (NSArray *)scriptGroups;
 - (NSArray *)searchGroups;
+- (NSArray *)webGroups;
 - (NSArray *)smartGroups;
 - (NSArray *)staticGroups;
 - (NSArray *)categoryGroups;
@@ -82,12 +82,14 @@ enum {
 
 - (void)setLastImportedPublications:(NSArray *)pubs;
 - (void)setSharedGroups:(NSArray *)array;
+- (void)addWebGroup:(BDSKWebGroup *)group;
+- (void)removeWebGroup:(BDSKWebGroup *)group;
+- (void)addSearchGroup:(BDSKSearchGroup *)group;
+- (void)removeSearchGroup:(BDSKSearchGroup *)group;
 - (void)addURLGroup:(BDSKURLGroup *)group;
 - (void)removeURLGroup:(BDSKURLGroup *)group;
 - (void)addScriptGroup:(BDSKScriptGroup *)group;
 - (void)removeScriptGroup:(BDSKScriptGroup *)group;
-- (void)addSearchGroup:(BDSKSearchGroup *)group;
-- (void)removeSearchGroup:(BDSKSearchGroup *)group;
 - (void)addSmartGroup:(BDSKSmartGroup *)group;
 - (void)removeSmartGroup:(BDSKSmartGroup *)group;
 - (void)addStaticGroup:(BDSKStaticGroup *)group;
