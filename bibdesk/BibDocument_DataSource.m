@@ -1274,9 +1274,10 @@
             url = [NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]]; 	
         else if ([type isEqualToString:NSURLPboardType])
             url = [NSURL URLFromPasteboard:pboard];
-        if (url)
-            return [self openURL:url];
-        else
+        if (url) {
+            [(BDSKWebGroup *)item setURL:url];
+            return YES;
+        } else
             return NO;
         
     } else if (([item isExternal] || [item isEqual:[groups externalParent]]) && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil] containsObject:type]){
