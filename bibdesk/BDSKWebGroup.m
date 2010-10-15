@@ -413,8 +413,6 @@ static NSString *BDSKWebLocalizedString = nil;
 	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark This Page", @"Menu item title") stringByAppendingEllipsis]
                                                                 action:@selector(addBookmark:)
                                                          keyEquivalent:@""];
-    [item setTarget:sender];
-    [item setRepresentedObject:element];
     [menuItems addObject:[item autorelease]];
     
 	return menuItems;
