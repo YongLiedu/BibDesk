@@ -50,6 +50,7 @@
 #import "NSMenu_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
 
 #define MAX_HISTORY 50
 
@@ -143,9 +144,13 @@
     NSString *newURLString = [sender stringValue];
     
     if ([NSString isEmptyString:newURLString] == NO) {
-        NSURL *theURL = [NSURL URLWithString:newURLString];
-        if ([theURL scheme] == nil)
-            theURL = [NSURL URLWithString:[@"http://" stringByAppendingString:newURLString]];
+        NSURL *theURL = [NSURL URLWithStringByNormalizingPercentEscapes:newURLString];
+        if ([theURL scheme] == nil) {
+            if ([newURLString isAbsolutePath])
+                theURL = [NSURL fileURLWithPath:newURLString];
+            else
+                theURL = [NSURL URLWithStringByNormalizingPercentEscapes:[@"http://" stringByAppendingString:newURLString]];
+        }
         [[self group] setURL:theURL];
     }
 }
@@ -223,14 +228,15 @@
 - (BOOL)dragTextField:(BDSKDragTextField *)textField acceptDrop:(id <NSDraggingInfo>)sender {
     NSPasteboard *pboard = [sender draggingPasteboard];
 	NSString *dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]];
-    NSURL *url = nil;
+    NSString *urlString = nil;
     
     if ([dragType isEqualToString:NSURLPboardType])
-        url = [NSURL URLFromPasteboard:pboard];
+        urlString = [[NSURL URLFromPasteboard:pboard] absoluteString];
     else if ([dragType isEqualToString:BDSKWeblocFilePboardType])
-        url = [NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]];
-    if (url) {
-        [[self group] setURL:url];
+        urlString = [pboard stringForType:BDSKWeblocFilePboardType];
+    if (urlString) {
+        [textField setStringValue:urlString];
+        [self changeURL:textField];
         return YES;
     }
     return NO;
