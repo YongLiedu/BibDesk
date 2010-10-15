@@ -1365,7 +1365,7 @@
 								</object>
 								<object class="NSMenuItem" id="1008517648">
 									<reference key="NSMenu" ref="588461980"/>
-									<string key="NSTitle">New Smart Group</string>
+									<string key="NSTitle">New Smart Group…</string>
 									<string key="NSKeyEquiv">g</string>
 									<int key="NSKeyEquivModMask">1572864</int>
 									<int key="NSMnemonicLoc">2147483647</int>
@@ -1383,7 +1383,7 @@
 								</object>
 								<object class="NSMenuItem" id="519095234">
 									<reference key="NSMenu" ref="588461980"/>
-									<string key="NSTitle">New External File Group</string>
+									<string key="NSTitle">New External File Group…</string>
 									<string key="NSKeyEquiv"/>
 									<int key="NSKeyEquivModMask">1310720</int>
 									<int key="NSMnemonicLoc">2147483647</int>
@@ -1392,7 +1392,7 @@
 								</object>
 								<object class="NSMenuItem" id="965567988">
 									<reference key="NSMenu" ref="588461980"/>
-									<string key="NSTitle">New Script Group</string>
+									<string key="NSTitle">New Script Group…</string>
 									<string key="NSKeyEquiv"/>
 									<int key="NSKeyEquivModMask">1310720</int>
 									<int key="NSMnemonicLoc">2147483647</int>
@@ -1401,7 +1401,7 @@
 								</object>
 								<object class="NSMenuItem" id="321714287">
 									<reference key="NSMenu" ref="588461980"/>
-									<string key="NSTitle">New Search Group</string>
+									<string key="NSTitle">New Search Group…</string>
 									<string key="NSKeyEquiv"/>
 									<int key="NSKeyEquivModMask">1048576</int>
 									<int key="NSMnemonicLoc">2147483647</int>
