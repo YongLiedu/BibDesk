@@ -155,7 +155,9 @@ static NSString *BDSKWebLocalizedString = nil;
 }
 
 - (NSURL *)URL {
-    return [[[[webView mainFrame] provisionalDataSource] request] URL] ?: [[[[webView mainFrame] dataSource] request] URL];
+    WebFrame *mainFrame = [webView mainFrame];
+    WebDataSource *dataSource = [mainFrame provisionalDataSource] ?: [mainFrame dataSource];
+    return [[dataSource request] URL];
 }
 
 - (void)setURL:(NSURL *)newURL {
