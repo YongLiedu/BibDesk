@@ -601,7 +601,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         
         NSArray *bookmarks = [[[BDSKBookmarkController sharedBookmarkController] bookmarkRoot] children];
         NSInteger i = [menu numberOfItems];
-        while (--i > 1)
+        while (--i > 2)
             [menu removeItemAtIndex:i];
         if ([bookmarks count] > 0)
             [menu addItem:[NSMenuItem separatorItem]];
