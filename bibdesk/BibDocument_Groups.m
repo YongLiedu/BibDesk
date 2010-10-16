@@ -1624,6 +1624,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     BDSKWebGroup *group = nil;
     if ([self hasWebGroupsSelected]) {
         group = [[self selectedGroups] lastObject];
+        [group setURL:url];
     } else {
         if ([[groups webGroups] count] == 0 || [[NSUserDefaults standardUserDefaults] boolForKey:BDSKOpenURLsInNewWebGroupKey]) {
             group = [[[BDSKWebGroup alloc] init] autorelease];
@@ -1631,9 +1632,9 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         } else {
             group = [[groups webGroups] firstObject];
         }
+        [group setURL:url];
         [self selectGroup:group];
     }
-    [group setURL:url];
     return group != nil;
 }
 
