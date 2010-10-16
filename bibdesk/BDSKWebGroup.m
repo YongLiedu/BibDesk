@@ -272,8 +272,13 @@ static NSString *BDSKWebLocalizedString = nil;
     
     if (frame == [sender mainFrame]) {
         NSString *title = [sender mainFrameTitle];
+        if ([NSString isEmptyString:title]) {
+            if (url == nil)
+                url = [self URL];
+            title = [url isFileURL] ? [[url path] lastPathComponent] : [[url absoluteString] stringByReplacingPercentEscapes];
+        }
         [delegate webGroup:self setIcon:[sender mainFrameIcon]];
-        [self setLabel:[NSString isEmptyString:title] ?  [[self URL] absoluteString] : title];
+        [self setLabel:title];
     }
     
     if (frame == loadingWebFrame) {
