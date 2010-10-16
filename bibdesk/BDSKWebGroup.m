@@ -437,6 +437,8 @@ static NSString *BDSKWebLocalizedString = nil;
     return [newWindowHandler webView];
 }
 
+- (void)webViewClose:(WebView *)sender {}
+
 #pragma mark WebEditingDelegate protocol
 
 // this is needed because WebView uses the document's undo manager by default, rather than the one from the window.
