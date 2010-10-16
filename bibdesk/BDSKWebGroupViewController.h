@@ -42,8 +42,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 
 @class BDSKCollapsibleView, BDSKEdgeView, WebView, BDSKDragTextField, BDSKFieldEditor;
 
-@protocol BDSKWebGroupViewControllerDelegate;
-
 @interface BDSKWebGroupViewController : NSViewController <NSMenuDelegate, BDSKWebGroupDelegate> {
     IBOutlet BDSKCollapsibleView *collapsibleView;
     IBOutlet BDSKDragTextField *urlField;
@@ -58,15 +56,8 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 - (BDSKWebGroup *)group;
 - (void)setGroup:(BDSKWebGroup *)newGroup;
 
-- (WebView *)webView;
-
 - (IBAction)changeURL:(id)sender;
 - (IBAction)goBackForward:(id)sender;
 - (IBAction)stopOrReloadAction:(id)sender;
 
-@end
-
-
-@protocol BDSKWebGroupViewControllerDelegate <NSObject>
-- (void)webGroupViewController:(BDSKWebGroupViewController *)controller setStatusText:(NSString *)text;
 @end

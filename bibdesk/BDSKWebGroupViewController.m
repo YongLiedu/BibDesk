@@ -69,8 +69,9 @@
 }
 
 - (void)handleGroupUpdatedNotification:(NSNotification *)note {
-    [backForwardButton setEnabled:[[self webView] canGoBack] forSegment:0];
-    [backForwardButton setEnabled:[[self webView] canGoForward] forSegment:1];
+    WebView *webView = [[self group] webView];
+    [backForwardButton setEnabled:[webView canGoBack] forSegment:0];
+    [backForwardButton setEnabled:[webView canGoForward] forSegment:1];
     [stopOrReloadButton setEnabled:YES];
     if ([[self group] isRetrieving]) {
         [stopOrReloadButton setImage:[NSImage imageNamed:NSImageNameStopProgressTemplate]];
@@ -106,10 +107,6 @@
 }
 
 #pragma mark Accessors
-
-- (WebView *)webView {
-    return [[self group] webView];
-}
 
 - (BDSKWebGroup *)group {
     return [self representedObject];
@@ -156,24 +153,25 @@
 }
 
 - (IBAction)goBackForward:(id)sender {
+    WebView *webView = [[self group] webView];
     if([sender selectedSegment] == 0)
-        [[self webView] goBack:sender];
+        [webView goBack:sender];
     else
-        [[self webView] goForward:sender];
+        [webView goForward:sender];
 }
 
 - (IBAction)stopOrReloadAction:(id)sender {
-	if ([[self group] isRetrieving]) {
-		[[self webView] stopLoading:sender];
-	} else {
-		[[self webView] reload:sender];
-	}
+    WebView *webView = [[self group] webView];
+	if ([[self group] isRetrieving])
+		[webView stopLoading:sender];
+	else 
+		[webView reload:sender];
 }
 
 - (void)goBackForwardInHistory:(id)sender {
     WebHistoryItem *item = [sender representedObject];
     if (item)
-        [[self webView] goToBackForwardItem:item];
+        [[[self group] webView] goToBackForwardItem:item];
 }
 
 #pragma mark BDSKWebGroupDelegate protocol
@@ -189,7 +187,7 @@
 #pragma mark NSMenu delegate protocol
 
 - (void)menuNeedsUpdate:(NSMenu *)menu {
-    WebBackForwardList *backForwardList = [[self webView] backForwardList];
+    WebBackForwardList *backForwardList = [[[self group] webView] backForwardList];
     id items = nil;
     if (menu == backMenu)
         items = [[backForwardList backListWithLimit:MAX_HISTORY] reverseObjectEnumerator];

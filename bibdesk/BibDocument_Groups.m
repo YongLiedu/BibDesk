@@ -246,13 +246,13 @@ The groupedPublications array is a subset of the publications array, developed b
         webGroupViewController = [[BDSKWebGroupViewController alloc] init];
     [self insertControlView:[webGroupViewController view] atTop:NO];
     
-    WebView *oldWebView = [webGroupViewController webView];
+    WebView *oldWebView = [[webGroupViewController group] webView];
     
     BDSKWebGroup *group = [[self selectedGroups] firstObject];
     BDSKASSERT([group isWeb]);
     [webGroupViewController setGroup:group];
     
-    NSView *webView = [webGroupViewController webView];
+    NSView *webView = [group webView];
     if ([webView window] == nil) {
         if ([oldWebView window]) {
             [webView setFrame:[oldWebView frame]];
@@ -288,7 +288,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)hideWebGroupView{
-    NSView *webView = [webGroupViewController webView];
+    NSView *webView = [[webGroupViewController group] webView];
     if ([webView window]) {
         NSView *webGroupView = [webGroupViewController view];
         id firstResponder = [documentWindow firstResponder];
