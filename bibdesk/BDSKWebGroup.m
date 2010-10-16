@@ -106,6 +106,15 @@ static NSString *BDSKWebLocalizedString = nil;
     return copy;
 }
 
+- (void)makeWebView {
+    BDSKASSERT(webView == nil);
+    webView = [[WebView alloc] init];
+    [webView setFrameLoadDelegate:self];
+    [webView setUIDelegate:self];
+    [webView setPolicyDelegate:self];
+    [webView setEditingDelegate:self];
+}
+
 #pragma mark BDSKGroup overrides
 
 // note that pointer equality is used for these groups, so names can overlap
@@ -136,11 +145,7 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (WebView *)webView {
     if (webView == nil) {
-        webView = [[WebView alloc] init];
-        [webView setFrameLoadDelegate:self];
-        [webView setUIDelegate:self];
-        [webView setPolicyDelegate:self];
-        [webView setEditingDelegate:self];
+        [self makeWebView];
         [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:BDSKBibDeskWebGroupURL]];
     }
     return webView;
@@ -161,11 +166,13 @@ static NSString *BDSKWebLocalizedString = nil;
 }
 
 - (void)setURL:(NSURL *)newURL {
-    if (newURL && [[[[[[self webView] mainFrame] dataSource] request] URL] isEqual:newURL] == NO) {
+    if (newURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:newURL] == NO) {
         [self setLabel:[NSLocalizedString(@"Loading", @"Placeholder web group label") stringByAppendingEllipsis]];
         [delegate webGroup:self setIcon:nil];
         [delegate webGroup:self setURL:newURL];
-        [[[self webView] mainFrame] loadRequest:[NSURLRequest requestWithURL:newURL]];
+        if (webView == nil)
+            [self makeWebView];
+        [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:newURL]];
     }
 }
 
