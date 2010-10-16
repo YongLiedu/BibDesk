@@ -47,9 +47,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
     IBOutlet BDSKDragTextField *urlField;
     IBOutlet NSSegmentedControl *backForwardButton;
     IBOutlet NSButton *stopOrReloadButton;
-    
-    NSMenu *backMenu;
-    NSMenu *forwardMenu;
     BDSKFieldEditor *fieldEditor;
 }
 

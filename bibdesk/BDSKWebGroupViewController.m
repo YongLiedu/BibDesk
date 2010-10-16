@@ -53,6 +53,8 @@
 #import "NSURL_BDSKExtensions.h"
 
 #define MAX_HISTORY 50
+#define BACK_SEGMENT_INDEX 0
+#define FORWARD_SEGMENT_INDEX 1
 
 @implementation BDSKWebGroupViewController
 
@@ -70,8 +72,8 @@
 
 - (void)handleGroupUpdatedNotification:(NSNotification *)note {
     WebView *webView = [[self group] webView];
-    [backForwardButton setEnabled:[webView canGoBack] forSegment:0];
-    [backForwardButton setEnabled:[webView canGoForward] forSegment:1];
+    [backForwardButton setEnabled:[webView canGoBack] forSegment:BACK_SEGMENT_INDEX];
+    [backForwardButton setEnabled:[webView canGoForward] forSegment:FORWARD_SEGMENT_INDEX];
     [stopOrReloadButton setEnabled:YES];
     if ([[self group] isRetrieving]) {
         [stopOrReloadButton setImage:[NSImage imageNamed:NSImageNameStopProgressTemplate]];
@@ -93,12 +95,12 @@
     [edgeView setEdges:BDSKMinYEdgeMask];
     [edgeView setColor:[edgeView colorForEdge:NSMaxYEdge] forEdge:NSMinYEdge];
     
-    backMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
-    [backMenu setDelegate:self];
-    [backForwardButton setMenu:backMenu forSegment:0];
-    forwardMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
-    [forwardMenu setDelegate:self];
-    [backForwardButton setMenu:forwardMenu forSegment:1];
+    NSMenu *menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
+    [menu setDelegate:self];
+    [backForwardButton setMenu:menu forSegment:BACK_SEGMENT_INDEX];
+    menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
+    [menu setDelegate:self];
+    [backForwardButton setMenu:menu forSegment:FORWARD_SEGMENT_INDEX];
     
     // update the buttons, we should not be retrieving at this point
     [self handleGroupUpdatedNotification:nil];
@@ -189,9 +191,9 @@
 - (void)menuNeedsUpdate:(NSMenu *)menu {
     WebBackForwardList *backForwardList = [[[self group] webView] backForwardList];
     id items = nil;
-    if (menu == backMenu)
+    if (menu == [backForwardButton menuForSegment:BACK_SEGMENT_INDEX])
         items = [[backForwardList backListWithLimit:MAX_HISTORY] reverseObjectEnumerator];
-    else if (menu == forwardMenu)
+    else if (menu == [backForwardButton menuForSegment:FORWARD_SEGMENT_INDEX])
         items = [backForwardList forwardListWithLimit:MAX_HISTORY];
     else
         return;
