@@ -78,6 +78,8 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
     [imageCell setImageScaling:NSImageScaleProportionallyUpOrDown];
     labelCell = [[NSTextFieldCell alloc] initTextCell:@""];
     [labelCell setFont:[[NSFontManager sharedFontManager] convertFont:[self font] toSize:[[self font] pointSize] - LABEL_FONTSIZE_OFFSET]];
+    [labelCell setWraps:NO];
+    [labelCell setLineBreakMode:NSLineBreakByClipping];
     countString = [[NSMutableAttributedString alloc] init];
     if ([self formatter] == nil)
         [self setFormatter:groupCellFormatter];
