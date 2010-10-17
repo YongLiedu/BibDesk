@@ -44,6 +44,7 @@
 #import "BDSKWebParser.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 #import <WebKit/WebView.h>
 #import "BDSKTemplateParser.h"
 
@@ -93,7 +94,7 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
         [client URLProtocol:self didLoadData:data];
         [client URLProtocolDidFinishLoading:self];
         [response release];
-    } else if ([resourceSpecifier hasCaseInsensitivePrefix:HELP_SPECIFIER]) {
+    } else if ([HELP_SPECIFIER caseInsensitiveCompare:[[resourceSpecifier pathComponents] firstObject]] == NSOrderedSame) {
         // when there's no "//" the URL we get has percent escapes including in particular the # character, which would we don't want
         NSString *URLString = [NSString stringWithFormat:@"%@://%@", BDSKBibDeskScheme, [resourceSpecifier stringByReplacingPercentEscapes]];
         NSURLResponse *response = [[NSURLResponse alloc] initWithURL:theURL MIMEType:@"text/html" expectedContentLength:-1 textEncodingName:nil];
@@ -123,7 +124,7 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
             [client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorFileDoesNotExist userInfo:nil]];
         }
     } else {
-        [client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorResourceUnavailable userInfo:nil]];
+        [client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:nil]];
     }
 }
 
