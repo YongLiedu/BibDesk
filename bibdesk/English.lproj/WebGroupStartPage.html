@@ -7,7 +7,8 @@
 		* { margin: 0px; padding: 0px; }
 		body { font-family: "Lucida Grande"; font-size: 13px; padding: 1em; }
 		h1 { font-size: 16px; display:none; }
-		.help {display: block; float:right; margin-left:1em;}
+		.table { width: 100%; border-width: 0px; border-spacing: 0px; border-style: none; }
+		.right { text-align: right; }
 		p, .columns { max-width:50em; margin:auto;}
 		.columns { margin-top:1em; }
 		.column { width:33.3333%; float:left; display:block; }
@@ -30,9 +31,11 @@
 	
 		<h1>Web Group</h1>	
 		<p>
+			<table class="table"><tr><td>
 			BibDesk recognises bibliographic information on some web pages and processes them for easy searching and single-click import. Supported sites and formats: 
-			<a class="help" href="help:anchor=Web-Group">[Help]</a>
-			<a class="help" href="bibdesk:downloads">[Downloads]</a>
+			</td><td class="right">
+			<a href="help:anchor=Web-Group">[Help]</a><br /><a href="bibdesk:downloads">[Downloads]</a>
+			</td></tr></table>
 		</p>
 		
 		<div class="columns">
