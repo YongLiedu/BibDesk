@@ -245,6 +245,8 @@ typedef NSInteger FVDisplayMode;
     NSDictionary            *_contentBinding;
     NSMutableArray          *_downloads;
     CFRunLoopTimerRef        _progressTimer;
+    NSMutableSet            *_modificationSet;
+    NSLock                  *_modificationLock;
     NSArray                 *_iconURLs;
 }
 

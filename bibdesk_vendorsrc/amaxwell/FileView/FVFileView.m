@@ -53,6 +53,12 @@
 #import "FVColorMenuView.h"
 #import "FVAccessibilityIconElement.h"
 
+#import <sys/stat.h>
+#import <sys/time.h>
+#import <pthread.h>
+#include <sys/attr.h>
+#include <unistd.h>
+
 // draws grid and margin frames
 #define DEBUG_GRID 0
 
@@ -100,6 +106,19 @@ static char _FVFileViewContentObservationContext;
 - (id)initWithURL:(NSURL *)aURL;
 - (NSString *)name;
 - (NSUInteger)label;
+@end
+
+#pragma mark -
+
+@interface _FVControllerFileKey : FVObject
+{
+@public;
+    char            *_filePath;
+    NSUInteger       _hash;
+    struct timespec  _mtimespec;
+}
++ (id)newWithURL:(NSURL *)aURL;
+- (id)initWithURL:(NSURL *)aURL;
 @end
 
 #pragma mark -
@@ -288,8 +307,13 @@ static char _FVFileViewContentObservationContext;
 
     // array of FVDownload instances
     _downloads = nil;
+    
     // timer to update the view when a download's length is indeterminate
     _progressTimer = NULL;
+    
+    // set of _FVFileKey instances
+    _modificationSet = [NSMutableSet new];
+    _modificationLock = [NSLock new];
     
     _operationQueue = [FVOperationQueue new];
     
@@ -340,6 +364,8 @@ static char _FVFileViewContentObservationContext;
     // takes care of the timer as well
     [self _cancelDownloads];
     [_downloads release];
+    [_modificationSet release];
+    [_modificationLock release];
     [_operationQueue terminate];
     [_operationQueue release];
     CGLayerRelease(_selectionOverlay);
@@ -629,6 +655,12 @@ static char _FVFileViewContentObservationContext;
     // convenient time to do this, although the timer would also handle it
     [_iconCache removeAllObjects];
     [_zombieIconCache removeAllObjects];
+    
+    // not critical; just avoid blocking here...
+    if ([_modificationLock tryLock]) {
+        [_modificationSet removeAllObjects];
+        [_modificationLock unlock];
+    }
     
     // datasource may implement subtitles, which affects our drawing layout (padding height)
     [self reloadIcons];
@@ -1515,6 +1547,84 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     [window invalidateCursorRectsForView:self];
     if ([window isKeyWindow] == NO)
         [self resetCursorRects];
+}
+
+static inline bool __equal_timespecs(const struct timespec *ts1, const struct timespec *ts2)
+{
+    return ts1->tv_nsec == ts2->tv_nsec && ts1->tv_sec == ts2->tv_sec;
+}
+
+- (void)_setViewNeedsDisplay
+{
+    NSAssert(pthread_main_np() != 0, @"main thread required");
+    [self setNeedsDisplay:YES];
+}
+
+- (void)_recacheIconsWithInfo:(NSDictionary *)info
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    // if there's ever any contention, don't block
+    if ([_modificationLock tryLock]) {
+
+        NSArray *orderedIcons = [info objectForKey:@"orderedIcons"];
+        NSArray *orderedURLs = [info objectForKey:@"orderedURLs"];
+        NSParameterAssert([orderedIcons count] == [orderedURLs count]);
+        
+        NSUInteger cnt = [orderedURLs count];
+        NSNull *nsnull = [NSNull null];
+        bool redisplay = false;
+        while (cnt--) {
+            id aURL = [orderedURLs objectAtIndex:cnt];
+            FVIcon *icon = [orderedIcons objectAtIndex:cnt];
+            if (aURL != nsnull && [aURL isFileURL]) {
+                _FVControllerFileKey *newKey = [_FVControllerFileKey newWithURL:aURL];
+                _FVControllerFileKey *oldKey = [_modificationSet member:newKey];
+                /*
+                 Check to see if the icon has cached resources calling recache.  This is of marginal
+                 benefit, since recache should be cheap in that case, but avoids redisplay.  We can't
+                 use it to avoid the stat() call, since otherwise the modification set doesn't get
+                 populated with initial values.
+                 */
+                if (oldKey && __equal_timespecs(&newKey->_mtimespec, &oldKey->_mtimespec) == false && [icon canReleaseResources]) {
+                    [[orderedIcons objectAtIndex:cnt] recache];
+                    [_modificationSet removeObject:oldKey];
+                    redisplay = true;
+                }
+                [_modificationSet addObject:newKey];
+                [newKey release];
+            }
+        }
+
+        [_modificationLock unlock];
+        
+        /*
+         When the view calls -recache on an icon, it has to reload the controller as well.
+         In this case, we know that the URL itself is the same, but the underlying data
+         has changed.  Consequently, setNeedsDisplay:YES should be sufficient.
+         */
+        if (redisplay)
+            [self performSelectorOnMainThread:@selector(_setViewNeedsDisplay) withObject:nil waitUntilDone:NO];
+        
+    }
+    else {
+#if DEBUG
+        // keep an eye out for this; it gets hit with the test program during view setup
+        FVLog(@"FileView: called %@ while another call was in progress.", NSStringFromSelector(_cmd));
+#endif
+    }
+    [pool release];
+}
+
+- (void)_recacheIconsInBackgroundIfNeeded
+{
+    if ([_orderedURLs count]) {
+        NSArray *orderedIcons = [[NSArray alloc] initWithArray:_orderedIcons copyItems:NO];
+        NSArray *orderedURLs = [[NSArray alloc] initWithArray:_orderedURLs copyItems:NO];
+        NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:orderedIcons, @"orderedIcons", orderedURLs, @"orderedURLs", nil];
+        [orderedIcons release];
+        [orderedURLs release];
+        [NSThread detachNewThreadSelector:@selector(_recacheIconsWithInfo:) toTarget:self withObject:info];
+    }
 }
 
 - (void)_reloadIcons;
@@ -3867,6 +3977,7 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 
 @end
 
+#pragma mark -
 
 @implementation _FVURLInfo
 
@@ -3899,6 +4010,168 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 
 @end
 
+#pragma mark -
+
+@implementation _FVControllerFileKey
+
+/* 
+ NOTE: the following applies only to the SuperFastHash function and the
+ macros it uses.
+ 
+ By Paul Hsieh (C) 2004, 2005.  Covered under the Paul Hsieh derivative 
+ license. See: 
+ http://www.azillionmonkeys.com/qed/weblicense.html for license details.
+ 
+ http://www.azillionmonkeys.com/qed/hash.html 
+ */
+
+#undef get16bits
+#if (defined(__GNUC__) && defined(__i386__)) || defined(__WATCOMC__) \
+|| defined(_MSC_VER) || defined (__BORLANDC__) || defined (__TURBOC__)
+#define get16bits(d) (*((const uint16_t *) (d)))
+#endif
+
+#if !defined (get16bits)
+#define get16bits(d) ((((uint32_t)(((const uint8_t *)(d))[1])) << 8)\
++(uint32_t)(((const uint8_t *)(d))[0]) )
+#endif
+
+static uint32_t SuperFastHash (const char * data, int len) {
+    uint32_t hash = 0, tmp;
+    int rem;
+    
+	if (len <= 0 || data == NULL) return 0;
+    
+	rem = len & 3;
+	len >>= 2;
+    
+	/* Main loop */
+	for (;len > 0; len--) {
+		hash  += get16bits (data);
+		tmp    = (get16bits (data+2) << 11) ^ hash;
+		hash   = (hash << 16) ^ tmp;
+		data  += 2*sizeof (uint16_t);
+		hash  += hash >> 11;
+	}
+    
+	/* Handle end cases */
+	switch (rem) {
+		case 3:	hash += get16bits (data);
+            hash ^= hash << 16;
+            hash ^= data[sizeof (uint16_t)] << 18;
+            hash += hash >> 11;
+            break;
+		case 2:	hash += get16bits (data);
+            hash ^= hash << 11;
+            hash += hash >> 17;
+            break;
+		case 1: hash += *data;
+            hash ^= hash << 10;
+            hash += hash >> 1;
+	}
+    
+	/* Force "avalanching" of final 127 bits */
+	hash ^= hash << 3;
+	hash += hash >> 5;
+	hash ^= hash << 4;
+	hash += hash >> 17;
+	hash ^= hash << 25;
+	hash += hash >> 6;
+    
+	return hash;
+}
+
++ (id)newWithURL:(NSURL *)aURL
+{
+    return [[self allocWithZone:[self zone]] initWithURL:aURL];
+}
+
+/*
+ Has to be path-based, since we can't guarantee that device/inode will remain
+ the same after a file is modified.  This is unfortunate, since path-based
+ comparisons are inherently slow.
+ */
+
+- (id)initWithURL:(NSURL *)aURL
+{
+    NSParameterAssert([aURL isFileURL]);
+    self = [super init];
+    if (self) {
+        
+        CFStringRef absolutePath = CFURLCopyFileSystemPath((CFURLRef)aURL, kCFURLPOSIXPathStyle);
+        NSUInteger maxLen = CFStringGetMaximumSizeOfFileSystemRepresentation(absolutePath);
+        _filePath = NSZoneMalloc(NSDefaultMallocZone(), maxLen);
+        CFStringGetFileSystemRepresentation(absolutePath, _filePath, maxLen);        
+        CFRelease(absolutePath);
+
+        _hash = SuperFastHash(_filePath, strlen(_filePath));
+
+        int err;
+        
+        /*
+         getattrlist values are always 4-byte aligned, so we have to force that
+         in order to avoid crashing on x86_64.
+         */
+#pragma pack(push, 4)
+        struct _mod_time_buf {
+            uint32_t        len;
+            struct timespec ts;
+        } mod_time_buf;
+#pragma pack(pop)
+        
+        /*
+         Try to use getattrlist() first, since we can explicitly request the desired
+         attributes, instead of getting them all from stat().  Fall back to stat() in
+         case getattrlist() isn't supported, though.
+         */
+        struct attrlist alist;
+        memset(&alist, 0, sizeof(alist));
+        alist.bitmapcount = ATTR_BIT_MAP_COUNT;
+        alist.commonattr = ATTR_CMN_MODTIME;
+        err = getattrlist(_filePath, &alist, &mod_time_buf, sizeof(mod_time_buf), 0);
+        if (noErr == err) {
+            assert(mod_time_buf.len == sizeof(mod_time_buf));
+            _mtimespec = mod_time_buf.ts;
+        }
+        else if (ENOTSUP == err) {
+            
+            struct stat sb;
+            err = stat(_filePath, &sb);
+            
+            if (noErr == err)
+                _mtimespec = sb.st_mtimespec;
+        }
+        
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    NSZoneFree(NSDefaultMallocZone(), _filePath);
+    [super dealloc];
+}
+
+- (NSString *)description { return [NSString stringWithFormat:@"%@: %s", [super description], _filePath]; }
+
+- (id)copyWithZone:(NSZone *)aZone
+{
+    return [self retain];
+}
+
+- (BOOL)isEqual:(_FVControllerFileKey *)other
+{
+    if ([other isKindOfClass:[self class]] == NO)
+        return NO;
+
+    return strcmp(_filePath, other->_filePath) == 0;
+}
+
+- (NSUInteger)hash { return _hash; }
+
+@end
+
+#pragma mark -
 
 @implementation FVAnimation
 
