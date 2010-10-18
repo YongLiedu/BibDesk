@@ -93,7 +93,7 @@ static pthread_mutex_t _providerLock = PTHREAD_MUTEX_INITIALIZER;
     return MAX_MAPPED_PROVIDER_COUNT;
 }
 
-+ (CGDataProviderRef)newDataProviderForURL:(NSURL *)aURL
++ (CGDataProviderRef)dataProviderForURL:(NSURL *)aURL
 {
     pthread_mutex_lock(&_providerLock);
     _FVProviderInfo *pInfo = (id)CFDictionaryGetValue(_dataProviders, (CFURLRef)aURL);

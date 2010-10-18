@@ -2935,7 +2935,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     }    
 }
 
-static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
+static NSRect _rectWithCorners(const NSPoint aPoint, const NSPoint bPoint) {
     NSRect rect;
     rect.origin.x = fmin(aPoint.x, bPoint.x);
     rect.origin.y = fmin(aPoint.y, bPoint.y);
