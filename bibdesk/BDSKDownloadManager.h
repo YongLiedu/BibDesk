@@ -38,6 +38,12 @@
 
 #import <Cocoa/Cocoa.h>
 
+enum {
+    BDSKDownloadStatusDownloading,
+    BDSKDownloadStatusFinished,
+    BDSKDownloadStatusFailed
+};
+typedef NSUInteger BDSKDownloadStatus;
 
 @interface BDSKDownloadManager : NSObject {
     NSMutableArray *downloads;
@@ -47,6 +53,29 @@
 
 - (void)addDownloadForURL:(NSURL *)aURL;
 
+- (NSArray *)downloads;
+
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)note;
+
+@end
+
+
+@interface BDSKDownload : NSObject {
+    NSUInteger uniqueID;
+    NSURL *URL;
+    NSURL *fileURL;
+    NSInteger status;
+    NSURLDownload *download;
+}
+
+- (id)initWithURL:(NSURL *)aURL;
+
+- (NSUInteger)uniqueID;
+- (NSURL *)URL;
+- (NSURL *)fileURL;
+- (BDSKDownloadStatus)status;
+- (NSString *)statusDescription;
+
+- (void)cancel;
 
 @end

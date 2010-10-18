@@ -194,6 +194,14 @@ static NSString *BDSKWebLocalizedString = nil;
         NSBeep();
 }
 
+- (void)revealLink:(id)sender {
+	NSURL *linkURL = (NSURL *)[[sender representedObject] objectForKey:WebElementLinkURLKey];
+    if ([linkURL isFileURL])
+        [[NSWorkspace sharedWorkspace] selectFile:[linkURL path] inFileViewerRootedAtPath:nil];
+    else
+        NSBeep();
+}
+
 - (void)openInDefaultBrowser:(id)sender {
     NSDictionary *element = (NSDictionary *)[sender representedObject];
 	NSURL *theURL = [element objectForKey:WebElementLinkURLKey];
@@ -206,6 +214,7 @@ static NSString *BDSKWebLocalizedString = nil;
 - (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame{
     
     if (frame == [sender mainFrame]) {
+    [[webView windowScriptObject] setValue:[BDSKDownloadManager sharedManager] forKey:@"downloads"];
         
         BDSKASSERT(loadingWebFrame == nil);
         
@@ -325,6 +334,10 @@ static NSString *BDSKWebLocalizedString = nil;
     }
 }
 
+- (void)webView:(WebView *)sender didClearWindowObject:(WebScriptObject *)windowObject forFrame:(WebFrame *)frame {
+    [[webView windowScriptObject] setValue:[BDSKDownloadManager sharedManager] forKey:@"downloads"];
+}
+
 #pragma mark WebPolicyDelegate protocol
 
 - (void)webView:(WebView *)sender decidePolicyForNewWindowAction:(NSDictionary *)actionInformation request:(NSURLRequest *)request newFrameName:(NSString *)frameName decisionListener:(id < WebPolicyDecisionListener >)listener {
@@ -365,26 +378,35 @@ static NSString *BDSKWebLocalizedString = nil;
     
     if (i != NSNotFound) {
         
-        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open in Default Browser",@"Open web page")
+        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open in Default Browser", @"Menu item title")
                                                                     action:@selector(openInDefaultBrowser:)
                                                              keyEquivalent:@""];
         [item setTarget:self];
         [item setRepresentedObject:element];
         [menuItems insertObject:[item autorelease] atIndex:(i > 0 ? i - 1 : 0)];
         
-        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark Link",@"Bookmark linked page") stringByAppendingEllipsis]
+        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark Link", @"Menu item title") stringByAppendingEllipsis]
                                    action:@selector(bookmarkLink:)
                             keyEquivalent:@""];
         [item setTarget:self];
         [item setRepresentedObject:element];
         [menuItems insertObject:[item autorelease] atIndex:++i];
         
-        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save Link As",@"Bookmark linked page") stringByAppendingEllipsis]
+        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save Link As", @"Menu item title") stringByAppendingEllipsis]
                                    action:@selector(downloadLink:)
                             keyEquivalent:@""];
         [item setTarget:self];
         [item setRepresentedObject:element];
         [menuItems insertObject:[item autorelease] atIndex:++i];
+        
+        if ([[element objectForKey:WebElementLinkURLKey] isFileURL]) {
+            item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Reveal Link", @"Menu item title") stringByAppendingEllipsis]
+                                       action:@selector(revealLink:)
+                                keyEquivalent:@""];
+            [item setTarget:self];
+            [item setRepresentedObject:element];
+            [menuItems insertObject:[item autorelease] atIndex:++i];
+        }
     }
     
 	if ([menuItems count] > 0) 

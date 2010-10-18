@@ -322,6 +322,7 @@
 		CEF1D6BC117F01C60069E249 /* applehelp.init in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6BA117F01C60069E249 /* applehelp.init */; };
 		CEF1D6BD117F01C60069E249 /* postprocess-nontitle.py in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6BB117F01C60069E249 /* postprocess-nontitle.py */; };
 		CEF2EEE70F3462A900A7989E /* NSColor_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */; };
+		CEF52DD8126C7869006E904B /* WebGroupDownloads.html in Resources */ = {isa = PBXBuildFile; fileRef = CEF52DD6126C7869006E904B /* WebGroupDownloads.html */; };
 		CEF5366A1192EFE400027C3C /* BDSKNotesOutlineView.h in Headers */ = {isa = PBXBuildFile; fileRef = CEF536681192EFE400027C3C /* BDSKNotesOutlineView.h */; };
 		CEF5366B1192EFE400027C3C /* BDSKNotesOutlineView.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF536691192EFE400027C3C /* BDSKNotesOutlineView.m */; };
 		CEF546100F56BDDB008A630F /* BDSKStringArrayFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5460E0F56BDDB008A630F /* BDSKStringArrayFormatter.m */; };
@@ -1276,6 +1277,8 @@
 		CEB5D6971072AE950001C135 /* French */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = French; path = French.lproj/TextImport.xib; sourceTree = "<group>"; };
 		CEB772E80A34529D00B8A299 /* NSAttributedString_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSAttributedString_BDSKExtensions.h; sourceTree = "<group>"; };
 		CEB772E90A34529D00B8A299 /* NSAttributedString_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSAttributedString_BDSKExtensions.m; sourceTree = "<group>"; };
+		CEB9D5CD126CF0A000C1FADB /* French */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = French; path = French.lproj/WebGroupDownloads.html; sourceTree = "<group>"; };
+		CEB9D5CE126CF0A400C1FADB /* German */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = German; path = German.lproj/WebGroupDownloads.html; sourceTree = "<group>"; };
 		CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCrossrefFormatter.h; sourceTree = "<group>"; };
 		CEBA63D60A7CA0B400588BB7 /* BDSKCrossrefFormatter.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCrossrefFormatter.m; sourceTree = "<group>"; };
 		CEBB8D8709C8B0D90074C79E /* Font.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Font.tiff; sourceTree = "<group>"; };
@@ -1341,6 +1344,7 @@
 		CEF1D6BB117F01C60069E249 /* postprocess-nontitle.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = "postprocess-nontitle.py"; path = "BibDeskHelp/postprocess-nontitle.py"; sourceTree = "<group>"; };
 		CEF2EEE40F3462A900A7989E /* NSColor_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSColor_BDSKExtensions.h; sourceTree = "<group>"; };
 		CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSColor_BDSKExtensions.m; sourceTree = "<group>"; };
+		CEF52DD7126C7869006E904B /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = English; path = English.lproj/WebGroupDownloads.html; sourceTree = "<group>"; };
 		CEF536681192EFE400027C3C /* BDSKNotesOutlineView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKNotesOutlineView.h; sourceTree = "<group>"; };
 		CEF536691192EFE400027C3C /* BDSKNotesOutlineView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKNotesOutlineView.m; sourceTree = "<group>"; };
 		CEF5460D0F56BDDB008A630F /* BDSKStringArrayFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStringArrayFormatter.h; sourceTree = "<group>"; };
@@ -1924,6 +1928,7 @@
 				CE8962C40CBEC0C500EA2D98 /* TemplateOptions.strings */,
 				CE8F5F830DEEB26800061148 /* ZoomValues.strings */,
 				CEF8F8DD0F93519700948A88 /* WebGroupStartPage.html */,
+				CEF52DD6126C7869006E904B /* WebGroupDownloads.html */,
 				F9022CE50758050E00C3F701 /* Credits.rtf */,
 				F994B8F607F5F65F00751DA1 /* RelNotes.rtf */,
 				CE2941040A7F8F2900A46D05 /* ReadMe.rtf */,
@@ -3300,6 +3305,7 @@
 				CEF1D6BC117F01C60069E249 /* applehelp.init in Resources */,
 				CEF1D6BD117F01C60069E249 /* postprocess-nontitle.py in Resources */,
 				CE2F057211B51FA7001B0AE0 /* BDSKOpenAccessoryView.xib in Resources */,
+				CEF52DD8126C7869006E904B /* WebGroupDownloads.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4434,6 +4440,16 @@
 				CEF1D683117F015A0069E249 /* English */,
 			);
 			name = BibDeskHelp;
+			sourceTree = "<group>";
+		};
+		CEF52DD6126C7869006E904B /* WebGroupDownloads.html */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEF52DD7126C7869006E904B /* English */,
+				CEB9D5CD126CF0A000C1FADB /* French */,
+				CEB9D5CE126CF0A400C1FADB /* German */,
+			);
+			name = WebGroupDownloads.html;
 			sourceTree = "<group>";
 		};
 		CEF8F8DD0F93519700948A88 /* WebGroupStartPage.html */ = {

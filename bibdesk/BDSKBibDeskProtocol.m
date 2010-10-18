@@ -45,8 +45,10 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
+#import "NSImage_BDSKExtensions.h"
 #import <WebKit/WebView.h>
 #import "BDSKTemplateParser.h"
+#import "BDSKDownloadManager.h"
 
 #define WEBGROUP_SPECIFIER  @"webgroup"
 #define HELP_SPECIFIER      @"help"
@@ -90,6 +92,30 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
     if ([WEBGROUP_SPECIFIER caseInsensitiveCompare:resourceSpecifier] == NSOrderedSame) {
         NSData *data = [self welcomeHTMLData];
         NSURLResponse *response = [[NSURLResponse alloc] initWithURL:[request URL] MIMEType:@"text/html" expectedContentLength:[data length] textEncodingName:@"utf-8"];
+        [client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
+        [client URLProtocol:self didLoadData:data];
+        [client URLProtocolDidFinishLoading:self];
+        [response release];
+    } else if ([@"downloads" caseInsensitiveCompare:resourceSpecifier] == NSOrderedSame) {
+        NSData *data = [self downloadsHTMLData];
+        NSURLResponse *response = [[NSURLResponse alloc] initWithURL:[request URL] MIMEType:@"text/html" expectedContentLength:[data length] textEncodingName:@"utf-8"];
+        [client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
+        [client URLProtocol:self didLoadData:data];
+        [client URLProtocolDidFinishLoading:self];
+        [response release];
+    } else if ([resourceSpecifier hasCaseInsensitivePrefix:@"fileicon:"]) {
+        NSString *extension = [resourceSpecifier substringFromIndex:9];
+        NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFileType:extension];
+        NSSize size = NSMakeSize(32.0, 32.0);
+        if (NSEqualSizes([icon size], size) == NO) {
+            NSImage *tmp = [[NSImage alloc] initWithSize:size];
+            [tmp lockFocus];
+            [icon drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0]; 
+            [tmp unlockFocus];
+            icon = tmp;
+        }
+        NSData *data = [icon TIFFRepresentation];
+        NSURLResponse *response = [[NSURLResponse alloc] initWithURL:[request URL] MIMEType:@"image/tiff" expectedContentLength:[data length] textEncodingName:@"utf-8"];
         [client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
         [client URLProtocol:self didLoadData:data];
         [client URLProtocolDidFinishLoading:self];
@@ -170,6 +196,13 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
         data = [[string dataUsingEncoding:NSUTF8StringEncoding] copy];
     }
     return data;
+}
+
+- (NSData *) downloadsHTMLData {
+    NSString *templateStringPath = [[NSBundle mainBundle] pathForResource:@"WebGroupDownloads" ofType:@"html"];
+    NSString *templateString = [NSString stringWithContentsOfFile:templateStringPath encoding:NSUTF8StringEncoding error:NULL];
+    NSString *string = [BDSKTemplateParser stringByParsingTemplateString:templateString usingObject:[BDSKDownloadManager sharedManager]];
+    return [[string dataUsingEncoding:NSUTF8StringEncoding] copy];
 }
 
 @end
